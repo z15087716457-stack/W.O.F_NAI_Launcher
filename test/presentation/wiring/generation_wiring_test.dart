@@ -1,3 +1,5 @@
+import 'package:nai_launcher/presentation/router/app_router.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:async';
 import 'package:nai_launcher/presentation/ui/tools/tools_sheets.dart';
 import 'dart:io';
@@ -117,6 +119,79 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
+  }
+
+  for (final path in [AppRoutes.home, AppRoutes.generation]) {
+    testWidgets(
+      'actual $path transition and viewer fallback own one caption cluster',
+      (tester) async {
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        messenger.setMockMethodCallHandler(
+          const MethodChannel('window_manager'),
+          (call) async => call.method == 'isMaximized' ? false : null,
+        );
+        addTearDown(
+          () => messenger.setMockMethodCallHandler(
+            const MethodChannel('window_manager'),
+            null,
+          ),
+        );
+        final production = container.read(appRouterProvider);
+        addTearDown(production.dispose);
+        final shell = production.configuration.routes
+            .whereType<StatefulShellRoute>()
+            .single;
+        final route = shell.branches.first.routes
+            .whereType<GoRoute>()
+            .singleWhere((route) => route.path == path);
+        final router = GoRouter(
+          initialLocation: path,
+          routes: [
+            GoRoute(
+              path: path,
+              pageBuilder: route.pageBuilder,
+              routes: route.routes.whereType<GoRoute>().toList(),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        tester.view.physicalSize = const Size(1600, 1000);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp.router(
+              routerConfig: router,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              locale: const Locale('zh'),
+              builder: (_, child) =>
+                  IntegratedTitleBarShell(deferToRoute: true, child: child!),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('window-caption-controls')),
+          findsOneWidget,
+        );
+        expect(find.byType(WindowChromePage), findsOneWidget);
+        if (path == AppRoutes.generation) {
+          router.go('$path/viewer');
+          await tester.pumpAndSettle();
+          expect(
+            find.byKey(const Key('window-caption-controls')),
+            findsOneWidget,
+          );
+          expect(find.byType(WindowChromePage), findsOneWidget);
+        }
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      },
+    );
   }
 
   testWidgets('路由宿主注册可自定义正负面快捷键，禁用后不触发', (tester) async {

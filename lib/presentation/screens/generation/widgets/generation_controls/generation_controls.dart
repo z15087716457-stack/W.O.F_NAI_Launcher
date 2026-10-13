@@ -70,6 +70,7 @@ class GenerationControls extends ConsumerStatefulWidget {
   /// 生成页左栏把它挪到了历史面板标题栏，传 false 关闭底栏渲染。
   final bool showAutoSaveChip;
   final GenerationControlsController? controller;
+  final bool Function()? canGenerate;
   final Widget Function(BuildContext, GenerationControlsViewState)?
   presentationBuilder;
 
@@ -82,6 +83,7 @@ class GenerationControls extends ConsumerStatefulWidget {
     this.showBalanceChips = true,
     this.showAutoSaveChip = true,
     this.controller,
+    this.canGenerate,
     this.presentationBuilder,
   });
 
@@ -279,6 +281,7 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
   }
 
   Future<void> _handleGenerate(BuildContext context, WidgetRef ref) async {
+    if (widget.canGenerate?.call() == false) return;
     final params = widget.exploreMode
         ? ref.read(generationParamsNotifierProvider)
         : ref.read(generationRequestParamsProvider);
@@ -295,6 +298,10 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
           : null,
     );
     if (!confirmed || !context.mounted) {
+      return;
+    }
+    if (widget.canGenerate?.call() == false) {
+      AppToast.info(context, context.l10n.bridge_conflict);
       return;
     }
 

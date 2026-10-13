@@ -1,14 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:dio/dio.dart';
 
 import '../../core/services/anlas_calculator.dart';
+import '../../core/services/desktop_app_shutdown_service.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../data/datasources/remote/nai_image_enhancement_api_service.dart';
 import '../../data/models/director/director_tool_type.dart';
 import '../../data/services/director/pixel_snap_service.dart';
 import 'image_generation_provider.dart';
 import 'subscription_provider.dart';
+import 'generation/cloud_upscale_provider.dart';
+import 'generation/local_upscale_provider.dart';
+import 'generation/image_workflow_controller.dart';
 
 class EmotionPreset {
   const EmotionPreset(this.label, this.mood, [this.extraTags = '']);
@@ -173,14 +178,122 @@ final directorToolsNotifierProvider =
 /// Every request snapshots its input and settings. Returned images never acquire
 /// the unrelated prompt currently typed in the generation sidebar.
 class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
-  bool _disposed = false;
   final _toolSettings =
       <DirectorToolType, ({int defry, String prompt, String emotion})>{};
+  Future<List<Uint8List>?>? _pending;
+  CancelToken? _cancellation;
+  bool _disposed = false;
   @override
   DirectorToolsState build() {
     _disposed = false;
-    ref.onDispose(() => _disposed = true);
+    final remove = DesktopAppShutdownService.registerCleanup(() async {
+      _cancellation?.cancel();
+      await _pending;
+    });
+    ref.onDispose(() {
+      _disposed = true;
+      _cancellation?.cancel();
+      remove();
+    });
     return const DirectorToolsState();
+  }
+
+  /// Execute frozen inputs without replacing the director workbench's source
+  /// or settings. Manual callers and Agent callers share admission/shutdown.
+  Future<List<Uint8List>?> processGenerated(
+    Uint8List source, {
+    required DirectorToolType tool,
+    String prompt = '',
+    int defry = 0,
+    PixelSnapOptions pixelOptions = const PixelSnapOptions(),
+    CancelToken? cancellation,
+    void Function()? onStarted,
+    bool Function()? canApply,
+  }) async {
+    if (_pending != null ||
+        state.isRunning ||
+        ref.read(imageGenerationNotifierProvider).isGenerating ||
+        ref.read(imageWorkflowControllerProvider).isToolRunning ||
+        (ref.exists(localUpscaleTaskProvider) &&
+            ref.read(localUpscaleTaskProvider).running) ||
+        (ref.exists(cloudUpscaleTaskProvider) &&
+            ref.read(cloudUpscaleTaskProvider).running)) {
+      return null;
+    }
+    final token = cancellation ?? CancelToken();
+    if (token.isCancelled) return null;
+    final frozen = Uint8List.fromList(source);
+    final work = _processGenerated(
+      frozen,
+      tool,
+      prompt,
+      defry,
+      pixelOptions,
+      token,
+      canApply,
+    );
+    _pending = work;
+    onStarted?.call();
+    try {
+      return await work;
+    } finally {
+      _pending = null;
+    }
+  }
+
+  Future<List<Uint8List>?> _processGenerated(
+    Uint8List source,
+    DirectorToolType tool,
+    String prompt,
+    int defry,
+    PixelSnapOptions pixelOptions,
+    CancelToken token,
+    bool Function()? canApply,
+  ) async {
+    _cancellation = token;
+    state = state.copyWith(isRunning: true, clearError: true);
+    final workflow = ref.read(imageWorkflowControllerProvider.notifier);
+    workflow.setToolRunning(true);
+    try {
+      final List<Uint8List> bytes;
+      if (tool == DirectorToolType.pixelSnap) {
+        bytes = [await PixelSnapService.snap(source, options: pixelOptions)];
+      } else {
+        bytes = await ref
+            .read(naiImageEnhancementApiServiceProvider)
+            .augmentImages(
+              source,
+              reqType: tool.requestType!,
+              prompt: tool.needsPrompt && prompt.trim().isNotEmpty
+                  ? prompt.trim()
+                  : null,
+              defry: defry,
+              cancelToken: token,
+            );
+      }
+      return _disposed || token.isCancelled || canApply?.call() == false
+          ? null
+          : bytes;
+    } catch (error) {
+      if (!_disposed && !token.isCancelled && canApply?.call() != false) {
+        state = state.copyWith(error: '$error');
+      }
+      return null;
+    } finally {
+      _cancellation = null;
+      if (!_disposed) {
+        state = state.copyWith(isRunning: false);
+        workflow.setToolRunning(false);
+        if (tool != DirectorToolType.pixelSnap &&
+            !token.isCancelled &&
+            canApply?.call() != false &&
+            ref.exists(subscriptionNotifierProvider)) {
+          ref
+              .read(subscriptionNotifierProvider.notifier)
+              .schedulePostBillingRefresh();
+        }
+      }
+    }
   }
 
   Future<void> init(Uint8List sourceImage, {String? initialPrompt}) async {
@@ -314,34 +427,22 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
   }
 
   Future<void> runTool({bool Function()? canApply, int? quotedCost}) async {
-    if (!state.canRun) return;
+    if (!state.canRun || canApply?.call() == false) return;
     final request = state;
     final source = request.source!;
     final tool = request.selectedTool;
-    state = state.copyWith(isRunning: true, clearError: true);
     try {
-      final List<Uint8List> bytes;
-      if (tool == DirectorToolType.pixelSnap) {
-        bytes = [
-          await PixelSnapService.snap(
-            source.bytes,
-            options: request.pixelOptions,
-          ),
-        ];
-      } else {
-        final prompt = tool == DirectorToolType.fixEmotion
+      final bytes = await processGenerated(
+        source.bytes,
+        tool: tool,
+        prompt: tool == DirectorToolType.fixEmotion
             ? '${request.emotion};;${request.prompt.trim()}'
-            : request.prompt.trim();
-        bytes = await ref
-            .read(naiImageEnhancementApiServiceProvider)
-            .augmentImages(
-              source.bytes,
-              reqType: tool.requestType!,
-              prompt: tool.needsPrompt && prompt.isNotEmpty ? prompt : null,
-              defry: request.defry,
-            );
-      }
-      if (_disposed || canApply?.call() == false) return;
+            : request.prompt.trim(),
+        defry: request.defry,
+        pixelOptions: request.pixelOptions,
+        canApply: canApply,
+      );
+      if (bytes == null || _disposed || canApply?.call() == false) return;
       final images = ref
           .read(imageGenerationNotifierProvider.notifier)
           .registerToolResults(
@@ -371,18 +472,6 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
     } catch (error) {
       if (!_disposed && canApply?.call() != false) {
         state = state.copyWith(error: error.toString(), isRunning: false);
-      }
-    } finally {
-      if (!_disposed && state.isRunning) {
-        state = state.copyWith(isRunning: false);
-      }
-      if (!_disposed &&
-          canApply?.call() != false &&
-          tool != DirectorToolType.pixelSnap &&
-          ref.exists(subscriptionNotifierProvider)) {
-        ref
-            .read(subscriptionNotifierProvider.notifier)
-            .schedulePostBillingRefresh();
       }
     }
   }

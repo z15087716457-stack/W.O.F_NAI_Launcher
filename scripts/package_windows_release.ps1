@@ -52,7 +52,8 @@ if (-not $SkipFlutterBuild) {
   & (Join-Path $PSScriptRoot "verify_nuget.ps1")
   flutter pub get
   flutter gen-l10n
-  dart run build_runner build --delete-conflicting-outputs
+  dart run tool/generate.dart
+  if ($LASTEXITCODE -ne 0) { throw 'Business code generation failed.' }
   flutter build windows --release
 }
 

@@ -53,6 +53,64 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
 
   void cancel() => _cancellation?.cancel();
 
+  /// Frozen-image execution for callers that own result export/display.
+  Future<Uint8List?> processGenerated(
+    Uint8List source, {
+    required CancelToken cancellation,
+    void Function()? onStarted,
+  }) async {
+    if (_pending != null ||
+        state.running ||
+        cancellation.isCancelled ||
+        ref.read(imageWorkflowControllerProvider).isToolRunning ||
+        ref.read(imageGenerationNotifierProvider).isGenerating ||
+        ref.read(localUpscaleTaskProvider).running) {
+      return null;
+    }
+    final work = _processGenerated(Uint8List.fromList(source), cancellation);
+    _pending = work.then<void>((_) {});
+    onStarted?.call();
+    try {
+      return await work;
+    } finally {
+      _pending = null;
+    }
+  }
+
+  Future<Uint8List?> _processGenerated(
+    Uint8List source,
+    CancelToken token,
+  ) async {
+    _cancellation = token;
+    state = const CloudUpscaleState(running: true);
+    final workflow = ref.read(imageWorkflowControllerProvider.notifier);
+    workflow.setToolRunning(true);
+    try {
+      final result = await ref
+          .read(naiImageEnhancementApiServiceProvider)
+          .upscaleImage(source, cancelToken: token);
+      if (_disposed || token.isCancelled) return null;
+      state = const CloudUpscaleState(completed: true);
+      return result;
+    } catch (error) {
+      if (!_disposed) {
+        state = CloudUpscaleState(error: token.isCancelled ? null : '$error');
+      }
+      return null;
+    } finally {
+      _cancellation = null;
+      if (!_disposed) {
+        workflow.setToolRunning(false);
+        if (state.running) state = const CloudUpscaleState();
+        if (ref.exists(subscriptionNotifierProvider)) {
+          ref
+              .read(subscriptionNotifierProvider.notifier)
+              .schedulePostBillingRefresh();
+        }
+      }
+    }
+  }
+
   Future<void> start({GeneratedImage? image}) {
     if (_pending != null) return _pending!;
     final work = _start(image);

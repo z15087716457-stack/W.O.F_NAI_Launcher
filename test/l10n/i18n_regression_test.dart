@@ -198,7 +198,7 @@ void main() {
     final japanese = lookupAppLocalizations(const Locale('ja'));
     final chinese = lookupAppLocalizations(const Locale('zh'));
 
-    expect(japanese.statistics_monday, '月');
+    expect(japanese.stats_unitMonth, '月');
     expect(chinese.common_enabled, '已启用');
     expect(english.networkError_requestFailed(429), 'Request failed (429)');
     expect(
@@ -212,8 +212,8 @@ void main() {
     final english = lookupAppLocalizations(const Locale('en'));
     final japanese = lookupAppLocalizations(const Locale('ja'));
 
-    expect(english.vibeDetail_timesUsed(5), '5 times');
-    expect(japanese.vibeDetail_saveParameters, 'パラメーターを保存');
+    expect(english.refs_usedTimes(5, 'today'), '5 times · last today');
+    expect(japanese.refs_saveDefault, '既定値として保存');
   });
 
   test('additional visible surfaces use generated translations', () {
@@ -228,8 +228,8 @@ void main() {
       english.imagePicker_fileSelectionFailed('denied'),
       'Failed to select file: denied',
     );
-    expect(japanese.history_dragFilePreparing, 'ドラッグ用ファイルを準備しています...');
-    expect(chinese.vibeDetail_releasePreviewImage, '释放以设置预览图');
+    expect(japanese.gen_history, '履歴');
+    expect(chinese.refs_dropReplacePreview, '把新图拖到这里 = 换掉预览图（不影响编码）');
     expect(english.router_pageNotFound('missing'), 'Page not found: missing');
   });
 }

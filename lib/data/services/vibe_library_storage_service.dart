@@ -39,8 +39,12 @@ class VibeLibraryStorageService
       'vibe_library_display_cache_ready_v2';
   static const String _tag = 'VibeLibrary';
 
-  VibeLibraryStorageService({VibeFileStorageService? fileStorage})
-    : _fileStorage = fileStorage ?? VibeFileStorageService();
+  VibeLibraryStorageService({
+    VibeFileStorageService? fileStorage,
+    Future<Uint8List?> Function(Uint8List)? thumbnailNormalizer,
+  }) : _fileStorage = fileStorage ?? VibeFileStorageService(),
+       _thumbnailNormalizer =
+           thumbnailNormalizer ?? DisplayThumbnailUtils.normalize;
 
   Box<VibeLibraryEntry>? _entriesBox;
   LazyBox<VibeLibraryEntry>? _lazyEntriesBox;
@@ -55,6 +59,13 @@ class VibeLibraryStorageService
   Future<void> _thumbnailLoadQueue = Future.value();
   final Map<String, Future<Uint8List?>> _thumbnailLoadsById = {};
   final VibeFileStorageService _fileStorage;
+  final Future<Uint8List?> Function(Uint8List) _thumbnailNormalizer;
+  final _thumbnailRevisions = <String, int>{};
+  var _nextThumbnailRevision = 0;
+  var _baseThumbnailRevision = 0;
+
+  int getDisplayThumbnailRevision(String id) =>
+      _thumbnailRevisions[id] ?? _baseThumbnailRevision;
 
   Uint8List? _pickDisplayThumbnailSource(VibeLibraryEntry entry) {
     final thumbnail = entry.thumbnail;
@@ -85,6 +96,7 @@ class VibeLibraryStorageService
       'storage.loadDisplayThumbnail',
       details: {'id': id},
     );
+    final revision = getDisplayThumbnailRevision(id);
     var found = false;
     var cached = false;
     var sourceBytes = 0;
@@ -110,13 +122,15 @@ class VibeLibraryStorageService
       }
       sourceBytes = source.length;
 
-      final thumbnail = await DisplayThumbnailUtils.normalize(source);
+      final thumbnail = await _thumbnailNormalizer(source);
       if (thumbnail == null || thumbnail.isEmpty) {
         return null;
       }
 
       resultBytes = thumbnail.length;
-      await _thumbnailCacheBox!.put(id, thumbnail);
+      if (revision == getDisplayThumbnailRevision(id)) {
+        await _thumbnailCacheBox!.put(id, thumbnail);
+      }
       return thumbnail;
     } catch (e, stackTrace) {
       AppLogger.e('Failed to load display thumbnail', e, stackTrace, _tag);
@@ -381,6 +395,10 @@ class VibeLibraryStorageService
 
   // ==================== Entry CRUD ====================
 
+  /// Read one native record without opening its reference file. This retains
+  /// legacy inline data and lets callers identify missing-file entries.
+  Future<VibeLibraryEntry?> getEntryRecord(String id) => _readStoredEntry(id);
+
   /// 保存条目（新增或更新）
   Future<VibeLibraryEntry> saveEntry(VibeLibraryEntry entry) async {
     try {
@@ -399,6 +417,48 @@ class VibeLibraryStorageService
       AppLogger.e('Failed to save entry', e, stackTrace, _tag);
       rethrow;
     }
+  }
+
+  /// Parsed .naiv4vibe/.naiv4vibebundle import, preserving the original file's
+  /// complete model/variant encodings. The entry remains native library data.
+  Future<VibeLibraryEntry> importOriginalVibeFile(
+    Uint8List bytes, {
+    required List<VibeReference> parsed,
+    required String name,
+    required bool bundle,
+  }) async {
+    if (parsed.isEmpty || bytes.length > 64 * 1024 * 1024) {
+      throw ArgumentError('Invalid original Vibe file');
+    }
+    final filePath = await _fileStorage.saveOriginalVibeFile(
+      bytes,
+      name: name,
+      bundle: bundle,
+    );
+    var entry = VibeLibraryEntry.fromVibeReference(
+      name: p.basenameWithoutExtension(filePath),
+      vibeData: parsed.first,
+      filePath: filePath,
+    );
+    if (bundle) {
+      entry = entry.copyWith(
+        bundleId: p.basenameWithoutExtension(filePath),
+        bundledVibeNames: parsed.map((v) => v.displayName).toList(),
+        bundledVibePreviews: parsed
+            .where((v) => v.thumbnail != null)
+            .take(4)
+            .map((v) => v.thumbnail!)
+            .toList(),
+        bundledVibeEncodings: parsed.map((v) => v.vibeEncoding).toList(),
+        bundledVibeStrengths: parsed.map((v) => v.strength).toList(),
+        bundledVibeInfoExtracted: parsed.map((v) => v.infoExtracted).toList(),
+        bundledVibeEncodingModels: parsed.map((v) => v.encodingModel).toList(),
+      );
+    }
+    await _putStoredEntry(entry);
+    await _upsertDisplayEntryIfReady(entry);
+    await _deleteDisplayThumbnailCache(entry.id);
+    return entry;
   }
 
   /// 显式保存条目参数。
@@ -578,6 +638,8 @@ class VibeLibraryStorageService
     }
   }
 
+  Future<VibeLibraryEntry?> getEntrySnapshot(String id) => _readStoredEntry(id);
+
   /// 根据 ID 获取条目
   Future<VibeLibraryEntry?> getEntry(String id) async {
     final span = VibePerformanceDiagnostics.start(
@@ -702,7 +764,7 @@ class VibeLibraryStorageService
         await _ensureInit();
         try {
           final entries = _entriesBox!.values.toList(growable: false);
-          return Future.wait(entries.map(_resolveEntryDisplayParams));
+          return await Future.wait(entries.map(_resolveEntryDisplayParams));
         } catch (e, stackTrace) {
           AppLogger.e(
             'Failed to get all entries: $e',
@@ -745,7 +807,7 @@ class VibeLibraryStorageService
         'VibeLibrary',
         stackTrace,
       );
-      return [];
+      rethrow;
     } finally {
       span.finish(
         details: {
@@ -933,6 +995,15 @@ class VibeLibraryStorageService
     }
   }
 
+  Future<VibeLibraryEntry?> setFavorite(String id, bool favorite) async {
+    final entry = await _readStoredEntry(id);
+    if (entry == null) return null;
+    final updated = entry.copyWith(isFavorite: favorite);
+    await _putStoredEntry(updated);
+    await _upsertDisplayEntryIfReady(updated);
+    return updated;
+  }
+
   /// 切换收藏状态
   Future<VibeLibraryEntry?> toggleFavorite(String id) async {
     try {
@@ -1082,6 +1153,9 @@ class VibeLibraryStorageService
       await _ensureDisplayEntriesBox();
       await _displayEntriesBox!.clear();
       await _ensureThumbnailCacheBox();
+      _baseThumbnailRevision = ++_nextThumbnailRevision;
+      _thumbnailRevisions.clear();
+      _thumbnailLoadsById.clear();
       await _thumbnailCacheBox!.clear();
       await _setDisplayCacheReady(true);
       AppLogger.i('All entries cleared', 'VibeLibrary');

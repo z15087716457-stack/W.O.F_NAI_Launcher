@@ -12,6 +12,7 @@ import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
 import '../../../data/services/metadata/unified_metadata_parser.dart';
 import '../../utils/app_logger.dart';
+import '../../utils/gallery_path_utils.dart';
 import '../../utils/tag_normalizer.dart';
 import '../base_data_source.dart';
 import '../data_source.dart'
@@ -26,6 +27,7 @@ part 'gallery_data_source_import.dart';
 part 'gallery_data_source_advanced_search.dart';
 part 'gallery_data_source_collections.dart';
 part 'gallery_data_source_metadata.dart';
+part 'gallery_data_source_management.dart';
 
 /// 画廊数据源
 ///

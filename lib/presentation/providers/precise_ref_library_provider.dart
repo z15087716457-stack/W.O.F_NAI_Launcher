@@ -319,6 +319,13 @@ class PreciseRefLibraryNotifier extends _$PreciseRefLibraryNotifier {
     return removed;
   }
 
+  Future<PreciseRefLibraryEntry?> setFavorite(String id, bool favorite) async {
+    await _ensureInitialized();
+    final updated = await _storage.setFavorite(id, favorite);
+    if (updated != null) _replaceEntryInState(updated);
+    return updated;
+  }
+
   /// 切换收藏状态
   Future<void> toggleFavorite(String id) async {
     await _ensureInitialized();

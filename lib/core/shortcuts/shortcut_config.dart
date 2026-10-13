@@ -97,6 +97,35 @@ class ShortcutConfig with _$ShortcutConfig {
     return copyWith(bindings: {...defaults, ...bindings});
   }
 
+  ShortcutConfig withCurrentNavigationDefaults() {
+    final defaults = ShortcutConfig.createDefault().bindings;
+    final reserved = ShortcutConfig(
+      bindings: {
+        for (final entry in bindings.entries)
+          if (entry.value.customShortcut != null) entry.key: entry.value,
+      },
+    );
+    final migrated = {...bindings};
+    for (final id in DefaultShortcuts.navigation.keys) {
+      final current = bindings[id];
+      var binding = (current ?? defaults[id]!).copyWith(
+        defaultShortcut: defaults[id]!.defaultShortcut,
+      );
+      if (binding.customShortcut == null &&
+          reserved
+              .findConflicts(
+                binding.defaultShortcut,
+                context: binding.context,
+                excludeId: id,
+              )
+              .isNotEmpty) {
+        binding = binding.copyWith(customShortcut: '');
+      }
+      migrated[id] = binding;
+    }
+    return copyWith(bindings: migrated);
+  }
+
   /// 获取指定ID的快捷键绑定
   ShortcutBinding? getBinding(String id) => bindings[id];
 
@@ -213,7 +242,8 @@ class ShortcutConfig with _$ShortcutConfig {
 
   /// 规范化快捷键字符串用于比较
   static String _normalizeShortcut(String shortcut) {
-    return shortcut.toLowerCase().replaceAll(' ', '');
+    return ShortcutParser.parse(shortcut)?.toActivatorString() ??
+        shortcut.toLowerCase().replaceAll(' ', '');
   }
 }
 

@@ -126,6 +126,9 @@ class VibeImportService {
 
   final VibeLibraryImportRepository _repository;
 
+  Future<bool> hasEntryNamed(String name) async =>
+      await _repository.findEntryByName(name.trim()) != null;
+
   Future<VibeImportResult> importFromFile({
     required List<PlatformFile> files,
     String? categoryId,
@@ -300,6 +303,46 @@ class VibeImportService {
     );
 
     return _mergeImportResult(result, errors);
+  }
+
+  Future<VibeImportResult> importPrepared({
+    required String name,
+    required List<VibeReference> references,
+    bool bundle = false,
+    bool splitNames = false,
+    String? categoryId,
+    List<String>? tags,
+    ConflictResolution conflictResolution = ConflictResolution.rename,
+  }) {
+    return _importParsedSources(
+      references.isEmpty
+          ? []
+          : bundle
+          ? [
+              _ParsedSource(
+                source: name,
+                reference: references.first,
+                preferredName: name,
+                bundledReferences: references,
+              ),
+            ]
+          : [
+              for (final reference in references)
+                _ParsedSource(
+                  source: name,
+                  reference: reference,
+                  preferredName: references.length == 1 && !splitNames
+                      ? name
+                      : '$name - ${reference.displayName}',
+                ),
+            ],
+      categoryId: categoryId,
+      tags: tags,
+      conflictResolution: conflictResolution,
+      onProgress: null,
+      onNaming: null,
+      progressPrefix: currentL10n.vibeImport_importFiles,
+    );
   }
 
   Future<VibeImportResult> _importParsedSources(

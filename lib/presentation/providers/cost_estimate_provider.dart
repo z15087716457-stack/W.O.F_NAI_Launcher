@@ -63,6 +63,7 @@ int _calculateEstimatedCost(
   Ref ref, {
   required int batchSize,
   bool includeCanvasTool = true,
+  int? batchCountOverride,
 }) {
   final params = includeCanvasTool
       ? ref.watch(generationRequestParamsProvider)
@@ -73,15 +74,22 @@ int _calculateEstimatedCost(
   final subscription = ref.watch(
     subscriptionNotifierProvider.select((state) => state.subscription),
   );
-  return generationRequestCost(params, workflow, subscription, batchSize);
+  return generationRequestCost(
+    params,
+    workflow,
+    subscription,
+    batchSize,
+    batchCountOverride: batchCountOverride,
+  );
 }
 
 int generationRequestCost(
   ImageParams params,
   ImageWorkflowState workflow,
   UserSubscription? subscription,
-  int batchSize,
-) {
+  int batchSize, {
+  int? batchCountOverride,
+}) {
   final subscriptionTier = subscription?.isOpus == true
       ? AnlasCalculator.opusTier
       : 0;
@@ -99,7 +107,7 @@ int generationRequestCost(
     );
   }
 
-  final batchCount = params.nSamples;
+  final batchCount = batchCountOverride ?? params.nSamples;
   if (batchCount <= 0 || batchSize <= 0) {
     return 0;
   }
@@ -124,6 +132,15 @@ int generationRequestCost(
     opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
   );
 }
+
+final styleExploreCostForCountProvider = Provider.family<int, int>(
+  (ref, count) => _calculateEstimatedCost(
+    ref,
+    batchSize: 1,
+    includeCanvasTool: false,
+    batchCountOverride: count,
+  ),
+);
 
 /// 预估消耗 Provider
 ///

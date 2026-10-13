@@ -1,0 +1,11 @@
+# NAI Agent E4B: native reference/source/mask configuration
+
+`reference_manage` adds current-state inspection, source/mask/focus setup and clearing, and Vibe/precise add/update/remove/clear (18 actual tools). Native workflow/parameter methods preserve editor behavior. Inputs use original image bytes; precise PNG normalization happens locally before final guarded writes, and Vibe encoding remains deferred to generation pricing/execution.
+
+Mutations require a fresh draft version, capture a complete draft/image/reference backup, and recheck draft/workflow/busy/cancellation/lifetime after image processing and backup IO. No await occurs between the final guard and native mutations. Readback reports actual native fields, participation and exclusion reasons (precise priority/inpainting). `image_read` accepts current `draft:*` IDs. Unsupported additions/updates reject; removal remains available. Vision-disabled models can configure original local images but cannot upload pixels through image_read.
+
+311 distinct Flutter checks (283 domain/native regression + 28 existing real-font UI/Traditional resource checks) and 14 Node checks pass. Twelve reference binding cases include real backups and concurrent edits/Stop. Official Pi and local synthetic SSE perform 8 requests/7 tool calls through the production factory, adding a Vibe, inspecting it and reading its actual pixels alongside history lookup. Vibe persistence is in memory for tests; inputs/backups are temporary. Targeted analyze and CRLF-aware diff check pass; no generated inputs or localization labels changed.
+
+Installed receipt/app.so hashes stay unchanged. No real provider/NAI requests, Anlas use, build/install/launch/restart/hot reload or commits. Reference libraries/pre-encoded imports, gallery mutations, remaining domain tools and F delivery remain in progress.
+
+A separate targeted probe reproduces an E1 restore gap: save infill/source/mask, clear source, load saved configuration. ImageParams restores infill and pixels, but native ImageWorkflowState remains base with sourceWidth=null. This failed diagnostic is outside the 325 passing affected-scope checks. Next priority is complete native workflow capture/synchronization/restore verification; parameter-only round trips do not prove workflow completion.

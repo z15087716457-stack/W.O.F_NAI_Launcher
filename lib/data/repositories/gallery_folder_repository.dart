@@ -14,6 +14,7 @@ import '../../core/utils/file_name_sanitizer.dart';
 import '../../core/utils/file_transfer_utils.dart';
 import '../../core/utils/gallery_path_utils.dart';
 import '../models/gallery/gallery_folder.dart';
+import '../services/gallery/gallery_stream_scanner.dart';
 
 /// 画廊文件夹仓库
 class GalleryFolderRepository {
@@ -299,48 +300,115 @@ class GalleryFolderRepository {
     String targetFolderPath,
   ) async {
     try {
-      final file = File(imagePath);
-      if (!await file.exists()) return false;
+      return await transferImageToFolder(imagePath, targetFolderPath) != null;
+    } catch (error) {
+      AppLogger.e('移动图片失败: $imagePath', error);
+      return false;
+    }
+  }
 
-      final fileName = p.basename(imagePath);
-      var newPath = p.join(targetFolderPath, fileName);
-
-      if (await File(newPath).exists()) {
-        final baseName = p.basenameWithoutExtension(fileName);
-        final ext = p.extension(fileName);
-        newPath = p.join(
+  /// Return the actual collision-safe destination. Existing boolean callers
+  /// keep their contract; explicit management can verify the native index.
+  Future<String?> transferImageToFolder(
+    String imagePath,
+    String targetFolderPath, {
+    bool copy = false,
+    bool updateIndex = true,
+    Future<void> Function()? beforeTransfer,
+    Future<void> Function(String path)? afterTransfer,
+    FileCopyValidator? validator,
+  }) => GalleryStreamScanner.instance(dataSource: _dataSource)
+      .withFilesystemMutation(
+        () => _transferImageToFolder(
+          imagePath,
           targetFolderPath,
-          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
+          copy: copy,
+          updateIndex: updateIndex,
+          beforeTransfer: beforeTransfer,
+          afterTransfer: afterTransfer,
+          validator: validator,
+        ),
+      );
+
+  Future<String?> _transferImageToFolder(
+    String imagePath,
+    String targetFolderPath, {
+    required bool copy,
+    required bool updateIndex,
+    Future<void> Function()? beforeTransfer,
+    Future<void> Function(String path)? afterTransfer,
+    FileCopyValidator? validator,
+  }) async {
+    File? reservation;
+    String? result;
+    try {
+      if (!await File(imagePath).exists() ||
+          !await Directory(targetFolderPath).exists()) {
+        return null;
+      }
+      final name = p.basename(imagePath);
+      for (var attempt = 0; attempt < 1000; attempt++) {
+        final suffix = attempt == 0
+            ? ''
+            : '_${DateTime.now().microsecondsSinceEpoch}_$attempt';
+        final destination = File(
+          p.join(
+            targetFolderPath,
+            '${p.basenameWithoutExtension(name)}$suffix${p.extension(name)}',
+          ),
         );
-      }
-
-      final movedPath = await moveFileCrossVolume(imagePath, newPath);
-      if (movedPath == null) {
-        AppLogger.e('移动图片失败: $imagePath -> $newPath');
-        return false;
-      }
-
-      // 即时 DB 跟进（不等扫描）
-      if (_dataSource.isInitialized) {
+        if (await FileSystemEntity.type(destination.path, followLinks: false) !=
+            FileSystemEntityType.notFound) {
+          continue;
+        }
         try {
-          final idsMap = await _dataSource.getImageIdsByPaths([imagePath]);
-          final id = idsMap[imagePath];
+          reservation = await destination.create(exclusive: true);
+          break;
+        } on FileSystemException {
+          if (await FileSystemEntity.type(
+                destination.path,
+                followLinks: false,
+              ) ==
+              FileSystemEntityType.notFound) {
+            rethrow;
+          }
+        }
+      }
+      if (reservation == null) return null;
+      await beforeTransfer?.call();
+      result = copy
+          ? await copyFileWithFreshMtime(
+              imagePath,
+              reservation.path,
+              validator: validator,
+            )
+          : await moveFileCrossVolume(
+              imagePath,
+              reservation.path,
+              validator: validator,
+            );
+      if (result != null && !copy && updateIndex && _dataSource.isInitialized) {
+        try {
+          final id = (await _dataSource.getImageIdsByPaths([
+            imagePath,
+          ]))[imagePath];
           if (id != null) {
             await _dataSource.updateFilePath(
               id,
-              movedPath,
-              newFileName: p.basename(movedPath),
+              result,
+              newFileName: p.basename(result),
             );
           }
-        } catch (dbError) {
-          AppLogger.w('移动后即时更新DB失败: $imagePath -> $movedPath ($dbError)');
+        } catch (error) {
+          AppLogger.w('移动后即时更新DB失败: $imagePath -> $result ($error)');
         }
       }
-
-      return true;
-    } catch (e) {
-      AppLogger.e('移动图片失败: $imagePath -> $targetFolderPath', e);
-      return false;
+      if (result != null) await afterTransfer?.call(result);
+      return result;
+    } finally {
+      if (result == null && reservation != null && await reservation.exists()) {
+        await reservation.delete();
+      }
     }
   }
 
@@ -364,30 +432,14 @@ class GalleryFolderRepository {
     String targetFolderPath,
   ) async {
     try {
-      final file = File(imagePath);
-      if (!await file.exists()) return false;
-
-      final fileName = p.basename(imagePath);
-      var newPath = p.join(targetFolderPath, fileName);
-
-      if (await File(newPath).exists()) {
-        final baseName = p.basenameWithoutExtension(fileName);
-        final ext = p.extension(fileName);
-        newPath = p.join(
-          targetFolderPath,
-          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
-        );
-      }
-
-      final copiedPath = await copyFileWithFreshMtime(imagePath, newPath);
-      if (copiedPath == null) {
-        AppLogger.e('复制图片失败: $imagePath -> $newPath');
-        return false;
-      }
-
-      return true;
-    } catch (e) {
-      AppLogger.e('复制图片失败: $imagePath -> $targetFolderPath', e);
+      return await transferImageToFolder(
+            imagePath,
+            targetFolderPath,
+            copy: true,
+          ) !=
+          null;
+    } catch (error) {
+      AppLogger.e('复制图片失败: $imagePath', error);
       return false;
     }
   }

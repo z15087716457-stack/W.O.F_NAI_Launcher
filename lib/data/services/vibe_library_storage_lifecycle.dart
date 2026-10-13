@@ -360,12 +360,19 @@ mixin VibeLibraryStorageLifecycle {
   Future<void> _deleteDisplayThumbnailCache(String id) async {
     final service = _lifecycleService;
     await _ensureThumbnailCacheBox();
+    service._thumbnailRevisions[id] = ++service._nextThumbnailRevision;
+    service._thumbnailLoadsById.remove(id);
     await service._thumbnailCacheBox!.delete(id);
+    service._thumbnailRevisions[id] = ++service._nextThumbnailRevision;
+    service._thumbnailLoadsById.remove(id);
   }
 
   /// 关闭存储（清理资源）
   Future<void> close() async {
     final service = _lifecycleService;
+    service._baseThumbnailRevision = ++service._nextThumbnailRevision;
+    service._thumbnailRevisions.clear();
+    service._thumbnailLoadsById.clear();
     try {
       if (service._entriesBox != null && service._entriesBox!.isOpen) {
         await service._entriesBox!.close();

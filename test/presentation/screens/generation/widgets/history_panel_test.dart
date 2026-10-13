@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
+import 'package:nai_launcher/presentation/wiring/generation_view_mapping.dart';
 
 void main() {
   group('resolveHistoryPreviewAspectRatio', () {

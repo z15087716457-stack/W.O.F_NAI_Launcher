@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.0.0-blue" alt="Version"></a>
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.1.1-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
@@ -26,6 +26,11 @@
 W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It integrates image generation, image-to-image, inpainting, Vibe / Precise Reference, local gallery, online gallery, generation queues, Krita integration, and statistical tools into a single desktop application, making it ideal for daily generation, batch processing, and long-term management of local artwork.
 
 > This project is not an official NovelAI product. Please ensure you have your own NovelAI account and comply with NovelAI's Terms of Service before use.
+
+
+> This README describes the current source tree. New Studio, translation, and gallery work remains under `[Unreleased]` in CHANGELOG; the feature set of a downloaded package is determined by its own release notes. Existing interface screenshots are retained as historical illustrations.
+
+> The nine UIUX page backends and the existing NAI Agent are combined in the 2026-10-13 source candidate, preserving production gallery, bridge, and storage fixes. The desktop package has not been built or replaced; frontend layout and desktop validation remain pending. See the [integration record](docs/uiux-integration-2026-10-13.md) for source provenance and engineering checks.
 
 ## ✨ Features Overview
 
@@ -55,7 +60,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 Break prompts into reusable **blocks**: artist pools, quality tags, UC presets, and style strings are all blocks. A block library panel stays docked on the generation page — one tap inserts a block into the current prompt. Blocks render inline as highlighted pills, editable in place, and work identically in positive, negative, and character prompts.
 
 - **Three instance modes**: fixed output; sequential rotation (→ badge, in-card ←→ scene stepping); random draw with count range, Split-Beta weight distribution, and trigger probability — re-rolled per image in batch generation.
-- **Block manager**: dual-pane sidebar with folder tree + ⭐ favorite collections (draggable, persisted split), grid/list/masonry views grouped under sticky per-folder section headers, multi-select bulk operations, block thumbnails with crop framing, custom colors and icons, hover preview + detail panel, TXT export; ships with 12 official NovelAI preset blocks.
+- **Block manager**: dual-pane sidebar with folder tree + ⭐ favorite collections (draggable, persisted split), grid/list/masonry views grouped under sticky per-folder section headers, multi-select bulk operations, block thumbnails with crop framing, custom colors, tags, hover preview and paired positive/negative content; ships with official NovelAI preset blocks. The old per-block TXT export action is now tag management.
 - **Floating palette + docked block-library panel**: drag favorite blocks onto the 🎨 palette for one-tap insertion; the generation-page panel filters by folder subtree and keeps a draggable, persisted split.
 - **Per-instance locking and an "evolution target" DNA badge**: marks which blocks participate in mutation — the entry point for style exploration below.
 
@@ -93,21 +98,21 @@ Driven by a capability-flag registry: V5 Full / Curated (with inpainting mapping
 
 ### 🔌 Open Bridge · Any Agent Can Take the Wheel
 
-The launcher exposes a local bridge protocol that **any external agent tool, script, or workflow can plug into directly** — no whitelist, no caller restrictions. Get the bridge endpoint and you get full control of the launcher:
+The launcher exposes a local bridge protocol that **any external agent tool, script, or workflow can plug into directly** — authenticate through the per-launch local port and secret. Available actions follow the bridge protocol:
 
-- **Full-parameter writes**: `set_params` writes any generation parameter in batch; `generate` produces images silently (no UI changes, returns gallery paths) — external tools can drive the entire generation pipeline without touching the interface.
-- **Full-state readback**: `get_params` symmetrically reads back everything (character prompts and coordinates, noise_schedule, cfg_rescale, PR/Vibe/img2img, actual token usage) for lossless get→set round-trips.
-- **Companion toolchain**: `tool/nai_bridge_client.py` CLI (get / set / set-json / gen / ui-gen / cancel), `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` 11-point end-to-end self-check — the CLI source doubles as a reference implementation for writing a client in any language.
+- **Parameter control**: `set_params` updates supported fields such as prompts, dimensions, seeds, sampling parameters, and characters; `generate` returns image paths through the bridge. Complex reference-image data has separate read/write limits; check the current CLI and handlers before using it.
+- **State readback**: `get_params` reports effective prompts, characters, model parameters, references, and token usage. Reading a field does not imply that it can be written back unchanged; character arrays replace the entire list.
+- **Companion toolchain**: `tool/nai_bridge_client.py` CLI (get / set / set-json / gen / ui-gen / cancel), `tool/nai_fill.py` one-shot metadata fill, and `tool/bridge_selfcheck.py` for targeted self-checks — the CLI source doubles as a reference implementation for writing a client in any language.
 - In-app auto-update is served from this repository's Releases (since v1.0.1), so bridge extensions are never clobbered by upstream updates.
 
 ### 🖼️ Gallery Overhaul
 
-Multi-source galleries, a three-pane layout (continuous timeline + details panel), collections (root/subset linking), soft-delete trash pool, three-channel NAI-only filtering, precise local model-version filters, HD/SD thumbnail quality tiers, unified drag-out across all three views, envelope-metadata backfill, and byte-level dedup on image save — plus local favorites (works + subsets + authors) for the online gallery, with in-app author-work browsing on AI TAG.
+Local galleries use a library / collection / folder sidebar, a continuous image wall, and a details inspector. Grid, masonry, and justified rows share thumbnail sizing; justified rows are the default, preserve aspect ratios without cropping, and leave a short final row aligned left. There is no pagination: group by day or month, scrub the timeline, inspect a single image, multi-select, and reuse parameters. The responsive search toolbar and empty header areas support window dragging. Multi-source scanning, soft-delete trash, NAI/model/tag/date filters, HD/SD thumbnails, drag-out, and byte-level dedup remain. Online galleries keep their separate local favorites and AI TAG author browsing.
 
 <p align="center">
   <img src="screenshots/local_gallery_masonry.png" alt="Local gallery masonry" width="80%">
   <br>
-  <em>Local gallery: masonry layout, category tree, NAI-only and model-version filters</em>
+  <em>Historical gallery screenshot; the current layout is the three-pane timeline described above.</em>
 </p>
 
 ### ➕ More Improvements
@@ -116,6 +121,13 @@ Multi-source galleries, a three-pane layout (continuous timeline + details panel
 - Opus free-quota chip: official `usage.percent` plus refill countdown; free-eligibility rules match observed official behavior — PR / img2img / inpainting no longer wrongly cancel free generation.
 - Guest mode: skip login and use all offline features with a non-persistent in-memory session.
 - Unified NAI lexer with numeric-weight tail guard; removed focus-loss space-to-underscore conversion; Magic Byte metadata parsing for PNG / WebP / JPEG; anti-hotlink headers for the AI TAG online gallery.
+
+### 🌐 Translation, Models, and Languages
+
+- Bilingual prompt blocks support whole-document or single-block toggling, editing, retranslation, source restoration, and undo. Reading the translation does not change the saved generation source.
+- Models & APIs provides provider management, searchable catalog / selected-model columns, manual IDs, cached discovery results, and connection tests. Context, output limits, reasoning, and sampling belong to each model; task interfaces and prompt presets do not override them. Capability flags record configuration and do not create an embedded agent executor.
+- The interface supports Simplified Chinese, Traditional Chinese (Taiwan), English, Japanese, and Korean. The main workspace stays at 100% typography; settings have their own shared scale for pages, menus, and dialogs.
+- Drag/drop, paste, and gallery parameter reuse share a compact image-use dialog with explicit import choices; seed is not selected by default, and character data can replace or append.
 
 ## 🧩 Platform Support
 
@@ -134,12 +146,13 @@ Download the latest version from [Releases](https://github.com/z15087716457-stac
 
 You can log in for the first time using your NovelAI account credentials or an API Token. Account data is stored locally on the device only. The desktop app uses the system's secure storage for sensitive information.
 
-### Autocomplete Data & Privacy
+### Tags, Translation & Privacy
 
-- The base Danbooru tag and alias catalog ships with the app and is queried locally without a network connection.
-- The app neither bundles nor downloads a Chinese tag dictionary. Tag readings come from the tag translation interface configured under Settings → Models & APIs: the wiki, tag expansion, prompt tag chips, online gallery, and image details share the Auto-translate switch found in the wiki and tag expansion, along with its translation cache, and show English tags only while it is off. Chinese input is not used for local tag search.
-- The Danbooru online supplement is enabled by default. It sends only the current English token under the cursor, never the complete prompt; it can be disabled and its cache cleared separately under Settings → Data Sources & Cache.
-- AI translation for missing entries is disabled by default. When enabled, it reuses the Prompt Assistant `Translate` route and sends at most 8 untranslated tags to the model service selected by the user, which may incur API charges. Its cache can be cleared separately.
+- The app includes an offline tag/alias catalog and local English wiki data. It neither bundles nor downloads the retired ffdkj Chinese dictionary; Chinese text is not used for local tag search.
+- Optional automatic tag/wiki translation is off by default. When enabled, it uses the configured Tag translation and Wiki translation interfaces, prioritizes the latest visible tags, and allows up to five concurrent requests. Tag-name requests include the full available local wiki as context; full article translation is requested only when opened.
+- Prompt translation sends the selected plain-text segments and matched terminology to the configured service. Bilingual blocks retain a separate source projection for generation. Shared terminology can include a Chinese name, a brief definition, and its language; missing/expired Chinese definitions fall back to labeled source text without making extra requests.
+- Translations live in a separate local cache. They do not overwrite the tag/wiki databases, and existing results remain readable. Provider requests may incur API charges; use the selected service's terms and settings.
+- Optional Danbooru online relations send the relevant tag rather than the full prompt. Their controls and cache management are under Settings → Lexicon & Cache.
 
 ## 🛠️ Build from Source
 
@@ -161,6 +174,7 @@ git lfs pull --include="assets/databases/*.db"
 
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
+flutter gen-l10n
 flutter analyze
 flutter test
 ```

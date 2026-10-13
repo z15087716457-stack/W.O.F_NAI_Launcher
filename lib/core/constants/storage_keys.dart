@@ -58,6 +58,9 @@ class StorageKeys {
   static const String canvasImageBackground = 'canvas_image_background';
   static const String canvasPinnedImages = 'canvas_pinned_images';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
+  static const String mainNavHiddenBranches = 'main_nav_hidden_branches';
+  static const String mainNavCtrlNumbers = 'main_nav_ctrl_numbers';
+  static const String mainNavCtrlHintSeen = 'main_nav_ctrl_hint_seen';
   static const String mainNavRailCollapseMigrated =
       'main_nav_rail_collapse_migrated';
   static const String webLeftPanelWidth = 'web_left_panel_width';
@@ -323,6 +326,12 @@ class StorageKeys {
 
   // 数据源后台刷新相关
   static const String pendingDataSourceRefresh = 'pending_data_source_refresh';
+
+  static const String onlineGalleryRecentPrefix = 'online_gallery_recent_';
+  static const String onlineGallerySidebarOpen = 'online_gallery_sidebar_open';
+  static const String onlineGalleryInspectorOpen =
+      'online_gallery_inspector_open';
+  static const String onlineGallerySendMode = 'online_gallery_send_mode';
 
   // 在线画廊黑名单设置
   static const String onlineGalleryBlacklistTags =

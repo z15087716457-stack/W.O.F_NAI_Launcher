@@ -7,24 +7,6 @@
   "brand_switchToDark": "ダークモードに切り替え",
   "app_subtitle": "NovelAI サードパーティ クライアント",
   "common_cancel": "キャンセル",
-  "onlineFav_all": "すべて",
-  "onlineFav_rootCollection": "ルート",
-  "onlineFav_newCollection": "新しいコレクション",
-  "onlineFav_renameCollection": "名前を変更",
-  "onlineFav_deleteCollection": "コレクションを削除",
-  "onlineFav_empty": "お気に入りの作品はまだありません",
-  "onlineFav_authorWorkCount": "{n} 作品",
-  "@onlineFav_authorWorkCount": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "onlineFav_moveHere": "ここに移動",
-  "onlineFav_removeFavorite": "お気に入り解除",
-  "onlineFav_favoriteAuthor": "作者をお気に入り",
-  "onlineFav_unfavoriteAuthor": "作者のお気に入りを解除",
-  "onlineFav_authorFavorited": "作者をお気に入りに追加しました",
-  "onlineFav_authorUnfavorited": "作者のお気に入りを解除しました",
   "common_confirm": "確認",
   "common_continue": "続行",
   "common_selectAll": "すべて選択",
@@ -45,7 +27,6 @@
   "common_reset": "リセット",
   "common_add": "追加",
   "common_added": "追加しました",
-  "common_new": "新規",
   "common_confirmDelete": "削除の確認",
   "common_confirmClear": "クリアの確認",
   "common_gotIt": "わかりました",
@@ -63,7 +44,6 @@
     }
   },
   "common_clearInputConfirm": "入力内容をクリアしますか?",
-  "common_yesterday": "昨日",
   "common_daysAgo": "{days} 日前",
   "@common_daysAgo": {
     "placeholders": {
@@ -75,13 +55,11 @@
   "common_refresh": "更新",
   "common_download": "ダウンロード",
   "common_apply": "適用する",
-  "common_move": "移動",
   "common_favorite": "お気に入り",
   "common_unfavorite": "お気に入りから削除",
   "common_ok": "OK",
   "common_exit": "終了",
   "common_grid": "グリッド",
-  "common_pack": "パック",
   "common_multiSelect": "複数選択",
   "common_category": "カテゴリ",
   "networkError_connectionTimeout": "接続がタイムアウトしました。ネットワーク接続を確認してください。",
@@ -109,10 +87,6 @@
       }
     }
   },
-  "nav_canvas": "キャンバス",
-  "nav_onlineGallery": "オンライン ギャラリー",
-  "nav_expandSidebar": "サイドバーを展開",
-  "nav_collapseSidebar": "サイドバーを折りたたむ",
   "auth_login": "ログイン",
   "auth_logout": "ログアウト",
   "auth_email": "電子メール",
@@ -128,7 +102,6 @@
   "auth_emailRequired": "メールアドレスを入力してください",
   "auth_emailInvalid": "有効な電子メール アドレスを入力してください",
   "auth_passwordRequired": "パスワードを入力してください",
-  "auth_tokenLogin": "API トークンのログイン",
   "auth_tokenLoginRecommended": "API トークンのログイン（推奨）",
   "auth_credentialsLogin": "電子メールとパスワード",
   "auth_credentialsLoginUnavailable": "メールアドレス/パスワードでのログインは現在利用できません。Token ログインを使用してください。",
@@ -148,7 +121,6 @@
   "auth_addAccount": "アカウントを追加",
   "auth_tokenNotFound": "このアカウントのトークンが見つかりません",
   "auth_switchAccount": "アカウントを切り替える",
-  "auth_currentAccount": "現在のアカウント",
   "auth_selectAccount": "アカウントを選択してください",
   "auth_deleteAccount": "アカウントを削除",
   "auth_deleteAccountConfirm": "「{name}」を削除してもよろしいですか?これを元に戻すことはできません。",
@@ -193,7 +165,6 @@
   "common_paste": "貼り付け",
   "common_default": "デフォルト",
   "settings_title": "設定",
-  "settings_account": "アカウント",
   "settings_savedAccounts": "保存済みアカウント",
   "settings_style": "スタイル",
   "settings_font": "フォント",
@@ -311,8 +282,6 @@
   "settings_avatarUpdated": "アバターが更新されました",
   "settings_avatarRemoved": "アバターが削除されました",
   "settings_setAsDefaultSuccess": "デフォルトのアカウントとして設定",
-  "generation_title": "生成",
-  "generation_generate": "生成",
   "generation_cooldownRemaining": "あと{seconds}秒",
   "@generation_cooldownRemaining": {
     "placeholders": {
@@ -324,26 +293,6 @@
   "generation_stopGeneration": "生成を停止",
   "generation_pleaseInputPrompt": "プロンプトを入力してください",
   "generation_generationFailed": "生成に失敗しました",
-  "generation_progress": "生成中...{progress}%",
-  "@generation_progress": {
-    "placeholders": {
-      "progress": {}
-    }
-  },
-  "generation_lockHistoryScroll": "履歴スクロールをロック",
-  "generation_unlockHistoryScroll": "履歴スクロールのロックを解除",
-  "generation_downloadAllImages": "すべての画像をダウンロード",
-  "generation_selectMultiple": "複数選択",
-  "generation_deselectAll": "選択を解除",
-  "generation_deleteSelectedImages": "選択した画像を削除 ({count})",
-  "@generation_deleteSelectedImages": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_deleteSelectedImagesTitle": "選択した画像を削除",
   "generation_deleteSelectedImagesConfirm": "レコードから {count} 枚の画像を削除します（ディスクに保存されたファイルは保持されます）",
   "@generation_deleteSelectedImagesConfirm": {
     "placeholders": {
@@ -381,23 +330,9 @@
   "generation_canvasPinImage": "画像を固定",
   "generation_canvasUnpinImage": "固定を解除",
   "generation_canvasUseSeed": "クリックしてこのシードを再利用",
-  "generation_canvasPinnedCount": "固定 {count}",
-  "@generation_canvasPinnedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_params": "パラメータ",
-  "generation_paramsSettings": "パラメータ設定",
   "generation_history": "履歴",
-  "generation_historyRecord": "履歴レコード",
   "generation_failedStreamSnapshot": "スナップショットが失敗しました",
   "generation_failedStreamSnapshotHint": "生成が完了しませんでした。最後のプレビュー フレームのみが保持されます。保存したり、お気に入りに登録したり、画像ワークフローに使用したりすることはできません。",
-  "generation_noHistory": "履歴レコードがありません",
-  "generation_clearHistory": "履歴をクリア",
-  "generation_clearHistoryConfirm": "すべての履歴レコードをクリアしてもよろしいですか?この操作は元に戻すことができません。",
   "generation_model": "モデル",
   "generation_imageSize": "画像サイズ",
   "generation_sampler": "サンプラー",
@@ -589,7 +524,6 @@
   "img2img_startUpscale": "拡大を開始",
   "img2img_novelAiUpscaleComplete": "NovelAI 拡大が完了しました",
   "img2img_decodeSourceFailed": "ソース画像のデコードに失敗しました",
-  "img2img_upscalePanelOpened": "Image2Image の拡大パネルを開きました",
   "editor_tolerance": "許容差",
   "editor_intensity": "強度",
   "editor_sourcePoint": "Alt+クリックしてソースポイントを設定します",
@@ -623,7 +557,6 @@
   "editor_zoomIn": "ズームイン",
   "editor_zoomOut": "ズームアウト",
   "editor_fitToWindow": "窓に合わせる",
-  "editor_shortcut100Zoom": "100% ズーム",
   "editor_effectBrightness": "明るさ",
   "editor_effectSaturation": "彩度",
   "editor_changeCanvasSize": "キャンバス サイズの変更",
@@ -738,12 +671,8 @@
   "vibe_sourceType_bundle": "バンドル",
   "vibe_sourceType_image": "画像",
   "vibe_sourceType": "ソース",
-  "vibe_reuseButton": "再利用",
   "vibe_info": "Vibe 情報",
   "vibe_name": "名前",
-  "vibe_strength": "強度",
-  "vibe_infoExtracted": "抽出情報",
-  "vibe_shiftReplaceHint": "Shift+クリックして置換",
   "character_buttonLabel": "キャラ/位置",
   "character_addCharacter": "キャラクターを追加",
   "character_number": "キャラクター {index}",
@@ -759,9 +688,6 @@
   "gallery_metaSampler": "サンプラー",
   "gallery_metaCfgScale": "プロンプトガイダンス",
   "gallery_metaSeed": "シード",
-  "gallery_metaSmea": "SMEA",
-  "gallery_promptCopied": "プロンプトがコピーされました",
-  "gallery_seedCopied": "シードがコピーされました",
   "gallery_sendToKritaAction": "Krita に送信",
   "gallery_upscalePanelLoaded": "Image2Image の拡大パネルを読み込みました",
   "gallery_readImageFailed": "画像の読み取りに失敗しました: {error}",
@@ -786,48 +712,15 @@
       "error": {}
     }
   },
-  "onlineGallery_search": "検索",
-  "onlineGallery_popular": "人気",
-  "onlineGallery_favorites": "お気に入り",
-  "onlineGallery_refresh": "更新",
   "onlineGallery_login": "ログイン",
-  "onlineGallery_logout": "ログアウト",
-  "onlineGallery_dayRank": "日",
-  "onlineGallery_weekRank": "週",
-  "onlineGallery_monthRank": "月",
-  "onlineGallery_today": "今日",
-  "onlineGallery_imageCount": "{count} 画像",
-  "@onlineGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_loadFailed": "ロードに失敗しました",
-  "onlineGallery_favoritesEmpty": "お気に入りが空です",
-  "onlineGallery_noResults": "画像が見つかりませんでした",
   "onlineGallery_pleaseLogin": "まずログインしてください",
-  "onlineGallery_size": "サイズ",
-  "onlineGallery_score": "スコア",
-  "onlineGallery_favCount": "お気に入り",
-  "onlineGallery_type": "タイプ",
   "mediaType_video": "ビデオ",
   "mediaType_gif": "GIF",
-  "onlineGallery_tags": "タグ",
-  "onlineGallery_artists": "アーティスト",
-  "onlineGallery_characters": "キャラクター",
-  "onlineGallery_copyrights": "著作権",
-  "onlineGallery_general": "一般",
   "onlineGallery_copied": "コピーされました",
   "onlineGallery_copyTags": "タグをコピー",
-  "onlineGallery_open": "開く",
-  "onlineGallery_send": "送信",
   "onlineGallery_sendToTextToImage": "テキストから画像へ送信",
   "onlineGallery_sentToTextToImage": "text-to-image に送信されました",
   "onlineGallery_noTagInfo": "この画像にはタグ情報がありません",
-  "onlineGallery_promptSentToGeneration": "プロンプトが生成ページに送信されました",
-  "onlineGallery_gifLoadFailed": "GIFのロードに失敗しました",
-  "onlineGallery_pinchToZoom": "ピンチしてズーム",
-  "onlineGallery_metadata": "メタデータ",
   "onlineGallery_chooseDownloadDirectory": "ダウンロード ディレクトリを選択してください",
   "onlineGallery_downloadStarted": "ダウンロードが開始されました...",
   "onlineGallery_savedToPath": "保存先: {path}",
@@ -843,24 +736,10 @@
     }
   },
   "onlineGallery_downloadOriginal": "元の画像をダウンロード",
-  "onlineGallery_all": "すべて",
   "onlineGallery_ratingGeneral": "一般",
   "onlineGallery_ratingSensitive": "センシティブ",
   "onlineGallery_ratingQuestionable": "疑問あり",
   "onlineGallery_ratingExplicit": "露骨",
-  "onlineGallery_clear": "クリア",
-  "onlineGallery_previousPage": "前のページ",
-  "onlineGallery_nextPage": "次のページ",
-  "onlineGallery_pageN": "ページ {page}",
-  "@onlineGallery_pageN": {
-    "placeholders": {
-      "page": {}
-    }
-  },
-  "onlineGallery_dateRange": "日付範囲",
-  "onlineGallery_fuzzySearch": "ファジーマッチ",
-  "onlineGallery_fuzzySearchTooltip": "有効な場合は、関連タグに *tag* マッチングを使用します。無効になっている場合は、正確な Danbooru タグを検索します",
-  "onlineGallery_blacklistTags": "ブラックリスト タグ",
   "onlineGallery_blacklistTitle": "オンライン ギャラリー ブラックリスト",
   "onlineGallery_blacklistSubtitle": "ブラックリストに登録されたタグを含む画像は、オンライン ギャラリーで直接非表示になります。",
   "onlineGallery_addBlacklistTagHint": "ブラックリスト タグを追加",
@@ -882,28 +761,6 @@
   },
   "onlineGallery_blacklistSettingsTitle": "オンライン ギャラリーのブラックリスト設定",
   "onlineGallery_blacklistLoginHint": "Danbooru にログインしていません。ローカルのブラックリストは引き続き機能しますが、同期にはログインが必要です。",
-  "onlineGallery_bulkFavorite": "選択項目をお気に入りに追加",
-  "onlineGallery_bulkDownload": "選択項目をダウンロード",
-  "onlineGallery_unfavorited": "お気に入りから削除しました",
-  "onlineGallery_favorited": "お気に入りに登録しました",
-  "onlineGallery_favoritedImages": "{count} 件の画像をお気に入りに追加しました",
-  "@onlineGallery_favoritedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_selectDownloadDirectoryFailed": "ダウンロード ディレクトリの選択に失敗しました: {error}",
-  "@onlineGallery_selectDownloadDirectoryFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "onlineGallery_downloadSelectedStarted": "{count} 画像をダウンロードしています...",
-  "@onlineGallery_downloadSelectedStarted": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "onlineGallery_downloadSelectedCompleted": "ダウンロード完了: {success} 成功、{failed} 失敗",
   "@onlineGallery_downloadSelectedCompleted": {
     "placeholders": {
@@ -911,14 +768,6 @@
       "failed": {}
     }
   },
-  "onlineGallery_startDate": "開始日",
-  "onlineGallery_endDate": "終了日",
-  "onlineGallery_invalidDateFormat": "無効な日付形式です",
-  "onlineGallery_dateOutOfRange": "日付が範囲外です",
-  "onlineGallery_last30Days": "過去 30 日間",
-  "onlineGallery_configureGelbooruApi": "Gelbooru API を設定",
-  "onlineGallery_gelbooruApiReady": "Gelbooru API は検証済みです",
-  "onlineGallery_gelbooruApiInvalid": "Gelbooru 認証情報が無効です",
   "onlineGallery_gelbooruCredentialsRequired": "ウェブサイトのお気に入りを表示するには、Gelbooru の User ID と API Key を設定してください。",
   "onlineGallery_gelbooruCredentialsInvalid": "Gelbooru 認証情報が無効になりました。再設定してください。",
   "onlineGallery_gelbooruRateLimited": "Gelbooru のリクエスト回数が多すぎます。しばらくしてから再試行してください。",
@@ -927,18 +776,7 @@
   "onlineGallery_gelbooruNetworkError": "Gelbooru に接続できません。ネットワークまたはプロキシ設定を確認してください。",
   "onlineGallery_gelbooruMalformedResponse": "Gelbooru から解析できないデータが返されました。",
   "onlineGallery_gelbooruRequestFailed": "Gelbooru リクエストに失敗しました。しばらくしてから再試行してください。",
-  "onlineGallery_aiTagQuery": "作品、作者、タイトル、タグ、モデルを検索",
-  "onlineGallery_aiTagPromptQuery": "AI Prompt 検索（::artist: などの原文構文に対応）",
-  "onlineGallery_aiTagTimeRange": "期間",
-  "onlineGallery_aiTagAllTime": "すべて",
-  "onlineGallery_aiTagCurrentMonthly": "リアルタイム月間ランキング",
-  "onlineGallery_aiTagOlderMonthly": "過去のアーカイブ",
   "onlineGallery_aiTagRankingProcessing": "ランキングを生成中です。しばらくしてから再試行してください。",
-  "onlineGallery_aiTagNaiOnly": "NAIのみ",
-  "onlineGallery_aiTagModelVersion": "モデルバージョン",
-  "onlineGallery_viewAuthor": "この作者を見る",
-  "onlineGallery_returnFromAuthor": "前の閲覧位置に戻る",
-  "onlineGallery_generationParams": "生成パラメータ",
   "onlineGallery_sourceConfigUnavailable": "ソース設定を取得できません。接続を確認して再試行してください。",
   "onlineGallery_sourceRateLimited": "リクエストが多すぎます。しばらくしてから再試行してください。",
   "onlineGallery_sourceTimeout": "リクエストがタイムアウトしました。接続を確認してください。",
@@ -946,26 +784,7 @@
   "onlineGallery_sourceMalformedResponse": "ソースのレスポンス形式が変更され、解析できません。",
   "onlineGallery_detailNotFound": "作品が存在しないか、削除されています。",
   "onlineGallery_imageUnavailable": "画像は現在利用できません。",
-  "onlineGallery_loadedAll": "すべて読み込み済み",
-  "onlineGallery_retryAppend": "読み込みに失敗しました。クリックして再試行",
-  "onlineGallery_rankNumber": "第 {rank} 位",
-  "@onlineGallery_rankNumber": {
-    "placeholders": {
-      "rank": {}
-    }
-  },
-  "onlineGallery_multipleImages": "{count} 枚の画像",
-  "@onlineGallery_multipleImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_views": "閲覧数",
-  "onlineGallery_downloadAllMedia": "作品の全画像をダウンロード",
-  "onlineGallery_copyFullMetadata": "完全なメタデータをコピー",
-  "onlineGallery_metadataParseFailed": "メタデータの解析に失敗しました。元の内容は保持され、コピーできます。",
   "onlineGallery_gelbooruReadOnly": "読み取り専用のお気に入り",
-  "onlineGallery_gelbooruFavoritesSortHint": "投稿 ID の新しい順です。ウェブサイトのお気に入り登録時刻順とは異なる場合があります。",
   "tooltip_fullscreenEdit": "フルスクリーン編集",
   "tooltip_decreaseWeight": "ウェイトを下げる [-5%]",
   "tooltip_increaseWeight": "ウェイトを上げる [+5%]",
@@ -1482,7 +1301,6 @@
   "comparison_close": "詳細比較",
   "comparison_zoomHint": "ピンチまたはスクロールして個別にズームします",
   "comparison_loadError": "画像のロードに失敗しました",
-  "statistics_title": "統計",
   "localGallery_group_today": "今日",
   "localGallery_group_yesterday": "昨日",
   "localGallery_groupImageCount": "{formatted} 枚",
@@ -1811,7 +1629,6 @@
   "promptToken_negativePreset": "除外したい要素プリセット",
   "promptToken_characterNegative": "キャラクター除外要素",
   "common_rename": "名前の変更",
-  "tagLibrary_newCategory": "新しいカテゴリ",
   "tagLibrary_tags": "タグ",
   "settings_network": "ネットワーク",
   "settings_enableProxy": "プロキシを有効にする",
@@ -2086,42 +1903,7 @@
     }
   },
   "vibeLibrary_title": "バイブライブラリ",
-  "vibeLibrary_categories": "カテゴリ",
-  "vibeLibrary_createCategoryTitle": "新しいカテゴリ",
-  "vibeLibrary_createSubCategoryTitle": "新しいサブカテゴリ",
-  "vibeLibrary_categoryNameHint": "カテゴリ名を入力してください",
-  "vibeLibrary_createCategoryConfirm": "作成",
-  "vibeLibrary_deleteCategoryTitle": "削除の確認",
-  "vibeLibrary_deleteCategoryContent": "このカテゴリを削除しますか？中の Vibe は未分類に移動されます。",
-  "vibeLibrary_sortTooltip": "並べ替え基準",
-  "vibeLibrary_openFolderTooltip": "バイブライブラリフォルダーを開く",
-  "vibeLibrary_totalCount": "{count} 件の Vibe",
-  "@vibeLibrary_totalCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_noCategoriesAvailable": "使用可能なカテゴリがありません",
-  "vibeLibrary_moveToCategory": "カテゴリに移動",
   "vibeLibrary_uncategorized": "未分類",
-  "vibeLibrary_movedToCategory": "{count} 件の Vibe を移動しました",
-  "@vibeLibrary_movedToCategory": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_favoriteStatusUpdated": "お気に入りのステータスが更新されました",
-  "vibeLibrary_importFromFile": "ファイルからインポート",
-  "vibeLibrary_importFromImage": "画像からインポート",
-  "vibeLibrary_importFromClipboard": "クリップボードからエンコードされたデータをインポート",
-  "vibeLibrary_openFolderFailed": "フォルダーを開けませんでした: {error}",
-  "@vibeLibrary_openFolderFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibeLibrary_importFileDialogTitle": "インポートする Vibe ファイルを選択してください",
-  "vibeLibrary_preparingImport": "インポートを準備しています...",
   "vibeLibrary_importSuccessCount": "{count} 件の Vibe をインポートしました",
   "@vibeLibrary_importSuccessCount": {
     "placeholders": {
@@ -2135,66 +1917,9 @@
       "failed": {}
     }
   },
-  "vibeLibrary_dropImportHint": ".naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp ファイルまたはフォルダーをここにドロップしてインポートします",
-  "vibeLibrary_importing": "インポート中...",
-  "vibeLibrary_pageIndicator": "{current} / {total} ページ",
-  "@vibeLibrary_pageIndicator": {
-    "placeholders": {
-      "current": {},
-      "total": {}
-    }
-  },
-  "vibeLibrary_itemsPerPage": "ページごと:",
-  "vibeLibrary_tooManyTitle": "Vibe が多すぎます",
-  "vibeLibrary_tooManySelectedContent": "{count} 件の Vibe が選択されています。一度に使用できるのは最大 16 件です。\n\n選択数を減らして再試行してください。",
-  "@vibeLibrary_tooManySelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_tooManyExistingContent": "生成ページにはすでに {current} 件の Vibe があります。さらに {remaining} 件まで追加できます。\n\n選択数を減らして再試行してください。",
-  "@vibeLibrary_tooManyExistingContent": {
-    "placeholders": {
-      "current": {},
-      "remaining": {}
-    }
-  },
-  "vibeLibrary_sentToGenerationCount": "{count} 件の Vibe を生成に送信しました",
-  "@vibeLibrary_sentToGenerationCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deleteSelectedContent": "選択した {count} 件の Vibe を削除しますか？この操作は元に戻せません。",
-  "@vibeLibrary_deleteSelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deletedCount": "{count} 件の Vibe を削除しました",
-  "@vibeLibrary_deletedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_importImageDialogTitle": "Vibe データを含む画像を選択してください",
-  "vibeLibrary_clipboardEmpty": "クリップボードが空です",
-  "vibeLibrary_encodeTimeout": "エンコードがタイムアウトしました。ネットワーク接続を確認してください。",
-  "vibeLibrary_unknownError": "不明なエラー",
   "vibeLibrary_save": "ライブラリに保存",
   "vibeLibrary_import": "Vibe をインポート",
-  "vibeLibrary_searchHint": "名前、タグを検索...",
-  "vibeLibrary_empty": "バイブライブラリは空です",
-  "vibeLibrary_emptyHint": "まずバイブライブラリにエントリを追加してください",
-  "vibeLibrary_allVibes": "すべての Vibe",
-  "vibeLibrary_favorites": "お気に入り",
   "vibeLibrary_sendToGeneration": "生成に送信",
-  "vibeLibrary_export": "エクスポート",
-  "vibeLibrary_edit": "編集",
-  "vibeLibrary_delete": "削除",
-  "vibeLibrary_addToFavorites": "お気に入りに追加",
-  "vibeLibrary_removeFromFavorites": "お気に入りから削除",
-  "vibeLibrary_newSubCategory": "新しいサブカテゴリ",
   "vibeLibrary_maxVibesReached": "最大制限に達しました (16 件の Vibe)",
   "vibeLibrary_bundleReadFailed": "バンドルファイルの読み取りに失敗したため、単一ファイルモードを使用します",
   "categoryError_loadFailed": "カテゴリの読み込みに失敗しました: {error}",
@@ -2274,251 +1999,8 @@
       }
     }
   },
-  "vibeBulkTag_actionPreview": "変更内容",
-  "vibeDetail_strengthDescription": "この Vibe が生成結果に与える影響の強さを調整します",
-  "vibeDetail_infoExtractedDescription": "元画像から抽出する情報量を調整します（2 Anlas を消費）",
-  "vibeDetail_statistics": "統計情報",
-  "vibeDetail_usageCount": "使用回数",
-  "vibeDetail_timesUsed": "{count} 回",
-  "@vibeDetail_timesUsed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeDetail_lastUsed": "最終使用",
-  "vibeDetail_neverUsed": "未使用",
-  "vibeDetail_createdAt": "作成日時",
-  "vibeDetail_saveParameters": "パラメーターを保存",
   "vibe_export_title": "Vibe をエクスポート",
-  "vibe_export_format": "エクスポート形式",
-  "vibe_selector_title": "Vibe を選択してください",
   "vibe_selector_recent": "最近の",
-  "vibe_export_include_thumbnails": "サムネイルを含める",
-  "vibe_export_include_thumbnails_subtitle": "エクスポート ファイルにサムネイル プレビューを含めます",
-  "vibe_export_singleFile": "単一ファイル (.naiv4vibe)",
-  "vibe_export_singleFileDescription": "各 Vibe を個別のファイルとしてエクスポートし、1 つの Vibe を共有するのに適しています",
-  "vibe_export_bundleFile": "バンドル ファイル (.naiv4vibebundle)",
-  "vibe_export_bundleFileDescription": "複数の Vibe を 1 つのファイルにまとめ、バッチバックアップに適しています",
-  "vibe_export_embedIntoPng": "PNG に埋め込む",
-  "vibe_export_embedIntoPngDescription": "データを PNG メタデータに埋め込んで単一の Vibe をエクスポートします",
-  "vibe_export_exportable": "エクスポート可能",
-  "vibe_export_notExportable": "エクスポートできません",
-  "vibe_export_selectVibesToExport": "エクスポートする Vibe を選択してください",
-  "vibe_export_exportSelected": "エクスポート ({count})",
-  "@vibe_export_exportSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_strengthPercent": "強度: {percent}%",
-  "@vibe_export_strengthPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_pngCarrierImage": "PNG キャリア画像",
-  "vibe_export_noUsablePngCarrier": "この Vibe には、直接使用できる PNG キャリア画像がありません。外部 PNG 画像をキャリアとして選択できます。",
-  "vibe_export_selectExternalPngImage": "外部 PNG 画像を選択してください...",
-  "vibe_export_changeExternalPngImage": "外部 PNG 画像を変更します...",
-  "vibe_export_useVibeImageInstead": "代わりに Vibe 画像を使用してください",
-  "vibe_export_usingExternalPng": "外部 PNG の使用: {fileName}",
-  "@vibe_export_usingExternalPng": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectPngImage": "PNG 画像を選択してください",
-  "vibe_export_invalidPngImage": "選択したファイルは有効な PNG 画像ではありません",
-  "vibe_export_selectPngImageFailed": "PNG 画像の選択に失敗しました: {error}",
-  "@vibe_export_selectPngImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embeddingPng": "PNG の埋め込み: {name}",
-  "@vibe_export_embeddingPng": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_exportCompleteCounts": "エクスポート完了: {successCount} 成功、{failCount} 失敗",
-  "@vibe_export_exportCompleteCounts": {
-    "placeholders": {
-      "successCount": {
-        "type": "int"
-      },
-      "failCount": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportCompletePath": "エクスポートが完了しました: {path}",
-  "@vibe_export_exportCompletePath": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_packingVibes": "{count} 件の Vibe をパックしています...",
-  "@vibe_export_packingVibes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingName": "エクスポート中: {name}",
-  "@vibe_export_exportingName": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectExportFolder": "エクスポートフォルダーを選択してください",
-  "vibe_export_generatingBundleFile": "バンドル ファイルを生成しています...",
-  "vibe_export_bundleTitle": "バンドルのエクスポート: {name}",
-  "@vibe_export_bundleTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_vibesTitle": "Vibe をエクスポート ({count} 件選択中)",
-  "@vibe_export_vibesTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_method": "エクスポート方法",
-  "vibe_export_wholeBundle": "バンドル全体",
-  "vibe_export_internalVibe": "内部 Vibe",
-  "vibe_export_wholeBundleDescription": "全 {count} 件の Vibe を含む .naiv4vibebundle ファイルとしてエクスポートします",
-  "@vibe_export_wholeBundleDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_internalVibeDescription": ".naiv4vibe ファイルとして個別にエクスポートする内部バンドル Vibe を選択してください (合計 {count})",
-  "@vibe_export_internalVibeDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportBundle": "エクスポート バンドル",
-  "vibe_export_exportAsFiles": "ファイルとしてエクスポート",
-  "vibe_export_exportBundleDescription": ".naiv4vibebundle ファイルとしてエクスポート",
-  "vibe_export_exportAsFilesDescription": ".naiv4vibe または .naiv4vibebundle ファイルとしてエクスポート",
-  "vibe_export_exportAsZip": "ZIP としてエクスポート",
-  "vibe_export_exportAsZipDescription": "選択したバイブライブラリエントリを個別のファイルとして .zip にパックします",
-  "vibe_export_compressData": "データを圧縮します",
-  "vibe_export_compressDataDescription": "圧縮を使用してファイル サイズを削減します (バッチ エクスポートに推奨)",
-  "vibe_export_zipCompressDescription": "ZIP 内のファイルを圧縮してサイズを削減します",
-  "vibe_export_exportAsPng": "PNG としてエクスポート",
-  "vibe_export_pngInternalBundleUnsupported": "単一の内部バンドル Vibe をエクスポートする場合、画像への埋め込みはサポートされていません",
-  "vibe_export_embedVibeDataIntoPng": "Vibe データを PNG メタデータに埋め込む",
-  "vibe_export_batchPngUsesFirstImage": "バッチ エクスポートでは、各 Vibe の最初に使用可能な画像が使用されます。画像のないエントリは自動的にスキップされます。",
-  "vibe_export_exportCarrierImage": "キャリアイメージのエクスポート",
-  "vibe_export_usingExternalCarrierImage": "エクスポートキャリア画像として外部 PNG を使用する",
-  "vibe_export_exportAsEncodings": "エンコーディングとしてエクスポート",
-  "vibe_export_exportAsEncodingsDescription": "データをエンコーディング (JSON または Base64) としてエクスポートします。",
-  "vibe_export_jsonDescription": "読み取りと編集を容易にするために、フォーマットされた JSON ファイルとしてエクスポートします。",
-  "vibe_export_base64Description": "コピーと共有のためにプレーン Base64 としてエクスポートします",
-  "vibe_export_selectAtLeastOneMethod": "少なくとも 1 つのエクスポート方法を選択してください",
-  "vibe_export_batchPngUnsupported": "バッチ Vibe エクスポートは、PNG への埋め込みをサポートしていません。単一の Vibe エクスポート画面を使用します。",
-  "vibe_export_selectPngCarrier": "エクスポートする PNG キャリア画像を選択してください",
-  "vibe_export_selectAtLeastOneInternalVibe": "エクスポートする内部 Vibe を少なくとも 1 つ選択してください",
-  "vibe_export_selectVibeExportFolder": "Vibe エクスポート フォルダーを選択してください",
-  "vibe_export_saveEncodingFile": "エンコードファイルを保存",
-  "vibe_export_preparingExport": "エクスポートを準備しています...",
-  "vibe_export_preparingVibeProgress": "Vibe {current}/{total} を読み取り中...",
-  "@vibe_export_preparingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingBundle": "バンドルをエクスポートしています...",
-  "vibe_export_exportingZip": "ZIP をエクスポートしています...",
-  "vibe_export_embeddingImage": "画像を埋め込んでいます...",
-  "vibe_export_exportingEncoding": "エンコーディングをエクスポートしています...",
-  "vibe_export_exportFailedWithError": "エクスポートに失敗しました: {error}",
-  "vibe_export_noExportableEntries": "エクスポート可能な Vibe エントリがありません",
-  "@vibe_export_exportFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_bundleFilePathEmpty": "バンドル ファイルのパスが空です",
-  "vibe_export_invalidImageFormatWithError": "無効な画像形式: {error}",
-  "@vibe_export_invalidImageFormatWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedFailedWithError": "埋め込みに失敗しました: {error}",
-  "@vibe_export_embedFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedImageFailedWithError": "画像の埋め込みに失敗しました: {error}",
-  "@vibe_export_embedImageFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_extractingVibeProgress": "Vibe {current}/{total} を抽出しています...",
-  "@vibe_export_extractingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_selectImageFailed": "画像の選択に失敗しました: {error}",
-  "@vibe_export_selectImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "vibe_export_dialogTitle": "{count} 件の Vibe をエクスポート",
   "@vibe_export_dialogTitle": {
     "placeholders": {
@@ -2562,8 +2044,6 @@
   },
   "vibe_export_embedFailed": "埋め込みに失敗しました",
   "vibe_embedToImage": "画像に埋め込む",
-  "vibe_import_skip": "スキップ",
-  "vibe_import_confirm": "確認",
   "vibe_import_noEncodingData": "エンコード データがありません",
   "vibe_import_encodingCost": "エンコードには 2 Anlas を消費します",
   "vibe_import_confirmCost": "続けて Anlas を消費しますか?",
@@ -2576,39 +2056,9 @@
   "vibe_import_encodingComplete": "エンコードが完了しました",
   "vibe_import_partialFailed": "部分的なエンコードに失敗しました",
   "vibe_import_timeout": "エンコードのタイムアウト",
-  "vibe_import_title": "ライブラリからインポート",
-  "vibe_import_result": "{count} 件の Vibe をインポートしました",
-  "@vibe_import_result": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_import_fileParseFailed": "ファイルの解析に失敗しました",
   "vibe_import_fileSelectionFailed": "ファイルの選択に失敗しました",
   "vibe_import_importFailed": "インポートに失敗しました",
-  "vibe_import_bundleTitle": "Vibe バンドルをインポート",
-  "vibe_import_bundleChooseMethod": "インポート方法を選択してください",
-  "vibe_import_bundleAsWhole": "全体としてインポート",
-  "vibe_import_bundleAsWholeDescription": "バンドル構造を保持し、1 つのライブラリ エントリとしてインポートします",
-  "vibe_import_bundleSplitEntries": "個別のエントリに分割",
-  "vibe_import_bundleSplitEntriesDescription": "各 Vibe を個別のライブラリエントリとしてインポートします",
-  "vibe_import_bundleSelectVibes": "インポートする Vibe を選択してください",
-  "vibe_import_bundleSelectVibesDescription": "選択した Vibe のみをインポートします",
-  "vibe_import_bundleConfigureEachVibe": "各 Vibe のパラメータを設定します",
-  "vibe_import_bundleSelectAndConfigureEachVibe": "各 Vibe のパラメータを選択して設定します",
-  "vibe_import_bundleSelectedCount": "{selected}/{total} が選択されました",
-  "@vibe_import_bundleSelectedCount": {
-    "placeholders": {
-      "selected": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_saveToLibrary_title": "ライブラリに保存",
   "vibe_saveToLibrary_strength": "強度",
   "vibe_saveToLibrary_infoExtracted": "抽出情報",
@@ -2698,30 +2148,10 @@
   "selection_clear_selection": "選択をクリア",
   "selection_invert_selection": "選択範囲を反転",
   "selection_cut_to_layer": "レイヤーにカット",
-  "search_results": "検索結果",
-  "search_noResults": "一致する結果はありません",
-  "addToCurrent": "現在に追加",
-  "replaceExisting": "既存のものを置き換えます",
-  "confirmSelection": "選択を確認",
   "selectAll": "すべて選択",
   "clearSelection": "クリア",
-  "clearFilters": "フィルターをクリア",
   "shortcut_context_vibe_detail": "Vibe 詳細",
   "shortcut_action_vibe_detail_rename": "名前の変更",
-  "vibeSelectorFilterFavorites": "お気に入り",
-  "vibeSelectorFilterSourceAll": "すべてのタイプ",
-  "vibeSelectorSortCreated": "作成されました",
-  "vibeSelectorSortLastUsed": "最後に使用したもの",
-  "vibeSelectorSortUsedCount": "使用回数",
-  "vibeSelectorSortName": "名前",
-  "vibeSelectorItemsCount": "{count} アイテム",
-  "@vibeSelectorItemsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "tray_show": "ウィンドウを表示",
   "tray_exit": "終了",
   "settings_shortcutsSubtitle": "キーボード ショートカットをカスタマイズする",
@@ -3052,26 +2482,6 @@
   "toast_kritaNotConnected": "Krita が接続されていません。設定でブリッジを有効にし、最初にプラグインを接続します。",
   "toast_sentToKrita": "画像が Krita に送信されました",
   "toast_kritaUnsupportedImageFormat": "この画像形式は Krita に送信できません。一般的な画像形式を使用します。",
-  "toast_deletedNamed": "削除されました: {name}",
-  "@toast_deletedNamed": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_vibeParamSaveReencodeFailed": "Vibe の再エンコードに失敗したため、パラメーターを保存できませんでした",
-  "toast_exportSuccess": "エクスポートが成功しました",
-  "toast_exportFailed": "エクスポートに失敗しました: {error}",
-  "@toast_exportFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_selectVibeToExport": "先にエクスポートする Vibe を選択してください",
-  "toast_embedPngSingleVibeOnly": "PNG への埋め込みでは、1 つの Vibe のエクスポートのみがサポートされます",
-  "toast_selectPngCarrier": "エクスポートする PNG キャリア画像を選択してください",
-  "toast_renameSuccess": "名前が正常に変更されました",
-  "toast_paramsSaved": "パラメータが保存されました",
-  "toast_paramsSaveFailed": "パラメータの保存に失敗しました",
   "toast_dropNoReadableImageOrVibe": "ドロップ ソースは読み取り可能な画像または Vibe ファイルを提供しませんでした",
   "toast_contentCannotBeEmpty": "コンテンツを空にすることはできません",
   "toast_addedToLibrary": "ライブラリに追加されました",
@@ -3092,33 +2502,6 @@
       "skipped": {}
     }
   },
-  "toast_favorited": "お気に入りに登録しました",
-  "toast_unfavorited": "お気に入りから削除しました",
-  "toast_favoriteUpdateFailed": "お気に入りの状態を更新できませんでした: {error}",
-  "@toast_favoriteUpdateFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_packingImages": "{count} 個の画像をパッキングしています...",
-  "@toast_packingImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packedImages": "{count} 個の画像をパックしました",
-  "@toast_packedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packFailed": "パックに失敗しました",
-  "toast_packFailedWithError": "パックに失敗しました: {error}",
-  "@toast_packFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "toast_saveDirNotSet": "保存ディレクトリが設定されていません",
   "toast_savedTo": "{path} に保存されました",
   "@toast_savedTo": {
@@ -3131,42 +2514,12 @@
   "toast_savedToVibeLibrary": "バイブライブラリに保存しました",
   "toast_saveBundleFailed": "バンドルの保存に失敗しました",
   "toast_saveEntryFailed": "エントリの保存に失敗しました",
-  "toast_imagePromptCopied": "プロンプトがコピーされました",
-  "toast_imageHasNoPrompt": "この画像にはプロンプトがありません",
-  "toast_useDeleteButton": "UI の削除ボタンを使用します。",
   "toast_imageDataUnavailable": "画像データが利用できないため、コピーできません",
-  "toast_vibeDataCopied": "Vibe データをコピーしました",
   "toast_characterPromptCopied": "キャラクタープロンプトをコピーしました",
   "toast_copiedTitle": "{title} がコピーされました",
   "@toast_copiedTitle": {
     "placeholders": {
       "title": {}
-    }
-  },
-  "toast_replacedVibesCount": "{count} 件の Vibe を置換しました: {name}",
-  "@toast_replacedVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_sentVibesCount": "{count} 件の Vibe を生成に送信しました: {name}",
-  "@toast_sentVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_replacedVibe": "{name} に置き換えました",
-  "@toast_replacedVibe": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_sentVibeToGeneration": "生成に送信しました: {name}",
-  "@toast_sentVibeToGeneration": {
-    "placeholders": {
-      "name": {}
     }
   },
   "toast_unreadableDroppedImageSource": "ドロップ ソースは読み取り可能な画像ファイルまたは画像 URL を提供しませんでした",
@@ -3196,12 +2549,6 @@
       "error": {}
     }
   },
-  "toast_renameNameRequired": "名前は必須です",
-  "toast_renameNameConflict": "名前はすでに存在します。別の名前を使用してください。",
-  "toast_renameEntryNotFound": "エントリはもう存在しないため、削除された可能性があります",
-  "toast_renameFilePathMissing": "このエントリにはファイル パスがないため、名前を変更できません",
-  "toast_renameFileFailed": "ファイル名の変更に失敗しました。後でもう一度試してください。",
-  "toast_renameFailed": "名前の変更に失敗しました。後でもう一度試してください。",
   "toast_processImageFailed": "画像の処理に失敗しました: {error}",
   "@toast_processImageFailed": {
     "placeholders": {
@@ -3223,55 +2570,14 @@
     }
   },
   "common_saving": "保存中...",
-  "common_pleaseWait": "お待ちください",
-  "common_change": "変更",
   "common_expand": "展開する",
   "common_collapse": "折りたたむ",
-  "vibeLibrary_emptySearchTitle": "一致する Vibe がありません",
-  "vibeLibrary_emptySearchSubtitle": "別のキーワードを試してください",
-  "vibeLibrary_emptyFavoritesTitle": "お気に入りの Vibe はまだありません",
-  "vibeLibrary_emptyFavoritesSubtitle": "ハートのアイコンをクリックして Vibe をお気に入りに追加します",
-  "vibeLibrary_emptyCategoryTitle": "このカテゴリには Vibe がありません",
-  "vibeLibrary_emptyCategorySubtitle": "すべてのエントリを表示するには「すべての Vibe」に切り替えてください",
-  "vibeLibrary_emptyNoMatchesTitle": "一致する結果はありません",
-  "vibeLibrary_emptySaveFromGenerationHint": "生成ページから Vibe を保存してライブラリに追加します",
-  "vibe_nameRequired": "名前は必須です",
-  "vibe_import_namingTitle": "Vibe に名前を付ける",
-  "vibe_import_nameConflictOverwrite": "この名前はすでに存在するため上書きされます",
-  "vibe_previewLoadFailed": "プレビューのロードに失敗しました",
-  "vibe_import_applyToRemainingFiles": "残りのすべてのファイルに適用します",
-  "vibe_import_applyNamingToRemainingFiles": "残りのファイルにはこの命名規則を使用します",
-  "vibe_encodeImageTitle": "画像を Vibe としてエンコード",
-  "vibe_imagePreview": "画像プレビュー",
-  "vibe_encodeStartButton": "エンコードの開始",
-  "vibe_encodeImageInProgress": "画像をエンコード中...",
-  "vibe_encodeErrorImage": "画像: {fileName}",
-  "@vibe_encodeErrorImage": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "vibe_encodeErrorMessage": "エラー: {error}",
-  "@vibe_encodeErrorMessage": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibe_encodeSkipImage": "この画像をスキップ",
-  "detail_sendToImg2Img": "Image2Image に送信",
-  "detail_loadingImage": "画像を読み込み中...",
-  "detail_imageLoadFailed": "画像のロードに失敗しました",
-  "detail_noImage": "画像がありません",
   "detail_parsingMetadata": "メタデータを解析しています...",
   "detail_noMetadata": "この画像にはメタデータがありません",
   "detail_metadata": "メタデータ",
-  "detail_imageDetails": "画像の詳細",
-  "detail_basicInfo": "基本情報",
-  "detail_fileName": "ファイル名",
   "detail_modifiedTime": "更新日時",
   "detail_fileSize": "ファイルサイズ",
   "detail_noContent": "(コンテンツなし)",
-  "detail_saveBlock": "ブロックとして保存",
   "saveBlock_title": "ブロックとして保存",
   "saveBlock_nameLabel": "ブロック名",
   "saveBlock_nameHint": "ブロック名を入力",
@@ -3285,9 +2591,6 @@
       "label": {}
     }
   },
-  "detail_copyCharacterPrompt": "キャラクタープロンプトをコピー",
-  "detail_copyAllVibeData": "すべての Vibe データをコピーします",
-  "detail_saveToVibeLibrary": "バイブライブラリに保存",
   "comfyImport_detectedTitle": "ComfyUI の複数キャラクタープロンプトを検出しました",
   "comfyImport_characterList": "キャラクター一覧 ({count})",
   "@comfyImport_characterList": {
@@ -3401,39 +2704,11 @@
   "model3d_light": "ライティング",
   "model3d_addLayerTooltip": "3Dモデルレイヤーを追加",
   "nav_preciseRefLibrary": "精密参照ライブラリ",
-  "preciseRefLib_title": "精密参照ライブラリ",
-  "preciseRefLib_searchHint": "参照画像を検索...",
-  "preciseRefLib_empty": "ここに画像をドロップまたは貼り付けてライブラリを作成",
-  "preciseRefLib_emptyHint": "プレビュー・履歴・ギャラリーで右クリックして保存もできます",
-  "preciseRefLib_import": "画像をインポート",
-  "preciseRefLib_entryCount": "{count} 件",
-  "preciseRefLib_sendToPreciseRef": "精密参照へ送る",
-  "preciseRefLib_sendToImg2Img": "画像から画像へ送る",
-  "preciseRefLib_editEntry": "パラメータを編集",
-  "preciseRefLib_confirmDeleteTitle": "エントリを削除",
-  "preciseRefLib_confirmDelete": "「{name}」を削除しますか？画像ファイルも削除されます。",
   "preciseRefLib_saved": "精密参照ライブラリに保存しました：{name}",
   "preciseRefLib_savedHint": "ライブラリでパラメータを編集できます",
-  "preciseRefLib_sent": "精密参照へ送信しました：{name}",
-  "preciseRefLib_sentToImg2Img": "画像から画像へ送信しました：{name}",
   "preciseRefLib_imageMissing": "元画像ファイルが見つかりません",
   "preciseRefLib_invalidImage": "画像形式を認識できないか、ファイルが破損しています",
-  "preciseRefLib_deleteFailed": "削除に失敗しました。項目と元画像は保持されています。後でもう一度お試しください",
-  "preciseRefLib_favoritesOnly": "お気に入りのみ",
-  "preciseRefLib_sortBy": "並び替え",
-  "preciseRefLib_sortCreatedAt": "作成日時",
-  "preciseRefLib_sortLastUsed": "最終使用",
-  "preciseRefLib_sortUsedCount": "使用回数",
-  "preciseRefLib_sortName": "名前",
   "preciseRefLib_importedCount": "{count} 枚の画像をインポートしました",
-  "preciseRefLib_loadFailed": "精密参照ライブラリを読み込めませんでした：{error}",
-  "@preciseRefLib_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "preciseRefLib_importFailed": "精密参照ライブラリへの保存に失敗しました：{error}",
   "@preciseRefLib_importFailed": {
     "placeholders": {
@@ -3453,10 +2728,6 @@
   "preciseRefLib_fromLibrary": "ライブラリから",
   "preciseRefLib_saveCurrentToLibrary": "ライブラリへ保存",
   "preciseRefLib_saveCurrentCount": "{count} 件をライブラリへ保存しました",
-  "preciseRefLib_selectorTitle": "精密参照ライブラリから選択",
-  "preciseRefLib_selectorConfirm": "選択を追加 ({count})",
-  "preciseRefLib_nameLabel": "名前",
-  "preciseRefLib_typeFilterAll": "すべて",
   "img2img_fromPreciseRefLibrary": "精密参照ライブラリから",
   "localGallery_saveToPreciseRefLibrary": "精密参照ライブラリへ保存",
   "drop_saveToPreciseRefLibrary": "精密参照ライブラリへ保存",
@@ -3560,20 +2831,6 @@
       }
     }
   },
-  "@preciseRefLib_confirmDelete": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@preciseRefLib_entryCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@preciseRefLib_importedCount": {
     "placeholders": {
       "count": {
@@ -3595,27 +2852,6 @@
       }
     }
   },
-  "@preciseRefLib_selectorConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@preciseRefLib_sent": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@preciseRefLib_sentToImg2Img": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "common_optional": "任意",
   "common_emptyValue": "（空）",
   "common_clickToRetry": "クリックして再試行",
@@ -3624,9 +2860,6 @@
   "addToLibrary_displayNameHint": "この項目を識別する名前を入力",
   "addToLibrary_tagHint": "タグを入力して Enter キーで追加",
   "drop_saveVibeBundle": "Vibe Bundleを保存",
-  "history_dragFilePreparationFailed": "ドラッグ用ファイルの準備に失敗しました。後でもう一度お試しください。",
-  "history_dragFilePreparing": "ドラッグ用ファイルを準備しています...",
-  "history_dragFileNotReady": "ドラッグ用ファイルはまだ準備できていません",
   "vibe_import_overwriteOriginalParams": "元のVibeパラメータを置換",
   "vibe_import_overwriteOriginalParamsHint": "{name} のライブラリ内パラメータのみ置換します。初期状態では無効です",
   "@vibe_import_overwriteOriginalParamsHint": {
@@ -3654,11 +2887,6 @@
   },
   "galleryScan_organizingGallery": "ギャラリーを整理中",
   "galleryScan_processing": "処理中",
-  "vibeDetail_useAll": "すべて使用",
-  "vibeDetail_longPressSetCover": "長押ししてカバーに設定",
-  "vibeDetail_noPreviewImage": "プレビュー画像がありません",
-  "vibeDetail_dropPreviewImage": "ここに画像をドロップしてプレビューを設定",
-  "vibeDetail_releasePreviewImage": "離すとプレビュー画像を設定",
   "imagePicker_dropReadFailed": "ドロップした画像を読み込めませんでした: {error}",
   "@imagePicker_dropReadFailed": {
     "placeholders": {
@@ -3746,14 +2974,9 @@
       }
     }
   },
-  "nav_promptBlockLibrary": "プロンプトブロック",
-  "promptBlockLibrary_title": "プロンプトブロック",
-  "promptBlockLibrary_folders": "フォルダー",
   "promptBlockLibrary_allBlocks": "すべてのブロック",
   "promptBlockLibrary_rootFolder": "ルート / 未分類",
   "promptBlockLibrary_unnamedBlock": "無題のブロック",
-  "promptBlockLibrary_noBlockSelected": "ブロックが選択されていません",
-  "promptBlockLibrary_details": "詳細",
   "promptBlockLibrary_useCount": "{count} 回使用されました",
   "@promptBlockLibrary_useCount": {
     "placeholders": {
@@ -3764,69 +2987,7 @@
   },
   "promptBlockPill_missing": "削除されたブロック",
   "promptBlockPill_unknown": "無効なブロック",
-  "pillCardReroll": "再抽選",
-  "pillCardRerollLocked": "ロック中のため再抽選できません",
-  "pillCardLock": "現在の抽選結果をロック",
-  "pillCardUnlock": "ロックを解除",
-  "pillCardSettings": "ランダム設定",
-  "pillCardEnable": "有効化",
-  "pillCardDisable": "無効化",
-  "pillCardDeleteInstance": "インスタンス削除",
-  "pillCardEmptyRoll": "（今回は空）",
-  "pillCardEvolutionEnable": "遺伝を有効化",
-  "pillCardEvolutionDisable": "遺伝を無効化",
-  "pillCardEvolutionRequiresEnabled": "先にインスタンスを有効化してください",
-  "pillCardStepBack": "一幕戻る",
-  "pillCardStepForward": "一幕進む",
-  "pillSettingsTitle": "ブロックインスタンス設定",
-  "pillSettingsModeFixed": "固定",
-  "pillSettingsModeSequential": "順番",
-  "pillSettingsModeRandom": "ランダム抽出",
-  "pillSettingsCount": "抽出数",
-  "pillSettingsOrder": "出力順",
-  "pillSettingsOrderDrawn": "抽選順",
-  "pillSettingsOrderOriginal": "元の順序",
-  "pillSettingsWeight": "ランダム重み",
-  "pillSettingsWeightMin": "最小",
-  "pillSettingsWeightMax": "最大",
-  "pillSettingsWeightAverage": "平均",
-  "pillSettingsDispersion": "分散",
-  "pillSettingsDispersionFocused": "集中",
-  "pillSettingsDispersionBalanced": "均衡",
-  "pillSettingsDispersionSpread": "拡散",
-  "pillSettingsAdvanced": "詳細",
-  "pillSettingsLeftDispersion": "左分散",
-  "pillSettingsRightDispersion": "右分散",
-  "pillSettingsSoftBalance": "ソフトバランス",
-  "pillSettingsSoftBalanceStrength": "強度",
-  "pillSettingsTriggerProbability": "発動確率",
-  "pillSettingsCancel": "キャンセル",
-  "pillSettingsApply": "適用",
   "promptBlockLibrary_unnamedFolder": "無題のフォルダー",
-  "promptBlockLibrary_scope": "表示範囲",
-  "promptBlockLibrary_newBlock": "新しいブロック",
-  "promptBlockLibrary_editBlock": "ブロックを編集",
-  "promptBlockLibrary_newFolder": "新しいフォルダー",
-  "promptBlockLibrary_newSubfolder": "新しいサブフォルダー",
-  "promptBlockLibrary_renameFolder": "フォルダー名を変更",
-  "promptBlockLibrary_moveToRoot": "ルートへ移動",
-  "promptBlockLibrary_moveToFolder": "フォルダーへ移動",
-  "promptBlockLibrary_favorites": "お気に入り",
-  "promptBlockLibrary_unclassified": "未分類",
-  "promptBlockLibrary_newCollection": "コレクションを作成",
-  "promptBlockLibrary_newSubcollection": "サブコレクションを作成",
-  "promptBlockLibrary_newCollectionFolder": "コレクションフォルダーを作成",
-  "promptBlockLibrary_renameCollection": "コレクション名を変更",
-  "promptBlockLibrary_renameCollectionFolder": "コレクションフォルダー名を変更",
-  "promptBlockLibrary_moveToFavoritesRoot": "コレクションのルートへ移動",
-  "promptBlockLibrary_unnamedCollection": "無題のコレクション",
-  "promptBlockLibrary_unnamedCollectionFolder": "無題のコレクションフォルダー",
-  "promptBlockLibrary_collectionName": "コレクション名",
-  "promptBlockLibrary_collectionNameHint": "コレクション名",
-  "promptBlockLibrary_noCollections": "コレクションはまだありません —「お気に入り」行の + から作成するか、ブロックをコレクションへドラッグしてください",
-  "promptBlockLibrary_noFolders": "フォルダーはまだありません",
-  "promptBlockLibrary_emptyFavorites": "お気に入りのブロックはまだありません。ブロックの ★ で登録できます",
-  "promptBlockLibrary_emptyCollection": "このコレクションは空です",
   "promptBlockLibrary_deleteCollectionConfirm": "コレクション「{name}」を削除しますか？中のブロックは削除されず、コレクションから外れるだけです。",
   "@promptBlockLibrary_deleteCollectionConfirm": {
     "placeholders": {
@@ -3845,39 +3006,9 @@
   },
   "promptBlockLibrary_blockTitle": "タイトル",
   "promptBlockLibrary_titleHint": "ブロックのタイトル",
-  "promptBlockLibrary_searchHint": "タイトル、プロンプト、タグを検索",
   "promptBlockLibrary_folder": "フォルダー",
-  "promptBlockLibrary_folderName": "フォルダー名",
-  "promptBlockLibrary_folderNameHint": "フォルダー名",
-  "promptBlockLibrary_basicPrompt": "基本プロンプト",
-  "promptBlockLibrary_generationSettings": "設定",
-  "promptBlockLibrary_settingsOptionalHint": "入力した項目のみ保存します。ブロック挿入後に設定を手動で適用できます。",
-  "promptBlockLibrary_notSpecified": "指定しない",
-  "promptBlockLibrary_stepsLabel": "ステップ数",
-  "promptBlockLibrary_noiseScheduleLabel": "ノイズスケジュール",
-  "promptBlockLibrary_invalidGenerationSettings": "設定を確認してください：ステップ数 1～50、プロンプトガイダンス 1～20、プロンプトガイダンスリスケール 0～1、モデルとの互換性。",
-  "promptBlockLibrary_applySettings": "設定を読み込む",
   "promptBlockLibrary_settingsApplied": "ブロック設定を現在の画像に読み込みました",
   "promptBlockLibrary_settingsIncompatible": "ブロック設定は対象モデルに対応していません。パラメータは変更されませんでした。",
-  "promptBlockLibrary_noSettings": "生成設定は保存されていません",
-  "promptBlockLibrary_tags": "タグ",
-  "promptBlockLibrary_addTag": "タグを追加",
-  "promptBlockLibrary_tagName": "タグ名",
-  "promptBlockLibrary_tagColor": "タグの色（16進数）",
-  "promptBlockLibrary_duplicateTag": "同じ名前のタグが既にあります",
-  "promptBlockLibrary_invalidTagColor": "有効な16進数の色を入力してください",
-  "pillCard_rollScope": "変化範囲",
-  "pillCard_positiveScope": "ポジティブ",
-  "pillCard_negativeScope": "ネガティブ",
-  "promptBlockLibrary_modelResetNotice": "モデル変更後、非対応の値を消去しました。",
-  "promptBlockLibrary_atomInputHint": "テキストを入力し、Enterで原子ブロック化",
-  "promptBlockLibrary_atomRestoreHint": "クリックでテキストに戻して再編集",
-  "promptBlockLibrary_atomOrphan": "不明なマーカー",
-  "promptBlockLibrary_atomEditorTutorial": "Enterでブロック化、クリックでテキストに戻す。未ブロックのテキストは保存時に自動で原子化。",
-  "promptBlockLibrary_color": "色",
-  "promptBlockLibrary_icon": "アイコン",
-  "promptBlockLibrary_saved": "保存しました",
-  "promptBlockLibrary_copied": "内容をコピーしました",
   "promptBlockLibrary_deleted": "削除しました",
   "promptBlockLibrary_multiSelect": "複数選択",
   "promptBlockLibrary_exitMultiSelect": "複数選択を終了",
@@ -3891,37 +3022,8 @@
   },
   "promptBlockLibrary_selectAllVisible": "すべて選択",
   "promptBlockLibrary_clearSelection": "選択をクリア",
-  "promptBlockLibrary_moveTo": "移動先…",
-  "promptBlockLibrary_moveToFolderTitle": "フォルダーへ移動",
-  "promptBlockLibrary_deleteBlocksConfirm": "選択した {count} 個のブロックを削除しますか？この操作は取り消せません。",
-  "@promptBlockLibrary_deleteBlocksConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_deleteSelected": "選択した {count} 個のブロックを削除",
-  "@promptBlockLibrary_deleteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_empty": "プロンプトブロックはまだありません",
-  "promptBlockLibrary_emptyFolder": "このフォルダーは空です",
   "promptBlockLibrary_noSearchResults": "一致するブロックがありません",
-  "promptBlockLibrary_tryDifferentSearch": "別のキーワードを試してください",
-  "promptBlockLibrary_emptyHint": "ブロックを作成して再利用可能なテキストを整理します",
-  "promptBlockLibrary_loadFailed": "プロンプトブロックの読み込みに失敗しました: {error}",
-  "@promptBlockLibrary_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_deleteFolderTitle": "フォルダー「{name}」を削除しますか？",
   "@promptBlockLibrary_deleteFolderTitle": {
     "placeholders": {
@@ -3934,11 +3036,7 @@
   "promptBlockLibrary_destinationFolder": "移動先フォルダー",
   "promptBlockLibrary_deleteContents": "内容を削除",
   "promptBlockLibrary_deleteContentsWarning": "フォルダー内のすべてのブロックも完全に削除されます。",
-  "promptBlockLibrary_importExport": "インポート / エクスポート",
-  "promptBlockLibrary_importTxtFiles": "TXT ファイルをインポート",
-  "promptBlockLibrary_importFromFolder": "フォルダからインポート…",
   "promptBlockLibrary_exportLibraryBackup": "ライブラリをバックアップ…",
-  "promptBlockLibrary_importLibraryBackup": "ライブラリバックアップをインポート…",
   "promptBlockLibrary_importTxtTitle": "TXT ファイルを選択",
   "promptBlockLibrary_txtImportDone": "{created} 個のブロックをインポート、{skipped} 個の既存ソースをスキップ",
   "@promptBlockLibrary_txtImportDone": {
@@ -3997,30 +3095,7 @@
   "promptBlockLibrary_curationUnchanged": "変更なし",
   "promptBlockLibrary_curationChanged": "変更あり",
   "promptBlockLibrary_curationLocalModified": "ローカル編集済み",
-  "promptBlockLibrary_libraryBackupDone": "{count} 個のブロックのバックアップをエクスポートしました",
-  "@promptBlockLibrary_libraryBackupDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_libraryImportTitle": "ライブラリバックアップを選択",
-  "promptBlockLibrary_libraryBackupInvalid": "有効なブロックライブラリのバックアップではありません",
-  "promptBlockLibrary_libraryImportDone": "ブロック {blocks} 個・フォルダ {folders} 個をインポート、{skipped} 個の既存をスキップ",
-  "@promptBlockLibrary_libraryImportDone": {
-    "placeholders": {
-      "blocks": {
-        "type": "int"
-      },
-      "folders": {
-        "type": "int"
-      },
-      "skipped": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_importFailed": "インポートに失敗しました：{error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
@@ -4031,9 +3106,6 @@
   },
   "promptBlockLibrary_sourceFile": "ソースファイル",
   "promptBlockLibrary_importedAt": "インポート日時",
-  "promptBlockLibrary_listView": "リスト表示",
-  "promptBlockLibrary_gridView": "グリッド表示",
-  "promptBlockLibrary_waterfallView": "ウォーターフォール表示",
   "promptBlockPalette_tooltip": "ブロック",
   "promptBlockPalette_emptyHint": "よく使うプロンプトブロックや翻訳ブロックをここに収納。クリックでカーソル位置に挿入するか、プロンプト欄へドラッグできます。",
   "promptBlockPalette_remove": "ブロックから削除",
@@ -4047,45 +3119,11 @@
       }
     }
   },
-  "promptBlockLibrary_sortBy": "並べ替え",
-  "promptBlockLibrary_sortCustom": "既定（手動順）",
-  "promptBlockLibrary_sortUpdated": "更新日時",
-  "promptBlockLibrary_sortTitle": "名前",
-  "promptBlockLibrary_sortColor": "色",
-  "promptBlockLibrary_sortIcon": "アイコン",
-  "promptBlockLibrary_sortAscending": "昇順",
-  "promptBlockLibrary_sortDescending": "降順",
-  "promptBlockLibrary_cardSize": "カードサイズ",
-  "promptBlockLibrary_reorderFolders": "フォルダーの順序を変更",
   "nav_styleExplore": "スタイル探索",
-  "styleExplore_rename": "名前変更",
-  "styleExplore_nameRequired": "名前を入力してください",
   "styleExplore_operationFailed": "操作に失敗しました",
   "styleExplore_discardChangesTitle": "未保存の変更を破棄しますか？",
   "styleExplore_discardChangesMessage": "ワークスペースに未保存の変更があります。続行すると破棄されます。",
   "styleExplore_discardChangesConfirm": "続行して破棄",
-  "styleExplore_newRun": "新しい探索",
-  "styleExplore_runDeleted": "探索「{name}」を削除しました",
-  "@styleExplore_runDeleted": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_runStatusGenerating": "生成中",
-  "styleExplore_runStatusPaused": "一時停止",
-  "styleExplore_runStatusCancelled": "キャンセル",
-  "styleExplore_pauseRun": "一時停止",
-  "styleExplore_cancelRun": "探索をキャンセル",
-  "styleExplore_retryFailed": "失敗を再試行（{count}）",
-  "@styleExplore_retryFailed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_manualRunName": "手動キャプチャ {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4095,64 +3133,6 @@
     }
   },
   "styleExplore_runBusy": "生成中です。しばらくしてからお試しください",
-  "styleExplore_deleteRunTitle": "探索を削除",
-  "styleExplore_deleteRunMessage": "「{name}」とその候補画像コピーを削除します。ギャラリーの元画像には影響しません。",
-  "@styleExplore_deleteRunMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_cancelRunTitle": "探索をキャンセル",
-  "styleExplore_cancelRunMessage": "キャンセル後は再開できません。残りの待機候補はキャンセル済みになります。",
-  "styleExplore_filterAll": "すべて",
-  "styleExplore_filterHearted": "お気に入り",
-  "styleExplore_renameFolder": "グループ名を変更",
-  "styleExplore_deleteFolder": "グループを削除",
-  "styleExplore_deleteFolderMessage": "グループ「{name}」を削除します。候補は未分類に戻り、画像は残ります。",
-  "@styleExplore_deleteFolderMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_folderNameLabel": "グループ名",
-  "styleExplore_deleteFamily": "進化ラインを削除",
-  "styleExplore_deleteFamilyMessage": "進化ライン「{name}」と親・子の記録（{count} 枚）を削除します。画像ファイルは残ります。",
-  "@styleExplore_deleteFamilyMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_familyBusy": "この進化ラインは生成中です。先に生成を停止してください。",
-  "styleExplore_folderUncategorized": "未分類",
-  "styleExplore_folderCreated": "グループ「{name}」を作成しました",
-  "@styleExplore_folderCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_candidateMissing": "画像ファイルがありません",
-  "styleExplore_candidateDetailTitle": "候補詳細",
-  "styleExplore_prevCandidate": "前へ",
-  "styleExplore_nextCandidate": "次へ",
-  "styleExplore_roundNumber": "ラウンド {number}",
-  "@styleExplore_roundNumber": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_adoptBlockSaved": "ブロック「{name}」として保存しました",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
@@ -4162,25 +3142,9 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "保存できる絵師の組み合わせや正のプロンプトがありません",
-  "styleExplore_deleteImage": "画像を削除",
-  "styleExplore_deleteImageTitle": "候補画像を削除",
-  "styleExplore_deleteImageMessage": "候補の画像コピーと記録を削除します。ライブラリの元画像は残ります。",
-  "styleExplore_deleteImageDone": "候補画像とレコードを削除しました",
-  "styleExplore_selectCandidates": "複数選択",
-  "styleExplore_selectedCount": "{count} 枚選択中",
-  "@styleExplore_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockEditor_library": "ブロックライブラリ",
   "promptBlockPicker_title": "ブロックを選択",
-  "promptBlockLibrary_thumbnail": "サムネイル",
-  "promptBlockLibrary_selectNewImage": "新しい画像を選択",
   "promptBlockLibrary_selectImage": "画像を選択",
-  "promptBlockLibrary_adjustDisplayRange": "表示範囲を調整",
   "promptBlockLibrary_adjustThumbnailTitle": "サムネイル表示範囲の調整",
   "promptBlockLibrary_dragToMove": "ドラッグして移動、スクロールまたはピンチしてズームします",
   "promptBlockLibrary_addToLibrary": "ブロックライブラリに追加",
@@ -4198,52 +3162,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "既存ブロックのサムネイルを更新",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "ブロックを選択し、そのサムネイルを置き換えます",
-  "styleExplore_deepRoundCountHint": "最低 {min} 枚（各親につき1枚）",
-  "@styleExplore_deepRoundCountHint": {
-    "placeholders": {
-      "min": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_deepRoundNoInstance": "メインプロンプトに有効な遺伝ランダムブロックがないため、子を生成できません",
-  "styleExplore_deepRoundEmpty": "異なる子の絵師の組み合わせを十分に作れませんでした",
-  "styleExplore_sortLeft": "左が良い",
-  "styleExplore_sortRight": "右が良い",
-  "styleExplore_sortNeither": "どちらも好みではない",
-  "styleExplore_sortSkip": "スキップ",
-  "styleExplore_sortProgress": "{current} / {total} ペア",
-  "@styleExplore_sortProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_sortDone": "ペア比較が完了しました",
-  "styleExplore_branchCreated": "次世代を育てました（親 {count} 個）",
-  "@styleExplore_branchCreated": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_branchNeedLatest": "最新世代の子から次世代を育ててください",
-  "styleExplore_branchRoundsIncomplete": "この世代には未生成の子があります。完了を待つか生成を停止してください",
-  "styleExplore_branchDuplicate": "選択した子代が第一世代の親文字列と完全に重複しています",
-  "styleExplore_branchEmpty": "子代候補を少なくとも 1 枚選択してください",
-  "styleExplore_pileManageDeleteDone": "{count} 件の候補と画像コピーを削除しました",
-  "@styleExplore_pileManageDeleteDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "subscriptionExpiresOn": "期限 {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {
@@ -5126,11 +4044,7 @@
   "settings_updateCredentials2": "認証情報を更新",
   "settings_checking": "確認中…",
   "settings_enterNewSignInToken": "新しいログイントークンを入力してください。確認後に更新します。",
-  "auth_signInAccounts": "ログインとアカウント",
   "auth_notSignedIn": "未ログイン",
-  "auth_chooseAccountContinue": "アカウントを選択して続ける",
-  "auth_manageAccounts2": "アカウント管理",
-  "auth_subscriptionExpired": "サブスクリプションの期限切れ",
   "settings_tagExpansion": "タグ検索",
   "settings_tagDictionaries": "タグ辞書",
   "settings_cacheMaintenance": "キャッシュの管理",
@@ -5330,8 +4244,6 @@
   "translationLanguage_japanese": "日本語",
   "translationLanguage_korean": "韓国語",
   "translationLanguage_traditionalChinese": "繁体字中国語",
-  "promptBlockEditor_translationNeedsReview": "原文が変更されました。訳文の更新が必要です",
-  "promptBlockEditor_translationReviewHint": "原文を編集したら、この訳文も確認してください",
   "modelTask_translateTitle": "原文 → 表示言語",
   "modelTask_promptReverseTitle": "表示言語 → 原文",
   "modelTask_tagTranslateTitle": "タグ名の翻訳",
@@ -5902,56 +4814,8 @@
   "promptTranslation_incompleteStructure": "変換結果の重みまたはグループが不完全です。下書きは保持されています",
   "promptTranslation_inputRequired": "先に変換する内容を入力してください",
   "wiki_configureTagModel": "先に「モデルとAPI」で利用できるタグ翻訳モデルを設定してください。",
-  "blockOrganizer_barrierLabel": "ブロックの整理",
-  "blockOrganizer_replaceTitle": "同じ元のブロックを置き換えますか？",
   "blockOrganizer_replaceMoveBody": "移動先に同じ元のコピーが {count} 件あります。置き換えると元のブロックはライブラリで非表示になりますが、プロンプトに挿入済みのインスタンスは引き続き元のブロックを参照できます。",
   "@blockOrganizer_replaceMoveBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replaceCopyBody": "移動先に同じ元のコピーが {count} 件あります。置き換えると移動先のコピーの内容が更新され、元のブロックは残ります。",
-  "@blockOrganizer_replaceCopyBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replace": "置き換え",
-  "blockOrganizer_customTagColor": "タグの色をカスタマイズ",
-  "blockOrganizer_colorHint": "#RRGGBB または #AARRGGBB",
-  "blockOrganizer_invalidColor": "6 桁または 8 桁の 16 進数カラーを入力してください",
-  "blockOrganizer_deleteFolderConfirm": "「{name}」を削除しますか？中のブロックはルートに移動します。",
-  "@blockOrganizer_deleteFolderConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_deleteCollectionConfirm": "「{name}」を削除しますか？ブロック自体は残ります。",
-  "@blockOrganizer_deleteCollectionConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_titleFavorites": "お気に入りとコレクション",
-  "blockOrganizer_titleFolders": "フォルダーを選択",
-  "blockOrganizer_itemCount": "{count} 件",
-  "@blockOrganizer_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_search": "検索",
-  "blockOrganizer_name": "名前",
-  "blockOrganizer_customColor": "カスタムカラー…",
-  "blockOrganizer_newCollection": "新しいコレクション",
-  "blockOrganizer_newCollectionFolder": "新しいコレクションフォルダー",
-  "blockOrganizer_newTag": "新しいタグ",
-  "blockOrganizer_newFolder": "新しいフォルダー",
-  "blockOrganizer_rootUncategorized": "ルート / 未分類",
-  "blockOrganizer_manageDrag": "管理（ドラッグで並べ替え）",
-  "blockLibrary_dragSelectedHint": "選択したブロックを左側のお気に入りやフォルダーにドラッグし、離したらコピーか移動を選びます。",
-  "blockLibrary_blockCount": "{count} 件のブロック",
-  "@blockLibrary_blockCount": {
     "placeholders": {
       "count": {}
     }
@@ -5961,8 +4825,6 @@
   "blockLibrary_sameSourceSelected": "選択に同じ元のコピーが含まれています。別々に整理してください",
   "blockLibrary_sameSourceExists": "同じ元のブロックが既にあります。置き換えを確認してください",
   "blockLibrary_collectionMissing": "コレクションが存在しません",
-  "promptBlockEditor_appearance": "ブロックの外観",
-  "promptBlockEditor_imageUnreadable": "選択した画像を読み込めません",
   "blockAppearance_classic": "クラシック",
   "blockAppearance_stripes": "細いストライプ",
   "blockAppearance_dots": "ドット",
@@ -6290,15 +5152,6 @@
       "error": {}
     }
   },
-  "vibeImport_imageProgress": "画像をインポート中（{current}/{total}）：{source}",
-  "@vibeImport_imageProgress": {
-    "placeholders": {
-      "current": {},
-      "total": {},
-      "source": {}
-    }
-  },
-  "vibeImport_clipboardSource": "クリップボード",
   "resolution_noAdjustment": "調整不要",
   "dataRefresh_updating": "データを更新中...",
   "dataRefresh_updatingService": "{service} を更新中...",
@@ -6539,15 +5392,6 @@
   "generation_referenceUpload": "アップロード",
   "generation_seedPinnedLabel": "シード・固定",
   "generation_paramsDrawerTooltip": "詳細パラメータ",
-  "generation_historyBatchCount": "{count}枚",
-  "@generation_historyBatchCount": {
-    "description": "Number of images in one generation history batch",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "library_sizeSmall": "小",
   "library_sizeMedium": "中",
   "library_sizeLarge": "大",
@@ -6558,16 +5402,6 @@
   "library_selectedCount": "{count} 件選択",
   "library_invertSelection": "選択を反転",
   "library_more": "その他",
-  "library_addToGeneration": "生成に追加",
-  "library_strength": "強度",
-  "library_information": "情報",
-  "library_fidelity": "忠実度",
-  "library_encodeOnUse": "使用時にエンコード",
-  "library_reencode": "再エンコード",
-  "library_unusableModel": "{model} では利用不可",
-  "library_exportAll": "すべてエクスポート",
-  "library_rescanFolders": "フォルダーを再スキャン",
-  "library_preview": "プレビュー",
   "@library_selectedCount": {
     "placeholders": {
       "count": {
@@ -6575,64 +5409,12 @@
       }
     }
   },
-  "@library_unusableModel": {
-    "placeholders": {
-      "model": {
-        "type": "String"
-      }
-    }
-  },
-  "viewer_backLocalGallery": "ローカルギャラリー",
   "viewer_fit": "フィット",
   "viewer_showInfo": "情報パネルを表示 (I)",
   "viewer_hideInfo": "情報パネルを隠す (I)",
   "viewer_originalSize": "原寸 (1)",
   "viewer_fullscreen": "全画面 (F11)",
   "shortcut_action_toggle_info_panel": "情報パネルの切り替え",
-  "styleExplore_runNamingHint": "自動命名：ランダムブロック名＋日時。名前をダブルクリックして変更",
-  "styleExplore_roundGenerating": "第 {round} ラウンド · 生成中",
-  "@styleExplore_roundGenerating": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorTitle": "詳細",
-  "styleExplore_failedBadge": "失敗 {count}",
-  "@styleExplore_failedBadge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_showInspector": "詳細を表示",
-  "styleExplore_roundProgress": "第 {round} ラウンド · {current} / {total}",
-  "@styleExplore_roundProgress": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      },
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_earlier": "それ以前",
-  "styleExplore_noMatchingRuns": "一致する探索がありません",
-  "styleExplore_lineCount": "{count} 進化系統",
-  "@styleExplore_lineCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_newRunDescription": "現在のプロンプトと設定で作成。名前は後から変更できます",
   "styleExplore_autoRunName": "{blocks} · {time}",
   "@styleExplore_autoRunName": {
     "placeholders": {
@@ -6643,89 +5425,6 @@
         "type": "String"
       }
     }
-  },
-  "styleExplore_largeCandidates": "大きい候補画像",
-  "styleExplore_hideInspector": "詳細を隠す",
-  "styleExplore_searchRuns": "探索名または絵師を検索",
-  "styleExplore_favoriteCount": "お気に入り {count}",
-  "@styleExplore_favoriteCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingBadge": "生成中 {current}/{total}",
-  "@styleExplore_generatingBadge": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_roundCount": "{count} ラウンド",
-  "@styleExplore_roundCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pausedRemaining": "一時停止 · 残り {count} 枚",
-  "@styleExplore_pausedRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stopRun": "生成を停止",
-  "styleExplore_thisWeek": "今週",
-  "styleExplore_today": "今日",
-  "styleExplore_smallCandidates": "小さい候補画像",
-  "styleExplore_imageCount": "{count} 枚",
-  "@styleExplore_imageCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variablesTitle": "ランダム変数",
-  "@styleExplore_variablesTitle": {
-    "description": "Style exploration workbench: styleExplore_variablesTitle"
-  },
-  "styleExplore_variablesHint": "画像ごとに再抽選",
-  "@styleExplore_variablesHint": {
-    "description": "Style exploration workbench: styleExplore_variablesHint"
-  },
-  "styleExplore_variablesExplanation": "有効なランダム・順次抽選の進化ブロックについて、各候補の抽選内容を記録します。",
-  "@styleExplore_variablesExplanation": {
-    "description": "Style exploration workbench: styleExplore_variablesExplanation"
-  },
-  "styleExplore_variablePoolSize": "プール {count} 件",
-  "@styleExplore_variablePoolSize": {
-    "description": "Style exploration workbench: styleExplore_variablePoolSize",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variableEvolutionTarget": "進化対象",
-  "@styleExplore_variableEvolutionTarget": {
-    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
-  },
-  "styleExplore_variableNegative": "ネガティブ",
-  "@styleExplore_variableNegative": {
-    "description": "Style exploration workbench: styleExplore_variableNegative"
-  },
-  "styleExplore_variablesEmpty": "プロンプトにランダムブロックがありません。候補が似た画像になります。",
-  "@styleExplore_variablesEmpty": {
-    "description": "Style exploration workbench: styleExplore_variablesEmpty"
   },
   "styleExplore_openBlockLibrary": "ブロックライブラリを開く",
   "@styleExplore_openBlockLibrary": {
@@ -6739,461 +5438,10 @@
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   },
-  "styleExplore_candidatesTab": "候補",
-  "@styleExplore_candidatesTab": {
-    "description": "Style explore task03: candidatesTab"
-  },
-  "styleExplore_evolutionTab": "進化",
-  "@styleExplore_evolutionTab": {
-    "description": "Style explore task03: evolutionTab"
-  },
-  "styleExplore_deepRoundTitle": "進化 · {name} 第{generation}世代",
-  "@styleExplore_deepRoundTitle": {
-    "description": "Style explore task03: deepRoundTitle",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallRoundCount": "{count}枚",
-  "@styleExplore_wallRoundCount": {
-    "description": "Style explore task03: wallRoundCount",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallGenerating": "生成中",
-  "@styleExplore_wallGenerating": {
-    "description": "Style explore task03: wallGenerating"
-  },
-  "styleExplore_roundFailures": "失敗 {count}",
-  "@styleExplore_roundFailures": {
-    "description": "Style explore task03: roundFailures",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_queued": "待機 #{number}",
-  "@styleExplore_queued": {
-    "description": "Style explore task03: queued",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingCandidate": "生成中 #{number}",
-  "@styleExplore_generatingCandidate": {
-    "description": "Style explore task03: generatingCandidate",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationFailed": "生成失敗",
-  "@styleExplore_generationFailed": {
-    "description": "Style explore task03: generationFailed"
-  },
-  "styleExplore_failureHint": "ホバーで原因を表示",
-  "@styleExplore_failureHint": {
-    "description": "Style explore task03: failureHint"
-  },
-  "styleExplore_imageDeleted": "画像は削除済み",
-  "@styleExplore_imageDeleted": {
-    "description": "Style explore task03: imageDeleted"
-  },
-  "styleExplore_parentBadge": "親",
-  "@styleExplore_parentBadge": {
-    "description": "Style explore task03: parentBadge"
-  },
-  "styleExplore_opMutation": "変異",
-  "@styleExplore_opMutation": {
-    "description": "Style explore task03: opMutation"
-  },
-  "styleExplore_opCrossover": "交叉",
-  "@styleExplore_opCrossover": {
-    "description": "Style explore task03: opCrossover"
-  },
-  "styleExplore_opInjection": "注入",
-  "@styleExplore_opInjection": {
-    "description": "Style explore task03: opInjection"
-  },
-  "styleExplore_copyArtists": "画家タグをコピー",
-  "@styleExplore_copyArtists": {
-    "description": "Style explore task03: copyArtists"
-  },
-  "styleExplore_interrupted": "中断",
-  "@styleExplore_interrupted": {
-    "description": "Style explore task03: interrupted"
-  },
-  "styleExplore_emptyFilter": "条件に合う候補はありません",
-  "@styleExplore_emptyFilter": {
-    "description": "Style explore task03: emptyFilter"
-  },
-  "styleExplore_emptyRound": "このラウンドに候補はありません",
-  "@styleExplore_emptyRound": {
-    "description": "Style explore task03: emptyRound"
-  },
-  "styleExplore_unfavorite": "お気に入り解除",
-  "@styleExplore_unfavorite": {
-    "description": "Explore workbench selection: unfavorite"
-  },
-  "styleExplore_groupLabel": "グループ",
-  "@styleExplore_groupLabel": {
-    "description": "Explore workbench selection: groupLabel"
-  },
-  "styleExplore_newGroup": "新しいグループ…",
-  "@styleExplore_newGroup": {
-    "description": "Explore workbench selection: newGroup"
-  },
-  "styleExplore_saveBlock": "ブロックとして保存",
-  "@styleExplore_saveBlock": {
-    "description": "Explore workbench selection: saveBlock"
-  },
-  "styleExplore_startEvolution": "進化を開始",
-  "@styleExplore_startEvolution": {
-    "description": "Explore workbench selection: startEvolution"
-  },
-  "styleExplore_newestFirst": "新しいラウンドを先に",
-  "@styleExplore_newestFirst": {
-    "description": "Explore workbench selection: newestFirst"
-  },
-  "styleExplore_oldestFirst": "古いラウンドを先に",
-  "@styleExplore_oldestFirst": {
-    "description": "Explore workbench selection: oldestFirst"
-  },
-  "styleExplore_pickEvolution": "進化する候補を選ぶ",
-  "@styleExplore_pickEvolution": {
-    "description": "Explore workbench selection: pickEvolution"
-  },
-  "styleExplore_deleteCandidatesTitle": "候補を削除",
-  "@styleExplore_deleteCandidatesTitle": {
-    "description": "Delete candidates with or without local copies"
-  },
-  "styleExplore_deleteCandidatesMessage": "候補{count}枚と画像コピーを削除しますか？ライブラリの原画像は保持されます。",
-  "@styleExplore_deleteCandidatesMessage": {
-    "description": "Delete candidates with or without local copies",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorEmpty": "候補を選ぶと詳細が表示されます",
-  "@styleExplore_inspectorEmpty": {
-    "description": "styleExplore_inspectorEmpty."
-  },
-  "styleExplore_drawsTitle": "この画像の抽選結果",
-  "@styleExplore_drawsTitle": {
-    "description": "styleExplore_drawsTitle."
-  },
-  "styleExplore_drawsAfterGeneration": "生成完了後に表示",
-  "@styleExplore_drawsAfterGeneration": {
-    "description": "styleExplore_drawsAfterGeneration."
-  },
-  "styleExplore_emptyDraw": "今回は空の項目が選ばれました",
-  "@styleExplore_emptyDraw": {
-    "description": "styleExplore_emptyDraw."
-  },
-  "styleExplore_hearted": "お気に入り済み",
-  "@styleExplore_hearted": {
-    "description": "styleExplore_hearted."
-  },
-  "styleExplore_joinEvolution": "進化に追加",
-  "@styleExplore_joinEvolution": {
-    "description": "styleExplore_joinEvolution."
-  },
-  "styleExplore_applyToEditor": "編集欄に適用",
-  "@styleExplore_applyToEditor": {
-    "description": "styleExplore_applyToEditor."
-  },
-  "styleExplore_seedName": "シード",
-  "@styleExplore_seedName": {
-    "description": "styleExplore_seedName."
-  },
-  "styleExplore_elapsedName": "所要時間",
-  "@styleExplore_elapsedName": {
-    "description": "styleExplore_elapsedName."
-  },
-  "styleExplore_parameters": "パラメーター",
-  "@styleExplore_parameters": {
-    "description": "styleExplore_parameters."
-  },
-  "styleExplore_modelName": "モデル",
-  "@styleExplore_modelName": {
-    "description": "styleExplore_modelName."
-  },
-  "styleExplore_fullPrompt": "完全なプロンプト",
-  "@styleExplore_fullPrompt": {
-    "description": "styleExplore_fullPrompt."
-  },
-  "styleExplore_mergedArtists": "画師をまとめる（重複除去）",
-  "@styleExplore_mergedArtists": {
-    "description": "styleExplore_mergedArtists."
-  },
-  "styleExplore_selectionExplanation": "ブロック保存はこれらを1つにまとめ、進化では各画像の画師文字列を親として使います。",
-  "@styleExplore_selectionExplanation": {
-    "description": "styleExplore_selectionExplanation."
-  },
-  "styleExplore_quickGroupHint": "1–9 で分類",
-  "@styleExplore_quickGroupHint": {
-    "description": "styleExplore_quickGroupHint."
-  },
-  "styleExplore_newGroupChip": "新規グループ",
-  "@styleExplore_newGroupChip": {
-    "description": "Inspector compact new group chip."
-  },
-  "styleExplore_parameterSummary": "{width}×{height} · {steps} ステップ · {scale}",
-  "@styleExplore_parameterSummary": {
-    "description": "Inspector generation parameter summary.",
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      },
-      "steps": {
-        "type": "int"
-      },
-      "scale": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_viewerBack": "画風探索",
-  "@styleExplore_viewerBack": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_viewerPosition": "{index} 枚目 / {total} 枚",
-  "@styleExplore_viewerPosition": {
-    "description": "Exploration viewer.",
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_viewerGroupsShortcut": "1–9：分類、0：分類解除",
-  "@styleExplore_viewerGroupsShortcut": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_seedClickCopy": "シード（クリックでコピー）",
-  "@styleExplore_seedClickCopy": {
-    "description": "Exploration viewer."
-  },
   "styleExplore_appliedToEditor": "編集欄に適用しました",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
   },
-  "styleExplore_generationNumber": "第{index}世代",
-  "@styleExplore_generationNumber": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_currentGeneration": "現在",
-  "styleExplore_generationStart": "候補{count}枚から開始",
-  "@styleExplore_generationStart": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationSource": "第{index}世代から{count}枚選択 + 初代{roots}枚を戻し交配",
-  "@styleExplore_generationSource": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      },
-      "roots": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentsByPreference": "親 · 好み順",
-  "styleExplore_backcross": "戻し交配",
-  "styleExplore_childrenCount": "子 · {count}",
-  "@styleExplore_childrenCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedSelected": "選択した{count}枚で第{index}世代を育成",
-  "@styleExplore_breedSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationBusy": "この世代はまだ生成中です",
-  "styleExplore_regeneratePrefix": "再生成",
-  "styleExplore_regenerateSuffix": "枚の子",
-  "styleExplore_pairCompare": "ペア比較で並べ替え",
-  "styleExplore_howToUse": "使い方",
-  "styleExplore_helpParents": "親は選んだ絵師の組み合わせです。好みの値が高いほど組み合わせに参加しやすくなります。",
-  "styleExplore_helpChildren": "子は親の交叉、変異、絵師プールからの新しい絵師の追加で生まれます。",
-  "styleExplore_helpCompare": "ペア比較で親の好みの値を更新し、その後の組み合わせに反映します。",
-  "styleExplore_helpBackcross": "次世代の育成では、初代の親を自動で加えて戻し交配します。",
-  "styleExplore_originTitle": "生成の由来",
-  "styleExplore_originCross": "これらの親の絵師を交叉して組み合わせました",
-  "styleExplore_originMutation": "親の組み合わせの一部の絵師を置き換えました",
-  "styleExplore_originInjection": "プールから新しい絵師を追加しました",
-  "styleExplore_newArtist": "新規",
-  "styleExplore_evolutionEmpty": "候補からお気に入りを選んで進化ラインを始めましょう",
-  "styleExplore_pickFromCandidates": "候補を選ぶ",
-  "styleExplore_generationSummary": "親{parents}枚 · 子{children}枚 · 次世代に{selected}枚選択",
-  "@styleExplore_generationSummary": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      },
-      "selected": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedNext": "次世代を育成",
-  "styleExplore_optionalName": "名前（任意）",
-  "styleExplore_childrenEmpty": "子はまだありません。上でまとめて生成してください。",
-  "styleExplore_evolutionStepOne": "親の絵師を混ぜて子を生成",
-  "styleExplore_evolutionStepTwo": "ペア比較で好みを伝える",
-  "styleExplore_evolutionStepThree": "良い子を選び次世代を育てる",
-  "styleExplore_evolutionNewLine": "新しい進化ライン",
-  "styleExplore_evolutionJoinLine": "「{name}」の現世代に追加",
-  "@styleExplore_evolutionJoinLine": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionName": "進化ライン名",
-  "styleExplore_defaultEvolutionName": "進化ライン {n}",
-  "@styleExplore_defaultEvolutionName": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionAddCustom": "カスタム絵師文字列を追加",
-  "styleExplore_evolutionCustomHint": "絵師文字列を入力",
-  "styleExplore_evolutionParentEmpty": "使用できる絵師文字列がありません",
-  "styleExplore_evolutionTarget": "子孫はプロンプト内の",
-  "styleExplore_evolutionOnlyCreate": "作成のみ",
-  "styleExplore_evolutionOnlyJoin": "追加のみ",
-  "styleExplore_evolutionCreateGenerate": "作成して {count} 枚生成",
-  "@styleExplore_evolutionCreateGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionJoinGenerate": "追加して {count} 枚生成",
-  "@styleExplore_evolutionJoinGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionFirstBatch": "最初の子のバッチ",
-  "styleExplore_evolutionMinimum": "枚（最低 {count}）",
-  "@styleExplore_evolutionMinimum": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionCreated": "進化ライン「{name}」を作成しました",
-  "@styleExplore_evolutionCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionJoined": "進化ライン「{name}」に追加しました",
-  "@styleExplore_evolutionJoined": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_sortLiveSave": "結果は即時保存されます。いつでも閉じられます",
-  "styleExplore_sortRanking": "現在の順位 · リアルタイム",
-  "styleExplore_sortRankingHint": "順位は次のバッチで各親が選ばれる確率に影響します",
-  "styleExplore_sortSpace": "スペース",
-  "styleExplore_saveSingleSubtitle": "#{n} の絵師を1つのブロックに保存",
-  "@styleExplore_saveSingleSubtitle": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveManySubtitle": "候補 {count} 枚の絵師を1つのライブラリブロックにまとめます",
-  "@styleExplore_saveManySubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveArtistsOnly": "抽選された絵師のみ",
-  "styleExplore_saveFullPositive": "正のプロンプト全体",
-  "styleExplore_saveNoDraws": "正の遺伝抽選記録がないため、正のプロンプト全体を保存してください",
-  "styleExplore_saveContent": "内容",
-  "styleExplore_saveRemoveAtoms": "不要な絵師は × で除去",
-  "styleExplore_saveRemoved": "{count} 個除去済み",
-  "@styleExplore_saveRemoved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveRestore": "復元",
-  "styleExplore_saveName": "名前",
-  "styleExplore_saveColor": "色",
-  "styleExplore_saveIcon": "アイコン",
-  "styleExplore_saveFolder": "保存先フォルダー",
-  "styleExplore_saveRoot": "ルート",
-  "styleExplore_saveHint": "保存後、ライブラリからプロンプトにドラッグできます",
-  "styleExplore_onboardingTitle": "ランダムブロックで画風を試す",
-  "styleExplore_onboardingRandomTitle": "ランダムブロックを追加",
-  "styleExplore_onboardingDrawTitle": "候補をまとめて生成",
   "styleExplore_onboardingDraw": "候補を {count} 枚生成",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7202,136 +5450,156 @@
       }
     }
   },
-  "styleExplore_onboardingReviewTitle": "お気に入り・比較・進化",
-  "styleExplore_onboardingOpenPrevious": "以前の探索を開く",
-  "styleExplore_onboardingSubtitle": "画像ごとにランダムブロックから画家を抽選。好きな画像を選ぶだけです",
-  "styleExplore_onboardingRandomDescription": "プロンプトに画家プールを挿入します。検出したランダム変数は左側に表示されます。",
-  "styleExplore_onboardingDrawDescription": "左下の「候補を {count} 枚生成」を押します。各画像の下に抽選された画家が表示されます。",
-  "@styleExplore_onboardingDrawDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_onboardingReviewDescription": "F でお気に入りに登録。数枚を選んで進化し、良い画家の組み合わせを次の世代へ。",
-  "styleExplore_onboardingDetected": "{count} 個を検出",
-  "@styleExplore_onboardingDetected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_compareTitle": "ペア比較 · 親候補を順位付け",
-  "styleExplore_compareQuestion": "求める画風に近いのはどちらですか？",
-  "styleExplore_childLabel": "子候補 #{index}",
-  "styleExplore_generationCounts": "親 {parents} 件 → 子 {children} 件",
-  "styleExplore_viewLarge": "大きく表示",
-  "@styleExplore_childLabel": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@styleExplore_generationCounts": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveDialogTitle": "プロンプトブロックとして保存",
-  "styleExplore_startDialogTitle": "候補 {count} 枚から進化を開始",
-  "@styleExplore_startDialogTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stepGenerate": "子孫を生成",
-  "styleExplore_stepPick": "良いものを選ぶ",
-  "styleExplore_stepBreed": "次の世代を育てる",
-  "styleExplore_firstGenerationParents": "第1世代の親 · {count}",
-  "@styleExplore_firstGenerationParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionTargetAfter": "の位置を置き換え、他の内容は保持します",
   "stats_title": "統計",
   "stats_subtitle": "ローカルギャラリー · ファイル日時順",
   "stats_rangeDays": "{count} 日",
-  "@stats_rangeDays": {"placeholders": {"count": {}}},
+  "@stats_rangeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_rangeThisYear": "今年",
   "stats_rangeAll": "すべて",
   "stats_naiOnly": "NAI 画像のみ",
   "stats_updatedAt": "{time} に更新",
-  "@stats_updatedAt": {"placeholders": {"time": {}}},
+  "@stats_updatedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "stats_updating": "更新中",
   "stats_counting": "{count} 枚を集計中…",
-  "@stats_counting": {"placeholders": {"count": {}}},
+  "@stats_counting": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_updateFailed": "更新に失敗しました",
   "stats_refresh": "更新",
   "stats_lastDays": "直近 {count} 日",
-  "@stats_lastDays": {"placeholders": {"count": {}}},
+  "@stats_lastDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_lastDaysShort": "{count} 日",
-  "@stats_lastDaysShort": {"placeholders": {"count": {}}},
+  "@stats_lastDaysShort": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_unitDays": "日",
   "stats_imagesCount": "{count} 枚",
-  "@stats_imagesCount": {"placeholders": {"count": {}}},
+  "@stats_imagesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_less": "少",
   "stats_more": "多",
   "stats_kpiImages": "画像",
   "stats_kpiNewImages": "新しい画像",
   "stats_kpiActiveDays": "活動 {days} 日 · 1 日平均 {avg}",
-  "@stats_kpiActiveDays": {"placeholders": {"days": {}, "avg": {}}},
+  "@stats_kpiActiveDays": {
+    "placeholders": {
+      "days": {},
+      "avg": {}
+    }
+  },
   "stats_kpiVsPrevious": "前の {count} 日比",
-  "@stats_kpiVsPrevious": {"placeholders": {"count": {}}},
+  "@stats_kpiVsPrevious": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_kpiVsLastYear": "前年同期比",
   "stats_kpiPreviousValue": "（{value}）",
-  "@stats_kpiPreviousValue": {"placeholders": {"value": {}}},
+  "@stats_kpiPreviousValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "stats_kpiFavorites": "お気に入り",
   "stats_kpiFavoriteRate": "お気に入り率 {rate}",
-  "@stats_kpiFavoriteRate": {"placeholders": {"rate": {}}},
+  "@stats_kpiFavoriteRate": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
   "stats_kpiAnlas90": "Anlas · 直近 90 日",
   "stats_kpiAnlasSpent": "Anlas 消費",
   "stats_kpiAnlasRecent": "7 日 {week} · 今日 {today}",
-  "@stats_kpiAnlasRecent": {"placeholders": {"week": {}, "today": {}}},
+  "@stats_kpiAnlasRecent": {
+    "placeholders": {
+      "week": {},
+      "today": {}
+    }
+  },
   "stats_kpiAnlasDaily": "1 日平均 {avg} · 今日 {today}",
-  "@stats_kpiAnlasDaily": {"placeholders": {"avg": {}, "today": {}}},
+  "@stats_kpiAnlasDaily": {
+    "placeholders": {
+      "avg": {},
+      "today": {}
+    }
+  },
   "stats_kpiStreak": "連続制作",
   "stats_kpiLongest": "最長 {days} {unit}",
-  "@stats_kpiLongest": {"placeholders": {"days": {}, "unit": {}}},
+  "@stats_kpiLongest": {
+    "placeholders": {
+      "days": {},
+      "unit": {}
+    }
+  },
   "stats_kpiLongestRange": "最長 {days} {unit}（{range}）",
-  "@stats_kpiLongestRange": {"placeholders": {"days": {}, "unit": {}, "range": {}}},
+  "@stats_kpiLongestRange": {
+    "placeholders": {
+      "days": {},
+      "unit": {},
+      "range": {}
+    }
+  },
   "stats_kpiStorage": "容量",
   "stats_kpiStorageDetail": "平均 {avg} · メタデータあり {pct}",
-  "@stats_kpiStorageDetail": {"placeholders": {"avg": {}, "pct": {}}},
+  "@stats_kpiStorageDetail": {
+    "placeholders": {
+      "avg": {},
+      "pct": {}
+    }
+  },
   "stats_calendarTitle": "制作カレンダー",
   "stats_calendarHint": "1 マス 1 日、濃いほど多い",
   "stats_calendarPastYear": "直近 1 年",
   "stats_calendarYear": "{year} 年",
-  "@stats_calendarYear": {"placeholders": {"year": {}}},
+  "@stats_calendarYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarImagesPastYear": "直近 1 年の画像",
   "stats_calendarImagesInYear": "{year} 年の画像",
-  "@stats_calendarImagesInYear": {"placeholders": {"year": {}}},
+  "@stats_calendarImagesInYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarActiveDays": "制作した日数",
   "stats_calendarBestDay": "最も多い日",
   "stats_calendarLongestStreak": "最長連続",
   "stats_calendarTipOpen": "クリックでこの日をローカルギャラリーで開く",
   "stats_productionTitle": "生成量とモデル",
   "stats_productionHintAll": "{unit}ごと、色はモデル",
-  "@stats_productionHintAll": {"placeholders": {"unit": {}}},
+  "@stats_productionHintAll": {
+    "placeholders": {
+      "unit": {}
+    }
+  },
   "stats_productionHintRange": "{range}、{unit}ごと、色はモデル",
-  "@stats_productionHintRange": {"placeholders": {"range": {}, "unit": {}}},
+  "@stats_productionHintRange": {
+    "placeholders": {
+      "range": {},
+      "unit": {}
+    }
+  },
   "stats_unitDay": "日",
   "stats_unitWeek": "週",
   "stats_unitMonth": "月",
@@ -7339,16 +5607,34 @@
   "stats_granularityWeek": "週",
   "stats_granularityMonth": "月",
   "stats_monthWithYear": "{year}.{month}",
-  "@stats_monthWithYear": {"placeholders": {"year": {}, "month": {}}},
+  "@stats_monthWithYear": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
   "stats_productionModelsHint": "モデル · クリックでそのモデルだけ表示",
   "stats_productionOtherModels": "その他 {count} モデル",
-  "@stats_productionOtherModels": {"placeholders": {"count": {}}},
+  "@stats_productionOtherModels": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_productionNoMetadata": "ほかにメタデータなし {count} 枚（薄いグレー）",
-  "@stats_productionNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_productionNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_familyOther": "その他のモデル",
   "stats_familyNoMetadata": "メタデータなし",
   "stats_productionTipTotal": "{period} · {count} 枚",
-  "@stats_productionTipTotal": {"placeholders": {"period": {}, "count": {}}},
+  "@stats_productionTipTotal": {
+    "placeholders": {
+      "period": {},
+      "count": {}
+    }
+  },
   "stats_productionTipOpenDay": "クリックでこの日をローカルギャラリーで開く",
   "stats_productionTipOpenWeek": "クリックでこの週をローカルギャラリーで開く",
   "stats_productionTipOpenMonth": "クリックでこの月をローカルギャラリーで開く",
@@ -7356,7 +5642,13 @@
   "stats_punchHint": "曜日 × 時間",
   "stats_punchPeak": "最も多い",
   "stats_punchPeakValue": "{weekday} {from}–{to} 時",
-  "@stats_punchPeakValue": {"placeholders": {"weekday": {}, "from": {}, "to": {}}},
+  "@stats_punchPeakValue": {
+    "placeholders": {
+      "weekday": {},
+      "from": {},
+      "to": {}
+    }
+  },
   "stats_punchBusiest": "最も忙しい",
   "stats_punchLateNight": "深夜",
   "stats_punchNote": "円が大きいほど多い",
@@ -7364,7 +5656,11 @@
   "stats_anlasToday": "今日",
   "stats_anlasDailyAvg": "1 日平均",
   "stats_anlasActiveDays": "消費あり {count} 日",
-  "@stats_anlasActiveDays": {"placeholders": {"count": {}}},
+  "@stats_anlasActiveDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_anlasPeak": "最多",
   "stats_anlasNote": "残高が減ったときに記録（アップスケールや Vibe エンコードを含む）。直近 90 日のみ保持",
   "stats_aspectTitle": "画面サイズ",
@@ -7374,9 +5670,19 @@
   "stats_orientationLandscape": "横",
   "stats_orientationSquare": "正方形",
   "stats_aspectShapeCount": "{orientation} · {count}",
-  "@stats_aspectShapeCount": {"placeholders": {"orientation": {}, "count": {}}},
+  "@stats_aspectShapeCount": {
+    "placeholders": {
+      "orientation": {},
+      "count": {}
+    }
+  },
   "stats_aspectOthers": "その他 {count} 種 · {pct}",
-  "@stats_aspectOthers": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_aspectOthers": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_aspectClickHint": "サイズや向きをクリックするとその画像だけ表示",
   "stats_paramsTitle": "パラメーターの傾向",
   "stats_paramsHint": "メタデータのある画像",
@@ -7384,28 +5690,58 @@
   "stats_paramsSampler": "サンプラー",
   "stats_paramsSteps": "ステップ",
   "stats_paramsStepsValue": "{count} ステップ",
-  "@stats_paramsStepsValue": {"placeholders": {"count": {}}},
+  "@stats_paramsStepsValue": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_paramsNoise": "ノイズスケジュール",
   "stats_artistsTitle": "よく使う絵師",
   "stats_artistsHint": "絵師タグ入り {count} 枚（{pct}）",
-  "@stats_artistsHint": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_artistsHint": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_artistsComputing": "絵師を集計中…",
   "stats_artistsNone": "プロンプトに artist: がまだありません",
   "stats_artistsNote": "登場した画像の枚数順。1 枚で何度書いても 1 回",
   "stats_artistsTipSearch": "ローカルギャラリーで {query} を検索",
-  "@stats_artistsTipSearch": {"placeholders": {"query": {}}},
+  "@stats_artistsTipSearch": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "stats_artistsTipCopy": "右クリック：絵師名をコピー",
   "stats_artistsCopied": "{name} をコピーしました",
-  "@stats_artistsCopied": {"placeholders": {"name": {}}},
+  "@stats_artistsCopied": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "stats_storageTitle": "ストレージ",
   "stats_storageFiles": "{count} ファイル",
-  "@stats_storageFiles": {"placeholders": {"count": {}}},
+  "@stats_storageFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageMonthly": "直近 12 か月の月別追加",
   "stats_storageNoMetadata": "メタデータなし {count} 枚",
-  "@stats_storageNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_storageNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageViewInGallery": "ローカルギャラリーで表示",
   "stats_storageLarge": "10 MB 超 {count} 枚 · {size}",
-  "@stats_storageLarge": {"placeholders": {"count": {}, "size": {}}},
+  "@stats_storageLarge": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "stats_storageView": "表示",
   "stats_footer": "統計を開くたびにギャラリーの変化を確認し、変わっていればバックグラウンドで再集計 · 数字をクリックするとそのフィルターでローカルギャラリーを開く",
   "stats_emptyTitle": "ローカルギャラリーにまだ画像がありません",
@@ -7433,16 +5769,33 @@
   "navShell_pin": "展開を固定",
   "navShell_genRunning": "生成中",
   "navShell_genRunningCount": "生成中 · {current} / {total} 枚目",
-  "@navShell_genRunningCount": {"placeholders": {"current": {}, "total": {}}},
+  "@navShell_genRunningCount": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
   "navShell_genPercent": "{percent}% · ライブプレビュー",
-  "@navShell_genPercent": {"placeholders": {"percent": {}}},
+  "@navShell_genPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "navShell_genBack": "クリックで生成ページへ戻る",
   "navShell_genDone": "{count} 枚完了、クリックで表示",
-  "@navShell_genDone": {"placeholders": {"count": {}}},
+  "@navShell_genDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_genFailed": "生成に失敗しました",
   "navShell_tasksTitle": "バックグラウンドタスク",
   "navShell_tasksRunning": "{count} 件実行中",
-  "@navShell_tasksRunning": {"placeholders": {"count": {}}},
+  "@navShell_tasksRunning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_tasksFooter": "すべて終わると 10 秒後にこのアイコンは消えます",
   "navShell_task_localUpscale": "ローカル拡大",
   "navShell_task_cloudUpscale": "クラウド拡大",
@@ -7453,7 +5806,12 @@
   "navShell_task_bulkRemoveFromCollection": "コレクションから削除",
   "navShell_task_bulkFavorite": "一括お気に入り",
   "navShell_taskImages": "{title} {count} 枚",
-  "@navShell_taskImages": {"placeholders": {"title": {}, "count": {}}},
+  "@navShell_taskImages": {
+    "placeholders": {
+      "title": {},
+      "count": {}
+    }
+  },
   "navShell_taskJustDone": "完了しました",
   "navShell_taskView": "表示",
   "navShell_taskCancel": "キャンセル",
@@ -7467,7 +5825,12 @@
   "navShell_accountNotSignedIn": "未ログイン",
   "navShell_accountChoose": "アカウントを選んで続行",
   "navShell_subExpires": "サブスクは {date} に終了 · 残り {days} 日",
-  "@navShell_subExpires": {"placeholders": {"date": {}, "days": {}}},
+  "@navShell_subExpires": {
+    "placeholders": {
+      "date": {},
+      "days": {}
+    }
+  },
   "navShell_subExpired": "サブスクの期限切れ",
   "navShell_anlas": "Anlas 残高",
   "navShell_switchAccount": "アカウント切替",
@@ -7503,10 +5866,18 @@
   "online_favAuthors": "保存した作者",
   "online_blacklist": "ブロックリスト",
   "online_blacklistCount": "{count} 件のタグを除外",
-  "@online_blacklistCount": {"placeholders": {"count": {}}},
+  "@online_blacklistCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_srcSubAiTag": "NAI 作品コミュニティ · Prompt 付き",
   "online_srcSubSignedIn": "ログイン中 · {name}",
-  "@online_srcSubSignedIn": {"placeholders": {"name": {}}},
+  "@online_srcSubSignedIn": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "online_srcSubSafebooru": "全年齢 · ログイン不要",
   "online_srcSubKeyOk": "API Key 設定済み",
   "online_srcSubKeyInvalid": "API Key が無効",
@@ -7547,12 +5918,25 @@
   "online_modelAll": "すべて",
   "online_timeAll": "全期間",
   "online_timeYear": "{year} 年",
-  "@online_timeYear": {"placeholders": {"year": {}}},
+  "@online_timeYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "online_timeOlder": "それ以前",
   "online_loaded": "{count} 枚 · {pages} ページ読込済み",
-  "@online_loaded": {"placeholders": {"count": {}, "pages": {}}},
+  "@online_loaded": {
+    "placeholders": {
+      "count": {},
+      "pages": {}
+    }
+  },
   "online_rankLoaded": "1–{count} 位 · {count} 枚読込済み",
-  "@online_rankLoaded": {"placeholders": {"count": {}}},
+  "@online_rankLoaded": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_jumpToPage": "ページへ移動…",
   "online_jumpGo": "移動",
   "online_ratingLabel": "レーティング",
@@ -7573,9 +5957,18 @@
   "online_sortFavTime": "保存日時",
   "online_favAll": "すべてのお気に入り",
   "online_countImages": "{count} 枚",
-  "@online_countImages": {"placeholders": {"count": {}}},
+  "@online_countImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_authorSaved": "{count} 枚保存 · {date} に作者を保存",
-  "@online_authorSaved": {"placeholders": {"count": {}, "date": {}}},
+  "@online_authorSaved": {
+    "placeholders": {
+      "count": {},
+      "date": {}
+    }
+  },
   "online_authorAllWorks": "AI TAG で全作品を見る",
   "online_unfavAuthor": "作者の保存を解除",
   "online_favAuthor": "作者を保存",
@@ -7591,7 +5984,11 @@
   "online_copyTags": "タグをコピー",
   "online_download": "ダウンロード",
   "online_downloadAll": "全 {count} 枚をダウンロード",
-  "@online_downloadAll": {"placeholders": {"count": {}}},
+  "@online_downloadAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_downloadCurrent": "この 1 枚をダウンロード",
   "online_more": "その他",
   "online_openInBrowser": "サイトで開く",
@@ -7603,7 +6000,11 @@
   "online_inspWork": "作品",
   "online_inspPost": "投稿",
   "online_youSaved": "この作者を {count} 枚保存",
-  "@online_youSaved": {"placeholders": {"count": {}}},
+  "@online_youSaved": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_params": "生成パラメータ",
   "online_pModel": "モデル",
   "online_pSize": "サイズ",
@@ -7622,25 +6023,41 @@
   "online_copy": "コピー",
   "online_noSelection": "カードをクリックすると Prompt とパラメータをここに表示",
   "online_detailError": "詳細を読み込めませんでした：{error}",
-  "@online_detailError": {"placeholders": {"error": {}}},
+  "@online_detailError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_retry": "再試行",
   "online_noPrompt": "この画像には Prompt がありません",
   "online_selCount": "{count} 枚選択中",
-  "@online_selCount": {"placeholders": {"count": {}}},
+  "@online_selCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_selAll": "すべて選択",
   "online_selInvert": "選択を反転",
   "online_favoriteTo": "お気に入りに追加…",
   "online_favoriteToTitle": "追加先",
   "online_favoriteToSite": "サイトのお気に入りへ",
   "online_downloadN": "ダウンロード · {count} 枚",
-  "@online_downloadN": {"placeholders": {"count": {}}},
+  "@online_downloadN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_newCollectionAndFav": "新規コレクションに追加",
   "online_collectionNameHint": "コレクション名（Enter で確定）",
   "online_exitMulti": "選択を終了",
   "online_sendRemember": "この選択を記憶",
   "online_sendReplace": "プロンプトを置換、キャラ枠をクリア",
   "online_sendReplaceDesc": "ポジ + ネガをこの画像のものに置換し、生成ページのキャラ枠 {count} 個をクリア。以前のカードのボタンと同じ",
-  "@online_sendReplaceDesc": {"placeholders": {"count": {}}},
+  "@online_sendReplaceDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendReplaceDescNone": "ポジ + ネガをこの画像のものに置換し、キャラ枠をクリア。以前のカードのボタンと同じ",
   "online_sendPromptOnly": "プロンプトだけ置換、キャラ枠は残す",
   "online_sendPromptOnlyDesc": "絵師タグと情景描写だけ借りたいときに",
@@ -7648,26 +6065,52 @@
   "online_sendParamsDesc": "サイズ・シード・サンプラー・ステップ・CFG と画像内のキャラ枠も適用。ローカルギャラリーの「パラメータを再利用」と同じ",
   "online_sendParamsUnavailable": "この画像には生成パラメータがないため、プロンプトのみ送れます",
   "online_sendNote": "生成ページの現在のポジ（{count} 文字）は置き換わります",
-  "@online_sendNote": {"placeholders": {"count": {}}},
+  "@online_sendNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendNoteEmpty": "生成ページのポジは空です",
   "online_cancel": "キャンセル",
   "online_sendGo": "送って生成ページへ",
   "online_blacklistDesc": "該当する作品は表示しません",
   "online_blacklistAddHint": "タグを追加（Enter で確定）",
   "online_blacklistSync": "Danbooru のブロックリストを同期 · {count} 件",
-  "@online_blacklistSync": {"placeholders": {"count": {}}},
+  "@online_blacklistSync": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_blacklistScope": "4 つのソースすべてに適用。AI TAG は作品タグで照合",
   "online_blacklistEmpty": "除外タグはまだありません",
   "online_removeTag": "削除",
   "online_appendError": "{page} ページ目を読み込めませんでした：{reason}",
-  "@online_appendError": {"placeholders": {"page": {}, "reason": {}}},
+  "@online_appendError": {
+    "placeholders": {
+      "page": {},
+      "reason": {}
+    }
+  },
   "online_retryPage": "このページを再試行",
   "online_end": "これで全部です · 計 {count} 枚",
-  "@online_end": {"placeholders": {"count": {}}},
+  "@online_end": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_endBlocked": "これで全部です · 計 {count} 枚 · {blocked} 枚を除外",
-  "@online_endBlocked": {"placeholders": {"count": {}, "blocked": {}}},
+  "@online_endBlocked": {
+    "placeholders": {
+      "count": {},
+      "blocked": {}
+    }
+  },
   "online_emptyTitle": "「{query}」の作品は見つかりませんでした",
-  "@online_emptyTitle": {"placeholders": {"query": {}}},
+  "@online_emptyTitle": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "online_emptyTitleNoQuery": "作品が見つかりませんでした",
   "online_emptyHint": "条件をゆるめてみてください",
   "online_sugNaiOff": "「NAI 画像のみ」を外す",
@@ -7679,7 +6122,11 @@
   "online_favEmpty": "まだお気に入りはありません",
   "online_favEmptyHint": "カードの ♡ で保存できます",
   "online_loadError": "読み込めませんでした：{error}",
-  "@online_loadError": {"placeholders": {"error": {}}},
+  "@online_loadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_loginDbTitle": "お気に入りを見るには Danbooru にログイン",
   "online_loginDbDesc": "ユーザー名 + API Key でログインするとサイトと同期します。\nカードの ♡ もサイトに直接保存します",
   "online_loginDb": "Danbooru にログイン",
@@ -7689,9 +6136,21 @@
   "online_apiKeyHelp": "API Key の取得方法",
   "online_loginOther": "ログインしたくない場合：AI TAG のお気に入りは端末内に保存されアカウント不要。Gelbooru は閲覧のみ",
   "online_viewerPosition": "画像 {image} / {images} · 作品 {work} / {works}",
-  "@online_viewerPosition": {"placeholders": {"image": {}, "images": {}, "work": {}, "works": {}}},
+  "@online_viewerPosition": {
+    "placeholders": {
+      "image": {},
+      "images": {},
+      "work": {},
+      "works": {}
+    }
+  },
   "online_viewerWorkPosition": "作品 {work} / {works}",
-  "@online_viewerWorkPosition": {"placeholders": {"work": {}, "works": {}}},
+  "@online_viewerWorkPosition": {
+    "placeholders": {
+      "work": {},
+      "works": {}
+    }
+  },
   "online_close": "閉じる",
   "online_keyImage": "画像を切り替え",
   "online_keyWork": "前 / 次の作品",
@@ -7720,12 +6179,24 @@
   "refs_open": "開く",
   "refs_types": "参照タイプ",
   "refs_importTypeNoteAll": "インポートした画像は既定で {type} として保存されます。左でタイプを選んでからインポートするとそのタイプで保存されます。",
-  "@refs_importTypeNoteAll": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteAll": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_importTypeNoteSelected": "インポートした画像は {type} として保存されます（左で選んだタイプ）。",
-  "@refs_importTypeNoteSelected": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteSelected": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_preciseOnlyV45": "V4.5 のみ",
   "refs_preciseCostNote": "1 枚 {cost} Anlas。Vibe とは同時に使えません",
-  "@refs_preciseCostNote": {"placeholders": {"cost": {}}},
+  "@refs_preciseCostNote": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_searchVibe": "名前・タグを検索",
   "refs_searchPrecise": "名前を検索",
   "refs_sortLastUsed": "最近使用",
@@ -7754,13 +6225,25 @@
   "refs_hideInspector": "インスペクターを閉じる",
   "refs_showInspector": "インスペクターを開く",
   "refs_bannerVibeLead": "{model} は Vibe 転送に対応していません。",
-  "@refs_bannerVibeLead": {"placeholders": {"model": {}}},
+  "@refs_bannerVibeLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerVibeBody": "Vibe の整理・エクスポートはできます。生成に使うには V4.5 か V4 に切り替えてください",
   "refs_bannerPreciseLead": "{model} は精密参照に対応していません。",
-  "@refs_bannerPreciseLead": {"placeholders": {"model": {}}},
+  "@refs_bannerPreciseLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerPreciseBody": "参照画像の整理はできます。生成に使うには V4.5 に切り替えてください",
   "refs_switchTo": "{model} に切り替え",
-  "@refs_switchTo": {"placeholders": {"model": {}}},
+  "@refs_switchTo": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_quickAll": "すべて",
   "refs_quickFavorites": "お気に入り",
   "refs_quickHasRaw": "元画像あり",
@@ -7768,12 +6251,26 @@
   "refs_quickBundles": "バンドル",
   "refs_quickUnused": "未使用",
   "refs_countVibe": "{count} 件 · 生成ページで {inGen} 件",
-  "@refs_countVibe": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countVibe": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_countPrecise": "{count} 枚 · 生成ページで {inGen} 枚",
-  "@refs_countPrecise": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countPrecise": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_noResults": "条件に合う項目はありません",
   "refs_noResultsFor": "「{query}」は見つかりませんでした",
-  "@refs_noResultsFor": {"placeholders": {"query": {}}},
+  "@refs_noResultsFor": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "refs_clearFilters": "フィルターをクリア",
   "refs_addShort": "生成に追加",
   "refs_sendPrecise": "精密参照に送る",
@@ -7792,7 +6289,11 @@
   "refs_copyImage": "画像をコピー",
   "refs_delete": "削除",
   "refs_selected": "{count} 件選択",
-  "@refs_selected": {"placeholders": {"count": {}}},
+  "@refs_selected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveTo": "移動",
   "refs_export": "エクスポート",
   "refs_emptyVibeTitle": "画像や Vibe ファイルをここにドロップ",
@@ -7806,62 +6307,143 @@
   "refs_emptyFromGallery": "ローカルギャラリーからも可",
   "refs_emptyHelpTitle": "Vibe と精密参照の違い",
   "refs_emptyHelpBody": "Vibe：全体の雰囲気や画風を借り、何枚も重ねられます（V4 / V4.5、V5 は非対応）。精密参照：1 枚の画像の人物や画風により忠実に描きます。1 枚 {cost} Anlas（V4.5 のみ）。両者は同時に使えません。",
-  "@refs_emptyHelpBody": {"placeholders": {"cost": {}}},
+  "@refs_emptyHelpBody": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_dropTitle": "離すと {count} 件をインポート",
-  "@refs_dropTitle": {"placeholders": {"count": {}}},
+  "@refs_dropTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeDesc": "まずインポート画面で確認します。すぐに Anlas は消費しません",
   "refs_dropPreciseDesc": "左で選んだタイプで保存します",
   "refs_dropVibePngs": "Vibe 入り PNG {count} 件",
-  "@refs_dropVibePngs": {"placeholders": {"count": {}}},
+  "@refs_dropVibePngs": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeFiles": "Vibe ファイル {count} 件",
-  "@refs_dropVibeFiles": {"placeholders": {"count": {}}},
+  "@refs_dropVibeFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropBundles": "バンドル {count} 件",
-  "@refs_dropBundles": {"placeholders": {"count": {}}},
+  "@refs_dropBundles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropImages": "通常の画像 {count} 枚",
-  "@refs_dropImages": {"placeholders": {"count": {}}},
+  "@refs_dropImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_inGeneration": "使用中",
   "refs_tag": "タグ",
   "refs_strengthShort": "強度",
   "refs_infoShort": "情報",
   "refs_fidelityShort": "忠実",
   "refs_encModelOff": "{model} では使用不可",
-  "@refs_encModelOff": {"placeholders": {"model": {}}},
+  "@refs_encModelOff": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encModelOffDesc": "{model} は Vibe 転送非対応です。V4.5 / V4 に切り替えると使えます",
-  "@refs_encModelOffDesc": {"placeholders": {"model": {}}},
+  "@refs_encModelOffDesc": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReady": "エンコード済み · {model}",
-  "@refs_encReady": {"placeholders": {"model": {}}},
+  "@refs_encReady": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyShort": "{model} エンコード済み",
-  "@refs_encReadyShort": {"placeholders": {"model": {}}},
+  "@refs_encReadyShort": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyDesc": "現在のモデルでそのまま使えます。エンコード料金はかかりません",
   "refs_encOnUse": "使用時にエンコード",
   "refs_encOnUseDesc": "まだエンコードしていません。初めて生成に使うときにエンコードします（{cost} Anlas）",
-  "@refs_encOnUseDesc": {"placeholders": {"cost": {}}},
+  "@refs_encOnUseDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_encRe": "再エンコードが必要",
   "refs_encReDesc": "{from} 用のエンコードです（現在は {model}）。使用時に元画像から再エンコードします（{cost} Anlas）",
-  "@refs_encReDesc": {"placeholders": {"from": {}, "model": {}, "cost": {}}},
+  "@refs_encReDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_encUnusable": "{model} では使えません",
-  "@refs_encUnusable": {"placeholders": {"model": {}}},
+  "@refs_encUnusable": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encUnusableDesc": "{from} 用のエンコードのみで元画像がないため、{model} 用に再エンコードできません",
-  "@refs_encUnusableDesc": {"placeholders": {"from": {}, "model": {}}},
+  "@refs_encUnusableDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {}
+    }
+  },
   "refs_trayVibe": "生成ページの Vibe",
   "refs_trayPrecise": "生成ページの精密参照",
   "refs_trayVibeCost": "{free} 件を超えると 1 件ごとに +{extra} Anlas",
-  "@refs_trayVibeCost": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_trayVibeCost": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_trayPreciseCost": "1 枚 {cost} Anlas · 今回 +{total}",
-  "@refs_trayPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_trayPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_trayHint": "カードをここにドラッグで追加、Shift でまとめて置き換え。\nページは移動しないので続けて選べます",
   "refs_trayDropHere": "カードをここにドロップして追加",
   "refs_clear": "クリア",
   "refs_goGeneration": "生成ページへ",
   "refs_conflict": "生成ページに **Vibe が {count} 件** あります。精密参照があると Vibe は送信されません（公式非対応）",
-  "@refs_conflict": {"placeholders": {"count": {}}},
+  "@refs_conflict": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_conflictPaused": "生成ページの **Vibe {count} 件** は一時停止中。精密参照のみ送信します",
-  "@refs_conflictPaused": {"placeholders": {"count": {}}},
+  "@refs_conflictPaused": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pauseVibes": "Vibe を一時停止",
   "refs_resumeVibes": "Vibe を再開",
   "refs_inspector": "インスペクター",
   "refs_selectedN": "{count} 件選択中",
-  "@refs_selectedN": {"placeholders": {"count": {}}},
+  "@refs_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_noSelectionVibe": "カードを選ぶとパラメータとエンコード状態を表示します",
   "refs_noSelectionPrecise": "参照画像を選ぶとタイプとパラメータを表示します",
   "refs_rename": "名前を変更",
@@ -7871,29 +6453,55 @@
   "refs_strengthDesc": "高いほどこの画像の雰囲気に近づきます",
   "refs_infoExtracted": "情報抽出",
   "refs_infoDesc": "高いほど細部を多く取り込みます。変更すると元画像から再エンコードします（{cost} Anlas）",
-  "@refs_infoDesc": {"placeholders": {"cost": {}}},
+  "@refs_infoDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_infoLocked": "エンコードデータのみで元画像がないため、情報抽出は変更できません",
   "refs_changedNote": "変更は今回の送信のみに使われます",
   "refs_saveDefault": "既定値として保存",
   "refs_revert": "元に戻す",
   "refs_encodeNow": "今すぐ {model} 用にエンコード · {cost} Anlas",
-  "@refs_encodeNow": {"placeholders": {"model": {}, "cost": {}}},
+  "@refs_encodeNow": {
+    "placeholders": {
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_bundleNote": "このバンドルの {count} 件の Vibe はそれぞれ強度と情報抽出を持ちます。バンドルを開くと個別に調整できます。",
-  "@refs_bundleNote": {"placeholders": {"count": {}}},
+  "@refs_bundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOf": "バンドル · {count} 件",
-  "@refs_bundleOf": {"placeholders": {"count": {}}},
+  "@refs_bundleOf": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_organize": "整理",
   "refs_category": "カテゴリ",
   "refs_tags": "タグ",
   "refs_used": "使用",
   "refs_neverUsed": "未使用",
   "refs_usedTimes": "{count} 回 · 最後 {last}",
-  "@refs_usedTimes": {"placeholders": {"count": {}, "last": {}}},
+  "@refs_usedTimes": {
+    "placeholders": {
+      "count": {},
+      "last": {}
+    }
+  },
   "refs_added": "追加",
   "refs_file": "ファイル",
   "refs_original": "元画像",
   "refs_plusAnlas": "+{cost} Anlas",
-  "@refs_plusAnlas": {"placeholders": {"cost": {}}},
+  "@refs_plusAnlas": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_alsoSaveVibe": "Vibe にも保存",
   "refs_referenceWhat": "参照するもの",
   "refs_typeCharacter": "キャラ",
@@ -7912,23 +6520,60 @@
   "refs_multiAddTitle": "まとめて生成ページに追加",
   "refs_multiSendTitle": "まとめて精密参照に送る",
   "refs_multiFree": "{free} 件までは追加料金なし。",
-  "@refs_multiFree": {"placeholders": {"free": {}}},
+  "@refs_multiFree": {
+    "placeholders": {
+      "free": {}
+    }
+  },
   "refs_multiExtra": "{free} 件を超えると 1 件ごとに +{extra} Anlas：1 枚あたり {total} Anlas 増えます。",
-  "@refs_multiExtra": {"placeholders": {"free": {}, "extra": {}, "total": {}}},
+  "@refs_multiExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {},
+      "total": {}
+    }
+  },
   "refs_multiOverMax": "上限 {max} 件を超えた分は追加されません。",
-  "@refs_multiOverMax": {"placeholders": {"max": {}}},
+  "@refs_multiOverMax": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "refs_multiEncodes": "うち {count} 件はエンコードが必要です（{names}、1 件 {cost} Anlas、初回のみ）。",
-  "@refs_multiEncodes": {"placeholders": {"count": {}, "names": {}, "cost": {}}},
+  "@refs_multiEncodes": {
+    "placeholders": {
+      "count": {},
+      "names": {},
+      "cost": {}
+    }
+  },
   "refs_multiAlready": "{count} 件は既に生成ページにあるため重複しません。",
-  "@refs_multiAlready": {"placeholders": {"count": {}}},
+  "@refs_multiAlready": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_multiPreciseCost": "1 枚 {cost} Anlas、合計で 1 枚あたり {total} Anlas。",
-  "@refs_multiPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_multiPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_unify": "まとめて設定",
   "refs_mixed": "混在",
   "refs_unifyVibeNote": "ドラッグすると {count} 件の既定値をまとめて変更します。情報抽出は再エンコードが必要なため変更しません",
-  "@refs_unifyVibeNote": {"placeholders": {"count": {}}},
+  "@refs_unifyVibeNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_unifyPreciseNote": "クリックで {count} 枚すべてをこのタイプに",
-  "@refs_unifyPreciseNote": {"placeholders": {"count": {}}},
+  "@refs_unifyPreciseNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveToCategory": "カテゴリへ移動",
   "refs_addTag": "タグを追加",
   "refs_packBundle": "バンドルにまとめる",
@@ -7940,28 +6585,53 @@
   "refs_switch": "切り替え",
   "refs_dropReplacePreview": "ここに画像をドロップするとプレビューを差し替え（エンコードは変わりません）",
   "refs_bundleOfVibes": "バンドル · Vibe {count} 件",
-  "@refs_bundleOfVibes": {"placeholders": {"count": {}}},
+  "@refs_bundleOfVibes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleAll": "全 {count} 件",
-  "@refs_bundleAll": {"placeholders": {"count": {}}},
+  "@refs_bundleAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOnlyChecked": "チェックした {count} 件のみ",
-  "@refs_bundleOnlyChecked": {"placeholders": {"count": {}}},
+  "@refs_bundleOnlyChecked": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleScopeNote": "送信時は各 Vibe の強度と情報抽出を使います",
   "refs_splitBundle": "個別の Vibe に分割",
   "refs_bundleNoteLong": "パラメータを変えたら「バンドルに保存」で保存できます。保存しなければ今回の送信のみに影響します。",
   "refs_bundleAllEncoded": "{count} 件すべて {model} 用にエンコード済み",
-  "@refs_bundleAllEncoded": {"placeholders": {"count": {}, "model": {}}},
+  "@refs_bundleAllEncoded": {
+    "placeholders": {
+      "count": {},
+      "model": {}
+    }
+  },
   "refs_saveToBundle": "バンドルに保存",
   "refs_cover": "カバー",
   "refs_setCover": "カバーに設定",
   "refs_exportTitle": "Vibe {count} 件をエクスポート",
-  "@refs_exportTitle": {"placeholders": {"count": {}}},
+  "@refs_exportTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_exportListNote": "ライブラリで複数選択して「エクスポート」。ここで外すこともできます",
   "refs_exportAs": "エクスポート形式",
   "refs_fmtVibeFile": "個別の Vibe ファイル",
   "refs_fmtVibeFileDesc": ".naiv4vibe を 1 件ずつ。公式サイトや他クライアントでも読み込めます",
   "refs_fmtBundle": "バンドルにまとめる",
   "refs_fmtBundleDesc": ".naiv4vibebundle、{count} 件を 1 ファイルに",
-  "@refs_fmtBundleDesc": {"placeholders": {"count": {}}},
+  "@refs_fmtBundleDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_fmtPng": "PNG に埋め込み",
   "refs_fmtPngDesc": "画像に Vibe を埋め込み、ドロップするだけで使えます。1 件ずつのみ",
   "refs_fmtEncoded": "エンコードテキスト",
@@ -7971,21 +6641,47 @@
   "refs_optThumbsDesc": "ファイルが少し大きくなりますが、インポート時に画像が見えます",
   "refs_optZip": "ZIP に圧縮",
   "refs_optZipDesc": "{count} 個のファイルを 1 つにまとめます",
-  "@refs_optZipDesc": {"placeholders": {"count": {}}},
+  "@refs_optZipDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_saveTo": "保存先",
   "refs_choose": "選択",
   "refs_exportSummary": "{ext} ファイルを {count} 個作成します",
-  "@refs_exportSummary": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummary": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_exportSummaryZip": "ZIP を 1 個作成（{ext} ファイル {count} 個）",
-  "@refs_exportSummaryZip": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummaryZip": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_deleteOne": "「{name}」を削除しますか？",
-  "@refs_deleteOne": {"placeholders": {"name": {}}},
+  "@refs_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "refs_deleteMany": "{count} 件を削除しますか？",
-  "@refs_deleteMany": {"placeholders": {"count": {}}},
+  "@refs_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_deleteVibeDesc": "Vibe ライブラリから削除します。生成ページで使用中のものには影響しません。",
   "refs_deletePreciseDesc": "ライブラリから削除します。生成ページで使用中のものには影響しません。",
   "refs_importTitle": "{count} 件をインポート",
-  "@refs_importTitle": {"placeholders": {"count": {}}},
+  "@refs_importTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_importSubtitle": "ドロップ・選択・貼り付けはすべてこの画面で確認します",
   "refs_importMore": "ファイルを追加",
   "refs_importPutIn": "すべて入れる先",
@@ -7994,39 +6690,85 @@
   "refs_importPlainImages": "通常の画像",
   "refs_importEncodeLater": "使用時にエンコード",
   "refs_importEncodeNow": "今すぐエンコード · 1 枚 {cost} Anlas",
-  "@refs_importEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_importEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importName": "名前",
   "refs_importResult": "判定結果",
   "refs_recPng": "Vibe 入り PNG · {model} エンコード",
-  "@refs_recPng": {"placeholders": {"model": {}}},
+  "@refs_recPng": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recVibeFile": "Vibe ファイル · {model} エンコード",
-  "@refs_recVibeFile": {"placeholders": {"model": {}}},
+  "@refs_recVibeFile": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundle": "バンドル · Vibe {count} 件",
-  "@refs_recBundle": {"placeholders": {"count": {}}},
+  "@refs_recBundle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recImage": "通常の画像 · 未エンコード",
   "refs_recImageDup": "通常の画像 · 同名あり",
   "refs_recFree": "そのままインポート（無料）",
   "refs_recReencode": "{model} で使うには再エンコードが必要（元画像がなければ不可）",
-  "@refs_recReencode": {"placeholders": {"model": {}}},
+  "@refs_recReencode": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundleNote": "まとめて = カード 1 枚、分割 = {count} 枚",
-  "@refs_recBundleNote": {"placeholders": {"count": {}}},
+  "@refs_recBundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recEncodeLater": "元画像を保存し、初めて生成に使うときにそのモデル用にエンコード",
   "refs_recEncodeNow": "インポート時にエンコード（1 枚 {cost} Anlas）",
-  "@refs_recEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_recEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_bundleWhole": "まとめて",
   "refs_bundleSplit": "{count} 件に分割",
-  "@refs_bundleSplit": {"placeholders": {"count": {}}},
+  "@refs_bundleSplit": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundlePick": "選んで",
   "refs_dupExists": "同名の項目があります",
   "refs_dupKeepBoth": "両方残す",
   "refs_dupOverwrite": "上書き",
   "refs_dupSkip": "スキップ",
   "refs_importSummary": "{files} 件 → カード {cards} 枚追加",
-  "@refs_importSummary": {"placeholders": {"files": {}, "cards": {}}},
+  "@refs_importSummary": {
+    "placeholders": {
+      "files": {},
+      "cards": {}
+    }
+  },
   "refs_importNow": " · 今 {cost} Anlas 消費",
-  "@refs_importNow": {"placeholders": {"cost": {}}},
+  "@refs_importNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importLater": " · 通常の画像 {count} 枚は初回使用時にエンコード（1 枚 {cost} Anlas）",
-  "@refs_importLater": {"placeholders": {"count": {}, "cost": {}}},
+  "@refs_importLater": {
+    "placeholders": {
+      "count": {},
+      "cost": {}
+    }
+  },
   "refs_pickerVibeTitle": "Vibe ライブラリから追加",
   "refs_pickerPreciseTitle": "精密参照ライブラリから追加",
   "refs_openVibeLibrary": "Vibe ライブラリを開く",
@@ -8034,33 +6776,87 @@
   "refs_recentUsed": "最近使用",
   "refs_inUse": "使用中",
   "refs_pickedN": "{count} 件選択",
-  "@refs_pickedN": {"placeholders": {"count": {}}},
+  "@refs_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerAfterVibe": " · 追加後 {count}/{max}",
-  "@refs_pickerAfterVibe": {"placeholders": {"count": {}, "max": {}}},
+  "@refs_pickerAfterVibe": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
   "refs_pickerAfterPrecise": " · 追加後 {count} 枚",
-  "@refs_pickerAfterPrecise": {"placeholders": {"count": {}}},
+  "@refs_pickerAfterPrecise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerEncode": "「{name}」は {model} 用のエンコードが必要 · {cost} Anlas",
-  "@refs_pickerEncode": {"placeholders": {"name": {}, "model": {}, "cost": {}}},
+  "@refs_pickerEncode": {
+    "placeholders": {
+      "name": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_pickerEncodeMore": "ほか {count} 件もエンコードが必要",
-  "@refs_pickerEncodeMore": {"placeholders": {"count": {}}},
+  "@refs_pickerEncodeMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerExtra": "{free} 件を超えると +{extra} Anlas",
-  "@refs_pickerExtra": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_pickerExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_pickerPreciseCost": "1 枚 {cost} Anlas · 合計 {total} Anlas",
-  "@refs_pickerPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_pickerPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_replaceExisting": "既存を置き換え",
   "refs_appendN": "{count} 件追加",
-  "@refs_appendN": {"placeholders": {"count": {}}},
+  "@refs_appendN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeNever": "未使用",
   "refs_timeJustNow": "たった今",
   "refs_timeMinutes": "{count} 分前",
-  "@refs_timeMinutes": {"placeholders": {"count": {}}},
+  "@refs_timeMinutes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeHours": "{count} 時間前",
-  "@refs_timeHours": {"placeholders": {"count": {}}},
+  "@refs_timeHours": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeYesterday": "昨日",
   "refs_timeDays": "{count} 日前",
-  "@refs_timeDays": {"placeholders": {"count": {}}},
+  "@refs_timeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeMonthDay": "{month}月{day}日",
-  "@refs_timeMonthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@refs_timeMonthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "blocks_title": "ブロックライブラリ",
   "blocks_translationMark": "訳",
   "blocks_add": "追加",
@@ -8080,12 +6876,24 @@
   "blocks_off": "オフ",
   "blocks_to": "〜",
   "blocks_items": "{count} 項目",
-  "@blocks_items": {"placeholders": {"count": {}}},
+  "@blocks_items": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_itemUnit": "項目",
   "blocks_usedTimes": "{count} 回使用",
-  "@blocks_usedTimes": {"placeholders": {"count": {}}},
+  "@blocks_usedTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_nBlocks": "{count} 個",
-  "@blocks_nBlocks": {"placeholders": {"count": {}}},
+  "@blocks_nBlocks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_untitled": "無題",
   "blocks_favorite": "お気に入り",
   "blocks_unfavorite": "お気に入り解除",
@@ -8095,9 +6903,17 @@
   "blocks_positive": "ポジティブ",
   "blocks_negative": "ネガティブ",
   "blocks_positiveN": "ポジ {count}",
-  "@blocks_positiveN": {"placeholders": {"count": {}}},
+  "@blocks_positiveN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_negativeN": "ネガ {count}",
-  "@blocks_negativeN": {"placeholders": {"count": {}}},
+  "@blocks_negativeN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_content": "内容",
   "blocks_name": "名前",
   "blocks_folder": "フォルダー",
@@ -8126,7 +6942,11 @@
   "blocks_searchHint": "ブロックを検索…",
   "blocks_filterAll": "すべて",
   "blocks_allN": "すべて {count}",
-  "@blocks_allN": {"placeholders": {"count": {}}},
+  "@blocks_allN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_searchResults": "検索結果",
   "blocks_noResults": "一致するブロックはありません",
   "blocks_noFavorites": "お気に入りはまだありません。ブロックを右クリック → お気に入り。",
@@ -8143,9 +6963,18 @@
   "blocks_modeSequential": "順番",
   "blocks_modeRandom": "ランダム",
   "blocks_summaryRandom": "ランダム · 毎回 {range} 項目 · プール {pool} 項目",
-  "@blocks_summaryRandom": {"placeholders": {"range": {}, "pool": {}}},
+  "@blocks_summaryRandom": {
+    "placeholders": {
+      "range": {},
+      "pool": {}
+    }
+  },
   "blocks_summarySequential": "順番 · 毎回 {range} 項目 · 1 枚ごとに進む",
-  "@blocks_summarySequential": {"placeholders": {"range": {}}},
+  "@blocks_summarySequential": {
+    "placeholders": {
+      "range": {}
+    }
+  },
   "blocks_drawnThisTime": "今回の抽選",
   "blocks_lock": "ロック",
   "blocks_unlock": "ロック解除",
@@ -8154,22 +6983,47 @@
   "blocks_reroll": "再抽選",
   "blocks_rerollLocked": "ロック中。再抽選するには解除してください",
   "blocks_skipped": "今回は出現なし（出現率 {percent}）",
-  "@blocks_skipped": {"placeholders": {"percent": {}}},
+  "@blocks_skipped": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "blocks_sendPrefix": "送信：{text}",
-  "@blocks_sendPrefix": {"placeholders": {"text": {}}},
+  "@blocks_sendPrefix": {
+    "placeholders": {
+      "text": {}
+    }
+  },
   "blocks_seqPosition": "{index} / {total} 項目",
-  "@blocks_seqPosition": {"placeholders": {"index": {}, "total": {}}},
+  "@blocks_seqPosition": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "blocks_seqLocked": "ロック中、自動で進みません",
   "blocks_prevItem": "前の項目",
   "blocks_nextItem": "次の項目",
   "blocks_prevValue": "前 {value}",
-  "@blocks_prevValue": {"placeholders": {"value": {}}},
+  "@blocks_prevValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_nextValue": "次 {value}",
-  "@blocks_nextValue": {"placeholders": {"value": {}}},
+  "@blocks_nextValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_paramsTitle": "このブロックには生成パラメーターがあります",
   "blocks_drawMode": "抽選方式",
   "blocks_fixedExplain": "固定：毎回 {count} 項目すべてをそのまま入れます。順番かランダムにすると、ここで数と重みを設定できます。",
-  "@blocks_fixedExplain": {"placeholders": {"count": {}}},
+  "@blocks_fixedExplain": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_ruleCount": "数",
   "blocks_ruleWeight": "重み",
   "blocks_ruleShow": "出現",
@@ -8195,7 +7049,11 @@
   "blocks_drawEach": "毎回",
   "blocks_takeEach": "毎回",
   "blocks_poolSize": "プール {count} 項目",
-  "@blocks_poolSize": {"placeholders": {"count": {}}},
+  "@blocks_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_outputOrder": "出力順",
   "blocks_orderDrawn": "抽選順",
   "blocks_orderOriginal": "元の順序",
@@ -8248,11 +7106,23 @@
   "blocks_exportBackup": "ライブラリをバックアップ",
   "blocks_importBackup": "バックアップから復元…",
   "blocks_dropMoveTo": "「{name}」へ移動",
-  "@blocks_dropMoveTo": {"placeholders": {"name": {}}},
+  "@blocks_dropMoveTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropCopyTo": "「{name}」へコピー",
-  "@blocks_dropCopyTo": {"placeholders": {"name": {}}},
+  "@blocks_dropCopyTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropAddTo": "「{name}」に追加",
-  "@blocks_dropAddTo": {"placeholders": {"name": {}}},
+  "@blocks_dropAddTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_searchLibrary": "タイトル・内容・タグを検索",
   "blocks_sortCustom": "カスタム順",
   "blocks_sortUpdated": "最近の変更",
@@ -8284,9 +7154,17 @@
   "blocks_colUsed": "使用",
   "blocks_colModified": "変更",
   "blocks_selectedN": "{count} 件選択",
-  "@blocks_selectedN": {"placeholders": {"count": {}}},
+  "@blocks_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_selectedBlocksN": "{count} 個のブロックを選択",
-  "@blocks_selectedBlocksN": {"placeholders": {"count": {}}},
+  "@blocks_selectedBlocksN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_moveTo": "移動…",
   "blocks_noTags": "タグはまだありません",
   "blocks_emptyTitle": "ブロックライブラリは空です",
@@ -8297,9 +7175,17 @@
   "blocks_exportTxt": "TXT にエクスポート",
   "blocks_removeFromCollection": "コレクションから外す",
   "blocks_deleteOne": "「{name}」を削除しますか？",
-  "@blocks_deleteOne": {"placeholders": {"name": {}}},
+  "@blocks_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_deleteMany": "{count} 個のブロックを削除しますか？",
-  "@blocks_deleteMany": {"placeholders": {"count": {}}},
+  "@blocks_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_deleteBody": "プロンプトに挿入済みのインスタンスは「ブロックは削除済み」と表示されます。元に戻せます。",
   "blocks_details": "詳細",
   "blocks_noSelection": "カードをクリックで詳細。ダブルクリックで編集、Enter でプロンプトに挿入。",
@@ -8315,33 +7201,69 @@
   "blocks_paramSampler": "サンプラー",
   "blocks_paramNoise": "ノイズ",
   "blocks_steps": "{count} ステップ",
-  "@blocks_steps": {"placeholders": {"count": {}}},
+  "@blocks_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_guidance": "ガイダンス {value}",
-  "@blocks_guidance": {"placeholders": {"value": {}}},
+  "@blocks_guidance": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_rescale": "リスケール {value}",
-  "@blocks_rescale": {"placeholders": {"value": {}}},
+  "@blocks_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_newTagInEdit": "新規タグ…",
   "blocks_modifiedAt": "{time} に変更",
-  "@blocks_modifiedAt": {"placeholders": {"time": {}}},
+  "@blocks_modifiedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "blocks_createdAt": "{date} に作成",
-  "@blocks_createdAt": {"placeholders": {"date": {}}},
+  "@blocks_createdAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_sourceFile": "ソースファイル {path}",
-  "@blocks_sourceFile": {"placeholders": {"path": {}}},
+  "@blocks_sourceFile": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "blocks_sourceSynced": "ファイルと一致",
   "blocks_sourceChanged": "ファイルが変更済み",
   "blocks_sourceMissing": "ファイルが見つかりません",
   "blocks_importedAt": "{date} にインポート",
-  "@blocks_importedAt": {"placeholders": {"date": {}}},
+  "@blocks_importedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_total": "合計",
   "blocks_totalItems": "{count} 項目",
-  "@blocks_totalItems": {"placeholders": {"count": {}}},
+  "@blocks_totalItems": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_from": "出所",
   "blocks_batch": "一括操作",
   "blocks_insertInOrder": "順にプロンプトへ挿入",
   "blocks_mergeNew": "新しいブロックに統合…",
   "blocks_batchStyle": "色 / 外観をまとめて変更",
   "blocks_dragHint": "この {count} 枚のカードを左のフォルダーやコレクションにドラッグし、離すときに移動かコピーを選べます。",
-  "@blocks_dragHint": {"placeholders": {"count": {}}},
+  "@blocks_dragHint": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_editBlockTitle": "ブロックを編集",
   "blocks_editHint": "保存後、プロンプト内の固定インスタンスはすぐ更新され、ランダム / 順番は次の抽選から新しい内容を使います",
   "blocks_newBlockHint": "保存後、生成ページのサイドバーからワンクリックで挿入できます",
@@ -8367,7 +7289,11 @@
   "blocks_saveAsBlock": "ブロックとして保存",
   "blocks_lookup": "用語を調べる",
   "blocks_splitDone": "{count} 項目 · カンマで分割済み",
-  "@blocks_splitDone": {"placeholders": {"count": {}}},
+  "@blocks_splitDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_replaceSelection": "保存後、選択したテキストをこのブロックに置き換える",
   "blocks_quickHint": "プレビュー・ネガ・パラメーターは後でライブラリで設定",
   "imageViewer_backGallery": "ローカルギャラリー",
@@ -8381,9 +7307,17 @@
   "imageViewer_unsaved": "未保存",
   "imageViewer_saved": "保存済み",
   "imageViewer_batch": "生成結果 · 今回 {count} 枚",
-  "@imageViewer_batch": {"placeholders": {"count": {}}},
+  "@imageViewer_batch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_zoomFit": "フィット · {percent}%",
-  "@imageViewer_zoomFit": {"placeholders": {"percent": {}}},
+  "@imageViewer_zoomFit": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "imageViewer_zoomFitPending": "フィット · —",
   "imageViewer_zoomFitShort": "フィット",
   "imageViewer_zoomIn": "拡大",
@@ -8399,7 +7333,11 @@
   "imageViewer_next": "次へ",
   "imageViewer_loadingOriginal": "元画像を読み込み中",
   "imageViewer_loadingOriginalSize": "元画像を読み込み中 · {size}",
-  "@imageViewer_loadingOriginalSize": {"placeholders": {"size": {}}},
+  "@imageViewer_loadingOriginalSize": {
+    "placeholders": {
+      "size": {}
+    }
+  },
   "imageViewer_missingTitle": "この画像が見つかりません",
   "imageViewer_missingHint": "エクスプローラーで移動・名前変更・削除された可能性があります",
   "imageViewer_openFolder": "フォルダーを開く",
@@ -8417,10 +7355,18 @@
   "imageViewer_favorite": "お気に入り",
   "imageViewer_showInFolder": "フォルダーに表示",
   "imageViewer_deleteKey": "削除  {key}",
-  "@imageViewer_deleteKey": {"placeholders": {"key": {}}},
+  "@imageViewer_deleteKey": {
+    "placeholders": {
+      "key": {}
+    }
+  },
   "imageViewer_more": "その他",
   "imageViewer_genIndex": "今回の生成 · {index} 枚目",
-  "@imageViewer_genIndex": {"placeholders": {"index": {}}},
+  "@imageViewer_genIndex": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_notSaved": "ギャラリー未保存",
   "imageViewer_savedToGallery": "ギャラリーに保存済み",
   "imageViewer_size": "サイズ",
@@ -8434,35 +7380,71 @@
   "imageViewer_steps": "ステップ",
   "imageViewer_guidance": "ガイダンス",
   "imageViewer_noise": "ノイズ {value}",
-  "@imageViewer_noise": {"placeholders": {"value": {}}},
+  "@imageViewer_noise": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_rescale": "リスケール {value}",
-  "@imageViewer_rescale": {"placeholders": {"value": {}}},
+  "@imageViewer_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_precise": "精密参照 ×{count}",
-  "@imageViewer_precise": {"placeholders": {"count": {}}},
+  "@imageViewer_precise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_qualityTags": "品質タグ",
   "imageViewer_prompt": "プロンプト",
   "imageViewer_translate": "翻訳",
   "imageViewer_showOriginal": "原文を表示",
   "imageViewer_translateFailed": "翻訳に失敗しました：{error}",
-  "@imageViewer_translateFailed": {"placeholders": {"error": {}}},
+  "@imageViewer_translateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "imageViewer_copy": "コピー",
   "imageViewer_copySeed": "シードをコピー",
   "imageViewer_expandAll": "すべて表示",
   "imageViewer_expand": "展開",
   "imageViewer_collapse": "折りたたむ",
   "imageViewer_character": "キャラクター {index}",
-  "@imageViewer_character": {"placeholders": {"index": {}}},
+  "@imageViewer_character": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_position": "位置 {cell}",
-  "@imageViewer_position": {"placeholders": {"cell": {}}},
+  "@imageViewer_position": {
+    "placeholders": {
+      "cell": {}
+    }
+  },
   "imageViewer_characterNegative": "キャラ ネガティブ · ",
   "imageViewer_negative": "ネガティブ",
   "imageViewer_tagCount": "{count} 項目",
-  "@imageViewer_tagCount": {"placeholders": {"count": {}}},
+  "@imageViewer_tagCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_vibes": "Vibe 参照",
   "imageViewer_vibeStrength": "強度 {value}",
-  "@imageViewer_vibeStrength": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeStrength": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_vibeInfo": "情報 {value}",
-  "@imageViewer_vibeInfo": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeInfo": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_saveVibe": "Vibe ライブラリに保存",
   "imageViewer_noMetaTitle": "NovelAI の生成情報がありません",
   "imageViewer_noMetaBody": "NAI で生成された画像ではないか、メタデータが削除されています（スクリーンショット・再保存・圧縮画像によくあります）。\n下の画像から画像・スタイル転送・精密参照・拡大は使えます。",
@@ -8510,9 +7492,17 @@
   "imageViewer_cancel": "キャンセル",
   "imageViewer_justNow": "たった今",
   "imageViewer_minutesAgo": "{count} 分前",
-  "@imageViewer_minutesAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_hoursAgo": "{count} 時間前",
-  "@imageViewer_hoursAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_yesterday": "昨日",
   "explore_back": "画風探索",
   "explore_close": "閉じる",
@@ -8529,13 +7519,33 @@
   "explore_previous": "前へ",
   "explore_next": "次へ",
   "explore_today": "今日 {time}",
-  "@explore_today": {"placeholders": {"time": {}}},
+  "@explore_today": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_yesterday": "昨日 {time}",
-  "@explore_yesterday": {"placeholders": {"time": {}}},
+  "@explore_yesterday": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_monthDay": "{month}月{day}日 {time}",
-  "@explore_monthDay": {"placeholders": {"month": {}, "day": {}, "time": {}}},
+  "@explore_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {},
+      "time": {}
+    }
+  },
   "explore_fullDate": "{year}年{month}月{day}日",
-  "@explore_fullDate": {"placeholders": {"year": {}, "month": {}, "day": {}}},
+  "@explore_fullDate": {
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
   "explore_sectionToday": "今日",
   "explore_thisWeek": "今週",
   "explore_earlier": "それ以前",
@@ -8546,29 +7556,74 @@
   "explore_openBlockLibrary": "ブロックライブラリを開く",
   "explore_variableMissing": "ブロック削除済み",
   "explore_poolSize": "プール {count} 件",
-  "@explore_poolSize": {"placeholders": {"count": {}}},
+  "@explore_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evolutionTarget": "進化対象",
   "explore_draw": "候補を {count} 枚引く",
-  "@explore_draw": {"placeholders": {"count": {}}},
+  "@explore_draw": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_stopGenerating": "生成を停止",
   "explore_busy": "生成中",
   "explore_cooldown": "クールダウン {seconds} 秒",
-  "@explore_cooldown": {"placeholders": {"seconds": {}}},
+  "@explore_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "explore_insufficient": "Anlas が足りません",
   "explore_count": "{count} 枚",
-  "@explore_count": {"placeholders": {"count": {}}},
+  "@explore_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_favoritesCount": "お気に入り {count}",
-  "@explore_favoritesCount": {"placeholders": {"count": {}}},
+  "@explore_favoritesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_roundsCount": "{count} ラウンド",
-  "@explore_roundsCount": {"placeholders": {"count": {}}},
+  "@explore_roundsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_linesCount": "進化ライン {count}",
-  "@explore_linesCount": {"placeholders": {"count": {}}},
+  "@explore_linesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_progressRound": "ラウンド {round} · {done} / {total}",
-  "@explore_progressRound": {"placeholders": {"round": {}, "done": {}, "total": {}}},
+  "@explore_progressRound": {
+    "placeholders": {
+      "round": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_progressChildren": "{line} 第 {gen} 世代 · {done} / {total}",
-  "@explore_progressChildren": {"placeholders": {"line": {}, "gen": {}, "done": {}, "total": {}}},
+  "@explore_progressChildren": {
+    "placeholders": {
+      "line": {},
+      "gen": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_paused": "一時停止 · {where}",
-  "@explore_paused": {"placeholders": {"where": {}}},
+  "@explore_paused": {
+    "placeholders": {
+      "where": {}
+    }
+  },
   "explore_pause": "一時停止",
   "explore_resume": "再開",
   "explore_stop": "停止",
@@ -8595,23 +7650,48 @@
   "explore_selectExit": "選択を終了  Esc",
   "explore_selectHint": "カードをクリックで選択",
   "explore_selectedN": "{count} 枚選択中",
-  "@explore_selectedN": {"placeholders": {"count": {}}},
+  "@explore_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_sortNewest": "新しいラウンドが上（クリックで古い順）",
   "explore_sortOldest": "古いラウンドが上（クリックで新しい順）",
   "explore_round": "ラウンド {number}",
-  "@explore_round": {"placeholders": {"number": {}}},
+  "@explore_round": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingShort": "生成中 {done} / {total}",
-  "@explore_generatingShort": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_generatingShort": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_failedRetry": "{count} 枚失敗 · 再試行",
-  "@explore_failedRetry": {"placeholders": {"count": {}}},
+  "@explore_failedRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pick": "進化用に選ぶ",
   "explore_pickTip": "このラウンドのお気に入りを選択した状態で複数選択に入ります",
   "explore_filterEmpty": "このフィルターに一致する候補はありません",
   "explore_showAll": "すべて表示",
   "explore_queued": "待機 #{number}",
-  "@explore_queued": {"placeholders": {"number": {}}},
+  "@explore_queued": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingN": "生成中 #{number}",
-  "@explore_generatingN": {"placeholders": {"number": {}}},
+  "@explore_generatingN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_failed": "生成失敗",
   "explore_failedHover": "ホバーで理由を表示",
   "explore_noArtists": "絵師なし",
@@ -8632,15 +7712,32 @@
   "explore_ungroup": "グループから外す",
   "explore_delete": "削除",
   "explore_deleteN": "{count} 枚を削除",
-  "@explore_deleteN": {"placeholders": {"count": {}}},
+  "@explore_deleteN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteThis": "この画像を削除",
   "explore_deleted": "{count} 枚を削除しました",
-  "@explore_deleted": {"placeholders": {"count": {}}},
+  "@explore_deleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_inspectorEmpty": "候補をクリックすると、抽選された絵師がここに表示されます",
   "explore_childN": "子 #{number}",
-  "@explore_childN": {"placeholders": {"number": {}}},
+  "@explore_childN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_genOp": "第 {gen} 世代 · {op}",
-  "@explore_genOp": {"placeholders": {"gen": {}, "op": {}}},
+  "@explore_genOp": {
+    "placeholders": {
+      "gen": {},
+      "op": {}
+    }
+  },
   "explore_drawn": "この画像の抽選結果",
   "explore_drawEmpty": "今回は空き枠が出ました",
   "explore_origin": "生まれ方",
@@ -8650,40 +7747,85 @@
   "explore_sampler": "サンプラー",
   "explore_model": "モデル",
   "explore_steps": "{count} ステップ",
-  "@explore_steps": {"placeholders": {"count": {}}},
+  "@explore_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_fullPrompt": "完全なプロンプト",
   "explore_negative": "ネガティブ",
   "explore_failReason": "失敗の理由",
   "explore_retryFailed": "失敗した候補を再試行",
   "explore_waitHint": "生成されると抽選された絵師がここに表示されます",
   "explore_mergedArtists": "まとめた絵師 · {count}",
-  "@explore_mergedArtists": {"placeholders": {"count": {}}},
+  "@explore_mergedArtists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_multiHint": "ブロック保存ではこれらの絵師を 1 つにまとめます。進化では 1 枚ずつが親になります。",
   "explore_evoEmptyTitle": "進化ラインはまだありません",
   "explore_evoEmptyBody": "気に入った候補を選んで「進化を開始」を押すと、良い絵師の組み合わせから新しい組み合わせを育てます。",
   "explore_evoGoPick": "候補から選ぶ",
   "explore_gen": "第 {number} 世代",
-  "@explore_gen": {"placeholders": {"number": {}}},
+  "@explore_gen": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_current": "現在",
   "explore_genFirst": "候補から {picked} 枚を起点に · 子 {children} 枚",
-  "@explore_genFirst": {"placeholders": {"picked": {}, "children": {}}},
+  "@explore_genFirst": {
+    "placeholders": {
+      "picked": {},
+      "children": {}
+    }
+  },
   "explore_genFrom": "親 {parents} → 子 {children} · 第 {from} 世代から {picked} 枚",
-  "@explore_genFrom": {"placeholders": {"parents": {}, "children": {}, "from": {}, "picked": {}}},
+  "@explore_genFrom": {
+    "placeholders": {
+      "parents": {},
+      "children": {},
+      "from": {},
+      "picked": {}
+    }
+  },
   "explore_backcross": "第 1 世代と戻し交配",
   "explore_compare": "2 枚比較で並べ替え",
   "explore_compareTip": "親を 2 枚ずつ見て良い方を選びます。優先度が高いほど選ばれやすくなります",
   "explore_generateChildren": "子を {count} 枚生成",
-  "@explore_generateChildren": {"placeholders": {"count": {}}},
+  "@explore_generateChildren": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_children": "子 · {count}",
-  "@explore_children": {"placeholders": {"count": {}}},
+  "@explore_children": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pickedN": "{count} 枚選択",
-  "@explore_pickedN": {"placeholders": {"count": {}}},
+  "@explore_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_breedHint": "気に入った子を選んで次の世代へ",
   "explore_breed": "選んだ {count} 枚で第 {next} 世代を育てる",
-  "@explore_breed": {"placeholders": {"count": {}, "next": {}}},
+  "@explore_breed": {
+    "placeholders": {
+      "count": {},
+      "next": {}
+    }
+  },
   "explore_noChildren": "まだ子はありません · 「生成」で最初のバッチを作成",
   "explore_parentsByPref": "親 · 優先度順 · {count}",
-  "@explore_parentsByPref": {"placeholders": {"count": {}}},
+  "@explore_parentsByPref": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_opMutation": "変異",
   "explore_opCrossover": "交叉",
   "explore_opInjection": "注入",
@@ -8691,39 +7833,87 @@
   "explore_newRun": "新しい探索",
   "explore_newRunHint": "現在のプロンプトと設定で開始。名前は後で変更できます",
   "explore_runRunning": "生成中 {done}/{total}",
-  "@explore_runRunning": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runRunning": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runPaused": "一時停止 {done}/{total}",
-  "@explore_runPaused": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runPaused": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runFailed": "{count} 枚失敗",
-  "@explore_runFailed": {"placeholders": {"count": {}}},
+  "@explore_runFailed": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noRunMatch": "一致する探索はありません",
   "explore_runMenuHint": "自動命名：ランダムブロック名 + 日付 · 行の「⋯」で名前変更・削除",
   "explore_deleteRun": "探索を削除",
   "explore_deleteRunTitle": "「{name}」を削除しますか？",
-  "@explore_deleteRunTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteRunTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteRunBody": "候補 {count} 枚とすべての進化ラインが削除され、元に戻せません。ギャラリーの画像には影響しません。",
-  "@explore_deleteRunBody": {"placeholders": {"count": {}}},
+  "@explore_deleteRunBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteLineTitle": "進化ライン「{name}」を削除しますか？",
-  "@explore_deleteLineTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteLineTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteLineBody": "このラインの子 {count} 枚も削除され、元に戻せません。候補には影響しません。",
-  "@explore_deleteLineBody": {"placeholders": {"count": {}}},
+  "@explore_deleteLineBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_onboardingTitle": "ランダムブロックで画風をまとめて試す",
   "explore_onboardingBody": "1 枚ごとに絵師プールから抽選。気に入った組み合わせを残して進化させます。",
   "explore_step1": "ランダムブロックを入れる",
   "explore_step1Body": "ライブラリのランダムブロック（絵師プールなど）をプロンプトに挿入します。",
   "explore_step2": "候補をまとめて引く",
   "explore_step2Body": "左下の「候補を {count} 枚引く」を押すと、1 枚ずつ絵師を抽選します。",
-  "@explore_step2Body": {"placeholders": {"count": {}}},
+  "@explore_step2Body": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_step3": "お気に入り・進化・保存",
   "explore_step3Body": "気に入ったものを保存して進化させ、満足した組み合わせをブロックにします。",
   "explore_detected": "{count} 個検出",
-  "@explore_detected": {"placeholders": {"count": {}}},
+  "@explore_detected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noVariables": "ランダムブロックがありません",
   "explore_openPrevious": "以前の探索を開く",
   "explore_evoTitle": "{count} 枚の候補で進化を開始",
-  "@explore_evoTitle": {"placeholders": {"count": {}}},
+  "@explore_evoTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoJoinTitle": "{count} 枚を「{line}」第 {gen} 世代に追加",
-  "@explore_evoJoinTitle": {"placeholders": {"count": {}, "line": {}, "gen": {}}},
+  "@explore_evoJoinTitle": {
+    "placeholders": {
+      "count": {},
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoStep1": "親",
   "explore_evoStep1Body": "各候補の絵師列が 1 つの親になります",
   "explore_evoStep2": "子",
@@ -8732,16 +7922,38 @@
   "explore_evoStep3Body": "気に入った子で次の世代へ",
   "explore_evoNewLine": "新しい進化ライン",
   "explore_evoJoin": "「{line}」第 {gen} 世代に追加",
-  "@explore_evoJoin": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_evoJoin": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_lineName": "進化ライン名",
   "explore_lineDefault": "進化ライン {number}",
-  "@explore_lineDefault": {"placeholders": {"number": {}}},
+  "@explore_lineDefault": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_lineGen": "{line} · 第 {gen} 世代",
-  "@explore_lineGen": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_lineGen": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoParents": "第 1 世代の親 · {count}",
-  "@explore_evoParents": {"placeholders": {"count": {}}},
+  "@explore_evoParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoAddParents": "追加する親 · {count}",
-  "@explore_evoAddParents": {"placeholders": {"count": {}}},
+  "@explore_evoAddParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_addCustom": "カスタム絵師列を追加",
   "explore_customHint": "例：0.8::artist:ciloranko::, artist:rella（Enter で追加）",
   "explore_targetBefore": "子はプロンプト内の",
@@ -8752,22 +7964,44 @@
   "explore_createOnly": "作成のみ",
   "explore_joinOnly": "追加のみ",
   "explore_createGenerate": "作成して {count} 枚生成",
-  "@explore_createGenerate": {"placeholders": {"count": {}}},
+  "@explore_createGenerate": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_saveBlockTitle": "プロンプトブロックとして保存",
   "explore_untitled": "無題",
   "explore_blockFromOne": "候補 #{number} から",
-  "@explore_blockFromOne": {"placeholders": {"number": {}}},
+  "@explore_blockFromOne": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_blockFromMany": "{count} 枚の候補から（重複なし）",
-  "@explore_blockFromMany": {"placeholders": {"count": {}}},
+  "@explore_blockFromMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_blockNameMany": "{run} · 厳選 {count}",
-  "@explore_blockNameMany": {"placeholders": {"run": {}, "count": {}}},
+  "@explore_blockNameMany": {
+    "placeholders": {
+      "run": {},
+      "count": {}
+    }
+  },
   "explore_blockContent": "内容",
   "explore_blockArtists": "抽選された絵師のみ",
   "explore_blockFull": "ポジティブ全体",
   "explore_blockFullSingle": "候補が 1 枚のときだけ使えます",
   "explore_blockRemoveHint": "× で不要な絵師を外す",
   "explore_blockKept": "{kept} / {total} を保持",
-  "@explore_blockKept": {"placeholders": {"kept": {}, "total": {}}},
+  "@explore_blockKept": {
+    "placeholders": {
+      "kept": {},
+      "total": {}
+    }
+  },
   "explore_blockName": "名前",
   "explore_blockColor": "色",
   "explore_blockFolder": "保存先",
@@ -8777,7 +8011,12 @@
   "explore_compareNote": "結果はその都度保存されます",
   "explore_compareQuestion": "どちらが求める画風に近いですか？",
   "explore_comparePairs": "{index} / {total} 組",
-  "@explore_comparePairs": {"placeholders": {"index": {}, "total": {}}},
+  "@explore_comparePairs": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "explore_leftBetter": "左が良い",
   "explore_rightBetter": "右が良い",
   "explore_neither": "どちらも違う",
@@ -8808,14 +8047,23 @@
   "gen_unpin": "ヘッダーから外す",
   "gen_yesterday": "昨日",
   "gen_monthDay": "{month}月{day}日",
-  "@gen_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@gen_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "gen_params": "生成設定",
   "gen_generating": "生成中",
   "gen_modelsNew": "新しいモデル",
   "gen_modelsLegacy": "旧モデル",
   "gen_modeTip": "クリックで Anime / Furry を切り替え",
   "gen_anlasTip": "Anlas 残高 {value}",
-  "@gen_anlasTip": {"placeholders": {"value": {}}},
+  "@gen_anlasTip": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "gen_positive": "プロンプト",
   "gen_basePrompt": "ベースプロンプト",
   "gen_negative": "除外",
@@ -8840,7 +8088,11 @@
   "gen_translateNeedsModel": "翻訳モデル未設定。クリックして設定",
   "gen_translateRestore": "原文を表示",
   "gen_translateWith": "翻訳（{route}）",
-  "@gen_translateWith": {"placeholders": {"route": {}}},
+  "@gen_translateWith": {
+    "placeholders": {
+      "route": {}
+    }
+  },
   "gen_translateNew": "追加分を翻訳",
   "gen_translateShowOriginal": "すべて原文に戻す",
   "gen_translateShowTranslated": "すべて訳文を表示",
@@ -8854,16 +8106,32 @@
   "gen_charactersTip": "キャラクターごとに別のプロンプトを書けます。特徴が混ざりません。",
   "gen_charactersEmpty": "キャラクターがいません。右上の + で追加できます。",
   "gen_charactersFull": "最大 {max} 人まで",
-  "@gen_charactersFull": {"placeholders": {"max": {}}},
+  "@gen_charactersFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_addCharacter": "キャラクターを追加",
   "gen_addAs": "{gender}キャラクターを追加",
-  "@gen_addAs": {"placeholders": {"gender": {}}},
+  "@gen_addAs": {
+    "placeholders": {
+      "gender": {}
+    }
+  },
   "gen_clearCharacters": "すべてのキャラクターを削除",
   "gen_clearCharactersTitle": "すべてのキャラクターを削除しますか？",
   "gen_clearCharactersBody": "{count} 人のキャラクターとプロンプトが削除されます。",
-  "@gen_clearCharactersBody": {"placeholders": {"count": {}}},
+  "@gen_clearCharactersBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_characterN": "キャラクター {n}",
-  "@gen_characterN": {"placeholders": {"n": {}}},
+  "@gen_characterN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "gen_genderFemale": "女性",
   "gen_genderMale": "男性",
   "gen_genderOther": "その他",
@@ -8873,7 +8141,11 @@
   "gen_positionBoard": "キャラクター配置",
   "gen_positionAiTip": "位置は AI が決めます",
   "gen_positionAt": "位置 {at}（クリックで調整）",
-  "@gen_positionAt": {"placeholders": {"at": {}}},
+  "@gen_positionAt": {
+    "placeholders": {
+      "at": {}
+    }
+  },
   "gen_positionUnset": "未配置（クリックで配置）",
   "gen_positionAiHint": "位置は AI が決めています",
   "gen_positionGridHint": "キャラクターをマスにドラッグ。中心に吸着します",
@@ -8893,7 +8165,12 @@
   "gen_img2img": "img2img",
   "gen_img2imgDesc": "元画像からバリエーションを生成",
   "gen_img2imgSummary": "強度 {strength} · ノイズ {noise}",
-  "@gen_img2imgSummary": {"placeholders": {"strength": {}, "noise": {}}},
+  "@gen_img2imgSummary": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "gen_img2imgDrop": "画像をドロップ、または",
   "gen_upload": "アップロード",
   "gen_replace": "差し替え",
@@ -8921,18 +8198,32 @@
   "gen_addFromVibeLibrary": "Vibe ライブラリから",
   "gen_addFromPreciseLibrary": "精密参照ライブラリから",
   "gen_vibeFull": "最大 {max} 個",
-  "@gen_vibeFull": {"placeholders": {"max": {}}},
+  "@gen_vibeFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_saveToLibrary": "ライブラリに保存",
   "gen_normalize": "正規化",
   "gen_normalizeTip": "Vibe 強度を合計で正規化",
   "gen_vibeExtraCost": "{free} 個を超えると 1 個ごとに +{each} Anlas · 今回 +{total}",
-  "@gen_vibeExtraCost": {"placeholders": {"free": {}, "each": {}, "total": {}}},
+  "@gen_vibeExtraCost": {
+    "placeholders": {
+      "free": {},
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_recent": "最近",
   "gen_encoded": "エンコード済み",
   "gen_encoding": "エンコード中",
   "gen_encode": "エンコード",
   "gen_encodeTip": "エンコードは 1 回 {cost} Anlas。以後は再利用できます",
-  "@gen_encodeTip": {"placeholders": {"cost": {}}},
+  "@gen_encodeTip": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "gen_vibeStrength": "強度",
   "gen_vibeInfo": "情報抽出",
   "gen_vibeInfoReencode": "エンコード済みの Vibe は再エンコードが必要です",
@@ -8944,7 +8235,12 @@
   "gen_preciseBoth": "両方",
   "gen_fidelity": "忠実度",
   "gen_preciseCost": "1 枚 {each} Anlas · 今回 +{total}",
-  "@gen_preciseCost": {"placeholders": {"each": {}, "total": {}}},
+  "@gen_preciseCost": {
+    "placeholders": {
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_preciseConflict": "精密参照があるとき Vibe は送信されません。",
   "gen_pauseVibes": "Vibe を一時停止",
   "gen_savePrecise": "精密参照ライブラリに保存",
@@ -8966,7 +8262,12 @@
   "gen_repeat": "繰り返し",
   "gen_repeatTip": "連続で送るリクエスト数",
   "gen_repeatTotal": "{times} 回、計 {total} 枚（ホイールでも調整可）",
-  "@gen_repeatTotal": {"placeholders": {"times": {}, "total": {}}},
+  "@gen_repeatTotal": {
+    "placeholders": {
+      "times": {},
+      "total": {}
+    }
+  },
   "gen_steps": "ステップ",
   "gen_guidance": "ガイダンス",
   "gen_guidanceTip": "高いほどプロンプトに忠実。高すぎると硬くなります（既定 5）",
@@ -8989,7 +8290,11 @@
   "gen_paramsClose": "設定を閉じる",
   "gen_stop": "生成を停止",
   "gen_cooldown": "クールダウン {seconds} 秒",
-  "@gen_cooldown": {"placeholders": {"seconds": {}}},
+  "@gen_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "gen_insufficient": "Anlas が足りません",
   "gen_free": "今回は無料（Opus 枠内）",
   "gen_emptyTitle": "プロンプトを書いて最初の 1 枚を",
@@ -8998,8 +8303,6 @@
   "gen_tileFailed": "この 1 枚は失敗しました",
   "gen_enhance": "エンハンス",
   "gen_variations": "バリエーション",
-  "gen_variationsCost": "バリエーション（{cost} Anlas）",
-  "@gen_variationsCost": {"placeholders": {"cost": {}}},
   "gen_upscale": "アップスケール",
   "gen_upscaleStop": "アップスケールを停止",
   "gen_upscaleOptions": "アップスケール方式",
@@ -9035,14 +8338,26 @@
   "gen_historyEmpty": "まだ生成していません",
   "gen_historyEmptySub": "生成した画像がバッチごとに並びます",
   "gen_batchCount": "{count} 枚",
-  "@gen_batchCount": {"placeholders": {"count": {}}},
+  "@gen_batchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_batchPending": "残り {count} 枚",
-  "@gen_batchPending": {"placeholders": {"count": {}}},
+  "@gen_batchPending": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pinnedTip": "キャンバスに固定した画像（クリックで移動）",
   "gen_select": "複数選択",
   "gen_selectDone": "選択を終了",
   "gen_selectedCount": "{count} 枚選択中",
-  "@gen_selectedCount": {"placeholders": {"count": {}}},
+  "@gen_selectedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pack": "zip にまとめる",
   "gen_saveSelected": "選択した画像を保存",
   "gen_removeSelected": "履歴から外す",
@@ -9056,11 +8371,23 @@
   "gen_clearHistoryBody": "ここから外すだけで、ギャラリーに保存済みのファイルは残ります。",
   "gen_deleteImagesTitle": "履歴から外しますか？",
   "gen_deleteImagesBody": "{count} 枚をここから外します。保存済みのファイルは残ります。",
-  "@gen_deleteImagesBody": {"placeholders": {"count": {}}},
+  "@gen_deleteImagesBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_saveBatch": "このバッチを保存（{count} 枚）",
-  "@gen_saveBatch": {"placeholders": {"count": {}}},
+  "@gen_saveBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeBatch": "このバッチを外す（{count} 枚）",
-  "@gen_removeBatch": {"placeholders": {"count": {}}},
+  "@gen_removeBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeImage": "履歴から外す",
   "gen_favorite": "お気に入り",
   "gen_unfavorite": "お気に入り解除",
@@ -9076,7 +8403,11 @@
   "tools_free": "無料",
   "tools_localFree": "ローカル · 無料",
   "tools_anlasN": "{count} Anlas",
-  "@tools_anlasN": {"placeholders": {"count": {}}},
+  "@tools_anlasN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_cancel": "キャンセル",
   "tools_close": "閉じる",
   "tools_done": "完了",
@@ -9086,11 +8417,24 @@
   "tools_optional": "任意",
   "tools_justNow": "たった今",
   "tools_minutesAgo": "{count} 分前",
-  "@tools_minutesAgo": {"placeholders": {"count": {}}},
+  "@tools_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_hoursAgo": "{count} 時間前",
-  "@tools_hoursAgo": {"placeholders": {"count": {}}},
+  "@tools_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_monthDay": "{month}月{day}日",
-  "@tools_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@tools_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "tools_useAsInit": "img2img のベースにする",
   "tools_upscale": "アップスケール",
   "tools_enhance": "エンハンス",
@@ -9111,13 +8455,23 @@
   "tools_enhanceLocal": "ローカル拡大",
   "tools_enhanceLocalRow": "ローカル",
   "tools_enhanceOutLocal": "{size} → ローカル {factor}",
-  "@tools_enhanceOutLocal": {"placeholders": {"size": {}, "factor": {}}},
+  "@tools_enhanceOutLocal": {
+    "placeholders": {
+      "size": {},
+      "factor": {}
+    }
+  },
   "tools_enhanceMagnitude": "強さ",
   "tools_magLight": "弱",
   "tools_magMedium": "中",
   "tools_magStrong": "強",
   "tools_enhanceValues": "強度 {strength} · ノイズ {noise}",
-  "@tools_enhanceValues": {"placeholders": {"strength": {}, "noise": {}}},
+  "@tools_enhanceValues": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "tools_enhanceCustomTag": "カスタム",
   "tools_enhanceCustom": "強度とノイズを指定",
   "tools_enhanceCustomHint": "強度が高いほど大きく変わり、ノイズは細部を足しますが荒れやすくなります",
@@ -9125,7 +8479,12 @@
   "tools_localNotSet": "ローカル拡大モデル未選択",
   "tools_upscaleSettings": "アップスケール設定",
   "tools_enhanceFooter": "現在のプロンプト · {model} · {steps} ステップ",
-  "@tools_enhanceFooter": {"placeholders": {"model": {}, "steps": {}}},
+  "@tools_enhanceFooter": {
+    "placeholders": {
+      "model": {},
+      "steps": {}
+    }
+  },
   "tools_enhanceRun": "エンハンス",
   "tools_enhanceRunLocal": "エンハンス + ローカル拡大",
   "tools_upscaleSub": "拡大結果は新しい画像として表示され、元画像と img2img のベースは変わりません",
@@ -9195,7 +8554,11 @@
   "tools_edgeLeft": "左",
   "tools_edgeRight": "右",
   "tools_hintExpand": "キャンバスの端をドラッグしても可。{step} px 単位",
-  "@tools_hintExpand": {"placeholders": {"step": {}}},
+  "@tools_hintExpand": {
+    "placeholders": {
+      "step": {}
+    }
+  },
   "tools_maskLook": "マスク表示",
   "tools_maskBorder": "輪郭線",
   "tools_patternSolid": "単色",
@@ -9216,10 +8579,18 @@
   "tools_inpaintStrengthHint": "低いほど元画像に近くなります",
   "tools_mask": "マスク",
   "tools_maskCoverage": "の範囲 · {count} か所",
-  "@tools_maskCoverage": {"placeholders": {"count": {}}},
+  "@tools_maskCoverage": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_focusNone": "未設定（画像全体）",
   "tools_focusContextShort": "· コンテキスト {value}",
-  "@tools_focusContextShort": {"placeholders": {"value": {}}},
+  "@tools_focusContextShort": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "tools_output": "出力",
   "tools_expandTag": "拡張",
   "tools_layers": "レイヤー",
@@ -9272,7 +8643,11 @@
   "tools_emptyEmotion": "表情を選んで「実行」",
   "tools_emptyBody": "結果はここに元画像と並べて表示されます",
   "tools_running": "{tool}を実行中…",
-  "@tools_running": {"placeholders": {"tool": {}}},
+  "@tools_running": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runningBody": "通常は数秒です。結果は生成ページの履歴にも入ります",
   "tools_runFailed": "実行に失敗しました",
   "tools_noInput": "まず画像を追加してください",
@@ -9283,7 +8658,11 @@
   "tools_saveGallery": "ギャラリーに保存",
   "tools_queue": "入力キュー",
   "tools_queueCount": "{count} 枚",
-  "@tools_queueCount": {"placeholders": {"count": {}}},
+  "@tools_queueCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_queueHint": "＋：ファイル読込 / 生成履歴から選択。ドラッグや Ctrl+V も可",
   "tools_importFiles": "ファイルを読み込む",
   "tools_fromHistory": "生成履歴から選ぶ",
@@ -9296,7 +8675,11 @@
   "tools_dtNoOptionsSketch": "スケッチ化に調整項目はありません。きれいな線なら「線画抽出」、着色なら「さらに処理」して「着色」へ。",
   "tools_dtEmotionLabel": "表情",
   "tools_dtEmotionMore": "さらに {count} 個",
-  "@tools_dtEmotionMore": {"placeholders": {"count": {}}},
+  "@tools_dtEmotionMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_dtEmotionLess": "閉じる",
   "tools_dtStrength": "強さ",
   "tools_defry0": "標準",
@@ -9321,7 +8704,11 @@
   "tools_dtPixelUpscale": "元のサイズに拡大",
   "tools_dtPixelUpscaleHint": "オフでは 1 マス 1 ピクセルの小さな画像を出力",
   "tools_runTool": "{tool}を実行",
-  "@tools_runTool": {"placeholders": {"tool": {}}},
+  "@tools_runTool": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runHint": "実行 · 現在の入力を処理",
   "tools_runNeedInput": "下に入力を追加してください",
   "tools_results": "結果",
@@ -9351,5 +8738,223 @@
   "tools_emoLove": "恋",
   "tools_emoDetermined": "決意",
   "tools_emoHurt": "傷心",
-  "tools_emoPlayful": "いたずら"
+  "tools_emoPlayful": "いたずら",
+  "auth_logoutConfirm": "現在のアカウントからログアウトしますか？",
+  "naiAgent_title": "NAI Agent",
+  "naiAgent_local": "ローカル",
+  "naiAgent_permissionMode": "承認モード",
+  "naiAgent_permissionAuto": "自動",
+  "naiAgent_permissionAsk": "確認",
+  "naiAgent_permissionReadOnly": "閲覧のみ",
+  "naiAgent_permissionAutoHint": "通常のワークスペース編集は自動実行。コマンド、削除、未知のツールには承認が必要です。生成の確認も維持します。",
+  "naiAgent_permissionAskHint": "ワークスペースの読み取りは直接実行。編集、コマンド、未知のツールは毎回承認が必要です。生成は料金確認を使います。",
+  "naiAgent_permissionReadOnlyHint": "閲覧と相談のみ。編集、生成、未知のツールは実行しません。切替時は Agent の処理を停止し、手動生成は維持します。",
+  "naiAgent_useModelSetting": "モデル設定を使用",
+  "naiAgent_permissionTitle": "ツールの承認が必要です",
+  "naiAgent_permissionOnce": "今回のみ許可",
+  "naiAgent_permissionSession": "このセッションで同一の呼び出しを許可",
+  "naiAgent_permissionDeny": "拒否",
+  "naiAgent_thinking": "思考の強度 · 次の処理から適用",
+  "naiAgent_thinkingUnsupported": "調整可能な思考レベルが確認されていません。モデル設定を確認してください。",
+  "naiAgent_pasteImage": "クリップボードの画像を貼り付け",
+  "naiAgent_contextUnknown": "モデルの上限と使用量が判明するまで、コンテキスト使用量は表示できません。",
+  "naiAgent_contextTooltip": "使用可能なコンテキスト: {percent}%\n残り {remaining} / {window} tokens\nクリックで詳細統計を表示",
+  "naiAgent_statistics": "コンテキストと会話の統計",
+  "naiAgent_contextUsage": "現在のコンテキスト使用量 · 推定",
+  "naiAgent_contextRemaining": "残りのコンテキスト",
+  "naiAgent_contextWindow": "モデルの上限",
+  "naiAgent_sessionUsage": "セッションの累計使用量",
+  "naiAgent_tokensInput": "入力",
+  "naiAgent_tokensOutput": "出力",
+  "naiAgent_tokensCacheRead": "キャッシュ読み取り",
+  "naiAgent_tokensCacheWrite": "キャッシュ書き込み",
+  "naiAgent_tokensTotal": "累計 tokens",
+  "naiAgent_cumulativeUsageHint": "累計使用量には過去のリクエストも含まれ、現在のコンテキスト量とは異なります。",
+  "naiAgent_messageCounts": "会話記録",
+  "naiAgent_userAssistantMessages": "ユーザー / アシスタント",
+  "naiAgent_toolCalls": "ツールの呼び出し",
+  "naiAgent_cost": "料金",
+  "naiAgent_defaultWorkspace": "ワークスペース 1",
+  "naiAgent_newChat": "新しいチャット",
+  "naiAgent_settings": "Agent 設定",
+  "naiAgent_workspace": "ワークスペース",
+  "naiAgent_createWorkspace": "新規ワークスペース",
+  "naiAgent_rename": "名前を変更",
+  "naiAgent_name": "名前",
+  "naiAgent_placeholder": "アイデアや質問を入力…",
+  "naiAgent_welcome": "ひとつのアイデアから",
+  "naiAgent_welcomeHint": "プロンプトの相談、画像の分析、ワークスペースの整理。\nまず話し合ってから、作業を始めましょう。",
+  "naiAgent_suggestCurrent": "現在の下書きを確認",
+  "naiAgent_suggestImage": "参考画像を分析",
+  "naiAgent_suggestWorkspace": "ワークスペースを整理",
+  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
+  "naiAgent_promptCurrent": "現在の下書きとパラメータを確認してください。まだ変更しないでください。",
+  "naiAgent_promptImage": "現在の画像の構図と画風を分析してください。まだ生成しないでください。",
+  "naiAgent_promptWorkspace": "現在のワークスペースを確認し、整理方法を提案してください。まだ変更しないでください。",
+  "naiAgent_tipTitle": "TIPS / ヒント",
+  "naiAgent_tipNext": "次のヒント",
+  "naiAgent_tipReadOnly": "まず「読み取り専用」で確認してから、変更する内容を決めましょう。",
+  "naiAgent_tipAttachments": "参考画像をドロップするか、+ から添付して具体的に相談できます。",
+  "naiAgent_tipGeneration": "画像生成は費用を表示し、確認を待ってから実行します。",
+  "naiAgent_welcomeFootnote": "すべての操作は現在の承認モードに従います",
+  "naiAgent_chooseModel": "モデルを選択",
+  "naiAgent_modelSettings": "モデルと接続を管理",
+  "naiAgent_attach": "画像を添付",
+  "naiAgent_removeAttachment": "添付を削除",
+  "naiAgent_selectedImage": "選択画像を添付",
+  "naiAgent_send": "送信",
+  "naiAgent_stop": "処理を停止",
+  "naiAgent_queue": "待機列",
+  "naiAgent_steer": "ガイド",
+  "naiAgent_promote": "ガイドに変更",
+  "naiAgent_waiting": "回答を待っています",
+  "naiAgent_working": "処理中",
+  "naiAgent_waitingSlot": "リクエスト枠を待機中",
+  "naiAgent_starting": "チャットを開いています",
+  "naiAgent_interrupted": "前回の処理は中断され、自動再送はされません。",
+  "naiAgent_restorePending": "入力欄に戻す",
+  "naiAgent_withdraw": "取り消す",
+  "naiAgent_newContent": "最新メッセージへ",
+  "naiAgent_toolRunning": "実行中",
+  "naiAgent_toolDone": "完了",
+  "naiAgent_toolFailed": "失敗",
+  "naiAgent_arguments": "引数",
+  "naiAgent_result": "結果",
+  "naiAgent_systemPrompt": "システムプロンプト",
+  "naiAgent_promptHelp": "カスタム内容は既定プロンプトを置き換えます。ツール一覧はアプリが追加し、以降のリクエストに適用されます。",
+  "naiAgent_restoreDefault": "既定に戻す",
+  "naiAgent_showEffective": "有効なプロンプトを表示",
+  "naiAgent_useGlobal": "全体のプロンプトを使用",
+  "naiAgent_save": "保存",
+  "naiAgent_runLimit": "処理ごとのリクエスト上限",
+  "naiAgent_enterSends": "Enter で送信、Shift+Enter で改行",
+  "naiAgent_dataFolder": "ワークスペース保存先",
+  "naiAgent_openFolder": "フォルダーを開く",
+  "naiAgent_toolsManuals": "ツールとマニュアル",
+  "naiAgent_toolsHint": "状態・画像・プロンプト・ファイルを必要に応じて取得し、モデル別の NAI マニュアルを参照します。",
+  "naiAgent_unknownCost": "実際の料金は提供元によります",
+  "naiAgent_error": "操作に失敗しました。モデル設定やファイルを確認してください。",
+  "naiAgent_visionDisabled": "画像入力が有効ではありません。モデル設定で対応を確認してください。",
+  "naiAgent_inputChanged": "準備中に入力が変わりました。現在の下書きを送信してください。",
+  "naiAgent_imageLimit": "画像形式が無効、またはアップロード上限を超えています。",
+  "naiAgent_composerNotEmpty": "現在の入力を保存または送信してから戻してください。",
+  "naiAgent_compact": "チャットを要約",
+  "naiAgent_export": "チャットをエクスポート",
+  "naiAgent_copyMessage": "メッセージをコピー",
+  "naiAgent_editMessage": "メッセージを編集",
+  "naiAgent_regenerate": "回答を再生成",
+  "naiAgent_submitAnswer": "回答を送信",
+  "naiAgent_customAnswer": "自由に回答を入力できます",
+  "naiAgent_close": "パネルを閉じる",
+  "naiAgent_showChats": "チャット一覧",
+  "naiAgent_runtimeMissing": "Agent 実行環境がありません。完全な更新パッケージを使用してください。",
+  "naiAgent_usage": "モデル使用量",
+  "naiAgent_cancel": "キャンセル",
+  "naiAgent_dropHint": "ドロップしてこのチャットに添付",
+  "naiAgent_emptyAttachment": "画像を読み込めません",
+  "naiAgent_globalScope": "全体の既定値",
+  "naiAgent_workspaceScope": "現在のワークスペース",
+  "naiAgent_generationTitle": "生成の確認",
+  "naiAgent_generationWaiting": "生成の確認を待機中",
+  "naiAgent_generationAccount": "アカウント：{name}",
+  "@naiAgent_generationAccount": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "naiAgent_generationBatch": "{requests} 回 × {size} 枚 · 合計 {total} 枚",
+  "@naiAgent_generationBatch": {
+    "placeholders": {
+      "requests": {},
+      "size": {},
+      "total": {}
+    }
+  },
+  "naiAgent_generationUnit": "1 回あたり {cost} Anlas",
+  "@naiAgent_generationUnit": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationEncoding": "参照画像のエンコード：{cost} Anlas",
+  "@naiAgent_generationEncoding": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationTotal": "見積もり {cost} Anlas",
+  "@naiAgent_generationTotal": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationBalance": "現在の残高 {balance} Anlas",
+  "@naiAgent_generationBalance": {
+    "placeholders": {
+      "balance": {}
+    }
+  },
+  "naiAgent_generationEstimateNote": "料金は見積もりです。実際の請求額はサーバーで決まります。",
+  "naiAgent_generationChanged": "設定または見積もりが変わりました。再度準備してください。",
+  "naiAgent_generationLocalEnhance": "生成後にローカルで拡大：{model} ×{scale}",
+  "@naiAgent_generationLocalEnhance": {
+    "placeholders": {
+      "model": {},
+      "scale": {}
+    }
+  },
+  "naiAgent_generationText": "テキストから生成",
+  "naiAgent_generationImage": "画像から生成",
+  "naiAgent_generationInpaint": "部分修正",
+  "naiAgent_galleryDeleteEmptyFolderConfirm": "この空のフォルダーとギャラリー分類を削除しますか？他のフォルダー内の画像は保持されます。\n{path}",
+  "@naiAgent_galleryDeleteEmptyFolderConfirm": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_extensions": "拡張機能",
+  "naiAgent_interactionExtension": "Studio 連携",
+  "naiAgent_extensionRequired": "内蔵 · 必須",
+  "naiAgent_interactionExtensionHint": "現在の Studio 状態を必要に応じて読み取り、質問カードで回答を収集します。",
+  "naiAgent_extensionAddFile": "拡張ファイルを追加",
+  "naiAgent_extensionAddFolder": "拡張フォルダーを追加",
+  "naiAgent_extensionsHint": "拡張機能はワークスペースごとに読み込まれます。変更は現在のタスク終了後、次の送信時に適用されます。外部拡張はローカルコードを実行するため、信頼できる提供元を選んでください。",
+  "naiAgent_extensionError": "拡張機能の実行に失敗しました",
+  "naiAgent_extensionCompatibility": "ローカルの Pi 拡張・パッケージフォルダー、ツール、コマンド、標準ダイアログに対応。ターミナル専用のカスタム UI はデスクトップに表示されません。",
+  "naiAgent_instructions": "指示",
+  "naiAgent_globalInstructions": "共通指示",
+  "naiAgent_globalInstructionsHelp": "すべてのワークスペースで使用します。言語、文体、作業の好みなどを記入できます。空欄にするとこの部分を無効にします。",
+  "naiAgent_systemPromptPrefix": "システムプロンプトの前置き",
+  "naiAgent_systemPromptPrefixHelp": "NAI Agent の基本プロンプトの前に挿入します。基本プロンプトとツールマップは保持します。空欄にするとこの部分を無効にします。",
+  "naiAgent_instructionOrder": "適用順：前置き → 基本プロンプト → 共通指示 → ワークスペースのルール。以後のリクエストに適用します。",
+  "naiAgent_saveInstructions": "指示を保存",
+  "naiAgent_mcpBuiltin": "NAI Studio · 内蔵ツール",
+  "naiAgent_mcpBuiltinHint": "プロンプト、ブロック、百科、画像、履歴、参照、生成、設定ツール。既定では必要時に検索します。バックアップ、バージョン確認、ユーザー確認は引き続き有効です。",
+  "naiAgent_mcpAdd": "MCP サーバーを追加",
+  "naiAgent_mcpName": "サーバー名",
+  "naiAgent_mcpConfig": "サーバー設定（JSON）",
+  "naiAgent_mcpConfigHint": "stdio と Streamable HTTP に対応。サーバー設定オブジェクトを貼り付けてください。command は実行ファイル、args は配列です。env、cwd、url、headers、oauth、toolExposure も使用できます。設定は暗号化して保存されます。",
+  "naiAgent_mcpStatus": "接続状態を確認",
+  "naiAgent_mcpReconnect": "再接続",
+  "naiAgent_mcpLogin": "ログイン",
+  "naiAgent_mcpLogout": "ログアウト",
+  "naiAgent_mcpHint": "既定では CodeMode で必要時に検索します。codemode：サンドボックスから呼び出す。deferred：検索後に直接呼び出す。direct：常時公開。hidden：非公開。変更は次の待機中の呼び出しに反映されます。接続確認はチャットモデルを呼び出しません。",
+  "generation_generate": "生成",
+  "detail_imageDetails": "画像の詳細",
+  "promptBlockLibrary_title": "プロンプトブロック",
+  "@naiAgent_contextTooltip": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      }
+    }
+  }
 }

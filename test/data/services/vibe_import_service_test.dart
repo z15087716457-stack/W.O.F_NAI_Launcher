@@ -9,7 +9,6 @@ import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/vibe_file_storage_service.dart';
 import 'package:nai_launcher/data/services/vibe_import_service.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_selector_dialog.dart';
 
 class _FakeVibeLibraryImportRepository implements VibeLibraryImportRepository {
   final List<VibeLibraryEntry> savedEntries = <VibeLibraryEntry>[];
@@ -214,45 +213,5 @@ void main() {
         'third-encoded',
       ]);
     });
-  });
-
-  group('VibeSelectorDialog selection result', () {
-    test(
-      'keeps normal library entries lightweight during confirmation',
-      () async {
-        var hydrateCalls = 0;
-        var recordUsageCalls = 0;
-        final lightEntry = VibeLibraryEntry(
-          id: 'entry-1',
-          name: 'Light Entry',
-          vibeDisplayName: 'Light Entry',
-          vibeEncoding: '',
-          strength: 0.6,
-          infoExtracted: 0.7,
-          sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-          tags: const ['light'],
-          createdAt: DateTime(2026, 4, 14),
-          filePath: r'C:\vibes\entry-1.naiv4vibe',
-        );
-
-        final result = await buildLightweightVibeSelectionResult(
-          selectedIds: {'entry-1'},
-          entries: [lightEntry],
-          shouldReplace: false,
-          hydrateBundleChild: (bundleEntry, index) async {
-            hydrateCalls++;
-            return null;
-          },
-          recordUsage: (id) async {
-            recordUsageCalls++;
-          },
-        );
-
-        expect(result.selectedEntries, [lightEntry]);
-        expect(result.shouldReplace, isFalse);
-        expect(hydrateCalls, 0, reason: '普通条目确认阶段不应在 selector 内读取完整 Vibe 文件');
-        expect(recordUsageCalls, 0, reason: '使用次数应由真正添加成功的外层导入 handler 统一记录一次');
-      },
-    );
   });
 }

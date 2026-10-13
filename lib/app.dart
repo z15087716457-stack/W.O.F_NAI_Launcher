@@ -23,6 +23,16 @@ import 'presentation/providers/subscription_provider.dart'
     hide anlasBalanceProvider;
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
+import 'presentation/wiring/nai_agent_generation_host.dart';
+
+double windowCaptionHeightForRoute(String path) => switch (path) {
+  AppRoutes.localGallery => 62,
+  AppRoutes.onlineGallery ||
+  AppRoutes.vibeLibrary ||
+  AppRoutes.preciseRefLibrary ||
+  AppRoutes.promptBlockLibrary => 61,
+  _ => 36,
+};
 
 /// 全局副作用挂载层
 ///
@@ -133,6 +143,15 @@ class NAILauncherApp extends ConsumerWidget {
       ShortcutIds.navigateToVibeLibrary: () {
         router.go(AppRoutes.vibeLibrary);
       },
+      ShortcutIds.navigateToStyleExplore: () {
+        router.go(AppRoutes.styleExplore);
+      },
+      ShortcutIds.navigateToPreciseRefLibrary: () {
+        router.go(AppRoutes.preciseRefLibrary);
+      },
+      ShortcutIds.navigateToTagWiki: () {
+        router.go(AppRoutes.tagWiki);
+      },
 
       // 全局应用快捷键
       ShortcutIds.showShortcutHelp: () {
@@ -176,18 +195,20 @@ class NAILauncherApp extends ConsumerWidget {
             // 让 Navigator 的菜单、提示与对话框位于按钮上方。
             // child 作为普通子组件直传，保证 element 在 MaterialApp
             // rebuild 时原地更新、不拆树重建。
-            return WorkspaceTypographyScope(
-              child: _RouteAwareTitleBar(
-                router: router,
-                // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
-                // 认证尚未建立（例如测试里）时不在这里触发它
-                initialImmersive: () =>
-                    ref.exists(authNotifierProvider) &&
-                    !ref.read(authNotifierProvider).isAuthenticated &&
-                    !ref.read(guestSessionNotifierProvider),
-                onToggleTheme: () =>
-                    ref.read(themeNotifierProvider.notifier).nextTheme(),
-                child: child ?? const SizedBox.shrink(),
+            return NaiAgentIntegrationScope(
+              child: WorkspaceTypographyScope(
+                child: _RouteAwareTitleBar(
+                  router: router,
+                  // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
+                  // 认证尚未建立（例如测试里）时不在这里触发它
+                  initialImmersive: () =>
+                      ref.exists(authNotifierProvider) &&
+                      !ref.read(authNotifierProvider).isAuthenticated &&
+                      !ref.read(guestSessionNotifierProvider),
+                  onToggleTheme: () =>
+                      ref.read(themeNotifierProvider.notifier).nextTheme(),
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
             );
           },
@@ -253,15 +274,9 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     return config.uri.path == AppRoutes.login;
   }
 
-  double _resolveCaptionHeight() =>
-      switch (widget.router.routerDelegate.currentConfiguration.uri.path) {
-        AppRoutes.localGallery ||
-        AppRoutes.onlineGallery ||
-        AppRoutes.vibeLibrary ||
-        AppRoutes.preciseRefLibrary ||
-        AppRoutes.promptBlockLibrary => 62,
-        _ => 36,
-      };
+  double _resolveCaptionHeight() => windowCaptionHeightForRoute(
+    widget.router.routerDelegate.currentConfiguration.uri.path,
+  );
 
   void _onRouteChanged() {
     final building =

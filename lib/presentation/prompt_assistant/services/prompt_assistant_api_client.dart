@@ -13,6 +13,7 @@ import 'provider_adapters/openai_chat_completions_adapter.dart';
 import 'provider_adapters/openai_responses_adapter.dart';
 import 'provider_adapters/prompt_assistant_adapter.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/nai_agent/model_request_gate.dart';
 
 class PromptAssistantApiClient {
   PromptAssistantApiClient({
@@ -60,7 +61,6 @@ class PromptAssistantApiClient {
   final Dio _dio;
   final ModelRequestHistory? history;
   final ProviderConnectionHealth? connectionHealth;
-  final _gates = <String, _RequestGate>{};
   final int imageUploadMaxBytes;
   final Map<String, CancelToken> _cancelTokens = {};
   static const _exchangeKey = 'studio.modelRequestExchange';
@@ -140,7 +140,8 @@ class PromptAssistantApiClient {
     final probe = request.trackConnectionHealth
         ? connectionHealth?.begin(request.provider)
         : null;
-    final gate = _gates.putIfAbsent(request.provider.id, _RequestGate.new);
+    final gate = ModelRequestGates.shared.forProvider(request.provider.id);
+    void Function()? release;
     var acquired = false;
     var attempts = 0;
     var requested = false;
@@ -152,10 +153,15 @@ class PromptAssistantApiClient {
         ).validateFor(request.provider.protocol);
         if (error != null) throw FormatException(error);
       }
-      await gate.acquire(
-        request.provider.maxConcurrentRequests.clamp(1, 20),
-        cancelToken,
-      );
+      try {
+        release = await gate.acquire(
+          limit: request.provider.maxConcurrentRequests.clamp(1, 20),
+          cancellation: cancelToken.whenCancel.then<void>((_) {}),
+          isCancelled: () => cancelToken.isCancelled,
+        );
+      } on ModelRequestCancelled {
+        throw cancelToken.cancelError!;
+      }
       acquired = true;
       if (record != null) history?.update(record, ModelRequestStatus.running);
       final upload = await optimizePromptAssistantRequestImagesForUpload(
@@ -242,7 +248,7 @@ class PromptAssistantApiClient {
       rethrow;
     } finally {
       _diagnostics.remove(cancelToken);
-      if (acquired) gate.release();
+      if (acquired) release?.call();
       if (identical(_cancelTokens[request.sessionId], cancelToken)) {
         _cancelTokens.remove(request.sessionId);
       }
@@ -419,33 +425,5 @@ class PromptAssistantApiClient {
     }
     final query = uri.hasQuery ? '?<redacted>' : '';
     return '${uri.path}$query';
-  }
-}
-
-class _RequestGate {
-  int active = 0;
-  final waiting = <Completer<void>>[];
-  Future<void> acquire(int limit, CancelToken token) async {
-    while (active >= limit) {
-      final waiter = Completer<void>();
-      waiting.add(waiter);
-      try {
-        await Future.any([
-          waiter.future,
-          token.whenCancel.then<void>((error) => throw error),
-        ]);
-      } finally {
-        waiting.remove(waiter);
-      }
-    }
-    if (token.isCancelled) throw token.cancelError!;
-    active++;
-  }
-
-  void release() {
-    active--;
-    for (final waiter in waiting.toList()) {
-      if (!waiter.isCompleted) waiter.complete();
-    }
   }
 }

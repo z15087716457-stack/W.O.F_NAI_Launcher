@@ -7,24 +7,6 @@
   "brand_switchToDark": "Switch to dark mode",
   "app_subtitle": "NovelAI Third-party Client",
   "common_cancel": "Cancel",
-  "onlineFav_all": "All",
-  "onlineFav_rootCollection": "Root",
-  "onlineFav_newCollection": "New Collection",
-  "onlineFav_renameCollection": "Rename",
-  "onlineFav_deleteCollection": "Delete Collection",
-  "onlineFav_empty": "No favorited works yet",
-  "onlineFav_authorWorkCount": "{n} works",
-  "@onlineFav_authorWorkCount": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "onlineFav_moveHere": "Move here",
-  "onlineFav_removeFavorite": "Unfavorite",
-  "onlineFav_favoriteAuthor": "Favorite Author",
-  "onlineFav_unfavoriteAuthor": "Unfavorite author",
-  "onlineFav_authorFavorited": "Author favorited",
-  "onlineFav_authorUnfavorited": "Author unfavorited",
   "common_confirm": "Confirm",
   "common_continue": "Continue",
   "common_selectAll": "Select All",
@@ -46,7 +28,6 @@
   "common_reset": "Reset",
   "common_add": "Add",
   "common_added": "Added",
-  "common_new": "New",
   "common_confirmDelete": "Confirm Delete",
   "common_confirmClear": "Confirm Clear",
   "common_gotIt": "Got it",
@@ -64,7 +45,6 @@
     }
   },
   "common_clearInputConfirm": "Clear the input content?",
-  "common_yesterday": "Yesterday",
   "common_daysAgo": "{days} days ago",
   "@common_daysAgo": {
     "placeholders": {
@@ -76,13 +56,11 @@
   "common_refresh": "Refresh",
   "common_download": "Download",
   "common_apply": "Apply",
-  "common_move": "Move",
   "common_favorite": "Favorite",
   "common_unfavorite": "Unfavorite",
   "common_ok": "OK",
   "common_exit": "Exit",
   "common_grid": "Grid",
-  "common_pack": "Pack",
   "common_multiSelect": "Multi-select",
   "common_category": "Category",
   "networkError_connectionTimeout": "Connection timed out. Check your network connection.",
@@ -110,10 +88,6 @@
       }
     }
   },
-  "nav_canvas": "Canvas",
-  "nav_onlineGallery": "Online Gallery",
-  "nav_expandSidebar": "Expand sidebar",
-  "nav_collapseSidebar": "Collapse sidebar",
   "auth_login": "Login",
   "auth_logout": "Logout",
   "auth_email": "Email",
@@ -129,7 +103,6 @@
   "auth_emailRequired": "Please enter email",
   "auth_emailInvalid": "Please enter a valid email address",
   "auth_passwordRequired": "Please enter password",
-  "auth_tokenLogin": "API Token Login",
   "auth_tokenLoginRecommended": "API Token Login (Recommended)",
   "auth_credentialsLogin": "Email & Password",
   "auth_credentialsLoginUnavailable": "Email/password login is currently unavailable. Please use Token login.",
@@ -149,7 +122,6 @@
   "auth_addAccount": "Add Account",
   "auth_tokenNotFound": "Token not found for this account",
   "auth_switchAccount": "Switch Account",
-  "auth_currentAccount": "Current Account",
   "auth_selectAccount": "Select Account",
   "auth_deleteAccount": "Delete Account",
   "auth_deleteAccountConfirm": "Are you sure you want to delete \"{name}\"? This cannot be undone.",
@@ -194,7 +166,6 @@
   "common_paste": "Paste",
   "common_default": "Default",
   "settings_title": "Settings",
-  "settings_account": "Account",
   "settings_savedAccounts": "Saved Accounts",
   "settings_style": "Style",
   "settings_font": "Font",
@@ -312,8 +283,6 @@
   "settings_avatarUpdated": "Avatar updated",
   "settings_avatarRemoved": "Avatar removed",
   "settings_setAsDefaultSuccess": "Set as default account",
-  "generation_title": "Generate",
-  "generation_generate": "Generate",
   "generation_cooldownRemaining": "Wait {seconds}s",
   "@generation_cooldownRemaining": {
     "placeholders": {
@@ -325,26 +294,6 @@
   "generation_stopGeneration": "Stop Generation",
   "generation_pleaseInputPrompt": "Please enter prompt",
   "generation_generationFailed": "Generation failed",
-  "generation_progress": "Generating... {progress}%",
-  "@generation_progress": {
-    "placeholders": {
-      "progress": {}
-    }
-  },
-  "generation_lockHistoryScroll": "Lock history scrolling",
-  "generation_unlockHistoryScroll": "Unlock history scrolling",
-  "generation_downloadAllImages": "Download all images",
-  "generation_selectMultiple": "Select multiple",
-  "generation_deselectAll": "Exit multi-select",
-  "generation_deleteSelectedImages": "Delete selected images ({count})",
-  "@generation_deleteSelectedImages": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_deleteSelectedImagesTitle": "Delete Selected Images",
   "generation_deleteSelectedImagesConfirm": "{count} image(s) will be removed from records (files saved to disk are kept)",
   "@generation_deleteSelectedImagesConfirm": {
     "placeholders": {
@@ -382,23 +331,9 @@
   "generation_canvasPinImage": "Pin image",
   "generation_canvasUnpinImage": "Unpin image",
   "generation_canvasUseSeed": "Click to use this seed",
-  "generation_canvasPinnedCount": "Pins {count}",
-  "@generation_canvasPinnedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_params": "Parameters",
-  "generation_paramsSettings": "Parameter Settings",
   "generation_history": "History",
-  "generation_historyRecord": "History Records",
   "generation_failedStreamSnapshot": "Failed snapshot",
   "generation_failedStreamSnapshotHint": "Generation did not finish; only the last preview frame is kept. It cannot be saved, favorited, or used for image workflows.",
-  "generation_noHistory": "No history records",
-  "generation_clearHistory": "Clear History",
-  "generation_clearHistoryConfirm": "Are you sure you want to clear all history records? This action cannot be undone.",
   "generation_model": "Model",
   "generation_imageSize": "Image Size",
   "generation_sampler": "Sampler",
@@ -590,7 +525,6 @@
   "img2img_startUpscale": "Start Upscale",
   "img2img_novelAiUpscaleComplete": "NovelAI upscale complete",
   "img2img_decodeSourceFailed": "Failed to decode source image",
-  "img2img_upscalePanelOpened": "Opened the Image2Image Upscale panel",
   "editor_tolerance": "Tolerance",
   "editor_intensity": "Intensity",
   "editor_sourcePoint": "Alt+Click to set source point",
@@ -624,7 +558,6 @@
   "editor_zoomIn": "Zoom In",
   "editor_zoomOut": "Zoom Out",
   "editor_fitToWindow": "Fit to Window",
-  "editor_shortcut100Zoom": "100% Zoom",
   "editor_effectBrightness": "Brightness",
   "editor_effectSaturation": "Saturation",
   "editor_changeCanvasSize": "Change Canvas Size",
@@ -739,12 +672,8 @@
   "vibe_sourceType_bundle": "Bundle",
   "vibe_sourceType_image": "Image",
   "vibe_sourceType": "Source",
-  "vibe_reuseButton": "Reuse",
   "vibe_info": "Vibe Info",
   "vibe_name": "Name",
-  "vibe_strength": "Strength",
-  "vibe_infoExtracted": "Information Extracted",
-  "vibe_shiftReplaceHint": "Shift+Click to Replace",
   "character_buttonLabel": "Char/Position",
   "character_addCharacter": "Add Character",
   "character_number": "Character {index}",
@@ -760,9 +689,6 @@
   "gallery_metaSampler": "Sampler",
   "gallery_metaCfgScale": "Prompt Guidance",
   "gallery_metaSeed": "Seed",
-  "gallery_metaSmea": "SMEA",
-  "gallery_promptCopied": "Prompt copied",
-  "gallery_seedCopied": "Seed copied",
   "gallery_sendToKritaAction": "Send to Krita",
   "gallery_upscalePanelLoaded": "Loaded the Image2Image Upscale panel",
   "gallery_readImageFailed": "Failed to read image: {error}",
@@ -787,48 +713,15 @@
       "error": {}
     }
   },
-  "onlineGallery_search": "Search",
-  "onlineGallery_popular": "Popular",
-  "onlineGallery_favorites": "Favorites",
-  "onlineGallery_refresh": "Refresh",
   "onlineGallery_login": "Login",
-  "onlineGallery_logout": "Logout",
-  "onlineGallery_dayRank": "Day",
-  "onlineGallery_weekRank": "Week",
-  "onlineGallery_monthRank": "Month",
-  "onlineGallery_today": "Today",
-  "onlineGallery_imageCount": "{count} images",
-  "@onlineGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_loadFailed": "Load failed",
-  "onlineGallery_favoritesEmpty": "Favorites is empty",
-  "onlineGallery_noResults": "No images found",
   "onlineGallery_pleaseLogin": "Please login first",
-  "onlineGallery_size": "Size",
-  "onlineGallery_score": "Score",
-  "onlineGallery_favCount": "Favorites",
-  "onlineGallery_type": "Type",
   "mediaType_video": "Video",
   "mediaType_gif": "GIF",
-  "onlineGallery_tags": "Tags",
-  "onlineGallery_artists": "Artists",
-  "onlineGallery_characters": "Characters",
-  "onlineGallery_copyrights": "Copyrights",
-  "onlineGallery_general": "General",
   "onlineGallery_copied": "Copied",
   "onlineGallery_copyTags": "Copy Tags",
-  "onlineGallery_open": "Open",
-  "onlineGallery_send": "Send",
   "onlineGallery_sendToTextToImage": "Send to Text to Image",
   "onlineGallery_sentToTextToImage": "Sent to text-to-image",
   "onlineGallery_noTagInfo": "This image has no tag information",
-  "onlineGallery_promptSentToGeneration": "Prompt sent to generation page",
-  "onlineGallery_gifLoadFailed": "Failed to load GIF",
-  "onlineGallery_pinchToZoom": "Pinch to zoom",
-  "onlineGallery_metadata": "Metadata",
   "onlineGallery_chooseDownloadDirectory": "Choose Download Directory",
   "onlineGallery_downloadStarted": "Download started...",
   "onlineGallery_savedToPath": "Saved to: {path}",
@@ -844,24 +737,10 @@
     }
   },
   "onlineGallery_downloadOriginal": "Download original image",
-  "onlineGallery_all": "All",
   "onlineGallery_ratingGeneral": "General",
   "onlineGallery_ratingSensitive": "Sensitive",
   "onlineGallery_ratingQuestionable": "Questionable",
   "onlineGallery_ratingExplicit": "Explicit",
-  "onlineGallery_clear": "Clear",
-  "onlineGallery_previousPage": "Previous Page",
-  "onlineGallery_nextPage": "Next Page",
-  "onlineGallery_pageN": "Page {page}",
-  "@onlineGallery_pageN": {
-    "placeholders": {
-      "page": {}
-    }
-  },
-  "onlineGallery_dateRange": "Date Range",
-  "onlineGallery_fuzzySearch": "Fuzzy Match",
-  "onlineGallery_fuzzySearchTooltip": "Use *tag* matching for related tags when enabled; search exact Danbooru tags when disabled",
-  "onlineGallery_blacklistTags": "Blacklist Tags",
   "onlineGallery_blacklistTitle": "Online Gallery Blacklist",
   "onlineGallery_blacklistSubtitle": "Images containing blacklisted tags will be hidden directly in the online gallery.",
   "onlineGallery_addBlacklistTagHint": "Add blacklist tag",
@@ -883,28 +762,6 @@
   },
   "onlineGallery_blacklistSettingsTitle": "Online Gallery Blacklist Settings",
   "onlineGallery_blacklistLoginHint": "You are not logged in to Danbooru. The local blacklist still works, but syncing requires login.",
-  "onlineGallery_bulkFavorite": "Favorite Selected",
-  "onlineGallery_bulkDownload": "Download Selected",
-  "onlineGallery_unfavorited": "Unfavorited",
-  "onlineGallery_favorited": "Favorited",
-  "onlineGallery_favoritedImages": "Favorited {count} images",
-  "@onlineGallery_favoritedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_selectDownloadDirectoryFailed": "Failed to choose download directory: {error}",
-  "@onlineGallery_selectDownloadDirectoryFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "onlineGallery_downloadSelectedStarted": "Downloading {count} images...",
-  "@onlineGallery_downloadSelectedStarted": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "onlineGallery_downloadSelectedCompleted": "Download complete: {success} succeeded, {failed} failed",
   "@onlineGallery_downloadSelectedCompleted": {
     "placeholders": {
@@ -912,14 +769,6 @@
       "failed": {}
     }
   },
-  "onlineGallery_startDate": "Start Date",
-  "onlineGallery_endDate": "End Date",
-  "onlineGallery_invalidDateFormat": "Invalid date format",
-  "onlineGallery_dateOutOfRange": "Date out of range",
-  "onlineGallery_last30Days": "Last 30 Days",
-  "onlineGallery_configureGelbooruApi": "Configure Gelbooru API",
-  "onlineGallery_gelbooruApiReady": "Gelbooru API verified",
-  "onlineGallery_gelbooruApiInvalid": "Gelbooru credentials expired",
   "onlineGallery_gelbooruCredentialsRequired": "Configure your Gelbooru User ID and API Key to view website favorites.",
   "onlineGallery_gelbooruCredentialsInvalid": "Your Gelbooru credentials are no longer valid. Configure them again.",
   "onlineGallery_gelbooruRateLimited": "Gelbooru is rate limiting requests. Try again later.",
@@ -928,18 +777,7 @@
   "onlineGallery_gelbooruNetworkError": "Could not connect to Gelbooru. Check your network or proxy settings.",
   "onlineGallery_gelbooruMalformedResponse": "Gelbooru returned data that could not be parsed.",
   "onlineGallery_gelbooruRequestFailed": "The Gelbooru request failed. Try again later.",
-  "onlineGallery_aiTagQuery": "Search works, artists, titles, tags, or models",
-  "onlineGallery_aiTagPromptQuery": "AI Prompt search (raw syntax such as ::artist: is supported)",
-  "onlineGallery_aiTagTimeRange": "Time range",
-  "onlineGallery_aiTagAllTime": "All",
-  "onlineGallery_aiTagCurrentMonthly": "Live monthly ranking",
-  "onlineGallery_aiTagOlderMonthly": "Older archive",
   "onlineGallery_aiTagRankingProcessing": "The ranking is being generated. Please try again shortly.",
-  "onlineGallery_aiTagNaiOnly": "NAI only",
-  "onlineGallery_aiTagModelVersion": "Model version",
-  "onlineGallery_viewAuthor": "View this author",
-  "onlineGallery_returnFromAuthor": "Return to previous gallery position",
-  "onlineGallery_generationParams": "Generation parameters",
   "onlineGallery_sourceConfigUnavailable": "Could not load source configuration. Check your connection and retry.",
   "onlineGallery_sourceRateLimited": "Too many requests. Please try again later.",
   "onlineGallery_sourceTimeout": "The request timed out. Check your connection.",
@@ -947,26 +785,7 @@
   "onlineGallery_sourceMalformedResponse": "The source response format has changed and cannot be parsed.",
   "onlineGallery_detailNotFound": "This work does not exist or has been removed.",
   "onlineGallery_imageUnavailable": "This image is currently unavailable.",
-  "onlineGallery_loadedAll": "All items loaded",
-  "onlineGallery_retryAppend": "Load failed. Click to retry",
-  "onlineGallery_rankNumber": "Rank #{rank}",
-  "@onlineGallery_rankNumber": {
-    "placeholders": {
-      "rank": {}
-    }
-  },
-  "onlineGallery_multipleImages": "{count} images",
-  "@onlineGallery_multipleImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_views": "Views",
-  "onlineGallery_downloadAllMedia": "Download all images in this work",
-  "onlineGallery_copyFullMetadata": "Copy full metadata",
-  "onlineGallery_metadataParseFailed": "Metadata parsing failed. The original content is preserved and can be copied.",
   "onlineGallery_gelbooruReadOnly": "Read-only favorites",
-  "onlineGallery_gelbooruFavoritesSortHint": "Sorted by post ID, newest first. This may differ from website favorite-time order.",
   "tooltip_fullscreenEdit": "Fullscreen Edit",
   "tooltip_decreaseWeight": "Decrease Weight [-5%]",
   "tooltip_increaseWeight": "Increase Weight [+5%]",
@@ -1482,7 +1301,6 @@
   "comparison_close": "Close comparison",
   "comparison_zoomHint": "Pinch or scroll to zoom independently",
   "comparison_loadError": "Failed to load image",
-  "statistics_title": "Statistics",
   "localGallery_group_today": "Today",
   "localGallery_group_yesterday": "Yesterday",
   "localGallery_groupImageCount": "{count, plural, =1{{formatted} image} other{{formatted} images}}",
@@ -1811,7 +1629,6 @@
   "promptToken_negativePreset": "Undesired Content Preset",
   "promptToken_characterNegative": "Character Undesired Content",
   "common_rename": "Rename",
-  "tagLibrary_newCategory": "New Category",
   "tagLibrary_tags": "Tags",
   "settings_network": "Network",
   "settings_enableProxy": "Enable Proxy",
@@ -2086,42 +1903,7 @@
     }
   },
   "vibeLibrary_title": "Vibe Library",
-  "vibeLibrary_categories": "Categories",
-  "vibeLibrary_createCategoryTitle": "New Category",
-  "vibeLibrary_createSubCategoryTitle": "New Subcategory",
-  "vibeLibrary_categoryNameHint": "Enter category name",
-  "vibeLibrary_createCategoryConfirm": "Create",
-  "vibeLibrary_deleteCategoryTitle": "Confirm Delete",
-  "vibeLibrary_deleteCategoryContent": "Delete this category? Vibes in it will be moved to Uncategorized.",
-  "vibeLibrary_sortTooltip": "Sort by",
-  "vibeLibrary_openFolderTooltip": "Open Vibe library folder",
-  "vibeLibrary_totalCount": "{count} Vibes",
-  "@vibeLibrary_totalCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_noCategoriesAvailable": "No categories available",
-  "vibeLibrary_moveToCategory": "Move to Category",
   "vibeLibrary_uncategorized": "Uncategorized",
-  "vibeLibrary_movedToCategory": "Moved {count} Vibes",
-  "@vibeLibrary_movedToCategory": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_favoriteStatusUpdated": "Favorite status updated",
-  "vibeLibrary_importFromFile": "Import from File",
-  "vibeLibrary_importFromImage": "Import from Image",
-  "vibeLibrary_importFromClipboard": "Import Encoded Data from Clipboard",
-  "vibeLibrary_openFolderFailed": "Failed to open folder: {error}",
-  "@vibeLibrary_openFolderFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibeLibrary_importFileDialogTitle": "Select Vibe files to import",
-  "vibeLibrary_preparingImport": "Preparing import...",
   "vibeLibrary_importSuccessCount": "Imported {count} Vibes",
   "@vibeLibrary_importSuccessCount": {
     "placeholders": {
@@ -2135,66 +1917,9 @@
       "failed": {}
     }
   },
-  "vibeLibrary_dropImportHint": "Drop .naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp files or folders here to import",
-  "vibeLibrary_importing": "Importing...",
-  "vibeLibrary_pageIndicator": "{current} / {total} pages",
-  "@vibeLibrary_pageIndicator": {
-    "placeholders": {
-      "current": {},
-      "total": {}
-    }
-  },
-  "vibeLibrary_itemsPerPage": "Per page:",
-  "vibeLibrary_tooManyTitle": "Too Many Vibes",
-  "vibeLibrary_tooManySelectedContent": "Selected {count} Vibes, but at most 16 can be used at once.\n\nPlease reduce the selection and try again.",
-  "@vibeLibrary_tooManySelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_tooManyExistingContent": "The generation page already has {current} Vibes. You can add {remaining} more.\n\nPlease reduce the selection and try again.",
-  "@vibeLibrary_tooManyExistingContent": {
-    "placeholders": {
-      "current": {},
-      "remaining": {}
-    }
-  },
-  "vibeLibrary_sentToGenerationCount": "Sent {count} Vibes to generation",
-  "@vibeLibrary_sentToGenerationCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deleteSelectedContent": "Delete {count} selected Vibes? This action cannot be undone.",
-  "@vibeLibrary_deleteSelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deletedCount": "Deleted {count} Vibes",
-  "@vibeLibrary_deletedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_importImageDialogTitle": "Select images containing Vibe data",
-  "vibeLibrary_clipboardEmpty": "Clipboard is empty",
-  "vibeLibrary_encodeTimeout": "Encoding timed out. Please check your network connection.",
-  "vibeLibrary_unknownError": "Unknown error",
   "vibeLibrary_save": "Save to Library",
   "vibeLibrary_import": "Import Vibe",
-  "vibeLibrary_searchHint": "Search name, tags...",
-  "vibeLibrary_empty": "Vibe Library is empty",
-  "vibeLibrary_emptyHint": "Add some entries to Vibe Library first",
-  "vibeLibrary_allVibes": "All Vibes",
-  "vibeLibrary_favorites": "Favorites",
   "vibeLibrary_sendToGeneration": "Send to Generation",
-  "vibeLibrary_export": "Export",
-  "vibeLibrary_edit": "Edit",
-  "vibeLibrary_delete": "Delete",
-  "vibeLibrary_addToFavorites": "Add to Favorites",
-  "vibeLibrary_removeFromFavorites": "Remove from Favorites",
-  "vibeLibrary_newSubCategory": "New Subcategory",
   "vibeLibrary_maxVibesReached": "Maximum limit reached (16 vibes)",
   "vibeLibrary_bundleReadFailed": "Failed to read bundle file, using single file mode",
   "categoryError_loadFailed": "Failed to load categories: {error}",
@@ -2274,251 +1999,8 @@
       }
     }
   },
-  "vibeBulkTag_actionPreview": "Change preview",
-  "vibeDetail_strengthDescription": "Controls how strongly this Vibe influences generated results",
-  "vibeDetail_infoExtractedDescription": "Controls how much information is extracted from the source image (costs 2 Anlas)",
-  "vibeDetail_statistics": "Statistics",
-  "vibeDetail_usageCount": "Times used",
-  "vibeDetail_timesUsed": "{count} times",
-  "@vibeDetail_timesUsed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeDetail_lastUsed": "Last used",
-  "vibeDetail_neverUsed": "Never used",
-  "vibeDetail_createdAt": "Created",
-  "vibeDetail_saveParameters": "Save Parameters",
   "vibe_export_title": "Export Vibe",
-  "vibe_export_format": "Export Format",
-  "vibe_selector_title": "Select Vibe",
   "vibe_selector_recent": "Recent",
-  "vibe_export_include_thumbnails": "Include Thumbnails",
-  "vibe_export_include_thumbnails_subtitle": "Include thumbnail preview in export file",
-  "vibe_export_singleFile": "Single file (.naiv4vibe)",
-  "vibe_export_singleFileDescription": "Export each Vibe as a separate file, suitable for sharing one Vibe",
-  "vibe_export_bundleFile": "Bundle file (.naiv4vibebundle)",
-  "vibe_export_bundleFileDescription": "Pack multiple Vibes into one file, suitable for batch backup",
-  "vibe_export_embedIntoPng": "Embed into PNG",
-  "vibe_export_embedIntoPngDescription": "Export a single Vibe by embedding its data into PNG metadata",
-  "vibe_export_exportable": "Exportable",
-  "vibe_export_notExportable": "Not exportable",
-  "vibe_export_selectVibesToExport": "Select Vibes to export",
-  "vibe_export_exportSelected": "Export ({count})",
-  "@vibe_export_exportSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_strengthPercent": "Strength: {percent}%",
-  "@vibe_export_strengthPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_pngCarrierImage": "PNG carrier image",
-  "vibe_export_noUsablePngCarrier": "This Vibe has no directly usable PNG carrier image. You can choose an external PNG image as the carrier.",
-  "vibe_export_selectExternalPngImage": "Select external PNG image...",
-  "vibe_export_changeExternalPngImage": "Change external PNG image...",
-  "vibe_export_useVibeImageInstead": "Use Vibe image instead",
-  "vibe_export_usingExternalPng": "Using external PNG: {fileName}",
-  "@vibe_export_usingExternalPng": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectPngImage": "Select PNG image",
-  "vibe_export_invalidPngImage": "The selected file is not a valid PNG image",
-  "vibe_export_selectPngImageFailed": "Failed to select PNG image: {error}",
-  "@vibe_export_selectPngImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embeddingPng": "Embedding PNG: {name}",
-  "@vibe_export_embeddingPng": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_exportCompleteCounts": "Export complete: {successCount} succeeded, {failCount} failed",
-  "@vibe_export_exportCompleteCounts": {
-    "placeholders": {
-      "successCount": {
-        "type": "int"
-      },
-      "failCount": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportCompletePath": "Export complete: {path}",
-  "@vibe_export_exportCompletePath": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_packingVibes": "Packing {count} Vibes...",
-  "@vibe_export_packingVibes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingName": "Exporting: {name}",
-  "@vibe_export_exportingName": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectExportFolder": "Select export folder",
-  "vibe_export_generatingBundleFile": "Generating bundle file...",
-  "vibe_export_bundleTitle": "Export Bundle: {name}",
-  "@vibe_export_bundleTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_vibesTitle": "Export Vibes ({count} selected)",
-  "@vibe_export_vibesTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_method": "Export Method",
-  "vibe_export_wholeBundle": "Whole Bundle",
-  "vibe_export_internalVibe": "Internal Vibe",
-  "vibe_export_wholeBundleDescription": "Export as a .naiv4vibebundle file containing all {count} vibes",
-  "@vibe_export_wholeBundleDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_internalVibeDescription": "Select internal bundle vibes to export separately as .naiv4vibe files ({count} total)",
-  "@vibe_export_internalVibeDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportBundle": "Export Bundle",
-  "vibe_export_exportAsFiles": "Export as Files",
-  "vibe_export_exportBundleDescription": "Export as a .naiv4vibebundle file",
-  "vibe_export_exportAsFilesDescription": "Export as .naiv4vibe or .naiv4vibebundle files",
-  "vibe_export_exportAsZip": "Export as ZIP",
-  "vibe_export_exportAsZipDescription": "Pack the selected Vibe library entries into a .zip as separate files",
-  "vibe_export_compressData": "Compress data",
-  "vibe_export_compressDataDescription": "Use compression to reduce file size (recommended for batch export)",
-  "vibe_export_zipCompressDescription": "Compress files inside the ZIP to reduce size",
-  "vibe_export_exportAsPng": "Export as PNG",
-  "vibe_export_pngInternalBundleUnsupported": "Embedding into an image is not supported when exporting a single internal bundle vibe",
-  "vibe_export_embedVibeDataIntoPng": "Embed Vibe data into PNG metadata",
-  "vibe_export_batchPngUsesFirstImage": "Batch export uses each Vibe's first available image. Entries without images are skipped automatically.",
-  "vibe_export_exportCarrierImage": "Export carrier image",
-  "vibe_export_usingExternalCarrierImage": "Using an external PNG as the export carrier image",
-  "vibe_export_exportAsEncodings": "Export as Encodings",
-  "vibe_export_exportAsEncodingsDescription": "Export data as encodings (JSON or Base64)",
-  "vibe_export_jsonDescription": "Export as a formatted JSON file for easier reading and editing",
-  "vibe_export_base64Description": "Export as plain Base64 for copying and sharing",
-  "vibe_export_selectAtLeastOneMethod": "Select at least one export method",
-  "vibe_export_batchPngUnsupported": "Batch Vibe export does not support embedding into PNG. Use the single Vibe export screen.",
-  "vibe_export_selectPngCarrier": "Select a PNG carrier image for export",
-  "vibe_export_selectAtLeastOneInternalVibe": "Select at least one internal vibe to export",
-  "vibe_export_selectVibeExportFolder": "Select Vibe export folder",
-  "vibe_export_saveEncodingFile": "Save encoding file",
-  "vibe_export_preparingExport": "Preparing export...",
-  "vibe_export_preparingVibeProgress": "Reading Vibe {current}/{total}...",
-  "@vibe_export_preparingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingBundle": "Exporting Bundle...",
-  "vibe_export_exportingZip": "Exporting ZIP...",
-  "vibe_export_embeddingImage": "Embedding image...",
-  "vibe_export_exportingEncoding": "Exporting encoding...",
-  "vibe_export_exportFailedWithError": "Export failed: {error}",
-  "vibe_export_noExportableEntries": "No exportable Vibe entries",
-  "@vibe_export_exportFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_bundleFilePathEmpty": "Bundle file path is empty",
-  "vibe_export_invalidImageFormatWithError": "Invalid image format: {error}",
-  "@vibe_export_invalidImageFormatWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedFailedWithError": "Embed failed: {error}",
-  "@vibe_export_embedFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedImageFailedWithError": "Failed to embed image: {error}",
-  "@vibe_export_embedImageFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_extractingVibeProgress": "Extracting vibe {current}/{total}...",
-  "@vibe_export_extractingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_selectImageFailed": "Failed to select image: {error}",
-  "@vibe_export_selectImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "vibe_export_dialogTitle": "Export {count} Vibes",
   "@vibe_export_dialogTitle": {
     "placeholders": {
@@ -2562,8 +2044,6 @@
   },
   "vibe_export_embedFailed": "Embed failed",
   "vibe_embedToImage": "Embed to Image",
-  "vibe_import_skip": "Skip",
-  "vibe_import_confirm": "Confirm",
   "vibe_import_noEncodingData": "No encoding data",
   "vibe_import_encodingCost": "Encoding will cost 2 Anlas",
   "vibe_import_confirmCost": "Continue and consume Anlas?",
@@ -2576,39 +2056,9 @@
   "vibe_import_encodingComplete": "Encoding complete",
   "vibe_import_partialFailed": "Partial encoding failed",
   "vibe_import_timeout": "Encoding timeout",
-  "vibe_import_title": "Import from Library",
-  "vibe_import_result": "Imported {count} vibes",
-  "@vibe_import_result": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_import_fileParseFailed": "Failed to parse file",
   "vibe_import_fileSelectionFailed": "File selection failed",
   "vibe_import_importFailed": "Import failed",
-  "vibe_import_bundleTitle": "Import Vibe Bundle",
-  "vibe_import_bundleChooseMethod": "Choose import method",
-  "vibe_import_bundleAsWhole": "Import as whole",
-  "vibe_import_bundleAsWholeDescription": "Keep the bundle structure and import it as one library entry",
-  "vibe_import_bundleSplitEntries": "Split into separate entries",
-  "vibe_import_bundleSplitEntriesDescription": "Import each vibe as a separate library entry",
-  "vibe_import_bundleSelectVibes": "Select vibes to import",
-  "vibe_import_bundleSelectVibesDescription": "Import only the selected vibes",
-  "vibe_import_bundleConfigureEachVibe": "Configure each Vibe's parameters",
-  "vibe_import_bundleSelectAndConfigureEachVibe": "Select and configure each Vibe's parameters",
-  "vibe_import_bundleSelectedCount": "{selected}/{total} selected",
-  "@vibe_import_bundleSelectedCount": {
-    "placeholders": {
-      "selected": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_saveToLibrary_title": "Save to Library",
   "vibe_saveToLibrary_strength": "Strength",
   "vibe_saveToLibrary_infoExtracted": "Information Extracted",
@@ -2698,30 +2148,10 @@
   "selection_clear_selection": "Clear Selection",
   "selection_invert_selection": "Invert Selection",
   "selection_cut_to_layer": "Cut to Layer",
-  "search_results": "Search Results",
-  "search_noResults": "No matching results",
-  "addToCurrent": "Add to Current",
-  "replaceExisting": "Replace Existing",
-  "confirmSelection": "Confirm Selection",
   "selectAll": "Select All",
   "clearSelection": "Clear",
-  "clearFilters": "Clear Filters",
   "shortcut_context_vibe_detail": "Vibe Detail",
   "shortcut_action_vibe_detail_rename": "Rename",
-  "vibeSelectorFilterFavorites": "Favorites",
-  "vibeSelectorFilterSourceAll": "All Types",
-  "vibeSelectorSortCreated": "Created",
-  "vibeSelectorSortLastUsed": "Last Used",
-  "vibeSelectorSortUsedCount": "Usage Count",
-  "vibeSelectorSortName": "Name",
-  "vibeSelectorItemsCount": "{count} items",
-  "@vibeSelectorItemsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "tray_show": "Show Window",
   "tray_exit": "Exit",
   "settings_shortcutsSubtitle": "Customize keyboard shortcuts",
@@ -3052,26 +2482,6 @@
   "toast_kritaNotConnected": "Krita is not connected. Enable the bridge in Settings and connect the plugin first.",
   "toast_sentToKrita": "Image sent to Krita",
   "toast_kritaUnsupportedImageFormat": "This image format cannot be sent to Krita. Use a common image format.",
-  "toast_deletedNamed": "Deleted: {name}",
-  "@toast_deletedNamed": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_vibeParamSaveReencodeFailed": "Failed to save parameters because Vibe re-encoding failed",
-  "toast_exportSuccess": "Export successful",
-  "toast_exportFailed": "Export failed: {error}",
-  "@toast_exportFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_selectVibeToExport": "Select a Vibe to export first",
-  "toast_embedPngSingleVibeOnly": "Embedding into PNG only supports exporting one Vibe",
-  "toast_selectPngCarrier": "Select a PNG carrier image for export",
-  "toast_renameSuccess": "Renamed successfully",
-  "toast_paramsSaved": "Parameters saved",
-  "toast_paramsSaveFailed": "Failed to save parameters",
   "toast_dropNoReadableImageOrVibe": "The drop source did not provide a readable image or Vibe file",
   "toast_contentCannotBeEmpty": "Content cannot be empty",
   "toast_addedToLibrary": "Added to library",
@@ -3092,33 +2502,6 @@
       "skipped": {}
     }
   },
-  "toast_favorited": "Favorited",
-  "toast_unfavorited": "Unfavorited",
-  "toast_favoriteUpdateFailed": "Failed to update favorite state: {error}",
-  "@toast_favoriteUpdateFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_packingImages": "Packing {count} images...",
-  "@toast_packingImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packedImages": "Packed {count} images",
-  "@toast_packedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packFailed": "Pack failed",
-  "toast_packFailedWithError": "Pack failed: {error}",
-  "@toast_packFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "toast_saveDirNotSet": "Save directory is not set",
   "toast_savedTo": "Saved to {path}",
   "@toast_savedTo": {
@@ -3131,42 +2514,12 @@
   "toast_savedToVibeLibrary": "Saved to Vibe Library",
   "toast_saveBundleFailed": "Failed to save bundle",
   "toast_saveEntryFailed": "Failed to save entry",
-  "toast_imagePromptCopied": "Prompt copied",
-  "toast_imageHasNoPrompt": "This image has no Prompt",
-  "toast_useDeleteButton": "Use the delete button in the UI",
   "toast_imageDataUnavailable": "Image data is unavailable and cannot be copied",
-  "toast_vibeDataCopied": "Vibe data copied",
   "toast_characterPromptCopied": "Character prompt copied",
   "toast_copiedTitle": "{title} copied",
   "@toast_copiedTitle": {
     "placeholders": {
       "title": {}
-    }
-  },
-  "toast_replacedVibesCount": "Replaced with {count} Vibes: {name}",
-  "@toast_replacedVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_sentVibesCount": "Sent {count} Vibes to generation: {name}",
-  "@toast_sentVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_replacedVibe": "Replaced with: {name}",
-  "@toast_replacedVibe": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_sentVibeToGeneration": "Sent to generation: {name}",
-  "@toast_sentVibeToGeneration": {
-    "placeholders": {
-      "name": {}
     }
   },
   "toast_unreadableDroppedImageSource": "The drop source did not provide a readable image file or image URL",
@@ -3196,12 +2549,6 @@
       "error": {}
     }
   },
-  "toast_renameNameRequired": "Name is required",
-  "toast_renameNameConflict": "Name already exists. Use another name.",
-  "toast_renameEntryNotFound": "The entry no longer exists and may have been deleted",
-  "toast_renameFilePathMissing": "This entry has no file path and cannot be renamed",
-  "toast_renameFileFailed": "Failed to rename file. Try again later.",
-  "toast_renameFailed": "Rename failed. Try again later.",
   "toast_processImageFailed": "Failed to process image: {error}",
   "@toast_processImageFailed": {
     "placeholders": {
@@ -3223,55 +2570,14 @@
     }
   },
   "common_saving": "Saving...",
-  "common_pleaseWait": "Please wait",
-  "common_change": "Change",
   "common_expand": "Expand",
   "common_collapse": "Collapse",
-  "vibeLibrary_emptySearchTitle": "No matching Vibes",
-  "vibeLibrary_emptySearchSubtitle": "Try a different keyword",
-  "vibeLibrary_emptyFavoritesTitle": "No favorite Vibes yet",
-  "vibeLibrary_emptyFavoritesSubtitle": "Click the heart icon to favorite a Vibe",
-  "vibeLibrary_emptyCategoryTitle": "No Vibes in this category",
-  "vibeLibrary_emptyCategorySubtitle": "Switch to \"All Vibes\" to see all entries",
-  "vibeLibrary_emptyNoMatchesTitle": "No matching results",
-  "vibeLibrary_emptySaveFromGenerationHint": "Save Vibes from the generation page to add them to the library",
-  "vibe_nameRequired": "Name is required",
-  "vibe_import_namingTitle": "Name Vibe",
-  "vibe_import_nameConflictOverwrite": "This name already exists and will be overwritten",
-  "vibe_previewLoadFailed": "Failed to load preview",
-  "vibe_import_applyToRemainingFiles": "Apply to all remaining files",
-  "vibe_import_applyNamingToRemainingFiles": "Use this naming rule for the remaining files",
-  "vibe_encodeImageTitle": "Encode Image as Vibe",
-  "vibe_imagePreview": "Image preview",
-  "vibe_encodeStartButton": "Start Encoding",
-  "vibe_encodeImageInProgress": "Encoding image...",
-  "vibe_encodeErrorImage": "Image: {fileName}",
-  "@vibe_encodeErrorImage": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "vibe_encodeErrorMessage": "Error: {error}",
-  "@vibe_encodeErrorMessage": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibe_encodeSkipImage": "Skip this image",
-  "detail_sendToImg2Img": "Send to Image2Image",
-  "detail_loadingImage": "Loading image...",
-  "detail_imageLoadFailed": "Failed to load image",
-  "detail_noImage": "No image",
   "detail_parsingMetadata": "Parsing metadata...",
   "detail_noMetadata": "This image has no metadata",
   "detail_metadata": "Metadata",
-  "detail_imageDetails": "Image Details",
-  "detail_basicInfo": "Basic Info",
-  "detail_fileName": "File Name",
   "detail_modifiedTime": "Modified",
   "detail_fileSize": "File Size",
   "detail_noContent": "(No content)",
-  "detail_saveBlock": "Save as Block",
   "saveBlock_title": "Save as Block",
   "saveBlock_nameLabel": "Block title",
   "saveBlock_nameHint": "Enter block title",
@@ -3285,9 +2591,6 @@
       "label": {}
     }
   },
-  "detail_copyCharacterPrompt": "Copy Character Prompt",
-  "detail_copyAllVibeData": "Copy all Vibe data",
-  "detail_saveToVibeLibrary": "Save to Vibe Library",
   "comfyImport_detectedTitle": "Detected ComfyUI multi-character prompt",
   "comfyImport_characterList": "Character List ({count})",
   "@comfyImport_characterList": {
@@ -3401,31 +2704,6 @@
   "model3d_light": "Lighting",
   "model3d_addLayerTooltip": "Add 3D Model Layer",
   "nav_preciseRefLibrary": "Precise Ref Library",
-  "preciseRefLib_title": "Precise Reference Library",
-  "preciseRefLib_searchHint": "Search references...",
-  "preciseRefLib_empty": "Drop or paste images here to build your library",
-  "preciseRefLib_emptyHint": "You can also right-click images in preview, history, or gallery to save them here",
-  "preciseRefLib_import": "Import Images",
-  "preciseRefLib_entryCount": "{count} items",
-  "@preciseRefLib_entryCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "preciseRefLib_sendToPreciseRef": "Send to Precise Reference",
-  "preciseRefLib_sendToImg2Img": "Send to Image to Image",
-  "preciseRefLib_editEntry": "Edit Parameters",
-  "preciseRefLib_confirmDeleteTitle": "Delete Entry",
-  "preciseRefLib_confirmDelete": "Delete \"{name}\"? The image file will also be removed.",
-  "@preciseRefLib_confirmDelete": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "preciseRefLib_saved": "Saved \"{name}\" to Precise Ref Library",
   "@preciseRefLib_saved": {
     "placeholders": {
@@ -3435,44 +2713,13 @@
     }
   },
   "preciseRefLib_savedHint": "You can edit parameters in the library",
-  "preciseRefLib_sent": "Sent \"{name}\" to Precise Reference",
-  "@preciseRefLib_sent": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "preciseRefLib_sentToImg2Img": "Sent \"{name}\" to Image to Image",
-  "@preciseRefLib_sentToImg2Img": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "preciseRefLib_imageMissing": "Image file is missing",
   "preciseRefLib_invalidImage": "The image format is unsupported or the file is corrupt",
-  "preciseRefLib_deleteFailed": "Delete failed. The entry and original image were kept; try again later",
-  "preciseRefLib_favoritesOnly": "Favorites only",
-  "preciseRefLib_sortBy": "Sort by",
-  "preciseRefLib_sortCreatedAt": "Created",
-  "preciseRefLib_sortLastUsed": "Last used",
-  "preciseRefLib_sortUsedCount": "Most used",
-  "preciseRefLib_sortName": "Name",
   "preciseRefLib_importedCount": "Imported {count} images",
   "@preciseRefLib_importedCount": {
     "placeholders": {
       "count": {
         "type": "int"
-      }
-    }
-  },
-  "preciseRefLib_loadFailed": "Failed to load the Precise Reference Library: {error}",
-  "@preciseRefLib_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
       }
     }
   },
@@ -3502,17 +2749,6 @@
       }
     }
   },
-  "preciseRefLib_selectorTitle": "Select from Precise Ref Library",
-  "preciseRefLib_selectorConfirm": "Add Selected ({count})",
-  "@preciseRefLib_selectorConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "preciseRefLib_nameLabel": "Name",
-  "preciseRefLib_typeFilterAll": "All",
   "img2img_fromPreciseRefLibrary": "From Precise Ref Library",
   "localGallery_saveToPreciseRefLibrary": "Save to Precise Ref Library",
   "drop_saveToPreciseRefLibrary": "Save to Precise Ref Library",
@@ -3624,9 +2860,6 @@
   "addToLibrary_displayNameHint": "Enter a name to identify this entry",
   "addToLibrary_tagHint": "Enter a tag and press Enter to add it",
   "drop_saveVibeBundle": "Save Vibe Bundle",
-  "history_dragFilePreparationFailed": "Failed to prepare the drag file. Try again later.",
-  "history_dragFilePreparing": "Preparing the drag file...",
-  "history_dragFileNotReady": "The drag file is not ready yet",
   "vibe_import_overwriteOriginalParams": "Replace Original Vibe Parameters",
   "vibe_import_overwriteOriginalParamsHint": "Only replace the library parameters for {name}; disabled by default",
   "@vibe_import_overwriteOriginalParamsHint": {
@@ -3654,11 +2887,6 @@
   },
   "galleryScan_organizingGallery": "Organizing gallery",
   "galleryScan_processing": "Processing",
-  "vibeDetail_useAll": "Use All",
-  "vibeDetail_longPressSetCover": "Long-press to set as cover",
-  "vibeDetail_noPreviewImage": "No preview image",
-  "vibeDetail_dropPreviewImage": "Drop an image here to set the preview",
-  "vibeDetail_releasePreviewImage": "Release to set the preview image",
   "imagePicker_dropReadFailed": "Failed to read the dropped image: {error}",
   "@imagePicker_dropReadFailed": {
     "placeholders": {
@@ -3746,14 +2974,9 @@
       }
     }
   },
-  "nav_promptBlockLibrary": "Prompt Blocks",
-  "promptBlockLibrary_title": "Prompt Blocks",
-  "promptBlockLibrary_folders": "Folders",
   "promptBlockLibrary_allBlocks": "All blocks",
   "promptBlockLibrary_rootFolder": "Root / Unfiled",
   "promptBlockLibrary_unnamedBlock": "Untitled block",
-  "promptBlockLibrary_noBlockSelected": "No block selected",
-  "promptBlockLibrary_details": "Details",
   "promptBlockLibrary_useCount": "Used {count} times",
   "@promptBlockLibrary_useCount": {
     "placeholders": {
@@ -3764,69 +2987,7 @@
   },
   "promptBlockPill_missing": "Block deleted",
   "promptBlockPill_unknown": "Invalid block",
-  "pillCardReroll": "Re-roll",
-  "pillCardRerollLocked": "Locked; re-roll unavailable",
-  "pillCardLock": "Lock current roll",
-  "pillCardUnlock": "Unlock",
-  "pillCardSettings": "Random settings",
-  "pillCardEnable": "Enable",
-  "pillCardDisable": "Disable",
-  "pillCardDeleteInstance": "Remove instance",
-  "pillCardEmptyRoll": "(empty roll this time)",
-  "pillCardEvolutionEnable": "Enable evolution",
-  "pillCardEvolutionDisable": "Disable evolution",
-  "pillCardEvolutionRequiresEnabled": "Enable the instance first",
-  "pillCardStepBack": "Step back one scene",
-  "pillCardStepForward": "Step forward one scene",
-  "pillSettingsTitle": "Block instance settings",
-  "pillSettingsModeFixed": "Fixed",
-  "pillSettingsModeSequential": "Sequential",
-  "pillSettingsModeRandom": "Random draw",
-  "pillSettingsCount": "Draw count",
-  "pillSettingsOrder": "Output order",
-  "pillSettingsOrderDrawn": "As drawn",
-  "pillSettingsOrderOriginal": "Original order",
-  "pillSettingsWeight": "Random weight",
-  "pillSettingsWeightMin": "Min",
-  "pillSettingsWeightMax": "Max",
-  "pillSettingsWeightAverage": "Average",
-  "pillSettingsDispersion": "Dispersion",
-  "pillSettingsDispersionFocused": "Focused",
-  "pillSettingsDispersionBalanced": "Balanced",
-  "pillSettingsDispersionSpread": "Spread",
-  "pillSettingsAdvanced": "Advanced",
-  "pillSettingsLeftDispersion": "Left",
-  "pillSettingsRightDispersion": "Right",
-  "pillSettingsSoftBalance": "Soft balance",
-  "pillSettingsSoftBalanceStrength": "Strength",
-  "pillSettingsTriggerProbability": "Trigger chance",
-  "pillSettingsCancel": "Cancel",
-  "pillSettingsApply": "Apply",
   "promptBlockLibrary_unnamedFolder": "Untitled folder",
-  "promptBlockLibrary_scope": "Browse",
-  "promptBlockLibrary_newBlock": "New block",
-  "promptBlockLibrary_editBlock": "Edit block",
-  "promptBlockLibrary_newFolder": "New folder",
-  "promptBlockLibrary_newSubfolder": "New subfolder",
-  "promptBlockLibrary_renameFolder": "Rename folder",
-  "promptBlockLibrary_moveToRoot": "Move to root",
-  "promptBlockLibrary_moveToFolder": "Move to folder",
-  "promptBlockLibrary_favorites": "Favorites",
-  "promptBlockLibrary_unclassified": "Unclassified",
-  "promptBlockLibrary_newCollection": "New collection",
-  "promptBlockLibrary_newSubcollection": "New sub-collection",
-  "promptBlockLibrary_newCollectionFolder": "New collection folder",
-  "promptBlockLibrary_renameCollection": "Rename collection",
-  "promptBlockLibrary_renameCollectionFolder": "Rename collection folder",
-  "promptBlockLibrary_moveToFavoritesRoot": "Move to favorites root",
-  "promptBlockLibrary_unnamedCollection": "Unnamed collection",
-  "promptBlockLibrary_unnamedCollectionFolder": "Unnamed collection folder",
-  "promptBlockLibrary_collectionName": "Collection name",
-  "promptBlockLibrary_collectionNameHint": "Collection name",
-  "promptBlockLibrary_noCollections": "No collections yet — use the + next to Favorites, or drag a block onto a collection",
-  "promptBlockLibrary_noFolders": "No folders yet",
-  "promptBlockLibrary_emptyFavorites": "No favorite blocks yet — tap the ★ on a block to favorite it",
-  "promptBlockLibrary_emptyCollection": "This collection is empty",
   "promptBlockLibrary_deleteCollectionConfirm": "Delete collection \"{name}\"? Blocks inside are not deleted, only unlinked from the collection.",
   "@promptBlockLibrary_deleteCollectionConfirm": {
     "placeholders": {
@@ -3845,39 +3006,9 @@
   },
   "promptBlockLibrary_blockTitle": "Title",
   "promptBlockLibrary_titleHint": "Block title",
-  "promptBlockLibrary_searchHint": "Search title, prompt, or tag",
   "promptBlockLibrary_folder": "Folder",
-  "promptBlockLibrary_folderName": "Folder name",
-  "promptBlockLibrary_folderNameHint": "Folder name",
-  "promptBlockLibrary_basicPrompt": "Base Prompt",
-  "promptBlockLibrary_generationSettings": "Settings",
-  "promptBlockLibrary_settingsOptionalHint": "Only filled parameters are saved. Apply settings manually after inserting the block.",
-  "promptBlockLibrary_notSpecified": "Not specified",
-  "promptBlockLibrary_stepsLabel": "Steps",
-  "promptBlockLibrary_noiseScheduleLabel": "Noise Schedule",
-  "promptBlockLibrary_invalidGenerationSettings": "Check settings: steps 1–50, Prompt Guidance 1–20, Prompt Guidance Rescale 0–1, and model compatibility.",
-  "promptBlockLibrary_applySettings": "Import settings",
   "promptBlockLibrary_settingsApplied": "Block settings imported to the current image",
   "promptBlockLibrary_settingsIncompatible": "Block settings are incompatible with the target model. No parameters were imported.",
-  "promptBlockLibrary_noSettings": "No generation settings saved",
-  "promptBlockLibrary_tags": "Tags",
-  "promptBlockLibrary_addTag": "Add tag",
-  "promptBlockLibrary_tagName": "Tag name",
-  "promptBlockLibrary_tagColor": "Tag color (hex)",
-  "promptBlockLibrary_duplicateTag": "This block already has a tag with that name",
-  "promptBlockLibrary_invalidTagColor": "Enter a valid hex color",
-  "pillCard_rollScope": "Variation scope",
-  "pillCard_positiveScope": "Positive",
-  "pillCard_negativeScope": "Negative",
-  "promptBlockLibrary_modelResetNotice": "Unsupported values were cleared after changing the model.",
-  "promptBlockLibrary_atomInputHint": "Type text, press Enter to make an atom",
-  "promptBlockLibrary_atomRestoreHint": "Click to restore as editable text",
-  "promptBlockLibrary_atomOrphan": "Unknown marker",
-  "promptBlockLibrary_atomEditorTutorial": "Enter makes a block, click a block to restore text; unblocked text becomes atoms on save.",
-  "promptBlockLibrary_color": "Color",
-  "promptBlockLibrary_icon": "Icon",
-  "promptBlockLibrary_saved": "Saved",
-  "promptBlockLibrary_copied": "Content copied",
   "promptBlockLibrary_deleted": "Deleted",
   "promptBlockLibrary_multiSelect": "Multi-select",
   "promptBlockLibrary_exitMultiSelect": "Exit multi-select",
@@ -3891,37 +3022,8 @@
   },
   "promptBlockLibrary_selectAllVisible": "Select all",
   "promptBlockLibrary_clearSelection": "Clear selection",
-  "promptBlockLibrary_moveTo": "Move to…",
-  "promptBlockLibrary_moveToFolderTitle": "Move to folder",
-  "promptBlockLibrary_deleteBlocksConfirm": "Delete {count} selected blocks? This cannot be undone.",
-  "@promptBlockLibrary_deleteBlocksConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_deleteSelected": "Delete {count} selected blocks",
-  "@promptBlockLibrary_deleteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_empty": "No prompt blocks yet",
-  "promptBlockLibrary_emptyFolder": "This folder is empty",
   "promptBlockLibrary_noSearchResults": "No matching blocks",
-  "promptBlockLibrary_tryDifferentSearch": "Try a different search",
-  "promptBlockLibrary_emptyHint": "Create a block to start organizing reusable text",
-  "promptBlockLibrary_loadFailed": "Failed to load prompt blocks: {error}",
-  "@promptBlockLibrary_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_deleteFolderTitle": "Delete folder \"{name}\"?",
   "@promptBlockLibrary_deleteFolderTitle": {
     "placeholders": {
@@ -3934,11 +3036,7 @@
   "promptBlockLibrary_destinationFolder": "Destination folder",
   "promptBlockLibrary_deleteContents": "Delete contents",
   "promptBlockLibrary_deleteContentsWarning": "This also permanently deletes all blocks in the folder tree.",
-  "promptBlockLibrary_importExport": "Import / Export",
-  "promptBlockLibrary_importTxtFiles": "Import TXT files",
-  "promptBlockLibrary_importFromFolder": "Import from folder…",
   "promptBlockLibrary_exportLibraryBackup": "Export library backup…",
-  "promptBlockLibrary_importLibraryBackup": "Import library backup…",
   "promptBlockLibrary_importTxtTitle": "Select TXT files",
   "promptBlockLibrary_txtImportDone": "Imported {created} blocks, skipped {skipped} existing sources",
   "@promptBlockLibrary_txtImportDone": {
@@ -3997,30 +3095,7 @@
   "promptBlockLibrary_curationUnchanged": "Unchanged",
   "promptBlockLibrary_curationChanged": "Changed",
   "promptBlockLibrary_curationLocalModified": "Locally modified",
-  "promptBlockLibrary_libraryBackupDone": "Exported backup with {count} blocks",
-  "@promptBlockLibrary_libraryBackupDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_libraryImportTitle": "Select library backup",
-  "promptBlockLibrary_libraryBackupInvalid": "Not a valid block library backup",
-  "promptBlockLibrary_libraryImportDone": "Imported {blocks} blocks and {folders} folders, skipped {skipped} existing",
-  "@promptBlockLibrary_libraryImportDone": {
-    "placeholders": {
-      "blocks": {
-        "type": "int"
-      },
-      "folders": {
-        "type": "int"
-      },
-      "skipped": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_importFailed": "Import failed: {error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
@@ -4031,9 +3106,6 @@
   },
   "promptBlockLibrary_sourceFile": "Source file",
   "promptBlockLibrary_importedAt": "Imported at",
-  "promptBlockLibrary_listView": "List view",
-  "promptBlockLibrary_gridView": "Grid view",
-  "promptBlockLibrary_waterfallView": "Waterfall view",
   "promptBlockPalette_tooltip": "Blocks",
   "promptBlockPalette_emptyHint": "Keep prompt blocks or translation blocks here; click to insert at the caret, or drag them into the prompt box.",
   "promptBlockPalette_remove": "Remove from blocks",
@@ -4047,45 +3119,11 @@
       }
     }
   },
-  "promptBlockLibrary_sortBy": "Sort by",
-  "promptBlockLibrary_sortCustom": "Default (manual order)",
-  "promptBlockLibrary_sortUpdated": "Last modified",
-  "promptBlockLibrary_sortTitle": "Title",
-  "promptBlockLibrary_sortColor": "Color",
-  "promptBlockLibrary_sortIcon": "Icon",
-  "promptBlockLibrary_sortAscending": "Ascending",
-  "promptBlockLibrary_sortDescending": "Descending",
-  "promptBlockLibrary_cardSize": "Card size",
-  "promptBlockLibrary_reorderFolders": "Reorder folders",
   "nav_styleExplore": "Style Explore",
-  "styleExplore_rename": "Rename",
-  "styleExplore_nameRequired": "Name cannot be empty",
   "styleExplore_operationFailed": "Operation failed",
   "styleExplore_discardChangesTitle": "Discard unsaved changes?",
   "styleExplore_discardChangesMessage": "The workspace has unsaved changes. Continuing will discard them.",
   "styleExplore_discardChangesConfirm": "Continue and discard",
-  "styleExplore_newRun": "New exploration",
-  "styleExplore_runDeleted": "Deleted exploration “{name}”",
-  "@styleExplore_runDeleted": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_runStatusGenerating": "Generating",
-  "styleExplore_runStatusPaused": "Paused",
-  "styleExplore_runStatusCancelled": "Cancelled",
-  "styleExplore_pauseRun": "Pause",
-  "styleExplore_cancelRun": "Cancel exploration",
-  "styleExplore_retryFailed": "Retry failed ({count})",
-  "@styleExplore_retryFailed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_manualRunName": "Manual capture {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4095,64 +3133,6 @@
     }
   },
   "styleExplore_runBusy": "Generation busy, try again later",
-  "styleExplore_deleteRunTitle": "Delete exploration",
-  "styleExplore_deleteRunMessage": "Deletes \"{name}\" and its candidate image copies; source images in the gallery are not affected.",
-  "@styleExplore_deleteRunMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_cancelRunTitle": "Cancel exploration",
-  "styleExplore_cancelRunMessage": "A cancelled exploration cannot be restarted; remaining queued candidates are marked as cancelled.",
-  "styleExplore_filterAll": "All",
-  "styleExplore_filterHearted": "Favorites",
-  "styleExplore_renameFolder": "Rename group",
-  "styleExplore_deleteFolder": "Delete group",
-  "styleExplore_deleteFolderMessage": "Delete group “{name}”? Its candidates become ungrouped; images are kept.",
-  "@styleExplore_deleteFolderMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_folderNameLabel": "Group name",
-  "styleExplore_deleteFamily": "Delete evolution line",
-  "styleExplore_deleteFamilyMessage": "Delete evolution line “{name}”, all parents and offspring records ({count} images)? Image files are kept.",
-  "@styleExplore_deleteFamilyMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_familyBusy": "This evolution line still has candidates generating. Stop generation first.",
-  "styleExplore_folderUncategorized": "Ungrouped",
-  "styleExplore_folderCreated": "Created group “{name}”",
-  "@styleExplore_folderCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_candidateMissing": "Image file missing",
-  "styleExplore_candidateDetailTitle": "Candidate detail",
-  "styleExplore_prevCandidate": "Previous",
-  "styleExplore_nextCandidate": "Next",
-  "styleExplore_roundNumber": "Round {number}",
-  "@styleExplore_roundNumber": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_adoptBlockSaved": "Saved as block “{name}”",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
@@ -4162,25 +3142,9 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "The selected candidates have no artist strings or positive prompts to save",
-  "styleExplore_deleteImage": "Delete image",
-  "styleExplore_deleteImageTitle": "Delete candidate image",
-  "styleExplore_deleteImageMessage": "Delete this candidate’s image copy and record? Library originals are kept.",
-  "styleExplore_deleteImageDone": "Candidate image and record deleted",
-  "styleExplore_selectCandidates": "Select",
-  "styleExplore_selectedCount": "{count} selected",
-  "@styleExplore_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockEditor_library": "Block library",
   "promptBlockPicker_title": "Select Block",
-  "promptBlockLibrary_thumbnail": "Thumbnail",
-  "promptBlockLibrary_selectNewImage": "Select New Image",
   "promptBlockLibrary_selectImage": "Select Image",
-  "promptBlockLibrary_adjustDisplayRange": "Adjust Display Range",
   "promptBlockLibrary_adjustThumbnailTitle": "Adjust Thumbnail Display Range",
   "promptBlockLibrary_dragToMove": "Drag to move, scroll or pinch to zoom",
   "promptBlockLibrary_addToLibrary": "Add to Block Library",
@@ -4198,52 +3162,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "Update Existing Block Thumbnail",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "Select a block and replace its thumbnail",
-  "styleExplore_deepRoundCountHint": "At least {min} images (one guaranteed for each parent)",
-  "@styleExplore_deepRoundCountHint": {
-    "placeholders": {
-      "min": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_deepRoundNoInstance": "No enabled genetic random block in the main prompt; offspring cannot be generated",
-  "styleExplore_deepRoundEmpty": "Not enough distinct offspring artist combinations could be created",
-  "styleExplore_sortLeft": "Left is better",
-  "styleExplore_sortRight": "Right is better",
-  "styleExplore_sortNeither": "Neither is good",
-  "styleExplore_sortSkip": "Skip",
-  "styleExplore_sortProgress": "Pair {current} / {total}",
-  "@styleExplore_sortProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_sortDone": "Pairwise comparison complete",
-  "styleExplore_branchCreated": "Next generation bred ({count} parents)",
-  "@styleExplore_branchCreated": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_branchNeedLatest": "Use offspring from the latest generation to breed the next one",
-  "styleExplore_branchRoundsIncomplete": "This generation has unfinished offspring; wait or stop generation",
-  "styleExplore_branchDuplicate": "A selected offspring candidate duplicates a first-generation parent string",
-  "styleExplore_branchEmpty": "Select at least one offspring candidate",
-  "styleExplore_pileManageDeleteDone": "Deleted {count} candidates and their image copies",
-  "@styleExplore_pileManageDeleteDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "subscriptionExpiresOn": "Expires {date}",
   "@subscriptionExpiresOn": {
     "placeholders": {
@@ -5126,11 +4044,7 @@
   "settings_updateCredentials2": "Update credentials",
   "settings_checking": "Checking…",
   "settings_enterNewSignInToken": "Enter a new sign-in token. This account updates after validation.",
-  "auth_signInAccounts": "Sign-in & accounts",
   "auth_notSignedIn": "Not signed in",
-  "auth_chooseAccountContinue": "Choose an account to continue",
-  "auth_manageAccounts2": "Manage accounts",
-  "auth_subscriptionExpired": "Subscription expired",
   "settings_tagExpansion": "Tag expansion",
   "settings_tagDictionaries": "Tag dictionaries",
   "settings_cacheMaintenance": "Cache maintenance",
@@ -5330,8 +4244,6 @@
   "translationLanguage_japanese": "Japanese",
   "translationLanguage_korean": "Korean",
   "translationLanguage_traditionalChinese": "Traditional Chinese",
-  "promptBlockEditor_translationNeedsReview": "Original changed; translation needs updating",
-  "promptBlockEditor_translationReviewHint": "After editing the original, review this translation as well",
   "modelTask_translateTitle": "Original → reading language",
   "modelTask_promptReverseTitle": "Reading language → original",
   "modelTask_tagTranslateTitle": "Tag name translation",
@@ -5902,56 +4814,8 @@
   "promptTranslation_incompleteStructure": "The conversion result has incomplete weights or groups; the draft is kept",
   "promptTranslation_inputRequired": "Enter the content to convert first",
   "wiki_configureTagModel": "Configure an available tag translation model in Models & APIs first.",
-  "blockOrganizer_barrierLabel": "Block organizer",
-  "blockOrganizer_replaceTitle": "Replace copies from the same source?",
   "blockOrganizer_replaceMoveBody": "The target already has {count} copies from the same source. After replacing, the source is hidden from the library; instances already inserted in prompts can still reference the original block.",
   "@blockOrganizer_replaceMoveBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replaceCopyBody": "The target already has {count} copies from the same source. Replacing updates the target copies; the source is kept.",
-  "@blockOrganizer_replaceCopyBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replace": "Replace",
-  "blockOrganizer_customTagColor": "Custom tag color",
-  "blockOrganizer_colorHint": "#RRGGBB or #AARRGGBB",
-  "blockOrganizer_invalidColor": "Enter a 6- or 8-digit hexadecimal color",
-  "blockOrganizer_deleteFolderConfirm": "Delete “{name}”? Its blocks will move to the root folder.",
-  "@blockOrganizer_deleteFolderConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_deleteCollectionConfirm": "Delete “{name}”? The blocks themselves are kept.",
-  "@blockOrganizer_deleteCollectionConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_titleFavorites": "Favorites & collections",
-  "blockOrganizer_titleFolders": "Choose a folder",
-  "blockOrganizer_itemCount": "{count} items",
-  "@blockOrganizer_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_search": "Search",
-  "blockOrganizer_name": "Name",
-  "blockOrganizer_customColor": "Custom color…",
-  "blockOrganizer_newCollection": "New collection",
-  "blockOrganizer_newCollectionFolder": "New collection folder",
-  "blockOrganizer_newTag": "New tag",
-  "blockOrganizer_newFolder": "New folder",
-  "blockOrganizer_rootUncategorized": "Root / Uncategorized",
-  "blockOrganizer_manageDrag": "Manage; drag to reorder",
-  "blockLibrary_dragSelectedHint": "Drag the selected blocks onto a favorite or folder on the left, then choose copy or move when you release.",
-  "blockLibrary_blockCount": "{count} blocks",
-  "@blockLibrary_blockCount": {
     "placeholders": {
       "count": {}
     }
@@ -5961,8 +4825,6 @@
   "blockLibrary_sameSourceSelected": "The selection contains copies from the same source; organize them separately",
   "blockLibrary_sameSourceExists": "Copies from the same source already exist; confirm replacement",
   "blockLibrary_collectionMissing": "The collection does not exist",
-  "promptBlockEditor_appearance": "Block appearance",
-  "promptBlockEditor_imageUnreadable": "Could not read the selected image",
   "blockAppearance_classic": "Classic",
   "blockAppearance_stripes": "Fine stripes",
   "blockAppearance_dots": "Dots",
@@ -6290,15 +5152,6 @@
       "error": {}
     }
   },
-  "vibeImport_imageProgress": "Importing image ({current}/{total}): {source}",
-  "@vibeImport_imageProgress": {
-    "placeholders": {
-      "current": {},
-      "total": {},
-      "source": {}
-    }
-  },
-  "vibeImport_clipboardSource": "Clipboard",
   "resolution_noAdjustment": "No adjustment needed",
   "dataRefresh_updating": "Updating data...",
   "dataRefresh_updatingService": "Updating {service}...",
@@ -6539,15 +5392,6 @@
   "generation_referenceUpload": "Upload",
   "generation_seedPinnedLabel": "Seed · Fixed",
   "generation_paramsDrawerTooltip": "More parameters",
-  "generation_historyBatchCount": "{count} images",
-  "@generation_historyBatchCount": {
-    "description": "Number of images in one generation history batch",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "library_sizeSmall": "Small",
   "library_sizeMedium": "Medium",
   "library_sizeLarge": "Large",
@@ -6558,16 +5402,6 @@
   "library_selectedCount": "{count} selected",
   "library_invertSelection": "Invert selection",
   "library_more": "More",
-  "library_addToGeneration": "Add to generation",
-  "library_strength": "Strength",
-  "library_information": "Info",
-  "library_fidelity": "Fidelity",
-  "library_encodeOnUse": "Encode on use",
-  "library_reencode": "Re-encode",
-  "library_unusableModel": "Unavailable for {model}",
-  "library_exportAll": "Export all",
-  "library_rescanFolders": "Rescan folders",
-  "library_preview": "Preview",
   "@library_selectedCount": {
     "placeholders": {
       "count": {
@@ -6575,64 +5409,12 @@
       }
     }
   },
-  "@library_unusableModel": {
-    "placeholders": {
-      "model": {
-        "type": "String"
-      }
-    }
-  },
-  "viewer_backLocalGallery": "Local gallery",
   "viewer_fit": "Fit",
   "viewer_showInfo": "Show information panel (I)",
   "viewer_hideInfo": "Hide information panel (I)",
   "viewer_originalSize": "Original size (1)",
   "viewer_fullscreen": "Fullscreen (F11)",
   "shortcut_action_toggle_info_panel": "Toggle information panel",
-  "styleExplore_runNamingHint": "Named from rolling blocks and the date. Double-click a name to rename it.",
-  "styleExplore_roundGenerating": "Round {round} · Generating",
-  "@styleExplore_roundGenerating": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorTitle": "Details",
-  "styleExplore_failedBadge": "{count} failed",
-  "@styleExplore_failedBadge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_showInspector": "Show inspector",
-  "styleExplore_roundProgress": "Round {round} · {current} / {total}",
-  "@styleExplore_roundProgress": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      },
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_earlier": "Earlier",
-  "styleExplore_noMatchingRuns": "No matching explorations",
-  "styleExplore_lineCount": "{count} evolution lines",
-  "@styleExplore_lineCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_newRunDescription": "Start with the current prompts and parameters; rename it later",
   "styleExplore_autoRunName": "{blocks} · {time}",
   "@styleExplore_autoRunName": {
     "placeholders": {
@@ -6643,89 +5425,6 @@
         "type": "String"
       }
     }
-  },
-  "styleExplore_largeCandidates": "Large candidates",
-  "styleExplore_hideInspector": "Hide inspector",
-  "styleExplore_searchRuns": "Search exploration names or artists",
-  "styleExplore_favoriteCount": "{count} favorites",
-  "@styleExplore_favoriteCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingBadge": "Generating {current}/{total}",
-  "@styleExplore_generatingBadge": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_roundCount": "{count} rounds",
-  "@styleExplore_roundCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pausedRemaining": "Paused · {count} remaining",
-  "@styleExplore_pausedRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stopRun": "Stop generation",
-  "styleExplore_thisWeek": "This week",
-  "styleExplore_today": "Today",
-  "styleExplore_smallCandidates": "Small candidates",
-  "styleExplore_imageCount": "{count} images",
-  "@styleExplore_imageCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variablesTitle": "Random variables",
-  "@styleExplore_variablesTitle": {
-    "description": "Style exploration workbench: styleExplore_variablesTitle"
-  },
-  "styleExplore_variablesHint": "Redraw each image",
-  "@styleExplore_variablesHint": {
-    "description": "Style exploration workbench: styleExplore_variablesHint"
-  },
-  "styleExplore_variablesExplanation": "Enabled random and sequential evolution blocks are recorded for each candidate.",
-  "@styleExplore_variablesExplanation": {
-    "description": "Style exploration workbench: styleExplore_variablesExplanation"
-  },
-  "styleExplore_variablePoolSize": "Pool: {count} items",
-  "@styleExplore_variablePoolSize": {
-    "description": "Style exploration workbench: styleExplore_variablePoolSize",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variableEvolutionTarget": "Evolution target",
-  "@styleExplore_variableEvolutionTarget": {
-    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
-  },
-  "styleExplore_variableNegative": "Negative",
-  "@styleExplore_variableNegative": {
-    "description": "Style exploration workbench: styleExplore_variableNegative"
-  },
-  "styleExplore_variablesEmpty": "No random blocks in the prompt yet; candidates will look alike.",
-  "@styleExplore_variablesEmpty": {
-    "description": "Style exploration workbench: styleExplore_variablesEmpty"
   },
   "styleExplore_openBlockLibrary": "Open block library",
   "@styleExplore_openBlockLibrary": {
@@ -6739,461 +5438,10 @@
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   },
-  "styleExplore_candidatesTab": "Candidates",
-  "@styleExplore_candidatesTab": {
-    "description": "Style explore task03: candidatesTab"
-  },
-  "styleExplore_evolutionTab": "Evolution",
-  "@styleExplore_evolutionTab": {
-    "description": "Style explore task03: evolutionTab"
-  },
-  "styleExplore_deepRoundTitle": "Evolution · {name} · Generation {generation}",
-  "@styleExplore_deepRoundTitle": {
-    "description": "Style explore task03: deepRoundTitle",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallRoundCount": "{count} images",
-  "@styleExplore_wallRoundCount": {
-    "description": "Style explore task03: wallRoundCount",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallGenerating": "Generating",
-  "@styleExplore_wallGenerating": {
-    "description": "Style explore task03: wallGenerating"
-  },
-  "styleExplore_roundFailures": "Failed {count}",
-  "@styleExplore_roundFailures": {
-    "description": "Style explore task03: roundFailures",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_queued": "Queued #{number}",
-  "@styleExplore_queued": {
-    "description": "Style explore task03: queued",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingCandidate": "Generating #{number}",
-  "@styleExplore_generatingCandidate": {
-    "description": "Style explore task03: generatingCandidate",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationFailed": "Generation failed",
-  "@styleExplore_generationFailed": {
-    "description": "Style explore task03: generationFailed"
-  },
-  "styleExplore_failureHint": "Hover to see the reason",
-  "@styleExplore_failureHint": {
-    "description": "Style explore task03: failureHint"
-  },
-  "styleExplore_imageDeleted": "Image deleted",
-  "@styleExplore_imageDeleted": {
-    "description": "Style explore task03: imageDeleted"
-  },
-  "styleExplore_parentBadge": "Parent",
-  "@styleExplore_parentBadge": {
-    "description": "Style explore task03: parentBadge"
-  },
-  "styleExplore_opMutation": "Mutation",
-  "@styleExplore_opMutation": {
-    "description": "Style explore task03: opMutation"
-  },
-  "styleExplore_opCrossover": "Crossover",
-  "@styleExplore_opCrossover": {
-    "description": "Style explore task03: opCrossover"
-  },
-  "styleExplore_opInjection": "Injection",
-  "@styleExplore_opInjection": {
-    "description": "Style explore task03: opInjection"
-  },
-  "styleExplore_copyArtists": "Copy artists",
-  "@styleExplore_copyArtists": {
-    "description": "Style explore task03: copyArtists"
-  },
-  "styleExplore_interrupted": "Interrupted",
-  "@styleExplore_interrupted": {
-    "description": "Style explore task03: interrupted"
-  },
-  "styleExplore_emptyFilter": "No matching candidates",
-  "@styleExplore_emptyFilter": {
-    "description": "Style explore task03: emptyFilter"
-  },
-  "styleExplore_emptyRound": "This round has no candidates",
-  "@styleExplore_emptyRound": {
-    "description": "Style explore task03: emptyRound"
-  },
-  "styleExplore_unfavorite": "Unfavorite",
-  "@styleExplore_unfavorite": {
-    "description": "Explore workbench selection: unfavorite"
-  },
-  "styleExplore_groupLabel": "Group",
-  "@styleExplore_groupLabel": {
-    "description": "Explore workbench selection: groupLabel"
-  },
-  "styleExplore_newGroup": "New group…",
-  "@styleExplore_newGroup": {
-    "description": "Explore workbench selection: newGroup"
-  },
-  "styleExplore_saveBlock": "Save as block",
-  "@styleExplore_saveBlock": {
-    "description": "Explore workbench selection: saveBlock"
-  },
-  "styleExplore_startEvolution": "Start evolution",
-  "@styleExplore_startEvolution": {
-    "description": "Explore workbench selection: startEvolution"
-  },
-  "styleExplore_newestFirst": "Newest rounds first",
-  "@styleExplore_newestFirst": {
-    "description": "Explore workbench selection: newestFirst"
-  },
-  "styleExplore_oldestFirst": "Oldest rounds first",
-  "@styleExplore_oldestFirst": {
-    "description": "Explore workbench selection: oldestFirst"
-  },
-  "styleExplore_pickEvolution": "Pick candidates to evolve",
-  "@styleExplore_pickEvolution": {
-    "description": "Explore workbench selection: pickEvolution"
-  },
-  "styleExplore_deleteCandidatesTitle": "Delete candidates",
-  "@styleExplore_deleteCandidatesTitle": {
-    "description": "Delete candidates with or without local copies"
-  },
-  "styleExplore_deleteCandidatesMessage": "Delete {count} candidates and their image copies? Library originals are kept.",
-  "@styleExplore_deleteCandidatesMessage": {
-    "description": "Delete candidates with or without local copies",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorEmpty": "Select a candidate to view details",
-  "@styleExplore_inspectorEmpty": {
-    "description": "styleExplore_inspectorEmpty."
-  },
-  "styleExplore_drawsTitle": "Drawn for this image",
-  "@styleExplore_drawsTitle": {
-    "description": "styleExplore_drawsTitle."
-  },
-  "styleExplore_drawsAfterGeneration": "Shown after generation",
-  "@styleExplore_drawsAfterGeneration": {
-    "description": "styleExplore_drawsAfterGeneration."
-  },
-  "styleExplore_emptyDraw": "Nothing drawn (the pool contains empty entries)",
-  "@styleExplore_emptyDraw": {
-    "description": "styleExplore_emptyDraw."
-  },
-  "styleExplore_hearted": "Favorited",
-  "@styleExplore_hearted": {
-    "description": "styleExplore_hearted."
-  },
-  "styleExplore_joinEvolution": "Add to evolution",
-  "@styleExplore_joinEvolution": {
-    "description": "styleExplore_joinEvolution."
-  },
-  "styleExplore_applyToEditor": "Apply to editor",
-  "@styleExplore_applyToEditor": {
-    "description": "styleExplore_applyToEditor."
-  },
-  "styleExplore_seedName": "Seed",
-  "@styleExplore_seedName": {
-    "description": "styleExplore_seedName."
-  },
-  "styleExplore_elapsedName": "Elapsed",
-  "@styleExplore_elapsedName": {
-    "description": "styleExplore_elapsedName."
-  },
-  "styleExplore_parameters": "Parameters",
-  "@styleExplore_parameters": {
-    "description": "styleExplore_parameters."
-  },
-  "styleExplore_modelName": "Model",
-  "@styleExplore_modelName": {
-    "description": "styleExplore_modelName."
-  },
-  "styleExplore_fullPrompt": "Full prompt",
-  "@styleExplore_fullPrompt": {
-    "description": "styleExplore_fullPrompt."
-  },
-  "styleExplore_mergedArtists": "Combined artists (deduplicated)",
-  "@styleExplore_mergedArtists": {
-    "description": "styleExplore_mergedArtists."
-  },
-  "styleExplore_selectionExplanation": "Save as block combines these into one block; evolution uses each image’s artist string as a parent.",
-  "@styleExplore_selectionExplanation": {
-    "description": "styleExplore_selectionExplanation."
-  },
-  "styleExplore_quickGroupHint": "Group with 1–9",
-  "@styleExplore_quickGroupHint": {
-    "description": "styleExplore_quickGroupHint."
-  },
-  "styleExplore_newGroupChip": "New group",
-  "@styleExplore_newGroupChip": {
-    "description": "Inspector compact new group chip."
-  },
-  "styleExplore_parameterSummary": "{width}×{height} · {steps} steps · {scale}",
-  "@styleExplore_parameterSummary": {
-    "description": "Inspector generation parameter summary.",
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      },
-      "steps": {
-        "type": "int"
-      },
-      "scale": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_viewerBack": "Style exploration",
-  "@styleExplore_viewerBack": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_viewerPosition": "Image {index} / {total}",
-  "@styleExplore_viewerPosition": {
-    "description": "Exploration viewer.",
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_viewerGroupsShortcut": "1–9: group; 0: ungroup",
-  "@styleExplore_viewerGroupsShortcut": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_seedClickCopy": "Seed (click to copy)",
-  "@styleExplore_seedClickCopy": {
-    "description": "Exploration viewer."
-  },
   "styleExplore_appliedToEditor": "Applied to editor",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
   },
-  "styleExplore_generationNumber": "Generation {index}",
-  "@styleExplore_generationNumber": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_currentGeneration": "Current",
-  "styleExplore_generationStart": "Started with {count} candidates",
-  "@styleExplore_generationStart": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationSource": "{count} picked from generation {index} + {roots} founders",
-  "@styleExplore_generationSource": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      },
-      "roots": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentsByPreference": "Parents · By preference",
-  "styleExplore_backcross": "Backcross",
-  "styleExplore_childrenCount": "Offspring · {count}",
-  "@styleExplore_childrenCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedSelected": "Breed generation {index} with {count} selected",
-  "@styleExplore_breedSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationBusy": "This generation is still generating",
-  "styleExplore_regeneratePrefix": "Generate",
-  "styleExplore_regenerateSuffix": "offspring",
-  "styleExplore_pairCompare": "Rank by pairwise comparison",
-  "styleExplore_howToUse": "How to use",
-  "styleExplore_helpParents": "Parents are the artist combinations you pick; higher preference makes them more likely to contribute.",
-  "styleExplore_helpChildren": "Offspring come from crossing parents, mutations, or new artists injected from a pool.",
-  "styleExplore_helpCompare": "Pairwise comparison updates parent preferences and influences later combinations.",
-  "styleExplore_helpBackcross": "Breeding the next generation automatically includes first-generation parents for backcrossing.",
-  "styleExplore_originTitle": "How it was made",
-  "styleExplore_originCross": "Artist combinations crossed from these parents",
-  "styleExplore_originMutation": "Some artists were replaced in the parent combination",
-  "styleExplore_originInjection": "New artists were injected from the pool",
-  "styleExplore_newArtist": "New",
-  "styleExplore_evolutionEmpty": "Pick a few favorites from the candidates to start an evolution line",
-  "styleExplore_pickFromCandidates": "Pick candidates",
-  "styleExplore_generationSummary": "{parents} parents · {children} offspring · {selected} picked for the next generation",
-  "@styleExplore_generationSummary": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      },
-      "selected": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedNext": "Breed next generation",
-  "styleExplore_optionalName": "Name (optional)",
-  "styleExplore_childrenEmpty": "No offspring yet. Generate a batch above.",
-  "styleExplore_evolutionStepOne": "Mix parent artists to generate offspring",
-  "styleExplore_evolutionStepTwo": "Compare pairs to show your preferences",
-  "styleExplore_evolutionStepThree": "Pick the best offspring for the next generation",
-  "styleExplore_evolutionNewLine": "New evolution line",
-  "styleExplore_evolutionJoinLine": "Join the current generation of “{name}”",
-  "@styleExplore_evolutionJoinLine": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionName": "Evolution line name",
-  "styleExplore_defaultEvolutionName": "Evolution line {n}",
-  "@styleExplore_defaultEvolutionName": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionAddCustom": "Add a custom artist string",
-  "styleExplore_evolutionCustomHint": "Enter an artist string",
-  "styleExplore_evolutionParentEmpty": "No usable artist string",
-  "styleExplore_evolutionTarget": "Offspring replace",
-  "styleExplore_evolutionOnlyCreate": "Create only",
-  "styleExplore_evolutionOnlyJoin": "Add only",
-  "styleExplore_evolutionCreateGenerate": "Create and generate {count}",
-  "@styleExplore_evolutionCreateGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionJoinGenerate": "Add and generate {count}",
-  "@styleExplore_evolutionJoinGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionFirstBatch": "First offspring batch",
-  "styleExplore_evolutionMinimum": "images (at least {count})",
-  "@styleExplore_evolutionMinimum": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionCreated": "Created evolution line “{name}”",
-  "@styleExplore_evolutionCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionJoined": "Added to evolution line “{name}”",
-  "@styleExplore_evolutionJoined": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_sortLiveSave": "Results save live; close at any time",
-  "styleExplore_sortRanking": "Current ranking · Live",
-  "styleExplore_sortRankingHint": "Ranking affects each parent’s chance of selection in the next offspring batch",
-  "styleExplore_sortSpace": "Space",
-  "styleExplore_saveSingleSubtitle": "Save the artists from #{n} as one block",
-  "@styleExplore_saveSingleSubtitle": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveManySubtitle": "Combine artists from {count} candidates into one library block",
-  "@styleExplore_saveManySubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveArtistsOnly": "Drawn artists only",
-  "styleExplore_saveFullPositive": "Full positive prompt",
-  "styleExplore_saveNoDraws": "These candidates have no positive genetic draw records; save the full positive prompt",
-  "styleExplore_saveContent": "Content",
-  "styleExplore_saveRemoveAtoms": "Click × to remove unwanted artists",
-  "styleExplore_saveRemoved": "Removed {count}",
-  "@styleExplore_saveRemoved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveRestore": "Restore",
-  "styleExplore_saveName": "Name",
-  "styleExplore_saveColor": "Color",
-  "styleExplore_saveIcon": "Icon",
-  "styleExplore_saveFolder": "Library folder",
-  "styleExplore_saveRoot": "Root",
-  "styleExplore_saveHint": "Drag the saved block from the library into a prompt",
-  "styleExplore_onboardingTitle": "Explore styles with random blocks",
-  "styleExplore_onboardingRandomTitle": "Add random blocks",
-  "styleExplore_onboardingDrawTitle": "Draw a candidate batch",
   "styleExplore_onboardingDraw": "Draw {count} candidates",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7202,136 +5450,156 @@
       }
     }
   },
-  "styleExplore_onboardingReviewTitle": "Favorite, compare, evolve",
-  "styleExplore_onboardingOpenPrevious": "Open previous explorations",
-  "styleExplore_onboardingSubtitle": "Each image draws artists again from random blocks. Just choose your favorites.",
-  "styleExplore_onboardingRandomDescription": "Insert an artist-pool block in the prompt, such as the 400-artist pool. Detected random variables appear on the left.",
-  "styleExplore_onboardingDrawDescription": "Click “Draw {count} candidates” at the bottom left. Each image lists the artists it drew.",
-  "@styleExplore_onboardingDrawDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_onboardingReviewDescription": "Press F to favorite images; select a few to evolve and combine promising artists into the next generation.",
-  "styleExplore_onboardingDetected": "Detected {count}",
-  "@styleExplore_onboardingDetected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_compareTitle": "Pair comparison · Rank parents",
-  "styleExplore_compareQuestion": "Which image is closer to the style you want?",
-  "styleExplore_childLabel": "Child #{index}",
-  "styleExplore_generationCounts": "{parents} parents → {children} children",
-  "styleExplore_viewLarge": "View large",
-  "@styleExplore_childLabel": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@styleExplore_generationCounts": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveDialogTitle": "Save as a prompt block",
-  "styleExplore_startDialogTitle": "Start evolution with {count} candidates",
-  "@styleExplore_startDialogTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stepGenerate": "Generate offspring",
-  "styleExplore_stepPick": "Pick the best",
-  "styleExplore_stepBreed": "Breed the next generation",
-  "styleExplore_firstGenerationParents": "Generation 1 parents · {count}",
-  "@styleExplore_firstGenerationParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionTargetAfter": "while keeping the rest unchanged",
   "stats_title": "Statistics",
   "stats_subtitle": "Local gallery · by file time",
   "stats_rangeDays": "{count}D",
-  "@stats_rangeDays": {"placeholders": {"count": {}}},
+  "@stats_rangeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_rangeThisYear": "YTD",
   "stats_rangeAll": "All",
   "stats_naiOnly": "NAI images only",
   "stats_updatedAt": "Updated {time}",
-  "@stats_updatedAt": {"placeholders": {"time": {}}},
+  "@stats_updatedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "stats_updating": "Updating",
   "stats_counting": "Counting {count} images…",
-  "@stats_counting": {"placeholders": {"count": {}}},
+  "@stats_counting": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_updateFailed": "Update failed",
   "stats_refresh": "Refresh",
   "stats_lastDays": "Last {count} days",
-  "@stats_lastDays": {"placeholders": {"count": {}}},
+  "@stats_lastDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_lastDaysShort": "{count} days",
-  "@stats_lastDaysShort": {"placeholders": {"count": {}}},
+  "@stats_lastDaysShort": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_unitDays": "days",
   "stats_imagesCount": "{count} images",
-  "@stats_imagesCount": {"placeholders": {"count": {}}},
+  "@stats_imagesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_less": "Less",
   "stats_more": "More",
   "stats_kpiImages": "Images",
   "stats_kpiNewImages": "New images",
   "stats_kpiActiveDays": "{days} active days · {avg}/day",
-  "@stats_kpiActiveDays": {"placeholders": {"days": {}, "avg": {}}},
+  "@stats_kpiActiveDays": {
+    "placeholders": {
+      "days": {},
+      "avg": {}
+    }
+  },
   "stats_kpiVsPrevious": "vs previous {count} days",
-  "@stats_kpiVsPrevious": {"placeholders": {"count": {}}},
+  "@stats_kpiVsPrevious": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_kpiVsLastYear": "vs same period last year",
   "stats_kpiPreviousValue": " ({value})",
-  "@stats_kpiPreviousValue": {"placeholders": {"value": {}}},
+  "@stats_kpiPreviousValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "stats_kpiFavorites": "Favorites",
   "stats_kpiFavoriteRate": "{rate} favorited",
-  "@stats_kpiFavoriteRate": {"placeholders": {"rate": {}}},
+  "@stats_kpiFavoriteRate": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
   "stats_kpiAnlas90": "Anlas · last 90 days",
   "stats_kpiAnlasSpent": "Anlas spent",
   "stats_kpiAnlasRecent": "7 days {week} · today {today}",
-  "@stats_kpiAnlasRecent": {"placeholders": {"week": {}, "today": {}}},
+  "@stats_kpiAnlasRecent": {
+    "placeholders": {
+      "week": {},
+      "today": {}
+    }
+  },
   "stats_kpiAnlasDaily": "{avg}/day · today {today}",
-  "@stats_kpiAnlasDaily": {"placeholders": {"avg": {}, "today": {}}},
+  "@stats_kpiAnlasDaily": {
+    "placeholders": {
+      "avg": {},
+      "today": {}
+    }
+  },
   "stats_kpiStreak": "Streak",
   "stats_kpiLongest": "Longest {days} {unit}",
-  "@stats_kpiLongest": {"placeholders": {"days": {}, "unit": {}}},
+  "@stats_kpiLongest": {
+    "placeholders": {
+      "days": {},
+      "unit": {}
+    }
+  },
   "stats_kpiLongestRange": "Longest {days} {unit} ({range})",
-  "@stats_kpiLongestRange": {"placeholders": {"days": {}, "unit": {}, "range": {}}},
+  "@stats_kpiLongestRange": {
+    "placeholders": {
+      "days": {},
+      "unit": {},
+      "range": {}
+    }
+  },
   "stats_kpiStorage": "Storage",
   "stats_kpiStorageDetail": "avg {avg} · {pct} with metadata",
-  "@stats_kpiStorageDetail": {"placeholders": {"avg": {}, "pct": {}}},
+  "@stats_kpiStorageDetail": {
+    "placeholders": {
+      "avg": {},
+      "pct": {}
+    }
+  },
   "stats_calendarTitle": "Creation calendar",
   "stats_calendarHint": "One square per day; darker means more images",
   "stats_calendarPastYear": "Past year",
   "stats_calendarYear": "{year}",
-  "@stats_calendarYear": {"placeholders": {"year": {}}},
+  "@stats_calendarYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarImagesPastYear": "Images in the past year",
   "stats_calendarImagesInYear": "Images in {year}",
-  "@stats_calendarImagesInYear": {"placeholders": {"year": {}}},
+  "@stats_calendarImagesInYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarActiveDays": "Days with images",
   "stats_calendarBestDay": "Busiest day",
   "stats_calendarLongestStreak": "Longest streak",
   "stats_calendarTipOpen": "Click to open this day in the local gallery",
   "stats_productionTitle": "Output & models",
   "stats_productionHintAll": "By {unit}, colored by model",
-  "@stats_productionHintAll": {"placeholders": {"unit": {}}},
+  "@stats_productionHintAll": {
+    "placeholders": {
+      "unit": {}
+    }
+  },
   "stats_productionHintRange": "{range}, by {unit}, colored by model",
-  "@stats_productionHintRange": {"placeholders": {"range": {}, "unit": {}}},
+  "@stats_productionHintRange": {
+    "placeholders": {
+      "range": {},
+      "unit": {}
+    }
+  },
   "stats_unitDay": "day",
   "stats_unitWeek": "week",
   "stats_unitMonth": "month",
@@ -7339,16 +5607,34 @@
   "stats_granularityWeek": "Week",
   "stats_granularityMonth": "Month",
   "stats_monthWithYear": "{month} {year}",
-  "@stats_monthWithYear": {"placeholders": {"year": {}, "month": {}}},
+  "@stats_monthWithYear": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
   "stats_productionModelsHint": "Models · click to see only that model",
   "stats_productionOtherModels": "{count} other models",
-  "@stats_productionOtherModels": {"placeholders": {"count": {}}},
+  "@stats_productionOtherModels": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_productionNoMetadata": "{count} more images have no metadata (light gray)",
-  "@stats_productionNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_productionNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_familyOther": "Other models",
   "stats_familyNoMetadata": "No metadata",
   "stats_productionTipTotal": "{period} · {count} images",
-  "@stats_productionTipTotal": {"placeholders": {"period": {}, "count": {}}},
+  "@stats_productionTipTotal": {
+    "placeholders": {
+      "period": {},
+      "count": {}
+    }
+  },
   "stats_productionTipOpenDay": "Click to open this day in the local gallery",
   "stats_productionTipOpenWeek": "Click to open this week in the local gallery",
   "stats_productionTipOpenMonth": "Click to open this month in the local gallery",
@@ -7356,7 +5642,13 @@
   "stats_punchHint": "Weekday × hour",
   "stats_punchPeak": "Most often",
   "stats_punchPeakValue": "{weekday} {from}:00–{to}:00",
-  "@stats_punchPeakValue": {"placeholders": {"weekday": {}, "from": {}, "to": {}}},
+  "@stats_punchPeakValue": {
+    "placeholders": {
+      "weekday": {},
+      "from": {},
+      "to": {}
+    }
+  },
   "stats_punchBusiest": "Busiest",
   "stats_punchLateNight": "Late night",
   "stats_punchNote": "Bigger dots mean more images",
@@ -7364,7 +5656,11 @@
   "stats_anlasToday": "Today",
   "stats_anlasDailyAvg": "Daily avg",
   "stats_anlasActiveDays": "{count} days with spend",
-  "@stats_anlasActiveDays": {"placeholders": {"count": {}}},
+  "@stats_anlasActiveDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_anlasPeak": "Peak",
   "stats_anlasNote": "Recorded when your balance drops, including upscales and Vibe encoding; only the last 90 days are kept",
   "stats_aspectTitle": "Canvas size",
@@ -7374,9 +5670,19 @@
   "stats_orientationLandscape": "Landscape",
   "stats_orientationSquare": "Square",
   "stats_aspectShapeCount": "{orientation} · {count}",
-  "@stats_aspectShapeCount": {"placeholders": {"orientation": {}, "count": {}}},
+  "@stats_aspectShapeCount": {
+    "placeholders": {
+      "orientation": {},
+      "count": {}
+    }
+  },
   "stats_aspectOthers": "{count} others · {pct}",
-  "@stats_aspectOthers": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_aspectOthers": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_aspectClickHint": "Click a size or orientation to see only those images",
   "stats_paramsTitle": "Parameter habits",
   "stats_paramsHint": "Images with metadata",
@@ -7384,28 +5690,58 @@
   "stats_paramsSampler": "Sampler",
   "stats_paramsSteps": "Steps",
   "stats_paramsStepsValue": "{count} steps",
-  "@stats_paramsStepsValue": {"placeholders": {"count": {}}},
+  "@stats_paramsStepsValue": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_paramsNoise": "Noise schedule",
   "stats_artistsTitle": "Favorite artists",
   "stats_artistsHint": "{count} images use artist tags ({pct})",
-  "@stats_artistsHint": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_artistsHint": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_artistsComputing": "Counting artists…",
   "stats_artistsNone": "No artist: tags in prompts yet",
   "stats_artistsNote": "Ranked by how many images mention them; repeats in one image count once",
   "stats_artistsTipSearch": "Search {query} in the local gallery",
-  "@stats_artistsTipSearch": {"placeholders": {"query": {}}},
+  "@stats_artistsTipSearch": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "stats_artistsTipCopy": "Right-click: copy artist name",
   "stats_artistsCopied": "Copied {name}",
-  "@stats_artistsCopied": {"placeholders": {"name": {}}},
+  "@stats_artistsCopied": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "stats_storageTitle": "Storage",
   "stats_storageFiles": "{count} files",
-  "@stats_storageFiles": {"placeholders": {"count": {}}},
+  "@stats_storageFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageMonthly": "Added per month, last 12 months",
   "stats_storageNoMetadata": "{count} images without metadata",
-  "@stats_storageNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_storageNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageViewInGallery": "View in local gallery",
   "stats_storageLarge": "{count} images over 10 MB · {size}",
-  "@stats_storageLarge": {"placeholders": {"count": {}, "size": {}}},
+  "@stats_storageLarge": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "stats_storageView": "View",
   "stats_footer": "Statistics recalculate in the background when the gallery changes · Click any number to open the local gallery with that filter",
   "stats_emptyTitle": "Your local gallery has no images yet",
@@ -7433,16 +5769,33 @@
   "navShell_pin": "Keep expanded",
   "navShell_genRunning": "Generating",
   "navShell_genRunningCount": "Generating · {current} of {total}",
-  "@navShell_genRunningCount": {"placeholders": {"current": {}, "total": {}}},
+  "@navShell_genRunningCount": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
   "navShell_genPercent": "{percent}% · live preview",
-  "@navShell_genPercent": {"placeholders": {"percent": {}}},
+  "@navShell_genPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "navShell_genBack": "Click to return to Generate",
   "navShell_genDone": "{count} done · click to view",
-  "@navShell_genDone": {"placeholders": {"count": {}}},
+  "@navShell_genDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_genFailed": "Generation failed",
   "navShell_tasksTitle": "Background tasks",
   "navShell_tasksRunning": "{count} running",
-  "@navShell_tasksRunning": {"placeholders": {"count": {}}},
+  "@navShell_tasksRunning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_tasksFooter": "This icon goes away 10 seconds after everything finishes",
   "navShell_task_localUpscale": "Local upscale",
   "navShell_task_cloudUpscale": "Cloud upscale",
@@ -7453,7 +5806,12 @@
   "navShell_task_bulkRemoveFromCollection": "Remove from collection",
   "navShell_task_bulkFavorite": "Bulk favorite",
   "navShell_taskImages": "{title} · {count} images",
-  "@navShell_taskImages": {"placeholders": {"title": {}, "count": {}}},
+  "@navShell_taskImages": {
+    "placeholders": {
+      "title": {},
+      "count": {}
+    }
+  },
   "navShell_taskJustDone": "Just finished",
   "navShell_taskView": "View",
   "navShell_taskCancel": "Cancel",
@@ -7467,7 +5825,12 @@
   "navShell_accountNotSignedIn": "Not signed in",
   "navShell_accountChoose": "Choose an account to continue",
   "navShell_subExpires": "Subscription ends {date} · {days} days left",
-  "@navShell_subExpires": {"placeholders": {"date": {}, "days": {}}},
+  "@navShell_subExpires": {
+    "placeholders": {
+      "date": {},
+      "days": {}
+    }
+  },
   "navShell_subExpired": "Subscription expired",
   "navShell_anlas": "Anlas balance",
   "navShell_switchAccount": "Switch account",
@@ -7503,10 +5866,18 @@
   "online_favAuthors": "Saved artists",
   "online_blacklist": "Blocklist",
   "online_blacklistCount": "{count} tags blocked",
-  "@online_blacklistCount": {"placeholders": {"count": {}}},
+  "@online_blacklistCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_srcSubAiTag": "NAI community · full prompts",
   "online_srcSubSignedIn": "Signed in · {name}",
-  "@online_srcSubSignedIn": {"placeholders": {"name": {}}},
+  "@online_srcSubSignedIn": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "online_srcSubSafebooru": "All ages · no sign-in",
   "online_srcSubKeyOk": "API key set",
   "online_srcSubKeyInvalid": "API key invalid",
@@ -7547,12 +5918,25 @@
   "online_modelAll": "All",
   "online_timeAll": "All time",
   "online_timeYear": "{year}",
-  "@online_timeYear": {"placeholders": {"year": {}}},
+  "@online_timeYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "online_timeOlder": "Older archive",
   "online_loaded": "{count} loaded · {pages} pages",
-  "@online_loaded": {"placeholders": {"count": {}, "pages": {}}},
+  "@online_loaded": {
+    "placeholders": {
+      "count": {},
+      "pages": {}
+    }
+  },
   "online_rankLoaded": "Top 1–{count} · {count} loaded",
-  "@online_rankLoaded": {"placeholders": {"count": {}}},
+  "@online_rankLoaded": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_jumpToPage": "Go to page…",
   "online_jumpGo": "Go",
   "online_ratingLabel": "Rating",
@@ -7573,9 +5957,18 @@
   "online_sortFavTime": "Date saved",
   "online_favAll": "All favorites",
   "online_countImages": "{count}",
-  "@online_countImages": {"placeholders": {"count": {}}},
+  "@online_countImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_authorSaved": "{count} saved · artist saved {date}",
-  "@online_authorSaved": {"placeholders": {"count": {}, "date": {}}},
+  "@online_authorSaved": {
+    "placeholders": {
+      "count": {},
+      "date": {}
+    }
+  },
   "online_authorAllWorks": "All works on AI TAG",
   "online_unfavAuthor": "Remove artist",
   "online_favAuthor": "Save artist",
@@ -7591,7 +5984,11 @@
   "online_copyTags": "Copy tags",
   "online_download": "Download",
   "online_downloadAll": "Download all {count}",
-  "@online_downloadAll": {"placeholders": {"count": {}}},
+  "@online_downloadAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_downloadCurrent": "Download this image",
   "online_more": "More",
   "online_openInBrowser": "Open on site",
@@ -7603,7 +6000,11 @@
   "online_inspWork": "Work",
   "online_inspPost": "Post",
   "online_youSaved": "You saved {count} of theirs",
-  "@online_youSaved": {"placeholders": {"count": {}}},
+  "@online_youSaved": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_params": "Parameters",
   "online_pModel": "Model",
   "online_pSize": "Size",
@@ -7622,25 +6023,41 @@
   "online_copy": "Copy",
   "online_noSelection": "Click a card to see its prompt and parameters here",
   "online_detailError": "Details failed to load: {error}",
-  "@online_detailError": {"placeholders": {"error": {}}},
+  "@online_detailError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_retry": "Retry",
   "online_noPrompt": "This image has no prompt",
   "online_selCount": "{count} selected",
-  "@online_selCount": {"placeholders": {"count": {}}},
+  "@online_selCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_selAll": "All",
   "online_selInvert": "Invert",
   "online_favoriteTo": "Favorite to…",
   "online_favoriteToTitle": "Favorite to",
   "online_favoriteToSite": "Favorite on site",
   "online_downloadN": "Download · {count} images",
-  "@online_downloadN": {"placeholders": {"count": {}}},
+  "@online_downloadN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_newCollectionAndFav": "New collection and favorite",
   "online_collectionNameHint": "Collection name, Enter to confirm",
   "online_exitMulti": "Exit selection",
   "online_sendRemember": "Remember this choice",
   "online_sendReplace": "Replace prompt, clear characters",
   "online_sendReplaceDesc": "Positive + negative are replaced; the {count} character boxes on Generate are cleared. Same as the old card button",
-  "@online_sendReplaceDesc": {"placeholders": {"count": {}}},
+  "@online_sendReplaceDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendReplaceDescNone": "Positive + negative are replaced; character boxes on Generate are cleared. Same as the old card button",
   "online_sendPromptOnly": "Replace prompt only, keep characters",
   "online_sendPromptOnlyDesc": "For borrowing the artist mix and scene description",
@@ -7648,26 +6065,52 @@
   "online_sendParamsDesc": "Also applies size, seed, sampler, steps, CFG and the image's characters, same as Reuse parameters in the local gallery",
   "online_sendParamsUnavailable": "No parameters in this image; only the prompt can be sent",
   "online_sendNote": "The current positive prompt ({count} chars) will be replaced",
-  "@online_sendNote": {"placeholders": {"count": {}}},
+  "@online_sendNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendNoteEmpty": "The positive prompt on Generate is empty",
   "online_cancel": "Cancel",
   "online_sendGo": "Send and open Generate",
   "online_blacklistDesc": "Matching works are hidden",
   "online_blacklistAddHint": "Add a tag, Enter to confirm",
   "online_blacklistSync": "Sync Danbooru blocklist · {count}",
-  "@online_blacklistSync": {"placeholders": {"count": {}}},
+  "@online_blacklistSync": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_blacklistScope": "Applies to all four sources; AI TAG matches work tags",
   "online_blacklistEmpty": "No blocked tags yet",
   "online_removeTag": "Remove",
   "online_appendError": "Page {page} failed to load: {reason}",
-  "@online_appendError": {"placeholders": {"page": {}, "reason": {}}},
+  "@online_appendError": {
+    "placeholders": {
+      "page": {},
+      "reason": {}
+    }
+  },
   "online_retryPage": "Retry this page",
   "online_end": "End of results · {count} total",
-  "@online_end": {"placeholders": {"count": {}}},
+  "@online_end": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_endBlocked": "End of results · {count} total · {blocked} blocked",
-  "@online_endBlocked": {"placeholders": {"count": {}, "blocked": {}}},
+  "@online_endBlocked": {
+    "placeholders": {
+      "count": {},
+      "blocked": {}
+    }
+  },
   "online_emptyTitle": "No works found for “{query}”",
-  "@online_emptyTitle": {"placeholders": {"query": {}}},
+  "@online_emptyTitle": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "online_emptyTitleNoQuery": "No works found",
   "online_emptyHint": "Try loosening these filters",
   "online_sugNaiOff": "Turn off “NAI images only”",
@@ -7679,7 +6122,11 @@
   "online_favEmpty": "Nothing saved here yet",
   "online_favEmptyHint": "Click ♡ on a card to save it",
   "online_loadError": "Failed to load: {error}",
-  "@online_loadError": {"placeholders": {"error": {}}},
+  "@online_loadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_loginDbTitle": "Sign in to Danbooru to see your favorites",
   "online_loginDbDesc": "Sign in with username + API key; favorites sync with the site.\nClicking ♡ on a card also saves to the site",
   "online_loginDb": "Sign in to Danbooru",
@@ -7689,9 +6136,21 @@
   "online_apiKeyHelp": "Where to get an API key",
   "online_loginOther": "Rather not sign in? AI TAG favorites stay on this device with no account; Gelbooru favorites are read-only",
   "online_viewerPosition": "Image {image} / {images} · Work {work} / {works}",
-  "@online_viewerPosition": {"placeholders": {"image": {}, "images": {}, "work": {}, "works": {}}},
+  "@online_viewerPosition": {
+    "placeholders": {
+      "image": {},
+      "images": {},
+      "work": {},
+      "works": {}
+    }
+  },
   "online_viewerWorkPosition": "Work {work} / {works}",
-  "@online_viewerWorkPosition": {"placeholders": {"work": {}, "works": {}}},
+  "@online_viewerWorkPosition": {
+    "placeholders": {
+      "work": {},
+      "works": {}
+    }
+  },
   "online_close": "Close",
   "online_keyImage": "Switch image",
   "online_keyWork": "Previous / next work",
@@ -7720,12 +6179,24 @@
   "refs_open": "Open",
   "refs_types": "Reference types",
   "refs_importTypeNoteAll": "Imported images are saved as {type} by default. Select a type on the left first to save as that type.",
-  "@refs_importTypeNoteAll": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteAll": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_importTypeNoteSelected": "Imported images are saved as {type}, following the type selected on the left.",
-  "@refs_importTypeNoteSelected": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteSelected": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_preciseOnlyV45": "V4.5 only",
   "refs_preciseCostNote": "{cost} Anlas each; cannot be used together with Vibes",
-  "@refs_preciseCostNote": {"placeholders": {"cost": {}}},
+  "@refs_preciseCostNote": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_searchVibe": "Search names, tags",
   "refs_searchPrecise": "Search names",
   "refs_sortLastUsed": "Last used",
@@ -7754,13 +6225,25 @@
   "refs_hideInspector": "Hide inspector",
   "refs_showInspector": "Show inspector",
   "refs_bannerVibeLead": "{model} does not support Vibe Transfer. ",
-  "@refs_bannerVibeLead": {"placeholders": {"model": {}}},
+  "@refs_bannerVibeLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerVibeBody": "You can still organize and export Vibes; switch to V4.5 or V4 to generate with them",
   "refs_bannerPreciseLead": "{model} does not support Precise Reference. ",
-  "@refs_bannerPreciseLead": {"placeholders": {"model": {}}},
+  "@refs_bannerPreciseLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerPreciseBody": "You can still organize references; switch to V4.5 to generate with them",
   "refs_switchTo": "Switch to {model}",
-  "@refs_switchTo": {"placeholders": {"model": {}}},
+  "@refs_switchTo": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_quickAll": "All",
   "refs_quickFavorites": "Favorites",
   "refs_quickHasRaw": "Has original",
@@ -7768,12 +6251,26 @@
   "refs_quickBundles": "Bundles",
   "refs_quickUnused": "Never used",
   "refs_countVibe": "{count} · {inGen} in generation",
-  "@refs_countVibe": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countVibe": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_countPrecise": "{count} · {inGen} in generation",
-  "@refs_countPrecise": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countPrecise": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_noResults": "Nothing matches these filters",
   "refs_noResultsFor": "Nothing found for “{query}”",
-  "@refs_noResultsFor": {"placeholders": {"query": {}}},
+  "@refs_noResultsFor": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "refs_clearFilters": "Clear filters",
   "refs_addShort": "Add",
   "refs_sendPrecise": "Send to Precise Reference",
@@ -7792,7 +6289,11 @@
   "refs_copyImage": "Copy image",
   "refs_delete": "Delete",
   "refs_selected": "{count} selected",
-  "@refs_selected": {"placeholders": {"count": {}}},
+  "@refs_selected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveTo": "Move to",
   "refs_export": "Export",
   "refs_emptyVibeTitle": "Drop images or Vibe files here",
@@ -7806,62 +6307,143 @@
   "refs_emptyFromGallery": "Works from the local gallery too",
   "refs_emptyHelpTitle": "Vibe vs. Precise Reference",
   "refs_emptyHelpBody": "Vibe borrows the overall mood and style and can be stacked (V4 / V4.5, not V5). Precise Reference follows one image’s character or style more closely, {cost} Anlas each (V4.5 only). The two cannot be used together.",
-  "@refs_emptyHelpBody": {"placeholders": {"cost": {}}},
+  "@refs_emptyHelpBody": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_dropTitle": "Release to import {count} files",
-  "@refs_dropTitle": {"placeholders": {"count": {}}},
+  "@refs_dropTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeDesc": "You will confirm in the import window first — no Anlas is spent yet",
   "refs_dropPreciseDesc": "Saved with the type selected on the left",
   "refs_dropVibePngs": "{count} PNG with Vibe",
-  "@refs_dropVibePngs": {"placeholders": {"count": {}}},
+  "@refs_dropVibePngs": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeFiles": "{count} Vibe files",
-  "@refs_dropVibeFiles": {"placeholders": {"count": {}}},
+  "@refs_dropVibeFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropBundles": "{count} bundles",
-  "@refs_dropBundles": {"placeholders": {"count": {}}},
+  "@refs_dropBundles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropImages": "{count} plain images",
-  "@refs_dropImages": {"placeholders": {"count": {}}},
+  "@refs_dropImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_inGeneration": "In use",
   "refs_tag": "Tag",
   "refs_strengthShort": "Str",
   "refs_infoShort": "Info",
   "refs_fidelityShort": "Fid",
   "refs_encModelOff": "Not on {model}",
-  "@refs_encModelOff": {"placeholders": {"model": {}}},
+  "@refs_encModelOff": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encModelOffDesc": "{model} has no Vibe Transfer; switch to V4.5 / V4 to use it",
-  "@refs_encModelOffDesc": {"placeholders": {"model": {}}},
+  "@refs_encModelOffDesc": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReady": "Encoded · {model}",
-  "@refs_encReady": {"placeholders": {"model": {}}},
+  "@refs_encReady": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyShort": "{model} encoded",
-  "@refs_encReadyShort": {"placeholders": {"model": {}}},
+  "@refs_encReadyShort": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyDesc": "Ready for the current model, no encoding fee",
   "refs_encOnUse": "Encodes on use",
   "refs_encOnUseDesc": "Not encoded yet. Encoded the first time you generate with it, {cost} Anlas",
-  "@refs_encOnUseDesc": {"placeholders": {"cost": {}}},
+  "@refs_encOnUseDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_encRe": "Needs re-encoding",
   "refs_encReDesc": "Encoded for {from}, current model is {model}. Re-encoded from the original on use, {cost} Anlas",
-  "@refs_encReDesc": {"placeholders": {"from": {}, "model": {}, "cost": {}}},
+  "@refs_encReDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_encUnusable": "Unusable on {model}",
-  "@refs_encUnusable": {"placeholders": {"model": {}}},
+  "@refs_encUnusable": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encUnusableDesc": "Only a {from} encoding and no original, so it can’t be re-encoded for {model}",
-  "@refs_encUnusableDesc": {"placeholders": {"from": {}, "model": {}}},
+  "@refs_encUnusableDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {}
+    }
+  },
   "refs_trayVibe": "Vibes in generation",
   "refs_trayPrecise": "References in generation",
   "refs_trayVibeCost": "+{extra} Anlas each beyond {free}",
-  "@refs_trayVibeCost": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_trayVibeCost": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_trayPreciseCost": "{cost} Anlas each · +{total} now",
-  "@refs_trayPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_trayPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_trayHint": "Drag cards here to add; hold Shift to replace all.\nYou stay on this page, so keep picking",
   "refs_trayDropHere": "Drop cards here to add them",
   "refs_clear": "Clear",
   "refs_goGeneration": "Go to generation",
   "refs_conflict": "Generation still has **{count} Vibes**. Vibes aren’t sent while a precise reference is set (not compatible)",
-  "@refs_conflict": {"placeholders": {"count": {}}},
+  "@refs_conflict": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_conflictPaused": "**{count} Vibes** in generation are paused; only the precise reference is sent",
-  "@refs_conflictPaused": {"placeholders": {"count": {}}},
+  "@refs_conflictPaused": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pauseVibes": "Pause Vibes",
   "refs_resumeVibes": "Resume Vibes",
   "refs_inspector": "Inspector",
   "refs_selectedN": "{count} selected",
-  "@refs_selectedN": {"placeholders": {"count": {}}},
+  "@refs_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_noSelectionVibe": "Select a card to see its parameters and encoding",
   "refs_noSelectionPrecise": "Select a reference to see its type and parameters",
   "refs_rename": "Rename",
@@ -7871,29 +6453,55 @@
   "refs_strengthDesc": "Higher feels more like this image",
   "refs_infoExtracted": "Information extracted",
   "refs_infoDesc": "Higher brings in more detail. Changing it re-encodes from the original, {cost} Anlas",
-  "@refs_infoDesc": {"placeholders": {"cost": {}}},
+  "@refs_infoDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_infoLocked": "Only encoded data, no original — information extracted can’t be changed",
   "refs_changedNote": "Changes apply to this send only",
   "refs_saveDefault": "Save as default",
   "refs_revert": "Revert",
   "refs_encodeNow": "Encode for {model} now · {cost} Anlas",
-  "@refs_encodeNow": {"placeholders": {"model": {}, "cost": {}}},
+  "@refs_encodeNow": {
+    "placeholders": {
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_bundleNote": "Each of the {count} Vibes in this bundle has its own strength and information extracted; open the bundle to adjust them.",
-  "@refs_bundleNote": {"placeholders": {"count": {}}},
+  "@refs_bundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOf": "Bundle · {count}",
-  "@refs_bundleOf": {"placeholders": {"count": {}}},
+  "@refs_bundleOf": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_organize": "Organize",
   "refs_category": "Category",
   "refs_tags": "Tags",
   "refs_used": "Used",
   "refs_neverUsed": "Never used",
   "refs_usedTimes": "{count} times · last {last}",
-  "@refs_usedTimes": {"placeholders": {"count": {}, "last": {}}},
+  "@refs_usedTimes": {
+    "placeholders": {
+      "count": {},
+      "last": {}
+    }
+  },
   "refs_added": "Added",
   "refs_file": "File",
   "refs_original": "Original",
   "refs_plusAnlas": "+{cost} Anlas",
-  "@refs_plusAnlas": {"placeholders": {"cost": {}}},
+  "@refs_plusAnlas": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_alsoSaveVibe": "Also save as Vibe",
   "refs_referenceWhat": "Reference",
   "refs_typeCharacter": "Character",
@@ -7912,23 +6520,60 @@
   "refs_multiAddTitle": "Add together",
   "refs_multiSendTitle": "Send together",
   "refs_multiFree": "Up to {free} at no extra cost. ",
-  "@refs_multiFree": {"placeholders": {"free": {}}},
+  "@refs_multiFree": {
+    "placeholders": {
+      "free": {}
+    }
+  },
   "refs_multiExtra": "Beyond {free}, +{extra} Anlas each: {total} Anlas more per image. ",
-  "@refs_multiExtra": {"placeholders": {"free": {}, "extra": {}, "total": {}}},
+  "@refs_multiExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {},
+      "total": {}
+    }
+  },
   "refs_multiOverMax": "Over the {max} limit; the extra ones won’t be added. ",
-  "@refs_multiOverMax": {"placeholders": {"max": {}}},
+  "@refs_multiOverMax": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "refs_multiEncodes": "{count} need encoding ({names}, {cost} Anlas each, charged once). ",
-  "@refs_multiEncodes": {"placeholders": {"count": {}, "names": {}, "cost": {}}},
+  "@refs_multiEncodes": {
+    "placeholders": {
+      "count": {},
+      "names": {},
+      "cost": {}
+    }
+  },
   "refs_multiAlready": "{count} already in generation won’t be added twice.",
-  "@refs_multiAlready": {"placeholders": {"count": {}}},
+  "@refs_multiAlready": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_multiPreciseCost": "{cost} Anlas each, {total} Anlas per image in total.",
-  "@refs_multiPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_multiPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_unify": "Set for all",
   "refs_mixed": "Mixed",
   "refs_unifyVibeNote": "Dragging updates all {count} defaults; information extracted is left alone (needs re-encoding)",
-  "@refs_unifyVibeNote": {"placeholders": {"count": {}}},
+  "@refs_unifyVibeNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_unifyPreciseNote": "Click to set all {count} to this type",
-  "@refs_unifyPreciseNote": {"placeholders": {"count": {}}},
+  "@refs_unifyPreciseNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveToCategory": "Move to category",
   "refs_addTag": "Add tag",
   "refs_packBundle": "Pack as bundle",
@@ -7940,28 +6585,53 @@
   "refs_switch": "switch",
   "refs_dropReplacePreview": "Drop an image here to replace the preview (encoding unchanged)",
   "refs_bundleOfVibes": "Bundle · {count} Vibes",
-  "@refs_bundleOfVibes": {"placeholders": {"count": {}}},
+  "@refs_bundleOfVibes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleAll": "All {count}",
-  "@refs_bundleAll": {"placeholders": {"count": {}}},
+  "@refs_bundleAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOnlyChecked": "Only {count} checked",
-  "@refs_bundleOnlyChecked": {"placeholders": {"count": {}}},
+  "@refs_bundleOnlyChecked": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleScopeNote": "Each Vibe is sent with its own strength and information extracted",
   "refs_splitBundle": "Split into Vibes",
   "refs_bundleNoteLong": "After changing a Vibe, “Save to bundle” keeps it; otherwise it only affects this send. ",
   "refs_bundleAllEncoded": "All {count} are encoded for {model}",
-  "@refs_bundleAllEncoded": {"placeholders": {"count": {}, "model": {}}},
+  "@refs_bundleAllEncoded": {
+    "placeholders": {
+      "count": {},
+      "model": {}
+    }
+  },
   "refs_saveToBundle": "Save to bundle",
   "refs_cover": "Cover",
   "refs_setCover": "Set as cover",
   "refs_exportTitle": "Export {count} Vibes",
-  "@refs_exportTitle": {"placeholders": {"count": {}}},
+  "@refs_exportTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_exportListNote": "Select several in the library and click Export; remove items here",
   "refs_exportAs": "Export as",
   "refs_fmtVibeFile": "Single Vibe files",
   "refs_fmtVibeFileDesc": ".naiv4vibe, one per Vibe. Works on the site and other clients",
   "refs_fmtBundle": "One bundle",
   "refs_fmtBundleDesc": ".naiv4vibebundle, all {count} in one file",
-  "@refs_fmtBundleDesc": {"placeholders": {"count": {}}},
+  "@refs_fmtBundleDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_fmtPng": "Embed in PNG",
   "refs_fmtPngDesc": "The image carries the Vibe — just drop it in. One at a time",
   "refs_fmtEncoded": "Encoded text",
@@ -7971,21 +6641,47 @@
   "refs_optThumbsDesc": "Slightly larger files, but previews show on import",
   "refs_optZip": "Compress to ZIP",
   "refs_optZipDesc": "Put {count} files in one archive",
-  "@refs_optZipDesc": {"placeholders": {"count": {}}},
+  "@refs_optZipDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_saveTo": "Save to",
   "refs_choose": "Choose",
   "refs_exportSummary": "Creates {count} {ext} files",
-  "@refs_exportSummary": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummary": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_exportSummaryZip": "Creates 1 ZIP ({count} {ext} files)",
-  "@refs_exportSummaryZip": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummaryZip": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_deleteOne": "Delete “{name}”?",
-  "@refs_deleteOne": {"placeholders": {"name": {}}},
+  "@refs_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "refs_deleteMany": "Delete {count} items?",
-  "@refs_deleteMany": {"placeholders": {"count": {}}},
+  "@refs_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_deleteVibeDesc": "Removes them from the Vibe Library. Vibes already in generation are not affected.",
   "refs_deletePreciseDesc": "Removes them from the library. References already in generation are not affected.",
   "refs_importTitle": "Import {count} files",
-  "@refs_importTitle": {"placeholders": {"count": {}}},
+  "@refs_importTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_importSubtitle": "Dropped, chosen or pasted files all come here",
   "refs_importMore": "Add files",
   "refs_importPutIn": "Put all in",
@@ -7994,39 +6690,85 @@
   "refs_importPlainImages": "Plain images",
   "refs_importEncodeLater": "Encode on use",
   "refs_importEncodeNow": "Encode now · {cost} Anlas each",
-  "@refs_importEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_importEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importName": "Name",
   "refs_importResult": "Detected as",
   "refs_recPng": "PNG with Vibe · {model} encoding",
-  "@refs_recPng": {"placeholders": {"model": {}}},
+  "@refs_recPng": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recVibeFile": "Vibe file · {model} encoding",
-  "@refs_recVibeFile": {"placeholders": {"model": {}}},
+  "@refs_recVibeFile": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundle": "Bundle · {count} Vibes",
-  "@refs_recBundle": {"placeholders": {"count": {}}},
+  "@refs_recBundle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recImage": "Plain image · not encoded",
   "refs_recImageDup": "Plain image · name exists",
   "refs_recFree": "Imported as-is, free",
   "refs_recReencode": "Needs re-encoding for {model} (not possible without the original)",
-  "@refs_recReencode": {"placeholders": {"model": {}}},
+  "@refs_recReencode": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundleNote": "Whole = one card; split = {count} cards",
-  "@refs_recBundleNote": {"placeholders": {"count": {}}},
+  "@refs_recBundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recEncodeLater": "Stored as-is; encoded for the model in use the first time",
   "refs_recEncodeNow": "Encoded on import, {cost} Anlas each",
-  "@refs_recEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_recEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_bundleWhole": "Whole",
   "refs_bundleSplit": "Split into {count}",
-  "@refs_bundleSplit": {"placeholders": {"count": {}}},
+  "@refs_bundleSplit": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundlePick": "Pick some",
   "refs_dupExists": "Name already in library",
   "refs_dupKeepBoth": "Keep both",
   "refs_dupOverwrite": "Overwrite",
   "refs_dupSkip": "Skip",
   "refs_importSummary": "{files} files → {cards} new cards",
-  "@refs_importSummary": {"placeholders": {"files": {}, "cards": {}}},
+  "@refs_importSummary": {
+    "placeholders": {
+      "files": {},
+      "cards": {}
+    }
+  },
   "refs_importNow": " · {cost} Anlas now",
-  "@refs_importNow": {"placeholders": {"cost": {}}},
+  "@refs_importNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importLater": " · {count} plain images are encoded on first use ({cost} Anlas each)",
-  "@refs_importLater": {"placeholders": {"count": {}, "cost": {}}},
+  "@refs_importLater": {
+    "placeholders": {
+      "count": {},
+      "cost": {}
+    }
+  },
   "refs_pickerVibeTitle": "Add from Vibe Library",
   "refs_pickerPreciseTitle": "Add from Precise Reference Library",
   "refs_openVibeLibrary": "Open Vibe Library",
@@ -8034,33 +6776,87 @@
   "refs_recentUsed": "Recently used",
   "refs_inUse": "In use",
   "refs_pickedN": "{count} selected",
-  "@refs_pickedN": {"placeholders": {"count": {}}},
+  "@refs_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerAfterVibe": " · {count}/{max} after adding",
-  "@refs_pickerAfterVibe": {"placeholders": {"count": {}, "max": {}}},
+  "@refs_pickerAfterVibe": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
   "refs_pickerAfterPrecise": " · {count} after adding",
-  "@refs_pickerAfterPrecise": {"placeholders": {"count": {}}},
+  "@refs_pickerAfterPrecise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerEncode": "“{name}” needs encoding for {model} · {cost} Anlas",
-  "@refs_pickerEncode": {"placeholders": {"name": {}, "model": {}, "cost": {}}},
+  "@refs_pickerEncode": {
+    "placeholders": {
+      "name": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_pickerEncodeMore": "{count} more need encoding",
-  "@refs_pickerEncodeMore": {"placeholders": {"count": {}}},
+  "@refs_pickerEncodeMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerExtra": "+{extra} Anlas each beyond {free}",
-  "@refs_pickerExtra": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_pickerExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_pickerPreciseCost": "{cost} Anlas each · {total} Anlas total",
-  "@refs_pickerPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_pickerPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_replaceExisting": "Replace existing",
   "refs_appendN": "Add {count}",
-  "@refs_appendN": {"placeholders": {"count": {}}},
+  "@refs_appendN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeNever": "never",
   "refs_timeJustNow": "just now",
   "refs_timeMinutes": "{count} min ago",
-  "@refs_timeMinutes": {"placeholders": {"count": {}}},
+  "@refs_timeMinutes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeHours": "{count} h ago",
-  "@refs_timeHours": {"placeholders": {"count": {}}},
+  "@refs_timeHours": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeYesterday": "yesterday",
   "refs_timeDays": "{count} days ago",
-  "@refs_timeDays": {"placeholders": {"count": {}}},
+  "@refs_timeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeMonthDay": "{month}/{day}",
-  "@refs_timeMonthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@refs_timeMonthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "blocks_title": "Block library",
   "blocks_translationMark": "Tr",
   "blocks_add": "Add",
@@ -8080,12 +6876,24 @@
   "blocks_off": "off",
   "blocks_to": "to",
   "blocks_items": "{count} items",
-  "@blocks_items": {"placeholders": {"count": {}}},
+  "@blocks_items": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_itemUnit": "items",
   "blocks_usedTimes": "Used {count}×",
-  "@blocks_usedTimes": {"placeholders": {"count": {}}},
+  "@blocks_usedTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_nBlocks": "{count}",
-  "@blocks_nBlocks": {"placeholders": {"count": {}}},
+  "@blocks_nBlocks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_untitled": "Untitled",
   "blocks_favorite": "Favorite",
   "blocks_unfavorite": "Unfavorite",
@@ -8095,9 +6903,17 @@
   "blocks_positive": "Positive",
   "blocks_negative": "Negative",
   "blocks_positiveN": "Positive {count}",
-  "@blocks_positiveN": {"placeholders": {"count": {}}},
+  "@blocks_positiveN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_negativeN": "Negative {count}",
-  "@blocks_negativeN": {"placeholders": {"count": {}}},
+  "@blocks_negativeN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_content": "Content",
   "blocks_name": "Name",
   "blocks_folder": "Folder",
@@ -8126,7 +6942,11 @@
   "blocks_searchHint": "Search blocks…",
   "blocks_filterAll": "All",
   "blocks_allN": "All {count}",
-  "@blocks_allN": {"placeholders": {"count": {}}},
+  "@blocks_allN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_searchResults": "Results",
   "blocks_noResults": "No matching blocks",
   "blocks_noFavorites": "No favorites yet. Right-click a block → Favorite.",
@@ -8143,9 +6963,18 @@
   "blocks_modeSequential": "Sequential",
   "blocks_modeRandom": "Random",
   "blocks_summaryRandom": "Random · {range} per roll · {pool} in pool",
-  "@blocks_summaryRandom": {"placeholders": {"range": {}, "pool": {}}},
+  "@blocks_summaryRandom": {
+    "placeholders": {
+      "range": {},
+      "pool": {}
+    }
+  },
   "blocks_summarySequential": "Sequential · {range} per roll · steps forward each image",
-  "@blocks_summarySequential": {"placeholders": {"range": {}}},
+  "@blocks_summarySequential": {
+    "placeholders": {
+      "range": {}
+    }
+  },
   "blocks_drawnThisTime": "This roll",
   "blocks_lock": "Lock",
   "blocks_unlock": "Unlock",
@@ -8154,22 +6983,47 @@
   "blocks_reroll": "Reroll",
   "blocks_rerollLocked": "Locked — unlock to reroll",
   "blocks_skipped": "Skipped this time (chance {percent})",
-  "@blocks_skipped": {"placeholders": {"percent": {}}},
+  "@blocks_skipped": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "blocks_sendPrefix": "Sends: {text}",
-  "@blocks_sendPrefix": {"placeholders": {"text": {}}},
+  "@blocks_sendPrefix": {
+    "placeholders": {
+      "text": {}
+    }
+  },
   "blocks_seqPosition": "Item {index} / {total}",
-  "@blocks_seqPosition": {"placeholders": {"index": {}, "total": {}}},
+  "@blocks_seqPosition": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "blocks_seqLocked": "Locked; won’t advance",
   "blocks_prevItem": "Previous",
   "blocks_nextItem": "Next",
   "blocks_prevValue": "Prev {value}",
-  "@blocks_prevValue": {"placeholders": {"value": {}}},
+  "@blocks_prevValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_nextValue": "Next {value}",
-  "@blocks_nextValue": {"placeholders": {"value": {}}},
+  "@blocks_nextValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_paramsTitle": "This block carries generation settings",
   "blocks_drawMode": "Draw mode",
   "blocks_fixedExplain": "Fixed: all {count} items go in as-is every time. Switch to Sequential or Random to set counts and weights here.",
-  "@blocks_fixedExplain": {"placeholders": {"count": {}}},
+  "@blocks_fixedExplain": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_ruleCount": "Count",
   "blocks_ruleWeight": "Weight",
   "blocks_ruleShow": "Chance",
@@ -8195,7 +7049,11 @@
   "blocks_drawEach": "Draw",
   "blocks_takeEach": "Take",
   "blocks_poolSize": "{count} in pool",
-  "@blocks_poolSize": {"placeholders": {"count": {}}},
+  "@blocks_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_outputOrder": "Output order",
   "blocks_orderDrawn": "As drawn",
   "blocks_orderOriginal": "Original order",
@@ -8248,11 +7106,23 @@
   "blocks_exportBackup": "Export library backup",
   "blocks_importBackup": "Import library backup…",
   "blocks_dropMoveTo": "Move to “{name}”",
-  "@blocks_dropMoveTo": {"placeholders": {"name": {}}},
+  "@blocks_dropMoveTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropCopyTo": "Copy to “{name}”",
-  "@blocks_dropCopyTo": {"placeholders": {"name": {}}},
+  "@blocks_dropCopyTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropAddTo": "Add to “{name}”",
-  "@blocks_dropAddTo": {"placeholders": {"name": {}}},
+  "@blocks_dropAddTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_searchLibrary": "Search titles, content or tags",
   "blocks_sortCustom": "Custom order",
   "blocks_sortUpdated": "Recently modified",
@@ -8284,9 +7154,17 @@
   "blocks_colUsed": "Used",
   "blocks_colModified": "Modified",
   "blocks_selectedN": "{count} selected",
-  "@blocks_selectedN": {"placeholders": {"count": {}}},
+  "@blocks_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_selectedBlocksN": "{count} blocks selected",
-  "@blocks_selectedBlocksN": {"placeholders": {"count": {}}},
+  "@blocks_selectedBlocksN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_moveTo": "Move to…",
   "blocks_noTags": "No tags yet",
   "blocks_emptyTitle": "Your block library is empty",
@@ -8297,9 +7175,17 @@
   "blocks_exportTxt": "Export as TXT",
   "blocks_removeFromCollection": "Remove from collection",
   "blocks_deleteOne": "Delete “{name}”?",
-  "@blocks_deleteOne": {"placeholders": {"name": {}}},
+  "@blocks_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_deleteMany": "Delete {count} blocks?",
-  "@blocks_deleteMany": {"placeholders": {"count": {}}},
+  "@blocks_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_deleteBody": "Instances already in prompts will show as “Block deleted”. You can undo this.",
   "blocks_details": "Details",
   "blocks_noSelection": "Click a card to see details. Double-click to edit; Enter inserts it into the prompt.",
@@ -8315,33 +7201,69 @@
   "blocks_paramSampler": "Sampler",
   "blocks_paramNoise": "Noise",
   "blocks_steps": "{count} steps",
-  "@blocks_steps": {"placeholders": {"count": {}}},
+  "@blocks_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_guidance": "Guidance {value}",
-  "@blocks_guidance": {"placeholders": {"value": {}}},
+  "@blocks_guidance": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_rescale": "rescale {value}",
-  "@blocks_rescale": {"placeholders": {"value": {}}},
+  "@blocks_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_newTagInEdit": "New tag…",
   "blocks_modifiedAt": "Modified {time}",
-  "@blocks_modifiedAt": {"placeholders": {"time": {}}},
+  "@blocks_modifiedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "blocks_createdAt": "Created {date}",
-  "@blocks_createdAt": {"placeholders": {"date": {}}},
+  "@blocks_createdAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_sourceFile": "Source file {path}",
-  "@blocks_sourceFile": {"placeholders": {"path": {}}},
+  "@blocks_sourceFile": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "blocks_sourceSynced": "matches file",
   "blocks_sourceChanged": "file changed",
   "blocks_sourceMissing": "file missing",
   "blocks_importedAt": "Imported {date}",
-  "@blocks_importedAt": {"placeholders": {"date": {}}},
+  "@blocks_importedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_total": "Total",
   "blocks_totalItems": "{count} items",
-  "@blocks_totalItems": {"placeholders": {"count": {}}},
+  "@blocks_totalItems": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_from": "From",
   "blocks_batch": "Batch actions",
   "blocks_insertInOrder": "Insert into prompt in order",
   "blocks_mergeNew": "Merge into a new block…",
   "blocks_batchStyle": "Set color / style for all",
   "blocks_dragHint": "You can also drag these {count} cards onto a folder or collection on the left and choose move or copy when you drop.",
-  "@blocks_dragHint": {"placeholders": {"count": {}}},
+  "@blocks_dragHint": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_editBlockTitle": "Edit block",
   "blocks_editHint": "After saving, fixed instances in prompts update at once; random and sequential use the new content on the next roll",
   "blocks_newBlockHint": "Once saved, insert it from the generation sidebar with one click",
@@ -8367,7 +7289,11 @@
   "blocks_saveAsBlock": "Save as block",
   "blocks_lookup": "Look up",
   "blocks_splitDone": "{count} items · split at commas",
-  "@blocks_splitDone": {"placeholders": {"count": {}}},
+  "@blocks_splitDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_replaceSelection": "Replace the selected text with this block",
   "blocks_quickHint": "Preview, negative and settings can be set later in the library",
   "imageViewer_backGallery": "Local gallery",
@@ -8381,9 +7307,17 @@
   "imageViewer_unsaved": "Unsaved",
   "imageViewer_saved": "Saved",
   "imageViewer_batch": "Results · {count} in this batch",
-  "@imageViewer_batch": {"placeholders": {"count": {}}},
+  "@imageViewer_batch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_zoomFit": "Fit · {percent}%",
-  "@imageViewer_zoomFit": {"placeholders": {"percent": {}}},
+  "@imageViewer_zoomFit": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "imageViewer_zoomFitPending": "Fit · —",
   "imageViewer_zoomFitShort": "Fit",
   "imageViewer_zoomIn": "Zoom in",
@@ -8399,7 +7333,11 @@
   "imageViewer_next": "Next",
   "imageViewer_loadingOriginal": "Loading original",
   "imageViewer_loadingOriginalSize": "Loading original · {size}",
-  "@imageViewer_loadingOriginalSize": {"placeholders": {"size": {}}},
+  "@imageViewer_loadingOriginalSize": {
+    "placeholders": {
+      "size": {}
+    }
+  },
   "imageViewer_missingTitle": "Can't find this image",
   "imageViewer_missingHint": "It may have been moved, renamed or deleted in Explorer",
   "imageViewer_openFolder": "Open folder",
@@ -8417,10 +7355,18 @@
   "imageViewer_favorite": "Favorite",
   "imageViewer_showInFolder": "Show in folder",
   "imageViewer_deleteKey": "Delete  {key}",
-  "@imageViewer_deleteKey": {"placeholders": {"key": {}}},
+  "@imageViewer_deleteKey": {
+    "placeholders": {
+      "key": {}
+    }
+  },
   "imageViewer_more": "More",
   "imageViewer_genIndex": "This batch · #{index}",
-  "@imageViewer_genIndex": {"placeholders": {"index": {}}},
+  "@imageViewer_genIndex": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_notSaved": "Not saved to gallery",
   "imageViewer_savedToGallery": "Saved to gallery",
   "imageViewer_size": "Size",
@@ -8434,35 +7380,71 @@
   "imageViewer_steps": "Steps",
   "imageViewer_guidance": "Guidance",
   "imageViewer_noise": "Noise {value}",
-  "@imageViewer_noise": {"placeholders": {"value": {}}},
+  "@imageViewer_noise": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_rescale": "Rescale {value}",
-  "@imageViewer_rescale": {"placeholders": {"value": {}}},
+  "@imageViewer_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_precise": "Precise ref ×{count}",
-  "@imageViewer_precise": {"placeholders": {"count": {}}},
+  "@imageViewer_precise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_qualityTags": "Quality tags",
   "imageViewer_prompt": "Prompt",
   "imageViewer_translate": "Translate",
   "imageViewer_showOriginal": "Show original",
   "imageViewer_translateFailed": "Translation failed: {error}",
-  "@imageViewer_translateFailed": {"placeholders": {"error": {}}},
+  "@imageViewer_translateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "imageViewer_copy": "Copy",
   "imageViewer_copySeed": "Copy seed",
   "imageViewer_expandAll": "Show all",
   "imageViewer_expand": "Expand",
   "imageViewer_collapse": "Collapse",
   "imageViewer_character": "Character {index}",
-  "@imageViewer_character": {"placeholders": {"index": {}}},
+  "@imageViewer_character": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_position": "Position {cell}",
-  "@imageViewer_position": {"placeholders": {"cell": {}}},
+  "@imageViewer_position": {
+    "placeholders": {
+      "cell": {}
+    }
+  },
   "imageViewer_characterNegative": "Character negative · ",
   "imageViewer_negative": "Negative",
   "imageViewer_tagCount": "{count} tags",
-  "@imageViewer_tagCount": {"placeholders": {"count": {}}},
+  "@imageViewer_tagCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_vibes": "Vibe references",
   "imageViewer_vibeStrength": "Strength {value}",
-  "@imageViewer_vibeStrength": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeStrength": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_vibeInfo": "Info {value}",
-  "@imageViewer_vibeInfo": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeInfo": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_saveVibe": "Save to Vibe library",
   "imageViewer_noMetaTitle": "No NovelAI generation info",
   "imageViewer_noMetaBody": "This image wasn't made with NAI, or its metadata was stripped (common for screenshots, re-saved or compressed images).\nImage to image, style transfer, precise reference and upscale below still work.",
@@ -8510,9 +7492,17 @@
   "imageViewer_cancel": "Cancel",
   "imageViewer_justNow": "just now",
   "imageViewer_minutesAgo": "{count} min ago",
-  "@imageViewer_minutesAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_hoursAgo": "{count} h ago",
-  "@imageViewer_hoursAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_yesterday": "yesterday",
   "explore_back": "Style explore",
   "explore_close": "Close",
@@ -8529,13 +7519,33 @@
   "explore_previous": "Previous",
   "explore_next": "Next",
   "explore_today": "Today {time}",
-  "@explore_today": {"placeholders": {"time": {}}},
+  "@explore_today": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_yesterday": "Yesterday {time}",
-  "@explore_yesterday": {"placeholders": {"time": {}}},
+  "@explore_yesterday": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_monthDay": "{month}/{day} {time}",
-  "@explore_monthDay": {"placeholders": {"month": {}, "day": {}, "time": {}}},
+  "@explore_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {},
+      "time": {}
+    }
+  },
   "explore_fullDate": "{year}/{month}/{day}",
-  "@explore_fullDate": {"placeholders": {"year": {}, "month": {}, "day": {}}},
+  "@explore_fullDate": {
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
   "explore_sectionToday": "Today",
   "explore_thisWeek": "This week",
   "explore_earlier": "Earlier",
@@ -8546,29 +7556,74 @@
   "explore_openBlockLibrary": "Open block library",
   "explore_variableMissing": "Block deleted",
   "explore_poolSize": "{count} in pool",
-  "@explore_poolSize": {"placeholders": {"count": {}}},
+  "@explore_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evolutionTarget": "Evolution target",
   "explore_draw": "Draw {count} candidates",
-  "@explore_draw": {"placeholders": {"count": {}}},
+  "@explore_draw": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_stopGenerating": "Stop",
   "explore_busy": "Generating",
   "explore_cooldown": "Cooldown {seconds} s",
-  "@explore_cooldown": {"placeholders": {"seconds": {}}},
+  "@explore_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "explore_insufficient": "Not enough Anlas",
   "explore_count": "{count} images",
-  "@explore_count": {"placeholders": {"count": {}}},
+  "@explore_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_favoritesCount": "{count} favorites",
-  "@explore_favoritesCount": {"placeholders": {"count": {}}},
+  "@explore_favoritesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_roundsCount": "{count} rounds",
-  "@explore_roundsCount": {"placeholders": {"count": {}}},
+  "@explore_roundsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_linesCount": "{count} lines",
-  "@explore_linesCount": {"placeholders": {"count": {}}},
+  "@explore_linesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_progressRound": "Round {round} · {done} / {total}",
-  "@explore_progressRound": {"placeholders": {"round": {}, "done": {}, "total": {}}},
+  "@explore_progressRound": {
+    "placeholders": {
+      "round": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_progressChildren": "{line} G{gen} · {done} / {total}",
-  "@explore_progressChildren": {"placeholders": {"line": {}, "gen": {}, "done": {}, "total": {}}},
+  "@explore_progressChildren": {
+    "placeholders": {
+      "line": {},
+      "gen": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_paused": "Paused · {where}",
-  "@explore_paused": {"placeholders": {"where": {}}},
+  "@explore_paused": {
+    "placeholders": {
+      "where": {}
+    }
+  },
   "explore_pause": "Pause",
   "explore_resume": "Resume",
   "explore_stop": "Stop",
@@ -8595,23 +7650,48 @@
   "explore_selectExit": "Exit selection  Esc",
   "explore_selectHint": "Click cards to select",
   "explore_selectedN": "{count} selected",
-  "@explore_selectedN": {"placeholders": {"count": {}}},
+  "@explore_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_sortNewest": "Newest round first (click for oldest first)",
   "explore_sortOldest": "Oldest round first (click for newest first)",
   "explore_round": "Round {number}",
-  "@explore_round": {"placeholders": {"number": {}}},
+  "@explore_round": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingShort": "Generating {done} / {total}",
-  "@explore_generatingShort": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_generatingShort": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_failedRetry": "{count} failed · Retry",
-  "@explore_failedRetry": {"placeholders": {"count": {}}},
+  "@explore_failedRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pick": "Pick for evolution",
   "explore_pickTip": "Enter selection with this round's favorites ticked",
   "explore_filterEmpty": "No candidates match this filter",
   "explore_showAll": "Show all",
   "explore_queued": "Queued #{number}",
-  "@explore_queued": {"placeholders": {"number": {}}},
+  "@explore_queued": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingN": "Generating #{number}",
-  "@explore_generatingN": {"placeholders": {"number": {}}},
+  "@explore_generatingN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_failed": "Failed",
   "explore_failedHover": "Hover for the reason",
   "explore_noArtists": "No artists drawn",
@@ -8632,15 +7712,32 @@
   "explore_ungroup": "Ungroup",
   "explore_delete": "Delete",
   "explore_deleteN": "Delete {count}",
-  "@explore_deleteN": {"placeholders": {"count": {}}},
+  "@explore_deleteN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteThis": "Delete this image",
   "explore_deleted": "Deleted {count}",
-  "@explore_deleted": {"placeholders": {"count": {}}},
+  "@explore_deleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_inspectorEmpty": "Click a candidate to see which artists it drew",
   "explore_childN": "Offspring #{number}",
-  "@explore_childN": {"placeholders": {"number": {}}},
+  "@explore_childN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_genOp": "G{gen} · {op}",
-  "@explore_genOp": {"placeholders": {"gen": {}, "op": {}}},
+  "@explore_genOp": {
+    "placeholders": {
+      "gen": {},
+      "op": {}
+    }
+  },
   "explore_drawn": "Drawn for this image",
   "explore_drawEmpty": "Nothing drawn this time (the pool has empty entries)",
   "explore_origin": "How it was made",
@@ -8650,40 +7747,85 @@
   "explore_sampler": "Sampler",
   "explore_model": "Model",
   "explore_steps": "{count} steps",
-  "@explore_steps": {"placeholders": {"count": {}}},
+  "@explore_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_fullPrompt": "Full prompt",
   "explore_negative": "Negative",
   "explore_failReason": "Reason",
   "explore_retryFailed": "Retry failed candidates",
   "explore_waitHint": "Artists show up here once it is generated",
   "explore_mergedArtists": "Combined artists · {count}",
-  "@explore_mergedArtists": {"placeholders": {"count": {}}},
+  "@explore_mergedArtists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_multiHint": "Save as block merges these artists into one block; in evolution each image becomes a parent.",
   "explore_evoEmptyTitle": "No evolution lines yet",
   "explore_evoEmptyBody": "Pick a few candidates you like and press \"Start evolution\" to breed new artist mixes from the good ones.",
   "explore_evoGoPick": "Pick from candidates",
   "explore_gen": "G{number}",
-  "@explore_gen": {"placeholders": {"number": {}}},
+  "@explore_gen": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_current": "Current",
   "explore_genFirst": "Started from {picked} candidates · {children} offspring",
-  "@explore_genFirst": {"placeholders": {"picked": {}, "children": {}}},
+  "@explore_genFirst": {
+    "placeholders": {
+      "picked": {},
+      "children": {}
+    }
+  },
   "explore_genFrom": "{parents} parents → {children} offspring · {picked} picked from G{from}",
-  "@explore_genFrom": {"placeholders": {"parents": {}, "children": {}, "from": {}, "picked": {}}},
+  "@explore_genFrom": {
+    "placeholders": {
+      "parents": {},
+      "children": {},
+      "from": {},
+      "picked": {}
+    }
+  },
   "explore_backcross": "G1 backcross",
   "explore_compare": "Rank by comparing",
   "explore_compareTip": "See two parents at a time and pick the better one; higher preference means picked more often",
   "explore_generateChildren": "Generate {count} offspring",
-  "@explore_generateChildren": {"placeholders": {"count": {}}},
+  "@explore_generateChildren": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_children": "Offspring · {count}",
-  "@explore_children": {"placeholders": {"count": {}}},
+  "@explore_children": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pickedN": "{count} picked",
-  "@explore_pickedN": {"placeholders": {"count": {}}},
+  "@explore_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_breedHint": "Tick offspring you like to breed the next generation",
   "explore_breed": "Breed G{next} from {count}",
-  "@explore_breed": {"placeholders": {"count": {}, "next": {}}},
+  "@explore_breed": {
+    "placeholders": {
+      "count": {},
+      "next": {}
+    }
+  },
   "explore_noChildren": "No offspring yet · press Generate for the first batch",
   "explore_parentsByPref": "Parents by preference · {count}",
-  "@explore_parentsByPref": {"placeholders": {"count": {}}},
+  "@explore_parentsByPref": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_opMutation": "Mutation",
   "explore_opCrossover": "Crossover",
   "explore_opInjection": "Injection",
@@ -8691,39 +7833,87 @@
   "explore_newRun": "New exploration",
   "explore_newRunHint": "Starts with the current prompt and settings; rename any time",
   "explore_runRunning": "Generating {done}/{total}",
-  "@explore_runRunning": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runRunning": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runPaused": "Paused {done}/{total}",
-  "@explore_runPaused": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runPaused": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runFailed": "{count} failed",
-  "@explore_runFailed": {"placeholders": {"count": {}}},
+  "@explore_runFailed": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noRunMatch": "No matching explorations",
   "explore_runMenuHint": "Auto-named from random blocks + date · hover a row and use ⋯ to rename or delete",
   "explore_deleteRun": "Delete exploration",
   "explore_deleteRunTitle": "Delete \"{name}\"?",
-  "@explore_deleteRunTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteRunTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteRunBody": "Its {count} candidates and all evolution lines will be deleted. This cannot be undone. Gallery images are not affected.",
-  "@explore_deleteRunBody": {"placeholders": {"count": {}}},
+  "@explore_deleteRunBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteLineTitle": "Delete line \"{name}\"?",
-  "@explore_deleteLineTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteLineTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteLineBody": "Its {count} offspring will be deleted. This cannot be undone. Candidates are not affected.",
-  "@explore_deleteLineBody": {"placeholders": {"count": {}}},
+  "@explore_deleteLineBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_onboardingTitle": "Try styles in bulk with random blocks",
   "explore_onboardingBody": "Every image draws again from your artist pool — keep the mixes you like and let them evolve.",
   "explore_step1": "Add a random block",
   "explore_step1Body": "Insert a random block from the library into the prompt, e.g. an artist pool.",
   "explore_step2": "Draw a batch",
   "explore_step2Body": "Press \"Draw {count} candidates\" at the bottom left; each image draws new artists.",
-  "@explore_step2Body": {"placeholders": {"count": {}}},
+  "@explore_step2Body": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_step3": "Keep, evolve, save",
   "explore_step3Body": "Favorite what you like, evolve it, and save the mixes you love as blocks.",
   "explore_detected": "{count} detected",
-  "@explore_detected": {"placeholders": {"count": {}}},
+  "@explore_detected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noVariables": "No random blocks yet",
   "explore_openPrevious": "Open a previous exploration",
   "explore_evoTitle": "Start evolution with {count} candidates",
-  "@explore_evoTitle": {"placeholders": {"count": {}}},
+  "@explore_evoTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoJoinTitle": "Add {count} to \"{line}\" G{gen}",
-  "@explore_evoJoinTitle": {"placeholders": {"count": {}, "line": {}, "gen": {}}},
+  "@explore_evoJoinTitle": {
+    "placeholders": {
+      "count": {},
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoStep1": "Parents",
   "explore_evoStep1Body": "Each candidate's artist string is a parent",
   "explore_evoStep2": "Offspring",
@@ -8732,16 +7922,38 @@
   "explore_evoStep3Body": "Tick favorites to breed the next one",
   "explore_evoNewLine": "New line",
   "explore_evoJoin": "Join \"{line}\" G{gen}",
-  "@explore_evoJoin": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_evoJoin": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_lineName": "Line name",
   "explore_lineDefault": "Line {number}",
-  "@explore_lineDefault": {"placeholders": {"number": {}}},
+  "@explore_lineDefault": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_lineGen": "{line} · G{gen}",
-  "@explore_lineGen": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_lineGen": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoParents": "Generation 1 parents · {count}",
-  "@explore_evoParents": {"placeholders": {"count": {}}},
+  "@explore_evoParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoAddParents": "Parents to add · {count}",
-  "@explore_evoAddParents": {"placeholders": {"count": {}}},
+  "@explore_evoAddParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_addCustom": "Add a custom artist string",
   "explore_customHint": "e.g. 0.8::artist:ciloranko::, artist:rella (Enter to add)",
   "explore_targetBefore": "Offspring replace",
@@ -8752,22 +7964,44 @@
   "explore_createOnly": "Create only",
   "explore_joinOnly": "Add only",
   "explore_createGenerate": "Create & generate {count}",
-  "@explore_createGenerate": {"placeholders": {"count": {}}},
+  "@explore_createGenerate": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_saveBlockTitle": "Save as prompt block",
   "explore_untitled": "Untitled",
   "explore_blockFromOne": "From candidate #{number}",
-  "@explore_blockFromOne": {"placeholders": {"number": {}}},
+  "@explore_blockFromOne": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_blockFromMany": "From {count} candidates, merged and deduplicated",
-  "@explore_blockFromMany": {"placeholders": {"count": {}}},
+  "@explore_blockFromMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_blockNameMany": "{run} · Picks {count}",
-  "@explore_blockNameMany": {"placeholders": {"run": {}, "count": {}}},
+  "@explore_blockNameMany": {
+    "placeholders": {
+      "run": {},
+      "count": {}
+    }
+  },
   "explore_blockContent": "Content",
   "explore_blockArtists": "Drawn artists only",
   "explore_blockFull": "Full positive prompt",
   "explore_blockFullSingle": "Full prompt is available for a single candidate",
   "explore_blockRemoveHint": "Click × to drop artists",
   "explore_blockKept": "Keeping {kept} / {total}",
-  "@explore_blockKept": {"placeholders": {"kept": {}, "total": {}}},
+  "@explore_blockKept": {
+    "placeholders": {
+      "kept": {},
+      "total": {}
+    }
+  },
   "explore_blockName": "Name",
   "explore_blockColor": "Color",
   "explore_blockFolder": "Folder",
@@ -8777,7 +8011,12 @@
   "explore_compareNote": "Saved as you go — close any time",
   "explore_compareQuestion": "Which is closer to the style you want?",
   "explore_comparePairs": "Pair {index} / {total}",
-  "@explore_comparePairs": {"placeholders": {"index": {}, "total": {}}},
+  "@explore_comparePairs": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "explore_leftBetter": "Left is better",
   "explore_rightBetter": "Right is better",
   "explore_neither": "Neither",
@@ -8808,14 +8047,23 @@
   "gen_unpin": "Unpin from header",
   "gen_yesterday": "Yesterday",
   "gen_monthDay": "{month}/{day}",
-  "@gen_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@gen_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "gen_params": "Generation settings",
   "gen_generating": "Generating",
   "gen_modelsNew": "Current models",
   "gen_modelsLegacy": "Legacy models",
   "gen_modeTip": "Click to switch Anime / Furry",
   "gen_anlasTip": "Anlas balance {value}",
-  "@gen_anlasTip": {"placeholders": {"value": {}}},
+  "@gen_anlasTip": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "gen_positive": "Prompt",
   "gen_basePrompt": "Base prompt",
   "gen_negative": "Undesired",
@@ -8840,7 +8088,11 @@
   "gen_translateNeedsModel": "No translation model yet — click to set one up",
   "gen_translateRestore": "Show original",
   "gen_translateWith": "Translate ({route})",
-  "@gen_translateWith": {"placeholders": {"route": {}}},
+  "@gen_translateWith": {
+    "placeholders": {
+      "route": {}
+    }
+  },
   "gen_translateNew": "Translate new text",
   "gen_translateShowOriginal": "Show all original",
   "gen_translateShowTranslated": "Show all translations",
@@ -8854,16 +8106,32 @@
   "gen_charactersTip": "Write a separate prompt for each character so traits do not bleed between them.",
   "gen_charactersEmpty": "No characters yet. Click + to add one and give each its own prompt.",
   "gen_charactersFull": "Up to {max} characters",
-  "@gen_charactersFull": {"placeholders": {"max": {}}},
+  "@gen_charactersFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_addCharacter": "Add character",
   "gen_addAs": "Add {gender} character",
-  "@gen_addAs": {"placeholders": {"gender": {}}},
+  "@gen_addAs": {
+    "placeholders": {
+      "gender": {}
+    }
+  },
   "gen_clearCharacters": "Remove all characters",
   "gen_clearCharactersTitle": "Remove all characters?",
   "gen_clearCharactersBody": "All {count} characters and their prompts will be removed.",
-  "@gen_clearCharactersBody": {"placeholders": {"count": {}}},
+  "@gen_clearCharactersBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_characterN": "Character {n}",
-  "@gen_characterN": {"placeholders": {"n": {}}},
+  "@gen_characterN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "gen_genderFemale": "female",
   "gen_genderMale": "male",
   "gen_genderOther": "other",
@@ -8873,7 +8141,11 @@
   "gen_positionBoard": "Character positions",
   "gen_positionAiTip": "Position chosen by AI",
   "gen_positionAt": "At {at} — click to adjust",
-  "@gen_positionAt": {"placeholders": {"at": {}}},
+  "@gen_positionAt": {
+    "placeholders": {
+      "at": {}
+    }
+  },
   "gen_positionUnset": "Not placed yet — click to place",
   "gen_positionAiHint": "Positions are chosen by AI",
   "gen_positionGridHint": "Drag characters onto the grid; they snap to the cell centre",
@@ -8893,7 +8165,12 @@
   "gen_img2img": "Image to image",
   "gen_img2imgDesc": "Generate variations of an image",
   "gen_img2imgSummary": "Strength {strength} · Noise {noise}",
-  "@gen_img2imgSummary": {"placeholders": {"strength": {}, "noise": {}}},
+  "@gen_img2imgSummary": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "gen_img2imgDrop": "Drop an image here, or",
   "gen_upload": "Upload",
   "gen_replace": "Replace",
@@ -8921,18 +8198,32 @@
   "gen_addFromVibeLibrary": "From vibe library",
   "gen_addFromPreciseLibrary": "From reference library",
   "gen_vibeFull": "Up to {max}",
-  "@gen_vibeFull": {"placeholders": {"max": {}}},
+  "@gen_vibeFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_saveToLibrary": "Save to library",
   "gen_normalize": "Normalize",
   "gen_normalizeTip": "Normalize vibe strengths by their total",
   "gen_vibeExtraCost": "Each vibe beyond {free} costs +{each} Anlas · +{total} this time",
-  "@gen_vibeExtraCost": {"placeholders": {"free": {}, "each": {}, "total": {}}},
+  "@gen_vibeExtraCost": {
+    "placeholders": {
+      "free": {},
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_recent": "Recent",
   "gen_encoded": "Encoded",
   "gen_encoding": "Encoding",
   "gen_encode": "Encode",
   "gen_encodeTip": "Encoding costs {cost} Anlas once, then it can be reused",
-  "@gen_encodeTip": {"placeholders": {"cost": {}}},
+  "@gen_encodeTip": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "gen_vibeStrength": "Strength",
   "gen_vibeInfo": "Info",
   "gen_vibeInfoReencode": "Changing info extraction re-encodes this vibe",
@@ -8944,7 +8235,12 @@
   "gen_preciseBoth": "Both",
   "gen_fidelity": "Fidelity",
   "gen_preciseCost": "{each} Anlas each · +{total} this time",
-  "@gen_preciseCost": {"placeholders": {"each": {}, "total": {}}},
+  "@gen_preciseCost": {
+    "placeholders": {
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_preciseConflict": "While a precise reference is active, vibes are not sent.",
   "gen_pauseVibes": "Pause vibes",
   "gen_savePrecise": "Save to reference library",
@@ -8966,7 +8262,12 @@
   "gen_repeat": "Repeat",
   "gen_repeatTip": "How many requests to send in a row",
   "gen_repeatTotal": "{times} requests, {total} images (scroll to adjust)",
-  "@gen_repeatTotal": {"placeholders": {"times": {}, "total": {}}},
+  "@gen_repeatTotal": {
+    "placeholders": {
+      "times": {},
+      "total": {}
+    }
+  },
   "gen_steps": "Steps",
   "gen_guidance": "Guidance",
   "gen_guidanceTip": "Higher follows the prompt more closely; too high looks harsh (default 5)",
@@ -8989,7 +8290,11 @@
   "gen_paramsClose": "Hide settings",
   "gen_stop": "Stop",
   "gen_cooldown": "Cooling down {seconds}s",
-  "@gen_cooldown": {"placeholders": {"seconds": {}}},
+  "@gen_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "gen_insufficient": "Not enough Anlas",
   "gen_free": "Free this time (within Opus allowance)",
   "gen_emptyTitle": "Write a prompt and make your first image",
@@ -8998,8 +8303,6 @@
   "gen_tileFailed": "This one failed",
   "gen_enhance": "Enhance",
   "gen_variations": "Variations",
-  "gen_variationsCost": "Variations ({cost} Anlas)",
-  "@gen_variationsCost": {"placeholders": {"cost": {}}},
   "gen_upscale": "Upscale",
   "gen_upscaleStop": "Stop upscaling",
   "gen_upscaleOptions": "Upscale options",
@@ -9035,14 +8338,26 @@
   "gen_historyEmpty": "Nothing generated yet",
   "gen_historyEmptySub": "Your images will appear here batch by batch",
   "gen_batchCount": "{count} images",
-  "@gen_batchCount": {"placeholders": {"count": {}}},
+  "@gen_batchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_batchPending": "{count} to go",
-  "@gen_batchPending": {"placeholders": {"count": {}}},
+  "@gen_batchPending": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pinnedTip": "Pinned images — click to jump to them",
   "gen_select": "Select",
   "gen_selectDone": "Done selecting",
   "gen_selectedCount": "{count} selected",
-  "@gen_selectedCount": {"placeholders": {"count": {}}},
+  "@gen_selectedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pack": "Pack as zip",
   "gen_saveSelected": "Save selected",
   "gen_removeSelected": "Remove from history",
@@ -9056,11 +8371,23 @@
   "gen_clearHistoryBody": "Images are only removed from this list; files already saved to the gallery stay.",
   "gen_deleteImagesTitle": "Remove from history?",
   "gen_deleteImagesBody": "{count} images will be removed from this list; saved files stay in the gallery.",
-  "@gen_deleteImagesBody": {"placeholders": {"count": {}}},
+  "@gen_deleteImagesBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_saveBatch": "Save batch ({count})",
-  "@gen_saveBatch": {"placeholders": {"count": {}}},
+  "@gen_saveBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeBatch": "Remove batch ({count})",
-  "@gen_removeBatch": {"placeholders": {"count": {}}},
+  "@gen_removeBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeImage": "Remove from history",
   "gen_favorite": "Favorite",
   "gen_unfavorite": "Unfavorite",
@@ -9076,7 +8403,11 @@
   "tools_free": "Free",
   "tools_localFree": "Local · free",
   "tools_anlasN": "{count} Anlas",
-  "@tools_anlasN": {"placeholders": {"count": {}}},
+  "@tools_anlasN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_cancel": "Cancel",
   "tools_close": "Close",
   "tools_done": "Done",
@@ -9086,11 +8417,24 @@
   "tools_optional": "optional",
   "tools_justNow": "just now",
   "tools_minutesAgo": "{count} min ago",
-  "@tools_minutesAgo": {"placeholders": {"count": {}}},
+  "@tools_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_hoursAgo": "{count} h ago",
-  "@tools_hoursAgo": {"placeholders": {"count": {}}},
+  "@tools_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_monthDay": "{month}/{day}",
-  "@tools_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@tools_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "tools_useAsInit": "Use as img2img base",
   "tools_upscale": "Upscale",
   "tools_enhance": "Enhance",
@@ -9111,13 +8455,23 @@
   "tools_enhanceLocal": "Local upscale",
   "tools_enhanceLocalRow": "Local",
   "tools_enhanceOutLocal": "{size} → local {factor}",
-  "@tools_enhanceOutLocal": {"placeholders": {"size": {}, "factor": {}}},
+  "@tools_enhanceOutLocal": {
+    "placeholders": {
+      "size": {},
+      "factor": {}
+    }
+  },
   "tools_enhanceMagnitude": "Amount",
   "tools_magLight": "subtle",
   "tools_magMedium": "medium",
   "tools_magStrong": "strong",
   "tools_enhanceValues": "Strength {strength} · Noise {noise}",
-  "@tools_enhanceValues": {"placeholders": {"strength": {}, "noise": {}}},
+  "@tools_enhanceValues": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "tools_enhanceCustomTag": "Custom",
   "tools_enhanceCustom": "Custom strength and noise",
   "tools_enhanceCustomHint": "Higher strength changes more; noise adds detail but can get messy",
@@ -9125,7 +8479,12 @@
   "tools_localNotSet": "No local upscale model selected",
   "tools_upscaleSettings": "Upscale settings",
   "tools_enhanceFooter": "Current prompt · {model} · {steps} steps",
-  "@tools_enhanceFooter": {"placeholders": {"model": {}, "steps": {}}},
+  "@tools_enhanceFooter": {
+    "placeholders": {
+      "model": {},
+      "steps": {}
+    }
+  },
   "tools_enhanceRun": "Enhance",
   "tools_enhanceRunLocal": "Enhance + local upscale",
   "tools_upscaleSub": "The upscaled image appears as a new image; the original and img2img base stay untouched",
@@ -9195,7 +8554,11 @@
   "tools_edgeLeft": "Left",
   "tools_edgeRight": "Right",
   "tools_hintExpand": "You can also drag the canvas edges; {step} px steps",
-  "@tools_hintExpand": {"placeholders": {"step": {}}},
+  "@tools_hintExpand": {
+    "placeholders": {
+      "step": {}
+    }
+  },
   "tools_maskLook": "Mask look",
   "tools_maskBorder": "Outline",
   "tools_patternSolid": "Solid",
@@ -9216,10 +8579,18 @@
   "tools_inpaintStrengthHint": "Lower stays closer to the original",
   "tools_mask": "Mask",
   "tools_maskCoverage": "of the image · {count} areas",
-  "@tools_maskCoverage": {"placeholders": {"count": {}}},
+  "@tools_maskCoverage": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_focusNone": "Not set (whole image)",
   "tools_focusContextShort": "· context {value}",
-  "@tools_focusContextShort": {"placeholders": {"value": {}}},
+  "@tools_focusContextShort": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "tools_output": "Output",
   "tools_expandTag": "Expanded",
   "tools_layers": "Layers",
@@ -9272,7 +8643,11 @@
   "tools_emptyEmotion": "Pick an expression, then Run",
   "tools_emptyBody": "The result appears here next to the original",
   "tools_running": "Running {tool}…",
-  "@tools_running": {"placeholders": {"tool": {}}},
+  "@tools_running": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runningBody": "Usually a few seconds; results also go to the Generate history",
   "tools_runFailed": "Run failed",
   "tools_noInput": "Add an image first",
@@ -9283,7 +8658,11 @@
   "tools_saveGallery": "Save to gallery",
   "tools_queue": "Input queue",
   "tools_queueCount": "{count}",
-  "@tools_queueCount": {"placeholders": {"count": {}}},
+  "@tools_queueCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_queueHint": "Plus: import files or pick from history; you can also drag in or paste",
   "tools_importFiles": "Import files",
   "tools_fromHistory": "From Generate history",
@@ -9296,7 +8675,11 @@
   "tools_dtNoOptionsSketch": "Sketch has no options. For cleaner lines use Line art; to color, use Process further, then Colorize.",
   "tools_dtEmotionLabel": "Expression",
   "tools_dtEmotionMore": "{count} more",
-  "@tools_dtEmotionMore": {"placeholders": {"count": {}}},
+  "@tools_dtEmotionMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_dtEmotionLess": "Show less",
   "tools_dtStrength": "Strength",
   "tools_defry0": "Normal",
@@ -9321,7 +8704,11 @@
   "tools_dtPixelUpscale": "Upscale to original size",
   "tools_dtPixelUpscaleHint": "When off, outputs one pixel per cell",
   "tools_runTool": "Run {tool}",
-  "@tools_runTool": {"placeholders": {"tool": {}}},
+  "@tools_runTool": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runHint": "Run · processes the current input",
   "tools_runNeedInput": "Add an input below first",
   "tools_results": "Results",
@@ -9351,5 +8738,223 @@
   "tools_emoLove": "Love",
   "tools_emoDetermined": "Determined",
   "tools_emoHurt": "Hurt",
-  "tools_emoPlayful": "Playful"
+  "tools_emoPlayful": "Playful",
+  "auth_logoutConfirm": "Sign out of the current account?",
+  "naiAgent_title": "NAI Agent",
+  "naiAgent_local": "Local",
+  "naiAgent_permissionMode": "Approval mode",
+  "naiAgent_permissionAuto": "Auto",
+  "naiAgent_permissionAsk": "Ask",
+  "naiAgent_permissionReadOnly": "Read only",
+  "naiAgent_permissionAutoHint": "Routine workspace edits run automatically. Commands, deletion and unknown tools still need approval. Generation confirmation stays enabled.",
+  "naiAgent_permissionAskHint": "Workspace reads run directly. Edits, commands and unknown tools need approval for each call. Generation uses its price confirmation.",
+  "naiAgent_permissionReadOnlyHint": "Read and discuss only. Edits, generation and unknown tools are blocked. Switching stops current Agent tasks, not manual generation.",
+  "naiAgent_useModelSetting": "Use model setting",
+  "naiAgent_permissionTitle": "Tool approval required",
+  "naiAgent_permissionOnce": "Allow once",
+  "naiAgent_permissionSession": "Allow identical calls this session",
+  "naiAgent_permissionDeny": "Deny",
+  "naiAgent_thinking": "Thinking effort · applies to the next run",
+  "naiAgent_thinkingUnsupported": "This model has no confirmed adjustable thinking levels. Check its model settings first.",
+  "naiAgent_pasteImage": "Paste clipboard image",
+  "naiAgent_contextUnknown": "Context usage is unavailable until the model window and usage are known.",
+  "naiAgent_contextTooltip": "Available context: {percent}%\n{remaining} / {window} tokens remaining\nClick for detailed statistics",
+  "@naiAgent_contextTooltip": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_statistics": "Context and session statistics",
+  "naiAgent_contextUsage": "Current context usage · estimated",
+  "naiAgent_contextRemaining": "Remaining context",
+  "naiAgent_contextWindow": "Model window",
+  "naiAgent_sessionUsage": "Cumulative session usage",
+  "naiAgent_tokensInput": "Input",
+  "naiAgent_tokensOutput": "Output",
+  "naiAgent_tokensCacheRead": "Cache read",
+  "naiAgent_tokensCacheWrite": "Cache write",
+  "naiAgent_tokensTotal": "Total tokens",
+  "naiAgent_cumulativeUsageHint": "Cumulative usage includes past requests and is not the current context size.",
+  "naiAgent_messageCounts": "Conversation",
+  "naiAgent_userAssistantMessages": "User / assistant messages",
+  "naiAgent_toolCalls": "Tool calls",
+  "naiAgent_cost": "Cost",
+  "naiAgent_defaultWorkspace": "Workspace 1",
+  "naiAgent_newChat": "New chat",
+  "naiAgent_settings": "Agent settings",
+  "naiAgent_workspace": "Workspace",
+  "naiAgent_createWorkspace": "New workspace",
+  "naiAgent_rename": "Rename",
+  "naiAgent_name": "Name",
+  "naiAgent_placeholder": "Describe an idea or ask a question…",
+  "naiAgent_welcome": "Start with an idea",
+  "naiAgent_welcomeHint": "Discuss prompts, inspect images, organize your workspace.\nTalk it through, then take action.",
+  "naiAgent_suggestCurrent": "Inspect current draft",
+  "naiAgent_suggestImage": "Analyze a reference",
+  "naiAgent_suggestWorkspace": "Organize workspace",
+  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
+  "naiAgent_promptCurrent": "Inspect my current draft and parameters without changing anything yet.",
+  "naiAgent_promptImage": "Analyze the composition and style of the current image without generating anything yet.",
+  "naiAgent_promptWorkspace": "Review my current workspace and suggest how to organize it without changing anything yet.",
+  "naiAgent_tipTitle": "TIPS / GETTING STARTED",
+  "naiAgent_tipNext": "Next tip",
+  "naiAgent_tipReadOnly": "Explore in Read-only mode first, then decide what to change.",
+  "naiAgent_tipAttachments": "Drop a reference image here, or use + to add an attachment.",
+  "naiAgent_tipGeneration": "Image generation shows its cost and waits for your confirmation.",
+  "naiAgent_welcomeFootnote": "All actions follow your current approval mode",
+  "naiAgent_chooseModel": "Choose model",
+  "naiAgent_modelSettings": "Manage models and interfaces",
+  "naiAgent_attach": "Attach images",
+  "naiAgent_removeAttachment": "Remove attachment",
+  "naiAgent_selectedImage": "Attach selected image",
+  "naiAgent_send": "Send",
+  "naiAgent_stop": "Stop run",
+  "naiAgent_queue": "Queue",
+  "naiAgent_steer": "Steer",
+  "naiAgent_promote": "Use as steering",
+  "naiAgent_waiting": "Waiting for your answer",
+  "naiAgent_working": "Working",
+  "naiAgent_waitingSlot": "Waiting for a provider slot",
+  "naiAgent_starting": "Opening chat",
+  "naiAgent_interrupted": "The previous run was interrupted and was not resent.",
+  "naiAgent_restorePending": "Restore to composer",
+  "naiAgent_withdraw": "Withdraw",
+  "naiAgent_newContent": "Jump to latest",
+  "naiAgent_toolRunning": "Running",
+  "naiAgent_toolDone": "Complete",
+  "naiAgent_toolFailed": "Failed",
+  "naiAgent_arguments": "Arguments",
+  "naiAgent_result": "Result",
+  "naiAgent_systemPrompt": "System prompt",
+  "naiAgent_promptHelp": "Custom text replaces the default prompt. The app appends its tool map. Existing history stays intact; later requests use the new text.",
+  "naiAgent_restoreDefault": "Restore default",
+  "naiAgent_showEffective": "View effective prompt",
+  "naiAgent_useGlobal": "Use global prompt",
+  "naiAgent_save": "Save",
+  "naiAgent_runLimit": "Model requests per run",
+  "naiAgent_enterSends": "Enter sends; Shift+Enter adds a line",
+  "naiAgent_dataFolder": "Workspace data directory",
+  "naiAgent_openFolder": "Open folder",
+  "naiAgent_toolsManuals": "Tools and manuals",
+  "naiAgent_toolsHint": "Read current state, images, prompts and workspace files on demand. Load detailed NAI manuals for the selected model.",
+  "naiAgent_unknownCost": "Actual cost is set by the provider",
+  "naiAgent_error": "Operation failed. Check model settings or workspace files.",
+  "naiAgent_visionDisabled": "Image input is not enabled for this model. Confirm support in model settings.",
+  "naiAgent_inputChanged": "Input changed while preparing. Send the current draft.",
+  "naiAgent_imageLimit": "Invalid image format or image exceeds upload limits.",
+  "naiAgent_composerNotEmpty": "Save or send the current input before restoring this message.",
+  "naiAgent_compact": "Compact chat context",
+  "naiAgent_export": "Export chat",
+  "naiAgent_copyMessage": "Copy message",
+  "naiAgent_editMessage": "Edit message",
+  "naiAgent_regenerate": "Regenerate reply",
+  "naiAgent_submitAnswer": "Submit answer",
+  "naiAgent_customAnswer": "Or write your own answer",
+  "naiAgent_close": "Collapse panel",
+  "naiAgent_showChats": "Chats",
+  "naiAgent_runtimeMissing": "Agent runtime is missing. Install the complete update package.",
+  "naiAgent_usage": "Model usage",
+  "naiAgent_cancel": "Cancel",
+  "naiAgent_dropHint": "Drop to attach to this chat",
+  "naiAgent_emptyAttachment": "Cannot read image",
+  "naiAgent_globalScope": "Global default",
+  "naiAgent_workspaceScope": "Current workspace",
+  "naiAgent_generationTitle": "Generation approval",
+  "naiAgent_generationWaiting": "Waiting for generation approval",
+  "naiAgent_generationAccount": "Account: {name}",
+  "@naiAgent_generationAccount": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "naiAgent_generationBatch": "{requests} requests × {size} images · {total} total",
+  "@naiAgent_generationBatch": {
+    "placeholders": {
+      "requests": {},
+      "size": {},
+      "total": {}
+    }
+  },
+  "naiAgent_generationUnit": "{cost} Anlas per request",
+  "@naiAgent_generationUnit": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationEncoding": "Reference encoding: {cost} Anlas",
+  "@naiAgent_generationEncoding": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationTotal": "Estimated {cost} Anlas",
+  "@naiAgent_generationTotal": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationBalance": "Balance: {balance} Anlas",
+  "@naiAgent_generationBalance": {
+    "placeholders": {
+      "balance": {}
+    }
+  },
+  "naiAgent_generationEstimateNote": "Cost is an estimate; the server determines the actual charge.",
+  "naiAgent_generationChanged": "Configuration or quote changed. Prepare again.",
+  "naiAgent_generationLocalEnhance": "Local upscale after generation: {model} ×{scale}",
+  "@naiAgent_generationLocalEnhance": {
+    "placeholders": {
+      "model": {},
+      "scale": {}
+    }
+  },
+  "naiAgent_generationText": "Text to image",
+  "naiAgent_generationImage": "Image to image",
+  "naiAgent_generationInpaint": "Inpaint",
+  "naiAgent_galleryDeleteEmptyFolderConfirm": "Delete this empty folder and its gallery category? Images in other folders will be kept.\n{path}",
+  "@naiAgent_galleryDeleteEmptyFolderConfirm": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_extensions": "Extensions",
+  "naiAgent_interactionExtension": "Studio interaction",
+  "naiAgent_extensionRequired": "Built in · Required",
+  "naiAgent_interactionExtensionHint": "Read current Studio state on demand and collect answers through question cards.",
+  "naiAgent_extensionAddFile": "Add extension file",
+  "naiAgent_extensionAddFolder": "Add extension folder",
+  "naiAgent_extensionsHint": "Extensions load separately in each workspace. Changes apply on the next send after the current task ends. External extensions run local code; choose trusted sources.",
+  "naiAgent_extensionError": "Extension failed",
+  "naiAgent_extensionCompatibility": "Supports local Pi extensions and package folders, tools, commands and standard dialogs. Terminal-only custom UI is not rendered on desktop.",
+  "naiAgent_instructions": "Instructions",
+  "naiAgent_globalInstructions": "Global instructions",
+  "naiAgent_globalInstructionsHelp": "Shared by every workspace. Use for language, style or task preferences. Leave blank to disable this part.",
+  "naiAgent_systemPromptPrefix": "System prompt prefix",
+  "naiAgent_systemPromptPrefixHelp": "Inserted before the NAI Agent base prompt, keeping the base prompt and tool map. Leave blank to disable this part.",
+  "naiAgent_instructionOrder": "Order: prefix → base prompt → global instructions → workspace rules. Applies to subsequent requests.",
+  "naiAgent_saveInstructions": "Save instructions",
+  "naiAgent_mcpBuiltin": "NAI Studio · Built-in tools",
+  "naiAgent_mcpBuiltinHint": "Prompt, block, wiki, image, history, reference, generation and settings tools. Discovered on demand by default; existing backups, version checks and user confirmations still apply.",
+  "naiAgent_mcpAdd": "Add MCP server",
+  "naiAgent_mcpName": "Server name",
+  "naiAgent_mcpConfig": "Server configuration (JSON)",
+  "naiAgent_mcpConfigHint": "Supports stdio and Streamable HTTP. Paste one server configuration object; command is an executable and args is an array. Supports env, cwd, url, headers, oauth and toolExposure. Configuration is saved in encrypted storage.",
+  "naiAgent_mcpStatus": "Check connections",
+  "naiAgent_mcpReconnect": "Reconnect",
+  "naiAgent_mcpLogin": "Sign in",
+  "naiAgent_mcpLogout": "Sign out",
+  "naiAgent_mcpHint": "CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.",
+  "generation_generate": "Generate",
+  "detail_imageDetails": "Image Details",
+  "promptBlockLibrary_title": "Prompt Blocks"
 }

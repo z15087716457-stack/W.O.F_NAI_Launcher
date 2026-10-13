@@ -225,6 +225,10 @@ class ExploreCandidate with _$ExploreCandidate {
   const factory ExploreCandidate({
     required String id,
     required String roundId,
+    @Default(0) int number,
+    DateTime? createdAt,
+    @JsonSerializable(explicitToJson: true)
+    ExploreParamsSnapshot? paramsSnapshot,
 
     /// roll 快照（每张生成前一刻抓取；pending 壳阶段为 null）。
     @JsonSerializable(explicitToJson: true) ExploreRollSnapshot? rollSnapshot,
@@ -383,6 +387,7 @@ class ExploreRun with _$ExploreRun {
 
     required DateTime createdAt,
     required DateTime updatedAt,
+    @Default(1) int nextCandidateNumber,
 
     /// 基础轮出图数（仅草稿态可编辑）。
     required int targetCount,

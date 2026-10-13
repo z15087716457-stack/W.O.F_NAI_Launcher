@@ -15,4 +15,4 @@ Wiki 目录底部弹窗默认不启用窗口拖拽；新增、排序等弹窗及
 
 证据位于本机忽略目录 `.dart_tool/page-header-drag-20261005/`：修改前源码与状态、`page-tests.log`、`shared-tests.log`、`regression-tests.log`、`analyze.log` 和 12 张真实字体/Material 图标控件实绘。截图是隔离数据的 widget 渲染，不是运行中用户窗口截图；窗口操作由方法通道记录验证，实际 Windows 拖动仍待安装后实机验收。
 
-当前仅源码完成，随下一批更新组包交付；没有覆盖、重启或热重载当前 Studio。已安装 `09ea804f`、AOT `d56bf31e5843513242681d68ca24685cf7a6108f3aaedf3a16064d7fb070d5d1` 和完整检查点 `2026-10-05-studio-verified` 保持固定。
+已随本地超分合并包于 2026-10-05 19:06（Asia/Taipei）安装，当前运行版为 `36f4d4f0`，AOT `eefd3789840743df2a325bbd3edae28a96a89c76f775de833f8706777d153978`。安装与前版回退备份复验通过；未自动启动、重启或热重载。实际 Windows 拖动仍待用户反馈，完整检查点 `2026-10-05-studio-verified` 固定为满意版本 `09ea804f`。

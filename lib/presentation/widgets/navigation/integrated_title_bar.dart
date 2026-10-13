@@ -1,3 +1,4 @@
+import '../nai_agent/nai_agent_panel.dart';
 import 'dart:async';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -92,45 +93,62 @@ class WindowChromePage extends StatelessWidget {
   const WindowChromePage({
     super.key,
     required this.child,
-    this.hidden = false,
+    this.captionHeight,
     this.captionTheme,
+    this.hideCaptions = false,
+    this.hidden = false,
+    this.showNaiAgent = false,
+    this.showAccessory = true,
   });
   final Widget child;
-  final bool hidden;
+  final double? captionHeight;
   final ThemeData? captionTheme;
+  final bool hideCaptions;
+  final bool hidden;
+  final bool showNaiAgent;
+  final bool showAccessory;
 
   @override
   Widget build(BuildContext context) {
     final configuration = context
         .dependOnInheritedWidgetOfExactType<_WindowChromeConfiguration>();
-    if (configuration == null || hidden) return child;
+    if (configuration == null) return child;
+    if (hideCaptions || hidden) {
+      return WindowChromeScope(enabled: false, child: child);
+    }
     final shell = configuration.shell;
-    final caption = _TitleBar(
-      height: shell.immersive
-          ? IntegratedTitleBarShell.barHeight
-          : shell.captionHeight,
+    final height = captionHeight ?? shell.captionHeight;
+    final captions = _TitleBar(
+      height: shell.immersive ? IntegratedTitleBarShell.barHeight : height,
       immersive: shell.immersive,
+      showNaiAgent: showNaiAgent,
       onToggleTheme: shell.onToggleTheme,
     );
-    return Stack(
-      children: [
-        Positioned.fill(child: child),
-        if (!shell.immersive && shell.accessory != null)
+    return WindowChromeScope(
+      enabled: !shell.immersive,
+      extraWidth:
+          (showAccessory ? shell.accessoryWidth : 0) + (showNaiAgent ? 28 : 0),
+      captionHeight: height,
+      child: Stack(
+        children: [
+          Positioned.fill(child: child),
+          if (showAccessory && !shell.immersive && shell.accessory != null)
+            Positioned(
+              top: 0,
+              right: IntegratedTitleBarShell.reservedRight,
+              width: shell.accessoryWidth,
+              height: height,
+              child: shell.accessory!,
+            ),
           Positioned(
             top: 0,
-            right: IntegratedTitleBarShell.reservedRight,
-            width: shell.accessoryWidth,
-            height: shell.captionHeight,
-            child: shell.accessory!,
+            right: 0,
+            child: captionTheme == null
+                ? captions
+                : Theme(data: captionTheme!, child: captions),
           ),
-        Positioned(
-          top: 0,
-          right: 0,
-          child: captionTheme == null
-              ? caption
-              : Theme(data: captionTheme!, child: caption),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -140,8 +158,10 @@ class _TitleBar extends StatefulWidget {
     required this.immersive,
     required this.height,
     this.onToggleTheme,
+    this.showNaiAgent = false,
   });
 
+  final bool showNaiAgent;
   final double height;
 
   final bool immersive;
@@ -295,6 +315,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (widget.showNaiAgent) const NaiAgentToggleButton(),
             if (_showsThemeButton(widget)) ...[
               _CaptionButton(
                 key: const Key('brand_appearance_toggle'),

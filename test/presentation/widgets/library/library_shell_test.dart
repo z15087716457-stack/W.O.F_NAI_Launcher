@@ -20,11 +20,12 @@ void main() {
         find.text('inspector'),
         width >= 1140 ? findsOneWidget : findsNothing,
       );
-      if (width >= 1140)
+      if (width >= 1140) {
         expect(
           tester.getSize(find.byKey(const Key('main'))).width,
           width - 580,
         );
+      }
     });
   }
   testWidgets(

@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -257,6 +258,12 @@ void main() {
         await tester.pumpAndSettle();
         expectAppearance(Brightness.light);
         expect(
+          NaiAgentIntegrationScope.activeOf(
+            tester.element(find.byKey(ValueKey(path))),
+          ),
+          isTrue,
+        );
+        expect(
           find.byKey(const Key('window-caption-controls')),
           findsOneWidget,
         );
@@ -264,7 +271,11 @@ void main() {
           tester
               .getSize(find.byKey(const Key('window-caption-controls')))
               .height,
-          path == AppRoutes.generation ? 36 : 62,
+          switch (path) {
+            AppRoutes.generation => 36,
+            AppRoutes.localGallery => 62,
+            _ => 61,
+          },
         );
       }
       final shortcuts = tester.widget<GlobalShortcuts>(

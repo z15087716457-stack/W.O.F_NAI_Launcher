@@ -148,6 +148,16 @@ class CharacterPromptNotifier extends _$CharacterPromptNotifier {
     _deletePillLanes(removedIds);
   }
 
+  /// Restores metadata and global coordinate mode as well as character text.
+  /// Call only after the complete snapshot has been validated and backed up.
+  void restoreAgentSnapshot(CharacterPromptConfig config) {
+    final removedIds = state.characters.map((c) => c.id).toSet()
+      ..removeAll(config.characters.map((c) => c.id));
+    state = config;
+    _saveConfig();
+    _deletePillLanes(removedIds);
+  }
+
   /// 追加多个角色并保留现有角色及其位置设置。
   void appendAll(List<CharacterPrompt> characters) {
     if (characters.isEmpty) return;

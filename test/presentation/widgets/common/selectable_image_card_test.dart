@@ -14,7 +14,21 @@ import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_history.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
+import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import '../../providers/krita/agent_bridge_draft_test.dart'
+    show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
+import '../../wiring/generation_data_wiring_test.dart'
+    show DataGeneration, DataSubscription, DataShortcuts;
+import '../../wiring/generation_reference_imports_test.dart' show ImportStorage;
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_memory_image.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
@@ -434,6 +448,14 @@ void main() {
         imageClipboardWriterProvider.overrideWithValue(
           (imageBytes) async => copiedBytes = imageBytes,
         ),
+        localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
+        characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
+        promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
+        authNotifierProvider.overrideWith(OfflineAuth.new),
+        imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
+        subscriptionNotifierProvider.overrideWith(DataSubscription.new),
+        shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
+        vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
       ],
     );
     addTearDown(container.dispose);
@@ -451,13 +473,23 @@ void main() {
 
     await tester.pumpWidget(_buildHistoryApp(container));
     await tester.pumpAndSettle();
-    await _openImageContextMenu(tester);
-
-    await tester.tap(find.text('复制图像'));
+    final tile = find.byKey(const Key('gen-batch-tile-img:history-copy-image'));
+    final gesture = await tester.startGesture(
+      tester.getCenter(tile),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    addTearDown(gesture.removePointer);
+    await gesture.up();
+    await tester.pumpAndSettle();
+    final l = AppLocalizations.of(
+      tester.element(find.byType(GenHistoryPanel)),
+    )!;
+    await tester.tap(find.text(l.gen_copyImage));
     await tester.pumpAndSettle();
 
     expect(copiedBytes, orderedEquals(bytes));
-    expect(find.byKey(const Key('image-action-menu')), findsNothing);
+    expect(find.text(l.gen_copyImage), findsNothing);
     await tester.pump(const Duration(seconds: 4));
     await tester.pumpAndSettle();
   });
@@ -745,12 +777,24 @@ Widget _buildPreviewApp(ProviderContainer container) {
 Widget _buildHistoryApp(ProviderContainer container) {
   return UncontrolledProviderScope(
     container: container,
-    child: const MaterialApp(
-      locale: Locale('zh'),
+    child: MaterialApp(
+      locale: const Locale('zh'),
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       home: Scaffold(
-        body: SizedBox(width: 320, height: 640, child: HistoryPanel()),
+        body: SizedBox(
+          width: 320,
+          height: 640,
+          child: GenerationWiring(
+            builder: ({required data, required actions, required slots}) =>
+                GenHost(
+                  data: data,
+                  actions: actions,
+                  slots: slots,
+                  child: const GenHistoryPanel(width: 320),
+                ),
+          ),
+        ),
       ),
     ),
   );

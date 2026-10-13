@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../core/services/anlas_calculator.dart';
 import '../../../core/utils/pill_document_editor.dart';
+import '../../../core/utils/max_enhance_utils.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/user/user_subscription.dart';
@@ -17,6 +18,7 @@ import '../subscription_provider.dart';
 import '../quality_preset_provider.dart';
 import '../uc_preset_provider.dart';
 import '../prompt_block_library_provider.dart';
+import '../generation/image_workflow_snapshot.dart';
 
 final _bridgeDraftFingerprintProvider = Provider<String>((ref) {
   ref.watch(pillWorkspaceRevisionProvider);
@@ -53,10 +55,20 @@ BridgeDraftSnapshot readBridgeDraft(
   Ref ref, {
   bool reactive = false,
   bool includeEpoch = true,
+  ImageParams? imageOverride,
 }) {
   T read<T>(ProviderListenable<T> provider) =>
       reactive ? ref.watch(provider) : ref.read(provider);
-  final p = read(generationParamsNotifierProvider);
+  final p =
+      imageOverride ?? read<ImageParams>(generationParamsNotifierProvider);
+  ImageWorkflowState? workflow;
+  ImageParams workflowImage = p;
+  if (ref.exists(imageWorkflowControllerProvider)) {
+    read(imageWorkflowControllerProvider);
+    final controller = ref.read(imageWorkflowControllerProvider.notifier);
+    workflow = controller.snapshotDraftWorkflow;
+    workflowImage = imageOverride ?? controller.snapshotDraftParams;
+  }
   // An unopened lane has no document yet. Reads must not initialize or rewrite it.
   PillWorkspaceState lane(String scope, String fallback) {
     final provider = pillWorkspaceProvider(scope);
@@ -114,6 +126,9 @@ BridgeDraftSnapshot readBridgeDraft(
       // Structural Freezed hash avoids serializing image bytes on every edit.
       p.copyWith(advancedOptionsExpanded: false).hashCode,
       read(generationImg2ImgEnabledProvider),
+      // Local upscaler settings can change without changing ImageParams. UI
+      // expansion and active jobs are excluded from this content version.
+      jsonEncode(encodeImageWorkflowConfiguration(workflow, workflowImage)),
       read(autoFormatPromptSettingsProvider),
       read(sdSyntaxAutoConvertSettingsProvider),
       if (includeEpoch) ref.read(_bridgeDraftEpochProvider),
@@ -193,7 +208,12 @@ Future<String> backupBridgeDraft(
   return file.path;
 }
 
-Map<String, dynamic> readBridgeBilling(Ref ref, ImageParams p) {
+Map<String, dynamic> readBridgeBilling(
+  Ref ref,
+  ImageParams p, {
+  int batchCount = 1,
+  int batchSize = 1,
+}) {
   // Read only the already-loaded account state; a quote never requests an API.
   final auth = ref.read(authNotifierProvider);
   final raw = auth.subscriptionInfo;
@@ -202,32 +222,47 @@ Map<String, dynamic> readBridgeBilling(Ref ref, ImageParams p) {
       : null;
   final subscription =
       loaded ?? (raw == null ? null : UserSubscription.fromJson(raw));
-  final cost = AnlasCalculator.calculateRequestCost(
-    width: p.effectiveInpaintRequestSize.width,
-    height: p.effectiveInpaintRequestSize.height,
-    steps: p.steps,
-    batchCount: 1,
-    batchSize: 1,
-    smea: p.effectiveSmea,
-    smeaDyn: p.effectiveSmeaDyn,
-    model: p.model,
-    subscriptionTier: subscription?.isOpus == true
-        ? AnlasCalculator.opusTier
-        : 0,
-    strength: switch (p.action) {
-      ImageGenerationAction.generate => 1.0,
-      ImageGenerationAction.img2img => p.strength,
-      ImageGenerationAction.infill => p.inpaintStrength,
-    },
-    extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(p),
-    extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(p),
-    oneTimeCost: AnlasCalculator.resolveVibeEncodingCost(p),
-    opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
-  );
+  final requestSize =
+      p.upscaledEnhance && MaxEnhanceMath.isEligible(p.model, p.width, p.height)
+      ? MaxEnhanceMath.targetSize(p.width, p.height)
+      : p.effectiveInpaintRequestSize;
+  int estimate(int count, {required int encoding}) =>
+      AnlasCalculator.calculateRequestCost(
+        width: requestSize.width,
+        height: requestSize.height,
+        steps: p.steps,
+        batchCount: count,
+        batchSize: batchSize,
+        smea: p.effectiveSmea,
+        smeaDyn: p.effectiveSmeaDyn,
+        model: p.model,
+        subscriptionTier: subscription?.isOpus == true
+            ? AnlasCalculator.opusTier
+            : 0,
+        strength: switch (p.action) {
+          ImageGenerationAction.generate => 1.0,
+          ImageGenerationAction.img2img => p.strength,
+          ImageGenerationAction.infill => p.inpaintStrength,
+        },
+        extraPerSampleCost: AnlasCalculator.resolvePreciseReferenceExtraCost(p),
+        extraPerRequestCost: AnlasCalculator.resolveVibeReferenceExtraCost(p),
+        oneTimeCost: encoding,
+        opusUsageExhausted: subscription?.isOpusUsageExhausted ?? false,
+      );
+  final encoding = AnlasCalculator.resolveVibeEncodingCost(p);
+  final cost = estimate(batchCount, encoding: encoding);
   return {
     'estimated_anlas': cost,
-    'balance_anlas': subscription?.anlasBalance,
-    'balance_source': subscription == null ? 'unavailable' : 'cached_account',
-    'samples': 1,
+    'balance_anlas': subscription?.trainingStepsLeft == null
+        ? null
+        : subscription!.anlasBalance,
+    'balance_source': subscription?.trainingStepsLeft == null
+        ? 'unavailable'
+        : 'cached_account',
+    'samples': batchCount * batchSize,
+    'requests': batchCount,
+    'images_per_request': batchSize,
+    'per_request_anlas': estimate(1, encoding: 0),
+    'encoding_anlas': encoding,
   };
 }

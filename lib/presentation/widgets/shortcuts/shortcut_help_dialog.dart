@@ -392,6 +392,12 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         return l10n.shortcut_action_navigate_to_settings;
       case 'shortcut_action_navigate_to_vibe_library':
         return l10n.vibeLibrary_title;
+      case 'shortcut_action_navigate_to_style_explore':
+        return l10n.nav_styleExplore;
+      case 'shortcut_action_navigate_to_precise_ref_library':
+        return l10n.nav_preciseRefLibrary;
+      case 'shortcut_action_navigate_to_tag_wiki':
+        return l10n.nav_tagWiki;
       case 'shortcut_action_vibe_import':
         return l10n.common_import;
       case 'shortcut_action_vibe_export':

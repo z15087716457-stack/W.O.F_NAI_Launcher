@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/wiring/refs_library_wiring.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -30,26 +31,52 @@ import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart
 import 'package:nai_launcher/presentation/providers/online_favorites_provider.dart';
 import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
-import 'package:nai_launcher/presentation/providers/vibe_library_selection_provider.dart';
-import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
-import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_ref_library_screen.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
+import 'package:nai_launcher/presentation/wiring/refs_platform.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
+import 'package:nai_launcher/presentation/wiring/online_wiring.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart'
+    as character;
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+
+import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_library_wiring.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
 import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
+
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
-import 'package:nai_launcher/presentation/widgets/bulk_action_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
+import '../../helpers/light_theme_contrast.dart';
+
+class _Palette extends PromptBlockPaletteNotifier {
+  @override
+  Future<PromptBlockPaletteState> build() async =>
+      PromptBlockPaletteState(blocks: const []);
+}
 
 class _Shortcuts extends ShortcutConfigNotifier {
   @override
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
+}
+
+class _OnlineParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+}
+
+class _OnlineCharacters extends CharacterPromptNotifier {
+  @override
+  character.CharacterPromptConfig build() =>
+      const character.CharacterPromptConfig();
 }
 
 class _Gallery extends OnlineGalleryNotifier {
@@ -93,7 +120,7 @@ class _Blocks extends PromptBlockLibraryNotifier {
 
 class _Vibes extends VibeLibraryNotifier {
   @override
-  VibeLibraryState build() => const VibeLibraryState();
+  VibeLibraryState build() => const VibeLibraryState(isLoading: false);
   @override
   Future<void> initialize() async {}
 }
@@ -101,6 +128,11 @@ class _Vibes extends VibeLibraryNotifier {
 class _Categories extends VibeLibraryCategoryNotifier {
   @override
   VibeLibraryCategoryState build() => const VibeLibraryCategoryState();
+}
+
+class _RefsPlatform extends RefsPlatform {
+  @override
+  Future<String> libraryFolder() async => 'test-library';
 }
 
 class _References extends PreciseRefLibraryNotifier {
@@ -144,10 +176,10 @@ class _Translation extends ChangeNotifier
 }
 
 const _pages = <String, Widget>{
-  'online': OnlineGalleryScreen(),
-  'blocks': PromptBlockLibraryScreen(),
-  'vibes': VibeLibraryScreen(),
-  'references': PreciseRefLibraryScreen(),
+  'online': OnlineWiring(),
+  'blocks': BlocksLibraryWiring(),
+  'vibes': VibeLibraryWiring(),
+  'references': PreciseRefLibraryWiring(),
   'wiki': Scaffold(
     body: TagWikiScreen(
       directory: WikiDirectory(roots: [], groups: {}),
@@ -213,11 +245,18 @@ void main() {
         overrides: [
           shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
           onlineGalleryNotifierProvider.overrideWith(_Gallery.new),
+          localStorageServiceProvider.overrideWithValue(
+            InMemoryLocalStorageService(),
+          ),
+          generationParamsNotifierProvider.overrideWith(_OnlineParams.new),
+          characterPromptNotifierProvider.overrideWith(_OnlineCharacters.new),
           onlineFavoritesNotifierProvider.overrideWith((_) => _Favorites()),
           danbooruAuthProvider.overrideWith(_Danbooru.new),
           gelbooruAuthProvider.overrideWith(_Gelbooru.new),
           promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
+          promptBlockPaletteNotifierProvider.overrideWith(_Palette.new),
           vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
+          refsPlatformProvider.overrideWith((ref) => _RefsPlatform()),
           vibeLibraryCategoryNotifierProvider.overrideWith(_Categories.new),
           preciseRefLibraryNotifierProvider.overrideWith(_References.new),
           unifiedTagRepositoryProvider.overrideWith((_) => _Tags()),
@@ -232,7 +271,7 @@ void main() {
           home: RepaintBoundary(
             key: const Key('capture-page'),
             child: IntegratedTitleBarShell(
-              captionHeight: 62,
+              captionHeight: page == 'wiki' ? 62 : 61,
               child: _pages[page]!,
             ),
           ),
@@ -240,6 +279,13 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    if (page == 'blocks') {
+      tester
+          .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+          .actions
+          .onInspectorChanged(false);
+      await tester.pumpAndSettle();
+    }
     expect(tester.takeException(), isNull);
     calls.clear();
   }
@@ -252,8 +298,19 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
   }
 
+  Finder pageHeader() {
+    final legacy = find.byType(WindowHeader);
+    if (legacy.evaluate().isNotEmpty) return legacy.first;
+    return find
+        .ancestor(
+          of: find.byType(TextField).first,
+          matching: find.byType(WindowHeaderDragSurface),
+        )
+        .first;
+  }
+
   Future<void> checkHeader(WidgetTester tester) async {
-    final header = find.byType(WindowHeader).first;
+    final header = pageHeader();
     final rect = tester.getRect(header);
     // This is page padding, far from the pre-existing right caption strip.
     await mouseDrag(tester, rect.topLeft + Offset(3, rect.height - 5));
@@ -318,43 +375,70 @@ void main() {
     }
   }
 
-  for (final page in ['blocks', 'vibes', 'wiki']) {
-    testWidgets('$page sidebar gaps drag and create button opens its dialog', (
-      tester,
-    ) async {
-      await pumpPage(tester, page);
-      final sidebarSurface = find.byType(WindowHeaderDragSurface).first;
-      final rect = tester.getRect(sidebarSurface);
-      await mouseDrag(tester, rect.topLeft + Offset(rect.width * .55, 30));
-      expect(calls, contains('startDragging'));
-      calls.clear();
-      final create = find
-          .descendant(
-            of: sidebarSurface,
-            matching: page == 'vibes'
-                ? find.byType(FilledButton)
-                : find.byType(IconButton),
-          )
-          .first;
-      await tester.tap(create);
+  for (final page in ['vibes', 'wiki']) {
+    testWidgets(
+      '$page sidebar gaps drag and create button opens its category editor',
+      (tester) async {
+        await pumpPage(tester, page);
+        final sidebarSurface = find.byType(WindowHeaderDragSurface).first;
+        final rect = tester.getRect(sidebarSurface);
+        await mouseDrag(tester, rect.topLeft + Offset(rect.width * .55, 30));
+        expect(calls, contains('startDragging'));
+        calls.clear();
+        final create = page == 'vibes'
+            ? find.byTooltip(
+                lookupAppLocalizations(const Locale('zh')).refs_newCategory,
+              )
+            : find
+                  .descendant(
+                    of: sidebarSurface,
+                    matching: find.byType(IconButton),
+                  )
+                  .first;
+        await tester.tap(create);
+        await tester.pumpAndSettle();
+        expect(calls, isNot(contains('startDragging')));
+        if (page == 'vibes') {
+          final field = find.byKey(const Key('refs-category-name'));
+          expect(field, findsOneWidget);
+          await mouseDrag(tester, tester.getCenter(field));
+        } else {
+          expect(find.byType(Dialog), findsOneWidget);
+          // A modal's blank surface must not reach the header underneath.
+          await mouseDrag(tester, rect.topLeft + const Offset(3, 30));
+        }
+        expect(calls, isNot(contains('startDragging')));
+        expect(tester.takeException(), isNull);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.windows),
+    );
+  }
+
+  testWidgets(
+    'blocks toolbar create opens the editor without dragging the window',
+    (tester) async {
+      await pumpPage(tester, 'blocks');
+      await tester.tap(find.byKey(const Key('blocks-create')));
       await tester.pumpAndSettle();
-      expect(find.byType(Dialog), findsOneWidget);
+      expect(find.byType(BlockEditDialog), findsOneWidget);
       expect(calls, isNot(contains('startDragging')));
-      // A modal's blank surface must not reach the header underneath.
-      await mouseDrag(tester, rect.topLeft + const Offset(3, 30));
+      await mouseDrag(tester, const Offset(600, 56));
       expect(calls, isNot(contains('startDragging')));
       expect(tester.takeException(), isNull);
-    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
-  }
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
 
   testWidgets('block header stays draggable with the right detail panel open', (
     tester,
   ) async {
     await pumpPage(tester, 'blocks');
-    await tester.tap(find.byKey(const Key('prompt-block-detail-collapsed')));
+    await tester.tap(find.byKey(const Key('blocks-inspector-toggle')));
     await tester.pumpAndSettle();
     expect(
-      tester.widget<WindowHeader>(find.byType(WindowHeader)).enabled,
+      tester
+          .widget<WindowHeader>(find.byKey(const Key('blocks-toolbar')))
+          .enabled,
       isFalse,
     );
     await checkHeader(tester);
@@ -363,16 +447,19 @@ void main() {
   for (final page in ['online', 'vibes']) {
     testWidgets('$page selection header gaps still drag', (tester) async {
       await pumpPage(tester, page);
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(WindowHeader)),
-      );
+      RefsController? refs;
       if (page == 'vibes') {
-        container.read(vibeLibrarySelectionNotifierProvider.notifier).enter();
+        refs = tester.state(find.byType(RefsLibraryPage)) as RefsController;
+        refs.setPicking(true);
       } else {
-        container.read(onlineGallerySelectionNotifierProvider.notifier).enter();
+        await tester.tap(find.byKey(const Key('online-multi')));
       }
       await tester.pumpAndSettle();
-      expect(find.byType(BulkActionBar), findsOneWidget);
+      if (page == 'online') {
+        expect(find.byKey(const Key('online-multi-done')), findsOneWidget);
+      } else {
+        expect(refs!.picking, isTrue);
+      }
       await checkHeader(tester);
     }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
   }

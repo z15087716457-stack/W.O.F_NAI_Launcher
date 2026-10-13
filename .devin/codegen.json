@@ -1,0 +1,8 @@
+{
+  "sourceRoots": ["lib", "test", "tool"],
+  "excludedPrefixes": [
+    "lib/presentation/ui/",
+    "test/presentation/ui/",
+    "tool/ui_shell/"
+  ]
+}

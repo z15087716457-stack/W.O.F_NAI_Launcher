@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
@@ -43,7 +42,7 @@ import '../../router/gallery_navigation_request.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
-import '../../utils/image_detail_opener.dart';
+import '../../utils/image_viewer_opener.dart';
 import '../../utils/krita_send_helper.dart';
 import '../../utils/local_gallery_metadata_resolver.dart';
 import '../../utils/local_gallery_reference_factory.dart';
@@ -52,8 +51,6 @@ import '../../utils/precise_ref_library_import_helper.dart';
 import '../../widgets/bulk_metadata_edit_dialog.dart';
 import '../../widgets/collection_select_dialog.dart';
 import '../../widgets/common/app_toast.dart';
-import '../../widgets/common/image_detail/image_detail_data.dart';
-import '../../widgets/common/image_detail/image_detail_viewer.dart';
 import '../../widgets/common/precise_reference_type_dialog.dart';
 import '../../widgets/common/prototype_typography_scope.dart';
 import '../../widgets/common/themed_confirm_dialog.dart';
@@ -525,64 +522,20 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
 
   /// 打开大图：以当前图片为中心读取前后各 60 张的完整记录供左右切换
   Future<void> _openViewerAt(int index) async {
-    final notifier = ref.read(localGalleryNotifierProvider.notifier);
-    final entries = ref.read(localGalleryNotifierProvider).timeline.entries;
-    if (index < 0 || index >= entries.length) return;
-    final start = math.max(0, index - 60);
-    final end = math.min(entries.length, index + 61);
-    final target = entries[index].path;
-    final aspectRatios = {
-      for (var i = start; i < end; i++)
-        galleryFilePathKey(entries[i].path): entries[i].aspectRatio,
-    };
-    final records = await notifier.loadRecords([
-      for (var i = start; i < end; i++) entries[i].path,
-    ]);
-    if (!mounted || records.isEmpty) return;
-    final initialIndex = math.max(
-      0,
-      records.indexWhere((r) => galleryFilePathsEqual(r.path, target)),
-    );
-    ref.read(localGalleryFocusNotifierProvider.notifier).focus(target);
-
-    bool getFavoriteStatus(String path) =>
-        notifier.cachedRecord(path)?.isFavorite ?? false;
-
-    ImageDetailOpener.showMultipleImmediate(
-      context,
-      images: [
-        for (final record in records)
-          LocalImageDetailData(
-            record,
-            getFavoriteStatus: getFavoriteStatus,
-            aspectRatio: aspectRatios[galleryFilePathKey(record.path)],
-          ),
-      ],
-      initialIndex: initialIndex,
-      showMetadataPanel: true,
-      showThumbnails: records.length > 1,
-      backLabel: context.l10n.viewer_backLocalGallery,
-      callbacks: ImageDetailCallbacks(
-        onReuseMetadata: (data) =>
-            _importImageMetadata((data as LocalImageDetailData).record),
-        onFavoriteToggle: (data) =>
-            notifier.toggleFavorite((data as LocalImageDetailData).record.path),
-        onSendToImg2Img: (data) async {
-          try {
-            final bytes = await data.getImageBytes();
-            ImageWorkflowLauncher.openImageToImage(ref, bytes);
-            if (!mounted) return;
-            Navigator.of(context).pop();
-            context.go(AppRoutes.home);
-            AppToast.success(context, context.l10n.gallery_sentToImg2Img);
-          } catch (e) {
-            if (mounted) {
-              AppToast.error(context, context.l10n.gallery_sendFailed('$e'));
-            }
-          }
-        },
-        onDelete: (data) =>
-            _confirmDeleteImage((data as LocalImageDetailData).record),
+    final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
+    final category = ref.read(galleryCategoryNotifierProvider).selectedCategory;
+    final collections = ref.read(collectionNotifierProvider).collections;
+    final collection = collections
+        .where((entry) => entry.id == criteria.collectionId)
+        .firstOrNull;
+    unawaited(
+      ImageViewerOpener.showGallery(
+        context,
+        initialIndex: index,
+        scopeName:
+            collection?.name ??
+            category?.displayName ??
+            (criteria.searchQuery.isEmpty ? null : criteria.searchQuery),
       ),
     );
   }

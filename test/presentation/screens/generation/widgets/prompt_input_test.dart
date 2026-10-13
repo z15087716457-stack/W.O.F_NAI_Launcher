@@ -23,7 +23,7 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
@@ -991,7 +991,7 @@ void main() {
       container.read(pillWorkspaceProvider(PillScopes.negative)).document.text,
       'external uc',
     );
-    expect(find.byType(PromptPill), findsNothing);
+    expect(find.byType(UiBlockPill), findsNothing);
     expect(tester.takeException(), isNull);
   });
 
@@ -1410,7 +1410,7 @@ void main() {
     pillNotifier.insertBlockAt(offset: 7, blockId: 'source-block-ui');
     await tester.pump();
     // 药丸编辑器：块渲染为内联药丸而非旧整行卡片
-    expect(find.byType(PromptPill), findsOneWidget);
+    expect(find.byType(UiBlockPill), findsOneWidget);
     expect(find.text('画师组合'), findsOneWidget);
 
     container
@@ -1419,7 +1419,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    expect(find.byType(PromptPill), findsNothing);
+    expect(find.byType(UiBlockPill), findsNothing);
     expect(find.text('flattened replacement'), findsOneWidget);
     final pillState = container.read(pillWorkspaceNotifierProvider);
     expect(pillState.document.text, 'flattened replacement');

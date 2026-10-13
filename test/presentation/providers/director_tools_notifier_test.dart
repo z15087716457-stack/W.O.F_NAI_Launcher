@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'dart:async';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +30,7 @@ Uint8List _png(int width) =>
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  registerFallbackValue(CancelToken());
   setUpAll(() => registerFallbackValue(Uint8List(0)));
   late ProviderContainer container;
   late _Api api;
@@ -89,6 +91,7 @@ void main() {
             reqType: 'emotion',
             prompt: '$mood;;extra guidance',
             defry: 5,
+            cancelToken: any(named: 'cancelToken'),
           ),
         ).thenAnswer((_) async => [_png(16)]);
         controller.updateEmotion(mood);
@@ -99,6 +102,7 @@ void main() {
             reqType: 'emotion',
             prompt: '$mood;;extra guidance',
             defry: 5,
+            cancelToken: any(named: 'cancelToken'),
           ),
         ).called(1);
         expect(container.read(directorToolsNotifierProvider).error, isNull);
@@ -123,6 +127,7 @@ void main() {
           reqType: 'bg-removal',
           prompt: null,
           defry: 0,
+          cancelToken: any(named: 'cancelToken'),
         ),
       ).thenAnswer((_) => pending.future);
       final controller = container.read(directorToolsNotifierProvider.notifier);
@@ -183,6 +188,7 @@ void main() {
           reqType: 'bg-removal',
           prompt: null,
           defry: 0,
+          cancelToken: any(named: 'cancelToken'),
         ),
       ).called(1);
     },
@@ -208,6 +214,7 @@ void main() {
           reqType: 'colorize',
           prompt: 'red hair',
           defry: 4,
+          cancelToken: any(named: 'cancelToken'),
         ),
       ).thenThrow(StateError('offline fixture error'));
       await controller.runTool();

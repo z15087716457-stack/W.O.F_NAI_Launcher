@@ -229,9 +229,9 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   }
 
   /// 重新从 Hive 读取块库。
-  Future<void> refresh() async {
+  Future<void> refresh({bool preserveCurrent = false}) async {
     final repository = ref.read(promptBlockRepositoryProvider);
-    state = const AsyncLoading();
+    if (!preserveCurrent) state = const AsyncLoading();
     try {
       state = AsyncData(_toState(await repository.load()));
     } catch (error, stackTrace) {
@@ -293,6 +293,33 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
   Future<PromptBlock> updateBlock(PromptBlock block) =>
       _mutate((repository) => repository.updateBlock(block));
 
+  Future<PromptBlock> updateBlockIfUnchanged(
+    PromptBlock expected,
+    PromptBlock block,
+  ) => _mutate((repository) async {
+    final current = await repository.getBlock(block.id);
+    if (current == null ||
+        current.copyWith(
+              useCount: expected.useCount,
+              updatedAt: expected.updatedAt,
+            ) !=
+            expected) {
+      throw StateError(currentL10n.bridge_conflict);
+    }
+    return repository.updateBlock(block.copyWith(useCount: current.useCount));
+  });
+
+  Future<PromptBlock> setBlockFavorite(String id, bool value) =>
+      _mutate((repository) async {
+        final current = await repository.getBlock(id);
+        if (current == null) {
+          throw StateError(currentL10n.styleExplore_operationFailed);
+        }
+        return current.isFavorite == value
+            ? current
+            : repository.toggleFavorite(id);
+      });
+
   /// 使用次数 +1：块被插入提示词（点击/拖拽同一汇点）时调用。
   ///
   /// 轻量路径——只回写单条块记录、原位替换 state 中该条，不走整库
@@ -303,22 +330,31 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     if (!Hive.isBoxOpen(PromptBlockStorage.boxName)) return;
     try {
       final repository = ref.read(promptBlockRepositoryProvider);
-      final existing = await repository.getBlock(blockId);
-      if (existing == null) return;
-      final updated = await repository.updateBlock(
-        existing.copyWith(useCount: existing.useCount + 1),
-      );
+      final updated = await repository.incrementUseCount(blockId);
+      if (updated == null) return;
       final current = state.valueOrNull;
       if (current == null) return;
       state = AsyncData(
         PromptBlockLibraryState(
           blocks: [
             for (final block in current.blocks)
-              block.id == blockId ? updated : block,
+              block.id == blockId
+                  ? block.copyWith(
+                      useCount: block.useCount > updated.useCount
+                          ? block.useCount
+                          : updated.useCount,
+                    )
+                  : block,
           ],
           archivedBlocks: [
             for (final block in current.archivedBlocks)
-              block.id == blockId ? updated : block,
+              block.id == blockId
+                  ? block.copyWith(
+                      useCount: block.useCount > updated.useCount
+                          ? block.useCount
+                          : updated.useCount,
+                    )
+                  : block,
           ],
           folders: current.folders,
           collections: current.collections,
@@ -908,7 +944,22 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     return maximum + 1;
   }
 
+  Future<void> _mutationTail = Future<void>.value();
+
   Future<T> _mutate<T>(
+    Future<T> Function(PromptBlockRepository repository) action,
+  ) => _serializeLibraryMutation(() => _performMutation(action));
+
+  Future<T> _serializeLibraryMutation<T>(Future<T> Function() action) {
+    final result = _mutationTail.then((_) => action());
+    _mutationTail = result.then<void>(
+      (_) {},
+      onError: (Object _, StackTrace __) {},
+    );
+    return result;
+  }
+
+  Future<T> _performMutation<T>(
     Future<T> Function(PromptBlockRepository repository) action,
   ) async {
     final repository = ref.read(promptBlockRepositoryProvider);
@@ -917,7 +968,10 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
       state = AsyncData(_toState(await repository.load()));
       return result;
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      final previous = state.valueOrNull;
+      state = previous == null
+          ? AsyncError(error, stackTrace)
+          : AsyncData(previous);
       rethrow;
     }
   }

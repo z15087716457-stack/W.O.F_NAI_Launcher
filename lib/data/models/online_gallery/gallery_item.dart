@@ -1,3 +1,4 @@
+import '../gallery/nai_image_metadata.dart';
 import 'gallery_source.dart';
 
 class GalleryMedia {
@@ -16,6 +17,7 @@ class GalleryMedia {
     this.negativePrompt,
     this.metadataFormat,
     this.metadataError,
+    this.naiMetadata,
     this.metadata = const {},
   });
 
@@ -33,6 +35,7 @@ class GalleryMedia {
   final String? negativePrompt;
   final String? metadataFormat;
   final String? metadataError;
+  final NaiImageMetadata? naiMetadata;
   final Map<String, dynamic> metadata;
 
   bool get hasKnownDimensions => width > 0 && height > 0;
@@ -64,6 +67,7 @@ class GalleryMedia {
       negativePrompt: negativePrompt,
       metadataFormat: metadataFormat,
       metadataError: metadataError,
+      naiMetadata: naiMetadata,
       metadata: metadata,
     );
   }
@@ -305,6 +309,8 @@ class GalleryItem {
       'uploader_id': uploaderId,
       'score': score,
       'rating': rating,
+      'file_ext': fileExt,
+      'file_size': fileSize,
       'image_width': imageWidth,
       'image_height': imageHeight,
       'tags': tags,
@@ -320,6 +326,13 @@ class GalleryItem {
         'width': cover.width,
         'height': cover.height,
         'extension': cover.extension,
+        'prompt': cover.prompt,
+        'negative_prompt': cover.negativePrompt,
+        'raw_metadata': cover.rawMetadata,
+        'metadata_format': cover.metadataFormat,
+        'metadata_error': cover.metadataError,
+        'nai_metadata': cover.naiMetadata?.toJson(),
+        'metadata': cover.metadata,
       },
     };
   }
@@ -336,6 +349,19 @@ class GalleryItem {
             width: (coverJson['width'] as num?)?.toInt() ?? 0,
             height: (coverJson['height'] as num?)?.toInt() ?? 0,
             extension: coverJson['extension']?.toString(),
+            prompt: coverJson['prompt']?.toString(),
+            negativePrompt: coverJson['negative_prompt']?.toString(),
+            rawMetadata: coverJson['raw_metadata']?.toString(),
+            metadataFormat: coverJson['metadata_format']?.toString(),
+            metadataError: coverJson['metadata_error']?.toString(),
+            naiMetadata: coverJson['nai_metadata'] is Map
+                ? NaiImageMetadata.fromJson(
+                    Map<String, dynamic>.from(coverJson['nai_metadata'] as Map),
+                  )
+                : null,
+            metadata: coverJson['metadata'] is Map
+                ? Map<String, dynamic>.from(coverJson['metadata'] as Map)
+                : const {},
           )
         : null;
     final sourceKey = json['source']?.toString();
@@ -352,6 +378,8 @@ class GalleryItem {
       uploaderId: (json['uploader_id'] as num?)?.toInt() ?? 0,
       score: (json['score'] as num?)?.toInt(),
       rating: json['rating']?.toString(),
+      fileExt: json['file_ext']?.toString(),
+      fileSize: (json['file_size'] as num?)?.toInt(),
       imageWidth: (json['image_width'] as num?)?.toInt() ?? 0,
       imageHeight: (json['image_height'] as num?)?.toInt() ?? 0,
       tags: tags is List

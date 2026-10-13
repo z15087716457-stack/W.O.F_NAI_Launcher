@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -42,6 +43,57 @@ void main() {
     if (await hiveTempDir.exists()) {
       await hiveTempDir.delete(recursive: true);
     }
+  });
+
+  test('换预览后旧缩略图任务不会回写或被新预览复用', () async {
+    await storage.close();
+    final started = Completer<void>();
+    final proceed = Completer<void>();
+    var first = true;
+    storage = VibeLibraryStorageService(
+      thumbnailNormalizer: (source) async {
+        if (first) {
+          first = false;
+          started.complete();
+          await proceed.future;
+        }
+        return source;
+      },
+    );
+    final entry = VibeLibraryEntry.create(
+      name: 'preview',
+      vibeDisplayName: 'preview',
+      vibeEncoding: 'encoded',
+      filePath: '${hiveTempDir.path}/preview.naiv4vibe',
+    ).copyWith(thumbnail: Uint8List.fromList([1]));
+    await storage.saveEntry(entry);
+    final old = storage.getDisplayThumbnail(entry.id);
+    await started.future;
+    final revision = storage.getDisplayThumbnailRevision(entry.id);
+    await storage.updateEntryThumbnail(entry.id, Uint8List.fromList([2]));
+    expect(storage.getDisplayThumbnailRevision(entry.id), isNot(revision));
+    final fresh = storage.getDisplayThumbnail(entry.id);
+    proceed.complete();
+    expect(await old, [1]);
+    expect(await fresh, [2]);
+    expect(await storage.getDisplayThumbnail(entry.id), [2]);
+  });
+
+  test('setFavorite 按目标值保存且读取摘要不解析文件', () async {
+    final entry = VibeLibraryEntry.create(
+      name: 'favorite',
+      vibeDisplayName: 'favorite',
+      vibeEncoding: 'encoded',
+      filePath: '${hiveTempDir.path}/missing.naiv4vibe',
+    );
+    await storage.saveEntry(entry);
+    await storage.setFavorite(entry.id, true);
+    await storage.setFavorite(entry.id, true);
+    expect((await storage.getEntrySnapshot(entry.id))!.isFavorite, isTrue);
+    await storage.setFavorite(entry.id, false);
+    await storage.setFavorite(entry.id, false);
+    expect((await storage.getEntrySnapshot(entry.id))!.isFavorite, isFalse);
+    expect((await storage.getDisplayEntries()).single.vibeEncoding, isEmpty);
   });
 
   test(

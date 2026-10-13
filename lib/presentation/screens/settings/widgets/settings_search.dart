@@ -36,6 +36,11 @@ List<SettingsSearchEntry> settingsSearchEntries(
   );
   return [
     for (final page in pages.entries) item(page.key, page.value),
+    if (pages.containsKey('agent')) ...[
+      item('agent', l.naiAgent_globalInstructions, l.naiAgent_instructions),
+      item('agent', l.naiAgent_systemPromptPrefix, l.naiAgent_instructions),
+      item('agent', 'MCP', l.naiAgent_mcpBuiltin),
+    ],
     item('appearance', l.settings_style, 'theme light dark 深浅色 明暗'),
     item('appearance', l.settings_font, 'font 字体'),
     item('appearance', l.settings_fontScale, 'scale 字号'),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/storage_keys.dart';
+import '../../../core/utils/gallery_path_utils.dart';
 
 /// 本地画廊删除池的 SharedPreferences 持久化。
 ///
@@ -16,6 +17,41 @@ import '../../../core/constants/storage_keys.dart';
 /// 独立小类以便单元测试（测试用 `SharedPreferences.setMockInitialValues`）。
 class GalleryDeletePoolStore {
   const GalleryDeletePoolStore();
+
+  /// Pending deletions follow a native directory move; otherwise a later
+  /// scan can resurrect the deleted image at its new path.
+  Future<void> relocateDirectory(
+    String oldRoot,
+    String newRoot, {
+    Map<String, String> aliases = const {},
+  }) async {
+    final current = await load();
+    final mappings = {...aliases, oldRoot: newRoot};
+    final updated = current
+        .map((path) {
+          final mapping = mappings.entries
+              .where((entry) => galleryPathIsWithin(entry.key, path))
+              .firstOrNull;
+          if (mapping == null) return path;
+          final normalizedRoot = normalizeGalleryFilePath(
+            mapping.key,
+          ).replaceAll(RegExp(r'[\\/]+$'), '');
+          final relative = normalizeGalleryFilePath(path)
+              .substring(normalizedRoot.length)
+              .replaceFirst(RegExp(r'^[\\/]+'), '');
+          return '${mapping.value}${Platform.pathSeparator}$relative';
+        })
+        .toSet()
+        .toList();
+    if (jsonEncode(current) == jsonEncode(updated)) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (!await prefs.setString(
+      StorageKeys.galleryDeletePool,
+      jsonEncode(updated),
+    )) {
+      throw StateError('Failed to relocate gallery delete pool');
+    }
+  }
 
   /// 读取删除池路径列表；无记录或解析失败时返回空表。
   Future<List<String>> load() async {
@@ -43,7 +79,12 @@ class GalleryDeletePoolStore {
     for (final path in paths) {
       if (seen.add(path)) merged.add(path);
     }
-    await prefs.setString(StorageKeys.galleryDeletePool, jsonEncode(merged));
+    if (!await prefs.setString(
+      StorageKeys.galleryDeletePool,
+      jsonEncode(merged),
+    )) {
+      throw StateError('Failed to persist gallery delete pool');
+    }
   }
 
   /// 移除路径（幂等；路径不在池中时无操作）。
@@ -56,7 +97,21 @@ class GalleryDeletePoolStore {
     final remaining = current
         .where((path) => !removed.contains(path))
         .toList(growable: false);
-    await prefs.setString(StorageKeys.galleryDeletePool, jsonEncode(remaining));
+    if (!await prefs.setString(
+      StorageKeys.galleryDeletePool,
+      jsonEncode(remaining),
+    )) {
+      throw StateError('Failed to persist gallery delete pool removal');
+    }
+  }
+
+  /// Restore must stop durable startup cleanup before exposing an index row.
+  Future<void> restore(
+    List<String> paths,
+    Future<void> Function() restoreIndex,
+  ) async {
+    await removeAll(paths);
+    await restoreIndex();
   }
 
   /// 清空删除池（物理文件不受影响）。

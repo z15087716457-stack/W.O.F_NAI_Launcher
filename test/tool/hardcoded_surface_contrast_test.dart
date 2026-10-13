@@ -29,6 +29,31 @@ void main() {
           '${offenders.join('\n')}',
     );
   });
+  test('foreground white is not mistaken for its container background', () {
+    expect(
+      _scanFile(
+        'fixture.dart',
+        "Container(color: theme.surface, child: Row(children: [Icon(Icons.star, color: Colors.white), Text('label')]))",
+      ),
+      isEmpty,
+    );
+  });
+  test('opaque white and decorated black still require explicit foreground', () {
+    expect(
+      _scanFile(
+        'fixture.dart',
+        "Container(color: Colors.white, child: Text('label'))",
+      ),
+      hasLength(1),
+    );
+    expect(
+      _scanFile(
+        'fixture.dart',
+        "Container(decoration: BoxDecoration(color: Colors.black87), child: Icon(Icons.star))",
+      ),
+      hasLength(1),
+    );
+  });
 }
 
 /// 能承载背景色的容器。
@@ -100,6 +125,7 @@ List<String> _scanFile(String path, String source) {
       match.start,
     );
     if (_shadowContext.hasMatch(lookBehind)) continue;
+    if (!_isBackgroundArgument(source, match.start)) continue;
 
     final holder = _enclosingHolder(source, match.start);
     if (holder == null) continue;
@@ -136,6 +162,22 @@ List<String> _scanFile(String path, String source) {
   }
 
   return found;
+}
+
+bool _isBackgroundArgument(String source, int position) {
+  final calls = RegExp(
+    r'\b([A-Za-z_]\w*)\s*\(',
+  ).allMatches(source.substring(0, position)).toList();
+  for (final call in calls.reversed) {
+    final open = source.indexOf('(', call.start);
+    if (_matchClose(source, open) <= position) continue;
+    return [
+      ..._holders,
+      'BoxDecoration(',
+      'ShapeDecoration(',
+    ].contains('${call.group(1)}(');
+  }
+  return false;
 }
 
 /// 从 [openParen] 处做括号配对，返回匹配的右括号下标。

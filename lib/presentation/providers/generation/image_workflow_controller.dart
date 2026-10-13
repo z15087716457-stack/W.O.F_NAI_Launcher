@@ -13,6 +13,7 @@ import '../../../core/utils/max_enhance_utils.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/upscale/local_upscale_models.dart';
+import '../../utils/native_image_enhance.dart';
 import 'generation_params_notifier.dart';
 
 enum ImageWorkflowMode { base, inpaint, enhance, upscale }
@@ -584,6 +585,95 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   ImageWorkflowState get draftWorkflow => state.temporaryEnhanceSource != null
       ? (_toolWorkflowSnapshot ?? state)
       : state;
+
+  /// Saving configuration must not adopt a toolbar's temporary image as the
+  /// sidebar source. Keep current prompt/seed/reference edits in that projection.
+  ImageParams get snapshotDraftParams {
+    final saved = _toolParamsSnapshot;
+    if (saved == null || !identical(_params.sourceImage, _toolSource)) {
+      return _params;
+    }
+    return _params.copyWith(
+      sourceImage: saved.sourceImage,
+      maskImage: saved.maskImage,
+      inpaintFocusRegion: saved.inpaintFocusRegion,
+      width: saved.width,
+      height: saved.height,
+      action: saved.action,
+      strength: saved.strength,
+      noise: saved.noise,
+      inpaintStrength: saved.inpaintStrength,
+      isOutpaint: saved.isOutpaint,
+      enhanceWorkflow: saved.enhanceWorkflow,
+      upscaledEnhance: saved.upscaledEnhance,
+    );
+  }
+
+  ImageWorkflowState get snapshotDraftWorkflow =>
+      (_toolWorkflowSnapshot ?? state).copyWith(
+        enhance: state.enhance,
+        upscale: state.upscale,
+      );
+
+  /// The caller validates, backs up and rechecks the draft and workflow first.
+  /// Clear temporary ownership so closing a former tool cannot undo the load.
+  void restoreConfiguration(ImageParams params, ImageWorkflowState workflow) {
+    if (state.isToolRunning) {
+      throw StateError('Cannot restore an active image workflow');
+    }
+    _sourceImageRequestId++;
+    _toolParamsSnapshot = null;
+    _toolWorkflowSnapshot = null;
+    _toolSource = null;
+    _paramsNotifier.restoreAgentSnapshot(params);
+    state = ImageWorkflowState(
+      mode: workflow.mode,
+      sourceWidth: workflow.sourceWidth,
+      sourceHeight: workflow.sourceHeight,
+      sourceImageWidth: workflow.sourceImageWidth,
+      sourceImageHeight: workflow.sourceImageHeight,
+      baseWidth: workflow.baseWidth,
+      baseHeight: workflow.baseHeight,
+      baseStrength: workflow.baseStrength,
+      baseNoise: workflow.baseNoise,
+      enhance: workflow.enhance,
+      upscale: workflow.upscale,
+      isPanelExpanded: workflow.mode != ImageWorkflowMode.base,
+      isOutpaint: workflow.isOutpaint,
+    );
+    _persistEnhanceSettings(state.enhance);
+    _persistUpscaleSettings(state.upscale);
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.localUpscaleBackend,
+        state.upscale.backend.name,
+      ),
+    );
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.localUpscaleModel,
+        state.upscale.localModel,
+      ),
+    );
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.localUpscaleScale,
+        state.upscale.localScale,
+      ),
+    );
+    unawaited(
+      _storage.setSetting(
+        StorageKeys.localSeedvr2Model,
+        state.upscale.localSeedvr2Model,
+      ),
+    );
+    unawaited(
+      _storage.setSetting(StorageKeys.localSeedvr2Options, {
+        for (final e in state.upscale.localSeedvr2Options.entries)
+          e.key: e.value.toJson(),
+      }),
+    );
+  }
 
   ImageParams paramsForGeneration(ImageParams draft) {
     if (state.isEnhance && state.enhance.localUpscale) {
@@ -1783,14 +1873,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   }
 
   (double, double) _resolveMagnitude(double magnitude) {
-    const presets = [
-      (0.2, 0.0),
-      (0.4, 0.0),
-      (0.5, 0.0),
-      (0.6, 0.0),
-      (0.7, 0.1),
-    ];
-    return presets[(magnitude.clamp(0.0, 1.0) * 4).round()];
+    return NativeImageEnhance.magnitude(magnitude);
   }
 
   bool _usesStableDiffusionImportBounds(String model) {

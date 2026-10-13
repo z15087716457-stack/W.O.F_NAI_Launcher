@@ -10,21 +10,23 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../../data/models/prompt_block/prompt_block_folder.dart';
-import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/generation/generation_params_notifier.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
 import '../../../providers/prompt_block_palette_provider.dart';
-import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../../../utils/translation_palette_drop.dart';
-import '../../../screens/prompt_block_library/widgets/prompt_block_card.dart';
-import '../../../screens/prompt_block_library/widgets/prompt_block_detail.dart';
+import 'prompt_block_pill.dart';
+import 'prompt_block_hover_preview.dart';
 import 'prompt_block_drag_data.dart';
+import 'prompt_block_colors.dart';
+import '../../../ui/kit/ui_block_pill.dart';
+import '../../../wiring/blocks_actions.dart';
 
 /// 积木按钮（生成页提示词卡头部右侧，原颜料板重命名归来）。
 ///
 /// 点击 = 开/关积木悬浮窗；把块拖上按钮 = 直接收纳进板。
 class PromptBlockPaletteButton extends ConsumerStatefulWidget {
-  const PromptBlockPaletteButton({super.key});
+  const PromptBlockPaletteButton({super.key, this.onInsert});
+  final Future<void> Function(String id)? onInsert;
 
   static Future<void> showAt(BuildContext context, Rect anchor) =>
       showDialog<void>(
@@ -113,6 +115,7 @@ class _PromptBlockPaletteButtonState
             anchor: anchor,
             progress: _progress,
             onClose: () => unawaited(_close()),
+            onInsert: widget.onInsert,
           ),
         ),
       );
@@ -209,12 +212,14 @@ class _PromptBlockPaletteOverlay extends StatefulWidget {
     required this.progress,
     required this.onClose,
     this.anchorRect,
+    this.onInsert,
   });
 
   final Rect? anchorRect;
   final RenderBox? anchor;
   final Animation<double> progress;
   final VoidCallback onClose;
+  final Future<void> Function(String id)? onInsert;
 
   @override
   State<_PromptBlockPaletteOverlay> createState() =>
@@ -290,6 +295,7 @@ class _PromptBlockPaletteOverlayState
                   minHeight: _windowMinHeight,
                   maxHeight: _windowMaxHeight,
                   onClose: widget.onClose,
+                  onInsert: widget.onInsert,
                   onPanUpdate: (delta) => setState(() {
                     _offset = _clamp(_offset! + delta, screen);
                     _lastOffset = _offset;
@@ -311,6 +317,7 @@ class _PromptBlockPaletteCard extends ConsumerStatefulWidget {
     required this.minHeight,
     required this.maxHeight,
     required this.onClose,
+    this.onInsert,
     required this.onPanUpdate,
   });
 
@@ -318,6 +325,7 @@ class _PromptBlockPaletteCard extends ConsumerStatefulWidget {
   final double minHeight;
   final double maxHeight;
   final VoidCallback onClose;
+  final Future<void> Function(String id)? onInsert;
   final ValueChanged<Offset> onPanUpdate;
 
   @override
@@ -623,6 +631,7 @@ class _PromptBlockPaletteCardState
                                       block: blocks[i],
                                       index: i,
                                       folders: folders,
+                                      onInsert: widget.onInsert,
                                       multiSelectMode: _multiSelectMode,
                                       selected: selectedIds.contains(
                                         blocks[i].id,
@@ -656,6 +665,7 @@ class _PaletteChipRow extends ConsumerStatefulWidget {
     required this.multiSelectMode,
     required this.selected,
     this.onToggleSelected,
+    this.onInsert,
   });
 
   final PromptBlock block;
@@ -666,6 +676,7 @@ class _PaletteChipRow extends ConsumerStatefulWidget {
   final bool multiSelectMode;
   final bool selected;
   final VoidCallback? onToggleSelected;
+  final Future<void> Function(String id)? onInsert;
 
   @override
   ConsumerState<_PaletteChipRow> createState() => _PaletteChipRowState();
@@ -678,19 +689,11 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
   /// 点击插入：与块库面板同一路由——最近聚焦的药丸框光标处，
   /// 从未聚焦过时回退主提示词末尾。
   void _insertAtCaret() {
-    final target = ref.read(pillActiveEditorTargetProvider);
-    final lane = pillWorkspaceProvider(target?.scope ?? PillScopes.main);
-    final document = ref.read(lane).document;
-    final offset = (target?.caret ?? document.text.length).clamp(
-      0,
-      document.text.length,
-    );
-    insertPromptBlockBundle(
-      ref,
-      scope: target?.scope ?? PillScopes.main,
-      offset: offset,
-      blockId: widget.block.id,
-    );
+    if (widget.onInsert != null) {
+      unawaited(widget.onInsert!(widget.block.id));
+      return;
+    }
+    BlocksActions(ref, context, () => mounted).insert([widget.block.id]);
   }
 
   void _remove() => ref
@@ -713,16 +716,34 @@ class _PaletteChipRowState extends ConsumerState<_PaletteChipRow> {
       ),
     );
 
-    final chip = PromptBlockPill(
-      block: block,
-      displayTitle: title,
-      maxWidth: 374,
-      paletteStyle: true,
-      highlightEnabled: highlightEnabled,
-      numericEmphasisEnabled: numericEmphasisEnabled,
-      multiSelected: widget.selected,
-      onTap: widget.onToggleSelected ?? _insertAtCaret,
-    );
+    final chip =
+        block.readingTranslationZh != null || block.appearance == 'translation'
+        ? PromptBlockPill(
+            block: block,
+            displayTitle: title,
+            maxWidth: 374,
+            paletteStyle: true,
+            highlightEnabled: highlightEnabled,
+            numericEmphasisEnabled: numericEmphasisEnabled,
+            multiSelected: widget.selected,
+            onTap: widget.onToggleSelected ?? _insertAtCaret,
+          )
+        : GestureDetector(
+            key: ValueKey('prompt-block-pill-body-${block.id}'),
+            onTap: widget.onToggleSelected ?? _insertAtCaret,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 374),
+              child: UiBlockPill(
+                label: title,
+                color: promptBlockColorFromString(block.color),
+                icon: block.iconName,
+                look:
+                    BlockAppearance.values.asNameMap()[block.appearance] ??
+                    BlockAppearance.classic,
+                focused: widget.selected,
+              ),
+            ),
+          );
 
     return DragTarget<PromptBlockDragData>(
       onWillAcceptWithDetails: (details) =>

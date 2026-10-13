@@ -9,6 +9,31 @@ import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 
 void main() {
+  test('初始化前从精准库存入 Vibe 后，仍须加载原有整库', () async {
+    final storage = _WarmStorage();
+    final container = ProviderContainer(
+      overrides: [vibeLibraryStorageServiceProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(vibeLibraryNotifierProvider.notifier);
+    await notifier.saveEntry((await storage.getDisplayEntries()).first);
+    expect(container.read(vibeLibraryNotifierProvider).entries, hasLength(1));
+    await notifier.initialize();
+    expect(container.read(vibeLibraryNotifierProvider).entries, hasLength(2));
+  });
+
+  test('加载过的空库不重复初始化', () async {
+    final storage = _EmptyStorage();
+    final container = ProviderContainer(
+      overrides: [vibeLibraryStorageServiceProvider.overrideWithValue(storage)],
+    );
+    addTearDown(container.dispose);
+    final notifier = container.read(vibeLibraryNotifierProvider.notifier);
+    await notifier.initialize();
+    await notifier.initialize();
+    expect(storage.reads, 1);
+  });
+
   test('切换到分类后再清空分类过滤，应恢复显示全部 Vibe', () async {
     final storage = _CategorizedStorageService();
     final container = ProviderContainer(
@@ -158,6 +183,20 @@ class _LoadedStorageService extends VibeLibraryStorageService {
 
   @override
   Future<List<VibeLibraryCategory>> getAllCategories() async => const [];
+}
+
+class _WarmStorage extends _LoadedStorageService {
+  @override
+  Future<VibeLibraryEntry> saveEntry(VibeLibraryEntry entry) async => entry;
+}
+
+class _EmptyStorage extends _LoadedStorageService {
+  var reads = 0;
+  @override
+  Future<List<VibeLibraryEntry>> getDisplayEntries() async {
+    reads++;
+    return [];
+  }
 }
 
 class _CategorizedStorageService extends VibeLibraryStorageService {

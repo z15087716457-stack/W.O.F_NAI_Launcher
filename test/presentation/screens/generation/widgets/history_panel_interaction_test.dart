@@ -1,162 +1,333 @@
-import 'package:flutter/gestures.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
-import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
+import 'package:nai_launcher/data/services/canvas_pin_repository.dart';
+import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
-import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/history_panel.dart';
+import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/history_batch.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generated_image_actions.dart';
-import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
-import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_history.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_confirm_dialog.dart';
+import 'package:nai_launcher/presentation/wiring/generation_data_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/generation_view_mapping.dart';
+import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
+import '../../../providers/krita/agent_bridge_draft_test.dart'
+    show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
+import '../../../wiring/generation_data_wiring_test.dart'
+    show DataGeneration, DataSubscription, DataShortcuts;
+import '../../../wiring/generation_reference_imports_test.dart'
+    show ImportStorage;
+import '../../../../helpers/studio_capture_fonts.dart';
 
 void main() {
-  for (final language in ['zh', 'en', 'ja', 'ko']) {
-    testWidgets('history titles and expected total in $language', (
-      tester,
-    ) async {
-      final today = DateTime.now();
-      final older = DateTime(today.year, today.month, today.day - 2, 8, 3);
-      final single = _image(
-        'single-time',
-        createdAt: DateTime(today.year, today.month, today.day, 16, 42),
-      );
-      final pair = [
-        for (var index = 0; index < 2; index++)
-          _image(
-            'pair-$index',
-            createdAt: older,
-          ).copyWith(generationRunId: 71, batchIndex: index),
-      ];
-      final container = _createContainer([
-        single,
-        ...pair,
-      ], status: GenerationStatus.generating);
-      addTearDown(container.dispose);
-      final notifier = container.read(imageGenerationNotifierProvider.notifier);
-      notifier.state = notifier.state.copyWith(
-        generationRunId: 99,
-        totalImages: 4,
-        currentImage: 1,
-        progress: .4,
-      );
-      await tester.pumpWidget(
-        _historyApp(container, width: 210, locale: Locale(language)),
-      );
-      await tester.pumpAndSettle();
-      final l10n = AppLocalizations.of(
-        tester.element(find.byType(HistoryPanel)),
-      )!;
-      final titles = tester
-          .widgetList<Text>(
-            find.descendant(
-              of: find.byType(HistoryPanel),
-              matching: find.byWidgetPredicate(
-                (widget) => widget is Text && widget.textSpan != null,
-              ),
-            ),
-          )
-          .map((text) => text.textSpan!.toPlainText())
-          .toList();
-      expect(titles, contains('16:42'));
-      final oldTime =
-          '${older.month.toString().padLeft(2, '0')}-${older.day.toString().padLeft(2, '0')} 08:03';
-      expect(
-        titles,
-        contains('$oldTime · ${l10n.generation_historyBatchCount(2)}'),
-      );
-      expect(
-        titles,
-        contains(
-          '${l10n.generation_generating} · ${l10n.generation_historyBatchCount(4)}',
-        ),
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('history-total-count')),
-          matching: find.text('7'),
-        ),
-        findsOneWidget,
-      );
-      final list = tester.widget<ListView>(find.byType(ListView));
-      expect(list.itemExtent, 18 + 4 + 194 + 8);
-      final loading = find.byKey(const ValueKey('history-loading:run:99'));
-      final title = find.byKey(const ValueKey('history-batch-title:run:99'));
-      expect(tester.getSize(title).height, 18);
-      expect(tester.getTopLeft(loading).dy - tester.getBottomLeft(title).dy, 4);
-      expect(tester.takeException(), isNull);
-    });
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadStudioCaptureFonts);
+  late Directory directory;
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    directory = await Directory.systemTemp.createTemp('generation-history-ui-');
+    Hive.init(directory.path);
+    await Hive.openBox(StorageKeys.settingsBox);
+  });
+  tearDown(() async {
+    await Hive.close();
+    await directory.delete(recursive: true);
+  });
+  ProviderContainer create(List<GeneratedImage> images) {
+    final storage = MemoryDraftSettings();
+    final container = ProviderContainer(
+      overrides: [
+        localStorageServiceProvider.overrideWithValue(storage),
+        characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
+        promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
+        authNotifierProvider.overrideWith(OfflineAuth.new),
+        imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
+        subscriptionNotifierProvider.overrideWith(DataSubscription.new),
+        shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
+        vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
+        localUpscaleModelsProvider.overrideWith((ref) async => []),
+        generationFavoriteImagesProvider.overrideWith((ref) async => {}),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(canvasPinnedNotifierProvider.notifier).debugRepository =
+        CanvasPinRepository(storage: storage, directory: directory);
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(ImageGenerationState(history: images));
+    return container;
   }
 
-  testWidgets('empty history hides total count badge', (tester) async {
-    final container = _createContainer([]);
-    addTearDown(container.dispose);
-    await tester.pumpWidget(_historyApp(container, width: 200));
+  Future<void> pump(
+    WidgetTester tester,
+    ProviderContainer container, {
+    double width = 320,
+    Locale locale = const Locale('zh'),
+  }) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          home: Scaffold(
+            body: SizedBox(
+              width: width,
+              height: 640,
+              child: GenerationWiring(
+                builder: ({required data, required actions, required slots}) =>
+                    GenHost(
+                      data: data,
+                      actions: actions,
+                      slots: slots,
+                      child: GenHistoryPanel(width: width),
+                    ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
-    expect(find.byKey(const Key('history-total-count')), findsNothing);
+  }
+
+  test(
+    'groups only explicit runs, sorts by slot and deduplicates current/history',
+    () {
+      final images = [
+        for (var i = 0; i < 4; i++) _image('batch-$i', run: 7, slot: i),
+      ];
+      final batches = buildHistoryBatches(
+        ImageGenerationState(
+          currentImages: [images[0]],
+          history: [...images.reversed, _image('legacy-1'), _image('legacy-2')],
+        ),
+      );
+      expect(batches, hasLength(3));
+      expect(
+        batches.first.images.map((image) => image.id),
+        images.map((image) => image.id),
+      );
+      expect(batches.first.cover?.id, images.first.id);
+      expect(batches.first.count, 4);
+      expect(batches.skip(1).map((batch) => batch.count), [1, 1]);
+    },
+  );
+
+  test('a long history retains every image and takes new requests on top', () {
+    final images = [for (var i = 0; i < 120; i++) _image('long-$i')];
+    final state = ImageGenerationState(history: images);
+    final before = generationHistoryView(state);
+    expect(before.total, 120);
+    // A progress-only update keeps the list; a new image joins at the top.
+    final progress = generationHistoryView(state.copyWith(progress: .5));
+    expect(
+      progress.batches.map((batch) => batch.id),
+      before.batches.map((batch) => batch.id),
+    );
+    final added = generationHistoryView(
+      state.copyWith(
+        history: [
+          _image('long-new', createdAt: DateTime(2026, 10, 13)),
+          ...images,
+        ],
+      ),
+    );
+    expect(added.total, 121);
+    expect(added.batches.first.images.single.id, 'long-new');
+    expect(
+      added.batches.expand((batch) => batch.images).map((image) => image.id),
+      contains('long-119'),
+    );
+  });
+
+  test(
+    'waiting, out-of-order responses and completion keep one batch and first-slot cover',
+    () {
+      final images = [
+        for (var i = 0; i < 4; i++) _image('stream-$i', run: 9, slot: i),
+      ];
+      var state = const ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: 9,
+        totalImages: 4,
+      );
+      var history = generationHistoryView(state);
+      expect(history.batches.single.pending, 4);
+      state = state.copyWith(
+        currentImages: [images[2], images[0]],
+        history: [images[2], images[0]],
+      );
+      history = generationHistoryView(state);
+      expect(history.batches.single.images.first.id, 'stream-0');
+      expect(history.batches.single.images, hasLength(2));
+      expect(history.batches.single.pending, 2);
+      history = generationHistoryView(
+        state.copyWith(
+          status: GenerationStatus.idle,
+          currentImages: [],
+          history: images.reversed.toList(),
+        ),
+      );
+      expect(history.batches.single.images, hasLength(4));
+      expect(history.batches.single.pending, 0);
+      expect(history.batches.single.images.first.id, 'stream-0');
+    },
+  );
+
+  test('cancelled partial batch counts only retained images', () {
+    final image = _image('partial', run: 5, slot: 2);
+    final history = generationHistoryView(
+      ImageGenerationState(history: [image], totalImages: 4),
+    );
+    expect(history.total, 1);
+    expect(history.batches.single.pending, 0);
   });
 
   testWidgets(
-    'history menu directly deletes only the cover, clears its focus and updates remaining batch count',
+    'empty history has no total count and renders the new empty state',
     (tester) async {
-      final images = [
-        for (var i = 0; i < 3; i++)
-          _image('delete-$i').copyWith(generationRunId: 7, batchIndex: i),
-      ];
-      final other = _image('other');
-      final container = _createContainer(
-        [...images, other],
-        currentImages: images,
-        behavior: HistoryClickBehavior.selectPreview,
-      );
-      addTearDown(container.dispose);
-      final notifier = container.read(imageGenerationNotifierProvider.notifier);
-      notifier.state = notifier.state.copyWith(displayImages: images);
-      container
-          .read(generationPreviewSelectionProvider.notifier)
-          .select(images.first.id);
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pumpAndSettle();
-      await _openContextMenu(tester, find.byKey(const ValueKey('delete-0')));
-      await tester.tap(find.text('删除'));
-      await tester.pumpAndSettle();
-      expect(find.byType(ThemedConfirmDialog), findsNothing);
-      expect(container.read(generationPreviewSelectionProvider), isNull);
-      final state = container.read(imageGenerationNotifierProvider);
-      expect(state.currentImages.map((image) => image.id), [
-        'delete-1',
-        'delete-2',
-      ]);
-      expect(state.displayImages.map((image) => image.id), [
-        'delete-1',
-        'delete-2',
-      ]);
-      expect(state.history.map((image) => image.id), [
-        'delete-1',
-        'delete-2',
-        'other',
-      ]);
-      expect(find.byKey(const ValueKey('delete-0')), findsNothing);
-      expect(find.byKey(const ValueKey('delete-1')), findsOneWidget);
-      expect(find.text('×2'), findsOneWidget);
+      await pump(tester, create([]));
+      expect(find.byKey(const Key('gen-history-empty')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
     },
   );
+
+  testWidgets(
+    'batch click focuses first slot and confirmed bulk removal removes every batch image',
+    (tester) async {
+      final images = [
+        for (var i = 0; i < 4; i++) _image('batch-$i', run: 7, slot: i),
+      ];
+      final container = create(images.reversed.toList());
+      await pump(tester, container);
+      final tile = find.byKey(const Key('gen-batch-tile-run:7'));
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:7');
+      expect(container.read(generationPreviewSelectionProvider), 'batch-0');
+      await tester.tap(find.byKey(const Key('gen-history-select')));
+      await tester.pumpAndSettle();
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('gen-history-delete-selected')));
+      await tester.pumpAndSettle();
+      final l = AppLocalizations.of(
+        tester.element(find.byType(GenHistoryPanel)),
+      )!;
+      await tester.tap(find.text(l.gen_removeConfirm));
+      await tester.pumpAndSettle();
+      expect(container.read(imageGenerationNotifierProvider).history, isEmpty);
+      expect(find.byKey(const Key('gen-history-empty')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'selecting a non-cover child highlights its batch through provider data',
+    (tester) async {
+      final images = [
+        _image('cover', run: 1, slot: 0),
+        _image('child', run: 1, slot: 1),
+      ];
+      final container = create(images);
+      await pump(tester, container);
+      container
+          .read(generationPreviewSelectionProvider.notifier)
+          .select('child');
+      await tester.pump();
+      final scope = GenScope.of(tester.element(find.byType(GenHistoryPanel)));
+      expect(scope.data.history.selected, 'run:1');
+      expect(find.byKey(const Key('gen-batch-focused')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'rapid Ctrl clicks stay in batch multi-selection instead of opening a viewer',
+    (tester) async {
+      final container = create([_image('first')]);
+      await pump(tester, container);
+      final tile = find.byKey(const Key('gen-batch-tile-img:first'));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(tile);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byKey(const Key('gen-history-selection')), findsOneWidget);
+      await tester.tap(tile);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pump();
+      expect(
+        container.read(imageGenerationNotifierProvider).history.single.id,
+        'first',
+      );
+      expect(find.byKey(const Key('gen-history-open')), findsNothing);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  for (final locale in ['zh', 'en', 'ja']) {
+    for (final width in [200.0, 280.0, 400.0]) {
+      testWidgets('bulk actions fit ${width}px history in $locale', (
+        tester,
+      ) async {
+        await pump(
+          tester,
+          create([_image('bulk-layout')]),
+          width: width,
+          locale: Locale(locale),
+        );
+        await tester.tap(find.byKey(const Key('gen-history-select')));
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find.byKey(const Key('gen-batch-tile-img:bulk-layout')),
+        );
+        await tester.pumpAndSettle();
+        final panel = tester.getRect(find.byType(GenHistoryPanel));
+        for (final key in [
+          'gen-history-pack',
+          'gen-history-save-selected',
+          'gen-history-delete-selected',
+        ]) {
+          final rect = tester.getRect(find.byKey(Key(key)));
+          expect(panel.contains(rect.topLeft), isTrue);
+          expect(
+            panel.contains(rect.bottomRight - const Offset(.1, .1)),
+            isTrue,
+          );
+        }
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox());
+      });
+    }
+  }
 
   testWidgets('shared image action retains confirmation for other callers', (
     tester,
   ) async {
     final images = [_image('canvas')];
-    final container = _createContainer(images);
-    addTearDown(container.dispose);
+    final container = create(images);
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -187,724 +358,17 @@ void main() {
       'canvas',
     );
     expect(tester.takeException(), isNull);
-  });
-
-  testWidgets(
-    'explicit history multi-selection keeps rapid clicks out of details',
-    (tester) async {
-      final container = _createContainer([
-        _image('first'),
-      ], behavior: HistoryClickBehavior.selectPreview);
-      addTearDown(container.dispose);
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('history-multi-select')));
-      await tester.pumpAndSettle();
-      final card = find.byKey(const ValueKey('first'));
-      await tester.tap(card);
-      await tester.pump(const Duration(milliseconds: 100));
-      await tester.tap(card);
-      await tester.pump();
-      expect(find.byType(ImageDetailViewer), findsNothing);
-      expect(
-        container.read(imageGenerationNotifierProvider).history.single.id,
-        'first',
-      );
-    },
-  );
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  test(
-    'groups only explicit runs, sorts by slot and deduplicates current/history',
-    () {
-      final images = [
-        for (var i = 0; i < 4; i++)
-          _image('batch-$i').copyWith(generationRunId: 7, batchIndex: i),
-      ];
-      final legacy1 = _image('legacy-1');
-      final legacy2 = _image('legacy-2');
-      final batches = buildHistoryBatches(
-        ImageGenerationState(
-          currentImages: [images[0]],
-          history: [...images.reversed, legacy1, legacy2],
-        ),
-      );
-      expect(batches, hasLength(3));
-      expect(
-        batches.first.images.map((image) => image.id),
-        images.map((image) => image.id),
-      );
-      expect(batches.first.cover?.id, images.first.id);
-      expect(batches.first.count, 4);
-      expect(batches.skip(1).map((batch) => batch.count), [1, 1]);
-    },
-  );
-
-  testWidgets('a long history lists every image and takes new ones on top', (
-    tester,
-  ) async {
-    final images = [for (var i = 0; i < 120; i++) _image('long-$i')];
-    final container = _createContainer(images);
-    addTearDown(container.dispose);
-    await tester.pumpWidget(_historyApp(container));
-    await tester.pumpAndSettle();
-
-    final list = find.descendant(
-      of: find.byType(ListView),
-      matching: find.byType(Scrollable),
-    );
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('long-119')),
-      2000,
-      scrollable: list,
-    );
-    expect(find.byKey(const ValueKey('long-119')), findsOneWidget);
-
-    // A progress-only update keeps the list; a new image joins at the top.
-    final notifier = container.read(imageGenerationNotifierProvider.notifier);
-    notifier.state = notifier.state.copyWith(progress: 0.5);
-    await tester.pump();
-    expect(find.byKey(const ValueKey('long-119')), findsOneWidget);
-    notifier.state = notifier.state.copyWith(
-      history: [_image('long-new'), ...images],
-    );
-    await tester.pump();
-    await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('long-new')),
-      -2000,
-      scrollable: list,
-    );
-    expect(find.byKey(const ValueKey('long-new')), findsOneWidget);
-  });
-
-  testWidgets('batch uses first cover and selects/deletes all four images', (
-    tester,
-  ) async {
-    final images = [
-      for (var i = 0; i < 4; i++)
-        _image('batch-$i').copyWith(generationRunId: 7, batchIndex: i),
-    ];
-    final container = _createContainer(
-      images.reversed.toList(),
-      behavior: HistoryClickBehavior.selectPreview,
-    );
-    addTearDown(container.dispose);
-    await tester.pumpWidget(_historyApp(container));
-    await tester.pumpAndSettle();
-    expect(find.byType(SelectableImageCard), findsOneWidget);
-    expect(find.byKey(const ValueKey('batch-0')), findsOneWidget);
-    expect(find.text('×4'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('batch-0')));
-    await tester.pumpAndSettle();
-    expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:7');
-    expect(container.read(generationPreviewSelectionProvider), 'batch-0');
-    await tester.tap(find.byKey(const ValueKey('history-multi-select')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('batch-0')));
-    await tester.pumpAndSettle();
-    expect(find.text('保存 (4)'), findsOneWidget);
-    expect(find.text('打包 (4)'), findsOneWidget);
-    await tester.tap(find.byTooltip('删除选中图像 (4)'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('清除').last);
-    await tester.pumpAndSettle();
-    expect(container.read(imageGenerationNotifierProvider).history, isEmpty);
-    expect(find.byType(SelectableImageCard), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets(
-    'selecting a non-cover child scrolls to and highlights its batch',
-    (tester) async {
-      final cover = _image(
-        'target-cover',
-      ).copyWith(generationRunId: 1, batchIndex: 0);
-      final child = _image(
-        'target-child',
-      ).copyWith(generationRunId: 1, batchIndex: 1);
-      final container = _createContainer([
-        for (var i = 0; i < 8; i++)
-          _image('other-$i').copyWith(generationRunId: i + 2, batchIndex: 0),
-        child,
-        cover,
-      ], behavior: HistoryClickBehavior.selectPreview);
-      addTearDown(container.dispose);
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pumpAndSettle();
-      container
-          .read(generationPreviewSelectionProvider.notifier)
-          .select(child.id);
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(milliseconds: 150));
-      final card = tester.widget<SelectableImageCard>(
-        find.byKey(ValueKey(cover.id)),
-      );
-      expect(card.isPreviewActive, isTrue);
-      expect(find.byKey(ValueKey(child.id)), findsNothing);
-      expect(
-        tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels,
-        greaterThan(0),
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets(
-    'waiting, out-of-order responses and completion keep one row and cover',
-    (tester) async {
-      final images = [
-        for (var i = 0; i < 4; i++)
-          _image('stream-$i').copyWith(generationRunId: 9, batchIndex: i),
-      ];
-      final container = _createContainer(
-        [],
-        behavior: HistoryClickBehavior.selectPreview,
-      );
-      addTearDown(container.dispose);
-      final notifier = container.read(imageGenerationNotifierProvider.notifier);
-      notifier.state = notifier.state.copyWith(
-        status: GenerationStatus.generating,
-        generationRunId: 9,
-        totalImages: 4,
-      );
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(find.byType(SelectableImageCard), findsOneWidget);
-      expect(find.text('×4'), findsOneWidget);
-      await tester.tap(find.byType(SelectableImageCard));
-      await tester.pump();
-      expect(container.read(canvasHistoryFocusRequestProvider)?.group, 'run:9');
-      notifier.state = notifier.state.copyWith(
-        currentImages: [images[2]],
-        history: [images[2]],
-        currentImage: 3,
-      );
-      await tester.pump();
-      expect(
-        tester
-            .widget<SelectableImageCard>(find.byType(SelectableImageCard))
-            .isGenerating,
-        isTrue,
-      );
-      notifier.state = notifier.state.copyWith(
-        currentImages: [images[2], images[0]],
-        history: [images[2], images[0]],
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(SelectableImageCard), findsOneWidget);
-      expect(find.byKey(const ValueKey('stream-0')), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('history-multi-select')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const ValueKey('stream-0')));
-      await tester.pumpAndSettle();
-      expect(find.text('保存 (2)'), findsOneWidget);
-      notifier.state = notifier.state.copyWith(
-        status: GenerationStatus.idle,
-        currentImages: [],
-        history: images.reversed.toList(),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(SelectableImageCard), findsOneWidget);
-      expect(find.byKey(const ValueKey('stream-0')), findsOneWidget);
-      expect(find.text('×4'), findsOneWidget);
-      expect(find.text('保存 (4)'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets(
-    'cancelled partial batch counts only remaining images and exits group selection',
-    (tester) async {
-      final image = _image(
-        'partial',
-      ).copyWith(generationRunId: 5, batchIndex: 2);
-      final container = _createContainer([
-        image,
-      ], behavior: HistoryClickBehavior.selectPreview);
-      addTearDown(container.dispose);
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pumpAndSettle();
-      expect(find.byType(SelectableImageCard), findsOneWidget);
-      expect(find.text('×4'), findsNothing);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.tap(find.byKey(ValueKey(image.id)));
-      await tester.pumpAndSettle();
-      expect(find.text('保存 (1)'), findsOneWidget);
-      await tester.tap(find.byKey(ValueKey(image.id)));
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      await tester.pumpAndSettle();
-      expect(find.text('保存 (1)'), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  for (final locale in ['zh', 'en', 'ja']) {
-    for (final width in [200.0, 280.0, 400.0]) {
-      testWidgets('bulk actions fit ${width}px history in $locale', (
-        tester,
-      ) async {
-        final container = _createContainer([
-          _image('bulk-layout'),
-        ], behavior: HistoryClickBehavior.selectPreview);
-        addTearDown(container.dispose);
-        await tester.pumpWidget(
-          _historyApp(
-            container,
-            width: width,
-            locale: Locale(locale),
-            theme: ThemeData(
-              filledButtonTheme: FilledButtonThemeData(
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-              outlinedButtonTheme: OutlinedButtonThemeData(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const ValueKey('history-multi-select')));
-        await tester.pumpAndSettle();
-
-        final pack = find.widgetWithIcon(
-          OutlinedButton,
-          Icons.archive_outlined,
-        );
-        final save = find.widgetWithIcon(FilledButton, Icons.image_outlined);
-        expect(tester.widget<OutlinedButton>(pack).onPressed, isNull);
-        expect(tester.widget<FilledButton>(save).onPressed, isNull);
-        expect(tester.takeException(), isNull);
-
-        final packRect = tester.getRect(pack);
-        final saveRect = tester.getRect(save);
-        final panelRect = tester.getRect(find.byType(HistoryPanel));
-        expect(panelRect.contains(packRect.topLeft), isTrue);
-        expect(panelRect.contains(saveRect.bottomRight), isTrue);
-        if (width < 296) {
-          expect(packRect.bottom, lessThan(saveRect.top));
-        } else {
-          expect(packRect.top, saveRect.top);
-          expect(packRect.right, lessThan(saveRect.left));
-        }
-
-        final tile = find.byKey(const ValueKey('bulk-layout'));
-        await tester.tap(tile);
-        await tester.pumpAndSettle();
-        expect(tester.widget<SelectableImageCard>(tile).isSelected, isTrue);
-        expect(tester.widget<OutlinedButton>(pack).onPressed, isNotNull);
-        expect(tester.widget<FilledButton>(save).onPressed, isNotNull);
-        expect(tester.takeException(), isNull);
-
-        await tester.tap(find.byIcon(Icons.close));
-        await tester.pumpAndSettle();
-        expect(pack, findsNothing);
-        expect(save, findsNothing);
-        expect(tester.widget<SelectableImageCard>(tile).isSelected, isFalse);
-        expect(tester.takeException(), isNull);
-      });
-    }
-  }
-
-  testWidgets('classic single click opens one image detail', (tester) async {
-    final container = _createContainer([_image('classic')]);
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await _pumpRoute(tester);
-    await tester.tap(find.byKey(const ValueKey('classic')));
-    await _pumpRoute(tester);
-
-    final viewer = tester.widget<ImageDetailViewer>(
-      find.byType(ImageDetailViewer),
-    );
-    expect(viewer.images, hasLength(1));
-    expect(viewer.initialIndex, 0);
-    expect(viewer.showThumbnails, isFalse);
-  });
-
-  testWidgets(
-    'linked single click selects and second click opens the merged sequence',
-    (tester) async {
-      final container = _createContainer([
-        _image('first'),
-        _image('second'),
-      ], behavior: HistoryClickBehavior.selectPreview);
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(_historyApp(container));
-      await _pumpRoute(tester);
-
-      await tester.tap(find.byKey(const ValueKey('first')));
-      await tester.pump();
-      expect(container.read(generationPreviewSelectionProvider), 'first');
-      expect(find.byType(ImageDetailViewer), findsNothing);
-      expect(
-        tester
-            .widget<SelectableImageCard>(find.byKey(const ValueKey('first')))
-            .isPreviewActive,
-        isTrue,
-      );
-      expect(
-        container.read(generationPreviewFocusNodeProvider).hasFocus,
-        isTrue,
-      );
-
-      await tester.tap(find.byKey(const ValueKey('first')));
-      await _pumpRoute(tester);
-      _expectLinkedViewer(tester, initialIndex: 0);
-    },
-  );
-
-  testWidgets('linked long press opens the merged sequence at its image', (
-    tester,
-  ) async {
-    final container = _createContainer([
-      _image('first'),
-      _image('second'),
-    ], behavior: HistoryClickBehavior.selectPreview);
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await _pumpRoute(tester);
-    final second = find.byKey(const ValueKey('second'));
-    await tester.ensureVisible(second);
-    await tester.pumpAndSettle();
-    await tester.longPress(second);
-    await _pumpRoute(tester);
-
-    _expectLinkedViewer(tester, initialIndex: 1);
-  });
-
-  testWidgets('linked context detail opens the merged sequence at its image', (
-    tester,
-  ) async {
-    final container = _createContainer([
-      _image('first'),
-      _image('second'),
-    ], behavior: HistoryClickBehavior.selectPreview);
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await _pumpRoute(tester);
-    final second = find.byKey(const ValueKey('second'));
-    await tester.ensureVisible(second);
-    await tester.pumpAndSettle();
-    await _openContextMenu(tester, second);
-    await tester.tap(find.text('详情'));
-    await _pumpRoute(tester);
-    await tester.pump();
-    expect(find.byType(MenuAnchor), findsNothing);
-
-    _expectLinkedViewer(tester, initialIndex: 1);
-  });
-
-  testWidgets('linked Ctrl rapid clicks toggle bulk selection on every click', (
-    tester,
-  ) async {
-    final container = _createContainer([
-      _image('toggle'),
-    ], behavior: HistoryClickBehavior.selectPreview);
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await tester.pumpAndSettle();
-    final finder = find.byKey(const ValueKey('toggle'));
-
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    await tester.tap(finder);
-    await tester.pump();
-    expect(tester.widget<SelectableImageCard>(finder).isSelected, isTrue);
-
-    await tester.tap(finder);
-    await tester.pump();
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-    expect(tester.widget<SelectableImageCard>(finder).isSelected, isFalse);
-    expect(container.read(generationPreviewSelectionProvider), isNull);
-  });
-
-  testWidgets(
-    'classic Ctrl rapid clicks stay bulk-only and context opens one',
-    (tester) async {
-      final container = _createContainer([_image('classic-toggle')]);
-      addTearDown(container.dispose);
-
-      await tester.pumpWidget(_historyApp(container));
-      await tester.pumpAndSettle();
-      final finder = find.byKey(const ValueKey('classic-toggle'));
-
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.tap(finder);
-      await tester.pump();
-      expect(tester.widget<SelectableImageCard>(finder).isSelected, isTrue);
-      await tester.tap(finder);
-      await tester.pump();
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-
-      expect(tester.widget<SelectableImageCard>(finder).isSelected, isFalse);
-      expect(container.read(generationPreviewSelectionProvider), isNull);
-      expect(find.byType(ImageDetailViewer), findsNothing);
-
-      await _openContextMenu(tester, finder);
-      await tester.tap(find.text('详情'));
-      await _pumpRoute(tester);
-      await tester.pump();
-      expect(find.byType(MenuAnchor), findsNothing);
-      final viewer = tester.widget<ImageDetailViewer>(
-        find.byType(ImageDetailViewer),
-      );
-      expect(viewer.images, hasLength(1));
-      expect(viewer.showThumbnails, isFalse);
-    },
-  );
-
-  testWidgets('rapid tall-row navigation settles on the latest selection', (
-    tester,
-  ) async {
-    final images = [
-      for (var index = 0; index < 8; index++)
-        _image(
-          'rapid-$index',
-          width: 100,
-          height: 400,
-          kind: GeneratedImageKind.failedStreamSnapshot,
-        ),
-    ];
-    final container = _createContainer(
-      images,
-      behavior: HistoryClickBehavior.selectPreview,
-    );
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await tester.pumpAndSettle();
-    final selection = container.read(
-      generationPreviewSelectionProvider.notifier,
-    );
-    selection.select('rapid-0');
-    for (var index = 0; index < 7; index++) {
-      selection.selectNext();
-      await tester.pump(const Duration(milliseconds: 20));
-    }
-    await tester.pump(const Duration(milliseconds: 220));
-    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
-    final latestPosition = scrollable.position.pixels;
-    await tester.pump(const Duration(milliseconds: 300));
-
-    expect(container.read(generationPreviewSelectionProvider), 'rapid-7');
-    expect(find.byKey(const ValueKey('rapid-7')), findsOneWidget);
-    expect(scrollable.position.pixels, greaterThan(0));
-    expect(
-      scrollable.position.pixels,
-      greaterThanOrEqualTo(latestPosition - 10),
-    );
-  });
-
-  testWidgets('generation placeholder row participates in selected offset', (
-    tester,
-  ) async {
-    final target = _image('after-placeholder');
-    final container = _createContainer(
-      [target],
-      behavior: HistoryClickBehavior.selectPreview,
-      currentImages: [_image('completed-current')],
-      status: GenerationStatus.generating,
-    );
-    addTearDown(container.dispose);
-
-    await tester.pumpWidget(_historyApp(container));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 100));
-    container
-        .read(generationPreviewSelectionProvider.notifier)
-        .select(target.id);
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
-    expect(find.byKey(ValueKey(target.id)), findsOneWidget);
-    expect(scrollable.position.pixels, greaterThan(250));
-  });
-
-  testWidgets('remount scrolls to selection changed while panel was hidden', (
-    tester,
-  ) async {
-    final images = [
-      for (var index = 0; index < 5; index++)
-        _image(
-          'portrait-$index',
-          width: 100,
-          height: 400,
-          kind: GeneratedImageKind.failedStreamSnapshot,
-        ),
-    ];
-    final container = _createContainer(
-      images,
-      behavior: HistoryClickBehavior.selectPreview,
-    );
-    addTearDown(container.dispose);
-    final visible = ValueNotifier(true);
-    addTearDown(visible.dispose);
-
-    await tester.pumpWidget(_historyApp(container, visible: visible));
-    await tester.pumpAndSettle();
-    visible.value = false;
-    await tester.pumpAndSettle();
-
-    final selection = container.read(
-      generationPreviewSelectionProvider.notifier,
-    );
-    selection.select('portrait-0');
-    for (var index = 0; index < 4; index++) {
-      selection.selectNext();
-    }
-    expect(container.read(generationPreviewSelectionProvider), 'portrait-4');
-
-    visible.value = true;
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 300));
-    await tester.pump(const Duration(milliseconds: 100));
-
-    expect(find.byKey(const ValueKey('portrait-4')), findsOneWidget);
-    final scrollable = tester.state<ScrollableState>(find.byType(Scrollable));
-    expect(scrollable.position.pixels, greaterThan(0));
+    await tester.pumpWidget(const SizedBox());
   });
 }
 
-ProviderContainer _createContainer(
-  List<GeneratedImage> images, {
-  HistoryClickBehavior behavior = HistoryClickBehavior.openDetail,
-  List<GeneratedImage> currentImages = const [],
-  GenerationStatus status = GenerationStatus.idle,
-}) {
-  final container = ProviderContainer(
-    overrides: [
-      localStorageServiceProvider.overrideWith(
-        (_) => _HistoryBehaviorStorage(behavior),
-      ),
-      shortcutConfigNotifierProvider.overrideWith(
-        _HistoryShortcutConfigNotifier.new,
-      ),
-    ],
-  );
-  final notifier = container.read(imageGenerationNotifierProvider.notifier);
-  notifier.state = notifier.state.copyWith(
-    status: status,
-    currentImages: currentImages,
-    history: images,
-    batchWidth: 100,
-    batchHeight: 100,
-  );
-  return container;
-}
-
-class _HistoryBehaviorStorage extends LocalStorageService {
-  _HistoryBehaviorStorage(this.behavior);
-
-  HistoryClickBehavior behavior;
-
-  @override
-  String getHistoryClickBehavior() => behavior.storageValue;
-
-  @override
-  Future<void> setHistoryClickBehavior(String value) async {
-    behavior = HistoryClickBehavior.fromStorageValue(value);
-  }
-}
-
-class _HistoryShortcutConfigNotifier extends ShortcutConfigNotifier {
-  @override
-  Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
-}
-
-GeneratedImage _image(
-  String id, {
-  int width = 32,
-  int height = 32,
-  GeneratedImageKind kind = GeneratedImageKind.completed,
-  DateTime? createdAt,
-}) {
-  return GeneratedImage(
-    id: id,
-    createdAt: createdAt,
-    bytes: Uint8List.fromList(
-      img.encodePng(img.Image(width: 4, height: 4, numChannels: 4)),
-    ),
-    width: width,
-    height: height,
-    kind: kind,
-  );
-}
-
-Widget _historyApp(
-  ProviderContainer container, {
-  ValueNotifier<bool>? visible,
-  double width = 320,
-  Locale locale = const Locale('zh'),
-  ThemeData? theme,
-}) {
-  final previewFocusNode = container.read(generationPreviewFocusNodeProvider);
-  return UncontrolledProviderScope(
-    container: container,
-    child: MaterialApp(
-      locale: locale,
-      theme: theme,
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: Scaffold(
-        body: Focus(
-          focusNode: previewFocusNode,
-          child: SizedBox(
-            width: width,
-            height: 640,
-            child: visible == null
-                ? const HistoryPanel()
-                : ValueListenableBuilder(
-                    valueListenable: visible,
-                    builder: (_, isVisible, __) => isVisible
-                        ? const HistoryPanel()
-                        : const SizedBox.shrink(),
-                  ),
-          ),
-        ),
-      ),
-    ),
-  );
-}
-
-void _expectLinkedViewer(WidgetTester tester, {required int initialIndex}) {
-  final viewer = tester.widget<ImageDetailViewer>(
-    find.byType(ImageDetailViewer),
-  );
-  expect(viewer.images, hasLength(2));
-  expect(viewer.initialIndex, initialIndex);
-  expect(viewer.showThumbnails, isTrue);
-}
-
-Future<void> _openContextMenu(WidgetTester tester, Finder target) async {
-  final gesture = await tester.startGesture(
-    tester.getCenter(target),
-    kind: PointerDeviceKind.mouse,
-    buttons: kSecondaryMouseButton,
-  );
-  await tester.pump();
-  await gesture.up();
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 200));
-}
-
-Future<void> _pumpRoute(WidgetTester tester) async {
-  await tester.pump();
-  await tester.pump(const Duration(milliseconds: 350));
-}
+GeneratedImage _image(String id, {int? run, int? slot, DateTime? createdAt}) =>
+    GeneratedImage(
+      id: id,
+      bytes: img.encodePng(img.Image(width: 64, height: 64)),
+      width: 64,
+      height: 64,
+      generationRunId: run,
+      batchIndex: slot,
+      createdAt: createdAt ?? DateTime(2026, 10, 12, 8),
+    );

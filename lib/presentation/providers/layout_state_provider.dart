@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/local_storage_service.dart';
 import '../../core/constants/storage_keys.dart';
+import '../router/app_branch.dart';
 
 part 'layout_state_provider.g.dart';
 
@@ -12,6 +13,9 @@ class LayoutState {
   final bool rightPanelExpanded;
   final double rightPanelWidth;
   final bool mainNavRailExpanded;
+  final Set<AppBranch> mainNavHiddenBranches;
+  final bool mainNavCtrlNumbers;
+  final bool mainNavCtrlHintSeen;
   final double webLeftPanelWidth;
   final bool webLeftPanelExpanded;
   final bool blockLibraryPanelExpanded;
@@ -30,6 +34,9 @@ class LayoutState {
     this.rightPanelExpanded = true,
     this.rightPanelWidth = 280.0,
     this.mainNavRailExpanded = false,
+    this.mainNavHiddenBranches = const {},
+    this.mainNavCtrlNumbers = true,
+    this.mainNavCtrlHintSeen = false,
     this.webLeftPanelWidth = 400.0,
     this.webLeftPanelExpanded = true,
     this.blockLibraryPanelExpanded = false,
@@ -48,6 +55,9 @@ class LayoutState {
     bool? rightPanelExpanded,
     double? rightPanelWidth,
     bool? mainNavRailExpanded,
+    Set<AppBranch>? mainNavHiddenBranches,
+    bool? mainNavCtrlNumbers,
+    bool? mainNavCtrlHintSeen,
     double? webLeftPanelWidth,
     bool? webLeftPanelExpanded,
     bool? blockLibraryPanelExpanded,
@@ -64,6 +74,10 @@ class LayoutState {
       rightPanelExpanded: rightPanelExpanded ?? this.rightPanelExpanded,
       rightPanelWidth: rightPanelWidth ?? this.rightPanelWidth,
       mainNavRailExpanded: mainNavRailExpanded ?? this.mainNavRailExpanded,
+      mainNavHiddenBranches:
+          mainNavHiddenBranches ?? this.mainNavHiddenBranches,
+      mainNavCtrlNumbers: mainNavCtrlNumbers ?? this.mainNavCtrlNumbers,
+      mainNavCtrlHintSeen: mainNavCtrlHintSeen ?? this.mainNavCtrlHintSeen,
       webLeftPanelWidth: webLeftPanelWidth ?? this.webLeftPanelWidth,
       webLeftPanelExpanded: webLeftPanelExpanded ?? this.webLeftPanelExpanded,
       blockLibraryPanelExpanded:
@@ -102,6 +116,16 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       rightPanelExpanded: storage.getRightPanelExpanded(),
       rightPanelWidth: storage.getRightPanelWidth(),
       mainNavRailExpanded: storage.getMainNavRailExpanded(),
+      mainNavHiddenBranches: Set.unmodifiable(
+        AppBranch.values.where(
+          (branch) =>
+              branch != AppBranch.generation &&
+              branch != AppBranch.settings &&
+              storage.getMainNavHiddenBranches().contains(branch.name),
+        ),
+      ),
+      mainNavCtrlNumbers: storage.getMainNavCtrlNumbers(),
+      mainNavCtrlHintSeen: storage.getMainNavCtrlHintSeen(),
       webLeftPanelWidth: storage.getWebLeftPanelWidth(),
       webLeftPanelExpanded: storage.getWebLeftPanelExpanded(),
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
@@ -150,6 +174,34 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
 
     final storage = ref.read(localStorageServiceProvider);
     await storage.setMainNavRailExpanded(expanded);
+  }
+
+  Future<void> setMainNavHiddenBranches(Set<AppBranch> branches) async {
+    final hidden = Set<AppBranch>.unmodifiable(
+      branches.where(
+        (branch) =>
+            branch != AppBranch.generation && branch != AppBranch.settings,
+      ),
+    );
+    state = state.copyWith(mainNavHiddenBranches: hidden);
+    await ref
+        .read(localStorageServiceProvider)
+        .setMainNavHiddenBranches(
+          AppBranch.values
+              .where(hidden.contains)
+              .map((branch) => branch.name)
+              .toList(),
+        );
+  }
+
+  Future<void> setMainNavCtrlNumbers(bool enabled) async {
+    state = state.copyWith(mainNavCtrlNumbers: enabled);
+    await ref.read(localStorageServiceProvider).setMainNavCtrlNumbers(enabled);
+  }
+
+  Future<void> setMainNavCtrlHintSeen(bool seen) async {
+    state = state.copyWith(mainNavCtrlHintSeen: seen);
+    await ref.read(localStorageServiceProvider).setMainNavCtrlHintSeen(seen);
   }
 
   /// 切换桌面主导航栏展开状态

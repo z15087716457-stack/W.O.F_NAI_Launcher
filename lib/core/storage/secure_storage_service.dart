@@ -10,6 +10,23 @@ part 'secure_storage_service.g.dart';
 /// 安全存储服务 - 存储敏感数据（Token、密码等）
 /// 使用内存缓存 + 持久化存储双重保障
 class SecureStorageService {
+  Future<void> saveAgentMcpConfig(String id, String json) async {
+    final key = 'nai_agent_mcp_$id';
+    await _storage.write(key: key, value: json);
+    _memoryCache[key] = json;
+  }
+
+  Future<String?> readAgentMcpConfig(String id) async {
+    final key = 'nai_agent_mcp_$id';
+    return _memoryCache[key] ?? await _storage.read(key: key);
+  }
+
+  Future<void> deleteAgentMcpConfig(String id) async {
+    final key = 'nai_agent_mcp_$id';
+    await _storage.delete(key: key);
+    _memoryCache.remove(key);
+  }
+
   final FlutterSecureStorage _storage;
 
   static final RegExp _bearerPrefixRegex = RegExp(

@@ -621,8 +621,16 @@ void main() {
           await tester.pumpWidget(
             ProviderScope(
               overrides: [
-                localUpscaleModelsProvider.overrideWith((ref) async => [localUpscaleCatalog.first.withInstalled(true), ...localUpscaleCatalog.skip(1), ...advancedUpscaleCatalog]),
-                bridgeDraftVersionProvider.overrideWith((ref) => 'fixture-draft'),
+                localUpscaleModelsProvider.overrideWith(
+                  (ref) async => [
+                    localUpscaleCatalog.first.withInstalled(true),
+                    ...localUpscaleCatalog.skip(1),
+                    ...advancedUpscaleCatalog,
+                  ],
+                ),
+                bridgeDraftVersionProvider.overrideWith(
+                  (ref) => 'fixture-draft',
+                ),
                 settingsFontScaleProvider.overrideWith(
                   () => _DesignSettingsScale(scale),
                 ),
@@ -752,6 +760,7 @@ void main() {
                 SettingsDestination.data => l10n.settings_dictionariesCache,
                 SettingsDestination.localUpscale => l10n.settings_localUpscale,
                 SettingsDestination.account => l10n.settings_novelaiAccounts,
+                SettingsDestination.agent => l10n.naiAgent_title,
                 SettingsDestination.models => l10n.settings_modelsAndInterfaces,
                 SettingsDestination.integrations =>
                   l10n.settings_connectionsIntegrations,

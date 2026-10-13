@@ -14,10 +14,10 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/pill_roll_coordinator.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_settings_dialog.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_lib_controls.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 
@@ -772,13 +772,16 @@ void main() {
 
       // 遗传角标替换骰子角标，不叠加
       expect(find.byIcon(Icons.casino_outlined), findsNothing);
-      expect(find.byType(DnaIcon), findsOneWidget);
+      expect(
+        tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).badge,
+        UiBlockBadge.evolution,
+      );
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
 
-      expect(find.byType(PillInstanceCard), findsOneWidget);
+      expect(find.byType(BlockInstanceCard), findsOneWidget);
       // 卡内显示物化 roll（单原子脚本源取 'A'）
       expect(find.text('A'), findsOneWidget);
 
@@ -789,7 +792,7 @@ void main() {
           .currentRoll;
 
       // 卡内骰子 = 重抽（按钮 key 与药丸角标相互独立）
-      await tester.tap(find.byKey(const Key('pill-reroll')));
+      await tester.tap(find.byKey(const Key('block-card-reroll')));
       await tester.pump();
 
       final after = container
@@ -799,7 +802,7 @@ void main() {
           .currentRoll;
       expect(after, isNot(before));
       // 卡仍开着并显示新 roll
-      expect(find.byType(PillInstanceCard), findsOneWidget);
+      expect(find.byType(BlockInstanceCard), findsOneWidget);
       expect(find.text(after!), findsOneWidget);
     });
 
@@ -813,15 +816,15 @@ void main() {
       notifier.updateInstanceSettings(markerA, randomSettings);
       await tester.pump();
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
 
-      final lockButton = tester.widget<IconButton>(
-        find.byKey(const Key('pill-lock-toggle')),
+      final lockButton = tester.widget<UiBtn>(
+        find.byKey(const Key('block-card-lock')),
       );
-      expect(lockButton.onPressed, isNotNull);
-      await tester.tap(find.byKey(const Key('pill-lock-toggle')));
+      expect(lockButton.onTap, isNotNull);
+      await tester.tap(find.byKey(const Key('block-card-lock')));
       await tester.pump();
 
       expect(
@@ -832,21 +835,23 @@ void main() {
             .locked,
         isTrue,
       );
-      expect(tester.widget<PromptPill>(find.byType(PromptPill)).locked, isTrue);
       expect(
-        tester
-            .widget<IconButton>(find.byKey(const Key('pill-reroll')))
-            .onPressed,
+        tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).badge,
+        UiBlockBadge.locked,
+      );
+      expect(
+        tester.widget<UiBtn>(find.byKey(const Key('block-card-reroll'))).onTap,
         isNull,
       );
       expect(
         tester
-            .widget<IconButton>(find.byKey(const Key('pill-lock-toggle')))
-            .icon,
-        isA<Icon>(),
+            .widget<UiBtn>(find.byKey(const Key('block-card-lock')))
+            .children
+            .first,
+        isA<UiGlyph>(),
       );
 
-      await tester.tap(find.byKey(const Key('pill-lock-toggle')));
+      await tester.tap(find.byKey(const Key('block-card-lock')));
       await tester.pump();
       expect(
         container
@@ -857,9 +862,7 @@ void main() {
         isFalse,
       );
       expect(
-        tester
-            .widget<IconButton>(find.byKey(const Key('pill-reroll')))
-            .onPressed,
+        tester.widget<UiBtn>(find.byKey(const Key('block-card-reroll'))).onTap,
         isNotNull,
       );
     });
@@ -872,12 +875,12 @@ void main() {
           .insertBlockAt(offset: 0, blockId: 'style');
       await tester.pump();
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
 
       // FEAT-46：固定块不渲染锁定钮（原置灰）。
-      expect(find.byKey(const Key('pill-lock-toggle')), findsNothing);
+      expect(find.byKey(const Key('block-card-lock')), findsNothing);
     });
 
     testWidgets('tapping outside dismisses the card', (tester) async {
@@ -888,15 +891,15 @@ void main() {
           .insertBlockAt(offset: 0, blockId: 'style');
       await tester.pump();
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
-      expect(find.byType(PillInstanceCard), findsOneWidget);
+      expect(find.byType(BlockInstanceCard), findsOneWidget);
 
       await tester.tapAt(const Offset(1100, 700));
       await tester.pump();
       await tester.pump();
-      expect(find.byType(PillInstanceCard), findsNothing);
+      expect(find.byType(BlockInstanceCard), findsNothing);
     });
 
     testWidgets('card delete removes the marker instance', (tester) async {
@@ -907,15 +910,15 @@ void main() {
           .insertBlockAt(offset: 0, blockId: 'style');
       await tester.pump();
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byKey(const Key('block-card-remove')));
       await tester.pump();
       await tester.pump();
 
-      expect(find.byType(PillInstanceCard), findsNothing);
+      expect(find.byType(BlockInstanceCard), findsNothing);
       expect(
         container.read(pillWorkspaceNotifierProvider).document.instances,
         isEmpty,
@@ -924,10 +927,10 @@ void main() {
     });
 
     group('mode-differentiated button rows (FEAT-46)', () {
-      const rerollKey = Key('pill-reroll');
-      const stepBackKey = Key('pill-step-back');
-      const stepForwardKey = Key('pill-step-forward');
-      const lockKey = Key('pill-lock-toggle');
+      const rerollKey = Key('block-card-reroll');
+      const stepBackKey = Key('block-card-step-prev');
+      const stepForwardKey = Key('block-card-step-next');
+      const lockKey = Key('block-card-lock');
       const evolutionKey = Key('pill-evolution-toggle');
 
       Future<ProviderContainer> openCard(
@@ -942,10 +945,10 @@ void main() {
           notifier.updateInstanceSettings(markerA, settings);
         }
         await tester.pump();
-        await tester.tap(find.byType(PromptPill));
+        await tester.tap(find.byType(UiBlockPill).first);
         await tester.pump();
         await tester.pump();
-        expect(find.byType(PillInstanceCard), findsOneWidget);
+        expect(find.byType(BlockInstanceCard), findsOneWidget);
         return container;
       }
 
@@ -954,9 +957,9 @@ void main() {
       ) async {
         await openCard(tester, PillInstanceSettings.fixedDefault);
 
-        expect(find.byIcon(Icons.tune), findsOneWidget);
-        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
-        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byKey(const Key('block-card-mode-random')), findsOneWidget);
+        expect(find.byKey(const Key('block-card-toggle')), findsOneWidget);
+        expect(find.byKey(const Key('block-card-remove')), findsOneWidget);
         for (final key in [
           rerollKey,
           stepBackKey,
@@ -975,12 +978,12 @@ void main() {
         expect(find.byKey(stepBackKey), findsOneWidget);
         expect(find.byKey(stepForwardKey), findsOneWidget);
         expect(find.byKey(lockKey), findsOneWidget);
-        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byKey(const Key('block-card-remove')), findsOneWidget);
         expect(find.byKey(rerollKey), findsNothing);
         // 设置/启停为全模式共有：设置弹窗是唯一模式切换入口，
         // 顺序块缺它会堵死回不去。
-        expect(find.byIcon(Icons.tune), findsOneWidget);
-        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+        expect(find.byKey(const Key('block-card-rules')), findsOneWidget);
+        expect(find.byKey(const Key('block-card-toggle')), findsOneWidget);
         expect(find.byKey(evolutionKey), findsNothing);
 
         PillInstance read() => container
@@ -997,17 +1000,34 @@ void main() {
         expect(read().currentRoll, 'A');
       });
 
-      testWidgets('sequential arrows disable while locked', (tester) async {
-        await openCard(tester, sequentialSettings);
-
+      testWidgets('sequential arrows cannot change a locked instance', (
+        tester,
+      ) async {
+        final container = await openCard(tester, sequentialSettings);
         await tester.tap(find.byKey(lockKey));
         await tester.pump();
-
+        final before = container
+            .read(pillWorkspaceNotifierProvider)
+            .document
+            .instances[markerA]!;
+        expect(before.locked, isTrue);
+        expect(
+          tester
+              .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+              .data
+              .locked,
+          isTrue,
+        );
         for (final key in [stepBackKey, stepForwardKey]) {
+          await tester.tap(find.byKey(key));
+          await tester.pump();
           expect(
-            tester.widget<IconButton>(find.byKey(key)).onPressed,
-            isNull,
-            reason: '锁定态步进钮禁用',
+            container
+                .read(pillWorkspaceNotifierProvider)
+                .document
+                .instances[markerA],
+            before,
+            reason: '锁定态不能修改顺序游标或物化结果',
           );
         }
       });
@@ -1018,10 +1038,10 @@ void main() {
         await openCard(tester, randomSettings);
 
         expect(find.byKey(rerollKey), findsOneWidget);
-        expect(find.byIcon(Icons.tune), findsOneWidget);
-        expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+        expect(find.byKey(const Key('block-card-rules')), findsOneWidget);
+        expect(find.byKey(const Key('block-card-toggle')), findsOneWidget);
         expect(find.byKey(lockKey), findsOneWidget);
-        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        expect(find.byKey(const Key('block-card-remove')), findsOneWidget);
         expect(find.byKey(stepBackKey), findsNothing);
         expect(find.byKey(stepForwardKey), findsNothing);
         // 主页面不渲染遗传钮（FEAT-47）。
@@ -1030,171 +1050,89 @@ void main() {
     });
   });
 
-  group('L2 settings dialog', () {
+  group('instance extraction rules', () {
+    Future<ProviderContainer> openRules(WidgetTester tester) async {
+      final container = await _pumpEditor(tester);
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      container
+          .read(pillWorkspaceNotifierProvider.notifier)
+          .insertBlockAt(offset: 0, blockId: 'style');
+      await tester.pump();
+      await tester.tap(find.byType(UiBlockPill).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-card-mode-sequential')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-card-rules')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-rules-mode-fixed')));
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    PillInstanceSettings settings(ProviderContainer container) => container
+        .read(pillWorkspaceNotifierProvider)
+        .document
+        .instances[markerA]!
+        .settings;
+
     testWidgets('switching to random and applying returns drafted settings', (
       tester,
     ) async {
-      PillInstanceSettings? result;
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () async {
-                  result = await PillInstanceSettingsDialog.show(
-                    context,
-                    PillInstanceSettings.fixedDefault,
-                  );
-                },
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('open'));
-      await tester.pump();
-      await tester.pump();
-
-      expect(find.byType(PillInstanceSettingsDialog), findsOneWidget);
-      // 随机抽取控件初始不可见（固定模式）
-      expect(find.text('随机抽取'), findsOneWidget); // segmented 段本身
-      expect(find.textContaining('触发概率'), findsNothing);
-
-      await tester.tap(find.text('随机抽取'));
-      await tester.pump();
-      await tester.pump();
-      expect(find.textContaining('触发概率'), findsOneWidget);
-
-      await tester.tap(find.text('确定'));
-      await tester.pump();
-      await tester.pump();
-
-      expect(result, isNotNull);
-      expect(result!.mode, PillRollMode.random);
+      final container = await openRules(tester);
+      expect(find.byKey(const Key('block-rules')), findsOneWidget);
+      expect(find.byKey(const Key('block-rules-min')), findsNothing);
+      await tester.tap(find.byKey(const Key('block-rules-mode-random')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('block-rules-prob')), findsOneWidget);
+      expect(settings(container).mode, PillRollMode.sequential);
+      await tester.tap(find.byKey(const Key('block-rules-done')));
+      await tester.pumpAndSettle();
+      expect(settings(container).mode, PillRollMode.random);
     });
 
     testWidgets(
       'switching to sequential shows trigger/weight, hides order row',
       (tester) async {
-        PillInstanceSettings? result;
-        await tester.pumpWidget(
-          MaterialApp(
-            locale: const Locale('zh'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => TextButton(
-                  onPressed: () async {
-                    result = await PillInstanceSettingsDialog.show(
-                      context,
-                      PillInstanceSettings.fixedDefault,
-                    );
-                  },
-                  child: const Text('open'),
-                ),
-              ),
-            ),
-          ),
-        );
-
-        await tester.tap(find.text('open'));
-        await tester.pump();
-        await tester.pump();
-
-        await tester.tap(find.text('顺序'));
-        await tester.pump();
-        await tester.pump();
-
-        // 顺序模式：数量/权重/触发行可见
-        expect(find.textContaining('触发概率'), findsOneWidget);
-        expect(find.textContaining('抽取数量'), findsOneWidget);
-        expect(find.text('随机权重'), findsOneWidget);
-        // 输出顺序行是随机模式专属，顺序模式天然按池序输出
-        expect(find.text('输出顺序'), findsNothing);
-        expect(find.text('按抽中顺序'), findsNothing);
-        expect(find.text('按池原序'), findsNothing);
-
-        await tester.tap(find.text('确定'));
-        await tester.pump();
-        await tester.pump();
-
-        expect(result, isNotNull);
-        expect(result!.mode, PillRollMode.sequential);
+        final container = await openRules(tester);
+        await tester.tap(find.byKey(const Key('block-rules-mode-sequential')));
+        await tester.pumpAndSettle();
+        for (final key in [
+          'block-rules-min',
+          'block-rules-max',
+          'block-rules-prob',
+          'block-rules-weight',
+        ]) {
+          expect(find.byKey(Key(key)), findsOneWidget);
+        }
+        expect(find.byKey(const Key('block-rules-order')), findsNothing);
+        await tester.tap(find.byKey(const Key('block-rules-done')));
+        await tester.pumpAndSettle();
+        expect(settings(container).mode, PillRollMode.sequential);
       },
     );
 
     testWidgets('random mode still shows the order row (回归)', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () async {
-                  await PillInstanceSettingsDialog.show(
-                    context,
-                    PillInstanceSettings.fixedDefault,
-                  );
-                },
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('open'));
-      await tester.pump();
-      await tester.pump();
-      await tester.tap(find.text('随机抽取'));
-      await tester.pump();
-      await tester.pump();
-
-      expect(find.text('输出顺序'), findsOneWidget);
-      // Dropdown 未展开时只渲染当前选中项（默认按抽中顺序）
-      expect(find.text('按抽中顺序'), findsOneWidget);
-      expect(find.byType(DropdownButton<PillRollOrder>), findsOneWidget);
+      final container = await openRules(tester);
+      await tester.tap(find.byKey(const Key('block-rules-mode-random')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('block-rules-order')), findsOneWidget);
+      expect(find.byKey(const Key('block-rules-order-drawn')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('block-rules-order-original')));
+      await tester.tap(find.byKey(const Key('block-rules-done')));
+      await tester.pumpAndSettle();
+      expect(settings(container).order, PillRollOrder.original);
     });
 
-    testWidgets('cancel returns null', (tester) async {
-      var called = false;
-      await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('zh'),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => TextButton(
-                onPressed: () async {
-                  final r = await PillInstanceSettingsDialog.show(
-                    context,
-                    PillInstanceSettings.fixedDefault,
-                  );
-                  if (r == null) called = true;
-                },
-                child: const Text('open'),
-              ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('open'));
-      await tester.pump();
-      await tester.pump();
-      await tester.tap(find.text('取消'));
-      await tester.pump();
-      await tester.pump();
-      expect(called, isTrue);
+    testWidgets('cancel preserves the committed settings', (tester) async {
+      final container = await openRules(tester);
+      final before = settings(container);
+      await tester.tap(find.byKey(const Key('block-rules-mode-random')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-rules-cancel')));
+      await tester.pumpAndSettle();
+      expect(settings(container), before);
+      expect(find.byKey(const Key('block-rules')), findsNothing);
+      expect(find.byType(BlockInstanceCard), findsOneWidget);
     });
   });
 }

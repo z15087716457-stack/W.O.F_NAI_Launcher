@@ -107,6 +107,18 @@ bool isFavoriteOnlyFastFilter(FilterCriteria criteria) {
 /// - 过滤和搜索
 /// - 收藏管理
 /// - 元数据操作
+/// A read-only library query, independent of the visible gallery's filters.
+class GalleryQueryPage {
+  const GalleryQueryPage({
+    required this.records,
+    required this.totalCount,
+    this.nextOffset,
+  });
+  final List<LocalImageRecord> records;
+  final int totalCount;
+  final int? nextOffset;
+}
+
 abstract class LocalGalleryService {
   /// 服务是否已初始化
   bool get isInitialized;
@@ -136,6 +148,15 @@ abstract class LocalGalleryService {
   /// - [GalleryNotInitializedException] 服务未初始化
   /// - [GalleryDatabaseException] 数据库错误
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize});
+
+  Future<GalleryQueryPage> queryRecords(
+    FilterCriteria criteria, {
+    int offset = 0,
+    int limit = 50,
+  });
+
+  /// Resolve only tracked library files, without changing the visible dataset.
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(List<String> paths);
 
   /// 当前过滤与排序下的全部条目（路径、修改时间、宽高），供连续画廊排版。
   ///
@@ -921,6 +942,81 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           height: _dimensions[file.path]?.$2,
         ),
     ];
+  }
+
+  @override
+  Future<GalleryQueryPage> queryRecords(
+    FilterCriteria criteria, {
+    int offset = 0,
+    int limit = 50,
+  }) async {
+    _ensureInitialized();
+    if (offset < 0 || limit < 1 || limit > 100) {
+      throw ArgumentError('Expected offset >= 0 and limit 1..100');
+    }
+    // Separate filter/cancellation/cache state: an Agent query must not cancel
+    // a user's filter operation or replace its current criteria and sorting.
+    final tracked = List<File>.of(_allFiles);
+    final deleted = await _dataSource.getDeletedImagePaths();
+    final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+    final files = [
+      for (final f in tracked)
+        if (!deleted.contains(f.path) &&
+            roots.any((root) => p.isWithin(root.path, f.path)))
+          f,
+    ];
+    final filter = GalleryFilterService(_dataSource);
+    filter.setSort(const GallerySort.modifiedAtDesc());
+    final result = await filter.applyFilters(files, criteria);
+    final candidates = List<File>.of(result.files);
+    await _ensureFileStats(candidates);
+    const order = GallerySort.modifiedAtDesc();
+    candidates.sort((a, b) {
+      final ka = _fileStats[a.path] ?? _missingSortStats;
+      final kb = _fileStats[b.path] ?? _missingSortStats;
+      return order.compareFiles(
+        modifiedAtA: ka.modified,
+        modifiedAtB: kb.modified,
+        fileSizeA: ka.size,
+        fileSizeB: kb.size,
+        fileNameKeyA: _lowerBaseNameOf(a.path),
+        fileNameKeyB: _lowerBaseNameOf(b.path),
+      );
+    });
+    final batch = candidates.skip(offset).take(limit).toList();
+    return GalleryQueryPage(
+      records: await _loadExistingLibraryRecords(batch),
+      totalCount: candidates.length,
+      nextOffset: offset + batch.length < candidates.length
+          ? offset + batch.length
+          : null,
+    );
+  }
+
+  @override
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(
+    List<String> paths,
+  ) async {
+    _ensureInitialized();
+    final wanted = paths.toSet();
+    final deleted = await _dataSource.getDeletedImagePaths();
+    final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+    return _loadExistingLibraryRecords([
+      for (final file in _allFiles)
+        if (wanted.contains(file.path) &&
+            !deleted.contains(file.path) &&
+            roots.any((root) => p.isWithin(root.path, file.path)))
+          file,
+    ]);
+  }
+
+  Future<List<LocalImageRecord>> _loadExistingLibraryRecords(
+    List<File> files,
+  ) async {
+    final existing = await Future.wait(
+      files.map((file) async => await file.exists() ? file : null),
+    );
+    return _loadRecords(existing.whereType<File>().toList());
   }
 
   /// 补齐宽高缓存：缺得多时一次读全表，少量时按路径批查。
@@ -1797,6 +1893,18 @@ class ErrorGalleryService implements LocalGalleryService {
       _throwError();
 
   @override
+  Future<GalleryQueryPage> queryRecords(
+    FilterCriteria criteria, {
+    int offset = 0,
+    int limit = 50,
+  }) => _throwError();
+
+  @override
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(
+    List<String> paths,
+  ) => _throwError();
+
+  @override
   Future<List<GalleryTimelineEntry>> getTimelineEntries() => _throwError();
 
   @override
@@ -1887,6 +1995,18 @@ class _PlaceholderGalleryService implements LocalGalleryService {
   @override
   Future<List<LocalImageRecord>> getPage(int page, {int? pageSize}) =>
       _throwNotInitialized();
+
+  @override
+  Future<GalleryQueryPage> queryRecords(
+    FilterCriteria criteria, {
+    int offset = 0,
+    int limit = 50,
+  }) => _throwNotInitialized();
+
+  @override
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(
+    List<String> paths,
+  ) => _throwNotInitialized();
 
   @override
   Future<List<GalleryTimelineEntry>> getTimelineEntries() =>

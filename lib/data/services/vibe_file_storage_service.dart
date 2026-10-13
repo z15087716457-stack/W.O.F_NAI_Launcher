@@ -47,6 +47,24 @@ class VibeFileStorageService {
   static const String _bundleFileExtension = '.naiv4vibebundle';
   static const String _tag = 'VibeFileStorage';
 
+  /// Store an already parsed original file without discarding other models or
+  /// encoding variants. A fresh native filename never overwrites a library file.
+  Future<String> saveOriginalVibeFile(
+    Uint8List bytes, {
+    required String name,
+    required bool bundle,
+  }) async {
+    final directory = await _ensureVibeDirectory();
+    final fileName = await _generateUniqueFileName(
+      directory,
+      _normalizeFileBaseName(name),
+      bundle ? _bundleFileExtension : _singleFileExtension,
+    );
+    final filePath = p.join(directory, fileName);
+    await File(filePath).writeAsBytes(bytes, flush: true);
+    return filePath;
+  }
+
   /// 保存单个 Vibe 到 .naiv4vibe 文件
   Future<String> saveVibeToFile(
     VibeReference vibe, {
@@ -168,8 +186,34 @@ class VibeFileStorageService {
     }
 
     try {
-      final jsonString = _buildBundleJson(vibes, defaultModel: defaultModel);
-      await file.writeAsString(jsonString);
+      final replacement = NovelAiVibeCodec.buildBundleMap(
+        vibes,
+        fallbackModel: defaultModel,
+      );
+      // Editing one child must retain compatible encodings for other models
+      // and information levels, including the untouched bundle children.
+      Object? existing;
+      try {
+        existing = jsonDecode(await file.readAsString());
+      } on FormatException {
+        // Keep the existing native repair path for a corrupt bundle file.
+      }
+      final previous = existing is Map ? existing['vibes'] : null;
+      if (previous is List) {
+        for (final next in replacement['vibes'] as List) {
+          final old = previous
+              .whereType<Map>()
+              .where((v) => v['id'] == next['id'])
+              .firstOrNull;
+          if (old != null) {
+            _mergeCompatibleImageEncodings(
+              Map<String, dynamic>.from(old),
+              next as Map<String, dynamic>,
+            );
+          }
+        }
+      }
+      await file.writeAsString(NovelAiVibeCodec.encodeJson(replacement));
       AppLogger.i('Vibe Bundle 文件覆盖成功: $filePath', _tag);
     } catch (e, stackTrace) {
       AppLogger.e('覆盖 Vibe Bundle 失败: $filePath', e, stackTrace, _tag);
@@ -792,8 +836,8 @@ class VibeFileStorageService {
     Map<String, dynamic> existing,
     Map<String, dynamic> replacement,
   ) {
-    if (existing['type'] != 'image' ||
-        replacement['type'] != 'image' ||
+    if (!{'image', 'encoding'}.contains(existing['type']) ||
+        existing['type'] != replacement['type'] ||
         existing['id'] != replacement['id']) {
       return;
     }

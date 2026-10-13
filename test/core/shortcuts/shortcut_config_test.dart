@@ -3,6 +3,26 @@ import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 
 void main() {
+  test('navigation defaults follow the new rail order', () {
+    final config = ShortcutConfig.createDefault();
+    const expected = {
+      'navigate_to_generation': 'ctrl+1',
+      'navigate_to_style_explore': 'ctrl+2',
+      'navigate_to_local_gallery': 'ctrl+3',
+      'navigate_to_online_gallery': 'ctrl+4',
+      'navigate_to_tag_library': 'ctrl+5',
+      'navigate_to_vibe_library': 'ctrl+6',
+      'navigate_to_precise_ref_library': 'ctrl+7',
+      'navigate_to_tag_wiki': 'ctrl+8',
+      'navigate_to_statistics': 'ctrl+9',
+      'navigate_to_settings': 'ctrl+comma',
+    };
+    for (final entry in expected.entries) {
+      expect(config.getEffectiveShortcut(entry.key), entry.value);
+      expect(config.getBinding(entry.key)?.context, ShortcutContext.global);
+    }
+  });
+
   test(
     'new generation navigation defaults use arrows in generation context',
     () {

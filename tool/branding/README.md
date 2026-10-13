@@ -1,121 +1,73 @@
-# W.O.F NAI Studio · 品牌素材
+# W.O.F NAI Studio · 品牌与界面约定
 
-## 设置导航与服务商标识
+本文件描述当前源码的字体、图标、窗口和材质，使用现有母版与组件；当前安装 / 验收版本见工作区接手说明。界面改动先按用户指定流程展示方案，得到实施指令后施工；已接受的结果不做推测性改动。
 
-设置页按使用偏好、创作与资源、服务与连接分组，隐私与分享、关于与诊断位于导航底部。九个入口使用 `studio_icons/settings_*.svg` 自绘线性图标，追加至 StudioIcons 字体的 e90e–e916，已有码位保持稳定；字体和 `studio_icon_paths.dart` 由 `generate_studio_icons.py` 同步生成。
+## 字体与缩放
 
-服务商标识根据用户选择的 `ProviderPreset` 显示，兼容协议不推断厂商。OpenAI、Anthropic、Gemini、DeepSeek、通义千问、Kimi、智谱、MiniMax、豆包、混元、文心、xAI、Mistral、Groq、硅基流动、OpenRouter、LM Studio、Ollama、Pollinations 共 19 枚标识离线随包提供，来自 Lobe Icons 1.95.1 的 SVG 资源；固定来源与 SHA-256 见 `provider_logos.json`，MIT 许可见 `assets/licenses/LobeIcons-LICENSE.txt`，应用许可页同步登记。品牌标识仍归各厂商所有。单色标识随深浅主题调整，彩色标识保留原色；自定义兼容服务显示 Studio 自绘模型图标。
-
-`CAPTURE_SETTINGS_REDESIGN=1` 运行设置页测试可导出实际字体的九页、深浅色、1280 / 740 / 360px 宽度及窄窗口 130% 字号实绘；同变量运行 AppToast 测试导出通知卡片。测试只使用临时存储与模拟服务，不读取用户账号或调用模型。
-
-## 字体
-
-| 用途 | 字体 |
+| 角色 | 当前默认 |
 |---|---|
-| 正文与控件 | HarmonyOS Sans SC + Pretendard缺字回退；13px / 1.45、400 / 500 / 600–700 |
-| 参数、尺寸、快捷键、代码 | Geist Mono + HarmonyOS Sans SC + Pretendard回退；400为Regular、500–700共用Medium字形 |
-| 本地画廊 | Geist → HarmonyOS Sans SC；查看器恢复HOS |
-| 标签百科 | Segoe UI → Microsoft YaHei UI → Microsoft YaHei；文章标题Cascadia Code → Consolas |
+| 正文与控件 | HarmonyOS Sans SC，由 FontConfig.defaultFont 选择；显式系统 / Google 字体仍有效 |
+| 参数、尺寸、快捷键与代码 | Geist Mono，CJK 回退 HarmonyOS Sans SC |
+| 本地画廊 | 按原型使用 Geist → HarmonyOS Sans SC；查看器恢复 HOS |
+| 标签百科 | Segoe UI → Microsoft YaHei UI → Microsoft YaHei；文章标题 Cascadia Code → Consolas |
+| 韩文 | Pretendard 1.3.9 静态 OTF，四档字重，OFL-1.1 |
+| 登录 / 载入背景字符场 | Geist Pixel Square / Circle |
 
-`StudioTypography` 负责正文、控件与等宽数据字体，字距与词距默认为0；原生Geist Mono600 / 700登记文件由 `tool/fonts/build_prototype_weights.py` 生成，仅改字重元数据、不改字形与度量。主工作区固定100%，设置页及其弹层以1.0为基准应用用户相对倍率，详见 [原型字体核对](../../docs/uiux-typography-2026-10-09.md)。应用使用Geist深浅两套主题，共用离线Geist / HarmonyOS字体；HarmonyOS Sans SC 不含韩文字母，韩文由随包的 Pretendard 1.3.9（OFL-1.1，未修改的静态 OTF 四档字重）回退显示。显式系统 / Google 字体选择仍有效，旧默认键 `system`、空键使用应用默认组合。独立标题栏已移除，品牌展示位于登录 / 载入页和生图空画布。字体许可在 `assets/licenses/` 和应用「关于 → 界面字体与许可」。
+字体角色由 `StudioTypography` 处理，多数原型正文13px / 1.45、字距与词距0。Geist Mono 500–700按原型共用Medium字形，原生600 / 700元数据文件由 `tool/fonts/build_prototype_weights.py` 生成，字形与度量不变。旧默认键自然落到当前默认，显式字体选择保留。主工作区固定100%，设置页、菜单与嵌套弹窗也以1.0为基准，相对字号不叠乘。字体许可在 `assets/licenses/` 与应用「关于与诊断」中。详细依据见 [原型字体核对](../../docs/uiux-typography-2026-10-09.md)。
 
-功能图标统一使用 `lib/presentation/widgets/common/studio_icons.dart` 的 `StudioIcons`：画风探索为遗传分支，块内遗传动作为双螺旋，在线画廊为图片＋地球，提示词块为模块网格，积木悬浮窗为双凸点轻量砖块，精准参考为人物叠卡，Vibe 为方形叠卡与弯箭头；生图为画布与画笔，本地画廊为图片文件夹，统计为三级圆角柱，设置为六齿圆角齿轮。侧栏、标题、块默认图标和菜单复用对应造型；参考卡片使用下述独立功能图标。网格布局、通用文件夹、保存动作与用户自选块图标保持各自语义。
+## StudioIcons 与厂商标识
 
-SVG 母版在 `tool/branding/studio_icons/`；`generate_studio_icons.py` 将描边转轮廓生成 `assets/fonts/StudioIcons.ttf`，并同步图生图 / 风格迁移 / 精准参考三份面板 SVG 资源及原生动画路径 `studio_icon_paths.dart`。Flutter 原生 `IconData` 与 SVG 消费者因此保持一致，无额外运行时依赖。复建命令见脚本开头，码位只追加、不重排；母版修改后必须重新生成字体、三份 SVG 和 Dart 路径，再运行 Dart 格式化。矢量图标按主题继承颜色与尺寸，不能把预览图切成位图用于控件。
+功能图标母版在 `studio_icons/`，`generate_studio_icons.py` 同时生成 `assets/fonts/StudioIcons.ttf`、参考面板 SVG 和 `studio_icon_paths.dart`；码位不重排，不复用仍有调用者的字位。修改母版后完整生成并检查旧字形 / 度量，不把生成参考图切成控件位图。
 
-`StudioAnimatedIcon` 复用同源矢量路径，十四种语义分别设计一次性点击动作（500–600ms），主导航、积木与块库面板按钮、遗传按钮和参考面板展开共用。积木点击时两个凸点依次轻抬、落回砖身，主体轻微回弹。点击立即执行原操作；连续点击不重启或排队，悬停不自动播放，空闲返回普通 `Icon`。系统减少动画或页面 TickerMode 关闭时停止并回到静态。非操作性标题和块标记只显示图标。`studio_animated_icon_test.dart` 覆盖生命周期、连续触发、减少动画、隐藏页、首尾轮廓和画布边界；`CAPTURE_STUDIO_ICON_MOTION=1` 可输出实际字体与动画关键帧的深浅色对照。
+- Agent 桥接专用母版为 `agent_bridge_link.svg`，由 `BridgeLinkIcon` 原生绘制运动分段，不加入字体码位或改变设置集成字形。24 网格、2.7 描边，实际 16px / 1.8px；只在执行时微动，遵守减少动态效果与 TickerMode。绿色代表内容确认，灰色等待 / 内容变化，橙色失败；固定 24px 槽无背景、阴影或点击水波。
+- 导航、块库、积木、遗传与参考卡片使用现有 StudioIcons 和 Flutter 点击动效。积木为双凸点轻量砖块，开关弹窗与关闭动效保留；常规按钮继续用 Material 图标。
+- 本地画廊使用 `gallery_*.svg` 细线图标（`0xe919`–`0xe944`），24 网格、1.7 描边、圆端；选择圈勾加粗、收藏心形实心。网格 / 瀑布流视图为 `galleryViewGrid` / `galleryViewMasonry`；火车流单独保留 Material `view_day_outlined`。末尾未使用的 rows 字形已删除，不重新添加。
+- 参考卡片继续使用图生图、风格迁移与精准参考字形（`0xe90b`–`0xe90d`）；点击时立即展开 / 收起，随后播放既有分阶段动效，Reduced Motion 降为静态。
+- 设置共十个入口，分使用偏好、创作与资源、服务与连接；常规与外观采用明暗圆图标，词库与缓存有自己的入口。不要按旧九入口说明恢复分类。
+- 40 个服务 / 自定义入口与 30 枚离线 SVG 标识由当前目录配置驱动；兼容协议不推断厂商。当前来源、版本、hash 和许可分别见 `provider_logos.json`、`assets/licenses/LobeIcons-LICENSE.txt` 和应用许可页；不在文档固定旧 19 枚标识名单。
+- 服务选择器当前按接口服务 / 本地服务组织，预置与手动 ID、官方来源和地区限制见 `provider_catalog_sources.json`。正文 ID 跟随当前无衬线字族与 CJK 回退；模型能力记录不能宣称 Agent 已可执行。
 
-本地画廊（侧栏、顶栏、筛选条、卡片悬停、详情面板、多选操作条、发送与右键菜单、收藏菜单）使用 `gallery_*.svg` 细线图标，追加码位 `0xe919`–`0xe944`：24 网格、1.7 描边、圆角线头，造型来自用户选定的 HTML 原型（`.devin/mockups/gallery/`）；勾选圈用 2.6 加粗勾，已收藏心形为实心填充部件。网格／瀑布流视图切换图标（`gallery_view_grid` / `gallery_view_masonry`，`0xe943`–`0xe944`）也按原型画法重画，块间距从原型的 2 放宽到 3，16px 下各块不粘连；火车流图标经用户确认保留 Material `view_day_outlined`（原型的两行方块看不出是火车流）；图生图／风格迁移／精准参考继续使用下述参考卡片图标。这组图标不带点击动效（`supportsMotion` 只覆盖导航与参考卡片）。
+## 色彩、层级与材质
 
-参考卡片单独使用 `StudioIcons.imageToImage` / `styleTransfer` / `referenceFocus`（追加码位 `0xe90b`–`0xe90d`）：图生图为圆环与星芒的回环转换，风格迁移为开放双框之间的流动传递，精准参考为四角定位包围圆形与三角形，适用于角色、物体和风格等通用视觉特征。三枚采用 2.1 描边及少量实心形状，以 24px 标题图标尺寸与粗体标题配对；侧栏和库内原有细线图标保持独立。SVG 母版中的 `stroke="none"` 部件同时生成字体填充轮廓和动画填充路径。
+颜色以 `lib/presentation/themes/presets/geist_theme.dart` 与实际 ColorScheme 为准：深色为炭灰、浅色为中性浅色，面板 / 卡片 / 控件分层，蓝色用于动作和焦点；不把过时的 #181818 / #3B3B3B 色表当当前常量。圆角、字重和行高由场景组件定义，设置控件、账号面板和画廊不强套同一尺寸。
 
-点击参考卡片标题时立即执行原展开 / 收起，并播放 520–580ms 动效：图生图弧线轻转、源圆环收缩后星芒回应；风格迁移的连接线从左向右显现、目标星芒轻弹；精准参考四角向内聚焦后回位、内部几何形依次回应。悬停、导入按钮等独立操作不触发该动效。相关测试另覆盖图生图实际标题点击、字体与动画轮廓（含实心部件）一致性。`CAPTURE_REFERENCE_FEATURES=1` 运行 `reference_feature_icons_test.dart` 可输出参考卡片深浅色及动效关键帧，截图使用测试数据。
+主生图左栏与画风探索编辑列使用统一模块卡片，角色卡及三个参考图行并入模块；参考图行带图收起时保留原图 cover 解码、2.4px 模糊和深色遮罩，文字与按钮保持清晰。窄窗 `ParameterPanel` 的三个参考面板仍使用 `StudioGlassSurface`。画布三条浮动工具条使用其专用局部模糊路径。画廊版本标签与悬停动作只在悬停时构建 6px BackdropFilter 和半透明底，不常驻在整墙卡片上。
 
-左侧主导航按用途分三组：生图 / 画风探索；本地图库 / 在线画廊 / 提示词块 / Vibe 库 / 精准参考库；统计。组间使用中性细线与留白，收起和展开状态共用分组顺序；账户头像固定在侧栏顶部，下接分隔线与功能导航；收起钮和设置固定在底部。账号菜单从顶部头像右侧展开，展开侧栏时仍显示账号名称。导航显示顺序独立于路由分支和快捷键映射。
+图标、材质的最近改动不覆盖已有用户验收；没有新需求时保持接受的形态。
 
-## Logo 与 Windows 图标
+## Logo、导航与 Windows 图标
 
-- `assets/images/wof_logo_full.png`：原品牌完整 Logo，只移除外围透明留白，保留 W.O.F 与 NAI STUDIO 的原始比例和字形。源文件来自工作区品牌资产 `wof_logo_full.png`，取原图 `(0, 328, 1111, 547)` 区域。
-- `tool/branding/wof_logo_block.png`：保留的横版 Logo 素材；应用内不再展示，因此不随包。
-- Windows ICO 分两个角色：运行 `node tool/branding/generate_windows_icons.cjs`（依赖 sharp）。桌面 / Explorer 用 `app_icon.ico`（完整长方形 Logo 等比置于透明方框，资源 ID 101），只导出原生资源；窗口 / 任务栏和托盘用 `window_icon.ico`（`tool/branding/wof_icon.svg` 方形 W，资源 ID 102），同时导出原生资源与托盘使用的 Flutter asset。两套各十档 16–256px；可用 `--brand-dir <目录>` 导出独立完整 Logo 尺寸库。
-- ICO 改动必须重编原生 Windows runner，并检查 EXE 中两套 RT_GROUP_ICON / RT_ICON 与各自源 ICO 一致。窗口通过 WM_SETICON 分别设置大小图标，并按 DPI 加载合适尺寸，避免 Explorer 与运行中任务栏共用一份图。
+`assets/images/wof_logo_full.png` 是保留原字形比例的完整 Logo，品牌展示在登录 / 载入和空生图画布；NAI LAB 使用 `assets/images/wof_nai_lab.svg`。旧蓝块只留工具侧素材，不在标题栏或运行资源恢复。
 
-## 登录与载入
+主导航依次为生图 / 画风探索，本地图库 / 在线画廊 / 块库 / Vibe / 精准参考，统计；中性分隔，头像置顶，收起与设置在底部。收起宽度 48px、展开 196px，头像 40px。账号面板显示当前账号概要，其他账号独立切换，动作复用已有认证与保存流程。
 
-`BrandEntryScene` 提供完整 Logo、留白、边缘几何细节和明暗切换；`GeistTheme` 提供与工作区一致的黑白灰配色与有边界的表单控件。登录方式用紧凑页签，已有账号用紧凑账号卡。载入进度直接读取 WarmupState，显示真实进度、任务和错误信息，不制造假进度或无休止的装饰动画。
+`generate_windows_icons.cjs`（Node + sharp）生成两套 ICO：桌面 / Explorer 的完整长方形 Logo 对应资源 ID 101，窗口 / 任务栏 / 托盘的方形 W 对应 ID 102。ICO 改动需重编原生 runner 并检查 DPI 图标与资源；字体 / SVG 改动须随 Flutter 资源交付。`CompanyName=com.example`、`ProductName=nai_launcher` 和单实例标识保持，品牌名通过 FileDescription / 窗口标题展示。
 
-明暗选择由 `themeNotifierProvider` 持久化到 `studio_theme_mode`，载入、登录、标题栏、工作区与弹窗共同继承；入口按钮、设置和快捷键切换同一状态。登录验证、账号保存、第三方地址、游客状态和预热调度仍由现有 provider 负责。
+## 窗口与浮层
 
-## 验证
+独立品牌标题栏已经移除，页面延伸至 y=0。`IntegratedTitleBarShell(deferToRoute: true)` 下发 WindowChrome 配置，各路由的 WindowChromePage 绘制按钮与更新胶囊；Navigator 提示 / 菜单 / 弹窗在其上，改变路由 / 主题不能重建输入和 Navigator。
 
-- `test/presentation/screens/brand_entry_test.dart`：真实登录 / 载入 widget，深浅色、三种语言、390px 窄屏和 125% 字号、登录方式切换、明暗切换保留输入、游客入口、已保存账号、真实进度。
-- `studio_visual_system_test.dart`：离线字体、CJK 回退和显式字体选择兼容。
-- `integrated_title_bar_test.dart`：完整 Logo、标题、原图标与原生标题栏命中区。
+右上按钮簇宽 138px，通常高 36px；本地 / 在线画廊、块管理、Vibe 和精准参考库为 62px，更新胶囊自身 26px 高并在有更新时预留 88px。窄窗局部换行避让，不能给满高画布恢复整行留白。关闭按钮沿用托盘行为，窗口隐藏不代表进程退出。
 
-设置 `CAPTURE_STUDIO_UI=1` 运行入口测试，会把实际字体 / Logo 的渲染保存到 `.dart_tool/brand-entry-captures/`。这些是 widget 渲染，不应冒充运行中的用户窗口截图。
+主工作区向原生报 `barHeight=0`，由明确空白的 WindowDragArea 拖窗 / 双击最大化，模型、搜索、图标与窗口按钮独立命中；登录 / 载入顶部仍有原生命中和明暗按钮。原生 Acrylic 当前禁用。画廊搜索最大宽 880px，标题与工具之间伸缩；侧栏标题、顶栏空白和按钮下保留区可拖动，`LibraryWindowHeader(dragBelowCaptions: true)` 处理后者。
 
-## Geist 色彩与层级
+浮层定位先把全局坐标转到 overlay 局部，再用 overlay 的尺寸做避让；不可直接用 MediaQuery 或屏幕坐标定位内部菜单。
 
-参考 [官方色彩](https://vercel.com/geist/colors)、[材质](https://vercel.com/geist/materials) 与 [字体规范](https://vercel.com/geist/typography)，使用柔和炭灰 / 纯白页面、分层灰阶面板、细边框和蓝色操作强调。深色采用适合长期创作的中性炭灰，不使用纯黑铺底。`GeistTheme` 显式设置所有 Material surface/container 槽及透明 surfaceTint，避免种子色或弹层海拔把大面积背景染蓝。
+## 欢迎页、小贴士与模型工作台
 
-- 深色：背景 `#181818`，分区 `#202020`，卡片 / 浮层 `#262626`，控件 `#303030`，悬停 `#363636`，选中 `#3D3D3D`；正文 `#E4E4E4`，次级文字 `#A8A8A8`，边框 `#3B3B3B`。
-- 浅色：背景 `#FFFFFF`，分区 `#FAFAFA`，控件 `#F2F2F2`；正文 `#171717`，次级文字 `#666666`。
-- 主要按钮沿用品牌蓝 `#005DFF` 配白字；可交互文字 / 焦点使用深色 `#50A8FF`、浅色 `#0064E2`。大容器选中底色仍用中性灰。
-- 常规控件 6px 圆角，菜单 / 对话框 12px。正文 / 标签 14px，辅助文字 12–13px；保留已验收的生图侧栏紧凑层级。
-- `test/presentation/themes/studio_theme_test.dart` 覆盖磁盘恢复、根路由与保活页面、弹窗和快捷键切换；`studio_workspace_theme_test.dart` 实绘图库、块库与主题选择器，注入测试数据，不读取用户库。
+GenerationWelcome 固定 Logo 尺寸 / 位置，长段落在下方，短窗口滚动；ExploreGalleryWelcome 使用当前 LAB 标识和同款小贴士。小贴士分 guide / trick / wolf，五种界面语言各自成文，按洗牌顺序使用；具体文案和轮换边界见 [DEVELOPMENT.md](../../DEVELOPMENT.md)，不再把旧的固定三语单条提示作为需求。
 
-## 磨砂材质
+设置标题、侧栏和正文共用背景，普通内容最大宽 850px、模型页 1400px，在右侧可用区居中。模型工作台保留顶部 / 左侧服务和右侧目录 / 已选双栏；当前固定高度边界、操作条、高级参数、目录缓存和草稿保护由现行组件实现，不从早期布局稿恢复旧动作。
 
-主生图左栏与画风探索编辑列使用统一模块卡片，角色卡及三个参考图行并入模块；参考图行带图收起时保留原图 cover 解码、2.4px 模糊和深色遮罩，文字与按钮保持清晰。窄窗 `ParameterPanel` 的三个参考面板仍使用 `StudioGlassSurface`。
+## 验证与实绘
 
-参考图行收起且有图时使用原图背景、2.4px 模糊与暗遮罩，展开后恢复模块表面；窄窗参考面板保留原材质，不对整窗或文字做实时模糊。背景 `DecodedMemoryImage` 显式启用 `decodeForCover`，由原图宽高与控件物理尺寸计算覆盖裁切需要的解码尺寸，保留比例且不放大低分辨率原图，最长边上限 4096px；其余使用处的解码行为不变。Vibe 优先原图，仅在无原图时回退既有缩略图，不能凭缩略图恢复丢失的细节。
+根据实际修改选择下列现有路径，使用 `test/helpers/studio_capture_fonts.dart` 和合成数据：
 
-## 窗口与空画布
+- `test/presentation/widgets/common/studio_visual_system_test.dart`：字体与视觉角色。
+- `test/presentation/widgets/navigation/integrated_title_bar_test.dart`：窗口和页面命中。
+- `test/presentation/screens/settings/settings_screen_test.dart`：设置入口及布局。
+- `test/presentation/widgets/gallery/local_gallery_toolbar_test.dart`：视图图标、搜索与拖动。
+- `test/presentation/screens/local_gallery/local_gallery_screen_layout_test.dart`：三栏实际部件实绘。
+- `test/presentation/tips/tip_layout_test.dart`：小贴士五语布局。
 
-Windows 的 `IntegratedTitleBarShell` 不再占用一整行：各页背景延伸到窗口顶边，右上角固定 138×36 的最小化 / 最大化 / 关闭按钮簇，以页面色保证覆盖深色图片详情时仍可辨认；登录 / 载入页另有明暗切换。窗口关闭仍走原托盘策略。
-
-窗口配置由 `MaterialApp.builder` 内的 `IntegratedTitleBarShell(deferToRoute: true)` 下发，按钮与更新胶囊通过 `WindowChromePage` 在各路由页面内绘制；根 Navigator 和分支 Navigator 的提示、菜单、对话框均在按钮上方，关闭浮层后窗口按钮恢复命中。登录 / 载入、子页面和路由错误页使用相同页面层。
-
-`WindowChromeScope` 在 shell 内保持稳定层级，路由、主题改变不重建 Navigator 或丢失输入。现有主页面工具栏通过 `WindowHeader` 为按钮和 64px 拖动空白留位置，较窄时分行；最右 dock 使用 `WindowPaneInset` 留顶部操作空间，生图画布直接延伸至顶边，不套整栏 WindowPaneInset；右侧历史栏顶部保留拖动区。浮动画布工具条随画布上移，WindowSafeTopToolbar 仅在与窗口按钮重叠时左移，窄画布不足时仅工具条下移避让，图片视口始终全高。历史 / 块详情面板收起时仍保留窗口操作位置；全屏图片详情的自身工具栏避让窗口按钮。
-
-画风探索的候选画廊使用 `WindowPanelHeader`：面板直达顶边，36px 标题行与右上窗口按钮同高、同中心线，底边紧贴按钮下沿；标题旁的向右收起按钮仅收起画廊，原画廊开关重新展开。空白区域可拖动窗口；极窄栏才局部分行，仍按可见宽度避让窗口按钮。
-
-`UpdateAwareWindowShell` 在发现新版本时，在最小化左边增加 88px 橙色「↑ 更新」胶囊；`WindowChromeScope.extraWidth` 同步各页避让，消失时恢复原宽度，不重建输入或 Navigator。桌面端不再显示顶部大幅更新通知，移动端保留既有通知。更新对话框保留 Markdown 日志、下载进度和失败重试；关闭或取消不隐藏已发现的更新，安装并重启后按当前版本比较自动消失。安装按钮在主生图 / 探索任务进行时禁用，并在点击边界重新检查；使用已有校验下载与安装服务，不改变更新仓库。UI 和状态测试使用模拟版本 / 安装服务，不执行线上升级。
-
-本地画廊、在线画廊、块管理、Vibe 库和精准参考库统一使用 62px 窗口按钮高度；块管理的工具栏 / 分类栏同步 62px，避免依次切页时按钮上下跳动；其余路由维持 36px。`WindowChromeScope.captionHeight` 同步拖动区和窄栏避让。五页共用 `LibraryWindowHeader` 绘制背景与底边，分隔线覆盖窗口按钮预留区；内部工具栏 / 多选栏不再重复绘制。块管理右侧详情栏的竖线延伸至顶边，并在窗口按钮下接续横线，展开和收起均保留。独立复用工具栏时仍默认保留原外观。更新胶囊自身维持 26px 高，随窗口按钮行垂直居中。
-
-主工作区向原生 runner 报 `barHeight=0`，关闭旧的整行 HTCAPTION，避免抢走模型、搜索和工具点击；仅明确定义的空白区调用 window_manager 原生拖动，双击切换最大化。登录 / 载入页顶部 36px 仍用原生命中区（扣除按钮簇）。窗口尺寸调整沿用原生窗口边缘；原生 Acrylic 当前禁用，页面顶部直接使用不透明的应用表面，参考卡片的应用内磨砂保持。
-
-生图空画布使用 `GenerationWelcome`：原完整 Logo（最多 300px 宽，窄画布按可用宽度缩放）和一条 Tip（正文 14px、TIP 标签 11px） 在画布中心略偏上，随左右面板宽度重新居中。中英日 Tip 覆盖块复用、顺序 / 随机与锁定；进入空状态选一条，不轮播，参数刷新与面板切换不换提示。开始生成或出现图片时使用原生成 / 画布组件，不在图片上保留 Logo。
-
-窗口测试覆盖内容从 y=0 起、按钮调用、搜索输入、拖动与双击最大化、登录切换命中区；页面测试覆盖主生图区域、历史展开/收起、深浅色以及各库/探索/设置页面。`CAPTURE_BORDERLESS=1` 运行 `sidebar_official_layout_test.dart` 可输出实际部件组成的生图布局截图；这些是 widget 实绘，不是用户运行窗口截图。Windows 实际拖动吸附和交互手感仍以用户运行包验收为准。
-
-## NAI LAB 探索空画廊
-
-`assets/images/wof_nai_lab.svg` 是用户选定 C 款的矢量定稿：W.O.F 主体顶边与基线对齐，像素由左下沿字形向右上破碎；下方为轮廓化的 NAI LAB，不依赖系统字体。品牌蓝固定为 #005DFF，透明背景适配深浅主题；SVG 是独立品牌资源，主页 NAI STUDIO 标识沿用原稿。
-
-`ExploreGalleryWelcome` 在未选任务或任务没有候选时显示，最大 Logo 宽度 340px，字母主体的视觉高度对齐主生图 300px 的 STUDIO 标识；NAI LAB 副标等比增大 20%，字高约 18px。TIP 与主生图空画布保持同款字号、间距和略偏上的居中方式。提示为“选择喜欢的候选，让画风逐代进化。”，提供中英日文本；有候选但筛选结果为空时仍走原筛选提示。无轮播和新增动效。
-
-`CAPTURE_LAB_WELCOME=1` 运行 `explore_gallery_welcome_test.dart` 可保存真实 SVG、字体的明暗主题截图至 `.dart_tool/lab-welcome-*.png`；另覆盖窄短栏和 150% 字号。
-
-LAB SVG 的编辑源为 `tool/branding/wof_nai_lab_source.svg`，通过 `generate_lab_logo.py` 做布尔并集后输出正式资源。相接的像素块必须合为同一填充轮廓，避免分开抗锯齿让内部接缝透出背景；不通过描边或扩大形状掩盖。测试对明暗底色、340 / 214.4px 宽度及 100% / 125% / 150% / 200% 缩放检查内部接点纯蓝。
-
-## 设置体验精修
-
-设置的九个工作流继续使用固定字位的专用 SVG / StudioIcons 字体。入口改为柔和的叶片、圆角键盘、滑杆、文件夹和连接图形，1.6px 圆端描边；先前其他功能图标的字位与轮廓保持。正文最大宽度 850px，模型管理 1400px，在右侧可用区域居中。顶部空白整行可拖动、双击最大化，搜索和窗口按钮单独命中。侧栏、标题区和正文共用背景；局部 settingsUiTheme 把表单值和下拉菜单统一为 13px 常规字重，辅助文字 11px。
-
-NovelAI 账号页以当前账号、订阅与资料、已保存账号、登录偏好组织。默认账号优先使用显式选择，未设置时回退最近账号；自动登录复用现有 auto_login 偏好。默认头像在设置中使用低饱和底色，用户自选头像照常显示。
-
-顶部搜索支持 Ctrl/Cmd+F，定位分类、模型接口、预设及集成子页，并保留未保存编辑的离开保护。“关于与诊断”提供公开偏好的导入、导出、按范围恢复默认及上次恢复；仅允许白名单中的界面、输入与保护项，每次写入前生成回退副本，拒绝过时确认，失败时回滚已写项并保留后续修改。账号、密钥、模型配置、草稿、图片和本地路径不纳入偏好包。
-
-CAPTURE_SETTINGS_REDESIGN=1 SETTINGS_CAPTURE_DIR=.dart_tool/settings-polish-captures 运行 settings_screen_test.dart 可实绘九页、深浅色、1280/2400/740/360px 和窄窗 130% 字号，另有模型表单与账号菜单；所有数据为夹具，不读取用户账户、不调用在线接口。原生拖动手感仍由运行包验收。
-
-## 本轮设置与模型工作台
-
-常规与外观使用用户选定的第四款「明暗圆」：圆形细线轮廓与半圆实心，固定码位不变；已同步 SVG 母版、字体与动画路径。主界面字号维持原 100%，设置独立字号基线与 48px 导航栏、40px 账号头像沿用验收版本。
-
-模型页保留顶部导航与左侧服务列表，右侧使用可搜索的预置/服务模型目录和已选模型双栏；连接摘要、测试与保存固定在顶部，手动模型 ID 入口固定在已选列表底部。上下文、最大输出和推理强度为模型级设置，采样与能力标记折叠；功能接口与提示词预设不再覆盖参数。旧地址、协议、模型 ID 与提示词保留，旧覆盖参数解码时忽略，下一次保存移除。能力未知值不会自动变成支持。
-
-服务商菜单按国内、国际、聚合、本地与自定义分组，每个厂商只显示一次；协议位于服务高级设置。默认连接和预置模型的官方来源、核对日期与限制见 `provider_catalog_sources.json`。密钥和请求头继续使用安全存储，切换厂商只修改草稿，保存前不会替换已有凭据。
-
-设置弹窗统一裁切圆角，Anlas 阈值说明独立换行；快捷键分类使用圆角分区并支持本地化名称搜索。通知行、词库操作、图库源操作、集成标签内容与黑名单开关按同一控件体系排布。`settings_round_widgets_test.dart` 和 `model_catalog_migration_test.dart` 覆盖弹窗、搜索、参数迁移、未知能力与数值校验。全部测试使用夹具，不读取个人资料或调用付费接口。
+采集变量与输出目录从对应测试源码读取，不复用旧文档中的页数 / 文件名。实绘是带真实字体的测试部件，不是用户运行窗口；Windows 原生拖动手感与最新交付仍由实机反馈验收。纯文档维护不需要重生成图标、字体或运行包。

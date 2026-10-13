@@ -223,3 +223,7 @@ dist/*.exe
 .claude_settings.json
 .worktrees/
 .kimi/
+
+# Local NAI Agent dependencies and synthetic test sessions.
+/tool/nai_agent/node_modules/
+/tool/nai_agent/.runs/

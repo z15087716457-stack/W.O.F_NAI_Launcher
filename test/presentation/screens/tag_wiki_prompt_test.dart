@@ -20,7 +20,7 @@ import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -259,28 +259,21 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('wiki-add-to-block')));
       await tester.pumpAndSettle();
-      final dialog = tester.widget<PromptBlockEditDialog>(
-        find.byType(PromptBlockEditDialog),
+      final dialog = tester.widget<BlockEditDialog>(
+        find.byType(BlockEditDialog),
       );
-      expect(dialog.initialContent, '1girl');
-      expect(dialog.initialTitle, '1个女孩');
+      expect(dialog.data.draft.text, '1girl');
+      expect(dialog.data.draft.title, '1个女孩');
       expect(container.read(generationParamsNotifierProvider).prompt, 'solo');
       expect(find.byType(SnackBar), findsNothing);
       container
           .read(generationParamsNotifierProvider.notifier)
           .updatePromptImmediately('new user draft');
-      await tester.tap(
-        find
-            .descendant(
-              of: find.byType(PromptBlockEditDialog),
-              matching: find.byType(DropdownButtonFormField<String>),
-            )
-            .first,
-      );
+      await tester.tap(find.byKey(const Key('block-edit-folder')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('百科').last);
       await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithText(FilledButton, '保存'));
+      await tester.tap(find.byKey(const Key('block-edit-save')));
       await tester.pumpAndSettle();
       final block = container
           .read(promptBlockLibraryNotifierProvider)
@@ -293,7 +286,7 @@ void main() {
         container.read(generationParamsNotifierProvider).prompt,
         'new user draft',
       );
-      expect(find.byType(PromptBlockEditDialog), findsNothing);
+      expect(find.byType(BlockEditDialog), findsNothing);
       expect(find.byType(SnackBar), findsNothing);
       await tester.pump(const Duration(seconds: 6));
       await tester.pumpAndSettle();
@@ -311,7 +304,7 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('wiki-add-to-block')));
     await tester.pumpAndSettle();
-    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.tap(find.byKey(const Key('block-edit-cancel')));
     await tester.pumpAndSettle();
     expect(
       container.read(promptBlockLibraryNotifierProvider).value!.blocks,
@@ -388,12 +381,14 @@ void main() {
     expect(container.read(generationParamsNotifierProvider).prompt, '');
     expect(
       tester
-          .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
-          .initialContent,
+          .widget<BlockEditDialog>(find.byType(BlockEditDialog))
+          .data
+          .draft
+          .text,
       'solo',
     );
     expect(find.byType(SnackBar), findsNothing);
-    await tester.tap(find.widgetWithText(TextButton, '取消'));
+    await tester.tap(find.byKey(const Key('block-edit-cancel')));
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('wiki-body-blue_eyes')), findsOneWidget);
   });
@@ -557,11 +552,13 @@ void main() {
       expect(prompt(), '');
       expect(
         tester
-            .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
-            .initialContent,
+            .widget<BlockEditDialog>(find.byType(BlockEditDialog))
+            .data
+            .draft
+            .text,
         '1girl',
       );
-      await tester.tap(find.widgetWithText(TextButton, '取消'));
+      await tester.tap(find.byKey(const Key('block-edit-cancel')));
       await tester.pumpAndSettle();
       Focus.of(
         tester.element(find.byKey(const Key('wiki-add-to-block'))),

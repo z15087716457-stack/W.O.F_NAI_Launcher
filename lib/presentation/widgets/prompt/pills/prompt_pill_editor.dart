@@ -1,3 +1,4 @@
+import '../comfyui_import_wrapper.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -13,14 +14,15 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_translation_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
-import '../../../utils/prompt_block_bundle_insertion.dart';
 import '../blocks/prompt_block_colors.dart';
 import '../blocks/prompt_block_drag_data.dart';
-import '../blocks/prompt_block_icons.dart';
-import '../comfyui_import_wrapper.dart';
 import '../unified/unified_prompt_config.dart';
 import '../unified/unified_prompt_input.dart';
-import 'pill_instance_card.dart';
+import '../../../ui/kit/ui_block_pill.dart';
+import '../../../ui/kit/ui_popover.dart';
+import '../../../wiring/blocks_instance_wiring.dart';
+import '../../../wiring/blocks_mapping.dart';
+import '../../../wiring/blocks_actions.dart';
 import 'prompt_pill.dart';
 import 'translation_pill_view.dart';
 
@@ -99,7 +101,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   bool _pendingSeed = false;
 
   /// L1 实例卡浮层（P2.5）：同屏只开一张，编辑器卸载时必须带走。
-  OverlayEntry? _instanceCardEntry;
+  UiPopoverAnchor? _instanceCardAnchor;
   String? _instanceCardMarker;
   TranslationPillEditHandle? _translationEditor;
 
@@ -192,25 +194,18 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   /// 点药丸开 L1 实例卡（P2.5）：点击位置浮卡，点外/再点别处关闭。
   void _showInstanceCard(String marker, Offset globalPosition) {
-    _dismissInstanceCard(refresh: false);
-    final entry = buildPillInstanceOverlayEntry(
-      scope: widget.pillScope,
-      marker: marker,
-      globalPosition: globalPosition,
-      onDismiss: _dismissInstanceCard,
-      allowEvolutionToggle: widget.allowEvolutionToggle,
-    );
-    _instanceCardEntry = entry;
-    Overlay.of(context, rootOverlay: true).insert(entry);
-    setState(() => _instanceCardMarker = marker);
+    setState(() {
+      _instanceCardMarker = marker;
+      _instanceCardAnchor = UiPopoverAnchor(
+        globalPosition + const Offset(-174, 8),
+      );
+    });
   }
 
   void _dismissInstanceCard({bool refresh = true}) {
-    final entry = _instanceCardEntry;
-    _instanceCardEntry = null;
     final hadMarker = _instanceCardMarker != null;
     _instanceCardMarker = null;
-    entry?.remove();
+    _instanceCardAnchor = null;
     if (refresh && hadMarker && mounted) setState(() {});
   }
 
@@ -249,42 +244,52 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       pillVisualsSignature: _pillSignature(workspace, library),
     );
 
-    return DragTarget<PromptBlockDragData>(
-      onWillAcceptWithDetails: (_) => true,
-      onAcceptWithDetails: (details) =>
-          _handleDrop(details.data, details.offset),
-      builder: (context, candidateData, rejectedData) {
-        final highlighted = candidateData.isNotEmpty;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            border: highlighted
-                ? Border.all(color: Theme.of(context).colorScheme.primary)
-                : null,
-          ),
-          child: KeyedSubtree(
-            key: _fieldAreaKey,
-            child: UnifiedPromptInput(
-              textStyle: widget.textStyle,
-              controller: _controller,
-              focusNode: _focusNode,
-              // A source field inside a WidgetSpan owns its own caret.
-              showCursor: _focusNode.hasPrimaryFocus ? null : false,
-              config: effectiveConfig,
-              decoration: widget.decoration,
-              onComfyuiImport: widget.onComfyuiImport == null
-                  ? null
-                  : _handleComfyuiImport,
-              beginComfyuiImport: widget.beginComfyuiImport,
-              maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
-              minLines: widget.minLines ?? (widget.compact ? 1 : 2),
-              expands: false,
-              fitContent: true,
+    return UiPopover(
+      anchor: _instanceCardAnchor,
+      onDismiss: _dismissInstanceCard,
+      builder: (_) => BlockInstanceWiring(
+        scope: widget.pillScope,
+        marker: _instanceCardMarker!,
+        onDismiss: _dismissInstanceCard,
+        allowEvolutionToggle: widget.allowEvolutionToggle,
+      ),
+      child: DragTarget<PromptBlockDragData>(
+        onWillAcceptWithDetails: (_) => true,
+        onAcceptWithDetails: (details) =>
+            _handleDrop(details.data, details.offset),
+        builder: (context, candidateData, rejectedData) {
+          final highlighted = candidateData.isNotEmpty;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: highlighted
+                  ? Border.all(color: Theme.of(context).colorScheme.primary)
+                  : null,
             ),
-          ),
-        );
-      },
+            child: KeyedSubtree(
+              key: _fieldAreaKey,
+              child: UnifiedPromptInput(
+                textStyle: widget.textStyle,
+                controller: _controller,
+                pillScope: widget.pillScope,
+                focusNode: _focusNode,
+                // A source field inside a WidgetSpan owns its own caret.
+                showCursor: _focusNode.hasPrimaryFocus ? null : false,
+                config: effectiveConfig,
+                decoration: widget.decoration,
+                onComfyuiImport: widget.onComfyuiImport == null
+                    ? null
+                    : _handleComfyuiImport,
+                maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
+                minLines: widget.minLines ?? (widget.compact ? 1 : 2),
+                expands: false,
+                fitContent: true,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -340,10 +345,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         child: _withPillGap(
           GestureDetector(
             onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
-            child: PromptPill(
-              title: context.l10n.promptBlockPill_unknown,
+            child: UiBlockPill(
+              label: context.l10n.promptBlockPill_unknown,
               color: Theme.of(context).colorScheme.outline,
-              variant: PromptPillVariant.unknown,
+              status: UiBlockPillStatus.invalid,
             ),
           ),
         ),
@@ -429,10 +434,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         return WidgetSpan(
           alignment: PlaceholderAlignment.middle,
           child: _withPillGap(
-            const PromptPill(
-              title: '…',
+            const UiBlockPill(
+              label: '…',
               color: Colors.grey,
-              variant: PromptPillVariant.unknown,
+              status: UiBlockPillStatus.invalid,
             ),
           ),
         );
@@ -443,10 +448,10 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         child: _withPillGap(
           GestureDetector(
             onTap: () => ref.read(_workspace.notifier).removeMarker(marker),
-            child: PromptPill(
-              title: context.l10n.promptBlockPill_missing,
+            child: UiBlockPill(
+              label: context.l10n.promptBlockPill_missing,
               color: Theme.of(context).colorScheme.error,
-              variant: PromptPillVariant.missing,
+              status: UiBlockPillStatus.missing,
             ),
           ),
         ),
@@ -456,21 +461,23 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     final title = block.title.trim().isEmpty
         ? context.l10n.promptBlockLibrary_unnamedBlock
         : block.title;
-    final pill = PromptPill(
-      title: title,
+    final pill = UiBlockPill(
+      label: title,
       color: promptBlockColorFromString(block.color),
-      appearance: block.appearance,
-      enabled: instance.enabled,
-      icon: promptBlockIconFromName(block.iconName),
-      locked: instance.locked,
-      showRollBadge: instance.settings.hasRoll,
-      rollBadgeIcon: instance.settings.mode == PillRollMode.sequential
-          ? Icons.arrow_right_alt
-          : Icons.casino_outlined,
-      evolutionEnabled: instance.evolutionEnabled,
-      allowEvolutionToggle: widget.allowEvolutionToggle,
-      isAttachedUc: instance.useNegativeContent && instance.bundleId != null,
-      active: _instanceCardMarker == marker,
+      look: blockLook(block.appearance),
+      disabled: !instance.enabled,
+      icon: block.iconName,
+      badge: widget.allowEvolutionToggle && instance.evolutionEnabled
+          ? UiBlockBadge.evolution
+          : instance.locked
+          ? UiBlockBadge.locked
+          : instance.settings.mode == PillRollMode.sequential
+          ? UiBlockBadge.sequential
+          : instance.settings.mode == PillRollMode.random
+          ? UiBlockBadge.random
+          : UiBlockBadge.none,
+      paired: instance.bundleId != null,
+      open: _instanceCardMarker == marker,
     );
 
     return WidgetSpan(
@@ -503,13 +510,19 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           childWhenDragging: Opacity(opacity: 0.35, child: pill),
           // P2.5：点击从「直接切启停」改为开 L1 实例卡（启停/删除/重 roll/
           // 高级选项都在卡里）；即按即拖与 tap 天然分流，不受影响。
-          child: GestureDetector(
-            onTapUp: (details) {
-              final keyboard = HardwareKeyboard.instance;
-              if (keyboard.isControlPressed || keyboard.isMetaPressed) return;
-              _showInstanceCard(marker, details.globalPosition);
-            },
-            child: pill,
+          child: Builder(
+            builder: (pillContext) => GestureDetector(
+              onTapUp: (details) {
+                final keyboard = HardwareKeyboard.instance;
+                if (keyboard.isControlPressed || keyboard.isMetaPressed) return;
+                final box = pillContext.findRenderObject() as RenderBox;
+                _showInstanceCard(
+                  marker,
+                  box.localToGlobal(box.size.bottomCenter(Offset.zero)),
+                );
+              },
+              child: pill,
+            ),
           ),
         ),
       ),
@@ -631,13 +644,16 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       return;
     }
     if (!sameLane) {
-      final inserted = insertPromptBlockBundle(
+      final scope = widget.pillScope;
+      BlocksActions(
         ref,
-        scope: widget.pillScope,
-        offset: offset,
-        blockId: data.blockId,
+        context,
+        () => mounted && widget.pillScope == scope,
+      ).insert(
+        [data.blockId],
+        at: (scope: scope, caret: offset),
+        onInserted: _placeCaretAfter,
       );
-      _placeCaretAfter(offset + inserted);
     } else {
       ref
           .read(_workspace.notifier)

@@ -7,24 +7,6 @@
   "brand_switchToDark": "다크 모드로 전환",
   "app_subtitle": "NovelAI 서드파티 클라이언트",
   "common_cancel": "취소",
-  "onlineFav_all": "전체",
-  "onlineFav_rootCollection": "루트",
-  "onlineFav_newCollection": "새 컬렉션",
-  "onlineFav_renameCollection": "이름 변경",
-  "onlineFav_deleteCollection": "컬렉션 삭제",
-  "onlineFav_empty": "즐겨찾기한 작품이 없습니다",
-  "onlineFav_authorWorkCount": "작품 {n}개",
-  "@onlineFav_authorWorkCount": {
-    "placeholders": {
-      "n": {}
-    }
-  },
-  "onlineFav_moveHere": "여기로 이동",
-  "onlineFav_removeFavorite": "즐겨찾기 해제",
-  "onlineFav_favoriteAuthor": "작가 즐겨찾기",
-  "onlineFav_unfavoriteAuthor": "작가 즐겨찾기 해제",
-  "onlineFav_authorFavorited": "작가를 즐겨찾기에 추가했습니다",
-  "onlineFav_authorUnfavorited": "작가 즐겨찾기를 해제했습니다",
   "common_confirm": "확인",
   "common_continue": "계속",
   "common_selectAll": "모두 선택",
@@ -45,7 +27,6 @@
   "common_reset": "초기화",
   "common_add": "추가",
   "common_added": "추가했습니다",
-  "common_new": "새로 만들기",
   "common_confirmDelete": "삭제 확인",
   "common_confirmClear": "비우기 확인",
   "common_gotIt": "확인했습니다",
@@ -63,7 +44,6 @@
     }
   },
   "common_clearInputConfirm": "입력한 내용을 지우시겠습니까?",
-  "common_yesterday": "어제",
   "common_daysAgo": "{days}일 전",
   "@common_daysAgo": {
     "placeholders": {
@@ -75,13 +55,11 @@
   "common_refresh": "새로 고침",
   "common_download": "다운로드",
   "common_apply": "적용",
-  "common_move": "이동",
   "common_favorite": "즐겨찾기",
   "common_unfavorite": "즐겨찾기 해제",
   "common_ok": "확인",
   "common_exit": "종료",
   "common_grid": "그리드",
-  "common_pack": "묶기",
   "common_multiSelect": "다중 선택",
   "common_category": "분류",
   "networkError_connectionTimeout": "연결 시간이 초과되었습니다. 네트워크 연결을 확인하세요.",
@@ -109,10 +87,6 @@
       }
     }
   },
-  "nav_canvas": "캔버스",
-  "nav_onlineGallery": "온라인 갤러리",
-  "nav_expandSidebar": "사이드바 펼치기",
-  "nav_collapseSidebar": "사이드바 접기",
   "auth_login": "로그인",
   "auth_logout": "로그아웃",
   "auth_email": "이메일",
@@ -128,7 +102,6 @@
   "auth_emailRequired": "이메일을 입력하세요",
   "auth_emailInvalid": "올바른 이메일 주소를 입력하세요",
   "auth_passwordRequired": "비밀번호를 입력하세요",
-  "auth_tokenLogin": "API 토큰 로그인",
   "auth_tokenLoginRecommended": "API 토큰 로그인(추천)",
   "auth_credentialsLogin": "이메일 및 비밀번호",
   "auth_credentialsLoginUnavailable": "이메일/비밀번호 로그인은 현재 사용할 수 없습니다. 토큰으로 로그인하세요.",
@@ -148,7 +121,6 @@
   "auth_addAccount": "계정 추가",
   "auth_tokenNotFound": "이 계정의 토큰을 찾을 수 없습니다",
   "auth_switchAccount": "계정 전환",
-  "auth_currentAccount": "현재 계정",
   "auth_selectAccount": "계정 선택",
   "auth_deleteAccount": "계정 삭제",
   "auth_deleteAccountConfirm": "\"{name}\" 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
@@ -193,7 +165,6 @@
   "common_paste": "붙여넣기",
   "common_default": "기본값",
   "settings_title": "설정",
-  "settings_account": "계정",
   "settings_savedAccounts": "저장된 계정",
   "settings_style": "스타일",
   "settings_font": "글꼴",
@@ -311,8 +282,6 @@
   "settings_avatarUpdated": "아바타를 변경했습니다",
   "settings_avatarRemoved": "아바타를 제거했습니다",
   "settings_setAsDefaultSuccess": "기본 계정으로 설정했습니다",
-  "generation_title": "생성",
-  "generation_generate": "생성",
   "generation_cooldownRemaining": "{seconds}초 대기",
   "@generation_cooldownRemaining": {
     "placeholders": {
@@ -324,26 +293,6 @@
   "generation_stopGeneration": "생성 중지",
   "generation_pleaseInputPrompt": "프롬프트를 입력하세요",
   "generation_generationFailed": "생성에 실패했습니다",
-  "generation_progress": "생성하는 중... {progress}%",
-  "@generation_progress": {
-    "placeholders": {
-      "progress": {}
-    }
-  },
-  "generation_lockHistoryScroll": "기록 스크롤 잠금",
-  "generation_unlockHistoryScroll": "기록 스크롤 잠금 해제",
-  "generation_downloadAllImages": "이미지 모두 다운로드",
-  "generation_selectMultiple": "다중 선택",
-  "generation_deselectAll": "다중 선택 종료",
-  "generation_deleteSelectedImages": "선택한 이미지 삭제({count})",
-  "@generation_deleteSelectedImages": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_deleteSelectedImagesTitle": "선택한 이미지 삭제",
   "generation_deleteSelectedImagesConfirm": "이미지 {count}장을 기록에서 제거합니다(디스크에 저장된 파일은 유지됩니다)",
   "@generation_deleteSelectedImagesConfirm": {
     "placeholders": {
@@ -381,23 +330,9 @@
   "generation_canvasPinImage": "이미지 고정",
   "generation_canvasUnpinImage": "고정 해제",
   "generation_canvasUseSeed": "클릭하여 이 시드 사용",
-  "generation_canvasPinnedCount": "고정 {count}",
-  "@generation_canvasPinnedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "generation_params": "매개변수",
-  "generation_paramsSettings": "매개변수 설정",
   "generation_history": "기록",
-  "generation_historyRecord": "기록",
   "generation_failedStreamSnapshot": "실패한 스냅숏",
   "generation_failedStreamSnapshotHint": "생성이 끝나지 않아 마지막 미리 보기 프레임만 남았습니다. 저장, 즐겨찾기, 이미지 작업에 사용할 수 없습니다.",
-  "generation_noHistory": "기록이 없습니다",
-  "generation_clearHistory": "기록 지우기",
-  "generation_clearHistoryConfirm": "모든 기록을 지우시겠습니까? 이 작업은 되돌릴 수 없습니다.",
   "generation_model": "모델",
   "generation_imageSize": "이미지 크기",
   "generation_sampler": "샘플러",
@@ -589,7 +524,6 @@
   "img2img_startUpscale": "업스케일 시작",
   "img2img_novelAiUpscaleComplete": "NovelAI 업스케일 완료",
   "img2img_decodeSourceFailed": "원본 이미지를 디코딩하지 못했습니다",
-  "img2img_upscalePanelOpened": "Image2Image 업스케일 패널을 열었습니다",
   "editor_tolerance": "허용 범위",
   "editor_intensity": "강도",
   "editor_sourcePoint": "Alt+클릭으로 원본 지점 설정",
@@ -623,7 +557,6 @@
   "editor_zoomIn": "확대",
   "editor_zoomOut": "축소",
   "editor_fitToWindow": "창에 맞추기",
-  "editor_shortcut100Zoom": "100% 확대",
   "editor_effectBrightness": "밝기",
   "editor_effectSaturation": "채도",
   "editor_changeCanvasSize": "캔버스 크기 변경",
@@ -738,12 +671,8 @@
   "vibe_sourceType_bundle": "번들",
   "vibe_sourceType_image": "이미지",
   "vibe_sourceType": "소스",
-  "vibe_reuseButton": "재사용",
   "vibe_info": "Vibe 정보",
   "vibe_name": "이름",
-  "vibe_strength": "강도",
-  "vibe_infoExtracted": "정보 추출량",
-  "vibe_shiftReplaceHint": "Shift+클릭으로 교체",
   "character_buttonLabel": "캐릭터/위치",
   "character_addCharacter": "캐릭터 추가",
   "character_number": "캐릭터 {index}",
@@ -759,9 +688,6 @@
   "gallery_metaSampler": "샘플러",
   "gallery_metaCfgScale": "프롬프트 가이던스",
   "gallery_metaSeed": "시드",
-  "gallery_metaSmea": "SMEA",
-  "gallery_promptCopied": "프롬프트를 복사했습니다",
-  "gallery_seedCopied": "시드를 복사했습니다",
   "gallery_sendToKritaAction": "Krita로 보내기",
   "gallery_upscalePanelLoaded": "Image2Image 업스케일 패널을 불러왔습니다",
   "gallery_readImageFailed": "이미지를 읽지 못했습니다: {error}",
@@ -786,48 +712,15 @@
       "error": {}
     }
   },
-  "onlineGallery_search": "검색",
-  "onlineGallery_popular": "인기",
-  "onlineGallery_favorites": "즐겨찾기",
-  "onlineGallery_refresh": "새로 고침",
   "onlineGallery_login": "로그인",
-  "onlineGallery_logout": "로그아웃",
-  "onlineGallery_dayRank": "일간",
-  "onlineGallery_weekRank": "주간",
-  "onlineGallery_monthRank": "월간",
-  "onlineGallery_today": "오늘",
-  "onlineGallery_imageCount": "이미지 {count}장",
-  "@onlineGallery_imageCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_loadFailed": "불러오지 못했습니다",
-  "onlineGallery_favoritesEmpty": "즐겨찾기가 비어 있습니다",
-  "onlineGallery_noResults": "이미지를 찾을 수 없습니다",
   "onlineGallery_pleaseLogin": "먼저 로그인하세요",
-  "onlineGallery_size": "크기",
-  "onlineGallery_score": "점수",
-  "onlineGallery_favCount": "즐겨찾기",
-  "onlineGallery_type": "유형",
   "mediaType_video": "동영상",
   "mediaType_gif": "GIF",
-  "onlineGallery_tags": "태그",
-  "onlineGallery_artists": "작가",
-  "onlineGallery_characters": "캐릭터",
-  "onlineGallery_copyrights": "작품",
-  "onlineGallery_general": "일반",
   "onlineGallery_copied": "복사했습니다",
   "onlineGallery_copyTags": "태그 복사",
-  "onlineGallery_open": "열기",
-  "onlineGallery_send": "보내기",
   "onlineGallery_sendToTextToImage": "텍스트로 이미지 생성으로 보내기",
   "onlineGallery_sentToTextToImage": "텍스트로 이미지 생성으로 보냈습니다",
   "onlineGallery_noTagInfo": "이 이미지에는 태그 정보가 없습니다",
-  "onlineGallery_promptSentToGeneration": "프롬프트를 생성 페이지로 보냈습니다",
-  "onlineGallery_gifLoadFailed": "GIF를 불러오지 못했습니다",
-  "onlineGallery_pinchToZoom": "두 손가락으로 확대/축소",
-  "onlineGallery_metadata": "메타데이터",
   "onlineGallery_chooseDownloadDirectory": "다운로드 폴더 선택",
   "onlineGallery_downloadStarted": "다운로드를 시작했습니다...",
   "onlineGallery_savedToPath": "저장 위치: {path}",
@@ -843,24 +736,10 @@
     }
   },
   "onlineGallery_downloadOriginal": "원본 이미지 다운로드",
-  "onlineGallery_all": "전체",
   "onlineGallery_ratingGeneral": "전체 연령",
   "onlineGallery_ratingSensitive": "민감",
   "onlineGallery_ratingQuestionable": "의심",
   "onlineGallery_ratingExplicit": "성인",
-  "onlineGallery_clear": "지우기",
-  "onlineGallery_previousPage": "이전 페이지",
-  "onlineGallery_nextPage": "다음 페이지",
-  "onlineGallery_pageN": "{page}페이지",
-  "@onlineGallery_pageN": {
-    "placeholders": {
-      "page": {}
-    }
-  },
-  "onlineGallery_dateRange": "날짜 범위",
-  "onlineGallery_fuzzySearch": "유사 일치",
-  "onlineGallery_fuzzySearchTooltip": "켜면 *tag* 일치로 비슷한 태그를 찾고, 끄면 Danbooru 태그를 정확히 검색합니다",
-  "onlineGallery_blacklistTags": "차단 태그",
   "onlineGallery_blacklistTitle": "온라인 갤러리 차단 목록",
   "onlineGallery_blacklistSubtitle": "차단 태그가 포함된 이미지는 온라인 갤러리에서 바로 숨겨집니다.",
   "onlineGallery_addBlacklistTagHint": "차단 태그 추가",
@@ -882,28 +761,6 @@
   },
   "onlineGallery_blacklistSettingsTitle": "온라인 갤러리 차단 목록 설정",
   "onlineGallery_blacklistLoginHint": "Danbooru에 로그인하지 않았습니다. 로컬 차단 목록은 사용할 수 있지만 동기화하려면 로그인해야 합니다.",
-  "onlineGallery_bulkFavorite": "선택 항목 즐겨찾기",
-  "onlineGallery_bulkDownload": "선택 항목 다운로드",
-  "onlineGallery_unfavorited": "즐겨찾기를 해제했습니다",
-  "onlineGallery_favorited": "즐겨찾기에 추가했습니다",
-  "onlineGallery_favoritedImages": "이미지 {count}장을 즐겨찾기에 추가했습니다",
-  "@onlineGallery_favoritedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_selectDownloadDirectoryFailed": "다운로드 폴더를 선택하지 못했습니다: {error}",
-  "@onlineGallery_selectDownloadDirectoryFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "onlineGallery_downloadSelectedStarted": "이미지 {count}장 다운로드 중...",
-  "@onlineGallery_downloadSelectedStarted": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "onlineGallery_downloadSelectedCompleted": "다운로드 완료: 성공 {success}, 실패 {failed}",
   "@onlineGallery_downloadSelectedCompleted": {
     "placeholders": {
@@ -911,14 +768,6 @@
       "failed": {}
     }
   },
-  "onlineGallery_startDate": "시작 날짜",
-  "onlineGallery_endDate": "종료 날짜",
-  "onlineGallery_invalidDateFormat": "날짜 형식이 올바르지 않습니다",
-  "onlineGallery_dateOutOfRange": "날짜가 범위를 벗어났습니다",
-  "onlineGallery_last30Days": "최근 30일",
-  "onlineGallery_configureGelbooruApi": "Gelbooru API 설정",
-  "onlineGallery_gelbooruApiReady": "Gelbooru API 확인됨",
-  "onlineGallery_gelbooruApiInvalid": "Gelbooru 자격 증명이 만료되었습니다",
   "onlineGallery_gelbooruCredentialsRequired": "웹사이트 즐겨찾기를 보려면 Gelbooru User ID와 API Key를 설정하세요.",
   "onlineGallery_gelbooruCredentialsInvalid": "Gelbooru 자격 증명이 더 이상 유효하지 않습니다. 다시 설정하세요.",
   "onlineGallery_gelbooruRateLimited": "Gelbooru에서 요청을 제한하고 있습니다. 잠시 후 다시 시도하세요.",
@@ -927,18 +776,7 @@
   "onlineGallery_gelbooruNetworkError": "Gelbooru에 연결할 수 없습니다. 네트워크나 프록시 설정을 확인하세요.",
   "onlineGallery_gelbooruMalformedResponse": "Gelbooru가 분석할 수 없는 데이터를 반환했습니다.",
   "onlineGallery_gelbooruRequestFailed": "Gelbooru 요청에 실패했습니다. 잠시 후 다시 시도하세요.",
-  "onlineGallery_aiTagQuery": "작품, 작가, 제목, 태그, 모델 검색",
-  "onlineGallery_aiTagPromptQuery": "AI 프롬프트 검색(::artist: 같은 원본 구문 지원)",
-  "onlineGallery_aiTagTimeRange": "기간",
-  "onlineGallery_aiTagAllTime": "전체",
-  "onlineGallery_aiTagCurrentMonthly": "실시간 월간 순위",
-  "onlineGallery_aiTagOlderMonthly": "이전 보관",
   "onlineGallery_aiTagRankingProcessing": "순위를 생성하는 중입니다. 잠시 후 다시 시도하세요.",
-  "onlineGallery_aiTagNaiOnly": "NAI만",
-  "onlineGallery_aiTagModelVersion": "모델 버전",
-  "onlineGallery_viewAuthor": "이 작가 보기",
-  "onlineGallery_returnFromAuthor": "이전 갤러리 위치로 돌아가기",
-  "onlineGallery_generationParams": "생성 매개변수",
   "onlineGallery_sourceConfigUnavailable": "소스 설정을 불러올 수 없습니다. 연결을 확인하고 다시 시도하세요.",
   "onlineGallery_sourceRateLimited": "요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
   "onlineGallery_sourceTimeout": "요청 시간이 초과되었습니다. 연결을 확인하세요.",
@@ -946,26 +784,7 @@
   "onlineGallery_sourceMalformedResponse": "소스 응답 형식이 바뀌어 분석할 수 없습니다.",
   "onlineGallery_detailNotFound": "작품이 존재하지 않거나 삭제되었습니다.",
   "onlineGallery_imageUnavailable": "지금은 이 이미지를 사용할 수 없습니다.",
-  "onlineGallery_loadedAll": "모든 항목을 불러왔습니다",
-  "onlineGallery_retryAppend": "불러오지 못했습니다. 클릭하여 다시 시도",
-  "onlineGallery_rankNumber": "{rank}위",
-  "@onlineGallery_rankNumber": {
-    "placeholders": {
-      "rank": {}
-    }
-  },
-  "onlineGallery_multipleImages": "이미지 {count}장",
-  "@onlineGallery_multipleImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "onlineGallery_views": "조회수",
-  "onlineGallery_downloadAllMedia": "이 작품의 모든 이미지 다운로드",
-  "onlineGallery_copyFullMetadata": "전체 메타데이터 복사",
-  "onlineGallery_metadataParseFailed": "메타데이터를 분석하지 못했습니다. 원본 내용은 그대로 있으며 복사할 수 있습니다.",
   "onlineGallery_gelbooruReadOnly": "읽기 전용 즐겨찾기",
-  "onlineGallery_gelbooruFavoritesSortHint": "게시물 ID 기준 최신순으로 정렬됩니다. 웹사이트의 즐겨찾기 순서와 다를 수 있습니다.",
   "tooltip_fullscreenEdit": "전체 화면 편집",
   "tooltip_decreaseWeight": "가중치 낮추기 [-5%]",
   "tooltip_increaseWeight": "가중치 높이기 [+5%]",
@@ -1482,7 +1301,6 @@
   "comparison_close": "비교 닫기",
   "comparison_zoomHint": "손가락을 오므리거나 스크롤해 각각 확대/축소",
   "comparison_loadError": "이미지를 불러오지 못했습니다",
-  "statistics_title": "통계",
   "localGallery_group_today": "오늘",
   "localGallery_group_yesterday": "어제",
   "localGallery_groupImageCount": "{formatted}장",
@@ -1811,7 +1629,6 @@
   "promptToken_negativePreset": "네거티브 프리셋",
   "promptToken_characterNegative": "캐릭터 네거티브",
   "common_rename": "이름 변경",
-  "tagLibrary_newCategory": "새 분류",
   "tagLibrary_tags": "태그",
   "settings_network": "네트워크",
   "settings_enableProxy": "프록시 사용",
@@ -2086,42 +1903,7 @@
     }
   },
   "vibeLibrary_title": "Vibe 라이브러리",
-  "vibeLibrary_categories": "분류",
-  "vibeLibrary_createCategoryTitle": "새 분류",
-  "vibeLibrary_createSubCategoryTitle": "새 하위 분류",
-  "vibeLibrary_categoryNameHint": "분류 이름을 입력하세요",
-  "vibeLibrary_createCategoryConfirm": "만들기",
-  "vibeLibrary_deleteCategoryTitle": "삭제 확인",
-  "vibeLibrary_deleteCategoryContent": "이 분류를 삭제하시겠습니까? 안에 있는 Vibe는 분류 안 됨으로 이동합니다.",
-  "vibeLibrary_sortTooltip": "정렬 기준",
-  "vibeLibrary_openFolderTooltip": "Vibe 라이브러리 폴더 열기",
-  "vibeLibrary_totalCount": "Vibe {count}개",
-  "@vibeLibrary_totalCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_noCategoriesAvailable": "사용할 수 있는 분류가 없습니다",
-  "vibeLibrary_moveToCategory": "분류로 이동",
   "vibeLibrary_uncategorized": "분류 안 됨",
-  "vibeLibrary_movedToCategory": "Vibe {count}개를 이동했습니다",
-  "@vibeLibrary_movedToCategory": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_favoriteStatusUpdated": "즐겨찾기 상태를 업데이트했습니다",
-  "vibeLibrary_importFromFile": "파일에서 가져오기",
-  "vibeLibrary_importFromImage": "이미지에서 가져오기",
-  "vibeLibrary_importFromClipboard": "클립보드에서 인코딩 데이터 가져오기",
-  "vibeLibrary_openFolderFailed": "폴더를 열지 못했습니다: {error}",
-  "@vibeLibrary_openFolderFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibeLibrary_importFileDialogTitle": "가져올 Vibe 파일 선택",
-  "vibeLibrary_preparingImport": "가져오기 준비 중...",
   "vibeLibrary_importSuccessCount": "Vibe {count}개를 가져왔습니다",
   "@vibeLibrary_importSuccessCount": {
     "placeholders": {
@@ -2135,66 +1917,9 @@
       "failed": {}
     }
   },
-  "vibeLibrary_dropImportHint": ".naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp 파일이나 폴더를 여기에 놓아 가져오세요",
-  "vibeLibrary_importing": "가져오는 중...",
-  "vibeLibrary_pageIndicator": "{current} / {total}페이지",
-  "@vibeLibrary_pageIndicator": {
-    "placeholders": {
-      "current": {},
-      "total": {}
-    }
-  },
-  "vibeLibrary_itemsPerPage": "페이지당:",
-  "vibeLibrary_tooManyTitle": "Vibe가 너무 많습니다",
-  "vibeLibrary_tooManySelectedContent": "Vibe {count}개를 선택했지만 한 번에 최대 16개까지 사용할 수 있습니다.\n\n선택을 줄인 뒤 다시 시도하세요.",
-  "@vibeLibrary_tooManySelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_tooManyExistingContent": "생성 페이지에 이미 Vibe {current}개가 있습니다. {remaining}개를 더 추가할 수 있습니다.\n\n선택을 줄인 뒤 다시 시도하세요.",
-  "@vibeLibrary_tooManyExistingContent": {
-    "placeholders": {
-      "current": {},
-      "remaining": {}
-    }
-  },
-  "vibeLibrary_sentToGenerationCount": "Vibe {count}개를 생성 페이지로 보냈습니다",
-  "@vibeLibrary_sentToGenerationCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deleteSelectedContent": "선택한 Vibe {count}개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-  "@vibeLibrary_deleteSelectedContent": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_deletedCount": "Vibe {count}개를 삭제했습니다",
-  "@vibeLibrary_deletedCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "vibeLibrary_importImageDialogTitle": "Vibe 데이터가 포함된 이미지 선택",
-  "vibeLibrary_clipboardEmpty": "클립보드가 비어 있습니다",
-  "vibeLibrary_encodeTimeout": "인코딩 시간이 초과되었습니다. 네트워크 연결을 확인하세요.",
-  "vibeLibrary_unknownError": "알 수 없는 오류",
   "vibeLibrary_save": "라이브러리에 저장",
   "vibeLibrary_import": "Vibe 가져오기",
-  "vibeLibrary_searchHint": "이름, 태그 검색...",
-  "vibeLibrary_empty": "Vibe 라이브러리가 비어 있습니다",
-  "vibeLibrary_emptyHint": "먼저 Vibe 라이브러리에 항목을 추가하세요",
-  "vibeLibrary_allVibes": "모든 Vibe",
-  "vibeLibrary_favorites": "즐겨찾기",
   "vibeLibrary_sendToGeneration": "생성으로 보내기",
-  "vibeLibrary_export": "내보내기",
-  "vibeLibrary_edit": "편집",
-  "vibeLibrary_delete": "삭제",
-  "vibeLibrary_addToFavorites": "즐겨찾기에 추가",
-  "vibeLibrary_removeFromFavorites": "즐겨찾기에서 제거",
-  "vibeLibrary_newSubCategory": "새 하위 분류",
   "vibeLibrary_maxVibesReached": "최대 개수에 도달했습니다(Vibe 16개)",
   "vibeLibrary_bundleReadFailed": "번들 파일을 읽지 못해 단일 파일 모드를 사용합니다",
   "categoryError_loadFailed": "분류를 불러오지 못했습니다: {error}",
@@ -2274,251 +1999,8 @@
       }
     }
   },
-  "vibeBulkTag_actionPreview": "변경 미리 보기",
-  "vibeDetail_strengthDescription": "이 Vibe가 생성 결과에 미치는 영향의 강도를 조절합니다",
-  "vibeDetail_infoExtractedDescription": "원본 이미지에서 추출할 정보의 양을 조절합니다(2 Anlas 소비)",
-  "vibeDetail_statistics": "통계",
-  "vibeDetail_usageCount": "사용 횟수",
-  "vibeDetail_timesUsed": "{count}회",
-  "@vibeDetail_timesUsed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibeDetail_lastUsed": "마지막 사용",
-  "vibeDetail_neverUsed": "사용한 적 없음",
-  "vibeDetail_createdAt": "만든 날짜",
-  "vibeDetail_saveParameters": "매개변수 저장",
   "vibe_export_title": "Vibe 내보내기",
-  "vibe_export_format": "내보내기 형식",
-  "vibe_selector_title": "Vibe 선택",
   "vibe_selector_recent": "최근",
-  "vibe_export_include_thumbnails": "썸네일 포함",
-  "vibe_export_include_thumbnails_subtitle": "내보내는 파일에 썸네일 미리 보기를 포함합니다",
-  "vibe_export_singleFile": "단일 파일(.naiv4vibe)",
-  "vibe_export_singleFileDescription": "Vibe마다 별도 파일로 내보냅니다. Vibe 하나를 공유할 때 적합합니다",
-  "vibe_export_bundleFile": "번들 파일(.naiv4vibebundle)",
-  "vibe_export_bundleFileDescription": "여러 Vibe를 파일 하나로 묶습니다. 일괄 백업에 적합합니다",
-  "vibe_export_embedIntoPng": "PNG에 포함",
-  "vibe_export_embedIntoPngDescription": "데이터를 PNG 메타데이터에 넣어 Vibe 하나를 내보냅니다",
-  "vibe_export_exportable": "내보내기 가능",
-  "vibe_export_notExportable": "내보내기 불가",
-  "vibe_export_selectVibesToExport": "내보낼 Vibe 선택",
-  "vibe_export_exportSelected": "내보내기({count})",
-  "@vibe_export_exportSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_strengthPercent": "강도: {percent}%",
-  "@vibe_export_strengthPercent": {
-    "placeholders": {
-      "percent": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_pngCarrierImage": "PNG 전달 이미지",
-  "vibe_export_noUsablePngCarrier": "이 Vibe에는 바로 사용할 수 있는 PNG 전달 이미지가 없습니다. 외부 PNG 이미지를 전달 이미지로 선택할 수 있습니다.",
-  "vibe_export_selectExternalPngImage": "외부 PNG 이미지 선택...",
-  "vibe_export_changeExternalPngImage": "외부 PNG 이미지 변경...",
-  "vibe_export_useVibeImageInstead": "대신 Vibe 이미지 사용",
-  "vibe_export_usingExternalPng": "외부 PNG 사용 중: {fileName}",
-  "@vibe_export_usingExternalPng": {
-    "placeholders": {
-      "fileName": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectPngImage": "PNG 이미지 선택",
-  "vibe_export_invalidPngImage": "선택한 파일은 올바른 PNG 이미지가 아닙니다",
-  "vibe_export_selectPngImageFailed": "PNG 이미지를 선택하지 못했습니다: {error}",
-  "@vibe_export_selectPngImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embeddingPng": "PNG에 포함하는 중: {name}",
-  "@vibe_export_embeddingPng": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_exportCompleteCounts": "내보내기 완료: 성공 {successCount}개, 실패 {failCount}개",
-  "@vibe_export_exportCompleteCounts": {
-    "placeholders": {
-      "successCount": {
-        "type": "int"
-      },
-      "failCount": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportCompletePath": "내보내기 완료: {path}",
-  "@vibe_export_exportCompletePath": {
-    "placeholders": {
-      "path": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_packingVibes": "Vibe {count}개 묶는 중...",
-  "@vibe_export_packingVibes": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingName": "내보내는 중: {name}",
-  "@vibe_export_exportingName": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_selectExportFolder": "내보낼 폴더 선택",
-  "vibe_export_generatingBundleFile": "번들 파일 만드는 중...",
-  "vibe_export_bundleTitle": "번들 내보내기: {name}",
-  "@vibe_export_bundleTitle": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_vibesTitle": "Vibe 내보내기({count}개 선택)",
-  "@vibe_export_vibesTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_method": "내보내기 방식",
-  "vibe_export_wholeBundle": "번들 전체",
-  "vibe_export_internalVibe": "내부 Vibe",
-  "vibe_export_wholeBundleDescription": "Vibe {count}개를 모두 담은 .naiv4vibebundle 파일로 내보냅니다",
-  "@vibe_export_wholeBundleDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_internalVibeDescription": "번들 안의 Vibe를 골라 각각 .naiv4vibe 파일로 내보냅니다(총 {count}개)",
-  "@vibe_export_internalVibeDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportBundle": "번들 내보내기",
-  "vibe_export_exportAsFiles": "파일로 내보내기",
-  "vibe_export_exportBundleDescription": ".naiv4vibebundle 파일로 내보냅니다",
-  "vibe_export_exportAsFilesDescription": ".naiv4vibe 또는 .naiv4vibebundle 파일로 내보냅니다",
-  "vibe_export_exportAsZip": "ZIP으로 내보내기",
-  "vibe_export_exportAsZipDescription": "선택한 Vibe 라이브러리 항목을 개별 파일로 .zip에 묶습니다",
-  "vibe_export_compressData": "데이터 압축",
-  "vibe_export_compressDataDescription": "압축으로 파일 크기를 줄입니다(일괄 내보내기에 추천)",
-  "vibe_export_zipCompressDescription": "ZIP 안의 파일을 압축해 크기를 줄입니다",
-  "vibe_export_exportAsPng": "PNG로 내보내기",
-  "vibe_export_pngInternalBundleUnsupported": "번들 내부 Vibe 하나를 내보낼 때는 이미지에 포함할 수 없습니다",
-  "vibe_export_embedVibeDataIntoPng": "Vibe 데이터를 PNG 메타데이터에 포함",
-  "vibe_export_batchPngUsesFirstImage": "일괄 내보내기는 Vibe마다 처음으로 사용 가능한 이미지를 씁니다. 이미지가 없는 항목은 자동으로 건너뜁니다.",
-  "vibe_export_exportCarrierImage": "전달 이미지 내보내기",
-  "vibe_export_usingExternalCarrierImage": "외부 PNG를 내보내기 전달 이미지로 사용 중",
-  "vibe_export_exportAsEncodings": "인코딩으로 내보내기",
-  "vibe_export_exportAsEncodingsDescription": "데이터를 인코딩(JSON 또는 Base64)으로 내보냅니다",
-  "vibe_export_jsonDescription": "읽고 편집하기 쉬운 서식 있는 JSON 파일로 내보냅니다",
-  "vibe_export_base64Description": "복사하고 공유하기 쉬운 Base64 텍스트로 내보냅니다",
-  "vibe_export_selectAtLeastOneMethod": "내보내기 방식을 하나 이상 선택하세요",
-  "vibe_export_batchPngUnsupported": "Vibe 일괄 내보내기는 PNG 포함을 지원하지 않습니다. 단일 Vibe 내보내기 화면을 사용하세요.",
-  "vibe_export_selectPngCarrier": "내보낼 PNG 전달 이미지를 선택하세요",
-  "vibe_export_selectAtLeastOneInternalVibe": "내보낼 내부 Vibe를 하나 이상 선택하세요",
-  "vibe_export_selectVibeExportFolder": "Vibe 내보낼 폴더 선택",
-  "vibe_export_saveEncodingFile": "인코딩 파일 저장",
-  "vibe_export_preparingExport": "내보내기 준비 중...",
-  "vibe_export_preparingVibeProgress": "Vibe 읽는 중 {current}/{total}...",
-  "@vibe_export_preparingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_exportingBundle": "번들 내보내는 중...",
-  "vibe_export_exportingZip": "ZIP 내보내는 중...",
-  "vibe_export_embeddingImage": "이미지에 포함하는 중...",
-  "vibe_export_exportingEncoding": "인코딩 내보내는 중...",
-  "vibe_export_exportFailedWithError": "내보내지 못했습니다: {error}",
-  "vibe_export_noExportableEntries": "내보낼 수 있는 Vibe 항목이 없습니다",
-  "@vibe_export_exportFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_bundleFilePathEmpty": "번들 파일 경로가 비어 있습니다",
-  "vibe_export_invalidImageFormatWithError": "이미지 형식이 올바르지 않습니다: {error}",
-  "@vibe_export_invalidImageFormatWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedFailedWithError": "포함하지 못했습니다: {error}",
-  "@vibe_export_embedFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_embedImageFailedWithError": "이미지에 포함하지 못했습니다: {error}",
-  "@vibe_export_embedImageFailedWithError": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
-  "vibe_export_extractingVibeProgress": "Vibe 추출 중 {current}/{total}...",
-  "@vibe_export_extractingVibeProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "vibe_export_selectImageFailed": "이미지를 선택하지 못했습니다: {error}",
-  "@vibe_export_selectImageFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "vibe_export_dialogTitle": "Vibe {count}개 내보내기",
   "@vibe_export_dialogTitle": {
     "placeholders": {
@@ -2562,8 +2044,6 @@
   },
   "vibe_export_embedFailed": "포함하지 못했습니다",
   "vibe_embedToImage": "이미지에 포함",
-  "vibe_import_skip": "건너뛰기",
-  "vibe_import_confirm": "확인",
   "vibe_import_noEncodingData": "인코딩 데이터 없음",
   "vibe_import_encodingCost": "인코딩에 2 Anlas가 소비됩니다",
   "vibe_import_confirmCost": "계속하고 Anlas를 소비하시겠습니까?",
@@ -2576,39 +2056,9 @@
   "vibe_import_encodingComplete": "인코딩 완료",
   "vibe_import_partialFailed": "일부 인코딩 실패",
   "vibe_import_timeout": "인코딩 시간 초과",
-  "vibe_import_title": "라이브러리에서 가져오기",
-  "vibe_import_result": "Vibe {count}개를 가져왔습니다",
-  "@vibe_import_result": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_import_fileParseFailed": "파일을 분석하지 못했습니다",
   "vibe_import_fileSelectionFailed": "파일을 선택하지 못했습니다",
   "vibe_import_importFailed": "가져오지 못했습니다",
-  "vibe_import_bundleTitle": "Vibe 번들 가져오기",
-  "vibe_import_bundleChooseMethod": "가져오기 방식 선택",
-  "vibe_import_bundleAsWhole": "통째로 가져오기",
-  "vibe_import_bundleAsWholeDescription": "번들 구조를 유지해 라이브러리 항목 하나로 가져옵니다",
-  "vibe_import_bundleSplitEntries": "개별 항목으로 나누기",
-  "vibe_import_bundleSplitEntriesDescription": "Vibe마다 별도 라이브러리 항목으로 가져옵니다",
-  "vibe_import_bundleSelectVibes": "가져올 Vibe 선택",
-  "vibe_import_bundleSelectVibesDescription": "선택한 Vibe만 가져옵니다",
-  "vibe_import_bundleConfigureEachVibe": "Vibe별 매개변수 설정",
-  "vibe_import_bundleSelectAndConfigureEachVibe": "Vibe를 골라 매개변수 설정",
-  "vibe_import_bundleSelectedCount": "{selected}/{total} 선택됨",
-  "@vibe_import_bundleSelectedCount": {
-    "placeholders": {
-      "selected": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
   "vibe_saveToLibrary_title": "라이브러리에 저장",
   "vibe_saveToLibrary_strength": "강도",
   "vibe_saveToLibrary_infoExtracted": "정보 추출량",
@@ -2698,30 +2148,10 @@
   "selection_clear_selection": "선택 해제",
   "selection_invert_selection": "선택 반전",
   "selection_cut_to_layer": "레이어로 잘라내기",
-  "search_results": "검색 결과",
-  "search_noResults": "일치하는 결과가 없습니다",
-  "addToCurrent": "현재에 추가",
-  "replaceExisting": "기존 항목 교체",
-  "confirmSelection": "선택 확인",
   "selectAll": "모두 선택",
   "clearSelection": "지우기",
-  "clearFilters": "필터 지우기",
   "shortcut_context_vibe_detail": "Vibe 상세",
   "shortcut_action_vibe_detail_rename": "이름 변경",
-  "vibeSelectorFilterFavorites": "즐겨찾기",
-  "vibeSelectorFilterSourceAll": "모든 유형",
-  "vibeSelectorSortCreated": "만든 날짜",
-  "vibeSelectorSortLastUsed": "최근 사용",
-  "vibeSelectorSortUsedCount": "사용 횟수",
-  "vibeSelectorSortName": "이름",
-  "vibeSelectorItemsCount": "{count}개 항목",
-  "@vibeSelectorItemsCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "tray_show": "창 표시",
   "tray_exit": "종료",
   "settings_shortcutsSubtitle": "키보드 단축키를 사용자 지정합니다",
@@ -3052,26 +2482,6 @@
   "toast_kritaNotConnected": "Krita가 연결되지 않았습니다. 먼저 설정에서 브리지를 켜고 플러그인을 연결하세요.",
   "toast_sentToKrita": "이미지를 Krita로 보냈습니다",
   "toast_kritaUnsupportedImageFormat": "이 이미지 형식은 Krita로 보낼 수 없습니다. 일반적인 이미지 형식을 사용하세요.",
-  "toast_deletedNamed": "삭제했습니다: {name}",
-  "@toast_deletedNamed": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_vibeParamSaveReencodeFailed": "Vibe를 다시 인코딩하지 못해 매개변수를 저장하지 못했습니다",
-  "toast_exportSuccess": "내보냈습니다",
-  "toast_exportFailed": "내보내지 못했습니다: {error}",
-  "@toast_exportFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_selectVibeToExport": "먼저 내보낼 Vibe를 선택하세요",
-  "toast_embedPngSingleVibeOnly": "PNG 포함은 Vibe 하나만 내보낼 때 지원합니다",
-  "toast_selectPngCarrier": "내보낼 PNG 전달 이미지를 선택하세요",
-  "toast_renameSuccess": "이름을 변경했습니다",
-  "toast_paramsSaved": "매개변수를 저장했습니다",
-  "toast_paramsSaveFailed": "매개변수를 저장하지 못했습니다",
   "toast_dropNoReadableImageOrVibe": "놓은 항목에서 읽을 수 있는 이미지나 Vibe 파일을 찾지 못했습니다",
   "toast_contentCannotBeEmpty": "내용은 비워 둘 수 없습니다",
   "toast_addedToLibrary": "라이브러리에 추가했습니다",
@@ -3092,33 +2502,6 @@
       "skipped": {}
     }
   },
-  "toast_favorited": "즐겨찾기에 추가했습니다",
-  "toast_unfavorited": "즐겨찾기를 해제했습니다",
-  "toast_favoriteUpdateFailed": "즐겨찾기 상태를 업데이트하지 못했습니다: {error}",
-  "@toast_favoriteUpdateFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "toast_packingImages": "이미지 {count}장 묶는 중...",
-  "@toast_packingImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packedImages": "이미지 {count}장을 묶었습니다",
-  "@toast_packedImages": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "toast_packFailed": "묶지 못했습니다",
-  "toast_packFailedWithError": "묶지 못했습니다: {error}",
-  "@toast_packFailedWithError": {
-    "placeholders": {
-      "error": {}
-    }
-  },
   "toast_saveDirNotSet": "저장 폴더가 설정되지 않았습니다",
   "toast_savedTo": "{path}에 저장했습니다",
   "@toast_savedTo": {
@@ -3131,42 +2514,12 @@
   "toast_savedToVibeLibrary": "Vibe 라이브러리에 저장했습니다",
   "toast_saveBundleFailed": "번들을 저장하지 못했습니다",
   "toast_saveEntryFailed": "항목을 저장하지 못했습니다",
-  "toast_imagePromptCopied": "프롬프트를 복사했습니다",
-  "toast_imageHasNoPrompt": "이 이미지에는 프롬프트가 없습니다",
-  "toast_useDeleteButton": "화면의 삭제 버튼을 사용하세요",
   "toast_imageDataUnavailable": "이미지 데이터를 사용할 수 없어 복사할 수 없습니다",
-  "toast_vibeDataCopied": "Vibe 데이터를 복사했습니다",
   "toast_characterPromptCopied": "캐릭터 프롬프트를 복사했습니다",
   "toast_copiedTitle": "{title}을(를) 복사했습니다",
   "@toast_copiedTitle": {
     "placeholders": {
       "title": {}
-    }
-  },
-  "toast_replacedVibesCount": "Vibe {count}개로 교체했습니다: {name}",
-  "@toast_replacedVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_sentVibesCount": "Vibe {count}개를 생성으로 보냈습니다: {name}",
-  "@toast_sentVibesCount": {
-    "placeholders": {
-      "count": {},
-      "name": {}
-    }
-  },
-  "toast_replacedVibe": "교체했습니다: {name}",
-  "@toast_replacedVibe": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "toast_sentVibeToGeneration": "생성으로 보냈습니다: {name}",
-  "@toast_sentVibeToGeneration": {
-    "placeholders": {
-      "name": {}
     }
   },
   "toast_unreadableDroppedImageSource": "놓은 항목에서 읽을 수 있는 이미지 파일이나 이미지 URL을 찾지 못했습니다",
@@ -3196,12 +2549,6 @@
       "error": {}
     }
   },
-  "toast_renameNameRequired": "이름이 필요합니다",
-  "toast_renameNameConflict": "이미 있는 이름입니다. 다른 이름을 사용하세요.",
-  "toast_renameEntryNotFound": "항목이 더 이상 없습니다. 삭제되었을 수 있습니다",
-  "toast_renameFilePathMissing": "이 항목에는 파일 경로가 없어 이름을 바꿀 수 없습니다",
-  "toast_renameFileFailed": "파일 이름을 바꾸지 못했습니다. 잠시 후 다시 시도하세요.",
-  "toast_renameFailed": "이름을 바꾸지 못했습니다. 잠시 후 다시 시도하세요.",
   "toast_processImageFailed": "이미지를 처리하지 못했습니다: {error}",
   "@toast_processImageFailed": {
     "placeholders": {
@@ -3223,55 +2570,14 @@
     }
   },
   "common_saving": "저장하는 중...",
-  "common_pleaseWait": "잠시 기다리세요",
-  "common_change": "변경",
   "common_expand": "펼치기",
   "common_collapse": "접기",
-  "vibeLibrary_emptySearchTitle": "일치하는 Vibe가 없습니다",
-  "vibeLibrary_emptySearchSubtitle": "다른 키워드로 검색해 보세요",
-  "vibeLibrary_emptyFavoritesTitle": "즐겨찾기한 Vibe가 없습니다",
-  "vibeLibrary_emptyFavoritesSubtitle": "하트 아이콘을 클릭해 Vibe를 즐겨찾기에 추가하세요",
-  "vibeLibrary_emptyCategoryTitle": "이 분류에 Vibe가 없습니다",
-  "vibeLibrary_emptyCategorySubtitle": "\"모든 Vibe\"로 전환하면 모든 항목을 볼 수 있습니다",
-  "vibeLibrary_emptyNoMatchesTitle": "일치하는 결과가 없습니다",
-  "vibeLibrary_emptySaveFromGenerationHint": "생성 페이지에서 Vibe를 저장해 라이브러리에 추가하세요",
-  "vibe_nameRequired": "이름이 필요합니다",
-  "vibe_import_namingTitle": "Vibe 이름 지정",
-  "vibe_import_nameConflictOverwrite": "이미 있는 이름이므로 덮어씁니다",
-  "vibe_previewLoadFailed": "미리 보기를 불러오지 못했습니다",
-  "vibe_import_applyToRemainingFiles": "남은 모든 파일에 적용",
-  "vibe_import_applyNamingToRemainingFiles": "남은 파일에 이 이름 규칙 사용",
-  "vibe_encodeImageTitle": "이미지를 Vibe로 인코딩",
-  "vibe_imagePreview": "이미지 미리 보기",
-  "vibe_encodeStartButton": "인코딩 시작",
-  "vibe_encodeImageInProgress": "이미지 인코딩 중...",
-  "vibe_encodeErrorImage": "이미지: {fileName}",
-  "@vibe_encodeErrorImage": {
-    "placeholders": {
-      "fileName": {}
-    }
-  },
-  "vibe_encodeErrorMessage": "오류: {error}",
-  "@vibe_encodeErrorMessage": {
-    "placeholders": {
-      "error": {}
-    }
-  },
-  "vibe_encodeSkipImage": "이 이미지 건너뛰기",
-  "detail_sendToImg2Img": "Image2Image로 보내기",
-  "detail_loadingImage": "이미지 불러오는 중...",
-  "detail_imageLoadFailed": "이미지를 불러오지 못했습니다",
-  "detail_noImage": "이미지 없음",
   "detail_parsingMetadata": "메타데이터 분석 중...",
   "detail_noMetadata": "이 이미지에는 메타데이터가 없습니다",
   "detail_metadata": "메타데이터",
-  "detail_imageDetails": "이미지 상세 정보",
-  "detail_basicInfo": "기본 정보",
-  "detail_fileName": "파일 이름",
   "detail_modifiedTime": "수정한 날짜",
   "detail_fileSize": "파일 크기",
   "detail_noContent": "(내용 없음)",
-  "detail_saveBlock": "블록으로 저장",
   "saveBlock_title": "블록으로 저장",
   "saveBlock_nameLabel": "블록 제목",
   "saveBlock_nameHint": "블록 제목 입력",
@@ -3285,9 +2591,6 @@
       "label": {}
     }
   },
-  "detail_copyCharacterPrompt": "캐릭터 프롬프트 복사",
-  "detail_copyAllVibeData": "모든 Vibe 데이터 복사",
-  "detail_saveToVibeLibrary": "Vibe 라이브러리에 저장",
   "comfyImport_detectedTitle": "ComfyUI 다중 캐릭터 프롬프트를 감지했습니다",
   "comfyImport_characterList": "캐릭터 목록({count})",
   "@comfyImport_characterList": {
@@ -3401,39 +2704,11 @@
   "model3d_light": "조명",
   "model3d_addLayerTooltip": "3D 모델 레이어 추가",
   "nav_preciseRefLibrary": "정밀 참조 라이브러리",
-  "preciseRefLib_title": "정밀 참조 라이브러리",
-  "preciseRefLib_searchHint": "참조 검색...",
-  "preciseRefLib_empty": "이미지를 여기에 놓거나 붙여넣어 라이브러리를 만드세요",
-  "preciseRefLib_emptyHint": "미리 보기, 기록, 갤러리의 이미지를 마우스 오른쪽 버튼으로 클릭해 여기에 저장할 수도 있습니다",
-  "preciseRefLib_import": "이미지 가져오기",
-  "preciseRefLib_entryCount": "{count}개 항목",
-  "preciseRefLib_sendToPreciseRef": "정밀 참조로 보내기",
-  "preciseRefLib_sendToImg2Img": "Image2Image로 보내기",
-  "preciseRefLib_editEntry": "매개변수 편집",
-  "preciseRefLib_confirmDeleteTitle": "항목 삭제",
-  "preciseRefLib_confirmDelete": "\"{name}\"을(를) 삭제하시겠습니까? 이미지 파일도 함께 삭제됩니다.",
   "preciseRefLib_saved": "\"{name}\"을(를) 정밀 참조 라이브러리에 저장했습니다",
   "preciseRefLib_savedHint": "라이브러리에서 매개변수를 편집할 수 있습니다",
-  "preciseRefLib_sent": "\"{name}\"을(를) 정밀 참조로 보냈습니다",
-  "preciseRefLib_sentToImg2Img": "\"{name}\"을(를) Image2Image로 보냈습니다",
   "preciseRefLib_imageMissing": "이미지 파일이 없습니다",
   "preciseRefLib_invalidImage": "지원하지 않는 이미지 형식이거나 파일이 손상되었습니다",
-  "preciseRefLib_deleteFailed": "삭제하지 못했습니다. 항목과 원본 이미지는 그대로 두었습니다. 잠시 후 다시 시도하세요",
-  "preciseRefLib_favoritesOnly": "즐겨찾기만",
-  "preciseRefLib_sortBy": "정렬 기준",
-  "preciseRefLib_sortCreatedAt": "만든 날짜",
-  "preciseRefLib_sortLastUsed": "최근 사용",
-  "preciseRefLib_sortUsedCount": "많이 사용한 순",
-  "preciseRefLib_sortName": "이름",
   "preciseRefLib_importedCount": "이미지 {count}장을 가져왔습니다",
-  "preciseRefLib_loadFailed": "정밀 참조 라이브러리를 불러오지 못했습니다: {error}",
-  "@preciseRefLib_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "preciseRefLib_importFailed": "정밀 참조 라이브러리에 저장하지 못했습니다: {error}",
   "@preciseRefLib_importFailed": {
     "placeholders": {
@@ -3453,10 +2728,6 @@
   "preciseRefLib_fromLibrary": "라이브러리에서",
   "preciseRefLib_saveCurrentToLibrary": "라이브러리에 저장",
   "preciseRefLib_saveCurrentCount": "참조 {count}개를 라이브러리에 저장했습니다",
-  "preciseRefLib_selectorTitle": "정밀 참조 라이브러리에서 선택",
-  "preciseRefLib_selectorConfirm": "선택 항목 추가({count})",
-  "preciseRefLib_nameLabel": "이름",
-  "preciseRefLib_typeFilterAll": "전체",
   "img2img_fromPreciseRefLibrary": "정밀 참조 라이브러리에서",
   "localGallery_saveToPreciseRefLibrary": "정밀 참조 라이브러리에 저장",
   "drop_saveToPreciseRefLibrary": "정밀 참조 라이브러리에 저장",
@@ -3560,20 +2831,6 @@
       }
     }
   },
-  "@preciseRefLib_confirmDelete": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@preciseRefLib_entryCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "@preciseRefLib_importedCount": {
     "placeholders": {
       "count": {
@@ -3595,27 +2852,6 @@
       }
     }
   },
-  "@preciseRefLib_selectorConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "@preciseRefLib_sent": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "@preciseRefLib_sentToImg2Img": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
   "common_optional": "선택 사항",
   "common_emptyValue": "(비어 있음)",
   "common_clickToRetry": "클릭하여 다시 시도",
@@ -3624,9 +2860,6 @@
   "addToLibrary_displayNameHint": "이 항목을 알아보기 쉬운 이름을 입력하세요",
   "addToLibrary_tagHint": "태그를 입력하고 Enter를 눌러 추가하세요",
   "drop_saveVibeBundle": "Vibe 번들 저장",
-  "history_dragFilePreparationFailed": "끌기용 파일을 준비하지 못했습니다. 잠시 후 다시 시도하세요.",
-  "history_dragFilePreparing": "끌기용 파일 준비 중...",
-  "history_dragFileNotReady": "끌기용 파일이 아직 준비되지 않았습니다",
   "vibe_import_overwriteOriginalParams": "원래 Vibe 매개변수 교체",
   "vibe_import_overwriteOriginalParamsHint": "{name}의 라이브러리 매개변수만 교체합니다. 기본값은 꺼짐입니다",
   "@vibe_import_overwriteOriginalParamsHint": {
@@ -3654,11 +2887,6 @@
   },
   "galleryScan_organizingGallery": "갤러리 정리 중",
   "galleryScan_processing": "처리 중",
-  "vibeDetail_useAll": "모두 사용",
-  "vibeDetail_longPressSetCover": "길게 눌러 표지로 설정",
-  "vibeDetail_noPreviewImage": "미리 보기 이미지 없음",
-  "vibeDetail_dropPreviewImage": "이미지를 여기에 놓아 미리 보기로 설정",
-  "vibeDetail_releasePreviewImage": "놓으면 미리 보기 이미지로 설정합니다",
   "imagePicker_dropReadFailed": "놓은 이미지를 읽지 못했습니다: {error}",
   "@imagePicker_dropReadFailed": {
     "placeholders": {
@@ -3746,14 +2974,9 @@
       }
     }
   },
-  "nav_promptBlockLibrary": "프롬프트 블록",
-  "promptBlockLibrary_title": "프롬프트 블록",
-  "promptBlockLibrary_folders": "폴더",
   "promptBlockLibrary_allBlocks": "모든 블록",
   "promptBlockLibrary_rootFolder": "루트 / 미분류",
   "promptBlockLibrary_unnamedBlock": "제목 없는 블록",
-  "promptBlockLibrary_noBlockSelected": "선택한 블록 없음",
-  "promptBlockLibrary_details": "상세 정보",
   "promptBlockLibrary_useCount": "{count}회 사용",
   "@promptBlockLibrary_useCount": {
     "placeholders": {
@@ -3764,69 +2987,7 @@
   },
   "promptBlockPill_missing": "삭제된 블록",
   "promptBlockPill_unknown": "잘못된 블록",
-  "pillCardReroll": "다시 뽑기",
-  "pillCardRerollLocked": "잠겨 있어 다시 뽑을 수 없습니다",
-  "pillCardLock": "현재 결과 잠금",
-  "pillCardUnlock": "잠금 해제",
-  "pillCardSettings": "무작위 설정",
-  "pillCardEnable": "사용",
-  "pillCardDisable": "사용 안 함",
-  "pillCardDeleteInstance": "인스턴스 제거",
-  "pillCardEmptyRoll": "(이번에는 빈 결과)",
-  "pillCardEvolutionEnable": "유전 켜기",
-  "pillCardEvolutionDisable": "유전 끄기",
-  "pillCardEvolutionRequiresEnabled": "먼저 인스턴스를 사용하도록 설정하세요",
-  "pillCardStepBack": "한 장면 뒤로",
-  "pillCardStepForward": "한 장면 앞으로",
-  "pillSettingsTitle": "블록 인스턴스 설정",
-  "pillSettingsModeFixed": "고정",
-  "pillSettingsModeSequential": "순차",
-  "pillSettingsModeRandom": "무작위 뽑기",
-  "pillSettingsCount": "뽑을 개수",
-  "pillSettingsOrder": "출력 순서",
-  "pillSettingsOrderDrawn": "뽑힌 순서",
-  "pillSettingsOrderOriginal": "원래 순서",
-  "pillSettingsWeight": "무작위 가중치",
-  "pillSettingsWeightMin": "최소",
-  "pillSettingsWeightMax": "최대",
-  "pillSettingsWeightAverage": "평균",
-  "pillSettingsDispersion": "분산",
-  "pillSettingsDispersionFocused": "집중",
-  "pillSettingsDispersionBalanced": "균형",
-  "pillSettingsDispersionSpread": "넓게",
-  "pillSettingsAdvanced": "고급",
-  "pillSettingsLeftDispersion": "왼쪽",
-  "pillSettingsRightDispersion": "오른쪽",
-  "pillSettingsSoftBalance": "부드러운 균형",
-  "pillSettingsSoftBalanceStrength": "강도",
-  "pillSettingsTriggerProbability": "발동 확률",
-  "pillSettingsCancel": "취소",
-  "pillSettingsApply": "적용",
   "promptBlockLibrary_unnamedFolder": "제목 없는 폴더",
-  "promptBlockLibrary_scope": "탐색 범위",
-  "promptBlockLibrary_newBlock": "새 블록",
-  "promptBlockLibrary_editBlock": "블록 편집",
-  "promptBlockLibrary_newFolder": "새 폴더",
-  "promptBlockLibrary_newSubfolder": "새 하위 폴더",
-  "promptBlockLibrary_renameFolder": "폴더 이름 변경",
-  "promptBlockLibrary_moveToRoot": "루트로 이동",
-  "promptBlockLibrary_moveToFolder": "폴더로 이동",
-  "promptBlockLibrary_favorites": "즐겨찾기",
-  "promptBlockLibrary_unclassified": "미분류",
-  "promptBlockLibrary_newCollection": "새 컬렉션",
-  "promptBlockLibrary_newSubcollection": "새 하위 컬렉션",
-  "promptBlockLibrary_newCollectionFolder": "새 컬렉션 폴더",
-  "promptBlockLibrary_renameCollection": "컬렉션 이름 변경",
-  "promptBlockLibrary_renameCollectionFolder": "컬렉션 폴더 이름 변경",
-  "promptBlockLibrary_moveToFavoritesRoot": "즐겨찾기 루트로 이동",
-  "promptBlockLibrary_unnamedCollection": "이름 없는 컬렉션",
-  "promptBlockLibrary_unnamedCollectionFolder": "이름 없는 컬렉션 폴더",
-  "promptBlockLibrary_collectionName": "컬렉션 이름",
-  "promptBlockLibrary_collectionNameHint": "컬렉션 이름",
-  "promptBlockLibrary_noCollections": "아직 컬렉션이 없습니다 — 즐겨찾기 옆의 +를 누르거나 블록을 컬렉션으로 끌어 놓으세요",
-  "promptBlockLibrary_noFolders": "아직 폴더가 없습니다",
-  "promptBlockLibrary_emptyFavorites": "즐겨찾기한 블록이 없습니다 — 블록의 ★를 눌러 즐겨찾기에 추가하세요",
-  "promptBlockLibrary_emptyCollection": "이 컬렉션은 비어 있습니다",
   "promptBlockLibrary_deleteCollectionConfirm": "\"{name}\" 컬렉션을 삭제하시겠습니까? 안의 블록은 삭제되지 않고 컬렉션에서만 빠집니다.",
   "@promptBlockLibrary_deleteCollectionConfirm": {
     "placeholders": {
@@ -3845,39 +3006,9 @@
   },
   "promptBlockLibrary_blockTitle": "제목",
   "promptBlockLibrary_titleHint": "블록 제목",
-  "promptBlockLibrary_searchHint": "제목, 프롬프트, 태그 검색",
   "promptBlockLibrary_folder": "폴더",
-  "promptBlockLibrary_folderName": "폴더 이름",
-  "promptBlockLibrary_folderNameHint": "폴더 이름",
-  "promptBlockLibrary_basicPrompt": "기본 프롬프트",
-  "promptBlockLibrary_generationSettings": "설정",
-  "promptBlockLibrary_settingsOptionalHint": "입력한 매개변수만 저장됩니다. 블록을 삽입한 뒤 설정을 직접 적용하세요.",
-  "promptBlockLibrary_notSpecified": "지정 안 함",
-  "promptBlockLibrary_stepsLabel": "스텝",
-  "promptBlockLibrary_noiseScheduleLabel": "노이즈 스케줄",
-  "promptBlockLibrary_invalidGenerationSettings": "설정을 확인하세요: 스텝 1–50, 프롬프트 가이던스 1–20, 프롬프트 가이던스 리스케일 0–1, 모델 호환성.",
-  "promptBlockLibrary_applySettings": "설정 가져오기",
   "promptBlockLibrary_settingsApplied": "블록 설정을 현재 이미지로 가져왔습니다",
   "promptBlockLibrary_settingsIncompatible": "블록 설정이 대상 모델과 호환되지 않아 매개변수를 가져오지 않았습니다.",
-  "promptBlockLibrary_noSettings": "저장된 생성 설정이 없습니다",
-  "promptBlockLibrary_tags": "태그",
-  "promptBlockLibrary_addTag": "태그 추가",
-  "promptBlockLibrary_tagName": "태그 이름",
-  "promptBlockLibrary_tagColor": "태그 색상(16진수)",
-  "promptBlockLibrary_duplicateTag": "이 블록에 같은 이름의 태그가 이미 있습니다",
-  "promptBlockLibrary_invalidTagColor": "올바른 16진수 색상을 입력하세요",
-  "pillCard_rollScope": "변화 범위",
-  "pillCard_positiveScope": "프롬프트",
-  "pillCard_negativeScope": "네거티브",
-  "promptBlockLibrary_modelResetNotice": "모델을 바꾼 뒤 지원하지 않는 값을 지웠습니다.",
-  "promptBlockLibrary_atomInputHint": "텍스트를 입력하고 Enter를 눌러 아톰으로 만드세요",
-  "promptBlockLibrary_atomRestoreHint": "클릭하면 편집 가능한 텍스트로 되돌립니다",
-  "promptBlockLibrary_atomOrphan": "알 수 없는 표시",
-  "promptBlockLibrary_atomEditorTutorial": "Enter로 블록을 만들고, 블록을 클릭하면 텍스트로 되돌립니다. 저장할 때 블록이 아닌 텍스트는 아톰으로 바뀝니다.",
-  "promptBlockLibrary_color": "색상",
-  "promptBlockLibrary_icon": "아이콘",
-  "promptBlockLibrary_saved": "저장했습니다",
-  "promptBlockLibrary_copied": "내용을 복사했습니다",
   "promptBlockLibrary_deleted": "삭제했습니다",
   "promptBlockLibrary_multiSelect": "다중 선택",
   "promptBlockLibrary_exitMultiSelect": "다중 선택 종료",
@@ -3891,37 +3022,8 @@
   },
   "promptBlockLibrary_selectAllVisible": "모두 선택",
   "promptBlockLibrary_clearSelection": "선택 해제",
-  "promptBlockLibrary_moveTo": "이동…",
-  "promptBlockLibrary_moveToFolderTitle": "폴더로 이동",
-  "promptBlockLibrary_deleteBlocksConfirm": "선택한 블록 {count}개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-  "@promptBlockLibrary_deleteBlocksConfirm": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "promptBlockLibrary_deleteSelected": "선택한 블록 {count}개 삭제",
-  "@promptBlockLibrary_deleteSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_empty": "아직 프롬프트 블록이 없습니다",
-  "promptBlockLibrary_emptyFolder": "이 폴더는 비어 있습니다",
   "promptBlockLibrary_noSearchResults": "일치하는 블록이 없습니다",
-  "promptBlockLibrary_tryDifferentSearch": "다른 검색어를 사용해 보세요",
-  "promptBlockLibrary_emptyHint": "블록을 만들어 재사용할 텍스트를 정리해 보세요",
-  "promptBlockLibrary_loadFailed": "프롬프트 블록을 불러오지 못했습니다: {error}",
-  "@promptBlockLibrary_loadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
   "promptBlockLibrary_deleteFolderTitle": "\"{name}\" 폴더를 삭제하시겠습니까?",
   "@promptBlockLibrary_deleteFolderTitle": {
     "placeholders": {
@@ -3934,11 +3036,7 @@
   "promptBlockLibrary_destinationFolder": "대상 폴더",
   "promptBlockLibrary_deleteContents": "내용 삭제",
   "promptBlockLibrary_deleteContentsWarning": "폴더 트리 안의 모든 블록도 영구 삭제됩니다.",
-  "promptBlockLibrary_importExport": "가져오기 / 내보내기",
-  "promptBlockLibrary_importTxtFiles": "TXT 파일 가져오기",
-  "promptBlockLibrary_importFromFolder": "폴더에서 가져오기…",
   "promptBlockLibrary_exportLibraryBackup": "라이브러리 백업 내보내기…",
-  "promptBlockLibrary_importLibraryBackup": "라이브러리 백업 가져오기…",
   "promptBlockLibrary_importTxtTitle": "TXT 파일 선택",
   "promptBlockLibrary_txtImportDone": "블록 {created}개를 가져오고 기존 소스 {skipped}개를 건너뛰었습니다",
   "@promptBlockLibrary_txtImportDone": {
@@ -3997,30 +3095,7 @@
   "promptBlockLibrary_curationUnchanged": "변경 없음",
   "promptBlockLibrary_curationChanged": "변경됨",
   "promptBlockLibrary_curationLocalModified": "로컬에서 수정됨",
-  "promptBlockLibrary_libraryBackupDone": "블록 {count}개가 담긴 백업을 내보냈습니다",
-  "@promptBlockLibrary_libraryBackupDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_libraryImportTitle": "라이브러리 백업 선택",
-  "promptBlockLibrary_libraryBackupInvalid": "올바른 블록 라이브러리 백업이 아닙니다",
-  "promptBlockLibrary_libraryImportDone": "블록 {blocks}개와 폴더 {folders}개를 가져오고 기존 항목 {skipped}개를 건너뛰었습니다",
-  "@promptBlockLibrary_libraryImportDone": {
-    "placeholders": {
-      "blocks": {
-        "type": "int"
-      },
-      "folders": {
-        "type": "int"
-      },
-      "skipped": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockLibrary_importFailed": "가져오지 못했습니다: {error}",
   "@promptBlockLibrary_importFailed": {
     "placeholders": {
@@ -4031,9 +3106,6 @@
   },
   "promptBlockLibrary_sourceFile": "소스 파일",
   "promptBlockLibrary_importedAt": "가져온 시간",
-  "promptBlockLibrary_listView": "목록 보기",
-  "promptBlockLibrary_gridView": "그리드 보기",
-  "promptBlockLibrary_waterfallView": "폭포형 보기",
   "promptBlockPalette_tooltip": "블록",
   "promptBlockPalette_emptyHint": "자주 쓰는 프롬프트 블록이나 번역 블록을 여기에 보관하세요. 클릭하면 커서 위치에 삽입되고, 프롬프트 입력란으로 끌어 놓을 수도 있습니다.",
   "promptBlockPalette_remove": "블록에서 제거",
@@ -4047,45 +3119,11 @@
       }
     }
   },
-  "promptBlockLibrary_sortBy": "정렬 기준",
-  "promptBlockLibrary_sortCustom": "기본(수동 순서)",
-  "promptBlockLibrary_sortUpdated": "마지막 수정",
-  "promptBlockLibrary_sortTitle": "제목",
-  "promptBlockLibrary_sortColor": "색상",
-  "promptBlockLibrary_sortIcon": "아이콘",
-  "promptBlockLibrary_sortAscending": "오름차순",
-  "promptBlockLibrary_sortDescending": "내림차순",
-  "promptBlockLibrary_cardSize": "카드 크기",
-  "promptBlockLibrary_reorderFolders": "폴더 순서 변경",
   "nav_styleExplore": "스타일 탐색",
-  "styleExplore_rename": "이름 변경",
-  "styleExplore_nameRequired": "이름은 비워 둘 수 없습니다",
   "styleExplore_operationFailed": "작업에 실패했습니다",
   "styleExplore_discardChangesTitle": "저장하지 않은 변경 사항을 버리시겠습니까?",
   "styleExplore_discardChangesMessage": "작업 공간에 저장하지 않은 변경 사항이 있습니다. 계속하면 버려집니다.",
   "styleExplore_discardChangesConfirm": "계속하고 버리기",
-  "styleExplore_newRun": "새 탐색",
-  "styleExplore_runDeleted": "탐색 “{name}” 삭제됨",
-  "@styleExplore_runDeleted": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_runStatusGenerating": "생성 중",
-  "styleExplore_runStatusPaused": "일시 정지됨",
-  "styleExplore_runStatusCancelled": "취소됨",
-  "styleExplore_pauseRun": "일시 정지",
-  "styleExplore_cancelRun": "탐색 취소",
-  "styleExplore_retryFailed": "실패 항목 다시 시도({count})",
-  "@styleExplore_retryFailed": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_manualRunName": "수동 수집 {time}",
   "@styleExplore_manualRunName": {
     "placeholders": {
@@ -4095,64 +3133,6 @@
     }
   },
   "styleExplore_runBusy": "생성 중입니다. 잠시 후 다시 시도하세요",
-  "styleExplore_deleteRunTitle": "탐색 삭제",
-  "styleExplore_deleteRunMessage": "\"{name}\"과(와) 후보 이미지 사본을 삭제합니다. 갤러리의 원본 이미지는 영향을 받지 않습니다.",
-  "@styleExplore_deleteRunMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_cancelRunTitle": "탐색 취소",
-  "styleExplore_cancelRunMessage": "취소한 탐색은 재시작할 수 없으며 대기 중인 후보도 취소됩니다.",
-  "styleExplore_filterAll": "전체",
-  "styleExplore_filterHearted": "즐겨찾기",
-  "styleExplore_renameFolder": "그룹 이름 변경",
-  "styleExplore_deleteFolder": "그룹 삭제",
-  "styleExplore_deleteFolderMessage": "“{name}” 그룹을 삭제합니다. 후보는 미분류로 돌아가며 이미지는 유지됩니다.",
-  "@styleExplore_deleteFolderMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_folderNameLabel": "그룹 이름",
-  "styleExplore_deleteFamily": "진화 라인 삭제",
-  "styleExplore_deleteFamilyMessage": "“{name}” 진화 라인과 모든 부모 및 자손 기록(이미지 {count}장)을 삭제합니다. 이미지 파일은 유지됩니다.",
-  "@styleExplore_deleteFamilyMessage": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_familyBusy": "이 진화 라인에 생성 중인 후보가 있습니다. 먼저 생성을 중지하세요.",
-  "styleExplore_folderUncategorized": "미분류",
-  "styleExplore_folderCreated": "“{name}” 그룹 생성됨",
-  "@styleExplore_folderCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_candidateMissing": "이미지 파일 없음",
-  "styleExplore_candidateDetailTitle": "후보 상세",
-  "styleExplore_prevCandidate": "이전",
-  "styleExplore_nextCandidate": "다음",
-  "styleExplore_roundNumber": "{number}라운드",
-  "@styleExplore_roundNumber": {
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
   "styleExplore_adoptBlockSaved": "“{name}” 블록으로 저장됨",
   "@styleExplore_adoptBlockSaved": {
     "placeholders": {
@@ -4162,25 +3142,9 @@
     }
   },
   "styleExplore_adoptBlockEmpty": "선택한 후보에 저장할 작가 조합이나 긍정 프롬프트가 없습니다",
-  "styleExplore_deleteImage": "이미지 삭제",
-  "styleExplore_deleteImageTitle": "후보 이미지 삭제",
-  "styleExplore_deleteImageMessage": "후보의 이미지 사본과 기록을 삭제합니다. 라이브러리 원본은 유지됩니다.",
-  "styleExplore_deleteImageDone": "후보 이미지와 기록을 삭제했습니다",
-  "styleExplore_selectCandidates": "선택",
-  "styleExplore_selectedCount": "{count}개 선택됨",
-  "@styleExplore_selectedCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "promptBlockEditor_library": "블록 라이브러리",
   "promptBlockPicker_title": "블록 선택",
-  "promptBlockLibrary_thumbnail": "썸네일",
-  "promptBlockLibrary_selectNewImage": "새 이미지 선택",
   "promptBlockLibrary_selectImage": "이미지 선택",
-  "promptBlockLibrary_adjustDisplayRange": "표시 범위 조정",
   "promptBlockLibrary_adjustThumbnailTitle": "썸네일 표시 범위 조정",
   "promptBlockLibrary_dragToMove": "끌어서 이동, 스크롤하거나 손가락을 오므려 확대/축소",
   "promptBlockLibrary_addToLibrary": "블록 라이브러리에 추가",
@@ -4198,52 +3162,6 @@
   },
   "promptBlockLibrary_updateExistingThumbnail": "기존 블록 썸네일 업데이트",
   "promptBlockLibrary_updateExistingThumbnailSubtitle": "블록을 골라 썸네일을 교체합니다",
-  "styleExplore_deepRoundCountHint": "최소 {min}장(각 부모당 1장 보장)",
-  "@styleExplore_deepRoundCountHint": {
-    "placeholders": {
-      "min": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_deepRoundNoInstance": "메인 프롬프트에 활성 유전 무작위 블록이 없어 자손을 생성할 수 없습니다",
-  "styleExplore_deepRoundEmpty": "서로 다른 자손 작가 조합을 충분히 만들 수 없습니다",
-  "styleExplore_sortLeft": "왼쪽이 더 좋음",
-  "styleExplore_sortRight": "오른쪽이 더 좋음",
-  "styleExplore_sortNeither": "둘 다 별로",
-  "styleExplore_sortSkip": "건너뛰기",
-  "styleExplore_sortProgress": "{current} / {total} 쌍",
-  "@styleExplore_sortProgress": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_sortDone": "쌍별 비교 완료",
-  "styleExplore_branchCreated": "다음 세대 육성됨(부모 {count}개)",
-  "@styleExplore_branchCreated": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_branchNeedLatest": "최신 세대의 자손으로 다음 세대를 육성하세요",
-  "styleExplore_branchRoundsIncomplete": "현재 세대에 미완성 자손이 있습니다. 기다리거나 생성을 중지하세요",
-  "styleExplore_branchDuplicate": "선택한 자식이 1세대 부모 문자열과 같습니다",
-  "styleExplore_branchEmpty": "자식 후보를 하나 이상 선택하세요",
-  "styleExplore_pileManageDeleteDone": "후보 {count}개와 이미지 사본을 삭제했습니다",
-  "@styleExplore_pileManageDeleteDone": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "subscriptionExpiresOn": "{date} 만료",
   "@subscriptionExpiresOn": {
     "placeholders": {
@@ -5126,11 +4044,7 @@
   "settings_updateCredentials2": "로그인 정보 업데이트",
   "settings_checking": "확인하는 중…",
   "settings_enterNewSignInToken": "새 로그인 토큰을 입력하세요. 확인되면 이 계정이 업데이트됩니다.",
-  "auth_signInAccounts": "로그인 및 계정",
   "auth_notSignedIn": "로그인하지 않음",
-  "auth_chooseAccountContinue": "계속하려면 계정을 선택하세요",
-  "auth_manageAccounts2": "계정 관리",
-  "auth_subscriptionExpired": "구독 만료됨",
   "settings_tagExpansion": "태그 확장",
   "settings_tagDictionaries": "태그 사전",
   "settings_cacheMaintenance": "캐시 관리",
@@ -5330,8 +4244,6 @@
   "translationLanguage_japanese": "일본어",
   "translationLanguage_korean": "한국어",
   "translationLanguage_traditionalChinese": "중국어 번체",
-  "promptBlockEditor_translationNeedsReview": "원문이 바뀌었습니다. 번역을 업데이트해야 합니다",
-  "promptBlockEditor_translationReviewHint": "원문을 편집한 뒤 이 번역도 검토하세요",
   "modelTask_translateTitle": "원문 → 읽기 언어",
   "modelTask_promptReverseTitle": "읽기 언어 → 원문",
   "modelTask_tagTranslateTitle": "태그 이름 번역",
@@ -5902,56 +4814,8 @@
   "promptTranslation_incompleteStructure": "변환 결과의 가중치나 그룹이 완전하지 않습니다. 초안은 유지됩니다",
   "promptTranslation_inputRequired": "먼저 변환할 내용을 입력하세요",
   "wiki_configureTagModel": "먼저 모델 및 API에서 사용할 태그 번역 모델을 설정하세요.",
-  "blockOrganizer_barrierLabel": "블록 정리",
-  "blockOrganizer_replaceTitle": "같은 소스의 사본을 교체하시겠습니까?",
   "blockOrganizer_replaceMoveBody": "대상에 같은 소스의 사본이 이미 {count}개 있습니다. 교체하면 소스는 라이브러리에서 숨겨지며, 프롬프트에 이미 삽입된 인스턴스는 원래 블록을 계속 참조할 수 있습니다.",
   "@blockOrganizer_replaceMoveBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replaceCopyBody": "대상에 같은 소스의 사본이 이미 {count}개 있습니다. 교체하면 대상 사본이 업데이트되고 소스는 유지됩니다.",
-  "@blockOrganizer_replaceCopyBody": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_replace": "교체",
-  "blockOrganizer_customTagColor": "사용자 지정 태그 색상",
-  "blockOrganizer_colorHint": "#RRGGBB 또는 #AARRGGBB",
-  "blockOrganizer_invalidColor": "6자리 또는 8자리 16진수 색상을 입력하세요",
-  "blockOrganizer_deleteFolderConfirm": "\"{name}\"을(를) 삭제하시겠습니까? 안의 블록은 루트 폴더로 이동합니다.",
-  "@blockOrganizer_deleteFolderConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_deleteCollectionConfirm": "\"{name}\"을(를) 삭제하시겠습니까? 블록 자체는 유지됩니다.",
-  "@blockOrganizer_deleteCollectionConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "blockOrganizer_titleFavorites": "즐겨찾기 및 컬렉션",
-  "blockOrganizer_titleFolders": "폴더 선택",
-  "blockOrganizer_itemCount": "{count}개 항목",
-  "@blockOrganizer_itemCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
-  "blockOrganizer_search": "검색",
-  "blockOrganizer_name": "이름",
-  "blockOrganizer_customColor": "사용자 지정 색상…",
-  "blockOrganizer_newCollection": "새 컬렉션",
-  "blockOrganizer_newCollectionFolder": "새 컬렉션 폴더",
-  "blockOrganizer_newTag": "새 태그",
-  "blockOrganizer_newFolder": "새 폴더",
-  "blockOrganizer_rootUncategorized": "루트 / 미분류",
-  "blockOrganizer_manageDrag": "관리, 끌어서 순서 변경",
-  "blockLibrary_dragSelectedHint": "선택한 블록을 왼쪽의 즐겨찾기나 폴더로 끌어 놓은 뒤, 놓을 때 복사 또는 이동을 선택하세요.",
-  "blockLibrary_blockCount": "블록 {count}개",
-  "@blockLibrary_blockCount": {
     "placeholders": {
       "count": {}
     }
@@ -5961,8 +4825,6 @@
   "blockLibrary_sameSourceSelected": "선택 항목에 같은 소스의 사본이 있습니다. 따로 정리하세요",
   "blockLibrary_sameSourceExists": "같은 소스의 사본이 이미 있습니다. 교체를 확인하세요",
   "blockLibrary_collectionMissing": "컬렉션이 존재하지 않습니다",
-  "promptBlockEditor_appearance": "블록 외관",
-  "promptBlockEditor_imageUnreadable": "선택한 이미지를 읽을 수 없습니다",
   "blockAppearance_classic": "기본",
   "blockAppearance_stripes": "가는 줄무늬",
   "blockAppearance_dots": "물방울",
@@ -6290,15 +5152,6 @@
       "error": {}
     }
   },
-  "vibeImport_imageProgress": "이미지 가져오는 중({current}/{total}): {source}",
-  "@vibeImport_imageProgress": {
-    "placeholders": {
-      "current": {},
-      "total": {},
-      "source": {}
-    }
-  },
-  "vibeImport_clipboardSource": "클립보드",
   "resolution_noAdjustment": "조정할 필요 없음",
   "dataRefresh_updating": "데이터 업데이트 중...",
   "dataRefresh_updatingService": "{service} 업데이트 중...",
@@ -6539,15 +5392,6 @@
   "generation_referenceUpload": "업로드",
   "generation_seedPinnedLabel": "시드 · 고정",
   "generation_paramsDrawerTooltip": "추가 매개변수",
-  "generation_historyBatchCount": "{count}장",
-  "@generation_historyBatchCount": {
-    "description": "Number of images in one generation history batch",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
   "library_sizeSmall": "작게",
   "library_sizeMedium": "보통",
   "library_sizeLarge": "크게",
@@ -6558,16 +5402,6 @@
   "library_selectedCount": "{count}개 선택",
   "library_invertSelection": "선택 반전",
   "library_more": "더 보기",
-  "library_addToGeneration": "생성에 추가",
-  "library_strength": "강도",
-  "library_information": "정보",
-  "library_fidelity": "충실도",
-  "library_encodeOnUse": "사용 시 인코딩",
-  "library_reencode": "재인코딩 필요",
-  "library_unusableModel": "{model}에서 사용 불가",
-  "library_exportAll": "모두 내보내기",
-  "library_rescanFolders": "폴더 다시 스캔",
-  "library_preview": "미리 보기",
   "@library_selectedCount": {
     "placeholders": {
       "count": {
@@ -6575,64 +5409,12 @@
       }
     }
   },
-  "@library_unusableModel": {
-    "placeholders": {
-      "model": {
-        "type": "String"
-      }
-    }
-  },
-  "viewer_backLocalGallery": "로컬 갤러리",
   "viewer_fit": "맞춤",
   "viewer_showInfo": "정보 패널 표시 (I)",
   "viewer_hideInfo": "정보 패널 숨기기 (I)",
   "viewer_originalSize": "원본 크기 (1)",
   "viewer_fullscreen": "전체 화면 (F11)",
   "shortcut_action_toggle_info_panel": "정보 패널 전환",
-  "styleExplore_runNamingHint": "자동 이름: 랜덤 블록 이름 + 날짜. 이름을 두 번 클릭하여 변경",
-  "styleExplore_roundGenerating": "{round} 라운드 · 생성 중",
-  "@styleExplore_roundGenerating": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorTitle": "상세",
-  "styleExplore_failedBadge": "실패 {count}",
-  "@styleExplore_failedBadge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_showInspector": "상세 패널 펼치기",
-  "styleExplore_roundProgress": "{round} 라운드 · {current} / {total}",
-  "@styleExplore_roundProgress": {
-    "placeholders": {
-      "round": {
-        "type": "int"
-      },
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_earlier": "이전",
-  "styleExplore_noMatchingRuns": "일치하는 탐색이 없습니다",
-  "styleExplore_lineCount": "{count} 진화 계통",
-  "@styleExplore_lineCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_newRunDescription": "현재 프롬프트와 설정으로 시작하고 이름은 나중에 변경",
   "styleExplore_autoRunName": "{blocks} · {time}",
   "@styleExplore_autoRunName": {
     "placeholders": {
@@ -6643,89 +5425,6 @@
         "type": "String"
       }
     }
-  },
-  "styleExplore_largeCandidates": "큰 후보 이미지",
-  "styleExplore_hideInspector": "상세 패널 접기",
-  "styleExplore_searchRuns": "탐색 이름 또는 작가 검색",
-  "styleExplore_favoriteCount": "즐겨찾기 {count}",
-  "@styleExplore_favoriteCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingBadge": "생성 중 {current}/{total}",
-  "@styleExplore_generatingBadge": {
-    "placeholders": {
-      "current": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_roundCount": "{count} 라운드",
-  "@styleExplore_roundCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_pausedRemaining": "일시 정지 · {count}장 남음",
-  "@styleExplore_pausedRemaining": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stopRun": "생성 중지",
-  "styleExplore_thisWeek": "이번 주",
-  "styleExplore_today": "오늘",
-  "styleExplore_smallCandidates": "작은 후보 이미지",
-  "styleExplore_imageCount": "{count}장",
-  "@styleExplore_imageCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variablesTitle": "무작위 변수",
-  "@styleExplore_variablesTitle": {
-    "description": "Style exploration workbench: styleExplore_variablesTitle"
-  },
-  "styleExplore_variablesHint": "이미지마다 다시 추출",
-  "@styleExplore_variablesHint": {
-    "description": "Style exploration workbench: styleExplore_variablesHint"
-  },
-  "styleExplore_variablesExplanation": "활성화된 무작위·순차 진화 블록의 추출 내용을 후보마다 기록합니다.",
-  "@styleExplore_variablesExplanation": {
-    "description": "Style exploration workbench: styleExplore_variablesExplanation"
-  },
-  "styleExplore_variablePoolSize": "풀 {count}개",
-  "@styleExplore_variablePoolSize": {
-    "description": "Style exploration workbench: styleExplore_variablePoolSize",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_variableEvolutionTarget": "진화 대상",
-  "@styleExplore_variableEvolutionTarget": {
-    "description": "Style exploration workbench: styleExplore_variableEvolutionTarget"
-  },
-  "styleExplore_variableNegative": "부정",
-  "@styleExplore_variableNegative": {
-    "description": "Style exploration workbench: styleExplore_variableNegative"
-  },
-  "styleExplore_variablesEmpty": "프롬프트에 무작위 블록이 없어 후보가 비슷하게 나옵니다.",
-  "@styleExplore_variablesEmpty": {
-    "description": "Style exploration workbench: styleExplore_variablesEmpty"
   },
   "styleExplore_openBlockLibrary": "블록 라이브러리 열기",
   "@styleExplore_openBlockLibrary": {
@@ -6739,461 +5438,10 @@
   "@styleExplore_drawCountSuffix": {
     "description": "Style exploration workbench: styleExplore_drawCountSuffix"
   },
-  "styleExplore_candidatesTab": "후보",
-  "@styleExplore_candidatesTab": {
-    "description": "Style explore task03: candidatesTab"
-  },
-  "styleExplore_evolutionTab": "진화",
-  "@styleExplore_evolutionTab": {
-    "description": "Style explore task03: evolutionTab"
-  },
-  "styleExplore_deepRoundTitle": "진화 · {name} {generation}세대",
-  "@styleExplore_deepRoundTitle": {
-    "description": "Style explore task03: deepRoundTitle",
-    "placeholders": {
-      "name": {
-        "type": "String"
-      },
-      "generation": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallRoundCount": "{count}장",
-  "@styleExplore_wallRoundCount": {
-    "description": "Style explore task03: wallRoundCount",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_wallGenerating": "생성 중",
-  "@styleExplore_wallGenerating": {
-    "description": "Style explore task03: wallGenerating"
-  },
-  "styleExplore_roundFailures": "실패 {count}",
-  "@styleExplore_roundFailures": {
-    "description": "Style explore task03: roundFailures",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_queued": "대기 #{number}",
-  "@styleExplore_queued": {
-    "description": "Style explore task03: queued",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generatingCandidate": "생성 중 #{number}",
-  "@styleExplore_generatingCandidate": {
-    "description": "Style explore task03: generatingCandidate",
-    "placeholders": {
-      "number": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationFailed": "생성 실패",
-  "@styleExplore_generationFailed": {
-    "description": "Style explore task03: generationFailed"
-  },
-  "styleExplore_failureHint": "마우스를 올려 원인 확인",
-  "@styleExplore_failureHint": {
-    "description": "Style explore task03: failureHint"
-  },
-  "styleExplore_imageDeleted": "이미지 삭제됨",
-  "@styleExplore_imageDeleted": {
-    "description": "Style explore task03: imageDeleted"
-  },
-  "styleExplore_parentBadge": "부모",
-  "@styleExplore_parentBadge": {
-    "description": "Style explore task03: parentBadge"
-  },
-  "styleExplore_opMutation": "변이",
-  "@styleExplore_opMutation": {
-    "description": "Style explore task03: opMutation"
-  },
-  "styleExplore_opCrossover": "교차",
-  "@styleExplore_opCrossover": {
-    "description": "Style explore task03: opCrossover"
-  },
-  "styleExplore_opInjection": "주입",
-  "@styleExplore_opInjection": {
-    "description": "Style explore task03: opInjection"
-  },
-  "styleExplore_copyArtists": "작가 문자열 복사",
-  "@styleExplore_copyArtists": {
-    "description": "Style explore task03: copyArtists"
-  },
-  "styleExplore_interrupted": "중단됨",
-  "@styleExplore_interrupted": {
-    "description": "Style explore task03: interrupted"
-  },
-  "styleExplore_emptyFilter": "필터와 일치하는 후보가 없습니다",
-  "@styleExplore_emptyFilter": {
-    "description": "Style explore task03: emptyFilter"
-  },
-  "styleExplore_emptyRound": "이 라운드에는 후보가 없습니다",
-  "@styleExplore_emptyRound": {
-    "description": "Style explore task03: emptyRound"
-  },
-  "styleExplore_unfavorite": "즐겨찾기 해제",
-  "@styleExplore_unfavorite": {
-    "description": "Explore workbench selection: unfavorite"
-  },
-  "styleExplore_groupLabel": "그룹",
-  "@styleExplore_groupLabel": {
-    "description": "Explore workbench selection: groupLabel"
-  },
-  "styleExplore_newGroup": "새 그룹…",
-  "@styleExplore_newGroup": {
-    "description": "Explore workbench selection: newGroup"
-  },
-  "styleExplore_saveBlock": "블록으로 저장",
-  "@styleExplore_saveBlock": {
-    "description": "Explore workbench selection: saveBlock"
-  },
-  "styleExplore_startEvolution": "진화 시작",
-  "@styleExplore_startEvolution": {
-    "description": "Explore workbench selection: startEvolution"
-  },
-  "styleExplore_newestFirst": "최신 라운드 먼저",
-  "@styleExplore_newestFirst": {
-    "description": "Explore workbench selection: newestFirst"
-  },
-  "styleExplore_oldestFirst": "오래된 라운드 먼저",
-  "@styleExplore_oldestFirst": {
-    "description": "Explore workbench selection: oldestFirst"
-  },
-  "styleExplore_pickEvolution": "진화할 후보 선택",
-  "@styleExplore_pickEvolution": {
-    "description": "Explore workbench selection: pickEvolution"
-  },
-  "styleExplore_deleteCandidatesTitle": "후보 삭제",
-  "@styleExplore_deleteCandidatesTitle": {
-    "description": "Delete candidates with or without local copies"
-  },
-  "styleExplore_deleteCandidatesMessage": "후보 {count}개와 이미지 복사본을 삭제할까요? 라이브러리 원본은 유지됩니다.",
-  "@styleExplore_deleteCandidatesMessage": {
-    "description": "Delete candidates with or without local copies",
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_inspectorEmpty": "후보를 선택하여 자세히 보기",
-  "@styleExplore_inspectorEmpty": {
-    "description": "styleExplore_inspectorEmpty."
-  },
-  "styleExplore_drawsTitle": "이 이미지의 추출 결과",
-  "@styleExplore_drawsTitle": {
-    "description": "styleExplore_drawsTitle."
-  },
-  "styleExplore_drawsAfterGeneration": "생성이 완료되면 표시",
-  "@styleExplore_drawsAfterGeneration": {
-    "description": "styleExplore_drawsAfterGeneration."
-  },
-  "styleExplore_emptyDraw": "이번에는 빈 항목이 선택되었습니다",
-  "@styleExplore_emptyDraw": {
-    "description": "styleExplore_emptyDraw."
-  },
-  "styleExplore_hearted": "즐겨찾기됨",
-  "@styleExplore_hearted": {
-    "description": "styleExplore_hearted."
-  },
-  "styleExplore_joinEvolution": "진화에 추가",
-  "@styleExplore_joinEvolution": {
-    "description": "styleExplore_joinEvolution."
-  },
-  "styleExplore_applyToEditor": "편집기에 적용",
-  "@styleExplore_applyToEditor": {
-    "description": "styleExplore_applyToEditor."
-  },
-  "styleExplore_seedName": "시드",
-  "@styleExplore_seedName": {
-    "description": "styleExplore_seedName."
-  },
-  "styleExplore_elapsedName": "소요 시간",
-  "@styleExplore_elapsedName": {
-    "description": "styleExplore_elapsedName."
-  },
-  "styleExplore_parameters": "매개변수",
-  "@styleExplore_parameters": {
-    "description": "styleExplore_parameters."
-  },
-  "styleExplore_modelName": "모델",
-  "@styleExplore_modelName": {
-    "description": "styleExplore_modelName."
-  },
-  "styleExplore_fullPrompt": "전체 프롬프트",
-  "@styleExplore_fullPrompt": {
-    "description": "styleExplore_fullPrompt."
-  },
-  "styleExplore_mergedArtists": "합쳐진 작가 (중복 제거)",
-  "@styleExplore_mergedArtists": {
-    "description": "styleExplore_mergedArtists."
-  },
-  "styleExplore_selectionExplanation": "블록 저장은 하나로 합치고, 진화는 각 이미지의 작가 문자열을 부모로 사용합니다.",
-  "@styleExplore_selectionExplanation": {
-    "description": "styleExplore_selectionExplanation."
-  },
-  "styleExplore_quickGroupHint": "1–9로 빠르게 분류",
-  "@styleExplore_quickGroupHint": {
-    "description": "styleExplore_quickGroupHint."
-  },
-  "styleExplore_newGroupChip": "새 그룹",
-  "@styleExplore_newGroupChip": {
-    "description": "Inspector compact new group chip."
-  },
-  "styleExplore_parameterSummary": "{width}×{height} · {steps} 단계 · {scale}",
-  "@styleExplore_parameterSummary": {
-    "description": "Inspector generation parameter summary.",
-    "placeholders": {
-      "width": {
-        "type": "int"
-      },
-      "height": {
-        "type": "int"
-      },
-      "steps": {
-        "type": "int"
-      },
-      "scale": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_viewerBack": "화풍 탐색",
-  "@styleExplore_viewerBack": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_viewerPosition": "{index}장 / 총 {total}장",
-  "@styleExplore_viewerPosition": {
-    "description": "Exploration viewer.",
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "total": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_viewerGroupsShortcut": "1–9: 분류, 0: 분류 해제",
-  "@styleExplore_viewerGroupsShortcut": {
-    "description": "Exploration viewer."
-  },
-  "styleExplore_seedClickCopy": "시드 (클릭하여 복사)",
-  "@styleExplore_seedClickCopy": {
-    "description": "Exploration viewer."
-  },
   "styleExplore_appliedToEditor": "편집기에 적용됨",
   "@styleExplore_appliedToEditor": {
     "description": "Candidate prompt applied to editor."
   },
-  "styleExplore_generationNumber": "{index}세대",
-  "@styleExplore_generationNumber": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_currentGeneration": "현재",
-  "styleExplore_generationStart": "후보 {count}장으로 시작",
-  "@styleExplore_generationStart": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationSource": "{index}세대에서 {count}장 선택 + 1세대 {roots}장 역교배",
-  "@styleExplore_generationSource": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      },
-      "roots": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_parentsByPreference": "부모 · 선호도순",
-  "styleExplore_backcross": "역교배",
-  "styleExplore_childrenCount": "자손 · {count}",
-  "@styleExplore_childrenCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedSelected": "선택한 {count}장으로 {index}세대 육성",
-  "@styleExplore_breedSelected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_generationBusy": "이 세대는 아직 생성 중입니다",
-  "styleExplore_regeneratePrefix": "다시 생성",
-  "styleExplore_regenerateSuffix": "자손",
-  "styleExplore_pairCompare": "쌍 비교로 순위 지정",
-  "styleExplore_howToUse": "사용 방법",
-  "styleExplore_helpParents": "부모는 선택한 작가 조합입니다. 선호도가 높을수록 조합에 참여할 가능성이 높습니다.",
-  "styleExplore_helpChildren": "자손은 부모 교차, 변이 또는 작가 풀에서 새 작가를 주입하여 만들어집니다.",
-  "styleExplore_helpCompare": "쌍 비교는 부모 선호도를 갱신하여 이후 조합에 반영합니다.",
-  "styleExplore_helpBackcross": "다음 세대를 육성할 때 1세대 부모가 역교배에 자동으로 포함됩니다.",
-  "styleExplore_originTitle": "생성 과정",
-  "styleExplore_originCross": "이 부모들의 작가를 교차 조합했습니다",
-  "styleExplore_originMutation": "부모 조합의 일부 작가를 교체했습니다",
-  "styleExplore_originInjection": "풀에서 새 작가를 주입했습니다",
-  "styleExplore_newArtist": "신규",
-  "styleExplore_evolutionEmpty": "후보에서 마음에 드는 이미지를 골라 진화 라인을 시작하세요",
-  "styleExplore_pickFromCandidates": "후보 고르기",
-  "styleExplore_generationSummary": "부모 {parents}장 · 자손 {children}장 · 다음 세대에 {selected}장 선택",
-  "@styleExplore_generationSummary": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      },
-      "selected": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_breedNext": "다음 세대 육성",
-  "styleExplore_optionalName": "이름 (선택 사항)",
-  "styleExplore_childrenEmpty": "아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.",
-  "styleExplore_evolutionStepOne": "부모 작가를 섞어 자손 생성",
-  "styleExplore_evolutionStepTwo": "쌍별 비교로 선호도 전달",
-  "styleExplore_evolutionStepThree": "좋은 자손을 골라 다음 세대 육성",
-  "styleExplore_evolutionNewLine": "새 진화 계통",
-  "styleExplore_evolutionJoinLine": "“{name}”의 현재 세대에 추가",
-  "@styleExplore_evolutionJoinLine": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionName": "진화 계통 이름",
-  "styleExplore_defaultEvolutionName": "진화 계통 {n}",
-  "@styleExplore_defaultEvolutionName": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionAddCustom": "사용자 지정 작가 문자열 추가",
-  "styleExplore_evolutionCustomHint": "작가 문자열 입력",
-  "styleExplore_evolutionParentEmpty": "사용 가능한 작가 문자열 없음",
-  "styleExplore_evolutionTarget": "자손은 프롬프트의",
-  "styleExplore_evolutionOnlyCreate": "생성만",
-  "styleExplore_evolutionOnlyJoin": "추가만",
-  "styleExplore_evolutionCreateGenerate": "생성 후 {count}장 생성",
-  "@styleExplore_evolutionCreateGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionJoinGenerate": "추가 후 {count}장 생성",
-  "@styleExplore_evolutionJoinGenerate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionFirstBatch": "첫 자손 묶음",
-  "styleExplore_evolutionMinimum": "장 (최소 {count})",
-  "@styleExplore_evolutionMinimum": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionCreated": "진화 계통 “{name}” 생성됨",
-  "@styleExplore_evolutionCreated": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_evolutionJoined": "진화 계통 “{name}”에 추가됨",
-  "@styleExplore_evolutionJoined": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
-  "styleExplore_sortLiveSave": "결과는 즉시 저장되며 언제든 닫을 수 있습니다",
-  "styleExplore_sortRanking": "현재 순위 · 실시간",
-  "styleExplore_sortRankingHint": "순위는 다음 자손 묶음에서 각 부모가 선택될 확률에 영향을 줍니다",
-  "styleExplore_sortSpace": "Space",
-  "styleExplore_saveSingleSubtitle": "#{n}의 작가를 하나의 블록으로 저장",
-  "@styleExplore_saveSingleSubtitle": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveManySubtitle": "후보 {count}장의 작가를 하나의 라이브러리 블록으로 합칩니다",
-  "@styleExplore_saveManySubtitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveArtistsOnly": "추출된 작가만",
-  "styleExplore_saveFullPositive": "전체 긍정 프롬프트",
-  "styleExplore_saveNoDraws": "긍정 유전 추출 기록이 없어 전체 긍정 프롬프트를 저장합니다",
-  "styleExplore_saveContent": "내용",
-  "styleExplore_saveRemoveAtoms": "×를 눌러 원하지 않는 작가 제거",
-  "styleExplore_saveRemoved": "{count}개 제거됨",
-  "@styleExplore_saveRemoved": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveRestore": "복원",
-  "styleExplore_saveName": "이름",
-  "styleExplore_saveColor": "색상",
-  "styleExplore_saveIcon": "아이콘",
-  "styleExplore_saveFolder": "라이브러리 폴더",
-  "styleExplore_saveRoot": "루트",
-  "styleExplore_saveHint": "저장한 블록을 라이브러리에서 프롬프트로 끌어올 수 있습니다",
-  "styleExplore_onboardingTitle": "무작위 블록으로 화풍 탐색",
-  "styleExplore_onboardingRandomTitle": "무작위 블록 추가",
-  "styleExplore_onboardingDrawTitle": "후보 묶음 추출",
   "styleExplore_onboardingDraw": "후보 {count}장 추출",
   "@styleExplore_onboardingDraw": {
     "placeholders": {
@@ -7202,136 +5450,156 @@
       }
     }
   },
-  "styleExplore_onboardingReviewTitle": "즐겨찾기, 비교, 진화",
-  "styleExplore_onboardingOpenPrevious": "이전 탐색 열기",
-  "styleExplore_onboardingSubtitle": "이미지마다 랜덤 블록에서 작가를 다시 추첨합니다. 마음에 드는 이미지를 고르세요",
-  "styleExplore_onboardingRandomDescription": "프롬프트에 작가 풀을 넣으세요. 감지된 랜덤 변수는 왼쪽에 표시됩니다.",
-  "styleExplore_onboardingDrawDescription": "왼쪽 아래의 “후보 {count}장 생성”을 누르세요. 각 이미지 아래에 추첨된 작가가 표시됩니다.",
-  "@styleExplore_onboardingDrawDescription": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_onboardingReviewDescription": "F로 즐겨찾기하고 몇 장을 선택해 진화하세요. 좋은 작가 조합을 다음 세대로 이어갑니다.",
-  "styleExplore_onboardingDetected": "{count}개 감지됨",
-  "@styleExplore_onboardingDetected": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_compareTitle": "일대일 비교 · 부모 순위",
-  "styleExplore_compareQuestion": "어느 이미지가 원하는 화풍에 더 가까운가요?",
-  "styleExplore_childLabel": "자식 #{index}",
-  "styleExplore_generationCounts": "부모 {parents}개 → 자식 {children}개",
-  "styleExplore_viewLarge": "크게 보기",
-  "@styleExplore_childLabel": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
-  "@styleExplore_generationCounts": {
-    "placeholders": {
-      "parents": {
-        "type": "int"
-      },
-      "children": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_saveDialogTitle": "프롬프트 블록으로 저장",
-  "styleExplore_startDialogTitle": "후보 {count}개로 진화 시작",
-  "@styleExplore_startDialogTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_stepGenerate": "자손 생성",
-  "styleExplore_stepPick": "좋은 후보 선택",
-  "styleExplore_stepBreed": "다음 세대 육성",
-  "styleExplore_firstGenerationParents": "1세대 부모 · {count}",
-  "@styleExplore_firstGenerationParents": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "styleExplore_evolutionTargetAfter": "위치를 교체하고 나머지 내용은 유지합니다",
   "stats_title": "통계",
   "stats_subtitle": "로컬 갤러리 · 파일 시간 기준",
   "stats_rangeDays": "{count}일",
-  "@stats_rangeDays": {"placeholders": {"count": {}}},
+  "@stats_rangeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_rangeThisYear": "올해",
   "stats_rangeAll": "전체",
   "stats_naiOnly": "NAI 이미지만",
   "stats_updatedAt": "{time} 업데이트",
-  "@stats_updatedAt": {"placeholders": {"time": {}}},
+  "@stats_updatedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "stats_updating": "업데이트 중",
   "stats_counting": "{count}장 집계 중…",
-  "@stats_counting": {"placeholders": {"count": {}}},
+  "@stats_counting": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_updateFailed": "업데이트 실패",
   "stats_refresh": "새로 고침",
   "stats_lastDays": "최근 {count}일",
-  "@stats_lastDays": {"placeholders": {"count": {}}},
+  "@stats_lastDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_lastDaysShort": "{count}일",
-  "@stats_lastDaysShort": {"placeholders": {"count": {}}},
+  "@stats_lastDaysShort": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_unitDays": "일",
   "stats_imagesCount": "{count}장",
-  "@stats_imagesCount": {"placeholders": {"count": {}}},
+  "@stats_imagesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_less": "적음",
   "stats_more": "많음",
   "stats_kpiImages": "이미지",
   "stats_kpiNewImages": "새 이미지",
   "stats_kpiActiveDays": "활동 {days}일 · 일평균 {avg}",
-  "@stats_kpiActiveDays": {"placeholders": {"days": {}, "avg": {}}},
+  "@stats_kpiActiveDays": {
+    "placeholders": {
+      "days": {},
+      "avg": {}
+    }
+  },
   "stats_kpiVsPrevious": "이전 {count}일 대비",
-  "@stats_kpiVsPrevious": {"placeholders": {"count": {}}},
+  "@stats_kpiVsPrevious": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_kpiVsLastYear": "작년 같은 기간 대비",
   "stats_kpiPreviousValue": " ({value})",
-  "@stats_kpiPreviousValue": {"placeholders": {"value": {}}},
+  "@stats_kpiPreviousValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "stats_kpiFavorites": "즐겨찾기",
   "stats_kpiFavoriteRate": "즐겨찾기 비율 {rate}",
-  "@stats_kpiFavoriteRate": {"placeholders": {"rate": {}}},
+  "@stats_kpiFavoriteRate": {
+    "placeholders": {
+      "rate": {}
+    }
+  },
   "stats_kpiAnlas90": "Anlas · 최근 90일",
   "stats_kpiAnlasSpent": "Anlas 사용",
   "stats_kpiAnlasRecent": "7일 {week} · 오늘 {today}",
-  "@stats_kpiAnlasRecent": {"placeholders": {"week": {}, "today": {}}},
+  "@stats_kpiAnlasRecent": {
+    "placeholders": {
+      "week": {},
+      "today": {}
+    }
+  },
   "stats_kpiAnlasDaily": "일평균 {avg} · 오늘 {today}",
-  "@stats_kpiAnlasDaily": {"placeholders": {"avg": {}, "today": {}}},
+  "@stats_kpiAnlasDaily": {
+    "placeholders": {
+      "avg": {},
+      "today": {}
+    }
+  },
   "stats_kpiStreak": "연속 창작",
   "stats_kpiLongest": "최장 {days}{unit}",
-  "@stats_kpiLongest": {"placeholders": {"days": {}, "unit": {}}},
+  "@stats_kpiLongest": {
+    "placeholders": {
+      "days": {},
+      "unit": {}
+    }
+  },
   "stats_kpiLongestRange": "최장 {days}{unit} ({range})",
-  "@stats_kpiLongestRange": {"placeholders": {"days": {}, "unit": {}, "range": {}}},
+  "@stats_kpiLongestRange": {
+    "placeholders": {
+      "days": {},
+      "unit": {},
+      "range": {}
+    }
+  },
   "stats_kpiStorage": "용량",
   "stats_kpiStorageDetail": "평균 {avg} · 메타데이터 {pct}",
-  "@stats_kpiStorageDetail": {"placeholders": {"avg": {}, "pct": {}}},
+  "@stats_kpiStorageDetail": {
+    "placeholders": {
+      "avg": {},
+      "pct": {}
+    }
+  },
   "stats_calendarTitle": "창작 캘린더",
   "stats_calendarHint": "한 칸이 하루, 진할수록 많음",
   "stats_calendarPastYear": "최근 1년",
   "stats_calendarYear": "{year}년",
-  "@stats_calendarYear": {"placeholders": {"year": {}}},
+  "@stats_calendarYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarImagesPastYear": "최근 1년 이미지",
   "stats_calendarImagesInYear": "{year}년 이미지",
-  "@stats_calendarImagesInYear": {"placeholders": {"year": {}}},
+  "@stats_calendarImagesInYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "stats_calendarActiveDays": "창작한 날",
   "stats_calendarBestDay": "가장 많은 날",
   "stats_calendarLongestStreak": "최장 연속",
   "stats_calendarTipOpen": "클릭하면 로컬 갤러리에서 이 날을 엽니다",
   "stats_productionTitle": "생성량과 모델",
   "stats_productionHintAll": "{unit}별, 색은 모델",
-  "@stats_productionHintAll": {"placeholders": {"unit": {}}},
+  "@stats_productionHintAll": {
+    "placeholders": {
+      "unit": {}
+    }
+  },
   "stats_productionHintRange": "{range}, {unit}별, 색은 모델",
-  "@stats_productionHintRange": {"placeholders": {"range": {}, "unit": {}}},
+  "@stats_productionHintRange": {
+    "placeholders": {
+      "range": {},
+      "unit": {}
+    }
+  },
   "stats_unitDay": "일",
   "stats_unitWeek": "주",
   "stats_unitMonth": "월",
@@ -7339,16 +5607,34 @@
   "stats_granularityWeek": "주",
   "stats_granularityMonth": "월",
   "stats_monthWithYear": "{year}.{month}",
-  "@stats_monthWithYear": {"placeholders": {"year": {}, "month": {}}},
+  "@stats_monthWithYear": {
+    "placeholders": {
+      "year": {},
+      "month": {}
+    }
+  },
   "stats_productionModelsHint": "모델 · 클릭하면 해당 모델만 보기",
   "stats_productionOtherModels": "기타 모델 {count}개",
-  "@stats_productionOtherModels": {"placeholders": {"count": {}}},
+  "@stats_productionOtherModels": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_productionNoMetadata": "메타데이터 없는 이미지 {count}장 (연회색)",
-  "@stats_productionNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_productionNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_familyOther": "기타 모델",
   "stats_familyNoMetadata": "메타데이터 없음",
   "stats_productionTipTotal": "{period} · {count}장",
-  "@stats_productionTipTotal": {"placeholders": {"period": {}, "count": {}}},
+  "@stats_productionTipTotal": {
+    "placeholders": {
+      "period": {},
+      "count": {}
+    }
+  },
   "stats_productionTipOpenDay": "클릭하면 로컬 갤러리에서 이 날을 엽니다",
   "stats_productionTipOpenWeek": "클릭하면 로컬 갤러리에서 이 주를 엽니다",
   "stats_productionTipOpenMonth": "클릭하면 로컬 갤러리에서 이 달을 엽니다",
@@ -7356,7 +5642,13 @@
   "stats_punchHint": "요일 × 시간",
   "stats_punchPeak": "가장 많음",
   "stats_punchPeakValue": "{weekday} {from}–{to}시",
-  "@stats_punchPeakValue": {"placeholders": {"weekday": {}, "from": {}, "to": {}}},
+  "@stats_punchPeakValue": {
+    "placeholders": {
+      "weekday": {},
+      "from": {},
+      "to": {}
+    }
+  },
   "stats_punchBusiest": "가장 바쁨",
   "stats_punchLateNight": "심야",
   "stats_punchNote": "원이 클수록 많음",
@@ -7364,7 +5656,11 @@
   "stats_anlasToday": "오늘",
   "stats_anlasDailyAvg": "일평균",
   "stats_anlasActiveDays": "사용한 날 {count}일",
-  "@stats_anlasActiveDays": {"placeholders": {"count": {}}},
+  "@stats_anlasActiveDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_anlasPeak": "최다",
   "stats_anlasNote": "잔액이 줄 때 기록하며 업스케일·Vibe 인코딩 포함, 최근 90일만 보관",
   "stats_aspectTitle": "캔버스 크기",
@@ -7374,9 +5670,19 @@
   "stats_orientationLandscape": "가로",
   "stats_orientationSquare": "정사각",
   "stats_aspectShapeCount": "{orientation} · {count}",
-  "@stats_aspectShapeCount": {"placeholders": {"orientation": {}, "count": {}}},
+  "@stats_aspectShapeCount": {
+    "placeholders": {
+      "orientation": {},
+      "count": {}
+    }
+  },
   "stats_aspectOthers": "기타 {count}종 · {pct}",
-  "@stats_aspectOthers": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_aspectOthers": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_aspectClickHint": "크기나 방향을 클릭하면 해당 이미지만 보기",
   "stats_paramsTitle": "파라미터 습관",
   "stats_paramsHint": "메타데이터 있는 이미지",
@@ -7384,28 +5690,58 @@
   "stats_paramsSampler": "샘플러",
   "stats_paramsSteps": "스텝",
   "stats_paramsStepsValue": "{count}스텝",
-  "@stats_paramsStepsValue": {"placeholders": {"count": {}}},
+  "@stats_paramsStepsValue": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_paramsNoise": "노이즈 스케줄",
   "stats_artistsTitle": "자주 쓰는 작가",
   "stats_artistsHint": "작가 태그 사용 {count}장 ({pct})",
-  "@stats_artistsHint": {"placeholders": {"count": {}, "pct": {}}},
+  "@stats_artistsHint": {
+    "placeholders": {
+      "count": {},
+      "pct": {}
+    }
+  },
   "stats_artistsComputing": "작가 집계 중…",
   "stats_artistsNone": "프롬프트에 artist: 태그가 없습니다",
   "stats_artistsNote": "등장한 이미지 수 기준, 한 이미지에서 여러 번 써도 1회",
   "stats_artistsTipSearch": "로컬 갤러리에서 {query} 검색",
-  "@stats_artistsTipSearch": {"placeholders": {"query": {}}},
+  "@stats_artistsTipSearch": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "stats_artistsTipCopy": "우클릭: 작가 이름 복사",
   "stats_artistsCopied": "{name} 복사됨",
-  "@stats_artistsCopied": {"placeholders": {"name": {}}},
+  "@stats_artistsCopied": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "stats_storageTitle": "저장 공간",
   "stats_storageFiles": "파일 {count}개",
-  "@stats_storageFiles": {"placeholders": {"count": {}}},
+  "@stats_storageFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageMonthly": "최근 12개월 월별 추가",
   "stats_storageNoMetadata": "메타데이터 없음 {count}장",
-  "@stats_storageNoMetadata": {"placeholders": {"count": {}}},
+  "@stats_storageNoMetadata": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "stats_storageViewInGallery": "로컬 갤러리에서 보기",
   "stats_storageLarge": "10MB 초과 {count}장 · {size}",
-  "@stats_storageLarge": {"placeholders": {"count": {}, "size": {}}},
+  "@stats_storageLarge": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "stats_storageView": "보기",
   "stats_footer": "통계를 열 때마다 갤러리 변경을 확인해 백그라운드에서 다시 집계 · 숫자를 클릭하면 해당 필터로 로컬 갤러리를 엽니다",
   "stats_emptyTitle": "로컬 갤러리에 아직 이미지가 없습니다",
@@ -7433,16 +5769,33 @@
   "navShell_pin": "펼친 상태 고정",
   "navShell_genRunning": "생성 중",
   "navShell_genRunningCount": "생성 중 · {current} / {total}장",
-  "@navShell_genRunningCount": {"placeholders": {"current": {}, "total": {}}},
+  "@navShell_genRunningCount": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
   "navShell_genPercent": "{percent}% · 실시간 미리보기",
-  "@navShell_genPercent": {"placeholders": {"percent": {}}},
+  "@navShell_genPercent": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "navShell_genBack": "클릭하면 생성 페이지로 돌아갑니다",
   "navShell_genDone": "{count}장 완료, 클릭하여 보기",
-  "@navShell_genDone": {"placeholders": {"count": {}}},
+  "@navShell_genDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_genFailed": "생성 실패",
   "navShell_tasksTitle": "백그라운드 작업",
   "navShell_tasksRunning": "{count}개 진행 중",
-  "@navShell_tasksRunning": {"placeholders": {"count": {}}},
+  "@navShell_tasksRunning": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "navShell_tasksFooter": "모두 끝나면 10초 후 이 아이콘이 사라집니다",
   "navShell_task_localUpscale": "로컬 업스케일",
   "navShell_task_cloudUpscale": "클라우드 업스케일",
@@ -7453,7 +5806,12 @@
   "navShell_task_bulkRemoveFromCollection": "컬렉션에서 제거",
   "navShell_task_bulkFavorite": "일괄 즐겨찾기",
   "navShell_taskImages": "{title} {count}장",
-  "@navShell_taskImages": {"placeholders": {"title": {}, "count": {}}},
+  "@navShell_taskImages": {
+    "placeholders": {
+      "title": {},
+      "count": {}
+    }
+  },
   "navShell_taskJustDone": "방금 완료",
   "navShell_taskView": "보기",
   "navShell_taskCancel": "취소",
@@ -7467,7 +5825,12 @@
   "navShell_accountNotSignedIn": "로그인 안 됨",
   "navShell_accountChoose": "계속할 계정을 선택하세요",
   "navShell_subExpires": "구독 {date} 만료 · {days}일 남음",
-  "@navShell_subExpires": {"placeholders": {"date": {}, "days": {}}},
+  "@navShell_subExpires": {
+    "placeholders": {
+      "date": {},
+      "days": {}
+    }
+  },
   "navShell_subExpired": "구독 만료됨",
   "navShell_anlas": "Anlas 잔액",
   "navShell_switchAccount": "계정 전환",
@@ -7503,10 +5866,18 @@
   "online_favAuthors": "저장한 작가",
   "online_blacklist": "차단 목록",
   "online_blacklistCount": "태그 {count}개 차단",
-  "@online_blacklistCount": {"placeholders": {"count": {}}},
+  "@online_blacklistCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_srcSubAiTag": "NAI 작품 커뮤니티 · 전체 Prompt",
   "online_srcSubSignedIn": "로그인됨 · {name}",
-  "@online_srcSubSignedIn": {"placeholders": {"name": {}}},
+  "@online_srcSubSignedIn": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "online_srcSubSafebooru": "전연령 · 로그인 불필요",
   "online_srcSubKeyOk": "API Key 설정됨",
   "online_srcSubKeyInvalid": "API Key 무효",
@@ -7547,12 +5918,25 @@
   "online_modelAll": "전체",
   "online_timeAll": "전체 기간",
   "online_timeYear": "{year}년",
-  "@online_timeYear": {"placeholders": {"year": {}}},
+  "@online_timeYear": {
+    "placeholders": {
+      "year": {}
+    }
+  },
   "online_timeOlder": "이전 기록",
   "online_loaded": "{count}장 · {pages}페이지 불러옴",
-  "@online_loaded": {"placeholders": {"count": {}, "pages": {}}},
+  "@online_loaded": {
+    "placeholders": {
+      "count": {},
+      "pages": {}
+    }
+  },
   "online_rankLoaded": "1–{count}위 · {count}장 불러옴",
-  "@online_rankLoaded": {"placeholders": {"count": {}}},
+  "@online_rankLoaded": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_jumpToPage": "페이지 이동…",
   "online_jumpGo": "이동",
   "online_ratingLabel": "등급",
@@ -7573,9 +5957,18 @@
   "online_sortFavTime": "저장 시간",
   "online_favAll": "모든 즐겨찾기",
   "online_countImages": "{count}장",
-  "@online_countImages": {"placeholders": {"count": {}}},
+  "@online_countImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_authorSaved": "{count}장 저장 · {date} 작가 저장",
-  "@online_authorSaved": {"placeholders": {"count": {}, "date": {}}},
+  "@online_authorSaved": {
+    "placeholders": {
+      "count": {},
+      "date": {}
+    }
+  },
   "online_authorAllWorks": "AI TAG에서 모든 작품 보기",
   "online_unfavAuthor": "작가 저장 해제",
   "online_favAuthor": "작가 저장",
@@ -7591,7 +5984,11 @@
   "online_copyTags": "태그 복사",
   "online_download": "다운로드",
   "online_downloadAll": "{count}장 모두 다운로드",
-  "@online_downloadAll": {"placeholders": {"count": {}}},
+  "@online_downloadAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_downloadCurrent": "이 이미지만 다운로드",
   "online_more": "더보기",
   "online_openInBrowser": "사이트에서 열기",
@@ -7603,7 +6000,11 @@
   "online_inspWork": "작품",
   "online_inspPost": "게시물",
   "online_youSaved": "이 작가 작품 {count}장 저장",
-  "@online_youSaved": {"placeholders": {"count": {}}},
+  "@online_youSaved": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_params": "생성 파라미터",
   "online_pModel": "모델",
   "online_pSize": "크기",
@@ -7622,25 +6023,41 @@
   "online_copy": "복사",
   "online_noSelection": "카드를 클릭하면 여기에서 Prompt와 파라미터를 봅니다",
   "online_detailError": "상세 정보를 불러오지 못했습니다: {error}",
-  "@online_detailError": {"placeholders": {"error": {}}},
+  "@online_detailError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_retry": "다시 시도",
   "online_noPrompt": "이 이미지에는 Prompt가 없습니다",
   "online_selCount": "{count}장 선택됨",
-  "@online_selCount": {"placeholders": {"count": {}}},
+  "@online_selCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_selAll": "전체 선택",
   "online_selInvert": "선택 반전",
   "online_favoriteTo": "즐겨찾기에 추가…",
   "online_favoriteToTitle": "추가 위치",
   "online_favoriteToSite": "사이트 즐겨찾기에 추가",
   "online_downloadN": "다운로드 · {count}장",
-  "@online_downloadN": {"placeholders": {"count": {}}},
+  "@online_downloadN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_newCollectionAndFav": "새 컬렉션에 추가",
   "online_collectionNameHint": "컬렉션 이름, Enter로 확인",
   "online_exitMulti": "선택 종료",
   "online_sendRemember": "이 선택 기억",
   "online_sendReplace": "프롬프트 교체, 캐릭터 칸 비우기",
   "online_sendReplaceDesc": "긍정 + 부정을 이 이미지 것으로 바꾸고 생성 페이지의 캐릭터 칸 {count}개를 비웁니다. 예전 카드 버튼과 같습니다",
-  "@online_sendReplaceDesc": {"placeholders": {"count": {}}},
+  "@online_sendReplaceDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendReplaceDescNone": "긍정 + 부정을 이 이미지 것으로 바꾸고 캐릭터 칸을 비웁니다. 예전 카드 버튼과 같습니다",
   "online_sendPromptOnly": "프롬프트만 교체, 캐릭터 칸 유지",
   "online_sendPromptOnlyDesc": "작가 조합과 장면 묘사만 빌릴 때",
@@ -7648,26 +6065,52 @@
   "online_sendParamsDesc": "크기, 시드, 샘플러, 스텝, CFG와 이미지의 캐릭터 칸도 적용. 로컬 갤러리 “파라미터 재사용”과 같습니다",
   "online_sendParamsUnavailable": "이 이미지에는 생성 파라미터가 없어 프롬프트만 보낼 수 있습니다",
   "online_sendNote": "생성 페이지의 현재 긍정 프롬프트({count}자)가 교체됩니다",
-  "@online_sendNote": {"placeholders": {"count": {}}},
+  "@online_sendNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_sendNoteEmpty": "생성 페이지의 긍정 프롬프트가 비어 있습니다",
   "online_cancel": "취소",
   "online_sendGo": "보내고 생성 페이지로",
   "online_blacklistDesc": "해당 작품은 표시하지 않습니다",
   "online_blacklistAddHint": "태그 추가, Enter로 확인",
   "online_blacklistSync": "Danbooru 차단 목록 동기화 · {count}개",
-  "@online_blacklistSync": {"placeholders": {"count": {}}},
+  "@online_blacklistSync": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_blacklistScope": "네 소스 모두에 적용; AI TAG는 작품 태그로 매칭",
   "online_blacklistEmpty": "차단한 태그가 아직 없습니다",
   "online_removeTag": "삭제",
   "online_appendError": "{page}페이지를 불러오지 못했습니다: {reason}",
-  "@online_appendError": {"placeholders": {"page": {}, "reason": {}}},
+  "@online_appendError": {
+    "placeholders": {
+      "page": {},
+      "reason": {}
+    }
+  },
   "online_retryPage": "이 페이지 다시 시도",
   "online_end": "마지막입니다 · 총 {count}장",
-  "@online_end": {"placeholders": {"count": {}}},
+  "@online_end": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "online_endBlocked": "마지막입니다 · 총 {count}장 · {blocked}장 차단됨",
-  "@online_endBlocked": {"placeholders": {"count": {}, "blocked": {}}},
+  "@online_endBlocked": {
+    "placeholders": {
+      "count": {},
+      "blocked": {}
+    }
+  },
   "online_emptyTitle": "“{query}” 작품을 찾지 못했습니다",
-  "@online_emptyTitle": {"placeholders": {"query": {}}},
+  "@online_emptyTitle": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "online_emptyTitleNoQuery": "작품을 찾지 못했습니다",
   "online_emptyHint": "아래 조건을 완화해 보세요",
   "online_sugNaiOff": "“NAI 이미지만” 해제",
@@ -7679,7 +6122,11 @@
   "online_favEmpty": "아직 즐겨찾기가 없습니다",
   "online_favEmptyHint": "카드의 ♡ 를 눌러 저장하세요",
   "online_loadError": "불러오지 못했습니다: {error}",
-  "@online_loadError": {"placeholders": {"error": {}}},
+  "@online_loadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "online_loginDbTitle": "Danbooru에 로그인해야 즐겨찾기를 볼 수 있습니다",
   "online_loginDbDesc": "사용자 이름 + API Key로 로그인하면 사이트와 동기화됩니다.\n카드의 ♡ 도 사이트에 바로 저장됩니다",
   "online_loginDb": "Danbooru 로그인",
@@ -7689,9 +6136,21 @@
   "online_apiKeyHelp": "API Key 받는 곳",
   "online_loginOther": "로그인하기 싫다면? AI TAG 즐겨찾기는 이 기기에 저장되어 계정이 필요 없고, Gelbooru 즐겨찾기는 읽기 전용입니다",
   "online_viewerPosition": "이미지 {image} / {images} · 작품 {work} / {works}",
-  "@online_viewerPosition": {"placeholders": {"image": {}, "images": {}, "work": {}, "works": {}}},
+  "@online_viewerPosition": {
+    "placeholders": {
+      "image": {},
+      "images": {},
+      "work": {},
+      "works": {}
+    }
+  },
   "online_viewerWorkPosition": "작품 {work} / {works}",
-  "@online_viewerWorkPosition": {"placeholders": {"work": {}, "works": {}}},
+  "@online_viewerWorkPosition": {
+    "placeholders": {
+      "work": {},
+      "works": {}
+    }
+  },
   "online_close": "닫기",
   "online_keyImage": "이미지 전환",
   "online_keyWork": "이전 / 다음 작품",
@@ -7720,12 +6179,24 @@
   "refs_open": "열기",
   "refs_types": "참조 유형",
   "refs_importTypeNoteAll": "가져온 이미지는 기본적으로 {type}(으)로 저장됩니다. 왼쪽에서 유형을 먼저 고르면 그 유형으로 저장됩니다.",
-  "@refs_importTypeNoteAll": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteAll": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_importTypeNoteSelected": "가져온 이미지는 {type}(으)로 저장됩니다. 왼쪽에서 고른 유형을 따릅니다.",
-  "@refs_importTypeNoteSelected": {"placeholders": {"type": {}}},
+  "@refs_importTypeNoteSelected": {
+    "placeholders": {
+      "type": {}
+    }
+  },
   "refs_preciseOnlyV45": "V4.5 전용",
   "refs_preciseCostNote": "장당 {cost} Anlas, Vibe와 동시에 쓸 수 없습니다",
-  "@refs_preciseCostNote": {"placeholders": {"cost": {}}},
+  "@refs_preciseCostNote": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_searchVibe": "이름, 태그 검색",
   "refs_searchPrecise": "이름 검색",
   "refs_sortLastUsed": "최근 사용",
@@ -7754,13 +6225,25 @@
   "refs_hideInspector": "검사기 접기",
   "refs_showInspector": "검사기 펼치기",
   "refs_bannerVibeLead": "{model}은(는) Vibe 전송을 지원하지 않습니다. ",
-  "@refs_bannerVibeLead": {"placeholders": {"model": {}}},
+  "@refs_bannerVibeLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerVibeBody": "Vibe 정리와 내보내기는 그대로 됩니다. 생성에 쓰려면 V4.5 또는 V4로 바꾸세요",
   "refs_bannerPreciseLead": "{model}은(는) 정밀 참조를 지원하지 않습니다. ",
-  "@refs_bannerPreciseLead": {"placeholders": {"model": {}}},
+  "@refs_bannerPreciseLead": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_bannerPreciseBody": "참조 이미지 정리는 그대로 됩니다. 생성에 쓰려면 V4.5로 바꾸세요",
   "refs_switchTo": "{model}(으)로 전환",
-  "@refs_switchTo": {"placeholders": {"model": {}}},
+  "@refs_switchTo": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_quickAll": "전체",
   "refs_quickFavorites": "즐겨찾기",
   "refs_quickHasRaw": "원본 있음",
@@ -7768,12 +6251,26 @@
   "refs_quickBundles": "번들",
   "refs_quickUnused": "사용 안 함",
   "refs_countVibe": "{count}개 · 생성 페이지 {inGen}개",
-  "@refs_countVibe": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countVibe": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_countPrecise": "{count}장 · 생성 페이지 {inGen}장",
-  "@refs_countPrecise": {"placeholders": {"count": {}, "inGen": {}}},
+  "@refs_countPrecise": {
+    "placeholders": {
+      "count": {},
+      "inGen": {}
+    }
+  },
   "refs_noResults": "조건에 맞는 항목이 없습니다",
   "refs_noResultsFor": "“{query}”에 대한 결과가 없습니다",
-  "@refs_noResultsFor": {"placeholders": {"query": {}}},
+  "@refs_noResultsFor": {
+    "placeholders": {
+      "query": {}
+    }
+  },
   "refs_clearFilters": "필터 지우기",
   "refs_addShort": "생성에 추가",
   "refs_sendPrecise": "정밀 참조로 보내기",
@@ -7792,7 +6289,11 @@
   "refs_copyImage": "이미지 복사",
   "refs_delete": "삭제",
   "refs_selected": "{count}개 선택",
-  "@refs_selected": {"placeholders": {"count": {}}},
+  "@refs_selected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveTo": "이동",
   "refs_export": "내보내기",
   "refs_emptyVibeTitle": "이미지나 Vibe 파일을 여기에 놓으세요",
@@ -7806,62 +6307,143 @@
   "refs_emptyFromGallery": "로컬 갤러리에서도 가능",
   "refs_emptyHelpTitle": "Vibe와 정밀 참조의 차이",
   "refs_emptyHelpBody": "Vibe: 전체 분위기와 화풍을 빌리며 여러 장을 겹칠 수 있습니다(V4 / V4.5, V5 제외). 정밀 참조: 한 이미지의 인물이나 화풍을 더 정확히 따르며 장당 {cost} Anlas(V4.5 전용). 둘은 동시에 쓸 수 없습니다.",
-  "@refs_emptyHelpBody": {"placeholders": {"cost": {}}},
+  "@refs_emptyHelpBody": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_dropTitle": "놓으면 파일 {count}개 가져오기",
-  "@refs_dropTitle": {"placeholders": {"count": {}}},
+  "@refs_dropTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeDesc": "먼저 가져오기 창에서 확인합니다. 바로 Anlas가 차감되지 않습니다",
   "refs_dropPreciseDesc": "왼쪽에서 고른 유형으로 저장합니다",
   "refs_dropVibePngs": "Vibe 포함 PNG {count}개",
-  "@refs_dropVibePngs": {"placeholders": {"count": {}}},
+  "@refs_dropVibePngs": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropVibeFiles": "Vibe 파일 {count}개",
-  "@refs_dropVibeFiles": {"placeholders": {"count": {}}},
+  "@refs_dropVibeFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropBundles": "번들 {count}개",
-  "@refs_dropBundles": {"placeholders": {"count": {}}},
+  "@refs_dropBundles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_dropImages": "일반 이미지 {count}장",
-  "@refs_dropImages": {"placeholders": {"count": {}}},
+  "@refs_dropImages": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_inGeneration": "사용 중",
   "refs_tag": "태그",
   "refs_strengthShort": "강도",
   "refs_infoShort": "정보",
   "refs_fidelityShort": "충실",
   "refs_encModelOff": "{model} 사용 불가",
-  "@refs_encModelOff": {"placeholders": {"model": {}}},
+  "@refs_encModelOff": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encModelOffDesc": "{model}은(는) Vibe 전송을 지원하지 않습니다. V4.5 / V4로 바꾸면 쓸 수 있습니다",
-  "@refs_encModelOffDesc": {"placeholders": {"model": {}}},
+  "@refs_encModelOffDesc": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReady": "인코딩됨 · {model}",
-  "@refs_encReady": {"placeholders": {"model": {}}},
+  "@refs_encReady": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyShort": "{model} 인코딩됨",
-  "@refs_encReadyShort": {"placeholders": {"model": {}}},
+  "@refs_encReadyShort": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encReadyDesc": "현재 모델에서 바로 쓸 수 있고 인코딩 비용이 없습니다",
   "refs_encOnUse": "사용 시 인코딩",
   "refs_encOnUseDesc": "아직 인코딩되지 않았습니다. 처음 생성에 쓸 때 인코딩합니다({cost} Anlas)",
-  "@refs_encOnUseDesc": {"placeholders": {"cost": {}}},
+  "@refs_encOnUseDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_encRe": "다시 인코딩 필요",
   "refs_encReDesc": "{from}용 인코딩입니다(현재 {model}). 사용할 때 원본으로 다시 인코딩합니다({cost} Anlas)",
-  "@refs_encReDesc": {"placeholders": {"from": {}, "model": {}, "cost": {}}},
+  "@refs_encReDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_encUnusable": "{model}에서 사용 불가",
-  "@refs_encUnusable": {"placeholders": {"model": {}}},
+  "@refs_encUnusable": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_encUnusableDesc": "{from} 인코딩만 있고 원본이 없어 {model}용으로 다시 인코딩할 수 없습니다",
-  "@refs_encUnusableDesc": {"placeholders": {"from": {}, "model": {}}},
+  "@refs_encUnusableDesc": {
+    "placeholders": {
+      "from": {},
+      "model": {}
+    }
+  },
   "refs_trayVibe": "생성 페이지의 Vibe",
   "refs_trayPrecise": "생성 페이지의 정밀 참조",
   "refs_trayVibeCost": "{free}개 초과 시 개당 +{extra} Anlas",
-  "@refs_trayVibeCost": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_trayVibeCost": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_trayPreciseCost": "장당 {cost} Anlas · 이번 +{total}",
-  "@refs_trayPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_trayPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_trayHint": "카드를 여기로 끌어 추가, Shift는 전체 교체.\n페이지가 바뀌지 않아 계속 고를 수 있습니다",
   "refs_trayDropHere": "카드를 여기에 놓아 추가",
   "refs_clear": "비우기",
   "refs_goGeneration": "생성 페이지로",
   "refs_conflict": "생성 페이지에 **Vibe {count}개**가 있습니다. 정밀 참조가 있으면 Vibe는 전송되지 않습니다(공식 비호환)",
-  "@refs_conflict": {"placeholders": {"count": {}}},
+  "@refs_conflict": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_conflictPaused": "생성 페이지의 **Vibe {count}개**는 일시 중지됨. 정밀 참조만 보냅니다",
-  "@refs_conflictPaused": {"placeholders": {"count": {}}},
+  "@refs_conflictPaused": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pauseVibes": "Vibe 일시 중지",
   "refs_resumeVibes": "Vibe 재개",
   "refs_inspector": "검사기",
   "refs_selectedN": "{count}개 선택됨",
-  "@refs_selectedN": {"placeholders": {"count": {}}},
+  "@refs_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_noSelectionVibe": "카드를 선택하면 파라미터와 인코딩 상태가 보입니다",
   "refs_noSelectionPrecise": "참조 이미지를 선택하면 유형과 파라미터가 보입니다",
   "refs_rename": "이름 바꾸기",
@@ -7871,29 +6453,55 @@
   "refs_strengthDesc": "높을수록 이 이미지 느낌에 가까워집니다",
   "refs_infoExtracted": "정보 추출",
   "refs_infoDesc": "높을수록 디테일을 더 가져옵니다. 바꾸면 원본으로 다시 인코딩합니다({cost} Anlas)",
-  "@refs_infoDesc": {"placeholders": {"cost": {}}},
+  "@refs_infoDesc": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_infoLocked": "인코딩 데이터만 있고 원본이 없어 정보 추출을 바꿀 수 없습니다",
   "refs_changedNote": "변경은 이번 전송에만 적용됩니다",
   "refs_saveDefault": "기본값으로 저장",
   "refs_revert": "되돌리기",
   "refs_encodeNow": "지금 {model}용으로 인코딩 · {cost} Anlas",
-  "@refs_encodeNow": {"placeholders": {"model": {}, "cost": {}}},
+  "@refs_encodeNow": {
+    "placeholders": {
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_bundleNote": "이 번들의 Vibe {count}개는 각각 강도와 정보 추출 값을 가집니다. 번들을 열어 따로 조정하세요.",
-  "@refs_bundleNote": {"placeholders": {"count": {}}},
+  "@refs_bundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOf": "번들 · {count}개",
-  "@refs_bundleOf": {"placeholders": {"count": {}}},
+  "@refs_bundleOf": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_organize": "정리",
   "refs_category": "카테고리",
   "refs_tags": "태그",
   "refs_used": "사용",
   "refs_neverUsed": "사용한 적 없음",
   "refs_usedTimes": "{count}회 · 마지막 {last}",
-  "@refs_usedTimes": {"placeholders": {"count": {}, "last": {}}},
+  "@refs_usedTimes": {
+    "placeholders": {
+      "count": {},
+      "last": {}
+    }
+  },
   "refs_added": "추가",
   "refs_file": "파일",
   "refs_original": "원본",
   "refs_plusAnlas": "+{cost} Anlas",
-  "@refs_plusAnlas": {"placeholders": {"cost": {}}},
+  "@refs_plusAnlas": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_alsoSaveVibe": "Vibe로도 저장",
   "refs_referenceWhat": "참조 대상",
   "refs_typeCharacter": "캐릭터",
@@ -7912,23 +6520,60 @@
   "refs_multiAddTitle": "함께 생성 페이지에 추가",
   "refs_multiSendTitle": "함께 정밀 참조로 보내기",
   "refs_multiFree": "{free}개까지는 추가 비용이 없습니다. ",
-  "@refs_multiFree": {"placeholders": {"free": {}}},
+  "@refs_multiFree": {
+    "placeholders": {
+      "free": {}
+    }
+  },
   "refs_multiExtra": "{free}개 초과 시 개당 +{extra} Anlas: 이미지당 {total} Anlas 추가. ",
-  "@refs_multiExtra": {"placeholders": {"free": {}, "extra": {}, "total": {}}},
+  "@refs_multiExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {},
+      "total": {}
+    }
+  },
   "refs_multiOverMax": "상한 {max}개를 넘는 것은 추가되지 않습니다. ",
-  "@refs_multiOverMax": {"placeholders": {"max": {}}},
+  "@refs_multiOverMax": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "refs_multiEncodes": "그중 {count}개는 인코딩이 필요합니다({names}, 개당 {cost} Anlas, 한 번만). ",
-  "@refs_multiEncodes": {"placeholders": {"count": {}, "names": {}, "cost": {}}},
+  "@refs_multiEncodes": {
+    "placeholders": {
+      "count": {},
+      "names": {},
+      "cost": {}
+    }
+  },
   "refs_multiAlready": "{count}개는 이미 생성 페이지에 있어 중복 추가되지 않습니다.",
-  "@refs_multiAlready": {"placeholders": {"count": {}}},
+  "@refs_multiAlready": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_multiPreciseCost": "장당 {cost} Anlas, 이미지당 총 {total} Anlas.",
-  "@refs_multiPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_multiPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_unify": "일괄 설정",
   "refs_mixed": "혼합",
   "refs_unifyVibeNote": "끌면 {count}개의 기본값을 함께 바꿉니다. 정보 추출은 다시 인코딩해야 해서 바꾸지 않습니다",
-  "@refs_unifyVibeNote": {"placeholders": {"count": {}}},
+  "@refs_unifyVibeNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_unifyPreciseNote": "클릭하면 {count}장 모두 이 유형으로 바뀝니다",
-  "@refs_unifyPreciseNote": {"placeholders": {"count": {}}},
+  "@refs_unifyPreciseNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_moveToCategory": "카테고리로 이동",
   "refs_addTag": "태그 추가",
   "refs_packBundle": "번들로 묶기",
@@ -7940,28 +6585,53 @@
   "refs_switch": "전환",
   "refs_dropReplacePreview": "여기에 이미지를 놓으면 미리보기를 바꿉니다(인코딩은 그대로)",
   "refs_bundleOfVibes": "번들 · Vibe {count}개",
-  "@refs_bundleOfVibes": {"placeholders": {"count": {}}},
+  "@refs_bundleOfVibes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleAll": "전체 {count}개",
-  "@refs_bundleAll": {"placeholders": {"count": {}}},
+  "@refs_bundleAll": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleOnlyChecked": "체크한 {count}개만",
-  "@refs_bundleOnlyChecked": {"placeholders": {"count": {}}},
+  "@refs_bundleOnlyChecked": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundleScopeNote": "보낼 때 각 Vibe의 강도와 정보 추출 값을 씁니다",
   "refs_splitBundle": "개별 Vibe로 나누기",
   "refs_bundleNoteLong": "파라미터를 바꾼 뒤 “번들에 저장”으로 보관할 수 있습니다. 저장하지 않으면 이번 전송에만 적용됩니다. ",
   "refs_bundleAllEncoded": "{count}개 모두 {model}용으로 인코딩됨",
-  "@refs_bundleAllEncoded": {"placeholders": {"count": {}, "model": {}}},
+  "@refs_bundleAllEncoded": {
+    "placeholders": {
+      "count": {},
+      "model": {}
+    }
+  },
   "refs_saveToBundle": "번들에 저장",
   "refs_cover": "표지",
   "refs_setCover": "표지로 설정",
   "refs_exportTitle": "Vibe {count}개 내보내기",
-  "@refs_exportTitle": {"placeholders": {"count": {}}},
+  "@refs_exportTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_exportListNote": "라이브러리에서 여러 개를 골라 “내보내기”를 누르세요. 여기서 뺄 수도 있습니다",
   "refs_exportAs": "내보낼 형식",
   "refs_fmtVibeFile": "개별 Vibe 파일",
   "refs_fmtVibeFileDesc": ".naiv4vibe, 하나씩. 공식 사이트와 다른 클라이언트에서도 가져올 수 있습니다",
   "refs_fmtBundle": "번들 하나로",
   "refs_fmtBundleDesc": ".naiv4vibebundle, {count}개를 한 파일로",
-  "@refs_fmtBundleDesc": {"placeholders": {"count": {}}},
+  "@refs_fmtBundleDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_fmtPng": "PNG에 포함",
   "refs_fmtPngDesc": "이미지에 Vibe가 들어 있어 끌어다 놓으면 됩니다. 한 번에 하나만",
   "refs_fmtEncoded": "인코딩 텍스트",
@@ -7971,21 +6641,47 @@
   "refs_optThumbsDesc": "파일이 조금 커지지만 가져올 때 바로 보입니다",
   "refs_optZip": "ZIP으로 압축",
   "refs_optZipDesc": "파일 {count}개를 압축 파일 하나로",
-  "@refs_optZipDesc": {"placeholders": {"count": {}}},
+  "@refs_optZipDesc": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_saveTo": "저장 위치",
   "refs_choose": "선택",
   "refs_exportSummary": "{ext} 파일 {count}개를 만듭니다",
-  "@refs_exportSummary": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummary": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_exportSummaryZip": "ZIP 1개를 만듭니다({ext} 파일 {count}개)",
-  "@refs_exportSummaryZip": {"placeholders": {"count": {}, "ext": {}}},
+  "@refs_exportSummaryZip": {
+    "placeholders": {
+      "count": {},
+      "ext": {}
+    }
+  },
   "refs_deleteOne": "“{name}”을(를) 삭제할까요?",
-  "@refs_deleteOne": {"placeholders": {"name": {}}},
+  "@refs_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "refs_deleteMany": "{count}개 항목을 삭제할까요?",
-  "@refs_deleteMany": {"placeholders": {"count": {}}},
+  "@refs_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_deleteVibeDesc": "Vibe 라이브러리에서 제거합니다. 생성 페이지에서 쓰는 것은 영향을 받지 않습니다.",
   "refs_deletePreciseDesc": "라이브러리에서 제거합니다. 생성 페이지에서 쓰는 것은 영향을 받지 않습니다.",
   "refs_importTitle": "파일 {count}개 가져오기",
-  "@refs_importTitle": {"placeholders": {"count": {}}},
+  "@refs_importTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_importSubtitle": "끌어 놓기, 선택, 붙여넣기 모두 이 창에서 확인합니다",
   "refs_importMore": "파일 추가",
   "refs_importPutIn": "모두 넣을 곳",
@@ -7994,39 +6690,85 @@
   "refs_importPlainImages": "일반 이미지",
   "refs_importEncodeLater": "사용할 때 인코딩",
   "refs_importEncodeNow": "지금 인코딩 · 장당 {cost} Anlas",
-  "@refs_importEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_importEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importName": "이름",
   "refs_importResult": "인식 결과",
   "refs_recPng": "Vibe 포함 PNG · {model} 인코딩",
-  "@refs_recPng": {"placeholders": {"model": {}}},
+  "@refs_recPng": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recVibeFile": "Vibe 파일 · {model} 인코딩",
-  "@refs_recVibeFile": {"placeholders": {"model": {}}},
+  "@refs_recVibeFile": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundle": "번들 · Vibe {count}개",
-  "@refs_recBundle": {"placeholders": {"count": {}}},
+  "@refs_recBundle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recImage": "일반 이미지 · 인코딩 전",
   "refs_recImageDup": "일반 이미지 · 같은 이름 있음",
   "refs_recFree": "그대로 가져오기, 무료",
   "refs_recReencode": "{model}에서 쓰려면 다시 인코딩해야 합니다(원본이 없으면 불가)",
-  "@refs_recReencode": {"placeholders": {"model": {}}},
+  "@refs_recReencode": {
+    "placeholders": {
+      "model": {}
+    }
+  },
   "refs_recBundleNote": "통째로 = 카드 1장, 나누기 = {count}장",
-  "@refs_recBundleNote": {"placeholders": {"count": {}}},
+  "@refs_recBundleNote": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_recEncodeLater": "원본을 저장하고 처음 생성에 쓸 때 그 모델용으로 인코딩",
   "refs_recEncodeNow": "가져올 때 인코딩, 장당 {cost} Anlas",
-  "@refs_recEncodeNow": {"placeholders": {"cost": {}}},
+  "@refs_recEncodeNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_bundleWhole": "통째로",
   "refs_bundleSplit": "{count}개로 나누기",
-  "@refs_bundleSplit": {"placeholders": {"count": {}}},
+  "@refs_bundleSplit": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_bundlePick": "골라서",
   "refs_dupExists": "같은 이름이 이미 있습니다",
   "refs_dupKeepBoth": "둘 다 유지",
   "refs_dupOverwrite": "덮어쓰기",
   "refs_dupSkip": "건너뛰기",
   "refs_importSummary": "파일 {files}개 → 카드 {cards}장 추가",
-  "@refs_importSummary": {"placeholders": {"files": {}, "cards": {}}},
+  "@refs_importSummary": {
+    "placeholders": {
+      "files": {},
+      "cards": {}
+    }
+  },
   "refs_importNow": " · 지금 {cost} Anlas 차감",
-  "@refs_importNow": {"placeholders": {"cost": {}}},
+  "@refs_importNow": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "refs_importLater": " · 일반 이미지 {count}장은 처음 쓸 때 인코딩(장당 {cost} Anlas)",
-  "@refs_importLater": {"placeholders": {"count": {}, "cost": {}}},
+  "@refs_importLater": {
+    "placeholders": {
+      "count": {},
+      "cost": {}
+    }
+  },
   "refs_pickerVibeTitle": "Vibe 라이브러리에서 추가",
   "refs_pickerPreciseTitle": "정밀 참조 라이브러리에서 추가",
   "refs_openVibeLibrary": "Vibe 라이브러리 열기",
@@ -8034,33 +6776,87 @@
   "refs_recentUsed": "최근 사용",
   "refs_inUse": "사용 중",
   "refs_pickedN": "{count}개 선택",
-  "@refs_pickedN": {"placeholders": {"count": {}}},
+  "@refs_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerAfterVibe": " · 추가 후 {count}/{max}",
-  "@refs_pickerAfterVibe": {"placeholders": {"count": {}, "max": {}}},
+  "@refs_pickerAfterVibe": {
+    "placeholders": {
+      "count": {},
+      "max": {}
+    }
+  },
   "refs_pickerAfterPrecise": " · 추가 후 {count}장",
-  "@refs_pickerAfterPrecise": {"placeholders": {"count": {}}},
+  "@refs_pickerAfterPrecise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerEncode": "“{name}”은(는) {model}용 인코딩 필요 · {cost} Anlas",
-  "@refs_pickerEncode": {"placeholders": {"name": {}, "model": {}, "cost": {}}},
+  "@refs_pickerEncode": {
+    "placeholders": {
+      "name": {},
+      "model": {},
+      "cost": {}
+    }
+  },
   "refs_pickerEncodeMore": "그 밖에 {count}개도 인코딩 필요",
-  "@refs_pickerEncodeMore": {"placeholders": {"count": {}}},
+  "@refs_pickerEncodeMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_pickerExtra": "{free}개 초과 시 +{extra} Anlas",
-  "@refs_pickerExtra": {"placeholders": {"free": {}, "extra": {}}},
+  "@refs_pickerExtra": {
+    "placeholders": {
+      "free": {},
+      "extra": {}
+    }
+  },
   "refs_pickerPreciseCost": "장당 {cost} Anlas · 총 {total} Anlas",
-  "@refs_pickerPreciseCost": {"placeholders": {"cost": {}, "total": {}}},
+  "@refs_pickerPreciseCost": {
+    "placeholders": {
+      "cost": {},
+      "total": {}
+    }
+  },
   "refs_replaceExisting": "기존 교체",
   "refs_appendN": "{count}개 추가",
-  "@refs_appendN": {"placeholders": {"count": {}}},
+  "@refs_appendN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeNever": "사용 안 함",
   "refs_timeJustNow": "방금",
   "refs_timeMinutes": "{count}분 전",
-  "@refs_timeMinutes": {"placeholders": {"count": {}}},
+  "@refs_timeMinutes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeHours": "{count}시간 전",
-  "@refs_timeHours": {"placeholders": {"count": {}}},
+  "@refs_timeHours": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeYesterday": "어제",
   "refs_timeDays": "{count}일 전",
-  "@refs_timeDays": {"placeholders": {"count": {}}},
+  "@refs_timeDays": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "refs_timeMonthDay": "{month}월 {day}일",
-  "@refs_timeMonthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@refs_timeMonthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "blocks_title": "블록 라이브러리",
   "blocks_translationMark": "번",
   "blocks_add": "추가",
@@ -8080,12 +6876,24 @@
   "blocks_off": "끔",
   "blocks_to": "~",
   "blocks_items": "{count}개 항목",
-  "@blocks_items": {"placeholders": {"count": {}}},
+  "@blocks_items": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_itemUnit": "개",
   "blocks_usedTimes": "{count}회 사용",
-  "@blocks_usedTimes": {"placeholders": {"count": {}}},
+  "@blocks_usedTimes": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_nBlocks": "{count}개",
-  "@blocks_nBlocks": {"placeholders": {"count": {}}},
+  "@blocks_nBlocks": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_untitled": "제목 없음",
   "blocks_favorite": "즐겨찾기",
   "blocks_unfavorite": "즐겨찾기 해제",
@@ -8095,9 +6903,17 @@
   "blocks_positive": "긍정",
   "blocks_negative": "부정",
   "blocks_positiveN": "긍정 {count}",
-  "@blocks_positiveN": {"placeholders": {"count": {}}},
+  "@blocks_positiveN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_negativeN": "부정 {count}",
-  "@blocks_negativeN": {"placeholders": {"count": {}}},
+  "@blocks_negativeN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_content": "내용",
   "blocks_name": "이름",
   "blocks_folder": "폴더",
@@ -8126,7 +6942,11 @@
   "blocks_searchHint": "블록 검색…",
   "blocks_filterAll": "전체",
   "blocks_allN": "전체 {count}",
-  "@blocks_allN": {"placeholders": {"count": {}}},
+  "@blocks_allN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_searchResults": "검색 결과",
   "blocks_noResults": "일치하는 블록이 없습니다",
   "blocks_noFavorites": "아직 즐겨찾기가 없습니다. 블록을 우클릭 → 즐겨찾기.",
@@ -8143,9 +6963,18 @@
   "blocks_modeSequential": "순서",
   "blocks_modeRandom": "무작위",
   "blocks_summaryRandom": "무작위 · 매번 {range}개 · 풀 {pool}개",
-  "@blocks_summaryRandom": {"placeholders": {"range": {}, "pool": {}}},
+  "@blocks_summaryRandom": {
+    "placeholders": {
+      "range": {},
+      "pool": {}
+    }
+  },
   "blocks_summarySequential": "순서 · 매번 {range}개 · 한 장마다 한 칸씩",
-  "@blocks_summarySequential": {"placeholders": {"range": {}}},
+  "@blocks_summarySequential": {
+    "placeholders": {
+      "range": {}
+    }
+  },
   "blocks_drawnThisTime": "이번 결과",
   "blocks_lock": "잠금",
   "blocks_unlock": "잠금 해제",
@@ -8154,22 +6983,47 @@
   "blocks_reroll": "다시 뽑기",
   "blocks_rerollLocked": "잠김 — 다시 뽑으려면 잠금 해제",
   "blocks_skipped": "이번엔 등장 안 함 (확률 {percent})",
-  "@blocks_skipped": {"placeholders": {"percent": {}}},
+  "@blocks_skipped": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "blocks_sendPrefix": "전송: {text}",
-  "@blocks_sendPrefix": {"placeholders": {"text": {}}},
+  "@blocks_sendPrefix": {
+    "placeholders": {
+      "text": {}
+    }
+  },
   "blocks_seqPosition": "{index} / {total}번째",
-  "@blocks_seqPosition": {"placeholders": {"index": {}, "total": {}}},
+  "@blocks_seqPosition": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "blocks_seqLocked": "잠김, 자동으로 넘어가지 않음",
   "blocks_prevItem": "이전 항목",
   "blocks_nextItem": "다음 항목",
   "blocks_prevValue": "이전 {value}",
-  "@blocks_prevValue": {"placeholders": {"value": {}}},
+  "@blocks_prevValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_nextValue": "다음 {value}",
-  "@blocks_nextValue": {"placeholders": {"value": {}}},
+  "@blocks_nextValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_paramsTitle": "이 블록에는 생성 설정이 있습니다",
   "blocks_drawMode": "뽑기 방식",
   "blocks_fixedExplain": "고정: 매번 {count}개 항목을 그대로 넣습니다. 순서나 무작위로 바꾸면 여기서 개수와 가중치를 설정합니다.",
-  "@blocks_fixedExplain": {"placeholders": {"count": {}}},
+  "@blocks_fixedExplain": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_ruleCount": "개수",
   "blocks_ruleWeight": "가중치",
   "blocks_ruleShow": "확률",
@@ -8195,7 +7049,11 @@
   "blocks_drawEach": "매번",
   "blocks_takeEach": "매번",
   "blocks_poolSize": "풀 {count}개",
-  "@blocks_poolSize": {"placeholders": {"count": {}}},
+  "@blocks_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_outputOrder": "출력 순서",
   "blocks_orderDrawn": "뽑힌 순서",
   "blocks_orderOriginal": "원래 순서",
@@ -8248,11 +7106,23 @@
   "blocks_exportBackup": "라이브러리 백업 내보내기",
   "blocks_importBackup": "라이브러리 백업 가져오기…",
   "blocks_dropMoveTo": "“{name}”(으)로 이동",
-  "@blocks_dropMoveTo": {"placeholders": {"name": {}}},
+  "@blocks_dropMoveTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropCopyTo": "“{name}”(으)로 복사",
-  "@blocks_dropCopyTo": {"placeholders": {"name": {}}},
+  "@blocks_dropCopyTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_dropAddTo": "“{name}”에 추가",
-  "@blocks_dropAddTo": {"placeholders": {"name": {}}},
+  "@blocks_dropAddTo": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_searchLibrary": "제목, 내용, 태그 검색",
   "blocks_sortCustom": "사용자 순서",
   "blocks_sortUpdated": "최근 수정",
@@ -8284,9 +7154,17 @@
   "blocks_colUsed": "사용",
   "blocks_colModified": "수정",
   "blocks_selectedN": "{count}개 선택",
-  "@blocks_selectedN": {"placeholders": {"count": {}}},
+  "@blocks_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_selectedBlocksN": "블록 {count}개 선택",
-  "@blocks_selectedBlocksN": {"placeholders": {"count": {}}},
+  "@blocks_selectedBlocksN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_moveTo": "이동…",
   "blocks_noTags": "아직 태그가 없습니다",
   "blocks_emptyTitle": "블록 라이브러리가 비어 있습니다",
@@ -8297,9 +7175,17 @@
   "blocks_exportTxt": "TXT로 내보내기",
   "blocks_removeFromCollection": "컬렉션에서 빼기",
   "blocks_deleteOne": "“{name}”을(를) 삭제할까요?",
-  "@blocks_deleteOne": {"placeholders": {"name": {}}},
+  "@blocks_deleteOne": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "blocks_deleteMany": "블록 {count}개를 삭제할까요?",
-  "@blocks_deleteMany": {"placeholders": {"count": {}}},
+  "@blocks_deleteMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_deleteBody": "프롬프트에 이미 넣은 인스턴스는 “삭제된 블록”으로 표시됩니다. 실행 취소할 수 있습니다.",
   "blocks_details": "세부 정보",
   "blocks_noSelection": "카드를 클릭해 세부 정보 보기. 더블클릭으로 편집, Enter로 프롬프트에 삽입.",
@@ -8315,33 +7201,69 @@
   "blocks_paramSampler": "샘플러",
   "blocks_paramNoise": "노이즈",
   "blocks_steps": "{count} 스텝",
-  "@blocks_steps": {"placeholders": {"count": {}}},
+  "@blocks_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_guidance": "가이던스 {value}",
-  "@blocks_guidance": {"placeholders": {"value": {}}},
+  "@blocks_guidance": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_rescale": "리스케일 {value}",
-  "@blocks_rescale": {"placeholders": {"value": {}}},
+  "@blocks_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "blocks_newTagInEdit": "새 태그…",
   "blocks_modifiedAt": "{time} 수정",
-  "@blocks_modifiedAt": {"placeholders": {"time": {}}},
+  "@blocks_modifiedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "blocks_createdAt": "{date} 생성",
-  "@blocks_createdAt": {"placeholders": {"date": {}}},
+  "@blocks_createdAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_sourceFile": "원본 파일 {path}",
-  "@blocks_sourceFile": {"placeholders": {"path": {}}},
+  "@blocks_sourceFile": {
+    "placeholders": {
+      "path": {}
+    }
+  },
   "blocks_sourceSynced": "파일과 일치",
   "blocks_sourceChanged": "파일이 변경됨",
   "blocks_sourceMissing": "파일 없음",
   "blocks_importedAt": "{date} 가져옴",
-  "@blocks_importedAt": {"placeholders": {"date": {}}},
+  "@blocks_importedAt": {
+    "placeholders": {
+      "date": {}
+    }
+  },
   "blocks_total": "합계",
   "blocks_totalItems": "항목 {count}개",
-  "@blocks_totalItems": {"placeholders": {"count": {}}},
+  "@blocks_totalItems": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_from": "출처",
   "blocks_batch": "일괄 작업",
   "blocks_insertInOrder": "프롬프트에 순서대로 삽입",
   "blocks_mergeNew": "새 블록으로 합치기…",
   "blocks_batchStyle": "색 / 스타일 일괄 변경",
   "blocks_dragHint": "이 카드 {count}장을 왼쪽 폴더나 컬렉션으로 드래그하고, 놓을 때 이동 또는 복사를 고를 수도 있습니다.",
-  "@blocks_dragHint": {"placeholders": {"count": {}}},
+  "@blocks_dragHint": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_editBlockTitle": "블록 편집",
   "blocks_editHint": "저장하면 프롬프트의 고정 인스턴스는 바로 바뀌고, 무작위 / 순서는 다음 뽑기부터 새 내용을 씁니다",
   "blocks_newBlockHint": "저장 후 생성 페이지 사이드바에서 클릭 한 번으로 넣을 수 있습니다",
@@ -8367,7 +7289,11 @@
   "blocks_saveAsBlock": "블록으로 저장",
   "blocks_lookup": "용어 찾기",
   "blocks_splitDone": "{count}개 · 쉼표로 나눔",
-  "@blocks_splitDone": {"placeholders": {"count": {}}},
+  "@blocks_splitDone": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "blocks_replaceSelection": "저장 후 선택한 텍스트를 이 블록으로 바꾸기",
   "blocks_quickHint": "미리보기, 부정, 설정은 나중에 라이브러리에서",
   "imageViewer_backGallery": "로컬 갤러리",
@@ -8381,9 +7307,17 @@
   "imageViewer_unsaved": "저장 안 됨",
   "imageViewer_saved": "저장됨",
   "imageViewer_batch": "생성 결과 · 이번 {count}장",
-  "@imageViewer_batch": {"placeholders": {"count": {}}},
+  "@imageViewer_batch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_zoomFit": "맞춤 · {percent}%",
-  "@imageViewer_zoomFit": {"placeholders": {"percent": {}}},
+  "@imageViewer_zoomFit": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
   "imageViewer_zoomFitPending": "맞춤 · —",
   "imageViewer_zoomFitShort": "맞춤",
   "imageViewer_zoomIn": "확대",
@@ -8399,7 +7333,11 @@
   "imageViewer_next": "다음",
   "imageViewer_loadingOriginal": "원본 불러오는 중",
   "imageViewer_loadingOriginalSize": "원본 불러오는 중 · {size}",
-  "@imageViewer_loadingOriginalSize": {"placeholders": {"size": {}}},
+  "@imageViewer_loadingOriginalSize": {
+    "placeholders": {
+      "size": {}
+    }
+  },
   "imageViewer_missingTitle": "이미지를 찾을 수 없음",
   "imageViewer_missingHint": "탐색기에서 이동, 이름 변경 또는 삭제되었을 수 있습니다",
   "imageViewer_openFolder": "폴더 열기",
@@ -8417,10 +7355,18 @@
   "imageViewer_favorite": "즐겨찾기",
   "imageViewer_showInFolder": "폴더에서 보기",
   "imageViewer_deleteKey": "삭제  {key}",
-  "@imageViewer_deleteKey": {"placeholders": {"key": {}}},
+  "@imageViewer_deleteKey": {
+    "placeholders": {
+      "key": {}
+    }
+  },
   "imageViewer_more": "더 보기",
   "imageViewer_genIndex": "이번 생성 · {index}번째",
-  "@imageViewer_genIndex": {"placeholders": {"index": {}}},
+  "@imageViewer_genIndex": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_notSaved": "갤러리에 저장 안 됨",
   "imageViewer_savedToGallery": "갤러리에 저장됨",
   "imageViewer_size": "크기",
@@ -8434,35 +7380,71 @@
   "imageViewer_steps": "스텝",
   "imageViewer_guidance": "프롬프트 가이던스",
   "imageViewer_noise": "노이즈 {value}",
-  "@imageViewer_noise": {"placeholders": {"value": {}}},
+  "@imageViewer_noise": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_rescale": "리스케일 {value}",
-  "@imageViewer_rescale": {"placeholders": {"value": {}}},
+  "@imageViewer_rescale": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_precise": "정밀 참조 ×{count}",
-  "@imageViewer_precise": {"placeholders": {"count": {}}},
+  "@imageViewer_precise": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_qualityTags": "품질 태그",
   "imageViewer_prompt": "프롬프트",
   "imageViewer_translate": "번역",
   "imageViewer_showOriginal": "원문 보기",
   "imageViewer_translateFailed": "번역 실패: {error}",
-  "@imageViewer_translateFailed": {"placeholders": {"error": {}}},
+  "@imageViewer_translateFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
   "imageViewer_copy": "복사",
   "imageViewer_copySeed": "시드 복사",
   "imageViewer_expandAll": "모두 보기",
   "imageViewer_expand": "펼치기",
   "imageViewer_collapse": "접기",
   "imageViewer_character": "캐릭터 {index}",
-  "@imageViewer_character": {"placeholders": {"index": {}}},
+  "@imageViewer_character": {
+    "placeholders": {
+      "index": {}
+    }
+  },
   "imageViewer_position": "위치 {cell}",
-  "@imageViewer_position": {"placeholders": {"cell": {}}},
+  "@imageViewer_position": {
+    "placeholders": {
+      "cell": {}
+    }
+  },
   "imageViewer_characterNegative": "캐릭터 부정 · ",
   "imageViewer_negative": "부정",
   "imageViewer_tagCount": "{count}개",
-  "@imageViewer_tagCount": {"placeholders": {"count": {}}},
+  "@imageViewer_tagCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_vibes": "Vibe 참조",
   "imageViewer_vibeStrength": "강도 {value}",
-  "@imageViewer_vibeStrength": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeStrength": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_vibeInfo": "정보 {value}",
-  "@imageViewer_vibeInfo": {"placeholders": {"value": {}}},
+  "@imageViewer_vibeInfo": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "imageViewer_saveVibe": "Vibe 라이브러리에 저장",
   "imageViewer_noMetaTitle": "NovelAI 생성 정보 없음",
   "imageViewer_noMetaBody": "NAI로 생성한 이미지가 아니거나 메타데이터가 제거되었습니다(스크린샷, 다시 저장, 압축한 이미지에 흔함).\n아래의 이미지 투 이미지, 스타일 전송, 정밀 참조, 업스케일은 사용할 수 있습니다.",
@@ -8510,9 +7492,17 @@
   "imageViewer_cancel": "취소",
   "imageViewer_justNow": "방금",
   "imageViewer_minutesAgo": "{count}분 전",
-  "@imageViewer_minutesAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_hoursAgo": "{count}시간 전",
-  "@imageViewer_hoursAgo": {"placeholders": {"count": {}}},
+  "@imageViewer_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "imageViewer_yesterday": "어제",
   "explore_back": "화풍 탐색",
   "explore_close": "닫기",
@@ -8529,13 +7519,33 @@
   "explore_previous": "이전",
   "explore_next": "다음",
   "explore_today": "오늘 {time}",
-  "@explore_today": {"placeholders": {"time": {}}},
+  "@explore_today": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_yesterday": "어제 {time}",
-  "@explore_yesterday": {"placeholders": {"time": {}}},
+  "@explore_yesterday": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "explore_monthDay": "{month}월 {day}일 {time}",
-  "@explore_monthDay": {"placeholders": {"month": {}, "day": {}, "time": {}}},
+  "@explore_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {},
+      "time": {}
+    }
+  },
   "explore_fullDate": "{year}년 {month}월 {day}일",
-  "@explore_fullDate": {"placeholders": {"year": {}, "month": {}, "day": {}}},
+  "@explore_fullDate": {
+    "placeholders": {
+      "year": {},
+      "month": {},
+      "day": {}
+    }
+  },
   "explore_sectionToday": "오늘",
   "explore_thisWeek": "이번 주",
   "explore_earlier": "이전",
@@ -8546,29 +7556,74 @@
   "explore_openBlockLibrary": "블록 라이브러리 열기",
   "explore_variableMissing": "블록 삭제됨",
   "explore_poolSize": "풀 {count}개",
-  "@explore_poolSize": {"placeholders": {"count": {}}},
+  "@explore_poolSize": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evolutionTarget": "진화 대상",
   "explore_draw": "후보 {count}장 뽑기",
-  "@explore_draw": {"placeholders": {"count": {}}},
+  "@explore_draw": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_stopGenerating": "생성 중지",
   "explore_busy": "생성 중",
   "explore_cooldown": "쿨다운 {seconds}초",
-  "@explore_cooldown": {"placeholders": {"seconds": {}}},
+  "@explore_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "explore_insufficient": "Anlas 부족",
   "explore_count": "{count}장",
-  "@explore_count": {"placeholders": {"count": {}}},
+  "@explore_count": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_favoritesCount": "즐겨찾기 {count}",
-  "@explore_favoritesCount": {"placeholders": {"count": {}}},
+  "@explore_favoritesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_roundsCount": "{count}라운드",
-  "@explore_roundsCount": {"placeholders": {"count": {}}},
+  "@explore_roundsCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_linesCount": "진화 라인 {count}개",
-  "@explore_linesCount": {"placeholders": {"count": {}}},
+  "@explore_linesCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_progressRound": "{round}라운드 · {done} / {total}",
-  "@explore_progressRound": {"placeholders": {"round": {}, "done": {}, "total": {}}},
+  "@explore_progressRound": {
+    "placeholders": {
+      "round": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_progressChildren": "{line} {gen}세대 · {done} / {total}",
-  "@explore_progressChildren": {"placeholders": {"line": {}, "gen": {}, "done": {}, "total": {}}},
+  "@explore_progressChildren": {
+    "placeholders": {
+      "line": {},
+      "gen": {},
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_paused": "일시 정지 · {where}",
-  "@explore_paused": {"placeholders": {"where": {}}},
+  "@explore_paused": {
+    "placeholders": {
+      "where": {}
+    }
+  },
   "explore_pause": "일시 정지",
   "explore_resume": "계속",
   "explore_stop": "중지",
@@ -8595,23 +7650,48 @@
   "explore_selectExit": "선택 종료  Esc",
   "explore_selectHint": "카드를 눌러 선택",
   "explore_selectedN": "{count}장 선택됨",
-  "@explore_selectedN": {"placeholders": {"count": {}}},
+  "@explore_selectedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_sortNewest": "새 라운드가 위 (누르면 오래된 순)",
   "explore_sortOldest": "오래된 라운드가 위 (누르면 새로운 순)",
   "explore_round": "{number}라운드",
-  "@explore_round": {"placeholders": {"number": {}}},
+  "@explore_round": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingShort": "생성 중 {done} / {total}",
-  "@explore_generatingShort": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_generatingShort": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_failedRetry": "{count}장 실패 · 다시 시도",
-  "@explore_failedRetry": {"placeholders": {"count": {}}},
+  "@explore_failedRetry": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pick": "진화할 이미지 고르기",
   "explore_pickTip": "이 라운드의 즐겨찾기가 선택된 상태로 여러 개 선택을 시작합니다",
   "explore_filterEmpty": "이 필터에 맞는 후보가 없습니다",
   "explore_showAll": "모두 보기",
   "explore_queued": "대기 #{number}",
-  "@explore_queued": {"placeholders": {"number": {}}},
+  "@explore_queued": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_generatingN": "생성 중 #{number}",
-  "@explore_generatingN": {"placeholders": {"number": {}}},
+  "@explore_generatingN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_failed": "생성 실패",
   "explore_failedHover": "마우스를 올려 이유 보기",
   "explore_noArtists": "뽑힌 작가 없음",
@@ -8632,15 +7712,32 @@
   "explore_ungroup": "그룹에서 빼기",
   "explore_delete": "삭제",
   "explore_deleteN": "{count}장 삭제",
-  "@explore_deleteN": {"placeholders": {"count": {}}},
+  "@explore_deleteN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteThis": "이 이미지 삭제",
   "explore_deleted": "{count}장 삭제함",
-  "@explore_deleted": {"placeholders": {"count": {}}},
+  "@explore_deleted": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_inspectorEmpty": "후보를 누르면 뽑힌 작가가 여기에 표시됩니다",
   "explore_childN": "자손 #{number}",
-  "@explore_childN": {"placeholders": {"number": {}}},
+  "@explore_childN": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_genOp": "{gen}세대 · {op}",
-  "@explore_genOp": {"placeholders": {"gen": {}, "op": {}}},
+  "@explore_genOp": {
+    "placeholders": {
+      "gen": {},
+      "op": {}
+    }
+  },
   "explore_drawn": "이 이미지에서 뽑힌 것",
   "explore_drawEmpty": "이번에는 빈 항목이 뽑혔습니다",
   "explore_origin": "만들어진 방식",
@@ -8650,40 +7747,85 @@
   "explore_sampler": "샘플러",
   "explore_model": "모델",
   "explore_steps": "{count}스텝",
-  "@explore_steps": {"placeholders": {"count": {}}},
+  "@explore_steps": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_fullPrompt": "전체 프롬프트",
   "explore_negative": "네거티브",
   "explore_failReason": "실패 이유",
   "explore_retryFailed": "실패한 후보 다시 시도",
   "explore_waitHint": "생성되면 뽑힌 작가가 여기에 표시됩니다",
   "explore_mergedArtists": "합친 작가 · {count}",
-  "@explore_mergedArtists": {"placeholders": {"count": {}}},
+  "@explore_mergedArtists": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_multiHint": "블록으로 저장하면 이 작가들을 하나로 합칩니다. 진화에서는 이미지마다 부모가 됩니다.",
   "explore_evoEmptyTitle": "아직 진화 라인이 없습니다",
   "explore_evoEmptyBody": "마음에 드는 후보를 골라 \"진화 시작\"을 누르면 좋은 작가 조합에서 새 조합을 키웁니다.",
   "explore_evoGoPick": "후보에서 고르기",
   "explore_gen": "{number}세대",
-  "@explore_gen": {"placeholders": {"number": {}}},
+  "@explore_gen": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_current": "현재",
   "explore_genFirst": "후보 {picked}장에서 시작 · 자손 {children}장",
-  "@explore_genFirst": {"placeholders": {"picked": {}, "children": {}}},
+  "@explore_genFirst": {
+    "placeholders": {
+      "picked": {},
+      "children": {}
+    }
+  },
   "explore_genFrom": "부모 {parents} → 자손 {children} · {from}세대에서 {picked}장",
-  "@explore_genFrom": {"placeholders": {"parents": {}, "children": {}, "from": {}, "picked": {}}},
+  "@explore_genFrom": {
+    "placeholders": {
+      "parents": {},
+      "children": {},
+      "from": {},
+      "picked": {}
+    }
+  },
   "explore_backcross": "1세대 역교배",
   "explore_compare": "둘씩 비교해 순위",
   "explore_compareTip": "부모를 둘씩 보고 더 좋은 쪽을 고릅니다. 선호도가 높을수록 자주 선택됩니다",
   "explore_generateChildren": "자손 {count}장 생성",
-  "@explore_generateChildren": {"placeholders": {"count": {}}},
+  "@explore_generateChildren": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_children": "자손 · {count}",
-  "@explore_children": {"placeholders": {"count": {}}},
+  "@explore_children": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_pickedN": "{count}장 선택",
-  "@explore_pickedN": {"placeholders": {"count": {}}},
+  "@explore_pickedN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_breedHint": "마음에 드는 자손을 골라 다음 세대로",
   "explore_breed": "선택한 {count}장으로 {next}세대 키우기",
-  "@explore_breed": {"placeholders": {"count": {}, "next": {}}},
+  "@explore_breed": {
+    "placeholders": {
+      "count": {},
+      "next": {}
+    }
+  },
   "explore_noChildren": "아직 자손이 없습니다 · \"생성\"으로 첫 배치 만들기",
   "explore_parentsByPref": "부모 · 선호도순 · {count}",
-  "@explore_parentsByPref": {"placeholders": {"count": {}}},
+  "@explore_parentsByPref": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_opMutation": "변이",
   "explore_opCrossover": "교차",
   "explore_opInjection": "주입",
@@ -8691,39 +7833,87 @@
   "explore_newRun": "새 탐색",
   "explore_newRunHint": "현재 프롬프트와 설정으로 시작합니다. 이름은 나중에 바꿀 수 있습니다",
   "explore_runRunning": "생성 중 {done}/{total}",
-  "@explore_runRunning": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runRunning": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runPaused": "일시 정지 {done}/{total}",
-  "@explore_runPaused": {"placeholders": {"done": {}, "total": {}}},
+  "@explore_runPaused": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
   "explore_runFailed": "{count}장 실패",
-  "@explore_runFailed": {"placeholders": {"count": {}}},
+  "@explore_runFailed": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noRunMatch": "일치하는 탐색이 없습니다",
   "explore_runMenuHint": "자동 이름: 랜덤 블록 이름 + 날짜 · 행의 ⋯로 이름 변경·삭제",
   "explore_deleteRun": "탐색 삭제",
   "explore_deleteRunTitle": "\"{name}\"을(를) 삭제할까요?",
-  "@explore_deleteRunTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteRunTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteRunBody": "후보 {count}장과 모든 진화 라인이 삭제되며 되돌릴 수 없습니다. 갤러리 이미지는 영향을 받지 않습니다.",
-  "@explore_deleteRunBody": {"placeholders": {"count": {}}},
+  "@explore_deleteRunBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_deleteLineTitle": "진화 라인 \"{name}\"을(를) 삭제할까요?",
-  "@explore_deleteLineTitle": {"placeholders": {"name": {}}},
+  "@explore_deleteLineTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
   "explore_deleteLineBody": "이 라인의 자손 {count}장도 삭제되며 되돌릴 수 없습니다. 후보는 영향을 받지 않습니다.",
-  "@explore_deleteLineBody": {"placeholders": {"count": {}}},
+  "@explore_deleteLineBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_onboardingTitle": "랜덤 블록으로 화풍을 한꺼번에 시험하기",
   "explore_onboardingBody": "이미지마다 작가 풀에서 다시 뽑습니다. 마음에 드는 조합을 남겨 진화시키세요.",
   "explore_step1": "랜덤 블록 넣기",
   "explore_step1Body": "라이브러리의 랜덤 블록(예: 작가 풀)을 프롬프트에 넣습니다.",
   "explore_step2": "후보 한 묶음 뽑기",
   "explore_step2Body": "왼쪽 아래 \"후보 {count}장 뽑기\"를 누르면 이미지마다 작가를 다시 뽑습니다.",
-  "@explore_step2Body": {"placeholders": {"count": {}}},
+  "@explore_step2Body": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_step3": "즐겨찾기, 진화, 저장",
   "explore_step3Body": "마음에 드는 것을 즐겨찾기하고 진화시킨 뒤, 만족한 조합을 블록으로 저장합니다.",
   "explore_detected": "{count}개 감지됨",
-  "@explore_detected": {"placeholders": {"count": {}}},
+  "@explore_detected": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_noVariables": "랜덤 블록 없음",
   "explore_openPrevious": "이전 탐색 열기",
   "explore_evoTitle": "후보 {count}장으로 진화 시작",
-  "@explore_evoTitle": {"placeholders": {"count": {}}},
+  "@explore_evoTitle": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoJoinTitle": "{count}장을 \"{line}\" {gen}세대에 추가",
-  "@explore_evoJoinTitle": {"placeholders": {"count": {}, "line": {}, "gen": {}}},
+  "@explore_evoJoinTitle": {
+    "placeholders": {
+      "count": {},
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoStep1": "부모",
   "explore_evoStep1Body": "후보마다 작가 문자열이 부모가 됩니다",
   "explore_evoStep2": "자손",
@@ -8732,16 +7922,38 @@
   "explore_evoStep3Body": "마음에 드는 자손으로 다음 세대",
   "explore_evoNewLine": "새 진화 라인",
   "explore_evoJoin": "\"{line}\" {gen}세대에 추가",
-  "@explore_evoJoin": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_evoJoin": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_lineName": "진화 라인 이름",
   "explore_lineDefault": "진화 라인 {number}",
-  "@explore_lineDefault": {"placeholders": {"number": {}}},
+  "@explore_lineDefault": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_lineGen": "{line} · {gen}세대",
-  "@explore_lineGen": {"placeholders": {"line": {}, "gen": {}}},
+  "@explore_lineGen": {
+    "placeholders": {
+      "line": {},
+      "gen": {}
+    }
+  },
   "explore_evoParents": "1세대 부모 · {count}",
-  "@explore_evoParents": {"placeholders": {"count": {}}},
+  "@explore_evoParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_evoAddParents": "추가할 부모 · {count}",
-  "@explore_evoAddParents": {"placeholders": {"count": {}}},
+  "@explore_evoAddParents": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_addCustom": "사용자 작가 문자열 추가",
   "explore_customHint": "예: 0.8::artist:ciloranko::, artist:rella (Enter로 추가)",
   "explore_targetBefore": "자손은 프롬프트의",
@@ -8752,22 +7964,44 @@
   "explore_createOnly": "만들기만",
   "explore_joinOnly": "추가만",
   "explore_createGenerate": "만들고 {count}장 생성",
-  "@explore_createGenerate": {"placeholders": {"count": {}}},
+  "@explore_createGenerate": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_saveBlockTitle": "프롬프트 블록으로 저장",
   "explore_untitled": "제목 없음",
   "explore_blockFromOne": "후보 #{number}에서",
-  "@explore_blockFromOne": {"placeholders": {"number": {}}},
+  "@explore_blockFromOne": {
+    "placeholders": {
+      "number": {}
+    }
+  },
   "explore_blockFromMany": "후보 {count}장에서 합치고 중복 제거",
-  "@explore_blockFromMany": {"placeholders": {"count": {}}},
+  "@explore_blockFromMany": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "explore_blockNameMany": "{run} · 엄선 {count}",
-  "@explore_blockNameMany": {"placeholders": {"run": {}, "count": {}}},
+  "@explore_blockNameMany": {
+    "placeholders": {
+      "run": {},
+      "count": {}
+    }
+  },
   "explore_blockContent": "내용",
   "explore_blockArtists": "뽑힌 작가만",
   "explore_blockFull": "전체 포지티브",
   "explore_blockFullSingle": "후보가 1장일 때만 사용할 수 있습니다",
   "explore_blockRemoveHint": "×로 필요 없는 작가 빼기",
   "explore_blockKept": "{kept} / {total} 유지",
-  "@explore_blockKept": {"placeholders": {"kept": {}, "total": {}}},
+  "@explore_blockKept": {
+    "placeholders": {
+      "kept": {},
+      "total": {}
+    }
+  },
   "explore_blockName": "이름",
   "explore_blockColor": "색",
   "explore_blockFolder": "저장 위치",
@@ -8777,7 +8011,12 @@
   "explore_compareNote": "결과는 바로 저장됩니다",
   "explore_compareQuestion": "어느 쪽이 원하는 화풍에 더 가깝나요?",
   "explore_comparePairs": "{index} / {total}쌍",
-  "@explore_comparePairs": {"placeholders": {"index": {}, "total": {}}},
+  "@explore_comparePairs": {
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
   "explore_leftBetter": "왼쪽이 더 좋음",
   "explore_rightBetter": "오른쪽이 더 좋음",
   "explore_neither": "둘 다 아님",
@@ -8808,14 +8047,23 @@
   "gen_unpin": "헤더에서 해제",
   "gen_yesterday": "어제",
   "gen_monthDay": "{month}월 {day}일",
-  "@gen_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@gen_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "gen_params": "생성 설정",
   "gen_generating": "생성 중",
   "gen_modelsNew": "최신 모델",
   "gen_modelsLegacy": "이전 모델",
   "gen_modeTip": "클릭하여 Anime / Furry 전환",
   "gen_anlasTip": "Anlas 잔액 {value}",
-  "@gen_anlasTip": {"placeholders": {"value": {}}},
+  "@gen_anlasTip": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "gen_positive": "프롬프트",
   "gen_basePrompt": "기본 프롬프트",
   "gen_negative": "제외",
@@ -8840,7 +8088,11 @@
   "gen_translateNeedsModel": "번역 모델이 없습니다. 클릭하여 설정",
   "gen_translateRestore": "원문 보기",
   "gen_translateWith": "번역 ({route})",
-  "@gen_translateWith": {"placeholders": {"route": {}}},
+  "@gen_translateWith": {
+    "placeholders": {
+      "route": {}
+    }
+  },
   "gen_translateNew": "새 내용 번역",
   "gen_translateShowOriginal": "모두 원문 보기",
   "gen_translateShowTranslated": "모두 번역문 보기",
@@ -8854,16 +8106,32 @@
   "gen_charactersTip": "캐릭터마다 프롬프트를 따로 써서 특징이 섞이지 않게 합니다.",
   "gen_charactersEmpty": "캐릭터가 없습니다. 오른쪽 위 + 로 추가하세요.",
   "gen_charactersFull": "최대 {max}명",
-  "@gen_charactersFull": {"placeholders": {"max": {}}},
+  "@gen_charactersFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_addCharacter": "캐릭터 추가",
   "gen_addAs": "{gender} 캐릭터 추가",
-  "@gen_addAs": {"placeholders": {"gender": {}}},
+  "@gen_addAs": {
+    "placeholders": {
+      "gender": {}
+    }
+  },
   "gen_clearCharacters": "모든 캐릭터 삭제",
   "gen_clearCharactersTitle": "모든 캐릭터를 삭제할까요?",
   "gen_clearCharactersBody": "캐릭터 {count}명과 프롬프트가 모두 삭제됩니다.",
-  "@gen_clearCharactersBody": {"placeholders": {"count": {}}},
+  "@gen_clearCharactersBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_characterN": "캐릭터 {n}",
-  "@gen_characterN": {"placeholders": {"n": {}}},
+  "@gen_characterN": {
+    "placeholders": {
+      "n": {}
+    }
+  },
   "gen_genderFemale": "여성",
   "gen_genderMale": "남성",
   "gen_genderOther": "기타",
@@ -8873,7 +8141,11 @@
   "gen_positionBoard": "캐릭터 위치",
   "gen_positionAiTip": "AI가 위치를 정합니다",
   "gen_positionAt": "위치 {at} — 클릭하여 조정",
-  "@gen_positionAt": {"placeholders": {"at": {}}},
+  "@gen_positionAt": {
+    "placeholders": {
+      "at": {}
+    }
+  },
   "gen_positionUnset": "아직 배치 안 됨 — 클릭하여 배치",
   "gen_positionAiHint": "위치를 AI가 정하고 있습니다",
   "gen_positionGridHint": "캐릭터를 칸으로 끌면 칸 중앙에 맞춰집니다",
@@ -8893,7 +8165,12 @@
   "gen_img2img": "이미지 투 이미지",
   "gen_img2imgDesc": "원본 이미지로 변형 생성",
   "gen_img2imgSummary": "강도 {strength} · 노이즈 {noise}",
-  "@gen_img2imgSummary": {"placeholders": {"strength": {}, "noise": {}}},
+  "@gen_img2imgSummary": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "gen_img2imgDrop": "이미지를 끌어 놓거나",
   "gen_upload": "업로드",
   "gen_replace": "교체",
@@ -8921,18 +8198,32 @@
   "gen_addFromVibeLibrary": "바이브 라이브러리에서",
   "gen_addFromPreciseLibrary": "정밀 참조 라이브러리에서",
   "gen_vibeFull": "최대 {max}개",
-  "@gen_vibeFull": {"placeholders": {"max": {}}},
+  "@gen_vibeFull": {
+    "placeholders": {
+      "max": {}
+    }
+  },
   "gen_saveToLibrary": "라이브러리에 저장",
   "gen_normalize": "정규화",
   "gen_normalizeTip": "바이브 강도를 합계 기준으로 정규화",
   "gen_vibeExtraCost": "{free}개 초과 시 개당 +{each} Anlas · 이번 +{total}",
-  "@gen_vibeExtraCost": {"placeholders": {"free": {}, "each": {}, "total": {}}},
+  "@gen_vibeExtraCost": {
+    "placeholders": {
+      "free": {},
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_recent": "최근",
   "gen_encoded": "인코딩됨",
   "gen_encoding": "인코딩 중",
   "gen_encode": "인코딩",
   "gen_encodeTip": "인코딩 1회 {cost} Anlas, 이후 재사용 가능",
-  "@gen_encodeTip": {"placeholders": {"cost": {}}},
+  "@gen_encodeTip": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
   "gen_vibeStrength": "강도",
   "gen_vibeInfo": "정보 추출",
   "gen_vibeInfoReencode": "인코딩된 바이브는 다시 인코딩해야 합니다",
@@ -8944,7 +8235,12 @@
   "gen_preciseBoth": "둘 다",
   "gen_fidelity": "충실도",
   "gen_preciseCost": "장당 {each} Anlas · 이번 +{total}",
-  "@gen_preciseCost": {"placeholders": {"each": {}, "total": {}}},
+  "@gen_preciseCost": {
+    "placeholders": {
+      "each": {},
+      "total": {}
+    }
+  },
   "gen_preciseConflict": "정밀 참조가 있으면 바이브는 보내지 않습니다.",
   "gen_pauseVibes": "바이브 일시 중지",
   "gen_savePrecise": "정밀 참조 라이브러리에 저장",
@@ -8966,7 +8262,12 @@
   "gen_repeat": "반복",
   "gen_repeatTip": "연속으로 보낼 요청 수",
   "gen_repeatTotal": "{times}회, 총 {total}장 (휠로도 조절)",
-  "@gen_repeatTotal": {"placeholders": {"times": {}, "total": {}}},
+  "@gen_repeatTotal": {
+    "placeholders": {
+      "times": {},
+      "total": {}
+    }
+  },
   "gen_steps": "스텝",
   "gen_guidance": "가이던스",
   "gen_guidanceTip": "높을수록 프롬프트를 따르지만 너무 높으면 딱딱해집니다 (기본 5)",
@@ -8989,7 +8290,11 @@
   "gen_paramsClose": "설정 닫기",
   "gen_stop": "생성 중지",
   "gen_cooldown": "쿨다운 {seconds}초",
-  "@gen_cooldown": {"placeholders": {"seconds": {}}},
+  "@gen_cooldown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
   "gen_insufficient": "Anlas 부족",
   "gen_free": "이번엔 무료 (Opus 한도 내)",
   "gen_emptyTitle": "프롬프트를 쓰고 첫 이미지를 만드세요",
@@ -8998,8 +8303,6 @@
   "gen_tileFailed": "이 이미지는 실패했습니다",
   "gen_enhance": "향상",
   "gen_variations": "변형",
-  "gen_variationsCost": "변형 ({cost} Anlas)",
-  "@gen_variationsCost": {"placeholders": {"cost": {}}},
   "gen_upscale": "업스케일",
   "gen_upscaleStop": "업스케일 중지",
   "gen_upscaleOptions": "업스케일 방식",
@@ -9035,14 +8338,26 @@
   "gen_historyEmpty": "아직 생성한 이미지가 없습니다",
   "gen_historyEmptySub": "생성한 이미지가 묶음별로 표시됩니다",
   "gen_batchCount": "{count}장",
-  "@gen_batchCount": {"placeholders": {"count": {}}},
+  "@gen_batchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_batchPending": "{count}장 남음",
-  "@gen_batchPending": {"placeholders": {"count": {}}},
+  "@gen_batchPending": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pinnedTip": "고정한 이미지 — 클릭하여 이동",
   "gen_select": "여러 개 선택",
   "gen_selectDone": "선택 완료",
   "gen_selectedCount": "{count}장 선택됨",
-  "@gen_selectedCount": {"placeholders": {"count": {}}},
+  "@gen_selectedCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_pack": "zip으로 묶기",
   "gen_saveSelected": "선택한 이미지 저장",
   "gen_removeSelected": "기록에서 제거",
@@ -9056,11 +8371,23 @@
   "gen_clearHistoryBody": "목록에서만 제거하며 갤러리에 저장된 파일은 그대로입니다.",
   "gen_deleteImagesTitle": "기록에서 제거할까요?",
   "gen_deleteImagesBody": "{count}장을 목록에서 제거합니다. 저장된 파일은 그대로입니다.",
-  "@gen_deleteImagesBody": {"placeholders": {"count": {}}},
+  "@gen_deleteImagesBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_saveBatch": "이 묶음 저장 ({count}장)",
-  "@gen_saveBatch": {"placeholders": {"count": {}}},
+  "@gen_saveBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeBatch": "이 묶음 제거 ({count}장)",
-  "@gen_removeBatch": {"placeholders": {"count": {}}},
+  "@gen_removeBatch": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "gen_removeImage": "기록에서 제거",
   "gen_favorite": "즐겨찾기",
   "gen_unfavorite": "즐겨찾기 해제",
@@ -9076,7 +8403,11 @@
   "tools_free": "무료",
   "tools_localFree": "로컬 · 무료",
   "tools_anlasN": "{count} Anlas",
-  "@tools_anlasN": {"placeholders": {"count": {}}},
+  "@tools_anlasN": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_cancel": "취소",
   "tools_close": "닫기",
   "tools_done": "완료",
@@ -9086,11 +8417,24 @@
   "tools_optional": "선택",
   "tools_justNow": "방금",
   "tools_minutesAgo": "{count}분 전",
-  "@tools_minutesAgo": {"placeholders": {"count": {}}},
+  "@tools_minutesAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_hoursAgo": "{count}시간 전",
-  "@tools_hoursAgo": {"placeholders": {"count": {}}},
+  "@tools_hoursAgo": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_monthDay": "{month}월 {day}일",
-  "@tools_monthDay": {"placeholders": {"month": {}, "day": {}}},
+  "@tools_monthDay": {
+    "placeholders": {
+      "month": {},
+      "day": {}
+    }
+  },
   "tools_useAsInit": "img2img 원본으로 사용",
   "tools_upscale": "업스케일",
   "tools_enhance": "향상",
@@ -9111,13 +8455,23 @@
   "tools_enhanceLocal": "로컬 확대",
   "tools_enhanceLocalRow": "로컬",
   "tools_enhanceOutLocal": "{size} → 로컬 {factor}",
-  "@tools_enhanceOutLocal": {"placeholders": {"size": {}, "factor": {}}},
+  "@tools_enhanceOutLocal": {
+    "placeholders": {
+      "size": {},
+      "factor": {}
+    }
+  },
   "tools_enhanceMagnitude": "정도",
   "tools_magLight": "약",
   "tools_magMedium": "중",
   "tools_magStrong": "강",
   "tools_enhanceValues": "강도 {strength} · 노이즈 {noise}",
-  "@tools_enhanceValues": {"placeholders": {"strength": {}, "noise": {}}},
+  "@tools_enhanceValues": {
+    "placeholders": {
+      "strength": {},
+      "noise": {}
+    }
+  },
   "tools_enhanceCustomTag": "사용자 지정",
   "tools_enhanceCustom": "강도와 노이즈 직접 지정",
   "tools_enhanceCustomHint": "강도가 높을수록 많이 바뀌고, 노이즈는 디테일을 더하지만 지저분해지기 쉽습니다",
@@ -9125,7 +8479,12 @@
   "tools_localNotSet": "로컬 확대 모델 미선택",
   "tools_upscaleSettings": "업스케일 설정",
   "tools_enhanceFooter": "현재 프롬프트 · {model} · {steps}스텝",
-  "@tools_enhanceFooter": {"placeholders": {"model": {}, "steps": {}}},
+  "@tools_enhanceFooter": {
+    "placeholders": {
+      "model": {},
+      "steps": {}
+    }
+  },
   "tools_enhanceRun": "향상",
   "tools_enhanceRunLocal": "향상 + 로컬 확대",
   "tools_upscaleSub": "확대 결과는 새 이미지로 표시되며 원본과 img2img 원본은 그대로입니다",
@@ -9195,7 +8554,11 @@
   "tools_edgeLeft": "왼쪽",
   "tools_edgeRight": "오른쪽",
   "tools_hintExpand": "캔버스 가장자리를 끌어도 됩니다. {step}px 단위",
-  "@tools_hintExpand": {"placeholders": {"step": {}}},
+  "@tools_hintExpand": {
+    "placeholders": {
+      "step": {}
+    }
+  },
   "tools_maskLook": "마스크 표시",
   "tools_maskBorder": "윤곽선",
   "tools_patternSolid": "단색",
@@ -9216,10 +8579,18 @@
   "tools_inpaintStrengthHint": "낮을수록 원본에 가깝습니다",
   "tools_mask": "마스크",
   "tools_maskCoverage": "영역 · {count}곳",
-  "@tools_maskCoverage": {"placeholders": {"count": {}}},
+  "@tools_maskCoverage": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_focusNone": "미설정 (전체 이미지)",
   "tools_focusContextShort": "· 컨텍스트 {value}",
-  "@tools_focusContextShort": {"placeholders": {"value": {}}},
+  "@tools_focusContextShort": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "tools_output": "출력",
   "tools_expandTag": "확장",
   "tools_layers": "레이어",
@@ -9272,7 +8643,11 @@
   "tools_emptyEmotion": "표정을 고른 뒤 “실행”",
   "tools_emptyBody": "결과가 여기에 원본과 나란히 표시됩니다",
   "tools_running": "{tool} 실행 중…",
-  "@tools_running": {"placeholders": {"tool": {}}},
+  "@tools_running": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runningBody": "보통 몇 초면 끝나며 결과는 생성 페이지 기록에도 들어갑니다",
   "tools_runFailed": "실행 실패",
   "tools_noInput": "먼저 이미지를 추가하세요",
@@ -9283,7 +8658,11 @@
   "tools_saveGallery": "갤러리에 저장",
   "tools_queue": "입력 대기열",
   "tools_queueCount": "{count}장",
-  "@tools_queueCount": {"placeholders": {"count": {}}},
+  "@tools_queueCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_queueHint": "＋: 파일 가져오기 / 생성 기록에서 선택. 끌어 놓기나 Ctrl+V도 가능",
   "tools_importFiles": "파일 가져오기",
   "tools_fromHistory": "생성 기록에서 선택",
@@ -9296,7 +8675,11 @@
   "tools_dtNoOptionsSketch": "스케치화는 옵션이 없습니다. 깔끔한 선은 “선화 추출”, 채색은 “계속 처리” 후 “채색”을 쓰세요.",
   "tools_dtEmotionLabel": "표정",
   "tools_dtEmotionMore": "{count}개 더",
-  "@tools_dtEmotionMore": {"placeholders": {"count": {}}},
+  "@tools_dtEmotionMore": {
+    "placeholders": {
+      "count": {}
+    }
+  },
   "tools_dtEmotionLess": "접기",
   "tools_dtStrength": "강도",
   "tools_defry0": "보통",
@@ -9321,7 +8704,11 @@
   "tools_dtPixelUpscale": "원래 크기로 확대",
   "tools_dtPixelUpscaleHint": "끄면 칸마다 1픽셀인 작은 이미지를 출력",
   "tools_runTool": "{tool} 실행",
-  "@tools_runTool": {"placeholders": {"tool": {}}},
+  "@tools_runTool": {
+    "placeholders": {
+      "tool": {}
+    }
+  },
   "tools_runHint": "실행 · 현재 입력 처리",
   "tools_runNeedInput": "아래에 입력을 먼저 추가하세요",
   "tools_results": "결과",
@@ -9351,5 +8738,223 @@
   "tools_emoLove": "사랑",
   "tools_emoDetermined": "결연",
   "tools_emoHurt": "상처",
-  "tools_emoPlayful": "장난"
+  "tools_emoPlayful": "장난",
+  "auth_logoutConfirm": "현재 계정에서 로그아웃하시겠습니까?",
+  "naiAgent_title": "NAI Agent",
+  "naiAgent_local": "로컬",
+  "naiAgent_permissionMode": "승인 모드",
+  "naiAgent_permissionAuto": "자동",
+  "naiAgent_permissionAsk": "확인",
+  "naiAgent_permissionReadOnly": "읽기 전용",
+  "naiAgent_permissionAutoHint": "일반 작업 공간 편집은 자동 실행합니다. 명령, 삭제 및 알 수 없는 도구는 승인이 필요하며 이미지 생성 확인도 유지합니다.",
+  "naiAgent_permissionAskHint": "작업 공간 읽기는 바로 실행합니다. 편집, 명령 및 알 수 없는 도구는 매번 승인하며 이미지 생성은 비용 확인을 거칩니다.",
+  "naiAgent_permissionReadOnlyHint": "읽기와 대화만 가능하며 편집, 이미지 생성 및 알 수 없는 도구는 차단합니다. 전환 시 Agent 작업만 중지하고 수동 생성은 유지합니다.",
+  "naiAgent_useModelSetting": "모델 설정 사용",
+  "naiAgent_permissionTitle": "도구 승인이 필요합니다",
+  "naiAgent_permissionOnce": "한 번 허용",
+  "naiAgent_permissionSession": "이 세션에서 동일한 호출 허용",
+  "naiAgent_permissionDeny": "거부",
+  "naiAgent_thinking": "사고 강도 · 다음 작업부터 적용",
+  "naiAgent_thinkingUnsupported": "조절 가능한 사고 수준이 확인되지 않았습니다. 먼저 모델 설정을 확인하세요.",
+  "naiAgent_pasteImage": "클립보드 이미지 붙여넣기",
+  "naiAgent_contextUnknown": "모델 컨텍스트 한도와 실제 사용량이 확인될 때까지 표시할 수 없습니다.",
+  "naiAgent_contextTooltip": "사용 가능한 컨텍스트 {percent}%\n남은 토큰 {remaining} / {window}\n클릭하여 상세 통계 보기",
+  "naiAgent_statistics": "컨텍스트 및 대화 통계",
+  "naiAgent_contextUsage": "현재 컨텍스트 사용량 · 추정",
+  "naiAgent_contextRemaining": "남은 컨텍스트",
+  "naiAgent_contextWindow": "모델 컨텍스트 한도",
+  "naiAgent_sessionUsage": "세션 누적 사용량",
+  "naiAgent_tokensInput": "입력",
+  "naiAgent_tokensOutput": "출력",
+  "naiAgent_tokensCacheRead": "캐시 읽기",
+  "naiAgent_tokensCacheWrite": "캐시 쓰기",
+  "naiAgent_tokensTotal": "누적 토큰",
+  "naiAgent_cumulativeUsageHint": "누적 사용량에는 이전 요청이 포함되며 현재 컨텍스트 크기와 다릅니다.",
+  "naiAgent_messageCounts": "대화 기록",
+  "naiAgent_userAssistantMessages": "사용자 / 어시스턴트",
+  "naiAgent_toolCalls": "도구 호출",
+  "naiAgent_cost": "비용",
+  "naiAgent_defaultWorkspace": "작업 공간 1",
+  "naiAgent_newChat": "새 채팅",
+  "naiAgent_settings": "Agent 설정",
+  "naiAgent_workspace": "작업 공간",
+  "naiAgent_createWorkspace": "새 작업 공간",
+  "naiAgent_rename": "이름 변경",
+  "naiAgent_name": "이름",
+  "naiAgent_placeholder": "아이디어나 질문을 입력하세요…",
+  "naiAgent_welcome": "하나의 아이디어에서 시작",
+  "naiAgent_welcomeHint": "프롬프트를 논의하고 이미지를 분석하며 작업 공간을 정리하세요.\n먼저 이야기를 나눈 뒤 작업을 시작하세요.",
+  "naiAgent_suggestCurrent": "현재 초안 확인",
+  "naiAgent_suggestImage": "참조 이미지 분석",
+  "naiAgent_suggestWorkspace": "작업 공간 정리",
+  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
+  "naiAgent_promptCurrent": "현재 초안과 매개변수를 확인해 주세요. 아직 변경하지 마세요.",
+  "naiAgent_promptImage": "현재 이미지의 구도와 화풍을 분석해 주세요. 아직 생성하지 마세요.",
+  "naiAgent_promptWorkspace": "현재 작업 공간을 살펴보고 정리 방법을 제안해 주세요. 아직 변경하지 마세요.",
+  "naiAgent_tipTitle": "TIPS / 도움말",
+  "naiAgent_tipNext": "다음 도움말",
+  "naiAgent_tipReadOnly": "먼저 '읽기 전용' 모드로 살펴본 뒤 변경할 내용을 정하세요.",
+  "naiAgent_tipAttachments": "참조 이미지를 드래그하거나 + 로 첨부해 더 구체적으로 이야기하세요.",
+  "naiAgent_tipGeneration": "이미지 생성은 비용을 표시하고 확인을 받은 뒤 실행합니다.",
+  "naiAgent_welcomeFootnote": "모든 작업은 현재 승인 모드를 따릅니다",
+  "naiAgent_chooseModel": "모델 선택",
+  "naiAgent_modelSettings": "모델 및 인터페이스 관리",
+  "naiAgent_attach": "이미지 첨부",
+  "naiAgent_removeAttachment": "첨부 제거",
+  "naiAgent_selectedImage": "선택한 이미지 첨부",
+  "naiAgent_send": "보내기",
+  "naiAgent_stop": "작업 중지",
+  "naiAgent_queue": "대기열",
+  "naiAgent_steer": "지시 추가",
+  "naiAgent_promote": "지시로 전환",
+  "naiAgent_waiting": "답변을 기다리는 중",
+  "naiAgent_working": "처리 중",
+  "naiAgent_waitingSlot": "서비스 요청 슬롯 대기 중",
+  "naiAgent_starting": "채팅 여는 중",
+  "naiAgent_interrupted": "이전 작업이 중단되었으며 자동으로 다시 보내지 않았습니다.",
+  "naiAgent_restorePending": "입력창으로 복원",
+  "naiAgent_withdraw": "회수",
+  "naiAgent_newContent": "최신 메시지로 이동",
+  "naiAgent_toolRunning": "실행 중",
+  "naiAgent_toolDone": "완료",
+  "naiAgent_toolFailed": "실패",
+  "naiAgent_arguments": "인수",
+  "naiAgent_result": "결과",
+  "naiAgent_systemPrompt": "시스템 프롬프트",
+  "naiAgent_promptHelp": "사용자 지정 내용은 기본 프롬프트를 대체합니다. 도구 지도는 앱이 추가하며 이후 요청에 적용됩니다.",
+  "naiAgent_restoreDefault": "기본값 복원",
+  "naiAgent_showEffective": "적용되는 프롬프트 보기",
+  "naiAgent_useGlobal": "전역 프롬프트 사용",
+  "naiAgent_save": "저장",
+  "naiAgent_runLimit": "작업당 모델 요청 한도",
+  "naiAgent_enterSends": "Enter로 전송, Shift+Enter로 줄바꿈",
+  "naiAgent_dataFolder": "작업 공간 데이터 폴더",
+  "naiAgent_openFolder": "폴더 열기",
+  "naiAgent_toolsManuals": "도구 및 매뉴얼",
+  "naiAgent_toolsHint": "현재 상태, 이미지, 프롬프트 및 작업 공간 파일을 필요할 때 호출하며 모델별 NAI 매뉴얼을 읽습니다.",
+  "naiAgent_unknownCost": "실제 비용은 서비스 제공자 기준",
+  "naiAgent_error": "작업에 실패했습니다. 모델 설정이나 파일을 확인하세요.",
+  "naiAgent_visionDisabled": "이 모델의 이미지 입력이 활성화되지 않았습니다. 모델 설정에서 지원 여부를 확인하세요.",
+  "naiAgent_inputChanged": "준비 중 입력이 변경되었습니다. 현재 초안을 보내세요.",
+  "naiAgent_imageLimit": "잘못된 이미지 형식이거나 업로드 한도를 초과했습니다.",
+  "naiAgent_composerNotEmpty": "현재 입력을 저장하거나 보낸 후 이 메시지를 복원하세요.",
+  "naiAgent_compact": "채팅 컨텍스트 압축",
+  "naiAgent_export": "채팅 내보내기",
+  "naiAgent_copyMessage": "메시지 복사",
+  "naiAgent_editMessage": "메시지 편집",
+  "naiAgent_regenerate": "답변 다시 생성",
+  "naiAgent_submitAnswer": "답변 제출",
+  "naiAgent_customAnswer": "직접 답변을 입력할 수도 있습니다",
+  "naiAgent_close": "패널 접기",
+  "naiAgent_showChats": "채팅 목록",
+  "naiAgent_runtimeMissing": "Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.",
+  "naiAgent_usage": "모델 사용량",
+  "naiAgent_cancel": "취소",
+  "naiAgent_dropHint": "놓아서 이 채팅에 첨부",
+  "naiAgent_emptyAttachment": "이미지를 읽을 수 없음",
+  "naiAgent_globalScope": "전역 기본값",
+  "naiAgent_workspaceScope": "현재 작업 공간",
+  "naiAgent_generationTitle": "생성 승인",
+  "naiAgent_generationWaiting": "생성 승인 대기 중",
+  "naiAgent_generationAccount": "계정: {name}",
+  "@naiAgent_generationAccount": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "naiAgent_generationBatch": "요청 {requests}회 × {size}장 · 총 {total}장",
+  "@naiAgent_generationBatch": {
+    "placeholders": {
+      "requests": {},
+      "size": {},
+      "total": {}
+    }
+  },
+  "naiAgent_generationUnit": "요청당 {cost} Anlas",
+  "@naiAgent_generationUnit": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationEncoding": "참조 이미지 인코딩: {cost} Anlas",
+  "@naiAgent_generationEncoding": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationTotal": "예상 {cost} Anlas",
+  "@naiAgent_generationTotal": {
+    "placeholders": {
+      "cost": {}
+    }
+  },
+  "naiAgent_generationBalance": "현재 잔액 {balance} Anlas",
+  "@naiAgent_generationBalance": {
+    "placeholders": {
+      "balance": {}
+    }
+  },
+  "naiAgent_generationEstimateNote": "비용은 예상치이며 실제 차감액은 서버에서 결정합니다.",
+  "naiAgent_generationChanged": "설정 또는 견적이 변경되었습니다. 다시 준비해 주세요.",
+  "naiAgent_generationLocalEnhance": "생성 후 로컬 업스케일: {model} ×{scale}",
+  "@naiAgent_generationLocalEnhance": {
+    "placeholders": {
+      "model": {},
+      "scale": {}
+    }
+  },
+  "naiAgent_generationText": "텍스트로 이미지 생성",
+  "naiAgent_generationImage": "이미지로 이미지 생성",
+  "naiAgent_generationInpaint": "인페인트",
+  "naiAgent_galleryDeleteEmptyFolderConfirm": "이 빈 폴더와 갤러리 분류를 삭제할까요? 다른 폴더의 이미지는 유지됩니다.\n{path}",
+  "@naiAgent_galleryDeleteEmptyFolderConfirm": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_extensions": "확장",
+  "naiAgent_interactionExtension": "Studio 연동",
+  "naiAgent_extensionRequired": "내장 · 필수",
+  "naiAgent_interactionExtensionHint": "필요할 때 현재 Studio 상태를 읽고 질문 카드로 답변을 받습니다.",
+  "naiAgent_extensionAddFile": "확장 파일 추가",
+  "naiAgent_extensionAddFolder": "확장 폴더 추가",
+  "naiAgent_extensionsHint": "확장은 작업 공간별로 로드됩니다. 변경 사항은 현재 작업이 끝난 뒤 다음 전송에 적용됩니다. 외부 확장은 로컬 코드를 실행하므로 신뢰할 수 있는 출처를 선택하세요.",
+  "naiAgent_extensionError": "확장 실행 실패",
+  "naiAgent_extensionCompatibility": "로컬 Pi 확장과 패키지 폴더, 도구, 명령 및 표준 대화 상자를 지원합니다. 터미널 전용 사용자 지정 UI는 데스크톱에 표시되지 않습니다.",
+  "naiAgent_instructions": "지침",
+  "naiAgent_globalInstructions": "전역 지침",
+  "naiAgent_globalInstructionsHelp": "모든 작업 공간에서 사용합니다. 언어, 문체 또는 작업 선호도를 입력할 수 있습니다. 비워 두면 이 부분이 비활성화됩니다.",
+  "naiAgent_systemPromptPrefix": "시스템 프롬프트 앞부분",
+  "naiAgent_systemPromptPrefixHelp": "NAI Agent 기본 프롬프트 앞에 삽입하며 기본 프롬프트와 도구 맵을 유지합니다. 비워 두면 이 부분이 비활성화됩니다.",
+  "naiAgent_instructionOrder": "적용 순서: 앞부분 → 기본 프롬프트 → 전역 지침 → 작업 공간 규칙. 이후 요청부터 적용됩니다.",
+  "naiAgent_saveInstructions": "지침 저장",
+  "naiAgent_mcpBuiltin": "NAI Studio · 내장 도구",
+  "naiAgent_mcpBuiltinHint": "프롬프트, 블록, 위키, 이미지, 기록, 참조, 생성 및 설정 도구입니다. 기본적으로 필요할 때 검색하며 기존 백업, 버전 확인 및 사용자 확인이 유지됩니다.",
+  "naiAgent_mcpAdd": "MCP 서버 추가",
+  "naiAgent_mcpName": "서버 이름",
+  "naiAgent_mcpConfig": "서버 설정 (JSON)",
+  "naiAgent_mcpConfigHint": "stdio 및 Streamable HTTP를 지원합니다. 서버 설정 객체 하나를 붙여 넣으세요. command는 실행 파일이고 args는 배열입니다. env, cwd, url, headers, oauth, toolExposure도 지원합니다. 설정은 암호화하여 저장됩니다.",
+  "naiAgent_mcpStatus": "연결 상태 확인",
+  "naiAgent_mcpReconnect": "다시 연결",
+  "naiAgent_mcpLogin": "로그인",
+  "naiAgent_mcpLogout": "로그아웃",
+  "naiAgent_mcpHint": "기본적으로 CodeMode가 필요할 때 도구를 검색합니다. codemode: 샌드박스 호출; deferred: 검색 후 직접 호출; direct: 항상 공개; hidden: 숨김. 변경은 다음 유휴 호출에 적용됩니다. 연결 확인은 채팅 모델을 호출하지 않습니다.",
+  "generation_generate": "생성",
+  "detail_imageDetails": "이미지 상세 정보",
+  "promptBlockLibrary_title": "프롬프트 블록",
+  "@naiAgent_contextTooltip": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      },
+      "remaining": {
+        "type": "String"
+      },
+      "window": {
+        "type": "String"
+      }
+    }
+  }
 }

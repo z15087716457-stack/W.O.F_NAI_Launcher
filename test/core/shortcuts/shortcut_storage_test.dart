@@ -22,6 +22,95 @@ void main() {
   );
 
   test(
+    'navigation migration updates defaults but preserves custom bindings',
+    () async {
+      const legacy = ShortcutConfig(
+        bindings: {
+          ShortcutIds.navigateToLocalGallery: ShortcutBinding(
+            id: ShortcutIds.navigateToLocalGallery,
+            actionKey: 'shortcut_action_navigate_to_local_gallery',
+            defaultShortcut: 'ctrl+2',
+          ),
+          ShortcutIds.navigateToStatistics: ShortcutBinding(
+            id: ShortcutIds.navigateToStatistics,
+            actionKey: 'shortcut_action_navigate_to_statistics',
+            defaultShortcut: 'ctrl+6',
+            customShortcut: 'alt+s',
+            enabled: false,
+          ),
+        },
+      );
+      String? persisted;
+      final storage = ShortcutStorage.forTesting(
+        readConfig: () async => persisted ?? jsonEncode(legacy.toJson()),
+        writeConfig: (value) async => persisted = value,
+      );
+      final loaded = await storage.loadConfig();
+      expect(
+        loaded.getEffectiveShortcut(ShortcutIds.navigateToLocalGallery),
+        'ctrl+3',
+      );
+      final statistics = loaded.getBinding(ShortcutIds.navigateToStatistics)!;
+      expect(statistics.customShortcut, 'alt+s');
+      expect(statistics.enabled, isFalse);
+      expect(statistics.defaultShortcut, 'ctrl+9');
+      expect(await storage.loadConfig(), loaded);
+      expect(
+        loaded
+            .resetToDefault(ShortcutIds.navigateToStatistics)
+            .setEnabled(ShortcutIds.navigateToStatistics, true)
+            .getEffectiveShortcut(ShortcutIds.navigateToStatistics),
+        'ctrl+9',
+      );
+    },
+  );
+
+  test('new navigation defaults do not claim a customized binding', () async {
+    const legacy = ShortcutConfig(
+      bindings: {
+        ShortcutIds.navigateToLocalGallery: ShortcutBinding(
+          id: ShortcutIds.navigateToLocalGallery,
+          actionKey: 'shortcut_action_navigate_to_local_gallery',
+          defaultShortcut: 'ctrl+2',
+          customShortcut: 'control + 2',
+        ),
+        ShortcutIds.generateImage: ShortcutBinding(
+          id: ShortcutIds.generateImage,
+          actionKey: 'shortcut_action_generate_image',
+          defaultShortcut: 'ctrl+enter',
+          customShortcut: 'ctrl+7',
+          context: ShortcutContext.generation,
+        ),
+      },
+    );
+    String? persisted;
+    final storage = ShortcutStorage.forTesting(
+      readConfig: () async => persisted ?? jsonEncode(legacy.toJson()),
+      writeConfig: (value) async => persisted = value,
+    );
+    final loaded = await storage.loadConfig();
+    expect(
+      loaded.getEffectiveShortcut(ShortcutIds.navigateToLocalGallery),
+      'control + 2',
+    );
+    expect(
+      loaded.getEffectiveShortcut('navigate_to_style_explore'),
+      anyOf(isNull, isEmpty),
+    );
+    expect(
+      loaded.getEffectiveShortcut('navigate_to_precise_ref_library'),
+      anyOf(isNull, isEmpty),
+    );
+    expect(await storage.loadConfig(), loaded);
+    expect(
+      loaded
+          .resetToDefault('navigate_to_style_explore')
+          .getEffectiveShortcut('navigate_to_style_explore'),
+      'ctrl+2',
+    );
+  });
+
+  test(
     'load merges missing defaults and persists without replacing custom data',
     () async {
       String? persisted;

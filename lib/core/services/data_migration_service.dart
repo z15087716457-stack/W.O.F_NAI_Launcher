@@ -68,7 +68,7 @@ class DataMigrationService {
       result.imageMigrated = true;
 
       await _migrateAutocompleteSettings();
-      await migrateNavRailCollapse();
+      await migrateMainNavPreferences();
 
       onProgress?.call('数据迁移完成', 1.0);
       AppLogger.i('数据迁移流程完成', 'DataMigration');
@@ -111,6 +111,14 @@ class DataMigrationService {
       'Autocomplete settings migrated to unified pipeline',
       'DataMigration',
     );
+  }
+
+  Future<void> migrateMainNavPreferences() async {
+    if (!Hive.isBoxOpen(StorageKeys.settingsBox)) return;
+    final box = Hive.box(StorageKeys.settingsBox);
+    if (box.get(StorageKeys.mainNavRailCollapseMigrated) != true) {
+      await box.put(StorageKeys.mainNavRailCollapseMigrated, true);
+    }
   }
 
   /// 一次性迁移：存量用户侧栏展开态强制收回（FEAT-29）

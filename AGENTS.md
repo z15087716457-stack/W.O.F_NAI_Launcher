@@ -12,13 +12,16 @@ NovelAI Flutter 桌面客户端。业务按 `lib/core/`、`lib/data/`、`lib/pre
 
 ## 修改与验证
 
-- 依赖变化后 `flutter pub get`；修改 Riverpod、Freezed、JSON、Hive 或路由的生成输入后运行 `dart run build_runner build --delete-conflicting-outputs`。
+- 依赖变化后 `flutter pub get`；修改 Riverpod、Freezed、JSON、Hive 或路由的生成输入后运行 `dart run tool/generate.dart`。该入口读取 `.devin/codegen.json`，发现所有声明 `.g.dart`／`.freezed.dart` 的业务输入，排除不需要生成的锁定界面；缺 part 的生成注解会报错，不以静默跳过代替生成。
+- SDK 切换导致 build_runner 缓存失效时，清理旧输出可能越过 `--build-filter`；生成入口自动备份并恢复已有未提交生成文件。生成前后仍须核对内容哈希，不用重生成覆盖原改动。当前保留原生成工具和运行依赖，旧 analyzer 对新版 SDK 的提示不代表所有新语法已受支持；不得为此改 UI 或擅自升级依赖。
 - 界面文案统一写进 `lib/l10n/` 的 ARB，各语言同步补齐，改后运行 `flutter gen-l10n`；有 BuildContext 用 `context.l10n`，模型、服务等无 context 的代码用 `currentL10n`。不要在代码里内联 `zh/en/ja` 三元或只写中文；英日等布局回归用真实字体（`test/helpers/studio_capture_fonts.dart`）。
 - 代码按 Dart formatter 与现有分层风格编写。逻辑修复验证受影响路径；UI 行为变更验证实际界面，需要稳定回归覆盖时补对应测试。
 - 测试放在 `test/` 对应功能目录，使用 `flutter_test` / `mocktail`。按影响选择测试和分析范围；仅文档修改不运行 Flutter 全量测试或构建。
 - 已有开发会话时，代码修改完成必要验证后运行 `scripts/trigger_hot_reload.ps1`；需要重置状态用 `-Restart`，不要再启动第二个 attach。
 - 用户指定自行核验界面时，只构建并交付产物，不自动热重载、重启或操控应用。
 - 修改用户提示词、草稿、角色框或桥接状态须先备份并核对最新值。实际生图需用户明确授权，执行前报告单价和余额。
+- 生图数量口径以现有链路为准：`ImageParams.nSamples` 是重复请求次数，`imagesPerRequestProvider` 是每次请求张数；新契约 `GenImageData.repeat`／`count` 分别映射这两项，费用与按钮总张数仍走现有 provider，不能按字段名反接。
+- 生图接线核心回归：登记 SDK 下运行 `flutter test --no-pub test/presentation/wiring/generation_backend_test.dart test/presentation/wiring/generation_settings_test.dart test/presentation/wiring/generation_view_mapping_test.dart test/presentation/wiring/generation_editor_wiring_test.dart test/presentation/wiring/generation_comfyui_import_test.dart test/presentation/providers/krita/bridge_draft_version_test.dart`；扩展验证包含 `test/presentation/ui`、`test/presentation/widgets/prompt` 和 `test/presentation/providers/krita`，均使用隔离数据与生成替身，不调用真实生成接口。
 
 ## 仓库边界
 

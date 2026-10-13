@@ -1,3 +1,4 @@
+import 'nai_agent_generation_host.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -102,6 +103,7 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
     }
 
     return WindowChromePage(
+      showNaiAgent: NaiAgentIntegrationScope.activeOf(context),
       child: Material(
         type: MaterialType.transparency,
         child: LayoutBuilder(
@@ -142,7 +144,9 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
                     ShortcutIds.generationPrevImage: () => step(-1),
                     ShortcutIds.generationNextImage: () => step(1),
                   },
-                  child: GenerationWiring(key: wiring),
+                  child: NaiAgentGenerationHost(
+                    child: GenerationWiring(key: wiring),
+                  ),
                 ),
               ],
             );

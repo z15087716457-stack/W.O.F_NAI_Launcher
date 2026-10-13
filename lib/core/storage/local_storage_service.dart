@@ -116,6 +116,28 @@ class LocalStorageService {
     await setSetting(StorageKeys.mainNavRailExpanded, expanded);
   }
 
+  List<String> getMainNavHiddenBranches() =>
+      (getSetting<List<dynamic>>(StorageKeys.mainNavHiddenBranches) ?? const [])
+          .whereType<String>()
+          .toList(growable: false);
+
+  Future<void> setMainNavHiddenBranches(List<String> branches) =>
+      setSetting(StorageKeys.mainNavHiddenBranches, branches);
+
+  bool getMainNavCtrlNumbers() =>
+      getSetting<bool>(StorageKeys.mainNavCtrlNumbers, defaultValue: true) ??
+      true;
+
+  Future<void> setMainNavCtrlNumbers(bool enabled) =>
+      setSetting(StorageKeys.mainNavCtrlNumbers, enabled);
+
+  bool getMainNavCtrlHintSeen() =>
+      getSetting<bool>(StorageKeys.mainNavCtrlHintSeen, defaultValue: false) ??
+      false;
+
+  Future<void> setMainNavCtrlHintSeen(bool seen) =>
+      setSetting(StorageKeys.mainNavCtrlHintSeen, seen);
+
   // ==================== Diagnostics ====================
 
   /// 获取是否记录文件日志 (默认关闭)

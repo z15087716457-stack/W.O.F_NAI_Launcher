@@ -8,7 +8,8 @@ import '../../../../core/utils/prompt_input_normalization.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../presentation/utils/text_selection_utils.dart';
 import '../../../providers/generation/generation_settings_notifiers.dart';
-import '../../../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../../ui/blocks/blocks_quick.dart';
+import '../../../wiring/blocks_quick_save_wiring.dart';
 import '../../common/app_toast.dart';
 import '../../common/weight_adjust_toolbar.dart';
 import '../../tag_expansion/tag_expansion_wrapper.dart';
@@ -46,6 +47,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
   /// 焦点节点（可选）
   final FocusNode? focusNode;
   final bool? showCursor;
+  final String? pillScope;
 
   /// 输入装饰
   final InputDecoration? decoration;
@@ -87,6 +89,7 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.controller,
     this.focusNode,
     this.showCursor,
+    this.pillScope,
     this.decoration,
     this.onChanged,
     this.onSubmitted,
@@ -752,13 +755,30 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       _effectiveController,
     );
     final hasSelection = selectedText.isNotEmpty;
+    if (hasSelection && !widget.config.readOnly) {
+      final anchors = editableTextState.contextMenuAnchors;
+      return TextSelectionToolbar(
+        anchorAbove: anchors.primaryAnchor,
+        anchorBelow: anchors.secondaryAnchor ?? anchors.primaryAnchor,
+        children: [
+          BlockSelectionToolbar(
+            onSaveAsBlock: () {
+              editableTextState.hideToolbar();
+              _showSaveToLibraryDialog(context, selectedText);
+            },
+            onCopy: () =>
+                editableTextState.copySelection(SelectionChangedCause.toolbar),
+          ),
+        ],
+      );
+    }
 
     // 获取默认的上下文菜单项
     final List<ContextMenuButtonItem> buttonItems =
         editableTextState.contextMenuButtonItems;
 
     // 如果有选中文本，添加"保存到块库"选项
-    if (hasSelection) {
+    if (hasSelection && !widget.config.readOnly) {
       buttonItems.insert(
         0,
         ContextMenuButtonItem(
@@ -784,10 +804,12 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     String selectedText,
   ) async {
     // createWithDialog 自带落库与成功 toast
-    await PromptBlockEditDialog.createWithDialog(
+    await showBlockQuickSave(
       context,
       ref,
-      initialContent: selectedText,
+      _effectiveController,
+      scope: widget.pillScope,
+      onChanged: widget.onChanged,
     );
   }
 

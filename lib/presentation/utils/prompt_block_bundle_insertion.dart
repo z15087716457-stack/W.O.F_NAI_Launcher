@@ -11,16 +11,28 @@ int insertPromptBlockBundle(
   required String scope,
   required int offset,
   required String blockId,
+}) => insertPromptBlockBundleWithReader(
+  ref.read,
+  scope: scope,
+  offset: offset,
+  blockId: blockId,
+);
+
+/// Shared insertion semantics for both widgets and the Agent provider binding.
+int insertPromptBlockBundleWithReader(
+  T Function<T>(ProviderListenable<T>) read, {
+  required String scope,
+  required int offset,
+  required String blockId,
 }) {
-  final block = ref
-      .read(promptBlockLibraryNotifierProvider)
-      .valueOrNull
-      ?.blockById(blockId);
+  final block = read(
+    promptBlockLibraryNotifierProvider,
+  ).valueOrNull?.blockById(blockId);
   final negative = block?.negativeContent.isNotEmpty == true;
   if (!negative) {
-    ref
-        .read(pillWorkspaceProvider(scope).notifier)
-        .insertBlockAt(offset: offset, blockId: blockId);
+    read(
+      pillWorkspaceProvider(scope).notifier,
+    ).insertBlockAt(offset: offset, blockId: blockId);
     return 1;
   }
 
@@ -38,9 +50,9 @@ int insertPromptBlockBundle(
     }
   }
   if (positiveScope == null || negativeScope == null) {
-    ref
-        .read(pillWorkspaceProvider(scope).notifier)
-        .insertBlockAt(offset: offset, blockId: blockId);
+    read(
+      pillWorkspaceProvider(scope).notifier,
+    ).insertBlockAt(offset: offset, blockId: blockId);
     return 1;
   }
 
@@ -51,28 +63,24 @@ int insertPromptBlockBundle(
   var counted = false;
   if (hasPositive) {
     final lane = pillWorkspaceProvider(positiveScope);
-    final document = ref.read(lane).document;
-    ref
-        .read(lane.notifier)
-        .insertBlockAt(
-          offset: activePositive ? offset : document.text.length,
-          blockId: blockId,
-          bundleId: bundleId,
-          rollScopeMask: rollScopeMask,
-        );
+    final document = read(lane).document;
+    read(lane.notifier).insertBlockAt(
+      offset: activePositive ? offset : document.text.length,
+      blockId: blockId,
+      bundleId: bundleId,
+      rollScopeMask: rollScopeMask,
+    );
     counted = true;
   }
   final lane = pillWorkspaceProvider(negativeScope);
-  final document = ref.read(lane).document;
-  ref
-      .read(lane.notifier)
-      .insertBlockAt(
-        offset: activePositive ? document.text.length : offset,
-        blockId: blockId,
-        useNegativeContent: true,
-        countUse: !counted,
-        bundleId: bundleId,
-        rollScopeMask: rollScopeMask,
-      );
+  final document = read(lane).document;
+  read(lane.notifier).insertBlockAt(
+    offset: activePositive ? document.text.length : offset,
+    blockId: blockId,
+    useNegativeContent: true,
+    countUse: !counted,
+    bundleId: bundleId,
+    rollScopeMask: rollScopeMask,
+  );
   return activePositive ? (hasPositive ? 1 : 0) : 1;
 }

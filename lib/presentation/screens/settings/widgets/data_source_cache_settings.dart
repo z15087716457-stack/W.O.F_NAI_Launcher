@@ -103,7 +103,7 @@ class DataSourceCacheSettings extends ConsumerWidget {
 Future<int> _loadCooccurrenceCount(WidgetRef ref) async {
   try {
     final manager = await ref.read(databaseManagerProvider.future);
-    return manager.cooccurrenceDataSource.getCount();
+    return await manager.cooccurrenceDataSource.getCount();
   } catch (_) {
     return 0;
   }

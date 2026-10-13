@@ -18,7 +18,7 @@ import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/prompt_translation_provider.dart';
-import '../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'blocks_edit_wiring.dart';
 import '../screens/generation/handlers/vibe_import_handler.dart';
 import '../ui/gen/gen_contract.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
@@ -370,7 +370,7 @@ class _GenerationViewerWiringState
           ref.read(generationHistoryActionsProvider).image(id).bytes,
         );
       case ViewerAction.saveAsBlock:
-        await PromptBlockEditDialog.createWithDialog(
+        await BlocksEditWiring.createWithDialog(
           context,
           ref,
           initialContent: metadata[id]?.fullPrompt,

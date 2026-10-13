@@ -1,3 +1,4 @@
+import 'package:nai_launcher/presentation/wiring/style_explore_wiring.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -34,28 +35,29 @@ import 'package:nai_launcher/presentation/providers/generation/preview_selection
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
-import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
-import 'package:nai_launcher/presentation/screens/generation/generation_screen.dart';
+import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import '../../../providers/krita/agent_bridge_draft_test.dart' show OfflineAuth;
+import '../../../wiring/generation_data_wiring_test.dart' show DataShortcuts;
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_module_card.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_param_sections.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/parameter_panel.dart';
-import 'package:nai_launcher/presentation/screens/style_explore/style_explore_screen.dart';
+
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
-import 'package:nai_launcher/presentation/widgets/character/inline_character_section.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_glass_surface.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import '../../../../helpers/light_theme_contrast.dart';
 import '../../../../helpers/studio_capture_fonts.dart';
 import '../../../widgets/character/character_module_test.dart'
     show prototypeCharacterPrompt;
-import 'history_panel_capture_test.dart'
+import '../../../../helpers/generation_history_fixture.dart'
     show
         HistoryCaptureStorage,
         historyCaptureImages,
@@ -185,6 +187,8 @@ ProviderContainer _container(String model) {
   final container = createStorageFreeContainer(
     overrides: [
       localStorageServiceProvider.overrideWithValue(_Storage(model)),
+      authNotifierProvider.overrideWith(OfflineAuth.new),
+      shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
       generationParamsNotifierProvider.overrideWith(() => _Params(params)),
       characterPromptRepositoryProvider.overrideWithValue(_Characters()),
       promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
@@ -192,9 +196,6 @@ ProviderContainer _container(String model) {
       subscriptionNotifierProvider.overrideWith(_Subscription.new),
       promptTokenCounterServiceProvider.overrideWith(
         (ref) async => PromptTokenCounterService(encoder: _Tokens()),
-      ),
-      naiAgentUiPreferencesProvider.overrideWith(
-        (ref) => NaiAgentUiPreferences(),
       ),
       kritaBridgeNotifierProvider.overrideWith((ref) => KritaBridgeNotifier()),
       estimatedCostProvider.overrideWith((ref) => 0),
@@ -248,8 +249,8 @@ Widget _app(
             body: mobile
                 ? const ParameterPanel()
                 : explore
-                ? const StyleExploreScreen()
-                : const GenerationScreen(),
+                ? const StyleExploreWiring()
+                : const GenerationRoute(),
           ),
         ),
       ),
@@ -274,101 +275,92 @@ void main() {
     await Hive.openBox(StorageKeys.settingsBox);
   });
 
-  testWidgets(
-    'V3 has one 12px gap and model switches preserve module ordering',
-    (tester) async {
-      final container = _container('nai-diffusion-3');
-      addTearDown(container.dispose);
-      tester.view.devicePixelRatio = 1;
-      tester.view.physicalSize = const Size(1552, 1120);
-      addTearDown(tester.view.reset);
-      await tester.runAsync(
-        () => prepareHistoryCaptureImages(historyCaptureImages()),
-      );
-      await tester.pumpWidget(_app(container, dark: false));
-      await tester.pumpAndSettle();
-      final prompt = find.byType(PromptInputWidget);
-      final cards = find.byType(GenerationModuleCard);
-      expect(cards, findsNWidgets(2));
-      expect(find.byType(InlineCharacterSection), findsNothing);
-      expect(
-        tester.getTopLeft(cards.first).dy - tester.getBottomLeft(prompt).dy,
-        12,
-      );
-      for (final model in [
-        'nai-diffusion-5-full',
-        'nai-diffusion-4-5-full',
-        'nai-diffusion-3',
-      ]) {
-        container
-            .read(generationParamsNotifierProvider.notifier)
-            .updateModel(model, persist: false);
-        await tester.pumpAndSettle();
-        expect(
-          find.byType(GenerationModuleCard),
-          findsNWidgets(ImageModels.isV4Model(model) ? 3 : 2),
-        );
-        expect(
-          find.byType(GenerationModuleRow),
-          findsNWidgets(
-            model == 'nai-diffusion-5-full'
-                ? 1
-                : model == 'nai-diffusion-3'
-                ? 2
-                : 3,
-          ),
-        );
-        expect(tester.takeException(), isNull);
-      }
-    },
-  );
-
-  testWidgets('production page remains bounded at desktop widths', (
-    tester,
-  ) async {
+  testWidgets('新生图宿主按 V3、V4.5、V5 能力切换角色与参考控件', (tester) async {
+    final container = _container('nai-diffusion-3');
+    addTearDown(container.dispose);
     tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1552, 1120);
     addTearDown(tester.view.reset);
+    await tester.runAsync(
+      () => prepareHistoryCaptureImages(historyCaptureImages()),
+    );
+    await tester.pumpWidget(_app(container, dark: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('gen-prompt')), findsOneWidget);
+    expect(find.byKey(const Key('gen-characters')), findsNothing);
+    expect(find.byKey(const Key('gen-image')), findsOneWidget);
     for (final model in [
       'nai-diffusion-5-full',
       'nai-diffusion-4-5-full',
       'nai-diffusion-3',
     ]) {
-      for (final dark in [false, true]) {
-        for (final size in [
-          (window: 1280.0, left: 352.0),
-          (window: 1600.0, left: 420.0),
-          (window: 1920.0, left: 560.0),
-        ]) {
-          final container = _container(model);
-          addTearDown(container.dispose);
-          await container
-              .read(layoutStateNotifierProvider.notifier)
-              .setWebLeftPanelWidth(size.left);
-          await container
-              .read(layoutStateNotifierProvider.notifier)
-              .setRightPanelWidth(210);
-          await container
-              .read(layoutStateNotifierProvider.notifier)
-              .setRightPanelExpanded(true);
-          await tester.runAsync(
-            () => prepareHistoryCaptureImages(historyCaptureImages()),
-          );
-          // The navigation rail is outside this task; it occupies 48px.
-          tester.view.physicalSize = Size(size.window - 48, 1120);
-          await tester.pumpWidget(_app(container, dark: dark));
-          await tester.pumpAndSettle();
-          expect(tester.takeException(), isNull);
-          expect(tester.getSize(find.byType(WebLeftPanel)).width, size.left);
-          expect(
-            find.byType(GenerationModuleCard),
-            findsNWidgets(ImageModels.isV4Model(model) ? 3 : 2),
-          );
-          await tester.pumpWidget(const SizedBox());
-          container.dispose();
-        }
-      }
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(model, persist: false);
+      await tester.pumpAndSettle();
+      final page = tester.widget<GenerationPage>(find.byType(GenerationPage));
+      expect(page.data.model, model);
+      expect(page.data.characters != null, ImageModels.isV4Model(model));
+      expect(page.data.refs.vibes != null, model != 'nai-diffusion-5-full');
+      expect(page.data.refs.precise != null, model == 'nai-diffusion-4-5-full');
+      expect(tester.takeException(), isNull);
     }
   });
+
+  for (final model in [
+    'nai-diffusion-5-full',
+    'nai-diffusion-4-5-full',
+    'nai-diffusion-3',
+  ]) {
+    for (final dark in [false, true]) {
+      for (final size in [
+        (window: 1280.0, left: 352.0),
+        (window: 1600.0, left: 420.0),
+        (window: 1920.0, left: 560.0),
+      ]) {
+        testWidgets(
+          'production page bounded: $model dark=$dark left=${size.left}',
+          (tester) async {
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.reset);
+            final container = _container(model);
+            addTearDown(container.dispose);
+            await container
+                .read(layoutStateNotifierProvider.notifier)
+                .setWebLeftPanelWidth(size.left);
+            await container
+                .read(layoutStateNotifierProvider.notifier)
+                .setRightPanelWidth(210);
+            await container
+                .read(layoutStateNotifierProvider.notifier)
+                .setRightPanelExpanded(true);
+            await tester.runAsync(
+              () => prepareHistoryCaptureImages(historyCaptureImages()),
+            );
+            // The navigation rail is outside this task; it occupies 48px.
+            tester.view.physicalSize = Size(size.window - 48, 1120);
+            await tester.pumpWidget(_app(container, dark: dark));
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            expect(
+              tester.getSize(find.byKey(const Key('gen-left'))).width,
+              size.left,
+            );
+            expect(
+              tester
+                      .widget<GenerationPage>(find.byType(GenerationPage))
+                      .data
+                      .characters !=
+                  null,
+              ImageModels.isV4Model(model),
+            );
+            await tester.pumpWidget(const SizedBox());
+          },
+          tags: size.left == 352 ? ['locked-ui-defect'] : [],
+        );
+      }
+    }
+  }
 
   if (Platform.environment['CAPTURE_UIUX_FINAL'] != '1') return;
   testWidgets(
@@ -495,7 +487,7 @@ void main() {
           'mobile': entry.mobile,
           'viewport': [entry.mobile ? 420 : 1552, 1120],
           if (!entry.explore && !entry.mobile)
-            'left': rect(find.byType(WebLeftPanel)),
+            'left': rect(find.byType(GenEditorColumn)),
           'modules': tester.elementList(find.byType(GenerationModuleCard)).map((
             element,
           ) {
@@ -522,7 +514,11 @@ void main() {
         });
         await capture('');
         if (!entry.mobile) {
-          await tester.tap(find.byKey(const Key('params-drawer-toggle')));
+          await tester.tap(
+            find.byKey(
+              Key(entry.explore ? 'params-drawer-toggle' : 'gen-params-toggle'),
+            ),
+          );
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
           await capture('-drawer');

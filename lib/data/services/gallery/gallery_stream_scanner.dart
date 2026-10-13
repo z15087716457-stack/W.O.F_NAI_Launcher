@@ -170,6 +170,11 @@ class GalleryStreamScanner {
   // 互斥锁，防止并发扫描
   final _scanLock = Lock();
 
+  /// Physical file operations share the scan lock, so a scanner cannot commit
+  /// an old path after the file and its native index have been relocated.
+  Future<T> withFilesystemMutation<T>(Future<T> Function() action) =>
+      _scanLock.synchronized(action);
+
   // 统计
   final _statsController = StreamController<StreamScanStats>.broadcast();
   final _resultController = StreamController<FileProcessingResult>.broadcast();

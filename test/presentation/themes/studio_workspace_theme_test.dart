@@ -1,8 +1,20 @@
+import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
+import 'package:nai_launcher/presentation/providers/prompt_block_palette_provider.dart';
+import 'package:nai_launcher/presentation/ui/online/online_page.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart'
+    as character;
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_library_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/online_wiring.dart';
 import 'package:nai_launcher/presentation/providers/online_favorites_provider.dart';
 import 'package:nai_launcher/data/repositories/online_favorites_repository.dart';
 import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
-import 'package:nai_launcher/presentation/screens/online_gallery/online_gallery_screen.dart';
-import 'package:nai_launcher/presentation/screens/precise_ref_library/precise_ref_library_screen.dart';
+
+import 'package:nai_launcher/presentation/wiring/refs_library_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/refs_platform.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_toolbar.dart';
 import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart';
 import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
@@ -12,7 +24,6 @@ import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_category_provider.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/vibe_library_screen.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -43,14 +54,19 @@ import 'package:nai_launcher/presentation/providers/gallery_category_provider.da
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/theme_provider.dart';
 import 'package:nai_launcher/presentation/screens/local_gallery/local_gallery_screen.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/prompt_block_library_screen.dart';
+
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/settings/studio_theme_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/light_theme_contrast.dart';
 import '../../helpers/studio_capture_fonts.dart';
-import 'package:nai_launcher/presentation/widgets/library/library_toolbar.dart';
+
+class _Palette extends PromptBlockPaletteNotifier {
+  @override
+  Future<PromptBlockPaletteState> build() async =>
+      PromptBlockPaletteState(blocks: const []);
+}
 
 class _Shortcuts extends ShortcutConfigNotifier {
   @override
@@ -117,6 +133,11 @@ class _Blocks extends PromptBlockLibraryNotifier {
   );
 }
 
+class _RefsPlatform extends RefsPlatform {
+  @override
+  Future<String> libraryFolder() async => 'test-library';
+}
+
 class _Vibes extends VibeLibraryNotifier {
   @override
   VibeLibraryState build() => const VibeLibraryState();
@@ -127,6 +148,17 @@ class _Vibes extends VibeLibraryNotifier {
 class _VibeCategories extends VibeLibraryCategoryNotifier {
   @override
   VibeLibraryCategoryState build() => const VibeLibraryCategoryState();
+}
+
+class _OnlineParams extends GenerationParamsNotifier {
+  @override
+  ImageParams build() => const ImageParams();
+}
+
+class _OnlineCharacters extends CharacterPromptNotifier {
+  @override
+  character.CharacterPromptConfig build() =>
+      const character.CharacterPromptConfig();
 }
 
 class _Online extends OnlineGalleryNotifier {
@@ -184,11 +216,11 @@ void main() {
   for (final brightness in Brightness.values) {
     for (final (name, screen) in <(String, Widget)>[
       ('gallery', const LocalGalleryScreen()),
-      ('vibe', const VibeLibraryScreen()),
-      ('vibe-wide', const VibeLibraryScreen()),
-      ('online', const OnlineGalleryScreen()),
-      ('precise', const PreciseRefLibraryScreen()),
-      ('blocks', const PromptBlockLibraryScreen()),
+      ('vibe', const VibeLibraryWiring()),
+      ('vibe-wide', const VibeLibraryWiring()),
+      ('online', const OnlineWiring()),
+      ('precise', const PreciseRefLibraryWiring()),
+      ('blocks', const BlocksLibraryWiring()),
       (
         'appearance',
         const Scaffold(
@@ -227,6 +259,10 @@ void main() {
           ProviderScope(
             overrides: [
               onlineGalleryNotifierProvider.overrideWith(_Online.new),
+              generationParamsNotifierProvider.overrideWith(_OnlineParams.new),
+              characterPromptNotifierProvider.overrideWith(
+                _OnlineCharacters.new,
+              ),
               onlineFavoritesNotifierProvider.overrideWith(
                 (ref) => _OnlineFavorites(),
               ),
@@ -234,6 +270,7 @@ void main() {
               gelbooruAuthProvider.overrideWith(_Gelbooru.new),
               preciseRefLibraryNotifierProvider.overrideWith(_Precise.new),
               vibeLibraryNotifierProvider.overrideWith(_Vibes.new),
+              refsPlatformProvider.overrideWith((ref) => _RefsPlatform()),
               vibeLibraryCategoryNotifierProvider.overrideWith(
                 _VibeCategories.new,
               ),
@@ -251,6 +288,7 @@ void main() {
               collectionNotifierProvider.overrideWith(_Collections.new),
               galleryFavoriteCountProvider.overrideWith((ref) async => 0),
               promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
+              promptBlockPaletteNotifierProvider.overrideWith(_Palette.new),
             ],
             child: Consumer(
               builder: (context, ref, _) => MaterialApp(
@@ -266,14 +304,18 @@ void main() {
                 home: RepaintBoundary(
                   key: boundary,
                   child: IntegratedTitleBarShell(
-                    captionHeight: isLibrary ? 62 : 36,
+                    captionHeight: name == 'gallery'
+                        ? 62
+                        : isLibrary
+                        ? 61
+                        : 36,
                     accessoryWidth: isLibrary && brightness == Brightness.dark
                         ? UpdateCapsule.width
                         : 0,
                     accessory: isLibrary && brightness == Brightness.dark
                         ? UpdateCapsule(onPressed: () {})
                         : null,
-                    child: screen,
+                    child: name == 'online' ? Material(child: screen) : screen,
                   ),
                 ),
               ),
@@ -281,6 +323,13 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
+        if (name == 'blocks') {
+          tester
+              .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+              .actions
+              .onInspectorChanged(false);
+          await tester.pumpAndSettle();
+        }
         expect(tester.takeException(), isNull);
         final theme = Theme.of(tester.element(find.byWidget(screen)));
         expect(theme.brightness, brightness);
@@ -291,7 +340,7 @@ void main() {
               : Colors.white,
         );
         if (const ['vibe-wide', 'precise'].contains(name)) {
-          final toolbar = find.byType(LibraryToolbar);
+          final toolbar = find.byType(RefsToolbar);
           expect(tester.getSize(toolbar).height, 62);
           final search = find
               .descendant(of: toolbar, matching: find.byType(TextField))
@@ -307,18 +356,26 @@ void main() {
             tester.getRect(search).overlaps(tester.getRect(captions)),
             isFalse,
           );
+        } else if (name == 'online') {
+          expect(find.byType(OnlineGalleryPage), findsOneWidget);
+          final search = find.byKey(const Key('online-search-work'));
+          final captions = find.byKey(const Key('window-caption-controls'));
+          expect(
+            tester.getRect(search).overlaps(tester.getRect(captions)),
+            isFalse,
+          );
         } else if (isLibrary && name != 'vibe') {
-          final header = tester.getRect(find.byType(WindowHeader));
+          final headerFinder = name == 'blocks'
+              ? find.byKey(const Key('blocks-toolbar'))
+              : find.byType(WindowHeader);
+          final header = tester.getRect(headerFinder);
           final captions = find.byKey(const Key('window-caption-controls'));
           final minimize = find.descendant(
             of: captions,
             matching: find.byIcon(Icons.remove),
           );
           final search = find
-              .descendant(
-                of: find.byType(LibraryWindowHeader),
-                matching: find.byType(TextField),
-              )
+              .descendant(of: headerFinder, matching: find.byType(TextField))
               .first;
           if (brightness == Brightness.dark) {
             final capsule = find.byKey(const Key('window-update-capsule'));
@@ -393,17 +450,17 @@ void main() {
           });
         }
         if (name == 'blocks') {
-          await tester.tap(
-            find.byKey(const Key('prompt-block-detail-collapsed')),
-          );
+          await tester.tap(find.byKey(const Key('blocks-inspector-toggle')));
           await tester.pumpAndSettle();
           expect(tester.takeException(), isNull);
-          final header = tester.getRect(find.byType(WindowHeader));
+          final header = tester.getRect(
+            find.byKey(const Key('blocks-toolbar')),
+          );
           final captions = tester.getRect(
             find.byKey(const Key('window-caption-controls')),
           );
           expect(header.right, lessThan(captions.left));
-          expect(header.bottom, 63);
+          expect(header.bottom, 62);
         }
         if (name == 'gallery') {
           final container = ProviderScope.containerOf(

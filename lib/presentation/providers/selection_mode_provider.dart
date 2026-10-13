@@ -36,49 +36,6 @@ class SelectionModeState {
   bool isSelected(String id) => selectedIds.contains(id);
 }
 
-/// 在线画廊多选状态管理
-@riverpod
-class OnlineGallerySelectionNotifier extends _$OnlineGallerySelectionNotifier {
-  @override
-  SelectionModeState build() => const SelectionModeState();
-
-  void enter() => _update(state.copyWith(isActive: true));
-  void exit() => _update(const SelectionModeState());
-
-  void toggle(String id) {
-    final newIds = state.selectedIds.contains(id)
-        ? state.selectedIds.difference({id})
-        : state.selectedIds.union({id});
-    _update(state.copyWith(selectedIds: newIds));
-  }
-
-  void select(String id) {
-    if (!state.selectedIds.contains(id)) {
-      _update(state.copyWith(selectedIds: {...state.selectedIds, id}));
-    }
-  }
-
-  void deselect(String id) {
-    if (state.selectedIds.contains(id)) {
-      _update(state.copyWith(selectedIds: state.selectedIds.difference({id})));
-    }
-  }
-
-  void selectAll(List<String> ids) {
-    _update(state.copyWith(selectedIds: {...state.selectedIds, ...ids}));
-  }
-
-  void clearSelection() => _update(state.copyWith(selectedIds: {}));
-
-  void enterAndSelect(String id) {
-    _update(
-      state.copyWith(isActive: true, selectedIds: {...state.selectedIds, id}),
-    );
-  }
-
-  void _update(SelectionModeState newState) => state = newState;
-}
-
 /// 本地画廊多选状态管理
 @riverpod
 class LocalGallerySelectionNotifier extends _$LocalGallerySelectionNotifier {

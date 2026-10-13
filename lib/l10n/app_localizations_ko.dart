@@ -30,47 +30,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_cancel => '취소';
 
   @override
-  String get onlineFav_all => '전체';
-
-  @override
-  String get onlineFav_rootCollection => '루트';
-
-  @override
-  String get onlineFav_newCollection => '새 컬렉션';
-
-  @override
-  String get onlineFav_renameCollection => '이름 변경';
-
-  @override
-  String get onlineFav_deleteCollection => '컬렉션 삭제';
-
-  @override
-  String get onlineFav_empty => '즐겨찾기한 작품이 없습니다';
-
-  @override
-  String onlineFav_authorWorkCount(Object n) {
-    return '작품 $n개';
-  }
-
-  @override
-  String get onlineFav_moveHere => '여기로 이동';
-
-  @override
-  String get onlineFav_removeFavorite => '즐겨찾기 해제';
-
-  @override
-  String get onlineFav_favoriteAuthor => '작가 즐겨찾기';
-
-  @override
-  String get onlineFav_unfavoriteAuthor => '작가 즐겨찾기 해제';
-
-  @override
-  String get onlineFav_authorFavorited => '작가를 즐겨찾기에 추가했습니다';
-
-  @override
-  String get onlineFav_authorUnfavorited => '작가 즐겨찾기를 해제했습니다';
-
-  @override
   String get common_confirm => '확인';
 
   @override
@@ -134,9 +93,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_added => '추가했습니다';
 
   @override
-  String get common_new => '새로 만들기';
-
-  @override
   String get common_confirmDelete => '삭제 확인';
 
   @override
@@ -159,9 +115,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_clearInputConfirm => '입력한 내용을 지우시겠습니까?';
 
   @override
-  String get common_yesterday => '어제';
-
-  @override
   String common_daysAgo(Object days) {
     return '$days일 전';
   }
@@ -182,9 +135,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_apply => '적용';
 
   @override
-  String get common_move => '이동';
-
-  @override
   String get common_favorite => '즐겨찾기';
 
   @override
@@ -198,9 +148,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_grid => '그리드';
-
-  @override
-  String get common_pack => '묶기';
 
   @override
   String get common_multiSelect => '다중 선택';
@@ -267,18 +214,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nav_canvas => '캔버스';
-
-  @override
-  String get nav_onlineGallery => '온라인 갤러리';
-
-  @override
-  String get nav_expandSidebar => '사이드바 펼치기';
-
-  @override
-  String get nav_collapseSidebar => '사이드바 접기';
-
-  @override
   String get auth_login => '로그인';
 
   @override
@@ -322,9 +257,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get auth_passwordRequired => '비밀번호를 입력하세요';
-
-  @override
-  String get auth_tokenLogin => 'API 토큰 로그인';
 
   @override
   String get auth_tokenLoginRecommended => 'API 토큰 로그인(추천)';
@@ -384,9 +316,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get auth_switchAccount => '계정 전환';
-
-  @override
-  String get auth_currentAccount => '현재 계정';
 
   @override
   String get auth_selectAccount => '계정 선택';
@@ -500,9 +429,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_title => '설정';
-
-  @override
-  String get settings_account => '계정';
 
   @override
   String get settings_savedAccounts => '저장된 계정';
@@ -729,12 +655,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_setAsDefaultSuccess => '기본 계정으로 설정했습니다';
 
   @override
-  String get generation_title => '생성';
-
-  @override
-  String get generation_generate => '생성';
-
-  @override
   String generation_cooldownRemaining(Object seconds) {
     return '$seconds초 대기';
   }
@@ -753,34 +673,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get generation_generationFailed => '생성에 실패했습니다';
-
-  @override
-  String generation_progress(Object progress) {
-    return '생성하는 중... $progress%';
-  }
-
-  @override
-  String get generation_lockHistoryScroll => '기록 스크롤 잠금';
-
-  @override
-  String get generation_unlockHistoryScroll => '기록 스크롤 잠금 해제';
-
-  @override
-  String get generation_downloadAllImages => '이미지 모두 다운로드';
-
-  @override
-  String get generation_selectMultiple => '다중 선택';
-
-  @override
-  String get generation_deselectAll => '다중 선택 종료';
-
-  @override
-  String generation_deleteSelectedImages(int count) {
-    return '선택한 이미지 삭제($count)';
-  }
-
-  @override
-  String get generation_deleteSelectedImagesTitle => '선택한 이미지 삭제';
 
   @override
   String generation_deleteSelectedImagesConfirm(int count) {
@@ -856,21 +748,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_canvasUseSeed => '클릭하여 이 시드 사용';
 
   @override
-  String generation_canvasPinnedCount(int count) {
-    return '고정 $count';
-  }
-
-  @override
-  String get generation_params => '매개변수';
-
-  @override
-  String get generation_paramsSettings => '매개변수 설정';
-
-  @override
   String get generation_history => '기록';
-
-  @override
-  String get generation_historyRecord => '기록';
 
   @override
   String get generation_failedStreamSnapshot => '실패한 스냅숏';
@@ -878,16 +756,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get generation_failedStreamSnapshotHint =>
       '생성이 끝나지 않아 마지막 미리 보기 프레임만 남았습니다. 저장, 즐겨찾기, 이미지 작업에 사용할 수 없습니다.';
-
-  @override
-  String get generation_noHistory => '기록이 없습니다';
-
-  @override
-  String get generation_clearHistory => '기록 지우기';
-
-  @override
-  String get generation_clearHistoryConfirm =>
-      '모든 기록을 지우시겠습니까? 이 작업은 되돌릴 수 없습니다.';
 
   @override
   String get generation_model => '모델';
@@ -1310,9 +1178,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_decodeSourceFailed => '원본 이미지를 디코딩하지 못했습니다';
 
   @override
-  String get img2img_upscalePanelOpened => 'Image2Image 업스케일 패널을 열었습니다';
-
-  @override
   String get editor_tolerance => '허용 범위';
 
   @override
@@ -1412,9 +1277,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get editor_fitToWindow => '창에 맞추기';
-
-  @override
-  String get editor_shortcut100Zoom => '100% 확대';
 
   @override
   String get editor_effectBrightness => '밝기';
@@ -1664,22 +1526,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibe_sourceType => '소스';
 
   @override
-  String get vibe_reuseButton => '재사용';
-
-  @override
   String get vibe_info => 'Vibe 정보';
 
   @override
   String get vibe_name => '이름';
-
-  @override
-  String get vibe_strength => '강도';
-
-  @override
-  String get vibe_infoExtracted => '정보 추출량';
-
-  @override
-  String get vibe_shiftReplaceHint => 'Shift+클릭으로 교체';
 
   @override
   String get character_buttonLabel => '캐릭터/위치';
@@ -1712,15 +1562,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gallery_metaSeed => '시드';
-
-  @override
-  String get gallery_metaSmea => 'SMEA';
-
-  @override
-  String get gallery_promptCopied => '프롬프트를 복사했습니다';
-
-  @override
-  String get gallery_seedCopied => '시드를 복사했습니다';
 
   @override
   String get gallery_sendToKritaAction => 'Krita로 보내기';
@@ -1756,63 +1597,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get onlineGallery_search => '검색';
-
-  @override
-  String get onlineGallery_popular => '인기';
-
-  @override
-  String get onlineGallery_favorites => '즐겨찾기';
-
-  @override
-  String get onlineGallery_refresh => '새로 고침';
-
-  @override
   String get onlineGallery_login => '로그인';
 
   @override
-  String get onlineGallery_logout => '로그아웃';
-
-  @override
-  String get onlineGallery_dayRank => '일간';
-
-  @override
-  String get onlineGallery_weekRank => '주간';
-
-  @override
-  String get onlineGallery_monthRank => '월간';
-
-  @override
-  String get onlineGallery_today => '오늘';
-
-  @override
-  String onlineGallery_imageCount(Object count) {
-    return '이미지 $count장';
-  }
-
-  @override
-  String get onlineGallery_loadFailed => '불러오지 못했습니다';
-
-  @override
-  String get onlineGallery_favoritesEmpty => '즐겨찾기가 비어 있습니다';
-
-  @override
-  String get onlineGallery_noResults => '이미지를 찾을 수 없습니다';
-
-  @override
   String get onlineGallery_pleaseLogin => '먼저 로그인하세요';
-
-  @override
-  String get onlineGallery_size => '크기';
-
-  @override
-  String get onlineGallery_score => '점수';
-
-  @override
-  String get onlineGallery_favCount => '즐겨찾기';
-
-  @override
-  String get onlineGallery_type => '유형';
 
   @override
   String get mediaType_video => '동영상';
@@ -1821,31 +1609,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mediaType_gif => 'GIF';
 
   @override
-  String get onlineGallery_tags => '태그';
-
-  @override
-  String get onlineGallery_artists => '작가';
-
-  @override
-  String get onlineGallery_characters => '캐릭터';
-
-  @override
-  String get onlineGallery_copyrights => '작품';
-
-  @override
-  String get onlineGallery_general => '일반';
-
-  @override
   String get onlineGallery_copied => '복사했습니다';
 
   @override
   String get onlineGallery_copyTags => '태그 복사';
-
-  @override
-  String get onlineGallery_open => '열기';
-
-  @override
-  String get onlineGallery_send => '보내기';
 
   @override
   String get onlineGallery_sendToTextToImage => '텍스트로 이미지 생성으로 보내기';
@@ -1855,18 +1622,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onlineGallery_noTagInfo => '이 이미지에는 태그 정보가 없습니다';
-
-  @override
-  String get onlineGallery_promptSentToGeneration => '프롬프트를 생성 페이지로 보냈습니다';
-
-  @override
-  String get onlineGallery_gifLoadFailed => 'GIF를 불러오지 못했습니다';
-
-  @override
-  String get onlineGallery_pinchToZoom => '두 손가락으로 확대/축소';
-
-  @override
-  String get onlineGallery_metadata => '메타데이터';
 
   @override
   String get onlineGallery_chooseDownloadDirectory => '다운로드 폴더 선택';
@@ -1888,9 +1643,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onlineGallery_downloadOriginal => '원본 이미지 다운로드';
 
   @override
-  String get onlineGallery_all => '전체';
-
-  @override
   String get onlineGallery_ratingGeneral => '전체 연령';
 
   @override
@@ -1901,33 +1653,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get onlineGallery_ratingExplicit => '성인';
-
-  @override
-  String get onlineGallery_clear => '지우기';
-
-  @override
-  String get onlineGallery_previousPage => '이전 페이지';
-
-  @override
-  String get onlineGallery_nextPage => '다음 페이지';
-
-  @override
-  String onlineGallery_pageN(Object page) {
-    return '$page페이지';
-  }
-
-  @override
-  String get onlineGallery_dateRange => '날짜 범위';
-
-  @override
-  String get onlineGallery_fuzzySearch => '유사 일치';
-
-  @override
-  String get onlineGallery_fuzzySearchTooltip =>
-      '켜면 *tag* 일치로 비슷한 태그를 찾고, 끄면 Danbooru 태그를 정확히 검색합니다';
-
-  @override
-  String get onlineGallery_blacklistTags => '차단 태그';
 
   @override
   String get onlineGallery_blacklistTitle => '온라인 갤러리 차단 목록';
@@ -1971,63 +1696,12 @@ class AppLocalizationsKo extends AppLocalizations {
       'Danbooru에 로그인하지 않았습니다. 로컬 차단 목록은 사용할 수 있지만 동기화하려면 로그인해야 합니다.';
 
   @override
-  String get onlineGallery_bulkFavorite => '선택 항목 즐겨찾기';
-
-  @override
-  String get onlineGallery_bulkDownload => '선택 항목 다운로드';
-
-  @override
-  String get onlineGallery_unfavorited => '즐겨찾기를 해제했습니다';
-
-  @override
-  String get onlineGallery_favorited => '즐겨찾기에 추가했습니다';
-
-  @override
-  String onlineGallery_favoritedImages(Object count) {
-    return '이미지 $count장을 즐겨찾기에 추가했습니다';
-  }
-
-  @override
-  String onlineGallery_selectDownloadDirectoryFailed(Object error) {
-    return '다운로드 폴더를 선택하지 못했습니다: $error';
-  }
-
-  @override
-  String onlineGallery_downloadSelectedStarted(Object count) {
-    return '이미지 $count장 다운로드 중...';
-  }
-
-  @override
   String onlineGallery_downloadSelectedCompleted(
     Object success,
     Object failed,
   ) {
     return '다운로드 완료: 성공 $success, 실패 $failed';
   }
-
-  @override
-  String get onlineGallery_startDate => '시작 날짜';
-
-  @override
-  String get onlineGallery_endDate => '종료 날짜';
-
-  @override
-  String get onlineGallery_invalidDateFormat => '날짜 형식이 올바르지 않습니다';
-
-  @override
-  String get onlineGallery_dateOutOfRange => '날짜가 범위를 벗어났습니다';
-
-  @override
-  String get onlineGallery_last30Days => '최근 30일';
-
-  @override
-  String get onlineGallery_configureGelbooruApi => 'Gelbooru API 설정';
-
-  @override
-  String get onlineGallery_gelbooruApiReady => 'Gelbooru API 확인됨';
-
-  @override
-  String get onlineGallery_gelbooruApiInvalid => 'Gelbooru 자격 증명이 만료되었습니다';
 
   @override
   String get onlineGallery_gelbooruCredentialsRequired =>
@@ -2062,42 +1736,8 @@ class AppLocalizationsKo extends AppLocalizations {
       'Gelbooru 요청에 실패했습니다. 잠시 후 다시 시도하세요.';
 
   @override
-  String get onlineGallery_aiTagQuery => '작품, 작가, 제목, 태그, 모델 검색';
-
-  @override
-  String get onlineGallery_aiTagPromptQuery =>
-      'AI 프롬프트 검색(::artist: 같은 원본 구문 지원)';
-
-  @override
-  String get onlineGallery_aiTagTimeRange => '기간';
-
-  @override
-  String get onlineGallery_aiTagAllTime => '전체';
-
-  @override
-  String get onlineGallery_aiTagCurrentMonthly => '실시간 월간 순위';
-
-  @override
-  String get onlineGallery_aiTagOlderMonthly => '이전 보관';
-
-  @override
   String get onlineGallery_aiTagRankingProcessing =>
       '순위를 생성하는 중입니다. 잠시 후 다시 시도하세요.';
-
-  @override
-  String get onlineGallery_aiTagNaiOnly => 'NAI만';
-
-  @override
-  String get onlineGallery_aiTagModelVersion => '모델 버전';
-
-  @override
-  String get onlineGallery_viewAuthor => '이 작가 보기';
-
-  @override
-  String get onlineGallery_returnFromAuthor => '이전 갤러리 위치로 돌아가기';
-
-  @override
-  String get onlineGallery_generationParams => '생성 매개변수';
 
   @override
   String get onlineGallery_sourceConfigUnavailable =>
@@ -2124,40 +1764,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onlineGallery_imageUnavailable => '지금은 이 이미지를 사용할 수 없습니다.';
 
   @override
-  String get onlineGallery_loadedAll => '모든 항목을 불러왔습니다';
-
-  @override
-  String get onlineGallery_retryAppend => '불러오지 못했습니다. 클릭하여 다시 시도';
-
-  @override
-  String onlineGallery_rankNumber(Object rank) {
-    return '$rank위';
-  }
-
-  @override
-  String onlineGallery_multipleImages(Object count) {
-    return '이미지 $count장';
-  }
-
-  @override
-  String get onlineGallery_views => '조회수';
-
-  @override
-  String get onlineGallery_downloadAllMedia => '이 작품의 모든 이미지 다운로드';
-
-  @override
-  String get onlineGallery_copyFullMetadata => '전체 메타데이터 복사';
-
-  @override
-  String get onlineGallery_metadataParseFailed =>
-      '메타데이터를 분석하지 못했습니다. 원본 내용은 그대로 있으며 복사할 수 있습니다.';
-
-  @override
   String get onlineGallery_gelbooruReadOnly => '읽기 전용 즐겨찾기';
-
-  @override
-  String get onlineGallery_gelbooruFavoritesSortHint =>
-      '게시물 ID 기준 최신순으로 정렬됩니다. 웹사이트의 즐겨찾기 순서와 다를 수 있습니다.';
 
   @override
   String get tooltip_fullscreenEdit => '전체 화면 편집';
@@ -3212,9 +2819,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get comparison_loadError => '이미지를 불러오지 못했습니다';
 
   @override
-  String get statistics_title => '통계';
-
-  @override
   String get localGallery_group_today => '오늘';
 
   @override
@@ -3666,9 +3270,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get common_rename => '이름 변경';
-
-  @override
-  String get tagLibrary_newCategory => '새 분류';
 
   @override
   String get tagLibrary_tags => '태그';
@@ -4224,74 +3825,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibeLibrary_title => 'Vibe 라이브러리';
 
   @override
-  String get vibeLibrary_categories => '분류';
-
-  @override
-  String get vibeLibrary_createCategoryTitle => '새 분류';
-
-  @override
-  String get vibeLibrary_createSubCategoryTitle => '새 하위 분류';
-
-  @override
-  String get vibeLibrary_categoryNameHint => '분류 이름을 입력하세요';
-
-  @override
-  String get vibeLibrary_createCategoryConfirm => '만들기';
-
-  @override
-  String get vibeLibrary_deleteCategoryTitle => '삭제 확인';
-
-  @override
-  String get vibeLibrary_deleteCategoryContent =>
-      '이 분류를 삭제하시겠습니까? 안에 있는 Vibe는 분류 안 됨으로 이동합니다.';
-
-  @override
-  String get vibeLibrary_sortTooltip => '정렬 기준';
-
-  @override
-  String get vibeLibrary_openFolderTooltip => 'Vibe 라이브러리 폴더 열기';
-
-  @override
-  String vibeLibrary_totalCount(Object count) {
-    return 'Vibe $count개';
-  }
-
-  @override
-  String get vibeLibrary_noCategoriesAvailable => '사용할 수 있는 분류가 없습니다';
-
-  @override
-  String get vibeLibrary_moveToCategory => '분류로 이동';
-
-  @override
   String get vibeLibrary_uncategorized => '분류 안 됨';
-
-  @override
-  String vibeLibrary_movedToCategory(Object count) {
-    return 'Vibe $count개를 이동했습니다';
-  }
-
-  @override
-  String get vibeLibrary_favoriteStatusUpdated => '즐겨찾기 상태를 업데이트했습니다';
-
-  @override
-  String get vibeLibrary_importFromFile => '파일에서 가져오기';
-
-  @override
-  String get vibeLibrary_importFromImage => '이미지에서 가져오기';
-
-  @override
-  String get vibeLibrary_importFromClipboard => '클립보드에서 인코딩 데이터 가져오기';
-
-  @override
-  String vibeLibrary_openFolderFailed(Object error) {
-    return '폴더를 열지 못했습니다: $error';
-  }
-
-  @override
-  String get vibeLibrary_importFileDialogTitle => '가져올 Vibe 파일 선택';
-
-  @override
-  String get vibeLibrary_preparingImport => '가져오기 준비 중...';
 
   @override
   String vibeLibrary_importSuccessCount(Object count) {
@@ -4304,101 +3838,13 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get vibeLibrary_dropImportHint =>
-      '.naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp 파일이나 폴더를 여기에 놓아 가져오세요';
-
-  @override
-  String get vibeLibrary_importing => '가져오는 중...';
-
-  @override
-  String vibeLibrary_pageIndicator(Object current, Object total) {
-    return '$current / $total페이지';
-  }
-
-  @override
-  String get vibeLibrary_itemsPerPage => '페이지당:';
-
-  @override
-  String get vibeLibrary_tooManyTitle => 'Vibe가 너무 많습니다';
-
-  @override
-  String vibeLibrary_tooManySelectedContent(Object count) {
-    return 'Vibe $count개를 선택했지만 한 번에 최대 16개까지 사용할 수 있습니다.\n\n선택을 줄인 뒤 다시 시도하세요.';
-  }
-
-  @override
-  String vibeLibrary_tooManyExistingContent(Object current, Object remaining) {
-    return '생성 페이지에 이미 Vibe $current개가 있습니다. $remaining개를 더 추가할 수 있습니다.\n\n선택을 줄인 뒤 다시 시도하세요.';
-  }
-
-  @override
-  String vibeLibrary_sentToGenerationCount(Object count) {
-    return 'Vibe $count개를 생성 페이지로 보냈습니다';
-  }
-
-  @override
-  String vibeLibrary_deleteSelectedContent(Object count) {
-    return '선택한 Vibe $count개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
-  }
-
-  @override
-  String vibeLibrary_deletedCount(Object count) {
-    return 'Vibe $count개를 삭제했습니다';
-  }
-
-  @override
-  String get vibeLibrary_importImageDialogTitle => 'Vibe 데이터가 포함된 이미지 선택';
-
-  @override
-  String get vibeLibrary_clipboardEmpty => '클립보드가 비어 있습니다';
-
-  @override
-  String get vibeLibrary_encodeTimeout => '인코딩 시간이 초과되었습니다. 네트워크 연결을 확인하세요.';
-
-  @override
-  String get vibeLibrary_unknownError => '알 수 없는 오류';
-
-  @override
   String get vibeLibrary_save => '라이브러리에 저장';
 
   @override
   String get vibeLibrary_import => 'Vibe 가져오기';
 
   @override
-  String get vibeLibrary_searchHint => '이름, 태그 검색...';
-
-  @override
-  String get vibeLibrary_empty => 'Vibe 라이브러리가 비어 있습니다';
-
-  @override
-  String get vibeLibrary_emptyHint => '먼저 Vibe 라이브러리에 항목을 추가하세요';
-
-  @override
-  String get vibeLibrary_allVibes => '모든 Vibe';
-
-  @override
-  String get vibeLibrary_favorites => '즐겨찾기';
-
-  @override
   String get vibeLibrary_sendToGeneration => '생성으로 보내기';
-
-  @override
-  String get vibeLibrary_export => '내보내기';
-
-  @override
-  String get vibeLibrary_edit => '편집';
-
-  @override
-  String get vibeLibrary_delete => '삭제';
-
-  @override
-  String get vibeLibrary_addToFavorites => '즐겨찾기에 추가';
-
-  @override
-  String get vibeLibrary_removeFromFavorites => '즐겨찾기에서 제거';
-
-  @override
-  String get vibeLibrary_newSubCategory => '새 하위 분류';
 
   @override
   String get vibeLibrary_maxVibesReached => '최대 개수에 도달했습니다(Vibe 16개)';
@@ -4468,330 +3914,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get vibeBulkTag_actionPreview => '변경 미리 보기';
-
-  @override
-  String get vibeDetail_strengthDescription =>
-      '이 Vibe가 생성 결과에 미치는 영향의 강도를 조절합니다';
-
-  @override
-  String get vibeDetail_infoExtractedDescription =>
-      '원본 이미지에서 추출할 정보의 양을 조절합니다(2 Anlas 소비)';
-
-  @override
-  String get vibeDetail_statistics => '통계';
-
-  @override
-  String get vibeDetail_usageCount => '사용 횟수';
-
-  @override
-  String vibeDetail_timesUsed(int count) {
-    return '$count회';
-  }
-
-  @override
-  String get vibeDetail_lastUsed => '마지막 사용';
-
-  @override
-  String get vibeDetail_neverUsed => '사용한 적 없음';
-
-  @override
-  String get vibeDetail_createdAt => '만든 날짜';
-
-  @override
-  String get vibeDetail_saveParameters => '매개변수 저장';
-
-  @override
   String get vibe_export_title => 'Vibe 내보내기';
 
   @override
-  String get vibe_export_format => '내보내기 형식';
-
-  @override
-  String get vibe_selector_title => 'Vibe 선택';
-
-  @override
   String get vibe_selector_recent => '최근';
-
-  @override
-  String get vibe_export_include_thumbnails => '썸네일 포함';
-
-  @override
-  String get vibe_export_include_thumbnails_subtitle =>
-      '내보내는 파일에 썸네일 미리 보기를 포함합니다';
-
-  @override
-  String get vibe_export_singleFile => '단일 파일(.naiv4vibe)';
-
-  @override
-  String get vibe_export_singleFileDescription =>
-      'Vibe마다 별도 파일로 내보냅니다. Vibe 하나를 공유할 때 적합합니다';
-
-  @override
-  String get vibe_export_bundleFile => '번들 파일(.naiv4vibebundle)';
-
-  @override
-  String get vibe_export_bundleFileDescription =>
-      '여러 Vibe를 파일 하나로 묶습니다. 일괄 백업에 적합합니다';
-
-  @override
-  String get vibe_export_embedIntoPng => 'PNG에 포함';
-
-  @override
-  String get vibe_export_embedIntoPngDescription =>
-      '데이터를 PNG 메타데이터에 넣어 Vibe 하나를 내보냅니다';
-
-  @override
-  String get vibe_export_exportable => '내보내기 가능';
-
-  @override
-  String get vibe_export_notExportable => '내보내기 불가';
-
-  @override
-  String get vibe_export_selectVibesToExport => '내보낼 Vibe 선택';
-
-  @override
-  String vibe_export_exportSelected(int count) {
-    return '내보내기($count)';
-  }
-
-  @override
-  String vibe_export_strengthPercent(int percent) {
-    return '강도: $percent%';
-  }
-
-  @override
-  String get vibe_export_pngCarrierImage => 'PNG 전달 이미지';
-
-  @override
-  String get vibe_export_noUsablePngCarrier =>
-      '이 Vibe에는 바로 사용할 수 있는 PNG 전달 이미지가 없습니다. 외부 PNG 이미지를 전달 이미지로 선택할 수 있습니다.';
-
-  @override
-  String get vibe_export_selectExternalPngImage => '외부 PNG 이미지 선택...';
-
-  @override
-  String get vibe_export_changeExternalPngImage => '외부 PNG 이미지 변경...';
-
-  @override
-  String get vibe_export_useVibeImageInstead => '대신 Vibe 이미지 사용';
-
-  @override
-  String vibe_export_usingExternalPng(String fileName) {
-    return '외부 PNG 사용 중: $fileName';
-  }
-
-  @override
-  String get vibe_export_selectPngImage => 'PNG 이미지 선택';
-
-  @override
-  String get vibe_export_invalidPngImage => '선택한 파일은 올바른 PNG 이미지가 아닙니다';
-
-  @override
-  String vibe_export_selectPngImageFailed(String error) {
-    return 'PNG 이미지를 선택하지 못했습니다: $error';
-  }
-
-  @override
-  String vibe_export_embeddingPng(String name) {
-    return 'PNG에 포함하는 중: $name';
-  }
-
-  @override
-  String vibe_export_exportCompleteCounts(int successCount, int failCount) {
-    return '내보내기 완료: 성공 $successCount개, 실패 $failCount개';
-  }
-
-  @override
-  String vibe_export_exportCompletePath(String path) {
-    return '내보내기 완료: $path';
-  }
-
-  @override
-  String vibe_export_packingVibes(int count) {
-    return 'Vibe $count개 묶는 중...';
-  }
-
-  @override
-  String vibe_export_exportingName(String name) {
-    return '내보내는 중: $name';
-  }
-
-  @override
-  String get vibe_export_selectExportFolder => '내보낼 폴더 선택';
-
-  @override
-  String get vibe_export_generatingBundleFile => '번들 파일 만드는 중...';
-
-  @override
-  String vibe_export_bundleTitle(String name) {
-    return '번들 내보내기: $name';
-  }
-
-  @override
-  String vibe_export_vibesTitle(int count) {
-    return 'Vibe 내보내기($count개 선택)';
-  }
-
-  @override
-  String get vibe_export_method => '내보내기 방식';
-
-  @override
-  String get vibe_export_wholeBundle => '번들 전체';
-
-  @override
-  String get vibe_export_internalVibe => '내부 Vibe';
-
-  @override
-  String vibe_export_wholeBundleDescription(int count) {
-    return 'Vibe $count개를 모두 담은 .naiv4vibebundle 파일로 내보냅니다';
-  }
-
-  @override
-  String vibe_export_internalVibeDescription(int count) {
-    return '번들 안의 Vibe를 골라 각각 .naiv4vibe 파일로 내보냅니다(총 $count개)';
-  }
-
-  @override
-  String get vibe_export_exportBundle => '번들 내보내기';
-
-  @override
-  String get vibe_export_exportAsFiles => '파일로 내보내기';
-
-  @override
-  String get vibe_export_exportBundleDescription =>
-      '.naiv4vibebundle 파일로 내보냅니다';
-
-  @override
-  String get vibe_export_exportAsFilesDescription =>
-      '.naiv4vibe 또는 .naiv4vibebundle 파일로 내보냅니다';
-
-  @override
-  String get vibe_export_exportAsZip => 'ZIP으로 내보내기';
-
-  @override
-  String get vibe_export_exportAsZipDescription =>
-      '선택한 Vibe 라이브러리 항목을 개별 파일로 .zip에 묶습니다';
-
-  @override
-  String get vibe_export_compressData => '데이터 압축';
-
-  @override
-  String get vibe_export_compressDataDescription =>
-      '압축으로 파일 크기를 줄입니다(일괄 내보내기에 추천)';
-
-  @override
-  String get vibe_export_zipCompressDescription => 'ZIP 안의 파일을 압축해 크기를 줄입니다';
-
-  @override
-  String get vibe_export_exportAsPng => 'PNG로 내보내기';
-
-  @override
-  String get vibe_export_pngInternalBundleUnsupported =>
-      '번들 내부 Vibe 하나를 내보낼 때는 이미지에 포함할 수 없습니다';
-
-  @override
-  String get vibe_export_embedVibeDataIntoPng => 'Vibe 데이터를 PNG 메타데이터에 포함';
-
-  @override
-  String get vibe_export_batchPngUsesFirstImage =>
-      '일괄 내보내기는 Vibe마다 처음으로 사용 가능한 이미지를 씁니다. 이미지가 없는 항목은 자동으로 건너뜁니다.';
-
-  @override
-  String get vibe_export_exportCarrierImage => '전달 이미지 내보내기';
-
-  @override
-  String get vibe_export_usingExternalCarrierImage =>
-      '외부 PNG를 내보내기 전달 이미지로 사용 중';
-
-  @override
-  String get vibe_export_exportAsEncodings => '인코딩으로 내보내기';
-
-  @override
-  String get vibe_export_exportAsEncodingsDescription =>
-      '데이터를 인코딩(JSON 또는 Base64)으로 내보냅니다';
-
-  @override
-  String get vibe_export_jsonDescription => '읽고 편집하기 쉬운 서식 있는 JSON 파일로 내보냅니다';
-
-  @override
-  String get vibe_export_base64Description => '복사하고 공유하기 쉬운 Base64 텍스트로 내보냅니다';
-
-  @override
-  String get vibe_export_selectAtLeastOneMethod => '내보내기 방식을 하나 이상 선택하세요';
-
-  @override
-  String get vibe_export_batchPngUnsupported =>
-      'Vibe 일괄 내보내기는 PNG 포함을 지원하지 않습니다. 단일 Vibe 내보내기 화면을 사용하세요.';
-
-  @override
-  String get vibe_export_selectPngCarrier => '내보낼 PNG 전달 이미지를 선택하세요';
-
-  @override
-  String get vibe_export_selectAtLeastOneInternalVibe =>
-      '내보낼 내부 Vibe를 하나 이상 선택하세요';
-
-  @override
-  String get vibe_export_selectVibeExportFolder => 'Vibe 내보낼 폴더 선택';
-
-  @override
-  String get vibe_export_saveEncodingFile => '인코딩 파일 저장';
-
-  @override
-  String get vibe_export_preparingExport => '내보내기 준비 중...';
-
-  @override
-  String vibe_export_preparingVibeProgress(int current, int total) {
-    return 'Vibe 읽는 중 $current/$total...';
-  }
-
-  @override
-  String get vibe_export_exportingBundle => '번들 내보내는 중...';
-
-  @override
-  String get vibe_export_exportingZip => 'ZIP 내보내는 중...';
-
-  @override
-  String get vibe_export_embeddingImage => '이미지에 포함하는 중...';
-
-  @override
-  String get vibe_export_exportingEncoding => '인코딩 내보내는 중...';
-
-  @override
-  String vibe_export_exportFailedWithError(String error) {
-    return '내보내지 못했습니다: $error';
-  }
-
-  @override
-  String get vibe_export_noExportableEntries => '내보낼 수 있는 Vibe 항목이 없습니다';
-
-  @override
-  String get vibe_export_bundleFilePathEmpty => '번들 파일 경로가 비어 있습니다';
-
-  @override
-  String vibe_export_invalidImageFormatWithError(String error) {
-    return '이미지 형식이 올바르지 않습니다: $error';
-  }
-
-  @override
-  String vibe_export_embedFailedWithError(String error) {
-    return '포함하지 못했습니다: $error';
-  }
-
-  @override
-  String vibe_export_embedImageFailedWithError(String error) {
-    return '이미지에 포함하지 못했습니다: $error';
-  }
-
-  @override
-  String vibe_export_extractingVibeProgress(int current, int total) {
-    return 'Vibe 추출 중 $current/$total...';
-  }
-
-  @override
-  String vibe_export_selectImageFailed(String error) {
-    return '이미지를 선택하지 못했습니다: $error';
-  }
 
   @override
   String vibe_export_dialogTitle(int count) {
@@ -4847,12 +3973,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibe_embedToImage => '이미지에 포함';
 
   @override
-  String get vibe_import_skip => '건너뛰기';
-
-  @override
-  String get vibe_import_confirm => '확인';
-
-  @override
   String get vibe_import_noEncodingData => '인코딩 데이터 없음';
 
   @override
@@ -4890,14 +4010,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vibe_import_timeout => '인코딩 시간 초과';
 
   @override
-  String get vibe_import_title => '라이브러리에서 가져오기';
-
-  @override
-  String vibe_import_result(int count) {
-    return 'Vibe $count개를 가져왔습니다';
-  }
-
-  @override
   String get vibe_import_fileParseFailed => '파일을 분석하지 못했습니다';
 
   @override
@@ -4905,43 +4017,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vibe_import_importFailed => '가져오지 못했습니다';
-
-  @override
-  String get vibe_import_bundleTitle => 'Vibe 번들 가져오기';
-
-  @override
-  String get vibe_import_bundleChooseMethod => '가져오기 방식 선택';
-
-  @override
-  String get vibe_import_bundleAsWhole => '통째로 가져오기';
-
-  @override
-  String get vibe_import_bundleAsWholeDescription =>
-      '번들 구조를 유지해 라이브러리 항목 하나로 가져옵니다';
-
-  @override
-  String get vibe_import_bundleSplitEntries => '개별 항목으로 나누기';
-
-  @override
-  String get vibe_import_bundleSplitEntriesDescription =>
-      'Vibe마다 별도 라이브러리 항목으로 가져옵니다';
-
-  @override
-  String get vibe_import_bundleSelectVibes => '가져올 Vibe 선택';
-
-  @override
-  String get vibe_import_bundleSelectVibesDescription => '선택한 Vibe만 가져옵니다';
-
-  @override
-  String get vibe_import_bundleConfigureEachVibe => 'Vibe별 매개변수 설정';
-
-  @override
-  String get vibe_import_bundleSelectAndConfigureEachVibe => 'Vibe를 골라 매개변수 설정';
-
-  @override
-  String vibe_import_bundleSelectedCount(int selected, int total) {
-    return '$selected/$total 선택됨';
-  }
 
   @override
   String get vibe_saveToLibrary_title => '라이브러리에 저장';
@@ -5050,57 +4125,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String get selection_cut_to_layer => '레이어로 잘라내기';
 
   @override
-  String get search_results => '검색 결과';
-
-  @override
-  String get search_noResults => '일치하는 결과가 없습니다';
-
-  @override
-  String get addToCurrent => '현재에 추가';
-
-  @override
-  String get replaceExisting => '기존 항목 교체';
-
-  @override
-  String get confirmSelection => '선택 확인';
-
-  @override
   String get selectAll => '모두 선택';
 
   @override
   String get clearSelection => '지우기';
 
   @override
-  String get clearFilters => '필터 지우기';
-
-  @override
   String get shortcut_context_vibe_detail => 'Vibe 상세';
 
   @override
   String get shortcut_action_vibe_detail_rename => '이름 변경';
-
-  @override
-  String get vibeSelectorFilterFavorites => '즐겨찾기';
-
-  @override
-  String get vibeSelectorFilterSourceAll => '모든 유형';
-
-  @override
-  String get vibeSelectorSortCreated => '만든 날짜';
-
-  @override
-  String get vibeSelectorSortLastUsed => '최근 사용';
-
-  @override
-  String get vibeSelectorSortUsedCount => '사용 횟수';
-
-  @override
-  String get vibeSelectorSortName => '이름';
-
-  @override
-  String vibeSelectorItemsCount(int count) {
-    return '$count개 항목';
-  }
 
   @override
   String get tray_show => '창 표시';
@@ -5805,41 +4839,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '이 이미지 형식은 Krita로 보낼 수 없습니다. 일반적인 이미지 형식을 사용하세요.';
 
   @override
-  String toast_deletedNamed(Object name) {
-    return '삭제했습니다: $name';
-  }
-
-  @override
-  String get toast_vibeParamSaveReencodeFailed =>
-      'Vibe를 다시 인코딩하지 못해 매개변수를 저장하지 못했습니다';
-
-  @override
-  String get toast_exportSuccess => '내보냈습니다';
-
-  @override
-  String toast_exportFailed(Object error) {
-    return '내보내지 못했습니다: $error';
-  }
-
-  @override
-  String get toast_selectVibeToExport => '먼저 내보낼 Vibe를 선택하세요';
-
-  @override
-  String get toast_embedPngSingleVibeOnly => 'PNG 포함은 Vibe 하나만 내보낼 때 지원합니다';
-
-  @override
-  String get toast_selectPngCarrier => '내보낼 PNG 전달 이미지를 선택하세요';
-
-  @override
-  String get toast_renameSuccess => '이름을 변경했습니다';
-
-  @override
-  String get toast_paramsSaved => '매개변수를 저장했습니다';
-
-  @override
-  String get toast_paramsSaveFailed => '매개변수를 저장하지 못했습니다';
-
-  @override
   String get toast_dropNoReadableImageOrVibe =>
       '놓은 항목에서 읽을 수 있는 이미지나 Vibe 파일을 찾지 못했습니다';
 
@@ -5872,35 +4871,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get toast_favorited => '즐겨찾기에 추가했습니다';
-
-  @override
-  String get toast_unfavorited => '즐겨찾기를 해제했습니다';
-
-  @override
-  String toast_favoriteUpdateFailed(Object error) {
-    return '즐겨찾기 상태를 업데이트하지 못했습니다: $error';
-  }
-
-  @override
-  String toast_packingImages(Object count) {
-    return '이미지 $count장 묶는 중...';
-  }
-
-  @override
-  String toast_packedImages(Object count) {
-    return '이미지 $count장을 묶었습니다';
-  }
-
-  @override
-  String get toast_packFailed => '묶지 못했습니다';
-
-  @override
-  String toast_packFailedWithError(Object error) {
-    return '묶지 못했습니다: $error';
-  }
-
-  @override
   String get toast_saveDirNotSet => '저장 폴더가 설정되지 않았습니다';
 
   @override
@@ -5924,19 +4894,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get toast_saveEntryFailed => '항목을 저장하지 못했습니다';
 
   @override
-  String get toast_imagePromptCopied => '프롬프트를 복사했습니다';
-
-  @override
-  String get toast_imageHasNoPrompt => '이 이미지에는 프롬프트가 없습니다';
-
-  @override
-  String get toast_useDeleteButton => '화면의 삭제 버튼을 사용하세요';
-
-  @override
   String get toast_imageDataUnavailable => '이미지 데이터를 사용할 수 없어 복사할 수 없습니다';
-
-  @override
-  String get toast_vibeDataCopied => 'Vibe 데이터를 복사했습니다';
 
   @override
   String get toast_characterPromptCopied => '캐릭터 프롬프트를 복사했습니다';
@@ -5944,26 +4902,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String toast_copiedTitle(Object title) {
     return '$title을(를) 복사했습니다';
-  }
-
-  @override
-  String toast_replacedVibesCount(Object count, Object name) {
-    return 'Vibe $count개로 교체했습니다: $name';
-  }
-
-  @override
-  String toast_sentVibesCount(Object count, Object name) {
-    return 'Vibe $count개를 생성으로 보냈습니다: $name';
-  }
-
-  @override
-  String toast_replacedVibe(Object name) {
-    return '교체했습니다: $name';
-  }
-
-  @override
-  String toast_sentVibeToGeneration(Object name) {
-    return '생성으로 보냈습니다: $name';
   }
 
   @override
@@ -5999,24 +4937,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get toast_renameNameRequired => '이름이 필요합니다';
-
-  @override
-  String get toast_renameNameConflict => '이미 있는 이름입니다. 다른 이름을 사용하세요.';
-
-  @override
-  String get toast_renameEntryNotFound => '항목이 더 이상 없습니다. 삭제되었을 수 있습니다';
-
-  @override
-  String get toast_renameFilePathMissing => '이 항목에는 파일 경로가 없어 이름을 바꿀 수 없습니다';
-
-  @override
-  String get toast_renameFileFailed => '파일 이름을 바꾸지 못했습니다. 잠시 후 다시 시도하세요.';
-
-  @override
-  String get toast_renameFailed => '이름을 바꾸지 못했습니다. 잠시 후 다시 시도하세요.';
-
-  @override
   String toast_processImageFailed(Object error) {
     return '이미지를 처리하지 못했습니다: $error';
   }
@@ -6041,98 +4961,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_saving => '저장하는 중...';
 
   @override
-  String get common_pleaseWait => '잠시 기다리세요';
-
-  @override
-  String get common_change => '변경';
-
-  @override
   String get common_expand => '펼치기';
 
   @override
   String get common_collapse => '접기';
-
-  @override
-  String get vibeLibrary_emptySearchTitle => '일치하는 Vibe가 없습니다';
-
-  @override
-  String get vibeLibrary_emptySearchSubtitle => '다른 키워드로 검색해 보세요';
-
-  @override
-  String get vibeLibrary_emptyFavoritesTitle => '즐겨찾기한 Vibe가 없습니다';
-
-  @override
-  String get vibeLibrary_emptyFavoritesSubtitle =>
-      '하트 아이콘을 클릭해 Vibe를 즐겨찾기에 추가하세요';
-
-  @override
-  String get vibeLibrary_emptyCategoryTitle => '이 분류에 Vibe가 없습니다';
-
-  @override
-  String get vibeLibrary_emptyCategorySubtitle =>
-      '\"모든 Vibe\"로 전환하면 모든 항목을 볼 수 있습니다';
-
-  @override
-  String get vibeLibrary_emptyNoMatchesTitle => '일치하는 결과가 없습니다';
-
-  @override
-  String get vibeLibrary_emptySaveFromGenerationHint =>
-      '생성 페이지에서 Vibe를 저장해 라이브러리에 추가하세요';
-
-  @override
-  String get vibe_nameRequired => '이름이 필요합니다';
-
-  @override
-  String get vibe_import_namingTitle => 'Vibe 이름 지정';
-
-  @override
-  String get vibe_import_nameConflictOverwrite => '이미 있는 이름이므로 덮어씁니다';
-
-  @override
-  String get vibe_previewLoadFailed => '미리 보기를 불러오지 못했습니다';
-
-  @override
-  String get vibe_import_applyToRemainingFiles => '남은 모든 파일에 적용';
-
-  @override
-  String get vibe_import_applyNamingToRemainingFiles => '남은 파일에 이 이름 규칙 사용';
-
-  @override
-  String get vibe_encodeImageTitle => '이미지를 Vibe로 인코딩';
-
-  @override
-  String get vibe_imagePreview => '이미지 미리 보기';
-
-  @override
-  String get vibe_encodeStartButton => '인코딩 시작';
-
-  @override
-  String get vibe_encodeImageInProgress => '이미지 인코딩 중...';
-
-  @override
-  String vibe_encodeErrorImage(Object fileName) {
-    return '이미지: $fileName';
-  }
-
-  @override
-  String vibe_encodeErrorMessage(Object error) {
-    return '오류: $error';
-  }
-
-  @override
-  String get vibe_encodeSkipImage => '이 이미지 건너뛰기';
-
-  @override
-  String get detail_sendToImg2Img => 'Image2Image로 보내기';
-
-  @override
-  String get detail_loadingImage => '이미지 불러오는 중...';
-
-  @override
-  String get detail_imageLoadFailed => '이미지를 불러오지 못했습니다';
-
-  @override
-  String get detail_noImage => '이미지 없음';
 
   @override
   String get detail_parsingMetadata => '메타데이터 분석 중...';
@@ -6144,15 +4976,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get detail_metadata => '메타데이터';
 
   @override
-  String get detail_imageDetails => '이미지 상세 정보';
-
-  @override
-  String get detail_basicInfo => '기본 정보';
-
-  @override
-  String get detail_fileName => '파일 이름';
-
-  @override
   String get detail_modifiedTime => '수정한 날짜';
 
   @override
@@ -6160,9 +4983,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get detail_noContent => '(내용 없음)';
-
-  @override
-  String get detail_saveBlock => '블록으로 저장';
 
   @override
   String get saveBlock_title => '블록으로 저장';
@@ -6189,15 +5009,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String detail_copyLabel(Object label) {
     return '$label 복사';
   }
-
-  @override
-  String get detail_copyCharacterPrompt => '캐릭터 프롬프트 복사';
-
-  @override
-  String get detail_copyAllVibeData => '모든 Vibe 데이터 복사';
-
-  @override
-  String get detail_saveToVibeLibrary => 'Vibe 라이브러리에 저장';
 
   @override
   String get comfyImport_detectedTitle => 'ComfyUI 다중 캐릭터 프롬프트를 감지했습니다';
@@ -6406,44 +5217,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get nav_preciseRefLibrary => '정밀 참조 라이브러리';
 
   @override
-  String get preciseRefLib_title => '정밀 참조 라이브러리';
-
-  @override
-  String get preciseRefLib_searchHint => '참조 검색...';
-
-  @override
-  String get preciseRefLib_empty => '이미지를 여기에 놓거나 붙여넣어 라이브러리를 만드세요';
-
-  @override
-  String get preciseRefLib_emptyHint =>
-      '미리 보기, 기록, 갤러리의 이미지를 마우스 오른쪽 버튼으로 클릭해 여기에 저장할 수도 있습니다';
-
-  @override
-  String get preciseRefLib_import => '이미지 가져오기';
-
-  @override
-  String preciseRefLib_entryCount(int count) {
-    return '$count개 항목';
-  }
-
-  @override
-  String get preciseRefLib_sendToPreciseRef => '정밀 참조로 보내기';
-
-  @override
-  String get preciseRefLib_sendToImg2Img => 'Image2Image로 보내기';
-
-  @override
-  String get preciseRefLib_editEntry => '매개변수 편집';
-
-  @override
-  String get preciseRefLib_confirmDeleteTitle => '항목 삭제';
-
-  @override
-  String preciseRefLib_confirmDelete(String name) {
-    return '\"$name\"을(를) 삭제하시겠습니까? 이미지 파일도 함께 삭제됩니다.';
-  }
-
-  @override
   String preciseRefLib_saved(String name) {
     return '\"$name\"을(를) 정밀 참조 라이브러리에 저장했습니다';
   }
@@ -6452,51 +5225,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get preciseRefLib_savedHint => '라이브러리에서 매개변수를 편집할 수 있습니다';
 
   @override
-  String preciseRefLib_sent(String name) {
-    return '\"$name\"을(를) 정밀 참조로 보냈습니다';
-  }
-
-  @override
-  String preciseRefLib_sentToImg2Img(String name) {
-    return '\"$name\"을(를) Image2Image로 보냈습니다';
-  }
-
-  @override
   String get preciseRefLib_imageMissing => '이미지 파일이 없습니다';
 
   @override
   String get preciseRefLib_invalidImage => '지원하지 않는 이미지 형식이거나 파일이 손상되었습니다';
 
   @override
-  String get preciseRefLib_deleteFailed =>
-      '삭제하지 못했습니다. 항목과 원본 이미지는 그대로 두었습니다. 잠시 후 다시 시도하세요';
-
-  @override
-  String get preciseRefLib_favoritesOnly => '즐겨찾기만';
-
-  @override
-  String get preciseRefLib_sortBy => '정렬 기준';
-
-  @override
-  String get preciseRefLib_sortCreatedAt => '만든 날짜';
-
-  @override
-  String get preciseRefLib_sortLastUsed => '최근 사용';
-
-  @override
-  String get preciseRefLib_sortUsedCount => '많이 사용한 순';
-
-  @override
-  String get preciseRefLib_sortName => '이름';
-
-  @override
   String preciseRefLib_importedCount(int count) {
     return '이미지 $count장을 가져왔습니다';
-  }
-
-  @override
-  String preciseRefLib_loadFailed(String error) {
-    return '정밀 참조 라이브러리를 불러오지 못했습니다: $error';
   }
 
   @override
@@ -6519,20 +5255,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String preciseRefLib_saveCurrentCount(int count) {
     return '참조 $count개를 라이브러리에 저장했습니다';
   }
-
-  @override
-  String get preciseRefLib_selectorTitle => '정밀 참조 라이브러리에서 선택';
-
-  @override
-  String preciseRefLib_selectorConfirm(int count) {
-    return '선택 항목 추가($count)';
-  }
-
-  @override
-  String get preciseRefLib_nameLabel => '이름';
-
-  @override
-  String get preciseRefLib_typeFilterAll => '전체';
 
   @override
   String get img2img_fromPreciseRefLibrary => '정밀 참조 라이브러리에서';
@@ -6661,16 +5383,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get drop_saveVibeBundle => 'Vibe 번들 저장';
 
   @override
-  String get history_dragFilePreparationFailed =>
-      '끌기용 파일을 준비하지 못했습니다. 잠시 후 다시 시도하세요.';
-
-  @override
-  String get history_dragFilePreparing => '끌기용 파일 준비 중...';
-
-  @override
-  String get history_dragFileNotReady => '끌기용 파일이 아직 준비되지 않았습니다';
-
-  @override
   String get vibe_import_overwriteOriginalParams => '원래 Vibe 매개변수 교체';
 
   @override
@@ -6693,21 +5405,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get galleryScan_processing => '처리 중';
-
-  @override
-  String get vibeDetail_useAll => '모두 사용';
-
-  @override
-  String get vibeDetail_longPressSetCover => '길게 눌러 표지로 설정';
-
-  @override
-  String get vibeDetail_noPreviewImage => '미리 보기 이미지 없음';
-
-  @override
-  String get vibeDetail_dropPreviewImage => '이미지를 여기에 놓아 미리 보기로 설정';
-
-  @override
-  String get vibeDetail_releasePreviewImage => '놓으면 미리 보기 이미지로 설정합니다';
 
   @override
   String imagePicker_dropReadFailed(String error) {
@@ -6831,15 +5528,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get nav_promptBlockLibrary => '프롬프트 블록';
-
-  @override
-  String get promptBlockLibrary_title => '프롬프트 블록';
-
-  @override
-  String get promptBlockLibrary_folders => '폴더';
-
-  @override
   String get promptBlockLibrary_allBlocks => '모든 블록';
 
   @override
@@ -6847,12 +5535,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_unnamedBlock => '제목 없는 블록';
-
-  @override
-  String get promptBlockLibrary_noBlockSelected => '선택한 블록 없음';
-
-  @override
-  String get promptBlockLibrary_details => '상세 정보';
 
   @override
   String promptBlockLibrary_useCount(int count) {
@@ -6866,195 +5548,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockPill_unknown => '잘못된 블록';
 
   @override
-  String get pillCardReroll => '다시 뽑기';
-
-  @override
-  String get pillCardRerollLocked => '잠겨 있어 다시 뽑을 수 없습니다';
-
-  @override
-  String get pillCardLock => '현재 결과 잠금';
-
-  @override
-  String get pillCardUnlock => '잠금 해제';
-
-  @override
-  String get pillCardSettings => '무작위 설정';
-
-  @override
-  String get pillCardEnable => '사용';
-
-  @override
-  String get pillCardDisable => '사용 안 함';
-
-  @override
-  String get pillCardDeleteInstance => '인스턴스 제거';
-
-  @override
-  String get pillCardEmptyRoll => '(이번에는 빈 결과)';
-
-  @override
-  String get pillCardEvolutionEnable => '유전 켜기';
-
-  @override
-  String get pillCardEvolutionDisable => '유전 끄기';
-
-  @override
-  String get pillCardEvolutionRequiresEnabled => '먼저 인스턴스를 사용하도록 설정하세요';
-
-  @override
-  String get pillCardStepBack => '한 장면 뒤로';
-
-  @override
-  String get pillCardStepForward => '한 장면 앞으로';
-
-  @override
-  String get pillSettingsTitle => '블록 인스턴스 설정';
-
-  @override
-  String get pillSettingsModeFixed => '고정';
-
-  @override
-  String get pillSettingsModeSequential => '순차';
-
-  @override
-  String get pillSettingsModeRandom => '무작위 뽑기';
-
-  @override
-  String get pillSettingsCount => '뽑을 개수';
-
-  @override
-  String get pillSettingsOrder => '출력 순서';
-
-  @override
-  String get pillSettingsOrderDrawn => '뽑힌 순서';
-
-  @override
-  String get pillSettingsOrderOriginal => '원래 순서';
-
-  @override
-  String get pillSettingsWeight => '무작위 가중치';
-
-  @override
-  String get pillSettingsWeightMin => '최소';
-
-  @override
-  String get pillSettingsWeightMax => '최대';
-
-  @override
-  String get pillSettingsWeightAverage => '평균';
-
-  @override
-  String get pillSettingsDispersion => '분산';
-
-  @override
-  String get pillSettingsDispersionFocused => '집중';
-
-  @override
-  String get pillSettingsDispersionBalanced => '균형';
-
-  @override
-  String get pillSettingsDispersionSpread => '넓게';
-
-  @override
-  String get pillSettingsAdvanced => '고급';
-
-  @override
-  String get pillSettingsLeftDispersion => '왼쪽';
-
-  @override
-  String get pillSettingsRightDispersion => '오른쪽';
-
-  @override
-  String get pillSettingsSoftBalance => '부드러운 균형';
-
-  @override
-  String get pillSettingsSoftBalanceStrength => '강도';
-
-  @override
-  String get pillSettingsTriggerProbability => '발동 확률';
-
-  @override
-  String get pillSettingsCancel => '취소';
-
-  @override
-  String get pillSettingsApply => '적용';
-
-  @override
   String get promptBlockLibrary_unnamedFolder => '제목 없는 폴더';
-
-  @override
-  String get promptBlockLibrary_scope => '탐색 범위';
-
-  @override
-  String get promptBlockLibrary_newBlock => '새 블록';
-
-  @override
-  String get promptBlockLibrary_editBlock => '블록 편집';
-
-  @override
-  String get promptBlockLibrary_newFolder => '새 폴더';
-
-  @override
-  String get promptBlockLibrary_newSubfolder => '새 하위 폴더';
-
-  @override
-  String get promptBlockLibrary_renameFolder => '폴더 이름 변경';
-
-  @override
-  String get promptBlockLibrary_moveToRoot => '루트로 이동';
-
-  @override
-  String get promptBlockLibrary_moveToFolder => '폴더로 이동';
-
-  @override
-  String get promptBlockLibrary_favorites => '즐겨찾기';
-
-  @override
-  String get promptBlockLibrary_unclassified => '미분류';
-
-  @override
-  String get promptBlockLibrary_newCollection => '새 컬렉션';
-
-  @override
-  String get promptBlockLibrary_newSubcollection => '새 하위 컬렉션';
-
-  @override
-  String get promptBlockLibrary_newCollectionFolder => '새 컬렉션 폴더';
-
-  @override
-  String get promptBlockLibrary_renameCollection => '컬렉션 이름 변경';
-
-  @override
-  String get promptBlockLibrary_renameCollectionFolder => '컬렉션 폴더 이름 변경';
-
-  @override
-  String get promptBlockLibrary_moveToFavoritesRoot => '즐겨찾기 루트로 이동';
-
-  @override
-  String get promptBlockLibrary_unnamedCollection => '이름 없는 컬렉션';
-
-  @override
-  String get promptBlockLibrary_unnamedCollectionFolder => '이름 없는 컬렉션 폴더';
-
-  @override
-  String get promptBlockLibrary_collectionName => '컬렉션 이름';
-
-  @override
-  String get promptBlockLibrary_collectionNameHint => '컬렉션 이름';
-
-  @override
-  String get promptBlockLibrary_noCollections =>
-      '아직 컬렉션이 없습니다 — 즐겨찾기 옆의 +를 누르거나 블록을 컬렉션으로 끌어 놓으세요';
-
-  @override
-  String get promptBlockLibrary_noFolders => '아직 폴더가 없습니다';
-
-  @override
-  String get promptBlockLibrary_emptyFavorites =>
-      '즐겨찾기한 블록이 없습니다 — 블록의 ★를 눌러 즐겨찾기에 추가하세요';
-
-  @override
-  String get promptBlockLibrary_emptyCollection => '이 컬렉션은 비어 있습니다';
 
   @override
   String promptBlockLibrary_deleteCollectionConfirm(String name) {
@@ -7073,42 +5567,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockLibrary_titleHint => '블록 제목';
 
   @override
-  String get promptBlockLibrary_searchHint => '제목, 프롬프트, 태그 검색';
-
-  @override
   String get promptBlockLibrary_folder => '폴더';
-
-  @override
-  String get promptBlockLibrary_folderName => '폴더 이름';
-
-  @override
-  String get promptBlockLibrary_folderNameHint => '폴더 이름';
-
-  @override
-  String get promptBlockLibrary_basicPrompt => '기본 프롬프트';
-
-  @override
-  String get promptBlockLibrary_generationSettings => '설정';
-
-  @override
-  String get promptBlockLibrary_settingsOptionalHint =>
-      '입력한 매개변수만 저장됩니다. 블록을 삽입한 뒤 설정을 직접 적용하세요.';
-
-  @override
-  String get promptBlockLibrary_notSpecified => '지정 안 함';
-
-  @override
-  String get promptBlockLibrary_stepsLabel => '스텝';
-
-  @override
-  String get promptBlockLibrary_noiseScheduleLabel => '노이즈 스케줄';
-
-  @override
-  String get promptBlockLibrary_invalidGenerationSettings =>
-      '설정을 확인하세요: 스텝 1–50, 프롬프트 가이던스 1–20, 프롬프트 가이던스 리스케일 0–1, 모델 호환성.';
-
-  @override
-  String get promptBlockLibrary_applySettings => '설정 가져오기';
 
   @override
   String get promptBlockLibrary_settingsApplied => '블록 설정을 현재 이미지로 가져왔습니다';
@@ -7116,66 +5575,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get promptBlockLibrary_settingsIncompatible =>
       '블록 설정이 대상 모델과 호환되지 않아 매개변수를 가져오지 않았습니다.';
-
-  @override
-  String get promptBlockLibrary_noSettings => '저장된 생성 설정이 없습니다';
-
-  @override
-  String get promptBlockLibrary_tags => '태그';
-
-  @override
-  String get promptBlockLibrary_addTag => '태그 추가';
-
-  @override
-  String get promptBlockLibrary_tagName => '태그 이름';
-
-  @override
-  String get promptBlockLibrary_tagColor => '태그 색상(16진수)';
-
-  @override
-  String get promptBlockLibrary_duplicateTag => '이 블록에 같은 이름의 태그가 이미 있습니다';
-
-  @override
-  String get promptBlockLibrary_invalidTagColor => '올바른 16진수 색상을 입력하세요';
-
-  @override
-  String get pillCard_rollScope => '변화 범위';
-
-  @override
-  String get pillCard_positiveScope => '프롬프트';
-
-  @override
-  String get pillCard_negativeScope => '네거티브';
-
-  @override
-  String get promptBlockLibrary_modelResetNotice =>
-      '모델을 바꾼 뒤 지원하지 않는 값을 지웠습니다.';
-
-  @override
-  String get promptBlockLibrary_atomInputHint =>
-      '텍스트를 입력하고 Enter를 눌러 아톰으로 만드세요';
-
-  @override
-  String get promptBlockLibrary_atomRestoreHint => '클릭하면 편집 가능한 텍스트로 되돌립니다';
-
-  @override
-  String get promptBlockLibrary_atomOrphan => '알 수 없는 표시';
-
-  @override
-  String get promptBlockLibrary_atomEditorTutorial =>
-      'Enter로 블록을 만들고, 블록을 클릭하면 텍스트로 되돌립니다. 저장할 때 블록이 아닌 텍스트는 아톰으로 바뀝니다.';
-
-  @override
-  String get promptBlockLibrary_color => '색상';
-
-  @override
-  String get promptBlockLibrary_icon => '아이콘';
-
-  @override
-  String get promptBlockLibrary_saved => '저장했습니다';
-
-  @override
-  String get promptBlockLibrary_copied => '내용을 복사했습니다';
 
   @override
   String get promptBlockLibrary_deleted => '삭제했습니다';
@@ -7198,40 +5597,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockLibrary_clearSelection => '선택 해제';
 
   @override
-  String get promptBlockLibrary_moveTo => '이동…';
-
-  @override
-  String get promptBlockLibrary_moveToFolderTitle => '폴더로 이동';
-
-  @override
-  String promptBlockLibrary_deleteBlocksConfirm(int count) {
-    return '선택한 블록 $count개를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.';
-  }
-
-  @override
-  String promptBlockLibrary_deleteSelected(int count) {
-    return '선택한 블록 $count개 삭제';
-  }
-
-  @override
   String get promptBlockLibrary_empty => '아직 프롬프트 블록이 없습니다';
 
   @override
-  String get promptBlockLibrary_emptyFolder => '이 폴더는 비어 있습니다';
-
-  @override
   String get promptBlockLibrary_noSearchResults => '일치하는 블록이 없습니다';
-
-  @override
-  String get promptBlockLibrary_tryDifferentSearch => '다른 검색어를 사용해 보세요';
-
-  @override
-  String get promptBlockLibrary_emptyHint => '블록을 만들어 재사용할 텍스트를 정리해 보세요';
-
-  @override
-  String promptBlockLibrary_loadFailed(String error) {
-    return '프롬프트 블록을 불러오지 못했습니다: $error';
-  }
 
   @override
   String promptBlockLibrary_deleteFolderTitle(Object name) {
@@ -7259,19 +5628,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '폴더 트리 안의 모든 블록도 영구 삭제됩니다.';
 
   @override
-  String get promptBlockLibrary_importExport => '가져오기 / 내보내기';
-
-  @override
-  String get promptBlockLibrary_importTxtFiles => 'TXT 파일 가져오기';
-
-  @override
-  String get promptBlockLibrary_importFromFolder => '폴더에서 가져오기…';
-
-  @override
   String get promptBlockLibrary_exportLibraryBackup => '라이브러리 백업 내보내기…';
-
-  @override
-  String get promptBlockLibrary_importLibraryBackup => '라이브러리 백업 가져오기…';
 
   @override
   String get promptBlockLibrary_importTxtTitle => 'TXT 파일 선택';
@@ -7327,24 +5684,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptBlockLibrary_curationLocalModified => '로컬에서 수정됨';
 
   @override
-  String promptBlockLibrary_libraryBackupDone(int count) {
-    return '블록 $count개가 담긴 백업을 내보냈습니다';
-  }
-
-  @override
   String get promptBlockLibrary_libraryImportTitle => '라이브러리 백업 선택';
-
-  @override
-  String get promptBlockLibrary_libraryBackupInvalid => '올바른 블록 라이브러리 백업이 아닙니다';
-
-  @override
-  String promptBlockLibrary_libraryImportDone(
-    int blocks,
-    int folders,
-    int skipped,
-  ) {
-    return '블록 $blocks개와 폴더 $folders개를 가져오고 기존 항목 $skipped개를 건너뛰었습니다';
-  }
 
   @override
   String promptBlockLibrary_importFailed(String error) {
@@ -7356,15 +5696,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importedAt => '가져온 시간';
-
-  @override
-  String get promptBlockLibrary_listView => '목록 보기';
-
-  @override
-  String get promptBlockLibrary_gridView => '그리드 보기';
-
-  @override
-  String get promptBlockLibrary_waterfallView => '폭포형 보기';
 
   @override
   String get promptBlockPalette_tooltip => '블록';
@@ -7388,43 +5719,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get promptBlockLibrary_sortBy => '정렬 기준';
-
-  @override
-  String get promptBlockLibrary_sortCustom => '기본(수동 순서)';
-
-  @override
-  String get promptBlockLibrary_sortUpdated => '마지막 수정';
-
-  @override
-  String get promptBlockLibrary_sortTitle => '제목';
-
-  @override
-  String get promptBlockLibrary_sortColor => '색상';
-
-  @override
-  String get promptBlockLibrary_sortIcon => '아이콘';
-
-  @override
-  String get promptBlockLibrary_sortAscending => '오름차순';
-
-  @override
-  String get promptBlockLibrary_sortDescending => '내림차순';
-
-  @override
-  String get promptBlockLibrary_cardSize => '카드 크기';
-
-  @override
-  String get promptBlockLibrary_reorderFolders => '폴더 순서 변경';
-
-  @override
   String get nav_styleExplore => '스타일 탐색';
-
-  @override
-  String get styleExplore_rename => '이름 변경';
-
-  @override
-  String get styleExplore_nameRequired => '이름은 비워 둘 수 없습니다';
 
   @override
   String get styleExplore_operationFailed => '작업에 실패했습니다';
@@ -7440,112 +5735,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '계속하고 버리기';
 
   @override
-  String get styleExplore_newRun => '새 탐색';
-
-  @override
-  String styleExplore_runDeleted(String name) {
-    return '탐색 “$name” 삭제됨';
-  }
-
-  @override
-  String get styleExplore_runStatusGenerating => '생성 중';
-
-  @override
-  String get styleExplore_runStatusPaused => '일시 정지됨';
-
-  @override
-  String get styleExplore_runStatusCancelled => '취소됨';
-
-  @override
-  String get styleExplore_pauseRun => '일시 정지';
-
-  @override
-  String get styleExplore_cancelRun => '탐색 취소';
-
-  @override
-  String styleExplore_retryFailed(int count) {
-    return '실패 항목 다시 시도($count)';
-  }
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '수동 수집 $time';
   }
 
   @override
   String get styleExplore_runBusy => '생성 중입니다. 잠시 후 다시 시도하세요';
-
-  @override
-  String get styleExplore_deleteRunTitle => '탐색 삭제';
-
-  @override
-  String styleExplore_deleteRunMessage(String name) {
-    return '\"$name\"과(와) 후보 이미지 사본을 삭제합니다. 갤러리의 원본 이미지는 영향을 받지 않습니다.';
-  }
-
-  @override
-  String get styleExplore_cancelRunTitle => '탐색 취소';
-
-  @override
-  String get styleExplore_cancelRunMessage =>
-      '취소한 탐색은 재시작할 수 없으며 대기 중인 후보도 취소됩니다.';
-
-  @override
-  String get styleExplore_filterAll => '전체';
-
-  @override
-  String get styleExplore_filterHearted => '즐겨찾기';
-
-  @override
-  String get styleExplore_renameFolder => '그룹 이름 변경';
-
-  @override
-  String get styleExplore_deleteFolder => '그룹 삭제';
-
-  @override
-  String styleExplore_deleteFolderMessage(String name) {
-    return '“$name” 그룹을 삭제합니다. 후보는 미분류로 돌아가며 이미지는 유지됩니다.';
-  }
-
-  @override
-  String get styleExplore_folderNameLabel => '그룹 이름';
-
-  @override
-  String get styleExplore_deleteFamily => '진화 라인 삭제';
-
-  @override
-  String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '“$name” 진화 라인과 모든 부모 및 자손 기록(이미지 $count장)을 삭제합니다. 이미지 파일은 유지됩니다.';
-  }
-
-  @override
-  String get styleExplore_familyBusy =>
-      '이 진화 라인에 생성 중인 후보가 있습니다. 먼저 생성을 중지하세요.';
-
-  @override
-  String get styleExplore_folderUncategorized => '미분류';
-
-  @override
-  String styleExplore_folderCreated(String name) {
-    return '“$name” 그룹 생성됨';
-  }
-
-  @override
-  String get styleExplore_candidateMissing => '이미지 파일 없음';
-
-  @override
-  String get styleExplore_candidateDetailTitle => '후보 상세';
-
-  @override
-  String get styleExplore_prevCandidate => '이전';
-
-  @override
-  String get styleExplore_nextCandidate => '다음';
-
-  @override
-  String styleExplore_roundNumber(int number) {
-    return '$number라운드';
-  }
 
   @override
   String styleExplore_adoptBlockSaved(String name) {
@@ -7557,43 +5752,13 @@ class AppLocalizationsKo extends AppLocalizations {
       '선택한 후보에 저장할 작가 조합이나 긍정 프롬프트가 없습니다';
 
   @override
-  String get styleExplore_deleteImage => '이미지 삭제';
-
-  @override
-  String get styleExplore_deleteImageTitle => '후보 이미지 삭제';
-
-  @override
-  String get styleExplore_deleteImageMessage =>
-      '후보의 이미지 사본과 기록을 삭제합니다. 라이브러리 원본은 유지됩니다.';
-
-  @override
-  String get styleExplore_deleteImageDone => '후보 이미지와 기록을 삭제했습니다';
-
-  @override
-  String get styleExplore_selectCandidates => '선택';
-
-  @override
-  String styleExplore_selectedCount(int count) {
-    return '$count개 선택됨';
-  }
-
-  @override
   String get promptBlockEditor_library => '블록 라이브러리';
 
   @override
   String get promptBlockPicker_title => '블록 선택';
 
   @override
-  String get promptBlockLibrary_thumbnail => '썸네일';
-
-  @override
-  String get promptBlockLibrary_selectNewImage => '새 이미지 선택';
-
-  @override
   String get promptBlockLibrary_selectImage => '이미지 선택';
-
-  @override
-  String get promptBlockLibrary_adjustDisplayRange => '표시 범위 조정';
 
   @override
   String get promptBlockLibrary_adjustThumbnailTitle => '썸네일 표시 범위 조정';
@@ -7634,61 +5799,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get promptBlockLibrary_updateExistingThumbnailSubtitle =>
       '블록을 골라 썸네일을 교체합니다';
-
-  @override
-  String styleExplore_deepRoundCountHint(int min) {
-    return '최소 $min장(각 부모당 1장 보장)';
-  }
-
-  @override
-  String get styleExplore_deepRoundNoInstance =>
-      '메인 프롬프트에 활성 유전 무작위 블록이 없어 자손을 생성할 수 없습니다';
-
-  @override
-  String get styleExplore_deepRoundEmpty => '서로 다른 자손 작가 조합을 충분히 만들 수 없습니다';
-
-  @override
-  String get styleExplore_sortLeft => '왼쪽이 더 좋음';
-
-  @override
-  String get styleExplore_sortRight => '오른쪽이 더 좋음';
-
-  @override
-  String get styleExplore_sortNeither => '둘 다 별로';
-
-  @override
-  String get styleExplore_sortSkip => '건너뛰기';
-
-  @override
-  String styleExplore_sortProgress(int current, int total) {
-    return '$current / $total 쌍';
-  }
-
-  @override
-  String get styleExplore_sortDone => '쌍별 비교 완료';
-
-  @override
-  String styleExplore_branchCreated(int count) {
-    return '다음 세대 육성됨(부모 $count개)';
-  }
-
-  @override
-  String get styleExplore_branchNeedLatest => '최신 세대의 자손으로 다음 세대를 육성하세요';
-
-  @override
-  String get styleExplore_branchRoundsIncomplete =>
-      '현재 세대에 미완성 자손이 있습니다. 기다리거나 생성을 중지하세요';
-
-  @override
-  String get styleExplore_branchDuplicate => '선택한 자식이 1세대 부모 문자열과 같습니다';
-
-  @override
-  String get styleExplore_branchEmpty => '자식 후보를 하나 이상 선택하세요';
-
-  @override
-  String styleExplore_pileManageDeleteDone(int count) {
-    return '후보 $count개와 이미지 사본을 삭제했습니다';
-  }
 
   @override
   String subscriptionExpiresOn(String date) {
@@ -8808,19 +6918,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '새 로그인 토큰을 입력하세요. 확인되면 이 계정이 업데이트됩니다.';
 
   @override
-  String get auth_signInAccounts => '로그인 및 계정';
-
-  @override
   String get auth_notSignedIn => '로그인하지 않음';
-
-  @override
-  String get auth_chooseAccountContinue => '계속하려면 계정을 선택하세요';
-
-  @override
-  String get auth_manageAccounts2 => '계정 관리';
-
-  @override
-  String get auth_subscriptionExpired => '구독 만료됨';
 
   @override
   String get settings_tagExpansion => '태그 확장';
@@ -9398,13 +7496,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get translationLanguage_traditionalChinese => '중국어 번체';
-
-  @override
-  String get promptBlockEditor_translationNeedsReview =>
-      '원문이 바뀌었습니다. 번역을 업데이트해야 합니다';
-
-  @override
-  String get promptBlockEditor_translationReviewHint => '원문을 편집한 뒤 이 번역도 검토하세요';
 
   @override
   String get modelTask_translateTitle => '원문 → 읽기 언어';
@@ -10711,88 +8802,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get wiki_configureTagModel => '먼저 모델 및 API에서 사용할 태그 번역 모델을 설정하세요.';
 
   @override
-  String get blockOrganizer_barrierLabel => '블록 정리';
-
-  @override
-  String get blockOrganizer_replaceTitle => '같은 소스의 사본을 교체하시겠습니까?';
-
-  @override
   String blockOrganizer_replaceMoveBody(Object count) {
     return '대상에 같은 소스의 사본이 이미 $count개 있습니다. 교체하면 소스는 라이브러리에서 숨겨지며, 프롬프트에 이미 삽입된 인스턴스는 원래 블록을 계속 참조할 수 있습니다.';
-  }
-
-  @override
-  String blockOrganizer_replaceCopyBody(Object count) {
-    return '대상에 같은 소스의 사본이 이미 $count개 있습니다. 교체하면 대상 사본이 업데이트되고 소스는 유지됩니다.';
-  }
-
-  @override
-  String get blockOrganizer_replace => '교체';
-
-  @override
-  String get blockOrganizer_customTagColor => '사용자 지정 태그 색상';
-
-  @override
-  String get blockOrganizer_colorHint => '#RRGGBB 또는 #AARRGGBB';
-
-  @override
-  String get blockOrganizer_invalidColor => '6자리 또는 8자리 16진수 색상을 입력하세요';
-
-  @override
-  String blockOrganizer_deleteFolderConfirm(Object name) {
-    return '\"$name\"을(를) 삭제하시겠습니까? 안의 블록은 루트 폴더로 이동합니다.';
-  }
-
-  @override
-  String blockOrganizer_deleteCollectionConfirm(Object name) {
-    return '\"$name\"을(를) 삭제하시겠습니까? 블록 자체는 유지됩니다.';
-  }
-
-  @override
-  String get blockOrganizer_titleFavorites => '즐겨찾기 및 컬렉션';
-
-  @override
-  String get blockOrganizer_titleFolders => '폴더 선택';
-
-  @override
-  String blockOrganizer_itemCount(Object count) {
-    return '$count개 항목';
-  }
-
-  @override
-  String get blockOrganizer_search => '검색';
-
-  @override
-  String get blockOrganizer_name => '이름';
-
-  @override
-  String get blockOrganizer_customColor => '사용자 지정 색상…';
-
-  @override
-  String get blockOrganizer_newCollection => '새 컬렉션';
-
-  @override
-  String get blockOrganizer_newCollectionFolder => '새 컬렉션 폴더';
-
-  @override
-  String get blockOrganizer_newTag => '새 태그';
-
-  @override
-  String get blockOrganizer_newFolder => '새 폴더';
-
-  @override
-  String get blockOrganizer_rootUncategorized => '루트 / 미분류';
-
-  @override
-  String get blockOrganizer_manageDrag => '관리, 끌어서 순서 변경';
-
-  @override
-  String get blockLibrary_dragSelectedHint =>
-      '선택한 블록을 왼쪽의 즐겨찾기나 폴더로 끌어 놓은 뒤, 놓을 때 복사 또는 이동을 선택하세요.';
-
-  @override
-  String blockLibrary_blockCount(Object count) {
-    return '블록 $count개';
   }
 
   @override
@@ -10811,12 +8822,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get blockLibrary_collectionMissing => '컬렉션이 존재하지 않습니다';
-
-  @override
-  String get promptBlockEditor_appearance => '블록 외관';
-
-  @override
-  String get promptBlockEditor_imageUnreadable => '선택한 이미지를 읽을 수 없습니다';
 
   @override
   String get blockAppearance_classic => '기본';
@@ -11278,14 +9283,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String gallery_galleryInitFailed(Object error) {
     return '갤러리를 초기화하지 못했습니다: $error';
   }
-
-  @override
-  String vibeImport_imageProgress(Object current, Object total, Object source) {
-    return '이미지 가져오는 중($current/$total): $source';
-  }
-
-  @override
-  String get vibeImport_clipboardSource => '클립보드';
 
   @override
   String get resolution_noAdjustment => '조정할 필요 없음';
@@ -11934,11 +9931,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get generation_paramsDrawerTooltip => '추가 매개변수';
 
   @override
-  String generation_historyBatchCount(int count) {
-    return '$count장';
-  }
-
-  @override
   String get library_sizeSmall => '작게';
 
   @override
@@ -11971,41 +9963,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get library_more => '더 보기';
 
   @override
-  String get library_addToGeneration => '생성에 추가';
-
-  @override
-  String get library_strength => '강도';
-
-  @override
-  String get library_information => '정보';
-
-  @override
-  String get library_fidelity => '충실도';
-
-  @override
-  String get library_encodeOnUse => '사용 시 인코딩';
-
-  @override
-  String get library_reencode => '재인코딩 필요';
-
-  @override
-  String library_unusableModel(String model) {
-    return '$model에서 사용 불가';
-  }
-
-  @override
-  String get library_exportAll => '모두 내보내기';
-
-  @override
-  String get library_rescanFolders => '폴더 다시 스캔';
-
-  @override
-  String get library_preview => '미리 보기';
-
-  @override
-  String get viewer_backLocalGallery => '로컬 갤러리';
-
-  @override
   String get viewer_fit => '맞춤';
 
   @override
@@ -12024,118 +9981,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_toggle_info_panel => '정보 패널 전환';
 
   @override
-  String get styleExplore_runNamingHint =>
-      '자동 이름: 랜덤 블록 이름 + 날짜. 이름을 두 번 클릭하여 변경';
-
-  @override
-  String styleExplore_roundGenerating(int round) {
-    return '$round 라운드 · 생성 중';
-  }
-
-  @override
-  String get styleExplore_inspectorTitle => '상세';
-
-  @override
-  String styleExplore_failedBadge(int count) {
-    return '실패 $count';
-  }
-
-  @override
-  String get styleExplore_showInspector => '상세 패널 펼치기';
-
-  @override
-  String styleExplore_roundProgress(int round, int current, int total) {
-    return '$round 라운드 · $current / $total';
-  }
-
-  @override
-  String get styleExplore_earlier => '이전';
-
-  @override
-  String get styleExplore_noMatchingRuns => '일치하는 탐색이 없습니다';
-
-  @override
-  String styleExplore_lineCount(int count) {
-    return '$count 진화 계통';
-  }
-
-  @override
-  String get styleExplore_newRunDescription => '현재 프롬프트와 설정으로 시작하고 이름은 나중에 변경';
-
-  @override
   String styleExplore_autoRunName(String blocks, String time) {
     return '$blocks · $time';
   }
-
-  @override
-  String get styleExplore_largeCandidates => '큰 후보 이미지';
-
-  @override
-  String get styleExplore_hideInspector => '상세 패널 접기';
-
-  @override
-  String get styleExplore_searchRuns => '탐색 이름 또는 작가 검색';
-
-  @override
-  String styleExplore_favoriteCount(int count) {
-    return '즐겨찾기 $count';
-  }
-
-  @override
-  String styleExplore_generatingBadge(int current, int total) {
-    return '생성 중 $current/$total';
-  }
-
-  @override
-  String styleExplore_roundCount(int count) {
-    return '$count 라운드';
-  }
-
-  @override
-  String styleExplore_pausedRemaining(int count) {
-    return '일시 정지 · $count장 남음';
-  }
-
-  @override
-  String get styleExplore_stopRun => '생성 중지';
-
-  @override
-  String get styleExplore_thisWeek => '이번 주';
-
-  @override
-  String get styleExplore_today => '오늘';
-
-  @override
-  String get styleExplore_smallCandidates => '작은 후보 이미지';
-
-  @override
-  String styleExplore_imageCount(int count) {
-    return '$count장';
-  }
-
-  @override
-  String get styleExplore_variablesTitle => '무작위 변수';
-
-  @override
-  String get styleExplore_variablesHint => '이미지마다 다시 추출';
-
-  @override
-  String get styleExplore_variablesExplanation =>
-      '활성화된 무작위·순차 진화 블록의 추출 내용을 후보마다 기록합니다.';
-
-  @override
-  String styleExplore_variablePoolSize(int count) {
-    return '풀 $count개';
-  }
-
-  @override
-  String get styleExplore_variableEvolutionTarget => '진화 대상';
-
-  @override
-  String get styleExplore_variableNegative => '부정';
-
-  @override
-  String get styleExplore_variablesEmpty => '프롬프트에 무작위 블록이 없어 후보가 비슷하게 나옵니다.';
 
   @override
   String get styleExplore_openBlockLibrary => '블록 라이브러리 열기';
@@ -12147,503 +9995,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get styleExplore_drawCountSuffix => '장 · 한 장씩 생성';
 
   @override
-  String get styleExplore_candidatesTab => '후보';
-
-  @override
-  String get styleExplore_evolutionTab => '진화';
-
-  @override
-  String styleExplore_deepRoundTitle(String name, int generation) {
-    return '진화 · $name $generation세대';
-  }
-
-  @override
-  String styleExplore_wallRoundCount(int count) {
-    return '$count장';
-  }
-
-  @override
-  String get styleExplore_wallGenerating => '생성 중';
-
-  @override
-  String styleExplore_roundFailures(int count) {
-    return '실패 $count';
-  }
-
-  @override
-  String styleExplore_queued(int number) {
-    return '대기 #$number';
-  }
-
-  @override
-  String styleExplore_generatingCandidate(int number) {
-    return '생성 중 #$number';
-  }
-
-  @override
-  String get styleExplore_generationFailed => '생성 실패';
-
-  @override
-  String get styleExplore_failureHint => '마우스를 올려 원인 확인';
-
-  @override
-  String get styleExplore_imageDeleted => '이미지 삭제됨';
-
-  @override
-  String get styleExplore_parentBadge => '부모';
-
-  @override
-  String get styleExplore_opMutation => '변이';
-
-  @override
-  String get styleExplore_opCrossover => '교차';
-
-  @override
-  String get styleExplore_opInjection => '주입';
-
-  @override
-  String get styleExplore_copyArtists => '작가 문자열 복사';
-
-  @override
-  String get styleExplore_interrupted => '중단됨';
-
-  @override
-  String get styleExplore_emptyFilter => '필터와 일치하는 후보가 없습니다';
-
-  @override
-  String get styleExplore_emptyRound => '이 라운드에는 후보가 없습니다';
-
-  @override
-  String get styleExplore_unfavorite => '즐겨찾기 해제';
-
-  @override
-  String get styleExplore_groupLabel => '그룹';
-
-  @override
-  String get styleExplore_newGroup => '새 그룹…';
-
-  @override
-  String get styleExplore_saveBlock => '블록으로 저장';
-
-  @override
-  String get styleExplore_startEvolution => '진화 시작';
-
-  @override
-  String get styleExplore_newestFirst => '최신 라운드 먼저';
-
-  @override
-  String get styleExplore_oldestFirst => '오래된 라운드 먼저';
-
-  @override
-  String get styleExplore_pickEvolution => '진화할 후보 선택';
-
-  @override
-  String get styleExplore_deleteCandidatesTitle => '후보 삭제';
-
-  @override
-  String styleExplore_deleteCandidatesMessage(int count) {
-    return '후보 $count개와 이미지 복사본을 삭제할까요? 라이브러리 원본은 유지됩니다.';
-  }
-
-  @override
-  String get styleExplore_inspectorEmpty => '후보를 선택하여 자세히 보기';
-
-  @override
-  String get styleExplore_drawsTitle => '이 이미지의 추출 결과';
-
-  @override
-  String get styleExplore_drawsAfterGeneration => '생성이 완료되면 표시';
-
-  @override
-  String get styleExplore_emptyDraw => '이번에는 빈 항목이 선택되었습니다';
-
-  @override
-  String get styleExplore_hearted => '즐겨찾기됨';
-
-  @override
-  String get styleExplore_joinEvolution => '진화에 추가';
-
-  @override
-  String get styleExplore_applyToEditor => '편집기에 적용';
-
-  @override
-  String get styleExplore_seedName => '시드';
-
-  @override
-  String get styleExplore_elapsedName => '소요 시간';
-
-  @override
-  String get styleExplore_parameters => '매개변수';
-
-  @override
-  String get styleExplore_modelName => '모델';
-
-  @override
-  String get styleExplore_fullPrompt => '전체 프롬프트';
-
-  @override
-  String get styleExplore_mergedArtists => '합쳐진 작가 (중복 제거)';
-
-  @override
-  String get styleExplore_selectionExplanation =>
-      '블록 저장은 하나로 합치고, 진화는 각 이미지의 작가 문자열을 부모로 사용합니다.';
-
-  @override
-  String get styleExplore_quickGroupHint => '1–9로 빠르게 분류';
-
-  @override
-  String get styleExplore_newGroupChip => '새 그룹';
-
-  @override
-  String styleExplore_parameterSummary(
-    int width,
-    int height,
-    int steps,
-    String scale,
-  ) {
-    return '$width×$height · $steps 단계 · $scale';
-  }
-
-  @override
-  String get styleExplore_viewerBack => '화풍 탐색';
-
-  @override
-  String styleExplore_viewerPosition(int index, int total) {
-    return '$index장 / 총 $total장';
-  }
-
-  @override
-  String get styleExplore_viewerGroupsShortcut => '1–9: 분류, 0: 분류 해제';
-
-  @override
-  String get styleExplore_seedClickCopy => '시드 (클릭하여 복사)';
-
-  @override
   String get styleExplore_appliedToEditor => '편집기에 적용됨';
-
-  @override
-  String styleExplore_generationNumber(int index) {
-    return '$index세대';
-  }
-
-  @override
-  String get styleExplore_currentGeneration => '현재';
-
-  @override
-  String styleExplore_generationStart(int count) {
-    return '후보 $count장으로 시작';
-  }
-
-  @override
-  String styleExplore_generationSource(int index, int count, int roots) {
-    return '$index세대에서 $count장 선택 + 1세대 $roots장 역교배';
-  }
-
-  @override
-  String get styleExplore_parentsByPreference => '부모 · 선호도순';
-
-  @override
-  String get styleExplore_backcross => '역교배';
-
-  @override
-  String styleExplore_childrenCount(int count) {
-    return '자손 · $count';
-  }
-
-  @override
-  String styleExplore_breedSelected(int count, int index) {
-    return '선택한 $count장으로 $index세대 육성';
-  }
-
-  @override
-  String get styleExplore_generationBusy => '이 세대는 아직 생성 중입니다';
-
-  @override
-  String get styleExplore_regeneratePrefix => '다시 생성';
-
-  @override
-  String get styleExplore_regenerateSuffix => '자손';
-
-  @override
-  String get styleExplore_pairCompare => '쌍 비교로 순위 지정';
-
-  @override
-  String get styleExplore_howToUse => '사용 방법';
-
-  @override
-  String get styleExplore_helpParents =>
-      '부모는 선택한 작가 조합입니다. 선호도가 높을수록 조합에 참여할 가능성이 높습니다.';
-
-  @override
-  String get styleExplore_helpChildren =>
-      '자손은 부모 교차, 변이 또는 작가 풀에서 새 작가를 주입하여 만들어집니다.';
-
-  @override
-  String get styleExplore_helpCompare => '쌍 비교는 부모 선호도를 갱신하여 이후 조합에 반영합니다.';
-
-  @override
-  String get styleExplore_helpBackcross =>
-      '다음 세대를 육성할 때 1세대 부모가 역교배에 자동으로 포함됩니다.';
-
-  @override
-  String get styleExplore_originTitle => '생성 과정';
-
-  @override
-  String get styleExplore_originCross => '이 부모들의 작가를 교차 조합했습니다';
-
-  @override
-  String get styleExplore_originMutation => '부모 조합의 일부 작가를 교체했습니다';
-
-  @override
-  String get styleExplore_originInjection => '풀에서 새 작가를 주입했습니다';
-
-  @override
-  String get styleExplore_newArtist => '신규';
-
-  @override
-  String get styleExplore_evolutionEmpty => '후보에서 마음에 드는 이미지를 골라 진화 라인을 시작하세요';
-
-  @override
-  String get styleExplore_pickFromCandidates => '후보 고르기';
-
-  @override
-  String styleExplore_generationSummary(
-    int parents,
-    int children,
-    int selected,
-  ) {
-    return '부모 $parents장 · 자손 $children장 · 다음 세대에 $selected장 선택';
-  }
-
-  @override
-  String get styleExplore_breedNext => '다음 세대 육성';
-
-  @override
-  String get styleExplore_optionalName => '이름 (선택 사항)';
-
-  @override
-  String get styleExplore_childrenEmpty => '아직 자손이 없습니다. 위에서 한 묶음을 생성하세요.';
-
-  @override
-  String get styleExplore_evolutionStepOne => '부모 작가를 섞어 자손 생성';
-
-  @override
-  String get styleExplore_evolutionStepTwo => '쌍별 비교로 선호도 전달';
-
-  @override
-  String get styleExplore_evolutionStepThree => '좋은 자손을 골라 다음 세대 육성';
-
-  @override
-  String get styleExplore_evolutionNewLine => '새 진화 계통';
-
-  @override
-  String styleExplore_evolutionJoinLine(String name) {
-    return '“$name”의 현재 세대에 추가';
-  }
-
-  @override
-  String get styleExplore_evolutionName => '진화 계통 이름';
-
-  @override
-  String styleExplore_defaultEvolutionName(int n) {
-    return '진화 계통 $n';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => '사용자 지정 작가 문자열 추가';
-
-  @override
-  String get styleExplore_evolutionCustomHint => '작가 문자열 입력';
-
-  @override
-  String get styleExplore_evolutionParentEmpty => '사용 가능한 작가 문자열 없음';
-
-  @override
-  String get styleExplore_evolutionTarget => '자손은 프롬프트의';
-
-  @override
-  String get styleExplore_evolutionOnlyCreate => '생성만';
-
-  @override
-  String get styleExplore_evolutionOnlyJoin => '추가만';
-
-  @override
-  String styleExplore_evolutionCreateGenerate(int count) {
-    return '생성 후 $count장 생성';
-  }
-
-  @override
-  String styleExplore_evolutionJoinGenerate(int count) {
-    return '추가 후 $count장 생성';
-  }
-
-  @override
-  String get styleExplore_evolutionFirstBatch => '첫 자손 묶음';
-
-  @override
-  String styleExplore_evolutionMinimum(int count) {
-    return '장 (최소 $count)';
-  }
-
-  @override
-  String styleExplore_evolutionCreated(String name) {
-    return '진화 계통 “$name” 생성됨';
-  }
-
-  @override
-  String styleExplore_evolutionJoined(String name) {
-    return '진화 계통 “$name”에 추가됨';
-  }
-
-  @override
-  String get styleExplore_sortLiveSave => '결과는 즉시 저장되며 언제든 닫을 수 있습니다';
-
-  @override
-  String get styleExplore_sortRanking => '현재 순위 · 실시간';
-
-  @override
-  String get styleExplore_sortRankingHint =>
-      '순위는 다음 자손 묶음에서 각 부모가 선택될 확률에 영향을 줍니다';
-
-  @override
-  String get styleExplore_sortSpace => 'Space';
-
-  @override
-  String styleExplore_saveSingleSubtitle(int n) {
-    return '#$n의 작가를 하나의 블록으로 저장';
-  }
-
-  @override
-  String styleExplore_saveManySubtitle(int count) {
-    return '후보 $count장의 작가를 하나의 라이브러리 블록으로 합칩니다';
-  }
-
-  @override
-  String get styleExplore_saveArtistsOnly => '추출된 작가만';
-
-  @override
-  String get styleExplore_saveFullPositive => '전체 긍정 프롬프트';
-
-  @override
-  String get styleExplore_saveNoDraws => '긍정 유전 추출 기록이 없어 전체 긍정 프롬프트를 저장합니다';
-
-  @override
-  String get styleExplore_saveContent => '내용';
-
-  @override
-  String get styleExplore_saveRemoveAtoms => '×를 눌러 원하지 않는 작가 제거';
-
-  @override
-  String styleExplore_saveRemoved(int count) {
-    return '$count개 제거됨';
-  }
-
-  @override
-  String get styleExplore_saveRestore => '복원';
-
-  @override
-  String get styleExplore_saveName => '이름';
-
-  @override
-  String get styleExplore_saveColor => '색상';
-
-  @override
-  String get styleExplore_saveIcon => '아이콘';
-
-  @override
-  String get styleExplore_saveFolder => '라이브러리 폴더';
-
-  @override
-  String get styleExplore_saveRoot => '루트';
-
-  @override
-  String get styleExplore_saveHint => '저장한 블록을 라이브러리에서 프롬프트로 끌어올 수 있습니다';
-
-  @override
-  String get styleExplore_onboardingTitle => '무작위 블록으로 화풍 탐색';
-
-  @override
-  String get styleExplore_onboardingRandomTitle => '무작위 블록 추가';
-
-  @override
-  String get styleExplore_onboardingDrawTitle => '후보 묶음 추출';
 
   @override
   String styleExplore_onboardingDraw(int count) {
     return '후보 $count장 추출';
   }
-
-  @override
-  String get styleExplore_onboardingReviewTitle => '즐겨찾기, 비교, 진화';
-
-  @override
-  String get styleExplore_onboardingOpenPrevious => '이전 탐색 열기';
-
-  @override
-  String get styleExplore_onboardingSubtitle =>
-      '이미지마다 랜덤 블록에서 작가를 다시 추첨합니다. 마음에 드는 이미지를 고르세요';
-
-  @override
-  String get styleExplore_onboardingRandomDescription =>
-      '프롬프트에 작가 풀을 넣으세요. 감지된 랜덤 변수는 왼쪽에 표시됩니다.';
-
-  @override
-  String styleExplore_onboardingDrawDescription(int count) {
-    return '왼쪽 아래의 “후보 $count장 생성”을 누르세요. 각 이미지 아래에 추첨된 작가가 표시됩니다.';
-  }
-
-  @override
-  String get styleExplore_onboardingReviewDescription =>
-      'F로 즐겨찾기하고 몇 장을 선택해 진화하세요. 좋은 작가 조합을 다음 세대로 이어갑니다.';
-
-  @override
-  String styleExplore_onboardingDetected(int count) {
-    return '$count개 감지됨';
-  }
-
-  @override
-  String get styleExplore_compareTitle => '일대일 비교 · 부모 순위';
-
-  @override
-  String get styleExplore_compareQuestion => '어느 이미지가 원하는 화풍에 더 가까운가요?';
-
-  @override
-  String styleExplore_childLabel(int index) {
-    return '자식 #$index';
-  }
-
-  @override
-  String styleExplore_generationCounts(int parents, int children) {
-    return '부모 $parents개 → 자식 $children개';
-  }
-
-  @override
-  String get styleExplore_viewLarge => '크게 보기';
-
-  @override
-  String get styleExplore_saveDialogTitle => '프롬프트 블록으로 저장';
-
-  @override
-  String styleExplore_startDialogTitle(int count) {
-    return '후보 $count개로 진화 시작';
-  }
-
-  @override
-  String get styleExplore_stepGenerate => '자손 생성';
-
-  @override
-  String get styleExplore_stepPick => '좋은 후보 선택';
-
-  @override
-  String get styleExplore_stepBreed => '다음 세대 육성';
-
-  @override
-  String styleExplore_firstGenerationParents(int count) {
-    return '1세대 부모 · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionTargetAfter => '위치를 교체하고 나머지 내용은 유지합니다';
 
   @override
   String get stats_title => '통계';
@@ -17631,11 +14988,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_variations => '변형';
 
   @override
-  String gen_variationsCost(Object cost) {
-    return '변형 ($cost Anlas)';
-  }
-
-  @override
   String get gen_upscale => '업스케일';
 
   @override
@@ -18679,4 +16031,527 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get tools_emoPlayful => '장난';
+
+  @override
+  String get auth_logoutConfirm => '현재 계정에서 로그아웃하시겠습니까?';
+
+  @override
+  String get naiAgent_title => 'NAI Agent';
+
+  @override
+  String get naiAgent_local => '로컬';
+
+  @override
+  String get naiAgent_permissionMode => '승인 모드';
+
+  @override
+  String get naiAgent_permissionAuto => '자동';
+
+  @override
+  String get naiAgent_permissionAsk => '확인';
+
+  @override
+  String get naiAgent_permissionReadOnly => '읽기 전용';
+
+  @override
+  String get naiAgent_permissionAutoHint =>
+      '일반 작업 공간 편집은 자동 실행합니다. 명령, 삭제 및 알 수 없는 도구는 승인이 필요하며 이미지 생성 확인도 유지합니다.';
+
+  @override
+  String get naiAgent_permissionAskHint =>
+      '작업 공간 읽기는 바로 실행합니다. 편집, 명령 및 알 수 없는 도구는 매번 승인하며 이미지 생성은 비용 확인을 거칩니다.';
+
+  @override
+  String get naiAgent_permissionReadOnlyHint =>
+      '읽기와 대화만 가능하며 편집, 이미지 생성 및 알 수 없는 도구는 차단합니다. 전환 시 Agent 작업만 중지하고 수동 생성은 유지합니다.';
+
+  @override
+  String get naiAgent_useModelSetting => '모델 설정 사용';
+
+  @override
+  String get naiAgent_permissionTitle => '도구 승인이 필요합니다';
+
+  @override
+  String get naiAgent_permissionOnce => '한 번 허용';
+
+  @override
+  String get naiAgent_permissionSession => '이 세션에서 동일한 호출 허용';
+
+  @override
+  String get naiAgent_permissionDeny => '거부';
+
+  @override
+  String get naiAgent_thinking => '사고 강도 · 다음 작업부터 적용';
+
+  @override
+  String get naiAgent_thinkingUnsupported =>
+      '조절 가능한 사고 수준이 확인되지 않았습니다. 먼저 모델 설정을 확인하세요.';
+
+  @override
+  String get naiAgent_pasteImage => '클립보드 이미지 붙여넣기';
+
+  @override
+  String get naiAgent_contextUnknown =>
+      '모델 컨텍스트 한도와 실제 사용량이 확인될 때까지 표시할 수 없습니다.';
+
+  @override
+  String naiAgent_contextTooltip(
+    String percent,
+    String remaining,
+    String window,
+  ) {
+    return '사용 가능한 컨텍스트 $percent%\n남은 토큰 $remaining / $window\n클릭하여 상세 통계 보기';
+  }
+
+  @override
+  String get naiAgent_statistics => '컨텍스트 및 대화 통계';
+
+  @override
+  String get naiAgent_contextUsage => '현재 컨텍스트 사용량 · 추정';
+
+  @override
+  String get naiAgent_contextRemaining => '남은 컨텍스트';
+
+  @override
+  String get naiAgent_contextWindow => '모델 컨텍스트 한도';
+
+  @override
+  String get naiAgent_sessionUsage => '세션 누적 사용량';
+
+  @override
+  String get naiAgent_tokensInput => '입력';
+
+  @override
+  String get naiAgent_tokensOutput => '출력';
+
+  @override
+  String get naiAgent_tokensCacheRead => '캐시 읽기';
+
+  @override
+  String get naiAgent_tokensCacheWrite => '캐시 쓰기';
+
+  @override
+  String get naiAgent_tokensTotal => '누적 토큰';
+
+  @override
+  String get naiAgent_cumulativeUsageHint =>
+      '누적 사용량에는 이전 요청이 포함되며 현재 컨텍스트 크기와 다릅니다.';
+
+  @override
+  String get naiAgent_messageCounts => '대화 기록';
+
+  @override
+  String get naiAgent_userAssistantMessages => '사용자 / 어시스턴트';
+
+  @override
+  String get naiAgent_toolCalls => '도구 호출';
+
+  @override
+  String get naiAgent_cost => '비용';
+
+  @override
+  String get naiAgent_defaultWorkspace => '작업 공간 1';
+
+  @override
+  String get naiAgent_newChat => '새 채팅';
+
+  @override
+  String get naiAgent_settings => 'Agent 설정';
+
+  @override
+  String get naiAgent_workspace => '작업 공간';
+
+  @override
+  String get naiAgent_createWorkspace => '새 작업 공간';
+
+  @override
+  String get naiAgent_rename => '이름 변경';
+
+  @override
+  String get naiAgent_name => '이름';
+
+  @override
+  String get naiAgent_placeholder => '아이디어나 질문을 입력하세요…';
+
+  @override
+  String get naiAgent_welcome => '하나의 아이디어에서 시작';
+
+  @override
+  String get naiAgent_welcomeHint =>
+      '프롬프트를 논의하고 이미지를 분석하며 작업 공간을 정리하세요.\n먼저 이야기를 나눈 뒤 작업을 시작하세요.';
+
+  @override
+  String get naiAgent_suggestCurrent => '현재 초안 확인';
+
+  @override
+  String get naiAgent_suggestImage => '참조 이미지 분석';
+
+  @override
+  String get naiAgent_suggestWorkspace => '작업 공간 정리';
+
+  @override
+  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
+
+  @override
+  String get naiAgent_promptCurrent => '현재 초안과 매개변수를 확인해 주세요. 아직 변경하지 마세요.';
+
+  @override
+  String get naiAgent_promptImage => '현재 이미지의 구도와 화풍을 분석해 주세요. 아직 생성하지 마세요.';
+
+  @override
+  String get naiAgent_promptWorkspace =>
+      '현재 작업 공간을 살펴보고 정리 방법을 제안해 주세요. 아직 변경하지 마세요.';
+
+  @override
+  String get naiAgent_tipTitle => 'TIPS / 도움말';
+
+  @override
+  String get naiAgent_tipNext => '다음 도움말';
+
+  @override
+  String get naiAgent_tipReadOnly => '먼저 \'읽기 전용\' 모드로 살펴본 뒤 변경할 내용을 정하세요.';
+
+  @override
+  String get naiAgent_tipAttachments =>
+      '참조 이미지를 드래그하거나 + 로 첨부해 더 구체적으로 이야기하세요.';
+
+  @override
+  String get naiAgent_tipGeneration => '이미지 생성은 비용을 표시하고 확인을 받은 뒤 실행합니다.';
+
+  @override
+  String get naiAgent_welcomeFootnote => '모든 작업은 현재 승인 모드를 따릅니다';
+
+  @override
+  String get naiAgent_chooseModel => '모델 선택';
+
+  @override
+  String get naiAgent_modelSettings => '모델 및 인터페이스 관리';
+
+  @override
+  String get naiAgent_attach => '이미지 첨부';
+
+  @override
+  String get naiAgent_removeAttachment => '첨부 제거';
+
+  @override
+  String get naiAgent_selectedImage => '선택한 이미지 첨부';
+
+  @override
+  String get naiAgent_send => '보내기';
+
+  @override
+  String get naiAgent_stop => '작업 중지';
+
+  @override
+  String get naiAgent_queue => '대기열';
+
+  @override
+  String get naiAgent_steer => '지시 추가';
+
+  @override
+  String get naiAgent_promote => '지시로 전환';
+
+  @override
+  String get naiAgent_waiting => '답변을 기다리는 중';
+
+  @override
+  String get naiAgent_working => '처리 중';
+
+  @override
+  String get naiAgent_waitingSlot => '서비스 요청 슬롯 대기 중';
+
+  @override
+  String get naiAgent_starting => '채팅 여는 중';
+
+  @override
+  String get naiAgent_interrupted => '이전 작업이 중단되었으며 자동으로 다시 보내지 않았습니다.';
+
+  @override
+  String get naiAgent_restorePending => '입력창으로 복원';
+
+  @override
+  String get naiAgent_withdraw => '회수';
+
+  @override
+  String get naiAgent_newContent => '최신 메시지로 이동';
+
+  @override
+  String get naiAgent_toolRunning => '실행 중';
+
+  @override
+  String get naiAgent_toolDone => '완료';
+
+  @override
+  String get naiAgent_toolFailed => '실패';
+
+  @override
+  String get naiAgent_arguments => '인수';
+
+  @override
+  String get naiAgent_result => '결과';
+
+  @override
+  String get naiAgent_systemPrompt => '시스템 프롬프트';
+
+  @override
+  String get naiAgent_promptHelp =>
+      '사용자 지정 내용은 기본 프롬프트를 대체합니다. 도구 지도는 앱이 추가하며 이후 요청에 적용됩니다.';
+
+  @override
+  String get naiAgent_restoreDefault => '기본값 복원';
+
+  @override
+  String get naiAgent_showEffective => '적용되는 프롬프트 보기';
+
+  @override
+  String get naiAgent_useGlobal => '전역 프롬프트 사용';
+
+  @override
+  String get naiAgent_save => '저장';
+
+  @override
+  String get naiAgent_runLimit => '작업당 모델 요청 한도';
+
+  @override
+  String get naiAgent_enterSends => 'Enter로 전송, Shift+Enter로 줄바꿈';
+
+  @override
+  String get naiAgent_dataFolder => '작업 공간 데이터 폴더';
+
+  @override
+  String get naiAgent_openFolder => '폴더 열기';
+
+  @override
+  String get naiAgent_toolsManuals => '도구 및 매뉴얼';
+
+  @override
+  String get naiAgent_toolsHint =>
+      '현재 상태, 이미지, 프롬프트 및 작업 공간 파일을 필요할 때 호출하며 모델별 NAI 매뉴얼을 읽습니다.';
+
+  @override
+  String get naiAgent_unknownCost => '실제 비용은 서비스 제공자 기준';
+
+  @override
+  String get naiAgent_error => '작업에 실패했습니다. 모델 설정이나 파일을 확인하세요.';
+
+  @override
+  String get naiAgent_visionDisabled =>
+      '이 모델의 이미지 입력이 활성화되지 않았습니다. 모델 설정에서 지원 여부를 확인하세요.';
+
+  @override
+  String get naiAgent_inputChanged => '준비 중 입력이 변경되었습니다. 현재 초안을 보내세요.';
+
+  @override
+  String get naiAgent_imageLimit => '잘못된 이미지 형식이거나 업로드 한도를 초과했습니다.';
+
+  @override
+  String get naiAgent_composerNotEmpty => '현재 입력을 저장하거나 보낸 후 이 메시지를 복원하세요.';
+
+  @override
+  String get naiAgent_compact => '채팅 컨텍스트 압축';
+
+  @override
+  String get naiAgent_export => '채팅 내보내기';
+
+  @override
+  String get naiAgent_copyMessage => '메시지 복사';
+
+  @override
+  String get naiAgent_editMessage => '메시지 편집';
+
+  @override
+  String get naiAgent_regenerate => '답변 다시 생성';
+
+  @override
+  String get naiAgent_submitAnswer => '답변 제출';
+
+  @override
+  String get naiAgent_customAnswer => '직접 답변을 입력할 수도 있습니다';
+
+  @override
+  String get naiAgent_close => '패널 접기';
+
+  @override
+  String get naiAgent_showChats => '채팅 목록';
+
+  @override
+  String get naiAgent_runtimeMissing => 'Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.';
+
+  @override
+  String get naiAgent_usage => '모델 사용량';
+
+  @override
+  String get naiAgent_cancel => '취소';
+
+  @override
+  String get naiAgent_dropHint => '놓아서 이 채팅에 첨부';
+
+  @override
+  String get naiAgent_emptyAttachment => '이미지를 읽을 수 없음';
+
+  @override
+  String get naiAgent_globalScope => '전역 기본값';
+
+  @override
+  String get naiAgent_workspaceScope => '현재 작업 공간';
+
+  @override
+  String get naiAgent_generationTitle => '생성 승인';
+
+  @override
+  String get naiAgent_generationWaiting => '생성 승인 대기 중';
+
+  @override
+  String naiAgent_generationAccount(Object name) {
+    return '계정: $name';
+  }
+
+  @override
+  String naiAgent_generationBatch(Object requests, Object size, Object total) {
+    return '요청 $requests회 × $size장 · 총 $total장';
+  }
+
+  @override
+  String naiAgent_generationUnit(Object cost) {
+    return '요청당 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationEncoding(Object cost) {
+    return '참조 이미지 인코딩: $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationTotal(Object cost) {
+    return '예상 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationBalance(Object balance) {
+    return '현재 잔액 $balance Anlas';
+  }
+
+  @override
+  String get naiAgent_generationEstimateNote => '비용은 예상치이며 실제 차감액은 서버에서 결정합니다.';
+
+  @override
+  String get naiAgent_generationChanged => '설정 또는 견적이 변경되었습니다. 다시 준비해 주세요.';
+
+  @override
+  String naiAgent_generationLocalEnhance(Object model, Object scale) {
+    return '생성 후 로컬 업스케일: $model ×$scale';
+  }
+
+  @override
+  String get naiAgent_generationText => '텍스트로 이미지 생성';
+
+  @override
+  String get naiAgent_generationImage => '이미지로 이미지 생성';
+
+  @override
+  String get naiAgent_generationInpaint => '인페인트';
+
+  @override
+  String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
+    return '이 빈 폴더와 갤러리 분류를 삭제할까요? 다른 폴더의 이미지는 유지됩니다.\n$path';
+  }
+
+  @override
+  String get naiAgent_extensions => '확장';
+
+  @override
+  String get naiAgent_interactionExtension => 'Studio 연동';
+
+  @override
+  String get naiAgent_extensionRequired => '내장 · 필수';
+
+  @override
+  String get naiAgent_interactionExtensionHint =>
+      '필요할 때 현재 Studio 상태를 읽고 질문 카드로 답변을 받습니다.';
+
+  @override
+  String get naiAgent_extensionAddFile => '확장 파일 추가';
+
+  @override
+  String get naiAgent_extensionAddFolder => '확장 폴더 추가';
+
+  @override
+  String get naiAgent_extensionsHint =>
+      '확장은 작업 공간별로 로드됩니다. 변경 사항은 현재 작업이 끝난 뒤 다음 전송에 적용됩니다. 외부 확장은 로컬 코드를 실행하므로 신뢰할 수 있는 출처를 선택하세요.';
+
+  @override
+  String get naiAgent_extensionError => '확장 실행 실패';
+
+  @override
+  String get naiAgent_extensionCompatibility =>
+      '로컬 Pi 확장과 패키지 폴더, 도구, 명령 및 표준 대화 상자를 지원합니다. 터미널 전용 사용자 지정 UI는 데스크톱에 표시되지 않습니다.';
+
+  @override
+  String get naiAgent_instructions => '지침';
+
+  @override
+  String get naiAgent_globalInstructions => '전역 지침';
+
+  @override
+  String get naiAgent_globalInstructionsHelp =>
+      '모든 작업 공간에서 사용합니다. 언어, 문체 또는 작업 선호도를 입력할 수 있습니다. 비워 두면 이 부분이 비활성화됩니다.';
+
+  @override
+  String get naiAgent_systemPromptPrefix => '시스템 프롬프트 앞부분';
+
+  @override
+  String get naiAgent_systemPromptPrefixHelp =>
+      'NAI Agent 기본 프롬프트 앞에 삽입하며 기본 프롬프트와 도구 맵을 유지합니다. 비워 두면 이 부분이 비활성화됩니다.';
+
+  @override
+  String get naiAgent_instructionOrder =>
+      '적용 순서: 앞부분 → 기본 프롬프트 → 전역 지침 → 작업 공간 규칙. 이후 요청부터 적용됩니다.';
+
+  @override
+  String get naiAgent_saveInstructions => '지침 저장';
+
+  @override
+  String get naiAgent_mcpBuiltin => 'NAI Studio · 내장 도구';
+
+  @override
+  String get naiAgent_mcpBuiltinHint =>
+      '프롬프트, 블록, 위키, 이미지, 기록, 참조, 생성 및 설정 도구입니다. 기본적으로 필요할 때 검색하며 기존 백업, 버전 확인 및 사용자 확인이 유지됩니다.';
+
+  @override
+  String get naiAgent_mcpAdd => 'MCP 서버 추가';
+
+  @override
+  String get naiAgent_mcpName => '서버 이름';
+
+  @override
+  String get naiAgent_mcpConfig => '서버 설정 (JSON)';
+
+  @override
+  String get naiAgent_mcpConfigHint =>
+      'stdio 및 Streamable HTTP를 지원합니다. 서버 설정 객체 하나를 붙여 넣으세요. command는 실행 파일이고 args는 배열입니다. env, cwd, url, headers, oauth, toolExposure도 지원합니다. 설정은 암호화하여 저장됩니다.';
+
+  @override
+  String get naiAgent_mcpStatus => '연결 상태 확인';
+
+  @override
+  String get naiAgent_mcpReconnect => '다시 연결';
+
+  @override
+  String get naiAgent_mcpLogin => '로그인';
+
+  @override
+  String get naiAgent_mcpLogout => '로그아웃';
+
+  @override
+  String get naiAgent_mcpHint =>
+      '기본적으로 CodeMode가 필요할 때 도구를 검색합니다. codemode: 샌드박스 호출; deferred: 검색 후 직접 호출; direct: 항상 공개; hidden: 숨김. 변경은 다음 유휴 호출에 적용됩니다. 연결 확인은 채팅 모델을 호출하지 않습니다.';
+
+  @override
+  String get generation_generate => '생성';
+
+  @override
+  String get detail_imageDetails => '이미지 상세 정보';
+
+  @override
+  String get promptBlockLibrary_title => '프롬프트 블록';
 }

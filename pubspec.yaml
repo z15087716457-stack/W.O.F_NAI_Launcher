@@ -116,21 +116,28 @@ dependencies:
   flutter_markdown_plus: ^1.0.12
   flutter_svg: ^2.3.0
 dev_dependencies:
+  shared_preferences_platform_interface: any
+  irondash_message_channel: any
+  super_native_extensions: any
   file: ^7.0.1
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
-  build_runner: ^2.4.9
-  riverpod_generator: ^2.4.0
-  freezed: ^2.5.2
-  json_serializable: ^6.8.0
-  hive_generator: ^2.0.1
+  build_runner: 2.4.13
+  riverpod_generator: 2.4.0
+  freezed: 2.5.2
+  json_serializable: 6.8.0
   # Mock 测试
   mocktail: ^1.0.3
   path_provider_platform_interface: any
   sqlite3: ^2.9.4
   # CSV 解析
   csv: ^6.0.0
+  analyzer: 6.4.1
+  hive_generator: 2.0.1
+  build_runner_core: 7.3.2
+  build_config: 1.1.2
+  source_gen: 1.5.0
 flutter:
   uses-material-design: true
   generate: true

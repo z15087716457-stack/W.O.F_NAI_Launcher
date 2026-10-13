@@ -158,7 +158,9 @@ class SettingsPreferencesService {
   Future<File> apply(
     Map<String, Object?> values, {
     required Map<String, Object?> expected,
+    void Function()? beforeWrite,
   }) async {
+    beforeWrite?.call();
     decode(encode(values));
     bool unchanged() {
       final current = capture();
@@ -172,12 +174,14 @@ class SettingsPreferencesService {
       throw StateError('Preferences changed. Open the confirmation again.');
     }
     final saved = await backup(expected);
+    beforeWrite?.call();
     if (!unchanged()) {
       throw StateError('Preferences changed while preparing the backup.');
     }
     final touched = <String>[];
     try {
       for (final entry in values.entries) {
+        beforeWrite?.call();
         if (storage.getSetting<Object?>(entry.key) != expected[entry.key]) {
           throw StateError('Preference changed during import: ${entry.key}');
         }

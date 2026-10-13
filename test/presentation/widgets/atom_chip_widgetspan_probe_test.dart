@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/atom_list_editor.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/blocks/atom_chip.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/nai_syntax_controller.dart';
 
 /// Logs the PlaceholderDimensions the engine-side paragraph build hands us.

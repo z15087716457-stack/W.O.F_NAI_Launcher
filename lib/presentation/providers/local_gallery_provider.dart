@@ -975,6 +975,34 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     await _applyFilters();
   }
 
+  /// A physical directory move keeps the current category identity and the
+  /// user's other filters. The caller refreshes the same dataset afterward.
+  void rebindCategoryFolderPaths(
+    Map<String, String> paths, {
+    Set<String> removed = const {},
+  }) {
+    final criteria = state.filterCriteria;
+    final id = criteria.categoryId;
+    if (id == null) return;
+    if (removed.contains(id)) {
+      _setState(
+        state.copyWith(
+          filterCriteria: criteria.copyWith(
+            clearCategoryId: true,
+            clearCategoryFolderPath: true,
+          ),
+        ),
+      );
+    } else if (paths.containsKey(id) &&
+        paths[id] != criteria.categoryFolderPath) {
+      _setState(
+        state.copyWith(
+          filterCriteria: criteria.copyWith(categoryFolderPath: paths[id]),
+        ),
+      );
+    }
+  }
+
   /// Show a newly imported gallery root in one filter update. Old search,
   /// collection and favorites filters must not hide the imported images.
   Future<void> showImportedCategory(
@@ -1454,6 +1482,26 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _updateCachedRecords({
       galleryFilePathKey(filePath),
     }, (record) => record.copyWith(tags: tags));
+  }
+
+  /// Re-read externally changed metadata without resetting the visible dataset.
+  Future<void> refreshMetadataView() async {
+    final service = await getService();
+    final criteria = state.filterCriteria;
+    final serial = _filterRequestSerial;
+    await service.applyFilter(criteria);
+    if (serial != _filterRequestSerial || state.filterCriteria != criteria) {
+      return;
+    }
+    _markRecordsStale();
+    _setState(
+      state.copyWith(
+        totalCount: service.totalCount,
+        filteredCount: service.filteredCount,
+        contentRevision: state.contentRevision + 1,
+      ),
+    );
+    await _reloadTimeline(newDataset: false);
   }
 
   // ============================================================

@@ -80,6 +80,12 @@ class PromptBlockRepository {
 
   Future<PromptBlockFolder?> getFolder(String id) => _storage.getFolder(id);
 
+  /// Usage is a counter, not an edit of the definition read before an await.
+  Future<PromptBlock?> incrementUseCount(String id) => _storage.transformBlock(
+    id,
+    (current) => current?.copyWith(useCount: current.useCount + 1),
+  );
+
   /// 创建块，并自动取得目标文件夹内的下一个排序值。
   ///
   /// [thumbnail] 必须已是应用块缩略图目录内的路径（调用方负责落盘；
@@ -106,6 +112,8 @@ class PromptBlockRepository {
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
     List<PromptBlockTag> tags = const [],
+    bool isFavorite = false,
+    void Function()? beforeWrite,
   }) async {
     await _ensureFolderExists(folderId);
     final blocks = await _storage.getBlocks();
@@ -123,6 +131,7 @@ class PromptBlockRepository {
       negativeAtoms: negativeAtoms,
       generationSettings: generationSettings,
       tags: tags,
+      isFavorite: isFavorite,
       color: color,
       appearance: appearance,
       iconName: iconName,
@@ -132,20 +141,39 @@ class PromptBlockRepository {
       thumbnailScale: thumbnailScale,
       sortOrder: sortOrder ?? _nextSortOrder(blocks, folderId),
     );
-    await _storage.putBlock(block);
+    if (beforeWrite == null) {
+      await _storage.putBlock(block);
+    } else {
+      await _storage.transformBlock(block.id, (current) {
+        beforeWrite();
+        if (current != null) throw StateError('Block identity already exists');
+        return block;
+      });
+    }
     await _harmonizeTagColors(block.tags);
     return block;
   }
 
   /// 更新块。更新不会改变块 ID；正文仍按原文保存。
-  Future<PromptBlock> updateBlock(PromptBlock block) async {
+  Future<PromptBlock> updateBlock(
+    PromptBlock block, {
+    void Function(PromptBlock?)? beforeWrite,
+  }) async {
     final existing = await _storage.getBlock(block.id);
     if (existing == null) {
       throw StateError('Prompt block does not exist: ${block.id}');
     }
 
-    final updated = block.copyWith(updatedAt: DateTime.now());
-    await _storage.putBlock(updated);
+    var updated = block.copyWith(updatedAt: DateTime.now());
+    if (beforeWrite == null) {
+      await _storage.putBlock(updated);
+    } else {
+      updated = (await _storage.transformBlock(block.id, (current) {
+        beforeWrite(current);
+        if (current == null) throw StateError('Prompt block disappeared');
+        return updated.copyWith(useCount: current.useCount);
+      }))!;
+    }
     if (!const DeepCollectionEquality().equals(existing.tags, updated.tags)) {
       await _harmonizeTagColors(updated.tags);
     }
@@ -156,23 +184,24 @@ class PromptBlockRepository {
   Future<void> _harmonizeTagColors(List<PromptBlockTag> tags) async {
     if (tags.isEmpty) return;
     final colors = {for (final tag in tags) tag.name.toLowerCase(): tag.color};
-    for (final block in await _storage.getBlocks()) {
-      var changed = false;
-      final updatedTags = <PromptBlockTag>[];
-      for (final tag in block.tags) {
-        final color = colors[tag.name.toLowerCase()];
-        if (color != null && color != tag.color) {
-          updatedTags.add(tag.copyWith(color: color));
-          changed = true;
-        } else {
-          updatedTags.add(tag);
+    for (final candidate in await _storage.getBlocks()) {
+      await _storage.transformBlock(candidate.id, (block) {
+        if (block == null) return null;
+        var changed = false;
+        final updatedTags = <PromptBlockTag>[];
+        for (final tag in block.tags) {
+          final color = colors[tag.name.toLowerCase()];
+          if (color != null && color != tag.color) {
+            updatedTags.add(tag.copyWith(color: color));
+            changed = true;
+          } else {
+            updatedTags.add(tag);
+          }
         }
-      }
-      if (changed) {
-        await _storage.putBlock(
-          block.copyWith(tags: updatedTags, updatedAt: DateTime.now()),
-        );
-      }
+        return changed
+            ? block.copyWith(tags: updatedTags, updatedAt: DateTime.now())
+            : block;
+      });
     }
   }
 
@@ -202,8 +231,18 @@ class PromptBlockRepository {
   }
 
   /// 删除块；不存在时保持幂等。顺带从所有收藏集成员列表中修剪该 ID。
-  Future<void> deleteBlock(String blockId) async {
-    await _storage.deleteBlock(blockId);
+  Future<void> deleteBlock(
+    String blockId, {
+    void Function(PromptBlock?)? beforeWrite,
+  }) async {
+    if (beforeWrite == null) {
+      await _storage.deleteBlock(blockId);
+    } else {
+      await _storage.transformBlock(blockId, (current) {
+        beforeWrite(current);
+        return null;
+      });
+    }
     await _pruneBlocksFromCollections({blockId});
   }
 
@@ -238,11 +277,47 @@ class PromptBlockRepository {
   Future<void> importFolders(Iterable<PromptBlockFolder> folders) =>
       _storage.putFolders(folders);
 
+  PromptBlockLibraryData get currentLibrary {
+    final data = _storage.currentLibrary;
+    return PromptBlockLibraryData(
+      blocks: data.blocks,
+      folders: data.folders,
+      collections: data.collections,
+    );
+  }
+
+  /// Deletes one empty folder; moving blocks remains an explicit separate edit.
+  Future<void> deleteEmptyFolder(String id, {void Function()? beforeWrite}) =>
+      _storage.deleteFolder(
+        id,
+        beforeWrite: () {
+          beforeWrite?.call();
+          final data = currentLibrary;
+          if (data.blocks.any((b) => b.folderId == id) ||
+              data.folders.any((f) => f.parentId == id)) {
+            throw StateError('Move folder contents before deleting the folder');
+          }
+        },
+      );
+
+  Future<void> setCollectionMembership(
+    String collectionId,
+    String blockId,
+    bool member, {
+    void Function()? beforeWrite,
+  }) => _storage.setCollectionMembership(
+    collectionId,
+    blockId,
+    member,
+    beforeWrite: beforeWrite,
+  );
+
   /// 创建文件夹，并自动取得同级下一个排序值。
   Future<PromptBlockFolder> createFolder({
     required String name,
     String? parentId,
     int? sortOrder,
+    void Function()? beforeWrite,
   }) async {
     await _ensureFolderExists(parentId);
     final folders = await _storage.getFolders();
@@ -251,12 +326,15 @@ class PromptBlockRepository {
       parentId: parentId,
       sortOrder: sortOrder ?? _nextFolderSortOrder(folders, parentId),
     );
-    await _storage.putFolder(folder);
+    await _storage.putFolder(folder, beforeWrite: beforeWrite);
     return folder;
   }
 
   /// 更新文件夹；父级变更会检查循环引用。
-  Future<PromptBlockFolder> updateFolder(PromptBlockFolder folder) async {
+  Future<PromptBlockFolder> updateFolder(
+    PromptBlockFolder folder, {
+    void Function()? beforeWrite,
+  }) async {
     final existing = await _storage.getFolder(folder.id);
     if (existing == null) {
       throw StateError('Prompt block folder does not exist: ${folder.id}');
@@ -267,7 +345,7 @@ class PromptBlockRepository {
       name: folder.name.trim(),
       updatedAt: DateTime.now(),
     );
-    await _storage.putFolder(updated);
+    await _storage.putFolder(updated, beforeWrite: beforeWrite);
     return updated;
   }
 
@@ -286,8 +364,9 @@ class PromptBlockRepository {
   /// 同级重排块。传入的 ID 必须完整覆盖该层级的直属块。
   Future<void> reorderBlocks(
     String? folderId,
-    List<String> orderedBlockIds,
-  ) async {
+    List<String> orderedBlockIds, {
+    void Function()? beforeWrite,
+  }) async {
     final blocks = await _storage.getBlocks();
     final siblings = blocks.childrenOf(folderId);
     _validateCompleteOrder(
@@ -305,14 +384,16 @@ class PromptBlockRepository {
         (entry) =>
             byId[entry.value]!.copyWith(sortOrder: entry.key, updatedAt: now),
       ),
+      beforeWrite: beforeWrite,
     );
   }
 
   /// 同级重排文件夹。传入的 ID 必须完整覆盖该层级的直属文件夹。
   Future<void> reorderFolders(
     String? parentId,
-    List<String> orderedFolderIds,
-  ) async {
+    List<String> orderedFolderIds, {
+    void Function()? beforeWrite,
+  }) async {
     final folders = await _storage.getFolders();
     final siblings = folders.childrenOf(parentId);
     _validateCompleteOrder(
@@ -330,6 +411,7 @@ class PromptBlockRepository {
         (entry) =>
             byId[entry.value]!.copyWith(sortOrder: entry.key, updatedAt: now),
       ),
+      beforeWrite: beforeWrite,
     );
   }
 
@@ -411,6 +493,7 @@ class PromptBlockRepository {
     String? parentId,
     bool isFolder = false,
     int? sortOrder,
+    void Function()? beforeWrite,
   }) async {
     await _ensureCollectionParentExists(parentId);
     final collections = await _storage.getCollections();
@@ -420,14 +503,15 @@ class PromptBlockRepository {
       isFolder: isFolder,
       sortOrder: sortOrder ?? _nextCollectionSortOrder(collections, parentId),
     );
-    await _storage.putCollection(collection);
+    await _storage.putCollection(collection, beforeWrite: beforeWrite);
     return collection;
   }
 
   /// 更新收藏集 / 收藏文件夹；父级变更会检查存在性与循环引用。
   Future<PromptBlockCollection> updateCollection(
-    PromptBlockCollection collection,
-  ) async {
+    PromptBlockCollection collection, {
+    void Function()? beforeWrite,
+  }) async {
     final existing = await _storage.getCollection(collection.id);
     if (existing == null) {
       throw StateError(
@@ -448,7 +532,7 @@ class PromptBlockRepository {
       name: collection.name.trim(),
       updatedAt: DateTime.now(),
     );
-    await _storage.putCollection(updated);
+    await _storage.putCollection(updated, beforeWrite: beforeWrite);
     return updated;
   }
 
@@ -469,8 +553,9 @@ class PromptBlockRepository {
   /// 该层级的直属节点。
   Future<void> reorderCollections(
     String? parentId,
-    List<String> orderedIds,
-  ) async {
+    List<String> orderedIds, {
+    void Function()? beforeWrite,
+  }) async {
     final collections = await _storage.getCollections();
     final siblings = collections.childrenOf(parentId);
     _validateCompleteOrder(
@@ -488,12 +573,16 @@ class PromptBlockRepository {
         (entry) =>
             byId[entry.value]!.copyWith(sortOrder: entry.key, updatedAt: now),
       ),
+      beforeWrite: beforeWrite,
     );
   }
 
   /// 删除收藏集或收藏文件夹。删除文件夹会连带删除整棵子树
   /// （子文件夹 + 其中收藏集）；成员块本体不受影响，仅解除成员关系。
-  Future<void> deleteCollection(String collectionId) async {
+  Future<void> deleteCollection(
+    String collectionId, {
+    void Function()? beforeWrite,
+  }) async {
     final collections = await _storage.getCollections();
     final target = collections
         .where((node) => node.id == collectionId)
@@ -504,7 +593,7 @@ class PromptBlockRepository {
       collectionId,
       ...collections.getDescendantIds(collectionId),
     };
-    await _storage.deleteCollections(ids);
+    await _storage.deleteCollections(ids, beforeWrite: beforeWrite);
   }
 
   /// 切换块在收藏集中的成员关系，返回切换后的成员状态。
@@ -550,7 +639,6 @@ class PromptBlockRepository {
   Future<void> _pruneBlocksFromCollections(Set<String> blockIds) async {
     if (blockIds.isEmpty) return;
     final collections = await _storage.getCollections();
-    final dirty = <PromptBlockCollection>[];
     final now = DateTime.now();
     for (final node in collections) {
       if (node.isFolder || node.blockIds.isEmpty) continue;
@@ -558,10 +646,17 @@ class PromptBlockRepository {
           .where((id) => !blockIds.contains(id))
           .toList();
       if (remaining.length != node.blockIds.length) {
-        dirty.add(node.copyWith(blockIds: remaining, updatedAt: now));
+        await _storage.transformCollection(
+          node.id,
+          (current) => current?.copyWith(
+            blockIds: current.blockIds
+                .where((id) => !blockIds.contains(id))
+                .toList(),
+            updatedAt: now,
+          ),
+        );
       }
     }
-    if (dirty.isNotEmpty) await _storage.putCollections(dirty);
   }
 
   Future<void> _ensureCollectionParentExists(String? parentId) async {

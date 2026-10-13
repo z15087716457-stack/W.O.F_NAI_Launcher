@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -54,24 +55,28 @@ class ExploreDeepRoundException implements Exception {
 class ExploreRunRunnerState {
   const ExploreRunRunnerState({
     this.runId,
+    this.ownerId,
     this.isRunning = false,
     this.processedCount = 0,
     this.totalCount = 0,
   });
 
   final String? runId;
+  final String? ownerId;
   final bool isRunning;
   final int processedCount;
   final int totalCount;
 
   ExploreRunRunnerState copyWith({
     String? runId,
+    String? ownerId,
     bool? isRunning,
     int? processedCount,
     int? totalCount,
   }) {
     return ExploreRunRunnerState(
       runId: runId ?? this.runId,
+      ownerId: ownerId ?? this.ownerId,
       isRunning: isRunning ?? this.isRunning,
       processedCount: processedCount ?? this.processedCount,
       totalCount: totalCount ?? this.totalCount,
@@ -80,10 +85,17 @@ class ExploreRunRunnerState {
 }
 
 class _ExploreRunSession {
-  _ExploreRunSession({required this.ownerId, required this.runId});
+  _ExploreRunSession({
+    required this.ownerId,
+    required this.runId,
+    this.beforeGenerate,
+  });
 
   final String ownerId;
   final String runId;
+  final void Function(ImageParams)? beforeGenerate;
+  int? activeGenerationId;
+  ImageGenerationNotifier? generationOwner;
   String? roundId;
   bool persistedGenerating = false;
 }
@@ -104,9 +116,20 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   bool _pauseRequested = false;
   bool _cancelRequested = false;
   _ExploreRunSession? _session;
+  Completer<void>? _sessionDone;
+
+  Future<void> cancelAndWait(String runId) async {
+    if (_session?.runId != runId) return;
+    final done = _sessionDone;
+    cancel();
+    await done?.future;
+  }
+
   bool _suppressionHeld = false;
   bool _recoveryClaimed = false;
   bool _recoveryPending = false;
+  Future<void>? _recoveryFuture;
+  Future<void> get ready => _recoveryFuture ?? Future<void>.value();
 
   /// 深度轮变异引擎的随机源（生产不可复现；测试换 seeded Random 锁确定性）。
   @visibleForTesting
@@ -115,7 +138,7 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   @override
   ExploreRunRunnerState build() {
     _recoveryPending = true;
-    Future<void>.microtask(() async {
+    _recoveryFuture = Future<void>.microtask(() async {
       try {
         await _recoverInterruptedRuns();
       } finally {
@@ -175,8 +198,36 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   }
 
   /// 启动/续跑。返回 false = 被门禁拒绝（重入/主生成在跑/状态不可启动）。
-  Future<bool> start(String runId) async {
-    final session = _claim(runId);
+  String? get activeSessionId => _session?.ownerId;
+
+  bool pauseOwned(String ownerId) {
+    if (_session?.ownerId != ownerId) return false;
+    pause();
+    return true;
+  }
+
+  bool cancelOwned(String ownerId) {
+    final session = _session;
+    if (session?.ownerId != ownerId) return false;
+    _cancelRequested = true;
+    final native = ref.read(imageGenerationNotifierProvider);
+    if (session!.activeGenerationId != null &&
+        native.isGenerating &&
+        native.generationRunId == session.activeGenerationId &&
+        identical(
+          ref.read(imageGenerationNotifierProvider.notifier),
+          session.generationOwner,
+        )) {
+      session.generationOwner!.cancel();
+    }
+    return true;
+  }
+
+  Future<bool> start(
+    String runId, {
+    void Function(ImageParams)? beforeGenerate,
+  }) async {
+    final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
     return _executeSession(session, () => _prepareBasic(session));
   }
@@ -188,8 +239,9 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     required String familyId,
     required String parentSetId,
     required int count,
+    void Function(ImageParams)? beforeGenerate,
   }) async {
-    final session = _claim(runId);
+    final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
     return _executeSession(
       session,
@@ -218,8 +270,11 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
   }
 
   /// 失败重试：在同一 session 内把 failed 转 pending，再走公共准备和循环路径。
-  Future<bool> retryFailed(String runId) async {
-    final session = _claim(runId);
+  Future<bool> retryFailed(
+    String runId, {
+    void Function(ImageParams)? beforeGenerate,
+  }) async {
+    final session = _claim(runId, beforeGenerate: beforeGenerate);
     if (session == null) return false;
     return _executeSession(
       session,
@@ -227,7 +282,10 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     );
   }
 
-  _ExploreRunSession? _claim(String runId) {
+  _ExploreRunSession? _claim(
+    String runId, {
+    void Function(ImageParams)? beforeGenerate,
+  }) {
     if (_session != null ||
         state.isRunning ||
         _recoveryClaimed ||
@@ -238,13 +296,19 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     final session = _ExploreRunSession(
       ownerId: const Uuid().v4(),
       runId: runId,
+      beforeGenerate: beforeGenerate,
     );
     _session = session;
+    _sessionDone = Completer<void>();
     _pauseRequested = false;
     _cancelRequested = false;
     _suppressionHeld = true;
     PillRollCoordinator.suppressRoll();
-    state = ExploreRunRunnerState(runId: runId, isRunning: true);
+    state = ExploreRunRunnerState(
+      runId: runId,
+      ownerId: session.ownerId,
+      isRunning: true,
+    );
     return session;
   }
 
@@ -294,7 +358,12 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       ExploreRunStatus.paused,
       ExploreRunStatus.generated,
     };
-    if (!startable.contains(run.status)) return null;
+    if (!startable.contains(run.status) &&
+        !(resetFailed &&
+            (run.status == ExploreRunStatus.cancelled ||
+                run.status == ExploreRunStatus.completed))) {
+      return null;
+    }
     if (resetFailed) {
       if (run.failedCount == 0) return null;
       run = run.copyWith(
@@ -603,10 +672,29 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       await listNotifier.updateCandidate(
         session.runId,
         candidateId,
-        (current) => current.copyWith(rollSnapshot: rollSnapshot),
+        (current) => current.copyWith(
+          rollSnapshot: rollSnapshot,
+          paramsSnapshot: ExploreParamsSnapshot.fromImageParams(tempParams),
+        ),
       );
 
-      final result = await ref.read(exploreGenerateFnProvider)(tempParams);
+      session.beforeGenerate?.call(tempParams);
+      final beforeGeneration = ref
+          .read(imageGenerationNotifierProvider)
+          .generationRunId;
+      final generationOwner = ref.read(
+        imageGenerationNotifierProvider.notifier,
+      );
+      final pendingResult = ref.read(exploreGenerateFnProvider)(tempParams);
+      final admitted = ref.read(imageGenerationNotifierProvider);
+      session.activeGenerationId =
+          admitted.isGenerating && admitted.generationRunId != beforeGeneration
+          ? admitted.generationRunId
+          : null;
+      session.generationOwner = generationOwner;
+      final result = await pendingResult;
+      session.activeGenerationId = null;
+      session.generationOwner = null;
       if (result != null) {
         final storedPath = await ref
             .read(exploreRunImageStoreProvider)
@@ -812,6 +900,9 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
     }
     _session = null;
     state = const ExploreRunRunnerState();
+    final done = _sessionDone;
+    _sessionDone = null;
+    done?.complete();
   }
 
   void _clearGuardForSession(_ExploreRunSession session) {

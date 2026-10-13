@@ -1,52 +1,3 @@
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
-import '../../../../core/constants/api_constants.dart';
-import '../../../../core/utils/localization_extension.dart';
-import '../../../../core/utils/comfyui_prompt_parser/pipe_parser.dart';
-import '../../../../core/utils/nai_prompt_formatter.dart';
-import '../../../../core/utils/sd_to_nai_converter.dart';
-import '../../../../data/models/character/character_prompt.dart';
-import '../../../../data/models/prompt/prompt_preset_mode.dart';
-import '../../../../data/services/alias_resolver_service.dart';
-import '../../../providers/character_prompt_provider.dart';
-import '../../../providers/image_generation_provider.dart';
-import '../../../providers/layout_state_provider.dart';
-import '../../../providers/prompt_maximize_provider.dart';
-import '../../../providers/pill_workspace_provider.dart';
-import '../../../providers/prompt_translation_provider.dart';
-import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
-import '../../../router/app_router.dart';
-import '../../../providers/prompt_token_counter_provider.dart';
-import '../../../providers/quality_preset_provider.dart';
-import '../../../providers/tips_provider.dart';
-import '../../../providers/uc_preset_provider.dart';
-import '../../../widgets/common/app_toast.dart';
-import '../../../widgets/common/prompt_translation_guide.dart';
-import '../../../widgets/prompt/pills/prompt_pill_editor.dart';
-import '../../../widgets/prompt/unified/unified_prompt_config.dart';
-import '../../../widgets/prompt/nai_syntax_controller.dart';
-import '../../../widgets/prompt/prompt_token_count_bar.dart';
-import '../../../widgets/prompt/quality_tags_selector.dart';
-import '../../../widgets/prompt/transparent_background_chip.dart';
-import '../../../widgets/prompt/uc_preset_selector.dart';
-import '../../../widgets/prompt/blocks/prompt_block_palette.dart';
-import '../../../widgets/prompt/block_library_panel_toggle.dart';
-import '../../../widgets/character/character_prompt_button.dart';
-import '../../../providers/pending_prompt_provider.dart';
-import 'generation_sidebar_style.dart';
-import '../../../widgets/common/translation_icon.dart';
-import '../../../widgets/bridge/agent_bridge_indicator.dart';
-import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import '../../../themes/studio_typography.dart';
-import '../../../providers/character_position_canvas_provider.dart';
-import '../../style_explore/ui/explore_controls.dart';
-import '../../style_explore/ui/explore_icon.dart';
-import '../../style_explore/ui/explore_style.dart';
-import '../../style_explore/ui/explore_text.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -93,6 +44,14 @@ import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
 import '../../../widgets/common/translation_icon.dart';
 import '../../../widgets/bridge/agent_bridge_indicator.dart';
+import '../../../widgets/nai_agent/nai_agent_panel.dart';
+import '../../../themes/studio_typography.dart';
+import '../../../providers/character_position_canvas_provider.dart';
+import '../../../wiring/style_explore_blocks_wiring.dart';
+import '../../../widgets/generation/explore_controls.dart';
+import '../../../widgets/generation/explore_icon.dart';
+import '../../../widgets/generation/explore_style.dart';
+import '../../../widgets/generation/explore_text.dart';
 
 /// 提示词页签是否使用富文本 Tooltip。当前仅维护 Windows，
 /// 恒为 false；保留签名以兼容既有调用与测试。
@@ -692,11 +651,18 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             const CharacterPromptButton(),
             const SizedBox(width: 2),
           ],
+          const NaiAgentToggleButton(),
           // 模块图标位：「模块与开关」菜单钉住的工具，钉/收带动画。
           // 预留扩展槽给未来的翻译/Agent 动态提示钮，进同一钉机制。
           _PinnedToolSlot(
             pinned: palettePinned,
-            child: const PromptBlockPaletteButton(),
+            child: PromptBlockPaletteButton(
+              onInsert: widget.allowEvolutionToggle
+                  ? (id) async {
+                      await insertStyleExploreBlock(context, ref, id);
+                    }
+                  : null,
+            ),
           ),
           _PinnedToolSlot(
             pinned: panelToolPinned,

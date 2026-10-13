@@ -30,47 +30,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_cancel => '取消';
 
   @override
-  String get onlineFav_all => '全部';
-
-  @override
-  String get onlineFav_rootCollection => '根收藏';
-
-  @override
-  String get onlineFav_newCollection => '新建子集';
-
-  @override
-  String get onlineFav_renameCollection => '重命名子集';
-
-  @override
-  String get onlineFav_deleteCollection => '删除子集';
-
-  @override
-  String get onlineFav_empty => '还没有收藏的作品';
-
-  @override
-  String onlineFav_authorWorkCount(Object n) {
-    return '$n 张作品';
-  }
-
-  @override
-  String get onlineFav_moveHere => '移到这里';
-
-  @override
-  String get onlineFav_removeFavorite => '取消收藏';
-
-  @override
-  String get onlineFav_favoriteAuthor => '收藏作者';
-
-  @override
-  String get onlineFav_unfavoriteAuthor => '取消收藏作者';
-
-  @override
-  String get onlineFav_authorFavorited => '已收藏作者';
-
-  @override
-  String get onlineFav_authorUnfavorited => '已取消收藏作者';
-
-  @override
   String get common_confirm => '确定';
 
   @override
@@ -134,9 +93,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_added => '已添加';
 
   @override
-  String get common_new => '新建';
-
-  @override
   String get common_confirmDelete => '确认删除';
 
   @override
@@ -159,9 +115,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_clearInputConfirm => '确定要清空输入内容吗？';
 
   @override
-  String get common_yesterday => '昨天';
-
-  @override
   String common_daysAgo(Object days) {
     return '$days天前';
   }
@@ -182,9 +135,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_apply => '应用';
 
   @override
-  String get common_move => '移动';
-
-  @override
   String get common_favorite => '收藏';
 
   @override
@@ -198,9 +148,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_grid => '网格';
-
-  @override
-  String get common_pack => '打包';
 
   @override
   String get common_multiSelect => '多选';
@@ -265,18 +212,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get nav_canvas => '画布';
-
-  @override
-  String get nav_onlineGallery => '画廊';
-
-  @override
-  String get nav_expandSidebar => '展开侧边栏';
-
-  @override
-  String get nav_collapseSidebar => '收起侧边栏';
-
-  @override
   String get auth_login => '登录';
 
   @override
@@ -320,9 +255,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auth_passwordRequired => '请输入密码';
-
-  @override
-  String get auth_tokenLogin => 'API Token 登录';
 
   @override
   String get auth_tokenLoginRecommended => 'API Token 登录（推荐）';
@@ -381,9 +313,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get auth_switchAccount => '切换账号';
-
-  @override
-  String get auth_currentAccount => '当前账号';
 
   @override
   String get auth_selectAccount => '选择账号';
@@ -493,9 +422,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_title => '设置';
-
-  @override
-  String get settings_account => '账户';
 
   @override
   String get settings_savedAccounts => '已保存账号';
@@ -718,12 +644,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_setAsDefaultSuccess => '已设为默认账号';
 
   @override
-  String get generation_title => '生成';
-
-  @override
-  String get generation_generate => '生成';
-
-  @override
   String generation_cooldownRemaining(Object seconds) {
     return '等待 $seconds 秒';
   }
@@ -742,34 +662,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get generation_generationFailed => '生成失败';
-
-  @override
-  String generation_progress(Object progress) {
-    return '生成中... $progress%';
-  }
-
-  @override
-  String get generation_lockHistoryScroll => '锁定历史滚动';
-
-  @override
-  String get generation_unlockHistoryScroll => '解锁历史滚动';
-
-  @override
-  String get generation_downloadAllImages => '下载全部图像';
-
-  @override
-  String get generation_selectMultiple => '多选';
-
-  @override
-  String get generation_deselectAll => '退出多选';
-
-  @override
-  String generation_deleteSelectedImages(int count) {
-    return '删除选中图像 ($count)';
-  }
-
-  @override
-  String get generation_deleteSelectedImagesTitle => '删除选中图像';
 
   @override
   String generation_deleteSelectedImagesConfirm(int count) {
@@ -845,21 +737,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_canvasUseSeed => '点击复用此种子';
 
   @override
-  String generation_canvasPinnedCount(int count) {
-    return '固定 $count';
-  }
-
-  @override
-  String get generation_params => '参数';
-
-  @override
-  String get generation_paramsSettings => '生成参数';
-
-  @override
   String get generation_history => '历史';
-
-  @override
-  String get generation_historyRecord => '历史记录';
 
   @override
   String get generation_failedStreamSnapshot => '失败快照';
@@ -867,15 +745,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get generation_failedStreamSnapshotHint =>
       '生成未完成，仅保留最后一帧预览；不可保存、收藏或用于图生图';
-
-  @override
-  String get generation_noHistory => '暂无历史记录';
-
-  @override
-  String get generation_clearHistory => '清除历史记录';
-
-  @override
-  String get generation_clearHistoryConfirm => '确定要清除所有历史记录吗？此操作不可撤销。';
 
   @override
   String get generation_model => '模型';
@@ -1289,9 +1158,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_decodeSourceFailed => '无法解码源图像';
 
   @override
-  String get img2img_upscalePanelOpened => '已打开图生图超分面板';
-
-  @override
   String get editor_tolerance => '容差';
 
   @override
@@ -1390,9 +1256,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get editor_fitToWindow => '适应窗口';
-
-  @override
-  String get editor_shortcut100Zoom => '100% 缩放';
 
   @override
   String get editor_effectBrightness => '亮度';
@@ -1640,22 +1503,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibe_sourceType => '数据源';
 
   @override
-  String get vibe_reuseButton => '一键复用';
-
-  @override
   String get vibe_info => 'Vibe 信息';
 
   @override
   String get vibe_name => '名称';
-
-  @override
-  String get vibe_strength => '强度';
-
-  @override
-  String get vibe_infoExtracted => '信息提取';
-
-  @override
-  String get vibe_shiftReplaceHint => 'Shift+点击 替换';
 
   @override
   String get character_buttonLabel => '角色/定位';
@@ -1688,15 +1539,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gallery_metaSeed => '种子';
-
-  @override
-  String get gallery_metaSmea => 'SMEA';
-
-  @override
-  String get gallery_promptCopied => '已复制提示词';
-
-  @override
-  String get gallery_seedCopied => '已复制 Seed';
 
   @override
   String get gallery_sendToKritaAction => '发送到 Krita';
@@ -1732,63 +1574,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get onlineGallery_search => '搜索';
-
-  @override
-  String get onlineGallery_popular => '热门';
-
-  @override
-  String get onlineGallery_favorites => '收藏';
-
-  @override
-  String get onlineGallery_refresh => '刷新';
-
-  @override
   String get onlineGallery_login => '登录';
 
   @override
-  String get onlineGallery_logout => '退出登录';
-
-  @override
-  String get onlineGallery_dayRank => '日榜';
-
-  @override
-  String get onlineGallery_weekRank => '周榜';
-
-  @override
-  String get onlineGallery_monthRank => '月榜';
-
-  @override
-  String get onlineGallery_today => '今天';
-
-  @override
-  String onlineGallery_imageCount(Object count) {
-    return '$count 张';
-  }
-
-  @override
-  String get onlineGallery_loadFailed => '加载失败';
-
-  @override
-  String get onlineGallery_favoritesEmpty => '收藏夹为空';
-
-  @override
-  String get onlineGallery_noResults => '没有找到图片';
-
-  @override
   String get onlineGallery_pleaseLogin => '请先登录';
-
-  @override
-  String get onlineGallery_size => '尺寸';
-
-  @override
-  String get onlineGallery_score => '评分';
-
-  @override
-  String get onlineGallery_favCount => '收藏';
-
-  @override
-  String get onlineGallery_type => '类型';
 
   @override
   String get mediaType_video => '视频';
@@ -1797,31 +1586,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mediaType_gif => '动图';
 
   @override
-  String get onlineGallery_tags => '标签';
-
-  @override
-  String get onlineGallery_artists => '艺术家';
-
-  @override
-  String get onlineGallery_characters => '角色';
-
-  @override
-  String get onlineGallery_copyrights => '作品';
-
-  @override
-  String get onlineGallery_general => '通用';
-
-  @override
   String get onlineGallery_copied => '已复制';
 
   @override
   String get onlineGallery_copyTags => '复制标签';
-
-  @override
-  String get onlineGallery_open => '打开';
-
-  @override
-  String get onlineGallery_send => '发送';
 
   @override
   String get onlineGallery_sendToTextToImage => '发送到文生图';
@@ -1831,18 +1599,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onlineGallery_noTagInfo => '此图片没有标签信息';
-
-  @override
-  String get onlineGallery_promptSentToGeneration => '提示词已发送到生成页面';
-
-  @override
-  String get onlineGallery_gifLoadFailed => 'GIF加载失败';
-
-  @override
-  String get onlineGallery_pinchToZoom => '双指缩放';
-
-  @override
-  String get onlineGallery_metadata => '元数据';
 
   @override
   String get onlineGallery_chooseDownloadDirectory => '选择下载目录';
@@ -1864,9 +1620,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_downloadOriginal => '下载原图';
 
   @override
-  String get onlineGallery_all => '全部';
-
-  @override
   String get onlineGallery_ratingGeneral => '全年龄';
 
   @override
@@ -1877,33 +1630,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onlineGallery_ratingExplicit => '限制级';
-
-  @override
-  String get onlineGallery_clear => '清除';
-
-  @override
-  String get onlineGallery_previousPage => '上一页';
-
-  @override
-  String get onlineGallery_nextPage => '下一页';
-
-  @override
-  String onlineGallery_pageN(Object page) {
-    return '第 $page 页';
-  }
-
-  @override
-  String get onlineGallery_dateRange => '日期范围';
-
-  @override
-  String get onlineGallery_fuzzySearch => '模糊匹配';
-
-  @override
-  String get onlineGallery_fuzzySearchTooltip =>
-      '开启后使用 *tag* 匹配相近标签；关闭时按 Danbooru 精确标签搜索';
-
-  @override
-  String get onlineGallery_blacklistTags => '黑名单标签';
 
   @override
   String get onlineGallery_blacklistTitle => '在线画廊黑名单';
@@ -1944,63 +1670,12 @@ class AppLocalizationsZh extends AppLocalizations {
       '未登录 Danbooru，仍可使用本地黑名单；同步需要先登录。';
 
   @override
-  String get onlineGallery_bulkFavorite => '批量收藏';
-
-  @override
-  String get onlineGallery_bulkDownload => '批量下载';
-
-  @override
-  String get onlineGallery_unfavorited => '已取消收藏';
-
-  @override
-  String get onlineGallery_favorited => '已收藏';
-
-  @override
-  String onlineGallery_favoritedImages(Object count) {
-    return '已收藏 $count 张图片';
-  }
-
-  @override
-  String onlineGallery_selectDownloadDirectoryFailed(Object error) {
-    return '选择下载目录失败: $error';
-  }
-
-  @override
-  String onlineGallery_downloadSelectedStarted(Object count) {
-    return '开始下载 $count 张图片...';
-  }
-
-  @override
   String onlineGallery_downloadSelectedCompleted(
     Object success,
     Object failed,
   ) {
     return '下载完成: 成功 $success, 失败 $failed';
   }
-
-  @override
-  String get onlineGallery_startDate => '开始日期';
-
-  @override
-  String get onlineGallery_endDate => '结束日期';
-
-  @override
-  String get onlineGallery_invalidDateFormat => '日期格式无效';
-
-  @override
-  String get onlineGallery_dateOutOfRange => '日期超出范围';
-
-  @override
-  String get onlineGallery_last30Days => '最近30天';
-
-  @override
-  String get onlineGallery_configureGelbooruApi => '配置 Gelbooru API';
-
-  @override
-  String get onlineGallery_gelbooruApiReady => 'Gelbooru API 已验证';
-
-  @override
-  String get onlineGallery_gelbooruApiInvalid => 'Gelbooru 凭据已失效';
 
   @override
   String get onlineGallery_gelbooruCredentialsRequired =>
@@ -2030,41 +1705,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_gelbooruRequestFailed => 'Gelbooru 请求失败，请稍后重试。';
 
   @override
-  String get onlineGallery_aiTagQuery => '搜索作品、作者、标题、标签或模型';
-
-  @override
-  String get onlineGallery_aiTagPromptQuery =>
-      'AI Prompt 搜索（支持 ::artist: 等原始语法）';
-
-  @override
-  String get onlineGallery_aiTagTimeRange => '时间范围';
-
-  @override
-  String get onlineGallery_aiTagAllTime => '全部';
-
-  @override
-  String get onlineGallery_aiTagCurrentMonthly => '实时月榜';
-
-  @override
-  String get onlineGallery_aiTagOlderMonthly => '更早归档';
-
-  @override
   String get onlineGallery_aiTagRankingProcessing => '排行榜生成中，请稍后重试。';
-
-  @override
-  String get onlineGallery_aiTagNaiOnly => '仅 NAI';
-
-  @override
-  String get onlineGallery_aiTagModelVersion => '模型版本';
-
-  @override
-  String get onlineGallery_viewAuthor => '查看此作者';
-
-  @override
-  String get onlineGallery_returnFromAuthor => '返回之前的浏览位置';
-
-  @override
-  String get onlineGallery_generationParams => '生成参数';
 
   @override
   String get onlineGallery_sourceConfigUnavailable => '无法获取来源配置，请检查网络后重试。';
@@ -2088,39 +1729,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onlineGallery_imageUnavailable => '图片当前不可用。';
 
   @override
-  String get onlineGallery_loadedAll => '已加载全部';
-
-  @override
-  String get onlineGallery_retryAppend => '加载失败，点击重试';
-
-  @override
-  String onlineGallery_rankNumber(Object rank) {
-    return '第 $rank 名';
-  }
-
-  @override
-  String onlineGallery_multipleImages(Object count) {
-    return '$count 张图片';
-  }
-
-  @override
-  String get onlineGallery_views => '浏览';
-
-  @override
-  String get onlineGallery_downloadAllMedia => '下载作品全部图片';
-
-  @override
-  String get onlineGallery_copyFullMetadata => '复制完整元数据';
-
-  @override
-  String get onlineGallery_metadataParseFailed => '元数据解析失败，原始内容已保留，可直接复制。';
-
-  @override
   String get onlineGallery_gelbooruReadOnly => '只读收藏';
-
-  @override
-  String get onlineGallery_gelbooruFavoritesSortHint =>
-      '按帖子 ID 从新到旧排列，不保证与网站收藏时间顺序一致。';
 
   @override
   String get tooltip_fullscreenEdit => '全屏编辑';
@@ -3157,9 +2766,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get comparison_loadError => '加载图片失败';
 
   @override
-  String get statistics_title => '统计仪表盘';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
@@ -3610,9 +3216,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_rename => '重命名';
-
-  @override
-  String get tagLibrary_newCategory => '新建分类';
 
   @override
   String get tagLibrary_tags => '标签';
@@ -4165,74 +3768,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibeLibrary_title => 'Vibe 库';
 
   @override
-  String get vibeLibrary_categories => '分类';
-
-  @override
-  String get vibeLibrary_createCategoryTitle => '新建分类';
-
-  @override
-  String get vibeLibrary_createSubCategoryTitle => '新建子分类';
-
-  @override
-  String get vibeLibrary_categoryNameHint => '请输入分类名称';
-
-  @override
-  String get vibeLibrary_createCategoryConfirm => '创建';
-
-  @override
-  String get vibeLibrary_deleteCategoryTitle => '确认删除';
-
-  @override
-  String get vibeLibrary_deleteCategoryContent =>
-      '确定要删除此分类吗？分类下的 Vibe 将被移动到未分类。';
-
-  @override
-  String get vibeLibrary_sortTooltip => '排序方式';
-
-  @override
-  String get vibeLibrary_openFolderTooltip => '打开 Vibe 库文件夹';
-
-  @override
-  String vibeLibrary_totalCount(Object count) {
-    return '共 $count 个 Vibe';
-  }
-
-  @override
-  String get vibeLibrary_noCategoriesAvailable => '没有可用的分类';
-
-  @override
-  String get vibeLibrary_moveToCategory => '移动到分类';
-
-  @override
   String get vibeLibrary_uncategorized => '未分类';
-
-  @override
-  String vibeLibrary_movedToCategory(Object count) {
-    return '已移动 $count 个 Vibe';
-  }
-
-  @override
-  String get vibeLibrary_favoriteStatusUpdated => '收藏状态已更新';
-
-  @override
-  String get vibeLibrary_importFromFile => '从文件导入';
-
-  @override
-  String get vibeLibrary_importFromImage => '从图片导入';
-
-  @override
-  String get vibeLibrary_importFromClipboard => '从剪贴板导入编码';
-
-  @override
-  String vibeLibrary_openFolderFailed(Object error) {
-    return '打开文件夹失败: $error';
-  }
-
-  @override
-  String get vibeLibrary_importFileDialogTitle => '选择要导入的 Vibe 文件';
-
-  @override
-  String get vibeLibrary_preparingImport => '准备导入...';
 
   @override
   String vibeLibrary_importSuccessCount(Object count) {
@@ -4245,101 +3781,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get vibeLibrary_dropImportHint =>
-      '拖拽 .naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp 文件或文件夹到此处导入';
-
-  @override
-  String get vibeLibrary_importing => '正在导入...';
-
-  @override
-  String vibeLibrary_pageIndicator(Object current, Object total) {
-    return '$current / $total 页';
-  }
-
-  @override
-  String get vibeLibrary_itemsPerPage => '每页:';
-
-  @override
-  String get vibeLibrary_tooManyTitle => 'Vibe数量过多';
-
-  @override
-  String vibeLibrary_tooManySelectedContent(Object count) {
-    return '选中了 $count 个Vibe，但最多只能同时使用16个。\n\n请减少选择数量后再试。';
-  }
-
-  @override
-  String vibeLibrary_tooManyExistingContent(Object current, Object remaining) {
-    return '当前生成页面已有 $current 个Vibe，还可以添加 $remaining 个。\n\n请减少选择数量后再试。';
-  }
-
-  @override
-  String vibeLibrary_sentToGenerationCount(Object count) {
-    return '已发送 $count 个Vibe到生成页面';
-  }
-
-  @override
-  String vibeLibrary_deleteSelectedContent(Object count) {
-    return '确定要删除选中的 $count 个Vibe吗？此操作无法撤销。';
-  }
-
-  @override
-  String vibeLibrary_deletedCount(Object count) {
-    return '已删除 $count 个Vibe';
-  }
-
-  @override
-  String get vibeLibrary_importImageDialogTitle => '选择包含 Vibe 的图片';
-
-  @override
-  String get vibeLibrary_clipboardEmpty => '剪贴板为空';
-
-  @override
-  String get vibeLibrary_encodeTimeout => '编码超时，请检查网络连接';
-
-  @override
-  String get vibeLibrary_unknownError => '未知错误';
-
-  @override
   String get vibeLibrary_save => '保存到库';
 
   @override
   String get vibeLibrary_import => '导入 Vibe';
 
   @override
-  String get vibeLibrary_searchHint => '搜索名称、标签...';
-
-  @override
-  String get vibeLibrary_empty => 'Vibe 库为空';
-
-  @override
-  String get vibeLibrary_emptyHint => '先去 Vibe 库添加一些条目吧';
-
-  @override
-  String get vibeLibrary_allVibes => '全部 Vibe';
-
-  @override
-  String get vibeLibrary_favorites => '收藏';
-
-  @override
   String get vibeLibrary_sendToGeneration => '发送到生成';
-
-  @override
-  String get vibeLibrary_export => '导出';
-
-  @override
-  String get vibeLibrary_edit => '编辑';
-
-  @override
-  String get vibeLibrary_delete => '删除';
-
-  @override
-  String get vibeLibrary_addToFavorites => '收藏';
-
-  @override
-  String get vibeLibrary_removeFromFavorites => '取消收藏';
-
-  @override
-  String get vibeLibrary_newSubCategory => '新建子分类';
 
   @override
   String get vibeLibrary_maxVibesReached => '已达到最大数量 (16张)';
@@ -4408,321 +3856,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get vibeBulkTag_actionPreview => '操作预览';
-
-  @override
-  String get vibeDetail_strengthDescription => '控制 Vibe 对生成结果的影响强度';
-
-  @override
-  String get vibeDetail_infoExtractedDescription => '控制从原图提取的信息量（消耗 2 Anlas）';
-
-  @override
-  String get vibeDetail_statistics => '统计信息';
-
-  @override
-  String get vibeDetail_usageCount => '使用次数';
-
-  @override
-  String vibeDetail_timesUsed(int count) {
-    return '$count 次';
-  }
-
-  @override
-  String get vibeDetail_lastUsed => '最后使用';
-
-  @override
-  String get vibeDetail_neverUsed => '从未使用';
-
-  @override
-  String get vibeDetail_createdAt => '创建时间';
-
-  @override
-  String get vibeDetail_saveParameters => '保存参数';
-
-  @override
   String get vibe_export_title => '导出 Vibe';
 
   @override
-  String get vibe_export_format => '导出格式';
-
-  @override
-  String get vibe_selector_title => '选择 Vibe';
-
-  @override
   String get vibe_selector_recent => '最近使用';
-
-  @override
-  String get vibe_export_include_thumbnails => '包含缩略图';
-
-  @override
-  String get vibe_export_include_thumbnails_subtitle => '导出文件中包含缩略图预览';
-
-  @override
-  String get vibe_export_singleFile => '单文件 (.naiv4vibe)';
-
-  @override
-  String get vibe_export_singleFileDescription =>
-      '将每个 Vibe 导出为单独文件，适合分享单个 Vibe';
-
-  @override
-  String get vibe_export_bundleFile => '打包文件 (.naiv4vibebundle)';
-
-  @override
-  String get vibe_export_bundleFileDescription => '将多个 Vibe 打包到一个文件中，适合批量备份';
-
-  @override
-  String get vibe_export_embedIntoPng => '嵌入到 PNG';
-
-  @override
-  String get vibe_export_embedIntoPngDescription => '通过写入 PNG 元数据导出单个 Vibe';
-
-  @override
-  String get vibe_export_exportable => '可导出';
-
-  @override
-  String get vibe_export_notExportable => '不可导出';
-
-  @override
-  String get vibe_export_selectVibesToExport => '选择要导出的 Vibe';
-
-  @override
-  String vibe_export_exportSelected(int count) {
-    return '导出 ($count)';
-  }
-
-  @override
-  String vibe_export_strengthPercent(int percent) {
-    return '强度: $percent%';
-  }
-
-  @override
-  String get vibe_export_pngCarrierImage => 'PNG 载体图片';
-
-  @override
-  String get vibe_export_noUsablePngCarrier =>
-      '这个 Vibe 没有可直接使用的 PNG 载体图片。你可以选择外部 PNG 图片作为载体。';
-
-  @override
-  String get vibe_export_selectExternalPngImage => '选择外部 PNG 图片...';
-
-  @override
-  String get vibe_export_changeExternalPngImage => '更换外部 PNG 图片...';
-
-  @override
-  String get vibe_export_useVibeImageInstead => '改用 Vibe 图片';
-
-  @override
-  String vibe_export_usingExternalPng(String fileName) {
-    return '正在使用外部 PNG: $fileName';
-  }
-
-  @override
-  String get vibe_export_selectPngImage => '选择 PNG 图片';
-
-  @override
-  String get vibe_export_invalidPngImage => '所选文件不是有效的 PNG 图片';
-
-  @override
-  String vibe_export_selectPngImageFailed(String error) {
-    return '选择 PNG 图片失败: $error';
-  }
-
-  @override
-  String vibe_export_embeddingPng(String name) {
-    return '正在嵌入 PNG: $name';
-  }
-
-  @override
-  String vibe_export_exportCompleteCounts(int successCount, int failCount) {
-    return '导出完成: 成功 $successCount 个，失败 $failCount 个';
-  }
-
-  @override
-  String vibe_export_exportCompletePath(String path) {
-    return '导出完成: $path';
-  }
-
-  @override
-  String vibe_export_packingVibes(int count) {
-    return '正在打包 $count 个 Vibe...';
-  }
-
-  @override
-  String vibe_export_exportingName(String name) {
-    return '正在导出: $name';
-  }
-
-  @override
-  String get vibe_export_selectExportFolder => '选择导出文件夹';
-
-  @override
-  String get vibe_export_generatingBundleFile => '正在生成打包文件...';
-
-  @override
-  String vibe_export_bundleTitle(String name) {
-    return '导出 Bundle: $name';
-  }
-
-  @override
-  String vibe_export_vibesTitle(int count) {
-    return '导出 Vibe ($count 个已选)';
-  }
-
-  @override
-  String get vibe_export_method => '导出方式';
-
-  @override
-  String get vibe_export_wholeBundle => '整个 Bundle';
-
-  @override
-  String get vibe_export_internalVibe => '内部 Vibe';
-
-  @override
-  String vibe_export_wholeBundleDescription(int count) {
-    return '导出包含全部 $count 个 Vibe 的 .naiv4vibebundle 文件';
-  }
-
-  @override
-  String vibe_export_internalVibeDescription(int count) {
-    return '选择 Bundle 内部 Vibe，分别导出为 .naiv4vibe 文件 (共 $count 个)';
-  }
-
-  @override
-  String get vibe_export_exportBundle => '导出 Bundle';
-
-  @override
-  String get vibe_export_exportAsFiles => '导出为文件';
-
-  @override
-  String get vibe_export_exportBundleDescription => '导出为 .naiv4vibebundle 文件';
-
-  @override
-  String get vibe_export_exportAsFilesDescription =>
-      '导出为 .naiv4vibe 或 .naiv4vibebundle 文件';
-
-  @override
-  String get vibe_export_exportAsZip => '导出为 ZIP';
-
-  @override
-  String get vibe_export_exportAsZipDescription =>
-      '将选中的 Vibe 库条目作为独立文件打包为 .zip';
-
-  @override
-  String get vibe_export_compressData => '压缩数据';
-
-  @override
-  String get vibe_export_compressDataDescription => '使用压缩以减小文件大小 (推荐用于批量导出)';
-
-  @override
-  String get vibe_export_zipCompressDescription => '压缩 ZIP 内的文件以减小体积';
-
-  @override
-  String get vibe_export_exportAsPng => '导出为 PNG';
-
-  @override
-  String get vibe_export_pngInternalBundleUnsupported =>
-      '导出单个 Bundle 内部 Vibe 时不支持嵌入图片';
-
-  @override
-  String get vibe_export_embedVibeDataIntoPng => '将 Vibe 数据写入 PNG 元数据';
-
-  @override
-  String get vibe_export_batchPngUsesFirstImage =>
-      '批量导出会使用每个 Vibe 的第一张可用图片，没有图片的条目会自动跳过。';
-
-  @override
-  String get vibe_export_exportCarrierImage => '导出载体图片';
-
-  @override
-  String get vibe_export_usingExternalCarrierImage => '正在使用外部 PNG 作为导出载体图片';
-
-  @override
-  String get vibe_export_exportAsEncodings => '导出为编码';
-
-  @override
-  String get vibe_export_exportAsEncodingsDescription =>
-      '将数据导出为编码 (JSON 或 Base64)';
-
-  @override
-  String get vibe_export_jsonDescription => '导出为格式化 JSON 文件，便于阅读和编辑';
-
-  @override
-  String get vibe_export_base64Description => '导出为纯 Base64，便于复制和分享';
-
-  @override
-  String get vibe_export_selectAtLeastOneMethod => '请选择至少一种导出方式';
-
-  @override
-  String get vibe_export_batchPngUnsupported =>
-      '批量 Vibe 导出不支持嵌入 PNG。请使用单个 Vibe 导出界面。';
-
-  @override
-  String get vibe_export_selectPngCarrier => '请选择用于导出的 PNG 载体图片';
-
-  @override
-  String get vibe_export_selectAtLeastOneInternalVibe => '请选择至少一个内部 Vibe';
-
-  @override
-  String get vibe_export_selectVibeExportFolder => '选择 Vibe 导出文件夹';
-
-  @override
-  String get vibe_export_saveEncodingFile => '保存编码文件';
-
-  @override
-  String get vibe_export_preparingExport => '正在准备导出...';
-
-  @override
-  String vibe_export_preparingVibeProgress(int current, int total) {
-    return '正在读取 Vibe $current/$total...';
-  }
-
-  @override
-  String get vibe_export_exportingBundle => '正在导出 Bundle...';
-
-  @override
-  String get vibe_export_exportingZip => '正在导出 ZIP...';
-
-  @override
-  String get vibe_export_embeddingImage => '正在嵌入图片...';
-
-  @override
-  String get vibe_export_exportingEncoding => '正在导出编码...';
-
-  @override
-  String vibe_export_exportFailedWithError(String error) {
-    return '导出失败: $error';
-  }
-
-  @override
-  String get vibe_export_noExportableEntries => '没有可导出的 Vibe 条目';
-
-  @override
-  String get vibe_export_bundleFilePathEmpty => 'Bundle 文件路径为空';
-
-  @override
-  String vibe_export_invalidImageFormatWithError(String error) {
-    return '无效的图片格式: $error';
-  }
-
-  @override
-  String vibe_export_embedFailedWithError(String error) {
-    return '嵌入失败: $error';
-  }
-
-  @override
-  String vibe_export_embedImageFailedWithError(String error) {
-    return '嵌入图片失败: $error';
-  }
-
-  @override
-  String vibe_export_extractingVibeProgress(int current, int total) {
-    return '正在提取 Vibe $current/$total...';
-  }
-
-  @override
-  String vibe_export_selectImageFailed(String error) {
-    return '选择图片失败: $error';
-  }
 
   @override
   String vibe_export_dialogTitle(int count) {
@@ -4778,12 +3915,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibe_embedToImage => '嵌入到图片';
 
   @override
-  String get vibe_import_skip => '跳过';
-
-  @override
-  String get vibe_import_confirm => '确认';
-
-  @override
   String get vibe_import_noEncodingData => '无编码数据';
 
   @override
@@ -4820,14 +3951,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vibe_import_timeout => '编码超时';
 
   @override
-  String get vibe_import_title => '从库导入';
-
-  @override
-  String vibe_import_result(int count) {
-    return '已导入 $count 个 vibes';
-  }
-
-  @override
   String get vibe_import_fileParseFailed => '解析文件失败';
 
   @override
@@ -4835,41 +3958,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vibe_import_importFailed => '导入失败';
-
-  @override
-  String get vibe_import_bundleTitle => '导入 Vibe Bundle';
-
-  @override
-  String get vibe_import_bundleChooseMethod => '选择导入方式';
-
-  @override
-  String get vibe_import_bundleAsWhole => '作为整体导入';
-
-  @override
-  String get vibe_import_bundleAsWholeDescription => '保留 Bundle 结构，并作为一个库条目导入';
-
-  @override
-  String get vibe_import_bundleSplitEntries => '拆分为独立条目';
-
-  @override
-  String get vibe_import_bundleSplitEntriesDescription => '将每个 Vibe 作为独立库条目导入';
-
-  @override
-  String get vibe_import_bundleSelectVibes => '选择要导入的 Vibe';
-
-  @override
-  String get vibe_import_bundleSelectVibesDescription => '仅导入选中的 Vibe';
-
-  @override
-  String get vibe_import_bundleConfigureEachVibe => '配置每个 Vibe 的参数';
-
-  @override
-  String get vibe_import_bundleSelectAndConfigureEachVibe => '选择并配置每个 Vibe 的参数';
-
-  @override
-  String vibe_import_bundleSelectedCount(int selected, int total) {
-    return '已选择 $selected/$total';
-  }
 
   @override
   String get vibe_saveToLibrary_title => '保存到库';
@@ -4978,57 +4066,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get selection_cut_to_layer => '剪切到新图层';
 
   @override
-  String get search_results => '搜索结果';
-
-  @override
-  String get search_noResults => '未找到匹配结果';
-
-  @override
-  String get addToCurrent => '添加到当前';
-
-  @override
-  String get replaceExisting => '替换现有';
-
-  @override
-  String get confirmSelection => '确认选择';
-
-  @override
   String get selectAll => '全选';
 
   @override
   String get clearSelection => '清空';
 
   @override
-  String get clearFilters => '清除筛选';
-
-  @override
   String get shortcut_context_vibe_detail => 'Vibe 详情';
 
   @override
   String get shortcut_action_vibe_detail_rename => '重命名';
-
-  @override
-  String get vibeSelectorFilterFavorites => '收藏';
-
-  @override
-  String get vibeSelectorFilterSourceAll => '全部类型';
-
-  @override
-  String get vibeSelectorSortCreated => '创建时间';
-
-  @override
-  String get vibeSelectorSortLastUsed => '最近使用';
-
-  @override
-  String get vibeSelectorSortUsedCount => '使用次数';
-
-  @override
-  String get vibeSelectorSortName => '名称';
-
-  @override
-  String vibeSelectorItemsCount(int count) {
-    return '$count 项';
-  }
 
   @override
   String get tray_show => '显示窗口';
@@ -5718,40 +4765,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_kritaUnsupportedImageFormat => '图片格式无法发送到 Krita，请换用常见图片格式';
 
   @override
-  String toast_deletedNamed(Object name) {
-    return '已删除: $name';
-  }
-
-  @override
-  String get toast_vibeParamSaveReencodeFailed => '保存参数失败，Vibe 重新编码失败';
-
-  @override
-  String get toast_exportSuccess => '导出成功';
-
-  @override
-  String toast_exportFailed(Object error) {
-    return '导出失败: $error';
-  }
-
-  @override
-  String get toast_selectVibeToExport => '请先选择要导出的 Vibe';
-
-  @override
-  String get toast_embedPngSingleVibeOnly => '嵌入 PNG 仅支持单个 Vibe 导出';
-
-  @override
-  String get toast_selectPngCarrier => '请选择一个 PNG 载体图用于导出';
-
-  @override
-  String get toast_renameSuccess => '重命名成功';
-
-  @override
-  String get toast_paramsSaved => '参数已保存';
-
-  @override
-  String get toast_paramsSaveFailed => '保存参数失败';
-
-  @override
   String get toast_dropNoReadableImageOrVibe => '拖入源未提供可读取的图片或 Vibe 文件';
 
   @override
@@ -5783,35 +4796,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get toast_favorited => '已收藏';
-
-  @override
-  String get toast_unfavorited => '已取消收藏';
-
-  @override
-  String toast_favoriteUpdateFailed(Object error) {
-    return '收藏状态更新失败: $error';
-  }
-
-  @override
-  String toast_packingImages(Object count) {
-    return '正在打包 $count 张图片...';
-  }
-
-  @override
-  String toast_packedImages(Object count) {
-    return '已打包 $count 张图片';
-  }
-
-  @override
-  String get toast_packFailed => '打包失败';
-
-  @override
-  String toast_packFailedWithError(Object error) {
-    return '打包失败: $error';
-  }
-
-  @override
   String get toast_saveDirNotSet => '未设置保存目录';
 
   @override
@@ -5835,19 +4819,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get toast_saveEntryFailed => '保存条目失败';
 
   @override
-  String get toast_imagePromptCopied => '已复制 Prompt';
-
-  @override
-  String get toast_imageHasNoPrompt => '此图片没有 Prompt';
-
-  @override
-  String get toast_useDeleteButton => '请使用界面删除按钮';
-
-  @override
   String get toast_imageDataUnavailable => '图像数据不可用，无法复制';
-
-  @override
-  String get toast_vibeDataCopied => 'Vibe 数据已复制';
 
   @override
   String get toast_characterPromptCopied => '角色提示词已复制';
@@ -5855,26 +4827,6 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String toast_copiedTitle(Object title) {
     return '$title已复制';
-  }
-
-  @override
-  String toast_replacedVibesCount(Object count, Object name) {
-    return '已替换为 $count 个 Vibe: $name';
-  }
-
-  @override
-  String toast_sentVibesCount(Object count, Object name) {
-    return '已发送 $count 个 Vibe 到生成页面: $name';
-  }
-
-  @override
-  String toast_replacedVibe(Object name) {
-    return '已替换为: $name';
-  }
-
-  @override
-  String toast_sentVibeToGeneration(Object name) {
-    return '已发送到生成页面: $name';
   }
 
   @override
@@ -5907,24 +4859,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get toast_renameNameRequired => '名称不能为空';
-
-  @override
-  String get toast_renameNameConflict => '名称已存在，请使用其他名称';
-
-  @override
-  String get toast_renameEntryNotFound => '条目不存在，可能已被删除';
-
-  @override
-  String get toast_renameFilePathMissing => '该条目缺少文件路径，无法重命名';
-
-  @override
-  String get toast_renameFileFailed => '重命名文件失败，请稍后重试';
-
-  @override
-  String get toast_renameFailed => '重命名失败，请稍后重试';
-
-  @override
   String toast_processImageFailed(Object error) {
     return '处理图片失败: $error';
   }
@@ -5949,95 +4883,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get common_saving => '保存中...';
 
   @override
-  String get common_pleaseWait => '请稍候';
-
-  @override
-  String get common_change => '更换';
-
-  @override
   String get common_expand => '展开';
 
   @override
   String get common_collapse => '收起';
-
-  @override
-  String get vibeLibrary_emptySearchTitle => '未找到匹配的 Vibe';
-
-  @override
-  String get vibeLibrary_emptySearchSubtitle => '尝试其他关键词';
-
-  @override
-  String get vibeLibrary_emptyFavoritesTitle => '暂无收藏的 Vibe';
-
-  @override
-  String get vibeLibrary_emptyFavoritesSubtitle => '点击心形图标收藏 Vibe';
-
-  @override
-  String get vibeLibrary_emptyCategoryTitle => '该分类下暂无 Vibe';
-
-  @override
-  String get vibeLibrary_emptyCategorySubtitle => '尝试切换到\"全部 Vibe\"查看所有内容';
-
-  @override
-  String get vibeLibrary_emptyNoMatchesTitle => '无匹配结果';
-
-  @override
-  String get vibeLibrary_emptySaveFromGenerationHint => '从生成页面保存Vibe到库中';
-
-  @override
-  String get vibe_nameRequired => '名称不能为空';
-
-  @override
-  String get vibe_import_namingTitle => '命名 Vibe';
-
-  @override
-  String get vibe_import_nameConflictOverwrite => '该名称已存在，将被覆盖';
-
-  @override
-  String get vibe_previewLoadFailed => '预览加载失败';
-
-  @override
-  String get vibe_import_applyToRemainingFiles => '应用到后续所有文件';
-
-  @override
-  String get vibe_import_applyNamingToRemainingFiles => '使用此命名规则处理剩余文件';
-
-  @override
-  String get vibe_encodeImageTitle => '编码图片为 Vibe';
-
-  @override
-  String get vibe_imagePreview => '图片预览';
-
-  @override
-  String get vibe_encodeStartButton => '开始编码';
-
-  @override
-  String get vibe_encodeImageInProgress => '正在编码图片...';
-
-  @override
-  String vibe_encodeErrorImage(Object fileName) {
-    return '图片: $fileName';
-  }
-
-  @override
-  String vibe_encodeErrorMessage(Object error) {
-    return '错误: $error';
-  }
-
-  @override
-  String get vibe_encodeSkipImage => '跳过此图';
-
-  @override
-  String get detail_sendToImg2Img => '发送到图生图';
-
-  @override
-  String get detail_loadingImage => '加载图片中...';
-
-  @override
-  String get detail_imageLoadFailed => '无法加载图片';
-
-  @override
-  String get detail_noImage => '无图片';
 
   @override
   String get detail_parsingMetadata => '正在解析元数据...';
@@ -6049,15 +4898,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get detail_metadata => '元数据';
 
   @override
-  String get detail_imageDetails => '图片详情';
-
-  @override
-  String get detail_basicInfo => '基本信息';
-
-  @override
-  String get detail_fileName => '文件名';
-
-  @override
   String get detail_modifiedTime => '修改时间';
 
   @override
@@ -6065,9 +4905,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get detail_noContent => '(无内容)';
-
-  @override
-  String get detail_saveBlock => '保存为块';
 
   @override
   String get saveBlock_title => '保存为块';
@@ -6094,15 +4931,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String detail_copyLabel(Object label) {
     return '复制$label';
   }
-
-  @override
-  String get detail_copyCharacterPrompt => '复制角色提示词';
-
-  @override
-  String get detail_copyAllVibeData => '复制全部 Vibe 数据';
-
-  @override
-  String get detail_saveToVibeLibrary => '保存到 Vibe 库';
 
   @override
   String get comfyImport_detectedTitle => '检测到 ComfyUI 多角色提示词';
@@ -6308,43 +5136,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_preciseRefLibrary => '精准参考库';
 
   @override
-  String get preciseRefLib_title => '精准参考库';
-
-  @override
-  String get preciseRefLib_searchHint => '搜索参考图...';
-
-  @override
-  String get preciseRefLib_empty => '拖拽或粘贴图片到此处建立库';
-
-  @override
-  String get preciseRefLib_emptyHint => '也可以在生成结果、历史记录或本地图库中右键保存';
-
-  @override
-  String get preciseRefLib_import => '导入图片';
-
-  @override
-  String preciseRefLib_entryCount(int count) {
-    return '$count 个条目';
-  }
-
-  @override
-  String get preciseRefLib_sendToPreciseRef => '发送到精准参考';
-
-  @override
-  String get preciseRefLib_sendToImg2Img => '发送到图生图';
-
-  @override
-  String get preciseRefLib_editEntry => '编辑参数';
-
-  @override
-  String get preciseRefLib_confirmDeleteTitle => '删除条目';
-
-  @override
-  String preciseRefLib_confirmDelete(String name) {
-    return '确定删除“$name”？图片文件将一并删除。';
-  }
-
-  @override
   String preciseRefLib_saved(String name) {
     return '已存入精准参考库：$name';
   }
@@ -6353,50 +5144,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get preciseRefLib_savedHint => '可在精准参考库中编辑参数';
 
   @override
-  String preciseRefLib_sent(String name) {
-    return '已发送到精准参考：$name';
-  }
-
-  @override
-  String preciseRefLib_sentToImg2Img(String name) {
-    return '已发送到图生图：$name';
-  }
-
-  @override
   String get preciseRefLib_imageMissing => '原图文件丢失';
 
   @override
   String get preciseRefLib_invalidImage => '无法识别图片格式，或图片文件已经损坏';
 
   @override
-  String get preciseRefLib_deleteFailed => '删除失败，条目与原图已保留，请稍后重试';
-
-  @override
-  String get preciseRefLib_favoritesOnly => '只看收藏';
-
-  @override
-  String get preciseRefLib_sortBy => '排序方式';
-
-  @override
-  String get preciseRefLib_sortCreatedAt => '创建时间';
-
-  @override
-  String get preciseRefLib_sortLastUsed => '最近使用';
-
-  @override
-  String get preciseRefLib_sortUsedCount => '使用次数';
-
-  @override
-  String get preciseRefLib_sortName => '名称';
-
-  @override
   String preciseRefLib_importedCount(int count) {
     return '已导入 $count 张图片';
-  }
-
-  @override
-  String preciseRefLib_loadFailed(String error) {
-    return '加载精准参考库失败：$error';
   }
 
   @override
@@ -6419,20 +5174,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String preciseRefLib_saveCurrentCount(int count) {
     return '已保存 $count 张到精准参考库';
   }
-
-  @override
-  String get preciseRefLib_selectorTitle => '从精准参考库选择';
-
-  @override
-  String preciseRefLib_selectorConfirm(int count) {
-    return '添加所选 ($count)';
-  }
-
-  @override
-  String get preciseRefLib_nameLabel => '名称';
-
-  @override
-  String get preciseRefLib_typeFilterAll => '全部';
 
   @override
   String get img2img_fromPreciseRefLibrary => '从精准参考库导入';
@@ -6559,15 +5300,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get drop_saveVibeBundle => '保存 Vibe Bundle';
 
   @override
-  String get history_dragFilePreparationFailed => '拖拽文件准备失败，请稍后重试';
-
-  @override
-  String get history_dragFilePreparing => '正在准备拖拽文件...';
-
-  @override
-  String get history_dragFileNotReady => '拖拽文件尚未准备完成';
-
-  @override
   String get vibe_import_overwriteOriginalParams => '直接替换原 Vibe 参数';
 
   @override
@@ -6590,21 +5322,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get galleryScan_processing => '处理中';
-
-  @override
-  String get vibeDetail_useAll => '使用全部';
-
-  @override
-  String get vibeDetail_longPressSetCover => '长按设为封面';
-
-  @override
-  String get vibeDetail_noPreviewImage => '无预览图像';
-
-  @override
-  String get vibeDetail_dropPreviewImage => '拖拽图片到此处设置预览图';
-
-  @override
-  String get vibeDetail_releasePreviewImage => '释放以设置预览图';
 
   @override
   String imagePicker_dropReadFailed(String error) {
@@ -6726,15 +5443,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get nav_promptBlockLibrary => '提示词块';
-
-  @override
-  String get promptBlockLibrary_title => '提示词块';
-
-  @override
-  String get promptBlockLibrary_folders => '文件夹';
-
-  @override
   String get promptBlockLibrary_allBlocks => '全部块';
 
   @override
@@ -6742,12 +5450,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_unnamedBlock => '未命名块';
-
-  @override
-  String get promptBlockLibrary_noBlockSelected => '未选择块';
-
-  @override
-  String get promptBlockLibrary_details => '详情';
 
   @override
   String promptBlockLibrary_useCount(int count) {
@@ -6761,194 +5463,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockPill_unknown => '失效块';
 
   @override
-  String get pillCardReroll => '重抽';
-
-  @override
-  String get pillCardRerollLocked => '已锁定，无法重抽';
-
-  @override
-  String get pillCardLock => '锁定当前内容';
-
-  @override
-  String get pillCardUnlock => '解除锁定';
-
-  @override
-  String get pillCardSettings => '随机设置';
-
-  @override
-  String get pillCardEnable => '启用';
-
-  @override
-  String get pillCardDisable => '禁用';
-
-  @override
-  String get pillCardDeleteInstance => '删除实例';
-
-  @override
-  String get pillCardEmptyRoll => '（本次为空）';
-
-  @override
-  String get pillCardEvolutionEnable => '开启遗传';
-
-  @override
-  String get pillCardEvolutionDisable => '关闭遗传';
-
-  @override
-  String get pillCardEvolutionRequiresEnabled => '需先启用实例';
-
-  @override
-  String get pillCardStepBack => '退回一幕';
-
-  @override
-  String get pillCardStepForward => '前进一幕';
-
-  @override
-  String get pillSettingsTitle => '块实例设置';
-
-  @override
-  String get pillSettingsModeFixed => '固定';
-
-  @override
-  String get pillSettingsModeSequential => '顺序';
-
-  @override
-  String get pillSettingsModeRandom => '随机抽取';
-
-  @override
-  String get pillSettingsCount => '抽取数量';
-
-  @override
-  String get pillSettingsOrder => '输出顺序';
-
-  @override
-  String get pillSettingsOrderDrawn => '按抽中顺序';
-
-  @override
-  String get pillSettingsOrderOriginal => '按池原序';
-
-  @override
-  String get pillSettingsWeight => '随机权重';
-
-  @override
-  String get pillSettingsWeightMin => '最小';
-
-  @override
-  String get pillSettingsWeightMax => '最大';
-
-  @override
-  String get pillSettingsWeightAverage => '平均';
-
-  @override
-  String get pillSettingsDispersion => '离散';
-
-  @override
-  String get pillSettingsDispersionFocused => '集中';
-
-  @override
-  String get pillSettingsDispersionBalanced => '均衡';
-
-  @override
-  String get pillSettingsDispersionSpread => '发散';
-
-  @override
-  String get pillSettingsAdvanced => '高级';
-
-  @override
-  String get pillSettingsLeftDispersion => '左离散';
-
-  @override
-  String get pillSettingsRightDispersion => '右离散';
-
-  @override
-  String get pillSettingsSoftBalance => '软平衡';
-
-  @override
-  String get pillSettingsSoftBalanceStrength => '回拉强度';
-
-  @override
-  String get pillSettingsTriggerProbability => '触发概率';
-
-  @override
-  String get pillSettingsCancel => '取消';
-
-  @override
-  String get pillSettingsApply => '确定';
-
-  @override
   String get promptBlockLibrary_unnamedFolder => '未命名文件夹';
-
-  @override
-  String get promptBlockLibrary_scope => '浏览范围';
-
-  @override
-  String get promptBlockLibrary_newBlock => '新建块';
-
-  @override
-  String get promptBlockLibrary_editBlock => '编辑块';
-
-  @override
-  String get promptBlockLibrary_newFolder => '新建文件夹';
-
-  @override
-  String get promptBlockLibrary_newSubfolder => '新建子文件夹';
-
-  @override
-  String get promptBlockLibrary_renameFolder => '重命名文件夹';
-
-  @override
-  String get promptBlockLibrary_moveToRoot => '移到根目录';
-
-  @override
-  String get promptBlockLibrary_moveToFolder => '移动到文件夹';
-
-  @override
-  String get promptBlockLibrary_favorites => '收藏';
-
-  @override
-  String get promptBlockLibrary_unclassified => '未分类';
-
-  @override
-  String get promptBlockLibrary_newCollection => '新建收藏集';
-
-  @override
-  String get promptBlockLibrary_newSubcollection => '新建子收藏集';
-
-  @override
-  String get promptBlockLibrary_newCollectionFolder => '新建收藏文件夹';
-
-  @override
-  String get promptBlockLibrary_renameCollection => '重命名收藏集';
-
-  @override
-  String get promptBlockLibrary_renameCollectionFolder => '重命名收藏文件夹';
-
-  @override
-  String get promptBlockLibrary_moveToFavoritesRoot => '移到收藏区根级';
-
-  @override
-  String get promptBlockLibrary_unnamedCollection => '未命名收藏集';
-
-  @override
-  String get promptBlockLibrary_unnamedCollectionFolder => '未命名收藏文件夹';
-
-  @override
-  String get promptBlockLibrary_collectionName => '收藏集名称';
-
-  @override
-  String get promptBlockLibrary_collectionNameHint => '收藏集名称';
-
-  @override
-  String get promptBlockLibrary_noCollections =>
-      '还没有收藏集 —— 点「收藏」行旁的 + 新建，或把块拖到收藏集上';
-
-  @override
-  String get promptBlockLibrary_noFolders => '还没有文件夹';
-
-  @override
-  String get promptBlockLibrary_emptyFavorites => '还没有收藏的块，点块上的 ★ 即可收藏';
-
-  @override
-  String get promptBlockLibrary_emptyCollection => '该收藏集为空';
 
   @override
   String promptBlockLibrary_deleteCollectionConfirm(String name) {
@@ -6967,105 +5482,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_titleHint => '块标题';
 
   @override
-  String get promptBlockLibrary_searchHint => '搜索标题、提示词或标签';
-
-  @override
   String get promptBlockLibrary_folder => '文件夹';
-
-  @override
-  String get promptBlockLibrary_folderName => '文件夹名称';
-
-  @override
-  String get promptBlockLibrary_folderNameHint => '文件夹名称';
-
-  @override
-  String get promptBlockLibrary_basicPrompt => '基础提示词';
-
-  @override
-  String get promptBlockLibrary_generationSettings => '设置';
-
-  @override
-  String get promptBlockLibrary_settingsOptionalHint => '仅保存填写的参数；插入块后可手动应用设置。';
-
-  @override
-  String get promptBlockLibrary_notSpecified => '不指定';
-
-  @override
-  String get promptBlockLibrary_stepsLabel => '步数';
-
-  @override
-  String get promptBlockLibrary_noiseScheduleLabel => '噪声调度';
-
-  @override
-  String get promptBlockLibrary_invalidGenerationSettings =>
-      '请检查设置：步数 1–50、提示词引导 1–20、提示词引导重缩放 0–1，并确认参数受所选模型支持。';
-
-  @override
-  String get promptBlockLibrary_applySettings => '导入设置';
 
   @override
   String get promptBlockLibrary_settingsApplied => '块设置已导入当前画面';
 
   @override
   String get promptBlockLibrary_settingsIncompatible => '块设置与目标模型不兼容，未导入任何参数。';
-
-  @override
-  String get promptBlockLibrary_noSettings => '此块未保存生图参数';
-
-  @override
-  String get promptBlockLibrary_tags => '标签';
-
-  @override
-  String get promptBlockLibrary_addTag => '添加标签';
-
-  @override
-  String get promptBlockLibrary_tagName => '标签名称';
-
-  @override
-  String get promptBlockLibrary_tagColor => '标签颜色（十六进制）';
-
-  @override
-  String get promptBlockLibrary_duplicateTag => '这个块已有同名标签';
-
-  @override
-  String get promptBlockLibrary_invalidTagColor => '请输入有效的十六进制颜色';
-
-  @override
-  String get pillCard_rollScope => '变化范围';
-
-  @override
-  String get pillCard_positiveScope => '正面';
-
-  @override
-  String get pillCard_negativeScope => '负面';
-
-  @override
-  String get promptBlockLibrary_modelResetNotice => '切换模型后，不支持的参数已清除。';
-
-  @override
-  String get promptBlockLibrary_atomInputHint => '输入文本，回车变成原子块';
-
-  @override
-  String get promptBlockLibrary_atomRestoreHint => '点击还原成文本再编辑';
-
-  @override
-  String get promptBlockLibrary_atomOrphan => '未知标记';
-
-  @override
-  String get promptBlockLibrary_atomEditorTutorial =>
-      '输入后回车成块，点击还原为文本，保存时所有未成块文本自动转化。';
-
-  @override
-  String get promptBlockLibrary_color => '颜色';
-
-  @override
-  String get promptBlockLibrary_icon => '图标';
-
-  @override
-  String get promptBlockLibrary_saved => '已保存';
-
-  @override
-  String get promptBlockLibrary_copied => '正文已复制';
 
   @override
   String get promptBlockLibrary_deleted => '已删除';
@@ -7088,40 +5511,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_clearSelection => '清空选择';
 
   @override
-  String get promptBlockLibrary_moveTo => '移动到…';
-
-  @override
-  String get promptBlockLibrary_moveToFolderTitle => '移动到文件夹';
-
-  @override
-  String promptBlockLibrary_deleteBlocksConfirm(int count) {
-    return '确定要删除选中的 $count 个块吗？此操作无法撤销。';
-  }
-
-  @override
-  String promptBlockLibrary_deleteSelected(int count) {
-    return '删除选中的 $count 个块';
-  }
-
-  @override
   String get promptBlockLibrary_empty => '还没有提示词块';
 
   @override
-  String get promptBlockLibrary_emptyFolder => '此文件夹为空';
-
-  @override
   String get promptBlockLibrary_noSearchResults => '没有匹配的块';
-
-  @override
-  String get promptBlockLibrary_tryDifferentSearch => '请尝试其他搜索词';
-
-  @override
-  String get promptBlockLibrary_emptyHint => '新建一个块，开始整理可复用的文本';
-
-  @override
-  String promptBlockLibrary_loadFailed(String error) {
-    return '加载提示词块失败：$error';
-  }
 
   @override
   String promptBlockLibrary_deleteFolderTitle(Object name) {
@@ -7148,19 +5541,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_deleteContentsWarning => '这会永久删除整个文件夹树中的所有块。';
 
   @override
-  String get promptBlockLibrary_importExport => '导入 / 导出';
-
-  @override
-  String get promptBlockLibrary_importTxtFiles => '导入 TXT 文件';
-
-  @override
-  String get promptBlockLibrary_importFromFolder => '从文件夹导入…';
-
-  @override
   String get promptBlockLibrary_exportLibraryBackup => '导出库备份…';
-
-  @override
-  String get promptBlockLibrary_importLibraryBackup => '导入库备份…';
 
   @override
   String get promptBlockLibrary_importTxtTitle => '选择 TXT 文件';
@@ -7216,24 +5597,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptBlockLibrary_curationLocalModified => '本地已修改';
 
   @override
-  String promptBlockLibrary_libraryBackupDone(int count) {
-    return '已导出 $count 个块的库备份';
-  }
-
-  @override
   String get promptBlockLibrary_libraryImportTitle => '选择库备份文件';
-
-  @override
-  String get promptBlockLibrary_libraryBackupInvalid => '不是有效的块库备份文件';
-
-  @override
-  String promptBlockLibrary_libraryImportDone(
-    int blocks,
-    int folders,
-    int skipped,
-  ) {
-    return '导入 $blocks 个块、$folders 个文件夹，跳过 $skipped 个已存在';
-  }
 
   @override
   String promptBlockLibrary_importFailed(String error) {
@@ -7245,15 +5609,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importedAt => '导入时间';
-
-  @override
-  String get promptBlockLibrary_listView => '列表视图';
-
-  @override
-  String get promptBlockLibrary_gridView => '网格视图';
-
-  @override
-  String get promptBlockLibrary_waterfallView => '瀑布流视图';
 
   @override
   String get promptBlockPalette_tooltip => '积木';
@@ -7277,43 +5632,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get promptBlockLibrary_sortBy => '排序方式';
-
-  @override
-  String get promptBlockLibrary_sortCustom => '默认（手动顺序）';
-
-  @override
-  String get promptBlockLibrary_sortUpdated => '修改时间';
-
-  @override
-  String get promptBlockLibrary_sortTitle => '名称';
-
-  @override
-  String get promptBlockLibrary_sortColor => '颜色';
-
-  @override
-  String get promptBlockLibrary_sortIcon => '图标';
-
-  @override
-  String get promptBlockLibrary_sortAscending => '升序';
-
-  @override
-  String get promptBlockLibrary_sortDescending => '降序';
-
-  @override
-  String get promptBlockLibrary_cardSize => '卡片大小';
-
-  @override
-  String get promptBlockLibrary_reorderFolders => '调整文件夹顺序';
-
-  @override
   String get nav_styleExplore => '画风探索';
-
-  @override
-  String get styleExplore_rename => '重命名';
-
-  @override
-  String get styleExplore_nameRequired => '名称不能为空';
 
   @override
   String get styleExplore_operationFailed => '操作失败';
@@ -7328,110 +5647,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => '继续并丢弃';
 
   @override
-  String get styleExplore_newRun => '新建探索';
-
-  @override
-  String styleExplore_runDeleted(String name) {
-    return '已删除探索「$name」';
-  }
-
-  @override
-  String get styleExplore_runStatusGenerating => '生成中';
-
-  @override
-  String get styleExplore_runStatusPaused => '已暂停';
-
-  @override
-  String get styleExplore_runStatusCancelled => '已取消';
-
-  @override
-  String get styleExplore_pauseRun => '暂停';
-
-  @override
-  String get styleExplore_cancelRun => '取消探索';
-
-  @override
-  String styleExplore_retryFailed(int count) {
-    return '重试失败（$count）';
-  }
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '手动候选 $time';
   }
 
   @override
   String get styleExplore_runBusy => '生成进行中，稍后再试';
-
-  @override
-  String get styleExplore_deleteRunTitle => '删除探索';
-
-  @override
-  String styleExplore_deleteRunMessage(String name) {
-    return '将删除「$name」及其候选图副本；图库中的源图不受影响。';
-  }
-
-  @override
-  String get styleExplore_cancelRunTitle => '取消探索';
-
-  @override
-  String get styleExplore_cancelRunMessage => '取消后不可再启动；剩余待生成候选将标记为已取消。';
-
-  @override
-  String get styleExplore_filterAll => '全部';
-
-  @override
-  String get styleExplore_filterHearted => '收藏';
-
-  @override
-  String get styleExplore_renameFolder => '重命名分组';
-
-  @override
-  String get styleExplore_deleteFolder => '删除分组';
-
-  @override
-  String styleExplore_deleteFolderMessage(String name) {
-    return '将删除分组「$name」；其中的候选回到未分组，图片不会被删除。';
-  }
-
-  @override
-  String get styleExplore_folderNameLabel => '分组名称';
-
-  @override
-  String get styleExplore_deleteFamily => '删除进化线';
-
-  @override
-  String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '将删除进化线「$name」及其全部父本与子代记录（$count 张）；候选图片文件不会删除。';
-  }
-
-  @override
-  String get styleExplore_familyBusy => '这条进化线还有生成中的候选，请先停止生成';
-
-  @override
-  String get styleExplore_folderUncategorized => '未分组';
-
-  @override
-  String styleExplore_folderCreated(String name) {
-    return '已创建分组「$name」';
-  }
-
-  @override
-  String get styleExplore_candidateMissing => '图片文件缺失';
-
-  @override
-  String get styleExplore_candidateDetailTitle => '候选详情';
-
-  @override
-  String get styleExplore_prevCandidate => '上一张';
-
-  @override
-  String get styleExplore_nextCandidate => '下一张';
-
-  @override
-  String styleExplore_roundNumber(int number) {
-    return '第 $number 轮';
-  }
 
   @override
   String styleExplore_adoptBlockSaved(String name) {
@@ -7442,43 +5663,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_adoptBlockEmpty => '所选候选没有可保存的画师串或正向提示词';
 
   @override
-  String get styleExplore_deleteImage => '删除图片';
-
-  @override
-  String get styleExplore_deleteImageTitle => '删除候选图';
-
-  @override
-  String get styleExplore_deleteImageMessage =>
-      '将删除该候选在探索目录中的图片副本与候选记录；图库源图不受影响。';
-
-  @override
-  String get styleExplore_deleteImageDone => '已删除候选图与记录';
-
-  @override
-  String get styleExplore_selectCandidates => '多选';
-
-  @override
-  String styleExplore_selectedCount(int count) {
-    return '已选 $count 张';
-  }
-
-  @override
   String get promptBlockEditor_library => '块库';
 
   @override
   String get promptBlockPicker_title => '选择块';
 
   @override
-  String get promptBlockLibrary_thumbnail => '预览图';
-
-  @override
-  String get promptBlockLibrary_selectNewImage => '选择新图片';
-
-  @override
   String get promptBlockLibrary_selectImage => '选择图片';
-
-  @override
-  String get promptBlockLibrary_adjustDisplayRange => '调整显示范围';
 
   @override
   String get promptBlockLibrary_adjustThumbnailTitle => '调整预览图显示范围';
@@ -7517,59 +5708,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '选择块并替换其预览图';
-
-  @override
-  String styleExplore_deepRoundCountHint(int min) {
-    return '张数至少 $min（每个父本保底一张）';
-  }
-
-  @override
-  String get styleExplore_deepRoundNoInstance => '主提示词中没有启用的随机遗传块，无法生成子代';
-
-  @override
-  String get styleExplore_deepRoundEmpty => '无法产生足够不同的子代画师组合';
-
-  @override
-  String get styleExplore_sortLeft => '左边更好';
-
-  @override
-  String get styleExplore_sortRight => '右边更好';
-
-  @override
-  String get styleExplore_sortNeither => '两张都不行';
-
-  @override
-  String get styleExplore_sortSkip => '跳过';
-
-  @override
-  String styleExplore_sortProgress(int current, int total) {
-    return '第 $current / 共 $total 对';
-  }
-
-  @override
-  String get styleExplore_sortDone => '两两比较完成';
-
-  @override
-  String styleExplore_branchCreated(int count) {
-    return '已培育下一代（$count 个父本）';
-  }
-
-  @override
-  String get styleExplore_branchNeedLatest => '只能从最新代的子代培育下一代';
-
-  @override
-  String get styleExplore_branchRoundsIncomplete => '当前代还有未完成的子代，请等待或停止生成';
-
-  @override
-  String get styleExplore_branchDuplicate => '所选子代与第一代父本串完全重复';
-
-  @override
-  String get styleExplore_branchEmpty => '请至少选择一张子代候选';
-
-  @override
-  String styleExplore_pileManageDeleteDone(int count) {
-    return '已删除 $count 张候选图与记录';
-  }
 
   @override
   String subscriptionExpiresOn(String date) {
@@ -8642,19 +6780,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings_enterNewSignInToken => '输入新的登录令牌，验证成功后更新此账号。';
 
   @override
-  String get auth_signInAccounts => '登录与账号';
-
-  @override
   String get auth_notSignedIn => '尚未登录';
-
-  @override
-  String get auth_chooseAccountContinue => '选择账号，继续创作';
-
-  @override
-  String get auth_manageAccounts2 => '管理账号';
-
-  @override
-  String get auth_subscriptionExpired => '订阅已到期';
 
   @override
   String get settings_tagExpansion => '标签扩展';
@@ -9222,12 +7348,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get translationLanguage_traditionalChinese => '繁体中文';
-
-  @override
-  String get promptBlockEditor_translationNeedsReview => '原文已修改，译文待更新';
-
-  @override
-  String get promptBlockEditor_translationReviewHint => '修改原文后请同步校对这里的译文';
 
   @override
   String get modelTask_translateTitle => '原文 → 阅读语言';
@@ -10490,87 +8610,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_configureTagModel => '请先在「模型与接口」配置可用的标签翻译模型。';
 
   @override
-  String get blockOrganizer_barrierLabel => '块分类';
-
-  @override
-  String get blockOrganizer_replaceTitle => '替换同源块？';
-
-  @override
   String blockOrganizer_replaceMoveBody(Object count) {
     return '目标中已有 $count 个同源副本。替换后来源从块库隐藏；已插入提示词的实例仍可引用原块。';
-  }
-
-  @override
-  String blockOrganizer_replaceCopyBody(Object count) {
-    return '目标中已有 $count 个同源副本。替换会更新目标副本的内容，来源保留。';
-  }
-
-  @override
-  String get blockOrganizer_replace => '替换';
-
-  @override
-  String get blockOrganizer_customTagColor => '自定义标签颜色';
-
-  @override
-  String get blockOrganizer_colorHint => '#RRGGBB 或 #AARRGGBB';
-
-  @override
-  String get blockOrganizer_invalidColor => '请输入六位或八位十六进制颜色';
-
-  @override
-  String blockOrganizer_deleteFolderConfirm(Object name) {
-    return '删除「$name」？其中的块会移至根目录。';
-  }
-
-  @override
-  String blockOrganizer_deleteCollectionConfirm(Object name) {
-    return '删除「$name」？块本体会保留。';
-  }
-
-  @override
-  String get blockOrganizer_titleFavorites => '收藏与收藏集';
-
-  @override
-  String get blockOrganizer_titleFolders => '选择文件夹';
-
-  @override
-  String blockOrganizer_itemCount(Object count) {
-    return '$count 项';
-  }
-
-  @override
-  String get blockOrganizer_search => '搜索';
-
-  @override
-  String get blockOrganizer_name => '名称';
-
-  @override
-  String get blockOrganizer_customColor => '自定义颜色…';
-
-  @override
-  String get blockOrganizer_newCollection => '新建收藏集';
-
-  @override
-  String get blockOrganizer_newCollectionFolder => '新建收藏文件夹';
-
-  @override
-  String get blockOrganizer_newTag => '新标签';
-
-  @override
-  String get blockOrganizer_newFolder => '新建文件夹';
-
-  @override
-  String get blockOrganizer_rootUncategorized => '根目录 / 未分类';
-
-  @override
-  String get blockOrganizer_manageDrag => '管理；拖动排序';
-
-  @override
-  String get blockLibrary_dragSelectedHint => '拖动已选块到左侧的收藏或文件夹，松开后选择复制或移动。';
-
-  @override
-  String blockLibrary_blockCount(Object count) {
-    return '$count 个块';
   }
 
   @override
@@ -10587,12 +8628,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get blockLibrary_collectionMissing => '收藏集不存在';
-
-  @override
-  String get promptBlockEditor_appearance => '块外观';
-
-  @override
-  String get promptBlockEditor_imageUnreadable => '无法读取所选图像';
 
   @override
   String get blockAppearance_classic => '经典';
@@ -11047,14 +9082,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String gallery_galleryInitFailed(Object error) {
     return '画廊初始化失败: $error';
   }
-
-  @override
-  String vibeImport_imageProgress(Object current, Object total, Object source) {
-    return '导入图片($current/$total): $source';
-  }
-
-  @override
-  String get vibeImport_clipboardSource => '剪贴板';
 
   @override
   String get resolution_noAdjustment => '无需调整';
@@ -11690,11 +9717,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get generation_paramsDrawerTooltip => '更多参数';
 
   @override
-  String generation_historyBatchCount(int count) {
-    return '$count 张';
-  }
-
-  @override
   String get library_sizeSmall => '小';
 
   @override
@@ -11727,41 +9749,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get library_more => '更多';
 
   @override
-  String get library_addToGeneration => '加入生图';
-
-  @override
-  String get library_strength => '强度';
-
-  @override
-  String get library_information => '信息';
-
-  @override
-  String get library_fidelity => '保真';
-
-  @override
-  String get library_encodeOnUse => '用时编码';
-
-  @override
-  String get library_reencode => '需重新编码';
-
-  @override
-  String library_unusableModel(String model) {
-    return '不能用于 $model';
-  }
-
-  @override
-  String get library_exportAll => '导出全部';
-
-  @override
-  String get library_rescanFolders => '重新扫描文件夹';
-
-  @override
-  String get library_preview => '预览';
-
-  @override
-  String get viewer_backLocalGallery => '本地画廊';
-
-  @override
   String get viewer_fit => '适应';
 
   @override
@@ -11780,116 +9767,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_toggle_info_panel => '显示 / 隐藏信息栏';
 
   @override
-  String get styleExplore_runNamingHint => '自动命名：随机块名 + 日期，双击名称即可改名';
-
-  @override
-  String styleExplore_roundGenerating(int round) {
-    return '第 $round 轮 · 生成中';
-  }
-
-  @override
-  String get styleExplore_inspectorTitle => '详情';
-
-  @override
-  String styleExplore_failedBadge(int count) {
-    return '失败 $count';
-  }
-
-  @override
-  String get styleExplore_showInspector => '展开检查器';
-
-  @override
-  String styleExplore_roundProgress(int round, int current, int total) {
-    return '第 $round 轮 · $current / $total';
-  }
-
-  @override
-  String get styleExplore_earlier => '更早';
-
-  @override
-  String get styleExplore_noMatchingRuns => '没有匹配的探索';
-
-  @override
-  String styleExplore_lineCount(int count) {
-    return '$count 条进化线';
-  }
-
-  @override
-  String get styleExplore_newRunDescription => '用当前提示词和参数开一个新的，名字可以之后改';
-
-  @override
   String styleExplore_autoRunName(String blocks, String time) {
     return '$blocks · $time';
   }
-
-  @override
-  String get styleExplore_largeCandidates => '大候选图';
-
-  @override
-  String get styleExplore_hideInspector => '收起检查器';
-
-  @override
-  String get styleExplore_searchRuns => '搜索探索名称或画师';
-
-  @override
-  String styleExplore_favoriteCount(int count) {
-    return '收藏 $count';
-  }
-
-  @override
-  String styleExplore_generatingBadge(int current, int total) {
-    return '生成中 $current/$total';
-  }
-
-  @override
-  String styleExplore_roundCount(int count) {
-    return '$count 轮';
-  }
-
-  @override
-  String styleExplore_pausedRemaining(int count) {
-    return '已暂停 · 剩 $count 张';
-  }
-
-  @override
-  String get styleExplore_stopRun => '停止生成';
-
-  @override
-  String get styleExplore_thisWeek => '本周';
-
-  @override
-  String get styleExplore_today => '今天';
-
-  @override
-  String get styleExplore_smallCandidates => '小候选图';
-
-  @override
-  String styleExplore_imageCount(int count) {
-    return '$count 张';
-  }
-
-  @override
-  String get styleExplore_variablesTitle => '随机变量';
-
-  @override
-  String get styleExplore_variablesHint => '每张重新抽取';
-
-  @override
-  String get styleExplore_variablesExplanation => '每张候选会记录启用的随机或顺序遗传块抽到了哪些内容。';
-
-  @override
-  String styleExplore_variablePoolSize(int count) {
-    return '池 $count 项';
-  }
-
-  @override
-  String get styleExplore_variableEvolutionTarget => '进化目标';
-
-  @override
-  String get styleExplore_variableNegative => '负面';
-
-  @override
-  String get styleExplore_variablesEmpty => '提示词里还没有随机块，抽出来的图会很像';
 
   @override
   String get styleExplore_openBlockLibrary => '打开块库';
@@ -11901,498 +9781,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get styleExplore_drawCountSuffix => '张 · 逐张生成';
 
   @override
-  String get styleExplore_candidatesTab => '候选';
-
-  @override
-  String get styleExplore_evolutionTab => '进化';
-
-  @override
-  String styleExplore_deepRoundTitle(String name, int generation) {
-    return '进化 · $name 第 $generation 代';
-  }
-
-  @override
-  String styleExplore_wallRoundCount(int count) {
-    return '$count 张';
-  }
-
-  @override
-  String get styleExplore_wallGenerating => '正在生成';
-
-  @override
-  String styleExplore_roundFailures(int count) {
-    return '失败 $count';
-  }
-
-  @override
-  String styleExplore_queued(int number) {
-    return '排队 #$number';
-  }
-
-  @override
-  String styleExplore_generatingCandidate(int number) {
-    return '生成中 #$number';
-  }
-
-  @override
-  String get styleExplore_generationFailed => '生成失败';
-
-  @override
-  String get styleExplore_failureHint => '悬停查看原因';
-
-  @override
-  String get styleExplore_imageDeleted => '图片已删除';
-
-  @override
-  String get styleExplore_parentBadge => '父本';
-
-  @override
-  String get styleExplore_opMutation => '变异';
-
-  @override
-  String get styleExplore_opCrossover => '交叉';
-
-  @override
-  String get styleExplore_opInjection => '注入';
-
-  @override
-  String get styleExplore_copyArtists => '复制画师串';
-
-  @override
-  String get styleExplore_interrupted => '已中断';
-
-  @override
-  String get styleExplore_emptyFilter => '没有符合筛选的候选';
-
-  @override
-  String get styleExplore_emptyRound => '本轮还没有候选';
-
-  @override
-  String get styleExplore_unfavorite => '取消收藏';
-
-  @override
-  String get styleExplore_groupLabel => '分组';
-
-  @override
-  String get styleExplore_newGroup => '新建分组…';
-
-  @override
-  String get styleExplore_saveBlock => '存为块';
-
-  @override
-  String get styleExplore_startEvolution => '开始进化';
-
-  @override
-  String get styleExplore_newestFirst => '最新轮在前';
-
-  @override
-  String get styleExplore_oldestFirst => '最早轮在前';
-
-  @override
-  String get styleExplore_pickEvolution => '挑几张去进化';
-
-  @override
-  String get styleExplore_deleteCandidatesTitle => '删除候选';
-
-  @override
-  String styleExplore_deleteCandidatesMessage(int count) {
-    return '将删除 $count 张候选及其图片副本，图库源图保留。';
-  }
-
-  @override
-  String get styleExplore_inspectorEmpty => '选一张候选查看详情';
-
-  @override
-  String get styleExplore_drawsTitle => '本张抽到';
-
-  @override
-  String get styleExplore_drawsAfterGeneration => '生成完成后显示';
-
-  @override
-  String get styleExplore_emptyDraw => '这次没有抽中（池里有空项）';
-
-  @override
-  String get styleExplore_hearted => '已收藏';
-
-  @override
-  String get styleExplore_joinEvolution => '加入进化';
-
-  @override
-  String get styleExplore_applyToEditor => '套用到编辑区';
-
-  @override
-  String get styleExplore_seedName => '种子';
-
-  @override
-  String get styleExplore_elapsedName => '耗时';
-
-  @override
-  String get styleExplore_parameters => '参数';
-
-  @override
-  String get styleExplore_modelName => '模型';
-
-  @override
-  String get styleExplore_fullPrompt => '完整提示词';
-
-  @override
-  String get styleExplore_mergedArtists => '合在一起的画师（去重）';
-
-  @override
-  String get styleExplore_selectionExplanation =>
-      '存为块会把这些合成一个块；开始进化会把每张图的画师串作为一个父本。';
-
-  @override
-  String get styleExplore_quickGroupHint => '按 1–9 快速归组';
-
-  @override
-  String get styleExplore_newGroupChip => '新分组';
-
-  @override
-  String styleExplore_parameterSummary(
-    int width,
-    int height,
-    int steps,
-    String scale,
-  ) {
-    return '$width×$height · $steps 步 · $scale';
-  }
-
-  @override
-  String get styleExplore_viewerBack => '画风探索';
-
-  @override
-  String styleExplore_viewerPosition(int index, int total) {
-    return '第 $index 张 / 共 $total 张';
-  }
-
-  @override
-  String get styleExplore_viewerGroupsShortcut => '按 1–9 归组，0 移回未分组';
-
-  @override
-  String get styleExplore_seedClickCopy => '种子（点击复制）';
-
-  @override
   String get styleExplore_appliedToEditor => '已套用到编辑区';
-
-  @override
-  String styleExplore_generationNumber(int index) {
-    return '第 $index 代';
-  }
-
-  @override
-  String get styleExplore_currentGeneration => '当前';
-
-  @override
-  String styleExplore_generationStart(int count) {
-    return '从候选里选了 $count 张作为起点';
-  }
-
-  @override
-  String styleExplore_generationSource(int index, int count, int roots) {
-    return '由第 $index 代挑 $count 张 + 第 1 代回交 $roots 张';
-  }
-
-  @override
-  String get styleExplore_parentsByPreference => '父本 · 按偏好排序';
-
-  @override
-  String get styleExplore_backcross => '回交';
-
-  @override
-  String styleExplore_childrenCount(int count) {
-    return '子代 · $count';
-  }
-
-  @override
-  String styleExplore_breedSelected(int count, int index) {
-    return '用选中的 $count 张培育第 $index 代';
-  }
-
-  @override
-  String get styleExplore_generationBusy => '这一代还在生成';
-
-  @override
-  String get styleExplore_regeneratePrefix => '再生成';
-
-  @override
-  String get styleExplore_regenerateSuffix => '张子代';
-
-  @override
-  String get styleExplore_pairCompare => '两两比较排序';
-
-  @override
-  String get styleExplore_howToUse => '怎么用';
-
-  @override
-  String get styleExplore_helpParents => '父本是你选中的画师组合，偏好越高，越容易参与组合。';
-
-  @override
-  String get styleExplore_helpChildren => '子代由父本交叉、变异或从画师池注入新画师产生。';
-
-  @override
-  String get styleExplore_helpCompare => '两两比较会更新父本偏好，影响后续子代组合。';
-
-  @override
-  String get styleExplore_helpBackcross => '培育下一代时，会自动带上第 1 代父本做回交。';
-
-  @override
-  String get styleExplore_originTitle => '怎么来的';
-
-  @override
-  String get styleExplore_originCross => '由这几张父本的画师交叉组合';
-
-  @override
-  String get styleExplore_originMutation => '在父本基础上替换了部分画师';
-
-  @override
-  String get styleExplore_originInjection => '从池里注入了新画师';
-
-  @override
-  String get styleExplore_newArtist => '新';
-
-  @override
-  String get styleExplore_evolutionEmpty => '从候选里挑几张喜欢的，开始一条进化线';
-
-  @override
-  String get styleExplore_pickFromCandidates => '去候选里挑';
-
-  @override
-  String styleExplore_generationSummary(
-    int parents,
-    int children,
-    int selected,
-  ) {
-    return '$parents 个父本 → $children 张子代 · 选了 $selected 张';
-  }
-
-  @override
-  String get styleExplore_breedNext => '培育下一代';
-
-  @override
-  String get styleExplore_optionalName => '名称（可不填）';
-
-  @override
-  String get styleExplore_childrenEmpty => '还没有子代，在上面生成一批';
-
-  @override
-  String get styleExplore_evolutionStepOne => '父本的画师串互相变异、交叉';
-
-  @override
-  String get styleExplore_evolutionStepTwo => '可以两两比较帮你排序';
-
-  @override
-  String get styleExplore_evolutionStepThree => '选中的子代成为新父本';
-
-  @override
-  String get styleExplore_evolutionNewLine => '新建进化线';
-
-  @override
-  String styleExplore_evolutionJoinLine(String name) {
-    return '加入「$name」当前代';
-  }
-
-  @override
-  String get styleExplore_evolutionName => '进化线名称';
-
-  @override
-  String styleExplore_defaultEvolutionName(int n) {
-    return '进化线 $n';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => '再加一段自定义画师串';
-
-  @override
-  String get styleExplore_evolutionCustomHint => '输入画师串';
-
-  @override
-  String get styleExplore_evolutionParentEmpty => '没有可用的画师串';
-
-  @override
-  String get styleExplore_evolutionTarget => '子代会替换提示词里';
-
-  @override
-  String get styleExplore_evolutionOnlyCreate => '只创建';
-
-  @override
-  String get styleExplore_evolutionOnlyJoin => '只加入';
-
-  @override
-  String styleExplore_evolutionCreateGenerate(int count) {
-    return '创建并生成 $count 张';
-  }
-
-  @override
-  String styleExplore_evolutionJoinGenerate(int count) {
-    return '加入并生成 $count 张';
-  }
-
-  @override
-  String get styleExplore_evolutionFirstBatch => '第一批子代';
-
-  @override
-  String styleExplore_evolutionMinimum(int count) {
-    return '张（至少 $count）';
-  }
-
-  @override
-  String styleExplore_evolutionCreated(String name) {
-    return '已创建进化线「$name」';
-  }
-
-  @override
-  String styleExplore_evolutionJoined(String name) {
-    return '已加入进化线「$name」';
-  }
-
-  @override
-  String get styleExplore_sortLiveSave => '结果实时保存，可以随时关闭';
-
-  @override
-  String get styleExplore_sortRanking => '当前排名 · 实时';
-
-  @override
-  String get styleExplore_sortRankingHint => '排名会影响下一批子代里各父本被选中的概率';
-
-  @override
-  String get styleExplore_sortSpace => '空格';
-
-  @override
-  String styleExplore_saveSingleSubtitle(int n) {
-    return '#$n 的画师存成一个块';
-  }
-
-  @override
-  String styleExplore_saveManySubtitle(int count) {
-    return '来自 $count 张候选，已合并去重';
-  }
-
-  @override
-  String get styleExplore_saveArtistsOnly => '只要抽到的画师';
-
-  @override
-  String get styleExplore_saveFullPositive => '完整正向提示词';
-
-  @override
-  String get styleExplore_saveNoDraws => '这些候选没有正向遗传实例记录，请保存完整正向提示词';
-
-  @override
-  String get styleExplore_saveContent => '内容';
-
-  @override
-  String get styleExplore_saveRemoveAtoms => '点 × 去掉不要的画师';
-
-  @override
-  String styleExplore_saveRemoved(int count) {
-    return '已去掉 $count 个';
-  }
-
-  @override
-  String get styleExplore_saveRestore => '恢复';
-
-  @override
-  String get styleExplore_saveName => '名称';
-
-  @override
-  String get styleExplore_saveColor => '颜色';
-
-  @override
-  String get styleExplore_saveIcon => '图标';
-
-  @override
-  String get styleExplore_saveFolder => '放到块库';
-
-  @override
-  String get styleExplore_saveRoot => '根目录';
-
-  @override
-  String get styleExplore_saveHint => '存好后可以在块库里拖进提示词';
-
-  @override
-  String get styleExplore_onboardingTitle => '用随机块批量试画风';
-
-  @override
-  String get styleExplore_onboardingRandomTitle => '放入随机块';
-
-  @override
-  String get styleExplore_onboardingDrawTitle => '抽一批候选';
 
   @override
   String styleExplore_onboardingDraw(int count) {
     return '抽 $count 张候选';
   }
-
-  @override
-  String get styleExplore_onboardingReviewTitle => '收藏、比较、进化';
-
-  @override
-  String get styleExplore_onboardingOpenPrevious => '打开以前的探索';
-
-  @override
-  String get styleExplore_onboardingSubtitle => '每张图都会从随机块里重新抽画师，你只管挑喜欢的';
-
-  @override
-  String get styleExplore_onboardingRandomDescription =>
-      '在提示词里插入画师池，例如 400 精选画师池。左边会列出检测到的随机变量。';
-
-  @override
-  String styleExplore_onboardingDrawDescription(int count) {
-    return '点左下角“抽 $count 张候选”。每张图下方会写出它抽到了哪些画师。';
-  }
-
-  @override
-  String get styleExplore_onboardingReviewDescription =>
-      '喜欢的按 F 收藏；挑几张开始进化，让好的画师组合继续杂交出新组合。';
-
-  @override
-  String styleExplore_onboardingDetected(int count) {
-    return '已检测到 $count 个';
-  }
-
-  @override
-  String get styleExplore_compareTitle => '两两比较 · 给父本排个序';
-
-  @override
-  String get styleExplore_compareQuestion => '哪张更接近你想要的画风？';
-
-  @override
-  String styleExplore_childLabel(int index) {
-    return '子代 #$index';
-  }
-
-  @override
-  String styleExplore_generationCounts(int parents, int children) {
-    return '$parents 个父本 → $children 张子代';
-  }
-
-  @override
-  String get styleExplore_viewLarge => '看大图';
-
-  @override
-  String get styleExplore_saveDialogTitle => '存为提示词块';
-
-  @override
-  String styleExplore_startDialogTitle(int count) {
-    return '用 $count 张候选开始进化';
-  }
-
-  @override
-  String get styleExplore_stepGenerate => '生成子代';
-
-  @override
-  String get styleExplore_stepPick => '挑出好的';
-
-  @override
-  String get styleExplore_stepBreed => '培育下一代';
-
-  @override
-  String styleExplore_firstGenerationParents(int count) {
-    return '第 1 代父本 · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionTargetAfter => '的位置，其他内容不变';
 
   @override
   String get stats_title => '统计';
@@ -17359,11 +14753,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_variations => '变体';
 
   @override
-  String gen_variationsCost(Object cost) {
-    return '变体（$cost Anlas）';
-  }
-
-  @override
   String get gen_upscale => '放大';
 
   @override
@@ -18399,6 +15788,520 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get tools_emoPlayful => '俏皮';
+
+  @override
+  String get auth_logoutConfirm => '确定退出当前账号？';
+
+  @override
+  String get naiAgent_title => 'NAI Agent';
+
+  @override
+  String get naiAgent_local => '本地';
+
+  @override
+  String get naiAgent_permissionMode => '审批模式';
+
+  @override
+  String get naiAgent_permissionAuto => '自动';
+
+  @override
+  String get naiAgent_permissionAsk => '询问';
+
+  @override
+  String get naiAgent_permissionReadOnly => '只读';
+
+  @override
+  String get naiAgent_permissionAutoHint =>
+      '工作区内的常规修改自动执行；命令、删除和未知工具仍需审批。生图确认保留。';
+
+  @override
+  String get naiAgent_permissionAskHint => '工作区读取直接执行；修改、命令和未知工具逐次审批。生图仍走费用确认。';
+
+  @override
+  String get naiAgent_permissionReadOnlyHint =>
+      '只读取和讨论；禁止修改及生成，未知工具不执行。切换时停止 Agent 当前任务，不影响手动生图。';
+
+  @override
+  String get naiAgent_useModelSetting => '使用模型设置';
+
+  @override
+  String get naiAgent_permissionTitle => '需要审批';
+
+  @override
+  String get naiAgent_permissionOnce => '允许一次';
+
+  @override
+  String get naiAgent_permissionSession => '本会话允许相同调用';
+
+  @override
+  String get naiAgent_permissionDeny => '拒绝';
+
+  @override
+  String get naiAgent_thinking => '思考强度 · 下一次任务生效';
+
+  @override
+  String get naiAgent_thinkingUnsupported => '此模型没有已确认的可调思考档位，请先检查模型设置。';
+
+  @override
+  String get naiAgent_pasteImage => '粘贴剪贴板图片';
+
+  @override
+  String get naiAgent_contextUnknown => '上下文用量暂不可用，等待已知模型窗口及实际用量。';
+
+  @override
+  String naiAgent_contextTooltip(
+    String percent,
+    String remaining,
+    String window,
+  ) {
+    return '可用上下文 $percent%\n$remaining / $window tokens 剩余\n点击查看详细统计';
+  }
+
+  @override
+  String get naiAgent_statistics => '上下文与会话统计';
+
+  @override
+  String get naiAgent_contextUsage => '当前上下文占用 · 估算';
+
+  @override
+  String get naiAgent_contextRemaining => '剩余上下文';
+
+  @override
+  String get naiAgent_contextWindow => '模型窗口';
+
+  @override
+  String get naiAgent_sessionUsage => '本会话累计用量';
+
+  @override
+  String get naiAgent_tokensInput => '输入';
+
+  @override
+  String get naiAgent_tokensOutput => '输出';
+
+  @override
+  String get naiAgent_tokensCacheRead => '缓存读取';
+
+  @override
+  String get naiAgent_tokensCacheWrite => '缓存写入';
+
+  @override
+  String get naiAgent_tokensTotal => '累计 tokens';
+
+  @override
+  String get naiAgent_cumulativeUsageHint => '累计用量包含历次请求，不等于当前上下文占用。';
+
+  @override
+  String get naiAgent_messageCounts => '会话记录';
+
+  @override
+  String get naiAgent_userAssistantMessages => '用户 / 助手消息';
+
+  @override
+  String get naiAgent_toolCalls => '工具调用';
+
+  @override
+  String get naiAgent_cost => '费用';
+
+  @override
+  String get naiAgent_defaultWorkspace => '工作区 1';
+
+  @override
+  String get naiAgent_newChat => '新聊天';
+
+  @override
+  String get naiAgent_settings => 'Agent 设置';
+
+  @override
+  String get naiAgent_workspace => '工作区';
+
+  @override
+  String get naiAgent_createWorkspace => '新建工作区';
+
+  @override
+  String get naiAgent_rename => '重命名';
+
+  @override
+  String get naiAgent_name => '名称';
+
+  @override
+  String get naiAgent_placeholder => '描述想法，或问一个问题…';
+
+  @override
+  String get naiAgent_welcome => '从一个想法开始';
+
+  @override
+  String get naiAgent_welcomeHint => '讨论提示词、分析图片、整理工作区。\n先聊清楚，再动手。';
+
+  @override
+  String get naiAgent_suggestCurrent => '检查当前草稿';
+
+  @override
+  String get naiAgent_suggestImage => '分析参考图片';
+
+  @override
+  String get naiAgent_suggestWorkspace => '整理工作区';
+
+  @override
+  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
+
+  @override
+  String get naiAgent_promptCurrent => '看看当前草稿和参数，先不要修改。';
+
+  @override
+  String get naiAgent_promptImage => '分析当前图片的构图和画风，先不要生成。';
+
+  @override
+  String get naiAgent_promptWorkspace => '查看当前工作区，建议整理方式，先不要修改。';
+
+  @override
+  String get naiAgent_tipTitle => 'TIPS / 小提示';
+
+  @override
+  String get naiAgent_tipNext => '下一条提示';
+
+  @override
+  String get naiAgent_tipReadOnly => '先用「只读」模式探索，再决定要修改什么。';
+
+  @override
+  String get naiAgent_tipAttachments => '拖入参考图，或点击 + 添加附件，让讨论更具体。';
+
+  @override
+  String get naiAgent_tipGeneration => '生成前会显示费用并等待确认，不会直接生图。';
+
+  @override
+  String get naiAgent_welcomeFootnote => '所有操作遵循当前审批模式';
+
+  @override
+  String get naiAgent_chooseModel => '选择模型';
+
+  @override
+  String get naiAgent_modelSettings => '管理模型与接口';
+
+  @override
+  String get naiAgent_attach => '添加图片';
+
+  @override
+  String get naiAgent_removeAttachment => '移除附件';
+
+  @override
+  String get naiAgent_selectedImage => '附上当前图片';
+
+  @override
+  String get naiAgent_send => '发送';
+
+  @override
+  String get naiAgent_stop => '停止任务';
+
+  @override
+  String get naiAgent_queue => '排队';
+
+  @override
+  String get naiAgent_steer => '引导';
+
+  @override
+  String get naiAgent_promote => '转为引导';
+
+  @override
+  String get naiAgent_waiting => '等待你的回答';
+
+  @override
+  String get naiAgent_working => '正在处理';
+
+  @override
+  String get naiAgent_waitingSlot => '等待服务商请求额度';
+
+  @override
+  String get naiAgent_starting => '正在打开聊天';
+
+  @override
+  String get naiAgent_interrupted => '上次任务已中断，未自动重发。';
+
+  @override
+  String get naiAgent_restorePending => '放回输入框';
+
+  @override
+  String get naiAgent_withdraw => '撤回';
+
+  @override
+  String get naiAgent_newContent => '回到最新消息';
+
+  @override
+  String get naiAgent_toolRunning => '执行中';
+
+  @override
+  String get naiAgent_toolDone => '完成';
+
+  @override
+  String get naiAgent_toolFailed => '失败';
+
+  @override
+  String get naiAgent_arguments => '参数';
+
+  @override
+  String get naiAgent_result => '结果';
+
+  @override
+  String get naiAgent_systemPrompt => '内置提示词';
+
+  @override
+  String get naiAgent_promptHelp =>
+      '自定义内容替换默认提示词；工具地图由应用追加。已有聊天记录保持原样，后续请求使用新内容。';
+
+  @override
+  String get naiAgent_restoreDefault => '恢复默认';
+
+  @override
+  String get naiAgent_showEffective => '查看生效提示词';
+
+  @override
+  String get naiAgent_useGlobal => '使用全局提示词';
+
+  @override
+  String get naiAgent_save => '保存';
+
+  @override
+  String get naiAgent_runLimit => '每次运行的模型请求上限';
+
+  @override
+  String get naiAgent_enterSends => 'Enter 发送，Shift+Enter 换行';
+
+  @override
+  String get naiAgent_dataFolder => '工作区数据目录';
+
+  @override
+  String get naiAgent_openFolder => '打开文件夹';
+
+  @override
+  String get naiAgent_toolsManuals => '工具与手册';
+
+  @override
+  String get naiAgent_toolsHint => '当前状态、图片、提示词和工作区文件按需调用。详细 NAI 手册按模型读取。';
+
+  @override
+  String get naiAgent_unknownCost => '实际费用以服务商为准';
+
+  @override
+  String get naiAgent_error => '操作未完成，请检查模型设置或工作区文件。';
+
+  @override
+  String get naiAgent_visionDisabled => '此模型尚未启用图片输入，请在模型设置中确认支持后开启。';
+
+  @override
+  String get naiAgent_inputChanged => '准备期间输入已改变，请发送当前草稿。';
+
+  @override
+  String get naiAgent_imageLimit => '图片格式无效、文件过大或超出上传限制。';
+
+  @override
+  String get naiAgent_composerNotEmpty => '请先保存或发送当前输入，再恢复这条消息。';
+
+  @override
+  String get naiAgent_compact => '压缩聊天上下文';
+
+  @override
+  String get naiAgent_export => '导出聊天';
+
+  @override
+  String get naiAgent_copyMessage => '复制消息';
+
+  @override
+  String get naiAgent_editMessage => '编辑消息';
+
+  @override
+  String get naiAgent_regenerate => '重新回答';
+
+  @override
+  String get naiAgent_submitAnswer => '提交回答';
+
+  @override
+  String get naiAgent_customAnswer => '也可以输入自己的回答';
+
+  @override
+  String get naiAgent_close => '收起面板';
+
+  @override
+  String get naiAgent_showChats => '聊天列表';
+
+  @override
+  String get naiAgent_runtimeMissing => 'Agent 运行组件尚未安装，请使用完整更新包。';
+
+  @override
+  String get naiAgent_usage => '模型用量';
+
+  @override
+  String get naiAgent_cancel => '取消';
+
+  @override
+  String get naiAgent_dropHint => '松开以附加到此聊天';
+
+  @override
+  String get naiAgent_emptyAttachment => '图片读取失败';
+
+  @override
+  String get naiAgent_globalScope => '全局默认';
+
+  @override
+  String get naiAgent_workspaceScope => '当前工作区';
+
+  @override
+  String get naiAgent_generationTitle => '生成授权';
+
+  @override
+  String get naiAgent_generationWaiting => '等待生成授权';
+
+  @override
+  String naiAgent_generationAccount(Object name) {
+    return '账号：$name';
+  }
+
+  @override
+  String naiAgent_generationBatch(Object requests, Object size, Object total) {
+    return '$requests 次请求 × $size 张 · 共 $total 张';
+  }
+
+  @override
+  String naiAgent_generationUnit(Object cost) {
+    return '每次请求 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationEncoding(Object cost) {
+    return '参考图编码 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationTotal(Object cost) {
+    return '预计 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationBalance(Object balance) {
+    return '当前余额 $balance Anlas';
+  }
+
+  @override
+  String get naiAgent_generationEstimateNote => '费用为预估，以服务端扣费为准。';
+
+  @override
+  String get naiAgent_generationChanged => '配置或报价已变化，请重新准备。';
+
+  @override
+  String naiAgent_generationLocalEnhance(Object model, Object scale) {
+    return '生成后本地超分：$model ×$scale';
+  }
+
+  @override
+  String get naiAgent_generationText => '文生图';
+
+  @override
+  String get naiAgent_generationImage => '图生图';
+
+  @override
+  String get naiAgent_generationInpaint => '重绘';
+
+  @override
+  String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
+    return '删除这个空文件夹及其图库分类？其他文件夹中的图片会保留。\n$path';
+  }
+
+  @override
+  String get naiAgent_extensions => '扩展';
+
+  @override
+  String get naiAgent_interactionExtension => 'Studio 交互';
+
+  @override
+  String get naiAgent_extensionRequired => '内置 · 必需';
+
+  @override
+  String get naiAgent_interactionExtensionHint =>
+      '按需读取当前 Studio 状态，并通过问题卡片收集用户回答。';
+
+  @override
+  String get naiAgent_extensionAddFile => '添加扩展文件';
+
+  @override
+  String get naiAgent_extensionAddFolder => '添加扩展目录';
+
+  @override
+  String get naiAgent_extensionsHint =>
+      '扩展在各工作区独立加载。更改会在当前任务结束后的下一次发送生效。外部扩展能运行本地代码，请选择可信来源。';
+
+  @override
+  String get naiAgent_extensionError => '扩展运行失败';
+
+  @override
+  String get naiAgent_extensionCompatibility =>
+      '支持本地 Pi 扩展及扩展包目录、工具、命令和标准提问对话框；终端专用自定义界面不在桌面渲染。';
+
+  @override
+  String get naiAgent_instructions => '指令';
+
+  @override
+  String get naiAgent_globalInstructions => '全局指令';
+
+  @override
+  String get naiAgent_globalInstructionsHelp =>
+      '所有工作区都会使用，可填写语言、风格或任务偏好。留空即可停用这一部分。';
+
+  @override
+  String get naiAgent_systemPromptPrefix => '系统提示词前置内容';
+
+  @override
+  String get naiAgent_systemPromptPrefixHelp =>
+      '插在 NAI Agent 基础提示词之前，保留基础提示词和工具地图。留空即可停用这一部分。';
+
+  @override
+  String get naiAgent_instructionOrder =>
+      '生效顺序：前置内容 → 基础提示词 → 全局指令 → 工作区规则。仅影响后续请求。';
+
+  @override
+  String get naiAgent_saveInstructions => '保存指令';
+
+  @override
+  String get naiAgent_mcpBuiltin => 'NAI Studio · 内置工具组';
+
+  @override
+  String get naiAgent_mcpBuiltinHint =>
+      '提示词、积木、百科、图片、历史、参考图、生图和设置工具。默认按需发现，原有备份、版本校验和真实确认继续生效。';
+
+  @override
+  String get naiAgent_mcpAdd => '添加 MCP 服务器';
+
+  @override
+  String get naiAgent_mcpName => '服务器名称';
+
+  @override
+  String get naiAgent_mcpConfig => '服务器配置（JSON）';
+
+  @override
+  String get naiAgent_mcpConfigHint =>
+      '支持 stdio 和 Streamable HTTP。粘贴单个服务器配置对象；command 为可执行文件，args 为数组。可设置 env、cwd、url、headers、oauth 和 toolExposure。配置保存在加密存储中。';
+
+  @override
+  String get naiAgent_mcpStatus => '查看连接状态';
+
+  @override
+  String get naiAgent_mcpReconnect => '重新连接';
+
+  @override
+  String get naiAgent_mcpLogin => '登录';
+
+  @override
+  String get naiAgent_mcpLogout => '退出登录';
+
+  @override
+  String get naiAgent_mcpHint =>
+      '默认使用 CodeMode 按需发现。codemode：沙盒调用；deferred：搜索后直接调用；direct：常驻；hidden：隐藏。配置变更在下一次空闲调用时生效。连接检查不会调用聊天模型。';
+
+  @override
+  String get generation_generate => '生成';
+
+  @override
+  String get detail_imageDetails => '图片详情';
+
+  @override
+  String get promptBlockLibrary_title => '提示词块';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -18425,47 +16328,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_cancel => '取消';
-
-  @override
-  String get onlineFav_all => '全部';
-
-  @override
-  String get onlineFav_rootCollection => '根收藏';
-
-  @override
-  String get onlineFav_newCollection => '新增子集';
-
-  @override
-  String get onlineFav_renameCollection => '重新命名子集';
-
-  @override
-  String get onlineFav_deleteCollection => '刪除子集';
-
-  @override
-  String get onlineFav_empty => '還沒有收藏的作品';
-
-  @override
-  String onlineFav_authorWorkCount(Object n) {
-    return '$n 張作品';
-  }
-
-  @override
-  String get onlineFav_moveHere => '移到這裡';
-
-  @override
-  String get onlineFav_removeFavorite => '取消收藏';
-
-  @override
-  String get onlineFav_favoriteAuthor => '收藏作者';
-
-  @override
-  String get onlineFav_unfavoriteAuthor => '取消收藏作者';
-
-  @override
-  String get onlineFav_authorFavorited => '已收藏作者';
-
-  @override
-  String get onlineFav_authorUnfavorited => '已取消收藏作者';
 
   @override
   String get common_confirm => '確定';
@@ -18531,9 +16393,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_added => '已新增';
 
   @override
-  String get common_new => '新增';
-
-  @override
   String get common_confirmDelete => '確認刪除';
 
   @override
@@ -18556,9 +16415,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_clearInputConfirm => '確定要清空輸入內容嗎？';
 
   @override
-  String get common_yesterday => '昨天';
-
-  @override
   String common_daysAgo(Object days) {
     return '$days天前';
   }
@@ -18579,9 +16435,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_apply => '應用';
 
   @override
-  String get common_move => '移動';
-
-  @override
   String get common_favorite => '收藏';
 
   @override
@@ -18595,9 +16448,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_grid => '網格';
-
-  @override
-  String get common_pack => '打包';
 
   @override
   String get common_multiSelect => '多選';
@@ -18662,18 +16512,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get nav_canvas => '畫布';
-
-  @override
-  String get nav_onlineGallery => '畫廊';
-
-  @override
-  String get nav_expandSidebar => '展開側邊欄';
-
-  @override
-  String get nav_collapseSidebar => '收起側邊欄';
-
-  @override
   String get auth_login => '登入';
 
   @override
@@ -18717,9 +16555,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get auth_passwordRequired => '請輸入密碼';
-
-  @override
-  String get auth_tokenLogin => 'API Token 登入';
 
   @override
   String get auth_tokenLoginRecommended => 'API Token 登入（推薦）';
@@ -18778,9 +16613,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get auth_switchAccount => '切換帳號';
-
-  @override
-  String get auth_currentAccount => '當前帳號';
 
   @override
   String get auth_selectAccount => '選擇帳號';
@@ -18890,9 +16722,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_title => '設定';
-
-  @override
-  String get settings_account => '帳戶';
 
   @override
   String get settings_savedAccounts => '已儲存帳號';
@@ -19115,12 +16944,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_setAsDefaultSuccess => '已設為預設帳號';
 
   @override
-  String get generation_title => '生成';
-
-  @override
-  String get generation_generate => '生成';
-
-  @override
   String generation_cooldownRemaining(Object seconds) {
     return '等待 $seconds 秒';
   }
@@ -19139,34 +16962,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get generation_generationFailed => '生成失敗';
-
-  @override
-  String generation_progress(Object progress) {
-    return '生成中... $progress%';
-  }
-
-  @override
-  String get generation_lockHistoryScroll => '鎖定歷史滾動';
-
-  @override
-  String get generation_unlockHistoryScroll => '解鎖歷史滾動';
-
-  @override
-  String get generation_downloadAllImages => '下載全部影像';
-
-  @override
-  String get generation_selectMultiple => '多選';
-
-  @override
-  String get generation_deselectAll => '退出多選';
-
-  @override
-  String generation_deleteSelectedImages(int count) {
-    return '刪除選中影像 ($count)';
-  }
-
-  @override
-  String get generation_deleteSelectedImagesTitle => '刪除選中影像';
 
   @override
   String generation_deleteSelectedImagesConfirm(int count) {
@@ -19242,21 +17037,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_canvasUseSeed => '點選複用此種子';
 
   @override
-  String generation_canvasPinnedCount(int count) {
-    return '固定 $count';
-  }
-
-  @override
-  String get generation_params => '參數';
-
-  @override
-  String get generation_paramsSettings => '生成參數';
-
-  @override
   String get generation_history => '歷史';
-
-  @override
-  String get generation_historyRecord => '歷史記錄';
 
   @override
   String get generation_failedStreamSnapshot => '失敗快照';
@@ -19264,15 +17045,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get generation_failedStreamSnapshotHint =>
       '生成未完成，僅保留最後一幀預覽；不可儲存、收藏或用於圖生圖';
-
-  @override
-  String get generation_noHistory => '暫無歷史記錄';
-
-  @override
-  String get generation_clearHistory => '清除歷史記錄';
-
-  @override
-  String get generation_clearHistoryConfirm => '確定要清除所有歷史記錄嗎？此操作不可復原。';
 
   @override
   String get generation_model => '模型';
@@ -19686,9 +17458,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get img2img_decodeSourceFailed => '無法解碼來源影像';
 
   @override
-  String get img2img_upscalePanelOpened => '已開啟圖生圖超分面板';
-
-  @override
   String get editor_tolerance => '容差';
 
   @override
@@ -19787,9 +17556,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get editor_fitToWindow => '適應視窗';
-
-  @override
-  String get editor_shortcut100Zoom => '100% 縮放';
 
   @override
   String get editor_effectBrightness => '亮度';
@@ -20037,22 +17803,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibe_sourceType => '資料來源';
 
   @override
-  String get vibe_reuseButton => '一鍵複用';
-
-  @override
   String get vibe_info => 'Vibe 資訊';
 
   @override
   String get vibe_name => '名稱';
-
-  @override
-  String get vibe_strength => '強度';
-
-  @override
-  String get vibe_infoExtracted => '資訊提取';
-
-  @override
-  String get vibe_shiftReplaceHint => 'Shift+點選 替換';
 
   @override
   String get character_buttonLabel => '角色/定位';
@@ -20085,15 +17839,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gallery_metaSeed => '種子';
-
-  @override
-  String get gallery_metaSmea => 'SMEA';
-
-  @override
-  String get gallery_promptCopied => '已複製提示詞';
-
-  @override
-  String get gallery_seedCopied => '已複製 Seed';
 
   @override
   String get gallery_sendToKritaAction => '傳送到 Krita';
@@ -20129,63 +17874,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get onlineGallery_search => '搜尋';
-
-  @override
-  String get onlineGallery_popular => '熱門';
-
-  @override
-  String get onlineGallery_favorites => '收藏';
-
-  @override
-  String get onlineGallery_refresh => '重新整理';
-
-  @override
   String get onlineGallery_login => '登入';
 
   @override
-  String get onlineGallery_logout => '登出';
-
-  @override
-  String get onlineGallery_dayRank => '日榜';
-
-  @override
-  String get onlineGallery_weekRank => '周榜';
-
-  @override
-  String get onlineGallery_monthRank => '月榜';
-
-  @override
-  String get onlineGallery_today => '今天';
-
-  @override
-  String onlineGallery_imageCount(Object count) {
-    return '$count 張';
-  }
-
-  @override
-  String get onlineGallery_loadFailed => '載入失敗';
-
-  @override
-  String get onlineGallery_favoritesEmpty => '收藏夾為空';
-
-  @override
-  String get onlineGallery_noResults => '沒有找到圖片';
-
-  @override
   String get onlineGallery_pleaseLogin => '請先登入';
-
-  @override
-  String get onlineGallery_size => '尺寸';
-
-  @override
-  String get onlineGallery_score => '評分';
-
-  @override
-  String get onlineGallery_favCount => '收藏';
-
-  @override
-  String get onlineGallery_type => '類型';
 
   @override
   String get mediaType_video => '影片';
@@ -20194,31 +17886,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mediaType_gif => '動圖';
 
   @override
-  String get onlineGallery_tags => '標籤';
-
-  @override
-  String get onlineGallery_artists => '藝術家';
-
-  @override
-  String get onlineGallery_characters => '角色';
-
-  @override
-  String get onlineGallery_copyrights => '作品';
-
-  @override
-  String get onlineGallery_general => '通用';
-
-  @override
   String get onlineGallery_copied => '已複製';
 
   @override
   String get onlineGallery_copyTags => '複製標籤';
-
-  @override
-  String get onlineGallery_open => '開啟';
-
-  @override
-  String get onlineGallery_send => '傳送';
 
   @override
   String get onlineGallery_sendToTextToImage => '傳送到文生圖';
@@ -20228,18 +17899,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get onlineGallery_noTagInfo => '此圖片沒有標籤資訊';
-
-  @override
-  String get onlineGallery_promptSentToGeneration => '提示詞已傳送到生成頁面';
-
-  @override
-  String get onlineGallery_gifLoadFailed => 'GIF載入失敗';
-
-  @override
-  String get onlineGallery_pinchToZoom => '雙指縮放';
-
-  @override
-  String get onlineGallery_metadata => '後設資料';
 
   @override
   String get onlineGallery_chooseDownloadDirectory => '選擇下載目錄';
@@ -20261,9 +17920,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get onlineGallery_downloadOriginal => '下載原圖';
 
   @override
-  String get onlineGallery_all => '全部';
-
-  @override
   String get onlineGallery_ratingGeneral => '全年齡';
 
   @override
@@ -20274,33 +17930,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get onlineGallery_ratingExplicit => '限制級';
-
-  @override
-  String get onlineGallery_clear => '清除';
-
-  @override
-  String get onlineGallery_previousPage => '上一頁';
-
-  @override
-  String get onlineGallery_nextPage => '下一頁';
-
-  @override
-  String onlineGallery_pageN(Object page) {
-    return '第 $page 頁';
-  }
-
-  @override
-  String get onlineGallery_dateRange => '日期範圍';
-
-  @override
-  String get onlineGallery_fuzzySearch => '模糊匹配';
-
-  @override
-  String get onlineGallery_fuzzySearchTooltip =>
-      '開啟後使用 *tag* 匹配相近標籤；關閉時按 Danbooru 精確標籤搜尋';
-
-  @override
-  String get onlineGallery_blacklistTags => '黑名單標籤';
 
   @override
   String get onlineGallery_blacklistTitle => '線上畫廊黑名單';
@@ -20341,63 +17970,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '未登入 Danbooru，仍可使用本地黑名單；同步需要先登入。';
 
   @override
-  String get onlineGallery_bulkFavorite => '批次收藏';
-
-  @override
-  String get onlineGallery_bulkDownload => '批次下載';
-
-  @override
-  String get onlineGallery_unfavorited => '已取消收藏';
-
-  @override
-  String get onlineGallery_favorited => '已收藏';
-
-  @override
-  String onlineGallery_favoritedImages(Object count) {
-    return '已收藏 $count 張圖片';
-  }
-
-  @override
-  String onlineGallery_selectDownloadDirectoryFailed(Object error) {
-    return '選擇下載目錄失敗: $error';
-  }
-
-  @override
-  String onlineGallery_downloadSelectedStarted(Object count) {
-    return '開始下載 $count 張圖片...';
-  }
-
-  @override
   String onlineGallery_downloadSelectedCompleted(
     Object success,
     Object failed,
   ) {
     return '下載完成: 成功 $success, 失敗 $failed';
   }
-
-  @override
-  String get onlineGallery_startDate => '開始日期';
-
-  @override
-  String get onlineGallery_endDate => '結束日期';
-
-  @override
-  String get onlineGallery_invalidDateFormat => '日期格式無效';
-
-  @override
-  String get onlineGallery_dateOutOfRange => '日期超出範圍';
-
-  @override
-  String get onlineGallery_last30Days => '最近30天';
-
-  @override
-  String get onlineGallery_configureGelbooruApi => '配置 Gelbooru API';
-
-  @override
-  String get onlineGallery_gelbooruApiReady => 'Gelbooru API 已驗證';
-
-  @override
-  String get onlineGallery_gelbooruApiInvalid => 'Gelbooru 憑據已失效';
 
   @override
   String get onlineGallery_gelbooruCredentialsRequired =>
@@ -20427,41 +18005,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get onlineGallery_gelbooruRequestFailed => 'Gelbooru 請求失敗，請稍後重試。';
 
   @override
-  String get onlineGallery_aiTagQuery => '搜尋作品、作者、標題、標籤或模型';
-
-  @override
-  String get onlineGallery_aiTagPromptQuery =>
-      'AI Prompt 搜尋（支援 ::artist: 等原始語法）';
-
-  @override
-  String get onlineGallery_aiTagTimeRange => '時間範圍';
-
-  @override
-  String get onlineGallery_aiTagAllTime => '全部';
-
-  @override
-  String get onlineGallery_aiTagCurrentMonthly => '即時月榜';
-
-  @override
-  String get onlineGallery_aiTagOlderMonthly => '更早歸檔';
-
-  @override
   String get onlineGallery_aiTagRankingProcessing => '排行榜生成中，請稍後重試。';
-
-  @override
-  String get onlineGallery_aiTagNaiOnly => '僅 NAI';
-
-  @override
-  String get onlineGallery_aiTagModelVersion => '模型版本';
-
-  @override
-  String get onlineGallery_viewAuthor => '檢視此作者';
-
-  @override
-  String get onlineGallery_returnFromAuthor => '返回之前的瀏覽位置';
-
-  @override
-  String get onlineGallery_generationParams => '生成參數';
 
   @override
   String get onlineGallery_sourceConfigUnavailable => '無法取得來源配置，請檢查網路後重試。';
@@ -20485,39 +18029,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get onlineGallery_imageUnavailable => '圖片當前不可用。';
 
   @override
-  String get onlineGallery_loadedAll => '已載入全部';
-
-  @override
-  String get onlineGallery_retryAppend => '載入失敗，點選重試';
-
-  @override
-  String onlineGallery_rankNumber(Object rank) {
-    return '第 $rank 名';
-  }
-
-  @override
-  String onlineGallery_multipleImages(Object count) {
-    return '$count 張圖片';
-  }
-
-  @override
-  String get onlineGallery_views => '瀏覽';
-
-  @override
-  String get onlineGallery_downloadAllMedia => '下載作品全部圖片';
-
-  @override
-  String get onlineGallery_copyFullMetadata => '複製完整後設資料';
-
-  @override
-  String get onlineGallery_metadataParseFailed => '後設資料解析失敗，原始內容已保留，可直接複製。';
-
-  @override
   String get onlineGallery_gelbooruReadOnly => '只讀收藏';
-
-  @override
-  String get onlineGallery_gelbooruFavoritesSortHint =>
-      '按帖子 ID 從新到舊排列，不保證與網站收藏時間順序一致。';
 
   @override
   String get tooltip_fullscreenEdit => '全屏編輯';
@@ -21554,9 +19066,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get comparison_loadError => '載入圖片失敗';
 
   @override
-  String get statistics_title => '統計儀表盤';
-
-  @override
   String get localGallery_group_today => '今天';
 
   @override
@@ -22007,9 +19516,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get common_rename => '重新命名';
-
-  @override
-  String get tagLibrary_newCategory => '新增分類';
 
   @override
   String get tagLibrary_tags => '標籤';
@@ -22562,74 +20068,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibeLibrary_title => 'Vibe 庫';
 
   @override
-  String get vibeLibrary_categories => '分類';
-
-  @override
-  String get vibeLibrary_createCategoryTitle => '新增分類';
-
-  @override
-  String get vibeLibrary_createSubCategoryTitle => '新增子分類';
-
-  @override
-  String get vibeLibrary_categoryNameHint => '請輸入分類名稱';
-
-  @override
-  String get vibeLibrary_createCategoryConfirm => '建立';
-
-  @override
-  String get vibeLibrary_deleteCategoryTitle => '確認刪除';
-
-  @override
-  String get vibeLibrary_deleteCategoryContent =>
-      '確定要刪除此分類嗎？分類下的 Vibe 將被移動到未分類。';
-
-  @override
-  String get vibeLibrary_sortTooltip => '排序方式';
-
-  @override
-  String get vibeLibrary_openFolderTooltip => '開啟 Vibe 庫資料夾';
-
-  @override
-  String vibeLibrary_totalCount(Object count) {
-    return '共 $count 個 Vibe';
-  }
-
-  @override
-  String get vibeLibrary_noCategoriesAvailable => '沒有可用的分類';
-
-  @override
-  String get vibeLibrary_moveToCategory => '移動到分類';
-
-  @override
   String get vibeLibrary_uncategorized => '未分類';
-
-  @override
-  String vibeLibrary_movedToCategory(Object count) {
-    return '已移動 $count 個 Vibe';
-  }
-
-  @override
-  String get vibeLibrary_favoriteStatusUpdated => '收藏狀態已更新';
-
-  @override
-  String get vibeLibrary_importFromFile => '從檔案匯入';
-
-  @override
-  String get vibeLibrary_importFromImage => '從圖片匯入';
-
-  @override
-  String get vibeLibrary_importFromClipboard => '從剪貼簿匯入編碼';
-
-  @override
-  String vibeLibrary_openFolderFailed(Object error) {
-    return '開啟資料夾失敗: $error';
-  }
-
-  @override
-  String get vibeLibrary_importFileDialogTitle => '選擇要匯入的 Vibe 檔案';
-
-  @override
-  String get vibeLibrary_preparingImport => '準備匯入...';
 
   @override
   String vibeLibrary_importSuccessCount(Object count) {
@@ -22642,101 +20081,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get vibeLibrary_dropImportHint =>
-      '拖曳 .naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp 檔案或資料夾到此處匯入';
-
-  @override
-  String get vibeLibrary_importing => '正在匯入...';
-
-  @override
-  String vibeLibrary_pageIndicator(Object current, Object total) {
-    return '$current / $total 頁';
-  }
-
-  @override
-  String get vibeLibrary_itemsPerPage => '每頁:';
-
-  @override
-  String get vibeLibrary_tooManyTitle => 'Vibe數量過多';
-
-  @override
-  String vibeLibrary_tooManySelectedContent(Object count) {
-    return '選中了 $count 個Vibe，但最多隻能同時使用16個。\n\n請減少選擇數量後再試。';
-  }
-
-  @override
-  String vibeLibrary_tooManyExistingContent(Object current, Object remaining) {
-    return '當前生成頁面已有 $current 個Vibe，還可以新增 $remaining 個。\n\n請減少選擇數量後再試。';
-  }
-
-  @override
-  String vibeLibrary_sentToGenerationCount(Object count) {
-    return '已傳送 $count 個Vibe到生成頁面';
-  }
-
-  @override
-  String vibeLibrary_deleteSelectedContent(Object count) {
-    return '確定要刪除選中的 $count 個Vibe嗎？此操作無法復原。';
-  }
-
-  @override
-  String vibeLibrary_deletedCount(Object count) {
-    return '已刪除 $count 個Vibe';
-  }
-
-  @override
-  String get vibeLibrary_importImageDialogTitle => '選擇包含 Vibe 的圖片';
-
-  @override
-  String get vibeLibrary_clipboardEmpty => '剪貼簿為空';
-
-  @override
-  String get vibeLibrary_encodeTimeout => '編碼逾時，請檢查網路連線';
-
-  @override
-  String get vibeLibrary_unknownError => '未知錯誤';
-
-  @override
   String get vibeLibrary_save => '儲存到庫';
 
   @override
   String get vibeLibrary_import => '匯入 Vibe';
 
   @override
-  String get vibeLibrary_searchHint => '搜尋名稱、標籤...';
-
-  @override
-  String get vibeLibrary_empty => 'Vibe 庫為空';
-
-  @override
-  String get vibeLibrary_emptyHint => '先去 Vibe 庫新增一些條目吧';
-
-  @override
-  String get vibeLibrary_allVibes => '全部 Vibe';
-
-  @override
-  String get vibeLibrary_favorites => '收藏';
-
-  @override
   String get vibeLibrary_sendToGeneration => '傳送到生成';
-
-  @override
-  String get vibeLibrary_export => '匯出';
-
-  @override
-  String get vibeLibrary_edit => '編輯';
-
-  @override
-  String get vibeLibrary_delete => '刪除';
-
-  @override
-  String get vibeLibrary_addToFavorites => '收藏';
-
-  @override
-  String get vibeLibrary_removeFromFavorites => '取消收藏';
-
-  @override
-  String get vibeLibrary_newSubCategory => '新增子分類';
 
   @override
   String get vibeLibrary_maxVibesReached => '已達到最大數量 (16張)';
@@ -22805,321 +20156,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get vibeBulkTag_actionPreview => '操作預覽';
-
-  @override
-  String get vibeDetail_strengthDescription => '控制 Vibe 對生成結果的影響強度';
-
-  @override
-  String get vibeDetail_infoExtractedDescription => '控制從原圖提取的資訊量（消耗 2 Anlas）';
-
-  @override
-  String get vibeDetail_statistics => '統計資訊';
-
-  @override
-  String get vibeDetail_usageCount => '使用次數';
-
-  @override
-  String vibeDetail_timesUsed(int count) {
-    return '$count 次';
-  }
-
-  @override
-  String get vibeDetail_lastUsed => '最後使用';
-
-  @override
-  String get vibeDetail_neverUsed => '從未使用';
-
-  @override
-  String get vibeDetail_createdAt => '建立時間';
-
-  @override
-  String get vibeDetail_saveParameters => '儲存參數';
-
-  @override
   String get vibe_export_title => '匯出 Vibe';
 
   @override
-  String get vibe_export_format => '匯出格式';
-
-  @override
-  String get vibe_selector_title => '選擇 Vibe';
-
-  @override
   String get vibe_selector_recent => '最近使用';
-
-  @override
-  String get vibe_export_include_thumbnails => '包含縮圖';
-
-  @override
-  String get vibe_export_include_thumbnails_subtitle => '匯出檔案中包含縮圖預覽';
-
-  @override
-  String get vibe_export_singleFile => '單檔案 (.naiv4vibe)';
-
-  @override
-  String get vibe_export_singleFileDescription =>
-      '將每個 Vibe 匯出為單獨檔案，適合分享單個 Vibe';
-
-  @override
-  String get vibe_export_bundleFile => '打包檔案 (.naiv4vibebundle)';
-
-  @override
-  String get vibe_export_bundleFileDescription => '將多個 Vibe 打包到一個檔案中，適合批次備份';
-
-  @override
-  String get vibe_export_embedIntoPng => '嵌入到 PNG';
-
-  @override
-  String get vibe_export_embedIntoPngDescription => '通過寫入 PNG 後設資料匯出單個 Vibe';
-
-  @override
-  String get vibe_export_exportable => '可匯出';
-
-  @override
-  String get vibe_export_notExportable => '不可匯出';
-
-  @override
-  String get vibe_export_selectVibesToExport => '選擇要匯出的 Vibe';
-
-  @override
-  String vibe_export_exportSelected(int count) {
-    return '匯出 ($count)';
-  }
-
-  @override
-  String vibe_export_strengthPercent(int percent) {
-    return '強度: $percent%';
-  }
-
-  @override
-  String get vibe_export_pngCarrierImage => 'PNG 載體圖片';
-
-  @override
-  String get vibe_export_noUsablePngCarrier =>
-      '這個 Vibe 沒有可直接使用的 PNG 載體圖片。你可以選擇外部 PNG 圖片作為載體。';
-
-  @override
-  String get vibe_export_selectExternalPngImage => '選擇外部 PNG 圖片...';
-
-  @override
-  String get vibe_export_changeExternalPngImage => '更換外部 PNG 圖片...';
-
-  @override
-  String get vibe_export_useVibeImageInstead => '改用 Vibe 圖片';
-
-  @override
-  String vibe_export_usingExternalPng(String fileName) {
-    return '正在使用外部 PNG: $fileName';
-  }
-
-  @override
-  String get vibe_export_selectPngImage => '選擇 PNG 圖片';
-
-  @override
-  String get vibe_export_invalidPngImage => '所選檔案不是有效的 PNG 圖片';
-
-  @override
-  String vibe_export_selectPngImageFailed(String error) {
-    return '選擇 PNG 圖片失敗: $error';
-  }
-
-  @override
-  String vibe_export_embeddingPng(String name) {
-    return '正在嵌入 PNG: $name';
-  }
-
-  @override
-  String vibe_export_exportCompleteCounts(int successCount, int failCount) {
-    return '匯出完成: 成功 $successCount 個，失敗 $failCount 個';
-  }
-
-  @override
-  String vibe_export_exportCompletePath(String path) {
-    return '匯出完成: $path';
-  }
-
-  @override
-  String vibe_export_packingVibes(int count) {
-    return '正在打包 $count 個 Vibe...';
-  }
-
-  @override
-  String vibe_export_exportingName(String name) {
-    return '正在匯出: $name';
-  }
-
-  @override
-  String get vibe_export_selectExportFolder => '選擇匯出資料夾';
-
-  @override
-  String get vibe_export_generatingBundleFile => '正在生成打包檔案...';
-
-  @override
-  String vibe_export_bundleTitle(String name) {
-    return '匯出 Bundle: $name';
-  }
-
-  @override
-  String vibe_export_vibesTitle(int count) {
-    return '匯出 Vibe ($count 個已選)';
-  }
-
-  @override
-  String get vibe_export_method => '匯出方式';
-
-  @override
-  String get vibe_export_wholeBundle => '整個 Bundle';
-
-  @override
-  String get vibe_export_internalVibe => '內部 Vibe';
-
-  @override
-  String vibe_export_wholeBundleDescription(int count) {
-    return '匯出包含全部 $count 個 Vibe 的 .naiv4vibebundle 檔案';
-  }
-
-  @override
-  String vibe_export_internalVibeDescription(int count) {
-    return '選擇 Bundle 內部 Vibe，分別匯出為 .naiv4vibe 檔案 (共 $count 個)';
-  }
-
-  @override
-  String get vibe_export_exportBundle => '匯出 Bundle';
-
-  @override
-  String get vibe_export_exportAsFiles => '匯出為檔案';
-
-  @override
-  String get vibe_export_exportBundleDescription => '匯出為 .naiv4vibebundle 檔案';
-
-  @override
-  String get vibe_export_exportAsFilesDescription =>
-      '匯出為 .naiv4vibe 或 .naiv4vibebundle 檔案';
-
-  @override
-  String get vibe_export_exportAsZip => '匯出為 ZIP';
-
-  @override
-  String get vibe_export_exportAsZipDescription =>
-      '將選中的 Vibe 庫條目作為獨立檔案打包為 .zip';
-
-  @override
-  String get vibe_export_compressData => '壓縮資料';
-
-  @override
-  String get vibe_export_compressDataDescription => '使用壓縮以減小檔案大小 (推薦用於批次匯出)';
-
-  @override
-  String get vibe_export_zipCompressDescription => '壓縮 ZIP 內的檔案以減小體積';
-
-  @override
-  String get vibe_export_exportAsPng => '匯出為 PNG';
-
-  @override
-  String get vibe_export_pngInternalBundleUnsupported =>
-      '匯出單個 Bundle 內部 Vibe 時不支援嵌入圖片';
-
-  @override
-  String get vibe_export_embedVibeDataIntoPng => '將 Vibe 資料寫入 PNG 後設資料';
-
-  @override
-  String get vibe_export_batchPngUsesFirstImage =>
-      '批次匯出會使用每個 Vibe 的第一張可用圖片，沒有圖片的條目會自動跳過。';
-
-  @override
-  String get vibe_export_exportCarrierImage => '匯出載體圖片';
-
-  @override
-  String get vibe_export_usingExternalCarrierImage => '正在使用外部 PNG 作為匯出載體圖片';
-
-  @override
-  String get vibe_export_exportAsEncodings => '匯出為編碼';
-
-  @override
-  String get vibe_export_exportAsEncodingsDescription =>
-      '將資料匯出為編碼 (JSON 或 Base64)';
-
-  @override
-  String get vibe_export_jsonDescription => '匯出為格式化 JSON 檔案，便於閱讀和編輯';
-
-  @override
-  String get vibe_export_base64Description => '匯出為純 Base64，便於複製和分享';
-
-  @override
-  String get vibe_export_selectAtLeastOneMethod => '請選擇至少一種匯出方式';
-
-  @override
-  String get vibe_export_batchPngUnsupported =>
-      '批次 Vibe 匯出不支援嵌入 PNG。請使用單個 Vibe 匯出介面。';
-
-  @override
-  String get vibe_export_selectPngCarrier => '請選擇用於匯出的 PNG 載體圖片';
-
-  @override
-  String get vibe_export_selectAtLeastOneInternalVibe => '請選擇至少一個內部 Vibe';
-
-  @override
-  String get vibe_export_selectVibeExportFolder => '選擇 Vibe 匯出資料夾';
-
-  @override
-  String get vibe_export_saveEncodingFile => '儲存編碼檔案';
-
-  @override
-  String get vibe_export_preparingExport => '正在準備匯出...';
-
-  @override
-  String vibe_export_preparingVibeProgress(int current, int total) {
-    return '正在讀取 Vibe $current/$total...';
-  }
-
-  @override
-  String get vibe_export_exportingBundle => '正在匯出 Bundle...';
-
-  @override
-  String get vibe_export_exportingZip => '正在匯出 ZIP...';
-
-  @override
-  String get vibe_export_embeddingImage => '正在嵌入圖片...';
-
-  @override
-  String get vibe_export_exportingEncoding => '正在匯出編碼...';
-
-  @override
-  String vibe_export_exportFailedWithError(String error) {
-    return '匯出失敗: $error';
-  }
-
-  @override
-  String get vibe_export_noExportableEntries => '沒有可匯出的 Vibe 條目';
-
-  @override
-  String get vibe_export_bundleFilePathEmpty => 'Bundle 檔案路徑為空';
-
-  @override
-  String vibe_export_invalidImageFormatWithError(String error) {
-    return '無效的圖片格式: $error';
-  }
-
-  @override
-  String vibe_export_embedFailedWithError(String error) {
-    return '嵌入失敗: $error';
-  }
-
-  @override
-  String vibe_export_embedImageFailedWithError(String error) {
-    return '嵌入圖片失敗: $error';
-  }
-
-  @override
-  String vibe_export_extractingVibeProgress(int current, int total) {
-    return '正在提取 Vibe $current/$total...';
-  }
-
-  @override
-  String vibe_export_selectImageFailed(String error) {
-    return '選擇圖片失敗: $error';
-  }
 
   @override
   String vibe_export_dialogTitle(int count) {
@@ -23175,12 +20215,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibe_embedToImage => '嵌入到圖片';
 
   @override
-  String get vibe_import_skip => '跳過';
-
-  @override
-  String get vibe_import_confirm => '確認';
-
-  @override
   String get vibe_import_noEncodingData => '無編碼資料';
 
   @override
@@ -23217,14 +20251,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get vibe_import_timeout => '編碼逾時';
 
   @override
-  String get vibe_import_title => '從庫匯入';
-
-  @override
-  String vibe_import_result(int count) {
-    return '已匯入 $count 個 vibes';
-  }
-
-  @override
   String get vibe_import_fileParseFailed => '解析檔案失敗';
 
   @override
@@ -23232,41 +20258,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get vibe_import_importFailed => '匯入失敗';
-
-  @override
-  String get vibe_import_bundleTitle => '匯入 Vibe Bundle';
-
-  @override
-  String get vibe_import_bundleChooseMethod => '選擇匯入方式';
-
-  @override
-  String get vibe_import_bundleAsWhole => '作為整體匯入';
-
-  @override
-  String get vibe_import_bundleAsWholeDescription => '保留 Bundle 結構，並作為一個庫條目匯入';
-
-  @override
-  String get vibe_import_bundleSplitEntries => '拆分為獨立條目';
-
-  @override
-  String get vibe_import_bundleSplitEntriesDescription => '將每個 Vibe 作為獨立庫條目匯入';
-
-  @override
-  String get vibe_import_bundleSelectVibes => '選擇要匯入的 Vibe';
-
-  @override
-  String get vibe_import_bundleSelectVibesDescription => '僅匯入選中的 Vibe';
-
-  @override
-  String get vibe_import_bundleConfigureEachVibe => '配置每個 Vibe 的參數';
-
-  @override
-  String get vibe_import_bundleSelectAndConfigureEachVibe => '選擇並配置每個 Vibe 的參數';
-
-  @override
-  String vibe_import_bundleSelectedCount(int selected, int total) {
-    return '已選擇 $selected/$total';
-  }
 
   @override
   String get vibe_saveToLibrary_title => '儲存到庫';
@@ -23375,57 +20366,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get selection_cut_to_layer => '剪下到新圖層';
 
   @override
-  String get search_results => '搜尋結果';
-
-  @override
-  String get search_noResults => '未找到匹配結果';
-
-  @override
-  String get addToCurrent => '新增到當前';
-
-  @override
-  String get replaceExisting => '替換現有';
-
-  @override
-  String get confirmSelection => '確認選擇';
-
-  @override
   String get selectAll => '全選';
 
   @override
   String get clearSelection => '清空';
 
   @override
-  String get clearFilters => '清除篩選';
-
-  @override
   String get shortcut_context_vibe_detail => 'Vibe 詳情';
 
   @override
   String get shortcut_action_vibe_detail_rename => '重新命名';
-
-  @override
-  String get vibeSelectorFilterFavorites => '收藏';
-
-  @override
-  String get vibeSelectorFilterSourceAll => '全部類型';
-
-  @override
-  String get vibeSelectorSortCreated => '建立時間';
-
-  @override
-  String get vibeSelectorSortLastUsed => '最近使用';
-
-  @override
-  String get vibeSelectorSortUsedCount => '使用次數';
-
-  @override
-  String get vibeSelectorSortName => '名稱';
-
-  @override
-  String vibeSelectorItemsCount(int count) {
-    return '$count 項';
-  }
 
   @override
   String get tray_show => '顯示視窗';
@@ -24115,40 +21065,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get toast_kritaUnsupportedImageFormat => '圖片格式無法傳送到 Krita，請換用常見圖片格式';
 
   @override
-  String toast_deletedNamed(Object name) {
-    return '已刪除: $name';
-  }
-
-  @override
-  String get toast_vibeParamSaveReencodeFailed => '儲存參數失敗，Vibe 重新編碼失敗';
-
-  @override
-  String get toast_exportSuccess => '匯出成功';
-
-  @override
-  String toast_exportFailed(Object error) {
-    return '匯出失敗: $error';
-  }
-
-  @override
-  String get toast_selectVibeToExport => '請先選擇要匯出的 Vibe';
-
-  @override
-  String get toast_embedPngSingleVibeOnly => '嵌入 PNG 僅支援單個 Vibe 匯出';
-
-  @override
-  String get toast_selectPngCarrier => '請選擇一個 PNG 載體圖用於匯出';
-
-  @override
-  String get toast_renameSuccess => '重新命名成功';
-
-  @override
-  String get toast_paramsSaved => '參數已儲存';
-
-  @override
-  String get toast_paramsSaveFailed => '儲存參數失敗';
-
-  @override
   String get toast_dropNoReadableImageOrVibe => '拖入源未提供可讀取的圖片或 Vibe 檔案';
 
   @override
@@ -24180,35 +21096,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get toast_favorited => '已收藏';
-
-  @override
-  String get toast_unfavorited => '已取消收藏';
-
-  @override
-  String toast_favoriteUpdateFailed(Object error) {
-    return '收藏狀態更新失敗: $error';
-  }
-
-  @override
-  String toast_packingImages(Object count) {
-    return '正在打包 $count 張圖片...';
-  }
-
-  @override
-  String toast_packedImages(Object count) {
-    return '已打包 $count 張圖片';
-  }
-
-  @override
-  String get toast_packFailed => '打包失敗';
-
-  @override
-  String toast_packFailedWithError(Object error) {
-    return '打包失敗: $error';
-  }
-
-  @override
   String get toast_saveDirNotSet => '未設定儲存目錄';
 
   @override
@@ -24232,19 +21119,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get toast_saveEntryFailed => '儲存條目失敗';
 
   @override
-  String get toast_imagePromptCopied => '已複製 Prompt';
-
-  @override
-  String get toast_imageHasNoPrompt => '此圖片沒有 Prompt';
-
-  @override
-  String get toast_useDeleteButton => '請使用介面刪除按鈕';
-
-  @override
   String get toast_imageDataUnavailable => '影像資料不可用，無法複製';
-
-  @override
-  String get toast_vibeDataCopied => 'Vibe 資料已複製';
 
   @override
   String get toast_characterPromptCopied => '角色提示詞已複製';
@@ -24252,26 +21127,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String toast_copiedTitle(Object title) {
     return '$title已複製';
-  }
-
-  @override
-  String toast_replacedVibesCount(Object count, Object name) {
-    return '已替換為 $count 個 Vibe: $name';
-  }
-
-  @override
-  String toast_sentVibesCount(Object count, Object name) {
-    return '已傳送 $count 個 Vibe 到生成頁面: $name';
-  }
-
-  @override
-  String toast_replacedVibe(Object name) {
-    return '已替換為: $name';
-  }
-
-  @override
-  String toast_sentVibeToGeneration(Object name) {
-    return '已傳送到生成頁面: $name';
   }
 
   @override
@@ -24304,24 +21159,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get toast_renameNameRequired => '名稱不能為空';
-
-  @override
-  String get toast_renameNameConflict => '名稱已存在，請使用其他名稱';
-
-  @override
-  String get toast_renameEntryNotFound => '條目不存在，可能已被刪除';
-
-  @override
-  String get toast_renameFilePathMissing => '該條目缺少檔案路徑，無法重新命名';
-
-  @override
-  String get toast_renameFileFailed => '重新命名檔案失敗，請稍後重試';
-
-  @override
-  String get toast_renameFailed => '重新命名失敗，請稍後重試';
-
-  @override
   String toast_processImageFailed(Object error) {
     return '處理圖片失敗: $error';
   }
@@ -24346,95 +21183,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get common_saving => '儲存中...';
 
   @override
-  String get common_pleaseWait => '請稍候';
-
-  @override
-  String get common_change => '更換';
-
-  @override
   String get common_expand => '展開';
 
   @override
   String get common_collapse => '收起';
-
-  @override
-  String get vibeLibrary_emptySearchTitle => '未找到匹配的 Vibe';
-
-  @override
-  String get vibeLibrary_emptySearchSubtitle => '嘗試其他關鍵詞';
-
-  @override
-  String get vibeLibrary_emptyFavoritesTitle => '暫無收藏的 Vibe';
-
-  @override
-  String get vibeLibrary_emptyFavoritesSubtitle => '點選心形圖示收藏 Vibe';
-
-  @override
-  String get vibeLibrary_emptyCategoryTitle => '該分類下暫無 Vibe';
-
-  @override
-  String get vibeLibrary_emptyCategorySubtitle => '嘗試切換到\"全部 Vibe\"檢視所有內容';
-
-  @override
-  String get vibeLibrary_emptyNoMatchesTitle => '無匹配結果';
-
-  @override
-  String get vibeLibrary_emptySaveFromGenerationHint => '從生成頁面儲存Vibe到庫中';
-
-  @override
-  String get vibe_nameRequired => '名稱不能為空';
-
-  @override
-  String get vibe_import_namingTitle => '命名 Vibe';
-
-  @override
-  String get vibe_import_nameConflictOverwrite => '該名稱已存在，將被覆蓋';
-
-  @override
-  String get vibe_previewLoadFailed => '預覽載入失敗';
-
-  @override
-  String get vibe_import_applyToRemainingFiles => '應用到後續所有檔案';
-
-  @override
-  String get vibe_import_applyNamingToRemainingFiles => '使用此命名規則處理剩餘檔案';
-
-  @override
-  String get vibe_encodeImageTitle => '編碼圖片為 Vibe';
-
-  @override
-  String get vibe_imagePreview => '圖片預覽';
-
-  @override
-  String get vibe_encodeStartButton => '開始編碼';
-
-  @override
-  String get vibe_encodeImageInProgress => '正在編碼圖片...';
-
-  @override
-  String vibe_encodeErrorImage(Object fileName) {
-    return '圖片: $fileName';
-  }
-
-  @override
-  String vibe_encodeErrorMessage(Object error) {
-    return '錯誤: $error';
-  }
-
-  @override
-  String get vibe_encodeSkipImage => '跳過此圖';
-
-  @override
-  String get detail_sendToImg2Img => '傳送到圖生圖';
-
-  @override
-  String get detail_loadingImage => '載入圖片中...';
-
-  @override
-  String get detail_imageLoadFailed => '無法載入圖片';
-
-  @override
-  String get detail_noImage => '無圖片';
 
   @override
   String get detail_parsingMetadata => '正在解析後設資料...';
@@ -24446,15 +21198,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get detail_metadata => '後設資料';
 
   @override
-  String get detail_imageDetails => '圖片詳情';
-
-  @override
-  String get detail_basicInfo => '基本資訊';
-
-  @override
-  String get detail_fileName => '檔名';
-
-  @override
   String get detail_modifiedTime => '修改時間';
 
   @override
@@ -24462,9 +21205,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get detail_noContent => '(無內容)';
-
-  @override
-  String get detail_saveBlock => '儲存為塊';
 
   @override
   String get saveBlock_title => '儲存為塊';
@@ -24491,15 +21231,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String detail_copyLabel(Object label) {
     return '複製$label';
   }
-
-  @override
-  String get detail_copyCharacterPrompt => '複製角色提示詞';
-
-  @override
-  String get detail_copyAllVibeData => '複製全部 Vibe 資料';
-
-  @override
-  String get detail_saveToVibeLibrary => '儲存到 Vibe 庫';
 
   @override
   String get comfyImport_detectedTitle => '檢測到 ComfyUI 多角色提示詞';
@@ -24705,43 +21436,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get nav_preciseRefLibrary => '精準參考庫';
 
   @override
-  String get preciseRefLib_title => '精準參考庫';
-
-  @override
-  String get preciseRefLib_searchHint => '搜尋參考圖...';
-
-  @override
-  String get preciseRefLib_empty => '拖曳或貼上圖片到此處建立庫';
-
-  @override
-  String get preciseRefLib_emptyHint => '也可以在生成結果、歷史記錄或本地圖庫中右鍵儲存';
-
-  @override
-  String get preciseRefLib_import => '匯入圖片';
-
-  @override
-  String preciseRefLib_entryCount(int count) {
-    return '$count 個條目';
-  }
-
-  @override
-  String get preciseRefLib_sendToPreciseRef => '傳送到精準參考';
-
-  @override
-  String get preciseRefLib_sendToImg2Img => '傳送到圖生圖';
-
-  @override
-  String get preciseRefLib_editEntry => '編輯參數';
-
-  @override
-  String get preciseRefLib_confirmDeleteTitle => '刪除條目';
-
-  @override
-  String preciseRefLib_confirmDelete(String name) {
-    return '確定刪除“$name”？圖片檔案將一併刪除。';
-  }
-
-  @override
   String preciseRefLib_saved(String name) {
     return '已存入精準參考庫：$name';
   }
@@ -24750,50 +21444,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get preciseRefLib_savedHint => '可在精準參考庫中編輯參數';
 
   @override
-  String preciseRefLib_sent(String name) {
-    return '已傳送到精準參考：$name';
-  }
-
-  @override
-  String preciseRefLib_sentToImg2Img(String name) {
-    return '已傳送到圖生圖：$name';
-  }
-
-  @override
   String get preciseRefLib_imageMissing => '原圖檔案丟失';
 
   @override
   String get preciseRefLib_invalidImage => '無法識別圖片格式，或圖片檔案已經損壞';
 
   @override
-  String get preciseRefLib_deleteFailed => '刪除失敗，條目與原圖已保留，請稍後重試';
-
-  @override
-  String get preciseRefLib_favoritesOnly => '只看收藏';
-
-  @override
-  String get preciseRefLib_sortBy => '排序方式';
-
-  @override
-  String get preciseRefLib_sortCreatedAt => '建立時間';
-
-  @override
-  String get preciseRefLib_sortLastUsed => '最近使用';
-
-  @override
-  String get preciseRefLib_sortUsedCount => '使用次數';
-
-  @override
-  String get preciseRefLib_sortName => '名稱';
-
-  @override
   String preciseRefLib_importedCount(int count) {
     return '已匯入 $count 張圖片';
-  }
-
-  @override
-  String preciseRefLib_loadFailed(String error) {
-    return '載入精準參考庫失敗：$error';
   }
 
   @override
@@ -24816,20 +21474,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String preciseRefLib_saveCurrentCount(int count) {
     return '已儲存 $count 張到精準參考庫';
   }
-
-  @override
-  String get preciseRefLib_selectorTitle => '從精準參考庫選擇';
-
-  @override
-  String preciseRefLib_selectorConfirm(int count) {
-    return '新增所選 ($count)';
-  }
-
-  @override
-  String get preciseRefLib_nameLabel => '名稱';
-
-  @override
-  String get preciseRefLib_typeFilterAll => '全部';
 
   @override
   String get img2img_fromPreciseRefLibrary => '從精準參考庫匯入';
@@ -24956,15 +21600,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get drop_saveVibeBundle => '儲存 Vibe Bundle';
 
   @override
-  String get history_dragFilePreparationFailed => '拖曳檔案準備失敗，請稍後重試';
-
-  @override
-  String get history_dragFilePreparing => '正在準備拖曳檔案...';
-
-  @override
-  String get history_dragFileNotReady => '拖曳檔案尚未準備完成';
-
-  @override
   String get vibe_import_overwriteOriginalParams => '直接替換原 Vibe 參數';
 
   @override
@@ -24987,21 +21622,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get galleryScan_processing => '處理中';
-
-  @override
-  String get vibeDetail_useAll => '使用全部';
-
-  @override
-  String get vibeDetail_longPressSetCover => '長按設為封面';
-
-  @override
-  String get vibeDetail_noPreviewImage => '無預覽影像';
-
-  @override
-  String get vibeDetail_dropPreviewImage => '拖曳圖片到此處設定預覽圖';
-
-  @override
-  String get vibeDetail_releasePreviewImage => '釋放以設定預覽圖';
 
   @override
   String imagePicker_dropReadFailed(String error) {
@@ -25123,15 +21743,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get nav_promptBlockLibrary => '提示詞塊';
-
-  @override
-  String get promptBlockLibrary_title => '提示詞塊';
-
-  @override
-  String get promptBlockLibrary_folders => '資料夾';
-
-  @override
   String get promptBlockLibrary_allBlocks => '全部塊';
 
   @override
@@ -25139,12 +21750,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptBlockLibrary_unnamedBlock => '未命名塊';
-
-  @override
-  String get promptBlockLibrary_noBlockSelected => '未選擇塊';
-
-  @override
-  String get promptBlockLibrary_details => '詳情';
 
   @override
   String promptBlockLibrary_useCount(int count) {
@@ -25158,194 +21763,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockPill_unknown => '失效塊';
 
   @override
-  String get pillCardReroll => '重抽';
-
-  @override
-  String get pillCardRerollLocked => '已鎖定，無法重抽';
-
-  @override
-  String get pillCardLock => '鎖定當前內容';
-
-  @override
-  String get pillCardUnlock => '解除鎖定';
-
-  @override
-  String get pillCardSettings => '隨機設定';
-
-  @override
-  String get pillCardEnable => '啟用';
-
-  @override
-  String get pillCardDisable => '停用';
-
-  @override
-  String get pillCardDeleteInstance => '刪除實例';
-
-  @override
-  String get pillCardEmptyRoll => '（本次為空）';
-
-  @override
-  String get pillCardEvolutionEnable => '開啟遺傳';
-
-  @override
-  String get pillCardEvolutionDisable => '關閉遺傳';
-
-  @override
-  String get pillCardEvolutionRequiresEnabled => '需先啟用實例';
-
-  @override
-  String get pillCardStepBack => '退回一幕';
-
-  @override
-  String get pillCardStepForward => '前進一幕';
-
-  @override
-  String get pillSettingsTitle => '塊實例設定';
-
-  @override
-  String get pillSettingsModeFixed => '固定';
-
-  @override
-  String get pillSettingsModeSequential => '順序';
-
-  @override
-  String get pillSettingsModeRandom => '隨機抽取';
-
-  @override
-  String get pillSettingsCount => '抽取數量';
-
-  @override
-  String get pillSettingsOrder => '輸出順序';
-
-  @override
-  String get pillSettingsOrderDrawn => '按抽中順序';
-
-  @override
-  String get pillSettingsOrderOriginal => '按池原序';
-
-  @override
-  String get pillSettingsWeight => '隨機權重';
-
-  @override
-  String get pillSettingsWeightMin => '最小';
-
-  @override
-  String get pillSettingsWeightMax => '最大';
-
-  @override
-  String get pillSettingsWeightAverage => '平均';
-
-  @override
-  String get pillSettingsDispersion => '離散';
-
-  @override
-  String get pillSettingsDispersionFocused => '集中';
-
-  @override
-  String get pillSettingsDispersionBalanced => '均衡';
-
-  @override
-  String get pillSettingsDispersionSpread => '發散';
-
-  @override
-  String get pillSettingsAdvanced => '進階';
-
-  @override
-  String get pillSettingsLeftDispersion => '左離散';
-
-  @override
-  String get pillSettingsRightDispersion => '右離散';
-
-  @override
-  String get pillSettingsSoftBalance => '軟平衡';
-
-  @override
-  String get pillSettingsSoftBalanceStrength => '回拉強度';
-
-  @override
-  String get pillSettingsTriggerProbability => '觸發機率';
-
-  @override
-  String get pillSettingsCancel => '取消';
-
-  @override
-  String get pillSettingsApply => '確定';
-
-  @override
   String get promptBlockLibrary_unnamedFolder => '未命名資料夾';
-
-  @override
-  String get promptBlockLibrary_scope => '瀏覽範圍';
-
-  @override
-  String get promptBlockLibrary_newBlock => '新增塊';
-
-  @override
-  String get promptBlockLibrary_editBlock => '編輯塊';
-
-  @override
-  String get promptBlockLibrary_newFolder => '新增資料夾';
-
-  @override
-  String get promptBlockLibrary_newSubfolder => '新增子資料夾';
-
-  @override
-  String get promptBlockLibrary_renameFolder => '重新命名資料夾';
-
-  @override
-  String get promptBlockLibrary_moveToRoot => '移到根目錄';
-
-  @override
-  String get promptBlockLibrary_moveToFolder => '移動到資料夾';
-
-  @override
-  String get promptBlockLibrary_favorites => '收藏';
-
-  @override
-  String get promptBlockLibrary_unclassified => '未分類';
-
-  @override
-  String get promptBlockLibrary_newCollection => '新增收藏集';
-
-  @override
-  String get promptBlockLibrary_newSubcollection => '新增子收藏集';
-
-  @override
-  String get promptBlockLibrary_newCollectionFolder => '新增收藏資料夾';
-
-  @override
-  String get promptBlockLibrary_renameCollection => '重新命名收藏集';
-
-  @override
-  String get promptBlockLibrary_renameCollectionFolder => '重新命名收藏資料夾';
-
-  @override
-  String get promptBlockLibrary_moveToFavoritesRoot => '移到收藏區根級';
-
-  @override
-  String get promptBlockLibrary_unnamedCollection => '未命名收藏集';
-
-  @override
-  String get promptBlockLibrary_unnamedCollectionFolder => '未命名收藏資料夾';
-
-  @override
-  String get promptBlockLibrary_collectionName => '收藏集名稱';
-
-  @override
-  String get promptBlockLibrary_collectionNameHint => '收藏集名稱';
-
-  @override
-  String get promptBlockLibrary_noCollections =>
-      '還沒有收藏集 —— 點「收藏」行旁的 + 新增，或把塊拖到收藏集上';
-
-  @override
-  String get promptBlockLibrary_noFolders => '還沒有資料夾';
-
-  @override
-  String get promptBlockLibrary_emptyFavorites => '還沒有收藏的塊，點塊上的 ★ 即可收藏';
-
-  @override
-  String get promptBlockLibrary_emptyCollection => '該收藏集為空';
 
   @override
   String promptBlockLibrary_deleteCollectionConfirm(String name) {
@@ -25364,105 +21782,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_titleHint => '塊標題';
 
   @override
-  String get promptBlockLibrary_searchHint => '搜尋標題、提示詞或標籤';
-
-  @override
   String get promptBlockLibrary_folder => '資料夾';
-
-  @override
-  String get promptBlockLibrary_folderName => '資料夾名稱';
-
-  @override
-  String get promptBlockLibrary_folderNameHint => '資料夾名稱';
-
-  @override
-  String get promptBlockLibrary_basicPrompt => '基礎提示詞';
-
-  @override
-  String get promptBlockLibrary_generationSettings => '設定';
-
-  @override
-  String get promptBlockLibrary_settingsOptionalHint => '僅儲存填寫的參數；插入塊後可手動應用設定。';
-
-  @override
-  String get promptBlockLibrary_notSpecified => '不指定';
-
-  @override
-  String get promptBlockLibrary_stepsLabel => '步數';
-
-  @override
-  String get promptBlockLibrary_noiseScheduleLabel => '噪聲排程';
-
-  @override
-  String get promptBlockLibrary_invalidGenerationSettings =>
-      '請檢查設定：步數 1–50、提示詞引導 1–20、提示詞引導重縮放 0–1，並確認參數受所選模型支援。';
-
-  @override
-  String get promptBlockLibrary_applySettings => '匯入設定';
 
   @override
   String get promptBlockLibrary_settingsApplied => '塊設定已匯入當前畫面';
 
   @override
   String get promptBlockLibrary_settingsIncompatible => '塊設定與目標模型不相容，未匯入任何參數。';
-
-  @override
-  String get promptBlockLibrary_noSettings => '此塊未儲存生圖參數';
-
-  @override
-  String get promptBlockLibrary_tags => '標籤';
-
-  @override
-  String get promptBlockLibrary_addTag => '新增標籤';
-
-  @override
-  String get promptBlockLibrary_tagName => '標籤名稱';
-
-  @override
-  String get promptBlockLibrary_tagColor => '標籤顏色（十六進位）';
-
-  @override
-  String get promptBlockLibrary_duplicateTag => '這個塊已有同名標籤';
-
-  @override
-  String get promptBlockLibrary_invalidTagColor => '請輸入有效的十六進位顏色';
-
-  @override
-  String get pillCard_rollScope => '變化範圍';
-
-  @override
-  String get pillCard_positiveScope => '正面';
-
-  @override
-  String get pillCard_negativeScope => '負面';
-
-  @override
-  String get promptBlockLibrary_modelResetNotice => '切換模型後，不支援的參數已清除。';
-
-  @override
-  String get promptBlockLibrary_atomInputHint => '輸入文本，回車變成原子塊';
-
-  @override
-  String get promptBlockLibrary_atomRestoreHint => '點選還原成文本再編輯';
-
-  @override
-  String get promptBlockLibrary_atomOrphan => '未知標記';
-
-  @override
-  String get promptBlockLibrary_atomEditorTutorial =>
-      '輸入後回車成塊，點選還原為文本，儲存時所有未成塊文本自動轉化。';
-
-  @override
-  String get promptBlockLibrary_color => '顏色';
-
-  @override
-  String get promptBlockLibrary_icon => '圖示';
-
-  @override
-  String get promptBlockLibrary_saved => '已儲存';
-
-  @override
-  String get promptBlockLibrary_copied => '正文已複製';
 
   @override
   String get promptBlockLibrary_deleted => '已刪除';
@@ -25485,40 +21811,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_clearSelection => '清空選擇';
 
   @override
-  String get promptBlockLibrary_moveTo => '移動到…';
-
-  @override
-  String get promptBlockLibrary_moveToFolderTitle => '移動到資料夾';
-
-  @override
-  String promptBlockLibrary_deleteBlocksConfirm(int count) {
-    return '確定要刪除選中的 $count 個塊嗎？此操作無法復原。';
-  }
-
-  @override
-  String promptBlockLibrary_deleteSelected(int count) {
-    return '刪除選中的 $count 個塊';
-  }
-
-  @override
   String get promptBlockLibrary_empty => '還沒有提示詞塊';
 
   @override
-  String get promptBlockLibrary_emptyFolder => '此資料夾為空';
-
-  @override
   String get promptBlockLibrary_noSearchResults => '沒有匹配的塊';
-
-  @override
-  String get promptBlockLibrary_tryDifferentSearch => '請嘗試其他搜尋詞';
-
-  @override
-  String get promptBlockLibrary_emptyHint => '新增一個塊，開始整理可複用的文本';
-
-  @override
-  String promptBlockLibrary_loadFailed(String error) {
-    return '載入提示詞塊失敗：$error';
-  }
 
   @override
   String promptBlockLibrary_deleteFolderTitle(Object name) {
@@ -25545,19 +21841,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_deleteContentsWarning => '這會永久刪除整個資料夾樹中的所有塊。';
 
   @override
-  String get promptBlockLibrary_importExport => '匯入 / 匯出';
-
-  @override
-  String get promptBlockLibrary_importTxtFiles => '匯入 TXT 檔案';
-
-  @override
-  String get promptBlockLibrary_importFromFolder => '從資料夾匯入…';
-
-  @override
   String get promptBlockLibrary_exportLibraryBackup => '匯出庫備份…';
-
-  @override
-  String get promptBlockLibrary_importLibraryBackup => '匯入庫備份…';
 
   @override
   String get promptBlockLibrary_importTxtTitle => '選擇 TXT 檔案';
@@ -25613,24 +21897,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptBlockLibrary_curationLocalModified => '本地已修改';
 
   @override
-  String promptBlockLibrary_libraryBackupDone(int count) {
-    return '已匯出 $count 個塊的庫備份';
-  }
-
-  @override
   String get promptBlockLibrary_libraryImportTitle => '選擇庫備份檔案';
-
-  @override
-  String get promptBlockLibrary_libraryBackupInvalid => '不是有效的塊庫備份檔案';
-
-  @override
-  String promptBlockLibrary_libraryImportDone(
-    int blocks,
-    int folders,
-    int skipped,
-  ) {
-    return '匯入 $blocks 個塊、$folders 個資料夾，跳過 $skipped 個已存在';
-  }
 
   @override
   String promptBlockLibrary_importFailed(String error) {
@@ -25642,15 +21909,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptBlockLibrary_importedAt => '匯入時間';
-
-  @override
-  String get promptBlockLibrary_listView => '列表檢視';
-
-  @override
-  String get promptBlockLibrary_gridView => '網格檢視';
-
-  @override
-  String get promptBlockLibrary_waterfallView => '瀑布流檢視';
 
   @override
   String get promptBlockPalette_tooltip => '積木';
@@ -25674,43 +21932,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get promptBlockLibrary_sortBy => '排序方式';
-
-  @override
-  String get promptBlockLibrary_sortCustom => '預設（手動順序）';
-
-  @override
-  String get promptBlockLibrary_sortUpdated => '修改時間';
-
-  @override
-  String get promptBlockLibrary_sortTitle => '名稱';
-
-  @override
-  String get promptBlockLibrary_sortColor => '顏色';
-
-  @override
-  String get promptBlockLibrary_sortIcon => '圖示';
-
-  @override
-  String get promptBlockLibrary_sortAscending => '升序';
-
-  @override
-  String get promptBlockLibrary_sortDescending => '降序';
-
-  @override
-  String get promptBlockLibrary_cardSize => '卡片大小';
-
-  @override
-  String get promptBlockLibrary_reorderFolders => '調整資料夾順序';
-
-  @override
   String get nav_styleExplore => '畫風探索';
-
-  @override
-  String get styleExplore_rename => '重新命名';
-
-  @override
-  String get styleExplore_nameRequired => '名稱不能為空';
 
   @override
   String get styleExplore_operationFailed => '操作失敗';
@@ -25725,110 +21947,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_discardChangesConfirm => '繼續並丟棄';
 
   @override
-  String get styleExplore_newRun => '新增探索';
-
-  @override
-  String styleExplore_runDeleted(String name) {
-    return '已刪除探索「$name」';
-  }
-
-  @override
-  String get styleExplore_runStatusGenerating => '生成中';
-
-  @override
-  String get styleExplore_runStatusPaused => '已暫停';
-
-  @override
-  String get styleExplore_runStatusCancelled => '已取消';
-
-  @override
-  String get styleExplore_pauseRun => '暫停';
-
-  @override
-  String get styleExplore_cancelRun => '取消探索';
-
-  @override
-  String styleExplore_retryFailed(int count) {
-    return '重試失敗（$count）';
-  }
-
-  @override
   String styleExplore_manualRunName(String time) {
     return '手動候選 $time';
   }
 
   @override
   String get styleExplore_runBusy => '生成進行中，稍後再試';
-
-  @override
-  String get styleExplore_deleteRunTitle => '刪除探索';
-
-  @override
-  String styleExplore_deleteRunMessage(String name) {
-    return '將刪除「$name」及其候選圖副本；圖庫中的來源圖不受影響。';
-  }
-
-  @override
-  String get styleExplore_cancelRunTitle => '取消探索';
-
-  @override
-  String get styleExplore_cancelRunMessage => '取消後不可再啟動；剩餘待生成候選將標記為已取消。';
-
-  @override
-  String get styleExplore_filterAll => '全部';
-
-  @override
-  String get styleExplore_filterHearted => '收藏';
-
-  @override
-  String get styleExplore_renameFolder => '重新命名分組';
-
-  @override
-  String get styleExplore_deleteFolder => '刪除分組';
-
-  @override
-  String styleExplore_deleteFolderMessage(String name) {
-    return '將刪除分組「$name」；其中的候選回到未分組，圖片不會被刪除。';
-  }
-
-  @override
-  String get styleExplore_folderNameLabel => '分組名稱';
-
-  @override
-  String get styleExplore_deleteFamily => '刪除進化線';
-
-  @override
-  String styleExplore_deleteFamilyMessage(String name, int count) {
-    return '將刪除進化線「$name」及其全部父本與子代記錄（$count 張）；候選圖片檔案不會刪除。';
-  }
-
-  @override
-  String get styleExplore_familyBusy => '這條進化線還有生成中的候選，請先停止生成';
-
-  @override
-  String get styleExplore_folderUncategorized => '未分組';
-
-  @override
-  String styleExplore_folderCreated(String name) {
-    return '已建立分組「$name」';
-  }
-
-  @override
-  String get styleExplore_candidateMissing => '圖片檔案缺失';
-
-  @override
-  String get styleExplore_candidateDetailTitle => '候選詳情';
-
-  @override
-  String get styleExplore_prevCandidate => '上一張';
-
-  @override
-  String get styleExplore_nextCandidate => '下一張';
-
-  @override
-  String styleExplore_roundNumber(int number) {
-    return '第 $number 輪';
-  }
 
   @override
   String styleExplore_adoptBlockSaved(String name) {
@@ -25839,43 +21963,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_adoptBlockEmpty => '所選候選沒有可儲存的畫師串或正向提示詞';
 
   @override
-  String get styleExplore_deleteImage => '刪除圖片';
-
-  @override
-  String get styleExplore_deleteImageTitle => '刪除候選圖';
-
-  @override
-  String get styleExplore_deleteImageMessage =>
-      '將刪除該候選在探索目錄中的圖片副本與候選記錄；圖庫來源圖不受影響。';
-
-  @override
-  String get styleExplore_deleteImageDone => '已刪除候選圖與記錄';
-
-  @override
-  String get styleExplore_selectCandidates => '多選';
-
-  @override
-  String styleExplore_selectedCount(int count) {
-    return '已選 $count 張';
-  }
-
-  @override
   String get promptBlockEditor_library => '塊庫';
 
   @override
   String get promptBlockPicker_title => '選擇塊';
 
   @override
-  String get promptBlockLibrary_thumbnail => '預覽圖';
-
-  @override
-  String get promptBlockLibrary_selectNewImage => '選擇新圖片';
-
-  @override
   String get promptBlockLibrary_selectImage => '選擇圖片';
-
-  @override
-  String get promptBlockLibrary_adjustDisplayRange => '調整顯示範圍';
 
   @override
   String get promptBlockLibrary_adjustThumbnailTitle => '調整預覽圖顯示範圍';
@@ -25914,59 +22008,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptBlockLibrary_updateExistingThumbnailSubtitle => '選擇塊並替換其預覽圖';
-
-  @override
-  String styleExplore_deepRoundCountHint(int min) {
-    return '張數至少 $min（每個父本保底一張）';
-  }
-
-  @override
-  String get styleExplore_deepRoundNoInstance => '主提示詞中沒有啟用的隨機遺傳塊，無法生成子代';
-
-  @override
-  String get styleExplore_deepRoundEmpty => '無法產生足夠不同的子代畫師組合';
-
-  @override
-  String get styleExplore_sortLeft => '左邊更好';
-
-  @override
-  String get styleExplore_sortRight => '右邊更好';
-
-  @override
-  String get styleExplore_sortNeither => '兩張都不行';
-
-  @override
-  String get styleExplore_sortSkip => '跳過';
-
-  @override
-  String styleExplore_sortProgress(int current, int total) {
-    return '第 $current / 共 $total 對';
-  }
-
-  @override
-  String get styleExplore_sortDone => '兩兩比較完成';
-
-  @override
-  String styleExplore_branchCreated(int count) {
-    return '已培育下一代（$count 個父本）';
-  }
-
-  @override
-  String get styleExplore_branchNeedLatest => '只能從最新代的子代培育下一代';
-
-  @override
-  String get styleExplore_branchRoundsIncomplete => '當前代還有未完成的子代，請等待或停止生成';
-
-  @override
-  String get styleExplore_branchDuplicate => '所選子代與第一代父本串完全重複';
-
-  @override
-  String get styleExplore_branchEmpty => '請至少選擇一張子代候選';
-
-  @override
-  String styleExplore_pileManageDeleteDone(int count) {
-    return '已刪除 $count 張候選圖與記錄';
-  }
 
   @override
   String subscriptionExpiresOn(String date) {
@@ -27039,19 +23080,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings_enterNewSignInToken => '輸入新的登入令牌，驗證成功後更新此帳號。';
 
   @override
-  String get auth_signInAccounts => '登入與帳號';
-
-  @override
   String get auth_notSignedIn => '尚未登入';
-
-  @override
-  String get auth_chooseAccountContinue => '選擇帳號，繼續創作';
-
-  @override
-  String get auth_manageAccounts2 => '管理帳號';
-
-  @override
-  String get auth_subscriptionExpired => '訂閱已到期';
 
   @override
   String get settings_tagExpansion => '標籤擴展';
@@ -27619,12 +23648,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get translationLanguage_traditionalChinese => '繁體中文';
-
-  @override
-  String get promptBlockEditor_translationNeedsReview => '原文已修改，譯文待更新';
-
-  @override
-  String get promptBlockEditor_translationReviewHint => '修改原文後請同步校對這裡的譯文';
 
   @override
   String get modelTask_translateTitle => '原文 → 閱讀語言';
@@ -28887,87 +24910,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get wiki_configureTagModel => '請先在「模型與介面」配置可用的標籤翻譯模型。';
 
   @override
-  String get blockOrganizer_barrierLabel => '塊分類';
-
-  @override
-  String get blockOrganizer_replaceTitle => '替換同源塊？';
-
-  @override
   String blockOrganizer_replaceMoveBody(Object count) {
     return '目標中已有 $count 個同源副本。替換後來源從塊庫隱藏；已插入提示詞的實例仍可引用原塊。';
-  }
-
-  @override
-  String blockOrganizer_replaceCopyBody(Object count) {
-    return '目標中已有 $count 個同源副本。替換會更新目標副本的內容，來源保留。';
-  }
-
-  @override
-  String get blockOrganizer_replace => '替換';
-
-  @override
-  String get blockOrganizer_customTagColor => '自訂標籤顏色';
-
-  @override
-  String get blockOrganizer_colorHint => '#RRGGBB 或 #AARRGGBB';
-
-  @override
-  String get blockOrganizer_invalidColor => '請輸入六位或八位十六進位顏色';
-
-  @override
-  String blockOrganizer_deleteFolderConfirm(Object name) {
-    return '刪除「$name」？其中的塊會移至根目錄。';
-  }
-
-  @override
-  String blockOrganizer_deleteCollectionConfirm(Object name) {
-    return '刪除「$name」？塊本體會保留。';
-  }
-
-  @override
-  String get blockOrganizer_titleFavorites => '收藏與收藏集';
-
-  @override
-  String get blockOrganizer_titleFolders => '選擇資料夾';
-
-  @override
-  String blockOrganizer_itemCount(Object count) {
-    return '$count 項';
-  }
-
-  @override
-  String get blockOrganizer_search => '搜尋';
-
-  @override
-  String get blockOrganizer_name => '名稱';
-
-  @override
-  String get blockOrganizer_customColor => '自訂顏色…';
-
-  @override
-  String get blockOrganizer_newCollection => '新增收藏集';
-
-  @override
-  String get blockOrganizer_newCollectionFolder => '新增收藏資料夾';
-
-  @override
-  String get blockOrganizer_newTag => '新標籤';
-
-  @override
-  String get blockOrganizer_newFolder => '新增資料夾';
-
-  @override
-  String get blockOrganizer_rootUncategorized => '根目錄 / 未分類';
-
-  @override
-  String get blockOrganizer_manageDrag => '管理；拖動排序';
-
-  @override
-  String get blockLibrary_dragSelectedHint => '拖動已選塊到左側的收藏或資料夾，鬆開後選擇複製或移動。';
-
-  @override
-  String blockLibrary_blockCount(Object count) {
-    return '$count 個塊';
   }
 
   @override
@@ -28984,12 +24928,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get blockLibrary_collectionMissing => '收藏集不存在';
-
-  @override
-  String get promptBlockEditor_appearance => '塊外觀';
-
-  @override
-  String get promptBlockEditor_imageUnreadable => '無法讀取所選影像';
 
   @override
   String get blockAppearance_classic => '經典';
@@ -29444,14 +25382,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String gallery_galleryInitFailed(Object error) {
     return '畫廊初始化失敗: $error';
   }
-
-  @override
-  String vibeImport_imageProgress(Object current, Object total, Object source) {
-    return '匯入圖片($current/$total): $source';
-  }
-
-  @override
-  String get vibeImport_clipboardSource => '剪貼簿';
 
   @override
   String get resolution_noAdjustment => '無需調整';
@@ -30087,11 +26017,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get generation_paramsDrawerTooltip => '更多參數';
 
   @override
-  String generation_historyBatchCount(int count) {
-    return '$count 張';
-  }
-
-  @override
   String get library_sizeSmall => '小';
 
   @override
@@ -30124,41 +26049,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get library_more => '更多';
 
   @override
-  String get library_addToGeneration => '加入生圖';
-
-  @override
-  String get library_strength => '強度';
-
-  @override
-  String get library_information => '資訊';
-
-  @override
-  String get library_fidelity => '保真';
-
-  @override
-  String get library_encodeOnUse => '用時編碼';
-
-  @override
-  String get library_reencode => '需重新編碼';
-
-  @override
-  String library_unusableModel(String model) {
-    return '不能用於 $model';
-  }
-
-  @override
-  String get library_exportAll => '匯出全部';
-
-  @override
-  String get library_rescanFolders => '重新掃描資料夾';
-
-  @override
-  String get library_preview => '預覽';
-
-  @override
-  String get viewer_backLocalGallery => '本機圖庫';
-
-  @override
   String get viewer_fit => '適應';
 
   @override
@@ -30177,116 +26067,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get shortcut_action_toggle_info_panel => '顯示 / 隱藏資訊欄';
 
   @override
-  String get styleExplore_runNamingHint => '自動命名：隨機塊名 + 日期，雙擊名稱即可改名';
-
-  @override
-  String styleExplore_roundGenerating(int round) {
-    return '第 $round 輪 · 生成中';
-  }
-
-  @override
-  String get styleExplore_inspectorTitle => '詳情';
-
-  @override
-  String styleExplore_failedBadge(int count) {
-    return '失敗 $count';
-  }
-
-  @override
-  String get styleExplore_showInspector => '展開檢查器';
-
-  @override
-  String styleExplore_roundProgress(int round, int current, int total) {
-    return '第 $round 輪 · $current / $total';
-  }
-
-  @override
-  String get styleExplore_earlier => '更早';
-
-  @override
-  String get styleExplore_noMatchingRuns => '沒有匹配的探索';
-
-  @override
-  String styleExplore_lineCount(int count) {
-    return '$count 條進化線';
-  }
-
-  @override
-  String get styleExplore_newRunDescription => '用當前提示詞和參數開一個新的，名字可以之後改';
-
-  @override
   String styleExplore_autoRunName(String blocks, String time) {
     return '$blocks · $time';
   }
-
-  @override
-  String get styleExplore_largeCandidates => '大候選圖';
-
-  @override
-  String get styleExplore_hideInspector => '收起檢查器';
-
-  @override
-  String get styleExplore_searchRuns => '搜尋探索名稱或畫師';
-
-  @override
-  String styleExplore_favoriteCount(int count) {
-    return '收藏 $count';
-  }
-
-  @override
-  String styleExplore_generatingBadge(int current, int total) {
-    return '生成中 $current/$total';
-  }
-
-  @override
-  String styleExplore_roundCount(int count) {
-    return '$count 輪';
-  }
-
-  @override
-  String styleExplore_pausedRemaining(int count) {
-    return '已暫停 · 剩 $count 張';
-  }
-
-  @override
-  String get styleExplore_stopRun => '停止生成';
-
-  @override
-  String get styleExplore_thisWeek => '本週';
-
-  @override
-  String get styleExplore_today => '今天';
-
-  @override
-  String get styleExplore_smallCandidates => '小候選圖';
-
-  @override
-  String styleExplore_imageCount(int count) {
-    return '$count 張';
-  }
-
-  @override
-  String get styleExplore_variablesTitle => '隨機變數';
-
-  @override
-  String get styleExplore_variablesHint => '每張重新抽取';
-
-  @override
-  String get styleExplore_variablesExplanation => '每張候選會記錄啟用的隨機或順序遺傳塊抽到了哪些內容。';
-
-  @override
-  String styleExplore_variablePoolSize(int count) {
-    return '池 $count 項';
-  }
-
-  @override
-  String get styleExplore_variableEvolutionTarget => '進化目標';
-
-  @override
-  String get styleExplore_variableNegative => '負面';
-
-  @override
-  String get styleExplore_variablesEmpty => '提示詞裡還沒有隨機塊，抽出來的圖會很像';
 
   @override
   String get styleExplore_openBlockLibrary => '開啟塊庫';
@@ -30298,498 +26081,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get styleExplore_drawCountSuffix => '張 · 逐張生成';
 
   @override
-  String get styleExplore_candidatesTab => '候選';
-
-  @override
-  String get styleExplore_evolutionTab => '進化';
-
-  @override
-  String styleExplore_deepRoundTitle(String name, int generation) {
-    return '進化 · $name 第 $generation 代';
-  }
-
-  @override
-  String styleExplore_wallRoundCount(int count) {
-    return '$count 張';
-  }
-
-  @override
-  String get styleExplore_wallGenerating => '正在生成';
-
-  @override
-  String styleExplore_roundFailures(int count) {
-    return '失敗 $count';
-  }
-
-  @override
-  String styleExplore_queued(int number) {
-    return '排隊 #$number';
-  }
-
-  @override
-  String styleExplore_generatingCandidate(int number) {
-    return '生成中 #$number';
-  }
-
-  @override
-  String get styleExplore_generationFailed => '生成失敗';
-
-  @override
-  String get styleExplore_failureHint => '懸停檢視原因';
-
-  @override
-  String get styleExplore_imageDeleted => '圖片已刪除';
-
-  @override
-  String get styleExplore_parentBadge => '父本';
-
-  @override
-  String get styleExplore_opMutation => '變異';
-
-  @override
-  String get styleExplore_opCrossover => '交叉';
-
-  @override
-  String get styleExplore_opInjection => '注入';
-
-  @override
-  String get styleExplore_copyArtists => '複製畫師串';
-
-  @override
-  String get styleExplore_interrupted => '已中斷';
-
-  @override
-  String get styleExplore_emptyFilter => '沒有符合篩選的候選';
-
-  @override
-  String get styleExplore_emptyRound => '本輪還沒有候選';
-
-  @override
-  String get styleExplore_unfavorite => '取消收藏';
-
-  @override
-  String get styleExplore_groupLabel => '分組';
-
-  @override
-  String get styleExplore_newGroup => '新增分組…';
-
-  @override
-  String get styleExplore_saveBlock => '存為塊';
-
-  @override
-  String get styleExplore_startEvolution => '開始進化';
-
-  @override
-  String get styleExplore_newestFirst => '最新輪在前';
-
-  @override
-  String get styleExplore_oldestFirst => '最早輪在前';
-
-  @override
-  String get styleExplore_pickEvolution => '挑幾張去進化';
-
-  @override
-  String get styleExplore_deleteCandidatesTitle => '刪除候選';
-
-  @override
-  String styleExplore_deleteCandidatesMessage(int count) {
-    return '將刪除 $count 張候選及其圖片副本，圖庫來源圖保留。';
-  }
-
-  @override
-  String get styleExplore_inspectorEmpty => '選一張候選檢視詳情';
-
-  @override
-  String get styleExplore_drawsTitle => '本張抽到';
-
-  @override
-  String get styleExplore_drawsAfterGeneration => '生成完成後顯示';
-
-  @override
-  String get styleExplore_emptyDraw => '這次沒有抽中（池裡有空項）';
-
-  @override
-  String get styleExplore_hearted => '已收藏';
-
-  @override
-  String get styleExplore_joinEvolution => '加入進化';
-
-  @override
-  String get styleExplore_applyToEditor => '套用到編輯區';
-
-  @override
-  String get styleExplore_seedName => '種子';
-
-  @override
-  String get styleExplore_elapsedName => '耗時';
-
-  @override
-  String get styleExplore_parameters => '參數';
-
-  @override
-  String get styleExplore_modelName => '模型';
-
-  @override
-  String get styleExplore_fullPrompt => '完整提示詞';
-
-  @override
-  String get styleExplore_mergedArtists => '合在一起的畫師（去重）';
-
-  @override
-  String get styleExplore_selectionExplanation =>
-      '存為塊會把這些合成一個塊；開始進化會把每張圖的畫師串作為一個父本。';
-
-  @override
-  String get styleExplore_quickGroupHint => '按 1–9 快速歸組';
-
-  @override
-  String get styleExplore_newGroupChip => '新分組';
-
-  @override
-  String styleExplore_parameterSummary(
-    int width,
-    int height,
-    int steps,
-    String scale,
-  ) {
-    return '$width×$height · $steps 步 · $scale';
-  }
-
-  @override
-  String get styleExplore_viewerBack => '畫風探索';
-
-  @override
-  String styleExplore_viewerPosition(int index, int total) {
-    return '第 $index 張 / 共 $total 張';
-  }
-
-  @override
-  String get styleExplore_viewerGroupsShortcut => '按 1–9 歸組，0 移回未分組';
-
-  @override
-  String get styleExplore_seedClickCopy => '種子（點選複製）';
-
-  @override
   String get styleExplore_appliedToEditor => '已套用到編輯區';
-
-  @override
-  String styleExplore_generationNumber(int index) {
-    return '第 $index 代';
-  }
-
-  @override
-  String get styleExplore_currentGeneration => '當前';
-
-  @override
-  String styleExplore_generationStart(int count) {
-    return '從候選裡選了 $count 張作為起點';
-  }
-
-  @override
-  String styleExplore_generationSource(int index, int count, int roots) {
-    return '由第 $index 代挑 $count 張 + 第 1 代回交 $roots 張';
-  }
-
-  @override
-  String get styleExplore_parentsByPreference => '父本 · 按偏好排序';
-
-  @override
-  String get styleExplore_backcross => '回交';
-
-  @override
-  String styleExplore_childrenCount(int count) {
-    return '子代 · $count';
-  }
-
-  @override
-  String styleExplore_breedSelected(int count, int index) {
-    return '用選中的 $count 張培育第 $index 代';
-  }
-
-  @override
-  String get styleExplore_generationBusy => '這一代還在生成';
-
-  @override
-  String get styleExplore_regeneratePrefix => '再生成';
-
-  @override
-  String get styleExplore_regenerateSuffix => '張子代';
-
-  @override
-  String get styleExplore_pairCompare => '兩兩比較排序';
-
-  @override
-  String get styleExplore_howToUse => '怎麼用';
-
-  @override
-  String get styleExplore_helpParents => '父本是你選中的畫師組合，偏好越高，越容易參與組合。';
-
-  @override
-  String get styleExplore_helpChildren => '子代由父本交叉、變異或從畫師池注入新畫師產生。';
-
-  @override
-  String get styleExplore_helpCompare => '兩兩比較會更新父本偏好，影響後續子代組合。';
-
-  @override
-  String get styleExplore_helpBackcross => '培育下一代時，會自動帶上第 1 代父本做回交。';
-
-  @override
-  String get styleExplore_originTitle => '怎麼來的';
-
-  @override
-  String get styleExplore_originCross => '由這幾張父本的畫師交叉組合';
-
-  @override
-  String get styleExplore_originMutation => '在父本基礎上替換了部分畫師';
-
-  @override
-  String get styleExplore_originInjection => '從池裡注入了新畫師';
-
-  @override
-  String get styleExplore_newArtist => '新';
-
-  @override
-  String get styleExplore_evolutionEmpty => '從候選裡挑幾張喜歡的，開始一條進化線';
-
-  @override
-  String get styleExplore_pickFromCandidates => '去候選裡挑';
-
-  @override
-  String styleExplore_generationSummary(
-    int parents,
-    int children,
-    int selected,
-  ) {
-    return '$parents 個父本 → $children 張子代 · 選了 $selected 張';
-  }
-
-  @override
-  String get styleExplore_breedNext => '培育下一代';
-
-  @override
-  String get styleExplore_optionalName => '名稱（可不填）';
-
-  @override
-  String get styleExplore_childrenEmpty => '還沒有子代，在上面生成一批';
-
-  @override
-  String get styleExplore_evolutionStepOne => '父本的畫師串互相變異、交叉';
-
-  @override
-  String get styleExplore_evolutionStepTwo => '可以兩兩比較幫你排序';
-
-  @override
-  String get styleExplore_evolutionStepThree => '選中的子代成為新父本';
-
-  @override
-  String get styleExplore_evolutionNewLine => '新增進化線';
-
-  @override
-  String styleExplore_evolutionJoinLine(String name) {
-    return '加入「$name」當前代';
-  }
-
-  @override
-  String get styleExplore_evolutionName => '進化線名稱';
-
-  @override
-  String styleExplore_defaultEvolutionName(int n) {
-    return '進化線 $n';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => '再加一段自訂畫師串';
-
-  @override
-  String get styleExplore_evolutionCustomHint => '輸入畫師串';
-
-  @override
-  String get styleExplore_evolutionParentEmpty => '沒有可用的畫師串';
-
-  @override
-  String get styleExplore_evolutionTarget => '子代會替換提示詞裡';
-
-  @override
-  String get styleExplore_evolutionOnlyCreate => '只建立';
-
-  @override
-  String get styleExplore_evolutionOnlyJoin => '只加入';
-
-  @override
-  String styleExplore_evolutionCreateGenerate(int count) {
-    return '建立並生成 $count 張';
-  }
-
-  @override
-  String styleExplore_evolutionJoinGenerate(int count) {
-    return '加入並生成 $count 張';
-  }
-
-  @override
-  String get styleExplore_evolutionFirstBatch => '第一批子代';
-
-  @override
-  String styleExplore_evolutionMinimum(int count) {
-    return '張（至少 $count）';
-  }
-
-  @override
-  String styleExplore_evolutionCreated(String name) {
-    return '已建立進化線「$name」';
-  }
-
-  @override
-  String styleExplore_evolutionJoined(String name) {
-    return '已加入進化線「$name」';
-  }
-
-  @override
-  String get styleExplore_sortLiveSave => '結果即時儲存，可以隨時關閉';
-
-  @override
-  String get styleExplore_sortRanking => '當前排名 · 即時';
-
-  @override
-  String get styleExplore_sortRankingHint => '排名會影響下一批子代裡各父本被選中的機率';
-
-  @override
-  String get styleExplore_sortSpace => '空格';
-
-  @override
-  String styleExplore_saveSingleSubtitle(int n) {
-    return '#$n 的畫師存成一個塊';
-  }
-
-  @override
-  String styleExplore_saveManySubtitle(int count) {
-    return '來自 $count 張候選，已合併去重';
-  }
-
-  @override
-  String get styleExplore_saveArtistsOnly => '只要抽到的畫師';
-
-  @override
-  String get styleExplore_saveFullPositive => '完整正向提示詞';
-
-  @override
-  String get styleExplore_saveNoDraws => '這些候選沒有正向遺傳實例記錄，請儲存完整正向提示詞';
-
-  @override
-  String get styleExplore_saveContent => '內容';
-
-  @override
-  String get styleExplore_saveRemoveAtoms => '點 × 去掉不要的畫師';
-
-  @override
-  String styleExplore_saveRemoved(int count) {
-    return '已去掉 $count 個';
-  }
-
-  @override
-  String get styleExplore_saveRestore => '恢復';
-
-  @override
-  String get styleExplore_saveName => '名稱';
-
-  @override
-  String get styleExplore_saveColor => '顏色';
-
-  @override
-  String get styleExplore_saveIcon => '圖示';
-
-  @override
-  String get styleExplore_saveFolder => '放到塊庫';
-
-  @override
-  String get styleExplore_saveRoot => '根目錄';
-
-  @override
-  String get styleExplore_saveHint => '存好後可以在塊庫裡拖進提示詞';
-
-  @override
-  String get styleExplore_onboardingTitle => '用隨機塊批次試畫風';
-
-  @override
-  String get styleExplore_onboardingRandomTitle => '放入隨機塊';
-
-  @override
-  String get styleExplore_onboardingDrawTitle => '抽一批候選';
 
   @override
   String styleExplore_onboardingDraw(int count) {
     return '抽 $count 張候選';
   }
-
-  @override
-  String get styleExplore_onboardingReviewTitle => '收藏、比較、進化';
-
-  @override
-  String get styleExplore_onboardingOpenPrevious => '開啟以前的探索';
-
-  @override
-  String get styleExplore_onboardingSubtitle => '每張圖都會從隨機塊裡重新抽畫師，你只管挑喜歡的';
-
-  @override
-  String get styleExplore_onboardingRandomDescription =>
-      '在提示詞裡插入畫師池，例如 400 精選畫師池。左邊會列出檢測到的隨機變數。';
-
-  @override
-  String styleExplore_onboardingDrawDescription(int count) {
-    return '點左下角“抽 $count 張候選”。每張圖下方會寫出它抽到了哪些畫師。';
-  }
-
-  @override
-  String get styleExplore_onboardingReviewDescription =>
-      '喜歡的按 F 收藏；挑幾張開始進化，讓好的畫師組合繼續雜交出新組合。';
-
-  @override
-  String styleExplore_onboardingDetected(int count) {
-    return '已檢測到 $count 個';
-  }
-
-  @override
-  String get styleExplore_compareTitle => '兩兩比較 · 給父本排個序';
-
-  @override
-  String get styleExplore_compareQuestion => '哪張更接近你想要的畫風？';
-
-  @override
-  String styleExplore_childLabel(int index) {
-    return '子代 #$index';
-  }
-
-  @override
-  String styleExplore_generationCounts(int parents, int children) {
-    return '$parents 個父本 → $children 張子代';
-  }
-
-  @override
-  String get styleExplore_viewLarge => '看大圖';
-
-  @override
-  String get styleExplore_saveDialogTitle => '存為提示詞塊';
-
-  @override
-  String styleExplore_startDialogTitle(int count) {
-    return '用 $count 張候選開始進化';
-  }
-
-  @override
-  String get styleExplore_stepGenerate => '生成子代';
-
-  @override
-  String get styleExplore_stepPick => '挑出好的';
-
-  @override
-  String get styleExplore_stepBreed => '培育下一代';
-
-  @override
-  String styleExplore_firstGenerationParents(int count) {
-    return '第 1 代父本 · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionTargetAfter => '的位置，其他內容不變';
 
   @override
   String get stats_title => '統計';
@@ -35756,11 +31053,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_variations => '變體';
 
   @override
-  String gen_variationsCost(Object cost) {
-    return '變體（$cost Anlas）';
-  }
-
-  @override
   String get gen_upscale => '放大';
 
   @override
@@ -36796,4 +32088,518 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get tools_emoPlayful => '俏皮';
+
+  @override
+  String get auth_logoutConfirm => '確定退出當前帳號？';
+
+  @override
+  String get naiAgent_title => 'NAI Agent';
+
+  @override
+  String get naiAgent_local => '本地';
+
+  @override
+  String get naiAgent_permissionMode => '審批模式';
+
+  @override
+  String get naiAgent_permissionAuto => '自動';
+
+  @override
+  String get naiAgent_permissionAsk => '詢問';
+
+  @override
+  String get naiAgent_permissionReadOnly => '只讀';
+
+  @override
+  String get naiAgent_permissionAutoHint =>
+      '工作區內的常規修改自動執行；命令、刪除和未知工具仍需審批。生圖確認保留。';
+
+  @override
+  String get naiAgent_permissionAskHint => '工作區讀取直接執行；修改、命令和未知工具逐次審批。生圖仍走費用確認。';
+
+  @override
+  String get naiAgent_permissionReadOnlyHint =>
+      '只讀取和討論；禁止修改及生成，未知工具不執行。切換時停止 Agent 當前任務，不影響手動生圖。';
+
+  @override
+  String get naiAgent_useModelSetting => '使用模型設定';
+
+  @override
+  String get naiAgent_permissionTitle => '需要審批';
+
+  @override
+  String get naiAgent_permissionOnce => '允許一次';
+
+  @override
+  String get naiAgent_permissionSession => '本會話允許相同呼叫';
+
+  @override
+  String get naiAgent_permissionDeny => '拒絕';
+
+  @override
+  String get naiAgent_thinking => '思考強度 · 下一次任務生效';
+
+  @override
+  String get naiAgent_thinkingUnsupported => '此模型沒有已確認的可調思考檔位，請先檢查模型設定。';
+
+  @override
+  String get naiAgent_pasteImage => '貼上剪貼簿圖片';
+
+  @override
+  String get naiAgent_contextUnknown => '上下文用量暫不可用，等待已知模型視窗及實際用量。';
+
+  @override
+  String naiAgent_contextTooltip(
+    String percent,
+    String remaining,
+    String window,
+  ) {
+    return '可用上下文 $percent%\n$remaining / $window tokens 剩餘\n點選檢視詳細統計';
+  }
+
+  @override
+  String get naiAgent_statistics => '上下文與會話統計';
+
+  @override
+  String get naiAgent_contextUsage => '當前上下文佔用 · 估算';
+
+  @override
+  String get naiAgent_contextRemaining => '剩餘上下文';
+
+  @override
+  String get naiAgent_contextWindow => '模型視窗';
+
+  @override
+  String get naiAgent_sessionUsage => '本會話累計用量';
+
+  @override
+  String get naiAgent_tokensInput => '輸入';
+
+  @override
+  String get naiAgent_tokensOutput => '輸出';
+
+  @override
+  String get naiAgent_tokensCacheRead => '快取讀取';
+
+  @override
+  String get naiAgent_tokensCacheWrite => '快取寫入';
+
+  @override
+  String get naiAgent_tokensTotal => '累計 tokens';
+
+  @override
+  String get naiAgent_cumulativeUsageHint => '累計用量包含歷次請求，不等於當前上下文佔用。';
+
+  @override
+  String get naiAgent_messageCounts => '會話記錄';
+
+  @override
+  String get naiAgent_userAssistantMessages => '使用者 / 助手訊息';
+
+  @override
+  String get naiAgent_toolCalls => '工具呼叫';
+
+  @override
+  String get naiAgent_cost => '費用';
+
+  @override
+  String get naiAgent_defaultWorkspace => '工作區 1';
+
+  @override
+  String get naiAgent_newChat => '新聊天';
+
+  @override
+  String get naiAgent_settings => 'Agent 設定';
+
+  @override
+  String get naiAgent_workspace => '工作區';
+
+  @override
+  String get naiAgent_createWorkspace => '新增工作區';
+
+  @override
+  String get naiAgent_rename => '重新命名';
+
+  @override
+  String get naiAgent_name => '名稱';
+
+  @override
+  String get naiAgent_placeholder => '描述想法，或問一個問題…';
+
+  @override
+  String get naiAgent_welcome => '從一個想法開始';
+
+  @override
+  String get naiAgent_welcomeHint => '討論提示詞、分析圖片、整理工作區。\n先聊清楚，再動手。';
+
+  @override
+  String get naiAgent_suggestCurrent => '檢查當前草稿';
+
+  @override
+  String get naiAgent_suggestImage => '分析參考圖片';
+
+  @override
+  String get naiAgent_suggestWorkspace => '整理工作區';
+
+  @override
+  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
+
+  @override
+  String get naiAgent_promptCurrent => '看看當前草稿和參數，先不要修改。';
+
+  @override
+  String get naiAgent_promptImage => '分析當前圖片的構圖和畫風，先不要生成。';
+
+  @override
+  String get naiAgent_promptWorkspace => '檢視當前工作區，建議整理方式，先不要修改。';
+
+  @override
+  String get naiAgent_tipTitle => 'TIPS / 小提示';
+
+  @override
+  String get naiAgent_tipNext => '下一條提示';
+
+  @override
+  String get naiAgent_tipReadOnly => '先用「只讀」模式探索，再決定要修改什麼。';
+
+  @override
+  String get naiAgent_tipAttachments => '拖入參考圖，或點選 + 新增附件，讓討論更具體。';
+
+  @override
+  String get naiAgent_tipGeneration => '生成前會顯示費用並等待確認，不會直接生圖。';
+
+  @override
+  String get naiAgent_welcomeFootnote => '所有操作遵循當前審批模式';
+
+  @override
+  String get naiAgent_chooseModel => '選擇模型';
+
+  @override
+  String get naiAgent_modelSettings => '管理模型與介面';
+
+  @override
+  String get naiAgent_attach => '新增圖片';
+
+  @override
+  String get naiAgent_removeAttachment => '移除附件';
+
+  @override
+  String get naiAgent_selectedImage => '附上當前圖片';
+
+  @override
+  String get naiAgent_send => '傳送';
+
+  @override
+  String get naiAgent_stop => '停止任務';
+
+  @override
+  String get naiAgent_queue => '排隊';
+
+  @override
+  String get naiAgent_steer => '引導';
+
+  @override
+  String get naiAgent_promote => '轉為引導';
+
+  @override
+  String get naiAgent_waiting => '等待你的回答';
+
+  @override
+  String get naiAgent_working => '正在處理';
+
+  @override
+  String get naiAgent_waitingSlot => '等待服務商請求額度';
+
+  @override
+  String get naiAgent_starting => '正在開啟聊天';
+
+  @override
+  String get naiAgent_interrupted => '上次任務已中斷，未自動重發。';
+
+  @override
+  String get naiAgent_restorePending => '放回輸入框';
+
+  @override
+  String get naiAgent_withdraw => '撤回';
+
+  @override
+  String get naiAgent_newContent => '回到最新訊息';
+
+  @override
+  String get naiAgent_toolRunning => '執行中';
+
+  @override
+  String get naiAgent_toolDone => '完成';
+
+  @override
+  String get naiAgent_toolFailed => '失敗';
+
+  @override
+  String get naiAgent_arguments => '參數';
+
+  @override
+  String get naiAgent_result => '結果';
+
+  @override
+  String get naiAgent_systemPrompt => '內建提示詞';
+
+  @override
+  String get naiAgent_promptHelp =>
+      '自訂內容替換預設提示詞；工具地圖由應用追加。已有聊天記錄保持原樣，後續請求使用新內容。';
+
+  @override
+  String get naiAgent_restoreDefault => '恢復預設';
+
+  @override
+  String get naiAgent_showEffective => '檢視生效提示詞';
+
+  @override
+  String get naiAgent_useGlobal => '使用全域提示詞';
+
+  @override
+  String get naiAgent_save => '儲存';
+
+  @override
+  String get naiAgent_runLimit => '每次執行的模型請求上限';
+
+  @override
+  String get naiAgent_enterSends => 'Enter 傳送，Shift+Enter 換行';
+
+  @override
+  String get naiAgent_dataFolder => '工作區資料目錄';
+
+  @override
+  String get naiAgent_openFolder => '開啟資料夾';
+
+  @override
+  String get naiAgent_toolsManuals => '工具與手冊';
+
+  @override
+  String get naiAgent_toolsHint => '當前狀態、圖片、提示詞和工作區檔案按需呼叫。詳細 NAI 手冊按模型讀取。';
+
+  @override
+  String get naiAgent_unknownCost => '實際費用以服務商為準';
+
+  @override
+  String get naiAgent_error => '操作未完成，請檢查模型設定或工作區檔案。';
+
+  @override
+  String get naiAgent_visionDisabled => '此模型尚未啟用圖片輸入，請在模型設定中確認支援後開啟。';
+
+  @override
+  String get naiAgent_inputChanged => '準備期間輸入已改變，請傳送當前草稿。';
+
+  @override
+  String get naiAgent_imageLimit => '圖片格式無效、檔案過大或超出上傳限制。';
+
+  @override
+  String get naiAgent_composerNotEmpty => '請先儲存或傳送當前輸入，再恢復這條訊息。';
+
+  @override
+  String get naiAgent_compact => '壓縮聊天上下文';
+
+  @override
+  String get naiAgent_export => '匯出聊天';
+
+  @override
+  String get naiAgent_copyMessage => '複製訊息';
+
+  @override
+  String get naiAgent_editMessage => '編輯訊息';
+
+  @override
+  String get naiAgent_regenerate => '重新回答';
+
+  @override
+  String get naiAgent_submitAnswer => '提交回答';
+
+  @override
+  String get naiAgent_customAnswer => '也可以輸入自己的回答';
+
+  @override
+  String get naiAgent_close => '收起面板';
+
+  @override
+  String get naiAgent_showChats => '聊天列表';
+
+  @override
+  String get naiAgent_runtimeMissing => 'Agent 執行元件尚未安裝，請使用完整更新包。';
+
+  @override
+  String get naiAgent_usage => '模型用量';
+
+  @override
+  String get naiAgent_cancel => '取消';
+
+  @override
+  String get naiAgent_dropHint => '鬆開以附加到此聊天';
+
+  @override
+  String get naiAgent_emptyAttachment => '圖片讀取失敗';
+
+  @override
+  String get naiAgent_globalScope => '全域預設';
+
+  @override
+  String get naiAgent_workspaceScope => '當前工作區';
+
+  @override
+  String get naiAgent_generationTitle => '生成授權';
+
+  @override
+  String get naiAgent_generationWaiting => '等待生成授權';
+
+  @override
+  String naiAgent_generationAccount(Object name) {
+    return '帳號：$name';
+  }
+
+  @override
+  String naiAgent_generationBatch(Object requests, Object size, Object total) {
+    return '$requests 次請求 × $size 張 · 共 $total 張';
+  }
+
+  @override
+  String naiAgent_generationUnit(Object cost) {
+    return '每次請求 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationEncoding(Object cost) {
+    return '參考圖編碼 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationTotal(Object cost) {
+    return '預計 $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationBalance(Object balance) {
+    return '當前餘額 $balance Anlas';
+  }
+
+  @override
+  String get naiAgent_generationEstimateNote => '費用為預估，以服務端扣費為準。';
+
+  @override
+  String get naiAgent_generationChanged => '配置或報價已變化，請重新準備。';
+
+  @override
+  String naiAgent_generationLocalEnhance(Object model, Object scale) {
+    return '生成後本地超分：$model ×$scale';
+  }
+
+  @override
+  String get naiAgent_generationText => '文生圖';
+
+  @override
+  String get naiAgent_generationImage => '圖生圖';
+
+  @override
+  String get naiAgent_generationInpaint => '重繪';
+
+  @override
+  String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
+    return '刪除這個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n$path';
+  }
+
+  @override
+  String get naiAgent_extensions => '擴展';
+
+  @override
+  String get naiAgent_interactionExtension => 'Studio 互動';
+
+  @override
+  String get naiAgent_extensionRequired => '內建 · 必需';
+
+  @override
+  String get naiAgent_interactionExtensionHint =>
+      '按需讀取當前 Studio 狀態，並通過問題卡片收集使用者回答。';
+
+  @override
+  String get naiAgent_extensionAddFile => '新增擴展檔案';
+
+  @override
+  String get naiAgent_extensionAddFolder => '新增擴展目錄';
+
+  @override
+  String get naiAgent_extensionsHint =>
+      '擴展在各工作區獨立載入。更改會在當前任務結束後的下一次傳送生效。外部擴展能執行原生代碼，請選擇可信來源。';
+
+  @override
+  String get naiAgent_extensionError => '擴展執行失敗';
+
+  @override
+  String get naiAgent_extensionCompatibility =>
+      '支援本地 Pi 擴展及擴展包目錄、工具、命令和標準提問對話方塊；終端專用自訂介面不在桌面渲染。';
+
+  @override
+  String get naiAgent_instructions => '指令';
+
+  @override
+  String get naiAgent_globalInstructions => '全域指令';
+
+  @override
+  String get naiAgent_globalInstructionsHelp =>
+      '所有工作區都會使用，可填寫語言、風格或任務偏好。留空即可停用這一部分。';
+
+  @override
+  String get naiAgent_systemPromptPrefix => '系統提示詞前置內容';
+
+  @override
+  String get naiAgent_systemPromptPrefixHelp =>
+      '插在 NAI Agent 基礎提示詞之前，保留基礎提示詞和工具地圖。留空即可停用這一部分。';
+
+  @override
+  String get naiAgent_instructionOrder =>
+      '生效順序：前置內容 → 基礎提示詞 → 全域指令 → 工作區規則。僅影響後續請求。';
+
+  @override
+  String get naiAgent_saveInstructions => '儲存指令';
+
+  @override
+  String get naiAgent_mcpBuiltin => 'NAI Studio · 內建工具組';
+
+  @override
+  String get naiAgent_mcpBuiltinHint =>
+      '提示詞、積木、百科、圖片、歷史、參考圖、生圖和設定工具。預設按需發現，原有備份、版本校驗和真實確認繼續生效。';
+
+  @override
+  String get naiAgent_mcpAdd => '新增 MCP 伺服器';
+
+  @override
+  String get naiAgent_mcpName => '伺服器名稱';
+
+  @override
+  String get naiAgent_mcpConfig => '伺服器配置（JSON）';
+
+  @override
+  String get naiAgent_mcpConfigHint =>
+      '支援 stdio 和 Streamable HTTP。貼上單個伺服器配置物件；command 為執行檔，args 為陣列。可設定 env、cwd、url、headers、oauth 和 toolExposure。配置儲存在加密儲存中。';
+
+  @override
+  String get naiAgent_mcpStatus => '檢視連線狀態';
+
+  @override
+  String get naiAgent_mcpReconnect => '重新連線';
+
+  @override
+  String get naiAgent_mcpLogin => '登入';
+
+  @override
+  String get naiAgent_mcpLogout => '登出';
+
+  @override
+  String get naiAgent_mcpHint =>
+      '預設使用 CodeMode 按需發現。codemode：沙盒呼叫；deferred：搜尋後直接呼叫；direct：常駐；hidden：隱藏。配置變更在下一次空閒呼叫時生效。連線檢查不會呼叫聊天模型。';
+
+  @override
+  String get generation_generate => '生成';
+
+  @override
+  String get detail_imageDetails => '圖片詳情';
+
+  @override
+  String get promptBlockLibrary_title => '提示詞塊';
 }

@@ -2,7 +2,7 @@
 
 有效源码为 `E:/A.I/NovelAI/.devin/wt/nai-launcher-src/`，分支
 `devin/gallery-redesign`。本批合入同分支已有的目录排序 `4d083dce`
-与六页顶部拖拽 `a7698853`。已安装运行版仍是 `09ea804f`；
+与六页顶部拖拽 `a7698853`。已安装运行版为 `36f4d4f0`；
 完整满意版本检查点 `2026-10-05-studio-verified` 保持固定。
 
 ## 实现范围
@@ -84,10 +84,19 @@ Windows Release 与 Glass AOT/资源包单独构建，安装使用现有核准 G
 `E:/A.I/NovelAI/nai-launcher-src/.dart_tool/local-upscale-delivery.json`；
 安装/回退为同目录 `install_local_upscale.ps1` / `restore_local_upscale.ps1`。
 
-当前 Studio 仍在运行。先完成更新包及只读安装预检；托盘完全退出后才能
-实际安装。不自动终止、启动或热重载应用，完整检查点、草稿、账号、图库、
-桥接参数与原生 Glass 文件保持原值。本批未安装前，不把源码完成写成
-桌面运行版已更新。
+用户确认完整退出后，现场核对 Studio、桥接与超分进程为零，于
+2026-10-05 19:06（Asia/Taipei）完成安装。当前安装记录与本批交付单完全一致：
+`installed=true`、`ready_to_install=false`、`installation_hold=false`。
+已安装 AOT、199 项资源、31 个原生文件与 233 项托管文件复验通过。
+
+`glass-before-local-upscale/` 已保存前版 `09ea804f` 的程序 data、189 项资源、
+客户端、文件清单及安装记录；备份逐项复验与
+`restore_local_upscale.ps1 -ValidateOnly` 通过，未执行实际回退。
+冻结候选交付单及 ZIP 保持原值，满意版本完整检查点、草稿、账号、图库、
+桥接参数与原生 Glass 文件保持原值。未自动启动、重启或热重载应用，
+Windows 安装后的实机体验待用户反馈。安装证据为本机审计目录中的
+`pre-install-stopped.json`、`installation-result.json`、
+`restore-preflight.json` 与 `post-install-verification.json`。
 
 官方依据：
 [Real-ESRGAN NCNN/Vulkan](https://github.com/xinntao/Real-ESRGAN-ncnn-vulkan)、

@@ -226,6 +226,8 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     required String modelId,
     required double scale,
     Seedvr2Options seedvr2Options = const Seedvr2Options(),
+    void Function()? onStarted,
+    LocalUpscaleCancellation? cancellation,
   }) async {
     if (_pending != null || state.running) return null;
     final work = _processGenerated(
@@ -233,8 +235,10 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
       modelId: modelId,
       scale: scale,
       seedvr2Options: seedvr2Options,
+      suppliedCancellation: cancellation,
     );
     _pending = work.then<void>((_) {});
+    onStarted?.call();
     try {
       return await work;
     } finally {
@@ -247,8 +251,9 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     required String modelId,
     required double scale,
     Seedvr2Options seedvr2Options = const Seedvr2Options(),
+    LocalUpscaleCancellation? suppliedCancellation,
   }) async {
-    final cancellation = LocalUpscaleCancellation();
+    final cancellation = suppliedCancellation ?? LocalUpscaleCancellation();
     _cancellation = cancellation;
     state = const LocalUpscaleTaskState(running: true);
     try {

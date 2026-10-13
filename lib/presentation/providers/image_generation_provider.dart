@@ -753,6 +753,25 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ),
   );
 
+  /// Frozen source-image generation does not synchronize or roll the sidebar.
+  Future<void> generateSourceImage(
+    ImageParams params, {
+    required ImageOperation operation,
+    GeneratedImage? original,
+    GenerationBatchCallback? onBatchEvent,
+  }) => _withPostBillingRefresh(
+    () => _generate(
+      params.copyWith(nSamples: 1),
+      imagesPerRequestOverride: operation == ImageOperation.variations ? 3 : 1,
+      operation: operation,
+      variationOriginal: operation == ImageOperation.variations
+          ? original
+          : null,
+      onBatchEvent: onBatchEvent,
+      preservePromptSnapshot: true,
+    ),
+  );
+
   /// 探索任务专用生成入口（画风探索阶段 B）：单张、强制 nSamples=1、
   /// 随机种子实体化后把真实 seed 随结果带回；**不清空主 UI 当前图、
   /// 不触发全局 roll**（探索 runner 自控 roll 节奏）。
@@ -869,7 +888,9 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     GeneratedImage? variationOriginal,
     ImageWorkflowState? workflowOverride,
     bool preserveSnapshot = false,
+    bool preservePromptSnapshot = false,
   }) async {
+    preserveSnapshot = preserveSnapshot || preservePromptSnapshot;
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
     // 必须先于冷却扣减与 _startGenerationRun——重入若走到 run 创建，
     // 会顶替当前 run 标识，使在途请求脱离取消/陈旧更新防护；

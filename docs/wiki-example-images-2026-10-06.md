@@ -20,3 +20,7 @@
 匿名公开接口通过生产 API / repository 实际读取 `1girl`，得到官方三个示例，360px 缩略图 HEAD 均返回 200，总内容长度 64,643 字节；只读取元数据 / HEAD，没有下载图片正文。没有 NovelAI 生成、AI 翻译或 Anlas 消耗。
 
 独立构建 / 完整更新包材料位于 `.dart_tool/wiki-examples-20261006/`；安装回执登记在原运行源码根 `.dart_tool/wiki-examples-delivery.json`。更新包将累计包含此前的「更多」圆角修复。安装状态以回执与现有运行包核验为准；本轮保持暂不安装，后续须用户明确授权并从托盘完整退出后才覆盖，保留原生 Glass 运行文件与单步回退。
+
+## 安装状态更新（2026-10-06 20:04，Asia/Taipei）
+
+用户确认完整退出后，累计包已安装到登记的 Glass 运行目录。当前源码 / 安装提交 `af54e9ac`，AOT `3f2386340d1872c764ecc758a4d1a33ad694e545c77d1b593f07b307ae3888c5`；外部回执与当前安装回执字节一致，installed=true / ready_to_install=false / installation_hold=false。208 资源、31 原生、243 托管文件及独立桥接客户端核对通过。前版 `694aaf5f` 保存于 `glass-before-wiki-examples/`，文件复验与恢复脚本 ValidateOnly 通过，未实际回退；未自动启动，没有修改用户账户 / 草稿 / 图库 / 桥接参数。此状态覆盖前文准备阶段的暂缓安装描述，旧 ZIP 与其中准备阶段回执保持封存；实机窗口体验由用户反馈。

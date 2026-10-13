@@ -13,7 +13,6 @@ import '../../../../../core/enums/precise_ref_type.dart';
 import '../../../../../core/extensions/precise_ref_type_extensions.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_params.dart';
-import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/precise_ref_library_provider.dart';
 import '../../../utils/dropped_file_reader.dart';
@@ -24,7 +23,10 @@ import '../../../widgets/common/hover_image_preview.dart';
 import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
-import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
+import '../../../ui/refs/refs_contract.dart';
+import '../../../wiring/refs_generation_target.dart';
+import '../../../wiring/refs_picker_wiring.dart';
+import '../../../wiring/refs_platform.dart';
 
 const double _disabledPreciseReferenceCardOpacity = 0.48;
 
@@ -546,39 +548,27 @@ class _PreciseReferencePanelState extends ConsumerState<PreciseReferencePanel> {
 
   /// 从精准参考库导入条目（套用条目记住的类型与参数）
   Future<void> _importFromLibrary() async {
-    final selected = await PreciseRefSelectorDialog.show(context);
-    if (selected == null || selected.isEmpty || !mounted) return;
-
-    final storage = ref.read(preciseRefLibraryStorageServiceProvider);
-    final notifier = ref.read(generationParamsNotifierProvider.notifier);
-    final libraryNotifier = ref.read(
-      preciseRefLibraryNotifierProvider.notifier,
+    final selection = await RefsPickerWiring.show(
+      context,
+      kind: RefsKind.precise,
     );
-
-    final futures = <Future<void>>[];
-    var added = 0;
-    for (final entry in selected) {
-      final bytes = await storage.readImageBytes(entry.id);
-      if (bytes == null) continue;
-      futures.add(
-        notifier.addPreciseReferenceFromImage(
-          bytes,
-          type: entry.type,
-          strength: entry.strength,
-          fidelity: entry.fidelity,
-        ),
-      );
-      unawaited(libraryNotifier.recordUsage(entry.id));
-      added++;
-    }
-    await Future.wait(futures);
-
-    if (!mounted) return;
-    if (added > 0) {
-      AppToast.success(context, context.l10n.preciseRef_addedCount(added));
-    }
-    if (added < selected.length) {
-      AppToast.warning(context, context.l10n.preciseRefLib_imageMissing);
+    if (selection == null || !mounted) return;
+    final platform = ref.read(refsPlatformProvider);
+    try {
+      final entries = ref.read(preciseRefLibraryNotifierProvider).entries;
+      final result = await ref
+          .read(refsGenerationTargetProvider)
+          .addPrecise(
+            [
+              for (final key in selection.keys)
+                ...entries.where((entry) => entry.id == key),
+            ],
+            replace: selection.replace,
+            alive: () => mounted,
+          );
+      if (mounted) platform.sent(context, result.count);
+    } catch (error) {
+      if (mounted) platform.error(context, error);
     }
   }
 

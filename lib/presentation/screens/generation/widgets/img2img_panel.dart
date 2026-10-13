@@ -11,12 +11,10 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
-import '../../../../data/services/precise_ref_library_storage_service.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
 import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
-import '../../../providers/precise_ref_library_provider.dart';
 import '../../../utils/dropped_file_reader.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/collapsible_image_panel.dart';
@@ -26,7 +24,10 @@ import '../../../widgets/common/decoded_memory_image.dart';
 import '../../../widgets/common/image_picker_card/image_picker_card.dart';
 import '../../../widgets/common/themed_divider.dart';
 import '../../../widgets/image_editor/image_editor_screen.dart';
-import '../../precise_ref_library/widgets/precise_ref_selector_dialog.dart';
+import '../../../ui/refs/refs_contract.dart';
+import '../../../wiring/refs_generation_target.dart';
+import '../../../wiring/refs_picker_wiring.dart';
+import '../../../wiring/refs_platform.dart';
 import 'local_upscale_panel.dart';
 import '../../../providers/generation/cloud_upscale_provider.dart';
 import 'img2img_preview_cache.dart';
@@ -402,32 +403,20 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
 
   /// 从精准参考库选一张图作为图生图底图
   Future<void> _importSourceFromPreciseRefLibrary() async {
-    final selected = await PreciseRefSelectorDialog.show(
+    final selection = await RefsPickerWiring.show(
       context,
-      multiSelect: false,
+      kind: RefsKind.precise,
+      single: true,
     );
-    if (selected == null || selected.isEmpty || !mounted) return;
-
-    final entry = selected.first;
-    final bytes = await ref
-        .read(preciseRefLibraryStorageServiceProvider)
-        .readImageBytes(entry.id);
-    if (!mounted) return;
-    if (bytes == null) {
-      AppToast.error(context, context.l10n.preciseRefLib_imageMissing);
-      return;
+    if (selection == null || selection.keys.isEmpty || !mounted) return;
+    final platform = ref.read(refsPlatformProvider);
+    try {
+      await ref
+          .read(refsGenerationTargetProvider)
+          .sendImg2Img(selection.keys.first, alive: () => mounted);
+    } catch (error) {
+      if (mounted) platform.error(context, error);
     }
-
-    unawaited(
-      ref
-          .read(imageWorkflowControllerProvider.notifier)
-          .replaceSourceImageAsync(bytes),
-    );
-    unawaited(
-      ref
-          .read(preciseRefLibraryNotifierProvider.notifier)
-          .recordUsage(entry.id),
-    );
   }
 
   Widget _buildInpaintStatus(ThemeData theme, bool isReady) {

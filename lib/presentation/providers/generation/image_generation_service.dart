@@ -304,7 +304,7 @@ class ImageGenerationService {
 
       // 流式不支持或未完成，回退到非流式
       if (streamingNotAllowed || finalImages.isEmpty) {
-        return _generateWithRetry(params);
+        return await _generateWithRetry(params);
       }
 
       return ImageGenerationResult.error('No image generated');

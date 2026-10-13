@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/presentation/router/app_branch.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 
 void main() {
@@ -36,6 +38,64 @@ void main() {
 
       expect(storage.mainNavExpanded, isFalse);
     });
+  });
+
+  group('main navigation customization persistence', () {
+    test('fresh defaults leave pages visible and enable Ctrl numbers', () {
+      const state = LayoutState();
+      expect(state.mainNavHiddenBranches, isEmpty);
+      expect(state.mainNavCtrlNumbers, isTrue);
+      expect(state.mainNavCtrlHintSeen, isFalse);
+      final changed = state.copyWith(mainNavCtrlNumbers: false);
+      expect(changed.mainNavCtrlHintSeen, isFalse);
+      expect(changed.rightPanelWidth, state.rightPanelWidth);
+    });
+
+    test(
+      'preferences restore independently and ignore unknown or locked pages',
+      () async {
+        final storage = _FakeLayoutStorage()..mainNavExpanded = true;
+        storage.settings[StorageKeys.mainNavHiddenBranches] = [
+          'statistics',
+          'generation',
+          'settings',
+          'unknown',
+          'statistics',
+        ];
+        storage.settings[StorageKeys.mainNavCtrlNumbers] = false;
+        storage.settings[StorageKeys.mainNavCtrlHintSeen] = true;
+        ProviderContainer create() => ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWith((ref) => storage),
+          ],
+        );
+        final first = create();
+        final restored = first.read(layoutStateNotifierProvider);
+        expect(restored.mainNavHiddenBranches, {AppBranch.statistics});
+        expect(restored.mainNavCtrlNumbers, isFalse);
+        expect(restored.mainNavCtrlHintSeen, isTrue);
+        expect(restored.mainNavRailExpanded, isTrue);
+        final notifier = first.read(layoutStateNotifierProvider.notifier);
+        await notifier.setMainNavHiddenBranches({
+          AppBranch.localGallery,
+          AppBranch.generation,
+        });
+        await notifier.setMainNavCtrlNumbers(true);
+        await notifier.setMainNavCtrlHintSeen(false);
+        await notifier.setMainNavRailExpanded(false);
+        first.dispose();
+        final second = create();
+        addTearDown(second.dispose);
+        final state = second.read(layoutStateNotifierProvider);
+        expect(state.mainNavHiddenBranches, {AppBranch.localGallery});
+        expect(state.mainNavCtrlNumbers, isTrue);
+        expect(state.mainNavCtrlHintSeen, isFalse);
+        expect(state.mainNavRailExpanded, isFalse);
+        expect(storage.settings[StorageKeys.mainNavHiddenBranches], [
+          'localGallery',
+        ]);
+      },
+    );
   });
 
   group('LayoutState web style layout fields', () {

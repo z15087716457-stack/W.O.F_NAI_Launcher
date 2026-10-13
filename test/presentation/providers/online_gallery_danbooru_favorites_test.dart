@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:async';
+import 'package:nai_launcher/data/models/online_gallery/gallery_source.dart';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -69,6 +71,62 @@ void main() {
     expect(state.posts, isEmpty);
     expect(state.isLoading, isFalse);
   });
+
+  for (final remove in [false, true]) {
+    test(
+      'late favorite mutation after account invalidation is ignored (remove=$remove)',
+      () async {
+        final api = _DelayedFavoriteApi();
+        final container = ProviderContainer(
+          overrides: [
+            danbooruAuthProvider.overrideWith(_StubDanbooruAuth.new),
+            danbooruApiServiceProvider.overrideWithValue(api),
+          ],
+        );
+        addTearDown(container.dispose);
+        final notifier = container.read(onlineGalleryNotifierProvider.notifier);
+        final operation = remove
+            ? notifier.removeFavorite(42)
+            : notifier.addFavorite(42);
+        notifier.invalidateRemoteFavorites(GallerySourceId.danbooru);
+        api.result.complete(true);
+        expect(await operation, isFalse);
+        expect(
+          container.read(onlineGalleryNotifierProvider).favoritedPostKeys,
+          isEmpty,
+        );
+        expect(
+          container.read(onlineGalleryNotifierProvider).favoriteLoadingPostKeys,
+          isEmpty,
+        );
+      },
+    );
+  }
+
+  test('late favorite mutation after provider disposal is harmless', () async {
+    final api = _DelayedFavoriteApi();
+    final container = ProviderContainer(
+      overrides: [
+        danbooruAuthProvider.overrideWith(_StubDanbooruAuth.new),
+        danbooruApiServiceProvider.overrideWithValue(api),
+      ],
+    );
+    final operation = container
+        .read(onlineGalleryNotifierProvider.notifier)
+        .addFavorite(42);
+    container.dispose();
+    api.result.complete(true);
+    expect(await operation, isFalse);
+  });
+}
+
+class _DelayedFavoriteApi extends DanbooruApiService {
+  _DelayedFavoriteApi() : super(Dio());
+  final result = Completer<bool>();
+  @override
+  Future<bool> addFavorite(int postId) => result.future;
+  @override
+  Future<bool> removeFavorite(int postId) => result.future;
 }
 
 class _StubDanbooruAuth extends DanbooruAuth {

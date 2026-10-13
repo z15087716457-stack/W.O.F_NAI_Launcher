@@ -12,7 +12,7 @@ import '../providers/pill_roll_coordinator.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../providers/prompt_block_palette_provider.dart';
 import '../router/app_router.dart';
-import '../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'blocks_actions.dart';
 import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_dock.dart';
 import '../utils/prompt_block_bundle_insertion.dart';
@@ -123,49 +123,13 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
   }
 
   Future<void> edit(String? id) async {
-    final library = await ref.read(promptBlockLibraryNotifierProvider.future);
+    await ref.read(promptBlockLibraryNotifierProvider.future);
     if (!mounted) return;
-    if (id == null) {
-      await PromptBlockEditDialog.createWithDialog(
-        context,
-        ref,
-        initialFolderId: filter.folderId,
-      );
-      return;
-    }
-    final block = library.blockById(id);
-    if (block == null) return;
-    final result = await PromptBlockEditDialog.show(
-      context: context,
-      block: block,
-      folders: library.folders,
-      knownTags: [for (final item in library.blocks) ...item.tags],
-    );
-    if (result == null || !mounted) return;
-    if (ref
-            .read(promptBlockLibraryNotifierProvider)
-            .valueOrNull
-            ?.blockById(id) !=
-        block) {
-      throw StateError(context.l10n.bridge_conflict);
-    }
-    await ref
-        .read(promptBlockLibraryNotifierProvider.notifier)
-        .updateBlock(
-          block.copyWith(
-            title: result.title,
-            content: result.content,
-            atoms: result.atoms,
-            negativeContent: result.negativeContent,
-            negativeAtoms: result.negativeAtoms,
-            color: result.color,
-            iconName: result.iconName,
-            appearance: result.appearance,
-            folderId: result.folderId,
-            tags: result.tags,
-            generationSettings: result.generationSettings,
-          ),
-        );
+    await BlocksActions(
+      ref,
+      context,
+      () => mounted,
+    ).edit(id: id, folderId: filter.folderId);
   }
 
   @override

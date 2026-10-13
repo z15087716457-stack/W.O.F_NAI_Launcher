@@ -308,10 +308,14 @@ class OnlineGalleryState {
   final DateTime? dateRangeEnd;
   final OnlineGalleryAuthorReturnContext? authorReturnContext;
 
+  GallerySourceId get currentSourceId => switch (viewMode) {
+    GalleryViewMode.search => sourceId,
+    GalleryViewMode.popular => popularSourceId,
+    GalleryViewMode.favorites => favoritesSourceId,
+  };
+
   GallerySourceCapabilities get activeCapabilities =>
-      gallerySourceCapabilities[viewMode == GalleryViewMode.popular
-          ? popularSourceId
-          : sourceId]!;
+      gallerySourceCapabilities[currentSourceId]!;
 
   String get currentCacheKey {
     switch (viewMode) {
@@ -492,14 +496,89 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
 
   CancelToken? _cancelToken;
   int _requestGeneration = 0;
+  int _danbooruFavoriteGeneration = 0;
+  bool _disposed = false;
   int _activeDetailRequests = 0;
   final List<Completer<void>> _detailRequestQueue = [];
   final Map<String, Future<GalleryDetail>> _detailRequests = {};
   final Map<String, GalleryDetail> _resolvedDetails = {};
+  final Map<GallerySourceId, OnlineGalleryState> _sourceStates = {};
+
+  Future<void> setActiveSource(GallerySourceId source) async {
+    if (state.currentSourceId == source) return;
+    final supported = switch (state.viewMode) {
+      GalleryViewMode.search => source.capabilities.supportsSearch,
+      GalleryViewMode.popular => source.capabilities.supportsRanking,
+      GalleryViewMode.favorites =>
+        source == GallerySourceId.aiTag ||
+            source.capabilities.supportsFavorites,
+    };
+    if (!supported) return;
+    state = state.updateCurrentCache(state.currentCache);
+    _sourceStates[state.currentSourceId] = state;
+    final saved = _sourceStates[source] ?? const OnlineGalleryState();
+    _cancelCurrentRequest();
+    state = state
+        .copyWith(
+          sourceId: state.viewMode == GalleryViewMode.search ? source : null,
+          popularSourceId: state.viewMode == GalleryViewMode.popular
+              ? source
+              : null,
+          favoritesSourceId: state.viewMode == GalleryViewMode.favorites
+              ? source
+              : null,
+          searchQuery: saved.searchQuery,
+          promptQuery: saved.promptQuery,
+          popularQuery: saved.popularQuery,
+          popularPromptQuery: saved.popularPromptQuery,
+          fuzzySearchEnabled: saved.fuzzySearchEnabled,
+          selectedRatings: saved.selectedRatings,
+          popularScale: saved.popularScale,
+          popularDate: saved.popularDate,
+          clearPopularDate: saved.popularDate == null,
+          aiTagTimeRange: saved.aiTagTimeRange,
+          aiTagPopularPeriod: saved.aiTagPopularPeriod,
+          aiTagNaiOnly: saved.aiTagNaiOnly,
+          aiTagModelVersion: saved.aiTagModelVersion,
+          clearAiTagModelVersion: saved.aiTagModelVersion == null,
+          clearDateRange: true,
+          clearError: true,
+          clearNotice: true,
+        )
+        .copyWith(
+          dateRangeStart: saved.dateRangeStart,
+          dateRangeEnd: saved.dateRangeEnd,
+        );
+    if (state.currentCache.posts.isEmpty) await loadPosts(refresh: true);
+  }
+
+  Future<void> setViewMode(GalleryViewMode mode) async {
+    if (state.viewMode == mode) return;
+    final source = state.currentSourceId;
+    final supported = switch (mode) {
+      GalleryViewMode.search => source.capabilities.supportsSearch,
+      GalleryViewMode.popular => source.capabilities.supportsRanking,
+      GalleryViewMode.favorites =>
+        source == GallerySourceId.aiTag ||
+            source.capabilities.supportsFavorites,
+    };
+    if (!supported) return;
+    _cancelCurrentRequest();
+    state = state.copyWith(
+      viewMode: mode,
+      sourceId: mode == GalleryViewMode.search ? source : null,
+      popularSourceId: mode == GalleryViewMode.popular ? source : null,
+      favoritesSourceId: mode == GalleryViewMode.favorites ? source : null,
+      clearError: true,
+      clearNotice: true,
+    );
+    if (state.currentCache.posts.isEmpty) await loadPosts(refresh: true);
+  }
 
   @override
   OnlineGalleryState build() {
     ref.keepAlive();
+    ref.onDispose(() => _disposed = true);
     return const OnlineGalleryState();
   }
 
@@ -527,7 +606,8 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   }
 
   bool _isCurrentRequest(int generation, String cacheKey) {
-    return generation == _requestGeneration &&
+    return !_disposed &&
+        generation == _requestGeneration &&
         state.currentCacheKey == cacheKey;
   }
 
@@ -657,17 +737,28 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   /// 切换 AiTag「仅 NAI」客户端过滤。过滤结果烘焙进缓存，
   /// 开关是缓存键的一部分——来回切换命中各自缓存，不重复请求。
   Future<void> setAiTagNaiOnly(bool enabled) async {
-    if (state.aiTagNaiOnly == enabled) return;
+    if (state.aiTagNaiOnly == enabled &&
+        (enabled || state.aiTagModelVersion == null)) {
+      return;
+    }
     _cancelCurrentRequest();
-    state = state.copyWith(aiTagNaiOnly: enabled, clearError: true);
+    state = state.copyWith(
+      aiTagNaiOnly: enabled,
+      clearAiTagModelVersion: !enabled,
+      clearError: true,
+    );
     if (state.currentCache.posts.isEmpty) await loadPosts(refresh: true);
   }
 
   /// 选择 AiTag 模型版本过滤（传 null 清除）。版本词注入 q 走服务端检索。
   Future<void> setAiTagModelVersion(String? version) async {
-    if (state.aiTagModelVersion == version) return;
+    if (state.aiTagModelVersion == version &&
+        (version == null || state.aiTagNaiOnly)) {
+      return;
+    }
     _cancelCurrentRequest();
     state = state.copyWith(
+      aiTagNaiOnly: version != null ? true : null,
       aiTagModelVersion: version,
       clearAiTagModelVersion: version == null,
       clearError: true,
@@ -677,6 +768,28 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
       await loadPosts(refresh: true);
     }
   }
+
+  Future<void> submitQuery({
+    required String query,
+    required String prompt,
+    bool? fuzzy,
+  }) async {
+    _cancelCurrentRequest();
+    final ranking = state.viewMode == GalleryViewMode.popular;
+    state = state.copyWith(
+      sourceId: ranking ? null : state.currentSourceId,
+      viewMode: ranking ? GalleryViewMode.popular : GalleryViewMode.search,
+      searchQuery: ranking ? null : query.trim(),
+      promptQuery: ranking ? null : prompt.trim(),
+      popularQuery: ranking ? query.trim() : null,
+      popularPromptQuery: ranking ? prompt.trim() : null,
+      fuzzySearchEnabled: fuzzy,
+      clearError: true,
+    );
+    await loadPosts(refresh: true);
+  }
+
+  OnlineGalleryErrorCode errorCodeFor(Object error) => _errorCode(error);
 
   Future<void> search(String query) async {
     await searchWithPrompt(query, prompt: state.promptQuery);
@@ -1076,7 +1189,7 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   Future<void> _loadFavorites({required bool refresh, int? targetPage}) async {
     final sourceId = state.favoritesSourceId;
     if (sourceId == GallerySourceId.aiTag) {
-      // AItag 收藏为本地存储（OnlineFavoritesBrowser 渲染），无远端请求
+      // AItag 收藏为本地存储（接线层读取），无远端请求
       state = state.copyWith(isLoading: false, clearError: true);
       return;
     }
@@ -1256,10 +1369,12 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
     final postId = _danbooruFavoritePostId(postOrId);
     if (postId == null || !_danbooruAuth.isLoggedIn) return false;
     final key = 'danbooru:$postId';
+    final generation = _danbooruFavoriteGeneration;
     state = state.copyWith(
       favoriteLoadingPostKeys: {...state.favoriteLoadingPostKeys, key},
     );
     final success = await _danbooruApi.addFavorite(postId);
+    if (generation != _danbooruFavoriteGeneration || _disposed) return false;
     final loading = {...state.favoriteLoadingPostKeys}..remove(key);
     state = success
         ? state.copyWith(
@@ -1274,10 +1389,12 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
     final postId = _danbooruFavoritePostId(postOrId);
     if (postId == null || !_danbooruAuth.isLoggedIn) return false;
     final key = 'danbooru:$postId';
+    final generation = _danbooruFavoriteGeneration;
     state = state.copyWith(
       favoriteLoadingPostKeys: {...state.favoriteLoadingPostKeys, key},
     );
     final success = await _danbooruApi.removeFavorite(postId);
+    if (generation != _danbooruFavoriteGeneration || _disposed) return false;
     final loading = {...state.favoriteLoadingPostKeys}..remove(key);
     if (success) {
       final favorites = {...state.favoritedPostKeys}..remove(key);
@@ -1326,22 +1443,39 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
 
   void clearNotice() => state = state.copyWith(clearNotice: true);
 
-  void invalidateGelbooruFavorites() {
-    final filteredCaches = <String, ModeCache>{
-      for (final entry in state.caches.entries)
-        if (!entry.key.startsWith('favorites:gelbooru')) entry.key: entry.value,
-    };
+  void invalidateRemoteFavorites(GallerySourceId source) {
+    if (source != GallerySourceId.danbooru &&
+        source != GallerySourceId.gelbooru) {
+      return;
+    }
+    if (source == GallerySourceId.danbooru) _danbooruFavoriteGeneration++;
+    if (state.viewMode == GalleryViewMode.favorites &&
+        state.currentSourceId == source) {
+      _cancelCurrentRequest();
+    }
     state = state.copyWith(
-      caches: filteredCaches,
-      gelbooruFavoritesCache: const ModeCache(),
+      caches: {
+        for (final entry in state.caches.entries)
+          if (!entry.key.startsWith('favorites:${source.key}'))
+            entry.key: entry.value,
+      },
+      danbooruFavoritesCache: source == GallerySourceId.danbooru
+          ? const ModeCache()
+          : null,
+      gelbooruFavoritesCache: source == GallerySourceId.gelbooru
+          ? const ModeCache()
+          : null,
       favoritedPostKeys: state.favoritedPostKeys
-          .where((key) => !key.startsWith('gelbooru:'))
+          .where((key) => !key.startsWith('${source.key}:'))
           .toSet(),
       favoriteLoadingPostKeys: state.favoriteLoadingPostKeys
-          .where((key) => !key.startsWith('gelbooru:'))
+          .where((key) => !key.startsWith('${source.key}:'))
           .toSet(),
     );
   }
+
+  void invalidateGelbooruFavorites() =>
+      invalidateRemoteFavorites(GallerySourceId.gelbooru);
 
   OnlineGalleryErrorCode _errorCode(Object error) {
     if (error is GallerySourceException) {

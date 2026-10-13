@@ -290,6 +290,15 @@ class PreciseRefLibraryStorageService {
     }
   }
 
+  Future<PreciseRefLibraryEntry?> setFavorite(String id, bool favorite) async {
+    await init();
+    final entry = _entriesBox!.get(id);
+    if (entry == null) return null;
+    final updated = entry.copyWith(isFavorite: favorite);
+    await _entriesBox!.put(id, updated);
+    return updated;
+  }
+
   /// 切换收藏状态。
   Future<PreciseRefLibraryEntry?> toggleFavorite(String id) async {
     await init();
@@ -322,7 +331,7 @@ class PreciseRefLibraryStorageService {
       }
 
       final activeLoad = _thumbnailLoadsById[id];
-      if (activeLoad != null) return activeLoad;
+      if (activeLoad != null) return await activeLoad;
 
       final load = _loadAndCacheDisplayThumbnail(id);
       _thumbnailLoadsById[id] = load;

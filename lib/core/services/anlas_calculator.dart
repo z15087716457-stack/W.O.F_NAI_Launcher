@@ -15,6 +15,11 @@ class AnlasCalculator {
   static const int opusTier = 3;
   static const int invalidCost = -3;
   static const int maximumPerSampleCost = 140;
+  static const int maximumVibeReferences = 16;
+  static const int freeVibeReferences = 4;
+  static int get vibeEncodingCost => _vibeCost;
+  static int get extraVibeCost => _vibeCost;
+  static int get preciseReferenceCost => _preciseReferenceCost;
 
   static const double _areaCoefficient = 2.951823174884865e-6;
   static const double _stepAreaCoefficient = 5.753298233447344e-7;

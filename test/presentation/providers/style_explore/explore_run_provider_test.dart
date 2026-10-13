@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +9,22 @@ import 'package:nai_launcher/core/storage/style_explore_run_storage.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/style_explore/explore_run.dart';
 import 'package:nai_launcher/data/services/explore_run_image_store.dart';
+import 'package:nai_launcher/data/repositories/style_explore_run_repository.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_provider.dart';
+
+class _FailAfterWrite extends StyleExploreRunRepository {
+  _FailAfterWrite(super.storage);
+  bool failNext = false;
+  @override
+  Future<ExploreRun> overwrite(ExploreRun run) async {
+    final saved = await super.overwrite(run);
+    if (failNext) {
+      failNext = false;
+      throw StateError('committed write reported failure');
+    }
+    return saved;
+  }
+}
 
 final _epoch = DateTime.utc(2026, 9, 1);
 
@@ -62,7 +78,7 @@ void main() {
     decrisp: false,
   );
 
-  ProviderContainer container() {
+  ProviderContainer container({List<Override> extra = const []}) {
     final c = ProviderContainer(
       overrides: [
         styleExploreRunStorageProvider.overrideWithValue(runStorage),
@@ -71,6 +87,7 @@ void main() {
             rootPathResolver: () async => imageDirectory.path,
           ),
         ),
+        ...extra,
       ],
     );
     addTearDown(c.dispose);
@@ -90,6 +107,224 @@ void main() {
           targetCount: 5,
         );
   }
+
+  test(
+    'shared managed image copies remain while another candidate references them',
+    () async {
+      final c = container();
+      await c.read(exploreRunListNotifierProvider.future);
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final shells = await notifier.addManualCandidates(run.id, count: 2);
+      final path = await c
+          .read(exploreRunImageStoreProvider)
+          .storeCandidateImage(
+            runId: run.id,
+            candidateId: shells.first.id,
+            bytes: Uint8List.fromList([1, 2, 3]),
+          );
+      for (final shell in shells) {
+        await notifier.updateGeneration(
+          run.id,
+          shell.id,
+          ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+            filePath: path,
+          ),
+        );
+      }
+      final deletion = await notifier.softDeleteCandidates(run.id, [
+        shells.first.id,
+      ]);
+      expect(deletion.images, isEmpty);
+      expect(await File(path!).exists(), isTrue);
+      await notifier.undoCandidateDeletion(deletion.id);
+      expect(
+        (await c.read(
+          exploreRunListNotifierProvider.future,
+        )).runById(run.id)!.candidates,
+        hasLength(2),
+      );
+    },
+  );
+
+  test(
+    'an error after committed deletion retains the exact recovery record',
+    () async {
+      final repository = _FailAfterWrite(runStorage);
+      final c = container(
+        extra: [
+          styleExploreRunRepositoryProvider.overrideWithValue(repository),
+        ],
+      );
+      await c.read(exploreRunListNotifierProvider.future);
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final shell = (await notifier.addManualCandidates(
+        run.id,
+        count: 1,
+      )).single;
+      final path = await c
+          .read(exploreRunImageStoreProvider)
+          .storeCandidateImage(
+            runId: run.id,
+            candidateId: shell.id,
+            bytes: Uint8List.fromList([1, 2, 3]),
+          );
+      await notifier.updateGeneration(
+        run.id,
+        shell.id,
+        ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.done,
+          filePath: path,
+        ),
+      );
+      repository.failNext = true;
+      await expectLater(
+        notifier.softDeleteCandidates(run.id, [shell.id]),
+        throwsStateError,
+      );
+      final state = await c.read(exploreRunListNotifierProvider.future);
+      expect(state.runById(run.id)!.candidates, isEmpty);
+      expect(state.deletions, hasLength(1));
+      expect(await File(path!).exists(), isFalse);
+      await notifier.undoCandidateDeletion(state.deletions.single.id);
+      expect(await File(path).exists(), isTrue);
+      expect(
+        (await c.read(
+          exploreRunListNotifierProvider.future,
+        )).runById(run.id)!.candidates.single.id,
+        shell.id,
+      );
+    },
+  );
+
+  test(
+    'soft deletion restores only its candidates and keeps later edits',
+    () async {
+      final c = container();
+      await c.read(exploreRunListNotifierProvider.future);
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final shells = await notifier.addManualCandidates(run.id, count: 2);
+      final folder = await notifier.createFolder(run.id, 'Original group');
+      await notifier.assignCandidateFolder(run.id, shells.first.id, folder.id);
+      final store = c.read(exploreRunImageStoreProvider);
+      final path = await store.storeCandidateImage(
+        runId: run.id,
+        candidateId: shells.first.id,
+        bytes: Uint8List.fromList([1, 2, 3]),
+      );
+      for (final shell in shells) {
+        await notifier.updateGeneration(
+          run.id,
+          shell.id,
+          ExploreCandidateGeneration(
+            status: ExploreCandidateGenerationStatus.done,
+            filePath: shell.id == shells.first.id ? path : null,
+          ),
+        );
+      }
+      final deletion = await notifier.softDeleteCandidates(run.id, [
+        shells.first.id,
+        shells.first.id,
+      ]);
+      expect(deletion.candidateIds, {shells.first.id});
+      expect(await File(path!).exists(), isFalse);
+      await notifier.updateReview(run.id, shells.last.id, heart: true);
+      await notifier.deleteFolder(run.id, folder.id);
+      await notifier.addManualCandidates(run.id, count: 1);
+      await notifier.undoCandidateDeletion(deletion.id);
+      final updated = (await c
+          .read(styleExploreRunRepositoryProvider)
+          .getRun(run.id))!;
+      expect(updated.candidates.map((candidate) => candidate.number), [
+        1,
+        2,
+        3,
+      ]);
+      expect(updated.candidateById(shells.first.id)!.folderId, isNull);
+      expect(updated.candidateById(shells.last.id)!.review.heart, isTrue);
+      expect(await File(path).readAsBytes(), [1, 2, 3]);
+      expect(
+        (await c.read(exploreRunListNotifierProvider.future)).deletions,
+        isEmpty,
+      );
+    },
+  );
+
+  test(
+    'undo remains available after the page container is recreated',
+    () async {
+      final c = container();
+      await c.read(exploreRunListNotifierProvider.future);
+      final notifier = c.read(exploreRunListNotifierProvider.notifier);
+      final run = await createRun(c);
+      final shells = await notifier.addManualCandidates(run.id, count: 1);
+      await notifier.updateGeneration(
+        run.id,
+        shells.single.id,
+        const ExploreCandidateGeneration(
+          status: ExploreCandidateGenerationStatus.failed,
+          error: 'test',
+        ),
+      );
+      final deletion = await notifier.softDeleteCandidates(run.id, [
+        shells.single.id,
+      ]);
+      final fresh = container();
+      final state = await fresh.read(exploreRunListNotifierProvider.future);
+      expect(state.undoForRun(run.id)?.id, deletion.id);
+      await fresh
+          .read(exploreRunListNotifierProvider.notifier)
+          .undoCandidateDeletion(deletion.id);
+      final restored = (await fresh
+          .read(styleExploreRunRepositoryProvider)
+          .getRun(run.id))!;
+      expect(restored.candidates.single.id, shells.single.id);
+      expect(restored.candidates.single.number, 1);
+    },
+  );
+
+  test('pending candidates reject deletion without creating an undo', () async {
+    final c = container();
+    await c.read(exploreRunListNotifierProvider.future);
+    final notifier = c.read(exploreRunListNotifierProvider.notifier);
+    final run = await createRun(c);
+    final shells = await notifier.addManualCandidates(run.id, count: 1);
+    await expectLater(
+      notifier.softDeleteCandidates(run.id, [shells.single.id]),
+      throwsStateError,
+    );
+    expect(await runStorage.getCandidateDeletions(), isEmpty);
+    expect(
+      (await runStorage.getRun(run.id))!.candidates.single.id,
+      shells.single.id,
+    );
+  });
+
+  test('candidate numbers survive deletion and are never reused', () async {
+    final c = container();
+    final notifier = c.read(exploreRunListNotifierProvider.notifier);
+    final run = await createRun(c);
+    final first = await notifier.addManualCandidates(run.id, count: 3);
+    final repository = c.read(styleExploreRunRepositoryProvider);
+    final before = (await repository.getRun(run.id))!;
+    expect(before.candidates.map((candidate) => candidate.toJson()['number']), [
+      1,
+      2,
+      3,
+    ]);
+    await notifier.removeCandidates(run.id, [first.last.id]);
+    await notifier.addManualCandidates(run.id, count: 1);
+    final after = (await repository.getRun(run.id))!;
+    expect(after.candidates.map((candidate) => candidate.toJson()['number']), [
+      1,
+      2,
+      4,
+    ]);
+    expect(after.toJson()['nextCandidateNumber'], 5);
+  });
 
   test(
     'append parents deduplicates, keeps preference and serializes concurrent writes',

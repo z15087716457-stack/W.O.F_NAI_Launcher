@@ -20,6 +20,7 @@ import 'sections/integrations_settings_section.dart';
 import 'sections/about_settings_section.dart';
 import 'sections/model_management_section.dart';
 import 'sections/local_upscale_settings_section.dart';
+import 'sections/nai_agent_settings_section.dart';
 
 enum SettingsDestination {
   appearance,
@@ -30,6 +31,7 @@ enum SettingsDestination {
   localUpscale,
   account,
   models,
+  agent,
   integrations,
   privacy,
   about,
@@ -67,6 +69,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   late SettingsDestination _destination;
   final _scroll = ScrollController();
   final _modelsKey = GlobalKey<ModelManagementSectionState>();
+  final _agentKey = GlobalKey<NaiAgentSettingsSectionState>();
   bool _leavingModels = false;
   int _navigationRevision = 0;
   int? _integrationSearchTab;
@@ -82,6 +85,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     7 => SettingsDestination.models,
     9 => SettingsDestination.about,
     10 => SettingsDestination.localUpscale,
+    11 => SettingsDestination.agent,
     _ => SettingsDestination.appearance,
   };
 
@@ -127,6 +131,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         setState(() => _navigationRevision++);
         return;
       }
+    }
+    if (_destination == SettingsDestination.agent) {
+      _leavingModels = true;
+      final allowed =
+          await (_agentKey.currentState?.confirmLeave() ?? Future.value(true));
+      _leavingModels = false;
+      if (!mounted || !allowed) return;
     }
     if (_scroll.hasClients) _scroll.jumpTo(0);
     setState(() => _destination = destination);
@@ -267,6 +278,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         context.l10n.settings_modelsAndInterfaces,
         '',
         ModelManagementSection(key: _modelsKey),
+      ),
+      _SettingsSection(
+        SettingsDestination.agent,
+        Icons.auto_awesome_outlined,
+        context.l10n.naiAgent_title,
+        context.l10n.naiAgent_toolsHint,
+        NaiAgentSettingsSection(key: _agentKey),
       ),
       _SettingsSection(
         SettingsDestination.integrations,
@@ -467,11 +485,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               group(
                                 context.l10n.settings_servicesConnections,
-                                sections.skip(6).take(3),
+                                sections.skip(6).take(4),
                               ),
                               group(
                                 context.l10n.settings_safetyMaintenance,
-                                sections.skip(9),
+                                sections.skip(10),
                               ),
                             ],
                           ),

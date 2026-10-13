@@ -9,6 +9,8 @@ import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
@@ -57,6 +59,41 @@ class TestBlocks extends PromptBlockLibraryNotifier {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test('读取存档负向草稿不初始化未打开的药丸 lane', () async {
+    final directory = await Directory.systemTemp.createTemp('gen-draft-read-');
+    Hive.init(directory.path);
+    await Hive.openBox(StorageKeys.settingsBox);
+    await Hive.openBox<String>(PillWorkspaceStorage.boxName);
+    final container = ProviderContainer(
+      overrides: [
+        localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
+        characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
+        promptBlockLibraryNotifierProvider.overrideWith(TestBlocks.new),
+      ],
+    );
+    try {
+      const document = PillDocument(text: 'archived negative', instances: {});
+      await container
+          .read(pillWorkspaceStorageProvider)
+          .persist(PillScopes.negative, document);
+      final snapshot = container.read(Provider((ref) => readBridgeDraft(ref)));
+      expect(snapshot.fields['negative_prompt'], 'archived negative');
+      expect(
+        container.exists(pillWorkspaceProvider(PillScopes.negative)),
+        isFalse,
+      );
+      expect(
+        container
+            .read(pillWorkspaceStorageProvider)
+            .tryLoadSync(PillScopes.negative),
+        document,
+      );
+    } finally {
+      container.dispose();
+      await Hive.close();
+      await directory.delete(recursive: true);
+    }
+  });
   test('确认版本观察参数、角色、等价译块、预设和参考；撤销不恢复；不创建未打开lane', () async {
     final directory = await Directory.systemTemp.createTemp(
       'bridge-version-test-',

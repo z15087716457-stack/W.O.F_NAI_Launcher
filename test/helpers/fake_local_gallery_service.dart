@@ -91,6 +91,33 @@ class FakeLocalGalleryService implements LocalGalleryService {
   }
 
   @override
+  Future<GalleryQueryPage> queryRecords(
+    FilterCriteria criteria, {
+    int offset = 0,
+    int limit = 50,
+  }) async {
+    final items = _records
+        .where(
+          (r) =>
+              (!criteria.showFavoritesOnly || _favorites.contains(r.path)) &&
+              (criteria.searchQuery.isEmpty ||
+                  r.path.contains(criteria.searchQuery)),
+        )
+        .toList();
+    return GalleryQueryPage(
+      records: items.skip(offset).take(limit).map(_withFavorite).toList(),
+      totalCount: items.length,
+      nextOffset: offset + limit < items.length ? offset + limit : null,
+    );
+  }
+
+  @override
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(
+    List<String> paths,
+  ) async =>
+      _records.where((r) => paths.contains(r.path)).map(_withFavorite).toList();
+
+  @override
   Future<List<GalleryTimelineEntry>> getTimelineEntries() async {
     timelineRequests++;
     return [

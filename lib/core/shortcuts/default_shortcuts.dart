@@ -9,6 +9,10 @@ class ShortcutIds {
   static const String navigateToStatistics = 'navigate_to_statistics';
   static const String navigateToSettings = 'navigate_to_settings';
   static const String navigateToVibeLibrary = 'navigate_to_vibe_library';
+  static const String navigateToStyleExplore = 'navigate_to_style_explore';
+  static const String navigateToPreciseRefLibrary =
+      'navigate_to_precise_ref_library';
+  static const String navigateToTagWiki = 'navigate_to_tag_wiki';
 
   // 生成页面快捷键
   static const String generateImage = 'generate_image';
@@ -87,17 +91,24 @@ enum ShortcutContext {
 
 /// 默认快捷键配置
 class DefaultShortcuts {
+  static const navigation = <String, String>{
+    ShortcutIds.navigateToGeneration: 'ctrl+1',
+    ShortcutIds.navigateToStyleExplore: 'ctrl+2',
+    ShortcutIds.navigateToLocalGallery: 'ctrl+3',
+    ShortcutIds.navigateToOnlineGallery: 'ctrl+4',
+    ShortcutIds.navigateToTagLibrary: 'ctrl+5',
+    ShortcutIds.navigateToVibeLibrary: 'ctrl+6',
+    ShortcutIds.navigateToPreciseRefLibrary: 'ctrl+7',
+    ShortcutIds.navigateToTagWiki: 'ctrl+8',
+    ShortcutIds.navigateToStatistics: 'ctrl+9',
+    ShortcutIds.navigateToSettings: 'ctrl+comma',
+  };
+
   /// 获取所有默认快捷键配置
   /// 格式: Map<快捷键ID, 默认快捷键字符串>
   static Map<String, String> get all => {
     // 页面导航
-    ShortcutIds.navigateToGeneration: 'ctrl+1',
-    ShortcutIds.navigateToLocalGallery: 'ctrl+2',
-    ShortcutIds.navigateToOnlineGallery: 'ctrl+3',
-    ShortcutIds.navigateToTagLibrary: 'ctrl+5',
-    ShortcutIds.navigateToStatistics: 'ctrl+6',
-    ShortcutIds.navigateToSettings: 'ctrl+comma',
-    ShortcutIds.navigateToVibeLibrary: 'ctrl+7',
+    ...navigation,
 
     // 生成页面
     ShortcutIds.generateImage: 'ctrl+enter',
@@ -171,6 +182,9 @@ class DefaultShortcuts {
       case ShortcutIds.navigateToStatistics:
       case ShortcutIds.navigateToSettings:
       case ShortcutIds.navigateToVibeLibrary:
+      case ShortcutIds.navigateToStyleExplore:
+      case ShortcutIds.navigateToPreciseRefLibrary:
+      case ShortcutIds.navigateToTagWiki:
       case ShortcutIds.minimizeToTray:
       case ShortcutIds.quitApp:
       case ShortcutIds.showShortcutHelp:

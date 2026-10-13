@@ -7,6 +7,7 @@ import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/router/app_branch.dart';
 import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 
@@ -123,6 +124,61 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+  testWidgets('all ten navigation bindings dispatch with an input focused', (
+    tester,
+  ) async {
+    final opened = <AppBranch>[];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          shortcutConfigNotifierProvider.overrideWith(_DefaultConfig.new),
+        ],
+        child: MaterialApp(
+          home: GlobalShortcuts(
+            shortcuts: {
+              for (final entry in globalNavigationShortcutBranches.entries)
+                entry.key: () => opened.add(entry.value),
+            },
+            child: const Material(child: TextField(autofocus: true)),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(TextField));
+    const keys = [
+      LogicalKeyboardKey.digit1,
+      LogicalKeyboardKey.digit2,
+      LogicalKeyboardKey.digit3,
+      LogicalKeyboardKey.digit4,
+      LogicalKeyboardKey.digit5,
+      LogicalKeyboardKey.digit6,
+      LogicalKeyboardKey.digit7,
+      LogicalKeyboardKey.digit8,
+      LogicalKeyboardKey.digit9,
+      LogicalKeyboardKey.comma,
+    ];
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    for (final key in keys) {
+      await tester.sendKeyEvent(key);
+      await tester.pump();
+    }
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(opened, [
+      AppBranch.generation,
+      AppBranch.styleExplore,
+      AppBranch.localGallery,
+      AppBranch.onlineGallery,
+      AppBranch.promptBlockLibrary,
+      AppBranch.vibeLibrary,
+      AppBranch.preciseRefLibrary,
+      AppBranch.tagWiki,
+      AppBranch.statistics,
+      AppBranch.settings,
+    ]);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'nearest registered global binding wins without duplicate calls',
     (tester) async {

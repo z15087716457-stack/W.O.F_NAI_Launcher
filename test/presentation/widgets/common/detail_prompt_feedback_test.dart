@@ -19,7 +19,7 @@ import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/widgets/common/anlas_cost_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_context_menu.dart';
-import 'package:nai_launcher/presentation/widgets/common/image_detail/components/prompt_section.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_section.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_input.dart';

@@ -23,6 +23,9 @@ const Map<String, AppBranch> globalNavigationShortcutBranches = {
   ShortcutIds.navigateToStatistics: AppBranch.statistics,
   ShortcutIds.navigateToTagLibrary: AppBranch.promptBlockLibrary,
   ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,
+  ShortcutIds.navigateToStyleExplore: AppBranch.styleExplore,
+  ShortcutIds.navigateToPreciseRefLibrary: AppBranch.preciseRefLibrary,
+  ShortcutIds.navigateToTagWiki: AppBranch.tagWiki,
 };
 
 /// Mobile navigation only exposes generation, local gallery, and settings.

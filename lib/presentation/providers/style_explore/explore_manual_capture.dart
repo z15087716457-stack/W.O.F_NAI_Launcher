@@ -103,6 +103,10 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
       cancelSession(generationRunId: staleId);
     }
     final rollSnapshot = captureExploreRollSnapshot(ref);
+    final selectionEpoch = ref.read(exploreRunSelectionEpochProvider);
+    final paramsSnapshot = ExploreParamsSnapshot.fromImageParams(
+      ref.read(generationParamsNotifierProvider),
+    );
     final sessionId = ++_sessionCounter;
     state = ExploreManualCaptureState(
       armed: true,
@@ -115,7 +119,11 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     );
     try {
       await _orphanSweep;
-      final runId = await _ensureActiveRun(autoRunName, activeRunId);
+      final runId = await _ensureActiveRun(
+        autoRunName,
+        activeRunId,
+        selectionEpoch,
+      );
       if (!_isSessionActive(sessionId, generationRunId)) return;
       final shells = await ref
           .read(exploreRunListNotifierProvider.notifier)
@@ -123,6 +131,7 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
             runId,
             count: expectedCount < 1 ? 1 : expectedCount,
             rollSnapshots: [rollSnapshot],
+            paramsSnapshot: paramsSnapshot,
           );
       if (!_isSessionActive(sessionId, generationRunId)) {
         await _failShells(runId, [
@@ -156,6 +165,7 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
   Future<String> _ensureActiveRun(
     String autoRunName,
     String? activeRunId,
+    int selectionEpoch,
   ) async {
     if (activeRunId != null) {
       final run = await ref
@@ -180,7 +190,10 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
           paramsSnapshot: ExploreParamsSnapshot.fromImageParams(params),
           targetCount: 10,
         );
-    ref.read(exploreActiveRunIdProvider.notifier).state = created.id;
+    if (ref.read(exploreActiveRunIdProvider) == activeRunId &&
+        ref.read(exploreRunSelectionEpochProvider) == selectionEpoch) {
+      ref.read(exploreActiveRunIdProvider.notifier).state = created.id;
+    }
     return created.id;
   }
 
@@ -275,6 +288,12 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     await _completeBatch(event);
   }
 
+  Future<void> cancelAndWait({int? generationRunId, int? sessionId}) async {
+    if (sessionId != null && state.sessionId != sessionId) return;
+    cancelSession(generationRunId: generationRunId);
+    await _batchQueue;
+  }
+
   void cancelSession({int? generationRunId, String error = 'cancelled'}) {
     final capture = state;
     if (!capture.armed ||
@@ -311,6 +330,9 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
     final capture = state;
     final runId = capture.runId;
     if (runId == null) return;
+    final paramsSnapshot = ExploreParamsSnapshot.fromImageParams(
+      ref.read(generationParamsNotifierProvider),
+    );
 
     final snapshots = [...capture.rollSnapshots];
     final firstIndex = slotStart - 1;
@@ -336,7 +358,10 @@ class ExploreManualCaptureNotifier extends Notifier<ExploreManualCaptureState> {
             ExploreCandidateGenerationStatus.pending) {
           return candidate;
         }
-        return candidate.copyWith(rollSnapshot: snapshot);
+        return candidate.copyWith(
+          rollSnapshot: snapshot,
+          paramsSnapshot: paramsSnapshot,
+        );
       });
     }
   }

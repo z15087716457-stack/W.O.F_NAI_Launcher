@@ -1,10 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../core/storage/style_explore_run_storage.dart';
 import '../../../core/utils/nai_prompt_segments.dart';
 import '../../../core/utils/nai_prompt_syntax.dart';
 import '../../../data/models/style_explore/explore_run.dart';
+import '../../../data/models/style_explore/explore_candidate_deletion.dart';
 import '../../../data/repositories/style_explore_run_repository.dart';
 import '../../../data/services/explore_run_image_store.dart';
 import 'explore_roll_capture.dart';
@@ -24,10 +26,17 @@ final exploreRunImageStoreProvider = Provider<ExploreRunImageStore>(
 
 /// Run 列表只读快照，按更新时间新→旧排列。
 class ExploreRunListState {
-  ExploreRunListState({required List<ExploreRun> runs})
-    : runs = List.unmodifiable(runs);
+  ExploreRunListState({
+    required List<ExploreRun> runs,
+    List<ExploreCandidateDeletion> deletions = const [],
+  }) : runs = List.unmodifiable(runs),
+       deletions = List.unmodifiable(deletions);
 
   final List<ExploreRun> runs;
+  final List<ExploreCandidateDeletion> deletions;
+
+  ExploreCandidateDeletion? undoForRun(String id) =>
+      deletions.where((entry) => entry.before.id == id).lastOrNull;
 
   ExploreRun? runById(String id) {
     for (final run in runs) {
@@ -42,14 +51,38 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
   @override
   Future<ExploreRunListState> build() async {
     final runs = await ref.watch(styleExploreRunRepositoryProvider).load();
-    return ExploreRunListState(runs: runs);
+    final storage = ref.read(styleExploreRunStorageProvider);
+    final deletions = await storage.getCandidateDeletions();
+    for (final deletion in deletions) {
+      final run = runs
+          .where((entry) => entry.id == deletion.before.id)
+          .firstOrNull;
+      if (run != null &&
+          deletion.candidateIds.every((id) => run.candidateById(id) != null)) {
+        await ref
+            .read(exploreRunImageStoreProvider)
+            .restoreCandidateImages(deletion.images);
+        await storage.deleteCandidateDeletion(deletion.id);
+      }
+    }
+    return ExploreRunListState(
+      runs: runs,
+      deletions: await storage.getCandidateDeletions(),
+    );
   }
 
   Future<void> refresh() async {
     final repository = ref.read(styleExploreRunRepositoryProvider);
     state = const AsyncLoading();
     try {
-      state = AsyncData(ExploreRunListState(runs: await repository.load()));
+      state = AsyncData(
+        ExploreRunListState(
+          runs: await repository.load(),
+          deletions: await ref
+              .read(styleExploreRunStorageProvider)
+              .getCandidateDeletions(),
+        ),
+      );
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;
@@ -75,8 +108,41 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
   Future<ExploreRun> overwrite(ExploreRun run) =>
       _mutate((repository) => repository.overwrite(run));
 
+  /// Guarded edits share the native mutation queue and refresh its projection.
+  Future<ExploreRun> transform(
+    String id,
+    ExploreRun Function(ExploreRun) update,
+  ) => _mutate((repository) => repository.transform(id, update));
+
   Future<ExploreRun> rename(String id, String name) =>
       _mutate((repository) => repository.rename(id, name));
+
+  /// Cancel only a still-paused run, reading its latest state in the queue.
+  Future<ExploreRun> cancelPaused(String id) => _mutateRun(id, (current) {
+    if (current.status != ExploreRunStatus.paused) return current;
+    return current.copyWith(
+      status: ExploreRunStatus.cancelled,
+      candidates: [
+        for (final candidate in current.candidates)
+          candidate.generation.status ==
+                  ExploreCandidateGenerationStatus.pending
+              ? candidate.copyWith(
+                  generation: candidate.generation.copyWith(
+                    status: ExploreCandidateGenerationStatus.failed,
+                    error: 'cancelled',
+                  ),
+                )
+              : candidate,
+      ],
+      rounds: [
+        for (final round in current.rounds)
+          round.status == ExploreRoundStatus.generating ||
+                  round.status == ExploreRoundStatus.pending
+              ? round.copyWith(status: ExploreRoundStatus.cancelled)
+              : round,
+      ],
+    );
+  });
 
   /// 删除 Run，连带删除候选图副本目录（源图不动）。
   Future<void> delete(String id) async {
@@ -91,6 +157,7 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     String runId, {
     required int count,
     List<ExploreRollSnapshot?>? rollSnapshots,
+    ExploreParamsSnapshot? paramsSnapshot,
   }) {
     return _serializeMutation(
       () => _performMutation((repository) async {
@@ -116,6 +183,7 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
             ExploreCandidate(
               id: const Uuid().v4(),
               roundId: roundId,
+              paramsSnapshot: paramsSnapshot,
               rollSnapshot: snapshots != null && i < snapshots.length
                   ? snapshots[i]
                   : null,
@@ -141,32 +209,6 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
       }),
     );
   }
-
-  /// Cancel only a still-paused run, reading its latest state in the queue.
-  Future<ExploreRun> cancelPaused(String id) => _mutateRun(id, (current) {
-    if (current.status != ExploreRunStatus.paused) return current;
-    return current.copyWith(
-      status: ExploreRunStatus.cancelled,
-      candidates: [
-        for (final candidate in current.candidates)
-          candidate.generation.status == ExploreCandidateGenerationStatus.pending
-              ? candidate.copyWith(
-                  generation: candidate.generation.copyWith(
-                    status: ExploreCandidateGenerationStatus.failed,
-                    error: 'cancelled',
-                  ),
-                )
-              : candidate,
-      ],
-      rounds: [
-        for (final round in current.rounds)
-          round.status == ExploreRoundStatus.generating ||
-                  round.status == ExploreRoundStatus.pending
-              ? round.copyWith(status: ExploreRoundStatus.cancelled)
-              : round,
-      ],
-    );
-  });
 
   /// 候选通用更新：读-改-写单个候选后落盘。
   Future<ExploreRun> updateCandidate(
@@ -466,6 +508,154 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
       return updated;
     });
   }
+
+  Future<ExploreCandidateDeletion> softDeleteCandidates(
+    String runId,
+    List<String> candidateIds,
+  ) => _serializeMutation(
+    () => _performMutation((repository) async {
+      final run = await repository.getRun(runId);
+      if (run == null) {
+        throw StateError('Style explore run does not exist: $runId');
+      }
+      final target = candidateIds.toSet();
+      if (target.isEmpty) throw StateError('请选择至少一张候选');
+      for (final id in target) {
+        final candidate = run.candidateById(id);
+        if (candidate == null) {
+          throw StateError('Candidate $id not in run $runId');
+        }
+        if (candidate.generation.status ==
+            ExploreCandidateGenerationStatus.pending) {
+          throw StateError('候选还在生成');
+        }
+      }
+      final store = ref.read(exploreRunImageStoreProvider);
+      final storage = ref.read(styleExploreRunStorageProvider);
+      final id = const Uuid().v4();
+      final images = await store.planCandidateDeletion(
+        runId: runId,
+        deletionId: id,
+        paths: [
+          for (final candidate in run.candidates)
+            if (target.contains(candidate.id) &&
+                candidate.generation.filePath != null &&
+                !run.candidates.any(
+                  (other) =>
+                      !target.contains(other.id) &&
+                      other.generation.filePath != null &&
+                      p.equals(
+                        other.generation.filePath!,
+                        candidate.generation.filePath!,
+                      ),
+                ))
+              candidate.generation.filePath!,
+        ],
+      );
+      final deletion = ExploreCandidateDeletion(
+        id: id,
+        before: run,
+        candidateIds: target,
+        images: images,
+      );
+      await storage.putCandidateDeletion(deletion);
+      try {
+        await store.moveCandidateImages(images);
+        await repository.overwrite(_withoutCandidates(run, target));
+      } catch (_) {
+        final current = await repository.getRun(runId);
+        if (current != null &&
+            target.every((id) => current.candidateById(id) != null)) {
+          await store.restoreCandidateImages(images);
+          await storage.deleteCandidateDeletion(id);
+        }
+        rethrow;
+      }
+      return deletion;
+    }),
+  );
+
+  Future<void> undoCandidateDeletion(String id) => _serializeMutation(
+    () => _performMutation((repository) async {
+      final storage = ref.read(styleExploreRunStorageProvider);
+      final deletion = (await storage.getCandidateDeletions())
+          .where((entry) => entry.id == id)
+          .firstOrNull;
+      if (deletion == null) return;
+      final current = await repository.getRun(deletion.before.id);
+      if (current == null) {
+        throw StateError('Explore undo run no longer exists');
+      }
+      final restored = deletion.restoreInto(current);
+      await ref
+          .read(exploreRunImageStoreProvider)
+          .restoreCandidateImages(deletion.images);
+      await repository.overwrite(restored);
+      await storage.deleteCandidateDeletion(id);
+    }),
+  );
+
+  Future<void> dismissCandidateDeletion(String id) => _serializeMutation(
+    () => _performMutation((repository) async {
+      final storage = ref.read(styleExploreRunStorageProvider);
+      final deletion = (await storage.getCandidateDeletions())
+          .where((entry) => entry.id == id)
+          .firstOrNull;
+      if (deletion == null) return;
+      final current = await repository.getRun(deletion.before.id);
+      if (current != null &&
+          deletion.candidateIds.any(
+            (id) => current.candidateById(id) != null,
+          )) {
+        await ref
+            .read(exploreRunImageStoreProvider)
+            .restoreCandidateImages(deletion.images);
+      } else {
+        await ref
+            .read(exploreRunImageStoreProvider)
+            .discardCandidateImages(deletion.images);
+      }
+      await storage.deleteCandidateDeletion(id);
+    }),
+  );
+
+  Future<ExploreRun> renameFamily(String runId, String familyId, String name) =>
+      _mutateRun(runId, (run) {
+        if (name.trim().isEmpty || run.familyById(familyId) == null) {
+          throw StateError('进化线不存在或名称为空');
+        }
+        return run.copyWith(
+          families: [
+            for (final family in run.families)
+              family.id == familyId
+                  ? family.copyWith(name: name.trim())
+                  : family,
+          ],
+        );
+      });
+
+  static ExploreRun _withoutCandidates(ExploreRun run, Set<String> target) =>
+      run.copyWith(
+        candidates: [
+          for (final candidate in run.candidates)
+            if (!target.contains(candidate.id))
+              candidate.copyWith(
+                lineage: candidate.lineage.copyWith(
+                  parentCandidateIds: candidate.lineage.parentCandidateIds
+                      .where((id) => !target.contains(id))
+                      .toList(),
+                ),
+              ),
+        ],
+        rounds: [
+          for (final round in run.rounds)
+            round.copyWith(
+              candidateIds: round.candidateIds
+                  .where((id) => !target.contains(id))
+                  .toList(),
+            ),
+        ],
+      );
 
   /// 建家族（阶段 D）：父本串列表 → 家族 + 第一代父本集（active）。
   ///
@@ -781,16 +971,32 @@ class ExploreRunListNotifier extends AsyncNotifier<ExploreRunListState> {
     final repository = ref.read(styleExploreRunRepositoryProvider);
     try {
       final result = await action(repository);
-      state = AsyncData(ExploreRunListState(runs: await repository.load()));
+      state = AsyncData(
+        ExploreRunListState(
+          runs: await repository.load(),
+          deletions: await ref
+              .read(styleExploreRunStorageProvider)
+              .getCandidateDeletions(),
+        ),
+      );
       return result;
     } catch (error, stackTrace) {
       // 单次变更失败不污染列表：保留既有数据快照让 UI 继续可用（错误
       // 由调用方 toast），仅在还没有任何数据时才落 AsyncError。
       final previous = state.valueOrNull;
-      if (previous != null) {
-        state = AsyncData(previous);
-      } else {
-        state = AsyncError(error, stackTrace);
+      try {
+        state = AsyncData(
+          ExploreRunListState(
+            runs: await repository.load(),
+            deletions: await ref
+                .read(styleExploreRunStorageProvider)
+                .getCandidateDeletions(),
+          ),
+        );
+      } catch (_) {
+        state = previous == null
+            ? AsyncError(error, stackTrace)
+            : AsyncData(previous);
       }
       rethrow;
     }
@@ -804,6 +1010,7 @@ final exploreRunListNotifierProvider =
 
 /// 当前选中的 Run（右栏画廊与控制条的目标）。
 final exploreActiveRunIdProvider = StateProvider<String?>((ref) => null);
+final exploreRunSelectionEpochProvider = StateProvider<int>((ref) => 0);
 
 /// 当前选中的 Run 实体（可能为 null：未选中或列表未就绪）。
 final exploreActiveRunProvider = Provider<ExploreRun?>((ref) {

@@ -262,85 +262,90 @@ class _LibraryToolbarState extends State<LibraryToolbar> {
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: colors.outlineVariant)),
       ),
-      child: LayoutBuilder(
-        builder: (context, c) {
-          final compact = c.maxWidth < 890;
-          return Row(
-            children: [
-              if (widget.leading != null) ...[
-                widget.leading!,
-                const SizedBox(width: 8),
-              ],
-              Expanded(
-                child: Row(
-                  children: [
-                    Flexible(
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 300),
-                        child: TextField(
-                          key: widget.searchKey,
-                          controller: widget.searchController,
-                          focusNode: widget.searchFocusNode ?? _searchFocus,
-                          onChanged: widget.onSearchChanged,
-                          style: const TextStyle(fontSize: 12.5),
-                          decoration: InputDecoration(
-                            hintText: widget.searchHint,
-                            filled: true,
-                            fillColor: colors.surfaceContainerHighest,
-                            constraints: const BoxConstraints.tightFor(
-                              height: 36,
-                            ),
-                            isDense: true,
-                            prefixIcon: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10),
-                              child: LibraryIcon('search', size: 15),
-                            ),
-                            prefixIconConstraints: const BoxConstraints(
-                              minWidth: 35,
-                              minHeight: 15,
-                            ),
-                            suffixIcon: const Padding(
-                              padding: EdgeInsets.only(right: 7),
-                              child: LibraryKeyCap('/'),
-                            ),
-                            suffixIconConstraints: const BoxConstraints(
-                              minWidth: 25,
-                              minHeight: 18,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 10,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(9),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(9),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(9),
-                              borderSide: BorderSide(color: colors.primary),
+      child: WindowHeaderDragSurface(
+        child: SizedBox.expand(
+          child: LayoutBuilder(
+            builder: (context, c) {
+              final compact = c.maxWidth < 890;
+              return Row(
+                children: [
+                  if (widget.leading != null) ...[
+                    widget.leading!,
+                    const SizedBox(width: 8),
+                  ],
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 300),
+                            child: TextField(
+                              key: widget.searchKey,
+                              controller: widget.searchController,
+                              focusNode: widget.searchFocusNode ?? _searchFocus,
+                              onChanged: widget.onSearchChanged,
+                              style: const TextStyle(fontSize: 12.5),
+                              decoration: InputDecoration(
+                                hintText: widget.searchHint,
+                                filled: true,
+                                fillColor: colors.surfaceContainerHighest,
+                                constraints: const BoxConstraints.tightFor(
+                                  height: 36,
+                                ),
+                                isDense: true,
+                                prefixIcon: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                  child: LibraryIcon('search', size: 15),
+                                ),
+                                prefixIconConstraints: const BoxConstraints(
+                                  minWidth: 35,
+                                  minHeight: 15,
+                                ),
+                                suffixIcon: const Padding(
+                                  padding: EdgeInsets.only(right: 7),
+                                  child: LibraryKeyCap('/'),
+                                ),
+                                suffixIconConstraints: const BoxConstraints(
+                                  minWidth: 25,
+                                  minHeight: 18,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 10,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(9),
+                                  borderSide: BorderSide.none,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(9),
+                                  borderSide: BorderSide.none,
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(9),
+                                  borderSide: BorderSide(color: colors.primary),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                        const SizedBox(width: 8),
+                        if (widget.sortBuilder != null) ...[
+                          widget.sortBuilder!(compact),
+                          const SizedBox(width: 10),
+                        ],
+                        _sizeSegment(context),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    if (widget.sortBuilder != null) ...[
-                      widget.sortBuilder!(compact),
-                      const SizedBox(width: 10),
-                    ],
-                    _sizeSegment(context),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-              ...(widget.trailingBuilder?.call(compact) ?? const <Widget>[]),
-            ],
-          );
-        },
+                  ),
+                  const SizedBox(width: 8),
+                  ...(widget.trailingBuilder?.call(compact) ??
+                      const <Widget>[]),
+                ],
+              );
+            },
+          ),
+        ),
       ),
     );
     return widget.searchFocusNode == null

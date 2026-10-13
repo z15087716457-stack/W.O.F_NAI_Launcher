@@ -7,9 +7,9 @@ import '../../../themes/studio_typography.dart';
 import '../../../widgets/common/uiux_prototype_icon.dart';
 import 'generation_module_card.dart';
 import 'generation_sidebar_style.dart';
-import '../../style_explore/ui/explore_icon.dart';
-import '../../style_explore/ui/explore_text.dart';
-import '../../style_explore/ui/explore_style.dart';
+import '../../../widgets/generation/explore_icon.dart';
+import '../../../widgets/generation/explore_text.dart';
+import '../../../widgets/generation/explore_style.dart';
 
 enum SizeSelectorLayout { classic, moduleRow, explorePrototype }
 

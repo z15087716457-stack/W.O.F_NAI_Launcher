@@ -77,7 +77,7 @@ class ShortcutStorage {
       return ShortcutConfig.createDefault();
     }
 
-    final merged = loaded.mergedWithDefaults();
+    final merged = loaded.withCurrentNavigationDefaults().mergedWithDefaults();
     if (merged != loaded) {
       try {
         await saveConfig(merged);
@@ -118,7 +118,9 @@ class ShortcutStorage {
   Future<ShortcutConfig> importConfig(String jsonString) async {
     try {
       final json = jsonDecode(jsonString) as Map<String, dynamic>;
-      final config = ShortcutConfig.fromJson(json).mergedWithDefaults();
+      final config = ShortcutConfig.fromJson(
+        json,
+      ).withCurrentNavigationDefaults().mergedWithDefaults();
       await saveConfig(config);
       return config;
     } catch (e) {

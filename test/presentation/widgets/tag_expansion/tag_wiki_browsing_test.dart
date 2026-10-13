@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart' show PointerScrollEvent;
-import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_edit.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -2872,15 +2872,22 @@ void main() {
       // land on another previewable target, so park the pointer first.
       await gesture.moveTo(const Offset(10, 10));
       await tester.pumpAndSettle();
-      expect(params.state.prompt, isEmpty);
+      expect(
+        ProviderScope.containerOf(
+          tester.element(find.byType(Scaffold).first),
+        ).read(generationParamsNotifierProvider).prompt,
+        isEmpty,
+      );
       expect(
         tester
-            .widget<PromptBlockEditDialog>(find.byType(PromptBlockEditDialog))
-            .initialContent,
+            .widget<BlockEditDialog>(find.byType(BlockEditDialog))
+            .data
+            .draft
+            .text,
         'solo',
       );
       expect(find.byType(SnackBar), findsNothing);
-      await tester.tap(find.widgetWithText(TextButton, '取消'));
+      await tester.tap(find.byKey(const Key('block-edit-cancel')));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('wiki-preview-open')), findsNothing);
       // A chip opens the same card.

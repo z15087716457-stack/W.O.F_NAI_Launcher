@@ -91,10 +91,13 @@ class _GalleryTrashPanelDialogState
     setState(() => _busy = true);
     try {
       final dataSource = await _getDataSource();
-      if (dataSource != null) {
-        await dataSource.batchRestoreDeleted(paths);
+      if (dataSource == null) {
+        throw StateError('Gallery database unavailable');
       }
-      await const GalleryDeletePoolStore().removeAll(paths);
+      await const GalleryDeletePoolStore().restore(
+        paths,
+        () => dataSource.batchRestoreDeleted(paths),
+      );
       // 解除防复活屏，恢复的图才能回到画廊列表
       await ref
           .read(localGalleryNotifierProvider.notifier)

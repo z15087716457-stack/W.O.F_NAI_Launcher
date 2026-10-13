@@ -1,0 +1,458 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
+
+void main() {
+  late Directory root;
+  late HttpServer server;
+  late StreamSubscription<HttpRequest> serving;
+  final controllers = <NaiAgentWorkspaceController>[];
+  var calls = 0;
+  final requests = <Map<String, dynamic>>[];
+  Future<void> Function()? waitForResponse;
+  setUp(() async {
+    root = await Directory.systemTemp.createTemp('nai-controller-');
+    server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    calls = 0;
+    requests.clear();
+    waitForResponse = null;
+    serving = server.listen((request) async {
+      requests.add(
+        Map<String, dynamic>.from(
+          jsonDecode(await utf8.decoder.bind(request).join()) as Map,
+        ),
+      );
+      calls++;
+      await waitForResponse?.call();
+      request.response.headers.set(
+        'content-type',
+        'text/event-stream; charset=utf-8',
+      );
+      request.response.write(
+        'data: ${jsonEncode({
+          'id': 'test',
+          'object': 'chat.completion.chunk',
+          'model': 'test',
+          'choices': [
+            {
+              'index': 0,
+              'delta': {'role': 'assistant', 'content': '完成'},
+              'finish_reason': 'stop',
+            },
+          ],
+        })}\n\ndata: [DONE]\n\n',
+      );
+      await request.response.close();
+    });
+  });
+  tearDown(() async {
+    for (final controller in controllers) {
+      await controller.close();
+      controller.dispose();
+    }
+    controllers.clear();
+    await serving.cancel();
+    await server.close(force: true);
+    await root.delete(recursive: true);
+  });
+  NaiAgentWorkspaceController controller() {
+    final value = NaiAgentWorkspaceController(
+      store: AgentWorkspaceStore(root),
+      initialWorkspaceName: '工作区',
+      initialChatName: '新聊天',
+      startClient: (workspace, chat, settings, prompt, resume) =>
+          PiHostClient.start(
+            nodeExecutable: 'E:/node/node.exe',
+            hostScript: File('tool/nai_agent/host.mjs').absolute.path,
+            workspaceId: workspace.id,
+            workspaceDirectory: workspace.directory,
+            agentDirectory: workspace.agentDirectory,
+            sessionDirectory: workspace.sessions,
+            sessionFile: resume,
+            sessionName: chat.title,
+            systemPrompt: prompt,
+            extensionPaths: settings.enabledExtensionPaths,
+            mcp: {
+              'builtinEnabled': settings.studioMcpEnabled,
+              'builtinExposure': settings.studioMcpExposure,
+            },
+            privateModelConfig: {
+              'providerId': 'controller-local',
+              'modelId': 'test',
+              'protocol': 'openaiChatCompletions',
+              'baseUrl': 'http://127.0.0.1:${server.port}',
+              'tools': true,
+              'maxConcurrentRequests': 1,
+              'maxRequestsPerRun': 32,
+              'permissionMode': settings.permissionMode,
+            },
+            executeTool: (_, __, ___) async => {'content': []},
+          ),
+    );
+    controllers.add(value);
+    return value;
+  }
+
+  test(
+    'live approval mode updates the owned Pi host without a model request',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('first');
+      await c.send();
+      final client = c.selected!.client!;
+      await c.updateSettings({'permissionMode': 'ask'});
+      expect(c.selected!.client, same(client));
+      expect((await client.state())['permissionMode'], 'ask');
+      expect(calls, 1);
+    },
+  );
+  test(
+    'readonly stops background Agent work and recovers its queue without touching another draft',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final first = c.selected!;
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      await c.saveComposer('running');
+      final running = c.send();
+      await entered.future.timeout(const Duration(seconds: 10));
+      try {
+        await c.saveComposer('queued');
+        await c.send();
+        await c.createWorkspace('second');
+        await c.saveComposer('第二个项目的最新草稿');
+        await c
+            .updateSettings({'permissionMode': 'readonly'})
+            .timeout(const Duration(seconds: 10));
+        await running.timeout(const Duration(seconds: 10));
+        expect(first.running, false);
+        expect(first.composer.pending.single['recovered'], true);
+        expect(c.selected!.composer.text, '第二个项目的最新草稿');
+        expect((await first.client!.state())['permissionMode'], 'readonly');
+        expect(calls, 1);
+      } finally {
+        if (!release.isCompleted) release.complete();
+      }
+    },
+  );
+  test(
+    'instruction changes refresh live and restored Pi sessions while retaining each base prompt',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final first = c.selected!, firstWorkspace = c.selectedWorkspace!.id;
+      await c.saveComposer('first');
+      await c.send();
+      await c.createWorkspace('second');
+      await c.setWorkspacePrompt('PROJECT_BASE');
+      final second = c.selected!;
+      await c.saveComposer('second');
+      await c.send();
+      expect(calls, 2);
+      await c.updateSettings({
+        'globalInstructions': 'SHARED_RULE',
+        'systemPromptPrefix': 'PREFIX_IDENTITY',
+      });
+      expect(calls, 2);
+      final live = (await second.client!.getSystemPrompt())['text'] as String;
+      expect(
+        live.indexOf('PREFIX_IDENTITY'),
+        lessThan(live.indexOf('PROJECT_BASE')),
+      );
+      expect(
+        live.indexOf('PROJECT_BASE'),
+        lessThan(live.indexOf('SHARED_RULE')),
+      );
+      await c.saveComposer('second again');
+      await c.send();
+      await c.selectWorkspace(firstWorkspace);
+      final restored =
+          (await first.client!.getSystemPrompt())['text'] as String;
+      expect(
+        restored.indexOf('PREFIX_IDENTITY'),
+        lessThan(restored.indexOf('你是 NAI Agent')),
+      );
+      expect(restored, contains('SHARED_RULE'));
+      await c.saveComposer('first again');
+      await c.send();
+      for (final request in requests.skip(2)) {
+        final messages = request['messages'] as List;
+        final prompt =
+            messages.firstWhere(
+                  (message) => message['role'] == 'system',
+                )['content']
+                as String;
+        expect(prompt, contains('PREFIX_IDENTITY'));
+        expect(prompt, contains('SHARED_RULE'));
+      }
+      expect(first.messages.where((m) => m['role'] == 'user'), hasLength(2));
+      await c.updateSettings({'globalInstructions': ''});
+      final cleared = (await first.client!.getSystemPrompt())['text'] as String;
+      expect(cleared, isNot(contains('SHARED_RULE')));
+      expect(cleared, contains('PREFIX_IDENTITY'));
+      await c.selectWorkspace(second.workspace.id);
+      final reopened =
+          (await second.client!.getSystemPrompt())['text'] as String;
+      expect(reopened, isNot(contains('SHARED_RULE')));
+      expect(reopened, contains('PREFIX_IDENTITY'));
+      expect(reopened, contains('PROJECT_BASE'));
+      expect(second.messages.where((m) => m['role'] == 'user'), hasLength(2));
+      expect(calls, 4);
+    },
+  );
+
+  test(
+    'extension changes wait for next send and reload the same session in its workspace',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final first = c.selected!, chatId = c.selected!.chat.id;
+      final file = await File('${root.path}/workspace-extension.ts').writeAsString(
+        "import { writeFile } from 'node:fs/promises'; import { join } from 'node:path'; "
+        "export default pi => pi.on('session_start', async (_event, ctx) => { "
+        "await writeFile(join(ctx.cwd, 'extension-started.txt'), 'started'); });",
+      );
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      await c.saveComposer('first');
+      final running = c.send();
+      await entered.future.timeout(const Duration(seconds: 10));
+      final before = first.client!, sessionFile = first.chat.sessionFile;
+      final marker = File(
+        '${first.workspace.directory.path}/extension-started.txt',
+      );
+      await c.configureExtension(file.path);
+      expect(first.client, same(before));
+      expect(before.isClosed, false);
+      expect(await marker.exists(), false);
+      release.complete();
+      await running;
+      expect(await marker.exists(), false);
+      await c.saveComposer('next');
+      await c.send();
+      expect(first.error, isNull);
+      expect(first.client, isNot(same(before)));
+      expect(before.isClosed, true);
+      expect(first.chat.id, chatId);
+      expect(first.chat.sessionFile, sessionFile);
+      expect(await marker.readAsString(), 'started');
+      expect(first.messages.where((m) => m['role'] == 'user'), hasLength(2));
+      await c.createWorkspace('another');
+      final other = c.selected!;
+      final otherMarker = File(
+        '${other.workspace.directory.path}/extension-started.txt',
+      );
+      expect(await otherMarker.exists(), false);
+      await c.saveComposer('other');
+      await c.send();
+      expect(other.error, isNull);
+      expect(await otherMarker.readAsString(), 'started');
+      expect(other.messages.where((m) => m['role'] == 'user'), hasLength(1));
+      expect(calls, 3);
+    },
+  );
+
+  test(
+    'background task remains in original chat while switching workspaces preserves input',
+    () async {
+      final c = controller();
+      await c.initialize();
+      expect(calls, 0);
+      final first = c.selected!, firstWorkspace = c.selectedWorkspace!.id;
+      await c.saveComposer('先完成这个任务');
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      final running = c.send();
+      await entered.future.timeout(const Duration(seconds: 10));
+      await c.createWorkspace('另一个项目');
+      final secondWorkspace = c.selectedWorkspace!.id;
+      await c.saveComposer('第二个项目的草稿');
+      expect(c.runningChats.single.chat.id, first.chat.id);
+      expect(c.selected!.messages, isEmpty);
+      release.complete();
+      await running;
+      expect(c.selected!.composer.text, '第二个项目的草稿');
+      expect(
+        first.messages.where((m) => m['role'] == 'assistant'),
+        hasLength(1),
+      );
+      await c.selectWorkspace(firstWorkspace);
+      expect(c.selected!.chat.title, '先完成这个任务');
+      expect(calls, 1);
+      await c.selectWorkspace(secondWorkspace);
+      expect(c.selected!.composer.text, '第二个项目的草稿');
+    },
+  );
+  test(
+    'MCP changes preserve the Pi session and apply on the next idle send',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('first');
+      await c.send();
+      final runtime = c.selected!, before = c.selected!.client!;
+      final sessionFile = runtime.chat.sessionFile;
+      await c.updateSettings({'studioMcpEnabled': false});
+      expect(runtime.client, same(before));
+      expect(before.isClosed, false);
+      await c.saveComposer('next');
+      await c.send();
+      expect(before.isClosed, true);
+      expect(runtime.client, isNot(same(before)));
+      expect(runtime.chat.sessionFile, sessionFile);
+      expect(runtime.messages.where((m) => m['role'] == 'user'), hasLength(2));
+      expect(runtime.error, isNull);
+      final status = await runtime.client!.mcpCommand('status');
+      expect(status['mcpStatus'], contains('disabled'));
+      expect(calls, 2);
+    },
+  );
+
+  test(
+    'controller restart recovers Pi history, pending input and interrupted status without replay',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('第一次');
+      await c.send();
+      expect(c.selected!.error, isNull);
+      final workspaceId = c.selectedWorkspace!.id, chatId = c.selected!.chat.id;
+      await c.saveComposer('尚未发送');
+      await c.close();
+      await c.store.saveComposer(
+        workspaceId,
+        chatId,
+        const AgentComposerState(
+          text: '尚未发送',
+          wasRunning: true,
+          pending: [
+            {'queueId': 'recovered', 'text': '排队文字'},
+          ],
+        ),
+      );
+      final reopened = controller();
+      await reopened.initialize();
+      expect(calls, 1);
+      expect(
+        reopened.selected!.messages.where((m) => m['role'] == 'user'),
+        hasLength(1),
+      );
+      expect(reopened.selected!.composer.text, '尚未发送');
+      expect(reopened.selected!.composer.interrupted, true);
+      expect(reopened.selected!.composer.pending.single['text'], '排队文字');
+      await expectLater(
+        reopened.restorePending('recovered'),
+        throwsA(anything),
+      );
+      expect(reopened.selected!.composer.text, '尚未发送');
+      await reopened.saveComposer('');
+      await reopened.restorePending('recovered');
+      expect(reopened.selected!.composer.text, '排队文字');
+      expect(
+        calls,
+        1,
+      ); // Restoration is editing a draft, never automatic sending.
+    },
+  );
+
+  test(
+    'stopping preserves only unsent queue messages for explicit restoration',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('正在处理的消息');
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      final run = c.send();
+      await entered.future.timeout(const Duration(seconds: 10));
+      expect(c.selected!.composer.pending, isEmpty);
+      await c.saveComposer('还未处理的消息');
+      await c.send();
+      expect(c.selected!.composer.pending, hasLength(1));
+      await c.stop();
+      await run;
+      release.complete();
+      expect(c.selected!.composer.pending, hasLength(1));
+      expect(c.selected!.composer.pending.single['recovered'], true);
+      expect(c.selected!.composer.pending.single['text'], '还未处理的消息');
+      await c.restorePending(
+        c.selected!.composer.pending.single['queueId'] as String,
+      );
+      expect(c.selected!.composer.text, '还未处理的消息');
+      expect(c.selected!.composer.pending, isEmpty);
+    },
+  );
+  test(
+    'export keeps official Pi JSONL intact and makes no model call',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('保存这一轮');
+      await c.send();
+      final runtime = c.selected!, callsBefore = calls;
+      final exported = await c.exportSession(runtime);
+      final original = await File(
+        '${runtime.workspace.directory.path}/${runtime.chat.sessionFile}',
+      ).readAsBytes();
+      expect(exported, original);
+      final rows = utf8
+          .decode(exported)
+          .trim()
+          .split('\n')
+          .map(jsonDecode)
+          .toList();
+      expect(rows.first['type'], 'session');
+      expect(
+        rows
+            .where((e) => e['type'] == 'message')
+            .map((e) => e['message']['role']),
+        containsAll(['user', 'assistant']),
+      );
+      expect(calls, callsBefore);
+    },
+  );
+  test(
+    'an attachment prepared for one chat stays there after workspace switching',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final original = c.selected!;
+      await c.createWorkspace('第二个工作区');
+      await c.saveComposer('保留第二个项目的草稿');
+      final selected = c.selected!;
+      final pixels = base64Decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jNnUAAAAASUVORK5CYII=',
+      );
+      await c.attach('reference.png', pixels, 'image/png', target: original);
+      expect(selected.composer.attachments, isEmpty);
+      expect(selected.composer.text, '保留第二个项目的草稿');
+      expect(original.composer.attachments, hasLength(1));
+      expect(
+        await c.store.readAttachment(
+          original.workspace.id,
+          original.composer.attachments.single,
+        ),
+        pixels,
+      );
+      expect(calls, 0);
+    },
+  );
+}

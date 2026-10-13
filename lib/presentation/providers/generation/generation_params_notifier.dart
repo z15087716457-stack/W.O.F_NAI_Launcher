@@ -341,6 +341,30 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   // ==================== 生成动作 ====================
 
+  /// Explicit, already-validated Agent configuration restore. The owner must
+  /// back up and compare the complete draft immediately before this call.
+  /// Native presets and pill/character documents are restored by that owner.
+  void restoreAgentSnapshot(ImageParams snapshot) {
+    state = snapshot.copyWith(
+      advancedOptionsExpanded: state.advancedOptionsExpanded,
+    );
+    _storage.setDefaultModel(state.model);
+    _storage.setLastPrompt(state.prompt);
+    _storage.setLastNegativePrompt(state.negativePrompt);
+    _storage.setDefaultWidth(state.width);
+    _storage.setDefaultHeight(state.height);
+    _storage.setDefaultSteps(state.steps);
+    _storage.setDefaultScale(state.scale);
+    _storage.setDefaultSampler(state.sampler);
+    _storage.setLastCfgRescale(state.cfgRescale);
+    _storage.setLastNoiseSchedule(state.noiseSchedule);
+    _storage.setLastVarietyPlus(state.varietyPlus);
+    for (final vibe in state.vibeReferencesV4) {
+      _primeVibeEncodingCache(vibe);
+    }
+    _scheduleGenerationStateSave();
+  }
+
   /// 更新生成动作
   void updateAction(ImageGenerationAction action) {
     state = state.copyWith(action: action);

@@ -23,6 +23,62 @@ void main() {
   ExploreRunImageStore store() =>
       ExploreRunImageStore(rootPathResolver: () async => rootDirectory.path);
 
+  test(
+    'held candidates restore their bytes and never move source images',
+    () async {
+      final dynamic imageStore = store();
+      final copied =
+          await imageStore.storeCandidateImage(
+                runId: 'held-run',
+                candidateId: 'held',
+                bytes: Uint8List.fromList([4, 5, 6]),
+              )
+              as String;
+      final source = File('${rootDirectory.path}/original.png');
+      await source.writeAsBytes([7, 8]);
+      final held = Map<String, String>.from(
+        await imageStore.holdCandidateImages(
+              runId: 'held-run',
+              deletionId: 'delete-one',
+              paths: [copied, source.path],
+            )
+            as Map,
+      );
+      expect(held.keys, [copied]);
+      expect(await File(copied).exists(), isFalse);
+      expect(await source.readAsBytes(), [7, 8]);
+      expect(await File(held.values.single).readAsBytes(), [4, 5, 6]);
+      await imageStore.restoreCandidateImages(held);
+      expect(await File(copied).readAsBytes(), [4, 5, 6]);
+    },
+  );
+
+  test('restoring held images refuses to overwrite newer files', () async {
+    final dynamic imageStore = store();
+    final copied =
+        await imageStore.storeCandidateImage(
+              runId: 'conflict-run',
+              candidateId: 'candidate',
+              bytes: Uint8List.fromList([1]),
+            )
+            as String;
+    final held = Map<String, String>.from(
+      await imageStore.holdCandidateImages(
+            runId: 'conflict-run',
+            deletionId: 'delete-two',
+            paths: [copied],
+          )
+          as Map,
+    );
+    await File(copied).writeAsBytes([9]);
+    await expectLater(
+      imageStore.restoreCandidateImages(held) as Future<void>,
+      throwsStateError,
+    );
+    expect(await File(copied).readAsBytes(), [9]);
+    expect(await File(held.values.single).readAsBytes(), [1]);
+  });
+
   test('deleteCandidateImage removes the copy and is idempotent', () async {
     final imageStore = store();
     final runDir = '${rootDirectory.path}/style_explore_runs/run-x';

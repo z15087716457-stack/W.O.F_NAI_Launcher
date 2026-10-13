@@ -10,8 +10,8 @@ import 'uiux_prototype_icon.dart';
 import 'studio_glass_surface.dart';
 import 'studio_animated_icon.dart';
 import 'studio_icons.dart';
-import '../../screens/style_explore/ui/explore_text.dart';
-import '../../screens/style_explore/ui/explore_icon.dart';
+import '../generation/explore_text.dart';
+import '../generation/explore_icon.dart';
 
 /// Desktop/explore reference rows opt in; legacy panels retain their cards.
 class ReferenceModuleScope extends InheritedWidget {

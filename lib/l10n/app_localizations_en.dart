@@ -30,47 +30,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_cancel => 'Cancel';
 
   @override
-  String get onlineFav_all => 'All';
-
-  @override
-  String get onlineFav_rootCollection => 'Root';
-
-  @override
-  String get onlineFav_newCollection => 'New Collection';
-
-  @override
-  String get onlineFav_renameCollection => 'Rename';
-
-  @override
-  String get onlineFav_deleteCollection => 'Delete Collection';
-
-  @override
-  String get onlineFav_empty => 'No favorited works yet';
-
-  @override
-  String onlineFav_authorWorkCount(Object n) {
-    return '$n works';
-  }
-
-  @override
-  String get onlineFav_moveHere => 'Move here';
-
-  @override
-  String get onlineFav_removeFavorite => 'Unfavorite';
-
-  @override
-  String get onlineFav_favoriteAuthor => 'Favorite Author';
-
-  @override
-  String get onlineFav_unfavoriteAuthor => 'Unfavorite author';
-
-  @override
-  String get onlineFav_authorFavorited => 'Author favorited';
-
-  @override
-  String get onlineFav_authorUnfavorited => 'Author unfavorited';
-
-  @override
   String get common_confirm => 'Confirm';
 
   @override
@@ -134,9 +93,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_added => 'Added';
 
   @override
-  String get common_new => 'New';
-
-  @override
   String get common_confirmDelete => 'Confirm Delete';
 
   @override
@@ -159,9 +115,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_clearInputConfirm => 'Clear the input content?';
 
   @override
-  String get common_yesterday => 'Yesterday';
-
-  @override
   String common_daysAgo(Object days) {
     return '$days days ago';
   }
@@ -182,9 +135,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_apply => 'Apply';
 
   @override
-  String get common_move => 'Move';
-
-  @override
   String get common_favorite => 'Favorite';
 
   @override
@@ -198,9 +148,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_grid => 'Grid';
-
-  @override
-  String get common_pack => 'Pack';
 
   @override
   String get common_multiSelect => 'Multi-select';
@@ -271,18 +218,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nav_canvas => 'Canvas';
-
-  @override
-  String get nav_onlineGallery => 'Online Gallery';
-
-  @override
-  String get nav_expandSidebar => 'Expand sidebar';
-
-  @override
-  String get nav_collapseSidebar => 'Collapse sidebar';
-
-  @override
   String get auth_login => 'Login';
 
   @override
@@ -326,9 +261,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_passwordRequired => 'Please enter password';
-
-  @override
-  String get auth_tokenLogin => 'API Token Login';
 
   @override
   String get auth_tokenLoginRecommended => 'API Token Login (Recommended)';
@@ -392,9 +324,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auth_switchAccount => 'Switch Account';
-
-  @override
-  String get auth_currentAccount => 'Current Account';
 
   @override
   String get auth_selectAccount => 'Select Account';
@@ -511,9 +440,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_title => 'Settings';
-
-  @override
-  String get settings_account => 'Account';
 
   @override
   String get settings_savedAccounts => 'Saved Accounts';
@@ -748,12 +674,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_setAsDefaultSuccess => 'Set as default account';
 
   @override
-  String get generation_title => 'Generate';
-
-  @override
-  String get generation_generate => 'Generate';
-
-  @override
   String generation_cooldownRemaining(Object seconds) {
     return 'Wait ${seconds}s';
   }
@@ -772,34 +692,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get generation_generationFailed => 'Generation failed';
-
-  @override
-  String generation_progress(Object progress) {
-    return 'Generating... $progress%';
-  }
-
-  @override
-  String get generation_lockHistoryScroll => 'Lock history scrolling';
-
-  @override
-  String get generation_unlockHistoryScroll => 'Unlock history scrolling';
-
-  @override
-  String get generation_downloadAllImages => 'Download all images';
-
-  @override
-  String get generation_selectMultiple => 'Select multiple';
-
-  @override
-  String get generation_deselectAll => 'Exit multi-select';
-
-  @override
-  String generation_deleteSelectedImages(int count) {
-    return 'Delete selected images ($count)';
-  }
-
-  @override
-  String get generation_deleteSelectedImagesTitle => 'Delete Selected Images';
 
   @override
   String generation_deleteSelectedImagesConfirm(int count) {
@@ -875,21 +767,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_canvasUseSeed => 'Click to use this seed';
 
   @override
-  String generation_canvasPinnedCount(int count) {
-    return 'Pins $count';
-  }
-
-  @override
-  String get generation_params => 'Parameters';
-
-  @override
-  String get generation_paramsSettings => 'Parameter Settings';
-
-  @override
   String get generation_history => 'History';
-
-  @override
-  String get generation_historyRecord => 'History Records';
 
   @override
   String get generation_failedStreamSnapshot => 'Failed snapshot';
@@ -897,16 +775,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get generation_failedStreamSnapshotHint =>
       'Generation did not finish; only the last preview frame is kept. It cannot be saved, favorited, or used for image workflows.';
-
-  @override
-  String get generation_noHistory => 'No history records';
-
-  @override
-  String get generation_clearHistory => 'Clear History';
-
-  @override
-  String get generation_clearHistoryConfirm =>
-      'Are you sure you want to clear all history records? This action cannot be undone.';
 
   @override
   String get generation_model => 'Model';
@@ -1337,10 +1205,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_decodeSourceFailed => 'Failed to decode source image';
 
   @override
-  String get img2img_upscalePanelOpened =>
-      'Opened the Image2Image Upscale panel';
-
-  @override
   String get editor_tolerance => 'Tolerance';
 
   @override
@@ -1440,9 +1304,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editor_fitToWindow => 'Fit to Window';
-
-  @override
-  String get editor_shortcut100Zoom => '100% Zoom';
 
   @override
   String get editor_effectBrightness => 'Brightness';
@@ -1696,22 +1557,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibe_sourceType => 'Source';
 
   @override
-  String get vibe_reuseButton => 'Reuse';
-
-  @override
   String get vibe_info => 'Vibe Info';
 
   @override
   String get vibe_name => 'Name';
-
-  @override
-  String get vibe_strength => 'Strength';
-
-  @override
-  String get vibe_infoExtracted => 'Information Extracted';
-
-  @override
-  String get vibe_shiftReplaceHint => 'Shift+Click to Replace';
 
   @override
   String get character_buttonLabel => 'Char/Position';
@@ -1744,15 +1593,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gallery_metaSeed => 'Seed';
-
-  @override
-  String get gallery_metaSmea => 'SMEA';
-
-  @override
-  String get gallery_promptCopied => 'Prompt copied';
-
-  @override
-  String get gallery_seedCopied => 'Seed copied';
 
   @override
   String get gallery_sendToKritaAction => 'Send to Krita';
@@ -1789,63 +1629,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get onlineGallery_search => 'Search';
-
-  @override
-  String get onlineGallery_popular => 'Popular';
-
-  @override
-  String get onlineGallery_favorites => 'Favorites';
-
-  @override
-  String get onlineGallery_refresh => 'Refresh';
-
-  @override
   String get onlineGallery_login => 'Login';
 
   @override
-  String get onlineGallery_logout => 'Logout';
-
-  @override
-  String get onlineGallery_dayRank => 'Day';
-
-  @override
-  String get onlineGallery_weekRank => 'Week';
-
-  @override
-  String get onlineGallery_monthRank => 'Month';
-
-  @override
-  String get onlineGallery_today => 'Today';
-
-  @override
-  String onlineGallery_imageCount(Object count) {
-    return '$count images';
-  }
-
-  @override
-  String get onlineGallery_loadFailed => 'Load failed';
-
-  @override
-  String get onlineGallery_favoritesEmpty => 'Favorites is empty';
-
-  @override
-  String get onlineGallery_noResults => 'No images found';
-
-  @override
   String get onlineGallery_pleaseLogin => 'Please login first';
-
-  @override
-  String get onlineGallery_size => 'Size';
-
-  @override
-  String get onlineGallery_score => 'Score';
-
-  @override
-  String get onlineGallery_favCount => 'Favorites';
-
-  @override
-  String get onlineGallery_type => 'Type';
 
   @override
   String get mediaType_video => 'Video';
@@ -1854,31 +1641,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mediaType_gif => 'GIF';
 
   @override
-  String get onlineGallery_tags => 'Tags';
-
-  @override
-  String get onlineGallery_artists => 'Artists';
-
-  @override
-  String get onlineGallery_characters => 'Characters';
-
-  @override
-  String get onlineGallery_copyrights => 'Copyrights';
-
-  @override
-  String get onlineGallery_general => 'General';
-
-  @override
   String get onlineGallery_copied => 'Copied';
 
   @override
   String get onlineGallery_copyTags => 'Copy Tags';
-
-  @override
-  String get onlineGallery_open => 'Open';
-
-  @override
-  String get onlineGallery_send => 'Send';
 
   @override
   String get onlineGallery_sendToTextToImage => 'Send to Text to Image';
@@ -1888,19 +1654,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineGallery_noTagInfo => 'This image has no tag information';
-
-  @override
-  String get onlineGallery_promptSentToGeneration =>
-      'Prompt sent to generation page';
-
-  @override
-  String get onlineGallery_gifLoadFailed => 'Failed to load GIF';
-
-  @override
-  String get onlineGallery_pinchToZoom => 'Pinch to zoom';
-
-  @override
-  String get onlineGallery_metadata => 'Metadata';
 
   @override
   String get onlineGallery_chooseDownloadDirectory =>
@@ -1923,9 +1676,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onlineGallery_downloadOriginal => 'Download original image';
 
   @override
-  String get onlineGallery_all => 'All';
-
-  @override
   String get onlineGallery_ratingGeneral => 'General';
 
   @override
@@ -1936,33 +1686,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onlineGallery_ratingExplicit => 'Explicit';
-
-  @override
-  String get onlineGallery_clear => 'Clear';
-
-  @override
-  String get onlineGallery_previousPage => 'Previous Page';
-
-  @override
-  String get onlineGallery_nextPage => 'Next Page';
-
-  @override
-  String onlineGallery_pageN(Object page) {
-    return 'Page $page';
-  }
-
-  @override
-  String get onlineGallery_dateRange => 'Date Range';
-
-  @override
-  String get onlineGallery_fuzzySearch => 'Fuzzy Match';
-
-  @override
-  String get onlineGallery_fuzzySearchTooltip =>
-      'Use *tag* matching for related tags when enabled; search exact Danbooru tags when disabled';
-
-  @override
-  String get onlineGallery_blacklistTags => 'Blacklist Tags';
 
   @override
   String get onlineGallery_blacklistTitle => 'Online Gallery Blacklist';
@@ -2007,63 +1730,12 @@ class AppLocalizationsEn extends AppLocalizations {
       'You are not logged in to Danbooru. The local blacklist still works, but syncing requires login.';
 
   @override
-  String get onlineGallery_bulkFavorite => 'Favorite Selected';
-
-  @override
-  String get onlineGallery_bulkDownload => 'Download Selected';
-
-  @override
-  String get onlineGallery_unfavorited => 'Unfavorited';
-
-  @override
-  String get onlineGallery_favorited => 'Favorited';
-
-  @override
-  String onlineGallery_favoritedImages(Object count) {
-    return 'Favorited $count images';
-  }
-
-  @override
-  String onlineGallery_selectDownloadDirectoryFailed(Object error) {
-    return 'Failed to choose download directory: $error';
-  }
-
-  @override
-  String onlineGallery_downloadSelectedStarted(Object count) {
-    return 'Downloading $count images...';
-  }
-
-  @override
   String onlineGallery_downloadSelectedCompleted(
     Object success,
     Object failed,
   ) {
     return 'Download complete: $success succeeded, $failed failed';
   }
-
-  @override
-  String get onlineGallery_startDate => 'Start Date';
-
-  @override
-  String get onlineGallery_endDate => 'End Date';
-
-  @override
-  String get onlineGallery_invalidDateFormat => 'Invalid date format';
-
-  @override
-  String get onlineGallery_dateOutOfRange => 'Date out of range';
-
-  @override
-  String get onlineGallery_last30Days => 'Last 30 Days';
-
-  @override
-  String get onlineGallery_configureGelbooruApi => 'Configure Gelbooru API';
-
-  @override
-  String get onlineGallery_gelbooruApiReady => 'Gelbooru API verified';
-
-  @override
-  String get onlineGallery_gelbooruApiInvalid => 'Gelbooru credentials expired';
 
   @override
   String get onlineGallery_gelbooruCredentialsRequired =>
@@ -2098,44 +1770,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'The Gelbooru request failed. Try again later.';
 
   @override
-  String get onlineGallery_aiTagQuery =>
-      'Search works, artists, titles, tags, or models';
-
-  @override
-  String get onlineGallery_aiTagPromptQuery =>
-      'AI Prompt search (raw syntax such as ::artist: is supported)';
-
-  @override
-  String get onlineGallery_aiTagTimeRange => 'Time range';
-
-  @override
-  String get onlineGallery_aiTagAllTime => 'All';
-
-  @override
-  String get onlineGallery_aiTagCurrentMonthly => 'Live monthly ranking';
-
-  @override
-  String get onlineGallery_aiTagOlderMonthly => 'Older archive';
-
-  @override
   String get onlineGallery_aiTagRankingProcessing =>
       'The ranking is being generated. Please try again shortly.';
-
-  @override
-  String get onlineGallery_aiTagNaiOnly => 'NAI only';
-
-  @override
-  String get onlineGallery_aiTagModelVersion => 'Model version';
-
-  @override
-  String get onlineGallery_viewAuthor => 'View this author';
-
-  @override
-  String get onlineGallery_returnFromAuthor =>
-      'Return to previous gallery position';
-
-  @override
-  String get onlineGallery_generationParams => 'Generation parameters';
 
   @override
   String get onlineGallery_sourceConfigUnavailable =>
@@ -2166,41 +1802,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This image is currently unavailable.';
 
   @override
-  String get onlineGallery_loadedAll => 'All items loaded';
-
-  @override
-  String get onlineGallery_retryAppend => 'Load failed. Click to retry';
-
-  @override
-  String onlineGallery_rankNumber(Object rank) {
-    return 'Rank #$rank';
-  }
-
-  @override
-  String onlineGallery_multipleImages(Object count) {
-    return '$count images';
-  }
-
-  @override
-  String get onlineGallery_views => 'Views';
-
-  @override
-  String get onlineGallery_downloadAllMedia =>
-      'Download all images in this work';
-
-  @override
-  String get onlineGallery_copyFullMetadata => 'Copy full metadata';
-
-  @override
-  String get onlineGallery_metadataParseFailed =>
-      'Metadata parsing failed. The original content is preserved and can be copied.';
-
-  @override
   String get onlineGallery_gelbooruReadOnly => 'Read-only favorites';
-
-  @override
-  String get onlineGallery_gelbooruFavoritesSortHint =>
-      'Sorted by post ID, newest first. This may differ from website favorite-time order.';
 
   @override
   String get tooltip_fullscreenEdit => 'Fullscreen Edit';
@@ -3286,9 +2888,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get comparison_loadError => 'Failed to load image';
 
   @override
-  String get statistics_title => 'Statistics';
-
-  @override
   String get localGallery_group_today => 'Today';
 
   @override
@@ -3763,9 +3362,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_rename => 'Rename';
-
-  @override
-  String get tagLibrary_newCategory => 'New Category';
 
   @override
   String get tagLibrary_tags => 'Tags';
@@ -4329,75 +3925,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibeLibrary_title => 'Vibe Library';
 
   @override
-  String get vibeLibrary_categories => 'Categories';
-
-  @override
-  String get vibeLibrary_createCategoryTitle => 'New Category';
-
-  @override
-  String get vibeLibrary_createSubCategoryTitle => 'New Subcategory';
-
-  @override
-  String get vibeLibrary_categoryNameHint => 'Enter category name';
-
-  @override
-  String get vibeLibrary_createCategoryConfirm => 'Create';
-
-  @override
-  String get vibeLibrary_deleteCategoryTitle => 'Confirm Delete';
-
-  @override
-  String get vibeLibrary_deleteCategoryContent =>
-      'Delete this category? Vibes in it will be moved to Uncategorized.';
-
-  @override
-  String get vibeLibrary_sortTooltip => 'Sort by';
-
-  @override
-  String get vibeLibrary_openFolderTooltip => 'Open Vibe library folder';
-
-  @override
-  String vibeLibrary_totalCount(Object count) {
-    return '$count Vibes';
-  }
-
-  @override
-  String get vibeLibrary_noCategoriesAvailable => 'No categories available';
-
-  @override
-  String get vibeLibrary_moveToCategory => 'Move to Category';
-
-  @override
   String get vibeLibrary_uncategorized => 'Uncategorized';
-
-  @override
-  String vibeLibrary_movedToCategory(Object count) {
-    return 'Moved $count Vibes';
-  }
-
-  @override
-  String get vibeLibrary_favoriteStatusUpdated => 'Favorite status updated';
-
-  @override
-  String get vibeLibrary_importFromFile => 'Import from File';
-
-  @override
-  String get vibeLibrary_importFromImage => 'Import from Image';
-
-  @override
-  String get vibeLibrary_importFromClipboard =>
-      'Import Encoded Data from Clipboard';
-
-  @override
-  String vibeLibrary_openFolderFailed(Object error) {
-    return 'Failed to open folder: $error';
-  }
-
-  @override
-  String get vibeLibrary_importFileDialogTitle => 'Select Vibe files to import';
-
-  @override
-  String get vibeLibrary_preparingImport => 'Preparing import...';
 
   @override
   String vibeLibrary_importSuccessCount(Object count) {
@@ -4410,103 +3938,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vibeLibrary_dropImportHint =>
-      'Drop .naiv4vibe/.naiv4vibebundle/.png/.jpg/.jpeg/.webp files or folders here to import';
-
-  @override
-  String get vibeLibrary_importing => 'Importing...';
-
-  @override
-  String vibeLibrary_pageIndicator(Object current, Object total) {
-    return '$current / $total pages';
-  }
-
-  @override
-  String get vibeLibrary_itemsPerPage => 'Per page:';
-
-  @override
-  String get vibeLibrary_tooManyTitle => 'Too Many Vibes';
-
-  @override
-  String vibeLibrary_tooManySelectedContent(Object count) {
-    return 'Selected $count Vibes, but at most 16 can be used at once.\n\nPlease reduce the selection and try again.';
-  }
-
-  @override
-  String vibeLibrary_tooManyExistingContent(Object current, Object remaining) {
-    return 'The generation page already has $current Vibes. You can add $remaining more.\n\nPlease reduce the selection and try again.';
-  }
-
-  @override
-  String vibeLibrary_sentToGenerationCount(Object count) {
-    return 'Sent $count Vibes to generation';
-  }
-
-  @override
-  String vibeLibrary_deleteSelectedContent(Object count) {
-    return 'Delete $count selected Vibes? This action cannot be undone.';
-  }
-
-  @override
-  String vibeLibrary_deletedCount(Object count) {
-    return 'Deleted $count Vibes';
-  }
-
-  @override
-  String get vibeLibrary_importImageDialogTitle =>
-      'Select images containing Vibe data';
-
-  @override
-  String get vibeLibrary_clipboardEmpty => 'Clipboard is empty';
-
-  @override
-  String get vibeLibrary_encodeTimeout =>
-      'Encoding timed out. Please check your network connection.';
-
-  @override
-  String get vibeLibrary_unknownError => 'Unknown error';
-
-  @override
   String get vibeLibrary_save => 'Save to Library';
 
   @override
   String get vibeLibrary_import => 'Import Vibe';
 
   @override
-  String get vibeLibrary_searchHint => 'Search name, tags...';
-
-  @override
-  String get vibeLibrary_empty => 'Vibe Library is empty';
-
-  @override
-  String get vibeLibrary_emptyHint => 'Add some entries to Vibe Library first';
-
-  @override
-  String get vibeLibrary_allVibes => 'All Vibes';
-
-  @override
-  String get vibeLibrary_favorites => 'Favorites';
-
-  @override
   String get vibeLibrary_sendToGeneration => 'Send to Generation';
-
-  @override
-  String get vibeLibrary_export => 'Export';
-
-  @override
-  String get vibeLibrary_edit => 'Edit';
-
-  @override
-  String get vibeLibrary_delete => 'Delete';
-
-  @override
-  String get vibeLibrary_addToFavorites => 'Add to Favorites';
-
-  @override
-  String get vibeLibrary_removeFromFavorites => 'Remove from Favorites';
-
-  @override
-  String get vibeLibrary_newSubCategory => 'New Subcategory';
 
   @override
   String get vibeLibrary_maxVibesReached => 'Maximum limit reached (16 vibes)';
@@ -4578,339 +4016,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get vibeBulkTag_actionPreview => 'Change preview';
-
-  @override
-  String get vibeDetail_strengthDescription =>
-      'Controls how strongly this Vibe influences generated results';
-
-  @override
-  String get vibeDetail_infoExtractedDescription =>
-      'Controls how much information is extracted from the source image (costs 2 Anlas)';
-
-  @override
-  String get vibeDetail_statistics => 'Statistics';
-
-  @override
-  String get vibeDetail_usageCount => 'Times used';
-
-  @override
-  String vibeDetail_timesUsed(int count) {
-    return '$count times';
-  }
-
-  @override
-  String get vibeDetail_lastUsed => 'Last used';
-
-  @override
-  String get vibeDetail_neverUsed => 'Never used';
-
-  @override
-  String get vibeDetail_createdAt => 'Created';
-
-  @override
-  String get vibeDetail_saveParameters => 'Save Parameters';
-
-  @override
   String get vibe_export_title => 'Export Vibe';
 
   @override
-  String get vibe_export_format => 'Export Format';
-
-  @override
-  String get vibe_selector_title => 'Select Vibe';
-
-  @override
   String get vibe_selector_recent => 'Recent';
-
-  @override
-  String get vibe_export_include_thumbnails => 'Include Thumbnails';
-
-  @override
-  String get vibe_export_include_thumbnails_subtitle =>
-      'Include thumbnail preview in export file';
-
-  @override
-  String get vibe_export_singleFile => 'Single file (.naiv4vibe)';
-
-  @override
-  String get vibe_export_singleFileDescription =>
-      'Export each Vibe as a separate file, suitable for sharing one Vibe';
-
-  @override
-  String get vibe_export_bundleFile => 'Bundle file (.naiv4vibebundle)';
-
-  @override
-  String get vibe_export_bundleFileDescription =>
-      'Pack multiple Vibes into one file, suitable for batch backup';
-
-  @override
-  String get vibe_export_embedIntoPng => 'Embed into PNG';
-
-  @override
-  String get vibe_export_embedIntoPngDescription =>
-      'Export a single Vibe by embedding its data into PNG metadata';
-
-  @override
-  String get vibe_export_exportable => 'Exportable';
-
-  @override
-  String get vibe_export_notExportable => 'Not exportable';
-
-  @override
-  String get vibe_export_selectVibesToExport => 'Select Vibes to export';
-
-  @override
-  String vibe_export_exportSelected(int count) {
-    return 'Export ($count)';
-  }
-
-  @override
-  String vibe_export_strengthPercent(int percent) {
-    return 'Strength: $percent%';
-  }
-
-  @override
-  String get vibe_export_pngCarrierImage => 'PNG carrier image';
-
-  @override
-  String get vibe_export_noUsablePngCarrier =>
-      'This Vibe has no directly usable PNG carrier image. You can choose an external PNG image as the carrier.';
-
-  @override
-  String get vibe_export_selectExternalPngImage =>
-      'Select external PNG image...';
-
-  @override
-  String get vibe_export_changeExternalPngImage =>
-      'Change external PNG image...';
-
-  @override
-  String get vibe_export_useVibeImageInstead => 'Use Vibe image instead';
-
-  @override
-  String vibe_export_usingExternalPng(String fileName) {
-    return 'Using external PNG: $fileName';
-  }
-
-  @override
-  String get vibe_export_selectPngImage => 'Select PNG image';
-
-  @override
-  String get vibe_export_invalidPngImage =>
-      'The selected file is not a valid PNG image';
-
-  @override
-  String vibe_export_selectPngImageFailed(String error) {
-    return 'Failed to select PNG image: $error';
-  }
-
-  @override
-  String vibe_export_embeddingPng(String name) {
-    return 'Embedding PNG: $name';
-  }
-
-  @override
-  String vibe_export_exportCompleteCounts(int successCount, int failCount) {
-    return 'Export complete: $successCount succeeded, $failCount failed';
-  }
-
-  @override
-  String vibe_export_exportCompletePath(String path) {
-    return 'Export complete: $path';
-  }
-
-  @override
-  String vibe_export_packingVibes(int count) {
-    return 'Packing $count Vibes...';
-  }
-
-  @override
-  String vibe_export_exportingName(String name) {
-    return 'Exporting: $name';
-  }
-
-  @override
-  String get vibe_export_selectExportFolder => 'Select export folder';
-
-  @override
-  String get vibe_export_generatingBundleFile => 'Generating bundle file...';
-
-  @override
-  String vibe_export_bundleTitle(String name) {
-    return 'Export Bundle: $name';
-  }
-
-  @override
-  String vibe_export_vibesTitle(int count) {
-    return 'Export Vibes ($count selected)';
-  }
-
-  @override
-  String get vibe_export_method => 'Export Method';
-
-  @override
-  String get vibe_export_wholeBundle => 'Whole Bundle';
-
-  @override
-  String get vibe_export_internalVibe => 'Internal Vibe';
-
-  @override
-  String vibe_export_wholeBundleDescription(int count) {
-    return 'Export as a .naiv4vibebundle file containing all $count vibes';
-  }
-
-  @override
-  String vibe_export_internalVibeDescription(int count) {
-    return 'Select internal bundle vibes to export separately as .naiv4vibe files ($count total)';
-  }
-
-  @override
-  String get vibe_export_exportBundle => 'Export Bundle';
-
-  @override
-  String get vibe_export_exportAsFiles => 'Export as Files';
-
-  @override
-  String get vibe_export_exportBundleDescription =>
-      'Export as a .naiv4vibebundle file';
-
-  @override
-  String get vibe_export_exportAsFilesDescription =>
-      'Export as .naiv4vibe or .naiv4vibebundle files';
-
-  @override
-  String get vibe_export_exportAsZip => 'Export as ZIP';
-
-  @override
-  String get vibe_export_exportAsZipDescription =>
-      'Pack the selected Vibe library entries into a .zip as separate files';
-
-  @override
-  String get vibe_export_compressData => 'Compress data';
-
-  @override
-  String get vibe_export_compressDataDescription =>
-      'Use compression to reduce file size (recommended for batch export)';
-
-  @override
-  String get vibe_export_zipCompressDescription =>
-      'Compress files inside the ZIP to reduce size';
-
-  @override
-  String get vibe_export_exportAsPng => 'Export as PNG';
-
-  @override
-  String get vibe_export_pngInternalBundleUnsupported =>
-      'Embedding into an image is not supported when exporting a single internal bundle vibe';
-
-  @override
-  String get vibe_export_embedVibeDataIntoPng =>
-      'Embed Vibe data into PNG metadata';
-
-  @override
-  String get vibe_export_batchPngUsesFirstImage =>
-      'Batch export uses each Vibe\'s first available image. Entries without images are skipped automatically.';
-
-  @override
-  String get vibe_export_exportCarrierImage => 'Export carrier image';
-
-  @override
-  String get vibe_export_usingExternalCarrierImage =>
-      'Using an external PNG as the export carrier image';
-
-  @override
-  String get vibe_export_exportAsEncodings => 'Export as Encodings';
-
-  @override
-  String get vibe_export_exportAsEncodingsDescription =>
-      'Export data as encodings (JSON or Base64)';
-
-  @override
-  String get vibe_export_jsonDescription =>
-      'Export as a formatted JSON file for easier reading and editing';
-
-  @override
-  String get vibe_export_base64Description =>
-      'Export as plain Base64 for copying and sharing';
-
-  @override
-  String get vibe_export_selectAtLeastOneMethod =>
-      'Select at least one export method';
-
-  @override
-  String get vibe_export_batchPngUnsupported =>
-      'Batch Vibe export does not support embedding into PNG. Use the single Vibe export screen.';
-
-  @override
-  String get vibe_export_selectPngCarrier =>
-      'Select a PNG carrier image for export';
-
-  @override
-  String get vibe_export_selectAtLeastOneInternalVibe =>
-      'Select at least one internal vibe to export';
-
-  @override
-  String get vibe_export_selectVibeExportFolder => 'Select Vibe export folder';
-
-  @override
-  String get vibe_export_saveEncodingFile => 'Save encoding file';
-
-  @override
-  String get vibe_export_preparingExport => 'Preparing export...';
-
-  @override
-  String vibe_export_preparingVibeProgress(int current, int total) {
-    return 'Reading Vibe $current/$total...';
-  }
-
-  @override
-  String get vibe_export_exportingBundle => 'Exporting Bundle...';
-
-  @override
-  String get vibe_export_exportingZip => 'Exporting ZIP...';
-
-  @override
-  String get vibe_export_embeddingImage => 'Embedding image...';
-
-  @override
-  String get vibe_export_exportingEncoding => 'Exporting encoding...';
-
-  @override
-  String vibe_export_exportFailedWithError(String error) {
-    return 'Export failed: $error';
-  }
-
-  @override
-  String get vibe_export_noExportableEntries => 'No exportable Vibe entries';
-
-  @override
-  String get vibe_export_bundleFilePathEmpty => 'Bundle file path is empty';
-
-  @override
-  String vibe_export_invalidImageFormatWithError(String error) {
-    return 'Invalid image format: $error';
-  }
-
-  @override
-  String vibe_export_embedFailedWithError(String error) {
-    return 'Embed failed: $error';
-  }
-
-  @override
-  String vibe_export_embedImageFailedWithError(String error) {
-    return 'Failed to embed image: $error';
-  }
-
-  @override
-  String vibe_export_extractingVibeProgress(int current, int total) {
-    return 'Extracting vibe $current/$total...';
-  }
-
-  @override
-  String vibe_export_selectImageFailed(String error) {
-    return 'Failed to select image: $error';
-  }
 
   @override
   String vibe_export_dialogTitle(int count) {
@@ -4966,12 +4075,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibe_embedToImage => 'Embed to Image';
 
   @override
-  String get vibe_import_skip => 'Skip';
-
-  @override
-  String get vibe_import_confirm => 'Confirm';
-
-  @override
   String get vibe_import_noEncodingData => 'No encoding data';
 
   @override
@@ -5009,14 +4112,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vibe_import_timeout => 'Encoding timeout';
 
   @override
-  String get vibe_import_title => 'Import from Library';
-
-  @override
-  String vibe_import_result(int count) {
-    return 'Imported $count vibes';
-  }
-
-  @override
   String get vibe_import_fileParseFailed => 'Failed to parse file';
 
   @override
@@ -5024,46 +4119,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vibe_import_importFailed => 'Import failed';
-
-  @override
-  String get vibe_import_bundleTitle => 'Import Vibe Bundle';
-
-  @override
-  String get vibe_import_bundleChooseMethod => 'Choose import method';
-
-  @override
-  String get vibe_import_bundleAsWhole => 'Import as whole';
-
-  @override
-  String get vibe_import_bundleAsWholeDescription =>
-      'Keep the bundle structure and import it as one library entry';
-
-  @override
-  String get vibe_import_bundleSplitEntries => 'Split into separate entries';
-
-  @override
-  String get vibe_import_bundleSplitEntriesDescription =>
-      'Import each vibe as a separate library entry';
-
-  @override
-  String get vibe_import_bundleSelectVibes => 'Select vibes to import';
-
-  @override
-  String get vibe_import_bundleSelectVibesDescription =>
-      'Import only the selected vibes';
-
-  @override
-  String get vibe_import_bundleConfigureEachVibe =>
-      'Configure each Vibe\'s parameters';
-
-  @override
-  String get vibe_import_bundleSelectAndConfigureEachVibe =>
-      'Select and configure each Vibe\'s parameters';
-
-  @override
-  String vibe_import_bundleSelectedCount(int selected, int total) {
-    return '$selected/$total selected';
-  }
 
   @override
   String get vibe_saveToLibrary_title => 'Save to Library';
@@ -5172,57 +4227,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selection_cut_to_layer => 'Cut to Layer';
 
   @override
-  String get search_results => 'Search Results';
-
-  @override
-  String get search_noResults => 'No matching results';
-
-  @override
-  String get addToCurrent => 'Add to Current';
-
-  @override
-  String get replaceExisting => 'Replace Existing';
-
-  @override
-  String get confirmSelection => 'Confirm Selection';
-
-  @override
   String get selectAll => 'Select All';
 
   @override
   String get clearSelection => 'Clear';
 
   @override
-  String get clearFilters => 'Clear Filters';
-
-  @override
   String get shortcut_context_vibe_detail => 'Vibe Detail';
 
   @override
   String get shortcut_action_vibe_detail_rename => 'Rename';
-
-  @override
-  String get vibeSelectorFilterFavorites => 'Favorites';
-
-  @override
-  String get vibeSelectorFilterSourceAll => 'All Types';
-
-  @override
-  String get vibeSelectorSortCreated => 'Created';
-
-  @override
-  String get vibeSelectorSortLastUsed => 'Last Used';
-
-  @override
-  String get vibeSelectorSortUsedCount => 'Usage Count';
-
-  @override
-  String get vibeSelectorSortName => 'Name';
-
-  @override
-  String vibeSelectorItemsCount(int count) {
-    return '$count items';
-  }
 
   @override
   String get tray_show => 'Show Window';
@@ -5946,42 +4960,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'This image format cannot be sent to Krita. Use a common image format.';
 
   @override
-  String toast_deletedNamed(Object name) {
-    return 'Deleted: $name';
-  }
-
-  @override
-  String get toast_vibeParamSaveReencodeFailed =>
-      'Failed to save parameters because Vibe re-encoding failed';
-
-  @override
-  String get toast_exportSuccess => 'Export successful';
-
-  @override
-  String toast_exportFailed(Object error) {
-    return 'Export failed: $error';
-  }
-
-  @override
-  String get toast_selectVibeToExport => 'Select a Vibe to export first';
-
-  @override
-  String get toast_embedPngSingleVibeOnly =>
-      'Embedding into PNG only supports exporting one Vibe';
-
-  @override
-  String get toast_selectPngCarrier => 'Select a PNG carrier image for export';
-
-  @override
-  String get toast_renameSuccess => 'Renamed successfully';
-
-  @override
-  String get toast_paramsSaved => 'Parameters saved';
-
-  @override
-  String get toast_paramsSaveFailed => 'Failed to save parameters';
-
-  @override
   String get toast_dropNoReadableImageOrVibe =>
       'The drop source did not provide a readable image or Vibe file';
 
@@ -6015,35 +4993,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toast_favorited => 'Favorited';
-
-  @override
-  String get toast_unfavorited => 'Unfavorited';
-
-  @override
-  String toast_favoriteUpdateFailed(Object error) {
-    return 'Failed to update favorite state: $error';
-  }
-
-  @override
-  String toast_packingImages(Object count) {
-    return 'Packing $count images...';
-  }
-
-  @override
-  String toast_packedImages(Object count) {
-    return 'Packed $count images';
-  }
-
-  @override
-  String get toast_packFailed => 'Pack failed';
-
-  @override
-  String toast_packFailedWithError(Object error) {
-    return 'Pack failed: $error';
-  }
-
-  @override
   String get toast_saveDirNotSet => 'Save directory is not set';
 
   @override
@@ -6067,20 +5016,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get toast_saveEntryFailed => 'Failed to save entry';
 
   @override
-  String get toast_imagePromptCopied => 'Prompt copied';
-
-  @override
-  String get toast_imageHasNoPrompt => 'This image has no Prompt';
-
-  @override
-  String get toast_useDeleteButton => 'Use the delete button in the UI';
-
-  @override
   String get toast_imageDataUnavailable =>
       'Image data is unavailable and cannot be copied';
-
-  @override
-  String get toast_vibeDataCopied => 'Vibe data copied';
 
   @override
   String get toast_characterPromptCopied => 'Character prompt copied';
@@ -6088,26 +5025,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String toast_copiedTitle(Object title) {
     return '$title copied';
-  }
-
-  @override
-  String toast_replacedVibesCount(Object count, Object name) {
-    return 'Replaced with $count Vibes: $name';
-  }
-
-  @override
-  String toast_sentVibesCount(Object count, Object name) {
-    return 'Sent $count Vibes to generation: $name';
-  }
-
-  @override
-  String toast_replacedVibe(Object name) {
-    return 'Replaced with: $name';
-  }
-
-  @override
-  String toast_sentVibeToGeneration(Object name) {
-    return 'Sent to generation: $name';
   }
 
   @override
@@ -6143,28 +5060,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get toast_renameNameRequired => 'Name is required';
-
-  @override
-  String get toast_renameNameConflict =>
-      'Name already exists. Use another name.';
-
-  @override
-  String get toast_renameEntryNotFound =>
-      'The entry no longer exists and may have been deleted';
-
-  @override
-  String get toast_renameFilePathMissing =>
-      'This entry has no file path and cannot be renamed';
-
-  @override
-  String get toast_renameFileFailed =>
-      'Failed to rename file. Try again later.';
-
-  @override
-  String get toast_renameFailed => 'Rename failed. Try again later.';
-
-  @override
   String toast_processImageFailed(Object error) {
     return 'Failed to process image: $error';
   }
@@ -6189,101 +5084,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_saving => 'Saving...';
 
   @override
-  String get common_pleaseWait => 'Please wait';
-
-  @override
-  String get common_change => 'Change';
-
-  @override
   String get common_expand => 'Expand';
 
   @override
   String get common_collapse => 'Collapse';
-
-  @override
-  String get vibeLibrary_emptySearchTitle => 'No matching Vibes';
-
-  @override
-  String get vibeLibrary_emptySearchSubtitle => 'Try a different keyword';
-
-  @override
-  String get vibeLibrary_emptyFavoritesTitle => 'No favorite Vibes yet';
-
-  @override
-  String get vibeLibrary_emptyFavoritesSubtitle =>
-      'Click the heart icon to favorite a Vibe';
-
-  @override
-  String get vibeLibrary_emptyCategoryTitle => 'No Vibes in this category';
-
-  @override
-  String get vibeLibrary_emptyCategorySubtitle =>
-      'Switch to \"All Vibes\" to see all entries';
-
-  @override
-  String get vibeLibrary_emptyNoMatchesTitle => 'No matching results';
-
-  @override
-  String get vibeLibrary_emptySaveFromGenerationHint =>
-      'Save Vibes from the generation page to add them to the library';
-
-  @override
-  String get vibe_nameRequired => 'Name is required';
-
-  @override
-  String get vibe_import_namingTitle => 'Name Vibe';
-
-  @override
-  String get vibe_import_nameConflictOverwrite =>
-      'This name already exists and will be overwritten';
-
-  @override
-  String get vibe_previewLoadFailed => 'Failed to load preview';
-
-  @override
-  String get vibe_import_applyToRemainingFiles =>
-      'Apply to all remaining files';
-
-  @override
-  String get vibe_import_applyNamingToRemainingFiles =>
-      'Use this naming rule for the remaining files';
-
-  @override
-  String get vibe_encodeImageTitle => 'Encode Image as Vibe';
-
-  @override
-  String get vibe_imagePreview => 'Image preview';
-
-  @override
-  String get vibe_encodeStartButton => 'Start Encoding';
-
-  @override
-  String get vibe_encodeImageInProgress => 'Encoding image...';
-
-  @override
-  String vibe_encodeErrorImage(Object fileName) {
-    return 'Image: $fileName';
-  }
-
-  @override
-  String vibe_encodeErrorMessage(Object error) {
-    return 'Error: $error';
-  }
-
-  @override
-  String get vibe_encodeSkipImage => 'Skip this image';
-
-  @override
-  String get detail_sendToImg2Img => 'Send to Image2Image';
-
-  @override
-  String get detail_loadingImage => 'Loading image...';
-
-  @override
-  String get detail_imageLoadFailed => 'Failed to load image';
-
-  @override
-  String get detail_noImage => 'No image';
 
   @override
   String get detail_parsingMetadata => 'Parsing metadata...';
@@ -6295,15 +5099,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get detail_metadata => 'Metadata';
 
   @override
-  String get detail_imageDetails => 'Image Details';
-
-  @override
-  String get detail_basicInfo => 'Basic Info';
-
-  @override
-  String get detail_fileName => 'File Name';
-
-  @override
   String get detail_modifiedTime => 'Modified';
 
   @override
@@ -6311,9 +5106,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get detail_noContent => '(No content)';
-
-  @override
-  String get detail_saveBlock => 'Save as Block';
 
   @override
   String get saveBlock_title => 'Save as Block';
@@ -6340,15 +5132,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String detail_copyLabel(Object label) {
     return 'Copy $label';
   }
-
-  @override
-  String get detail_copyCharacterPrompt => 'Copy Character Prompt';
-
-  @override
-  String get detail_copyAllVibeData => 'Copy all Vibe data';
-
-  @override
-  String get detail_saveToVibeLibrary => 'Save to Vibe Library';
 
   @override
   String get comfyImport_detectedTitle =>
@@ -6564,45 +5347,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_preciseRefLibrary => 'Precise Ref Library';
 
   @override
-  String get preciseRefLib_title => 'Precise Reference Library';
-
-  @override
-  String get preciseRefLib_searchHint => 'Search references...';
-
-  @override
-  String get preciseRefLib_empty =>
-      'Drop or paste images here to build your library';
-
-  @override
-  String get preciseRefLib_emptyHint =>
-      'You can also right-click images in preview, history, or gallery to save them here';
-
-  @override
-  String get preciseRefLib_import => 'Import Images';
-
-  @override
-  String preciseRefLib_entryCount(int count) {
-    return '$count items';
-  }
-
-  @override
-  String get preciseRefLib_sendToPreciseRef => 'Send to Precise Reference';
-
-  @override
-  String get preciseRefLib_sendToImg2Img => 'Send to Image to Image';
-
-  @override
-  String get preciseRefLib_editEntry => 'Edit Parameters';
-
-  @override
-  String get preciseRefLib_confirmDeleteTitle => 'Delete Entry';
-
-  @override
-  String preciseRefLib_confirmDelete(String name) {
-    return 'Delete \"$name\"? The image file will also be removed.';
-  }
-
-  @override
   String preciseRefLib_saved(String name) {
     return 'Saved \"$name\" to Precise Ref Library';
   }
@@ -6612,16 +5356,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'You can edit parameters in the library';
 
   @override
-  String preciseRefLib_sent(String name) {
-    return 'Sent \"$name\" to Precise Reference';
-  }
-
-  @override
-  String preciseRefLib_sentToImg2Img(String name) {
-    return 'Sent \"$name\" to Image to Image';
-  }
-
-  @override
   String get preciseRefLib_imageMissing => 'Image file is missing';
 
   @override
@@ -6629,35 +5363,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'The image format is unsupported or the file is corrupt';
 
   @override
-  String get preciseRefLib_deleteFailed =>
-      'Delete failed. The entry and original image were kept; try again later';
-
-  @override
-  String get preciseRefLib_favoritesOnly => 'Favorites only';
-
-  @override
-  String get preciseRefLib_sortBy => 'Sort by';
-
-  @override
-  String get preciseRefLib_sortCreatedAt => 'Created';
-
-  @override
-  String get preciseRefLib_sortLastUsed => 'Last used';
-
-  @override
-  String get preciseRefLib_sortUsedCount => 'Most used';
-
-  @override
-  String get preciseRefLib_sortName => 'Name';
-
-  @override
   String preciseRefLib_importedCount(int count) {
     return 'Imported $count images';
-  }
-
-  @override
-  String preciseRefLib_loadFailed(String error) {
-    return 'Failed to load the Precise Reference Library: $error';
   }
 
   @override
@@ -6680,20 +5387,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String preciseRefLib_saveCurrentCount(int count) {
     return 'Saved $count references to library';
   }
-
-  @override
-  String get preciseRefLib_selectorTitle => 'Select from Precise Ref Library';
-
-  @override
-  String preciseRefLib_selectorConfirm(int count) {
-    return 'Add Selected ($count)';
-  }
-
-  @override
-  String get preciseRefLib_nameLabel => 'Name';
-
-  @override
-  String get preciseRefLib_typeFilterAll => 'All';
 
   @override
   String get img2img_fromPreciseRefLibrary => 'From Precise Ref Library';
@@ -6828,16 +5521,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get drop_saveVibeBundle => 'Save Vibe Bundle';
 
   @override
-  String get history_dragFilePreparationFailed =>
-      'Failed to prepare the drag file. Try again later.';
-
-  @override
-  String get history_dragFilePreparing => 'Preparing the drag file...';
-
-  @override
-  String get history_dragFileNotReady => 'The drag file is not ready yet';
-
-  @override
   String get vibe_import_overwriteOriginalParams =>
       'Replace Original Vibe Parameters';
 
@@ -6861,23 +5544,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get galleryScan_processing => 'Processing';
-
-  @override
-  String get vibeDetail_useAll => 'Use All';
-
-  @override
-  String get vibeDetail_longPressSetCover => 'Long-press to set as cover';
-
-  @override
-  String get vibeDetail_noPreviewImage => 'No preview image';
-
-  @override
-  String get vibeDetail_dropPreviewImage =>
-      'Drop an image here to set the preview';
-
-  @override
-  String get vibeDetail_releasePreviewImage =>
-      'Release to set the preview image';
 
   @override
   String imagePicker_dropReadFailed(String error) {
@@ -7003,15 +5669,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get nav_promptBlockLibrary => 'Prompt Blocks';
-
-  @override
-  String get promptBlockLibrary_title => 'Prompt Blocks';
-
-  @override
-  String get promptBlockLibrary_folders => 'Folders';
-
-  @override
   String get promptBlockLibrary_allBlocks => 'All blocks';
 
   @override
@@ -7019,12 +5676,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_unnamedBlock => 'Untitled block';
-
-  @override
-  String get promptBlockLibrary_noBlockSelected => 'No block selected';
-
-  @override
-  String get promptBlockLibrary_details => 'Details';
 
   @override
   String promptBlockLibrary_useCount(int count) {
@@ -7038,197 +5689,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockPill_unknown => 'Invalid block';
 
   @override
-  String get pillCardReroll => 'Re-roll';
-
-  @override
-  String get pillCardRerollLocked => 'Locked; re-roll unavailable';
-
-  @override
-  String get pillCardLock => 'Lock current roll';
-
-  @override
-  String get pillCardUnlock => 'Unlock';
-
-  @override
-  String get pillCardSettings => 'Random settings';
-
-  @override
-  String get pillCardEnable => 'Enable';
-
-  @override
-  String get pillCardDisable => 'Disable';
-
-  @override
-  String get pillCardDeleteInstance => 'Remove instance';
-
-  @override
-  String get pillCardEmptyRoll => '(empty roll this time)';
-
-  @override
-  String get pillCardEvolutionEnable => 'Enable evolution';
-
-  @override
-  String get pillCardEvolutionDisable => 'Disable evolution';
-
-  @override
-  String get pillCardEvolutionRequiresEnabled => 'Enable the instance first';
-
-  @override
-  String get pillCardStepBack => 'Step back one scene';
-
-  @override
-  String get pillCardStepForward => 'Step forward one scene';
-
-  @override
-  String get pillSettingsTitle => 'Block instance settings';
-
-  @override
-  String get pillSettingsModeFixed => 'Fixed';
-
-  @override
-  String get pillSettingsModeSequential => 'Sequential';
-
-  @override
-  String get pillSettingsModeRandom => 'Random draw';
-
-  @override
-  String get pillSettingsCount => 'Draw count';
-
-  @override
-  String get pillSettingsOrder => 'Output order';
-
-  @override
-  String get pillSettingsOrderDrawn => 'As drawn';
-
-  @override
-  String get pillSettingsOrderOriginal => 'Original order';
-
-  @override
-  String get pillSettingsWeight => 'Random weight';
-
-  @override
-  String get pillSettingsWeightMin => 'Min';
-
-  @override
-  String get pillSettingsWeightMax => 'Max';
-
-  @override
-  String get pillSettingsWeightAverage => 'Average';
-
-  @override
-  String get pillSettingsDispersion => 'Dispersion';
-
-  @override
-  String get pillSettingsDispersionFocused => 'Focused';
-
-  @override
-  String get pillSettingsDispersionBalanced => 'Balanced';
-
-  @override
-  String get pillSettingsDispersionSpread => 'Spread';
-
-  @override
-  String get pillSettingsAdvanced => 'Advanced';
-
-  @override
-  String get pillSettingsLeftDispersion => 'Left';
-
-  @override
-  String get pillSettingsRightDispersion => 'Right';
-
-  @override
-  String get pillSettingsSoftBalance => 'Soft balance';
-
-  @override
-  String get pillSettingsSoftBalanceStrength => 'Strength';
-
-  @override
-  String get pillSettingsTriggerProbability => 'Trigger chance';
-
-  @override
-  String get pillSettingsCancel => 'Cancel';
-
-  @override
-  String get pillSettingsApply => 'Apply';
-
-  @override
   String get promptBlockLibrary_unnamedFolder => 'Untitled folder';
-
-  @override
-  String get promptBlockLibrary_scope => 'Browse';
-
-  @override
-  String get promptBlockLibrary_newBlock => 'New block';
-
-  @override
-  String get promptBlockLibrary_editBlock => 'Edit block';
-
-  @override
-  String get promptBlockLibrary_newFolder => 'New folder';
-
-  @override
-  String get promptBlockLibrary_newSubfolder => 'New subfolder';
-
-  @override
-  String get promptBlockLibrary_renameFolder => 'Rename folder';
-
-  @override
-  String get promptBlockLibrary_moveToRoot => 'Move to root';
-
-  @override
-  String get promptBlockLibrary_moveToFolder => 'Move to folder';
-
-  @override
-  String get promptBlockLibrary_favorites => 'Favorites';
-
-  @override
-  String get promptBlockLibrary_unclassified => 'Unclassified';
-
-  @override
-  String get promptBlockLibrary_newCollection => 'New collection';
-
-  @override
-  String get promptBlockLibrary_newSubcollection => 'New sub-collection';
-
-  @override
-  String get promptBlockLibrary_newCollectionFolder => 'New collection folder';
-
-  @override
-  String get promptBlockLibrary_renameCollection => 'Rename collection';
-
-  @override
-  String get promptBlockLibrary_renameCollectionFolder =>
-      'Rename collection folder';
-
-  @override
-  String get promptBlockLibrary_moveToFavoritesRoot => 'Move to favorites root';
-
-  @override
-  String get promptBlockLibrary_unnamedCollection => 'Unnamed collection';
-
-  @override
-  String get promptBlockLibrary_unnamedCollectionFolder =>
-      'Unnamed collection folder';
-
-  @override
-  String get promptBlockLibrary_collectionName => 'Collection name';
-
-  @override
-  String get promptBlockLibrary_collectionNameHint => 'Collection name';
-
-  @override
-  String get promptBlockLibrary_noCollections =>
-      'No collections yet — use the + next to Favorites, or drag a block onto a collection';
-
-  @override
-  String get promptBlockLibrary_noFolders => 'No folders yet';
-
-  @override
-  String get promptBlockLibrary_emptyFavorites =>
-      'No favorite blocks yet — tap the ★ on a block to favorite it';
-
-  @override
-  String get promptBlockLibrary_emptyCollection => 'This collection is empty';
 
   @override
   String promptBlockLibrary_deleteCollectionConfirm(String name) {
@@ -7247,42 +5708,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_titleHint => 'Block title';
 
   @override
-  String get promptBlockLibrary_searchHint => 'Search title, prompt, or tag';
-
-  @override
   String get promptBlockLibrary_folder => 'Folder';
-
-  @override
-  String get promptBlockLibrary_folderName => 'Folder name';
-
-  @override
-  String get promptBlockLibrary_folderNameHint => 'Folder name';
-
-  @override
-  String get promptBlockLibrary_basicPrompt => 'Base Prompt';
-
-  @override
-  String get promptBlockLibrary_generationSettings => 'Settings';
-
-  @override
-  String get promptBlockLibrary_settingsOptionalHint =>
-      'Only filled parameters are saved. Apply settings manually after inserting the block.';
-
-  @override
-  String get promptBlockLibrary_notSpecified => 'Not specified';
-
-  @override
-  String get promptBlockLibrary_stepsLabel => 'Steps';
-
-  @override
-  String get promptBlockLibrary_noiseScheduleLabel => 'Noise Schedule';
-
-  @override
-  String get promptBlockLibrary_invalidGenerationSettings =>
-      'Check settings: steps 1–50, Prompt Guidance 1–20, Prompt Guidance Rescale 0–1, and model compatibility.';
-
-  @override
-  String get promptBlockLibrary_applySettings => 'Import settings';
 
   @override
   String get promptBlockLibrary_settingsApplied =>
@@ -7291,68 +5717,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promptBlockLibrary_settingsIncompatible =>
       'Block settings are incompatible with the target model. No parameters were imported.';
-
-  @override
-  String get promptBlockLibrary_noSettings => 'No generation settings saved';
-
-  @override
-  String get promptBlockLibrary_tags => 'Tags';
-
-  @override
-  String get promptBlockLibrary_addTag => 'Add tag';
-
-  @override
-  String get promptBlockLibrary_tagName => 'Tag name';
-
-  @override
-  String get promptBlockLibrary_tagColor => 'Tag color (hex)';
-
-  @override
-  String get promptBlockLibrary_duplicateTag =>
-      'This block already has a tag with that name';
-
-  @override
-  String get promptBlockLibrary_invalidTagColor => 'Enter a valid hex color';
-
-  @override
-  String get pillCard_rollScope => 'Variation scope';
-
-  @override
-  String get pillCard_positiveScope => 'Positive';
-
-  @override
-  String get pillCard_negativeScope => 'Negative';
-
-  @override
-  String get promptBlockLibrary_modelResetNotice =>
-      'Unsupported values were cleared after changing the model.';
-
-  @override
-  String get promptBlockLibrary_atomInputHint =>
-      'Type text, press Enter to make an atom';
-
-  @override
-  String get promptBlockLibrary_atomRestoreHint =>
-      'Click to restore as editable text';
-
-  @override
-  String get promptBlockLibrary_atomOrphan => 'Unknown marker';
-
-  @override
-  String get promptBlockLibrary_atomEditorTutorial =>
-      'Enter makes a block, click a block to restore text; unblocked text becomes atoms on save.';
-
-  @override
-  String get promptBlockLibrary_color => 'Color';
-
-  @override
-  String get promptBlockLibrary_icon => 'Icon';
-
-  @override
-  String get promptBlockLibrary_saved => 'Saved';
-
-  @override
-  String get promptBlockLibrary_copied => 'Content copied';
 
   @override
   String get promptBlockLibrary_deleted => 'Deleted';
@@ -7375,41 +5739,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_clearSelection => 'Clear selection';
 
   @override
-  String get promptBlockLibrary_moveTo => 'Move to…';
-
-  @override
-  String get promptBlockLibrary_moveToFolderTitle => 'Move to folder';
-
-  @override
-  String promptBlockLibrary_deleteBlocksConfirm(int count) {
-    return 'Delete $count selected blocks? This cannot be undone.';
-  }
-
-  @override
-  String promptBlockLibrary_deleteSelected(int count) {
-    return 'Delete $count selected blocks';
-  }
-
-  @override
   String get promptBlockLibrary_empty => 'No prompt blocks yet';
 
   @override
-  String get promptBlockLibrary_emptyFolder => 'This folder is empty';
-
-  @override
   String get promptBlockLibrary_noSearchResults => 'No matching blocks';
-
-  @override
-  String get promptBlockLibrary_tryDifferentSearch => 'Try a different search';
-
-  @override
-  String get promptBlockLibrary_emptyHint =>
-      'Create a block to start organizing reusable text';
-
-  @override
-  String promptBlockLibrary_loadFailed(String error) {
-    return 'Failed to load prompt blocks: $error';
-  }
 
   @override
   String promptBlockLibrary_deleteFolderTitle(Object name) {
@@ -7438,19 +5771,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'This also permanently deletes all blocks in the folder tree.';
 
   @override
-  String get promptBlockLibrary_importExport => 'Import / Export';
-
-  @override
-  String get promptBlockLibrary_importTxtFiles => 'Import TXT files';
-
-  @override
-  String get promptBlockLibrary_importFromFolder => 'Import from folder…';
-
-  @override
   String get promptBlockLibrary_exportLibraryBackup => 'Export library backup…';
-
-  @override
-  String get promptBlockLibrary_importLibraryBackup => 'Import library backup…';
 
   @override
   String get promptBlockLibrary_importTxtTitle => 'Select TXT files';
@@ -7508,25 +5829,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get promptBlockLibrary_curationLocalModified => 'Locally modified';
 
   @override
-  String promptBlockLibrary_libraryBackupDone(int count) {
-    return 'Exported backup with $count blocks';
-  }
-
-  @override
   String get promptBlockLibrary_libraryImportTitle => 'Select library backup';
-
-  @override
-  String get promptBlockLibrary_libraryBackupInvalid =>
-      'Not a valid block library backup';
-
-  @override
-  String promptBlockLibrary_libraryImportDone(
-    int blocks,
-    int folders,
-    int skipped,
-  ) {
-    return 'Imported $blocks blocks and $folders folders, skipped $skipped existing';
-  }
 
   @override
   String promptBlockLibrary_importFailed(String error) {
@@ -7538,15 +5841,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_importedAt => 'Imported at';
-
-  @override
-  String get promptBlockLibrary_listView => 'List view';
-
-  @override
-  String get promptBlockLibrary_gridView => 'Grid view';
-
-  @override
-  String get promptBlockLibrary_waterfallView => 'Waterfall view';
 
   @override
   String get promptBlockPalette_tooltip => 'Blocks';
@@ -7570,43 +5864,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get promptBlockLibrary_sortBy => 'Sort by';
-
-  @override
-  String get promptBlockLibrary_sortCustom => 'Default (manual order)';
-
-  @override
-  String get promptBlockLibrary_sortUpdated => 'Last modified';
-
-  @override
-  String get promptBlockLibrary_sortTitle => 'Title';
-
-  @override
-  String get promptBlockLibrary_sortColor => 'Color';
-
-  @override
-  String get promptBlockLibrary_sortIcon => 'Icon';
-
-  @override
-  String get promptBlockLibrary_sortAscending => 'Ascending';
-
-  @override
-  String get promptBlockLibrary_sortDescending => 'Descending';
-
-  @override
-  String get promptBlockLibrary_cardSize => 'Card size';
-
-  @override
-  String get promptBlockLibrary_reorderFolders => 'Reorder folders';
-
-  @override
   String get nav_styleExplore => 'Style Explore';
-
-  @override
-  String get styleExplore_rename => 'Rename';
-
-  @override
-  String get styleExplore_nameRequired => 'Name cannot be empty';
 
   @override
   String get styleExplore_operationFailed => 'Operation failed';
@@ -7622,112 +5880,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_discardChangesConfirm => 'Continue and discard';
 
   @override
-  String get styleExplore_newRun => 'New exploration';
-
-  @override
-  String styleExplore_runDeleted(String name) {
-    return 'Deleted exploration “$name”';
-  }
-
-  @override
-  String get styleExplore_runStatusGenerating => 'Generating';
-
-  @override
-  String get styleExplore_runStatusPaused => 'Paused';
-
-  @override
-  String get styleExplore_runStatusCancelled => 'Cancelled';
-
-  @override
-  String get styleExplore_pauseRun => 'Pause';
-
-  @override
-  String get styleExplore_cancelRun => 'Cancel exploration';
-
-  @override
-  String styleExplore_retryFailed(int count) {
-    return 'Retry failed ($count)';
-  }
-
-  @override
   String styleExplore_manualRunName(String time) {
     return 'Manual capture $time';
   }
 
   @override
   String get styleExplore_runBusy => 'Generation busy, try again later';
-
-  @override
-  String get styleExplore_deleteRunTitle => 'Delete exploration';
-
-  @override
-  String styleExplore_deleteRunMessage(String name) {
-    return 'Deletes \"$name\" and its candidate image copies; source images in the gallery are not affected.';
-  }
-
-  @override
-  String get styleExplore_cancelRunTitle => 'Cancel exploration';
-
-  @override
-  String get styleExplore_cancelRunMessage =>
-      'A cancelled exploration cannot be restarted; remaining queued candidates are marked as cancelled.';
-
-  @override
-  String get styleExplore_filterAll => 'All';
-
-  @override
-  String get styleExplore_filterHearted => 'Favorites';
-
-  @override
-  String get styleExplore_renameFolder => 'Rename group';
-
-  @override
-  String get styleExplore_deleteFolder => 'Delete group';
-
-  @override
-  String styleExplore_deleteFolderMessage(String name) {
-    return 'Delete group “$name”? Its candidates become ungrouped; images are kept.';
-  }
-
-  @override
-  String get styleExplore_folderNameLabel => 'Group name';
-
-  @override
-  String get styleExplore_deleteFamily => 'Delete evolution line';
-
-  @override
-  String styleExplore_deleteFamilyMessage(String name, int count) {
-    return 'Delete evolution line “$name”, all parents and offspring records ($count images)? Image files are kept.';
-  }
-
-  @override
-  String get styleExplore_familyBusy =>
-      'This evolution line still has candidates generating. Stop generation first.';
-
-  @override
-  String get styleExplore_folderUncategorized => 'Ungrouped';
-
-  @override
-  String styleExplore_folderCreated(String name) {
-    return 'Created group “$name”';
-  }
-
-  @override
-  String get styleExplore_candidateMissing => 'Image file missing';
-
-  @override
-  String get styleExplore_candidateDetailTitle => 'Candidate detail';
-
-  @override
-  String get styleExplore_prevCandidate => 'Previous';
-
-  @override
-  String get styleExplore_nextCandidate => 'Next';
-
-  @override
-  String styleExplore_roundNumber(int number) {
-    return 'Round $number';
-  }
 
   @override
   String styleExplore_adoptBlockSaved(String name) {
@@ -7739,44 +5897,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'The selected candidates have no artist strings or positive prompts to save';
 
   @override
-  String get styleExplore_deleteImage => 'Delete image';
-
-  @override
-  String get styleExplore_deleteImageTitle => 'Delete candidate image';
-
-  @override
-  String get styleExplore_deleteImageMessage =>
-      'Delete this candidate’s image copy and record? Library originals are kept.';
-
-  @override
-  String get styleExplore_deleteImageDone =>
-      'Candidate image and record deleted';
-
-  @override
-  String get styleExplore_selectCandidates => 'Select';
-
-  @override
-  String styleExplore_selectedCount(int count) {
-    return '$count selected';
-  }
-
-  @override
   String get promptBlockEditor_library => 'Block library';
 
   @override
   String get promptBlockPicker_title => 'Select Block';
 
   @override
-  String get promptBlockLibrary_thumbnail => 'Thumbnail';
-
-  @override
-  String get promptBlockLibrary_selectNewImage => 'Select New Image';
-
-  @override
   String get promptBlockLibrary_selectImage => 'Select Image';
-
-  @override
-  String get promptBlockLibrary_adjustDisplayRange => 'Adjust Display Range';
 
   @override
   String get promptBlockLibrary_adjustThumbnailTitle =>
@@ -7820,65 +5947,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get promptBlockLibrary_updateExistingThumbnailSubtitle =>
       'Select a block and replace its thumbnail';
-
-  @override
-  String styleExplore_deepRoundCountHint(int min) {
-    return 'At least $min images (one guaranteed for each parent)';
-  }
-
-  @override
-  String get styleExplore_deepRoundNoInstance =>
-      'No enabled genetic random block in the main prompt; offspring cannot be generated';
-
-  @override
-  String get styleExplore_deepRoundEmpty =>
-      'Not enough distinct offspring artist combinations could be created';
-
-  @override
-  String get styleExplore_sortLeft => 'Left is better';
-
-  @override
-  String get styleExplore_sortRight => 'Right is better';
-
-  @override
-  String get styleExplore_sortNeither => 'Neither is good';
-
-  @override
-  String get styleExplore_sortSkip => 'Skip';
-
-  @override
-  String styleExplore_sortProgress(int current, int total) {
-    return 'Pair $current / $total';
-  }
-
-  @override
-  String get styleExplore_sortDone => 'Pairwise comparison complete';
-
-  @override
-  String styleExplore_branchCreated(int count) {
-    return 'Next generation bred ($count parents)';
-  }
-
-  @override
-  String get styleExplore_branchNeedLatest =>
-      'Use offspring from the latest generation to breed the next one';
-
-  @override
-  String get styleExplore_branchRoundsIncomplete =>
-      'This generation has unfinished offspring; wait or stop generation';
-
-  @override
-  String get styleExplore_branchDuplicate =>
-      'A selected offspring candidate duplicates a first-generation parent string';
-
-  @override
-  String get styleExplore_branchEmpty =>
-      'Select at least one offspring candidate';
-
-  @override
-  String styleExplore_pileManageDeleteDone(int count) {
-    return 'Deleted $count candidates and their image copies';
-  }
 
   @override
   String subscriptionExpiresOn(String date) {
@@ -9025,19 +7093,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a new sign-in token. This account updates after validation.';
 
   @override
-  String get auth_signInAccounts => 'Sign-in & accounts';
-
-  @override
   String get auth_notSignedIn => 'Not signed in';
-
-  @override
-  String get auth_chooseAccountContinue => 'Choose an account to continue';
-
-  @override
-  String get auth_manageAccounts2 => 'Manage accounts';
-
-  @override
-  String get auth_subscriptionExpired => 'Subscription expired';
 
   @override
   String get settings_tagExpansion => 'Tag expansion';
@@ -9640,14 +7696,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get translationLanguage_traditionalChinese => 'Traditional Chinese';
-
-  @override
-  String get promptBlockEditor_translationNeedsReview =>
-      'Original changed; translation needs updating';
-
-  @override
-  String get promptBlockEditor_translationReviewHint =>
-      'After editing the original, review this translation as well';
 
   @override
   String get modelTask_translateTitle => 'Original → reading language';
@@ -11027,90 +9075,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Configure an available tag translation model in Models & APIs first.';
 
   @override
-  String get blockOrganizer_barrierLabel => 'Block organizer';
-
-  @override
-  String get blockOrganizer_replaceTitle =>
-      'Replace copies from the same source?';
-
-  @override
   String blockOrganizer_replaceMoveBody(Object count) {
     return 'The target already has $count copies from the same source. After replacing, the source is hidden from the library; instances already inserted in prompts can still reference the original block.';
-  }
-
-  @override
-  String blockOrganizer_replaceCopyBody(Object count) {
-    return 'The target already has $count copies from the same source. Replacing updates the target copies; the source is kept.';
-  }
-
-  @override
-  String get blockOrganizer_replace => 'Replace';
-
-  @override
-  String get blockOrganizer_customTagColor => 'Custom tag color';
-
-  @override
-  String get blockOrganizer_colorHint => '#RRGGBB or #AARRGGBB';
-
-  @override
-  String get blockOrganizer_invalidColor =>
-      'Enter a 6- or 8-digit hexadecimal color';
-
-  @override
-  String blockOrganizer_deleteFolderConfirm(Object name) {
-    return 'Delete “$name”? Its blocks will move to the root folder.';
-  }
-
-  @override
-  String blockOrganizer_deleteCollectionConfirm(Object name) {
-    return 'Delete “$name”? The blocks themselves are kept.';
-  }
-
-  @override
-  String get blockOrganizer_titleFavorites => 'Favorites & collections';
-
-  @override
-  String get blockOrganizer_titleFolders => 'Choose a folder';
-
-  @override
-  String blockOrganizer_itemCount(Object count) {
-    return '$count items';
-  }
-
-  @override
-  String get blockOrganizer_search => 'Search';
-
-  @override
-  String get blockOrganizer_name => 'Name';
-
-  @override
-  String get blockOrganizer_customColor => 'Custom color…';
-
-  @override
-  String get blockOrganizer_newCollection => 'New collection';
-
-  @override
-  String get blockOrganizer_newCollectionFolder => 'New collection folder';
-
-  @override
-  String get blockOrganizer_newTag => 'New tag';
-
-  @override
-  String get blockOrganizer_newFolder => 'New folder';
-
-  @override
-  String get blockOrganizer_rootUncategorized => 'Root / Uncategorized';
-
-  @override
-  String get blockOrganizer_manageDrag => 'Manage; drag to reorder';
-
-  @override
-  String get blockLibrary_dragSelectedHint =>
-      'Drag the selected blocks onto a favorite or folder on the left, then choose copy or move when you release.';
-
-  @override
-  String blockLibrary_blockCount(Object count) {
-    return '$count blocks';
   }
 
   @override
@@ -11130,13 +9096,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blockLibrary_collectionMissing => 'The collection does not exist';
-
-  @override
-  String get promptBlockEditor_appearance => 'Block appearance';
-
-  @override
-  String get promptBlockEditor_imageUnreadable =>
-      'Could not read the selected image';
 
   @override
   String get blockAppearance_classic => 'Classic';
@@ -11624,14 +9583,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String gallery_galleryInitFailed(Object error) {
     return 'Gallery initialization failed: $error';
   }
-
-  @override
-  String vibeImport_imageProgress(Object current, Object total, Object source) {
-    return 'Importing image ($current/$total): $source';
-  }
-
-  @override
-  String get vibeImport_clipboardSource => 'Clipboard';
 
   @override
   String get resolution_noAdjustment => 'No adjustment needed';
@@ -12296,11 +10247,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generation_paramsDrawerTooltip => 'More parameters';
 
   @override
-  String generation_historyBatchCount(int count) {
-    return '$count images';
-  }
-
-  @override
   String get library_sizeSmall => 'Small';
 
   @override
@@ -12333,41 +10279,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get library_more => 'More';
 
   @override
-  String get library_addToGeneration => 'Add to generation';
-
-  @override
-  String get library_strength => 'Strength';
-
-  @override
-  String get library_information => 'Info';
-
-  @override
-  String get library_fidelity => 'Fidelity';
-
-  @override
-  String get library_encodeOnUse => 'Encode on use';
-
-  @override
-  String get library_reencode => 'Re-encode';
-
-  @override
-  String library_unusableModel(String model) {
-    return 'Unavailable for $model';
-  }
-
-  @override
-  String get library_exportAll => 'Export all';
-
-  @override
-  String get library_rescanFolders => 'Rescan folders';
-
-  @override
-  String get library_preview => 'Preview';
-
-  @override
-  String get viewer_backLocalGallery => 'Local gallery';
-
-  @override
   String get viewer_fit => 'Fit';
 
   @override
@@ -12386,120 +10297,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_toggle_info_panel => 'Toggle information panel';
 
   @override
-  String get styleExplore_runNamingHint =>
-      'Named from rolling blocks and the date. Double-click a name to rename it.';
-
-  @override
-  String styleExplore_roundGenerating(int round) {
-    return 'Round $round · Generating';
-  }
-
-  @override
-  String get styleExplore_inspectorTitle => 'Details';
-
-  @override
-  String styleExplore_failedBadge(int count) {
-    return '$count failed';
-  }
-
-  @override
-  String get styleExplore_showInspector => 'Show inspector';
-
-  @override
-  String styleExplore_roundProgress(int round, int current, int total) {
-    return 'Round $round · $current / $total';
-  }
-
-  @override
-  String get styleExplore_earlier => 'Earlier';
-
-  @override
-  String get styleExplore_noMatchingRuns => 'No matching explorations';
-
-  @override
-  String styleExplore_lineCount(int count) {
-    return '$count evolution lines';
-  }
-
-  @override
-  String get styleExplore_newRunDescription =>
-      'Start with the current prompts and parameters; rename it later';
-
-  @override
   String styleExplore_autoRunName(String blocks, String time) {
     return '$blocks · $time';
   }
-
-  @override
-  String get styleExplore_largeCandidates => 'Large candidates';
-
-  @override
-  String get styleExplore_hideInspector => 'Hide inspector';
-
-  @override
-  String get styleExplore_searchRuns => 'Search exploration names or artists';
-
-  @override
-  String styleExplore_favoriteCount(int count) {
-    return '$count favorites';
-  }
-
-  @override
-  String styleExplore_generatingBadge(int current, int total) {
-    return 'Generating $current/$total';
-  }
-
-  @override
-  String styleExplore_roundCount(int count) {
-    return '$count rounds';
-  }
-
-  @override
-  String styleExplore_pausedRemaining(int count) {
-    return 'Paused · $count remaining';
-  }
-
-  @override
-  String get styleExplore_stopRun => 'Stop generation';
-
-  @override
-  String get styleExplore_thisWeek => 'This week';
-
-  @override
-  String get styleExplore_today => 'Today';
-
-  @override
-  String get styleExplore_smallCandidates => 'Small candidates';
-
-  @override
-  String styleExplore_imageCount(int count) {
-    return '$count images';
-  }
-
-  @override
-  String get styleExplore_variablesTitle => 'Random variables';
-
-  @override
-  String get styleExplore_variablesHint => 'Redraw each image';
-
-  @override
-  String get styleExplore_variablesExplanation =>
-      'Enabled random and sequential evolution blocks are recorded for each candidate.';
-
-  @override
-  String styleExplore_variablePoolSize(int count) {
-    return 'Pool: $count items';
-  }
-
-  @override
-  String get styleExplore_variableEvolutionTarget => 'Evolution target';
-
-  @override
-  String get styleExplore_variableNegative => 'Negative';
-
-  @override
-  String get styleExplore_variablesEmpty =>
-      'No random blocks in the prompt yet; candidates will look alike.';
 
   @override
   String get styleExplore_openBlockLibrary => 'Open block library';
@@ -12511,523 +10311,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get styleExplore_drawCountSuffix => 'images · one at a time';
 
   @override
-  String get styleExplore_candidatesTab => 'Candidates';
-
-  @override
-  String get styleExplore_evolutionTab => 'Evolution';
-
-  @override
-  String styleExplore_deepRoundTitle(String name, int generation) {
-    return 'Evolution · $name · Generation $generation';
-  }
-
-  @override
-  String styleExplore_wallRoundCount(int count) {
-    return '$count images';
-  }
-
-  @override
-  String get styleExplore_wallGenerating => 'Generating';
-
-  @override
-  String styleExplore_roundFailures(int count) {
-    return 'Failed $count';
-  }
-
-  @override
-  String styleExplore_queued(int number) {
-    return 'Queued #$number';
-  }
-
-  @override
-  String styleExplore_generatingCandidate(int number) {
-    return 'Generating #$number';
-  }
-
-  @override
-  String get styleExplore_generationFailed => 'Generation failed';
-
-  @override
-  String get styleExplore_failureHint => 'Hover to see the reason';
-
-  @override
-  String get styleExplore_imageDeleted => 'Image deleted';
-
-  @override
-  String get styleExplore_parentBadge => 'Parent';
-
-  @override
-  String get styleExplore_opMutation => 'Mutation';
-
-  @override
-  String get styleExplore_opCrossover => 'Crossover';
-
-  @override
-  String get styleExplore_opInjection => 'Injection';
-
-  @override
-  String get styleExplore_copyArtists => 'Copy artists';
-
-  @override
-  String get styleExplore_interrupted => 'Interrupted';
-
-  @override
-  String get styleExplore_emptyFilter => 'No matching candidates';
-
-  @override
-  String get styleExplore_emptyRound => 'This round has no candidates';
-
-  @override
-  String get styleExplore_unfavorite => 'Unfavorite';
-
-  @override
-  String get styleExplore_groupLabel => 'Group';
-
-  @override
-  String get styleExplore_newGroup => 'New group…';
-
-  @override
-  String get styleExplore_saveBlock => 'Save as block';
-
-  @override
-  String get styleExplore_startEvolution => 'Start evolution';
-
-  @override
-  String get styleExplore_newestFirst => 'Newest rounds first';
-
-  @override
-  String get styleExplore_oldestFirst => 'Oldest rounds first';
-
-  @override
-  String get styleExplore_pickEvolution => 'Pick candidates to evolve';
-
-  @override
-  String get styleExplore_deleteCandidatesTitle => 'Delete candidates';
-
-  @override
-  String styleExplore_deleteCandidatesMessage(int count) {
-    return 'Delete $count candidates and their image copies? Library originals are kept.';
-  }
-
-  @override
-  String get styleExplore_inspectorEmpty =>
-      'Select a candidate to view details';
-
-  @override
-  String get styleExplore_drawsTitle => 'Drawn for this image';
-
-  @override
-  String get styleExplore_drawsAfterGeneration => 'Shown after generation';
-
-  @override
-  String get styleExplore_emptyDraw =>
-      'Nothing drawn (the pool contains empty entries)';
-
-  @override
-  String get styleExplore_hearted => 'Favorited';
-
-  @override
-  String get styleExplore_joinEvolution => 'Add to evolution';
-
-  @override
-  String get styleExplore_applyToEditor => 'Apply to editor';
-
-  @override
-  String get styleExplore_seedName => 'Seed';
-
-  @override
-  String get styleExplore_elapsedName => 'Elapsed';
-
-  @override
-  String get styleExplore_parameters => 'Parameters';
-
-  @override
-  String get styleExplore_modelName => 'Model';
-
-  @override
-  String get styleExplore_fullPrompt => 'Full prompt';
-
-  @override
-  String get styleExplore_mergedArtists => 'Combined artists (deduplicated)';
-
-  @override
-  String get styleExplore_selectionExplanation =>
-      'Save as block combines these into one block; evolution uses each image’s artist string as a parent.';
-
-  @override
-  String get styleExplore_quickGroupHint => 'Group with 1–9';
-
-  @override
-  String get styleExplore_newGroupChip => 'New group';
-
-  @override
-  String styleExplore_parameterSummary(
-    int width,
-    int height,
-    int steps,
-    String scale,
-  ) {
-    return '$width×$height · $steps steps · $scale';
-  }
-
-  @override
-  String get styleExplore_viewerBack => 'Style exploration';
-
-  @override
-  String styleExplore_viewerPosition(int index, int total) {
-    return 'Image $index / $total';
-  }
-
-  @override
-  String get styleExplore_viewerGroupsShortcut => '1–9: group; 0: ungroup';
-
-  @override
-  String get styleExplore_seedClickCopy => 'Seed (click to copy)';
-
-  @override
   String get styleExplore_appliedToEditor => 'Applied to editor';
-
-  @override
-  String styleExplore_generationNumber(int index) {
-    return 'Generation $index';
-  }
-
-  @override
-  String get styleExplore_currentGeneration => 'Current';
-
-  @override
-  String styleExplore_generationStart(int count) {
-    return 'Started with $count candidates';
-  }
-
-  @override
-  String styleExplore_generationSource(int index, int count, int roots) {
-    return '$count picked from generation $index + $roots founders';
-  }
-
-  @override
-  String get styleExplore_parentsByPreference => 'Parents · By preference';
-
-  @override
-  String get styleExplore_backcross => 'Backcross';
-
-  @override
-  String styleExplore_childrenCount(int count) {
-    return 'Offspring · $count';
-  }
-
-  @override
-  String styleExplore_breedSelected(int count, int index) {
-    return 'Breed generation $index with $count selected';
-  }
-
-  @override
-  String get styleExplore_generationBusy =>
-      'This generation is still generating';
-
-  @override
-  String get styleExplore_regeneratePrefix => 'Generate';
-
-  @override
-  String get styleExplore_regenerateSuffix => 'offspring';
-
-  @override
-  String get styleExplore_pairCompare => 'Rank by pairwise comparison';
-
-  @override
-  String get styleExplore_howToUse => 'How to use';
-
-  @override
-  String get styleExplore_helpParents =>
-      'Parents are the artist combinations you pick; higher preference makes them more likely to contribute.';
-
-  @override
-  String get styleExplore_helpChildren =>
-      'Offspring come from crossing parents, mutations, or new artists injected from a pool.';
-
-  @override
-  String get styleExplore_helpCompare =>
-      'Pairwise comparison updates parent preferences and influences later combinations.';
-
-  @override
-  String get styleExplore_helpBackcross =>
-      'Breeding the next generation automatically includes first-generation parents for backcrossing.';
-
-  @override
-  String get styleExplore_originTitle => 'How it was made';
-
-  @override
-  String get styleExplore_originCross =>
-      'Artist combinations crossed from these parents';
-
-  @override
-  String get styleExplore_originMutation =>
-      'Some artists were replaced in the parent combination';
-
-  @override
-  String get styleExplore_originInjection =>
-      'New artists were injected from the pool';
-
-  @override
-  String get styleExplore_newArtist => 'New';
-
-  @override
-  String get styleExplore_evolutionEmpty =>
-      'Pick a few favorites from the candidates to start an evolution line';
-
-  @override
-  String get styleExplore_pickFromCandidates => 'Pick candidates';
-
-  @override
-  String styleExplore_generationSummary(
-    int parents,
-    int children,
-    int selected,
-  ) {
-    return '$parents parents · $children offspring · $selected picked for the next generation';
-  }
-
-  @override
-  String get styleExplore_breedNext => 'Breed next generation';
-
-  @override
-  String get styleExplore_optionalName => 'Name (optional)';
-
-  @override
-  String get styleExplore_childrenEmpty =>
-      'No offspring yet. Generate a batch above.';
-
-  @override
-  String get styleExplore_evolutionStepOne =>
-      'Mix parent artists to generate offspring';
-
-  @override
-  String get styleExplore_evolutionStepTwo =>
-      'Compare pairs to show your preferences';
-
-  @override
-  String get styleExplore_evolutionStepThree =>
-      'Pick the best offspring for the next generation';
-
-  @override
-  String get styleExplore_evolutionNewLine => 'New evolution line';
-
-  @override
-  String styleExplore_evolutionJoinLine(String name) {
-    return 'Join the current generation of “$name”';
-  }
-
-  @override
-  String get styleExplore_evolutionName => 'Evolution line name';
-
-  @override
-  String styleExplore_defaultEvolutionName(int n) {
-    return 'Evolution line $n';
-  }
-
-  @override
-  String get styleExplore_evolutionAddCustom => 'Add a custom artist string';
-
-  @override
-  String get styleExplore_evolutionCustomHint => 'Enter an artist string';
-
-  @override
-  String get styleExplore_evolutionParentEmpty => 'No usable artist string';
-
-  @override
-  String get styleExplore_evolutionTarget => 'Offspring replace';
-
-  @override
-  String get styleExplore_evolutionOnlyCreate => 'Create only';
-
-  @override
-  String get styleExplore_evolutionOnlyJoin => 'Add only';
-
-  @override
-  String styleExplore_evolutionCreateGenerate(int count) {
-    return 'Create and generate $count';
-  }
-
-  @override
-  String styleExplore_evolutionJoinGenerate(int count) {
-    return 'Add and generate $count';
-  }
-
-  @override
-  String get styleExplore_evolutionFirstBatch => 'First offspring batch';
-
-  @override
-  String styleExplore_evolutionMinimum(int count) {
-    return 'images (at least $count)';
-  }
-
-  @override
-  String styleExplore_evolutionCreated(String name) {
-    return 'Created evolution line “$name”';
-  }
-
-  @override
-  String styleExplore_evolutionJoined(String name) {
-    return 'Added to evolution line “$name”';
-  }
-
-  @override
-  String get styleExplore_sortLiveSave =>
-      'Results save live; close at any time';
-
-  @override
-  String get styleExplore_sortRanking => 'Current ranking · Live';
-
-  @override
-  String get styleExplore_sortRankingHint =>
-      'Ranking affects each parent’s chance of selection in the next offspring batch';
-
-  @override
-  String get styleExplore_sortSpace => 'Space';
-
-  @override
-  String styleExplore_saveSingleSubtitle(int n) {
-    return 'Save the artists from #$n as one block';
-  }
-
-  @override
-  String styleExplore_saveManySubtitle(int count) {
-    return 'Combine artists from $count candidates into one library block';
-  }
-
-  @override
-  String get styleExplore_saveArtistsOnly => 'Drawn artists only';
-
-  @override
-  String get styleExplore_saveFullPositive => 'Full positive prompt';
-
-  @override
-  String get styleExplore_saveNoDraws =>
-      'These candidates have no positive genetic draw records; save the full positive prompt';
-
-  @override
-  String get styleExplore_saveContent => 'Content';
-
-  @override
-  String get styleExplore_saveRemoveAtoms =>
-      'Click × to remove unwanted artists';
-
-  @override
-  String styleExplore_saveRemoved(int count) {
-    return 'Removed $count';
-  }
-
-  @override
-  String get styleExplore_saveRestore => 'Restore';
-
-  @override
-  String get styleExplore_saveName => 'Name';
-
-  @override
-  String get styleExplore_saveColor => 'Color';
-
-  @override
-  String get styleExplore_saveIcon => 'Icon';
-
-  @override
-  String get styleExplore_saveFolder => 'Library folder';
-
-  @override
-  String get styleExplore_saveRoot => 'Root';
-
-  @override
-  String get styleExplore_saveHint =>
-      'Drag the saved block from the library into a prompt';
-
-  @override
-  String get styleExplore_onboardingTitle =>
-      'Explore styles with random blocks';
-
-  @override
-  String get styleExplore_onboardingRandomTitle => 'Add random blocks';
-
-  @override
-  String get styleExplore_onboardingDrawTitle => 'Draw a candidate batch';
 
   @override
   String styleExplore_onboardingDraw(int count) {
     return 'Draw $count candidates';
   }
-
-  @override
-  String get styleExplore_onboardingReviewTitle => 'Favorite, compare, evolve';
-
-  @override
-  String get styleExplore_onboardingOpenPrevious =>
-      'Open previous explorations';
-
-  @override
-  String get styleExplore_onboardingSubtitle =>
-      'Each image draws artists again from random blocks. Just choose your favorites.';
-
-  @override
-  String get styleExplore_onboardingRandomDescription =>
-      'Insert an artist-pool block in the prompt, such as the 400-artist pool. Detected random variables appear on the left.';
-
-  @override
-  String styleExplore_onboardingDrawDescription(int count) {
-    return 'Click “Draw $count candidates” at the bottom left. Each image lists the artists it drew.';
-  }
-
-  @override
-  String get styleExplore_onboardingReviewDescription =>
-      'Press F to favorite images; select a few to evolve and combine promising artists into the next generation.';
-
-  @override
-  String styleExplore_onboardingDetected(int count) {
-    return 'Detected $count';
-  }
-
-  @override
-  String get styleExplore_compareTitle => 'Pair comparison · Rank parents';
-
-  @override
-  String get styleExplore_compareQuestion =>
-      'Which image is closer to the style you want?';
-
-  @override
-  String styleExplore_childLabel(int index) {
-    return 'Child #$index';
-  }
-
-  @override
-  String styleExplore_generationCounts(int parents, int children) {
-    return '$parents parents → $children children';
-  }
-
-  @override
-  String get styleExplore_viewLarge => 'View large';
-
-  @override
-  String get styleExplore_saveDialogTitle => 'Save as a prompt block';
-
-  @override
-  String styleExplore_startDialogTitle(int count) {
-    return 'Start evolution with $count candidates';
-  }
-
-  @override
-  String get styleExplore_stepGenerate => 'Generate offspring';
-
-  @override
-  String get styleExplore_stepPick => 'Pick the best';
-
-  @override
-  String get styleExplore_stepBreed => 'Breed the next generation';
-
-  @override
-  String styleExplore_firstGenerationParents(int count) {
-    return 'Generation 1 parents · $count';
-  }
-
-  @override
-  String get styleExplore_evolutionTargetAfter =>
-      'while keeping the rest unchanged';
 
   @override
   String get stats_title => 'Statistics';
@@ -18101,11 +15390,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_variations => 'Variations';
 
   @override
-  String gen_variationsCost(Object cost) {
-    return 'Variations ($cost Anlas)';
-  }
-
-  @override
   String get gen_upscale => 'Upscale';
 
   @override
@@ -19183,4 +16467,540 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tools_emoPlayful => 'Playful';
+
+  @override
+  String get auth_logoutConfirm => 'Sign out of the current account?';
+
+  @override
+  String get naiAgent_title => 'NAI Agent';
+
+  @override
+  String get naiAgent_local => 'Local';
+
+  @override
+  String get naiAgent_permissionMode => 'Approval mode';
+
+  @override
+  String get naiAgent_permissionAuto => 'Auto';
+
+  @override
+  String get naiAgent_permissionAsk => 'Ask';
+
+  @override
+  String get naiAgent_permissionReadOnly => 'Read only';
+
+  @override
+  String get naiAgent_permissionAutoHint =>
+      'Routine workspace edits run automatically. Commands, deletion and unknown tools still need approval. Generation confirmation stays enabled.';
+
+  @override
+  String get naiAgent_permissionAskHint =>
+      'Workspace reads run directly. Edits, commands and unknown tools need approval for each call. Generation uses its price confirmation.';
+
+  @override
+  String get naiAgent_permissionReadOnlyHint =>
+      'Read and discuss only. Edits, generation and unknown tools are blocked. Switching stops current Agent tasks, not manual generation.';
+
+  @override
+  String get naiAgent_useModelSetting => 'Use model setting';
+
+  @override
+  String get naiAgent_permissionTitle => 'Tool approval required';
+
+  @override
+  String get naiAgent_permissionOnce => 'Allow once';
+
+  @override
+  String get naiAgent_permissionSession => 'Allow identical calls this session';
+
+  @override
+  String get naiAgent_permissionDeny => 'Deny';
+
+  @override
+  String get naiAgent_thinking => 'Thinking effort · applies to the next run';
+
+  @override
+  String get naiAgent_thinkingUnsupported =>
+      'This model has no confirmed adjustable thinking levels. Check its model settings first.';
+
+  @override
+  String get naiAgent_pasteImage => 'Paste clipboard image';
+
+  @override
+  String get naiAgent_contextUnknown =>
+      'Context usage is unavailable until the model window and usage are known.';
+
+  @override
+  String naiAgent_contextTooltip(
+    String percent,
+    String remaining,
+    String window,
+  ) {
+    return 'Available context: $percent%\n$remaining / $window tokens remaining\nClick for detailed statistics';
+  }
+
+  @override
+  String get naiAgent_statistics => 'Context and session statistics';
+
+  @override
+  String get naiAgent_contextUsage => 'Current context usage · estimated';
+
+  @override
+  String get naiAgent_contextRemaining => 'Remaining context';
+
+  @override
+  String get naiAgent_contextWindow => 'Model window';
+
+  @override
+  String get naiAgent_sessionUsage => 'Cumulative session usage';
+
+  @override
+  String get naiAgent_tokensInput => 'Input';
+
+  @override
+  String get naiAgent_tokensOutput => 'Output';
+
+  @override
+  String get naiAgent_tokensCacheRead => 'Cache read';
+
+  @override
+  String get naiAgent_tokensCacheWrite => 'Cache write';
+
+  @override
+  String get naiAgent_tokensTotal => 'Total tokens';
+
+  @override
+  String get naiAgent_cumulativeUsageHint =>
+      'Cumulative usage includes past requests and is not the current context size.';
+
+  @override
+  String get naiAgent_messageCounts => 'Conversation';
+
+  @override
+  String get naiAgent_userAssistantMessages => 'User / assistant messages';
+
+  @override
+  String get naiAgent_toolCalls => 'Tool calls';
+
+  @override
+  String get naiAgent_cost => 'Cost';
+
+  @override
+  String get naiAgent_defaultWorkspace => 'Workspace 1';
+
+  @override
+  String get naiAgent_newChat => 'New chat';
+
+  @override
+  String get naiAgent_settings => 'Agent settings';
+
+  @override
+  String get naiAgent_workspace => 'Workspace';
+
+  @override
+  String get naiAgent_createWorkspace => 'New workspace';
+
+  @override
+  String get naiAgent_rename => 'Rename';
+
+  @override
+  String get naiAgent_name => 'Name';
+
+  @override
+  String get naiAgent_placeholder => 'Describe an idea or ask a question…';
+
+  @override
+  String get naiAgent_welcome => 'Start with an idea';
+
+  @override
+  String get naiAgent_welcomeHint =>
+      'Discuss prompts, inspect images, organize your workspace.\nTalk it through, then take action.';
+
+  @override
+  String get naiAgent_suggestCurrent => 'Inspect current draft';
+
+  @override
+  String get naiAgent_suggestImage => 'Analyze a reference';
+
+  @override
+  String get naiAgent_suggestWorkspace => 'Organize workspace';
+
+  @override
+  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
+
+  @override
+  String get naiAgent_promptCurrent =>
+      'Inspect my current draft and parameters without changing anything yet.';
+
+  @override
+  String get naiAgent_promptImage =>
+      'Analyze the composition and style of the current image without generating anything yet.';
+
+  @override
+  String get naiAgent_promptWorkspace =>
+      'Review my current workspace and suggest how to organize it without changing anything yet.';
+
+  @override
+  String get naiAgent_tipTitle => 'TIPS / GETTING STARTED';
+
+  @override
+  String get naiAgent_tipNext => 'Next tip';
+
+  @override
+  String get naiAgent_tipReadOnly =>
+      'Explore in Read-only mode first, then decide what to change.';
+
+  @override
+  String get naiAgent_tipAttachments =>
+      'Drop a reference image here, or use + to add an attachment.';
+
+  @override
+  String get naiAgent_tipGeneration =>
+      'Image generation shows its cost and waits for your confirmation.';
+
+  @override
+  String get naiAgent_welcomeFootnote =>
+      'All actions follow your current approval mode';
+
+  @override
+  String get naiAgent_chooseModel => 'Choose model';
+
+  @override
+  String get naiAgent_modelSettings => 'Manage models and interfaces';
+
+  @override
+  String get naiAgent_attach => 'Attach images';
+
+  @override
+  String get naiAgent_removeAttachment => 'Remove attachment';
+
+  @override
+  String get naiAgent_selectedImage => 'Attach selected image';
+
+  @override
+  String get naiAgent_send => 'Send';
+
+  @override
+  String get naiAgent_stop => 'Stop run';
+
+  @override
+  String get naiAgent_queue => 'Queue';
+
+  @override
+  String get naiAgent_steer => 'Steer';
+
+  @override
+  String get naiAgent_promote => 'Use as steering';
+
+  @override
+  String get naiAgent_waiting => 'Waiting for your answer';
+
+  @override
+  String get naiAgent_working => 'Working';
+
+  @override
+  String get naiAgent_waitingSlot => 'Waiting for a provider slot';
+
+  @override
+  String get naiAgent_starting => 'Opening chat';
+
+  @override
+  String get naiAgent_interrupted =>
+      'The previous run was interrupted and was not resent.';
+
+  @override
+  String get naiAgent_restorePending => 'Restore to composer';
+
+  @override
+  String get naiAgent_withdraw => 'Withdraw';
+
+  @override
+  String get naiAgent_newContent => 'Jump to latest';
+
+  @override
+  String get naiAgent_toolRunning => 'Running';
+
+  @override
+  String get naiAgent_toolDone => 'Complete';
+
+  @override
+  String get naiAgent_toolFailed => 'Failed';
+
+  @override
+  String get naiAgent_arguments => 'Arguments';
+
+  @override
+  String get naiAgent_result => 'Result';
+
+  @override
+  String get naiAgent_systemPrompt => 'System prompt';
+
+  @override
+  String get naiAgent_promptHelp =>
+      'Custom text replaces the default prompt. The app appends its tool map. Existing history stays intact; later requests use the new text.';
+
+  @override
+  String get naiAgent_restoreDefault => 'Restore default';
+
+  @override
+  String get naiAgent_showEffective => 'View effective prompt';
+
+  @override
+  String get naiAgent_useGlobal => 'Use global prompt';
+
+  @override
+  String get naiAgent_save => 'Save';
+
+  @override
+  String get naiAgent_runLimit => 'Model requests per run';
+
+  @override
+  String get naiAgent_enterSends => 'Enter sends; Shift+Enter adds a line';
+
+  @override
+  String get naiAgent_dataFolder => 'Workspace data directory';
+
+  @override
+  String get naiAgent_openFolder => 'Open folder';
+
+  @override
+  String get naiAgent_toolsManuals => 'Tools and manuals';
+
+  @override
+  String get naiAgent_toolsHint =>
+      'Read current state, images, prompts and workspace files on demand. Load detailed NAI manuals for the selected model.';
+
+  @override
+  String get naiAgent_unknownCost => 'Actual cost is set by the provider';
+
+  @override
+  String get naiAgent_error =>
+      'Operation failed. Check model settings or workspace files.';
+
+  @override
+  String get naiAgent_visionDisabled =>
+      'Image input is not enabled for this model. Confirm support in model settings.';
+
+  @override
+  String get naiAgent_inputChanged =>
+      'Input changed while preparing. Send the current draft.';
+
+  @override
+  String get naiAgent_imageLimit =>
+      'Invalid image format or image exceeds upload limits.';
+
+  @override
+  String get naiAgent_composerNotEmpty =>
+      'Save or send the current input before restoring this message.';
+
+  @override
+  String get naiAgent_compact => 'Compact chat context';
+
+  @override
+  String get naiAgent_export => 'Export chat';
+
+  @override
+  String get naiAgent_copyMessage => 'Copy message';
+
+  @override
+  String get naiAgent_editMessage => 'Edit message';
+
+  @override
+  String get naiAgent_regenerate => 'Regenerate reply';
+
+  @override
+  String get naiAgent_submitAnswer => 'Submit answer';
+
+  @override
+  String get naiAgent_customAnswer => 'Or write your own answer';
+
+  @override
+  String get naiAgent_close => 'Collapse panel';
+
+  @override
+  String get naiAgent_showChats => 'Chats';
+
+  @override
+  String get naiAgent_runtimeMissing =>
+      'Agent runtime is missing. Install the complete update package.';
+
+  @override
+  String get naiAgent_usage => 'Model usage';
+
+  @override
+  String get naiAgent_cancel => 'Cancel';
+
+  @override
+  String get naiAgent_dropHint => 'Drop to attach to this chat';
+
+  @override
+  String get naiAgent_emptyAttachment => 'Cannot read image';
+
+  @override
+  String get naiAgent_globalScope => 'Global default';
+
+  @override
+  String get naiAgent_workspaceScope => 'Current workspace';
+
+  @override
+  String get naiAgent_generationTitle => 'Generation approval';
+
+  @override
+  String get naiAgent_generationWaiting => 'Waiting for generation approval';
+
+  @override
+  String naiAgent_generationAccount(Object name) {
+    return 'Account: $name';
+  }
+
+  @override
+  String naiAgent_generationBatch(Object requests, Object size, Object total) {
+    return '$requests requests × $size images · $total total';
+  }
+
+  @override
+  String naiAgent_generationUnit(Object cost) {
+    return '$cost Anlas per request';
+  }
+
+  @override
+  String naiAgent_generationEncoding(Object cost) {
+    return 'Reference encoding: $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationTotal(Object cost) {
+    return 'Estimated $cost Anlas';
+  }
+
+  @override
+  String naiAgent_generationBalance(Object balance) {
+    return 'Balance: $balance Anlas';
+  }
+
+  @override
+  String get naiAgent_generationEstimateNote =>
+      'Cost is an estimate; the server determines the actual charge.';
+
+  @override
+  String get naiAgent_generationChanged =>
+      'Configuration or quote changed. Prepare again.';
+
+  @override
+  String naiAgent_generationLocalEnhance(Object model, Object scale) {
+    return 'Local upscale after generation: $model ×$scale';
+  }
+
+  @override
+  String get naiAgent_generationText => 'Text to image';
+
+  @override
+  String get naiAgent_generationImage => 'Image to image';
+
+  @override
+  String get naiAgent_generationInpaint => 'Inpaint';
+
+  @override
+  String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
+    return 'Delete this empty folder and its gallery category? Images in other folders will be kept.\n$path';
+  }
+
+  @override
+  String get naiAgent_extensions => 'Extensions';
+
+  @override
+  String get naiAgent_interactionExtension => 'Studio interaction';
+
+  @override
+  String get naiAgent_extensionRequired => 'Built in · Required';
+
+  @override
+  String get naiAgent_interactionExtensionHint =>
+      'Read current Studio state on demand and collect answers through question cards.';
+
+  @override
+  String get naiAgent_extensionAddFile => 'Add extension file';
+
+  @override
+  String get naiAgent_extensionAddFolder => 'Add extension folder';
+
+  @override
+  String get naiAgent_extensionsHint =>
+      'Extensions load separately in each workspace. Changes apply on the next send after the current task ends. External extensions run local code; choose trusted sources.';
+
+  @override
+  String get naiAgent_extensionError => 'Extension failed';
+
+  @override
+  String get naiAgent_extensionCompatibility =>
+      'Supports local Pi extensions and package folders, tools, commands and standard dialogs. Terminal-only custom UI is not rendered on desktop.';
+
+  @override
+  String get naiAgent_instructions => 'Instructions';
+
+  @override
+  String get naiAgent_globalInstructions => 'Global instructions';
+
+  @override
+  String get naiAgent_globalInstructionsHelp =>
+      'Shared by every workspace. Use for language, style or task preferences. Leave blank to disable this part.';
+
+  @override
+  String get naiAgent_systemPromptPrefix => 'System prompt prefix';
+
+  @override
+  String get naiAgent_systemPromptPrefixHelp =>
+      'Inserted before the NAI Agent base prompt, keeping the base prompt and tool map. Leave blank to disable this part.';
+
+  @override
+  String get naiAgent_instructionOrder =>
+      'Order: prefix → base prompt → global instructions → workspace rules. Applies to subsequent requests.';
+
+  @override
+  String get naiAgent_saveInstructions => 'Save instructions';
+
+  @override
+  String get naiAgent_mcpBuiltin => 'NAI Studio · Built-in tools';
+
+  @override
+  String get naiAgent_mcpBuiltinHint =>
+      'Prompt, block, wiki, image, history, reference, generation and settings tools. Discovered on demand by default; existing backups, version checks and user confirmations still apply.';
+
+  @override
+  String get naiAgent_mcpAdd => 'Add MCP server';
+
+  @override
+  String get naiAgent_mcpName => 'Server name';
+
+  @override
+  String get naiAgent_mcpConfig => 'Server configuration (JSON)';
+
+  @override
+  String get naiAgent_mcpConfigHint =>
+      'Supports stdio and Streamable HTTP. Paste one server configuration object; command is an executable and args is an array. Supports env, cwd, url, headers, oauth and toolExposure. Configuration is saved in encrypted storage.';
+
+  @override
+  String get naiAgent_mcpStatus => 'Check connections';
+
+  @override
+  String get naiAgent_mcpReconnect => 'Reconnect';
+
+  @override
+  String get naiAgent_mcpLogin => 'Sign in';
+
+  @override
+  String get naiAgent_mcpLogout => 'Sign out';
+
+  @override
+  String get naiAgent_mcpHint =>
+      'CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.';
+
+  @override
+  String get generation_generate => 'Generate';
+
+  @override
+  String get detail_imageDetails => 'Image Details';
+
+  @override
+  String get promptBlockLibrary_title => 'Prompt Blocks';
 }

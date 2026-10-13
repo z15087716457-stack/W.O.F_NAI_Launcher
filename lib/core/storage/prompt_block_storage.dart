@@ -137,7 +137,7 @@ class PromptBlockStorage {
     final box = await _getBox();
     final blocks = <PromptBlock>[];
     for (final key in _keysWithPrefix(box, _blockPrefix)) {
-      final block = await _readEntity(box, key, PromptBlock.fromJson);
+      final block = _readEntity(box, key, PromptBlock.fromJson);
       if (block != null) blocks.add(block);
     }
     blocks.sort(_comparePromptBlocks);
@@ -156,9 +156,127 @@ class PromptBlockStorage {
     await box.put(blockKey(block.id), jsonEncode(block.toJson()));
   }
 
-  /// 批量保存块。
-  Future<void> putBlocks(Iterable<PromptBlock> blocks) async {
+  /// The callback sees the latest Hive value after opening has completed.
+  /// Comparison and the synchronous Hive index update have no await between
+  /// them; callers can protect an externally prepared edit without a stale put.
+  Future<PromptBlock?> transformBlock(
+    String id,
+    PromptBlock? Function(PromptBlock?) transform,
+  ) async {
     final box = await _getBox();
+    final current = _readEntity(box, blockKey(id), PromptBlock.fromJson);
+    final next = transform(current);
+    if (identical(next, current)) return current;
+    if (next == null) {
+      await box.delete(blockKey(id));
+    } else {
+      if (next.id != id) throw StateError('Block identity cannot change');
+      if (next.folderId != null &&
+          _readEntity(
+                box,
+                folderKey(next.folderId!),
+                PromptBlockFolder.fromJson,
+              ) ==
+              null) {
+        throw StateError(
+          'Prompt block folder does not exist: ${next.folderId}',
+        );
+      }
+      await box.put(blockKey(id), jsonEncode(next.toJson()));
+    }
+    return next;
+  }
+
+  Future<PromptBlockCollection?> transformCollection(
+    String id,
+    PromptBlockCollection? Function(PromptBlockCollection?) transform,
+  ) async {
+    final box = await _getBox();
+    final current = _readEntity(
+      box,
+      collectionKey(id),
+      PromptBlockCollection.fromJson,
+    );
+    final next = transform(current);
+    if (identical(next, current)) return current;
+    if (next == null) {
+      await box.delete(collectionKey(id));
+    } else {
+      if (next.id != id) throw StateError('Collection identity cannot change');
+      await box.put(collectionKey(id), jsonEncode(next.toJson()));
+    }
+    return next;
+  }
+
+  /// Synchronous latest snapshot for a guarded write after initialization.
+  ({
+    List<PromptBlock> blocks,
+    List<PromptBlockFolder> folders,
+    List<PromptBlockCollection> collections,
+  })
+  get currentLibrary {
+    final box = _box;
+    if (box == null || !box.isOpen) throw StateError('Block storage is closed');
+    return (
+      blocks: [
+        for (final key in _keysWithPrefix(box, _blockPrefix))
+          if (_readEntity(box, key, PromptBlock.fromJson) case final value?)
+            value,
+      ],
+      folders: [
+        for (final key in _keysWithPrefix(box, _folderPrefix))
+          if (_readEntity(box, key, PromptBlockFolder.fromJson)
+              case final value?)
+            value,
+      ],
+      collections: [
+        for (final key in _keysWithPrefix(box, _collectionPrefix))
+          if (_readEntity(box, key, PromptBlockCollection.fromJson)
+              case final value?)
+            value,
+      ],
+    );
+  }
+
+  /// Membership and the native favorite flag are committed together.
+  Future<void> setCollectionMembership(
+    String collectionId,
+    String blockId,
+    bool member, {
+    void Function()? beforeWrite,
+  }) async {
+    final box = await _getBox();
+    beforeWrite?.call();
+    final collection = _readEntity(
+      box,
+      collectionKey(collectionId),
+      PromptBlockCollection.fromJson,
+    );
+    final block = _readEntity(box, blockKey(blockId), PromptBlock.fromJson);
+    if (collection == null || collection.isFolder || block == null) {
+      throw StateError('Collection or block does not exist');
+    }
+    final ids = [...collection.blockIds]..removeWhere((id) => id == blockId);
+    if (member) ids.add(blockId);
+    final now = DateTime.now();
+    await box.putAll({
+      collectionKey(collectionId): jsonEncode(
+        collection.copyWith(blockIds: ids, updatedAt: now).toJson(),
+      ),
+      if (member && !block.isFavorite)
+        blockKey(blockId): jsonEncode(
+          block.copyWith(isFavorite: true, updatedAt: now).toJson(),
+        ),
+    });
+  }
+
+  /// 批量保存块。
+  Future<void> putBlocks(
+    Iterable<PromptBlock> blocks, {
+    void Function()? beforeWrite,
+  }) async {
+    final box = await _getBox();
+    beforeWrite?.call();
     final values = <String, String>{
       for (final block in blocks)
         blockKey(block.id): jsonEncode(block.toJson()),
@@ -184,7 +302,7 @@ class PromptBlockStorage {
     final box = await _getBox();
     final folders = <PromptBlockFolder>[];
     for (final key in _keysWithPrefix(box, _folderPrefix)) {
-      final folder = await _readEntity(box, key, PromptBlockFolder.fromJson);
+      final folder = _readEntity(box, key, PromptBlockFolder.fromJson);
       if (folder != null) folders.add(folder);
     }
     folders.sort(_comparePromptBlockFolders);
@@ -198,14 +316,22 @@ class PromptBlockStorage {
   }
 
   /// 保存或覆盖单个文件夹。
-  Future<void> putFolder(PromptBlockFolder folder) async {
+  Future<void> putFolder(
+    PromptBlockFolder folder, {
+    void Function()? beforeWrite,
+  }) async {
     final box = await _getBox();
+    beforeWrite?.call();
     await box.put(folderKey(folder.id), jsonEncode(folder.toJson()));
   }
 
   /// 批量保存文件夹。
-  Future<void> putFolders(Iterable<PromptBlockFolder> folders) async {
+  Future<void> putFolders(
+    Iterable<PromptBlockFolder> folders, {
+    void Function()? beforeWrite,
+  }) async {
     final box = await _getBox();
+    beforeWrite?.call();
     final values = <String, String>{
       for (final folder in folders)
         folderKey(folder.id): jsonEncode(folder.toJson()),
@@ -214,8 +340,9 @@ class PromptBlockStorage {
   }
 
   /// 删除单个文件夹；不存在时保持幂等。
-  Future<void> deleteFolder(String id) async {
+  Future<void> deleteFolder(String id, {void Function()? beforeWrite}) async {
     final box = await _getBox();
+    beforeWrite?.call();
     await box.delete(folderKey(id));
   }
 
@@ -231,11 +358,7 @@ class PromptBlockStorage {
     final box = await _getBox();
     final collections = <PromptBlockCollection>[];
     for (final key in _keysWithPrefix(box, _collectionPrefix)) {
-      final collection = await _readEntity(
-        box,
-        key,
-        PromptBlockCollection.fromJson,
-      );
+      final collection = _readEntity(box, key, PromptBlockCollection.fromJson);
       if (collection != null) collections.add(collection);
     }
     collections.sort(_comparePromptBlockCollections);
@@ -249,8 +372,12 @@ class PromptBlockStorage {
   }
 
   /// 保存或覆盖单个收藏集 / 收藏文件夹。
-  Future<void> putCollection(PromptBlockCollection collection) async {
+  Future<void> putCollection(
+    PromptBlockCollection collection, {
+    void Function()? beforeWrite,
+  }) async {
     final box = await _getBox();
+    beforeWrite?.call();
     await box.put(
       collectionKey(collection.id),
       jsonEncode(collection.toJson()),
@@ -259,9 +386,11 @@ class PromptBlockStorage {
 
   /// 批量保存收藏集 / 收藏文件夹。
   Future<void> putCollections(
-    Iterable<PromptBlockCollection> collections,
-  ) async {
+    Iterable<PromptBlockCollection> collections, {
+    void Function()? beforeWrite,
+  }) async {
     final box = await _getBox();
+    beforeWrite?.call();
     final values = <String, String>{
       for (final collection in collections)
         collectionKey(collection.id): jsonEncode(collection.toJson()),
@@ -276,8 +405,12 @@ class PromptBlockStorage {
   }
 
   /// 批量删除收藏集 / 收藏文件夹。
-  Future<void> deleteCollections(Iterable<String> ids) async {
+  Future<void> deleteCollections(
+    Iterable<String> ids, {
+    void Function()? beforeWrite,
+  }) async {
     final box = await _getBox();
+    beforeWrite?.call();
     final keys = ids.map(collectionKey).toList();
     if (keys.isNotEmpty) await box.deleteAll(keys);
   }
@@ -345,14 +478,15 @@ class PromptBlockStorage {
     return box.keys.whereType<String>().where((key) => key.startsWith(prefix));
   }
 
-  Future<T?> _readEntity<T>(
+  T? _readEntity<T>(
     Box<String> box,
     String key,
     T Function(Map<String, dynamic> json) fromJson,
-  ) async {
+  ) {
     final raw = box.get(key);
+    if (raw == null) return null;
     try {
-      if (raw is! String || raw.isEmpty) {
+      if (raw.isEmpty) {
         throw const FormatException('entity is not a JSON string');
       }
       final decoded = jsonDecode(raw);

@@ -1,3 +1,5 @@
+import 'dart:async';
+import '../wiring/style_explore_platform.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -15,20 +17,23 @@ import '../screens/auth/login_screen.dart';
 import '../wiring/generation_wiring.dart';
 import '../wiring/generation_viewer_wiring.dart';
 import '../screens/local_gallery/local_gallery_screen.dart';
-import '../screens/online_gallery/online_gallery_screen.dart';
+import '../wiring/image_viewer_session.dart';
+import '../wiring/image_viewer_wiring.dart';
+import '../wiring/online_wiring.dart';
 import '../screens/settings/settings_screen.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
 import '../wiring/statistics_wiring.dart';
 import 'gallery_navigation_request.dart';
-import '../screens/style_explore/style_explore_screen.dart';
-import '../screens/precise_ref_library/precise_ref_library_screen.dart';
-import '../screens/prompt_block_library/prompt_block_library_screen.dart';
-import '../screens/vibe_library/vibe_library_screen.dart';
+import '../wiring/style_explore_wiring.dart';
+import '../wiring/refs_library_wiring.dart';
+import '../wiring/blocks_library_wiring.dart';
+
 import '../screens/tag_wiki/tag_wiki_screen.dart';
 import '../widgets/common/update_notice_banner.dart';
 import '../widgets/drop/global_drop_handler.dart';
-import '../widgets/navigation/main_nav_rail.dart';
+import '../wiring/nav_wiring.dart';
+import '../providers/nav_activity_provider.dart';
 
 import '../widgets/shortcuts/shortcut_aware_widget.dart';
 import '../widgets/shortcuts/shortcut_help_dialog.dart';
@@ -55,6 +60,11 @@ final _styleExploreKey = GlobalKey<NavigatorState>(debugLabel: 'styleExplore');
 final _tagWikiKey = GlobalKey<NavigatorState>(debugLabel: 'tagWiki');
 
 /// 路由路径常量
+class PromptBlockLibraryLocation {
+  PromptBlockLibraryLocation(this.id);
+  final String id;
+}
+
 class AppRoutes {
   AppRoutes._();
 
@@ -191,7 +201,7 @@ GoRouter appRouter(Ref ref) {
                         ? GenerationViewerWiring(
                             request: state.extra as GenerationViewerRequest,
                           )
-                        : const WindowChromePage(child: GenerationRoute()),
+                        : const GenerationRoute(),
                   ),
                 ],
               ),
@@ -262,7 +272,7 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.onlineGallery,
                 name: 'onlineGallery',
                 builder: (context, state) =>
-                    const WindowChromePage(child: OnlineGalleryScreen()),
+                    const WindowChromePage(child: OnlineWiring()),
               ),
             ],
           ),
@@ -283,6 +293,8 @@ GoRouter appRouter(Ref ref) {
                         ? 10
                         : state.uri.queryParameters['section'] == 'storage'
                         ? 3
+                        : state.uri.queryParameters['section'] == 'agent'
+                        ? 11
                         : state.uri.queryParameters['section'] == 'models'
                         ? 7
                         : state.uri.queryParameters['section'] == 'integrations'
@@ -315,7 +327,7 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.vibeLibrary,
                 name: 'vibeLibrary',
                 builder: (context, state) =>
-                    const WindowChromePage(child: VibeLibraryScreen()),
+                    const WindowChromePage(child: VibeLibraryWiring()),
               ),
             ],
           ),
@@ -328,7 +340,7 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.preciseRefLibrary,
                 name: 'preciseRefLibrary',
                 builder: (context, state) =>
-                    const WindowChromePage(child: PreciseRefLibraryScreen()),
+                    const WindowChromePage(child: PreciseRefLibraryWiring()),
               ),
             ],
           ),
@@ -340,8 +352,14 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.promptBlockLibrary,
                 name: 'promptBlockLibrary',
-                builder: (context, state) =>
-                    const WindowChromePage(child: PromptBlockLibraryScreen()),
+                builder: (context, state) => WindowChromePage(
+                  child: BlocksLibraryWiring(
+                    initialBlockId: (state.extra is PromptBlockLibraryLocation)
+                        ? (state.extra as PromptBlockLibraryLocation).id
+                        : null,
+                    initialRequest: state.extra,
+                  ),
+                ),
               ),
             ],
           ),
@@ -353,8 +371,7 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.styleExplore,
                 name: 'styleExplore',
-                builder: (context, state) =>
-                    const WindowChromePage(child: StyleExploreScreen()),
+                builder: (context, state) => const StyleExploreWiring(),
               ),
             ],
           ),
@@ -412,6 +429,12 @@ class _MainShellState extends ConsumerState<MainShell> {
   int? _previousIndex;
 
   @override
+  void initState() {
+    super.initState();
+    _previousIndex = widget.navigationShell.currentIndex;
+  }
+
+  @override
   void didUpdateWidget(MainShell oldWidget) {
     super.didUpdateWidget(oldWidget);
     final currentIndex = widget.navigationShell.currentIndex;
@@ -419,6 +442,19 @@ class _MainShellState extends ConsumerState<MainShell> {
     // 页面切换检测（已移除互锁逻辑，不再需要重置标志）
     if (_previousIndex != null && _previousIndex != currentIndex) {
       // 不同页面间的图像详情页不再互锁
+      final session = ref.read(imageViewerSessionProvider);
+      if (session != null) {
+        scheduleMicrotask(() {
+          if (!mounted || ref.read(imageViewerSessionProvider) != session) {
+            return;
+          }
+          ref.read(imageViewerSessionProvider.notifier).state = null;
+          ref.read(imageViewerWindowProvider.notifier).state = (
+            fullscreen: false,
+            captionOverStage: false,
+          );
+        });
+      }
     }
     _previousIndex = currentIndex;
   }
@@ -426,6 +462,16 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     final currentIndex = widget.navigationShell.currentIndex;
+    final activity = ref.read(navActivityProvider.notifier);
+    if (activity.currentBranch != AppBranch.values[currentIndex]) {
+      Future.microtask(() {
+        if (mounted) {
+          activity.setCurrentBranch(
+            AppBranch.values[widget.navigationShell.currentIndex],
+          );
+        }
+      });
+    }
 
     // 构建混合保活内容栈
     // - 画廊、Vibe 库、精准参考库和块库使用 Offstage 保活
@@ -460,12 +506,17 @@ class _MainShellState extends ConsumerState<MainShell> {
     );
 
     // 使用 GlobalDropHandler 包装内容，支持拖拽图片到任意页面
-    final dropEnabledContent = GlobalDropHandler(child: contentStack);
+    final dropEnabledContent = ImageViewerHost(
+      child: GlobalDropHandler(child: contentStack),
+    );
 
     // 定义全局快捷键动作映射（使用 ShortcutIds 常量）
     final globalShortcuts = <String, VoidCallback>{
       for (final entry in globalNavigationShortcutBranches.entries)
-        entry.key: () => widget.navigationShell.goBranch(entry.value.index),
+        entry.key: () {
+          ref.read(navActivityProvider.notifier).setCurrentBranch(entry.value);
+          widget.navigationShell.goBranch(entry.value.index);
+        },
       // 显示快捷键帮助
       ShortcutIds.showShortcutHelp: () {
         ShortcutHelpDialog.show(context);
@@ -480,8 +531,11 @@ class _MainShellState extends ConsumerState<MainShell> {
       child: dropEnabledContent,
     );
 
-    if (currentIndex == AppBranch.generation.index &&
-        ref.watch(generationViewerWindowProvider).fullscreen) {
+    if (ref.watch(imageViewerWindowProvider).fullscreen ||
+        currentIndex == AppBranch.styleExplore.index &&
+            ref.watch(styleExploreWindowProvider).fullscreen ||
+        currentIndex == AppBranch.generation.index &&
+            ref.watch(generationViewerWindowProvider).fullscreen) {
       return shortcutEnabledContent;
     }
     return LayoutBuilder(
@@ -518,32 +572,27 @@ class DesktopShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: Row(
-        children: [
-          // 侧边导航栏
-          MainNavRail(navigationShell: navigationShell),
-
-          // 主内容区
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    content,
-                    if (!WindowChromeScope.activeOf(context))
-                      const Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: UpdateNoticeBanner(),
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
-        ],
+      body: NavWiring(
+        // 侧边导航栏
+        navigationShell: navigationShell,
+        // 主内容区
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Stack(
+              clipBehavior: Clip.none,
+              children: [
+                content,
+                if (!WindowChromeScope.activeOf(context))
+                  const Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: UpdateNoticeBanner(),
+                  ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -645,11 +694,10 @@ CustomTransitionPage<void> _buildFadePage({
     child: child,
     transitionDuration: duration,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return WindowChromePage(
-        child: FadeTransition(
-          opacity: CurveTween(curve: _defaultCurve).animate(animation),
-          child: child,
-        ),
+      // GenerationRoute owns captions and the Agent entry, including fullscreen.
+      return FadeTransition(
+        opacity: CurveTween(curve: _defaultCurve).animate(animation),
+        child: child,
       );
     },
   );

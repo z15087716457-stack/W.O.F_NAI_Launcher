@@ -33,7 +33,8 @@ Write-Host '[1/3] Checking Windows build prerequisites...' -ForegroundColor Cyan
 
 Write-Host ''
 Write-Host '[2/3] Running build_runner...' -ForegroundColor Cyan
-& $dartCommand run build_runner build --delete-conflicting-outputs
+& $dartCommand run tool/generate.dart
+if ($LASTEXITCODE -ne 0) { throw 'Business code generation failed.' }
 
 Write-Host ''
 Write-Host '[3/3] Starting Flutter Windows app...' -ForegroundColor Cyan

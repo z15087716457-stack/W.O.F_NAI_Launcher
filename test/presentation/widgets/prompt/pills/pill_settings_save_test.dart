@@ -11,9 +11,9 @@ import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_settings_dialog.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_contract.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 
@@ -93,21 +93,25 @@ void main() {
         await tester.pump();
 
         // 点药丸 → L1 浮卡
-        await tester.tap(find.byType(PromptPill));
+        await tester.tap(find.byType(UiBlockPill).first);
         await tester.pump();
         await tester.pump();
-        expect(find.byType(PillInstanceCard), findsOneWidget);
+        expect(find.byType(BlockInstanceCard), findsOneWidget);
 
         // ⚙ → L2 弹窗（B1 修复后：开弹窗时浮卡显式关闭）
-        await tester.tap(find.byIcon(Icons.tune));
+        if (find.byKey(const Key('block-card-rules')).evaluate().isEmpty) {
+          await tester.tap(find.byKey(const Key('block-card-mode-random')));
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.byKey(const Key('block-card-rules')));
         await tester.pump();
         await tester.pump();
-        expect(find.byType(PillInstanceSettingsDialog), findsOneWidget);
-        expect(find.byType(PillInstanceCard), findsNothing);
+        expect(find.byKey(const Key('block-rules')), findsOneWidget);
+        expect(find.byType(BlockInstanceCard), findsOneWidget);
 
-        await tester.tap(find.text('随机抽取'));
+        await tester.tap(find.byKey(const Key('block-rules-mode-random')));
         await tester.pump();
-        await tester.tap(find.text('确定'));
+        await tester.tap(find.byKey(const Key('block-rules-done')));
         await tester.pump();
         await tester.pump();
 
@@ -129,18 +133,20 @@ void main() {
         );
 
         // 重开链路：再点药丸 → 浮卡 → ⚙ → 弹窗初始选中态必须仍是随机
-        await tester.tap(find.byType(PromptPill));
+        await tester.pumpAndSettle();
+        expect(find.byType(BlockInstanceCard), findsOneWidget);
+        if (find.byKey(const Key('block-card-rules')).evaluate().isEmpty) {
+          await tester.tap(find.byKey(const Key('block-card-mode-random')));
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.byKey(const Key('block-card-rules')));
         await tester.pump();
         await tester.pump();
-        expect(find.byType(PillInstanceCard), findsOneWidget);
-        await tester.tap(find.byIcon(Icons.tune));
-        await tester.pump();
-        await tester.pump();
-        expect(find.byType(PillInstanceSettingsDialog), findsOneWidget);
-        final segmented = tester.widget<SegmentedButton<PillRollMode>>(
-          find.byType(SegmentedButton<PillRollMode>),
+        expect(find.byKey(const Key('block-rules')), findsOneWidget);
+        final card = tester.widget<BlockInstanceCard>(
+          find.byType(BlockInstanceCard),
         );
-        expect(segmented.selected, {PillRollMode.random});
+        expect(card.data.settings.mode, BlockMode.random);
       },
     );
 
@@ -154,13 +160,17 @@ void main() {
             .insertBlockAt(offset: 0, blockId: blockId);
         await tester.pump();
 
-        await tester.tap(find.byType(PromptPill));
+        await tester.tap(find.byType(UiBlockPill).first);
         await tester.pump();
         await tester.pump();
-        await tester.tap(find.byIcon(Icons.tune));
+        if (find.byKey(const Key('block-card-rules')).evaluate().isEmpty) {
+          await tester.tap(find.byKey(const Key('block-card-mode-random')));
+          await tester.pumpAndSettle();
+        }
+        await tester.tap(find.byKey(const Key('block-card-rules')));
         await tester.pump();
         await tester.pump();
-        await tester.tap(find.text('取消'));
+        await tester.tap(find.byKey(const Key('block-rules-cancel')));
         await tester.pump();
         await tester.pump();
 
@@ -169,7 +179,7 @@ void main() {
             .document
             .instances[markerA];
         expect(instance, isNotNull);
-        expect(instance!.settings.mode, PillRollMode.fixed);
+        expect(instance!.settings.mode, PillRollMode.random);
       },
     );
   });

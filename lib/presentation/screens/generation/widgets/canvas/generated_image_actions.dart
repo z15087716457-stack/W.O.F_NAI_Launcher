@@ -22,9 +22,9 @@ import '../../../../widgets/common/app_toast.dart';
 import '../../../../widgets/common/themed_confirm_dialog.dart';
 import '../../../../widgets/common/image_detail/file_image_detail_data.dart';
 import '../../../../widgets/common/image_detail/image_detail_data.dart';
-import '../../../../widgets/common/image_detail/image_detail_viewer.dart';
-import '../../../../utils/image_detail_opener.dart';
-import '../../../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../../../utils/image_viewer_callbacks.dart';
+import '../../../../utils/image_viewer_opener.dart';
+import '../../../../wiring/blocks_edit_wiring.dart';
 import '../../services/generation_save_service.dart';
 
 /// 生成图的可复用操作集合。
@@ -230,7 +230,7 @@ class GeneratedImageActions {
 
     if (!context.mounted) return;
 
-    await PromptBlockEditDialog.createWithDialog(
+    await BlocksEditWiring.createWithDialog(
       context,
       ref,
       initialContent: combinedPrompt,
@@ -293,13 +293,13 @@ class GeneratedImageActions {
     }).toList();
 
     // 使用 ImageDetailOpener 打开详情页
-    ImageDetailOpener.showMultipleImmediate(
+    ImageViewerOpener.showMultipleImmediate(
       context,
       images: allImages,
       initialIndex: initialIndex,
       showMetadataPanel: true,
       showThumbnails: allImages.length > 1,
-      callbacks: ImageDetailCallbacks(
+      callbacks: ImageViewerCallbacks(
         onSave: (image) async {
           if (!image.showSaveButton) return;
           await saveImage(context, image);

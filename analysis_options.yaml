@@ -6,6 +6,7 @@ analyzer:
     - "**/*.freezed.dart"
     - "flutter/**"
     - "build/**"
+    - windows/**
   errors:
     invalid_annotation_target: ignore
 

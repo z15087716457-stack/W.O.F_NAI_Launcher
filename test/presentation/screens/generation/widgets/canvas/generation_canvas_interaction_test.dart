@@ -20,7 +20,9 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canv
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_controller.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/generation_canvas_view.dart';
-import 'package:nai_launcher/presentation/widgets/common/image_detail/image_detail_viewer.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
+import 'package:nai_launcher/presentation/wiring/image_viewer_wiring.dart';
+import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 
 final _png = Uint8List.fromList(img.encodePng(img.Image(width: 1, height: 1)));
 
@@ -100,6 +102,7 @@ ProviderContainer _container(ImageGenerationState initial) => ProviderContainer(
   overrides: [
     imageGenerationNotifierProvider.overrideWith(() => _Generation(initial)),
     localStorageServiceProvider.overrideWith((ref) => _Storage()),
+    kritaBridgeNotifierProvider.overrideWith((ref) => KritaBridgeNotifier()),
     estimatedCostProvider.overrideWithValue(7),
     generationCanvasCameraProvider.overrideWith(_Camera.new),
     shortcutConfigNotifierProvider.overrideWith(_Shortcuts.new),
@@ -119,9 +122,11 @@ Future<void> _mount(WidgetTester tester, ProviderContainer container) async {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
-          body: Consumer(
-            builder: (context, ref, _) => GenerationCanvasView(
-              generationState: ref.watch(imageGenerationNotifierProvider),
+          body: ImageViewerHost(
+            child: Consumer(
+              builder: (context, ref, _) => GenerationCanvasView(
+                generationState: ref.watch(imageGenerationNotifierProvider),
+              ),
             ),
           ),
         ),
@@ -208,15 +213,15 @@ void main() {
         container.read(generationCanvasGroupSelectionProvider)?.subimage,
         0,
       );
-      expect(find.byType(ImageDetailViewer), findsNothing);
+      expect(find.byType(ImageViewerPage), findsNothing);
       await tester.pump(const Duration(milliseconds: 100));
       await tester.tapAt(position);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 350));
-      final viewer = tester.widget<ImageDetailViewer>(
-        find.byType(ImageDetailViewer),
+      final viewer = tester.widget<ImageViewerPage>(
+        find.byType(ImageViewerPage),
       );
-      expect(viewer.images[viewer.initialIndex].identifier, image.id);
+      expect(viewer.data.currentKey, image.id);
       await _unmount(tester);
     },
   );

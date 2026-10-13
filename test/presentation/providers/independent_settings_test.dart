@@ -37,7 +37,7 @@ void main() {
     );
   });
   test(
-    'settings default 100 is former 110 while workspace preferences stay intact',
+    'settings defaults to 100 percent while workspace preferences stay intact',
     () {
       final storage = _Storage();
       expect(storage.getFontScale(), 1);
@@ -50,7 +50,7 @@ void main() {
         SettingsFontScaleNotifier.effectiveScale(
           container.read(settingsFontScaleProvider),
         ),
-        1.1,
+        1.0,
       );
       storage.values[StorageKeys.fontScale] = 1.1;
       expect(storage.getFontScale(), 1.1);
@@ -78,7 +78,7 @@ void main() {
         SettingsFontScaleNotifier.effectiveScale(
           container.read(settingsFontScaleProvider),
         ),
-        closeTo(1.43, .001),
+        closeTo(1.3, .001),
       );
       await container.read(settingsFontScaleProvider.notifier).reset();
       expect(container.read(settingsFontScaleProvider), 1);

@@ -12,6 +12,9 @@ void main() {
       ShortcutIds.navigateToStatistics: AppBranch.statistics,
       ShortcutIds.navigateToTagLibrary: AppBranch.promptBlockLibrary,
       ShortcutIds.navigateToVibeLibrary: AppBranch.vibeLibrary,
+      ShortcutIds.navigateToStyleExplore: AppBranch.styleExplore,
+      ShortcutIds.navigateToPreciseRefLibrary: AppBranch.preciseRefLibrary,
+      ShortcutIds.navigateToTagWiki: AppBranch.tagWiki,
     });
   });
 

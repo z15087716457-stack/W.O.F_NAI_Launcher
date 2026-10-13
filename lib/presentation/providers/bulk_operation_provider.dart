@@ -180,8 +180,10 @@ class _BulkDeleteCommand extends HistoryCommand {
   Future<void> undo() async {
     // 撤销：出池 + DB 恢复 is_deleted=0（文件仍在盘上，refresh 后回列表）
     final dataSource = await _getDataSource();
-    await dataSource.batchRestoreDeleted(_imagePaths);
-    await const GalleryDeletePoolStore().removeAll(_imagePaths);
+    await const GalleryDeletePoolStore().restore(
+      _imagePaths,
+      () => dataSource.batchRestoreDeleted(_imagePaths),
+    );
     // 解除防复活屏，refresh 后恢复的图才能回到列表
     try {
       await _ref

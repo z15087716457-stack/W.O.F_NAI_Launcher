@@ -129,6 +129,7 @@ class NAIImageEnhancementApiService {
     required String reqType,
     String? prompt,
     int defry = 0,
+    CancelToken? cancelToken,
   }) async {
     try {
       final decoded = img.decodeImage(image);
@@ -152,6 +153,7 @@ class NAIImageEnhancementApiService {
           responseType: ResponseType.bytes,
           headers: {'Accept': 'application/x-zip-compressed'},
         ),
+        cancelToken: cancelToken,
       );
 
       final images = ZipUtils.extractAllImages(response.data as Uint8List);

@@ -10,6 +10,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/app.dart';
+import 'package:nai_launcher/presentation/router/app_router.dart';
 import 'package:nai_launcher/core/comfyui/builtin_workflows.dart';
 import 'package:nai_launcher/core/comfyui/comfyui_url_utils.dart';
 import 'package:nai_launcher/core/comfyui/workflow_node_validator.dart';
@@ -23,8 +24,6 @@ import 'package:nai_launcher/core/storage/secure_storage_service.dart';
 import 'package:nai_launcher/core/utils/file_explorer_utils.dart';
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
-import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
-import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
@@ -36,8 +35,9 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assista
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_api_client.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog.dart';
-import 'package:nai_launcher/presentation/screens/vibe_library/widgets/vibe_export_dialog_advanced.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
+import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_controls.dart';
 import 'package:nai_launcher/presentation/utils/dropped_file_reader.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_category_tree_view.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
@@ -57,6 +57,20 @@ void main() {
   setUpAll(() {
     registerFallbackValue(Options());
     registerFallbackValue(CancelToken());
+  });
+
+  test('window caption heights follow the current route toolbar body', () {
+    expect(windowCaptionHeightForRoute(AppRoutes.promptBlockLibrary), 61);
+    expect(windowCaptionHeightForRoute(AppRoutes.localGallery), 62);
+    for (final path in [
+      AppRoutes.onlineGallery,
+      AppRoutes.vibeLibrary,
+      AppRoutes.preciseRefLibrary,
+    ]) {
+      expect(windowCaptionHeightForRoute(path), 61);
+    }
+    expect(windowCaptionHeightForRoute(AppRoutes.login), 36);
+    expect(windowCaptionHeightForRoute(AppRoutes.generation), 36);
   });
 
   group('Widget Tests', () {
@@ -236,7 +250,7 @@ void main() {
       expect(find.text('17'), findsOneWidget);
     });
 
-    testWidgets('批量 Vibe 导出不显示嵌入 PNG 入口', (tester) async {
+    testWidgets('批量 Vibe 导出禁用嵌入 PNG 入口', (tester) async {
       await tester.binding.setSurfaceSize(const Size(1000, 900));
       addTearDown(() => tester.binding.setSurfaceSize(null));
 
@@ -247,12 +261,10 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('zh'),
             home: Scaffold(
-              body: VibeExportDialogAdvanced(
-                entries: [
-                  _buildVibeEntry(id: 'first', displayName: 'First'),
-                  _buildVibeEntry(id: 'second', displayName: 'Second'),
-                ],
-              ),
+              body: _refsExportPage([
+                _buildVibeEntry(id: 'first', displayName: 'First'),
+                _buildVibeEntry(id: 'second', displayName: 'Second'),
+              ]),
             ),
           ),
         ),
@@ -260,7 +272,16 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('导出为 PNG'), findsNothing);
+      (tester.state(find.byType(RefsLibraryPage)) as RefsController).openExport(
+        ['first', 'second'],
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<UiPressable>(find.byKey(const Key('refs-export-png')))
+            .onTap,
+        isNull,
+      );
     });
 
     testWidgets('单个 Vibe 导出显示嵌入 PNG 入口', (tester) async {
@@ -274,10 +295,9 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             locale: const Locale('zh'),
             home: Scaffold(
-              body: VibeExportDialog(
-                entries: [_buildVibeEntry(id: 'single', displayName: 'Single')],
-                categories: const [],
-              ),
+              body: _refsExportPage([
+                _buildVibeEntry(id: 'single', displayName: 'Single'),
+              ]),
             ),
           ),
         ),
@@ -285,12 +305,19 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(find.text('嵌入到 PNG'), findsOneWidget);
-
-      await tester.tap(find.text('嵌入到 PNG'));
+      (tester.state(find.byType(RefsLibraryPage)) as RefsController).openExport(
+        ['single'],
+      );
       await tester.pumpAndSettle();
-
-      expect(find.text('选择外部 PNG 图片...'), findsOneWidget);
+      expect(
+        tester
+            .widget<UiPressable>(find.byKey(const Key('refs-export-png')))
+            .onTap,
+        isNotNull,
+      );
+      await tester.tap(find.byKey(const Key('refs-export-png')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('.png'), findsOneWidget);
     });
 
     testWidgets('元数据导入模型选项应和其他参数一样只显示字段名', (tester) async {
@@ -2089,21 +2116,29 @@ class _FakeShortcutConfigNotifier extends ShortcutConfigNotifier {
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
 }
 
-VibeLibraryEntry _buildVibeEntry({
-  required String id,
-  required String displayName,
-}) {
-  return VibeLibraryEntry(
-    id: id,
-    name: displayName,
-    vibeDisplayName: displayName,
-    vibeEncoding: 'ZW5jb2RlZA==',
-    strength: 0.6,
-    infoExtracted: 0.7,
-    sourceTypeIndex: VibeSourceType.naiv4vibe.index,
-    createdAt: DateTime(2026, 5, 2),
-  );
-}
+RefsEntry _buildVibeEntry({required String id, required String displayName}) =>
+    RefsEntry(
+      key: id,
+      name: displayName,
+      source: RefsVibeSource.vibeFile,
+      createdAt: DateTime(2026, 5, 2),
+    );
+
+RefsLibraryPage _refsExportPage(List<RefsEntry> entries) => RefsLibraryPage(
+  data: RefsViewData(
+    kind: RefsKind.vibe,
+    now: DateTime(2026, 5, 2),
+    model: const RefsModel(
+      name: 'V4.5 Full',
+      shortName: 'V4.5',
+      vibeUsable: true,
+      preciseUsable: true,
+    ),
+    counts: RefsCounts(all: entries.length),
+    entries: entries,
+  ),
+  actions: RefsActions.none,
+);
 
 Uint8List _buildNoisyPngBytes({required int width, required int height}) {
   final image = img.Image(width: width, height: height);

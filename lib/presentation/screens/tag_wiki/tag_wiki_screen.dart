@@ -29,7 +29,7 @@ import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../../core/wiki/wiki_example_repository.dart';
 import '../../providers/data_source_cache_provider.dart';
-import '../prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../wiring/blocks_edit_wiring.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/prototype_typography_scope.dart';
 import '../../widgets/common/studio_icons.dart';
@@ -643,7 +643,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         .where((item) => item.canonicalTag == tag)
         .firstOrNull;
     try {
-      await PromptBlockEditDialog.createWithDialog(
+      await BlocksEditWiring.createWithDialog(
         context,
         ref,
         initialTitle:

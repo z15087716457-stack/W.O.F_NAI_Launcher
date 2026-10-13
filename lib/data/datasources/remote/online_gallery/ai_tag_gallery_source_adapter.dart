@@ -473,6 +473,7 @@ class AiTagGallerySourceAdapter implements GallerySourceAdapter {
       negativePrompt: parsed.metadata?.negativePrompt,
       rawMetadata: rawAiJson ?? promptText,
       metadataFormat: parsed.sourceFormat,
+      naiMetadata: parsed.metadata,
       metadataError: parsed.success ? null : parsed.errorMessage,
       metadata: _metadataMap(parsed.metadata, json),
     );

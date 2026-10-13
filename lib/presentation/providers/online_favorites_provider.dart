@@ -13,14 +13,18 @@ class OnlineFavoritesState {
     this.favoritedWorkIds = const {},
     this.collections = const [],
     this.authors = const [],
+    this.entries = const [],
     this.loading = false,
+    this.failed = false,
   });
 
   final String? sourceKey;
   final Set<int> favoritedWorkIds;
   final List<OnlineCollectionInfo> collections;
   final List<OnlineFavoriteAuthor> authors;
+  final List<OnlineFavoriteEntry> entries;
   final bool loading;
+  final bool failed;
 
   bool isFavorite(GallerySourceId source, int workId) =>
       sourceKey == source.key && favoritedWorkIds.contains(workId);
@@ -30,14 +34,18 @@ class OnlineFavoritesState {
     Set<int>? favoritedWorkIds,
     List<OnlineCollectionInfo>? collections,
     List<OnlineFavoriteAuthor>? authors,
+    List<OnlineFavoriteEntry>? entries,
     bool? loading,
+    bool? failed,
   }) {
     return OnlineFavoritesState(
       sourceKey: sourceKey ?? this.sourceKey,
       favoritedWorkIds: favoritedWorkIds ?? this.favoritedWorkIds,
       collections: collections ?? this.collections,
       authors: authors ?? this.authors,
+      entries: entries ?? this.entries,
       loading: loading ?? this.loading,
+      failed: failed ?? this.failed,
     );
   }
 }
@@ -49,6 +57,9 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
   final OnlineFavoritesRepository _repository;
 
   GallerySourceId? _source;
+  int _reloadGeneration = 0;
+
+  Future<void> refresh() => _reload();
 
   /// 切换数据源时刷新整份状态
   Future<void> bindSource(GallerySourceId source) async {
@@ -60,21 +71,31 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
   Future<void> _reload() async {
     final source = _source;
     if (source == null) return;
-    state = state.copyWith(sourceKey: source.key, loading: true);
+    final generation = ++_reloadGeneration;
+    state = state.sourceKey == source.key
+        ? state.copyWith(loading: true, failed: false)
+        : OnlineFavoritesState(sourceKey: source.key, loading: true);
     try {
       await _repository.initialize();
       final ids = await _repository.favoritedWorkIds(source);
       final collections = await _repository.listCollectionsWithCounts(source);
       final authors = await _repository.listAuthors(source);
+      final entries = await _repository.listFavorites(source, includeAll: true);
+      if (!mounted || generation != _reloadGeneration || _source != source) {
+        return;
+      }
       state = state.copyWith(
-        favoritedWorkIds: ids,
-        collections: collections,
-        authors: authors,
+        favoritedWorkIds: Set.unmodifiable(ids),
+        collections: List.unmodifiable(collections),
+        authors: List.unmodifiable(authors),
+        entries: List.unmodifiable(entries),
         loading: false,
       );
     } catch (e) {
       AppLogger.e('Online favorites reload failed', e, null, 'OnlineFav');
-      state = state.copyWith(loading: false);
+      if (mounted && generation == _reloadGeneration && _source == source) {
+        state = state.copyWith(loading: false, failed: true);
+      }
     }
   }
 
@@ -92,7 +113,10 @@ class OnlineFavoritesNotifier extends StateNotifier<OnlineFavoritesState> {
       }
       final ids = Set<int>.of(state.favoritedWorkIds);
       wasFavorite ? ids.remove(item.id) : ids.add(item.id);
-      state = state.copyWith(favoritedWorkIds: ids);
+      if (mounted && _source == source) {
+        state = state.copyWith(favoritedWorkIds: ids);
+        await _reload();
+      }
       return !wasFavorite;
     } catch (e) {
       AppLogger.e('Online favorite toggle failed', e, null, 'OnlineFav');

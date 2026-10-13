@@ -91,6 +91,16 @@ void main() {
     }
   });
 
+  test('setFavorite 按目标值持久化而不是再次翻转', () async {
+    final entry = await storage.importFromBytes(_pngBytes(), name: 'favorite');
+    await storage.setFavorite(entry.id, true);
+    await storage.setFavorite(entry.id, true);
+    expect((await storage.getAllEntries()).single.isFavorite, isTrue);
+    await storage.setFavorite(entry.id, false);
+    await storage.setFavorite(entry.id, false);
+    expect((await storage.getAllEntries()).single.isFavorite, isFalse);
+  });
+
   test('detectImageExtension 按魔数识别所有支持格式并拒绝未知数据', () {
     expect(
       PreciseRefLibraryStorageService.detectImageExtension(_pngBytes()),

@@ -132,6 +132,16 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('navigate_to_vibe_library'), findsNothing);
+    for (final (id, name) in [
+      (ShortcutIds.navigateToStyleExplore, l10n.nav_styleExplore),
+      (ShortcutIds.navigateToPreciseRefLibrary, l10n.nav_preciseRefLibrary),
+      (ShortcutIds.navigateToTagWiki, l10n.nav_tagWiki),
+    ]) {
+      await tester.enterText(search, name);
+      await tester.pumpAndSettle();
+      expect(find.byKey(Key('shortcut-help-item-$id')), findsOneWidget);
+      expect(find.text(id), findsNothing);
+    }
     expect(tester.takeException(), isNull);
   });
 

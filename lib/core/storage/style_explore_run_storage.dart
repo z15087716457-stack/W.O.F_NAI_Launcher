@@ -7,6 +7,7 @@ import 'base_hive_storage.dart';
 import '../utils/app_logger.dart';
 import '../utils/hive_startup_box_opener.dart';
 import '../../data/models/style_explore/explore_run.dart';
+import '../../data/models/style_explore/explore_candidate_deletion.dart';
 
 /// 画风探索 Run 的 Hive 存储层。
 ///
@@ -128,7 +129,7 @@ class StyleExploreRunStorage {
     final box = await _getBox();
     final runs = <ExploreRun>[];
     for (final key in _keysWithPrefix(box, _runPrefix)) {
-      final run = await _readEntity(box, key, ExploreRun.fromJson);
+      final run = _readEntity(box, key, ExploreRun.fromJson);
       if (run != null) runs.add(_normalizeLegacyStatus(run));
     }
     runs.sort((a, b) {
@@ -142,7 +143,7 @@ class StyleExploreRunStorage {
   /// 读取单个 Run。
   Future<ExploreRun?> getRun(String id) async {
     final box = await _getBox();
-    final run = await _readEntity(box, runKey(id), ExploreRun.fromJson);
+    final run = _readEntity(box, runKey(id), ExploreRun.fromJson);
     return run == null ? null : _normalizeLegacyStatus(run);
   }
 
@@ -153,10 +154,34 @@ class StyleExploreRunStorage {
       ? run.copyWith(status: ExploreRunStatus.generated)
       : run;
 
+  ExploreRun? currentRun(String id) {
+    final box = _box;
+    if (box == null || !box.isOpen) {
+      throw StateError('Explore storage is closed');
+    }
+    final run = _readEntity(box, runKey(id), ExploreRun.fromJson);
+    return run == null ? null : _normalizeLegacyStatus(run);
+  }
+
   /// 保存或覆盖单个 Run。
-  Future<void> putRun(ExploreRun run) async {
+  Future<void> putRun(ExploreRun run, {void Function()? beforeWrite}) async {
     final box = await _getBox();
+    beforeWrite?.call();
     await box.put(runKey(run.id), jsonEncode(run.toJson()));
+  }
+
+  /// Latest comparison and Hive index update have no asynchronous gap.
+  Future<ExploreRun> transformRun(
+    String id,
+    ExploreRun Function(ExploreRun) update,
+  ) async {
+    final box = await _getBox();
+    final current = _readEntity(box, runKey(id), ExploreRun.fromJson);
+    if (current == null) throw StateError('Explore run does not exist');
+    final next = update(_normalizeLegacyStatus(current));
+    if (next.id != id) throw StateError('Explore identity cannot change');
+    await box.put(runKey(id), jsonEncode(next.toJson()));
+    return next;
   }
 
   /// 删除单个 Run；不存在时保持幂等。
@@ -179,17 +204,38 @@ class StyleExploreRunStorage {
     _initFuture = null;
   }
 
+  Future<List<ExploreCandidateDeletion>> getCandidateDeletions() async {
+    final box = await _getBox();
+    final result = <ExploreCandidateDeletion>[];
+    for (final key in _keysWithPrefix(box, 'undo:')) {
+      final deletion = _readEntity(box, key, ExploreCandidateDeletion.fromJson);
+      if (deletion != null) result.add(deletion);
+    }
+    return result..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  }
+
+  Future<void> putCandidateDeletion(ExploreCandidateDeletion deletion) async {
+    await (await _getBox()).put(
+      'undo:${deletion.id}',
+      jsonEncode(deletion.toJson()),
+    );
+  }
+
+  Future<void> deleteCandidateDeletion(String id) async {
+    await (await _getBox()).delete('undo:$id');
+  }
+
   static String runKey(String id) => '$_runPrefix$id';
 
   Iterable<String> _keysWithPrefix(Box<String> box, String prefix) {
     return box.keys.whereType<String>().where((key) => key.startsWith(prefix));
   }
 
-  Future<T?> _readEntity<T>(
+  T? _readEntity<T>(
     Box<String> box,
     String key,
     T Function(Map<String, dynamic> json) fromJson,
-  ) async {
+  ) {
     final raw = box.get(key);
     try {
       if (raw is! String || raw.isEmpty) {

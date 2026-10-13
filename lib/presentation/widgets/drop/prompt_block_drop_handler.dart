@@ -10,7 +10,7 @@ import '../../../core/utils/prompt_block_thumbnails.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
 import '../../providers/prompt_block_library_provider.dart';
-import '../../screens/prompt_block_library/widgets/prompt_block_edit_dialog.dart';
+import '../../wiring/blocks_edit_wiring.dart';
 import '../common/app_toast.dart';
 import '../common/prompt_block_picker_dialog.dart';
 import 'prompt_block_drop_menu.dart';
@@ -91,7 +91,7 @@ class PromptBlockDropHandler {
 
     if (!context.mounted) return;
 
-    await PromptBlockEditDialog.createWithDialog(
+    await BlocksEditWiring.createWithDialog(
       context,
       ref,
       initialTitle: defaultName,

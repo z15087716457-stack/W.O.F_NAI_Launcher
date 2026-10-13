@@ -27,7 +27,8 @@ import 'package:nai_launcher/presentation/providers/prompt_token_counter_provide
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_welcome.dart';
-import 'package:nai_launcher/presentation/screens/generation/widgets/web_left_panel.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/prompt_input.dart';
+import 'package:nai_launcher/presentation/widgets/character/inline_character_section.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/themes/studio_typography.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
@@ -227,7 +228,19 @@ void main() {
               child: Scaffold(
                 body: Align(
                   alignment: Alignment.topLeft,
-                  child: WebLeftPanel(negativeModeNotifier: mode),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        PromptInputWidget(
+                          autoGrow: true,
+                          showMaximizeButton: false,
+                          negativeModeNotifier: mode,
+                        ),
+                        const SizedBox(height: 12),
+                        const InlineCharacterSection(),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

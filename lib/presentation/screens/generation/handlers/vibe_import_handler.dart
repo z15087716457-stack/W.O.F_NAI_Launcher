@@ -21,7 +21,10 @@ import '../../../providers/image_generation_provider.dart';
 import '../../../providers/vibe_library_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/editable_double_field.dart';
-import '../../vibe_library/widgets/vibe_selector_dialog.dart';
+import '../../../ui/refs/refs_contract.dart';
+import '../../../wiring/refs_generation_target.dart';
+import '../../../wiring/refs_picker_wiring.dart';
+import '../../../wiring/refs_platform.dart';
 
 /// Vibe 导入处理器
 ///
@@ -625,99 +628,21 @@ class VibeImportHandler {
   ///
   /// 显示选择器对话框，支持替换或追加模式
   Future<void> importFromLibrary() async {
-    final span = VibePerformanceDiagnostics.start(
-      'importHandler.importFromLibrary',
-    );
-    final storageService = ref.read(vibeLibraryStorageServiceProvider);
-    var selectedEntries = 0;
-    var totalAdded = 0;
-    var bundleEntries = 0;
-    var replacedExisting = false;
-
+    final platform = ref.read(refsPlatformProvider);
+    final target = ref.read(refsGenerationTargetProvider);
+    final result = await RefsPickerWiring.show(context, kind: RefsKind.vibe);
+    if (result == null || !context.mounted) return;
     try {
-      // 显示选择器对话框
-      final result = await VibeSelectorDialog.show(
-        context: context,
-        initialSelectedIds: const {},
-        showReplaceOption: true,
-        title: context.l10n.vibe_import_title,
+      final sent = await target.addVibes(
+        result.keys,
+        replace: result.replace,
+        alive: () => context.mounted,
       );
-
-      if (result == null || result.selectedEntries.isEmpty) return;
-      selectedEntries = result.selectedEntries.length;
-
-      final notifier = ref.read(generationParamsNotifierProvider.notifier);
-
-      if (result.shouldReplace) {
-        // 替换模式：清除现有并添加新的
-        notifier.clearVibeReferences();
-        replacedExisting = true;
-      }
-
-      // 处理每个选中的条目（支持 bundle 展开）
-      for (final selectedEntry in result.selectedEntries) {
-        final currentCount = ref
-            .read(generationParamsNotifierProvider)
-            .vibeReferencesV4
-            .length;
-        if (currentCount >= 16) break;
-
-        var addedForEntry = 0;
-        var canRecordUsage = selectedEntry.filePath != null;
-
-        if (selectedEntry.isBundle) {
-          bundleEntries++;
-          final hydratedEntry = selectedEntry.filePath == null
-              ? await storageService.getEntry(selectedEntry.id)
-              : null;
-          final importEntry = hydratedEntry ?? selectedEntry;
-          canRecordUsage = canRecordUsage || hydratedEntry != null;
-
-          // 从 bundle 提取 vibes；display entry 已包含 filePath 和数量缓存。
-          addedForEntry = await extractAndAddBundleVibes(importEntry);
-          totalAdded += addedForEntry;
-        } else {
-          final hydratedEntry = await storageService.getEntry(selectedEntry.id);
-          final importEntry = hydratedEntry ?? selectedEntry;
-          canRecordUsage = canRecordUsage || hydratedEntry != null;
-
-          // 普通 vibe
-          final existingNames = ref
-              .read(generationParamsNotifierProvider)
-              .vibeReferencesV4
-              .map((v) => v.displayName)
-              .toSet();
-          if (!existingNames.contains(importEntry.displayName)) {
-            final vibe = importEntry.toVibeReference();
-            notifier.addVibeReferences([vibe], recordUsage: false);
-            addedForEntry = 1;
-            totalAdded++;
-          }
-        }
-
-        // 仅在真正添加成功后记录一次库条目使用次数。
-        if (addedForEntry > 0 && canRecordUsage) {
-          await storageService.incrementUsedCount(selectedEntry.id);
-        }
-      }
-
       if (context.mounted) {
-        AppToast.success(context, context.l10n.vibe_import_result(totalAdded));
+        platform.sent(context, sent.count, truncated: sent.truncated);
       }
-    } catch (e, stackTrace) {
-      AppLogger.e('Failed to import from library', e, stackTrace, _tag);
-      if (context.mounted) {
-        AppToast.error(context, context.l10n.vibe_import_importFailed);
-      }
-    } finally {
-      span.finish(
-        details: {
-          'selectedEntries': selectedEntries,
-          'bundleEntries': bundleEntries,
-          'totalAdded': totalAdded,
-          'replacedExisting': replacedExisting,
-        },
-      );
+    } catch (error) {
+      if (context.mounted) platform.error(context, error);
     }
   }
 

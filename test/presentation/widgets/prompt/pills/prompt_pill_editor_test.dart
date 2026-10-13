@@ -1,10 +1,14 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
-import 'package:nai_launcher/presentation/widgets/common/uiux_prototype_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_platform.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/data/models/character/character_prompt.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
@@ -14,13 +18,39 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/dna_icon.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/pill_instance_card.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_glyph.dart';
+import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_view.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 
+class _MemorySettings extends LocalStorageService {
+  @override
+  T? getSetting<T>(String key, {T? defaultValue}) => defaultValue;
+  @override
+  Future<void> setSetting<T>(String key, T value) async {}
+}
+
+class _MemoryCharacters extends CharacterPromptNotifier {
+  @override
+  CharacterPromptConfig build() => const CharacterPromptConfig();
+}
+
+class _TestBlocksPlatform extends BlocksPlatform {
+  int backups = 0;
+  bool fail = false;
+  @override
+  Future<void> backupDraft(String snapshot) async {
+    backups++;
+    if (fail) {
+      throw StateError('Backup failed');
+    }
+  }
+}
+
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   const markerA = '\uE000';
   const markerB = '\uE001';
 
@@ -83,7 +113,7 @@ void main() {
     expect(state.projection, 'artist:foo, artist:bar');
   });
 
-  testWidgets('attached negative pill shows UC and card header tags', (
+  testWidgets('attached negative pill shows UC and forwards tags to the card', (
     tester,
   ) async {
     final block = _block('style', '画风', 'bright').copyWith(
@@ -105,59 +135,35 @@ void main() {
         );
     await tester.pump();
     expect(
-      tester.widget<PromptPill>(find.byType(PromptPill)).isAttachedUc,
+      tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).paired,
       isTrue,
     );
     expect(find.text('UC'), findsOneWidget);
-    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isFalse);
-    await tester.tap(find.byType(PromptPill));
+    expect(
+      tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).open,
+      isFalse,
+    );
+    await tester.tap(find.byType(UiBlockPill).first);
     await tester.pumpAndSettle();
-    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isTrue);
-    expect(find.text('冷色'), findsOneWidget);
+    expect(
+      tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).open,
+      isTrue,
+    );
+    expect(
+      tester
+          .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+          .data
+          .block
+          .tags
+          .map((t) => t.name),
+      ['冷色'],
+    );
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
-    expect(tester.widget<PromptPill>(find.byType(PromptPill)).active, isFalse);
-  });
-
-  testWidgets('tag divider starts near short title and moves with long title', (
-    tester,
-  ) async {
-    final tags = [
-      for (var i = 0; i < 8; i++)
-        PromptBlockTag(name: '标签$i', color: '#FF268BEA'),
-    ];
-    Future<(double, double)> measure(String title) async {
-      await tester.pumpWidget(const SizedBox.shrink());
-      final block = _block('tagged', title, 'prompt').copyWith(tags: tags);
-      final container = await _pump(
-        tester,
-        libraryState: PromptBlockLibraryState(
-          blocks: [block],
-          folders: const [],
-        ),
-      );
-      container
-          .read(pillWorkspaceNotifierProvider.notifier)
-          .insertBlockAt(offset: 0, blockId: block.id);
-      await tester.pump();
-      await tester.tap(find.byType(PromptPill));
-      await tester.pumpAndSettle();
-      final card = tester.getRect(find.byType(PillInstanceCard));
-      final divider = tester.getRect(
-        find.byKey(const Key('block-tag-overflow-divider')),
-      );
-      final scroll = tester.getRect(
-        find.byKey(const Key('block-tag-scroll-area')),
-      );
-      expect(tester.takeException(), isNull);
-      return (divider.left - card.left, scroll.width);
-    }
-
-    final short = await measure('123');
-    expect(short.$1, inInclusiveRange(90, 110));
-    final long = await measure('一个非常非常长的画风块标题需要保留标签空间');
-    expect(long.$1, greaterThan(short.$1 + 60));
-    expect(long.$2, greaterThanOrEqualTo(60));
+    expect(
+      tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).open,
+      isFalse,
+    );
   });
 
   testWidgets(
@@ -195,9 +201,9 @@ void main() {
           .read(generationParamsNotifierProvider.notifier)
           .updateNegativePromptFromPill('muted');
       await tester.pump();
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pumpAndSettle();
-      await tester.tap(find.byIcon(Icons.delete_outline));
+      await tester.tap(find.byKey(const Key('block-card-remove')));
       await tester.pumpAndSettle();
       final positive = container.read(pillWorkspaceProvider(PillScopes.main));
       final negative = container.read(
@@ -252,15 +258,15 @@ void main() {
     await tester.pump();
 
     // P2.5：点药丸 = 开 L1 实例卡（启停挪进卡里，不再直接 toggle）
-    await tester.tap(find.byType(PromptPill));
+    await tester.tap(find.byType(UiBlockPill).first);
     await tester.pump();
     await tester.pump();
 
-    expect(find.byType(PillInstanceCard), findsOneWidget);
+    expect(find.byType(BlockInstanceCard), findsOneWidget);
     // 卡内显示块内容预览
     expect(find.text('CONTENT'), findsOneWidget);
 
-    await tester.tap(find.byIcon(Icons.visibility_outlined));
+    await tester.tap(find.byKey(const Key('block-card-toggle')));
     await tester.pump();
 
     final state = container.read(pillWorkspaceNotifierProvider);
@@ -300,13 +306,11 @@ void main() {
         );
     await tester.pump();
 
-    await tester.tap(find.byType(PromptPill));
+    await tester.tap(find.byType(UiBlockPill).first);
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('pill-preview-tab-2')));
+    await tester.tap(find.byKey(const Key('block-card-side-negative')));
     await tester.pump();
-    await tester.tap(find.byKey(const Key('pill-scope-negative')));
-    await tester.pump();
-    await tester.tap(find.byKey(const Key('pill-scope-positive')));
+    await tester.tap(find.byKey(const Key('block-card-side-positive')));
     await tester.pump();
     expect(
       container
@@ -325,11 +329,7 @@ void main() {
       2,
     );
 
-    await tester.tap(find.byIcon(Icons.tune));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('顺序'));
-    await tester.pump();
-    await tester.tap(find.widgetWithText(FilledButton, '确定'));
+    await tester.tap(find.byKey(const Key('block-card-mode-sequential')));
     await tester.pumpAndSettle();
 
     final pos = container.read(pillWorkspaceProvider(PillScopes.main));
@@ -342,9 +342,7 @@ void main() {
     expect(pos.projection, 'bright');
     expect(neg.projection, 'muted');
 
-    await tester.tap(find.byType(PromptPill));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('pill-step-forward')));
+    await tester.tap(find.byKey(const Key('block-card-step-next')));
     await tester.pump();
     expect(
       container.read(pillWorkspaceProvider(PillScopes.main)).projection,
@@ -356,32 +354,48 @@ void main() {
     );
   });
 
-  testWidgets('generation import appears only on the settings preview', (
-    tester,
-  ) async {
-    final block = _block('settings', '画风参数', 'artist:foo').copyWith(
-      generationSettings: const PromptBlockGenerationSettings(
-        model: 'nai-diffusion-5-full',
-        steps: 30,
-        scale: 5.0,
-      ),
-    );
-    final container = await _pump(
-      tester,
-      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
-    );
-    container
-        .read(pillWorkspaceProvider(PillScopes.main).notifier)
-        .insertBlockAt(offset: 0, blockId: block.id);
-    await tester.pump();
-    await tester.tap(find.byType(PromptPill));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('pill-apply-block-settings')), findsNothing);
-    await tester.tap(find.byKey(const Key('pill-preview-tab-2')));
-    await tester.pump();
-    expect(find.byKey(const Key('pill-apply-block-settings')), findsOneWidget);
-    expect(find.text('导入设置'), findsOneWidget);
-  });
+  testWidgets(
+    'card generation import is confined to its saved parameters section',
+    (tester) async {
+      final block = _block('settings', '画风参数', 'artist:foo').copyWith(
+        generationSettings: const PromptBlockGenerationSettings(
+          model: 'nai-diffusion-5-full',
+          steps: 30,
+          scale: 5.0,
+        ),
+      );
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+      );
+      container
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .insertBlockAt(offset: 0, blockId: block.id);
+      await tester.pump();
+      await tester.tap(find.byType(UiBlockPill).first);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+            .data
+            .block
+            .params!
+            .steps,
+        30,
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('block-card-params')),
+          matching: find.byKey(const Key('block-card-apply')),
+        ),
+        findsOneWidget,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('L1 card anchors to the pill with a non-zero Overlay offset', (
     tester,
@@ -399,13 +413,13 @@ void main() {
         .insertBlockAt(offset: 0, blockId: 'style');
     await tester.pump();
 
-    final pill = find.byType(PromptPill);
+    final pill = find.byType(UiBlockPill).first;
     final clickPosition = tester.getCenter(pill);
+    final pillBottom = tester.getBottomLeft(pill).dy;
     await tester.tap(pill);
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    final card = find.byType(PillInstanceCard);
+    final card = find.byType(BlockInstanceCard);
     expect(card, findsOneWidget);
     final overlay = find.ancestor(of: card, matching: find.byType(Overlay));
     expect(overlay, findsOneWidget);
@@ -413,11 +427,15 @@ void main() {
     final localClick = clickPosition - overlayRect.topLeft;
     final expectedLeft =
         overlayRect.left +
-        (localClick.dx - 150).clamp(
-          8.0,
-          (overlayRect.width - 308).clamp(8.0, overlayRect.width),
+        (localClick.dx - BlockInstanceCard.width / 2).clamp(
+          4.0,
+          (overlayRect.width - BlockInstanceCard.width - 4).clamp(
+            4.0,
+            overlayRect.width,
+          ),
         );
     expect(tester.getTopLeft(card).dx, closeTo(expectedLeft, 0.1));
+    expect(tester.getTopLeft(card).dy, closeTo(pillBottom + 8, 0.1));
   });
 
   testWidgets(
@@ -444,15 +462,13 @@ void main() {
       // FEAT-47：开着遗传的实例在主页面不渲染 DNA 角标，回退骰子角标。
       expect(
         find.byWidgetPredicate(
-          (widget) =>
-              widget is UiuxPrototypeIcon &&
-              widget.icon == Icons.casino_outlined,
+          (widget) => widget is UiGlyph && widget.path == UiGlyphs.dice,
         ),
         findsOneWidget,
       );
       expect(find.byType(DnaIcon), findsNothing);
 
-      await tester.tap(find.byType(PromptPill));
+      await tester.tap(find.byType(UiBlockPill).first);
       await tester.pump();
       await tester.pump();
       expect(find.byKey(const Key('pill-evolution-toggle')), findsNothing);
@@ -478,15 +494,16 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.byType(PromptPill));
+    await tester.tap(find.byType(UiBlockPill).first);
     await tester.pump();
     await tester.pump();
-    final evolutionButton = tester.widget<IconButton>(
-      find.byKey(const Key('pill-evolution-toggle')),
+    final card = tester.widget<BlockInstanceCard>(
+      find.byType(BlockInstanceCard),
     );
-    expect(evolutionButton.onPressed, isNotNull);
-
-    await tester.tap(find.byKey(const Key('pill-evolution-toggle')));
+    expect(card.actions.onEvolutionChanged, isNotNull);
+    await tester.tap(find.byKey(const Key('block-card-more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('设为遗传块'));
     await tester.pump();
     expect(
       container
@@ -507,10 +524,18 @@ void main() {
         blocks: [_block('style', '画风1', 'CONTENT')],
         folders: const [],
       ),
+      overrides: [
+        generationParamsNotifierProvider.overrideWith(
+          _FakeGenerationParamsNotifier.new,
+        ),
+      ],
     );
     container
         .read(pillWorkspaceNotifierProvider.notifier)
         .setText('hello world');
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .updatePromptFromPill('hello world');
     await tester.pump();
 
     _acceptDrop(
@@ -520,12 +545,54 @@ void main() {
     );
     await tester.pump();
 
+    expect(
+      (container.read(blocksPlatformProvider) as _TestBlocksPlatform).backups,
+      1,
+    );
     final state = container.read(pillWorkspaceNotifierProvider);
     expect(state.document.instances.length, 1);
     expect(state.document.instances.values.single.blockId, 'style');
     // Offset.zero 命中文本起始区域，标记落在 [0, len] 区间内
     expect(state.document.text.contains(markerA), isTrue);
     expect(state.document.text.length, 'hello world'.length + 1);
+  });
+
+  testWidgets('failed drag backup leaves the current document intact', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(
+        blocks: [_block('style', 'Style', 'CONTENT')],
+        folders: const [],
+      ),
+      overrides: [
+        generationParamsNotifierProvider.overrideWith(
+          _FakeGenerationParamsNotifier.new,
+        ),
+      ],
+    );
+    container
+        .read(pillWorkspaceNotifierProvider.notifier)
+        .setText('current draft');
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .updatePromptFromPill('current draft');
+    final platform =
+        container.read(blocksPlatformProvider) as _TestBlocksPlatform;
+    platform.fail = true;
+    await tester.pump();
+    _acceptDrop(
+      tester,
+      const PromptBlockDragData(blockId: 'style'),
+      offset: Offset.zero,
+    );
+    await tester.pumpAndSettle();
+    final doc = container.read(pillWorkspaceNotifierProvider).document;
+    expect(doc.text, 'current draft');
+    expect(doc.instances, isEmpty);
+    expect(platform.backups, 1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('dropping a pill moves its marker in the text', (tester) async {
@@ -790,233 +857,203 @@ void main() {
     },
   );
 
-  testWidgets(
-    'original keyboard deletion keeps the block and neighbors',
-    (tester) async {
-      final container = await _pump(
-        tester,
-        libraryState: PromptBlockLibraryState(blocks: [], folders: []),
-      );
-      final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
-      notifier.setText('before, after');
-      notifier.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
-      notifier.insertTranslationAt(offset: 9, source: 'red hair', zh: '红发');
-      notifier.showAllTranslations(original: true);
-      await tester.pumpAndSettle();
-      final originalDocument = container
-          .read(pillWorkspaceNotifierProvider)
-          .document;
-      final outer = tester.widget<EditableText>(
-        find.byType(EditableText).first,
-      );
-      outer.controller.selection = const TextSelection.collapsed(offset: 9);
-      final field = find
-          .byKey(const Key('translation-pill-source-input'))
-          .first;
-      await tester.tap(field);
-      await tester.pump();
-      final input = tester.widget<TextField>(field).controller!;
-      input.selection = TextSelection.collapsed(offset: input.text.length);
+  testWidgets('original keyboard deletion keeps the block and neighbors', (
+    tester,
+  ) async {
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [], folders: []),
+    );
+    final notifier = container.read(pillWorkspaceNotifierProvider.notifier);
+    notifier.setText('before, after');
+    notifier.insertTranslationAt(offset: 8, source: 'blue eyes', zh: '蓝眼睛');
+    notifier.insertTranslationAt(offset: 9, source: 'red hair', zh: '红发');
+    notifier.showAllTranslations(original: true);
+    await tester.pumpAndSettle();
+    final originalDocument = container
+        .read(pillWorkspaceNotifierProvider)
+        .document;
+    final outer = tester.widget<EditableText>(find.byType(EditableText).first);
+    outer.controller.selection = const TextSelection.collapsed(offset: 9);
+    final field = find.byKey(const Key('translation-pill-source-input')).first;
+    await tester.tap(field);
+    await tester.pump();
+    final input = tester.widget<TextField>(field).controller!;
+    input.selection = TextSelection.collapsed(offset: input.text.length);
 
-      Future<void> press(LogicalKeyboardKey key, String source) async {
-        await tester.sendKeyEvent(key);
-        await tester.pump();
-        final workspace = container.read(pillWorkspaceNotifierProvider);
-        expect(workspace.document.text, originalDocument.text);
-        expect(
-          workspace.document.instances.keys,
-          originalDocument.instances.keys,
-        );
-        expect(
-          workspace.document.instances[markerA]!.translation!.source,
-          source,
-        );
-        expect(
-          workspace.document.instances[markerB],
-          originalDocument.instances[markerB],
-        );
-        expect(workspace.projection, 'before, ${source}red hairafter');
-        expect(
-          tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
-          isTrue,
-        );
-        expect(tester.takeException(), isNull);
-      }
-
-      await press(LogicalKeyboardKey.backspace, 'blue eye');
-      input.selection = const TextSelection.collapsed(offset: 4);
-      await press(LogicalKeyboardKey.delete, 'blueeye');
-      input.selection = const TextSelection.collapsed(offset: 0);
-      await press(LogicalKeyboardKey.backspace, 'blueeye');
-      input.selection = TextSelection.collapsed(offset: input.text.length);
-      await press(LogicalKeyboardKey.delete, 'blueeye');
-      input.selection = const TextSelection(baseOffset: 1, extentOffset: 4);
-      await press(LogicalKeyboardKey.backspace, 'beye');
-      input.selection = TextSelection(
-        baseOffset: 0,
-        extentOffset: input.text.length,
-      );
-      await press(LogicalKeyboardKey.delete, '');
-      await press(LogicalKeyboardKey.backspace, '');
-      await press(LogicalKeyboardKey.delete, '');
-      tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: '眼睛👩‍🎨',
-          selection: TextSelection.collapsed(offset: 7),
-        ),
-      );
+    Future<void> press(LogicalKeyboardKey key, String source) async {
+      await tester.sendKeyEvent(key);
       await tester.pump();
-      await press(LogicalKeyboardKey.backspace, '眼睛');
-      input.selection = const TextSelection.collapsed(offset: 0);
-      await press(LogicalKeyboardKey.delete, '睛');
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
-
-  testWidgets(
-    'original keyboard navigation and word deletion stay local',
-    (tester) async {
-      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
-        tester,
-      );
-      final document = container.read(pillWorkspaceNotifierProvider).document;
-      final outerValue = outer.value;
-      input.selection = const TextSelection.collapsed(offset: 5);
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.pump();
-      expect(input.selection, const TextSelection.collapsed(offset: 4));
-      await _controlKey(tester, LogicalKeyboardKey.arrowLeft);
-      expect(input.selection, const TextSelection.collapsed(offset: 0));
-      await tester.sendKeyEvent(LogicalKeyboardKey.end);
-      await tester.pump();
-      expect(
-        input.selection,
-        const TextSelection.collapsed(
-          offset: 9,
-          affinity: TextAffinity.upstream,
-        ),
-      );
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      await tester.pump();
-      expect(
-        input.selection,
-        const TextSelection(baseOffset: 9, extentOffset: 8),
-      );
-      await _controlKey(tester, LogicalKeyboardKey.keyA);
-      expect(
-        input.selection,
-        const TextSelection(baseOffset: 0, extentOffset: 9),
-      );
-      input.selection = const TextSelection.collapsed(offset: 9);
-      await _controlKey(tester, LogicalKeyboardKey.backspace);
-      expect(input.text, 'blue ');
-      input.selection = const TextSelection.collapsed(offset: 0);
-      await _controlKey(tester, LogicalKeyboardKey.delete);
-      expect(input.text, ' ');
-      await tester.sendKeyEvent(LogicalKeyboardKey.delete);
-      await tester.pump();
-      expect(input.text, isEmpty);
       final workspace = container.read(pillWorkspaceNotifierProvider);
-      expect(workspace.document.text, document.text);
+      expect(workspace.document.text, originalDocument.text);
       expect(
-        workspace.document.instances[markerB],
-        document.instances[markerB],
+        workspace.document.instances.keys,
+        originalDocument.instances.keys,
       );
-      expect(outer.value, outerValue);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
-
-  testWidgets(
-    'original clipboard shortcuts only copy cut and paste source',
-    (tester) async {
-      String? clipboard;
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform,
-        (call) async {
-          if (call.method == 'Clipboard.setData') {
-            clipboard = (call.arguments as Map)['text'] as String;
-          } else if (call.method == 'Clipboard.getData') {
-            return {'text': clipboard};
-          }
-          return null;
-        },
-      );
-      addTearDown(() {
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          null,
-        );
-      });
-      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
-        tester,
-      );
-      final document = container.read(pillWorkspaceNotifierProvider).document;
-      final outerValue = outer.value;
-      await _controlKey(tester, LogicalKeyboardKey.keyA);
-      await _controlKey(tester, LogicalKeyboardKey.keyC);
-      expect(clipboard, 'blue eyes');
-      await _controlKey(tester, LogicalKeyboardKey.keyX);
-      expect(input.text, isEmpty);
-      expect(clipboard, 'blue eyes');
-      await _controlKey(tester, LogicalKeyboardKey.keyV);
-      expect(input.text, 'blue eyes');
-      await Clipboard.setData(const ClipboardData(text: 'green eyes'));
-      await _controlKey(tester, LogicalKeyboardKey.keyA);
-      await _controlKey(tester, LogicalKeyboardKey.keyV);
-      final workspace = container.read(pillWorkspaceNotifierProvider);
-      expect(input.text, 'green eyes');
       expect(
         workspace.document.instances[markerA]!.translation!.source,
-        'green eyes',
+        source,
       );
       expect(
         workspace.document.instances[markerB],
-        document.instances[markerB],
+        originalDocument.instances[markerB],
       );
-      expect(workspace.document.text, document.text);
-      expect(outer.value, outerValue);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
-
-  testWidgets(
-    'original undo and redo do not touch the outer document',
-    (tester) async {
-      final (container, outer, input) = await _pumpOriginalKeyboardEditor(
-        tester,
-      );
-      final document = container.read(pillWorkspaceNotifierProvider).document;
-      final outerValue = outer.value;
-      await tester.pump(const Duration(milliseconds: 600));
-      tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: 'green eyes',
-          selection: TextSelection.collapsed(offset: 10),
-        ),
-      );
-      await tester.pump(const Duration(milliseconds: 600));
-      await _controlKey(tester, LogicalKeyboardKey.keyZ);
-      expect(input.text, 'blue eyes');
-      await _controlKey(tester, LogicalKeyboardKey.keyY);
-      expect(input.text, 'green eyes');
-      final workspace = container.read(pillWorkspaceNotifierProvider);
-      expect(workspace.document.text, document.text);
+      expect(workspace.projection, 'before, ${source}red hairafter');
       expect(
-        workspace.document.instances[markerB],
-        document.instances[markerB],
-      );
-      expect(
-        workspace.document.instances[markerA]!.translation!.needsReview,
+        tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
         isTrue,
       );
-      expect(outer.value, outerValue);
-      await tester.pumpWidget(const SizedBox.shrink());
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.windows),
-  );
+      expect(tester.takeException(), isNull);
+    }
+
+    await press(LogicalKeyboardKey.backspace, 'blue eye');
+    input.selection = const TextSelection.collapsed(offset: 4);
+    await press(LogicalKeyboardKey.delete, 'blueeye');
+    input.selection = const TextSelection.collapsed(offset: 0);
+    await press(LogicalKeyboardKey.backspace, 'blueeye');
+    input.selection = TextSelection.collapsed(offset: input.text.length);
+    await press(LogicalKeyboardKey.delete, 'blueeye');
+    input.selection = const TextSelection(baseOffset: 1, extentOffset: 4);
+    await press(LogicalKeyboardKey.backspace, 'beye');
+    input.selection = TextSelection(
+      baseOffset: 0,
+      extentOffset: input.text.length,
+    );
+    await press(LogicalKeyboardKey.delete, '');
+    await press(LogicalKeyboardKey.backspace, '');
+    await press(LogicalKeyboardKey.delete, '');
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: '眼睛👩‍🎨',
+        selection: TextSelection.collapsed(offset: 7),
+      ),
+    );
+    await tester.pump();
+    await press(LogicalKeyboardKey.backspace, '眼睛');
+    input.selection = const TextSelection.collapsed(offset: 0);
+    await press(LogicalKeyboardKey.delete, '睛');
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+  testWidgets('original keyboard navigation and word deletion stay local', (
+    tester,
+  ) async {
+    final (container, outer, input) = await _pumpOriginalKeyboardEditor(tester);
+    final document = container.read(pillWorkspaceNotifierProvider).document;
+    final outerValue = outer.value;
+    input.selection = const TextSelection.collapsed(offset: 5);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pump();
+    expect(input.selection, const TextSelection.collapsed(offset: 4));
+    await _controlKey(tester, LogicalKeyboardKey.arrowLeft);
+    expect(input.selection, const TextSelection.collapsed(offset: 0));
+    await tester.sendKeyEvent(LogicalKeyboardKey.end);
+    await tester.pump();
+    expect(
+      input.selection,
+      const TextSelection.collapsed(offset: 9, affinity: TextAffinity.upstream),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.pump();
+    expect(
+      input.selection,
+      const TextSelection(baseOffset: 9, extentOffset: 8),
+    );
+    await _controlKey(tester, LogicalKeyboardKey.keyA);
+    expect(
+      input.selection,
+      const TextSelection(baseOffset: 0, extentOffset: 9),
+    );
+    input.selection = const TextSelection.collapsed(offset: 9);
+    await _controlKey(tester, LogicalKeyboardKey.backspace);
+    expect(input.text, 'blue ');
+    input.selection = const TextSelection.collapsed(offset: 0);
+    await _controlKey(tester, LogicalKeyboardKey.delete);
+    expect(input.text, ' ');
+    await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+    await tester.pump();
+    expect(input.text, isEmpty);
+    final workspace = container.read(pillWorkspaceNotifierProvider);
+    expect(workspace.document.text, document.text);
+    expect(workspace.document.instances[markerB], document.instances[markerB]);
+    expect(outer.value, outerValue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+  testWidgets('original clipboard shortcuts only copy cut and paste source', (
+    tester,
+  ) async {
+    String? clipboard;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          clipboard = (call.arguments as Map)['text'] as String;
+        } else if (call.method == 'Clipboard.getData') {
+          return {'text': clipboard};
+        }
+        return null;
+      },
+    );
+    addTearDown(() {
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      );
+    });
+    final (container, outer, input) = await _pumpOriginalKeyboardEditor(tester);
+    final document = container.read(pillWorkspaceNotifierProvider).document;
+    final outerValue = outer.value;
+    await _controlKey(tester, LogicalKeyboardKey.keyA);
+    await _controlKey(tester, LogicalKeyboardKey.keyC);
+    expect(clipboard, 'blue eyes');
+    await _controlKey(tester, LogicalKeyboardKey.keyX);
+    expect(input.text, isEmpty);
+    expect(clipboard, 'blue eyes');
+    await _controlKey(tester, LogicalKeyboardKey.keyV);
+    expect(input.text, 'blue eyes');
+    await Clipboard.setData(const ClipboardData(text: 'green eyes'));
+    await _controlKey(tester, LogicalKeyboardKey.keyA);
+    await _controlKey(tester, LogicalKeyboardKey.keyV);
+    final workspace = container.read(pillWorkspaceNotifierProvider);
+    expect(input.text, 'green eyes');
+    expect(
+      workspace.document.instances[markerA]!.translation!.source,
+      'green eyes',
+    );
+    expect(workspace.document.instances[markerB], document.instances[markerB]);
+    expect(workspace.document.text, document.text);
+    expect(outer.value, outerValue);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+
+  testWidgets('original undo and redo do not touch the outer document', (
+    tester,
+  ) async {
+    final (container, outer, input) = await _pumpOriginalKeyboardEditor(tester);
+    final document = container.read(pillWorkspaceNotifierProvider).document;
+    final outerValue = outer.value;
+    await tester.pump(const Duration(milliseconds: 600));
+    tester.testTextInput.updateEditingValue(
+      const TextEditingValue(
+        text: 'green eyes',
+        selection: TextSelection.collapsed(offset: 10),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 600));
+    await _controlKey(tester, LogicalKeyboardKey.keyZ);
+    expect(input.text, 'blue eyes');
+    await _controlKey(tester, LogicalKeyboardKey.keyY);
+    expect(input.text, 'green eyes');
+    final workspace = container.read(pillWorkspaceNotifierProvider);
+    expect(workspace.document.text, document.text);
+    expect(workspace.document.instances[markerB], document.instances[markerB]);
+    expect(
+      workspace.document.instances[markerA]!.translation!.needsReview,
+      isTrue,
+    );
+    expect(outer.value, outerValue);
+    await tester.pumpWidget(const SizedBox.shrink());
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
   testWidgets('original text selection is separate from the icon drag handle', (
     tester,
@@ -1193,13 +1230,13 @@ void main() {
         .setText('abc$markerA');
     await tester.pump();
 
-    final pill = tester.widget<PromptPill>(find.byType(PromptPill));
-    expect(pill.variant, PromptPillVariant.unknown);
+    final pill = tester.widget<UiBlockPill>(find.byType(UiBlockPill).first);
+    expect(pill.status, UiBlockPillStatus.invalid);
 
-    await tester.tap(find.byType(PromptPill));
+    await tester.tap(find.byType(UiBlockPill).first);
     await tester.pump();
     expect(container.read(pillWorkspaceNotifierProvider).document.text, 'abc');
-    expect(find.byType(PromptPill), findsNothing);
+    expect(find.byType(UiBlockPill), findsNothing);
   });
 
   testWidgets('cut then paste resurrects the instance from tombstone', (
@@ -1254,8 +1291,8 @@ void main() {
         .setText('abc$markerB');
     await tester.pump();
 
-    final pill = tester.widget<PromptPill>(find.byType(PromptPill));
-    expect(pill.variant, PromptPillVariant.unknown);
+    final pill = tester.widget<UiBlockPill>(find.byType(UiBlockPill).first);
+    expect(pill.status, UiBlockPillStatus.invalid);
     expect(
       container.read(pillWorkspaceNotifierProvider).document.instances,
       isEmpty,
@@ -1288,8 +1325,8 @@ void main() {
     );
     await tester.pump();
 
-    final pill = tester.widget<PromptPill>(find.byType(PromptPill));
-    expect(pill.variant, PromptPillVariant.missing);
+    final pill = tester.widget<UiBlockPill>(find.byType(UiBlockPill).first);
+    expect(pill.status, UiBlockPillStatus.missing);
   });
 }
 
@@ -1347,6 +1384,9 @@ Future<ProviderContainer> _pump(
       libraryNotifier ?? _FakePromptBlockLibraryNotifier(libraryState);
   final app = ProviderScope(
     overrides: [
+      blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
+      localStorageServiceProvider.overrideWithValue(_MemorySettings()),
+      characterPromptNotifierProvider.overrideWith(_MemoryCharacters.new),
       promptBlockLibraryNotifierProvider.overrideWith(() => notifier),
       ...overrides,
     ],

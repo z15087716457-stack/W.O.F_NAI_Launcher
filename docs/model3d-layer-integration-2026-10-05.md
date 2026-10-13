@@ -30,3 +30,7 @@
 构建和安装状态以 `model3d-layer-integration-delivery.json` 为准。安装保留当前原生 Glass 文件、客户端和私有数据，使用独立回退目录；完整托盘退出后才覆盖，不自动启动。Windows WebView2 安装后验收仍需实机反馈。
 
 当前模型格式仍是 GLB/GLTF；本次没有新增 VRM/MMD、动画或物理引擎。
+
+## 安装核验
+
+功能提交 `d9cb3b6b8799e10b9198ddfa500b7485ac0f0e81`，已于 2026-10-05 13:03（Asia/Taipei）安装。AOT `1a2ab584c560bf6d615b3eee17c0ebaff57d00addef2eaff0b55290fa3e8b944`；1371 源码输入、177 资源、31 原生文件、211 托管文件与前版 `0b428923` 的完整回退备份逐项核对通过。当前安装记录与本批交付单一致，冻结交付单/ZIP 保持原值；证据为 `install-result.txt`、`install-verification.json`。安装前后现场进程均为 0，未自动启动。

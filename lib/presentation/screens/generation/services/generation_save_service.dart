@@ -11,11 +11,11 @@ import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/image_metadata_service.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
-import '../../../utils/image_detail_opener.dart';
+import '../../../utils/image_viewer_opener.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/image_detail/file_image_detail_data.dart';
 import '../../../widgets/common/image_detail/image_detail_data.dart';
-import '../../../widgets/common/image_detail/image_detail_viewer.dart';
+import '../../../utils/image_viewer_callbacks.dart';
 
 /// 图像保存服务类
 ///
@@ -67,13 +67,13 @@ class GenerationSaveService {
 
     // 使用 ImageDetailOpener 打开详情页（带防重复点击）
     // 使用 'generation_desktop' key 避免与本地图库的 'default' key 冲突
-    ImageDetailOpener.showMultipleImmediate(
+    ImageViewerOpener.showMultipleImmediate(
       context,
       images: allImages,
       initialIndex: 0,
       showMetadataPanel: true,
       showThumbnails: allImages.length > 1,
-      callbacks: ImageDetailCallbacks(
+      callbacks: ImageViewerCallbacks(
         onSave: (image) async {
           if (!image.showSaveButton) return;
           await saveImageFromDetail(context, ref, image);

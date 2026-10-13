@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../providers/layout_state_provider.dart';
 import '../../../providers/pill_workspace_provider.dart';
-import 'block_library_panel.dart';
+import '../../../wiring/blocks_dock_wiring.dart';
 import 'resize_handle.dart';
 
 /// 块库面板插槽（经典布局与官网式布局共用）
@@ -77,9 +77,15 @@ class _BlockLibraryPanelSlotState extends ConsumerState<BlockLibraryPanelSlot> {
           decoration: decoration,
           child: widget.overlay
               ? ClipRect(
-                  child: BlockLibraryPanel(fallbackScope: widget.fallbackScope),
+                  child: BlocksDockWiring(
+                    fallbackScope: widget.fallbackScope,
+                    allowPopOut: !widget.overlay,
+                  ),
                 )
-              : BlockLibraryPanel(fallbackScope: widget.fallbackScope),
+              : BlocksDockWiring(
+                  fallbackScope: widget.fallbackScope,
+                  allowPopOut: !widget.overlay,
+                ),
         );
         final resizeHandle = ResizeHandle(
           key: const Key('block-library-panel-resize-handle'),

@@ -53,3 +53,7 @@ more 和 chevron 为当前按钮/React Select 控件的内联 SVG；箭头以槽
 - 控件渲染和官网实测不冒充安装后 Windows 实机验收。Release/Glass、安装预检、逐文件 SHA-256 和完整回退状态以本批交付单为准。
 
 安装/回退使用独立 `install_director_official.ps1` / `restore_director_official.ps1` 和 `glass-before-director-official/`。覆盖运行文件前现场核对进程路径并等待完全托盘退出，不自动启动/重启/热重载，不修改已冻结的前批交付物。
+
+当前交付已于 2026-10-05 14:43（Asia/Taipei）安装，功能提交 `6068310bdd09e1268f5f68f1fe54253c12144b2e`。断连后接续核对原测试/静态分析/Windows Release 记录及功能源码，再完成 Glass assemble；126 项测试和 160 张控件截图是原阶段的结果，本次未重复运行。Release/Glass AOT 均为 `a7ee3e7048041bc5211a4ff30bc76c2f132f8c199435c8b867f37ee273b95a6d`。
+
+完整资源更新包为 `build/nai-studio-director-official-20261005.zip`，SHA-256 `30f05aa537ffb3d7a8a8473cb804c2a0ebb7bd9530b8f92fb33b86ab0ec6104f`。安装前现场确认进程为零；1383 源码输入、189 资源、31 原生文件、223 托管文件及 ZIP 全部 194 个条目通过核验。安装后逐项复验，当前安装记录与 `director-official-delivery.json` 相同；冻结交付单和 ZIP 未改变。`glass-before-director-official/` 对应上一版 `d9cb3b6b`，其程序 data、177 项资源、客户端、清单与安装记录均已复验，回退脚本只读预检通过。本次接续未调用付费接口，未启动或热重载应用，用户草稿/角色/账号/图库/桥接参数未修改；Windows 实机验收仍待用户反馈。

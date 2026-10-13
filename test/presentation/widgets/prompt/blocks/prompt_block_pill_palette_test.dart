@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
-import 'package:nai_launcher/presentation/screens/prompt_block_library/widgets/prompt_block_card.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_pill.dart';
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
 
 void main() {

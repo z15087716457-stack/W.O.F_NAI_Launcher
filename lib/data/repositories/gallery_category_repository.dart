@@ -10,10 +10,11 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
-import '../../core/utils/file_transfer_utils.dart';
 import '../../core/utils/gallery_path_utils.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../models/gallery/gallery_category.dart';
+import '../services/gallery/gallery_delete_pool_store.dart';
+import '../services/gallery/gallery_stream_scanner.dart';
 
 /// 画廊分类仓库
 class GalleryCategoryRepository {
@@ -348,8 +349,9 @@ class GalleryCategoryRepository {
   Future<GalleryCategory?> renameCategory(
     GalleryCategory category,
     String newName,
-    List<GalleryCategory> allCategories,
-  ) async {
+    List<GalleryCategory> allCategories, {
+    Future<void> Function()? beforeRelocate,
+  }) async {
     if (_categoryOrAncestorsExternal(category, allCategories)) {
       AppLogger.w('外部图库源分类为只读，禁止重命名: ${category.name}');
       return null;
@@ -376,7 +378,7 @@ class GalleryCategoryRepository {
         return null;
       }
 
-      await oldDir.rename(newPath);
+      await _relocateDirectory(oldDir, newPath, beforeRelocate: beforeRelocate);
 
       AppLogger.i('重命名分类成功: ${category.name} -> $newName');
       return category.copyWith(
@@ -397,9 +399,14 @@ class GalleryCategoryRepository {
     List<GalleryCategory> categories,
   ) {
     return categories.map((c) {
-      if (c.folderPath.startsWith(oldParentPath)) {
+      if (galleryPathIsWithin(oldParentPath, c.folderPath)) {
         return c.copyWith(
-          folderPath: c.folderPath.replaceFirst(oldParentPath, newParentPath),
+          folderPath: p.join(
+            newParentPath,
+            normalizeGalleryFilePath(c.folderPath)
+                .substring(normalizeGalleryFilePath(oldParentPath).length)
+                .replaceFirst(RegExp(r'^[\\/]+'), ''),
+          ),
           updatedAt: DateTime.now(),
         );
       }
@@ -413,8 +420,9 @@ class GalleryCategoryRepository {
   Future<GalleryCategory?> moveCategory(
     GalleryCategory category,
     String? newParentId,
-    List<GalleryCategory> allCategories,
-  ) async {
+    List<GalleryCategory> allCategories, {
+    Future<void> Function()? beforeRelocate,
+  }) async {
     if (_categoryOrAncestorsExternal(category, allCategories)) {
       AppLogger.w('外部图库源分类为只读，禁止移动: ${category.name}');
       return null;
@@ -466,7 +474,11 @@ class GalleryCategoryRepository {
         await newParentDir.create(recursive: true);
       }
 
-      await oldDir.rename(newAbsolutePath);
+      await _relocateDirectory(
+        oldDir,
+        newAbsolutePath,
+        beforeRelocate: beforeRelocate,
+      );
 
       AppLogger.i('移动分类成功: ${category.name}');
       return category.copyWith(
@@ -477,6 +489,59 @@ class GalleryCategoryRepository {
     } catch (e) {
       AppLogger.e('移动分类失败: ${category.name}', e);
       return null;
+    }
+  }
+
+  Future<void> _relocateDirectory(
+    Directory source,
+    String target, {
+    Future<void> Function()? beforeRelocate,
+  }) => GalleryStreamScanner.instance(dataSource: _dataSource)
+      .withFilesystemMutation(
+        () => _relocateDirectoryWithIndex(source, target, beforeRelocate),
+      );
+
+  Future<void> _relocateDirectoryWithIndex(
+    Directory source,
+    String target,
+    Future<void> Function()? beforeRelocate,
+  ) async {
+    await beforeRelocate?.call();
+    if (await FileSystemEntity.type(target, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      throw FileSystemException('Target already exists', target);
+    }
+    final original = source.path;
+    final canonicalOriginal = await source.resolveSymbolicLinks();
+    final moved = await source.rename(target);
+    final canonicalTarget = await moved.resolveSymbolicLinks();
+    var indexMoved = false;
+    try {
+      if (_dataSource.isInitialized) {
+        await _dataSource.relocateDirectoryRecords(
+          original,
+          target,
+          aliases: {canonicalOriginal: canonicalTarget},
+        );
+        indexMoved = true;
+      }
+      await const GalleryDeletePoolStore().relocateDirectory(
+        original,
+        target,
+        aliases: {canonicalOriginal: canonicalTarget},
+      );
+    } catch (_) {
+      // No scan runs with half-relocated records. A failed durable update
+      // returns the directory and index to their original paths.
+      await moved.rename(original);
+      if (indexMoved) {
+        await _dataSource.relocateDirectoryRecords(
+          target,
+          original,
+          aliases: {canonicalTarget: canonicalOriginal},
+        );
+      }
+      rethrow;
     }
   }
 
@@ -557,58 +622,22 @@ class GalleryCategoryRepository {
     String imagePath,
     GalleryCategory? targetCategory,
   ) async {
-    final rootPath = await getRootPath();
-    if (rootPath == null) return null;
-
+    final root = await getRootPath();
+    if (root == null) return null;
     try {
-      final file = File(imagePath);
-      if (!await file.exists()) return null;
-
-      final fileName = p.basename(imagePath);
-      final targetDir = targetCategory == null
-          ? rootPath
-          : await _absoluteCategoryPath(rootPath, targetCategory);
-
-      final dir = Directory(targetDir);
-      if (!await dir.exists()) await dir.create(recursive: true);
-
-      var targetPath = p.join(targetDir, fileName);
-
-      if (await File(targetPath).exists()) {
-        final baseName = p.basenameWithoutExtension(fileName);
-        final ext = p.extension(fileName);
-        targetPath = p.join(
-          targetDir,
-          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
-        );
+      final target = targetCategory == null
+          ? root
+          : await _absoluteCategoryPath(root, targetCategory);
+      if (!await Directory(target).exists()) {
+        await Directory(target).create(recursive: true);
       }
-
-      final movedPath = await moveFileCrossVolume(imagePath, targetPath);
-      if (movedPath == null) {
-        AppLogger.e('移动图片失败: $imagePath -> $targetPath');
-        return null;
-      }
-
-      // 即时 DB 跟进（不等扫描）
-      if (_dataSource.isInitialized) {
-        try {
-          final idsMap = await _dataSource.getImageIdsByPaths([imagePath]);
-          final id = idsMap[imagePath];
-          if (id != null) {
-            await _dataSource.updateFilePath(
-              id,
-              movedPath,
-              newFileName: p.basename(movedPath),
-            );
-          }
-        } catch (dbError) {
-          AppLogger.w('移动后即时更新DB失败: $imagePath -> $movedPath ($dbError)');
-        }
-      }
-
-      return movedPath;
-    } catch (e) {
-      AppLogger.e('移动图片失败: $imagePath', e);
+      return await GalleryFolderRepository.instance.transferImageToFolder(
+        imagePath,
+        target,
+        copy: false,
+      );
+    } catch (error) {
+      AppLogger.e('图片转移失败: $imagePath', error);
       return null;
     }
   }
@@ -620,41 +649,22 @@ class GalleryCategoryRepository {
     String imagePath,
     GalleryCategory? targetCategory,
   ) async {
-    final rootPath = await getRootPath();
-    if (rootPath == null) return null;
-
+    final root = await getRootPath();
+    if (root == null) return null;
     try {
-      final file = File(imagePath);
-      if (!await file.exists()) return null;
-
-      final fileName = p.basename(imagePath);
-      final targetDir = targetCategory == null
-          ? rootPath
-          : await _absoluteCategoryPath(rootPath, targetCategory);
-
-      final dir = Directory(targetDir);
-      if (!await dir.exists()) await dir.create(recursive: true);
-
-      var targetPath = p.join(targetDir, fileName);
-
-      if (await File(targetPath).exists()) {
-        final baseName = p.basenameWithoutExtension(fileName);
-        final ext = p.extension(fileName);
-        targetPath = p.join(
-          targetDir,
-          '${baseName}_${DateTime.now().millisecondsSinceEpoch}$ext',
-        );
+      final target = targetCategory == null
+          ? root
+          : await _absoluteCategoryPath(root, targetCategory);
+      if (!await Directory(target).exists()) {
+        await Directory(target).create(recursive: true);
       }
-
-      final copiedPath = await copyFileWithFreshMtime(imagePath, targetPath);
-      if (copiedPath == null) {
-        AppLogger.e('复制图片失败: $imagePath -> $targetPath');
-        return null;
-      }
-
-      return copiedPath;
-    } catch (e) {
-      AppLogger.e('复制图片失败: $imagePath', e);
+      return await GalleryFolderRepository.instance.transferImageToFolder(
+        imagePath,
+        target,
+        copy: true,
+      );
+    } catch (error) {
+      AppLogger.e('图片转移失败: $imagePath', error);
       return null;
     }
   }

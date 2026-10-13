@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_platform.dart';
 import 'package:hive/hive.dart';
 
 import 'package:nai_launcher/core/constants/storage_keys.dart';
@@ -24,12 +26,21 @@ import 'package:nai_launcher/presentation/widgets/common/studio_animated_icon.da
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/blocks/prompt_block_palette.dart';
-import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_block_pill.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 
 import '../../../../helpers/studio_capture_fonts.dart';
 
+class _TestBlocksPlatform extends BlocksPlatform {
+  int backups = 0;
+  @override
+  Future<void> backupDraft(String snapshot) async {
+    backups++;
+  }
+}
+
 void main() {
+  setUp(() => SharedPreferences.setMockInitialValues({}));
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory hiveDirectory;
@@ -62,7 +73,10 @@ void main() {
 
   ProviderContainer makeContainer() {
     final container = ProviderContainer(
-      overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      overrides: [
+        blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
+        promptBlockStorageProvider.overrideWithValue(storage),
+      ],
     );
     addTearDown(container.dispose);
     return container;
@@ -383,6 +397,9 @@ void main() {
               ];
               final container = ProviderContainer(
                 overrides: [
+                  blocksPlatformProvider.overrideWithValue(
+                    _TestBlocksPlatform(),
+                  ),
                   promptBlockPaletteNotifierProvider.overrideWith(
                     () => _FakePaletteNotifier(blocks),
                   ),
@@ -428,9 +445,9 @@ void main() {
                 find.byKey(const Key('prompt-block-palette-toggle')),
               );
               await tester.pumpAndSettle();
-              final ordinary = tester
-                  .widgetList<PromptPill>(find.byType(PromptPill))
-                  .where((pill) => !pill.multiline);
+              final ordinary = tester.widgetList<UiBlockPill>(
+                find.byType(UiBlockPill),
+              );
               expect(ordinary, hasLength(4));
               for (final pill in ordinary) {
                 expect(tester.getSize(find.byWidget(pill)).height, 20);
@@ -465,7 +482,11 @@ void main() {
       }
     }
 
-    Widget buildApp(ProviderContainer container, {bool reducedMotion = false}) {
+    Widget buildApp(
+      ProviderContainer container, {
+      bool reducedMotion = false,
+      Future<void> Function(String id)? onInsert,
+    }) {
       return UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
@@ -478,12 +499,12 @@ void main() {
             ).copyWith(disableAnimations: reducedMotion),
             child: child!,
           ),
-          home: const Scaffold(
+          home: Scaffold(
             body: Align(
               alignment: Alignment.topLeft,
               child: Padding(
-                padding: EdgeInsets.all(20),
-                child: PromptBlockPaletteButton(),
+                padding: const EdgeInsets.all(20),
+                child: PromptBlockPaletteButton(onInsert: onInsert),
               ),
             ),
           ),
@@ -492,10 +513,51 @@ void main() {
     }
 
     testWidgets(
+      'a palette insertion delegates to the supplied protected host without writing directly',
+      (tester) async {
+        final block = PromptBlock.create(
+          id: 'block',
+          title: 'Block',
+          content: 'artist:a',
+        );
+        final calls = <String>[];
+        final container = ProviderContainer(
+          overrides: [
+            promptBlockPaletteNotifierProvider.overrideWith(
+              () => _FakePaletteNotifier([block]),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        await tester.pumpWidget(
+          buildApp(
+            container,
+            onInsert: (id) async {
+              calls.add(id);
+            },
+          ),
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Block').last);
+        await tester.pump();
+        expect(calls, ['block']);
+        expect(
+          container.exists(pillWorkspaceProvider(PillScopes.main)),
+          isFalse,
+        );
+        await tester.pumpWidget(const SizedBox());
+        await tester.pumpAndSettle();
+      },
+    );
+
+    testWidgets(
       'opens on tap, shows empty hint, closes via X and outside tap',
       (tester) async {
         final container = ProviderContainer(
           overrides: [
+            blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
             promptBlockPaletteNotifierProvider.overrideWith(
               () => _FakePaletteNotifier(const []),
             ),
@@ -555,6 +617,7 @@ void main() {
     ProviderContainer emptyPalette() {
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(
             () => _FakePaletteNotifier(const []),
           ),
@@ -702,6 +765,7 @@ void main() {
         );
         final container = ProviderContainer(
           overrides: [
+            blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
             promptBlockPaletteNotifierProvider.overrideWith(
               () => _FakePaletteNotifier([block]),
             ),
@@ -709,7 +773,10 @@ void main() {
             // fake-zone 里 I/O 锁会让 tearDownAll 的 Hive.close() 死等，
             // 这里换 no-op fake 彻底绕开。
             promptBlockLibraryNotifierProvider.overrideWith(
-              _NoopLibraryNotifier.new,
+              () => _SingleBlockLibraryNotifier(block),
+            ),
+            generationParamsNotifierProvider.overrideWith(
+              _FakeGenerationParamsNotifier.new,
             ),
           ],
         );
@@ -749,6 +816,7 @@ void main() {
       final library = _SingleBlockLibraryNotifier(block);
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(
             () => _FakePaletteNotifier([block]),
           ),
@@ -774,6 +842,10 @@ void main() {
       );
       expect(positive.projection, 'bright colors');
       expect(negative.projection, 'muted colors');
+      expect(
+        (container.read(blocksPlatformProvider) as _TestBlocksPlatform).backups,
+        1,
+      );
       expect(
         negative.document.instances.values.single.useNegativeContent,
         isTrue,
@@ -806,6 +878,7 @@ void main() {
       ];
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(
             () => _FakePaletteNotifier(blocks),
           ),
@@ -845,6 +918,7 @@ void main() {
       ];
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(
             () => _FakePaletteNotifier(blocks),
           ),
@@ -900,6 +974,7 @@ void main() {
       ]);
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(() => fake),
           promptBlockLibraryNotifierProvider.overrideWith(
             _NoopLibraryNotifier.new,
@@ -934,6 +1009,7 @@ void main() {
       final fake = _FakePaletteNotifier(const []);
       final container = ProviderContainer(
         overrides: [
+          blocksPlatformProvider.overrideWithValue(_TestBlocksPlatform()),
           promptBlockPaletteNotifierProvider.overrideWith(() => fake),
           promptBlockLibraryNotifierProvider.overrideWith(
             _NoopLibraryNotifier.new,

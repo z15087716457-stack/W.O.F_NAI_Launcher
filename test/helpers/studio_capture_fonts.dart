@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 Future<void> loadStudioCaptureFonts() async {
+  await (FontLoader(
+    'MaterialIcons',
+  )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
   for (final entry in const {
     'StudioIcons': ['StudioIcons.ttf'],
     'Geist': [

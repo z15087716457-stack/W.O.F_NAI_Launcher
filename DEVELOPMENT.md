@@ -1,86 +1,96 @@
 # 开发与发布参考
 
-按当前任务读取对应节。命令在 `nai-launcher-src/` 下执行；项目约束见 [AGENTS.md](AGENTS.md)，本机环境和功能不变量见 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md)。
+按任务读取对应章节。命令在当前有效启动器源码目录执行，不从桌面包所在的旧源码分支施工；本机路径与当前交付见工作区接手说明。通用约束见 [AGENTS.md](AGENTS.md)，功能不变量见 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md)。
 
 ## 构建、测试与开发命令
 
-Flutter/Dart 版本要求以 `pubspec.yaml` 和 README 为准；下列命令按任务选择，不是每次修改的必跑清单。
+本机 SDK 为 Flutter 3.44.2 / Dart 3.12.2，最低约束以 `pubspec.yaml` 为准。Shell 使用 Bash，原生 `.ps1` 使用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/dev_hot_reload_window.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/dev_hot_reload.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/trigger_hot_reload.ps1
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1
+```bash
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs
-flutter run -d windows
-flutter test
+flutter gen-l10n
+flutter test test/core/utils/justified_layout_test.dart
 flutter analyze
 flutter build windows --release
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/validate_windows_data_identity.ps1
 ```
 
-Windows 桌面热重载优先使用 `scripts/dev_hot_reload_window.ps1`，它会打开独立 PowerShell 窗口并调用 `scripts/dev_hot_reload.ps1`。后者会先运行 `build_runner`，再进入 `flutter run -d windows`，之后可在该窗口按 `r` 热重载、`R` 热重启、`q` 退出。已有该开发会话时，代码修改并完成最小验证后应自动运行 `scripts/trigger_hot_reload.ps1`；该脚本直接向现有 Flutter 控制台发送热重载，不启动第二个 `flutter attach`，需要完整状态重置时传入 `-Restart`。桌面 UI 改动可用 `scripts/capture_dev_window.ps1` 截取实际 Debug 窗口，默认输出到 `tool/.tmp/nai_launcher_window.png`；截图验证完需删除临时图片。依赖变更后运行 `flutter pub get`。新增或修改 Riverpod providers、Freezed models、JSON models、Hive adapters 或生成路由后运行 `build_runner`。
+依赖改变后 `pub get`；Riverpod、Freezed、JSON、Hive 或路由生成输入改变后运行 `build_runner`。界面文案进入各语言 ARB，再运行本节下方的繁体生成与 `gen-l10n`。纯文档或纯注释维护不运行 Flutter 测试 / 构建，也不调用桥接写参、模型或生图接口。
 
-## 代码风格与命名约定
+只有需要并获准建立独立开发会话时，才使用 `scripts/dev_hot_reload_window.ps1` / `scripts/dev_hot_reload.ps1`；已有同一开发会话时用 `scripts/trigger_hot_reload.ps1`，状态重置用 `-Restart`，不另开第二个 attach。`capture_dev_window.ps1` 捕获该 Debug 开发窗口，不能把它当当前安装包。用户自行实机核验时只交付，不自动热重载、重启或操作其运行实例。
 
-遵循 `analysis_options.yaml` 和 Dart 默认格式化规则，使用两个空格缩进。变量和方法使用 `lowerCamelCase`，类型使用 `UpperCamelCase`。Riverpod provider 命名应以 `Provider` 或 `NotifierProvider` 结尾。新增功能优先复用现有 service、provider、widget 和 utility，保持 `core`、`data`、`presentation` 的职责边界清晰。
+### NAI Agent 紧凑面板验证
 
-新增可写标签的输入框复用 `TagExpansionWrapper`：Ctrl+单击或 Ctrl+拖选显式打开本地标签搜索，按输入框自身语义通过 `onTagSelected` 提交标签。普通打字不触发旧补全浮层；空格分隔的查询框设置 `splitOnSpaces: true`。
-在线图库的 AI TAG 全文／提示词搜索以及块管理顶部搜索也使用此组件；选入标签时在线查询按各框原有提交路径执行，块管理按标签名或空格形式筛选块。
+功能工作树的紧凑面板使用独立固定的 Flutter 3.47.7 / Dart 3.13.5 SDK 验证，不自动替换全局 SDK 或安装包。PowerShell 调用 `flutter_studio.ps1` 必须显式传 `-SdkRoot`、`-FlutterArgs`；否则位置参数 `test` 会被误当作 SDK 目录。
+
+```powershell
+$sdk = (Resolve-Path '../../sdk/flutter-3.47.7').Path
+./scripts/flutter_studio.ps1 -SdkRoot $sdk -FlutterArgs @('test', '--no-pub', 'test/core/nai_agent', 'test/presentation/providers/nai_agent', 'test/presentation/widgets/nai_agent', 'test/l10n/zh_tw_resources_test.dart')
+./scripts/flutter_studio.ps1 -SdkRoot $sdk -FlutterArgs @('analyze', '--no-pub', 'lib/presentation/widgets/nai_agent', 'lib/presentation/providers/nai_agent')
+```
+
+Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服务，不请求真实模型或 NAI。`NAI_AGENT_COMPOSER_CAPTURES` 指定 widget 实绘输出目录；紧凑面板测试覆盖五种语言、320/380/460px、深浅色及六种状态。运行中状态有持续进度动画，使用定时 `pump` 而非 `pumpAndSettle`。截图仅作组件／合成数据证据，不代表已安装版本。
+
+## 当前 Glass 包交付
+
+本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
+
+Glass 组包通常用有效源码下 `.dart_tool/assemble_glass.py`，AOT 来自 `build/glass-bundle/windows/app.so`，资源来自 `build/glass-bundle/flutter_assets/`。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
+
+覆盖前现场检查 `nai_launcher` 进程路径，等用户从托盘完全退出，备份当前程序 `data/` 与记录；安装后逐项复验并保存单步回退，不自动启动。不要用标准 `build/windows/x64/runner/Release/` 整目录覆盖既有 Glass 包，尤其不能移除其原生插件。Release 发布流程另按下方规范执行。
+
+## 代码风格与输入组件
+
+遵循 `analysis_options.yaml` 和 Dart formatter；复用 core / data / presentation 现有 service、provider 和 widget。生成工具的语法支持以锁定依赖和实际诊断为准，不根据旧 SDK 记录推定能力。
+
+可写标签框复用 `TagExpansionWrapper`：Ctrl+单击 / Ctrl+拖选显式查标签，按原输入框语义提交；普通输入不弹旧补全。空格查询设置 `splitOnSpaces: true`。本地图库、在线 AI TAG 搜索、块管理、黑名单与批量元数据框沿用各自提交路径。中文输入不再依赖已退役的 ffdkj 词库。
 
 ## 测试规范
 
-测试使用 `flutter_test`，需要 mock 时使用 `mocktail`。测试文件以 `_test.dart` 结尾，并放在对应功能路径下，例如 `test/core/utils/`、`test/data/services/`、`test/presentation/providers/`。UI 行为、状态管理、请求构造和文件处理的变更，按实际风险选择 widget、provider 或 service 回归覆盖。仅文档修改不运行 Flutter 测试或构建。
+使用 `flutter_test` / `mocktail`，测试放在对应 `test/` 路径。选择实际影响的 service、provider、widget 与布局路径；必要时扩大范围，全量结果记录实际通过 / 跳过 / 失败，不引用旧数字冒充新验证。界面检查使用 `test/helpers/studio_capture_fonts.dart` 的真实字体，覆盖涉及语言、主题、宽窄和字号；临时存储 / 合成数据不读取用户账号、数据库或提示词。
 
-## 资源、生成文件与发布注意事项
+日志测试使用 `test/helpers/app_logger_test_isolation.dart` 隔离输出，避免并发套件互相污染。可用测试与采集入口见 [test/README.md](test/README.md)。交付记录、历史报告和用户验收是不同证据；widget 实绘不能写成运行中用户窗口截图。
 
-界面文案以 `lib/l10n/app_en.arb` 为模板，中、日、韩 ARB 手工维护，修改后运行 `flutter gen-l10n`。繁体中文（台湾）的 `lib/l10n/app_zh_TW.arb` 与固定中文名单对照 `lib/l10n/zh_tw_labels.dart` 由 `tool/l10n` 用 OpenCC 1.4.2 `s2twp` 加产品术语生成，不手改：修改 `app_zh.arb`、Wiki 目录中文名、标签分组或子分类中文名后，运行 `UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart`，再运行 `flutter gen-l10n`。通用用语修正写入 `tool/l10n/zh_tw_terms.dart`，单条消息的整句修正写入 `tool/l10n/zh_tw_overrides.json`（按 ARB 键）。
+## 资源与国际化
 
-`assets/databases/*.db` 通过 Git LFS 管理，发布前应确认本地文件是真实 SQLite 数据库而不是 LFS pointer。`assets/data/` 和 `assets/images/` 会随 Flutter assets 打包，移动或重命名后需要同步检查 `pubspec.yaml`。`assets/translations/github_chening233.csv` 只是 `tool/database/build_tag_wiki.py` 生成 `tag_wiki.db` 的源数据，不打包；`cooccurrence.db` 由 `tool/database/build_cooccurrence_only.dart` 按 `cooccurrence_source_lock.json` 锁定的下载文件生成。发布前确认 `CHANGELOG.md`、`dist/release_notes_<tag>.md`、`pubspec.yaml` 版本号和 Windows release build。
+界面支持 `zh`、`zh-TW`、`en`、`ja`、`ko`。英文 ARB 是模板，简中 / 日文 / 韩文手工维护；台湾正体 ARB 与 `zh_tw_labels.dart` 由 `tool/l10n` 使用 OpenCC 1.4.2 `s2twp` 与产品术语生成，不手改。更改简中 ARB、Wiki 目录、分组 / 分类中文名后：
 
-### 小贴士与彩蛋文案
+```bash
+UPDATE_ZH_TW=1 flutter test test/l10n/zh_tw_resources_test.dart
+flutter gen-l10n
+```
 
-小贴士和生成按钮彩蛋的正文都在 ARB：`tips_<位置>_<类型>_<序号>` 与 `genButton_<分档>_<序号>`。`lib/presentation/providers/tip_catalog.dart` 只登记每条出现的位置、类型（`guide` 正经教程 / `trick` 幽默教学 / `wolf` 品牌角色「狼」的闲聊）以及 `short`（窄屏紧凑提示词框可用）、`night`（只在本地 01:00–04:59 出现）；生成按钮的分档与概率写在 `generate_button_copy.dart`。新增一条要同时改四份手写 ARB、登记目录并重新生成繁体。
+通用台湾用语写 `tool/l10n/zh_tw_terms.dart`，单条完整句子覆盖写 `tool/l10n/zh_tw_overrides.json`。有 context 使用 `context.l10n`，无 context 使用 `currentL10n`；不在代码内临时写中文或语言三元分支。
 
-- **说真话**：教程与幽默教学只写当前真实存在的功能，ARB `@description` 记下它依赖的功能或设置键；功能改名或删除时搜这些说明一起改。玩笑要一眼看得出是玩笑。
-- **不碰**：NSFW、真实画师、嘲讽用户作品、催促消费；报错、删除确认、扣费确认、设置说明不加梗。
-- **狼的口吻**：第一人称、温和、偶尔吐槽；类型标签已经写了「狼」，正文不要再以「狼说」开头。
-- **长度**：欢迎页可写成段落；提示词框不超过最低高度，角色框不超过 3 行；搜索框和生成中占位卡只有一行。`test/presentation/tips/tip_layout_test.dart` 用真实字体逐条核对，`CAPTURE_TIPS=1` 时把截图写到 `.dart_tool/tips-captures/`。
-- **多语言**：英日韩按各自语言的梗重写，不逐字直译；同一编号讲同一个功能。ICU 下花括号是占位符，正文写「花括号」而不是 `{}`。
+`assets/databases/*.db` 经 Git LFS 管理，发布前确认是真 SQLite 而非 pointer。CSV 建库源不随应用打包；`github_chening233.csv` 用于 `tag_wiki.db`，co-occurrence 独立构建器以来源 lock 为准。当前不分发 ffdkj 中文词库与已删除的旧 translation.db 建库链，不能重新恢复旧预构建包。资源增删与 `pubspec.yaml`、许可、清单和本次交付必须一致。
 
-### Windows 品牌图标
+### 小贴士与彩蛋
 
-Windows 桌面 / 文件图标使用完整长方形 Logo `assets/images/wof_logo_full.png`，等比放入透明方框；窗口 / 任务栏及托盘使用独立方形 W 母版 `assets/icons/wof_icon.svg`。标题栏使用旧版 W.O.F 蓝块 `assets/images/wof_logo_block.png`＋13px 普通文字 `NAI Studio`，保留旧版间距与黄色双下划线。
+正文在 ARB 的 `tips_<位置>_<类型>_<序号>` / `genButton_<分档>_<序号>`；`tip_catalog.dart` 登记位置、guide / trick / wolf、short 与 night，生成按钮规则在 `generate_button_copy.dart`。四份手工 ARB同步维护，再生成台湾正体。
 
-使用 Node.js 和 `sharp` 运行 `node tool/branding/generate_windows_icons.cjs`，导出桌面 `app_icon.ico` 与窗口 / 托盘 `window_icon.ico` 两套资源，分别同步到 `windows/runner/resources/` 和 `assets/icons/`。EXE 的最低图标资源 ID 101 留给横版；窗口类回退与大小窗口图标使用方形 W 的 ID 102，DPI 变化时更新窗口图标并释放旧句柄；Windows 托盘读取 `assets/icons/window_icon.ico`。ICO 内嵌 16、20、24、32、40、48、64、96、128、256px，共十档。可追加 `--brand-dir <目录>` 导出 1024px PNG、多尺寸 PNG 和 ICO 到品牌资产库。
+教程只写真实功能，`@description` 记录依赖；功能改名 / 删除时同步搜索。狼采用温和第一人称，英日韩按各自语言成文；欢迎页可成段，角色提示最多三行，搜索和生成占位只一行。报错、扣费、删除和设置说明不加梗，避免 NSFW、真实画师与催消费内容。布局检查见 `test/presentation/tips/tip_layout_test.dart`，`CAPTURE_TIPS=1` 可保存部件实绘。
 
-ICO 属于原生程序资源；更新后必须重新构建 Windows 程序才能改变 EXE 自身的图标，仅 Flutter 热重载不会更新。
+## 字体、图标与窗口身份
 
-Windows `Runner.rc` 的 `CompanyName=com.example`、`ProductName=nai_launcher` 是数据目录标识，必须保持稳定：`path_provider_windows` 用这两项定位 `%APPDATA%/com.example/nai_launcher/`，更改它们会让图库、块库和账号配置指向另一目录。品牌显示名写入 `FileDescription`、窗口标题与应用文案，不通过 `ProductName` 改名。
+默认正文 HarmonyOS Sans SC，等宽参数 Geist Mono，韩文回退 Pretendard；用户选字族保持有效。主界面固定 100%，设置页及其弹窗共用独立 1.1 基准，不能重复缩放。功能入口使用 StudioIcons，常规操作使用 Material；画廊火车流图标保留 `view_day_outlined`，网格 / 瀑布流为细线字形。母版、生成器、字位和字体许可见 [品牌文档](tool/branding/README.md)。
 
-构建后运行 `scripts/validate_windows_data_identity.ps1`，直接检查 Release EXE 的版本资源；也可用 `-ExecutablePath` 检查指定运行包。该检查只读文件，不启动应用；`package_windows_release.ps1` 在打包前自动执行此检查。
+独立品牌标题栏已经移除。页面内容直达顶边，窗口按钮由各路由页面绘制，Navigator 浮层在按钮上方；主工作区只有明确空白区可拖窗，登录 / 载入保留自己的原生命中区，原生 Acrylic 当前禁用。
 
-### Studio 字体与界面图标
+桌面 / Explorer 用完整长方形 Logo，窗口 / 任务栏 / 托盘用方形 W；`generate_windows_icons.cjs` 生成两套 ICO，原生图标修改需重编 Windows runner。原生 `CompanyName=com.example`、`ProductName=nai_launcher`、单实例身份和可执行文件名保持稳定，品牌显示名写 FileDescription / 窗口标题；否则数据目录会切到新位置。
 
-显示名为 `W.O.F NAI Studio`；数据目录、单实例标识、可执行文件名和更新仓库保持既有标识。界面字族使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 与韩文回退 Pretendard，字体角色、品牌入口、许可和实绘验证见 [tool/branding/README.md](tool/branding/README.md)。界面图标已恢复原有 `Icon` 和专用符号，只保留 `StudioTypography` 字体角色。应用统一使用 Geist 深色 / 浅色两套主题，`themeNotifierProvider` 持久化明暗选择，载入、登录、工作区与弹窗继承同一根主题。背景和面板使用黑白灰，蓝色仅用于操作强调；标题栏、图标与字体角色保持原有约定。字体、Logo、许可或原生显示名变更后需交付包含新资源的完整运行包。
+构建后运行 `scripts/validate_windows_data_identity.ps1`，可用 `-ExecutablePath` 核对指定包。其检查只读 EXE；打包脚本也执行。字体、SVG / 图标字体、许可或资源清单变更须随完整资源交付，不只换 AOT。
 
-## Changelog 与 Release Notes 规范
+## Changelog、README 与发布
 
-`CHANGELOG.md` 是 GitHub Release notes 的“更新内容”来源；Release workflow 不会自动根据 git commit 生成变更摘要。准备发布前必须对比上一个 tag 到当前 HEAD 的提交，把本版本用户可见变化整理进对应版本段落，例如 `## [1.0.0] - YYYY-MM-DD`。
+`CHANGELOG.md` 记录用户可见结果；当前开发变化放 Unreleased，真正发布时核对上一 tag 至当前代码、版本号、LFS、Windows 构建、release notes 和资产清单，再整理对应版本段落。交付到本机和发布 GitHub Release 是不同状态，不能把本地安装当新 Release 已发布。
 
-Changelog 条目应面向用户描述结果，不要只写内部实现名。常用分类为 `### ✨ 新增`、`### 🛠 改进`、`### 🐛 修复`，必要时才增加 `### ⚠️ 注意`。不要在 `CHANGELOG.md` 中写发布文件列表；安装版、便携版说明由 `scripts/generate_release_metadata.ps1` 自动生成，避免 Release notes 重复。
+README 中英文同批同步，保留相互切换和上游归属链接。截图须说明是否为历史界面或合成数据的部件实绘，不能把旧图包装成当前窗口。保留原创项目归属、许可和本分支更新仓库；观察上游后自主实现需要的变化，不 merge / cherry-pick 上游。
 
-准备发布时需要检查：
+提交采用 Conventional Commits，限定改动范围。PR 描述面向未看过聊天的读者，说明实际结果、验证、资源 / 生成文件和界面证据；不提交账号、API Key、本机运行日志、构建产物或私有工作流。
 
-- 当前版本段落是否覆盖登录、更新、生成、设置、启动、安装包等用户实际能感知到的变化。
-- bug 修复是否写成用户看到的问题和结果，例如“修复 Token 登录后无法获取会员状态”，而不是只写接口名或类名。
-- 新功能开发期间顺手修掉的问题，如果用户从未用过损坏版本，可以合并进新功能描述，不必拆成多条。
-- `CHANGELOG.md` 中不要重复自动生成的下载文件表；Release 页面会自动附带文件说明、校验文件和更新内容。
+本地高级放大宿主构建入口为 `tool/local_upscale/build_worker.ps1`；源码、组件固定版本与用户暂缓大模型下载的边界见 `docs/advanced-upscale-2026-10-05.md`。
 
-## README 双语同步规范
+## NAI Agent E5D 开发验证（2026-10-07）
 
-`README.md`（简体中文）与 `README.en-US.md`（English）内容必须保持同步：新增功能、平台支持、构建步骤、发布流程、项目结构等任一变化涉及 README 时，两份文件在同一提交中一起更新，不允许只改一份。两份文件顶部均保留指向对方的语言切换链接。仓库约定（如提交消息格式）以中文版表述为准，英文版只做翻译说明，不得改写约定本身。
-
-## 提交与 Pull Request 规范
-
-Git 历史使用 Conventional Commits，例如 `fix(generation): cancel stale results`、`feat(prompt): add random mode`。提交应保持范围清晰、标题简洁。Pull Request 需要说明用户可见变化，列出已运行的验证命令，标注生成文件、LFS 资源或 assets 变更；涉及界面变化时附截图。
+物理目录／文件管理与扫描互斥、索引／删除池路径同步完成。695 + 101 + 14 + 4 = 814 项不同检查通过，3 项 Vulkan 审计跳过；13 文件 analyze 无诊断。ARB 与生成的台湾正体／l10n 已更新，未改依赖／数据库结构／Riverpod 生成输入。E/F 尚未完成且未安装；见 [E5D 记录](docs/nai-agent-stage-e5d-2026-10-07.md)。

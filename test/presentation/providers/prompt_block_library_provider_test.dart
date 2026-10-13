@@ -61,6 +61,67 @@ void main() {
     expect(current.blockById(block.id)?.color, '#FFFF0000');
   });
 
+  test(
+    'optimistic edits preserve concurrent use counts and reject newer content',
+    () async {
+      final container = ProviderContainer(
+        overrides: [promptBlockStorageProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        promptBlockLibraryNotifierProvider.notifier,
+      );
+      final block = await notifier.createBlock(
+        title: 'Original',
+        content: 'artist:a',
+      );
+      await notifier.incrementUseCount(block.id);
+      await notifier.updateBlockIfUnchanged(
+        block,
+        block.copyWith(title: 'New title'),
+      );
+      var current = (await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      )).blockById(block.id)!;
+      expect(current.useCount, 1);
+      final edited = current;
+      final counting = notifier.incrementUseCount(block.id);
+      final updating = notifier.updateBlockIfUnchanged(
+        edited,
+        edited.copyWith(content: 'artist:b'),
+      );
+      await Future.wait([counting, updating]);
+      current = (await container.read(
+        promptBlockLibraryNotifierProvider.future,
+      )).blockById(block.id)!;
+      expect(current.content, 'artist:b');
+      expect(current.useCount, 2);
+      await expectLater(
+        notifier.updateBlockIfUnchanged(
+          edited,
+          edited.copyWith(content: 'stale'),
+        ),
+        throwsStateError,
+      );
+      expect(
+        (await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        )).blockById(block.id)!.content,
+        'artist:b',
+      );
+      await Future.wait([
+        notifier.setBlockFavorite(block.id, true),
+        notifier.setBlockFavorite(block.id, true),
+      ]);
+      expect(
+        (await container.read(
+          promptBlockLibraryNotifierProvider.future,
+        )).blockById(block.id)!.isFavorite,
+        isTrue,
+      );
+    },
+  );
+
   test('provider exposes favorite blocks after toggling a block', () async {
     final container = ProviderContainer(
       overrides: [promptBlockStorageProvider.overrideWithValue(storage)],

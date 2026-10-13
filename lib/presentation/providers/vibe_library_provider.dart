@@ -120,6 +120,7 @@ enum VibeLibraryBulkOperationType {
 class VibeLibraryNotifier extends _$VibeLibraryNotifier {
   late final VibeLibraryStorageService _storage;
   Future<void>? _activeLoadFuture;
+  bool _initialized = false;
 
   @override
   VibeLibraryState build() {
@@ -133,7 +134,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
 
   /// 初始化 Vibe 库
   Future<void> initialize() async {
-    if (state.entries.isNotEmpty || state.isInitializing) return;
+    if (_initialized && state.error == null) return;
     await VibePerformanceDiagnostics.measure('provider.initialize', () async {
       await _loadData(isInitializing: true, showLoading: true);
     });
@@ -144,17 +145,13 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
     bool syncFileSystem = false,
     bool showLoading = false,
   }) async {
-    await VibePerformanceDiagnostics.measure(
-      'provider.reload',
-      () async {
-        // 先同步文件系统，确保文件增删反映在 Hive 中
-        if (syncFileSystem) {
-          await syncWithFileSystem();
-        }
-        await _loadData(isInitializing: false, showLoading: showLoading);
-      },
-      details: {'syncFileSystem': syncFileSystem, 'showLoading': showLoading},
-    );
+    await VibePerformanceDiagnostics.measure('provider.reload', () async {
+      // 先同步文件系统，确保文件增删反映在 Hive 中
+      if (syncFileSystem) {
+        await syncWithFileSystem();
+      }
+      await _loadData(isInitializing: false, showLoading: showLoading);
+    }, details: {'syncFileSystem': syncFileSystem, 'showLoading': showLoading});
   }
 
   /// 仅从缓存加载数据（不扫描文件系统）- 用于快速显示
@@ -293,6 +290,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       );
       currentPageCount = currentEntries.length;
 
+      _initialized = true;
       state = state.copyWith(
         entries: entries,
         filteredEntries: filteredEntries,
@@ -301,6 +299,7 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
         currentPage: 0,
         isLoading: false,
         isInitializing: false,
+        error: null,
       );
     } catch (e, stackTrace) {
       AppLogger.e('Failed to load vibe library', e, stackTrace, 'VibeLibrary');
@@ -676,6 +675,19 @@ class VibeLibraryNotifier extends _$VibeLibraryNotifier {
       state = state.copyWith(error: e.toString());
       return 0;
     }
+  }
+
+  Future<VibeLibraryEntry?> setFavorite(String id, bool favorite) async {
+    final updated = await _storage.setFavorite(id, favorite);
+    if (updated == null) return null;
+    state = state.copyWith(
+      entries: [
+        for (final entry in state.entries)
+          entry.id == id ? updated.toDisplayEntry() : entry,
+      ],
+    );
+    await _applyFilters();
+    return updated;
   }
 
   /// 切换收藏状态

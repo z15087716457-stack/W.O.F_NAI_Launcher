@@ -426,7 +426,7 @@ class AdvancedUpscaleComponentManager {
         rethrow;
       }
       cancellation.check();
-      return partial.rename(complete.path);
+      return await partial.rename(complete.path);
     } on DioException {
       cancellation.check();
       rethrow;

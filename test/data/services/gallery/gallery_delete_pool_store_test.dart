@@ -2,8 +2,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences_platform_interface/shared_preferences_platform_interface.dart';
 
 import 'package:nai_launcher/data/services/gallery/gallery_delete_pool_store.dart';
+
+class _RejectStore extends InMemorySharedPreferencesStore {
+  _RejectStore(super.data) : super.withData();
+  @override
+  Future<bool> setValue(String type, String key, Object value) async => false;
+}
 
 /// 删除池 store 单元测试（SharedPreferences mock + 真实临时文件）
 void main() {
@@ -34,6 +41,36 @@ void main() {
     // 幂等：再删一次无变化
     await store.removeAll(['b.png']);
     expect(await store.load(), ['a.png', 'c.png']);
+  });
+
+  test(
+    'restore preserves other pending files and removes cleanup before exposing index',
+    () async {
+      await store.addAll(['a.png', 'b.png']);
+      var restored = false;
+      await store.restore(['a.png'], () async {
+        expect(await store.load(), ['b.png']);
+        restored = true;
+      });
+      expect(restored, true);
+      expect(await store.load(), ['b.png']);
+    },
+  );
+
+  test('rejected durable pool write never exposes restored index', () async {
+    await store.addAll(['a.png']);
+    final platform = SharedPreferencesStorePlatform.instance;
+    SharedPreferencesStorePlatform.instance = _RejectStore({});
+    var restored = false;
+    try {
+      await expectLater(
+        store.restore(['a.png'], () async => restored = true),
+        throwsStateError,
+      );
+      expect(restored, false);
+    } finally {
+      SharedPreferencesStorePlatform.instance = platform;
+    }
   });
 
   test('clear empties the pool', () async {
