@@ -665,6 +665,26 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+  testWidgets('Agent header leaves room for the update capsule at 320px', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await pump(
+      tester,
+      const WindowChromeScope(
+        enabled: true,
+        extraWidth: 88,
+        child: NaiAgentPanel(),
+      ),
+      width: 320,
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('nai-agent-header'))),
+      const Rect.fromLTWH(0, 0, 320, 39),
+    );
+    expect(tester.takeException(), isNull);
+  });
   testWidgets('Agent thinking selection is isolated from the model setting', (
     tester,
   ) async {

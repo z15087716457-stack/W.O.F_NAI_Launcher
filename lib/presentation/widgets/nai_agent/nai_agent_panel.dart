@@ -221,21 +221,27 @@ class _PanelState extends ConsumerState<NaiAgentPanel> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final compact = constraints.maxWidth < 260;
+              final tiny = constraints.maxWidth < 120;
               return Row(
                 children: [
-                  Icon(
-                    Icons.auto_awesome_outlined,
-                    size: 16,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 7),
+                  if (!tiny) ...[
+                    Icon(
+                      Icons.auto_awesome_outlined,
+                      size: 16,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 7),
+                  ],
                   Expanded(
-                    child: Text(
-                      l.naiAgent_title,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                    child: Tooltip(
+                      message: l.naiAgent_title,
+                      child: Text(
+                        l.naiAgent_title,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ),
