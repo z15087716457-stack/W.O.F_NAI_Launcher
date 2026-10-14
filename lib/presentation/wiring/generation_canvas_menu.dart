@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/utils/localization_extension.dart';
 import '../providers/image_generation_provider.dart';
 import '../screens/generation/widgets/canvas/generated_image_actions.dart';
+import '../ui/gen/gen_canvas.dart';
 import '../ui/gen/gen_contract.dart';
 import '../ui/gen/gen_page.dart';
 import '../ui/gen/gen_parts.dart';
@@ -13,6 +14,28 @@ import '../ui/kit/ui_popover.dart';
 import '../utils/krita_send_helper.dart';
 import '../utils/precise_ref_library_import_helper.dart';
 import 'generation_operations.dart';
+import 'generation_history_actions.dart';
+
+class GenerationCanvasMenuWiring extends ConsumerWidget {
+  const GenerationCanvasMenuWiring({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) => GenCanvasMenuScope(
+    onOpen: (context, id, position) {
+      final image = ref
+          .read(generationHistoryActionsProvider)
+          .images
+          .where((image) => image.id == id)
+          .firstOrNull;
+      if (image != null) {
+        openGenerationCanvasMenu(context, ref, image, position);
+      }
+    },
+    child: child,
+  );
+}
 
 /// 使用新页面菜单外观，接回旧图块的图片操作；菜单对象始终是右击的图。
 void openGenerationCanvasMenu(

@@ -21,6 +21,7 @@ import '../ui/gen/gen_page.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import 'generation_backend.dart';
 import 'generation_canvas_wiring.dart';
+import 'generation_canvas_menu.dart';
 import 'generation_data_wiring.dart';
 import 'generation_editor_wiring.dart';
 import 'generation_history_actions.dart';
@@ -219,7 +220,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
       }
     }
 
-    return widget.builder(
+    final page = widget.builder(
       data: data,
       slots: GenSlots(
         canvas: ref.watch(simpleOutputViewerNotifierProvider)
@@ -406,5 +407,6 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onReveal: (id) => run(() => operations.reveal(id)),
       ),
     );
+    return GenerationCanvasMenuWiring(child: page);
   }
 }

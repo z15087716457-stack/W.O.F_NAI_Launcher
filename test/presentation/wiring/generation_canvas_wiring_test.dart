@@ -145,21 +145,21 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
-          locale: language == 'zh_TW'
-              ? const Locale('zh', 'TW')
-              : Locale(language),
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: dark ? GeistTheme.dark : GeistTheme.light,
-          builder: (context, child) => MediaQuery(
-            data: MediaQuery.of(context).copyWith(disableAnimations: true),
-            child: child!,
-          ),
-          home: Scaffold(
-            body: RepaintBoundary(
-              key: boundary,
-              child: fullPage
+        child: RepaintBoundary(
+          key: boundary,
+          child: MaterialApp(
+            locale: language == 'zh_TW'
+                ? const Locale('zh', 'TW')
+                : Locale(language),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: dark ? GeistTheme.dark : GeistTheme.light,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
+            ),
+            home: Scaffold(
+              body: fullPage
                   ? const GenerationWiring()
                   : GenerationWiring(
                       builder:
@@ -212,8 +212,12 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final contextMenu =
+        Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!restored && Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
+    if (!contextMenu &&
+        !restored &&
+        Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
       return;
     }
     await tester.runAsync(() async {
@@ -221,7 +225,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = restored
+      final area = contextMenu
+          ? 'canvas-context-menu-20261014'
+          : restored
           ? 'canvas-presentation-20261014'
           : 'infinite-canvas-20261014';
       final file = File('.dart_tool/$area/captures/$name.png');
@@ -786,6 +792,68 @@ void main() {
     await tester.tap(find.byKey(const Key('gen-canvas-menu-delete')));
     await tester.pumpAndSettle();
     expect(events, contains('onDeleteImages([1-1])'));
+  });
+  for (final simple in [false, true]) {
+    testWidgets('${simple ? '简单模式' : '无限画布'}正中央焦点图右击显示菜单且指向本图', (tester) async {
+      publish(ImageGenerationState(history: [image(1)]));
+      await container
+          .read(simpleOutputViewerNotifierProvider.notifier)
+          .setSimple(simple);
+      await pump(tester);
+      final target = find.byKey(const Key('gen-tile-1-0'));
+      final center = tester.getCenter(find.byKey(const Key('gen-canvas')));
+      expect(tester.getRect(target).contains(center), isTrue);
+      final selected = container.read(generationPreviewSelectionProvider);
+      await tester.tapAt(center, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gen-canvas-menu-copy')), findsOneWidget);
+      expect(events, isEmpty);
+      expect(container.read(generationPreviewSelectionProvider), selected);
+      await capture(
+        tester,
+        simple ? 'simple-center-menu' : 'canvas-center-menu',
+      );
+      await tester.tap(find.byKey(const Key('gen-canvas-menu-copy')));
+      await tester.pumpAndSettle();
+      expect(events, ['onCopyImage(1-0)']);
+      await tester.tapAt(
+        tester.getTopLeft(find.byKey(const Key('gen-canvas'))) +
+            const Offset(20, 100),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gen-canvas-menu-copy')), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+  }
+  testWidgets('切换画布模式后右键保持目标图，生成槽不会弹图片菜单', (tester) async {
+    publish(loading(2).copyWith(history: [image(1)]));
+    await pump(tester);
+    for (final simple in [false, true, false]) {
+      await container
+          .read(simpleOutputViewerNotifierProvider.notifier)
+          .setSimple(simple);
+      container.read(generationHistoryActionsProvider).focusTile('1-0');
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('gen-tile-1-0')),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gen-canvas-menu-copy')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('gen-canvas-menu-copy')));
+      await tester.pumpAndSettle();
+      container.read(generationHistoryActionsProvider).focusBatch('run:2');
+      await tester.pumpAndSettle();
+      await tester.tap(
+        find.byKey(const Key('gen-tile-slot:run:2:0')),
+        buttons: kSecondaryMouseButton,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gen-canvas-menu-copy')), findsNothing);
+    }
+    expect(events, List.filled(3, 'onCopyImage(1-0)'));
+    expect(tester.takeException(), isNull);
   });
   testWidgets('生成期间右键禁用派生入口，保留成图保存和查看', (tester) async {
     publish(loading(2).copyWith(history: [image(1)]));

@@ -292,6 +292,24 @@ class _Stage extends StatelessWidget {
   }
 }
 
+/// 接线方提供图片菜单；简单舞台与无限画布使用同一个右击入口。
+class GenCanvasMenuScope extends InheritedWidget {
+  const GenCanvasMenuScope({
+    super.key,
+    required this.onOpen,
+    required super.child,
+  });
+
+  final void Function(BuildContext context, String id, Offset position) onOpen;
+
+  static GenCanvasMenuScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GenCanvasMenuScope>();
+
+  @override
+  bool updateShouldNotify(GenCanvasMenuScope oldWidget) =>
+      onOpen != oldWidget.onOpen;
+}
+
 /// 画布引擎提供选中回调与可选的合成流式预览，图块视觉由新页面绘制。
 class GenCanvasTileScope extends InheritedWidget {
   const GenCanvasTileScope({
@@ -455,7 +473,7 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
               ),
             ),
     };
-    return UiPressable(
+    final tile = UiPressable(
       key: Key('gen-tile-${t.id}'),
       onTap: () => _tap(scope),
       builder: (context, hover) => Container(
@@ -476,6 +494,18 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
               ),
         child: ClipRRect(borderRadius: BorderRadius.circular(6), child: body),
       ),
+    );
+    final menu = GenCanvasMenuScope.maybeOf(context);
+    if (menu == null ||
+        t.state == GenTileState.pending ||
+        t.state == GenTileState.streaming) {
+      return tile;
+    }
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onSecondaryTapDown: (details) =>
+          menu.onOpen(context, t.id, details.globalPosition),
+      child: tile,
     );
   }
 }

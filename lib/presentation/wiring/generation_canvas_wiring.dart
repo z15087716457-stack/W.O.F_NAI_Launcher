@@ -17,7 +17,6 @@ import '../ui/gen/gen_contract.dart';
 import '../widgets/common/selectable_image_card.dart';
 import 'generation_operations.dart';
 import 'generation_view_mapping.dart';
-import 'generation_canvas_menu.dart';
 import 'tools_generation_wiring.dart';
 
 /// 新页面保留图块和工具条，旧引擎只管理世界坐标、相机与选择联动。
@@ -122,15 +121,7 @@ class _GenerationCanvasWiringState
                   message: item.image!.isFailedStreamSnapshot
                       ? context.l10n.generation_failedStreamSnapshotHint
                       : '',
-                  child: GestureDetector(
-                    onSecondaryTapDown: (details) => openGenerationCanvasMenu(
-                      context,
-                      ref,
-                      item.image!,
-                      details.globalPosition,
-                    ),
-                    child: content,
-                  ),
+                  child: content,
                 ),
         );
       },
