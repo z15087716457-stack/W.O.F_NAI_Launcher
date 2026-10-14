@@ -4,6 +4,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 /// Flutter owns submenu positioning, keyboard traversal and edge avoidance.
 class ImageMenuAction<T> {
   const ImageMenuAction({
+    this.key,
     required this.label,
     required this.icon,
     this.value,
@@ -13,13 +14,15 @@ class ImageMenuAction<T> {
   });
 
   const ImageMenuAction.divider()
-    : label = '',
+    : key = null,
+      label = '',
       icon = Icons.more_horiz,
       value = null,
       enabled = false,
       destructive = false,
       children = const [];
 
+  final Key? key;
   final String label;
   final IconData icon;
   final T? value;
@@ -27,6 +30,23 @@ class ImageMenuAction<T> {
   final bool destructive;
   final List<ImageMenuAction<T>> children;
   bool get isDivider => label.isEmpty;
+}
+
+/// Optional visual styles; existing image menus keep their current appearance.
+class ImageActionMenuStyle {
+  const ImageActionMenuStyle({
+    this.menu,
+    this.item,
+    this.quickAction,
+    this.iconSize,
+    this.disabledColor,
+  });
+
+  final MenuStyle? menu;
+  final ButtonStyle? item;
+  final ButtonStyle? quickAction;
+  final double? iconSize;
+  final Color? disabledColor;
 }
 
 class ImageActionMenu {
@@ -38,6 +58,7 @@ class ImageActionMenu {
     required List<ImageMenuAction<T>> actions,
     List<ImageMenuAction<T>> quickActions = const [],
     double? width = 248,
+    ImageActionMenuStyle? appearance,
   }) async {
     final overlay = Navigator.of(context).overlay!;
     final box = overlay.context.findRenderObject()! as RenderBox;
@@ -46,6 +67,7 @@ class ImageActionMenu {
       actions: actions,
       quickActions: quickActions,
       width: width,
+      appearance: appearance,
       barrierText: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
     final result = await Navigator.of(context).push<T>(route);
@@ -60,12 +82,14 @@ class _ImageMenuRoute<T> extends PopupRoute<T> {
     required this.actions,
     required this.quickActions,
     required this.width,
+    required this.appearance,
     required this.barrierText,
   });
   final Offset position;
   final List<ImageMenuAction<T>> actions;
   final List<ImageMenuAction<T>> quickActions;
   final double? width;
+  final ImageActionMenuStyle? appearance;
   final String barrierText;
   @override
   Color? get barrierColor => null;
@@ -112,7 +136,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
 
   MenuStyle _menuStyle({double? width = 248}) {
     final colors = Theme.of(context).colorScheme;
-    return MenuStyle(
+    final base = MenuStyle(
       alignment: Alignment.topLeft,
       backgroundColor: WidgetStatePropertyAll(colors.surface),
       surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
@@ -128,6 +152,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
         ),
       ),
     );
+    return widget.route.appearance?.menu?.merge(base) ?? base;
   }
 
   Widget _item(ImageMenuAction<T> action, {bool quick = false}) {
@@ -139,7 +164,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
     }
     final colors = Theme.of(context).colorScheme;
     final color = action.destructive ? colors.error : colors.onSurface;
-    final style = ButtonStyle(
+    final base = ButtonStyle(
       minimumSize: WidgetStatePropertyAll(Size(0, quick ? 36 : 32)),
       fixedSize: WidgetStatePropertyAll(Size(double.infinity, quick ? 36 : 32)),
       padding: WidgetStatePropertyAll(
@@ -158,7 +183,8 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
       ),
       foregroundColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.disabled)
-            ? Theme.of(context).disabledColor
+            ? widget.route.appearance?.disabledColor ??
+                  Theme.of(context).disabledColor
             : color,
       ),
       overlayColor: WidgetStatePropertyAll(
@@ -167,9 +193,13 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
       visualDensity: VisualDensity.standard,
       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
+    final override = quick
+        ? widget.route.appearance?.quickAction
+        : widget.route.appearance?.item;
+    final style = override?.merge(base) ?? base;
     final leading = Icon(
       action.icon,
-      size: 16,
+      size: widget.route.appearance?.iconSize ?? 16,
       color: action.destructive && action.enabled ? colors.error : null,
     );
     final label = Text(
@@ -179,6 +209,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
     );
     if (action.children.isNotEmpty) {
       return SubmenuButton(
+        key: action.key,
         style: style,
         menuStyle: _menuStyle(
           width: 232,
@@ -193,6 +224,7 @@ class _ImageMenuState<T> extends State<_ImageMenu<T>> {
       );
     }
     return MenuItemButton(
+      key: action.key,
       style: style,
       closeOnActivate: false,
       leadingIcon: leading,

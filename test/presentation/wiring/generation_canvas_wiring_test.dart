@@ -28,7 +28,7 @@ import 'package:nai_launcher/presentation/providers/simple_output_viewer_provide
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
-import 'package:nai_launcher/presentation/ui/kit/ui_controls.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_world_viewport.dart';
@@ -212,10 +212,12 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final imageMenu = Platform.environment['CAPTURE_CANVAS_IMAGE_MENU'] == '1';
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!contextMenu &&
+    if (!imageMenu &&
+        !contextMenu &&
         !restored &&
         Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
       return;
@@ -225,7 +227,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = contextMenu
+      final area = imageMenu
+          ? 'canvas-image-menu-20261014'
+          : contextMenu
           ? 'canvas-context-menu-20261014'
           : restored
           ? 'canvas-presentation-20261014'
@@ -865,14 +869,16 @@ void main() {
       buttons: kSecondaryMouseButton,
     );
     await tester.pumpAndSettle();
-    final disabled = tester.widget<UiPressable>(
+    await tester.tap(find.byKey(const Key('gen-canvas-menu-edit-group')));
+    await tester.pumpAndSettle();
+    final disabled = tester.widget<MenuItemButton>(
       find.byKey(const Key('gen-canvas-menu-variations')),
     );
-    expect(disabled.onTap, isNull);
+    expect(disabled.onPressed, isNull);
     expect(
       tester
-          .widget<UiPressable>(find.byKey(const Key('gen-canvas-menu-save')))
-          .onTap,
+          .widget<MenuItemButton>(find.byKey(const Key('gen-canvas-menu-save')))
+          .onPressed,
       isNotNull,
     );
     await tester.ensureVisible(
@@ -909,18 +915,100 @@ void main() {
     expect(events, contains('onOpenViewer(failed)'));
     await tester.tap(target, buttons: kSecondaryMouseButton);
     await tester.pumpAndSettle();
-    for (final key in ['save', 'copy', 'img2img', 'variations']) {
+    for (final key in ['save', 'copy', 'img2img']) {
       expect(
         tester
-            .widget<UiPressable>(find.byKey(Key('gen-canvas-menu-$key')))
-            .onTap,
+            .widget<MenuItemButton>(find.byKey(Key('gen-canvas-menu-$key')))
+            .onPressed,
         isNull,
       );
     }
+    await tester.tap(find.byKey(const Key('gen-canvas-menu-edit-group')));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .widget<MenuItemButton>(
+            find.byKey(const Key('gen-canvas-menu-variations')),
+          )
+          .onPressed,
+      isNull,
+    );
     await capture(tester, 'failed-frame-retained');
   });
   for (final language in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
     for (final dark in [false, true]) {
+      testWidgets('$language ${dark ? 'dark' : 'light'} 图片菜单双快捷按钮、详情下删除及分层', (
+        tester,
+      ) async {
+        publish(ImageGenerationState(history: [image(1)]));
+        await pump(tester, language: language, dark: dark);
+        await tester.tap(
+          find.byKey(const Key('gen-tile-1-0')),
+          buttons: kSecondaryMouseButton,
+        );
+        await tester.pumpAndSettle();
+        final save = tester.getRect(
+          find.byKey(const Key('gen-canvas-menu-save')),
+        );
+        final copy = tester.getRect(
+          find.byKey(const Key('gen-canvas-menu-copy')),
+        );
+        final detail = tester.getRect(
+          find.byKey(const Key('gen-canvas-menu-viewer')),
+        );
+        final trash = find.byKey(const Key('gen-canvas-menu-delete'));
+        expect(save.top, closeTo(copy.top, .001));
+        expect(save.right, lessThan(copy.left));
+        expect(tester.getRect(trash).top, closeTo(detail.bottom, .001));
+        expect(
+          find.descendant(
+            of: trash,
+            matching: find.byIcon(Icons.delete_outline),
+          ),
+          findsOneWidget,
+        );
+        expect(find.byKey(const Key('gen-canvas-menu-edit')), findsNothing);
+        expect(find.byKey(const Key('gen-canvas-menu-reveal')), findsNothing);
+        final button = tester.widget<MenuItemButton>(trash);
+        final colors = tester.element(trash).ui;
+        expect(button.style!.foregroundColor!.resolve({}), colors.error);
+        expect(
+          tester
+              .widget<MenuAnchor>(find.byKey(const Key('image-action-menu')))
+              .style!
+              .backgroundColor!
+              .resolve({}),
+          colors.raised,
+        );
+        final regular = tester.widget<MenuItemButton>(
+          find.byKey(const Key('gen-canvas-menu-viewer')),
+        );
+        expect(regular.style!.fixedSize!.resolve({})!.height, 34);
+        expect(
+          regular.style!.textStyle!.resolve({})!.fontWeight,
+          FontWeight.w400,
+        );
+        await capture(
+          tester,
+          'compact-menu-$language-${dark ? 'dark' : 'light'}',
+        );
+        await tester.tap(find.byKey(const Key('gen-canvas-menu-edit-group')));
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('gen-canvas-menu-inpaint')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('gen-canvas-menu-upscale')),
+          findsOneWidget,
+        );
+        await capture(tester, 'edit-menu-$language-${dark ? 'dark' : 'light'}');
+        await tester.tap(find.byKey(const Key('gen-canvas-menu-edit')));
+        await tester.pumpAndSettle();
+        expect(events, ['onEditImage(1-0)']);
+        expect(find.byKey(const Key('image-action-menu')), findsNothing);
+        expect(tester.takeException(), isNull);
+      });
       testWidgets('$language ${dark ? 'dark' : 'light'} 生成文案实绘和布局', (
         tester,
       ) async {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,10 +9,9 @@ import '../screens/generation/widgets/canvas/generated_image_actions.dart';
 import '../ui/gen/gen_canvas.dart';
 import '../ui/gen/gen_contract.dart';
 import '../ui/gen/gen_page.dart';
-import '../ui/gen/gen_parts.dart';
-import '../ui/kit/ui_glyph.dart';
-import '../ui/kit/ui_menu.dart';
-import '../ui/kit/ui_popover.dart';
+import '../ui/kit/ui_image_menu.dart';
+import '../widgets/common/image_action_menu.dart';
+import '../widgets/common/studio_icons.dart';
 import '../utils/krita_send_helper.dart';
 import '../utils/precise_ref_library_import_helper.dart';
 import 'generation_operations.dart';
@@ -30,20 +31,20 @@ class GenerationCanvasMenuWiring extends ConsumerWidget {
           .where((image) => image.id == id)
           .firstOrNull;
       if (image != null) {
-        openGenerationCanvasMenu(context, ref, image, position);
+        unawaited(openGenerationCanvasMenu(context, ref, image, position));
       }
     },
     child: child,
   );
 }
 
-/// 使用新页面菜单外观，接回旧图块的图片操作；菜单对象始终是右击的图。
-void openGenerationCanvasMenu(
+/// 复用旧图片菜单：顶部快捷操作，编辑与更多操作分别折入子菜单。
+Future<void> openGenerationCanvasMenu(
   BuildContext context,
   WidgetRef ref,
   GeneratedImage image,
   Offset position,
-) {
+) async {
   final scope = GenScope.of(context);
   final a = scope.actions;
   final l = context.l10n;
@@ -51,134 +52,173 @@ void openGenerationCanvasMenu(
   final canInput = image.canUseAsGenerationInput && !scope.data.canvas.locked;
   final operations = GenerationOperations(ref, context, () => context.mounted);
   void run(Future<void> Function() task) => operations.run(task);
-  scope.controller.openMenu(
-    UiPopoverAnchor(position),
-    [
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-viewer'),
-        label: l.imageMenu_details,
-        glyph: UiGlyphs.expand,
-        onTap: () => a.onOpenViewer(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-delete'),
-        label: l.common_delete,
-        glyph: UiGlyphs.trash,
-        danger: true,
-        onTap: () => a.onDeleteImages([id]),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-save'),
-        label: l.gen_saveImage,
-        glyph: GenGlyphs.save2,
-        divider: true,
+  ImageMenuAction<VoidCallback> action(
+    String key,
+    String label,
+    IconData icon,
+    VoidCallback callback, {
+    bool enabled = true,
+    bool destructive = false,
+  }) => ImageMenuAction(
+    key: Key('gen-canvas-menu-$key'),
+    label: label,
+    icon: icon,
+    value: callback,
+    enabled: enabled,
+    destructive: destructive,
+  );
+  scope.controller.closePopover();
+  final selected = await UiImageMenu.show<VoidCallback>(
+    context,
+    position: position,
+    quickActions: [
+      action(
+        'save',
+        l.shortcut_action_save_image,
+        Icons.save_alt,
+        () => a.onSaveImage(id),
         enabled: image.canSave,
-        onTap: () => a.onSaveImage(id),
       ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-copy'),
-        label: l.gen_copyImage,
-        glyph: UiGlyphs.copy,
+      action(
+        'copy',
+        l.shortcut_action_copy_image,
+        Icons.copy,
+        () => a.onCopyImage(id),
         enabled: image.canSave,
-        onTap: () => a.onCopyImage(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-reveal'),
-        label: l.gen_reveal,
-        glyph: GenGlyphs.reveal,
-        enabled: image.canSave,
-        onTap: () => a.onReveal(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-img2img'),
-        label: l.gen_sendImg2Img,
-        glyph: UiGlyphs.image,
-        divider: true,
-        enabled: canInput,
-        onTap: () => a.onSendTo(id, GenSendTarget.img2img),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-vibe'),
-        label: l.gen_sendVibe,
-        glyph: UiGlyphs.palette,
-        enabled: canInput && scope.data.refs.vibes != null,
-        onTap: () => a.onSendTo(id, GenSendTarget.vibe),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-precise'),
-        label: l.gen_sendPrecise,
-        glyph: UiGlyphs.personStar,
-        enabled: canInput && scope.data.refs.precise != null,
-        onTap: () => a.onSendTo(id, GenSendTarget.precise),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-precise-library'),
-        label: l.drop_saveToPreciseRefLibrary,
-        enabled: canInput,
-        onTap: () =>
-            run(() => saveBytesToPreciseRefLibrary(ref, context, image.bytes)),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-edit'),
-        label: l.gen_editImage,
-        divider: true,
-        enabled: canInput,
-        onTap: () => a.onEditImage(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-inpaint'),
-        label: l.gen_inpaint,
-        enabled: canInput,
-        onTap: () => a.onInpaint(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-variations'),
-        label: l.gen_variations,
-        enabled: canInput,
-        onTap: () => a.onVariations(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-tools'),
-        label: l.img2img_directorTools,
-        enabled: canInput,
-        onTap: () => a.onSendToTools(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-enhance'),
-        label: l.gen_enhance,
-        enabled: canInput,
-        onTap: () => a.onEnhance(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-upscale'),
-        label: l.gen_upscale,
-        enabled: canInput,
-        onTap: () => a.onUpscale(id),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-krita'),
-        label: l.gallery_sendToKritaAction,
-        divider: true,
-        enabled: canInput,
-        onTap: () => KritaSendHelper.sendImageBytes(
-          context,
-          ref,
-          image.bytes,
-          name: GeneratedImageActions(ref).previewImageFileName(image),
-        ),
-      ),
-      UiMenuItem(
-        key: const Key('gen-canvas-menu-block-library'),
-        label: l.image_saveToLibrary,
-        enabled: canInput,
-        onTap: () => run(
-          () => GeneratedImageActions(
-            ref,
-          ).showSaveToLibraryDialog(context, image.bytes),
-        ),
       ),
     ],
-    tag: ('canvas', id),
-    width: 240,
+    actions: [
+      action(
+        'viewer',
+        l.imageMenu_details,
+        Icons.open_in_full,
+        () => a.onOpenViewer(id),
+      ),
+      action(
+        'delete',
+        l.common_delete,
+        Icons.delete_outline,
+        () => a.onDeleteImages([id]),
+        destructive: true,
+      ),
+      action(
+        'img2img',
+        l.drop_img2img,
+        Icons.image_outlined,
+        () => a.onSendTo(id, GenSendTarget.img2img),
+        enabled: canInput,
+      ),
+      action(
+        'vibe',
+        l.drop_vibeTransfer,
+        StudioIcons.vibeLibrary,
+        () => a.onSendTo(id, GenSendTarget.vibe),
+        enabled: canInput && scope.data.refs.vibes != null,
+      ),
+      action(
+        'precise',
+        l.drop_characterReference,
+        StudioIcons.preciseReference,
+        () => a.onSendTo(id, GenSendTarget.precise),
+        enabled: canInput && scope.data.refs.precise != null,
+      ),
+      const ImageMenuAction.divider(),
+      ImageMenuAction(
+        key: const Key('gen-canvas-menu-edit-group'),
+        label: l.imageMenu_editAndDerive,
+        icon: Icons.auto_fix_high_outlined,
+        children: [
+          action(
+            'edit',
+            l.img2img_editImage,
+            Icons.edit_outlined,
+            () => a.onEditImage(id),
+            enabled: canInput,
+          ),
+          action(
+            'inpaint',
+            l.img2img_inpaint,
+            Icons.draw_outlined,
+            () => a.onInpaint(id),
+            enabled: canInput,
+          ),
+          action(
+            'variations',
+            l.img2img_generateVariations,
+            Icons.auto_awesome_motion_outlined,
+            () => a.onVariations(id),
+            enabled: canInput,
+          ),
+          action(
+            'tools',
+            l.img2img_directorTools,
+            Icons.auto_fix_high_outlined,
+            () => a.onSendToTools(id),
+            enabled: canInput,
+          ),
+          action(
+            'enhance',
+            l.img2img_enhance,
+            Icons.auto_awesome_outlined,
+            () => a.onEnhance(id),
+            enabled: canInput,
+          ),
+          action(
+            'upscale',
+            l.image_upscale,
+            Icons.zoom_out_map_rounded,
+            () => a.onUpscale(id),
+            enabled: canInput,
+          ),
+        ],
+      ),
+      ImageMenuAction(
+        key: const Key('gen-canvas-menu-more-group'),
+        label: l.imageMenu_more,
+        icon: Icons.more_horiz,
+        children: [
+          action(
+            'precise-library',
+            l.drop_saveToPreciseRefLibrary,
+            Icons.bookmark_add_outlined,
+            () => run(
+              () => saveBytesToPreciseRefLibrary(ref, context, image.bytes),
+            ),
+            enabled: canInput,
+          ),
+          action(
+            'reveal',
+            l.shortcut_action_open_folder,
+            Icons.folder_open,
+            () => a.onReveal(id),
+            enabled: image.canSave,
+          ),
+          action(
+            'krita',
+            l.gallery_sendToKritaAction,
+            Icons.brush_outlined,
+            () => KritaSendHelper.sendImageBytes(
+              context,
+              ref,
+              image.bytes,
+              name: GeneratedImageActions(ref).previewImageFileName(image),
+            ),
+            enabled: canInput,
+          ),
+          action(
+            'block-library',
+            l.image_saveToLibrary,
+            Icons.library_add_outlined,
+            () => run(
+              () => GeneratedImageActions(
+                ref,
+              ).showSaveToLibraryDialog(context, image.bytes),
+            ),
+            enabled: canInput,
+          ),
+        ],
+      ),
+    ],
   );
+  if (context.mounted) selected?.call();
 }
