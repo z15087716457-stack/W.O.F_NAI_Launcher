@@ -177,13 +177,15 @@ class GenerationModelMenuButton extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Image.asset(
-                        'assets/icons/novelai-icon.png',
+                      SvgPicture.asset(
+                        'assets/icons/novelai-icon.svg',
                         width: 14,
                         height: 14,
                         // 素材是纯黑剪影，srcIn 着色随内胆底色取反
-                        color: theme.colorScheme.surface,
-                        filterQuality: FilterQuality.medium,
+                        colorFilter: ColorFilter.mode(
+                          theme.colorScheme.surface,
+                          BlendMode.srcIn,
+                        ),
                       ),
                       const SizedBox(width: 5),
                       Flexible(

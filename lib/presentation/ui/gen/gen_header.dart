@@ -135,13 +135,7 @@ class _ModelCapsule extends StatelessWidget {
                 spacing: 5,
                 children: [
                   // 素材是纯黑剪影，按反色内胆底色着色。
-                  Image.asset(
-                    'assets/icons/novelai-icon.png',
-                    width: 13,
-                    height: 13,
-                    color: c.bg,
-                    filterQuality: FilterQuality.medium,
-                  ),
+                  GenNaiIcon('novelai-icon.svg', size: 13, color: c.bg),
                   Text(
                     data.currentModel.name,
                     style: UiText.sans(

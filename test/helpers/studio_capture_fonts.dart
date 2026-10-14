@@ -43,7 +43,6 @@ Future<void> loadStudioCaptureFonts() async {
   }
   // The legacy titlebar uses the Windows UI fallback instead of a bundled font.
   if (Platform.isWindows && Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
-    // Wiki's selected prototype uses Windows faces rather than HOS/Geist.
     for (final entry in const {
       'Segoe UI': ['segoeui.ttf', 'seguisb.ttf', 'segoeuib.ttf'],
       'Microsoft YaHei UI': ['msyh.ttc', 'msyhbd.ttc'],

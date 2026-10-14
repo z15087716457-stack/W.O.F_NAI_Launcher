@@ -81,7 +81,6 @@ Future<void> precacheExplore(
       'assets/images/explore-example-c01.jpg',
       'assets/images/explore-example-c04.jpg',
       'assets/images/explore-example-c12.jpg',
-      'assets/icons/novelai-icon.png',
     ]) {
       await precacheImage(AssetImage(a), ctx);
     }

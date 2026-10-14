@@ -29,6 +29,7 @@ import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../../core/wiki/wiki_example_repository.dart';
 import '../../providers/data_source_cache_provider.dart';
+import '../../themes/studio_typography.dart';
 import '../../wiring/blocks_edit_wiring.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/prototype_typography_scope.dart';
@@ -90,14 +91,8 @@ class TagWikiScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => PrototypeTypographyScope(
-    family: 'Segoe UI',
-    height: 0, // CSS normal: use the system face's intrinsic line metrics.
-    fallback: const [
-      'Microsoft YaHei UI',
-      'Microsoft YaHei',
-      'HarmonyOS Sans SC',
-      'Pretendard',
-    ],
+    family: StudioTypography.cjk,
+    height: 0, // CSS normal: use the face's intrinsic line metrics.
     child: _TagWikiContents(initialTag: initialTag, directory: directory),
   );
 }
@@ -1818,13 +1813,9 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
                                   key: const ValueKey('wiki-article-title'),
                                   style: baseStyle.copyWith(
                                     fontSize: 30,
-                                    fontFamily: 'Cascadia Code',
-                                    fontFamilyFallback: const [
-                                      'Consolas',
-                                      'Segoe UI',
-                                      'Microsoft YaHei UI',
-                                      'Microsoft YaHei',
-                                    ],
+                                    fontFamily: StudioTypography.mono,
+                                    fontFamilyFallback:
+                                        StudioTypography.fallback,
                                     height: 0,
                                     leadingDistribution:
                                         TextLeadingDistribution.even,

@@ -186,12 +186,11 @@ class _Header extends StatelessWidget {
                 spacing: 5,
                 children: [
                   // 素材是纯黑剪影，按反色内胆底色着色（同生图页 header_capsules）。
-                  Image.asset(
-                    'assets/icons/novelai-icon.png',
+                  SvgPicture.asset(
+                    'assets/icons/novelai-icon.svg',
                     width: 13,
                     height: 13,
-                    color: c.bg,
-                    filterQuality: FilterQuality.medium,
+                    colorFilter: ColorFilter.mode(c.bg, BlendMode.srcIn),
                   ),
                   Text(
                     v45 ? 'V4.5 Full' : 'V5 Full',
