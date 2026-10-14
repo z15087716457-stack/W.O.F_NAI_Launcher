@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -25,34 +26,38 @@ class GenHeader extends StatelessWidget {
     return Container(
       key: const Key('gen-header'),
       constraints: const BoxConstraints(minHeight: 37),
-      padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: c.line)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 6,
-        children: [
-          const Expanded(
-            child: Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              runSpacing: 4,
-              spacing: 6,
-              children: [_ModelCapsule(), _QuotaCapsule()],
-            ),
-          ),
-          if (collapsible)
-            GenIb(
-              key: const Key('gen-collapse-left'),
-              glyph: UiGlyphs.chevronLeft,
-              glyphSize: 16,
-              tooltip: context.l10n.gen_collapse,
-              onTap: () => scope.actions.onLayoutChanged(
-                scope.data.layout.copyWith(leftOpen: false),
+      child: WindowHeaderDragSurface(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 6,
+            children: [
+              const Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  runSpacing: 4,
+                  spacing: 6,
+                  children: [_ModelCapsule(), _QuotaCapsule()],
+                ),
               ),
-            ),
-        ],
+              if (collapsible)
+                GenIb(
+                  key: const Key('gen-collapse-left'),
+                  glyph: UiGlyphs.chevronLeft,
+                  glyphSize: 16,
+                  tooltip: context.l10n.gen_collapse,
+                  onTap: () => scope.actions.onLayoutChanged(
+                    scope.data.layout.copyWith(leftOpen: false),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

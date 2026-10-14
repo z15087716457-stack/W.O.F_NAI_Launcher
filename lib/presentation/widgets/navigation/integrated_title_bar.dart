@@ -307,35 +307,29 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       ),
     ];
     final dark = colorScheme.brightness == Brightness.dark;
-    return ColoredBox(
-      color: colorScheme.surface,
-      child: SizedBox(
-        key: const Key('window-caption-controls'),
-        height: widget.height,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (widget.showNaiAgent) const NaiAgentToggleButton(),
-            if (_showsThemeButton(widget)) ...[
-              _CaptionButton(
-                key: const Key('brand_appearance_toggle'),
-                icon: dark
-                    ? Icons.light_mode_outlined
-                    : Icons.dark_mode_outlined,
-                iconSize: 15,
-                width: IntegratedTitleBarShell.themeButtonWidth,
-                tooltip: dark
-                    ? (l10n?.brand_switchToLight ?? 'Light')
-                    : (l10n?.brand_switchToDark ?? 'Dark'),
-                onTap: widget.onToggleTheme!,
-              ),
-              const SizedBox(
-                width: IntegratedTitleBarShell.themeSeparatorWidth,
-              ),
-            ],
-            ...captionButtons,
+    // Let the actual header/panel paint through, including its divider.
+    return SizedBox(
+      key: const Key('window-caption-controls'),
+      height: widget.height,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.showNaiAgent) const NaiAgentToggleButton(),
+          if (_showsThemeButton(widget)) ...[
+            _CaptionButton(
+              key: const Key('brand_appearance_toggle'),
+              icon: dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              iconSize: 15,
+              width: IntegratedTitleBarShell.themeButtonWidth,
+              tooltip: dark
+                  ? (l10n?.brand_switchToLight ?? 'Light')
+                  : (l10n?.brand_switchToDark ?? 'Dark'),
+              onTap: widget.onToggleTheme!,
+            ),
+            const SizedBox(width: IntegratedTitleBarShell.themeSeparatorWidth),
           ],
-        ),
+          ...captionButtons,
+        ],
       ),
     );
   }

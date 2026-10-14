@@ -18,43 +18,40 @@ class UpdateCapsule extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     final foreground = dark ? const Color(0xFFFFB45C) : const Color(0xFF995000);
-    return ColoredBox(
-      color: scheme.surface,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Center(
-          child: SizedBox(
-            height: 26,
-            child: Material(
-              color: dark ? const Color(0xFF392B1A) : const Color(0xFFFFEDD5),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Center(
+        child: SizedBox(
+          height: 26,
+          child: Material(
+            color: dark ? const Color(0xFF392B1A) : const Color(0xFFFFEDD5),
+            borderRadius: BorderRadius.circular(20),
+            child: InkWell(
+              key: const Key('window-update-capsule'),
               borderRadius: BorderRadius.circular(20),
-              child: InkWell(
-                key: const Key('window-update-capsule'),
-                borderRadius: BorderRadius.circular(20),
-                onTap: onPressed,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.arrow_upward_rounded,
-                          size: 14,
+              onTap: onPressed,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.arrow_upward_rounded,
+                        size: 14,
+                        color: foreground,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        context.l10n.updateCapsuleLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
                           color: foreground,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          context.l10n.updateCapsuleLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: foreground,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),

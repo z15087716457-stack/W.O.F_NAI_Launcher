@@ -200,251 +200,256 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     final scope = GenScope.of(context);
     final h = scope.data.history;
     final l = context.l10n;
-    final chrome = WindowChromeScope.activeOf(context);
     final selectedIds = _ids(h, _selected);
     return Container(
       key: const Key('gen-history'),
       width: widget.width,
-      padding: EdgeInsets.only(
-        top: chrome ? WindowChromeScope.heightOf(context) : 0,
-      ),
       decoration: BoxDecoration(
         color: c.bg,
         border: Border(left: BorderSide(color: c.line)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            key: const Key('gen-history-header'),
-            height: 40,
-            padding: const EdgeInsets.only(left: 8, right: 6),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: c.line)),
-            ),
-            child: Row(
-              spacing: 8,
-              children: [
-                Tooltip(
-                  message: l.gen_collapse,
-                  child: UiPressable(
-                    key: const Key('gen-collapse-history'),
-                    onTap: () => scope.actions.onLayoutChanged(
-                      scope.data.layout.copyWith(historyOpen: false),
-                    ),
-                    builder: (context, hover) => Container(
-                      width: 24,
-                      height: 24,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: hover ? c.hover : c.control,
-                        borderRadius: BorderRadius.circular(5),
+      child: WindowPaneInset(
+        key: const Key('gen-history-window-inset'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              key: const Key('gen-history-header'),
+              height: 40,
+              padding: const EdgeInsets.only(left: 8, right: 6),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: c.line)),
+              ),
+              child: Row(
+                spacing: 8,
+                children: [
+                  Tooltip(
+                    message: l.gen_collapse,
+                    child: UiPressable(
+                      key: const Key('gen-collapse-history'),
+                      onTap: () => scope.actions.onLayoutChanged(
+                        scope.data.layout.copyWith(historyOpen: false),
                       ),
-                      child: UiGlyph(
-                        UiGlyphs.chevronRight,
-                        size: 13,
-                        color: hover ? c.ink : c.muted,
+                      builder: (context, hover) => Container(
+                        width: 24,
+                        height: 24,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: hover ? c.hover : c.control,
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: UiGlyph(
+                          UiGlyphs.chevronRight,
+                          size: 13,
+                          color: hover ? c.ink : c.muted,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          l.gen_history,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: UiText.sans(
-                            14,
-                            weight: FontWeight.w700,
-                            color: c.ink,
+                  Expanded(
+                    child: Row(
+                      spacing: 8,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            l.gen_history,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: UiText.sans(
+                              14,
+                              weight: FontWeight.w700,
+                              color: c.ink,
+                            ),
+                          ),
+                        ),
+                        if (h.total > 0) GenCount('${h.total}'),
+                      ],
+                    ),
+                  ),
+                  if (h.pinned > 0)
+                    Tooltip(
+                      message: l.gen_pinnedTip,
+                      child: UiPressable(
+                        key: const Key('gen-history-pins'),
+                        onTap: scope.actions.onFocusPins,
+                        builder: (context, hover) => Container(
+                          height: 22,
+                          padding: const EdgeInsets.symmetric(horizontal: 7),
+                          decoration: BoxDecoration(
+                            color: c.accent.withValues(
+                              alpha: hover ? .16 : .10,
+                            ),
+                            borderRadius: BorderRadius.circular(11),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 4,
+                            children: [
+                              GenNaiIcon(
+                                'pin-filled',
+                                size: 11,
+                                color: c.accent,
+                              ),
+                              Text(
+                                '${h.pinned}',
+                                style: UiText.mono(
+                                  11,
+                                  weight: FontWeight.w600,
+                                  color: c.accent,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      if (h.total > 0) GenCount('${h.total}'),
-                    ],
-                  ),
-                ),
-                if (h.pinned > 0)
-                  Tooltip(
-                    message: l.gen_pinnedTip,
-                    child: UiPressable(
-                      key: const Key('gen-history-pins'),
-                      onTap: scope.actions.onFocusPins,
-                      builder: (context, hover) => Container(
-                        height: 22,
-                        padding: const EdgeInsets.symmetric(horizontal: 7),
-                        decoration: BoxDecoration(
-                          color: c.accent.withValues(alpha: hover ? .16 : .10),
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          spacing: 4,
-                          children: [
-                            GenNaiIcon('pin-filled', size: 11, color: c.accent),
-                            Text(
-                              '${h.pinned}',
-                              style: UiText.mono(
-                                11,
-                                weight: FontWeight.w600,
-                                color: c.accent,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
-                  ),
-                GenIb(
-                  key: const Key('gen-history-select'),
-                  glyph: GenGlyphs.multi,
-                  glyphSize: 16,
-                  active: _selecting,
-                  color: _selecting ? c.accent : null,
-                  tooltip: _selecting ? l.gen_selectDone : l.gen_select,
-                  onTap: h.batches.isEmpty
-                      ? null
-                      : () => _setSelecting(!_selecting),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: h.batches.isEmpty
-                ? const _Empty()
-                : ListView.builder(
-                    key: const Key('gen-history-list'),
-                    controller: _scroll,
-                    padding: const EdgeInsets.all(8),
-                    itemCount: h.batches.length,
-                    itemBuilder: (context, i) {
-                      final b = h.batches[i];
-                      return Padding(
-                        padding: EdgeInsets.only(top: i == 0 ? 0 : 6),
-                        child: _BatchItem(
-                          batch: b,
-                          width: widget.width - 16,
-                          now: scope.data.now ?? DateTime.now(),
-                          focused: h.selected == b.id,
-                          selecting: _selecting,
-                          checked: _selected.contains(b.id),
-                          onTap: () => _tap(scope, b),
-                          onMenu: (at) => _menu(scope, b, at),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          if (_selecting)
-            Container(
-              key: const Key('gen-history-selection'),
-              height: 40,
-              padding: const EdgeInsets.only(left: 10, right: 6),
-              decoration: BoxDecoration(
-                color: c.accent.withValues(alpha: .06),
-                border: Border(top: BorderSide(color: c.line)),
-              ),
-              child: Row(
-                spacing: 2,
-                children: [
-                  Expanded(
-                    child: Text(
-                      l.gen_selectedCount(selectedIds.length),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: UiText.sans(
-                        12,
-                        weight: FontWeight.w600,
-                        color: c.accent,
-                      ),
-                    ),
-                  ),
                   GenIb(
-                    key: const Key('gen-history-pack'),
-                    glyph: GenGlyphs.zip,
-                    tooltip: l.gen_pack,
-                    onTap: selectedIds.isEmpty
+                    key: const Key('gen-history-select'),
+                    glyph: GenGlyphs.multi,
+                    glyphSize: 16,
+                    active: _selecting,
+                    color: _selecting ? c.accent : null,
+                    tooltip: _selecting ? l.gen_selectDone : l.gen_select,
+                    onTap: h.batches.isEmpty
                         ? null
-                        : () => scope.actions.onPackImages(selectedIds),
-                  ),
-                  GenIb(
-                    key: const Key('gen-history-save-selected'),
-                    glyph: UiGlyphs.download,
-                    tooltip: l.gen_saveSelected,
-                    onTap: selectedIds.isEmpty
-                        ? null
-                        : () => scope.actions.onSaveImages(selectedIds),
-                  ),
-                  GenIb(
-                    key: const Key('gen-history-delete-selected'),
-                    glyph: UiGlyphs.trash,
-                    color: c.error,
-                    tooltip: l.gen_removeSelected,
-                    onTap: selectedIds.isEmpty
-                        ? null
-                        : () => _confirmDelete(scope, selectedIds),
+                        : () => _setSelecting(!_selecting),
                   ),
                 ],
               ),
             ),
-          Container(
-            key: const Key('gen-history-footer'),
-            height: 40,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: c.line.withValues(alpha: .6)),
+            Expanded(
+              child: h.batches.isEmpty
+                  ? const _Empty()
+                  : ListView.builder(
+                      key: const Key('gen-history-list'),
+                      controller: _scroll,
+                      padding: const EdgeInsets.all(8),
+                      itemCount: h.batches.length,
+                      itemBuilder: (context, i) {
+                        final b = h.batches[i];
+                        return Padding(
+                          padding: EdgeInsets.only(top: i == 0 ? 0 : 6),
+                          child: _BatchItem(
+                            batch: b,
+                            width: widget.width - 16,
+                            now: scope.data.now ?? DateTime.now(),
+                            focused: h.selected == b.id,
+                            selecting: _selecting,
+                            checked: _selected.contains(b.id),
+                            onTap: () => _tap(scope, b),
+                            onMenu: (at) => _menu(scope, b, at),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            if (_selecting)
+              Container(
+                key: const Key('gen-history-selection'),
+                height: 40,
+                padding: const EdgeInsets.only(left: 10, right: 6),
+                decoration: BoxDecoration(
+                  color: c.accent.withValues(alpha: .06),
+                  border: Border(top: BorderSide(color: c.line)),
+                ),
+                child: Row(
+                  spacing: 2,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l.gen_selectedCount(selectedIds.length),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          12,
+                          weight: FontWeight.w600,
+                          color: c.accent,
+                        ),
+                      ),
+                    ),
+                    GenIb(
+                      key: const Key('gen-history-pack'),
+                      glyph: GenGlyphs.zip,
+                      tooltip: l.gen_pack,
+                      onTap: selectedIds.isEmpty
+                          ? null
+                          : () => scope.actions.onPackImages(selectedIds),
+                    ),
+                    GenIb(
+                      key: const Key('gen-history-save-selected'),
+                      glyph: UiGlyphs.download,
+                      tooltip: l.gen_saveSelected,
+                      onTap: selectedIds.isEmpty
+                          ? null
+                          : () => scope.actions.onSaveImages(selectedIds),
+                    ),
+                    GenIb(
+                      key: const Key('gen-history-delete-selected'),
+                      glyph: UiGlyphs.trash,
+                      color: c.error,
+                      tooltip: l.gen_removeSelected,
+                      onTap: selectedIds.isEmpty
+                          ? null
+                          : () => _confirmDelete(scope, selectedIds),
+                    ),
+                  ],
+                ),
+              ),
+            Container(
+              key: const Key('gen-history-footer'),
+              height: 40,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: c.line.withValues(alpha: .6)),
+                ),
+              ),
+              child: Row(
+                spacing: 2,
+                children: [
+                  GenIb(
+                    key: const Key('gen-autosave'),
+                    glyph: GenGlyphs.autosave,
+                    glyphSize: 16,
+                    color: h.autoSave ? c.accent : null,
+                    tooltip: h.autoSave ? l.gen_autoSaveOn : l.gen_autoSaveOff,
+                    onTap: () => scope.actions.onAutoSaveChanged(!h.autoSave),
+                  ),
+                  const Spacer(),
+                  GenIb(
+                    key: const Key('gen-history-lock'),
+                    glyph: _locked ? UiGlyphs.lock : UiGlyphs.unlock,
+                    glyphSize: 16,
+                    color: _locked ? c.accent : null,
+                    tooltip: _locked ? l.gen_scrollUnlock : l.gen_scrollLock,
+                    onTap: () => setState(() => _locked = !_locked),
+                  ),
+                  GenIb(
+                    key: const Key('gen-history-save-all'),
+                    glyph: UiGlyphs.download,
+                    glyphSize: 16,
+                    tooltip: l.gen_saveAll,
+                    onTap: h.total == 0
+                        ? null
+                        : () => scope.actions.onSaveImages(
+                            _ids(h, h.batches.map((b) => b.id)),
+                          ),
+                  ),
+                  GenIb(
+                    key: const Key('gen-history-clear'),
+                    glyph: UiGlyphs.trash,
+                    glyphSize: 16,
+                    color: c.error,
+                    tooltip: l.gen_clearHistory,
+                    onTap: h.batches.isEmpty
+                        ? null
+                        : () => _confirmDelete(scope, const [], all: true),
+                  ),
+                ],
               ),
             ),
-            child: Row(
-              spacing: 2,
-              children: [
-                GenIb(
-                  key: const Key('gen-autosave'),
-                  glyph: GenGlyphs.autosave,
-                  glyphSize: 16,
-                  color: h.autoSave ? c.accent : null,
-                  tooltip: h.autoSave ? l.gen_autoSaveOn : l.gen_autoSaveOff,
-                  onTap: () => scope.actions.onAutoSaveChanged(!h.autoSave),
-                ),
-                const Spacer(),
-                GenIb(
-                  key: const Key('gen-history-lock'),
-                  glyph: _locked ? UiGlyphs.lock : UiGlyphs.unlock,
-                  glyphSize: 16,
-                  color: _locked ? c.accent : null,
-                  tooltip: _locked ? l.gen_scrollUnlock : l.gen_scrollLock,
-                  onTap: () => setState(() => _locked = !_locked),
-                ),
-                GenIb(
-                  key: const Key('gen-history-save-all'),
-                  glyph: UiGlyphs.download,
-                  glyphSize: 16,
-                  tooltip: l.gen_saveAll,
-                  onTap: h.total == 0
-                      ? null
-                      : () => scope.actions.onSaveImages(
-                          _ids(h, h.batches.map((b) => b.id)),
-                        ),
-                ),
-                GenIb(
-                  key: const Key('gen-history-clear'),
-                  glyph: UiGlyphs.trash,
-                  glyphSize: 16,
-                  color: c.error,
-                  tooltip: l.gen_clearHistory,
-                  onTap: h.batches.isEmpty
-                      ? null
-                      : () => _confirmDelete(scope, const [], all: true),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

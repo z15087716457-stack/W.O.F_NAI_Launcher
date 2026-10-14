@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -68,6 +69,16 @@ class _GenCanvasState extends State<GenCanvas> {
             else if (!empty)
               const _Stage(),
             if (empty && cv.error == null) const _Empty(),
+          ],
+          if (!cv.positioning && WindowChromeScope.activeOf(context))
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: WindowChromeScope.heightOf(context),
+              child: const WindowDragArea(key: Key('gen-canvas-window-drag')),
+            ),
+          if (!cv.positioning) ...[
             if (bar) ...[
               Positioned(
                 top: 10,
@@ -1392,39 +1403,48 @@ class GenPositionBoard extends StatelessWidget {
     return Column(
       key: const Key('gen-position-board'),
       children: [
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            spacing: 10,
-            children: [
-              UiGlyph(UiGlyphs.grid, size: 16, color: c.ink),
-              Text(
-                l.gen_positionBoard,
-                style: UiText.sans(14, weight: FontWeight.w700, color: c.ink),
-              ),
-              Expanded(
-                child: Text(
-                  chars.aiPosition
-                      ? l.gen_positionAiHint
-                      : (chars.freeform
-                            ? l.gen_positionFreeHint
-                            : l.gen_positionGridHint),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(12, color: c.muted),
-                ),
-              ),
-              UiBtn(
-                key: const Key('gen-position-done'),
-                tone: UiBtnTone.primary,
-                onTap: () => scope.actions.onPositioningChanged(false),
+        WindowHeaderDragSurface(
+          key: const Key('gen-position-window-drag-header'),
+          child: SizedBox(
+            height: 52,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                spacing: 10,
                 children: [
-                  const UiGlyph(UiGlyphs.check, size: 13, strokeWidth: 2.4),
-                  Text(l.gen_done),
+                  UiGlyph(UiGlyphs.grid, size: 16, color: c.ink),
+                  Text(
+                    l.gen_positionBoard,
+                    style: UiText.sans(
+                      14,
+                      weight: FontWeight.w700,
+                      color: c.ink,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      chars.aiPosition
+                          ? l.gen_positionAiHint
+                          : (chars.freeform
+                                ? l.gen_positionFreeHint
+                                : l.gen_positionGridHint),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: UiText.sans(12, color: c.muted),
+                    ),
+                  ),
+                  UiBtn(
+                    key: const Key('gen-position-done'),
+                    tone: UiBtnTone.primary,
+                    onTap: () => scope.actions.onPositioningChanged(false),
+                    children: [
+                      const UiGlyph(UiGlyphs.check, size: 13, strokeWidth: 2.4),
+                      Text(l.gen_done),
+                    ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
         Expanded(
