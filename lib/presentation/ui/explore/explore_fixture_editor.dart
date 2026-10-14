@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../widgets/common/studio_icons.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_glyph.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import 'explore_contract.dart';
 import 'explore_editor.dart';
@@ -186,10 +186,9 @@ class _Header extends StatelessWidget {
                 spacing: 5,
                 children: [
                   // 素材是纯黑剪影，按反色内胆底色着色（同生图页 header_capsules）。
-                  SvgPicture.asset(
+                  UiSvgIcon.asset(
                     'assets/icons/novelai-icon.svg',
-                    width: 13,
-                    height: 13,
+                    size: 13,
                     colorFilter: ColorFilter.mode(c.bg, BlendMode.srcIn),
                   ),
                   Text(
@@ -216,10 +215,9 @@ class _Header extends StatelessWidget {
                 spacing: 5,
                 children: [
                   // 素材是白色填充，按文字色着色。
-                  SvgPicture.asset(
+                  UiSvgIcon.asset(
                     'assets/icons/nai-icon-sakura.svg',
-                    width: 13,
-                    height: 13,
+                    size: 13,
                     colorFilter: ColorFilter.mode(c.muted, BlendMode.srcIn),
                   ),
                   Text(
@@ -261,10 +259,9 @@ class _Header extends StatelessWidget {
               child: Row(
                 spacing: 4,
                 children: [
-                  SvgPicture.asset(
+                  UiSvgIcon.asset(
                     'assets/icons/nai-icon-anlas.svg',
-                    width: 12,
-                    height: 12,
+                    size: 12,
                     colorFilter: ColorFilter.mode(c.ink, BlendMode.srcIn),
                   ),
                   Text(

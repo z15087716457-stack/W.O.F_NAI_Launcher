@@ -1,5 +1,6 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../ui/kit/ui_svg_icon.dart';
 
 import 'uiux_prototype_icon_paths.dart';
 
@@ -45,13 +46,12 @@ class UiuxPrototypeIcon extends StatelessWidget {
     final theme = IconTheme.of(context);
     final dimension = size ?? theme.size ?? 24;
     final ink = color ?? theme.color ?? Theme.of(context).colorScheme.onSurface;
-    return SvgPicture.string(
+    return UiSvgIcon.string(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
       'fill="none" stroke="#000" stroke-width="$strokeWidth" '
       'stroke-linecap="round" stroke-linejoin="round">'
       '<path d="$path"/></svg>',
-      width: dimension,
-      height: dimension,
+      size: dimension,
       colorFilter: ColorFilter.mode(
         ink.withValues(alpha: ink.a * (theme.opacity ?? 1)),
         BlendMode.srcIn,

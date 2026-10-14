@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -9,6 +8,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_slider.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import '../kit/ui_tip.dart';
 import 'gen_contract.dart';
@@ -44,10 +44,9 @@ class GenNaiIcon extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) => SvgPicture.asset(
+  Widget build(BuildContext context) => UiSvgIcon.asset(
     'assets/icons/${name.contains('.') ? name : 'nai-icon-$name.svg'}',
-    width: size,
-    height: size,
+    size: size,
     colorFilter: ColorFilter.mode(color ?? context.ui.ink, BlendMode.srcIn),
   );
 }

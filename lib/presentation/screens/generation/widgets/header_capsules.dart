@@ -1,6 +1,5 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import '../../../../core/constants/api_constants.dart';
@@ -10,6 +9,7 @@ import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_params.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/subscription_provider.dart';
+import '../../../ui/kit/ui_svg_icon.dart';
 import '../../../widgets/anlas/anlas_balance_chip.dart';
 import '../../../widgets/anlas/opus_usage_chip.dart';
 
@@ -73,12 +73,11 @@ class ModelModeCapsule extends ConsumerWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // 官网同款图标：anime=sakura 樱花 / furry=爪印
-                        SvgPicture.asset(
+                        UiSvgIcon.asset(
                           furryMode
                               ? 'assets/icons/nai-icon-furry.svg'
                               : 'assets/icons/nai-icon-sakura.svg',
-                          width: 14,
-                          height: 14,
+                          size: 14,
                           colorFilter: ColorFilter.mode(
                             theme.colorScheme.onSurfaceVariant,
                             BlendMode.srcIn,
@@ -177,10 +176,9 @@ class GenerationModelMenuButton extends ConsumerWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      SvgPicture.asset(
+                      UiSvgIcon.asset(
                         'assets/icons/novelai-icon.svg',
-                        width: 14,
-                        height: 14,
+                        size: 14,
                         // 素材是纯黑剪影，srcIn 着色随内胆底色取反
                         colorFilter: ColorFilter.mode(
                           theme.colorScheme.surface,

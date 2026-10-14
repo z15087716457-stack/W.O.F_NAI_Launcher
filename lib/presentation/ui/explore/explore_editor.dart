@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_block_pill.dart';
@@ -7,6 +6,7 @@ import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import 'explore_contract.dart';
 import 'explore_format.dart';
@@ -313,10 +313,9 @@ class _Cost extends StatelessWidget {
                 height: 1,
               ),
             ),
-            SvgPicture.asset(
+            UiSvgIcon.asset(
               'assets/icons/nai-icon-anlas.svg',
-              width: 10,
-              height: 10,
+              size: 10,
               colorFilter: ColorFilter.mode(ink, BlendMode.srcIn),
             ),
           ],

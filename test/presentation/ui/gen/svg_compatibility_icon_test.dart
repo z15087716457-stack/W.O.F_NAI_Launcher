@@ -3,8 +3,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart';
 
 void main() {
   const references = {
@@ -33,10 +33,15 @@ void main() {
                     color: dark ? Colors.black : Colors.white,
                     child: SizedBox.square(
                       dimension: 16,
-                      child: GenNaiIcon(
-                        entry.key,
-                        size: 16,
-                        color: dark ? Colors.white : Colors.black,
+                      // Asset contour checks bypass presentation resampling.
+                      child: SvgPicture.asset(
+                        'assets/icons/${entry.key}',
+                        width: 16,
+                        height: 16,
+                        colorFilter: ColorFilter.mode(
+                          dark ? Colors.white : Colors.black,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),

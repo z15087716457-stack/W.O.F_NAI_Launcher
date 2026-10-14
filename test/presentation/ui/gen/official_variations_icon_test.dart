@@ -4,8 +4,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart';
 
 /// Geometric oracle for the archived official variations.d35c8a3a.svg.
 /// The source's 3-unit centered strokes are masked to each rectangle, leaving
@@ -87,7 +87,14 @@ void main() {
                   children: [
                     tile(
                       actual,
-                      GenNaiIcon('variations', size: 17, color: ink),
+                      // Check SVG geometry independently of the shared icon's
+                      // user-selected low-density edge resampling.
+                      SvgPicture.asset(
+                        'assets/icons/nai-icon-variations.svg',
+                        width: 17,
+                        height: 17,
+                        colorFilter: ColorFilter.mode(ink, BlendMode.srcIn),
+                      ),
                     ),
                     tile(
                       expected,

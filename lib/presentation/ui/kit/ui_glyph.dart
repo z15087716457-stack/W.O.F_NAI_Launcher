@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+import 'ui_svg_icon.dart';
 
 /// 线性图标：直接用 HTML 原型里的 SVG 路径（24 网格、圆头圆角描边）。
 class UiGlyph extends StatelessWidget {
@@ -24,15 +25,14 @@ class UiGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = color ?? IconTheme.of(context).color ?? Colors.black;
-    return SvgPicture.string(
+    return UiSvgIcon.string(
       filled
           ? '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
                 'fill="#000" stroke="none"><path d="$path"/></svg>'
           : '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" '
                 'stroke="#000" stroke-width="$strokeWidth" stroke-linecap="round" '
                 'stroke-linejoin="round"><path d="$path"/></svg>',
-      width: size,
-      height: size,
+      size: size,
       colorFilter: ColorFilter.mode(ink, BlendMode.srcIn),
       excludeFromSemantics: true,
     );
