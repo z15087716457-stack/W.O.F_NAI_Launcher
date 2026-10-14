@@ -4,7 +4,10 @@ import 'package:flutter/services.dart';
 
 import '../../core/shortcuts/default_shortcuts.dart';
 import '../../core/shortcuts/shortcut_manager.dart';
+import '../../core/utils/localization_extension.dart';
 import '../providers/shortcuts_provider.dart';
+import '../providers/canvas_settings_provider.dart';
+import '../providers/tips_provider.dart';
 
 import '../providers/image_generation_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -14,17 +17,34 @@ import '../ui/gen/gen_contract.dart';
 import '../widgets/common/selectable_image_card.dart';
 import 'generation_operations.dart';
 import 'generation_view_mapping.dart';
+import 'generation_canvas_menu.dart';
 import 'tools_generation_wiring.dart';
 
 /// 新页面保留图块和工具条，旧引擎只管理世界坐标、相机与选择联动。
-class GenerationCanvasWiring extends ConsumerWidget {
+class GenerationCanvasWiring extends ConsumerStatefulWidget {
   const GenerationCanvasWiring({super.key, required this.tileBuilder});
 
   final GenTileBuilder tileBuilder;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GenerationCanvasWiring> createState() =>
+      _GenerationCanvasWiringState();
+}
+
+class _GenerationCanvasWiringState
+    extends ConsumerState<GenerationCanvasWiring> {
+  final _tips = <String, Tip>{};
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(imageGenerationNotifierProvider);
+    final pins = ref.watch(canvasPinnedNotifierProvider);
+    final run = state.generationRunId == null
+        ? 'inflight'
+        : 'run:${state.generationRunId}';
+    _tips.removeWhere(
+      (key, _) => !state.isGenerating || !key.startsWith('$run:'),
+    );
     return GenerationCanvasView(
       generationState: state,
       focusInsets: GenCanvas.pad,
@@ -46,7 +66,7 @@ class GenerationCanvasWiring extends ConsumerWidget {
       tileBuilder: (context, item, focused, select, allowTap) {
         final tile = generationCanvasItemView(item, state);
         final slot = item.tile.slot;
-        return GenCanvasTileScope(
+        final content = GenCanvasTileScope(
           allowTap: allowTap,
           onFocus: () {
             if (ref.read(toolsSheetProvider) == null) {
@@ -69,11 +89,49 @@ class GenerationCanvasWiring extends ConsumerWidget {
                   bytes: slot!.previewBytes!,
                   placement: slot.inpaintPreviewPlacement,
                 ),
-          child: tileBuilder(
+          generating: slot == null
+              ? null
+              : CanvasGeneratingContent(
+                  tip: _tips.putIfAbsent(
+                    '${item.group.key}:${slot.imageNumber}',
+                    () => ref.read(tipDeckProvider).draw(TipSurface.generating),
+                  ),
+                ),
+          failedPreview: item.image?.isFailedStreamSnapshot == true
+              ? Image(
+                  image: tile.image!,
+                  fit: BoxFit.fill,
+                  gaplessPlayback: true,
+                  filterQuality: FilterQuality.medium,
+                )
+              : null,
+          child: widget.tileBuilder(
             context,
             tile,
             focused: focused && item.group.tiles.length > 1,
           ),
+        );
+        return buildCanvasTilePresentation(
+          item: item,
+          focused: focused,
+          pinned: item.image != null && pins.contains(item.image!.id),
+          onSelect: select,
+          child: item.image == null
+              ? content
+              : Tooltip(
+                  message: item.image!.isFailedStreamSnapshot
+                      ? context.l10n.generation_failedStreamSnapshotHint
+                      : '',
+                  child: GestureDetector(
+                    onSecondaryTapDown: (details) => openGenerationCanvasMenu(
+                      context,
+                      ref,
+                      item.image!,
+                      details.globalPosition,
+                    ),
+                    child: content,
+                  ),
+                ),
         );
       },
     );

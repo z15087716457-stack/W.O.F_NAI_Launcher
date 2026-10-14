@@ -26,6 +26,9 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/providers/tips_provider.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_controls.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_tile_toolbar.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_world_viewport.dart';
@@ -48,11 +51,22 @@ import 'generation_data_wiring_test.dart'
 import '../screens/generation/widgets/reference_module_test.dart'
     show prepareGenerationDropTestPlatform;
 
+class _CountingTipDeck extends TipDeck {
+  _CountingTipDeck() : super(seed: 23);
+  int generatingDraws = 0;
+  @override
+  Tip draw(TipSurface surface, {DateTime? now}) {
+    if (surface == TipSurface.generating) generatingDraws++;
+    return super.draw(surface, now: now);
+  }
+}
+
 void main() {
   prepareGenerationDropTestPlatform();
   late Directory directory;
   late ProviderContainer container;
   late MemoryDraftSettings storage;
+  late _CountingTipDeck deck;
   final events = <String>[];
   final bytes = Uint8List.fromList(
     pixels.encodePng(
@@ -73,6 +87,15 @@ void main() {
               as DataGeneration)
           .publish(value);
   CanvasCamera camera() => container.read(generationCanvasCameraProvider);
+  ImageGenerationState loading(int run, {int count = 1}) =>
+      ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: run,
+        totalImages: count,
+        currentImage: 1,
+        batchWidth: 512,
+        batchHeight: 768,
+      );
   final boundary = GlobalKey();
 
   setUpAll(loadStudioCaptureFonts);
@@ -83,9 +106,11 @@ void main() {
     Hive.init(directory.path);
     await Hive.openBox(StorageKeys.settingsBox);
     storage = MemoryDraftSettings();
+    deck = _CountingTipDeck();
     storage.values[StorageKeys.canvasReducedMotion] = true;
     container = ProviderContainer(
       overrides: [
+        tipDeckProvider.overrideWithValue(deck),
         localStorageServiceProvider.overrideWithValue(storage),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
@@ -187,15 +212,19 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
-    if (Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') return;
+    final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
+    if (!restored && Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
+      return;
+    }
     await tester.runAsync(() async {
       final target =
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final file = File(
-        '.dart_tool/infinite-canvas-20261014/captures/$name.png',
-      );
+      final area = restored
+          ? 'canvas-presentation-20261014'
+          : 'infinite-canvas-20261014';
+      final file = File('.dart_tool/$area/captures/$name.png');
       await file.parent.create(recursive: true);
       await file.writeAsBytes(data!.buffer.asUint8List());
       snapshot.dispose();
@@ -583,6 +612,270 @@ void main() {
     expect(container.read(generationPreviewSelectionProvider), selected);
     expect(find.byKey(const Key('gen-tile-1-1')), findsNothing);
   });
+  testWidgets('旧悬浮动效从 .98 平滑到 1，离开后恢复且不改变相机', (tester) async {
+    publish(ImageGenerationState(history: [image(1)]));
+    await pump(tester);
+    final scale = find.byKey(const ValueKey('canvas-tile-scale:run:1:0'));
+    final target = find.byKey(const Key('gen-tile-1-0'));
+    expect(tester.widget<AnimatedScale>(scale).scale, .98);
+    final width = tester.getRect(target).width;
+    final before = camera();
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: const Offset(5, 5));
+    await mouse.moveTo(tester.getCenter(target));
+    await tester.pumpAndSettle();
+    expect(tester.widget<AnimatedScale>(scale).scale, 1);
+    expect(tester.getRect(target).width / width, closeTo(1 / .98, .001));
+    expect(camera().offset, before.offset);
+    expect(camera().scale, before.scale);
+    await capture(tester, 'hover-restored');
+    await mouse.moveTo(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(tester.widget<AnimatedScale>(scale).scale, .98);
+    await mouse.removePointer();
+  });
+  testWidgets('子图已选中时保持 1 倍，不随移入移出收缩', (tester) async {
+    publish(ImageGenerationState(history: [image(1)]));
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('gen-tile-1-0')));
+    await tester.pumpAndSettle();
+    final scale = find.byKey(const ValueKey('canvas-tile-scale:run:1:0'));
+    expect(tester.widget<AnimatedScale>(scale).scale, 1);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: const Offset(5, 5));
+    await mouse.moveTo(tester.getCenter(find.byKey(const Key('gen-tile-1-0'))));
+    await tester.pumpAndSettle();
+    await mouse.moveTo(const Offset(5, 5));
+    await tester.pumpAndSettle();
+    expect(tester.widget<AnimatedScale>(scale).scale, 1);
+    await mouse.removePointer();
+  });
+  testWidgets('生成文案跨进度、流式帧、可见剔除保持，同槽位只抽一次', (tester) async {
+    publish(loading(2));
+    await pump(tester);
+    final tip = find.byKey(const Key('canvas-inflight-tip'));
+    final text = tester.widget<Text>(tip).data;
+    expect(text, isNotEmpty);
+    expect(deck.generatingDraws, 1);
+    publish(
+      container
+          .read(imageGenerationNotifierProvider)
+          .copyWith(progress: .5, streamPreview: bytes),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(tip).data, text);
+    final before = camera();
+    container
+        .read(generationCanvasCameraProvider.notifier)
+        .panBy(const Offset(0, -5000));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(tip, findsNothing);
+    container.read(generationCanvasCameraProvider.notifier).jump(before);
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(tester.widget<Text>(tip).data, text);
+    expect(deck.generatingDraws, 1);
+    await capture(tester, 'stable-generating-tip');
+    publish(loading(3));
+    await tester.pumpAndSettle();
+    expect(deck.generatingDraws, 2);
+  });
+  testWidgets('生成动效跟随减少动态设置，停止动画仍显示文案', (tester) async {
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: Locale('zh'),
+          home: Scaffold(body: Center(child: CanvasGeneratingContent())),
+        ),
+      ),
+    );
+    await tester.pump();
+    final animated = find.descendant(
+      of: find.byType(CanvasGeneratingContent),
+      matching: find.byType(AnimatedBuilder),
+    );
+    final animation =
+        tester.widget<AnimatedBuilder>(animated).animation
+            as AnimationController;
+    expect(animation.isAnimating, isFalse);
+    await container
+        .read(canvasReducedMotionNotifierProvider.notifier)
+        .setReduced(false);
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(animation.isAnimating, isTrue);
+    await container
+        .read(canvasReducedMotionNotifierProvider.notifier)
+        .setReduced(true);
+    await tester.pump();
+    expect(animation.isAnimating, isFalse);
+    expect(find.byKey(const Key('canvas-inflight-tip')), findsOneWidget);
+  });
+  testWidgets('固定角标、变体原图和组张数重新接回，缩放时固定角标恒定', (tester) async {
+    final original = GeneratedImage(
+      id: 'original',
+      bytes: bytes,
+      width: 512,
+      height: 768,
+      generationRunId: 1,
+      batchIndex: 0,
+      isVariationOriginal: true,
+    );
+    publish(ImageGenerationState(history: [original, image(1, 1)]));
+    await tester.runAsync(
+      () => container
+          .read(generationHistoryActionsProvider)
+          .pin(original.id, true),
+    );
+    await pump(tester);
+    final item = find.byKey(const ValueKey('canvas-tile:run:1:0'));
+    expect(
+      find.descendant(
+        of: item,
+        matching: find.byKey(
+          const ValueKey('canvas-variation-original:original'),
+        ),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: item,
+        matching: find.byKey(const ValueKey('canvas-pin:original')),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('canvas-batch-count:run:1')),
+      findsOneWidget,
+    );
+    final pin = find.descendant(
+      of: item,
+      matching: find.byIcon(Icons.push_pin),
+    );
+    final width = tester.getRect(pin).width;
+    final before = camera();
+    container
+        .read(generationCanvasCameraProvider.notifier)
+        .jump(CanvasCamera(offset: before.offset, scale: before.scale * 2));
+    await tester.pump(const Duration(milliseconds: 16));
+    expect(tester.getRect(pin).width, closeTo(width, .001));
+    await capture(tester, 'restored-badges');
+  });
+  testWidgets('右击未选中图的菜单操作准确指向该图，无真实请求', (tester) async {
+    publish(ImageGenerationState(history: [image(1), image(1, 1)]));
+    await pump(tester);
+    await tester.tap(
+      find.byKey(const Key('gen-tile-1-1')),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    final selected = container.read(generationPreviewSelectionProvider);
+    expect(find.byKey(const Key('gen-canvas-menu-save')), findsOneWidget);
+    await capture(tester, 'restored-context-menu');
+    await tester.tap(find.byKey(const Key('gen-canvas-menu-save')));
+    await tester.pumpAndSettle();
+    expect(events, contains('onSaveImage(1-1)'));
+    expect(container.read(generationPreviewSelectionProvider), selected);
+    await tester.tap(
+      find.byKey(const Key('gen-tile-1-1')),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('gen-canvas-menu-delete')));
+    await tester.pumpAndSettle();
+    expect(events, contains('onDeleteImages([1-1])'));
+  });
+  testWidgets('生成期间右键禁用派生入口，保留成图保存和查看', (tester) async {
+    publish(loading(2).copyWith(history: [image(1)]));
+    await pump(tester);
+    container.read(generationHistoryActionsProvider).focusBatch('run:1');
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const Key('gen-tile-1-0')),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+    final disabled = tester.widget<UiPressable>(
+      find.byKey(const Key('gen-canvas-menu-variations')),
+    );
+    expect(disabled.onTap, isNull);
+    expect(
+      tester
+          .widget<UiPressable>(find.byKey(const Key('gen-canvas-menu-save')))
+          .onTap,
+      isNotNull,
+    );
+    await tester.ensureVisible(
+      find.byKey(const Key('gen-canvas-menu-variations')),
+    );
+    await tester.tap(find.byKey(const Key('gen-canvas-menu-variations')));
+    await tester.pumpAndSettle();
+    expect(events.where((event) => event.startsWith('onVariations')), isEmpty);
+  });
+  testWidgets('失败快照仍渲染原图片与状态标签，双击可查看，派生保存禁用', (tester) async {
+    final failed = GeneratedImage(
+      id: 'failed',
+      bytes: bytes,
+      width: 512,
+      height: 768,
+      generationRunId: 1,
+      kind: GeneratedImageKind.failedStreamSnapshot,
+    );
+    publish(ImageGenerationState(history: [failed]));
+    await pump(tester);
+    final target = find.byKey(const Key('gen-tile-failed'));
+    expect(
+      find.descendant(of: target, matching: find.byType(Image)),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('canvas-failed-snapshot:failed')),
+      findsOneWidget,
+    );
+    await tester.tap(target);
+    await tester.pumpAndSettle();
+    await tester.tap(target);
+    await tester.pumpAndSettle();
+    expect(events, contains('onOpenViewer(failed)'));
+    await tester.tap(target, buttons: kSecondaryMouseButton);
+    await tester.pumpAndSettle();
+    for (final key in ['save', 'copy', 'img2img', 'variations']) {
+      expect(
+        tester
+            .widget<UiPressable>(find.byKey(Key('gen-canvas-menu-$key')))
+            .onTap,
+        isNull,
+      );
+    }
+    await capture(tester, 'failed-frame-retained');
+  });
+  for (final language in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
+    for (final dark in [false, true]) {
+      testWidgets('$language ${dark ? 'dark' : 'light'} 生成文案实绘和布局', (
+        tester,
+      ) async {
+        publish(loading(2, count: 2));
+        await pump(tester, fullPage: true, language: language, dark: dark);
+        expect(find.byKey(const Key('canvas-inflight-tip')), findsNWidgets(2));
+        expect(deck.generatingDraws, 2);
+        for (final element in find.byType(CanvasGeneratingContent).evaluate()) {
+          final widget = element.widget as CanvasGeneratingContent;
+          final text = widget.tip!.text(element.l10n);
+          expect(
+            find.descendant(
+              of: find.byWidget(widget),
+              matching: find.text(text),
+            ),
+            findsOneWidget,
+          );
+        }
+        expect(tester.takeException(), isNull);
+        await capture(tester, 'tips-$language-${dark ? 'dark' : 'light'}');
+      });
+    }
+  }
   for (final language in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
     for (final dark in [false, true]) {
       testWidgets('$language ${dark ? 'dark' : 'light'} 新页面完整挂载与缩窄', (

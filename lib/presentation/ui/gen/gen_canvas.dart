@@ -299,12 +299,16 @@ class GenCanvasTileScope extends InheritedWidget {
     required this.onFocus,
     required this.allowTap,
     this.preview,
+    this.generating,
+    this.failedPreview,
     required super.child,
   });
 
   final VoidCallback onFocus;
   final bool Function() allowTap;
   final Widget? preview;
+  final Widget? generating;
+  final Widget? failedPreview;
 
   static GenCanvasTileScope? maybeOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<GenCanvasTileScope>();
@@ -313,7 +317,9 @@ class GenCanvasTileScope extends InheritedWidget {
   bool updateShouldNotify(GenCanvasTileScope oldWidget) =>
       onFocus != oldWidget.onFocus ||
       allowTap != oldWidget.allowTap ||
-      preview != oldWidget.preview;
+      preview != oldWidget.preview ||
+      generating != oldWidget.generating ||
+      failedPreview != oldWidget.failedPreview;
 }
 
 /// 画布上的一张：圆角 6。单击选中，300ms 内再点一次开大图。
@@ -340,7 +346,7 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
         _last != null &&
         now.difference(_last!) < const Duration(milliseconds: 300);
     _last = now;
-    if (t.state != GenTileState.done) {
+    if (t.state != GenTileState.done && interaction?.failedPreview == null) {
       interaction?.onFocus();
       return;
     }
@@ -389,7 +395,14 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
                     gaplessPlayback: true,
                   ),
             ),
-          const Center(child: _Dots()),
+          if (t.preview != null &&
+              GenCanvasTileScope.maybeOf(context)?.generating != null)
+            ColoredBox(color: c.bg.withValues(alpha: .35)),
+          Center(
+            child:
+                GenCanvasTileScope.maybeOf(context)?.generating ??
+                const _Dots(),
+          ),
           if (t.progress != null)
             Positioned(
               left: 0,
@@ -408,33 +421,39 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
             ),
         ],
       ),
-      _ => ColoredBox(
-        color: GenFormat.softBg(c),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 8,
-              children: [
-                UiGlyph(UiGlyphs.alert, size: 22, color: c.error),
-                Text(
-                  l.gen_tileFailed,
-                  style: UiText.sans(13, weight: FontWeight.w600, color: c.ink),
-                ),
-                if (t.error != null)
-                  Text(
-                    t.error!,
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(12, color: c.muted),
+      _ =>
+        GenCanvasTileScope.maybeOf(context)?.failedPreview ??
+            ColoredBox(
+              color: GenFormat.softBg(c),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      UiGlyph(UiGlyphs.alert, size: 22, color: c.error),
+                      Text(
+                        l.gen_tileFailed,
+                        style: UiText.sans(
+                          13,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                        ),
+                      ),
+                      if (t.error != null)
+                        Text(
+                          t.error!,
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: UiText.sans(12, color: c.muted),
+                        ),
+                    ],
                   ),
-              ],
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     };
     return UiPressable(
       key: Key('gen-tile-${t.id}'),

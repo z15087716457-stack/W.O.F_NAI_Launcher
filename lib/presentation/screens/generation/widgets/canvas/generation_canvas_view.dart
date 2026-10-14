@@ -686,8 +686,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                       .toList(),
                                 ),
                               ),
-                              if (!widget.embedded)
-                                ..._buildGroupBadges(layout, camera),
+                              ..._buildGroupBadges(layout, camera),
                             ],
                           );
                         },
@@ -811,6 +810,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                     .dy +
                 6,
             child: IgnorePointer(
+              key: ValueKey('canvas-batch-count:${group.key}'),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
@@ -1310,6 +1310,24 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 }
 
 /// 单 tile：非焦点 scale(0.98) + 悬停回 1
+Widget buildCanvasTilePresentation({
+  required CanvasFeedItem item,
+  required bool focused,
+  required bool pinned,
+  required VoidCallback onSelect,
+  required Widget child,
+}) => _CanvasTile(
+  group: item.group,
+  tile: item.tile,
+  subimageIndex: item.subimageIndex,
+  isFocusGroup: focused,
+  isFocusSubimage: focused,
+  isPinned: pinned,
+  onSelect: onSelect,
+  imageChild: child,
+  embedded: true,
+);
+
 class _CanvasTile extends ConsumerStatefulWidget {
   const _CanvasTile({
     required this.group,
@@ -1320,6 +1338,7 @@ class _CanvasTile extends ConsumerStatefulWidget {
     required this.isPinned,
     required this.onSelect,
     required this.imageChild,
+    this.embedded = false,
   });
 
   final CanvasFeedGroup group;
@@ -1330,6 +1349,7 @@ class _CanvasTile extends ConsumerStatefulWidget {
   final bool isPinned;
   final VoidCallback onSelect;
   final Widget? imageChild;
+  final bool embedded;
 
   @override
   ConsumerState<_CanvasTile> createState() => _CanvasTileState();
@@ -1350,6 +1370,7 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
     // 生成中占位槽（官网 image-grid-generating）：批参数尺寸 + 三点
     // 弹跳动画，有流式帧时叠预览帧。
     if (widget.tile.isInFlight) {
+      if (widget.embedded) return widget.imageChild!;
       return GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onSelect,
@@ -1365,6 +1386,9 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
         setState(() => _hovering = false);
       },
       child: AnimatedScale(
+        key: ValueKey(
+          'canvas-tile-scale:${widget.group.key}:${widget.subimageIndex}',
+        ),
         scale: scale,
         duration: const Duration(milliseconds: 250),
         curve: const Cubic(0.22, 1, 0.36, 1),
@@ -1372,16 +1396,21 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
           clipBehavior: Clip.none,
           children: [
             Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: CanvasImageBackground(
-                  child: RepaintBoundary(child: widget.imageChild!),
-                ),
-              ),
+              child: widget.embedded
+                  ? RepaintBoundary(child: widget.imageChild!)
+                  : ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CanvasImageBackground(
+                        child: RepaintBoundary(child: widget.imageChild!),
+                      ),
+                    ),
             ),
             // 钉住角标（官网钉板标记）：实心 pin，右上反缩放恒屏大小
             if (widget.tile.image?.isVariationOriginal == true)
               Positioned(
+                key: ValueKey(
+                  'canvas-variation-original:${widget.tile.image!.id}',
+                ),
                 top: 0,
                 left: 0,
                 child: Transform.scale(
@@ -1412,6 +1441,7 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
               ),
             if (widget.isPinned)
               Positioned(
+                key: ValueKey('canvas-pin:${widget.tile.image!.id}'),
                 top: -30 / cameraScale.clamp(0.5, 2.5),
                 right: 0,
                 child: Transform.scale(
@@ -1433,6 +1463,36 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
                   ),
                 ),
               ),
+            if (widget.embedded &&
+                widget.tile.image?.isFailedStreamSnapshot == true)
+              Positioned(
+                left: 6,
+                bottom: 6,
+                child: IgnorePointer(
+                  child: Tooltip(
+                    message: context.l10n.generation_failedStreamSnapshotHint,
+                    child: Container(
+                      key: ValueKey(
+                        'canvas-failed-snapshot:${widget.tile.image!.id}',
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 7,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        context.l10n.generation_failedStreamSnapshot,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -1442,35 +1502,14 @@ class _CanvasTileState extends ConsumerState<_CanvasTile> {
 
 /// 生成中占位 tile（官网 `image-grid-generating`）：批参数尺寸的卡面 +
 /// 三点弹跳加载动画 + 一句等待小贴士；有流式预览帧时盖一层进度图。
-class _InflightSlotTile extends ConsumerStatefulWidget {
+class _InflightSlotTile extends StatelessWidget {
   const _InflightSlotTile({required this.slot});
-
   final StreamPreviewSlot slot;
-
-  @override
-  ConsumerState<_InflightSlotTile> createState() => _InflightSlotTileState();
-}
-
-class _InflightSlotTileState extends ConsumerState<_InflightSlotTile>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _dots = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1200),
-  )..repeat();
-
-  /// 每张占位卡一句，生成期间不换。
-  late final Tip _tip = ref.read(tipDeckProvider).draw(TipSurface.generating);
-
-  @override
-  void dispose() {
-    _dots.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final preview = widget.slot.previewBytes;
+    final preview = slot.previewBytes;
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
       child: CanvasImageBackground(
@@ -1484,70 +1523,116 @@ class _InflightSlotTileState extends ConsumerState<_InflightSlotTile>
               if (preview != null && preview.isNotEmpty)
                 buildStreamPreviewImage(
                   bytes: preview,
-                  placement: widget.slot.inpaintPreviewPlacement,
+                  placement: slot.inpaintPreviewPlacement,
                 ),
-              Container(
+              ColoredBox(
                 color: theme.colorScheme.surface.withValues(
                   alpha: preview != null && preview.isNotEmpty ? 0.35 : 0.0,
                 ),
               ),
-              Center(
-                child: AnimatedBuilder(
-                  animation: _dots,
-                  builder: (context, _) {
-                    // 官网三点弹跳：三圆依次起落的 loading 节奏
-                    Widget dot(int i) {
-                      final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
-                      final bump = math.sin(phase * math.pi);
-                      return Transform.translate(
-                        offset: Offset(0, -6 * bump),
-                        child: Container(
-                          width: 10,
-                          height: 10,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.55 + 0.35 * bump,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            dot(0),
-                            const SizedBox(width: 8),
-                            dot(1),
-                            const SizedBox(width: 8),
-                            dot(2),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            _tip.text(context.l10n),
-                            key: const Key('canvas-inflight-tip'),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyMedium,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              const Center(child: CanvasGeneratingContent()),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 旧画布与新图块共享同一套生成动效和小贴士。
+class CanvasGeneratingContent extends ConsumerStatefulWidget {
+  const CanvasGeneratingContent({super.key, this.tip});
+  final Tip? tip;
+  @override
+  ConsumerState<CanvasGeneratingContent> createState() =>
+      _CanvasGeneratingContentState();
+}
+
+class _CanvasGeneratingContentState
+    extends ConsumerState<CanvasGeneratingContent>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _dots = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
+  late final Tip _tip =
+      widget.tip ?? ref.read(tipDeckProvider).draw(TipSurface.generating);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateMotion();
+  }
+
+  void _updateMotion() {
+    if (ref.read(canvasReducedMotionNotifierProvider) ||
+        MediaQuery.disableAnimationsOf(context)) {
+      _dots.stop();
+    } else if (!_dots.isAnimating) {
+      _dots.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _dots.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(canvasReducedMotionNotifierProvider, (_, _) => _updateMotion());
+    final theme = Theme.of(context);
+    return AnimatedBuilder(
+      animation: _dots,
+      builder: (context, _) {
+        // 官网三点弹跳：三圆依次起落的 loading 节奏
+        Widget dot(int i) {
+          final phase = (_dots.value * 3 - i).clamp(0.0, 1.0);
+          final bump = math.sin(phase * math.pi);
+          return Transform.translate(
+            offset: Offset(0, -6 * bump),
+            child: Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: theme.colorScheme.onSurface.withValues(
+                  alpha: 0.55 + 0.35 * bump,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                dot(0),
+                const SizedBox(width: 8),
+                dot(1),
+                const SizedBox(width: 8),
+                dot(2),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                _tip.text(context.l10n),
+                key: const Key('canvas-inflight-tip'),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
