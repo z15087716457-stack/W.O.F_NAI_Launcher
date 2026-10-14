@@ -7,6 +7,7 @@ import '../providers/character_prompt_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/pill_roll_coordinator.dart';
 import '../providers/pill_workspace_provider.dart';
+import '../providers/tips_provider.dart';
 import '../ui/gen/gen_contract.dart';
 import '../widgets/prompt/comfyui_import_wrapper.dart';
 import '../widgets/prompt/pills/prompt_pill_editor.dart';
@@ -37,9 +38,13 @@ class GenerationEditorWiring extends ConsumerWidget {
     super.key,
     required this.target,
     this.characterId,
+    this.explore = false,
   });
   final GenEditorTarget target;
   final String? characterId;
+
+  /// 画风探索：正向基础提示词可以切换随机块的进化标记，空白提示用探索的提示语。
+  final bool explore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,12 +74,14 @@ class GenerationEditorWiring extends ConsumerWidget {
         ? character.negativePrompt
         : character.prompt;
     final spec = ModelSpecs.of(params.model);
+    final explorePrompt = explore && target.isBase && !target.negative;
     final editor = PromptPillEditor(
       key: ValueKey('generation-editor-$scope-${target.fullscreen}'),
       pillScope: scope,
       initialPlainText: plain,
       minLines: target.fullscreen ? 8 : 1,
       autoGrow: true,
+      allowEvolutionToggle: explorePrompt,
       textStyle: DefaultTextStyle.of(
         context,
       ).style.copyWith(fontSize: target.fullscreen ? 14 : 13, height: 1.5),
@@ -94,6 +101,9 @@ class GenerationEditorWiring extends ConsumerWidget {
           sdSyntaxAutoConvertSettingsProvider,
         ),
         showClearButton: false,
+        hintText: explorePrompt
+            ? watchTipHint(ref, context.l10n, TipSurface.explorePrompt)
+            : null,
         enableComfyuiImport:
             target.isBase && !target.negative && spec.characterPrompts,
       ),

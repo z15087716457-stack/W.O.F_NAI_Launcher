@@ -8,7 +8,6 @@ import '../../core/utils/app_logger.dart';
 import '../../data/models/style_explore/explore_run.dart'
     show ExploreRunStatus, ExploreCandidateGenerationStatus;
 import '../../core/utils/localization_extension.dart';
-import '../providers/character_position_canvas_provider.dart';
 import '../providers/cost_estimate_provider.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/generation/local_upscale_provider.dart';
@@ -28,10 +27,10 @@ import '../utils/explore_display_data.dart';
 import '../ui/explore/explore_contract.dart';
 import '../ui/explore/explore_page.dart';
 import '../utils/asset_protection_guard.dart';
-import '../widgets/character/character_position_canvas.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
+import 'generation_blocks_dock.dart';
 import 'style_explore_backend.dart';
 import 'style_explore_blocks_wiring.dart';
 import 'style_explore_editor_wiring.dart';
@@ -268,41 +267,8 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
     }
   }
 
-  Future<void> _positioning() async {
-    await showDialog<void>(
-      context: context,
-      builder: (dialogContext) => Consumer(
-        builder: (context, ref, _) {
-          ref.listen(characterPositionCanvasProvider, (previous, next) {
-            if (!next && dialogContext.mounted) {
-              Navigator.of(dialogContext).pop();
-            }
-          });
-          final size = MediaQuery.sizeOf(context);
-          return Dialog(
-            child: SizedBox(
-              width: size.width * 0.6,
-              height: size.height * 0.85,
-              child: const CharacterPositionCanvasView(),
-            ),
-          );
-        },
-      ),
-    );
-    if (mounted && ref.read(characterPositionCanvasProvider)) {
-      ref.read(characterPositionCanvasProvider.notifier).close();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    ref.listen(characterPositionCanvasProvider, (previous, next) {
-      if (next && previous != true) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) unawaited(_run(_positioning));
-        });
-      }
-    });
     final list = ref.watch(exploreRunListNotifierProvider);
     final current = ref.watch(exploreActiveRunProvider);
     final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
@@ -532,31 +498,24 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
                 ),
               )
             : null,
-        child: Stack(
-          children: [
-            StyleExplorePage(
-              data: data,
-              actions: actions,
-              editor:
-                  widget.editor ??
-                  (context, parts) => StyleExploreEditorWiring(
-                    parts: parts,
-                    controller: _generation,
-                    onBatchEvent: _batch,
-                    canGenerate: () => _manualGuard?.call() ?? false,
-                  ),
-            ),
-            if (layout.blockLibraryPanelExpanded &&
-                !window.captionOverStage &&
-                !window.fullscreen)
-              Positioned(
-                left: data.editorWidth,
-                top: 61,
-                bottom: 0,
-                width: 300,
-                child: const StyleExploreBlocksDockWiring(),
+        child: StyleExplorePage(
+          data: data,
+          actions: actions,
+          dock: layout.blockLibraryPanelExpanded
+              ? BlocksDockWiring(
+                  onInsert: (id) async {
+                    await insertStyleExploreBlock(context, ref, id);
+                  },
+                )
+              : null,
+          editor:
+              widget.editor ??
+              (context, parts) => StyleExploreEditorWiring(
+                parts: parts,
+                controller: _generation,
+                onBatchEvent: _batch,
+                canGenerate: () => _manualGuard?.call() ?? false,
               ),
-          ],
         ),
       ),
     );

@@ -165,8 +165,15 @@ typedef GenerationPageBuilder =
     });
 
 class GenerationWiring extends ConsumerStatefulWidget {
-  const GenerationWiring({super.key, this.builder = GenerationPage.new});
+  const GenerationWiring({
+    super.key,
+    this.builder = GenerationPage.new,
+    this.explore = false,
+  });
   final GenerationPageBuilder builder;
+
+  /// 画风探索编辑列：正向提示词允许切换进化标记，提示语换成探索的。
+  final bool explore;
   @override
   ConsumerState<GenerationWiring> createState() => _GenerationWiringState();
 }
@@ -215,6 +222,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
       slots: GenSlots(
         editor: (context, target) => GenerationEditorWiring(
           target: target,
+          explore: widget.explore,
           characterId: target.character == null
               ? null
               : characterId(target.character!),

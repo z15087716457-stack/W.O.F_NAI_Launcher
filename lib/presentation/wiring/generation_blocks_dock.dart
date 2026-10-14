@@ -73,8 +73,15 @@ BlockData generationBlockData(
 );
 
 class BlocksDockWiring extends ConsumerStatefulWidget {
-  const BlocksDockWiring({super.key, this.fallbackScope = PillScopes.main});
+  const BlocksDockWiring({
+    super.key,
+    this.fallbackScope = PillScopes.main,
+    this.onInsert,
+  });
   final String fallbackScope;
+
+  /// 换掉默认的插入写入（画风探索用自己的草稿保护）。
+  final Future<void> Function(String id)? onInsert;
   @override
   ConsumerState<BlocksDockWiring> createState() => _BlocksDockWiringState();
 }
@@ -209,7 +216,7 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
           filter = value;
           query = '';
         }),
-        onInsert: (id) => run(() => insert(id)),
+        onInsert: (id) => run(() => (widget.onInsert ?? insert)(id)),
         dragDataOf: (id) => PromptBlockDragData(blockId: id),
         onCreate: () => run(() => edit(null)),
         onEdit: (id) => run(() => edit(id)),

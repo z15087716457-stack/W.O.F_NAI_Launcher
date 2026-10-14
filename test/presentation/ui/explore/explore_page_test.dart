@@ -419,6 +419,33 @@ void main() {
     });
   });
 
+  group('块库侧栏', () {
+    testWidgets('贴在编辑列右边、整高 300，舞台让位；窗口窄时检查器改抽屉、不溢出', (t) async {
+      for (final window in [1600.0, 1250.0]) {
+        await pumpExplore(
+          t,
+          data: ExploreFixture.view(),
+          actions: rec.actions,
+          window: window,
+          dock: const SizedBox.expand(key: Key('dock-body')),
+        );
+        await t.pumpAndSettle();
+        final editor = t.getRect(find.byKey(const Key('explore-editor')));
+        final dock = t.getRect(find.byKey(const Key('explore-dock')));
+        expect(dock.left, editor.right);
+        expect(dock.top, 0);
+        expect(dock.width, 300);
+        expect(dock.height, editor.height);
+        expect(find.byKey(const Key('dock-body')), findsOneWidget);
+        expect(
+          find.byKey(const Key('explore-inspector')),
+          window == 1600 ? findsOneWidget : findsNothing,
+        );
+        expect(t.takeException(), isNull);
+      }
+    });
+  });
+
   group('顶栏与生成', () {
     testWidgets('切换探索：搜索、打开另一个、新建', (t) async {
       await pump(t);

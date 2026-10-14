@@ -146,53 +146,62 @@ class _RoundHeader extends StatelessWidget {
       l.explore_count(round.keys.length),
       if (live) l.explore_generatingShort(p.done, p.total),
     ].join(' · ');
+    final metaText = Text(
+      meta,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: UiText.sans(12, color: live ? c.accent : c.muted),
+    );
     return Padding(
       key: Key('explore-round-${round.id}'),
       padding: const EdgeInsets.fromLTRB(2, 14, 2, 10),
-      child: Row(
-        spacing: 10,
-        children: [
-          Text(
-            l.explore_round(round.number),
-            style: UiText.sans(13, weight: FontWeight.w700, color: c.ink),
-          ),
-          Text(meta, style: UiText.sans(12, color: live ? c.accent : c.muted)),
-          if (failed > 0)
-            UiPressable(
-              key: Key('explore-retry-${round.id}'),
-              onTap: scope.actions.onRetryFailed,
-              builder: (context, hover) => Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 4,
-                children: [
-                  UiGlyph(UiGlyphs.alert, size: 13, color: c.error),
-                  Text(
-                    l.explore_failedRetry(failed),
-                    style: UiText.sans(12, color: c.error).copyWith(
-                      decoration: hover ? TextDecoration.underline : null,
-                      decorationColor: c.error,
+      // 舞台窄（块库侧栏打开、窗口小）时时间和张数可以省略号收起；宽的时候原样排。
+      child: LayoutBuilder(
+        builder: (context, box) => Row(
+          spacing: 10,
+          children: [
+            Text(
+              l.explore_round(round.number),
+              style: UiText.sans(13, weight: FontWeight.w700, color: c.ink),
+            ),
+            if (box.maxWidth < 640) Flexible(child: metaText) else metaText,
+            if (failed > 0)
+              UiPressable(
+                key: Key('explore-retry-${round.id}'),
+                onTap: scope.actions.onRetryFailed,
+                builder: (context, hover) => Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 4,
+                  children: [
+                    UiGlyph(UiGlyphs.alert, size: 13, color: c.error),
+                    Text(
+                      l.explore_failedRetry(failed),
+                      style: UiText.sans(12, color: c.error).copyWith(
+                        decoration: hover ? TextDecoration.underline : null,
+                        decorationColor: c.error,
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+              ),
+            Expanded(child: Container(height: 1, color: c.line)),
+            if (!ctrl.selecting)
+              UiBtn(
+                key: Key('explore-pick-${round.id}'),
+                tone: UiBtnTone.ghost,
+                size: UiBtnSize.small,
+                tooltip: l.explore_pickTip,
+                onTap: () => ctrl.setSelected([
+                  for (final x in cands)
+                    if (x.favorite && x.done) x.key,
+                ]),
+                children: [
+                  UiGlyph(UiGlyphs.evo, size: 13, color: c.evo),
+                  Text(l.explore_pick),
                 ],
               ),
-            ),
-          Expanded(child: Container(height: 1, color: c.line)),
-          if (!ctrl.selecting)
-            UiBtn(
-              key: Key('explore-pick-${round.id}'),
-              tone: UiBtnTone.ghost,
-              size: UiBtnSize.small,
-              tooltip: l.explore_pickTip,
-              onTap: () => ctrl.setSelected([
-                for (final x in cands)
-                  if (x.favorite && x.done) x.key,
-              ]),
-              children: [
-                UiGlyph(UiGlyphs.evo, size: 13, color: c.evo),
-                Text(l.explore_pick),
-              ],
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

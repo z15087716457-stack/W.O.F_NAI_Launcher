@@ -21,6 +21,7 @@ Future<void> pumpExplore(
   String locale = 'zh',
   bool dark = false,
   bool v45 = false,
+  Widget? dock,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(window - exploreRail, height);
@@ -31,6 +32,7 @@ Future<void> pumpExplore(
       StyleExplorePage(
         data: data,
         actions: actions ?? ExploreActions.none,
+        dock: dock,
         editor: (context, parts) =>
             exploreFixtureEditor(context, parts, v45: v45),
       ),

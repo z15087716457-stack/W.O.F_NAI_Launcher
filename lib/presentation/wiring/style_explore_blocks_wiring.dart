@@ -11,23 +11,18 @@ import '../../core/utils/localization_extension.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
-import '../../data/models/prompt_block/prompt_block_folder.dart';
 import 'blocks_preferences.dart';
-import '../providers/layout_state_provider.dart';
 import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
-import '../providers/prompt_block_palette_provider.dart';
 import '../router/app_router.dart';
 import 'blocks_actions.dart';
 import '../ui/blocks/blocks_contract.dart';
-import '../ui/blocks/blocks_dock.dart';
 import '../ui/blocks/blocks_instance.dart';
 import '../utils/prompt_block_bundle_insertion.dart';
 import '../utils/prompt_block_generation_settings_applier.dart';
 import '../utils/prompt_block_instance_bundle.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/prompt/blocks/prompt_block_colors.dart';
-import '../widgets/prompt/blocks/prompt_block_drag_data.dart';
 import 'style_explore_backend.dart';
 import 'style_explore_mapping.dart';
 
@@ -456,159 +451,6 @@ class StyleExploreVariableWiring extends ConsumerWidget {
               );
             });
           },
-        ),
-      ),
-    );
-  }
-}
-
-class StyleExploreBlocksDockWiring extends ConsumerStatefulWidget {
-  const StyleExploreBlocksDockWiring({super.key});
-  @override
-  ConsumerState<StyleExploreBlocksDockWiring> createState() =>
-      _StyleExploreBlocksDockWiringState();
-}
-
-class _StyleExploreBlocksDockWiringState
-    extends ConsumerState<StyleExploreBlocksDockWiring> {
-  String _query = '';
-  var _filter = const BlocksDockFilter.all();
-
-  Future<void> _insert(String id) async {
-    await insertStyleExploreBlock(context, ref, id);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(promptBlockLibraryNotifierProvider);
-    final library =
-        state.valueOrNull ?? PromptBlockLibraryState(blocks: [], folders: []);
-    final prefs =
-        ref.watch(blocksPreferencesProvider).valueOrNull ??
-        const BlocksPreferences();
-    final scope = _filter.folderId;
-    final folders = scope == null
-        ? library.folders
-        : [
-            if (library.folderById(scope) case final folder?) folder,
-            ...library.folders.where(
-              (folder) =>
-                  library.folders.getDescendantIds(scope).contains(folder.id),
-            ),
-          ];
-    final groups = [
-      for (final folder in folders)
-        BlocksDockGroup(
-          id: folder.id,
-          name: folder.name,
-          count: library.blocksInFolder(folder.id).length,
-          blocks: library
-              .blocksInFolder(folder.id)
-              .map((block) => styleExploreBlockData(block, library))
-              .toList(),
-          expanded: !prefs.collapsed.contains(folder.id),
-        ),
-      if (scope == null)
-        BlocksDockGroup(
-          id: '',
-          name: context.l10n.blocks_uncategorized,
-          count: library.blocksInFolder(null).length,
-          blocks: library
-              .blocksInFolder(null)
-              .map((block) => styleExploreBlockData(block, library))
-              .toList(),
-          expanded: !prefs.collapsed.contains(''),
-        ),
-    ];
-    final results = library.blocks
-        .where(
-          (block) => '${block.title} ${block.content} ${block.negativeContent}'
-              .toLowerCase()
-              .replaceAll('_', ' ')
-              .contains(_query.toLowerCase().replaceAll('_', ' ')),
-        )
-        .map((block) => styleExploreBlockData(block, library))
-        .toList();
-    return Material(
-      type: MaterialType.transparency,
-      child: BlocksDock(
-        data: BlocksDockViewData(
-          total: library.blocks.length,
-          loading: state.isLoading,
-          query: _query,
-          filter: _filter,
-          chips: [
-            for (final folder in library.foldersIn(null))
-              BlocksDockChip(
-                id: folder.id,
-                name: folder.name,
-                count: library.blocksInFolderTree(folder.id).length,
-              ),
-          ],
-          favorites: library.favoriteBlocks
-              .map((block) => styleExploreBlockData(block, library))
-              .toList(),
-          recent: [
-            for (final id in prefs.recentIds)
-              if (library.blockById(id) case final block?)
-                styleExploreBlockData(block, library),
-          ],
-          groups: groups,
-          results: results,
-        ),
-        actions: BlocksDockActions(
-          onQueryChanged: (value) => setState(() => _query = value),
-          onFilterChanged: (value) => setState(() => _filter = value),
-          onInsert: (id) => unawaited(_blockAction(context, () => _insert(id))),
-          dragDataOf: (id) => PromptBlockDragData(blockId: id),
-          onCreate: () => unawaited(
-            _blockAction(context, () => _editBlock(context, ref, null)),
-          ),
-          onEdit: (id) => unawaited(
-            _blockAction(context, () => _editBlock(context, ref, id)),
-          ),
-          onOpenLibrary: () => context.go(AppRoutes.promptBlockLibrary),
-          onShowInLibrary: (id) => context.go(
-            AppRoutes.promptBlockLibrary,
-            extra: PromptBlockLibraryLocation(id),
-          ),
-          onClose: () => unawaited(
-            _blockAction(
-              context,
-              () => ref
-                  .read(layoutStateNotifierProvider.notifier)
-                  .setBlockLibraryPanelExpanded(false),
-            ),
-          ),
-          onToggleGroup: (id, expanded) => unawaited(
-            _blockAction(
-              context,
-              () => ref
-                  .read(blocksPreferencesProvider.notifier)
-                  .change(
-                    (prefs) => prefs.copyWith(
-                      collapsed: expanded
-                          ? (Set.of(prefs.collapsed)..remove(id))
-                          : {...prefs.collapsed, id},
-                    ),
-                  ),
-            ),
-          ),
-          onSetFavorite: (id, value) => unawaited(
-            _blockAction(context, () async {
-              await ref
-                  .read(promptBlockLibraryNotifierProvider.notifier)
-                  .setBlockFavorite(id, value);
-            }),
-          ),
-          onAddToPalette: (id) => unawaited(
-            _blockAction(
-              context,
-              () => ref
-                  .read(promptBlockPaletteNotifierProvider.notifier)
-                  .addBlock(id),
-            ),
-          ),
         ),
       ),
     );

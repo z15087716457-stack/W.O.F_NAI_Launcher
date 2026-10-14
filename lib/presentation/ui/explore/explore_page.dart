@@ -145,13 +145,18 @@ class StyleExplorePage extends StatefulWidget {
     required this.data,
     required this.actions,
     required this.editor,
+    this.dock,
   });
 
   final ExploreViewData data;
   final ExploreActions actions;
   final ExploreEditorBuilder editor;
 
+  /// 块库侧栏（和生图页同一个）：非空时贴在编辑列右边、整高，舞台跟着让位。
+  final Widget? dock;
+
   static const inspectorWidth = 340.0;
+  static const dockWidth = 300.0;
   static const minEditor = 352.0;
   static const maxEditor = 560.0;
   static const minStage = 480.0;
@@ -800,7 +805,10 @@ class _StyleExplorePageState extends State<StyleExplorePage>
               color: c.bg,
               child: LayoutBuilder(
                 builder: (context, box) {
-                  final w = box.maxWidth;
+                  final dock = widget.dock == null
+                      ? 0.0
+                      : StyleExplorePage.dockWidth;
+                  final w = box.maxWidth - dock;
                   final want = (_dragWidth ?? data.editorWidth).clamp(
                     StyleExplorePage.minEditor,
                     StyleExplorePage.maxEditor,
@@ -825,6 +833,17 @@ class _StyleExplorePageState extends State<StyleExplorePage>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             _editorColumn(editor),
+                            if (widget.dock case final d?)
+                              Container(
+                                key: const Key('explore-dock'),
+                                width: dock,
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    right: BorderSide(color: c.line),
+                                  ),
+                                ),
+                                child: d,
+                              ),
                             Expanded(child: _stage()),
                             if (docked) const ExploreInspector(),
                           ],
@@ -880,7 +899,9 @@ class _StyleExplorePageState extends State<StyleExplorePage>
                           ),
                         if (data.undo case final u?)
                           Positioned(
-                            left: _detailKey != null || !_hasRun ? 0 : editor,
+                            left: _detailKey != null || !_hasRun
+                                ? 0
+                                : editor + dock,
                             right: _detailKey == null && docked
                                 ? StyleExplorePage.inspectorWidth
                                 : 0,

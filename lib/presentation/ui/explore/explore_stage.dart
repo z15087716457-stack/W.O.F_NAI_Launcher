@@ -793,6 +793,9 @@ class ExploreOnboarding extends StatelessWidget {
   const ExploreOnboarding({super.key, this.compact = false});
   final bool compact;
 
+  /// 舞台窄于这个宽度时步骤卡竖排。
+  static const narrowWidth = 760.0;
+
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
@@ -825,68 +828,59 @@ class ExploreOnboarding extends StatelessWidget {
       ),
     );
 
-    Widget step(int n, String title, String desc, Widget ill) => Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: c.raised,
-          border: Border.all(color: c.line),
-          borderRadius: BorderRadius.circular(14),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 12,
-          children: [
-            Row(
-              spacing: 8,
-              children: [
-                Container(
-                  width: 22,
-                  height: 22,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: c.ink,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '$n',
-                    style: UiText.sans(
-                      12,
-                      weight: FontWeight.w700,
-                      color: c.bg,
-                      height: 1,
-                    ),
+    Widget step(int n, String title, String desc, Widget ill) => Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: c.raised,
+        border: Border.all(color: c.line),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Container(
+                width: 22,
+                height: 22,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(color: c.ink, shape: BoxShape.circle),
+                child: Text(
+                  '$n',
+                  style: UiText.sans(
+                    12,
+                    weight: FontWeight.w700,
+                    color: c.bg,
+                    height: 1,
                   ),
                 ),
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(
-                      15,
-                      weight: FontWeight.w700,
-                      color: c.ink,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 36),
-              child: Text(desc, style: UiText.sans(12, color: c.muted)),
-            ),
-            Container(
-              height: 150,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: c.panel,
-                borderRadius: BorderRadius.circular(10),
               ),
-              child: ill,
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(15, weight: FontWeight.w700, color: c.ink),
+                ),
+              ),
+            ],
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 36),
+            child: Text(desc, style: UiText.sans(12, color: c.muted)),
+          ),
+          Container(
+            height: 150,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: c.panel,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ],
-        ),
+            child: ill,
+          ),
+        ],
       ),
     );
 
@@ -950,7 +944,8 @@ class ExploreOnboarding extends StatelessWidget {
             ],
           );
 
-    final body = Column(
+    // 舞台窄（块库侧栏打开、窗口小）时三张步骤卡改成竖排，边距收小。
+    Widget body(bool narrow) => Column(
       mainAxisSize: MainAxisSize.min,
       spacing: 26,
       children: [
@@ -986,49 +981,65 @@ class ExploreOnboarding extends StatelessWidget {
           ],
         ),
         ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 980),
+          constraints: BoxConstraints(maxWidth: narrow ? 420 : 980),
           child: IntrinsicHeight(
-            child: Row(
+            child: Flex(
               key: const Key('explore-onboarding-steps'),
+              direction: narrow ? Axis.vertical : Axis.horizontal,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: 14,
               children: [
-                step(
-                  1,
-                  l.explore_step1,
-                  l.explore_step1Body,
-                  Center(child: detected),
-                ),
-                step(
-                  2,
-                  l.explore_step2,
-                  l.explore_step2Body(data.generate.count),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 8,
-                    children: [th('c01', -6), th('c04', 2), th('c12', 7)],
+                for (final card in [
+                  step(
+                    1,
+                    l.explore_step1,
+                    l.explore_step1Body,
+                    _ScaleDown(child: detected),
                   ),
-                ),
-                step(
-                  3,
-                  l.explore_step3,
-                  l.explore_step3Body,
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    spacing: 8,
-                    children: [
-                      Icon(
-                        StudioIcons.galleryHeartFilled,
-                        size: 28,
-                        color: c.fav,
+                  step(
+                    2,
+                    l.explore_step2,
+                    l.explore_step2Body(data.generate.count),
+                    _ScaleDown(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
+                        children: [th('c01', -6), th('c04', 2), th('c12', 7)],
                       ),
-                      UiGlyph(UiGlyphs.arrowRight, size: 18, color: c.faint),
-                      UiGlyph(UiGlyphs.evo, size: 30, color: c.evo),
-                      UiGlyph(UiGlyphs.arrowRight, size: 18, color: c.faint),
-                      UiGlyph(UiGlyphs.archive, size: 28, color: c.muted),
-                    ],
+                    ),
                   ),
-                ),
+                  step(
+                    3,
+                    l.explore_step3,
+                    l.explore_step3Body,
+                    _ScaleDown(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 8,
+                        children: [
+                          Icon(
+                            StudioIcons.galleryHeartFilled,
+                            size: 28,
+                            color: c.fav,
+                          ),
+                          UiGlyph(
+                            UiGlyphs.arrowRight,
+                            size: 18,
+                            color: c.faint,
+                          ),
+                          UiGlyph(UiGlyphs.evo, size: 30, color: c.evo),
+                          UiGlyph(
+                            UiGlyphs.arrowRight,
+                            size: 18,
+                            color: c.faint,
+                          ),
+                          UiGlyph(UiGlyphs.archive, size: 28, color: c.muted),
+                        ],
+                      ),
+                    ),
+                  ),
+                ])
+                  narrow ? card : Expanded(child: card),
               ],
             ),
           ),
@@ -1075,16 +1086,25 @@ class ExploreOnboarding extends StatelessWidget {
           ),
         Expanded(
           child: LayoutBuilder(
-            builder: (context, box) => SingleChildScrollView(
-              key: const Key('explore-onboarding'),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: box.maxHeight),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(70, compact ? 32 : 0, 70, 40),
-                  child: Center(child: body),
+            builder: (context, box) {
+              final narrow = box.maxWidth < narrowWidth;
+              final side = narrow ? 24.0 : 70.0;
+              return SingleChildScrollView(
+                key: const Key('explore-onboarding'),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: box.maxHeight),
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      side,
+                      compact || narrow ? 32 : 0,
+                      side,
+                      40,
+                    ),
+                    child: Center(child: body(narrow)),
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ],
@@ -1220,4 +1240,18 @@ class ExploreUndoToast extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 引导卡里的示意：放得下原样居中，卡片变窄时整体等比缩小，不溢出。
+class _ScaleDown extends StatelessWidget {
+  const _ScaleDown({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: FittedBox(fit: BoxFit.scaleDown, child: child),
+    ),
+  );
 }
