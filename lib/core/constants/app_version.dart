@@ -34,6 +34,10 @@ class AppVersion {
     if (match != null) {
       final core = match.group(1)!; // 1.0.0
       final prerelease = match.group(2)!; // beta3.1
+      if (prerelease.toLowerCase() == 'preview') {
+        final parts = core.split('.');
+        return '${parts[0]}.${parts[1]} Preview';
+      }
       // 将 beta3.1 转为 Beta3.1
       final capitalized =
           prerelease.substring(0, 1).toUpperCase() + prerelease.substring(1);
@@ -45,7 +49,10 @@ class AppVersion {
 
   /// 完整版本号
   /// 例如: 1.0.0-beta3.1+3
-  static String get fullVersion => _info.version;
+  static String get fullVersion =>
+      _info.buildNumber.isEmpty || _info.version.contains('+')
+      ? _info.version
+      : '${_info.version}+${_info.buildNumber}';
 
   /// 主版本号
   static int get major => int.tryParse(_info.version.split('.')[0]) ?? 0;

@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.1.1-blue" alt="Version"></a>
-  <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0%20Preview-blue" alt="Version"></a>
+  <img src="https://img.shields.io/badge/Flutter-3.47.7-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
@@ -30,7 +30,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 > 本文描述当前源码能力。近期 Studio、翻译与图库改动仍列在 CHANGELOG 的 `[Unreleased]`；下载包具备哪些功能，以该包对应 Release 的说明为准。既有界面截图保留为早期示意。
 
-> UIUX 九页后端与既有 NAI Agent 已整合到 2026-10-13 候选源码；正式版相关图库／桥接／存储修正保留。桌面包尚未构建或替换，前端布局和实机验收待后续完成。来源与工程验证见 [整合记录](docs/uiux-integration-2026-10-13.md)。
+> 当前版本为 **2.0 Preview**（Windows x64 本地便携预览通道），包含 UIUX 九页整合、完整 NAI Agent 及后续画布、图标、工具条、Vibe 编码和 OLD 对比修复。便携包解压后运行，配置仍使用原有应用数据目录；请使用自己的账号。来源见 [整合记录](docs/uiux-integration-2026-10-13.md)，本批交付见 [2.0 Preview 记录](docs/studio-2-preview-2026-10-14.md)。本地交付不代表已经发布 GitHub Release。
 
 ## ✨ 功能概览
 

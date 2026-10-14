@@ -166,8 +166,8 @@ void main() {
     PackageInfo.setMockInitialValues(
       appName: 'W.O.F NAI Studio',
       packageName: 'nai_launcher',
-      version: '1.1.1',
-      buildNumber: '1',
+      version: '2.0.0-preview',
+      buildNumber: '6',
       buildSignature: '',
     );
     await AppVersion.initialize();

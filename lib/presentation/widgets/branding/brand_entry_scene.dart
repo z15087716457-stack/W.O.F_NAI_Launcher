@@ -466,7 +466,7 @@ class _Footer extends StatelessWidget {
                       ),
                     ],
                     TextSpan(text: 'SEED ${EntryField.seed.value}  ·  '),
-                    TextSpan(text: 'v${AppVersion.versionName}'),
+                    TextSpan(text: AppVersion.versionName),
                   ],
                 ),
                 style: hud,

@@ -13,8 +13,8 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-1.1.1-blue" alt="Version"></a>
-  <img src="https://img.shields.io/badge/Flutter-3.44.2-blue?logo=flutter" alt="Flutter">
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0%20Preview-blue" alt="Version"></a>
+  <img src="https://img.shields.io/badge/Flutter-3.47.7-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
 </p>
@@ -30,7 +30,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 
 > This README describes the current source tree. New Studio, translation, and gallery work remains under `[Unreleased]` in CHANGELOG; the feature set of a downloaded package is determined by its own release notes. Existing interface screenshots are retained as historical illustrations.
 
-> The nine UIUX page backends and the existing NAI Agent are combined in the 2026-10-13 source candidate, preserving production gallery, bridge, and storage fixes. The desktop package has not been built or replaced; frontend layout and desktop validation remain pending. See the [integration record](docs/uiux-integration-2026-10-13.md) for source provenance and engineering checks.
+> The current version is **2.0 Preview**, a local Windows x64 portable preview with the nine-page UIUX integration, full NAI Agent, and subsequent canvas, icon, toolbar, Vibe encoding and OLD comparison fixes. Extract and run the package using your own account; settings continue to use the existing application data directory. See the [integration record](docs/uiux-integration-2026-10-13.md) and [2.0 Preview delivery record](docs/studio-2-preview-2026-10-14.md). Local delivery is separate from publishing a GitHub Release.
 
 ## ✨ Features Overview
 
