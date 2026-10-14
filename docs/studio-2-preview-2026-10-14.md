@@ -20,4 +20,14 @@
 
 源码、版本修改备份、构建输入冻结、测试 / 分析 / 构建日志、打包与解压核验、原生依赖检查、隔离更新器案例、回退材料和本机安装结果保存在 `.dart_tool/studio-2-preview-20261014/`。它们是本轮审计材料，不随用户便携包分发。
 
-最终构建提交、验证数字、包校验值及本机安装状态在完成本批交付后补充；本地交付不代表 GitHub Release 已发布。
+## 最终结果
+
+- 编译源码：`bdc0e6634d5862ea81737299ed2eed417858d7ef`。最终全量 Flutter **6716 通过 / 5 跳过 / 0 失败**；全仓 analyze 无诊断，Windows Release 使用 `--no-pub --no-tree-shake-icons`，1813 份生产输入冻结并复验。
+- 版本显示覆盖启动入口、关于与许可页，以及更新弹窗的当前 / 最新版本；统一使用 `2.0 Preview`，机器比较仍使用原始 SemVer。新显示回归核对两种字段，不改版本比较。
+- 最终便携包：`04_工具/UIUX重做/测试包/WOF_NAI_Studio_2.0_Preview_20261014_r2_Windows_x64_Portable.zip`，317328202 字节（约 302.63 MiB），15363 文件；同目录附 `.sha256`。SHA-256：`cc12e9e483f3290601190c24a2b8072681010a57885ebd11d29f736be65b0635`。
+- ZIP CRC、每份内容哈希、实际解压、程序清单、三个 SQLite 的只读 quick_check、完整字体 / 214 资源、48 个原生模块依赖闭包通过，无未解决依赖；十份 Microsoft CRT 签名均有效。解压后 Node 24.18.0 / Pi 1.1.0 的 Agent / CodeMode / 会话恢复六项检查通过，七个默认入口与十九个业务工具保持；两次模型请求只到本地合成服务，没有真实模型或 NAI 请求。
+- 本机已于 **2026-10-14T20:03:44.619435+08:00** 更新，安装前 / 期间均重新检查完全退出；没有强行结束进程，也没有自动启动。正式收据与最终 `installed-delivery.json` 字节一致，installed=true / ready_to_install=false / installation_hold=false。
+- 最终 AOT：`744a1069d068b0c979e76dd493703a4b985c13b246adcfe179a270ce4e14caa5`。15345 程序文件、214 资源、31 原生文件与 15095 Agent 文件全量哈希通过；本批只受控替换 AOT、EXE 和程序清单。原 EXE 的代码 / 展开信息保持，第一阶段仅更新版本资源，后续补全更新弹窗显示。字体、图标、数据库、桥接客户端和 Agent 内容保持。
+- 本轮先交付并安装一份已核验的 Preview，再在最后版本入口检查中发现更新弹窗仍显示内部版本串，完成格式化和新增回归后交付 `r2`；第一份 Preview 和原 1.1.1 便携 ZIP 均保留。两阶段程序回退材料分别在 `.dart_tool/studio-2-preview-20261014/rollback/` 与 `.dart_tool/studio-2-preview-final-20261014/rollback/`，合并入口 `rollback_all.py` 默认只验证，显式 `--restore` 才按序恢复到本任务前的 16:28 运行包；只读回退预检已通过，未实际回退。
+
+最终审计以 `.dart_tool/studio-2-preview-final-20261014/` 为准，第一阶段记录保留。版本入口的真实字体组件实绘在其 `captures/`，不冒充正式窗口实机验收。本地交付不代表 GitHub Release 已发布。

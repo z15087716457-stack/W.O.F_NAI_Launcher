@@ -1,5 +1,7 @@
 # 画布 OLD 原图与局部重绘范围对比
 
+本项已随 2.0 Preview 累计更新到本机并纳入最终 `r2` 便携包，交付与核验见 [2.0 Preview 记录](studio-2-preview-2026-10-14.md)。下文保留本项施工阶段的验证记录。
+
 有效源码：`.devin/wt/ui-integration`，分支 `codex/uiux-integration`。用户要求在新画布补回官网 OLD，并授权使用 Anlas 做必要的实际验证。本项承接已提交但尚未安装的 Vibe 编码卡片修复。
 
 ## 官网实测

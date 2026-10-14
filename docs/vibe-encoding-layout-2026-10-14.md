@@ -1,5 +1,7 @@
 # Vibe 库编码卡片文本与费用布局（2026-10-14）
 
+本项已随 2.0 Preview 累计更新到本机并纳入最终 `r2` 便携包，交付与核验见 [2.0 Preview 记录](studio-2-preview-2026-10-14.md)。下文保留本项施工阶段的验证记录。
+
 用户先要求只调查文本溢出，再确认独立样本，并授权实现；同时要求删除上方说明中的 2 Anlas，避免与按钮重复。有效源码为 `.devin/wt/ui-integration` / `codex/uiux-integration`。
 
 ## 实现
