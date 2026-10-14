@@ -63,6 +63,12 @@ class GenerationHistoryActions {
         .read(generationCanvasGroupSelectionProvider.notifier)
         .selectTile(item.group.key, item.subimageIndex);
     ref.read(generationPreviewSelectionProvider.notifier).select(id);
+    final previous = ref.read(canvasTileFocusRequestProvider);
+    ref.read(canvasTileFocusRequestProvider.notifier).state = (
+      group: item.group.key,
+      subimage: item.subimageIndex,
+      revision: (previous?.revision ?? 0) + 1,
+    );
   }
 
   void focusPins() {

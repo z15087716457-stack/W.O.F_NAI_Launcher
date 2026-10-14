@@ -20,12 +20,14 @@ import '../ui/gen/gen_contract.dart';
 import '../ui/gen/gen_page.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import 'generation_backend.dart';
+import 'generation_canvas_wiring.dart';
 import 'generation_data_wiring.dart';
 import 'generation_editor_wiring.dart';
 import 'generation_history_actions.dart';
 import 'generation_operations.dart';
 import 'generation_references.dart';
 import 'generation_settings.dart';
+import '../providers/simple_output_viewer_provider.dart';
 
 class GenerationRoute extends ConsumerStatefulWidget {
   const GenerationRoute({super.key});
@@ -220,6 +222,9 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
     return widget.builder(
       data: data,
       slots: GenSlots(
+        canvas: ref.watch(simpleOutputViewerNotifierProvider)
+            ? null
+            : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),
         editor: (context, target) => GenerationEditorWiring(
           target: target,
           explore: widget.explore,

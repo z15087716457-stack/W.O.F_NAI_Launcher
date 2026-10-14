@@ -14,6 +14,10 @@ final canvasHistoryFocusRequestProvider =
       (ref) => null,
     );
 
+/// 单图定位也发送独立请求，避免共享选中已更新或 ID 未变时漏掉相机移动。
+final canvasTileFocusRequestProvider =
+    StateProvider<({String group, int subimage, int revision})?>((ref) => null);
+
 // ── 官网逐字常量（chunk 5285 布局函数对码）──────────────────────────
 
 /// 组间垂直间距（官网 `i += n.height + 340`）。
@@ -490,7 +494,11 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
   CanvasFeedLayoutResult build() {
     final state = ref.watch(imageGenerationNotifierProvider);
     final runId = state.generationRunId;
-    final mergedImages = state.mergedPanelImages;
+    // 清空历史保留中央展示图；图生图或工具返回也可能只登记 display。
+    final mergedImages = {
+      for (final image in [...state.mergedPanelImages, ...state.displayImages])
+        image.id: image,
+    }.values.toList();
     final done = runId == null
         ? state.currentImages
         : mergedImages

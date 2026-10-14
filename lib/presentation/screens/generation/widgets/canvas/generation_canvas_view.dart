@@ -36,9 +36,29 @@ import '../../../../../core/utils/localization_extension.dart';
 ///   非焦点悬停出底部迷你条；焦点组出 top/bottom 边缘工具条
 /// - 归组：组 = 一次生成请求（generationRunId），连续单张各自成组（官网原样）
 class GenerationCanvasView extends ConsumerStatefulWidget {
-  const GenerationCanvasView({required this.generationState, super.key});
+  const GenerationCanvasView({
+    required this.generationState,
+    this.tileBuilder,
+    this.focusInsets,
+    this.deferKeyEvent,
+    super.key,
+  });
 
   final ImageGenerationState generationState;
+
+  /// 嵌入新页面时只提供相机和世界布局，图片与外围界面由宿主管理。
+  final Widget Function(
+    BuildContext,
+    CanvasFeedItem,
+    bool,
+    VoidCallback,
+    bool Function(),
+  )?
+  tileBuilder;
+  final EdgeInsets? focusInsets;
+  final bool Function(KeyEvent)? deferKeyEvent;
+
+  bool get embedded => tileBuilder != null;
 
   @override
   ConsumerState<GenerationCanvasView> createState() =>
@@ -79,6 +99,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
   // 拖拽平移状态（官网 5px 死区 + 松手 <60ms 有速度则抛掷）
   Offset _panAccum = Offset.zero;
   bool _panActive = false;
+  bool _suppressTileTap = false;
   DateTime? _lastPanAt;
   Offset _inertiaVelocity = Offset.zero;
 
@@ -289,7 +310,9 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
 
   /// Fit inside the measured space between the three floating toolbars.
   CanvasCamera _fitCameraForRect(Rect rect) {
-    final available = _focusViewport.isEmpty
+    final available = widget.focusInsets != null
+        ? _insetViewport()
+        : _focusViewport.isEmpty
         ? Rect.fromLTWH(
             20,
             56,
@@ -310,6 +333,29 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     final tx = available.center.dx - rect.center.dx * y;
     final ty = available.center.dy - rect.center.dy * y;
     return CanvasCamera(offset: Offset(tx, ty), scale: y);
+  }
+
+  Rect _insetViewport() {
+    final insets = widget.focusInsets!;
+    final left = math.min(insets.left, math.max(0.0, _viewport.width - 1));
+    final top = math.min(insets.top, math.max(0.0, _viewport.height - 1));
+    return Rect.fromLTRB(
+      left,
+      top,
+      math.max(left + 1, _viewport.width - insets.right),
+      math.max(top + 1, _viewport.height - insets.bottom),
+    );
+  }
+
+  void _setViewport(Size size) {
+    final changed = _viewport != size;
+    _viewport = size;
+    _camera.setViewport(size);
+    if (changed && widget.embedded && _focusFitActive && !_manualOverview) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _refitCurrentFocus(immediate: true);
+      });
+    }
   }
 
   void _measureFocusViewport() {
@@ -524,6 +570,21 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _flyToGroup(layout, group);
     });
 
+    ref.listen(canvasTileFocusRequestProvider, (previous, request) {
+      if (request == null) return;
+      final layout = ref.read(canvasFeedLayoutProvider);
+      final group = layout.groups
+          .where((group) => group.key == request.group)
+          .firstOrNull;
+      if (group == null ||
+          request.subimage < 0 ||
+          request.subimage >= group.tiles.length) {
+        return;
+      }
+      _manualOverview = false;
+      _flyToSubimage(layout, group, request.subimage);
+    });
+
     ref.listen(canvasLockCameraNotifierProvider, (prev, locked) {
       if (!locked) return;
       _stopWasd();
@@ -539,8 +600,8 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     if (layout.groups.isEmpty) {
       return LayoutBuilder(
         builder: (context, constraints) {
-          _viewport = Size(constraints.maxWidth, constraints.maxHeight);
-          _camera.setViewport(_viewport);
+          _setViewport(Size(constraints.maxWidth, constraints.maxHeight));
+          if (widget.embedded) return const SizedBox.expand();
           return Stack(
             children: [
               Positioned.fill(
@@ -563,8 +624,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       },
       onKeyEvent: (node, event) => _onKey(event, layout),
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTapUp: _onCanvasTapUp,
         child: Listener(
+          behavior: HitTestBehavior.opaque,
           onPointerDown: _onPointerDown,
           onPointerMove: _onPointerMove,
           onPointerUp: _onPointerUp,
@@ -574,11 +637,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           onPointerPanZoomUpdate: _onPanZoomUpdate,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              _viewport = Size(constraints.maxWidth, constraints.maxHeight);
-              _camera.setViewport(_viewport);
+              _setViewport(Size(constraints.maxWidth, constraints.maxHeight));
               final selectedImage = _resolveSelectedImage(layout, focus);
               final showEdgeBars = focus != null && selectedImage != null;
-              if (showEdgeBars) _measureFocusViewport();
+              if (showEdgeBars && !widget.embedded) _measureFocusViewport();
 
               return ClipRect(
                 key: _viewportKey,
@@ -592,23 +654,24 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                           );
                           return Stack(
                             children: [
-                              Positioned.fill(
-                                child: RepaintBoundary(
-                                  child: CustomPaint(
-                                    key: const ValueKey(
-                                      'canvas-pixel-background',
-                                    ),
-                                    painter: CanvasPixelBackgroundPainter(
-                                      camera: camera,
-                                      theme: theme,
-                                      devicePixelRatio:
-                                          MediaQuery.devicePixelRatioOf(
-                                            context,
-                                          ),
+                              if (!widget.embedded)
+                                Positioned.fill(
+                                  child: RepaintBoundary(
+                                    child: CustomPaint(
+                                      key: const ValueKey(
+                                        'canvas-pixel-background',
+                                      ),
+                                      painter: CanvasPixelBackgroundPainter(
+                                        camera: camera,
+                                        theme: theme,
+                                        devicePixelRatio:
+                                            MediaQuery.devicePixelRatioOf(
+                                              context,
+                                            ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
                               Positioned.fill(
                                 child: CanvasWorldViewport(
                                   camera: camera,
@@ -623,16 +686,18 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                       .toList(),
                                 ),
                               ),
-                              ..._buildGroupBadges(layout, camera),
+                              if (!widget.embedded)
+                                ..._buildGroupBadges(layout, camera),
                             ],
                           );
                         },
                       ),
                     ),
-                    if (WindowChromeScope.activeOf(context))
+                    if (!widget.embedded && WindowChromeScope.activeOf(context))
                       _buildWindowDragStrip(),
                     // 屏幕空间覆盖层：焦点组 edge bars（顶中/底左/底右）
-                    if (showEdgeBars) _buildEdgeBars(layout, focus),
+                    if (showEdgeBars && !widget.embedded)
+                      _buildEdgeBars(layout, focus),
                   ],
                 ),
               );
@@ -685,27 +750,39 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           key: ValueKey('canvas-tile:${item.group.key}:${item.subimageIndex}'),
           rect: item.worldRect,
           child: RepaintBoundary(
-            child: _CanvasTile(
-              group: item.group,
-              tile: item.tile,
-              subimageIndex: item.subimageIndex,
-              isFocusGroup: focus?.group == item.group.key,
-              isFocusSubimage:
-                  focus?.group == item.group.key &&
-                  focus?.subimage == item.subimageIndex,
-              isPinned: item.image != null && pinned.contains(item.image!.id),
-              onSelect: () => _onTileTap(item),
-              imageChild: item.image == null
-                  ? null
-                  : buildGeneratedImageCard(
-                      context: context,
-                      ref: ref,
-                      image: item.image!,
-                      showIndex: false,
-                      canvasTile: true,
-                      onTap: () => _onTileTap(item),
-                    ),
-            ),
+            child: widget.tileBuilder != null
+                ? widget.tileBuilder!(
+                    context,
+                    item,
+                    focus?.group == item.group.key &&
+                        focus?.subimage == item.subimageIndex,
+                    () => _selectEmbeddedTile(item),
+                    () =>
+                        !_suppressTileTap &&
+                        !HardwareKeyboard.instance.isShiftPressed,
+                  )
+                : _CanvasTile(
+                    group: item.group,
+                    tile: item.tile,
+                    subimageIndex: item.subimageIndex,
+                    isFocusGroup: focus?.group == item.group.key,
+                    isFocusSubimage:
+                        focus?.group == item.group.key &&
+                        focus?.subimage == item.subimageIndex,
+                    isPinned:
+                        item.image != null && pinned.contains(item.image!.id),
+                    onSelect: () => _onTileTap(item),
+                    imageChild: item.image == null
+                        ? null
+                        : buildGeneratedImageCard(
+                            context: context,
+                            ref: ref,
+                            image: item.image!,
+                            showIndex: false,
+                            canvasTile: true,
+                            onTap: () => _onTileTap(item),
+                          ),
+                  ),
           ),
         ),
     ];
@@ -780,6 +857,27 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _syncPreviewSelection(item.image?.id);
       _flyToSubimage(layout, item.group, item.subimageIndex);
     }
+  }
+
+  void _selectEmbeddedTile(CanvasFeedItem item) {
+    if (_suppressTileTap || HardwareKeyboard.instance.isShiftPressed) return;
+    final layout = ref.read(canvasFeedLayoutProvider);
+    final target = layout.items
+        .where(
+          (candidate) =>
+              candidate.group.key == item.group.key &&
+              (item.image == null
+                  ? candidate.subimageIndex == item.subimageIndex
+                  : candidate.image?.id == item.image!.id),
+        )
+        .firstOrNull;
+    if (target == null) return;
+    _manualOverview = false;
+    ref
+        .read(generationCanvasGroupSelectionProvider.notifier)
+        .selectTile(target.group.key, target.subimageIndex);
+    _syncPreviewSelection(target.image?.id);
+    _flyToSubimage(layout, target.group, target.subimageIndex);
   }
 
   Widget _buildEdgeBars(CanvasFeedLayoutResult layout, CanvasFocus? focus) {
@@ -903,6 +1001,9 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       if (_wasdKeys.isEmpty) _stopWasd();
       return KeyEventResult.handled;
     }
+    if (widget.deferKeyEvent?.call(event) == true) {
+      return KeyEventResult.ignored;
+    }
     final groups = layout.groups;
     if (groups.isEmpty) return KeyEventResult.ignored;
 
@@ -995,6 +1096,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       return KeyEventResult.handled;
     }
     if (ctrl && key == LogicalKeyboardKey.keyS) {
+      if (widget.embedded) return KeyEventResult.ignored;
       final img = _resolveSelectedImage(layout, focus);
       if (img != null && img.canSave) {
         unawaited(_saveFocusedImage(img));
@@ -1055,6 +1157,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
               HardwareKeyboard.instance.isShiftPressed));
 
   void _onPointerDown(PointerDownEvent e) {
+    _suppressTileTap = false;
     _pointers.add(e.pointer);
     _consumedUiPointers.remove(e.pointer);
     _canvasFocusNode.requestFocus();
@@ -1079,6 +1182,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       _panAccum += e.localDelta;
       if (_panAccum.distance <= 5) return;
       _panActive = true;
+      _suppressTileTap = true;
       _manualOverview = false;
       _focusFitActive = false;
       _camera.panBy(_panAccum);

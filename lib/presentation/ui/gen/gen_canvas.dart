@@ -292,8 +292,31 @@ class _Stage extends StatelessWidget {
   }
 }
 
-/// 画布上的一张：圆角 6。出图了画图；排队三点跳动；正在出用流式预览模糊垫底 + 进度；失败说明。
-/// 单击选中（成为浮动工具条的对象），300ms 内再点一次开大图。
+/// 画布引擎提供选中回调与可选的合成流式预览，图块视觉由新页面绘制。
+class GenCanvasTileScope extends InheritedWidget {
+  const GenCanvasTileScope({
+    super.key,
+    required this.onFocus,
+    required this.allowTap,
+    this.preview,
+    required super.child,
+  });
+
+  final VoidCallback onFocus;
+  final bool Function() allowTap;
+  final Widget? preview;
+
+  static GenCanvasTileScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<GenCanvasTileScope>();
+
+  @override
+  bool updateShouldNotify(GenCanvasTileScope oldWidget) =>
+      onFocus != oldWidget.onFocus ||
+      allowTap != oldWidget.allowTap ||
+      preview != oldWidget.preview;
+}
+
+/// 画布上的一张：圆角 6。单击选中，300ms 内再点一次开大图。
 class GenCanvasTile extends StatefulWidget {
   const GenCanvasTile({super.key, required this.tile, this.focused = false});
   final GenTile tile;
@@ -310,17 +333,26 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
 
   void _tap(GenScope scope) {
     final t = widget.tile;
+    final interaction = GenCanvasTileScope.maybeOf(context);
+    if (interaction != null && !interaction.allowTap()) return;
     final now = DateTime.now();
     final double =
         _last != null &&
         now.difference(_last!) < const Duration(milliseconds: 300);
     _last = now;
-    if (t.state != GenTileState.done) return;
+    if (t.state != GenTileState.done) {
+      interaction?.onFocus();
+      return;
+    }
     if (double) {
       _last = null;
       scope.actions.onOpenViewer(t.id);
     } else {
-      scope.actions.onFocusTile(t.id);
+      if (interaction == null) {
+        scope.actions.onFocusTile(t.id);
+      } else {
+        interaction.onFocus();
+      }
     }
   }
 
@@ -349,11 +381,13 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
           if (t.preview != null)
             ImageFiltered(
               imageFilter: ui.ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-              child: Image(
-                image: t.preview!,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-              ),
+              child:
+                  GenCanvasTileScope.maybeOf(context)?.preview ??
+                  Image(
+                    image: t.preview!,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
             ),
           const Center(child: _Dots()),
           if (t.progress != null)

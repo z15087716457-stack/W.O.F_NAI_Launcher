@@ -331,6 +331,9 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
                           padding: EdgeInsets.only(top: i == 0 ? 0 : 6),
                           child: _BatchItem(
                             batch: b,
+                            showTime:
+                                i == 0 ||
+                                !_sameMinute(b.time, h.batches[i - 1].time),
                             width: widget.width - 16,
                             now: scope.data.now ?? DateTime.now(),
                             focused: h.selected == b.id,
@@ -455,11 +458,22 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
   }
 }
 
+bool _sameMinute(DateTime first, DateTime second) {
+  final a = first.toLocal();
+  final b = second.toLocal();
+  return a.year == b.year &&
+      a.month == b.month &&
+      a.day == b.day &&
+      a.hour == b.hour &&
+      a.minute == b.minute;
+}
+
 /// 一批（原型 `.batch` + `.ta`）：时间（Geist Mono 75%）· N 张；封面高 190（随栏宽缩放），
 /// 当前批 2px 强调色外圈、外扩 2；左上角操作角标，右下角 ×N。
 class _BatchItem extends StatelessWidget {
   const _BatchItem({
     required this.batch,
+    required this.showTime,
     required this.width,
     required this.now,
     required this.focused,
@@ -470,6 +484,7 @@ class _BatchItem extends StatelessWidget {
   });
 
   final GenBatch batch;
+  final bool showTime;
   final double width;
   final DateTime now;
   final bool focused;
@@ -489,7 +504,8 @@ class _BatchItem extends StatelessWidget {
     final ratio = cover == null ? 832 / 1216 : cover.width / cover.height;
     final h = (width / ratio).clamp(0.0, maxH);
     final w = h * ratio;
-    final day = GenFormat.day(context, b.time, now);
+    final time = b.time.toLocal();
+    final day = GenFormat.day(context, time, now);
     Widget image = cover == null
         ? Container(
             width: w,
@@ -529,34 +545,36 @@ class _BatchItem extends StatelessWidget {
       key: Key('gen-batch-${b.id}'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(2, 2, 2, 6),
-          child: Row(
-            spacing: 6,
-            children: [
-              Text(
-                day == null
-                    ? GenFormat.clock(b.time)
-                    : '$day ${GenFormat.clock(b.time)}',
-                style: UiText.mono(11, color: c.ink.withValues(alpha: .75)),
-              ),
-              if (b.count > 1)
-                Text(
-                  '· ${l.gen_batchCount(b.count)}',
-                  style: UiText.sans(11, color: c.muted),
-                ),
-              if (b.pending > 0 && b.images.isNotEmpty)
-                Flexible(
-                  child: Text(
-                    '· ${l.gen_batchPending(b.pending)}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(11, color: c.accent),
+        if (showTime || b.count > 1 || b.pending > 0 && b.images.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(2, 2, 2, 6),
+            child: Row(
+              spacing: 6,
+              children: [
+                if (showTime)
+                  Text(
+                    day == null
+                        ? GenFormat.clock(time)
+                        : '$day ${GenFormat.clock(time)}',
+                    style: UiText.mono(11, color: c.ink.withValues(alpha: .75)),
                   ),
-                ),
-            ],
+                if (b.count > 1)
+                  Text(
+                    '${showTime ? '· ' : ''}${l.gen_batchCount(b.count)}',
+                    style: UiText.sans(11, color: c.muted),
+                  ),
+                if (b.pending > 0 && b.images.isNotEmpty)
+                  Flexible(
+                    child: Text(
+                      '· ${l.gen_batchPending(b.pending)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: UiText.sans(11, color: c.accent),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
         GestureDetector(
           onSecondaryTapDown: (d) => onMenu(d.globalPosition),
           child: UiPressable(
