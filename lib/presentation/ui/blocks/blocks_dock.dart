@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -313,7 +314,10 @@ class _BlocksDockState extends State<BlocksDock> {
             margin: const EdgeInsets.fromLTRB(12, 6, 12, 0),
             color: c.line,
           ),
-        for (final g in d.groups)
+        for (final g in [
+          ...d.groups.where((group) => group.blocks.isNotEmpty),
+          ...d.groups.where((group) => group.blocks.isEmpty),
+        ])
           _section(
             key: Key('dock-group-${g.id}'),
             icon: UiGlyph(
@@ -408,10 +412,19 @@ class _BlocksDockState extends State<BlocksDock> {
           _Chips(data: d, onChanged: a.onFilterChanged),
           Container(height: 1, color: c.line),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: body,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.depth == 0 &&
+                    notification is ScrollUpdateNotification) {
+                  _exit();
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: body,
+                ),
               ),
             ),
           ),
@@ -448,7 +461,7 @@ class _BlocksDockState extends State<BlocksDock> {
     );
   }
 
-  /// 悬停预览卡：贴在侧栏右缘外 10，顶边在药丸上方 90（夹在窗口内）；药丸和卡之间一条虚线。
+  /// 按卡片实际尺寸与药丸居中对齐；靠近窗口边缘时避边并连接两者中线。
   Widget _preview(BuildContext context) {
     final b = _hover;
     final r = _hoverRect;
@@ -458,32 +471,34 @@ class _BlocksDockState extends State<BlocksDock> {
     if (b == null || r == null || dockBox == null || overlay == null) {
       return const SizedBox.shrink();
     }
-    final dockRight = dockBox.localToGlobal(Offset(dockBox.size.width, 0)).dx;
-    final o = overlay.globalToLocal(Offset.zero);
-    final left = dockRight + 10 + o.dx;
-    final pillMid = r.center.dy + o.dy;
-    final top = math.max(
-      8.0,
-      math.min(r.top + o.dy - 90, overlay.size.height - 400),
+    final dockRight = overlay
+        .globalToLocal(dockBox.localToGlobal(Offset(dockBox.size.width, 0)))
+        .dx;
+    final pill = Rect.fromPoints(
+      overlay.globalToLocal(r.topLeft),
+      overlay.globalToLocal(r.bottomRight),
     );
+    final line = _PreviewLine();
     final reduce = MediaQuery.disableAnimationsOf(context);
     final c = context.ui;
     return Positioned.fill(
       child: IgnorePointer(
-        child: Stack(
+        child: CustomMultiChildLayout(
+          delegate: _PreviewLayout(
+            pill: pill,
+            dockRight: dockRight,
+            line: line,
+          ),
           children: [
-            Positioned(
-              left: r.right + o.dx,
-              top: pillMid,
-              width: math.max(0, left - r.right - o.dx),
+            LayoutId(
+              id: _PreviewPart.line,
               child: CustomPaint(
-                size: const Size.fromHeight(1.5),
-                painter: _DashPainter(c.strong),
+                key: const Key('dock-preview-connector'),
+                painter: _DashPainter(c.strong, line),
               ),
             ),
-            Positioned(
-              left: left,
-              top: top,
+            LayoutId(
+              id: _PreviewPart.card,
               child: TweenAnimationBuilder<double>(
                 key: ValueKey(b.id),
                 tween: Tween(begin: reduce ? 1 : 0, end: 1),
@@ -496,7 +511,10 @@ class _BlocksDockState extends State<BlocksDock> {
                     child: child,
                   ),
                 ),
-                child: BlockHoverCard(b),
+                child: SingleChildScrollView(
+                  primary: false,
+                  child: BlockHoverCard(b),
+                ),
               ),
             ),
           ],
@@ -506,26 +524,79 @@ class _BlocksDockState extends State<BlocksDock> {
   }
 }
 
+enum _PreviewPart { card, line }
+
+// Layout fills the endpoints before painting, using the measured card size.
+class _PreviewLine {
+  Offset start = Offset.zero;
+  Offset end = Offset.zero;
+}
+
+class _PreviewLayout extends MultiChildLayoutDelegate {
+  _PreviewLayout({
+    required this.pill,
+    required this.dockRight,
+    required this.line,
+  });
+  final Rect pill;
+  final double dockRight;
+  final _PreviewLine line;
+
+  @override
+  void performLayout(Size size) {
+    final card = layoutChild(
+      _PreviewPart.card,
+      BoxConstraints(
+        maxWidth: math.min(300, math.max(0, size.width - 16)),
+        maxHeight: math.max(0, size.height - 16),
+      ),
+    );
+    final left = (dockRight + 10)
+        .clamp(8.0, math.max(8.0, size.width - card.width - 8))
+        .toDouble();
+    final top = (pill.center.dy - card.height / 2)
+        .clamp(8.0, math.max(8.0, size.height - card.height - 8))
+        .toDouble();
+    positionChild(_PreviewPart.card, Offset(left, top));
+    line.start = Offset(pill.right, pill.center.dy);
+    line.end = Offset(left, top + card.height / 2);
+    layoutChild(_PreviewPart.line, BoxConstraints.tight(size));
+    positionChild(_PreviewPart.line, Offset.zero);
+  }
+
+  @override
+  bool shouldRelayout(_PreviewLayout old) =>
+      old.pill != pill || old.dockRight != dockRight || old.line != line;
+}
+
 class _DashPainter extends CustomPainter {
-  _DashPainter(this.color);
+  _DashPainter(this.color, this.line);
   final Color color;
+  final _PreviewLine line;
+  Offset get start => line.start;
+  Offset get end => line.end;
 
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()
       ..color = color
       ..strokeWidth = 1.5;
-    for (var x = 0.0; x < size.width; x += 6) {
+    final delta = end - start;
+    final distance = delta.distance;
+    if (distance == 0) return;
+    final direction = delta / distance;
+    for (var x = 0.0; x < distance; x += 6) {
       canvas.drawLine(
-        Offset(x, .75),
-        Offset(math.min(size.width, x + 3), .75),
+        start + direction * x,
+        start + direction * math.min(distance, x + 3),
         p,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_DashPainter old) => old.color != color;
+  bool shouldRepaint(_DashPainter old) =>
+      old.color != color || old.line != line;
 }
 
 /// 标题旁的计数（原型 `.cnt`）：18 高、圆角 9、控件底、11 / w600。
@@ -559,14 +630,86 @@ class _Count extends StatelessWidget {
 }
 
 /// 一行分类筛选（原型 `.fchip`）：26 高、圆角 13、12 号；选中是正文色实心 + 窗口底色字。
-/// 横向滚动，右端渐隐。
-class _Chips extends StatelessWidget {
+/// “全部”固定；其余标签由滚轮左右滑动，两端按剩余内容渐隐。
+class _Chips extends StatefulWidget {
   const _Chips({required this.data, required this.onChanged});
   final BlocksDockViewData data;
   final ValueChanged<BlocksDockFilter> onChanged;
 
   @override
+  State<_Chips> createState() => _ChipsState();
+}
+
+class _ChipsState extends State<_Chips> {
+  final _scroll = ScrollController();
+  bool _left = false;
+  bool _right = false;
+  bool _refreshPending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_refresh);
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _refresh() {
+    if (!mounted ||
+        !_scroll.hasClients ||
+        !_scroll.position.hasContentDimensions) {
+      return;
+    }
+    final left = _scroll.position.extentBefore > .5;
+    final right = _scroll.position.extentAfter > .5;
+    if (left != _left || right != _right) {
+      setState(() {
+        _left = left;
+        _right = right;
+      });
+    }
+  }
+
+  bool _metrics(ScrollMetricsNotification notification) {
+    if (notification.depth == 0 && !_refreshPending) {
+      _refreshPending = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _refreshPending = false;
+        _refresh();
+      });
+    }
+    return false;
+  }
+
+  void _wheel(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || !_scroll.hasClients) return;
+    final position = _scroll.position;
+    if (!position.hasContentDimensions || position.maxScrollExtent <= 0) return;
+    final delta = event.scrollDelta.dx != 0
+        ? event.scrollDelta.dx
+        : event.scrollDelta.dy;
+    if (delta == 0) return;
+    GestureBinding.instance.pointerSignalResolver.register(event, (resolved) {
+      if (!mounted || !_scroll.hasClients) return;
+      final current = _scroll.position;
+      _scroll.jumpTo(
+        (current.pixels + delta).clamp(
+          current.minScrollExtent,
+          current.maxScrollExtent,
+        ),
+      );
+      (resolved as PointerScrollEvent).respond(allowPlatformDefault: false);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final data = widget.data;
+    final onChanged = widget.onChanged;
     final c = context.ui;
     final l10n = context.l10n;
     Widget chip(BlocksDockFilter f, String label, {int? count, String? glyph}) {
@@ -614,28 +757,63 @@ class _Chips extends StatelessWidget {
       );
     }
 
-    return ShaderMask(
-      shaderCallback: (r) => const LinearGradient(
-        colors: [Color(0xFF000000), Color(0xFF000000), Color(0x00000000)],
-        stops: [0, .85, 1],
-      ).createShader(r),
-      blendMode: BlendMode.dstIn,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(12, 0, 24, 8),
-        child: Row(
-          spacing: 2,
-          children: [
-            chip(const BlocksDockFilter.all(), l10n.blocks_filterAll),
-            chip(
-              const BlocksDockFilter.favorites(),
-              l10n.blocks_favorites,
-              glyph: UiGlyphs.star,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: Row(
+        children: [
+          chip(const BlocksDockFilter.all(), l10n.blocks_filterAll),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 6),
+            child: UiVSep(key: Key('dock-chips-divider'), height: 14),
+          ),
+          Expanded(
+            child: NotificationListener<ScrollMetricsNotification>(
+              onNotification: _metrics,
+              child: Listener(
+                onPointerSignal: _wheel,
+                child: ShaderMask(
+                  key: const Key('dock-chips-fade'),
+                  shaderCallback: (r) => LinearGradient(
+                    colors: [
+                      _left ? const Color(0x00000000) : const Color(0xFF000000),
+                      const Color(0xFF000000),
+                      const Color(0xFF000000),
+                      _right
+                          ? const Color(0x00000000)
+                          : const Color(0xFF000000),
+                    ],
+                    stops: const [0, .08, .92, 1],
+                  ).createShader(r),
+                  blendMode: BlendMode.dstIn,
+                  child: SingleChildScrollView(
+                    key: const Key('dock-chips-scroll'),
+                    controller: _scroll,
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      spacing: 2,
+                      children: [
+                        chip(
+                          const BlocksDockFilter.favorites(),
+                          l10n.blocks_favorites,
+                          glyph: UiGlyphs.star,
+                        ),
+                        for (final ch in [
+                          ...data.chips.where((chip) => chip.count != 0),
+                          ...data.chips.where((chip) => chip.count == 0),
+                        ])
+                          chip(
+                            BlocksDockFilter.folder(ch.id),
+                            ch.name,
+                            count: ch.count,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
-            for (final ch in data.chips)
-              chip(BlocksDockFilter.folder(ch.id), ch.name, count: ch.count),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
