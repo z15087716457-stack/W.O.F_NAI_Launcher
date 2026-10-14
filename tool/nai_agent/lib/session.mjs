@@ -44,8 +44,8 @@ export function studioTools(execute, extraToolNames = []) {
   return [
     tool('studio_context', 'Read current Studio state on demand. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
       Type.Object({ scope: Type.Optional(Type.Union([Type.Literal('summary'), Type.Literal('draft')])) })),
-    tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or a workspace-relative file path. Returns image pixels and original metadata without altering the image or draft.',
-      Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()) })),
+    tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or an original attachment using its workspace-relative path included in the user message. metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
+      Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),
     tool('prompt_update', 'Patch Studio draft after reading studio_context(scope=draft). Send expected field_versions for every affected field. Backups and a latest-state comparison precede all writes; returns actual readback. Does not generate.',
       Type.Object({ changes: Type.Record(Type.String(), Type.Unknown()),
         expected: Type.Record(Type.String(), Type.String()) })),

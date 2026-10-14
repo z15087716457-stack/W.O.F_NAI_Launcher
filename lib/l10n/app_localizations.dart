@@ -29750,6 +29750,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold to compare the original image and inpaint area'**
   String get gen_compareOriginal;
+
+  /// No description provided for @naiAgent_importingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading images…'**
+  String get naiAgent_importingImages;
+
+  /// No description provided for @naiAgent_imageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image exceeds 64 MiB or 64 million pixels.'**
+  String get naiAgent_imageTooLarge;
+
+  /// No description provided for @naiAgent_linkOnlyImage.
+  ///
+  /// In en, this message translates to:
+  /// **'This source only provides a link. Save the image file and drag it here.'**
+  String get naiAgent_linkOnlyImage;
+
+  /// No description provided for @naiAgent_invalidImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to read this image. Use a PNG, JPEG, WebP, GIF or BMP file.'**
+  String get naiAgent_invalidImage;
+
+  /// No description provided for @naiAgent_importResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {added} images; {failed} failed.'**
+  String naiAgent_importResult(int added, int failed);
+
+  /// No description provided for @naiAgent_attachmentMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Original image metadata'**
+  String get naiAgent_attachmentMetadata;
 }
 
 class _AppLocalizationsDelegate

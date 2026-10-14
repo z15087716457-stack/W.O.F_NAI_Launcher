@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +10,8 @@ import '../../providers/image_generation_provider.dart';
 import '../../providers/generation/preview_selection_provider.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../utils/dropped_file_reader.dart';
+import '../../utils/nai_agent_image_reader.dart';
+import '../../../core/nai_agent/attachment_image.dart';
 import 'nai_agent_shared.dart';
 import 'nai_agent_controls.dart';
 import 'nai_agent_image_input.dart';
@@ -35,7 +36,8 @@ class _AgentPasteIntent extends Intent {
 class _ComposerState extends ConsumerState<NaiAgentComposer> {
   late final TextEditingController _text;
   final _focus = FocusNode();
-  bool _dragging = false, _reading = false;
+  bool _dragging = false;
+  final _readingTargets = <AgentChatRuntime>{};
   @override
   void initState() {
     super.initState();
@@ -88,6 +90,7 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
         .firstOrNull;
     return provider != null &&
         model != null &&
+        r.importingImages == 0 &&
         !r.starting &&
         (r.composer.text.trim().isNotEmpty ||
             r.composer.attachments.isNotEmpty);
@@ -114,57 +117,59 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
     return KeyEventResult.ignored;
   }
 
-  Future<void> _attach(DroppedFileData data, AgentChatRuntime target) =>
-      attachAgentImage(widget.controller, target, data);
-
   Future<void> _pick() async {
     final target = widget.runtime;
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp', 'gif'],
-      allowMultiple: true,
-    );
-    if (result == null || !mounted) return;
-    await agentUiAction(context, () async {
-      for (final file in result.files) {
-        final bytes =
-            file.bytes ??
-            (file.path == null ? null : await File(file.path!).readAsBytes());
-        if (bytes != null) {
-          await _attach(
-            DroppedFileData(fileName: file.name, bytes: bytes),
-            target,
-          );
-        }
+    final controller = widget.controller;
+    await controller.importImages(target, () async {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: const ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'],
+        allowMultiple: true,
+      );
+      if (result == null) return;
+      final report = await importAgentImageSources(controller, target, [
+        for (final file in result.files)
+          () async {
+            if (file.path != null) return readAgentImageFile(file.path!);
+            if (file.bytes == null) {
+              throw const AgentImageInputException('unreadable');
+            }
+            return DroppedFileData(fileName: file.name, bytes: file.bytes!);
+          },
+      ]);
+      if (mounted && identical(controller.selected, target)) {
+        presentAgentImageImport(context, report);
       }
     });
   }
 
   Future<void> _paste() async {
-    if (_reading) return;
-    _reading = true;
     final target = widget.runtime;
+    if (!_readingTargets.add(target)) return;
+    final controller = widget.controller;
     try {
-      var imageFound = false;
-      final clipboard = SystemClipboard.instance;
-      if (clipboard != null) {
-        final reader = await clipboard.read();
-        for (final item in reader.items) {
-          final data = await DroppedFileReader.read(
-            item,
-            allowRemoteImages: false,
-            logTag: 'NaiAgentPaste',
-          );
-          if (data != null) {
-            imageFound = true;
-            await _attach(data, target);
-          }
+      await controller.importImages(target, () async {
+        var readers = <DataReader>[];
+        try {
+          readers = await ref.read(naiAgentClipboardReadersProvider)();
+        } catch (_) {
+          // Rich clipboard failures must not swallow ordinary text paste.
         }
-      }
-      if (!imageFound) {
+        controller.checkImageImportTarget(target);
+        final report = await importAgentImageSources(controller, target, [
+          for (final item in readers) () => readAgentImage(item, clipboard: true),
+        ]);
+        if (report.added > 0 || report.failures.isNotEmpty) {
+          if (mounted && identical(controller.selected, target)) {
+            presentAgentImageImport(context, report);
+          }
+          return;
+        }
         final data = await Clipboard.getData(Clipboard.kTextPlain);
+        controller.checkImageImportTarget(target);
         if (!mounted ||
             !_focus.hasFocus ||
+            !identical(controller.selected, target) ||
             widget.runtime != target ||
             data?.text == null) {
           return;
@@ -185,18 +190,18 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
             offset: selection.start + data.text!.length,
           ),
         );
-        await widget.controller.saveComposer(text);
-      }
-    } catch (_) {
-      if (mounted) {
-        await agentUiAction(
+        await controller.saveComposer(text);
+      });
+    } catch (error) {
+      if (mounted &&
+          (error is! AgentImageInputException || error.code != 'closed')) {
+        presentAgentImageImport(
           context,
-          () =>
-              Future.error(const FormatException('Clipboard image unreadable')),
+          AgentImageImportReport()..failures.add('unreadable'),
         );
       }
     } finally {
-      _reading = false;
+      _readingTargets.remove(target);
     }
   }
 
@@ -207,10 +212,14 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
         ? state.mergedPanelImages.firstOrNull
         : state.findImageById(id);
     if (image == null || !image.canDrag) return;
-    await _attach(
-      DroppedFileData(fileName: 'canvas_${image.id}.png', bytes: image.bytes),
-      widget.runtime,
-    );
+    final report =
+        await importAgentImageSources(widget.controller, widget.runtime, [
+          () async => DroppedFileData(
+            fileName: 'canvas_${image.id}.png',
+            bytes: image.bytes,
+          ),
+        ]);
+    if (mounted) presentAgentImageImport(context, report);
   }
 
   @override
@@ -228,6 +237,12 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
       },
       child: Actions(
         actions: {
+          PasteTextIntent: CallbackAction<PasteTextIntent>(
+            onInvoke: (_) {
+              unawaited(_paste());
+              return null;
+            },
+          ),
           _AgentPasteIntent: CallbackAction<_AgentPasteIntent>(
             onInvoke: (_) {
               unawaited(_paste());
@@ -242,6 +257,17 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
             children: [
               NaiAgentWorkspacePicker(controller: c, runtime: r),
               const SizedBox(height: 7),
+              if (r.importingImages > 0)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    l.naiAgent_importingImages,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               Container(
                 key: const Key('nai-agent-composer'),
                 padding: const EdgeInsets.fromLTRB(12, 10, 10, 10),
@@ -301,6 +327,28 @@ class _ComposerState extends ConsumerState<NaiAgentComposer> {
                               ),
                               keyboardType: TextInputType.multiline,
                               textInputAction: TextInputAction.newline,
+                              contextMenuBuilder: (context, state) {
+                                final items = state.contextMenuButtonItems
+                                    .where(
+                                      (item) =>
+                                          item.type !=
+                                          ContextMenuButtonType.paste,
+                                    )
+                                    .toList();
+                                items.add(
+                                  ContextMenuButtonItem(
+                                    type: ContextMenuButtonType.paste,
+                                    onPressed: () {
+                                      ContextMenuController.removeAny();
+                                      unawaited(_paste());
+                                    },
+                                  ),
+                                );
+                                return AdaptiveTextSelectionToolbar.buttonItems(
+                                  anchors: state.contextMenuAnchors,
+                                  buttonItems: items,
+                                );
+                              },
                               decoration: InputDecoration(
                                 hintText: _dragging
                                     ? l.naiAgent_dropHint

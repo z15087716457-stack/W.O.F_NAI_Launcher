@@ -6471,22 +6471,30 @@
   "@refs_encReBody": {
     "description": "Re-encoding card description; the action below displays the price.",
     "placeholders": {
-      "from": { "type": "String" },
-      "model": { "type": "String" }
+      "from": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
     }
   },
   "refs_encodeAction": "为 {model} 编码",
   "@refs_encodeAction": {
     "description": "Compact encoding action label; price is a separate badge.",
     "placeholders": {
-      "model": { "type": "String" }
+      "model": {
+        "type": "String"
+      }
     }
   },
   "refs_encodingPrice": "{cost} Anlas",
   "@refs_encodingPrice": {
     "description": "Encoding price badge inside the action button.",
     "placeholders": {
-      "cost": { "type": "int" }
+      "cost": {
+        "type": "int"
+      }
     }
   },
   "refs_encodeNow": "现在为 {model} 编码 · {cost} Anlas",
@@ -8985,5 +8993,21 @@
     }
   },
   "gen_oldImageLabel": "OLD",
-  "gen_compareOriginal": "按住查看原图与局部重绘范围"
+  "gen_compareOriginal": "按住查看原图与局部重绘范围",
+  "naiAgent_importingImages": "正在读取图片…",
+  "naiAgent_imageTooLarge": "图片超过 64 MiB 或 6400 万像素。",
+  "naiAgent_linkOnlyImage": "当前来源只提供链接，请保存图片文件后拖入。",
+  "naiAgent_invalidImage": "无法读取图片，请使用 PNG、JPEG、WebP、GIF 或 BMP 文件。",
+  "naiAgent_importResult": "已添加 {added} 张图片，{failed} 张失败。",
+  "naiAgent_attachmentMetadata": "原图元数据",
+  "@naiAgent_importResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

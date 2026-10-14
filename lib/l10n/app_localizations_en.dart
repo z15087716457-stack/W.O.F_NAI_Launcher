@@ -17023,4 +17023,27 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gen_compareOriginal =>
       'Hold to compare the original image and inpaint area';
+
+  @override
+  String get naiAgent_importingImages => 'Reading images…';
+
+  @override
+  String get naiAgent_imageTooLarge =>
+      'Image exceeds 64 MiB or 64 million pixels.';
+
+  @override
+  String get naiAgent_linkOnlyImage =>
+      'This source only provides a link. Save the image file and drag it here.';
+
+  @override
+  String get naiAgent_invalidImage =>
+      'Unable to read this image. Use a PNG, JPEG, WebP, GIF or BMP file.';
+
+  @override
+  String naiAgent_importResult(int added, int failed) {
+    return 'Added $added images; $failed failed.';
+  }
+
+  @override
+  String get naiAgent_attachmentMetadata => 'Original image metadata';
 }

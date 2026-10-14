@@ -176,9 +176,14 @@ class AgentAttachment {
     required this.mimeType,
     required this.bytes,
     required this.sha256Hex,
+    this.width,
+    this.height,
+    this.metadata,
   });
   final String id, name, relativePath, mimeType, sha256Hex;
   final int bytes;
+  final int? width, height;
+  final Map<String, dynamic>? metadata;
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,
@@ -186,6 +191,9 @@ class AgentAttachment {
     'mimeType': mimeType,
     'bytes': bytes,
     'sha256': sha256Hex,
+    if (width != null) 'width': width,
+    if (height != null) 'height': height,
+    if (metadata != null) 'metadata': metadata,
   };
   factory AgentAttachment.fromJson(Map<String, dynamic> value) =>
       AgentAttachment(
@@ -195,6 +203,11 @@ class AgentAttachment {
         mimeType: value['mimeType'] as String,
         bytes: value['bytes'] as int,
         sha256Hex: value['sha256'] as String,
+        width: value['width'] as int?,
+        height: value['height'] as int?,
+        metadata: value['metadata'] is Map
+            ? Map<String, dynamic>.from(value['metadata'] as Map)
+            : null,
       );
 }
 
@@ -655,6 +668,9 @@ class AgentWorkspaceStore {
     required String name,
     required Uint8List bytes,
     required String mimeType,
+    int? width,
+    int? height,
+    Map<String, dynamic>? metadata,
   }) => _write(() async {
     _id(sessionId);
     if (bytes.isEmpty ||
@@ -664,6 +680,7 @@ class AgentWorkspaceStore {
           'image/jpeg',
           'image/webp',
           'image/gif',
+          'image/bmp',
         }.contains(mimeType)) {
       throw const FormatException('Unsupported or oversized image attachment');
     }
@@ -673,6 +690,7 @@ class AgentWorkspaceStore {
       'image/jpeg' => '.jpg',
       'image/webp' => '.webp',
       'image/gif' => '.gif',
+      'image/bmp' => '.bmp',
       _ => '.png',
     };
     final relative = p.join('attachments', sessionId, id + suffix);
@@ -686,6 +704,9 @@ class AgentWorkspaceStore {
       mimeType: mimeType,
       bytes: bytes.length,
       sha256Hex: sha256.convert(bytes).toString(),
+      width: width,
+      height: height,
+      metadata: metadata,
     );
   });
   Future<Uint8List> readAttachment(

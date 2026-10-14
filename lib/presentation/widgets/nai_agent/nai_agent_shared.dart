@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
+import '../../../core/nai_agent/attachment_image.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/nai_agent/nai_agent_questions.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
@@ -402,7 +404,11 @@ class _AttachmentState extends ConsumerState<NaiAgentAttachmentThumbnail> {
   void _load() {
     _bytes = ref
         .read(naiAgentWorkspaceStoreProvider)
-        .readAttachment(widget.workspaceId, widget.attachment);
+        .readAttachment(widget.workspaceId, widget.attachment)
+        .then(
+          (bytes) =>
+              agentAttachmentVisualBytes(bytes, widget.attachment.mimeType),
+        );
   }
 
   @override
@@ -473,6 +479,59 @@ class _AttachmentState extends ConsumerState<NaiAgentAttachmentThumbnail> {
                 ),
               ),
             ),
+            if (widget.attachment.metadata != null)
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Material(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface.withValues(alpha: .9),
+                  borderRadius: BorderRadius.circular(4),
+                  child: IconButton(
+                    key: ValueKey(
+                      'agent-attachment-metadata-${widget.attachment.id}',
+                    ),
+                    tooltip: context.l10n.naiAgent_attachmentMetadata,
+                    constraints: const BoxConstraints.tightFor(
+                      width: 23,
+                      height: 23,
+                    ),
+                    padding: EdgeInsets.zero,
+                    icon: const Icon(Icons.info_outline, size: 15),
+                    onPressed: () => showDialog<void>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(
+                          widget.attachment.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        content: SizedBox(
+                          width: 520,
+                          child: SingleChildScrollView(
+                            child: SelectableText(
+                              const JsonEncoder.withIndent(
+                                '  ',
+                              ).convert(widget.attachment.metadata),
+                            ),
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              MaterialLocalizations.of(
+                                context,
+                              ).closeButtonLabel,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Positioned(
               right: -4,
               top: -5,

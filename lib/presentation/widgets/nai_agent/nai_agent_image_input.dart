@@ -3,29 +3,89 @@ import 'dart:typed_data';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:super_clipboard/super_clipboard.dart';
+import '../../../core/nai_agent/attachment_image.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../utils/dropped_file_reader.dart';
 import '../../utils/internal_drag_protocol.dart';
-import 'nai_agent_shared.dart';
+import '../../utils/nai_agent_image_reader.dart';
+import '../../../core/utils/localization_extension.dart';
+import '../common/app_toast.dart';
 
 /// Native OLE is tested with the packaged desktop runtime, outside fake clocks.
 final naiAgentNativeDragEnabledProvider = Provider<bool>((ref) => true);
 
 String? agentAttachmentMime(Uint8List bytes) {
-  if (bytes.length < 12) return null;
-  if (bytes[0] == 137 && bytes[1] == 80 && bytes[2] == 78 && bytes[3] == 71) {
-    return 'image/png';
+  return agentImageMime(bytes);
+}
+
+/// Tests inject OS readers, while production keeps the real clipboard channel.
+final naiAgentClipboardReadersProvider =
+    Provider<Future<List<DataReader>> Function()>(
+      (ref) => () async {
+        final clipboard = SystemClipboard.instance;
+        return clipboard == null ? [] : (await clipboard.read()).items;
+      },
+    );
+
+class AgentImageImportReport {
+  int added = 0, skipped = 0;
+  final failures = <String>[];
+}
+
+Future<AgentImageImportReport> importAgentImageSources(
+  NaiAgentWorkspaceController controller,
+  AgentChatRuntime target,
+  List<Future<DroppedFileData?> Function()> sources,
+) => controller.importImages(target, () async {
+  final result = AgentImageImportReport();
+  for (final source in sources) {
+    try {
+      controller.checkImageImportTarget(target);
+      final data = await source();
+      controller.checkImageImportTarget(target);
+      if (data == null) {
+        result.skipped++;
+        continue;
+      }
+      await attachAgentImage(controller, target, data);
+      result.added++;
+    } catch (error) {
+      if (error is AgentImageInputException && error.code == 'closed') rethrow;
+      result.failures.add(
+        error is AgentImageInputException ? error.code : 'unreadable',
+      );
+    }
   }
-  if (bytes[0] == 255 && bytes[1] == 216 && bytes[2] == 255) {
-    return 'image/jpeg';
+  return result;
+});
+
+void presentAgentImageImport(
+  BuildContext context,
+  AgentImageImportReport report, {
+  bool dropping = false,
+}) {
+  if (!context.mounted) return;
+  final l = context.l10n;
+  if (report.failures.isNotEmpty) {
+    final reasons = report.failures
+        .toSet()
+        .map(
+          (code) => switch (code) {
+            'oversized' => l.naiAgent_imageTooLarge,
+            'link_only' => l.naiAgent_linkOnlyImage,
+            _ => l.naiAgent_invalidImage,
+          },
+        )
+        .join('\n');
+    AppToast.warning(
+      context,
+      '${l.naiAgent_importResult(report.added, report.failures.length)}\n$reasons',
+    );
+  } else if (dropping && report.added == 0) {
+    AppToast.warning(context, l.naiAgent_invalidImage);
   }
-  if (String.fromCharCodes(bytes.take(3)) == 'GIF') return 'image/gif';
-  if (String.fromCharCodes(bytes.take(4)) == 'RIFF' &&
-      String.fromCharCodes(bytes.sublist(8, 12)) == 'WEBP') {
-    return 'image/webp';
-  }
-  return null;
 }
 
 Future<void> attachAgentImage(
@@ -59,32 +119,33 @@ class NaiAgentDropTarget extends ConsumerStatefulWidget {
 class _DropTargetState extends ConsumerState<NaiAgentDropTarget> {
   Future<void> _drop(PerformDropEvent event, AgentChatRuntime target) async {
     final controller = widget.controller;
-    final generation = ref.read(imageGenerationNotifierProvider);
     widget.onHighlight?.call(false);
     try {
-      var handled = false;
+      final sources = <Future<DroppedFileData?> Function()>[];
       for (final item in event.session.items) {
-        final internal = resolveInternalHistoryDropPayload(
-          item.localData,
-          generation,
+        final internal = isHistoryInternalDragLocalData(item.localData)
+            ? resolveInternalHistoryDropPayload(
+                item.localData,
+                ref.read(imageGenerationNotifierProvider),
+              )
+            : null;
+        final reader = item.dataReader;
+        sources.add(
+          () async =>
+              internal ??
+              (reader == null
+                  ? null
+                  : await readAgentImage(reader, dropping: true)),
         );
-        final data =
-            internal ??
-            (item.dataReader == null
-                ? null
-                : await DroppedFileReader.read(
-                    item.dataReader!,
-                    allowRemoteImages: false,
-                    logTag: 'NaiAgentDrop',
-                  ));
-        if (data != null) {
-          await attachAgentImage(controller, target, data);
-          handled = true;
-        }
       }
-      if (!handled) throw const FormatException('No readable image');
+      final report = await importAgentImageSources(controller, target, sources);
+      if (mounted && identical(controller.selected, target)) {
+        presentAgentImageImport(context, report, dropping: true);
+      }
     } catch (error) {
-      if (mounted) await agentUiAction(context, () => Future.error(error));
+      if (mounted && error is! AgentImageInputException) {
+        AppToast.error(context, context.l10n.naiAgent_invalidImage);
+      }
     }
   }
 
@@ -93,11 +154,15 @@ class _DropTargetState extends ConsumerState<NaiAgentDropTarget> {
     if (!ref.watch(naiAgentNativeDragEnabledProvider)) return widget.child;
     return DropRegion(
       formats: Formats.standardFormats,
-      onDropOver: (_) {
+      onDropOver: (event) {
+        if (!event.session.allowedOperations.contains(DropOperation.copy)) {
+          return DropOperation.none;
+        }
         widget.onHighlight?.call(true);
         return DropOperation.copy;
       },
       onDropLeave: (_) => widget.onHighlight?.call(false),
+      onDropEnded: (_) => widget.onHighlight?.call(false),
       onPerformDrop: (event) async {
         // Do not await file readers inside the Windows OLE drop callback.
         unawaited(_drop(event, widget.runtime));

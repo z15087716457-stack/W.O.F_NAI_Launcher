@@ -8993,5 +8993,21 @@
     }
   },
   "gen_oldImageLabel": "OLD",
-  "gen_compareOriginal": "按住檢視原圖與局部重繪範圍"
+  "gen_compareOriginal": "按住檢視原圖與局部重繪範圍",
+  "naiAgent_importingImages": "正在讀取圖片…",
+  "naiAgent_imageTooLarge": "圖片超過 64 MiB 或 6400 萬像素。",
+  "naiAgent_linkOnlyImage": "當前來源只提供連結，請儲存圖片檔案後拖入。",
+  "naiAgent_invalidImage": "無法讀取圖片，請使用 PNG、JPEG、WebP、GIF 或 BMP 檔案。",
+  "naiAgent_importResult": "已新增 {added} 張圖片，{failed} 張失敗。",
+  "naiAgent_attachmentMetadata": "原圖後設資料",
+  "@naiAgent_importResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

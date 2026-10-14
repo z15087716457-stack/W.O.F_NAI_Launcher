@@ -16320,6 +16320,26 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_compareOriginal => '按住查看原图与局部重绘范围';
+
+  @override
+  String get naiAgent_importingImages => '正在读取图片…';
+
+  @override
+  String get naiAgent_imageTooLarge => '图片超过 64 MiB 或 6400 万像素。';
+
+  @override
+  String get naiAgent_linkOnlyImage => '当前来源只提供链接，请保存图片文件后拖入。';
+
+  @override
+  String get naiAgent_invalidImage => '无法读取图片，请使用 PNG、JPEG、WebP、GIF 或 BMP 文件。';
+
+  @override
+  String naiAgent_importResult(int added, int failed) {
+    return '已添加 $added 张图片，$failed 张失败。';
+  }
+
+  @override
+  String get naiAgent_attachmentMetadata => '原图元数据';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -32638,4 +32658,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_compareOriginal => '按住檢視原圖與局部重繪範圍';
+
+  @override
+  String get naiAgent_importingImages => '正在讀取圖片…';
+
+  @override
+  String get naiAgent_imageTooLarge => '圖片超過 64 MiB 或 6400 萬像素。';
+
+  @override
+  String get naiAgent_linkOnlyImage => '當前來源只提供連結，請儲存圖片檔案後拖入。';
+
+  @override
+  String get naiAgent_invalidImage => '無法讀取圖片，請使用 PNG、JPEG、WebP、GIF 或 BMP 檔案。';
+
+  @override
+  String naiAgent_importResult(int added, int failed) {
+    return '已新增 $added 張圖片，$failed 張失敗。';
+  }
+
+  @override
+  String get naiAgent_attachmentMetadata => '原圖後設資料';
 }

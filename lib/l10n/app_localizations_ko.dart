@@ -16572,4 +16572,26 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_compareOriginal => '누르고 있는 동안 원본 이미지와 인페인트 영역 비교';
+
+  @override
+  String get naiAgent_importingImages => '이미지 읽는 중…';
+
+  @override
+  String get naiAgent_imageTooLarge => '이미지가 64 MiB 또는 6,400만 픽셀을 초과합니다.';
+
+  @override
+  String get naiAgent_linkOnlyImage =>
+      '이 소스에는 링크만 있습니다. 이미지 파일을 저장한 뒤 여기로 드래그하세요.';
+
+  @override
+  String get naiAgent_invalidImage =>
+      '이미지를 읽을 수 없습니다. PNG, JPEG, WebP, GIF 또는 BMP 파일을 사용하세요.';
+
+  @override
+  String naiAgent_importResult(int added, int failed) {
+    return '이미지 $added개 추가, $failed개 실패했습니다.';
+  }
+
+  @override
+  String get naiAgent_attachmentMetadata => '원본 이미지 메타데이터';
 }

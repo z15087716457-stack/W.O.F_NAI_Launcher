@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
@@ -60,7 +61,7 @@ void main() {
     await server.close(force: true);
     await root.delete(recursive: true);
   });
-  NaiAgentWorkspaceController controller() {
+  NaiAgentWorkspaceController controller({bool vision = false}) {
     final value = NaiAgentWorkspaceController(
       store: AgentWorkspaceStore(root),
       initialWorkspaceName: '工作区',
@@ -87,6 +88,7 @@ void main() {
               'protocol': 'openaiChatCompletions',
               'baseUrl': 'http://127.0.0.1:${server.port}',
               'tools': true,
+              'vision': vision,
               'maxConcurrentRequests': 1,
               'maxRequestsPerRun': 32,
               'permissionMode': settings.permissionMode,
@@ -98,6 +100,71 @@ void main() {
     return value;
   }
 
+  test('nonvision sends only compact NAI summary and original paths', () async {
+    final c = controller();
+    await c.initialize();
+    final runtime = c.selected!;
+    final png = img.encodePng(
+      img.Image(
+        width: 2,
+        height: 2,
+        textData: {
+          'Software': 'NovelAI',
+          'Description': 'large private prompt',
+          'Comment': jsonEncode({
+            'prompt': 'large private prompt',
+            'seed': 6789,
+            'steps': 28,
+          }),
+        },
+      ),
+    );
+    final ordinary = img.encodePng(
+      img.Image(
+        width: 2,
+        height: 2,
+        textData: {'Software': 'Photoshop', 'Description': 'private EXIF'},
+      ),
+    );
+    await c.attach('NAI.png', png, 'image/png');
+    await c.attach('ordinary.png', ordinary, 'image/png');
+    final originals = runtime.composer.attachments;
+    await c.saveComposer('read original metadata when needed');
+    await c.send();
+    expect(runtime.error, isNull);
+    expect(calls, 1);
+    final sent = jsonEncode(requests.single['messages']);
+    expect(sent, contains('6789'));
+    expect(sent, contains('metadata_only=true'));
+    expect(sent, contains('ordinary.png'));
+    expect(sent, isNot(contains('large private prompt')));
+    expect(sent, isNot(contains('private EXIF')));
+    expect(sent, isNot(contains('image_url')));
+    expect(
+      await c.store.readAttachment(runtime.workspace.id, originals.first),
+      png,
+    );
+    expect(
+      await c.store.readAttachment(runtime.workspace.id, originals.last),
+      ordinary,
+    );
+  });
+  test('vision sends BMP as a PNG copy and retains the original BMP', () async {
+    final c = controller(vision: true);
+    await c.initialize();
+    final runtime = c.selected!;
+    final bmp = img.encodeBmp(img.Image(width: 3, height: 2));
+    await c.attach('original.bmp', bmp, 'image/bmp');
+    final original = runtime.composer.attachments.single;
+    await c.send();
+    expect(runtime.error, isNull);
+    expect(calls, 1);
+    expect(
+      jsonEncode(requests.single['messages']),
+      contains('data:image/png;base64,'),
+    );
+    expect(await c.store.readAttachment(runtime.workspace.id, original), bmp);
+  });
   test(
     'live approval mode updates the owned Pi host without a model request',
     () async {
@@ -439,9 +506,7 @@ void main() {
       await c.createWorkspace('第二个工作区');
       await c.saveComposer('保留第二个项目的草稿');
       final selected = c.selected!;
-      final pixels = base64Decode(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jNnUAAAAASUVORK5CYII=',
-      );
+      final pixels = img.encodePng(img.Image(width: 1, height: 1));
       await c.attach('reference.png', pixels, 'image/png', target: original);
       expect(selected.composer.attachments, isEmpty);
       expect(selected.composer.text, '保留第二个项目的草稿');

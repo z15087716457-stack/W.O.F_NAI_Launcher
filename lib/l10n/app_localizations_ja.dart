@@ -16532,4 +16532,26 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_compareOriginal => '押している間、元画像とインペイント範囲を比較';
+
+  @override
+  String get naiAgent_importingImages => '画像を読み込み中…';
+
+  @override
+  String get naiAgent_imageTooLarge => '画像が64 MiBまたは6400万画素を超えています。';
+
+  @override
+  String get naiAgent_linkOnlyImage =>
+      'このソースにはリンクしかありません。画像ファイルを保存してここにドラッグしてください。';
+
+  @override
+  String get naiAgent_invalidImage =>
+      '画像を読み込めません。PNG、JPEG、WebP、GIF、BMPファイルを使用してください。';
+
+  @override
+  String naiAgent_importResult(int added, int failed) {
+    return '画像を$added枚追加、$failed枚失敗しました。';
+  }
+
+  @override
+  String get naiAgent_attachmentMetadata => '元画像のメタデータ';
 }

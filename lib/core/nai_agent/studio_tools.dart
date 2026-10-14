@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import '../krita/bridge_draft_guard.dart';
 import '../utils/nai_resolution_adapter.dart';
-import '../../data/services/metadata/unified_metadata_parser.dart';
 import '../../presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 import 'agent_tool.dart';
+import 'attachment_image.dart';
 
 class NaiAgentImage {
   const NaiAgentImage({required this.id, required this.bytes, this.metadata});
@@ -145,7 +145,8 @@ class NaiAgentStudioTools {
     Map<String, dynamic> params,
     NaiAgentCancellation cancellation,
   ) async {
-    if (!allowsImages) {
+    final metadataOnly = params['metadata_only'] == true;
+    if (!allowsImages && !metadataOnly) {
       throw const NaiAgentToolError(
         'vision_unavailable',
         'Image input is not enabled for this model',
@@ -154,13 +155,22 @@ class NaiAgentStudioTools {
     final image = await loadImage(params, cancellation);
     final size = NaiResolutionAdapter.readImageSize(image.bytes)!;
     final mime = _mime(image.bytes)!;
-    final metadata =
-        image.metadata ??
-        UnifiedMetadataParser.parseFromImageBytes(
-          image.bytes,
-        ).metadata?.toJson();
+    final metadata = image.metadata ?? readNaiAttachmentMetadata(image.bytes);
+    final originalInfo = {
+      'image_id': image.id,
+      'width': size.$1,
+      'height': size.$2,
+      'source_bytes': image.bytes.length,
+      'source_mime': mime,
+      'metadata': metadata,
+    };
+    if (metadataOnly) return naiAgentTextResult(originalInfo);
+    final visual = await agentAttachmentVisualBytes(image.bytes, mime);
     final optimized = await optimizePromptAssistantImagePartForUpload(
-      PromptAssistantImagePart(bytes: image.bytes, mimeType: mime),
+      PromptAssistantImagePart(
+        bytes: visual,
+        mimeType: mime == 'image/bmp' ? 'image/png' : mime,
+      ),
     );
     cancellation.check();
     if (!isAlive()) {
@@ -284,6 +294,7 @@ class NaiAgentStudioTools {
   }
 
   static String? _mime(Uint8List bytes) {
+    if (agentImageMime(bytes) == 'image/bmp') return 'image/bmp';
     if (bytes.length < 12) return null;
     if (bytes[0] == 137 && bytes[1] == 80 && bytes[2] == 78 && bytes[3] == 71) {
       return 'image/png';

@@ -6471,22 +6471,30 @@
   "@refs_encReBody": {
     "description": "Re-encoding card description; the action below displays the price.",
     "placeholders": {
-      "from": { "type": "String" },
-      "model": { "type": "String" }
+      "from": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
     }
   },
   "refs_encodeAction": "{model} 用にエンコード",
   "@refs_encodeAction": {
     "description": "Compact encoding action label; price is a separate badge.",
     "placeholders": {
-      "model": { "type": "String" }
+      "model": {
+        "type": "String"
+      }
     }
   },
   "refs_encodingPrice": "{cost} Anlas",
   "@refs_encodingPrice": {
     "description": "Encoding price badge inside the action button.",
     "placeholders": {
-      "cost": { "type": "int" }
+      "cost": {
+        "type": "int"
+      }
     }
   },
   "refs_encodeNow": "{model} 用にエンコード · {cost} Anlas",
@@ -8985,5 +8993,21 @@
     }
   },
   "gen_oldImageLabel": "OLD",
-  "gen_compareOriginal": "押している間、元画像とインペイント範囲を比較"
+  "gen_compareOriginal": "押している間、元画像とインペイント範囲を比較",
+  "naiAgent_importingImages": "画像を読み込み中…",
+  "naiAgent_imageTooLarge": "画像が64 MiBまたは6400万画素を超えています。",
+  "naiAgent_linkOnlyImage": "このソースにはリンクしかありません。画像ファイルを保存してここにドラッグしてください。",
+  "naiAgent_invalidImage": "画像を読み込めません。PNG、JPEG、WebP、GIF、BMPファイルを使用してください。",
+  "naiAgent_importResult": "画像を{added}枚追加、{failed}枚失敗しました。",
+  "naiAgent_attachmentMetadata": "元画像のメタデータ",
+  "@naiAgent_importResult": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "failed": {
+        "type": "int"
+      }
+    }
+  }
 }

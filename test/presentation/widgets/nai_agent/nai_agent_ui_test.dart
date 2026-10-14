@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:image/image.dart' as img;
@@ -7,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
@@ -35,6 +37,7 @@ import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_ex
 import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_mcp_settings.dart';
 import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/agent_data_reader.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
@@ -117,6 +120,39 @@ class _Controller extends NaiAgentWorkspaceController {
 // Widget tests run a fake clock; persistence has separate real IO coverage.
 class _UiStore extends AgentWorkspaceStore {
   _UiStore(super.root);
+  final attachmentBytes = <String, Uint8List>{};
+  @override
+  Future<AgentAttachment> addAttachment(
+    String workspaceId,
+    String sessionId, {
+    required String name,
+    required Uint8List bytes,
+    required String mimeType,
+    int? width,
+    int? height,
+    Map<String, dynamic>? metadata,
+  }) async {
+    final attachment = await super.addAttachment(
+      workspaceId,
+      sessionId,
+      name: name,
+      bytes: bytes,
+      mimeType: mimeType,
+      width: width,
+      height: height,
+      metadata: metadata,
+    );
+    attachmentBytes[attachment.id] = bytes;
+    return attachment;
+  }
+
+  @override
+  Future<Uint8List> readAttachment(
+    String workspaceId,
+    AgentAttachment attachment,
+  ) async =>
+      attachmentBytes[attachment.id] ??
+      await super.readAttachment(workspaceId, attachment);
   AgentSettings value = const AgentSettings();
   @override
   Future<AgentSettings> readSettings() async => value;
@@ -156,14 +192,19 @@ void main() {
   late Directory root;
   late _Controller c;
   late ProviderContainer container;
+  late Future<List<DataReader>> Function() readClipboard;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('nai-agent-ui-');
     c = _Controller(_UiStore(root));
+    readClipboard = () async => [];
     await c.initialize(restoreHistory: false);
     await c.updateSettings({'providerId': 'local', 'modelId': 'model'});
     container = ProviderContainer(
       overrides: [
         naiAgentNativeDragEnabledProvider.overrideWithValue(false),
+        naiAgentClipboardReadersProvider.overrideWithValue(
+          () => readClipboard(),
+        ),
         naiAgentControllerProvider.overrideWith((_) => c),
         naiAgentWorkspaceStoreProvider.overrideWithValue(c.store),
         localStorageServiceProvider.overrideWithValue(_Local()),
@@ -262,6 +303,175 @@ void main() {
     expect(model.right, lessThanOrEqualTo(thinking.left));
     expect(thinking.right, lessThanOrEqualTo(ring.left));
     expect(tester.takeException(), isNull);
+  });
+
+  Future<void> finishImageImport(
+    WidgetTester tester, {
+    AgentChatRuntime? target,
+  }) async {
+    final runtime = target ?? c.selected!;
+    final deadline = DateTime.now().add(const Duration(seconds: 8));
+    while (runtime.importingImages > 0 && DateTime.now().isBefore(deadline)) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      await tester.pump();
+    }
+    expect(runtime.importingImages, 0);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+    'Ctrl+V preserves original attachment and exposes local metadata',
+    (tester) async {
+      final png = img.encodePng(
+        img.Image(
+          width: 2,
+          height: 1,
+          textData: {
+            'Software': 'NovelAI',
+            'Description': 'original prompt',
+            'Comment': jsonEncode({
+              'prompt': 'original prompt',
+              'seed': 54321,
+              'steps': 28,
+            }),
+          },
+        ),
+      );
+      readClipboard = () async => [AgentFixtureDataReader(bytes: png)];
+      await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
+      final input = find.byKey(const Key('nai-agent-input'));
+      await tester.enterText(input, 'keep text');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await finishImageImport(tester);
+      final attachment = c.selected!.composer.attachments.single;
+      expect(
+        await tester.runAsync(
+          () => c.store.readAttachment(c.selected!.workspace.id, attachment),
+        ),
+        png,
+      );
+      expect(c.selected!.composer.text, 'keep text');
+      expect(attachment.metadata!['seed'], 54321);
+      await pump(
+        tester,
+        NaiAgentComposer(controller: c, runtime: c.selected!),
+        waitForFiles: true,
+      );
+      await tester.tap(
+        find.byKey(ValueKey('agent-attachment-metadata-${attachment.id}')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining('54321'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('context menu image paste uses the same attachment route', (
+    tester,
+  ) async {
+    readClipboard = () async => [
+      AgentFixtureDataReader(
+        bytes: img.encodePng(img.Image(width: 2, height: 1)),
+      ),
+    ];
+    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
+    await tester.longPress(find.byKey(const Key('nai-agent-input')));
+    await tester.pumpAndSettle();
+    final toolbar = tester.widget<AdaptiveTextSelectionToolbar>(
+      find.byType(AdaptiveTextSelectionToolbar),
+    );
+    toolbar.buttonItems!
+        .singleWhere((item) => item.type == ContextMenuButtonType.paste)
+        .onPressed!
+        .call();
+    await finishImageImport(tester);
+    expect(c.selected!.composer.attachments, hasLength(1));
+    final attachment = c.selected!.composer.attachments.single;
+    expect(attachment.metadata, isNull);
+    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
+    expect(find.byType(NaiAgentAttachmentThumbnail), findsOneWidget);
+    expect(
+      find.byKey(ValueKey('agent-attachment-metadata-${attachment.id}')),
+      findsNothing,
+    );
+    expect(c.sends, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('switching during paste permits a new paste in the new chat', (
+    tester,
+  ) async {
+    final first = c.selected!;
+    final firstRead = Completer<List<DataReader>>();
+    var reads = 0;
+    final png = img.encodePng(img.Image(width: 2, height: 2));
+    readClipboard = () => reads++ == 0
+        ? firstRead.future
+        : Future.value([AgentFixtureDataReader(bytes: png)]);
+    Future<void> paste() async {
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    }
+
+    await pump(tester, NaiAgentComposer(controller: c, runtime: first));
+    await tester.enterText(
+      find.byKey(const Key('nai-agent-input')),
+      'first draft',
+    );
+    await paste();
+    expect(first.importingImages, 1);
+    await tester.runAsync(() => c.createWorkspace('second'));
+    final second = c.selected!;
+    await pump(tester, NaiAgentComposer(controller: c, runtime: second));
+    await tester.enterText(
+      find.byKey(const Key('nai-agent-input')),
+      'second draft',
+    );
+    await paste();
+    await finishImageImport(tester);
+    expect(second.composer.attachments, hasLength(1));
+    expect(first.composer.attachments, isEmpty);
+    firstRead.complete([AgentFixtureDataReader(bytes: png)]);
+    await finishImageImport(tester, target: first);
+    expect(first.composer.attachments, hasLength(1));
+    expect(second.composer.attachments, hasLength(1));
+    expect(first.composer.text, 'first draft');
+    expect(second.composer.text, 'second draft');
+    expect(c.sends, 0);
+  });
+
+  testWidgets('rich clipboard failure falls back to text at latest selection', (
+    tester,
+  ) async {
+    final complete = Completer<List<DataReader>>();
+    readClipboard = () => complete.future;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async =>
+          call.method == 'Clipboard.getData' ? {'text': ' pasted'} : null,
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
+    final input = find.byKey(const Key('nai-agent-input'));
+    await tester.enterText(input, 'old');
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.enterText(input, 'latest');
+    complete.completeError(StateError('rich clipboard unavailable'));
+    await finishImageImport(tester);
+    expect(c.selected!.composer.text, 'latest pasted');
+    expect(c.selected!.composer.attachments, isEmpty);
   });
   testWidgets(
     'brand empty state is centered and suggestions only fill the composer',
