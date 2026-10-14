@@ -1,6 +1,6 @@
 # W.O.F NAI Studio 2.0 Preview · Windows x64 本地交付
 
-本批按用户授权累计更新当前 Studio，并重做最新版免安装便携包。有效源码继续为 `.devin/wt/ui-integration` / `codex/uiux-integration`；既有正式运行根、原检查点、旧便携 ZIP 和应用数据身份保持。
+本批按用户授权累计更新当前 Studio，并重做最新版免安装便携包。有效源码继续为 `.devin/wt/ui-integration` / `codex/uiux-integration`；既有正式运行根、原检查点和应用数据身份保持；分发目录按用户后续要求只保留最终 R2 便携包与校验文件。
 
 ## 版本与内容
 
@@ -28,6 +28,6 @@
 - ZIP CRC、每份内容哈希、实际解压、程序清单、三个 SQLite 的只读 quick_check、完整字体 / 214 资源、48 个原生模块依赖闭包通过，无未解决依赖；十份 Microsoft CRT 签名均有效。解压后 Node 24.18.0 / Pi 1.1.0 的 Agent / CodeMode / 会话恢复六项检查通过，七个默认入口与十九个业务工具保持；两次模型请求只到本地合成服务，没有真实模型或 NAI 请求。
 - 本机已于 **2026-10-14T20:03:44.619435+08:00** 更新，安装前 / 期间均重新检查完全退出；没有强行结束进程，也没有自动启动。正式收据与最终 `installed-delivery.json` 字节一致，installed=true / ready_to_install=false / installation_hold=false。
 - 最终 AOT：`744a1069d068b0c979e76dd493703a4b985c13b246adcfe179a270ce4e14caa5`。15345 程序文件、214 资源、31 原生文件与 15095 Agent 文件全量哈希通过；本批只受控替换 AOT、EXE 和程序清单。原 EXE 的代码 / 展开信息保持，第一阶段仅更新版本资源，后续补全更新弹窗显示。字体、图标、数据库、桥接客户端和 Agent 内容保持。
-- 本轮先交付并安装一份已核验的 Preview，再在最后版本入口检查中发现更新弹窗仍显示内部版本串，完成格式化和新增回归后交付 `r2`；第一份 Preview 和原 1.1.1 便携 ZIP 均保留。两阶段程序回退材料分别在 `.dart_tool/studio-2-preview-20261014/rollback/` 与 `.dart_tool/studio-2-preview-final-20261014/rollback/`，合并入口 `rollback_all.py` 默认只验证，显式 `--restore` 才按序恢复到本任务前的 16:28 运行包；只读回退预检已通过，未实际回退。
+- 本轮先交付并安装一份已核验的 Preview，再在最后版本入口检查中发现更新弹窗仍显示内部版本串，完成格式化和新增回归后交付 `r2`；交付时保留第一份 Preview 和原 1.1.1 便携 ZIP；后续按用户要求删除这两份旧分发 ZIP 及各自校验文件，仅保留最终 R2 分发。两阶段程序回退材料分别在 `.dart_tool/studio-2-preview-20261014/rollback/` 与 `.dart_tool/studio-2-preview-final-20261014/rollback/`，合并入口 `rollback_all.py` 默认只验证，显式 `--restore` 才按序恢复到本任务前的 16:28 运行包；只读回退预检已通过，未实际回退。
 
 最终审计以 `.dart_tool/studio-2-preview-final-20261014/` 为准，第一阶段记录保留。版本入口的真实字体组件实绘在其 `captures/`，不冒充正式窗口实机验收。本地交付不代表 GitHub Release 已发布。
