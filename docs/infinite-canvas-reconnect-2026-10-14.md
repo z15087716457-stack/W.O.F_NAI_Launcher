@@ -12,3 +12,7 @@
 真实字体和合成图片的组件实绘在 `.dart_tool/infinite-canvas-20261014/captures/`，日志 `.dart_tool/infinite-canvas-*.log`。这些是接线组件验证，不冒充用户运行窗口验收。没有调用真实生成、增强、云放大、模型或 NAI 接口，没有读取或写入用户草稿、账户或私有状态。
 
 交付使用新 AOT、程序清单和完整收据；只有在资源、字体、原生程序、Agent 运行时和当前正式程序基线逐项匹配时才允许增量替换。安装前要求 Studio / Agent 完全退出，保存真实旧程序和收据，失败恢复原文件，不自动启动或热重载。安装器五项隔离场景通过：成功往返、替换失败恢复、运行中阻止覆盖、基线漂移阻止覆盖、损坏备份阻止回退；合成私有状态完整保留。
+
+已于 **2026-10-14 11:08（Asia/Taipei）** 安装，编译源码 `f3503320`，1624 生产输入冻结。程序目录继续登记 `windows-glass-preview/runner/Release`；仅替换 AOT 和程序清单，15345 程序文件完整哈希核验通过，资源、字体、原生程序及 Agent 运行时沿用前版。新 AOT SHA-256 `9151bb4685dab266202981072a68b647e5f8f472ae475b1dcce825ad0ec3899c`；运行根收据与本次 `installed-delivery.json` 字节一致。
+
+旧 AOT `bee6fa8b0322688096e991f2794c4dd57e69b47b95ba0b81d3800ff2de648a0d`、程序清单和收据备份在 `.dart_tool/infinite-canvas-20261014/rollback/`，回退材料复验通过；安装未启动 Studio。增量包 `build/nai-studio-infinite-canvas-20261014-update.zip`，16618190 字节，SHA-256 `db0f8a8f85b5c578b491f17a6d48cf0e0cf9f716c6614d355acb4f33d4b4f3ce`。安装收据及安装器 / 五项隔离场景日志同审计目录。用户最终确认的展示是“时间 → 第一批缩略图 → 第二批缩略图”，保留 ×N；没有合并批次数据。界面体验待用户从原入口打开确认。
