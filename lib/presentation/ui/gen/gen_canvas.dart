@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -28,6 +29,9 @@ class GenCanvas extends StatefulWidget {
   /// 舞台留白（原型：图距顶 50、距底 70，左右至少 40）。
   static const pad = EdgeInsets.fromLTRB(40, 50, 40, 70);
 
+  static EdgeInsets focusPadding(double width, bool hasOriginal) =>
+      hasOriginal && width < 500 ? pad.copyWith(bottom: 118) : pad;
+
   /// 落下面板 / 放大进度条的顶边：工具条（顶 10、高 38）下面再空 12。
   static const sheetTop = 60.0;
 
@@ -44,6 +48,8 @@ class GenCanvas extends StatefulWidget {
 class _GenCanvasState extends State<GenCanvas> {
   final _enhanceLink = LayerLink();
   final _upscaleLink = LayerLink();
+  String? _comparedId;
+  String? _focusId;
 
   @override
   Widget build(BuildContext context) {
@@ -55,92 +61,124 @@ class _GenCanvasState extends State<GenCanvas> {
     final bar = info != null && !empty;
     final sheet = bar ? cv.sheet : null;
     final strip = bar && cv.upscale.running && cv.upscale.progress != null;
-    return ClipRect(
-      key: const Key('gen-canvas'),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(child: CustomPaint(painter: _Ticks(c))),
-          if (cv.positioning)
-            const GenPositionBoard()
-          else ...[
-            if (scope.slots.canvas case final b?)
-              b(context, GenCanvas._tile)
-            else if (!empty)
-              const _Stage(),
-            if (empty && cv.error == null) const _Empty(),
-          ],
-          if (!cv.positioning && WindowChromeScope.activeOf(context))
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              height: WindowChromeScope.heightOf(context),
-              child: const WindowDragArea(key: Key('gen-canvas-window-drag')),
-            ),
-          if (!cv.positioning) ...[
-            if (bar) ...[
+    if (_focusId != info?.tileId ||
+        cv.locked ||
+        cv.positioning ||
+        !bar ||
+        !info.canCompareOriginal) {
+      _comparedId = null;
+    }
+    _focusId = info?.tileId;
+    return _OriginalScope(
+      tileId: _comparedId,
+      onChanged: (id, active) {
+        if (!mounted) return;
+        if (active && (cv.locked || id != _focusId)) return;
+        if (!active && _comparedId != id) return;
+        setState(() => _comparedId = active ? id : null);
+      },
+      child: ClipRect(
+        key: const Key('gen-canvas'),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(child: CustomPaint(painter: _Ticks(c))),
+            if (cv.positioning)
+              const GenPositionBoard()
+            else ...[
+              if (scope.slots.canvas case final b?)
+                b(context, GenCanvas._tile)
+              else if (!empty)
+                const _Stage(),
+              if (empty && cv.error == null) const _Empty(),
+            ],
+            if (!cv.positioning && WindowChromeScope.activeOf(context))
               Positioned(
-                top: 10,
+                top: 0,
                 left: 0,
                 right: 0,
-                child: Center(
-                  child: _TopBar(
-                    enhanceLink: _enhanceLink,
-                    upscaleLink: _upscaleLink,
+                height: WindowChromeScope.heightOf(context),
+                child: const WindowDragArea(key: Key('gen-canvas-window-drag')),
+              ),
+            if (!cv.positioning) ...[
+              if (bar) ...[
+                Positioned(
+                  top: 10,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: _TopBar(
+                      enhanceLink: _enhanceLink,
+                      upscaleLink: _upscaleLink,
+                    ),
                   ),
                 ),
-              ),
-              const Positioned(left: 16, bottom: 14, child: _InfoBar()),
-              const Positioned(right: 16, bottom: 14, child: _ActionBar()),
-            ],
-            if (strip && sheet == null)
-              const Positioned(
-                top: GenCanvas.sheetTop,
-                left: 16,
-                right: 16,
-                child: Center(child: _UpscaleStrip()),
-              ),
-            if (sheet != null && scope.slots.toolSheet != null) ...[
-              Positioned(
-                top: GenCanvas.sheetTop,
-                left: 16,
-                right: 16,
-                bottom: 16,
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: scope.slots.toolSheet,
+                const Positioned.fill(child: _BottomBars()),
+              ],
+              if (strip && sheet == null)
+                const Positioned(
+                  top: GenCanvas.sheetTop,
+                  left: 16,
+                  right: 16,
+                  child: Center(child: _UpscaleStrip()),
                 ),
-              ),
-              Positioned(
-                left: 0,
-                top: 0,
-                child: CompositedTransformFollower(
-                  link: sheet == GenToolSheet.enhance
-                      ? _enhanceLink
-                      : _upscaleLink,
-                  showWhenUnlinked: false,
-                  targetAnchor: Alignment.bottomCenter,
-                  followerAnchor: Alignment.topCenter,
-                  offset: const Offset(0, 9),
-                  child: const IgnorePointer(
-                    child: GenSheetCaret(key: Key('gen-sheet-caret')),
+              if (sheet != null && scope.slots.toolSheet != null) ...[
+                Positioned(
+                  top: GenCanvas.sheetTop,
+                  left: 16,
+                  right: 16,
+                  bottom: 16,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: scope.slots.toolSheet,
                   ),
                 ),
-              ),
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: CompositedTransformFollower(
+                    link: sheet == GenToolSheet.enhance
+                        ? _enhanceLink
+                        : _upscaleLink,
+                    showWhenUnlinked: false,
+                    targetAnchor: Alignment.bottomCenter,
+                    followerAnchor: Alignment.topCenter,
+                    offset: const Offset(0, 9),
+                    child: const IgnorePointer(
+                      child: GenSheetCaret(key: Key('gen-sheet-caret')),
+                    ),
+                  ),
+                ),
+              ],
+              if (cv.error case final e?)
+                Positioned(
+                  left: 16,
+                  right: 16,
+                  bottom: info != null && !empty ? 64 : 24,
+                  child: Center(child: _ErrorCard(error: e)),
+                ),
             ],
-            if (cv.error case final e?)
-              Positioned(
-                left: 16,
-                right: 16,
-                bottom: info != null && !empty ? 64 : 24,
-                child: Center(child: _ErrorCard(error: e)),
-              ),
           ],
-        ],
+        ),
       ),
     );
   }
+}
+
+/// Display-only comparison. The result identity and all image actions stay intact.
+class _OriginalScope extends InheritedWidget {
+  const _OriginalScope({
+    required this.tileId,
+    required this.onChanged,
+    required super.child,
+  });
+  final String? tileId;
+  final void Function(String id, bool active) onChanged;
+  static _OriginalScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_OriginalScope>();
+  @override
+  bool updateShouldNotify(_OriginalScope oldWidget) =>
+      tileId != oldWidget.tileId;
 }
 
 /// 画布底纹：稀疏像素刻度（原型 `bg()`：200 方一格，正文色 10%）。
@@ -239,7 +277,11 @@ class _Stage extends StatelessWidget {
     final tiles = cv.focus!.tiles;
     return LayoutBuilder(
       builder: (context, box) {
-        final area = GenCanvas.pad.deflateSize(box.biggest);
+        final padding = GenCanvas.focusPadding(
+          box.maxWidth,
+          cv.info?.canCompareOriginal == true,
+        );
+        final area = padding.deflateSize(box.biggest);
         const gap = 16.0;
         var best = (cols: 1, scale: 0.0);
         for (var cols = 1; cols <= tiles.length; cols++) {
@@ -260,7 +302,7 @@ class _Stage extends StatelessWidget {
           rows.add(tiles.sublist(i, math.min(i + best.cols, tiles.length)));
         }
         return Padding(
-          padding: GenCanvas.pad,
+          padding: padding,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -354,6 +396,28 @@ class GenCanvasTile extends StatefulWidget {
 
 class _GenCanvasTileState extends State<GenCanvasTile> {
   DateTime? _last;
+  Uint8List? _maskBytes;
+  Future<Uint8List?>? _maskOverlay;
+  ImageProvider? _cachedOriginal;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _precacheOriginal();
+  }
+
+  @override
+  void didUpdateWidget(GenCanvasTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _precacheOriginal();
+  }
+
+  void _precacheOriginal() {
+    final original = widget.tile.originalImage;
+    if (original == null || original == _cachedOriginal) return;
+    _cachedOriginal = original;
+    unawaited(precacheImage(original, context, onError: (_, _) {}));
+  }
 
   void _tap(GenScope scope) {
     final t = widget.tile;
@@ -386,16 +450,60 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
     final scope = GenScope.of(context);
     final t = widget.tile;
     final l = context.l10n;
+    final comparing =
+        _OriginalScope.maybeOf(context)?.tileId == t.id &&
+        t.originalImage != null &&
+        t.state == GenTileState.done;
+    if (!identical(_maskBytes, t.inpaintMaskBytes)) {
+      _maskBytes = t.inpaintMaskBytes;
+      _maskOverlay = null;
+    }
+    if (scope.data.canvas.info?.tileId == t.id && _maskBytes != null) {
+      _maskOverlay ??= InpaintMaskUtils.maskToComparisonOverlayAsync(
+        _maskBytes!,
+      );
+    }
     final body = switch (t.state) {
       GenTileState.done when t.image != null => CustomPaint(
         painter: scope.data.canvas.backdrop == null
             ? null
             : GenBackdropPainter(scope.data.canvas.backdrop!, c),
-        child: Image(
-          image: t.image!,
-          fit: BoxFit.fill,
-          gaplessPlayback: true,
-          filterQuality: FilterQuality.medium,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image(
+              image: t.image!,
+              fit: BoxFit.fill,
+              gaplessPlayback: true,
+              filterQuality: FilterQuality.medium,
+            ),
+            if (comparing)
+              IgnorePointer(
+                child: Stack(
+                  key: Key('gen-original-${t.id}'),
+                  fit: StackFit.expand,
+                  children: [
+                    Image(
+                      image: t.originalImage!,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                    if (_maskOverlay != null)
+                      FutureBuilder<Uint8List?>(
+                        future: _maskOverlay,
+                        builder: (context, snapshot) => snapshot.data == null
+                            ? const SizedBox.shrink()
+                            : Image.memory(
+                                snapshot.data!,
+                                key: Key('gen-original-mask-${t.id}'),
+                                fit: BoxFit.contain,
+                                filterQuality: FilterQuality.none,
+                              ),
+                      ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
       GenTileState.streaming || GenTileState.pending => Stack(
@@ -1058,7 +1166,30 @@ class _InfoBar extends StatelessWidget {
   }
 }
 
-/// 右下操作条（原型）：钉住 / 复制 / 保存 / 信息（开大图）。
+/// Narrow canvases put the info strip above the action strip, without overlap.
+class _BottomBars extends StatelessWidget {
+  const _BottomBars();
+  @override
+  Widget build(BuildContext context) {
+    final hasOriginal = GenScope.of(
+      context,
+    ).data.canvas.info!.canCompareOriginal;
+    return LayoutBuilder(
+      builder: (context, box) => Stack(
+        children: [
+          Positioned(
+            left: 16,
+            bottom: hasOriginal && box.maxWidth < 500 ? 62 : 14,
+            child: const _InfoBar(),
+          ),
+          const Positioned(right: 16, bottom: 14, child: _ActionBar()),
+        ],
+      ),
+    );
+  }
+}
+
+/// 右下操作条：OLD / 钉住 / 复制 / 保存 / 信息（开大图）。
 class _ActionBar extends StatelessWidget {
   const _ActionBar();
 
@@ -1073,6 +1204,14 @@ class _ActionBar extends StatelessWidget {
     return GenFloat(
       key: const Key('gen-bar-actions'),
       children: [
+        if (info.canCompareOriginal) ...[
+          _OriginalCompareButton(
+            key: ValueKey('gen-old-${info.tileId}'),
+            id: info.tileId,
+            enabled: !scope.data.canvas.locked,
+          ),
+          const GenFloatDivider(),
+        ],
         GenFloatButton(
           key: const Key('gen-pin'),
           tooltip: info.pinned ? l.gen_unpinImage : l.gen_pinImage,
@@ -1103,6 +1242,110 @@ class _ActionBar extends StatelessWidget {
           child: GenNaiIcon('info', size: 16, color: c.ink),
         ),
       ],
+    );
+  }
+}
+
+/// Website parity: pointer/key down shows OLD, up/cancel/focus loss restores it.
+class _OriginalCompareButton extends StatefulWidget {
+  const _OriginalCompareButton({
+    super.key,
+    required this.id,
+    required this.enabled,
+  });
+  final String id;
+  final bool enabled;
+  @override
+  State<_OriginalCompareButton> createState() => _OriginalCompareButtonState();
+}
+
+class _OriginalCompareButtonState extends State<_OriginalCompareButton>
+    with WidgetsBindingObserver {
+  final _focus = FocusNode(debugLabel: 'canvas-old-compare');
+  int? _pointer;
+  bool _keyHeld = false;
+  _OriginalScope? _scope;
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _release() {
+    _pointer = null;
+    _keyHeld = false;
+    _scope?.onChanged(widget.id, false);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _release();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _scope = _OriginalScope.maybeOf(context);
+    final active = _scope?.tileId == widget.id;
+    final l = context.l10n;
+    final c = context.ui;
+    return Focus(
+      focusNode: _focus,
+      onFocusChange: (focused) {
+        if (!focused && _keyHeld) _release();
+      },
+      onKeyEvent: (_, event) {
+        if (event.logicalKey != LogicalKeyboardKey.space &&
+            event.logicalKey != LogicalKeyboardKey.enter) {
+          return KeyEventResult.ignored;
+        }
+        if (event is KeyUpEvent) {
+          _release();
+        } else if (event is KeyDownEvent && widget.enabled) {
+          _keyHeld = true;
+          _scope?.onChanged(widget.id, true);
+        }
+        return KeyEventResult.handled;
+      },
+      child: Listener(
+        onPointerDown: (event) {
+          if (!widget.enabled || event.buttons != 1 || _pointer != null) return;
+          _pointer = event.pointer;
+          _focus.requestFocus();
+          _scope?.onChanged(widget.id, true);
+        },
+        onPointerUp: (event) {
+          if (event.pointer == _pointer) _release();
+        },
+        onPointerCancel: (event) {
+          if (event.pointer == _pointer) _release();
+        },
+        child: GenFloatButton(
+          key: const Key('gen-old'),
+          width: null,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          active: active,
+          tooltip: l.gen_compareOriginal,
+          onTap: widget.enabled ? () {} : null,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 5,
+            children: [
+              GenNaiIcon('enhance', size: 16, color: active ? c.accent : c.ink),
+              Text(
+                l.gen_oldImageLabel,
+                style: UiText.mono(11.5, weight: FontWeight.w600, color: c.ink),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

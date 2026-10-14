@@ -16,6 +16,7 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/services/canvas_pin_repository.dart';
 import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
+import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
@@ -47,7 +48,7 @@ import '../../helpers/studio_capture_fonts.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks, OfflineAuth;
 import 'generation_data_wiring_test.dart'
-    show DataGeneration, DataSubscription, DataShortcuts;
+    show DataGeneration, DataSubscription, DataShortcuts, DataRecents;
 import '../screens/generation/widgets/reference_module_test.dart'
     show prepareGenerationDropTestPlatform;
 
@@ -118,6 +119,7 @@ void main() {
         imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
+        referencePanelNotifierProvider.overrideWith(DataRecents.new),
         localUpscaleModelsProvider.overrideWith((ref) async => []),
         generationFavoriteImagesProvider.overrideWith((ref) async => {}),
       ],
@@ -212,13 +214,15 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final oldCompare = Platform.environment['CAPTURE_OLD_COMPARE'] == '1';
     final retiredEntry =
         Platform.environment['CAPTURE_CANVAS_MENU_RETIRED_ENTRY'] == '1';
     final imageMenu = Platform.environment['CAPTURE_CANVAS_IMAGE_MENU'] == '1';
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!retiredEntry &&
+    if (!oldCompare &&
+        !retiredEntry &&
         !imageMenu &&
         !contextMenu &&
         !restored &&
@@ -230,7 +234,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = retiredEntry
+      final area = oldCompare
+          ? 'inpaint-old-compare-20261014'
+          : retiredEntry
           ? 'canvas-menu-retired-entry-20261014'
           : imageMenu
           ? 'canvas-image-menu-20261014'
@@ -245,6 +251,271 @@ void main() {
       snapshot.dispose();
     });
   }
+
+  GeneratedImage comparisonImage(String id, {bool masked = true}) {
+    final original = Uint8List.fromList(
+      pixels.encodePng(
+        pixels.Image(width: 64, height: 96)
+          ..clear(pixels.ColorRgb8(70, 160, 80)),
+      ),
+    );
+    final mask = pixels.Image(width: 64, height: 96)
+      ..clear(pixels.ColorRgb8(0, 0, 0));
+    pixels.fillRect(
+      mask,
+      x1: 20,
+      y1: 40,
+      x2: 43,
+      y2: 51,
+      color: pixels.ColorRgb8(255, 255, 255),
+    );
+    return GeneratedImage(
+      id: id,
+      bytes: bytes,
+      width: 512,
+      height: 768,
+      generationRunId: 70,
+      originalBytes: original,
+      inpaintMaskBytes: masked
+          ? Uint8List.fromList(pixels.encodePng(mask))
+          : null,
+    );
+  }
+
+  Future<void> settleComparison(WidgetTester tester, String id) async {
+    await tester.pump();
+    final builders = find.descendant(
+      of: find.byKey(Key('gen-original-$id')),
+      matching: find.byType(FutureBuilder<Uint8List?>),
+    );
+    if (builders.evaluate().isNotEmpty) {
+      // The isolate is real; its completion callback runs in the widget test's
+      // fake zone. Pump between real waits rather than await that fake-zone Future.
+      for (
+        var attempt = 0;
+        attempt < 100 &&
+            find.byKey(Key('gen-original-mask-$id')).evaluate().isEmpty;
+        attempt++
+      ) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+    }
+    await tester.pump();
+    await tester.runAsync(() async {
+      for (final node
+          in find
+              .descendant(
+                of: find.byKey(Key('gen-original-$id')),
+                matching: find.byType(Image),
+              )
+              .evaluate()) {
+        await precacheImage((node.widget as Image).image, node);
+      }
+    });
+    await tester.pumpAndSettle();
+  }
+
+  for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+    for (final dark in [false, true]) {
+      testWidgets('$language dark=$dark OLD 按住原图蒙版、松手恢复且不改相机和结果', (
+        tester,
+      ) async {
+        final result = comparisonImage('old-test');
+        publish(ImageGenerationState(history: [result]));
+        await pump(tester, language: language, dark: dark);
+        expect(find.byKey(const Key('gen-old')), findsOneWidget);
+        final before = camera();
+        final draft = Map<String, dynamic>.from(storage.values);
+        final gesture = await tester.startGesture(
+          tester.getCenter(find.byKey(const Key('gen-old'))),
+          kind: PointerDeviceKind.mouse,
+        );
+        await settleComparison(tester, result.id);
+        expect(find.byKey(Key('gen-original-${result.id}')), findsOneWidget);
+        final mask = tester.widget<Image>(
+          find.byKey(Key('gen-original-mask-${result.id}')),
+        );
+        final overlay = pixels.decodePng((mask.image as MemoryImage).bytes)!;
+        expect(overlay.getPixel(0, 0).a, 0);
+        expect(overlay.getPixel(30, 45).a, 77);
+        expect(camera().offset, before.offset);
+        expect(camera().scale, before.scale);
+        expect(
+          container.read(imageGenerationNotifierProvider).history.single,
+          same(result),
+        );
+        expect(storage.values, draft);
+        expect(events, isEmpty);
+        if (language == 'zh') {
+          await capture(tester, 'studio-old-held-${dark ? 'dark' : 'light'}');
+        }
+        await gesture.up();
+        await tester.pumpAndSettle();
+        expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+        await tester.tap(find.byKey(const Key('gen-save')));
+        await tester.tap(find.byKey(const Key('gen-copy')));
+        expect(events, ['onSaveImage(old-test)', 'onCopyImage(old-test)']);
+        expect(
+          container.read(imageGenerationNotifierProvider).history.single.bytes,
+          same(bytes),
+        );
+        expect(tester.takeException(), isNull);
+        if (language == 'zh') {
+          await capture(tester, 'studio-result-${dark ? 'dark' : 'light'}');
+        }
+      });
+    }
+  }
+
+  testWidgets('OLD 简单视图、无蒙版、移出后释放和取消均恢复', (tester) async {
+    final result = comparisonImage('simple-old', masked: false);
+    publish(ImageGenerationState(history: [result]));
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await pump(tester);
+    final old = find.byKey(const Key('gen-old'));
+    var gesture = await tester.startGesture(
+      tester.getCenter(old),
+      kind: PointerDeviceKind.mouse,
+    );
+    await settleComparison(tester, result.id);
+    expect(find.byKey(Key('gen-original-${result.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-original-mask-${result.id}')), findsNothing);
+    await gesture.moveTo(const Offset(20, 20));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+    gesture = await tester.startGesture(
+      tester.getCenter(old),
+      kind: PointerDeviceKind.mouse,
+    );
+    await settleComparison(tester, result.id);
+    await gesture.cancel();
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+  });
+
+  testWidgets('OLD 换图、新生成和回到原图不会留住旧预览', (tester) async {
+    final first = comparisonImage('first-old');
+    final second = comparisonImage('second-old');
+    publish(ImageGenerationState(history: [first, second]));
+    await pump(tester);
+    final history = container.read(generationHistoryActionsProvider);
+    history.focusTile(first.id);
+    await tester.pumpAndSettle();
+    var gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('gen-old'))),
+    );
+    await settleComparison(tester, first.id);
+    expect(find.byKey(Key('gen-original-${first.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-original-${second.id}')), findsNothing);
+    history.focusTile(second.id);
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${first.id}')), findsNothing);
+    await gesture.up();
+    history.focusTile(first.id);
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${first.id}')), findsNothing);
+    gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('gen-old'))),
+    );
+    await settleComparison(tester, first.id);
+    publish(loading(71).copyWith(history: [first, second]));
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${first.id}')), findsNothing);
+    await gesture.up();
+    publish(ImageGenerationState(history: [first, second]));
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${first.id}')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('OLD 支持空格按住，失焦恢复，右键不进入对比', (tester) async {
+    final result = comparisonImage('keyboard-old', masked: false);
+    publish(ImageGenerationState(history: [result]));
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('gen-old')));
+    await tester.pumpAndSettle();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.space);
+    await settleComparison(tester, result.id);
+    expect(find.byKey(Key('gen-original-${result.id}')), findsOneWidget);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.space);
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.enter);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('gen-old'))),
+      kind: PointerDeviceKind.mouse,
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pump();
+    expect(find.byKey(Key('gen-original-${result.id}')), findsNothing);
+    await gesture.up();
+    expect(events, isEmpty);
+  });
+
+  testWidgets('无原图与失败快照不出现 OLD', (tester) async {
+    publish(ImageGenerationState(history: [image(1)]));
+    await pump(tester);
+    expect(find.byKey(const Key('gen-old')), findsNothing);
+    final result = comparisonImage('failed-old');
+    publish(
+      ImageGenerationState(
+        history: [
+          GeneratedImage(
+            id: result.id,
+            bytes: bytes,
+            width: 512,
+            height: 768,
+            kind: GeneratedImageKind.failedStreamSnapshot,
+            originalBytes: result.originalBytes,
+          ),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('gen-old')), findsNothing);
+  });
+
+  testWidgets('OLD 360px 窄画布保留完整种子，底部两条不重叠、不遮住图片', (tester) async {
+    final source = comparisonImage('narrow-old', masked: false);
+    final result = GeneratedImage(
+      id: source.id,
+      bytes: bytes,
+      width: 512,
+      height: 768,
+      originalBytes: source.originalBytes,
+      metadata: const NaiImageMetadata(seed: 4294967295),
+    );
+    publish(ImageGenerationState(history: [result]));
+    await pump(tester);
+    tester.view.physicalSize = const Size(360, 600);
+    await tester.pumpAndSettle();
+    final info = tester.getRect(find.byKey(const Key('gen-bar-info')));
+    final actions = tester.getRect(find.byKey(const Key('gen-bar-actions')));
+    final tile = tester.getRect(find.byKey(Key('gen-tile-${result.id}')));
+    expect(info.overlaps(actions), isFalse);
+    expect(tile.overlaps(info), isFalse);
+    expect(tile.overlaps(actions), isFalse);
+    expect(find.text('4294967295'), findsOneWidget);
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byKey(const Key('gen-old'))),
+    );
+    await settleComparison(tester, result.id);
+    expect(find.byKey(Key('gen-original-${result.id}')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await capture(tester, 'studio-old-narrow');
+    await gesture.up();
+  });
 
   testWidgets('真实页面默认挂无限画布，仅保留新图块和三条工具条', (tester) async {
     publish(ImageGenerationState(history: [image(2), image(1)]));

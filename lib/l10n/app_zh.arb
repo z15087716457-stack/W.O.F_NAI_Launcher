@@ -8983,5 +8983,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_oldImageLabel": "OLD",
+  "gen_compareOriginal": "按住查看原图与局部重绘范围"
 }

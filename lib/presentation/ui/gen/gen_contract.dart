@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/widgets.dart';
 
 /// 生图页（方案 A 精修）：界面只认这份契约。
@@ -695,6 +697,8 @@ class GenTile {
     required this.width,
     required this.height,
     this.image,
+    this.originalImage,
+    this.inpaintMaskBytes,
     this.preview,
     this.state = GenTileState.done,
     this.progress,
@@ -705,6 +709,8 @@ class GenTile {
   final int width;
   final int height;
   final ImageProvider? image;
+  final ImageProvider? originalImage;
+  final Uint8List? inpaintMaskBytes;
 
   /// 流式预览（`streamPreview`）。
   final ImageProvider? preview;
@@ -733,6 +739,7 @@ class GenFocusInfo {
     this.variationsCost,
     this.enhanceCost,
     this.canUseAsInput = true,
+    this.canCompareOriginal = false,
   });
 
   final String tileId;
@@ -751,6 +758,7 @@ class GenFocusInfo {
 
   /// 能不能拿去增强 / 变体 / 放大 / 设为图生图（`canUseAsGenerationInput`，失败快照不行）。
   final bool canUseAsInput;
+  final bool canCompareOriginal;
 }
 
 /// 放大按钮（`CanvasUpscaleButton`）：主按钮按记住的方案执行，箭头改方案。

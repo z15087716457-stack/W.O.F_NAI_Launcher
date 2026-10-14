@@ -183,6 +183,10 @@ GenTile generationTileView(GeneratedImage image) => GenTile(
   width: image.width,
   height: image.height,
   image: MemoryImage(image.bytes),
+  originalImage: image.canCompareOriginal
+      ? MemoryImage(image.originalBytes!)
+      : null,
+  inpaintMaskBytes: image.canCompareOriginal ? image.inpaintMaskBytes : null,
   state: image.isFailedStreamSnapshot ? GenTileState.failed : GenTileState.done,
 );
 

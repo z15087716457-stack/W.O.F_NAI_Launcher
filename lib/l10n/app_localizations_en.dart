@@ -17016,4 +17016,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_title => 'Prompt Blocks';
+
+  @override
+  String get gen_oldImageLabel => 'OLD';
+
+  @override
+  String get gen_compareOriginal =>
+      'Hold to compare the original image and inpaint area';
 }

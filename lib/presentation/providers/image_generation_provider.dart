@@ -933,7 +933,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         _activeLocalEnhance = workflow.upscale;
       }
     }
-    final effectiveParams = params;
+    // Freeze the buffers before the first await, including OLD's full-source mask.
+    final effectiveParams = params.copyWith(
+      sourceImage: params.sourceImage == null
+          ? null
+          : Uint8List.fromList(params.sourceImage!),
+      maskImage: params.maskImage == null
+          ? null
+          : Uint8List.fromList(params.maskImage!),
+    );
 
     // 在参数准备/网络请求的首次 await 前发布完整占位信息。
     // nSamples 是请求次数，batchSize 是每次请求的图片数。

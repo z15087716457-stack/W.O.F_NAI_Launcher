@@ -8983,5 +8983,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_oldImageLabel": "OLD",
+  "gen_compareOriginal": "押している間、元画像とインペイント範囲を比較"
 }

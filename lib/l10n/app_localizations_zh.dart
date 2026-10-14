@@ -16314,6 +16314,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_title => '提示词块';
+
+  @override
+  String get gen_oldImageLabel => 'OLD';
+
+  @override
+  String get gen_compareOriginal => '按住查看原图与局部重绘范围';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -32626,4 +32632,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get promptBlockLibrary_title => '提示詞塊';
+
+  @override
+  String get gen_oldImageLabel => 'OLD';
+
+  @override
+  String get gen_compareOriginal => '按住檢視原圖與局部重繪範圍';
 }

@@ -23,6 +23,9 @@ class GeneratedImage {
   final ImageOperation? operation;
   final Uint8List? originalBytes;
 
+  /// Frozen full-source mask from this inpaint request, for OLD comparison.
+  final Uint8List? inpaintMaskBytes;
+
   /// Display-only source inserted before the three new variation images.
   final bool isVariationOriginal;
 
@@ -46,6 +49,7 @@ class GeneratedImage {
     this.metadata,
     this.operation,
     this.originalBytes,
+    this.inpaintMaskBytes,
     this.isVariationOriginal = false,
     this.filePath,
     this.generationRunId,
@@ -79,7 +83,10 @@ class GeneratedImage {
           (sourceParams == null
               ? null
               : ImageOperation.fromParams(sourceParams)),
-      originalBytes: originalBytes ?? sourceParams?.sourceImage,
+      originalBytes: _snapshot(originalBytes ?? sourceParams?.sourceImage),
+      inpaintMaskBytes: sourceParams?.action == ImageGenerationAction.infill
+          ? _snapshot(sourceParams?.maskImage)
+          : null,
       isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
@@ -99,6 +106,7 @@ class GeneratedImage {
       filePath: path,
       operation: operation,
       originalBytes: originalBytes,
+      inpaintMaskBytes: inpaintMaskBytes,
       isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId,
       batchIndex: batchIndex,
@@ -118,6 +126,7 @@ class GeneratedImage {
       filePath: filePath,
       operation: operation,
       originalBytes: originalBytes,
+      inpaintMaskBytes: inpaintMaskBytes,
       isVariationOriginal: isVariationOriginal,
       generationRunId: generationRunId ?? this.generationRunId,
       batchIndex: batchIndex ?? this.batchIndex,
@@ -129,6 +138,14 @@ class GeneratedImage {
 
   bool get isFailedStreamSnapshot =>
       kind == GeneratedImageKind.failedStreamSnapshot;
+
+  bool get canCompareOriginal =>
+      !isFailedStreamSnapshot &&
+      !isVariationOriginal &&
+      originalBytes?.isNotEmpty == true;
+
+  static Uint8List? _snapshot(Uint8List? bytes) =>
+      bytes == null ? null : Uint8List.fromList(bytes);
 
   bool get canSave => kind == GeneratedImageKind.completed;
 

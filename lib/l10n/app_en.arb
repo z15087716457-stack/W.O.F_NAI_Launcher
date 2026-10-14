@@ -8983,5 +8983,7 @@
   "naiAgent_mcpHint": "CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.",
   "generation_generate": "Generate",
   "detail_imageDetails": "Image Details",
-  "promptBlockLibrary_title": "Prompt Blocks"
+  "promptBlockLibrary_title": "Prompt Blocks",
+  "gen_oldImageLabel": "OLD",
+  "gen_compareOriginal": "Hold to compare the original image and inpaint area"
 }

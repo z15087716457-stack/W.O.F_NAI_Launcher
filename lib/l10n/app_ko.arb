@@ -8983,5 +8983,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_oldImageLabel": "OLD",
+  "gen_compareOriginal": "누르고 있는 동안 원본 이미지와 인페인트 영역 비교"
 }

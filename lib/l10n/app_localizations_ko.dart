@@ -16566,4 +16566,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_title => '프롬프트 블록';
+
+  @override
+  String get gen_oldImageLabel => 'OLD';
+
+  @override
+  String get gen_compareOriginal => '누르고 있는 동안 원본 이미지와 인페인트 영역 비교';
 }

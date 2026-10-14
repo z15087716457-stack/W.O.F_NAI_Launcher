@@ -29738,6 +29738,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prompt Blocks'**
   String get promptBlockLibrary_title;
+
+  /// No description provided for @gen_oldImageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OLD'**
+  String get gen_oldImageLabel;
+
+  /// No description provided for @gen_compareOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to compare the original image and inpaint area'**
+  String get gen_compareOriginal;
 }
 
 class _AppLocalizationsDelegate

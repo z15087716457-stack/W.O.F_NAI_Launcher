@@ -480,6 +480,7 @@ final generationViewDataProvider = Provider.autoDispose
                   seed: image.metadata?.seed,
                   pinned: pins.contains(image.id),
                   canUseAsInput: image.canUseAsGenerationInput,
+                  canCompareOriginal: image.canCompareOriginal,
                   variationsCost: ref.watch(imageVariationCostProvider(image)),
                   enhanceCost: ref.watch(toolsEnhanceCostProvider(image)),
                 ),

@@ -1082,6 +1082,29 @@ class InpaintMaskUtils {
     return Uint8List.fromList(img.encodePng(overlay));
   }
 
+  /// OLD shows only masked pixels as a 30% white overlay; black stays clear.
+  /// Invalid masks are omitted instead of covering the original with opaque data.
+  static Uint8List? maskToComparisonOverlay(Uint8List bytes) {
+    final decoded = decodeBinaryMask(bytes);
+    if (decoded == null) return null;
+    final overlay = img.Image(
+      width: decoded.width,
+      height: decoded.height,
+      numChannels: 4,
+    );
+    for (var y = 0; y < decoded.height; y++) {
+      for (var x = 0; x < decoded.width; x++) {
+        if (decoded.mask[y * decoded.width + x] == 1) {
+          overlay.setPixelRgba(x, y, 255, 255, 255, 77);
+        }
+      }
+    }
+    return Uint8List.fromList(img.encodePng(overlay));
+  }
+
+  static Future<Uint8List?> maskToComparisonOverlayAsync(Uint8List bytes) =>
+      Isolate.run(() => maskToComparisonOverlay(bytes));
+
   static Future<Uint8List> maskToEditorOverlayAsync(
     Uint8List bytes, {
     int overlayAlpha = 140,

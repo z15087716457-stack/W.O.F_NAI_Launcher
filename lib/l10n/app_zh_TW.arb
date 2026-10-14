@@ -8991,5 +8991,7 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_oldImageLabel": "OLD",
+  "gen_compareOriginal": "按住檢視原圖與局部重繪範圍"
 }

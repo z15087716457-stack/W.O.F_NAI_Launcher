@@ -14,6 +14,7 @@ import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import '../screens/generation/widgets/canvas/generation_canvas_view.dart';
 import '../ui/gen/gen_canvas.dart';
 import '../ui/gen/gen_contract.dart';
+import '../ui/gen/gen_page.dart';
 import '../widgets/common/selectable_image_card.dart';
 import 'generation_operations.dart';
 import 'generation_view_mapping.dart';
@@ -44,87 +45,95 @@ class _GenerationCanvasWiringState
     _tips.removeWhere(
       (key, _) => !state.isGenerating || !key.startsWith('$run:'),
     );
-    return GenerationCanvasView(
-      generationState: state,
-      focusInsets: GenCanvas.pad,
-      deferKeyEvent: (event) {
-        final config = ref.read(shortcutConfigNotifierProvider).valueOrNull;
-        if (config == null || !config.enableShortcuts) return false;
-        return config.bindings.values.any((binding) {
-          if (!binding.enabled ||
-              (binding.context != ShortcutContext.generation &&
-                  binding.context != ShortcutContext.global)) {
-            return false;
-          }
-          final activator = AppShortcutManager.parseActivator(
-            binding.effectiveShortcut,
-          );
-          return activator?.accepts(event, HardwareKeyboard.instance) ?? false;
-        });
-      },
-      tileBuilder: (context, item, focused, select, allowTap) {
-        final tile = generationCanvasItemView(item, state);
-        final slot = item.tile.slot;
-        final content = GenCanvasTileScope(
-          allowTap: allowTap,
-          onFocus: () {
-            if (ref.read(toolsSheetProvider) == null) {
-              select();
-              return;
+    return LayoutBuilder(
+      builder: (context, constraints) => GenerationCanvasView(
+        generationState: state,
+        focusInsets: GenCanvas.focusPadding(
+          constraints.maxWidth,
+          GenScope.of(context).data.canvas.info?.canCompareOriginal == true,
+        ),
+        deferKeyEvent: (event) {
+          final config = ref.read(shortcutConfigNotifierProvider).valueOrNull;
+          if (config == null || !config.enableShortcuts) return false;
+          return config.bindings.values.any((binding) {
+            if (!binding.enabled ||
+                (binding.context != ShortcutContext.generation &&
+                    binding.context != ShortcutContext.global)) {
+              return false;
             }
-            final operations = GenerationOperations(
-              ref,
-              context,
-              () => context.mounted,
+            final activator = AppShortcutManager.parseActivator(
+              binding.effectiveShortcut,
             );
-            operations.run(() async {
-              await operations.closeToolSheet();
-              if (context.mounted) select();
-            });
-          },
-          preview: slot?.inpaintPreviewPlacement == null || tile.preview == null
-              ? null
-              : buildStreamPreviewImage(
-                  bytes: slot!.previewBytes!,
-                  placement: slot.inpaintPreviewPlacement,
-                ),
-          generating: slot == null
-              ? null
-              : CanvasGeneratingContent(
-                  tip: _tips.putIfAbsent(
-                    '${item.group.key}:${slot.imageNumber}',
-                    () => ref.read(tipDeckProvider).draw(TipSurface.generating),
+            return activator?.accepts(event, HardwareKeyboard.instance) ??
+                false;
+          });
+        },
+        tileBuilder: (context, item, focused, select, allowTap) {
+          final tile = generationCanvasItemView(item, state);
+          final slot = item.tile.slot;
+          final content = GenCanvasTileScope(
+            allowTap: allowTap,
+            onFocus: () {
+              if (ref.read(toolsSheetProvider) == null) {
+                select();
+                return;
+              }
+              final operations = GenerationOperations(
+                ref,
+                context,
+                () => context.mounted,
+              );
+              operations.run(() async {
+                await operations.closeToolSheet();
+                if (context.mounted) select();
+              });
+            },
+            preview:
+                slot?.inpaintPreviewPlacement == null || tile.preview == null
+                ? null
+                : buildStreamPreviewImage(
+                    bytes: slot!.previewBytes!,
+                    placement: slot.inpaintPreviewPlacement,
                   ),
-                ),
-          failedPreview: item.image?.isFailedStreamSnapshot == true
-              ? Image(
-                  image: tile.image!,
-                  fit: BoxFit.fill,
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.medium,
-                )
-              : null,
-          child: widget.tileBuilder(
-            context,
-            tile,
-            focused: focused && item.group.tiles.length > 1,
-          ),
-        );
-        return buildCanvasTilePresentation(
-          item: item,
-          focused: focused,
-          pinned: item.image != null && pins.contains(item.image!.id),
-          onSelect: select,
-          child: item.image == null
-              ? content
-              : Tooltip(
-                  message: item.image!.isFailedStreamSnapshot
-                      ? context.l10n.generation_failedStreamSnapshotHint
-                      : '',
-                  child: content,
-                ),
-        );
-      },
+            generating: slot == null
+                ? null
+                : CanvasGeneratingContent(
+                    tip: _tips.putIfAbsent(
+                      '${item.group.key}:${slot.imageNumber}',
+                      () =>
+                          ref.read(tipDeckProvider).draw(TipSurface.generating),
+                    ),
+                  ),
+            failedPreview: item.image?.isFailedStreamSnapshot == true
+                ? Image(
+                    image: tile.image!,
+                    fit: BoxFit.fill,
+                    gaplessPlayback: true,
+                    filterQuality: FilterQuality.medium,
+                  )
+                : null,
+            child: widget.tileBuilder(
+              context,
+              tile,
+              focused: focused && item.group.tiles.length > 1,
+            ),
+          );
+          return buildCanvasTilePresentation(
+            item: item,
+            focused: focused,
+            pinned: item.image != null && pins.contains(item.image!.id),
+            onSelect: select,
+            child: item.image == null
+                ? content
+                : Tooltip(
+                    message: item.image!.isFailedStreamSnapshot
+                        ? context.l10n.generation_failedStreamSnapshotHint
+                        : '',
+                    child: content,
+                  ),
+          );
+        },
+      ),
     );
   }
 }

@@ -16526,4 +16526,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get promptBlockLibrary_title => 'プロンプトブロック';
+
+  @override
+  String get gen_oldImageLabel => 'OLD';
+
+  @override
+  String get gen_compareOriginal => '押している間、元画像とインペイント範囲を比較';
 }
