@@ -311,7 +311,7 @@ class UpdateCheckDialog extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'v$value',
+            value.endsWith(' Preview') ? value : 'v$value',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: isHighlighted ? theme.colorScheme.primary : null,
