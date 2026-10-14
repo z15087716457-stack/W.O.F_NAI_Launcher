@@ -60,9 +60,7 @@ void main() {
                           padding: const EdgeInsets.all(12),
                           child: GenerationModuleCard(
                             key: const Key('module'),
-                            title: AppLocalizations.of(
-                              context,
-                            )!.generation_moduleImage,
+                            title: AppLocalizations.of(context)!.gen_image,
                             children: [
                               const SizeSection(
                                 layout: SizeSectionLayout.moduleRow,

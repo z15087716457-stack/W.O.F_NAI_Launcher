@@ -158,7 +158,11 @@ void main() {
       );
       expect(
         state.resultVariants.map((i) => i.originalBytes),
-        everyElement(same(source)),
+        everyElement(orderedEquals(source)),
+      );
+      expect(
+        state.resultVariants.map((i) => i.originalBytes),
+        everyElement(isNot(same(source))),
       );
       final history = buildHistoryBatches(
         container.read(imageGenerationNotifierProvider),
