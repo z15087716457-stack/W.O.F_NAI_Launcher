@@ -378,7 +378,6 @@
   "generation_sectionCharacters": "Character Prompts",
   "generation_sectionCharactersSub": "Create a separate prompt for characters in your scene.",
   "character_positionLabel": "Position",
-  "generation_sectionReferenceImages": "Reference Images",
   "anlas_subscription": "Subscription",
   "anlas_purchased": "Purchased",
   "prompt_positive": "Prompt",
@@ -452,7 +451,6 @@
   "image_save": "Save",
   "image_copy": "Copy",
   "image_upscale": "Upscale",
-  "image_saveToLibrary": "Save to Library",
   "image_imageSaved": "Image saved to: {path}",
   "@image_imageSaved": {
     "placeholders": {
@@ -5385,7 +5383,6 @@
   "localUpscale_scrollDown": "Scroll down",
   "wiki_exampleImages": "Example image",
   "wiki_exampleImagesUnavailable": "Example images are temporarily unavailable",
-  "generation_moduleImage": "Image",
   "generation_perRequestLabel": "Images",
   "generation_perRequestTooltip": "Images per request (1–4)",
   "generation_repeatLabel": "Repeat",

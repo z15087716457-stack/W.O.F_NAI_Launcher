@@ -855,9 +855,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get character_positionLabel => '위치';
 
   @override
-  String get generation_sectionReferenceImages => '참조 이미지';
-
-  @override
   String get anlas_subscription => '구독';
 
   @override
@@ -1004,9 +1001,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get image_upscale => '업스케일';
-
-  @override
-  String get image_saveToLibrary => '라이브러리에 저장';
 
   @override
   String image_imageSaved(Object path) {
@@ -9908,9 +9902,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get wiki_exampleImagesUnavailable => '예시 이미지를 불러올 수 없습니다';
-
-  @override
-  String get generation_moduleImage => '이미지';
 
   @override
   String get generation_perRequestLabel => '장 수';

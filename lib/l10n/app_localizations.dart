@@ -1674,12 +1674,6 @@ abstract class AppLocalizations {
   /// **'Position'**
   String get character_positionLabel;
 
-  /// No description provided for @generation_sectionReferenceImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference Images'**
-  String get generation_sectionReferenceImages;
-
   /// No description provided for @anlas_subscription.
   ///
   /// In en, this message translates to:
@@ -1949,12 +1943,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upscale'**
   String get image_upscale;
-
-  /// No description provided for @image_saveToLibrary.
-  ///
-  /// In en, this message translates to:
-  /// **'Save to Library'**
-  String get image_saveToLibrary;
 
   /// No description provided for @image_imageSaved.
   ///
@@ -17743,12 +17731,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Example images are temporarily unavailable'**
   String get wiki_exampleImagesUnavailable;
-
-  /// No description provided for @generation_moduleImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Image'**
-  String get generation_moduleImage;
 
   /// No description provided for @generation_perRequestLabel.
   ///

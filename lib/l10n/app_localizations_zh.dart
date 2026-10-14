@@ -841,9 +841,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get character_positionLabel => '定位';
 
   @override
-  String get generation_sectionReferenceImages => '参考图';
-
-  @override
   String get anlas_subscription => '订阅赠送';
 
   @override
@@ -988,9 +985,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get image_upscale => '放大';
-
-  @override
-  String get image_saveToLibrary => '保存到词库';
 
   @override
   String image_imageSaved(Object path) {
@@ -9696,9 +9690,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get wiki_exampleImagesUnavailable => '示例图片暂时无法加载';
 
   @override
-  String get generation_moduleImage => '图像';
-
-  @override
   String get generation_perRequestLabel => '张数';
 
   @override
@@ -17141,9 +17132,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get character_positionLabel => '定位';
 
   @override
-  String get generation_sectionReferenceImages => '參考圖';
-
-  @override
   String get anlas_subscription => '訂閱贈送';
 
   @override
@@ -17288,9 +17276,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get image_upscale => '放大';
-
-  @override
-  String get image_saveToLibrary => '儲存到詞庫';
 
   @override
   String image_imageSaved(Object path) {
@@ -25994,9 +25979,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get wiki_exampleImagesUnavailable => '示例圖片暫時無法載入';
-
-  @override
-  String get generation_moduleImage => '影像';
 
   @override
   String get generation_perRequestLabel => '張數';

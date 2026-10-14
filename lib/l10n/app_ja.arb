@@ -377,7 +377,6 @@
   "generation_sectionCharacters": "キャラクタープロンプト",
   "generation_sectionCharactersSub": "シーン内のキャラクターに個別のプロンプトを作成します。",
   "character_positionLabel": "位置",
-  "generation_sectionReferenceImages": "参照画像",
   "anlas_subscription": "サブスク",
   "anlas_purchased": "購入済み",
   "prompt_positive": "プロンプト",
@@ -451,7 +450,6 @@
   "image_save": "保存",
   "image_copy": "コピー",
   "image_upscale": "拡大",
-  "image_saveToLibrary": "ライブラリに保存",
   "image_imageSaved": "画像は次の場所に保存されました: {path}",
   "@image_imageSaved": {
     "placeholders": {
@@ -5385,7 +5383,6 @@
   "localUpscale_scrollDown": "下へスクロール",
   "wiki_exampleImages": "作例画像",
   "wiki_exampleImagesUnavailable": "作例画像を読み込めませんでした",
-  "generation_moduleImage": "画像",
   "generation_perRequestLabel": "枚数",
   "generation_perRequestTooltip": "1回のリクエストで生成する枚数（1〜4）",
   "generation_repeatLabel": "繰り返し",

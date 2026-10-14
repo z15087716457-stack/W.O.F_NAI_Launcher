@@ -746,7 +746,7 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     }
   }
 
-  /// 构建自定义上下文菜单，添加"保存到词库"选项
+  /// 构建自定义上下文菜单，添加"保存到块库"选项
   Widget _buildContextMenu(
     BuildContext context,
     EditableTextState editableTextState,

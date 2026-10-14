@@ -30,7 +30,7 @@ import '../../services/generation_save_service.dart';
 /// 生成图的可复用操作集合。
 ///
 /// 历史预览卡片与 G11 画布 tile 共用同一套操作：详情页、保存、
-/// 发送到图生图/Vibe/精准参考、在资源管理器定位、存入词库等。
+/// 发送到图生图/Vibe/精准参考、在资源管理器定位、存入块库等。
 /// 全部方法依赖 [WidgetRef] 读取最新状态，不持有 widget 状态。
 class GeneratedImageActions {
   const GeneratedImageActions(this.ref);
@@ -215,7 +215,7 @@ class GeneratedImageActions {
     }
   }
 
-  /// 显示保存到词库对话框
+  /// 显示保存到块库对话框（沿用旧方法名，实际调用当前块库创建入口）。
   Future<void> showSaveToLibraryDialog(
     BuildContext context,
     Uint8List bytes,

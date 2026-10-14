@@ -380,7 +380,7 @@ void main() {
                 ])
                   PromptBlock.create(
                     id: 'capture-$appearance',
-                    title: l10n.generation_sectionReferenceImages,
+                    title: l10n.gen_refs,
                     content: 'synthetic tag',
                     appearance: appearance,
                   ),
@@ -391,7 +391,7 @@ void main() {
                   appearance: 'translation',
                   readingTranslationZh: List.filled(
                     12,
-                    l10n.generation_sectionReferenceImages,
+                    l10n.gen_refs,
                   ).join(', '),
                 ),
               ];

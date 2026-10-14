@@ -142,7 +142,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
   /// 已保存源文件路径（用于复制/拖拽时复用源文件，避免重复写临时文件）。
   final String? sourceFilePath;
 
-  /// 保存到词库的回调（传入图像字节和合并后的提示词）
+  /// 保存到块库的回调（传入图像字节和合并后的提示词）
   final void Function(Uint8List imageBytes, String prompt)? onSaveToLibrary;
 
   /// 是否已被本地画廊收藏。
@@ -1510,7 +1510,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
             if (widget.onSaveToLibrary != null)
               _HoverActionButton(
                 icon: Icons.bookmark_add_rounded,
-                tooltip: context.l10n.image_saveToLibrary,
+                tooltip: context.l10n.promptBlockLibrary_saveToLibrary,
                 onTap: () => _saveToLibrary(context),
               ),
           ],
@@ -1710,7 +1710,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
   Future<void> _saveToLibrary(BuildContext context) async {
     if (widget.onSaveToLibrary == null || widget.imageBytes == null) return;
 
-    // 调用保存到词库的回调
+    // 调用保存到块库的回调
     widget.onSaveToLibrary!(widget.imageBytes!, '');
   }
 

@@ -205,17 +205,6 @@ Future<void> openGenerationCanvasMenu(
             ),
             enabled: canInput,
           ),
-          action(
-            'block-library',
-            l.image_saveToLibrary,
-            Icons.library_add_outlined,
-            () => run(
-              () => GeneratedImageActions(
-                ref,
-              ).showSaveToLibraryDialog(context, image.bytes),
-            ),
-            enabled: canInput,
-          ),
         ],
       ),
     ],

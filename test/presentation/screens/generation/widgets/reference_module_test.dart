@@ -93,9 +93,7 @@ Widget referenceShell(
                     padding: const EdgeInsets.all(12),
                     child: GenerationModuleCard(
                       key: const Key('module'),
-                      title: AppLocalizations.of(
-                        context,
-                      )!.generation_sectionReferenceImages,
+                      title: AppLocalizations.of(context)!.gen_refs,
                       children: const [
                         ReferenceModuleScope(
                           child: Column(

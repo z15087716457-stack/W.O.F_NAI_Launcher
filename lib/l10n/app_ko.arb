@@ -377,7 +377,6 @@
   "generation_sectionCharacters": "캐릭터 프롬프트",
   "generation_sectionCharactersSub": "장면 속 캐릭터마다 별도의 프롬프트를 만듭니다.",
   "character_positionLabel": "위치",
-  "generation_sectionReferenceImages": "참조 이미지",
   "anlas_subscription": "구독",
   "anlas_purchased": "구매",
   "prompt_positive": "프롬프트",
@@ -451,7 +450,6 @@
   "image_save": "저장",
   "image_copy": "복사",
   "image_upscale": "업스케일",
-  "image_saveToLibrary": "라이브러리에 저장",
   "image_imageSaved": "이미지를 저장했습니다: {path}",
   "@image_imageSaved": {
     "placeholders": {
@@ -5385,7 +5383,6 @@
   "localUpscale_scrollDown": "아래로 스크롤",
   "wiki_exampleImages": "예시 이미지",
   "wiki_exampleImagesUnavailable": "예시 이미지를 불러올 수 없습니다",
-  "generation_moduleImage": "이미지",
   "generation_perRequestLabel": "장 수",
   "generation_perRequestTooltip": "요청당 생성할 이미지 수 (1–4)",
   "generation_repeatLabel": "반복",

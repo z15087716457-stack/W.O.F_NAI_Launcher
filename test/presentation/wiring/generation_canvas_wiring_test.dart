@@ -212,11 +212,14 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final retiredEntry =
+        Platform.environment['CAPTURE_CANVAS_MENU_RETIRED_ENTRY'] == '1';
     final imageMenu = Platform.environment['CAPTURE_CANVAS_IMAGE_MENU'] == '1';
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!imageMenu &&
+    if (!retiredEntry &&
+        !imageMenu &&
         !contextMenu &&
         !restored &&
         Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
@@ -227,7 +230,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = imageMenu
+      final area = retiredEntry
+          ? 'canvas-menu-retired-entry-20261014'
+          : imageMenu
           ? 'canvas-image-menu-20261014'
           : contextMenu
           ? 'canvas-context-menu-20261014'
@@ -1006,6 +1011,27 @@ void main() {
         await tester.tap(find.byKey(const Key('gen-canvas-menu-edit')));
         await tester.pumpAndSettle();
         expect(events, ['onEditImage(1-0)']);
+        expect(find.byKey(const Key('image-action-menu')), findsNothing);
+        await tester.tap(
+          find.byKey(const Key('gen-tile-1-0')),
+          buttons: kSecondaryMouseButton,
+        );
+        await tester.pumpAndSettle();
+        final more = find.byKey(const Key('gen-canvas-menu-more-group'));
+        await tester.tap(more);
+        await tester.pumpAndSettle();
+        expect(tester.widget<SubmenuButton>(more).menuChildren, hasLength(3));
+        for (final key in ['precise-library', 'reveal', 'krita']) {
+          expect(find.byKey(Key('gen-canvas-menu-$key')), findsOneWidget);
+        }
+        expect(
+          find.byKey(const Key('gen-canvas-menu-block-library')),
+          findsNothing,
+        );
+        await capture(tester, 'more-menu-$language-${dark ? 'dark' : 'light'}');
+        await tester.tap(find.byKey(const Key('gen-canvas-menu-reveal')));
+        await tester.pumpAndSettle();
+        expect(events, ['onEditImage(1-0)', 'onReveal(1-0)']);
         expect(find.byKey(const Key('image-action-menu')), findsNothing);
         expect(tester.takeException(), isNull);
       });

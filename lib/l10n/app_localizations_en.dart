@@ -876,9 +876,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get character_positionLabel => 'Position';
 
   @override
-  String get generation_sectionReferenceImages => 'Reference Images';
-
-  @override
   String get anlas_subscription => 'Subscription';
 
   @override
@@ -1028,9 +1025,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get image_upscale => 'Upscale';
-
-  @override
-  String get image_saveToLibrary => 'Save to Library';
 
   @override
   String image_imageSaved(Object path) {
@@ -10224,9 +10218,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get wiki_exampleImagesUnavailable =>
       'Example images are temporarily unavailable';
-
-  @override
-  String get generation_moduleImage => 'Image';
 
   @override
   String get generation_perRequestLabel => 'Images';

@@ -43,3 +43,13 @@
 已于 **2026-10-14 12:15（Asia/Taipei）** 安装，编译源码 `5b3de333`，1626 生产输入冻结。程序目录继续登记 `windows-glass-preview/runner/Release`；仅替换 AOT 和程序清单，15345 程序文件完整哈希核验通过，资源、字体、原生程序及 Agent 运行时沿用前版。新 AOT SHA-256 `56235bb396446dc14042f6629c0489bbaef6d94391508371e7977c988ed8fcc8`；运行根收据与本次 `installed-delivery.json` 字节一致。
 
 旧 AOT `9151bb4685dab266202981072a68b647e5f8f472ae475b1dcce825ad0ec3899c`、程序清单和收据备份在 `.dart_tool/canvas-image-menu-20261014/rollback/`，回退材料复验通过；安装未启动 Studio。增量包 `build/nai-studio-canvas-image-menu-20261014-update.zip`，16630927 字节，SHA-256 `f40177887506e6c0962bd2ef0f5c801ca26aeb6a798c8bdb71339ab2f89a303e`。安装收据及安装器 / 五项隔离场景日志同审计目录。旧图块动效和状态展示已补齐，图片菜单按最新反馈重做（详情下删除、顶部双快捷按钮、分层菜单、当前 UIUX 配色与字体）；历史栏继续保留 ×N 与纵向串联时间标注，批次数据没有合并。界面体验待用户从原入口打开确认。
+
+## 撤掉误带回的旧词库入口
+
+用户指出“词库早已删除”。核对当前代码：新菜单误加的 `block-library` 项使用退役前 `image_saveToLibrary` 文案，实际回调进入 `BlocksEditWiring.createWithDialog`，旧个人词库模块没有恢复。此项未得到本轮需求支持，现从图片右键菜单移除，不用改名来保留误加入口。“更多操作”只保留精准参考库、打开文件夹与发送到 Krita。
+
+现有图片控件合法的块库保存沿用 `promptBlockLibrary_saveToLibrary` 文案；删除四份手工 ARB 中无调用的旧 `image_saveToLibrary` 键，生成台湾正体与 Dart 本地化。其他个人块库、Vibe / 精准参考库及只读标签词典不因旧词库退役而删除；没有迁移或改写用户数据。代码注释中的旧词库指称同步改为块库。
+
+本地化无引用检查还发现两个原有旧参考模块标题键 `generation_moduleImage` / `generation_sectionReferenceImages`；生产侧均已无调用，随死文案清理删除，旧组件测试标题采用当前 `gen_refs`，保留测试断言与金图。当前范围 **313 通过、0 失败**，包括画布 / 菜单、共用图片控件、生图 UI / 金图、国际化与旧模块 / 提示词组件回归。五语言明暗的 10 项既有菜单测试加强“更多操作只留三项 / 退役入口缺席 / 打开文件夹目标正确”的断言；台湾资源生成验证通过，范围分析无诊断。真实字体合成实绘 `.dart_tool/canvas-menu-retired-entry-20261014/captures/`，日志 `.dart_tool/canvas-menu-retired-entry-*.log`。
+
+交付入口 `.dart_tool/canvas-menu-retired-entry-20261014/`；构建 / 安装状态在核验后登记。12:15 的前版安装记录保留为历史，不表示该前版已移除退役入口。

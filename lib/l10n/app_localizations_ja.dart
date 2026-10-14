@@ -857,9 +857,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get character_positionLabel => '位置';
 
   @override
-  String get generation_sectionReferenceImages => '参照画像';
-
-  @override
   String get anlas_subscription => 'サブスク';
 
   @override
@@ -1006,9 +1003,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get image_upscale => '拡大';
-
-  @override
-  String get image_saveToLibrary => 'ライブラリに保存';
 
   @override
   String image_imageSaved(Object path) {
@@ -9884,9 +9878,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get wiki_exampleImagesUnavailable => '作例画像を読み込めませんでした';
-
-  @override
-  String get generation_moduleImage => '画像';
 
   @override
   String get generation_perRequestLabel => '枚数';

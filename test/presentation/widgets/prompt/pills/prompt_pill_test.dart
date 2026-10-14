@@ -491,7 +491,7 @@ class _Specification extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final title = l10n.generation_sectionReferenceImages;
+    final title = l10n.gen_refs;
     final color = promptBlockColorPalette[8];
     Widget pill({
       bool locked = false,

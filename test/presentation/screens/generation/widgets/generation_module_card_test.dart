@@ -96,7 +96,7 @@ void main() {
       late String hint;
       await _pump(tester, (context) {
         final l10n = AppLocalizations.of(context)!;
-        title = l10n.generation_sectionReferenceImages;
+        title = l10n.gen_refs;
         hint = l10n.img2img_subtitle;
         return GenerationModuleCard(
           title: title,
@@ -156,9 +156,7 @@ void main() {
       await _pump(
         tester,
         (context) => GenerationModuleCard(
-          title: AppLocalizations.of(
-            context,
-          )!.generation_sectionReferenceImages,
+          title: AppLocalizations.of(context)!.gen_refs,
           count: count,
         ),
       );
@@ -179,9 +177,7 @@ void main() {
       await _pump(
         tester,
         (context) => GenerationModuleCard(
-          title: AppLocalizations.of(
-            context,
-          )!.generation_sectionReferenceImages,
+          title: AppLocalizations.of(context)!.gen_refs,
           headerKey: const Key('row-header'),
           children: [
             GenerationModuleRow(
@@ -231,9 +227,7 @@ void main() {
       await _pump(
         tester,
         (context) => GenerationModuleCard(
-          title: AppLocalizations.of(
-            context,
-          )!.generation_sectionReferenceImages,
+          title: AppLocalizations.of(context)!.gen_refs,
           children: [
             GenerationModuleRow(
               key: const Key('growing-row'),
@@ -548,7 +542,7 @@ class _SampleModules extends StatelessWidget {
         const SizedBox(height: GenSidebarStyle.sectionGap),
         GenerationModuleCard(
           headerKey: const Key('reference-header'),
-          title: l10n.generation_sectionReferenceImages,
+          title: l10n.gen_refs,
           count: 3,
           actions: [
             ModuleHeaderIconButton(
