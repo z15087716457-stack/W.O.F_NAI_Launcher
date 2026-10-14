@@ -11,3 +11,9 @@
 按用户指定的新布局更新四张侧栏金图：`dock`、`dock-dark`、`dock-search`、`dock-empty`；原图和最初差异保存在本机审计区。两个无悬浮场景在分类栏下方逐像素保持，其余金图、断言、业务契约和假数据未修改。实绘及日志位于 `.dart_tool/blocks-dock-20261014/`、`.dart_tool/blocks-dock-*.log`。截图是组件/合成数据验证，不冒充用户运行窗口的效果验收。
 
 交付采用本次编译的 Dart AOT，并同步程序清单和完整安装收据；仅在确认资源、字体、原生程序和 Agent 运行时与已安装包一致后使用增量更新。覆盖前需要 Studio/Agent 从托盘完全退出，备份实际旧程序文件和收据，失败恢复原文件，不自动启动。不读写用户草稿、账号、图库或私有 Agent/浏览器状态，不调用真实模型/NAI。
+
+已于 **2026-10-14 10:21（Asia/Taipei）** 安装到登记运行目录 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`。编译源码提交 `600a8c08`，生产输入冻结 1623 份；只替换 `data/app.so` 和 `app_files_manifest.json`，原生程序、214 份资源、字体和 15095 份 Agent 文件均沿用已安装内容。安装前后 15345 份程序文件按完整清单核验通过，运行根收据与 `.dart_tool/blocks-dock-20261014/installed-delivery.json` 字节一致，installed=true / installation_hold=false / ready_to_install=false。
+
+新 AOT SHA-256：`bee6fa8b0322688096e991f2794c4dd57e69b47b95ba0b81d3800ff2de648a0d`。旧 AOT `9f88e27f34052f68e8344f5a014060114ada4c2b83e486084a3214ea2a94a053`、程序清单和安装收据已备份到 `.dart_tool/blocks-dock-20261014/rollback/`，回退材料复验通过。安装器五项隔离场景通过：成功往返、替换失败后恢复、运行中阻止覆盖、基线漂移阻止覆盖、损坏备份阻止回退；实际安装未执行回退，未启动 Studio。
+
+增量 ZIP：`build/nai-studio-blocks-dock-20261014-update.zip`，16565966 字节，SHA-256 `d1e50add0b4c3b3f1452c5c2dacb425310e20cb7e71589f3146f61c48bf449bd`；包内 CRC 和增量文件哈希通过。保留此前顶部拖拽、窗口底色及另一个开发窗口的探索页 / NAI 图标 / Wiki 字体修复，等待用户从原入口打开体验；本记录之后的文档提交不改变编译输入。
