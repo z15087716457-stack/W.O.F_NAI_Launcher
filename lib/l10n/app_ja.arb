@@ -6463,6 +6463,32 @@
   "refs_changedNote": "変更は今回の送信のみに使われます",
   "refs_saveDefault": "既定値として保存",
   "refs_revert": "元に戻す",
+  "refs_encOnUseBody": "まだエンコードしていません。初めて生成に使うときにエンコードします。",
+  "@refs_encOnUseBody": {
+    "description": "Encoding card description; the action below displays the price."
+  },
+  "refs_encReBody": "{from} 用のエンコードです（現在は {model}）。使用時に元画像から再エンコードします。",
+  "@refs_encReBody": {
+    "description": "Re-encoding card description; the action below displays the price.",
+    "placeholders": {
+      "from": { "type": "String" },
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodeAction": "{model} 用にエンコード",
+  "@refs_encodeAction": {
+    "description": "Compact encoding action label; price is a separate badge.",
+    "placeholders": {
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodingPrice": "{cost} Anlas",
+  "@refs_encodingPrice": {
+    "description": "Encoding price badge inside the action button.",
+    "placeholders": {
+      "cost": { "type": "int" }
+    }
+  },
   "refs_encodeNow": "{model} 用にエンコード · {cost} Anlas",
   "@refs_encodeNow": {
     "placeholders": {

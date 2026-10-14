@@ -6463,6 +6463,40 @@
   "refs_changedNote": "改動只用於這次傳送",
   "refs_saveDefault": "存為預設",
   "refs_revert": "還原",
+  "refs_encOnUseBody": "還沒編碼。第一次用在生圖時編碼。",
+  "@refs_encOnUseBody": {
+    "description": "Encoding card description; the action below displays the price."
+  },
+  "refs_encReBody": "編碼是給 {from} 的，當前是 {model}。用時按原圖重新編碼。",
+  "@refs_encReBody": {
+    "description": "Re-encoding card description; the action below displays the price.",
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "refs_encodeAction": "為 {model} 編碼",
+  "@refs_encodeAction": {
+    "description": "Compact encoding action label; price is a separate badge.",
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "refs_encodingPrice": "{cost} Anlas",
+  "@refs_encodingPrice": {
+    "description": "Encoding price badge inside the action button.",
+    "placeholders": {
+      "cost": {
+        "type": "int"
+      }
+    }
+  },
   "refs_encodeNow": "現在為 {model} 編碼 · {cost} Anlas",
   "@refs_encodeNow": {
     "placeholders": {

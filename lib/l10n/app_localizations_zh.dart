@@ -11533,6 +11533,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get refs_revert => '还原';
 
   @override
+  String get refs_encOnUseBody => '还没编码。第一次用在生图时编码。';
+
+  @override
+  String refs_encReBody(String from, String model) {
+    return '编码是给 $from 的，当前是 $model。用时按原图重新编码。';
+  }
+
+  @override
+  String refs_encodeAction(String model) {
+    return '为 $model 编码';
+  }
+
+  @override
+  String refs_encodingPrice(int cost) {
+    return '$cost Anlas';
+  }
+
+  @override
   String refs_encodeNow(Object model, Object cost) {
     return '现在为 $model 编码 · $cost Anlas';
   }
@@ -27825,6 +27843,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get refs_revert => '還原';
+
+  @override
+  String get refs_encOnUseBody => '還沒編碼。第一次用在生圖時編碼。';
+
+  @override
+  String refs_encReBody(String from, String model) {
+    return '編碼是給 $from 的，當前是 $model。用時按原圖重新編碼。';
+  }
+
+  @override
+  String refs_encodeAction(String model) {
+    return '為 $model 編碼';
+  }
+
+  @override
+  String refs_encodingPrice(int cost) {
+    return '$cost Anlas';
+  }
 
   @override
   String refs_encodeNow(Object model, Object cost) {

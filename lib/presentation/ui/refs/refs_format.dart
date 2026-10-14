@@ -32,6 +32,17 @@ abstract final class RefsLayout {
 abstract final class RefsFormat {
   static String two(double v) => v.toStringAsFixed(2);
 
+  static final _naiModelName = RegExp(
+    r'^NAI Diffusion (V\d+(?:\.\d+)*)(?: \((Full|Curated)\))?$',
+  );
+
+  /// 紧凑操作名称保留 Full / Curated；完整型号继续用于说明和编码确认。
+  static String compactModel(RefsModel model) {
+    final match = _naiModelName.firstMatch(model.name);
+    if (match == null) return model.name;
+    return [match.group(1)!, ?match.group(2)].join(' ');
+  }
+
   static String date(DateTime d) => '${d.year}-${_pad(d.month)}-${_pad(d.day)}';
 
   static String dateTime(DateTime d) =>

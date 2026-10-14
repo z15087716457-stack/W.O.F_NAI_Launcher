@@ -6463,6 +6463,32 @@
   "refs_changedNote": "Changes apply to this send only",
   "refs_saveDefault": "Save as default",
   "refs_revert": "Revert",
+  "refs_encOnUseBody": "Not encoded yet. Encoded the first time you generate with it.",
+  "@refs_encOnUseBody": {
+    "description": "Encoding card description; the action below displays the price."
+  },
+  "refs_encReBody": "Encoded for {from}, current model is {model}. Re-encoded from the original on use.",
+  "@refs_encReBody": {
+    "description": "Re-encoding card description; the action below displays the price.",
+    "placeholders": {
+      "from": { "type": "String" },
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodeAction": "Encode for {model}",
+  "@refs_encodeAction": {
+    "description": "Compact encoding action label; price is a separate badge.",
+    "placeholders": {
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodingPrice": "{cost} Anlas",
+  "@refs_encodingPrice": {
+    "description": "Encoding price badge inside the action button.",
+    "placeholders": {
+      "cost": { "type": "int" }
+    }
+  },
   "refs_encodeNow": "Encode for {model} now · {cost} Anlas",
   "@refs_encodeNow": {
     "placeholders": {

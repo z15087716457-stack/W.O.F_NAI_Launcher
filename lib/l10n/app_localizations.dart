@@ -21019,6 +21019,30 @@ abstract class AppLocalizations {
   /// **'Revert'**
   String get refs_revert;
 
+  /// Encoding card description; the action below displays the price.
+  ///
+  /// In en, this message translates to:
+  /// **'Not encoded yet. Encoded the first time you generate with it.'**
+  String get refs_encOnUseBody;
+
+  /// Re-encoding card description; the action below displays the price.
+  ///
+  /// In en, this message translates to:
+  /// **'Encoded for {from}, current model is {model}. Re-encoded from the original on use.'**
+  String refs_encReBody(String from, String model);
+
+  /// Compact encoding action label; price is a separate badge.
+  ///
+  /// In en, this message translates to:
+  /// **'Encode for {model}'**
+  String refs_encodeAction(String model);
+
+  /// Encoding price badge inside the action button.
+  ///
+  /// In en, this message translates to:
+  /// **'{cost} Anlas'**
+  String refs_encodingPrice(int cost);
+
   /// No description provided for @refs_encodeNow.
   ///
   /// In en, this message translates to:

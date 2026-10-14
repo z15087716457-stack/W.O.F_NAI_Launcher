@@ -12097,6 +12097,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refs_revert => 'Revert';
 
   @override
+  String get refs_encOnUseBody =>
+      'Not encoded yet. Encoded the first time you generate with it.';
+
+  @override
+  String refs_encReBody(String from, String model) {
+    return 'Encoded for $from, current model is $model. Re-encoded from the original on use.';
+  }
+
+  @override
+  String refs_encodeAction(String model) {
+    return 'Encode for $model';
+  }
+
+  @override
+  String refs_encodingPrice(int cost) {
+    return '$cost Anlas';
+  }
+
+  @override
   String refs_encodeNow(Object model, Object cost) {
     return 'Encode for $model now · $cost Anlas';
   }

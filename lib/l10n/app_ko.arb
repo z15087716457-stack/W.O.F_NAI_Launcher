@@ -6463,6 +6463,32 @@
   "refs_changedNote": "변경은 이번 전송에만 적용됩니다",
   "refs_saveDefault": "기본값으로 저장",
   "refs_revert": "되돌리기",
+  "refs_encOnUseBody": "아직 인코딩되지 않았습니다. 처음 생성에 쓸 때 인코딩합니다.",
+  "@refs_encOnUseBody": {
+    "description": "Encoding card description; the action below displays the price."
+  },
+  "refs_encReBody": "{from}용 인코딩입니다(현재 {model}). 사용할 때 원본으로 다시 인코딩합니다.",
+  "@refs_encReBody": {
+    "description": "Re-encoding card description; the action below displays the price.",
+    "placeholders": {
+      "from": { "type": "String" },
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodeAction": "{model}용으로 인코딩",
+  "@refs_encodeAction": {
+    "description": "Compact encoding action label; price is a separate badge.",
+    "placeholders": {
+      "model": { "type": "String" }
+    }
+  },
+  "refs_encodingPrice": "{cost} Anlas",
+  "@refs_encodingPrice": {
+    "description": "Encoding price badge inside the action button.",
+    "placeholders": {
+      "cost": { "type": "int" }
+    }
+  },
   "refs_encodeNow": "지금 {model}용으로 인코딩 · {cost} Anlas",
   "@refs_encodeNow": {
     "placeholders": {

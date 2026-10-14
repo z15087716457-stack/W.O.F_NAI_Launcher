@@ -400,9 +400,12 @@ class RefsModelCapsule extends StatelessWidget {
               l10n.refs_currentModel,
               style: UiText.sans(12, color: c.muted),
             ),
-          Text(
-            m.name,
-            style: UiText.sans(12, weight: FontWeight.w700, color: c.ink),
+          Tooltip(
+            message: m.name,
+            child: Text(
+              RefsFormat.compactModel(m),
+              style: UiText.sans(12, weight: FontWeight.w700, color: c.ink),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.only(left: 2),

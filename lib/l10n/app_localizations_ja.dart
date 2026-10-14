@@ -11728,6 +11728,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get refs_revert => '元に戻す';
 
   @override
+  String get refs_encOnUseBody => 'まだエンコードしていません。初めて生成に使うときにエンコードします。';
+
+  @override
+  String refs_encReBody(String from, String model) {
+    return '$from 用のエンコードです（現在は $model）。使用時に元画像から再エンコードします。';
+  }
+
+  @override
+  String refs_encodeAction(String model) {
+    return '$model 用にエンコード';
+  }
+
+  @override
+  String refs_encodingPrice(int cost) {
+    return '$cost Anlas';
+  }
+
+  @override
   String refs_encodeNow(Object model, Object cost) {
     return '$model 用にエンコード · $cost Anlas';
   }

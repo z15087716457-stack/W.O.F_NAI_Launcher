@@ -11752,6 +11752,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get refs_revert => '되돌리기';
 
   @override
+  String get refs_encOnUseBody => '아직 인코딩되지 않았습니다. 처음 생성에 쓸 때 인코딩합니다.';
+
+  @override
+  String refs_encReBody(String from, String model) {
+    return '$from용 인코딩입니다(현재 $model). 사용할 때 원본으로 다시 인코딩합니다.';
+  }
+
+  @override
+  String refs_encodeAction(String model) {
+    return '$model용으로 인코딩';
+  }
+
+  @override
+  String refs_encodingPrice(int cost) {
+    return '$cost Anlas';
+  }
+
+  @override
   String refs_encodeNow(Object model, Object cost) {
     return '지금 $model용으로 인코딩 · $cost Anlas';
   }

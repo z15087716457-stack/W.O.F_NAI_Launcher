@@ -581,6 +581,16 @@ class RefsEncodingBox extends StatelessWidget {
         model.vibeUsable &&
         (entry.encoding == RefsEncoding.encodeOnUse ||
             entry.encoding == RefsEncoding.reencode);
+    final description = canEncode
+        ? switch (entry.encoding) {
+            RefsEncoding.encodeOnUse => l10n.refs_encOnUseBody,
+            RefsEncoding.reencode => l10n.refs_encReBody(
+              entry.encodedFor ?? '?',
+              model.name,
+            ),
+            _ => i.desc,
+          }
+        : i.desc;
     return RefsBox(
       key: const Key('refs-encoding'),
       color: i.ok ? null : (i.tone == UiMiniTone.error ? null : c.warnBg),
@@ -616,7 +626,8 @@ class RefsEncodingBox extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  i.desc,
+                  description,
+                  key: const Key('refs-encoding-description'),
                   style: UiText.sans(12, color: c.muted, height: 1.5),
                 ),
                 if (canEncode)
@@ -626,9 +637,30 @@ class RefsEncodingBox extends StatelessWidget {
                       key: const Key('refs-encode-now'),
                       size: UiBtnSize.small,
                       onTap: onEncodeNow,
+                      tooltip: l10n.refs_encodeNow(model.name, costs.encode),
                       children: [
                         const UiGlyph(UiGlyphs.bolt, size: 13),
-                        Text(l10n.refs_encodeNow(model.name, costs.encode)),
+                        Flexible(
+                          child: Text(
+                            l10n.refs_encodeAction(
+                              RefsFormat.compactModel(model),
+                            ),
+                            key: const Key('refs-encode-label'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          key: const Key('refs-encode-cost'),
+                          height: 18,
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: c.control,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                          child: Text(l10n.refs_encodingPrice(costs.encode)),
+                        ),
                       ],
                     ),
                   ),
