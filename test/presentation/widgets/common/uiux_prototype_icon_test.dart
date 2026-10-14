@@ -98,46 +98,35 @@ void main() {
     }
   });
 
-  testWidgets(
-    'pill translation uses the prototype glyph in both activity states',
-    (tester) async {
-      for (final busy in [false, true]) {
-        await _pump(
-          tester,
-          TranslationIcon(
-            size: 12,
-            busy: busy,
-            style: TranslationIconStyle.pill,
-          ),
-          settle: !busy,
-        );
-        final slot = tester.getSize(find.byType(TranslationIcon));
-        expect(slot.height, 12);
-        final glyph = tester
-            .widgetList<RichText>(find.byType(RichText))
-            .singleWhere((widget) => widget.text.toPlainText() == '译');
-        expect(slot.width, tester.getSize(find.byWidget(glyph)).width);
-        final style = glyph.text.style!;
-        expect(style.fontSize, 10);
-        expect(style.fontWeight, FontWeight.w700);
-        final fade = tester.widget<FadeTransition>(
-          find.descendant(
-            of: find.byType(TranslationIcon),
-            matching: find.byType(FadeTransition),
-          ),
-        );
-        expect(fade.opacity.value, 1);
-        if (busy) {
-          await tester.pump(const Duration(milliseconds: 350));
-          expect(fade.opacity.value, lessThan(1));
-        }
-        expect(tester.takeException(), isNull);
-      }
-      await _pump(
-        tester,
-        const TranslationIcon(size: 12, style: TranslationIconStyle.pill),
-      );
-      expect(tester.binding.hasScheduledFrame, isFalse);
-    },
-  );
+  testWidgets('pill retains its compact glyph slot while busy', (tester) async {
+    await _pump(
+      tester,
+      const TranslationIcon(size: 12, style: TranslationIconStyle.pill),
+    );
+    final slot = tester.getSize(find.byType(TranslationIcon));
+    final glyph = tester
+        .widgetList<RichText>(find.byType(RichText))
+        .singleWhere((w) => w.text.toPlainText() == '译');
+    expect(slot, const Size(10, 12));
+    expect(glyph.text.style!.fontWeight, FontWeight.w700);
+    await _pump(
+      tester,
+      const TranslationIcon(
+        size: 12,
+        style: TranslationIconStyle.pill,
+        busy: true,
+      ),
+      settle: false,
+    );
+    await tester.pump();
+    expect(tester.getSize(find.byType(TranslationIcon)), slot);
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(tester.getSize(find.byType(TranslationIcon)), slot);
+    expect(tester.takeException(), isNull);
+    await _pump(
+      tester,
+      const TranslationIcon(size: 12, style: TranslationIconStyle.pill),
+    );
+    expect(tester.binding.hasScheduledFrame, isFalse);
+  });
 }

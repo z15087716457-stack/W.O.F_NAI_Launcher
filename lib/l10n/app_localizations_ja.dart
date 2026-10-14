@@ -8715,10 +8715,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get promptTranslation_guideConvertText => '↓ 原文から訳文へ。確認してから保存';
 
   @override
-  String get promptTranslation_guideRestoreTitle => 'A / 復元';
+  String get promptTranslation_guideRestoreTitle => 'グループ全体の表示切替';
 
   @override
-  String get promptTranslation_guideRestoreText => 'グループ全体を原文に戻す / 翻訳ブロックに戻す';
+  String get promptTranslation_guideRestoreText => '翻訳メニューで原文 / 訳文をまとめて切り替え';
 
   @override
   String get promptTranslation_middleButton => 'マウス中ボタン';

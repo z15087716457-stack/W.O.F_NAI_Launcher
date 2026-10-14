@@ -8549,10 +8549,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get promptTranslation_guideConvertText => '↓ 原文转中文，检查后保存';
 
   @override
-  String get promptTranslation_guideRestoreTitle => 'A / 恢复';
+  String get promptTranslation_guideRestoreTitle => '切换整组显示';
 
   @override
-  String get promptTranslation_guideRestoreText => '整组还原原文 / 恢复翻译块';
+  String get promptTranslation_guideRestoreText => '在翻译菜单中切换全部原文 / 译文';
 
   @override
   String get promptTranslation_middleButton => '鼠标中键';
@@ -24887,10 +24887,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get promptTranslation_guideConvertText => '↓ 原文轉中文，檢查後儲存';
 
   @override
-  String get promptTranslation_guideRestoreTitle => 'A / 恢復';
+  String get promptTranslation_guideRestoreTitle => '切換整組顯示';
 
   @override
-  String get promptTranslation_guideRestoreText => '整組還原原文 / 恢復翻譯塊';
+  String get promptTranslation_guideRestoreText => '在翻譯選單中切換全部原文 / 譯文';
 
   @override
   String get promptTranslation_middleButton => '滑鼠中鍵';

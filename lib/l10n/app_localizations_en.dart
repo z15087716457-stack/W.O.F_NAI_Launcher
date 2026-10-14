@@ -9001,11 +9001,11 @@ class AppLocalizationsEn extends AppLocalizations {
       '↓ Original to translation; review before saving';
 
   @override
-  String get promptTranslation_guideRestoreTitle => 'A / Restore';
+  String get promptTranslation_guideRestoreTitle => 'Switch the whole group';
 
   @override
   String get promptTranslation_guideRestoreText =>
-      'Restore the whole group / bring blocks back';
+      'Use the translation menu to show all source text / translations';
 
   @override
   String get promptTranslation_middleButton => 'Middle mouse button';

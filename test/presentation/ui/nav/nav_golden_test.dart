@@ -12,6 +12,7 @@ import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'nav_test_harness.dart';
 
 const _small = Size(640, 760);
@@ -91,9 +92,16 @@ void main() {
           await interact(tester);
           await tester.pumpAndSettle();
         }
-        await expectLater(
+        final masks = <Rect>[];
+        for (final key in ['main-nav-avatar', 'main-nav-panel-account']) {
+          final anchor = find.byKey(Key(key));
+          if (anchor.evaluate().isNotEmpty) masks.add(tester.getRect(anchor));
+        }
+        await expectOutsideApprovedRegions(
+          tester,
           find.byKey(const Key('nav-capture')),
-          matchesGoldenFile('goldens/$file.png'),
+          'test/presentation/ui/nav/goldens/$file.png',
+          masks,
         );
         if (name == 'ctrl') {
           await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);

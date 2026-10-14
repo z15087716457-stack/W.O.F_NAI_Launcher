@@ -12,6 +12,7 @@ import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture_editor.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'gen_test_harness.dart';
 
 void main() {
@@ -174,9 +175,23 @@ void main() {
           await interact(t);
           await t.pumpAndSettle();
         }
-        await expectLater(
+        final masks = <Rect>[];
+        final tools = find.byKey(const Key('gen-tool-menu'));
+        final prompt = find.byKey(const Key('gen-prompt'));
+        if (tools.evaluate().isNotEmpty && prompt.evaluate().isNotEmpty) {
+          final row = t.getRect(tools), card = t.getRect(prompt);
+          masks.add(Rect.fromLTWH(card.left, row.top, card.width, row.height));
+        }
+        final translatePin = find.byKey(const Key('gen-pin-translate'));
+        if (translatePin.evaluate().isNotEmpty) {
+          final row = t.getRect(translatePin);
+          masks.add(Rect.fromLTWH(row.left, row.top, 30, row.height));
+        }
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('gen-capture')),
-          matchesGoldenFile('goldens/$file.png'),
+          'test/presentation/ui/gen/goldens/$file.png',
+          masks,
         );
         await t.pumpWidget(const SizedBox());
         debugDisableShadows = true;

@@ -22,6 +22,7 @@ class LayoutState {
   final double blockLibraryPanelWidth;
   final bool blockPaletteToolPinned;
   final bool translationToolPinned;
+  final bool naiAgentToolPinned;
   final bool blockLibraryPanelToolPinned;
   final bool styleExploreGridLarge;
   final double styleExploreEditorWidth;
@@ -43,6 +44,7 @@ class LayoutState {
     this.blockLibraryPanelWidth = 320.0,
     this.blockPaletteToolPinned = true,
     this.translationToolPinned = true,
+    this.naiAgentToolPinned = true,
     this.blockLibraryPanelToolPinned = false,
     this.styleExploreGridLarge = true,
     this.styleExploreEditorWidth = 384.0,
@@ -64,6 +66,7 @@ class LayoutState {
     double? blockLibraryPanelWidth,
     bool? blockPaletteToolPinned,
     bool? translationToolPinned,
+    bool? naiAgentToolPinned,
     bool? blockLibraryPanelToolPinned,
     bool? styleExploreGridLarge,
     double? styleExploreEditorWidth,
@@ -88,6 +91,7 @@ class LayoutState {
           blockPaletteToolPinned ?? this.blockPaletteToolPinned,
       translationToolPinned:
           translationToolPinned ?? this.translationToolPinned,
+      naiAgentToolPinned: naiAgentToolPinned ?? this.naiAgentToolPinned,
       blockLibraryPanelToolPinned:
           blockLibraryPanelToolPinned ?? this.blockLibraryPanelToolPinned,
       styleExploreGridLarge:
@@ -132,6 +136,7 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
       blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
       translationToolPinned: storage.getTranslationToolPinned(),
+      naiAgentToolPinned: storage.getNaiAgentToolPinned(),
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
       styleExploreGridLarge:
           storage.getSetting<bool>(
@@ -267,6 +272,11 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
     await ref
         .read(localStorageServiceProvider)
         .setTranslationToolPinned(state.translationToolPinned);
+  }
+
+  Future<void> setNaiAgentToolPinned(bool pinned) async {
+    state = state.copyWith(naiAgentToolPinned: pinned);
+    await ref.read(localStorageServiceProvider).setNaiAgentToolPinned(pinned);
   }
 
   /// 设置块库面板图标钉住状态（头部"块库"图标位显隐）

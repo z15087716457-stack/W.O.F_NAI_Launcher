@@ -29,6 +29,11 @@ import 'generation_operations.dart';
 import 'generation_references.dart';
 import 'generation_settings.dart';
 import '../providers/simple_output_viewer_provider.dart';
+import '../providers/nai_agent/nai_agent_window_controller.dart';
+import '../providers/nai_agent/nai_agent_workspace_provider.dart';
+import '../widgets/nai_agent/nai_agent_panel.dart';
+import '../widgets/common/prompt_translation_guide.dart';
+import '../screens/generation/widgets/generation_welcome.dart';
 
 class GenerationRoute extends ConsumerStatefulWidget {
   const GenerationRoute({super.key});
@@ -106,7 +111,6 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
     }
 
     return WindowChromePage(
-      showNaiAgent: NaiAgentIntegrationScope.activeOf(context),
       child: Material(
         type: MaterialType.transparency,
         child: LayoutBuilder(
@@ -199,6 +203,16 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(generationViewDataProvider(context.l10n));
+    final agentAvailable =
+        !widget.explore && NaiAgentIntegrationScope.activeOf(context);
+    final agentDocked =
+        agentAvailable &&
+        ref.watch(
+          naiAgentUiPreferencesProvider.select(
+            (value) => value.settings.panelExpanded,
+          ),
+        ) &&
+        ref.watch(naiAgentWindowControllerProvider).docked;
     final settings = ref.read(generationSettingsProvider);
     final references = ref.read(generationReferencesProvider);
     final history = ref.read(generationHistoryActionsProvider);
@@ -223,6 +237,10 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
     final page = widget.builder(
       data: data,
       slots: GenSlots(
+        emptyCanvas: (_) => const GenerationWelcome(),
+        translationGuide: (_, onBack) => PromptTranslationGuide(onBack: onBack),
+        agentToggle: agentAvailable ? const NaiAgentToggleButton() : null,
+        historyCaptionInset: !agentDocked,
         canvas: ref.watch(simpleOutputViewerNotifierProvider)
             ? null
             : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),

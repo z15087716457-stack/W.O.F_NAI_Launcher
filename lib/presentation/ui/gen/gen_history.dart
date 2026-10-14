@@ -210,6 +210,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
       ),
       child: WindowPaneInset(
         key: const Key('gen-history-window-inset'),
+        enabled: scope.slots.historyCaptionInset,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

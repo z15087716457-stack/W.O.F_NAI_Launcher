@@ -24,7 +24,7 @@ class StudioResourceLoader extends DefaultResourceLoader {
 export const studioToolMap = [
   'Tool map:',
   '- Current draft/parameters/selected image: studio_context (scope=draft for raw fields and field_versions).',
-  '- See pixels or workspace images: image_read.',
+  '- See pixels or workspace images: image_read. For original attachment metadata only, use its message path with metadata_only=true; this returns no pixels and requires no vision.',
   '- Change draft: prompt_update using the versions just read; inspect returned readback.',
   '- Workspace files/manuals: read, write, edit, bash. Read NAI manuals only when needed.',
 ].join('\n');

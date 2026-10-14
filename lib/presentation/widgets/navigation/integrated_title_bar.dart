@@ -135,7 +135,9 @@ class WindowChromePage extends StatelessWidget {
           if (showAccessory && !shell.immersive && shell.accessory != null)
             Positioned(
               top: 0,
-              right: IntegratedTitleBarShell.reservedRight,
+              right:
+                  IntegratedTitleBarShell.reservedRight +
+                  (showNaiAgent ? 28 : 0),
               width: shell.accessoryWidth,
               height: height,
               child: shell.accessory!,

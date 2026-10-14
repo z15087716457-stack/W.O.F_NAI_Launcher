@@ -95,6 +95,7 @@ class NavRail extends StatelessWidget {
             const SizedBox(height: 5),
             NavRailButton(
               key: const Key('main-nav-avatar'),
+              plateSize: 40,
               plain: true,
               semanticLabel: data.account.current?.name ?? l.navShell_account,
               tipsEnabled: tipsEnabled,
@@ -102,7 +103,7 @@ class NavRail extends StatelessWidget {
                 label: data.account.current?.name ?? l.navShell_account,
               ),
               onTapWithContext: onAvatar,
-              child: (_) => NavAvatar(account: data.account.current, size: 30),
+              child: (_) => NavAvatar(account: data.account.current, size: 40),
             ),
             const SizedBox(height: 5),
             Expanded(
@@ -208,6 +209,7 @@ class NavRailButton extends StatefulWidget {
     super.key,
     this.icon,
     this.iconSize = 20,
+    this.plateSize = 36,
     this.child,
     this.selected = false,
     this.muted = false,
@@ -225,6 +227,7 @@ class NavRailButton extends StatefulWidget {
   /// 页面图标（带点击动效）；和 [child] 二选一。
   final IconData? icon;
   final double iconSize;
+  final double plateSize;
   final Widget Function(Color color)? child;
   final bool selected;
 
@@ -325,15 +328,17 @@ class _NavRailButtonState extends State<NavRailButton> {
         : widget.child!(fg);
     final plate = AnimatedContainer(
       duration: reduce ? Duration.zero : const Duration(milliseconds: 150),
-      width: 36,
-      height: 36,
+      width: widget.plateSize,
+      height: widget.plateSize,
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(widget.plateSize >= 40 ? 10 : 9),
       ),
       foregroundDecoration: _focus
           ? BoxDecoration(
-              borderRadius: BorderRadius.circular(9),
+              borderRadius: BorderRadius.circular(
+                widget.plateSize >= 40 ? 10 : 9,
+              ),
               border: Border.all(color: c.accent, width: 1.5),
             )
           : null,

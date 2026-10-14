@@ -15677,13 +15677,13 @@ abstract class AppLocalizations {
   /// No description provided for @promptTranslation_guideRestoreTitle.
   ///
   /// In en, this message translates to:
-  /// **'A / Restore'**
+  /// **'Switch the whole group'**
   String get promptTranslation_guideRestoreTitle;
 
   /// No description provided for @promptTranslation_guideRestoreText.
   ///
   /// In en, this message translates to:
-  /// **'Restore the whole group / bring blocks back'**
+  /// **'Use the translation menu to show all source text / translations'**
   String get promptTranslation_guideRestoreText;
 
   /// No description provided for @promptTranslation_middleButton.

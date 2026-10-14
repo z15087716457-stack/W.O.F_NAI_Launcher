@@ -368,6 +368,7 @@ final generationViewDataProvider = Provider.autoDispose
             palettePinned: layout.blockPaletteToolPinned,
             dockPinned: layout.blockLibraryPanelToolPinned,
             translatePinned: layout.translationToolPinned,
+            agentPinned: layout.naiAgentToolPinned,
             autoFormat: ref.watch(autoFormatPromptSettingsProvider),
             highlight: ref.watch(highlightEmphasisSettingsProvider),
             sdConvert: ref.watch(sdSyntaxAutoConvertSettingsProvider),

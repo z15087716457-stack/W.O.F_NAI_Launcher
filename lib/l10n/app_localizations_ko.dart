@@ -8736,10 +8736,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get promptTranslation_guideConvertText => '↓ 원문을 번역문으로, 저장 전에 검토';
 
   @override
-  String get promptTranslation_guideRestoreTitle => 'A / 복원';
+  String get promptTranslation_guideRestoreTitle => '그룹 전체 표시 전환';
 
   @override
-  String get promptTranslation_guideRestoreText => '그룹 전체 복원 / 블록 되돌리기';
+  String get promptTranslation_guideRestoreText => '번역 메뉴에서 원문 / 번역을 모두 전환';
 
   @override
   String get promptTranslation_middleButton => '마우스 가운데 버튼';

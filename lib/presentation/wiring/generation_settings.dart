@@ -203,6 +203,8 @@ class GenerationSettings {
         }
       case GenPromptTool.autoFormat:
         ref.read(autoFormatPromptSettingsProvider.notifier).set(value);
+      case GenPromptTool.agentPinned:
+        await layout.setNaiAgentToolPinned(value);
       case GenPromptTool.highlight:
         ref.read(highlightEmphasisSettingsProvider.notifier).set(value);
       case GenPromptTool.sdConvert:

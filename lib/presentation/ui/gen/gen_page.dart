@@ -480,7 +480,10 @@ class _Strip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final top = side == _StripSide.right && WindowChromeScope.activeOf(context)
+    final top =
+        side == _StripSide.right &&
+            GenScope.of(context).slots.historyCaptionInset &&
+            WindowChromeScope.activeOf(context)
         ? WindowChromeScope.heightOf(context)
         : 0.0;
     return Container(

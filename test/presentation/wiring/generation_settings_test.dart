@@ -235,10 +235,23 @@ void main() {
     await settings.promptTool(GenPromptTool.autoFormat, false);
     await settings.promptTool(GenPromptTool.translatePinned, false);
     await settings.promptTool(GenPromptTool.translatePinned, false);
+    await settings.promptTool(GenPromptTool.agentPinned, false);
+    await settings.promptTool(GenPromptTool.agentPinned, false);
     expect(container.read(autoFormatPromptSettingsProvider), isFalse);
     expect(
       container.read(layoutStateNotifierProvider).translationToolPinned,
       isFalse,
+    );
+    container.invalidate(layoutStateNotifierProvider);
+    expect(
+      container.read(layoutStateNotifierProvider).naiAgentToolPinned,
+      isFalse,
+    );
+    await settings.promptTool(GenPromptTool.agentPinned, true);
+    container.invalidate(layoutStateNotifierProvider);
+    expect(
+      container.read(layoutStateNotifierProvider).naiAgentToolPinned,
+      isTrue,
     );
   });
 }

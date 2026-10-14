@@ -91,7 +91,7 @@ class NavPanel extends StatelessWidget {
                     children: [
                       NavAvatar(
                         account: account.current,
-                        size: 30,
+                        size: 40,
                         showSubscriptionDot: false,
                       ),
                       Expanded(

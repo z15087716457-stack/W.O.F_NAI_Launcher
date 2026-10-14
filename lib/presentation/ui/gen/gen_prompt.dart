@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/translation_icon.dart';
+import '../../widgets/bridge/bridge_link_icon.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -140,11 +142,8 @@ class _PromptHead extends StatelessWidget {
           Builder(
             builder: (context) => GenIb(
               key: const Key('gen-tool-palette'),
-              icon: Icon(
-                StudioIcons.promptBlockPalette,
-                size: 15,
-                color: c.muted,
-              ),
+              animatedIcon: StudioIcons.promptBlockPalette,
+              glyphSize: 15,
               tooltip: l.gen_toolPalette,
               onTap: () => scope.actions.onOpenPalette(genRectOf(context)),
             ),
@@ -152,11 +151,8 @@ class _PromptHead extends StatelessWidget {
         if (tools.dockPinned)
           GenIb(
             key: const Key('gen-tool-dock'),
-            icon: Icon(
-              StudioIcons.promptBlocks,
-              size: 16,
-              color: data.layout.dockOpen ? c.ink : c.muted,
-            ),
+            animatedIcon: StudioIcons.promptBlocks,
+            glyphSize: 16,
             active: data.layout.dockOpen,
             tooltip: l.gen_toolDock,
             onTap: () => scope.actions.onLayoutChanged(
@@ -164,9 +160,12 @@ class _PromptHead extends StatelessWidget {
             ),
           ),
         if (tools.translatePinned) const _Translate(),
+        if (tools.agentPinned && scope.slots.agentToggle != null)
+          scope.slots.agentToggle!,
         Builder(
           builder: (context) => GenIb(
             key: const Key('gen-tool-menu'),
+            animateOnTap: true,
             icon: GenNaiIcon(
               'prompt-chunk',
               size: 16,
@@ -242,17 +241,30 @@ class _Bridge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = context.ui;
+    final theme = Theme.of(context);
     final color = switch (bridge.phase) {
-      GenBridgePhase.working => c.accent,
-      GenBridgePhase.synced => c.ok,
-      GenBridgePhase.failed => c.warn,
-      GenBridgePhase.idle => c.muted,
+      GenBridgePhase.working => theme.colorScheme.primary,
+      GenBridgePhase.synced =>
+        theme.brightness == Brightness.dark
+            ? const Color(0xFF63D79C)
+            : const Color(0xFF17965F),
+      GenBridgePhase.failed => Colors.orange,
+      GenBridgePhase.idle => theme.colorScheme.onSurfaceVariant.withValues(
+        alpha: .55,
+      ),
     };
     return Builder(
       builder: (context) => GenIb(
         key: const Key('gen-bridge'),
-        glyph: UiGlyphs.link,
+        plain: true,
+        icon: Transform.translate(
+          offset: const Offset(0, 1),
+          child: BridgeLinkIcon(
+            color: color,
+            working: bridge.phase == GenBridgePhase.working,
+          ),
+        ),
+        size: 24,
         width: 24,
         color: color,
         tooltip: bridge.label,
@@ -314,49 +326,20 @@ class _Translate extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 5, right: 1),
                   color: hover ? c.control : null,
                   alignment: Alignment.center,
-                  child: t.busy
-                      ? const UiSpinner(size: 15)
-                      : UiGlyph(
-                          UiGlyphs.retry,
-                          size: 15,
-                          color: t.showing
-                              ? c.accent
-                              : (hover ? c.ink : c.muted),
-                        ),
+                  child: TranslationIcon(
+                    size: 17,
+                    busy: t.busy,
+                    color: t.busy || t.showing
+                        ? c.accent
+                        : (hover ? c.ink : c.muted),
+                  ),
                 ),
               ),
             ),
             UiPressable(
               key: const Key('gen-translate-menu'),
-              onTap: () => scope.controller.openMenu(
-                genBelow(context, dy: 4, right: true),
-                [
-                  UiMenuItem(
-                    key: const Key('gen-translate-new'),
-                    label: l.gen_translateNew,
-                    glyph: UiGlyphs.retry,
-                    enabled: !t.busy && t.route != null,
-                    onTap: scope.actions.onTranslate,
-                  ),
-                  UiMenuItem(
-                    label: t.showing
-                        ? l.gen_translateShowOriginal
-                        : l.gen_translateShowTranslated,
-                    glyph: UiGlyphs.swap,
-                    enabled: !t.busy && t.route != null,
-                    onTap: scope.actions.onToggleTranslation,
-                  ),
-                  UiMenuItem(
-                    label: l.gen_translateSettings,
-                    glyph: UiGlyphs.external,
-                    divider: true,
-                    trailing: t.route,
-                    onTap: scope.actions.onTranslationSettings,
-                  ),
-                ],
-                tag: #translate,
-                width: 240,
-              ),
+              onTap: () =>
+                  _openMenu(context, genBelow(context, dy: 4, right: true)),
               builder: (context, hover) => Container(
                 height: 24,
                 padding: const EdgeInsets.only(left: 1, right: 3),
@@ -368,6 +351,61 @@ class _Translate extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  static void _openMenu(BuildContext context, UiPopoverAnchor anchor) {
+    final scope = GenScope.of(context);
+    final t = scope.data.prompt.translate;
+    final l = context.l10n;
+    scope.controller.openMenu(
+      anchor,
+      [
+        UiMenuItem(
+          key: const Key('gen-translate-new'),
+          label: l.gen_translateNew,
+          glyph: UiGlyphs.retry,
+          enabled: !t.busy && t.route != null,
+          onTap: scope.actions.onTranslate,
+        ),
+        UiMenuItem(
+          label: t.showing
+              ? l.gen_translateShowOriginal
+              : l.gen_translateShowTranslated,
+          glyph: UiGlyphs.swap,
+          enabled: !t.busy && t.route != null,
+          onTap: scope.actions.onToggleTranslation,
+        ),
+        UiMenuItem(
+          label: l.gen_translateSettings,
+          glyph: UiGlyphs.external,
+          divider: true,
+          trailing: t.route,
+          onTap: scope.actions.onTranslationSettings,
+        ),
+        if (scope.slots.translationGuide != null)
+          UiMenuItem(
+            key: const Key('gen-translation-tutorial'),
+            label: l.promptTranslation_tutorial,
+            glyph: UiGlyphs.infoCircle,
+            divider: true,
+            onTap: () => scope.controller.openPopover(
+              anchor,
+              (guideContext) => UiPopoverSurface(
+                key: const Key('gen-translation-guide'),
+                width: 300,
+                padding: const EdgeInsets.all(10),
+                child: scope.slots.translationGuide!(
+                  guideContext,
+                  () => _openMenu(context, anchor),
+                ),
+              ),
+              tag: #translate,
+            ),
+          ),
+      ],
+      tag: #translate,
+      width: 240,
     );
   }
 }
@@ -507,11 +545,19 @@ class _ToolsMenu extends StatelessWidget {
           ),
           pinRow(
             const Key('gen-pin-translate'),
-            UiGlyph(UiGlyphs.retry, size: 15, color: c.muted),
+            Icon(Icons.translate, size: 15, color: c.muted),
             l.gen_toolTranslate,
             GenPromptTool.translatePinned,
             t.translatePinned,
           ),
+          if (scope.slots.agentToggle != null)
+            pinRow(
+              const Key('gen-pin-agent'),
+              Icon(Icons.auto_awesome_outlined, size: 15, color: c.muted),
+              l.naiAgent_title,
+              GenPromptTool.agentPinned,
+              t.agentPinned,
+            ),
           _MenuSection(l.gen_toolsSettings),
           switchRow(
             const Key('gen-switch-format'),

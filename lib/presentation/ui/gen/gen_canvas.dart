@@ -90,7 +90,11 @@ class _GenCanvasState extends State<GenCanvas> {
                 b(context, GenCanvas._tile)
               else if (!empty)
                 const _Stage(),
-              if (empty && cv.error == null) const _Empty(),
+              if (empty && cv.error == null)
+                if (scope.slots.emptyCanvas case final welcome?)
+                  welcome(context)
+                else
+                  const _Empty(),
             ],
             if (!cv.positioning && WindowChromeScope.activeOf(context))
               Positioned(

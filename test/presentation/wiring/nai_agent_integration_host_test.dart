@@ -9,6 +9,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspac
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
+import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
 
@@ -115,6 +116,7 @@ void main() {
         ),
       );
       double? reserved;
+      var updateTaps = 0;
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -128,6 +130,8 @@ void main() {
             home: IntegratedTitleBarShell(
               deferToRoute: true,
               captionHeight: 61,
+              accessoryWidth: UpdateCapsule.width,
+              accessory: UpdateCapsule(onPressed: () => updateTaps++),
               child: WindowChromePage(
                 showNaiAgent: true,
                 child: Builder(
@@ -142,13 +146,23 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(reserved, WindowChromeScope.controlsWidth + 28);
+      expect(
+        reserved,
+        WindowChromeScope.controlsWidth + 28 + UpdateCapsule.width,
+      );
       expect(
         tester.getSize(find.byKey(const Key('window-caption-controls'))).height,
         61,
       );
       final toggle = find.byKey(const Key('nai-agent-toggle'));
       expect(toggle, findsOneWidget);
+      final capsule = find.byKey(const Key('window-update-capsule'));
+      expect(
+        tester.getRect(capsule).right,
+        lessThanOrEqualTo(tester.getRect(toggle).left),
+      );
+      await tester.tap(capsule);
+      expect(updateTaps, 1);
       await tester.tap(toggle);
       await tester.pumpAndSettle();
       expect(preferences.settings.panelExpanded, isTrue);

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../widgets/common/studio_glass_surface.dart';
+import '../../widgets/common/studio_animated_icon.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -124,7 +125,7 @@ class GenCount extends StatelessWidget {
 }
 
 /// 28 方图标按钮（原型 `.ib`）：圆角 5、次要色，悬停控件底。
-class GenIb extends StatelessWidget {
+class GenIb extends StatefulWidget {
   const GenIb({
     super.key,
     this.glyph,
@@ -140,6 +141,9 @@ class GenIb extends StatelessWidget {
     this.dim = false,
     this.bordered = false,
     this.filled = false,
+    this.animatedIcon,
+    this.animateOnTap = false,
+    this.plain = false,
   });
 
   final String? glyph;
@@ -163,34 +167,105 @@ class GenIb extends StatelessWidget {
   /// 描边（参数条右端的展开钮）。
   final bool bordered;
   final bool filled;
+  final IconData? animatedIcon;
+  final bool animateOnTap;
+  final bool plain;
+
+  @override
+  State<GenIb> createState() => _GenIbState();
+}
+
+class _GenIbState extends State<GenIb> with SingleTickerProviderStateMixin {
+  int _trigger = 0;
+  late final AnimationController _tap = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 260),
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context) ||
+        !TickerMode.valuesOf(context).enabled) {
+      _tap.stop();
+      _tap.value = 0;
+    }
+  }
+
+  void _activate() {
+    if (widget.onTap == null) return;
+    setState(() => _trigger++);
+    if (widget.animateOnTap &&
+        !MediaQuery.disableAnimationsOf(context) &&
+        TickerMode.valuesOf(context).enabled) {
+      _tap.forward(from: 0);
+    }
+    widget.onTap!();
+  }
+
+  @override
+  void dispose() {
+    _tap.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    final onTap = widget.onTap;
+    final width = widget.width;
+    final size = widget.size;
+    final active = widget.active;
+    final bordered = widget.bordered;
+    final filled = widget.filled;
+    final dim = widget.dim;
+    final tooltip = widget.tooltip;
+    final glyph = widget.glyph;
+    final glyphSize = widget.glyphSize;
+    final strokeWidth = widget.strokeWidth;
+    final color = widget.color;
+    final icon = widget.icon;
     final box = UiPressable(
-      onTap: onTap,
+      onTap: onTap == null ? null : _activate,
       builder: (context, hover) => Container(
         width: width ?? size,
         height: size,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: active ? c.control : (hover ? c.control : null),
+          color: widget.plain
+              ? null
+              : active
+              ? c.control
+              : (hover ? c.control : null),
           border: bordered ? Border.all(color: c.line) : null,
           borderRadius: BorderRadius.circular(bordered ? 6 : 5),
         ),
-        child:
-            icon ??
-            UiGlyph(
-              glyph!,
-              size: glyphSize,
-              strokeWidth: strokeWidth,
-              filled: filled,
-              color: color ?? (hover || active ? c.ink : c.muted),
-            ),
+        child: AnimatedBuilder(
+          animation: _tap,
+          builder: (_, child) => Transform.scale(
+            scale: 1 - .16 * (1 - (2 * _tap.value - 1).abs()),
+            child: child,
+          ),
+          child: widget.animatedIcon != null
+              ? StudioAnimatedIcon(
+                  icon: widget.animatedIcon!,
+                  trigger: _trigger,
+                  size: glyphSize,
+                  color: color ?? (hover || active ? c.ink : c.muted),
+                )
+              : icon ??
+                    UiGlyph(
+                      glyph!,
+                      size: glyphSize,
+                      strokeWidth: strokeWidth,
+                      filled: filled,
+                      color: color ?? (hover || active ? c.ink : c.muted),
+                    ),
+        ),
       ),
     );
     final shown = dim ? Opacity(opacity: .35, child: box) : box;
-    return tooltip == null || tooltip!.isEmpty
+    return tooltip == null || tooltip.isEmpty
         ? shown
         : Tooltip(
             message: tooltip,

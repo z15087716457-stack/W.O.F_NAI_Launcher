@@ -790,6 +790,14 @@ class LocalStorageService {
       getSetting<bool>(StorageKeys.translationToolPinned, defaultValue: true) ??
       true;
 
+  bool getNaiAgentToolPinned() =>
+      getSetting<bool>(StorageKeys.naiAgentToolPinned, defaultValue: true) ??
+      true;
+
+  Future<void> setNaiAgentToolPinned(bool pinned) async {
+    await setSetting(StorageKeys.naiAgentToolPinned, pinned);
+  }
+
   Future<void> setTranslationToolPinned(bool pinned) async {
     await setSetting(StorageKeys.translationToolPinned, pinned);
   }

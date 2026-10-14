@@ -205,6 +205,7 @@ class GenPromptTools {
     this.palettePinned = false,
     this.dockPinned = true,
     this.translatePinned = true,
+    this.agentPinned = true,
     this.autoFormat = true,
     this.highlight = true,
     this.sdConvert = false,
@@ -219,6 +220,9 @@ class GenPromptTools {
 
   /// 翻译按钮钉在头部。
   final bool translatePinned;
+
+  /// NAI Agent 入口钉在头部；运行时由接线方提供。
+  final bool agentPinned;
 
   /// 自动格式化（`autoFormatPromptSettingsProvider`）。
   final bool autoFormat;
@@ -237,6 +241,7 @@ enum GenPromptTool {
   palettePinned,
   dockPinned,
   translatePinned,
+  agentPinned,
   autoFormat,
   highlight,
   sdConvert,
@@ -1056,9 +1061,26 @@ class GenSlots {
     this.drop,
     this.historyDrag,
     this.toolSheet,
+    this.emptyCanvas,
+    this.translationGuide,
+    this.agentToggle,
+    this.historyCaptionInset = true,
   });
 
   final GenEditorBuilder editor;
+
+  /// 品牌欢迎页与随机小贴士由现有组件提供。
+  final WidgetBuilder? emptyCanvas;
+
+  /// 教程显示在翻译浮层内；回调返回操作菜单。
+  final Widget Function(BuildContext context, VoidCallback onBack)?
+  translationGuide;
+
+  /// 仅应用启用 Agent 集成时提供。
+  final Widget? agentToggle;
+
+  /// Agent 停靠右侧时，历史栏不再占用窗口按钮所在的一行。
+  final bool historyCaptionInset;
 
   /// null = 用界面自带的舞台（只摆焦点组）。
   final GenCanvasBuilder? canvas;
