@@ -12,4 +12,6 @@
 
 候选完整包使用当前安装程序白名单保留 Agent/许可及额外原生插件，再更新本次 Windows Release。资源和 Agent 运行时必须与当前安装逐份相同。包和安装收据由 `.dart_tool/window-headers-20261014/package.py` 固定生产输入，安装器校验当前程序、包内文件及源码；托盘完全退出后备份替换，支持只读预检及回退，不自动启动。最新完整验收检查点和原版前端壳保持。
 
-这是待安装修正，源侧交付收据为 `.dart_tool/window-headers-20261014/delivery.json`；正式安装状态以运行根 `.dart_tool/glass-rollout-delivery.json` 为准。本次没有操作运行中的 Studio、读写用户草稿/账号/数据库或调用真实模型/NAI。
+本次已于 2026-10-14 09:31（Asia/Taipei）备份并安装，源侧交付收据为 `.dart_tool/window-headers-20261014/delivery.json`；正式安装状态以运行根 `.dart_tool/glass-rollout-delivery.json` 为准。本次没有操作运行中的 Studio、读写用户草稿/账号/数据库或调用真实模型/NAI。
+
+另一个开发窗口的 `ec50104d`（探索页）与 `9b2da31d`（矢量 NAI 图标 / Wiki 字体）已处于本次编译输入的祖先历史，原样包含。补跑探索 / Wiki 82 项通过，不与上述 340 项混作全仓结果。实际旧程序和未同步旧收据的差异已保存；本次正式收据完整纳入新增矢量素材，15345 文件安装校验通过，AOT 为 `9f88e27f34052f68e8344f5a014060114ada4c2b83e486084a3214ea2a94a053`。用户从原入口自行打开核验；本轮未启动 Studio。
