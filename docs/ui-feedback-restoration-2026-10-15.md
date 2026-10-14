@@ -35,3 +35,5 @@
 - 原桌面入口继续指向登记运行目录，数据身份保持 `com.example/nai_launcher`。
 - 本地审计目录：`.dart_tool/feedback-restoration-20261014/`，包含施工前字节备份、测试 / 实绘、构建输入、包与安装复验、四项程序回退材料。r2 便携包和原版设计对照保持原值。
 - 原始未提交 `DEVELOPMENT.md` 按 SHA-256 保留，未混入本轮提交；测试运行日志 `.runs/` 未提交。GitHub Release 没有发布。
+
+源码提交已在本地保留，当前分支 `codex/uiux-integration`。远端推送尝试因 GitHub CLI / Git 凭据尚未登录而未完成；已终止等待认证的进程，没有创建 Release。登录后可继续执行 `git push -u origin codex/uiux-integration`。
