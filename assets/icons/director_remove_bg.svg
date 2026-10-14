@@ -1,7 +1,7 @@
 <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g clip-path="url(#clip0_9405_56400)">
-        <rect x="1.5" y="1" width="14" height="14" rx="1" stroke="#F7F7F7" stroke-opacity="0.7"
-            stroke-width="2" stroke-dasharray="3 3" />
+        <!-- Preserve the SVG rounded-rect dash origin; Flutter starts rect dashes elsewhere. -->
+        <path d="M2.2205845 1.0398297A1 1 0 0 1 2.5 1L5.5 1 M8.5 1L11.5 1 M14.5 1A1 1 0 0 1 15.5 2L15.5 3.4292037 M15.5 6.4292037L15.5 9.4292037 M15.5 12.4292037L15.5 14A1 1 0 0 1 14.64112 14.9899925 M11.6415927 15L8.6415927 15 M5.6415927 15L2.6415927 15 M1.5 12.712389L1.5 9.712389 M1.5 6.712389L1.5 3.712389" stroke="#F7F7F7" stroke-width="2" stroke-opacity="0.7"/>
         <path fill-rule="evenodd" clip-rule="evenodd"
             d="M7.22727 9.77778L5.31818 8.44445L3.5 12H13.5L10.4091 5.77778L7.22727 9.77778ZM5.31818 6.66667C6.0713 6.66667 6.68182 6.06971 6.68182 5.33333C6.68182 4.59695 6.0713 4 5.31818 4C4.56507 4 3.95455 4.59695 3.95455 5.33333C3.95455 6.06971 4.56507 6.66667 5.31818 6.66667Z"
             fill="#F7F7F7" fill-opacity="1" />

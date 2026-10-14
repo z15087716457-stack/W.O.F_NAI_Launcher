@@ -1,0 +1,17 @@
+{
+  "nai-icon-inpaint": {
+    "source_revision": "5aeb618c",
+    "source_sha256": "328e078835d594cbeb92d365e4614f7cd68aa56f98fc70354354879e6ea75316",
+    "fixture_sha256": "277127fdb1a690be37e92c163d820d9d295f63f79605a14cd8c949f0832b2725"
+  },
+  "director_remove_bg": {
+    "source_revision": "5aeb618c",
+    "source_sha256": "76832fad477da3ed51381dbd600fdd43856b159308a675287ddf103f7918145d",
+    "fixture_sha256": "27722d92711f610f542e2c0d949c4b1dd50b88aaf9f8e76acce580e4f5499bd4"
+  },
+  "inpaint_palette": {
+    "source_revision": "5aeb618c",
+    "source_sha256": "c2fe3f8706d0696370b465ea8f7e8d041a2bd446ea0ab8581186874e74f01148",
+    "fixture_sha256": "cbb6e6284d8170bbb2349acf8d673a4ed5b1fcf21073f4daa75598c12a2ab599"
+  }
+}
