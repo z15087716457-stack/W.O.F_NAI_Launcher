@@ -1153,6 +1153,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get img2img_novelAiCloudUpscale => 'NovelAI 클라우드 업스케일(2배 고정)';
 
   @override
+  String get img2img_novelAiCloudUpscaleTitle => 'NovelAI 클라우드 업스케일';
+
+  @override
   String get img2img_cloudUpscaleSizeLimit =>
       'NovelAI 클라우드 업스케일은 최대 3MP 입력 이미지를 지원합니다.';
 

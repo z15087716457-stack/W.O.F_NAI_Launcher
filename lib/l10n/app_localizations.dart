@@ -2220,6 +2220,12 @@ abstract class AppLocalizations {
   /// **'NovelAI cloud upscale (fixed 2x)'**
   String get img2img_novelAiCloudUpscale;
 
+  /// Short cloud upscale option title; the fixed 2x detail is shown separately.
+  ///
+  /// In en, this message translates to:
+  /// **'NovelAI cloud upscale'**
+  String get img2img_novelAiCloudUpscaleTitle;
+
   /// No description provided for @img2img_cloudUpscaleSizeLimit.
   ///
   /// In en, this message translates to:

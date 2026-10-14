@@ -1155,6 +1155,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get img2img_novelAiCloudUpscale => 'NovelAI クラウド拡大（2x 固定）';
 
   @override
+  String get img2img_novelAiCloudUpscaleTitle => 'NovelAI クラウド拡大';
+
+  @override
   String get img2img_cloudUpscaleSizeLimit =>
       'NovelAI クラウド拡大は 3MP 以下の入力画像に対応しています。';
 

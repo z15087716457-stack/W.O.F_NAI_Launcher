@@ -1134,6 +1134,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get img2img_novelAiCloudUpscale => 'NovelAI 云端超分（固定 2x 放大）';
 
   @override
+  String get img2img_novelAiCloudUpscaleTitle => 'NovelAI 云端超分';
+
+  @override
   String get img2img_cloudUpscaleSizeLimit => 'NovelAI 云端放大支持不超过 3MP 的输入图片。';
 
   @override
@@ -17423,6 +17426,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get img2img_novelAiCloudUpscale => 'NovelAI 雲端超分（固定 2x 放大）';
+
+  @override
+  String get img2img_novelAiCloudUpscaleTitle => 'NovelAI 雲端超分';
 
   @override
   String get img2img_cloudUpscaleSizeLimit => 'NovelAI 雲端放大支援不超過 3MP 的輸入圖片。';

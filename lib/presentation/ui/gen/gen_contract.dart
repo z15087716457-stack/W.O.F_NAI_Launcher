@@ -743,7 +743,7 @@ class GenFocusInfo {
   /// 钉在画布上（`canvasPinnedNotifierProvider`）。
   final bool pinned;
 
-  /// “变体”要的 Anlas（null = 免费或不显示）。
+  /// “变体”要的 Anlas；0 仍显示胶囊，null = 报价尚不可用 / 不支持。
   final int? variationsCost;
 
   /// “增强”按当前增强设置要的 Anlas（悬停提示里写；null = 不显示价格）。
@@ -766,7 +766,7 @@ class GenUpscale {
     this.status,
   });
 
-  /// 云端放大的 Anlas；null = 本地放大（价格块写“免费”）。
+  /// 云端放大的非负 Anlas；null 时本地写“免费”，云端报价不可用写“—”。
   final int? cost;
 
   /// 正在放大：主按钮变“停止”。

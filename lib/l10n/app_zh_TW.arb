@@ -472,6 +472,10 @@
   "img2img_enhanceUpscaleAmount": "放大倍數",
   "img2img_enhanceMax": "Max✨",
   "img2img_novelAiCloudUpscale": "NovelAI 雲端超分（固定 2x 放大）",
+  "img2img_novelAiCloudUpscaleTitle": "NovelAI 雲端超分",
+  "@img2img_novelAiCloudUpscaleTitle": {
+    "description": "Short cloud upscale option title; the fixed 2x detail is shown separately."
+  },
   "img2img_cloudUpscaleSizeLimit": "NovelAI 雲端放大支援不超過 3MP 的輸入圖片。",
   "img2img_upscaleRegularModel": "普通模型",
   "img2img_upscaleModel": "超分模型",

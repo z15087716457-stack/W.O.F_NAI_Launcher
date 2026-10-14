@@ -686,15 +686,8 @@ class _TopBar extends StatelessWidget {
                   spacing: 5,
                   children: [
                     nai('variations'),
-                    Container(
+                    GenFloatCost(
                       key: const Key('gen-variations-cost'),
-                      height: 22,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: c.control.withValues(alpha: .9),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
                       child: GenAnlas('${info.variationsCost}', iconSize: 10),
                     ),
                   ],
@@ -744,14 +737,8 @@ class _TopBar extends StatelessWidget {
                       )
                     else
                       nai('upscale'),
-                    Container(
-                      height: 22,
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: c.control.withValues(alpha: .9),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
+                    GenFloatCost(
+                      key: const Key('gen-upscale-cost'),
                       child: up.running
                           ? const SizedBox(
                               width: 22,
@@ -759,7 +746,7 @@ class _TopBar extends StatelessWidget {
                             )
                           : up.cost == null
                           ? Text(
-                              l.tools_free,
+                              up.selected == 'novelai' ? '—' : l.tools_free,
                               style: UiText.sans(
                                 12,
                                 weight: FontWeight.w700,

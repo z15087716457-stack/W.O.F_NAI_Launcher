@@ -516,6 +516,10 @@
   "img2img_enhanceUpscaleAmount": "업스케일 배율",
   "img2img_enhanceMax": "최대✨",
   "img2img_novelAiCloudUpscale": "NovelAI 클라우드 업스케일(2배 고정)",
+  "img2img_novelAiCloudUpscaleTitle": "NovelAI 클라우드 업스케일",
+  "@img2img_novelAiCloudUpscaleTitle": {
+    "description": "Short cloud upscale option title; the fixed 2x detail is shown separately."
+  },
   "img2img_cloudUpscaleSizeLimit": "NovelAI 클라우드 업스케일은 최대 3MP 입력 이미지를 지원합니다.",
   "img2img_upscaleRegularModel": "일반 모델",
   "img2img_upscaleModel": "업스케일 모델",

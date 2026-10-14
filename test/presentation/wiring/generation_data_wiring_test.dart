@@ -17,6 +17,7 @@ import 'package:nai_launcher/l10n/app_localizations_zh.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
@@ -61,6 +62,8 @@ class DataRecents extends ReferencePanelNotifier {
   ReferencePanelState build() => const ReferencePanelState();
 }
 
+final _variationQuotes = StateProvider<Map<String, int?>>((ref) => {});
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late Directory directory;
@@ -100,6 +103,9 @@ void main() {
           () => DateTime(2026, 10, 12, 12),
         ),
         estimatedCostProvider.overrideWithValue(12),
+        imageVariationCostProvider.overrideWith(
+          (ref, image) => ref.watch(_variationQuotes)[image.id],
+        ),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -195,6 +201,46 @@ void main() {
     expect(data.generate.state, GenRunState.generating);
     expect(data.generate.total, 2);
     expect(data.history.batches.first.pending, 2);
+  });
+  test('变体报价跟随当前图片和异步报价更新，0 保留，草稿不变', () async {
+    final before = container.read(generationParamsNotifierProvider);
+    GeneratedImage source(String id, int run) => GeneratedImage(
+      id: id,
+      bytes: Uint8List(0),
+      width: 832,
+      height: 1216,
+      generationRunId: run,
+    );
+    void focus(GeneratedImage image) {
+      (container.read(imageGenerationNotifierProvider.notifier)
+              as DataGeneration)
+          .publish(
+            ImageGenerationState(history: [image], displayImages: [image]),
+          );
+      container
+          .read(generationCanvasGroupSelectionProvider.notifier)
+          .selectGroup('run:${image.generationRunId}');
+    }
+
+    container.read(_variationQuotes.notifier).state = {
+      'quote-a': 0,
+      'quote-b': 12,
+    };
+    focus(source('quote-a', 30));
+    expect(container.read(provider).canvas.info!.variationsCost, 0);
+    container.read(_variationQuotes.notifier).state = {
+      'quote-a': 9,
+      'quote-b': 12,
+    };
+    await container.pump();
+    expect(container.read(provider).canvas.info!.variationsCost, 9);
+    focus(source('quote-b', 31));
+    expect(container.read(provider).canvas.info!.tileId, 'quote-b');
+    expect(container.read(provider).canvas.info!.variationsCost, 12);
+    container.read(_variationQuotes.notifier).state = {};
+    await container.pump();
+    expect(container.read(provider).canvas.info!.variationsCost, isNull);
+    expect(container.read(generationParamsNotifierProvider), before);
   });
   test('图生图停用不隐去草稿图和蒙版；数据开关与请求一致', () {
     final params = container.read(generationParamsNotifierProvider.notifier);

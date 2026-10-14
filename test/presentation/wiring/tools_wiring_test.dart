@@ -239,6 +239,12 @@ void main() {
       var sheet = tester.widget<ToolsUpscaleSheet>(
         find.byType(ToolsUpscaleSheet),
       );
+      final cloudOption = sheet.data.backends.singleWhere(
+        (b) => b.id == 'novelai',
+      );
+      expect(cloudOption.title, isNot(cloudOption.detail));
+      expect(cloudOption.title, isNot(contains('2')));
+      expect(cloudOption.detail, contains('2'));
       sheet.actions.onMethod('seedvr2');
       await drain(tester);
       sheet = tester.widget<ToolsUpscaleSheet>(find.byType(ToolsUpscaleSheet));

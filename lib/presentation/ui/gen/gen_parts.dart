@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../widgets/common/studio_glass_surface.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -475,7 +476,7 @@ class _GenSliderRowState extends State<GenSliderRow> {
   }
 }
 
-/// 浮动工具条（原型 `.float`）：内边距 3 / 4、圆角 11、抬起底 90%、1px 描边 80%、`0 4px 14px` 投影；13 / w500。
+/// 三条画布工具条：沿用新控件布局，恢复旧玻璃背景、颗粒与边缘高光。
 class GenFloat extends StatelessWidget {
   const GenFloat({super.key, required this.children});
   final List<Widget> children;
@@ -483,26 +484,52 @@ class GenFloat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+    const radius = BorderRadius.all(Radius.circular(11));
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: c.raised.withValues(alpha: .9),
-        borderRadius: BorderRadius.circular(11),
-        border: Border.all(color: c.line.withValues(alpha: .8)),
+        borderRadius: radius,
         boxShadow: [
           BoxShadow(
             color: GenFormat.shadow(c),
-            blurRadius: 12,
+            blurRadius: 14,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: DefaultTextStyle.merge(
-        style: UiText.sans(13, weight: FontWeight.w500, color: c.ink),
-        child: Row(mainAxisSize: MainAxisSize.min, children: children),
+      child: StudioGlassSurface(
+        borderRadius: radius,
+        backdropBlur: true,
+        useGradient: false,
+        child: Padding(
+          // Former Container padding also included its 1px border. The glass
+          // edge is painted, so keep that space explicitly for stable geometry.
+          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 4),
+          child: DefaultTextStyle.merge(
+            style: UiText.sans(13, weight: FontWeight.w500, color: c.ink),
+            child: Row(mainAxisSize: MainAxisSize.min, children: children),
+          ),
+        ),
       ),
     );
   }
+}
+
+/// 工具条价格胶囊：旧版半透明内胆，按当前主题和字体显示价格或“免费”。
+class GenFloatCost extends StatelessWidget {
+  const GenFloatCost({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 22,
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: context.ui.control.withValues(alpha: .6),
+      borderRadius: BorderRadius.circular(3),
+    ),
+    child: child,
+  );
 }
 
 /// 浮动工具条里的按钮（原型 `.fb`）：32 × 30、圆角 6、正文色。

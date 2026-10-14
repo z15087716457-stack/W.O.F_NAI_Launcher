@@ -20,6 +20,7 @@ import '../providers/character_position_canvas_provider.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/cost_estimate_provider.dart';
 import '../providers/generation/cloud_upscale_provider.dart';
+import '../providers/generation/image_action_providers.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/generation/local_upscale_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
@@ -479,13 +480,17 @@ final generationViewDataProvider = Provider.autoDispose
                   seed: image.metadata?.seed,
                   pinned: pins.contains(image.id),
                   canUseAsInput: image.canUseAsGenerationInput,
+                  variationsCost: ref.watch(imageVariationCostProvider(image)),
                   enhanceCost: ref.watch(toolsEnhanceCostProvider(image)),
                 ),
           upscale: GenUpscale(
             running: local.running || cloud.running,
             progress: local.progress?.fraction,
             status: toolsUpscaleStatus(local.progress),
-            cost: workflow.upscale.backend == UpscaleBackend.novelai
+            cost:
+                workflow.upscale.backend == UpscaleBackend.novelai &&
+                    cloudCost != null &&
+                    cloudCost >= 0
                 ? cloudCost
                 : null,
             available: workflow.upscale.backend == UpscaleBackend.novelai
@@ -501,7 +506,10 @@ final generationViewDataProvider = Provider.autoDispose
                 ? 'novelai'
                 : 'local:${workflow.upscale.localModel}',
             options: [
-              GenOption(id: 'novelai', label: l.img2img_novelAiCloudUpscale),
+              GenOption(
+                id: 'novelai',
+                label: l.img2img_novelAiCloudUpscaleTitle,
+              ),
               for (final model in localModels ?? const [])
                 if (model.installed)
                   GenOption(id: 'local:${model.id}', label: model.name),

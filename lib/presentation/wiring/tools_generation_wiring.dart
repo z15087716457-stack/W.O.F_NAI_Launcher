@@ -147,7 +147,7 @@ ToolsUpscaleData toolsUpscaleView(Ref ref, GeneratedImage image) {
       ),
       ToolsUpscaleBackend(
         id: 'novelai',
-        title: l.img2img_novelAiCloudUpscale,
+        title: l.img2img_novelAiCloudUpscaleTitle,
         detail: l.img2img_novelAiCloudUpscale,
         cost: cloudCost < 0 ? null : cloudCost,
       ),

@@ -1180,6 +1180,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get img2img_novelAiCloudUpscale => 'NovelAI cloud upscale (fixed 2x)';
 
   @override
+  String get img2img_novelAiCloudUpscaleTitle => 'NovelAI cloud upscale';
+
+  @override
   String get img2img_cloudUpscaleSizeLimit =>
       'NovelAI cloud upscale supports input images up to 3MP.';
 
