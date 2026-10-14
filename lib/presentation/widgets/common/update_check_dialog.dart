@@ -6,6 +6,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/byte_format.dart';
+import '../../../core/constants/app_version.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/version/version_info.dart';
 import '../../providers/update_provider.dart';
@@ -142,7 +143,9 @@ class UpdateCheckDialog extends ConsumerWidget {
                 child: _buildVersionInfoTile(
                   context,
                   label: context.l10n.currentVersion,
-                  value: versionInfo.currentVersion ?? '',
+                  value: AppVersion.formatDisplayVersion(
+                    versionInfo.currentVersion ?? '',
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -150,7 +153,7 @@ class UpdateCheckDialog extends ConsumerWidget {
                 child: _buildVersionInfoTile(
                   context,
                   label: context.l10n.latestVersion,
-                  value: versionInfo.version,
+                  value: AppVersion.formatDisplayVersion(versionInfo.version),
                   isHighlighted: true,
                 ),
               ),

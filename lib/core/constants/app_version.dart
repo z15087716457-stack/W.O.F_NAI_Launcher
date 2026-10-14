@@ -27,8 +27,10 @@ class AppVersion {
   /// 版本名称 (显示给用户)
   /// 从 pubspec.yaml 的 version 字段解析
   /// 例如: 1.0.0-Beta3.1
-  static String get versionName {
-    final version = _info.version;
+  static String get versionName => formatDisplayVersion(_info.version);
+
+  /// Human-readable release label; never used for version comparison.
+  static String formatDisplayVersion(String version) {
     // 解析 x.y.z-prerelease+build -> 返回 x.y.z-Prerelease
     final match = RegExp(r'(\d+\.\d+\.\d+)-([^+]+)').firstMatch(version);
     if (match != null) {

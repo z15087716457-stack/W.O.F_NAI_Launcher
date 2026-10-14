@@ -18,6 +18,43 @@ class _DialogUpdateNotifier extends UpdateStateNotifier {
 }
 
 void main() {
+  testWidgets(
+    'update dialog uses Preview labels and retains raw comparison versions',
+    (tester) async {
+      const info = VersionInfo(
+        version: '2.0.0-preview',
+        currentVersion: '2.0.0-preview+6',
+        isNewer: true,
+      );
+      const state = UpdateState(
+        status: UpdateStatus.available,
+        versionInfo: info,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            updateStateNotifierProvider.overrideWith(
+              () => _DialogUpdateNotifier(state),
+            ),
+            updateTaskBusyProvider.overrideWithValue(false),
+          ],
+          child: const MaterialApp(
+            locale: Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(body: UpdateCheckDialog()),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(find.text('2.0 Preview'), findsNWidgets(2));
+      expect(find.text('2.0.0-preview'), findsNothing);
+      expect(find.text('2.0.0-preview+6'), findsNothing);
+      expect(info.currentVersion, '2.0.0-preview+6');
+      expect(info.version, '2.0.0-preview');
+    },
+  );
+
   testWidgets('renders GitHub Flavored Markdown release notes', (tester) async {
     const asset = ReleaseAssetInfo(
       type: ReleaseAssetType.windowsPortable,
