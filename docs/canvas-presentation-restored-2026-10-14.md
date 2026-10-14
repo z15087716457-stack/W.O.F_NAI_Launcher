@@ -17,3 +17,5 @@
 真实字体与合成 PNG 的组件实绘保存在 `.dart_tool/canvas-presentation-20261014/captures/`；日志 `.dart_tool/canvas-presentation-*.log`，旧画布接回审计材料保持。截图是组件接线验证，不冒充用户窗口验收；没有真实生成、增强、云放大、模型 / NAI 请求，没有读写用户草稿、账户或私有数据。
 
 增量交付只替换当前编译 AOT 和程序清单，资源 / 字体 / 原生程序 / Agent 先与登记安装逐项校验。准备包不会改写运行中的 Studio；覆盖前现场确认 Studio / Agent 完全退出，备份实际旧程序和收据，失败恢复，不自动启动。五项隔离安装器场景已通过，正式安装状态由本次安装收据另行登记。
+
+候选增量包已完成：编译源码 `cff847d4`，AOT `f4cc8a37ef1c6e8f366a340e3c16b4323276f4507fa0ea59709559d3eb084b8b`；`build/nai-studio-canvas-presentation-20261014-update.zip`，16628302 字节，SHA-256 `51b72f972c5012cbe097572379d356b791e58d8a631fde762cd26fb31d4f1001`，1625 生产输入冻结。包和正式基线预检通过，但 Studio PID 6000 仍在运行，当前 **未安装**。从托盘完全退出后使用 `.dart_tool/canvas-presentation-20261014/update.py install` 再次预检、备份并替换；正式收据仍为前次无限画布回接版。
