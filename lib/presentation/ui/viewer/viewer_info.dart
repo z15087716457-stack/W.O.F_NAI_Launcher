@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/translation_icon.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -322,6 +323,7 @@ class _BodyState extends State<_Body> {
             : l10n.imageViewer_translate,
         color: on ? c.accent : null,
         busy: t?.busy ?? false,
+        translation: true,
         onTap: () => a.onToggleTranslation(key, part),
       );
     }
@@ -419,35 +421,40 @@ class _BodyState extends State<_Body> {
 
     if (d.prompt.trim().isNotEmpty) {
       out.add(
-        Column(
-          key: const Key('viewer-info-prompt'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 6,
-          children: [
-            _SectionTitle(
-              label: l10n.imageViewer_prompt,
-              actions: [translate(ViewerPart.prompt), copy(ViewerPart.prompt)],
-            ),
-            ViewerPromptBox(
-              key: const Key('viewer-prompt-box'),
-              spans: spans(shown(ViewerPart.prompt, d.prompt)),
-              maxLines: _promptFull ? null : 9,
-              onOverflow: (v) {
-                if (v != _promptOver && mounted) {
-                  setState(() => _promptOver = v);
-                }
-              },
-            ),
-            ?error(ViewerPart.prompt),
-            if (_promptFull || _promptOver)
-              _More(
-                pressKey: const Key('viewer-prompt-more'),
-                label: _promptFull
-                    ? l10n.imageViewer_collapse
-                    : l10n.imageViewer_expandAll,
-                onTap: () => setState(() => _promptFull = !_promptFull),
+        _PromptHover(
+          child: Column(
+            key: const Key('viewer-info-prompt'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 6,
+            children: [
+              _SectionTitle(
+                label: l10n.imageViewer_prompt,
+                actions: [
+                  _HoverTranslation(translate(ViewerPart.prompt)),
+                  copy(ViewerPart.prompt),
+                ],
               ),
-          ],
+              ViewerPromptBox(
+                key: const Key('viewer-prompt-box'),
+                spans: spans(shown(ViewerPart.prompt, d.prompt)),
+                maxLines: _promptFull ? null : 9,
+                onOverflow: (v) {
+                  if (v != _promptOver && mounted) {
+                    setState(() => _promptOver = v);
+                  }
+                },
+              ),
+              ?error(ViewerPart.prompt),
+              if (_promptFull || _promptOver)
+                _More(
+                  pressKey: const Key('viewer-prompt-more'),
+                  label: _promptFull
+                      ? l10n.imageViewer_collapse
+                      : l10n.imageViewer_expandAll,
+                  onTap: () => setState(() => _promptFull = !_promptFull),
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -455,85 +462,100 @@ class _BodyState extends State<_Body> {
     for (final (i, ch) in d.characters.indexed) {
       final part = ViewerPart.character(i);
       out.add(
-        Column(
-          key: Key('viewer-info-character-$i'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 6,
-          children: [
-            _SectionTitle(
-              label: l10n.imageViewer_character(i + 1),
-              extra: [
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Tooltip(
-                    message: l10n.imageViewer_position(
-                      viewerCellName(ch.x, ch.y),
-                    ),
-                    // 和原型一样：39 高的格子在 22 高的标题行里上下溢出，不撑高标题行。
-                    child: SizedBox(
-                      width: 39,
-                      height: 22,
-                      child: OverflowBox(
-                        maxHeight: 40,
-                        child: ViewerPositionGrid(x: ch.x, y: ch.y),
+        _PromptHover(
+          child: Column(
+            key: Key('viewer-info-character-$i'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 6,
+            children: [
+              _SectionTitle(
+                label: l10n.imageViewer_character(i + 1),
+                extra: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: Tooltip(
+                      message: l10n.imageViewer_position(
+                        viewerCellName(ch.x, ch.y),
+                      ),
+                      // 和原型一样：39 高的格子在 22 高的标题行里上下溢出，不撑高标题行。
+                      child: SizedBox(
+                        width: 39,
+                        height: 22,
+                        child: OverflowBox(
+                          maxHeight: 40,
+                          child: ViewerPositionGrid(x: ch.x, y: ch.y),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Text(
-                  viewerCellName(ch.x, ch.y),
-                  style: UiText.sans(11, color: c.faint),
-                ),
-              ],
-              actions: [translate(part), copy(part)],
-            ),
-            ViewerPromptBox(spans: spans(shown(part, ch.prompt))),
-            ?error(part),
-            if (ch.negative.trim().isNotEmpty)
-              ViewerPromptBox(
-                muted: true,
-                prefix: l10n.imageViewer_characterNegative,
-                spans: [TextSpan(text: ch.negative.trim())],
+                  Text(
+                    viewerCellName(ch.x, ch.y),
+                    style: UiText.sans(11, color: c.faint),
+                  ),
+                ],
+                actions: [_HoverTranslation(translate(part)), copy(part)],
               ),
-          ],
+              // The 39px grid overflows its 22px title by 8.5px.
+              // 6 + 4.5px leaves a real 2px gap below the grid.
+              Padding(
+                padding: const EdgeInsets.only(top: 4.5),
+                child: ViewerPromptBox(spans: spans(shown(part, ch.prompt))),
+              ),
+              ?error(part),
+              if (ch.negative.trim().isNotEmpty)
+                ViewerPromptBox(
+                  muted: true,
+                  prefix: l10n.imageViewer_characterNegative,
+                  spans: [TextSpan(text: ch.negative.trim())],
+                ),
+            ],
+          ),
         ),
       );
     }
 
     if (d.negative.trim().isNotEmpty) {
       out.add(
-        Column(
-          key: const Key('viewer-info-negative'),
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 6,
-          children: [
-            _SectionTitle(
-              label: l10n.imageViewer_negative,
-              extra: [
-                Text(
-                  l10n.imageViewer_tagCount(viewerTagCount(d.negative)),
-                  style: UiText.sans(11, color: c.faint),
-                ),
-              ],
-              actions: [copy(ViewerPart.negative)],
-            ),
-            ViewerPromptBox(
-              muted: true,
-              spans: [TextSpan(text: d.negative.trim())],
-              maxLines: _negFull ? null : 3,
-              onOverflow: (v) {
-                if (v != _negOver && mounted) setState(() => _negOver = v);
-              },
-            ),
-            if (_negFull || _negOver)
-              _More(
-                pressKey: const Key('viewer-negative-more'),
-                label: _negFull
-                    ? l10n.imageViewer_collapse
-                    : l10n.imageViewer_expand,
-                onTap: () => setState(() => _negFull = !_negFull),
+        _PromptHover(
+          child: Column(
+            key: const Key('viewer-info-negative'),
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 6,
+            children: [
+              _SectionTitle(
+                label: l10n.imageViewer_negative,
+                extra: [
+                  Text(
+                    l10n.imageViewer_tagCount(viewerTagCount(d.negative)),
+                    style: UiText.sans(11, color: c.faint),
+                  ),
+                ],
+                actions: [
+                  _HoverTranslation(translate(ViewerPart.negative)),
+                  copy(ViewerPart.negative),
+                ],
               ),
-          ],
+              ViewerPromptBox(
+                muted: true,
+                spans: [
+                  TextSpan(text: shown(ViewerPart.negative, d.negative).trim()),
+                ],
+                maxLines: _negFull ? null : 3,
+                onOverflow: (v) {
+                  if (v != _negOver && mounted) setState(() => _negOver = v);
+                },
+              ),
+              ?error(ViewerPart.negative),
+              if (_negFull || _negOver)
+                _More(
+                  pressKey: const Key('viewer-negative-more'),
+                  label: _negFull
+                      ? l10n.imageViewer_collapse
+                      : l10n.imageViewer_expand,
+                  onTap: () => setState(() => _negFull = !_negFull),
+                ),
+            ],
+          ),
         ),
       );
     }
@@ -589,6 +611,49 @@ class _IconLine extends StatelessWidget {
   }
 }
 
+/// One hover region per prompt section, including its title and body.
+class _PromptHover extends StatefulWidget {
+  const _PromptHover({required this.child});
+  final Widget child;
+  @override
+  State<_PromptHover> createState() => _PromptHoverState();
+}
+
+class _PromptHoverState extends State<_PromptHover> {
+  bool hovered = false;
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) => setState(() => hovered = true),
+    onExit: (_) => setState(() => hovered = false),
+    child: _PromptHoverScope(hovered: hovered, child: widget.child),
+  );
+}
+
+class _PromptHoverScope extends InheritedWidget {
+  const _PromptHoverScope({required this.hovered, required super.child});
+  final bool hovered;
+  @override
+  bool updateShouldNotify(_PromptHoverScope oldWidget) =>
+      hovered != oldWidget.hovered;
+}
+
+class _HoverTranslation extends StatelessWidget {
+  const _HoverTranslation(this.child);
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => Visibility(
+    visible:
+        context
+            .dependOnInheritedWidgetOfExactType<_PromptHoverScope>()
+            ?.hovered ??
+        false,
+    maintainSize: true,
+    maintainState: true,
+    maintainAnimation: true,
+    child: child,
+  );
+}
+
 /// 段标题：12 / w700，22 高；后面可跟小字，右侧小图标按钮。
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({
@@ -631,6 +696,7 @@ class _TinyIcon extends StatefulWidget {
     this.size = 13,
     this.color,
     this.busy = false,
+    this.translation = false,
   });
   final String glyph;
   final String tooltip;
@@ -638,6 +704,7 @@ class _TinyIcon extends StatefulWidget {
   final double size;
   final Color? color;
   final bool busy;
+  final bool translation;
 
   @override
   State<_TinyIcon> createState() => _TinyIconState();
@@ -697,11 +764,17 @@ class _TinyIconState extends State<_TinyIcon>
           ),
           child: FadeTransition(
             opacity: _pulse,
-            child: UiGlyph(
-              widget.glyph,
-              size: widget.size,
-              color: widget.color ?? (hover ? c.ink : c.faint),
-            ),
+            child: widget.translation
+                ? TranslationIcon(
+                    size: 16,
+                    busy: widget.busy,
+                    color: widget.color ?? (hover ? c.ink : c.faint),
+                  )
+                : UiGlyph(
+                    widget.glyph,
+                    size: widget.size,
+                    color: widget.color ?? (hover ? c.ink : c.faint),
+                  ),
           ),
         ),
       ),

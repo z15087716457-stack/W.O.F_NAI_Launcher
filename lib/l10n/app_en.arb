@@ -9067,7 +9067,7 @@
   "rag_description": "Manage local retrieval, models and contextual tag suggestions",
   "rag_enabled": "Enable RAG",
   "rag_enabledHint": "Enable local semantic retrieval. Preview and start the first index explicitly.",
-  "rag_status": "Runtime and index status",
+  "rag_status": "Shared vector pool",
   "rag_off": "Disabled",
   "rag_loading": "Preparing local models",
   "rag_empty": "Models connected; index not built",
@@ -9102,7 +9102,7 @@
   "rag_notConfigured": "Not configured",
   "rag_choose": "Choose",
   "rag_modelMode": "Model capabilities",
-  "rag_modelModeHint": "Gemma retains text/image support with audio disabled; tags load text only. Qwen reranks text.",
+  "rag_modelModeHint": "Gemma handles text and images with audio disabled. Qwen reranks text only.",
   "rag_discover": "Find local models",
   "rag_modelsMissing": "Models not found. Choose downloaded model directories.",
   "rag_pythonPath": "Separate Python runtime",
@@ -9197,5 +9197,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rag_downloadModel": "Download model",
+  "rag_modelDownloading": "Downloading model",
+  "rag_modelVerifying": "Verifying model",
+  "rag_downloadProgress": "{done} / {total} MB",
+  "rag_poolHint": "Enabled sources share one vector pool. New content and saved translations update incrementally.",
+  "rag_runtimeReady": "Runtime ready",
+  "rag_runtimeCheck": "Check runtime",
+  "rag_runtimeExisting": "Checking existing runtime",
+  "rag_runtimeDownload": "Downloading setup tool",
+  "rag_runtimeCreate": "Preparing Python runtime",
+  "rag_runtimeCuda": "Installing CUDA inference packages",
+  "rag_runtimePackages": "Installing inference dependencies",
+  "rag_runtimeVerify": "Verifying runtime compatibility",
+  "rag_runtimeElapsed": "{seconds}s in this step",
+  "rag_useRuntime": "Use existing runtime",
+  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
 }

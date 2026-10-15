@@ -6,6 +6,7 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../../../../core/rag/rag_settings.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/rag_provider.dart';
+import '../../../providers/rag_model_download_provider.dart';
 import '../widgets/settings_tile.dart';
 
 /// Uses the existing settings rows; no locked page shell or golden is changed.
@@ -343,16 +344,81 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
     final controller = ref.read(ragControllerProvider.notifier);
     final available = settings.enabled && settings.tagsEnabled;
     final installing = status.installPhase != null;
-    final locked = status.anyBusy || installing;
+    final download = ref.watch(ragModelDownloadProvider);
+    final runtime = installing ? null : ref.watch(ragRuntimeInfoProvider);
+    final runtimeInfo = runtime?.valueOrNull;
+    final locked = status.anyBusy || installing || download.active;
     Widget path(String title, String value, String kind) => SettingsTile(
       title: Text(title),
-      subtitle: Text(value.isEmpty ? l.rag_notConfigured : value),
-      trailing: OutlinedButton(
-        onPressed: locked ? null : () => _action(() => _pick(kind)),
-        child: Text(l.rag_choose),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(value.isEmpty ? l.rag_notConfigured : value),
+          if (download.kind == kind) ...[
+            Text(
+              download.progress?.checking == true
+                  ? l.rag_modelVerifying
+                  : l.rag_modelDownloading,
+            ),
+            if (download.progress case final progress?) ...[
+              Text(
+                l.rag_downloadProgress(
+                  (progress.received / 1048576).toStringAsFixed(1),
+                  (progress.total / 1048576).toStringAsFixed(1),
+                ),
+              ),
+              LinearProgressIndicator(value: progress.fraction),
+            ],
+          ],
+        ],
+      ),
+      trailing: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        alignment: WrapAlignment.end,
+        children: [
+          OutlinedButton(
+            onPressed: locked ? null : () => _action(() => _pick(kind)),
+            child: Text(l.rag_choose),
+          ),
+          if (kind != 'python')
+            TextButton(
+              key: Key('rag-download-$kind'),
+              onPressed: download.kind == kind
+                  ? ref.read(ragModelDownloadProvider.notifier).cancel
+                  : locked
+                  ? null
+                  : () => ref
+                        .read(ragModelDownloadProvider.notifier)
+                        .download(kind),
+              child: Text(
+                download.kind == kind ? l.common_cancel : l.rag_downloadModel,
+              ),
+            ),
+        ],
       ),
     );
-    final phase = switch (status.phase) {
+    final enabled = [
+      for (final source in RagSource.values)
+        if (settings.enabledFor(source)) status.forSource(source),
+    ];
+    final poolIndexed = enabled.fold<int>(0, (n, s) => n + s.indexed);
+    final poolTotal = enabled.fold<int>(0, (n, s) => n + s.total);
+    final poolBytes = enabled.fold<int>(0, (n, s) => n + s.bytes);
+    final poolPhase = enabled.isEmpty
+        ? 'off'
+        : enabled.any((s) => s.busy)
+        ? 'building'
+        : enabled.any((s) => s.error != null)
+        ? 'error'
+        : enabled.any((s) => s.phase == 'loading')
+        ? 'loading'
+        : poolIndexed == 0
+        ? 'empty'
+        : enabled.every((s) => s.complete)
+        ? 'ready'
+        : 'partial';
+    final phase = switch (poolPhase) {
       'off' => l.rag_off,
       'loading' => l.rag_loading,
       'empty' => l.rag_empty,
@@ -361,6 +427,15 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
       'building' => l.rag_building,
       'paused' => l.rag_paused,
       _ => l.rag_unavailable,
+    };
+    final installPhase = switch (status.installPhase) {
+      'existing' => l.rag_runtimeExisting,
+      'download' => l.rag_runtimeDownload,
+      'create' => l.rag_runtimeCreate,
+      'cuda' => l.rag_runtimeCuda,
+      'packages' => l.rag_runtimePackages,
+      'check' => l.rag_runtimeVerify,
+      _ => l.rag_installing,
     };
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,17 +459,26 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(phase),
-              Text(l.rag_indexCounts(status.indexed, status.total)),
-              if (status.bytes > 0)
-                Text(
-                  l.rag_storage((status.bytes / 1048576).toStringAsFixed(1)),
-                ),
+              Text(l.rag_poolHint),
+              Text(l.rag_indexCounts(poolIndexed, poolTotal)),
+              if (poolBytes > 0)
+                Text(l.rag_storage((poolBytes / 1048576).toStringAsFixed(1))),
               if (status.error != null)
                 Text('${l.rag_operationFailed} (${status.error})'),
+              if (download.error != null)
+                Text('${l.rag_operationFailed} (${download.error})'),
+              if (status.error != null && status.installDetail.isNotEmpty)
+                Text(
+                  status.installDetail,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
             ],
           ),
           trailing: IconButton(
-            onPressed: available && !locked ? () => controller.refresh() : null,
+            onPressed: enabled.isNotEmpty && !locked
+                ? () => controller.refresh()
+                : null,
             icon: const Icon(Icons.refresh),
             tooltip: l.rag_refresh,
           ),
@@ -418,17 +502,74 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
             child: Text(l.rag_discover),
           ),
         ),
-        path(l.rag_pythonPath, settings.python, 'python'),
+        path(
+          l.rag_pythonPath,
+          settings.python.isEmpty && runtimeInfo?.ready == true
+              ? runtimeInfo!.python
+              : settings.python,
+          'python',
+        ),
         SettingsTile(
           title: Text(l.rag_runtime),
-          subtitle: Text(installing ? l.rag_installing : l.rag_runtimeHint),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                installing
+                    ? installPhase
+                    : runtimeInfo?.ready == true
+                    ? l.rag_runtimeReady
+                    : runtime?.isLoading == true
+                    ? l.rag_runtimeExisting
+                    : l.rag_runtimeHint,
+              ),
+              if (installing) ...[
+                Text(l.rag_runtimeElapsed(status.installElapsed)),
+                const LinearProgressIndicator(),
+                if (status.installDetail.isNotEmpty)
+                  Text(
+                    status.installDetail,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ],
+          ),
           trailing: installing
               ? TextButton(
                   onPressed: controller.cancelInstall,
                   child: Text(l.common_cancel),
                 )
+              : runtimeInfo?.ready == true
+              ? Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    if (settings.python.isNotEmpty &&
+                        settings.python != runtimeInfo!.python)
+                      TextButton(
+                        onPressed: locked
+                            ? null
+                            : () => controller.installRuntime(
+                                cuda: runtimeInfo.cuda,
+                              ),
+                        child: Text(l.rag_useRuntime),
+                      )
+                    else
+                      Text(l.rag_runtimeReady),
+                    IconButton(
+                      onPressed: locked
+                          ? null
+                          : () => ref.invalidate(ragRuntimeInfoProvider),
+                      tooltip: l.rag_runtimeCheck,
+                      icon: const Icon(Icons.refresh),
+                    ),
+                  ],
+                )
               : OutlinedButton(
-                  onPressed: status.busy ? null : () => _action(_install),
+                  onPressed: locked || runtime?.isLoading == true
+                      ? null
+                      : () => _action(_install),
                   child: Text(l.rag_installRuntime),
                 ),
         ),

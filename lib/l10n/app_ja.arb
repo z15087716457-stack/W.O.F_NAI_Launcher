@@ -9067,7 +9067,7 @@
   "rag_description": "ローカル検索、モデル、文脈に沿ったタグ候補を管理",
   "rag_enabled": "RAG を有効にする",
   "rag_enabledHint": "ローカル意味検索を有効化。初回の索引作成は範囲を確認して開始します。",
-  "rag_status": "実行・索引の状態",
+  "rag_status": "共通ベクトルプール",
   "rag_off": "無効",
   "rag_loading": "ローカルモデルを準備中",
   "rag_empty": "モデル接続済み・索引未作成",
@@ -9102,7 +9102,7 @@
   "rag_notConfigured": "未設定",
   "rag_choose": "選択",
   "rag_modelMode": "モデルの機能",
-  "rag_modelModeHint": "Gemma はテキスト・画像に対応し音声は無効。タグ処理はテキストのみ読み込み、Qwen が再順位付けします。",
+  "rag_modelModeHint": "Gemmaはテキストと画像に使用し、音声は無効です。Qwenはテキストの再ランキングに使用します。",
   "rag_discover": "ローカルモデルを検出",
   "rag_modelsMissing": "モデルが見つかりません。保存済みモデルのフォルダーを選択してください。",
   "rag_pythonPath": "専用 Python 実行環境",
@@ -9197,5 +9197,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rag_downloadModel": "モデルをダウンロード",
+  "rag_modelDownloading": "モデルをダウンロード中",
+  "rag_modelVerifying": "モデルを検証中",
+  "rag_downloadProgress": "{done} / {total} MB",
+  "rag_poolHint": "有効なソースは1つのベクトルプールを共有します。新しい資料や保存した翻訳は差分更新されます。",
+  "rag_runtimeReady": "実行環境の準備完了",
+  "rag_runtimeCheck": "実行環境を確認",
+  "rag_runtimeExisting": "既存の実行環境を確認中",
+  "rag_runtimeDownload": "セットアップツールをダウンロード中",
+  "rag_runtimeCreate": "Python環境を準備中",
+  "rag_runtimeCuda": "CUDA推論パッケージをインストール中",
+  "rag_runtimePackages": "推論用の依存パッケージをインストール中",
+  "rag_runtimeVerify": "実行環境の互換性を検証中",
+  "rag_runtimeElapsed": "このステップの経過時間：{seconds}秒",
+  "rag_useRuntime": "既存の環境を使用",
+  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
 }

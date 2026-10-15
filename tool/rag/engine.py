@@ -11,6 +11,7 @@ import sqlite3
 import time
 
 from context import context_window, clean_tag
+from pool import VectorPool
 
 
 def readonly(path):
@@ -93,53 +94,27 @@ class Sources:
 
 class Engine:
     batch_size = 32
-    def __init__(self, directory, models, sources):
+    def __init__(self, directory, models, sources, *, pool=None, collection='tags'):
         self.models = models; self.sources = sources
-        self.root = Path(directory).resolve(); self.root.mkdir(parents=True, exist_ok=True)
-        self.folder = self.root / models.fingerprint
-        self.folder.mkdir(exist_ok=True)
-        self.db = sqlite3.connect(self.folder / 'tags.sqlite')
-        self.db.execute('PRAGMA journal_mode=WAL')
-        self.db.execute('CREATE TABLE IF NOT EXISTS documents (id INTEGER PRIMARY KEY, name TEXT UNIQUE, category INTEGER, post_count INTEGER, aliases TEXT, text TEXT, digest TEXT, vector BLOB, seen TEXT)')
-        self.db.execute('CREATE TABLE IF NOT EXISTS metadata (key TEXT PRIMARY KEY, value TEXT)')
-        self.db.commit()
-        self.ann = None; self.plan = None; self.active = False
-        self._ann_generation = 0
-        self._load_ann()
+        self.root = Path(directory).resolve()
+        self.pool = pool or VectorPool(self.root,models.fingerprint)
+        self._owns_pool = pool is None; self.collection = collection
+        self.folder = self.pool.folder
+        self.db,self.ann = self.pool.collection(collection,self.root/models.fingerprint)
+        self.plan = None; self.active = False; self._ann_generation = 0
 
     def _load_ann(self):
-        import numpy as np
-        from usearch.index import Index
-        self.ann = Index(ndim=768, metric='cos', dtype='f32')
-        generation = self.db.execute("SELECT value FROM metadata WHERE key='ann_generation'").fetchone()
-        self._ann_generation = int(generation[0]) if generation else 0
-        checkpoint = self.folder / 'ann.json'
-        if checkpoint.exists():
-            try:
-                saved = json.loads(checkpoint.read_text('utf-8'))
-                if saved['generation'] == self._ann_generation:
-                    self.ann.load(str(self.folder / 'tags.usearch'))
-                    if len(self.ann) == saved['count']: return
-            except Exception: pass
-            self.ann = Index(ndim=768, metric='cos', dtype='f32')
-        # SQLite vectors are authoritative; ANN is disposable derived state.
-        for row in self.db.execute('SELECT id,vector FROM documents WHERE vector IS NOT NULL'):
-            self.ann.add(row[0], np.frombuffer(row[1], dtype=np.float32))
+        self.pool.reload()
+        self.ann = self.pool.views[self.collection]
 
-    def _checkpoint(self):
-        temporary = self.folder / 'tags.usearch.tmp'
-        self.ann.save(str(temporary))
-        os.replace(temporary, self.folder / 'tags.usearch')
-        metadata = self.folder / 'ann.json.tmp'
-        metadata.write_text(json.dumps({'generation':self._ann_generation,'count':len(self.ann)}),encoding='utf-8')
-        os.replace(metadata,self.folder / 'ann.json')
+    def _checkpoint(self): self.pool.checkpoint()
 
     def status(self):
         count = len(self.ann)
         total = self.sources.count()
         row = self.db.execute("SELECT value FROM metadata WHERE key='complete_signature'").fetchone()
         complete = bool(row and row[0] == self.sources.signature())
-        size = sum(p.stat().st_size for p in self.folder.iterdir() if p.is_file())
+        size = self.db.execute('SELECT COALESCE(SUM(length(vector)+length(text)+length(name)),0) FROM documents').fetchone()[0]
         metadata = dict(self.db.execute('SELECT key,value FROM metadata'))
         return {'indexed': count, 'total': total, 'complete': complete,
                 'auto_update_allowed': metadata.get('consented') == '1' and metadata.get('paused') != '1',
@@ -192,7 +167,7 @@ class Engine:
                             skipped += 1
                             continue
                         old = self.db.execute('SELECT id FROM documents WHERE name=?', (item['name'],)).fetchone()
-                        self.db.execute('INSERT INTO documents(name,category,post_count,aliases,text,digest,vector,seen) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(name) DO UPDATE SET category=excluded.category,post_count=excluded.post_count,aliases=excluded.aliases,text=excluded.text,digest=excluded.digest,vector=excluded.vector,seen=excluded.seen',
+                        self.db.execute('INSERT INTO documents(name,category,post_count,aliases,text,digest,vector,seen) VALUES(?,?,?,?,?,?,?,?)',
                             (item['name'], item['category'], item['post_count'], json.dumps(item['aliases']), item['text'], item['digest'], vector.tobytes(), signature))
                         key = old[0] if old else self.db.execute('SELECT id FROM documents WHERE name=?', (item['name'],)).fetchone()[0]
                         if old and key in self.ann: self.ann.remove(key)
@@ -266,3 +241,4 @@ class Engine:
     def close(self):
         self._checkpoint()
         self.db.close()
+        if self._owns_pool: self.pool.close()

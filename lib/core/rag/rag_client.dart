@@ -70,6 +70,7 @@ class RagClient {
     for (final name in [
       'worker.py',
       'engine.py',
+      'pool.py',
       'models.py',
       'context.py',
       'documents.py',

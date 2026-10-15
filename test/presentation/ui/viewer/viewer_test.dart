@@ -1,4 +1,7 @@
 // 大图查看器交互：每个回调、快捷键和界面自己的状态（缩放、抽屉、快捷键表、确认框、计时器）。
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
 
+import 'package:nai_launcher/presentation/ui/viewer/viewer_prompt.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'viewer_test_harness.dart';
 
@@ -277,16 +281,91 @@ void main() {
     await done(t);
   });
 
+  Future<void> hoverTranslate(WidgetTester t, String name) async {
+    final target = find.byKey(Key(name));
+    await t.ensureVisible(target);
+    await t.pumpAndSettle();
+    final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    await mouse.moveTo(t.getCenter(target));
+    await t.pump();
+    await tapKey(t, name);
+    await mouse.removePointer();
+    await t.pump();
+  }
+
+  Future<void> captureFeedback(WidgetTester t, String name) async {
+    if (Platform.environment['CAPTURE_R6_FEEDBACK'] != '1') return;
+    await t.runAsync(() async {
+      final boundary = t.renderObject<RenderRepaintBoundary>(
+        find.byKey(const Key('viewer-capture')),
+      );
+      final image = await boundary.toImage();
+      final data = await image.toByteData(format: ui.ImageByteFormat.png);
+      image.dispose();
+      final file = File('.dart_tool/feedback-r6-20261015/captures/$name.png');
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(data!.buffer.asUint8List());
+    });
+  }
+
+  testWidgets('各提示词独立悬停显示翻译，负面接线，定位格下留 2px', (t) async {
+    await pump(t, ViewerFixture.gallery(current: '29', favorite: false));
+    expect(
+      find.byKey(const Key('viewer-translate-prompt0')).hitTestable(),
+      findsNothing,
+    );
+    final mouse = await t.createGesture(kind: PointerDeviceKind.mouse);
+    await mouse.addPointer(location: Offset.zero);
+    final main = find.byKey(const Key('viewer-info-prompt'));
+    await mouse.moveTo(t.getCenter(main));
+    await t.pump();
+    expect(
+      find.byKey(const Key('viewer-translate-prompt0')).hitTestable(),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('viewer-translate-character0')).hitTestable(),
+      findsNothing,
+    );
+    final role = find.byKey(const Key('viewer-info-character-0'));
+    await t.ensureVisible(role);
+    await mouse.moveTo(t.getCenter(role));
+    await t.pump();
+    expect(
+      find.byKey(const Key('viewer-translate-character0')).hitTestable(),
+      findsOneWidget,
+    );
+    final grid = find
+        .descendant(of: role, matching: find.byType(ViewerPositionGrid))
+        .first;
+    final box = find
+        .descendant(of: role, matching: find.byType(ViewerPromptBox))
+        .first;
+    expect(t.getTopLeft(box).dy - t.getBottomLeft(grid).dy, closeTo(2, .01));
+    await captureFeedback(t, 'viewer-role-hover');
+    await mouse.moveTo(Offset.zero);
+    await t.pump();
+    expect(
+      find.byKey(const Key('viewer-translate-character0')).hitTestable(),
+      findsNothing,
+    );
+    await mouse.removePointer();
+    await hoverTranslate(t, 'viewer-translate-negative0');
+    expect(rec.calls, contains('translate:29:negative'));
+    await done(t);
+  });
+
   testWidgets('复制和翻译按段走；Ctrl C 复制主提示词', (t) async {
     await pump(t, ViewerFixture.gallery(current: '29', favorite: false));
     await key(t, LogicalKeyboardKey.keyC, ctrl: true);
     await tapKey(t, 'viewer-copy-seed');
     await tapKey(t, 'viewer-copy-prompt0');
-    await tapKey(t, 'viewer-translate-prompt0');
+    await hoverTranslate(t, 'viewer-translate-prompt0');
     await t.ensureVisible(find.byKey(const Key('viewer-copy-character2')));
     await t.pumpAndSettle();
     await tapKey(t, 'viewer-copy-character2');
-    await tapKey(t, 'viewer-translate-character1');
+    await hoverTranslate(t, 'viewer-translate-character1');
     await t.ensureVisible(find.byKey(const Key('viewer-copy-negative0')));
     await t.pumpAndSettle();
     await tapKey(t, 'viewer-copy-negative0');

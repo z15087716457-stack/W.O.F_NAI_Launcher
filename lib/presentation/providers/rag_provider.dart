@@ -9,6 +9,7 @@ import '../../core/database/asset_database_manager.dart';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
+import '../../core/rag/rag_runtime_probe.dart';
 import '../../core/rag/rag_text_search.dart';
 import '../../core/rag/rag_block_snapshot.dart';
 import '../../core/rag/rag_gallery_search.dart';
@@ -31,6 +32,8 @@ class RagStatus {
     this.suspended = false,
     this.searching = 0,
     this.installPhase,
+    this.installElapsed = 0,
+    this.installDetail = '',
     this.sources = const {},
     this.runtimeReady = false,
     this.details = const {},
@@ -40,6 +43,8 @@ class RagStatus {
   final String? jobId, error, installPhase;
   final bool busy, complete, partial, suspended;
   final bool runtimeReady;
+  final int installElapsed;
+  final String installDetail;
   final Map<RagSource, RagStatus> sources;
   final Map<String, int> details;
   RagStatus forSource(RagSource source) => source == RagSource.tags
@@ -64,6 +69,8 @@ class RagStatus {
     bool? suspended,
     int? searching,
     String? installPhase,
+    int? installElapsed,
+    String? installDetail,
     bool clearInstall = false,
     Map<RagSource, RagStatus>? sources,
     bool? runtimeReady,
@@ -82,6 +89,8 @@ class RagStatus {
     suspended: suspended ?? this.suspended,
     searching: searching ?? this.searching,
     installPhase: clearInstall ? null : installPhase ?? this.installPhase,
+    installElapsed: clearInstall ? 0 : installElapsed ?? this.installElapsed,
+    installDetail: installDetail ?? this.installDetail,
     sources: sources ?? this.sources,
     runtimeReady: runtimeReady ?? this.runtimeReady,
     details: details ?? this.details,
@@ -128,12 +137,38 @@ final ragSourcePathsProvider = Provider<Future<RagSourcePaths> Function()>(
   },
 );
 
+final ragWikiTranslationsPathProvider = Provider<Future<String> Function()>(
+  (ref) => () async {
+    final root = await ref.read(ragDirectoryProvider)();
+    return p.join(
+      p.dirname(p.dirname(root.path)),
+      'autocomplete',
+      'visible_tag_translations.db',
+    );
+  },
+);
+
+final ragRuntimeProbeFactoryProvider = Provider<RagRuntimeProbe Function()>(
+  (ref) =>
+      () => RagRuntimeProbe(),
+);
+final ragRuntimeInfoProvider = FutureProvider.autoDispose<RagRuntimeInfo>((
+  ref,
+) async {
+  final python = ref.watch(ragSettingsProvider.select((s) => s.python));
+  final probe = ref.read(ragRuntimeProbeFactoryProvider)();
+  ref.onDispose(probe.cancel);
+  final root = await ref.read(ragDirectoryProvider)();
+  return probe.inspect(root, python);
+});
+
 class RagController extends Notifier<RagStatus> {
   RagClient? _client;
   Future<RagClient>? _connecting;
   StreamSubscription<Map<String, dynamic>>? _events;
   Timer? _refresh;
   RagRuntimeInstaller? _installer;
+  bool _runtimeInstallCancelled = false;
   bool _disposed = false;
   int _epoch = 0, _gpuHolds = 0;
   final _finishedJobs = <String>{};
@@ -188,7 +223,11 @@ class RagController extends Notifier<RagStatus> {
     await _events?.cancel();
     await old?.close();
     if (_disposed || epoch != _epoch) return;
-    state = const RagStatus();
+    state = RagStatus(
+      installPhase: state.installPhase,
+      installElapsed: state.installElapsed,
+      installDetail: state.installDetail,
+    );
     if (_enabled) await refresh();
   }
 
@@ -243,6 +282,7 @@ class RagController extends Notifier<RagStatus> {
         'catalog': paths.catalog,
         'runtime': paths.runtime,
         'wiki': paths.wiki,
+        'translations': await ref.read(ragWikiTranslationsPathProvider)(),
         'blocks': snapshot,
         'gallery_roots': galleryRoots,
         'sources': [
@@ -407,7 +447,12 @@ class RagController extends Notifier<RagStatus> {
   }
 
   Future<void> refresh({bool autoUpdate = false}) async {
-    if (!_enabled || _disposed || _refreshToken != null) return;
+    if (!_enabled ||
+        _disposed ||
+        _refreshToken != null ||
+        state.installPhase != null) {
+      return;
+    }
     final refreshToken = _refreshToken = Object();
     final epoch = _epoch;
     try {
@@ -789,13 +834,33 @@ class RagController extends Notifier<RagStatus> {
   }
 
   Future<void> installRuntime({required bool cuda}) async {
-    if (_installer != null) return;
-    final installer = _installer = RagRuntimeInstaller(
-      await ref.read(ragDirectoryProvider)(),
+    if (_installer != null || state.installPhase != null) return;
+    final selectedPython = ref.read(ragSettingsProvider).python;
+    _runtimeInstallCancelled = false;
+    state = state.copyWith(
+      installPhase: 'existing',
+      installElapsed: 0,
+      installDetail: '',
+      clearError: true,
     );
+    RagRuntimeInstaller? installer;
     try {
+      await _reset();
+      if (_disposed || _runtimeInstallCancelled) return;
+      final root = await ref.read(ragDirectoryProvider)();
+      if (_disposed || _runtimeInstallCancelled) return;
+      installer = _installer = RagRuntimeInstaller(root);
       final python = await installer.install(
         cuda: cuda,
+        preferredPython: selectedPython,
+        onProgress: (seconds, detail) {
+          if (!_disposed) {
+            state = state.copyWith(
+              installElapsed: seconds,
+              installDetail: detail,
+            );
+          }
+        },
         onPhase: (phase) {
           if (!_disposed) {
             state = state.copyWith(installPhase: phase, clearError: true);
@@ -803,20 +868,36 @@ class RagController extends Notifier<RagStatus> {
         },
       );
       if (!_disposed) {
-        await ref
-            .read(ragSettingsProvider.notifier)
-            .update(ref.read(ragSettingsProvider).copyWith(python: python));
+        final latest = ref.read(ragSettingsProvider);
+        if (latest.python == selectedPython) {
+          await ref
+              .read(ragSettingsProvider.notifier)
+              .update(latest.copyWith(python: python));
+        }
       }
     } catch (error) {
-      _fail(error);
+      if (!_runtimeInstallCancelled &&
+          !(error is RagException && error.code == 'cancelled')) {
+        if (!_disposed) {
+          state = state.copyWith(installDetail: installer?.diagnostic ?? '');
+        }
+        _fail(error);
+      }
     } finally {
-      installer.dispose();
+      installer?.dispose();
       _installer = null;
-      if (!_disposed) state = state.copyWith(clearInstall: true);
+      if (!_disposed) {
+        state = state.copyWith(clearInstall: true);
+        ref.invalidate(ragRuntimeInfoProvider);
+        if (_enabled) unawaited(refresh());
+      }
     }
   }
 
-  void cancelInstall() => _installer?.cancel();
+  void cancelInstall() {
+    _runtimeInstallCancelled = true;
+    _installer?.cancel();
+  }
 }
 
 final ragTextSearchProvider = FutureProvider.autoDispose

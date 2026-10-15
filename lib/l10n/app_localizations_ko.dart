@@ -16766,7 +16766,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get rag_enabledHint => '로컬 의미 검색을 켭니다. 최초 색인은 범위를 확인한 후 시작합니다.';
 
   @override
-  String get rag_status => '실행 및 색인 상태';
+  String get rag_status => '공유 벡터 풀';
 
   @override
   String get rag_off => '꺼짐';
@@ -16825,7 +16825,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rag_modelModeHint =>
-      'Gemma는 텍스트·이미지를 지원하며 오디오는 끕니다. 태그 작업은 텍스트만 로드하고 Qwen으로 재정렬합니다.';
+      'Gemma는 텍스트와 이미지에 사용하며 오디오는 비활성화합니다. Qwen은 텍스트 재정렬에만 사용합니다.';
 
   @override
   String get rag_discover => '로컬 모델 찾기';
@@ -16974,4 +16974,54 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rag_gallerySearchOptions => '갤러리 RAG 검색 옵션';
+
+  @override
+  String get rag_downloadModel => '모델 다운로드';
+
+  @override
+  String get rag_modelDownloading => '모델 다운로드 중';
+
+  @override
+  String get rag_modelVerifying => '모델 검증 중';
+
+  @override
+  String rag_downloadProgress(String done, String total) {
+    return '$done / $total MB';
+  }
+
+  @override
+  String get rag_poolHint =>
+      '활성화한 자료는 하나의 벡터 풀을 공유합니다. 새 자료와 저장한 번역은 증분 업데이트됩니다.';
+
+  @override
+  String get rag_runtimeReady => '실행 환경 준비 완료';
+
+  @override
+  String get rag_runtimeCheck => '실행 환경 확인';
+
+  @override
+  String get rag_runtimeExisting => '기존 실행 환경 확인 중';
+
+  @override
+  String get rag_runtimeDownload => '설치 도구 다운로드 중';
+
+  @override
+  String get rag_runtimeCreate => 'Python 환경 준비 중';
+
+  @override
+  String get rag_runtimeCuda => 'CUDA 추론 패키지 설치 중';
+
+  @override
+  String get rag_runtimePackages => '추론 의존 패키지 설치 중';
+
+  @override
+  String get rag_runtimeVerify => '실행 환경 호환성 검증 중';
+
+  @override
+  String rag_runtimeElapsed(int seconds) {
+    return '현재 단계 경과: $seconds초';
+  }
+
+  @override
+  String get rag_useRuntime => '기존 환경 사용';
 }

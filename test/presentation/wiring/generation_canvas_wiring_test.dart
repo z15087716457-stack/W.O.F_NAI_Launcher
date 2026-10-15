@@ -224,6 +224,9 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final feedback =
+        Platform.environment['CAPTURE_R6_FEEDBACK'] == '1' &&
+        name.startsWith('r6-');
     final channel =
         Platform.environment['CAPTURE_CHANNEL_BACKEND'] == '1' &&
         name.startsWith('channel-');
@@ -234,7 +237,8 @@ void main() {
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!channel &&
+    if (!feedback &&
+        !channel &&
         !oldCompare &&
         !retiredEntry &&
         !imageMenu &&
@@ -248,7 +252,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = channel
+      final area = feedback
+          ? 'feedback-r6-20261015'
+          : channel
           ? 'channel-backend-20261015'
           : oldCompare
           ? 'inpaint-old-compare-20261014'
@@ -337,6 +343,44 @@ void main() {
     expect(prices.values.toSet(), hasLength(2));
     expect(container.read(generationParamsNotifierProvider), initialDraft);
     expect(events, isEmpty);
+  });
+
+  testWidgets('首张出图前保留同一背景和画布，出图后欢迎内容退场', (tester) async {
+    publish(const ImageGenerationState());
+    await pump(tester, fullPage: true);
+    expect(find.byType(ChannelBackdrop), findsOneWidget);
+    expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
+    final logo = find.byWidgetPredicate(
+      (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
+    );
+    expect(logo, findsOneWidget);
+    await tester.runAsync(
+      () => precacheImage(
+        tester.widget<Image>(logo).image,
+        tester.element(find.byType(GenCanvas)),
+      ),
+    );
+    await tester.pump();
+    final canvasState = tester.state(find.byType(GenerationCanvasView));
+    final backdrop = tester
+        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .data
+        .settings;
+    await capture(tester, 'r6-before-first-image');
+    publish(ImageGenerationState(history: [image(42)]));
+    await tester.pumpAndSettle();
+    expect(tester.state(find.byType(GenerationCanvasView)), same(canvasState));
+    expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
+    expect(logo, findsNothing);
+    expect(
+      tester
+          .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+          .data
+          .settings,
+      backdrop,
+    );
+    expect(find.byKey(const ValueKey('canvas-world-viewport')), findsOneWidget);
+    await capture(tester, 'r6-after-first-image');
   });
 
   testWidgets('主画布显式启用通道，开关不重挂图块，设置回调落到存储', (tester) async {

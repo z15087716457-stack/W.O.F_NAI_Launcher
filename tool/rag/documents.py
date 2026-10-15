@@ -1,6 +1,7 @@
 """Separate text collections for Wiki passages and saved prompt blocks."""
 import hashlib
 import json
+import sqlite3
 from pathlib import Path
 
 from engine import Engine, readonly
@@ -44,13 +45,47 @@ class TextSources:
 
 
 class WikiSources(TextSources):
-    def __init__(self, path, catalog):
+    def __init__(self, path, catalog, translations=''):
         super().__init__(path)
         self.catalog = Path(catalog).resolve(strict=True)
+        self.translations = Path(translations).resolve() if translations else None
+        self._translated_cache = None
 
     def signature(self):
         info = self.catalog.stat()
-        return hashlib.sha256((super().signature()+str((info.st_size,info.st_mtime_ns))).encode()).hexdigest()
+        extra = []
+        if self.translations:
+            for path in (self.translations,Path(str(self.translations)+'-wal')):
+                if path.is_file():
+                    stat=path.stat();extra.append((str(path),stat.st_size,stat.st_mtime_ns))
+        return hashlib.sha256((super().signature()+str((info.st_size,info.st_mtime_ns))+str(extra)).encode()).hexdigest()
+
+    def translated(self):
+        signature=self.signature()
+        if self._translated_cache and self._translated_cache[0]==signature:return self._translated_cache[1]
+        result={}
+        if self.translations and self.translations.is_file():
+            cache=readonly(self.translations);wiki=readonly(self.path)
+            try:
+                # Keep the latest valid saved translation per language. No
+                # translator is called and stale source hashes never get used.
+                for tag,title,body,original_hash,language in cache.execute(
+                    "SELECT tag,name_zh,wiki_zh,wiki_hash,COALESCE(name_language,'zh') FROM tag_translations WHERE length(trim(name_zh))>0 OR length(trim(wiki_zh))>0 ORDER BY updated_at DESC"):
+                    section='translation:'+language
+                    names='translation-name:'+language
+                    if section in result.get(tag,{}):continue
+                    original=wiki.execute('SELECT body FROM wiki_pages WHERE tag=?',(tag,)).fetchone()
+                    if not original or not original[0].strip():continue
+                    if body and body.strip() and hashlib.sha256(original[0].encode()).hexdigest()==original_hash:
+                        result.setdefault(tag,{})[section]=(title or tag.replace('_',' '),body)
+                        result[tag].pop(names,None)
+                    elif title and title.strip() and names not in result.get(tag,{}):
+                        result.setdefault(tag,{})[names]=(tag.replace('_',' '),title)
+            except sqlite3.OperationalError:
+                result={}
+            finally:cache.close();wiki.close()
+        self._translated_cache=(signature,result)
+        return result
 
     def counts(self):
         signature = self.signature()
@@ -58,6 +93,8 @@ class WikiSources(TextSources):
         db = readonly(self.path)
         try:
             result = db.execute('SELECT COUNT(*),COALESCE(SUM(MAX(1,(length(body)-120+1079)/1080)),0) FROM wiki_pages WHERE length(trim(body))>0').fetchone()
+            translations=self.translated()
+            result=(result[0],result[1]+sum(count_chunks(body) for rows in translations.values() for _,body in rows.values()))
             self._counts = (signature, result); return result
         finally: db.close()
 
@@ -65,7 +102,9 @@ class WikiSources(TextSources):
         db = readonly(self.path)
         try:
             return [key(tag, 'article', i) for tag, size in db.execute('SELECT tag,length(body) FROM wiki_pages WHERE length(trim(body))>0 ORDER BY tag')
-                    for i in range(max(1, (size - OVERLAP + STRIDE - 1) // STRIDE))]
+                    for i in range(max(1, (size - OVERLAP + STRIDE - 1) // STRIDE))] + [
+                        key(tag,section,i) for tag,rows in sorted(self.translated().items())
+                        for section,(_,body) in sorted(rows.items()) for i in range(count_chunks(body))]
         finally: db.close()
 
     def rows(self, offset=0, limit=64, names=None):
@@ -78,9 +117,15 @@ class WikiSources(TextSources):
             placeholders = ','.join('?' for _ in owners)
             pages = {r[0]: r[1] for r in db.execute('SELECT tag,body FROM wiki_pages WHERE tag IN (' + placeholders + ')', owners)}
             categories = dict(catalog.execute('SELECT name,category FROM tags WHERE name IN (' + placeholders + ')', owners))
-            return [document(owner, owner.replace('_',' '), section, index, pages[owner], categories.get(owner,0))
-                    for owner, section, index in decoded if owner in pages and pages[owner].strip()
-                    and section == 'article' and 0 <= index < count_chunks(pages[owner])]
+            translations=self.translated();result=[]
+            for owner,section,index in decoded:
+                if owner not in pages or not pages[owner].strip():continue
+                if section=='article':title=owner.replace('_',' ');body=pages[owner];extra=''
+                elif section in translations.get(owner,{}):
+                    title,body=translations[owner][section];extra=owner.replace('_',' ')
+                else:continue
+                if 0<=index<count_chunks(body):result.append(document(owner,title,section,index,body,categories.get(owner,0),extra))
+            return result
         finally: db.close(); catalog.close()
 
 
@@ -128,11 +173,8 @@ class BlockSources(TextSources):
 
 
 class TextEngine(Engine):
-    def __init__(self, directory, models, sources):
-        super().__init__(directory, models, sources)
-        self.db.execute("CREATE INDEX IF NOT EXISTS documents_owner ON documents(json_extract(name,'$[0]'))")
-        self.db.execute('CREATE INDEX IF NOT EXISTS documents_category ON documents(category)')
-        self.db.commit()
+    def __init__(self, directory, models, sources, *, pool=None, collection='text'):
+        super().__init__(directory,models,sources,pool=pool,collection=collection)
 
     def preview(self):
         return {**super().preview(), 'documents':self.sources.document_count()}

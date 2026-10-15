@@ -16506,7 +16506,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_enabledHint => '开启本地语义检索服务；首次建库需预览范围后手动开始。';
 
   @override
-  String get rag_status => '运行与索引状态';
+  String get rag_status => '统一向量池';
 
   @override
   String get rag_off => '未启用';
@@ -16564,8 +16564,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_modelMode => '模型能力';
 
   @override
-  String get rag_modelModeHint =>
-      'Gemma 保留文字与图片能力，禁用音频；当前标签任务仅加载文字。Qwen 用于文字重排。';
+  String get rag_modelModeHint => 'Gemma 用于文字与图片，音频关闭；Qwen 仅用于文字重排。';
 
   @override
   String get rag_discover => '检测本地权重';
@@ -16710,6 +16709,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rag_gallerySearchOptions => '图库 RAG 检索方式';
+
+  @override
+  String get rag_downloadModel => '下载模型';
+
+  @override
+  String get rag_modelDownloading => '正在下载模型';
+
+  @override
+  String get rag_modelVerifying => '正在校验模型';
+
+  @override
+  String rag_downloadProgress(String done, String total) {
+    return '$done / $total MB';
+  }
+
+  @override
+  String get rag_poolHint => '所有已启用来源共用一个向量池，新增资料与翻译自动增量更新。';
+
+  @override
+  String get rag_runtimeReady => '运行环境已就绪';
+
+  @override
+  String get rag_runtimeCheck => '检测运行环境';
+
+  @override
+  String get rag_runtimeExisting => '正在检测已有环境';
+
+  @override
+  String get rag_runtimeDownload => '正在下载环境安装工具';
+
+  @override
+  String get rag_runtimeCreate => '正在准备 Python 环境';
+
+  @override
+  String get rag_runtimeCuda => '正在安装 CUDA 推理组件';
+
+  @override
+  String get rag_runtimePackages => '正在安装推理依赖';
+
+  @override
+  String get rag_runtimeVerify => '正在校验环境兼容性';
+
+  @override
+  String rag_runtimeElapsed(int seconds) {
+    return '此阶段已用 $seconds 秒';
+  }
+
+  @override
+  String get rag_useRuntime => '使用已有环境';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -33214,7 +33262,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_enabledHint => '開啟本地語義檢索服務；首次建庫需預覽範圍後手動開始。';
 
   @override
-  String get rag_status => '執行與索引狀態';
+  String get rag_status => '統一向量池';
 
   @override
   String get rag_off => '未啟用';
@@ -33272,8 +33320,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_modelMode => '模型能力';
 
   @override
-  String get rag_modelModeHint =>
-      'Gemma 保留文字與圖片能力，停用音訊；當前標籤任務僅載入文字。Qwen 用於文字重排。';
+  String get rag_modelModeHint => 'Gemma 用於文字與圖片，音訊關閉；Qwen 僅用於文字重排。';
 
   @override
   String get rag_discover => '檢測本地權重';
@@ -33418,4 +33465,53 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get rag_gallerySearchOptions => '圖庫 RAG 檢索方式';
+
+  @override
+  String get rag_downloadModel => '下載模型';
+
+  @override
+  String get rag_modelDownloading => '正在下載模型';
+
+  @override
+  String get rag_modelVerifying => '正在校驗模型';
+
+  @override
+  String rag_downloadProgress(String done, String total) {
+    return '$done / $total MB';
+  }
+
+  @override
+  String get rag_poolHint => '所有已啟用來源共用一個向量池，新增資料與翻譯自動增量更新。';
+
+  @override
+  String get rag_runtimeReady => '執行環境已就緒';
+
+  @override
+  String get rag_runtimeCheck => '檢測執行環境';
+
+  @override
+  String get rag_runtimeExisting => '正在檢測已有環境';
+
+  @override
+  String get rag_runtimeDownload => '正在下載環境安裝工具';
+
+  @override
+  String get rag_runtimeCreate => '正在準備 Python 環境';
+
+  @override
+  String get rag_runtimeCuda => '正在安裝 CUDA 推理元件';
+
+  @override
+  String get rag_runtimePackages => '正在安裝推理依賴';
+
+  @override
+  String get rag_runtimeVerify => '正在校驗環境相容性';
+
+  @override
+  String rag_runtimeElapsed(int seconds) {
+    return '此階段已用 $seconds 秒';
+  }
+
+  @override
+  String get rag_useRuntime => '使用已有環境';
 }

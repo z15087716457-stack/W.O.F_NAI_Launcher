@@ -136,7 +136,7 @@ class IndexTests(unittest.TestCase):
 
     def test_corrupted_ann_checkpoint_is_rebuilt_from_sqlite(self):
         self.build();self.engine.close()
-        (self.engine.folder/'tags.usearch').write_bytes(b'corrupted')
+        (self.engine.folder/'vectors.usearch').write_bytes(b'corrupted')
         self.engine=Engine(self.root/'index',FakeModels(),Sources(self.source))
         self.assertEqual(self.engine.status()['indexed'],70)
         self.assertTrue(self.engine.search('rain',4,'before',[],[],False)['items'])
@@ -156,6 +156,7 @@ class IndexTests(unittest.TestCase):
         self.engine._checkpoint()  # Periodic save before the final stale-row cleanup.
         with patch.object(self.engine,'_checkpoint',side_effect=RuntimeError('crash')):
             with self.assertRaisesRegex(RuntimeError,'crash'): next(build)
+        self.engine.pool.db.close()  # Process loss also releases the shared connection.
         self.engine.db.close()  # Process loss: skip the normal close checkpoint.
         self.engine=Engine(self.root/'index',FakeModels(),Sources(self.source))
         self.assertEqual(self.engine.status()['indexed'],69)

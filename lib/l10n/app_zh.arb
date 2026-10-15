@@ -9067,7 +9067,7 @@
   "rag_description": "管理本地语义检索、模型与标签上下文推荐",
   "rag_enabled": "启用 RAG",
   "rag_enabledHint": "开启本地语义检索服务；首次建库需预览范围后手动开始。",
-  "rag_status": "运行与索引状态",
+  "rag_status": "统一向量池",
   "rag_off": "未启用",
   "rag_loading": "正在准备本地模型",
   "rag_empty": "模型已连接，等待建立索引",
@@ -9102,7 +9102,7 @@
   "rag_notConfigured": "尚未配置",
   "rag_choose": "选择",
   "rag_modelMode": "模型能力",
-  "rag_modelModeHint": "Gemma 保留文字与图片能力，禁用音频；当前标签任务仅加载文字。Qwen 用于文字重排。",
+  "rag_modelModeHint": "Gemma 用于文字与图片，音频关闭；Qwen 仅用于文字重排。",
   "rag_discover": "检测本地权重",
   "rag_modelsMissing": "未找到模型，请选择已下载的权重目录",
   "rag_pythonPath": "独立 Python 运行环境",
@@ -9197,5 +9197,22 @@
         "type": "int"
       }
     }
-  }
+  },
+  "rag_downloadModel": "下载模型",
+  "rag_modelDownloading": "正在下载模型",
+  "rag_modelVerifying": "正在校验模型",
+  "rag_downloadProgress": "{done} / {total} MB",
+  "rag_poolHint": "所有已启用来源共用一个向量池，新增资料与翻译自动增量更新。",
+  "rag_runtimeReady": "运行环境已就绪",
+  "rag_runtimeCheck": "检测运行环境",
+  "rag_runtimeExisting": "正在检测已有环境",
+  "rag_runtimeDownload": "正在下载环境安装工具",
+  "rag_runtimeCreate": "正在准备 Python 环境",
+  "rag_runtimeCuda": "正在安装 CUDA 推理组件",
+  "rag_runtimePackages": "正在安装推理依赖",
+  "rag_runtimeVerify": "正在校验环境兼容性",
+  "rag_runtimeElapsed": "此阶段已用 {seconds} 秒",
+  "rag_useRuntime": "使用已有环境",
+  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
 }

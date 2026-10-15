@@ -30090,7 +30090,7 @@ abstract class AppLocalizations {
   /// No description provided for @rag_status.
   ///
   /// In en, this message translates to:
-  /// **'Runtime and index status'**
+  /// **'Shared vector pool'**
   String get rag_status;
 
   /// No description provided for @rag_off.
@@ -30198,7 +30198,7 @@ abstract class AppLocalizations {
   /// No description provided for @rag_modelModeHint.
   ///
   /// In en, this message translates to:
-  /// **'Gemma retains text/image support with audio disabled; tags load text only. Qwen reranks text.'**
+  /// **'Gemma handles text and images with audio disabled. Qwen reranks text only.'**
   String get rag_modelModeHint;
 
   /// No description provided for @rag_discover.
@@ -30457,6 +30457,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gallery RAG search options'**
   String get rag_gallerySearchOptions;
+
+  /// No description provided for @rag_downloadModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Download model'**
+  String get rag_downloadModel;
+
+  /// No description provided for @rag_modelDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading model'**
+  String get rag_modelDownloading;
+
+  /// No description provided for @rag_modelVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying model'**
+  String get rag_modelVerifying;
+
+  /// No description provided for @rag_downloadProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} MB'**
+  String rag_downloadProgress(String done, String total);
+
+  /// No description provided for @rag_poolHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled sources share one vector pool. New content and saved translations update incrementally.'**
+  String get rag_poolHint;
+
+  /// No description provided for @rag_runtimeReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime ready'**
+  String get rag_runtimeReady;
+
+  /// No description provided for @rag_runtimeCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check runtime'**
+  String get rag_runtimeCheck;
+
+  /// No description provided for @rag_runtimeExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking existing runtime'**
+  String get rag_runtimeExisting;
+
+  /// No description provided for @rag_runtimeDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading setup tool'**
+  String get rag_runtimeDownload;
+
+  /// No description provided for @rag_runtimeCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing Python runtime'**
+  String get rag_runtimeCreate;
+
+  /// No description provided for @rag_runtimeCuda.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing CUDA inference packages'**
+  String get rag_runtimeCuda;
+
+  /// No description provided for @rag_runtimePackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing inference dependencies'**
+  String get rag_runtimePackages;
+
+  /// No description provided for @rag_runtimeVerify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying runtime compatibility'**
+  String get rag_runtimeVerify;
+
+  /// No description provided for @rag_runtimeElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s in this step'**
+  String rag_runtimeElapsed(int seconds);
+
+  /// No description provided for @rag_useRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Use existing runtime'**
+  String get rag_useRuntime;
 }
 
 class _AppLocalizationsDelegate

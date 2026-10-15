@@ -17221,7 +17221,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enable local semantic retrieval. Preview and start the first index explicitly.';
 
   @override
-  String get rag_status => 'Runtime and index status';
+  String get rag_status => 'Shared vector pool';
 
   @override
   String get rag_off => 'Disabled';
@@ -17282,7 +17282,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_modelModeHint =>
-      'Gemma retains text/image support with audio disabled; tags load text only. Qwen reranks text.';
+      'Gemma handles text and images with audio disabled. Qwen reranks text only.';
 
   @override
   String get rag_discover => 'Find local models';
@@ -17434,4 +17434,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_gallerySearchOptions => 'Gallery RAG search options';
+
+  @override
+  String get rag_downloadModel => 'Download model';
+
+  @override
+  String get rag_modelDownloading => 'Downloading model';
+
+  @override
+  String get rag_modelVerifying => 'Verifying model';
+
+  @override
+  String rag_downloadProgress(String done, String total) {
+    return '$done / $total MB';
+  }
+
+  @override
+  String get rag_poolHint =>
+      'Enabled sources share one vector pool. New content and saved translations update incrementally.';
+
+  @override
+  String get rag_runtimeReady => 'Runtime ready';
+
+  @override
+  String get rag_runtimeCheck => 'Check runtime';
+
+  @override
+  String get rag_runtimeExisting => 'Checking existing runtime';
+
+  @override
+  String get rag_runtimeDownload => 'Downloading setup tool';
+
+  @override
+  String get rag_runtimeCreate => 'Preparing Python runtime';
+
+  @override
+  String get rag_runtimeCuda => 'Installing CUDA inference packages';
+
+  @override
+  String get rag_runtimePackages => 'Installing inference dependencies';
+
+  @override
+  String get rag_runtimeVerify => 'Verifying runtime compatibility';
+
+  @override
+  String rag_runtimeElapsed(int seconds) {
+    return '${seconds}s in this step';
+  }
+
+  @override
+  String get rag_useRuntime => 'Use existing runtime';
 }

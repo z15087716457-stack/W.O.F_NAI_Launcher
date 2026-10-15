@@ -16721,7 +16721,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rag_enabledHint => 'ローカル意味検索を有効化。初回の索引作成は範囲を確認して開始します。';
 
   @override
-  String get rag_status => '実行・索引の状態';
+  String get rag_status => '共通ベクトルプール';
 
   @override
   String get rag_off => '無効';
@@ -16780,7 +16780,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rag_modelModeHint =>
-      'Gemma はテキスト・画像に対応し音声は無効。タグ処理はテキストのみ読み込み、Qwen が再順位付けします。';
+      'Gemmaはテキストと画像に使用し、音声は無効です。Qwenはテキストの再ランキングに使用します。';
 
   @override
   String get rag_discover => 'ローカルモデルを検出';
@@ -16928,4 +16928,53 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rag_gallerySearchOptions => 'ギャラリー RAG 検索設定';
+
+  @override
+  String get rag_downloadModel => 'モデルをダウンロード';
+
+  @override
+  String get rag_modelDownloading => 'モデルをダウンロード中';
+
+  @override
+  String get rag_modelVerifying => 'モデルを検証中';
+
+  @override
+  String rag_downloadProgress(String done, String total) {
+    return '$done / $total MB';
+  }
+
+  @override
+  String get rag_poolHint => '有効なソースは1つのベクトルプールを共有します。新しい資料や保存した翻訳は差分更新されます。';
+
+  @override
+  String get rag_runtimeReady => '実行環境の準備完了';
+
+  @override
+  String get rag_runtimeCheck => '実行環境を確認';
+
+  @override
+  String get rag_runtimeExisting => '既存の実行環境を確認中';
+
+  @override
+  String get rag_runtimeDownload => 'セットアップツールをダウンロード中';
+
+  @override
+  String get rag_runtimeCreate => 'Python環境を準備中';
+
+  @override
+  String get rag_runtimeCuda => 'CUDA推論パッケージをインストール中';
+
+  @override
+  String get rag_runtimePackages => '推論用の依存パッケージをインストール中';
+
+  @override
+  String get rag_runtimeVerify => '実行環境の互換性を検証中';
+
+  @override
+  String rag_runtimeElapsed(int seconds) {
+    return 'このステップの経過時間：$seconds秒';
+  }
+
+  @override
+  String get rag_useRuntime => '既存の環境を使用';
 }

@@ -12,6 +12,7 @@ import time
 
 from documents import TextEngine, TextSources, count_chunks, document, key
 from engine import Engine, readonly
+from pool import VectorPool
 
 EXTENSIONS = {'.png','.jpg','.jpeg','.webp','.bmp','.gif','.tif','.tiff','.avif'}
 NAI = """COALESCE(m.has_metadata,0)=1 AND (
@@ -186,17 +187,17 @@ class VisualEngine(Engine):
 
 
 class GalleryEngine:
-    def __init__(self,directory,models,database,roots_file):
+    def __init__(self,directory,models,database,roots_file,*,pool=None):
         self.models = models
+        self.pool = pool or VectorPool(directory,models.fingerprint)
+        self._owns_pool = pool is None
         self.sources = GallerySources(database,roots_file)
         processor = hashlib.sha256(b'wof-gallery-rgb-exif-2048-v1')
         for name in ('preprocessor_config.json','processor_config.json'):
             path = Path(models.embedding_path)/name
             if path.is_file(): processor.update(path.read_bytes())
-        self.visual = VisualEngine(Path(directory)/('images-v1-'+processor.hexdigest()[:16]),models,self.sources)
-        self.visual.db.execute("CREATE INDEX IF NOT EXISTS documents_owner ON documents(json_extract(name,'$[0]'))")
-        self.visual.db.commit()
-        self.text = TextEngine(Path(directory)/'nai-text-v1',models,GallerySources(database,roots_file,False))
+        self.visual = VisualEngine(Path(directory)/('images-v1-'+processor.hexdigest()[:16]),models,self.sources,pool=self.pool,collection='gallery-images-'+processor.hexdigest()[:16])
+        self.text = TextEngine(Path(directory)/'nai-text-v1',models,GallerySources(database,roots_file,False),pool=self.pool,collection='gallery-parameters')
         self.plan = None
 
     def status(self):
@@ -239,6 +240,7 @@ class GalleryEngine:
 
     def close(self):
         self.visual.close();self.text.close()
+        if self._owns_pool: self.pool.close()
 
     def search(self,query,paths,image_path,mode,limit,cancelled):
         if mode not in ('mixed','visual','parameters'): raise ValueError('invalid_source')

@@ -9,6 +9,7 @@ import time
 import uuid
 
 from engine import Engine, Sources
+from pool import VectorPool
 from models import Models
 from documents import TextEngine, WikiSources, BlockSources
 from gallery import GalleryEngine
@@ -26,7 +27,7 @@ class Worker:
     def __init__(self):
         self.queue = queue.PriorityQueue()
         self.sequence = 0; self.tokens = {}; self.jobs = {}
-        self.engine = None; self.models = None; self.engines = {}; self.settings = None
+        self.engine = None; self.models = None; self.engines = {}; self.settings = None; self.pool = None
         self.last_use = time.monotonic(); self.running = True; self.suspended = False
 
     def enqueue(self, value, priority=0):
@@ -66,20 +67,22 @@ class Worker:
             self.jobs.clear()
             if self.models: self.models.unload()
             for engine in self.engines.values(): engine.close()
+            if self.pool: self.pool.close()
             self.engine = None; self.engines = {}
             models = Models(p['embedding'], p['reranker'], p.get('device','auto'))
             self.models = models
             enabled = p.get('sources',['tags'])
             if not isinstance(enabled,list) or any(s not in ('tags','wiki','blocks','gallery') for s in enabled): raise ValueError('invalid_source')
             root = os.path.abspath(p['directory'])
+            self.pool = VectorPool(root,models.fingerprint)
             if 'tags' in enabled:
-                self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki','')))
+                self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki','')),pool=self.pool,collection='tags')
             if 'wiki' in enabled:
-                self.engines['wiki'] = TextEngine(os.path.join(root,'wiki-v1'),models,WikiSources(p['wiki'],p['catalog']))
+                self.engines['wiki'] = TextEngine(os.path.join(root,'wiki-v1'),models,WikiSources(p['wiki'],p['catalog'],p.get('translations','')),pool=self.pool,collection='wiki')
             if 'blocks' in enabled:
-                self.engines['blocks'] = TextEngine(os.path.join(root,'blocks-v1'),models,BlockSources(p['blocks']))
+                self.engines['blocks'] = TextEngine(os.path.join(root,'blocks-v1'),models,BlockSources(p['blocks']),pool=self.pool,collection='blocks')
             if 'gallery' in enabled:
-                self.engines['gallery'] = GalleryEngine(os.path.join(root,'gallery-v1'),models,p['runtime'],p['gallery_roots'])
+                self.engines['gallery'] = GalleryEngine(os.path.join(root,'gallery-v1'),models,p['runtime'],p['gallery_roots'],pool=self.pool)
             self.settings = p; self.suspended = False
             return self.status()
         if self.models is None: raise ValueError('not_configured')
@@ -191,6 +194,7 @@ class Worker:
             for job in self.jobs.values(): job['generator'].close()
             self.models.unload()
             for engine in self.engines.values(): engine.close()
+            if self.pool: self.pool.close()
 
     def main(self):
         # Load native runtimes on the main thread before it blocks reading stdin.

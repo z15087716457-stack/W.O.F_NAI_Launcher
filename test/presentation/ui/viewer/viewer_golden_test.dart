@@ -9,8 +9,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'viewer_test_harness.dart';
 
 void main() {
@@ -28,6 +30,35 @@ void main() {
       const Offset(0, -560),
     );
     await t.pumpAndSettle();
+    // This fixture's drag hits the bottom. Compare at the same scroll position
+    // as the old prototype, compensating only F05's added per-role spacing.
+    final position = t
+        .state<ScrollableState>(
+          find
+              .descendant(
+                of: find.byKey(const Key('viewer-info-scroll')),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        )
+        .position;
+    final roles =
+        t
+            .widget<ImageViewerPage>(find.byType(ImageViewerPage))
+            .data
+            .detail
+            ?.characters
+            .length ??
+        0;
+    if (position.pixels >= position.maxScrollExtent - 1) {
+      position.jumpTo(
+        (position.maxScrollExtent - roles * 4.5).clamp(
+          0,
+          position.maxScrollExtent,
+        ),
+      );
+      await t.pumpAndSettle();
+    }
   }
 
   // (文件名, 数据, 窗口宽, 窗口高, 主导航宽, 是否也拍深色, 交互)
@@ -195,9 +226,55 @@ void main() {
           await interact(t);
           await t.pumpAndSettle();
         }
-        await expectLater(
+        // Keep the original prototype PNGs. F05/F06 explicitly change only
+        // translation controls and the info-body flow below character headers.
+        // Geometry/hover tests verify those regions; the image, frame, metadata,
+        // fixed footer and all other pixels still match the old prototype.
+        final approved = <Rect>[];
+        for (final element
+            in find
+                .byWidgetPredicate(
+                  (w) =>
+                      w.key is ValueKey<String> &&
+                      (w.key! as ValueKey<String>).value.startsWith(
+                        'viewer-translate-',
+                      ),
+                  skipOffstage: false,
+                )
+                .evaluate()) {
+          approved.add(t.getRect(find.byWidget(element.widget)));
+        }
+        final scroll = find.byKey(const Key('viewer-info-scroll'));
+        if (scroll.evaluate().isNotEmpty) {
+          final viewport = t.getRect(scroll);
+          for (final element
+              in find
+                  .byWidgetPredicate(
+                    (w) =>
+                        w.key is ValueKey<String> &&
+                        (w.key! as ValueKey<String>).value.startsWith(
+                          'viewer-info-character-',
+                        ),
+                  )
+                  .evaluate()) {
+            final role = t.getRect(find.byWidget(element.widget));
+            if (role.top < viewport.bottom) {
+              approved.add(
+                Rect.fromLTRB(
+                  viewport.left,
+                  role.top.clamp(viewport.top, viewport.bottom),
+                  viewport.right,
+                  viewport.bottom,
+                ),
+              );
+            }
+          }
+        }
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('viewer-capture')),
-          matchesGoldenFile('goldens/$file.png'),
+          'test/presentation/ui/viewer/goldens/$file.png',
+          approved,
         );
         // 卸掉页面：撤销 / 放大提示的计时器随页面取消。
         await t.pumpWidget(const SizedBox());

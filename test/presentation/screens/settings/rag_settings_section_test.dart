@@ -8,14 +8,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/core/rag/rag_runtime_probe.dart';
+import 'package:nai_launcher/core/rag/rag_model_download.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/providers/rag_model_download_provider.dart';
 import 'package:nai_launcher/presentation/screens/settings/sections/rag_settings_section.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_ui_theme.dart';
 import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typography_scope.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 class _FakeRag extends RagController {
+  void showInstallation() => state = state.copyWith(
+    installPhase: 'cuda',
+    installElapsed: 75,
+    installDetail: 'Downloading torch (2.5 GiB)',
+  );
   final previews = <RagSource>[];
   final starts = <RagSource>[];
   @override
@@ -80,6 +88,15 @@ class _FakeRag extends RagController {
   );
 }
 
+class _FakeDownloads extends RagModelDownloads {
+  @override
+  RagModelDownloadState build() => const RagModelDownloadState();
+  void showDownload() => state = const RagModelDownloadState(
+    kind: 'embedding',
+    progress: RagModelDownloadProgress(500000000, 1525808822),
+  );
+}
+
 class _EnabledSettings extends RagSettingsController {
   @override
   RagSettings build() => const RagSettings(
@@ -113,7 +130,15 @@ void main() {
             ProviderScope(
               overrides: [
                 ragControllerProvider.overrideWith(_FakeRag.new),
+                ragModelDownloadProvider.overrideWith(_FakeDownloads.new),
                 ragSettingsProvider.overrideWith(_EnabledSettings.new),
+                ragRuntimeInfoProvider.overrideWith(
+                  (ref) async => const RagRuntimeInfo(
+                    python: 'C:/RAG/runtime/Scripts/python.exe',
+                    ready: true,
+                    cuda: true,
+                  ),
+                ),
               ],
               child: MaterialApp(
                 locale: locale,
@@ -145,7 +170,7 @@ void main() {
           await tester.pump();
           expect(tester.takeException(), isNull);
           final directory = Directory(
-            '.dart_tool/rag-gallery-20261015/captures',
+            '.dart_tool/feedback-r6-20261015/captures',
           );
           Future<void> capture(String part) async {
             await tester.runAsync(() async {
@@ -165,6 +190,23 @@ void main() {
           }
 
           await capture('top');
+          if ((locale.languageCode == 'en' && width == 280) ||
+              (locale.languageCode == 'zh' && width == 760)) {
+            final container = ProviderScope.containerOf(
+              tester.element(find.byType(RagSettingsSection)),
+            );
+            (container.read(ragModelDownloadProvider.notifier)
+                    as _FakeDownloads)
+                .showDownload();
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            await capture('download');
+            (container.read(ragControllerProvider.notifier) as _FakeRag)
+                .showInstallation();
+            await tester.pump();
+            expect(tester.takeException(), isNull);
+            await capture('install');
+          }
           await tester.ensureVisible(find.byKey(const Key('rag-wiki-index')));
           await tester.pump();
           expect(tester.takeException(), isNull);
@@ -190,6 +232,13 @@ void main() {
         overrides: [
           ragControllerProvider.overrideWith(_FakeRag.new),
           ragSettingsProvider.overrideWith(_EnabledSettings.new),
+          ragRuntimeInfoProvider.overrideWith(
+            (ref) async => const RagRuntimeInfo(
+              python: 'C:/RAG/runtime/Scripts/python.exe',
+              ready: true,
+              cuda: true,
+            ),
+          ),
           ragGalleryRootsProvider.overrideWithValue(
             () async => ['C:/Gallery/NAI', 'D:/Pictures'],
           ),

@@ -617,7 +617,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     });
 
     final tiles = _buildTiles(layout, focus);
-    if (layout.groups.isEmpty) {
+    if (layout.groups.isEmpty && !widget.visualChannel) {
       return LayoutBuilder(
         builder: (context, constraints) {
           _setViewport(Size(constraints.maxWidth, constraints.maxHeight));
