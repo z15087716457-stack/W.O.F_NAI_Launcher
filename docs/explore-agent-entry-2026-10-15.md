@@ -1,5 +1,7 @@
 # F09 · 画风探索接入共享 NAI Agent
 
+后续交付：已随 [r8 累计更新](cumulative-preview-r8-2026-10-15.md) 安装；下文为开发验证记录。
+
 2026-10-15。按用户要求逐项修复、本地积攒，尚未构建 Release 或安装；桌面继续使用 r7 `2.0.0-preview+11`，F07／F08 保留。
 
 主生图与探索原本共用 `GenerationWiring`、`GenPromptModule` 和同一份固定偏好。入口缺失来自接线：`agentAvailable` 明确排除了 `widget.explore`，使 `GenSlots.agentToggle` 为空，菜单与头部均不显示 Agent；探索外层也未接入面板宿主。不是两套提示词组件版本不同。
