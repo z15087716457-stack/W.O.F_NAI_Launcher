@@ -30,12 +30,12 @@ import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layou
 
 import '../../../helpers/studio_capture_fonts.dart';
 
-Widget _page(String name) => switch (name) {
+Widget _page(String name, {ValueChanged<String>? onAction}) => switch (name) {
   'gen-positioning' => GenerationPage(
     data: GenFixture.characters().copyWith(
       canvas: const GenCanvasData(positioning: true),
     ),
-    actions: GenActions.logging((_) {}),
+    actions: GenActions.logging(onAction ?? (_) {}),
     slots: const GenSlots(editor: GenFixtureEditor.builder),
   ),
   'gen-empty' || 'gen-images' || 'gen-collapsed' => GenerationPage(
@@ -44,7 +44,7 @@ Widget _page(String name) => switch (name) {
         : GenFixture.view(
             layout: GenLayout(historyOpen: name != 'gen-collapsed'),
           ),
-    actions: GenActions.logging((_) {}),
+    actions: GenActions.logging(onAction ?? (_) {}),
     slots: const GenSlots(editor: GenFixtureEditor.builder),
   ),
   'explore' || 'explore-empty' => StyleExplorePage(
@@ -148,6 +148,7 @@ void main() {
             tester.view.physicalSize = Size(width, 1000);
             addTearDown(tester.view.reset);
             final boundary = GlobalKey();
+            final actions = <String>[];
             final gen = name.startsWith('gen-');
             await tester.pumpWidget(
               MaterialApp(
@@ -169,7 +170,7 @@ void main() {
                       captionTheme: name == 'viewer-stage'
                           ? GeistTheme.dark
                           : null,
-                      child: Scaffold(body: _page(name)),
+                      child: Scaffold(body: _page(name, onAction: actions.add)),
                     ),
                   ),
                 ),
@@ -202,6 +203,51 @@ void main() {
                 await drag(tester, canvas.topLeft + const Offset(12, 6));
                 // The strip remains callable above the floating canvas toolbar.
                 await drag(tester, Offset(canvas.center.dx, canvas.top + 4));
+                final topBar = find.byKey(const Key('gen-bar-top'));
+                if (topBar.evaluate().isEmpty ||
+                    tester.getSize(topBar).width < canvas.width - 40) {
+                  // Blank space beside the toolbar belongs to the window,
+                  // through the lower edge of the enlarged drag strip.
+                  for (final x in [canvas.left + 12, canvas.right - 12]) {
+                    for (final y in [32.0, 42.0]) {
+                      final point = Offset(x, canvas.top + y);
+                      final captions = tester.getRect(
+                        find.byKey(const Key('window-caption-controls')),
+                      );
+                      if (!captions.contains(point)) {
+                        await drag(tester, point);
+                      }
+                    }
+                  }
+                }
+                calls.clear();
+                await tester.dragFrom(
+                  canvas.topLeft + const Offset(12, 52),
+                  const Offset(40, 0),
+                  kind: ui.PointerDeviceKind.mouse,
+                );
+                await tester.pumpAndSettle();
+                expect(calls, isNot(contains('startDragging')));
+                if (topBar.evaluate().isNotEmpty) {
+                  calls.clear();
+                  await tester.tap(find.byKey(const Key('gen-enhance')));
+                  await tester.pumpAndSettle();
+                  expect(actions.any((a) => a.startsWith('onEnhance')), isTrue);
+                  expect(calls, isNot(contains('startDragging')));
+                  if (tester.getSize(topBar).width > canvas.width) {
+                    final scrollable = Scrollable.of(tester.element(topBar));
+                    final before = scrollable.position.pixels;
+                    calls.clear();
+                    await tester.dragFrom(
+                      Offset(canvas.center.dx, canvas.top + 28),
+                      const Offset(-60, 0),
+                      kind: ui.PointerDeviceKind.mouse,
+                    );
+                    await tester.pumpAndSettle();
+                    expect(scrollable.position.pixels, greaterThan(before));
+                    expect(calls, isNot(contains('startDragging')));
+                  }
+                }
               }
               final header = tester.getRect(
                 find.byKey(const Key('gen-header')),

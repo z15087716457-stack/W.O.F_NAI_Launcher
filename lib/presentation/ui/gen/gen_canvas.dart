@@ -36,6 +36,9 @@ class GenCanvas extends StatefulWidget {
   /// 落下面板 / 放大进度条的顶边：工具条（顶 10、高 38）下面再空 12。
   static const sheetTop = 60.0;
 
+  /// 顶部空白拖窗区略低于窗口按钮，浮动工具条保留独立点击范围。
+  static const windowDragHeight = 44.0;
+
   @override
   State<GenCanvas> createState() => _GenCanvasState();
 
@@ -102,7 +105,10 @@ class _GenCanvasState extends State<GenCanvas> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: WindowChromeScope.heightOf(context),
+                height: math.max(
+                  GenCanvas.windowDragHeight,
+                  WindowChromeScope.heightOf(context),
+                ),
                 child: const WindowDragArea(key: Key('gen-canvas-window-drag')),
               ),
             if (!cv.positioning) ...[
@@ -1210,18 +1216,16 @@ class _InfoBar extends StatelessWidget {
   }
 }
 
-/// Narrow canvases put the info strip above the action strip, without overlap.
+/// Only the visible bar scrolls; surrounding blank space keeps its canvas or
+/// window drag handling. Overflowing bars remain scrollable on narrow canvases.
 class _CanvasBarViewport extends StatelessWidget {
   const _CanvasBarViewport({required this.child});
   final Widget child;
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-    builder: (context, box) => SingleChildScrollView(
+  Widget build(BuildContext context) => Center(
+    child: SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(minWidth: box.maxWidth),
-        child: Center(child: child),
-      ),
+      child: child,
     ),
   );
 }
