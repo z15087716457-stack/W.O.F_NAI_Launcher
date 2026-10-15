@@ -16554,4 +16554,157 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get naiAgent_attachmentMetadata => '元画像のメタデータ';
+
+  @override
+  String get channel_themeCircuit => '回路';
+
+  @override
+  String get channel_themeStars => '星図';
+
+  @override
+  String get channel_themeHerb => '植物標本';
+
+  @override
+  String get channel_themeArcade => '回廊';
+
+  @override
+  String get channel_themeAbyss => '深海';
+
+  @override
+  String get channel_themeWave => '青海波';
+
+  @override
+  String get channel_descCircuit =>
+      '両側を 2 本ずつバスが下り、分岐・パッド・チップが並びます。待機中は光がバスを流れます';
+
+  @override
+  String get channel_descStars => '星、星座線、目盛りリング、赤緯スケール。待機中は明るい星がかすかに瞬きます';
+
+  @override
+  String get channel_descHerb => '墨線の標本が両側から伸び、葉・花・テープ・番号ラベル付き。待機中は風に揺れます';
+
+  @override
+  String get channel_descArcade => '大聖堂の平面図。画像は身廊を進み、両側に柱・リブヴォールト・窓・通り芯・寸法線';
+
+  @override
+  String get channel_descAbyss => '下るほど深く（古く）なります。深度計、等深線、昇る泡、降るマリンスノー';
+
+  @override
+  String get channel_descWave => '和柄の波が両側に集まり、朱の日輪と霞を添えます。待機中は光が波を渡ります';
+
+  @override
+  String get channel_title => 'ビジュアルチャンネル';
+
+  @override
+  String get channel_new => 'NEW';
+
+  @override
+  String get channel_subtitle => 'スクロールすると両側に現れる装飾。画像の外側だけに描かれます';
+
+  @override
+  String get channel_paused => '生成中 · アニメ一時停止';
+
+  @override
+  String get channel_modeOff => 'オフ';
+
+  @override
+  String get channel_modeFixed => '固定';
+
+  @override
+  String get channel_modeRandom => '毎回ランダム';
+
+  @override
+  String get channel_session => '今回';
+
+  @override
+  String get channel_reroll => '入れ替え';
+
+  @override
+  String get channel_offNote => 'オフにすると今のピクセル模様のままです';
+
+  @override
+  String get channel_minTwo => 'ランダムには 2 つ以上のテーマが必要です';
+
+  @override
+  String get channel_level => '濃さ';
+
+  @override
+  String get channel_levelSoft => '淡';
+
+  @override
+  String get channel_levelStandard => '標準';
+
+  @override
+  String get channel_levelStrong => '濃';
+
+  @override
+  String get channel_ruler => '時刻目盛り';
+
+  @override
+  String get channel_rulerSub => 'バッチ時刻、日付の区切り、右端のスクラバー';
+
+  @override
+  String get channel_motion => 'アイドル時の動き';
+
+  @override
+  String get channel_motionSub => 'ごく軽い動き。生成中は自動で止まります';
+
+  @override
+  String get channel_toastTitle => '今回のチャンネル';
+
+  @override
+  String channel_batch(String time, int count) {
+    return '$time · $count 枚';
+  }
+
+  @override
+  String channel_batchNewest(String time, int count) {
+    return '$time · $count 枚 · 最新';
+  }
+
+  @override
+  String channel_batchPending(int count) {
+    return '生成中 · $count 枚';
+  }
+
+  @override
+  String channel_dayToday(String date) {
+    return '今日 · $date';
+  }
+
+  @override
+  String channel_dayYesterday(String date) {
+    return '昨日 · $date';
+  }
+
+  @override
+  String channel_monthDayWeek(int month, int day, String weekday) {
+    return '$month月$day日（$weekday）';
+  }
+
+  @override
+  String get channel_weekday1 => '月';
+
+  @override
+  String get channel_weekday2 => '火';
+
+  @override
+  String get channel_weekday3 => '水';
+
+  @override
+  String get channel_weekday4 => '木';
+
+  @override
+  String get channel_weekday5 => '金';
+
+  @override
+  String get channel_weekday6 => '土';
+
+  @override
+  String get channel_weekday7 => '日';
+
+  @override
+  String channel_scrubWhen(String day, String time) {
+    return '$day $time';
+  }
 }

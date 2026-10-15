@@ -56,6 +56,7 @@ class StorageKeys {
   static const String canvasReducedMotion = 'canvas_reduced_motion';
   static const String canvasZoomToFill = 'canvas_zoom_to_fill';
   static const String canvasImageBackground = 'canvas_image_background';
+  static const String canvasChannelPreferences = 'canvas_channel_preferences';
   static const String canvasPinnedImages = 'canvas_pinned_images';
   static const String mainNavRailExpanded = 'main_nav_rail_expanded';
   static const String mainNavHiddenBranches = 'main_nav_hidden_branches';

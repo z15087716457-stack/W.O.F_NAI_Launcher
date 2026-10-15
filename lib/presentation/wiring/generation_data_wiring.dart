@@ -16,6 +16,8 @@ import '../../l10n/app_localizations.dart';
 import '../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/canvas_settings_provider.dart';
+import '../providers/canvas_channel_provider.dart';
+import '../providers/canvas_channel_feed_provider.dart';
 import '../providers/character_position_canvas_provider.dart';
 import '../providers/character_prompt_provider.dart';
 import '../providers/cost_estimate_provider.dart';
@@ -481,6 +483,8 @@ final generationViewDataProvider = Provider.autoDispose
               : null,
         ),
         canvas: GenCanvasData(
+          channel: ref.watch(canvasChannelNotifierProvider),
+          channelTop: ref.watch(canvasChannelFeedProvider).top,
           focus: focus,
           info: image == null
               ? null

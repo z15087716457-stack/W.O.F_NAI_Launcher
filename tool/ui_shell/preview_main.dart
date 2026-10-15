@@ -5,11 +5,13 @@
 // “本地画廊”显示大图查看器（全屏时藏起主导航）；生图页工具条的增强 / 放大 / 编辑 / 局部重绘 / 导演工具
 // 由画布工具模拟器接管（都由本地模拟器驱动），其他页显示占位。
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_fixture.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_fixture_editor.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
@@ -99,6 +101,10 @@ class _PreviewAppState extends State<_PreviewApp> {
   // 生图页 + 画布工具（工具条面板、编辑器、导演工具）
   late final _tools = ToolsPreviewSim(log: _log)..addListener(_rebuild);
   late final _genSim = _tools.gen..addListener(_rebuild);
+
+  /// 画布视觉通道：每次打开预览随机一个种子（同正式版“每次进来主题不一样”）。
+  var _channelOn = true;
+  var _channel = ChannelSettings(seed: math.Random().nextInt(1 << 31));
 
   void _rebuild() => setState(() {});
 
@@ -209,6 +215,34 @@ class _PreviewAppState extends State<_PreviewApp> {
     onGoGenerate: () => _log('onGoGenerate'),
     onAddGalleryFolder: () => _log('onAddGalleryFolder'),
   );
+
+  /// 生图页；“视觉通道”打开时画布换成通道假画布（ChannelFixtureCanvas），显示设置里出通道一节。
+  Widget _generationPage() {
+    final data = _genSim.data;
+    final channel = _channelOn ? _channel : null;
+    void set(ChannelSettings v) {
+      _log('onChannelChanged($v)');
+      setState(() => _channel = v);
+    }
+
+    return GenerationPage(
+      data: data.copyWith(canvas: data.canvas.withChannel(channel)),
+      actions: _genSim.actions.withChannel(_channelOn ? set : null),
+      slots: GenSlots(
+        editor: _genSim.editor,
+        dock: _genSim.dock(),
+        toolSheet: _tools.sheet(),
+        canvas: _channelOn
+            ? (context, tile) => ChannelFixtureCanvas(
+                settings: _channel,
+                onSettingsChanged: set,
+                generating: data.generate.state == GenRunState.generating,
+                images: genPreviewImage,
+              )
+            : null,
+      ),
+    );
+  }
 
   Widget _dropdown<T>(T value, List<T> values, ValueChanged<T> onChanged) =>
       DropdownButton<T>(
@@ -322,6 +356,11 @@ class _PreviewAppState extends State<_PreviewApp> {
                       GenScene.values,
                       (s) => setState(() => _genSim.scene = s),
                     ),
+                    _chip(
+                      '视觉通道',
+                      _channelOn,
+                      (v) => setState(() => _channelOn = v),
+                    ),
                     const Text('画布工具：'),
                     _dropdown(
                       _tools.scene,
@@ -390,15 +429,7 @@ class _PreviewAppState extends State<_PreviewApp> {
                     NavPage.generation =>
                       _genSim.scene == GenScene.blocksDemo
                           ? BlocksGenerationMock(log: _log)
-                          : GenerationPage(
-                              data: _genSim.data,
-                              actions: _genSim.actions,
-                              slots: GenSlots(
-                                editor: _genSim.editor,
-                                dock: _genSim.dock(),
-                                toolSheet: _tools.sheet(),
-                              ),
-                            ),
+                          : _generationPage(),
                     NavPage.styleExplore => _explorePage(),
                     NavPage.localGallery => ImageViewerPage(
                       data: _viewer.data,

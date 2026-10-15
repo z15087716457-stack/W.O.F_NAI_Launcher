@@ -16340,6 +16340,158 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get naiAgent_attachmentMetadata => '原图元数据';
+
+  @override
+  String get channel_themeCircuit => '像素电路';
+
+  @override
+  String get channel_themeStars => '星图';
+
+  @override
+  String get channel_themeHerb => '植物标本';
+
+  @override
+  String get channel_themeArcade => '回廊';
+
+  @override
+  String get channel_themeAbyss => '深海';
+
+  @override
+  String get channel_themeWave => '青海波';
+
+  @override
+  String get channel_descCircuit => '两侧各两条总线一路往下，分支、焊盘、芯片；空闲时有光点沿总线流动';
+
+  @override
+  String get channel_descStars => '星点、星座连线、刻度环和赤纬尺；亮星空闲时轻微闪烁';
+
+  @override
+  String get channel_descHerb => '墨线标本从两侧长出，叶片、花头、胶带和编号标签；空闲时随风轻摆';
+
+  @override
+  String get channel_descArcade => '俯视的教堂平面图：图片走在中殿里，两侧是立柱、肋拱、墙窗、轴号和尺寸线';
+
+  @override
+  String get channel_descAbyss => '越往下越深（越旧）：深度尺、等深线、上浮的气泡和飘落的海雪';
+
+  @override
+  String get channel_descWave => '和风波纹在两侧聚散，配一轮朱日和几道霞；空闲时有光沿波纹扫过';
+
+  @override
+  String get channel_title => '视觉通道';
+
+  @override
+  String get channel_new => 'NEW';
+
+  @override
+  String get channel_subtitle => '滚动时两侧的装饰，只画在图片之外，不挡图';
+
+  @override
+  String get channel_paused => '生成中 · 动画已暂停';
+
+  @override
+  String get channel_modeOff => '关闭';
+
+  @override
+  String get channel_modeFixed => '固定一个';
+
+  @override
+  String get channel_modeRandom => '每次随机';
+
+  @override
+  String get channel_session => '本次';
+
+  @override
+  String get channel_reroll => '换一组';
+
+  @override
+  String get channel_offNote => '关闭后保留现在的像素底纹';
+
+  @override
+  String get channel_minTwo => '随机至少保留两个主题';
+
+  @override
+  String get channel_level => '浓淡';
+
+  @override
+  String get channel_levelSoft => '淡';
+
+  @override
+  String get channel_levelStandard => '标准';
+
+  @override
+  String get channel_levelStrong => '浓';
+
+  @override
+  String get channel_ruler => '时间刻度';
+
+  @override
+  String get channel_rulerSub => '批次时间、日期分隔和右侧刻度条';
+
+  @override
+  String get channel_motion => '空闲微动';
+
+  @override
+  String get channel_motionSub => '很轻的动效，生成时自动暂停';
+
+  @override
+  String get channel_toastTitle => '本次通道';
+
+  @override
+  String channel_batch(String time, int count) {
+    return '$time · $count 张';
+  }
+
+  @override
+  String channel_batchNewest(String time, int count) {
+    return '$time · $count 张 · 最新';
+  }
+
+  @override
+  String channel_batchPending(int count) {
+    return '生成中 · $count 张';
+  }
+
+  @override
+  String channel_dayToday(String date) {
+    return '今天 · $date';
+  }
+
+  @override
+  String channel_dayYesterday(String date) {
+    return '昨天 · $date';
+  }
+
+  @override
+  String channel_monthDayWeek(int month, int day, String weekday) {
+    return '$month月$day日 $weekday';
+  }
+
+  @override
+  String get channel_weekday1 => '周一';
+
+  @override
+  String get channel_weekday2 => '周二';
+
+  @override
+  String get channel_weekday3 => '周三';
+
+  @override
+  String get channel_weekday4 => '周四';
+
+  @override
+  String get channel_weekday5 => '周五';
+
+  @override
+  String get channel_weekday6 => '周六';
+
+  @override
+  String get channel_weekday7 => '周日';
+
+  @override
+  String channel_scrubWhen(String day, String time) {
+    return '$day $time';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -32678,4 +32830,156 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get naiAgent_attachmentMetadata => '原圖後設資料';
+
+  @override
+  String get channel_themeCircuit => '像素電路';
+
+  @override
+  String get channel_themeStars => '星圖';
+
+  @override
+  String get channel_themeHerb => '植物標本';
+
+  @override
+  String get channel_themeArcade => '迴廊';
+
+  @override
+  String get channel_themeAbyss => '深海';
+
+  @override
+  String get channel_themeWave => '青海波';
+
+  @override
+  String get channel_descCircuit => '兩側各兩條匯流排一路往下，分支、焊盤、晶片；空閒時有光點沿匯流排流動';
+
+  @override
+  String get channel_descStars => '星點、星座連線、刻度環和赤緯尺；亮星空閒時輕微閃爍';
+
+  @override
+  String get channel_descHerb => '墨線標本從兩側長出，葉片、花頭、膠帶和編號標籤；空閒時隨風輕擺';
+
+  @override
+  String get channel_descArcade => '俯視的教堂平面圖：圖片走在中殿裡，兩側是立柱、肋拱、牆窗、軸號和尺寸線';
+
+  @override
+  String get channel_descAbyss => '越往下越深（越舊）：深度尺、等深線、上浮的氣泡和飄落的海雪';
+
+  @override
+  String get channel_descWave => '和風波紋在兩側聚散，配一輪朱日和幾道霞；空閒時有光沿波紋掃過';
+
+  @override
+  String get channel_title => '視覺通道';
+
+  @override
+  String get channel_new => 'NEW';
+
+  @override
+  String get channel_subtitle => '滾動時兩側的裝飾，只畫在圖片之外，不擋圖';
+
+  @override
+  String get channel_paused => '生成中 · 動畫已暫停';
+
+  @override
+  String get channel_modeOff => '關閉';
+
+  @override
+  String get channel_modeFixed => '固定一個';
+
+  @override
+  String get channel_modeRandom => '每次隨機';
+
+  @override
+  String get channel_session => '本次';
+
+  @override
+  String get channel_reroll => '換一組';
+
+  @override
+  String get channel_offNote => '關閉後保留現在的像素底紋';
+
+  @override
+  String get channel_minTwo => '隨機至少保留兩個主題';
+
+  @override
+  String get channel_level => '濃淡';
+
+  @override
+  String get channel_levelSoft => '淡';
+
+  @override
+  String get channel_levelStandard => '標準';
+
+  @override
+  String get channel_levelStrong => '濃';
+
+  @override
+  String get channel_ruler => '時間刻度';
+
+  @override
+  String get channel_rulerSub => '批次時間、日期分隔和右側刻度條';
+
+  @override
+  String get channel_motion => '空閒微動';
+
+  @override
+  String get channel_motionSub => '很輕的動效，生成時自動暫停';
+
+  @override
+  String get channel_toastTitle => '本次通道';
+
+  @override
+  String channel_batch(String time, int count) {
+    return '$time · $count 張';
+  }
+
+  @override
+  String channel_batchNewest(String time, int count) {
+    return '$time · $count 張 · 最新';
+  }
+
+  @override
+  String channel_batchPending(int count) {
+    return '生成中 · $count 張';
+  }
+
+  @override
+  String channel_dayToday(String date) {
+    return '今天 · $date';
+  }
+
+  @override
+  String channel_dayYesterday(String date) {
+    return '昨天 · $date';
+  }
+
+  @override
+  String channel_monthDayWeek(int month, int day, String weekday) {
+    return '$month月$day日 $weekday';
+  }
+
+  @override
+  String get channel_weekday1 => '週一';
+
+  @override
+  String get channel_weekday2 => '週二';
+
+  @override
+  String get channel_weekday3 => '週三';
+
+  @override
+  String get channel_weekday4 => '週四';
+
+  @override
+  String get channel_weekday5 => '週五';
+
+  @override
+  String get channel_weekday6 => '週六';
+
+  @override
+  String get channel_weekday7 => '週日';
+
+  @override
+  String channel_scrubWhen(String day, String time) {
+    return '$day $time';
+  }
 }

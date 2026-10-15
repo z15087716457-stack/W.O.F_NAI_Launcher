@@ -1,0 +1,31 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 视觉通道原型的元素位置（给 channel_measure.py 出偏差表）。键名和 channel_prototype_capture_test.dart 一致。
+// 设置分区以“视觉通道”标题内容框左上角为原点；刻度条以画布右上角为原点。
+const view=location.hash.slice(1);
+const P={pop:'pop&seed=7','pop-dark':'pop&seed=7&dark','pop-fixed':'pop&seed=7&mode=fixed&theme=arcade','pop-off':'pop&seed=7&mode=off',random:'seed=7'}[view]||'seed=7';
+const f=document.getElementById('f');
+f.src='/mockups/canvas-channel/mock.html#'+P;
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,1200));
+  const q=s=>d.querySelector(s);
+  const B=e=>e.getBoundingClientRect();
+  const m={};
+  const sec=q('.psec');
+  if(sec&&q('#pop').classList.contains('open')){
+    const s=B(sec),ox=s.left+10,oy=s.top+8;
+    const put=(k,e,pad=[0,0,0,0])=>{if(!e)return;const b=B(e);m[k]=[b.left+pad[3]-ox,b.top+pad[0]-oy,b.width-pad[1]-pad[3],b.height-pad[0]-pad[2]]};
+    m.sec=[0,0,s.width-20,0];
+    put('mode',q('#pmode'));
+    const md=[...q('#pmode').children];put('mode-off',md[0]);put('mode-fixed',md[1]);put('mode-random',md[2]);
+    put('cards',q('.tgrid'),[10,10,0,10]);
+    put('card-circuit',q('.tc[data-id="circuit"]'));put('card-wave',q('.tc[data-id="wave"]'));
+    put('note',q('.pnote'));put('level',q('#plevel'));
+    put('ruler',q('.swr[data-k="ruler"]'),[9,10,0,10]);put('motion',q('.swr[data-k="anim"]'),[9,10,10,10]);
+    m.noteText=(q('.pnote .seqs')||{}).textContent||'';
+  }
+  const cv=B(q('#cv')),sb=q('#scrub');
+  if(sb&&sb.style.display!=='none'){const b=B(sb);m.scrub=[b.left-cv.right,b.top-cv.top,b.width,cv.bottom-b.bottom]}
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+};
+</script></body></html>

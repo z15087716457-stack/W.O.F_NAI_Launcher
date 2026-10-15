@@ -10,6 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/canvas_settings_provider.dart';
+import '../../../../providers/canvas_channel_provider.dart';
+import '../../../../providers/canvas_channel_feed_provider.dart';
+import '../../../../ui/channel/channel_contract.dart';
+import '../../../../ui/channel/channel_layer.dart';
+import '../../../../ui/channel/channel_overlay.dart';
 import '../../../../providers/generation/generation_models.dart';
 import '../../../../providers/generation/preview_selection_provider.dart';
 import '../../../../providers/image_generation_provider.dart';
@@ -41,6 +46,7 @@ class GenerationCanvasView extends ConsumerStatefulWidget {
     this.tileBuilder,
     this.focusInsets,
     this.deferKeyEvent,
+    this.visualChannel = false,
     super.key,
   });
 
@@ -57,6 +63,10 @@ class GenerationCanvasView extends ConsumerStatefulWidget {
   tileBuilder;
   final EdgeInsets? focusInsets;
   final bool Function(KeyEvent)? deferKeyEvent;
+
+  /// The main generation host opts in. Generic embedded previews remain bare.
+  /// `embedded` controls legacy chrome, not this separately supplied decoration.
+  final bool visualChannel;
 
   bool get embedded => tileBuilder != null;
 
@@ -475,6 +485,16 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     MediaQuery.textScalerOf(context);
     final layout = ref.watch(canvasFeedLayoutProvider);
     final focus = ref.watch(generationCanvasGroupSelectionProvider);
+    final channelSettings = widget.visualChannel
+        ? ref.watch(canvasChannelNotifierProvider)
+        : null;
+    final channelActive =
+        channelSettings != null && channelSettings.mode != ChannelMode.off;
+    final channelFeed = channelActive
+        ? ref.watch(canvasChannelFeedProvider)
+        : null;
+    final reducedChannelMotion =
+        channelActive && ref.watch(canvasReducedMotionNotifierProvider);
 
     // 新批占位出现时立即飞过去；流式帧和最终图更新使用同一组身份。
     ref.listen(canvasFeedLayoutProvider, (prev, next) {
@@ -652,9 +672,28 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                           final camera = ref.watch(
                             generationCanvasCameraProvider,
                           );
+                          final channel = channelFeed == null
+                              ? null
+                              : ChannelViewData(
+                                  settings: reducedChannelMotion
+                                      ? channelSettings.copyWith(motion: false)
+                                      : channelSettings!,
+                                  camera: ChannelCamera(
+                                    offset: camera.offset,
+                                    scale: camera.scale,
+                                  ),
+                                  batches: channelFeed.batches,
+                                  pinboard: channelFeed.pinboard,
+                                  now: channelFeed.now,
+                                  generating: channelFeed.generating,
+                                );
                           return Stack(
                             children: [
-                              if (!widget.embedded)
+                              if (channel != null)
+                                Positioned.fill(
+                                  child: ChannelBackdrop(data: channel),
+                                )
+                              else if (!widget.embedded)
                                 Positioned.fill(
                                   child: RepaintBoundary(
                                     child: CustomPaint(
@@ -673,6 +712,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                   ),
                                 ),
                               Positioned.fill(
+                                key: const ValueKey('canvas-world-viewport'),
                                 child: CanvasWorldViewport(
                                   camera: camera,
                                   children: tiles
@@ -687,6 +727,34 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                 ),
                               ),
                               ..._buildGroupBadges(layout, camera),
+                              if (channel != null)
+                                Positioned.fill(
+                                  key: const ValueKey('canvas-channel-overlay'),
+                                  child: Listener(
+                                    onPointerDown: (event) =>
+                                        _uiPointers.add(event.pointer),
+                                    onPointerUp: (event) {
+                                      _uiPointers.remove(event.pointer);
+                                      _consumedUiPointers.add(event.pointer);
+                                    },
+                                    onPointerCancel: (event) {
+                                      _uiPointers.remove(event.pointer);
+                                      _consumedUiPointers.remove(event.pointer);
+                                    },
+                                    child: ChannelOverlay(
+                                      data: channel,
+                                      actions: ChannelActions(
+                                        onSettingsChanged: (value) => ref
+                                            .read(
+                                              canvasChannelNotifierProvider
+                                                  .notifier,
+                                            )
+                                            .set(value),
+                                        onJumpTo: _jumpChannel,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             ],
                           );
                         },
@@ -704,6 +772,26 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           ),
         ),
       ),
+    );
+  }
+
+  void _jumpChannel(double worldY) {
+    if (_cameraLocked || _viewport.isEmpty || !worldY.isFinite) return;
+    _stopWasd();
+    _lostTimer?.cancel();
+    _panActive = false;
+    _panAccum = Offset.zero;
+    _inertiaVelocity = Offset.zero;
+    _manualOverview = true;
+    _focusFitActive = false;
+    final camera = _cameraState();
+    _camera.jump(
+      CanvasCamera(
+        offset:
+            _viewport.center(Offset.zero) - Offset(0, worldY) * camera.scale,
+        scale: camera.scale,
+      ),
+      notifyIdle: false,
     );
   }
 

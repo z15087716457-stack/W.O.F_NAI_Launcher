@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
+import '../channel/channel_settings.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -1485,9 +1486,12 @@ class _DisplayPopover extends StatelessWidget {
       );
     }
 
+    final channel = cv.channel;
+    final onChannel = scope.actions.onChannelChanged;
+    final showChannel = channel != null && onChannel != null;
     return UiPopoverSurface(
       key: const Key('gen-display-popover'),
-      width: 260,
+      width: showChannel ? 316 : 260,
       padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1539,6 +1543,15 @@ class _DisplayPopover extends StatelessWidget {
               ],
             ),
           ),
+          if (showChannel) ...[
+            Container(height: 1, color: c.line),
+            ChannelSettingsSection(
+              settings: channel,
+              onChanged: onChannel,
+              anchorY: cv.channelTop,
+              generating: scope.data.generate.state == GenRunState.generating,
+            ),
+          ],
         ],
       ),
     );

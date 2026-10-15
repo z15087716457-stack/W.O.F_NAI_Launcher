@@ -255,12 +255,13 @@ class GenerationCanvasCameraNotifier extends Notifier<CanvasCamera> {
   }
 
   /// 直接跳变（惯性每帧/拖拽）
-  void jump(CanvasCamera next) {
+  void jump(CanvasCamera next, {bool notifyIdle = true}) {
     if (_disposed) return;
     _cancelMotion();
+    _cancelIdle();
     state = next;
     _notify();
-    _settle();
+    if (notifyIdle) _settle();
   }
 
   /// 官网 zoomBy：以屏幕锚点缩放，钳 [0.1,8]。

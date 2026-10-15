@@ -9,6 +9,7 @@ import '../widgets/shortcuts/shortcut_aware_widget.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
 import 'tools_generation_wiring.dart';
 import '../providers/character_prompt_provider.dart';
+import '../providers/canvas_channel_provider.dart';
 import '../providers/pill_workspace_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/image_save_settings_provider.dart';
@@ -258,6 +259,8 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         toolSheet: const ToolsGenerationSheetWiring(),
       ),
       actions: GenActions(
+        onChannelChanged: (value) =>
+            ref.read(canvasChannelNotifierProvider.notifier).set(value),
         onLayoutChanged: (value) =>
             run(() => settings.layout(value, previous: data.layout)),
         onModelChanged: (value) => run(() => settings.model(value)),

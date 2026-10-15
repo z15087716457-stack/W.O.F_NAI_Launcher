@@ -29786,6 +29786,282 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Original image metadata'**
   String get naiAgent_attachmentMetadata;
+
+  /// No description provided for @channel_themeCircuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Circuit'**
+  String get channel_themeCircuit;
+
+  /// No description provided for @channel_themeStars.
+  ///
+  /// In en, this message translates to:
+  /// **'Star atlas'**
+  String get channel_themeStars;
+
+  /// No description provided for @channel_themeHerb.
+  ///
+  /// In en, this message translates to:
+  /// **'Herbarium'**
+  String get channel_themeHerb;
+
+  /// No description provided for @channel_themeArcade.
+  ///
+  /// In en, this message translates to:
+  /// **'Arcade'**
+  String get channel_themeArcade;
+
+  /// No description provided for @channel_themeAbyss.
+  ///
+  /// In en, this message translates to:
+  /// **'Abyss'**
+  String get channel_themeAbyss;
+
+  /// No description provided for @channel_themeWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Seigaiha'**
+  String get channel_themeWave;
+
+  /// No description provided for @channel_descCircuit.
+  ///
+  /// In en, this message translates to:
+  /// **'Two buses run down each side with branches, pads and chips; light pulses flow along them when idle'**
+  String get channel_descCircuit;
+
+  /// No description provided for @channel_descStars.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars, constellation lines, graduated rings and a declination scale; bright stars twinkle when idle'**
+  String get channel_descStars;
+
+  /// No description provided for @channel_descHerb.
+  ///
+  /// In en, this message translates to:
+  /// **'Ink specimens grow from both sides with leaves, flowers, tape and numbered labels; they sway when idle'**
+  String get channel_descHerb;
+
+  /// No description provided for @channel_descArcade.
+  ///
+  /// In en, this message translates to:
+  /// **'A cathedral floor plan: images walk the nave, flanked by piers, rib vaults, windows, grid marks and dimensions'**
+  String get channel_descArcade;
+
+  /// No description provided for @channel_descAbyss.
+  ///
+  /// In en, this message translates to:
+  /// **'Deeper as you go down (older): depth gauge, isobaths, rising bubbles and falling marine snow'**
+  String get channel_descAbyss;
+
+  /// No description provided for @channel_descWave.
+  ///
+  /// In en, this message translates to:
+  /// **'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle'**
+  String get channel_descWave;
+
+  /// No description provided for @channel_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual channel'**
+  String get channel_title;
+
+  /// No description provided for @channel_new.
+  ///
+  /// In en, this message translates to:
+  /// **'NEW'**
+  String get channel_new;
+
+  /// No description provided for @channel_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Decorations on both sides as you scroll — drawn only outside your images'**
+  String get channel_subtitle;
+
+  /// No description provided for @channel_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating · motion paused'**
+  String get channel_paused;
+
+  /// No description provided for @channel_modeOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get channel_modeOff;
+
+  /// No description provided for @channel_modeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'One theme'**
+  String get channel_modeFixed;
+
+  /// No description provided for @channel_modeRandom.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle'**
+  String get channel_modeRandom;
+
+  /// No description provided for @channel_session.
+  ///
+  /// In en, this message translates to:
+  /// **'This time'**
+  String get channel_session;
+
+  /// No description provided for @channel_reroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reshuffle'**
+  String get channel_reroll;
+
+  /// No description provided for @channel_offNote.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, the current pixel pattern stays'**
+  String get channel_offNote;
+
+  /// No description provided for @channel_minTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least two themes to shuffle'**
+  String get channel_minTwo;
+
+  /// No description provided for @channel_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Strength'**
+  String get channel_level;
+
+  /// No description provided for @channel_levelSoft.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft'**
+  String get channel_levelSoft;
+
+  /// No description provided for @channel_levelStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get channel_levelStandard;
+
+  /// No description provided for @channel_levelStrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Bold'**
+  String get channel_levelStrong;
+
+  /// No description provided for @channel_ruler.
+  ///
+  /// In en, this message translates to:
+  /// **'Time marks'**
+  String get channel_ruler;
+
+  /// No description provided for @channel_rulerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch times, day dividers and the scrubber'**
+  String get channel_rulerSub;
+
+  /// No description provided for @channel_motion.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle motion'**
+  String get channel_motion;
+
+  /// No description provided for @channel_motionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtle animation, paused while generating'**
+  String get channel_motionSub;
+
+  /// No description provided for @channel_toastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This session'**
+  String get channel_toastTitle;
+
+  /// No description provided for @channel_batch.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · ×{count}'**
+  String channel_batch(String time, int count);
+
+  /// No description provided for @channel_batchNewest.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} · ×{count} · latest'**
+  String channel_batchNewest(String time, int count);
+
+  /// No description provided for @channel_batchPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating · ×{count}'**
+  String channel_batchPending(int count);
+
+  /// No description provided for @channel_dayToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today · {date}'**
+  String channel_dayToday(String date);
+
+  /// No description provided for @channel_dayYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday · {date}'**
+  String channel_dayYesterday(String date);
+
+  /// No description provided for @channel_monthDayWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'{weekday}, {month}/{day}'**
+  String channel_monthDayWeek(int month, int day, String weekday);
+
+  /// No description provided for @channel_weekday1.
+  ///
+  /// In en, this message translates to:
+  /// **'Mon'**
+  String get channel_weekday1;
+
+  /// No description provided for @channel_weekday2.
+  ///
+  /// In en, this message translates to:
+  /// **'Tue'**
+  String get channel_weekday2;
+
+  /// No description provided for @channel_weekday3.
+  ///
+  /// In en, this message translates to:
+  /// **'Wed'**
+  String get channel_weekday3;
+
+  /// No description provided for @channel_weekday4.
+  ///
+  /// In en, this message translates to:
+  /// **'Thu'**
+  String get channel_weekday4;
+
+  /// No description provided for @channel_weekday5.
+  ///
+  /// In en, this message translates to:
+  /// **'Fri'**
+  String get channel_weekday5;
+
+  /// No description provided for @channel_weekday6.
+  ///
+  /// In en, this message translates to:
+  /// **'Sat'**
+  String get channel_weekday6;
+
+  /// No description provided for @channel_weekday7.
+  ///
+  /// In en, this message translates to:
+  /// **'Sun'**
+  String get channel_weekday7;
+
+  /// No description provided for @channel_scrubWhen.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} {time}'**
+  String channel_scrubWhen(String day, String time);
 }
 
 class _AppLocalizationsDelegate

@@ -48,6 +48,7 @@ class _GenerationCanvasWiringState
     return LayoutBuilder(
       builder: (context, constraints) => GenerationCanvasView(
         generationState: state,
+        visualChannel: true,
         focusInsets: GenCanvas.focusPadding(
           constraints.maxWidth,
           GenScope.of(context).data.canvas.info?.canCompareOriginal == true,

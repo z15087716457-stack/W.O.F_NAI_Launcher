@@ -386,6 +386,25 @@ void main() {
       await tester.pump(const Duration(milliseconds: 200));
     });
 
+    testWidgets('导航跳转取消先前 idle，且不重新调度自动选图', (tester) async {
+      final container = buildContainer();
+      final n = await mountCamera(tester, container);
+      var idle = 0;
+      n.onIdle = () => idle++;
+      n.panBy(const Offset(0, 20));
+      await tester.pump(const Duration(milliseconds: 60));
+      n.jump(
+        const CanvasCamera(offset: Offset(3, -10000), scale: .8),
+        notifyIdle: false,
+      );
+      await tester.pump(const Duration(seconds: 3));
+      expect(idle, 0);
+      expect(state(container).offset, const Offset(3, -10000));
+      n.panBy(const Offset(0, 10));
+      await tester.pump(const Duration(milliseconds: 121));
+      expect(idle, 1);
+    });
+
     testWidgets('停稳 120ms 触发 onIdle；运动恢复会取消待触发计时', (tester) async {
       final container = buildContainer();
       final n = await mountCamera(tester, container);

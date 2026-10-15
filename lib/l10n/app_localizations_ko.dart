@@ -16594,4 +16594,162 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get naiAgent_attachmentMetadata => '원본 이미지 메타데이터';
+
+  @override
+  String get channel_themeCircuit => '회로';
+
+  @override
+  String get channel_themeStars => '성도';
+
+  @override
+  String get channel_themeHerb => '식물 표본';
+
+  @override
+  String get channel_themeArcade => '회랑';
+
+  @override
+  String get channel_themeAbyss => '심해';
+
+  @override
+  String get channel_themeWave => '청해파';
+
+  @override
+  String get channel_descCircuit =>
+      '양쪽에 버스가 두 줄씩 내려가며 분기·패드·칩이 붙습니다. 대기 중에는 빛이 버스를 따라 흐릅니다';
+
+  @override
+  String get channel_descStars =>
+      '별, 별자리 선, 눈금 고리와 적위 눈금. 대기 중에는 밝은 별이 살짝 반짝입니다';
+
+  @override
+  String get channel_descHerb =>
+      '먹선 표본이 양쪽에서 자라며 잎·꽃·테이프·번호 라벨이 붙습니다. 대기 중에는 바람에 흔들립니다';
+
+  @override
+  String get channel_descArcade =>
+      '성당 평면도. 이미지는 신랑을 따라가고 양쪽에 기둥·리브 볼트·창·축 번호·치수선';
+
+  @override
+  String get channel_descAbyss =>
+      '내려갈수록 깊어집니다(오래될수록). 수심계, 등심선, 떠오르는 거품과 내리는 바다눈';
+
+  @override
+  String get channel_descWave =>
+      '일본풍 물결이 양쪽에 모이고 붉은 해와 안개 띠가 있습니다. 대기 중에는 빛이 물결을 훑습니다';
+
+  @override
+  String get channel_title => '비주얼 채널';
+
+  @override
+  String get channel_new => 'NEW';
+
+  @override
+  String get channel_subtitle => '스크롤할 때 양쪽에 보이는 장식. 이미지 바깥에만 그려집니다';
+
+  @override
+  String get channel_paused => '생성 중 · 애니메이션 일시정지';
+
+  @override
+  String get channel_modeOff => '끄기';
+
+  @override
+  String get channel_modeFixed => '고정';
+
+  @override
+  String get channel_modeRandom => '매번 무작위';
+
+  @override
+  String get channel_session => '이번';
+
+  @override
+  String get channel_reroll => '다시 섞기';
+
+  @override
+  String get channel_offNote => '끄면 지금의 픽셀 무늬가 유지됩니다';
+
+  @override
+  String get channel_minTwo => '무작위에는 테마가 두 개 이상 필요합니다';
+
+  @override
+  String get channel_level => '농도';
+
+  @override
+  String get channel_levelSoft => '연하게';
+
+  @override
+  String get channel_levelStandard => '보통';
+
+  @override
+  String get channel_levelStrong => '진하게';
+
+  @override
+  String get channel_ruler => '시간 눈금';
+
+  @override
+  String get channel_rulerSub => '배치 시간, 날짜 구분선과 오른쪽 스크러버';
+
+  @override
+  String get channel_motion => '대기 중 움직임';
+
+  @override
+  String get channel_motionSub => '아주 가벼운 움직임. 생성 중에는 자동으로 멈춥니다';
+
+  @override
+  String get channel_toastTitle => '이번 채널';
+
+  @override
+  String channel_batch(String time, int count) {
+    return '$time · $count장';
+  }
+
+  @override
+  String channel_batchNewest(String time, int count) {
+    return '$time · $count장 · 최신';
+  }
+
+  @override
+  String channel_batchPending(int count) {
+    return '생성 중 · $count장';
+  }
+
+  @override
+  String channel_dayToday(String date) {
+    return '오늘 · $date';
+  }
+
+  @override
+  String channel_dayYesterday(String date) {
+    return '어제 · $date';
+  }
+
+  @override
+  String channel_monthDayWeek(int month, int day, String weekday) {
+    return '$month월 $day일 $weekday';
+  }
+
+  @override
+  String get channel_weekday1 => '월';
+
+  @override
+  String get channel_weekday2 => '화';
+
+  @override
+  String get channel_weekday3 => '수';
+
+  @override
+  String get channel_weekday4 => '목';
+
+  @override
+  String get channel_weekday5 => '금';
+
+  @override
+  String get channel_weekday6 => '토';
+
+  @override
+  String get channel_weekday7 => '일';
+
+  @override
+  String channel_scrubWhen(String day, String time) {
+    return '$day $time';
+  }
 }

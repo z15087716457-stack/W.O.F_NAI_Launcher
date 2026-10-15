@@ -20,6 +20,12 @@ import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
+import 'package:nai_launcher/presentation/providers/canvas_channel_provider.dart';
+import 'package:nai_launcher/presentation/providers/canvas_channel_feed_provider.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_layer.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_overlay.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_settings.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
@@ -114,6 +120,7 @@ void main() {
       overrides: [
         tipDeckProvider.overrideWithValue(deck),
         localStorageServiceProvider.overrideWithValue(storage),
+        canvasChannelSeedProvider.overrideWithValue(7),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
@@ -169,7 +176,9 @@ void main() {
                           ({required data, required actions, required slots}) =>
                               GenHost(
                                 data: data,
-                                actions: GenActions.logging(events.add),
+                                actions: GenActions.logging(
+                                  events.add,
+                                ).withChannel(actions.onChannelChanged),
                                 slots: slots,
                                 child: shortcutHost
                                     ? ShortcutAwareWidget(
@@ -215,6 +224,9 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final channel =
+        Platform.environment['CAPTURE_CHANNEL_BACKEND'] == '1' &&
+        name.startsWith('channel-');
     final oldCompare = Platform.environment['CAPTURE_OLD_COMPARE'] == '1';
     final retiredEntry =
         Platform.environment['CAPTURE_CANVAS_MENU_RETIRED_ENTRY'] == '1';
@@ -222,7 +234,8 @@ void main() {
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!oldCompare &&
+    if (!channel &&
+        !oldCompare &&
         !retiredEntry &&
         !imageMenu &&
         !contextMenu &&
@@ -235,7 +248,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = oldCompare
+      final area = channel
+          ? 'channel-backend-20261015'
+          : oldCompare
           ? 'inpaint-old-compare-20261014'
           : retiredEntry
           ? 'canvas-menu-retired-entry-20261014'
@@ -323,6 +338,191 @@ void main() {
     expect(container.read(generationParamsNotifierProvider), initialDraft);
     expect(events, isEmpty);
   });
+
+  testWidgets('主画布显式启用通道，开关不重挂图块，设置回调落到存储', (tester) async {
+    publish(ImageGenerationState(history: [image(1), image(1, 1)]));
+    await pump(tester);
+    expect(find.byType(ChannelBackdrop), findsOneWidget);
+    expect(find.byType(ChannelOverlay), findsOneWidget);
+    final backdrop = tester
+        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .data;
+    final feed = container.read(canvasChannelFeedProvider);
+    expect(backdrop.batches, same(feed.batches));
+    expect(backdrop.camera.offset, camera().offset);
+    expect(backdrop.camera.scale, camera().scale);
+    expect(
+      backdrop.settings.motion,
+      isFalse,
+    ); // Application reduced-motion setting.
+    final tile = find.byKey(const Key('gen-tile-1-0'));
+    final element = tester.element(tile);
+    await tester.tap(find.byKey(const Key('gen-display')));
+    await tester.pumpAndSettle();
+    final section = tester.widget<ChannelSettingsSection>(
+      find.byType(ChannelSettingsSection),
+    );
+    section.onChanged(section.settings.copyWith(mode: ChannelMode.off));
+    await tester.pumpAndSettle();
+    expect(find.byType(ChannelBackdrop), findsNothing);
+    expect(find.byType(ChannelOverlay), findsNothing);
+    expect(tester.element(tile), same(element));
+    expect(
+      storage.values.containsKey(StorageKeys.canvasChannelPreferences),
+      isTrue,
+    );
+    expect(container.read(canvasChannelNotifierProvider).mode, ChannelMode.off);
+  });
+
+  for (final kind in [PointerDeviceKind.mouse, PointerDeviceKind.touch]) {
+    testWidgets('导航尺点击与拖动保持缩放及选中，锁相机时忽略 $kind', (tester) async {
+      publish(ImageGenerationState(history: [image(1), image(2)]));
+      await pump(tester);
+      final before = camera();
+      final focus = container.read(generationCanvasGroupSelectionProvider);
+      final selection = container.read(generationPreviewSelectionProvider);
+      final rect = tester.getRect(find.byKey(const Key('channel-scrubber')));
+      final gesture = await tester.startGesture(
+        rect.topLeft + Offset(12, rect.height * .6),
+        kind: kind,
+      );
+      await tester.pump();
+      await gesture.moveTo(rect.topLeft + Offset(12, rect.height * .8));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump(const Duration(milliseconds: 20));
+      final feed = container.read(canvasChannelFeedProvider);
+      final top = feed.batches.first.rect.top - 1600;
+      final bottom = feed.batches.last.rect.bottom + 1600;
+      final view = tester.getSize(find.byKey(const Key('gen-canvas')));
+      final center = camera().screenToWorld(view.center(Offset.zero));
+      expect(center.dx, closeTo(0, .001));
+      expect(center.dy, closeTo(top + (bottom - top) * .8, .001));
+      expect(camera().scale, before.scale);
+      final jumped = camera();
+      await tester.pump(const Duration(seconds: 3));
+      expect(camera().offset, jumped.offset);
+      expect(container.read(generationCanvasGroupSelectionProvider), focus);
+      expect(container.read(generationPreviewSelectionProvider), selection);
+      await container
+          .read(canvasLockCameraNotifierProvider.notifier)
+          .setLocked(true);
+      await tester.tap(find.byKey(const Key('channel-scrubber')));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(camera().offset, jumped.offset);
+      expect(camera().scale, jumped.scale);
+    });
+  }
+
+  testWidgets('通道叠层透传图块点击、滚轮、Ctrl 缩放与 WASD', (tester) async {
+    publish(ImageGenerationState(history: [image(1), image(1, 1)]));
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('gen-tile-1-1')));
+    await tester.pumpAndSettle();
+    expect(container.read(generationPreviewSelectionProvider), '1-1');
+    final before = camera();
+    await wheel(tester, const Offset(0, 45));
+    expect(camera().offset, before.offset - const Offset(0, 45));
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await wheel(tester, const Offset(0, -50));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    expect(camera().scale, greaterThan(before.scale));
+    final moved = camera().offset;
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.keyW);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.keyW);
+    expect(camera().offset, isNot(moved));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('未显式启用的嵌入视图不出现通道', (tester) async {
+    final data = ImageGenerationState(history: [image(1)]);
+    publish(data);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: GeistTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: GenerationCanvasView(
+            generationState: data,
+            tileBuilder: (_, _, _, _, _) => const SizedBox.expand(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(ChannelBackdrop), findsNothing);
+    expect(find.byType(ChannelOverlay), findsNothing);
+  });
+
+  testWidgets('生成占位与首张结果映射到真实批次数量和时间', (tester) async {
+    publish(loading(71, count: 2));
+    await pump(tester);
+    var data = tester
+        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .data;
+    expect(data.generating, isTrue);
+    expect(data.batches.first.count, 2);
+    expect(data.batches.first.pending, isTrue);
+    expect(data.batches.first.time, isNull);
+    final result = image(71);
+    publish(
+      ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: 71,
+        totalImages: 2,
+        currentImage: 2,
+        currentImages: [result],
+        batchWidth: 512,
+        batchHeight: 768,
+      ),
+    );
+    await tester.pumpAndSettle();
+    data = tester.widget<ChannelBackdrop>(find.byType(ChannelBackdrop)).data;
+    expect(data.batches.first.count, 2);
+    expect(data.batches.first.pending, isFalse);
+    expect(data.batches.first.time, result.createdAt);
+  });
+
+  for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+    for (final dark in [false, true]) {
+      testWidgets('真实通道设置、导航提示与本次顺序 $language dark=$dark', (tester) async {
+        publish(ImageGenerationState(history: [image(1), image(2)]));
+        await pump(tester, fullPage: true, language: language, dark: dark);
+        expect(find.byKey(const Key('channel-toast')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await capture(tester, 'channel-$language-$dark-canvas');
+        await tester.tap(find.byKey(const Key('gen-display')));
+        await tester.pumpAndSettle();
+        expect(
+          tester.getSize(find.byKey(const Key('gen-display-popover'))).width,
+          316,
+        );
+        expect(find.byType(ChannelSettingsSection), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await capture(tester, 'channel-$language-$dark-settings');
+        GenScope.of(
+          tester.element(find.byType(GenCanvas)),
+        ).controller.closePopover();
+        await tester.pumpAndSettle();
+        final pointer = await tester.createGesture(
+          kind: PointerDeviceKind.mouse,
+        );
+        await pointer.addPointer(location: Offset.zero);
+        await pointer.moveTo(
+          tester.getCenter(find.byKey(const Key('channel-scrubber'))),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('channel-scrub-tip')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+        await capture(tester, 'channel-$language-$dark-tip');
+        await pointer.removePointer();
+      });
+    }
+  }
 
   GeneratedImage comparisonImage(String id, {bool masked = true}) {
     final original = Uint8List.fromList(

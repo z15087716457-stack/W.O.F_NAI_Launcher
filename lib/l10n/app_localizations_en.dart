@@ -17046,4 +17046,163 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get naiAgent_attachmentMetadata => 'Original image metadata';
+
+  @override
+  String get channel_themeCircuit => 'Circuit';
+
+  @override
+  String get channel_themeStars => 'Star atlas';
+
+  @override
+  String get channel_themeHerb => 'Herbarium';
+
+  @override
+  String get channel_themeArcade => 'Arcade';
+
+  @override
+  String get channel_themeAbyss => 'Abyss';
+
+  @override
+  String get channel_themeWave => 'Seigaiha';
+
+  @override
+  String get channel_descCircuit =>
+      'Two buses run down each side with branches, pads and chips; light pulses flow along them when idle';
+
+  @override
+  String get channel_descStars =>
+      'Stars, constellation lines, graduated rings and a declination scale; bright stars twinkle when idle';
+
+  @override
+  String get channel_descHerb =>
+      'Ink specimens grow from both sides with leaves, flowers, tape and numbered labels; they sway when idle';
+
+  @override
+  String get channel_descArcade =>
+      'A cathedral floor plan: images walk the nave, flanked by piers, rib vaults, windows, grid marks and dimensions';
+
+  @override
+  String get channel_descAbyss =>
+      'Deeper as you go down (older): depth gauge, isobaths, rising bubbles and falling marine snow';
+
+  @override
+  String get channel_descWave =>
+      'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle';
+
+  @override
+  String get channel_title => 'Visual channel';
+
+  @override
+  String get channel_new => 'NEW';
+
+  @override
+  String get channel_subtitle =>
+      'Decorations on both sides as you scroll — drawn only outside your images';
+
+  @override
+  String get channel_paused => 'Generating · motion paused';
+
+  @override
+  String get channel_modeOff => 'Off';
+
+  @override
+  String get channel_modeFixed => 'One theme';
+
+  @override
+  String get channel_modeRandom => 'Shuffle';
+
+  @override
+  String get channel_session => 'This time';
+
+  @override
+  String get channel_reroll => 'Reshuffle';
+
+  @override
+  String get channel_offNote => 'When off, the current pixel pattern stays';
+
+  @override
+  String get channel_minTwo => 'Keep at least two themes to shuffle';
+
+  @override
+  String get channel_level => 'Strength';
+
+  @override
+  String get channel_levelSoft => 'Soft';
+
+  @override
+  String get channel_levelStandard => 'Normal';
+
+  @override
+  String get channel_levelStrong => 'Bold';
+
+  @override
+  String get channel_ruler => 'Time marks';
+
+  @override
+  String get channel_rulerSub => 'Batch times, day dividers and the scrubber';
+
+  @override
+  String get channel_motion => 'Idle motion';
+
+  @override
+  String get channel_motionSub => 'Subtle animation, paused while generating';
+
+  @override
+  String get channel_toastTitle => 'This session';
+
+  @override
+  String channel_batch(String time, int count) {
+    return '$time · ×$count';
+  }
+
+  @override
+  String channel_batchNewest(String time, int count) {
+    return '$time · ×$count · latest';
+  }
+
+  @override
+  String channel_batchPending(int count) {
+    return 'Generating · ×$count';
+  }
+
+  @override
+  String channel_dayToday(String date) {
+    return 'Today · $date';
+  }
+
+  @override
+  String channel_dayYesterday(String date) {
+    return 'Yesterday · $date';
+  }
+
+  @override
+  String channel_monthDayWeek(int month, int day, String weekday) {
+    return '$weekday, $month/$day';
+  }
+
+  @override
+  String get channel_weekday1 => 'Mon';
+
+  @override
+  String get channel_weekday2 => 'Tue';
+
+  @override
+  String get channel_weekday3 => 'Wed';
+
+  @override
+  String get channel_weekday4 => 'Thu';
+
+  @override
+  String get channel_weekday5 => 'Fri';
+
+  @override
+  String get channel_weekday6 => 'Sat';
+
+  @override
+  String get channel_weekday7 => 'Sun';
+
+  @override
+  String channel_scrubWhen(String day, String time) {
+    return '$day $time';
+  }
 }

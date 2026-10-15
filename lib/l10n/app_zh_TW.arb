@@ -9009,5 +9009,115 @@
         "type": "int"
       }
     }
+  },
+  "channel_themeCircuit": "像素電路",
+  "channel_themeStars": "星圖",
+  "channel_themeHerb": "植物標本",
+  "channel_themeArcade": "迴廊",
+  "channel_themeAbyss": "深海",
+  "channel_themeWave": "青海波",
+  "channel_descCircuit": "兩側各兩條匯流排一路往下，分支、焊盤、晶片；空閒時有光點沿匯流排流動",
+  "channel_descStars": "星點、星座連線、刻度環和赤緯尺；亮星空閒時輕微閃爍",
+  "channel_descHerb": "墨線標本從兩側長出，葉片、花頭、膠帶和編號標籤；空閒時隨風輕擺",
+  "channel_descArcade": "俯視的教堂平面圖：圖片走在中殿裡，兩側是立柱、肋拱、牆窗、軸號和尺寸線",
+  "channel_descAbyss": "越往下越深（越舊）：深度尺、等深線、上浮的氣泡和飄落的海雪",
+  "channel_descWave": "和風波紋在兩側聚散，配一輪朱日和幾道霞；空閒時有光沿波紋掃過",
+  "channel_title": "視覺通道",
+  "channel_new": "NEW",
+  "channel_subtitle": "滾動時兩側的裝飾，只畫在圖片之外，不擋圖",
+  "channel_paused": "生成中 · 動畫已暫停",
+  "channel_modeOff": "關閉",
+  "channel_modeFixed": "固定一個",
+  "channel_modeRandom": "每次隨機",
+  "channel_session": "本次",
+  "channel_reroll": "換一組",
+  "channel_offNote": "關閉後保留現在的像素底紋",
+  "channel_minTwo": "隨機至少保留兩個主題",
+  "channel_level": "濃淡",
+  "channel_levelSoft": "淡",
+  "channel_levelStandard": "標準",
+  "channel_levelStrong": "濃",
+  "channel_ruler": "時間刻度",
+  "channel_rulerSub": "批次時間、日期分隔和右側刻度條",
+  "channel_motion": "空閒微動",
+  "channel_motionSub": "很輕的動效，生成時自動暫停",
+  "channel_toastTitle": "本次通道",
+  "channel_batch": "{time} · {count} 張",
+  "@channel_batch": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "channel_batchNewest": "{time} · {count} 張 · 最新",
+  "@channel_batchNewest": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "channel_batchPending": "生成中 · {count} 張",
+  "@channel_batchPending": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "channel_dayToday": "今天 · {date}",
+  "@channel_dayToday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "channel_dayYesterday": "昨天 · {date}",
+  "@channel_dayYesterday": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "channel_monthDayWeek": "{month}月{day}日 {weekday}",
+  "@channel_monthDayWeek": {
+    "placeholders": {
+      "month": {
+        "type": "int"
+      },
+      "day": {
+        "type": "int"
+      },
+      "weekday": {
+        "type": "String"
+      }
+    }
+  },
+  "channel_weekday1": "週一",
+  "channel_weekday2": "週二",
+  "channel_weekday3": "週三",
+  "channel_weekday4": "週四",
+  "channel_weekday5": "週五",
+  "channel_weekday6": "週六",
+  "channel_weekday7": "週日",
+  "channel_scrubWhen": "{day} {time}",
+  "@channel_scrubWhen": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
   }
 }

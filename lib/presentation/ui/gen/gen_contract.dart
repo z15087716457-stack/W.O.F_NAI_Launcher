@@ -2,6 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 
+import '../channel/channel_contract.dart';
+
+export '../channel/channel_contract.dart' show ChannelSettings;
+
 /// 生图页（方案 A 精修）：界面只认这份契约。
 ///
 /// 口径约定：
@@ -848,6 +852,8 @@ class GenCanvasData {
     this.generateShortcut = 'Ctrl+Enter',
     this.locked = false,
     this.sheet,
+    this.channel,
+    this.channelTop = 0,
   });
 
   /// 焦点组（历史栏点了哪一批 / 刚生成的那一批）；null = 画布上什么都没有。
@@ -879,6 +885,31 @@ class GenCanvasData {
   /// 从工具条落下的面板开着哪个（对应按钮显示选中，箭头指着它）；面板本身由
   /// [GenSlots.toolSheet] 给（画布工具的 `ToolsEnhanceSheet` / `ToolsUpscaleSheet`）。
   final GenToolSheet? sheet;
+
+  /// 画布视觉通道的设置（见 `ui/channel/channel_contract.dart`）。给了就在显示设置弹层里出
+  /// “视觉通道”一节，改动走 [GenActions.onChannelChanged]；null = 不出这一节。
+  final ChannelSettings? channel;
+
+  /// 画布最新一批顶边的世界 y（`canvasFeedLayout.groups.first` 的组矩形顶边），
+  /// 设置里“本次”从这里所在的段开始列，和画布进入提示一致。
+  final double channelTop;
+
+  /// 只换视觉通道两项（其余照旧）。
+  GenCanvasData withChannel(ChannelSettings? channel, {double? top}) =>
+      GenCanvasData(
+        focus: focus,
+        info: info,
+        upscale: upscale,
+        error: error,
+        backdrop: backdrop,
+        zoomToFill: zoomToFill,
+        positioning: positioning,
+        generateShortcut: generateShortcut,
+        locked: locked,
+        sheet: sheet,
+        channel: channel,
+        channelTop: top ?? channelTop,
+      );
 }
 
 /// 工具条落下的面板：增强（点“增强”）/ 放大设置（点放大旁的小箭头）。
@@ -1204,6 +1235,7 @@ class GenActions {
     required this.onSendTo,
     required this.onReveal,
     this.onUpscaleSettings,
+    this.onChannelChanged,
   });
 
   /// 每个回调只把名字和参数交给 [log]（测试、预览用）。
@@ -1302,7 +1334,106 @@ class GenActions {
     onFavorite: (imageId, favorite) => log('onFavorite($imageId, $favorite)'),
     onSendTo: (imageId, target) => log('onSendTo($imageId, $target)'),
     onReveal: (v) => log('onReveal($v)'),
+    onChannelChanged: (v) => log('onChannelChanged($v)'),
   );
+
+  /// 换掉视觉通道回调（其余照旧）：测试、预览里给 [GenActions.logging] 接上可用的设置。
+  GenActions withChannel(ValueChanged<ChannelSettings>? onChannelChanged) =>
+      GenActions(
+        onLayoutChanged: onLayoutChanged,
+        onModelChanged: onModelChanged,
+        onFurryChanged: onFurryChanged,
+        onOpenQuota: onOpenQuota,
+        onNegativeTab: onNegativeTab,
+        onClearPrompt: onClearPrompt,
+        onQualityPreset: onQualityPreset,
+        onUcPreset: onUcPreset,
+        onTransparentChanged: onTransparentChanged,
+        onPromptTool: onPromptTool,
+        onOpenPalette: onOpenPalette,
+        onTranslate: onTranslate,
+        onToggleTranslation: onToggleTranslation,
+        onTranslationSettings: onTranslationSettings,
+        onOpenBridge: onOpenBridge,
+        onAddCharacter: onAddCharacter,
+        onClearCharacters: onClearCharacters,
+        onRemoveCharacter: onRemoveCharacter,
+        onMoveCharacter: onMoveCharacter,
+        onCharacterEnabled: onCharacterEnabled,
+        onRenameCharacter: onRenameCharacter,
+        onCharacterGender: onCharacterGender,
+        onCharacterToLibrary: onCharacterToLibrary,
+        onAiPositionChanged: onAiPositionChanged,
+        onCharacterPosition: onCharacterPosition,
+        onPositioningChanged: onPositioningChanged,
+        onImg2ImgUpload: onImg2ImgUpload,
+        onImg2ImgFromLibrary: onImg2ImgFromLibrary,
+        onImg2ImgSketch: onImg2ImgSketch,
+        onImg2ImgChanged: onImg2ImgChanged,
+        onImg2ImgEdit: onImg2ImgEdit,
+        onImg2ImgInpaint: onImg2ImgInpaint,
+        onImg2ImgPlace: onImg2ImgPlace,
+        onImg2ImgRemove: onImg2ImgRemove,
+        onAddVibeFiles: onAddVibeFiles,
+        onAddVibeFromLibrary: onAddVibeFromLibrary,
+        onAddRecentVibe: onAddRecentVibe,
+        onVibeChanged: onVibeChanged,
+        onEncodeVibe: onEncodeVibe,
+        onRemoveVibe: onRemoveVibe,
+        onClearVibes: onClearVibes,
+        onSaveVibes: onSaveVibes,
+        onNormalizeChanged: onNormalizeChanged,
+        onAddPreciseFiles: onAddPreciseFiles,
+        onAddPreciseFromLibrary: onAddPreciseFromLibrary,
+        onPreciseChanged: onPreciseChanged,
+        onRemovePrecise: onRemovePrecise,
+        onClearPrecise: onClearPrecise,
+        onSavePrecise: onSavePrecise,
+        onSizeChanged: onSizeChanged,
+        onCountChanged: onCountChanged,
+        onRepeatChanged: onRepeatChanged,
+        onParamChanged: onParamChanged,
+        onSeedChanged: onSeedChanged,
+        onSeedPinned: onSeedPinned,
+        onSamplerChanged: onSamplerChanged,
+        onNoiseChanged: onNoiseChanged,
+        onVarietyChanged: onVarietyChanged,
+        onDecrispChanged: onDecrispChanged,
+        onSmeaChanged: onSmeaChanged,
+        onGenerate: onGenerate,
+        onStop: onStop,
+        onEnhance: onEnhance,
+        onVariations: onVariations,
+        onUpscale: onUpscale,
+        onUpscaleOption: onUpscaleOption,
+        onSetInit: onSetInit,
+        onEditImage: onEditImage,
+        onInpaint: onInpaint,
+        onSendToTools: onSendToTools,
+        onUseSeed: onUseSeed,
+        onCopySeed: onCopySeed,
+        onPin: onPin,
+        onCopyImage: onCopyImage,
+        onSaveImage: onSaveImage,
+        onOpenViewer: onOpenViewer,
+        onFocusTile: onFocusTile,
+        onBackdropChanged: onBackdropChanged,
+        onZoomToFillChanged: onZoomToFillChanged,
+        onRetry: onRetry,
+        onDismissError: onDismissError,
+        onFocusBatch: onFocusBatch,
+        onAutoSaveChanged: onAutoSaveChanged,
+        onFocusPins: onFocusPins,
+        onSaveImages: onSaveImages,
+        onPackImages: onPackImages,
+        onDeleteImages: onDeleteImages,
+        onClearHistory: onClearHistory,
+        onFavorite: onFavorite,
+        onSendTo: onSendTo,
+        onReveal: onReveal,
+        onUpscaleSettings: onUpscaleSettings,
+        onChannelChanged: onChannelChanged,
+      );
 
   /// 拖宽松手 / 折叠展开 / 开关块库侧栏（存 `layoutState`）。
   final ValueChanged<GenLayout> onLayoutChanged;
@@ -1454,6 +1585,10 @@ class GenActions {
   /// 选了垫底（预设名或 `#RRGGBB`）。
   final ValueChanged<String> onBackdropChanged;
   final ValueChanged<bool> onZoomToFillChanged;
+
+  /// 显示设置里改了视觉通道（含“换一组”换种子），同 `ChannelActions.onSettingsChanged`。
+  /// null = 不出“视觉通道”一节。
+  final ValueChanged<ChannelSettings>? onChannelChanged;
   final VoidCallback onRetry;
   final VoidCallback onDismissError;
 
