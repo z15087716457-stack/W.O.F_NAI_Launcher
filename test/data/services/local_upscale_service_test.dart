@@ -258,6 +258,58 @@ void main() {
   );
 
   test(
+    'GPU arbitration completes before work and releases on failure or cancellation',
+    () async {
+      for (final cancelled in [false, true]) {
+        final order = <String>[];
+        final cancellation = LocalUpscaleCancellation();
+        final gate = Completer<void>();
+        final service = LocalUpscaleService(
+          manager,
+          supportedPlatform: true,
+          beforeInference: () async {
+            order.add('suspend');
+            await gate.future;
+          },
+          afterInference: () async {
+            order.add('release');
+            throw StateError('retrieval restart');
+          },
+          startProcess: (_, __) async {
+            order.add('inference');
+            throw StateError('native failure');
+          },
+        );
+        final pending = service.upscale(
+          cancelled ? _source() : Uint8List.fromList([1, 2]),
+          modelId: 'anime',
+          scale: 2,
+          cancellation: cancellation,
+        );
+        final checked = expectLater(
+          pending,
+          throwsA(
+            _error(
+              cancelled
+                  ? LocalUpscaleError.cancelled
+                  : LocalUpscaleError.invalidImage,
+            ),
+          ),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(order, ['suspend']);
+        if (cancelled) cancellation.cancel();
+        gate.complete();
+        await checked;
+        expect(order, ['suspend', 'release']);
+        expect(service.isRunning, isFalse);
+        manager.claimInference('anime');
+        manager.releaseInference();
+      }
+    },
+  );
+
+  test(
     'real bundled native worker produces exact fractional targets, keeps alpha, and exits',
     () async {
       final service = LocalUpscaleService(manager);

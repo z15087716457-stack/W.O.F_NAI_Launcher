@@ -41,6 +41,15 @@ List<SettingsSearchEntry> settingsSearchEntries(
       item('agent', l.naiAgent_systemPromptPrefix, l.naiAgent_instructions),
       item('agent', 'MCP', l.naiAgent_mcpBuiltin),
     ],
+    if (pages.containsKey('rag')) ...[
+      item(
+        'rag',
+        l.rag_modelMode,
+        'RAG Gemma Qwen embedding reranker 向量 嵌入 重排',
+      ),
+      item('rag', l.rag_context, '120 token cursor 标签 扩展 推荐 光标'),
+      item('rag', l.rag_buildIndex, 'index vector 索引 建库 清除 暂停'),
+    ],
     item('appearance', l.settings_style, 'theme light dark 深浅色 明暗'),
     item('appearance', l.settings_font, 'font 字体'),
     item('appearance', l.settings_fontScale, 'scale 字号'),

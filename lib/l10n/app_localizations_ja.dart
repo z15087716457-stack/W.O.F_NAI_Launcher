@@ -16707,4 +16707,160 @@ class AppLocalizationsJa extends AppLocalizations {
   String channel_scrubWhen(String day, String time) {
     return '$day $time';
   }
+
+  @override
+  String get rag_title => 'RAG ベクトルシステム';
+
+  @override
+  String get rag_description => 'ローカル検索、モデル、文脈に沿ったタグ候補を管理';
+
+  @override
+  String get rag_enabled => 'RAG を有効にする';
+
+  @override
+  String get rag_enabledHint => 'ローカル意味検索を有効化。初回の索引作成は範囲を確認して開始します。';
+
+  @override
+  String get rag_status => '実行・索引の状態';
+
+  @override
+  String get rag_off => '無効';
+
+  @override
+  String get rag_loading => 'ローカルモデルを準備中';
+
+  @override
+  String get rag_empty => 'モデル接続済み・索引未作成';
+
+  @override
+  String get rag_ready => '意味検索の準備完了';
+
+  @override
+  String get rag_partial => '一部利用可能・未索引の内容は通常検索';
+
+  @override
+  String get rag_building => '索引を作成中';
+
+  @override
+  String get rag_paused => '索引作成を一時停止・既存索引は検索可能';
+
+  @override
+  String get rag_unavailable => 'RAG 利用不可・通常検索は利用可能';
+
+  @override
+  String get rag_operationFailed => '操作に失敗しました。モデルの場所と専用環境を確認してください。';
+
+  @override
+  String rag_indexCounts(int indexed, int total) {
+    return '索引済み $indexed / $total 件';
+  }
+
+  @override
+  String rag_storage(String size) {
+    return '索引容量：$size MiB';
+  }
+
+  @override
+  String get rag_refresh => '状態を更新';
+
+  @override
+  String get rag_embeddingPath => 'EmbeddingGemma 2 のモデルフォルダー';
+
+  @override
+  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B のモデルフォルダー';
+
+  @override
+  String get rag_notConfigured => '未設定';
+
+  @override
+  String get rag_choose => '選択';
+
+  @override
+  String get rag_modelMode => 'モデルの機能';
+
+  @override
+  String get rag_modelModeHint =>
+      'Gemma はテキスト・画像に対応し音声は無効。タグ処理はテキストのみ読み込み、Qwen が再順位付けします。';
+
+  @override
+  String get rag_discover => 'ローカルモデルを検出';
+
+  @override
+  String get rag_modelsMissing => 'モデルが見つかりません。保存済みモデルのフォルダーを選択してください。';
+
+  @override
+  String get rag_pythonPath => '専用 Python 実行環境';
+
+  @override
+  String get rag_runtime => '推論実行環境';
+
+  @override
+  String get rag_runtimeHint => '専用環境を使用します。既存の拡大コンポーネントは変更せず、モデルは別途指定します。';
+
+  @override
+  String get rag_installRuntime => '専用環境をインストール';
+
+  @override
+  String get rag_installHint =>
+      'Python と推論依存関係を取得します。CUDA 版は数 GB と対応 NVIDIA GPU が必要です。CPU 版は小さく、モデルは別途用意します。';
+
+  @override
+  String get rag_installing => '実行環境をインストール中';
+
+  @override
+  String get rag_device => '実行デバイス';
+
+  @override
+  String get rag_auto => '自動選択';
+
+  @override
+  String get rag_tagsEnabled => '文脈に沿ったタグ候補';
+
+  @override
+  String get rag_tagsHint => '意味・共起・再順位付けを組み合わせ、入力欄・キャラクター・正負を分離します。';
+
+  @override
+  String get rag_context => '候補の文脈範囲';
+
+  @override
+  String get rag_contextHint => '両モードともタグ単位で最大 120 Gemma トークン。全文は重複除外のみに使用。';
+
+  @override
+  String get rag_contextBefore => 'カーソル前 · 120 tokens';
+
+  @override
+  String get rag_contextAround => 'カーソル前後 · 120 tokens';
+
+  @override
+  String get rag_buildIndex => '確認して索引を作成';
+
+  @override
+  String rag_plan(int total) {
+    return '現在の $total 件のタグ、別名、既存のローカル解説を索引化します。初回は時間がかかりますが一時停止・部分利用が可能です。';
+  }
+
+  @override
+  String get rag_start => '作成を開始';
+
+  @override
+  String get rag_pause => '作成を一時停止';
+
+  @override
+  String get rag_resume => '作成を再開';
+
+  @override
+  String get rag_rebuild => '索引を再作成';
+
+  @override
+  String get rag_clear => '索引を削除';
+
+  @override
+  String get rag_clearHint => '派生索引を削除します。元のタグとモデルは保持され、再利用には再作成が必要です。';
+
+  @override
+  String get rag_futureSources =>
+      '初版はタグ候補に対応。Wiki、ブロック、作業領域、画像庫、Agent 検索は順次追加します。';
+
+  @override
+  String get rag_badgeHint => 'ローカル意味タグ候補が利用可能';
 }

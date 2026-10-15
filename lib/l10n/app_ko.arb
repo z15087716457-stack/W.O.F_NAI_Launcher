@@ -9062,5 +9062,78 @@
   "channel_weekday6": "토",
   "channel_weekday7": "일",
   "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}}
+  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
+  "rag_title": "RAG 벡터 시스템",
+  "rag_description": "로컬 검색, 모델 및 문맥 태그 추천 관리",
+  "rag_enabled": "RAG 사용",
+  "rag_enabledHint": "로컬 의미 검색을 켭니다. 최초 색인은 범위를 확인한 후 시작합니다.",
+  "rag_status": "실행 및 색인 상태",
+  "rag_off": "꺼짐",
+  "rag_loading": "로컬 모델 준비 중",
+  "rag_empty": "모델 연결됨 · 색인 대기",
+  "rag_ready": "의미 검색 준비 완료",
+  "rag_partial": "일부 준비됨 · 나머지는 일반 검색",
+  "rag_building": "색인 생성 중",
+  "rag_paused": "색인 생성 일시 정지 · 기존 색인은 검색 가능",
+  "rag_unavailable": "RAG 사용 불가 · 일반 검색 가능",
+  "rag_operationFailed": "작업에 실패했습니다. 모델 경로와 전용 환경을 확인하세요.",
+  "rag_indexCounts": "색인 완료 {indexed} / {total}개",
+  "@rag_indexCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_storage": "색인 용량: {size} MiB",
+  "@rag_storage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "rag_refresh": "상태 새로 고침",
+  "rag_embeddingPath": "EmbeddingGemma 2 모델 폴더",
+  "rag_rerankerPath": "Qwen3-Reranker-0.6B 모델 폴더",
+  "rag_notConfigured": "설정되지 않음",
+  "rag_choose": "선택",
+  "rag_modelMode": "모델 기능",
+  "rag_modelModeHint": "Gemma는 텍스트·이미지를 지원하며 오디오는 끕니다. 태그 작업은 텍스트만 로드하고 Qwen으로 재정렬합니다.",
+  "rag_discover": "로컬 모델 찾기",
+  "rag_modelsMissing": "모델을 찾지 못했습니다. 다운로드한 모델 폴더를 선택하세요.",
+  "rag_pythonPath": "전용 Python 실행 환경",
+  "rag_runtime": "추론 실행 환경",
+  "rag_runtimeHint": "전용 환경을 사용합니다. 기존 업스케일 환경은 유지되며 모델은 별도로 선택합니다.",
+  "rag_installRuntime": "전용 실행 환경 설치",
+  "rag_installHint": "Python과 추론 패키지를 다운로드합니다. CUDA는 수 GB와 호환 NVIDIA GPU가 필요하며 CPU 버전은 더 작습니다. 모델 파일은 별도입니다.",
+  "rag_installing": "실행 환경 설치 중",
+  "rag_device": "실행 장치",
+  "rag_auto": "자동 선택",
+  "rag_tagsEnabled": "문맥 기반 태그 추천",
+  "rag_tagsHint": "의미·공기 관계·재정렬을 결합하며 입력란, 캐릭터, 정·부정을 분리합니다.",
+  "rag_context": "추천 문맥 범위",
+  "rag_contextHint": "두 모드 모두 태그 경계 기준 최대 120 Gemma 토큰입니다. 전체 입력은 중복 제거에만 사용합니다.",
+  "rag_contextBefore": "커서 앞 · 120 tokens",
+  "rag_contextAround": "커서 주변 · 120 tokens",
+  "rag_buildIndex": "미리 보기 및 색인 생성",
+  "rag_plan": "현재 태그 {total}개와 별칭, 기존 로컬 설명을 색인합니다. 최초 작업은 시간이 걸리며 일시 정지와 부분 사용이 가능합니다.",
+  "@rag_plan": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_start": "색인 시작",
+  "rag_pause": "색인 일시 정지",
+  "rag_resume": "색인 계속",
+  "rag_rebuild": "색인 다시 생성",
+  "rag_clear": "색인 삭제",
+  "rag_clearHint": "파생 색인을 삭제하며 원본 태그와 모델은 유지합니다. 다시 사용하려면 재생성이 필요합니다.",
+  "rag_futureSources": "첫 버전은 태그 추천에 연결됩니다. Wiki, 블록, 작업 공간, 갤러리 및 Agent 검색은 순차 추가됩니다.",
+  "rag_badgeHint": "로컬 의미 태그 추천 준비 완료"
 }

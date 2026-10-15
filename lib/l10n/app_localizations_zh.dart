@@ -16492,6 +16492,162 @@ class AppLocalizationsZh extends AppLocalizations {
   String channel_scrubWhen(String day, String time) {
     return '$day $time';
   }
+
+  @override
+  String get rag_title => 'RAG 向量系统';
+
+  @override
+  String get rag_description => '管理本地语义检索、模型与标签上下文推荐';
+
+  @override
+  String get rag_enabled => '启用 RAG';
+
+  @override
+  String get rag_enabledHint => '开启本地语义检索服务；首次建库需预览范围后手动开始。';
+
+  @override
+  String get rag_status => '运行与索引状态';
+
+  @override
+  String get rag_off => '未启用';
+
+  @override
+  String get rag_loading => '正在准备本地模型';
+
+  @override
+  String get rag_empty => '模型已连接，等待建立索引';
+
+  @override
+  String get rag_ready => '语义检索已就绪';
+
+  @override
+  String get rag_partial => '部分就绪，未覆盖内容保留普通搜索';
+
+  @override
+  String get rag_building => '正在建立索引';
+
+  @override
+  String get rag_paused => '建库已暂停，已有索引仍可查询';
+
+  @override
+  String get rag_unavailable => 'RAG 暂不可用，保留普通搜索';
+
+  @override
+  String get rag_operationFailed => '操作未完成，请检查模型路径与独立运行环境';
+
+  @override
+  String rag_indexCounts(int indexed, int total) {
+    return '已索引 $indexed / $total 项';
+  }
+
+  @override
+  String rag_storage(String size) {
+    return '索引占用 $size MiB';
+  }
+
+  @override
+  String get rag_refresh => '刷新状态';
+
+  @override
+  String get rag_embeddingPath => 'EmbeddingGemma 2 权重目录';
+
+  @override
+  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B 权重目录';
+
+  @override
+  String get rag_notConfigured => '尚未配置';
+
+  @override
+  String get rag_choose => '选择';
+
+  @override
+  String get rag_modelMode => '模型能力';
+
+  @override
+  String get rag_modelModeHint =>
+      'Gemma 保留文字与图片能力，禁用音频；当前标签任务仅加载文字。Qwen 用于文字重排。';
+
+  @override
+  String get rag_discover => '检测本地权重';
+
+  @override
+  String get rag_modelsMissing => '未找到模型，请选择已下载的权重目录';
+
+  @override
+  String get rag_pythonPath => '独立 Python 运行环境';
+
+  @override
+  String get rag_runtime => '推理运行环境';
+
+  @override
+  String get rag_runtimeHint => '使用专用环境，不修改现有放大组件。模型权重需单独选择。';
+
+  @override
+  String get rag_installRuntime => '安装独立运行环境';
+
+  @override
+  String get rag_installHint =>
+      '下载 Python 与推理依赖。CUDA 版本约需数 GB 下载空间，适用于兼容的 NVIDIA 显卡；CPU 版本下载较小。不会下载模型权重。';
+
+  @override
+  String get rag_installing => '正在安装运行环境';
+
+  @override
+  String get rag_device => '运行设备';
+
+  @override
+  String get rag_auto => '自动选择';
+
+  @override
+  String get rag_tagsEnabled => '标签上下文推荐';
+
+  @override
+  String get rag_tagsHint => '结合语义、共现与文字重排；各框、角色和正负面独立。';
+
+  @override
+  String get rag_context => '推荐上下文范围';
+
+  @override
+  String get rag_contextHint => '两种模式均最多 120 个 Gemma tokens，按完整标签取样；全文仅用于去重。';
+
+  @override
+  String get rag_contextBefore => '光标前 · 120 tokens';
+
+  @override
+  String get rag_contextAround => '插入点前后 · 120 tokens';
+
+  @override
+  String get rag_buildIndex => '预览并建立索引';
+
+  @override
+  String rag_plan(int total) {
+    return '将收录当前标签目录的 $total 项标签、别名与已有本地释义。首次处理可能较久；可暂停，已完成部分可提前使用。';
+  }
+
+  @override
+  String get rag_start => '开始建立';
+
+  @override
+  String get rag_pause => '暂停建库';
+
+  @override
+  String get rag_resume => '继续建库';
+
+  @override
+  String get rag_rebuild => '重建索引';
+
+  @override
+  String get rag_clear => '清除索引';
+
+  @override
+  String get rag_clearHint => '清除本地派生索引，保留原始标签库和模型。下次使用需重新建立。';
+
+  @override
+  String get rag_futureSources =>
+      '首版仅接入标签推荐；Wiki、提示词块、工作区、图库和 Agent 查询入口后续分批接入。';
+
+  @override
+  String get rag_badgeHint => '本地语义标签推荐已就绪';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -32982,4 +33138,160 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String channel_scrubWhen(String day, String time) {
     return '$day $time';
   }
+
+  @override
+  String get rag_title => 'RAG 向量系統';
+
+  @override
+  String get rag_description => '管理本地語義檢索、模型與標籤上下文推薦';
+
+  @override
+  String get rag_enabled => '啟用 RAG';
+
+  @override
+  String get rag_enabledHint => '開啟本地語義檢索服務；首次建庫需預覽範圍後手動開始。';
+
+  @override
+  String get rag_status => '執行與索引狀態';
+
+  @override
+  String get rag_off => '未啟用';
+
+  @override
+  String get rag_loading => '正在準備本地模型';
+
+  @override
+  String get rag_empty => '模型已連線，等待建立索引';
+
+  @override
+  String get rag_ready => '語義檢索已就緒';
+
+  @override
+  String get rag_partial => '部分就緒，未覆蓋內容保留普通搜尋';
+
+  @override
+  String get rag_building => '正在建立索引';
+
+  @override
+  String get rag_paused => '建庫已暫停，已有索引仍可查詢';
+
+  @override
+  String get rag_unavailable => 'RAG 暫不可用，保留普通搜尋';
+
+  @override
+  String get rag_operationFailed => '操作未完成，請檢查模型路徑與獨立執行環境';
+
+  @override
+  String rag_indexCounts(int indexed, int total) {
+    return '已索引 $indexed / $total 項';
+  }
+
+  @override
+  String rag_storage(String size) {
+    return '索引佔用 $size MiB';
+  }
+
+  @override
+  String get rag_refresh => '重新整理狀態';
+
+  @override
+  String get rag_embeddingPath => 'EmbeddingGemma 2 權重目錄';
+
+  @override
+  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B 權重目錄';
+
+  @override
+  String get rag_notConfigured => '尚未配置';
+
+  @override
+  String get rag_choose => '選擇';
+
+  @override
+  String get rag_modelMode => '模型能力';
+
+  @override
+  String get rag_modelModeHint =>
+      'Gemma 保留文字與圖片能力，停用音訊；當前標籤任務僅載入文字。Qwen 用於文字重排。';
+
+  @override
+  String get rag_discover => '檢測本地權重';
+
+  @override
+  String get rag_modelsMissing => '未找到模型，請選擇已下載的權重目錄';
+
+  @override
+  String get rag_pythonPath => '獨立 Python 執行環境';
+
+  @override
+  String get rag_runtime => '推理執行環境';
+
+  @override
+  String get rag_runtimeHint => '使用專用環境，不修改現有放大元件。模型權重需單獨選擇。';
+
+  @override
+  String get rag_installRuntime => '安裝獨立執行環境';
+
+  @override
+  String get rag_installHint =>
+      '下載 Python 與推理依賴。CUDA 版本約需數 GB 下載空間，適用於相容的 NVIDIA 顯示卡；CPU 版本下載較小。不會下載模型權重。';
+
+  @override
+  String get rag_installing => '正在安裝執行環境';
+
+  @override
+  String get rag_device => '執行裝置';
+
+  @override
+  String get rag_auto => '自動選擇';
+
+  @override
+  String get rag_tagsEnabled => '標籤上下文推薦';
+
+  @override
+  String get rag_tagsHint => '結合語義、共現與文字重排；各框、角色和正負面獨立。';
+
+  @override
+  String get rag_context => '推薦上下文範圍';
+
+  @override
+  String get rag_contextHint => '兩種模式均最多 120 個 Gemma tokens，按完整標籤取樣；全文僅用於去重。';
+
+  @override
+  String get rag_contextBefore => '游標前 · 120 tokens';
+
+  @override
+  String get rag_contextAround => '插入點前後 · 120 tokens';
+
+  @override
+  String get rag_buildIndex => '預覽並建立索引';
+
+  @override
+  String rag_plan(int total) {
+    return '將收錄當前標籤目錄的 $total 項標籤、別名與已有本地釋義。首次處理可能較久；可暫停，已完成部分可提前使用。';
+  }
+
+  @override
+  String get rag_start => '開始建立';
+
+  @override
+  String get rag_pause => '暫停建庫';
+
+  @override
+  String get rag_resume => '繼續建庫';
+
+  @override
+  String get rag_rebuild => '重建索引';
+
+  @override
+  String get rag_clear => '清除索引';
+
+  @override
+  String get rag_clearHint => '清除本地派生索引，保留原始標籤庫和模型。下次使用需重新增立。';
+
+  @override
+  String get rag_futureSources =>
+      '首版僅接入標籤推薦；Wiki、提示詞塊、工作區、圖庫和 Agent 查詢入口後續分批接入。';
+
+  @override
+  String get rag_badgeHint => '本地語義標籤推薦已就緒';
 }

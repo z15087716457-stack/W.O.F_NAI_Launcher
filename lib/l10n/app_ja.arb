@@ -9062,5 +9062,78 @@
   "channel_weekday6": "土",
   "channel_weekday7": "日",
   "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}}
+  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
+  "rag_title": "RAG ベクトルシステム",
+  "rag_description": "ローカル検索、モデル、文脈に沿ったタグ候補を管理",
+  "rag_enabled": "RAG を有効にする",
+  "rag_enabledHint": "ローカル意味検索を有効化。初回の索引作成は範囲を確認して開始します。",
+  "rag_status": "実行・索引の状態",
+  "rag_off": "無効",
+  "rag_loading": "ローカルモデルを準備中",
+  "rag_empty": "モデル接続済み・索引未作成",
+  "rag_ready": "意味検索の準備完了",
+  "rag_partial": "一部利用可能・未索引の内容は通常検索",
+  "rag_building": "索引を作成中",
+  "rag_paused": "索引作成を一時停止・既存索引は検索可能",
+  "rag_unavailable": "RAG 利用不可・通常検索は利用可能",
+  "rag_operationFailed": "操作に失敗しました。モデルの場所と専用環境を確認してください。",
+  "rag_indexCounts": "索引済み {indexed} / {total} 件",
+  "@rag_indexCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_storage": "索引容量：{size} MiB",
+  "@rag_storage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "rag_refresh": "状態を更新",
+  "rag_embeddingPath": "EmbeddingGemma 2 のモデルフォルダー",
+  "rag_rerankerPath": "Qwen3-Reranker-0.6B のモデルフォルダー",
+  "rag_notConfigured": "未設定",
+  "rag_choose": "選択",
+  "rag_modelMode": "モデルの機能",
+  "rag_modelModeHint": "Gemma はテキスト・画像に対応し音声は無効。タグ処理はテキストのみ読み込み、Qwen が再順位付けします。",
+  "rag_discover": "ローカルモデルを検出",
+  "rag_modelsMissing": "モデルが見つかりません。保存済みモデルのフォルダーを選択してください。",
+  "rag_pythonPath": "専用 Python 実行環境",
+  "rag_runtime": "推論実行環境",
+  "rag_runtimeHint": "専用環境を使用します。既存の拡大コンポーネントは変更せず、モデルは別途指定します。",
+  "rag_installRuntime": "専用環境をインストール",
+  "rag_installHint": "Python と推論依存関係を取得します。CUDA 版は数 GB と対応 NVIDIA GPU が必要です。CPU 版は小さく、モデルは別途用意します。",
+  "rag_installing": "実行環境をインストール中",
+  "rag_device": "実行デバイス",
+  "rag_auto": "自動選択",
+  "rag_tagsEnabled": "文脈に沿ったタグ候補",
+  "rag_tagsHint": "意味・共起・再順位付けを組み合わせ、入力欄・キャラクター・正負を分離します。",
+  "rag_context": "候補の文脈範囲",
+  "rag_contextHint": "両モードともタグ単位で最大 120 Gemma トークン。全文は重複除外のみに使用。",
+  "rag_contextBefore": "カーソル前 · 120 tokens",
+  "rag_contextAround": "カーソル前後 · 120 tokens",
+  "rag_buildIndex": "確認して索引を作成",
+  "rag_plan": "現在の {total} 件のタグ、別名、既存のローカル解説を索引化します。初回は時間がかかりますが一時停止・部分利用が可能です。",
+  "@rag_plan": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_start": "作成を開始",
+  "rag_pause": "作成を一時停止",
+  "rag_resume": "作成を再開",
+  "rag_rebuild": "索引を再作成",
+  "rag_clear": "索引を削除",
+  "rag_clearHint": "派生索引を削除します。元のタグとモデルは保持され、再利用には再作成が必要です。",
+  "rag_futureSources": "初版はタグ候補に対応。Wiki、ブロック、作業領域、画像庫、Agent 検索は順次追加します。",
+  "rag_badgeHint": "ローカル意味タグ候補が利用可能"
 }

@@ -9119,5 +9119,78 @@
         "type": "String"
       }
     }
-  }
+  },
+  "rag_title": "RAG 向量系統",
+  "rag_description": "管理本地語義檢索、模型與標籤上下文推薦",
+  "rag_enabled": "啟用 RAG",
+  "rag_enabledHint": "開啟本地語義檢索服務；首次建庫需預覽範圍後手動開始。",
+  "rag_status": "執行與索引狀態",
+  "rag_off": "未啟用",
+  "rag_loading": "正在準備本地模型",
+  "rag_empty": "模型已連線，等待建立索引",
+  "rag_ready": "語義檢索已就緒",
+  "rag_partial": "部分就緒，未覆蓋內容保留普通搜尋",
+  "rag_building": "正在建立索引",
+  "rag_paused": "建庫已暫停，已有索引仍可查詢",
+  "rag_unavailable": "RAG 暫不可用，保留普通搜尋",
+  "rag_operationFailed": "操作未完成，請檢查模型路徑與獨立執行環境",
+  "rag_indexCounts": "已索引 {indexed} / {total} 項",
+  "@rag_indexCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_storage": "索引佔用 {size} MiB",
+  "@rag_storage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "rag_refresh": "重新整理狀態",
+  "rag_embeddingPath": "EmbeddingGemma 2 權重目錄",
+  "rag_rerankerPath": "Qwen3-Reranker-0.6B 權重目錄",
+  "rag_notConfigured": "尚未配置",
+  "rag_choose": "選擇",
+  "rag_modelMode": "模型能力",
+  "rag_modelModeHint": "Gemma 保留文字與圖片能力，停用音訊；當前標籤任務僅載入文字。Qwen 用於文字重排。",
+  "rag_discover": "檢測本地權重",
+  "rag_modelsMissing": "未找到模型，請選擇已下載的權重目錄",
+  "rag_pythonPath": "獨立 Python 執行環境",
+  "rag_runtime": "推理執行環境",
+  "rag_runtimeHint": "使用專用環境，不修改現有放大元件。模型權重需單獨選擇。",
+  "rag_installRuntime": "安裝獨立執行環境",
+  "rag_installHint": "下載 Python 與推理依賴。CUDA 版本約需數 GB 下載空間，適用於相容的 NVIDIA 顯示卡；CPU 版本下載較小。不會下載模型權重。",
+  "rag_installing": "正在安裝執行環境",
+  "rag_device": "執行裝置",
+  "rag_auto": "自動選擇",
+  "rag_tagsEnabled": "標籤上下文推薦",
+  "rag_tagsHint": "結合語義、共現與文字重排；各框、角色和正負面獨立。",
+  "rag_context": "推薦上下文範圍",
+  "rag_contextHint": "兩種模式均最多 120 個 Gemma tokens，按完整標籤取樣；全文僅用於去重。",
+  "rag_contextBefore": "游標前 · 120 tokens",
+  "rag_contextAround": "插入點前後 · 120 tokens",
+  "rag_buildIndex": "預覽並建立索引",
+  "rag_plan": "將收錄當前標籤目錄的 {total} 項標籤、別名與已有本地釋義。首次處理可能較久；可暫停，已完成部分可提前使用。",
+  "@rag_plan": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_start": "開始建立",
+  "rag_pause": "暫停建庫",
+  "rag_resume": "繼續建庫",
+  "rag_rebuild": "重建索引",
+  "rag_clear": "清除索引",
+  "rag_clearHint": "清除本地派生索引，保留原始標籤庫和模型。下次使用需重新增立。",
+  "rag_futureSources": "首版僅接入標籤推薦；Wiki、提示詞塊、工作區、圖庫和 Agent 查詢入口後續分批接入。",
+  "rag_badgeHint": "本地語義標籤推薦已就緒"
 }

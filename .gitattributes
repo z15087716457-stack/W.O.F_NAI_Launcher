@@ -6,3 +6,4 @@ assets/local_upscale/** -text -whitespace
 assets/local_upscale/models/*.bin filter=lfs diff=lfs merge=lfs -text
 assets/local_upscale/windows/*.exe filter=lfs diff=lfs merge=lfs -text
 assets/local_upscale/windows/*.dll filter=lfs diff=lfs merge=lfs -text
+assets/rag/windows/*.exe filter=lfs diff=lfs merge=lfs -text

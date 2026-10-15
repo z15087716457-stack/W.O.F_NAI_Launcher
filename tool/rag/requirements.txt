@@ -1,0 +1,6 @@
+# Verified model architecture support. Runtime is separate from SeedVR2.
+transformers==5.19.0
+sentence-transformers==6.1.0
+numpy==2.5.4
+usearch==2.26.4
+Pillow==12.2.0

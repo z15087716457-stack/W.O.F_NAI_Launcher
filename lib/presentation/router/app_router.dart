@@ -295,6 +295,8 @@ GoRouter appRouter(Ref ref) {
                         ? 3
                         : state.uri.queryParameters['section'] == 'agent'
                         ? 11
+                        : state.uri.queryParameters['section'] == 'rag'
+                        ? 12
                         : state.uri.queryParameters['section'] == 'models'
                         ? 7
                         : state.uri.queryParameters['section'] == 'integrations'

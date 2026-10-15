@@ -30062,6 +30062,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{day} {time}'**
   String channel_scrubWhen(String day, String time);
+
+  /// No description provided for @rag_title.
+  ///
+  /// In en, this message translates to:
+  /// **'RAG vector system'**
+  String get rag_title;
+
+  /// No description provided for @rag_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage local retrieval, models and contextual tag suggestions'**
+  String get rag_description;
+
+  /// No description provided for @rag_enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable RAG'**
+  String get rag_enabled;
+
+  /// No description provided for @rag_enabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable local semantic retrieval. Preview and start the first index explicitly.'**
+  String get rag_enabledHint;
+
+  /// No description provided for @rag_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime and index status'**
+  String get rag_status;
+
+  /// No description provided for @rag_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get rag_off;
+
+  /// No description provided for @rag_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing local models'**
+  String get rag_loading;
+
+  /// No description provided for @rag_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Models connected; index not built'**
+  String get rag_empty;
+
+  /// No description provided for @rag_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic retrieval ready'**
+  String get rag_ready;
+
+  /// No description provided for @rag_partial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partly ready; ordinary search covers the rest'**
+  String get rag_partial;
+
+  /// No description provided for @rag_building.
+  ///
+  /// In en, this message translates to:
+  /// **'Building index'**
+  String get rag_building;
+
+  /// No description provided for @rag_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexing paused; existing index remains searchable'**
+  String get rag_paused;
+
+  /// No description provided for @rag_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'RAG unavailable; ordinary search remains available'**
+  String get rag_unavailable;
+
+  /// No description provided for @rag_operationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation failed. Check model paths and the separate runtime.'**
+  String get rag_operationFailed;
+
+  /// No description provided for @rag_indexCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexed {indexed} / {total} items'**
+  String rag_indexCounts(int indexed, int total);
+
+  /// No description provided for @rag_storage.
+  ///
+  /// In en, this message translates to:
+  /// **'Index storage: {size} MiB'**
+  String rag_storage(String size);
+
+  /// No description provided for @rag_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh status'**
+  String get rag_refresh;
+
+  /// No description provided for @rag_embeddingPath.
+  ///
+  /// In en, this message translates to:
+  /// **'EmbeddingGemma 2 model directory'**
+  String get rag_embeddingPath;
+
+  /// No description provided for @rag_rerankerPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Qwen3-Reranker-0.6B model directory'**
+  String get rag_rerankerPath;
+
+  /// No description provided for @rag_notConfigured.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get rag_notConfigured;
+
+  /// No description provided for @rag_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get rag_choose;
+
+  /// No description provided for @rag_modelMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Model capabilities'**
+  String get rag_modelMode;
+
+  /// No description provided for @rag_modelModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Gemma retains text/image support with audio disabled; tags load text only. Qwen reranks text.'**
+  String get rag_modelModeHint;
+
+  /// No description provided for @rag_discover.
+  ///
+  /// In en, this message translates to:
+  /// **'Find local models'**
+  String get rag_discover;
+
+  /// No description provided for @rag_modelsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Models not found. Choose downloaded model directories.'**
+  String get rag_modelsMissing;
+
+  /// No description provided for @rag_pythonPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Separate Python runtime'**
+  String get rag_pythonPath;
+
+  /// No description provided for @rag_runtime.
+  ///
+  /// In en, this message translates to:
+  /// **'Inference runtime'**
+  String get rag_runtime;
+
+  /// No description provided for @rag_runtimeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a dedicated environment. Existing upscale components are unchanged. Select model weights separately.'**
+  String get rag_runtimeHint;
+
+  /// No description provided for @rag_installRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Install separate runtime'**
+  String get rag_installRuntime;
+
+  /// No description provided for @rag_installHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Python and inference dependencies. CUDA requires several GB and a compatible NVIDIA GPU; CPU needs a smaller download. Model weights are separate.'**
+  String get rag_installHint;
+
+  /// No description provided for @rag_installing.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing runtime'**
+  String get rag_installing;
+
+  /// No description provided for @rag_device.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get rag_device;
+
+  /// No description provided for @rag_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get rag_auto;
+
+  /// No description provided for @rag_tagsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Contextual tag suggestions'**
+  String get rag_tagsEnabled;
+
+  /// No description provided for @rag_tagsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Combine semantics, cooccurrence and reranking; keep fields, characters and polarity separate.'**
+  String get rag_tagsHint;
+
+  /// No description provided for @rag_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion context'**
+  String get rag_context;
+
+  /// No description provided for @rag_contextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Both modes use at most 120 Gemma tokens at tag boundaries. Full field text is used only for deduplication.'**
+  String get rag_contextHint;
+
+  /// No description provided for @rag_contextBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before caret · 120 tokens'**
+  String get rag_contextBefore;
+
+  /// No description provided for @rag_contextAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Around caret · 120 tokens'**
+  String get rag_contextAround;
+
+  /// No description provided for @rag_buildIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview and build index'**
+  String get rag_buildIndex;
+
+  /// No description provided for @rag_plan.
+  ///
+  /// In en, this message translates to:
+  /// **'Index {total} tags with aliases and existing local descriptions. Initial processing may take time; pause is supported and completed parts are usable.'**
+  String rag_plan(int total);
+
+  /// No description provided for @rag_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start indexing'**
+  String get rag_start;
+
+  /// No description provided for @rag_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause indexing'**
+  String get rag_pause;
+
+  /// No description provided for @rag_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume indexing'**
+  String get rag_resume;
+
+  /// No description provided for @rag_rebuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild index'**
+  String get rag_rebuild;
+
+  /// No description provided for @rag_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear index'**
+  String get rag_clear;
+
+  /// No description provided for @rag_clearHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the derived index while keeping source tags and models. Rebuild before using it again.'**
+  String get rag_clearHint;
+
+  /// No description provided for @rag_futureSources.
+  ///
+  /// In en, this message translates to:
+  /// **'This version connects tag suggestions. Wiki, blocks, workspace, gallery and Agent search will follow in stages.'**
+  String get rag_futureSources;
+
+  /// No description provided for @rag_badgeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Local semantic tag suggestions are ready'**
+  String get rag_badgeHint;
 }
 
 class _AppLocalizationsDelegate

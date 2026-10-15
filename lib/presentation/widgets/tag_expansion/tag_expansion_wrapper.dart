@@ -14,6 +14,9 @@ import '../../../core/autocomplete/completion_models.dart';
 import '../../../core/autocomplete/prompt_token_parser.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
+import '../../../core/rag/rag_client.dart';
+import '../../../core/rag/rag_settings.dart';
+import '../../providers/rag_provider.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/tag_normalizer.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
@@ -74,10 +77,15 @@ class TagExpansionWrapper extends ConsumerStatefulWidget {
     this.onCandidateSelected,
     this.onApplied,
     this.onActiveChanged,
+    this.ragContext = false,
+    this.ragNegative = false,
+    this.ragScope,
   });
 
   final Widget child;
   final TextEditingController controller;
+  final bool ragContext, ragNegative;
+  final String? ragScope;
   final FocusNode? focusNode;
   final bool enabled;
 
@@ -168,6 +176,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   String? _focusedId;
   String? _contextTag;
   bool _usingContext = false;
+  RagCancellation? _ragCancellation;
+  bool _selectionFrozen = false;
+  bool _applyingRag = false;
 
   @override
   void initState() {
@@ -204,10 +215,14 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       _close();
     } else if (oldWidget.enabled && !widget.enabled) {
       _close();
+    } else if (oldWidget.ragScope != widget.ragScope ||
+        oldWidget.ragNegative != widget.ragNegative) {
+      _close();
     }
   }
 
   void _onEditorChanged() {
+    if (_applyingRag) return;
     if (_active && widget.controller.text != _openedText) _close();
   }
 
@@ -613,6 +628,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   void _queueSearch({bool immediate = false}) {
+    _ragCancellation?.cancel();
+    _selectionFrozen = _hoveredId != null || _focusedId != null;
     _autoTranslation.clearSurface(_searchSurface);
     _searchVisible.clear();
     _debounce?.cancel();
@@ -664,6 +681,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       _usingContext = usingContext;
       _selectedIndex = 0;
       _searchFailed = false;
+      unawaited(_runRag(sequence, results));
     } catch (_) {
       if (!mounted || !_active || sequence != _searchSequence) return;
       _results = const [];
@@ -687,12 +705,59 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       _results = results;
       _selectedIndex = 0;
       _searchFailed = false;
+      unawaited(_runRag(sequence, results));
     } catch (_) {
       if (!mounted || !_active || sequence != _searchSequence) return;
       _results = const [];
       _searchFailed = true;
     }
     _searchLoading = false;
+    _markNeedsBuild();
+  }
+
+  Future<void> _runRag(int sequence, List<CompletionCandidate> lexical) async {
+    final settings = ref.read(ragSettingsProvider);
+    if (!widget.ragContext || !settings.enabled || !settings.tagsEnabled) {
+      return;
+    }
+    final cancellation = _ragCancellation = RagCancellation();
+    final text = _openedText;
+    final results = await ref
+        .read(ragControllerProvider.notifier)
+        .recommend(
+          text: text,
+          cursor: _insertionOffset,
+          existing: _existingTags,
+          lexical: lexical,
+          negative: widget.ragNegative,
+          cancellation: cancellation,
+          keyword: _searchController.text,
+          limit: _resultLimit,
+        );
+    if (!mounted ||
+        !_active ||
+        cancellation.isCancelled ||
+        sequence != _searchSequence ||
+        widget.controller.text != text ||
+        _selectionFrozen ||
+        results.isEmpty) {
+      return;
+    }
+    final exactKinds = {
+      CompletionMatchKind.englishExact,
+      CompletionMatchKind.aliasExact,
+      CompletionMatchKind.chineseExact,
+    };
+    final merged = <String, CompletionCandidate>{};
+    for (final candidate in [
+      ...lexical.where((c) => exactKinds.contains(c.matchKind)),
+      ...results,
+      ...lexical,
+    ]) {
+      merged.putIfAbsent(candidate.stableId, () => candidate);
+    }
+    _results = merged.values.take(_resultLimit).toList(growable: false);
+    _selectedIndex = 0;
     _markNeedsBuild();
   }
 
@@ -814,6 +879,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       if (nextIndex >= _results.length) nextIndex = _selectedIndex;
     }
     if (nextIndex != null) {
+      _selectionFrozen = true;
       if (nextIndex != _selectedIndex) {
         _selectedIndex = nextIndex;
         _markNeedsBuild();
@@ -868,6 +934,40 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       canonicalTag: candidate.canonicalTag,
       autoInsertComma: true,
     );
+    final rag = ref.read(ragSettingsProvider);
+    if (widget.ragContext &&
+        rag.enabled &&
+        rag.tagsEnabled &&
+        result.text != widget.controller.text) {
+      _openedText = result.text;
+      _insertionOffset = result.cursorPosition;
+      _applyingRag = true;
+      try {
+        widget.controller.value = TextEditingValue(
+          text: result.text,
+          selection: TextSelection.collapsed(offset: result.cursorPosition),
+        );
+        widget.onApplied?.call(result.text);
+      } finally {
+        _applyingRag = false;
+      }
+      if (!mounted || !_active || widget.controller.text != result.text) return;
+      _existingTags = {
+        ...PromptTokenParser.parse(
+          text: result.text,
+          cursorPosition: result.cursorPosition,
+          limit: _resultLimit,
+          locale: 'en',
+        ).existingTags,
+        candidate.canonicalTag,
+      };
+      _contextTag = candidate.canonicalTag;
+      _hoveredId = _focusedId = null;
+      _searchController.clear();
+      _queueSearch(immediate: true);
+      _markNeedsBuild();
+      return;
+    }
     _close(restoreFocus: true);
     if (result.text == widget.controller.text) return;
     widget.controller.value = TextEditingValue(
@@ -880,6 +980,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   void _markNeedsBuild() => _entry?.markNeedsBuild();
 
   void _close({bool restoreFocus = false, bool notify = true}) {
+    _ragCancellation?.cancel();
     _surfaceEpoch++;
     _visibilityScheduled = false;
     _autoTranslation.clearSurface(_searchSurface);
@@ -1241,6 +1342,49 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             style: Theme.of(context).textTheme.labelMedium,
           ),
         ),
+        if (widget.ragContext)
+          Consumer(
+            builder: (context, ref, _) {
+              final settings = ref.watch(ragSettingsProvider);
+              if (!settings.enabled || !settings.tagsEnabled) {
+                return const SizedBox.shrink();
+              }
+              final status = ref.watch(ragControllerProvider);
+              return Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Tooltip(
+                  message: status.available
+                      ? (status.partial
+                            ? context.l10n.rag_partial
+                            : context.l10n.rag_badgeHint)
+                      : context.l10n.rag_unavailable,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (status.searching > 0)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 4),
+                          child: SizedBox(
+                            width: 10,
+                            height: 10,
+                            child: CircularProgressIndicator(strokeWidth: 1.2),
+                          ),
+                        ),
+                      Text(
+                        'RAG',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontSize: 10,
+                          color: status.available
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
         Builder(
           builder: (context) {
             final translation = ref.read(autoTagTranslationProvider);
@@ -1606,6 +1750,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     final showActions = _hoveredId == id || _focusedId == id;
     return MouseRegion(
       onEnter: (_) {
+        if (!related) _selectionFrozen = true;
         _hoveredId = id;
         _markNeedsBuild();
       },
@@ -1615,6 +1760,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       },
       child: Focus(
         onFocusChange: (focused) {
+          if (focused && !related) _selectionFrozen = true;
           _focusedId = focused ? id : (_focusedId == id ? null : _focusedId);
           _markNeedsBuild();
         },
@@ -1938,6 +2084,15 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   @override
   Widget build(BuildContext context) {
+    if (widget.ragContext) {
+      ref.listen(ragSettingsProvider, (previous, next) {
+        if (previous?.mode != next.mode ||
+            previous?.connectionKey != next.connectionKey) {
+          _ragCancellation?.cancel();
+          if (_active) _queueSearch(immediate: true);
+        }
+      });
+    }
     ref.listen<AutocompleteSettings>(autocompleteSettingsProvider, (_, next) {
       if (!next.relatedTagsEnabled) _close();
     });

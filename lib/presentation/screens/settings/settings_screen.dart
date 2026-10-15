@@ -21,6 +21,7 @@ import 'sections/about_settings_section.dart';
 import 'sections/model_management_section.dart';
 import 'sections/local_upscale_settings_section.dart';
 import 'sections/nai_agent_settings_section.dart';
+import 'sections/rag_settings_section.dart';
 
 enum SettingsDestination {
   appearance,
@@ -32,6 +33,7 @@ enum SettingsDestination {
   account,
   models,
   agent,
+  rag,
   integrations,
   privacy,
   about,
@@ -86,6 +88,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     9 => SettingsDestination.about,
     10 => SettingsDestination.localUpscale,
     11 => SettingsDestination.agent,
+    12 => SettingsDestination.rag,
     _ => SettingsDestination.appearance,
   };
 
@@ -287,6 +290,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         NaiAgentSettingsSection(key: _agentKey),
       ),
       _SettingsSection(
+        SettingsDestination.rag,
+        Icons.hub_outlined,
+        context.l10n.rag_title,
+        context.l10n.rag_description,
+        const RagSettingsSection(),
+      ),
+      _SettingsSection(
         SettingsDestination.integrations,
         StudioIcons.settingsIntegrations,
         context.l10n.settings_connectionsIntegrations,
@@ -485,11 +495,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                               group(
                                 context.l10n.settings_servicesConnections,
-                                sections.skip(6).take(4),
+                                sections.skip(6).take(5),
                               ),
                               group(
                                 context.l10n.settings_safetyMaintenance,
-                                sections.skip(10),
+                                sections.skip(11),
                               ),
                             ],
                           ),

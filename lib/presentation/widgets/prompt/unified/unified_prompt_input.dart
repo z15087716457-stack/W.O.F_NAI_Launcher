@@ -1156,6 +1156,12 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     if (!widget.config.readOnly) {
       result = TagExpansionWrapper(
         controller: _effectiveController,
+        ragContext: true,
+        ragScope: widget.pillScope,
+        ragNegative:
+            widget.pillScope == 'negative' ||
+            widget.pillScope?.endsWith(':neg') == true ||
+            widget.pillScope?.endsWith(':negative') == true,
         focusNode: _effectiveFocusNode,
         onApplied: _handleTextChanged,
         onActiveChanged: _onTagExpansionActiveChanged,

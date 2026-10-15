@@ -11,6 +11,7 @@ import '../image_generation_provider.dart';
 import '../auth_provider.dart';
 import '../image_save_settings_provider.dart';
 import '../proxy_settings_provider.dart';
+import '../rag_provider.dart';
 import 'image_workflow_controller.dart';
 import 'preview_selection_provider.dart';
 import '../../screens/generation/widgets/canvas/canvas_feed_layout.dart';
@@ -24,6 +25,8 @@ final localUpscaleServiceProvider = Provider(
   (ref) => LocalUpscaleService(
     ref.watch(localUpscaleModelManagerProvider),
     advanced: ref.watch(advancedUpscaleComponentManagerProvider),
+    beforeInference: () => ref.read(ragControllerProvider.notifier).suspendForGpu(),
+    afterInference: () => ref.read(ragControllerProvider.notifier).releaseGpu(),
   ),
 );
 final advancedUpscaleComponentManagerProvider = Provider((ref) {

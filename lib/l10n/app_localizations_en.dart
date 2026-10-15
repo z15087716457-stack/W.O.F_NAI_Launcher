@@ -17205,4 +17205,169 @@ class AppLocalizationsEn extends AppLocalizations {
   String channel_scrubWhen(String day, String time) {
     return '$day $time';
   }
+
+  @override
+  String get rag_title => 'RAG vector system';
+
+  @override
+  String get rag_description =>
+      'Manage local retrieval, models and contextual tag suggestions';
+
+  @override
+  String get rag_enabled => 'Enable RAG';
+
+  @override
+  String get rag_enabledHint =>
+      'Enable local semantic retrieval. Preview and start the first index explicitly.';
+
+  @override
+  String get rag_status => 'Runtime and index status';
+
+  @override
+  String get rag_off => 'Disabled';
+
+  @override
+  String get rag_loading => 'Preparing local models';
+
+  @override
+  String get rag_empty => 'Models connected; index not built';
+
+  @override
+  String get rag_ready => 'Semantic retrieval ready';
+
+  @override
+  String get rag_partial => 'Partly ready; ordinary search covers the rest';
+
+  @override
+  String get rag_building => 'Building index';
+
+  @override
+  String get rag_paused => 'Indexing paused; existing index remains searchable';
+
+  @override
+  String get rag_unavailable =>
+      'RAG unavailable; ordinary search remains available';
+
+  @override
+  String get rag_operationFailed =>
+      'Operation failed. Check model paths and the separate runtime.';
+
+  @override
+  String rag_indexCounts(int indexed, int total) {
+    return 'Indexed $indexed / $total items';
+  }
+
+  @override
+  String rag_storage(String size) {
+    return 'Index storage: $size MiB';
+  }
+
+  @override
+  String get rag_refresh => 'Refresh status';
+
+  @override
+  String get rag_embeddingPath => 'EmbeddingGemma 2 model directory';
+
+  @override
+  String get rag_rerankerPath => 'Qwen3-Reranker-0.6B model directory';
+
+  @override
+  String get rag_notConfigured => 'Not configured';
+
+  @override
+  String get rag_choose => 'Choose';
+
+  @override
+  String get rag_modelMode => 'Model capabilities';
+
+  @override
+  String get rag_modelModeHint =>
+      'Gemma retains text/image support with audio disabled; tags load text only. Qwen reranks text.';
+
+  @override
+  String get rag_discover => 'Find local models';
+
+  @override
+  String get rag_modelsMissing =>
+      'Models not found. Choose downloaded model directories.';
+
+  @override
+  String get rag_pythonPath => 'Separate Python runtime';
+
+  @override
+  String get rag_runtime => 'Inference runtime';
+
+  @override
+  String get rag_runtimeHint =>
+      'Use a dedicated environment. Existing upscale components are unchanged. Select model weights separately.';
+
+  @override
+  String get rag_installRuntime => 'Install separate runtime';
+
+  @override
+  String get rag_installHint =>
+      'Download Python and inference dependencies. CUDA requires several GB and a compatible NVIDIA GPU; CPU needs a smaller download. Model weights are separate.';
+
+  @override
+  String get rag_installing => 'Installing runtime';
+
+  @override
+  String get rag_device => 'Device';
+
+  @override
+  String get rag_auto => 'Automatic';
+
+  @override
+  String get rag_tagsEnabled => 'Contextual tag suggestions';
+
+  @override
+  String get rag_tagsHint =>
+      'Combine semantics, cooccurrence and reranking; keep fields, characters and polarity separate.';
+
+  @override
+  String get rag_context => 'Suggestion context';
+
+  @override
+  String get rag_contextHint =>
+      'Both modes use at most 120 Gemma tokens at tag boundaries. Full field text is used only for deduplication.';
+
+  @override
+  String get rag_contextBefore => 'Before caret · 120 tokens';
+
+  @override
+  String get rag_contextAround => 'Around caret · 120 tokens';
+
+  @override
+  String get rag_buildIndex => 'Preview and build index';
+
+  @override
+  String rag_plan(int total) {
+    return 'Index $total tags with aliases and existing local descriptions. Initial processing may take time; pause is supported and completed parts are usable.';
+  }
+
+  @override
+  String get rag_start => 'Start indexing';
+
+  @override
+  String get rag_pause => 'Pause indexing';
+
+  @override
+  String get rag_resume => 'Resume indexing';
+
+  @override
+  String get rag_rebuild => 'Rebuild index';
+
+  @override
+  String get rag_clear => 'Clear index';
+
+  @override
+  String get rag_clearHint =>
+      'Delete the derived index while keeping source tags and models. Rebuild before using it again.';
+
+  @override
+  String get rag_futureSources =>
+      'This version connects tag suggestions. Wiki, blocks, workspace, gallery and Agent search will follow in stages.';
+
+  @override
+  String get rag_badgeHint => 'Local semantic tag suggestions are ready';
 }

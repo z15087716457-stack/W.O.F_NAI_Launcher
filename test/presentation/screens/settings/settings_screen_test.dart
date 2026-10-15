@@ -761,6 +761,7 @@ void main() {
                 SettingsDestination.localUpscale => l10n.settings_localUpscale,
                 SettingsDestination.account => l10n.settings_novelaiAccounts,
                 SettingsDestination.agent => l10n.naiAgent_title,
+                SettingsDestination.rag => l10n.rag_title,
                 SettingsDestination.models => l10n.settings_modelsAndInterfaces,
                 SettingsDestination.integrations =>
                   l10n.settings_connectionsIntegrations,

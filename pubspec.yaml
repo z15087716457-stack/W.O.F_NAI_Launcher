@@ -143,6 +143,12 @@ flutter:
   generate: true
 
   assets:
+    - tool/rag/worker.py
+    - tool/rag/engine.py
+    - tool/rag/models.py
+    - tool/rag/context.py
+    - tool/rag/requirements.txt
+    - assets/rag/windows/stdio_host.exe
     - assets/local_upscale/
     - assets/local_upscale/windows/
     - assets/local_upscale/models/

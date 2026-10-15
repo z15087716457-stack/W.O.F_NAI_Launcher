@@ -25,12 +25,15 @@ class LocalUpscaleService {
     this.timeout = const Duration(minutes: 10),
     bool? supportedPlatform,
     this.advanced,
+    this.beforeInference,
+    this.afterInference,
   }) : _startProcess =
            startProcess ?? ((exe, args) => Process.start(exe, args)),
        _supportedPlatform = supportedPlatform ?? Platform.isWindows;
 
   final LocalUpscaleModelManager models;
   final AdvancedUpscaleComponentManager? advanced;
+  final Future<void> Function()? beforeInference, afterInference;
   final UpscaleProcessStarter _startProcess;
   final bool _supportedPlatform;
   final Duration timeout;
@@ -69,6 +72,7 @@ class LocalUpscaleService {
     }
 
     try {
+      await beforeInference?.call();
       progress(LocalUpscalePhase.preparing);
       final optional = advancedUpscaleCatalog
           .where((m) => m.id == modelId)
@@ -281,6 +285,11 @@ class LocalUpscaleService {
         _running = false;
         models.releaseInference();
         advanced?.releaseInference();
+        try {
+          await afterInference?.call();
+        } catch (_) {
+          // A retrieval restart must never discard a completed upscale.
+        }
       }
     }
   }

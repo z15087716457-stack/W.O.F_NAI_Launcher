@@ -9062,5 +9062,78 @@
   "channel_weekday6": "周六",
   "channel_weekday7": "周日",
   "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}}
+  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
+  "rag_title": "RAG 向量系统",
+  "rag_description": "管理本地语义检索、模型与标签上下文推荐",
+  "rag_enabled": "启用 RAG",
+  "rag_enabledHint": "开启本地语义检索服务；首次建库需预览范围后手动开始。",
+  "rag_status": "运行与索引状态",
+  "rag_off": "未启用",
+  "rag_loading": "正在准备本地模型",
+  "rag_empty": "模型已连接，等待建立索引",
+  "rag_ready": "语义检索已就绪",
+  "rag_partial": "部分就绪，未覆盖内容保留普通搜索",
+  "rag_building": "正在建立索引",
+  "rag_paused": "建库已暂停，已有索引仍可查询",
+  "rag_unavailable": "RAG 暂不可用，保留普通搜索",
+  "rag_operationFailed": "操作未完成，请检查模型路径与独立运行环境",
+  "rag_indexCounts": "已索引 {indexed} / {total} 项",
+  "@rag_indexCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_storage": "索引占用 {size} MiB",
+  "@rag_storage": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "rag_refresh": "刷新状态",
+  "rag_embeddingPath": "EmbeddingGemma 2 权重目录",
+  "rag_rerankerPath": "Qwen3-Reranker-0.6B 权重目录",
+  "rag_notConfigured": "尚未配置",
+  "rag_choose": "选择",
+  "rag_modelMode": "模型能力",
+  "rag_modelModeHint": "Gemma 保留文字与图片能力，禁用音频；当前标签任务仅加载文字。Qwen 用于文字重排。",
+  "rag_discover": "检测本地权重",
+  "rag_modelsMissing": "未找到模型，请选择已下载的权重目录",
+  "rag_pythonPath": "独立 Python 运行环境",
+  "rag_runtime": "推理运行环境",
+  "rag_runtimeHint": "使用专用环境，不修改现有放大组件。模型权重需单独选择。",
+  "rag_installRuntime": "安装独立运行环境",
+  "rag_installHint": "下载 Python 与推理依赖。CUDA 版本约需数 GB 下载空间，适用于兼容的 NVIDIA 显卡；CPU 版本下载较小。不会下载模型权重。",
+  "rag_installing": "正在安装运行环境",
+  "rag_device": "运行设备",
+  "rag_auto": "自动选择",
+  "rag_tagsEnabled": "标签上下文推荐",
+  "rag_tagsHint": "结合语义、共现与文字重排；各框、角色和正负面独立。",
+  "rag_context": "推荐上下文范围",
+  "rag_contextHint": "两种模式均最多 120 个 Gemma tokens，按完整标签取样；全文仅用于去重。",
+  "rag_contextBefore": "光标前 · 120 tokens",
+  "rag_contextAround": "插入点前后 · 120 tokens",
+  "rag_buildIndex": "预览并建立索引",
+  "rag_plan": "将收录当前标签目录的 {total} 项标签、别名与已有本地释义。首次处理可能较久；可暂停，已完成部分可提前使用。",
+  "@rag_plan": {
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_start": "开始建立",
+  "rag_pause": "暂停建库",
+  "rag_resume": "继续建库",
+  "rag_rebuild": "重建索引",
+  "rag_clear": "清除索引",
+  "rag_clearHint": "清除本地派生索引，保留原始标签库和模型。下次使用需重新建立。",
+  "rag_futureSources": "首版仅接入标签推荐；Wiki、提示词块、工作区、图库和 Agent 查询入口后续分批接入。",
+  "rag_badgeHint": "本地语义标签推荐已就绪"
 }
