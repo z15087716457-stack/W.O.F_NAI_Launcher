@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -12,6 +13,7 @@ import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
+import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/l10n/app_localizations_zh.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
@@ -71,7 +73,9 @@ void main() {
   final l = AppLocalizationsZh();
   final provider = generationViewDataProvider(l);
   late ProviderSubscription<GenViewData> subscription;
+  late Completer<NaiImageMetadata?> pendingMetadata;
   setUp(() async {
+    pendingMetadata = Completer<NaiImageMetadata?>();
     SharedPreferences.setMockInitialValues({});
     directory = await Directory.systemTemp.createTemp('generation-data-');
     Hive.init(directory.path);
@@ -105,6 +109,11 @@ void main() {
         estimatedCostProvider.overrideWithValue(12),
         imageVariationCostProvider.overrideWith(
           (ref, image) => ref.watch(_variationQuotes)[image.id],
+        ),
+        generatedImageMetadataProvider.overrideWith(
+          (ref, image) => image.id == 'quote-loading'
+              ? pendingMetadata.future
+              : image.metadata,
         ),
       ],
     );
@@ -228,6 +237,10 @@ void main() {
     };
     focus(source('quote-a', 30));
     expect(container.read(provider).canvas.info!.variationsCost, 0);
+    expect(
+      container.read(provider).canvas.info!.variationsCostLoading,
+      isFalse,
+    );
     container.read(_variationQuotes.notifier).state = {
       'quote-a': 9,
       'quote-b': 12,
@@ -241,6 +254,33 @@ void main() {
     await container.pump();
     expect(container.read(provider).canvas.info!.variationsCost, isNull);
     expect(container.read(generationParamsNotifierProvider), before);
+  });
+
+  test('报价加载与解析结束但无参数分开，换图不沿用旧价', () async {
+    final image = GeneratedImage(
+      id: 'quote-loading',
+      bytes: Uint8List(0),
+      width: 1024,
+      height: 1024,
+      generationRunId: 32,
+    );
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(
+          ImageGenerationState(history: [image], displayImages: [image]),
+        );
+    container
+        .read(generationCanvasGroupSelectionProvider.notifier)
+        .selectGroup('run:32');
+    expect(container.read(provider).canvas.info!.variationsCost, isNull);
+    expect(container.read(provider).canvas.info!.variationsCostLoading, isTrue);
+    pendingMetadata.complete(null);
+    await container.read(generatedImageMetadataProvider(image).future);
+    await container.pump();
+    expect(container.read(provider).canvas.info!.variationsCost, isNull);
+    expect(
+      container.read(provider).canvas.info!.variationsCostLoading,
+      isFalse,
+    );
   });
   test('图生图停用不隐去草稿图和蒙版；数据开关与请求一致', () {
     final params = container.read(generationParamsNotifierProvider.notifier);

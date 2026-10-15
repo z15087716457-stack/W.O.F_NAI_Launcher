@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/services/anlas_calculator.dart';
@@ -9,12 +11,58 @@ import '../image_generation_provider.dart';
 import '../subscription_provider.dart';
 import 'image_workflow_controller.dart';
 
+// Retain parsed metadata, not quotes or image bytes. Auto-disposed image
+// providers can then return synchronously when scrolling back to a recent image.
+final _generatedImageMetadataCacheProvider = Provider(
+  (ref) => _GeneratedImageMetadataCache(),
+);
+
+class _GeneratedImageMetadataCache {
+  static const capacity = 64;
+  final _entries = <String, _GeneratedImageMetadataEntry>{};
+
+  _GeneratedImageMetadataEntry? get(GeneratedImage image) {
+    final entry = _entries.remove(image.id);
+    if (entry == null ||
+        !identical(entry.bytes.target, image.bytes) ||
+        !identical(entry.fallback, image.metadata)) {
+      return null;
+    }
+    _entries[image.id] = entry;
+    return entry;
+  }
+
+  void put(GeneratedImage image, NaiImageMetadata? metadata) {
+    _entries.remove(image.id);
+    _entries[image.id] = _GeneratedImageMetadataEntry(image, metadata);
+    if (_entries.length > capacity) _entries.remove(_entries.keys.first);
+  }
+}
+
+class _GeneratedImageMetadataEntry {
+  _GeneratedImageMetadataEntry(GeneratedImage image, this.value)
+    : bytes = WeakReference(image.bytes),
+      fallback = image.metadata;
+
+  final WeakReference<Uint8List> bytes;
+  final NaiImageMetadata? fallback;
+  final NaiImageMetadata? value;
+}
+
 /// The PNG is authoritative even when the in-memory image has not been hydrated.
 final generatedImageMetadataProvider = FutureProvider.autoDispose
-    .family<NaiImageMetadata?, GeneratedImage>((ref, image) async {
+    .family<NaiImageMetadata?, GeneratedImage>((ref, image) {
       if (image.bytes.isEmpty) return image.metadata;
-      return await ImageMetadataService().getMetadataFromBytes(image.bytes) ??
-          image.metadata;
+      final cache = ref.watch(_generatedImageMetadataCacheProvider);
+      final cached = cache.get(image);
+      if (cached != null) return cached.value;
+      return ImageMetadataService().getMetadataFromBytes(image.bytes).then((
+        metadata,
+      ) {
+        final result = metadata ?? image.metadata;
+        cache.put(image, result);
+        return result;
+      });
     });
 
 /// Only quote a variation when the selected image has sufficient request data.

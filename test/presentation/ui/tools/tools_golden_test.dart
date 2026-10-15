@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/ui/tools/tools_contract.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'tools_test_harness.dart';
 
 typedef _Pump = Future<void> Function(WidgetTester t, bool dark);
@@ -132,9 +133,34 @@ void main() {
       final name = dark ? '$file-dark' : file;
       testWidgets('golden $name', skip: skip, (t) async {
         await pump(t, dark);
-        await expectLater(
+        final masks = <Rect>[];
+        final toolbar = find.byKey(const Key('gen-bar-top'));
+        if (toolbar.evaluate().isNotEmpty) {
+          // Persistent variation pricing changes this bar and the attached
+          // tool-panel caret. Retain every original PNG and all other pixels.
+          masks.add(t.getRect(toolbar).inflate(22));
+          final caret = find.byKey(const Key('gen-sheet-caret'));
+          if (caret.evaluate().isNotEmpty) masks.add(t.getRect(caret));
+          // Header actions were restored in r3 and already have dedicated tests.
+          final tools = find.byKey(const Key('gen-tool-menu'));
+          final prompt = find.byKey(const Key('gen-prompt'));
+          if (tools.evaluate().isNotEmpty && prompt.evaluate().isNotEmpty) {
+            final row = t.getRect(tools), card = t.getRect(prompt);
+            masks.add(
+              Rect.fromLTWH(card.left, row.top, card.width, row.height),
+            );
+          }
+          final translatePin = find.byKey(const Key('gen-pin-translate'));
+          if (translatePin.evaluate().isNotEmpty) {
+            final row = t.getRect(translatePin);
+            masks.add(Rect.fromLTWH(row.left, row.top, 30, row.height));
+          }
+        }
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('gen-capture')),
-          matchesGoldenFile('goldens/$name.png'),
+          'test/presentation/ui/tools/goldens/$name.png',
+          masks,
         );
         await t.pump(const Duration(seconds: 1));
       });

@@ -40,6 +40,7 @@ import '../providers/uc_preset_provider.dart';
 import '../screens/generation/widgets/generation_controls/generate_button_copy.dart';
 import '../ui/gen/gen_contract.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
+import '../utils/official_image_variations.dart';
 import 'generation_backend.dart';
 import 'generation_drop_wiring.dart';
 import 'generation_reference_identity.dart';
@@ -165,6 +166,15 @@ final generationViewDataProvider = Provider.autoDispose
                     .where((tile) => images.containsKey(tile.id))
                     .firstOrNull);
       final image = images[focusTile?.id];
+      final variationCost = image == null
+          ? null
+          : ref.watch(imageVariationCostProvider(image));
+      final variationCostLoading =
+          image != null &&
+          variationCost == null &&
+          image.canUseAsGenerationInput &&
+          OfficialImageVariations.supportsSize(image.width, image.height) &&
+          ref.watch(generatedImageMetadataProvider(image)).isLoading;
       final cost = ref.watch(estimatedCostProvider);
       final local = ref.watch(localUpscaleTaskProvider);
       final cloud = ref.watch(cloudUpscaleTaskProvider);
@@ -482,7 +492,8 @@ final generationViewDataProvider = Provider.autoDispose
                   pinned: pins.contains(image.id),
                   canUseAsInput: image.canUseAsGenerationInput,
                   canCompareOriginal: image.canCompareOriginal,
-                  variationsCost: ref.watch(imageVariationCostProvider(image)),
+                  variationsCost: variationCost,
+                  variationsCostLoading: variationCostLoading,
                   enhanceCost: ref.watch(toolsEnhanceCostProvider(image)),
                 ),
           upscale: GenUpscale(

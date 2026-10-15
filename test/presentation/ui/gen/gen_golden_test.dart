@@ -187,6 +187,14 @@ void main() {
           final row = t.getRect(translatePin);
           masks.add(Rect.fromLTWH(row.left, row.top, 30, row.height));
         }
+        // The user requested a persistent variation price slot. Preserve the
+        // original prototype PNG and compare every pixel outside this bar.
+        final canvasToolbar = find.byKey(const Key('gen-bar-top'));
+        if (canvasToolbar.evaluate().isNotEmpty) {
+          masks.add(
+            t.getRect(canvasToolbar).inflate(22),
+          ); // Includes its shadow.
+        }
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('gen-capture')),

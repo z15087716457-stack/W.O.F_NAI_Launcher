@@ -786,26 +786,23 @@ class _TopBar extends StatelessWidget {
           richTip: tip(
             l.gen_variations,
             l.tools_tipVariations,
-            info.variationsCost == null ? null : cost(info.variationsCost),
+            info.variationsCostLoading
+                ? Text(l.common_loading, style: UiTipStyle.number(context))
+                : info.variationsCost == null
+                ? null
+                : cost(info.variationsCost),
           ),
-          width: info.variationsCost == null ? 32 : null,
-          padding: info.variationsCost == null
-              ? null
-              : const EdgeInsets.symmetric(horizontal: 4),
+          width: null,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           onTap: busy ? null : () => a.onVariations(id),
-          child: info.variationsCost == null
-              ? nai('variations')
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 5,
-                  children: [
-                    nai('variations'),
-                    GenFloatCost(
-                      key: const Key('gen-variations-cost'),
-                      child: GenAnlas('${info.variationsCost}', iconSize: 10),
-                    ),
-                  ],
-                ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 5,
+            children: [
+              nai('variations'),
+              _VariationCost(info: info),
+            ],
+          ),
         ),
         GenFloatButton(
           key: const Key('gen-upscale'),
@@ -940,6 +937,46 @@ class _TopBar extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Keep the price slot stable across loading, unavailable and numeric quotes.
+/// The invisible sample follows the real font/text scale; longer prices fit
+/// inside that slot rather than shifting every other toolbar action.
+class _VariationCost extends StatelessWidget {
+  const _VariationCost({required this.info});
+
+  final GenFocusInfo info;
+
+  @override
+  Widget build(BuildContext context) => GenFloatCost(
+    key: const Key('gen-variations-cost'),
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        const ExcludeSemantics(
+          child: Opacity(opacity: 0, child: GenAnlas('0000', iconSize: 10)),
+        ),
+        Positioned.fill(
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Semantics(
+                label: info.variationsCostLoading
+                    ? context.l10n.common_loading
+                    : null,
+                excludeSemantics: info.variationsCostLoading,
+                child: GenAnlas(
+                  info.variationsCost?.toString() ??
+                      (info.variationsCostLoading ? '…' : '—'),
+                  iconSize: 10,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 /// 放大进度圈（原型 `uprun`）：强调色 25% 底圈 + 进度弧，中间一个小停止方块。

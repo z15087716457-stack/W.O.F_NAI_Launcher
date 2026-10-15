@@ -21,6 +21,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -251,6 +252,77 @@ void main() {
       snapshot.dispose();
     });
   }
+
+  testWidgets('滚轮自动切图后往返报价不闪空，工具条逐帧保持位置', (tester) async {
+    final sources = [
+      for (final (run, steps) in [(60, 28), (61, 50)])
+        GeneratedImage(
+          id: 'quote-scroll-$run',
+          bytes: bytes,
+          width: 512,
+          height: 768,
+          generationRunId: run,
+          metadata: NaiImageMetadata(
+            prompt: 'synthetic scroll source',
+            steps: steps,
+            model: 'nai-diffusion-4-5-full',
+          ),
+        ),
+    ];
+    publish(ImageGenerationState(history: sources));
+    await pump(tester);
+    final initialBar = tester.getRect(find.byKey(const Key('gen-bar-top')));
+    final initialDraft = container.read(generationParamsNotifierProvider);
+    final prices = <String, int>{};
+    for (final image in sources) {
+      await container.read(generatedImageMetadataProvider(image).future);
+    }
+    await tester.pumpAndSettle();
+
+    for (final image in [...sources, ...sources, ...sources]) {
+      final layout = container.read(canvasFeedLayoutProvider);
+      final item = layout.items.firstWhere(
+        (item) => item.image?.id == image.id,
+      );
+      final view = tester.getSize(find.byKey(const Key('gen-canvas')));
+      final center = camera().worldToScreen(item.worldRect.center);
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: tester.getCenter(find.byKey(const Key('gen-canvas'))),
+          scrollDelta: Offset(0, center.dy - view.height / 2),
+        ),
+      );
+      for (var frame = 0; frame < 16; frame++) {
+        await tester.pump(const Duration(milliseconds: 16));
+        expect(
+          tester.getRect(find.byKey(const Key('gen-bar-top'))),
+          initialBar,
+        );
+        expect(tester.takeException(), isNull);
+      }
+      final selected = container.read(generationCanvasGroupSelectionProvider);
+      expect(selected?.group, 'run:${image.generationRunId}');
+      final info = container
+          .read(
+            generationViewDataProvider(
+              AppLocalizations.of(tester.element(find.byType(GenCanvas)))!,
+            ),
+          )
+          .canvas
+          .info!;
+      expect(info.tileId, image.id);
+      expect(info.variationsCostLoading, isFalse);
+      expect(info.variationsCost, isNotNull);
+      expect(
+        container.read(generatedImageMetadataProvider(image)).isLoading,
+        isFalse,
+      );
+      prices[image.id] = info.variationsCost!;
+    }
+    expect(prices.values.toSet(), hasLength(2));
+    expect(container.read(generationParamsNotifierProvider), initialDraft);
+    expect(events, isEmpty);
+  });
 
   GeneratedImage comparisonImage(String id, {bool masked = true}) {
     final original = Uint8List.fromList(

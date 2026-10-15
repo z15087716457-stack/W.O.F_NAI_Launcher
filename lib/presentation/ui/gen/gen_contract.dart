@@ -742,6 +742,7 @@ class GenFocusInfo {
     this.seed,
     this.pinned = false,
     this.variationsCost,
+    this.variationsCostLoading = false,
     this.enhanceCost,
     this.canUseAsInput = true,
     this.canCompareOriginal = false,
@@ -755,8 +756,11 @@ class GenFocusInfo {
   /// 钉在画布上（`canvasPinnedNotifierProvider`）。
   final bool pinned;
 
-  /// “变体”要的 Anlas；0 仍显示胶囊，null = 报价尚不可用 / 不支持。
+  /// “变体”要的 Anlas；0 仍显示胶囊，null = 尚无报价。
   final int? variationsCost;
+
+  /// 首次读取图片参数时显示加载占位；结束后无报价显示“—”。
+  final bool variationsCostLoading;
 
   /// “增强”按当前增强设置要的 Anlas（悬停提示里写；null = 不显示价格）。
   final int? enhanceCost;

@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_canvas.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'gen_test_harness.dart';
 
 class _Stripes extends CustomPainter {
@@ -158,9 +161,136 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('gen-variations-cost')), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('gen-variations-cost')),
+        matching: find.text('—'),
+      ),
+      findsOneWidget,
+    );
     expect(tester.takeException(), isNull);
   });
+
+  for (final dark in [false, true]) {
+    for (final locale in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+      testWidgets('变体报价切换保持工具条位置 $locale dark=$dark', (tester) async {
+        final base = GenFixture.view();
+        final info = base.canvas.info!;
+        final recorder = GenRecorder();
+        Rect? bar, slot;
+        var index = 0;
+        for (final (price, loading) in <(int?, bool)>[
+          (48, false),
+          (null, true),
+          (9, false),
+          (null, false),
+          (0, false),
+          (9999, false),
+          (123456, false),
+          (48, false),
+        ]) {
+          await pumpGen(
+            tester,
+            dark: dark,
+            locale: locale,
+            window: 1100,
+            actions: recorder.actions,
+            data: base.copyWith(
+              canvas: GenCanvasData(
+                focus: base.canvas.focus,
+                info: GenFocusInfo(
+                  tileId: 'scroll-${index++}',
+                  width: info.width,
+                  height: info.height,
+                  variationsCost: price,
+                  variationsCostLoading: loading,
+                ),
+                upscale: const GenUpscale(selected: 'local:test'),
+              ),
+            ),
+          );
+          final currentBar = tester.getRect(
+            find.byKey(const Key('gen-bar-top')),
+          );
+          final currentSlot = tester.getRect(
+            find.byKey(const Key('gen-variations-cost')),
+          );
+          bar ??= currentBar;
+          slot ??= currentSlot;
+          expect(currentBar, bar);
+          expect(currentSlot, slot);
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('gen-variations-cost')),
+              matching: find.text(price?.toString() ?? (loading ? '…' : '—')),
+            ),
+            findsOneWidget,
+          );
+          expect(tester.takeException(), isNull);
+          if (locale == 'zh' && index <= 4) {
+            await captureUiuxRegion(
+              tester,
+              find.byKey(const Key('gen-capture')),
+              'variation-${dark ? 'dark' : 'light'}-${loading ? 'loading' : price ?? 'unavailable'}',
+              currentBar.inflate(22),
+            );
+          }
+        }
+        await tapKey(tester, 'gen-variations');
+        expect(recorder.called('onVariations'), isTrue);
+      });
+    }
+  }
+
+  for (final width in [280.0, 440.0]) {
+    testWidgets('放大字体与窄画布保持价签占位 width=$width', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.5;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = Size(width, 800);
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final base = GenFixture.view();
+      final info = base.canvas.info!;
+      Rect? previous;
+      for (final price in <int?>[48, null, 9999, 0]) {
+        final data = base.copyWith(
+          canvas: GenCanvasData(
+            focus: base.canvas.focus,
+            info: GenFocusInfo(
+              tileId: info.tileId,
+              width: info.width,
+              height: info.height,
+              variationsCost: price,
+              variationsCostLoading: price == null,
+            ),
+            upscale: const GenUpscale(selected: 'local:test'),
+          ),
+        );
+        await tester.pumpWidget(
+          genApp(
+            GenHost(
+              data: data,
+              actions: GenActions.logging((_) {}),
+              slots: GenSlots(
+                editor: (_, _) => const SizedBox.shrink(),
+                canvas: (_, _) => const SizedBox.expand(),
+              ),
+              child: const GenCanvas(),
+            ),
+            locale: 'en',
+          ),
+        );
+        await tester.pumpAndSettle();
+        final slot = tester.getRect(
+          find.byKey(const Key('gen-variations-cost')),
+        );
+        previous ??= slot;
+        expect(slot, previous);
+        expect(tester.takeException(), isNull);
+      }
+    });
+  }
   testWidgets('云端放大保留数字与 Anlas 胶囊及原执行回调', (tester) async {
     final base = GenFixture.view();
     final recorder = GenRecorder();
