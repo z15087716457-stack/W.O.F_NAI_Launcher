@@ -16902,12 +16902,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rag_clearHint =>
-      '파생 색인을 삭제하며 원본 태그와 모델은 유지합니다. 다시 사용하려면 재생성이 필요합니다.';
+      '원본 콘텐츠와 모델을 유지하고 이 파생 색인만 삭제합니다. 다시 구축하면 사용할 수 있습니다.';
 
   @override
   String get rag_futureSources =>
-      '첫 버전은 태그 추천에 연결됩니다. Wiki, 블록, 작업 공간, 갤러리 및 Agent 검색은 순차 추가됩니다.';
+      '태그 추천, Wiki 및 프롬프트 블록 검색이 연결되었습니다. 작업 공간, 갤러리, Agent 검색은 단계적으로 연결됩니다.';
 
   @override
-  String get rag_badgeHint => '로컬 의미 태그 추천 준비 완료';
+  String get rag_badgeHint => '로컬 의미 검색을 사용할 수 있습니다';
+
+  @override
+  String get rag_wikiEnabled => 'Wiki 의미 검색';
+
+  @override
+  String get rag_wikiHint =>
+      '로컬 문서 본문을 색인합니다. 정확한 이름 일치를 우선하고 의미 검색 결과로 보완합니다. 첫 색인은 범위를 확인한 뒤 시작하세요.';
+
+  @override
+  String get rag_blocksEnabled => '프롬프트 블록 의미 검색';
+
+  @override
+  String get rag_blocksHint =>
+      '저장된 활성 블록의 제목, 태그, 긍정·부정 텍스트만 색인합니다. 이미지와 저장하지 않은 초안은 제외합니다.';
+
+  @override
+  String rag_textPlan(int documents, int total) {
+    return '저장된 자료 $documents개를 텍스트 조각 $total개로 색인합니다. 첫 작업은 직접 시작하고 이후에는 변경분만 갱신합니다. 일시 중지하거나 완료된 부분을 검색할 수 있습니다.';
+  }
+
+  @override
+  String rag_textCounts(int indexed, int total) {
+    return '색인된 텍스트 조각 $indexed / $total개';
+  }
 }

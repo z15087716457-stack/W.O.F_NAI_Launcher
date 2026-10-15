@@ -17362,12 +17362,36 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_clearHint =>
-      'Delete the derived index while keeping source tags and models. Rebuild before using it again.';
+      'Delete this derived index while keeping source content and models. Rebuild before using it again.';
 
   @override
   String get rag_futureSources =>
-      'This version connects tag suggestions. Wiki, blocks, workspace, gallery and Agent search will follow in stages.';
+      'Tag suggestions, Wiki and prompt block search are connected. Workspace, gallery and Agent retrieval will follow in stages.';
 
   @override
-  String get rag_badgeHint => 'Local semantic tag suggestions are ready';
+  String get rag_badgeHint => 'Local semantic search is ready';
+
+  @override
+  String get rag_wikiEnabled => 'Wiki semantic search';
+
+  @override
+  String get rag_wikiHint =>
+      'Index local article text. Exact names come first; semantic matches supplement them. Preview and start the first index separately.';
+
+  @override
+  String get rag_blocksEnabled => 'Prompt block semantic search';
+
+  @override
+  String get rag_blocksHint =>
+      'Index saved, active block titles, tags and positive/negative text. Images and unsaved drafts are excluded.';
+
+  @override
+  String rag_textPlan(int documents, int total) {
+    return 'Index $documents saved documents as $total text passages. Start this first build explicitly; later updates are incremental. Pause anytime and search completed passages.';
+  }
+
+  @override
+  String rag_textCounts(int indexed, int total) {
+    return 'Indexed $indexed / $total text passages';
+  }
 }

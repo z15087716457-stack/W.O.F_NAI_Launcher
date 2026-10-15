@@ -14,6 +14,10 @@ import 'blocks_actions.dart';
 import 'blocks_library_backend.dart';
 import 'blocks_mapping.dart';
 import 'blocks_preferences.dart';
+import '../../core/rag/rag_settings.dart';
+import '../../core/rag/rag_text_search.dart';
+import '../providers/rag_provider.dart';
+import 'blocks_rag_wiring.dart';
 
 class BlocksDockWiring extends ConsumerStatefulWidget {
   const BlocksDockWiring({
@@ -52,10 +56,29 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
         : filter.folderId == null
         ? const BlocksScope.all()
         : BlocksScope.folder(filter.folderId!);
+    final semantic = _query.trim().isEmpty
+        ? const <RagSearchHit>[]
+        : ref
+                  .watch(
+                    ragTextSearchProvider(
+                      RagTextQuery(
+                        source: RagSource.blocks,
+                        query: _query.trim(),
+                        allowed: mapBlocksLibrary(
+                          library,
+                          preferences: prefs.copyWith(scope: scope),
+                        ).blocks.map((b) => b.id),
+                      ),
+                    ),
+                  )
+                  .asData
+                  ?.value ??
+              const <RagSearchHit>[];
     final data = mapBlocksLibrary(
       library,
       preferences: prefs.copyWith(scope: scope),
       query: _query,
+      semanticIds: semantic.map((hit) => hit.id).toList(),
     );
     final host = BlocksActions(ref, context, () => mounted && context.mounted);
     final backend = ref.read(blocksLibraryBackendProvider);
@@ -123,6 +146,7 @@ class _BlocksDockWiringState extends ConsumerState<BlocksDockWiring> {
           ).take(8).map((b) => blockDataOf(b, library)).toList(),
           groups: groups,
           results: data.blocks,
+          rag: blocksRagStatus(ref, context),
         ),
         actions: BlocksDockActions(
           onQueryChanged: (value) => setState(() => _query = value),

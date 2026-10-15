@@ -180,6 +180,8 @@ BlocksLibraryViewData mapBlocksLibrary(
   PromptBlockLibraryState library, {
   BlocksPreferences preferences = const BlocksPreferences(),
   String query = '',
+  List<String> semanticIds = const [],
+  BlocksRagStatus rag = const BlocksRagStatus(),
   Set<BlocksQuick> quick = const {},
   String? selectedId,
   bool loading = false,
@@ -205,7 +207,8 @@ BlocksLibraryViewData mapBlocksLibrary(
   var filtered = scoped
       .where(
         (b) =>
-            blockMatches(b, query) &&
+            (blockMatches(b, query) ||
+                (query.trim().isNotEmpty && semanticIds.contains(b.id))) &&
             (!quick.contains(BlocksQuick.image) || b.hasThumbnail) &&
             (!quick.contains(BlocksQuick.negative) ||
                 b.negativeContent.isNotEmpty) &&
@@ -236,6 +239,28 @@ BlocksLibraryViewData mapBlocksLibrary(
         folderOrder: library.folderTreeOrder(),
       );
     }
+  }
+  if (query.trim().isNotEmpty && semanticIds.isNotEmpty) {
+    final original = {
+      for (var i = 0; i < filtered.length; i++) filtered[i].id: i,
+    };
+    final semantic = {
+      for (var i = 0; i < semanticIds.length; i++) semanticIds[i]: i,
+    };
+    String normalize(String value) =>
+        value.toLowerCase().replaceAll('_', ' ').trim();
+    int group(PromptBlock b) => normalize(b.title) == normalize(query)
+        ? 0
+        : blockMatches(b, query)
+        ? 1
+        : 2;
+    filtered.sort((a, b) {
+      final order = group(a).compareTo(group(b));
+      if (order != 0) return order;
+      return group(a) < 2
+          ? original[a.id]!.compareTo(original[b.id]!)
+          : semantic[a.id]!.compareTo(semantic[b.id]!);
+    });
   }
   final tags = <String, (BlockTag, int)>{};
   for (final b in library.blocks) {
@@ -308,6 +333,7 @@ BlocksLibraryViewData mapBlocksLibrary(
     selectedId: filtered.any((b) => b.id == selectedId) ? selectedId : null,
     catalog: catalog,
     paletteIds: paletteIds,
+    rag: rag,
   );
 }
 

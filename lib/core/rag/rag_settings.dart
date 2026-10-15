@@ -6,17 +6,28 @@ enum RagContextMode { before, around }
 
 enum RagDevice { auto, cpu, cuda }
 
+enum RagSource { tags, wiki, blocks }
+
 class RagSettings {
   const RagSettings({
     this.enabled = false,
     this.tagsEnabled = true,
+    this.wikiEnabled = false,
+    this.blocksEnabled = false,
     this.embedding = '',
     this.reranker = '',
     this.python = '',
     this.mode = RagContextMode.around,
     this.device = RagDevice.auto,
   });
-  final bool enabled, tagsEnabled;
+  final bool enabled, tagsEnabled, wikiEnabled, blocksEnabled;
+  bool enabledFor(RagSource source) =>
+      enabled &&
+      switch (source) {
+        RagSource.tags => tagsEnabled,
+        RagSource.wiki => wikiEnabled,
+        RagSource.blocks => blocksEnabled,
+      };
   final String embedding, reranker, python;
   final RagContextMode mode;
   final RagDevice device;
@@ -25,6 +36,8 @@ class RagSettings {
     'version': 1,
     'enabled': enabled,
     'tagsEnabled': tagsEnabled,
+    'wikiEnabled': wikiEnabled,
+    'blocksEnabled': blocksEnabled,
     'embedding': embedding,
     'reranker': reranker,
     'python': python,
@@ -34,6 +47,8 @@ class RagSettings {
   factory RagSettings.fromJson(Map<String, dynamic> json) => RagSettings(
     enabled: json['version'] == 1 && json['enabled'] == true,
     tagsEnabled: json['tagsEnabled'] != false,
+    wikiEnabled: json['wikiEnabled'] == true,
+    blocksEnabled: json['blocksEnabled'] == true,
     embedding: json['embedding'] is String ? json['embedding'] : '',
     reranker: json['reranker'] is String ? json['reranker'] : '',
     python: json['python'] is String ? json['python'] : '',
@@ -49,6 +64,8 @@ class RagSettings {
   RagSettings copyWith({
     bool? enabled,
     bool? tagsEnabled,
+    bool? wikiEnabled,
+    bool? blocksEnabled,
     String? embedding,
     String? reranker,
     String? python,
@@ -57,6 +74,8 @@ class RagSettings {
   }) => RagSettings(
     enabled: enabled ?? this.enabled,
     tagsEnabled: tagsEnabled ?? this.tagsEnabled,
+    wikiEnabled: wikiEnabled ?? this.wikiEnabled,
+    blocksEnabled: blocksEnabled ?? this.blocksEnabled,
     embedding: embedding ?? this.embedding,
     reranker: reranker ?? this.reranker,
     python: python ?? this.python,
@@ -66,6 +85,8 @@ class RagSettings {
   String get connectionKey => jsonEncode([
     enabled,
     tagsEnabled,
+    wikiEnabled,
+    blocksEnabled,
     embedding,
     reranker,
     python,

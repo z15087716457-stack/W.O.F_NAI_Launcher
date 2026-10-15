@@ -64,6 +64,61 @@ void main() {
     expect(data.counts.all, 2);
   });
 
+  test(
+    'semantic additions cannot bypass folder, favorites or quick filters',
+    () {
+      final scoped = mapBlocksLibrary(
+        library,
+        preferences: const BlocksPreferences(
+          scope: BlocksScope.folder('parent'),
+        ),
+        query: 'rain',
+        semanticIds: ['b', 'deleted', 'a'],
+      );
+      expect(scoped.blocks.map((b) => b.id), ['a']);
+      final favorites = mapBlocksLibrary(
+        library,
+        preferences: const BlocksPreferences(scope: BlocksScope.favorites()),
+        query: 'rain',
+        semanticIds: ['b', 'a'],
+      );
+      expect(favorites.blocks.map((b) => b.id), ['a']);
+      expect(
+        mapBlocksLibrary(
+          library,
+          query: 'rain',
+          semanticIds: ['a'],
+          quick: {BlocksQuick.image},
+        ).blocks,
+        isEmpty,
+      );
+    },
+  );
+  test(
+    'literal matches stay ahead of semantic additions and semantic rank is retained',
+    () {
+      final data = PromptBlockLibraryState(
+        blocks: [
+          block('z').copyWith(title: 'rain'),
+          block('a').copyWith(title: 'rain coat'),
+          block('b'),
+          block('c'),
+        ],
+        folders: [],
+      );
+      final result = mapBlocksLibrary(
+        data,
+        query: 'rain',
+        semanticIds: ['c', 'b', 'z'],
+      );
+      expect(result.blocks.map((b) => b.id), ['z', 'a', 'c', 'b']);
+      expect(
+        mapBlocksLibrary(data, query: '', semanticIds: ['c']).blocks.length,
+        4,
+      );
+    },
+  );
+
   test('recent IDs resolve unique live blocks in stored order', () {
     final data = mapBlocksLibrary(
       library,

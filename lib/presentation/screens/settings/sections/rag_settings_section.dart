@@ -109,16 +109,26 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
     }
   }
 
-  Future<void> _preview({bool rebuild = false}) async {
+  Future<void> _preview({
+    bool rebuild = false,
+    RagSource source = RagSource.tags,
+  }) async {
     final controller = ref.read(ragControllerProvider.notifier);
-    final plan = await controller.preview();
+    final plan = await controller.preview(source: source);
     if (!mounted) return;
     final l = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(rebuild ? l.rag_rebuild : l.rag_buildIndex),
-        content: Text(l.rag_plan((plan['total'] as num).toInt())),
+        content: Text(
+          source == RagSource.tags
+              ? l.rag_plan((plan['total'] as num).toInt())
+              : l.rag_textPlan(
+                  (plan['documents'] as num).toInt(),
+                  (plan['total'] as num).toInt(),
+                ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
@@ -132,8 +142,144 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
       ),
     );
     if (confirm == true && mounted) {
-      await controller.start(plan['plan_id'] as String, rebuild: rebuild);
+      await controller.start(
+        plan['plan_id'] as String,
+        rebuild: rebuild,
+        source: source,
+      );
     }
+  }
+
+  Future<void> _clearSource(RagSource source) async {
+    final l = context.l10n;
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (c) => AlertDialog(
+        title: Text(l.rag_clear),
+        content: Text(l.rag_clearHint),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(c, false),
+            child: Text(l.common_cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(c, true),
+            child: Text(l.rag_clear),
+          ),
+        ],
+      ),
+    );
+    if (yes == true && mounted) {
+      await ref.read(ragControllerProvider.notifier).clear(source: source);
+    }
+  }
+
+  Widget _textSource(RagSource source) {
+    final l = context.l10n,
+        settings = ref.watch(ragSettingsProvider),
+        all = ref.watch(ragControllerProvider);
+    final status = all.forSource(source),
+        controller = ref.read(ragControllerProvider.notifier);
+    final wiki = source == RagSource.wiki;
+    final enabled = wiki ? settings.wikiEnabled : settings.blocksEnabled;
+    final available = settings.enabled && enabled;
+    final locked = status.busy || all.installPhase != null;
+    final phase = switch (status.phase) {
+      'off' => l.rag_off,
+      'empty' => l.rag_empty,
+      'loading' => l.rag_loading,
+      'paused' => l.rag_paused,
+      'building' => l.rag_building,
+      'partial' => l.rag_partial,
+      'ready' => l.rag_ready,
+      _ => l.rag_unavailable,
+    };
+    return Column(
+      key: Key('rag-${source.name}-index'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SettingsSwitchTile(
+          key: Key('rag-${source.name}-enable'),
+          title: Text(wiki ? l.rag_wikiEnabled : l.rag_blocksEnabled),
+          subtitle: Text(wiki ? l.rag_wikiHint : l.rag_blocksHint),
+          value: enabled,
+          onChanged: all.installPhase != null
+              ? null
+              : (v) => _action(
+                  () => ref
+                      .read(ragSettingsProvider.notifier)
+                      .update(
+                        wiki
+                            ? ref
+                                  .read(ragSettingsProvider)
+                                  .copyWith(wikiEnabled: v)
+                            : ref
+                                  .read(ragSettingsProvider)
+                                  .copyWith(blocksEnabled: v),
+                      ),
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 8, bottom: 10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(phase),
+              Text(l.rag_textCounts(status.indexed, status.total)),
+              if (status.bytes > 0)
+                Text(
+                  l.rag_storage((status.bytes / 1048576).toStringAsFixed(1)),
+                ),
+              if (status.error != null)
+                Text('${l.rag_operationFailed} (${status.error})'),
+              if (status.busy)
+                LinearProgressIndicator(
+                  value: status.total > 0
+                      ? (status.processed / status.total).clamp(0.0, 1.0)
+                      : null,
+                ),
+            ],
+          ),
+        ),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: [
+            FilledButton(
+              key: Key('rag-${source.name}-preview'),
+              onPressed: available && !locked && status.jobId == null
+                  ? () => _action(() => _preview(source: source))
+                  : null,
+              child: Text(l.rag_buildIndex),
+            ),
+            if (available && (status.jobId != null || status.phase == 'paused'))
+              OutlinedButton(
+                onPressed: () => _action(
+                  () => status.phase == 'paused'
+                      ? controller.resume(source: source)
+                      : controller.pause(source: source),
+                ),
+                child: Text(
+                  status.phase == 'paused' ? l.rag_resume : l.rag_pause,
+                ),
+              ),
+            OutlinedButton(
+              onPressed: available && !locked && status.jobId == null
+                  ? () => _action(() => _preview(source: source, rebuild: true))
+                  : null,
+              child: Text(l.rag_rebuild),
+            ),
+            TextButton(
+              onPressed: available && !locked
+                  ? () => _action(() => _clearSource(source))
+                  : null,
+              child: Text(l.rag_clear),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+      ],
+    );
   }
 
   @override
@@ -144,7 +290,7 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
     final controller = ref.read(ragControllerProvider.notifier);
     final available = settings.enabled && settings.tagsEnabled;
     final installing = status.installPhase != null;
-    final locked = status.busy || installing;
+    final locked = status.anyBusy || installing;
     Widget path(String title, String value, String kind) => SettingsTile(
       title: Text(title),
       subtitle: Text(value.isEmpty ? l.rag_notConfigured : value),
@@ -354,6 +500,8 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
             ],
           ),
         ),
+        _textSource(RagSource.wiki),
+        _textSource(RagSource.blocks),
         Text(l.rag_futureSources, style: Theme.of(context).textTheme.bodySmall),
       ],
     );

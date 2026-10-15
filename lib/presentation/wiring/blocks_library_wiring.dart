@@ -23,6 +23,10 @@ import 'blocks_library_backend.dart';
 import 'blocks_mapping.dart';
 import 'blocks_platform.dart';
 import 'blocks_preferences.dart';
+import '../../core/rag/rag_settings.dart';
+import '../../core/rag/rag_text_search.dart';
+import '../providers/rag_provider.dart';
+import 'blocks_rag_wiring.dart';
 
 final blockSourceStateProvider = FutureProvider.autoDispose
     .family<BlockSourceState, PromptBlock>((ref, block) async {
@@ -154,10 +158,31 @@ class _BlocksLibraryWiringState extends ConsumerState<BlocksLibraryWiring> {
     final model = ref.watch(
       generationParamsNotifierProvider.select((p) => p.model),
     );
+    final semantic = _query.trim().isEmpty
+        ? const <RagSearchHit>[]
+        : ref
+                  .watch(
+                    ragTextSearchProvider(
+                      RagTextQuery(
+                        source: RagSource.blocks,
+                        query: _query.trim(),
+                        allowed: mapBlocksLibrary(
+                          library,
+                          preferences: preferences,
+                          quick: _quick,
+                        ).blocks.map((b) => b.id),
+                      ),
+                    ),
+                  )
+                  .asData
+                  ?.value ??
+              const <RagSearchHit>[];
     final data = mapBlocksLibrary(
       library,
       preferences: preferences,
       query: _query,
+      semanticIds: semantic.map((hit) => hit.id).toList(),
+      rag: blocksRagStatus(ref, context),
       quick: _quick,
       loading: libraryAsync.isLoading || preferencesAsync.isLoading,
       selectedId: requested,

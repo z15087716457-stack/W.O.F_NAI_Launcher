@@ -458,6 +458,18 @@ class BlocksCounts {
 }
 
 @immutable
+class BlocksRagStatus {
+  const BlocksRagStatus({
+    this.enabled = false,
+    this.available = false,
+    this.searching = false,
+    this.tooltip = '',
+  });
+  final bool enabled, available, searching;
+  final String tooltip;
+}
+
+@immutable
 class BlocksLibraryViewData {
   const BlocksLibraryViewData({
     required this.now,
@@ -479,6 +491,7 @@ class BlocksLibraryViewData {
     this.inspectorOpen = true,
     this.catalog = const BlockParamCatalog(),
     this.paletteIds = const {},
+    this.rag = const BlocksRagStatus(),
   });
 
   final DateTime now;
@@ -510,6 +523,7 @@ class BlocksLibraryViewData {
 
   /// 已经放进积木的块（多选浮条“放进积木”的提示用）。
   final Set<String> paletteIds;
+  final BlocksRagStatus rag;
 
   bool get libraryEmpty => counts.all == 0 && !loading;
   BlockData? get selected =>
@@ -784,6 +798,7 @@ class BlocksDockViewData {
     this.recent = const [],
     this.groups = const [],
     this.results = const [],
+    this.rag = const BlocksRagStatus(),
   });
 
   final int total;
@@ -801,6 +816,7 @@ class BlocksDockViewData {
 
   /// 搜索结果（[query] 非空时显示，平铺不分组）。
   final List<BlockData> results;
+  final BlocksRagStatus rag;
 }
 
 @immutable

@@ -16640,14 +16640,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rag_clear => '清除索引';
 
   @override
-  String get rag_clearHint => '清除本地派生索引，保留原始标签库和模型。下次使用需重新建立。';
+  String get rag_clearHint => '仅删除此来源的派生索引，保留原始内容与模型；重新建库后可继续使用。';
 
   @override
   String get rag_futureSources =>
-      '首版仅接入标签推荐；Wiki、提示词块、工作区、图库和 Agent 查询入口后续分批接入。';
+      '已接入标签推荐、Wiki 与提示词块搜索；工作区、图库与 Agent 检索后续分批接入。';
 
   @override
-  String get rag_badgeHint => '本地语义标签推荐已就绪';
+  String get rag_badgeHint => '本地语义检索已就绪';
+
+  @override
+  String get rag_wikiEnabled => 'Wiki 语义搜索';
+
+  @override
+  String get rag_wikiHint => '收录本地百科正文，名称精确匹配优先，语义结果补充。单独预览并开始首次建库。';
+
+  @override
+  String get rag_blocksEnabled => '提示词块语义搜索';
+
+  @override
+  String get rag_blocksHint => '仅收录已保存、未归档块的标题、标签与正负面文字；不收录图片或编辑草稿。';
+
+  @override
+  String rag_textPlan(int documents, int total) {
+    return '将收录 $documents 份已保存资料，切分为 $total 个文字片段。首次建库需手动开始，之后增量更新；可暂停，已完成部分可检索。';
+  }
+
+  @override
+  String rag_textCounts(int indexed, int total) {
+    return '已索引 $indexed / $total 个文字片段';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -33286,12 +33308,34 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get rag_clear => '清除索引';
 
   @override
-  String get rag_clearHint => '清除本地派生索引，保留原始標籤庫和模型。下次使用需重新增立。';
+  String get rag_clearHint => '僅刪除此來源的派生索引，保留原始內容與模型；重新增庫後可繼續使用。';
 
   @override
   String get rag_futureSources =>
-      '首版僅接入標籤推薦；Wiki、提示詞塊、工作區、圖庫和 Agent 查詢入口後續分批接入。';
+      '已接入標籤推薦、Wiki 與提示詞塊搜尋；工作區、圖庫與 Agent 檢索後續分批接入。';
 
   @override
-  String get rag_badgeHint => '本地語義標籤推薦已就緒';
+  String get rag_badgeHint => '本地語義檢索已就緒';
+
+  @override
+  String get rag_wikiEnabled => 'Wiki 語義搜尋';
+
+  @override
+  String get rag_wikiHint => '收錄本地百科正文，名稱精確匹配優先，語義結果補充。單獨預覽並開始首次建庫。';
+
+  @override
+  String get rag_blocksEnabled => '提示詞塊語義搜尋';
+
+  @override
+  String get rag_blocksHint => '僅收錄已儲存、未歸檔塊的標題、標籤與正負面文字；不收錄圖片或編輯草稿。';
+
+  @override
+  String rag_textPlan(int documents, int total) {
+    return '將收錄 $documents 份已儲存資料，切分為 $total 個文字片段。首次建庫需手動開始，之後增量更新；可暫停，已完成部分可檢索。';
+  }
+
+  @override
+  String rag_textCounts(int indexed, int total) {
+    return '已索引 $indexed / $total 個文字片段';
+  }
 }

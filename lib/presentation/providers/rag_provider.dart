@@ -8,6 +8,9 @@ import '../../core/database/asset_database_manager.dart';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
+import '../../core/rag/rag_text_search.dart';
+import '../../core/rag/rag_block_snapshot.dart';
+import 'prompt_block_library_provider.dart';
 import '../../core/services/desktop_app_shutdown_service.dart';
 
 class RagStatus {
@@ -25,11 +28,19 @@ class RagStatus {
     this.suspended = false,
     this.searching = 0,
     this.installPhase,
+    this.sources = const {},
+    this.runtimeReady = false,
   });
   final String phase;
   final int indexed, processed, total, bytes, searching;
   final String? jobId, error, installPhase;
   final bool busy, complete, partial, suspended;
+  final bool runtimeReady;
+  final Map<RagSource, RagStatus> sources;
+  RagStatus forSource(RagSource source) => source == RagSource.tags
+      ? this
+      : (sources[source] ?? const RagStatus()).copyWith(suspended: suspended);
+  bool get anyBusy => busy || sources.values.any((s) => s.busy);
   bool get available =>
       indexed > 0 && error == null && !suspended && phase != 'off';
   RagStatus copyWith({
@@ -49,6 +60,8 @@ class RagStatus {
     int? searching,
     String? installPhase,
     bool clearInstall = false,
+    Map<RagSource, RagStatus>? sources,
+    bool? runtimeReady,
   }) => RagStatus(
     phase: phase ?? this.phase,
     indexed: indexed ?? this.indexed,
@@ -63,6 +76,8 @@ class RagStatus {
     suspended: suspended ?? this.suspended,
     searching: searching ?? this.searching,
     installPhase: clearInstall ? null : installPhase ?? this.installPhase,
+    sources: sources ?? this.sources,
+    runtimeReady: runtimeReady ?? this.runtimeReady,
   );
 }
 
@@ -76,6 +91,28 @@ final ragControllerProvider = NotifierProvider<RagController, RagStatus>(
   RagController.new,
 );
 
+typedef RagClientStarter =
+    Future<RagClient> Function({
+      required String python,
+      required Directory directory,
+    });
+final ragClientStarterProvider = Provider<RagClientStarter>(
+  (ref) => RagClient.start,
+);
+typedef RagSourcePaths = ({String catalog, String runtime, String wiki});
+final ragSourcePathsProvider = Provider<Future<RagSourcePaths> Function()>(
+  (ref) => () async {
+    await AssetDatabaseManager.initialize();
+    final support = await getApplicationSupportDirectory();
+    final runtime = File(p.join(support.path, 'databases', 'danbooru.db'));
+    return (
+      catalog: AssetDatabaseManager.instance.tagCatalogDbPath,
+      runtime: await runtime.exists() ? runtime.path : '',
+      wiki: await AssetDatabaseManager.instance.ensureTagWikiDb(),
+    );
+  },
+);
+
 class RagController extends Notifier<RagStatus> {
   RagClient? _client;
   Future<RagClient>? _connecting;
@@ -85,12 +122,22 @@ class RagController extends Notifier<RagStatus> {
   bool _disposed = false;
   int _epoch = 0, _gpuHolds = 0;
   final _finishedJobs = <String>{};
+  Future<void> _snapshotWrites = Future.value();
+  Object? _refreshToken;
   @override
   RagStatus build() {
     final unregister = DesktopAppShutdownService.registerCleanup(() async {
+      _disposed = true;
+      _epoch++;
       _refresh?.cancel();
       _installer?.cancel();
       await _client?.close();
+      final opening = _connecting;
+      if (opening != null) {
+        try {
+          await (await opening.timeout(const Duration(seconds: 3))).close();
+        } catch (_) {}
+      }
     });
     ref.listen(ragSettingsProvider, (previous, next) {
       if (previous?.connectionKey != next.connectionKey) unawaited(_reset());
@@ -112,13 +159,14 @@ class RagController extends Notifier<RagStatus> {
 
   bool get _enabled {
     final s = ref.read(ragSettingsProvider);
-    return s.enabled && s.tagsEnabled;
+    return RagSource.values.any(s.enabledFor);
   }
 
   Future<void> _reset() async {
     final epoch = ++_epoch;
     _refresh?.cancel();
     _connecting = null;
+    _refreshToken = null;
     _finishedJobs.clear();
     final old = _client;
     _client = null;
@@ -156,58 +204,82 @@ class RagController extends Notifier<RagStatus> {
       throw const RagException('models_missing');
     }
     if (!_disposed && epoch == _epoch) {
-      state = state.copyWith(phase: 'loading', clearError: true);
+      for (final source in RagSource.values.where(settings.enabledFor)) {
+        _change(source, (s) => s.copyWith(phase: 'loading', clearError: true));
+      }
     }
-    await AssetDatabaseManager.initialize();
-    final support = await getApplicationSupportDirectory();
-    final runtime = File(p.join(support.path, 'databases', 'danbooru.db'));
-    final client = await RagClient.start(python: python, directory: root);
+    final paths = await ref.read(ragSourcePathsProvider)();
+    final snapshot = settings.blocksEnabled
+        ? await _writeBlockSnapshot(root)
+        : '';
+    final client = await ref.read(ragClientStarterProvider)(
+      python: python,
+      directory: root,
+    );
     try {
       final result = await client.request('configure', {
         'embedding': settings.embedding,
         'reranker': settings.reranker,
         'device': settings.device.name,
         'directory': p.join(root.path, 'indices'),
-        'catalog': AssetDatabaseManager.instance.tagCatalogDbPath,
-        'runtime': await runtime.exists() ? runtime.path : '',
-        'wiki': await AssetDatabaseManager.instance.ensureTagWikiDb(),
+        'catalog': paths.catalog,
+        'runtime': paths.runtime,
+        'wiki': paths.wiki,
+        'blocks': snapshot,
+        'sources': [
+          for (final source in RagSource.values)
+            if (settings.enabledFor(source)) source.name,
+        ],
       });
       if (_disposed || epoch != _epoch) throw const RagException('cancelled');
       _client = client;
       _events = client.events.listen((event) {
         if (_disposed || epoch != _epoch) return;
         if (event['event'] == 'lost') {
-          state = state.copyWith(
-            phase: 'error',
-            error: 'worker_closed',
-            busy: false,
-            clearJob: true,
-          );
+          for (final source in RagSource.values) {
+            _change(
+              source,
+              (s) => s.copyWith(
+                phase: 'error',
+                error: 'worker_closed',
+                busy: false,
+                clearJob: true,
+              ),
+            );
+          }
+          state = state.copyWith(runtimeReady: false);
           return;
         }
         if (event['event'] == 'index') {
+          final source = RagSource.values.firstWhere(
+            (s) => s.name == event['source'],
+            orElse: () => RagSource.tags,
+          );
           if (['complete', 'error'].contains(event['phase'])) {
             _finishedJobs.add(event['job_id'] as String);
             if (_finishedJobs.length > 32) {
               _finishedJobs.remove(_finishedJobs.first);
             }
           }
-          _apply(event);
-          state = state.copyWith(
-            jobId: event['job_id'] as String?,
-            phase: event['phase'] == 'complete'
-                ? (state.complete ? 'ready' : 'partial')
-                : event['phase'] as String?,
-            busy: event['phase'] == 'building',
-            clearJob: ['complete', 'error'].contains(event['phase']),
-            error: event['code'] as String?,
-            clearError: event['phase'] != 'error',
+          _applyIndex(event, source);
+          _change(
+            source,
+            (s) => s.copyWith(
+              jobId: event['job_id'] as String?,
+              phase: event['phase'] == 'complete'
+                  ? (s.complete ? 'ready' : 'partial')
+                  : event['phase'] as String?,
+              busy: event['phase'] == 'building',
+              clearJob: ['complete', 'error'].contains(event['phase']),
+              error: event['code'] as String?,
+              clearError: event['phase'] != 'error',
+            ),
           );
         }
       });
       _apply(result);
       _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
-        if (!_disposed && !state.busy) unawaited(refresh(autoUpdate: true));
+        if (!_disposed) unawaited(refresh(autoUpdate: true));
       });
       if (_gpuHolds > 0) {
         state = state.copyWith(suspended: true);
@@ -222,117 +294,208 @@ class RagController extends Notifier<RagStatus> {
 
   void _apply(Map<String, dynamic> result) {
     if (_disposed) return;
-    state = state.copyWith(
-      indexed: (result['indexed'] as num?)?.toInt(),
-      processed: (result['processed'] as num?)?.toInt(),
-      total: (result['total'] as num?)?.toInt(),
-      bytes: (result['bytes'] as num?)?.toInt(),
-      complete: result['complete'] as bool?,
-      partial: result['partial'] as bool?,
-      busy: result['building'] as bool?,
-      suspended: result['suspended'] as bool?,
-      phase: result['complete'] == true
-          ? 'ready'
-          : (result['indexed'] as num? ?? 0) > 0
-          ? 'partial'
-          : 'empty',
-      clearError: true,
-    );
-    if (result['paused'] == true) {
-      state = state.copyWith(phase: 'paused', busy: false);
+    if (result['sources'] case final Map sources) {
+      for (final source in RagSource.values) {
+        if (sources[source.name] case final Map value) {
+          _applyIndex(value.cast<String, dynamic>(), source);
+        } else {
+          _change(
+            source,
+            (s) => s.copyWith(phase: 'off', busy: false, clearJob: true),
+          );
+        }
+      }
+      final jobs = result['jobs'] as List? ?? const [];
+      for (final source in RagSource.values) {
+        final job = jobs
+            .cast<Map>()
+            .where((j) => j['source'] == source.name)
+            .firstOrNull;
+        _change(
+          source,
+          (s) =>
+              s.copyWith(jobId: job?['id'] as String?, clearJob: job == null),
+        );
+      }
+      state = state.copyWith(
+        suspended: result['suspended'] as bool? ?? false,
+        runtimeReady: true,
+      );
+    } else {
+      _applyIndex(result, RagSource.tags);
     }
   }
 
-  void _fail(Object error) {
+  void _change(RagSource source, RagStatus Function(RagStatus) update) {
     if (_disposed) return;
-    state = state.copyWith(
-      phase: 'error',
-      error: error is RagException ? error.code : 'rag_runtime_error',
-      busy: false,
+    if (source == RagSource.tags) {
+      state = update(state);
+    } else {
+      state = state.copyWith(
+        sources: {...state.sources, source: update(state.forSource(source))},
+      );
+    }
+  }
+
+  void _applyIndex(Map<String, dynamic> result, RagSource source) {
+    _change(
+      source,
+      (s) => s.copyWith(
+        indexed: (result['indexed'] as num?)?.toInt(),
+        processed: (result['processed'] as num?)?.toInt(),
+        total: (result['total'] as num?)?.toInt(),
+        bytes: (result['bytes'] as num?)?.toInt(),
+        complete: result['complete'] as bool?,
+        partial: result['partial'] as bool?,
+        busy: result['building'] as bool?,
+        phase: result['paused'] == true
+            ? 'paused'
+            : result['building'] == true
+            ? 'building'
+            : result['complete'] == true
+            ? 'ready'
+            : (result['indexed'] as num? ?? 0) > 0
+            ? 'partial'
+            : 'empty',
+        clearError: true,
+      ),
+    );
+    if (result['paused'] == true) {
+      _change(source, (s) => s.copyWith(busy: false));
+    }
+  }
+
+  void _fail(Object error, {RagSource source = RagSource.tags}) {
+    if (_disposed) return;
+    _change(
+      source,
+      (s) => s.copyWith(
+        phase: 'error',
+        error: error is RagException ? error.code : 'rag_runtime_error',
+        busy: false,
+      ),
     );
   }
 
   Future<void> refresh({bool autoUpdate = false}) async {
-    if (!_enabled || _disposed) return;
+    if (!_enabled || _disposed || _refreshToken != null) return;
+    final refreshToken = _refreshToken = Object();
     final epoch = _epoch;
     try {
       final c = await _connect();
+      if (ref.read(ragSettingsProvider).enabledFor(RagSource.blocks)) {
+        await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
+      }
       final status = await c.request('status');
       if (_disposed || epoch != _epoch) return;
       _apply(status);
-      if (autoUpdate &&
-          status['auto_update_allowed'] == true &&
-          status['complete'] != true &&
-          state.jobId == null &&
-          !state.suspended &&
-          _gpuHolds == 0) {
-        final plan = await c.request('preview');
-        await start(plan['plan_id'] as String);
+      final sources = status['sources'] as Map? ?? {'tags': status};
+      for (final source in RagSource.values) {
+        final value = sources[source.name] as Map?;
+        if (autoUpdate &&
+            value?['auto_update_allowed'] == true &&
+            value?['complete'] != true &&
+            state.forSource(source).jobId == null &&
+            !state.suspended &&
+            _gpuHolds == 0 &&
+            ref.read(ragSettingsProvider).enabledFor(source)) {
+          final plan = await c.request('preview', {'source': source.name});
+          await start(plan['plan_id'] as String, source: source);
+        }
       }
     } catch (error) {
-      if (epoch == _epoch) _fail(error);
+      if (epoch == _epoch) {
+        for (final source in RagSource.values) {
+          if (ref.read(ragSettingsProvider).enabledFor(source)) {
+            _fail(error, source: source);
+          }
+        }
+      }
+    } finally {
+      if (identical(_refreshToken, refreshToken)) _refreshToken = null;
     }
   }
 
-  Future<Map<String, dynamic>> preview() async {
+  Future<Map<String, dynamic>> preview({
+    RagSource source = RagSource.tags,
+  }) async {
     final c = await _connect();
-    return c.request('preview');
+    if (source == RagSource.blocks) {
+      await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
+    }
+    return c.request('preview', {'source': source.name});
   }
 
-  Future<void> start(String planId, {bool rebuild = false}) async {
+  Future<void> start(
+    String planId, {
+    bool rebuild = false,
+    RagSource source = RagSource.tags,
+  }) async {
     final epoch = _epoch;
     try {
       final c = await _connect();
-      if (rebuild) await c.request('clear');
-      final result = await c.request('start', {'plan_id': planId});
+      if (rebuild) await c.request('clear', {'source': source.name});
+      final result = await c.request('start', {
+        'plan_id': planId,
+        'source': source.name,
+      });
       if (!_disposed &&
           epoch == _epoch &&
           !_finishedJobs.contains(result['job_id'])) {
-        state = state.copyWith(
-          jobId: result['job_id'] as String,
-          phase: 'building',
-          processed: 0,
-          busy: true,
-          clearError: true,
+        _change(
+          source,
+          (s) => s.copyWith(
+            jobId: result['job_id'] as String,
+            phase: 'building',
+            processed: 0,
+            busy: true,
+            clearError: true,
+          ),
         );
       }
     } catch (error) {
-      if (epoch == _epoch) _fail(error);
+      if (epoch == _epoch) _fail(error, source: source);
       rethrow;
     }
   }
 
-  Future<void> pause() async {
+  Future<void> pause({RagSource source = RagSource.tags}) async {
     final epoch = _epoch;
-    final id = state.jobId;
+    final id = state.forSource(source).jobId;
     if (id == null) return;
-    await (await _connect()).request('pause', {'job_id': id});
+    await (await _connect()).request('pause', {
+      'job_id': id,
+      'source': source.name,
+    });
     if (!_disposed && epoch == _epoch) {
-      state = state.copyWith(phase: 'paused', busy: false);
+      _change(source, (s) => s.copyWith(phase: 'paused', busy: false));
     }
   }
 
-  Future<void> resume() async {
+  Future<void> resume({RagSource source = RagSource.tags}) async {
     final epoch = _epoch;
-    final id = state.jobId;
+    final id = state.forSource(source).jobId;
     if (id == null) {
-      final p = await preview();
-      await start(p['plan_id'] as String);
+      final p = await preview(source: source);
+      await start(p['plan_id'] as String, source: source);
       return;
     }
-    await (await _connect()).request('resume', {'job_id': id});
+    await (await _connect()).request('resume', {
+      'job_id': id,
+      'source': source.name,
+    });
     if (!_disposed && epoch == _epoch) {
-      state = state.copyWith(phase: 'building', busy: true);
+      _change(source, (s) => s.copyWith(phase: 'building', busy: true));
     }
   }
 
-  Future<void> clear() async {
+  Future<void> clear({RagSource source = RagSource.tags}) async {
     final epoch = _epoch;
     final c = await _connect();
-    final result = await c.request('clear');
+    final result = await c.request('clear', {'source': source.name});
     if (_disposed || epoch != _epoch) return;
-    _apply(result);
-    state = state.copyWith(clearJob: true);
+    _applyIndex(result, source);
+    _change(source, (s) => s.copyWith(clearJob: true));
   }
 
   Future<void> suspendForGpu() async {
@@ -356,6 +519,77 @@ class RagController extends Notifier<RagStatus> {
     if (!_disposed) state = state.copyWith(suspended: false);
   }
 
+  Future<String> _writeBlockSnapshot(Directory root) async {
+    final epoch = _epoch;
+    final library = await ref.read(promptBlockLibraryNotifierProvider.future);
+    final content = encodeRagBlocks(library.blocks);
+    final file = File(p.join(root.path, 'sources', 'blocks.json'));
+    final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
+      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+      await file.parent.create(recursive: true);
+      if (await file.exists() && await file.readAsString() == content) return;
+      final temporary = File('${file.path}.tmp');
+      await temporary.writeAsString(content, flush: true);
+      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+      await temporary.rename(file.path);
+    });
+    _snapshotWrites = write;
+    await write;
+    return file.path;
+  }
+
+  Future<List<RagSearchHit>> searchText(
+    RagTextQuery query, {
+    required RagCancellation cancellation,
+  }) async {
+    if (query.source == RagSource.tags ||
+        query.query.trim().isEmpty ||
+        !ref.read(ragSettingsProvider).enabledFor(query.source) ||
+        _gpuHolds > 0) {
+      return const [];
+    }
+    final epoch = _epoch;
+    var counted = false;
+    try {
+      final c = await _connect();
+      if (query.source == RagSource.blocks) {
+        await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
+      }
+      if (cancellation.isCancelled || _disposed || epoch != _epoch) {
+        return const [];
+      }
+      counted = true;
+      _change(query.source, (s) => s.copyWith(searching: s.searching + 1));
+      final result = await c.request('text_search', {
+        'source': query.source.name,
+        'query': query.query,
+        if (query.allowed != null) 'allowed': query.allowed,
+        if (query.categories != null) 'categories': query.categories,
+        'limit': 80,
+      }, cancellation);
+      if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+        return const [];
+      }
+      return [
+        for (final item in result['items'] as List? ?? const [])
+          RagSearchHit.fromJson((item as Map).cast<String, dynamic>()),
+      ];
+    } catch (error) {
+      if (epoch == _epoch &&
+          !(error is RagException && error.code == 'cancelled')) {
+        _fail(error, source: query.source);
+      }
+      return const [];
+    } finally {
+      if (counted && !_disposed && epoch == _epoch) {
+        _change(
+          query.source,
+          (s) => s.copyWith(searching: (s.searching - 1).clamp(0, 100)),
+        );
+      }
+    }
+  }
+
   Future<List<CompletionCandidate>> recommend({
     required String text,
     required int cursor,
@@ -366,7 +600,10 @@ class RagController extends Notifier<RagStatus> {
     String keyword = '',
     int limit = 40,
   }) async {
-    if (!_enabled || _gpuHolds > 0) return const [];
+    if (!ref.read(ragSettingsProvider).enabledFor(RagSource.tags) ||
+        _gpuHolds > 0) {
+      return const [];
+    }
     final epoch = _epoch;
     var counted = false;
     try {
@@ -445,3 +682,36 @@ class RagController extends Notifier<RagStatus> {
 
   void cancelInstall() => _installer?.cancel();
 }
+
+final ragTextSearchProvider = FutureProvider.autoDispose
+    .family<List<RagSearchHit>, RagTextQuery>((ref, query) async {
+      final settings = ref.watch(ragSettingsProvider);
+      if (!settings.enabledFor(query.source) || query.query.trim().isEmpty) {
+        return const [];
+      }
+      ref.watch(
+        ragControllerProvider.select(
+          (s) => (
+            s.forSource(query.source).indexed,
+            s.forSource(query.source).complete,
+            s.suspended,
+          ),
+        ),
+      );
+      if (query.source == RagSource.blocks) {
+        ref.watch(
+          promptBlockLibraryNotifierProvider.select(
+            (s) => s.valueOrNull == null
+                ? null
+                : encodeRagBlocks(s.requireValue.blocks),
+          ),
+        );
+      }
+      final cancellation = RagCancellation();
+      ref.onDispose(cancellation.cancel);
+      await Future<void>.delayed(const Duration(milliseconds: 180));
+      if (cancellation.isCancelled) return const [];
+      return ref
+          .read(ragControllerProvider.notifier)
+          .searchText(query, cancellation: cancellation);
+    });

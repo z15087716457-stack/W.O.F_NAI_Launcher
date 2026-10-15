@@ -2,6 +2,10 @@ import 'dart:async';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/rag/rag_settings.dart';
+import '../../../core/rag/rag_text_search.dart';
+import '../../providers/rag_provider.dart';
+import 'rag_search_badge.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 
 import '../../../core/constants/storage_keys.dart';
@@ -143,6 +147,13 @@ class _PromptBlockPickerDialogState
             decoration: InputDecoration(
               hintText: watchTipHint(ref, context.l10n, TipSurface.blockSearch),
               prefixIcon: const Icon(Icons.search, size: 20),
+              suffixIcon:
+                  ref.watch(ragSettingsProvider).enabledFor(RagSource.blocks)
+                  ? const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [RagSearchBadge(source: RagSource.blocks)],
+                    )
+                  : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -205,18 +216,45 @@ class _PromptBlockPickerDialogState
         ? state.blocks.toList()
         : state.blocksInFolderTree(selectedFolderId);
 
-    // 搜索过滤（标题 + 内容）
+    final semantic = _searchQuery.trim().isEmpty
+        ? const <RagSearchHit>[]
+        : ref
+                  .watch(
+                    ragTextSearchProvider(
+                      RagTextQuery(
+                        source: RagSource.blocks,
+                        query: _searchQuery.trim(),
+                        allowed: blocks.map((b) => b.id),
+                      ),
+                    ),
+                  )
+                  .asData
+                  ?.value ??
+              const <RagSearchHit>[];
+    final rank = {for (var i = 0; i < semantic.length; i++) semantic[i].id: i};
+    final literal = <String>{};
+    // 普通匹配先显示；语义只补充当前文件夹内的已保存块。
     if (_searchQuery.isNotEmpty) {
       final lowerQuery = _searchQuery.toLowerCase();
-      blocks = blocks
-          .where(
-            (block) =>
-                block.title.toLowerCase().contains(lowerQuery) ||
-                block.content.toLowerCase().contains(lowerQuery),
-          )
-          .toList();
+      blocks = blocks.where((block) {
+        final match =
+            block.title.toLowerCase().contains(lowerQuery) ||
+            block.content.toLowerCase().contains(lowerQuery);
+        if (match) literal.add(block.id);
+        return match || rank.containsKey(block.id);
+      }).toList();
     }
     blocks = _sortFavoritesFirst(blocks);
+    if (rank.isNotEmpty && _searchQuery.trim().isNotEmpty) {
+      final order = {for (var i = 0; i < blocks.length; i++) blocks[i].id: i};
+      blocks.sort((a, b) {
+        final first = literal.contains(a.id), second = literal.contains(b.id);
+        if (first != second) return first ? -1 : 1;
+        return first
+            ? order[a.id]!.compareTo(order[b.id]!)
+            : rank[a.id]!.compareTo(rank[b.id]!);
+      });
+    }
 
     if (blocks.isEmpty) {
       return Center(

@@ -72,7 +72,7 @@ class Models:
             raise RuntimeError('invalid_embeddings')
         return result
 
-    def rerank(self, query, documents, negative=False):
+    def rerank(self, query, documents, negative=False, purpose='tags'):
         if not documents:
             return []
         import numpy as np
@@ -82,10 +82,11 @@ class Models:
                 local_files_only=True, trust_remote_code=False, max_length=1024,
                 model_kwargs={'torch_dtype': self._dtype()},
                 prompts={'positive': 'Retrieve real image tags that complement the existing visual prompt; prefer useful additional concepts over repeated synonyms.',
-                         'negative': 'Retrieve real image tags that can complement the existing exclusion tags in a negative prompt.'},
+                         'negative': 'Retrieve real image tags that can complement the existing exclusion tags in a negative prompt.',
+                         'retrieval': 'Retrieve text passages relevant to the search query or useful for answering it.'},
                 default_prompt_name='positive')
         scores = np.asarray(self.scorer.predict([(query, d) for d in documents],
-            prompt_name='negative' if negative else 'positive',
+            prompt_name='retrieval' if purpose == 'retrieval' else ('negative' if negative else 'positive'),
             batch_size=8, show_progress_bar=False), dtype=float).reshape(-1)
         if len(scores) != len(documents) or not np.isfinite(scores).all():
             raise RuntimeError('invalid_rerank_scores')

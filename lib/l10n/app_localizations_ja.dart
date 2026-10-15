@@ -16855,12 +16855,37 @@ class AppLocalizationsJa extends AppLocalizations {
   String get rag_clear => '索引を削除';
 
   @override
-  String get rag_clearHint => '派生索引を削除します。元のタグとモデルは保持され、再利用には再作成が必要です。';
+  String get rag_clearHint =>
+      '元のコンテンツとモデルを保持して、この派生インデックスのみを削除します。再構築後に利用できます。';
 
   @override
   String get rag_futureSources =>
-      '初版はタグ候補に対応。Wiki、ブロック、作業領域、画像庫、Agent 検索は順次追加します。';
+      'タグ候補、Wiki、プロンプトブロックの検索に対応しました。ワークスペース、ギャラリー、Agent 検索は順次対応します。';
 
   @override
-  String get rag_badgeHint => 'ローカル意味タグ候補が利用可能';
+  String get rag_badgeHint => 'ローカルの意味検索が利用できます';
+
+  @override
+  String get rag_wikiEnabled => 'Wiki の意味検索';
+
+  @override
+  String get rag_wikiHint =>
+      'ローカル記事の本文を索引化します。名前の完全一致を優先し、意味検索で補います。初回は範囲を確認して開始します。';
+
+  @override
+  String get rag_blocksEnabled => 'プロンプトブロックの意味検索';
+
+  @override
+  String get rag_blocksHint =>
+      '保存済みで未アーカイブのブロックの題名、タグ、正負の本文のみが対象です。画像や未保存の下書きは含みません。';
+
+  @override
+  String rag_textPlan(int documents, int total) {
+    return '保存済み資料 $documents 件を $total 個の文章に分割して索引化します。初回は手動で開始し、以後は差分更新します。一時停止でき、処理済み部分を検索できます。';
+  }
+
+  @override
+  String rag_textCounts(int indexed, int total) {
+    return '索引済みの文章 $indexed / $total 個';
+  }
 }

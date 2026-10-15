@@ -21,6 +21,7 @@ import 'blocks_contract.dart';
 import 'blocks_format.dart';
 import 'blocks_page.dart';
 import 'blocks_parts.dart';
+import 'blocks_rag_badge.dart';
 
 String? _lastTapId;
 var _lastTapAt = DateTime(0);
@@ -169,6 +170,9 @@ class BlocksToolbar extends StatelessWidget {
                             focusNode: ctrl.searchFocus,
                             enabled: !empty,
                             onChanged: a.onQueryChanged,
+                            trailing: d.rag.enabled
+                                ? BlocksRagBadge(data: d.rag)
+                                : null,
                           ),
                         ),
                       ),

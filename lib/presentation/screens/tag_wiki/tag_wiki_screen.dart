@@ -43,6 +43,11 @@ import 'wiki_article_outline.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/common/wiki_linked_body.dart';
 import '../../widgets/common/wiki_retranslate_button.dart';
+import '../../../core/rag/rag_client.dart';
+import '../../../core/rag/rag_settings.dart';
+import '../../../core/rag/rag_text_search.dart';
+import '../../providers/rag_provider.dart';
+import '../../widgets/common/rag_search_badge.dart';
 
 /// Which body the article pane shows: source only, translation only, or the
 /// two interleaved block by block.
@@ -67,6 +72,8 @@ class _WikiVisit {
     required this.articleOffset,
     required this.readingMode,
     required this.linkedCandidate,
+    this.ragMatches = const [],
+    this.ragQuery,
   });
   final TextEditingValue query;
   final WikiScope? scope;
@@ -81,6 +88,8 @@ class _WikiVisit {
   final int? total;
   final double listOffset, articleOffset;
   final CompletionCandidate? linkedCandidate;
+  final List<CompletionCandidate> ragMatches;
+  final String? ragQuery;
 }
 
 class TagWikiScreen extends StatelessWidget {
@@ -125,6 +134,9 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
   late final String _articleSurface =
       'tag-wiki-article-${identityHashCode(this)}';
   Timer? _searchTimer;
+  RagCancellation? _ragCancellation;
+  List<CompletionCandidate> _ragMatches = const [];
+  String? _ragQuery;
   WikiDirectory? _directory;
   WikiScope? _scope;
   TagCategory? _category;
@@ -232,6 +244,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
 
   @override
   void dispose() {
+    _ragCancellation?.cancel();
     _autoTranslation.clearSurface(_listSurface);
     _autoTranslation.clearSurface(_articleSurface);
     _searchTimer?.cancel();
@@ -277,6 +290,8 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     listOffset: _listScroll.hasClients ? _listScroll.offset : 0,
     articleOffset: _articleScroll.hasClients ? _articleScroll.offset : 0,
     linkedCandidate: _linkedCandidate,
+    ragMatches: _ragMatches,
+    ragQuery: _ragQuery,
   );
 
   void _selectTag(
@@ -336,6 +351,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
   }
 
   void _applyVisit(_WikiVisit visit) {
+    _ragCancellation?.cancel();
     _searchTimer?.cancel();
     _epoch++;
     _preview?.dismiss();
@@ -344,6 +360,8 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     _listVisible.clear();
     setState(() {
       _search.value = visit.query;
+      _ragMatches = visit.ragMatches;
+      _ragQuery = visit.ragQuery;
       _scope = visit.scope;
       _category = visit.category;
       _hasArticle = visit.hasArticle;
@@ -436,6 +454,9 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
   Future<void> _load({bool append = false}) async {
     if (_directory == null || _scope == null || (append && !_more)) return;
     if (!append) {
+      _ragCancellation?.cancel();
+      _ragMatches = const [];
+      _ragQuery = null;
       _autoTranslation.clearSurface(_listSurface);
       _listVisible.clear();
     }
@@ -459,6 +480,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
       List<CompletionCandidate> page;
       int? total;
       bool more;
+      List<CompletionCandidate>? ordinary;
       if (query.isEmpty && scoped == null) {
         page = await source.browse(
           category: _category,
@@ -470,9 +492,13 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         total = await source.count(category: _category, hasWiki: _hasArticle);
         more = offset + page.length < total;
       } else {
-        final candidates = query.isNotEmpty
+        final raw = query.isNotEmpty
             ? await _searchCandidates(query)
             : await source.byNames(scoped ?? const {});
+        final candidates = <String, CompletionCandidate>{
+          for (final item in [...raw, if (_ragQuery == query) ..._ragMatches])
+            item.canonicalTag: item,
+        }.values.toList();
         final allowed = scoped == null
             ? candidates
             : candidates
@@ -498,6 +524,16 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         filtered.sort((a, b) {
           if (_alphabetical) return a.canonicalTag.compareTo(b.canonicalTag);
           if (query.isNotEmpty) {
+            final ranks = {
+              for (var i = 0; i < _ragMatches.length; i++)
+                _ragMatches[i].canonicalTag: i,
+            };
+            final ar = ranks[a.canonicalTag], br = ranks[b.canonicalTag];
+            if (ar != null || br != null) {
+              if (ar == null) return -1;
+              if (br == null) return 1;
+              return ar.compareTo(br);
+            }
             final relevance = a.matchKind.index.compareTo(b.matchKind.index);
             if (relevance != 0) return relevance;
           }
@@ -507,6 +543,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         total = filtered.length;
         page = filtered.skip(offset).take(_pageSize).toList();
         more = offset + page.length < filtered.length;
+        ordinary = filtered;
       }
       if (!mounted || epoch != _epoch) return;
       setState(() {
@@ -521,6 +558,12 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         }
       });
       if (_hasArticle == null) unawaited(_refreshArticleTags(epoch));
+      if (!append &&
+          query.isNotEmpty &&
+          ordinary != null &&
+          _hasArticle != false) {
+        unawaited(_loadRag(epoch, query, scoped, ordinary));
+      }
       if (!append && _selected == null && page.isNotEmpty) {
         _selectTag(
           page.first.canonicalTag,
@@ -534,6 +577,83 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
         _loading = false;
         _loadError = '$error';
       });
+    }
+  }
+
+  Future<void> _loadRag(
+    int epoch,
+    String query,
+    Set<String>? scope,
+    List<CompletionCandidate> ordinary,
+  ) async {
+    try {
+      if (!ref.read(ragSettingsProvider).enabledFor(RagSource.wiki)) return;
+      final cancellation = _ragCancellation = RagCancellation();
+      final category = _category;
+      final hits = await ref
+          .read(ragControllerProvider.notifier)
+          .searchText(
+            RagTextQuery(
+              source: RagSource.wiki,
+              query: query,
+              allowed: scope,
+              categories: category == null
+                  ? null
+                  : [
+                      for (var i = 0; i < 16; i++)
+                        if (TagCategory.fromCatalog(i) == category) i,
+                    ],
+            ),
+            cancellation: cancellation,
+          );
+      if (!mounted ||
+          epoch != _epoch ||
+          cancellation.isCancelled ||
+          _search.text.trim() != query) {
+        return;
+      }
+      final names = hits.map((h) => h.id).toList();
+      final found = await ref.read(unifiedTagRepositoryProvider).byNames(names);
+      if (!mounted ||
+          epoch != _epoch ||
+          cancellation.isCancelled ||
+          _search.text.trim() != query) {
+        return;
+      }
+      final existing = ordinary.map((c) => c.canonicalTag).toSet();
+      final byName = {for (final item in found) item.canonicalTag: item};
+      final extra = [
+        for (final name in names)
+          if (!existing.contains(name) &&
+              byName[name] != null &&
+              (scope == null || scope.contains(name)) &&
+              (category == null || byName[name]!.category == category))
+            byName[name]!.copyWith(matchKind: CompletionMatchKind.related),
+      ];
+      final merged = [...ordinary, ...extra];
+      if (_alphabetical) {
+        merged.sort((a, b) => a.canonicalTag.compareTo(b.canonicalTag));
+      }
+      setState(() {
+        _ragMatches = extra;
+        _ragQuery = query;
+        _total = merged.length;
+        _items = merged.take(math.max(_pageSize, _items.length)).toList();
+        _more = _items.length < merged.length;
+        if (_hasArticle == true) {
+          _articleTags = _items.map((c) => c.canonicalTag).toSet();
+        }
+      });
+      if (_hasArticle == null) unawaited(_refreshArticleTags(epoch));
+      if (_selected == null && _items.isNotEmpty) {
+        _selectTag(
+          _items.first.canonicalTag,
+          remember: false,
+          reveal: !_singlePane,
+        );
+      }
+    } catch (_) {
+      /* Ordinary search remains available. */
     }
   }
 
@@ -614,6 +734,7 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
   }
 
   void _queueSearch({bool immediate = false}) {
+    _ragCancellation?.cancel();
     ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
     setState(() {
       _selected = null;
@@ -844,6 +965,18 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(ragSettingsProvider, (previous, next) {
+      if (previous?.enabledFor(RagSource.wiki) !=
+              next.enabledFor(RagSource.wiki) ||
+          previous?.connectionKey != next.connectionKey) {
+        _ragCancellation?.cancel();
+        if (_search.text.trim().isNotEmpty) {
+          scheduleMicrotask(() {
+            if (mounted) _load();
+          });
+        }
+      }
+    });
     ref.watch(autoTagTranslationProvider);
     _scheduleVisibleUpdate();
     _scheduleHeaderUpdate();
@@ -980,6 +1113,41 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
       borderRadius: BorderRadius.circular(9),
       borderSide: BorderSide(color: theme.dividerColor),
     );
+    final Widget? searchSuffix = _search.text.isNotEmpty
+        ? IconButton(
+            icon: const Icon(Icons.close, size: 16),
+            onPressed: () {
+              _search.clear();
+              _queueSearch(immediate: true);
+            },
+          )
+        : _searchFocus.hasFocus
+        ? null
+        : IgnorePointer(
+            child: Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: Center(
+                widthFactor: 1,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 1,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: theme.dividerColor),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '/',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
     final search = SizedBox(
       height: 36,
       child: TextField(
@@ -995,41 +1163,15 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
           prefixIcon: const Icon(Icons.search, size: 17),
           hintText: context.l10n.wiki_searchHint,
           hintStyle: const TextStyle(fontSize: 12.5),
-          suffixIcon: _search.text.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.close, size: 16),
-                  onPressed: () {
-                    _search.clear();
-                    _queueSearch(immediate: true);
-                  },
+          suffixIcon: ref.watch(ragSettingsProvider).enabledFor(RagSource.wiki)
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const RagSearchBadge(source: RagSource.wiki),
+                    if (searchSuffix != null) searchSuffix,
+                  ],
                 )
-              : _searchFocus.hasFocus
-              ? null
-              : IgnorePointer(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Center(
-                      widthFactor: 1,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: theme.dividerColor),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          '/',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+              : searchSuffix,
           border: searchBorder,
           enabledBorder: searchBorder,
           focusedBorder: searchBorder,
@@ -1125,12 +1267,14 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
                 ),
               ),
               if (_search.text.isNotEmpty && _scope?.kind != WikiScopeKind.all)
-                _toolbarChoice(
-                  value: _searchAll,
-                  label: _searchAll
-                      ? context.l10n.wiki_scopeAll
-                      : context.l10n.wiki_scopeCurrent,
-                  onTap: () => _changeFilter(() => _searchAll = !_searchAll),
+                Flexible(
+                  child: _toolbarChoice(
+                    value: _searchAll,
+                    label: _searchAll
+                        ? context.l10n.wiki_scopeAll
+                        : context.l10n.wiki_scopeCurrent,
+                    onTap: () => _changeFilter(() => _searchAll = !_searchAll),
+                  ),
                 ),
               Tooltip(
                 message: _alphabetical
@@ -1448,7 +1592,12 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
     ),
     onPressed: onTap,
     icon: Icon(value ? Icons.public : Icons.folder_outlined, size: 15),
-    label: Text(label, style: const TextStyle(fontSize: 11.5)),
+    label: Text(
+      label,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: const TextStyle(fontSize: 11.5),
+    ),
   );
 
   void _scheduleVisibleUpdate() {

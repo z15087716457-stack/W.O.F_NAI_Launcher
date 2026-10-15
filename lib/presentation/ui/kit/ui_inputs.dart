@@ -21,6 +21,7 @@ class UiSearchField extends StatefulWidget {
     this.focusNode,
     this.height = 36,
     this.enabled = true,
+    this.trailing,
   });
 
   final String value;
@@ -29,6 +30,7 @@ class UiSearchField extends StatefulWidget {
   final FocusNode? focusNode;
   final double height;
   final bool enabled;
+  final Widget? trailing;
 
   @override
   State<UiSearchField> createState() => _UiSearchFieldState();
@@ -130,6 +132,7 @@ class _UiSearchFieldState extends State<UiSearchField> {
                   ),
                 ),
               ),
+              if (widget.trailing case final trailing?) trailing,
               if (_ctrl.text.isNotEmpty)
                 UiIconBox(
                   glyph: UiGlyphs.close,

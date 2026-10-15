@@ -17,6 +17,7 @@ import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
 import 'blocks_contract.dart';
 import 'blocks_parts.dart';
+import 'blocks_rag_badge.dart';
 
 /// 生图页块库侧栏（原型 `.dock`，默认宽 300，宽度由外面的 `BlockLibraryPanelSlot` 定）：
 /// 标题行 44 · 搜索 32 · 一行分类筛选 · 收藏 / 最近使用置顶 · 按分类分组摆药丸 · 底部提示 34。
@@ -407,6 +408,7 @@ class _BlocksDockState extends State<BlocksDock> {
               height: 32,
               hint: l10n.blocks_searchHint,
               onChanged: a.onQueryChanged,
+              trailing: d.rag.enabled ? BlocksRagBadge(data: d.rag) : null,
             ),
           ),
           _Chips(data: d, onChanged: a.onFilterChanged),

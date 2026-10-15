@@ -18,6 +18,16 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/screens/tag_wiki/tag_wiki_screen.dart';
 import 'package:nai_launcher/presentation/widgets/common/wiki_linked_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:nai_launcher/core/rag/rag_client.dart';
+import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/core/rag/rag_text_search.dart';
+import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import '../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 
 class _Tags extends UnifiedTagRepository {
   _Tags()
@@ -55,6 +65,14 @@ class _Tags extends UnifiedTagRepository {
   @override
   Future<int> count({TagCategory? category, bool? hasWiki}) async =>
       entries.length;
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      entries.where((e) => e.canonicalTag.startsWith(query.token)).toList();
+  @override
+  Future<List<CompletionCandidate>> searchContains(
+    String input, {
+    int limit = 20,
+  }) async => entries.where((e) => e.canonicalTag.contains(input)).toList();
 
   @override
   Future<List<CompletionCandidate>> byNames(Iterable<String> names) async =>
@@ -102,10 +120,214 @@ class _Auto extends ChangeNotifier implements AutoTagTranslationController {
   Object? noSuchMethod(Invocation invocation) => null;
 }
 
+class _RagSettings extends RagSettingsController {
+  @override
+  RagSettings build() => const RagSettings(enabled: true, wikiEnabled: true);
+}
+
+class _Rag extends RagController {
+  bool deferred = false;
+  final requests =
+      <
+        ({
+          RagTextQuery query,
+          RagCancellation cancellation,
+          Completer<List<RagSearchHit>> result,
+        })
+      >[];
+  @override
+  RagStatus build() => const RagStatus(
+    sources: {
+      RagSource.wiki: RagStatus(
+        phase: 'partial',
+        indexed: 8,
+        total: 10,
+        partial: true,
+      ),
+    },
+  );
+  @override
+  Future<List<RagSearchHit>> searchText(
+    RagTextQuery query, {
+    required RagCancellation cancellation,
+  }) {
+    final result = Completer<List<RagSearchHit>>();
+    requests.add((query: query, cancellation: cancellation, result: result));
+    if (!deferred) {
+      result.complete(const [
+        RagSearchHit(
+          id: 'short_hair',
+          title: 'Short hair',
+          snippet: 'A short cut.',
+          section: 'article',
+        ),
+      ]);
+    }
+    return result.future;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  Future<void> ragPage(
+    WidgetTester tester,
+    _Rag rag, {
+    Locale locale = const Locale('en'),
+    Brightness brightness = Brightness.light,
+    double width = 1200,
+    GlobalKey? capture,
+  }) async {
+    tester.view.physicalSize = Size(width, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ragSettingsProvider.overrideWith(_RagSettings.new),
+          ragControllerProvider.overrideWith(() => rag),
+          unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+          tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
+          cooccurrenceCompletionSourceProvider.overrideWithValue(
+            _Cooccurrence(),
+          ),
+          autoTagTranslationProvider.overrideWith((ref) => _Auto()),
+          wikiTagLinksProvider.overrideWithValue(
+            WikiTagLinks(exactLookup: (_) async => {}),
+          ),
+          wikiExampleRepositoryProvider.overrideWithValue(
+            WikiExampleRepository(
+              fetchWiki: (tag, {cancelToken}) async => null,
+              fetchPosts: (ids, {cancelToken}) async => [],
+            ),
+          ),
+          promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
+        ],
+        child: MaterialApp(
+          locale: locale,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          theme: brightness == Brightness.dark
+              ? GeistTheme.dark
+              : GeistTheme.light,
+          home: RepaintBoundary(
+            key: capture,
+            child: const Scaffold(
+              body: TagWikiScreen(
+                directory: WikiDirectory(
+                  roots: [
+                    WikiDirectoryNode(
+                      label: 'Traits',
+                      group: 'traits',
+                      children: [],
+                    ),
+                  ],
+                  groups: {
+                    'traits': WikiDirectoryGroup(
+                      title: 'Traits',
+                      members: ['blue_eyes'],
+                      children: [],
+                      sourceUrl: 'https://example.test',
+                    ),
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> search(WidgetTester tester, String text) async {
+    await tester.enterText(find.byKey(const Key('wiki-search')), text);
+    await tester.pump(const Duration(milliseconds: 200));
+    for (var i = 0; i < 5; i++) {
+      await tester.pump();
+    }
+  }
+
+  testWidgets(
+    'Wiki semantic matches supplement names and preserve folder scope',
+    (tester) async {
+      final rag = _Rag();
+      await ragPage(tester, rag);
+      await search(tester, 'weather');
+      expect(rag.requests.single.query.source, RagSource.wiki);
+      expect(find.byKey(const Key('wiki-body-short_hair')), findsOneWidget);
+      expect(find.byKey(const Key('rag-badge-wiki')), findsOneWidget);
+      await tester.tap(find.text('Traits').first);
+      await tester.pumpAndSettle();
+      expect(rag.requests.last.query.allowed, ['blue_eyes']);
+      expect(find.byKey(const Key('wiki-body-short_hair')), findsNothing);
+    },
+  );
+  testWidgets('Wiki discards cancelled results after the query changes', (
+    tester,
+  ) async {
+    final rag = _Rag()..deferred = true;
+    await ragPage(tester, rag);
+    await search(tester, 'weather');
+    final old = rag.requests.single;
+    await search(tester, 'ocean');
+    expect(old.cancellation.isCancelled, isTrue);
+    old.result.complete(const [
+      RagSearchHit(
+        id: 'short_hair',
+        title: 'Old',
+        snippet: 'old',
+        section: 'article',
+      ),
+    ]);
+    rag.requests.last.result.complete([]);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('wiki-body-short_hair')), findsNothing);
+  });
+  for (final locale in AppLocalizations.supportedLocales) {
+    for (final brightness in Brightness.values) {
+      for (final width in [360.0, 1200.0]) {
+        testWidgets(
+          'Wiki RAG ${locale.toLanguageTag()} ${brightness.name} $width',
+          (tester) async {
+            final key = GlobalKey();
+            final rag = _Rag();
+            await ragPage(
+              tester,
+              rag,
+              locale: locale,
+              brightness: brightness,
+              width: width,
+              capture: key,
+            );
+            await search(tester, 'weather');
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            await tester.runAsync(() async {
+              final directory = Directory(
+                '.dart_tool/rag-text-20261015/captures',
+              );
+              await directory.create(recursive: true);
+              final image =
+                  await (key.currentContext!.findRenderObject()!
+                          as RenderRepaintBoundary)
+                      .toImage(pixelRatio: 1);
+              final data = await image.toByteData(
+                format: ui.ImageByteFormat.png,
+              );
+              image.dispose();
+              await File(
+                '${directory.path}/wiki-${locale.toLanguageTag()}-${brightness.name}-${width.toInt()}.png',
+              ).writeAsBytes(data!.buffer.asUint8List());
+            });
+          },
+        );
+      }
+    }
+  }
 
   testWidgets(
     'desktop Wiki renders directory, results, article and reading popover',

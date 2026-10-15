@@ -16,6 +16,26 @@ import 'package:nai_launcher/presentation/screens/settings/widgets/settings_typo
 import '../../../helpers/studio_capture_fonts.dart';
 
 class _FakeRag extends RagController {
+  final previews = <RagSource>[];
+  final starts = <RagSource>[];
+  @override
+  Future<Map<String, dynamic>> preview({
+    RagSource source = RagSource.tags,
+  }) async {
+    previews.add(source);
+    return {'plan_id': 'preview-${source.name}', 'documents': 20, 'total': 60};
+  }
+
+  @override
+  Future<void> start(
+    String planId, {
+    bool rebuild = false,
+    RagSource source = RagSource.tags,
+  }) async {
+    expect(planId, 'preview-${source.name}');
+    starts.add(source);
+  }
+
   @override
   RagStatus build() => const RagStatus(
     phase: 'partial',
@@ -23,12 +43,29 @@ class _FakeRag extends RagController {
     total: 5000,
     partial: true,
     bytes: 5242880,
+    sources: {
+      RagSource.wiki: RagStatus(
+        phase: 'partial',
+        indexed: 64,
+        total: 180,
+        partial: true,
+        bytes: 2097152,
+      ),
+      RagSource.blocks: RagStatus(
+        phase: 'ready',
+        indexed: 40,
+        total: 40,
+        complete: true,
+        bytes: 1048576,
+      ),
+    },
   );
 }
 
 class _EnabledSettings extends RagSettingsController {
   @override
-  RagSettings build() => const RagSettings(enabled: true);
+  RagSettings build() =>
+      const RagSettings(enabled: true, wikiEnabled: true, blocksEnabled: true);
 }
 
 void main() {
@@ -85,7 +122,7 @@ void main() {
           );
           await tester.pump();
           expect(tester.takeException(), isNull);
-          final directory = Directory('.dart_tool/rag-20261015/captures');
+          final directory = Directory('.dart_tool/rag-text-20261015/captures');
           Future<void> capture(String part) async {
             await tester.runAsync(() async {
               await directory.create(recursive: true);
@@ -104,6 +141,10 @@ void main() {
           }
 
           await capture('top');
+          await tester.ensureVisible(find.byKey(const Key('rag-wiki-index')));
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          await capture('wiki');
           scroll.jumpTo(scroll.position.maxScrollExtent);
           await tester.pump();
           expect(tester.takeException(), isNull);
@@ -112,4 +153,54 @@ void main() {
       }
     }
   }
+  testWidgets(
+    'text collections preview before starting only the confirmed source',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          ragControllerProvider.overrideWith(_FakeRag.new),
+          ragSettingsProvider.overrideWith(_EnabledSettings.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: SingleChildScrollView(child: RagSettingsSection()),
+            ),
+          ),
+        ),
+      );
+      final controller =
+          container.read(ragControllerProvider.notifier) as _FakeRag;
+      for (final source in [RagSource.wiki, RagSource.blocks]) {
+        final button = find.byKey(Key('rag-${source.name}-preview'));
+        await tester.ensureVisible(button);
+        await tester.tap(button);
+        await tester.pumpAndSettle();
+        expect(controller.previews.last, source);
+        expect(find.textContaining('20'), findsWidgets);
+        expect(controller.starts, isEmpty);
+        await tester.tap(find.widgetWithText(TextButton, 'Cancel'));
+        await tester.pumpAndSettle();
+        expect(controller.starts, isEmpty);
+      }
+      final button = find.byKey(const Key('rag-wiki-preview'));
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      final start = AppLocalizations.of(
+        tester.element(find.byType(AlertDialog)),
+      )!.rag_start;
+      await tester.tap(find.widgetWithText(FilledButton, start));
+      await tester.pumpAndSettle();
+      expect(controller.starts, [RagSource.wiki]);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

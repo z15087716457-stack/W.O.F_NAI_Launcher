@@ -9133,7 +9133,33 @@
   "rag_resume": "继续建库",
   "rag_rebuild": "重建索引",
   "rag_clear": "清除索引",
-  "rag_clearHint": "清除本地派生索引，保留原始标签库和模型。下次使用需重新建立。",
-  "rag_futureSources": "首版仅接入标签推荐；Wiki、提示词块、工作区、图库和 Agent 查询入口后续分批接入。",
-  "rag_badgeHint": "本地语义标签推荐已就绪"
+  "rag_clearHint": "仅删除此来源的派生索引，保留原始内容与模型；重新建库后可继续使用。",
+  "rag_futureSources": "已接入标签推荐、Wiki 与提示词块搜索；工作区、图库与 Agent 检索后续分批接入。",
+  "rag_badgeHint": "本地语义检索已就绪",
+  "rag_wikiEnabled": "Wiki 语义搜索",
+  "rag_wikiHint": "收录本地百科正文，名称精确匹配优先，语义结果补充。单独预览并开始首次建库。",
+  "rag_blocksEnabled": "提示词块语义搜索",
+  "rag_blocksHint": "仅收录已保存、未归档块的标题、标签与正负面文字；不收录图片或编辑草稿。",
+  "rag_textPlan": "将收录 {documents} 份已保存资料，切分为 {total} 个文字片段。首次建库需手动开始，之后增量更新；可暂停，已完成部分可检索。",
+  "rag_textCounts": "已索引 {indexed} / {total} 个文字片段",
+  "@rag_textPlan": {
+    "placeholders": {
+      "documents": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "@rag_textCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

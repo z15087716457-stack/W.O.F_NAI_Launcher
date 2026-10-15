@@ -3,7 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_actions.dart';
+import 'package:nai_launcher/presentation/widgets/common/prompt_block_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/rag/rag_client.dart';
+import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/core/rag/rag_text_search.dart';
+import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
@@ -34,6 +40,47 @@ import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 class MemoryCharacters extends CharacterPromptNotifier {
   @override
   CharacterPromptConfig build() => const CharacterPromptConfig();
+}
+
+class MemoryRagSettings extends RagSettingsController {
+  @override
+  RagSettings build() => const RagSettings(blocksEnabled: true);
+  @override
+  Future<void> update(RagSettings value) async {
+    state = value;
+  }
+}
+
+class MemoryRag extends RagController {
+  final ids = <String>[];
+  final requests = <RagTextQuery>[];
+  @override
+  RagStatus build() => const RagStatus(
+    sources: {
+      RagSource.blocks: RagStatus(
+        phase: 'ready',
+        indexed: 10,
+        total: 10,
+        complete: true,
+      ),
+    },
+  );
+  @override
+  Future<List<RagSearchHit>> searchText(
+    RagTextQuery query, {
+    required RagCancellation cancellation,
+  }) async {
+    requests.add(query);
+    return [
+      for (final id in ids)
+        RagSearchHit(
+          id: id,
+          title: 'Saved',
+          snippet: 'rain',
+          section: 'positive',
+        ),
+    ];
+  }
 }
 
 class MemorySettings extends LocalStorageService {
@@ -260,6 +307,9 @@ void main() {
         localStorageServiceProvider.overrideWithValue(MemorySettings()),
         characterPromptNotifierProvider.overrideWith(MemoryCharacters.new),
         blocksPlatformProvider.overrideWithValue(platform),
+        ragSettingsProvider.overrideWith(MemoryRagSettings.new),
+        ragControllerProvider.overrideWith(MemoryRag.new),
+        tipEpochProvider.overrideWith((ref) => const Stream.empty()),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -480,6 +530,128 @@ void main() {
       '',
     });
     expect(dock.actions.dragDataOf(blockId), isNotNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final dock in [false, true]) {
+    testWidgets(
+      '${dock ? 'dock' : 'library'} supplements literal search with saved semantic blocks',
+      (tester) async {
+        late String semanticId;
+        await tester.runAsync(() async {
+          semanticId = (await backend.save(
+            const BlockDraft(title: 'Storm', text: 'umbrella, rain'),
+          )).id;
+          await container
+              .read(ragSettingsProvider.notifier)
+              .update(
+                const RagSettings(
+                  enabled: true,
+                  tagsEnabled: false,
+                  blocksEnabled: true,
+                ),
+              );
+        });
+        final rag = container.read(ragControllerProvider.notifier) as MemoryRag;
+        rag.ids.addAll([semanticId, 'deleted']);
+        await mount(
+          tester,
+          dock
+              ? const SizedBox(
+                  width: 300,
+                  child: BlocksDockWiring(allowPopOut: false),
+                )
+              : const BlocksLibraryWiring(),
+        );
+        if (dock) {
+          tester
+              .widget<BlocksDock>(find.byType(BlocksDock))
+              .actions
+              .onQueryChanged('weather');
+        } else {
+          tester
+              .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+              .actions
+              .onQueryChanged('weather');
+        }
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        await flush(tester);
+        final results = dock
+            ? tester.widget<BlocksDock>(find.byType(BlocksDock)).data.results
+            : tester
+                  .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+                  .data
+                  .blocks;
+        expect(results.map((b) => b.id), [semanticId]);
+        expect(find.byKey(const Key('blocks-rag-badge')), findsOneWidget);
+        expect(rag.requests.last.source, RagSource.blocks);
+        expect(rag.requests.last.allowed, containsAll([blockId, semanticId]));
+        if (dock) {
+          tester
+              .widget<BlocksDock>(find.byType(BlocksDock))
+              .actions
+              .onQueryChanged('Style');
+        } else {
+          tester
+              .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+              .actions
+              .onQueryChanged('Style');
+        }
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 200));
+        await flush(tester);
+        final mixed = dock
+            ? tester.widget<BlocksDock>(find.byType(BlocksDock)).data.results
+            : tester
+                  .widget<BlocksLibraryPage>(find.byType(BlocksLibraryPage))
+                  .data
+                  .blocks;
+        expect(mixed.map((b) => b.id), [blockId, semanticId]);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('block picker shows semantic results after literal matches', (
+    tester,
+  ) async {
+    late String semanticId;
+    await tester.runAsync(() async {
+      semanticId = (await backend.save(
+        const BlockDraft(title: 'Storm', text: 'umbrella, rain'),
+      )).id;
+      await container
+          .read(ragSettingsProvider.notifier)
+          .update(
+            const RagSettings(
+              enabled: true,
+              tagsEnabled: false,
+              blocksEnabled: true,
+            ),
+          );
+    });
+    final rag = container.read(ragControllerProvider.notifier) as MemoryRag;
+    rag.ids.add(semanticId);
+    await mount(tester, const PromptBlockPickerDialog());
+    await tester.enterText(find.byType(TextField).first, 'weather');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    await flush(tester);
+    expect(find.text('Storm'), findsOneWidget);
+    expect(find.text('Style'), findsNothing);
+    expect(rag.requests.last.allowed, containsAll([blockId, semanticId]));
+    await tester.enterText(find.byType(TextField).first, 'Style');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    await flush(tester);
+    final styleTitle = find.text('Style', findRichText: false).last;
+    expect(styleTitle, findsOneWidget);
+    expect(find.text('Storm'), findsOneWidget);
+    expect(
+      tester.getTopLeft(styleTitle).dx,
+      lessThan(tester.getTopLeft(find.text('Storm')).dx),
+    );
     expect(tester.takeException(), isNull);
   });
 

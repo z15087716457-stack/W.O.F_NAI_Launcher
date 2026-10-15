@@ -67,7 +67,13 @@ class RagClient {
   }) async {
     final loader = loadAsset ?? rootBundle.loadString;
     final files = <String, String>{};
-    for (final name in ['worker.py', 'engine.py', 'models.py', 'context.py']) {
+    for (final name in [
+      'worker.py',
+      'engine.py',
+      'models.py',
+      'context.py',
+      'documents.py',
+    ]) {
       files[name] = await loader('tool/rag/$name');
     }
     final digest = sha256.convert(utf8.encode(jsonEncode(files))).toString();
