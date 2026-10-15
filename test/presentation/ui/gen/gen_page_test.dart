@@ -89,6 +89,13 @@ void main() {
       await pump(t, GenFixture.refsFull(), 1100, 700);
       expect(t.takeException(), isNull);
     });
+
+    testWidgets('固定导航占宽后 564px 主区仍能显示与滚动画布工具', (t) async {
+      await pump(t, null, 612, 860);
+      expect(t.getSize(find.byKey(const Key('gen-canvas'))).width, 172);
+      expect(find.byKey(const Key('gen-bar-top')), findsOneWidget);
+      expect(t.takeException(), isNull);
+    });
   });
 
   group('顶栏', () {

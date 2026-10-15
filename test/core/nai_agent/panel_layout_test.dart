@@ -16,6 +16,16 @@ void main() {
       }
     }
   });
+  test('pinned navigation still leaves a readable Agent and full history', () {
+    for (final available in [564.0, 640.0, 700.0]) {
+      final width = AgentPanelLayout.resolve(1280, available);
+      expect(width, 320);
+      expect(
+        available - width - AgentPanelLayout.handle,
+        greaterThanOrEqualTo(200),
+      );
+    }
+  });
   test(
     'legacy narrow panes migrate once; explicit new sizes survive reload',
     () {

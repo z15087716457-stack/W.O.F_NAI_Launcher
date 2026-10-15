@@ -464,6 +464,13 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     await captureSidebar(tester, capture, 'sidebar-narrow-history');
+    tester.view.physicalSize = const Size(564, 860);
+    await tester.pumpAndSettle();
+    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 320);
+    expect(find.byKey(const Key('gen-history')), findsOneWidget);
+    expect(tester.getSize(find.byKey(const Key('gen-history'))).width, 200);
+    expect(tester.takeException(), isNull);
+    await captureSidebar(tester, capture, 'sidebar-pinned-navigation-budget');
   });
 
   testWidgets(
@@ -566,6 +573,13 @@ void main() {
         same(editorElement),
       );
       expect(find.byType(_RetainedPage).evaluate().single, same(canvasElement));
+      tester.view.physicalSize = const Size(564, 860);
+      await tester.pumpAndSettle();
+      expect(
+        find.byType(_RetainedPage, skipOffstage: false).evaluate().single,
+        same(canvasElement),
+      );
+      expect(find.byKey(const Key('gen-history')), findsOneWidget);
       tester.view.physicalSize = const Size(1600, 860);
       await tester.pumpAndSettle();
       expect(editor.evaluate().single, same(editorElement));

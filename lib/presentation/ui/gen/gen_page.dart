@@ -312,6 +312,12 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
     if (!keepHistory && w - left - dock - history < minimumCanvas && leftOpen) {
       left = math.max(GenLayout.minLeft, w - dock - history - minimumCanvas);
     }
+    if (keepHistory && w < GenerationPage.strip + GenLayout.minHistory) {
+      leftOpen = false;
+      left = 0;
+    }
+    final canvasVisible =
+        !keepHistory || w - left - dock - history >= minimumCanvas;
     return Stack(
       children: [
         Row(
@@ -337,7 +343,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
                         ),
                       ),
                     ),
-                    if (!leftOpen)
+                    if (!leftOpen && left > 0)
                       _Strip(
                         key: const Key('gen-left-strip'),
                         glyph: GenGlyphs.editNote,
@@ -351,7 +357,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
                   ],
                 ),
               )
-            else
+            else if (left > 0)
               _Strip(
                 key: const Key('gen-left-strip'),
                 glyph: GenGlyphs.editNote,
@@ -370,7 +376,30 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
                 ),
                 child: scope.slots.dock,
               ),
-            const Expanded(key: Key('gen-canvas-host'), child: GenCanvas()),
+            Expanded(
+              key: const Key('gen-canvas-host'),
+              child: ClipRect(
+                child: LayoutBuilder(
+                  builder: (context, box) {
+                    final width = keepHistory
+                        ? math.max(minimumCanvas, box.maxWidth)
+                        : box.maxWidth;
+                    return OverflowBox(
+                      alignment: Alignment.topLeft,
+                      minWidth: width,
+                      maxWidth: width,
+                      child: TickerMode(
+                        enabled: canvasVisible,
+                        child: Offstage(
+                          offstage: !canvasVisible,
+                          child: const GenCanvas(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
             if (historyOpen)
               GenHistoryPanel(width: history)
             else
