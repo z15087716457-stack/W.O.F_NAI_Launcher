@@ -75,16 +75,34 @@ class GenerationEditorWiring extends ConsumerWidget {
         : character.prompt;
     final spec = ModelSpecs.of(params.model);
     final explorePrompt = explore && target.isBase && !target.negative;
-    final editor = PromptPillEditor(
+    final editorConfig = UnifiedPromptConfig(
+      embedded: true,
+      enableSyntaxHighlight: ref.watch(highlightEmphasisSettingsProvider),
+      numericEmphasisEnabled: spec.v4Prompts,
+      enableAutoFormat: ref.watch(autoFormatPromptSettingsProvider),
+      enableSdSyntaxAutoConvert: ref.watch(sdSyntaxAutoConvertSettingsProvider),
+      showClearButton: false,
+      hintText: target.isBase && !target.negative
+          ? watchTipHint(
+              ref,
+              context.l10n,
+              explore ? TipSurface.explorePrompt : TipSurface.prompt,
+            )
+          : null,
+      enableComfyuiImport:
+          target.isBase && !target.negative && spec.characterPrompts,
+    );
+    final textStyle = DefaultTextStyle.of(
+      context,
+    ).style.copyWith(fontSize: target.fullscreen ? 14 : 13, height: 1.5);
+    Widget editor(int minLines) => PromptPillEditor(
       key: ValueKey('generation-editor-$scope-${target.fullscreen}'),
       pillScope: scope,
       initialPlainText: plain,
-      minLines: target.fullscreen ? 8 : 1,
+      minLines: minLines,
       autoGrow: true,
       allowEvolutionToggle: explorePrompt,
-      textStyle: DefaultTextStyle.of(
-        context,
-      ).style.copyWith(fontSize: target.fullscreen ? 14 : 13, height: 1.5),
+      textStyle: textStyle,
       decoration: const InputDecoration(
         contentPadding: EdgeInsets.zero,
         border: InputBorder.none,
@@ -92,21 +110,7 @@ class GenerationEditorWiring extends ConsumerWidget {
         focusedBorder: InputBorder.none,
         filled: false,
       ),
-      config: UnifiedPromptConfig(
-        embedded: true,
-        enableSyntaxHighlight: ref.watch(highlightEmphasisSettingsProvider),
-        numericEmphasisEnabled: spec.v4Prompts,
-        enableAutoFormat: ref.watch(autoFormatPromptSettingsProvider),
-        enableSdSyntaxAutoConvert: ref.watch(
-          sdSyntaxAutoConvertSettingsProvider,
-        ),
-        showClearButton: false,
-        hintText: explorePrompt
-            ? watchTipHint(ref, context.l10n, TipSurface.explorePrompt)
-            : null,
-        enableComfyuiImport:
-            target.isBase && !target.negative && spec.characterPrompts,
-      ),
+      config: editorConfig,
       beginComfyuiImport:
           target.isBase && !target.negative && spec.characterPrompts
           ? () =>
@@ -120,7 +124,24 @@ class GenerationEditorWiring extends ConsumerWidget {
         ref.read(pillRollCoordinatorProvider).syncLaneProjection(scope, value);
       },
     );
-    return target.fullscreen ? SingleChildScrollView(child: editor) : editor;
+    if (target.fullscreen) return SingleChildScrollView(child: editor(8));
+    if (!target.isBase) return editor(1);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final lineHeight =
+            MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) *
+            textStyle.height!;
+        // 卡片高约 0.72×宽；编辑槽比卡片窄 46px，头尾约 92px，
+        // 折算后从槽宽的 0.72 倍扣除约 60px。长正文仍可继续增高。
+        final minLines = constraints.hasBoundedWidth
+            ? ((constraints.maxWidth * .72 - 60) / lineHeight).round().clamp(
+                4,
+                16,
+              )
+            : 4;
+        return editor(minLines);
+      },
+    );
   }
 }
 

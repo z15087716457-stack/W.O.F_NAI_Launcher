@@ -119,6 +119,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         tipDeckProvider.overrideWithValue(deck),
+        tipEpochProvider.overrideWith((ref) => Stream.value(0)),
         localStorageServiceProvider.overrideWithValue(storage),
         canvasChannelSeedProvider.overrideWithValue(7),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),

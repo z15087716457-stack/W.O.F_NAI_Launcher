@@ -33,6 +33,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
@@ -80,6 +81,7 @@ void main() {
         authNotifierProvider.overrideWith(OfflineAuth.new),
         imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
+        tipEpochProvider.overrideWith((ref) => Stream.value(0)),
         shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
         promptTranslationCoordinatorProvider.overrideWith(
           (ref) => MemoryViewerTranslation(ref),
