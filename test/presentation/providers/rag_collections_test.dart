@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/rag/rag_text_search.dart';
+import 'package:nai_launcher/core/rag/rag_gallery_search.dart';
 import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -36,6 +37,9 @@ for line in sys.stdin:
  elif op=='text_search':
   result={'items':[{'id':source+'-hit','title':'Saved','snippet':'rain','section':'article'}]}
   if p['query']=='delay':threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
+ elif op=='gallery_search':
+  with open(p['scope'],encoding='utf-8') as f:paths=json.load(f)
+  result={'items':[{'id':'gallery-hit','path':paths[0],'channel':'visual'}] if paths else []}
  else:result={}
  emit({'id':i,'result':result})
 ''';
@@ -88,6 +92,7 @@ void main() {
         ragSourcePathsProvider.overrideWithValue(
           () async => (catalog: 'fixture', runtime: '', wiki: 'fixture'),
         ),
+        ragGalleryRootsProvider.overrideWithValue(() async => [root.path]),
         ragClientStarterProvider.overrideWithValue(
           ({required python, required directory}) => RagClient.start(
             python: python,
@@ -109,6 +114,50 @@ void main() {
   group(
     'collection routing with a real JSON child',
     () {
+      test(
+        'gallery transport uses an ephemeral scope and independent status',
+        () async {
+          await container
+              .read(ragSettingsProvider.notifier)
+              .update(
+                container
+                    .read(ragSettingsProvider)
+                    .copyWith(galleryEnabled: true),
+              );
+          await controller.preview(source: RagSource.gallery);
+          final result = await controller.searchGallery(
+            query: 'private-gallery-query',
+            allowed: ['${root.path}/image.png'],
+            mode: RagGalleryMode.visual,
+            cancellation: RagCancellation(),
+          );
+          expect(result.single.path, '${root.path}/image.png');
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.gallery)
+                .searching,
+            0,
+          );
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .indexed,
+            8,
+          );
+          expect(
+            await Directory('${root.path}/search-scopes').list().toList(),
+            isEmpty,
+          );
+          expect(
+            await File(
+              '${root.path}/sources/gallery-roots.json',
+            ).readAsString(),
+            isNot(contains('private-gallery-query')),
+          );
+        },
+      );
       test(
         'Wiki and blocks are usable with tag recommendations disabled',
         () async {

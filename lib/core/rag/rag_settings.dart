@@ -6,7 +6,7 @@ enum RagContextMode { before, around }
 
 enum RagDevice { auto, cpu, cuda }
 
-enum RagSource { tags, wiki, blocks }
+enum RagSource { tags, wiki, blocks, gallery }
 
 class RagSettings {
   const RagSettings({
@@ -14,19 +14,21 @@ class RagSettings {
     this.tagsEnabled = true,
     this.wikiEnabled = false,
     this.blocksEnabled = false,
+    this.galleryEnabled = false,
     this.embedding = '',
     this.reranker = '',
     this.python = '',
     this.mode = RagContextMode.around,
     this.device = RagDevice.auto,
   });
-  final bool enabled, tagsEnabled, wikiEnabled, blocksEnabled;
+  final bool enabled, tagsEnabled, wikiEnabled, blocksEnabled, galleryEnabled;
   bool enabledFor(RagSource source) =>
       enabled &&
       switch (source) {
         RagSource.tags => tagsEnabled,
         RagSource.wiki => wikiEnabled,
         RagSource.blocks => blocksEnabled,
+        RagSource.gallery => galleryEnabled,
       };
   final String embedding, reranker, python;
   final RagContextMode mode;
@@ -38,6 +40,7 @@ class RagSettings {
     'tagsEnabled': tagsEnabled,
     'wikiEnabled': wikiEnabled,
     'blocksEnabled': blocksEnabled,
+    'galleryEnabled': galleryEnabled,
     'embedding': embedding,
     'reranker': reranker,
     'python': python,
@@ -49,6 +52,7 @@ class RagSettings {
     tagsEnabled: json['tagsEnabled'] != false,
     wikiEnabled: json['wikiEnabled'] == true,
     blocksEnabled: json['blocksEnabled'] == true,
+    galleryEnabled: json['galleryEnabled'] == true,
     embedding: json['embedding'] is String ? json['embedding'] : '',
     reranker: json['reranker'] is String ? json['reranker'] : '',
     python: json['python'] is String ? json['python'] : '',
@@ -66,6 +70,7 @@ class RagSettings {
     bool? tagsEnabled,
     bool? wikiEnabled,
     bool? blocksEnabled,
+    bool? galleryEnabled,
     String? embedding,
     String? reranker,
     String? python,
@@ -76,6 +81,7 @@ class RagSettings {
     tagsEnabled: tagsEnabled ?? this.tagsEnabled,
     wikiEnabled: wikiEnabled ?? this.wikiEnabled,
     blocksEnabled: blocksEnabled ?? this.blocksEnabled,
+    galleryEnabled: galleryEnabled ?? this.galleryEnabled,
     embedding: embedding ?? this.embedding,
     reranker: reranker ?? this.reranker,
     python: python ?? this.python,
@@ -87,6 +93,7 @@ class RagSettings {
     tagsEnabled,
     wikiEnabled,
     blocksEnabled,
+    galleryEnabled,
     embedding,
     reranker,
     python,

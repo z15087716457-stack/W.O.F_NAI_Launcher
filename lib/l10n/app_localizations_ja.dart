@@ -16860,7 +16860,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rag_futureSources =>
-      'タグ候補、Wiki、プロンプトブロックの検索に対応しました。ワークスペース、ギャラリー、Agent 検索は順次対応します。';
+      'タグ候補、Wiki、プロンプトブロック、ギャラリーのマルチモーダル検索に対応しました。ワークスペースと Agent の検索は今後追加します。';
 
   @override
   String get rag_badgeHint => 'ローカルの意味検索が利用できます';
@@ -16888,4 +16888,44 @@ class AppLocalizationsJa extends AppLocalizations {
   String rag_textCounts(int indexed, int total) {
     return '索引済みの文章 $indexed / $total 個';
   }
+
+  @override
+  String get rag_galleryEnabled => 'ギャラリーのマルチモーダル検索';
+
+  @override
+  String get rag_galleryHint =>
+      '登録済みフォルダーの画像内容と、既存の NAI パラメーターを別々に索引化します。原画像を変更せず、他のソフトのメタデータは解析しません。';
+
+  @override
+  String rag_galleryPlan(int images, int parameters) {
+    return '未削除画像 $images 枚と NAI パラメーター $parameters 断片を索引化します。初回は手動で開始し、以降は差分更新します。画像とテキストの索引は別々に保存され、一時停止できます。';
+  }
+
+  @override
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  ) {
+    return '画像 $indexed / $images 枚・NAI $parameters 断片・スキップ $skipped 枚';
+  }
+
+  @override
+  String get rag_galleryMixed => '組み合わせて検索';
+
+  @override
+  String get rag_galleryVisual => '画像内容のみ';
+
+  @override
+  String get rag_galleryParameters => 'NAI パラメーターのみ';
+
+  @override
+  String get rag_galleryChooseImage => '画像を選んで類似検索';
+
+  @override
+  String get rag_galleryClearImage => '検索画像をクリア';
+
+  @override
+  String get rag_gallerySearchOptions => 'ギャラリー RAG 検索設定';
 }

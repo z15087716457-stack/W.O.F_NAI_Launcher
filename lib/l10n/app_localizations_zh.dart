@@ -16644,7 +16644,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rag_futureSources =>
-      '已接入标签推荐、Wiki 与提示词块搜索；工作区、图库与 Agent 检索后续分批接入。';
+      '已接入标签推荐、Wiki、提示词块与图库多模态检索；工作区与 Agent 检索后续接入。';
 
   @override
   String get rag_badgeHint => '本地语义检索已就绪';
@@ -16670,6 +16670,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String rag_textCounts(int indexed, int total) {
     return '已索引 $indexed / $total 个文字片段';
   }
+
+  @override
+  String get rag_galleryEnabled => '图库多模态检索';
+
+  @override
+  String get rag_galleryHint =>
+      '分析已登记图库中的图片画面；仅为 NAI 图的已有参数另建文字索引。原图不改写，普通图不解析其他软件元数据。';
+
+  @override
+  String rag_galleryPlan(int images, int parameters) {
+    return '当前图库来源将收录 $images 张未删除图片及 $parameters 个 NAI 参数片段。首次需点击开始，之后增量更新；画面与参数分开索引，可随时暂停。';
+  }
+
+  @override
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  ) {
+    return '画面 $indexed / $images 张；NAI 参数 $parameters 段；跳过 $skipped 张';
+  }
+
+  @override
+  String get rag_galleryMixed => '综合检索';
+
+  @override
+  String get rag_galleryVisual => '仅画面';
+
+  @override
+  String get rag_galleryParameters => '仅 NAI 参数';
+
+  @override
+  String get rag_galleryChooseImage => '选择图片找相似';
+
+  @override
+  String get rag_galleryClearImage => '清除查询图片';
+
+  @override
+  String get rag_gallerySearchOptions => '图库 RAG 检索方式';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -33312,7 +33352,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get rag_futureSources =>
-      '已接入標籤推薦、Wiki 與提示詞塊搜尋；工作區、圖庫與 Agent 檢索後續分批接入。';
+      '已接入標籤推薦、Wiki、提示詞塊與圖庫多模態檢索；工作區與 Agent 檢索後續接入。';
 
   @override
   String get rag_badgeHint => '本地語義檢索已就緒';
@@ -33338,4 +33378,44 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String rag_textCounts(int indexed, int total) {
     return '已索引 $indexed / $total 個文字片段';
   }
+
+  @override
+  String get rag_galleryEnabled => '圖庫多模態檢索';
+
+  @override
+  String get rag_galleryHint =>
+      '分析已登記圖庫中的圖片畫面；僅為 NAI 圖的已有參數另建文字索引。原圖不改寫，普通圖不解析其他軟體後設資料。';
+
+  @override
+  String rag_galleryPlan(int images, int parameters) {
+    return '當前圖庫來源將收錄 $images 張未刪除圖片及 $parameters 個 NAI 參數片段。首次需點選開始，之後增量更新；畫面與參數分開索引，可隨時暫停。';
+  }
+
+  @override
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  ) {
+    return '畫面 $indexed / $images 張；NAI 參數 $parameters 段；跳過 $skipped 張';
+  }
+
+  @override
+  String get rag_galleryMixed => '綜合檢索';
+
+  @override
+  String get rag_galleryVisual => '僅畫面';
+
+  @override
+  String get rag_galleryParameters => '僅 NAI 參數';
+
+  @override
+  String get rag_galleryChooseImage => '選擇圖片找相似';
+
+  @override
+  String get rag_galleryClearImage => '清除查詢圖片';
+
+  @override
+  String get rag_gallerySearchOptions => '圖庫 RAG 檢索方式';
 }

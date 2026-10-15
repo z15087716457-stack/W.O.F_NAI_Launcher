@@ -36,6 +36,7 @@ class Models:
         self.reranker_path = str(Path(reranker).resolve(strict=True))
         self.requested_device = device
         self.encoder = self.scorer = self.tokenizer = None
+        self.vision = False
         self.fingerprint = model_fingerprint(embedding)
 
     def _device(self):
@@ -57,20 +58,48 @@ class Models:
 
     def embed(self, texts, *, query=False):
         import numpy as np
+        self._encoder()
+        vectors = self.encoder.encode(texts, prompt_name='SearchQuery' if query else 'Document',
+            normalize_embeddings=True, convert_to_numpy=True, show_progress_bar=False,
+            batch_size=8)
+        return self._vectors(vectors)
+
+    def _encoder(self, vision=False):
+        if vision and not self.vision and self.encoder is not None:
+            self.encoder = None
+            gc.collect()
+            import torch
+            if torch.cuda.is_available(): torch.cuda.empty_cache()
         if self.encoder is None:
             from sentence_transformers import SentenceTransformer
             self.encoder = SentenceTransformer(self.embedding_path,
                 device=self._device(), local_files_only=True, trust_remote_code=False,
-                config_kwargs={'audio_config': None, 'vision_config': None},
+                config_kwargs={'audio_config': None} if vision else {'audio_config': None, 'vision_config': None},
                 model_kwargs={'torch_dtype': self._dtype()})
             self.encoder.max_seq_length = 8192
-        vectors = self.encoder.encode(texts, prompt_name='SearchQuery' if query else 'Document',
+            self.vision = vision
+
+    def embed_images(self, images, text=''):
+        self._encoder(vision=True)
+        # PIL images only: never let the library fetch URLs or arbitrary strings.
+        items = [{'image': image, 'text': 'task: search result | query: ' + text + ' <|image|>'}
+                 if text else {'image': image} for image in images]
+        vectors = self.encoder.encode(items, prompt='',
             normalize_embeddings=True, convert_to_numpy=True, show_progress_bar=False,
-            batch_size=8)
+            batch_size=2)
+        return self._vectors(vectors)
+
+    @staticmethod
+    def _vectors(vectors):
+        import numpy as np
         result = np.asarray(vectors, dtype=np.float32)
         if result.ndim != 2 or result.shape[1] != 768 or not np.isfinite(result).all():
             raise RuntimeError('invalid_embeddings')
-        return result
+        # BF16 normalization can round norms away from one. Normalize again in
+        # float32 before persistence / scoped cosine scoring.
+        norms = np.linalg.norm(result,axis=1,keepdims=True)
+        if (norms<1e-8).any(): raise RuntimeError('invalid_embeddings')
+        return result/norms
 
     def rerank(self, query, documents, negative=False, purpose='tags'):
         if not documents:
@@ -94,6 +123,7 @@ class Models:
 
     def unload(self):
         self.encoder = self.scorer = None
+        self.vision = False
         gc.collect()
         import torch
         if torch.cuda.is_available():
@@ -104,4 +134,4 @@ class Models:
         return {'device': self._device(), 'cuda_available': torch.cuda.is_available(),
                 'loaded': self.encoder is not None or self.scorer is not None,
                 'audio_enabled': False, 'dimension': 768,
-                'image_capable': True, 'active_modalities': ['text']}
+                'image_capable': True, 'active_modalities': ['text', 'image'] if self.vision else ['text']}

@@ -164,6 +164,11 @@ abstract class LocalGalleryService {
   /// null。DB 失败时退化为无尺寸条目，不抛异常。
   Future<List<GalleryTimelineEntry>> getTimelineEntries();
 
+  /// Read-only scope query; does not change visible filters or sort state.
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria,
+  );
+
   /// 按路径批量加载完整记录（复用排序 stat 缓存，按传入顺序返回；
   /// 已不存在的文件跳过）。
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths);
@@ -935,6 +940,35 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     await _ensureDimensions(files);
     return [
       for (final file in files)
+        GalleryTimelineEntry(
+          path: file.path,
+          modifiedAt: (_fileStats[file.path] ?? _missingSortStats).modified,
+          width: _dimensions[file.path]?.$1,
+          height: _dimensions[file.path]?.$2,
+        ),
+    ];
+  }
+
+  @override
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria,
+  ) async {
+    _ensureInitialized();
+    final deleted = await _dataSource.getDeletedImagePaths();
+    final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+    final tracked = [
+      for (final file in List<File>.of(_allFiles))
+        if (!deleted.contains(file.path) &&
+            roots.any((root) => p.isWithin(root.path, file.path)))
+          file,
+    ];
+    final filter = GalleryFilterService(_dataSource);
+    filter.setSort(_filterService.sort);
+    final result = await filter.applyFilters(tracked, criteria);
+    await _ensureFileStats(result.files);
+    await _ensureDimensions(result.files);
+    return [
+      for (final file in result.files)
         GalleryTimelineEntry(
           path: file.path,
           modifiedAt: (_fileStats[file.path] ?? _missingSortStats).modified,
@@ -1906,6 +1940,10 @@ class ErrorGalleryService implements LocalGalleryService {
 
   @override
   Future<List<GalleryTimelineEntry>> getTimelineEntries() => _throwError();
+  @override
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria,
+  ) => _throwError();
 
   @override
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>
@@ -2011,6 +2049,10 @@ class _PlaceholderGalleryService implements LocalGalleryService {
   @override
   Future<List<GalleryTimelineEntry>> getTimelineEntries() =>
       _throwNotInitialized();
+  @override
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria,
+  ) => _throwNotInitialized();
 
   @override
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>

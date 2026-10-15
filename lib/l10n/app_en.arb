@@ -9134,7 +9134,7 @@
   "rag_rebuild": "Rebuild index",
   "rag_clear": "Clear index",
   "rag_clearHint": "Delete this derived index while keeping source content and models. Rebuild before using it again.",
-  "rag_futureSources": "Tag suggestions, Wiki and prompt block search are connected. Workspace, gallery and Agent retrieval will follow in stages.",
+  "rag_futureSources": "Tag suggestions, Wiki, prompt blocks and multimodal gallery search are connected. Workspace and Agent retrieval will follow.",
   "rag_badgeHint": "Local semantic search is ready",
   "rag_wikiEnabled": "Wiki semantic search",
   "rag_wikiHint": "Index local article text. Exact names come first; semantic matches supplement them. Preview and start the first index separately.",
@@ -9158,6 +9158,42 @@
         "type": "int"
       },
       "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_galleryEnabled": "Gallery multimodal search",
+  "rag_galleryHint": "Index visual content from registered gallery folders and existing NAI parameters as separate text. Originals stay unchanged; other software metadata is not parsed.",
+  "rag_galleryPlan": "Index {images} active gallery images and {parameters} NAI parameter passages. Start this first build explicitly; later updates are incremental. Visual and text indices are separate and pausable.",
+  "rag_galleryCounts": "Images {indexed} / {images}; NAI passages {parameters}; skipped images {skipped}",
+  "rag_galleryMixed": "Combined search",
+  "rag_galleryVisual": "Visual content only",
+  "rag_galleryParameters": "NAI parameters only",
+  "rag_galleryChooseImage": "Choose an image to find similar",
+  "rag_galleryClearImage": "Clear query image",
+  "rag_gallerySearchOptions": "Gallery RAG search options",
+  "@rag_galleryPlan": {
+    "placeholders": {
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      }
+    }
+  },
+  "@rag_galleryCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      },
+      "skipped": {
         "type": "int"
       }
     }

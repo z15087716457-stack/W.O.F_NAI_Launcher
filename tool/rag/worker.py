@@ -11,6 +11,7 @@ import uuid
 from engine import Engine, Sources
 from models import Models
 from documents import TextEngine, WikiSources, BlockSources
+from gallery import GalleryEngine
 
 write_lock = threading.Lock()
 
@@ -69,7 +70,7 @@ class Worker:
             models = Models(p['embedding'], p['reranker'], p.get('device','auto'))
             self.models = models
             enabled = p.get('sources',['tags'])
-            if not isinstance(enabled,list) or any(s not in ('tags','wiki','blocks') for s in enabled): raise ValueError('invalid_source')
+            if not isinstance(enabled,list) or any(s not in ('tags','wiki','blocks','gallery') for s in enabled): raise ValueError('invalid_source')
             root = os.path.abspath(p['directory'])
             if 'tags' in enabled:
                 self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki','')))
@@ -77,6 +78,8 @@ class Worker:
                 self.engines['wiki'] = TextEngine(os.path.join(root,'wiki-v1'),models,WikiSources(p['wiki'],p['catalog']))
             if 'blocks' in enabled:
                 self.engines['blocks'] = TextEngine(os.path.join(root,'blocks-v1'),models,BlockSources(p['blocks']))
+            if 'gallery' in enabled:
+                self.engines['gallery'] = GalleryEngine(os.path.join(root,'gallery-v1'),models,p['runtime'],p['gallery_roots'])
             self.settings = p; self.suspended = False
             return self.status()
         if self.models is None: raise ValueError('not_configured')
@@ -92,7 +95,7 @@ class Worker:
                 if not j['paused']: self.enqueue({'_step':job_id},10)
             return {'suspended':False}
         source = p.get('source','tags')
-        if source not in ('tags','wiki','blocks'): raise ValueError('invalid_source')
+        if source not in ('tags','wiki','blocks','gallery'): raise ValueError('invalid_source')
         engine = self.engines.get(source)
         if engine is None: raise ValueError('disabled_source')
         if op == 'preview': return engine.preview()
@@ -118,8 +121,7 @@ class Worker:
                                signature=engine.sources.signature())
                 job['paused'] = op == 'pause'
                 if op == 'resume': self.enqueue({'_step':p['job_id']},10)
-            engine.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused',?)", ('1' if op == 'pause' else '0',))
-            engine.db.commit()
+            engine.set_paused(op == 'pause')
             return {'job_id':p['job_id'],'paused':op == 'pause',**engine.status()}
         if op == 'clear':
             for job_id,job in list(self.jobs.items()):
@@ -128,7 +130,7 @@ class Worker:
             engine.clear()
             return engine.status()
         if op == 'text_search':
-            if source == 'tags': raise ValueError('invalid_source')
+            if source not in ('wiki','blocks'): raise ValueError('invalid_source')
             if self.suspended: return {'items':[],'fallback':'resource_busy'}
             self.last_use = time.monotonic()
             allowed = p.get('allowed'); categories = p.get('categories')
@@ -136,6 +138,16 @@ class Worker:
             if categories is not None and (not isinstance(categories,list) or len(categories)>32): raise ValueError('invalid_source')
             return engine.search_text(p['query'][:32768],allowed,categories,
                 min(80,max(1,p.get('limit',40))),token.is_set)
+        if op == 'gallery_search':
+            if source != 'gallery': raise ValueError('invalid_source')
+            if self.suspended: return {'items':[],'fallback':'resource_busy'}
+            self.last_use = time.monotonic()
+            scope = p.get('scope')
+            if not isinstance(scope,str) or os.path.getsize(scope)>64*1024*1024: raise ValueError('source_too_large')
+            with open(scope,encoding='utf-8') as stream: paths = json.load(stream)
+            if not isinstance(paths,list) or len(paths)>500000 or any(not isinstance(path,str) for path in paths): raise ValueError('source_too_large')
+            return engine.search(p.get('query',''),paths,p.get('image',''),p.get('mode','mixed'),
+                min(80,max(1,p.get('limit',60))),token.is_set)
         if op == 'search':
             if source != 'tags': raise ValueError('invalid_source')
             if self.suspended: return {'items':[],'fallback':'resource_busy'}

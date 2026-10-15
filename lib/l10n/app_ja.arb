@@ -9134,7 +9134,7 @@
   "rag_rebuild": "索引を再作成",
   "rag_clear": "索引を削除",
   "rag_clearHint": "元のコンテンツとモデルを保持して、この派生インデックスのみを削除します。再構築後に利用できます。",
-  "rag_futureSources": "タグ候補、Wiki、プロンプトブロックの検索に対応しました。ワークスペース、ギャラリー、Agent 検索は順次対応します。",
+  "rag_futureSources": "タグ候補、Wiki、プロンプトブロック、ギャラリーのマルチモーダル検索に対応しました。ワークスペースと Agent の検索は今後追加します。",
   "rag_badgeHint": "ローカルの意味検索が利用できます",
   "rag_wikiEnabled": "Wiki の意味検索",
   "rag_wikiHint": "ローカル記事の本文を索引化します。名前の完全一致を優先し、意味検索で補います。初回は範囲を確認して開始します。",
@@ -9158,6 +9158,42 @@
         "type": "int"
       },
       "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_galleryEnabled": "ギャラリーのマルチモーダル検索",
+  "rag_galleryHint": "登録済みフォルダーの画像内容と、既存の NAI パラメーターを別々に索引化します。原画像を変更せず、他のソフトのメタデータは解析しません。",
+  "rag_galleryPlan": "未削除画像 {images} 枚と NAI パラメーター {parameters} 断片を索引化します。初回は手動で開始し、以降は差分更新します。画像とテキストの索引は別々に保存され、一時停止できます。",
+  "rag_galleryCounts": "画像 {indexed} / {images} 枚・NAI {parameters} 断片・スキップ {skipped} 枚",
+  "rag_galleryMixed": "組み合わせて検索",
+  "rag_galleryVisual": "画像内容のみ",
+  "rag_galleryParameters": "NAI パラメーターのみ",
+  "rag_galleryChooseImage": "画像を選んで類似検索",
+  "rag_galleryClearImage": "検索画像をクリア",
+  "rag_gallerySearchOptions": "ギャラリー RAG 検索設定",
+  "@rag_galleryPlan": {
+    "placeholders": {
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      }
+    }
+  },
+  "@rag_galleryCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      },
+      "skipped": {
         "type": "int"
       }
     }

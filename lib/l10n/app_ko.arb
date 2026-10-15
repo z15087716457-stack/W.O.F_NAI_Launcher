@@ -9134,7 +9134,7 @@
   "rag_rebuild": "색인 다시 생성",
   "rag_clear": "색인 삭제",
   "rag_clearHint": "원본 콘텐츠와 모델을 유지하고 이 파생 색인만 삭제합니다. 다시 구축하면 사용할 수 있습니다.",
-  "rag_futureSources": "태그 추천, Wiki 및 프롬프트 블록 검색이 연결되었습니다. 작업 공간, 갤러리, Agent 검색은 단계적으로 연결됩니다.",
+  "rag_futureSources": "태그 추천, Wiki, 프롬프트 블록 및 갤러리 멀티모달 검색이 연결되었습니다. 작업 공간과 Agent 검색은 추후 지원됩니다.",
   "rag_badgeHint": "로컬 의미 검색을 사용할 수 있습니다",
   "rag_wikiEnabled": "Wiki 의미 검색",
   "rag_wikiHint": "로컬 문서 본문을 색인합니다. 정확한 이름 일치를 우선하고 의미 검색 결과로 보완합니다. 첫 색인은 범위를 확인한 뒤 시작하세요.",
@@ -9158,6 +9158,42 @@
         "type": "int"
       },
       "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_galleryEnabled": "갤러리 멀티모달 검색",
+  "rag_galleryHint": "등록된 갤러리의 이미지 내용과 기존 NAI 매개변수를 별도로 색인합니다. 원본은 유지하며 다른 소프트웨어의 메타데이터는 분석하지 않습니다.",
+  "rag_galleryPlan": "삭제되지 않은 이미지 {images}개와 NAI 매개변수 조각 {parameters}개를 색인합니다. 처음에는 직접 시작하고 이후에는 증분 업데이트합니다. 이미지와 텍스트 색인은 별도로 저장되며 일시 중지할 수 있습니다.",
+  "rag_galleryCounts": "이미지 {indexed} / {images}개 · NAI 조각 {parameters}개 · 건너뜀 {skipped}개",
+  "rag_galleryMixed": "통합 검색",
+  "rag_galleryVisual": "이미지 내용만",
+  "rag_galleryParameters": "NAI 매개변수만",
+  "rag_galleryChooseImage": "이미지를 선택하여 유사 검색",
+  "rag_galleryClearImage": "검색 이미지 지우기",
+  "rag_gallerySearchOptions": "갤러리 RAG 검색 옵션",
+  "@rag_galleryPlan": {
+    "placeholders": {
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      }
+    }
+  },
+  "@rag_galleryCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      },
+      "skipped": {
         "type": "int"
       }
     }

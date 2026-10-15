@@ -15,10 +15,16 @@ void main() {
     expect(settings.enabledFor(RagSource.tags), isFalse);
     expect(settings.wikiEnabled, isFalse);
     expect(settings.blocksEnabled, isFalse);
-    final updated = settings.copyWith(wikiEnabled: true, blocksEnabled: true);
+    expect(settings.galleryEnabled, isFalse);
+    final updated = settings.copyWith(
+      wikiEnabled: true,
+      blocksEnabled: true,
+      galleryEnabled: true,
+    );
     final restored = RagSettings.fromJson(updated.toJson());
     expect(restored.enabledFor(RagSource.wiki), isTrue);
     expect(restored.enabledFor(RagSource.blocks), isTrue);
+    expect(restored.enabledFor(RagSource.gallery), isTrue);
     expect(settings.connectionKey, isNot(updated.connectionKey));
   });
   test('query identity includes the source and the actual scope', () {

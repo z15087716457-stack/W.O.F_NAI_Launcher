@@ -114,6 +114,15 @@ void main() {
       expect(byPath[landscape.path]?.aspectRatio, closeTo(1216 / 832, 0.001));
       expect(byPath[nodims.path]?.width, isNull);
       expect(byPath[nodims.path]?.aspectRatio, isNull);
+      await service.applyFilter(const FilterCriteria(searchQuery: 'portrait'));
+      final scope = await service.getTimelineForFilter(
+        const FilterCriteria(searchQuery: 'landscape'),
+      );
+      expect(scope.map((e) => e.path), [landscape.path]);
+      expect(service.currentFilter.searchQuery, 'portrait');
+      expect((await service.getTimelineEntries()).map((e) => e.path), [
+        portrait.path,
+      ]);
     });
 
     test('getTimelineEntries 与分页同一排序源', () async {

@@ -73,6 +73,7 @@ class RagClient {
       'models.py',
       'context.py',
       'documents.py',
+      'gallery.py',
     ]) {
       files[name] = await loader('tool/rag/$name');
     }

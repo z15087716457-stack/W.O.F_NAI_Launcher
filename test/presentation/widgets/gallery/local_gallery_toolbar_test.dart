@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/core/rag/rag_settings.dart';
+import 'package:nai_launcher/core/rag/rag_gallery_search.dart';
+import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import 'package:nai_launcher/presentation/providers/gallery_rag_query_provider.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/gallery_rag_search_menu.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
@@ -28,6 +36,118 @@ import '../../../helpers/studio_capture_fonts.dart';
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets(
+    'query image remains retryable after an error and waits during GPU hold',
+    (tester) async {
+      await _pumpToolbar(tester, rag: true);
+      final context = tester.element(find.byKey(const Key('gallery-rag-menu')));
+      final container = ProviderScope.containerOf(context);
+      final controller =
+          container.read(ragControllerProvider.notifier) as _ToolbarRag;
+      controller.changeStatus(error: true);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('gallery-rag-menu')));
+      await tester.pumpAndSettle();
+      final choose = find.widgetWithText(
+        PopupMenuItem<String>,
+        AppLocalizations.of(context)!.rag_galleryChooseImage,
+      );
+      expect(tester.widget<PopupMenuItem<String>>(choose).enabled, isTrue);
+      await tester.tap(choose);
+      await tester.pumpAndSettle();
+      controller.changeStatus(hold: true);
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('gallery-rag-menu')));
+      await tester.pumpAndSettle();
+      expect(tester.widget<PopupMenuItem<String>>(choose).enabled, isFalse);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    for (final dark in [false, true]) {
+      for (final width in [760.0, 1400.0]) {
+        testWidgets(
+          'gallery RAG menu ${locale.toLanguageTag()} dark=$dark width=$width',
+          (tester) async {
+            await _pumpToolbar(
+              tester,
+              rag: true,
+              width: width,
+              locale: locale,
+              theme: AppTheme.getTheme(
+                AppStyle.geist,
+                dark ? Brightness.dark : Brightness.light,
+                fontConfig: FontConfig.defaultFont,
+              ),
+            );
+            expect(find.byKey(const Key('rag-badge-gallery')), findsOneWidget);
+            Future<void> capture(String scene) async {
+              await tester.runAsync(() async {
+                final boundary = tester.renderObject<RenderRepaintBoundary>(
+                  find.byKey(const Key('gallery-toolbar-capture')),
+                );
+                final image = await boundary.toImage();
+                final bytes = await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                );
+                image.dispose();
+                final dir = Directory(
+                  '.dart_tool/rag-gallery-20261015/captures',
+                );
+                await dir.create(recursive: true);
+                await File(
+                  '${dir.path}/toolbar-${locale.toLanguageTag()}-${dark ? 'dark' : 'light'}-${width.toInt()}-$scene.png',
+                ).writeAsBytes(bytes!.buffer.asUint8List());
+              });
+            }
+
+            await capture('ready');
+            await tester.tap(find.byKey(const Key('gallery-rag-menu')));
+            await tester.pumpAndSettle();
+            expect(tester.takeException(), isNull);
+            await capture('menu');
+            final context = tester.element(
+              find.byKey(const Key('gallery-rag-menu')),
+            );
+            final l = AppLocalizations.of(context)!;
+            await tester.tap(
+              find.widgetWithText(
+                CheckedPopupMenuItem<String>,
+                l.rag_galleryVisual,
+              ),
+            );
+            await tester.pumpAndSettle();
+            final container = ProviderScope.containerOf(context);
+            expect(
+              container.read(galleryRagQueryProvider).mode,
+              RagGalleryMode.visual,
+            );
+            await tester.tap(find.byKey(const Key('gallery-rag-menu')));
+            await tester.pumpAndSettle();
+            await tester.tap(
+              find.widgetWithText(
+                PopupMenuItem<String>,
+                l.rag_galleryChooseImage,
+              ),
+            );
+            await tester.pumpAndSettle();
+            expect(
+              container.read(galleryRagQueryProvider).image,
+              'C:/query/original.png',
+            );
+            await capture('image');
+            await tester.tap(find.byKey(const Key('gallery-rag-clear-image')));
+            await tester.pumpAndSettle();
+            expect(container.read(galleryRagQueryProvider).image, isEmpty);
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox());
+          },
+        );
+      }
+    }
+  }
 
   for (final locale in ['zh', 'zh-TW', 'en', 'ja', 'ko']) {
     for (final dark in [false, true]) {
@@ -325,6 +445,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
   bool inspectorAvailable = true,
   VoidCallback? onToggleInspector,
   bool autocomplete = false,
+  bool rag = false,
   bool windowChrome = false,
   ThemeData? theme,
   Locale locale = const Locale('zh'),
@@ -340,6 +461,11 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
     ProviderScope(
       overrides: [
         localGalleryNotifierProvider.overrideWith(() => notifier),
+        ragSettingsProvider.overrideWith(() => _ToolbarRagSettings(rag)),
+        ragControllerProvider.overrideWith(_ToolbarRag.new),
+        galleryRagImagePickerProvider.overrideWithValue(
+          () async => 'C:/query/original.png',
+        ),
         galleryCategoryNotifierProvider.overrideWith(_FakeCategoryNotifier.new),
         shortcutConfigNotifierProvider.overrideWith(
           _FakeShortcutConfigNotifier.new,
@@ -353,26 +479,30 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
           ),
         ),
       ],
-      child: MaterialApp(
-        locale: locale,
-        theme: theme,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(
-          body: WindowChromeScope(
-            enabled: windowChrome,
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: LocalGalleryToolbar(
-                searchFocusNode: focusNode,
-                inspectorVisible: true,
-                inspectorAvailable: inspectorAvailable,
-                onToggleInspector: onToggleInspector ?? () {},
-                onOpenFolder: () {},
-                onRefresh: () {},
-                showCategoryPanel: true,
-                onToggleCategoryPanel: () {},
-                enableSearchAutocomplete: autocomplete,
+      child: RepaintBoundary(
+        key: const Key('gallery-toolbar-capture'),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          theme: theme,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: WindowChromeScope(
+              enabled: windowChrome,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: LocalGalleryToolbar(
+                  searchFocusNode: focusNode,
+                  inspectorVisible: true,
+                  inspectorAvailable: inspectorAvailable,
+                  onToggleInspector: onToggleInspector ?? () {},
+                  onOpenFolder: () {},
+                  onRefresh: () {},
+                  showCategoryPanel: true,
+                  onToggleCategoryPanel: () {},
+                  enableSearchAutocomplete: autocomplete,
+                ),
               ),
             ),
           ),
@@ -382,6 +512,47 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
   );
   await tester.pumpAndSettle();
   return notifier;
+}
+
+class _ToolbarRagSettings extends RagSettingsController {
+  _ToolbarRagSettings(this.enabled);
+  final bool enabled;
+  @override
+  RagSettings build() => RagSettings(
+    enabled: enabled,
+    tagsEnabled: false,
+    galleryEnabled: enabled,
+  );
+}
+
+class _ToolbarRag extends RagController {
+  void changeStatus({bool error = false, bool hold = false}) {
+    state = state.copyWith(
+      suspended: hold,
+      sources: {
+        RagSource.gallery: state
+            .forSource(RagSource.gallery)
+            .copyWith(
+              phase: error ? 'error' : 'partial',
+              error: error ? 'rag_runtime_error' : null,
+              clearError: !error,
+            ),
+      },
+    );
+  }
+
+  @override
+  RagStatus build() => const RagStatus(
+    sources: {
+      RagSource.gallery: RagStatus(
+        phase: 'partial',
+        indexed: 32,
+        total: 40,
+        partial: true,
+        details: {'visual_indexed': 32},
+      ),
+    },
+  );
 }
 
 class _FakeGalleryNotifier extends LocalGalleryNotifier {

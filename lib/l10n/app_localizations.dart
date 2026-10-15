@@ -30348,7 +30348,7 @@ abstract class AppLocalizations {
   /// No description provided for @rag_futureSources.
   ///
   /// In en, this message translates to:
-  /// **'Tag suggestions, Wiki and prompt block search are connected. Workspace, gallery and Agent retrieval will follow in stages.'**
+  /// **'Tag suggestions, Wiki, prompt blocks and multimodal gallery search are connected. Workspace and Agent retrieval will follow.'**
   String get rag_futureSources;
 
   /// No description provided for @rag_badgeHint.
@@ -30392,6 +30392,71 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Indexed {indexed} / {total} text passages'**
   String rag_textCounts(int indexed, int total);
+
+  /// No description provided for @rag_galleryEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery multimodal search'**
+  String get rag_galleryEnabled;
+
+  /// No description provided for @rag_galleryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Index visual content from registered gallery folders and existing NAI parameters as separate text. Originals stay unchanged; other software metadata is not parsed.'**
+  String get rag_galleryHint;
+
+  /// No description provided for @rag_galleryPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Index {images} active gallery images and {parameters} NAI parameter passages. Start this first build explicitly; later updates are incremental. Visual and text indices are separate and pausable.'**
+  String rag_galleryPlan(int images, int parameters);
+
+  /// No description provided for @rag_galleryCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Images {indexed} / {images}; NAI passages {parameters}; skipped images {skipped}'**
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  );
+
+  /// No description provided for @rag_galleryMixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined search'**
+  String get rag_galleryMixed;
+
+  /// No description provided for @rag_galleryVisual.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual content only'**
+  String get rag_galleryVisual;
+
+  /// No description provided for @rag_galleryParameters.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI parameters only'**
+  String get rag_galleryParameters;
+
+  /// No description provided for @rag_galleryChooseImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an image to find similar'**
+  String get rag_galleryChooseImage;
+
+  /// No description provided for @rag_galleryClearImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear query image'**
+  String get rag_galleryClearImage;
+
+  /// No description provided for @rag_gallerySearchOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery RAG search options'**
+  String get rag_gallerySearchOptions;
 }
 
 class _AppLocalizationsDelegate

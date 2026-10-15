@@ -166,7 +166,8 @@ class TextEngine(Engine):
                     where.append("json_extract(name,'$[0]') IN (" + ','.join('?' for _ in group) + ')'); values.extend(group)
                 for row in self.db.execute('SELECT name,digest,vector FROM documents WHERE ' + ' AND '.join(where),values):
                     if cancelled(): raise ValueError('cancelled')
-                    score = float(np.dot(np.frombuffer(row[2],dtype=np.float32),vector))
+                    stored = np.frombuffer(row[2],dtype=np.float32)
+                    score = float(np.dot(stored,vector)/max(np.linalg.norm(stored),1e-8))
                     rows.append((score,row[0],row[1]))
             rows.sort(reverse=True); rows = rows[:160]
         else:

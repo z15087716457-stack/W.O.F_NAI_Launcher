@@ -25,6 +25,11 @@ import '../../data/services/gallery/gallery_view_mode.dart';
 import '../../data/services/gallery/scan_state_manager.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/rag/rag_client.dart';
+import '../../core/rag/rag_settings.dart';
+import '../../core/rag/rag_gallery_search.dart';
+import 'rag_provider.dart';
+import 'gallery_rag_query_provider.dart';
 import 'collection_provider.dart';
 
 part 'local_gallery_provider.freezed.dart';
@@ -81,12 +86,17 @@ class LocalGalleryError {
 /// [datasetId] 只在筛选/范围/排序变化时递增，视图据此回到顶部，
 /// 删除、收藏、新增等内容变化保持滚动位置。
 class GalleryTimeline {
-  const GalleryTimeline(this.entries, {required this.datasetId});
+  const GalleryTimeline(
+    this.entries, {
+    required this.datasetId,
+    this.semanticRanked = false,
+  });
 
   static const empty = GalleryTimeline(<GalleryTimelineEntry>[], datasetId: 0);
 
   final List<GalleryTimelineEntry> entries;
   final int datasetId;
+  final bool semanticRanked;
 
   static final Expando<Map<String, int>> _indexCache = Expando();
 
@@ -181,10 +191,12 @@ class LocalGalleryState with _$LocalGalleryState {
   bool get hasFilters => filterCriteria.hasFilters;
 
   /// 是否有 naiOnly 之外的会话过滤条件（清除按钮按此显隐）
-  bool get hasSessionFilters => filterCriteria.hasSessionFilters;
+  bool get hasSessionFilters =>
+      filterCriteria.hasSessionFilters || timeline.semanticRanked;
 
   /// 当前结果数（有过滤时为过滤结果数）
-  int get resultCount => hasFilters ? filteredCount : totalCount;
+  int get resultCount =>
+      hasFilters || timeline.semanticRanked ? filteredCount : totalCount;
 
   /// 当前排序是否按时间（按天/月分组只在时间排序下有意义）
   bool get isTimeSorted =>
@@ -193,7 +205,9 @@ class LocalGalleryState with _$LocalGalleryState {
 
   /// 实际生效的分组方式
   GalleryGroupMode get effectiveGroupMode =>
-      isTimeSorted ? groupMode : GalleryGroupMode.none;
+      isTimeSorted && !timeline.semanticRanked
+      ? groupMode
+      : GalleryGroupMode.none;
 }
 
 /// 顶栏与筛选条用的画廊状态：去掉时间线与记录/内容版本，
@@ -202,7 +216,11 @@ final localGalleryChromeStateProvider = Provider<LocalGalleryState>((ref) {
   return ref.watch(
     localGalleryNotifierProvider.select(
       (state) => state.copyWith(
-        timeline: GalleryTimeline.empty,
+        timeline: GalleryTimeline(
+          const [],
+          datasetId: 0,
+          semanticRanked: state.timeline.semanticRanked,
+        ),
         recordsRevision: 0,
         contentRevision: 0,
       ),
@@ -236,6 +254,8 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   LocalGalleryService? _service;
   int _filterRequestSerial = 0;
   int _timelineSerial = 0;
+  RagCancellation? _ragCancellation;
+  Timer? _ragRefresh;
 
   /// 最近软删路径键集（防复活屏）：服务层重建/重扫期间时间线可能从
   /// 尚未摘除的内存文件列表取回含被删图的旧数据，这里在出口强制过滤。
@@ -268,7 +288,29 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     GalleryCacheManager().registerOnCacheCleared(_resetState);
     ref.onDispose(() {
       GalleryCacheManager().unregisterOnCacheCleared(_resetState);
+      _ragCancellation?.cancel();
+      _ragRefresh?.cancel();
     });
+    void refreshRag() {
+      _ragCancellation?.cancel();
+      _ragRefresh?.cancel();
+      _ragRefresh = Timer(const Duration(milliseconds: 180), () {
+        if (state.isInitialized) unawaited(_reloadTimeline(newDataset: false));
+      });
+    }
+
+    ref.listen(
+      ragSettingsProvider.select((s) => s.enabledFor(RagSource.gallery)),
+      (_, __) => refreshRag(),
+    );
+    ref.listen(galleryRagQueryProvider, (_, __) => refreshRag());
+    ref.listen(
+      ragControllerProvider.select((s) {
+        final g = s.forSource(RagSource.gallery);
+        return (g.available, g.complete, s.suspended);
+      }),
+      (_, __) => refreshRag(),
+    );
 
     return const LocalGalleryState();
   }
@@ -279,6 +321,8 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   }
 
   void _resetState() {
+    _ragCancellation?.cancel();
+    _ragRefresh?.cancel();
     _cachedState = null;
     final service = _service;
     _service = null;
@@ -455,6 +499,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   /// false 表示内容变化（保持滚动位置）。
   Future<void> _reloadTimeline({required bool newDataset}) async {
     final serial = ++_timelineSerial;
+    _ragCancellation?.cancel();
     try {
       final service = await getService();
       var entries = await service.getTimelineEntries();
@@ -481,6 +526,17 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           isLoading: false,
         ),
       );
+      if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+        unawaited(
+          _loadGalleryRag(
+            serial,
+            service,
+            entries,
+            state.filterCriteria,
+            ref.read(galleryRagQueryProvider),
+          ),
+        );
+      }
     } on GalleryNotInitializedException {
       _setState(
         state.copyWith(
@@ -509,6 +565,78 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     } catch (e) {
       AppLogger.e('Failed to load timeline', e, null, 'LocalGalleryNotifier');
       _setState(state.copyWith(isLoading: false));
+    }
+  }
+
+  Future<void> _loadGalleryRag(
+    int serial,
+    LocalGalleryService service,
+    List<GalleryTimelineEntry> ordinary,
+    FilterCriteria criteria,
+    RagGalleryQueryOptions options,
+  ) async {
+    if (criteria.searchQuery.trim().isEmpty && options.image.isEmpty) return;
+    final status = ref.read(ragControllerProvider).forSource(RagSource.gallery);
+    if (status.indexed == 0 || status.suspended) {
+      return;
+    }
+    final cancellation = _ragCancellation = RagCancellation();
+    try {
+      final scope = await service.getTimelineForFilter(
+        criteria.copyWith(searchQuery: ''),
+      );
+      if (cancellation.isCancelled || serial != _timelineSerial) return;
+      final hits = await ref
+          .read(ragControllerProvider.notifier)
+          .searchGallery(
+            query: criteria.searchQuery,
+            allowed: scope.map((e) => e.path).toList(),
+            image: options.image,
+            mode: options.mode,
+            cancellation: cancellation,
+          );
+      if (cancellation.isCancelled ||
+          serial != _timelineSerial ||
+          state.filterCriteria != criteria ||
+          !ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+        return;
+      }
+      final allowed = {
+        for (final entry in scope) galleryFilePathKey(entry.path): entry,
+      };
+      final seen = <String>{};
+      final result = <GalleryTimelineEntry>[];
+      if (options.image.isEmpty || criteria.searchQuery.trim().isNotEmpty) {
+        for (final entry in ordinary) {
+          final key = galleryFilePathKey(entry.path);
+          if (!_recentlyDeletedKeys.contains(key) && seen.add(key)) {
+            result.add(entry);
+          }
+        }
+      }
+      final count = result.length;
+      for (final hit in hits) {
+        final key = galleryFilePathKey(hit.path);
+        if (allowed[key] != null &&
+            !_recentlyDeletedKeys.contains(key) &&
+            seen.add(key)) {
+          result.add(allowed[key]!);
+        }
+      }
+      if (result.length == count && options.image.isEmpty) return;
+      _setState(
+        state.copyWith(
+          timeline: GalleryTimeline(
+            result,
+            datasetId: state.timeline.datasetId,
+            semanticRanked: true,
+          ),
+          filteredCount: result.length,
+          contentRevision: state.contentRevision + 1,
+        ),
+      );
+    } catch (_) {
+      // Keep native filename/prompt search usable when vectors are unavailable.
     }
   }
 
@@ -1044,6 +1172,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   }
 
   Future<void> clearAllFilters() async {
+    ref.read(galleryRagQueryProvider.notifier).clearImage();
     // 语义分界：
     // - 浏览范围（侧栏选择的表达式，清除时保留）：categoryId /
     //   categoryFolderPath / collectionId / showFavoritesOnly
@@ -1092,6 +1221,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
               .where((e) => !removedKeys.contains(galleryFilePathKey(e.path)))
               .toList(growable: false),
           datasetId: timeline.datasetId,
+          semanticRanked: timeline.semanticRanked,
         ),
         contentRevision: state.contentRevision + 1,
       ),
@@ -1104,7 +1234,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       _setState(
         state.copyWith(
           totalCount: service.totalCount,
-          filteredCount: service.filteredCount,
+          filteredCount: state.timeline.semanticRanked
+              ? state.timeline.length
+              : service.filteredCount,
         ),
       );
     } catch (e, stack) {

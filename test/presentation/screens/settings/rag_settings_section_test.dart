@@ -23,7 +23,13 @@ class _FakeRag extends RagController {
     RagSource source = RagSource.tags,
   }) async {
     previews.add(source);
-    return {'plan_id': 'preview-${source.name}', 'documents': 20, 'total': 60};
+    return {
+      'plan_id': 'preview-${source.name}',
+      'documents': 20,
+      'total': 60,
+      'images': 40,
+      'parameter_chunks': 20,
+    };
   }
 
   @override
@@ -58,14 +64,30 @@ class _FakeRag extends RagController {
         complete: true,
         bytes: 1048576,
       ),
+      RagSource.gallery: RagStatus(
+        phase: 'partial',
+        indexed: 38,
+        total: 60,
+        partial: true,
+        details: {
+          'visual_indexed': 32,
+          'images': 40,
+          'parameters_indexed': 6,
+          'skipped': 1,
+        },
+      ),
     },
   );
 }
 
 class _EnabledSettings extends RagSettingsController {
   @override
-  RagSettings build() =>
-      const RagSettings(enabled: true, wikiEnabled: true, blocksEnabled: true);
+  RagSettings build() => const RagSettings(
+    enabled: true,
+    wikiEnabled: true,
+    blocksEnabled: true,
+    galleryEnabled: true,
+  );
 }
 
 void main() {
@@ -122,7 +144,9 @@ void main() {
           );
           await tester.pump();
           expect(tester.takeException(), isNull);
-          final directory = Directory('.dart_tool/rag-text-20261015/captures');
+          final directory = Directory(
+            '.dart_tool/rag-gallery-20261015/captures',
+          );
           Future<void> capture(String part) async {
             await tester.runAsync(() async {
               await directory.create(recursive: true);
@@ -145,6 +169,12 @@ void main() {
           await tester.pump();
           expect(tester.takeException(), isNull);
           await capture('wiki');
+          await tester.ensureVisible(
+            find.byKey(const Key('rag-gallery-index')),
+          );
+          await tester.pump();
+          expect(tester.takeException(), isNull);
+          await capture('gallery');
           scroll.jumpTo(scroll.position.maxScrollExtent);
           await tester.pump();
           expect(tester.takeException(), isNull);
@@ -160,6 +190,9 @@ void main() {
         overrides: [
           ragControllerProvider.overrideWith(_FakeRag.new),
           ragSettingsProvider.overrideWith(_EnabledSettings.new),
+          ragGalleryRootsProvider.overrideWithValue(
+            () async => ['C:/Gallery/NAI', 'D:/Pictures'],
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -178,7 +211,11 @@ void main() {
       );
       final controller =
           container.read(ragControllerProvider.notifier) as _FakeRag;
-      for (final source in [RagSource.wiki, RagSource.blocks]) {
+      for (final source in [
+        RagSource.wiki,
+        RagSource.blocks,
+        RagSource.gallery,
+      ]) {
         final button = find.byKey(Key('rag-${source.name}-preview'));
         await tester.ensureVisible(button);
         await tester.tap(button);

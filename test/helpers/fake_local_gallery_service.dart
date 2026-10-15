@@ -132,6 +132,19 @@ class FakeLocalGalleryService implements LocalGalleryService {
   }
 
   @override
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria,
+  ) async {
+    final previous = _filter;
+    try {
+      _filter = criteria;
+      return await getTimelineEntries();
+    } finally {
+      _filter = previous;
+    }
+  }
+
+  @override
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) async {
     recordRequests.add(List.of(paths));
     final byPath = {for (final record in _records) record.path: record};

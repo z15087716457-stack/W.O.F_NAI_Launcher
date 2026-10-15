@@ -115,20 +115,43 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
   }) async {
     final controller = ref.read(ragControllerProvider.notifier);
     final plan = await controller.preview(source: source);
+    final roots = source == RagSource.gallery
+        ? await ref.read(ragGalleryRootsProvider)()
+        : const <String>[];
     if (!mounted) return;
     final l = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (c) => AlertDialog(
         title: Text(rebuild ? l.rag_rebuild : l.rag_buildIndex),
-        content: Text(
-          source == RagSource.tags
-              ? l.rag_plan((plan['total'] as num).toInt())
-              : l.rag_textPlan(
-                  (plan['documents'] as num).toInt(),
-                  (plan['total'] as num).toInt(),
+        content: source == RagSource.gallery
+            ? SizedBox(
+                width: 560,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l.rag_galleryPlan(
+                          (plan['images'] as num).toInt(),
+                          (plan['parameter_chunks'] as num).toInt(),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      for (final root in roots) Text(root, softWrap: true),
+                    ],
+                  ),
                 ),
-        ),
+              )
+            : Text(
+                source == RagSource.tags
+                    ? l.rag_plan((plan['total'] as num).toInt())
+                    : l.rag_textPlan(
+                        (plan['documents'] as num).toInt(),
+                        (plan['total'] as num).toInt(),
+                      ),
+              ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(c, false),
@@ -181,7 +204,12 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
     final status = all.forSource(source),
         controller = ref.read(ragControllerProvider.notifier);
     final wiki = source == RagSource.wiki;
-    final enabled = wiki ? settings.wikiEnabled : settings.blocksEnabled;
+    final gallery = source == RagSource.gallery;
+    final enabled = gallery
+        ? settings.galleryEnabled
+        : wiki
+        ? settings.wikiEnabled
+        : settings.blocksEnabled;
     final available = settings.enabled && enabled;
     final locked = status.busy || all.installPhase != null;
     final phase = switch (status.phase) {
@@ -200,8 +228,20 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
       children: [
         SettingsSwitchTile(
           key: Key('rag-${source.name}-enable'),
-          title: Text(wiki ? l.rag_wikiEnabled : l.rag_blocksEnabled),
-          subtitle: Text(wiki ? l.rag_wikiHint : l.rag_blocksHint),
+          title: Text(
+            gallery
+                ? l.rag_galleryEnabled
+                : wiki
+                ? l.rag_wikiEnabled
+                : l.rag_blocksEnabled,
+          ),
+          subtitle: Text(
+            gallery
+                ? l.rag_galleryHint
+                : wiki
+                ? l.rag_wikiHint
+                : l.rag_blocksHint,
+          ),
           value: enabled,
           onChanged: all.installPhase != null
               ? null
@@ -209,7 +249,11 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
                   () => ref
                       .read(ragSettingsProvider.notifier)
                       .update(
-                        wiki
+                        gallery
+                            ? ref
+                                  .read(ragSettingsProvider)
+                                  .copyWith(galleryEnabled: v)
+                            : wiki
                             ? ref
                                   .read(ragSettingsProvider)
                                   .copyWith(wikiEnabled: v)
@@ -225,7 +269,16 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(phase),
-              Text(l.rag_textCounts(status.indexed, status.total)),
+              Text(
+                gallery
+                    ? l.rag_galleryCounts(
+                        status.details['visual_indexed'] ?? 0,
+                        status.details['images'] ?? 0,
+                        status.details['parameters_indexed'] ?? 0,
+                        status.details['skipped'] ?? 0,
+                      )
+                    : l.rag_textCounts(status.indexed, status.total),
+              ),
               if (status.bytes > 0)
                 Text(
                   l.rag_storage((status.bytes / 1048576).toStringAsFixed(1)),
@@ -502,6 +555,7 @@ class _RagSettingsSectionState extends ConsumerState<RagSettingsSection> {
         ),
         _textSource(RagSource.wiki),
         _textSource(RagSource.blocks),
+        _textSource(RagSource.gallery),
         Text(l.rag_futureSources, style: Theme.of(context).textTheme.bodySmall),
       ],
     );

@@ -16906,7 +16906,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rag_futureSources =>
-      '태그 추천, Wiki 및 프롬프트 블록 검색이 연결되었습니다. 작업 공간, 갤러리, Agent 검색은 단계적으로 연결됩니다.';
+      '태그 추천, Wiki, 프롬프트 블록 및 갤러리 멀티모달 검색이 연결되었습니다. 작업 공간과 Agent 검색은 추후 지원됩니다.';
 
   @override
   String get rag_badgeHint => '로컬 의미 검색을 사용할 수 있습니다';
@@ -16934,4 +16934,44 @@ class AppLocalizationsKo extends AppLocalizations {
   String rag_textCounts(int indexed, int total) {
     return '색인된 텍스트 조각 $indexed / $total개';
   }
+
+  @override
+  String get rag_galleryEnabled => '갤러리 멀티모달 검색';
+
+  @override
+  String get rag_galleryHint =>
+      '등록된 갤러리의 이미지 내용과 기존 NAI 매개변수를 별도로 색인합니다. 원본은 유지하며 다른 소프트웨어의 메타데이터는 분석하지 않습니다.';
+
+  @override
+  String rag_galleryPlan(int images, int parameters) {
+    return '삭제되지 않은 이미지 $images개와 NAI 매개변수 조각 $parameters개를 색인합니다. 처음에는 직접 시작하고 이후에는 증분 업데이트합니다. 이미지와 텍스트 색인은 별도로 저장되며 일시 중지할 수 있습니다.';
+  }
+
+  @override
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  ) {
+    return '이미지 $indexed / $images개 · NAI 조각 $parameters개 · 건너뜀 $skipped개';
+  }
+
+  @override
+  String get rag_galleryMixed => '통합 검색';
+
+  @override
+  String get rag_galleryVisual => '이미지 내용만';
+
+  @override
+  String get rag_galleryParameters => 'NAI 매개변수만';
+
+  @override
+  String get rag_galleryChooseImage => '이미지를 선택하여 유사 검색';
+
+  @override
+  String get rag_galleryClearImage => '검색 이미지 지우기';
+
+  @override
+  String get rag_gallerySearchOptions => '갤러리 RAG 검색 옵션';
 }

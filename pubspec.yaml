@@ -146,6 +146,7 @@ flutter:
     - tool/rag/worker.py
     - tool/rag/engine.py
     - tool/rag/documents.py
+    - tool/rag/gallery.py
     - tool/rag/models.py
     - tool/rag/context.py
     - tool/rag/requirements.txt

@@ -92,6 +92,7 @@ class Sources:
 
 
 class Engine:
+    batch_size = 32
     def __init__(self, directory, models, sources):
         self.models = models; self.sources = sources
         self.root = Path(directory).resolve(); self.root.mkdir(parents=True, exist_ok=True)
@@ -143,7 +144,7 @@ class Engine:
         return {'indexed': count, 'total': total, 'complete': complete,
                 'auto_update_allowed': metadata.get('consented') == '1' and metadata.get('paused') != '1',
                 'partial': bool(count and not complete), 'bytes': size, 'building': self.active,
-                'paused': metadata.get('paused') == '1'}
+                'paused': metadata.get('paused') == '1', 'skipped': int(metadata.get('skipped','0'))}
 
     def preview(self):
         self.plan = {'source_signature': self.sources.signature(),
@@ -151,6 +152,13 @@ class Engine:
                      'total': self.sources.count(), 'expires': time.monotonic() + 1800}
         self.plan['plan_id'] = hashlib.sha256(json.dumps(self.plan, sort_keys=True).encode()).hexdigest()
         return {k: v for k, v in self.plan.items() if k != 'expires'}
+
+    def embed_rows(self, rows):
+        return self.models.embed([item['text'] for item in rows])
+
+    def set_paused(self, paused):
+        self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused',?)", ('1' if paused else '0',))
+        self.db.commit()
 
     def build(self, plan_id, cancelled):
         if self.active: raise ValueError('index_busy')
@@ -162,14 +170,14 @@ class Engine:
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('consented','1')")
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused','0')")
         self.db.commit()
-        processed = 0
+        processed = 0; skipped = 0
         try:
             names = self.sources.ordered_names()
             while processed < plan['total']:
                 if cancelled(): break
                 if self.sources.signature() != signature: raise ValueError('source_changed')
-                batch = names[processed:processed+32]
-                rows = self.sources.rows(names=batch, limit=32)
+                batch = names[processed:processed+self.batch_size]
+                rows = self.sources.rows(names=batch, limit=self.batch_size)
                 if len(rows) != len(batch) or not rows: raise ValueError('source_changed')
                 pending = []
                 for item in rows:
@@ -177,9 +185,12 @@ class Engine:
                     if not old or old[0] != item['digest']: pending.append(item)
                     else: self.db.execute('UPDATE documents SET seen=?, post_count=? WHERE name=?', (signature, item['post_count'], item['name']))
                 if pending:
-                    vectors = self.models.embed([item['text'] for item in pending])
+                    vectors = self.embed_rows(pending)
                     if cancelled(): break
                     for item, vector in zip(pending, vectors):
+                        if vector is None:
+                            skipped += 1
+                            continue
                         old = self.db.execute('SELECT id FROM documents WHERE name=?', (item['name'],)).fetchone()
                         self.db.execute('INSERT INTO documents(name,category,post_count,aliases,text,digest,vector,seen) VALUES(?,?,?,?,?,?,?,?) ON CONFLICT(name) DO UPDATE SET category=excluded.category,post_count=excluded.post_count,aliases=excluded.aliases,text=excluded.text,digest=excluded.digest,vector=excluded.vector,seen=excluded.seen',
                             (item['name'], item['category'], item['post_count'], json.dumps(item['aliases']), item['text'], item['digest'], vector.tobytes(), signature))
@@ -188,6 +199,7 @@ class Engine:
                         self.ann.add(key, vector)
                 self._ann_generation += 1
                 self.db.execute("INSERT OR REPLACE INTO metadata VALUES('ann_generation',?)",(str(self._ann_generation),))
+                self.db.execute("INSERT OR REPLACE INTO metadata VALUES('skipped',?)", (str(skipped),))
                 self.db.commit(); processed += len(rows)
                 if processed % 32768 == 0: self._checkpoint()
                 yield {'processed': processed, 'total': plan['total'], **self.status()}

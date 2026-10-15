@@ -23,6 +23,8 @@ import '../shortcuts/shortcut_tooltip.dart';
 import '../navigation/window_chrome_layout.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../common/studio_icons.dart';
+import '../../../core/rag/rag_settings.dart';
+import 'gallery_rag_search_menu.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
@@ -365,6 +367,29 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     final scopeLabel = _searchScopeLabel(state);
     final focused = widget.searchFocusNode.hasFocus;
     final hasText = _searchController.text.isNotEmpty;
+    final suffix = hasText
+        ? IconButton(
+            icon: Icon(
+              StudioIcons.galleryClose,
+              size: 16,
+              color: colors.onSurfaceVariant,
+            ),
+            tooltip: context.l10n.common_clear,
+            onPressed: () {
+              _debounceTimer?.cancel();
+              _searchController.clear();
+              ref
+                  .read(localGalleryNotifierProvider.notifier)
+                  .setSearchQuery('');
+              setState(() {});
+            },
+          )
+        : focused
+        ? null
+        : const Padding(
+            padding: EdgeInsets.only(right: 6),
+            child: _KeyHint(label: 'Ctrl F'),
+          );
     final searchField = AnimatedContainer(
       duration: const Duration(milliseconds: 120),
       height: 34,
@@ -402,28 +427,16 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
               color: colors.onSurfaceVariant,
             ),
             prefixIconConstraints: const BoxConstraints(minWidth: 36),
-            suffixIcon: hasText
-                ? IconButton(
-                    icon: Icon(
-                      StudioIcons.galleryClose,
-                      size: 16,
-                      color: colors.onSurfaceVariant,
-                    ),
-                    tooltip: context.l10n.common_clear,
-                    onPressed: () {
-                      _searchController.clear();
-                      ref
-                          .read(localGalleryNotifierProvider.notifier)
-                          .setSearchQuery('');
-                      setState(() {});
-                    },
+            suffixIcon:
+                ref.watch(ragSettingsProvider).enabledFor(RagSource.gallery)
+                ? Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const GalleryRagSearchMenu(),
+                      if (suffix != null) suffix,
+                    ],
                   )
-                : focused
-                ? null
-                : const Padding(
-                    padding: EdgeInsets.only(right: 6),
-                    child: _KeyHint(label: 'Ctrl F'),
-                  ),
+                : suffix,
             suffixIconConstraints: const BoxConstraints(minWidth: 30),
             filled: false,
             border: InputBorder.none,

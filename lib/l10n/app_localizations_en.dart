@@ -17366,7 +17366,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_futureSources =>
-      'Tag suggestions, Wiki and prompt block search are connected. Workspace, gallery and Agent retrieval will follow in stages.';
+      'Tag suggestions, Wiki, prompt blocks and multimodal gallery search are connected. Workspace and Agent retrieval will follow.';
 
   @override
   String get rag_badgeHint => 'Local semantic search is ready';
@@ -17394,4 +17394,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String rag_textCounts(int indexed, int total) {
     return 'Indexed $indexed / $total text passages';
   }
+
+  @override
+  String get rag_galleryEnabled => 'Gallery multimodal search';
+
+  @override
+  String get rag_galleryHint =>
+      'Index visual content from registered gallery folders and existing NAI parameters as separate text. Originals stay unchanged; other software metadata is not parsed.';
+
+  @override
+  String rag_galleryPlan(int images, int parameters) {
+    return 'Index $images active gallery images and $parameters NAI parameter passages. Start this first build explicitly; later updates are incremental. Visual and text indices are separate and pausable.';
+  }
+
+  @override
+  String rag_galleryCounts(
+    int indexed,
+    int images,
+    int parameters,
+    int skipped,
+  ) {
+    return 'Images $indexed / $images; NAI passages $parameters; skipped images $skipped';
+  }
+
+  @override
+  String get rag_galleryMixed => 'Combined search';
+
+  @override
+  String get rag_galleryVisual => 'Visual content only';
+
+  @override
+  String get rag_galleryParameters => 'NAI parameters only';
+
+  @override
+  String get rag_galleryChooseImage => 'Choose an image to find similar';
+
+  @override
+  String get rag_galleryClearImage => 'Clear query image';
+
+  @override
+  String get rag_gallerySearchOptions => 'Gallery RAG search options';
 }

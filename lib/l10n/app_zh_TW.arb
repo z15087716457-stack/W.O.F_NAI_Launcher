@@ -9191,7 +9191,7 @@
   "rag_rebuild": "重建索引",
   "rag_clear": "清除索引",
   "rag_clearHint": "僅刪除此來源的派生索引，保留原始內容與模型；重新增庫後可繼續使用。",
-  "rag_futureSources": "已接入標籤推薦、Wiki 與提示詞塊搜尋；工作區、圖庫與 Agent 檢索後續分批接入。",
+  "rag_futureSources": "已接入標籤推薦、Wiki、提示詞塊與圖庫多模態檢索；工作區與 Agent 檢索後續接入。",
   "rag_badgeHint": "本地語義檢索已就緒",
   "rag_wikiEnabled": "Wiki 語義搜尋",
   "rag_wikiHint": "收錄本地百科正文，名稱精確匹配優先，語義結果補充。單獨預覽並開始首次建庫。",
@@ -9215,6 +9215,42 @@
         "type": "int"
       },
       "total": {
+        "type": "int"
+      }
+    }
+  },
+  "rag_galleryEnabled": "圖庫多模態檢索",
+  "rag_galleryHint": "分析已登記圖庫中的圖片畫面；僅為 NAI 圖的已有參數另建文字索引。原圖不改寫，普通圖不解析其他軟體後設資料。",
+  "rag_galleryPlan": "當前圖庫來源將收錄 {images} 張未刪除圖片及 {parameters} 個 NAI 參數片段。首次需點選開始，之後增量更新；畫面與參數分開索引，可隨時暫停。",
+  "rag_galleryCounts": "畫面 {indexed} / {images} 張；NAI 參數 {parameters} 段；跳過 {skipped} 張",
+  "rag_galleryMixed": "綜合檢索",
+  "rag_galleryVisual": "僅畫面",
+  "rag_galleryParameters": "僅 NAI 參數",
+  "rag_galleryChooseImage": "選擇圖片找相似",
+  "rag_galleryClearImage": "清除查詢圖片",
+  "rag_gallerySearchOptions": "圖庫 RAG 檢索方式",
+  "@rag_galleryPlan": {
+    "placeholders": {
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      }
+    }
+  },
+  "@rag_galleryCounts": {
+    "placeholders": {
+      "indexed": {
+        "type": "int"
+      },
+      "images": {
+        "type": "int"
+      },
+      "parameters": {
+        "type": "int"
+      },
+      "skipped": {
         "type": "int"
       }
     }

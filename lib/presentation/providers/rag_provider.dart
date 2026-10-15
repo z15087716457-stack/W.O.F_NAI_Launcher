@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
@@ -10,6 +11,8 @@ import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
 import '../../core/rag/rag_text_search.dart';
 import '../../core/rag/rag_block_snapshot.dart';
+import '../../core/rag/rag_gallery_search.dart';
+import '../../data/repositories/gallery_folder_repository.dart';
 import 'prompt_block_library_provider.dart';
 import '../../core/services/desktop_app_shutdown_service.dart';
 
@@ -30,6 +33,7 @@ class RagStatus {
     this.installPhase,
     this.sources = const {},
     this.runtimeReady = false,
+    this.details = const {},
   });
   final String phase;
   final int indexed, processed, total, bytes, searching;
@@ -37,6 +41,7 @@ class RagStatus {
   final bool busy, complete, partial, suspended;
   final bool runtimeReady;
   final Map<RagSource, RagStatus> sources;
+  final Map<String, int> details;
   RagStatus forSource(RagSource source) => source == RagSource.tags
       ? this
       : (sources[source] ?? const RagStatus()).copyWith(suspended: suspended);
@@ -62,6 +67,7 @@ class RagStatus {
     bool clearInstall = false,
     Map<RagSource, RagStatus>? sources,
     bool? runtimeReady,
+    Map<String, int>? details,
   }) => RagStatus(
     phase: phase ?? this.phase,
     indexed: indexed ?? this.indexed,
@@ -78,6 +84,7 @@ class RagStatus {
     installPhase: clearInstall ? null : installPhase ?? this.installPhase,
     sources: sources ?? this.sources,
     runtimeReady: runtimeReady ?? this.runtimeReady,
+    details: details ?? this.details,
   );
 }
 
@@ -98,6 +105,14 @@ typedef RagClientStarter =
     });
 final ragClientStarterProvider = Provider<RagClientStarter>(
   (ref) => RagClient.start,
+);
+final ragGalleryRootsProvider = Provider<Future<List<String>> Function()>(
+  (ref) =>
+      () async => [
+        for (final root
+            in await GalleryFolderRepository.instance.getAllRootDirs())
+          root.path,
+      ],
 );
 typedef RagSourcePaths = ({String catalog, String runtime, String wiki});
 final ragSourcePathsProvider = Provider<Future<RagSourcePaths> Function()>(
@@ -212,6 +227,9 @@ class RagController extends Notifier<RagStatus> {
     final snapshot = settings.blocksEnabled
         ? await _writeBlockSnapshot(root)
         : '';
+    final galleryRoots = settings.galleryEnabled
+        ? await _writeGalleryRoots(root)
+        : '';
     final client = await ref.read(ragClientStarterProvider)(
       python: python,
       directory: root,
@@ -226,6 +244,7 @@ class RagController extends Notifier<RagStatus> {
         'runtime': paths.runtime,
         'wiki': paths.wiki,
         'blocks': snapshot,
+        'gallery_roots': galleryRoots,
         'sources': [
           for (final source in RagSource.values)
             if (settings.enabledFor(source)) source.name,
@@ -348,6 +367,16 @@ class RagController extends Notifier<RagStatus> {
         complete: result['complete'] as bool?,
         partial: result['partial'] as bool?,
         busy: result['building'] as bool?,
+        details: {
+          for (final key in [
+            'images',
+            'visual_indexed',
+            'parameter_chunks',
+            'parameters_indexed',
+            'skipped',
+          ])
+            if (result[key] is num) key: (result[key] as num).toInt(),
+        },
         phase: result['paused'] == true
             ? 'paused'
             : result['building'] == true
@@ -386,6 +415,9 @@ class RagController extends Notifier<RagStatus> {
       if (ref.read(ragSettingsProvider).enabledFor(RagSource.blocks)) {
         await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
       }
+      if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+        await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
+      }
       final status = await c.request('status');
       if (_disposed || epoch != _epoch) return;
       _apply(status);
@@ -422,6 +454,9 @@ class RagController extends Notifier<RagStatus> {
     final c = await _connect();
     if (source == RagSource.blocks) {
       await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
+    }
+    if (source == RagSource.gallery) {
+      await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
     }
     return c.request('preview', {'source': source.name});
   }
@@ -542,7 +577,7 @@ class RagController extends Notifier<RagStatus> {
     RagTextQuery query, {
     required RagCancellation cancellation,
   }) async {
-    if (query.source == RagSource.tags ||
+    if ((query.source != RagSource.wiki && query.source != RagSource.blocks) ||
         query.query.trim().isEmpty ||
         !ref.read(ragSettingsProvider).enabledFor(query.source) ||
         _gpuHolds > 0) {
@@ -586,6 +621,107 @@ class RagController extends Notifier<RagStatus> {
           query.source,
           (s) => s.copyWith(searching: (s.searching - 1).clamp(0, 100)),
         );
+      }
+    }
+  }
+
+  Future<String> _writeGalleryRoots(Directory root) async {
+    final roots = (await ref.read(ragGalleryRootsProvider)()).toSet().toList()
+      ..sort();
+    final content = jsonEncode({'version': 1, 'roots': roots});
+    final file = File(p.join(root.path, 'sources', 'gallery-roots.json'));
+    final epoch = _epoch;
+    final write = _snapshotWrites.catchError((Object _) {}).then((_) async {
+      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+      await file.parent.create(recursive: true);
+      if (await file.exists() && await file.readAsString() == content) return;
+      final temporary = File('${file.path}.tmp');
+      await temporary.writeAsString(content, flush: true);
+      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+      await temporary.rename(file.path);
+    });
+    _snapshotWrites = write;
+    await write;
+    return file.path;
+  }
+
+  int _scopeId = 0;
+  Future<List<RagGalleryHit>> searchGallery({
+    required String query,
+    required List<String> allowed,
+    required RagCancellation cancellation,
+    String image = '',
+    RagGalleryMode mode = RagGalleryMode.mixed,
+  }) async {
+    if (!ref.read(ragSettingsProvider).enabledFor(RagSource.gallery) ||
+        _gpuHolds > 0 ||
+        (query.trim().isEmpty && image.isEmpty) ||
+        allowed.isEmpty) {
+      return const [];
+    }
+    final epoch = _epoch;
+    var counted = false;
+    File? scope;
+    try {
+      final client = await _connect();
+      final root = await ref.read(ragDirectoryProvider)();
+      await _writeGalleryRoots(root);
+      if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+        return const [];
+      }
+      scope = File(
+        p.join(
+          root.path,
+          'search-scopes',
+          '$pid-${DateTime.now().microsecondsSinceEpoch}-${_scopeId++}.json',
+        ),
+      );
+      await scope.parent.create(recursive: true);
+      await scope.writeAsString(jsonEncode(allowed), flush: true);
+      if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+        return const [];
+      }
+      counted = true;
+      _change(RagSource.gallery, (s) => s.copyWith(searching: s.searching + 1));
+      final result = await client.request('gallery_search', {
+        'source': 'gallery',
+        'query': query,
+        'scope': scope.path,
+        'image': image,
+        'mode': mode.name,
+        'limit': 60,
+      }, cancellation);
+      if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+        return const [];
+      }
+      _change(
+        RagSource.gallery,
+        (s) => s.copyWith(
+          clearError: true,
+          phase: s.complete ? 'ready' : 'partial',
+        ),
+      );
+      return [
+        for (final value in result['items'] as List? ?? const [])
+          RagGalleryHit.fromJson((value as Map).cast<String, dynamic>()),
+      ];
+    } catch (error) {
+      if (epoch == _epoch &&
+          !(error is RagException && error.code == 'cancelled')) {
+        _fail(error, source: RagSource.gallery);
+      }
+      return const [];
+    } finally {
+      if (counted && !_disposed && epoch == _epoch) {
+        _change(
+          RagSource.gallery,
+          (s) => s.copyWith(searching: (s.searching - 1).clamp(0, 100)),
+        );
+      }
+      if (scope != null) {
+        try {
+          await scope.delete();
+        } catch (_) {}
       }
     }
   }
