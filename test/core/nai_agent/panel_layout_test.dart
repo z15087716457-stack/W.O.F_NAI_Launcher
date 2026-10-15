@@ -27,6 +27,14 @@ void main() {
     }
   });
   test(
+    'exploration reserves its editor and stage before widening the Agent',
+    () {
+      expect(AgentPanelLayout.resolve(520, 1280, minimumPageWidth: 832), 440);
+      expect(AgentPanelLayout.resolve(1280, 1600, minimumPageWidth: 832), 760);
+      expect(AgentPanelLayout.resolve(520, 1056, minimumPageWidth: 832), 320);
+    },
+  );
+  test(
     'legacy narrow panes migrate once; explicit new sizes survive reload',
     () {
       final legacy = AgentSettings.fromJson({'panelWidth': 440});

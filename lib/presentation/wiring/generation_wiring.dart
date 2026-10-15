@@ -204,8 +204,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(generationViewDataProvider(context.l10n));
-    final agentAvailable =
-        !widget.explore && NaiAgentIntegrationScope.activeOf(context);
+    final agentAvailable = NaiAgentIntegrationScope.activeOf(context);
     final agentExpanded =
         agentAvailable &&
         (ref.watch(naiAgentWindowControllerProvider).presentationExpanded ??

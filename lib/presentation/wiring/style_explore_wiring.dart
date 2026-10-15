@@ -14,6 +14,8 @@ import '../providers/generation/local_upscale_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../providers/layout_state_provider.dart';
+import '../providers/nai_agent/nai_agent_window_controller.dart';
+import '../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../providers/style_explore/explore_manual_capture.dart';
@@ -31,6 +33,7 @@ import '../widgets/common/app_toast.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
 import 'generation_blocks_dock.dart';
+import 'nai_agent_generation_host.dart';
 import 'style_explore_backend.dart';
 import 'style_explore_blocks_wiring.dart';
 import 'style_explore_editor_wiring.dart';
@@ -278,6 +281,10 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
     final params = ref.watch(generationParamsNotifierProvider);
     final layout = ref.watch(layoutStateNotifierProvider);
     final window = ref.watch(styleExploreWindowProvider);
+    final agentExpanded =
+        NaiAgentIntegrationScope.activeOf(context) &&
+        (ref.watch(naiAgentWindowControllerProvider).presentationExpanded ??
+            ref.watch(naiAgentUiPreferencesProvider).settings.panelExpanded);
     final backend = ref.read(styleExploreBackendProvider);
     final undo = current == null
         ? null
@@ -487,9 +494,9 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
     return Material(
       type: MaterialType.transparency,
       child: WindowChromePage(
-        captionHeight: 61,
+        captionHeight: agentExpanded ? null : 61,
         hideCaptions: window.fullscreen,
-        captionTheme: window.captionOverStage
+        captionTheme: window.captionOverStage && !agentExpanded
             ? Theme.of(context).copyWith(
                 colorScheme: Theme.of(context).colorScheme.copyWith(
                   brightness: Brightness.dark,
@@ -498,24 +505,28 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
                 ),
               )
             : null,
-        child: StyleExplorePage(
-          data: data,
-          actions: actions,
-          dock: layout.blockLibraryPanelExpanded
-              ? BlocksDockWiring(
-                  onInsert: (id) async {
-                    await insertStyleExploreBlock(context, ref, id);
-                  },
-                )
-              : null,
-          editor:
-              widget.editor ??
-              (context, parts) => StyleExploreEditorWiring(
-                parts: parts,
-                controller: _generation,
-                onBatchEvent: _batch,
-                canGenerate: () => _manualGuard?.call() ?? false,
-              ),
+        child: NaiAgentGenerationHost(
+          minimumPageWidth:
+              StyleExplorePage.minEditor + StyleExplorePage.minStage,
+          child: StyleExplorePage(
+            data: data,
+            actions: actions,
+            dock: layout.blockLibraryPanelExpanded
+                ? BlocksDockWiring(
+                    onInsert: (id) async {
+                      await insertStyleExploreBlock(context, ref, id);
+                    },
+                  )
+                : null,
+            editor:
+                widget.editor ??
+                (context, parts) => StyleExploreEditorWiring(
+                  parts: parts,
+                  controller: _generation,
+                  onBatchEvent: _batch,
+                  canGenerate: () => _manualGuard?.call() ?? false,
+                ),
+          ),
         ),
       ),
     );

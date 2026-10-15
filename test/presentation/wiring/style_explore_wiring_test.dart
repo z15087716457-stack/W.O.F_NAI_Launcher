@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +42,24 @@ import 'package:nai_launcher/presentation/wiring/style_explore_backend.dart';
 import 'package:nai_launcher/presentation/wiring/style_explore_platform.dart';
 import 'package:nai_launcher/presentation/wiring/style_explore_wiring.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_controls/generation_controls.dart';
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_window_controller.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/providers/tips_provider.dart';
+import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_panel.dart';
+import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_input.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
+import '../../helpers/studio_capture_fonts.dart';
+import '../screens/generation/widgets/reference_module_test.dart'
+    show prepareGenerationDropTestPlatform;
+import 'generation_data_wiring_test.dart' show DataShortcuts;
+import 'generation_reference_imports_test.dart' show ImportStorage;
 
 class _Runs extends StyleExploreRunStorage {
   final runs = <String, domain.ExploreRun>{};
@@ -208,6 +230,22 @@ class _Controls extends GenerationControlsController {
   }
 }
 
+class _AgentStore extends AgentWorkspaceStore {
+  _AgentStore(super.root);
+  AgentSettings settings = const AgentSettings();
+  @override
+  Future<AgentSettings> readSettings() async => settings;
+  @override
+  Future<AgentSettings> patchSettings(Map<String, dynamic> changes) async =>
+      settings = AgentSettings.fromJson({...settings.toJson(), ...changes});
+  @override
+  Future<void> saveComposer(
+    String workspaceId,
+    String chatId,
+    AgentComposerState state,
+  ) async {}
+}
+
 domain.ExploreRun _run(String id) {
   final created = DateTime(2026, 10, 12, 12);
   return domain.ExploreRun.create(
@@ -271,6 +309,13 @@ domain.ExploreRun _run(String id) {
 }
 
 void main() {
+  prepareGenerationDropTestPlatform();
+  setUpAll(() async {
+    await loadStudioCaptureFonts();
+    await (FontLoader(
+      'MaterialIcons',
+    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
+  });
   late _Runs storage;
   late _Settings settings;
   late _Pills pills;
@@ -278,6 +323,9 @@ void main() {
   late _Platform platform;
   late _Controls controls;
   late _Library library;
+  Directory? agentDirectory;
+  NaiAgentWorkspaceController? agentController;
+  ProviderContainer? mountedContainer;
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     library = _Library();
@@ -289,53 +337,111 @@ void main() {
     runner = _Runner();
     platform = _Platform();
     controls = _Controls();
+    agentDirectory = null;
+    agentController = null;
+    mountedContainer = null;
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+          const MethodChannel('window_manager'),
+          (call) async => call.method == 'isMaximized' ? false : null,
+        );
+  });
+  tearDown(() async {
+    mountedContainer?.dispose();
+    await agentController?.close();
+    await agentDirectory?.delete(recursive: true);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(const MethodChannel('window_manager'), null);
   });
 
-  Future<ProviderContainer> mount(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1600, 1000);
+  Future<ProviderContainer> mount(
+    WidgetTester tester, {
+    List<Override> overrides = const [],
+    bool realEditor = false,
+    ValueNotifier<bool>? generationRoute,
+    Locale locale = const Locale('zh'),
+    bool dark = false,
+    double width = 1600,
+  }) async {
+    tester.view.physicalSize = Size(width, 1000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          localStorageServiceProvider.overrideWithValue(settings),
-          pillWorkspaceStorageProvider.overrideWithValue(pills),
-          styleExploreRunStorageProvider.overrideWithValue(storage),
-          promptBlockLibraryNotifierProvider.overrideWith(() => library),
-          imageGenerationNotifierProvider.overrideWith(_Generation.new),
-          authNotifierProvider.overrideWith(_Auth.new),
-          generationParamsNotifierProvider.overrideWith(_Params.new),
-          characterPromptNotifierProvider.overrideWith(_Characters.new),
-          subscriptionNotifierProvider.overrideWith(_Subscription.new),
-          exploreRunRunnerProvider.overrideWith(() => runner),
-          styleExplorePlatformProvider.overrideWithValue(platform),
-          kritaBridgeNotifierProvider.overrideWith(
-            (ref) => KritaBridgeNotifier(),
-          ),
-          estimatedCostForBatchSizeProvider(1).overrideWith((ref) => 0),
-          styleExploreCostForCountProvider.overrideWith((ref, count) => 0),
-          anlasBalanceProvider.overrideWith((ref) => 100),
-        ],
+      UncontrolledProviderScope(
+        container: mountedContainer = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(settings),
+            pillWorkspaceStorageProvider.overrideWithValue(pills),
+            styleExploreRunStorageProvider.overrideWithValue(storage),
+            promptBlockLibraryNotifierProvider.overrideWith(() => library),
+            imageGenerationNotifierProvider.overrideWith(_Generation.new),
+            authNotifierProvider.overrideWith(_Auth.new),
+            generationParamsNotifierProvider.overrideWith(_Params.new),
+            characterPromptNotifierProvider.overrideWith(_Characters.new),
+            subscriptionNotifierProvider.overrideWith(_Subscription.new),
+            exploreRunRunnerProvider.overrideWith(() => runner),
+            styleExplorePlatformProvider.overrideWithValue(platform),
+            kritaBridgeNotifierProvider.overrideWith(
+              (ref) => KritaBridgeNotifier(),
+            ),
+            estimatedCostForBatchSizeProvider(1).overrideWith((ref) => 0),
+            styleExploreCostForCountProvider.overrideWith((ref, count) => 0),
+            anlasBalanceProvider.overrideWith((ref) => 100),
+            shortcutConfigNotifierProvider.overrideWith(DataShortcuts.new),
+            ...overrides,
+          ],
+        ),
         child: MaterialApp(
-          theme: GeistTheme.light,
-          locale: const Locale('zh'),
+          theme: dark ? GeistTheme.dark : GeistTheme.light,
+          locale: locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: StyleExploreWiring(
-            generationController: controls,
-            editor: (context, parts) => Column(
-              children: [
-                parts.randomVariables,
-                const Spacer(),
-                parts.generateBar,
-              ],
+          builder: (context, child) => RepaintBoundary(
+            key: const Key('explore-agent-capture'),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              child: child!,
             ),
+          ),
+          home: Builder(
+            builder: (context) {
+              Widget explore() => StyleExploreWiring(
+                generationController: controls,
+                editor: realEditor
+                    ? null
+                    : (context, parts) => Column(
+                        children: [
+                          parts.randomVariables,
+                          const Spacer(),
+                          parts.generateBar,
+                        ],
+                      ),
+              );
+              return generationRoute == null
+                  ? explore()
+                  : NaiAgentIntegrationScope(
+                      child: IntegratedTitleBarShell(
+                        deferToRoute: true,
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: generationRoute,
+                          builder: (_, generation, _) =>
+                              generation ? const GenerationRoute() : explore(),
+                        ),
+                      ),
+                    );
+            },
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
+    await tester.runAsync(
+      () => precacheImage(
+        const AssetImage('assets/images/wof_logo_full.png'),
+        tester.element(find.byType(StyleExploreWiring)),
+      ),
+    );
     final container = ProviderScope.containerOf(
       tester.element(find.byType(StyleExploreWiring)),
     );
@@ -346,6 +452,199 @@ void main() {
 
   ExploreActions actions(WidgetTester tester) =>
       tester.widget<StyleExplorePage>(find.byType(StyleExplorePage)).actions;
+
+  Future<ProviderContainer> mountAgent(
+    WidgetTester tester,
+    ValueNotifier<bool> route, {
+    Locale locale = const Locale('zh'),
+    bool dark = false,
+    double width = 1600,
+  }) async {
+    late Directory directory;
+    late NaiAgentWorkspaceController agent;
+    await tester.runAsync(() async {
+      directory = await Directory.systemTemp.createTemp('explore-agent-');
+      agent = NaiAgentWorkspaceController(
+        store: _AgentStore(directory),
+        initialWorkspaceName: 'Synthetic workspace',
+        initialChatName: 'Synthetic chat',
+        startClient: (_, __, ___, ____, _____) =>
+            Future.error(StateError('UI test must not start a model')),
+      );
+      await agent.initialize(restoreHistory: false);
+    });
+    final preferences = NaiAgentUiPreferences()..replace(agent.settings);
+    agent.addListener(() => preferences.replace(agent.settings));
+    agent.ready = Future.value();
+    agentDirectory = directory;
+    agentController = agent;
+    addTearDown(route.dispose);
+    return mount(
+      tester,
+      realEditor: true,
+      generationRoute: route,
+      locale: locale,
+      dark: dark,
+      width: width,
+      overrides: [
+        naiAgentControllerProvider.overrideWith((ref) => agent),
+        naiAgentWorkspaceStoreProvider.overrideWithValue(agent.store),
+        naiAgentUiPreferencesProvider.overrideWith((ref) => preferences),
+        naiAgentWindowHostProvider.overrideWithValue(null),
+        naiAgentWindowControllerProvider.overrideWith(
+          (ref) => NaiAgentWindowController(
+            host: null,
+            readSettings: () async => agent.settings,
+            saveExpanded: (expanded) =>
+                agent.updateSettings({'panelExpanded': expanded}),
+          ),
+        ),
+        naiAgentNativeDragEnabledProvider.overrideWithValue(false),
+        vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
+        tipEpochProvider.overrideWith((ref) => Stream.value(0)),
+      ],
+    );
+  }
+
+  Future<void> captureAgent(WidgetTester tester, String name) async {
+    if (Platform.environment['CAPTURE_EXPLORE_AGENT'] != '1') return;
+    await tester.runAsync(() async {
+      final boundary = tester.renderObject<RenderRepaintBoundary>(
+        find.byKey(const Key('explore-agent-capture')),
+      );
+      final bitmap = await boundary.toImage(pixelRatio: 1);
+      final bytes = await bitmap.toByteData(format: ui.ImageByteFormat.png);
+      bitmap.dispose();
+      final file = File(
+        '.dart_tool/explore-agent-entry-20261015/captures/$name.png',
+      );
+      await file.parent.create(recursive: true);
+      await file.writeAsBytes(bytes!.buffer.asUint8List());
+    });
+  }
+
+  testWidgets('explore Agent pin and panel share the generation runtime', (
+    tester,
+  ) async {
+    final route = ValueNotifier(false);
+    final container = await mountAgent(tester, route);
+    final documents = Map.of(pills.values);
+    final params = container.read(generationParamsNotifierProvider);
+    final run = storage.runs['first'];
+    final toggle = find.byKey(const Key('nai-agent-toggle'));
+    expect(toggle, findsOneWidget);
+    await tester.tap(find.byKey(const Key('gen-tool-menu')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('gen-pin-agent')), findsOneWidget);
+    await captureAgent(tester, 'shared-menu');
+    await tester.tap(find.byKey(const Key('gen-pin-agent')));
+    await tester.pumpAndSettle();
+    expect(toggle, findsNothing);
+    expect(settings.getNaiAgentToolPinned(), isFalse);
+    await tester.tapAt(const Offset(20, 850));
+    await tester.pumpAndSettle();
+
+    route.value = true;
+    await tester.pumpAndSettle();
+    expect(toggle, findsNothing);
+    await tester.tap(find.byKey(const Key('gen-tool-menu')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('gen-pin-agent')));
+    await tester.pumpAndSettle();
+    expect(settings.getNaiAgentToolPinned(), isTrue);
+    await tester.tapAt(const Offset(20, 850));
+    await tester.pumpAndSettle();
+    route.value = false;
+    await tester.pumpAndSettle();
+    expect(toggle, findsOneWidget);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(naiAgentControllerProvider).settings.panelExpanded,
+      isTrue,
+    );
+    expect(find.byType(NaiAgentPanel), findsOneWidget);
+    expect(
+      container.read(naiAgentUiPreferencesProvider).settings.panelExpanded,
+      isTrue,
+    );
+    final reveal = find.byKey(const Key('nai-agent-reveal'));
+    expect(tester.getSize(reveal).width, greaterThan(0));
+    final editor = find.byKey(const Key('explore-editor'));
+    final element = tester.element(editor);
+    await captureAgent(tester, 'explore-open');
+    final panelBefore = tester.getSize(reveal).width;
+    await tester.drag(
+      find.byKey(const Key('nai-agent-resize')),
+      const Offset(-80, 0),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.getSize(reveal).width, greaterThan(panelBefore));
+    expect(tester.element(editor), same(element));
+
+    route.value = true;
+    await tester.pumpAndSettle();
+    expect(find.byType(NaiAgentPanel), findsOneWidget);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    route.value = false;
+    await tester.pumpAndSettle();
+    expect(find.byType(NaiAgentPanel), findsNothing);
+    expect(tester.getSize(reveal).width, 0);
+    expect(pills.values, documents);
+    expect(container.read(generationParamsNotifierProvider), params);
+    expect(storage.runs['first'], run);
+    expect(controls.calls, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+    for (final dark in [false, true]) {
+      testWidgets('explore Agent toolbar $language dark=$dark', (tester) async {
+        final locale = language == 'zh_TW'
+            ? const Locale('zh', 'TW')
+            : Locale(language);
+        final container = await mountAgent(
+          tester,
+          ValueNotifier(false),
+          locale: locale,
+          dark: dark,
+          width: dark ? 1280 : 1800,
+        );
+        await tester.tap(find.byKey(const Key('gen-tool-menu')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('gen-pin-agent')), findsOneWidget);
+        await captureAgent(tester, 'menu-$language-$dark');
+        await tester.tapAt(const Offset(20, 850));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('nai-agent-toggle')));
+        await tester.pumpAndSettle();
+        expect(
+          container.read(naiAgentControllerProvider).settings.panelExpanded,
+          isTrue,
+        );
+        expect(find.byType(NaiAgentPanel), findsOneWidget);
+        final page = tester.getRect(find.byType(StyleExplorePage));
+        final panel = tester.getRect(find.byType(NaiAgentPanel));
+        expect(panel.left, greaterThanOrEqualTo(page.right));
+        expect(panel.right, lessThanOrEqualTo(dark ? 1280 : 1800));
+        expect(find.byKey(const Key('explore-editor')), findsOneWidget);
+        expect(
+          find.byKey(const Key('window-caption-controls')),
+          findsOneWidget,
+        );
+        expect(
+          WindowChromeScope.activeOf(
+            tester.element(find.byType(StyleExplorePage)),
+          ),
+          isFalse,
+        );
+        await captureAgent(tester, 'open-$language-$dark');
+        expect(controls.calls, 0);
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 
   testWidgets(
     'routes real run data and preserves a stale callback target after switching runs',

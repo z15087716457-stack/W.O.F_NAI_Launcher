@@ -6,6 +6,7 @@ import '../providers/nai_agent/nai_agent_window_controller.dart';
 import '../widgets/nai_agent/nai_agent_shared.dart';
 import '../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../widgets/nai_agent/nai_agent_dock.dart';
+import '../widgets/navigation/window_chrome_layout.dart';
 
 /// The application enables its existing runtime around the router. Standalone
 /// page adapters remain usable without initializing a personal Agent store.
@@ -21,8 +22,13 @@ class NaiAgentIntegrationScope extends InheritedWidget {
 }
 
 class NaiAgentGenerationHost extends ConsumerStatefulWidget {
-  const NaiAgentGenerationHost({super.key, required this.child});
+  const NaiAgentGenerationHost({
+    super.key,
+    required this.child,
+    this.minimumPageWidth = AgentPanelLayout.minimumPage,
+  });
   final Widget child;
+  final double minimumPageWidth;
   @override
   ConsumerState<NaiAgentGenerationHost> createState() => _GenerationHostState();
 }
@@ -52,6 +58,8 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
     final window = ref.watch(naiAgentWindowControllerProvider);
     final settings = ref.watch(naiAgentUiPreferencesProvider).settings;
     final expanded = window.presentationExpanded ?? settings.panelExpanded;
+    final chrome = context
+        .dependOnInheritedWidgetOfExactType<WindowChromeScope>();
     final reduced = MediaQuery.disableAnimationsOf(context);
     if (_wasNative &&
         !window.nativeReveal &&
@@ -84,6 +92,7 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
           final width = AgentPanelLayout.resolve(
             _dragWidth ?? settings.panelWidth,
             constraints.maxWidth,
+            minimumPageWidth: widget.minimumPageWidth,
           );
           final waitingForSurface =
               _wasNative &&
@@ -94,7 +103,16 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
           _waitingNativeSurface = waitingForSurface;
           return AnimatedBuilder(
             animation: _reveal,
-            child: widget.child,
+            // The Agent owns the rightmost caption area while docked. Keep
+            // this wrapper stable so revealing it never remounts the page.
+            child: chrome == null
+                ? widget.child
+                : WindowChromeScope(
+                    enabled: chrome.enabled && !expanded,
+                    extraWidth: chrome.extraWidth,
+                    captionHeight: chrome.captionHeight,
+                    child: widget.child,
+                  ),
             builder: (context, child) {
               final fraction = waitingForSurface
                   ? 0.0
@@ -131,6 +149,8 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
                                           _dragWidth = AgentPanelLayout.resolve(
                                             (_dragWidth ?? width) - dx,
                                             constraints.maxWidth,
+                                            minimumPageWidth:
+                                                widget.minimumPageWidth,
                                           );
                                         }),
                                         onDragCancel: () =>

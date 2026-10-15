@@ -9,19 +9,23 @@ abstract final class AgentPanelLayout {
   // 40px collapsed editor + 200px history + 160px usable canvas.
   static const minimumPage = 400.0;
 
-  static double cap(double available) {
+  static double cap(double available, {double minimumPageWidth = minimumPage}) {
     // A pinned 236px navigation panel can leave only 564px in the smallest
     // desktop window. Keep the Agent readable; the page then retains history
     // and temporarily hides its canvas without disposing it.
     final reserve = math.min(
-      minimumPage,
+      minimumPageWidth,
       math.max(0.0, available - minimum - handle),
     );
     return math.max(0, math.min(maximum, available - reserve - handle));
   }
 
-  static double resolve(double preferred, double available) {
-    final upper = cap(available);
+  static double resolve(
+    double preferred,
+    double available, {
+    double minimumPageWidth = minimumPage,
+  }) {
+    final upper = cap(available, minimumPageWidth: minimumPageWidth);
     return (preferred.isFinite ? preferred : initial)
         .clamp(math.min(minimum, upper), upper)
         .toDouble();

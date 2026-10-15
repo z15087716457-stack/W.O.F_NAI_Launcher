@@ -106,6 +106,10 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: child!,
+          ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('zh'),
@@ -168,8 +172,13 @@ void main() {
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               locale: const Locale('zh'),
-              builder: (_, child) =>
-                  IntegratedTitleBarShell(deferToRoute: true, child: child!),
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(disableAnimations: true),
+                child: IntegratedTitleBarShell(
+                  deferToRoute: true,
+                  child: child!,
+                ),
+              ),
             ),
           ),
         );
@@ -379,6 +388,10 @@ void main() {
       UncontrolledProviderScope(
         container: container,
         child: MaterialApp.router(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: child!,
+          ),
           routerConfig: router,
           locale: const Locale('zh'),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
