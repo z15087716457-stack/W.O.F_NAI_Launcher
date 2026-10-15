@@ -615,7 +615,7 @@ void main() {
         final rgba = (await image.toByteData(
           format: ui.ImageByteFormat.rawRgba,
         ))!;
-        for (final y in [0, 20, 39, 100, 500, 737, 800, 859]) {
+          for (var y = 0; y < image.height; y++) {
           final offset = (y * image.width + pane.left.round()) * 4;
           final argb =
               (rgba.getUint8(offset + 3) << 24) |
