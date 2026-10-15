@@ -205,14 +205,14 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
     final data = ref.watch(generationViewDataProvider(context.l10n));
     final agentAvailable =
         !widget.explore && NaiAgentIntegrationScope.activeOf(context);
-    final agentDocked =
+    final agentExpanded =
         agentAvailable &&
-        ref.watch(
-          naiAgentUiPreferencesProvider.select(
-            (value) => value.settings.panelExpanded,
-          ),
-        ) &&
-        ref.watch(naiAgentWindowControllerProvider).docked;
+        (ref.watch(naiAgentWindowControllerProvider).presentationExpanded ??
+            ref.watch(
+              naiAgentUiPreferencesProvider.select(
+                (value) => value.settings.panelExpanded,
+              ),
+            ));
     final settings = ref.read(generationSettingsProvider);
     final references = ref.read(generationReferencesProvider);
     final history = ref.read(generationHistoryActionsProvider);
@@ -240,7 +240,8 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         emptyCanvas: (_) => const GenerationWelcome(),
         translationGuide: (_, onBack) => PromptTranslationGuide(onBack: onBack),
         agentToggle: agentAvailable ? const NaiAgentToggleButton() : null,
-        historyCaptionInset: !agentDocked,
+        historyCaptionInset: !agentExpanded,
+        preserveHistory: agentExpanded,
         canvas: ref.watch(simpleOutputViewerNotifierProvider)
             ? null
             : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),

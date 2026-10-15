@@ -42,7 +42,7 @@ void main() {
         AgentSettings.fromJson({'permissionMode': 'invalid'}).permissionMode,
         'ask',
       );
-      expect(AgentSettings.fromJson({}).panelWidth, 380);
+      expect(AgentSettings.fromJson({}).panelWidth, 520);
     },
   );
   test(

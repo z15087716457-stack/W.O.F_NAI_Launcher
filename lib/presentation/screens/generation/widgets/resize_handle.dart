@@ -7,6 +7,7 @@ class ResizeHandle extends StatelessWidget {
   final void Function(double delta) onDrag;
   final VoidCallback? onDragStart;
   final VoidCallback? onDragEnd;
+  final VoidCallback? onDragCancel;
   final double width;
 
   const ResizeHandle({
@@ -14,6 +15,7 @@ class ResizeHandle extends StatelessWidget {
     required this.onDrag,
     this.onDragStart,
     this.onDragEnd,
+    this.onDragCancel,
     this.width = 8.0,
   });
 
@@ -29,6 +31,7 @@ class ResizeHandle extends StatelessWidget {
             ? (_) => onDragStart!()
             : null,
         onHorizontalDragEnd: onDragEnd != null ? (_) => onDragEnd!() : null,
+        onHorizontalDragCancel: onDragCancel,
         onHorizontalDragUpdate: (details) {
           final delta = details.primaryDelta ?? details.delta.dx;
           if (delta == 0) return;

@@ -32,7 +32,8 @@ class AgentSettings {
     this.systemPromptPrefix = '',
     this.selectedWorkspaceId,
     this.panelExpanded = false,
-    this.panelWidth = 380,
+    this.panelWidth = 520,
+    this.panelLayoutVersion = 1,
     this.enterToSend = true,
     this.maxRequestsPerRun = 32,
     this.permissionMode = 'auto',
@@ -47,6 +48,7 @@ class AgentSettings {
   final String globalInstructions, systemPromptPrefix;
   final bool panelExpanded, enterToSend;
   final double panelWidth;
+  final int panelLayoutVersion;
   final int maxRequestsPerRun;
   final String permissionMode;
   final Map<String, String> reasoningEfforts;
@@ -78,6 +80,7 @@ class AgentSettings {
     'selectedWorkspaceId': selectedWorkspaceId,
     'panelExpanded': panelExpanded,
     'panelWidth': panelWidth,
+    'panelLayoutVersion': panelLayoutVersion,
     'enterToSend': enterToSend,
     'maxRequestsPerRun': maxRequestsPerRun,
     'permissionMode': permissionMode,
@@ -123,10 +126,7 @@ class AgentSettings {
     ]),
     selectedWorkspaceId: value['selectedWorkspaceId'] as String?,
     panelExpanded: value['panelExpanded'] == true,
-    panelWidth: ((value['panelWidth'] as num?)?.toDouble() ?? 380).clamp(
-      320,
-      720,
-    ),
+    panelWidth: _panelWidth(value),
     enterToSend: value['enterToSend'] != false,
     maxRequestsPerRun: ((value['maxRequestsPerRun'] as num?)?.toInt() ?? 32)
         .clamp(1, 200),
@@ -141,6 +141,16 @@ class AgentSettings {
           ),
     ]),
   );
+
+  static double _panelWidth(Map<String, dynamic> value) {
+    final stored = (value['panelWidth'] as num?)?.toDouble();
+    var width = stored != null && stored.isFinite ? stored : 520.0;
+    // One-time migration to the wider layout; subsequent user sizes survive.
+    if ((value['panelLayoutVersion'] as num? ?? 0) < 1 && width < 520) {
+      width = 520;
+    }
+    return width.clamp(320.0, 1280.0);
+  }
 }
 
 class AgentWorkspace {

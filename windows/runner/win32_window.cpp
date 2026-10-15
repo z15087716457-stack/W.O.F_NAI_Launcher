@@ -269,7 +269,8 @@ Win32Window::MessageHandler(HWND hwnd,
       RECT rect = GetClientArea();
       if (child_content_ != nullptr) {
         // Size and position the child window.
-        MoveWindow(child_content_, rect.left, rect.top, rect.right - rect.left,
+        MoveWindow(child_content_, rect.left, rect.top,
+                   content_width_override_ > 0 ? content_width_override_ : rect.right - rect.left,
                    rect.bottom - rect.top, TRUE);
       }
       return 0;
@@ -297,6 +298,16 @@ Win32Window::MessageHandler(HWND hwnd,
   }
 
   return DefWindowProc(window_handle_, message, wparam, lparam);
+}
+
+void Win32Window::SetContentWidthOverride(int width) {
+  content_width_override_ = width;
+  if (child_content_ != nullptr) {
+    const RECT rect = GetClientArea();
+    MoveWindow(child_content_, rect.left, rect.top,
+               width > 0 ? width : rect.right - rect.left,
+               rect.bottom - rect.top, TRUE);
+  }
 }
 
 void Win32Window::Destroy() {

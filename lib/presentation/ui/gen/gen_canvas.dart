@@ -110,7 +110,7 @@ class _GenCanvasState extends State<GenCanvas> {
                   top: 10,
                   left: 0,
                   right: 0,
-                  child: Center(
+                  child: _CanvasBarViewport(
                     child: _TopBar(
                       enhanceLink: _enhanceLink,
                       upscaleLink: _upscaleLink,
@@ -715,9 +715,11 @@ class _Empty extends StatelessWidget {
             l.gen_emptyTitle,
             style: UiText.sans(15, weight: FontWeight.w600, color: c.ink),
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             spacing: 6,
+            runSpacing: 4,
             children: [
               Text(l.gen_emptyPress, style: UiText.sans(12.5, color: c.muted)),
               UiKeycaps(keys),
@@ -1171,6 +1173,21 @@ class _InfoBar extends StatelessWidget {
 }
 
 /// Narrow canvases put the info strip above the action strip, without overlap.
+class _CanvasBarViewport extends StatelessWidget {
+  const _CanvasBarViewport({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) => SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minWidth: box.maxWidth),
+        child: Center(child: child),
+      ),
+    ),
+  );
+}
+
 class _BottomBars extends StatelessWidget {
   const _BottomBars();
   @override
@@ -1179,16 +1196,34 @@ class _BottomBars extends StatelessWidget {
       context,
     ).data.canvas.info!.canCompareOriginal;
     return LayoutBuilder(
-      builder: (context, box) => Stack(
-        children: [
-          Positioned(
-            left: 16,
-            bottom: hasOriginal && box.maxWidth < 500 ? 62 : 14,
-            child: const _InfoBar(),
-          ),
-          const Positioned(right: 16, bottom: 14, child: _ActionBar()),
-        ],
-      ),
+      builder: (context, box) => box.maxWidth < 360
+          ? const Stack(
+              children: [
+                Positioned(
+                  left: 8,
+                  right: 8,
+                  bottom: 14,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      _CanvasBarViewport(child: _InfoBar()),
+                      _CanvasBarViewport(child: _ActionBar()),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Stack(
+              children: [
+                Positioned(
+                  left: 16,
+                  bottom: hasOriginal && box.maxWidth < 500 ? 62 : 14,
+                  child: const _InfoBar(),
+                ),
+                const Positioned(right: 16, bottom: 14, child: _ActionBar()),
+              ],
+            ),
     );
   }
 }

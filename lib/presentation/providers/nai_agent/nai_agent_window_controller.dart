@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screen_retriever/screen_retriever.dart';
@@ -13,6 +13,12 @@ abstract class NaiAgentWindowHost {
   Future<bool> locked();
   Future<List<Rect>> workAreas();
   Future<void> setBounds(Rect bounds);
+  Future<bool> reveal(Rect original, Rect target) async {
+    await setBounds(target);
+    return true;
+  }
+
+  Future<void> cancelReveal() async {}
   void watch(VoidCallback onChanged) {}
   void stopWatching() {}
 }
@@ -53,6 +59,42 @@ class NaiAgentDesktopWindowHost extends NaiAgentWindowHost with WindowListener {
 
   @override
   Future<void> setBounds(Rect bounds) => windowManager.setBounds(bounds);
+  static const _reveal = MethodChannel('com.nailauncher/window_reveal');
+  @override
+  Future<bool> reveal(Rect original, Rect target) async {
+    try {
+      return await _reveal.invokeMethod<bool>('grow', {
+            'left': original.left,
+            'top': original.top,
+            'width': original.width,
+            'height': original.height,
+            'targetWidth': target.width,
+            'pixelRatio': _readPixelRatio(),
+            'durationMs':
+                WidgetsBinding
+                    .instance
+                    .platformDispatcher
+                    .accessibilityFeatures
+                    .disableAnimations
+                ? 0.0
+                : 280.0,
+          }) ??
+          false;
+    } on MissingPluginException {
+      await setBounds(target);
+      return true;
+    }
+  }
+
+  @override
+  Future<void> cancelReveal() async {
+    try {
+      await _reveal.invokeMethod<void>('cancel');
+    } on MissingPluginException {
+      /* No native reveal on this host. */
+    }
+  }
+
   @override
   void watch(VoidCallback onChanged) {
     _onChanged = onChanged;
@@ -91,7 +133,15 @@ class NaiAgentWindowController extends ChangeNotifier {
   Future<void> _pending = Future.value();
   Rect? _original, _expected;
   bool _docked = false, _applying = false, _disposed = false;
+  bool _nativeReveal = false;
+  bool? _presentationExpanded;
+  double _openingGrowth = 0;
+  // Layout remains docked after manual movement, resizing and maximization.
+  // Ownership below controls automatic restoration only.
   bool get docked => _docked;
+  bool get nativeReveal => _nativeReveal;
+  bool? get presentationExpanded => _presentationExpanded;
+  double get openingGrowth => _openingGrowth;
   double get addedWidth => _original == null || _expected == null
       ? 0
       : _expected!.width - _original!.width;
@@ -108,63 +158,33 @@ class NaiAgentWindowController extends ChangeNotifier {
     final settings = await readSettings();
     await _setExpanded(!settings.panelExpanded, settings.panelWidth);
   });
-
-  Future<void> close() => _serial(() async {
-    await _setExpanded(false, (await readSettings()).panelWidth);
-  });
-
-  Future<void> resizeDock(double width) => _serial(() async {
-    if (!_docked || _original == null || host == null) return;
-    if (!await _ownsBounds()) {
-      _forget();
-      return;
-    }
-    if (!await _grow(width)) await _restore();
-  });
-
-  Future<void> _setExpanded(bool expanded, double width) async {
-    if (_disposed) return;
-    if (expanded) {
-      try {
-        await _grow(width);
-        if (!_disposed) await saveExpanded(true);
-      } catch (_) {
-        await _restore();
-        rethrow;
-      }
-    } else {
-      await saveExpanded(false);
-      await _restore();
-    }
-  }
+  Future<void> close() => _serial(() => _setExpanded(false, 0));
 
   bool _near(Rect a, Rect b) =>
       (a.left - b.left).abs() <= 1 &&
       (a.top - b.top).abs() <= 1 &&
       (a.width - b.width).abs() <= 1 &&
       (a.height - b.height).abs() <= 1;
-
   bool _valid(Rect rect) =>
       [rect.left, rect.top, rect.width, rect.height].every((v) => v.isFinite) &&
       rect.width > 0 &&
       rect.height > 0;
-
   Future<bool> _ownsBounds() async =>
       _expected != null &&
+      host != null &&
       !await host!.locked() &&
       _near(await host!.bounds(), _expected!);
 
-  Future<bool> _grow(double width) async {
-    if (host == null || _disposed || !width.isFinite) return false;
+  Future<({Rect original, Rect target})?> _growth(double width) async {
+    if (host == null || _disposed || !width.isFinite) return null;
     try {
-      if (await host!.locked()) return false;
+      if (await host!.locked()) return null;
       final current = await host!.bounds();
-      final original = _original ?? current;
-      if (!_valid(original)) return false;
+      if (!_valid(current) || _disposed) return null;
       final areas = (await host!.workAreas()).where(_valid).toList();
       areas.sort((a, b) {
         double overlap(Rect area) {
-          final intersection = area.intersect(original);
+          final intersection = area.intersect(current);
           return intersection.isEmpty
               ? 0
               : intersection.width * intersection.height;
@@ -172,71 +192,94 @@ class NaiAgentWindowController extends ChangeNotifier {
 
         return overlap(b).compareTo(overlap(a));
       });
-      if (areas.isEmpty || !areas.first.contains(original.center)) return false;
-      final target = Rect.fromLTWH(
-        original.left,
-        original.top,
-        original.width + width.clamp(320.0, 720.0) + 8,
-        original.height,
+      if (areas.isEmpty || !areas.first.contains(current.center)) return null;
+      final extra = (areas.first.right - 8 - current.right).clamp(
+        0.0,
+        width.clamp(320.0, 1280.0) + 8,
       );
-      if (target.right > areas.first.right - 8 ||
+      if (extra < 80 ||
           _disposed ||
           !(_near(await host!.bounds(), current)) ||
           await host!.locked()) {
-        return false;
+        return null;
       }
-      _applying = true;
-      try {
-        await host!.setBounds(target);
-        final actual = await host!.bounds();
-        if (_disposed || !_near(actual, target)) {
-          _forget();
-          return false;
-        }
-        _original = original;
-        _expected = actual;
-        _docked = true;
-        notifyListeners();
-        return true;
-      } finally {
-        _applying = false;
-      }
+      return (
+        original: current,
+        target: Rect.fromLTWH(
+          current.left,
+          current.top,
+          current.width + extra,
+          current.height,
+        ),
+      );
     } on MissingPluginException {
-      return false;
+      return null;
     } on PlatformException {
-      return false;
+      return null;
     }
   }
 
-  Future<void> _restore() async {
-    final original = _original;
+  Future<void> _setExpanded(bool expanded, double width) async {
+    if (_disposed) return;
+    final plan = expanded ? await _growth(width) : null;
+    if (_disposed) return;
+    final restore = !expanded && await _ownsBounds();
+    _nativeReveal = plan != null || restore;
+    _openingGrowth = plan == null ? 0 : plan.target.width - plan.original.width;
+    _presentationExpanded = expanded;
+    _docked = expanded;
+    notifyListeners();
     try {
-      if (original != null && host != null && await _ownsBounds()) {
+      // Display state precedes native growth. The prepared surface can then
+      // paint the complete pane before the window exposes a single new pixel.
+      await saveExpanded(expanded);
+      if (_disposed) return;
+      if (plan != null) {
+        if (await host!.locked() ||
+            !(_near(await host!.bounds(), plan.original))) {
+          return;
+        }
         _applying = true;
-        await host!.setBounds(original);
+        final completed = await host!.reveal(plan.original, plan.target);
+        final actual = await host!.bounds();
+        if (!_disposed && completed && _near(actual, plan.target)) {
+          _original = plan.original;
+          _expected = actual;
+        } else {
+          _forgetOwnership();
+        }
+      } else if (restore && _original != null && await _ownsBounds()) {
+        _applying = true;
+        await host!.setBounds(_original!);
+        _forgetOwnership();
       }
     } on MissingPluginException {
-      return;
+      _forgetOwnership();
     } on PlatformException {
-      return;
+      _forgetOwnership();
+    } catch (_) {
+      _presentationExpanded = !expanded;
+      _docked = !expanded;
+      rethrow;
     } finally {
       _applying = false;
-      _forget();
+      _nativeReveal = false;
+      _openingGrowth = 0;
+      _presentationExpanded = null;
+      if (!_disposed) notifyListeners();
     }
   }
 
-  void _forget() {
+  void _forgetOwnership() {
     _original = _expected = null;
-    _docked = false;
-    if (!_disposed) notifyListeners();
   }
 
   void _windowChanged() {
     if (_applying || _expected == null || _disposed) return;
     unawaited(
       _serial(() async {
-        if (_expected != null && !await _ownsBounds()) _forget();
-      }).catchError((Object _) => _forget()),
+        if (_expected != null && !await _ownsBounds()) _forgetOwnership();
+      }).catchError((Object _) => _forgetOwnership()),
     );
   }
 
@@ -244,6 +287,7 @@ class NaiAgentWindowController extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     host?.stopWatching();
+    unawaited(host?.cancelReveal().catchError((Object _) {}) ?? Future.value());
     super.dispose();
   }
 }

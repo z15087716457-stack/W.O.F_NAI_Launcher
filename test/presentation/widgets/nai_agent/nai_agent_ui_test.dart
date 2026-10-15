@@ -1,4 +1,9 @@
 import 'dart:io';
+import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_window_controller.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
@@ -37,6 +42,7 @@ import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_ex
 import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_mcp_settings.dart';
 import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import '../../../helpers/agent_data_reader.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
@@ -181,6 +187,31 @@ class _UiStore extends AgentWorkspaceStore {
   ) async {}
 }
 
+int _pageMounts = 0, _pageDisposals = 0;
+
+class _RetainedPage extends StatefulWidget {
+  const _RetainedPage();
+  @override
+  State<_RetainedPage> createState() => _RetainedPageState();
+}
+
+class _RetainedPageState extends State<_RetainedPage> {
+  @override
+  void initState() {
+    super.initState();
+    _pageMounts++;
+  }
+
+  @override
+  void dispose() {
+    _pageDisposals++;
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.expand();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(() async {
@@ -275,6 +306,320 @@ void main() {
     final binding = TestWidgetsFlutterBinding.instance;
     binding.platformDispatcher.clearAllTestValues();
   });
+  Widget agentHost(Widget child) =>
+      NaiAgentIntegrationScope(child: NaiAgentGenerationHost(child: child));
+
+  Future<void> captureSidebar(
+    WidgetTester tester,
+    GlobalKey key,
+    String name,
+  ) async {
+    if (Platform.environment['UIUX_FRONTEND_CAPTURE_DIR'] == null) return;
+    await tester.runAsync(() async {
+      for (final element in find.byType(Image).evaluate()) {
+        await precacheImage(
+          (element.widget as Image).image,
+          element,
+          onError: (error, stack) {},
+        );
+      }
+    });
+    await tester.pump();
+    await captureUiuxRegion(
+      tester,
+      find.byKey(key),
+      name,
+      Offset.zero & tester.getSize(find.byKey(key)),
+    );
+  }
+
+  testWidgets('Agent opening clips fixed-width content and retains the page', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    _pageMounts = 0;
+    _pageDisposals = 0;
+    final capture = GlobalKey();
+    final preferences = container.read(naiAgentUiPreferencesProvider);
+    await pump(
+      tester,
+      agentHost(const _RetainedPage()),
+      width: 1448,
+      captureKey: capture,
+    );
+    expect(_pageMounts, 1);
+    preferences.replace(
+      AgentSettings.fromJson({...c.settings.toJson(), 'panelExpanded': true}),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 70));
+    final visible = tester
+        .getSize(find.byKey(const Key('nai-agent-reveal')))
+        .width;
+    expect(visible, greaterThan(0));
+    expect(visible, lessThan(528));
+    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 520);
+    expect(_pageMounts, 1);
+    expect(_pageDisposals, 0);
+    await captureSidebar(tester, capture, 'sidebar-reveal-70ms');
+    await tester.pumpAndSettle();
+    await captureSidebar(tester, capture, 'sidebar-reveal-open');
+    preferences.replace(c.settings);
+    await tester.pumpAndSettle();
+    expect(_pageMounts, 1);
+    expect(_pageDisposals, 0);
+    expect(tester.getSize(find.byKey(const Key('nai-agent-reveal'))).width, 0);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'Agent drag preserves history and only changes the internal split',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await c.updateSettings({'panelExpanded': true});
+      container.read(naiAgentUiPreferencesProvider).replace(c.settings);
+      c.addListener(
+        () => container.read(naiAgentUiPreferencesProvider).replace(c.settings),
+      );
+      final controller = container.read(naiAgentWindowControllerProvider);
+      final capture = GlobalKey();
+      await pump(
+        tester,
+        agentHost(
+          GenerationPage(
+            data: GenFixture.view(),
+            actions: GenActions.logging((_) {}),
+            slots: GenSlots(
+              preserveHistory: true,
+              historyCaptionInset: false,
+              editor: (_, __) => const SizedBox(height: 60),
+            ),
+          ),
+        ),
+        width: 1200,
+        captureKey: capture,
+      );
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.byKey(const Key('nai-agent-resize'))),
+      );
+      await gesture.moveBy(const Offset(-150, 0));
+      await tester.pump();
+      await gesture.moveBy(const Offset(-60, 0));
+      await tester.pump();
+      expect(tester.getSize(find.byType(NaiAgentPanel)).width, 730);
+      expect(find.byKey(const Key('gen-history')), findsOneWidget);
+      expect(find.byKey(const Key('gen-history-strip')), findsNothing);
+      final history = tester.getRect(find.byKey(const Key('gen-history')));
+      final pane = tester.getRect(find.byType(NaiAgentPanel));
+      expect(history.right, lessThanOrEqualTo(pane.left));
+      await captureSidebar(tester, capture, 'sidebar-drag-history');
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(c.settings.panelWidth, 730);
+      expect(controller.addedWidth, 0);
+      expect(find.byKey(const Key('gen-history')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('narrow Agent viewport keeps history within the window', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await c.updateSettings({'panelExpanded': true, 'panelWidth': 1000});
+    container.read(naiAgentUiPreferencesProvider).replace(c.settings);
+    final capture = GlobalKey();
+    await pump(
+      tester,
+      agentHost(
+        GenerationPage(
+          data: GenFixture.view(
+            layout: const GenLayout(historyWidth: 400, dockOpen: true),
+          ),
+          actions: GenActions.logging((_) {}),
+          slots: GenSlots(
+            preserveHistory: true,
+            historyCaptionInset: false,
+            dock: const SizedBox.expand(),
+            editor: (_, __) => const SizedBox(height: 60),
+          ),
+        ),
+      ),
+      width: 752,
+      captureKey: capture,
+    );
+    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 344);
+    expect(find.byKey(const Key('gen-history')), findsOneWidget);
+    expect(find.byKey(const Key('gen-left-strip')), findsOneWidget);
+    expect(
+      tester.getSize(find.byKey(const Key('gen-canvas'))).width,
+      greaterThanOrEqualTo(160),
+    );
+    expect(
+      tester.getRect(find.byKey(const Key('gen-history'))).right,
+      lessThanOrEqualTo(tester.getRect(find.byType(NaiAgentPanel)).left),
+    );
+    expect(tester.takeException(), isNull);
+    await captureSidebar(tester, capture, 'sidebar-narrow-history');
+  });
+
+  testWidgets(
+    'long paragraphs URLs code and tables stay in the Agent viewport',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final token = List.filled(160, 'abcdefgh').join();
+      c.selected!.messages = [
+        {
+          'role': 'assistant',
+          'timestamp': 1,
+          'content':
+              '${List.filled(20, '长段落需要在侧栏内自动换行。').join()}\n\n'
+              'https://example.invalid/$token\n\n```text\n$token\n```\n\n'
+              '| 参数 | 说明 |\n| --- | --- |\n| width | $token |\n',
+        },
+      ];
+      for (final locale in [
+        const Locale('zh'),
+        const Locale('zh', 'TW'),
+        const Locale('en'),
+        const Locale('ja'),
+        const Locale('ko'),
+      ]) {
+        for (final width in [320.0, 520.0]) {
+          for (final brightness in [Brightness.light, Brightness.dark]) {
+            final capture = GlobalKey();
+            await pump(
+              tester,
+              const NaiAgentPanel(),
+              width: width,
+              locale: locale,
+              brightness: brightness,
+              captureKey: capture,
+            );
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '$locale $width $brightness',
+            );
+            expect(
+              tester.getRect(find.byKey(const Key('nai-agent-composer'))).right,
+              lessThanOrEqualTo(width),
+            );
+            if (locale == const Locale('zh') && width == 320) {
+              await captureSidebar(
+                tester,
+                capture,
+                'sidebar-long-copy-${brightness.name}',
+              );
+            }
+          }
+        }
+      }
+      expect(c.sends, 0);
+    },
+  );
+
+  testWidgets(
+    'compact editor and canvas retain elements through Agent resizing',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await c.updateSettings({'panelExpanded': true});
+      container.read(naiAgentUiPreferencesProvider).replace(c.settings);
+      await pump(
+        tester,
+        agentHost(
+          GenerationPage(
+            data: GenFixture.view(),
+            actions: GenActions.logging((_) {}),
+            slots: GenSlots(
+              preserveHistory: true,
+              historyCaptionInset: false,
+              canvas: (_, __) => const _RetainedPage(),
+              editor: (_, target) =>
+                  target.character == null && !target.negative
+                  ? const SizedBox(
+                      height: 60,
+                      child: TextField(key: Key('sidebar-editor-keep')),
+                    )
+                  : const SizedBox(height: 60),
+            ),
+          ),
+        ),
+        width: 1600,
+      );
+      final editor = find.byKey(const Key('sidebar-editor-keep'));
+      final editorElement = editor.evaluate().single;
+      final canvasElement = find.byType(_RetainedPage).evaluate().single;
+      await tester.enterText(editor, 'retain the latest draft');
+      tester.view.physicalSize = const Size(752, 860);
+      await tester.pumpAndSettle();
+      expect(
+        find
+            .byKey(const Key('sidebar-editor-keep'), skipOffstage: false)
+            .evaluate()
+            .single,
+        same(editorElement),
+      );
+      expect(find.byType(_RetainedPage).evaluate().single, same(canvasElement));
+      tester.view.physicalSize = const Size(1600, 860);
+      await tester.pumpAndSettle();
+      expect(editor.evaluate().single, same(editorElement));
+      expect(find.text('retain the latest draft'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('Agent divider paints continuously over header body and footer', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await c.updateSettings({'panelExpanded': true});
+    container.read(naiAgentUiPreferencesProvider).replace(c.settings);
+    for (final brightness in [Brightness.light, Brightness.dark]) {
+      final capture = GlobalKey();
+      await pump(
+        tester,
+        agentHost(const _RetainedPage()),
+        width: 1200,
+        brightness: brightness,
+        captureKey: capture,
+      );
+      final pane = tester.getRect(find.byType(NaiAgentPanel));
+      final color = Theme.of(
+        tester.element(find.byType(NaiAgentPanel)),
+      ).colorScheme.outlineVariant;
+      await tester.runAsync(() async {
+        final image = await tester
+            .renderObject<RenderRepaintBoundary>(find.byKey(capture))
+            .toImage(pixelRatio: 1);
+        final rgba = (await image.toByteData(
+          format: ui.ImageByteFormat.rawRgba,
+        ))!;
+        for (final y in [0, 20, 39, 100, 500, 737, 800, 859]) {
+          final offset = (y * image.width + pane.left.round()) * 4;
+          final argb =
+              (rgba.getUint8(offset + 3) << 24) |
+              (rgba.getUint8(offset) << 16) |
+              (rgba.getUint8(offset + 1) << 8) |
+              rgba.getUint8(offset + 2);
+          expect(argb, color.toARGB32(), reason: '$brightness divider at y=$y');
+        }
+        image.dispose();
+      });
+      await captureSidebar(
+        tester,
+        capture,
+        'sidebar-divider-${brightness.name}',
+      );
+    }
+  });
+
   testWidgets('compact composer keeps workspace above and controls below', (
     tester,
   ) async {

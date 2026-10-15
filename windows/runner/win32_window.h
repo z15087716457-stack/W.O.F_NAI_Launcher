@@ -57,6 +57,8 @@ class Win32Window {
   RECT GetClientArea();
 
  protected:
+  // A reveal temporarily paints beyond the parent HWND's current right edge.
+  void SetContentWidthOverride(int width);
   // Processes and route salient window messages for mouse handling,
   // size change and DPI. Delegates handling of these to member overloads that
   // inheriting classes can handle.
@@ -104,6 +106,7 @@ class Win32Window {
 
   // window handle for hosted content.
   HWND child_content_ = nullptr;
+  int content_width_override_ = 0;
 };
 
 #endif  // RUNNER_WIN32_WINDOW_H_

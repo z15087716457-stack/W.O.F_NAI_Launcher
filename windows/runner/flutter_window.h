@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "win32_window.h"
+#include "window_reveal.h"
 
 // A window that does nothing but host a Flutter view.
 class FlutterWindow : public Win32Window {
@@ -30,6 +31,8 @@ class FlutterWindow : public Win32Window {
   bool material_dark_ = true;
   bool material_available_ = false;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> material_channel_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> reveal_channel_;
+  std::unique_ptr<WindowReveal> reveal_;
 
   // The project to run.
   flutter::DartProject project_;

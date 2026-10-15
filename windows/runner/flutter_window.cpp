@@ -1,6 +1,7 @@
 ﻿#include "flutter_window.h"
 
 #include <optional>
+#include <cmath>
 #include <set>
 #include <string>
 #include <vector>
@@ -224,6 +225,57 @@ bool FlutterWindow::OnCreate() {
         }
       });
 
+  reveal_ = std::make_unique<WindowReveal>(
+      GetHandle(), [this](int width) { SetContentWidthOverride(width); },
+      [this](std::function<void()> callback) {
+        flutter_controller_->engine()->SetNextFrameCallback(std::move(callback));
+        flutter_controller_->ForceRedraw();
+      });
+  reveal_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.nailauncher/window_reveal", &flutter::StandardMethodCodec::GetInstance());
+  reveal_channel_->SetMethodCallHandler([this](const auto& call, auto result) {
+    if (call.method_name() == "cancel") {
+      reveal_->Cancel();
+      result->Success();
+      return;
+    }
+    if (call.method_name() != "grow") { result->NotImplemented(); return; }
+    const auto* args = std::get_if<flutter::EncodableMap>(call.arguments());
+    auto number = [args](const char* key) -> double {
+      if (args == nullptr) return NAN;
+      const auto entry = args->find(flutter::EncodableValue(key));
+      if (entry == args->end()) return NAN;
+      if (const auto* value = std::get_if<double>(&entry->second)) return *value;
+      return NAN;
+    };
+    const double ratio = number("pixelRatio"), left = number("left"),
+        top = number("top"), width = number("width"), height = number("height"),
+        target_width = number("targetWidth"), duration = number("durationMs");
+    if (!std::isfinite(ratio) || ratio <= 0 || ratio > 8 ||
+        !std::isfinite(left) || !std::isfinite(top) ||
+        !std::isfinite(width) || width <= 0 ||
+        !std::isfinite(height) || height <= 0 ||
+        !std::isfinite(target_width) || target_width <= 0 || target_width * ratio > 100000 ||
+        !std::isfinite(duration) || duration < 0 || duration > 1000 ||
+        std::abs(left * ratio) > 100000 || std::abs(top * ratio) > 100000 ||
+        width * ratio > 100000 || height * ratio > 100000) {
+      result->Error("invalid_bounds", "Invalid reveal geometry.");
+      return;
+    }
+    const RECT expected{
+        static_cast<LONG>(std::lround(left * ratio)),
+        static_cast<LONG>(std::lround(top * ratio)),
+        static_cast<LONG>(std::lround((left + width) * ratio)),
+        static_cast<LONG>(std::lround((top + height) * ratio))};
+    auto reply = std::shared_ptr<flutter::MethodResult<flutter::EncodableValue>>(std::move(result));
+    if (!reveal_->Start(expected, static_cast<int>(std::lround(target_width * ratio)),
+                        static_cast<int>(duration), [reply](bool completed) {
+                          reply->Success(flutter::EncodableValue(completed));
+                        })) reply->Success(flutter::EncodableValue(false));
+  });
+
   flutter_controller_->engine()->SetNextFrameCallback([&]() {
     this->Show();
   });
@@ -237,6 +289,8 @@ bool FlutterWindow::OnCreate() {
 }
 
 void FlutterWindow::OnDestroy() {
+  reveal_.reset();
+  reveal_channel_.reset();
   material_channel_.reset();
   if (flutter_controller_) {
     flutter_controller_ = nullptr;
@@ -263,6 +317,9 @@ LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
                               LPARAM const lparam) noexcept {
+  if (reveal_) {
+    if (auto result = reveal_->HandleMessage(message, wparam)) return *result;
+  }
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =

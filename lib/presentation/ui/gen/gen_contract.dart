@@ -1065,6 +1065,7 @@ class GenSlots {
     this.translationGuide,
     this.agentToggle,
     this.historyCaptionInset = true,
+    this.preserveHistory = false,
   });
 
   final GenEditorBuilder editor;
@@ -1081,6 +1082,10 @@ class GenSlots {
 
   /// Agent 停靠右侧时，历史栏不再占用窗口按钮所在的一行。
   final bool historyCaptionInset;
+
+  /// A docked Agent keeps history visible; narrow layouts compact the editor
+  /// and use a smaller canvas instead of covering or auto-collapsing history.
+  final bool preserveHistory;
 
   /// null = 用界面自带的舞台（只摆焦点组）。
   final GenCanvasBuilder? canvas;

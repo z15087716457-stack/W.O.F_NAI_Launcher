@@ -265,10 +265,11 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
     final scope = GenScope.of(context);
     final layout = scope.data.layout;
     final actions = scope.actions;
-    final dock = layout.dockOpen && scope.slots.dock != null
+    var dock = layout.dockOpen && scope.slots.dock != null
         ? GenerationPage.dockWidth
         : 0.0;
-    var left = layout.leftOpen
+    var leftOpen = layout.leftOpen;
+    var left = leftOpen
         ? (_dragLeft ?? layout.leftWidth).clamp(
             GenLayout.minLeft,
             GenLayout.maxLeft,
@@ -281,17 +282,35 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
             GenLayout.maxHistory,
           )
         : GenerationPage.strip;
-    // 画布放不下：先收历史栏，再压左栏。
-    if (w - left - dock - history < GenerationPage.minCanvas && historyOpen) {
+    final keepHistory = scope.slots.preserveHistory;
+    final minimumCanvas = keepHistory ? 160.0 : GenerationPage.minCanvas;
+    if (keepHistory) {
+      // The Agent has its own width budget. Preserve the user's history pane,
+      // compacting the editor/dock only for this viewport (no settings writes).
+      if (w - left - dock - history < minimumCanvas) dock = 0;
+      if (leftOpen && w - left - history < minimumCanvas) {
+        left = math.max(GenLayout.minLeft, w - history - minimumCanvas);
+        if (w - left - history < minimumCanvas) {
+          leftOpen = false;
+          left = GenerationPage.strip;
+        }
+      }
+      if (historyOpen) {
+        history = math.min(
+          history,
+          math.max(GenLayout.minHistory, w - left - minimumCanvas),
+        );
+      }
+    }
+    // Without an Agent, retain the original page's responsive behavior.
+    if (!keepHistory &&
+        w - left - dock - history < minimumCanvas &&
+        historyOpen) {
       historyOpen = false;
       history = GenerationPage.strip;
     }
-    if (w - left - dock - history < GenerationPage.minCanvas &&
-        layout.leftOpen) {
-      left = math.max(
-        GenLayout.minLeft,
-        w - dock - history - GenerationPage.minCanvas,
-      );
+    if (!keepHistory && w - left - dock - history < minimumCanvas && leftOpen) {
+      left = math.max(GenLayout.minLeft, w - dock - history - minimumCanvas);
     }
     return Stack(
       children: [
@@ -299,7 +318,39 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (layout.leftOpen)
-              GenLeftPanel(width: left)
+              SizedBox(
+                width: left,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Offstage(
+                      offstage: !leftOpen,
+                      child: ExcludeFocus(
+                        excluding: !leftOpen,
+                        child: OverflowBox(
+                          alignment: Alignment.topLeft,
+                          minWidth: leftOpen ? left : layout.leftWidth,
+                          maxWidth: leftOpen ? left : layout.leftWidth,
+                          child: GenLeftPanel(
+                            width: leftOpen ? left : layout.leftWidth,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (!leftOpen)
+                      _Strip(
+                        key: const Key('gen-left-strip'),
+                        glyph: GenGlyphs.editNote,
+                        label: context.l10n.gen_params,
+                        expandGlyph: UiGlyphs.chevronRight,
+                        onExpand: () => actions.onLayoutChanged(
+                          layout.copyWith(leftOpen: true),
+                        ),
+                        side: _StripSide.left,
+                      ),
+                  ],
+                ),
+              )
             else
               _Strip(
                 key: const Key('gen-left-strip'),
@@ -319,7 +370,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
                 ),
                 child: scope.slots.dock,
               ),
-            const Expanded(child: GenCanvas()),
+            const Expanded(key: Key('gen-canvas-host'), child: GenCanvas()),
             if (historyOpen)
               GenHistoryPanel(width: history)
             else
@@ -335,7 +386,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
               ),
           ],
         ),
-        if (layout.leftOpen)
+        if (leftOpen)
           Positioned(
             left: left - 4,
             top: 0,
