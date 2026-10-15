@@ -15,6 +15,7 @@ import '../../providers/warmup_provider.dart';
 import 'splash_screen.dart';
 import '../../providers/theme_provider.dart';
 import '../../widgets/common/workspace_typography_scope.dart';
+import '../../widgets/branding/entry_language_button.dart';
 import '../../widgets/navigation/integrated_title_bar.dart';
 
 /// 应用启动引导器
@@ -94,6 +95,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
           immersive: true,
           onToggleTheme: () =>
               ref.read(themeNotifierProvider.notifier).nextTheme(),
+          entryLanguageButton: const EntryLanguageButton(),
           child: child ?? const SizedBox.shrink(),
         ),
       ),

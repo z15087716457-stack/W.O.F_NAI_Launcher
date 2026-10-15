@@ -18,6 +18,7 @@ class IntegratedTitleBarShell extends StatefulWidget {
     required this.child,
     this.immersive = false,
     this.onToggleTheme,
+    this.entryLanguageButton,
     this.accessory,
     this.accessoryWidth = 0,
     this.captionHeight = barHeight,
@@ -36,6 +37,9 @@ class IntegratedTitleBarShell extends StatefulWidget {
   /// 沉浸模式下明暗切换按钮的回调；为 null 时不显示该按钮。
   final VoidCallback? onToggleTheme;
 
+  /// Optional entry-only picker, beside the appearance control.
+  final Widget? entryLanguageButton;
+
   /// 栏高（逻辑像素），与原生命中区换算共用。
   static const double barHeight = 36;
 
@@ -45,6 +49,7 @@ class IntegratedTitleBarShell extends StatefulWidget {
 
   /// 沉浸模式的明暗切换按钮宽，及其与窗口按钮之间的分隔（1px + 两侧 4px）。
   static const double themeButtonWidth = 40;
+  static const double languageButtonWidth = 40;
   static const double themeSeparatorWidth = 9;
 
   @override
@@ -83,7 +88,8 @@ class _WindowChromeConfiguration extends InheritedWidget {
       shell.captionHeight != oldWidget.shell.captionHeight ||
       shell.accessoryWidth != oldWidget.shell.accessoryWidth ||
       shell.accessory != oldWidget.shell.accessory ||
-      shell.onToggleTheme != oldWidget.shell.onToggleTheme;
+      shell.onToggleTheme != oldWidget.shell.onToggleTheme ||
+      shell.entryLanguageButton != oldWidget.shell.entryLanguageButton;
 }
 
 /// Paint chrome inside the route content, below every Navigator popup/overlay.
@@ -123,6 +129,7 @@ class WindowChromePage extends StatelessWidget {
       immersive: shell.immersive,
       showNaiAgent: showNaiAgent,
       onToggleTheme: shell.onToggleTheme,
+      entryLanguageButton: shell.entryLanguageButton,
     );
     return WindowChromeScope(
       enabled: !shell.immersive,
@@ -160,6 +167,7 @@ class _TitleBar extends StatefulWidget {
     required this.immersive,
     required this.height,
     this.onToggleTheme,
+    this.entryLanguageButton,
     this.showNaiAgent = false,
   });
 
@@ -168,6 +176,7 @@ class _TitleBar extends StatefulWidget {
 
   final bool immersive;
   final VoidCallback? onToggleTheme;
+  final Widget? entryLanguageButton;
 
   @override
   State<_TitleBar> createState() => _TitleBarState();
@@ -217,7 +226,8 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   void didUpdateWidget(_TitleBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.immersive != widget.immersive ||
-        _showsThemeButton(oldWidget) != _showsThemeButton(widget)) {
+        _showsThemeButton(oldWidget) != _showsThemeButton(widget) ||
+        _showsLanguageButton(oldWidget) != _showsLanguageButton(widget)) {
       _reportRegion();
     }
   }
@@ -232,16 +242,23 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
   static bool _showsThemeButton(_TitleBar bar) =>
       bar.immersive && bar.onToggleTheme != null;
 
+  static bool _showsLanguageButton(_TitleBar bar) =>
+      bar.immersive && bar.entryLanguageButton != null;
+
   void _reportRegion() {
-    // 沉浸模式多出的明暗按钮也要留在可点击区，不能被当成拖拽区。
-    final extra = _showsThemeButton(widget)
+    // Entry controls must stay in HTCLIENT rather than becoming drag handles.
+    final themeExtra = _showsThemeButton(widget)
         ? IntegratedTitleBarShell.themeButtonWidth +
               IntegratedTitleBarShell.themeSeparatorWidth
+        : 0.0;
+    final languageExtra = _showsLanguageButton(widget)
+        ? IntegratedTitleBarShell.languageButtonWidth
         : 0.0;
     unawaited(
       TitleBarRegionService.setRegion(
         barHeight: widget.immersive ? IntegratedTitleBarShell.barHeight : 0,
-        reservedRight: IntegratedTitleBarShell.reservedRight + extra,
+        reservedRight:
+            IntegratedTitleBarShell.reservedRight + themeExtra + languageExtra,
       ),
     );
   }
@@ -317,6 +334,12 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (widget.showNaiAgent) const NaiAgentToggleButton(),
+          if (_showsLanguageButton(widget))
+            SizedBox(
+              width: IntegratedTitleBarShell.languageButtonWidth,
+              height: widget.height,
+              child: widget.entryLanguageButton!,
+            ),
           if (_showsThemeButton(widget)) ...[
             _CaptionButton(
               key: const Key('brand_appearance_toggle'),

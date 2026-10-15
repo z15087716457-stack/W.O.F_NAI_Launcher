@@ -11,6 +11,7 @@ import '../../providers/theme_provider.dart';
 import '../../themes/studio_typography.dart';
 import '../auth/entry_controls.dart';
 import 'entry_field.dart';
+import 'entry_language_button.dart';
 
 /// The complete, original wordmark. The asset only removes empty source margins;
 /// both the W.O.F block and the NAI STUDIO signature remain in their original ratio.
@@ -195,24 +196,35 @@ class _BrandEntrySceneState extends ConsumerState<BrandEntryScene>
                     ),
                   ),
                 ),
-                // 非 Windows 没有自绘标题栏，明暗切换放回页面右上角
+                // Platforms without Windows chrome keep both entry controls.
                 if (!chromeInBar)
                   Positioned(
                     top: 8,
                     right: 12,
-                    child: IconButton(
-                      key: const Key('brand_appearance_toggle'),
-                      tooltip: palette.dark
-                          ? context.l10n.brand_switchToLight
-                          : context.l10n.brand_switchToDark,
-                      onPressed: () =>
-                          ref.read(themeNotifierProvider.notifier).nextTheme(),
-                      icon: Icon(
-                        palette.dark
-                            ? Icons.light_mode_outlined
-                            : Icons.dark_mode_outlined,
-                        size: 18,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const EntryLanguageButton(
+                          width: 48,
+                          height: 48,
+                          iconSize: 18,
+                        ),
+                        IconButton(
+                          key: const Key('brand_appearance_toggle'),
+                          tooltip: palette.dark
+                              ? context.l10n.brand_switchToLight
+                              : context.l10n.brand_switchToDark,
+                          onPressed: () => ref
+                              .read(themeNotifierProvider.notifier)
+                              .nextTheme(),
+                          icon: Icon(
+                            palette.dark
+                                ? Icons.light_mode_outlined
+                                : Icons.dark_mode_outlined,
+                            size: 18,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],

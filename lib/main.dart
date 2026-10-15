@@ -16,9 +16,11 @@ import 'package:timeago/timeago.dart' as timeago;
 import 'core/constants/app_version.dart';
 import 'core/utils/studio_asset_licenses.dart';
 import 'core/constants/storage_keys.dart';
+import 'core/storage/local_storage_service.dart';
 import 'l10n/app_localizations.dart';
 import 'core/autocomplete/retired_dictionary_cleanup.dart';
 import 'core/utils/app_language.dart';
+import 'core/utils/initial_app_language.dart';
 import 'core/network/proxy_service.dart';
 import 'core/network/system_proxy_http_overrides.dart';
 import 'core/shortcuts/shortcut_storage.dart';
@@ -381,6 +383,11 @@ Future<void> _bootstrapApplication() async {
   } catch (e) {
     AppLogger.w('Startup migration failed (will continue): $e', 'Main');
   }
+
+  await initializeAppLanguage(
+    storage: LocalStorageService(),
+    systemLocales: WidgetsBinding.instance.platformDispatcher.locales,
+  );
 
   // ===== V2 架构：数据库初始化和恢复（在 runApp 之前完成）====
   AppLogger.i('等待数据库初始化...', 'Main');

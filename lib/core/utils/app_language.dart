@@ -60,13 +60,15 @@ enum AppLanguage {
   static AppLanguage fromLocale(Locale locale) {
     switch (locale.languageCode.toLowerCase()) {
       case 'zh':
+        final script = locale.scriptCode?.toLowerCase();
         final traditional =
-            locale.scriptCode?.toLowerCase() == 'hant' ||
-            const {
-              'TW',
-              'HK',
-              'MO',
-            }.contains(locale.countryCode?.toUpperCase());
+            script == 'hant' ||
+            (script != 'hans' &&
+                const {
+                  'TW',
+                  'HK',
+                  'MO',
+                }.contains(locale.countryCode?.toUpperCase()));
         return traditional ? traditionalChinese : simplifiedChinese;
       case 'ja':
         return japanese;
@@ -75,6 +77,19 @@ enum AppLanguage {
       default:
         return english;
     }
+  }
+
+  /// Pick the first supported system preference, using English if none match.
+  static AppLanguage fromSystemLocales(Iterable<Locale> locales) {
+    for (final locale in locales) {
+      if (values.any(
+        (language) =>
+            language.locale.languageCode == locale.languageCode.toLowerCase(),
+      )) {
+        return fromLocale(locale);
+      }
+    }
+    return english;
   }
 
   /// Accepts BCP 47 tags such as `zh-TW`, `zh-Hant` or `zh-CN`.

@@ -1,5 +1,6 @@
 import 'presentation/widgets/common/update_capsule.dart';
 import 'presentation/widgets/common/update_check_dialog.dart';
+import 'presentation/widgets/branding/entry_language_button.dart';
 import 'package:nai_launcher/core/constants/brand.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -325,6 +326,7 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
       captionHeight: _captionHeight,
       onShowUpdate: _showUpdate,
       onToggleTheme: widget.onToggleTheme,
+      entryLanguageButton: _immersive ? const EntryLanguageButton() : null,
       child: widget.child,
     );
   }

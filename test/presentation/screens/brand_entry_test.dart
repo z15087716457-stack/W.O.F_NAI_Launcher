@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/app_version.dart';
+import 'package:nai_launcher/core/utils/app_language.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
@@ -18,16 +19,20 @@ import 'package:nai_launcher/presentation/providers/update_provider.dart';
 import 'package:nai_launcher/presentation/providers/warmup_provider.dart';
 import 'package:nai_launcher/presentation/screens/auth/login_screen.dart';
 import 'package:nai_launcher/presentation/screens/splash/splash_screen.dart';
+import 'package:nai_launcher/presentation/screens/splash/app_bootstrap.dart';
 import 'package:nai_launcher/presentation/providers/theme_provider.dart';
+import 'package:nai_launcher/presentation/providers/locale_provider.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/services/titlebar_region_service.dart';
 import '../../helpers/light_theme_contrast.dart';
 import 'package:nai_launcher/presentation/widgets/auth/entry_controls.dart';
 import 'package:nai_launcher/presentation/widgets/branding/brand_entry_scene.dart';
+import 'package:nai_launcher/presentation/widgets/branding/entry_language_button.dart';
 import 'package:nai_launcher/presentation/widgets/branding/entry_field.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
+import '../../helpers/uiux_frontend_capture.dart';
 
 class _Auth extends AuthNotifier {
   _Auth([this.initial = const AuthState(status: AuthStatus.unauthenticated)]);
@@ -91,6 +96,7 @@ Future<GlobalKey> pumpEntry(
   final key = GlobalKey();
   final storage = InMemoryLocalStorageService();
   await storage.setStudioThemeMode(brightness.name);
+  await storage.setLocaleCode(AppLanguage.fromLocale(locale).storageCode);
   await tester.pumpWidget(
     ProviderScope(
       overrides: [
@@ -101,30 +107,32 @@ Future<GlobalKey> pumpEntry(
         warmupNotifierProvider.overrideWith(() => _Warmup(warmup)),
       ],
       child: Consumer(
-        builder: (context, ref, _) => MaterialApp(
-          theme: ref.watch(studioLightThemeProvider),
-          darkTheme: ref.watch(studioDarkThemeProvider),
-          themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
-              ? ThemeMode.dark
-              : ThemeMode.light,
-          locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: RepaintBoundary(
-            key: key,
-            child: MediaQuery(
-              // 字符场在“关闭动画”时只画一帧静态画面，测试才能 settle
-              data: MediaQueryData(
-                size: size,
+        builder: (context, ref, _) => RepaintBoundary(
+          key: key,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ref.watch(studioLightThemeProvider),
+            darkTheme: ref.watch(studioDarkThemeProvider),
+            themeMode: ref.watch(themeNotifierProvider) == Brightness.dark
+                ? ThemeMode.dark
+                : ThemeMode.light,
+            locale: ref.watch(localeNotifierProvider),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            builder: (context, child) => MediaQuery(
+              // Disable the ambient field for settling, including popup routes.
+              data: MediaQuery.of(context).copyWith(
                 textScaler: TextScaler.linear(textScale),
                 disableAnimations: !animate,
               ),
-              child: IntegratedTitleBarShell(
-                immersive: true,
-                onToggleTheme: () =>
-                    ref.read(themeNotifierProvider.notifier).nextTheme(),
-                child: splash ? const SplashScreen() : const LoginScreen(),
-              ),
+              child: child!,
+            ),
+            home: IntegratedTitleBarShell(
+              immersive: true,
+              onToggleTheme: () =>
+                  ref.read(themeNotifierProvider.notifier).nextTheme(),
+              entryLanguageButton: const EntryLanguageButton(),
+              child: splash ? const SplashScreen() : const LoginScreen(),
             ),
           ),
         ),
@@ -285,6 +293,150 @@ void main() {
     expect(container.read(guestSessionNotifierProvider), isTrue);
     expect(tester.takeException(), isNull);
   });
+
+  for (final brightness in Brightness.values) {
+    testWidgets(
+      'language switch preserves form and stores choice ${brightness.name}',
+      (tester) async {
+        await pumpEntry(tester, brightness: brightness);
+        await expandFirstRun(tester);
+        await tester.enterText(find.byType(TextField).first, 'Studio draft');
+        await tester.enterText(
+          find.byType(TextField).last,
+          'test-only-placeholder',
+        );
+        final before = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .map((field) => field.controller!)
+            .toList();
+        final values = before.map((controller) => controller.value).toList();
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(LoginScreen)),
+        );
+        await tester.tap(find.byKey(const Key('brand_language_toggle')));
+        await tester.pumpAndSettle();
+        for (final language in AppLanguage.values) {
+          expect(
+            find.byKey(Key('brand_language_${language.storageCode}')),
+            findsOneWidget,
+          );
+          expect(find.text(language.nativeName), findsOneWidget);
+        }
+        await tester.tap(find.byKey(const Key('brand_language_ja')));
+        await tester.pumpAndSettle();
+        expect(container.read(localeNotifierProvider), const Locale('ja'));
+        expect(
+          container.read(localStorageServiceProvider).getLocaleCode(),
+          'ja',
+        );
+        expect(container.read(themeNotifierProvider), brightness);
+        final after = tester
+            .widgetList<TextField>(find.byType(TextField))
+            .map((field) => field.controller!)
+            .toList();
+        expect(after, orderedEquals(before));
+        expect(
+          after.map((controller) => controller.value),
+          orderedEquals(values),
+        );
+        expect(
+          Localizations.localeOf(tester.element(find.byType(LoginScreen))),
+          const Locale('ja'),
+        );
+        expect(
+          find.byKey(const Key('auth_back')).hitTestable(),
+          findsOneWidget,
+        );
+        expect(container.read(guestSessionNotifierProvider), isFalse);
+        await tester.tap(find.byKey(const Key('brand_language_toggle')));
+        await tester.pumpAndSettle();
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pumpAndSettle();
+        expect(
+          container.read(localStorageServiceProvider).getLocaleCode(),
+          'ja',
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final language in AppLanguage.values) {
+    for (final brightness in Brightness.values) {
+      for (final narrow in [false, true]) {
+        testWidgets(
+          'entry language menu ${language.storageCode} ${brightness.name} narrow=$narrow',
+          (tester) async {
+            final previousShadows = debugDisableShadows;
+            debugDisableShadows = false;
+            try {
+              final size = narrow
+                  ? const Size(390, 780)
+                  : const Size(1280, 960);
+              final key = await pumpEntry(
+                tester,
+                brightness: brightness,
+                locale: language.locale,
+                size: size,
+                textScale: narrow ? 1.4 : 1,
+              );
+              final languageButton = find.byKey(
+                const Key('brand_language_toggle'),
+              );
+              final appearanceButton = find.byKey(
+                const Key('brand_appearance_toggle'),
+              );
+              expect(
+                tester.getRect(languageButton).right,
+                lessThanOrEqualTo(tester.getRect(appearanceButton).left),
+              );
+              await tester.tap(languageButton);
+              await tester.pumpAndSettle();
+              for (final candidate in AppLanguage.values) {
+                final item = find.byKey(
+                  Key('brand_language_${candidate.storageCode}'),
+                );
+                expect(
+                  tester
+                      .widget<CheckedPopupMenuItem<AppLanguage>>(item)
+                      .checked,
+                  candidate == language,
+                );
+                final bounds = tester.getRect(item);
+                expect(
+                  bounds.top,
+                  greaterThanOrEqualTo(tester.getRect(languageButton).bottom),
+                );
+                expect(bounds.right, lessThanOrEqualTo(size.width));
+                expect(bounds.left, greaterThanOrEqualTo(0));
+                expect(bounds.bottom, lessThanOrEqualTo(size.height));
+                final text = find.descendant(
+                  of: item,
+                  matching: find.text(candidate.nativeName),
+                );
+                expect(
+                  tester.renderObject<RenderParagraph>(text).didExceedMaxLines,
+                  isFalse,
+                );
+              }
+              expect(tester.takeException(), isNull);
+              await captureUiuxRegion(
+                tester,
+                find.byKey(key),
+                'entry-language-${language.storageCode}-${brightness.name}-$narrow',
+                Rect.fromLTWH(size.width - 380, 0, 380, 340),
+              );
+              await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+              await tester.pumpAndSettle();
+              await tester.pumpWidget(const SizedBox());
+            } finally {
+              debugDisableShadows = previousShadows;
+            }
+          },
+        );
+      }
+    }
+  }
 
   testWidgets('empty token shows inline validation instead of submitting', (
     tester,
@@ -515,6 +667,63 @@ void main() {
     await capture(tester, key, 'login-saved-busy');
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'actual bootstrap switches language without losing loading progress',
+    (tester) async {
+      tester.view.physicalSize = const Size(1280, 960);
+      tester.view.devicePixelRatio = 1;
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(tester.view.reset);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      final storage = InMemoryLocalStorageService();
+      await storage.setLocaleCode('en');
+      await storage.setStudioThemeMode('light');
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(storage),
+            warmupNotifierProvider.overrideWith(
+              () => _Warmup(
+                const WarmupState(
+                  progress: WarmupProgress(
+                    progress: .42,
+                    currentTask: 'warmup_fonts',
+                  ),
+                ),
+              ),
+            ),
+          ],
+          child: const AppBootstrap(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('42%'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('brand_language_toggle')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('brand_language_zh_TW')));
+      await tester.pumpAndSettle();
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(SplashScreen)),
+      );
+      expect(container.read(localeNotifierProvider), const Locale('zh', 'TW'));
+      expect(storage.getLocaleCode(), 'zh_TW');
+      expect(container.read(themeNotifierProvider), Brightness.light);
+      expect(find.text('42%'), findsOneWidget);
+      expect(
+        AppLocalizations.of(
+          tester.element(find.byType(SplashScreen)),
+        )!.localeName,
+        'zh_TW',
+      );
+      expect(find.byType(EntryLanguageButton), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('warmup completion updates progress without losing appearance', (
     tester,

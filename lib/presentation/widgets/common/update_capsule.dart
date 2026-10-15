@@ -72,6 +72,7 @@ class UpdateAwareWindowShell extends ConsumerWidget {
     required this.onShowUpdate,
     this.immersive = false,
     this.onToggleTheme,
+    this.entryLanguageButton,
     this.captionHeight = IntegratedTitleBarShell.barHeight,
     this.deferToRoute = false,
   });
@@ -79,6 +80,7 @@ class UpdateAwareWindowShell extends ConsumerWidget {
   final VoidCallback onShowUpdate;
   final bool immersive;
   final VoidCallback? onToggleTheme;
+  final Widget? entryLanguageButton;
   final double captionHeight;
   final bool deferToRoute;
 
@@ -92,6 +94,7 @@ class UpdateAwareWindowShell extends ConsumerWidget {
       deferToRoute: deferToRoute,
       captionHeight: captionHeight,
       onToggleTheme: onToggleTheme,
+      entryLanguageButton: entryLanguageButton,
       accessoryWidth: available ? UpdateCapsule.width : 0,
       accessory: available ? UpdateCapsule(onPressed: onShowUpdate) : null,
       child: child,

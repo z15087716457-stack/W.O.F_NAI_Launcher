@@ -38,16 +38,21 @@ void main() {
     messenger.setMockMethodCallHandler(channel, null);
     messenger.setMockMethodCallHandler(windows, null);
   });
-  Widget host(Widget child, {bool immersive = false, VoidCallback? toggle}) =>
-      MaterialApp(
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: IntegratedTitleBarShell(
-          immersive: immersive,
-          onToggleTheme: toggle,
-          child: child,
-        ),
-      );
+  Widget host(
+    Widget child, {
+    bool immersive = false,
+    VoidCallback? toggle,
+    Widget? languageButton,
+  }) => MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    home: IntegratedTitleBarShell(
+      immersive: immersive,
+      onToggleTheme: toggle,
+      entryLanguageButton: languageButton,
+      child: child,
+    ),
+  );
 
   testWidgets(
     'content starts at zero; caption buttons stay fixed and callable',
@@ -88,6 +93,65 @@ void main() {
     expect((calls.last.arguments as Map)['barHeight'], 0);
     expect(find.byKey(const Key('brand_appearance_toggle')), findsNothing);
   });
+
+  testWidgets(
+    'entry language control joins the native client area and stays out of workspace',
+    (tester) async {
+      var selections = 0;
+      final languageButton = GestureDetector(
+        key: const Key('test-language-button'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => selections++,
+        child: const Icon(Icons.language),
+      );
+      await tester.pumpWidget(
+        host(
+          const Scaffold(),
+          immersive: true,
+          toggle: () {},
+          languageButton: languageButton,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as Map)['barHeight'], 36);
+      expect((calls.last.arguments as Map)['reservedRight'], 227);
+      final languageRect = tester.getRect(
+        find.byKey(const Key('test-language-button')),
+      );
+      final themeRect = tester.getRect(
+        find.byKey(const Key('brand_appearance_toggle')),
+      );
+      expect(languageRect.width, 40);
+      expect(languageRect.right, themeRect.left);
+      await tester.tap(find.byKey(const Key('test-language-button')));
+      expect(selections, 1);
+      expect(windowCalls, isNot(contains('startDragging')));
+      await tester.pumpWidget(
+        host(const Scaffold(), languageButton: languageButton),
+      );
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as Map)['barHeight'], 0);
+      expect((calls.last.arguments as Map)['reservedRight'], 138);
+      expect(find.byKey(const Key('test-language-button')), findsNothing);
+      await tester.pumpWidget(
+        host(const Scaffold(), immersive: true, toggle: () {}),
+      );
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as Map)['reservedRight'], 187);
+      await tester.pumpWidget(
+        host(
+          const Scaffold(),
+          immersive: true,
+          toggle: () {},
+          languageButton: languageButton,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect((calls.last.arguments as Map)['reservedRight'], 227);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets(
     'full-image controls stay below window captions and can close only the viewer',
