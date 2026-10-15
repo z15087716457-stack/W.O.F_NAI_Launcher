@@ -32,9 +32,11 @@ import 'package:nai_launcher/data/repositories/character_prompt_repository.dart'
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
@@ -46,6 +48,7 @@ import '../providers/krita/agent_bridge_draft_test.dart'
 import 'generation_backend_test.dart' show MemoryGenerationPlatform;
 import 'generation_data_wiring_test.dart'
     show DataGeneration, DataSubscription, DataShortcuts;
+import '../../helpers/studio_capture_fonts.dart';
 
 class MemoryViewerTranslation extends PromptTranslationCoordinator {
   MemoryViewerTranslation(super.ref);
@@ -59,6 +62,7 @@ class MemoryViewerTranslation extends PromptTranslationCoordinator {
 
 void main() {
   prepareGenerationDropTestPlatform();
+  setUpAll(loadStudioCaptureFonts);
   late Directory directory;
   late ProviderContainer container;
   late MemoryViewerWindow viewerPlatform;
@@ -124,6 +128,83 @@ void main() {
     await tester.pump();
     await tester.pump();
   }
+
+  String promptFor(GenEditorTarget target) {
+    if (target.character case final index?) {
+      final character = container
+          .read(characterPromptNotifierProvider)
+          .characters[index];
+      return target.negative ? character.negativePrompt : character.prompt;
+    }
+    final params = container.read(generationParamsNotifierProvider);
+    return target.negative ? params.negativePrompt : params.prompt;
+  }
+
+  for (final target in const [
+    GenEditorTarget.base(),
+    GenEditorTarget.base(negative: true),
+    GenEditorTarget.character(0),
+    GenEditorTarget.character(0, negative: true),
+  ]) {
+    testWidgets('$target 清空撤销提示显示两秒后自动消退', (tester) async {
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateNegativePromptImmediately('base negative');
+      final before = promptFor(target);
+      expect(before, isNotEmpty);
+      await pump(tester);
+      if (target.negative) {
+        final tab = find.byKey(
+          Key(
+            target.isBase
+                ? 'gen-tab-negative'
+                : 'gen-character-tab-neg-${target.character}',
+          ),
+        );
+        await tester.ensureVisible(tab);
+        await tester.tap(tab);
+        await tester.pumpAndSettle();
+      }
+      final clear = find.byKey(Key('gen-clear-$target'));
+      await tester.ensureVisible(clear);
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+      expect(promptFor(target), isEmpty);
+      expect(
+        (container.read(generationPlatformProvider) as MemoryGenerationPlatform)
+            .backups,
+        hasLength(1),
+      );
+      expect(find.byType(SnackBarAction), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 1900));
+      expect(find.byType(SnackBarAction), findsOneWidget);
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(SnackBar), findsNothing);
+      expect(promptFor(target), isEmpty);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
+  }
+
+  testWidgets('清空后两秒内仍能撤销并恢复原提示词', (tester) async {
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('gen-clear-base')));
+    await tester.pumpAndSettle();
+    expect(promptFor(const GenEditorTarget.base()), isEmpty);
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.byType(SnackBarAction));
+    await tester.pumpAndSettle();
+    expect(promptFor(const GenEditorTarget.base()), 'current prompt');
+    expect(find.byType(SnackBar), findsNothing);
+    expect(
+      (container.read(generationPlatformProvider) as MemoryGenerationPlatform)
+          .backups,
+      hasLength(2),
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   for (final path in [AppRoutes.home, AppRoutes.generation]) {
     testWidgets(

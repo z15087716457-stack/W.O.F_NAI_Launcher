@@ -110,6 +110,8 @@ class GenerationOperations {
     if (undo == null || !context.mounted || !alive()) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        duration: const Duration(seconds: 2),
+        persist: false,
         content: Text(context.l10n.common_clear),
         action: SnackBarAction(
           label: context.l10n.common_undo,
