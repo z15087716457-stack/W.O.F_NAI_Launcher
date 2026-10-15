@@ -8148,13 +8148,13 @@
     }
   },
   "gen_addCharacter": "キャラクターを追加",
-  "gen_addAs": "{gender}キャラクターを追加",
+  "gen_addAs": "{gender}を追加",
   "@gen_addAs": {
     "placeholders": {
       "gender": {}
     }
   },
-  "gen_clearCharacters": "すべてのキャラクターを削除",
+  "gen_clearCharacters": "すべて削除",
   "gen_clearCharactersTitle": "すべてのキャラクターを削除しますか？",
   "gen_clearCharactersBody": "{count} 人のキャラクターとプロンプトが削除されます。",
   "@gen_clearCharactersBody": {

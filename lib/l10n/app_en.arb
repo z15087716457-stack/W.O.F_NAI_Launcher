@@ -8148,13 +8148,13 @@
     }
   },
   "gen_addCharacter": "Add character",
-  "gen_addAs": "Add {gender} character",
+  "gen_addAs": "Add {gender}",
   "@gen_addAs": {
     "placeholders": {
       "gender": {}
     }
   },
-  "gen_clearCharacters": "Remove all characters",
+  "gen_clearCharacters": "Remove all",
   "gen_clearCharactersTitle": "Remove all characters?",
   "gen_clearCharactersBody": "All {count} characters and their prompts will be removed.",
   "@gen_clearCharactersBody": {

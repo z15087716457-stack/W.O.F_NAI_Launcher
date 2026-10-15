@@ -14590,11 +14590,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String gen_addAs(Object gender) {
-    return '$gender 캐릭터 추가';
+    return '$gender 추가';
   }
 
   @override
-  String get gen_clearCharacters => '모든 캐릭터 삭제';
+  String get gen_clearCharacters => '모두 삭제';
 
   @override
   String get gen_clearCharactersTitle => '모든 캐릭터를 삭제할까요?';

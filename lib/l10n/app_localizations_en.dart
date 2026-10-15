@@ -14984,11 +14984,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gen_addAs(Object gender) {
-    return 'Add $gender character';
+    return 'Add $gender';
   }
 
   @override
-  String get gen_clearCharacters => 'Remove all characters';
+  String get gen_clearCharacters => 'Remove all';
 
   @override
   String get gen_clearCharactersTitle => 'Remove all characters?';

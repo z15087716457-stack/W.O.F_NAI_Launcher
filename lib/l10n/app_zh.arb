@@ -8148,13 +8148,13 @@
     }
   },
   "gen_addCharacter": "添加角色",
-  "gen_addAs": "添加{gender}角色",
+  "gen_addAs": "添加{gender}",
   "@gen_addAs": {
     "placeholders": {
       "gender": {}
     }
   },
-  "gen_clearCharacters": "清空全部角色",
+  "gen_clearCharacters": "清空全部",
   "gen_clearCharactersTitle": "清空全部角色？",
   "gen_clearCharactersBody": "{count} 个角色和它们的提示词都会删掉。",
   "@gen_clearCharactersBody": {

@@ -26006,13 +26006,13 @@ abstract class AppLocalizations {
   /// No description provided for @gen_addAs.
   ///
   /// In en, this message translates to:
-  /// **'Add {gender} character'**
+  /// **'Add {gender}'**
   String gen_addAs(Object gender);
 
   /// No description provided for @gen_clearCharacters.
   ///
   /// In en, this message translates to:
-  /// **'Remove all characters'**
+  /// **'Remove all'**
   String get gen_clearCharacters;
 
   /// No description provided for @gen_clearCharactersTitle.

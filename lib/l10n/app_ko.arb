@@ -8148,13 +8148,13 @@
     }
   },
   "gen_addCharacter": "캐릭터 추가",
-  "gen_addAs": "{gender} 캐릭터 추가",
+  "gen_addAs": "{gender} 추가",
   "@gen_addAs": {
     "placeholders": {
       "gender": {}
     }
   },
-  "gen_clearCharacters": "모든 캐릭터 삭제",
+  "gen_clearCharacters": "모두 삭제",
   "gen_clearCharactersTitle": "모든 캐릭터를 삭제할까요?",
   "gen_clearCharactersBody": "캐릭터 {count}명과 프롬프트가 모두 삭제됩니다.",
   "@gen_clearCharactersBody": {

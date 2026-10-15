@@ -14354,11 +14354,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String gen_addAs(Object gender) {
-    return '添加$gender角色';
+    return '添加$gender';
   }
 
   @override
-  String get gen_clearCharacters => '清空全部角色';
+  String get gen_clearCharacters => '清空全部';
 
   @override
   String get gen_clearCharactersTitle => '清空全部角色？';
@@ -31113,11 +31113,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String gen_addAs(Object gender) {
-    return '新增$gender角色';
+    return '新增$gender';
   }
 
   @override
-  String get gen_clearCharacters => '清空全部角色';
+  String get gen_clearCharacters => '清空全部';
 
   @override
   String get gen_clearCharactersTitle => '清空全部角色？';
