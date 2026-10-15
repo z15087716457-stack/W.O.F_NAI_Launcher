@@ -899,6 +899,108 @@ void main() {
   );
 
   testWidgets(
+    'ordinary variables keep row identity and genetic writes are backed up',
+    (tester) async {
+      library.blocks.addAll([
+        PromptBlock.create(
+          id: 'ordinary',
+          title: 'Ordinary',
+          content: 'artist:a, artist:b',
+        ),
+        PromptBlock.create(
+          id: 'genetic',
+          title: 'Genetic',
+          content: 'artist:c, artist:d',
+        ),
+      ]);
+      pills.values[PillScopes.main] = const PillDocument(
+        text: '\ue001, \ue000',
+        instances: {
+          '\ue000': PillInstance(
+            blockId: 'genetic',
+            evolutionEnabled: true,
+            currentRoll: 'artist:c',
+            sequenceCursor: 1,
+            settings: PillInstanceSettings(mode: PillRollMode.sequential),
+          ),
+          '\ue001': PillInstance(
+            blockId: 'ordinary',
+            currentRoll: 'artist:a',
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+        },
+      );
+      final container = await mount(tester);
+      final page = tester.widget<StyleExplorePage>(
+        find.byType(StyleExplorePage),
+      );
+      expect(page.data.variables.map((v) => v.title), ['Ordinary', 'Genetic']);
+      expect(page.data.variables.map((v) => v.evolution), [false, true]);
+      actions(tester).onOpenVariable(0);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+            .data
+            .block
+            .title,
+        'Ordinary',
+      );
+      await tester.tap(find.byKey(const Key('block-card-genetic')));
+      await tester.pumpAndSettle();
+      final after = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document;
+      expect(after.instances['\ue001']!.evolutionEnabled, isTrue);
+      expect(after.instances['\ue001']!.currentRoll, 'artist:a');
+      expect(after.instances['\ue000']!.sequenceCursor, 1);
+      expect(platform.backups, hasLength(1));
+      expect(
+        tester
+            .widget<StyleExplorePage>(find.byType(StyleExplorePage))
+            .data
+            .variables
+            .every((v) => v.evolution),
+        isTrue,
+      );
+      Navigator.of(tester.element(find.byType(BlockInstanceCard))).pop();
+      await tester.pumpAndSettle();
+      actions(tester).onOpenVariable(1);
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+            .data
+            .block
+            .title,
+        'Genetic',
+      );
+      await tester.tap(find.byKey(const Key('block-card-mode-fixed')));
+      await tester.pumpAndSettle();
+      final before = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document;
+      final backups = platform.backups.length;
+      final control = tester.widget<Semantics>(
+        find.byKey(const Key('block-card-genetic')),
+      );
+      expect(control.properties.enabled, isFalse);
+      tester
+          .widget<BlockInstanceCard>(find.byType(BlockInstanceCard))
+          .actions
+          .onEvolutionChanged!(false);
+      await tester.pumpAndSettle();
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).document,
+        before,
+      );
+      expect(platform.backups.length, backups);
+      expect(controls.calls, 0);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'evolution callbacks create, compare, generate, rename and delete the explicit line',
     (tester) async {
       await mount(tester);

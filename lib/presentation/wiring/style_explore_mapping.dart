@@ -33,19 +33,25 @@ ImageProvider? styleExploreImage(String? path, {bool thumbnail = false}) {
 List<MapEntry<String, PillInstance>> styleExploreVariableInstances(
   PillDocument document,
 ) =>
-    exploreGeneticInstances(
-      document,
-    ).where((entry) => document.text.contains(entry.key)).toList()..sort(
-      (a, b) =>
-          document.text.indexOf(a.key).compareTo(document.text.indexOf(b.key)),
-    );
+    document.instances.entries
+        .where(
+          (entry) =>
+              entry.value.enabled &&
+              entry.value.settings.hasRoll &&
+              document.text.contains(entry.key),
+        )
+        .toList()
+      ..sort(
+        (a, b) => document.text
+            .indexOf(a.key)
+            .compareTo(document.text.indexOf(b.key)),
+      );
 
 List<ui.ExploreVariable> styleExploreVariables(
   PillDocument document,
   PromptBlockLibraryState? library, {
   required String missingLabel,
 }) {
-  final target = resolveExploreOverrideMarkerInDocument(document);
   return [
     for (final entry in styleExploreVariableInstances(document))
       ui.ExploreVariable(
@@ -57,7 +63,7 @@ List<ui.ExploreVariable> styleExploreVariables(
         ),
         icon: library?.blockById(entry.value.blockId)?.iconName,
         poolSize: library?.blockById(entry.value.blockId)?.atomsOrSplit.length,
-        evolution: entry.key == target,
+        evolution: entry.value.evolutionEnabled,
         missing: library?.blockById(entry.value.blockId) == null,
       ),
   ];

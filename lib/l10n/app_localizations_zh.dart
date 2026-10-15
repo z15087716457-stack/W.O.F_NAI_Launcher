@@ -12413,10 +12413,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get blocks_copySend => '复制发送文本';
 
   @override
-  String get blocks_evolutionOn => '设为遗传块';
+  String get blocks_evolutionOn => '设为遗传目标';
 
   @override
   String get blocks_evolutionOff => '取消遗传';
+
+  @override
+  String get blocks_evolutionModeHint => '启用的顺序或随机块可参与遗传，固定模式不可用。';
 
   @override
   String get blocks_rulesTitle => '抽取规则';
@@ -13449,7 +13452,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get explore_variablesInfo =>
-      '提示词里的随机块。每张候选都会从池里重新抽，抽到的画师写在候选下面；标“进化目标”的块是进化时子代替换的位置。';
+      '提示词中启用的顺序或随机块，按各自的抽取规则取值。标“遗传目标”的块会合并抽取结果，组成父本串参与遗传。';
 
   @override
   String get explore_variablesEmpty => '提示词里还没有随机块。插入块库里的随机块（比如画师池），每张图都会重新抽。';
@@ -13466,7 +13469,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get explore_evolutionTarget => '进化目标';
+  String get explore_evolutionTarget => '遗传目标';
 
   @override
   String explore_draw(Object count) {
@@ -14024,13 +14027,13 @@ class AppLocalizationsZh extends AppLocalizations {
       '比如 0.8::artist:ciloranko::, artist:rella（回车添加）';
 
   @override
-  String get explore_targetBefore => '子代会替换提示词里';
+  String get explore_targetBefore => '遗传目标：';
 
   @override
-  String get explore_targetAfter => '的位置，其他内容不变';
+  String get explore_targetAfter => '合并抽取结果，组成父本串';
 
   @override
-  String get explore_noTarget => '提示词里没有随机块，子代没地方替换——先在提示词里插入一个随机块。';
+  String get explore_noTarget => '还没有遗传目标。请在顺序或随机块上开启遗传。';
 
   @override
   String get explore_firstBatch => '第一批子代';
@@ -29169,10 +29172,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get blocks_copySend => '複製傳送文本';
 
   @override
-  String get blocks_evolutionOn => '設為遺傳塊';
+  String get blocks_evolutionOn => '設為遺傳目標';
 
   @override
   String get blocks_evolutionOff => '取消遺傳';
+
+  @override
+  String get blocks_evolutionModeHint => '啟用的順序或隨機塊可參與遺傳，固定模式不可用。';
 
   @override
   String get blocks_rulesTitle => '抽取規則';
@@ -30205,7 +30211,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get explore_variablesInfo =>
-      '提示詞裡的隨機塊。每張候選都會從池裡重新抽，抽到的畫師寫在候選下面；標“進化目標”的塊是進化時子代替換的位置。';
+      '提示詞中啟用的順序或隨機塊，按各自的抽取規則取值。標“遺傳目標”的塊會合並抽取結果，組成父本串參與遺傳。';
 
   @override
   String get explore_variablesEmpty => '提示詞裡還沒有隨機塊。插入塊庫裡的隨機塊（比如畫師池），每張圖都會重新抽。';
@@ -30222,7 +30228,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get explore_evolutionTarget => '進化目標';
+  String get explore_evolutionTarget => '遺傳目標';
 
   @override
   String explore_draw(Object count) {
@@ -30780,13 +30786,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '比如 0.8::artist:ciloranko::, artist:rella（回車新增）';
 
   @override
-  String get explore_targetBefore => '子代會替換提示詞裡';
+  String get explore_targetBefore => '遺傳目標：';
 
   @override
-  String get explore_targetAfter => '的位置，其他內容不變';
+  String get explore_targetAfter => '合併抽取結果，組成父本串';
 
   @override
-  String get explore_noTarget => '提示詞裡沒有隨機塊，子代沒地方替換——先在提示詞裡插入一個隨機塊。';
+  String get explore_noTarget => '還沒有遺傳目標。請在順序或隨機塊上開啟遺傳。';
 
   @override
   String get explore_firstBatch => '第一批子代';

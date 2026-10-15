@@ -501,10 +501,12 @@ void main() {
       find.byType(BlockInstanceCard),
     );
     expect(card.actions.onEvolutionChanged, isNotNull);
-    await tester.tap(find.byKey(const Key('block-card-more')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('设为遗传块'));
+    await tester.tap(find.byKey(const Key('block-card-genetic')));
     await tester.pump();
+    expect(
+      (container.read(blocksPlatformProvider) as _TestBlocksPlatform).backups,
+      1,
+    );
     expect(
       container
           .read(pillWorkspaceNotifierProvider)

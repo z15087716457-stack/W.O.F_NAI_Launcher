@@ -12639,10 +12639,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get blocks_copySend => '전송 텍스트 복사';
 
   @override
-  String get blocks_evolutionOn => '유전 블록으로 지정';
+  String get blocks_evolutionOn => '유전 대상으로 지정';
 
   @override
   String get blocks_evolutionOff => '유전 해제';
+
+  @override
+  String get blocks_evolutionModeHint =>
+      '블록을 활성화하고 순차 또는 랜덤 모드를 사용하면 유전에 참여할 수 있습니다.';
 
   @override
   String get blocks_rulesTitle => '뽑기 규칙';
@@ -13679,7 +13683,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get explore_variablesInfo =>
-      '프롬프트의 랜덤 블록입니다. 후보마다 풀에서 다시 뽑고 결과를 후보 아래에 표시합니다. \"진화 대상\" 블록은 자손이 바뀌는 위치입니다.';
+      '활성화된 순차·랜덤 블록은 각자의 추출 규칙을 따릅니다. 유전 대상으로 표시된 블록의 추출 결과를 합쳐 부모 프롬프트로 사용합니다.';
 
   @override
   String get explore_variablesEmpty =>
@@ -13697,7 +13701,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get explore_evolutionTarget => '진화 대상';
+  String get explore_evolutionTarget => '유전 대상';
 
   @override
   String explore_draw(Object count) {
@@ -14259,13 +14263,13 @@ class AppLocalizationsKo extends AppLocalizations {
       '예: 0.8::artist:ciloranko::, artist:rella (Enter로 추가)';
 
   @override
-  String get explore_targetBefore => '자손은 프롬프트의';
+  String get explore_targetBefore => '유전 대상:';
 
   @override
-  String get explore_targetAfter => '위치를 바꾸고 나머지는 그대로 둡니다';
+  String get explore_targetAfter => '추출 결과를 합쳐 부모 프롬프트를 만듭니다';
 
   @override
-  String get explore_noTarget => '프롬프트에 랜덤 블록이 없어 자손을 바꿀 곳이 없습니다. 먼저 넣어 주세요.';
+  String get explore_noTarget => '유전 대상이 없습니다. 순차 또는 랜덤 블록에서 유전을 켜 주세요.';
 
   @override
   String get explore_firstBatch => '첫 자손';

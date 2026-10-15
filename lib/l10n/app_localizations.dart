@@ -22522,7 +22522,7 @@ abstract class AppLocalizations {
   /// No description provided for @blocks_evolutionOn.
   ///
   /// In en, this message translates to:
-  /// **'Mark as evolution target'**
+  /// **'Mark as genetic target'**
   String get blocks_evolutionOn;
 
   /// No description provided for @blocks_evolutionOff.
@@ -22530,6 +22530,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unmark evolution'**
   String get blocks_evolutionOff;
+
+  /// No description provided for @blocks_evolutionModeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable this block and use sequential or random mode to include it in genetics.'**
+  String get blocks_evolutionModeHint;
 
   /// No description provided for @blocks_rulesTitle.
   ///
@@ -24436,7 +24442,7 @@ abstract class AppLocalizations {
   /// No description provided for @explore_variablesInfo.
   ///
   /// In en, this message translates to:
-  /// **'Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.'**
+  /// **'Enabled sequential and random blocks follow their own draw rules. Results from blocks marked as genetic targets are combined into a parent prompt for breeding.'**
   String get explore_variablesInfo;
 
   /// No description provided for @explore_variablesEmpty.
@@ -24466,7 +24472,7 @@ abstract class AppLocalizations {
   /// No description provided for @explore_evolutionTarget.
   ///
   /// In en, this message translates to:
-  /// **'Evolution target'**
+  /// **'Genetic target'**
   String get explore_evolutionTarget;
 
   /// No description provided for @explore_draw.
@@ -25388,19 +25394,19 @@ abstract class AppLocalizations {
   /// No description provided for @explore_targetBefore.
   ///
   /// In en, this message translates to:
-  /// **'Offspring replace'**
+  /// **'Genetic targets:'**
   String get explore_targetBefore;
 
   /// No description provided for @explore_targetAfter.
   ///
   /// In en, this message translates to:
-  /// **'in the prompt; everything else stays'**
+  /// **'combine their draws into the parent prompt'**
   String get explore_targetAfter;
 
   /// No description provided for @explore_noTarget.
   ///
   /// In en, this message translates to:
-  /// **'There is no random block in the prompt for offspring to replace — insert one first.'**
+  /// **'No genetic targets yet. Enable genetics on a sequential or random block.'**
   String get explore_noTarget;
 
   /// No description provided for @explore_firstBatch.

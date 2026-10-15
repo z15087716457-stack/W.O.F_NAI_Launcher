@@ -62,7 +62,7 @@ class ExploreAtom {
   int get hashCode => raw.hashCode;
 }
 
-/// 提示词里检测到的随机块（有效实例：启用、随机抽取、参与遗传，与 roll 快照同一判定）。
+/// 提示词中启用的顺序／随机块，包含未开启遗传的普通变量。
 @immutable
 class ExploreVariable {
   const ExploreVariable({
@@ -84,7 +84,7 @@ class ExploreVariable {
   /// 池里有多少项；拿不到为 null。
   final int? poolSize;
 
-  /// 进化目标：子代会替换这个块的位置（`DeepRoundRollGuard` 选中的那个）。
+  /// 参与遗传；所有开启遗传的变量都标记，不暴露后端子代承接位置。
   final bool evolution;
 
   /// 引用的块已经被删了。

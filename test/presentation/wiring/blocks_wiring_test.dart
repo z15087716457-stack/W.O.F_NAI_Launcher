@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_actions.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_instance_wiring.dart';
 import 'package:nai_launcher/presentation/widgets/common/prompt_block_picker_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
@@ -889,6 +890,7 @@ void main() {
       await tester.tap(find.byType(UiBlockPill).first);
       await tester.pumpAndSettle();
       expect(find.byType(BlockInstanceCard), findsOneWidget);
+      expect(find.byKey(const Key('block-card-genetic')), findsNothing);
       final card = tester.widget<BlockInstanceCard>(
         find.byType(BlockInstanceCard),
       );
@@ -924,6 +926,64 @@ void main() {
         container.read(pillWorkspaceProvider(PillScopes.main)).document,
         before,
       );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'exploration prompt instance backs up genetic toggle without changing rolls',
+    (tester) async {
+      final notifier = container.read(
+        pillWorkspaceProvider(PillScopes.main).notifier,
+      );
+      notifier.insertBlockAt(offset: 0, blockId: blockId);
+      final marker = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances
+          .keys
+          .single;
+      notifier.updateInstanceSettings(
+        marker,
+        const PillInstanceSettings(mode: PillRollMode.sequential),
+      );
+      final before = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances[marker]!;
+      await mount(
+        tester,
+        Align(
+          alignment: Alignment.topLeft,
+          child: BlockInstanceWiring(
+            scope: PillScopes.main,
+            marker: marker,
+            onDismiss: () {},
+            allowEvolutionToggle: true,
+          ),
+        ),
+      );
+      await tester.tap(find.byKey(const Key('block-card-genetic')));
+      await flush(tester);
+      final after = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances[marker]!;
+      expect(after.evolutionEnabled, isTrue);
+      expect(after.currentRoll, before.currentRoll);
+      expect(after.sequenceCursor, before.sequenceCursor);
+      expect(platform.backups, hasLength(1));
+      await tester.tap(find.byKey(const Key('block-card-genetic')));
+      await flush(tester);
+      expect(
+        container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances[marker]!
+            .evolutionEnabled,
+        isFalse,
+      );
+      expect(platform.backups, hasLength(2));
       expect(tester.takeException(), isNull);
     },
   );

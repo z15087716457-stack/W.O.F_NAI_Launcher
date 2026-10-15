@@ -7073,8 +7073,9 @@
   "blocks_removeInstanceTip": "从提示词里移除",
   "blocks_removeInstance": "从提示词里移除",
   "blocks_copySend": "复制发送文本",
-  "blocks_evolutionOn": "设为遗传块",
+  "blocks_evolutionOn": "设为遗传目标",
   "blocks_evolutionOff": "取消遗传",
+  "blocks_evolutionModeHint": "启用的顺序或随机块可参与遗传，固定模式不可用。",
   "blocks_rulesTitle": "抽取规则",
   "blocks_rulesHint": "点完成后生效",
   "blocks_rulesDirty": "有改动 · 点完成后生效",
@@ -7586,7 +7587,7 @@
   "explore_earlier": "更早",
   "explore_variables": "随机变量",
   "explore_variablesHint": "每张重新抽取",
-  "explore_variablesInfo": "提示词里的随机块。每张候选都会从池里重新抽，抽到的画师写在候选下面；标“进化目标”的块是进化时子代替换的位置。",
+  "explore_variablesInfo": "提示词中启用的顺序或随机块，按各自的抽取规则取值。标“遗传目标”的块会合并抽取结果，组成父本串参与遗传。",
   "explore_variablesEmpty": "提示词里还没有随机块。插入块库里的随机块（比如画师池），每张图都会重新抽。",
   "explore_openBlockLibrary": "打开块库",
   "explore_variableMissing": "块已删除",
@@ -7596,7 +7597,7 @@
       "count": {}
     }
   },
-  "explore_evolutionTarget": "进化目标",
+  "explore_evolutionTarget": "遗传目标",
   "explore_draw": "抽 {count} 张候选",
   "@explore_draw": {
     "placeholders": {
@@ -7991,9 +7992,9 @@
   },
   "explore_addCustom": "再加一段自定义画师串",
   "explore_customHint": "比如 0.8::artist:ciloranko::, artist:rella（回车添加）",
-  "explore_targetBefore": "子代会替换提示词里",
-  "explore_targetAfter": "的位置，其他内容不变",
-  "explore_noTarget": "提示词里没有随机块，子代没地方替换——先在提示词里插入一个随机块。",
+  "explore_targetBefore": "遗传目标：",
+  "explore_targetAfter": "合并抽取结果，组成父本串",
+  "explore_noTarget": "还没有遗传目标。请在顺序或随机块上开启遗传。",
   "explore_firstBatch": "第一批子代",
   "explore_atLeast4": "张（至少 4）",
   "explore_createOnly": "只创建",

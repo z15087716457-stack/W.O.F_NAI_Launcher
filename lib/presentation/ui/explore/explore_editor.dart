@@ -157,6 +157,7 @@ class ExploreRandomVariables extends StatelessWidget {
                       if (v.evolution)
                         Text(
                           '· ${l.explore_evolutionTarget}',
+                          key: Key('explore-variable-genetic-$i'),
                           style: UiText.sans(12, color: c.faint),
                         ),
                     ],

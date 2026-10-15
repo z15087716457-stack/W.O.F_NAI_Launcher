@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_instance.dart';
 import '../utils/prompt_block_instance_bundle.dart';
 import 'blocks_actions.dart';
+import 'blocks_generation_target.dart';
 import 'blocks_mapping.dart';
 
 List<BlockDrawn> blockDrawnOf(String text) => [
@@ -154,9 +156,26 @@ class BlockInstanceWiring extends ConsumerWidget {
           }),
           onEvolutionChanged: !allowEvolutionToggle
               ? null
-              : (value) => each((n, marker, i) {
-                  if (i.evolutionEnabled != value) n.toggleEvolution(marker);
-                }),
+              : (value) {
+                  if (!settings.hasRoll || !instance.enabled || !current()) {
+                    return;
+                  }
+                  unawaited(
+                    host.run(
+                      () => ref
+                          .read(blocksGenerationTargetProvider)
+                          .commit(
+                            () => each((n, marker, i) {
+                              if (i.evolutionEnabled != value) {
+                                n.toggleEvolution(marker);
+                              }
+                            }),
+                            alive: () => context.mounted,
+                            unchanged: current,
+                          ),
+                    ),
+                  );
+                },
           onModeChanged: (mode) => each(
             (n, marker, i) => n.updateInstanceSettings(
               marker,

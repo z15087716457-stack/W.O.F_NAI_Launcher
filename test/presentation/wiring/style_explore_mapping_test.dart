@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/providers/generation/generation_models
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_manual_capture.dart';
 import 'package:nai_launcher/presentation/providers/style_explore/explore_run_runner.dart';
+import 'package:nai_launcher/presentation/providers/style_explore/explore_roll_capture.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_contract.dart'
     as ui;
 import 'package:nai_launcher/presentation/wiring/style_explore_mapping.dart';
@@ -251,35 +252,98 @@ void main() {
     );
   });
 
-  test('variable order follows prompt markers and keeps the runner target', () {
-    const settings = PillInstanceSettings(mode: PillRollMode.random);
-    const document = PillDocument(
-      text: '\ue001, \ue000',
-      instances: {
-        '\ue000': PillInstance(
-          blockId: 'first',
-          evolutionEnabled: true,
-          settings: settings,
-        ),
-        '\ue001': PillInstance(
-          blockId: 'second',
-          evolutionEnabled: true,
-          settings: settings,
-        ),
-      },
-    );
-    final variables = styleExploreVariables(
-      document,
-      null,
-      missingLabel: 'Missing',
-    );
-    expect(styleExploreVariableInstances(document).map((entry) => entry.key), [
-      '\ue001',
-      '\ue000',
-    ]);
-    expect(variables.map((variable) => variable.evolution), [false, true]);
-    expect(variables.every((variable) => variable.missing), isTrue);
-  });
+  test(
+    'variable order follows prompt markers and marks every genetic block',
+    () {
+      const settings = PillInstanceSettings(mode: PillRollMode.random);
+      const document = PillDocument(
+        text: '\ue001, \ue000',
+        instances: {
+          '\ue000': PillInstance(
+            blockId: 'first',
+            evolutionEnabled: true,
+            settings: settings,
+          ),
+          '\ue001': PillInstance(
+            blockId: 'second',
+            evolutionEnabled: true,
+            settings: settings,
+          ),
+        },
+      );
+      final variables = styleExploreVariables(
+        document,
+        null,
+        missingLabel: 'Missing',
+      );
+      expect(
+        styleExploreVariableInstances(document).map((entry) => entry.key),
+        ['\ue001', '\ue000'],
+      );
+      expect(variables.map((variable) => variable.evolution), [true, true]);
+      expect(variables.every((variable) => variable.missing), isTrue);
+    },
+  );
+
+  test(
+    'ordinary random and sequential variables do not enter genetic helpers',
+    () {
+      const document = PillDocument(
+        text: '\ue003, \ue001, \ue002, \ue004, \ue005, \ue006',
+        instances: {
+          '\ue000': PillInstance(
+            blockId: 'orphan',
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+          '\ue001': PillInstance(
+            blockId: 'genetic-random',
+            evolutionEnabled: true,
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+          '\ue002': PillInstance(
+            blockId: 'ordinary-sequence',
+            settings: PillInstanceSettings(mode: PillRollMode.sequential),
+          ),
+          '\ue003': PillInstance(
+            blockId: 'ordinary-random',
+            locked: true,
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+          '\ue004': PillInstance(
+            blockId: 'genetic-sequence',
+            evolutionEnabled: true,
+            settings: PillInstanceSettings(mode: PillRollMode.sequential),
+          ),
+          '\ue005': PillInstance(blockId: 'fixed', evolutionEnabled: true),
+          '\ue006': PillInstance(
+            blockId: 'disabled',
+            enabled: false,
+            settings: PillInstanceSettings(mode: PillRollMode.random),
+          ),
+        },
+      );
+      expect(
+        styleExploreVariableInstances(document).map((e) => e.value.blockId),
+        [
+          'ordinary-random',
+          'genetic-random',
+          'ordinary-sequence',
+          'genetic-sequence',
+        ],
+      );
+      final variables = styleExploreVariables(
+        document,
+        null,
+        missingLabel: 'Missing',
+      );
+      expect(variables.map((v) => v.evolution), [false, true, false, true]);
+      expect(exploreGeneticInstances(document).map((e) => e.value.blockId), [
+        'genetic-random',
+        'genetic-sequence',
+      ]);
+      expect(resolveExploreOverrideMarkerInDocument(document), '\ue001');
+    },
+  );
 
   test(
     'shared artist helpers retain weighted atomic text and stable deduplication',

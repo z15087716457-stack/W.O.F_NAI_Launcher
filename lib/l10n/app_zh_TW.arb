@@ -7073,8 +7073,9 @@
   "blocks_removeInstanceTip": "從提示詞裡移除",
   "blocks_removeInstance": "從提示詞裡移除",
   "blocks_copySend": "複製傳送文本",
-  "blocks_evolutionOn": "設為遺傳塊",
+  "blocks_evolutionOn": "設為遺傳目標",
   "blocks_evolutionOff": "取消遺傳",
+  "blocks_evolutionModeHint": "啟用的順序或隨機塊可參與遺傳，固定模式不可用。",
   "blocks_rulesTitle": "抽取規則",
   "blocks_rulesHint": "點完成後生效",
   "blocks_rulesDirty": "有改動 · 點完成後生效",
@@ -7586,7 +7587,7 @@
   "explore_earlier": "更早",
   "explore_variables": "隨機變數",
   "explore_variablesHint": "每張重新抽取",
-  "explore_variablesInfo": "提示詞裡的隨機塊。每張候選都會從池裡重新抽，抽到的畫師寫在候選下面；標“進化目標”的塊是進化時子代替換的位置。",
+  "explore_variablesInfo": "提示詞中啟用的順序或隨機塊，按各自的抽取規則取值。標“遺傳目標”的塊會合並抽取結果，組成父本串參與遺傳。",
   "explore_variablesEmpty": "提示詞裡還沒有隨機塊。插入塊庫裡的隨機塊（比如畫師池），每張圖都會重新抽。",
   "explore_openBlockLibrary": "開啟塊庫",
   "explore_variableMissing": "塊已刪除",
@@ -7596,7 +7597,7 @@
       "count": {}
     }
   },
-  "explore_evolutionTarget": "進化目標",
+  "explore_evolutionTarget": "遺傳目標",
   "explore_draw": "抽 {count} 張候選",
   "@explore_draw": {
     "placeholders": {
@@ -7991,9 +7992,9 @@
   },
   "explore_addCustom": "再加一段自訂畫師串",
   "explore_customHint": "比如 0.8::artist:ciloranko::, artist:rella（回車新增）",
-  "explore_targetBefore": "子代會替換提示詞裡",
-  "explore_targetAfter": "的位置，其他內容不變",
-  "explore_noTarget": "提示詞裡沒有隨機塊，子代沒地方替換——先在提示詞裡插入一個隨機塊。",
+  "explore_targetBefore": "遺傳目標：",
+  "explore_targetAfter": "合併抽取結果，組成父本串",
+  "explore_noTarget": "還沒有遺傳目標。請在順序或隨機塊上開啟遺傳。",
   "explore_firstBatch": "第一批子代",
   "explore_atLeast4": "張（至少 4）",
   "explore_createOnly": "只建立",

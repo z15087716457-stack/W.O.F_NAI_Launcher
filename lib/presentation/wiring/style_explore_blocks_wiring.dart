@@ -367,13 +367,16 @@ class StyleExploreVariableWiring extends ConsumerWidget {
               if (instance.enabled != value) notifier.toggleEnabled(marker);
             }),
           ),
-          onEvolutionChanged: (value) => change(
-            () => each((notifier, marker, instance) {
-              if (instance.evolutionEnabled != value) {
-                notifier.toggleEvolution(marker);
-              }
-            }),
-          ),
+          onEvolutionChanged: (value) {
+            if (!settings.hasRoll || !instance.enabled) return;
+            change(
+              () => each((notifier, marker, instance) {
+                if (instance.evolutionEnabled != value) {
+                  notifier.toggleEvolution(marker);
+                }
+              }),
+            );
+          },
           onModeChanged: (mode) => change(
             () => rules(
               settings.copyWith(mode: PillRollMode.values.byName(mode.name)),

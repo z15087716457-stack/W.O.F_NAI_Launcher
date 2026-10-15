@@ -12611,10 +12611,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get blocks_copySend => '送信テキストをコピー';
 
   @override
-  String get blocks_evolutionOn => '遺伝ブロックにする';
+  String get blocks_evolutionOn => '遺伝対象にする';
 
   @override
   String get blocks_evolutionOff => '遺伝を解除';
+
+  @override
+  String get blocks_evolutionModeHint => '有効なブロックを順番またはランダム抽選にすると遺伝に参加できます。';
 
   @override
   String get blocks_rulesTitle => '抽選ルール';
@@ -13649,7 +13652,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get explore_variablesInfo =>
-      'プロンプト内のランダムブロック。候補ごとにプールから抽選し、結果を候補の下に表示します。「進化対象」のブロックは子世代が差し替わる位置です。';
+      '有効な順番・ランダムブロックを、それぞれの抽選ルールで使います。「遺伝対象」の抽選結果を結合し、親のプロンプトとして遺伝に使います。';
 
   @override
   String get explore_variablesEmpty =>
@@ -13667,7 +13670,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get explore_evolutionTarget => '進化対象';
+  String get explore_evolutionTarget => '遺伝対象';
 
   @override
   String explore_draw(Object count) {
@@ -14227,13 +14230,13 @@ class AppLocalizationsJa extends AppLocalizations {
       '例：0.8::artist:ciloranko::, artist:rella（Enter で追加）';
 
   @override
-  String get explore_targetBefore => '子はプロンプト内の';
+  String get explore_targetBefore => '遺伝対象：';
 
   @override
-  String get explore_targetAfter => 'の位置を差し替え、他はそのままです';
+  String get explore_targetAfter => 'の抽選結果を結合して親のプロンプトにします';
 
   @override
-  String get explore_noTarget => 'プロンプトにランダムブロックがないため子を差し替えられません。先に挿入してください。';
+  String get explore_noTarget => '遺伝対象がありません。順番またはランダムブロックで遺伝を有効にしてください。';
 
   @override
   String get explore_firstBatch => '最初の子';

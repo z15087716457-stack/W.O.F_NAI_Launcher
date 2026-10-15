@@ -251,15 +251,14 @@ class _ExploreEvolutionDialogState extends State<ExploreEvolutionDialog> {
     final join = _mode == _EvoMode.join && line != null;
     final name = _name ?? l.explore_lineDefault(run.lines.length + 1);
     final vars = scope.data.variables;
-    final target =
-        vars.where((v) => v.evolution).firstOrNull ?? vars.firstOrNull;
+    final targets = vars.where((v) => v.evolution).toList();
     final cands = [
       for (final k in _keys)
         if (run.candidate(k) case final x?) x,
     ];
     final parents = cands.length + _custom.length;
     final ok =
-        target != null && parents > 0 && (join || name.trim().isNotEmpty);
+        targets.isNotEmpty && parents > 0 && (join || name.trim().isNotEmpty);
 
     Widget step(int n, String title, String body) => Expanded(
       child: Container(
@@ -502,15 +501,16 @@ class _ExploreEvolutionDialogState extends State<ExploreEvolutionDialog> {
                     ],
                   ),
                   Container(
+                    key: const Key('explore-genetic-summary'),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 9,
                     ),
                     decoration: BoxDecoration(
-                      color: target == null ? c.warnBg : c.panel,
+                      color: targets.isEmpty ? c.warnBg : c.panel,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: target == null
+                    child: targets.isEmpty
                         ? Row(
                             spacing: 8,
                             children: [
@@ -529,20 +529,21 @@ class _ExploreEvolutionDialogState extends State<ExploreEvolutionDialog> {
                             runSpacing: 4,
                             children: [
                               UiGlyph(
-                                UiGlyphs.dice,
+                                UiGlyphs.evo,
                                 size: 15,
-                                color: target.color,
+                                color: targets.first.color,
                               ),
                               Text(
                                 l.explore_targetBefore,
                                 style: UiText.sans(12, color: c.muted),
                               ),
-                              UiBlockPill(
-                                label: target.title,
-                                color: target.color,
-                                icon: target.icon,
-                                badge: UiBlockBadge.evolution,
-                              ),
+                              for (final target in targets)
+                                UiBlockPill(
+                                  label: target.title,
+                                  color: target.color,
+                                  icon: target.icon,
+                                  badge: UiBlockBadge.evolution,
+                                ),
                               Text(
                                 l.explore_targetAfter,
                                 style: UiText.sans(12, color: c.muted),

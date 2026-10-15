@@ -112,15 +112,6 @@ class _CardState extends State<_Card> {
         label: l10n.blocks_copySend,
         onTap: a.onCopySend,
       ),
-      if (a.onEvolutionChanged != null && d.evolution != null)
-        UiMenuItem(
-          glyph: UiGlyphs.evo,
-          label: d.evolution!
-              ? l10n.blocks_evolutionOff
-              : l10n.blocks_evolutionOn,
-          enabled: d.enabled,
-          onTap: () => a.onEvolutionChanged!(!d.evolution!),
-        ),
       UiMenuItem(
         glyph: UiGlyphs.trash,
         label: l10n.blocks_removeInstance,
@@ -312,8 +303,29 @@ class _CardState extends State<_Card> {
                   Row(
                     spacing: 8,
                     children: [
-                      BlockLabel(l10n.blocks_drawMode),
-                      const Spacer(),
+                      if (d.evolution != null &&
+                          a.onEvolutionChanged != null) ...[
+                        Expanded(
+                          child: Tooltip(
+                            message: l10n.blocks_drawMode,
+                            child: Text(
+                              l10n.blocks_drawMode,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: UiText.sans(
+                                11.5,
+                                weight: FontWeight.w600,
+                                color: c.muted,
+                                letterSpacing: .23,
+                              ),
+                            ),
+                          ),
+                        ),
+                        _geneticToggle(context),
+                      ] else ...[
+                        BlockLabel(l10n.blocks_drawMode),
+                        const Spacer(),
+                      ],
                       BlockSeg<BlockMode>(
                         key: const Key('block-card-modes'),
                         values: BlockMode.values,
@@ -432,6 +444,33 @@ class _CardState extends State<_Card> {
       builder: (_) =>
           UiMenu(items: menu(), onClose: () => setState(() => _menu = null)),
       child: card,
+    );
+  }
+
+  Widget _geneticToggle(BuildContext context) {
+    final l = context.l10n;
+    final enabled = d.enabled && d.settings.mode != BlockMode.fixed;
+    final active = enabled && d.evolution == true;
+    final label = !enabled
+        ? l.blocks_evolutionModeHint
+        : active
+        ? l.blocks_evolutionOff
+        : l.blocks_evolutionOn;
+    return Semantics(
+      key: const Key('block-card-genetic'),
+      button: true,
+      enabled: enabled,
+      toggled: active,
+      label: label,
+      child: UiIconBox(
+        glyph: UiGlyphs.evo,
+        size: 26,
+        glyphSize: 16,
+        tone: active ? UiIconBoxTone.on : UiIconBoxTone.plain,
+        color: enabled ? null : context.ui.faint,
+        tooltip: label,
+        onTap: enabled ? () => a.onEvolutionChanged!(!d.evolution!) : null,
+      ),
     );
   }
 

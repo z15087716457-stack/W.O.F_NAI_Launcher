@@ -12996,10 +12996,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blocks_copySend => 'Copy sent text';
 
   @override
-  String get blocks_evolutionOn => 'Mark as evolution target';
+  String get blocks_evolutionOn => 'Mark as genetic target';
 
   @override
   String get blocks_evolutionOff => 'Unmark evolution';
+
+  @override
+  String get blocks_evolutionModeHint =>
+      'Enable this block and use sequential or random mode to include it in genetics.';
 
   @override
   String get blocks_rulesTitle => 'Draw rules';
@@ -14050,7 +14054,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get explore_variablesInfo =>
-      'Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.';
+      'Enabled sequential and random blocks follow their own draw rules. Results from blocks marked as genetic targets are combined into a parent prompt for breeding.';
 
   @override
   String get explore_variablesEmpty =>
@@ -14068,7 +14072,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get explore_evolutionTarget => 'Evolution target';
+  String get explore_evolutionTarget => 'Genetic target';
 
   @override
   String explore_draw(Object count) {
@@ -14642,14 +14646,15 @@ class AppLocalizationsEn extends AppLocalizations {
       'e.g. 0.8::artist:ciloranko::, artist:rella (Enter to add)';
 
   @override
-  String get explore_targetBefore => 'Offspring replace';
+  String get explore_targetBefore => 'Genetic targets:';
 
   @override
-  String get explore_targetAfter => 'in the prompt; everything else stays';
+  String get explore_targetAfter =>
+      'combine their draws into the parent prompt';
 
   @override
   String get explore_noTarget =>
-      'There is no random block in the prompt for offspring to replace — insert one first.';
+      'No genetic targets yet. Enable genetics on a sequential or random block.';
 
   @override
   String get explore_firstBatch => 'First batch';

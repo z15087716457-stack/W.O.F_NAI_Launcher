@@ -7073,8 +7073,9 @@
   "blocks_removeInstanceTip": "Remove from prompt",
   "blocks_removeInstance": "Remove from prompt",
   "blocks_copySend": "Copy sent text",
-  "blocks_evolutionOn": "Mark as evolution target",
+  "blocks_evolutionOn": "Mark as genetic target",
   "blocks_evolutionOff": "Unmark evolution",
+  "blocks_evolutionModeHint": "Enable this block and use sequential or random mode to include it in genetics.",
   "blocks_rulesTitle": "Draw rules",
   "blocks_rulesHint": "Applies when you click Done",
   "blocks_rulesDirty": "Changed · applies on Done",
@@ -7586,7 +7587,7 @@
   "explore_earlier": "Earlier",
   "explore_variables": "Random variables",
   "explore_variablesHint": "Re-roll per image",
-  "explore_variablesInfo": "Random blocks in your prompt. Each candidate draws again from the pool and shows what it got; the block marked as evolution target is where offspring swap in.",
+  "explore_variablesInfo": "Enabled sequential and random blocks follow their own draw rules. Results from blocks marked as genetic targets are combined into a parent prompt for breeding.",
   "explore_variablesEmpty": "No random blocks in the prompt yet. Insert one from the block library (e.g. an artist pool) and every image draws again.",
   "explore_openBlockLibrary": "Open block library",
   "explore_variableMissing": "Block deleted",
@@ -7596,7 +7597,7 @@
       "count": {}
     }
   },
-  "explore_evolutionTarget": "Evolution target",
+  "explore_evolutionTarget": "Genetic target",
   "explore_draw": "Draw {count} candidates",
   "@explore_draw": {
     "placeholders": {
@@ -7991,9 +7992,9 @@
   },
   "explore_addCustom": "Add a custom artist string",
   "explore_customHint": "e.g. 0.8::artist:ciloranko::, artist:rella (Enter to add)",
-  "explore_targetBefore": "Offspring replace",
-  "explore_targetAfter": "in the prompt; everything else stays",
-  "explore_noTarget": "There is no random block in the prompt for offspring to replace — insert one first.",
+  "explore_targetBefore": "Genetic targets:",
+  "explore_targetAfter": "combine their draws into the parent prompt",
+  "explore_noTarget": "No genetic targets yet. Enable genetics on a sequential or random block.",
   "explore_firstBatch": "First batch",
   "explore_atLeast4": "images (at least 4)",
   "explore_createOnly": "Create only",

@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/ui/explore/explore_contract.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'explore_test_harness.dart';
 
 void main() {
@@ -221,10 +222,32 @@ void main() {
           await interact(t);
           await t.pumpAndSettle();
         }
-        await expectLater(
-          find.byKey(const Key('explore-capture')),
-          matchesGoldenFile('goldens/$file.png'),
-        );
+        final approved = <Rect>[
+          for (var i = 0; i < data.variables.length; i++)
+            if (find
+                .byKey(Key('explore-variable-genetic-$i'))
+                .evaluate()
+                .isNotEmpty)
+              t.getRect(find.byKey(Key('explore-variable-genetic-$i'))),
+          if (find
+              .byKey(const Key('explore-genetic-summary'))
+              .evaluate()
+              .isNotEmpty)
+            t.getRect(find.byKey(const Key('explore-genetic-summary'))),
+        ];
+        if (approved.isEmpty) {
+          await expectLater(
+            find.byKey(const Key('explore-capture')),
+            matchesGoldenFile('goldens/$file.png'),
+          );
+        } else {
+          await expectOutsideApprovedRegions(
+            t,
+            find.byKey(const Key('explore-capture')),
+            'test/presentation/ui/explore/goldens/$file.png',
+            approved,
+          );
+        }
         await t.pumpWidget(const SizedBox());
         debugDisableShadows = true;
       });

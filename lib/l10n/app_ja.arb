@@ -7073,8 +7073,9 @@
   "blocks_removeInstanceTip": "プロンプトから削除",
   "blocks_removeInstance": "プロンプトから削除",
   "blocks_copySend": "送信テキストをコピー",
-  "blocks_evolutionOn": "遺伝ブロックにする",
+  "blocks_evolutionOn": "遺伝対象にする",
   "blocks_evolutionOff": "遺伝を解除",
+  "blocks_evolutionModeHint": "有効なブロックを順番またはランダム抽選にすると遺伝に参加できます。",
   "blocks_rulesTitle": "抽選ルール",
   "blocks_rulesHint": "完了を押すと反映",
   "blocks_rulesDirty": "変更あり · 完了で反映",
@@ -7586,7 +7587,7 @@
   "explore_earlier": "それ以前",
   "explore_variables": "ランダム変数",
   "explore_variablesHint": "1 枚ごとに抽選",
-  "explore_variablesInfo": "プロンプト内のランダムブロック。候補ごとにプールから抽選し、結果を候補の下に表示します。「進化対象」のブロックは子世代が差し替わる位置です。",
+  "explore_variablesInfo": "有効な順番・ランダムブロックを、それぞれの抽選ルールで使います。「遺伝対象」の抽選結果を結合し、親のプロンプトとして遺伝に使います。",
   "explore_variablesEmpty": "プロンプトにランダムブロックがありません。ブロックライブラリから（絵師プールなど）を挿入すると、毎回抽選されます。",
   "explore_openBlockLibrary": "ブロックライブラリを開く",
   "explore_variableMissing": "ブロック削除済み",
@@ -7596,7 +7597,7 @@
       "count": {}
     }
   },
-  "explore_evolutionTarget": "進化対象",
+  "explore_evolutionTarget": "遺伝対象",
   "explore_draw": "候補を {count} 枚引く",
   "@explore_draw": {
     "placeholders": {
@@ -7991,9 +7992,9 @@
   },
   "explore_addCustom": "カスタム絵師列を追加",
   "explore_customHint": "例：0.8::artist:ciloranko::, artist:rella（Enter で追加）",
-  "explore_targetBefore": "子はプロンプト内の",
-  "explore_targetAfter": "の位置を差し替え、他はそのままです",
-  "explore_noTarget": "プロンプトにランダムブロックがないため子を差し替えられません。先に挿入してください。",
+  "explore_targetBefore": "遺伝対象：",
+  "explore_targetAfter": "の抽選結果を結合して親のプロンプトにします",
+  "explore_noTarget": "遺伝対象がありません。順番またはランダムブロックで遺伝を有効にしてください。",
   "explore_firstBatch": "最初の子",
   "explore_atLeast4": "枚（4 枚以上）",
   "explore_createOnly": "作成のみ",
