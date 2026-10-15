@@ -757,6 +757,11 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                     },
                                     child: ChannelOverlay(
                                       data: channel,
+                                      claimEntryToast: () => ref
+                                          .read(
+                                            canvasChannelEntryNoticeProvider,
+                                          )
+                                          .claim(),
                                       actions: ChannelActions(
                                         onSettingsChanged: (value) => ref
                                             .read(

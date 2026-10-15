@@ -39,6 +39,29 @@ void main() {
   tearDownAll(AppLoggerTestIsolation.tearDown);
 
   test(
+    'entry notice survives route listeners and settings reset, not restart',
+    () async {
+      final storage = MemoryDraftSettings();
+      final first = _container(storage, 17);
+      final notice = first.read(canvasChannelEntryNoticeProvider);
+      expect(notice.claim(), isTrue);
+      expect(storage.values, isEmpty);
+      final sub = first.listen(canvasChannelEntryNoticeProvider, (_, _) {});
+      sub.close();
+      await first.pump();
+      first.invalidate(canvasChannelNotifierProvider);
+      first.read(canvasChannelNotifierProvider);
+      expect(first.read(canvasChannelEntryNoticeProvider), same(notice));
+      expect(notice.claim(), isFalse);
+      first.dispose();
+      final restarted = _container(storage, 23);
+      addTearDown(restarted.dispose);
+      expect(restarted.read(canvasChannelEntryNoticeProvider).claim(), isTrue);
+      expect(storage.values, isEmpty);
+    },
+  );
+
+  test(
     'real isolated storage survives restart; only the seed changes',
     () async {
       final dir = await Directory.systemTemp.createTemp(

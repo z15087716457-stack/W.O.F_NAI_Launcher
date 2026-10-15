@@ -15,9 +15,18 @@ import 'channel_palette.dart';
 /// 接线：放在画布引擎的屏幕层（图块之上、浮动工具条之下），铺满画布区域。只有刻度条那一条
 /// 接收指针，其余区域透传给画布。
 class ChannelOverlay extends StatefulWidget {
-  const ChannelOverlay({super.key, required this.data, required this.actions});
+  const ChannelOverlay({
+    super.key,
+    required this.data,
+    required this.actions,
+    this.claimEntryToast,
+  });
   final ChannelViewData data;
   final ChannelActions actions;
+
+  /// The host owns the launch-wide lifetime; standalone previews may omit it.
+  /// Called only when a random-channel entry notice is actually about to show.
+  final bool Function()? claimEntryToast;
 
   /// 刻度条离画布上下边的距离（让开浮动工具条）。
   static const scrubInset = 64.0;
@@ -52,7 +61,13 @@ class _ChannelOverlayState extends State<ChannelOverlay> {
   }
 
   void _show() {
-    if (!mounted || widget.data.settings.mode != ChannelMode.random) return;
+    if (!mounted) return;
+    if (widget.data.settings.mode != ChannelMode.random) {
+      _hide?.cancel();
+      if (_toast) setState(() => _toast = false);
+      return;
+    }
+    if (_toast || !(widget.claimEntryToast?.call() ?? true)) return;
     setState(() => _toast = true);
     _hide?.cancel();
     _hide = Timer(const Duration(milliseconds: 4200), () {

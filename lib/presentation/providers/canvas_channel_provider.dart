@@ -13,6 +13,22 @@ final canvasChannelSeedProvider = Provider<int>(
   (ref) => Random().nextInt(1 << 31),
 );
 
+/// Kept by the application scope, not a route or persisted preferences. A new
+/// launch gets a new notice; remounting the canvas never rearms this one.
+final canvasChannelEntryNoticeProvider = Provider(
+  (ref) => CanvasChannelEntryNotice(),
+);
+
+class CanvasChannelEntryNotice {
+  bool _shown = false;
+
+  bool claim() {
+    if (_shown) return false;
+    _shown = true;
+    return true;
+  }
+}
+
 final canvasChannelNotifierProvider =
     NotifierProvider<CanvasChannelNotifier, ChannelSettings>(
       CanvasChannelNotifier.new,

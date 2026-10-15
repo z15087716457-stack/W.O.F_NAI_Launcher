@@ -224,6 +224,9 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final notice =
+        Platform.environment['CAPTURE_CHANNEL_NOTICE'] == '1' &&
+        name.startsWith('notice-');
     final welcome =
         Platform.environment['CAPTURE_WELCOME_ALIGNMENT'] == '1' &&
         name.startsWith('welcome-');
@@ -240,7 +243,8 @@ void main() {
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!welcome &&
+    if (!notice &&
+        !welcome &&
         !feedback &&
         !channel &&
         !oldCompare &&
@@ -256,7 +260,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = welcome
+      final area = notice
+          ? 'channel-entry-notice-20261015'
+          : welcome
           ? 'canvas-welcome-alignment-20261015'
           : feedback
           ? 'feedback-r6-20261015'
@@ -392,6 +398,76 @@ void main() {
   Finder welcomeLogo() => find.byWidgetPredicate(
     (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
   );
+
+  testWidgets('本次通道提示每轮启动一次，重进和切模式不重弹', (tester) async {
+    publish(const ImageGenerationState());
+    await pump(tester, fullPage: true);
+    final toast = find.byKey(const Key('channel-toast'));
+    expect(toast, findsOneWidget);
+    await capture(tester, 'notice-first-entry');
+    await tester.pumpWidget(const SizedBox());
+    await pump(tester, fullPage: true);
+    expect(toast, findsNothing);
+    await capture(tester, 'notice-return-within-four-seconds');
+    final settings = container.read(canvasChannelNotifierProvider.notifier);
+    for (final mode in [
+      ChannelMode.fixed,
+      ChannelMode.random,
+      ChannelMode.off,
+      ChannelMode.random,
+    ]) {
+      await settings.set(
+        container.read(canvasChannelNotifierProvider).copyWith(mode: mode),
+      );
+      await tester.pumpAndSettle();
+      expect(toast, findsNothing);
+    }
+    await settings.set(
+      container
+          .read(canvasChannelNotifierProvider)
+          .copyWith(seed: 91, pool: {ChannelTheme.stars, ChannelTheme.wave}),
+    );
+    await tester.pumpAndSettle();
+    expect(toast, findsNothing);
+    publish(ImageGenerationState(history: [image(81)]));
+    await tester.pumpAndSettle();
+    expect(toast, findsNothing);
+    await capture(tester, 'notice-after-mode-and-seed-changes');
+  });
+
+  for (final initial in [ChannelMode.fixed, ChannelMode.off]) {
+    testWidgets('通道提示不被 $initial 提前消耗，首次随机后不重弹', (tester) async {
+      publish(const ImageGenerationState());
+      final settings = container.read(canvasChannelNotifierProvider.notifier);
+      await settings.set(
+        container.read(canvasChannelNotifierProvider).copyWith(mode: initial),
+      );
+      await pump(tester, fullPage: true);
+      final toast = find.byKey(const Key('channel-toast'));
+      expect(toast, findsNothing);
+      await settings.set(
+        container
+            .read(canvasChannelNotifierProvider)
+            .copyWith(mode: ChannelMode.random),
+      );
+      await tester.pumpAndSettle();
+      expect(toast, findsOneWidget);
+      await settings.set(
+        container
+            .read(canvasChannelNotifierProvider)
+            .copyWith(mode: ChannelMode.fixed),
+      );
+      await tester.pumpAndSettle();
+      expect(toast, findsNothing);
+      await settings.set(
+        container
+            .read(canvasChannelNotifierProvider)
+            .copyWith(mode: ChannelMode.random),
+      );
+      await tester.pumpAndSettle();
+      expect(toast, findsNothing);
+    });
+  }
 
   void expectWelcomeCentered(WidgetTester tester) {
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
