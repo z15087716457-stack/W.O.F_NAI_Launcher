@@ -357,6 +357,11 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     );
   }
 
+  // The welcome layout is in viewport space. Keep the background's quiet
+  // world-x=0 corridor on that same centre, regardless of a retained camera.
+  CanvasCamera _welcomeCamera() =>
+      CanvasCamera(offset: _viewport.center(Offset.zero), scale: 1);
+
   void _setViewport(Size size) {
     final changed = _viewport != size;
     _viewport = size;
@@ -510,6 +515,11 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
           selected != null &&
           !next.groups.any((group) => group.key == selected.group);
       if (prev?.groups.firstOrNull?.key != head.key || selectionMissing) {
+        if (widget.visualChannel && prev?.groups.isEmpty == true) {
+          // Start the first focus flight from what was actually on screen,
+          // rather than a camera left behind by an earlier canvas visit.
+          _camera.jump(_welcomeCamera(), notifyIdle: false);
+        }
         _manualOverview = false;
         ref
             .read(generationCanvasGroupSelectionProvider.notifier)
@@ -669,9 +679,13 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                     Positioned.fill(
                       child: Consumer(
                         builder: (context, ref, _) {
-                          final camera = ref.watch(
+                          final retainedCamera = ref.watch(
                             generationCanvasCameraProvider,
                           );
+                          final camera =
+                              widget.visualChannel && layout.groups.isEmpty
+                              ? _welcomeCamera()
+                              : retainedCamera;
                           final channel = channelFeed == null
                               ? null
                               : ChannelViewData(

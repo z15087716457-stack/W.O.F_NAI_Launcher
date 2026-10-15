@@ -224,6 +224,9 @@ void main() {
   }
 
   Future<void> capture(WidgetTester tester, String name) async {
+    final welcome =
+        Platform.environment['CAPTURE_WELCOME_ALIGNMENT'] == '1' &&
+        name.startsWith('welcome-');
     final feedback =
         Platform.environment['CAPTURE_R6_FEEDBACK'] == '1' &&
         name.startsWith('r6-');
@@ -237,7 +240,8 @@ void main() {
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
-    if (!feedback &&
+    if (!welcome &&
+        !feedback &&
         !channel &&
         !oldCompare &&
         !retiredEntry &&
@@ -252,7 +256,9 @@ void main() {
           boundary.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final snapshot = await target.toImage(pixelRatio: 1);
       final data = await snapshot.toByteData(format: ui.ImageByteFormat.png);
-      final area = feedback
+      final area = welcome
+          ? 'canvas-welcome-alignment-20261015'
+          : feedback
           ? 'feedback-r6-20261015'
           : channel
           ? 'channel-backend-20261015'
@@ -381,6 +387,121 @@ void main() {
     );
     expect(find.byKey(const ValueKey('canvas-world-viewport')), findsOneWidget);
     await capture(tester, 'r6-after-first-image');
+  });
+
+  Finder welcomeLogo() => find.byWidgetPredicate(
+    (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
+  );
+
+  void expectWelcomeCentered(WidgetTester tester) {
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final logo = tester.getRect(welcomeLogo());
+    final tip = tester.getRect(find.byKey(const Key('tip-welcome-text')));
+    final background = tester
+        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .data;
+    final quietCenter =
+        viewport.left + background.camera.worldToScreen(Offset.zero).dx;
+    expect(logo.center.dx, closeTo(viewport.center.dx, .01));
+    expect(quietCenter, closeTo(logo.center.dx, .01));
+    expect(tip.center.dx, closeTo(quietCenter, .01));
+    expect(background.camera.scale, 1);
+    expect(logo.left, greaterThanOrEqualTo(quietCenter - 416));
+    expect(logo.right, lessThanOrEqualTo(quietCenter + 416));
+    expect(tip.left, greaterThanOrEqualTo(quietCenter - 416));
+    expect(tip.right, lessThanOrEqualTo(quietCenter + 416));
+    final world = tester.widget<CanvasWorldViewport>(
+      find.byType(CanvasWorldViewport),
+    );
+    expect(world.camera.offset, background.camera.offset);
+    expect(world.camera.scale, background.camera.scale);
+  }
+
+  for (final dark in [false, true]) {
+    testWidgets('空态六种背景与 Logo 同轴，缩窗和重进不继承偏移：$dark', (tester) async {
+      publish(const ImageGenerationState());
+      final controller = container.read(
+        generationCanvasCameraProvider.notifier,
+      );
+      controller.jump(
+        const CanvasCamera(offset: Offset(-800, 9000), scale: .4),
+        notifyIdle: false,
+      );
+      await pump(tester, fullPage: true, dark: dark);
+      await tester.runAsync(
+        () => precacheImage(
+          tester.widget<Image>(welcomeLogo()).image,
+          tester.element(find.byType(GenCanvas)),
+        ),
+      );
+      await tester.pump();
+      expectWelcomeCentered(tester);
+      final state = tester.state(find.byType(GenerationCanvasView));
+      final settings = container.read(canvasChannelNotifierProvider.notifier);
+      for (final theme in ChannelTheme.values) {
+        await settings.set(
+          container
+              .read(canvasChannelNotifierProvider)
+              .copyWith(mode: ChannelMode.fixed, fixed: theme, motion: false),
+        );
+        for (final width in [2240.0, 1280.0]) {
+          tester.view.physicalSize = Size(width, width == 2240 ? 1345 : 850);
+          await tester.pumpAndSettle();
+          expectWelcomeCentered(tester);
+          expect(tester.state(find.byType(GenerationCanvasView)), same(state));
+          expect(tester.takeException(), isNull);
+          await capture(
+            tester,
+            'welcome-${theme.name}-${dark ? 'dark' : 'light'}-${width.toInt()}',
+          );
+        }
+      }
+      await wheel(tester, const Offset(200, 800));
+      expectWelcomeCentered(tester);
+      await tester.pumpWidget(const SizedBox());
+      controller.jump(
+        const CanvasCamera(offset: Offset(3000, -7000), scale: .1),
+        notifyIdle: false,
+      );
+      await pump(tester, fullPage: true, dark: dark);
+      expectWelcomeCentered(tester);
+    });
+  }
+
+  testWidgets('首批从空态实际视图接续，完成后正常滚动，清空后恢复居中', (tester) async {
+    storage.values[StorageKeys.canvasReducedMotion] = false;
+    publish(const ImageGenerationState());
+    final controller = container.read(generationCanvasCameraProvider.notifier);
+    controller.jump(
+      const CanvasCamera(offset: Offset(6000, -9000), scale: .2),
+      notifyIdle: false,
+    );
+    await pump(tester, fullPage: true);
+    final before = tester
+        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .data
+        .camera;
+    publish(loading(71));
+    await tester.pump();
+    expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
+    expect(camera().offset, before.offset);
+    expect(camera().scale, before.scale);
+    publish(ImageGenerationState(history: [image(71)]));
+    await tester.pumpAndSettle();
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final item = container.read(canvasFeedLayoutProvider).items.single;
+    expect(
+      (camera().worldToScreen(item.worldRect.center) -
+              Offset(viewport.width / 2, viewport.height / 2 - 10))
+          .distance,
+      lessThan(1),
+    );
+    final settled = camera();
+    await wheel(tester, const Offset(0, 80));
+    expect(camera().offset, settled.offset - const Offset(0, 80));
+    publish(const ImageGenerationState());
+    await tester.pumpAndSettle();
+    expectWelcomeCentered(tester);
   });
 
   testWidgets('主画布显式启用通道，开关不重挂图块，设置回调落到存储', (tester) async {
