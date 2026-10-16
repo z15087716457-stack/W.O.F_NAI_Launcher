@@ -18894,6 +18894,20 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get set_rgStartupTitle => '첫 색인 준비에는 시간이 걸릴 수 있습니다';
+
+  @override
+  String get set_rgStartupBody =>
+      'Studio를 시작한 후 처음으로 색인을 만들거나 재개할 때는 로컬 실행 환경, 모델, 기존 색인을 준비해야 합니다. 데이터가 많으면 몇 분 이상 걸릴 수 있으며, 이 단계에서는 진행 수치가 잠시 바뀌지 않을 수 있습니다. 잠시 기다려 주세요.';
+
+  @override
+  String get set_rgPreparing => '색인 준비 중';
+
+  @override
+  String get set_rgPreparingHint =>
+      '색인을 준비하거나 확인하고 있습니다. 데이터가 많으면 시간이 걸리고 진행 수치가 잠시 바뀌지 않을 수 있습니다.';
+
+  @override
   String get set_rgPlanLoading => '색인할 내용을 세는 중…';
 
   @override

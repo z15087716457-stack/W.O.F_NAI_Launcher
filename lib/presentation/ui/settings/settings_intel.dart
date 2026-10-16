@@ -1114,6 +1114,20 @@ class SettingsRagPage extends StatelessWidget {
       if (!x.enabled) return null;
       final plan = rg.plan?.kind == x.kind ? rg.plan : null;
       final parts = [
+        if (rg.preparing == x.kind)
+          Row(
+            key: Key('rag-preparing-${x.kind.name}'),
+            spacing: 8,
+            children: [
+              const UiSpinner(),
+              Expanded(
+                child: Text(
+                  l.set_rgPreparingHint,
+                  style: UiText.sans(11.5, color: c.muted, height: 1.5),
+                ),
+              ),
+            ],
+          ),
         if (x.state != SettingsRagState.empty)
           Row(
             spacing: 10,
@@ -1331,14 +1345,18 @@ class SettingsRagPage extends StatelessWidget {
                 title: SettingsFormat.ragSource(context, x.kind),
                 subtitle: sub(x.kind),
                 badges: [
-                  if (x.enabled && x.state == SettingsRagState.empty)
-                    UiMini(l.set_rgEmpty),
-                  if (x.enabled && x.state == SettingsRagState.paused)
-                    UiMini(l.set_rgPaused, tone: UiMiniTone.warn),
-                  if (x.enabled && x.state == SettingsRagState.building)
-                    UiMini(l.set_rgBuilding, tone: UiMiniTone.accent),
-                  if (x.enabled && x.state == SettingsRagState.error)
-                    UiMini(l.set_rgError, tone: UiMiniTone.error),
+                  if (rg.preparing == x.kind)
+                    UiMini(l.set_rgPreparing, tone: UiMiniTone.accent)
+                  else ...[
+                    if (x.enabled && x.state == SettingsRagState.empty)
+                      UiMini(l.set_rgEmpty),
+                    if (x.enabled && x.state == SettingsRagState.paused)
+                      UiMini(l.set_rgPaused, tone: UiMiniTone.warn),
+                    if (x.enabled && x.state == SettingsRagState.building)
+                      UiMini(l.set_rgBuilding, tone: UiMiniTone.accent),
+                    if (x.enabled && x.state == SettingsRagState.error)
+                      UiMini(l.set_rgError, tone: UiMiniTone.error),
+                  ],
                 ],
                 below: below(x),
                 control: Padding(

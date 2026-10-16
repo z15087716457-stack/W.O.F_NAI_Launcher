@@ -10206,6 +10206,10 @@
       "n": {}
     }
   },
+  "set_rgStartupTitle": "Initial index preparation may take a while",
+  "set_rgStartupBody": "The first time you build or resume an index after starting Studio, the local runtime, models, and existing index need to be prepared. Large datasets may take several minutes or longer. Progress counts may stay unchanged during this step; please wait.",
+  "set_rgPreparing": "Preparing index",
+  "set_rgPreparingHint": "Preparing or checking the index. Large datasets may take a while, and progress counts may stay unchanged.",
   "set_rgPlanLoading": "Counting what will be indexed…",
   "set_rgPlanTags": "Will index {n} tags with aliases and local descriptions.",
   "@set_rgPlanTags": {

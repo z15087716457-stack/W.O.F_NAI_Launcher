@@ -1425,6 +1425,7 @@ class SettingsRagData {
     this.download,
     this.modelsMissing = false,
     this.plan,
+    this.preparing,
     this.error,
   });
 
@@ -1462,11 +1463,15 @@ class SettingsRagData {
   /// 待确认的建库计划；null = 没有。
   final SettingsRagPlan? plan;
 
+  /// A user-requested index preview/start/resume is awaiting the local worker.
+  final SettingsRagSourceKind? preparing;
+
   /// 最近一次安装 / 下载失败的原因（原样显示在状态卡里）。
   final String? error;
 
   /// 安装、下载、建库任一在进行：别的重活按钮都不可点。
   bool get busy =>
+      preparing != null ||
       install != null ||
       download != null ||
       sources.any((s) => s.state == SettingsRagState.building);

@@ -38,6 +38,7 @@ SettingsRagData settingsRagData(
   SettingsRagSessionState session,
   ({bool embedding, bool reranker})? weights, {
   int indexBytes = 0,
+  SettingsRagSourceKind? preparing,
 }) {
   final environment = runtime.valueOrNull;
   final ready =
@@ -104,6 +105,7 @@ SettingsRagData settingsRagData(
         }(),
     ],
     indexBytes: indexBytes,
+    preparing: preparing,
     checking: runtime.isLoading,
     runtimeReady: ready,
     runtimeCuda: environment?.cuda == true,

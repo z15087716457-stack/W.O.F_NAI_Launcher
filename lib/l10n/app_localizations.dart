@@ -33914,6 +33914,30 @@ abstract class AppLocalizations {
   /// **'{n} skipped'**
   String set_rgSkipped(Object n);
 
+  /// No description provided for @set_rgStartupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Initial index preparation may take a while'**
+  String get set_rgStartupTitle;
+
+  /// No description provided for @set_rgStartupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The first time you build or resume an index after starting Studio, the local runtime, models, and existing index need to be prepared. Large datasets may take several minutes or longer. Progress counts may stay unchanged during this step; please wait.'**
+  String get set_rgStartupBody;
+
+  /// No description provided for @set_rgPreparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing index'**
+  String get set_rgPreparing;
+
+  /// No description provided for @set_rgPreparingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing or checking the index. Large datasets may take a while, and progress counts may stay unchanged.'**
+  String get set_rgPreparingHint;
+
   /// No description provided for @set_rgPlanLoading.
   ///
   /// In en, this message translates to:

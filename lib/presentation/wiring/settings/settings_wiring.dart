@@ -38,6 +38,7 @@ import 'settings_caches.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
+import 'settings_rag_startup.dart';
 import 'settings_shortcuts.dart';
 import 'settings_storage.dart';
 import 'settings_system.dart';
@@ -353,11 +354,36 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
           _run(() => plans.sourceEnabled(kind, value)),
       onRagPause: (kind) =>
           _run(() => rag.pause(source: settingsRagSource(kind))),
-      onRagResume: (kind) =>
-          _run(() => rag.resume(source: settingsRagSource(kind))),
-      onRagBuild: (kind) => _run(() => plans.preview(kind)),
-      onRagRebuild: (kind) => _run(() => plans.preview(kind, rebuild: true)),
-      onRagStartPlan: () => _run(plans.start),
+      onRagResume: (kind) => _run(
+        () => runSettingsRagStartup(
+          ref,
+          context,
+          kind,
+          () => rag.resume(source: settingsRagSource(kind)),
+        ),
+      ),
+      onRagBuild: (kind) => _run(
+        () => runSettingsRagStartup(
+          ref,
+          context,
+          kind,
+          () => plans.preview(kind),
+        ),
+      ),
+      onRagRebuild: (kind) => _run(
+        () => runSettingsRagStartup(
+          ref,
+          context,
+          kind,
+          () => plans.preview(kind, rebuild: true),
+        ),
+      ),
+      onRagStartPlan: () => _run(() async {
+        final kind = ref.read(settingsRagSessionProvider).plan?.kind;
+        if (kind != null) {
+          await runSettingsRagStartup(ref, context, kind, plans.start);
+        }
+      }),
       onRagCancelPlan: plans.cancelPlan,
       onRagClear: (kind) =>
           _run(() => rag.clear(source: settingsRagSource(kind))),

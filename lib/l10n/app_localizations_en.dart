@@ -19412,6 +19412,20 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get set_rgStartupTitle => 'Initial index preparation may take a while';
+
+  @override
+  String get set_rgStartupBody =>
+      'The first time you build or resume an index after starting Studio, the local runtime, models, and existing index need to be prepared. Large datasets may take several minutes or longer. Progress counts may stay unchanged during this step; please wait.';
+
+  @override
+  String get set_rgPreparing => 'Preparing index';
+
+  @override
+  String get set_rgPreparingHint =>
+      'Preparing or checking the index. Large datasets may take a while, and progress counts may stay unchanged.';
+
+  @override
   String get set_rgPlanLoading => 'Counting what will be indexed…';
 
   @override

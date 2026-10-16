@@ -10206,6 +10206,10 @@
       "n": {}
     }
   },
+  "set_rgStartupTitle": "首次准备索引可能较慢",
+  "set_rgStartupBody": "每次启动 Studio 后，首次建立或继续索引时，需要准备本地运行环境、模型和已有索引。数据较多时可能需要几分钟或更久，期间进度数字可能暂时不变，请耐心等待。",
+  "set_rgPreparing": "正在准备索引",
+  "set_rgPreparingHint": "正在准备或检查索引，数据较多时请耐心等待；进度数字可能暂时不变。",
   "set_rgPlanLoading": "正在统计要收录的内容…",
   "set_rgPlanTags": "将收录 {n} 项标签、别名与已有本地释义。",
   "@set_rgPlanTags": {

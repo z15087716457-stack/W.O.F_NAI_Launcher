@@ -37,6 +37,7 @@ import 'settings_caches.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
+import 'settings_rag_startup.dart';
 import 'settings_shortcuts.dart';
 import 'settings_storage.dart';
 import 'settings_system.dart';
@@ -171,6 +172,7 @@ SettingsViewData settingsViewData(
     indexBytes: page == SettingsPageId.rag
         ? ref.watch(settingsIndexBytesProvider).valueOrNull ?? 0
         : 0,
+    preparing: ref.watch(settingsRagStartupProvider).preparing,
   );
   final storage =
       page == SettingsPageId.storage || page == SettingsPageId.overview
