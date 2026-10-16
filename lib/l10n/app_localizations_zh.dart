@@ -7886,7 +7886,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get modelSettings_reasoningHelp =>
-      '纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。';
+      '翻译通常不需要开启思考；考虑到接口使用结构化输出，建议选择该模型支持的最低思考档位。';
 
   @override
   String get modelSettings_reasoningHelpLabel => '思考档位建议';
@@ -18070,6 +18070,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_mdTasks => '功能分配';
 
   @override
+  String get set_mdTaskHint => '即使不使用翻译，也可将模型用于语义分割、结构化排序等功能。';
+
+  @override
   String get set_mdPresets => '提示词预设';
 
   @override
@@ -27286,7 +27289,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get modelSettings_reasoningHelp =>
-      '純翻譯通常無需開啟思考；為兼顧打標、語義分類等處理，建議開啟該模型支援的最低思考檔位。';
+      '翻譯通常不需要開啟思考；考慮到介面使用結構化輸出，建議選擇該模型支援的最低思考檔位。';
 
   @override
   String get modelSettings_reasoningHelpLabel => '思考檔位建議';
@@ -37468,6 +37471,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_mdTasks => '功能分配';
+
+  @override
+  String get set_mdTaskHint => '即使不使用翻譯，也可將模型用於語義分割、結構化排序等功能。';
 
   @override
   String get set_mdPresets => '提示詞預設';

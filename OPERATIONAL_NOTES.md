@@ -184,7 +184,8 @@
 
 ## 模型与接口、翻译和缓存
 
-- 当前配置序列化 `schemaVersion=7`，入口在 `prompt_assistant/models/prompt_assistant_models.dart`。上下文、最大输出、推理与采样参数属于每个模型；功能接口与提示词预设不覆盖模型参数，内置规则只读。旧地址、协议、模型与提示词保持兼容，未知能力不推定支持。
+- 当前配置序列化 `schemaVersion=7`，入口在 `prompt_assistant/models/prompt_assistant_models.dart`。上下文、最大输出、推理与采样默认参数属于每个模型；功能接口可用既有 `InterfaceSlotConfig.reasoningEffort` 独立覆盖思考强度，经 `effectiveTaskModel` 应用，不修改模型默认或其他接口。提示词预设不覆盖模型参数，内置规则只读。旧地址、协议、模型与提示词保持兼容，未知能力不推定支持。
+- 功能分配表的思考强度仅展示模型登记档位；跟随模型与显式关闭分开，切换服务商／模型清除旧覆盖，单独换预设保留覆盖。保存前重读配置，拒绝旧下拉菜单恢复已更换的路由；说明文字不自动启用思考。实现与验证见 `docs/model-interface-reasoning-2026-10-16.md`。
 - 工作台为目录 / 已选模型双栏，手动模型入口和服务操作保留；目录发现 ID 独立于已选模型持久化，失败刷新不清旧目录，连接摘要变化使缓存失效。密钥 / 请求头使用既有安全存储；切换厂商只改草稿，新厂商不继承旧 Key / Header，过时草稿不覆盖新保存。
 - 服务入口与离线标识以当前 preset/catalog 和 `tool/branding/provider_logos.json` 为准。能力标记只是配置，不代表内置 Agent 执行端存在。
 - 双语块只改变阅读；`TranslationPill.source` 是生成投影。类别 / icon 标记经本地命中与原文验证，错误显示标记不应丢失有效译文。全文、单块、正反向编辑与还原沿当前字段和新编辑保护边界执行。

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../prompt_assistant/models/prompt_task_definitions.dart'
+    show reasoningEffortLabel;
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -31,6 +33,13 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
     orElse: () => _Tab.providers,
   );
   String? _selected;
+  final _taskScroll = ScrollController();
+
+  @override
+  void dispose() {
+    _taskScroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +120,16 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
             },
           ],
         ),
+        if (_tab == _Tab.tasks)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              l.set_mdTaskHint,
+              key: const Key('models-task-hint'),
+              textAlign: TextAlign.right,
+              style: UiText.sans(11, color: c.muted, height: 1.5),
+            ),
+          ),
       ],
     );
   }
@@ -260,18 +279,38 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
           SizedBox(width: 120, child: cells[0]),
           SizedBox(width: 150, child: cells[1]),
           SizedBox(width: 190, child: cells[2]),
-          SizedBox(width: 150, child: cells[3]),
-          Expanded(child: cells[4]),
+          SizedBox(width: 130, child: cells[3]),
+          SizedBox(width: 150, child: cells[4]),
+          Expanded(child: cells[5]),
         ],
       ),
     );
-    return Column(
+    final table = Column(
+      key: const Key('models-task-table'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         line([
           Text(l.set_mdFeature, style: head),
           Text(l.set_mdProvider, style: head),
           Text(l.set_mdModel, style: head),
+          Row(
+            spacing: 4,
+            children: [
+              Flexible(child: Text(l.modelReasoning_strength, style: head)),
+              Tooltip(
+                key: const Key('models-reasoning-help'),
+                message: l.modelSettings_reasoningHelp,
+                waitDuration: const Duration(milliseconds: 450),
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: Center(
+                    child: UiGlyph(UiGlyphs.help, size: 13, color: c.faint),
+                  ),
+                ),
+              ),
+            ],
+          ),
           Text(l.set_mdPreset, style: head),
           Text(l.set_mdStatus, style: head),
         ], pad: const EdgeInsets.fromLTRB(18, 12, 18, 8)),
@@ -288,6 +327,14 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
                 final presets = m.presets
                     .where((x) => x.task == a.task)
                     .toList();
+                final model = p?.models
+                    .where((x) => x.id == a.modelId)
+                    .firstOrNull;
+                final efforts = model?.reasoningEfforts;
+                final effort = efforts?.contains(a.reasoningEffort) == true
+                    ? a.reasoningEffort
+                    : null;
+                final unsupported = efforts?.isEmpty == true;
                 return line([
                   Text(
                     SettingsFormat.task(context, a.task),
@@ -332,6 +379,48 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
                       providerId: a.providerId,
                       modelId: id,
                       presetId: a.presetId,
+                    ),
+                  ),
+                  SettingsSelect(
+                    key: Key('assign-reasoning-${a.task.name}'),
+                    width: 130,
+                    menuWidth: 260,
+                    label: model == null
+                        ? '—'
+                        : unsupported
+                        ? l.modelReasoning_unsupported
+                        : effort != null
+                        ? reasoningEffortLabel(l, effort)
+                        : l.modelReasoning_followModel,
+                    selected: effort ?? 'inherit',
+                    options: [
+                      if (p?.enabled == true &&
+                          model != null &&
+                          !model.retired &&
+                          !unsupported) ...[
+                        SettingsOption(
+                          value: 'inherit',
+                          label: l.modelReasoning_followModel,
+                          detail: l.modelReasoning_modelDefault(
+                            reasoningEffortLabel(
+                              l,
+                              model.defaultReasoningEffort,
+                            ),
+                          ),
+                        ),
+                        for (final value in efforts ?? const <String>[])
+                          SettingsOption(
+                            value: value,
+                            label: reasoningEffortLabel(l, value),
+                          ),
+                      ],
+                    ],
+                    onSelected: (value) => s.actions.onAssign(
+                      a.task,
+                      providerId: a.providerId,
+                      modelId: a.modelId,
+                      reasoningEffort: value == 'inherit' ? null : value,
+                      clearReasoningEffort: value == 'inherit',
                     ),
                   ),
                   SettingsSelect(
@@ -380,6 +469,31 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
           ),
         ],
       ],
+    );
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final minimumWidth = 980 * MediaQuery.textScalerOf(context).scale(1);
+        return ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+          child: Scrollbar(
+            key: const Key('models-task-scrollbar'),
+            controller: _taskScroll,
+            thumbVisibility: true,
+            interactive: true,
+            child: SingleChildScrollView(
+              key: const Key('models-task-scroll'),
+              controller: _taskScroll,
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: constraints.maxWidth < minimumWidth
+                    ? minimumWidth
+                    : constraints.maxWidth,
+                child: table,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 

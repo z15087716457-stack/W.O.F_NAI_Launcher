@@ -8059,7 +8059,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modelSettings_reasoningHelp =>
-      '단순 번역에는 보통 사고가 필요 없습니다. 태그 지정, 의미 분류 같은 작업에는 모델이 지원하는 가장 낮은 사고 단계를 사용하세요.';
+      '번역에는 보통 사고가 필요하지 않습니다. 이 기능들은 구조화된 출력을 사용하므로 모델이 지원하는 가장 낮은 사고 단계를 권장합니다.';
 
   @override
   String get modelSettings_reasoningHelpLabel => '사고 단계 안내';
@@ -18340,6 +18340,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_mdTasks => '기능별 모델';
+
+  @override
+  String get set_mdTaskHint =>
+      '번역을 사용하지 않아도 의미 단위 분할이나 구조화된 정렬 등에 모델을 활용할 수 있습니다.';
 
   @override
   String get set_mdPresets => '프롬프트 프리셋';

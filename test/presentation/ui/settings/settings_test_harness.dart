@@ -199,8 +199,17 @@ class SettingsHostState extends State<SettingsHost> {
         onDeleteProvider: (id) => call('deleteProvider:$id'),
         onTestComfy: () => call('testComfy'),
         onUpscaleInstall: (id) => call('install:$id'),
-        onAssign: (t, {providerId, modelId, presetId}) =>
-            call('assign:${t.name}:$providerId:$modelId'),
+        onAssign:
+            (
+              t, {
+              providerId,
+              modelId,
+              presetId,
+              reasoningEffort,
+              clearReasoningEffort = false,
+            }) => call(
+              'assign:${t.name}:$providerId:$modelId:$reasoningEffort:$clearReasoningEffort',
+            ),
         onCopyDiagnostics: () => call('copyDiagnostics'),
       ),
     );

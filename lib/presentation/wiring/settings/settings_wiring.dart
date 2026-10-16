@@ -276,14 +276,24 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onRemoveModel: (id, model) => _run(() => models.removeModel(id, model)),
       onProviderAdvanced: (id) => _run(() => models.edit(id)),
       onDeleteProvider: (id) => _run(() => models.delete(id)),
-      onAssign: (task, {providerId, modelId, presetId}) => _run(
-        () => models.assign(
-          task,
-          providerId: providerId,
-          modelId: modelId,
-          presetId: presetId,
-        ),
-      ),
+      onAssign:
+          (
+            task, {
+            providerId,
+            modelId,
+            presetId,
+            reasoningEffort,
+            clearReasoningEffort = false,
+          }) => _run(
+            () => models.assign(
+              task,
+              providerId: providerId,
+              modelId: modelId,
+              presetId: presetId,
+              reasoningEffort: reasoningEffort,
+              clearReasoningEffort: clearReasoningEffort,
+            ),
+          ),
       onEditPreset: (id) => _run(() => models.editPreset(id)),
       onDeletePreset: (id) => _run(() => models.deletePreset(id)),
       onSaveInstructions:

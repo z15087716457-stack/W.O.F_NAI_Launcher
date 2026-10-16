@@ -8037,7 +8037,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modelSettings_reasoningHelp =>
-      '単純な翻訳では通常、思考は不要です。タグ付けや意味による分類なども行う場合は、モデルが対応する最も低い思考レベルをおすすめします。';
+      '翻訳では通常、思考は不要です。これらの機能は構造化出力を使うため、モデルが対応する最も低い思考レベルをおすすめします。';
 
   @override
   String get modelSettings_reasoningHelpLabel => '思考レベルのヒント';
@@ -18286,6 +18286,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_mdTasks => '機能の割り当て';
+
+  @override
+  String get set_mdTaskHint => '翻訳を使わなくても、意味単位への分割や構造化した並べ替えなどにモデルを利用できます。';
 
   @override
   String get set_mdPresets => 'プロンプトプリセット';

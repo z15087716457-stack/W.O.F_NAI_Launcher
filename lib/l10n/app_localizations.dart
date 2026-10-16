@@ -14447,7 +14447,7 @@ abstract class AppLocalizations {
   /// No description provided for @modelSettings_reasoningHelp.
   ///
   /// In en, this message translates to:
-  /// **'Plain translation usually needs no thinking. For tagging, semantic grouping and similar work, use the lowest thinking level the model supports.'**
+  /// **'Translation usually needs no thinking. Since these interfaces use structured output, the lowest thinking level supported by the model is recommended.'**
   String get modelSettings_reasoningHelp;
 
   /// No description provided for @modelSettings_reasoningHelpLabel.
@@ -32893,6 +32893,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Feature models'**
   String get set_mdTasks;
+
+  /// No description provided for @set_mdTaskHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Even without translation, models can support semantic grouping, structured sorting and other tasks.'**
+  String get set_mdTaskHint;
 
   /// No description provided for @set_mdPresets.
   ///

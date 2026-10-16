@@ -8290,7 +8290,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modelSettings_reasoningHelp =>
-      'Plain translation usually needs no thinking. For tagging, semantic grouping and similar work, use the lowest thinking level the model supports.';
+      'Translation usually needs no thinking. Since these interfaces use structured output, the lowest thinking level supported by the model is recommended.';
 
   @override
   String get modelSettings_reasoningHelpLabel => 'Thinking level advice';
@@ -18835,6 +18835,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_mdTasks => 'Feature models';
+
+  @override
+  String get set_mdTaskHint =>
+      'Even without translation, models can support semantic grouping, structured sorting and other tasks.';
 
   @override
   String get set_mdPresets => 'Prompt presets';

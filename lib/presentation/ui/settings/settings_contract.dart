@@ -935,6 +935,8 @@ class SettingsModel {
     this.capabilities = const {},
     this.usedFor = const {},
     this.retired = false,
+    this.reasoningEfforts,
+    this.defaultReasoningEffort,
   });
 
   /// 模型 id，例如 `deepseek-chat`。
@@ -947,6 +949,10 @@ class SettingsModel {
 
   /// 服务商已下线。
   final bool retired;
+
+  /// null = 档位未知；空列表 = 不支持调节。只展示模型实际登记的档位。
+  final List<String>? reasoningEfforts;
+  final String? defaultReasoningEffort;
 }
 
 @immutable
@@ -1002,6 +1008,7 @@ class SettingsTaskAssignment {
     this.modelId,
     this.presetId,
     this.fallback = false,
+    this.reasoningEffort,
   });
 
   final SettingsModelTask task;
@@ -1011,6 +1018,9 @@ class SettingsTaskAssignment {
 
   /// 没选模型，实际回落到第一个可用服务商。
   final bool fallback;
+
+  /// null = 跟随模型默认；具体档位仅覆盖本功能。
+  final String? reasoningEffort;
 }
 
 @immutable
@@ -1873,6 +1883,8 @@ class SettingsActions {
     String? providerId,
     String? modelId,
     String? presetId,
+    String? reasoningEffort,
+    bool clearReasoningEffort,
   })
   onAssign;
 
@@ -2008,6 +2020,8 @@ class SettingsActions {
     String? providerId,
     String? modelId,
     String? presetId,
+    String? reasoningEffort,
+    bool clearReasoningEffort = false,
   }) {}
   static Future<bool> _noInstructions({
     required String global,

@@ -57,6 +57,7 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
         modelId: config.interfaceFor(task).model,
         presetId: presetFor(config, task).id,
         fallback: !config.interfaceFor(task).isConfigured,
+        reasoningEffort: config.interfaceFor(task).reasoningEffort,
       ),
   ];
   return SettingsModelsData(
@@ -90,6 +91,12 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
               if (!model.isPlaceholder)
                 SettingsModel(
                   id: model.name,
+                  reasoningEfforts:
+                      model.reasoningEfforts == null &&
+                          model.availableReasoningEfforts.isEmpty
+                      ? null
+                      : model.availableReasoningEfforts,
+                  defaultReasoningEffort: model.reasoningEffort,
                   detail: model.displayName == model.name
                       ? ''
                       : model.displayName,
@@ -295,6 +302,8 @@ class SettingsModelActions {
     String? providerId,
     String? modelId,
     String? presetId,
+    String? reasoningEffort,
+    bool clearReasoningEffort = false,
   }) async {
     final task = settingsTask(kind);
     final current = ref.read(promptAssistantConfigProvider).interfaceFor(task);
@@ -310,6 +319,13 @@ class SettingsModelActions {
                       ?.name ??
                   ''
             : current.model);
+    final sameRoute =
+        selectedProvider == current.providerId &&
+        selectedModel == current.model;
+    if ((reasoningEffort != null || clearReasoningEffort) &&
+        (!sameRoute || !current.isConfigured)) {
+      throw StateError(context.l10n.modelConfig_modelChanged);
+    }
     await controller.saveInterface(
       task,
       InterfaceSlotConfig(
@@ -317,11 +333,9 @@ class SettingsModelActions {
         model: selectedModel,
         presetId: presetId ?? current.presetId,
         targetLanguage: current.targetLanguage,
-        reasoningEffort:
-            selectedProvider == current.providerId &&
-                selectedModel == current.model
-            ? current.reasoningEffort
-            : null,
+        reasoningEffort: clearReasoningEffort
+            ? null
+            : reasoningEffort ?? (sameRoute ? current.reasoningEffort : null),
       ),
     );
   }
