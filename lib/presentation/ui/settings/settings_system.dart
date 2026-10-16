@@ -1080,16 +1080,24 @@ class SettingsAboutPage extends StatelessWidget {
       aside: [
         if (ab.system.isNotEmpty)
           SettingsAsideCard(
+            key: const Key('about-system'),
             title: l.set_abSystem,
             child: SettingsAsideList(
               rows: [
                 for (final (k, v) in ab.system)
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 12,
                     children: [
+                      Text(k, style: UiText.sans(12, color: c.muted)),
                       Expanded(
-                        child: Text(k, style: UiText.sans(12, color: c.muted)),
+                        child: Text(
+                          v,
+                          textAlign: TextAlign.end,
+                          softWrap: true,
+                          style: UiText.mono(12, color: c.ink),
+                        ),
                       ),
-                      Text(v, style: UiText.mono(12, color: c.ink)),
                     ],
                   ),
               ],
