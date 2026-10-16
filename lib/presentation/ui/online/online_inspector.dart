@@ -454,6 +454,8 @@ class OnlineDetailBody extends StatelessWidget {
             key: const Key('online-insp-prompt'),
             title: l10n.online_prompt,
             copy: d.prompt,
+            translationText: d.prompt,
+            translationId: '${d.key}-positive',
             child: _PromptText(text: d.prompt!),
           ),
         );
@@ -461,8 +463,11 @@ class OnlineDetailBody extends StatelessWidget {
       if (d.negative != null && d.negative!.isNotEmpty) {
         children.add(
           _Section(
+            key: const Key('online-insp-negative'),
             title: l10n.online_negative,
             copy: d.negative,
+            translationText: d.negative,
+            translationId: '${d.key}-negative',
             child: _PromptText(text: d.negative!, clamp: true),
           ),
         );
@@ -473,6 +478,9 @@ class OnlineDetailBody extends StatelessWidget {
             key: const Key('online-insp-site-tags'),
             title: l10n.online_tags,
             hint: l10n.online_tagsHint,
+            translationText: d.siteTags.join(', '),
+            translationId: '${d.key}-site-tags',
+            preserveOriginal: true,
             child: Wrap(
               spacing: 5,
               runSpacing: 5,
@@ -683,13 +691,18 @@ class _FilmThumb extends StatelessWidget {
 }
 
 /// 小节：标题行（11.5 / w600 次要色，可带提示和复制按钮）+ 内容，间距 7。
-class _Section extends StatelessWidget {
+class _Section extends StatefulWidget {
   const _Section({
     super.key,
     required this.title,
     required this.child,
     this.hint,
     this.copy,
+    this.translationText,
+    this.translationId,
+    this.preserveOriginal = false,
+    this.titleColor,
+    this.spacing = 7,
   });
   final String title;
   final Widget child;
@@ -697,28 +710,81 @@ class _Section extends StatelessWidget {
 
   /// 非 null 时标题行右侧有复制按钮，复制这段文字。
   final String? copy;
+  final String? translationText, translationId;
+  final bool preserveOriginal;
+  final Color? titleColor;
+  final double spacing;
+
+  @override
+  State<_Section> createState() => _SectionState();
+}
+
+class _SectionState extends State<_Section> {
+  bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
+    final builder = OnlineScope.of(context).actions.translationBuilder;
+    if (builder != null && widget.translationText?.isNotEmpty == true) {
+      return builder(
+        context,
+        widget.translationId!,
+        widget.translationText!,
+        (action, translated) => _body(context, action, translated),
+      );
+    }
+    return _body(context, null, null);
+  }
+
+  Widget _body(BuildContext context, Widget? action, Widget? translated) {
     final c = context.ui;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 7,
-      children: [
-        Row(
-          spacing: 6,
-          children: [
-            Text(
-              title,
-              style: UiText.sans(11.5, weight: FontWeight.w600, color: c.muted),
-            ),
-            if (hint != null)
-              Text(hint!, style: UiText.sans(11.5, color: c.faint)),
-            if (copy != null) ...[const Spacer(), _CopyIcon(text: copy!)],
-          ],
-        ),
-        child,
-      ],
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: widget.spacing,
+        children: [
+          Row(
+            spacing: 6,
+            children: [
+              Expanded(
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: UiText.sans(
+                        11.5,
+                        weight: FontWeight.w600,
+                        color: widget.titleColor ?? c.muted,
+                      ),
+                    ),
+                    if (widget.hint != null)
+                      Flexible(
+                        child: Text(
+                          widget.hint!,
+                          style: UiText.sans(11.5, color: c.faint),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              if (action != null)
+                Visibility(
+                  visible: _hovered,
+                  maintainSize: true,
+                  maintainState: true,
+                  maintainAnimation: true,
+                  child: action,
+                ),
+              if (widget.copy != null) _CopyIcon(text: widget.copy!),
+            ],
+          ),
+          if (translated == null || widget.preserveOriginal) widget.child,
+          if (translated != null) translated,
+        ],
+      ),
     );
   }
 }
@@ -922,47 +988,50 @@ class _TagGroup extends StatelessWidget {
       OnlineTagGroup.meta => l10n.online_tagMeta,
     };
     final a = OnlineScope.of(context).actions;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 2,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: Text(
-            title,
-            style: UiText.sans(11.5, weight: FontWeight.w600, color: color),
-          ),
-        ),
-        for (final t in tags)
-          UiPressable(
-            key: Key('online-tag-row-${t.name}'),
-            onTap: () => a.onTagTap(t.name),
-            builder: (context, hover) => SizedBox(
-              height: 24,
-              child: Row(
-                spacing: 6,
-                children: [
-                  Expanded(
-                    child: Text(
-                      t.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: UiText.sans(12.5, color: color).copyWith(
-                        decoration: hover ? TextDecoration.underline : null,
-                        decorationColor: color,
+    return _Section(
+      key: Key('online-tag-group-${group.name}'),
+      title: title,
+      titleColor: color,
+      spacing: 4,
+      translationText: tags.map((t) => t.name).join(', '),
+      translationId:
+          '${OnlineScope.of(context).data.detail?.key}-${group.name}',
+      preserveOriginal: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 2,
+        children: [
+          for (final t in tags)
+            UiPressable(
+              key: Key('online-tag-row-${t.name}'),
+              onTap: () => a.onTagTap(t.name),
+              builder: (context, hover) => SizedBox(
+                height: 24,
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        t.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(12.5, color: color).copyWith(
+                          decoration: hover ? TextDecoration.underline : null,
+                          decorationColor: color,
+                        ),
                       ),
                     ),
-                  ),
-                  if (t.translation != null)
-                    Text(
-                      t.translation!,
-                      style: UiText.sans(10.5, color: c.faint),
-                    ),
-                ],
+                    if (t.translation != null)
+                      Text(
+                        t.translation!,
+                        style: UiText.sans(10.5, color: c.faint),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 }

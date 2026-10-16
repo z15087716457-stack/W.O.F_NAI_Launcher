@@ -32,6 +32,7 @@ import '../widgets/danbooru_login_dialog.dart';
 import '../widgets/gelbooru_credentials_dialog.dart';
 import 'online_generation_target.dart';
 import 'online_mapping.dart';
+import 'online_prompt_translation.dart';
 
 final onlineGalleryPlatformProvider = Provider<OnlineGalleryPlatform>(
   (ref) => const OnlineGalleryPlatform(),
@@ -594,6 +595,7 @@ class _OnlineWiringState extends ConsumerState<OnlineWiring>
       child: OnlineGalleryPage(
         data: data,
         actions: OnlineActions(
+          translationBuilder: buildOnlineTranslation,
           onSourceChanged: (source) => _run(() {
             _clearSelection();
             return _gallery.setActiveSource(gallerySource(source));

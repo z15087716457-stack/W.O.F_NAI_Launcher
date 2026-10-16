@@ -86,6 +86,7 @@
 - 收藏是根-子集关系：心形根集包含全部收藏；加入子集自动加入根集，取消根集会清掉所有子集关系，从子集移出不影响根集。
 - 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动=前端移动当场 `updateFilePath` 直更 DB + 扫描器 size+mtime 签名匹配兜底（签名命中还要求原路径文件已不存在才判移动，同签名副本按新文件入库不抢 id）；签名失配则旧行软删、收藏跟丢。分类树展开状态持久化于 `gallery_category_tree_expanded_ids`，侧栏分组收起状态持久化于 `gallery_sidebar_collapsed_sections`（重启恢复）；「移动到…」对话框展开状态为会话级（重启重置）。
 - 在线 AItag 列表走 `/api/ai_works_search`，详情走 `/api/work/{id}`；列表图使用 pximg 缩略图并带 Pixiv Referer。详情元数据优先读取 `images[].ai_json`，顶层 `model` 可作为 Source 兜底。作者搜索有一级返回快照，晚到请求不得覆盖原页面。
+- 在线侧栏／大图共用 `OnlineDetailBody`；正向、负面、站点标签及 Booru 标签组各自悬停显示翻译按钮。接线通过 `OnlineActions.translationBuilder` 复用本地 `PromptSection` 的隔离文档和译文块，仅点击时请求翻译；切作品以作品／字段键隔离旧结果。提示词译文可还原，标签保留原名称搜索，不修改作品元数据、发送内容或生图草稿；跳页按钮最小宽度 96px，长语言按内容扩展。见 `docs/online-gallery-hover-translation-2026-10-16.md`。
 - 元数据解析按文件签名和统一读取链执行，细节见 `.kimi-code/skills/nai/refs/metadata.md`；不要按扩展名判断 PNG/WebP/JPEG 或 NAI 版本。
 
 ## 本地画廊缩略图

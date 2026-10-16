@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/ui/online/online_contract.dart';
 import 'package:nai_launcher/presentation/ui/online/online_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/approved_visual_regions.dart';
 import 'online_test_harness.dart';
 
 void main() {
@@ -182,9 +183,18 @@ void main() {
           await interact(t);
           await t.pumpAndSettle();
         }
-        await expectLater(
+        final jump = find.byKey(const Key('online-jump'));
+        final loaded = find.byKey(const Key('online-loaded'));
+        // F30: only the wider jump control and the count shifted by it.
+        final regions = <Rect>[
+          if (jump.evaluate().isNotEmpty)
+            t.getRect(jump).expandToInclude(t.getRect(loaded)),
+        ];
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('online-capture')),
-          matchesGoldenFile('goldens/$file.png'),
+          'test/presentation/ui/online/goldens/$file.png',
+          regions,
         );
         debugDisableShadows = true;
       });

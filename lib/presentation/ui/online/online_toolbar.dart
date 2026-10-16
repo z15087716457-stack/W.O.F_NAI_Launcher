@@ -893,12 +893,16 @@ class _OnlineFilterRowState extends State<OnlineFilterRow> {
       ),
     );
     final jump = Builder(
-      builder: (ctx) => UiBtn(
-        key: const Key('online-jump'),
-        size: UiBtnSize.small,
-        tone: UiBtnTone.ghost,
-        onTap: () => _open(ctx, _RowPop.jump, right: true),
-        children: [Text(l10n.online_jumpToPage)],
+      builder: (ctx) => ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 96),
+        child: UiBtn(
+          key: const Key('online-jump'),
+          size: UiBtnSize.small,
+          tone: UiBtnTone.ghost,
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          onTap: () => _open(ctx, _RowPop.jump, right: true),
+          children: [Text(l10n.online_jumpToPage)],
+        ),
       ),
     );
     final naiChip = UiFilterChip(

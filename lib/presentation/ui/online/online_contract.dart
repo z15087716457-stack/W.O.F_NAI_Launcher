@@ -611,9 +611,20 @@ class OnlineSendContext {
   final OnlineSendMode? remembered;
 }
 
+/// Wiring supplies isolated, read-only translation. UI keeps the original
+/// section layout, hover state and canonical tag search callbacks.
+typedef OnlineTranslationBuilder =
+    Widget Function(
+      BuildContext context,
+      String identity,
+      String content,
+      Widget Function(Widget action, Widget? translated) section,
+    );
+
 @immutable
 class OnlineActions {
   const OnlineActions({
+    this.translationBuilder,
     required this.onSourceChanged,
     required this.onModeChanged,
     required this.onSearch,
@@ -662,6 +673,8 @@ class OnlineActions {
     required this.onLogin,
     required this.onApiKeyHelp,
   });
+
+  final OnlineTranslationBuilder? translationBuilder;
 
   /// 换来源（`setSource`）。每个来源记住自己的浏览方式、搜索词和滚动位置，接线方不要清掉。
   final ValueChanged<OnlineSource> onSourceChanged;

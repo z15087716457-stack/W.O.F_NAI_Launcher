@@ -31,6 +31,7 @@ class PromptSection extends ConsumerStatefulWidget {
     this.contentStyle,
     this.previewLines,
     this.onCopy,
+    this.sectionBuilder,
   });
 
   final String title;
@@ -44,6 +45,11 @@ class PromptSection extends ConsumerStatefulWidget {
   final TextStyle? contentStyle;
   final int? previewLines;
   final VoidCallback? onCopy;
+
+  /// Alternate read-only layout, sharing translation, stale-result protection
+  /// and draggable pills with the local gallery. Null content means original.
+  final Widget Function(BuildContext, Widget action, Widget? translated)?
+  sectionBuilder;
 
   @override
   ConsumerState<PromptSection> createState() => _PromptSectionState();
@@ -199,6 +205,32 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final hasContent = widget.content.isNotEmpty;
+    if (widget.sectionBuilder case final builder?) {
+      return builder(
+        context,
+        IconButton(
+          key: const Key('detail-prompt-translate'),
+          style: IconButton.styleFrom(
+            padding: EdgeInsets.zero,
+            minimumSize: const Size(20, 16),
+            maximumSize: const Size(20, 16),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            overlayColor: Colors.transparent,
+            splashFactory: NoSplash.splashFactory,
+          ),
+          tooltip: _translated
+              ? context.l10n.promptTranslation_restoreAll
+              : context.l10n.promptTranslation_translateNew,
+          onPressed: _busy ? null : _translate,
+          icon: TranslationIcon(
+            size: 13,
+            busy: _busy,
+            color: _translated ? colors.primary : colors.onSurfaceVariant,
+          ),
+        ),
+        _translated ? _translatedInput() : null,
+      );
+    }
     if (widget.inspectorStyle) return _buildInspector(context);
     final buttonStyle = IconButton.styleFrom(
       padding: const EdgeInsets.all(4),
@@ -375,29 +407,7 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
               borderRadius: BorderRadius.circular(6),
             ),
             child: _translated
-                ? UnifiedPromptInput(
-                    key: const Key('detail-prompt-original-input'),
-                    controller: _controller,
-                    showCursor: false,
-                    fitContent: true,
-                    minLines: 1,
-                    maxLines: null,
-                    decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    config: UnifiedPromptConfig(
-                      readOnly: true,
-                      embedded: true,
-                      compact: true,
-                      enableAutoFormat: false,
-                      enableSdSyntaxAutoConvert: false,
-                      enableSyntaxHighlight: ref.watch(
-                        highlightEmphasisSettingsProvider,
-                      ),
-                      pillBuilder: _span,
-                      pillVisualsSignature: identityHashCode(_document),
-                    ),
-                  )
+                ? _translatedInput()
                 : widget.previewLines == null
                 ? SelectableText(widget.content, style: textStyle)
                 : Text(
@@ -411,4 +421,24 @@ class _PromptSectionState extends ConsumerState<PromptSection> {
       ),
     );
   }
+
+  Widget _translatedInput() => UnifiedPromptInput(
+    key: const Key('detail-prompt-original-input'),
+    controller: _controller,
+    showCursor: false,
+    fitContent: true,
+    minLines: 1,
+    maxLines: null,
+    decoration: const InputDecoration(contentPadding: EdgeInsets.zero),
+    config: UnifiedPromptConfig(
+      readOnly: true,
+      embedded: true,
+      compact: true,
+      enableAutoFormat: false,
+      enableSdSyntaxAutoConvert: false,
+      enableSyntaxHighlight: ref.watch(highlightEmphasisSettingsProvider),
+      pillBuilder: _span,
+      pillVisualsSignature: identityHashCode(_document),
+    ),
+  );
 }

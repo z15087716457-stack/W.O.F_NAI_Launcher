@@ -90,6 +90,7 @@ Future<TestGesture> hoverOver(WidgetTester tester, Finder f) async {
 
 /// 记录所有回调，断言用。
 class RecordingOnlineActions {
+  OnlineTranslationBuilder? translationBuilder;
   final calls = <String>[];
   final searches = <OnlineQuery>[];
   final sends = <(String, OnlineSendMode, bool)>[];
@@ -103,6 +104,7 @@ class RecordingOnlineActions {
   void _c(String s) => calls.add(s);
 
   OnlineActions get actions => OnlineActions(
+    translationBuilder: translationBuilder,
     onSourceChanged: (s) => _c('source:${s.name}'),
     onModeChanged: (m) => _c('mode:${m.name}'),
     onSearch: searches.add,
