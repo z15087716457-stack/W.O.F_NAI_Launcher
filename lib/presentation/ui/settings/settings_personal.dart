@@ -568,7 +568,7 @@ class SettingsAppearancePage extends StatelessWidget {
               ),
             ),
             SettingsBlock(
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 16),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               child: Container(
                 key: const Key('font-sample'),
                 padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),

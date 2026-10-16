@@ -1,7 +1,8 @@
-// 保留原设置页基准；归一居中，仅排除获准修改的标题行、图标、新标签、Agent 文案与主题卡顺序。
+// 保留原设置页基准；归一居中，仅排除获准修改的标题行、图标、新标签、Agent 文案、主题卡顺序与字号示例位置。
 // 获准区域以外仍逐像素匹配，变更区域另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -56,6 +57,21 @@ void main() {
     testWidgets(name, skip: skip, (t) async {
       await pump(t);
       await _expectCenteredGolden(t, name);
+      final output = Platform.environment['FONT_SAMPLE_CAPTURE_DIR'];
+      if (output != null && name.startsWith('appearance')) {
+        final box = t.renderObject<RenderRepaintBoundary>(
+          find.byKey(const Key('settings-capture')),
+        );
+        await t.runAsync(() async {
+          final bitmap = await box.toImage(pixelRatio: 1);
+          final bytes = await bitmap.toByteData(format: ui.ImageByteFormat.png);
+          Directory(output).createSync(recursive: true);
+          File(
+            '$output/$name.png',
+          ).writeAsBytesSync(bytes!.buffer.asUint8List());
+          bitmap.dispose();
+        });
+      }
       await t.pump(const Duration(seconds: 5));
     });
   }
@@ -77,6 +93,22 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     align.alignment = Alignment.topLeft;
     await t.pump();
     final masks = <Rect>[];
+    // F36：字号示例在原占位内下移 8px，外侧行高及其余文字设置保持。
+    // 只排除示例内框的原／新位置，居中与上下留白直接按几何核验。
+    final sample = find.byKey(const Key('font-sample'));
+    if (sample.evaluate().isNotEmpty) {
+      final content = t.getRect(sample);
+      final block = t.getRect(
+        find.ancestor(of: sample, matching: find.byType(SettingsBlock)).first,
+      );
+      expect(content.center.dx, closeTo(block.center.dx, .01));
+      expect(content.center.dy, closeTo(block.center.dy, .01));
+      expect(content.top, greaterThan(block.top));
+      expect(content.bottom, lessThan(block.bottom));
+      masks.add(
+        Rect.fromLTRB(content.left, block.top, content.right, block.bottom),
+      );
+    }
     // F29: the base row now shows Tag/Wiki counts instead of a version hash.
     // Supplement controls are capability-driven and covered by their own tests.
     final dictionaryBase = find.byKey(const Key('dictionary-base-row'));
