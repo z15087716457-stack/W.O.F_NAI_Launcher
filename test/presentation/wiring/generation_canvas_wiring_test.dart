@@ -105,6 +105,28 @@ void main() {
         batchHeight: 768,
       );
   final boundary = GlobalKey();
+  Finder canvasBackdrop() => find.descendant(
+    of: find.byType(GenCanvas),
+    matching: find.byType(ChannelBackdrop),
+  );
+
+  void expectPanelBackdropAligned(WidgetTester tester) {
+    final side = tester
+        .widget<ChannelBackdrop>(find.byKey(const Key('gen-panel-backdrop')))
+        .data;
+    final center = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
+    final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+    final page = tester.getRect(find.byType(GenerationPage));
+    expect(
+      side.camera.offset,
+      center.camera.offset + viewport.topLeft - page.topLeft,
+    );
+    expect(side.camera.scale, center.camera.scale);
+    expect(side.settings.fixed, center.settings.fixed);
+    expect(side.settings.seed, center.settings.seed);
+    expect(side.settings.motion, isFalse);
+    expect(side.settings.ruler, isFalse);
+  }
 
   setUpAll(loadStudioCaptureFonts);
   setUp(() async {
@@ -229,7 +251,8 @@ void main() {
         Platform.environment['CAPTURE_CHANNEL_NOTICE'] == '1' &&
         name.startsWith('notice-');
     final welcome =
-        Platform.environment['CAPTURE_WELCOME_ALIGNMENT'] == '1' &&
+        (Platform.environment['CAPTURE_WELCOME_ALIGNMENT'] == '1' ||
+            Platform.environment['SIDE_GLASS_CAPTURE_DIR'] != null) &&
         name.startsWith('welcome-');
     final feedback =
         Platform.environment['CAPTURE_R6_FEEDBACK'] == '1' &&
@@ -244,6 +267,9 @@ void main() {
     final contextMenu =
         Platform.environment['CAPTURE_CANVAS_CONTEXT_MENU'] == '1';
     final restored = Platform.environment['CAPTURE_CANVAS_PRESENTATION'] == '1';
+    final sideGlass =
+        Platform.environment['SIDE_GLASS_CAPTURE_DIR'] != null &&
+        (name.startsWith('r6-') || name.endsWith('-narrow'));
     if (!notice &&
         !welcome &&
         !feedback &&
@@ -253,6 +279,7 @@ void main() {
         !imageMenu &&
         !contextMenu &&
         !restored &&
+        !sideGlass &&
         Platform.environment['CAPTURE_INFINITE_CANVAS'] != '1') {
       return;
     }
@@ -280,7 +307,12 @@ void main() {
           : restored
           ? 'canvas-presentation-20261014'
           : 'infinite-canvas-20261014';
-      final file = File('.dart_tool/$area/captures/$name.png');
+      final output = Platform.environment['SIDE_GLASS_CAPTURE_DIR'];
+      final file = File(
+        output == null
+            ? '.dart_tool/$area/captures/$name.png'
+            : '$output/$name.png',
+      );
       await file.parent.create(recursive: true);
       await file.writeAsBytes(data!.buffer.asUint8List());
       snapshot.dispose();
@@ -361,7 +393,8 @@ void main() {
   testWidgets('首张出图前保留同一背景和画布，出图后欢迎内容退场', (tester) async {
     publish(const ImageGenerationState());
     await pump(tester, fullPage: true);
-    expect(find.byType(ChannelBackdrop), findsOneWidget);
+    expect(find.byType(ChannelBackdrop), findsNWidgets(2));
+    expectPanelBackdropAligned(tester);
     expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
     final logo = find.byWidgetPredicate(
       (widget) => widget is Image && widget.semanticLabel == 'W.O.F NAI Studio',
@@ -376,20 +409,18 @@ void main() {
     await tester.pump();
     final canvasState = tester.state(find.byType(GenerationCanvasView));
     final backdrop = tester
-        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
+        .widget<ChannelBackdrop>(canvasBackdrop())
         .data
         .settings;
     await capture(tester, 'r6-before-first-image');
     publish(ImageGenerationState(history: [image(42)]));
     await tester.pumpAndSettle();
     expect(tester.state(find.byType(GenerationCanvasView)), same(canvasState));
+    expectPanelBackdropAligned(tester);
     expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
     expect(logo, findsNothing);
     expect(
-      tester
-          .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
-          .data
-          .settings,
+      tester.widget<ChannelBackdrop>(canvasBackdrop()).data.settings,
       backdrop,
     );
     expect(find.byKey(const ValueKey('canvas-world-viewport')), findsOneWidget);
@@ -471,12 +502,11 @@ void main() {
   }
 
   void expectWelcomeCentered(WidgetTester tester) {
+    expectPanelBackdropAligned(tester);
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
     final logo = tester.getRect(welcomeLogo());
     final tip = tester.getRect(find.byKey(const Key('tip-welcome-text')));
-    final background = tester
-        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
-        .data;
+    final background = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     final quietCenter =
         viewport.left + background.camera.worldToScreen(Offset.zero).dx;
     expect(logo.center.dx, closeTo(viewport.center.dx, .01));
@@ -554,10 +584,7 @@ void main() {
       notifyIdle: false,
     );
     await pump(tester, fullPage: true);
-    final before = tester
-        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
-        .data
-        .camera;
+    final before = tester.widget<ChannelBackdrop>(canvasBackdrop()).data.camera;
     publish(loading(71));
     await tester.pump();
     expect(find.byKey(const Key('tip-welcome-text')), findsNothing);
@@ -586,9 +613,7 @@ void main() {
     await pump(tester);
     expect(find.byType(ChannelBackdrop), findsOneWidget);
     expect(find.byType(ChannelOverlay), findsOneWidget);
-    final backdrop = tester
-        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
-        .data;
+    final backdrop = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     final feed = container.read(canvasChannelFeedProvider);
     expect(backdrop.batches, same(feed.batches));
     expect(backdrop.camera.offset, camera().offset);
@@ -703,9 +728,7 @@ void main() {
   testWidgets('生成占位与首张结果映射到真实批次数量和时间', (tester) async {
     publish(loading(71, count: 2));
     await pump(tester);
-    var data = tester
-        .widget<ChannelBackdrop>(find.byType(ChannelBackdrop))
-        .data;
+    var data = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     expect(data.generating, isTrue);
     expect(data.batches.first.count, 2);
     expect(data.batches.first.pending, isTrue);
@@ -723,7 +746,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    data = tester.widget<ChannelBackdrop>(find.byType(ChannelBackdrop)).data;
+    data = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     expect(data.batches.first.count, 2);
     expect(data.batches.first.pending, isFalse);
     expect(data.batches.first.time, result.createdAt);
@@ -1851,9 +1874,11 @@ void main() {
         publish(ImageGenerationState(history: [image(1), image(1, 1)]));
         await pump(tester, fullPage: true, language: language, dark: dark);
         bars();
+        expectPanelBackdropAligned(tester);
         tester.view.physicalSize = const Size(1280, 850);
         await tester.pumpAndSettle();
         final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
+        expectPanelBackdropAligned(tester);
         final info = tester.getRect(find.byKey(const Key('gen-bar-info')));
         expect(viewport.contains(info.center), isTrue);
         expect(tester.takeException(), isNull);

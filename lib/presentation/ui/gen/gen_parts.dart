@@ -53,6 +53,61 @@ class GenNaiIcon extends StatelessWidget {
   );
 }
 
+/// One clipped glass pass per side; inner modules do not stack opaque fills.
+class GenPanelSurface extends StatelessWidget {
+  const GenPanelSurface({
+    super.key,
+    required this.enabled,
+    required this.child,
+    this.width,
+    this.border,
+    this.padding,
+  });
+
+  final bool enabled;
+  final Widget child;
+  final double? width;
+  final Border? border;
+  final EdgeInsets? padding;
+
+  static bool activeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_PanelGlassScope>()?.active ??
+      false;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = padding == null
+        ? child
+        : Padding(padding: padding!, child: child);
+    return Container(
+      width: width,
+      decoration: BoxDecoration(border: border),
+      child: !enabled
+          ? ColoredBox(color: context.ui.bg, child: content)
+          : _PanelGlassScope(
+              active: !MediaQuery.highContrastOf(context),
+              child: StudioGlassSurface(
+                borderRadius: BorderRadius.zero,
+                clipBehavior: Clip.hardEdge,
+                backdropBlur: true,
+                useGradient: false,
+                tintColor: context.ui.bg.withValues(alpha: .85),
+                child: content,
+              ),
+            ),
+    );
+  }
+}
+
+class _PanelGlassScope extends InheritedWidget {
+  const _PanelGlassScope({required this.active, required super.child});
+  final bool active;
+
+  @override
+  bool updateShouldNotify(_PanelGlassScope oldWidget) =>
+      active != oldWidget.active;
+}
+
 /// 模块外框（原型 `.mod`）：提示词底、1px 描边、圆角 8，内容按圆角裁。
 class GenModule extends StatelessWidget {
   const GenModule({super.key, required this.child});
@@ -70,7 +125,9 @@ class GenModule extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       decoration: BoxDecoration(
-        color: GenFormat.promptBg(c),
+        color: GenPanelSurface.activeOf(context)
+            ? Colors.transparent
+            : GenFormat.promptBg(c),
         borderRadius: BorderRadius.circular(8),
       ),
       child: child,

@@ -30,7 +30,7 @@ class GenParamStrip extends StatelessWidget {
     return Container(
       key: const Key('gen-params'),
       decoration: BoxDecoration(
-        color: c.bg,
+        color: GenPanelSurface.activeOf(context) ? Colors.transparent : c.bg,
         border: Border(top: BorderSide(color: c.line)),
       ),
       child: Row(

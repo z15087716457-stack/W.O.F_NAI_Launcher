@@ -1090,6 +1090,11 @@ typedef GenTileBuilder =
 typedef GenCanvasBuilder =
     Widget Function(BuildContext context, GenTileBuilder tile);
 
+/// Extend the canvas decoration behind the side panels. The viewport is in
+/// page coordinates, after responsive panel widths have been resolved.
+typedef GenPanelBackdropBuilder =
+    Widget Function(BuildContext context, Rect canvasViewport);
+
 /// 参考图某一行外面包一层投放区（`DropRegion`）：接线方读文件、判断是图还是 `.naiv4vibe`，
 /// 拖进拖出时更新 [GenRefsData.dropHover]。
 typedef GenDropWrapper =
@@ -1104,6 +1109,7 @@ class GenSlots {
   const GenSlots({
     required this.editor,
     this.canvas,
+    this.panelBackdrop,
     this.dock,
     this.drop,
     this.historyDrag,
@@ -1136,6 +1142,10 @@ class GenSlots {
 
   /// null = 用界面自带的舞台（只摆焦点组）。
   final GenCanvasBuilder? canvas;
+
+  /// null keeps standalone editor hosts and original fixtures on a solid base.
+  /// The generation host supplies its shared canvas background for glass sides.
+  final GenPanelBackdropBuilder? panelBackdrop;
 
   /// [GenCanvasData.sheet] 非 null 时，摆在顶部工具条下面、水平居中的面板
   /// （画布工具的增强面板 / 放大设置）。

@@ -12,6 +12,7 @@ class StudioGlassSurface extends StatelessWidget {
     this.nativeBackdrop = false,
     this.backdropBlur = false,
     this.useGradient = true,
+    this.tintColor,
     this.clipBehavior = Clip.antiAlias,
   });
 
@@ -20,6 +21,9 @@ class StudioGlassSurface extends StatelessWidget {
   final bool nativeBackdrop;
   final bool backdropBlur;
   final bool useGradient;
+
+  /// Optional uniform tint for a blurred surface; children retain full opacity.
+  final Color? tintColor;
   final Clip clipBehavior;
 
   @override
@@ -64,7 +68,7 @@ class StudioGlassSurface extends StatelessWidget {
           ),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: useGradient ? null : colors[1],
+              color: useGradient ? null : tintColor ?? colors[1],
               gradient: useGradient
                   ? LinearGradient(
                       begin: Alignment.topLeft,

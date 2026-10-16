@@ -20,7 +20,9 @@ class GenGenerateBar extends StatelessWidget {
       key: const Key('gen-generate-bar'),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: c.bg.withValues(alpha: .5),
+        color: GenPanelSurface.activeOf(context)
+            ? Colors.transparent
+            : c.bg.withValues(alpha: .5),
         border: Border(top: BorderSide(color: c.line)),
       ),
       child: const GenGenerateButton(),

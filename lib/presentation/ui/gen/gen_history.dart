@@ -201,13 +201,11 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     final h = scope.data.history;
     final l = context.l10n;
     final selectedIds = _ids(h, _selected);
-    return Container(
+    return GenPanelSurface(
       key: const Key('gen-history'),
       width: widget.width,
-      decoration: BoxDecoration(
-        color: c.bg,
-        border: Border(left: BorderSide(color: c.line)),
-      ),
+      enabled: scope.slots.panelBackdrop != null,
+      border: Border(left: BorderSide(color: c.line)),
       child: WindowPaneInset(
         key: const Key('gen-history-window-inset'),
         enabled: scope.slots.historyCaptionInset,

@@ -86,7 +86,8 @@ class _GenCanvasState extends State<GenCanvas> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Positioned.fill(child: CustomPaint(painter: _Ticks(c))),
+            if (scope.slots.panelBackdrop == null)
+              Positioned.fill(child: CustomPaint(painter: _Ticks(c))),
             if (cv.positioning)
               const GenPositionBoard()
             else ...[

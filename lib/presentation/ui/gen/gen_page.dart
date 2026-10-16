@@ -259,9 +259,10 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
 
   @override
   Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, box) => _row(context, box.maxWidth));
+      LayoutBuilder(builder: (context, box) => _row(context, box.biggest));
 
-  Widget _row(BuildContext context, double w) {
+  Widget _row(BuildContext context, Size size) {
+    final w = size.width;
     final scope = GenScope.of(context);
     final layout = scope.data.layout;
     final actions = scope.actions;
@@ -320,6 +321,22 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
         !keepHistory || w - left - dock - history >= minimumCanvas;
     return Stack(
       children: [
+        if (scope.slots.panelBackdrop case final backdrop?)
+          Positioned.fill(
+            child: IgnorePointer(
+              child: backdrop(
+                context,
+                Rect.fromLTWH(
+                  left + dock,
+                  0,
+                  keepHistory
+                      ? math.max(minimumCanvas, w - left - dock - history)
+                      : w - left - dock - history,
+                  size.height,
+                ),
+              ),
+            ),
+          ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -466,13 +483,11 @@ class GenLeftPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return Container(
+    return GenPanelSurface(
       key: const Key('gen-left'),
       width: width,
-      decoration: BoxDecoration(
-        color: c.bg,
-        border: Border(right: BorderSide(color: c.line)),
-      ),
+      enabled: GenScope.of(context).slots.panelBackdrop != null,
+      border: Border(right: BorderSide(color: c.line)),
       child: const GenEditorColumn(),
     );
   }
@@ -566,14 +581,12 @@ class _Strip extends StatelessWidget {
             WindowChromeScope.activeOf(context)
         ? WindowChromeScope.heightOf(context)
         : 0.0;
-    return Container(
+    return GenPanelSurface(
       width: GenerationPage.strip,
-      decoration: BoxDecoration(
-        color: c.bg,
-        border: side == _StripSide.left
-            ? Border(right: BorderSide(color: c.line))
-            : Border(left: BorderSide(color: c.line)),
-      ),
+      enabled: GenScope.of(context).slots.panelBackdrop != null,
+      border: side == _StripSide.left
+          ? Border(right: BorderSide(color: c.line))
+          : Border(left: BorderSide(color: c.line)),
       padding: EdgeInsets.only(top: top + 6),
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
