@@ -120,8 +120,13 @@ void main() {
               isNull,
               reason: '$locale $width $scale $phase',
             );
-            if (phase == SettingsDictionaryPhase.idle && scale == 1) {
-              await _capture(t, '$locale-${width.toInt()}');
+            if (phase == SettingsDictionaryPhase.idle && scale == 1 ||
+                locale == 'zh' &&
+                    width == 1600 &&
+                    scale == 1 &&
+                    (phase == SettingsDictionaryPhase.downloading ||
+                        phase == SettingsDictionaryPhase.done)) {
+              await _capture(t, '$locale-${width.toInt()}-${phase.name}');
             }
           }
         }

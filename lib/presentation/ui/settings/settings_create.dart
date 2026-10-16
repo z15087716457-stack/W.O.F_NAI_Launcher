@@ -930,6 +930,7 @@ class SettingsDictionaryPage extends StatelessWidget {
               SettingsRow(
                 key: const Key('dictionary-supplement-row'),
                 title: l.set_dcSupplement,
+                belowSpacing: update.busy ? 10 : 0,
                 subtitle: l.set_dcSources(update.tagDate, update.wikiDate),
                 control: Wrap(
                   spacing: 8,
@@ -972,7 +973,7 @@ class SettingsDictionaryPage extends StatelessWidget {
                 below: update.phase == SettingsDictionaryPhase.idle
                     ? null
                     : Padding(
-                        padding: const EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.only(top: update.busy ? 10 : 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [

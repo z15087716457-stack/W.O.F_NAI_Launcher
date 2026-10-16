@@ -1355,6 +1355,7 @@ class SettingsRow extends StatefulWidget {
     this.minHeight,
     this.alignTop = false,
     this.below,
+    this.belowSpacing = 10,
     this.titleLead,
     this.padding,
     this.titleWidget,
@@ -1363,6 +1364,7 @@ class SettingsRow extends StatefulWidget {
 
   /// 标题下面整宽的内容（选项卡片、进度条……）。
   final Widget? below;
+  final double belowSpacing;
 
   /// 标题文字前的小件（状态点）。
   final Widget? titleLead;
@@ -1453,7 +1455,7 @@ class _SettingsRowState extends State<SettingsRow> {
             ),
           ),
         if (widget.below != null) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: widget.belowSpacing),
           widget.below!,
         ],
       ],
