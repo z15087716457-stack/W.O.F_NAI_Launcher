@@ -38,7 +38,7 @@ class GenGenerateButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.generate);
     final g = scope.data.generate;
     final l = context.l10n;
     final reduce = MediaQuery.disableAnimationsOf(context);

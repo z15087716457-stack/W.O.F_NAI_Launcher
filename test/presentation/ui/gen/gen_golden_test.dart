@@ -174,6 +174,7 @@ void main() {
         if (interact != null) {
           await interact(t);
           await t.pumpAndSettle();
+          await precacheGen(t, const []);
         }
         final masks = <Rect>[];
         final tools = find.byKey(const Key('gen-tool-menu'));

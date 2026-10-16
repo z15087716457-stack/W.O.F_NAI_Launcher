@@ -22,7 +22,7 @@ class GenParamStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     final p = scope.data.params;
     final l = context.l10n;
     final open = scope.controller.drawerOpen;
@@ -194,7 +194,7 @@ class _GroupedMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     return UiPopoverSurface(
       width: 250,
       padding: const EdgeInsets.all(4),
@@ -290,7 +290,7 @@ class _GenParamDrawerHostState extends State<GenParamDrawerHost>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final open = GenScope.of(context).controller.drawerOpen;
+    final open = GenScope.of(context, GenAspect.params).controller.drawerOpen;
     final reduce = MediaQuery.disableAnimationsOf(context);
     if (open && _a.value < 1 && _a.status != AnimationStatus.forward) {
       reduce ? _a.value = 1 : _a.forward();
@@ -307,7 +307,7 @@ class _GenParamDrawerHostState extends State<GenParamDrawerHost>
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     return LayoutBuilder(
       builder: (context, box) => AnimatedBuilder(
         animation: _a,
@@ -358,7 +358,7 @@ class _Drawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     final p = scope.data.params;
     final a = scope.actions;
     final l = context.l10n;
@@ -547,7 +547,7 @@ class _SamplerField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     return _Field(
       label: context.l10n.gen_sampler,
       child: Builder(
@@ -566,7 +566,7 @@ class _NoiseField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     final p = scope.data.params;
     final label =
         p.noises.where((n) => n.id == p.noise).firstOrNull?.label ?? p.noise!;
@@ -626,13 +626,15 @@ class _SeedFieldState extends State<_SeedField> {
 
   void _commit() {
     final v = int.tryParse(_c.text.trim());
-    if (v != null) GenScope.of(context).actions.onSeedChanged(v);
+    if (v != null) {
+      GenScope.of(context, GenAspect.params).actions.onSeedChanged(v);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     final p = scope.data.params;
     final l = context.l10n;
     final text = p.seed == null ? '' : '${p.seed}';
@@ -702,7 +704,7 @@ class _SmeaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.params);
     final s = smea;
     final l = context.l10n;
     void set({bool? auto, bool? on, bool? dyn}) => scope.actions.onSmeaChanged(

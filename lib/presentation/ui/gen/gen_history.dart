@@ -9,6 +9,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_preview_image.dart';
 import 'gen_contract.dart';
 import 'gen_format.dart';
 import 'gen_page.dart';
@@ -44,7 +45,10 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final batches = GenScope.of(context).data.history.batches;
+    final batches = GenScope.of(
+      context,
+      GenAspect.history,
+    ).data.history.batches;
     final first = batches.firstOrNull?.id;
     if (_first != null && first != _first && !_locked && _scroll.hasClients) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -197,7 +201,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.history);
     final h = scope.data.history;
     final l = context.l10n;
     final selectedIds = _ids(h, _selected);
@@ -495,7 +499,7 @@ class _BatchItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.history);
     final l = context.l10n;
     final b = batch;
     final cover = b.images.firstOrNull;
@@ -529,11 +533,10 @@ class _BatchItem extends StatelessWidget {
           )
         : ClipRRect(
             borderRadius: BorderRadius.circular(5),
-            child: Image(
+            child: UiPreviewImage(
               image: cover.thumb,
               width: w,
               height: h,
-              fit: BoxFit.cover,
               gaplessPlayback: true,
             ),
           );

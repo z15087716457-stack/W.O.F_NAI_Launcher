@@ -227,6 +227,57 @@ void main() {
 
     expect(_FakePromptTokenEncoder.callCount, initialCallCount);
   });
+
+  test(
+    'unchanged lane reuses usage while cross-lane preset semantics still refresh',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWith(
+            (ref) => _TestLocalStorageService(),
+          ),
+          promptTokenCounterServiceProvider.overrideWith(
+            (ref) async =>
+                PromptTokenCounterService(encoder: _FakePromptTokenEncoder()),
+          ),
+          promptBlockLibraryNotifierProvider.overrideWith(
+            () => _FakePromptBlockLibraryNotifier(
+              PromptBlockLibraryState(blocks: const [], folders: const []),
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      container
+          .read(ucPresetNotifierProvider.notifier)
+          .setPresetType(api.UcPresetType.none);
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updateNegativePromptImmediately('nsfw, bad hands');
+      const target = PromptTokenCountTarget.negative;
+      final first = container.read(promptTokenUsageProvider(target).future);
+      await first;
+      final calls = _FakePromptTokenEncoder.callCount;
+      params.updatePromptImmediately('blue sky');
+      final unchanged = container.read(promptTokenUsageProvider(target).future);
+      expect(identical(unchanged, first), isTrue);
+      await unchanged;
+      expect(_FakePromptTokenEncoder.callCount, calls);
+      expect(
+        container.read(promptTokenPayloadProvider(target)).mainText,
+        contains('nsfw'),
+      );
+      params.updatePromptImmediately('nsfw, blue sky');
+      final changed = container.read(promptTokenUsageProvider(target).future);
+      expect(identical(changed, first), isFalse);
+      await changed;
+      expect(
+        container.read(promptTokenPayloadProvider(target)).mainText,
+        isNot(contains('nsfw')),
+      );
+      expect(_FakePromptTokenEncoder.callCount, greaterThan(calls));
+    },
+  );
 }
 
 String _resolveAliases(String text) {
@@ -293,5 +344,4 @@ class _TestLocalStorageService extends LocalStorageService {
 
   @override
   String getLastNoiseSchedule() => 'native';
-
 }

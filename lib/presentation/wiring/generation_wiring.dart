@@ -52,12 +52,12 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
       context,
       () => context.mounted && ModalRoute.of(context)?.isCurrent != false,
     );
-    final data = ref.watch(generationViewDataProvider(context.l10n));
+    GenViewData getData() => ref.read(generationViewDataProvider(context.l10n));
     final settings = ref.read(generationSettingsProvider);
     final history = ref.read(generationHistoryActionsProvider);
     GenController? controller() => wiring.currentState?.controller;
     void focused(Future<void> Function(String) action) {
-      final id = data.canvas.info?.tileId;
+      final id = getData().canvas.info?.tileId;
       if (id != null) operations.run(() => action(id));
     }
 
@@ -98,8 +98,8 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
     }
 
     void step(int delta) {
-      final group = data.canvas.focus;
-      final id = data.canvas.info?.tileId;
+      final group = getData().canvas.focus;
+      final id = getData().canvas.info?.tileId;
       if (group == null || group.tiles.isEmpty) return;
       final index = group.tiles.indexWhere((tile) => tile.id == id);
       final target =
@@ -144,10 +144,10 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
                         controller()?.setDrawer(true),
                     ShortcutIds.openHistoryPanel: () => operations.run(
                       () => settings.layout(
-                        data.layout.copyWith(
-                          historyOpen: !data.layout.historyOpen,
+                        getData().layout.copyWith(
+                          historyOpen: !getData().layout.historyOpen,
                         ),
-                        previous: data.layout,
+                        previous: getData().layout,
                       ),
                     ),
                     ShortcutIds.generationPrevImage: () => step(-1),
@@ -188,6 +188,10 @@ class GenerationWiring extends ConsumerStatefulWidget {
 }
 
 class _GenerationWiringState extends ConsumerState<GenerationWiring> {
+  GenActions? _actions;
+  GenSlots? _slots;
+  Object? _slotInputs;
+
   GenController? get controller {
     GenController? result;
     void locate(Element element) {
@@ -218,11 +222,15 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
     final references = ref.read(generationReferencesProvider);
     final history = ref.read(generationHistoryActionsProvider);
     final operations = GenerationOperations(ref, context, () => mounted);
-    final characters = ref.read(characterPromptNotifierProvider).characters;
-    final ids = characters.map((character) => character.id).toList();
-    String characterId(int index) => index >= 0 && index < ids.length
-        ? ids[index]
-        : (throw StateError(context.l10n.bridge_conflict));
+    GenViewData currentData() =>
+        ref.read(generationViewDataProvider(context.l10n));
+    String characterId(int index) {
+      final characters = ref.read(characterPromptNotifierProvider).characters;
+      return index >= 0 && index < characters.length
+          ? characters[index].id
+          : throw StateError(context.l10n.bridge_conflict);
+    }
+
     void run(Future<void> Function() task) => operations.run(task);
     void focus(void Function() action) {
       if (ref.read(toolsSheetProvider) == null) {
@@ -235,9 +243,17 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
       }
     }
 
-    final page = widget.builder(
-      data: data,
-      slots: GenSlots(
+    final simpleViewer = ref.watch(simpleOutputViewerNotifierProvider);
+    final slotInputs = (
+      agentAvailable,
+      agentExpanded,
+      simpleViewer,
+      data.prompt.negative,
+      widget.explore,
+    );
+    if (_slots == null || _slotInputs != slotInputs) {
+      _slotInputs = slotInputs;
+      _slots = GenSlots(
         panelBackdrop: (context, viewport) =>
             GenerationPanelBackdropWiring(canvasViewport: viewport),
         emptyCanvas: (_) => const GenerationWelcome(),
@@ -245,7 +261,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         agentToggle: agentAvailable ? const NaiAgentToggleButton() : null,
         historyCaptionInset: !agentExpanded,
         preserveHistory: agentExpanded,
-        canvas: ref.watch(simpleOutputViewerNotifierProvider)
+        canvas: simpleViewer
             ? null
             : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),
         editor: (context, target) => GenerationEditorWiring(
@@ -259,12 +275,16 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         drop: operations.drop,
         historyDrag: operations.historyDrag,
         toolSheet: const ToolsGenerationSheetWiring(),
-      ),
-      actions: GenActions(
+      );
+    }
+    final page = widget.builder(
+      data: data,
+      slots: _slots!,
+      actions: _actions ??= GenActions(
         onChannelChanged: (value) =>
             ref.read(canvasChannelNotifierProvider.notifier).set(value),
         onLayoutChanged: (value) =>
-            run(() => settings.layout(value, previous: data.layout)),
+            run(() => settings.layout(value, previous: currentData().layout)),
         onModelChanged: (value) => run(() => settings.model(value)),
         onFurryChanged: (value) => run(() => settings.furry(value)),
         onOpenQuota: () => run(
@@ -288,11 +308,11 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onTranslate: () => run(() async {
           await ref
               .read(promptTranslationCoordinatorProvider)
-              .translate(data.prompt.negative);
+              .translate(currentData().prompt.negative);
         }),
         onToggleTranslation: () => ref
             .read(promptTranslationCoordinatorProvider)
-            .toggleAll(data.prompt.negative),
+            .toggleAll(currentData().prompt.negative),
         onTranslationSettings: () =>
             context.go('${AppRoutes.settings}?section=promptAssistant'),
         onOpenBridge: (rect) => run(
@@ -321,8 +341,9 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onImg2ImgFromLibrary: () =>
             run(() => operations.library(GenDropTarget.img2img)),
         onImg2ImgSketch: () => run(operations.sketch),
-        onImg2ImgChanged: (value) =>
-            run(() => references.img2img(value, previous: data.refs.img2img)),
+        onImg2ImgChanged: (value) => run(
+          () => references.img2img(value, previous: currentData().refs.img2img),
+        ),
         onImg2ImgEdit: () => run(() => operations.editSource(false)),
         onImg2ImgInpaint: () => run(() => operations.editSource(true)),
         onImg2ImgPlace: () => run(operations.placeSource),
@@ -334,7 +355,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onVibeChanged: (value) => run(
           () => references.vibe(
             value,
-            previous: data.refs.vibes?.list
+            previous: currentData().refs.vibes?.list
                 .where((item) => item.id == value.id)
                 .firstOrNull,
           ),
@@ -351,7 +372,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onPreciseChanged: (value) => run(
           () => references.precise(
             value,
-            previous: data.refs.precise?.list
+            previous: currentData().refs.precise?.list
                 .where((item) => item.id == value.id)
                 .firstOrNull,
           ),
@@ -366,8 +387,9 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onParamChanged: (param, value) =>
             run(() => settings.param(param, value)),
         onSeedChanged: (value) => run(() => settings.seed(value)),
-        onSeedPinned: (value) =>
-            run(() => settings.pinSeed(value, lastSeed: data.params.seed)),
+        onSeedPinned: (value) => run(
+          () => settings.pinSeed(value, lastSeed: currentData().params.seed),
+        ),
         onSamplerChanged: (value) => run(() => settings.sampler(value)),
         onNoiseChanged: (value) => run(() => settings.noise(value)),
         onVarietyChanged: (value) => run(() => settings.variety(value)),
@@ -386,7 +408,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onVariations: (id) => run(() => operations.variations(id)),
         onUpscale: (id) => run(() => operations.upscale(id)),
         onUpscaleSettings: () {
-          final id = data.canvas.info?.tileId;
+          final id = currentData().canvas.info?.tileId;
           if (id != null) {
             run(
               () => ToolsGenerationSheetWiring.open(

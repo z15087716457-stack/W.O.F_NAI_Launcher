@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/image_generation_provider.dart';
@@ -132,6 +133,26 @@ class CanvasFeedLayoutResult {
 
   /// 世界内容包围盒（官网 bounds.height = cursorY-340 截尾距）。
   final Rect bounds;
+}
+
+/// One union per layout, shared by badges, nearest-group selection and camera
+/// navigation. Camera frames never rescan every tile for every group.
+class CanvasGroupBoundsIndex {
+  CanvasFeedLayoutResult? _layout;
+  final _bounds = <String, Rect>{};
+
+  Rect boundsOf(CanvasFeedLayoutResult layout, String key) {
+    if (!identical(_layout, layout)) {
+      _layout = layout;
+      _bounds.clear();
+      for (final item in layout.items) {
+        final previous = _bounds[item.group.key];
+        _bounds[item.group.key] =
+            previous?.expandToInclude(item.worldRect) ?? item.worldRect;
+      }
+    }
+    return _bounds[key] ?? Rect.zero;
+  }
 }
 
 // ── 官网 FNV-1a 32bit 哈希（mX/mJ 同式）─────────────────────────────
@@ -487,12 +508,37 @@ CanvasFeedGroup inflightGroup({
 
 /// 当前批占位始终置顶，使用与最终图片相同的 run 身份。
 /// 保留已有组的世界位置，让新组出现在其上方，相机确实向新组移动。
-class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
+class _CanvasFeedGeometryNotifier extends Notifier<CanvasFeedLayoutResult> {
   CanvasFeedLayoutResult? _previousLayout;
 
   @override
   CanvasFeedLayoutResult build() {
-    final state = ref.watch(imageGenerationNotifierProvider);
+    final input = ref.watch(
+      imageGenerationNotifierProvider.select(
+        (state) => (
+          state.currentImages,
+          state.history,
+          state.displayImages,
+          state.isGenerating,
+          state.generationRunId,
+          state.batchWidth,
+          state.batchHeight,
+          state.totalImages,
+        ),
+      ),
+    );
+    // Stream pixels and progress do not participate in geometry. Their fresh
+    // values are attached to the active slots by CanvasFeedLayoutNotifier.
+    final state = ImageGenerationState(
+      currentImages: input.$1,
+      history: input.$2,
+      displayImages: input.$3,
+      status: input.$4 ? GenerationStatus.generating : GenerationStatus.idle,
+      generationRunId: input.$5,
+      batchWidth: input.$6,
+      batchHeight: input.$7,
+      totalImages: input.$8,
+    );
     final runId = state.generationRunId;
     // 清空历史保留中央展示图；图生图或工具返回也可能只登记 display。
     final mergedImages = {
@@ -610,6 +656,100 @@ class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
       bounds: result.bounds.isEmpty
           ? pinBounds
           : result.bounds.expandToInclude(pinBounds),
+    );
+  }
+}
+
+final canvasFeedGeometryProvider =
+    NotifierProvider<_CanvasFeedGeometryNotifier, CanvasFeedLayoutResult>(
+      _CanvasFeedGeometryNotifier.new,
+    );
+
+/// Geometry is stable while a preview streams. Only the active batch receives
+/// new specs; retained history items and their world coordinates are reused.
+class CanvasFeedLayoutNotifier extends Notifier<CanvasFeedLayoutResult> {
+  CanvasFeedLayoutResult? _geometry;
+  List<CanvasFeedItem> _activeItems = const [];
+  List<CanvasFeedItem> _retainedItems = const [];
+  List<CanvasFeedGroup> _retainedGroups = const [];
+
+  @override
+  CanvasFeedLayoutResult build() {
+    final geometry = ref.watch(canvasFeedGeometryProvider);
+    final active = geometry.groups.firstOrNull;
+    if (active == null || !active.isInFlight) return geometry;
+    if (!identical(_geometry, geometry)) {
+      _geometry = geometry;
+      _activeItems = [
+        for (final item in geometry.items)
+          if (item.group.key == active.key) item,
+      ];
+      _retainedItems = [
+        for (final item in geometry.items)
+          if (item.group.key != active.key) item,
+      ];
+      _retainedGroups = geometry.groups.skip(1).toList(growable: false);
+    }
+    final stream = ref.watch(
+      imageGenerationNotifierProvider.select(
+        (state) => (
+          state.streamPreviewSlots,
+          state.currentImage,
+          state.progress,
+          state.streamPreview,
+          state.inpaintPreviewPlacement,
+          state.totalImages,
+        ),
+      ),
+    );
+    final byNumber = {for (final slot in stream.$1) slot.imageNumber: slot};
+    final tiles = [
+      for (final tile in active.tiles)
+        if (tile.slot case final slot?)
+          CanvasTileSpec.slot(
+            byNumber[slot.imageNumber] ??
+                StreamPreviewSlot(
+                  imageNumber: slot.imageNumber,
+                  totalImages: stream.$6,
+                  progress: slot.imageNumber == stream.$2 ? stream.$3 : 0,
+                  previewBytes: slot.imageNumber == stream.$2
+                      ? stream.$4
+                      : null,
+                  inpaintPreviewPlacement: slot.imageNumber == stream.$2
+                      ? stream.$5
+                      : null,
+                ),
+            slotWidth: tile.slotWidth,
+            slotHeight: tile.slotHeight,
+          )
+        else
+          tile,
+    ];
+    final group = CanvasFeedGroup(
+      key: active.key,
+      runId: active.runId,
+      tiles: tiles,
+      requestedCount: active.requestedCount,
+    );
+    return CanvasFeedLayoutResult(
+      groups: CombinedListView([
+        [group],
+        _retainedGroups,
+      ]),
+      items: CombinedListView([
+        [
+          for (final item in _activeItems)
+            CanvasFeedItem(
+              group: group,
+              tile: tiles[item.subimageIndex],
+              subimageIndex: item.subimageIndex,
+              worldRect: item.worldRect,
+              groupRect: item.groupRect,
+            ),
+        ],
+        _retainedItems,
+      ]),
+      bounds: geometry.bounds,
     );
   }
 }

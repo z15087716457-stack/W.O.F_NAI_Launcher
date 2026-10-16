@@ -22,7 +22,7 @@ class GenHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.header);
     return Container(
       key: const Key('gen-header'),
       constraints: const BoxConstraints(minHeight: 37),
@@ -107,7 +107,7 @@ class _ModelCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.header);
     final data = scope.data;
     final furry = data.furry;
     final open = scope.controller.popoverTag == #model;
@@ -202,7 +202,7 @@ class _QuotaCapsule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.header);
     final q = scope.data.quota;
     final opus = q.opusPercent;
     final capsule = UiPressable(
@@ -268,7 +268,7 @@ class _ModelMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.header);
     final data = scope.data;
     final l = context.l10n;
     Widget header(String t) => Padding(

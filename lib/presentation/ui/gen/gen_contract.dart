@@ -1,10 +1,28 @@
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 
 import '../channel/channel_contract.dart';
 
 export '../channel/channel_contract.dart' show ChannelSettings;
+
+/// Structural equality for view projections, with encoded images compared by
+/// their provider keys / byte identity rather than traversing image buffers.
+mixin _GenValue {
+  List<Object?> get _values;
+  static const _equality = DeepCollectionEquality();
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _GenValue &&
+          runtimeType == other.runtimeType &&
+          _equality.equals(_values, other._values);
+
+  @override
+  int get hashCode => Object.hash(runtimeType, _equality.hash(_values));
+}
 
 /// 生图页（方案 A 精修）：界面只认这份契约。
 ///
@@ -88,7 +106,7 @@ class GenLayout {
 
 /// 模型菜单的一项（`ImageModels.allModels`）。
 @immutable
-class GenModel {
+class GenModel with _GenValue {
   const GenModel({
     required this.id,
     required this.name,
@@ -107,11 +125,13 @@ class GenModel {
 
   /// 归在“旧模型”分组（`ModelDisplay.groupOf == legacy`）。
   final bool legacy;
+  @override
+  List<Object?> get _values => [id, name, description, legacy];
 }
 
 /// 账号额度胶囊。
 @immutable
-class GenQuota {
+class GenQuota with _GenValue {
   const GenQuota({
     this.opusPercent,
     this.opusTip,
@@ -134,18 +154,28 @@ class GenQuota {
 
   /// 付费购买的 Anlas；null = 未取得明细。
   final int? purchasedAnlas;
+  @override
+  List<Object?> get _values => [
+    opusPercent,
+    opusTip,
+    anlas,
+    subscriptionAnlas,
+    purchasedAnlas,
+  ];
 }
 
 /// 桥接（Krita / Agent）状态小图标，放在提示词页签后面（`AgentBridgeIndicator`）。
 enum GenBridgePhase { idle, working, synced, failed }
 
 @immutable
-class GenBridge {
+class GenBridge with _GenValue {
   const GenBridge({required this.phase, required this.label});
   final GenBridgePhase phase;
 
   /// 悬停说明（`bridgeAgentStatus`）。
   final String label;
+  @override
+  List<Object?> get _values => [phase, label];
 }
 
 // ───────────────────────── 提示词 ─────────────────────────
@@ -187,36 +217,42 @@ class GenEditorTarget {
 
 /// token 用量（`PromptTokenCount`）：底部 3px 长条，超过 90% 变琥珀色，超限变红。
 @immutable
-class GenTokens {
+class GenTokens with _GenValue {
   const GenTokens(this.used, this.limit);
   final int used;
   final int limit;
+  @override
+  List<Object?> get _values => [used, limit];
 }
 
 /// 下拉里的一项（质量词预设、负面预设、采样器、噪声调度……）。
 @immutable
-class GenOption {
+class GenOption with _GenValue {
   const GenOption({required this.id, required this.label, this.detail});
   final String id;
   final String label;
 
   /// 菜单右侧的弱色说明（推荐 / 描述）。
   final String? detail;
+  @override
+  List<Object?> get _values => [id, label, detail];
 }
 
 /// 页签悬停时显示的“最终发送”预览的一段（`_PositivePromptTooltip` 的各节）。
 @immutable
-class GenPreviewSection {
+class GenPreviewSection with _GenValue {
   const GenPreviewSection({required this.label, required this.text});
 
   /// “主提示词 / 质量词 / 角色 1 …”。
   final String label;
   final String text;
+  @override
+  List<Object?> get _values => [label, text];
 }
 
 /// 提示词卡头部“模块与开关”菜单里的状态（`layoutState.*ToolPinned` 和提示词设置）。
 @immutable
-class GenPromptTools {
+class GenPromptTools with _GenValue {
   const GenPromptTools({
     this.palettePinned = false,
     this.dockPinned = true,
@@ -251,6 +287,17 @@ class GenPromptTools {
 
   /// 共现推荐（`autocompleteSettings.relatedTagsEnabled`）。
   final bool related;
+  @override
+  List<Object?> get _values => [
+    palettePinned,
+    dockPinned,
+    translatePinned,
+    agentPinned,
+    autoFormat,
+    highlight,
+    sdConvert,
+    related,
+  ];
 }
 
 enum GenPromptTool {
@@ -266,7 +313,7 @@ enum GenPromptTool {
 
 /// 翻译按钮（`promptTranslationCoordinator`）。
 @immutable
-class GenTranslate {
+class GenTranslate with _GenValue {
   const GenTranslate({this.busy = false, this.showing = false, this.route});
 
   /// 正在翻译：图标转圈、按钮不可点。
@@ -277,10 +324,12 @@ class GenTranslate {
 
   /// “DeepSeek · deepseek-chat”这类线路名；null = 没配翻译模型（点了先引导去设置）。
   final String? route;
+  @override
+  List<Object?> get _values => [busy, showing, route];
 }
 
 @immutable
-class GenPromptData {
+class GenPromptData with _GenValue {
   const GenPromptData({
     this.negative = false,
     this.positiveTokens = const GenTokens(0, 512),
@@ -324,6 +373,22 @@ class GenPromptData {
   final GenBridge? bridge;
 
   GenTokens get tokens => negative ? negativeTokens : positiveTokens;
+  @override
+  List<Object?> get _values => [
+    negative,
+    positiveTokens,
+    negativeTokens,
+    qualityPresets,
+    qualityPreset,
+    ucPresets,
+    ucPreset,
+    transparent,
+    positivePreview,
+    negativePreview,
+    tools,
+    translate,
+    bridge,
+  ];
 }
 
 // ───────────────────────── 角色 ─────────────────────────
@@ -331,7 +396,7 @@ class GenPromptData {
 enum GenGender { female, male, other }
 
 @immutable
-class GenCharacter {
+class GenCharacter with _GenValue {
   const GenCharacter({
     required this.id,
     this.name,
@@ -356,10 +421,20 @@ class GenCharacter {
   /// 自定义定位时的位置，0–1（V4.5 吸附到 5 × 5 格中心 0.1 / 0.3 / 0.5 / 0.7 / 0.9）；
   /// null = 还没放（按 AI 选择处理）。
   final Offset? position;
+  @override
+  List<Object?> get _values => [
+    id,
+    name,
+    gender,
+    enabled,
+    positiveTokens,
+    negativeTokens,
+    position,
+  ];
 }
 
 @immutable
-class GenCharactersData {
+class GenCharactersData with _GenValue {
   const GenCharactersData({
     this.list = const [],
     this.aiPosition = true,
@@ -377,13 +452,15 @@ class GenCharactersData {
 
   /// V5 自由坐标；false = V4.5 的 5 × 5 网格（`spec.freeformCharacterPosition`）。
   final bool freeform;
+  @override
+  List<Object?> get _values => [list, aiPosition, max, freeform];
 }
 
 // ───────────────────────── 参考图 ─────────────────────────
 
 /// 图生图（`Img2ImgPanel`）。[image] 为 null = 还没放图。
 @immutable
-class GenImg2Img {
+class GenImg2Img with _GenValue {
   const GenImg2Img({
     this.image,
     this.width = 0,
@@ -411,6 +488,17 @@ class GenImg2Img {
   final double inpaintStrength;
 
   bool get hasImage => image != null;
+  @override
+  List<Object?> get _values => [
+    image,
+    width,
+    height,
+    strength,
+    noise,
+    enabled,
+    mask,
+    inpaintStrength,
+  ];
 }
 
 enum GenMask { none, ready }
@@ -419,7 +507,7 @@ enum GenVibeState { encoded, pending, encoding }
 
 /// 一个风格迁移参考（`VibeReference`）。
 @immutable
-class GenVibe {
+class GenVibe with _GenValue {
   const GenVibe({
     required this.id,
     required this.thumb,
@@ -443,10 +531,21 @@ class GenVibe {
 
   /// 待编码时编码一次要的 Anlas。
   final int encodeCost;
+  @override
+  List<Object?> get _values => [
+    id,
+    thumb,
+    name,
+    strength,
+    info,
+    enabled,
+    state,
+    encodeCost,
+  ];
 }
 
 @immutable
-class GenRecentVibe {
+class GenRecentVibe with _GenValue {
   const GenRecentVibe({
     required this.id,
     required this.thumb,
@@ -455,10 +554,12 @@ class GenRecentVibe {
   final String id;
   final ImageProvider thumb;
   final String name;
+  @override
+  List<Object?> get _values => [id, thumb, name];
 }
 
 @immutable
-class GenVibesData {
+class GenVibesData with _GenValue {
   const GenVibesData({
     this.list = const [],
     this.max = 16,
@@ -480,13 +581,22 @@ class GenVibesData {
 
   /// 最近用过的 Vibe（`referencePanelNotifierProvider` 的 `recentEntries`），点一下加回来。
   final List<GenRecentVibe> recent;
+  @override
+  List<Object?> get _values => [
+    list,
+    max,
+    freeCount,
+    extraCost,
+    normalize,
+    recent,
+  ];
 }
 
 enum GenPreciseType { character, style, both }
 
 /// 一个精准参考（`PreciseReference`）。
 @immutable
-class GenPrecise {
+class GenPrecise with _GenValue {
   const GenPrecise({
     required this.id,
     required this.thumb,
@@ -502,19 +612,23 @@ class GenPrecise {
   final double strength;
   final double fidelity;
   final bool enabled;
+  @override
+  List<Object?> get _values => [id, thumb, type, strength, fidelity, enabled];
 }
 
 @immutable
-class GenPreciseData {
+class GenPreciseData with _GenValue {
   const GenPreciseData({this.list = const [], this.costEach = 5});
   final List<GenPrecise> list;
 
   /// 每张多少 Anlas（`AnlasCalculator`）。
   final int costEach;
+  @override
+  List<Object?> get _values => [list, costEach];
 }
 
 @immutable
-class GenRefsData {
+class GenRefsData with _GenValue {
   const GenRefsData({
     this.img2img = const GenImg2Img(),
     this.vibes,
@@ -532,6 +646,8 @@ class GenRefsData {
 
   /// 文件正拖在哪一行上（接线方的 [GenSlots.drop] 报进出），界面画投放高亮。
   final GenDropTarget? dropHover;
+  @override
+  List<Object?> get _values => [img2img, vibes, precise, dropHover];
 }
 
 // ───────────────────────── 图像 ─────────────────────────
@@ -542,16 +658,18 @@ enum GenOrientation { portrait, landscape, square }
 
 /// 一个尺寸预设（`ResolutionPreset.presets`）。
 @immutable
-class GenSizePreset {
+class GenSizePreset with _GenValue {
   const GenSizePreset(this.group, this.orientation, this.width, this.height);
   final GenSizeGroup group;
   final GenOrientation orientation;
   final int width;
   final int height;
+  @override
+  List<Object?> get _values => [group, orientation, width, height];
 }
 
 @immutable
-class GenImageData {
+class GenImageData with _GenValue {
   const GenImageData({
     this.width = 832,
     this.height = 1216,
@@ -573,20 +691,32 @@ class GenImageData {
   /// 重复请求次数（`requestCount`）1–[maxRepeat]。
   final int repeat;
   final int maxRepeat;
+  @override
+  List<Object?> get _values => [
+    width,
+    height,
+    presets,
+    count,
+    maxCount,
+    repeat,
+    maxRepeat,
+  ];
 }
 
 // ───────────────────────── 参数 ─────────────────────────
 
 @immutable
-class GenSmea {
+class GenSmea with _GenValue {
   const GenSmea({this.auto = true, this.smea = false, this.dyn = false});
   final bool auto;
   final bool smea;
   final bool dyn;
+  @override
+  List<Object?> get _values => [auto, smea, dyn];
 }
 
 @immutable
-class GenParamsData {
+class GenParamsData with _GenValue {
   const GenParamsData({
     this.steps = 28,
     this.maxSteps = 50,
@@ -636,6 +766,23 @@ class GenParamsData {
 
   String get samplerLabel =>
       samplers.where((s) => s.id == sampler).firstOrNull?.label ?? sampler;
+  @override
+  List<Object?> get _values => [
+    steps,
+    maxSteps,
+    scale,
+    maxScale,
+    cfgRescale,
+    seed,
+    seedPinned,
+    sampler,
+    samplers,
+    noise,
+    noises,
+    varietyPlus,
+    decrisp,
+    smea,
+  ];
 }
 
 /// 参数抽屉里能改的项。
@@ -658,7 +805,7 @@ enum GenRunState {
 }
 
 @immutable
-class GenGenerateData {
+class GenGenerateData with _GenValue {
   const GenGenerateData({
     this.state = GenRunState.ready,
     this.label = '',
@@ -692,6 +839,18 @@ class GenGenerateData {
 
   /// [GenRunState.blocked] 时的原因（悬停说明）。
   final String? blocked;
+  @override
+  List<Object?> get _values => [
+    state,
+    label,
+    cost,
+    insufficient,
+    done,
+    total,
+    progress,
+    cooldown,
+    blocked,
+  ];
 }
 
 // ───────────────────────── 画布 ─────────────────────────
@@ -712,7 +871,7 @@ enum GenTileState {
 
 /// 画布上的一张（一次请求里的一张图，或它的占位）。
 @immutable
-class GenTile {
+class GenTile with _GenValue {
   const GenTile({
     required this.id,
     required this.width,
@@ -738,19 +897,34 @@ class GenTile {
   final GenTileState state;
   final double? progress;
   final String? error;
+  @override
+  List<Object?> get _values => [
+    id,
+    width,
+    height,
+    image,
+    originalImage,
+    (inpaintMaskBytes,),
+    preview,
+    state,
+    progress,
+    error,
+  ];
 }
 
 /// 一组 = 一次生成请求（`generationRunId`）。
 @immutable
-class GenGroup {
+class GenGroup with _GenValue {
   const GenGroup({required this.id, required this.tiles});
   final String id;
   final List<GenTile> tiles;
+  @override
+  List<Object?> get _values => [id, tiles];
 }
 
 /// 浮动工具条要用的“当前这张”（焦点组里选中的那张）。
 @immutable
-class GenFocusInfo {
+class GenFocusInfo with _GenValue {
   const GenFocusInfo({
     required this.tileId,
     required this.width,
@@ -784,11 +958,24 @@ class GenFocusInfo {
   /// 能不能拿去增强 / 变体 / 放大 / 设为图生图（`canUseAsGenerationInput`，失败快照不行）。
   final bool canUseAsInput;
   final bool canCompareOriginal;
+  @override
+  List<Object?> get _values => [
+    tileId,
+    width,
+    height,
+    seed,
+    pinned,
+    variationsCost,
+    variationsCostLoading,
+    enhanceCost,
+    canUseAsInput,
+    canCompareOriginal,
+  ];
 }
 
 /// 放大按钮（`CanvasUpscaleButton`）：主按钮按记住的方案执行，箭头改方案。
 @immutable
-class GenUpscale {
+class GenUpscale with _GenValue {
   const GenUpscale({
     this.cost,
     this.running = false,
@@ -818,6 +1005,16 @@ class GenUpscale {
   /// 方案菜单（本地模型、NovelAI 云端……）。
   final List<GenOption> options;
   final String? selected;
+  @override
+  List<Object?> get _values => [
+    cost,
+    running,
+    progress,
+    status,
+    available,
+    options,
+    selected,
+  ];
 }
 
 /// 透明图的垫底（`CanvasImageBackgroundNotifier.presets`，另可给 `#RRGGBB`）：只画在图片像素下面，
@@ -842,17 +1039,19 @@ abstract final class GenBackdrop {
 
 /// 生成失败（`image_preview.dart` 按错误码映射好的标题和说明）。
 @immutable
-class GenError {
+class GenError with _GenValue {
   const GenError({required this.title, this.hint, this.detail});
   final String title;
   final String? hint;
 
   /// 原始错误（可复制）。
   final String? detail;
+  @override
+  List<Object?> get _values => [title, hint, detail];
 }
 
 @immutable
-class GenCanvasData {
+class GenCanvasData with _GenValue {
   const GenCanvasData({
     this.focus,
     this.info,
@@ -922,6 +1121,21 @@ class GenCanvasData {
         channel: channel,
         channelTop: top ?? channelTop,
       );
+  @override
+  List<Object?> get _values => [
+    focus,
+    info,
+    upscale,
+    error,
+    backdrop,
+    zoomToFill,
+    positioning,
+    generateShortcut,
+    locked,
+    sheet,
+    channel,
+    channelTop,
+  ];
 }
 
 /// 工具条落下的面板：增强（点“增强”）/ 放大设置（点放大旁的小箭头）。
@@ -933,7 +1147,7 @@ enum GenToolSheet { enhance, upscale }
 enum GenOp { upscale, enhance, variation, inpaint, img2img }
 
 @immutable
-class GenHistoryImage {
+class GenHistoryImage with _GenValue {
   const GenHistoryImage({
     required this.id,
     required this.thumb,
@@ -949,11 +1163,13 @@ class GenHistoryImage {
   final int height;
   final GenOp? op;
   final bool favorite;
+  @override
+  List<Object?> get _values => [id, thumb, width, height, op, favorite];
 }
 
 /// 一批 = 一次请求。
 @immutable
-class GenBatch {
+class GenBatch with _GenValue {
   const GenBatch({
     required this.id,
     required this.time,
@@ -969,10 +1185,12 @@ class GenBatch {
   final int pending;
 
   int get count => images.length + pending;
+  @override
+  List<Object?> get _values => [id, time, images, pending];
 }
 
 @immutable
-class GenHistoryData {
+class GenHistoryData with _GenValue {
   const GenHistoryData({
     this.batches = const [],
     this.selected,
@@ -993,12 +1211,14 @@ class GenHistoryData {
   final int pinned;
 
   int get total => batches.fold(0, (s, b) => s + b.images.length);
+  @override
+  List<Object?> get _values => [batches, selected, autoSave, pinned];
 }
 
 // ───────────────────────── 整页 ─────────────────────────
 
 @immutable
-class GenViewData {
+class GenViewData with _GenValue {
   const GenViewData({
     required this.model,
     required this.models,
@@ -1074,6 +1294,23 @@ class GenViewData {
     history: history ?? this.history,
     now: now,
   );
+  @override
+  List<Object?> get _values => [
+    model,
+    models,
+    furry,
+    quota,
+    layout,
+    prompt,
+    characters,
+    refs,
+    image,
+    params,
+    generate,
+    canvas,
+    history,
+    now,
+  ];
 }
 
 // ───────────────────────── 槽位 ─────────────────────────

@@ -22,7 +22,7 @@ class GenPromptModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final p = scope.data.prompt;
     final target = GenEditorTarget.base(negative: p.negative);
     return GenModule(
@@ -56,7 +56,7 @@ class GenEditorArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     return Stack(
       children: [
         Padding(
@@ -97,7 +97,7 @@ class _PromptHead extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final data = scope.data;
     final p = data.prompt;
     final l = context.l10n;
@@ -268,8 +268,10 @@ class _Bridge extends StatelessWidget {
         width: 24,
         color: color,
         tooltip: bridge.label,
-        onTap: () =>
-            GenScope.of(context).actions.onOpenBridge(genRectOf(context)),
+        onTap: () => GenScope.of(
+          context,
+          GenAspect.prompt,
+        ).actions.onOpenBridge(genRectOf(context)),
       ),
     );
   }
@@ -282,7 +284,7 @@ class _Translate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final t = scope.data.prompt.translate;
     final l = context.l10n;
     final open = scope.controller.popoverTag == #translate;
@@ -355,7 +357,7 @@ class _Translate extends StatelessWidget {
   }
 
   static void _openMenu(BuildContext context, UiPopoverAnchor anchor) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final t = scope.data.prompt.translate;
     final l = context.l10n;
     scope.controller.openMenu(
@@ -417,7 +419,7 @@ class _ToolsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final t = scope.data.prompt.tools;
     final l = context.l10n;
     Widget pinRow(
@@ -621,7 +623,7 @@ class _PromptFoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final p = scope.data.prompt;
     final l = context.l10n;
     final presets = p.negative ? p.ucPresets : p.qualityPresets;
@@ -686,7 +688,7 @@ class _Transparent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final l = context.l10n;
     return Tooltip(
       message: on ? l.gen_transparentOn : l.gen_transparentOff,
@@ -755,7 +757,7 @@ class GenFullscreenEditor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.prompt);
     final l = context.l10n;
     final data = scope.data;
     final ch = target.character;

@@ -48,16 +48,30 @@ class GenerationEditorWiring extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final params = ref.watch(generationParamsNotifierProvider);
-    final config = ref.watch(characterPromptNotifierProvider);
+    final input = ref.watch(
+      generationParamsNotifierProvider.select(
+        (params) => (
+          model: params.model,
+          text: target.isBase
+              ? (target.negative ? params.negativePrompt : params.prompt)
+              : null,
+        ),
+      ),
+    );
     final index = target.character;
     final character = target.isBase
         ? null
-        : characterId != null
-        ? config.findCharacterById(characterId!)
-        : index != null && index >= 0 && index < config.characters.length
-        ? config.characters[index]
-        : null;
+        : ref.watch(
+            characterPromptNotifierProvider.select(
+              (config) => characterId != null
+                  ? config.findCharacterById(characterId!)
+                  : index != null &&
+                        index >= 0 &&
+                        index < config.characters.length
+                  ? config.characters[index]
+                  : null,
+            ),
+          );
     if (!target.isBase && character == null) return const SizedBox.shrink();
     final scope = character == null
         ? target.negative
@@ -67,13 +81,11 @@ class GenerationEditorWiring extends ConsumerWidget {
         ? PillScopes.charNeg(character.id)
         : PillScopes.charPos(character.id);
     final plain = character == null
-        ? target.negative
-              ? params.negativePrompt
-              : params.prompt
+        ? input.text!
         : target.negative
         ? character.negativePrompt
         : character.prompt;
-    final spec = ModelSpecs.of(params.model);
+    final spec = ModelSpecs.of(input.model);
     final explorePrompt = explore && target.isBase && !target.negative;
     final editorConfig = UnifiedPromptConfig(
       embedded: true,

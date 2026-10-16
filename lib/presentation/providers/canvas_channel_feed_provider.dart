@@ -11,7 +11,7 @@ final canvasChannelClockProvider = Provider<DateTime Function()>(
 
 /// Project once per feed change, never once per animation/camera frame.
 final canvasChannelFeedProvider = Provider<CanvasChannelFeed>((ref) {
-  final layout = ref.watch(canvasFeedLayoutProvider);
+  final layout = ref.watch(canvasFeedGeometryProvider);
   final generation = ref.watch(
     imageGenerationNotifierProvider.select(
       (state) => (state.isGenerating, state.generationRunId),

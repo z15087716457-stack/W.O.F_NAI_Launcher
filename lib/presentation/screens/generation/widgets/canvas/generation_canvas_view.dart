@@ -243,21 +243,10 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     }
   }
 
-  Rect _groupBounds(CanvasFeedLayoutResult layout, CanvasFeedGroup g) {
-    var l = double.infinity, t = double.infinity;
-    var r = double.negativeInfinity, b = double.negativeInfinity;
-    var found = false;
-    for (final item in layout.items) {
-      if (item.group.key != g.key) continue;
-      found = true;
-      final rect = item.worldRect;
-      l = math.min(l, rect.left);
-      t = math.min(t, rect.top);
-      r = math.max(r, rect.right);
-      b = math.max(b, rect.bottom);
-    }
-    return found ? Rect.fromLTRB(l, t, r, b) : Rect.zero;
-  }
+  final _groupBoundsIndex = CanvasGroupBoundsIndex();
+
+  Rect _groupBounds(CanvasFeedLayoutResult layout, CanvasFeedGroup g) =>
+      _groupBoundsIndex.boundsOf(layout, g.key);
 
   void _syncSelectionToCamera() {
     final layout = ref.read(canvasFeedLayoutProvider);
@@ -845,53 +834,79 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     return index >= 0 && index < g.tiles.length ? g.tiles[index].image : null;
   }
 
+  final _embeddedTiles = <Object, CanvasWorldItem>{};
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _embeddedTiles.clear();
+  }
+
   List<CanvasWorldItem> _buildTiles(
     CanvasFeedLayoutResult layout,
     CanvasFocus? focus,
   ) {
     final pinned = ref.watch(canvasPinnedNotifierProvider);
-    return [
-      for (final item in layout.items)
-        CanvasWorldItem(
-          key: ValueKey('canvas-tile:${item.group.key}:${item.subimageIndex}'),
-          rect: item.worldRect,
-          child: RepaintBoundary(
-            child: widget.tileBuilder != null
-                ? widget.tileBuilder!(
-                    context,
-                    item,
-                    focus?.group == item.group.key &&
-                        focus?.subimage == item.subimageIndex,
-                    () => _selectEmbeddedTile(item),
-                    () =>
-                        !_suppressTileTap &&
-                        !HardwareKeyboard.instance.isShiftPressed,
-                  )
-                : _CanvasTile(
-                    group: item.group,
-                    tile: item.tile,
-                    subimageIndex: item.subimageIndex,
-                    isFocusGroup: focus?.group == item.group.key,
-                    isFocusSubimage:
-                        focus?.group == item.group.key &&
-                        focus?.subimage == item.subimageIndex,
-                    isPinned:
-                        item.image != null && pinned.contains(item.image!.id),
-                    onSelect: () => _onTileTap(item),
-                    imageChild: item.image == null
-                        ? null
-                        : buildGeneratedImageCard(
-                            context: context,
-                            ref: ref,
-                            image: item.image!,
-                            showIndex: false,
-                            canvasTile: true,
-                            onTap: () => _onTileTap(item),
-                          ),
-                  ),
-          ),
-        ),
-    ];
+    final retained = <Object>{};
+    final result = <CanvasWorldItem>[];
+    for (final item in layout.items) {
+      final key = (
+        item,
+        focus?.group == item.group.key,
+        focus?.group == item.group.key && focus?.subimage == item.subimageIndex,
+        item.image != null && pinned.contains(item.image!.id),
+        widget.tileBuilder,
+      );
+      retained.add(key);
+      final cached = widget.embedded ? _embeddedTiles[key] : null;
+      final tile =
+          cached ??
+          CanvasWorldItem(
+            key: ValueKey(
+              'canvas-tile:${item.group.key}:${item.subimageIndex}',
+            ),
+            rect: item.worldRect,
+            child: RepaintBoundary(
+              child: widget.tileBuilder != null
+                  ? widget.tileBuilder!(
+                      context,
+                      item,
+                      focus?.group == item.group.key &&
+                          focus?.subimage == item.subimageIndex,
+                      () => _selectEmbeddedTile(item),
+                      () =>
+                          !_suppressTileTap &&
+                          !HardwareKeyboard.instance.isShiftPressed,
+                    )
+                  : _CanvasTile(
+                      group: item.group,
+                      tile: item.tile,
+                      subimageIndex: item.subimageIndex,
+                      isFocusGroup: focus?.group == item.group.key,
+                      isFocusSubimage:
+                          focus?.group == item.group.key &&
+                          focus?.subimage == item.subimageIndex,
+                      isPinned:
+                          item.image != null && pinned.contains(item.image!.id),
+                      onSelect: () => _onTileTap(item),
+                      imageChild: item.image == null
+                          ? null
+                          : buildGeneratedImageCard(
+                              context: context,
+                              ref: ref,
+                              image: item.image!,
+                              showIndex: false,
+                              canvasTile: true,
+                              onTap: () => _onTileTap(item),
+                            ),
+                    ),
+            ),
+          );
+      if (widget.embedded) _embeddedTiles[key] = tile;
+      result.add(tile);
+    }
+    _embeddedTiles.removeWhere((key, _) => !retained.contains(key));
+    return result;
   }
 
   List<Widget> _buildGroupBadges(

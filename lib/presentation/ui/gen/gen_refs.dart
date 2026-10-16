@@ -11,6 +11,7 @@ import '../kit/ui_lib_controls.dart';
 import '../kit/ui_lib_nav.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_preview_image.dart';
 import 'gen_contract.dart';
 import 'gen_format.dart';
 import 'gen_page.dart';
@@ -33,7 +34,7 @@ class _GenRefsModuleState extends State<GenRefsModule> {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final refs = scope.data.refs;
     final l = context.l10n;
     Widget wrap(GenDropTarget t, Widget child) {
@@ -218,11 +219,10 @@ class _BlurredStrip extends StatelessWidget {
                           sigmaX: 2.4,
                           sigmaY: 2.4,
                         ),
-                        child: Image(
+                        child: UiPreviewImage(
                           image: i,
                           height: 180,
                           width: double.infinity,
-                          fit: BoxFit.cover,
                           gaplessPlayback: true,
                         ),
                       ),
@@ -423,7 +423,7 @@ class _Img2ImgSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final m = scope.data.refs.img2img;
     final l = context.l10n;
@@ -501,7 +501,7 @@ class _Img2ImgSection extends StatelessWidget {
                                 color: hover ? c.accent : c.line,
                               ),
                             ),
-                            child: Image(image: m.image!, fit: BoxFit.cover),
+                            child: UiPreviewImage(image: m.image!),
                           ),
                         ),
                         Expanded(
@@ -664,7 +664,7 @@ class _VibeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final refs = scope.data.refs;
     final v = refs.vibes!;
@@ -838,7 +838,7 @@ class _VibeItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final l = context.l10n;
     final v = vibe;
@@ -870,7 +870,7 @@ class _VibeItem extends StatelessWidget {
               height: 44,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-              child: Image(image: v.thumb, fit: BoxFit.cover),
+              child: UiPreviewImage(image: v.thumb),
             ),
           ),
           Expanded(
@@ -1044,7 +1044,7 @@ class _Recent extends StatelessWidget {
                             width: 1.5,
                           ),
                         ),
-                        child: Image(image: r.thumb, fit: BoxFit.cover),
+                        child: UiPreviewImage(image: r.thumb),
                       ),
                     ),
                   ),
@@ -1067,7 +1067,7 @@ class _PreciseSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final refs = scope.data.refs;
     final p = refs.precise!;
@@ -1214,7 +1214,7 @@ class _PreciseItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.refs);
     final a = scope.actions;
     final l = context.l10n;
     final p = item;
@@ -1249,7 +1249,7 @@ class _PreciseItem extends StatelessWidget {
               height: 58,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(borderRadius: BorderRadius.circular(6)),
-              child: Image(image: p.thumb, fit: BoxFit.cover),
+              child: UiPreviewImage(image: p.thumb),
             ),
           ),
           Expanded(

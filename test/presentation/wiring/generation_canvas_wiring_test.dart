@@ -181,6 +181,7 @@ void main() {
     String language = 'zh',
     bool dark = false,
     bool highContrast = false,
+    GenTileBuilder? customTileBuilder,
   }) async {
     tester.view.physicalSize = const Size(1600, 1000);
     tester.view.devicePixelRatio = 1;
@@ -215,7 +216,15 @@ void main() {
                                 actions: GenActions.logging(
                                   events.add,
                                 ).withChannel(actions.onChannelChanged),
-                                slots: slots,
+                                slots: customTileBuilder == null
+                                    ? slots
+                                    : GenSlots(
+                                        editor: slots.editor,
+                                        canvas: (context, tile) =>
+                                            GenerationCanvasWiring(
+                                              tileBuilder: customTileBuilder,
+                                            ),
+                                      ),
                                 child: shortcutHost
                                     ? ShortcutAwareWidget(
                                         contextType: ShortcutContext.generation,
@@ -1395,6 +1404,25 @@ void main() {
       );
     }
   });
+  testWidgets('替换图块构建器会刷新缓存且保留相机宿主', (tester) async {
+    publish(ImageGenerationState(history: [image(1)]));
+    await pump(
+      tester,
+      customTileBuilder: (context, tile, {focused = false}) =>
+          Text('first:${tile.id}'),
+    );
+    final engine = tester.state(find.byType(GenerationCanvasView));
+    expect(find.text('first:1-0'), findsOneWidget);
+    await pump(
+      tester,
+      customTileBuilder: (context, tile, {focused = false}) =>
+          Text('second:${tile.id}'),
+    );
+    expect(tester.state(find.byType(GenerationCanvasView)), same(engine));
+    expect(find.text('second:1-0'), findsOneWidget);
+    expect(find.text('first:1-0'), findsNothing);
+  });
+
   testWidgets('空态、错误和恢复不卸载画布，错误仍由新页面展示', (tester) async {
     await pump(tester);
     final engine = tester.state(find.byType(GenerationCanvasView));

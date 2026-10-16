@@ -91,6 +91,14 @@ Future<void> precacheGen(
     }
   });
   await tester.pumpAndSettle();
+  // Layout-sized previews use their own cache keys. Await the providers which
+  // are actually mounted, including ones introduced by expanded reference rows.
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      await precacheImage((element.widget as Image).image, element);
+    }
+  });
+  await tester.pumpAndSettle();
 }
 
 Future<void> tapKey(WidgetTester tester, String key) async {

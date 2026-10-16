@@ -22,7 +22,7 @@ class GenCharacterModule extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.characters);
     final chars = scope.data.characters!;
     final l = context.l10n;
     final full = chars.list.length >= chars.max;
@@ -216,14 +216,17 @@ class _GenCharacterCardState extends State<GenCharacterCard> {
     if (cancel) return;
     final v = e.text.trim();
     if (v != (widget.character.name ?? '')) {
-      GenScope.of(context).actions.onRenameCharacter(widget.index, v);
+      GenScope.of(
+        context,
+        GenAspect.characters,
+      ).actions.onRenameCharacter(widget.index, v);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.characters);
     final l = context.l10n;
     final ch = widget.character;
     final i = widget.index;

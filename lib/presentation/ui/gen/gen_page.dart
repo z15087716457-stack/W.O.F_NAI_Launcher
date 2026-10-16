@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -52,13 +53,32 @@ abstract class GenController {
   void openFullscreen(GenEditorTarget target);
 }
 
-class GenScope extends InheritedWidget {
+/// Components subscribe to the values they draw. Actions and slots stay live;
+/// replacing either contract still notifies every dependent.
+enum GenAspect {
+  layout,
+  structure,
+  header,
+  prompt,
+  characters,
+  refs,
+  image,
+  params,
+  generate,
+  canvas,
+  canvasTile,
+  history,
+}
+
+class GenScope extends InheritedModel<GenAspect> {
   const GenScope({
     super.key,
     required this.data,
     required this.actions,
     required this.slots,
     required this.controller,
+    this.drawerSnapshot,
+    this.popoverSnapshot,
     required super.child,
   });
 
@@ -67,8 +87,65 @@ class GenScope extends InheritedWidget {
   final GenSlots slots;
   final GenController controller;
 
-  static GenScope of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<GenScope>()!;
+  static GenScope of(BuildContext context, [GenAspect? aspect]) =>
+      InheritedModel.inheritFrom<GenScope>(context, aspect: aspect)!;
+
+  static GenScope read(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<GenScope>()!;
+
+  Object? _value(GenAspect aspect) => switch (aspect) {
+    GenAspect.layout => (data.layout, data.history.total),
+    GenAspect.structure => data.characters != null,
+    GenAspect.header => [
+      data.model,
+      data.models,
+      data.furry,
+      data.quota,
+      data.layout,
+    ],
+    GenAspect.prompt => (data.prompt, data.characters, data.layout),
+    GenAspect.characters => (data.characters, data.canvas.positioning),
+    GenAspect.refs => data.refs,
+    GenAspect.image => data.image,
+    GenAspect.params => data.params,
+    GenAspect.generate => data.generate,
+    GenAspect.canvas => (
+      data.canvas,
+      data.generate.state == GenRunState.generating,
+      data.canvas.positioning ? data.characters : null,
+      data.canvas.positioning ? data.image : null,
+    ),
+    GenAspect.canvasTile => (data.canvas.info?.tileId, data.canvas.backdrop),
+    GenAspect.history => (
+      data.history,
+      data.layout,
+      data.refs.vibes != null,
+      data.refs.precise != null,
+      data.now?.year,
+      data.now?.month,
+      data.now?.day,
+    ),
+  };
+
+  @override
+  bool updateShouldNotifyDependent(GenScope old, Set<GenAspect> aspects) =>
+      actions != old.actions ||
+      slots != old.slots ||
+      controller != old.controller ||
+      _drawerOpen != old._drawerOpen ||
+      _popoverTag != old._popoverTag ||
+      aspects.any(
+        (aspect) => !const DeepCollectionEquality().equals(
+          _value(aspect),
+          old._value(aspect),
+        ),
+      );
+
+  // The controller is mutable; snapshot UI state in the inherited widget.
+  bool get _drawerOpen => drawerSnapshot ?? controller.drawerOpen;
+  Object? get _popoverTag => popoverSnapshot;
+  final bool? drawerSnapshot;
+  final Object? popoverSnapshot;
 
   @override
   bool updateShouldNotify(GenScope old) => true;
@@ -191,6 +268,8 @@ class _GenHostState extends State<GenHost> implements GenController {
     actions: widget.actions,
     slots: widget.slots,
     controller: this,
+    drawerSnapshot: _drawer,
+    popoverSnapshot: _tag,
     child: child,
   );
 
@@ -263,7 +342,7 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
 
   Widget _row(BuildContext context, Size size) {
     final w = size.width;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.layout);
     final layout = scope.data.layout;
     final actions = scope.actions;
     var dock = layout.dockOpen && scope.slots.dock != null
@@ -486,7 +565,8 @@ class GenLeftPanel extends StatelessWidget {
     return GenPanelSurface(
       key: const Key('gen-left'),
       width: width,
-      enabled: GenScope.of(context).slots.panelBackdrop != null,
+      enabled:
+          GenScope.of(context, GenAspect.layout).slots.panelBackdrop != null,
       border: Border(right: BorderSide(color: c.line)),
       child: const GenEditorColumn(),
     );
@@ -517,7 +597,7 @@ class GenEditorColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.structure);
     final data = scope.data;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -577,13 +657,14 @@ class _Strip extends StatelessWidget {
     final c = context.ui;
     final top =
         side == _StripSide.right &&
-            GenScope.of(context).slots.historyCaptionInset &&
+            GenScope.of(context, GenAspect.layout).slots.historyCaptionInset &&
             WindowChromeScope.activeOf(context)
         ? WindowChromeScope.heightOf(context)
         : 0.0;
     return GenPanelSurface(
       width: GenerationPage.strip,
-      enabled: GenScope.of(context).slots.panelBackdrop != null,
+      enabled:
+          GenScope.of(context, GenAspect.layout).slots.panelBackdrop != null,
       border: side == _StripSide.left
           ? Border(right: BorderSide(color: c.line))
           : Border(left: BorderSide(color: c.line)),

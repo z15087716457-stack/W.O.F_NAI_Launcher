@@ -49,7 +49,7 @@ class _SizeRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.image);
     final img = scope.data.image;
     final l = context.l10n;
     final o = GenFormat.orientationOf(img.width, img.height);
@@ -291,7 +291,7 @@ class _CountRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.image);
     final img = scope.data.image;
     final l = context.l10n;
     return Row(
@@ -336,7 +336,7 @@ class _RepeatStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.image);
     final img = scope.data.image;
     final l = context.l10n;
     void set(int v) {

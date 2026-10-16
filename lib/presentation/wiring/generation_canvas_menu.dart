@@ -17,25 +17,34 @@ import '../utils/precise_ref_library_import_helper.dart';
 import 'generation_operations.dart';
 import 'generation_history_actions.dart';
 
-class GenerationCanvasMenuWiring extends ConsumerWidget {
+class GenerationCanvasMenuWiring extends ConsumerStatefulWidget {
   const GenerationCanvasMenuWiring({super.key, required this.child});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => GenCanvasMenuScope(
-    onOpen: (context, id, position) {
-      final image = ref
-          .read(generationHistoryActionsProvider)
-          .images
-          .where((image) => image.id == id)
-          .firstOrNull;
-      if (image != null) {
-        unawaited(openGenerationCanvasMenu(context, ref, image, position));
-      }
-    },
-    child: child,
-  );
+  ConsumerState<GenerationCanvasMenuWiring> createState() =>
+      _GenerationCanvasMenuWiringState();
+}
+
+class _GenerationCanvasMenuWiringState
+    extends ConsumerState<GenerationCanvasMenuWiring> {
+  late final _onOpen = _open;
+
+  void _open(BuildContext context, String id, Offset position) {
+    final image = ref
+        .read(generationHistoryActionsProvider)
+        .images
+        .where((image) => image.id == id)
+        .firstOrNull;
+    if (image != null) {
+      unawaited(openGenerationCanvasMenu(context, ref, image, position));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      GenCanvasMenuScope(onOpen: _onOpen, child: widget.child);
 }
 
 /// 复用旧图片菜单：顶部快捷操作，编辑与更多操作分别折入子菜单。
@@ -45,7 +54,7 @@ Future<void> openGenerationCanvasMenu(
   GeneratedImage image,
   Offset position,
 ) async {
-  final scope = GenScope.of(context);
+  final scope = GenScope.read(context);
   final a = scope.actions;
   final l = context.l10n;
   final id = image.id;

@@ -57,7 +57,7 @@ class _GenCanvasState extends State<GenCanvas> {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final cv = scope.data.canvas;
     final c = context.ui;
     final info = cv.info;
@@ -284,7 +284,7 @@ class _Stage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final cv = scope.data.canvas;
     final tiles = cv.focus!.tiles;
     return LayoutBuilder(
@@ -459,7 +459,7 @@ class _GenCanvasTileState extends State<GenCanvasTile> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvasTile);
     final t = widget.tile;
     final l = context.l10n;
     final comparing =
@@ -697,7 +697,7 @@ class _Empty extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final l = context.l10n;
     final keys = scope.data.canvas.generateShortcut.split('+');
     return Center(
@@ -751,7 +751,7 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final cv = scope.data.canvas;
     final info = cv.info!;
     final a = scope.actions;
@@ -1031,7 +1031,7 @@ class _UpscaleStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final up = scope.data.canvas.upscale;
     final l = context.l10n;
     final v = up.progress!.clamp(0.0, 1.0);
@@ -1138,7 +1138,7 @@ class _InfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final info = scope.data.canvas.info!;
     final a = scope.actions;
     final l = context.l10n;
@@ -1237,6 +1237,7 @@ class _BottomBars extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasOriginal = GenScope.of(
       context,
+      GenAspect.canvas,
     ).data.canvas.info!.canCompareOriginal;
     return LayoutBuilder(
       builder: (context, box) => box.maxWidth < 360
@@ -1278,7 +1279,7 @@ class _ActionBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final info = scope.data.canvas.info!;
     final a = scope.actions;
     final l = context.l10n;
@@ -1439,7 +1440,7 @@ class _DisplayPopover extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final cv = scope.data.canvas;
     final l = context.l10n;
     Widget swatch(String b) {
@@ -1604,7 +1605,7 @@ class _HexFieldState extends State<_HexField> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     return Row(
       spacing: 8,
       children: [
@@ -1652,7 +1653,7 @@ class _ErrorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final l = context.l10n;
     return Container(
       key: const Key('gen-error'),
@@ -1798,7 +1799,7 @@ class GenPositionBoard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final chars = scope.data.characters;
     final img = scope.data.image;
     final l = context.l10n;
@@ -1928,7 +1929,7 @@ class _Board extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context);
+    final scope = GenScope.of(context, GenAspect.canvas);
     final l = context.l10n;
     Offset norm(Offset local) => Offset(
       (local.dx / size.width).clamp(0.0, 1.0),

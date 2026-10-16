@@ -31,7 +31,7 @@ abstract class PromptTokenEncoder {
 }
 
 class PromptTokenCounterService {
-  const PromptTokenCounterService({required PromptTokenEncoder encoder})
+  PromptTokenCounterService({required PromptTokenEncoder encoder})
     : _encoder = encoder;
 
   static const int v4PromptTokenLimit = 512;
@@ -42,6 +42,30 @@ class PromptTokenCounterService {
       'assets/data/tokenizers/t5_spiece.model';
 
   final PromptTokenEncoder _encoder;
+  // A bounded in-memory cache shares breakdown / total / character work and
+  // coalesces concurrent requests. No prompt content is written to disk.
+  final _counts = <String, Future<int>>{};
+  static const tokenCacheCapacity = 256;
+
+  Future<int> _count(String text) {
+    final cached = _counts.remove(text);
+    if (cached != null) {
+      _counts[text] = cached;
+      return cached;
+    }
+    final pending = Future<int>.sync(() => _encoder.countTokens(text));
+    _counts[text] = pending;
+    if (_counts.length > tokenCacheCapacity) _counts.remove(_counts.keys.first);
+    // Failed encodes must be retryable; observing the future also avoids an
+    // unhandled asynchronous error in this cache-maintenance branch.
+    pending.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stack) {
+        if (identical(_counts[text], pending)) _counts.remove(text);
+      },
+    );
+    return pending;
+  }
 
   static bool supportsPromptTokenCount(String model) {
     return ModelSpecs.of(model).v4Prompts;
@@ -112,7 +136,7 @@ class PromptTokenCounterService {
       if (normalizedText.isEmpty) {
         continue;
       }
-      usedTokens += await _encoder.countTokens(normalizedText);
+      usedTokens += await _count(normalizedText);
     }
 
     if (applyWebAdjustment && usedTokens > 0) {

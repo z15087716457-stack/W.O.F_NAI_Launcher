@@ -132,7 +132,7 @@
 | `canvas_utils.dart` | `rrectFromSize`/`parseAspect`/`hexToColor` |
 | `models.dart` | `CanvasImageData`/`CanvasImageGroup`/`CanvasTileVisual` |
 
-**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/固定图片持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是输出历史的数据源——**生成中 currentImages + 全部历史（不截断）**；当前 GenUI 的 `generationHistoryView` 与 `canvasFeedLayoutProvider` 仍会随宽依赖重新组装历史，进度刷新也会进入分组／布局；性能待办见 `docs/generation-performance-audit-2026-10-16.md`；独立固定图片区由 `CanvasPinRepository` 提供。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
+**Provider**：`canvas_settings_provider.dart`（锁/减弱动态/填充缩放/固定图片持久化）；`preview_selection_provider.dart`（焦点组=共享选中，喂参数面板和 emotion）；`image_generation_provider.dart` 的 `mergedPanelImages` 是输出历史的数据源——**生成中 currentImages + 全部历史（不截断）**；当前 GenUI 的历史批次／引用／图片目录按真实输入独立投影，`GenScope` 按区域订阅；`canvasFeedGeometryProvider` 只在图片、尺寸、批次或 Pins 变化时分组布局，`canvasFeedLayoutProvider` 为活动槽接入最新进度／预览并复用历史条目。相机帧复用批次边界索引；收藏按 ID／路径集合及图库内容版本刷新，正负 Token 先解析预设语义后分别失效。历史／参考缩略图按布局与 DPR 解码并保留滤波余量，放大、OLD、拖拽、保存仍使用原图；实现和验证见 `docs/generation-performance-fixes-2026-10-16.md`；独立固定图片区由 `CanvasPinRepository` 提供。子图态零 API，纯粹前端焦点（`generationPreviewSubFocusProvider`）。
 
 **当前相机与输入约定**：裸滚轮平移（Shift 转横向）、Ctrl+滚轮缩放；仅中键或 Shift+鼠标左键拖动相机；触控板平移/缩放按事件增量处理。锁相机阻止手动平移、缩放及复位，程序化对焦仍可用；WASD 松键始终清理按键状态。相机停稳 120ms 可选最近组，Ctrl+0 主动总览时暂不自动选中。远跳先移近起点再抵达准确终点，连续离散缩放累积未完成目标，平滑模式直接更新。常规手动 scale 夹在 [0.1, 8]；大图程序化聚焦可低于 0.1（下限 0.0001），后续缩放从实际比例连续进行；非焦点图 scale(0.98)，悬停回 1。相机逐帧变换不重建重图子树，仅挂载可见范围及缓冲区。
 

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -83,27 +84,129 @@ class GenerationCopySeed extends Notifier<int> {
   }
 }
 
+// Keep image-derived work out of prompt/token/progress notifications. List
+// identity is preserved by ImageGenerationState.copyWith on these paths.
+final generationPanelImagesProvider = Provider<List<GeneratedImage>>((ref) {
+  ref.watch(
+    imageGenerationNotifierProvider.select(
+      (state) => (state.currentImages, state.history),
+    ),
+  );
+  return ref.read(imageGenerationNotifierProvider).mergedPanelImages;
+});
+
+final generationImageCatalogProvider = Provider<Map<String, GeneratedImage>>((
+  ref,
+) {
+  final panel = ref.watch(generationPanelImagesProvider);
+  final display = ref.watch(
+    imageGenerationNotifierProvider.select((s) => s.displayImages),
+  );
+  ref.watch(canvasPinnedNotifierProvider);
+  final pins = ref.read(canvasPinnedNotifierProvider.notifier).images;
+  return {
+    for (final image in [...panel, ...display, ...pins]) image.id: image,
+  };
+});
+
+class _SavedImagePaths {
+  const _SavedImagePaths(this.paths);
+  final Map<String, String> paths;
+  static const _equality = MapEquality<String, String>();
+  @override
+  bool operator ==(Object other) =>
+      other is _SavedImagePaths && _equality.equals(paths, other.paths);
+  @override
+  int get hashCode => _equality.hash(paths);
+}
+
+final _generationSavedPathsProvider = Provider<_SavedImagePaths>(
+  (ref) => _SavedImagePaths({
+    for (final image in ref.watch(generationPanelImagesProvider))
+      if (image.filePath?.isNotEmpty == true) image.id: image.filePath!,
+  }),
+);
+
+final generationFocusViewProvider = Provider<GenGroup?>((ref) {
+  final generation = ref.watch(imageGenerationNotifierProvider);
+  ref.watch(canvasPinnedNotifierProvider);
+  return generationFocusView(
+    generation,
+    focus: ref.watch(generationCanvasGroupSelectionProvider),
+    selectedImage: ref.watch(generationPreviewSelectionProvider),
+    pinned: ref.read(canvasPinnedNotifierProvider.notifier).images,
+  );
+});
+
+final generationHistoryBatchesProvider = Provider<List<GenBatch>>((ref) {
+  final panel = ref.watch(generationPanelImagesProvider);
+  final active = ref.watch(
+    imageGenerationNotifierProvider.select(
+      (state) => (state.isGenerating, state.generationRunId, state.totalImages),
+    ),
+  );
+  return generationHistoryView(
+    ImageGenerationState(
+      history: panel,
+      status: active.$1 ? GenerationStatus.generating : GenerationStatus.idle,
+      generationRunId: active.$2,
+      totalImages: active.$3,
+    ),
+    favorites:
+        ref.watch(generationFavoriteImagesProvider).valueOrNull ?? const {},
+    now: ref.read(generationClockProvider)(),
+  ).batches;
+});
+
+final generationRefsViewProvider = Provider<GenRefsData>((ref) {
+  final fields = ref.watch(
+    generationParamsNotifierProvider.select(
+      (p) => (
+        p.model,
+        p.sourceImage,
+        p.strength,
+        p.noise,
+        p.maskImage,
+        p.inpaintStrength,
+        p.normalizeVibeStrength,
+        p.vibeReferencesV4,
+        p.preciseReferences,
+      ),
+    ),
+  );
+  return generationRefsView(
+    ref.read(generationParamsNotifierProvider),
+    ref.watch(draftImageWorkflowProvider),
+    ref.read(generationReferenceIdentityProvider),
+    enabled: ref.watch(generationImg2ImgEnabledProvider),
+    encoding: ref.watch(generationEncodingReferencesProvider),
+    dropHover: ref.watch(generationDropHoverProvider),
+    recent: ModelSpecs.of(fields.$1).vibetransfer
+        ? ref.watch(referencePanelNotifierProvider).recentEntries
+        : const [],
+  );
+});
+
 final generationFavoriteImagesProvider = FutureProvider<Set<String>>((
   ref,
 ) async {
-  final state = ref.watch(imageGenerationNotifierProvider);
-  final saved = {
-    for (final image in state.mergedPanelImages)
-      if (image.filePath?.isNotEmpty == true) image.id: image.filePath!,
-  };
+  final saved = ref
+      .watch(_generationSavedPathsProvider.select((value) => value))
+      .paths;
   if (saved.isEmpty) return {};
   ref.watch(
     localGalleryNotifierProvider.select((value) => value.contentRevision),
   );
   final notifier = ref.read(localGalleryNotifierProvider.notifier);
-  final statuses = await Future.wait(
-    saved.entries.map(
-      (entry) async => (entry.key, await notifier.isFavorite(entry.value)),
-    ),
-  );
+  final paths = saved.values.toSet().toList(growable: false);
+  final statuses = await Future.wait(paths.map(notifier.isFavorite));
+  final favoritePaths = {
+    for (var i = 0; i < paths.length; i++)
+      if (statuses[i]) paths[i],
+  };
   return {
-    for (final entry in statuses)
-      if (entry.$2) entry.$1,
+    for (final entry in saved.entries)
+      if (favoritePaths.contains(entry.value)) entry.key,
   };
 });
 
@@ -114,7 +217,6 @@ final generationViewDataProvider = Provider.autoDispose
       final request = ref.watch(generationRequestParamsProvider);
       final generation = ref.watch(imageGenerationNotifierProvider);
       final workflow = ref.watch(imageWorkflowControllerProvider);
-      final draftWorkflow = ref.watch(draftImageWorkflowProvider);
       final layout = ref.watch(layoutStateNotifierProvider);
       final characters = ref.watch(characterPromptNotifierProvider);
       final quality = ref.watch(qualityPresetNotifierProvider);
@@ -140,23 +242,10 @@ final generationViewDataProvider = Provider.autoDispose
       final count = ref.watch(imagesPerRequestProvider);
       final cooldown = ref.watch(generationCooldownProvider).remainingSeconds;
       final pins = ref.watch(canvasPinnedNotifierProvider);
-      final pinImages = ref.read(canvasPinnedNotifierProvider.notifier).images;
       final groupSelection = ref.watch(generationCanvasGroupSelectionProvider);
       final preview = ref.watch(generationPreviewSelectionProvider);
-      final focus = generationFocusView(
-        generation,
-        focus: groupSelection,
-        selectedImage: preview,
-        pinned: pinImages,
-      );
-      final images = {
-        for (final image in [
-          ...generation.mergedPanelImages,
-          ...generation.displayImages,
-          ...pinImages,
-        ])
-          image.id: image,
-      };
+      final focus = ref.watch(generationFocusViewProvider);
+      final images = ref.watch(generationImageCatalogProvider);
       final focusTile =
           focus?.tiles.where((tile) => tile.id == preview).firstOrNull ??
           (groupSelection?.subimage != null &&
@@ -324,9 +413,6 @@ final generationViewDataProvider = Provider.autoDispose
       final localModels = workflow.upscale.backend == UpscaleBackend.novelai
           ? null
           : ref.watch(localUpscaleModelsProvider).valueOrNull;
-      final favorites =
-          ref.watch(generationFavoriteImagesProvider).valueOrNull ??
-          const <String>{};
       return GenViewData(
         model: params.model,
         models: [
@@ -457,17 +543,7 @@ final generationViewDataProvider = Provider.autoDispose
                     ),
                 ],
               ),
-        refs: generationRefsView(
-          params,
-          draftWorkflow,
-          ref.read(generationReferenceIdentityProvider),
-          enabled: ref.watch(generationImg2ImgEnabledProvider),
-          encoding: ref.watch(generationEncodingReferencesProvider),
-          dropHover: ref.watch(generationDropHoverProvider),
-          recent: spec.vibetransfer
-              ? ref.watch(referencePanelNotifierProvider).recentEntries
-              : const [],
-        ),
+        refs: ref.watch(generationRefsViewProvider),
         image: generationImageView(params, imagesPerRequest: count),
         params: generationParamsView(params, lastSeed: image?.metadata?.seed),
         generate: GenGenerateData(
@@ -555,13 +631,11 @@ final generationViewDataProvider = Provider.autoDispose
               : null,
           sheet: toolSheet?.image.id == image?.id ? toolSheet?.sheet : null,
         ),
-        history: generationHistoryView(
-          generation,
+        history: GenHistoryData(
+          batches: ref.watch(generationHistoryBatchesProvider),
           selected: focus?.id,
-          favorites: favorites,
           autoSave: ref.watch(imageSaveSettingsNotifierProvider).autoSave,
           pinned: pins.length,
-          now: now,
         ),
         now: now,
       );

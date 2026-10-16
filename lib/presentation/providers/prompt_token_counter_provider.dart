@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/api_constants.dart';
@@ -59,6 +60,30 @@ class PromptTokenCountPayload {
   final String mainText;
   final List<String> extraTexts;
   final List<PromptTokenCountBreakdownGroup> breakdown;
+
+  static const _equality = DeepCollectionEquality();
+
+  @override
+  bool operator ==(Object other) =>
+      other is PromptTokenCountPayload &&
+      mainText == other.mainText &&
+      _equality.equals(extraTexts, other.extraTexts) &&
+      _equality.equals(
+        [
+          for (final group in breakdown) [group.label, group.texts],
+        ],
+        [
+          for (final group in other.breakdown) [group.label, group.texts],
+        ],
+      );
+  @override
+  int get hashCode => Object.hash(
+    mainText,
+    _equality.hash(extraTexts),
+    _equality.hash([
+      for (final group in breakdown) [group.label, group.texts],
+    ]),
+  );
 }
 
 class PromptTokenCountBreakdownGroup {
@@ -76,11 +101,13 @@ final promptTokenCounterServiceProvider =
       return PromptTokenCounterService.createDefault();
     });
 
-final promptTokenUsageProvider =
-    FutureProvider.family<PromptTokenUsage?, PromptTokenCountTarget>((
+// Resolve shared quality/UC guards before selecting a lane. Some presets depend
+// on both prompts; only an unchanged resolved payload may skip tokenization.
+final promptTokenPayloadProvider =
+    Provider.family<PromptTokenCountPayload, PromptTokenCountTarget>((
       ref,
       target,
-    ) async {
+    ) {
       final promptState = ref.watch(
         generationParamsNotifierProvider.select(
           (params) => (
@@ -99,7 +126,6 @@ final promptTokenUsageProvider =
       // 块库异步加载完成后重建，让别名展开计入 token 统计。
       ref.watch(promptBlockLibraryNotifierProvider);
       final aliasResolver = ref.read(aliasResolverServiceProvider.notifier);
-      final service = await ref.watch(promptTokenCounterServiceProvider.future);
       final qualityContent = switch (qualityPresetState.mode) {
         PromptPresetMode.naiDefault => QualityTags.getQualityTags(
           promptState.model,
@@ -118,7 +144,7 @@ final promptTokenUsageProvider =
               ucPresetState.presetType,
             );
 
-      final payload = buildPromptTokenCountPayload(
+      return buildPromptTokenCountPayload(
         target: target,
         prompt: promptState.prompt,
         negativePrompt: promptState.negativePrompt,
@@ -135,7 +161,20 @@ final promptTokenUsageProvider =
         characters: characterConfig.characters,
         resolveAliases: aliasResolver.resolveAliases,
       );
+    });
 
+final promptTokenUsageProvider =
+    FutureProvider.family<PromptTokenUsage?, PromptTokenCountTarget>((
+      ref,
+      target,
+    ) async {
+      final payload = ref.watch(
+        promptTokenPayloadProvider(target).select((value) => value),
+      );
+      final model = ref.watch(
+        generationParamsNotifierProvider.select((p) => p.model),
+      );
+      final service = await ref.watch(promptTokenCounterServiceProvider.future);
       final breakdown = <PromptTokenBreakdownEntry>[];
       for (final group in payload.breakdown) {
         final tokens = await service.countTokensForTexts(group.texts);
@@ -153,7 +192,7 @@ final promptTokenUsageProvider =
       }
 
       return service.countUsageFromTexts(
-        model: promptState.model,
+        model: model,
         mainText: payload.mainText,
         extraTexts: payload.extraTexts,
         breakdown: breakdown,
