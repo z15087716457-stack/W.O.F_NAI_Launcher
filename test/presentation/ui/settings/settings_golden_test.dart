@@ -1,4 +1,4 @@
-// 保留原设置页基准；归一整体居中，仅排除获准修改的蓝点标题行与放大图标。
+// 保留原设置页基准；归一居中，仅排除获准修改的蓝点标题行、品牌与放大图标。
 // 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
@@ -112,6 +112,16 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     ]) {
       final logo = find.byKey(Key(key));
       if (logo.evaluate().isNotEmpty) masks.add(t.getRect(logo));
+    }
+    final brand = find.byKey(const Key('about-brand-slot'));
+    if (brand.evaluate().isNotEmpty) {
+      masks.add(
+        t
+            .getRect(brand)
+            .expandToInclude(
+              t.getRect(find.byKey(const Key('about-brand-name'))),
+            ),
+      );
     }
     await expectOutsideApprovedRegions(
       t,

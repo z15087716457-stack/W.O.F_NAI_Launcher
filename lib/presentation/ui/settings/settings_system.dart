@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/branding/brand_logo.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -1119,28 +1120,25 @@ class SettingsAboutPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Row(
+                  key: const Key('about-brand-header'),
                   spacing: 16,
                   children: [
-                    Container(
-                      width: 56,
+                    const SizedBox(
+                      key: Key('about-brand-slot'),
+                      width: 112,
                       height: 56,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF111111),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Text(
-                        'W',
-                        style: UiText.mono(
-                          18,
-                          weight: FontWeight.w700,
-                          color: Colors.white,
-                          height: 1,
-                        ).copyWith(fontFamily: 'Geist Pixel Square'),
+                      child: Center(
+                        child: ExcludeSemantics(
+                          child: BrandLogo(
+                            key: Key('about-brand-logo'),
+                            width: 112,
+                          ),
+                        ),
                       ),
                     ),
                     Expanded(
                       child: Column(
+                        key: const Key('about-brand-name'),
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
