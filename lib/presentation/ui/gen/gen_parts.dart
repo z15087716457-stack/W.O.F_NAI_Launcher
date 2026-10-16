@@ -97,7 +97,7 @@ class GenPanelSurface extends StatelessWidget {
                         child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: context.ui.bg.withValues(
-                              alpha: highContrast ? 1 : .75,
+                              alpha: highContrast ? 1 : .65,
                             ),
                             border: Border.all(color: context.ui.line),
                           ),

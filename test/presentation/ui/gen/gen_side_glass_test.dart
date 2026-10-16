@@ -82,7 +82,7 @@ void main() {
   for (final dark in [false, true]) {
     for (final contrast in [false, true]) {
       testWidgets(
-        'glass panel keeps 75% tint and sharp content: $dark $contrast',
+        'glass panel keeps 65% tint and sharp content: $dark $contrast',
         (tester) async {
           tester.view.physicalSize = const Size(400, 180);
           tester.view.devicePixelRatio = 1;
@@ -158,7 +158,7 @@ void main() {
             final expected = contrast
                 ? base
                 : Color.alphaBlend(
-                    base.withValues(alpha: .75),
+                    base.withValues(alpha: .65),
                     const Color(0xFF2060A0),
                   );
             for (final point in [
