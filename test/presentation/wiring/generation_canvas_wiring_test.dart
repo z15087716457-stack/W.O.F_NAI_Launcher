@@ -1074,6 +1074,17 @@ void main() {
     expect(find.byType(CanvasWorldViewport), findsOneWidget);
     expect(find.byType(GenCanvasTile), findsWidgets);
     bars();
+    expect(find.byType(BackdropFilter), findsNWidgets(3));
+    for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
+      expect(
+        Theme.of(tester.element(find.byKey(Key(name)))).brightness,
+        Brightness.dark,
+      );
+    }
+    expect(
+      Theme.of(tester.element(find.byType(GenCanvas))).brightness,
+      Brightness.light,
+    );
     expectPanelBackdropAligned(tester);
     await container
         .read(simpleOutputViewerNotifierProvider.notifier)
@@ -1102,6 +1113,13 @@ void main() {
       findsNothing,
     );
     bars();
+    expect(find.byType(BackdropFilter), findsNothing);
+    for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
+      expect(
+        Theme.of(tester.element(find.byKey(Key(name)))).brightness,
+        Brightness.light,
+      );
+    }
     expect(tester.takeException(), isNull);
   });
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {

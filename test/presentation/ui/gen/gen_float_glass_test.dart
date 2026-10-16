@@ -15,22 +15,98 @@ import '../../../helpers/uiux_frontend_capture.dart';
 import 'gen_test_harness.dart';
 
 class _Stripes extends CustomPainter {
+  const _Stripes({this.color = Colors.black});
+  final Color color;
+
   @override
   void paint(Canvas canvas, Size size) {
     for (var x = 0.0; x < size.width; x += 4) {
       canvas.drawRect(
         Rect.fromLTWH(x, 0, 4, size.height),
-        Paint()..color = (x ~/ 4).isEven ? Colors.black : Colors.white,
+        Paint()..color = (x ~/ 4).isEven ? color : Colors.white,
       );
     }
   }
 
   @override
-  bool shouldRepaint(_Stripes old) => false;
+  bool shouldRepaint(_Stripes old) => old.color != color;
 }
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
+  testWidgets('三条独立深色玻璃实时取样，页面主题不变', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1000, 800);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+    final key = GlobalKey();
+    final base = GenFixture.view();
+    for (final dark in [false, true]) {
+      final samples = <List<int>>[];
+      for (final color in [Colors.blue, Colors.red]) {
+        await tester.pumpWidget(
+          genApp(
+            RepaintBoundary(
+              key: key,
+              child: GenHost(
+                data: base,
+                actions: GenActions.logging((_) {}),
+                slots: GenSlots(
+                  editor: (_, _) => const SizedBox.shrink(),
+                  canvas: (_, _) =>
+                      CustomPaint(painter: _Stripes(color: color)),
+                ),
+                child: const GenCanvas(),
+              ),
+            ),
+            dark: dark,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          Theme.of(tester.element(find.byType(GenCanvas))).brightness,
+          dark ? Brightness.dark : Brightness.light,
+        );
+        expect(find.byType(BackdropFilter), findsNWidgets(3));
+        final values = <int>[];
+        for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
+          final bar = find.byKey(Key(name));
+          expect(Theme.of(tester.element(bar)).brightness, Brightness.dark);
+          final rect = tester.getRect(bar);
+          await tester.runAsync(() async {
+            final boundary =
+                key.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary;
+            final bitmap = await boundary.toImage();
+            final data = (await bitmap.toByteData(
+              format: ui.ImageByteFormat.rawRgba,
+            ))!;
+            final at =
+                ((rect.bottom.toInt() - 3) * bitmap.width +
+                    rect.center.dx.toInt()) *
+                4;
+            values.addAll([data.getUint8(at), data.getUint8(at + 2)]);
+            bitmap.dispose();
+          });
+        }
+        samples.add(values);
+        if (color == Colors.blue) {
+          await captureUiuxRegion(
+            tester,
+            find.byKey(key),
+            'float-charcoal-${dark ? 'dark' : 'light'}',
+            tester.getRect(find.byKey(const Key('gen-bar-top'))).inflate(20),
+          );
+        }
+        expect(tester.takeException(), isNull);
+      }
+      for (var i = 0; i < 6; i += 2) {
+        expect(samples[0][i + 1], greaterThan(samples[0][i] + 20));
+        expect(samples[1][i], greaterThan(samples[1][i + 1] + 20));
+        expect(samples[0][i + 1], lessThan(160));
+      }
+    }
+  });
   for (final dark in [false, true]) {
     testWidgets('玻璃只模糊背后的图像 dark=$dark', (tester) async {
       tester.view.devicePixelRatio = 1;
@@ -43,10 +119,10 @@ void main() {
           theme: dark ? GeistTheme.dark : GeistTheme.light,
           home: RepaintBoundary(
             key: key,
-            child: Stack(
+            child: const Stack(
               children: [
                 Positioned.fill(child: CustomPaint(painter: _Stripes())),
-                const Positioned(
+                Positioned(
                   left: 40,
                   top: 30,
                   child: GenFloat(children: [SizedBox(width: 120, height: 30)]),
