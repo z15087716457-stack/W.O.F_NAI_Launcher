@@ -108,6 +108,14 @@ class ChannelPaint {
 
   /// 虚线：[pattern] 按屏幕像素（同原型 `setLineDash([a*px, b*px])`）。
   void dashed(Path p, Color c, List<double> pattern, [double w = 1]) {
+    if (!_inClip(p.getBounds(), w)) return;
+    canvas.drawPath(_dashPath(p, pattern), stroke(c, w));
+  }
+
+  bool _inClip(Rect bounds, double w) =>
+      bounds.inflate((w + 2) * px).overlaps(canvas.getLocalClipBounds());
+
+  Path _dashPath(Path p, List<double> pattern) {
     final dashes = [for (final d in pattern) d * px];
     final out = Path();
     for (final m in p.computeMetrics()) {
@@ -119,7 +127,21 @@ class ChannelPaint {
         i++;
       }
     }
-    canvas.drawPath(out, stroke(c, w));
+    return out;
+  }
+
+  // Retain the exact native path produced by computeMetrics/extractPath.
+  // Colour/width remain live; geometry depends on coordinates and dash scale.
+  static final _dashedPaths = <Object, Path>{};
+
+  Path _retainedDash(Object key, Path Function() path, List<double> pattern) {
+    final hit = _dashedPaths.remove(key);
+    if (hit != null) return _dashedPaths[key] = hit;
+    final value = _dashPath(path(), pattern);
+    if (_dashedPaths.length >= 512) {
+      _dashedPaths.remove(_dashedPaths.keys.first);
+    }
+    return _dashedPaths[key] = value;
   }
 
   void dashedLine(
@@ -130,14 +152,19 @@ class ChannelPaint {
     Color c,
     List<double> pattern, [
     double w = 1,
-  ]) => dashed(
-    Path()
-      ..moveTo(ax, ay)
-      ..lineTo(bx, by),
-    c,
-    pattern,
-    w,
-  );
+  ]) {
+    if (!_inClip(Rect.fromPoints(Offset(ax, ay), Offset(bx, by)), w)) return;
+    canvas.drawPath(
+      _retainedDash(
+        ('line', ax, ay, bx, by, s, pattern.join(',')),
+        () => Path()
+          ..moveTo(ax, ay)
+          ..lineTo(bx, by),
+        pattern,
+      ),
+      stroke(c, w),
+    );
+  }
 
   void dashedCircle(
     double x,
@@ -145,11 +172,18 @@ class ChannelPaint {
     double r,
     Color c,
     List<double> pattern,
-  ) => dashed(
-    Path()..addOval(Rect.fromCircle(center: Offset(x, y), radius: r)),
-    c,
-    pattern,
-  );
+  ) {
+    final bounds = Rect.fromCircle(center: Offset(x, y), radius: r);
+    if (!_inClip(bounds, 1)) return;
+    canvas.drawPath(
+      _retainedDash(
+        ('circle', x, y, r, s, pattern.join(',')),
+        () => Path()..addOval(bounds),
+        pattern,
+      ),
+      stroke(c),
+    );
+  }
 
   /// 文字：[y] 是基线（同 canvas `fillText`）；屏幕上小于 5.5px 的不画。
   void text(

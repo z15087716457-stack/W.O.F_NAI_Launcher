@@ -1,0 +1,68 @@
+import 'dart:io';
+import 'dart:convert';
+import 'dart:ui' as ui;
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
+import 'package:nai_launcher/presentation/ui/channel/channel_geometry.dart' as geometry;
+import 'package:nai_launcher/presentation/ui/channel/channel_scene.dart' as current;
+import '../../test/helpers/studio_capture_fonts.dart';
+import 'reference/channel_geometry.dart' as old_geometry;
+import 'reference/channel_scene.dart' as old;
+
+void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  setUpAll(loadStudioCaptureFonts);
+  test('retained geometry matches the original renderer, including warmed paths', () async {
+    final cases = <String>[];
+    const size = Size(700, 520);
+    final names = {for (final theme in ChannelTheme.values) theme: theme.name};
+    Future<ui.Image> render(ChannelSettings settings, ChannelCamera camera, bool dark, double time, bool reference) async {
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final base = dark ? const Color(0xff171717) : const Color(0xfffafafa);
+      if (reference) {
+        old.paintChannelScene(canvas, size, old.ChannelSceneSpec(env: old_geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion));
+      } else {
+        current.paintChannelScene(canvas, size, current.ChannelSceneSpec(env: geometry.ChannelEnv.of(settings), camera: camera, dark: dark, base: base, level: settings.level.factor, seed: settings.seed, names: names, t: time, motion: settings.motion));
+      }
+      final picture = recorder.endRecording();
+      final image = await picture.toImage(size.width.round(), size.height.round());
+      picture.dispose();
+      return image;
+    }
+    for (final theme in ChannelTheme.values) {
+      for (final dark in [false, true]) {
+        for (final scale in [.14, .32, .8]) {
+          for (final motion in [false, true]) {
+            for (final seed in [7, 29]) {
+              for (final y in [0.0, 3421.25]) {
+                final settings = ChannelSettings(mode: ChannelMode.fixed, fixed: theme, seed: seed, motion: motion);
+                final camera = ChannelCamera(offset: size.center(Offset.zero) - Offset(83.5, y) * scale, scale: scale);
+                final label = '${theme.name}/$dark/$scale/$motion/$seed/$y';
+                final before = await render(settings, camera, dark, 3.75, true);
+                final beforePixels = await before.toByteData();
+                // Warm unrelated opacity/time states before reusing a path.
+                final other = await render(settings, camera, dark, 8.25, false);
+                other.dispose();
+                final after = await render(settings, camera, dark, 3.75, false);
+                final afterPixels = await after.toByteData();
+                final a = beforePixels!.buffer.asUint32List(beforePixels.offsetInBytes, beforePixels.lengthInBytes ~/ 4);
+                final b = afterPixels!.buffer.asUint32List(afterPixels.offsetInBytes, afterPixels.lengthInBytes ~/ 4);
+                var identical = a.length == b.length;
+                for (var i = 0; identical && i < a.length; i++) {
+                  identical = a[i] == b[i];
+                }
+                expect(identical, isTrue, reason: label);
+                before.dispose();
+                after.dispose();
+                cases.add(label);
+              }
+            }
+          }
+        }
+      }
+    }
+    await File('.dart_tool/canvas-frames-20261016/visual-equivalence.json').writeAsString(jsonEncode({'cases': cases.length, 'identical_rgba': true, 'samples': cases}));
+  }, timeout: const Timeout(Duration(minutes: 5)));
+}

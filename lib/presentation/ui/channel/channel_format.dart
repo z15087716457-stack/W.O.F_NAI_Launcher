@@ -57,7 +57,10 @@ abstract final class ChannelFormat {
 
   static DateTime _day(DateTime t) => DateTime(t.year, t.month, t.day);
 
-  static bool sameDay(DateTime a, DateTime b) => _day(a) == _day(b);
+  // Calendar comparison does not need two new local DateTimes. Constructing
+  // those queries the Windows time-zone rules for every mark on every frame.
+  static bool sameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   /// 换日分隔线上的日期：“今天 · 10月14日 周二”“昨天 · …”“10月12日 周日”。
   static String day(BuildContext context, DateTime t, DateTime now) {

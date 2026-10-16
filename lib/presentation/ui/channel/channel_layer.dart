@@ -27,6 +27,11 @@ class _ChannelBackdropState extends State<ChannelBackdrop>
   final _time = ValueNotifier<double>(0);
   var _base = 0.0;
   var _last = Duration.zero;
+  Object? _annotationKey;
+  List<String?> _labels = const [];
+  List<String?> _days = const [];
+  Locale? _namesLocale;
+  Map<ChannelTheme, String> _names = const {};
 
   bool _animate(BuildContext context) {
     final d = widget.data;
@@ -79,23 +84,39 @@ class _ChannelBackdropState extends State<ChannelBackdrop>
     final d = widget.data;
     final c = context.ui;
     final batches = d.batches;
-    final labels = <String?>[];
-    final days = <String?>[];
-    for (final (i, b) in batches.indexed) {
-      labels.add(
-        d.settings.ruler
-            ? ChannelFormat.batch(context, b, newest: i == 0)
-            : null,
-      );
-      final t = b.time;
-      final prev = i == 0 ? null : batches[i - 1].time;
-      days.add(
-        d.settings.ruler &&
-                t != null &&
-                (prev == null || !ChannelFormat.sameDay(prev, t))
-            ? ChannelFormat.day(context, t, d.now)
-            : null,
-      );
+    final locale = Localizations.localeOf(context);
+    final annotationKey = (
+      batches,
+      d.settings.ruler,
+      locale,
+      d.now.year,
+      d.now.month,
+      d.now.day,
+    );
+    if (_annotationKey != annotationKey) {
+      _annotationKey = annotationKey;
+      _labels = const [];
+      _days = const [];
+      if (d.settings.ruler) {
+        _labels = [
+          for (final (i, b) in batches.indexed)
+            ChannelFormat.batch(context, b, newest: i == 0),
+        ];
+        _days = [
+          for (final (i, b) in batches.indexed)
+            if (b.time != null &&
+                (i == 0 ||
+                    batches[i - 1].time == null ||
+                    !ChannelFormat.sameDay(batches[i - 1].time!, b.time!)))
+              ChannelFormat.day(context, b.time!, d.now)
+            else
+              null,
+        ];
+      }
+    }
+    if (_namesLocale != locale) {
+      _namesLocale = locale;
+      _names = ChannelFormat.names(context);
     }
     return IgnorePointer(
       child: RepaintBoundary(
@@ -105,9 +126,9 @@ class _ChannelBackdropState extends State<ChannelBackdrop>
           painter: ChannelBackdropPainter(
             data: d,
             colors: c,
-            names: ChannelFormat.names(context),
-            labels: labels,
-            days: days,
+            names: _names,
+            labels: _labels,
+            days: _days,
             motion: _animate(context),
             time: _time,
           ),

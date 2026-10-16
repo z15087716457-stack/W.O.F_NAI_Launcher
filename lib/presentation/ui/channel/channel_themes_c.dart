@@ -235,6 +235,11 @@ void paintAbyss(ChannelPaint g) {
   }
 }
 
+// A row's absolute arcs never depend on the camera. Bucket membership already
+// uses the existing 20 opacity levels; retaining those exact paths avoids
+// rebuilding thousands of native arcs during pan and unchanged motion frames.
+final _waveRows = <(int, String), (Path, Map<int, Path>)>{};
+
 void paintWave(ChannelPaint g) {
   const rr = 60.0, dx = 2 * rr, dy = rr * 0.5;
   // 按行合并路径：一行一次底色填充（遮住上一行），描边按透明度分 20 档各一条路径
@@ -244,7 +249,8 @@ void paintWave(ChannelPaint g) {
     row++
   ) {
     final y = row * dy, off = row.isOdd ? rr : 0.0;
-    final fill = Path(), buckets = <int, Path>{};
+    final cells = <(double, int)>[];
+    final signature = StringBuffer();
     for (
       var col = ((g.x0 - off) / dx).floor() - 1;
       col <= ((g.x1 - off) / dx).floor() + 1;
@@ -264,24 +270,41 @@ void paintWave(ChannelPaint g) {
       final sh = g.motion
           ? 1 + 0.45 * math.sin(y * 0.003 - g.t * 1.1 + x * 0.0007)
           : 1.0;
-      fill
-        ..addArc(
-          Rect.fromCircle(center: Offset(x, y), radius: rr),
-          math.pi,
-          math.pi,
-        )
-        ..close();
       final q = ((0.3 * al * sh).clamp(0.0, 1.0) * 20).round();
-      if (q == 0) continue;
-      final p = buckets.putIfAbsent(q, Path.new);
-      for (final f in const [1.0, .76, .52, .28]) {
-        p.addArc(
-          Rect.fromCircle(center: Offset(x, y), radius: rr * f),
-          math.pi,
-          math.pi,
-        );
-      }
+      cells.add((x, q));
+      signature
+        ..write(col)
+        ..write(':')
+        ..write(q)
+        ..write(';');
     }
+    final key = (row, signature.toString());
+    var paths = _waveRows.remove(key);
+    if (paths == null) {
+      final fill = Path(), buckets = <int, Path>{};
+      for (final (x, q) in cells) {
+        fill
+          ..addArc(
+            Rect.fromCircle(center: Offset(x, y), radius: rr),
+            math.pi,
+            math.pi,
+          )
+          ..close();
+        if (q == 0) continue;
+        final p = buckets.putIfAbsent(q, Path.new);
+        for (final f in const [1.0, .76, .52, .28]) {
+          p.addArc(
+            Rect.fromCircle(center: Offset(x, y), radius: rr * f),
+            math.pi,
+            math.pi,
+          );
+        }
+      }
+      paths = (fill, buckets);
+      if (_waveRows.length >= 1024) _waveRows.remove(_waveRows.keys.first);
+    }
+    _waveRows[key] = paths;
+    final (fill, buckets) = paths;
     g.path(fill, g.bg(y, 1), filled: true);
     for (final MapEntry(key: q, value: p) in buckets.entries) {
       g.path(p, g.ink(q / 20));
