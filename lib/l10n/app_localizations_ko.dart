@@ -10816,7 +10816,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get online_jumpToPage => '페이지 이동…';
+  String get online_jumpToPage => '페이지 이동';
 
   @override
   String get online_jumpGo => '이동';

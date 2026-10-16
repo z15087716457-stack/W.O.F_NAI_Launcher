@@ -10793,7 +10793,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get online_jumpToPage => 'ページへ移動…';
+  String get online_jumpToPage => 'ページへ移動';
 
   @override
   String get online_jumpGo => '移動';

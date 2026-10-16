@@ -10601,7 +10601,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get online_jumpToPage => '跳到页…';
+  String get online_jumpToPage => '跳转到页';
 
   @override
   String get online_jumpGo => '跳转';
@@ -30051,7 +30051,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get online_jumpToPage => '跳到頁…';
+  String get online_jumpToPage => '跳轉到頁';
 
   @override
   String get online_jumpGo => '跳轉';

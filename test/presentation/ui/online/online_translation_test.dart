@@ -215,13 +215,19 @@ void main() {
           final jump = find.byKey(const Key('online-jump'));
           final label = find.descendant(of: jump, matching: find.byType(Text));
           final paragraph = t.renderObject<RenderParagraph>(label);
-          expect(t.getSize(jump).width, greaterThanOrEqualTo(96));
+          final text = t.widget<Text>(label).data!;
+          expect(text, isNot(contains('…')));
+          expect(text, isNot(contains('...')));
+          if (locale == 'zh') expect(text, '跳转到页');
           expect(
             paragraph.didExceedMaxLines,
             isFalse,
             reason: '$locale $width',
           );
-          expect(t.getRect(jump).contains(t.getRect(label).center), isTrue);
+          final buttonRect = t.getRect(jump);
+          final labelRect = t.getRect(label);
+          expect(labelRect.left, greaterThanOrEqualTo(buttonRect.left));
+          expect(labelRect.right, lessThanOrEqualTo(buttonRect.right));
           expect(t.takeException(), isNull);
         }
       }

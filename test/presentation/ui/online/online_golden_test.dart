@@ -184,12 +184,8 @@ void main() {
           await t.pumpAndSettle();
         }
         final jump = find.byKey(const Key('online-jump'));
-        final loaded = find.byKey(const Key('online-loaded'));
-        // F30: only the wider jump control and the count shifted by it.
-        final regions = <Rect>[
-          if (jump.evaluate().isNotEmpty)
-            t.getRect(jump).expandToInclude(t.getRect(loaded)),
-        ];
+        // F30: only the complete jump label; keep the original button sizing.
+        final regions = <Rect>[if (jump.evaluate().isNotEmpty) t.getRect(jump)];
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('online-capture')),

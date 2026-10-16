@@ -19361,7 +19361,7 @@ abstract class AppLocalizations {
   /// No description provided for @online_jumpToPage.
   ///
   /// In en, this message translates to:
-  /// **'Go to page…'**
+  /// **'Go to page'**
   String get online_jumpToPage;
 
   /// No description provided for @online_jumpGo.

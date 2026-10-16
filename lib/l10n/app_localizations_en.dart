@@ -11145,7 +11145,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get online_jumpToPage => 'Go to page…';
+  String get online_jumpToPage => 'Go to page';
 
   @override
   String get online_jumpGo => 'Go';
