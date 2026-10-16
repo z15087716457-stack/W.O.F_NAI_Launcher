@@ -8,6 +8,8 @@ import statistics
 import subprocess
 import time
 import shutil
+from contextlib import nullcontext
+from load import LoadCapture
 
 ROOT = Path(__file__).resolve().parents[2]
 AUDIT = ROOT / '.dart_tool/canvas-frames-20261016'
@@ -17,6 +19,7 @@ parser.add_argument('--variants', nargs='+', default=['full', 'no-sides', 'off']
 parser.add_argument('--rounds', type=int, default=3)
 parser.add_argument('--count', type=int, default=200)
 parser.add_argument('--paired', action='store_true')
+parser.add_argument('--monitor-load', action='store_true')
 args = parser.parse_args()
 exe = AUDIT / 'app/build/windows/x64/runner/Profile/nai_launcher.exe'
 assert exe.is_file(), exe
@@ -33,7 +36,8 @@ for run in range(args.rounds):
         env.update(APPDATA=str(private / 'roaming'), LOCALAPPDATA=str(private / 'local'))
         for folder in ['roaming', 'local']:
             (private / folder).mkdir(exist_ok=True)
-        with target.with_suffix('.log').open('w', encoding='utf-8') as log:
+        load = LoadCapture(target.with_suffix('')) if args.monitor_load else nullcontext()
+        with load, target.with_suffix('.log').open('w', encoding='utf-8') as log:
             if args.paired:
                 shutil.copy2(AUDIT / f'{variant}-profile-app.so', exe.parent / 'data/app.so')
             child = subprocess.Popen([

@@ -25,3 +25,7 @@ python tool/canvas_frame_benchmark/run.py after-one --variants full --count 1 --
 交替复测先运行 `prepare_paired.py`：把当前 `lib/` 复制到隔离包，只将四个通道文件换成基线 `370ce2153` 的内容；资产与工具资源是只读使用的目录联接。编译旧包前保存当前 Profile AOT。旧包编译结束后，将其 `data/app.so` 保存为审计目录 `before-profile-app.so`，并用 `original-probe-package-config.json` 恢复独立工程的包配置。随后 `run.py paired --paired --rounds 3` 会在每个独立进程之间切换两份 AOT，先等自己创建的进程结束再覆盖测试包。该操作不修改有效源码或桌面安装。不要递归处理联接目标。
 
 参考渲染对比：先 `python tool/canvas_frame_benchmark/prepare_visual_reference.py <优化前提交>`，再运行 `flutter test --no-pub .dart_tool/canvas-frames-20261016/equivalence_test.dart`。独立保存原渲染器，比较明暗、种子、缩放、运动相位及缓存复用后的 RGBA，不替换已有黄金 PNG。
+
+外部向量任务会干扰测量；先由用户确认已暂停或结束，不自动停止用户任务。可用 `python tool/canvas_frame_benchmark/load.py .dart_tool/canvas-frames-20261016/<新标签>-baseline --seconds 12` 记录开测前负载，再用 `run.py <新标签> --paired --rounds 3 --monitor-load` 为每轮附加 CPU JSON 与 GPU CSV。采样每 2 秒一次，只读进程名、PID、CPU 时间及 NVIDIA 计数，不读取进程参数、提示词或账号。GPU 查询子进程由驱动创建并在该轮结束时关闭；两侧使用相同监测开销。
+
+已有 `verification.json` 的生产源码／测试／构建证据时，`python tool/canvas_frame_benchmark/summarize_retest.py <新标签>` 核对相同 AOT、四个生产文件、其余保护文件、原生画面及安装哈希，生成新的 `<新标签>-verification.json`，拒绝覆盖旧结果。新数据与旧测量分开；低频负载计数只提供背景，不代表屏幕呈现 FPS 或 GPU 调度跟踪。此次用户确认暂停后的正式复测标签为 `idle-retest`，此前 `paired` 数据保留为向量任务可能并发的历史记录。
