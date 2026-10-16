@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../constants/storage_keys.dart';
 import '../storage/local_storage_service.dart';

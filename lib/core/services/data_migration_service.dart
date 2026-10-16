@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../constants/storage_keys.dart';
 import '../utils/app_logger.dart';

@@ -61,6 +61,15 @@ if (-not (Test-Path -LiteralPath $exePath)) {
   throw "Windows release executable was not found: $exePath"
 }
 
+# A used application directory contains private state and must never be packaged.
+$privateDirectories = @(Get-ChildItem -LiteralPath $buildPath -Directory -Force | Where-Object {
+  $_.Name -in @('user-data', 'agent-data', 'nai_launcher.exe.WebView2') -or
+  $_.Name.StartsWith('.studio-data-')
+})
+if ($privateDirectories.Count -gt 0) {
+  throw 'Package from a clean build output; private application data was found.'
+}
+
 & (Join-Path $PSScriptRoot 'validate_windows_data_identity.ps1') -ExecutablePath $exePath
 & (Join-Path $PSScriptRoot 'build_bridge_client.ps1') -OutputDirectory 'build/windows/x64/runner/Release/tools'
 

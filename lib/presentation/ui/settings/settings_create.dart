@@ -781,7 +781,7 @@ class SettingsStoragePage extends StatelessWidget {
                 SettingKey.appDataPath,
                 width: 300,
                 open: false,
-                defaultPath: r'%APPDATA%\nai_launcher\hive',
+                defaultPath: './user-data/hive',
               ),
             ),
           ],

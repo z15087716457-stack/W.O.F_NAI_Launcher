@@ -84,6 +84,20 @@ try {
 \$ScriptPath = \$MyInvocation.MyCommand.Path
 \$Swapped = \$false
 
+function Move-ProtectedApplicationData {
+  param([string]\$From, [string]\$To)
+  Get-ChildItem -LiteralPath \$From -Directory -Force | Where-Object {
+    \$_.Name -in @('user-data', 'agent-data', 'nai_launcher.exe.WebView2') -or
+    \$_.Name.StartsWith('.studio-data-backup-')
+  } | ForEach-Object {
+    \$Destination = Join-Path \$To \$_.Name
+    if (Test-Path -LiteralPath \$Destination) {
+      throw 'An update package must not contain private application data.'
+    }
+    Move-Item -LiteralPath \$_.FullName -Destination \$Destination
+  }
+}
+
 ${_commonFunctions()}
 
 try {
@@ -102,6 +116,12 @@ try {
   }
   if (!(Test-Path -LiteralPath (Join-Path \$SourceDir \$ExeName))) {
     throw 'The extracted update does not contain the application executable.'
+  }
+  if (@(Get-ChildItem -LiteralPath \$SourceDir -Directory -Force | Where-Object {
+    \$_.Name -in @('user-data', 'agent-data', 'nai_launcher.exe.WebView2') -or
+    \$_.Name.StartsWith('.studio-data-backup-')
+  }).Count -gt 0) {
+    throw 'An update package must not contain private application data.'
   }
 
   # 只把旧清单之外的文件视为用户文件。没有旧清单时无法可靠区分旧程序
@@ -127,6 +147,10 @@ try {
   Move-Item -LiteralPath \$AppDir -Destination \$BackupDir
   Move-Item -LiteralPath \$SourceDir -Destination \$AppDir
   \$Swapped = \$true
+
+  # Preserve adjacent state even when the old application has no manifest.
+  # Moving avoids duplicating model environments and keeps junction targets stable.
+  Move-ProtectedApplicationData -From \$BackupDir -To \$AppDir
 
   if (\$CanPreserveUserFiles) {
     Get-ChildItem -LiteralPath \$BackupDir -File -Recurse | ForEach-Object {
@@ -160,6 +184,7 @@ try {
 
   if (Test-Path -LiteralPath \$BackupDir) {
     if (Test-Path -LiteralPath \$AppDir) {
+      Move-ProtectedApplicationData -From \$AppDir -To \$BackupDir
       Remove-Item -LiteralPath \$AppDir -Recurse -Force -ErrorAction SilentlyContinue
     }
     Move-Item -LiteralPath \$BackupDir -Destination \$AppDir

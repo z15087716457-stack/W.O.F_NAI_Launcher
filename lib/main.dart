@@ -33,6 +33,7 @@ import 'core/utils/fatal_diagnostics.dart';
 import 'core/utils/app_logger.dart';
 import 'core/utils/hive_startup_box_opener.dart';
 import 'core/utils/hive_storage_helper.dart';
+import 'core/utils/app_support_directory.dart';
 import 'core/utils/window_focus_tracker.dart';
 import 'core/utils/window_state_coercion.dart';
 import 'core/utils/window_state_persistence.dart';
@@ -322,6 +323,9 @@ Future<void> _bootstrapApplication() async {
     enableFileLogging: false,
   );
   AppLogger.i('Application starting', 'Main');
+
+  // Finish storage migration before Hive, SQLite or background services open.
+  await getApplicationSupportDirectory();
 
   await _runNonFatalStartupStep('Fatal diagnostics initialization', () async {
     await FatalDiagnostics.initialize();

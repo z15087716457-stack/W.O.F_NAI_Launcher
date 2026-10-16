@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../../core/services/character_conversion_service.dart';
 import '../../core/utils/localization_extension.dart';

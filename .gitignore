@@ -227,3 +227,7 @@ dist/*.exe
 # Local NAI Agent dependencies and synthetic test sessions.
 /tool/nai_agent/node_modules/
 /tool/nai_agent/.runs/
+
+# Executable-adjacent private application data and migration backups.
+user-data/
+.studio-data-*

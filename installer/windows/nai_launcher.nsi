@@ -329,7 +329,7 @@ Section "${APP_NAME}" SecMain
   Call EnsureAppClosed
   SetOverwrite on
   SetOutPath "$INSTDIR"
-  File /r "${SOURCE_DIR}\*.*"
+  File /r /x user-data /x agent-data /x nai_launcher.exe.WebView2 /x .studio-data-* "${SOURCE_DIR}\*.*"
 
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
@@ -361,5 +361,26 @@ Section "Uninstall"
   RMDir "$SMPROGRAMS\${APP_NAME}"
 
   DeleteRegKey HKCU "${UNINSTALL_KEY}"
-  RMDir /r "$INSTDIR"
+  ; Keep adjacent private state and migration backups when uninstalling.
+  FindFirst $0 $1 "$INSTDIR\*"
+uninstall_program_files:
+  StrCmp $1 "" uninstall_program_files_done
+  StrCmp $1 "." uninstall_program_files_next
+  StrCmp $1 ".." uninstall_program_files_next
+  StrCmp $1 "user-data" uninstall_program_files_next
+  StrCmp $1 "agent-data" uninstall_program_files_next
+  StrCmp $1 "nai_launcher.exe.WebView2" uninstall_program_files_next
+  StrCpy $2 $1 13
+  StrCmp $2 ".studio-data-" uninstall_program_files_next
+  IfFileExists "$INSTDIR\$1\*.*" 0 uninstall_program_file
+  RMDir /r "$INSTDIR\$1"
+  Goto uninstall_program_files_next
+uninstall_program_file:
+  Delete "$INSTDIR\$1"
+uninstall_program_files_next:
+  FindNext $0 $1
+  Goto uninstall_program_files
+uninstall_program_files_done:
+  FindClose $0
+  RMDir "$INSTDIR"
 SectionEnd

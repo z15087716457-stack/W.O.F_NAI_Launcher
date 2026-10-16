@@ -4,7 +4,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../image_editor/widgets/panels/edit_image_controls.dart';

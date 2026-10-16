@@ -2201,7 +2201,7 @@
   "settings_canvasReducedMotionDescription": "Camera flights, zooms and inertia become instant, reducing animation",
   "image_viewDetail": "View details",
   "settings_defaultImagesPath": "Default (Documents/NAI_Launcher/images/)",
-  "settings_defaultHivePath": "Default (%APPDATA%/NAI_Launcher/hive/)",
+  "settings_defaultHivePath": "Default (./user-data/hive/)",
   "settings_protectionFeatures": "Protection Features",
   "settings_stripMetadataTitle": "Remove all metadata when copying or dragging",
   "settings_stripMetadataSubtitle": "Create a sanitized copy, remove PNG text chunks, EXIF, and NAI steganographic watermark data, and avoid exposing the original path while dragging.",

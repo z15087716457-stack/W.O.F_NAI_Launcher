@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../constants/storage_keys.dart';
 import 'app_logger.dart';
@@ -35,7 +35,7 @@ class HiveStorageHelper {
   /// 获取当前 Hive 存储路径（数据库文件存放路径）
   ///
   /// 优先返回用户自定义路径，如果没有则返回默认路径
-  /// 默认路径: {appSupportDir}/hive/ (Windows: %APPDATA%/com.example/nai_launcher/hive/)
+  /// 默认路径: {appSupportDir}/hive/ (Windows: executable/user-data/hive/)
   Future<String> getPath() async {
     if (_cachedPath != null) {
       return _cachedPath!;
@@ -158,13 +158,13 @@ class HiveStorageHelper {
   /// 旧位置 1：Documents 根目录下的 .hive 文件（最早的版本）
   /// 旧位置 2：Documents/NAI_Launcher/hive/（中间版本）
   /// 旧位置 3：%APPDATA%/NAI_Launcher/hive/（beta2.1版本）
-  /// 新位置：%APPDATA%/com.example/nai_launcher/hive/（当前版本）
+  /// 新位置：启动器目录/user-data/hive/（当前版本）
   ///
   /// 由 [DataMigrationService] 在预热阶段调用
   Future<void> migrateFromOldLocation(String newPath) async {
     try {
       final appDir = await getApplicationDocumentsDirectory();
-      final appSupportDir = await getApplicationSupportDirectory();
+      final appSupportDir = await getLegacyApplicationSupportDirectory();
 
       // 检查所有可能的旧位置
       // getApplicationSupportDirectory() 返回 %APPDATA%/com.example/nai_launcher/
@@ -419,7 +419,7 @@ class HiveStorageHelper {
     if (customPath != null && customPath.isNotEmpty) {
       return customPath;
     }
-    return '默认 (%APPDATA%/NAI_Launcher/hive/)';
+    return '默认 (./user-data/hive/)';
   }
 
   /// 检查是否使用了自定义路径

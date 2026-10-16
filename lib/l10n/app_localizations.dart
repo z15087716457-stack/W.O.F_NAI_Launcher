@@ -7826,7 +7826,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_defaultHivePath.
   ///
   /// In en, this message translates to:
-  /// **'Default (%APPDATA%/NAI_Launcher/hive/)'**
+  /// **'Default (./user-data/hive/)'**
   String get settings_defaultHivePath;
 
   /// No description provided for @settings_protectionFeatures.

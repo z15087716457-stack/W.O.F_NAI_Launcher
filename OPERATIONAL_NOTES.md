@@ -82,7 +82,7 @@
 - **图库提示词与细节对齐（2026-10-04 第二轮反馈）**：右侧详情正向、每个角色、负向提示词复用 `PromptSection(inspectorStyle: true)` 的隔离翻译文档；翻译按钮位于复制之前，只在对应区域悬停时显示，点击仅翻译该字段，不改图片元数据或生成草稿。译文可拖出块，点击块使用按内容宽度的 `ImageActionMenu(width: null)` 与 `StudioIcons.promptBlockPalette` 在点击位置存入积木（与提示词顶栏「积木」一致，区别于四格块库图标）；全屏详情同样复用这套紧凑浮层。原文复制入口与负向展开保留，切图用路径/字段键重置翻译状态。积木按钮的悬停提示 `verticalOffset: 18`，比原默认位置上提 6px。搜索框固定高 34px，`Center` 居中整行紧凑输入布局（文字、搜索图标与快捷键 / 清空按钮）；仅设 `textAlignVertical` 和零内边距会让实际内容高于外框中心 6px，不能据此宣称居中。左侧内容整体平移 -1px，比第二轮下移 1px 对齐 NAI 筛选。
 - **顶栏拖动窗口**：画廊顶栏与侧栏标题行的空白（含标题文字、搜索框右侧留缝）是 `WindowDragArea`，标题文字套 `IgnorePointer`；`LibraryWindowHeader(dragBelowCaptions: true)` 让窗口按钮正下方的保留区也能拖。搜索框在标题与工具之间伸缩，上限 880（1080p 正好占满）。
 - **收藏菜单即时反馈（2026-09-10 修）**：菜单首行「收藏」与收藏集勾选改为乐观更新——点击当帧先就地翻转勾选/红心，落库结果回来再以服务端口径校准；收藏切换按请求序号回写，连点时只认最后一次结果。旧实现等 `toggleFavorite` 整个链路（落库 + 取消收藏时的集合刷新 + 过滤视图重载）返回才 `setState`，点一下要愣一拍才见变化。
-- 本地 NAI-only 判定为三通道任一命中：`gallery_metadata` 的 software/source 含 NovelAI 指纹、model 为 `nai-diffusion-*`，或 raw_json 含 NAI 参数特征键。版本筛选按 model 精确匹配；历史空 model 由启动迁移按元数据指纹回填。数据库位于 `%APPDATA%/com.example/nai_launcher/databases/danbooru.db`。
+- 本地 NAI-only 判定为三通道任一命中：`gallery_metadata` 的 software/source 含 NovelAI 指纹、model 为 `nai-diffusion-*`，或 raw_json 含 NAI 参数特征键。版本筛选按 model 精确匹配；历史空 model 由启动迁移按元数据指纹回填。数据库位于 `<启动器目录>/user-data/databases/danbooru.db`；旧 AppData 路径在迁移后仅保留兼容联接。
 - 收藏是根-子集关系：心形根集包含全部收藏；加入子集自动加入根集，取消根集会清掉所有子集关系，从子集移出不影响根集。
 - 收藏集支持文件夹无限嵌套（`gallery_collections.parent_id` + `is_folder`）：文件夹是纯组织节点不参与成员关系，只有文件夹可拥有子节点；老数据 parent_id=NULL 留在收藏根级平铺。选中文件夹浏览=全部子孙收藏集成员的去重并集（`getCollectionImageIds` 递归语义，按各图最早加入时间排序）；文件夹计数同为递归并集去重（一图多集不重复计）。`moveCollection` 拒绝非文件夹目标与成环移动（UI 层和 DB 层双校验）；非空文件夹禁止删除；`reorderCollections` 按同父级分组重排并写回 parent_id。收藏操作只动链接表（image_id 锚定），不触碰文件路径；磁盘文件移动=前端移动当场 `updateFilePath` 直更 DB + 扫描器 size+mtime 签名匹配兜底（签名命中还要求原路径文件已不存在才判移动，同签名副本按新文件入库不抢 id）；签名失配则旧行软删、收藏跟丢。分类树展开状态持久化于 `gallery_category_tree_expanded_ids`，侧栏分组收起状态持久化于 `gallery_sidebar_collapsed_sections`（重启恢复）；「移动到…」对话框展开状态为会话级（重启重置）。
 - 在线 AItag 列表走 `/api/ai_works_search`，详情走 `/api/work/{id}`；列表图使用 pximg 缩略图并带 Pixiv Referer。详情元数据优先读取 `images[].ai_json`，顶层 `model` 可作为 Source 兜底。作者搜索有一级返回快照，晚到请求不得覆盖原页面。
@@ -200,7 +200,7 @@
 
 ## 构建与更新
 
-- Windows 数据路径取自原生版本资源 `CompanyName=com.example` 与 `ProductName=nai_launcher`，不是 InternalName；品牌显示名使用 FileDescription / 窗口标题。构建后须检查实际 EXE 的版本资源，确保继续读取 `%APPDATA%/com.example/nai_launcher/`，不能把新空目录覆盖回原图库 / 块库目录。
+- Windows 内部数据统一经 `app_support_directory.dart` 使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；不依赖工作目录，不静默退回 C 盘。旧 AppData 数据必须在数据库打开前完整备份、SHA-256 校验和迁移；保留旧路径联接兼容已存绝对路径，两端有不同数据时拒绝合并。旧目录识别仍取自 `CompanyName=com.example` 与 `ProductName=nai_launcher`，原生身份保持稳定。更新、打包和卸载必须保护 `user-data/` 及迁移备份。
 
 - 正常覆盖构建需目标文件未被运行实例锁定；用户要求自行核验时，不自动关闭程序，可使用独立 CMake 产物目录。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
 - 安装器（`installer/windows/nai_launcher.nsi`）进程检测自 2026-09-09 起为「软化 fail-closed」语义：进程枚举/查询失败时不再直接阻断，改为以 `CreateFileW(GENERIC_WRITE, share=0)` 探 `$INSTDIR\nai_launcher.exe` 文件锁——文件可写打开或不存在（全新安装）则放行，共享冲突/拒绝访问（文件真被占用）或其他未知错误仍阻断（静默退出码 3 不变）。每次检查失败会把失败阶段、GetLastError、疑似 PID、探锁结果追加写入 `$INSTDIR\install_diagnostics.log`（UTF-16，随卸载删除）。验证脚本已覆盖四场景：目标在跑阻断 / 他目录实例放行 / 查询失败+无锁放行+落诊断 / 全新目录放行。
@@ -213,7 +213,7 @@ INT8 可选分支提供 `seedvr2-3b-int8` / `seedvr2-7b-int8` / `seedvr2-7b-shar
 
 INT8 使用自研 standalone 适配器和固定 PyTorch 2.7.1/cu128 的原生 `torch._int_mm`，保持 INT8 参数、FP32 通道尺度和 256 组的 regular H4 ConvRot；有界分批、CUDA autocast 输出与 CPU/GPU 卸载保留，不反量化整套权重，不启动 ComfyUI。安装模型前先检查 SM≥7.5 与实际整数内核，失败明确显示 INT8 不可用并可选 FP8。小型张量、量化装载、CUDA 内核和完整 CLI 导入验证不等于真实 3B / 7B 模型实测，也不能套用 comfy-kitchen 社区的加速百分比；此分支作为实验选项。
 
-SeedVR2 提供 `seedvr2-3b` / `seedvr2-7b` / `seedvr2-7b-sharp` 三种 FP8 权重，共用固定源码、Python/CUDA 环境和 FP16 VAE，保持 venv 原绝对路径。只在用户点击对应型号的安装按钮后下载所需权重；列表、参数调整和推理不得触发下载。新增 / 取消 / 删除一种权重不能破坏另一种；最后一种删除后才移除共享安装。推理只校验共享必需文件与当前型号，不能因无关权重损坏而阻止另一型号运行。兼容 `7d72744f…` / `0de0f816…` 的旧 SeedVR2 / RTX 收据仍须逐项匹配当前期望大小与哈希，不仅凭旧清单标识放行。管理页权重大小不重复累计共享环境。
+SeedVR2 提供 `seedvr2-3b` / `seedvr2-7b` / `seedvr2-7b-sharp` 三种 FP8 权重，共用固定源码、Python/CUDA 环境和 FP16 VAE；历史 venv 原绝对路径通过迁移后的旧目录联接保持可用。只在用户点击对应型号的安装按钮后下载所需权重；列表、参数调整和推理不得触发下载。新增 / 取消 / 删除一种权重不能破坏另一种；最后一种删除后才移除共享安装。推理只校验共享必需文件与当前型号，不能因无关权重损坏而阻止另一型号运行。兼容 `7d72744f…` / `0de0f816…` 的旧 SeedVR2 / RTX 收据仍须逐项匹配当前期望大小与哈希，不仅凭旧清单标识放行。管理页权重大小不重复累计共享环境。
 
 高级设置默认收起，实验噪声另行折叠。`local_seedvr2_options` 按型号独立保存色彩校正、种子、BlockSwap、VAE 分块 / 重叠和两类噪声，不复用 ComfyUI 设置。默认 LAB / 种子 0 / BlockSwap 0 / VAE 分块 1024、重叠 128 / 噪声 0；3B / 7B（含 Sharp）的卸载上限分别 32 / 36，24 层起启用 I/O 卸载。参数必须有界且有限，重叠小于分块。回调按最新值合并，并拒绝切换型号后旧控件的回写；恢复默认只影响当前型号。手动放大和自动增强共用配置，生成批次保持原冻结参数。CUDA 显存不足明确报错，不静默换模型；注意力后端与分配器不开放给用户任意修改。
 

@@ -4210,7 +4210,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '默认 (Documents/NAI_Launcher/images/)';
 
   @override
-  String get settings_defaultHivePath => '默认 (%APPDATA%/NAI_Launcher/hive/)';
+  String get settings_defaultHivePath => '默认 (./user-data/hive/)';
 
   @override
   String get settings_protectionFeatures => '保护功能';
@@ -23613,7 +23613,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '預設 (Documents/NAI_Launcher/images/)';
 
   @override
-  String get settings_defaultHivePath => '預設 (%APPDATA%/NAI_Launcher/hive/)';
+  String get settings_defaultHivePath => '預設 (./user-data/hive/)';
 
   @override
   String get settings_protectionFeatures => '保護功能';

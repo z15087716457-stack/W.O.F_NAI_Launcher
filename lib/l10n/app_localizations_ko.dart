@@ -4272,7 +4272,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '기본값(Documents/NAI_Launcher/images/)';
 
   @override
-  String get settings_defaultHivePath => '기본값(%APPDATA%/NAI_Launcher/hive/)';
+  String get settings_defaultHivePath => '기본값(./user-data/hive/)';
 
   @override
   String get settings_protectionFeatures => '보호 기능';

@@ -2201,7 +2201,7 @@
   "settings_canvasReducedMotionDescription": "飛行・ズーム・慣性を瞬時切替にし、アニメーションを抑える",
   "image_viewDetail": "詳細を表示",
   "settings_defaultImagesPath": "デフォルト (Documents/NAI_Launcher/images/)",
-  "settings_defaultHivePath": "デフォルト (%APPDATA%/NAI_Launcher/hive/)",
+  "settings_defaultHivePath": "デフォルト (./user-data/hive/)",
   "settings_protectionFeatures": "保護機能",
   "settings_stripMetadataTitle": "コピーまたはドラッグするときにすべてのメタデータを削除します",
   "settings_stripMetadataSubtitle": "サニタイズされたコピーを作成し、PNG テキスト チャンク、EXIF、および NAI ステガノグラフィック透かしデータを削除し、ドラッグ中に元のパスが露出しないようにします。",

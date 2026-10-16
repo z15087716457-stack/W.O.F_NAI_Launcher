@@ -2116,7 +2116,7 @@
   "settings_canvasReducedMotionDescription": "飞行、缩放与惯性改为瞬时切换，降低动画负担",
   "image_viewDetail": "查看详情",
   "settings_defaultImagesPath": "默认 (Documents/NAI_Launcher/images/)",
-  "settings_defaultHivePath": "默认 (%APPDATA%/NAI_Launcher/hive/)",
+  "settings_defaultHivePath": "默认 (./user-data/hive/)",
   "settings_protectionFeatures": "保护功能",
   "settings_stripMetadataTitle": "复制/拖拽时移除全部元数据",
   "settings_stripMetadataSubtitle": "生成净化副本，清除 PNG 文本块、EXIF 与 NAI 隐写水印，并避免拖拽暴露原始路径。",
