@@ -500,6 +500,16 @@ abstract final class SettingsFixture {
     sessions: 27,
   );
 
+  /// 基础提示词编辑。[_agent] 默认不带（原型没有这一行，原基准截图不变），预览和测试按需带上。
+  static const systemPrompt = SettingsSystemPrompt(
+    builtin:
+        '你是 NAI Studio 里的创作助手，帮用户写提示词、整理块和查资料。\n'
+        '先读当前模型和画布状态，再动手；不确定就问。\n'
+        '任何会花 Anlas 的操作都要先报价，等用户确认后才执行。',
+    workspaceId: 'inspire',
+    workspaceName: '灵感',
+  );
+
   static const _rag = SettingsRagData(
     runtime: SettingsRagStep(value: 'CUDA 12.4', detail: '独立 Python · 不影响放大组件'),
     embedder: SettingsRagStep(value: 'EmbeddingGemma 2', detail: '文字 + 图片'),

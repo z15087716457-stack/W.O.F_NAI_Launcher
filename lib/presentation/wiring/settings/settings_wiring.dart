@@ -143,20 +143,34 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     await SettingsStorageActions(context, ref).openFolder(folder);
   }
 
-  Future<void> _instructions(String global, String prefix) async {
-    if (_expectedGlobal == null || _expectedPrefix == null) {
-      throw StateError('Instructions are not loaded');
+  Future<bool> _instructions(String global, String prefix) async {
+    final expectedGlobal = _expectedGlobal;
+    final expectedPrefix = _expectedPrefix;
+    try {
+      if (expectedGlobal == null || expectedPrefix == null) {
+        throw StateError('Instructions are not loaded');
+      }
+      await ref
+          .read(settingsAgentBackendProvider)
+          .saveInstructions(
+            global: global,
+            prefix: prefix,
+            expectedGlobal: expectedGlobal,
+            expectedPrefix: expectedPrefix,
+          );
+      if (mounted &&
+          _expectedGlobal == expectedGlobal &&
+          _expectedPrefix == expectedPrefix) {
+        _expectedGlobal = global;
+        _expectedPrefix = prefix;
+      }
+      return true;
+    } catch (_) {
+      if (mounted) {
+        AppToast.error(context, context.l10n.set_agInstructionsFailed);
+      }
+      return false;
     }
-    await ref
-        .read(settingsAgentBackendProvider)
-        .saveInstructions(
-          global: global,
-          prefix: prefix,
-          expectedGlobal: _expectedGlobal!,
-          expectedPrefix: _expectedPrefix!,
-        );
-    _expectedGlobal = global;
-    _expectedPrefix = prefix;
   }
 
   SettingsActions _actions(SettingsViewData data) {
@@ -266,7 +280,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onEditPreset: (id) => _run(() => models.editPreset(id)),
       onDeletePreset: (id) => _run(() => models.deletePreset(id)),
       onSaveInstructions: ({required global, required prefix}) =>
-          _run(() => _instructions(global, prefix)),
+          _instructions(global, prefix),
       onViewBuiltinPrompt: () => _run(() => agent.viewPrompt(builtin: true)),
       onViewFinalPrompt: () => _run(agent.viewPrompt),
       onExtensionEnabled: (id, value) =>

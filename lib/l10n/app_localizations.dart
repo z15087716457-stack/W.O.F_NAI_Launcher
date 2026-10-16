@@ -33269,7 +33269,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agOrderBuiltin.
   ///
   /// In en, this message translates to:
-  /// **'Built-in prompt'**
+  /// **'Base prompt'**
   String get set_agOrderBuiltin;
 
   /// No description provided for @set_agOrderPrefix.
@@ -33287,7 +33287,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agOrderWorkspace.
   ///
   /// In en, this message translates to:
-  /// **'Workspace instructions'**
+  /// **'Workspace rules'**
   String get set_agOrderWorkspace;
 
   /// No description provided for @set_agOrderTools.
@@ -35209,6 +35209,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'s'**
   String get set_unitSeconds;
+
+  /// No description provided for @set_unsavedAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved Agent prompt changes'**
+  String get set_unsavedAgent;
+
+  /// No description provided for @set_accUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Not loaded'**
+  String get set_accUnread;
+
+  /// No description provided for @set_accBalanceUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Balance not loaded'**
+  String get set_accBalanceUnread;
+
+  /// No description provided for @set_agBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Base prompt'**
+  String get set_agBase;
+
+  /// No description provided for @set_agBaseGlobalState.
+  ///
+  /// In en, this message translates to:
+  /// **'Global: {state}'**
+  String set_agBaseGlobalState(Object state);
+
+  /// No description provided for @set_agBaseWsState.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace “{name}”: {state}'**
+  String set_agBaseWsState(Object name, Object state);
+
+  /// No description provided for @set_agBaseBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'built-in'**
+  String get set_agBaseBuiltin;
+
+  /// No description provided for @set_agBaseCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'customized'**
+  String get set_agBaseCustom;
+
+  /// No description provided for @set_agBaseInherit.
+  ///
+  /// In en, this message translates to:
+  /// **'uses global'**
+  String get set_agBaseInherit;
+
+  /// No description provided for @set_agBaseOwn.
+  ///
+  /// In en, this message translates to:
+  /// **'own prompt'**
+  String get set_agBaseOwn;
+
+  /// No description provided for @set_agBaseEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get set_agBaseEdit;
+
+  /// No description provided for @set_agBaseCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get set_agBaseCollapse;
+
+  /// No description provided for @set_agScopeGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get set_agScopeGlobal;
+
+  /// No description provided for @set_agScopeWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace · {name}'**
+  String set_agScopeWorkspace(Object name);
+
+  /// No description provided for @set_agBaseUseGlobalOn.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace uses the global prompt; turn off to give it its own'**
+  String get set_agBaseUseGlobalOn;
+
+  /// No description provided for @set_agBaseUseGlobalOff.
+  ///
+  /// In en, this message translates to:
+  /// **'This workspace has its own prompt; turn on to use the global one'**
+  String get set_agBaseUseGlobalOff;
+
+  /// No description provided for @set_agBaseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom text replaces the built-in prompt and follows the system prefix; the app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.'**
+  String get set_agBaseHint;
+
+  /// No description provided for @set_agBaseRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore built-in'**
+  String get set_agBaseRestore;
+
+  /// No description provided for @set_agBaseRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the built-in prompt?'**
+  String get set_agBaseRestoreTitle;
+
+  /// No description provided for @set_agBaseRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The global custom base prompt is replaced by the built-in one; the old text goes to prompt history. Workspace prompts are not affected.'**
+  String get set_agBaseRestoreBody;
+
+  /// No description provided for @set_agBaseSwitchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard base prompt changes?'**
+  String get set_agBaseSwitchTitle;
+
+  /// No description provided for @set_agBaseSwitchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching scope discards unsaved changes.'**
+  String get set_agBaseSwitchBody;
+
+  /// No description provided for @set_agBaseSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get set_agBaseSaving;
+
+  /// No description provided for @set_agBaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not saved: the workspace changed or the write failed. Your edits are kept.'**
+  String get set_agBaseFailed;
+
+  /// No description provided for @set_agMcpUnchecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked'**
+  String get set_agMcpUnchecked;
+
+  /// No description provided for @set_agInstructionsSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving instructions…'**
+  String get set_agInstructionsSaving;
+
+  /// No description provided for @set_agInstructionsFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.'**
+  String get set_agInstructionsFailed;
 }
 
 class _AppLocalizationsDelegate

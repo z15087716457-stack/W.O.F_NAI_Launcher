@@ -633,8 +633,13 @@ class SettingsAccount {
 
   final String id;
   final String name;
-  final SettingsTier tier;
-  final int anlas;
+
+  /// null = 还没读取到（非当前账号不会为此自动登录查询），界面显示“未读取”；
+  /// [SettingsTier.none] 才是确实没有订阅。
+  final SettingsTier? tier;
+
+  /// null = 还没读取到，界面显示“未读取”；0 是真实余额。
+  final int? anlas;
   final SettingsLoginKind loginKind;
 
   /// 脱敏后的邮箱或令牌前缀，例如 `pelican@****.com`、`pst-****a91f`。
@@ -1067,7 +1072,15 @@ class SettingsModelsData {
 
 enum SettingsMcpMode { codemode, deferred, direct, hidden }
 
-enum SettingsMcpState { connected, connecting, needsLogin, error, disabled }
+/// [unchecked] = 已启用但还没连过（Agent 未启动等），灰点“未检测”；不要为渲染设置去启动 Agent / MCP。
+enum SettingsMcpState {
+  connected,
+  connecting,
+  needsLogin,
+  error,
+  disabled,
+  unchecked,
+}
 
 @immutable
 class SettingsMcpServer {
@@ -1113,11 +1126,48 @@ class SettingsExtension {
   final bool enabled;
 }
 
+enum SettingsPromptScope { global, workspace }
+
+/// 基础提示词（旧设置“内置提示词”里可编辑的那层，拼在系统前缀之后、全局指令之前）。
+/// 全局和当前工作区分开存，互不混写；也不和 [SettingsAgentData.globalInstructions] /
+/// [SettingsAgentData.systemPrefix] 混写。
+@immutable
+class SettingsSystemPrompt {
+  const SettingsSystemPrompt({
+    required this.builtin,
+    this.global,
+    this.workspaceId = '',
+    this.workspaceName = '',
+    this.workspace,
+    this.saving = false,
+  });
+
+  /// 内置默认提示词（`naiAgentDefaultSystemPrompt`）。全局没自定义时显示它，也是编辑起点。
+  final String builtin;
+
+  /// 全局自定义（`AgentSettings.customSystemPrompt`）；null = 用内置。
+  final String? global;
+
+  /// 当前工作区（`AgentWorkspace.id` / `name`）；id 为空 = 没有工作区，只出“全局”。
+  final String workspaceId;
+  final String workspaceName;
+
+  /// 当前工作区单独的提示词（`AgentWorkspace.customSystemPrompt`）；null = 沿用全局。
+  final String? workspace;
+
+  /// 保存中：保存、范围切换和“恢复内置”都不可点。
+  final bool saving;
+
+  /// 全局实际生效的基础提示词。
+  String get effectiveGlobal => global ?? builtin;
+}
+
 @immutable
 class SettingsAgentData {
   const SettingsAgentData({
     this.globalInstructions = '',
     this.systemPrefix = '',
+    this.systemPrompt,
     this.extensions = const [],
     this.mcp = const [],
     this.tools = const [],
@@ -1129,6 +1179,9 @@ class SettingsAgentData {
   /// 已保存的内容；界面里编辑的是草稿，点“保存”才回调。
   final String globalInstructions;
   final String systemPrefix;
+
+  /// 基础提示词编辑；null = 不显示这一行（Agent 未初始化时）。
+  final SettingsSystemPrompt? systemPrompt;
   final List<SettingsExtension> extensions;
   final List<SettingsMcpServer> mcp;
 
@@ -1137,6 +1190,22 @@ class SettingsAgentData {
   final String dataPath;
   final int workspaces;
   final int sessions;
+
+  SettingsAgentData copyWith({
+    String? globalInstructions,
+    String? systemPrefix,
+    SettingsSystemPrompt? systemPrompt,
+  }) => SettingsAgentData(
+    globalInstructions: globalInstructions ?? this.globalInstructions,
+    systemPrefix: systemPrefix ?? this.systemPrefix,
+    systemPrompt: systemPrompt ?? this.systemPrompt,
+    extensions: extensions,
+    mcp: mcp,
+    tools: tools,
+    dataPath: dataPath,
+    workspaces: workspaces,
+    sessions: sessions,
+  );
 }
 
 // ── 语义检索
@@ -1656,6 +1725,7 @@ class SettingsActions {
     this.onDeletePreset = _noId,
     // Agent
     this.onSaveInstructions = _noInstructions,
+    this.onSaveSystemPrompt = _noSystemPrompt,
     this.onViewBuiltinPrompt = _none,
     this.onViewFinalPrompt = _none,
     this.onExtensionEnabled = _noIdBool,
@@ -1810,8 +1880,20 @@ class SettingsActions {
   final ValueChanged<String?> onEditPreset;
   final ValueChanged<String> onDeletePreset;
 
-  final void Function({required String global, required String prefix})
+  /// Await the write acknowledgement. False (including a stale-value rejection)
+  /// keeps the submitted draft and the navigation guard active.
+  final Future<bool> Function({required String global, required String prefix})
   onSaveInstructions;
+
+  /// 保存基础提示词 [SettingsAgentData.systemPrompt]。[text] = null：全局恢复内置（界面已确认过）/
+  /// 工作区改回沿用全局。[workspaceId] 是开始编辑时的工作区：scope 为 workspace 时接线方须核对它
+  /// 仍是当前工作区再写。工作区已变或写入失败返回 false，界面保留草稿并提示。
+  final Future<bool> Function({
+    required SettingsPromptScope scope,
+    required String? text,
+    required String workspaceId,
+  })
+  onSaveSystemPrompt;
   final VoidCallback onViewBuiltinPrompt;
   final VoidCallback onViewFinalPrompt;
   final void Function(String id, bool enabled) onExtensionEnabled;
@@ -1921,10 +2003,15 @@ class SettingsActions {
     String? modelId,
     String? presetId,
   }) {}
-  static void _noInstructions({
+  static Future<bool> _noInstructions({
     required String global,
     required String prefix,
-  }) {}
+  }) async => false;
+  static Future<bool> _noSystemPrompt({
+    required SettingsPromptScope scope,
+    required String? text,
+    required String workspaceId,
+  }) async => true;
   static void _noMcpMode(String _, SettingsMcpMode _) {}
   static void _noRag(SettingsRagSourceKind _) {}
   static void _noRagBool(SettingsRagSourceKind _, bool _) {}

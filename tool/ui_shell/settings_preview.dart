@@ -17,7 +17,32 @@ class SettingsPreviewSim extends ChangeNotifier {
 
   var _scene = SettingsScene.ready;
   var _page = SettingsPageId.overview;
-  late SettingsViewData _data = SettingsFixture.view();
+  late SettingsViewData _data = _extras(SettingsFixture.view());
+
+  /// 预览额外带上：基础提示词编辑；小号的余额和订阅“未读取”（非当前账号不自动登录查询）。
+  static SettingsViewData _extras(SettingsViewData d) => d.copyWith(
+    agent: d.agent.copyWith(systemPrompt: SettingsFixture.systemPrompt),
+    account: SettingsAccountData(
+      monthlyAnlas: d.account.monthlyAnlas,
+      todayUsed: d.account.todayUsed,
+      accounts: [
+        for (final a in d.account.accounts)
+          a.current || a.expired
+              ? a
+              : SettingsAccount(
+                  id: a.id,
+                  name: a.name,
+                  tier: null,
+                  anlas: null,
+                  loginKind: a.loginKind,
+                  maskedId: a.maskedId,
+                  lastUsedAt: a.lastUsedAt,
+                  isDefault: a.isDefault,
+                  color: a.color,
+                ),
+      ],
+    ),
+  );
   final _undo = <String, (SettingKey, Object?)>{};
   var _n = 0;
   Timer? _download;
@@ -43,7 +68,7 @@ class SettingsPreviewSim extends ChangeNotifier {
   set scene(SettingsScene s) {
     _scene = s;
     _stopRag();
-    _data = SettingsFixture.view(page: _page, scene: s);
+    _data = _extras(SettingsFixture.view(page: _page, scene: s));
     _undo.clear();
     notifyListeners();
   }
@@ -123,22 +148,41 @@ class SettingsPreviewSim extends ChangeNotifier {
       onShortcutRecorded: (id, keys) => _shortcut(id, (x) => keys),
       onShortcutCleared: (id) => _shortcut(id, (x) => const []),
       onShortcutReset: (id) => _shortcut(id, (x) => x.defaultKeys),
-      onSaveInstructions: ({required global, required prefix}) {
+      onSaveInstructions: ({required global, required prefix}) async {
         _data = _data.copyWith(
-          agent: SettingsAgentData(
+          agent: _data.agent.copyWith(
             globalInstructions: global,
             systemPrefix: prefix,
-            extensions: _data.agent.extensions,
-            mcp: _data.agent.mcp,
-            tools: _data.agent.tools,
-            dataPath: _data.agent.dataPath,
-            workspaces: _data.agent.workspaces,
-            sessions: _data.agent.sessions,
           ),
         );
         log('onSaveInstructions');
         notifyListeners();
+        return true;
       },
+      onSaveSystemPrompt:
+          ({required scope, required text, required workspaceId}) async {
+            log(
+              'onSaveSystemPrompt(${scope.name}, ${text == null ? 'null' : '${text.length} 字'}, $workspaceId)',
+            );
+            await Future<void>.delayed(const Duration(milliseconds: 400));
+            final sp = _data.agent.systemPrompt;
+            if (sp == null) return false;
+            final ws = scope == SettingsPromptScope.workspace;
+            if (ws && workspaceId != sp.workspaceId) return false;
+            _data = _data.copyWith(
+              agent: _data.agent.copyWith(
+                systemPrompt: SettingsSystemPrompt(
+                  builtin: sp.builtin,
+                  global: ws ? sp.global : text,
+                  workspaceId: sp.workspaceId,
+                  workspaceName: sp.workspaceName,
+                  workspace: ws ? text : sp.workspace,
+                ),
+              ),
+            );
+            notifyListeners();
+            return true;
+          },
       onAddBlacklistTag: (tag) => _blacklist([..._data.privacy.blacklist, tag]),
       onRemoveBlacklistTag: (tag) =>
           _blacklist([..._data.privacy.blacklist]..remove(tag)),

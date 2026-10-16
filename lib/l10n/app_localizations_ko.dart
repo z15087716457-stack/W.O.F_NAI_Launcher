@@ -18542,7 +18542,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agInstrSub => '이 순서로 최종 프롬프트가 됩니다. 기존 채팅은 그대로, 이후 요청에 반영됩니다.';
 
   @override
-  String get set_agOrderBuiltin => '내장 프롬프트';
+  String get set_agOrderBuiltin => '기본 프롬프트';
 
   @override
   String get set_agOrderPrefix => '시스템 접두사';
@@ -18551,7 +18551,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agOrderGlobal => '전역 지침';
 
   @override
-  String get set_agOrderWorkspace => '작업 공간 지침';
+  String get set_agOrderWorkspace => '작업 공간 규칙';
 
   @override
   String get set_agOrderTools => '도구 맵';
@@ -19597,4 +19597,97 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_unitSeconds => '초';
+
+  @override
+  String get set_unsavedAgent => 'Agent 지침에 저장되지 않은 변경이 있습니다';
+
+  @override
+  String get set_accUnread => '불러오지 않음';
+
+  @override
+  String get set_accBalanceUnread => '잔액을 불러오지 않음';
+
+  @override
+  String get set_agBase => '기본 프롬프트';
+
+  @override
+  String set_agBaseGlobalState(Object state) {
+    return '전역: $state';
+  }
+
+  @override
+  String set_agBaseWsState(Object name, Object state) {
+    return '작업 공간 “$name”: $state';
+  }
+
+  @override
+  String get set_agBaseBuiltin => '내장';
+
+  @override
+  String get set_agBaseCustom => '사용자 지정';
+
+  @override
+  String get set_agBaseInherit => '전역 사용';
+
+  @override
+  String get set_agBaseOwn => '개별 설정';
+
+  @override
+  String get set_agBaseEdit => '편집';
+
+  @override
+  String get set_agBaseCollapse => '접기';
+
+  @override
+  String get set_agScopeGlobal => '전역';
+
+  @override
+  String set_agScopeWorkspace(Object name) {
+    return '작업 공간 · $name';
+  }
+
+  @override
+  String get set_agBaseUseGlobalOn =>
+      '이 작업 공간은 전역 프롬프트를 사용합니다. 끄면 따로 편집할 수 있습니다';
+
+  @override
+  String get set_agBaseUseGlobalOff =>
+      '이 작업 공간은 개별 프롬프트를 사용합니다. 켜면 전역 프롬프트로 돌아갑니다';
+
+  @override
+  String get set_agBaseHint =>
+      '사용자 지정 내용이 내장 프롬프트를 대신하며 시스템 접두사 뒤에 붙습니다. 도구 맵은 앱이 덧붙입니다. 전역과 작업 공간은 따로 저장되고 기존 채팅은 그대로입니다.';
+
+  @override
+  String get set_agBaseRestore => '내장으로 복원';
+
+  @override
+  String get set_agBaseRestoreTitle => '내장 프롬프트로 복원할까요?';
+
+  @override
+  String get set_agBaseRestoreBody =>
+      '전역 사용자 지정 기본 프롬프트를 내장 버전으로 되돌립니다. 이전 내용은 프롬프트 기록에 남습니다. 작업 공간별 프롬프트는 바뀌지 않습니다.';
+
+  @override
+  String get set_agBaseSwitchTitle => '기본 프롬프트 변경을 버릴까요?';
+
+  @override
+  String get set_agBaseSwitchBody => '범위를 바꾸면 저장하지 않은 변경이 사라집니다.';
+
+  @override
+  String get set_agBaseSaving => '저장 중…';
+
+  @override
+  String get set_agBaseFailed =>
+      '저장하지 못했습니다. 작업 공간이 바뀌었거나 쓰기에 실패했습니다. 변경 내용은 남아 있습니다.';
+
+  @override
+  String get set_agMcpUnchecked => '확인 전';
+
+  @override
+  String get set_agInstructionsSaving => '지침 저장 중…';
+
+  @override
+  String get set_agInstructionsFailed =>
+      '지침을 저장하지 못했습니다. 저장된 내용이 변경되었거나 쓰기에 실패했습니다. 초안은 유지됩니다. 다시 시도하세요.';
 }

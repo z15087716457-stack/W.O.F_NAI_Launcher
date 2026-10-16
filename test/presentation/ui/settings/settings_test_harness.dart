@@ -69,6 +69,17 @@ class SettingsRecorder {
   final pages = <SettingsPageId>[];
   ChannelSettings? channel;
 
+  /// onSaveSystemPrompt 的返回值（false = 模拟工作区已变 / 写入失败）。
+  var promptResult = true;
+  Future<bool> Function({required String global, required String prefix})?
+  saveInstructions;
+  Future<bool> Function({
+    required SettingsPromptScope scope,
+    required String? text,
+    required String workspaceId,
+  })?
+  saveSystemPrompt;
+
   bool has(String name) => calls.any((c) => c.startsWith(name));
 }
 
@@ -132,8 +143,24 @@ class SettingsHostState extends State<SettingsHost> {
         onShortcutRecorded: (id, keys) => call('record:$id:${keys.join('+')}'),
         onShortcutCleared: (id) => call('clearShortcut:$id'),
         onShortcutReset: (id) => call('resetShortcut:$id'),
-        onSaveInstructions: ({required global, required prefix}) =>
-            call('saveInstructions:$global'),
+        onSaveInstructions: ({required global, required prefix}) async {
+          call('saveInstructions:$global');
+          return await r.saveInstructions?.call(
+                global: global,
+                prefix: prefix,
+              ) ??
+              true;
+        },
+        onSaveSystemPrompt:
+            ({required scope, required text, required workspaceId}) async {
+              call('savePrompt:${scope.name}:${text ?? 'null'}:$workspaceId');
+              return await r.saveSystemPrompt?.call(
+                    scope: scope,
+                    text: text,
+                    workspaceId: workspaceId,
+                  ) ??
+                  r.promptResult;
+            },
         onDeleteAccount: (id) => call('deleteAccount:$id'),
         onSwitchAccount: (id) => call('switchAccount:$id'),
         onClearCache: (k) => call('clearCache:${k.name}'),

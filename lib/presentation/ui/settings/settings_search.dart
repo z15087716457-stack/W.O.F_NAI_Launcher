@@ -275,28 +275,34 @@ List<SettingsHit> settingsIndex(BuildContext context) {
   }
   final a = d.account.current;
   if (a != null) {
+    final balance = a.anlas == null
+        ? l.set_accUnread
+        : SettingsFormat.count(a.anlas!);
+    final tier = a.tier;
     hits.add(
       SettingsHit(
         page: SettingsPageId.overview,
         section: l.set_pageOverview,
         title: l.set_srBalance,
-        detail: '${SettingsFormat.count(a.anlas)} · ${a.name}',
+        detail: '$balance · ${a.name}',
         keywords: 'anlas balance',
         anchor: 'balance',
         control: Text(
-          SettingsFormat.count(a.anlas),
-          style: UiText.mono(12, color: c.ink),
+          balance,
+          style: a.anlas == null
+              ? UiText.sans(12, color: c.faint)
+              : UiText.mono(12, color: c.ink),
         ),
       ),
     );
-    if (a.tier != SettingsTier.none) {
+    if (tier != null && tier != SettingsTier.none) {
       hits.add(
         SettingsHit(
           page: SettingsPageId.account,
           section: l.set_accSub,
           title: l.set_srSubscription,
           detail:
-              '${SettingsFormat.tier(a.tier)} · ${l.set_accMonthly(SettingsFormat.count(d.account.monthlyAnlas))}',
+              '${SettingsFormat.tier(tier)} · ${l.set_accMonthly(SettingsFormat.count(d.account.monthlyAnlas))}',
           keywords: 'anlas subscription opus',
           anchor: 'subscription',
         ),
@@ -416,6 +422,18 @@ List<SettingsHit> settingsIndex(BuildContext context) {
         detail: sub,
         keywords: kw,
         anchor: anchor,
+      ),
+    );
+  }
+  if (d.agent.systemPrompt != null) {
+    hits.add(
+      SettingsHit(
+        page: SettingsPageId.agent,
+        section: l.set_agInstr,
+        title: l.set_agBase,
+        detail: l.set_agBaseHint,
+        keywords: 'system prompt base workspace 系统提示词 内置提示词',
+        anchor: 'agentSystemPrompt',
       ),
     );
   }

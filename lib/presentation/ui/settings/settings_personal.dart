@@ -31,6 +31,8 @@ class SettingsAccountPage extends StatelessWidget {
     final s = SettingsScope.of(context);
     final d = s.data;
     final cur = d.account.current;
+    final tier = cur?.tier;
+    final anlas = cur?.anlas;
     return SettingsPageFrame(
       title: SettingsPageTitle(
         eyebrow: SettingsFormat.eyebrow(SettingsPageId.account),
@@ -38,7 +40,7 @@ class SettingsAccountPage extends StatelessWidget {
         description: l.set_accDesc,
       ),
       aside: [
-        if (cur != null && cur.tier != SettingsTier.none)
+        if (tier != null && tier != SettingsTier.none)
           SettingsAsideCard(
             title: l.set_accSub,
             child: Column(
@@ -47,10 +49,7 @@ class SettingsAccountPage extends StatelessWidget {
                 Row(
                   spacing: 8,
                   children: [
-                    UiMini(
-                      SettingsFormat.tier(cur.tier),
-                      tone: UiMiniTone.accent,
-                    ),
+                    UiMini(SettingsFormat.tier(tier), tone: UiMiniTone.accent),
                     Text(
                       l.set_accMonthly(
                         SettingsFormat.count(d.account.monthlyAnlas),
@@ -61,19 +60,21 @@ class SettingsAccountPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 SettingsBar(
-                  value: d.account.monthlyAnlas == 0
+                  value: anlas == null || d.account.monthlyAnlas == 0
                       ? 0
-                      : cur.anlas / d.account.monthlyAnlas,
+                      : anlas / d.account.monthlyAnlas,
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
                     Text(
-                      l.set_accRemaining(SettingsFormat.count(cur.anlas)),
+                      anlas == null
+                          ? l.set_accBalanceUnread
+                          : l.set_accRemaining(SettingsFormat.count(anlas)),
                       style: UiText.sans(11, color: c.faint),
                     ),
                     const Spacer(),
-                    if (cur.renewsAt != null)
+                    if (cur!.renewsAt != null)
                       Text(
                         l.set_accResets(SettingsFormat.monthDay(cur.renewsAt!)),
                         style: UiText.sans(11, color: c.faint),
@@ -178,9 +179,9 @@ class _AccountRow extends StatelessWidget {
       ),
       title: a.name,
       badges: [
-        if (a.tier != SettingsTier.none)
+        if (a.tier != null && a.tier != SettingsTier.none)
           UiMini(
-            SettingsFormat.tier(a.tier),
+            SettingsFormat.tier(a.tier!),
             tone: a.tier == SettingsTier.opus
                 ? UiMiniTone.accent
                 : UiMiniTone.plain,
@@ -198,14 +199,21 @@ class _AccountRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  SettingsFormat.count(a.anlas),
-                  style: UiText.mono(
-                    13,
-                    weight: FontWeight.w500,
-                    color: a.anlas == 0 ? c.faint : c.ink,
+                if (a.anlas == null)
+                  Text(
+                    l.set_accUnread,
+                    key: Key('account-unread-${a.id}'),
+                    style: UiText.sans(12.5, color: c.faint, height: 1.3),
+                  )
+                else
+                  Text(
+                    SettingsFormat.count(a.anlas!),
+                    style: UiText.mono(
+                      13,
+                      weight: FontWeight.w500,
+                      color: a.anlas == 0 ? c.faint : c.ink,
+                    ),
                   ),
-                ),
                 Text('Anlas', style: UiText.sans(11, color: c.faint)),
               ],
             ),

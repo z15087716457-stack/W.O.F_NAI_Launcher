@@ -26,53 +26,278 @@ class SettingsAgentPage extends StatefulWidget {
 class _SettingsAgentPageState extends State<SettingsAgentPage> {
   TextEditingController? _global;
   TextEditingController? _prefix;
-  var _dirty = false;
+  var _instrDirty = false;
+  var _instrSaved = ('', '');
+  (String, String)? _instrObserved;
+  var _instrSaving = false;
+  var _instrFailed = false;
+  var _saveInFlight = false;
+
+  // 基础提示词：草稿和开始编辑时的 (文字, 沿用全局)、工作区，保存时一并交回核对。
+  final _base = TextEditingController();
+  var _baseOpen = false;
+  var _scope = SettingsPromptScope.global;
+  var _useGlobal = false;
+  var _baseSaved = ('', false);
+  var _baseWs = '';
+  var _baseDirty = false;
+  var _baseFailed = false;
+  var _baseSaving = false;
+  var _loading = false;
+  (String, String?, String, String?)? _baseObserved;
+
+  bool get _dirty => _instrDirty || _baseDirty;
+  bool get _protected => _dirty || _saveInFlight;
+  bool get _instructionsChanged =>
+      (_global!.text, _prefix!.text) != _instrSaved;
+
+  @override
+  void initState() {
+    super.initState();
+    _base.addListener(() => _changed(base: true));
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final a = SettingsScope.of(context).data.agent;
+    final instructions = (a.globalInstructions, a.systemPrefix);
     if (_global == null) {
+      _instrSaved = instructions;
       _global = TextEditingController(text: a.globalInstructions)
-        ..addListener(_changed);
+        ..addListener(() => _changed(instructions: true));
       _prefix = TextEditingController(text: a.systemPrefix)
-        ..addListener(_changed);
-    } else if (!_dirty) {
-      if (_global!.text != a.globalInstructions) {
-        _global!.text = a.globalInstructions;
+        ..addListener(() => _changed(instructions: true));
+    } else if (!_instrDirty &&
+        !_saveInFlight &&
+        instructions != _instrObserved) {
+      _loadInstructions(instructions);
+    }
+    _instrObserved = instructions;
+    final sp = a.systemPrompt;
+    if (sp != null) {
+      final source = (sp.builtin, sp.global, sp.workspaceId, sp.workspace);
+      if (!_baseDirty &&
+          !_busy(sp) &&
+          (source != _baseObserved || sp.workspaceId != _baseWs)) {
+        _loadBase(sp);
       }
-      if (_prefix!.text != a.systemPrefix) _prefix!.text = a.systemPrefix;
+      _baseObserved = source;
     }
   }
 
-  void _changed() {
+  void _loadInstructions((String, String) saved) {
+    _instrSaved = saved;
+    _loading = true;
+    _global!.text = saved.$1;
+    _prefix!.text = saved.$2;
+    _loading = false;
+  }
+
+  /// 按当前范围把已保存的基础提示词读进草稿（不触发脏检查）。
+  void _loadBase(SettingsSystemPrompt sp) {
+    if (sp.workspaceId.isEmpty) _scope = SettingsPromptScope.global;
+    final ws = _scope == SettingsPromptScope.workspace;
+    final inherit = ws && sp.workspace == null;
+    final text = ws ? sp.workspace ?? sp.effectiveGlobal : sp.effectiveGlobal;
+    _baseWs = sp.workspaceId;
+    _baseSaved = (text, inherit);
+    _useGlobal = inherit;
+    _setBase(text);
+  }
+
+  void _setBase(String text) {
+    if (_base.text == text) return;
+    _loading = true;
+    _base.text = text;
+    _loading = false;
+  }
+
+  void _changed({bool instructions = false, bool base = false}) {
+    if (_loading) return;
     final a = SettingsScope.of(context).data.agent;
-    final dirty =
-        _global!.text != a.globalInstructions ||
-        _prefix!.text != a.systemPrefix;
-    if (dirty != _dirty) {
-      setState(() => _dirty = dirty);
-      SettingsScope.of(context).reportDirty(dirty);
+    final was = _protected;
+    final instr = _instructionsChanged;
+    final baseDirty =
+        a.systemPrompt != null &&
+        (_base.text != _baseSaved.$1 || _useGlobal != _baseSaved.$2);
+    if (instr != _instrDirty ||
+        baseDirty != _baseDirty ||
+        (instructions && _instrFailed) ||
+        (base && _baseFailed)) {
+      setState(() {
+        _instrDirty = instr;
+        _baseDirty = baseDirty;
+        if (instructions) _instrFailed = false;
+        if (base) _baseFailed = false;
+      });
+    }
+    if (_protected != was) {
+      SettingsScope.of(context).reportDirty(_protected);
     }
   }
 
-  void _save() {
+  Future<bool> _acknowledged(Future<bool> Function() save) async {
+    try {
+      return await save();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _save() async {
     final s = SettingsScope.of(context);
-    s.actions.onSaveInstructions(global: _global!.text, prefix: _prefix!.text);
-    setState(() => _dirty = false);
-    s.reportDirty(false);
+    if (!_dirty || _busy(s.data.agent.systemPrompt)) return;
+    // Capture both layers before awaiting either callback. Later edits belong
+    // to the next save; a successful layer only acknowledges this snapshot.
+    final instructions = _instrDirty ? (_global!.text, _prefix!.text) : null;
+    final base = _baseDirty ? (_base.text, _useGlobal, _scope, _baseWs) : null;
+    setState(() {
+      _saveInFlight = true;
+      _instrSaving = instructions != null;
+      _baseSaving = base != null;
+    });
+    s.reportDirty(true);
+    try {
+      if (instructions != null) {
+        final ok = await _acknowledged(
+          () => s.actions.onSaveInstructions(
+            global: instructions.$1,
+            prefix: instructions.$2,
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _instrSaving = false;
+          _instrFailed = !ok;
+          if (ok) _instrSaved = instructions;
+          _instrDirty = _instructionsChanged;
+        });
+      }
+      if (base != null) {
+        final ok = await _acknowledged(
+          () => s.actions.onSaveSystemPrompt(
+            scope: base.$3,
+            text: base.$3 == SettingsPromptScope.workspace && base.$2
+                ? null
+                : base.$1,
+            workspaceId: base.$4,
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _baseSaving = false;
+          _baseFailed = !ok;
+          if (ok) _baseSaved = (base.$1, base.$2);
+          _baseDirty =
+              _base.text != _baseSaved.$1 || _useGlobal != _baseSaved.$2;
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _saveInFlight = false);
+        SettingsScope.of(context).reportDirty(_protected);
+      }
+    }
   }
 
   void _discard() {
     final a = SettingsScope.of(context).data.agent;
-    _global!.text = a.globalInstructions;
-    _prefix!.text = a.systemPrefix;
+    if (_busy(a.systemPrompt)) return;
+    setState(() {
+      _loadInstructions((a.globalInstructions, a.systemPrefix));
+      _instrDirty = false;
+      _instrFailed = false;
+      if (a.systemPrompt != null && _baseDirty) _loadBase(a.systemPrompt!);
+      _baseDirty = false;
+      _baseFailed = false;
+    });
+    SettingsScope.of(context).reportDirty(_protected);
+  }
+
+  bool _busy(SettingsSystemPrompt? sp) =>
+      _saveInFlight || (sp?.saving ?? false);
+
+  void _switchScope(SettingsPromptScope to) {
+    if (to == _scope) return;
+    final s = SettingsScope.of(context);
+    if (_busy(s.data.agent.systemPrompt)) return;
+    final l = context.l10n;
+    void go() {
+      final sp = SettingsScope.of(context).data.agent.systemPrompt;
+      if (sp == null) return;
+      setState(() {
+        _scope = to;
+        _baseDirty = false;
+        _baseFailed = false;
+        _loadBase(sp);
+      });
+      SettingsScope.of(context).reportDirty(_protected);
+    }
+
+    if (!_baseDirty) return go();
+    s.confirm(
+      title: l.set_agBaseSwitchTitle,
+      body: l.set_agBaseSwitchBody,
+      confirm: l.set_discard,
+      danger: true,
+      onConfirm: go,
+    );
+  }
+
+  void _toggleInherit(bool v, SettingsSystemPrompt sp) {
+    setState(() {
+      _useGlobal = v;
+      if (v) _setBase(sp.effectiveGlobal);
+    });
+    _changed(base: true);
+  }
+
+  void _restoreBuiltin() {
+    final s = SettingsScope.of(context);
+    final l = context.l10n;
+    s.confirm(
+      title: l.set_agBaseRestoreTitle,
+      body: l.set_agBaseRestoreBody,
+      confirm: l.set_agBaseRestore,
+      danger: true,
+      onConfirm: () async {
+        final latest = SettingsScope.of(context);
+        final sp = latest.data.agent.systemPrompt;
+        if (sp == null || _busy(sp)) return;
+        setState(() {
+          _saveInFlight = true;
+          _baseSaving = true;
+        });
+        latest.reportDirty(true);
+        final ok = await _acknowledged(
+          () => latest.actions.onSaveSystemPrompt(
+            scope: SettingsPromptScope.global,
+            text: null,
+            workspaceId: _baseWs,
+          ),
+        );
+        if (!mounted) return;
+        setState(() {
+          _baseSaving = false;
+          _saveInFlight = false;
+          _baseFailed = !ok;
+          if (ok) {
+            _baseSaved = (sp.builtin, false);
+            _setBase(sp.builtin);
+            _baseDirty = false;
+          }
+        });
+        SettingsScope.of(context).reportDirty(_protected);
+      },
+    );
   }
 
   @override
   void dispose() {
     _global?.dispose();
     _prefix?.dispose();
+    _base.dispose();
     super.dispose();
   }
 
@@ -86,9 +311,10 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     final model = s.data.options[SettingKey.agentModel]
         ?.where((o) => o.value == s.data.values.text(SettingKey.agentModel))
         .firstOrNull;
+    // 和 AgentWorkspaceStore.effectiveSystemPrompt 的拼接顺序一致。
     final order = [
-      l.set_agOrderBuiltin,
       l.set_agOrderPrefix,
+      l.set_agOrderBuiltin,
       l.set_agOrderGlobal,
       l.set_agOrderWorkspace,
       l.set_agOrderTools,
@@ -99,6 +325,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       SettingsMcpState.needsLogin => l.set_agNeedsLogin,
       SettingsMcpState.error => l.set_agMcpError,
       SettingsMcpState.disabled => l.set_agMcpOff,
+      SettingsMcpState.unchecked => l.set_agMcpUnchecked,
     };
     SettingsTone mcpTone(SettingsMcpServer m) => switch (m.state) {
       SettingsMcpState.connected => SettingsTone.ok,
@@ -106,6 +333,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       SettingsMcpState.needsLogin => SettingsTone.warn,
       SettingsMcpState.error => SettingsTone.error,
       SettingsMcpState.disabled => SettingsTone.idle,
+      SettingsMcpState.unchecked => SettingsTone.idle,
     };
     final page = SettingsPageFrame(
       title: SettingsPageTitle(
@@ -275,7 +503,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                     _label(
                       context,
                       l.set_agGlobal,
-                      _dirty && _global!.text != ag.globalInstructions,
+                      _instrDirty && _global!.text != _instrSaved.$1,
                     ),
                     _TextArea(
                       key: const Key('agent-global'),
@@ -287,7 +515,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                     _label(
                       context,
                       l.set_agPrefix,
-                      _dirty && _prefix!.text != ag.systemPrefix,
+                      _instrDirty && _prefix!.text != _instrSaved.$2,
                     ),
                     _TextArea(
                       key: const Key('agent-prefix'),
@@ -296,6 +524,21 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                       hint: l.set_agPrefixHint,
                       onSave: _save,
                     ),
+                    if (_instrSaving || _instrFailed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text(
+                          _instrSaving
+                              ? l.set_agInstructionsSaving
+                              : l.set_agInstructionsFailed,
+                          key: const Key('agent-instructions-status'),
+                          style: UiText.sans(
+                            11.5,
+                            color: _instrSaving ? c.muted : c.warn,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
                     const SizedBox(height: 14),
                     Row(
                       spacing: 8,
@@ -319,6 +562,8 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 ),
               ),
             ),
+            if (ag.systemPrompt != null)
+              ..._basePrompt(context, ag.systemPrompt!),
           ],
         ),
         SettingsSection(
@@ -455,7 +700,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     return Stack(
       children: [
         Positioned.fill(child: page),
-        if (_dirty)
+        if (_protected)
           Positioned(
             left: 0,
             right: 0,
@@ -466,7 +711,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 children: [
                   UiGlyph(UiGlyphs.infoCircle, size: 15, color: c.tipInk),
                   Text(
-                    l.set_unsavedInstructions,
+                    _baseDirty ? l.set_unsavedAgent : l.set_unsavedInstructions,
                     style: UiText.sans(12.5, color: c.tipInk),
                   ),
                   Text(
@@ -477,10 +722,13 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                       color: c.tipInk.withValues(alpha: .55),
                     ),
                   ),
-                  SettingsDockButton(label: l.set_discard, onTap: _discard),
+                  SettingsDockButton(
+                    label: l.set_discard,
+                    onTap: _busy(ag.systemPrompt) ? null : _discard,
+                  ),
                   SettingsDockButton(
                     label: l.set_save,
-                    onTap: _save,
+                    onTap: _busy(ag.systemPrompt) ? null : _save,
                     primary: true,
                   ),
                 ],
@@ -489,6 +737,132 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           ),
       ],
     );
+  }
+
+  /// 基础提示词：一行状态 + 展开后的编辑区（范围、沿用全局、正文、恢复内置）。
+  List<Widget> _basePrompt(BuildContext context, SettingsSystemPrompt sp) {
+    final l = context.l10n;
+    final c = context.ui;
+    final busy = _busy(sp);
+    final saving = _baseSaving || sp.saving;
+    final hasWs = sp.workspaceId.isNotEmpty;
+    final ws = _scope == SettingsPromptScope.workspace;
+    final global = l.set_agBaseGlobalState(
+      sp.global == null ? l.set_agBaseBuiltin : l.set_agBaseCustom,
+    );
+    final summary = [
+      global,
+      if (hasWs)
+        l.set_agBaseWsState(
+          sp.workspaceName,
+          sp.workspace == null ? l.set_agBaseInherit : l.set_agBaseOwn,
+        ),
+    ].join(' · ');
+    return [
+      SettingsRow(
+        key: const Key('agent-base'),
+        anchor: 'agentSystemPrompt',
+        title: l.set_agBase,
+        subtitle: summary,
+        control: SettingsBtn(
+          key: const Key('agent-base-toggle'),
+          label: _baseOpen ? l.set_agBaseCollapse : l.set_agBaseEdit,
+          small: true,
+          onTap: () => setState(() => _baseOpen = !_baseOpen),
+        ),
+      ),
+      if (_baseOpen)
+        SettingsBlock(
+          key: const Key('agent-base-editor'),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                spacing: 8,
+                children: [
+                  if (hasWs)
+                    UiSegmented<SettingsPromptScope>(
+                      key: const Key('agent-base-scope'),
+                      values: SettingsPromptScope.values,
+                      selected: _scope,
+                      labelOf: (v) => v == SettingsPromptScope.global
+                          ? l.set_agScopeGlobal
+                          : l.set_agScopeWorkspace(sp.workspaceName),
+                      onChanged: busy ? (_) {} : _switchScope,
+                    )
+                  else
+                    Text(
+                      l.set_agScopeGlobal,
+                      style: UiText.sans(
+                        13,
+                        weight: FontWeight.w500,
+                        color: c.ink,
+                      ),
+                    ),
+                  const Spacer(),
+                  if (!ws)
+                    SettingsBtn(
+                      key: const Key('agent-base-restore'),
+                      label: l.set_agBaseRestore,
+                      small: true,
+                      tone: SettingsBtnTone.ghost,
+                      onTap: sp.global == null || busy ? null : _restoreBuiltin,
+                    ),
+                ],
+              ),
+              if (ws)
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      SettingsSwitch(
+                        key: const Key('agent-base-inherit'),
+                        value: _useGlobal,
+                        onChanged: busy ? null : (v) => _toggleInherit(v, sp),
+                      ),
+                      Flexible(
+                        child: Text(
+                          _useGlobal
+                              ? l.set_agBaseUseGlobalOn
+                              : l.set_agBaseUseGlobalOff,
+                          style: UiText.sans(12.5, color: c.ink),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 12),
+              _TextArea(
+                key: const Key('agent-base-text'),
+                controller: _base,
+                minHeight: 160,
+                maxLines: 16,
+                enabled: !busy && !(ws && _useGlobal),
+                onSave: _save,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l.set_agBaseHint,
+                style: UiText.sans(11.5, color: c.muted, height: 1.6),
+              ),
+              if (_baseFailed || saving)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    saving ? l.set_agBaseSaving : l.set_agBaseFailed,
+                    key: const Key('agent-base-status'),
+                    style: UiText.sans(
+                      11.5,
+                      color: saving ? c.muted : c.warn,
+                      height: 1.6,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+    ];
   }
 
   Widget _label(BuildContext context, String text, bool modified) {
@@ -513,6 +887,8 @@ class _TextArea extends StatefulWidget {
     required this.minHeight,
     required this.onSave,
     this.hint,
+    this.maxLines,
+    this.enabled = true,
   });
   final TextEditingController controller;
 
@@ -520,6 +896,12 @@ class _TextArea extends StatefulWidget {
   final double minHeight;
   final String? hint;
   final VoidCallback onSave;
+
+  /// 超过这么多行就在框内滚动；null = 跟着内容长高。
+  final int? maxLines;
+
+  /// false = 只读（沿用全局、保存中），文字变淡。
+  final bool enabled;
 
   @override
   State<_TextArea> createState() => _TextAreaState();
@@ -543,8 +925,12 @@ class _TextAreaState extends State<_TextArea> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final on = _focus.hasFocus;
-    final style = UiText.sans(12.5, color: c.ink, height: 1.65);
+    final on = _focus.hasFocus && widget.enabled;
+    final style = UiText.sans(
+      12.5,
+      color: widget.enabled ? c.ink : c.muted,
+      height: 1.65,
+    );
     return CallbackShortcuts(
       bindings: {
         const SingleActivator(LogicalKeyboardKey.keyS, control: true):
@@ -553,7 +939,7 @@ class _TextAreaState extends State<_TextArea> {
       child: GestureDetector(
         // 点文本框下方的空白也能聚焦。
         behavior: HitTestBehavior.opaque,
-        onTap: _focus.requestFocus,
+        onTap: widget.enabled ? _focus.requestFocus : null,
         child: Container(
           constraints: BoxConstraints(minHeight: widget.minHeight),
           padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
@@ -573,8 +959,9 @@ class _TextAreaState extends State<_TextArea> {
           child: TextField(
             controller: widget.controller,
             focusNode: _focus,
+            readOnly: !widget.enabled,
             minLines: 1,
-            maxLines: null,
+            maxLines: widget.maxLines,
             style: style,
             cursorColor: c.accent,
             decoration: uiBareDecoration(

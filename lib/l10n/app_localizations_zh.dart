@@ -18270,7 +18270,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agInstrSub => '按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。';
 
   @override
-  String get set_agOrderBuiltin => '内置提示词';
+  String get set_agOrderBuiltin => '基础提示词';
 
   @override
   String get set_agOrderPrefix => '系统前缀';
@@ -18279,7 +18279,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agOrderGlobal => '全局指令';
 
   @override
-  String get set_agOrderWorkspace => '工作区指令';
+  String get set_agOrderWorkspace => '工作区规则';
 
   @override
   String get set_agOrderTools => '工具地图';
@@ -19316,6 +19316,95 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_unitSeconds => '秒';
+
+  @override
+  String get set_unsavedAgent => 'Agent 指令有未保存的修改';
+
+  @override
+  String get set_accUnread => '未读取';
+
+  @override
+  String get set_accBalanceUnread => '余额未读取';
+
+  @override
+  String get set_agBase => '基础提示词';
+
+  @override
+  String set_agBaseGlobalState(Object state) {
+    return '全局：$state';
+  }
+
+  @override
+  String set_agBaseWsState(Object name, Object state) {
+    return '工作区「$name」：$state';
+  }
+
+  @override
+  String get set_agBaseBuiltin => '内置';
+
+  @override
+  String get set_agBaseCustom => '已自定义';
+
+  @override
+  String get set_agBaseInherit => '沿用全局';
+
+  @override
+  String get set_agBaseOwn => '单独设置';
+
+  @override
+  String get set_agBaseEdit => '编辑';
+
+  @override
+  String get set_agBaseCollapse => '收起';
+
+  @override
+  String get set_agScopeGlobal => '全局';
+
+  @override
+  String set_agScopeWorkspace(Object name) {
+    return '工作区 · $name';
+  }
+
+  @override
+  String get set_agBaseUseGlobalOn => '这个工作区沿用全局提示词；关掉才能单独编辑';
+
+  @override
+  String get set_agBaseUseGlobalOff => '这个工作区使用单独的提示词；打开则改回沿用全局';
+
+  @override
+  String get set_agBaseHint =>
+      '自定义内容替换内置提示词，拼在系统前缀之后；工具地图由应用追加。全局和工作区分开保存，已有聊天保持原样。';
+
+  @override
+  String get set_agBaseRestore => '恢复内置';
+
+  @override
+  String get set_agBaseRestoreTitle => '恢复内置提示词？';
+
+  @override
+  String get set_agBaseRestoreBody =>
+      '全局自定义的基础提示词会换回内置版本，旧内容存入提示词历史。各工作区单独的提示词不受影响。';
+
+  @override
+  String get set_agBaseSwitchTitle => '放弃基础提示词的修改？';
+
+  @override
+  String get set_agBaseSwitchBody => '切换范围会丢掉还没保存的修改。';
+
+  @override
+  String get set_agBaseSaving => '正在保存…';
+
+  @override
+  String get set_agBaseFailed => '没有保存：工作区已切换或写入失败，修改还在。';
+
+  @override
+  String get set_agMcpUnchecked => '未检测';
+
+  @override
+  String get set_agInstructionsSaving => '正在保存指令…';
+
+  @override
+  String get set_agInstructionsFailed => '指令未保存：内容已变化或写入失败。草稿已保留，请重试。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -37584,7 +37673,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agInstrSub => '按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。';
 
   @override
-  String get set_agOrderBuiltin => '內建提示詞';
+  String get set_agOrderBuiltin => '基礎提示詞';
 
   @override
   String get set_agOrderPrefix => '系統字首';
@@ -37593,7 +37682,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agOrderGlobal => '全域指令';
 
   @override
-  String get set_agOrderWorkspace => '工作區指令';
+  String get set_agOrderWorkspace => '工作區規則';
 
   @override
   String get set_agOrderTools => '工具地圖';
@@ -38630,4 +38719,93 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_unitSeconds => '秒';
+
+  @override
+  String get set_unsavedAgent => 'Agent 指令有未儲存的修改';
+
+  @override
+  String get set_accUnread => '未讀取';
+
+  @override
+  String get set_accBalanceUnread => '餘額未讀取';
+
+  @override
+  String get set_agBase => '基礎提示詞';
+
+  @override
+  String set_agBaseGlobalState(Object state) {
+    return '全域：$state';
+  }
+
+  @override
+  String set_agBaseWsState(Object name, Object state) {
+    return '工作區「$name」：$state';
+  }
+
+  @override
+  String get set_agBaseBuiltin => '內建';
+
+  @override
+  String get set_agBaseCustom => '已自訂';
+
+  @override
+  String get set_agBaseInherit => '沿用全域';
+
+  @override
+  String get set_agBaseOwn => '單獨設定';
+
+  @override
+  String get set_agBaseEdit => '編輯';
+
+  @override
+  String get set_agBaseCollapse => '收起';
+
+  @override
+  String get set_agScopeGlobal => '全域';
+
+  @override
+  String set_agScopeWorkspace(Object name) {
+    return '工作區 · $name';
+  }
+
+  @override
+  String get set_agBaseUseGlobalOn => '這個工作區沿用全域提示詞；關掉才能單獨編輯';
+
+  @override
+  String get set_agBaseUseGlobalOff => '這個工作區使用單獨的提示詞；開啟則改回沿用全域';
+
+  @override
+  String get set_agBaseHint =>
+      '自訂內容替換內建提示詞，拼在系統字首之後；工具地圖由應用追加。全域和工作區分開儲存，已有聊天保持原樣。';
+
+  @override
+  String get set_agBaseRestore => '恢復內建';
+
+  @override
+  String get set_agBaseRestoreTitle => '恢復內建提示詞？';
+
+  @override
+  String get set_agBaseRestoreBody =>
+      '全域自訂的基礎提示詞會換回內建版本，舊內容存入提示詞歷史。各工作區單獨的提示詞不受影響。';
+
+  @override
+  String get set_agBaseSwitchTitle => '放棄基礎提示詞的修改？';
+
+  @override
+  String get set_agBaseSwitchBody => '切換範圍會丟掉還沒儲存的修改。';
+
+  @override
+  String get set_agBaseSaving => '正在儲存…';
+
+  @override
+  String get set_agBaseFailed => '沒有儲存：工作區已切換或寫入失敗，修改還在。';
+
+  @override
+  String get set_agMcpUnchecked => '未檢測';
+
+  @override
+  String get set_agInstructionsSaving => '正在儲存指令…';
+
+  @override
+  String get set_agInstructionsFailed => '指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。';
 }

@@ -18488,7 +18488,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agInstrSub => 'この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。';
 
   @override
-  String get set_agOrderBuiltin => '内蔵プロンプト';
+  String get set_agOrderBuiltin => 'ベースプロンプト';
 
   @override
   String get set_agOrderPrefix => 'システム前置';
@@ -18497,7 +18497,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agOrderGlobal => '全体の指示';
 
   @override
-  String get set_agOrderWorkspace => 'ワークスペースの指示';
+  String get set_agOrderWorkspace => 'ワークスペースのルール';
 
   @override
   String get set_agOrderTools => 'ツールマップ';
@@ -19534,4 +19534,95 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_unitSeconds => '秒';
+
+  @override
+  String get set_unsavedAgent => 'Agent の指示に未保存の変更があります';
+
+  @override
+  String get set_accUnread => '未取得';
+
+  @override
+  String get set_accBalanceUnread => '残高は未取得';
+
+  @override
+  String get set_agBase => 'ベースプロンプト';
+
+  @override
+  String set_agBaseGlobalState(Object state) {
+    return '全体：$state';
+  }
+
+  @override
+  String set_agBaseWsState(Object name, Object state) {
+    return 'ワークスペース「$name」：$state';
+  }
+
+  @override
+  String get set_agBaseBuiltin => '内蔵';
+
+  @override
+  String get set_agBaseCustom => 'カスタム';
+
+  @override
+  String get set_agBaseInherit => '全体を使用';
+
+  @override
+  String get set_agBaseOwn => '個別設定';
+
+  @override
+  String get set_agBaseEdit => '編集';
+
+  @override
+  String get set_agBaseCollapse => '閉じる';
+
+  @override
+  String get set_agScopeGlobal => '全体';
+
+  @override
+  String set_agScopeWorkspace(Object name) {
+    return 'ワークスペース · $name';
+  }
+
+  @override
+  String get set_agBaseUseGlobalOn => 'このワークスペースは全体のプロンプトを使用。オフにすると個別に編集できます';
+
+  @override
+  String get set_agBaseUseGlobalOff => 'このワークスペースは個別のプロンプトを使用。オンにすると全体に戻ります';
+
+  @override
+  String get set_agBaseHint =>
+      'カスタム内容は内蔵プロンプトを置き換え、システム前置の後に入ります。ツールマップはアプリが追加します。全体とワークスペースは別々に保存され、既存のチャットはそのままです。';
+
+  @override
+  String get set_agBaseRestore => '内蔵に戻す';
+
+  @override
+  String get set_agBaseRestoreTitle => '内蔵プロンプトに戻しますか？';
+
+  @override
+  String get set_agBaseRestoreBody =>
+      '全体のカスタムベースプロンプトを内蔵版に戻します。以前の内容はプロンプト履歴に残ります。ワークスペース個別のプロンプトは変わりません。';
+
+  @override
+  String get set_agBaseSwitchTitle => 'ベースプロンプトの変更を破棄しますか？';
+
+  @override
+  String get set_agBaseSwitchBody => '範囲を切り替えると未保存の変更は失われます。';
+
+  @override
+  String get set_agBaseSaving => '保存中…';
+
+  @override
+  String get set_agBaseFailed =>
+      '保存できませんでした。ワークスペースが変わったか、書き込みに失敗しました。変更は残っています。';
+
+  @override
+  String get set_agMcpUnchecked => '未確認';
+
+  @override
+  String get set_agInstructionsSaving => '指示を保存中…';
+
+  @override
+  String get set_agInstructionsFailed =>
+      '指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。';
 }

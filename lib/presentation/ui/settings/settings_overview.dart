@@ -563,9 +563,9 @@ class _AccountHero extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              if (a.tier != SettingsTier.none)
+                              if (a.tier != null && a.tier != SettingsTier.none)
                                 UiMini(
-                                  SettingsFormat.tier(a.tier),
+                                  SettingsFormat.tier(a.tier!),
                                   tone: UiMiniTone.accent,
                                 ),
                               if (a.isDefault) UiMini(l.set_defaultTag),
@@ -599,13 +599,18 @@ class _AccountHero extends StatelessWidget {
                   spacing: 10,
                   children: [
                     Text(
-                      SettingsFormat.count(a.anlas),
-                      style: settingsBig(context),
+                      a.anlas == null ? '—' : SettingsFormat.count(a.anlas!),
+                      style: a.anlas == null
+                          ? settingsBig(context).copyWith(color: c.faint)
+                          : settingsBig(context),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 4),
                       child: Text(
-                        'Anlas',
+                        a.anlas == null
+                            ? 'Anlas · ${l.set_accUnread}'
+                            : 'Anlas',
+                        key: const Key('overview-anlas-label'),
                         style: UiText.sans(12, color: c.muted),
                       ),
                     ),
@@ -629,9 +634,9 @@ class _AccountHero extends StatelessWidget {
                   ],
                 ),
                 SettingsBar(
-                  value: d.account.monthlyAnlas == 0
+                  value: a.anlas == null || d.account.monthlyAnlas == 0
                       ? 0
-                      : a.anlas / d.account.monthlyAnlas,
+                      : a.anlas! / d.account.monthlyAnlas,
                   height: 5,
                 ),
                 Row(

@@ -10127,10 +10127,10 @@
   "set_agTimesUnit": "次",
   "set_agInstr": "指令",
   "set_agInstrSub": "按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。",
-  "set_agOrderBuiltin": "內建提示詞",
+  "set_agOrderBuiltin": "基礎提示詞",
   "set_agOrderPrefix": "系統字首",
   "set_agOrderGlobal": "全域指令",
-  "set_agOrderWorkspace": "工作區指令",
+  "set_agOrderWorkspace": "工作區規則",
   "set_agOrderTools": "工具地圖",
   "set_agGlobal": "全域指令",
   "set_agPrefix": "系統字首",
@@ -10644,5 +10644,48 @@
   "set_listSep": "、",
   "set_on": "開",
   "set_off": "關",
-  "set_unitSeconds": "秒"
+  "set_unitSeconds": "秒",
+  "set_unsavedAgent": "Agent 指令有未儲存的修改",
+  "set_accUnread": "未讀取",
+  "set_accBalanceUnread": "餘額未讀取",
+  "set_agBase": "基礎提示詞",
+  "set_agBaseGlobalState": "全域：{state}",
+  "@set_agBaseGlobalState": {
+    "placeholders": {
+      "state": {}
+    }
+  },
+  "set_agBaseWsState": "工作區「{name}」：{state}",
+  "@set_agBaseWsState": {
+    "placeholders": {
+      "name": {},
+      "state": {}
+    }
+  },
+  "set_agBaseBuiltin": "內建",
+  "set_agBaseCustom": "已自訂",
+  "set_agBaseInherit": "沿用全域",
+  "set_agBaseOwn": "單獨設定",
+  "set_agBaseEdit": "編輯",
+  "set_agBaseCollapse": "收起",
+  "set_agScopeGlobal": "全域",
+  "set_agScopeWorkspace": "工作區 · {name}",
+  "@set_agScopeWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agBaseUseGlobalOn": "這個工作區沿用全域提示詞；關掉才能單獨編輯",
+  "set_agBaseUseGlobalOff": "這個工作區使用單獨的提示詞；開啟則改回沿用全域",
+  "set_agBaseHint": "自訂內容替換內建提示詞，拼在系統字首之後；工具地圖由應用追加。全域和工作區分開儲存，已有聊天保持原樣。",
+  "set_agBaseRestore": "恢復內建",
+  "set_agBaseRestoreTitle": "恢復內建提示詞？",
+  "set_agBaseRestoreBody": "全域自訂的基礎提示詞會換回內建版本，舊內容存入提示詞歷史。各工作區單獨的提示詞不受影響。",
+  "set_agBaseSwitchTitle": "放棄基礎提示詞的修改？",
+  "set_agBaseSwitchBody": "切換範圍會丟掉還沒儲存的修改。",
+  "set_agBaseSaving": "正在儲存…",
+  "set_agBaseFailed": "沒有儲存：工作區已切換或寫入失敗，修改還在。",
+  "set_agMcpUnchecked": "未檢測",
+  "set_agInstructionsSaving": "正在儲存指令…",
+  "set_agInstructionsFailed": "指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。"
 }

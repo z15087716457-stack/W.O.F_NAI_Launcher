@@ -19044,7 +19044,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Combined in this order. Existing chats keep their prompt; new requests use the new text.';
 
   @override
-  String get set_agOrderBuiltin => 'Built-in prompt';
+  String get set_agOrderBuiltin => 'Base prompt';
 
   @override
   String get set_agOrderPrefix => 'System prefix';
@@ -19053,7 +19053,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agOrderGlobal => 'Global instructions';
 
   @override
-  String get set_agOrderWorkspace => 'Workspace instructions';
+  String get set_agOrderWorkspace => 'Workspace rules';
 
   @override
   String get set_agOrderTools => 'Tool map';
@@ -20147,4 +20147,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_unitSeconds => 's';
+
+  @override
+  String get set_unsavedAgent => 'Unsaved Agent prompt changes';
+
+  @override
+  String get set_accUnread => 'Not loaded';
+
+  @override
+  String get set_accBalanceUnread => 'Balance not loaded';
+
+  @override
+  String get set_agBase => 'Base prompt';
+
+  @override
+  String set_agBaseGlobalState(Object state) {
+    return 'Global: $state';
+  }
+
+  @override
+  String set_agBaseWsState(Object name, Object state) {
+    return 'Workspace “$name”: $state';
+  }
+
+  @override
+  String get set_agBaseBuiltin => 'built-in';
+
+  @override
+  String get set_agBaseCustom => 'customized';
+
+  @override
+  String get set_agBaseInherit => 'uses global';
+
+  @override
+  String get set_agBaseOwn => 'own prompt';
+
+  @override
+  String get set_agBaseEdit => 'Edit';
+
+  @override
+  String get set_agBaseCollapse => 'Collapse';
+
+  @override
+  String get set_agScopeGlobal => 'Global';
+
+  @override
+  String set_agScopeWorkspace(Object name) {
+    return 'Workspace · $name';
+  }
+
+  @override
+  String get set_agBaseUseGlobalOn =>
+      'This workspace uses the global prompt; turn off to give it its own';
+
+  @override
+  String get set_agBaseUseGlobalOff =>
+      'This workspace has its own prompt; turn on to use the global one';
+
+  @override
+  String get set_agBaseHint =>
+      'Custom text replaces the built-in prompt and follows the system prefix; the app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.';
+
+  @override
+  String get set_agBaseRestore => 'Restore built-in';
+
+  @override
+  String get set_agBaseRestoreTitle => 'Restore the built-in prompt?';
+
+  @override
+  String get set_agBaseRestoreBody =>
+      'The global custom base prompt is replaced by the built-in one; the old text goes to prompt history. Workspace prompts are not affected.';
+
+  @override
+  String get set_agBaseSwitchTitle => 'Discard base prompt changes?';
+
+  @override
+  String get set_agBaseSwitchBody =>
+      'Switching scope discards unsaved changes.';
+
+  @override
+  String get set_agBaseSaving => 'Saving…';
+
+  @override
+  String get set_agBaseFailed =>
+      'Not saved: the workspace changed or the write failed. Your edits are kept.';
+
+  @override
+  String get set_agMcpUnchecked => 'Not checked';
+
+  @override
+  String get set_agInstructionsSaving => 'Saving instructions…';
+
+  @override
+  String get set_agInstructionsFailed =>
+      'Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.';
 }
