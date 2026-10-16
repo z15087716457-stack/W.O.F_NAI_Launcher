@@ -1426,6 +1426,7 @@ class _SettingsRowState extends State<SettingsRow> {
       _jumped = false;
     }
     final title = Row(
+      key: const Key('settings-row-title'),
       spacing: 7,
       children: [
         ?widget.titleLead,
@@ -1439,7 +1440,7 @@ class _SettingsRowState extends State<SettingsRow> {
                     UiText.sans(13, weight: FontWeight.w500, color: c.ink),
               ),
         ),
-        if (widget.modified && widget.sub) const _ModDot(),
+        if (widget.modified) const _ModDot(),
         ...widget.badges,
       ],
     );
@@ -1447,7 +1448,7 @@ class _SettingsRowState extends State<SettingsRow> {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        SettingsModMark(on: widget.modified && !widget.sub, child: title),
+        title,
         if (widget.subtitleWidget != null)
           Padding(
             padding: const EdgeInsets.only(top: 2),
@@ -1586,31 +1587,21 @@ class _ModDot extends StatelessWidget {
   );
 }
 
-/// 给 [child] 左侧 13px 外挂一个“已修改”蓝点（原型 `.md{margin-left:-13px}`），不占位。
+/// 在标签末尾以 7px 间距显示“已修改”蓝点，空间不足时允许文字换行。
 class SettingsModMark extends StatelessWidget {
-  const SettingsModMark({
-    super.key,
-    required this.on,
-    required this.child,
-    this.dx = -13,
-  });
+  const SettingsModMark({super.key, required this.on, required this.child});
   final bool on;
   final Widget child;
-  final double dx;
 
   @override
   Widget build(BuildContext context) => !on
       ? child
-      : Stack(
-          clipBehavior: Clip.none,
+      : Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 7,
           children: [
-            child,
-            Positioned(
-              left: dx,
-              top: 0,
-              bottom: 0,
-              child: const Center(child: _ModDot()),
-            ),
+            Flexible(child: child),
+            const _ModDot(),
           ],
         );
 }

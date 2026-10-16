@@ -1,5 +1,5 @@
-// 保留原设置页基准；用户授权的正文整体居中只允许水平平移。
-// 归一横向锚点后，正文排版、侧栏和顶栏仍须逐像素匹配原图。
+// 保留原设置页基准；归一用户授权的整体居中，只排除修改蓝点移动的标题行。
+// 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
 
@@ -8,7 +8,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 
+import '../../../helpers/approved_visual_regions.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'settings_test_harness.dart';
 
@@ -58,8 +60,8 @@ void main() {
 }
 
 // 只将已授权改变的横向锚点临时还原再实绘，避免平移旧 PNG 时
-// Skia 圆角边缘的栅格差异；正文尺寸、排版、所有控件及外围像素照常锁定。
-// 居中后的几何、窗口缩放和实际画面由 settings_centering_test 验证。
+// Skia 圆角边缘的栅格差异。仅排除蓝点移动的标题行，其余像素照常锁定。
+// 居中和蓝点的几何、窗口缩放及实绘由对应专项验证。
 Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
   final scroll = t.widget<SingleChildScrollView>(
     find.byKey(const Key('settings-scroll')),
@@ -72,9 +74,43 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
   try {
     align.alignment = Alignment.topLeft;
     await t.pump();
-    await expectLater(
+    final masks = <Rect>[];
+    for (final element in find.byType(SettingsRow).evaluate()) {
+      final row = element.widget as SettingsRow;
+      if (!row.modified || row.sub) continue;
+      final title = t.getRect(
+        find.descendant(
+          of: find.byWidget(row),
+          matching: find.byKey(const Key('settings-row-title')),
+        ),
+      );
+      masks.add(
+        Rect.fromLTRB(title.left - 13, title.top, title.right, title.bottom),
+      );
+    }
+    for (final element in find.byType(SettingsModMark).evaluate()) {
+      final mark = element.widget as SettingsModMark;
+      if (!mark.on) continue;
+      final shortcutLabel = find.ancestor(
+        of: find.byWidget(mark),
+        matching: find.byWidgetPredicate(
+          (w) =>
+              w.key is ValueKey<String> &&
+              (w.key! as ValueKey<String>).value.startsWith('shortcut-label-'),
+        ),
+      );
+      final label = t.getRect(
+        shortcutLabel.evaluate().isEmpty ? find.byWidget(mark) : shortcutLabel,
+      );
+      masks.add(
+        Rect.fromLTRB(label.left - 13, label.top, label.right, label.bottom),
+      );
+    }
+    await expectOutsideApprovedRegions(
+      t,
       find.byKey(const Key('settings-capture')),
-      matchesGoldenFile('goldens/settings-$name.png'),
+      'test/presentation/ui/settings/goldens/settings-$name.png',
+      masks,
     );
   } finally {
     align.alignment = current;

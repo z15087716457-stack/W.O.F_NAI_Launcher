@@ -1795,33 +1795,33 @@ class _ShortcutTable extends StatelessWidget {
                   ? c.error.withValues(alpha: .05)
                   : null,
               [
-                SettingsModMark(
-                  on: x.changed,
-                  dx: -12,
-                  child: Row(
-                    spacing: 8,
-                    children: [
-                      Flexible(
+                Row(
+                  key: Key('shortcut-label-${x.id}'),
+                  spacing: 8,
+                  children: [
+                    Flexible(
+                      child: SettingsModMark(
+                        on: x.changed,
                         child: Text(
                           x.label,
                           style: UiText.sans(12.5, color: c.ink),
                         ),
                       ),
-                      if (x.conflictWith != null)
-                        Flexible(
-                          child: UiMini(
-                            l.set_scConflict(
-                              all
-                                      .where((y) => y.id == x.conflictWith)
-                                      .firstOrNull
-                                      ?.label ??
-                                  '',
-                            ),
-                            tone: UiMiniTone.error,
+                    ),
+                    if (x.conflictWith != null)
+                      Flexible(
+                        child: UiMini(
+                          l.set_scConflict(
+                            all
+                                    .where((y) => y.id == x.conflictWith)
+                                    .firstOrNull
+                                    ?.label ??
+                                '',
                           ),
+                          tone: UiMiniTone.error,
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
                 recording == x.id
                     ? _Recorder(
