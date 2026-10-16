@@ -111,21 +111,31 @@ void main() {
   );
 
   void expectPanelBackdropAligned(WidgetTester tester) {
-    final side = tester
-        .widget<ChannelBackdrop>(find.byKey(const Key('gen-panel-backdrop')))
-        .data;
     final center = tester.widget<ChannelBackdrop>(canvasBackdrop()).data;
     final viewport = tester.getRect(find.byKey(const Key('gen-canvas')));
     final page = tester.getRect(find.byType(GenerationPage));
-    expect(
-      side.camera.offset,
-      center.camera.offset + viewport.topLeft - page.topLeft,
-    );
-    expect(side.camera.scale, center.camera.scale);
-    expect(side.settings.fixed, center.settings.fixed);
-    expect(side.settings.seed, center.settings.seed);
-    expect(side.settings.motion, isFalse);
-    expect(side.settings.ruler, isFalse);
+    for (final name in ['left', 'right']) {
+      final scene = find.byKey(ValueKey('gen-panel-backdrop-$name'));
+      final side = tester.widget<ChannelBackdrop>(scene).data;
+      expect(
+        side.camera.offset,
+        center.camera.offset + viewport.topLeft - tester.getTopLeft(scene),
+      );
+      final panelWidth = name == 'left'
+          ? viewport.left - page.left
+          : page.right - viewport.right;
+      expect(tester.getSize(scene).width, panelWidth + 60);
+      expect(tester.getSize(scene).height, viewport.height + 60);
+      expect(side.camera.scale, center.camera.scale);
+      expect(side.settings.fixed, center.settings.fixed);
+      expect(side.settings.seed, center.settings.seed);
+      expect(side.settings.motion, isFalse);
+      expect(side.settings.ruler, isFalse);
+      expect(
+        find.ancestor(of: scene, matching: find.byType(ImageFiltered)),
+        findsOneWidget,
+      );
+    }
   }
 
   setUpAll(loadStudioCaptureFonts);
@@ -170,6 +180,7 @@ void main() {
     bool shortcutHost = false,
     String language = 'zh',
     bool dark = false,
+    bool highContrast = false,
   }) async {
     tester.view.physicalSize = const Size(1600, 1000);
     tester.view.devicePixelRatio = 1;
@@ -188,7 +199,9 @@ void main() {
             supportedLocales: AppLocalizations.supportedLocales,
             theme: dark ? GeistTheme.dark : GeistTheme.light,
             builder: (context, child) => MediaQuery(
-              data: MediaQuery.of(context).copyWith(disableAnimations: true),
+              data: MediaQuery.of(
+                context,
+              ).copyWith(disableAnimations: true, highContrast: highContrast),
               child: child!,
             ),
             home: Scaffold(
@@ -393,7 +406,7 @@ void main() {
   testWidgets('首张出图前保留同一背景和画布，出图后欢迎内容退场', (tester) async {
     publish(const ImageGenerationState());
     await pump(tester, fullPage: true);
-    expect(find.byType(ChannelBackdrop), findsNWidgets(2));
+    expect(find.byType(ChannelBackdrop), findsNWidgets(3));
     expectPanelBackdropAligned(tester);
     expect(find.byKey(const Key('tip-welcome-text')), findsOneWidget);
     final logo = find.byWidgetPredicate(
@@ -1061,7 +1074,35 @@ void main() {
     expect(find.byType(CanvasWorldViewport), findsOneWidget);
     expect(find.byType(GenCanvasTile), findsWidgets);
     bars();
+    expectPanelBackdropAligned(tester);
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await tester.pumpAndSettle();
+    final simpleCenter = find.byKey(
+      const ValueKey('gen-panel-backdrop-center'),
+    );
+    expect(simpleCenter, findsOneWidget);
+    expect(
+      find.ancestor(of: simpleCenter, matching: find.byType(ImageFiltered)),
+      findsNothing,
+    );
+    bars();
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(false);
+    await tester.pumpAndSettle();
+    expect(simpleCenter, findsNothing);
+    expectPanelBackdropAligned(tester);
     await capture(tester, 'full-page-light');
+    await pump(tester, fullPage: true, highContrast: true);
+    expect(find.byKey(const ValueKey('gen-panel-backdrop-left')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('gen-panel-backdrop-right')),
+      findsNothing,
+    );
+    bars();
+    expect(tester.takeException(), isNull);
   });
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {
     publish(ImageGenerationState(history: [image(2), image(1)]));

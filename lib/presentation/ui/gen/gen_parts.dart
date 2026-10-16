@@ -53,7 +53,7 @@ class GenNaiIcon extends StatelessWidget {
   );
 }
 
-/// One clipped glass pass per side; inner modules do not stack opaque fills.
+/// The host pre-blurs the decoration; editing never re-samples the backdrop.
 class GenPanelSurface extends StatelessWidget {
   const GenPanelSurface({
     super.key,
@@ -76,6 +76,7 @@ class GenPanelSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final highContrast = MediaQuery.highContrastOf(context);
     final content = padding == null
         ? child
         : Padding(padding: padding!, child: child);
@@ -85,14 +86,27 @@ class GenPanelSurface extends StatelessWidget {
       child: !enabled
           ? ColoredBox(color: context.ui.bg, child: content)
           : _PanelGlassScope(
-              active: !MediaQuery.highContrastOf(context),
-              child: StudioGlassSurface(
-                borderRadius: BorderRadius.zero,
-                clipBehavior: Clip.hardEdge,
-                backdropBlur: true,
-                useGradient: false,
-                tintColor: context.ui.bg.withValues(alpha: .85),
-                child: content,
+              active: !highContrast,
+              child: ClipRect(
+                child: Stack(
+                  fit: StackFit.passthrough,
+                  children: [
+                    Positioned.fill(
+                      child: RepaintBoundary(
+                        key: const Key('gen-panel-material'),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: context.ui.bg.withValues(
+                              alpha: highContrast ? 1 : .85,
+                            ),
+                            border: Border.all(color: context.ui.line),
+                          ),
+                        ),
+                      ),
+                    ),
+                    RepaintBoundary(child: content),
+                  ],
+                ),
               ),
             ),
     );

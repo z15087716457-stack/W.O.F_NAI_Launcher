@@ -28,8 +28,57 @@ class _Bars extends CustomPainter {
   bool shouldRepaint(_Bars oldDelegate) => false;
 }
 
+class _ChangingContent extends CustomPainter {
+  _ChangingContent(this.tick) : super(repaint: tick);
+  final ValueNotifier<int> tick;
+  int paints = 0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    paints++;
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = Colors.blue.withAlpha(tick.value),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChangingContent old) => false;
+}
+
 void main() {
   setUpAll(loadStudioCaptureFonts);
+  testWidgets('content changes do not repaint the full-height panel material', (
+    tester,
+  ) async {
+    final tick = ValueNotifier(0);
+    addTearDown(tick.dispose);
+    final content = _ChangingContent(tick);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GeistTheme.light,
+        home: GenPanelSurface(
+          enabled: true,
+          child: CustomPaint(painter: content, child: const SizedBox.expand()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final material = tester.renderObject<RenderRepaintBoundary>(
+      find.byKey(const Key('gen-panel-material')),
+    );
+    material.debugResetMetrics();
+    content.paints = 0;
+    for (var i = 1; i <= 60; i++) {
+      tick.value = i;
+      await tester.pump(const Duration(milliseconds: 16));
+    }
+    expect(content.paints, 60);
+    expect(material.debugSymmetricPaintCount, 0);
+    expect(material.debugAsymmetricPaintCount, 0);
+    expect(find.byType(BackdropFilter), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
   for (final dark in [false, true]) {
     for (final contrast in [false, true]) {
       testWidgets(
@@ -54,7 +103,15 @@ void main() {
                     key: capture,
                     child: Stack(
                       children: [
-                        Positioned.fill(child: CustomPaint(painter: _Bars())),
+                        Positioned.fill(
+                          child: ImageFiltered(
+                            imageFilter: ui.ImageFilter.blur(
+                              sigmaX: 10,
+                              sigmaY: 10,
+                            ),
+                            child: CustomPaint(painter: _Bars()),
+                          ),
+                        ),
                         const Positioned(
                           left: 20,
                           right: 20,
@@ -88,10 +145,7 @@ void main() {
             ),
           );
           await tester.pumpAndSettle();
-          expect(
-            find.byType(BackdropFilter),
-            contrast ? findsNothing : findsOneWidget,
-          );
+          expect(find.byType(BackdropFilter), findsNothing);
           expect(find.byType(Opacity), findsNothing);
           await tester.runAsync(() async {
             final box =
