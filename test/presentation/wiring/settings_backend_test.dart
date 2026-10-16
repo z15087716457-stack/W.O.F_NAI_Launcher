@@ -43,10 +43,9 @@ class _SystemBrightness extends StudioSystemBrightness {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   test(
-    'system theme follows brightness without overwriting the stored mode',
+    'fresh theme follows system brightness without writing a preference',
     () async {
       final storage = MemoryStorage();
-      storage.values[StorageKeys.studioThemeMode] = 'system';
       final container = ProviderContainer(
         overrides: [
           localStorageServiceProvider.overrideWithValue(storage),
@@ -59,10 +58,21 @@ void main() {
               as _SystemBrightness)
           .set(Brightness.dark);
       expect(container.read(themeNotifierProvider), Brightness.dark);
-      expect(storage.values[StorageKeys.studioThemeMode], 'system');
+      expect(storage.values[StorageKeys.studioThemeMode], isNull);
       await container.read(themeNotifierProvider.notifier).setMode('light');
       expect(container.read(themeNotifierProvider), Brightness.light);
       expect(storage.values[StorageKeys.studioThemeMode], 'light');
+      (container.read(studioSystemBrightnessProvider.notifier)
+              as _SystemBrightness)
+          .set(Brightness.light);
+      (container.read(studioSystemBrightnessProvider.notifier)
+              as _SystemBrightness)
+          .set(Brightness.dark);
+      expect(container.read(themeNotifierProvider), Brightness.light);
+      expect(storage.values[StorageKeys.studioThemeMode], 'light');
+      await container.read(themeNotifierProvider.notifier).setMode('system');
+      expect(container.read(themeNotifierProvider), Brightness.dark);
+      expect(storage.values[StorageKeys.studioThemeMode], 'system');
     },
   );
   test('unread account facts stay null and known zero stays zero', () {

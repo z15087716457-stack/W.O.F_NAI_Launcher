@@ -103,7 +103,10 @@ void main() {
         'last_prompt': 'keep this draft',
       });
       final container = ProviderContainer();
-      expect(container.read(themeNotifierProvider), Brightness.dark);
+      expect(
+        container.read(themeNotifierProvider),
+        WidgetsBinding.instance.platformDispatcher.platformBrightness,
+      );
       await container
           .read(themeNotifierProvider.notifier)
           .setTheme(Brightness.light);
@@ -137,6 +140,7 @@ void main() {
         tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
       );
       final storage = InMemoryLocalStorageService();
+      await storage.setStudioThemeMode('dark');
       final router = GoRouter(
         initialLocation: AppRoutes.login,
         routes: [

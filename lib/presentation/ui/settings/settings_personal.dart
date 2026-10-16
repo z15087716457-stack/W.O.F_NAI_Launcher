@@ -521,7 +521,9 @@ class SettingsAppearancePage extends StatelessWidget {
                 child: SettingsGrid(
                   columns: 3,
                   children: [
-                    for (final k in ['light', 'dark', 'system'])
+                    for (final k in SettingSpec.of(
+                      SettingKey.themeMode,
+                    ).choices)
                       SettingsOptionCard(
                         key: Key('theme-$k'),
                         selected: theme == k,

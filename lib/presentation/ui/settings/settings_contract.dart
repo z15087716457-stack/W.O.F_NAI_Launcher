@@ -200,8 +200,8 @@ class SettingSpec {
     SettingKey.themeMode: SettingSpec._(
       _c,
       _ap,
-      choices: ['light', 'dark', 'system'],
-      defaultValue: 'dark',
+      choices: ['system', 'light', 'dark'],
+      defaultValue: 'system',
     ),
     SettingKey.fontFamily: SettingSpec._(_c, _ap, defaultValue: 'system'),
     SettingKey.settingsFontScale: SettingSpec._(

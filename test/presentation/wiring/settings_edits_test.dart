@@ -86,7 +86,7 @@ void main() {
     'opening and saving the same value do not write or create history',
     () async {
       expect(store.writes, 0);
-      await edits.change(SettingKey.themeMode, 'dark', title: 'Theme');
+      await edits.change(SettingKey.themeMode, 'system', title: 'Theme');
       expect(store.writes, 0);
       expect(container.read(settingsEditsProvider).entries, isEmpty);
     },
@@ -126,15 +126,15 @@ void main() {
         SettingKey.themeMode,
         'light',
         title: 'Theme',
-        label: (_, value) => value == 'light' ? 'Light label' : 'Dark label',
+        label: (_, value) => value == 'light' ? 'Light label' : 'System label',
       );
       final saved = container.read(settingsEditsProvider).last!;
-      expect(saved.from, 'Dark label');
+      expect(saved.from, 'System label');
       expect(saved.to, 'Light label');
       await edits.undo(saved.id);
       final undo = container.read(settingsEditsProvider).last!;
       expect(undo.from, 'Light label');
-      expect(undo.to, 'Dark label');
+      expect(undo.to, 'System label');
     },
   );
   test('undoing a restart setting clears the pending restart banner', () async {
@@ -159,7 +159,7 @@ void main() {
     expect(store.values.text(SettingKey.themeMode), 'light');
     await edits.undo(id);
     expect(store.values.number(SettingKey.costThreshold), 50);
-    expect(store.values.text(SettingKey.themeMode), 'dark');
+    expect(store.values.text(SettingKey.themeMode), 'system');
   });
   test(
     'default upscale persists atomically and keeps unrelated Seed options',
@@ -237,7 +237,7 @@ void main() {
     });
     await edits.resetPage(SettingsPageId.appearance, title: 'Reset');
     final saved = container.read(settingsEditsProvider).last!;
-    expect(store.values.text(SettingKey.themeMode), 'dark');
+    expect(store.values.text(SettingKey.themeMode), 'system');
     expect(store.values.number(SettingKey.costThreshold), 88);
     await edits.undo(saved.id);
     expect(store.values.text(SettingKey.themeMode), 'light');

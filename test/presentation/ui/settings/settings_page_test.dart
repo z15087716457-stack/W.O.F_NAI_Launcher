@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'settings_test_harness.dart';
@@ -47,6 +48,28 @@ void main() {
     );
     await t.pumpAndSettle();
     expect(rec.calls, contains('undo:c1'));
+    await t.pump(const Duration(seconds: 5));
+  });
+
+  testWidgets('默认跟随系统，主题选项按系统、浅色、深色排列且仍可手动选择', (t) async {
+    final rec = await pumpSettings(
+      t,
+      page: SettingsPageId.appearance,
+      data: SettingsFixture.view(
+        page: SettingsPageId.appearance,
+      ).copyWith(values: const SettingsValues({})),
+    );
+    final system = find.byKey(const Key('theme-system'));
+    final light = find.byKey(const Key('theme-light'));
+    final dark = find.byKey(const Key('theme-dark'));
+    expect(t.getTopLeft(system).dx, lessThan(t.getTopLeft(light).dx));
+    expect(t.getTopLeft(light).dx, lessThan(t.getTopLeft(dark).dx));
+    expect(t.widget<SettingsOptionCard>(system).selected, isTrue);
+    await t.tap(dark);
+    await t.pumpAndSettle();
+    expect(rec.changes.single, (SettingKey.themeMode, 'dark'));
+    expect(t.widget<SettingsOptionCard>(dark).selected, isTrue);
+    expect(t.widget<SettingsOptionCard>(system).selected, isFalse);
     await t.pump(const Duration(seconds: 5));
   });
 
@@ -223,7 +246,7 @@ void main() {
 
   testWidgets('默认值和现有实现一致（接线时不能把用户的真实设置当成“已修改”）', (t) async {
     const expected = <SettingKey, Object?>{
-      SettingKey.themeMode: 'dark',
+      SettingKey.themeMode: 'system',
       SettingKey.fontFamily: 'system',
       SettingKey.language: 'zh',
       SettingKey.shortcutsInMenus: false,

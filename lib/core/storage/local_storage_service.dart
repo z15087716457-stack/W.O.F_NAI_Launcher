@@ -41,10 +41,10 @@ class LocalStorageService {
 
   // ==================== Theme ====================
 
-  /// Explicit light/dark appearance; legacy theme_type indices stay untouched.
+  /// Follow the system until explicitly chosen; legacy indices stay untouched.
   String getStudioThemeMode() =>
-      getSetting<String>(StorageKeys.studioThemeMode, defaultValue: 'dark') ??
-      'dark';
+      getSetting<String>(StorageKeys.studioThemeMode, defaultValue: 'system') ??
+      'system';
 
   Future<void> setStudioThemeMode(String mode) =>
       setSetting(StorageKeys.studioThemeMode, mode);

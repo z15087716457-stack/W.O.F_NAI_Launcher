@@ -94,6 +94,7 @@ void main() {
         expected: before,
       );
       expect(storage.values[StorageKeys.studioThemeMode], isNull);
+      expect(storage.getStudioThemeMode(), 'system');
       expect(
         storage.values[StorageKeys.enableCooccurrenceRecommendation],
         false,

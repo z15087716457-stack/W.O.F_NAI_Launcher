@@ -1,5 +1,5 @@
-// 保留原设置页基准；归一居中，仅排除获准修改的标题行、图标、新标签与 Agent 指令文案。
-// 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
+// 保留原设置页基准；归一居中，仅排除获准修改的标题行、图标、新标签、Agent 文案与主题卡顺序。
+// 获准区域以外仍逐像素匹配，变更区域另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
 
@@ -77,6 +77,12 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     align.alignment = Alignment.topLeft;
     await t.pump();
     final masks = <Rect>[];
+    // F28：仅排除重排的三张主题卡及其 3px 选中光圈（含抗锯齿边缘）。
+    // 比较工具另加 2px 容差，卡片外围和其余外观设置继续保持基准。
+    for (final mode in ['system', 'light', 'dark']) {
+      final card = find.byKey(Key('theme-$mode'));
+      if (card.evaluate().isNotEmpty) masks.add(t.getRect(card).inflate(2));
+    }
     // F25：只豁免新增的“命中率”小字，原进度条、百分比及数量仍逐像素锁定。
     for (final label
         in find.byKey(const Key('cache-hit-rate-label')).evaluate()) {
