@@ -9215,5 +9215,1362 @@
   "rag_runtimeElapsed": "此阶段已用 {seconds} 秒",
   "rag_useRuntime": "使用已有环境",
   "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
+  "set_title": "设置",
+  "set_search": "搜索设置",
+  "set_searchResults": "搜索结果",
+  "set_searchCount": "{count} 项",
+  "@set_searchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_searchHint": "结果里的开关和数值可以直接改；点右侧箭头跳到所在页面并高亮这一行。",
+  "set_searchKeys": "选择",
+  "set_searchJump": "跳转",
+  "set_searchEmpty": "没有找到“{query}”",
+  "@set_searchEmpty": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_searchEmptyHint": "试试“代理”“保存”“快捷键”或某个路径",
+  "set_goTo": "跳到设置",
+  "set_hasUpdate": "有更新",
+  "set_groupPersonal": "个人",
+  "set_groupCreate": "创作",
+  "set_groupIntelligence": "智能",
+  "set_groupConnect": "连接",
+  "set_groupSystem": "系统",
+  "set_pageOverview": "概览",
+  "set_pageAccount": "账号",
+  "set_pageAppearance": "外观",
+  "set_pageCanvas": "画布与浏览",
+  "set_pageShortcuts": "快捷键",
+  "set_pageGeneration": "生成与额度",
+  "set_pageStorage": "存储与图库",
+  "set_pageDictionaries": "词库与缓存",
+  "set_pageModels": "模型与接口",
+  "set_pageAgent": "NAI Agent",
+  "set_pageRag": "语义检索",
+  "set_pageUpscale": "本地放大",
+  "set_pageBridges": "桥接与集成",
+  "set_pageNetwork": "网络与代理",
+  "set_pagePrivacy": "隐私与保护",
+  "set_pageBackup": "备份与重置",
+  "set_pageAbout": "关于",
+  "set_resetDefault": "恢复默认",
+  "set_resetPage": "恢复本页默认",
+  "set_needsRestart": "需重启",
+  "set_isNew": "新",
+  "set_defaultTag": "默认",
+  "set_readOnly": "只读",
+  "set_cancel": "取消",
+  "set_save": "保存",
+  "set_discard": "放弃",
+  "set_later": "稍后",
+  "set_undo": "撤销",
+  "set_open": "打开",
+  "set_choose": "选择",
+  "set_change": "更改",
+  "set_clear": "清除",
+  "set_delete": "删除",
+  "set_copy": "复制",
+  "set_more": "更多",
+  "set_refresh": "刷新",
+  "set_retry": "重试",
+  "set_test": "测试连接",
+  "set_testing": "检测中…",
+  "set_importIt": "导入",
+  "set_exportIt": "导出",
+  "set_install": "安装",
+  "set_download": "下载",
+  "set_resume": "继续",
+  "set_pause": "暂停",
+  "set_rebuild": "重建",
+  "set_login": "登录",
+  "set_adjust": "调整",
+  "set_collapse": "收起",
+  "set_notSet": "未设置",
+  "set_defaultLocation": "默认位置",
+  "set_builtinSound": "内置音效",
+  "set_justNow": "刚刚",
+  "set_minutesAgo": "{n} 分钟前",
+  "@set_minutesAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_todayAt": "今天 {time}",
+  "@set_todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_yesterday": "昨天",
+  "set_secondsAgo": "{n} 秒前",
+  "@set_secondsAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_savedChange": "已保存 · {title} {from} → {to}",
+  "@set_savedChange": {
+    "placeholders": {
+      "title": {},
+      "from": {},
+      "to": {}
+    }
+  },
+  "set_restartBanner": "设置已保存，重启 Studio 后生效。正在进行的生成不受影响。",
+  "set_restartNow": "立即重启",
+  "set_unsavedInstructions": "全局指令有未保存的修改",
+  "set_leaveTitle": "放弃未保存的修改？",
+  "set_leaveBody": "Agent 指令还没保存，离开这一页会丢掉修改。",
+  "set_resetPageTitle": "把“{page}”恢复默认？",
+  "@set_resetPageTitle": {
+    "placeholders": {
+      "page": {}
+    }
+  },
+  "set_resetPageBody": "这一页改过的 {count} 项会回到默认值，可以在概览里撤销。",
+  "@set_resetPageBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_ovDesc": "账号、存储、连接和智能服务的状态都在这里。需要处理的事项排在最前，点卡片直接进入对应设置。",
+  "set_ovSwitchAccount": "切换账号",
+  "set_ovTodayUsed": "今天已用",
+  "set_ovMonthly": "本月固定额度 {n}",
+  "@set_ovMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnAt": "高消耗提醒 ≥ {n} Anlas",
+  "@set_ovWarnAt": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnOff": "高消耗提醒已关闭",
+  "set_ovRenews": "订阅续期 {date}",
+  "@set_ovRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_ovSignedOut": "未登录",
+  "set_ovAttention": "需要处理",
+  "set_ovAllClear": "一切正常",
+  "set_attUpdate": "有新版本 {version}",
+  "@set_attUpdate": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_attRagPaused": "{source}语义索引已暂停",
+  "@set_attRagPaused": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "set_attRagPausedSub": "已完成 {done} / {total}，已有部分可检索",
+  "@set_attRagPausedSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_attBridgeDown": "{name} 地址无响应",
+  "@set_attBridgeDown": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCheckedAt": "{detail} · {when}检测",
+  "@set_attCheckedAt": {
+    "placeholders": {
+      "detail": {},
+      "when": {}
+    }
+  },
+  "set_attCredential": "账号“{name}”凭据已过期",
+  "@set_attCredential": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCredentialSub": "更新后才能切换到这个账号",
+  "set_attDiskLow": "{disk} 盘空间不足",
+  "@set_attDiskLow": {
+    "placeholders": {
+      "disk": {}
+    }
+  },
+  "set_attDiskLowSub": "剩余 {size}，自动保存可能失败",
+  "@set_attDiskLowSub": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "set_attProvider": "{name} 连接失败",
+  "@set_attProvider": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attProviderSub": "翻译和反推会回落到其他服务商",
+  "set_attView": "查看",
+  "set_attGo": "去看看",
+  "set_attUpdateCred": "更新凭据",
+  "set_tileStorage": "存储",
+  "set_tileImages": "图库 {n} 张",
+  "@set_tileImages": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileSaveTo": "保存到 {path}",
+  "@set_tileSaveTo": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "set_tileConnect": "连接",
+  "set_tileOnline": "{n} 项在线",
+  "@set_tileOnline": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileKrita": "Krita 已连接",
+  "set_tileKritaOff": "Krita 未连接",
+  "set_tileAgents": "外部 Agent {n} 个",
+  "@set_tileAgents": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileComfyDown": "ComfyUI 无响应",
+  "set_tileComfyOk": "ComfyUI 正常",
+  "set_tileComfyOff": "ComfyUI 未启用",
+  "set_tileModels": "模型与接口",
+  "set_tileTranslateVia": "提示词翻译 · {ms}",
+  "@set_tileTranslateVia": {
+    "placeholders": {
+      "ms": {}
+    }
+  },
+  "set_tileAgentModel": "Agent · {model}",
+  "@set_tileAgentModel": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "set_tileProviders": "{p} 个服务商 · {m} 个模型",
+  "@set_tileProviders": {
+    "placeholders": {
+      "p": {},
+      "m": {}
+    }
+  },
+  "set_tileNoModel": "未配置",
+  "set_tileRag": "语义检索",
+  "set_tileReady": "就绪",
+  "set_tileRagDone": "{names}已完成",
+  "@set_tileRagDone": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "set_tileRagPaused": "{name} {pct} · 已暂停",
+  "@set_tileRagPaused": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagBuilding": "{name} {pct} · 建库中",
+  "@set_tileRagBuilding": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagEmpty": "{name}还没建库",
+  "@set_tileRagEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileRagError": "{name}建库出错",
+  "@set_tileRagError": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileUpscale": "本地放大",
+  "set_tileUpscaleModels": "{n} 个模型可用",
+  "@set_tileUpscaleModels": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileDefaultIs": "{name}（默认）",
+  "@set_tileDefaultIs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileSeedMissing": "SeedVR2 未安装",
+  "set_tileSeedReady": "SeedVR2 已安装",
+  "set_tileProtect": "保护",
+  "set_tileProtectOn": "{on} / {all} 已开启",
+  "@set_tileProtectOn": {
+    "placeholders": {
+      "on": {},
+      "all": {}
+    }
+  },
+  "set_tileInterval": "生成间隔 {s} 秒 ± {p}%",
+  "@set_tileInterval": {
+    "placeholders": {
+      "s": {},
+      "p": {}
+    }
+  },
+  "set_tileIntervalOff": "不限制生成间隔",
+  "set_recent": "最近修改",
+  "set_recentSub": "自动保存 · 可撤销",
+  "set_recentEmpty": "还没有修改",
+  "set_quick": "常用开关",
+  "set_quickSub": "在这里直接改",
+  "set_quickDark": "深色模式",
+  "set_quickChannel": "画布视觉通道",
+  "set_searchTip": "按 {keys} 搜索任何设置；结果里可以直接开关，不用跳页。",
+  "@set_searchTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_accDesc": "管理 NovelAI 账号、默认登录和订阅额度。",
+  "set_accSaved": "已保存账号",
+  "set_accSavedSub": "添加后可以在这里一键切换；凭据保存在本机，不会出现在导出的偏好文件里。",
+  "set_accCurrent": "当前",
+  "set_accInUse": "使用中",
+  "set_accSwitch": "切换",
+  "set_accEmail": "邮箱登录",
+  "set_accToken": "令牌登录",
+  "set_accRenews": "订阅续期 {date}",
+  "@set_accRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accLastUsed": "上次使用 {date}",
+  "@set_accLastUsed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accNoSub": "无订阅",
+  "set_accExpired": "凭据已过期",
+  "set_accEdit": "编辑资料",
+  "set_accUpdate": "更新凭据",
+  "set_accMakeDefault": "设为默认账号",
+  "set_accDelete": "删除账号",
+  "set_accDeleteTitle": "删除账号“{name}”？",
+  "@set_accDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_accDeleteBody": "只删除本机保存的凭据，NovelAI 上的账号和图片不受影响。",
+  "set_accAdd": "添加账号",
+  "set_accAddHint": "支持邮箱密码或持久令牌",
+  "set_accLogin": "登录",
+  "set_accDefault": "默认账号",
+  "set_accDefaultSub": "登录页预先选中的账号",
+  "set_accAutoLogin": "启动时自动登录",
+  "set_accAutoLoginSub": "使用上次的会话；关掉后每次打开都停在登录页",
+  "set_accSub": "订阅",
+  "set_accMonthly": "每月 {n} Anlas",
+  "@set_accMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accRemaining": "剩余 {n}",
+  "@set_accRemaining": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accResets": "{date} 重置",
+  "@set_accResets": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accPortal": "打开 NovelAI 账户页",
+  "set_accSwitchHint": "切换账号会保留当前草稿和画布；生成队列中的任务按原账号完成。",
+  "set_apDesc": "主题、文字和提醒方式。所有修改即时保存，可以撤销。",
+  "set_apTheme": "主题",
+  "set_apThemeSub": "启动页、登录页和所有工作页面使用同一套主题。",
+  "set_apLight": "浅色",
+  "set_apDark": "深色",
+  "set_apSystem": "跟随系统",
+  "set_apSystemSub": "按 Windows 设置自动切换",
+  "set_apText": "文字",
+  "set_apFont": "界面字体",
+  "set_apFontSub": "中文用 HarmonyOS Sans SC，数字与代码用 Geist Mono",
+  "set_apScale": "设置与对话框字号",
+  "set_apScaleSub": "只放大设置页和弹窗，不影响画布和图片",
+  "set_apSampleTitle": "标题 · 生成完成",
+  "set_apSampleBody": "正文 · 结果已保存到本地画廊，可以继续调整提示词。",
+  "set_apSampleNote": "说明 · 拖动上面的滑块，这里实时预览。",
+  "set_apLanguage": "语言",
+  "set_apLanguageSub": "切换后立即生效，无需重启",
+  "set_apMotion": "动效与声音",
+  "set_apReduceMotion": "减少动态效果",
+  "set_apReduceMotionSub": "关闭画布飞行、缩放和面板过渡动画；视觉通道也会停止微动",
+  "set_apSound": "生成完成音效",
+  "set_apSoundSub": "一批图片全部完成后播放",
+  "set_apSoundFile": "完成音效文件",
+  "set_apPreviewSound": "试听",
+  "set_apNotify": "通知样式",
+  "set_apNotifySub": "提示从窗口右上角出现，3 秒后自动消失",
+  "set_apNotifyPreview": "预览一条",
+  "set_apPreview": "预览",
+  "set_apCurrent": "当前",
+  "set_apThemeTip": "快捷键 {keys} 可以随时切换深浅色。",
+  "@set_apThemeTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_cvDesc": "历史、查看器和无限画布的行为。",
+  "set_cvBrowse": "浏览",
+  "set_cvHistoryClick": "点击历史缩略图时",
+  "set_cvOpenDetail": "打开详情",
+  "set_cvOpenDetailSub": "弹出大图查看器，适合逐张细看",
+  "set_cvLinked": "联动预览",
+  "set_cvLinkedSub": "画布跳到这张并选中，查看器不弹出",
+  "set_cvViewer": "生成结果显示在",
+  "set_cvCanvas": "无限画布",
+  "set_cvCanvasSub": "按批次排成一列，可以平移、缩放、钉住对比",
+  "set_cvSimple": "简洁查看器",
+  "set_cvSimpleSub": "只显示最新一张，最省资源",
+  "set_cvCanvasSec": "画布",
+  "set_cvLock": "锁定画布视角",
+  "set_cvLockSub": "新图出现时不自动飞过去，视角保持在你停下的位置",
+  "set_cvFill": "新图缩放到填满",
+  "set_cvFillSub": "聚焦单张时放大到可视区域，而不是按原始像素",
+  "set_cvChannel": "视觉通道",
+  "set_cvChannelSub": "画布中间留空的长廊，按主题绘制装饰，翻历史时会依次经过各个主题。",
+  "set_cvMode": "模式",
+  "set_cvMinTwo": "随机时至少保留两个主题。",
+  "set_cvSession": "本次顺序：{order}",
+  "@set_cvSession": {
+    "placeholders": {
+      "order": {}
+    }
+  },
+  "set_cvLevel": "浓淡",
+  "set_cvRuler": "时间刻度",
+  "set_cvRulerSub": "批次时间、日期分隔和右侧刻度条",
+  "set_cvMotion": "空闲微动",
+  "set_cvMotionSub": "生成中和开启“减少动态效果”时自动暂停",
+  "set_cvOps": "画布操作",
+  "set_cvOpScroll": "上下翻",
+  "set_cvOpPan": "左右平移",
+  "set_cvOpZoom": "缩放",
+  "set_cvOpMove": "移动视角",
+  "set_cvOpAll": "看全局",
+  "set_cvOpHome": "回到最新一批",
+  "set_cvWheel": "滚轮",
+  "set_cvChannelTip": "画布右下角的齿轮里也能改视觉通道，两处是同一份设置。",
+  "set_scDesc": "按页面分组。点快捷键直接录制新组合；同一页面里重复时会标红，并给出一键修复。",
+  "set_scSearch": "搜索动作或按键，例如 Ctrl+S",
+  "set_scAll": "全部",
+  "set_scKeyboard": "键盘布局",
+  "set_scKeyboardSub": "点按键筛选下面的列表；蓝色是已占用，红色是冲突。",
+  "set_scNoMod": "无修饰",
+  "set_scLayer": "{context} · 按住 {mod} 时",
+  "@set_scLayer": {
+    "placeholders": {
+      "context": {},
+      "mod": {}
+    }
+  },
+  "set_scLayerNone": "{context} · 不按修饰键",
+  "@set_scLayerNone": {
+    "placeholders": {
+      "context": {}
+    }
+  },
+  "set_scAction": "动作",
+  "set_scKeys": "快捷键",
+  "set_scDefault": "默认",
+  "set_scDefaultIs": "默认 {keys}",
+  "@set_scDefaultIs": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflict": "与“{name}”冲突",
+  "@set_scConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_scRecording": "按下新的组合键…",
+  "set_scRecordHint": "Esc 取消 · Backspace 清除",
+  "set_scRecord": "录制新组合",
+  "set_scClear": "清除快捷键",
+  "set_scDisplay": "显示",
+  "set_scEnabled": "启用快捷键",
+  "set_scInTooltips": "在悬停提示中显示",
+  "set_scInMenus": "在菜单中显示",
+  "set_scBadges": "导航上显示数字标识",
+  "set_scConflicts": "冲突",
+  "set_scConflictCount": "{n} 项",
+  "@set_scConflictCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scConflictLine": "{keys} 被两个动作占用",
+  "@set_scConflictLine": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflictSub": "{context}：{a}、{b}。冲突时两个都不触发。",
+  "@set_scConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_scFix": "恢复{name}为 {keys}",
+  "@set_scFix": {
+    "placeholders": {
+      "name": {},
+      "keys": {}
+    }
+  },
+  "set_scNoConflict": "没有冲突",
+  "set_scConfig": "快捷键配置",
+  "set_scResetAll": "全部恢复默认",
+  "set_scResetAllTitle": "把全部快捷键恢复默认？",
+  "set_scResetAllBody": "{n} 个自定义的组合会被还原。",
+  "@set_scResetAllBody": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scHelp": "快捷键帮助",
+  "set_scHelpTip": "按 {key} 在任何页面查看当前页可用的快捷键。",
+  "@set_scHelpTip": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "set_scEmpty": "没有匹配的快捷键",
+  "set_gnDesc": "控制 Anlas 消耗和请求节奏，以及写提示词时的输入辅助。",
+  "set_gnCost": "额度保护",
+  "set_gnCostSub": "单次请求的消耗超过阈值时，先弹出确认再发送。",
+  "set_gnWarn": "高消耗提醒",
+  "set_gnWarnSub": "超过阈值时先确认",
+  "set_gnThreshold": "提醒阈值",
+  "set_gnEstimate": "当前生图参数：{model} · {w}×{h} · {steps} 步 · 每次 {n} 张",
+  "@set_gnEstimate": {
+    "placeholders": {
+      "model": {},
+      "w": {},
+      "h": {},
+      "steps": {},
+      "n": {}
+    }
+  },
+  "set_gnWillWarn": "会提醒",
+  "set_gnNoWarn": "不会提醒",
+  "set_gnFree": "免费",
+  "set_gnPace": "请求节奏",
+  "set_gnPaceSub": "连续生成时每次请求之间等一会儿，减轻服务器压力，也让队列更像手动操作。",
+  "set_gnLimit": "限制生成间隔",
+  "set_gnInterval": "间隔",
+  "set_gnJitter": "随机浮动",
+  "set_gnJitterSub": "在间隔上下随机增减",
+  "set_gnTimeline": "按当前设置，连续 10 次请求大约这样分布",
+  "set_gnInput": "提示词输入",
+  "set_gnWheel": "滚轮调整权重",
+  "set_gnWheelSub": "光标放在标签上滚动滚轮，直接加减权重",
+  "set_gnNoKey": "无需按键",
+  "set_gnRelated": "相关标签扩展",
+  "set_gnRelatedSub": "输入标签时附带推荐常一起出现的标签",
+  "set_gnRag": "语义标签推荐",
+  "set_gnRagSub": "结合上下文的智能推荐，由“语义检索”提供",
+  "set_gnReady": "已就绪",
+  "set_gnNotReady": "未就绪",
+  "set_gnGoSettings": "去设置",
+  "set_gnTranslate": "提示词翻译",
+  "set_gnTranslateSub": "在提示词框里中英互译使用的模型",
+  "set_gnToday": "今天",
+  "set_gnUsed": "Anlas 已用",
+  "set_gnNow": "现在",
+  "set_gnWarned": "高消耗提醒触发",
+  "set_gnTimes": "{n} 次",
+  "@set_gnTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_gnMaxSingle": "最大单次消耗",
+  "set_gnFreeTip": "免费额度规则（Opus 小图不扣 Anlas）由生图页按当前参数计算，这里的阈值只看实际要扣的数。",
+  "set_stDesc": "图片保存在哪里、画廊读哪些文件夹，以及占用与清理。",
+  "set_stUsage": "占用",
+  "set_stFree": "{disk} 盘剩余 {size}",
+  "@set_stFree": {
+    "placeholders": {
+      "disk": {},
+      "size": {}
+    }
+  },
+  "set_stRecount": "重新统计",
+  "set_stCounting": "统计中…",
+  "set_stImages": "图片",
+  "set_stUpscaleModels": "放大模型",
+  "set_stVibes": "Vibe 库",
+  "set_stThumbs": "缩略图缓存",
+  "set_stRag": "语义索引",
+  "set_stDict": "词库与缓存",
+  "set_stAgent": "Agent",
+  "set_stSave": "保存",
+  "set_stSavePath": "图片保存位置",
+  "set_stAutoSave": "自动保存",
+  "set_stAutoSaveSub": "生成完成后立即写入保存位置；关掉后只留在画布和历史里",
+  "set_stAssets": "素材与显示",
+  "set_stVibePath": "Vibe 库位置",
+  "set_stQuality": "本地画廊清晰度",
+  "set_stQualitySub": "缩略图的显示质量",
+  "set_stHigh": "高清",
+  "set_stStandard": "标清",
+  "set_stRoots": "图库来源",
+  "set_stRootsSub": "任何文件夹都可以加入本地画廊浏览和搜索，不参与自动保存。",
+  "set_stPrimary": "主目录",
+  "set_stCount": "{n} 张",
+  "@set_stCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_stAddFolder": "添加文件夹",
+  "set_stImportIndex": "导入标签索引 (.jsonl)",
+  "set_stLastScan": "上次扫描 {when} · {n} 张",
+  "@set_stLastScan": {
+    "placeholders": {
+      "when": {},
+      "n": {}
+    }
+  },
+  "set_stMaintain": "维护",
+  "set_stRescan": "重新扫描图库",
+  "set_stRescanSub": "检查缺失文件、补扫新文件、重试未读出的元数据",
+  "set_stScan": "扫描",
+  "set_stScanning": "扫描中…",
+  "set_stCleanThumbs": "清理缩略图缓存",
+  "set_stCleanThumbsSub": "按最近使用淘汰超出上限的缩略图，不碰原图",
+  "set_stClean": "清理",
+  "set_stCleanTitle": "清理缩略图缓存？",
+  "set_stCleanBody": "超出上限的缩略图会被删除，之后浏览时重新生成。原图不受影响。",
+  "set_stAppData": "应用数据位置",
+  "set_stAppDataSub": "账号、历史、块库等数据库所在目录；修改后需要重启",
+  "set_stOpenFolders": "打开文件夹",
+  "set_stLogs": "日志",
+  "set_stAppDataShort": "应用数据",
+  "set_stDeleteTip": "移动或删除单张图片仍在画廊里操作，并遵循“隐私与保护”里的确认规则。",
+  "set_stRemoveRoot": "移除这个文件夹",
+  "set_dcDesc": "标签数据和各级缓存。一般不用动，出现补全异常时可以在这里清理。",
+  "set_dcTags": "标签词库",
+  "set_dcTagsSub": "自动补全、标签翻译和相关推荐用到的本地数据。",
+  "set_dcBase": "基础词库",
+  "set_dcBaseValue": "{n} 个标签 · 数据版本 {version}",
+  "@set_dcBaseValue": {
+    "placeholders": {
+      "n": {},
+      "version": {}
+    }
+  },
+  "set_dcCooc": "共现数据",
+  "set_dcCoocSub": "用来推荐常一起出现的标签",
+  "set_dcEntries": "{n} 条",
+  "@set_dcEntries": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcTranslate": "标签翻译",
+  "set_dcTranslateSub": "词库里没有中文释义时，用这个接口补翻",
+  "set_dcCaches": "缓存",
+  "set_dcCachesSub": "清除后会在使用时重新获取，不影响你的图片和设置。",
+  "set_dcDanbooru": "Danbooru 缓存",
+  "set_dcDanbooruSub": "在线画廊与标签百科的请求结果",
+  "set_dcTranslation": "AI 翻译缓存",
+  "set_dcTranslationSub": "已翻译过的标签和提示词",
+  "set_dcCacheSize": "{n} 条 · {size}",
+  "@set_dcCacheSize": {
+    "placeholders": {
+      "n": {},
+      "size": {}
+    }
+  },
+  "set_dcClearTitle": "清除{name}？",
+  "@set_dcClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_dcClearBody": "下次用到时会重新获取。",
+  "set_dcStats": "缓存统计",
+  "set_dcL1": "L1 内存",
+  "set_dcL2": "L2 Hive",
+  "set_dcL3": "L3 SQLite",
+  "set_dcImagesUnit": "{n} 张图片",
+  "@set_dcImagesUnit": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcAutoRefresh": "自动刷新",
+  "set_dcUpdated": "上次更新 {when}",
+  "@set_dcUpdated": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcResetStats": "重置统计",
+  "set_dcTip": "这一页的数据都可以重新生成。真正的个人数据（账号、历史、块库）在“存储与图库 → 应用数据位置”。",
+  "set_mdDesc": "翻译、反推、标签翻译和 Agent 用到的大模型服务。先添加服务商，再在“功能分配”里给每个功能选模型。",
+  "set_mdProviders": "服务商",
+  "set_mdTasks": "功能分配",
+  "set_mdPresets": "提示词预设",
+  "set_mdRequests": "请求记录",
+  "set_mdProviderCount": "{n} 个服务商",
+  "@set_mdProviderCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdModelCount": "{n} 个模型",
+  "@set_mdModelCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdDisabled": "已停用",
+  "set_mdLocal": "本机",
+  "set_mdLatency": "{ms} · {when}",
+  "@set_mdLatency": {
+    "placeholders": {
+      "ms": {},
+      "when": {}
+    }
+  },
+  "set_mdUnreachable": "连接失败",
+  "set_mdName": "名称",
+  "set_mdBaseUrl": "接口地址",
+  "set_mdApiKey": "API Key",
+  "set_mdApiKeyEmpty": "未填写",
+  "set_mdModels": "模型",
+  "set_mdRefreshModels": "从服务商刷新",
+  "set_mdAddModel": "手动添加",
+  "set_mdUsedFor": "用于 {tasks}",
+  "@set_mdUsedFor": {
+    "placeholders": {
+      "tasks": {}
+    }
+  },
+  "set_mdRetired": "服务商已下线",
+  "set_mdCapTools": "工具",
+  "set_mdCapVision": "视觉",
+  "set_mdCapReasoning": "推理",
+  "set_mdAdvanced": "高级请求参数",
+  "set_mdDelete": "删除服务商",
+  "set_mdDeleteTitle": "删除服务商“{name}”？",
+  "@set_mdDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_mdDeleteBody": "用到它的功能会回落到其他可用服务商。",
+  "set_mdRemoveModel": "移除模型",
+  "set_mdTaskPrompt": "提示词翻译",
+  "set_mdTaskReverse": "提示词反推",
+  "set_mdTaskTag": "标签翻译",
+  "set_mdTaskWiki": "百科翻译",
+  "set_mdFeature": "功能",
+  "set_mdProvider": "服务商",
+  "set_mdModel": "模型",
+  "set_mdPreset": "预设",
+  "set_mdStatus": "状态",
+  "set_mdAvailable": "可用",
+  "set_mdFallback": "回落到第一个可用服务商",
+  "set_mdNotChosen": "未选择",
+  "set_mdBuiltin": "内置",
+  "set_mdNewPreset": "新建预设",
+  "set_mdEdit": "编辑",
+  "set_mdTime": "时间",
+  "set_mdTokens": "{n} tokens",
+  "@set_mdTokens": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdFailed": "失败",
+  "set_mdOk": "成功",
+  "set_mdShowing": "显示最近 {n} 条，共 {total} 条",
+  "@set_mdShowing": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "set_mdImport": "导入配置",
+  "set_mdAddProvider": "添加服务商",
+  "set_mdEmpty": "还没有服务商",
+  "set_mdEmptySub": "添加一个服务商后，翻译和反推就能用了。",
+  "set_agDesc": "侧栏助手的模型、指令、扩展和 MCP 工具。",
+  "set_agModelSec": "模型",
+  "set_agModel": "Agent 使用的模型",
+  "set_agModelSub": "思考强度在聊天框里按任务调整",
+  "set_agEnter": "Enter 直接发送",
+  "set_agEnterSub": "关掉后用 Ctrl+Enter 发送，Enter 换行",
+  "set_agMax": "单次任务最多请求",
+  "set_agMaxSub": "防止 Agent 陷入循环",
+  "set_agTimesUnit": "次",
+  "set_agInstr": "指令",
+  "set_agInstrSub": "按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。",
+  "set_agOrderBuiltin": "内置提示词",
+  "set_agOrderPrefix": "系统前缀",
+  "set_agOrderGlobal": "全局指令",
+  "set_agOrderWorkspace": "工作区指令",
+  "set_agOrderTools": "工具地图",
+  "set_agGlobal": "全局指令",
+  "set_agPrefix": "系统前缀",
+  "set_agPrefixHint": "在每次请求最前面加入的固定内容，例如身份或输出格式。",
+  "set_agBuiltin": "内置提示词",
+  "set_agFinal": "查看最终提示词",
+  "set_agExt": "扩展",
+  "set_agExtSub": "各工作区独立加载；外部扩展能运行本地代码，请只添加可信来源。",
+  "set_agStudioExt": "Studio 交互",
+  "set_agStudioExtSub": "读取当前 Studio 状态，并通过问题卡片收集回答",
+  "set_agRequired": "内置 · 必需",
+  "set_agAddFile": "添加扩展文件",
+  "set_agAddDir": "添加扩展目录",
+  "set_agMcp": "MCP 服务器",
+  "set_agMcpSub": "默认 CodeMode 按需发现，工具不会一次性塞进上下文。",
+  "set_agBuiltinTools": "NAI Studio · 内置工具组",
+  "set_agBuiltinToolsSub": "提示词、块、百科、图片、历史、参考图、生图与设置工具",
+  "set_agConnected": "已连接 · {n} 个工具",
+  "@set_agConnected": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agConnecting": "连接中…",
+  "set_agNeedsLogin": "需要登录",
+  "set_agMcpError": "连接失败",
+  "set_agMcpOff": "已停用",
+  "set_agAddMcp": "添加 MCP 服务器",
+  "set_agTools": "工具",
+  "set_agToolCount": "{n} 个",
+  "@set_agToolCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agToolsTip": "生图类工具始终先报价，等你确认后才执行。",
+  "set_agData": "数据目录",
+  "set_agWorkspaces": "工作区",
+  "set_agSessions": "会话",
+  "set_agCostTip": "费用由服务商计费，Studio 只显示 token 用量。",
+  "set_agOpen": "打开 Agent",
+  "set_agEditMcp": "编辑",
+  "set_agRemoveMcp": "移除服务器",
+  "set_agRemoveExt": "移除扩展",
+  "set_rgDesc": "本地运行的 RAG：给标签推荐、Wiki、提示词块和图库找相似提供语义能力，不上传任何内容。",
+  "set_rgReady": "语义检索已就绪",
+  "set_rgOff": "语义检索已关闭",
+  "set_rgPartial": "部分来源建库中",
+  "set_rgAllDone": "全部完成",
+  "set_rgPool": "所有来源共用一个本地向量池，新增内容自动增量更新。",
+  "set_rgStepRuntime": "运行环境",
+  "set_rgStepEmbed": "嵌入",
+  "set_rgStepRerank": "重排",
+  "set_rgStepDevice": "设备",
+  "set_rgSources": "来源",
+  "set_rgSourcesSub": "每个来源单独建库、单独开关；建库可以暂停，已完成的部分立即可用。",
+  "set_rgTags": "标签上下文推荐",
+  "set_rgTagsSub": "结合语义、共现与重排；各提示词框、角色和正负面分开计算",
+  "set_rgWiki": "Wiki 语义搜索",
+  "set_rgWikiSub": "本地百科正文，名称精确匹配优先，语义结果补充",
+  "set_rgBlocks": "提示词块",
+  "set_rgBlocksSub": "已保存、未归档块的标题、标签与正负面文字",
+  "set_rgGallery": "图库多模态",
+  "set_rgGallerySub": "分析画面找相似图；NAI 图的参数另建文字索引，原图不改写",
+  "set_rgCount": "{done} / {total}",
+  "@set_rgCount": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgSegments": "{done} / {total} 段",
+  "@set_rgSegments": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgGalleryCount": "画面 {done} / {total} · 参数 {n} 段",
+  "@set_rgGalleryCount": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "n": {}
+    }
+  },
+  "set_rgPaused": "已暂停",
+  "set_rgBuilding": "建库中",
+  "set_rgError": "出错",
+  "set_rgClearIndex": "清除索引",
+  "set_rgClearTitle": "清除“{name}”的索引？",
+  "@set_rgClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_rgClearBody": "只删除派生索引，原始内容和模型都保留。",
+  "set_rgContext": "推荐上下文",
+  "set_rgContextSub": "两种都最多取 120 个 Gemma token，按完整标签截取。",
+  "set_rgRange": "取样范围",
+  "set_rgBefore": "光标前",
+  "set_rgAround": "插入点前后",
+  "set_rgRuntime": "模型与运行环境",
+  "set_rgEmbedPath": "嵌入模型目录",
+  "set_rgRerankPath": "重排模型目录",
+  "set_rgDevice": "运行设备",
+  "set_rgAuto": "自动",
+  "set_rgEnv": "运行环境",
+  "set_rgEnvSub": "独立 Python 与推理依赖，不下载模型权重",
+  "set_rgCheck": "检测",
+  "set_rgReinstall": "重新安装",
+  "set_rgProgress": "建库进度",
+  "set_rgOverall": "总体",
+  "set_rgShortTags": "标签",
+  "set_rgShortWiki": "Wiki",
+  "set_rgShortBlocks": "块",
+  "set_rgShortGallery": "图库",
+  "set_rgTip": "清除某个来源只删除它的派生索引，原始内容和模型都保留。",
+  "set_rgNotReady": "语义检索还不能用",
+  "set_rgNotReadySub": "先安装运行环境，再选好两个模型目录。",
+  "set_rgEmpty": "未建立",
+  "set_rgBuild": "建立索引",
+  "set_rgContinue": "继续建立",
+  "set_rgSkipped": "跳过 {n} 张",
+  "@set_rgSkipped": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanLoading": "正在统计要收录的内容…",
+  "set_rgPlanTags": "将收录 {n} 项标签、别名与已有本地释义。",
+  "@set_rgPlanTags": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanText": "将收录 {docs} 份资料，切成 {n} 个文字片段。",
+  "@set_rgPlanText": {
+    "placeholders": {
+      "docs": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanGallery": "将收录 {images} 张图片和 {n} 段 NAI 参数，画面与参数分开索引。",
+  "@set_rgPlanGallery": {
+    "placeholders": {
+      "images": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanNote": "首次处理可能较久，可以随时暂停，已完成的部分立即可用。",
+  "set_rgPlanRebuild": "重建会先清掉这个来源的现有索引。",
+  "set_rgStart": "开始",
+  "set_rgDownload": "下载",
+  "set_rgDownloading": "正在下载 {done} / {total}",
+  "@set_rgDownloading": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgDownloadingUnknown": "正在下载 {done}",
+  "@set_rgDownloadingUnknown": {
+    "placeholders": {
+      "done": {}
+    }
+  },
+  "set_rgVerifying": "正在校验文件…",
+  "set_rgDiscover": "查找本地模型",
+  "set_rgDiscoverSub": "在工作区 04_工具/models 里找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到后自动填好上面两个目录。",
+  "set_rgFind": "查找",
+  "set_rgModelsMissing": "没找到。可以点“下载”，或手动选择已下载的权重目录。",
+  "set_rgPython": "Python 解释器",
+  "set_rgPythonSub": "默认用自动安装的独立环境；也可以选一个已有的 python.exe。",
+  "set_rgPythonAuto": "自动",
+  "set_rgPythonNone": "未安装",
+  "set_rgPythonPending": "选的解释器还没启用，点“使用此解释器”会按它重新安装依赖。",
+  "set_rgUsePython": "使用此解释器",
+  "set_rgEnvReady": "已就绪",
+  "set_rgEnvMissing": "还没有安装",
+  "set_rgInstall": "安装",
+  "set_rgInstallHint": "下载 Python 与推理依赖，不下载模型权重。NVIDIA 显卡选 CUDA（约需数 GB）；其他选 CPU，下载较小。",
+  "set_rgInstallCuda": "CUDA · NVIDIA",
+  "set_rgInstallCpu": "CPU",
+  "set_rgPhaseExisting": "正在检测已有环境",
+  "set_rgPhaseDownload": "正在下载安装工具",
+  "set_rgPhaseCreate": "正在准备 Python 环境",
+  "set_rgPhaseCuda": "正在安装 CUDA 推理组件",
+  "set_rgPhasePackages": "正在安装推理依赖",
+  "set_rgPhaseCheck": "正在校验环境",
+  "set_rgElapsed": "此阶段已用 {time}",
+  "@set_rgElapsed": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_upDesc": "管理本机超分模型和组件。所有下载都需要你手动开始。",
+  "set_upGpu": "{name} · {n} GB",
+  "@set_upGpu": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "set_upNoGpu": "没有检测到独立显卡",
+  "set_upLocal": "在本机放大图片，不消耗 Anlas。",
+  "set_upEsrgan": "常规模型",
+  "set_upEsrganSub": "Real-ESRGAN NCNN，4 倍放大，速度快，任何支持 Vulkan 的显卡都能用。",
+  "set_upAnimeQuality": "动漫 · 画质",
+  "set_upAnimeFast": "动漫 · 快速",
+  "set_upGeneral": "通用 · 摄影",
+  "set_upBuiltin": "内置",
+  "set_upInstalled": "已安装",
+  "set_upNotInstalled": "未安装",
+  "set_upFailed": "下载失败",
+  "set_upImport": "导入模型",
+  "set_upImportHint": "选择配套的 .param 和 .bin（4 倍 Real-ESRGAN NCNN）",
+  "set_upSeed": "SeedVR2 扩散放大",
+  "set_upSeedSub": "画质更好、更慢，需要 NVIDIA 显卡。型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境。",
+  "set_upSeed3b": "3B · 均衡",
+  "set_upSeed3bSub": "兼顾效果与资源占用，适合日常放大",
+  "set_upSeed7b": "7B · 高画质",
+  "set_upSeed7bSub": "更高画质潜力，需要更多显存与时间",
+  "set_upSeed7bSharp": "7B · 锐利",
+  "set_upSeed7bSharpSub": "偏向更锐利的细节，适合强化纹理",
+  "set_upVram": "显存 ≥ {n} GB",
+  "@set_upVram": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_upProgress": "{done} / {total} · {speed}/s",
+  "@set_upProgress": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "speed": {}
+    }
+  },
+  "set_upVramMode": "显存模式",
+  "set_upRecommended": "推荐",
+  "set_upLowVram": "低显存",
+  "set_upOffload": "CPU 卸载层数",
+  "set_upOffloadSub": "卸载越多越省显存，但更慢、占更多内存",
+  "set_upTiling": "VAE 分块",
+  "set_upTilingSub": "小分块省显存，重叠可以减轻接缝",
+  "set_upNoise": "实验性噪声",
+  "set_upNoiseSub": "输入噪声 {a} · 潜空间噪声 {b}；保持 0 即沿用当前效果",
+  "@set_upNoiseSub": {
+    "placeholders": {
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_upInputNoise": "输入噪声",
+  "set_upLatentNoise": "潜空间噪声",
+  "set_upExperimental": "实验",
+  "set_upRtx": "RTX Video",
+  "set_upRtxSub": "使用 NVIDIA RTX Video 快速放大，约 64 MB 独立组件。",
+  "set_upRtxName": "RTX Video Super Resolution",
+  "set_upRtxNeeds": "需要兼容的 RTX 显卡与驱动",
+  "set_upDefault": "默认放大方式",
+  "set_upDefaultTip": "生图页工具条上的“本地放大”默认用这个，菜单里随时可换。",
+  "set_upVramTip": "显存不足时不会自动换型号；可以改用 3B、降低倍率，或开启低显存与 VAE 分块。",
+  "set_upRemoveTitle": "删除{name}？",
+  "@set_upRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_upRemoveBody": "之后要用时需要重新下载。",
+  "set_brDesc": "和本机其他软件协作：Krita、外部 Agent 和 ComfyUI。",
+  "set_brKritaSub": "在 Krita 里直接调用 Studio 生图，结果回到 Krita 图层。",
+  "set_brKrita": "Krita 桥接",
+  "set_brLoopback": "本机监听，只接受 127.0.0.1 的连接",
+  "set_brConnected": "已连接",
+  "set_brWaiting": "等待 Krita 连接",
+  "set_brRegenerate": "重新生成会话",
+  "set_brDiscovery": "发现文件",
+  "set_brAgents": "外部 Agent",
+  "set_brAgentsSub": "让 Claude Code、Codex 等能执行本机命令的 Agent 读写参数和生图。",
+  "set_brLocal": "本机桥接",
+  "set_brClients": "{n} 个 Agent 已连接",
+  "@set_brClients": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brNoClients": "没有 Agent 连接",
+  "set_brTakeover": "复制接管说明",
+  "set_brEnd": "结束连接",
+  "set_brActivity": "最近活动",
+  "set_brComfySub": "导入 ComfyUI 工作流，在 Studio 里填参运行。",
+  "set_brComfyEnable": "启用 ComfyUI",
+  "set_brComfyUrl": "服务地址",
+  "set_brComfyFailed": "连接失败：{reason}（{when}）。确认 ComfyUI 已启动并允许本机访问。",
+  "@set_brComfyFailed": {
+    "placeholders": {
+      "reason": {},
+      "when": {}
+    }
+  },
+  "set_brComfyOk": "连接正常（{when}）",
+  "@set_brComfyOk": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_brStatus": "状态",
+  "set_brAgentsShort": "{n} 个",
+  "@set_brAgentsShort": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brOff": "未启用",
+  "set_brNoResponse": "无响应",
+  "set_brTip": "所有桥接只在本机回环地址上监听，不对局域网开放。代理设置不影响这些连接。",
+  "set_nwDesc": "代理和连接状态。",
+  "set_nwProxy": "代理",
+  "set_nwProxySub": "访问 NovelAI、Danbooru、GitHub 更新和第三方模型服务时使用。",
+  "set_nwUse": "使用代理",
+  "set_nwMode": "方式",
+  "set_nwSystem": "跟随系统",
+  "set_nwManual": "手动",
+  "set_nwAddress": "地址",
+  "set_nwDetected": "系统代理检测到 {addr}。代理只转发上述外部请求，本机桥接和本地模型不经过代理。",
+  "@set_nwDetected": {
+    "placeholders": {
+      "addr": {}
+    }
+  },
+  "set_nwNoSystem": "没有检测到系统代理。代理只转发外部请求，本机桥接和本地模型不经过代理。",
+  "set_nwCheck": "连接检测",
+  "set_nwCheckSub": "一键检查各服务是否可达，出错时更容易判断是网络还是服务的问题。",
+  "set_nwNaiImage": "NovelAI 生图",
+  "set_nwNaiApi": "NovelAI 账户",
+  "set_nwDanbooru": "Danbooru",
+  "set_nwUpdate": "应用更新",
+  "set_nwCheckAll": "全部检测",
+  "set_nwChecked": "上次检测 {when}",
+  "@set_nwChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_nwViaProxy": "经过代理",
+  "set_nwDirect": "直连",
+  "set_nwNeverChecked": "还没检测过",
+  "set_nwFail": "失败",
+  "set_nwTip": "改代理后需要重启才会生效；Studio 会提醒，不会自动重启打断你的工作。",
+  "set_pvDesc": "分享图片时带出什么信息，以及哪些操作需要你确认。",
+  "set_pvProtect": "保护",
+  "set_pvStrip": "分享时去除元数据",
+  "set_pvStripSub": "复制或拖出图片时去掉提示词和参数，原文件不变",
+  "set_pvExternal": "发送到外部前提醒",
+  "set_pvExternalSub": "把图片发给其他软件或网页前先确认",
+  "set_pvDanger": "危险操作需确认",
+  "set_pvDangerSub": "删除、清空、覆盖等不可撤销的操作先弹确认",
+  "set_pvOverwrite": "保存时不覆盖",
+  "set_pvOverwriteSub": "目标位置有同名文件时自动改名",
+  "set_pvBlacklist": "在线画廊黑名单",
+  "set_pvBlacklistSub": "含有这些标签的图片在在线画廊里直接隐藏。",
+  "set_pvAddTag": "添加标签…",
+  "set_pvSync": "同步 Danbooru 黑名单",
+  "set_pvSyncSub": "已登录 {user} · 上次同步 {when}",
+  "@set_pvSyncSub": {
+    "placeholders": {
+      "user": {},
+      "when": {}
+    }
+  },
+  "set_pvSyncNever": "已登录 {user} · 还没同步过",
+  "@set_pvSyncNever": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "set_pvSyncSignedOut": "登录 Danbooru 后可以同步账号里的黑名单",
+  "set_pvSyncNow": "立即同步",
+  "set_pvSyncing": "同步中…",
+  "set_pvAutoSync": "启动时自动同步",
+  "set_pvExported": "导出时包含什么",
+  "set_pvIncPrefs": "外观、操作、输入偏好",
+  "set_pvIncRules": "保护规则与黑名单",
+  "set_pvIncCred": "账号凭据",
+  "set_pvIncPaths": "文件路径",
+  "set_pvIncDrafts": "草稿与模型绑定",
+  "set_pvTip": "元数据保护只作用于“复制”和“拖出”，保存到磁盘的原图始终保留完整参数，方便日后复用。",
+  "set_bkDesc": "在设备之间迁移偏好，或者回到默认状态。所有重置都会先备份。",
+  "set_bkPrefs": "偏好设置",
+  "set_bkPrefsSub": "外观、操作、输入与保护规则。账号凭据、路径、草稿和模型绑定不会写进文件。",
+  "set_bkExport": "导出",
+  "set_bkExportSub": "保存为 studio-preferences.json",
+  "set_bkExportBtn": "导出…",
+  "set_bkImport": "导入",
+  "set_bkImportSub": "应用前会显示将修改多少项，并自动备份当前设置",
+  "set_bkImportBtn": "选择文件…",
+  "set_bkUndoImport": "撤销上次导入",
+  "set_bkUndoImportSub": "回到 {when} 导入前的状态",
+  "@set_bkUndoImportSub": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_bkNoImport": "还没有导入过",
+  "set_bkRestore": "恢复",
+  "set_bkOther": "其他配置",
+  "set_bkShortcutsSub": "{n} 个动作，{m} 个已自定义",
+  "@set_bkShortcutsSub": {
+    "placeholders": {
+      "n": {},
+      "m": {}
+    }
+  },
+  "set_bkModelsSub": "服务商、功能分配和预设；API Key 默认不导出",
+  "set_bkCopyConfig": "复制配置",
+  "set_bkReset": "恢复默认",
+  "set_bkResetSub": "选择要重置的范围；其他设置保持不变。",
+  "set_bkScopeAppearance": "外观与操作",
+  "set_bkScopeAppearanceSub": "主题、字体、语言、画布、提醒",
+  "set_bkScopeInput": "输入与补全",
+  "set_bkScopeInputSub": "滚轮权重、标签扩展、自动补全",
+  "set_bkScopeProtect": "隐私与生成保护",
+  "set_bkScopeProtectSub": "元数据、确认、高消耗提醒、请求节奏",
+  "set_bkScopeShortcuts": "快捷键",
+  "set_bkScopeShortcutsSub": "全部 {n} 个动作",
+  "@set_bkScopeShortcutsSub": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_bkResetBtn": "恢复所选为默认…",
+  "set_bkResetHint": "会先备份当前设置，可以撤销",
+  "set_bkResetTitle": "恢复所选设置为默认？",
+  "set_bkResetBody": "{scopes} 会回到默认值。当前设置会先自动备份。",
+  "@set_bkResetBody": {
+    "placeholders": {
+      "scopes": {}
+    }
+  },
+  "set_bkAuto": "自动备份",
+  "set_bkAutoSub": "保留最近 5 份",
+  "set_bkKindImport": "导入前",
+  "set_bkKindReset": "恢复默认前",
+  "set_bkKindUpgrade": "升级前",
+  "set_bkNoBackups": "还没有自动备份",
+  "set_bkRestoreTitle": "恢复到“{name}”的备份？",
+  "@set_bkRestoreTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_bkRestoreBody": "当前设置会先备份，之后可以再换回来。",
+  "set_abDesc": "版本、更新和问题诊断。",
+  "set_abNew": "有新版本 {version}",
+  "@set_abNew": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abLatest": "已是最新版本",
+  "set_abChecking": "正在检查更新…",
+  "set_abCheckFailed": "检查更新失败",
+  "set_abDownloading": "正在下载 {pct}",
+  "@set_abDownloading": {
+    "placeholders": {
+      "pct": {}
+    }
+  },
+  "set_abChecked": "上次检查 {when}",
+  "@set_abChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_abNotes": "{version} 更新内容",
+  "@set_abNotes": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abInstall": "下载并安装",
+  "set_abChangelog": "完整更新日志",
+  "set_abPrerelease": "包含预发布版本",
+  "set_abCheck": "检查更新",
+  "set_abDiag": "诊断",
+  "set_abLog": "写入日志文件",
+  "set_abLogSub": "排查问题时打开；日志不含 API Key 和登录凭据",
+  "set_abLogDir": "日志目录",
+  "set_abCopyDiag": "复制诊断信息",
+  "set_abCopyDiagSub": "版本、系统、显卡、各服务状态，方便反馈问题",
+  "set_abProject": "项目",
+  "set_abRepo": "开源项目",
+  "set_abUpstream": "原项目",
+  "set_abUpstreamSub": "本项目基于 NAI Launcher 开发，保留原作者署名",
+  "set_abFonts": "字体与素材",
+  "set_abLicenses": "许可证",
+  "set_abView": "查看",
+  "set_abSystem": "系统",
+  "set_srQuoted": "“{query}”",
+  "@set_srQuoted": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_srBalance": "Anlas 余额",
+  "set_srSubscription": "订阅与 Anlas 额度",
+  "set_agEnable": "启用",
+  "set_agDisable": "停用",
+  "set_listSep": "、",
+  "set_on": "开",
+  "set_off": "关",
+  "set_unitSeconds": "秒"
 }

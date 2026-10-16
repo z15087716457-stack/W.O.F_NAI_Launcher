@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import '../providers/share_image_settings_provider.dart';
 import '../widgets/common/themed_confirm_dialog.dart';
 import '../widgets/common/anlas_cost_dialog.dart';
 import '../../core/utils/localization_extension.dart';
+import '../../data/services/anlas_usage_metrics.dart';
 
 class AssetProtectionGuard {
   const AssetProtectionGuard._();
@@ -79,6 +81,12 @@ class AssetProtectionGuard {
       return Future.value(true);
     }
 
+    unawaited(
+      ref
+          .read(anlasUsageMetricsProvider.notifier)
+          .record(warning: true)
+          .catchError((Object _) {}),
+    );
     return AnlasCostDialog.show(
       context,
       cost: estimatedCost,

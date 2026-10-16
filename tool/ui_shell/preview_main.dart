@@ -2,7 +2,7 @@
 // 运行：flutter run -d windows -t tool/ui_shell/preview_main.dart
 // 主导航包着页面：切到“统计”显示统计页，“在线画廊”显示在线画廊，“Vibe 库 / 精准参考库”显示参考库，
 // “块库”显示块库管理页，“生图”显示块库侧栏 + 带药丸的提示词（点药丸开实例卡），
-// “本地画廊”显示大图查看器（全屏时藏起主导航）；生图页工具条的增强 / 放大 / 编辑 / 局部重绘 / 导演工具
+// “设置”显示新设置页，“本地画廊”显示大图查看器（全屏时藏起主导航）；生图页工具条的增强 / 放大 / 编辑 / 局部重绘 / 导演工具
 // 由画布工具模拟器接管（都由本地模拟器驱动），其他页显示占位。
 import 'dart:async';
 import 'dart:math' as math;
@@ -25,6 +25,8 @@ import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_fixture.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_picker.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_page.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_contract.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_fixture.dart';
 import 'package:nai_launcher/presentation/ui/statistics/statistics_page.dart';
@@ -39,6 +41,7 @@ import 'explore_preview.dart';
 import 'gen_preview.dart';
 import 'online_preview.dart';
 import 'refs_preview.dart';
+import 'settings_preview.dart';
 import 'tools_preview.dart';
 import 'viewer_preview.dart';
 
@@ -94,6 +97,11 @@ class _PreviewAppState extends State<_PreviewApp> {
     ..addListener(_rebuild)
     ..onClose = () => _log('关闭大图（真实应用回到本地画廊）');
 
+  // 设置页
+  late final _settings = SettingsPreviewSim(log: _log)
+    ..addListener(_rebuild)
+    ..onTheme = (v) => setState(() => _dark = v == 'dark');
+
   // 画风探索
   late final _explore = ExplorePreviewSim(log: _log)..addListener(_rebuild);
 
@@ -115,6 +123,7 @@ class _PreviewAppState extends State<_PreviewApp> {
     _blocks.dispose();
     _viewer.dispose();
     _explore.dispose();
+    _settings.dispose();
     _tools.dispose();
     super.dispose();
   }
@@ -376,6 +385,15 @@ class _PreviewAppState extends State<_PreviewApp> {
                       ExploreScene.values,
                       (s) => setState(() => _explore.scene = s),
                     ),
+                    const Text('设置：'),
+                    _dropdown(
+                      _settings.scene,
+                      SettingsScene.values,
+                      (s) => setState(() {
+                        _page = NavPage.settings;
+                        _settings.scene = s;
+                      }),
+                    ),
                     if (_lastAction != null)
                       Text(_lastAction!, style: const TextStyle(fontSize: 12)),
                   ],
@@ -434,6 +452,12 @@ class _PreviewAppState extends State<_PreviewApp> {
                     NavPage.localGallery => ImageViewerPage(
                       data: _viewer.data,
                       actions: _viewer.actions,
+                    ),
+                    NavPage.settings => Builder(
+                      builder: (context) => SettingsPage(
+                        data: _settings.data(dark: _dark),
+                        actions: _settings.actions(context),
+                      ),
                     ),
                     _ => _Placeholder(page: _page),
                   },

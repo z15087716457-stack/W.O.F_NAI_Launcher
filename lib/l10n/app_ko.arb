@@ -9215,5 +9215,1362 @@
   "rag_runtimeElapsed": "현재 단계 경과: {seconds}초",
   "rag_useRuntime": "기존 환경 사용",
   "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
+  "set_title": "설정",
+  "set_search": "설정 검색",
+  "set_searchResults": "검색 결과",
+  "set_searchCount": "{count}개",
+  "@set_searchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_searchHint": "결과에서 바로 바꿀 수 있습니다. 화살표를 누르면 해당 설정으로 이동합니다.",
+  "set_searchKeys": "선택",
+  "set_searchJump": "이동",
+  "set_searchEmpty": "“{query}”에 대한 결과가 없습니다",
+  "@set_searchEmpty": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_searchEmptyHint": "“프록시”, “저장”, “단축키” 또는 경로로 검색해 보세요",
+  "set_goTo": "설정으로 이동",
+  "set_hasUpdate": "업데이트",
+  "set_groupPersonal": "개인",
+  "set_groupCreate": "창작",
+  "set_groupIntelligence": "지능",
+  "set_groupConnect": "연결",
+  "set_groupSystem": "시스템",
+  "set_pageOverview": "개요",
+  "set_pageAccount": "계정",
+  "set_pageAppearance": "모양",
+  "set_pageCanvas": "캔버스와 보기",
+  "set_pageShortcuts": "단축키",
+  "set_pageGeneration": "생성과 Anlas",
+  "set_pageStorage": "저장소와 갤러리",
+  "set_pageDictionaries": "사전과 캐시",
+  "set_pageModels": "모델과 API",
+  "set_pageAgent": "NAI Agent",
+  "set_pageRag": "시맨틱 검색",
+  "set_pageUpscale": "로컬 업스케일",
+  "set_pageBridges": "브리지와 연동",
+  "set_pageNetwork": "네트워크와 프록시",
+  "set_pagePrivacy": "개인정보와 보호",
+  "set_pageBackup": "백업과 초기화",
+  "set_pageAbout": "정보",
+  "set_resetDefault": "기본값으로",
+  "set_resetPage": "이 페이지 초기화",
+  "set_needsRestart": "재시작 필요",
+  "set_isNew": "새",
+  "set_defaultTag": "기본",
+  "set_readOnly": "읽기 전용",
+  "set_cancel": "취소",
+  "set_save": "저장",
+  "set_discard": "버리기",
+  "set_later": "나중에",
+  "set_undo": "실행 취소",
+  "set_open": "열기",
+  "set_choose": "선택",
+  "set_change": "변경",
+  "set_clear": "지우기",
+  "set_delete": "삭제",
+  "set_copy": "복사",
+  "set_more": "더 보기",
+  "set_refresh": "새로 고침",
+  "set_retry": "다시 시도",
+  "set_test": "연결 테스트",
+  "set_testing": "확인 중…",
+  "set_importIt": "가져오기",
+  "set_exportIt": "내보내기",
+  "set_install": "설치",
+  "set_download": "다운로드",
+  "set_resume": "계속",
+  "set_pause": "일시 정지",
+  "set_rebuild": "다시 빌드",
+  "set_login": "로그인",
+  "set_adjust": "조정",
+  "set_collapse": "접기",
+  "set_notSet": "설정 안 됨",
+  "set_defaultLocation": "기본 위치",
+  "set_builtinSound": "내장 사운드",
+  "set_justNow": "방금",
+  "set_minutesAgo": "{n}분 전",
+  "@set_minutesAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_todayAt": "오늘 {time}",
+  "@set_todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_yesterday": "어제",
+  "set_secondsAgo": "{n}초 전",
+  "@set_secondsAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_savedChange": "저장됨 · {title} {from} → {to}",
+  "@set_savedChange": {
+    "placeholders": {
+      "title": {},
+      "from": {},
+      "to": {}
+    }
+  },
+  "set_restartBanner": "저장했습니다. Studio를 다시 시작하면 적용되며 진행 중인 생성에는 영향이 없습니다.",
+  "set_restartNow": "지금 다시 시작",
+  "set_unsavedInstructions": "지침에 저장되지 않은 변경이 있습니다",
+  "set_leaveTitle": "저장하지 않은 변경을 버릴까요?",
+  "set_leaveBody": "Agent 지침이 저장되지 않았습니다. 이동하면 변경이 사라집니다.",
+  "set_resetPageTitle": "“{page}”을(를) 기본값으로 되돌릴까요?",
+  "@set_resetPageTitle": {
+    "placeholders": {
+      "page": {}
+    }
+  },
+  "set_resetPageBody": "이 페이지에서 바꾼 {count}개 항목이 기본값으로 돌아갑니다. 개요에서 되돌릴 수 있습니다.",
+  "@set_resetPageBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_ovDesc": "계정, 저장소, 연결, AI 서비스 상태를 모았습니다. 처리할 항목이 먼저 나오며 카드를 누르면 해당 설정으로 이동합니다.",
+  "set_ovSwitchAccount": "계정 전환",
+  "set_ovTodayUsed": "오늘 사용",
+  "set_ovMonthly": "월 지급량 {n}",
+  "@set_ovMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnAt": "고비용 경고 ≥ {n} Anlas",
+  "@set_ovWarnAt": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnOff": "고비용 경고 꺼짐",
+  "set_ovRenews": "갱신일 {date}",
+  "@set_ovRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_ovSignedOut": "로그인 안 됨",
+  "set_ovAttention": "처리 필요",
+  "set_ovAllClear": "모두 정상",
+  "set_attUpdate": "새 버전 {version}",
+  "@set_attUpdate": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_attRagPaused": "{source} 색인 일시 정지됨",
+  "@set_attRagPaused": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "set_attRagPausedSub": "{done} / {total}, 일부 검색 가능",
+  "@set_attRagPausedSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_attBridgeDown": "{name}이(가) 응답하지 않습니다",
+  "@set_attBridgeDown": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCheckedAt": "{detail} · {when} 확인",
+  "@set_attCheckedAt": {
+    "placeholders": {
+      "detail": {},
+      "when": {}
+    }
+  },
+  "set_attCredential": "“{name}” 자격 증명 만료",
+  "@set_attCredential": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCredentialSub": "업데이트해야 이 계정으로 전환할 수 있습니다",
+  "set_attDiskLow": "{disk} 디스크 공간 부족",
+  "@set_attDiskLow": {
+    "placeholders": {
+      "disk": {}
+    }
+  },
+  "set_attDiskLowSub": "{size} 남음, 자동 저장이 실패할 수 있음",
+  "@set_attDiskLowSub": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "set_attProvider": "{name} 연결 실패",
+  "@set_attProvider": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attProviderSub": "번역은 다른 공급자로 대체됩니다",
+  "set_attView": "보기",
+  "set_attGo": "확인",
+  "set_attUpdateCred": "업데이트",
+  "set_tileStorage": "저장소",
+  "set_tileImages": "이미지 {n}장",
+  "@set_tileImages": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileSaveTo": "{path}에 저장",
+  "@set_tileSaveTo": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "set_tileConnect": "연결",
+  "set_tileOnline": "{n}개 온라인",
+  "@set_tileOnline": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileKrita": "Krita 연결됨",
+  "set_tileKritaOff": "Krita 연결 안 됨",
+  "set_tileAgents": "외부 Agent {n}개",
+  "@set_tileAgents": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileComfyDown": "ComfyUI 응답 없음",
+  "set_tileComfyOk": "ComfyUI 정상",
+  "set_tileComfyOff": "ComfyUI 꺼짐",
+  "set_tileModels": "모델과 API",
+  "set_tileTranslateVia": "프롬프트 번역 · {ms}",
+  "@set_tileTranslateVia": {
+    "placeholders": {
+      "ms": {}
+    }
+  },
+  "set_tileAgentModel": "Agent · {model}",
+  "@set_tileAgentModel": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "set_tileProviders": "공급자 {p}개 · 모델 {m}개",
+  "@set_tileProviders": {
+    "placeholders": {
+      "p": {},
+      "m": {}
+    }
+  },
+  "set_tileNoModel": "구성 안 됨",
+  "set_tileRag": "시맨틱 검색",
+  "set_tileReady": "준비",
+  "set_tileRagDone": "{names} 완료",
+  "@set_tileRagDone": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "set_tileRagPaused": "{name} {pct} · 일시 정지",
+  "@set_tileRagPaused": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagBuilding": "{name} {pct} · 빌드 중",
+  "@set_tileRagBuilding": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagEmpty": "{name} 아직 색인 없음",
+  "@set_tileRagEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileRagError": "{name} 색인 실패",
+  "@set_tileRagError": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileUpscale": "로컬 업스케일",
+  "set_tileUpscaleModels": "모델 {n}개 사용 가능",
+  "@set_tileUpscaleModels": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileDefaultIs": "{name} (기본)",
+  "@set_tileDefaultIs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileSeedMissing": "SeedVR2 미설치",
+  "set_tileSeedReady": "SeedVR2 설치됨",
+  "set_tileProtect": "보호",
+  "set_tileProtectOn": "{on} / {all} 켜짐",
+  "@set_tileProtectOn": {
+    "placeholders": {
+      "on": {},
+      "all": {}
+    }
+  },
+  "set_tileInterval": "간격 {s}초 ± {p}%",
+  "@set_tileInterval": {
+    "placeholders": {
+      "s": {},
+      "p": {}
+    }
+  },
+  "set_tileIntervalOff": "생성 간격 제한 없음",
+  "set_recent": "최근 변경",
+  "set_recentSub": "자동 저장 · 되돌리기 가능",
+  "set_recentEmpty": "아직 변경 없음",
+  "set_quick": "자주 쓰는 스위치",
+  "set_quickSub": "여기서 바로 변경",
+  "set_quickDark": "다크 모드",
+  "set_quickChannel": "캔버스 비주얼 채널",
+  "set_searchTip": "{keys}로 설정을 검색하고 결과에서 바로 바꿀 수 있습니다.",
+  "@set_searchTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_accDesc": "NovelAI 계정, 기본 로그인, 구독을 관리합니다.",
+  "set_accSaved": "저장된 계정",
+  "set_accSavedSub": "클릭 한 번으로 전환합니다. 자격 증명은 이 기기에만 저장되며 내보내지지 않습니다.",
+  "set_accCurrent": "현재",
+  "set_accInUse": "사용 중",
+  "set_accSwitch": "전환",
+  "set_accEmail": "이메일",
+  "set_accToken": "토큰",
+  "set_accRenews": "갱신 {date}",
+  "@set_accRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accLastUsed": "마지막 사용 {date}",
+  "@set_accLastUsed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accNoSub": "구독 없음",
+  "set_accExpired": "자격 증명 만료",
+  "set_accEdit": "프로필 편집",
+  "set_accUpdate": "자격 증명 업데이트",
+  "set_accMakeDefault": "기본 계정으로",
+  "set_accDelete": "계정 삭제",
+  "set_accDeleteTitle": "“{name}” 계정을 삭제할까요?",
+  "@set_accDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_accDeleteBody": "이 기기에 저장된 자격 증명만 삭제되며 NovelAI 계정에는 영향이 없습니다.",
+  "set_accAdd": "계정 추가",
+  "set_accAddHint": "이메일과 비밀번호 또는 영구 토큰",
+  "set_accLogin": "로그인",
+  "set_accDefault": "기본 계정",
+  "set_accDefaultSub": "로그인 화면에서 미리 선택되는 계정",
+  "set_accAutoLogin": "시작 시 자동 로그인",
+  "set_accAutoLoginSub": "마지막 세션을 사용합니다. 끄면 매번 로그인 화면에서 시작합니다",
+  "set_accSub": "구독",
+  "set_accMonthly": "매월 {n} Anlas",
+  "@set_accMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accRemaining": "{n} 남음",
+  "@set_accRemaining": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accResets": "{date} 초기화",
+  "@set_accResets": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accPortal": "NovelAI 계정 페이지 열기",
+  "set_accSwitchHint": "전환해도 초안과 캔버스는 유지되며 대기 중인 생성은 원래 계정으로 완료됩니다.",
+  "set_apDesc": "테마, 글꼴, 알림. 변경은 즉시 저장되며 되돌릴 수 있습니다.",
+  "set_apTheme": "테마",
+  "set_apThemeSub": "시작 화면, 로그인, 모든 페이지에 적용됩니다.",
+  "set_apLight": "라이트",
+  "set_apDark": "다크",
+  "set_apSystem": "시스템",
+  "set_apSystemSub": "Windows 설정을 따름",
+  "set_apText": "글꼴",
+  "set_apFont": "인터페이스 글꼴",
+  "set_apFontSub": "숫자와 코드는 Geist Mono를 사용합니다",
+  "set_apScale": "설정 및 대화 상자 글자 크기",
+  "set_apScaleSub": "설정과 대화 상자만 확대합니다",
+  "set_apSampleTitle": "제목 · 생성 완료",
+  "set_apSampleBody": "본문 · 로컬 갤러리에 저장했습니다. 프롬프트를 계속 다듬어 보세요.",
+  "set_apSampleNote": "설명 · 슬라이더를 움직이면 바로 미리 봅니다.",
+  "set_apLanguage": "언어",
+  "set_apLanguageSub": "바로 적용됩니다",
+  "set_apMotion": "모션과 소리",
+  "set_apReduceMotion": "동작 줄이기",
+  "set_apReduceMotionSub": "캔버스 이동, 확대/축소, 패널 전환 애니메이션을 끕니다",
+  "set_apSound": "생성 완료 소리",
+  "set_apSoundSub": "배치가 끝나면 재생",
+  "set_apSoundFile": "소리 파일",
+  "set_apPreviewSound": "듣기",
+  "set_apNotify": "알림",
+  "set_apNotifySub": "오른쪽 위에 나타났다가 3초 뒤 사라집니다",
+  "set_apNotifyPreview": "미리 보기",
+  "set_apPreview": "미리 보기",
+  "set_apCurrent": "현재",
+  "set_apThemeTip": "{keys}로 언제든 라이트/다크를 전환합니다.",
+  "@set_apThemeTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_cvDesc": "기록, 뷰어, 무한 캔버스의 동작.",
+  "set_cvBrowse": "보기",
+  "set_cvHistoryClick": "기록 썸네일을 누를 때",
+  "set_cvOpenDetail": "상세 열기",
+  "set_cvOpenDetailSub": "뷰어로 한 장씩 자세히 봅니다",
+  "set_cvLinked": "연동 미리 보기",
+  "set_cvLinkedSub": "캔버스에서 선택하고 뷰어는 열지 않습니다",
+  "set_cvViewer": "결과 표시 위치",
+  "set_cvCanvas": "무한 캔버스",
+  "set_cvCanvasSub": "배치를 세로로 놓고 이동, 확대, 고정 비교",
+  "set_cvSimple": "간단한 뷰어",
+  "set_cvSimpleSub": "최신 이미지만 표시, 가장 가벼움",
+  "set_cvCanvasSec": "캔버스",
+  "set_cvLock": "캔버스 시점 고정",
+  "set_cvLockSub": "새 이미지가 나와도 시점을 옮기지 않습니다",
+  "set_cvFill": "새 이미지를 꽉 차게",
+  "set_cvFillSub": "실제 픽셀 대신 보이는 영역에 맞춥니다",
+  "set_cvChannel": "비주얼 채널",
+  "set_cvChannelSub": "캔버스 통로를 테마로 꾸미며, 기록을 넘기면 테마가 차례로 바뀝니다.",
+  "set_cvMode": "모드",
+  "set_cvMinTwo": "무작위 모드에는 테마가 두 개 이상 필요합니다.",
+  "set_cvSession": "이번 순서: {order}",
+  "@set_cvSession": {
+    "placeholders": {
+      "order": {}
+    }
+  },
+  "set_cvLevel": "농도",
+  "set_cvRuler": "시간 눈금",
+  "set_cvRulerSub": "배치 시간, 날짜 구분선, 오른쪽 눈금",
+  "set_cvMotion": "대기 중 움직임",
+  "set_cvMotionSub": "생성 중이거나 동작 줄이기를 켜면 멈춥니다",
+  "set_cvOps": "캔버스 조작",
+  "set_cvOpScroll": "위아래 이동",
+  "set_cvOpPan": "좌우 이동",
+  "set_cvOpZoom": "확대/축소",
+  "set_cvOpMove": "시점 이동",
+  "set_cvOpAll": "전체 보기",
+  "set_cvOpHome": "최신 배치로",
+  "set_cvWheel": "휠",
+  "set_cvChannelTip": "캔버스의 톱니바퀴에서도 같은 설정을 바꿀 수 있습니다.",
+  "set_scDesc": "페이지별로 묶었습니다. 단축키를 눌러 새 조합을 기록하고, 같은 페이지의 중복은 빨갛게 표시됩니다.",
+  "set_scSearch": "동작 또는 키 검색 (예: Ctrl+S)",
+  "set_scAll": "전체",
+  "set_scKeyboard": "키보드 배치",
+  "set_scKeyboardSub": "키를 눌러 목록을 거릅니다. 파란색은 사용 중, 빨간색은 충돌입니다.",
+  "set_scNoMod": "수정자 없음",
+  "set_scLayer": "{context} · {mod}을(를) 누른 상태",
+  "@set_scLayer": {
+    "placeholders": {
+      "context": {},
+      "mod": {}
+    }
+  },
+  "set_scLayerNone": "{context} · 수정자 없음",
+  "@set_scLayerNone": {
+    "placeholders": {
+      "context": {}
+    }
+  },
+  "set_scAction": "동작",
+  "set_scKeys": "단축키",
+  "set_scDefault": "기본값",
+  "set_scDefaultIs": "기본 {keys}",
+  "@set_scDefaultIs": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflict": "“{name}”과(와) 충돌",
+  "@set_scConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_scRecording": "새 조합을 누르세요…",
+  "set_scRecordHint": "Esc 취소 · Backspace 지우기",
+  "set_scRecord": "기록",
+  "set_scClear": "지우기",
+  "set_scDisplay": "표시",
+  "set_scEnabled": "단축키 사용",
+  "set_scInTooltips": "툴팁에 표시",
+  "set_scInMenus": "메뉴에 표시",
+  "set_scBadges": "탐색에 숫자 표시",
+  "set_scConflicts": "충돌",
+  "set_scConflictCount": "{n}개",
+  "@set_scConflictCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scConflictLine": "{keys}이(가) 두 동작에 사용됨",
+  "@set_scConflictLine": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflictSub": "{context}: {a}, {b}. 충돌하는 동안 둘 다 동작하지 않습니다.",
+  "@set_scConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_scFix": "{name}을(를) {keys}(으)로",
+  "@set_scFix": {
+    "placeholders": {
+      "name": {},
+      "keys": {}
+    }
+  },
+  "set_scNoConflict": "충돌 없음",
+  "set_scConfig": "단축키 구성",
+  "set_scResetAll": "모두 기본값으로",
+  "set_scResetAllTitle": "모든 단축키를 기본값으로 되돌릴까요?",
+  "set_scResetAllBody": "사용자 지정 {n}개가 복원됩니다.",
+  "@set_scResetAllBody": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scHelp": "단축키 도움말",
+  "set_scHelpTip": "{key}을(를) 누르면 해당 페이지의 단축키를 봅니다.",
+  "@set_scHelpTip": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "set_scEmpty": "일치하는 단축키가 없습니다",
+  "set_gnDesc": "Anlas 사용, 요청 간격, 프롬프트 입력 도우미를 설정합니다.",
+  "set_gnCost": "Anlas 보호",
+  "set_gnCostSub": "임계값을 넘는 요청은 보내기 전에 확인합니다.",
+  "set_gnWarn": "고비용 경고",
+  "set_gnWarnSub": "임계값을 넘으면 확인",
+  "set_gnThreshold": "임계값",
+  "set_gnEstimate": "현재: {model} · {w}×{h} · {steps}단계 · {n}장",
+  "@set_gnEstimate": {
+    "placeholders": {
+      "model": {},
+      "w": {},
+      "h": {},
+      "steps": {},
+      "n": {}
+    }
+  },
+  "set_gnWillWarn": "경고함",
+  "set_gnNoWarn": "경고 안 함",
+  "set_gnFree": "무료",
+  "set_gnPace": "요청 간격",
+  "set_gnPaceSub": "연속 요청 사이에 잠시 기다려 서버 부하를 줄입니다.",
+  "set_gnLimit": "생성 간격 제한",
+  "set_gnInterval": "간격",
+  "set_gnJitter": "무작위 변동",
+  "set_gnJitterSub": "간격을 무작위로 늘이거나 줄임",
+  "set_gnTimeline": "이 설정에서 요청 10회는 대략 이렇게 배치됩니다",
+  "set_gnInput": "프롬프트 입력",
+  "set_gnWheel": "휠로 가중치 조정",
+  "set_gnWheelSub": "태그 위에서 휠을 돌려 가중치를 바꿉니다",
+  "set_gnNoKey": "키 없음",
+  "set_gnRelated": "관련 태그 제안",
+  "set_gnRelatedSub": "함께 자주 쓰는 태그를 제안",
+  "set_gnRag": "시맨틱 태그 제안",
+  "set_gnRagSub": "시맨틱 검색이 제공하는 문맥 기반 제안",
+  "set_gnReady": "준비됨",
+  "set_gnNotReady": "준비 안 됨",
+  "set_gnGoSettings": "설정",
+  "set_gnTranslate": "프롬프트 번역",
+  "set_gnTranslateSub": "프롬프트 번역에 쓰는 모델",
+  "set_gnToday": "오늘",
+  "set_gnUsed": "Anlas 사용",
+  "set_gnNow": "지금",
+  "set_gnWarned": "고비용 경고",
+  "set_gnTimes": "{n}회",
+  "@set_gnTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_gnMaxSingle": "최대 단일 요청",
+  "set_gnFreeTip": "Opus 무료 생성은 이미 제외되며 임계값은 실제 차감량만 봅니다.",
+  "set_stDesc": "이미지 저장 위치, 갤러리가 읽는 폴더, 용량과 정리.",
+  "set_stUsage": "사용량",
+  "set_stFree": "{disk} 여유 {size}",
+  "@set_stFree": {
+    "placeholders": {
+      "disk": {},
+      "size": {}
+    }
+  },
+  "set_stRecount": "다시 계산",
+  "set_stCounting": "계산 중…",
+  "set_stImages": "이미지",
+  "set_stUpscaleModels": "업스케일 모델",
+  "set_stVibes": "Vibe 라이브러리",
+  "set_stThumbs": "썸네일 캐시",
+  "set_stRag": "시맨틱 색인",
+  "set_stDict": "사전과 캐시",
+  "set_stAgent": "Agent",
+  "set_stSave": "저장",
+  "set_stSavePath": "이미지 저장 위치",
+  "set_stAutoSave": "자동 저장",
+  "set_stAutoSaveSub": "생성 직후 저장합니다. 끄면 캔버스와 기록에만 남습니다",
+  "set_stAssets": "소재와 표시",
+  "set_stVibePath": "Vibe 라이브러리 위치",
+  "set_stQuality": "갤러리 화질",
+  "set_stQualitySub": "썸네일 표시 품질",
+  "set_stHigh": "고화질",
+  "set_stStandard": "표준",
+  "set_stRoots": "갤러리 폴더",
+  "set_stRootsSub": "어떤 폴더든 갤러리에서 보고 검색할 수 있으며 자동 저장 대상은 아닙니다.",
+  "set_stPrimary": "주 폴더",
+  "set_stCount": "{n}장",
+  "@set_stCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_stAddFolder": "폴더 추가",
+  "set_stImportIndex": "태그 색인 가져오기 (.jsonl)",
+  "set_stLastScan": "마지막 스캔 {when} · {n}장",
+  "@set_stLastScan": {
+    "placeholders": {
+      "when": {},
+      "n": {}
+    }
+  },
+  "set_stMaintain": "유지 관리",
+  "set_stRescan": "갤러리 다시 스캔",
+  "set_stRescanSub": "누락 확인, 새 파일 추가, 메타데이터 다시 읽기",
+  "set_stScan": "스캔",
+  "set_stScanning": "스캔 중…",
+  "set_stCleanThumbs": "썸네일 캐시 정리",
+  "set_stCleanThumbsSub": "한도를 넘는 썸네일을 오래된 순으로 지웁니다. 원본은 그대로입니다",
+  "set_stClean": "정리",
+  "set_stCleanTitle": "썸네일 캐시를 정리할까요?",
+  "set_stCleanBody": "한도를 넘는 썸네일을 지우고 필요할 때 다시 만듭니다.",
+  "set_stAppData": "앱 데이터 위치",
+  "set_stAppDataSub": "계정, 기록, 블록 데이터베이스 위치. 바꾼 뒤 다시 시작",
+  "set_stOpenFolders": "폴더 열기",
+  "set_stLogs": "로그",
+  "set_stAppDataShort": "앱 데이터",
+  "set_stDeleteTip": "이미지 이동·삭제는 갤러리에서 하며 개인정보와 보호의 확인 규칙을 따릅니다.",
+  "set_stRemoveRoot": "이 폴더 제거",
+  "set_dcDesc": "태그 데이터와 캐시. 자동 완성이 이상할 때 여기서 정리합니다.",
+  "set_dcTags": "태그 사전",
+  "set_dcTagsSub": "자동 완성, 태그 번역, 제안에 쓰는 로컬 데이터.",
+  "set_dcBase": "기본 사전",
+  "set_dcBaseValue": "태그 {n}개 · 데이터 {version}",
+  "@set_dcBaseValue": {
+    "placeholders": {
+      "n": {},
+      "version": {}
+    }
+  },
+  "set_dcCooc": "동시 출현 데이터",
+  "set_dcCoocSub": "함께 나오는 태그 제안에 사용",
+  "set_dcEntries": "{n}개",
+  "@set_dcEntries": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcTranslate": "태그 번역",
+  "set_dcTranslateSub": "사전에 번역이 없을 때 사용",
+  "set_dcCaches": "캐시",
+  "set_dcCachesSub": "지워도 필요할 때 다시 받으며 이미지와 설정에는 영향이 없습니다.",
+  "set_dcDanbooru": "Danbooru 캐시",
+  "set_dcDanbooruSub": "온라인 갤러리와 태그 위키 응답",
+  "set_dcTranslation": "AI 번역 캐시",
+  "set_dcTranslationSub": "이미 번역한 태그와 프롬프트",
+  "set_dcCacheSize": "{n}개 · {size}",
+  "@set_dcCacheSize": {
+    "placeholders": {
+      "n": {},
+      "size": {}
+    }
+  },
+  "set_dcClearTitle": "{name}을(를) 지울까요?",
+  "@set_dcClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_dcClearBody": "다음에 쓸 때 다시 받습니다.",
+  "set_dcStats": "캐시 통계",
+  "set_dcL1": "L1 메모리",
+  "set_dcL2": "L2 Hive",
+  "set_dcL3": "L3 SQLite",
+  "set_dcImagesUnit": "이미지 {n}장",
+  "@set_dcImagesUnit": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcAutoRefresh": "자동 새로 고침",
+  "set_dcUpdated": "마지막 업데이트 {when}",
+  "@set_dcUpdated": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcResetStats": "통계 초기화",
+  "set_dcTip": "여기 데이터는 모두 다시 만들 수 있습니다. 개인 데이터는 저장소 → 앱 데이터 위치에 있습니다.",
+  "set_mdDesc": "번역, 역추론, 태그 번역, Agent에 쓰는 LLM 서비스. 공급자를 추가하고 기능별로 모델을 고릅니다.",
+  "set_mdProviders": "공급자",
+  "set_mdTasks": "기능별 모델",
+  "set_mdPresets": "프롬프트 프리셋",
+  "set_mdRequests": "요청 기록",
+  "set_mdProviderCount": "공급자 {n}개",
+  "@set_mdProviderCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdModelCount": "모델 {n}개",
+  "@set_mdModelCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdDisabled": "사용 안 함",
+  "set_mdLocal": "로컬",
+  "set_mdLatency": "{ms} · {when}",
+  "@set_mdLatency": {
+    "placeholders": {
+      "ms": {},
+      "when": {}
+    }
+  },
+  "set_mdUnreachable": "연결 실패",
+  "set_mdName": "이름",
+  "set_mdBaseUrl": "기본 URL",
+  "set_mdApiKey": "API 키",
+  "set_mdApiKeyEmpty": "입력 안 됨",
+  "set_mdModels": "모델",
+  "set_mdRefreshModels": "공급자에서 가져오기",
+  "set_mdAddModel": "직접 추가",
+  "set_mdUsedFor": "{tasks}에 사용",
+  "@set_mdUsedFor": {
+    "placeholders": {
+      "tasks": {}
+    }
+  },
+  "set_mdRetired": "공급자 지원 종료",
+  "set_mdCapTools": "도구",
+  "set_mdCapVision": "비전",
+  "set_mdCapReasoning": "추론",
+  "set_mdAdvanced": "고급 요청 옵션",
+  "set_mdDelete": "공급자 삭제",
+  "set_mdDeleteTitle": "“{name}”을(를) 삭제할까요?",
+  "@set_mdDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_mdDeleteBody": "사용하던 기능은 다른 공급자로 전환됩니다.",
+  "set_mdRemoveModel": "모델 제거",
+  "set_mdTaskPrompt": "프롬프트 번역",
+  "set_mdTaskReverse": "프롬프트 역추론",
+  "set_mdTaskTag": "태그 번역",
+  "set_mdTaskWiki": "위키 번역",
+  "set_mdFeature": "기능",
+  "set_mdProvider": "공급자",
+  "set_mdModel": "모델",
+  "set_mdPreset": "프리셋",
+  "set_mdStatus": "상태",
+  "set_mdAvailable": "사용 가능",
+  "set_mdFallback": "첫 번째 사용 가능한 공급자로 대체",
+  "set_mdNotChosen": "선택 안 함",
+  "set_mdBuiltin": "내장",
+  "set_mdNewPreset": "새 프리셋",
+  "set_mdEdit": "편집",
+  "set_mdTime": "시간",
+  "set_mdTokens": "{n} 토큰",
+  "@set_mdTokens": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdFailed": "실패",
+  "set_mdOk": "성공",
+  "set_mdShowing": "최근 {n}개 / 전체 {total}개",
+  "@set_mdShowing": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "set_mdImport": "구성 가져오기",
+  "set_mdAddProvider": "공급자 추가",
+  "set_mdEmpty": "공급자가 없습니다",
+  "set_mdEmptySub": "추가하면 번역과 역추론을 쓸 수 있습니다.",
+  "set_agDesc": "사이드바 도우미의 모델, 지침, 확장, MCP 도구.",
+  "set_agModelSec": "모델",
+  "set_agModel": "Agent 모델",
+  "set_agModelSub": "사고 강도는 채팅 창에서 작업별로 조정합니다",
+  "set_agEnter": "Enter로 보내기",
+  "set_agEnterSub": "끄면 Ctrl+Enter로 보내고 Enter는 줄 바꿈",
+  "set_agMax": "작업당 최대 요청",
+  "set_agMaxSub": "반복을 막습니다",
+  "set_agTimesUnit": "회",
+  "set_agInstr": "지침",
+  "set_agInstrSub": "이 순서로 최종 프롬프트가 됩니다. 기존 채팅은 그대로, 이후 요청에 반영됩니다.",
+  "set_agOrderBuiltin": "내장 프롬프트",
+  "set_agOrderPrefix": "시스템 접두사",
+  "set_agOrderGlobal": "전역 지침",
+  "set_agOrderWorkspace": "작업 공간 지침",
+  "set_agOrderTools": "도구 맵",
+  "set_agGlobal": "전역 지침",
+  "set_agPrefix": "시스템 접두사",
+  "set_agPrefixHint": "매 요청 맨 앞에 넣는 고정 내용.",
+  "set_agBuiltin": "내장 프롬프트",
+  "set_agFinal": "최종 프롬프트 보기",
+  "set_agExt": "확장",
+  "set_agExtSub": "작업 공간별로 불러옵니다. 외부 확장은 로컬 코드를 실행하므로 신뢰할 수 있는 것만 추가하세요.",
+  "set_agStudioExt": "Studio 상호 작용",
+  "set_agStudioExtSub": "Studio 상태를 읽고 질문 카드로 답을 받습니다",
+  "set_agRequired": "내장 · 필수",
+  "set_agAddFile": "확장 파일 추가",
+  "set_agAddDir": "확장 폴더 추가",
+  "set_agMcp": "MCP 서버",
+  "set_agMcpSub": "CodeMode는 필요할 때 도구를 찾아 한꺼번에 컨텍스트에 넣지 않습니다.",
+  "set_agBuiltinTools": "NAI Studio · 내장 도구",
+  "set_agBuiltinToolsSub": "프롬프트, 블록, 위키, 이미지, 기록, 참조, 생성, 설정",
+  "set_agConnected": "연결됨 · 도구 {n}개",
+  "@set_agConnected": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agConnecting": "연결 중…",
+  "set_agNeedsLogin": "로그인 필요",
+  "set_agMcpError": "연결 실패",
+  "set_agMcpOff": "꺼짐",
+  "set_agAddMcp": "MCP 서버 추가",
+  "set_agTools": "도구",
+  "set_agToolCount": "{n}개",
+  "@set_agToolCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agToolsTip": "생성 도구는 항상 가격을 먼저 알리고 확인 후 실행합니다.",
+  "set_agData": "데이터 폴더",
+  "set_agWorkspaces": "작업 공간",
+  "set_agSessions": "세션",
+  "set_agCostTip": "요금은 공급자가 청구하며 Studio는 토큰 사용량만 보여 줍니다.",
+  "set_agOpen": "Agent 열기",
+  "set_agEditMcp": "편집",
+  "set_agRemoveMcp": "서버 제거",
+  "set_agRemoveExt": "확장 제거",
+  "set_rgDesc": "로컬 RAG로 태그 제안, 위키, 블록, 유사 이미지 검색에 쓰며 아무것도 올리지 않습니다.",
+  "set_rgReady": "시맨틱 검색 준비됨",
+  "set_rgOff": "시맨틱 검색 꺼짐",
+  "set_rgPartial": "일부 빌드 중",
+  "set_rgAllDone": "모두 완료",
+  "set_rgPool": "모든 소스가 하나의 로컬 벡터 저장소를 공유하며 증분 업데이트합니다.",
+  "set_rgStepRuntime": "런타임",
+  "set_rgStepEmbed": "임베딩",
+  "set_rgStepRerank": "재순위",
+  "set_rgStepDevice": "장치",
+  "set_rgSources": "소스",
+  "set_rgSourcesSub": "소스마다 따로 색인하고 켭니다. 일시 정지할 수 있고 끝난 부분은 바로 쓸 수 있습니다.",
+  "set_rgTags": "태그 제안",
+  "set_rgTagsSub": "의미, 동시 출현, 재순위를 결합하고 입력 칸마다 계산",
+  "set_rgWiki": "위키 시맨틱 검색",
+  "set_rgWikiSub": "로컬 위키. 이름 일치를 먼저, 의미 결과를 보충",
+  "set_rgBlocks": "프롬프트 블록",
+  "set_rgBlocksSub": "저장된, 보관하지 않은 블록의 제목, 태그, 본문",
+  "set_rgGallery": "갤러리 (멀티모달)",
+  "set_rgGallerySub": "내용으로 유사 이미지를 찾고 NAI 매개변수는 텍스트 색인을 만듭니다. 원본은 그대로",
+  "set_rgCount": "{done} / {total}",
+  "@set_rgCount": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgSegments": "{done} / {total} 조각",
+  "@set_rgSegments": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgGalleryCount": "이미지 {done} / {total} · 매개변수 {n} 조각",
+  "@set_rgGalleryCount": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "n": {}
+    }
+  },
+  "set_rgPaused": "일시 정지됨",
+  "set_rgBuilding": "빌드 중",
+  "set_rgError": "오류",
+  "set_rgClearIndex": "색인 지우기",
+  "set_rgClearTitle": "“{name}” 색인을 지울까요?",
+  "@set_rgClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_rgClearBody": "파생 색인만 지우며 원본 내용과 모델은 남습니다.",
+  "set_rgContext": "제안 문맥",
+  "set_rgContextSub": "둘 다 최대 120 Gemma 토큰, 태그 단위로 자릅니다.",
+  "set_rgRange": "샘플 범위",
+  "set_rgBefore": "커서 앞",
+  "set_rgAround": "커서 앞뒤",
+  "set_rgRuntime": "모델과 런타임",
+  "set_rgEmbedPath": "임베딩 모델 폴더",
+  "set_rgRerankPath": "재순위 모델 폴더",
+  "set_rgDevice": "실행 장치",
+  "set_rgAuto": "자동",
+  "set_rgEnv": "런타임",
+  "set_rgEnvSub": "독립 Python과 추론 패키지, 모델 가중치는 받지 않음",
+  "set_rgCheck": "확인",
+  "set_rgReinstall": "다시 설치",
+  "set_rgProgress": "색인 진행",
+  "set_rgOverall": "전체",
+  "set_rgShortTags": "태그",
+  "set_rgShortWiki": "위키",
+  "set_rgShortBlocks": "블록",
+  "set_rgShortGallery": "갤러리",
+  "set_rgTip": "소스를 지워도 파생 색인만 지워지고 원본과 모델은 남습니다.",
+  "set_rgNotReady": "시맨틱 검색을 아직 쓸 수 없음",
+  "set_rgNotReadySub": "런타임을 설치하고 두 모델 폴더를 지정하세요.",
+  "set_rgEmpty": "색인 없음",
+  "set_rgBuild": "색인 만들기",
+  "set_rgContinue": "이어서 만들기",
+  "set_rgSkipped": "{n}장 건너뜀",
+  "@set_rgSkipped": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanLoading": "색인할 내용을 세는 중…",
+  "set_rgPlanTags": "태그 {n}개와 별칭, 로컬 설명을 색인합니다.",
+  "@set_rgPlanTags": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanText": "자료 {docs}개를 텍스트 조각 {n}개로 색인합니다.",
+  "@set_rgPlanText": {
+    "placeholders": {
+      "docs": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanGallery": "이미지 {images}장과 NAI 매개변수 {n}조각을 따로 색인합니다.",
+  "@set_rgPlanGallery": {
+    "placeholders": {
+      "images": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanNote": "처음에는 오래 걸릴 수 있습니다. 언제든 멈출 수 있고 끝난 부분은 바로 쓸 수 있습니다.",
+  "set_rgPlanRebuild": "다시 만들면 이 소스의 기존 색인을 먼저 지웁니다.",
+  "set_rgStart": "시작",
+  "set_rgDownload": "다운로드",
+  "set_rgDownloading": "다운로드 중 {done} / {total}",
+  "@set_rgDownloading": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgDownloadingUnknown": "다운로드 중 {done}",
+  "@set_rgDownloadingUnknown": {
+    "placeholders": {
+      "done": {}
+    }
+  },
+  "set_rgVerifying": "파일 확인 중…",
+  "set_rgDiscover": "로컬 모델 찾기",
+  "set_rgDiscoverSub": "작업 공간의 models 폴더에서 EmbeddingGemma 2와 Qwen3-Reranker 0.6B를 찾아 두 폴더를 채웁니다.",
+  "set_rgFind": "찾기",
+  "set_rgModelsMissing": "찾지 못했습니다. 다운로드하거나 가중치 폴더를 직접 고르세요.",
+  "set_rgPython": "Python 인터프리터",
+  "set_rgPythonSub": "기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.",
+  "set_rgPythonAuto": "자동",
+  "set_rgPythonNone": "설치 안 됨",
+  "set_rgPythonPending": "아직 쓰지 않습니다. “이 인터프리터 사용”을 누르면 패키지를 다시 설치합니다.",
+  "set_rgUsePython": "이 인터프리터 사용",
+  "set_rgEnvReady": "준비됨",
+  "set_rgEnvMissing": "설치 안 됨",
+  "set_rgInstall": "설치",
+  "set_rgInstallHint": "Python과 추론 패키지를 받습니다(모델 가중치 제외). NVIDIA는 CUDA(수 GB), 그 외는 더 작은 CPU.",
+  "set_rgInstallCuda": "CUDA · NVIDIA",
+  "set_rgInstallCpu": "CPU",
+  "set_rgPhaseExisting": "기존 환경 확인 중",
+  "set_rgPhaseDownload": "설치 도구 다운로드 중",
+  "set_rgPhaseCreate": "Python 준비 중",
+  "set_rgPhaseCuda": "CUDA 구성 요소 설치 중",
+  "set_rgPhasePackages": "패키지 설치 중",
+  "set_rgPhaseCheck": "환경 확인 중",
+  "set_rgElapsed": "이 단계 {time}",
+  "@set_rgElapsed": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_upDesc": "로컬 업스케일 모델과 구성 요소를 관리합니다. 다운로드는 직접 시작해야 합니다.",
+  "set_upGpu": "{name} · {n} GB",
+  "@set_upGpu": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "set_upNoGpu": "외장 GPU를 찾지 못했습니다",
+  "set_upLocal": "이 PC에서 확대하며 Anlas를 쓰지 않습니다.",
+  "set_upEsrgan": "기본 모델",
+  "set_upEsrganSub": "Real-ESRGAN NCNN, 4배, 빠름, Vulkan GPU에서 동작.",
+  "set_upAnimeQuality": "애니 · 화질",
+  "set_upAnimeFast": "애니 · 빠름",
+  "set_upGeneral": "범용 · 사진",
+  "set_upBuiltin": "내장",
+  "set_upInstalled": "설치됨",
+  "set_upNotInstalled": "미설치",
+  "set_upFailed": "다운로드 실패",
+  "set_upImport": "모델 가져오기",
+  "set_upImportHint": "짝이 맞는 .param과 .bin 선택 (4배 Real-ESRGAN NCNN)",
+  "set_upSeed": "SeedVR2 확산 업스케일",
+  "set_upSeedSub": "화질이 좋고 느리며 NVIDIA가 필요합니다. VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다.",
+  "set_upSeed3b": "3B · 균형",
+  "set_upSeed3bSub": "품질과 자원의 균형, 일상용",
+  "set_upSeed7b": "7B · 고화질",
+  "set_upSeed7bSub": "더 높은 화질, VRAM과 시간이 더 필요",
+  "set_upSeed7bSharp": "7B · 선명",
+  "set_upSeed7bSharpSub": "더 선명한 디테일",
+  "set_upVram": "VRAM ≥ {n} GB",
+  "@set_upVram": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_upProgress": "{done} / {total} · {speed}/s",
+  "@set_upProgress": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "speed": {}
+    }
+  },
+  "set_upVramMode": "VRAM 모드",
+  "set_upRecommended": "권장",
+  "set_upLowVram": "저 VRAM",
+  "set_upOffload": "CPU 오프로드 층 수",
+  "set_upOffloadSub": "많을수록 VRAM을 아끼지만 느려지고 RAM을 더 씁니다",
+  "set_upTiling": "VAE 타일",
+  "set_upTilingSub": "작은 타일은 VRAM을 아끼고 겹침으로 이음새를 줄입니다",
+  "set_upNoise": "실험적 노이즈",
+  "set_upNoiseSub": "입력 {a} · 잠재 {b}; 0이면 현재와 같음",
+  "@set_upNoiseSub": {
+    "placeholders": {
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_upInputNoise": "입력 노이즈",
+  "set_upLatentNoise": "잠재 노이즈",
+  "set_upExperimental": "실험",
+  "set_upRtx": "RTX Video",
+  "set_upRtxSub": "NVIDIA RTX Video로 빠르게 확대 (약 64 MB).",
+  "set_upRtxName": "RTX Video Super Resolution",
+  "set_upRtxNeeds": "호환 RTX GPU와 드라이버 필요",
+  "set_upDefault": "기본 업스케일 방식",
+  "set_upDefaultTip": "생성 페이지의 로컬 업스케일이 이 방식을 씁니다. 메뉴에서 언제든 바꿀 수 있습니다.",
+  "set_upVramTip": "VRAM이 부족해도 모델이 자동으로 바뀌지 않습니다. 3B, 낮은 배율, 저 VRAM, VAE 타일을 써 보세요.",
+  "set_upRemoveTitle": "{name}을(를) 삭제할까요?",
+  "@set_upRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_upRemoveBody": "다시 쓰려면 새로 받아야 합니다.",
+  "set_brDesc": "이 PC의 다른 앱과 연동: Krita, 외부 Agent, ComfyUI.",
+  "set_brKritaSub": "Krita에서 생성하고 결과를 레이어로 받습니다.",
+  "set_brKrita": "Krita 브리지",
+  "set_brLoopback": "127.0.0.1 연결만 받습니다",
+  "set_brConnected": "연결됨",
+  "set_brWaiting": "Krita 연결 대기",
+  "set_brRegenerate": "세션 다시 만들기",
+  "set_brDiscovery": "검색 파일",
+  "set_brAgents": "외부 Agent",
+  "set_brAgentsSub": "Claude Code, Codex 같은 로컬 Agent가 매개변수를 읽고 쓰고 생성할 수 있습니다.",
+  "set_brLocal": "로컬 브리지",
+  "set_brClients": "Agent {n}개 연결됨",
+  "@set_brClients": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brNoClients": "연결된 Agent 없음",
+  "set_brTakeover": "연결 안내 복사",
+  "set_brEnd": "연결 끊기",
+  "set_brActivity": "최근 활동",
+  "set_brComfySub": "ComfyUI 워크플로를 가져와 Studio에서 실행합니다.",
+  "set_brComfyEnable": "ComfyUI 사용",
+  "set_brComfyUrl": "서버 주소",
+  "set_brComfyFailed": "연결 실패: {reason} ({when}). ComfyUI가 실행 중인지 확인하세요.",
+  "@set_brComfyFailed": {
+    "placeholders": {
+      "reason": {},
+      "when": {}
+    }
+  },
+  "set_brComfyOk": "연결 정상 ({when})",
+  "@set_brComfyOk": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_brStatus": "상태",
+  "set_brAgentsShort": "{n}개",
+  "@set_brAgentsShort": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brOff": "꺼짐",
+  "set_brNoResponse": "응답 없음",
+  "set_brTip": "브리지는 루프백 주소에서만 대기하며 LAN에 공개되지 않습니다. 프록시는 적용되지 않습니다.",
+  "set_nwDesc": "프록시와 연결 상태.",
+  "set_nwProxy": "프록시",
+  "set_nwProxySub": "NovelAI, Danbooru, GitHub 업데이트, 모델 서비스에 사용합니다.",
+  "set_nwUse": "프록시 사용",
+  "set_nwMode": "방식",
+  "set_nwSystem": "시스템",
+  "set_nwManual": "수동",
+  "set_nwAddress": "주소",
+  "set_nwDetected": "시스템 프록시: {addr}. 외부 요청만 거치며 로컬 브리지와 모델은 거치지 않습니다.",
+  "@set_nwDetected": {
+    "placeholders": {
+      "addr": {}
+    }
+  },
+  "set_nwNoSystem": "시스템 프록시를 찾지 못했습니다. 외부 요청만 프록시를 거칩니다.",
+  "set_nwCheck": "연결 확인",
+  "set_nwCheckSub": "각 서비스 연결을 한 번에 확인해 네트워크 문제인지 구분합니다.",
+  "set_nwNaiImage": "NovelAI 이미지",
+  "set_nwNaiApi": "NovelAI 계정",
+  "set_nwDanbooru": "Danbooru",
+  "set_nwUpdate": "앱 업데이트",
+  "set_nwCheckAll": "모두 확인",
+  "set_nwChecked": "마지막 확인 {when}",
+  "@set_nwChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_nwViaProxy": "프록시 경유",
+  "set_nwDirect": "직접 연결",
+  "set_nwNeverChecked": "아직 확인 안 함",
+  "set_nwFail": "실패",
+  "set_nwTip": "프록시 변경은 다시 시작해야 적용되며 자동으로 다시 시작하지 않습니다.",
+  "set_pvDesc": "공유할 때 포함되는 정보와 확인이 필요한 작업.",
+  "set_pvProtect": "보호",
+  "set_pvStrip": "공유 시 메타데이터 제거",
+  "set_pvStripSub": "복사하거나 끌어낼 때 프롬프트와 매개변수를 지웁니다. 원본은 그대로",
+  "set_pvExternal": "외부 전송 전 확인",
+  "set_pvExternalSub": "다른 앱이나 사이트로 보내기 전에 확인",
+  "set_pvDanger": "위험한 작업 확인",
+  "set_pvDangerSub": "삭제, 비우기, 덮어쓰기 전에 확인",
+  "set_pvOverwrite": "저장 시 덮어쓰지 않음",
+  "set_pvOverwriteSub": "같은 이름이 있으면 자동으로 이름 변경",
+  "set_pvBlacklist": "온라인 갤러리 차단 목록",
+  "set_pvBlacklistSub": "이 태그가 있는 이미지는 온라인 갤러리에서 숨깁니다.",
+  "set_pvAddTag": "태그 추가…",
+  "set_pvSync": "Danbooru 차단 목록 동기화",
+  "set_pvSyncSub": "{user} 로그인됨 · 마지막 동기화 {when}",
+  "@set_pvSyncSub": {
+    "placeholders": {
+      "user": {},
+      "when": {}
+    }
+  },
+  "set_pvSyncNever": "{user} 로그인됨 · 동기화 안 함",
+  "@set_pvSyncNever": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "set_pvSyncSignedOut": "Danbooru에 로그인하면 동기화할 수 있습니다",
+  "set_pvSyncNow": "지금 동기화",
+  "set_pvSyncing": "동기화 중…",
+  "set_pvAutoSync": "시작 시 자동 동기화",
+  "set_pvExported": "내보내기에 포함되는 것",
+  "set_pvIncPrefs": "모양, 조작, 입력 설정",
+  "set_pvIncRules": "보호 규칙과 차단 목록",
+  "set_pvIncCred": "계정 자격 증명",
+  "set_pvIncPaths": "파일 경로",
+  "set_pvIncDrafts": "초안과 모델 연결",
+  "set_pvTip": "제거는 복사와 끌어내기에만 적용되며 저장한 원본은 매개변수를 유지합니다.",
+  "set_bkDesc": "다른 기기로 설정을 옮기거나 기본값으로 돌립니다. 초기화 전에 항상 백업합니다.",
+  "set_bkPrefs": "환경 설정",
+  "set_bkPrefsSub": "모양, 조작, 입력, 보호 규칙. 자격 증명, 경로, 초안, 모델 연결은 포함하지 않습니다.",
+  "set_bkExport": "내보내기",
+  "set_bkExportSub": "studio-preferences.json으로 저장",
+  "set_bkExportBtn": "내보내기…",
+  "set_bkImport": "가져오기",
+  "set_bkImportSub": "적용 전에 바뀌는 항목 수를 보여 주고 백업합니다",
+  "set_bkImportBtn": "파일 선택…",
+  "set_bkUndoImport": "마지막 가져오기 취소",
+  "set_bkUndoImportSub": "{when} 가져오기 이전으로",
+  "@set_bkUndoImportSub": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_bkNoImport": "가져온 적 없음",
+  "set_bkRestore": "복원",
+  "set_bkOther": "기타 구성",
+  "set_bkShortcutsSub": "동작 {n}개, 사용자 지정 {m}개",
+  "@set_bkShortcutsSub": {
+    "placeholders": {
+      "n": {},
+      "m": {}
+    }
+  },
+  "set_bkModelsSub": "공급자, 기능별 모델, 프리셋. API 키는 기본적으로 제외",
+  "set_bkCopyConfig": "구성 복사",
+  "set_bkReset": "기본값으로",
+  "set_bkResetSub": "초기화할 범위를 고릅니다. 나머지는 그대로입니다.",
+  "set_bkScopeAppearance": "모양과 조작",
+  "set_bkScopeAppearanceSub": "테마, 글꼴, 언어, 캔버스, 알림",
+  "set_bkScopeInput": "입력과 자동 완성",
+  "set_bkScopeInputSub": "휠 가중치, 관련 태그, 자동 완성",
+  "set_bkScopeProtect": "개인정보와 생성 보호",
+  "set_bkScopeProtectSub": "메타데이터, 확인, 고비용 경고, 간격",
+  "set_bkScopeShortcuts": "단축키",
+  "set_bkScopeShortcutsSub": "전체 {n}개 동작",
+  "@set_bkScopeShortcutsSub": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_bkResetBtn": "선택 항목 초기화…",
+  "set_bkResetHint": "먼저 백업하며 되돌릴 수 있습니다",
+  "set_bkResetTitle": "선택한 설정을 기본값으로 되돌릴까요?",
+  "set_bkResetBody": "{scopes}이(가) 기본값으로 돌아갑니다. 현재 설정은 먼저 백업됩니다.",
+  "@set_bkResetBody": {
+    "placeholders": {
+      "scopes": {}
+    }
+  },
+  "set_bkAuto": "자동 백업",
+  "set_bkAutoSub": "최근 5개 보관",
+  "set_bkKindImport": "가져오기 전",
+  "set_bkKindReset": "초기화 전",
+  "set_bkKindUpgrade": "업데이트 전",
+  "set_bkNoBackups": "아직 백업 없음",
+  "set_bkRestoreTitle": "“{name}” 백업으로 복원할까요?",
+  "@set_bkRestoreTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_bkRestoreBody": "현재 설정은 먼저 백업되어 다시 되돌릴 수 있습니다.",
+  "set_abDesc": "버전, 업데이트, 진단.",
+  "set_abNew": "새 버전 {version}",
+  "@set_abNew": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abLatest": "최신 버전",
+  "set_abChecking": "업데이트 확인 중…",
+  "set_abCheckFailed": "업데이트 확인 실패",
+  "set_abDownloading": "다운로드 중 {pct}",
+  "@set_abDownloading": {
+    "placeholders": {
+      "pct": {}
+    }
+  },
+  "set_abChecked": "마지막 확인 {when}",
+  "@set_abChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_abNotes": "{version} 변경 사항",
+  "@set_abNotes": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abInstall": "다운로드 및 설치",
+  "set_abChangelog": "전체 변경 기록",
+  "set_abPrerelease": "사전 릴리스 포함",
+  "set_abCheck": "업데이트 확인",
+  "set_abDiag": "진단",
+  "set_abLog": "로그 파일 기록",
+  "set_abLogSub": "문제를 조사할 때 켭니다. API 키와 자격 증명은 기록하지 않습니다",
+  "set_abLogDir": "로그 폴더",
+  "set_abCopyDiag": "진단 정보 복사",
+  "set_abCopyDiagSub": "버전, 시스템, GPU, 서비스 상태",
+  "set_abProject": "프로젝트",
+  "set_abRepo": "소스 코드",
+  "set_abUpstream": "원본 프로젝트",
+  "set_abUpstreamSub": "NAI Launcher를 바탕으로 개발했으며 원작자 표기를 유지합니다",
+  "set_abFonts": "글꼴과 소재",
+  "set_abLicenses": "라이선스",
+  "set_abView": "보기",
+  "set_abSystem": "시스템",
+  "set_srQuoted": "“{query}”",
+  "@set_srQuoted": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_srBalance": "Anlas 잔액",
+  "set_srSubscription": "구독과 Anlas",
+  "set_agEnable": "사용",
+  "set_agDisable": "사용 안 함",
+  "set_listSep": ", ",
+  "set_on": "켜짐",
+  "set_off": "꺼짐",
+  "set_unitSeconds": "초"
 }

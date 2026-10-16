@@ -278,6 +278,13 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
 
   /// 设置默认账号
   Future<void> setDefaultAccount(String accountId) async {
+    await setDefaultAccountId(accountId);
+  }
+
+  Future<void> setDefaultAccountId(String? accountId) async {
+    if (accountId != null && !state.accounts.any((a) => a.id == accountId)) {
+      throw ArgumentError.value(accountId, 'accountId');
+    }
     final newAccounts = state.accounts.map((a) {
       return a.copyWith(isDefault: a.id == accountId);
     }).toList();

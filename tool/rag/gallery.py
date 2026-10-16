@@ -216,9 +216,14 @@ class GalleryEngine:
             'expires':time.monotonic()+1800,'plans':plans,'source_signature':self.sources.signature()}
         return {'plan_id':self.plan['plan_id'],**self.status()}
 
-    def build(self,plan_id,cancelled):
+    def validate_plan(self,plan_id):
         if not self.plan or self.plan['plan_id']!=plan_id or self.plan['expires']<time.monotonic(): raise ValueError('invalid_plan')
         if self.plan['source_signature']!=self.sources.signature(): raise ValueError('source_changed')
+        for engine,plan in zip((self.visual,self.text),self.plan['plans']):
+            engine.validate_plan(plan['plan_id'])
+
+    def build(self,plan_id,cancelled):
+        self.validate_plan(plan_id)
         plans = self.plan['plans'];self.plan = None
         generators = [engine.build(plan['plan_id'],cancelled) for engine,plan in zip((self.visual,self.text),plans)]
         processed = [0,0];active = {0,1}

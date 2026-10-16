@@ -469,9 +469,17 @@ int? anlasBalance(Ref ref) {
 @Riverpod(keepAlive: true)
 class AnlasBalanceWatcher extends _$AnlasBalanceWatcher {
   int? _lastBalance;
+  String? _lastAccountId;
 
   @override
   void build() {
+    final account = ref.watch(
+      authNotifierProvider.select((state) => state.accountId),
+    );
+    if (account != _lastAccountId) {
+      _lastBalance = null;
+      _lastAccountId = account;
+    }
     final currentBalance = ref.watch(anlasBalanceProvider);
 
     // 检测余额减少

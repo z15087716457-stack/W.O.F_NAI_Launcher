@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import '../../core/autocomplete/completion_models.dart';
 import '../../core/database/asset_database_manager.dart';
 import '../../core/rag/rag_client.dart';
+import '../../core/rag/rag_maintenance.dart';
 import '../../core/rag/rag_settings.dart';
 import '../../core/rag/rag_runtime.dart';
 import '../../core/rag/rag_runtime_probe.dart';
@@ -174,6 +175,19 @@ class RagController extends Notifier<RagStatus> {
   final _finishedJobs = <String>{};
   Future<void> _snapshotWrites = Future.value();
   Object? _refreshToken;
+  final _plans = <String, ({RagSource source, int epoch, DateTime expires})>{};
+
+  Future<T> _maintain<T>(Future<T> Function() action) async {
+    final release = ref
+        .read(ragMaintenanceProvider)
+        .claim(indexBusy: state.anyBusy || state.installPhase != null);
+    try {
+      return await action();
+    } finally {
+      release();
+    }
+  }
+
   @override
   RagStatus build() {
     final unregister = DesktopAppShutdownService.registerCleanup(() async {
@@ -218,6 +232,7 @@ class RagController extends Notifier<RagStatus> {
     _connecting = null;
     _refreshToken = null;
     _finishedJobs.clear();
+    _plans.clear();
     final old = _client;
     _client = null;
     await _events?.cancel();
@@ -450,6 +465,7 @@ class RagController extends Notifier<RagStatus> {
     if (!_enabled ||
         _disposed ||
         _refreshToken != null ||
+        ref.read(ragMaintenanceProvider).busy ||
         state.installPhase != null) {
       return;
     }
@@ -470,13 +486,14 @@ class RagController extends Notifier<RagStatus> {
       for (final source in RagSource.values) {
         final value = sources[source.name] as Map?;
         if (autoUpdate &&
+            !state.anyBusy &&
             value?['auto_update_allowed'] == true &&
             value?['complete'] != true &&
             state.forSource(source).jobId == null &&
             !state.suspended &&
             _gpuHolds == 0 &&
             ref.read(ragSettingsProvider).enabledFor(source)) {
-          final plan = await c.request('preview', {'source': source.name});
+          final plan = await preview(source: source);
           await start(plan['plan_id'] as String, source: source);
         }
       }
@@ -493,9 +510,13 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
-  Future<Map<String, dynamic>> preview({
-    RagSource source = RagSource.tags,
-  }) async {
+  Future<Map<String, dynamic>> preview({RagSource source = RagSource.tags}) =>
+      _maintain(() => _preview(source));
+
+  void discardPlan(String id) => _plans.remove(id);
+
+  Future<Map<String, dynamic>> _preview(RagSource source) async {
+    final epoch = _epoch;
     final c = await _connect();
     if (source == RagSource.blocks) {
       await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
@@ -503,21 +524,48 @@ class RagController extends Notifier<RagStatus> {
     if (source == RagSource.gallery) {
       await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
     }
-    return c.request('preview', {'source': source.name});
+    final plan = await c.request('preview', {'source': source.name});
+    if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+    _plans.removeWhere((_, value) => value.source == source);
+    _plans[plan['plan_id'] as String] = (
+      source: source,
+      epoch: epoch,
+      expires: DateTime.now().add(const Duration(minutes: 29)),
+    );
+    return plan;
   }
 
   Future<void> start(
     String planId, {
     bool rebuild = false,
     RagSource source = RagSource.tags,
+  }) => _maintain(() => _start(planId, rebuild: rebuild, source: source));
+
+  Future<void> _start(
+    String planId, {
+    required bool rebuild,
+    required RagSource source,
   }) async {
     final epoch = _epoch;
+    final plan = _plans[planId];
+    if (plan == null ||
+        plan.source != source ||
+        plan.epoch != epoch ||
+        plan.expires.isBefore(DateTime.now())) {
+      throw const RagException('invalid_plan');
+    }
     try {
       final c = await _connect();
-      if (rebuild) await c.request('clear', {'source': source.name});
+      if (_disposed ||
+          epoch != _epoch ||
+          !ref.read(ragSettingsProvider).enabledFor(source)) {
+        throw const RagException('cancelled');
+      }
+      _plans.remove(planId);
       final result = await c.request('start', {
         'plan_id': planId,
         'source': source.name,
+        'rebuild': rebuild,
       });
       if (!_disposed &&
           epoch == _epoch &&
@@ -552,30 +600,45 @@ class RagController extends Notifier<RagStatus> {
     }
   }
 
-  Future<void> resume({RagSource source = RagSource.tags}) async {
+  Future<void> resume({RagSource source = RagSource.tags}) =>
+      _maintain(() => _resume(source));
+
+  Future<void> _resume(RagSource source) async {
     final epoch = _epoch;
     final id = state.forSource(source).jobId;
     if (id == null) {
-      final p = await preview(source: source);
-      await start(p['plan_id'] as String, source: source);
+      final p = await _preview(source);
+      await _start(p['plan_id'] as String, rebuild: false, source: source);
       return;
     }
-    await (await _connect()).request('resume', {
-      'job_id': id,
-      'source': source.name,
-    });
+    final client = await _connect();
+    if (_disposed ||
+        epoch != _epoch ||
+        !ref.read(ragSettingsProvider).enabledFor(source)) {
+      throw const RagException('cancelled');
+    }
+    await client.request('resume', {'job_id': id, 'source': source.name});
     if (!_disposed && epoch == _epoch) {
       _change(source, (s) => s.copyWith(phase: 'building', busy: true));
     }
   }
 
-  Future<void> clear({RagSource source = RagSource.tags}) async {
+  Future<void> clear({RagSource source = RagSource.tags}) =>
+      _maintain(() => _clear(source));
+
+  Future<void> _clear(RagSource source) async {
     final epoch = _epoch;
     final c = await _connect();
+    if (_disposed ||
+        epoch != _epoch ||
+        !ref.read(ragSettingsProvider).enabledFor(source)) {
+      throw const RagException('cancelled');
+    }
     final result = await c.request('clear', {'source': source.name});
     if (_disposed || epoch != _epoch) return;
     _applyIndex(result, source);
     _change(source, (s) => s.copyWith(clearJob: true));
+    _plans.removeWhere((_, plan) => plan.source == source);
   }
 
   Future<void> suspendForGpu() async {
@@ -835,6 +898,9 @@ class RagController extends Notifier<RagStatus> {
 
   Future<void> installRuntime({required bool cuda}) async {
     if (_installer != null || state.installPhase != null) return;
+    final release = ref
+        .read(ragMaintenanceProvider)
+        .claim(indexBusy: state.anyBusy);
     final selectedPython = ref.read(ragSettingsProvider).python;
     _runtimeInstallCancelled = false;
     state = state.copyWith(
@@ -886,6 +952,7 @@ class RagController extends Notifier<RagStatus> {
     } finally {
       installer?.dispose();
       _installer = null;
+      release();
       if (!_disposed) {
         state = state.copyWith(clearInstall: true);
         ref.invalidate(ragRuntimeInfoProvider);

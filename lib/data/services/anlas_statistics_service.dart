@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/utils/app_logger.dart';
+import 'anlas_usage_metrics.dart';
 
 part 'anlas_statistics_service.g.dart';
 
@@ -95,6 +96,13 @@ class AnlasStatisticsService extends _$AnlasStatisticsService {
     _dailyStats[key] = (_dailyStats[key] ?? 0) + cost;
 
     await _saveStats();
+    try {
+      await ref
+          .read(anlasUsageMetricsProvider.notifier)
+          .record(cost: cost, at: targetDate);
+    } catch (_) {
+      // Detail telemetry never blocks billing history or generation.
+    }
     AppLogger.d(
       'Recorded $cost Anlas on $key, total: ${_dailyStats[key]}',
       'AnlasStats',

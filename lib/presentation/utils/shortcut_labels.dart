@@ -1,0 +1,144 @@
+import '../../l10n/app_localizations.dart';
+import '../../core/shortcuts/default_shortcuts.dart';
+
+String settingsShortcutLabel(AppLocalizations l10n, String key) {
+  switch (key) {
+    case 'shortcut_action_navigate_to_generation':
+      return l10n.shortcut_action_navigate_to_generation;
+    case 'shortcut_action_navigate_to_local_gallery':
+      return l10n.shortcut_action_navigate_to_local_gallery;
+    case 'shortcut_action_navigate_to_online_gallery':
+      return l10n.shortcut_action_navigate_to_online_gallery;
+    case 'shortcut_action_navigate_to_tag_library':
+      return l10n.shortcut_action_navigate_to_tag_library;
+    case 'shortcut_action_navigate_to_statistics':
+      return l10n.shortcut_action_navigate_to_statistics;
+    case 'shortcut_action_navigate_to_settings':
+      return l10n.shortcut_action_navigate_to_settings;
+    case 'shortcut_action_navigate_to_vibe_library':
+      return l10n.vibeLibrary_title;
+    case 'shortcut_action_navigate_to_style_explore':
+      return l10n.nav_styleExplore;
+    case 'shortcut_action_navigate_to_precise_ref_library':
+      return l10n.nav_preciseRefLibrary;
+    case 'shortcut_action_navigate_to_tag_wiki':
+      return l10n.nav_tagWiki;
+    case 'shortcut_action_vibe_import':
+      return l10n.common_import;
+    case 'shortcut_action_vibe_export':
+    case 'shortcut_action_vibe_detail_export':
+      return l10n.common_export;
+    case 'shortcut_action_vibe_detail_rename':
+      return l10n.shortcut_action_vibe_detail_rename;
+    case 'shortcut_action_vibe_detail_delete':
+      return l10n.common_delete;
+    case 'shortcut_action_vibe_detail_toggle_favorite':
+      return l10n.shortcut_action_toggle_favorite;
+    case 'shortcut_action_vibe_detail_send_to_generation':
+      return l10n.vibeLibrary_sendToGeneration;
+    case 'shortcut_action_vibe_detail_prev_sub_vibe':
+      return l10n.shortcut_action_vibe_detail_prev_sub_vibe;
+    case 'shortcut_action_vibe_detail_next_sub_vibe':
+      return l10n.shortcut_action_vibe_detail_next_sub_vibe;
+    case 'shortcut_action_generate_image':
+      return l10n.shortcut_action_generate_image;
+    case 'shortcut_action_generation_prev_image':
+      return l10n.shortcut_action_generation_prev_image;
+    case 'shortcut_action_generation_next_image':
+      return l10n.shortcut_action_generation_next_image;
+    case 'shortcut_action_cancel_generation':
+      return l10n.shortcut_action_cancel_generation;
+    case 'shortcut_action_clear_prompt':
+      return l10n.shortcut_action_clear_prompt;
+    case 'shortcut_action_toggle_prompt_mode':
+      return l10n.shortcut_action_toggle_prompt_mode;
+    case 'shortcut_action_open_tag_library':
+      return l10n.shortcut_action_open_tag_library;
+    case 'shortcut_action_save_image':
+      return l10n.shortcut_action_save_image;
+    case 'shortcut_action_upscale_image':
+      return l10n.shortcut_action_upscale_image;
+    case 'shortcut_action_copy_image':
+      return l10n.shortcut_action_copy_image;
+    case 'shortcut_action_fullscreen_preview':
+      return l10n.shortcut_action_fullscreen_preview;
+    case 'shortcut_action_open_params_panel':
+      return l10n.shortcut_action_open_params_panel;
+    case 'shortcut_action_open_history_panel':
+      return l10n.shortcut_action_open_history_panel;
+    case 'shortcut_action_reuse_params':
+      return l10n.shortcut_action_reuse_params;
+    case 'shortcut_action_previous_image':
+      return l10n.shortcut_action_previous_image;
+    case 'shortcut_action_next_image':
+      return l10n.shortcut_action_next_image;
+    case 'shortcut_action_zoom_in':
+      return l10n.shortcut_action_zoom_in;
+    case 'shortcut_action_zoom_out':
+      return l10n.shortcut_action_zoom_out;
+    case 'shortcut_action_reset_zoom':
+      return l10n.shortcut_action_reset_zoom;
+    case 'shortcut_action_toggle_fullscreen':
+      return l10n.shortcut_action_toggle_fullscreen;
+    case 'shortcut_action_close_viewer':
+      return l10n.shortcut_action_close_viewer;
+    case 'shortcut_action_toggle_favorite':
+      return l10n.shortcut_action_toggle_favorite;
+    case 'shortcut_action_copy_prompt':
+      return l10n.shortcut_action_copy_prompt;
+    case 'shortcut_action_reuse_gallery_params':
+      return l10n.shortcut_action_reuse_gallery_params;
+    case 'shortcut_action_delete_image':
+      return l10n.shortcut_action_delete_image;
+    case 'shortcut_action_previous_page':
+      return l10n.shortcut_action_previous_page;
+    case 'shortcut_action_next_page':
+      return l10n.shortcut_action_next_page;
+    case 'shortcut_action_refresh_gallery':
+      return l10n.shortcut_action_refresh_gallery;
+    case 'shortcut_action_focus_search':
+      return l10n.shortcut_action_focus_search;
+    case 'shortcut_action_enter_selection_mode':
+      return l10n.shortcut_action_enter_selection_mode;
+    case 'shortcut_action_clear_filter':
+      return l10n.shortcut_action_clear_filter;
+    case 'shortcut_action_toggle_category_panel':
+      return l10n.shortcut_action_toggle_category_panel;
+    case 'shortcut_action_jump_to_date':
+      return l10n.shortcut_action_jump_to_date;
+    case 'shortcut_action_open_folder':
+      return l10n.shortcut_action_open_folder;
+    case 'shortcut_action_show_shortcut_help':
+      return l10n.shortcut_action_show_shortcut_help;
+    case 'shortcut_action_minimize_to_tray':
+      return l10n.shortcut_action_minimize_to_tray;
+    case 'shortcut_action_quit_app':
+      return l10n.shortcut_action_quit_app;
+    case 'shortcut_action_toggle_theme':
+      return l10n.shortcut_action_toggle_theme;
+    default:
+      return key.replaceAll('shortcut_action_', '');
+  }
+}
+
+String settingsShortcutContextLabel(
+  AppLocalizations l10n,
+  ShortcutContext shortcutContext,
+) {
+  switch (shortcutContext) {
+    case ShortcutContext.global:
+      return l10n.shortcut_context_global;
+    case ShortcutContext.generation:
+      return l10n.shortcut_context_generation;
+    case ShortcutContext.gallery:
+      return l10n.shortcut_context_gallery;
+    case ShortcutContext.viewer:
+      return l10n.shortcut_context_viewer;
+    case ShortcutContext.settings:
+      return l10n.shortcut_context_settings;
+    case ShortcutContext.input:
+      return l10n.shortcut_context_input;
+    case ShortcutContext.vibeDetail:
+      return l10n.shortcut_context_vibe_detail;
+  }
+}

@@ -115,6 +115,66 @@ void main() {
     'collection routing with a real JSON child',
     () {
       test(
+        'discarded and consumed plans cannot start or clear a live index',
+        () async {
+          final plan = await controller.preview(source: RagSource.wiki);
+          controller.discardPlan(plan['plan_id'] as String);
+          await expectLater(
+            controller.start(
+              plan['plan_id'] as String,
+              rebuild: true,
+              source: RagSource.wiki,
+            ),
+            throwsA(isA<RagException>()),
+          );
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .indexed,
+            8,
+          );
+          final next = await controller.preview(source: RagSource.wiki);
+          await controller.start(
+            next['plan_id'] as String,
+            source: RagSource.wiki,
+          );
+          await expectLater(
+            controller.start(
+              next['plan_id'] as String,
+              rebuild: true,
+              source: RagSource.wiki,
+            ),
+            throwsA(isA<RagException>()),
+          );
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .indexed,
+            8,
+          );
+        },
+      );
+      test('a plan cannot be used for another collection', () async {
+        final plan = await controller.preview(source: RagSource.wiki);
+        await expectLater(
+          controller.start(
+            plan['plan_id'] as String,
+            rebuild: true,
+            source: RagSource.blocks,
+          ),
+          throwsA(isA<RagException>()),
+        );
+        expect(
+          container
+              .read(ragControllerProvider)
+              .forSource(RagSource.blocks)
+              .indexed,
+          8,
+        );
+      });
+      test(
         'gallery transport uses an ephemeral scope and independent status',
         () async {
           await container

@@ -847,9 +847,16 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
                 .toDouble()
                 .clamp(1.0, 4.0),
         localSeedvr2Model:
-            _storage.getSetting(StorageKeys.localSeedvr2Model) == 'seedvr2-7b'
-            ? 'seedvr2-7b'
-            : 'seedvr2-3b',
+            advancedUpscaleCatalog
+                .where(
+                  (model) =>
+                      model.method == LocalUpscaleMethod.seedvr2 &&
+                      model.id ==
+                          _storage.getSetting(StorageKeys.localSeedvr2Model),
+                )
+                .firstOrNull
+                ?.id ??
+            'seedvr2-3b',
         localSeedvr2Options: _readLocalSeedvr2Options(),
         comfyModule: persistedComfyModule,
         comfyScale: persistedScale,
@@ -1397,13 +1404,73 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     );
   }
 
+  Future<void> setDefaultUpscale(
+    UpscaleBackend backend, {
+    String? model,
+  }) async {
+    if (state.isToolRunning) throw StateError('busy');
+    final original = state.upscale;
+    final seed = advancedUpscaleCatalog.any(
+      (item) => item.id == model && item.method == LocalUpscaleMethod.seedvr2,
+    );
+    final changes = <String, Object>{
+      StorageKeys.localUpscaleBackend: backend.name,
+      if (model != null) StorageKeys.localUpscaleModel: model,
+      if (seed) StorageKeys.localSeedvr2Model: model!,
+    };
+    final before = {
+      for (final key in changes.keys) key: _storage.getSetting<Object?>(key),
+    };
+    final touched = <String>[];
+    bool unchanged() =>
+        !_isDisposed &&
+        !state.isToolRunning &&
+        state.upscale.backend == original.backend &&
+        state.upscale.localModel == original.localModel &&
+        state.upscale.localSeedvr2Model == original.localSeedvr2Model;
+    try {
+      for (final entry in changes.entries) {
+        if (!unchanged() ||
+            _storage.getSetting<Object?>(entry.key) != before[entry.key]) {
+          throw StateError('Upscale preferences changed while saving');
+        }
+        touched.add(entry.key);
+        await _storage.setSetting(entry.key, entry.value);
+      }
+      if (!unchanged()) {
+        throw StateError('Upscale preferences changed while saving');
+      }
+      state = state.copyWith(
+        upscale: state.upscale.copyWith(
+          backend: backend,
+          localModel: model,
+          localSeedvr2Model: seed ? model : null,
+        ),
+      );
+    } catch (_) {
+      for (final key in touched.reversed) {
+        if (_storage.getSetting<Object?>(key) == changes[key]) {
+          if (before[key] == null) {
+            await _storage.deleteSetting(key);
+          } else {
+            await _storage.setSetting(key, before[key]);
+          }
+        }
+      }
+      rethrow;
+    }
+  }
+
   int get sourceRevision => _sourceImageRequestId;
   bool get isDisposed => _isDisposed;
 
   Map<String, Seedvr2Options> _readLocalSeedvr2Options() {
     final raw = _storage.getSetting(StorageKeys.localSeedvr2Options);
     return Map.unmodifiable({
-      for (final id in ['seedvr2-3b', 'seedvr2-7b'])
+      for (final id
+          in advancedUpscaleCatalog
+              .where((model) => model.method == LocalUpscaleMethod.seedvr2)
+              .map((model) => model.id))
         if (raw is Map && raw[id] is Map)
           id: Seedvr2Options.fromJson(raw[id], modelId: id),
     });
@@ -1411,7 +1478,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void updateLocalUpscaleModel(String model) {
     if (state.isToolRunning) return;
-    final seedvr2 = model == 'seedvr2-3b' || model == 'seedvr2-7b';
+    final seedvr2 = advancedUpscaleCatalog.any(
+      (item) => item.id == model && item.method == LocalUpscaleMethod.seedvr2,
+    );
     state = state.copyWith(
       upscale: state.upscale.copyWith(
         localModel: model,
@@ -1427,7 +1496,17 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
   void updateLocalSeedvr2Options(Seedvr2Options options) {
     if (state.isToolRunning) return;
     final id = state.upscale.localModel;
-    if (id != 'seedvr2-3b' && id != 'seedvr2-7b') return;
+    if (!id.startsWith('seedvr2-')) return;
+    unawaited(setLocalSeedvr2Options(id, options));
+  }
+
+  Future<void> setLocalSeedvr2Options(String id, Seedvr2Options options) async {
+    if (state.isToolRunning) throw StateError('busy');
+    if (!advancedUpscaleCatalog.any(
+      (item) => item.id == id && item.method == LocalUpscaleMethod.seedvr2,
+    )) {
+      throw ArgumentError.value(id, 'id');
+    }
     final values = Map<String, Seedvr2Options>.unmodifiable({
       ...state.upscale.localSeedvr2Options,
       id: options.normalized(id),
@@ -1435,11 +1514,9 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
     state = state.copyWith(
       upscale: state.upscale.copyWith(localSeedvr2Options: values),
     );
-    unawaited(
-      _storage.setSetting(StorageKeys.localSeedvr2Options, {
-        for (final entry in values.entries) entry.key: entry.value.toJson(),
-      }),
-    );
+    await _storage.setSetting(StorageKeys.localSeedvr2Options, {
+      for (final entry in values.entries) entry.key: entry.value.toJson(),
+    });
   }
 
   void updateLocalUpscaleScale(double scale) {

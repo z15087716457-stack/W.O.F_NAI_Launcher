@@ -9215,5 +9215,1362 @@
   "rag_runtimeElapsed": "このステップの経過時間：{seconds}秒",
   "rag_useRuntime": "既存の環境を使用",
   "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
+  "set_title": "設定",
+  "set_search": "設定を検索",
+  "set_searchResults": "検索結果",
+  "set_searchCount": "{count} 件",
+  "@set_searchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_searchHint": "結果の中で直接変更できます。矢印で設定の場所へ移動します。",
+  "set_searchKeys": "選択",
+  "set_searchJump": "移動",
+  "set_searchEmpty": "「{query}」は見つかりません",
+  "@set_searchEmpty": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_searchEmptyHint": "「プロキシ」「保存」「ショートカット」やパスで試してください",
+  "set_goTo": "設定へ移動",
+  "set_hasUpdate": "更新あり",
+  "set_groupPersonal": "個人",
+  "set_groupCreate": "制作",
+  "set_groupIntelligence": "インテリジェンス",
+  "set_groupConnect": "接続",
+  "set_groupSystem": "システム",
+  "set_pageOverview": "概要",
+  "set_pageAccount": "アカウント",
+  "set_pageAppearance": "外観",
+  "set_pageCanvas": "キャンバスと閲覧",
+  "set_pageShortcuts": "ショートカット",
+  "set_pageGeneration": "生成と Anlas",
+  "set_pageStorage": "ストレージとギャラリー",
+  "set_pageDictionaries": "辞書とキャッシュ",
+  "set_pageModels": "モデルと API",
+  "set_pageAgent": "NAI Agent",
+  "set_pageRag": "セマンティック検索",
+  "set_pageUpscale": "ローカル拡大",
+  "set_pageBridges": "ブリッジと連携",
+  "set_pageNetwork": "ネットワークとプロキシ",
+  "set_pagePrivacy": "プライバシーと保護",
+  "set_pageBackup": "バックアップとリセット",
+  "set_pageAbout": "について",
+  "set_resetDefault": "既定に戻す",
+  "set_resetPage": "このページを既定に戻す",
+  "set_needsRestart": "要再起動",
+  "set_isNew": "新",
+  "set_defaultTag": "既定",
+  "set_readOnly": "読み取り専用",
+  "set_cancel": "キャンセル",
+  "set_save": "保存",
+  "set_discard": "破棄",
+  "set_later": "後で",
+  "set_undo": "元に戻す",
+  "set_open": "開く",
+  "set_choose": "選択",
+  "set_change": "変更",
+  "set_clear": "消去",
+  "set_delete": "削除",
+  "set_copy": "コピー",
+  "set_more": "その他",
+  "set_refresh": "更新",
+  "set_retry": "再試行",
+  "set_test": "接続テスト",
+  "set_testing": "確認中…",
+  "set_importIt": "インポート",
+  "set_exportIt": "エクスポート",
+  "set_install": "インストール",
+  "set_download": "ダウンロード",
+  "set_resume": "再開",
+  "set_pause": "一時停止",
+  "set_rebuild": "再構築",
+  "set_login": "ログイン",
+  "set_adjust": "調整",
+  "set_collapse": "折りたたむ",
+  "set_notSet": "未設定",
+  "set_defaultLocation": "既定の場所",
+  "set_builtinSound": "内蔵サウンド",
+  "set_justNow": "たった今",
+  "set_minutesAgo": "{n} 分前",
+  "@set_minutesAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_todayAt": "今日 {time}",
+  "@set_todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_yesterday": "昨日",
+  "set_secondsAgo": "{n} 秒前",
+  "@set_secondsAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_savedChange": "保存 · {title} {from} → {to}",
+  "@set_savedChange": {
+    "placeholders": {
+      "title": {},
+      "from": {},
+      "to": {}
+    }
+  },
+  "set_restartBanner": "保存しました。Studio の再起動後に反映されます。実行中の生成には影響しません。",
+  "set_restartNow": "今すぐ再起動",
+  "set_unsavedInstructions": "指示に未保存の変更があります",
+  "set_leaveTitle": "未保存の変更を破棄しますか？",
+  "set_leaveBody": "Agent の指示は保存されていません。移動すると変更は失われます。",
+  "set_resetPageTitle": "「{page}」を既定に戻しますか？",
+  "@set_resetPageTitle": {
+    "placeholders": {
+      "page": {}
+    }
+  },
+  "set_resetPageBody": "このページで変更した {count} 項目が既定に戻ります。概要から元に戻せます。",
+  "@set_resetPageBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_ovDesc": "アカウント、ストレージ、接続、AI サービスの状態をまとめています。対応が必要な項目が先頭です。",
+  "set_ovSwitchAccount": "アカウント切替",
+  "set_ovTodayUsed": "今日の使用",
+  "set_ovMonthly": "月間付与 {n}",
+  "@set_ovMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnAt": "高コスト警告 ≥ {n} Anlas",
+  "@set_ovWarnAt": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnOff": "高コスト警告オフ",
+  "set_ovRenews": "更新日 {date}",
+  "@set_ovRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_ovSignedOut": "未ログイン",
+  "set_ovAttention": "要対応",
+  "set_ovAllClear": "すべて正常",
+  "set_attUpdate": "新しいバージョン {version}",
+  "@set_attUpdate": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_attRagPaused": "{source}のインデックスが一時停止中",
+  "@set_attRagPaused": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "set_attRagPausedSub": "{done} / {total}、一部は検索可能",
+  "@set_attRagPausedSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_attBridgeDown": "{name} が応答しません",
+  "@set_attBridgeDown": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCheckedAt": "{detail} · {when}に確認",
+  "@set_attCheckedAt": {
+    "placeholders": {
+      "detail": {},
+      "when": {}
+    }
+  },
+  "set_attCredential": "「{name}」の認証情報が期限切れ",
+  "@set_attCredential": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCredentialSub": "更新するとこのアカウントに切り替えられます",
+  "set_attDiskLow": "{disk} の空き容量不足",
+  "@set_attDiskLow": {
+    "placeholders": {
+      "disk": {}
+    }
+  },
+  "set_attDiskLowSub": "残り {size}、自動保存が失敗する可能性",
+  "@set_attDiskLowSub": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "set_attProvider": "{name} に接続できません",
+  "@set_attProvider": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attProviderSub": "翻訳は別のプロバイダーに切り替わります",
+  "set_attView": "表示",
+  "set_attGo": "確認",
+  "set_attUpdateCred": "更新",
+  "set_tileStorage": "ストレージ",
+  "set_tileImages": "{n} 枚",
+  "@set_tileImages": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileSaveTo": "保存先 {path}",
+  "@set_tileSaveTo": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "set_tileConnect": "接続",
+  "set_tileOnline": "{n} 件オンライン",
+  "@set_tileOnline": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileKrita": "Krita 接続済み",
+  "set_tileKritaOff": "Krita 未接続",
+  "set_tileAgents": "外部 Agent {n} 件",
+  "@set_tileAgents": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileComfyDown": "ComfyUI 応答なし",
+  "set_tileComfyOk": "ComfyUI 正常",
+  "set_tileComfyOff": "ComfyUI 無効",
+  "set_tileModels": "モデルと API",
+  "set_tileTranslateVia": "プロンプト翻訳 · {ms}",
+  "@set_tileTranslateVia": {
+    "placeholders": {
+      "ms": {}
+    }
+  },
+  "set_tileAgentModel": "Agent · {model}",
+  "@set_tileAgentModel": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "set_tileProviders": "{p} プロバイダー · {m} モデル",
+  "@set_tileProviders": {
+    "placeholders": {
+      "p": {},
+      "m": {}
+    }
+  },
+  "set_tileNoModel": "未設定",
+  "set_tileRag": "セマンティック検索",
+  "set_tileReady": "準備完了",
+  "set_tileRagDone": "{names} 完了",
+  "@set_tileRagDone": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "set_tileRagPaused": "{name} {pct} · 一時停止",
+  "@set_tileRagPaused": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagBuilding": "{name} {pct} · 構築中",
+  "@set_tileRagBuilding": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagEmpty": "{name} は未構築",
+  "@set_tileRagEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileRagError": "{name} の構築に失敗",
+  "@set_tileRagError": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileUpscale": "ローカル拡大",
+  "set_tileUpscaleModels": "{n} モデル利用可",
+  "@set_tileUpscaleModels": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileDefaultIs": "{name}（既定）",
+  "@set_tileDefaultIs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileSeedMissing": "SeedVR2 未インストール",
+  "set_tileSeedReady": "SeedVR2 インストール済み",
+  "set_tileProtect": "保護",
+  "set_tileProtectOn": "{on} / {all} オン",
+  "@set_tileProtectOn": {
+    "placeholders": {
+      "on": {},
+      "all": {}
+    }
+  },
+  "set_tileInterval": "間隔 {s} 秒 ± {p}%",
+  "@set_tileInterval": {
+    "placeholders": {
+      "s": {},
+      "p": {}
+    }
+  },
+  "set_tileIntervalOff": "生成間隔なし",
+  "set_recent": "最近の変更",
+  "set_recentSub": "自動保存 · 取り消し可",
+  "set_recentEmpty": "変更はまだありません",
+  "set_quick": "よく使う切替",
+  "set_quickSub": "ここで変更",
+  "set_quickDark": "ダークモード",
+  "set_quickChannel": "キャンバスのビジュアルチャネル",
+  "set_searchTip": "{keys} で設定を検索し、結果の中で直接変更できます。",
+  "@set_searchTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_accDesc": "NovelAI アカウント、既定ログイン、サブスクリプションを管理します。",
+  "set_accSaved": "保存済みアカウント",
+  "set_accSavedSub": "ワンクリックで切り替えられます。認証情報は端末内に保存され、エクスポートされません。",
+  "set_accCurrent": "使用中",
+  "set_accInUse": "使用中",
+  "set_accSwitch": "切替",
+  "set_accEmail": "メール",
+  "set_accToken": "トークン",
+  "set_accRenews": "更新 {date}",
+  "@set_accRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accLastUsed": "最終使用 {date}",
+  "@set_accLastUsed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accNoSub": "サブスクなし",
+  "set_accExpired": "認証情報の期限切れ",
+  "set_accEdit": "プロフィール編集",
+  "set_accUpdate": "認証情報を更新",
+  "set_accMakeDefault": "既定にする",
+  "set_accDelete": "アカウントを削除",
+  "set_accDeleteTitle": "「{name}」を削除しますか？",
+  "@set_accDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_accDeleteBody": "この端末の認証情報だけを削除します。NovelAI のアカウントには影響しません。",
+  "set_accAdd": "アカウントを追加",
+  "set_accAddHint": "メールとパスワード、または永続トークン",
+  "set_accLogin": "ログイン",
+  "set_accDefault": "既定のアカウント",
+  "set_accDefaultSub": "ログイン画面で最初に選ばれるアカウント",
+  "set_accAutoLogin": "起動時に自動ログイン",
+  "set_accAutoLoginSub": "前回のセッションを使います。オフにすると毎回ログイン画面から始まります",
+  "set_accSub": "サブスクリプション",
+  "set_accMonthly": "毎月 {n} Anlas",
+  "@set_accMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accRemaining": "残り {n}",
+  "@set_accRemaining": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accResets": "{date} にリセット",
+  "@set_accResets": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accPortal": "NovelAI のアカウントページ",
+  "set_accSwitchHint": "切り替えても下書きとキャンバスは残ります。キュー内の生成は元のアカウントで完了します。",
+  "set_apDesc": "テーマ、文字、通知。変更はすぐ保存され、元に戻せます。",
+  "set_apTheme": "テーマ",
+  "set_apThemeSub": "起動画面、ログイン、すべてのページで共通です。",
+  "set_apLight": "ライト",
+  "set_apDark": "ダーク",
+  "set_apSystem": "システム",
+  "set_apSystemSub": "Windows の設定に合わせる",
+  "set_apText": "文字",
+  "set_apFont": "UI フォント",
+  "set_apFontSub": "数字とコードは Geist Mono を使います",
+  "set_apScale": "設定とダイアログの文字サイズ",
+  "set_apScaleSub": "設定とダイアログだけを拡大します",
+  "set_apSampleTitle": "見出し · 生成完了",
+  "set_apSampleBody": "本文 · ローカルギャラリーに保存しました。",
+  "set_apSampleNote": "注記 · スライダーを動かすとここに反映されます。",
+  "set_apLanguage": "言語",
+  "set_apLanguageSub": "すぐに反映されます",
+  "set_apMotion": "モーションとサウンド",
+  "set_apReduceMotion": "動きを減らす",
+  "set_apReduceMotionSub": "キャンバス移動、ズーム、パネルのアニメーションを止めます",
+  "set_apSound": "生成完了サウンド",
+  "set_apSoundSub": "バッチ完了時に再生",
+  "set_apSoundFile": "サウンドファイル",
+  "set_apPreviewSound": "試聴",
+  "set_apNotify": "通知",
+  "set_apNotifySub": "右上に表示され 3 秒で消えます",
+  "set_apNotifyPreview": "プレビュー",
+  "set_apPreview": "プレビュー",
+  "set_apCurrent": "現在",
+  "set_apThemeTip": "{keys} でいつでもライト／ダークを切り替えられます。",
+  "@set_apThemeTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_cvDesc": "履歴、ビューアー、無限キャンバスの動作。",
+  "set_cvBrowse": "閲覧",
+  "set_cvHistoryClick": "履歴サムネイルをクリックしたとき",
+  "set_cvOpenDetail": "詳細を開く",
+  "set_cvOpenDetailSub": "ビューアーで 1 枚ずつ確認",
+  "set_cvLinked": "連動プレビュー",
+  "set_cvLinkedSub": "キャンバスで選択し、ビューアーは開きません",
+  "set_cvViewer": "生成結果の表示先",
+  "set_cvCanvas": "無限キャンバス",
+  "set_cvCanvasSub": "バッチを縦に並べ、移動・ズーム・ピン留め",
+  "set_cvSimple": "シンプルビューアー",
+  "set_cvSimpleSub": "最新の 1 枚のみ。最も軽量",
+  "set_cvCanvasSec": "キャンバス",
+  "set_cvLock": "キャンバスの視点を固定",
+  "set_cvLockSub": "新しい画像が出ても視点を動かしません",
+  "set_cvFill": "新しい画像を全体表示",
+  "set_cvFillSub": "実ピクセルではなく表示領域に合わせます",
+  "set_cvChannel": "ビジュアルチャネル",
+  "set_cvChannelSub": "キャンバスの通路をテーマで装飾し、履歴をたどると順にテーマが変わります。",
+  "set_cvMode": "モード",
+  "set_cvMinTwo": "ランダムでは 2 つ以上のテーマが必要です。",
+  "set_cvSession": "今回の順番：{order}",
+  "@set_cvSession": {
+    "placeholders": {
+      "order": {}
+    }
+  },
+  "set_cvLevel": "濃さ",
+  "set_cvRuler": "タイムスケール",
+  "set_cvRulerSub": "バッチ時刻、日付区切り、右側の目盛り",
+  "set_cvMotion": "アイドル時の動き",
+  "set_cvMotionSub": "生成中と「動きを減らす」オンのときは停止",
+  "set_cvOps": "キャンバス操作",
+  "set_cvOpScroll": "上下移動",
+  "set_cvOpPan": "左右移動",
+  "set_cvOpZoom": "ズーム",
+  "set_cvOpMove": "視点移動",
+  "set_cvOpAll": "全体表示",
+  "set_cvOpHome": "最新バッチへ",
+  "set_cvWheel": "ホイール",
+  "set_cvChannelTip": "キャンバスの歯車からも同じ設定を変更できます。",
+  "set_scDesc": "ページごとに分類。クリックして新しい組み合わせを記録します。重複は赤く表示されます。",
+  "set_scSearch": "操作やキーを検索（例：Ctrl+S）",
+  "set_scAll": "すべて",
+  "set_scKeyboard": "キーボード配置",
+  "set_scKeyboardSub": "キーをクリックで絞り込み。青は使用中、赤は重複。",
+  "set_scNoMod": "修飾なし",
+  "set_scLayer": "{context} · {mod} を押している間",
+  "@set_scLayer": {
+    "placeholders": {
+      "context": {},
+      "mod": {}
+    }
+  },
+  "set_scLayerNone": "{context} · 修飾キーなし",
+  "@set_scLayerNone": {
+    "placeholders": {
+      "context": {}
+    }
+  },
+  "set_scAction": "操作",
+  "set_scKeys": "ショートカット",
+  "set_scDefault": "既定",
+  "set_scDefaultIs": "既定 {keys}",
+  "@set_scDefaultIs": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflict": "「{name}」と重複",
+  "@set_scConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_scRecording": "新しい組み合わせを押してください…",
+  "set_scRecordHint": "Esc 取消 · Backspace 消去",
+  "set_scRecord": "記録",
+  "set_scClear": "消去",
+  "set_scDisplay": "表示",
+  "set_scEnabled": "ショートカットを有効にする",
+  "set_scInTooltips": "ツールチップに表示",
+  "set_scInMenus": "メニューに表示",
+  "set_scBadges": "ナビに番号を表示",
+  "set_scConflicts": "重複",
+  "set_scConflictCount": "{n} 件",
+  "@set_scConflictCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scConflictLine": "{keys} が 2 つの操作に割り当て",
+  "@set_scConflictLine": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflictSub": "{context}：{a}、{b}。重複中はどちらも動作しません。",
+  "@set_scConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_scFix": "{name}を {keys} に戻す",
+  "@set_scFix": {
+    "placeholders": {
+      "name": {},
+      "keys": {}
+    }
+  },
+  "set_scNoConflict": "重複なし",
+  "set_scConfig": "ショートカット設定",
+  "set_scResetAll": "すべて既定に戻す",
+  "set_scResetAllTitle": "すべてのショートカットを既定に戻しますか？",
+  "set_scResetAllBody": "カスタマイズした {n} 件が元に戻ります。",
+  "@set_scResetAllBody": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scHelp": "ショートカットのヘルプ",
+  "set_scHelpTip": "{key} でそのページのショートカットを表示します。",
+  "@set_scHelpTip": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "set_scEmpty": "一致するショートカットはありません",
+  "set_gnDesc": "Anlas の消費、リクエスト間隔、プロンプト入力補助を設定します。",
+  "set_gnCost": "Anlas 保護",
+  "set_gnCostSub": "しきい値を超えるリクエストは送信前に確認します。",
+  "set_gnWarn": "高コスト警告",
+  "set_gnWarnSub": "しきい値超過時に確認",
+  "set_gnThreshold": "しきい値",
+  "set_gnEstimate": "現在：{model} · {w}×{h} · {steps} ステップ · {n} 枚",
+  "@set_gnEstimate": {
+    "placeholders": {
+      "model": {},
+      "w": {},
+      "h": {},
+      "steps": {},
+      "n": {}
+    }
+  },
+  "set_gnWillWarn": "警告あり",
+  "set_gnNoWarn": "警告なし",
+  "set_gnFree": "無料",
+  "set_gnPace": "リクエスト間隔",
+  "set_gnPaceSub": "連続生成のリクエスト間に待機し、サーバー負荷を減らします。",
+  "set_gnLimit": "生成間隔を制限",
+  "set_gnInterval": "間隔",
+  "set_gnJitter": "ランダム変動",
+  "set_gnJitterSub": "間隔をランダムに増減",
+  "set_gnTimeline": "この設定では 10 回のリクエストはこのような間隔です",
+  "set_gnInput": "プロンプト入力",
+  "set_gnWheel": "ホイールで重み調整",
+  "set_gnWheelSub": "タグ上でホイールを回して重みを変更",
+  "set_gnNoKey": "キー不要",
+  "set_gnRelated": "関連タグの提案",
+  "set_gnRelatedSub": "よく一緒に使われるタグを提案",
+  "set_gnRag": "セマンティックなタグ提案",
+  "set_gnRagSub": "セマンティック検索による文脈に応じた提案",
+  "set_gnReady": "準備完了",
+  "set_gnNotReady": "未準備",
+  "set_gnGoSettings": "設定へ",
+  "set_gnTranslate": "プロンプト翻訳",
+  "set_gnTranslateSub": "プロンプト翻訳に使うモデル",
+  "set_gnToday": "今日",
+  "set_gnUsed": "Anlas 使用",
+  "set_gnNow": "現在",
+  "set_gnWarned": "高コスト警告",
+  "set_gnTimes": "{n} 回",
+  "@set_gnTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_gnMaxSingle": "最大 1 回の消費",
+  "set_gnFreeTip": "Opus の無料枠は計算済みです。しきい値は実際の消費だけを見ます。",
+  "set_stDesc": "画像の保存先、ギャラリーが読むフォルダー、容量と整理。",
+  "set_stUsage": "使用量",
+  "set_stFree": "{disk} 空き {size}",
+  "@set_stFree": {
+    "placeholders": {
+      "disk": {},
+      "size": {}
+    }
+  },
+  "set_stRecount": "再集計",
+  "set_stCounting": "集計中…",
+  "set_stImages": "画像",
+  "set_stUpscaleModels": "拡大モデル",
+  "set_stVibes": "Vibe ライブラリ",
+  "set_stThumbs": "サムネイルキャッシュ",
+  "set_stRag": "セマンティック索引",
+  "set_stDict": "辞書とキャッシュ",
+  "set_stAgent": "Agent",
+  "set_stSave": "保存",
+  "set_stSavePath": "画像の保存先",
+  "set_stAutoSave": "自動保存",
+  "set_stAutoSaveSub": "生成後すぐに保存します。オフではキャンバスと履歴にのみ残ります",
+  "set_stAssets": "素材と表示",
+  "set_stVibePath": "Vibe ライブラリの場所",
+  "set_stQuality": "ギャラリーの画質",
+  "set_stQualitySub": "サムネイルの表示品質",
+  "set_stHigh": "高画質",
+  "set_stStandard": "標準",
+  "set_stRoots": "ギャラリーのフォルダー",
+  "set_stRootsSub": "任意のフォルダーをギャラリーで閲覧・検索できます。自動保存の対象外です。",
+  "set_stPrimary": "メイン",
+  "set_stCount": "{n} 枚",
+  "@set_stCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_stAddFolder": "フォルダーを追加",
+  "set_stImportIndex": "タグ索引をインポート (.jsonl)",
+  "set_stLastScan": "最終スキャン {when} · {n} 枚",
+  "@set_stLastScan": {
+    "placeholders": {
+      "when": {},
+      "n": {}
+    }
+  },
+  "set_stMaintain": "メンテナンス",
+  "set_stRescan": "ギャラリーを再スキャン",
+  "set_stRescanSub": "欠落ファイルの確認、新規ファイルの追加、メタデータの再読込",
+  "set_stScan": "スキャン",
+  "set_stScanning": "スキャン中…",
+  "set_stCleanThumbs": "サムネイルキャッシュを整理",
+  "set_stCleanThumbsSub": "上限を超えたサムネイルを古い順に削除。元画像はそのまま",
+  "set_stClean": "整理",
+  "set_stCleanTitle": "サムネイルキャッシュを整理しますか？",
+  "set_stCleanBody": "上限を超えたサムネイルを削除し、必要時に再生成します。",
+  "set_stAppData": "アプリデータの場所",
+  "set_stAppDataSub": "アカウント、履歴、ブロックなどのデータベース。変更後は再起動",
+  "set_stOpenFolders": "フォルダーを開く",
+  "set_stLogs": "ログ",
+  "set_stAppDataShort": "アプリデータ",
+  "set_stDeleteTip": "画像の移動・削除はギャラリーで行い、「プライバシーと保護」の確認ルールに従います。",
+  "set_stRemoveRoot": "このフォルダーを外す",
+  "set_dcDesc": "タグデータとキャッシュ。補完がおかしいときにここで整理します。",
+  "set_dcTags": "タグ辞書",
+  "set_dcTagsSub": "補完、タグ翻訳、提案に使うローカルデータ。",
+  "set_dcBase": "基本辞書",
+  "set_dcBaseValue": "{n} タグ · データ {version}",
+  "@set_dcBaseValue": {
+    "placeholders": {
+      "n": {},
+      "version": {}
+    }
+  },
+  "set_dcCooc": "共起データ",
+  "set_dcCoocSub": "よく一緒に出るタグの提案に使います",
+  "set_dcEntries": "{n} 件",
+  "@set_dcEntries": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcTranslate": "タグ翻訳",
+  "set_dcTranslateSub": "辞書に訳がないときに使います",
+  "set_dcCaches": "キャッシュ",
+  "set_dcCachesSub": "消去しても必要時に再取得します。画像と設定には影響しません。",
+  "set_dcDanbooru": "Danbooru キャッシュ",
+  "set_dcDanbooruSub": "オンラインギャラリーとタグ百科の応答",
+  "set_dcTranslation": "AI 翻訳キャッシュ",
+  "set_dcTranslationSub": "翻訳済みのタグとプロンプト",
+  "set_dcCacheSize": "{n} 件 · {size}",
+  "@set_dcCacheSize": {
+    "placeholders": {
+      "n": {},
+      "size": {}
+    }
+  },
+  "set_dcClearTitle": "{name}を消去しますか？",
+  "@set_dcClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_dcClearBody": "次に使うときに再取得します。",
+  "set_dcStats": "キャッシュ統計",
+  "set_dcL1": "L1 メモリ",
+  "set_dcL2": "L2 Hive",
+  "set_dcL3": "L3 SQLite",
+  "set_dcImagesUnit": "{n} 枚",
+  "@set_dcImagesUnit": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcAutoRefresh": "自動更新",
+  "set_dcUpdated": "最終更新 {when}",
+  "@set_dcUpdated": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcResetStats": "統計をリセット",
+  "set_dcTip": "ここのデータは再生成できます。個人データは「ストレージ → アプリデータの場所」にあります。",
+  "set_mdDesc": "翻訳・逆推定・タグ翻訳・Agent が使う LLM サービス。プロバイダーを追加し、機能ごとにモデルを選びます。",
+  "set_mdProviders": "プロバイダー",
+  "set_mdTasks": "機能の割り当て",
+  "set_mdPresets": "プロンプトプリセット",
+  "set_mdRequests": "リクエスト履歴",
+  "set_mdProviderCount": "{n} プロバイダー",
+  "@set_mdProviderCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdModelCount": "{n} モデル",
+  "@set_mdModelCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdDisabled": "無効",
+  "set_mdLocal": "ローカル",
+  "set_mdLatency": "{ms} · {when}",
+  "@set_mdLatency": {
+    "placeholders": {
+      "ms": {},
+      "when": {}
+    }
+  },
+  "set_mdUnreachable": "接続失敗",
+  "set_mdName": "名前",
+  "set_mdBaseUrl": "ベース URL",
+  "set_mdApiKey": "API キー",
+  "set_mdApiKeyEmpty": "未入力",
+  "set_mdModels": "モデル",
+  "set_mdRefreshModels": "プロバイダーから取得",
+  "set_mdAddModel": "手動で追加",
+  "set_mdUsedFor": "{tasks} に使用",
+  "@set_mdUsedFor": {
+    "placeholders": {
+      "tasks": {}
+    }
+  },
+  "set_mdRetired": "提供終了",
+  "set_mdCapTools": "ツール",
+  "set_mdCapVision": "ビジョン",
+  "set_mdCapReasoning": "推論",
+  "set_mdAdvanced": "詳細なリクエスト設定",
+  "set_mdDelete": "プロバイダーを削除",
+  "set_mdDeleteTitle": "「{name}」を削除しますか？",
+  "@set_mdDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_mdDeleteBody": "使用中の機能は別のプロバイダーに切り替わります。",
+  "set_mdRemoveModel": "モデルを外す",
+  "set_mdTaskPrompt": "プロンプト翻訳",
+  "set_mdTaskReverse": "プロンプト逆推定",
+  "set_mdTaskTag": "タグ翻訳",
+  "set_mdTaskWiki": "百科翻訳",
+  "set_mdFeature": "機能",
+  "set_mdProvider": "プロバイダー",
+  "set_mdModel": "モデル",
+  "set_mdPreset": "プリセット",
+  "set_mdStatus": "状態",
+  "set_mdAvailable": "利用可",
+  "set_mdFallback": "最初の利用可能なプロバイダーを使用",
+  "set_mdNotChosen": "未選択",
+  "set_mdBuiltin": "内蔵",
+  "set_mdNewPreset": "プリセットを作成",
+  "set_mdEdit": "編集",
+  "set_mdTime": "時刻",
+  "set_mdTokens": "{n} トークン",
+  "@set_mdTokens": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdFailed": "失敗",
+  "set_mdOk": "成功",
+  "set_mdShowing": "最新 {n} 件 / 全 {total} 件",
+  "@set_mdShowing": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "set_mdImport": "設定をインポート",
+  "set_mdAddProvider": "プロバイダーを追加",
+  "set_mdEmpty": "プロバイダーがありません",
+  "set_mdEmptySub": "追加すると翻訳と逆推定が使えます。",
+  "set_agDesc": "サイドバーアシスタントのモデル、指示、拡張、MCP ツール。",
+  "set_agModelSec": "モデル",
+  "set_agModel": "Agent のモデル",
+  "set_agModelSub": "思考の強さはチャット欄で調整します",
+  "set_agEnter": "Enter で送信",
+  "set_agEnterSub": "オフでは Ctrl+Enter で送信、Enter で改行",
+  "set_agMax": "1 タスクの最大リクエスト",
+  "set_agMaxSub": "ループを防ぎます",
+  "set_agTimesUnit": "回",
+  "set_agInstr": "指示",
+  "set_agInstrSub": "この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。",
+  "set_agOrderBuiltin": "内蔵プロンプト",
+  "set_agOrderPrefix": "システム前置",
+  "set_agOrderGlobal": "全体の指示",
+  "set_agOrderWorkspace": "ワークスペースの指示",
+  "set_agOrderTools": "ツールマップ",
+  "set_agGlobal": "全体の指示",
+  "set_agPrefix": "システム前置",
+  "set_agPrefixHint": "毎回のリクエストの先頭に入れる固定内容。",
+  "set_agBuiltin": "内蔵プロンプト",
+  "set_agFinal": "最終プロンプトを表示",
+  "set_agExt": "拡張",
+  "set_agExtSub": "ワークスペースごとに読み込み。外部拡張はローカルコードを実行します。",
+  "set_agStudioExt": "Studio 連携",
+  "set_agStudioExtSub": "Studio の状態を読み、質問カードで回答を集めます",
+  "set_agRequired": "内蔵 · 必須",
+  "set_agAddFile": "拡張ファイルを追加",
+  "set_agAddDir": "拡張フォルダーを追加",
+  "set_agMcp": "MCP サーバー",
+  "set_agMcpSub": "CodeMode は必要時にツールを探し、一度にコンテキストへ入れません。",
+  "set_agBuiltinTools": "NAI Studio · 内蔵ツール",
+  "set_agBuiltinToolsSub": "プロンプト、ブロック、百科、画像、履歴、参照、生成、設定",
+  "set_agConnected": "接続済み · {n} ツール",
+  "@set_agConnected": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agConnecting": "接続中…",
+  "set_agNeedsLogin": "ログインが必要",
+  "set_agMcpError": "接続失敗",
+  "set_agMcpOff": "無効",
+  "set_agAddMcp": "MCP サーバーを追加",
+  "set_agTools": "ツール",
+  "set_agToolCount": "{n} 件",
+  "@set_agToolCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agToolsTip": "生成系ツールは必ず見積もりを出し、確認後に実行します。",
+  "set_agData": "データフォルダー",
+  "set_agWorkspaces": "ワークスペース",
+  "set_agSessions": "セッション",
+  "set_agCostTip": "料金はプロバイダーが請求し、Studio はトークン数のみ表示します。",
+  "set_agOpen": "Agent を開く",
+  "set_agEditMcp": "編集",
+  "set_agRemoveMcp": "サーバーを外す",
+  "set_agRemoveExt": "拡張を外す",
+  "set_rgDesc": "ローカル RAG。タグ提案、百科、ブロック、類似画像検索に使い、何もアップロードしません。",
+  "set_rgReady": "セマンティック検索の準備完了",
+  "set_rgOff": "セマンティック検索オフ",
+  "set_rgPartial": "一部構築中",
+  "set_rgAllDone": "すべて完了",
+  "set_rgPool": "すべてのソースが 1 つのローカルベクトルストアを共有し、差分更新します。",
+  "set_rgStepRuntime": "実行環境",
+  "set_rgStepEmbed": "埋め込み",
+  "set_rgStepRerank": "再ランク",
+  "set_rgStepDevice": "デバイス",
+  "set_rgSources": "ソース",
+  "set_rgSourcesSub": "ソースごとに構築・切替。一時停止でき、完了分はすぐ使えます。",
+  "set_rgTags": "タグ提案",
+  "set_rgTagsSub": "意味・共起・再ランクを組み合わせ、各入力欄ごとに計算",
+  "set_rgWiki": "百科のセマンティック検索",
+  "set_rgWikiSub": "ローカル百科。名前の完全一致を優先し、意味検索で補完",
+  "set_rgBlocks": "プロンプトブロック",
+  "set_rgBlocksSub": "保存済み・未アーカイブのブロックの名前、タグ、本文",
+  "set_rgGallery": "ギャラリー（マルチモーダル）",
+  "set_rgGallerySub": "画像内容で類似検索。NAI のパラメーターは別途テキスト索引。元画像は変更しません",
+  "set_rgCount": "{done} / {total}",
+  "@set_rgCount": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgSegments": "{done} / {total} 段",
+  "@set_rgSegments": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgGalleryCount": "画像 {done} / {total} · パラメーター {n} 段",
+  "@set_rgGalleryCount": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "n": {}
+    }
+  },
+  "set_rgPaused": "一時停止中",
+  "set_rgBuilding": "構築中",
+  "set_rgError": "エラー",
+  "set_rgClearIndex": "索引を消去",
+  "set_rgClearTitle": "「{name}」の索引を消去しますか？",
+  "@set_rgClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_rgClearBody": "派生索引だけを削除し、元の内容とモデルは残ります。",
+  "set_rgContext": "提案の文脈",
+  "set_rgContextSub": "どちらも最大 120 Gemma トークン、タグ単位で切り取り。",
+  "set_rgRange": "取得範囲",
+  "set_rgBefore": "カーソルの前",
+  "set_rgAround": "カーソルの前後",
+  "set_rgRuntime": "モデルと実行環境",
+  "set_rgEmbedPath": "埋め込みモデルのフォルダー",
+  "set_rgRerankPath": "再ランクモデルのフォルダー",
+  "set_rgDevice": "実行デバイス",
+  "set_rgAuto": "自動",
+  "set_rgEnv": "実行環境",
+  "set_rgEnvSub": "独立した Python と推論依存。モデルの重みは含みません",
+  "set_rgCheck": "確認",
+  "set_rgReinstall": "再インストール",
+  "set_rgProgress": "構築の進捗",
+  "set_rgOverall": "全体",
+  "set_rgShortTags": "タグ",
+  "set_rgShortWiki": "百科",
+  "set_rgShortBlocks": "ブロック",
+  "set_rgShortGallery": "ギャラリー",
+  "set_rgTip": "ソースを消去しても派生索引だけが消え、元の内容とモデルは残ります。",
+  "set_rgNotReady": "セマンティック検索はまだ使えません",
+  "set_rgNotReadySub": "実行環境をインストールし、2 つのモデルフォルダーを設定してください。",
+  "set_rgEmpty": "未構築",
+  "set_rgBuild": "索引を構築",
+  "set_rgContinue": "続きを構築",
+  "set_rgSkipped": "{n} 枚スキップ",
+  "@set_rgSkipped": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanLoading": "対象を集計中…",
+  "set_rgPlanTags": "{n} 件のタグ、別名、ローカルの説明を収録します。",
+  "@set_rgPlanTags": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanText": "{docs} 件の資料を {n} 個のテキスト片として収録します。",
+  "@set_rgPlanText": {
+    "placeholders": {
+      "docs": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanGallery": "画像 {images} 枚と NAI パラメーター {n} 段を別々に収録します。",
+  "@set_rgPlanGallery": {
+    "placeholders": {
+      "images": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanNote": "初回は時間がかかります。いつでも一時停止でき、完了分はすぐ使えます。",
+  "set_rgPlanRebuild": "再構築するとこのソースの既存の索引を先に消去します。",
+  "set_rgStart": "開始",
+  "set_rgDownload": "ダウンロード",
+  "set_rgDownloading": "ダウンロード中 {done} / {total}",
+  "@set_rgDownloading": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgDownloadingUnknown": "ダウンロード中 {done}",
+  "@set_rgDownloadingUnknown": {
+    "placeholders": {
+      "done": {}
+    }
+  },
+  "set_rgVerifying": "ファイルを検証中…",
+  "set_rgDiscover": "ローカルモデルを探す",
+  "set_rgDiscoverSub": "04_工具/models で EmbeddingGemma 2 と Qwen3-Reranker 0.6B を探し、上の 2 つのフォルダーを埋めます。",
+  "set_rgFind": "探す",
+  "set_rgModelsMissing": "見つかりません。「ダウンロード」するか、重みのフォルダーを選んでください。",
+  "set_rgPython": "Python インタープリター",
+  "set_rgPythonSub": "既定は自動インストールの独立環境。既存の python.exe も選べます。",
+  "set_rgPythonAuto": "自動",
+  "set_rgPythonNone": "未インストール",
+  "set_rgPythonPending": "まだ使われていません。「このインタープリターを使う」で依存を入れ直します。",
+  "set_rgUsePython": "このインタープリターを使う",
+  "set_rgEnvReady": "準備完了",
+  "set_rgEnvMissing": "未インストール",
+  "set_rgInstall": "インストール",
+  "set_rgInstallHint": "Python と推論依存をダウンロードします（モデルの重みは含みません）。NVIDIA なら CUDA（数 GB）、それ以外は小さい CPU 版。",
+  "set_rgInstallCuda": "CUDA · NVIDIA",
+  "set_rgInstallCpu": "CPU",
+  "set_rgPhaseExisting": "既存の環境を確認中",
+  "set_rgPhaseDownload": "インストーラーをダウンロード中",
+  "set_rgPhaseCreate": "Python を準備中",
+  "set_rgPhaseCuda": "CUDA コンポーネントをインストール中",
+  "set_rgPhasePackages": "依存をインストール中",
+  "set_rgPhaseCheck": "環境を検証中",
+  "set_rgElapsed": "この段階 {time}",
+  "@set_rgElapsed": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_upDesc": "ローカルの拡大モデルとコンポーネントを管理します。ダウンロードは手動で開始します。",
+  "set_upGpu": "{name} · {n} GB",
+  "@set_upGpu": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "set_upNoGpu": "独立 GPU が見つかりません",
+  "set_upLocal": "この PC で拡大し、Anlas を消費しません。",
+  "set_upEsrgan": "標準モデル",
+  "set_upEsrganSub": "Real-ESRGAN NCNN、4 倍、高速。Vulkan 対応 GPU で動作。",
+  "set_upAnimeQuality": "アニメ · 画質",
+  "set_upAnimeFast": "アニメ · 高速",
+  "set_upGeneral": "汎用 · 写真",
+  "set_upBuiltin": "内蔵",
+  "set_upInstalled": "インストール済み",
+  "set_upNotInstalled": "未インストール",
+  "set_upFailed": "ダウンロード失敗",
+  "set_upImport": "モデルをインポート",
+  "set_upImportHint": "対応する .param と .bin（4 倍 Real-ESRGAN NCNN）を選択",
+  "set_upSeed": "SeedVR2 拡散拡大",
+  "set_upSeedSub": "高画質・低速、NVIDIA 必須。VAE（約 0.5 GB）と Python/CUDA 環境を共有。",
+  "set_upSeed3b": "3B · バランス",
+  "set_upSeed3bSub": "品質とリソースのバランス。普段使いに",
+  "set_upSeed7b": "7B · 高画質",
+  "set_upSeed7bSub": "高画質。VRAM と時間が多く必要",
+  "set_upSeed7bSharp": "7B · シャープ",
+  "set_upSeed7bSharpSub": "よりシャープなディテール",
+  "set_upVram": "VRAM ≥ {n} GB",
+  "@set_upVram": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_upProgress": "{done} / {total} · {speed}/s",
+  "@set_upProgress": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "speed": {}
+    }
+  },
+  "set_upVramMode": "VRAM モード",
+  "set_upRecommended": "推奨",
+  "set_upLowVram": "省 VRAM",
+  "set_upOffload": "CPU オフロード層数",
+  "set_upOffloadSub": "多いほど VRAM を節約しますが遅くなります",
+  "set_upTiling": "VAE タイル",
+  "set_upTilingSub": "小さいタイルは VRAM を節約。重なりで継ぎ目を軽減",
+  "set_upNoise": "実験的ノイズ",
+  "set_upNoiseSub": "入力 {a} · 潜在 {b}。0 で現状維持",
+  "@set_upNoiseSub": {
+    "placeholders": {
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_upInputNoise": "入力ノイズ",
+  "set_upLatentNoise": "潜在ノイズ",
+  "set_upExperimental": "実験",
+  "set_upRtx": "RTX Video",
+  "set_upRtxSub": "NVIDIA RTX Video で高速拡大（約 64 MB）。",
+  "set_upRtxName": "RTX Video Super Resolution",
+  "set_upRtxNeeds": "対応 RTX GPU とドライバーが必要",
+  "set_upDefault": "既定の拡大方法",
+  "set_upDefaultTip": "生成ページの「ローカル拡大」で使います。メニューでいつでも変更可。",
+  "set_upVramTip": "VRAM 不足でもモデルは自動で切り替わりません。3B、倍率を下げる、省 VRAM、VAE タイルを試してください。",
+  "set_upRemoveTitle": "{name}を削除しますか？",
+  "@set_upRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_upRemoveBody": "使うときは再ダウンロードが必要です。",
+  "set_brDesc": "この PC の他のアプリと連携：Krita、外部 Agent、ComfyUI。",
+  "set_brKritaSub": "Krita から生成し、結果をレイヤーに戻します。",
+  "set_brKrita": "Krita ブリッジ",
+  "set_brLoopback": "127.0.0.1 からの接続のみ受け付けます",
+  "set_brConnected": "接続済み",
+  "set_brWaiting": "Krita の接続待ち",
+  "set_brRegenerate": "セッションを再生成",
+  "set_brDiscovery": "検出ファイル",
+  "set_brAgents": "外部 Agent",
+  "set_brAgentsSub": "Claude Code や Codex などがパラメーターの読み書きと生成を行えます。",
+  "set_brLocal": "ローカルブリッジ",
+  "set_brClients": "{n} 件の Agent が接続中",
+  "@set_brClients": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brNoClients": "接続中の Agent なし",
+  "set_brTakeover": "接続手順をコピー",
+  "set_brEnd": "接続を終了",
+  "set_brActivity": "最近のアクティビティ",
+  "set_brComfySub": "ComfyUI のワークフローを読み込み Studio から実行します。",
+  "set_brComfyEnable": "ComfyUI を有効にする",
+  "set_brComfyUrl": "サーバーアドレス",
+  "set_brComfyFailed": "接続失敗：{reason}（{when}）。ComfyUI が起動しているか確認してください。",
+  "@set_brComfyFailed": {
+    "placeholders": {
+      "reason": {},
+      "when": {}
+    }
+  },
+  "set_brComfyOk": "接続正常（{when}）",
+  "@set_brComfyOk": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_brStatus": "状態",
+  "set_brAgentsShort": "{n} 件",
+  "@set_brAgentsShort": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brOff": "無効",
+  "set_brNoResponse": "応答なし",
+  "set_brTip": "ブリッジはループバックのみで待ち受け、LAN には公開しません。プロキシは適用されません。",
+  "set_nwDesc": "プロキシと接続状態。",
+  "set_nwProxy": "プロキシ",
+  "set_nwProxySub": "NovelAI、Danbooru、GitHub 更新、モデルサービスへの接続に使います。",
+  "set_nwUse": "プロキシを使う",
+  "set_nwMode": "方式",
+  "set_nwSystem": "システム",
+  "set_nwManual": "手動",
+  "set_nwAddress": "アドレス",
+  "set_nwDetected": "システムプロキシ：{addr}。外部リクエストのみ経由し、ローカルブリッジとモデルは経由しません。",
+  "@set_nwDetected": {
+    "placeholders": {
+      "addr": {}
+    }
+  },
+  "set_nwNoSystem": "システムプロキシは見つかりません。外部リクエストのみ経由します。",
+  "set_nwCheck": "接続チェック",
+  "set_nwCheckSub": "各サービスへの到達性をまとめて確認します。",
+  "set_nwNaiImage": "NovelAI 画像生成",
+  "set_nwNaiApi": "NovelAI アカウント",
+  "set_nwDanbooru": "Danbooru",
+  "set_nwUpdate": "アプリ更新",
+  "set_nwCheckAll": "すべて確認",
+  "set_nwChecked": "最終確認 {when}",
+  "@set_nwChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_nwViaProxy": "プロキシ経由",
+  "set_nwDirect": "直接接続",
+  "set_nwNeverChecked": "未確認",
+  "set_nwFail": "失敗",
+  "set_nwTip": "プロキシの変更は再起動後に反映されます。自動で再起動はしません。",
+  "set_pvDesc": "共有時に含める情報と、確認が必要な操作。",
+  "set_pvProtect": "保護",
+  "set_pvStrip": "共有時にメタデータを除去",
+  "set_pvStripSub": "コピーやドラッグ時にプロンプトとパラメーターを除去。元ファイルはそのまま",
+  "set_pvExternal": "外部送信前に確認",
+  "set_pvExternalSub": "他のアプリやサイトへ送る前に確認",
+  "set_pvDanger": "危険な操作を確認",
+  "set_pvDangerSub": "削除・消去・上書きの前に確認",
+  "set_pvOverwrite": "保存時に上書きしない",
+  "set_pvOverwriteSub": "同名ファイルがあれば自動で名前を変更",
+  "set_pvBlacklist": "オンラインギャラリーのブロックリスト",
+  "set_pvBlacklistSub": "これらのタグを含む画像を非表示にします。",
+  "set_pvAddTag": "タグを追加…",
+  "set_pvSync": "Danbooru のブロックリストを同期",
+  "set_pvSyncSub": "{user} でログイン中 · 最終同期 {when}",
+  "@set_pvSyncSub": {
+    "placeholders": {
+      "user": {},
+      "when": {}
+    }
+  },
+  "set_pvSyncNever": "{user} でログイン中 · 未同期",
+  "@set_pvSyncNever": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "set_pvSyncSignedOut": "Danbooru にログインすると同期できます",
+  "set_pvSyncNow": "今すぐ同期",
+  "set_pvSyncing": "同期中…",
+  "set_pvAutoSync": "起動時に自動同期",
+  "set_pvExported": "エクスポートに含まれるもの",
+  "set_pvIncPrefs": "外観・操作・入力の設定",
+  "set_pvIncRules": "保護ルールとブロックリスト",
+  "set_pvIncCred": "アカウント認証情報",
+  "set_pvIncPaths": "ファイルパス",
+  "set_pvIncDrafts": "下書きとモデル設定",
+  "set_pvTip": "除去はコピーとドラッグのみ。保存した元画像はパラメーターを保持します。",
+  "set_bkDesc": "設定を他の端末へ移す、または既定に戻します。リセット前に必ずバックアップします。",
+  "set_bkPrefs": "設定",
+  "set_bkPrefsSub": "外観・操作・入力・保護ルール。認証情報、パス、下書き、モデル設定は含みません。",
+  "set_bkExport": "エクスポート",
+  "set_bkExportSub": "studio-preferences.json として保存",
+  "set_bkExportBtn": "エクスポート…",
+  "set_bkImport": "インポート",
+  "set_bkImportSub": "適用前に変更件数を表示し、現在の設定をバックアップします",
+  "set_bkImportBtn": "ファイルを選択…",
+  "set_bkUndoImport": "前回のインポートを取り消す",
+  "set_bkUndoImportSub": "{when} のインポート前に戻します",
+  "@set_bkUndoImportSub": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_bkNoImport": "インポート履歴なし",
+  "set_bkRestore": "復元",
+  "set_bkOther": "その他の設定",
+  "set_bkShortcutsSub": "{n} 件、{m} 件をカスタマイズ",
+  "@set_bkShortcutsSub": {
+    "placeholders": {
+      "n": {},
+      "m": {}
+    }
+  },
+  "set_bkModelsSub": "プロバイダー、割り当て、プリセット。API キーは既定で含みません",
+  "set_bkCopyConfig": "設定をコピー",
+  "set_bkReset": "既定に戻す",
+  "set_bkResetSub": "リセットする範囲を選びます。その他はそのままです。",
+  "set_bkScopeAppearance": "外観と操作",
+  "set_bkScopeAppearanceSub": "テーマ、フォント、言語、キャンバス、通知",
+  "set_bkScopeInput": "入力と補完",
+  "set_bkScopeInputSub": "ホイール重み、関連タグ、補完",
+  "set_bkScopeProtect": "プライバシーと生成保護",
+  "set_bkScopeProtectSub": "メタデータ、確認、高コスト警告、間隔",
+  "set_bkScopeShortcuts": "ショートカット",
+  "set_bkScopeShortcutsSub": "全 {n} 件",
+  "@set_bkScopeShortcutsSub": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_bkResetBtn": "選択した項目を既定に戻す…",
+  "set_bkResetHint": "先にバックアップし、元に戻せます",
+  "set_bkResetTitle": "選択した設定を既定に戻しますか？",
+  "set_bkResetBody": "{scopes} が既定に戻ります。現在の設定は先にバックアップされます。",
+  "@set_bkResetBody": {
+    "placeholders": {
+      "scopes": {}
+    }
+  },
+  "set_bkAuto": "自動バックアップ",
+  "set_bkAutoSub": "直近 5 件を保持",
+  "set_bkKindImport": "インポート前",
+  "set_bkKindReset": "リセット前",
+  "set_bkKindUpgrade": "更新前",
+  "set_bkNoBackups": "バックアップはまだありません",
+  "set_bkRestoreTitle": "「{name}」のバックアップに戻しますか？",
+  "@set_bkRestoreTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_bkRestoreBody": "現在の設定は先にバックアップされます。",
+  "set_abDesc": "バージョン、更新、診断。",
+  "set_abNew": "新しいバージョン {version}",
+  "@set_abNew": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abLatest": "最新です",
+  "set_abChecking": "更新を確認中…",
+  "set_abCheckFailed": "更新の確認に失敗",
+  "set_abDownloading": "ダウンロード中 {pct}",
+  "@set_abDownloading": {
+    "placeholders": {
+      "pct": {}
+    }
+  },
+  "set_abChecked": "最終確認 {when}",
+  "@set_abChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_abNotes": "{version} の更新内容",
+  "@set_abNotes": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abInstall": "ダウンロードしてインストール",
+  "set_abChangelog": "更新履歴",
+  "set_abPrerelease": "プレリリースを含める",
+  "set_abCheck": "更新を確認",
+  "set_abDiag": "診断",
+  "set_abLog": "ログファイルに記録",
+  "set_abLogSub": "問題調査時にオン。API キーや認証情報は含みません",
+  "set_abLogDir": "ログフォルダー",
+  "set_abCopyDiag": "診断情報をコピー",
+  "set_abCopyDiagSub": "バージョン、システム、GPU、各サービスの状態",
+  "set_abProject": "プロジェクト",
+  "set_abRepo": "ソースコード",
+  "set_abUpstream": "元のプロジェクト",
+  "set_abUpstreamSub": "NAI Launcher をもとに開発。原作者の表記を保持",
+  "set_abFonts": "フォントと素材",
+  "set_abLicenses": "ライセンス",
+  "set_abView": "表示",
+  "set_abSystem": "システム",
+  "set_srQuoted": "「{query}」",
+  "@set_srQuoted": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_srBalance": "Anlas 残高",
+  "set_srSubscription": "サブスクリプションと Anlas",
+  "set_agEnable": "有効にする",
+  "set_agDisable": "無効にする",
+  "set_listSep": "、",
+  "set_on": "オン",
+  "set_off": "オフ",
+  "set_unitSeconds": "秒"
 }

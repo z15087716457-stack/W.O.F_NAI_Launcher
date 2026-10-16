@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
+import 'package:collection/collection.dart';
 
 const naiAgentDefaultPromptVersion = '2026-10-07.1';
 const naiAgentDefaultSystemPrompt = '''
@@ -344,19 +345,35 @@ class AgentWorkspaceStore {
     await _saveSettings(settings);
   });
   Future<AgentSettings> patchSettings(Map<String, dynamic> changes) =>
-      _write(() async {
-        final current = await readSettings();
-        final settings = AgentSettings.fromJson({
-          ...current.toJson(),
-          ...changes,
-          'reasoningEfforts': {
-            ...current.reasoningEfforts,
-            ...?changes['reasoningEfforts'] as Map?,
-          },
-        });
-        await _saveSettings(settings);
-        return settings;
-      });
+      patchSettingsChecked(changes);
+
+  Future<AgentSettings> patchSettingsChecked(
+    Map<String, dynamic> changes, {
+    Map<String, dynamic>? expected,
+  }) => _write(() async {
+    final current = await readSettings();
+    if (expected != null) {
+      final values = current.toJson();
+      for (final entry in expected.entries) {
+        if (!const DeepCollectionEquality().equals(
+          values[entry.key],
+          entry.value,
+        )) {
+          throw StateError('Agent settings changed while editing');
+        }
+      }
+    }
+    final settings = AgentSettings.fromJson({
+      ...current.toJson(),
+      ...changes,
+      'reasoningEfforts': {
+        ...current.reasoningEfforts,
+        ...?changes['reasoningEfforts'] as Map?,
+      },
+    });
+    await _saveSettings(settings);
+    return settings;
+  });
 
   /// Mutate only one explicit user-selected extension against the latest settings.
   Future<AgentSettings> configureExtension(

@@ -17028,4 +17028,2573 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get rag_useRuntime => '기존 환경 사용';
+
+  @override
+  String get set_title => '설정';
+
+  @override
+  String get set_search => '설정 검색';
+
+  @override
+  String get set_searchResults => '검색 결과';
+
+  @override
+  String set_searchCount(Object count) {
+    return '$count개';
+  }
+
+  @override
+  String get set_searchHint => '결과에서 바로 바꿀 수 있습니다. 화살표를 누르면 해당 설정으로 이동합니다.';
+
+  @override
+  String get set_searchKeys => '선택';
+
+  @override
+  String get set_searchJump => '이동';
+
+  @override
+  String set_searchEmpty(Object query) {
+    return '“$query”에 대한 결과가 없습니다';
+  }
+
+  @override
+  String get set_searchEmptyHint => '“프록시”, “저장”, “단축키” 또는 경로로 검색해 보세요';
+
+  @override
+  String get set_goTo => '설정으로 이동';
+
+  @override
+  String get set_hasUpdate => '업데이트';
+
+  @override
+  String get set_groupPersonal => '개인';
+
+  @override
+  String get set_groupCreate => '창작';
+
+  @override
+  String get set_groupIntelligence => '지능';
+
+  @override
+  String get set_groupConnect => '연결';
+
+  @override
+  String get set_groupSystem => '시스템';
+
+  @override
+  String get set_pageOverview => '개요';
+
+  @override
+  String get set_pageAccount => '계정';
+
+  @override
+  String get set_pageAppearance => '모양';
+
+  @override
+  String get set_pageCanvas => '캔버스와 보기';
+
+  @override
+  String get set_pageShortcuts => '단축키';
+
+  @override
+  String get set_pageGeneration => '생성과 Anlas';
+
+  @override
+  String get set_pageStorage => '저장소와 갤러리';
+
+  @override
+  String get set_pageDictionaries => '사전과 캐시';
+
+  @override
+  String get set_pageModels => '모델과 API';
+
+  @override
+  String get set_pageAgent => 'NAI Agent';
+
+  @override
+  String get set_pageRag => '시맨틱 검색';
+
+  @override
+  String get set_pageUpscale => '로컬 업스케일';
+
+  @override
+  String get set_pageBridges => '브리지와 연동';
+
+  @override
+  String get set_pageNetwork => '네트워크와 프록시';
+
+  @override
+  String get set_pagePrivacy => '개인정보와 보호';
+
+  @override
+  String get set_pageBackup => '백업과 초기화';
+
+  @override
+  String get set_pageAbout => '정보';
+
+  @override
+  String get set_resetDefault => '기본값으로';
+
+  @override
+  String get set_resetPage => '이 페이지 초기화';
+
+  @override
+  String get set_needsRestart => '재시작 필요';
+
+  @override
+  String get set_isNew => '새';
+
+  @override
+  String get set_defaultTag => '기본';
+
+  @override
+  String get set_readOnly => '읽기 전용';
+
+  @override
+  String get set_cancel => '취소';
+
+  @override
+  String get set_save => '저장';
+
+  @override
+  String get set_discard => '버리기';
+
+  @override
+  String get set_later => '나중에';
+
+  @override
+  String get set_undo => '실행 취소';
+
+  @override
+  String get set_open => '열기';
+
+  @override
+  String get set_choose => '선택';
+
+  @override
+  String get set_change => '변경';
+
+  @override
+  String get set_clear => '지우기';
+
+  @override
+  String get set_delete => '삭제';
+
+  @override
+  String get set_copy => '복사';
+
+  @override
+  String get set_more => '더 보기';
+
+  @override
+  String get set_refresh => '새로 고침';
+
+  @override
+  String get set_retry => '다시 시도';
+
+  @override
+  String get set_test => '연결 테스트';
+
+  @override
+  String get set_testing => '확인 중…';
+
+  @override
+  String get set_importIt => '가져오기';
+
+  @override
+  String get set_exportIt => '내보내기';
+
+  @override
+  String get set_install => '설치';
+
+  @override
+  String get set_download => '다운로드';
+
+  @override
+  String get set_resume => '계속';
+
+  @override
+  String get set_pause => '일시 정지';
+
+  @override
+  String get set_rebuild => '다시 빌드';
+
+  @override
+  String get set_login => '로그인';
+
+  @override
+  String get set_adjust => '조정';
+
+  @override
+  String get set_collapse => '접기';
+
+  @override
+  String get set_notSet => '설정 안 됨';
+
+  @override
+  String get set_defaultLocation => '기본 위치';
+
+  @override
+  String get set_builtinSound => '내장 사운드';
+
+  @override
+  String get set_justNow => '방금';
+
+  @override
+  String set_minutesAgo(Object n) {
+    return '$n분 전';
+  }
+
+  @override
+  String set_todayAt(Object time) {
+    return '오늘 $time';
+  }
+
+  @override
+  String get set_yesterday => '어제';
+
+  @override
+  String set_secondsAgo(Object n) {
+    return '$n초 전';
+  }
+
+  @override
+  String set_savedChange(Object title, Object from, Object to) {
+    return '저장됨 · $title $from → $to';
+  }
+
+  @override
+  String get set_restartBanner =>
+      '저장했습니다. Studio를 다시 시작하면 적용되며 진행 중인 생성에는 영향이 없습니다.';
+
+  @override
+  String get set_restartNow => '지금 다시 시작';
+
+  @override
+  String get set_unsavedInstructions => '지침에 저장되지 않은 변경이 있습니다';
+
+  @override
+  String get set_leaveTitle => '저장하지 않은 변경을 버릴까요?';
+
+  @override
+  String get set_leaveBody => 'Agent 지침이 저장되지 않았습니다. 이동하면 변경이 사라집니다.';
+
+  @override
+  String set_resetPageTitle(Object page) {
+    return '“$page”을(를) 기본값으로 되돌릴까요?';
+  }
+
+  @override
+  String set_resetPageBody(Object count) {
+    return '이 페이지에서 바꾼 $count개 항목이 기본값으로 돌아갑니다. 개요에서 되돌릴 수 있습니다.';
+  }
+
+  @override
+  String get set_ovDesc =>
+      '계정, 저장소, 연결, AI 서비스 상태를 모았습니다. 처리할 항목이 먼저 나오며 카드를 누르면 해당 설정으로 이동합니다.';
+
+  @override
+  String get set_ovSwitchAccount => '계정 전환';
+
+  @override
+  String get set_ovTodayUsed => '오늘 사용';
+
+  @override
+  String set_ovMonthly(Object n) {
+    return '월 지급량 $n';
+  }
+
+  @override
+  String set_ovWarnAt(Object n) {
+    return '고비용 경고 ≥ $n Anlas';
+  }
+
+  @override
+  String get set_ovWarnOff => '고비용 경고 꺼짐';
+
+  @override
+  String set_ovRenews(Object date) {
+    return '갱신일 $date';
+  }
+
+  @override
+  String get set_ovSignedOut => '로그인 안 됨';
+
+  @override
+  String get set_ovAttention => '처리 필요';
+
+  @override
+  String get set_ovAllClear => '모두 정상';
+
+  @override
+  String set_attUpdate(Object version) {
+    return '새 버전 $version';
+  }
+
+  @override
+  String set_attRagPaused(Object source) {
+    return '$source 색인 일시 정지됨';
+  }
+
+  @override
+  String set_attRagPausedSub(Object done, Object total) {
+    return '$done / $total, 일부 검색 가능';
+  }
+
+  @override
+  String set_attBridgeDown(Object name) {
+    return '$name이(가) 응답하지 않습니다';
+  }
+
+  @override
+  String set_attCheckedAt(Object detail, Object when) {
+    return '$detail · $when 확인';
+  }
+
+  @override
+  String set_attCredential(Object name) {
+    return '“$name” 자격 증명 만료';
+  }
+
+  @override
+  String get set_attCredentialSub => '업데이트해야 이 계정으로 전환할 수 있습니다';
+
+  @override
+  String set_attDiskLow(Object disk) {
+    return '$disk 디스크 공간 부족';
+  }
+
+  @override
+  String set_attDiskLowSub(Object size) {
+    return '$size 남음, 자동 저장이 실패할 수 있음';
+  }
+
+  @override
+  String set_attProvider(Object name) {
+    return '$name 연결 실패';
+  }
+
+  @override
+  String get set_attProviderSub => '번역은 다른 공급자로 대체됩니다';
+
+  @override
+  String get set_attView => '보기';
+
+  @override
+  String get set_attGo => '확인';
+
+  @override
+  String get set_attUpdateCred => '업데이트';
+
+  @override
+  String get set_tileStorage => '저장소';
+
+  @override
+  String set_tileImages(Object n) {
+    return '이미지 $n장';
+  }
+
+  @override
+  String set_tileSaveTo(Object path) {
+    return '$path에 저장';
+  }
+
+  @override
+  String get set_tileConnect => '연결';
+
+  @override
+  String set_tileOnline(Object n) {
+    return '$n개 온라인';
+  }
+
+  @override
+  String get set_tileKrita => 'Krita 연결됨';
+
+  @override
+  String get set_tileKritaOff => 'Krita 연결 안 됨';
+
+  @override
+  String set_tileAgents(Object n) {
+    return '외부 Agent $n개';
+  }
+
+  @override
+  String get set_tileComfyDown => 'ComfyUI 응답 없음';
+
+  @override
+  String get set_tileComfyOk => 'ComfyUI 정상';
+
+  @override
+  String get set_tileComfyOff => 'ComfyUI 꺼짐';
+
+  @override
+  String get set_tileModels => '모델과 API';
+
+  @override
+  String set_tileTranslateVia(Object ms) {
+    return '프롬프트 번역 · $ms';
+  }
+
+  @override
+  String set_tileAgentModel(Object model) {
+    return 'Agent · $model';
+  }
+
+  @override
+  String set_tileProviders(Object p, Object m) {
+    return '공급자 $p개 · 모델 $m개';
+  }
+
+  @override
+  String get set_tileNoModel => '구성 안 됨';
+
+  @override
+  String get set_tileRag => '시맨틱 검색';
+
+  @override
+  String get set_tileReady => '준비';
+
+  @override
+  String set_tileRagDone(Object names) {
+    return '$names 완료';
+  }
+
+  @override
+  String set_tileRagPaused(Object name, Object pct) {
+    return '$name $pct · 일시 정지';
+  }
+
+  @override
+  String set_tileRagBuilding(Object name, Object pct) {
+    return '$name $pct · 빌드 중';
+  }
+
+  @override
+  String set_tileRagEmpty(Object name) {
+    return '$name 아직 색인 없음';
+  }
+
+  @override
+  String set_tileRagError(Object name) {
+    return '$name 색인 실패';
+  }
+
+  @override
+  String get set_tileUpscale => '로컬 업스케일';
+
+  @override
+  String set_tileUpscaleModels(Object n) {
+    return '모델 $n개 사용 가능';
+  }
+
+  @override
+  String set_tileDefaultIs(Object name) {
+    return '$name (기본)';
+  }
+
+  @override
+  String get set_tileSeedMissing => 'SeedVR2 미설치';
+
+  @override
+  String get set_tileSeedReady => 'SeedVR2 설치됨';
+
+  @override
+  String get set_tileProtect => '보호';
+
+  @override
+  String set_tileProtectOn(Object on, Object all) {
+    return '$on / $all 켜짐';
+  }
+
+  @override
+  String set_tileInterval(Object s, Object p) {
+    return '간격 $s초 ± $p%';
+  }
+
+  @override
+  String get set_tileIntervalOff => '생성 간격 제한 없음';
+
+  @override
+  String get set_recent => '최근 변경';
+
+  @override
+  String get set_recentSub => '자동 저장 · 되돌리기 가능';
+
+  @override
+  String get set_recentEmpty => '아직 변경 없음';
+
+  @override
+  String get set_quick => '자주 쓰는 스위치';
+
+  @override
+  String get set_quickSub => '여기서 바로 변경';
+
+  @override
+  String get set_quickDark => '다크 모드';
+
+  @override
+  String get set_quickChannel => '캔버스 비주얼 채널';
+
+  @override
+  String set_searchTip(Object keys) {
+    return '$keys로 설정을 검색하고 결과에서 바로 바꿀 수 있습니다.';
+  }
+
+  @override
+  String get set_accDesc => 'NovelAI 계정, 기본 로그인, 구독을 관리합니다.';
+
+  @override
+  String get set_accSaved => '저장된 계정';
+
+  @override
+  String get set_accSavedSub =>
+      '클릭 한 번으로 전환합니다. 자격 증명은 이 기기에만 저장되며 내보내지지 않습니다.';
+
+  @override
+  String get set_accCurrent => '현재';
+
+  @override
+  String get set_accInUse => '사용 중';
+
+  @override
+  String get set_accSwitch => '전환';
+
+  @override
+  String get set_accEmail => '이메일';
+
+  @override
+  String get set_accToken => '토큰';
+
+  @override
+  String set_accRenews(Object date) {
+    return '갱신 $date';
+  }
+
+  @override
+  String set_accLastUsed(Object date) {
+    return '마지막 사용 $date';
+  }
+
+  @override
+  String get set_accNoSub => '구독 없음';
+
+  @override
+  String get set_accExpired => '자격 증명 만료';
+
+  @override
+  String get set_accEdit => '프로필 편집';
+
+  @override
+  String get set_accUpdate => '자격 증명 업데이트';
+
+  @override
+  String get set_accMakeDefault => '기본 계정으로';
+
+  @override
+  String get set_accDelete => '계정 삭제';
+
+  @override
+  String set_accDeleteTitle(Object name) {
+    return '“$name” 계정을 삭제할까요?';
+  }
+
+  @override
+  String get set_accDeleteBody =>
+      '이 기기에 저장된 자격 증명만 삭제되며 NovelAI 계정에는 영향이 없습니다.';
+
+  @override
+  String get set_accAdd => '계정 추가';
+
+  @override
+  String get set_accAddHint => '이메일과 비밀번호 또는 영구 토큰';
+
+  @override
+  String get set_accLogin => '로그인';
+
+  @override
+  String get set_accDefault => '기본 계정';
+
+  @override
+  String get set_accDefaultSub => '로그인 화면에서 미리 선택되는 계정';
+
+  @override
+  String get set_accAutoLogin => '시작 시 자동 로그인';
+
+  @override
+  String get set_accAutoLoginSub => '마지막 세션을 사용합니다. 끄면 매번 로그인 화면에서 시작합니다';
+
+  @override
+  String get set_accSub => '구독';
+
+  @override
+  String set_accMonthly(Object n) {
+    return '매월 $n Anlas';
+  }
+
+  @override
+  String set_accRemaining(Object n) {
+    return '$n 남음';
+  }
+
+  @override
+  String set_accResets(Object date) {
+    return '$date 초기화';
+  }
+
+  @override
+  String get set_accPortal => 'NovelAI 계정 페이지 열기';
+
+  @override
+  String get set_accSwitchHint => '전환해도 초안과 캔버스는 유지되며 대기 중인 생성은 원래 계정으로 완료됩니다.';
+
+  @override
+  String get set_apDesc => '테마, 글꼴, 알림. 변경은 즉시 저장되며 되돌릴 수 있습니다.';
+
+  @override
+  String get set_apTheme => '테마';
+
+  @override
+  String get set_apThemeSub => '시작 화면, 로그인, 모든 페이지에 적용됩니다.';
+
+  @override
+  String get set_apLight => '라이트';
+
+  @override
+  String get set_apDark => '다크';
+
+  @override
+  String get set_apSystem => '시스템';
+
+  @override
+  String get set_apSystemSub => 'Windows 설정을 따름';
+
+  @override
+  String get set_apText => '글꼴';
+
+  @override
+  String get set_apFont => '인터페이스 글꼴';
+
+  @override
+  String get set_apFontSub => '숫자와 코드는 Geist Mono를 사용합니다';
+
+  @override
+  String get set_apScale => '설정 및 대화 상자 글자 크기';
+
+  @override
+  String get set_apScaleSub => '설정과 대화 상자만 확대합니다';
+
+  @override
+  String get set_apSampleTitle => '제목 · 생성 완료';
+
+  @override
+  String get set_apSampleBody => '본문 · 로컬 갤러리에 저장했습니다. 프롬프트를 계속 다듬어 보세요.';
+
+  @override
+  String get set_apSampleNote => '설명 · 슬라이더를 움직이면 바로 미리 봅니다.';
+
+  @override
+  String get set_apLanguage => '언어';
+
+  @override
+  String get set_apLanguageSub => '바로 적용됩니다';
+
+  @override
+  String get set_apMotion => '모션과 소리';
+
+  @override
+  String get set_apReduceMotion => '동작 줄이기';
+
+  @override
+  String get set_apReduceMotionSub => '캔버스 이동, 확대/축소, 패널 전환 애니메이션을 끕니다';
+
+  @override
+  String get set_apSound => '생성 완료 소리';
+
+  @override
+  String get set_apSoundSub => '배치가 끝나면 재생';
+
+  @override
+  String get set_apSoundFile => '소리 파일';
+
+  @override
+  String get set_apPreviewSound => '듣기';
+
+  @override
+  String get set_apNotify => '알림';
+
+  @override
+  String get set_apNotifySub => '오른쪽 위에 나타났다가 3초 뒤 사라집니다';
+
+  @override
+  String get set_apNotifyPreview => '미리 보기';
+
+  @override
+  String get set_apPreview => '미리 보기';
+
+  @override
+  String get set_apCurrent => '현재';
+
+  @override
+  String set_apThemeTip(Object keys) {
+    return '$keys로 언제든 라이트/다크를 전환합니다.';
+  }
+
+  @override
+  String get set_cvDesc => '기록, 뷰어, 무한 캔버스의 동작.';
+
+  @override
+  String get set_cvBrowse => '보기';
+
+  @override
+  String get set_cvHistoryClick => '기록 썸네일을 누를 때';
+
+  @override
+  String get set_cvOpenDetail => '상세 열기';
+
+  @override
+  String get set_cvOpenDetailSub => '뷰어로 한 장씩 자세히 봅니다';
+
+  @override
+  String get set_cvLinked => '연동 미리 보기';
+
+  @override
+  String get set_cvLinkedSub => '캔버스에서 선택하고 뷰어는 열지 않습니다';
+
+  @override
+  String get set_cvViewer => '결과 표시 위치';
+
+  @override
+  String get set_cvCanvas => '무한 캔버스';
+
+  @override
+  String get set_cvCanvasSub => '배치를 세로로 놓고 이동, 확대, 고정 비교';
+
+  @override
+  String get set_cvSimple => '간단한 뷰어';
+
+  @override
+  String get set_cvSimpleSub => '최신 이미지만 표시, 가장 가벼움';
+
+  @override
+  String get set_cvCanvasSec => '캔버스';
+
+  @override
+  String get set_cvLock => '캔버스 시점 고정';
+
+  @override
+  String get set_cvLockSub => '새 이미지가 나와도 시점을 옮기지 않습니다';
+
+  @override
+  String get set_cvFill => '새 이미지를 꽉 차게';
+
+  @override
+  String get set_cvFillSub => '실제 픽셀 대신 보이는 영역에 맞춥니다';
+
+  @override
+  String get set_cvChannel => '비주얼 채널';
+
+  @override
+  String get set_cvChannelSub => '캔버스 통로를 테마로 꾸미며, 기록을 넘기면 테마가 차례로 바뀝니다.';
+
+  @override
+  String get set_cvMode => '모드';
+
+  @override
+  String get set_cvMinTwo => '무작위 모드에는 테마가 두 개 이상 필요합니다.';
+
+  @override
+  String set_cvSession(Object order) {
+    return '이번 순서: $order';
+  }
+
+  @override
+  String get set_cvLevel => '농도';
+
+  @override
+  String get set_cvRuler => '시간 눈금';
+
+  @override
+  String get set_cvRulerSub => '배치 시간, 날짜 구분선, 오른쪽 눈금';
+
+  @override
+  String get set_cvMotion => '대기 중 움직임';
+
+  @override
+  String get set_cvMotionSub => '생성 중이거나 동작 줄이기를 켜면 멈춥니다';
+
+  @override
+  String get set_cvOps => '캔버스 조작';
+
+  @override
+  String get set_cvOpScroll => '위아래 이동';
+
+  @override
+  String get set_cvOpPan => '좌우 이동';
+
+  @override
+  String get set_cvOpZoom => '확대/축소';
+
+  @override
+  String get set_cvOpMove => '시점 이동';
+
+  @override
+  String get set_cvOpAll => '전체 보기';
+
+  @override
+  String get set_cvOpHome => '최신 배치로';
+
+  @override
+  String get set_cvWheel => '휠';
+
+  @override
+  String get set_cvChannelTip => '캔버스의 톱니바퀴에서도 같은 설정을 바꿀 수 있습니다.';
+
+  @override
+  String get set_scDesc =>
+      '페이지별로 묶었습니다. 단축키를 눌러 새 조합을 기록하고, 같은 페이지의 중복은 빨갛게 표시됩니다.';
+
+  @override
+  String get set_scSearch => '동작 또는 키 검색 (예: Ctrl+S)';
+
+  @override
+  String get set_scAll => '전체';
+
+  @override
+  String get set_scKeyboard => '키보드 배치';
+
+  @override
+  String get set_scKeyboardSub => '키를 눌러 목록을 거릅니다. 파란색은 사용 중, 빨간색은 충돌입니다.';
+
+  @override
+  String get set_scNoMod => '수정자 없음';
+
+  @override
+  String set_scLayer(Object context, Object mod) {
+    return '$context · $mod을(를) 누른 상태';
+  }
+
+  @override
+  String set_scLayerNone(Object context) {
+    return '$context · 수정자 없음';
+  }
+
+  @override
+  String get set_scAction => '동작';
+
+  @override
+  String get set_scKeys => '단축키';
+
+  @override
+  String get set_scDefault => '기본값';
+
+  @override
+  String set_scDefaultIs(Object keys) {
+    return '기본 $keys';
+  }
+
+  @override
+  String set_scConflict(Object name) {
+    return '“$name”과(와) 충돌';
+  }
+
+  @override
+  String get set_scRecording => '새 조합을 누르세요…';
+
+  @override
+  String get set_scRecordHint => 'Esc 취소 · Backspace 지우기';
+
+  @override
+  String get set_scRecord => '기록';
+
+  @override
+  String get set_scClear => '지우기';
+
+  @override
+  String get set_scDisplay => '표시';
+
+  @override
+  String get set_scEnabled => '단축키 사용';
+
+  @override
+  String get set_scInTooltips => '툴팁에 표시';
+
+  @override
+  String get set_scInMenus => '메뉴에 표시';
+
+  @override
+  String get set_scBadges => '탐색에 숫자 표시';
+
+  @override
+  String get set_scConflicts => '충돌';
+
+  @override
+  String set_scConflictCount(Object n) {
+    return '$n개';
+  }
+
+  @override
+  String set_scConflictLine(Object keys) {
+    return '$keys이(가) 두 동작에 사용됨';
+  }
+
+  @override
+  String set_scConflictSub(Object context, Object a, Object b) {
+    return '$context: $a, $b. 충돌하는 동안 둘 다 동작하지 않습니다.';
+  }
+
+  @override
+  String set_scFix(Object name, Object keys) {
+    return '$name을(를) $keys(으)로';
+  }
+
+  @override
+  String get set_scNoConflict => '충돌 없음';
+
+  @override
+  String get set_scConfig => '단축키 구성';
+
+  @override
+  String get set_scResetAll => '모두 기본값으로';
+
+  @override
+  String get set_scResetAllTitle => '모든 단축키를 기본값으로 되돌릴까요?';
+
+  @override
+  String set_scResetAllBody(Object n) {
+    return '사용자 지정 $n개가 복원됩니다.';
+  }
+
+  @override
+  String get set_scHelp => '단축키 도움말';
+
+  @override
+  String set_scHelpTip(Object key) {
+    return '$key을(를) 누르면 해당 페이지의 단축키를 봅니다.';
+  }
+
+  @override
+  String get set_scEmpty => '일치하는 단축키가 없습니다';
+
+  @override
+  String get set_gnDesc => 'Anlas 사용, 요청 간격, 프롬프트 입력 도우미를 설정합니다.';
+
+  @override
+  String get set_gnCost => 'Anlas 보호';
+
+  @override
+  String get set_gnCostSub => '임계값을 넘는 요청은 보내기 전에 확인합니다.';
+
+  @override
+  String get set_gnWarn => '고비용 경고';
+
+  @override
+  String get set_gnWarnSub => '임계값을 넘으면 확인';
+
+  @override
+  String get set_gnThreshold => '임계값';
+
+  @override
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  ) {
+    return '현재: $model · $w×$h · $steps단계 · $n장';
+  }
+
+  @override
+  String get set_gnWillWarn => '경고함';
+
+  @override
+  String get set_gnNoWarn => '경고 안 함';
+
+  @override
+  String get set_gnFree => '무료';
+
+  @override
+  String get set_gnPace => '요청 간격';
+
+  @override
+  String get set_gnPaceSub => '연속 요청 사이에 잠시 기다려 서버 부하를 줄입니다.';
+
+  @override
+  String get set_gnLimit => '생성 간격 제한';
+
+  @override
+  String get set_gnInterval => '간격';
+
+  @override
+  String get set_gnJitter => '무작위 변동';
+
+  @override
+  String get set_gnJitterSub => '간격을 무작위로 늘이거나 줄임';
+
+  @override
+  String get set_gnTimeline => '이 설정에서 요청 10회는 대략 이렇게 배치됩니다';
+
+  @override
+  String get set_gnInput => '프롬프트 입력';
+
+  @override
+  String get set_gnWheel => '휠로 가중치 조정';
+
+  @override
+  String get set_gnWheelSub => '태그 위에서 휠을 돌려 가중치를 바꿉니다';
+
+  @override
+  String get set_gnNoKey => '키 없음';
+
+  @override
+  String get set_gnRelated => '관련 태그 제안';
+
+  @override
+  String get set_gnRelatedSub => '함께 자주 쓰는 태그를 제안';
+
+  @override
+  String get set_gnRag => '시맨틱 태그 제안';
+
+  @override
+  String get set_gnRagSub => '시맨틱 검색이 제공하는 문맥 기반 제안';
+
+  @override
+  String get set_gnReady => '준비됨';
+
+  @override
+  String get set_gnNotReady => '준비 안 됨';
+
+  @override
+  String get set_gnGoSettings => '설정';
+
+  @override
+  String get set_gnTranslate => '프롬프트 번역';
+
+  @override
+  String get set_gnTranslateSub => '프롬프트 번역에 쓰는 모델';
+
+  @override
+  String get set_gnToday => '오늘';
+
+  @override
+  String get set_gnUsed => 'Anlas 사용';
+
+  @override
+  String get set_gnNow => '지금';
+
+  @override
+  String get set_gnWarned => '고비용 경고';
+
+  @override
+  String set_gnTimes(Object n) {
+    return '$n회';
+  }
+
+  @override
+  String get set_gnMaxSingle => '최대 단일 요청';
+
+  @override
+  String get set_gnFreeTip => 'Opus 무료 생성은 이미 제외되며 임계값은 실제 차감량만 봅니다.';
+
+  @override
+  String get set_stDesc => '이미지 저장 위치, 갤러리가 읽는 폴더, 용량과 정리.';
+
+  @override
+  String get set_stUsage => '사용량';
+
+  @override
+  String set_stFree(Object disk, Object size) {
+    return '$disk 여유 $size';
+  }
+
+  @override
+  String get set_stRecount => '다시 계산';
+
+  @override
+  String get set_stCounting => '계산 중…';
+
+  @override
+  String get set_stImages => '이미지';
+
+  @override
+  String get set_stUpscaleModels => '업스케일 모델';
+
+  @override
+  String get set_stVibes => 'Vibe 라이브러리';
+
+  @override
+  String get set_stThumbs => '썸네일 캐시';
+
+  @override
+  String get set_stRag => '시맨틱 색인';
+
+  @override
+  String get set_stDict => '사전과 캐시';
+
+  @override
+  String get set_stAgent => 'Agent';
+
+  @override
+  String get set_stSave => '저장';
+
+  @override
+  String get set_stSavePath => '이미지 저장 위치';
+
+  @override
+  String get set_stAutoSave => '자동 저장';
+
+  @override
+  String get set_stAutoSaveSub => '생성 직후 저장합니다. 끄면 캔버스와 기록에만 남습니다';
+
+  @override
+  String get set_stAssets => '소재와 표시';
+
+  @override
+  String get set_stVibePath => 'Vibe 라이브러리 위치';
+
+  @override
+  String get set_stQuality => '갤러리 화질';
+
+  @override
+  String get set_stQualitySub => '썸네일 표시 품질';
+
+  @override
+  String get set_stHigh => '고화질';
+
+  @override
+  String get set_stStandard => '표준';
+
+  @override
+  String get set_stRoots => '갤러리 폴더';
+
+  @override
+  String get set_stRootsSub => '어떤 폴더든 갤러리에서 보고 검색할 수 있으며 자동 저장 대상은 아닙니다.';
+
+  @override
+  String get set_stPrimary => '주 폴더';
+
+  @override
+  String set_stCount(Object n) {
+    return '$n장';
+  }
+
+  @override
+  String get set_stAddFolder => '폴더 추가';
+
+  @override
+  String get set_stImportIndex => '태그 색인 가져오기 (.jsonl)';
+
+  @override
+  String set_stLastScan(Object when, Object n) {
+    return '마지막 스캔 $when · $n장';
+  }
+
+  @override
+  String get set_stMaintain => '유지 관리';
+
+  @override
+  String get set_stRescan => '갤러리 다시 스캔';
+
+  @override
+  String get set_stRescanSub => '누락 확인, 새 파일 추가, 메타데이터 다시 읽기';
+
+  @override
+  String get set_stScan => '스캔';
+
+  @override
+  String get set_stScanning => '스캔 중…';
+
+  @override
+  String get set_stCleanThumbs => '썸네일 캐시 정리';
+
+  @override
+  String get set_stCleanThumbsSub => '한도를 넘는 썸네일을 오래된 순으로 지웁니다. 원본은 그대로입니다';
+
+  @override
+  String get set_stClean => '정리';
+
+  @override
+  String get set_stCleanTitle => '썸네일 캐시를 정리할까요?';
+
+  @override
+  String get set_stCleanBody => '한도를 넘는 썸네일을 지우고 필요할 때 다시 만듭니다.';
+
+  @override
+  String get set_stAppData => '앱 데이터 위치';
+
+  @override
+  String get set_stAppDataSub => '계정, 기록, 블록 데이터베이스 위치. 바꾼 뒤 다시 시작';
+
+  @override
+  String get set_stOpenFolders => '폴더 열기';
+
+  @override
+  String get set_stLogs => '로그';
+
+  @override
+  String get set_stAppDataShort => '앱 데이터';
+
+  @override
+  String get set_stDeleteTip => '이미지 이동·삭제는 갤러리에서 하며 개인정보와 보호의 확인 규칙을 따릅니다.';
+
+  @override
+  String get set_stRemoveRoot => '이 폴더 제거';
+
+  @override
+  String get set_dcDesc => '태그 데이터와 캐시. 자동 완성이 이상할 때 여기서 정리합니다.';
+
+  @override
+  String get set_dcTags => '태그 사전';
+
+  @override
+  String get set_dcTagsSub => '자동 완성, 태그 번역, 제안에 쓰는 로컬 데이터.';
+
+  @override
+  String get set_dcBase => '기본 사전';
+
+  @override
+  String set_dcBaseValue(Object n, Object version) {
+    return '태그 $n개 · 데이터 $version';
+  }
+
+  @override
+  String get set_dcCooc => '동시 출현 데이터';
+
+  @override
+  String get set_dcCoocSub => '함께 나오는 태그 제안에 사용';
+
+  @override
+  String set_dcEntries(Object n) {
+    return '$n개';
+  }
+
+  @override
+  String get set_dcTranslate => '태그 번역';
+
+  @override
+  String get set_dcTranslateSub => '사전에 번역이 없을 때 사용';
+
+  @override
+  String get set_dcCaches => '캐시';
+
+  @override
+  String get set_dcCachesSub => '지워도 필요할 때 다시 받으며 이미지와 설정에는 영향이 없습니다.';
+
+  @override
+  String get set_dcDanbooru => 'Danbooru 캐시';
+
+  @override
+  String get set_dcDanbooruSub => '온라인 갤러리와 태그 위키 응답';
+
+  @override
+  String get set_dcTranslation => 'AI 번역 캐시';
+
+  @override
+  String get set_dcTranslationSub => '이미 번역한 태그와 프롬프트';
+
+  @override
+  String set_dcCacheSize(Object n, Object size) {
+    return '$n개 · $size';
+  }
+
+  @override
+  String set_dcClearTitle(Object name) {
+    return '$name을(를) 지울까요?';
+  }
+
+  @override
+  String get set_dcClearBody => '다음에 쓸 때 다시 받습니다.';
+
+  @override
+  String get set_dcStats => '캐시 통계';
+
+  @override
+  String get set_dcL1 => 'L1 메모리';
+
+  @override
+  String get set_dcL2 => 'L2 Hive';
+
+  @override
+  String get set_dcL3 => 'L3 SQLite';
+
+  @override
+  String set_dcImagesUnit(Object n) {
+    return '이미지 $n장';
+  }
+
+  @override
+  String get set_dcAutoRefresh => '자동 새로 고침';
+
+  @override
+  String set_dcUpdated(Object when) {
+    return '마지막 업데이트 $when';
+  }
+
+  @override
+  String get set_dcResetStats => '통계 초기화';
+
+  @override
+  String get set_dcTip =>
+      '여기 데이터는 모두 다시 만들 수 있습니다. 개인 데이터는 저장소 → 앱 데이터 위치에 있습니다.';
+
+  @override
+  String get set_mdDesc =>
+      '번역, 역추론, 태그 번역, Agent에 쓰는 LLM 서비스. 공급자를 추가하고 기능별로 모델을 고릅니다.';
+
+  @override
+  String get set_mdProviders => '공급자';
+
+  @override
+  String get set_mdTasks => '기능별 모델';
+
+  @override
+  String get set_mdPresets => '프롬프트 프리셋';
+
+  @override
+  String get set_mdRequests => '요청 기록';
+
+  @override
+  String set_mdProviderCount(Object n) {
+    return '공급자 $n개';
+  }
+
+  @override
+  String set_mdModelCount(Object n) {
+    return '모델 $n개';
+  }
+
+  @override
+  String get set_mdDisabled => '사용 안 함';
+
+  @override
+  String get set_mdLocal => '로컬';
+
+  @override
+  String set_mdLatency(Object ms, Object when) {
+    return '$ms · $when';
+  }
+
+  @override
+  String get set_mdUnreachable => '연결 실패';
+
+  @override
+  String get set_mdName => '이름';
+
+  @override
+  String get set_mdBaseUrl => '기본 URL';
+
+  @override
+  String get set_mdApiKey => 'API 키';
+
+  @override
+  String get set_mdApiKeyEmpty => '입력 안 됨';
+
+  @override
+  String get set_mdModels => '모델';
+
+  @override
+  String get set_mdRefreshModels => '공급자에서 가져오기';
+
+  @override
+  String get set_mdAddModel => '직접 추가';
+
+  @override
+  String set_mdUsedFor(Object tasks) {
+    return '$tasks에 사용';
+  }
+
+  @override
+  String get set_mdRetired => '공급자 지원 종료';
+
+  @override
+  String get set_mdCapTools => '도구';
+
+  @override
+  String get set_mdCapVision => '비전';
+
+  @override
+  String get set_mdCapReasoning => '추론';
+
+  @override
+  String get set_mdAdvanced => '고급 요청 옵션';
+
+  @override
+  String get set_mdDelete => '공급자 삭제';
+
+  @override
+  String set_mdDeleteTitle(Object name) {
+    return '“$name”을(를) 삭제할까요?';
+  }
+
+  @override
+  String get set_mdDeleteBody => '사용하던 기능은 다른 공급자로 전환됩니다.';
+
+  @override
+  String get set_mdRemoveModel => '모델 제거';
+
+  @override
+  String get set_mdTaskPrompt => '프롬프트 번역';
+
+  @override
+  String get set_mdTaskReverse => '프롬프트 역추론';
+
+  @override
+  String get set_mdTaskTag => '태그 번역';
+
+  @override
+  String get set_mdTaskWiki => '위키 번역';
+
+  @override
+  String get set_mdFeature => '기능';
+
+  @override
+  String get set_mdProvider => '공급자';
+
+  @override
+  String get set_mdModel => '모델';
+
+  @override
+  String get set_mdPreset => '프리셋';
+
+  @override
+  String get set_mdStatus => '상태';
+
+  @override
+  String get set_mdAvailable => '사용 가능';
+
+  @override
+  String get set_mdFallback => '첫 번째 사용 가능한 공급자로 대체';
+
+  @override
+  String get set_mdNotChosen => '선택 안 함';
+
+  @override
+  String get set_mdBuiltin => '내장';
+
+  @override
+  String get set_mdNewPreset => '새 프리셋';
+
+  @override
+  String get set_mdEdit => '편집';
+
+  @override
+  String get set_mdTime => '시간';
+
+  @override
+  String set_mdTokens(Object n) {
+    return '$n 토큰';
+  }
+
+  @override
+  String get set_mdFailed => '실패';
+
+  @override
+  String get set_mdOk => '성공';
+
+  @override
+  String set_mdShowing(Object n, Object total) {
+    return '최근 $n개 / 전체 $total개';
+  }
+
+  @override
+  String get set_mdImport => '구성 가져오기';
+
+  @override
+  String get set_mdAddProvider => '공급자 추가';
+
+  @override
+  String get set_mdEmpty => '공급자가 없습니다';
+
+  @override
+  String get set_mdEmptySub => '추가하면 번역과 역추론을 쓸 수 있습니다.';
+
+  @override
+  String get set_agDesc => '사이드바 도우미의 모델, 지침, 확장, MCP 도구.';
+
+  @override
+  String get set_agModelSec => '모델';
+
+  @override
+  String get set_agModel => 'Agent 모델';
+
+  @override
+  String get set_agModelSub => '사고 강도는 채팅 창에서 작업별로 조정합니다';
+
+  @override
+  String get set_agEnter => 'Enter로 보내기';
+
+  @override
+  String get set_agEnterSub => '끄면 Ctrl+Enter로 보내고 Enter는 줄 바꿈';
+
+  @override
+  String get set_agMax => '작업당 최대 요청';
+
+  @override
+  String get set_agMaxSub => '반복을 막습니다';
+
+  @override
+  String get set_agTimesUnit => '회';
+
+  @override
+  String get set_agInstr => '지침';
+
+  @override
+  String get set_agInstrSub => '이 순서로 최종 프롬프트가 됩니다. 기존 채팅은 그대로, 이후 요청에 반영됩니다.';
+
+  @override
+  String get set_agOrderBuiltin => '내장 프롬프트';
+
+  @override
+  String get set_agOrderPrefix => '시스템 접두사';
+
+  @override
+  String get set_agOrderGlobal => '전역 지침';
+
+  @override
+  String get set_agOrderWorkspace => '작업 공간 지침';
+
+  @override
+  String get set_agOrderTools => '도구 맵';
+
+  @override
+  String get set_agGlobal => '전역 지침';
+
+  @override
+  String get set_agPrefix => '시스템 접두사';
+
+  @override
+  String get set_agPrefixHint => '매 요청 맨 앞에 넣는 고정 내용.';
+
+  @override
+  String get set_agBuiltin => '내장 프롬프트';
+
+  @override
+  String get set_agFinal => '최종 프롬프트 보기';
+
+  @override
+  String get set_agExt => '확장';
+
+  @override
+  String get set_agExtSub =>
+      '작업 공간별로 불러옵니다. 외부 확장은 로컬 코드를 실행하므로 신뢰할 수 있는 것만 추가하세요.';
+
+  @override
+  String get set_agStudioExt => 'Studio 상호 작용';
+
+  @override
+  String get set_agStudioExtSub => 'Studio 상태를 읽고 질문 카드로 답을 받습니다';
+
+  @override
+  String get set_agRequired => '내장 · 필수';
+
+  @override
+  String get set_agAddFile => '확장 파일 추가';
+
+  @override
+  String get set_agAddDir => '확장 폴더 추가';
+
+  @override
+  String get set_agMcp => 'MCP 서버';
+
+  @override
+  String get set_agMcpSub => 'CodeMode는 필요할 때 도구를 찾아 한꺼번에 컨텍스트에 넣지 않습니다.';
+
+  @override
+  String get set_agBuiltinTools => 'NAI Studio · 내장 도구';
+
+  @override
+  String get set_agBuiltinToolsSub => '프롬프트, 블록, 위키, 이미지, 기록, 참조, 생성, 설정';
+
+  @override
+  String set_agConnected(Object n) {
+    return '연결됨 · 도구 $n개';
+  }
+
+  @override
+  String get set_agConnecting => '연결 중…';
+
+  @override
+  String get set_agNeedsLogin => '로그인 필요';
+
+  @override
+  String get set_agMcpError => '연결 실패';
+
+  @override
+  String get set_agMcpOff => '꺼짐';
+
+  @override
+  String get set_agAddMcp => 'MCP 서버 추가';
+
+  @override
+  String get set_agTools => '도구';
+
+  @override
+  String set_agToolCount(Object n) {
+    return '$n개';
+  }
+
+  @override
+  String get set_agToolsTip => '생성 도구는 항상 가격을 먼저 알리고 확인 후 실행합니다.';
+
+  @override
+  String get set_agData => '데이터 폴더';
+
+  @override
+  String get set_agWorkspaces => '작업 공간';
+
+  @override
+  String get set_agSessions => '세션';
+
+  @override
+  String get set_agCostTip => '요금은 공급자가 청구하며 Studio는 토큰 사용량만 보여 줍니다.';
+
+  @override
+  String get set_agOpen => 'Agent 열기';
+
+  @override
+  String get set_agEditMcp => '편집';
+
+  @override
+  String get set_agRemoveMcp => '서버 제거';
+
+  @override
+  String get set_agRemoveExt => '확장 제거';
+
+  @override
+  String get set_rgDesc =>
+      '로컬 RAG로 태그 제안, 위키, 블록, 유사 이미지 검색에 쓰며 아무것도 올리지 않습니다.';
+
+  @override
+  String get set_rgReady => '시맨틱 검색 준비됨';
+
+  @override
+  String get set_rgOff => '시맨틱 검색 꺼짐';
+
+  @override
+  String get set_rgPartial => '일부 빌드 중';
+
+  @override
+  String get set_rgAllDone => '모두 완료';
+
+  @override
+  String get set_rgPool => '모든 소스가 하나의 로컬 벡터 저장소를 공유하며 증분 업데이트합니다.';
+
+  @override
+  String get set_rgStepRuntime => '런타임';
+
+  @override
+  String get set_rgStepEmbed => '임베딩';
+
+  @override
+  String get set_rgStepRerank => '재순위';
+
+  @override
+  String get set_rgStepDevice => '장치';
+
+  @override
+  String get set_rgSources => '소스';
+
+  @override
+  String get set_rgSourcesSub =>
+      '소스마다 따로 색인하고 켭니다. 일시 정지할 수 있고 끝난 부분은 바로 쓸 수 있습니다.';
+
+  @override
+  String get set_rgTags => '태그 제안';
+
+  @override
+  String get set_rgTagsSub => '의미, 동시 출현, 재순위를 결합하고 입력 칸마다 계산';
+
+  @override
+  String get set_rgWiki => '위키 시맨틱 검색';
+
+  @override
+  String get set_rgWikiSub => '로컬 위키. 이름 일치를 먼저, 의미 결과를 보충';
+
+  @override
+  String get set_rgBlocks => '프롬프트 블록';
+
+  @override
+  String get set_rgBlocksSub => '저장된, 보관하지 않은 블록의 제목, 태그, 본문';
+
+  @override
+  String get set_rgGallery => '갤러리 (멀티모달)';
+
+  @override
+  String get set_rgGallerySub =>
+      '내용으로 유사 이미지를 찾고 NAI 매개변수는 텍스트 색인을 만듭니다. 원본은 그대로';
+
+  @override
+  String set_rgCount(Object done, Object total) {
+    return '$done / $total';
+  }
+
+  @override
+  String set_rgSegments(Object done, Object total) {
+    return '$done / $total 조각';
+  }
+
+  @override
+  String set_rgGalleryCount(Object done, Object total, Object n) {
+    return '이미지 $done / $total · 매개변수 $n 조각';
+  }
+
+  @override
+  String get set_rgPaused => '일시 정지됨';
+
+  @override
+  String get set_rgBuilding => '빌드 중';
+
+  @override
+  String get set_rgError => '오류';
+
+  @override
+  String get set_rgClearIndex => '색인 지우기';
+
+  @override
+  String set_rgClearTitle(Object name) {
+    return '“$name” 색인을 지울까요?';
+  }
+
+  @override
+  String get set_rgClearBody => '파생 색인만 지우며 원본 내용과 모델은 남습니다.';
+
+  @override
+  String get set_rgContext => '제안 문맥';
+
+  @override
+  String get set_rgContextSub => '둘 다 최대 120 Gemma 토큰, 태그 단위로 자릅니다.';
+
+  @override
+  String get set_rgRange => '샘플 범위';
+
+  @override
+  String get set_rgBefore => '커서 앞';
+
+  @override
+  String get set_rgAround => '커서 앞뒤';
+
+  @override
+  String get set_rgRuntime => '모델과 런타임';
+
+  @override
+  String get set_rgEmbedPath => '임베딩 모델 폴더';
+
+  @override
+  String get set_rgRerankPath => '재순위 모델 폴더';
+
+  @override
+  String get set_rgDevice => '실행 장치';
+
+  @override
+  String get set_rgAuto => '자동';
+
+  @override
+  String get set_rgEnv => '런타임';
+
+  @override
+  String get set_rgEnvSub => '독립 Python과 추론 패키지, 모델 가중치는 받지 않음';
+
+  @override
+  String get set_rgCheck => '확인';
+
+  @override
+  String get set_rgReinstall => '다시 설치';
+
+  @override
+  String get set_rgProgress => '색인 진행';
+
+  @override
+  String get set_rgOverall => '전체';
+
+  @override
+  String get set_rgShortTags => '태그';
+
+  @override
+  String get set_rgShortWiki => '위키';
+
+  @override
+  String get set_rgShortBlocks => '블록';
+
+  @override
+  String get set_rgShortGallery => '갤러리';
+
+  @override
+  String get set_rgTip => '소스를 지워도 파생 색인만 지워지고 원본과 모델은 남습니다.';
+
+  @override
+  String get set_rgNotReady => '시맨틱 검색을 아직 쓸 수 없음';
+
+  @override
+  String get set_rgNotReadySub => '런타임을 설치하고 두 모델 폴더를 지정하세요.';
+
+  @override
+  String get set_rgEmpty => '색인 없음';
+
+  @override
+  String get set_rgBuild => '색인 만들기';
+
+  @override
+  String get set_rgContinue => '이어서 만들기';
+
+  @override
+  String set_rgSkipped(Object n) {
+    return '$n장 건너뜀';
+  }
+
+  @override
+  String get set_rgPlanLoading => '색인할 내용을 세는 중…';
+
+  @override
+  String set_rgPlanTags(Object n) {
+    return '태그 $n개와 별칭, 로컬 설명을 색인합니다.';
+  }
+
+  @override
+  String set_rgPlanText(Object docs, Object n) {
+    return '자료 $docs개를 텍스트 조각 $n개로 색인합니다.';
+  }
+
+  @override
+  String set_rgPlanGallery(Object images, Object n) {
+    return '이미지 $images장과 NAI 매개변수 $n조각을 따로 색인합니다.';
+  }
+
+  @override
+  String get set_rgPlanNote =>
+      '처음에는 오래 걸릴 수 있습니다. 언제든 멈출 수 있고 끝난 부분은 바로 쓸 수 있습니다.';
+
+  @override
+  String get set_rgPlanRebuild => '다시 만들면 이 소스의 기존 색인을 먼저 지웁니다.';
+
+  @override
+  String get set_rgStart => '시작';
+
+  @override
+  String get set_rgDownload => '다운로드';
+
+  @override
+  String set_rgDownloading(Object done, Object total) {
+    return '다운로드 중 $done / $total';
+  }
+
+  @override
+  String set_rgDownloadingUnknown(Object done) {
+    return '다운로드 중 $done';
+  }
+
+  @override
+  String get set_rgVerifying => '파일 확인 중…';
+
+  @override
+  String get set_rgDiscover => '로컬 모델 찾기';
+
+  @override
+  String get set_rgDiscoverSub =>
+      '작업 공간의 models 폴더에서 EmbeddingGemma 2와 Qwen3-Reranker 0.6B를 찾아 두 폴더를 채웁니다.';
+
+  @override
+  String get set_rgFind => '찾기';
+
+  @override
+  String get set_rgModelsMissing => '찾지 못했습니다. 다운로드하거나 가중치 폴더를 직접 고르세요.';
+
+  @override
+  String get set_rgPython => 'Python 인터프리터';
+
+  @override
+  String get set_rgPythonSub => '기본은 자동 설치한 독립 환경이며 기존 python.exe도 고를 수 있습니다.';
+
+  @override
+  String get set_rgPythonAuto => '자동';
+
+  @override
+  String get set_rgPythonNone => '설치 안 됨';
+
+  @override
+  String get set_rgPythonPending =>
+      '아직 쓰지 않습니다. “이 인터프리터 사용”을 누르면 패키지를 다시 설치합니다.';
+
+  @override
+  String get set_rgUsePython => '이 인터프리터 사용';
+
+  @override
+  String get set_rgEnvReady => '준비됨';
+
+  @override
+  String get set_rgEnvMissing => '설치 안 됨';
+
+  @override
+  String get set_rgInstall => '설치';
+
+  @override
+  String get set_rgInstallHint =>
+      'Python과 추론 패키지를 받습니다(모델 가중치 제외). NVIDIA는 CUDA(수 GB), 그 외는 더 작은 CPU.';
+
+  @override
+  String get set_rgInstallCuda => 'CUDA · NVIDIA';
+
+  @override
+  String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgPhaseExisting => '기존 환경 확인 중';
+
+  @override
+  String get set_rgPhaseDownload => '설치 도구 다운로드 중';
+
+  @override
+  String get set_rgPhaseCreate => 'Python 준비 중';
+
+  @override
+  String get set_rgPhaseCuda => 'CUDA 구성 요소 설치 중';
+
+  @override
+  String get set_rgPhasePackages => '패키지 설치 중';
+
+  @override
+  String get set_rgPhaseCheck => '환경 확인 중';
+
+  @override
+  String set_rgElapsed(Object time) {
+    return '이 단계 $time';
+  }
+
+  @override
+  String get set_upDesc => '로컬 업스케일 모델과 구성 요소를 관리합니다. 다운로드는 직접 시작해야 합니다.';
+
+  @override
+  String set_upGpu(Object name, Object n) {
+    return '$name · $n GB';
+  }
+
+  @override
+  String get set_upNoGpu => '외장 GPU를 찾지 못했습니다';
+
+  @override
+  String get set_upLocal => '이 PC에서 확대하며 Anlas를 쓰지 않습니다.';
+
+  @override
+  String get set_upEsrgan => '기본 모델';
+
+  @override
+  String get set_upEsrganSub => 'Real-ESRGAN NCNN, 4배, 빠름, Vulkan GPU에서 동작.';
+
+  @override
+  String get set_upAnimeQuality => '애니 · 화질';
+
+  @override
+  String get set_upAnimeFast => '애니 · 빠름';
+
+  @override
+  String get set_upGeneral => '범용 · 사진';
+
+  @override
+  String get set_upBuiltin => '내장';
+
+  @override
+  String get set_upInstalled => '설치됨';
+
+  @override
+  String get set_upNotInstalled => '미설치';
+
+  @override
+  String get set_upFailed => '다운로드 실패';
+
+  @override
+  String get set_upImport => '모델 가져오기';
+
+  @override
+  String get set_upImportHint => '짝이 맞는 .param과 .bin 선택 (4배 Real-ESRGAN NCNN)';
+
+  @override
+  String get set_upSeed => 'SeedVR2 확산 업스케일';
+
+  @override
+  String get set_upSeedSub =>
+      '화질이 좋고 느리며 NVIDIA가 필요합니다. VAE(약 0.5 GB)와 Python/CUDA 환경을 공유합니다.';
+
+  @override
+  String get set_upSeed3b => '3B · 균형';
+
+  @override
+  String get set_upSeed3bSub => '품질과 자원의 균형, 일상용';
+
+  @override
+  String get set_upSeed7b => '7B · 고화질';
+
+  @override
+  String get set_upSeed7bSub => '더 높은 화질, VRAM과 시간이 더 필요';
+
+  @override
+  String get set_upSeed7bSharp => '7B · 선명';
+
+  @override
+  String get set_upSeed7bSharpSub => '더 선명한 디테일';
+
+  @override
+  String set_upVram(Object n) {
+    return 'VRAM ≥ $n GB';
+  }
+
+  @override
+  String set_upProgress(Object done, Object total, Object speed) {
+    return '$done / $total · $speed/s';
+  }
+
+  @override
+  String get set_upVramMode => 'VRAM 모드';
+
+  @override
+  String get set_upRecommended => '권장';
+
+  @override
+  String get set_upLowVram => '저 VRAM';
+
+  @override
+  String get set_upOffload => 'CPU 오프로드 층 수';
+
+  @override
+  String get set_upOffloadSub => '많을수록 VRAM을 아끼지만 느려지고 RAM을 더 씁니다';
+
+  @override
+  String get set_upTiling => 'VAE 타일';
+
+  @override
+  String get set_upTilingSub => '작은 타일은 VRAM을 아끼고 겹침으로 이음새를 줄입니다';
+
+  @override
+  String get set_upNoise => '실험적 노이즈';
+
+  @override
+  String set_upNoiseSub(Object a, Object b) {
+    return '입력 $a · 잠재 $b; 0이면 현재와 같음';
+  }
+
+  @override
+  String get set_upInputNoise => '입력 노이즈';
+
+  @override
+  String get set_upLatentNoise => '잠재 노이즈';
+
+  @override
+  String get set_upExperimental => '실험';
+
+  @override
+  String get set_upRtx => 'RTX Video';
+
+  @override
+  String get set_upRtxSub => 'NVIDIA RTX Video로 빠르게 확대 (약 64 MB).';
+
+  @override
+  String get set_upRtxName => 'RTX Video Super Resolution';
+
+  @override
+  String get set_upRtxNeeds => '호환 RTX GPU와 드라이버 필요';
+
+  @override
+  String get set_upDefault => '기본 업스케일 방식';
+
+  @override
+  String get set_upDefaultTip =>
+      '생성 페이지의 로컬 업스케일이 이 방식을 씁니다. 메뉴에서 언제든 바꿀 수 있습니다.';
+
+  @override
+  String get set_upVramTip =>
+      'VRAM이 부족해도 모델이 자동으로 바뀌지 않습니다. 3B, 낮은 배율, 저 VRAM, VAE 타일을 써 보세요.';
+
+  @override
+  String set_upRemoveTitle(Object name) {
+    return '$name을(를) 삭제할까요?';
+  }
+
+  @override
+  String get set_upRemoveBody => '다시 쓰려면 새로 받아야 합니다.';
+
+  @override
+  String get set_brDesc => '이 PC의 다른 앱과 연동: Krita, 외부 Agent, ComfyUI.';
+
+  @override
+  String get set_brKritaSub => 'Krita에서 생성하고 결과를 레이어로 받습니다.';
+
+  @override
+  String get set_brKrita => 'Krita 브리지';
+
+  @override
+  String get set_brLoopback => '127.0.0.1 연결만 받습니다';
+
+  @override
+  String get set_brConnected => '연결됨';
+
+  @override
+  String get set_brWaiting => 'Krita 연결 대기';
+
+  @override
+  String get set_brRegenerate => '세션 다시 만들기';
+
+  @override
+  String get set_brDiscovery => '검색 파일';
+
+  @override
+  String get set_brAgents => '외부 Agent';
+
+  @override
+  String get set_brAgentsSub =>
+      'Claude Code, Codex 같은 로컬 Agent가 매개변수를 읽고 쓰고 생성할 수 있습니다.';
+
+  @override
+  String get set_brLocal => '로컬 브리지';
+
+  @override
+  String set_brClients(Object n) {
+    return 'Agent $n개 연결됨';
+  }
+
+  @override
+  String get set_brNoClients => '연결된 Agent 없음';
+
+  @override
+  String get set_brTakeover => '연결 안내 복사';
+
+  @override
+  String get set_brEnd => '연결 끊기';
+
+  @override
+  String get set_brActivity => '최근 활동';
+
+  @override
+  String get set_brComfySub => 'ComfyUI 워크플로를 가져와 Studio에서 실행합니다.';
+
+  @override
+  String get set_brComfyEnable => 'ComfyUI 사용';
+
+  @override
+  String get set_brComfyUrl => '서버 주소';
+
+  @override
+  String set_brComfyFailed(Object reason, Object when) {
+    return '연결 실패: $reason ($when). ComfyUI가 실행 중인지 확인하세요.';
+  }
+
+  @override
+  String set_brComfyOk(Object when) {
+    return '연결 정상 ($when)';
+  }
+
+  @override
+  String get set_brStatus => '상태';
+
+  @override
+  String set_brAgentsShort(Object n) {
+    return '$n개';
+  }
+
+  @override
+  String get set_brOff => '꺼짐';
+
+  @override
+  String get set_brNoResponse => '응답 없음';
+
+  @override
+  String get set_brTip => '브리지는 루프백 주소에서만 대기하며 LAN에 공개되지 않습니다. 프록시는 적용되지 않습니다.';
+
+  @override
+  String get set_nwDesc => '프록시와 연결 상태.';
+
+  @override
+  String get set_nwProxy => '프록시';
+
+  @override
+  String get set_nwProxySub => 'NovelAI, Danbooru, GitHub 업데이트, 모델 서비스에 사용합니다.';
+
+  @override
+  String get set_nwUse => '프록시 사용';
+
+  @override
+  String get set_nwMode => '방식';
+
+  @override
+  String get set_nwSystem => '시스템';
+
+  @override
+  String get set_nwManual => '수동';
+
+  @override
+  String get set_nwAddress => '주소';
+
+  @override
+  String set_nwDetected(Object addr) {
+    return '시스템 프록시: $addr. 외부 요청만 거치며 로컬 브리지와 모델은 거치지 않습니다.';
+  }
+
+  @override
+  String get set_nwNoSystem => '시스템 프록시를 찾지 못했습니다. 외부 요청만 프록시를 거칩니다.';
+
+  @override
+  String get set_nwCheck => '연결 확인';
+
+  @override
+  String get set_nwCheckSub => '각 서비스 연결을 한 번에 확인해 네트워크 문제인지 구분합니다.';
+
+  @override
+  String get set_nwNaiImage => 'NovelAI 이미지';
+
+  @override
+  String get set_nwNaiApi => 'NovelAI 계정';
+
+  @override
+  String get set_nwDanbooru => 'Danbooru';
+
+  @override
+  String get set_nwUpdate => '앱 업데이트';
+
+  @override
+  String get set_nwCheckAll => '모두 확인';
+
+  @override
+  String set_nwChecked(Object when) {
+    return '마지막 확인 $when';
+  }
+
+  @override
+  String get set_nwViaProxy => '프록시 경유';
+
+  @override
+  String get set_nwDirect => '직접 연결';
+
+  @override
+  String get set_nwNeverChecked => '아직 확인 안 함';
+
+  @override
+  String get set_nwFail => '실패';
+
+  @override
+  String get set_nwTip => '프록시 변경은 다시 시작해야 적용되며 자동으로 다시 시작하지 않습니다.';
+
+  @override
+  String get set_pvDesc => '공유할 때 포함되는 정보와 확인이 필요한 작업.';
+
+  @override
+  String get set_pvProtect => '보호';
+
+  @override
+  String get set_pvStrip => '공유 시 메타데이터 제거';
+
+  @override
+  String get set_pvStripSub => '복사하거나 끌어낼 때 프롬프트와 매개변수를 지웁니다. 원본은 그대로';
+
+  @override
+  String get set_pvExternal => '외부 전송 전 확인';
+
+  @override
+  String get set_pvExternalSub => '다른 앱이나 사이트로 보내기 전에 확인';
+
+  @override
+  String get set_pvDanger => '위험한 작업 확인';
+
+  @override
+  String get set_pvDangerSub => '삭제, 비우기, 덮어쓰기 전에 확인';
+
+  @override
+  String get set_pvOverwrite => '저장 시 덮어쓰지 않음';
+
+  @override
+  String get set_pvOverwriteSub => '같은 이름이 있으면 자동으로 이름 변경';
+
+  @override
+  String get set_pvBlacklist => '온라인 갤러리 차단 목록';
+
+  @override
+  String get set_pvBlacklistSub => '이 태그가 있는 이미지는 온라인 갤러리에서 숨깁니다.';
+
+  @override
+  String get set_pvAddTag => '태그 추가…';
+
+  @override
+  String get set_pvSync => 'Danbooru 차단 목록 동기화';
+
+  @override
+  String set_pvSyncSub(Object user, Object when) {
+    return '$user 로그인됨 · 마지막 동기화 $when';
+  }
+
+  @override
+  String set_pvSyncNever(Object user) {
+    return '$user 로그인됨 · 동기화 안 함';
+  }
+
+  @override
+  String get set_pvSyncSignedOut => 'Danbooru에 로그인하면 동기화할 수 있습니다';
+
+  @override
+  String get set_pvSyncNow => '지금 동기화';
+
+  @override
+  String get set_pvSyncing => '동기화 중…';
+
+  @override
+  String get set_pvAutoSync => '시작 시 자동 동기화';
+
+  @override
+  String get set_pvExported => '내보내기에 포함되는 것';
+
+  @override
+  String get set_pvIncPrefs => '모양, 조작, 입력 설정';
+
+  @override
+  String get set_pvIncRules => '보호 규칙과 차단 목록';
+
+  @override
+  String get set_pvIncCred => '계정 자격 증명';
+
+  @override
+  String get set_pvIncPaths => '파일 경로';
+
+  @override
+  String get set_pvIncDrafts => '초안과 모델 연결';
+
+  @override
+  String get set_pvTip => '제거는 복사와 끌어내기에만 적용되며 저장한 원본은 매개변수를 유지합니다.';
+
+  @override
+  String get set_bkDesc => '다른 기기로 설정을 옮기거나 기본값으로 돌립니다. 초기화 전에 항상 백업합니다.';
+
+  @override
+  String get set_bkPrefs => '환경 설정';
+
+  @override
+  String get set_bkPrefsSub =>
+      '모양, 조작, 입력, 보호 규칙. 자격 증명, 경로, 초안, 모델 연결은 포함하지 않습니다.';
+
+  @override
+  String get set_bkExport => '내보내기';
+
+  @override
+  String get set_bkExportSub => 'studio-preferences.json으로 저장';
+
+  @override
+  String get set_bkExportBtn => '내보내기…';
+
+  @override
+  String get set_bkImport => '가져오기';
+
+  @override
+  String get set_bkImportSub => '적용 전에 바뀌는 항목 수를 보여 주고 백업합니다';
+
+  @override
+  String get set_bkImportBtn => '파일 선택…';
+
+  @override
+  String get set_bkUndoImport => '마지막 가져오기 취소';
+
+  @override
+  String set_bkUndoImportSub(Object when) {
+    return '$when 가져오기 이전으로';
+  }
+
+  @override
+  String get set_bkNoImport => '가져온 적 없음';
+
+  @override
+  String get set_bkRestore => '복원';
+
+  @override
+  String get set_bkOther => '기타 구성';
+
+  @override
+  String set_bkShortcutsSub(Object n, Object m) {
+    return '동작 $n개, 사용자 지정 $m개';
+  }
+
+  @override
+  String get set_bkModelsSub => '공급자, 기능별 모델, 프리셋. API 키는 기본적으로 제외';
+
+  @override
+  String get set_bkCopyConfig => '구성 복사';
+
+  @override
+  String get set_bkReset => '기본값으로';
+
+  @override
+  String get set_bkResetSub => '초기화할 범위를 고릅니다. 나머지는 그대로입니다.';
+
+  @override
+  String get set_bkScopeAppearance => '모양과 조작';
+
+  @override
+  String get set_bkScopeAppearanceSub => '테마, 글꼴, 언어, 캔버스, 알림';
+
+  @override
+  String get set_bkScopeInput => '입력과 자동 완성';
+
+  @override
+  String get set_bkScopeInputSub => '휠 가중치, 관련 태그, 자동 완성';
+
+  @override
+  String get set_bkScopeProtect => '개인정보와 생성 보호';
+
+  @override
+  String get set_bkScopeProtectSub => '메타데이터, 확인, 고비용 경고, 간격';
+
+  @override
+  String get set_bkScopeShortcuts => '단축키';
+
+  @override
+  String set_bkScopeShortcutsSub(Object n) {
+    return '전체 $n개 동작';
+  }
+
+  @override
+  String get set_bkResetBtn => '선택 항목 초기화…';
+
+  @override
+  String get set_bkResetHint => '먼저 백업하며 되돌릴 수 있습니다';
+
+  @override
+  String get set_bkResetTitle => '선택한 설정을 기본값으로 되돌릴까요?';
+
+  @override
+  String set_bkResetBody(Object scopes) {
+    return '$scopes이(가) 기본값으로 돌아갑니다. 현재 설정은 먼저 백업됩니다.';
+  }
+
+  @override
+  String get set_bkAuto => '자동 백업';
+
+  @override
+  String get set_bkAutoSub => '최근 5개 보관';
+
+  @override
+  String get set_bkKindImport => '가져오기 전';
+
+  @override
+  String get set_bkKindReset => '초기화 전';
+
+  @override
+  String get set_bkKindUpgrade => '업데이트 전';
+
+  @override
+  String get set_bkNoBackups => '아직 백업 없음';
+
+  @override
+  String set_bkRestoreTitle(Object name) {
+    return '“$name” 백업으로 복원할까요?';
+  }
+
+  @override
+  String get set_bkRestoreBody => '현재 설정은 먼저 백업되어 다시 되돌릴 수 있습니다.';
+
+  @override
+  String get set_abDesc => '버전, 업데이트, 진단.';
+
+  @override
+  String set_abNew(Object version) {
+    return '새 버전 $version';
+  }
+
+  @override
+  String get set_abLatest => '최신 버전';
+
+  @override
+  String get set_abChecking => '업데이트 확인 중…';
+
+  @override
+  String get set_abCheckFailed => '업데이트 확인 실패';
+
+  @override
+  String set_abDownloading(Object pct) {
+    return '다운로드 중 $pct';
+  }
+
+  @override
+  String set_abChecked(Object when) {
+    return '마지막 확인 $when';
+  }
+
+  @override
+  String set_abNotes(Object version) {
+    return '$version 변경 사항';
+  }
+
+  @override
+  String get set_abInstall => '다운로드 및 설치';
+
+  @override
+  String get set_abChangelog => '전체 변경 기록';
+
+  @override
+  String get set_abPrerelease => '사전 릴리스 포함';
+
+  @override
+  String get set_abCheck => '업데이트 확인';
+
+  @override
+  String get set_abDiag => '진단';
+
+  @override
+  String get set_abLog => '로그 파일 기록';
+
+  @override
+  String get set_abLogSub => '문제를 조사할 때 켭니다. API 키와 자격 증명은 기록하지 않습니다';
+
+  @override
+  String get set_abLogDir => '로그 폴더';
+
+  @override
+  String get set_abCopyDiag => '진단 정보 복사';
+
+  @override
+  String get set_abCopyDiagSub => '버전, 시스템, GPU, 서비스 상태';
+
+  @override
+  String get set_abProject => '프로젝트';
+
+  @override
+  String get set_abRepo => '소스 코드';
+
+  @override
+  String get set_abUpstream => '원본 프로젝트';
+
+  @override
+  String get set_abUpstreamSub => 'NAI Launcher를 바탕으로 개발했으며 원작자 표기를 유지합니다';
+
+  @override
+  String get set_abFonts => '글꼴과 소재';
+
+  @override
+  String get set_abLicenses => '라이선스';
+
+  @override
+  String get set_abView => '보기';
+
+  @override
+  String get set_abSystem => '시스템';
+
+  @override
+  String set_srQuoted(Object query) {
+    return '“$query”';
+  }
+
+  @override
+  String get set_srBalance => 'Anlas 잔액';
+
+  @override
+  String get set_srSubscription => '구독과 Anlas';
+
+  @override
+  String get set_agEnable => '사용';
+
+  @override
+  String get set_agDisable => '사용 안 함';
+
+  @override
+  String get set_listSep => ', ';
+
+  @override
+  String get set_on => '켜짐';
+
+  @override
+  String get set_off => '꺼짐';
+
+  @override
+  String get set_unitSeconds => '초';
 }

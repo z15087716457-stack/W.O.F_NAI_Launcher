@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_model_download.dart';
+import '../../core/rag/rag_maintenance.dart';
 import '../../core/rag/rag_settings.dart';
 import '../../core/services/desktop_app_shutdown_service.dart';
 import 'rag_provider.dart';
@@ -43,6 +45,13 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
 
   Future<void> download(String kind) async {
     if (state.active) return;
+    if (!const ['embedding', 'reranker'].contains(kind)) {
+      throw const RagException('invalid_model');
+    }
+    final status = ref.read(ragControllerProvider);
+    final release = ref
+        .read(ragMaintenanceProvider)
+        .claim(indexBusy: status.anyBusy || status.installPhase != null);
     final selected = ref.read(ragSettingsProvider);
     final previousPath = kind == 'embedding'
         ? selected.embedding
@@ -93,6 +102,10 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
     } finally {
       _job?.dispose();
       _job = null;
+      release();
+      if (!_disposed && ref.read(ragSettingsProvider).enabled) {
+        unawaited(ref.read(ragControllerProvider.notifier).refresh());
+      }
     }
   }
 

@@ -69,6 +69,22 @@ class ProxySettingsNotifier extends _$ProxySettingsNotifier {
   }
 
   /// 清除手动代理设置
+  Future<void> setManualFields({String? host, int? port}) async {
+    final storage = ref.read(localStorageServiceProvider);
+    if (host == null) {
+      await storage.deleteSetting(StorageKeys.proxyManualHost);
+    } else {
+      await storage.setSetting(StorageKeys.proxyManualHost, host);
+    }
+    if (port == null) {
+      await storage.deleteSetting(StorageKeys.proxyManualPort);
+    } else {
+      await storage.setSetting(StorageKeys.proxyManualPort, port);
+    }
+    ref.invalidateSelf();
+  }
+
+  /// 清除手动代理设置
   Future<void> clearManualProxy() async {
     state = state.copyWith(manualHost: null, manualPort: null);
     final storage = ref.read(localStorageServiceProvider);

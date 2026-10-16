@@ -30553,6 +30553,4662 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Use existing runtime'**
   String get rag_useRuntime;
+
+  /// No description provided for @set_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get set_title;
+
+  /// No description provided for @set_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search settings'**
+  String get set_search;
+
+  /// No description provided for @set_searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search results'**
+  String get set_searchResults;
+
+  /// No description provided for @set_searchCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} results'**
+  String set_searchCount(Object count);
+
+  /// No description provided for @set_searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggles and values can be changed right here; use the arrow to jump to the setting.'**
+  String get set_searchHint;
+
+  /// No description provided for @set_searchKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'select'**
+  String get set_searchKeys;
+
+  /// No description provided for @set_searchJump.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get set_searchJump;
+
+  /// No description provided for @set_searchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches “{query}”'**
+  String set_searchEmpty(Object query);
+
+  /// No description provided for @set_searchEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try “proxy”, “save”, “shortcut” or a folder path'**
+  String get set_searchEmptyHint;
+
+  /// No description provided for @set_goTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to setting'**
+  String get set_goTo;
+
+  /// No description provided for @set_hasUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get set_hasUpdate;
+
+  /// No description provided for @set_groupPersonal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get set_groupPersonal;
+
+  /// No description provided for @set_groupCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get set_groupCreate;
+
+  /// No description provided for @set_groupIntelligence.
+  ///
+  /// In en, this message translates to:
+  /// **'Intelligence'**
+  String get set_groupIntelligence;
+
+  /// No description provided for @set_groupConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get set_groupConnect;
+
+  /// No description provided for @set_groupSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get set_groupSystem;
+
+  /// No description provided for @set_pageOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get set_pageOverview;
+
+  /// No description provided for @set_pageAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get set_pageAccount;
+
+  /// No description provided for @set_pageAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get set_pageAppearance;
+
+  /// No description provided for @set_pageCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas & browsing'**
+  String get set_pageCanvas;
+
+  /// No description provided for @set_pageShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get set_pageShortcuts;
+
+  /// No description provided for @set_pageGeneration.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation & Anlas'**
+  String get set_pageGeneration;
+
+  /// No description provided for @set_pageStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage & gallery'**
+  String get set_pageStorage;
+
+  /// No description provided for @set_pageDictionaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictionaries & cache'**
+  String get set_pageDictionaries;
+
+  /// No description provided for @set_pageModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models & APIs'**
+  String get set_pageModels;
+
+  /// No description provided for @set_pageAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI Agent'**
+  String get set_pageAgent;
+
+  /// No description provided for @set_pageRag.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search'**
+  String get set_pageRag;
+
+  /// No description provided for @set_pageUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscale'**
+  String get set_pageUpscale;
+
+  /// No description provided for @set_pageBridges.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridges & integrations'**
+  String get set_pageBridges;
+
+  /// No description provided for @set_pageNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network & proxy'**
+  String get set_pageNetwork;
+
+  /// No description provided for @set_pagePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & safeguards'**
+  String get set_pagePrivacy;
+
+  /// No description provided for @set_pageBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup & reset'**
+  String get set_pageBackup;
+
+  /// No description provided for @set_pageAbout.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get set_pageAbout;
+
+  /// No description provided for @set_resetDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get set_resetDefault;
+
+  /// No description provided for @set_resetPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset this page'**
+  String get set_resetPage;
+
+  /// No description provided for @set_needsRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get set_needsRestart;
+
+  /// No description provided for @set_isNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get set_isNew;
+
+  /// No description provided for @set_defaultTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get set_defaultTag;
+
+  /// No description provided for @set_readOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get set_readOnly;
+
+  /// No description provided for @set_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get set_cancel;
+
+  /// No description provided for @set_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get set_save;
+
+  /// No description provided for @set_discard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get set_discard;
+
+  /// No description provided for @set_later.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get set_later;
+
+  /// No description provided for @set_undo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get set_undo;
+
+  /// No description provided for @set_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get set_open;
+
+  /// No description provided for @set_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get set_choose;
+
+  /// No description provided for @set_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get set_change;
+
+  /// No description provided for @set_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get set_clear;
+
+  /// No description provided for @set_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get set_delete;
+
+  /// No description provided for @set_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get set_copy;
+
+  /// No description provided for @set_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get set_more;
+
+  /// No description provided for @set_refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get set_refresh;
+
+  /// No description provided for @set_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get set_retry;
+
+  /// No description provided for @set_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get set_test;
+
+  /// No description provided for @set_testing.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get set_testing;
+
+  /// No description provided for @set_importIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get set_importIt;
+
+  /// No description provided for @set_exportIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get set_exportIt;
+
+  /// No description provided for @set_install.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get set_install;
+
+  /// No description provided for @set_download.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get set_download;
+
+  /// No description provided for @set_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get set_resume;
+
+  /// No description provided for @set_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get set_pause;
+
+  /// No description provided for @set_rebuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuild'**
+  String get set_rebuild;
+
+  /// No description provided for @set_login.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get set_login;
+
+  /// No description provided for @set_adjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust'**
+  String get set_adjust;
+
+  /// No description provided for @set_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get set_collapse;
+
+  /// No description provided for @set_notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get set_notSet;
+
+  /// No description provided for @set_defaultLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Default location'**
+  String get set_defaultLocation;
+
+  /// No description provided for @set_builtinSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in sound'**
+  String get set_builtinSound;
+
+  /// No description provided for @set_justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'just now'**
+  String get set_justNow;
+
+  /// No description provided for @set_minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} min ago'**
+  String set_minutesAgo(Object n);
+
+  /// No description provided for @set_todayAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Today {time}'**
+  String set_todayAt(Object time);
+
+  /// No description provided for @set_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get set_yesterday;
+
+  /// No description provided for @set_secondsAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} s ago'**
+  String set_secondsAgo(Object n);
+
+  /// No description provided for @set_savedChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved · {title} {from} → {to}'**
+  String set_savedChange(Object title, Object from, Object to);
+
+  /// No description provided for @set_restartBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved. Restart Studio to apply; running generations are not affected.'**
+  String get set_restartBanner;
+
+  /// No description provided for @set_restartNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart now'**
+  String get set_restartNow;
+
+  /// No description provided for @set_unsavedInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes to instructions'**
+  String get set_unsavedInstructions;
+
+  /// No description provided for @set_leaveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard unsaved changes?'**
+  String get set_leaveTitle;
+
+  /// No description provided for @set_leaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Agent instructions are not saved. Leaving this page discards them.'**
+  String get set_leaveBody;
+
+  /// No description provided for @set_resetPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset “{page}” to defaults?'**
+  String set_resetPageTitle(Object page);
+
+  /// No description provided for @set_resetPageBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} changed settings on this page go back to defaults. You can undo from Overview.'**
+  String set_resetPageBody(Object count);
+
+  /// No description provided for @set_ovDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Status of your account, storage, connections and AI services. Items that need you come first; click a card to open its settings.'**
+  String get set_ovDesc;
+
+  /// No description provided for @set_ovSwitchAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch account'**
+  String get set_ovSwitchAccount;
+
+  /// No description provided for @set_ovTodayUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Used today'**
+  String get set_ovTodayUsed;
+
+  /// No description provided for @set_ovMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly allowance {n}'**
+  String set_ovMonthly(Object n);
+
+  /// No description provided for @set_ovWarnAt.
+  ///
+  /// In en, this message translates to:
+  /// **'High-cost warning ≥ {n} Anlas'**
+  String set_ovWarnAt(Object n);
+
+  /// No description provided for @set_ovWarnOff.
+  ///
+  /// In en, this message translates to:
+  /// **'High-cost warning off'**
+  String get set_ovWarnOff;
+
+  /// No description provided for @set_ovRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews {date}'**
+  String set_ovRenews(Object date);
+
+  /// No description provided for @set_ovSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Not signed in'**
+  String get set_ovSignedOut;
+
+  /// No description provided for @set_ovAttention.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs attention'**
+  String get set_ovAttention;
+
+  /// No description provided for @set_ovAllClear.
+  ///
+  /// In en, this message translates to:
+  /// **'All good'**
+  String get set_ovAllClear;
+
+  /// No description provided for @set_attUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available'**
+  String set_attUpdate(Object version);
+
+  /// No description provided for @set_attRagPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'{source} index paused'**
+  String set_attRagPaused(Object source);
+
+  /// No description provided for @set_attRagPausedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total}, partly searchable'**
+  String set_attRagPausedSub(Object done, Object total);
+
+  /// No description provided for @set_attBridgeDown.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is not responding'**
+  String set_attBridgeDown(Object name);
+
+  /// No description provided for @set_attCheckedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'{detail} · checked {when}'**
+  String set_attCheckedAt(Object detail, Object when);
+
+  /// No description provided for @set_attCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials for “{name}” expired'**
+  String set_attCredential(Object name);
+
+  /// No description provided for @set_attCredentialSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Update them to switch to this account'**
+  String get set_attCredentialSub;
+
+  /// No description provided for @set_attDiskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low disk space on {disk}'**
+  String set_attDiskLow(Object disk);
+
+  /// No description provided for @set_attDiskLowSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} left; auto-save may fail'**
+  String set_attDiskLowSub(Object size);
+
+  /// No description provided for @set_attProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} unreachable'**
+  String set_attProvider(Object name);
+
+  /// No description provided for @set_attProviderSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation falls back to another provider'**
+  String get set_attProviderSub;
+
+  /// No description provided for @set_attView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get set_attView;
+
+  /// No description provided for @set_attGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get set_attGo;
+
+  /// No description provided for @set_attUpdateCred.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get set_attUpdateCred;
+
+  /// No description provided for @set_tileStorage.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get set_tileStorage;
+
+  /// No description provided for @set_tileImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} images'**
+  String set_tileImages(Object n);
+
+  /// No description provided for @set_tileSaveTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving to {path}'**
+  String set_tileSaveTo(Object path);
+
+  /// No description provided for @set_tileConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connections'**
+  String get set_tileConnect;
+
+  /// No description provided for @set_tileOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} online'**
+  String set_tileOnline(Object n);
+
+  /// No description provided for @set_tileKrita.
+  ///
+  /// In en, this message translates to:
+  /// **'Krita connected'**
+  String get set_tileKrita;
+
+  /// No description provided for @set_tileKritaOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Krita not connected'**
+  String get set_tileKritaOff;
+
+  /// No description provided for @set_tileAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} external agents'**
+  String set_tileAgents(Object n);
+
+  /// No description provided for @set_tileComfyDown.
+  ///
+  /// In en, this message translates to:
+  /// **'ComfyUI not responding'**
+  String get set_tileComfyDown;
+
+  /// No description provided for @set_tileComfyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'ComfyUI ready'**
+  String get set_tileComfyOk;
+
+  /// No description provided for @set_tileComfyOff.
+  ///
+  /// In en, this message translates to:
+  /// **'ComfyUI off'**
+  String get set_tileComfyOff;
+
+  /// No description provided for @set_tileModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models & APIs'**
+  String get set_tileModels;
+
+  /// No description provided for @set_tileTranslateVia.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt translation · {ms}'**
+  String set_tileTranslateVia(Object ms);
+
+  /// No description provided for @set_tileAgentModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent · {model}'**
+  String set_tileAgentModel(Object model);
+
+  /// No description provided for @set_tileProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'{p} providers · {m} models'**
+  String set_tileProviders(Object p, Object m);
+
+  /// No description provided for @set_tileNoModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get set_tileNoModel;
+
+  /// No description provided for @set_tileRag.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search'**
+  String get set_tileRag;
+
+  /// No description provided for @set_tileReady.
+  ///
+  /// In en, this message translates to:
+  /// **'ready'**
+  String get set_tileReady;
+
+  /// No description provided for @set_tileRagDone.
+  ///
+  /// In en, this message translates to:
+  /// **'{names} done'**
+  String set_tileRagDone(Object names);
+
+  /// No description provided for @set_tileRagPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} {pct} · paused'**
+  String set_tileRagPaused(Object name, Object pct);
+
+  /// No description provided for @set_tileRagBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} {pct} · building'**
+  String set_tileRagBuilding(Object name, Object pct);
+
+  /// No description provided for @set_tileRagEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} not indexed yet'**
+  String set_tileRagEmpty(Object name);
+
+  /// No description provided for @set_tileRagError.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} indexing failed'**
+  String set_tileRagError(Object name);
+
+  /// No description provided for @set_tileUpscale.
+  ///
+  /// In en, this message translates to:
+  /// **'Local upscale'**
+  String get set_tileUpscale;
+
+  /// No description provided for @set_tileUpscaleModels.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} models ready'**
+  String set_tileUpscaleModels(Object n);
+
+  /// No description provided for @set_tileDefaultIs.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (default)'**
+  String set_tileDefaultIs(Object name);
+
+  /// No description provided for @set_tileSeedMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'SeedVR2 not installed'**
+  String get set_tileSeedMissing;
+
+  /// No description provided for @set_tileSeedReady.
+  ///
+  /// In en, this message translates to:
+  /// **'SeedVR2 installed'**
+  String get set_tileSeedReady;
+
+  /// No description provided for @set_tileProtect.
+  ///
+  /// In en, this message translates to:
+  /// **'Safeguards'**
+  String get set_tileProtect;
+
+  /// No description provided for @set_tileProtectOn.
+  ///
+  /// In en, this message translates to:
+  /// **'{on} of {all} on'**
+  String set_tileProtectOn(Object on, Object all);
+
+  /// No description provided for @set_tileInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval {s}s ± {p}%'**
+  String set_tileInterval(Object s, Object p);
+
+  /// No description provided for @set_tileIntervalOff.
+  ///
+  /// In en, this message translates to:
+  /// **'No request interval'**
+  String get set_tileIntervalOff;
+
+  /// No description provided for @set_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent changes'**
+  String get set_recent;
+
+  /// No description provided for @set_recentSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-saved · undoable'**
+  String get set_recentSub;
+
+  /// No description provided for @set_recentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes yet'**
+  String get set_recentEmpty;
+
+  /// No description provided for @set_quick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick toggles'**
+  String get set_quick;
+
+  /// No description provided for @set_quickSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Change here'**
+  String get set_quickSub;
+
+  /// No description provided for @set_quickDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark mode'**
+  String get set_quickDark;
+
+  /// No description provided for @set_quickChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas visual channel'**
+  String get set_quickChannel;
+
+  /// No description provided for @set_searchTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Press {keys} to search any setting and change it right in the results.'**
+  String set_searchTip(Object keys);
+
+  /// No description provided for @set_accDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage NovelAI accounts, default sign-in and subscription.'**
+  String get set_accDesc;
+
+  /// No description provided for @set_accSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved accounts'**
+  String get set_accSaved;
+
+  /// No description provided for @set_accSavedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch with one click. Credentials stay on this device and are never exported.'**
+  String get set_accSavedSub;
+
+  /// No description provided for @set_accCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get set_accCurrent;
+
+  /// No description provided for @set_accInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In use'**
+  String get set_accInUse;
+
+  /// No description provided for @set_accSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get set_accSwitch;
+
+  /// No description provided for @set_accEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get set_accEmail;
+
+  /// No description provided for @set_accToken.
+  ///
+  /// In en, this message translates to:
+  /// **'Token'**
+  String get set_accToken;
+
+  /// No description provided for @set_accRenews.
+  ///
+  /// In en, this message translates to:
+  /// **'renews {date}'**
+  String set_accRenews(Object date);
+
+  /// No description provided for @set_accLastUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'last used {date}'**
+  String set_accLastUsed(Object date);
+
+  /// No description provided for @set_accNoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription'**
+  String get set_accNoSub;
+
+  /// No description provided for @set_accExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials expired'**
+  String get set_accExpired;
+
+  /// No description provided for @set_accEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get set_accEdit;
+
+  /// No description provided for @set_accUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Update credentials'**
+  String get set_accUpdate;
+
+  /// No description provided for @set_accMakeDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Make default'**
+  String get set_accMakeDefault;
+
+  /// No description provided for @set_accDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove account'**
+  String get set_accDelete;
+
+  /// No description provided for @set_accDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove “{name}”?'**
+  String set_accDeleteTitle(Object name);
+
+  /// No description provided for @set_accDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the saved credentials on this device are removed. Your NovelAI account is unaffected.'**
+  String get set_accDeleteBody;
+
+  /// No description provided for @set_accAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add account'**
+  String get set_accAdd;
+
+  /// No description provided for @set_accAddHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Email and password, or a persistent token'**
+  String get set_accAddHint;
+
+  /// No description provided for @set_accLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in'**
+  String get set_accLogin;
+
+  /// No description provided for @set_accDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default account'**
+  String get set_accDefault;
+
+  /// No description provided for @set_accDefaultSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Preselected on the sign-in screen'**
+  String get set_accDefaultSub;
+
+  /// No description provided for @set_accAutoLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in automatically'**
+  String get set_accAutoLogin;
+
+  /// No description provided for @set_accAutoLoginSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reuse the last session; when off, Studio opens on the sign-in screen'**
+  String get set_accAutoLoginSub;
+
+  /// No description provided for @set_accSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get set_accSub;
+
+  /// No description provided for @set_accMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} Anlas / month'**
+  String set_accMonthly(Object n);
+
+  /// No description provided for @set_accRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} left'**
+  String set_accRemaining(Object n);
+
+  /// No description provided for @set_accResets.
+  ///
+  /// In en, this message translates to:
+  /// **'resets {date}'**
+  String set_accResets(Object date);
+
+  /// No description provided for @set_accPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Open NovelAI account page'**
+  String get set_accPortal;
+
+  /// No description provided for @set_accSwitchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching keeps your draft and canvas; queued generations finish on the original account.'**
+  String get set_accSwitchHint;
+
+  /// No description provided for @set_apDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, text and notifications. Changes save instantly and can be undone.'**
+  String get set_apDesc;
+
+  /// No description provided for @set_apTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get set_apTheme;
+
+  /// No description provided for @set_apThemeSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by the launch screen, sign-in and every page.'**
+  String get set_apThemeSub;
+
+  /// No description provided for @set_apLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get set_apLight;
+
+  /// No description provided for @set_apDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get set_apDark;
+
+  /// No description provided for @set_apSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get set_apSystem;
+
+  /// No description provided for @set_apSystemSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Follows the Windows setting'**
+  String get set_apSystemSub;
+
+  /// No description provided for @set_apText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get set_apText;
+
+  /// No description provided for @set_apFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Interface font'**
+  String get set_apFont;
+
+  /// No description provided for @set_apFontSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Numbers and code always use Geist Mono'**
+  String get set_apFontSub;
+
+  /// No description provided for @set_apScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings & dialog text size'**
+  String get set_apScale;
+
+  /// No description provided for @set_apScaleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Affects settings and dialogs only, not the canvas'**
+  String get set_apScaleSub;
+
+  /// No description provided for @set_apSampleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Heading · Generation finished'**
+  String get set_apSampleTitle;
+
+  /// No description provided for @set_apSampleBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Body · Saved to the local gallery; keep refining your prompt.'**
+  String get set_apSampleBody;
+
+  /// No description provided for @set_apSampleNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Caption · Drag the slider to preview.'**
+  String get set_apSampleNote;
+
+  /// No description provided for @set_apLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get set_apLanguage;
+
+  /// No description provided for @set_apLanguageSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies immediately'**
+  String get set_apLanguageSub;
+
+  /// No description provided for @set_apMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion & sound'**
+  String get set_apMotion;
+
+  /// No description provided for @set_apReduceMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduce motion'**
+  String get set_apReduceMotion;
+
+  /// No description provided for @set_apReduceMotionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns off canvas fly-to, zoom and panel transitions; the visual channel stops moving'**
+  String get set_apReduceMotionSub;
+
+  /// No description provided for @set_apSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Completion sound'**
+  String get set_apSound;
+
+  /// No description provided for @set_apSoundSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Plays when a batch finishes'**
+  String get set_apSoundSub;
+
+  /// No description provided for @set_apSoundFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound file'**
+  String get set_apSoundFile;
+
+  /// No description provided for @set_apPreviewSound.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get set_apPreviewSound;
+
+  /// No description provided for @set_apNotify.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get set_apNotify;
+
+  /// No description provided for @set_apNotifySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Toasts appear top-right and fade after 3 seconds'**
+  String get set_apNotifySub;
+
+  /// No description provided for @set_apNotifyPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get set_apNotifyPreview;
+
+  /// No description provided for @set_apPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get set_apPreview;
+
+  /// No description provided for @set_apCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get set_apCurrent;
+
+  /// No description provided for @set_apThemeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Press {keys} to switch light and dark anytime.'**
+  String set_apThemeTip(Object keys);
+
+  /// No description provided for @set_cvDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'How history, the viewer and the infinite canvas behave.'**
+  String get set_cvDesc;
+
+  /// No description provided for @set_cvBrowse.
+  ///
+  /// In en, this message translates to:
+  /// **'Browsing'**
+  String get set_cvBrowse;
+
+  /// No description provided for @set_cvHistoryClick.
+  ///
+  /// In en, this message translates to:
+  /// **'When clicking a history thumbnail'**
+  String get set_cvHistoryClick;
+
+  /// No description provided for @set_cvOpenDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Open details'**
+  String get set_cvOpenDetail;
+
+  /// No description provided for @set_cvOpenDetailSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Opens the image viewer for a closer look'**
+  String get set_cvOpenDetailSub;
+
+  /// No description provided for @set_cvLinked.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked preview'**
+  String get set_cvLinked;
+
+  /// No description provided for @set_cvLinkedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Jumps to it on the canvas without opening the viewer'**
+  String get set_cvLinkedSub;
+
+  /// No description provided for @set_cvViewer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show results in'**
+  String get set_cvViewer;
+
+  /// No description provided for @set_cvCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Infinite canvas'**
+  String get set_cvCanvas;
+
+  /// No description provided for @set_cvCanvasSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Batches in a column; pan, zoom and pin to compare'**
+  String get set_cvCanvasSub;
+
+  /// No description provided for @set_cvSimple.
+  ///
+  /// In en, this message translates to:
+  /// **'Simple viewer'**
+  String get set_cvSimple;
+
+  /// No description provided for @set_cvSimpleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the latest image; lightest on resources'**
+  String get set_cvSimpleSub;
+
+  /// No description provided for @set_cvCanvasSec.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas'**
+  String get set_cvCanvasSec;
+
+  /// No description provided for @set_cvLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock canvas view'**
+  String get set_cvLock;
+
+  /// No description provided for @set_cvLockSub.
+  ///
+  /// In en, this message translates to:
+  /// **'New images do not move the view'**
+  String get set_cvLockSub;
+
+  /// No description provided for @set_cvFill.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom new images to fill'**
+  String get set_cvFill;
+
+  /// No description provided for @set_cvFillSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Fit the visible area instead of actual pixels'**
+  String get set_cvFillSub;
+
+  /// No description provided for @set_cvChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Visual channel'**
+  String get set_cvChannel;
+
+  /// No description provided for @set_cvChannelSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Themed decoration along the canvas; scrolling through history passes each theme.'**
+  String get set_cvChannelSub;
+
+  /// No description provided for @set_cvMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get set_cvMode;
+
+  /// No description provided for @set_cvMinTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep at least two themes in random mode.'**
+  String get set_cvMinTwo;
+
+  /// No description provided for @set_cvSession.
+  ///
+  /// In en, this message translates to:
+  /// **'This session: {order}'**
+  String set_cvSession(Object order);
+
+  /// No description provided for @set_cvLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Intensity'**
+  String get set_cvLevel;
+
+  /// No description provided for @set_cvRuler.
+  ///
+  /// In en, this message translates to:
+  /// **'Time ruler'**
+  String get set_cvRuler;
+
+  /// No description provided for @set_cvRulerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch times, date dividers and the side ruler'**
+  String get set_cvRulerSub;
+
+  /// No description provided for @set_cvMotion.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle motion'**
+  String get set_cvMotion;
+
+  /// No description provided for @set_cvMotionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pauses while generating or when reduce motion is on'**
+  String get set_cvMotionSub;
+
+  /// No description provided for @set_cvOps.
+  ///
+  /// In en, this message translates to:
+  /// **'Canvas controls'**
+  String get set_cvOps;
+
+  /// No description provided for @set_cvOpScroll.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll'**
+  String get set_cvOpScroll;
+
+  /// No description provided for @set_cvOpPan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pan sideways'**
+  String get set_cvOpPan;
+
+  /// No description provided for @set_cvOpZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom'**
+  String get set_cvOpZoom;
+
+  /// No description provided for @set_cvOpMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move view'**
+  String get set_cvOpMove;
+
+  /// No description provided for @set_cvOpAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get set_cvOpAll;
+
+  /// No description provided for @set_cvOpHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest batch'**
+  String get set_cvOpHome;
+
+  /// No description provided for @set_cvWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheel'**
+  String get set_cvWheel;
+
+  /// No description provided for @set_cvChannelTip.
+  ///
+  /// In en, this message translates to:
+  /// **'The gear on the canvas edits the same visual channel settings.'**
+  String get set_cvChannelTip;
+
+  /// No description provided for @set_scDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped by page. Click a shortcut to record a new one; duplicates on the same page turn red with a one-click fix.'**
+  String get set_scDesc;
+
+  /// No description provided for @set_scSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search actions or keys, e.g. Ctrl+S'**
+  String get set_scSearch;
+
+  /// No description provided for @set_scAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get set_scAll;
+
+  /// No description provided for @set_scKeyboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard map'**
+  String get set_scKeyboard;
+
+  /// No description provided for @set_scKeyboardSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Click a key to filter the list. Blue keys are taken, red keys conflict.'**
+  String get set_scKeyboardSub;
+
+  /// No description provided for @set_scNoMod.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get set_scNoMod;
+
+  /// No description provided for @set_scLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'{context} · holding {mod}'**
+  String set_scLayer(Object context, Object mod);
+
+  /// No description provided for @set_scLayerNone.
+  ///
+  /// In en, this message translates to:
+  /// **'{context} · no modifier'**
+  String set_scLayerNone(Object context);
+
+  /// No description provided for @set_scAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get set_scAction;
+
+  /// No description provided for @set_scKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcut'**
+  String get set_scKeys;
+
+  /// No description provided for @set_scDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get set_scDefault;
+
+  /// No description provided for @set_scDefaultIs.
+  ///
+  /// In en, this message translates to:
+  /// **'Default {keys}'**
+  String set_scDefaultIs(Object keys);
+
+  /// No description provided for @set_scConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts with “{name}”'**
+  String set_scConflict(Object name);
+
+  /// No description provided for @set_scRecording.
+  ///
+  /// In en, this message translates to:
+  /// **'Press a new combination…'**
+  String get set_scRecording;
+
+  /// No description provided for @set_scRecordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Esc cancels · Backspace clears'**
+  String get set_scRecordHint;
+
+  /// No description provided for @set_scRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Record'**
+  String get set_scRecord;
+
+  /// No description provided for @set_scClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get set_scClear;
+
+  /// No description provided for @set_scDisplay.
+  ///
+  /// In en, this message translates to:
+  /// **'Display'**
+  String get set_scDisplay;
+
+  /// No description provided for @set_scEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable shortcuts'**
+  String get set_scEnabled;
+
+  /// No description provided for @set_scInTooltips.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in tooltips'**
+  String get set_scInTooltips;
+
+  /// No description provided for @set_scInMenus.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in menus'**
+  String get set_scInMenus;
+
+  /// No description provided for @set_scBadges.
+  ///
+  /// In en, this message translates to:
+  /// **'Number badges on navigation'**
+  String get set_scBadges;
+
+  /// No description provided for @set_scConflicts.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflicts'**
+  String get set_scConflicts;
+
+  /// No description provided for @set_scConflictCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}'**
+  String set_scConflictCount(Object n);
+
+  /// No description provided for @set_scConflictLine.
+  ///
+  /// In en, this message translates to:
+  /// **'{keys} is used twice'**
+  String set_scConflictLine(Object keys);
+
+  /// No description provided for @set_scConflictSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{context}: {a} and {b}. Neither fires while they conflict.'**
+  String set_scConflictSub(Object context, Object a, Object b);
+
+  /// No description provided for @set_scFix.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset {name} to {keys}'**
+  String set_scFix(Object name, Object keys);
+
+  /// No description provided for @set_scNoConflict.
+  ///
+  /// In en, this message translates to:
+  /// **'No conflicts'**
+  String get set_scNoConflict;
+
+  /// No description provided for @set_scConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcut profile'**
+  String get set_scConfig;
+
+  /// No description provided for @set_scResetAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all'**
+  String get set_scResetAll;
+
+  /// No description provided for @set_scResetAllTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset all shortcuts?'**
+  String get set_scResetAllTitle;
+
+  /// No description provided for @set_scResetAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} customized shortcuts will be restored.'**
+  String set_scResetAllBody(Object n);
+
+  /// No description provided for @set_scHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcut help'**
+  String get set_scHelp;
+
+  /// No description provided for @set_scHelpTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Press {key} on any page to see its shortcuts.'**
+  String set_scHelpTip(Object key);
+
+  /// No description provided for @set_scEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching shortcuts'**
+  String get set_scEmpty;
+
+  /// No description provided for @set_gnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Control Anlas spending, request pacing and prompt input helpers.'**
+  String get set_gnDesc;
+
+  /// No description provided for @set_gnCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas safeguard'**
+  String get set_gnCost;
+
+  /// No description provided for @set_gnCostSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before sending a request that costs more than the threshold.'**
+  String get set_gnCostSub;
+
+  /// No description provided for @set_gnWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'High-cost warning'**
+  String get set_gnWarn;
+
+  /// No description provided for @set_gnWarnSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm above the threshold'**
+  String get set_gnWarnSub;
+
+  /// No description provided for @set_gnThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get set_gnThreshold;
+
+  /// No description provided for @set_gnEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {model} · {w}×{h} · {steps} steps · {n} per request'**
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  );
+
+  /// No description provided for @set_gnWillWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Will warn'**
+  String get set_gnWillWarn;
+
+  /// No description provided for @set_gnNoWarn.
+  ///
+  /// In en, this message translates to:
+  /// **'No warning'**
+  String get set_gnNoWarn;
+
+  /// No description provided for @set_gnFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Free'**
+  String get set_gnFree;
+
+  /// No description provided for @set_gnPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Request pacing'**
+  String get set_gnPace;
+
+  /// No description provided for @set_gnPaceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait between consecutive requests to ease server load.'**
+  String get set_gnPaceSub;
+
+  /// No description provided for @set_gnLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit request interval'**
+  String get set_gnLimit;
+
+  /// No description provided for @set_gnInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval'**
+  String get set_gnInterval;
+
+  /// No description provided for @set_gnJitter.
+  ///
+  /// In en, this message translates to:
+  /// **'Random jitter'**
+  String get set_gnJitter;
+
+  /// No description provided for @set_gnJitterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Randomly vary the interval'**
+  String get set_gnJitterSub;
+
+  /// No description provided for @set_gnTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'With these settings, 10 requests are spaced like this'**
+  String get set_gnTimeline;
+
+  /// No description provided for @set_gnInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt input'**
+  String get set_gnInput;
+
+  /// No description provided for @set_gnWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust weight with the wheel'**
+  String get set_gnWheel;
+
+  /// No description provided for @set_gnWheelSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll over a tag to change its weight'**
+  String get set_gnWheelSub;
+
+  /// No description provided for @set_gnNoKey.
+  ///
+  /// In en, this message translates to:
+  /// **'No key'**
+  String get set_gnNoKey;
+
+  /// No description provided for @set_gnRelated.
+  ///
+  /// In en, this message translates to:
+  /// **'Related tag suggestions'**
+  String get set_gnRelated;
+
+  /// No description provided for @set_gnRelatedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest tags that often appear together'**
+  String get set_gnRelatedSub;
+
+  /// No description provided for @set_gnRag.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic tag suggestions'**
+  String get set_gnRag;
+
+  /// No description provided for @set_gnRagSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Context-aware suggestions from Semantic search'**
+  String get set_gnRagSub;
+
+  /// No description provided for @set_gnReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get set_gnReady;
+
+  /// No description provided for @set_gnNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Not ready'**
+  String get set_gnNotReady;
+
+  /// No description provided for @set_gnGoSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get set_gnGoSettings;
+
+  /// No description provided for @set_gnTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt translation'**
+  String get set_gnTranslate;
+
+  /// No description provided for @set_gnTranslateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Model used to translate prompts'**
+  String get set_gnTranslateSub;
+
+  /// No description provided for @set_gnToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get set_gnToday;
+
+  /// No description provided for @set_gnUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas used'**
+  String get set_gnUsed;
+
+  /// No description provided for @set_gnNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get set_gnNow;
+
+  /// No description provided for @set_gnWarned.
+  ///
+  /// In en, this message translates to:
+  /// **'High-cost warnings'**
+  String get set_gnWarned;
+
+  /// No description provided for @set_gnTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}×'**
+  String set_gnTimes(Object n);
+
+  /// No description provided for @set_gnMaxSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Largest single request'**
+  String get set_gnMaxSingle;
+
+  /// No description provided for @set_gnFreeTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Opus free generations are already excluded; the threshold only counts what will be charged.'**
+  String get set_gnFreeTip;
+
+  /// No description provided for @set_stDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Where images are saved, which folders the gallery reads, and cleanup.'**
+  String get set_stDesc;
+
+  /// No description provided for @set_stUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get set_stUsage;
+
+  /// No description provided for @set_stFree.
+  ///
+  /// In en, this message translates to:
+  /// **'{size} free on {disk}'**
+  String set_stFree(Object disk, Object size);
+
+  /// No description provided for @set_stRecount.
+  ///
+  /// In en, this message translates to:
+  /// **'Recount'**
+  String get set_stRecount;
+
+  /// No description provided for @set_stCounting.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting…'**
+  String get set_stCounting;
+
+  /// No description provided for @set_stImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get set_stImages;
+
+  /// No description provided for @set_stUpscaleModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale models'**
+  String get set_stUpscaleModels;
+
+  /// No description provided for @set_stVibes.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe library'**
+  String get set_stVibes;
+
+  /// No description provided for @set_stThumbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail cache'**
+  String get set_stThumbs;
+
+  /// No description provided for @set_stRag.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic index'**
+  String get set_stRag;
+
+  /// No description provided for @set_stDict.
+  ///
+  /// In en, this message translates to:
+  /// **'Dictionaries'**
+  String get set_stDict;
+
+  /// No description provided for @set_stAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent'**
+  String get set_stAgent;
+
+  /// No description provided for @set_stSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving'**
+  String get set_stSave;
+
+  /// No description provided for @set_stSavePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Image folder'**
+  String get set_stSavePath;
+
+  /// No description provided for @set_stAutoSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-save'**
+  String get set_stAutoSave;
+
+  /// No description provided for @set_stAutoSaveSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Write images to disk as soon as they finish; when off they stay on the canvas and in history'**
+  String get set_stAutoSaveSub;
+
+  /// No description provided for @set_stAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets & display'**
+  String get set_stAssets;
+
+  /// No description provided for @set_stVibePath.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe library folder'**
+  String get set_stVibePath;
+
+  /// No description provided for @set_stQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery thumbnail quality'**
+  String get set_stQuality;
+
+  /// No description provided for @set_stQualitySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Display quality of thumbnails'**
+  String get set_stQualitySub;
+
+  /// No description provided for @set_stHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get set_stHigh;
+
+  /// No description provided for @set_stStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get set_stStandard;
+
+  /// No description provided for @set_stRoots.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery folders'**
+  String get set_stRoots;
+
+  /// No description provided for @set_stRootsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Any folder can be browsed and searched in the gallery; auto-save does not write there.'**
+  String get set_stRootsSub;
+
+  /// No description provided for @set_stPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Main'**
+  String get set_stPrimary;
+
+  /// No description provided for @set_stCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}'**
+  String set_stCount(Object n);
+
+  /// No description provided for @set_stAddFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add folder'**
+  String get set_stAddFolder;
+
+  /// No description provided for @set_stImportIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Import tag index (.jsonl)'**
+  String get set_stImportIndex;
+
+  /// No description provided for @set_stLastScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Last scan {when} · {n} images'**
+  String set_stLastScan(Object when, Object n);
+
+  /// No description provided for @set_stMaintain.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get set_stMaintain;
+
+  /// No description provided for @set_stRescan.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescan gallery'**
+  String get set_stRescan;
+
+  /// No description provided for @set_stRescanSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Find missing files, add new ones and retry unread metadata'**
+  String get set_stRescanSub;
+
+  /// No description provided for @set_stScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan'**
+  String get set_stScan;
+
+  /// No description provided for @set_stScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning…'**
+  String get set_stScanning;
+
+  /// No description provided for @set_stCleanThumbs.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean thumbnail cache'**
+  String get set_stCleanThumbs;
+
+  /// No description provided for @set_stCleanThumbsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes least-recently-used thumbnails over the limit; originals are untouched'**
+  String get set_stCleanThumbsSub;
+
+  /// No description provided for @set_stClean.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean'**
+  String get set_stClean;
+
+  /// No description provided for @set_stCleanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean thumbnail cache?'**
+  String get set_stCleanTitle;
+
+  /// No description provided for @set_stCleanBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnails over the limit are deleted and rebuilt when needed. Originals are not touched.'**
+  String get set_stCleanBody;
+
+  /// No description provided for @set_stAppData.
+  ///
+  /// In en, this message translates to:
+  /// **'App data folder'**
+  String get set_stAppData;
+
+  /// No description provided for @set_stAppDataSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Databases for accounts, history and blocks; restart after changing'**
+  String get set_stAppDataSub;
+
+  /// No description provided for @set_stOpenFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Open folders'**
+  String get set_stOpenFolders;
+
+  /// No description provided for @set_stLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs'**
+  String get set_stLogs;
+
+  /// No description provided for @set_stAppDataShort.
+  ///
+  /// In en, this message translates to:
+  /// **'App data'**
+  String get set_stAppDataShort;
+
+  /// No description provided for @set_stDeleteTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Move or delete single images in the gallery; the confirmation rules in Privacy apply.'**
+  String get set_stDeleteTip;
+
+  /// No description provided for @set_stRemoveRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this folder'**
+  String get set_stRemoveRoot;
+
+  /// No description provided for @set_dcDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag data and caches. Clean up here if autocomplete misbehaves.'**
+  String get set_dcDesc;
+
+  /// No description provided for @set_dcTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag dictionary'**
+  String get set_dcTags;
+
+  /// No description provided for @set_dcTagsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Local data for autocomplete, tag translation and suggestions.'**
+  String get set_dcTagsSub;
+
+  /// No description provided for @set_dcBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Base dictionary'**
+  String get set_dcBase;
+
+  /// No description provided for @set_dcBaseValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} tags · data {version}'**
+  String set_dcBaseValue(Object n, Object version);
+
+  /// No description provided for @set_dcCooc.
+  ///
+  /// In en, this message translates to:
+  /// **'Co-occurrence'**
+  String get set_dcCooc;
+
+  /// No description provided for @set_dcCoocSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Used to suggest tags that appear together'**
+  String get set_dcCoocSub;
+
+  /// No description provided for @set_dcEntries.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} entries'**
+  String set_dcEntries(Object n);
+
+  /// No description provided for @set_dcTranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag translation'**
+  String get set_dcTranslate;
+
+  /// No description provided for @set_dcTranslateSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Fills in translations the dictionary lacks'**
+  String get set_dcTranslateSub;
+
+  /// No description provided for @set_dcCaches.
+  ///
+  /// In en, this message translates to:
+  /// **'Caches'**
+  String get set_dcCaches;
+
+  /// No description provided for @set_dcCachesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleared data is fetched again when needed; images and settings are unaffected.'**
+  String get set_dcCachesSub;
+
+  /// No description provided for @set_dcDanbooru.
+  ///
+  /// In en, this message translates to:
+  /// **'Danbooru cache'**
+  String get set_dcDanbooru;
+
+  /// No description provided for @set_dcDanbooruSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Online gallery and tag wiki responses'**
+  String get set_dcDanbooruSub;
+
+  /// No description provided for @set_dcTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'AI translation cache'**
+  String get set_dcTranslation;
+
+  /// No description provided for @set_dcTranslationSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags and prompts already translated'**
+  String get set_dcTranslationSub;
+
+  /// No description provided for @set_dcCacheSize.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} · {size}'**
+  String set_dcCacheSize(Object n, Object size);
+
+  /// No description provided for @set_dcClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {name}?'**
+  String set_dcClearTitle(Object name);
+
+  /// No description provided for @set_dcClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It will be fetched again when needed.'**
+  String get set_dcClearBody;
+
+  /// No description provided for @set_dcStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache statistics'**
+  String get set_dcStats;
+
+  /// No description provided for @set_dcL1.
+  ///
+  /// In en, this message translates to:
+  /// **'L1 memory'**
+  String get set_dcL1;
+
+  /// No description provided for @set_dcL2.
+  ///
+  /// In en, this message translates to:
+  /// **'L2 Hive'**
+  String get set_dcL2;
+
+  /// No description provided for @set_dcL3.
+  ///
+  /// In en, this message translates to:
+  /// **'L3 SQLite'**
+  String get set_dcL3;
+
+  /// No description provided for @set_dcImagesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} images'**
+  String set_dcImagesUnit(Object n);
+
+  /// No description provided for @set_dcAutoRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto refresh'**
+  String get set_dcAutoRefresh;
+
+  /// No description provided for @set_dcUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {when}'**
+  String set_dcUpdated(Object when);
+
+  /// No description provided for @set_dcResetStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset statistics'**
+  String get set_dcResetStats;
+
+  /// No description provided for @set_dcTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything here can be rebuilt. Personal data (accounts, history, blocks) lives under Storage → App data folder.'**
+  String get set_dcTip;
+
+  /// No description provided for @set_mdDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'LLM services for translation, prompt reverse, tag translation and the Agent. Add providers, then pick a model for each feature.'**
+  String get set_mdDesc;
+
+  /// No description provided for @set_mdProviders.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers'**
+  String get set_mdProviders;
+
+  /// No description provided for @set_mdTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature models'**
+  String get set_mdTasks;
+
+  /// No description provided for @set_mdPresets.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt presets'**
+  String get set_mdPresets;
+
+  /// No description provided for @set_mdRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Request log'**
+  String get set_mdRequests;
+
+  /// No description provided for @set_mdProviderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} providers'**
+  String set_mdProviderCount(Object n);
+
+  /// No description provided for @set_mdModelCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} models'**
+  String set_mdModelCount(Object n);
+
+  /// No description provided for @set_mdDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get set_mdDisabled;
+
+  /// No description provided for @set_mdLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get set_mdLocal;
+
+  /// No description provided for @set_mdLatency.
+  ///
+  /// In en, this message translates to:
+  /// **'{ms} · {when}'**
+  String set_mdLatency(Object ms, Object when);
+
+  /// No description provided for @set_mdUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unreachable'**
+  String get set_mdUnreachable;
+
+  /// No description provided for @set_mdName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get set_mdName;
+
+  /// No description provided for @set_mdBaseUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get set_mdBaseUrl;
+
+  /// No description provided for @set_mdApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get set_mdApiKey;
+
+  /// No description provided for @set_mdApiKeyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get set_mdApiKeyEmpty;
+
+  /// No description provided for @set_mdModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Models'**
+  String get set_mdModels;
+
+  /// No description provided for @set_mdRefreshModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch from provider'**
+  String get set_mdRefreshModels;
+
+  /// No description provided for @set_mdAddModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get set_mdAddModel;
+
+  /// No description provided for @set_mdUsedFor.
+  ///
+  /// In en, this message translates to:
+  /// **'used for {tasks}'**
+  String set_mdUsedFor(Object tasks);
+
+  /// No description provided for @set_mdRetired.
+  ///
+  /// In en, this message translates to:
+  /// **'Retired by provider'**
+  String get set_mdRetired;
+
+  /// No description provided for @set_mdCapTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get set_mdCapTools;
+
+  /// No description provided for @set_mdCapVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Vision'**
+  String get set_mdCapVision;
+
+  /// No description provided for @set_mdCapReasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get set_mdCapReasoning;
+
+  /// No description provided for @set_mdAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced request options'**
+  String get set_mdAdvanced;
+
+  /// No description provided for @set_mdDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete provider'**
+  String get set_mdDelete;
+
+  /// No description provided for @set_mdDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete “{name}”?'**
+  String set_mdDeleteTitle(Object name);
+
+  /// No description provided for @set_mdDeleteBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Features that use it fall back to another provider.'**
+  String get set_mdDeleteBody;
+
+  /// No description provided for @set_mdRemoveModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove model'**
+  String get set_mdRemoveModel;
+
+  /// No description provided for @set_mdTaskPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt translation'**
+  String get set_mdTaskPrompt;
+
+  /// No description provided for @set_mdTaskReverse.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt reverse'**
+  String get set_mdTaskReverse;
+
+  /// No description provided for @set_mdTaskTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag translation'**
+  String get set_mdTaskTag;
+
+  /// No description provided for @set_mdTaskWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiki translation'**
+  String get set_mdTaskWiki;
+
+  /// No description provided for @set_mdFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature'**
+  String get set_mdFeature;
+
+  /// No description provided for @set_mdProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider'**
+  String get set_mdProvider;
+
+  /// No description provided for @set_mdModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get set_mdModel;
+
+  /// No description provided for @set_mdPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'Preset'**
+  String get set_mdPreset;
+
+  /// No description provided for @set_mdStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get set_mdStatus;
+
+  /// No description provided for @set_mdAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get set_mdAvailable;
+
+  /// No description provided for @set_mdFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Falls back to the first available provider'**
+  String get set_mdFallback;
+
+  /// No description provided for @set_mdNotChosen.
+  ///
+  /// In en, this message translates to:
+  /// **'Not selected'**
+  String get set_mdNotChosen;
+
+  /// No description provided for @set_mdBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get set_mdBuiltin;
+
+  /// No description provided for @set_mdNewPreset.
+  ///
+  /// In en, this message translates to:
+  /// **'New preset'**
+  String get set_mdNewPreset;
+
+  /// No description provided for @set_mdEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get set_mdEdit;
+
+  /// No description provided for @set_mdTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get set_mdTime;
+
+  /// No description provided for @set_mdTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} tokens'**
+  String set_mdTokens(Object n);
+
+  /// No description provided for @set_mdFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get set_mdFailed;
+
+  /// No description provided for @set_mdOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get set_mdOk;
+
+  /// No description provided for @set_mdShowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing latest {n} of {total}'**
+  String set_mdShowing(Object n, Object total);
+
+  /// No description provided for @set_mdImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import config'**
+  String get set_mdImport;
+
+  /// No description provided for @set_mdAddProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'Add provider'**
+  String get set_mdAddProvider;
+
+  /// No description provided for @set_mdEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No providers yet'**
+  String get set_mdEmpty;
+
+  /// No description provided for @set_mdEmptySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add one to enable translation and prompt reverse.'**
+  String get set_mdEmptySub;
+
+  /// No description provided for @set_agDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Model, instructions, extensions and MCP tools for the sidebar assistant.'**
+  String get set_agDesc;
+
+  /// No description provided for @set_agModelSec.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get set_agModelSec;
+
+  /// No description provided for @set_agModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent model'**
+  String get set_agModel;
+
+  /// No description provided for @set_agModelSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking effort is set per task in the chat box'**
+  String get set_agModelSub;
+
+  /// No description provided for @set_agEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter sends'**
+  String get set_agEnter;
+
+  /// No description provided for @set_agEnterSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, Ctrl+Enter sends and Enter adds a line'**
+  String get set_agEnterSub;
+
+  /// No description provided for @set_agMax.
+  ///
+  /// In en, this message translates to:
+  /// **'Max requests per task'**
+  String get set_agMax;
+
+  /// No description provided for @set_agMaxSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Stops runaway loops'**
+  String get set_agMaxSub;
+
+  /// No description provided for @set_agTimesUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'req'**
+  String get set_agTimesUnit;
+
+  /// No description provided for @set_agInstr.
+  ///
+  /// In en, this message translates to:
+  /// **'Instructions'**
+  String get set_agInstr;
+
+  /// No description provided for @set_agInstrSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined in this order. Existing chats keep their prompt; new requests use the new text.'**
+  String get set_agInstrSub;
+
+  /// No description provided for @set_agOrderBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in prompt'**
+  String get set_agOrderBuiltin;
+
+  /// No description provided for @set_agOrderPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'System prefix'**
+  String get set_agOrderPrefix;
+
+  /// No description provided for @set_agOrderGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global instructions'**
+  String get set_agOrderGlobal;
+
+  /// No description provided for @set_agOrderWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace instructions'**
+  String get set_agOrderWorkspace;
+
+  /// No description provided for @set_agOrderTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool map'**
+  String get set_agOrderTools;
+
+  /// No description provided for @set_agGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global instructions'**
+  String get set_agGlobal;
+
+  /// No description provided for @set_agPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'System prefix'**
+  String get set_agPrefix;
+
+  /// No description provided for @set_agPrefixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed text placed before every request, such as a persona or output format.'**
+  String get set_agPrefixHint;
+
+  /// No description provided for @set_agBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in prompt'**
+  String get set_agBuiltin;
+
+  /// No description provided for @set_agFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'View final prompt'**
+  String get set_agFinal;
+
+  /// No description provided for @set_agExt.
+  ///
+  /// In en, this message translates to:
+  /// **'Extensions'**
+  String get set_agExt;
+
+  /// No description provided for @set_agExtSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Loaded per workspace. External extensions run local code; add only trusted ones.'**
+  String get set_agExtSub;
+
+  /// No description provided for @set_agStudioExt.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio interaction'**
+  String get set_agStudioExt;
+
+  /// No description provided for @set_agStudioExtSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Reads Studio state and asks questions with cards'**
+  String get set_agStudioExtSub;
+
+  /// No description provided for @set_agRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in · required'**
+  String get set_agRequired;
+
+  /// No description provided for @set_agAddFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Add extension file'**
+  String get set_agAddFile;
+
+  /// No description provided for @set_agAddDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Add extension folder'**
+  String get set_agAddDir;
+
+  /// No description provided for @set_agMcp.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP servers'**
+  String get set_agMcp;
+
+  /// No description provided for @set_agMcpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'CodeMode discovers tools on demand instead of loading them all into context.'**
+  String get set_agMcpSub;
+
+  /// No description provided for @set_agBuiltinTools.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI Studio · built-in tools'**
+  String get set_agBuiltinTools;
+
+  /// No description provided for @set_agBuiltinToolsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt, blocks, wiki, images, history, references, generation and settings'**
+  String get set_agBuiltinToolsSub;
+
+  /// No description provided for @set_agConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected · {n} tools'**
+  String set_agConnected(Object n);
+
+  /// No description provided for @set_agConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting…'**
+  String get set_agConnecting;
+
+  /// No description provided for @set_agNeedsLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in required'**
+  String get set_agNeedsLogin;
+
+  /// No description provided for @set_agMcpError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get set_agMcpError;
+
+  /// No description provided for @set_agMcpOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get set_agMcpOff;
+
+  /// No description provided for @set_agAddMcp.
+  ///
+  /// In en, this message translates to:
+  /// **'Add MCP server'**
+  String get set_agAddMcp;
+
+  /// No description provided for @set_agTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get set_agTools;
+
+  /// No description provided for @set_agToolCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}'**
+  String set_agToolCount(Object n);
+
+  /// No description provided for @set_agToolsTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation tools always quote a price and wait for your approval.'**
+  String get set_agToolsTip;
+
+  /// No description provided for @set_agData.
+  ///
+  /// In en, this message translates to:
+  /// **'Data folder'**
+  String get set_agData;
+
+  /// No description provided for @set_agWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspaces'**
+  String get set_agWorkspaces;
+
+  /// No description provided for @set_agSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get set_agSessions;
+
+  /// No description provided for @set_agCostTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers bill usage; Studio only shows token counts.'**
+  String get set_agCostTip;
+
+  /// No description provided for @set_agOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Agent'**
+  String get set_agOpen;
+
+  /// No description provided for @set_agEditMcp.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get set_agEditMcp;
+
+  /// No description provided for @set_agRemoveMcp.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove server'**
+  String get set_agRemoveMcp;
+
+  /// No description provided for @set_agRemoveExt.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove extension'**
+  String get set_agRemoveExt;
+
+  /// No description provided for @set_rgDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Local RAG for tag suggestions, wiki, prompt blocks and similar images. Nothing is uploaded.'**
+  String get set_rgDesc;
+
+  /// No description provided for @set_rgReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search ready'**
+  String get set_rgReady;
+
+  /// No description provided for @set_rgOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search off'**
+  String get set_rgOff;
+
+  /// No description provided for @set_rgPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Some sources building'**
+  String get set_rgPartial;
+
+  /// No description provided for @set_rgAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All indexed'**
+  String get set_rgAllDone;
+
+  /// No description provided for @set_rgPool.
+  ///
+  /// In en, this message translates to:
+  /// **'All sources share one local vector store and update incrementally.'**
+  String get set_rgPool;
+
+  /// No description provided for @set_rgStepRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime'**
+  String get set_rgStepRuntime;
+
+  /// No description provided for @set_rgStepEmbed.
+  ///
+  /// In en, this message translates to:
+  /// **'Embedding'**
+  String get set_rgStepEmbed;
+
+  /// No description provided for @set_rgStepRerank.
+  ///
+  /// In en, this message translates to:
+  /// **'Rerank'**
+  String get set_rgStepRerank;
+
+  /// No description provided for @set_rgStepDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get set_rgStepDevice;
+
+  /// No description provided for @set_rgSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Sources'**
+  String get set_rgSources;
+
+  /// No description provided for @set_rgSourcesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.'**
+  String get set_rgSourcesSub;
+
+  /// No description provided for @set_rgTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag suggestions'**
+  String get set_rgTags;
+
+  /// No description provided for @set_rgTagsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantics, co-occurrence and rerank; computed per prompt box and character'**
+  String get set_rgTagsSub;
+
+  /// No description provided for @set_rgWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiki semantic search'**
+  String get set_rgWiki;
+
+  /// No description provided for @set_rgWikiSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Local wiki text; exact names first, semantic matches after'**
+  String get set_rgWikiSub;
+
+  /// No description provided for @set_rgBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt blocks'**
+  String get set_rgBlocks;
+
+  /// No description provided for @set_rgBlocksSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Titles, tags and text of saved, unarchived blocks'**
+  String get set_rgBlocksSub;
+
+  /// No description provided for @set_rgGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery (multimodal)'**
+  String get set_rgGallery;
+
+  /// No description provided for @set_rgGallerySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Find similar images by content; NAI parameters get a text index; originals are untouched'**
+  String get set_rgGallerySub;
+
+  /// No description provided for @set_rgCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total}'**
+  String set_rgCount(Object done, Object total);
+
+  /// No description provided for @set_rgSegments.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} chunks'**
+  String set_rgSegments(Object done, Object total);
+
+  /// No description provided for @set_rgGalleryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Images {done} / {total} · params {n} chunks'**
+  String set_rgGalleryCount(Object done, Object total, Object n);
+
+  /// No description provided for @set_rgPaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get set_rgPaused;
+
+  /// No description provided for @set_rgBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Building'**
+  String get set_rgBuilding;
+
+  /// No description provided for @set_rgError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get set_rgError;
+
+  /// No description provided for @set_rgClearIndex.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear index'**
+  String get set_rgClearIndex;
+
+  /// No description provided for @set_rgClearTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the “{name}” index?'**
+  String set_rgClearTitle(Object name);
+
+  /// No description provided for @set_rgClearBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the derived index is removed; content and models stay.'**
+  String get set_rgClearBody;
+
+  /// No description provided for @set_rgContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggestion context'**
+  String get set_rgContext;
+
+  /// No description provided for @set_rgContextSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Both take up to 120 Gemma tokens, cut at whole tags.'**
+  String get set_rgContextSub;
+
+  /// No description provided for @set_rgRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample range'**
+  String get set_rgRange;
+
+  /// No description provided for @set_rgBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before cursor'**
+  String get set_rgBefore;
+
+  /// No description provided for @set_rgAround.
+  ///
+  /// In en, this message translates to:
+  /// **'Around cursor'**
+  String get set_rgAround;
+
+  /// No description provided for @set_rgRuntime.
+  ///
+  /// In en, this message translates to:
+  /// **'Models & runtime'**
+  String get set_rgRuntime;
+
+  /// No description provided for @set_rgEmbedPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Embedding model folder'**
+  String get set_rgEmbedPath;
+
+  /// No description provided for @set_rgRerankPath.
+  ///
+  /// In en, this message translates to:
+  /// **'Rerank model folder'**
+  String get set_rgRerankPath;
+
+  /// No description provided for @set_rgDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get set_rgDevice;
+
+  /// No description provided for @set_rgAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get set_rgAuto;
+
+  /// No description provided for @set_rgEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Runtime'**
+  String get set_rgEnv;
+
+  /// No description provided for @set_rgEnvSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Standalone Python and inference packages; no model weights'**
+  String get set_rgEnvSub;
+
+  /// No description provided for @set_rgCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check'**
+  String get set_rgCheck;
+
+  /// No description provided for @set_rgReinstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinstall'**
+  String get set_rgReinstall;
+
+  /// No description provided for @set_rgProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Indexing'**
+  String get set_rgProgress;
+
+  /// No description provided for @set_rgOverall.
+  ///
+  /// In en, this message translates to:
+  /// **'overall'**
+  String get set_rgOverall;
+
+  /// No description provided for @set_rgShortTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get set_rgShortTags;
+
+  /// No description provided for @set_rgShortWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiki'**
+  String get set_rgShortWiki;
+
+  /// No description provided for @set_rgShortBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks'**
+  String get set_rgShortBlocks;
+
+  /// No description provided for @set_rgShortGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get set_rgShortGallery;
+
+  /// No description provided for @set_rgTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clearing a source removes only its derived index; content and models stay.'**
+  String get set_rgTip;
+
+  /// No description provided for @set_rgNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search not ready'**
+  String get set_rgNotReady;
+
+  /// No description provided for @set_rgNotReadySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Install the runtime, then set both model folders.'**
+  String get set_rgNotReadySub;
+
+  /// No description provided for @set_rgEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not indexed'**
+  String get set_rgEmpty;
+
+  /// No description provided for @set_rgBuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Build index'**
+  String get set_rgBuild;
+
+  /// No description provided for @set_rgContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get set_rgContinue;
+
+  /// No description provided for @set_rgSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} skipped'**
+  String set_rgSkipped(Object n);
+
+  /// No description provided for @set_rgPlanLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Counting what will be indexed…'**
+  String get set_rgPlanLoading;
+
+  /// No description provided for @set_rgPlanTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Will index {n} tags with aliases and local descriptions.'**
+  String set_rgPlanTags(Object n);
+
+  /// No description provided for @set_rgPlanText.
+  ///
+  /// In en, this message translates to:
+  /// **'Will index {docs} documents as {n} text chunks.'**
+  String set_rgPlanText(Object docs, Object n);
+
+  /// No description provided for @set_rgPlanGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Will index {images} images and {n} NAI parameter chunks, separately.'**
+  String set_rgPlanGallery(Object images, Object n);
+
+  /// No description provided for @set_rgPlanNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The first run can take a while; pause any time, finished parts work right away.'**
+  String get set_rgPlanNote;
+
+  /// No description provided for @set_rgPlanRebuild.
+  ///
+  /// In en, this message translates to:
+  /// **'Rebuilding clears this source’s current index first.'**
+  String get set_rgPlanRebuild;
+
+  /// No description provided for @set_rgStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start'**
+  String get set_rgStart;
+
+  /// No description provided for @set_rgDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get set_rgDownload;
+
+  /// No description provided for @set_rgDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {done} / {total}'**
+  String set_rgDownloading(Object done, Object total);
+
+  /// No description provided for @set_rgDownloadingUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {done}'**
+  String set_rgDownloadingUnknown(Object done);
+
+  /// No description provided for @set_rgVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying files…'**
+  String get set_rgVerifying;
+
+  /// No description provided for @set_rgDiscover.
+  ///
+  /// In en, this message translates to:
+  /// **'Find local models'**
+  String get set_rgDiscover;
+
+  /// No description provided for @set_rgDiscoverSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Looks in the workspace models folder for EmbeddingGemma 2 and Qwen3-Reranker 0.6B and fills both folders.'**
+  String get set_rgDiscoverSub;
+
+  /// No description provided for @set_rgFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Find'**
+  String get set_rgFind;
+
+  /// No description provided for @set_rgModelsMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not found. Use Download, or choose a folder with the weights.'**
+  String get set_rgModelsMissing;
+
+  /// No description provided for @set_rgPython.
+  ///
+  /// In en, this message translates to:
+  /// **'Python interpreter'**
+  String get set_rgPython;
+
+  /// No description provided for @set_rgPythonSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Uses the standalone runtime by default; you can pick an existing python.exe.'**
+  String get set_rgPythonSub;
+
+  /// No description provided for @set_rgPythonAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get set_rgPythonAuto;
+
+  /// No description provided for @set_rgPythonNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed'**
+  String get set_rgPythonNone;
+
+  /// No description provided for @set_rgPythonPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in use yet. “Use this interpreter” reinstalls the packages with it.'**
+  String get set_rgPythonPending;
+
+  /// No description provided for @set_rgUsePython.
+  ///
+  /// In en, this message translates to:
+  /// **'Use this interpreter'**
+  String get set_rgUsePython;
+
+  /// No description provided for @set_rgEnvReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get set_rgEnvReady;
+
+  /// No description provided for @set_rgEnvMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed'**
+  String get set_rgEnvMissing;
+
+  /// No description provided for @set_rgInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Install'**
+  String get set_rgInstall;
+
+  /// No description provided for @set_rgInstallHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads Python and inference packages, not model weights. Pick CUDA for NVIDIA GPUs (several GB); otherwise CPU, which is smaller.'**
+  String get set_rgInstallHint;
+
+  /// No description provided for @set_rgInstallCuda.
+  ///
+  /// In en, this message translates to:
+  /// **'CUDA · NVIDIA'**
+  String get set_rgInstallCuda;
+
+  /// No description provided for @set_rgInstallCpu.
+  ///
+  /// In en, this message translates to:
+  /// **'CPU'**
+  String get set_rgInstallCpu;
+
+  /// No description provided for @set_rgPhaseExisting.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking existing runtime'**
+  String get set_rgPhaseExisting;
+
+  /// No description provided for @set_rgPhaseDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading installer'**
+  String get set_rgPhaseDownload;
+
+  /// No description provided for @set_rgPhaseCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing Python'**
+  String get set_rgPhaseCreate;
+
+  /// No description provided for @set_rgPhaseCuda.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing CUDA components'**
+  String get set_rgPhaseCuda;
+
+  /// No description provided for @set_rgPhasePackages.
+  ///
+  /// In en, this message translates to:
+  /// **'Installing packages'**
+  String get set_rgPhasePackages;
+
+  /// No description provided for @set_rgPhaseCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying runtime'**
+  String get set_rgPhaseCheck;
+
+  /// No description provided for @set_rgElapsed.
+  ///
+  /// In en, this message translates to:
+  /// **'{time} in this step'**
+  String set_rgElapsed(Object time);
+
+  /// No description provided for @set_upDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage local upscale models and components. Downloads only start when you click.'**
+  String get set_upDesc;
+
+  /// No description provided for @set_upGpu.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · {n} GB'**
+  String set_upGpu(Object name, Object n);
+
+  /// No description provided for @set_upNoGpu.
+  ///
+  /// In en, this message translates to:
+  /// **'No discrete GPU detected'**
+  String get set_upNoGpu;
+
+  /// No description provided for @set_upLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Upscale on this PC without spending Anlas.'**
+  String get set_upLocal;
+
+  /// No description provided for @set_upEsrgan.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard models'**
+  String get set_upEsrgan;
+
+  /// No description provided for @set_upEsrganSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Real-ESRGAN NCNN, 4×, fast, works on any Vulkan GPU.'**
+  String get set_upEsrganSub;
+
+  /// No description provided for @set_upAnimeQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime · quality'**
+  String get set_upAnimeQuality;
+
+  /// No description provided for @set_upAnimeFast.
+  ///
+  /// In en, this message translates to:
+  /// **'Anime · fast'**
+  String get set_upAnimeFast;
+
+  /// No description provided for @set_upGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General · photo'**
+  String get set_upGeneral;
+
+  /// No description provided for @set_upBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get set_upBuiltin;
+
+  /// No description provided for @set_upInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Installed'**
+  String get set_upInstalled;
+
+  /// No description provided for @set_upNotInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Not installed'**
+  String get set_upNotInstalled;
+
+  /// No description provided for @set_upFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download failed'**
+  String get set_upFailed;
+
+  /// No description provided for @set_upImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import model'**
+  String get set_upImport;
+
+  /// No description provided for @set_upImportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a matching .param and .bin (4× Real-ESRGAN NCNN)'**
+  String get set_upImportHint;
+
+  /// No description provided for @set_upSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'SeedVR2 diffusion upscale'**
+  String get set_upSeed;
+
+  /// No description provided for @set_upSeedSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Better quality, slower, needs NVIDIA. Models share a VAE (~0.5 GB) and the Python/CUDA runtime.'**
+  String get set_upSeedSub;
+
+  /// No description provided for @set_upSeed3b.
+  ///
+  /// In en, this message translates to:
+  /// **'3B · balanced'**
+  String get set_upSeed3b;
+
+  /// No description provided for @set_upSeed3bSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Balanced quality and resources for everyday use'**
+  String get set_upSeed3bSub;
+
+  /// No description provided for @set_upSeed7b.
+  ///
+  /// In en, this message translates to:
+  /// **'7B · quality'**
+  String get set_upSeed7b;
+
+  /// No description provided for @set_upSeed7bSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Higher quality; more VRAM and time'**
+  String get set_upSeed7bSub;
+
+  /// No description provided for @set_upSeed7bSharp.
+  ///
+  /// In en, this message translates to:
+  /// **'7B · sharp'**
+  String get set_upSeed7bSharp;
+
+  /// No description provided for @set_upSeed7bSharpSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Sharper details for textures'**
+  String get set_upSeed7bSharpSub;
+
+  /// No description provided for @set_upVram.
+  ///
+  /// In en, this message translates to:
+  /// **'VRAM ≥ {n} GB'**
+  String set_upVram(Object n);
+
+  /// No description provided for @set_upProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} / {total} · {speed}/s'**
+  String set_upProgress(Object done, Object total, Object speed);
+
+  /// No description provided for @set_upVramMode.
+  ///
+  /// In en, this message translates to:
+  /// **'VRAM mode'**
+  String get set_upVramMode;
+
+  /// No description provided for @set_upRecommended.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended'**
+  String get set_upRecommended;
+
+  /// No description provided for @set_upLowVram.
+  ///
+  /// In en, this message translates to:
+  /// **'Low VRAM'**
+  String get set_upLowVram;
+
+  /// No description provided for @set_upOffload.
+  ///
+  /// In en, this message translates to:
+  /// **'CPU offload layers'**
+  String get set_upOffload;
+
+  /// No description provided for @set_upOffloadSub.
+  ///
+  /// In en, this message translates to:
+  /// **'More layers save VRAM but run slower and use more RAM'**
+  String get set_upOffloadSub;
+
+  /// No description provided for @set_upTiling.
+  ///
+  /// In en, this message translates to:
+  /// **'VAE tiling'**
+  String get set_upTiling;
+
+  /// No description provided for @set_upTilingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Smaller tiles save VRAM; overlap hides seams'**
+  String get set_upTilingSub;
+
+  /// No description provided for @set_upNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental noise'**
+  String get set_upNoise;
+
+  /// No description provided for @set_upNoiseSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Input {a} · latent {b}; keep 0 for current results'**
+  String set_upNoiseSub(Object a, Object b);
+
+  /// No description provided for @set_upInputNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Input noise'**
+  String get set_upInputNoise;
+
+  /// No description provided for @set_upLatentNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Latent noise'**
+  String get set_upLatentNoise;
+
+  /// No description provided for @set_upExperimental.
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental'**
+  String get set_upExperimental;
+
+  /// No description provided for @set_upRtx.
+  ///
+  /// In en, this message translates to:
+  /// **'RTX Video'**
+  String get set_upRtx;
+
+  /// No description provided for @set_upRtxSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast upscaling with NVIDIA RTX Video, a ~64 MB component.'**
+  String get set_upRtxSub;
+
+  /// No description provided for @set_upRtxName.
+  ///
+  /// In en, this message translates to:
+  /// **'RTX Video Super Resolution'**
+  String get set_upRtxName;
+
+  /// No description provided for @set_upRtxNeeds.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs a compatible RTX GPU and driver'**
+  String get set_upRtxNeeds;
+
+  /// No description provided for @set_upDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Default upscaler'**
+  String get set_upDefault;
+
+  /// No description provided for @set_upDefaultTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Used by “Local upscale” on the generation toolbar; change it from the menu anytime.'**
+  String get set_upDefaultTip;
+
+  /// No description provided for @set_upVramTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of VRAM does not switch models automatically; try 3B, a lower scale, low VRAM mode or VAE tiling.'**
+  String get set_upVramTip;
+
+  /// No description provided for @set_upRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String set_upRemoveTitle(Object name);
+
+  /// No description provided for @set_upRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You will need to download it again to use it.'**
+  String get set_upRemoveBody;
+
+  /// No description provided for @set_brDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Work with other apps on this PC: Krita, external agents and ComfyUI.'**
+  String get set_brDesc;
+
+  /// No description provided for @set_brKritaSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate from Krita; results come back as layers.'**
+  String get set_brKritaSub;
+
+  /// No description provided for @set_brKrita.
+  ///
+  /// In en, this message translates to:
+  /// **'Krita bridge'**
+  String get set_brKrita;
+
+  /// No description provided for @set_brLoopback.
+  ///
+  /// In en, this message translates to:
+  /// **'Listens on 127.0.0.1 only'**
+  String get set_brLoopback;
+
+  /// No description provided for @set_brConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get set_brConnected;
+
+  /// No description provided for @set_brWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for Krita'**
+  String get set_brWaiting;
+
+  /// No description provided for @set_brRegenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'New session'**
+  String get set_brRegenerate;
+
+  /// No description provided for @set_brDiscovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Discovery file'**
+  String get set_brDiscovery;
+
+  /// No description provided for @set_brAgents.
+  ///
+  /// In en, this message translates to:
+  /// **'External agents'**
+  String get set_brAgents;
+
+  /// No description provided for @set_brAgentsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Let local agents such as Claude Code or Codex read and edit parameters and generate.'**
+  String get set_brAgentsSub;
+
+  /// No description provided for @set_brLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local bridge'**
+  String get set_brLocal;
+
+  /// No description provided for @set_brClients.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} agents connected'**
+  String set_brClients(Object n);
+
+  /// No description provided for @set_brNoClients.
+  ///
+  /// In en, this message translates to:
+  /// **'No agents connected'**
+  String get set_brNoClients;
+
+  /// No description provided for @set_brTakeover.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy setup prompt'**
+  String get set_brTakeover;
+
+  /// No description provided for @set_brEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnect'**
+  String get set_brEnd;
+
+  /// No description provided for @set_brActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent activity'**
+  String get set_brActivity;
+
+  /// No description provided for @set_brComfySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Import ComfyUI workflows and run them from Studio.'**
+  String get set_brComfySub;
+
+  /// No description provided for @set_brComfyEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable ComfyUI'**
+  String get set_brComfyEnable;
+
+  /// No description provided for @set_brComfyUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Server address'**
+  String get set_brComfyUrl;
+
+  /// No description provided for @set_brComfyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection failed: {reason} ({when}). Make sure ComfyUI is running and accepts local connections.'**
+  String set_brComfyFailed(Object reason, Object when);
+
+  /// No description provided for @set_brComfyOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected ({when})'**
+  String set_brComfyOk(Object when);
+
+  /// No description provided for @set_brStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get set_brStatus;
+
+  /// No description provided for @set_brAgentsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}'**
+  String set_brAgentsShort(Object n);
+
+  /// No description provided for @set_brOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get set_brOff;
+
+  /// No description provided for @set_brNoResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'No response'**
+  String get set_brNoResponse;
+
+  /// No description provided for @set_brTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridges listen on the loopback address only and are not exposed to the LAN. Proxy settings do not apply.'**
+  String get set_brTip;
+
+  /// No description provided for @set_nwDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy and connectivity.'**
+  String get set_nwDesc;
+
+  /// No description provided for @set_nwProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy'**
+  String get set_nwProxy;
+
+  /// No description provided for @set_nwProxySub.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for NovelAI, Danbooru, GitHub updates and model providers.'**
+  String get set_nwProxySub;
+
+  /// No description provided for @set_nwUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a proxy'**
+  String get set_nwUse;
+
+  /// No description provided for @set_nwMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Mode'**
+  String get set_nwMode;
+
+  /// No description provided for @set_nwSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get set_nwSystem;
+
+  /// No description provided for @set_nwManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get set_nwManual;
+
+  /// No description provided for @set_nwAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get set_nwAddress;
+
+  /// No description provided for @set_nwDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'System proxy: {addr}. Only external requests use it; local bridges and models do not.'**
+  String set_nwDetected(Object addr);
+
+  /// No description provided for @set_nwNoSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'No system proxy detected. Only external requests use the proxy.'**
+  String get set_nwNoSystem;
+
+  /// No description provided for @set_nwCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Connectivity check'**
+  String get set_nwCheck;
+
+  /// No description provided for @set_nwCheckSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Check each service at once to tell network problems from service problems.'**
+  String get set_nwCheckSub;
+
+  /// No description provided for @set_nwNaiImage.
+  ///
+  /// In en, this message translates to:
+  /// **'NovelAI image'**
+  String get set_nwNaiImage;
+
+  /// No description provided for @set_nwNaiApi.
+  ///
+  /// In en, this message translates to:
+  /// **'NovelAI account'**
+  String get set_nwNaiApi;
+
+  /// No description provided for @set_nwDanbooru.
+  ///
+  /// In en, this message translates to:
+  /// **'Danbooru'**
+  String get set_nwDanbooru;
+
+  /// No description provided for @set_nwUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'App updates'**
+  String get set_nwUpdate;
+
+  /// No description provided for @set_nwCheckAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Check all'**
+  String get set_nwCheckAll;
+
+  /// No description provided for @set_nwChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {when}'**
+  String set_nwChecked(Object when);
+
+  /// No description provided for @set_nwViaProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'via proxy'**
+  String get set_nwViaProxy;
+
+  /// No description provided for @set_nwDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'direct'**
+  String get set_nwDirect;
+
+  /// No description provided for @set_nwNeverChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked yet'**
+  String get set_nwNeverChecked;
+
+  /// No description provided for @set_nwFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get set_nwFail;
+
+  /// No description provided for @set_nwTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy changes need a restart; Studio reminds you and never restarts on its own.'**
+  String get set_nwTip;
+
+  /// No description provided for @set_pvDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'What leaves with shared images, and which actions need your confirmation.'**
+  String get set_pvDesc;
+
+  /// No description provided for @set_pvProtect.
+  ///
+  /// In en, this message translates to:
+  /// **'Safeguards'**
+  String get set_pvProtect;
+
+  /// No description provided for @set_pvStrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Strip metadata when sharing'**
+  String get set_pvStrip;
+
+  /// No description provided for @set_pvStripSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Copying or dragging out removes prompt and parameters; the file is unchanged'**
+  String get set_pvStripSub;
+
+  /// No description provided for @set_pvExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm before sending out'**
+  String get set_pvExternal;
+
+  /// No description provided for @set_pvExternalSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask before sending images to other apps or sites'**
+  String get set_pvExternalSub;
+
+  /// No description provided for @set_pvDanger.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm destructive actions'**
+  String get set_pvDanger;
+
+  /// No description provided for @set_pvDangerSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete, clear and overwrite ask first'**
+  String get set_pvDangerSub;
+
+  /// No description provided for @set_pvOverwrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Never overwrite on save'**
+  String get set_pvOverwrite;
+
+  /// No description provided for @set_pvOverwriteSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename automatically when a file exists'**
+  String get set_pvOverwriteSub;
+
+  /// No description provided for @set_pvBlacklist.
+  ///
+  /// In en, this message translates to:
+  /// **'Online gallery blocklist'**
+  String get set_pvBlacklist;
+
+  /// No description provided for @set_pvBlacklistSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Images with these tags are hidden in the online gallery.'**
+  String get set_pvBlacklistSub;
+
+  /// No description provided for @set_pvAddTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Add tag…'**
+  String get set_pvAddTag;
+
+  /// No description provided for @set_pvSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Danbooru blocklist'**
+  String get set_pvSync;
+
+  /// No description provided for @set_pvSyncSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {user} · synced {when}'**
+  String set_pvSyncSub(Object user, Object when);
+
+  /// No description provided for @set_pvSyncNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in as {user} · never synced'**
+  String set_pvSyncNever(Object user);
+
+  /// No description provided for @set_pvSyncSignedOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to Danbooru to sync your account blocklist'**
+  String get set_pvSyncSignedOut;
+
+  /// No description provided for @set_pvSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync now'**
+  String get set_pvSyncNow;
+
+  /// No description provided for @set_pvSyncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get set_pvSyncing;
+
+  /// No description provided for @set_pvAutoSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync on launch'**
+  String get set_pvAutoSync;
+
+  /// No description provided for @set_pvExported.
+  ///
+  /// In en, this message translates to:
+  /// **'What exports include'**
+  String get set_pvExported;
+
+  /// No description provided for @set_pvIncPrefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance, controls and input'**
+  String get set_pvIncPrefs;
+
+  /// No description provided for @set_pvIncRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Safeguards and blocklist'**
+  String get set_pvIncRules;
+
+  /// No description provided for @set_pvIncCred.
+  ///
+  /// In en, this message translates to:
+  /// **'Account credentials'**
+  String get set_pvIncCred;
+
+  /// No description provided for @set_pvIncPaths.
+  ///
+  /// In en, this message translates to:
+  /// **'File paths'**
+  String get set_pvIncPaths;
+
+  /// No description provided for @set_pvIncDrafts.
+  ///
+  /// In en, this message translates to:
+  /// **'Drafts and model bindings'**
+  String get set_pvIncDrafts;
+
+  /// No description provided for @set_pvTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Stripping applies to copy and drag-out only; files saved to disk keep full parameters.'**
+  String get set_pvTip;
+
+  /// No description provided for @set_bkDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Move preferences between devices or start fresh. Every reset backs up first.'**
+  String get set_bkDesc;
+
+  /// No description provided for @set_bkPrefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get set_bkPrefs;
+
+  /// No description provided for @set_bkPrefsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance, controls, input and safeguards. Credentials, paths, drafts and model bindings are never included.'**
+  String get set_bkPrefsSub;
+
+  /// No description provided for @set_bkExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get set_bkExport;
+
+  /// No description provided for @set_bkExportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as studio-preferences.json'**
+  String get set_bkExportSub;
+
+  /// No description provided for @set_bkExportBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Export…'**
+  String get set_bkExportBtn;
+
+  /// No description provided for @set_bkImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get set_bkImport;
+
+  /// No description provided for @set_bkImportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows how many settings will change and backs up first'**
+  String get set_bkImportSub;
+
+  /// No description provided for @set_bkImportBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose file…'**
+  String get set_bkImportBtn;
+
+  /// No description provided for @set_bkUndoImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo last import'**
+  String get set_bkUndoImport;
+
+  /// No description provided for @set_bkUndoImportSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to before the import on {when}'**
+  String set_bkUndoImportSub(Object when);
+
+  /// No description provided for @set_bkNoImport.
+  ///
+  /// In en, this message translates to:
+  /// **'No import yet'**
+  String get set_bkNoImport;
+
+  /// No description provided for @set_bkRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get set_bkRestore;
+
+  /// No description provided for @set_bkOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other profiles'**
+  String get set_bkOther;
+
+  /// No description provided for @set_bkShortcutsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} actions, {m} customized'**
+  String set_bkShortcutsSub(Object n, Object m);
+
+  /// No description provided for @set_bkModelsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Providers, feature models and presets; API keys are excluded by default'**
+  String get set_bkModelsSub;
+
+  /// No description provided for @set_bkCopyConfig.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy config'**
+  String get set_bkCopyConfig;
+
+  /// No description provided for @set_bkReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to defaults'**
+  String get set_bkReset;
+
+  /// No description provided for @set_bkResetSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose what to reset; everything else stays.'**
+  String get set_bkResetSub;
+
+  /// No description provided for @set_bkScopeAppearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance & controls'**
+  String get set_bkScopeAppearance;
+
+  /// No description provided for @set_bkScopeAppearanceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme, font, language, canvas, notifications'**
+  String get set_bkScopeAppearanceSub;
+
+  /// No description provided for @set_bkScopeInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Input & autocomplete'**
+  String get set_bkScopeInput;
+
+  /// No description provided for @set_bkScopeInputSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheel weight, related tags, autocomplete'**
+  String get set_bkScopeInputSub;
+
+  /// No description provided for @set_bkScopeProtect.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & generation safeguards'**
+  String get set_bkScopeProtect;
+
+  /// No description provided for @set_bkScopeProtectSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata, confirmations, cost warning, pacing'**
+  String get set_bkScopeProtectSub;
+
+  /// No description provided for @set_bkScopeShortcuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Shortcuts'**
+  String get set_bkScopeShortcuts;
+
+  /// No description provided for @set_bkScopeShortcutsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'All {n} actions'**
+  String set_bkScopeShortcutsSub(Object n);
+
+  /// No description provided for @set_bkResetBtn.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset selected…'**
+  String get set_bkResetBtn;
+
+  /// No description provided for @set_bkResetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Backs up first; can be undone'**
+  String get set_bkResetHint;
+
+  /// No description provided for @set_bkResetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset the selected settings?'**
+  String get set_bkResetTitle;
+
+  /// No description provided for @set_bkResetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{scopes} go back to defaults. Current settings are backed up first.'**
+  String set_bkResetBody(Object scopes);
+
+  /// No description provided for @set_bkAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic backups'**
+  String get set_bkAuto;
+
+  /// No description provided for @set_bkAutoSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5 kept'**
+  String get set_bkAutoSub;
+
+  /// No description provided for @set_bkKindImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Before import'**
+  String get set_bkKindImport;
+
+  /// No description provided for @set_bkKindReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Before reset'**
+  String get set_bkKindReset;
+
+  /// No description provided for @set_bkKindUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Before update'**
+  String get set_bkKindUpgrade;
+
+  /// No description provided for @set_bkNoBackups.
+  ///
+  /// In en, this message translates to:
+  /// **'No backups yet'**
+  String get set_bkNoBackups;
+
+  /// No description provided for @set_bkRestoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the “{name}” backup?'**
+  String set_bkRestoreTitle(Object name);
+
+  /// No description provided for @set_bkRestoreBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Current settings are backed up first so you can switch back.'**
+  String get set_bkRestoreBody;
+
+  /// No description provided for @set_abDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Version, updates and diagnostics.'**
+  String get set_abDesc;
+
+  /// No description provided for @set_abNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} available'**
+  String set_abNew(Object version);
+
+  /// No description provided for @set_abLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get set_abLatest;
+
+  /// No description provided for @set_abChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking for updates…'**
+  String get set_abChecking;
+
+  /// No description provided for @set_abCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update check failed'**
+  String get set_abCheckFailed;
+
+  /// No description provided for @set_abDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {pct}'**
+  String set_abDownloading(Object pct);
+
+  /// No description provided for @set_abChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Checked {when}'**
+  String set_abChecked(Object when);
+
+  /// No description provided for @set_abNotes.
+  ///
+  /// In en, this message translates to:
+  /// **'What’s new in {version}'**
+  String set_abNotes(Object version);
+
+  /// No description provided for @set_abInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Download and install'**
+  String get set_abInstall;
+
+  /// No description provided for @set_abChangelog.
+  ///
+  /// In en, this message translates to:
+  /// **'Full changelog'**
+  String get set_abChangelog;
+
+  /// No description provided for @set_abPrerelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Include pre-releases'**
+  String get set_abPrerelease;
+
+  /// No description provided for @set_abCheck.
+  ///
+  /// In en, this message translates to:
+  /// **'Check for updates'**
+  String get set_abCheck;
+
+  /// No description provided for @set_abDiag.
+  ///
+  /// In en, this message translates to:
+  /// **'Diagnostics'**
+  String get set_abDiag;
+
+  /// No description provided for @set_abLog.
+  ///
+  /// In en, this message translates to:
+  /// **'Write log files'**
+  String get set_abLog;
+
+  /// No description provided for @set_abLogSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn on when troubleshooting; logs never contain API keys or credentials'**
+  String get set_abLogSub;
+
+  /// No description provided for @set_abLogDir.
+  ///
+  /// In en, this message translates to:
+  /// **'Log folder'**
+  String get set_abLogDir;
+
+  /// No description provided for @set_abCopyDiag.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy diagnostics'**
+  String get set_abCopyDiag;
+
+  /// No description provided for @set_abCopyDiagSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Version, system, GPU and service status for bug reports'**
+  String get set_abCopyDiagSub;
+
+  /// No description provided for @set_abProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get set_abProject;
+
+  /// No description provided for @set_abRepo.
+  ///
+  /// In en, this message translates to:
+  /// **'Source code'**
+  String get set_abRepo;
+
+  /// No description provided for @set_abUpstream.
+  ///
+  /// In en, this message translates to:
+  /// **'Original project'**
+  String get set_abUpstream;
+
+  /// No description provided for @set_abUpstreamSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Built on NAI Launcher; original credits retained'**
+  String get set_abUpstreamSub;
+
+  /// No description provided for @set_abFonts.
+  ///
+  /// In en, this message translates to:
+  /// **'Fonts & assets'**
+  String get set_abFonts;
+
+  /// No description provided for @set_abLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Licenses'**
+  String get set_abLicenses;
+
+  /// No description provided for @set_abView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get set_abView;
+
+  /// No description provided for @set_abSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get set_abSystem;
+
+  /// No description provided for @set_srQuoted.
+  ///
+  /// In en, this message translates to:
+  /// **'“{query}”'**
+  String set_srQuoted(Object query);
+
+  /// No description provided for @set_srBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Anlas balance'**
+  String get set_srBalance;
+
+  /// No description provided for @set_srSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription & Anlas'**
+  String get set_srSubscription;
+
+  /// No description provided for @set_agEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get set_agEnable;
+
+  /// No description provided for @set_agDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get set_agDisable;
+
+  /// No description provided for @set_listSep.
+  ///
+  /// In en, this message translates to:
+  /// **', '**
+  String get set_listSep;
+
+  /// No description provided for @set_on.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get set_on;
+
+  /// No description provided for @set_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get set_off;
+
+  /// No description provided for @set_unitSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'s'**
+  String get set_unitSeconds;
 }
 
 class _AppLocalizationsDelegate

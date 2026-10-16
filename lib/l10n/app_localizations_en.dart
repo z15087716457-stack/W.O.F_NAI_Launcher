@@ -17489,4 +17489,2662 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rag_useRuntime => 'Use existing runtime';
+
+  @override
+  String get set_title => 'Settings';
+
+  @override
+  String get set_search => 'Search settings';
+
+  @override
+  String get set_searchResults => 'Search results';
+
+  @override
+  String set_searchCount(Object count) {
+    return '$count results';
+  }
+
+  @override
+  String get set_searchHint =>
+      'Toggles and values can be changed right here; use the arrow to jump to the setting.';
+
+  @override
+  String get set_searchKeys => 'select';
+
+  @override
+  String get set_searchJump => 'open';
+
+  @override
+  String set_searchEmpty(Object query) {
+    return 'Nothing matches “$query”';
+  }
+
+  @override
+  String get set_searchEmptyHint =>
+      'Try “proxy”, “save”, “shortcut” or a folder path';
+
+  @override
+  String get set_goTo => 'Go to setting';
+
+  @override
+  String get set_hasUpdate => 'Update';
+
+  @override
+  String get set_groupPersonal => 'Personal';
+
+  @override
+  String get set_groupCreate => 'Create';
+
+  @override
+  String get set_groupIntelligence => 'Intelligence';
+
+  @override
+  String get set_groupConnect => 'Connect';
+
+  @override
+  String get set_groupSystem => 'System';
+
+  @override
+  String get set_pageOverview => 'Overview';
+
+  @override
+  String get set_pageAccount => 'Account';
+
+  @override
+  String get set_pageAppearance => 'Appearance';
+
+  @override
+  String get set_pageCanvas => 'Canvas & browsing';
+
+  @override
+  String get set_pageShortcuts => 'Shortcuts';
+
+  @override
+  String get set_pageGeneration => 'Generation & Anlas';
+
+  @override
+  String get set_pageStorage => 'Storage & gallery';
+
+  @override
+  String get set_pageDictionaries => 'Dictionaries & cache';
+
+  @override
+  String get set_pageModels => 'Models & APIs';
+
+  @override
+  String get set_pageAgent => 'NAI Agent';
+
+  @override
+  String get set_pageRag => 'Semantic search';
+
+  @override
+  String get set_pageUpscale => 'Local upscale';
+
+  @override
+  String get set_pageBridges => 'Bridges & integrations';
+
+  @override
+  String get set_pageNetwork => 'Network & proxy';
+
+  @override
+  String get set_pagePrivacy => 'Privacy & safeguards';
+
+  @override
+  String get set_pageBackup => 'Backup & reset';
+
+  @override
+  String get set_pageAbout => 'About';
+
+  @override
+  String get set_resetDefault => 'Reset to default';
+
+  @override
+  String get set_resetPage => 'Reset this page';
+
+  @override
+  String get set_needsRestart => 'Restart';
+
+  @override
+  String get set_isNew => 'New';
+
+  @override
+  String get set_defaultTag => 'Default';
+
+  @override
+  String get set_readOnly => 'Read-only';
+
+  @override
+  String get set_cancel => 'Cancel';
+
+  @override
+  String get set_save => 'Save';
+
+  @override
+  String get set_discard => 'Discard';
+
+  @override
+  String get set_later => 'Later';
+
+  @override
+  String get set_undo => 'Undo';
+
+  @override
+  String get set_open => 'Open';
+
+  @override
+  String get set_choose => 'Choose';
+
+  @override
+  String get set_change => 'Change';
+
+  @override
+  String get set_clear => 'Clear';
+
+  @override
+  String get set_delete => 'Delete';
+
+  @override
+  String get set_copy => 'Copy';
+
+  @override
+  String get set_more => 'More';
+
+  @override
+  String get set_refresh => 'Refresh';
+
+  @override
+  String get set_retry => 'Retry';
+
+  @override
+  String get set_test => 'Test connection';
+
+  @override
+  String get set_testing => 'Checking…';
+
+  @override
+  String get set_importIt => 'Import';
+
+  @override
+  String get set_exportIt => 'Export';
+
+  @override
+  String get set_install => 'Install';
+
+  @override
+  String get set_download => 'Download';
+
+  @override
+  String get set_resume => 'Resume';
+
+  @override
+  String get set_pause => 'Pause';
+
+  @override
+  String get set_rebuild => 'Rebuild';
+
+  @override
+  String get set_login => 'Sign in';
+
+  @override
+  String get set_adjust => 'Adjust';
+
+  @override
+  String get set_collapse => 'Collapse';
+
+  @override
+  String get set_notSet => 'Not set';
+
+  @override
+  String get set_defaultLocation => 'Default location';
+
+  @override
+  String get set_builtinSound => 'Built-in sound';
+
+  @override
+  String get set_justNow => 'just now';
+
+  @override
+  String set_minutesAgo(Object n) {
+    return '$n min ago';
+  }
+
+  @override
+  String set_todayAt(Object time) {
+    return 'Today $time';
+  }
+
+  @override
+  String get set_yesterday => 'Yesterday';
+
+  @override
+  String set_secondsAgo(Object n) {
+    return '$n s ago';
+  }
+
+  @override
+  String set_savedChange(Object title, Object from, Object to) {
+    return 'Saved · $title $from → $to';
+  }
+
+  @override
+  String get set_restartBanner =>
+      'Saved. Restart Studio to apply; running generations are not affected.';
+
+  @override
+  String get set_restartNow => 'Restart now';
+
+  @override
+  String get set_unsavedInstructions => 'Unsaved changes to instructions';
+
+  @override
+  String get set_leaveTitle => 'Discard unsaved changes?';
+
+  @override
+  String get set_leaveBody =>
+      'The Agent instructions are not saved. Leaving this page discards them.';
+
+  @override
+  String set_resetPageTitle(Object page) {
+    return 'Reset “$page” to defaults?';
+  }
+
+  @override
+  String set_resetPageBody(Object count) {
+    return '$count changed settings on this page go back to defaults. You can undo from Overview.';
+  }
+
+  @override
+  String get set_ovDesc =>
+      'Status of your account, storage, connections and AI services. Items that need you come first; click a card to open its settings.';
+
+  @override
+  String get set_ovSwitchAccount => 'Switch account';
+
+  @override
+  String get set_ovTodayUsed => 'Used today';
+
+  @override
+  String set_ovMonthly(Object n) {
+    return 'Monthly allowance $n';
+  }
+
+  @override
+  String set_ovWarnAt(Object n) {
+    return 'High-cost warning ≥ $n Anlas';
+  }
+
+  @override
+  String get set_ovWarnOff => 'High-cost warning off';
+
+  @override
+  String set_ovRenews(Object date) {
+    return 'Renews $date';
+  }
+
+  @override
+  String get set_ovSignedOut => 'Not signed in';
+
+  @override
+  String get set_ovAttention => 'Needs attention';
+
+  @override
+  String get set_ovAllClear => 'All good';
+
+  @override
+  String set_attUpdate(Object version) {
+    return 'Version $version is available';
+  }
+
+  @override
+  String set_attRagPaused(Object source) {
+    return '$source index paused';
+  }
+
+  @override
+  String set_attRagPausedSub(Object done, Object total) {
+    return '$done / $total, partly searchable';
+  }
+
+  @override
+  String set_attBridgeDown(Object name) {
+    return '$name is not responding';
+  }
+
+  @override
+  String set_attCheckedAt(Object detail, Object when) {
+    return '$detail · checked $when';
+  }
+
+  @override
+  String set_attCredential(Object name) {
+    return 'Credentials for “$name” expired';
+  }
+
+  @override
+  String get set_attCredentialSub => 'Update them to switch to this account';
+
+  @override
+  String set_attDiskLow(Object disk) {
+    return 'Low disk space on $disk';
+  }
+
+  @override
+  String set_attDiskLowSub(Object size) {
+    return '$size left; auto-save may fail';
+  }
+
+  @override
+  String set_attProvider(Object name) {
+    return '$name unreachable';
+  }
+
+  @override
+  String get set_attProviderSub => 'Translation falls back to another provider';
+
+  @override
+  String get set_attView => 'View';
+
+  @override
+  String get set_attGo => 'Check';
+
+  @override
+  String get set_attUpdateCred => 'Update';
+
+  @override
+  String get set_tileStorage => 'Storage';
+
+  @override
+  String set_tileImages(Object n) {
+    return '$n images';
+  }
+
+  @override
+  String set_tileSaveTo(Object path) {
+    return 'Saving to $path';
+  }
+
+  @override
+  String get set_tileConnect => 'Connections';
+
+  @override
+  String set_tileOnline(Object n) {
+    return '$n online';
+  }
+
+  @override
+  String get set_tileKrita => 'Krita connected';
+
+  @override
+  String get set_tileKritaOff => 'Krita not connected';
+
+  @override
+  String set_tileAgents(Object n) {
+    return '$n external agents';
+  }
+
+  @override
+  String get set_tileComfyDown => 'ComfyUI not responding';
+
+  @override
+  String get set_tileComfyOk => 'ComfyUI ready';
+
+  @override
+  String get set_tileComfyOff => 'ComfyUI off';
+
+  @override
+  String get set_tileModels => 'Models & APIs';
+
+  @override
+  String set_tileTranslateVia(Object ms) {
+    return 'Prompt translation · $ms';
+  }
+
+  @override
+  String set_tileAgentModel(Object model) {
+    return 'Agent · $model';
+  }
+
+  @override
+  String set_tileProviders(Object p, Object m) {
+    return '$p providers · $m models';
+  }
+
+  @override
+  String get set_tileNoModel => 'Not configured';
+
+  @override
+  String get set_tileRag => 'Semantic search';
+
+  @override
+  String get set_tileReady => 'ready';
+
+  @override
+  String set_tileRagDone(Object names) {
+    return '$names done';
+  }
+
+  @override
+  String set_tileRagPaused(Object name, Object pct) {
+    return '$name $pct · paused';
+  }
+
+  @override
+  String set_tileRagBuilding(Object name, Object pct) {
+    return '$name $pct · building';
+  }
+
+  @override
+  String set_tileRagEmpty(Object name) {
+    return '$name not indexed yet';
+  }
+
+  @override
+  String set_tileRagError(Object name) {
+    return '$name indexing failed';
+  }
+
+  @override
+  String get set_tileUpscale => 'Local upscale';
+
+  @override
+  String set_tileUpscaleModels(Object n) {
+    return '$n models ready';
+  }
+
+  @override
+  String set_tileDefaultIs(Object name) {
+    return '$name (default)';
+  }
+
+  @override
+  String get set_tileSeedMissing => 'SeedVR2 not installed';
+
+  @override
+  String get set_tileSeedReady => 'SeedVR2 installed';
+
+  @override
+  String get set_tileProtect => 'Safeguards';
+
+  @override
+  String set_tileProtectOn(Object on, Object all) {
+    return '$on of $all on';
+  }
+
+  @override
+  String set_tileInterval(Object s, Object p) {
+    return 'Interval ${s}s ± $p%';
+  }
+
+  @override
+  String get set_tileIntervalOff => 'No request interval';
+
+  @override
+  String get set_recent => 'Recent changes';
+
+  @override
+  String get set_recentSub => 'Auto-saved · undoable';
+
+  @override
+  String get set_recentEmpty => 'No changes yet';
+
+  @override
+  String get set_quick => 'Quick toggles';
+
+  @override
+  String get set_quickSub => 'Change here';
+
+  @override
+  String get set_quickDark => 'Dark mode';
+
+  @override
+  String get set_quickChannel => 'Canvas visual channel';
+
+  @override
+  String set_searchTip(Object keys) {
+    return 'Press $keys to search any setting and change it right in the results.';
+  }
+
+  @override
+  String get set_accDesc =>
+      'Manage NovelAI accounts, default sign-in and subscription.';
+
+  @override
+  String get set_accSaved => 'Saved accounts';
+
+  @override
+  String get set_accSavedSub =>
+      'Switch with one click. Credentials stay on this device and are never exported.';
+
+  @override
+  String get set_accCurrent => 'Current';
+
+  @override
+  String get set_accInUse => 'In use';
+
+  @override
+  String get set_accSwitch => 'Switch';
+
+  @override
+  String get set_accEmail => 'Email';
+
+  @override
+  String get set_accToken => 'Token';
+
+  @override
+  String set_accRenews(Object date) {
+    return 'renews $date';
+  }
+
+  @override
+  String set_accLastUsed(Object date) {
+    return 'last used $date';
+  }
+
+  @override
+  String get set_accNoSub => 'No subscription';
+
+  @override
+  String get set_accExpired => 'Credentials expired';
+
+  @override
+  String get set_accEdit => 'Edit profile';
+
+  @override
+  String get set_accUpdate => 'Update credentials';
+
+  @override
+  String get set_accMakeDefault => 'Make default';
+
+  @override
+  String get set_accDelete => 'Remove account';
+
+  @override
+  String set_accDeleteTitle(Object name) {
+    return 'Remove “$name”?';
+  }
+
+  @override
+  String get set_accDeleteBody =>
+      'Only the saved credentials on this device are removed. Your NovelAI account is unaffected.';
+
+  @override
+  String get set_accAdd => 'Add account';
+
+  @override
+  String get set_accAddHint => 'Email and password, or a persistent token';
+
+  @override
+  String get set_accLogin => 'Sign-in';
+
+  @override
+  String get set_accDefault => 'Default account';
+
+  @override
+  String get set_accDefaultSub => 'Preselected on the sign-in screen';
+
+  @override
+  String get set_accAutoLogin => 'Sign in automatically';
+
+  @override
+  String get set_accAutoLoginSub =>
+      'Reuse the last session; when off, Studio opens on the sign-in screen';
+
+  @override
+  String get set_accSub => 'Subscription';
+
+  @override
+  String set_accMonthly(Object n) {
+    return '$n Anlas / month';
+  }
+
+  @override
+  String set_accRemaining(Object n) {
+    return '$n left';
+  }
+
+  @override
+  String set_accResets(Object date) {
+    return 'resets $date';
+  }
+
+  @override
+  String get set_accPortal => 'Open NovelAI account page';
+
+  @override
+  String get set_accSwitchHint =>
+      'Switching keeps your draft and canvas; queued generations finish on the original account.';
+
+  @override
+  String get set_apDesc =>
+      'Theme, text and notifications. Changes save instantly and can be undone.';
+
+  @override
+  String get set_apTheme => 'Theme';
+
+  @override
+  String get set_apThemeSub =>
+      'Used by the launch screen, sign-in and every page.';
+
+  @override
+  String get set_apLight => 'Light';
+
+  @override
+  String get set_apDark => 'Dark';
+
+  @override
+  String get set_apSystem => 'System';
+
+  @override
+  String get set_apSystemSub => 'Follows the Windows setting';
+
+  @override
+  String get set_apText => 'Text';
+
+  @override
+  String get set_apFont => 'Interface font';
+
+  @override
+  String get set_apFontSub => 'Numbers and code always use Geist Mono';
+
+  @override
+  String get set_apScale => 'Settings & dialog text size';
+
+  @override
+  String get set_apScaleSub =>
+      'Affects settings and dialogs only, not the canvas';
+
+  @override
+  String get set_apSampleTitle => 'Heading · Generation finished';
+
+  @override
+  String get set_apSampleBody =>
+      'Body · Saved to the local gallery; keep refining your prompt.';
+
+  @override
+  String get set_apSampleNote => 'Caption · Drag the slider to preview.';
+
+  @override
+  String get set_apLanguage => 'Language';
+
+  @override
+  String get set_apLanguageSub => 'Applies immediately';
+
+  @override
+  String get set_apMotion => 'Motion & sound';
+
+  @override
+  String get set_apReduceMotion => 'Reduce motion';
+
+  @override
+  String get set_apReduceMotionSub =>
+      'Turns off canvas fly-to, zoom and panel transitions; the visual channel stops moving';
+
+  @override
+  String get set_apSound => 'Completion sound';
+
+  @override
+  String get set_apSoundSub => 'Plays when a batch finishes';
+
+  @override
+  String get set_apSoundFile => 'Sound file';
+
+  @override
+  String get set_apPreviewSound => 'Play';
+
+  @override
+  String get set_apNotify => 'Notifications';
+
+  @override
+  String get set_apNotifySub =>
+      'Toasts appear top-right and fade after 3 seconds';
+
+  @override
+  String get set_apNotifyPreview => 'Preview';
+
+  @override
+  String get set_apPreview => 'Preview';
+
+  @override
+  String get set_apCurrent => 'Current';
+
+  @override
+  String set_apThemeTip(Object keys) {
+    return 'Press $keys to switch light and dark anytime.';
+  }
+
+  @override
+  String get set_cvDesc =>
+      'How history, the viewer and the infinite canvas behave.';
+
+  @override
+  String get set_cvBrowse => 'Browsing';
+
+  @override
+  String get set_cvHistoryClick => 'When clicking a history thumbnail';
+
+  @override
+  String get set_cvOpenDetail => 'Open details';
+
+  @override
+  String get set_cvOpenDetailSub => 'Opens the image viewer for a closer look';
+
+  @override
+  String get set_cvLinked => 'Linked preview';
+
+  @override
+  String get set_cvLinkedSub =>
+      'Jumps to it on the canvas without opening the viewer';
+
+  @override
+  String get set_cvViewer => 'Show results in';
+
+  @override
+  String get set_cvCanvas => 'Infinite canvas';
+
+  @override
+  String get set_cvCanvasSub =>
+      'Batches in a column; pan, zoom and pin to compare';
+
+  @override
+  String get set_cvSimple => 'Simple viewer';
+
+  @override
+  String get set_cvSimpleSub => 'Only the latest image; lightest on resources';
+
+  @override
+  String get set_cvCanvasSec => 'Canvas';
+
+  @override
+  String get set_cvLock => 'Lock canvas view';
+
+  @override
+  String get set_cvLockSub => 'New images do not move the view';
+
+  @override
+  String get set_cvFill => 'Zoom new images to fill';
+
+  @override
+  String get set_cvFillSub => 'Fit the visible area instead of actual pixels';
+
+  @override
+  String get set_cvChannel => 'Visual channel';
+
+  @override
+  String get set_cvChannelSub =>
+      'Themed decoration along the canvas; scrolling through history passes each theme.';
+
+  @override
+  String get set_cvMode => 'Mode';
+
+  @override
+  String get set_cvMinTwo => 'Keep at least two themes in random mode.';
+
+  @override
+  String set_cvSession(Object order) {
+    return 'This session: $order';
+  }
+
+  @override
+  String get set_cvLevel => 'Intensity';
+
+  @override
+  String get set_cvRuler => 'Time ruler';
+
+  @override
+  String get set_cvRulerSub => 'Batch times, date dividers and the side ruler';
+
+  @override
+  String get set_cvMotion => 'Idle motion';
+
+  @override
+  String get set_cvMotionSub =>
+      'Pauses while generating or when reduce motion is on';
+
+  @override
+  String get set_cvOps => 'Canvas controls';
+
+  @override
+  String get set_cvOpScroll => 'Scroll';
+
+  @override
+  String get set_cvOpPan => 'Pan sideways';
+
+  @override
+  String get set_cvOpZoom => 'Zoom';
+
+  @override
+  String get set_cvOpMove => 'Move view';
+
+  @override
+  String get set_cvOpAll => 'Overview';
+
+  @override
+  String get set_cvOpHome => 'Latest batch';
+
+  @override
+  String get set_cvWheel => 'Wheel';
+
+  @override
+  String get set_cvChannelTip =>
+      'The gear on the canvas edits the same visual channel settings.';
+
+  @override
+  String get set_scDesc =>
+      'Grouped by page. Click a shortcut to record a new one; duplicates on the same page turn red with a one-click fix.';
+
+  @override
+  String get set_scSearch => 'Search actions or keys, e.g. Ctrl+S';
+
+  @override
+  String get set_scAll => 'All';
+
+  @override
+  String get set_scKeyboard => 'Keyboard map';
+
+  @override
+  String get set_scKeyboardSub =>
+      'Click a key to filter the list. Blue keys are taken, red keys conflict.';
+
+  @override
+  String get set_scNoMod => 'None';
+
+  @override
+  String set_scLayer(Object context, Object mod) {
+    return '$context · holding $mod';
+  }
+
+  @override
+  String set_scLayerNone(Object context) {
+    return '$context · no modifier';
+  }
+
+  @override
+  String get set_scAction => 'Action';
+
+  @override
+  String get set_scKeys => 'Shortcut';
+
+  @override
+  String get set_scDefault => 'Default';
+
+  @override
+  String set_scDefaultIs(Object keys) {
+    return 'Default $keys';
+  }
+
+  @override
+  String set_scConflict(Object name) {
+    return 'Conflicts with “$name”';
+  }
+
+  @override
+  String get set_scRecording => 'Press a new combination…';
+
+  @override
+  String get set_scRecordHint => 'Esc cancels · Backspace clears';
+
+  @override
+  String get set_scRecord => 'Record';
+
+  @override
+  String get set_scClear => 'Clear';
+
+  @override
+  String get set_scDisplay => 'Display';
+
+  @override
+  String get set_scEnabled => 'Enable shortcuts';
+
+  @override
+  String get set_scInTooltips => 'Show in tooltips';
+
+  @override
+  String get set_scInMenus => 'Show in menus';
+
+  @override
+  String get set_scBadges => 'Number badges on navigation';
+
+  @override
+  String get set_scConflicts => 'Conflicts';
+
+  @override
+  String set_scConflictCount(Object n) {
+    return '$n';
+  }
+
+  @override
+  String set_scConflictLine(Object keys) {
+    return '$keys is used twice';
+  }
+
+  @override
+  String set_scConflictSub(Object context, Object a, Object b) {
+    return '$context: $a and $b. Neither fires while they conflict.';
+  }
+
+  @override
+  String set_scFix(Object name, Object keys) {
+    return 'Reset $name to $keys';
+  }
+
+  @override
+  String get set_scNoConflict => 'No conflicts';
+
+  @override
+  String get set_scConfig => 'Shortcut profile';
+
+  @override
+  String get set_scResetAll => 'Reset all';
+
+  @override
+  String get set_scResetAllTitle => 'Reset all shortcuts?';
+
+  @override
+  String set_scResetAllBody(Object n) {
+    return '$n customized shortcuts will be restored.';
+  }
+
+  @override
+  String get set_scHelp => 'Shortcut help';
+
+  @override
+  String set_scHelpTip(Object key) {
+    return 'Press $key on any page to see its shortcuts.';
+  }
+
+  @override
+  String get set_scEmpty => 'No matching shortcuts';
+
+  @override
+  String get set_gnDesc =>
+      'Control Anlas spending, request pacing and prompt input helpers.';
+
+  @override
+  String get set_gnCost => 'Anlas safeguard';
+
+  @override
+  String get set_gnCostSub =>
+      'Ask before sending a request that costs more than the threshold.';
+
+  @override
+  String get set_gnWarn => 'High-cost warning';
+
+  @override
+  String get set_gnWarnSub => 'Confirm above the threshold';
+
+  @override
+  String get set_gnThreshold => 'Threshold';
+
+  @override
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  ) {
+    return 'Current: $model · $w×$h · $steps steps · $n per request';
+  }
+
+  @override
+  String get set_gnWillWarn => 'Will warn';
+
+  @override
+  String get set_gnNoWarn => 'No warning';
+
+  @override
+  String get set_gnFree => 'Free';
+
+  @override
+  String get set_gnPace => 'Request pacing';
+
+  @override
+  String get set_gnPaceSub =>
+      'Wait between consecutive requests to ease server load.';
+
+  @override
+  String get set_gnLimit => 'Limit request interval';
+
+  @override
+  String get set_gnInterval => 'Interval';
+
+  @override
+  String get set_gnJitter => 'Random jitter';
+
+  @override
+  String get set_gnJitterSub => 'Randomly vary the interval';
+
+  @override
+  String get set_gnTimeline =>
+      'With these settings, 10 requests are spaced like this';
+
+  @override
+  String get set_gnInput => 'Prompt input';
+
+  @override
+  String get set_gnWheel => 'Adjust weight with the wheel';
+
+  @override
+  String get set_gnWheelSub => 'Scroll over a tag to change its weight';
+
+  @override
+  String get set_gnNoKey => 'No key';
+
+  @override
+  String get set_gnRelated => 'Related tag suggestions';
+
+  @override
+  String get set_gnRelatedSub => 'Suggest tags that often appear together';
+
+  @override
+  String get set_gnRag => 'Semantic tag suggestions';
+
+  @override
+  String get set_gnRagSub => 'Context-aware suggestions from Semantic search';
+
+  @override
+  String get set_gnReady => 'Ready';
+
+  @override
+  String get set_gnNotReady => 'Not ready';
+
+  @override
+  String get set_gnGoSettings => 'Settings';
+
+  @override
+  String get set_gnTranslate => 'Prompt translation';
+
+  @override
+  String get set_gnTranslateSub => 'Model used to translate prompts';
+
+  @override
+  String get set_gnToday => 'Today';
+
+  @override
+  String get set_gnUsed => 'Anlas used';
+
+  @override
+  String get set_gnNow => 'now';
+
+  @override
+  String get set_gnWarned => 'High-cost warnings';
+
+  @override
+  String set_gnTimes(Object n) {
+    return '$n×';
+  }
+
+  @override
+  String get set_gnMaxSingle => 'Largest single request';
+
+  @override
+  String get set_gnFreeTip =>
+      'Opus free generations are already excluded; the threshold only counts what will be charged.';
+
+  @override
+  String get set_stDesc =>
+      'Where images are saved, which folders the gallery reads, and cleanup.';
+
+  @override
+  String get set_stUsage => 'Usage';
+
+  @override
+  String set_stFree(Object disk, Object size) {
+    return '$size free on $disk';
+  }
+
+  @override
+  String get set_stRecount => 'Recount';
+
+  @override
+  String get set_stCounting => 'Counting…';
+
+  @override
+  String get set_stImages => 'Images';
+
+  @override
+  String get set_stUpscaleModels => 'Upscale models';
+
+  @override
+  String get set_stVibes => 'Vibe library';
+
+  @override
+  String get set_stThumbs => 'Thumbnail cache';
+
+  @override
+  String get set_stRag => 'Semantic index';
+
+  @override
+  String get set_stDict => 'Dictionaries';
+
+  @override
+  String get set_stAgent => 'Agent';
+
+  @override
+  String get set_stSave => 'Saving';
+
+  @override
+  String get set_stSavePath => 'Image folder';
+
+  @override
+  String get set_stAutoSave => 'Auto-save';
+
+  @override
+  String get set_stAutoSaveSub =>
+      'Write images to disk as soon as they finish; when off they stay on the canvas and in history';
+
+  @override
+  String get set_stAssets => 'Assets & display';
+
+  @override
+  String get set_stVibePath => 'Vibe library folder';
+
+  @override
+  String get set_stQuality => 'Gallery thumbnail quality';
+
+  @override
+  String get set_stQualitySub => 'Display quality of thumbnails';
+
+  @override
+  String get set_stHigh => 'High';
+
+  @override
+  String get set_stStandard => 'Standard';
+
+  @override
+  String get set_stRoots => 'Gallery folders';
+
+  @override
+  String get set_stRootsSub =>
+      'Any folder can be browsed and searched in the gallery; auto-save does not write there.';
+
+  @override
+  String get set_stPrimary => 'Main';
+
+  @override
+  String set_stCount(Object n) {
+    return '$n';
+  }
+
+  @override
+  String get set_stAddFolder => 'Add folder';
+
+  @override
+  String get set_stImportIndex => 'Import tag index (.jsonl)';
+
+  @override
+  String set_stLastScan(Object when, Object n) {
+    return 'Last scan $when · $n images';
+  }
+
+  @override
+  String get set_stMaintain => 'Maintenance';
+
+  @override
+  String get set_stRescan => 'Rescan gallery';
+
+  @override
+  String get set_stRescanSub =>
+      'Find missing files, add new ones and retry unread metadata';
+
+  @override
+  String get set_stScan => 'Scan';
+
+  @override
+  String get set_stScanning => 'Scanning…';
+
+  @override
+  String get set_stCleanThumbs => 'Clean thumbnail cache';
+
+  @override
+  String get set_stCleanThumbsSub =>
+      'Removes least-recently-used thumbnails over the limit; originals are untouched';
+
+  @override
+  String get set_stClean => 'Clean';
+
+  @override
+  String get set_stCleanTitle => 'Clean thumbnail cache?';
+
+  @override
+  String get set_stCleanBody =>
+      'Thumbnails over the limit are deleted and rebuilt when needed. Originals are not touched.';
+
+  @override
+  String get set_stAppData => 'App data folder';
+
+  @override
+  String get set_stAppDataSub =>
+      'Databases for accounts, history and blocks; restart after changing';
+
+  @override
+  String get set_stOpenFolders => 'Open folders';
+
+  @override
+  String get set_stLogs => 'Logs';
+
+  @override
+  String get set_stAppDataShort => 'App data';
+
+  @override
+  String get set_stDeleteTip =>
+      'Move or delete single images in the gallery; the confirmation rules in Privacy apply.';
+
+  @override
+  String get set_stRemoveRoot => 'Remove this folder';
+
+  @override
+  String get set_dcDesc =>
+      'Tag data and caches. Clean up here if autocomplete misbehaves.';
+
+  @override
+  String get set_dcTags => 'Tag dictionary';
+
+  @override
+  String get set_dcTagsSub =>
+      'Local data for autocomplete, tag translation and suggestions.';
+
+  @override
+  String get set_dcBase => 'Base dictionary';
+
+  @override
+  String set_dcBaseValue(Object n, Object version) {
+    return '$n tags · data $version';
+  }
+
+  @override
+  String get set_dcCooc => 'Co-occurrence';
+
+  @override
+  String get set_dcCoocSub => 'Used to suggest tags that appear together';
+
+  @override
+  String set_dcEntries(Object n) {
+    return '$n entries';
+  }
+
+  @override
+  String get set_dcTranslate => 'Tag translation';
+
+  @override
+  String get set_dcTranslateSub => 'Fills in translations the dictionary lacks';
+
+  @override
+  String get set_dcCaches => 'Caches';
+
+  @override
+  String get set_dcCachesSub =>
+      'Cleared data is fetched again when needed; images and settings are unaffected.';
+
+  @override
+  String get set_dcDanbooru => 'Danbooru cache';
+
+  @override
+  String get set_dcDanbooruSub => 'Online gallery and tag wiki responses';
+
+  @override
+  String get set_dcTranslation => 'AI translation cache';
+
+  @override
+  String get set_dcTranslationSub => 'Tags and prompts already translated';
+
+  @override
+  String set_dcCacheSize(Object n, Object size) {
+    return '$n · $size';
+  }
+
+  @override
+  String set_dcClearTitle(Object name) {
+    return 'Clear $name?';
+  }
+
+  @override
+  String get set_dcClearBody => 'It will be fetched again when needed.';
+
+  @override
+  String get set_dcStats => 'Cache statistics';
+
+  @override
+  String get set_dcL1 => 'L1 memory';
+
+  @override
+  String get set_dcL2 => 'L2 Hive';
+
+  @override
+  String get set_dcL3 => 'L3 SQLite';
+
+  @override
+  String set_dcImagesUnit(Object n) {
+    return '$n images';
+  }
+
+  @override
+  String get set_dcAutoRefresh => 'Auto refresh';
+
+  @override
+  String set_dcUpdated(Object when) {
+    return 'Updated $when';
+  }
+
+  @override
+  String get set_dcResetStats => 'Reset statistics';
+
+  @override
+  String get set_dcTip =>
+      'Everything here can be rebuilt. Personal data (accounts, history, blocks) lives under Storage → App data folder.';
+
+  @override
+  String get set_mdDesc =>
+      'LLM services for translation, prompt reverse, tag translation and the Agent. Add providers, then pick a model for each feature.';
+
+  @override
+  String get set_mdProviders => 'Providers';
+
+  @override
+  String get set_mdTasks => 'Feature models';
+
+  @override
+  String get set_mdPresets => 'Prompt presets';
+
+  @override
+  String get set_mdRequests => 'Request log';
+
+  @override
+  String set_mdProviderCount(Object n) {
+    return '$n providers';
+  }
+
+  @override
+  String set_mdModelCount(Object n) {
+    return '$n models';
+  }
+
+  @override
+  String get set_mdDisabled => 'Disabled';
+
+  @override
+  String get set_mdLocal => 'Local';
+
+  @override
+  String set_mdLatency(Object ms, Object when) {
+    return '$ms · $when';
+  }
+
+  @override
+  String get set_mdUnreachable => 'Unreachable';
+
+  @override
+  String get set_mdName => 'Name';
+
+  @override
+  String get set_mdBaseUrl => 'Base URL';
+
+  @override
+  String get set_mdApiKey => 'API key';
+
+  @override
+  String get set_mdApiKeyEmpty => 'Not set';
+
+  @override
+  String get set_mdModels => 'Models';
+
+  @override
+  String get set_mdRefreshModels => 'Fetch from provider';
+
+  @override
+  String get set_mdAddModel => 'Add manually';
+
+  @override
+  String set_mdUsedFor(Object tasks) {
+    return 'used for $tasks';
+  }
+
+  @override
+  String get set_mdRetired => 'Retired by provider';
+
+  @override
+  String get set_mdCapTools => 'Tools';
+
+  @override
+  String get set_mdCapVision => 'Vision';
+
+  @override
+  String get set_mdCapReasoning => 'Reasoning';
+
+  @override
+  String get set_mdAdvanced => 'Advanced request options';
+
+  @override
+  String get set_mdDelete => 'Delete provider';
+
+  @override
+  String set_mdDeleteTitle(Object name) {
+    return 'Delete “$name”?';
+  }
+
+  @override
+  String get set_mdDeleteBody =>
+      'Features that use it fall back to another provider.';
+
+  @override
+  String get set_mdRemoveModel => 'Remove model';
+
+  @override
+  String get set_mdTaskPrompt => 'Prompt translation';
+
+  @override
+  String get set_mdTaskReverse => 'Prompt reverse';
+
+  @override
+  String get set_mdTaskTag => 'Tag translation';
+
+  @override
+  String get set_mdTaskWiki => 'Wiki translation';
+
+  @override
+  String get set_mdFeature => 'Feature';
+
+  @override
+  String get set_mdProvider => 'Provider';
+
+  @override
+  String get set_mdModel => 'Model';
+
+  @override
+  String get set_mdPreset => 'Preset';
+
+  @override
+  String get set_mdStatus => 'Status';
+
+  @override
+  String get set_mdAvailable => 'Available';
+
+  @override
+  String get set_mdFallback => 'Falls back to the first available provider';
+
+  @override
+  String get set_mdNotChosen => 'Not selected';
+
+  @override
+  String get set_mdBuiltin => 'Built-in';
+
+  @override
+  String get set_mdNewPreset => 'New preset';
+
+  @override
+  String get set_mdEdit => 'Edit';
+
+  @override
+  String get set_mdTime => 'Time';
+
+  @override
+  String set_mdTokens(Object n) {
+    return '$n tokens';
+  }
+
+  @override
+  String get set_mdFailed => 'Failed';
+
+  @override
+  String get set_mdOk => 'OK';
+
+  @override
+  String set_mdShowing(Object n, Object total) {
+    return 'Showing latest $n of $total';
+  }
+
+  @override
+  String get set_mdImport => 'Import config';
+
+  @override
+  String get set_mdAddProvider => 'Add provider';
+
+  @override
+  String get set_mdEmpty => 'No providers yet';
+
+  @override
+  String get set_mdEmptySub =>
+      'Add one to enable translation and prompt reverse.';
+
+  @override
+  String get set_agDesc =>
+      'Model, instructions, extensions and MCP tools for the sidebar assistant.';
+
+  @override
+  String get set_agModelSec => 'Model';
+
+  @override
+  String get set_agModel => 'Agent model';
+
+  @override
+  String get set_agModelSub =>
+      'Thinking effort is set per task in the chat box';
+
+  @override
+  String get set_agEnter => 'Enter sends';
+
+  @override
+  String get set_agEnterSub =>
+      'When off, Ctrl+Enter sends and Enter adds a line';
+
+  @override
+  String get set_agMax => 'Max requests per task';
+
+  @override
+  String get set_agMaxSub => 'Stops runaway loops';
+
+  @override
+  String get set_agTimesUnit => 'req';
+
+  @override
+  String get set_agInstr => 'Instructions';
+
+  @override
+  String get set_agInstrSub =>
+      'Combined in this order. Existing chats keep their prompt; new requests use the new text.';
+
+  @override
+  String get set_agOrderBuiltin => 'Built-in prompt';
+
+  @override
+  String get set_agOrderPrefix => 'System prefix';
+
+  @override
+  String get set_agOrderGlobal => 'Global instructions';
+
+  @override
+  String get set_agOrderWorkspace => 'Workspace instructions';
+
+  @override
+  String get set_agOrderTools => 'Tool map';
+
+  @override
+  String get set_agGlobal => 'Global instructions';
+
+  @override
+  String get set_agPrefix => 'System prefix';
+
+  @override
+  String get set_agPrefixHint =>
+      'Fixed text placed before every request, such as a persona or output format.';
+
+  @override
+  String get set_agBuiltin => 'Built-in prompt';
+
+  @override
+  String get set_agFinal => 'View final prompt';
+
+  @override
+  String get set_agExt => 'Extensions';
+
+  @override
+  String get set_agExtSub =>
+      'Loaded per workspace. External extensions run local code; add only trusted ones.';
+
+  @override
+  String get set_agStudioExt => 'Studio interaction';
+
+  @override
+  String get set_agStudioExtSub =>
+      'Reads Studio state and asks questions with cards';
+
+  @override
+  String get set_agRequired => 'Built-in · required';
+
+  @override
+  String get set_agAddFile => 'Add extension file';
+
+  @override
+  String get set_agAddDir => 'Add extension folder';
+
+  @override
+  String get set_agMcp => 'MCP servers';
+
+  @override
+  String get set_agMcpSub =>
+      'CodeMode discovers tools on demand instead of loading them all into context.';
+
+  @override
+  String get set_agBuiltinTools => 'NAI Studio · built-in tools';
+
+  @override
+  String get set_agBuiltinToolsSub =>
+      'Prompt, blocks, wiki, images, history, references, generation and settings';
+
+  @override
+  String set_agConnected(Object n) {
+    return 'Connected · $n tools';
+  }
+
+  @override
+  String get set_agConnecting => 'Connecting…';
+
+  @override
+  String get set_agNeedsLogin => 'Sign-in required';
+
+  @override
+  String get set_agMcpError => 'Failed';
+
+  @override
+  String get set_agMcpOff => 'Off';
+
+  @override
+  String get set_agAddMcp => 'Add MCP server';
+
+  @override
+  String get set_agTools => 'Tools';
+
+  @override
+  String set_agToolCount(Object n) {
+    return '$n';
+  }
+
+  @override
+  String get set_agToolsTip =>
+      'Generation tools always quote a price and wait for your approval.';
+
+  @override
+  String get set_agData => 'Data folder';
+
+  @override
+  String get set_agWorkspaces => 'Workspaces';
+
+  @override
+  String get set_agSessions => 'Sessions';
+
+  @override
+  String get set_agCostTip =>
+      'Providers bill usage; Studio only shows token counts.';
+
+  @override
+  String get set_agOpen => 'Open Agent';
+
+  @override
+  String get set_agEditMcp => 'Edit';
+
+  @override
+  String get set_agRemoveMcp => 'Remove server';
+
+  @override
+  String get set_agRemoveExt => 'Remove extension';
+
+  @override
+  String get set_rgDesc =>
+      'Local RAG for tag suggestions, wiki, prompt blocks and similar images. Nothing is uploaded.';
+
+  @override
+  String get set_rgReady => 'Semantic search ready';
+
+  @override
+  String get set_rgOff => 'Semantic search off';
+
+  @override
+  String get set_rgPartial => 'Some sources building';
+
+  @override
+  String get set_rgAllDone => 'All indexed';
+
+  @override
+  String get set_rgPool =>
+      'All sources share one local vector store and update incrementally.';
+
+  @override
+  String get set_rgStepRuntime => 'Runtime';
+
+  @override
+  String get set_rgStepEmbed => 'Embedding';
+
+  @override
+  String get set_rgStepRerank => 'Rerank';
+
+  @override
+  String get set_rgStepDevice => 'Device';
+
+  @override
+  String get set_rgSources => 'Sources';
+
+  @override
+  String get set_rgSourcesSub =>
+      'Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.';
+
+  @override
+  String get set_rgTags => 'Tag suggestions';
+
+  @override
+  String get set_rgTagsSub =>
+      'Semantics, co-occurrence and rerank; computed per prompt box and character';
+
+  @override
+  String get set_rgWiki => 'Wiki semantic search';
+
+  @override
+  String get set_rgWikiSub =>
+      'Local wiki text; exact names first, semantic matches after';
+
+  @override
+  String get set_rgBlocks => 'Prompt blocks';
+
+  @override
+  String get set_rgBlocksSub =>
+      'Titles, tags and text of saved, unarchived blocks';
+
+  @override
+  String get set_rgGallery => 'Gallery (multimodal)';
+
+  @override
+  String get set_rgGallerySub =>
+      'Find similar images by content; NAI parameters get a text index; originals are untouched';
+
+  @override
+  String set_rgCount(Object done, Object total) {
+    return '$done / $total';
+  }
+
+  @override
+  String set_rgSegments(Object done, Object total) {
+    return '$done / $total chunks';
+  }
+
+  @override
+  String set_rgGalleryCount(Object done, Object total, Object n) {
+    return 'Images $done / $total · params $n chunks';
+  }
+
+  @override
+  String get set_rgPaused => 'Paused';
+
+  @override
+  String get set_rgBuilding => 'Building';
+
+  @override
+  String get set_rgError => 'Error';
+
+  @override
+  String get set_rgClearIndex => 'Clear index';
+
+  @override
+  String set_rgClearTitle(Object name) {
+    return 'Clear the “$name” index?';
+  }
+
+  @override
+  String get set_rgClearBody =>
+      'Only the derived index is removed; content and models stay.';
+
+  @override
+  String get set_rgContext => 'Suggestion context';
+
+  @override
+  String get set_rgContextSub =>
+      'Both take up to 120 Gemma tokens, cut at whole tags.';
+
+  @override
+  String get set_rgRange => 'Sample range';
+
+  @override
+  String get set_rgBefore => 'Before cursor';
+
+  @override
+  String get set_rgAround => 'Around cursor';
+
+  @override
+  String get set_rgRuntime => 'Models & runtime';
+
+  @override
+  String get set_rgEmbedPath => 'Embedding model folder';
+
+  @override
+  String get set_rgRerankPath => 'Rerank model folder';
+
+  @override
+  String get set_rgDevice => 'Device';
+
+  @override
+  String get set_rgAuto => 'Auto';
+
+  @override
+  String get set_rgEnv => 'Runtime';
+
+  @override
+  String get set_rgEnvSub =>
+      'Standalone Python and inference packages; no model weights';
+
+  @override
+  String get set_rgCheck => 'Check';
+
+  @override
+  String get set_rgReinstall => 'Reinstall';
+
+  @override
+  String get set_rgProgress => 'Indexing';
+
+  @override
+  String get set_rgOverall => 'overall';
+
+  @override
+  String get set_rgShortTags => 'Tags';
+
+  @override
+  String get set_rgShortWiki => 'Wiki';
+
+  @override
+  String get set_rgShortBlocks => 'Blocks';
+
+  @override
+  String get set_rgShortGallery => 'Gallery';
+
+  @override
+  String get set_rgTip =>
+      'Clearing a source removes only its derived index; content and models stay.';
+
+  @override
+  String get set_rgNotReady => 'Semantic search not ready';
+
+  @override
+  String get set_rgNotReadySub =>
+      'Install the runtime, then set both model folders.';
+
+  @override
+  String get set_rgEmpty => 'Not indexed';
+
+  @override
+  String get set_rgBuild => 'Build index';
+
+  @override
+  String get set_rgContinue => 'Continue';
+
+  @override
+  String set_rgSkipped(Object n) {
+    return '$n skipped';
+  }
+
+  @override
+  String get set_rgPlanLoading => 'Counting what will be indexed…';
+
+  @override
+  String set_rgPlanTags(Object n) {
+    return 'Will index $n tags with aliases and local descriptions.';
+  }
+
+  @override
+  String set_rgPlanText(Object docs, Object n) {
+    return 'Will index $docs documents as $n text chunks.';
+  }
+
+  @override
+  String set_rgPlanGallery(Object images, Object n) {
+    return 'Will index $images images and $n NAI parameter chunks, separately.';
+  }
+
+  @override
+  String get set_rgPlanNote =>
+      'The first run can take a while; pause any time, finished parts work right away.';
+
+  @override
+  String get set_rgPlanRebuild =>
+      'Rebuilding clears this source’s current index first.';
+
+  @override
+  String get set_rgStart => 'Start';
+
+  @override
+  String get set_rgDownload => 'Download';
+
+  @override
+  String set_rgDownloading(Object done, Object total) {
+    return 'Downloading $done / $total';
+  }
+
+  @override
+  String set_rgDownloadingUnknown(Object done) {
+    return 'Downloading $done';
+  }
+
+  @override
+  String get set_rgVerifying => 'Verifying files…';
+
+  @override
+  String get set_rgDiscover => 'Find local models';
+
+  @override
+  String get set_rgDiscoverSub =>
+      'Looks in the workspace models folder for EmbeddingGemma 2 and Qwen3-Reranker 0.6B and fills both folders.';
+
+  @override
+  String get set_rgFind => 'Find';
+
+  @override
+  String get set_rgModelsMissing =>
+      'Not found. Use Download, or choose a folder with the weights.';
+
+  @override
+  String get set_rgPython => 'Python interpreter';
+
+  @override
+  String get set_rgPythonSub =>
+      'Uses the standalone runtime by default; you can pick an existing python.exe.';
+
+  @override
+  String get set_rgPythonAuto => 'Auto';
+
+  @override
+  String get set_rgPythonNone => 'Not installed';
+
+  @override
+  String get set_rgPythonPending =>
+      'Not in use yet. “Use this interpreter” reinstalls the packages with it.';
+
+  @override
+  String get set_rgUsePython => 'Use this interpreter';
+
+  @override
+  String get set_rgEnvReady => 'Ready';
+
+  @override
+  String get set_rgEnvMissing => 'Not installed';
+
+  @override
+  String get set_rgInstall => 'Install';
+
+  @override
+  String get set_rgInstallHint =>
+      'Downloads Python and inference packages, not model weights. Pick CUDA for NVIDIA GPUs (several GB); otherwise CPU, which is smaller.';
+
+  @override
+  String get set_rgInstallCuda => 'CUDA · NVIDIA';
+
+  @override
+  String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgPhaseExisting => 'Checking existing runtime';
+
+  @override
+  String get set_rgPhaseDownload => 'Downloading installer';
+
+  @override
+  String get set_rgPhaseCreate => 'Preparing Python';
+
+  @override
+  String get set_rgPhaseCuda => 'Installing CUDA components';
+
+  @override
+  String get set_rgPhasePackages => 'Installing packages';
+
+  @override
+  String get set_rgPhaseCheck => 'Verifying runtime';
+
+  @override
+  String set_rgElapsed(Object time) {
+    return '$time in this step';
+  }
+
+  @override
+  String get set_upDesc =>
+      'Manage local upscale models and components. Downloads only start when you click.';
+
+  @override
+  String set_upGpu(Object name, Object n) {
+    return '$name · $n GB';
+  }
+
+  @override
+  String get set_upNoGpu => 'No discrete GPU detected';
+
+  @override
+  String get set_upLocal => 'Upscale on this PC without spending Anlas.';
+
+  @override
+  String get set_upEsrgan => 'Standard models';
+
+  @override
+  String get set_upEsrganSub =>
+      'Real-ESRGAN NCNN, 4×, fast, works on any Vulkan GPU.';
+
+  @override
+  String get set_upAnimeQuality => 'Anime · quality';
+
+  @override
+  String get set_upAnimeFast => 'Anime · fast';
+
+  @override
+  String get set_upGeneral => 'General · photo';
+
+  @override
+  String get set_upBuiltin => 'Built-in';
+
+  @override
+  String get set_upInstalled => 'Installed';
+
+  @override
+  String get set_upNotInstalled => 'Not installed';
+
+  @override
+  String get set_upFailed => 'Download failed';
+
+  @override
+  String get set_upImport => 'Import model';
+
+  @override
+  String get set_upImportHint =>
+      'Pick a matching .param and .bin (4× Real-ESRGAN NCNN)';
+
+  @override
+  String get set_upSeed => 'SeedVR2 diffusion upscale';
+
+  @override
+  String get set_upSeedSub =>
+      'Better quality, slower, needs NVIDIA. Models share a VAE (~0.5 GB) and the Python/CUDA runtime.';
+
+  @override
+  String get set_upSeed3b => '3B · balanced';
+
+  @override
+  String get set_upSeed3bSub =>
+      'Balanced quality and resources for everyday use';
+
+  @override
+  String get set_upSeed7b => '7B · quality';
+
+  @override
+  String get set_upSeed7bSub => 'Higher quality; more VRAM and time';
+
+  @override
+  String get set_upSeed7bSharp => '7B · sharp';
+
+  @override
+  String get set_upSeed7bSharpSub => 'Sharper details for textures';
+
+  @override
+  String set_upVram(Object n) {
+    return 'VRAM ≥ $n GB';
+  }
+
+  @override
+  String set_upProgress(Object done, Object total, Object speed) {
+    return '$done / $total · $speed/s';
+  }
+
+  @override
+  String get set_upVramMode => 'VRAM mode';
+
+  @override
+  String get set_upRecommended => 'Recommended';
+
+  @override
+  String get set_upLowVram => 'Low VRAM';
+
+  @override
+  String get set_upOffload => 'CPU offload layers';
+
+  @override
+  String get set_upOffloadSub =>
+      'More layers save VRAM but run slower and use more RAM';
+
+  @override
+  String get set_upTiling => 'VAE tiling';
+
+  @override
+  String get set_upTilingSub => 'Smaller tiles save VRAM; overlap hides seams';
+
+  @override
+  String get set_upNoise => 'Experimental noise';
+
+  @override
+  String set_upNoiseSub(Object a, Object b) {
+    return 'Input $a · latent $b; keep 0 for current results';
+  }
+
+  @override
+  String get set_upInputNoise => 'Input noise';
+
+  @override
+  String get set_upLatentNoise => 'Latent noise';
+
+  @override
+  String get set_upExperimental => 'Experimental';
+
+  @override
+  String get set_upRtx => 'RTX Video';
+
+  @override
+  String get set_upRtxSub =>
+      'Fast upscaling with NVIDIA RTX Video, a ~64 MB component.';
+
+  @override
+  String get set_upRtxName => 'RTX Video Super Resolution';
+
+  @override
+  String get set_upRtxNeeds => 'Needs a compatible RTX GPU and driver';
+
+  @override
+  String get set_upDefault => 'Default upscaler';
+
+  @override
+  String get set_upDefaultTip =>
+      'Used by “Local upscale” on the generation toolbar; change it from the menu anytime.';
+
+  @override
+  String get set_upVramTip =>
+      'Out of VRAM does not switch models automatically; try 3B, a lower scale, low VRAM mode or VAE tiling.';
+
+  @override
+  String set_upRemoveTitle(Object name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get set_upRemoveBody =>
+      'You will need to download it again to use it.';
+
+  @override
+  String get set_brDesc =>
+      'Work with other apps on this PC: Krita, external agents and ComfyUI.';
+
+  @override
+  String get set_brKritaSub =>
+      'Generate from Krita; results come back as layers.';
+
+  @override
+  String get set_brKrita => 'Krita bridge';
+
+  @override
+  String get set_brLoopback => 'Listens on 127.0.0.1 only';
+
+  @override
+  String get set_brConnected => 'Connected';
+
+  @override
+  String get set_brWaiting => 'Waiting for Krita';
+
+  @override
+  String get set_brRegenerate => 'New session';
+
+  @override
+  String get set_brDiscovery => 'Discovery file';
+
+  @override
+  String get set_brAgents => 'External agents';
+
+  @override
+  String get set_brAgentsSub =>
+      'Let local agents such as Claude Code or Codex read and edit parameters and generate.';
+
+  @override
+  String get set_brLocal => 'Local bridge';
+
+  @override
+  String set_brClients(Object n) {
+    return '$n agents connected';
+  }
+
+  @override
+  String get set_brNoClients => 'No agents connected';
+
+  @override
+  String get set_brTakeover => 'Copy setup prompt';
+
+  @override
+  String get set_brEnd => 'Disconnect';
+
+  @override
+  String get set_brActivity => 'Recent activity';
+
+  @override
+  String get set_brComfySub =>
+      'Import ComfyUI workflows and run them from Studio.';
+
+  @override
+  String get set_brComfyEnable => 'Enable ComfyUI';
+
+  @override
+  String get set_brComfyUrl => 'Server address';
+
+  @override
+  String set_brComfyFailed(Object reason, Object when) {
+    return 'Connection failed: $reason ($when). Make sure ComfyUI is running and accepts local connections.';
+  }
+
+  @override
+  String set_brComfyOk(Object when) {
+    return 'Connected ($when)';
+  }
+
+  @override
+  String get set_brStatus => 'Status';
+
+  @override
+  String set_brAgentsShort(Object n) {
+    return '$n';
+  }
+
+  @override
+  String get set_brOff => 'Off';
+
+  @override
+  String get set_brNoResponse => 'No response';
+
+  @override
+  String get set_brTip =>
+      'Bridges listen on the loopback address only and are not exposed to the LAN. Proxy settings do not apply.';
+
+  @override
+  String get set_nwDesc => 'Proxy and connectivity.';
+
+  @override
+  String get set_nwProxy => 'Proxy';
+
+  @override
+  String get set_nwProxySub =>
+      'Used for NovelAI, Danbooru, GitHub updates and model providers.';
+
+  @override
+  String get set_nwUse => 'Use a proxy';
+
+  @override
+  String get set_nwMode => 'Mode';
+
+  @override
+  String get set_nwSystem => 'System';
+
+  @override
+  String get set_nwManual => 'Manual';
+
+  @override
+  String get set_nwAddress => 'Address';
+
+  @override
+  String set_nwDetected(Object addr) {
+    return 'System proxy: $addr. Only external requests use it; local bridges and models do not.';
+  }
+
+  @override
+  String get set_nwNoSystem =>
+      'No system proxy detected. Only external requests use the proxy.';
+
+  @override
+  String get set_nwCheck => 'Connectivity check';
+
+  @override
+  String get set_nwCheckSub =>
+      'Check each service at once to tell network problems from service problems.';
+
+  @override
+  String get set_nwNaiImage => 'NovelAI image';
+
+  @override
+  String get set_nwNaiApi => 'NovelAI account';
+
+  @override
+  String get set_nwDanbooru => 'Danbooru';
+
+  @override
+  String get set_nwUpdate => 'App updates';
+
+  @override
+  String get set_nwCheckAll => 'Check all';
+
+  @override
+  String set_nwChecked(Object when) {
+    return 'Checked $when';
+  }
+
+  @override
+  String get set_nwViaProxy => 'via proxy';
+
+  @override
+  String get set_nwDirect => 'direct';
+
+  @override
+  String get set_nwNeverChecked => 'Not checked yet';
+
+  @override
+  String get set_nwFail => 'Failed';
+
+  @override
+  String get set_nwTip =>
+      'Proxy changes need a restart; Studio reminds you and never restarts on its own.';
+
+  @override
+  String get set_pvDesc =>
+      'What leaves with shared images, and which actions need your confirmation.';
+
+  @override
+  String get set_pvProtect => 'Safeguards';
+
+  @override
+  String get set_pvStrip => 'Strip metadata when sharing';
+
+  @override
+  String get set_pvStripSub =>
+      'Copying or dragging out removes prompt and parameters; the file is unchanged';
+
+  @override
+  String get set_pvExternal => 'Confirm before sending out';
+
+  @override
+  String get set_pvExternalSub =>
+      'Ask before sending images to other apps or sites';
+
+  @override
+  String get set_pvDanger => 'Confirm destructive actions';
+
+  @override
+  String get set_pvDangerSub => 'Delete, clear and overwrite ask first';
+
+  @override
+  String get set_pvOverwrite => 'Never overwrite on save';
+
+  @override
+  String get set_pvOverwriteSub => 'Rename automatically when a file exists';
+
+  @override
+  String get set_pvBlacklist => 'Online gallery blocklist';
+
+  @override
+  String get set_pvBlacklistSub =>
+      'Images with these tags are hidden in the online gallery.';
+
+  @override
+  String get set_pvAddTag => 'Add tag…';
+
+  @override
+  String get set_pvSync => 'Sync Danbooru blocklist';
+
+  @override
+  String set_pvSyncSub(Object user, Object when) {
+    return 'Signed in as $user · synced $when';
+  }
+
+  @override
+  String set_pvSyncNever(Object user) {
+    return 'Signed in as $user · never synced';
+  }
+
+  @override
+  String get set_pvSyncSignedOut =>
+      'Sign in to Danbooru to sync your account blocklist';
+
+  @override
+  String get set_pvSyncNow => 'Sync now';
+
+  @override
+  String get set_pvSyncing => 'Syncing…';
+
+  @override
+  String get set_pvAutoSync => 'Sync on launch';
+
+  @override
+  String get set_pvExported => 'What exports include';
+
+  @override
+  String get set_pvIncPrefs => 'Appearance, controls and input';
+
+  @override
+  String get set_pvIncRules => 'Safeguards and blocklist';
+
+  @override
+  String get set_pvIncCred => 'Account credentials';
+
+  @override
+  String get set_pvIncPaths => 'File paths';
+
+  @override
+  String get set_pvIncDrafts => 'Drafts and model bindings';
+
+  @override
+  String get set_pvTip =>
+      'Stripping applies to copy and drag-out only; files saved to disk keep full parameters.';
+
+  @override
+  String get set_bkDesc =>
+      'Move preferences between devices or start fresh. Every reset backs up first.';
+
+  @override
+  String get set_bkPrefs => 'Preferences';
+
+  @override
+  String get set_bkPrefsSub =>
+      'Appearance, controls, input and safeguards. Credentials, paths, drafts and model bindings are never included.';
+
+  @override
+  String get set_bkExport => 'Export';
+
+  @override
+  String get set_bkExportSub => 'Save as studio-preferences.json';
+
+  @override
+  String get set_bkExportBtn => 'Export…';
+
+  @override
+  String get set_bkImport => 'Import';
+
+  @override
+  String get set_bkImportSub =>
+      'Shows how many settings will change and backs up first';
+
+  @override
+  String get set_bkImportBtn => 'Choose file…';
+
+  @override
+  String get set_bkUndoImport => 'Undo last import';
+
+  @override
+  String set_bkUndoImportSub(Object when) {
+    return 'Back to before the import on $when';
+  }
+
+  @override
+  String get set_bkNoImport => 'No import yet';
+
+  @override
+  String get set_bkRestore => 'Restore';
+
+  @override
+  String get set_bkOther => 'Other profiles';
+
+  @override
+  String set_bkShortcutsSub(Object n, Object m) {
+    return '$n actions, $m customized';
+  }
+
+  @override
+  String get set_bkModelsSub =>
+      'Providers, feature models and presets; API keys are excluded by default';
+
+  @override
+  String get set_bkCopyConfig => 'Copy config';
+
+  @override
+  String get set_bkReset => 'Reset to defaults';
+
+  @override
+  String get set_bkResetSub => 'Choose what to reset; everything else stays.';
+
+  @override
+  String get set_bkScopeAppearance => 'Appearance & controls';
+
+  @override
+  String get set_bkScopeAppearanceSub =>
+      'Theme, font, language, canvas, notifications';
+
+  @override
+  String get set_bkScopeInput => 'Input & autocomplete';
+
+  @override
+  String get set_bkScopeInputSub => 'Wheel weight, related tags, autocomplete';
+
+  @override
+  String get set_bkScopeProtect => 'Privacy & generation safeguards';
+
+  @override
+  String get set_bkScopeProtectSub =>
+      'Metadata, confirmations, cost warning, pacing';
+
+  @override
+  String get set_bkScopeShortcuts => 'Shortcuts';
+
+  @override
+  String set_bkScopeShortcutsSub(Object n) {
+    return 'All $n actions';
+  }
+
+  @override
+  String get set_bkResetBtn => 'Reset selected…';
+
+  @override
+  String get set_bkResetHint => 'Backs up first; can be undone';
+
+  @override
+  String get set_bkResetTitle => 'Reset the selected settings?';
+
+  @override
+  String set_bkResetBody(Object scopes) {
+    return '$scopes go back to defaults. Current settings are backed up first.';
+  }
+
+  @override
+  String get set_bkAuto => 'Automatic backups';
+
+  @override
+  String get set_bkAutoSub => 'Last 5 kept';
+
+  @override
+  String get set_bkKindImport => 'Before import';
+
+  @override
+  String get set_bkKindReset => 'Before reset';
+
+  @override
+  String get set_bkKindUpgrade => 'Before update';
+
+  @override
+  String get set_bkNoBackups => 'No backups yet';
+
+  @override
+  String set_bkRestoreTitle(Object name) {
+    return 'Restore the “$name” backup?';
+  }
+
+  @override
+  String get set_bkRestoreBody =>
+      'Current settings are backed up first so you can switch back.';
+
+  @override
+  String get set_abDesc => 'Version, updates and diagnostics.';
+
+  @override
+  String set_abNew(Object version) {
+    return 'Version $version available';
+  }
+
+  @override
+  String get set_abLatest => 'Up to date';
+
+  @override
+  String get set_abChecking => 'Checking for updates…';
+
+  @override
+  String get set_abCheckFailed => 'Update check failed';
+
+  @override
+  String set_abDownloading(Object pct) {
+    return 'Downloading $pct';
+  }
+
+  @override
+  String set_abChecked(Object when) {
+    return 'Checked $when';
+  }
+
+  @override
+  String set_abNotes(Object version) {
+    return 'What’s new in $version';
+  }
+
+  @override
+  String get set_abInstall => 'Download and install';
+
+  @override
+  String get set_abChangelog => 'Full changelog';
+
+  @override
+  String get set_abPrerelease => 'Include pre-releases';
+
+  @override
+  String get set_abCheck => 'Check for updates';
+
+  @override
+  String get set_abDiag => 'Diagnostics';
+
+  @override
+  String get set_abLog => 'Write log files';
+
+  @override
+  String get set_abLogSub =>
+      'Turn on when troubleshooting; logs never contain API keys or credentials';
+
+  @override
+  String get set_abLogDir => 'Log folder';
+
+  @override
+  String get set_abCopyDiag => 'Copy diagnostics';
+
+  @override
+  String get set_abCopyDiagSub =>
+      'Version, system, GPU and service status for bug reports';
+
+  @override
+  String get set_abProject => 'Project';
+
+  @override
+  String get set_abRepo => 'Source code';
+
+  @override
+  String get set_abUpstream => 'Original project';
+
+  @override
+  String get set_abUpstreamSub =>
+      'Built on NAI Launcher; original credits retained';
+
+  @override
+  String get set_abFonts => 'Fonts & assets';
+
+  @override
+  String get set_abLicenses => 'Licenses';
+
+  @override
+  String get set_abView => 'View';
+
+  @override
+  String get set_abSystem => 'System';
+
+  @override
+  String set_srQuoted(Object query) {
+    return '“$query”';
+  }
+
+  @override
+  String get set_srBalance => 'Anlas balance';
+
+  @override
+  String get set_srSubscription => 'Subscription & Anlas';
+
+  @override
+  String get set_agEnable => 'Enable';
+
+  @override
+  String get set_agDisable => 'Disable';
+
+  @override
+  String get set_listSep => ', ';
+
+  @override
+  String get set_on => 'On';
+
+  @override
+  String get set_off => 'Off';
+
+  @override
+  String get set_unitSeconds => 's';
 }

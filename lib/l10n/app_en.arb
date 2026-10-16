@@ -9215,5 +9215,1362 @@
   "rag_runtimeElapsed": "{seconds}s in this step",
   "rag_useRuntime": "Use existing runtime",
   "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
-  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}}
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
+  "set_title": "Settings",
+  "set_search": "Search settings",
+  "set_searchResults": "Search results",
+  "set_searchCount": "{count} results",
+  "@set_searchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_searchHint": "Toggles and values can be changed right here; use the arrow to jump to the setting.",
+  "set_searchKeys": "select",
+  "set_searchJump": "open",
+  "set_searchEmpty": "Nothing matches “{query}”",
+  "@set_searchEmpty": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_searchEmptyHint": "Try “proxy”, “save”, “shortcut” or a folder path",
+  "set_goTo": "Go to setting",
+  "set_hasUpdate": "Update",
+  "set_groupPersonal": "Personal",
+  "set_groupCreate": "Create",
+  "set_groupIntelligence": "Intelligence",
+  "set_groupConnect": "Connect",
+  "set_groupSystem": "System",
+  "set_pageOverview": "Overview",
+  "set_pageAccount": "Account",
+  "set_pageAppearance": "Appearance",
+  "set_pageCanvas": "Canvas & browsing",
+  "set_pageShortcuts": "Shortcuts",
+  "set_pageGeneration": "Generation & Anlas",
+  "set_pageStorage": "Storage & gallery",
+  "set_pageDictionaries": "Dictionaries & cache",
+  "set_pageModels": "Models & APIs",
+  "set_pageAgent": "NAI Agent",
+  "set_pageRag": "Semantic search",
+  "set_pageUpscale": "Local upscale",
+  "set_pageBridges": "Bridges & integrations",
+  "set_pageNetwork": "Network & proxy",
+  "set_pagePrivacy": "Privacy & safeguards",
+  "set_pageBackup": "Backup & reset",
+  "set_pageAbout": "About",
+  "set_resetDefault": "Reset to default",
+  "set_resetPage": "Reset this page",
+  "set_needsRestart": "Restart",
+  "set_isNew": "New",
+  "set_defaultTag": "Default",
+  "set_readOnly": "Read-only",
+  "set_cancel": "Cancel",
+  "set_save": "Save",
+  "set_discard": "Discard",
+  "set_later": "Later",
+  "set_undo": "Undo",
+  "set_open": "Open",
+  "set_choose": "Choose",
+  "set_change": "Change",
+  "set_clear": "Clear",
+  "set_delete": "Delete",
+  "set_copy": "Copy",
+  "set_more": "More",
+  "set_refresh": "Refresh",
+  "set_retry": "Retry",
+  "set_test": "Test connection",
+  "set_testing": "Checking…",
+  "set_importIt": "Import",
+  "set_exportIt": "Export",
+  "set_install": "Install",
+  "set_download": "Download",
+  "set_resume": "Resume",
+  "set_pause": "Pause",
+  "set_rebuild": "Rebuild",
+  "set_login": "Sign in",
+  "set_adjust": "Adjust",
+  "set_collapse": "Collapse",
+  "set_notSet": "Not set",
+  "set_defaultLocation": "Default location",
+  "set_builtinSound": "Built-in sound",
+  "set_justNow": "just now",
+  "set_minutesAgo": "{n} min ago",
+  "@set_minutesAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_todayAt": "Today {time}",
+  "@set_todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_yesterday": "Yesterday",
+  "set_secondsAgo": "{n} s ago",
+  "@set_secondsAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_savedChange": "Saved · {title} {from} → {to}",
+  "@set_savedChange": {
+    "placeholders": {
+      "title": {},
+      "from": {},
+      "to": {}
+    }
+  },
+  "set_restartBanner": "Saved. Restart Studio to apply; running generations are not affected.",
+  "set_restartNow": "Restart now",
+  "set_unsavedInstructions": "Unsaved changes to instructions",
+  "set_leaveTitle": "Discard unsaved changes?",
+  "set_leaveBody": "The Agent instructions are not saved. Leaving this page discards them.",
+  "set_resetPageTitle": "Reset “{page}” to defaults?",
+  "@set_resetPageTitle": {
+    "placeholders": {
+      "page": {}
+    }
+  },
+  "set_resetPageBody": "{count} changed settings on this page go back to defaults. You can undo from Overview.",
+  "@set_resetPageBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_ovDesc": "Status of your account, storage, connections and AI services. Items that need you come first; click a card to open its settings.",
+  "set_ovSwitchAccount": "Switch account",
+  "set_ovTodayUsed": "Used today",
+  "set_ovMonthly": "Monthly allowance {n}",
+  "@set_ovMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnAt": "High-cost warning ≥ {n} Anlas",
+  "@set_ovWarnAt": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnOff": "High-cost warning off",
+  "set_ovRenews": "Renews {date}",
+  "@set_ovRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_ovSignedOut": "Not signed in",
+  "set_ovAttention": "Needs attention",
+  "set_ovAllClear": "All good",
+  "set_attUpdate": "Version {version} is available",
+  "@set_attUpdate": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_attRagPaused": "{source} index paused",
+  "@set_attRagPaused": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "set_attRagPausedSub": "{done} / {total}, partly searchable",
+  "@set_attRagPausedSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_attBridgeDown": "{name} is not responding",
+  "@set_attBridgeDown": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCheckedAt": "{detail} · checked {when}",
+  "@set_attCheckedAt": {
+    "placeholders": {
+      "detail": {},
+      "when": {}
+    }
+  },
+  "set_attCredential": "Credentials for “{name}” expired",
+  "@set_attCredential": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCredentialSub": "Update them to switch to this account",
+  "set_attDiskLow": "Low disk space on {disk}",
+  "@set_attDiskLow": {
+    "placeholders": {
+      "disk": {}
+    }
+  },
+  "set_attDiskLowSub": "{size} left; auto-save may fail",
+  "@set_attDiskLowSub": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "set_attProvider": "{name} unreachable",
+  "@set_attProvider": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attProviderSub": "Translation falls back to another provider",
+  "set_attView": "View",
+  "set_attGo": "Check",
+  "set_attUpdateCred": "Update",
+  "set_tileStorage": "Storage",
+  "set_tileImages": "{n} images",
+  "@set_tileImages": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileSaveTo": "Saving to {path}",
+  "@set_tileSaveTo": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "set_tileConnect": "Connections",
+  "set_tileOnline": "{n} online",
+  "@set_tileOnline": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileKrita": "Krita connected",
+  "set_tileKritaOff": "Krita not connected",
+  "set_tileAgents": "{n} external agents",
+  "@set_tileAgents": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileComfyDown": "ComfyUI not responding",
+  "set_tileComfyOk": "ComfyUI ready",
+  "set_tileComfyOff": "ComfyUI off",
+  "set_tileModels": "Models & APIs",
+  "set_tileTranslateVia": "Prompt translation · {ms}",
+  "@set_tileTranslateVia": {
+    "placeholders": {
+      "ms": {}
+    }
+  },
+  "set_tileAgentModel": "Agent · {model}",
+  "@set_tileAgentModel": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "set_tileProviders": "{p} providers · {m} models",
+  "@set_tileProviders": {
+    "placeholders": {
+      "p": {},
+      "m": {}
+    }
+  },
+  "set_tileNoModel": "Not configured",
+  "set_tileRag": "Semantic search",
+  "set_tileReady": "ready",
+  "set_tileRagDone": "{names} done",
+  "@set_tileRagDone": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "set_tileRagPaused": "{name} {pct} · paused",
+  "@set_tileRagPaused": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagBuilding": "{name} {pct} · building",
+  "@set_tileRagBuilding": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagEmpty": "{name} not indexed yet",
+  "@set_tileRagEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileRagError": "{name} indexing failed",
+  "@set_tileRagError": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileUpscale": "Local upscale",
+  "set_tileUpscaleModels": "{n} models ready",
+  "@set_tileUpscaleModels": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileDefaultIs": "{name} (default)",
+  "@set_tileDefaultIs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileSeedMissing": "SeedVR2 not installed",
+  "set_tileSeedReady": "SeedVR2 installed",
+  "set_tileProtect": "Safeguards",
+  "set_tileProtectOn": "{on} of {all} on",
+  "@set_tileProtectOn": {
+    "placeholders": {
+      "on": {},
+      "all": {}
+    }
+  },
+  "set_tileInterval": "Interval {s}s ± {p}%",
+  "@set_tileInterval": {
+    "placeholders": {
+      "s": {},
+      "p": {}
+    }
+  },
+  "set_tileIntervalOff": "No request interval",
+  "set_recent": "Recent changes",
+  "set_recentSub": "Auto-saved · undoable",
+  "set_recentEmpty": "No changes yet",
+  "set_quick": "Quick toggles",
+  "set_quickSub": "Change here",
+  "set_quickDark": "Dark mode",
+  "set_quickChannel": "Canvas visual channel",
+  "set_searchTip": "Press {keys} to search any setting and change it right in the results.",
+  "@set_searchTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_accDesc": "Manage NovelAI accounts, default sign-in and subscription.",
+  "set_accSaved": "Saved accounts",
+  "set_accSavedSub": "Switch with one click. Credentials stay on this device and are never exported.",
+  "set_accCurrent": "Current",
+  "set_accInUse": "In use",
+  "set_accSwitch": "Switch",
+  "set_accEmail": "Email",
+  "set_accToken": "Token",
+  "set_accRenews": "renews {date}",
+  "@set_accRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accLastUsed": "last used {date}",
+  "@set_accLastUsed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accNoSub": "No subscription",
+  "set_accExpired": "Credentials expired",
+  "set_accEdit": "Edit profile",
+  "set_accUpdate": "Update credentials",
+  "set_accMakeDefault": "Make default",
+  "set_accDelete": "Remove account",
+  "set_accDeleteTitle": "Remove “{name}”?",
+  "@set_accDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_accDeleteBody": "Only the saved credentials on this device are removed. Your NovelAI account is unaffected.",
+  "set_accAdd": "Add account",
+  "set_accAddHint": "Email and password, or a persistent token",
+  "set_accLogin": "Sign-in",
+  "set_accDefault": "Default account",
+  "set_accDefaultSub": "Preselected on the sign-in screen",
+  "set_accAutoLogin": "Sign in automatically",
+  "set_accAutoLoginSub": "Reuse the last session; when off, Studio opens on the sign-in screen",
+  "set_accSub": "Subscription",
+  "set_accMonthly": "{n} Anlas / month",
+  "@set_accMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accRemaining": "{n} left",
+  "@set_accRemaining": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accResets": "resets {date}",
+  "@set_accResets": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accPortal": "Open NovelAI account page",
+  "set_accSwitchHint": "Switching keeps your draft and canvas; queued generations finish on the original account.",
+  "set_apDesc": "Theme, text and notifications. Changes save instantly and can be undone.",
+  "set_apTheme": "Theme",
+  "set_apThemeSub": "Used by the launch screen, sign-in and every page.",
+  "set_apLight": "Light",
+  "set_apDark": "Dark",
+  "set_apSystem": "System",
+  "set_apSystemSub": "Follows the Windows setting",
+  "set_apText": "Text",
+  "set_apFont": "Interface font",
+  "set_apFontSub": "Numbers and code always use Geist Mono",
+  "set_apScale": "Settings & dialog text size",
+  "set_apScaleSub": "Affects settings and dialogs only, not the canvas",
+  "set_apSampleTitle": "Heading · Generation finished",
+  "set_apSampleBody": "Body · Saved to the local gallery; keep refining your prompt.",
+  "set_apSampleNote": "Caption · Drag the slider to preview.",
+  "set_apLanguage": "Language",
+  "set_apLanguageSub": "Applies immediately",
+  "set_apMotion": "Motion & sound",
+  "set_apReduceMotion": "Reduce motion",
+  "set_apReduceMotionSub": "Turns off canvas fly-to, zoom and panel transitions; the visual channel stops moving",
+  "set_apSound": "Completion sound",
+  "set_apSoundSub": "Plays when a batch finishes",
+  "set_apSoundFile": "Sound file",
+  "set_apPreviewSound": "Play",
+  "set_apNotify": "Notifications",
+  "set_apNotifySub": "Toasts appear top-right and fade after 3 seconds",
+  "set_apNotifyPreview": "Preview",
+  "set_apPreview": "Preview",
+  "set_apCurrent": "Current",
+  "set_apThemeTip": "Press {keys} to switch light and dark anytime.",
+  "@set_apThemeTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_cvDesc": "How history, the viewer and the infinite canvas behave.",
+  "set_cvBrowse": "Browsing",
+  "set_cvHistoryClick": "When clicking a history thumbnail",
+  "set_cvOpenDetail": "Open details",
+  "set_cvOpenDetailSub": "Opens the image viewer for a closer look",
+  "set_cvLinked": "Linked preview",
+  "set_cvLinkedSub": "Jumps to it on the canvas without opening the viewer",
+  "set_cvViewer": "Show results in",
+  "set_cvCanvas": "Infinite canvas",
+  "set_cvCanvasSub": "Batches in a column; pan, zoom and pin to compare",
+  "set_cvSimple": "Simple viewer",
+  "set_cvSimpleSub": "Only the latest image; lightest on resources",
+  "set_cvCanvasSec": "Canvas",
+  "set_cvLock": "Lock canvas view",
+  "set_cvLockSub": "New images do not move the view",
+  "set_cvFill": "Zoom new images to fill",
+  "set_cvFillSub": "Fit the visible area instead of actual pixels",
+  "set_cvChannel": "Visual channel",
+  "set_cvChannelSub": "Themed decoration along the canvas; scrolling through history passes each theme.",
+  "set_cvMode": "Mode",
+  "set_cvMinTwo": "Keep at least two themes in random mode.",
+  "set_cvSession": "This session: {order}",
+  "@set_cvSession": {
+    "placeholders": {
+      "order": {}
+    }
+  },
+  "set_cvLevel": "Intensity",
+  "set_cvRuler": "Time ruler",
+  "set_cvRulerSub": "Batch times, date dividers and the side ruler",
+  "set_cvMotion": "Idle motion",
+  "set_cvMotionSub": "Pauses while generating or when reduce motion is on",
+  "set_cvOps": "Canvas controls",
+  "set_cvOpScroll": "Scroll",
+  "set_cvOpPan": "Pan sideways",
+  "set_cvOpZoom": "Zoom",
+  "set_cvOpMove": "Move view",
+  "set_cvOpAll": "Overview",
+  "set_cvOpHome": "Latest batch",
+  "set_cvWheel": "Wheel",
+  "set_cvChannelTip": "The gear on the canvas edits the same visual channel settings.",
+  "set_scDesc": "Grouped by page. Click a shortcut to record a new one; duplicates on the same page turn red with a one-click fix.",
+  "set_scSearch": "Search actions or keys, e.g. Ctrl+S",
+  "set_scAll": "All",
+  "set_scKeyboard": "Keyboard map",
+  "set_scKeyboardSub": "Click a key to filter the list. Blue keys are taken, red keys conflict.",
+  "set_scNoMod": "None",
+  "set_scLayer": "{context} · holding {mod}",
+  "@set_scLayer": {
+    "placeholders": {
+      "context": {},
+      "mod": {}
+    }
+  },
+  "set_scLayerNone": "{context} · no modifier",
+  "@set_scLayerNone": {
+    "placeholders": {
+      "context": {}
+    }
+  },
+  "set_scAction": "Action",
+  "set_scKeys": "Shortcut",
+  "set_scDefault": "Default",
+  "set_scDefaultIs": "Default {keys}",
+  "@set_scDefaultIs": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflict": "Conflicts with “{name}”",
+  "@set_scConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_scRecording": "Press a new combination…",
+  "set_scRecordHint": "Esc cancels · Backspace clears",
+  "set_scRecord": "Record",
+  "set_scClear": "Clear",
+  "set_scDisplay": "Display",
+  "set_scEnabled": "Enable shortcuts",
+  "set_scInTooltips": "Show in tooltips",
+  "set_scInMenus": "Show in menus",
+  "set_scBadges": "Number badges on navigation",
+  "set_scConflicts": "Conflicts",
+  "set_scConflictCount": "{n}",
+  "@set_scConflictCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scConflictLine": "{keys} is used twice",
+  "@set_scConflictLine": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflictSub": "{context}: {a} and {b}. Neither fires while they conflict.",
+  "@set_scConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_scFix": "Reset {name} to {keys}",
+  "@set_scFix": {
+    "placeholders": {
+      "name": {},
+      "keys": {}
+    }
+  },
+  "set_scNoConflict": "No conflicts",
+  "set_scConfig": "Shortcut profile",
+  "set_scResetAll": "Reset all",
+  "set_scResetAllTitle": "Reset all shortcuts?",
+  "set_scResetAllBody": "{n} customized shortcuts will be restored.",
+  "@set_scResetAllBody": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scHelp": "Shortcut help",
+  "set_scHelpTip": "Press {key} on any page to see its shortcuts.",
+  "@set_scHelpTip": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "set_scEmpty": "No matching shortcuts",
+  "set_gnDesc": "Control Anlas spending, request pacing and prompt input helpers.",
+  "set_gnCost": "Anlas safeguard",
+  "set_gnCostSub": "Ask before sending a request that costs more than the threshold.",
+  "set_gnWarn": "High-cost warning",
+  "set_gnWarnSub": "Confirm above the threshold",
+  "set_gnThreshold": "Threshold",
+  "set_gnEstimate": "Current: {model} · {w}×{h} · {steps} steps · {n} per request",
+  "@set_gnEstimate": {
+    "placeholders": {
+      "model": {},
+      "w": {},
+      "h": {},
+      "steps": {},
+      "n": {}
+    }
+  },
+  "set_gnWillWarn": "Will warn",
+  "set_gnNoWarn": "No warning",
+  "set_gnFree": "Free",
+  "set_gnPace": "Request pacing",
+  "set_gnPaceSub": "Wait between consecutive requests to ease server load.",
+  "set_gnLimit": "Limit request interval",
+  "set_gnInterval": "Interval",
+  "set_gnJitter": "Random jitter",
+  "set_gnJitterSub": "Randomly vary the interval",
+  "set_gnTimeline": "With these settings, 10 requests are spaced like this",
+  "set_gnInput": "Prompt input",
+  "set_gnWheel": "Adjust weight with the wheel",
+  "set_gnWheelSub": "Scroll over a tag to change its weight",
+  "set_gnNoKey": "No key",
+  "set_gnRelated": "Related tag suggestions",
+  "set_gnRelatedSub": "Suggest tags that often appear together",
+  "set_gnRag": "Semantic tag suggestions",
+  "set_gnRagSub": "Context-aware suggestions from Semantic search",
+  "set_gnReady": "Ready",
+  "set_gnNotReady": "Not ready",
+  "set_gnGoSettings": "Settings",
+  "set_gnTranslate": "Prompt translation",
+  "set_gnTranslateSub": "Model used to translate prompts",
+  "set_gnToday": "Today",
+  "set_gnUsed": "Anlas used",
+  "set_gnNow": "now",
+  "set_gnWarned": "High-cost warnings",
+  "set_gnTimes": "{n}×",
+  "@set_gnTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_gnMaxSingle": "Largest single request",
+  "set_gnFreeTip": "Opus free generations are already excluded; the threshold only counts what will be charged.",
+  "set_stDesc": "Where images are saved, which folders the gallery reads, and cleanup.",
+  "set_stUsage": "Usage",
+  "set_stFree": "{size} free on {disk}",
+  "@set_stFree": {
+    "placeholders": {
+      "disk": {},
+      "size": {}
+    }
+  },
+  "set_stRecount": "Recount",
+  "set_stCounting": "Counting…",
+  "set_stImages": "Images",
+  "set_stUpscaleModels": "Upscale models",
+  "set_stVibes": "Vibe library",
+  "set_stThumbs": "Thumbnail cache",
+  "set_stRag": "Semantic index",
+  "set_stDict": "Dictionaries",
+  "set_stAgent": "Agent",
+  "set_stSave": "Saving",
+  "set_stSavePath": "Image folder",
+  "set_stAutoSave": "Auto-save",
+  "set_stAutoSaveSub": "Write images to disk as soon as they finish; when off they stay on the canvas and in history",
+  "set_stAssets": "Assets & display",
+  "set_stVibePath": "Vibe library folder",
+  "set_stQuality": "Gallery thumbnail quality",
+  "set_stQualitySub": "Display quality of thumbnails",
+  "set_stHigh": "High",
+  "set_stStandard": "Standard",
+  "set_stRoots": "Gallery folders",
+  "set_stRootsSub": "Any folder can be browsed and searched in the gallery; auto-save does not write there.",
+  "set_stPrimary": "Main",
+  "set_stCount": "{n}",
+  "@set_stCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_stAddFolder": "Add folder",
+  "set_stImportIndex": "Import tag index (.jsonl)",
+  "set_stLastScan": "Last scan {when} · {n} images",
+  "@set_stLastScan": {
+    "placeholders": {
+      "when": {},
+      "n": {}
+    }
+  },
+  "set_stMaintain": "Maintenance",
+  "set_stRescan": "Rescan gallery",
+  "set_stRescanSub": "Find missing files, add new ones and retry unread metadata",
+  "set_stScan": "Scan",
+  "set_stScanning": "Scanning…",
+  "set_stCleanThumbs": "Clean thumbnail cache",
+  "set_stCleanThumbsSub": "Removes least-recently-used thumbnails over the limit; originals are untouched",
+  "set_stClean": "Clean",
+  "set_stCleanTitle": "Clean thumbnail cache?",
+  "set_stCleanBody": "Thumbnails over the limit are deleted and rebuilt when needed. Originals are not touched.",
+  "set_stAppData": "App data folder",
+  "set_stAppDataSub": "Databases for accounts, history and blocks; restart after changing",
+  "set_stOpenFolders": "Open folders",
+  "set_stLogs": "Logs",
+  "set_stAppDataShort": "App data",
+  "set_stDeleteTip": "Move or delete single images in the gallery; the confirmation rules in Privacy apply.",
+  "set_stRemoveRoot": "Remove this folder",
+  "set_dcDesc": "Tag data and caches. Clean up here if autocomplete misbehaves.",
+  "set_dcTags": "Tag dictionary",
+  "set_dcTagsSub": "Local data for autocomplete, tag translation and suggestions.",
+  "set_dcBase": "Base dictionary",
+  "set_dcBaseValue": "{n} tags · data {version}",
+  "@set_dcBaseValue": {
+    "placeholders": {
+      "n": {},
+      "version": {}
+    }
+  },
+  "set_dcCooc": "Co-occurrence",
+  "set_dcCoocSub": "Used to suggest tags that appear together",
+  "set_dcEntries": "{n} entries",
+  "@set_dcEntries": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcTranslate": "Tag translation",
+  "set_dcTranslateSub": "Fills in translations the dictionary lacks",
+  "set_dcCaches": "Caches",
+  "set_dcCachesSub": "Cleared data is fetched again when needed; images and settings are unaffected.",
+  "set_dcDanbooru": "Danbooru cache",
+  "set_dcDanbooruSub": "Online gallery and tag wiki responses",
+  "set_dcTranslation": "AI translation cache",
+  "set_dcTranslationSub": "Tags and prompts already translated",
+  "set_dcCacheSize": "{n} · {size}",
+  "@set_dcCacheSize": {
+    "placeholders": {
+      "n": {},
+      "size": {}
+    }
+  },
+  "set_dcClearTitle": "Clear {name}?",
+  "@set_dcClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_dcClearBody": "It will be fetched again when needed.",
+  "set_dcStats": "Cache statistics",
+  "set_dcL1": "L1 memory",
+  "set_dcL2": "L2 Hive",
+  "set_dcL3": "L3 SQLite",
+  "set_dcImagesUnit": "{n} images",
+  "@set_dcImagesUnit": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcAutoRefresh": "Auto refresh",
+  "set_dcUpdated": "Updated {when}",
+  "@set_dcUpdated": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcResetStats": "Reset statistics",
+  "set_dcTip": "Everything here can be rebuilt. Personal data (accounts, history, blocks) lives under Storage → App data folder.",
+  "set_mdDesc": "LLM services for translation, prompt reverse, tag translation and the Agent. Add providers, then pick a model for each feature.",
+  "set_mdProviders": "Providers",
+  "set_mdTasks": "Feature models",
+  "set_mdPresets": "Prompt presets",
+  "set_mdRequests": "Request log",
+  "set_mdProviderCount": "{n} providers",
+  "@set_mdProviderCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdModelCount": "{n} models",
+  "@set_mdModelCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdDisabled": "Disabled",
+  "set_mdLocal": "Local",
+  "set_mdLatency": "{ms} · {when}",
+  "@set_mdLatency": {
+    "placeholders": {
+      "ms": {},
+      "when": {}
+    }
+  },
+  "set_mdUnreachable": "Unreachable",
+  "set_mdName": "Name",
+  "set_mdBaseUrl": "Base URL",
+  "set_mdApiKey": "API key",
+  "set_mdApiKeyEmpty": "Not set",
+  "set_mdModels": "Models",
+  "set_mdRefreshModels": "Fetch from provider",
+  "set_mdAddModel": "Add manually",
+  "set_mdUsedFor": "used for {tasks}",
+  "@set_mdUsedFor": {
+    "placeholders": {
+      "tasks": {}
+    }
+  },
+  "set_mdRetired": "Retired by provider",
+  "set_mdCapTools": "Tools",
+  "set_mdCapVision": "Vision",
+  "set_mdCapReasoning": "Reasoning",
+  "set_mdAdvanced": "Advanced request options",
+  "set_mdDelete": "Delete provider",
+  "set_mdDeleteTitle": "Delete “{name}”?",
+  "@set_mdDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_mdDeleteBody": "Features that use it fall back to another provider.",
+  "set_mdRemoveModel": "Remove model",
+  "set_mdTaskPrompt": "Prompt translation",
+  "set_mdTaskReverse": "Prompt reverse",
+  "set_mdTaskTag": "Tag translation",
+  "set_mdTaskWiki": "Wiki translation",
+  "set_mdFeature": "Feature",
+  "set_mdProvider": "Provider",
+  "set_mdModel": "Model",
+  "set_mdPreset": "Preset",
+  "set_mdStatus": "Status",
+  "set_mdAvailable": "Available",
+  "set_mdFallback": "Falls back to the first available provider",
+  "set_mdNotChosen": "Not selected",
+  "set_mdBuiltin": "Built-in",
+  "set_mdNewPreset": "New preset",
+  "set_mdEdit": "Edit",
+  "set_mdTime": "Time",
+  "set_mdTokens": "{n} tokens",
+  "@set_mdTokens": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdFailed": "Failed",
+  "set_mdOk": "OK",
+  "set_mdShowing": "Showing latest {n} of {total}",
+  "@set_mdShowing": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "set_mdImport": "Import config",
+  "set_mdAddProvider": "Add provider",
+  "set_mdEmpty": "No providers yet",
+  "set_mdEmptySub": "Add one to enable translation and prompt reverse.",
+  "set_agDesc": "Model, instructions, extensions and MCP tools for the sidebar assistant.",
+  "set_agModelSec": "Model",
+  "set_agModel": "Agent model",
+  "set_agModelSub": "Thinking effort is set per task in the chat box",
+  "set_agEnter": "Enter sends",
+  "set_agEnterSub": "When off, Ctrl+Enter sends and Enter adds a line",
+  "set_agMax": "Max requests per task",
+  "set_agMaxSub": "Stops runaway loops",
+  "set_agTimesUnit": "req",
+  "set_agInstr": "Instructions",
+  "set_agInstrSub": "Combined in this order. Existing chats keep their prompt; new requests use the new text.",
+  "set_agOrderBuiltin": "Built-in prompt",
+  "set_agOrderPrefix": "System prefix",
+  "set_agOrderGlobal": "Global instructions",
+  "set_agOrderWorkspace": "Workspace instructions",
+  "set_agOrderTools": "Tool map",
+  "set_agGlobal": "Global instructions",
+  "set_agPrefix": "System prefix",
+  "set_agPrefixHint": "Fixed text placed before every request, such as a persona or output format.",
+  "set_agBuiltin": "Built-in prompt",
+  "set_agFinal": "View final prompt",
+  "set_agExt": "Extensions",
+  "set_agExtSub": "Loaded per workspace. External extensions run local code; add only trusted ones.",
+  "set_agStudioExt": "Studio interaction",
+  "set_agStudioExtSub": "Reads Studio state and asks questions with cards",
+  "set_agRequired": "Built-in · required",
+  "set_agAddFile": "Add extension file",
+  "set_agAddDir": "Add extension folder",
+  "set_agMcp": "MCP servers",
+  "set_agMcpSub": "CodeMode discovers tools on demand instead of loading them all into context.",
+  "set_agBuiltinTools": "NAI Studio · built-in tools",
+  "set_agBuiltinToolsSub": "Prompt, blocks, wiki, images, history, references, generation and settings",
+  "set_agConnected": "Connected · {n} tools",
+  "@set_agConnected": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agConnecting": "Connecting…",
+  "set_agNeedsLogin": "Sign-in required",
+  "set_agMcpError": "Failed",
+  "set_agMcpOff": "Off",
+  "set_agAddMcp": "Add MCP server",
+  "set_agTools": "Tools",
+  "set_agToolCount": "{n}",
+  "@set_agToolCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agToolsTip": "Generation tools always quote a price and wait for your approval.",
+  "set_agData": "Data folder",
+  "set_agWorkspaces": "Workspaces",
+  "set_agSessions": "Sessions",
+  "set_agCostTip": "Providers bill usage; Studio only shows token counts.",
+  "set_agOpen": "Open Agent",
+  "set_agEditMcp": "Edit",
+  "set_agRemoveMcp": "Remove server",
+  "set_agRemoveExt": "Remove extension",
+  "set_rgDesc": "Local RAG for tag suggestions, wiki, prompt blocks and similar images. Nothing is uploaded.",
+  "set_rgReady": "Semantic search ready",
+  "set_rgOff": "Semantic search off",
+  "set_rgPartial": "Some sources building",
+  "set_rgAllDone": "All indexed",
+  "set_rgPool": "All sources share one local vector store and update incrementally.",
+  "set_rgStepRuntime": "Runtime",
+  "set_rgStepEmbed": "Embedding",
+  "set_rgStepRerank": "Rerank",
+  "set_rgStepDevice": "Device",
+  "set_rgSources": "Sources",
+  "set_rgSourcesSub": "Each source is indexed and toggled on its own. Indexing can pause; finished parts are usable.",
+  "set_rgTags": "Tag suggestions",
+  "set_rgTagsSub": "Semantics, co-occurrence and rerank; computed per prompt box and character",
+  "set_rgWiki": "Wiki semantic search",
+  "set_rgWikiSub": "Local wiki text; exact names first, semantic matches after",
+  "set_rgBlocks": "Prompt blocks",
+  "set_rgBlocksSub": "Titles, tags and text of saved, unarchived blocks",
+  "set_rgGallery": "Gallery (multimodal)",
+  "set_rgGallerySub": "Find similar images by content; NAI parameters get a text index; originals are untouched",
+  "set_rgCount": "{done} / {total}",
+  "@set_rgCount": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgSegments": "{done} / {total} chunks",
+  "@set_rgSegments": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgGalleryCount": "Images {done} / {total} · params {n} chunks",
+  "@set_rgGalleryCount": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "n": {}
+    }
+  },
+  "set_rgPaused": "Paused",
+  "set_rgBuilding": "Building",
+  "set_rgError": "Error",
+  "set_rgClearIndex": "Clear index",
+  "set_rgClearTitle": "Clear the “{name}” index?",
+  "@set_rgClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_rgClearBody": "Only the derived index is removed; content and models stay.",
+  "set_rgContext": "Suggestion context",
+  "set_rgContextSub": "Both take up to 120 Gemma tokens, cut at whole tags.",
+  "set_rgRange": "Sample range",
+  "set_rgBefore": "Before cursor",
+  "set_rgAround": "Around cursor",
+  "set_rgRuntime": "Models & runtime",
+  "set_rgEmbedPath": "Embedding model folder",
+  "set_rgRerankPath": "Rerank model folder",
+  "set_rgDevice": "Device",
+  "set_rgAuto": "Auto",
+  "set_rgEnv": "Runtime",
+  "set_rgEnvSub": "Standalone Python and inference packages; no model weights",
+  "set_rgCheck": "Check",
+  "set_rgReinstall": "Reinstall",
+  "set_rgProgress": "Indexing",
+  "set_rgOverall": "overall",
+  "set_rgShortTags": "Tags",
+  "set_rgShortWiki": "Wiki",
+  "set_rgShortBlocks": "Blocks",
+  "set_rgShortGallery": "Gallery",
+  "set_rgTip": "Clearing a source removes only its derived index; content and models stay.",
+  "set_rgNotReady": "Semantic search not ready",
+  "set_rgNotReadySub": "Install the runtime, then set both model folders.",
+  "set_rgEmpty": "Not indexed",
+  "set_rgBuild": "Build index",
+  "set_rgContinue": "Continue",
+  "set_rgSkipped": "{n} skipped",
+  "@set_rgSkipped": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanLoading": "Counting what will be indexed…",
+  "set_rgPlanTags": "Will index {n} tags with aliases and local descriptions.",
+  "@set_rgPlanTags": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanText": "Will index {docs} documents as {n} text chunks.",
+  "@set_rgPlanText": {
+    "placeholders": {
+      "docs": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanGallery": "Will index {images} images and {n} NAI parameter chunks, separately.",
+  "@set_rgPlanGallery": {
+    "placeholders": {
+      "images": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanNote": "The first run can take a while; pause any time, finished parts work right away.",
+  "set_rgPlanRebuild": "Rebuilding clears this source’s current index first.",
+  "set_rgStart": "Start",
+  "set_rgDownload": "Download",
+  "set_rgDownloading": "Downloading {done} / {total}",
+  "@set_rgDownloading": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgDownloadingUnknown": "Downloading {done}",
+  "@set_rgDownloadingUnknown": {
+    "placeholders": {
+      "done": {}
+    }
+  },
+  "set_rgVerifying": "Verifying files…",
+  "set_rgDiscover": "Find local models",
+  "set_rgDiscoverSub": "Looks in the workspace models folder for EmbeddingGemma 2 and Qwen3-Reranker 0.6B and fills both folders.",
+  "set_rgFind": "Find",
+  "set_rgModelsMissing": "Not found. Use Download, or choose a folder with the weights.",
+  "set_rgPython": "Python interpreter",
+  "set_rgPythonSub": "Uses the standalone runtime by default; you can pick an existing python.exe.",
+  "set_rgPythonAuto": "Auto",
+  "set_rgPythonNone": "Not installed",
+  "set_rgPythonPending": "Not in use yet. “Use this interpreter” reinstalls the packages with it.",
+  "set_rgUsePython": "Use this interpreter",
+  "set_rgEnvReady": "Ready",
+  "set_rgEnvMissing": "Not installed",
+  "set_rgInstall": "Install",
+  "set_rgInstallHint": "Downloads Python and inference packages, not model weights. Pick CUDA for NVIDIA GPUs (several GB); otherwise CPU, which is smaller.",
+  "set_rgInstallCuda": "CUDA · NVIDIA",
+  "set_rgInstallCpu": "CPU",
+  "set_rgPhaseExisting": "Checking existing runtime",
+  "set_rgPhaseDownload": "Downloading installer",
+  "set_rgPhaseCreate": "Preparing Python",
+  "set_rgPhaseCuda": "Installing CUDA components",
+  "set_rgPhasePackages": "Installing packages",
+  "set_rgPhaseCheck": "Verifying runtime",
+  "set_rgElapsed": "{time} in this step",
+  "@set_rgElapsed": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_upDesc": "Manage local upscale models and components. Downloads only start when you click.",
+  "set_upGpu": "{name} · {n} GB",
+  "@set_upGpu": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "set_upNoGpu": "No discrete GPU detected",
+  "set_upLocal": "Upscale on this PC without spending Anlas.",
+  "set_upEsrgan": "Standard models",
+  "set_upEsrganSub": "Real-ESRGAN NCNN, 4×, fast, works on any Vulkan GPU.",
+  "set_upAnimeQuality": "Anime · quality",
+  "set_upAnimeFast": "Anime · fast",
+  "set_upGeneral": "General · photo",
+  "set_upBuiltin": "Built-in",
+  "set_upInstalled": "Installed",
+  "set_upNotInstalled": "Not installed",
+  "set_upFailed": "Download failed",
+  "set_upImport": "Import model",
+  "set_upImportHint": "Pick a matching .param and .bin (4× Real-ESRGAN NCNN)",
+  "set_upSeed": "SeedVR2 diffusion upscale",
+  "set_upSeedSub": "Better quality, slower, needs NVIDIA. Models share a VAE (~0.5 GB) and the Python/CUDA runtime.",
+  "set_upSeed3b": "3B · balanced",
+  "set_upSeed3bSub": "Balanced quality and resources for everyday use",
+  "set_upSeed7b": "7B · quality",
+  "set_upSeed7bSub": "Higher quality; more VRAM and time",
+  "set_upSeed7bSharp": "7B · sharp",
+  "set_upSeed7bSharpSub": "Sharper details for textures",
+  "set_upVram": "VRAM ≥ {n} GB",
+  "@set_upVram": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_upProgress": "{done} / {total} · {speed}/s",
+  "@set_upProgress": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "speed": {}
+    }
+  },
+  "set_upVramMode": "VRAM mode",
+  "set_upRecommended": "Recommended",
+  "set_upLowVram": "Low VRAM",
+  "set_upOffload": "CPU offload layers",
+  "set_upOffloadSub": "More layers save VRAM but run slower and use more RAM",
+  "set_upTiling": "VAE tiling",
+  "set_upTilingSub": "Smaller tiles save VRAM; overlap hides seams",
+  "set_upNoise": "Experimental noise",
+  "set_upNoiseSub": "Input {a} · latent {b}; keep 0 for current results",
+  "@set_upNoiseSub": {
+    "placeholders": {
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_upInputNoise": "Input noise",
+  "set_upLatentNoise": "Latent noise",
+  "set_upExperimental": "Experimental",
+  "set_upRtx": "RTX Video",
+  "set_upRtxSub": "Fast upscaling with NVIDIA RTX Video, a ~64 MB component.",
+  "set_upRtxName": "RTX Video Super Resolution",
+  "set_upRtxNeeds": "Needs a compatible RTX GPU and driver",
+  "set_upDefault": "Default upscaler",
+  "set_upDefaultTip": "Used by “Local upscale” on the generation toolbar; change it from the menu anytime.",
+  "set_upVramTip": "Out of VRAM does not switch models automatically; try 3B, a lower scale, low VRAM mode or VAE tiling.",
+  "set_upRemoveTitle": "Delete {name}?",
+  "@set_upRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_upRemoveBody": "You will need to download it again to use it.",
+  "set_brDesc": "Work with other apps on this PC: Krita, external agents and ComfyUI.",
+  "set_brKritaSub": "Generate from Krita; results come back as layers.",
+  "set_brKrita": "Krita bridge",
+  "set_brLoopback": "Listens on 127.0.0.1 only",
+  "set_brConnected": "Connected",
+  "set_brWaiting": "Waiting for Krita",
+  "set_brRegenerate": "New session",
+  "set_brDiscovery": "Discovery file",
+  "set_brAgents": "External agents",
+  "set_brAgentsSub": "Let local agents such as Claude Code or Codex read and edit parameters and generate.",
+  "set_brLocal": "Local bridge",
+  "set_brClients": "{n} agents connected",
+  "@set_brClients": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brNoClients": "No agents connected",
+  "set_brTakeover": "Copy setup prompt",
+  "set_brEnd": "Disconnect",
+  "set_brActivity": "Recent activity",
+  "set_brComfySub": "Import ComfyUI workflows and run them from Studio.",
+  "set_brComfyEnable": "Enable ComfyUI",
+  "set_brComfyUrl": "Server address",
+  "set_brComfyFailed": "Connection failed: {reason} ({when}). Make sure ComfyUI is running and accepts local connections.",
+  "@set_brComfyFailed": {
+    "placeholders": {
+      "reason": {},
+      "when": {}
+    }
+  },
+  "set_brComfyOk": "Connected ({when})",
+  "@set_brComfyOk": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_brStatus": "Status",
+  "set_brAgentsShort": "{n}",
+  "@set_brAgentsShort": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brOff": "Off",
+  "set_brNoResponse": "No response",
+  "set_brTip": "Bridges listen on the loopback address only and are not exposed to the LAN. Proxy settings do not apply.",
+  "set_nwDesc": "Proxy and connectivity.",
+  "set_nwProxy": "Proxy",
+  "set_nwProxySub": "Used for NovelAI, Danbooru, GitHub updates and model providers.",
+  "set_nwUse": "Use a proxy",
+  "set_nwMode": "Mode",
+  "set_nwSystem": "System",
+  "set_nwManual": "Manual",
+  "set_nwAddress": "Address",
+  "set_nwDetected": "System proxy: {addr}. Only external requests use it; local bridges and models do not.",
+  "@set_nwDetected": {
+    "placeholders": {
+      "addr": {}
+    }
+  },
+  "set_nwNoSystem": "No system proxy detected. Only external requests use the proxy.",
+  "set_nwCheck": "Connectivity check",
+  "set_nwCheckSub": "Check each service at once to tell network problems from service problems.",
+  "set_nwNaiImage": "NovelAI image",
+  "set_nwNaiApi": "NovelAI account",
+  "set_nwDanbooru": "Danbooru",
+  "set_nwUpdate": "App updates",
+  "set_nwCheckAll": "Check all",
+  "set_nwChecked": "Checked {when}",
+  "@set_nwChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_nwViaProxy": "via proxy",
+  "set_nwDirect": "direct",
+  "set_nwNeverChecked": "Not checked yet",
+  "set_nwFail": "Failed",
+  "set_nwTip": "Proxy changes need a restart; Studio reminds you and never restarts on its own.",
+  "set_pvDesc": "What leaves with shared images, and which actions need your confirmation.",
+  "set_pvProtect": "Safeguards",
+  "set_pvStrip": "Strip metadata when sharing",
+  "set_pvStripSub": "Copying or dragging out removes prompt and parameters; the file is unchanged",
+  "set_pvExternal": "Confirm before sending out",
+  "set_pvExternalSub": "Ask before sending images to other apps or sites",
+  "set_pvDanger": "Confirm destructive actions",
+  "set_pvDangerSub": "Delete, clear and overwrite ask first",
+  "set_pvOverwrite": "Never overwrite on save",
+  "set_pvOverwriteSub": "Rename automatically when a file exists",
+  "set_pvBlacklist": "Online gallery blocklist",
+  "set_pvBlacklistSub": "Images with these tags are hidden in the online gallery.",
+  "set_pvAddTag": "Add tag…",
+  "set_pvSync": "Sync Danbooru blocklist",
+  "set_pvSyncSub": "Signed in as {user} · synced {when}",
+  "@set_pvSyncSub": {
+    "placeholders": {
+      "user": {},
+      "when": {}
+    }
+  },
+  "set_pvSyncNever": "Signed in as {user} · never synced",
+  "@set_pvSyncNever": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "set_pvSyncSignedOut": "Sign in to Danbooru to sync your account blocklist",
+  "set_pvSyncNow": "Sync now",
+  "set_pvSyncing": "Syncing…",
+  "set_pvAutoSync": "Sync on launch",
+  "set_pvExported": "What exports include",
+  "set_pvIncPrefs": "Appearance, controls and input",
+  "set_pvIncRules": "Safeguards and blocklist",
+  "set_pvIncCred": "Account credentials",
+  "set_pvIncPaths": "File paths",
+  "set_pvIncDrafts": "Drafts and model bindings",
+  "set_pvTip": "Stripping applies to copy and drag-out only; files saved to disk keep full parameters.",
+  "set_bkDesc": "Move preferences between devices or start fresh. Every reset backs up first.",
+  "set_bkPrefs": "Preferences",
+  "set_bkPrefsSub": "Appearance, controls, input and safeguards. Credentials, paths, drafts and model bindings are never included.",
+  "set_bkExport": "Export",
+  "set_bkExportSub": "Save as studio-preferences.json",
+  "set_bkExportBtn": "Export…",
+  "set_bkImport": "Import",
+  "set_bkImportSub": "Shows how many settings will change and backs up first",
+  "set_bkImportBtn": "Choose file…",
+  "set_bkUndoImport": "Undo last import",
+  "set_bkUndoImportSub": "Back to before the import on {when}",
+  "@set_bkUndoImportSub": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_bkNoImport": "No import yet",
+  "set_bkRestore": "Restore",
+  "set_bkOther": "Other profiles",
+  "set_bkShortcutsSub": "{n} actions, {m} customized",
+  "@set_bkShortcutsSub": {
+    "placeholders": {
+      "n": {},
+      "m": {}
+    }
+  },
+  "set_bkModelsSub": "Providers, feature models and presets; API keys are excluded by default",
+  "set_bkCopyConfig": "Copy config",
+  "set_bkReset": "Reset to defaults",
+  "set_bkResetSub": "Choose what to reset; everything else stays.",
+  "set_bkScopeAppearance": "Appearance & controls",
+  "set_bkScopeAppearanceSub": "Theme, font, language, canvas, notifications",
+  "set_bkScopeInput": "Input & autocomplete",
+  "set_bkScopeInputSub": "Wheel weight, related tags, autocomplete",
+  "set_bkScopeProtect": "Privacy & generation safeguards",
+  "set_bkScopeProtectSub": "Metadata, confirmations, cost warning, pacing",
+  "set_bkScopeShortcuts": "Shortcuts",
+  "set_bkScopeShortcutsSub": "All {n} actions",
+  "@set_bkScopeShortcutsSub": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_bkResetBtn": "Reset selected…",
+  "set_bkResetHint": "Backs up first; can be undone",
+  "set_bkResetTitle": "Reset the selected settings?",
+  "set_bkResetBody": "{scopes} go back to defaults. Current settings are backed up first.",
+  "@set_bkResetBody": {
+    "placeholders": {
+      "scopes": {}
+    }
+  },
+  "set_bkAuto": "Automatic backups",
+  "set_bkAutoSub": "Last 5 kept",
+  "set_bkKindImport": "Before import",
+  "set_bkKindReset": "Before reset",
+  "set_bkKindUpgrade": "Before update",
+  "set_bkNoBackups": "No backups yet",
+  "set_bkRestoreTitle": "Restore the “{name}” backup?",
+  "@set_bkRestoreTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_bkRestoreBody": "Current settings are backed up first so you can switch back.",
+  "set_abDesc": "Version, updates and diagnostics.",
+  "set_abNew": "Version {version} available",
+  "@set_abNew": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abLatest": "Up to date",
+  "set_abChecking": "Checking for updates…",
+  "set_abCheckFailed": "Update check failed",
+  "set_abDownloading": "Downloading {pct}",
+  "@set_abDownloading": {
+    "placeholders": {
+      "pct": {}
+    }
+  },
+  "set_abChecked": "Checked {when}",
+  "@set_abChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_abNotes": "What’s new in {version}",
+  "@set_abNotes": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abInstall": "Download and install",
+  "set_abChangelog": "Full changelog",
+  "set_abPrerelease": "Include pre-releases",
+  "set_abCheck": "Check for updates",
+  "set_abDiag": "Diagnostics",
+  "set_abLog": "Write log files",
+  "set_abLogSub": "Turn on when troubleshooting; logs never contain API keys or credentials",
+  "set_abLogDir": "Log folder",
+  "set_abCopyDiag": "Copy diagnostics",
+  "set_abCopyDiagSub": "Version, system, GPU and service status for bug reports",
+  "set_abProject": "Project",
+  "set_abRepo": "Source code",
+  "set_abUpstream": "Original project",
+  "set_abUpstreamSub": "Built on NAI Launcher; original credits retained",
+  "set_abFonts": "Fonts & assets",
+  "set_abLicenses": "Licenses",
+  "set_abView": "View",
+  "set_abSystem": "System",
+  "set_srQuoted": "“{query}”",
+  "@set_srQuoted": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_srBalance": "Anlas balance",
+  "set_srSubscription": "Subscription & Anlas",
+  "set_agEnable": "Enable",
+  "set_agDisable": "Disable",
+  "set_listSep": ", ",
+  "set_on": "On",
+  "set_off": "Off",
+  "set_unitSeconds": "s"
 }

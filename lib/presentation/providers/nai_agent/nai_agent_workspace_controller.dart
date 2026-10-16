@@ -215,8 +215,13 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> updateSettings(Map<String, dynamic> changes) async {
-    settings = await store.patchSettings(changes);
+  Future<void> updateSettings(
+    Map<String, dynamic> changes, {
+    Map<String, dynamic>? expected,
+  }) async {
+    settings = expected == null
+        ? await store.patchSettings(changes)
+        : await store.patchSettingsChecked(changes, expected: expected);
     _notify();
     if (changes.containsKey('permissionMode')) {
       await Future.wait([

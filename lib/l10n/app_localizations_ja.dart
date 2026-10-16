@@ -16980,4 +16980,2558 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get rag_useRuntime => '既存の環境を使用';
+
+  @override
+  String get set_title => '設定';
+
+  @override
+  String get set_search => '設定を検索';
+
+  @override
+  String get set_searchResults => '検索結果';
+
+  @override
+  String set_searchCount(Object count) {
+    return '$count 件';
+  }
+
+  @override
+  String get set_searchHint => '結果の中で直接変更できます。矢印で設定の場所へ移動します。';
+
+  @override
+  String get set_searchKeys => '選択';
+
+  @override
+  String get set_searchJump => '移動';
+
+  @override
+  String set_searchEmpty(Object query) {
+    return '「$query」は見つかりません';
+  }
+
+  @override
+  String get set_searchEmptyHint => '「プロキシ」「保存」「ショートカット」やパスで試してください';
+
+  @override
+  String get set_goTo => '設定へ移動';
+
+  @override
+  String get set_hasUpdate => '更新あり';
+
+  @override
+  String get set_groupPersonal => '個人';
+
+  @override
+  String get set_groupCreate => '制作';
+
+  @override
+  String get set_groupIntelligence => 'インテリジェンス';
+
+  @override
+  String get set_groupConnect => '接続';
+
+  @override
+  String get set_groupSystem => 'システム';
+
+  @override
+  String get set_pageOverview => '概要';
+
+  @override
+  String get set_pageAccount => 'アカウント';
+
+  @override
+  String get set_pageAppearance => '外観';
+
+  @override
+  String get set_pageCanvas => 'キャンバスと閲覧';
+
+  @override
+  String get set_pageShortcuts => 'ショートカット';
+
+  @override
+  String get set_pageGeneration => '生成と Anlas';
+
+  @override
+  String get set_pageStorage => 'ストレージとギャラリー';
+
+  @override
+  String get set_pageDictionaries => '辞書とキャッシュ';
+
+  @override
+  String get set_pageModels => 'モデルと API';
+
+  @override
+  String get set_pageAgent => 'NAI Agent';
+
+  @override
+  String get set_pageRag => 'セマンティック検索';
+
+  @override
+  String get set_pageUpscale => 'ローカル拡大';
+
+  @override
+  String get set_pageBridges => 'ブリッジと連携';
+
+  @override
+  String get set_pageNetwork => 'ネットワークとプロキシ';
+
+  @override
+  String get set_pagePrivacy => 'プライバシーと保護';
+
+  @override
+  String get set_pageBackup => 'バックアップとリセット';
+
+  @override
+  String get set_pageAbout => 'について';
+
+  @override
+  String get set_resetDefault => '既定に戻す';
+
+  @override
+  String get set_resetPage => 'このページを既定に戻す';
+
+  @override
+  String get set_needsRestart => '要再起動';
+
+  @override
+  String get set_isNew => '新';
+
+  @override
+  String get set_defaultTag => '既定';
+
+  @override
+  String get set_readOnly => '読み取り専用';
+
+  @override
+  String get set_cancel => 'キャンセル';
+
+  @override
+  String get set_save => '保存';
+
+  @override
+  String get set_discard => '破棄';
+
+  @override
+  String get set_later => '後で';
+
+  @override
+  String get set_undo => '元に戻す';
+
+  @override
+  String get set_open => '開く';
+
+  @override
+  String get set_choose => '選択';
+
+  @override
+  String get set_change => '変更';
+
+  @override
+  String get set_clear => '消去';
+
+  @override
+  String get set_delete => '削除';
+
+  @override
+  String get set_copy => 'コピー';
+
+  @override
+  String get set_more => 'その他';
+
+  @override
+  String get set_refresh => '更新';
+
+  @override
+  String get set_retry => '再試行';
+
+  @override
+  String get set_test => '接続テスト';
+
+  @override
+  String get set_testing => '確認中…';
+
+  @override
+  String get set_importIt => 'インポート';
+
+  @override
+  String get set_exportIt => 'エクスポート';
+
+  @override
+  String get set_install => 'インストール';
+
+  @override
+  String get set_download => 'ダウンロード';
+
+  @override
+  String get set_resume => '再開';
+
+  @override
+  String get set_pause => '一時停止';
+
+  @override
+  String get set_rebuild => '再構築';
+
+  @override
+  String get set_login => 'ログイン';
+
+  @override
+  String get set_adjust => '調整';
+
+  @override
+  String get set_collapse => '折りたたむ';
+
+  @override
+  String get set_notSet => '未設定';
+
+  @override
+  String get set_defaultLocation => '既定の場所';
+
+  @override
+  String get set_builtinSound => '内蔵サウンド';
+
+  @override
+  String get set_justNow => 'たった今';
+
+  @override
+  String set_minutesAgo(Object n) {
+    return '$n 分前';
+  }
+
+  @override
+  String set_todayAt(Object time) {
+    return '今日 $time';
+  }
+
+  @override
+  String get set_yesterday => '昨日';
+
+  @override
+  String set_secondsAgo(Object n) {
+    return '$n 秒前';
+  }
+
+  @override
+  String set_savedChange(Object title, Object from, Object to) {
+    return '保存 · $title $from → $to';
+  }
+
+  @override
+  String get set_restartBanner => '保存しました。Studio の再起動後に反映されます。実行中の生成には影響しません。';
+
+  @override
+  String get set_restartNow => '今すぐ再起動';
+
+  @override
+  String get set_unsavedInstructions => '指示に未保存の変更があります';
+
+  @override
+  String get set_leaveTitle => '未保存の変更を破棄しますか？';
+
+  @override
+  String get set_leaveBody => 'Agent の指示は保存されていません。移動すると変更は失われます。';
+
+  @override
+  String set_resetPageTitle(Object page) {
+    return '「$page」を既定に戻しますか？';
+  }
+
+  @override
+  String set_resetPageBody(Object count) {
+    return 'このページで変更した $count 項目が既定に戻ります。概要から元に戻せます。';
+  }
+
+  @override
+  String get set_ovDesc => 'アカウント、ストレージ、接続、AI サービスの状態をまとめています。対応が必要な項目が先頭です。';
+
+  @override
+  String get set_ovSwitchAccount => 'アカウント切替';
+
+  @override
+  String get set_ovTodayUsed => '今日の使用';
+
+  @override
+  String set_ovMonthly(Object n) {
+    return '月間付与 $n';
+  }
+
+  @override
+  String set_ovWarnAt(Object n) {
+    return '高コスト警告 ≥ $n Anlas';
+  }
+
+  @override
+  String get set_ovWarnOff => '高コスト警告オフ';
+
+  @override
+  String set_ovRenews(Object date) {
+    return '更新日 $date';
+  }
+
+  @override
+  String get set_ovSignedOut => '未ログイン';
+
+  @override
+  String get set_ovAttention => '要対応';
+
+  @override
+  String get set_ovAllClear => 'すべて正常';
+
+  @override
+  String set_attUpdate(Object version) {
+    return '新しいバージョン $version';
+  }
+
+  @override
+  String set_attRagPaused(Object source) {
+    return '$sourceのインデックスが一時停止中';
+  }
+
+  @override
+  String set_attRagPausedSub(Object done, Object total) {
+    return '$done / $total、一部は検索可能';
+  }
+
+  @override
+  String set_attBridgeDown(Object name) {
+    return '$name が応答しません';
+  }
+
+  @override
+  String set_attCheckedAt(Object detail, Object when) {
+    return '$detail · $whenに確認';
+  }
+
+  @override
+  String set_attCredential(Object name) {
+    return '「$name」の認証情報が期限切れ';
+  }
+
+  @override
+  String get set_attCredentialSub => '更新するとこのアカウントに切り替えられます';
+
+  @override
+  String set_attDiskLow(Object disk) {
+    return '$disk の空き容量不足';
+  }
+
+  @override
+  String set_attDiskLowSub(Object size) {
+    return '残り $size、自動保存が失敗する可能性';
+  }
+
+  @override
+  String set_attProvider(Object name) {
+    return '$name に接続できません';
+  }
+
+  @override
+  String get set_attProviderSub => '翻訳は別のプロバイダーに切り替わります';
+
+  @override
+  String get set_attView => '表示';
+
+  @override
+  String get set_attGo => '確認';
+
+  @override
+  String get set_attUpdateCred => '更新';
+
+  @override
+  String get set_tileStorage => 'ストレージ';
+
+  @override
+  String set_tileImages(Object n) {
+    return '$n 枚';
+  }
+
+  @override
+  String set_tileSaveTo(Object path) {
+    return '保存先 $path';
+  }
+
+  @override
+  String get set_tileConnect => '接続';
+
+  @override
+  String set_tileOnline(Object n) {
+    return '$n 件オンライン';
+  }
+
+  @override
+  String get set_tileKrita => 'Krita 接続済み';
+
+  @override
+  String get set_tileKritaOff => 'Krita 未接続';
+
+  @override
+  String set_tileAgents(Object n) {
+    return '外部 Agent $n 件';
+  }
+
+  @override
+  String get set_tileComfyDown => 'ComfyUI 応答なし';
+
+  @override
+  String get set_tileComfyOk => 'ComfyUI 正常';
+
+  @override
+  String get set_tileComfyOff => 'ComfyUI 無効';
+
+  @override
+  String get set_tileModels => 'モデルと API';
+
+  @override
+  String set_tileTranslateVia(Object ms) {
+    return 'プロンプト翻訳 · $ms';
+  }
+
+  @override
+  String set_tileAgentModel(Object model) {
+    return 'Agent · $model';
+  }
+
+  @override
+  String set_tileProviders(Object p, Object m) {
+    return '$p プロバイダー · $m モデル';
+  }
+
+  @override
+  String get set_tileNoModel => '未設定';
+
+  @override
+  String get set_tileRag => 'セマンティック検索';
+
+  @override
+  String get set_tileReady => '準備完了';
+
+  @override
+  String set_tileRagDone(Object names) {
+    return '$names 完了';
+  }
+
+  @override
+  String set_tileRagPaused(Object name, Object pct) {
+    return '$name $pct · 一時停止';
+  }
+
+  @override
+  String set_tileRagBuilding(Object name, Object pct) {
+    return '$name $pct · 構築中';
+  }
+
+  @override
+  String set_tileRagEmpty(Object name) {
+    return '$name は未構築';
+  }
+
+  @override
+  String set_tileRagError(Object name) {
+    return '$name の構築に失敗';
+  }
+
+  @override
+  String get set_tileUpscale => 'ローカル拡大';
+
+  @override
+  String set_tileUpscaleModels(Object n) {
+    return '$n モデル利用可';
+  }
+
+  @override
+  String set_tileDefaultIs(Object name) {
+    return '$name（既定）';
+  }
+
+  @override
+  String get set_tileSeedMissing => 'SeedVR2 未インストール';
+
+  @override
+  String get set_tileSeedReady => 'SeedVR2 インストール済み';
+
+  @override
+  String get set_tileProtect => '保護';
+
+  @override
+  String set_tileProtectOn(Object on, Object all) {
+    return '$on / $all オン';
+  }
+
+  @override
+  String set_tileInterval(Object s, Object p) {
+    return '間隔 $s 秒 ± $p%';
+  }
+
+  @override
+  String get set_tileIntervalOff => '生成間隔なし';
+
+  @override
+  String get set_recent => '最近の変更';
+
+  @override
+  String get set_recentSub => '自動保存 · 取り消し可';
+
+  @override
+  String get set_recentEmpty => '変更はまだありません';
+
+  @override
+  String get set_quick => 'よく使う切替';
+
+  @override
+  String get set_quickSub => 'ここで変更';
+
+  @override
+  String get set_quickDark => 'ダークモード';
+
+  @override
+  String get set_quickChannel => 'キャンバスのビジュアルチャネル';
+
+  @override
+  String set_searchTip(Object keys) {
+    return '$keys で設定を検索し、結果の中で直接変更できます。';
+  }
+
+  @override
+  String get set_accDesc => 'NovelAI アカウント、既定ログイン、サブスクリプションを管理します。';
+
+  @override
+  String get set_accSaved => '保存済みアカウント';
+
+  @override
+  String get set_accSavedSub => 'ワンクリックで切り替えられます。認証情報は端末内に保存され、エクスポートされません。';
+
+  @override
+  String get set_accCurrent => '使用中';
+
+  @override
+  String get set_accInUse => '使用中';
+
+  @override
+  String get set_accSwitch => '切替';
+
+  @override
+  String get set_accEmail => 'メール';
+
+  @override
+  String get set_accToken => 'トークン';
+
+  @override
+  String set_accRenews(Object date) {
+    return '更新 $date';
+  }
+
+  @override
+  String set_accLastUsed(Object date) {
+    return '最終使用 $date';
+  }
+
+  @override
+  String get set_accNoSub => 'サブスクなし';
+
+  @override
+  String get set_accExpired => '認証情報の期限切れ';
+
+  @override
+  String get set_accEdit => 'プロフィール編集';
+
+  @override
+  String get set_accUpdate => '認証情報を更新';
+
+  @override
+  String get set_accMakeDefault => '既定にする';
+
+  @override
+  String get set_accDelete => 'アカウントを削除';
+
+  @override
+  String set_accDeleteTitle(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String get set_accDeleteBody => 'この端末の認証情報だけを削除します。NovelAI のアカウントには影響しません。';
+
+  @override
+  String get set_accAdd => 'アカウントを追加';
+
+  @override
+  String get set_accAddHint => 'メールとパスワード、または永続トークン';
+
+  @override
+  String get set_accLogin => 'ログイン';
+
+  @override
+  String get set_accDefault => '既定のアカウント';
+
+  @override
+  String get set_accDefaultSub => 'ログイン画面で最初に選ばれるアカウント';
+
+  @override
+  String get set_accAutoLogin => '起動時に自動ログイン';
+
+  @override
+  String get set_accAutoLoginSub => '前回のセッションを使います。オフにすると毎回ログイン画面から始まります';
+
+  @override
+  String get set_accSub => 'サブスクリプション';
+
+  @override
+  String set_accMonthly(Object n) {
+    return '毎月 $n Anlas';
+  }
+
+  @override
+  String set_accRemaining(Object n) {
+    return '残り $n';
+  }
+
+  @override
+  String set_accResets(Object date) {
+    return '$date にリセット';
+  }
+
+  @override
+  String get set_accPortal => 'NovelAI のアカウントページ';
+
+  @override
+  String get set_accSwitchHint => '切り替えても下書きとキャンバスは残ります。キュー内の生成は元のアカウントで完了します。';
+
+  @override
+  String get set_apDesc => 'テーマ、文字、通知。変更はすぐ保存され、元に戻せます。';
+
+  @override
+  String get set_apTheme => 'テーマ';
+
+  @override
+  String get set_apThemeSub => '起動画面、ログイン、すべてのページで共通です。';
+
+  @override
+  String get set_apLight => 'ライト';
+
+  @override
+  String get set_apDark => 'ダーク';
+
+  @override
+  String get set_apSystem => 'システム';
+
+  @override
+  String get set_apSystemSub => 'Windows の設定に合わせる';
+
+  @override
+  String get set_apText => '文字';
+
+  @override
+  String get set_apFont => 'UI フォント';
+
+  @override
+  String get set_apFontSub => '数字とコードは Geist Mono を使います';
+
+  @override
+  String get set_apScale => '設定とダイアログの文字サイズ';
+
+  @override
+  String get set_apScaleSub => '設定とダイアログだけを拡大します';
+
+  @override
+  String get set_apSampleTitle => '見出し · 生成完了';
+
+  @override
+  String get set_apSampleBody => '本文 · ローカルギャラリーに保存しました。';
+
+  @override
+  String get set_apSampleNote => '注記 · スライダーを動かすとここに反映されます。';
+
+  @override
+  String get set_apLanguage => '言語';
+
+  @override
+  String get set_apLanguageSub => 'すぐに反映されます';
+
+  @override
+  String get set_apMotion => 'モーションとサウンド';
+
+  @override
+  String get set_apReduceMotion => '動きを減らす';
+
+  @override
+  String get set_apReduceMotionSub => 'キャンバス移動、ズーム、パネルのアニメーションを止めます';
+
+  @override
+  String get set_apSound => '生成完了サウンド';
+
+  @override
+  String get set_apSoundSub => 'バッチ完了時に再生';
+
+  @override
+  String get set_apSoundFile => 'サウンドファイル';
+
+  @override
+  String get set_apPreviewSound => '試聴';
+
+  @override
+  String get set_apNotify => '通知';
+
+  @override
+  String get set_apNotifySub => '右上に表示され 3 秒で消えます';
+
+  @override
+  String get set_apNotifyPreview => 'プレビュー';
+
+  @override
+  String get set_apPreview => 'プレビュー';
+
+  @override
+  String get set_apCurrent => '現在';
+
+  @override
+  String set_apThemeTip(Object keys) {
+    return '$keys でいつでもライト／ダークを切り替えられます。';
+  }
+
+  @override
+  String get set_cvDesc => '履歴、ビューアー、無限キャンバスの動作。';
+
+  @override
+  String get set_cvBrowse => '閲覧';
+
+  @override
+  String get set_cvHistoryClick => '履歴サムネイルをクリックしたとき';
+
+  @override
+  String get set_cvOpenDetail => '詳細を開く';
+
+  @override
+  String get set_cvOpenDetailSub => 'ビューアーで 1 枚ずつ確認';
+
+  @override
+  String get set_cvLinked => '連動プレビュー';
+
+  @override
+  String get set_cvLinkedSub => 'キャンバスで選択し、ビューアーは開きません';
+
+  @override
+  String get set_cvViewer => '生成結果の表示先';
+
+  @override
+  String get set_cvCanvas => '無限キャンバス';
+
+  @override
+  String get set_cvCanvasSub => 'バッチを縦に並べ、移動・ズーム・ピン留め';
+
+  @override
+  String get set_cvSimple => 'シンプルビューアー';
+
+  @override
+  String get set_cvSimpleSub => '最新の 1 枚のみ。最も軽量';
+
+  @override
+  String get set_cvCanvasSec => 'キャンバス';
+
+  @override
+  String get set_cvLock => 'キャンバスの視点を固定';
+
+  @override
+  String get set_cvLockSub => '新しい画像が出ても視点を動かしません';
+
+  @override
+  String get set_cvFill => '新しい画像を全体表示';
+
+  @override
+  String get set_cvFillSub => '実ピクセルではなく表示領域に合わせます';
+
+  @override
+  String get set_cvChannel => 'ビジュアルチャネル';
+
+  @override
+  String get set_cvChannelSub => 'キャンバスの通路をテーマで装飾し、履歴をたどると順にテーマが変わります。';
+
+  @override
+  String get set_cvMode => 'モード';
+
+  @override
+  String get set_cvMinTwo => 'ランダムでは 2 つ以上のテーマが必要です。';
+
+  @override
+  String set_cvSession(Object order) {
+    return '今回の順番：$order';
+  }
+
+  @override
+  String get set_cvLevel => '濃さ';
+
+  @override
+  String get set_cvRuler => 'タイムスケール';
+
+  @override
+  String get set_cvRulerSub => 'バッチ時刻、日付区切り、右側の目盛り';
+
+  @override
+  String get set_cvMotion => 'アイドル時の動き';
+
+  @override
+  String get set_cvMotionSub => '生成中と「動きを減らす」オンのときは停止';
+
+  @override
+  String get set_cvOps => 'キャンバス操作';
+
+  @override
+  String get set_cvOpScroll => '上下移動';
+
+  @override
+  String get set_cvOpPan => '左右移動';
+
+  @override
+  String get set_cvOpZoom => 'ズーム';
+
+  @override
+  String get set_cvOpMove => '視点移動';
+
+  @override
+  String get set_cvOpAll => '全体表示';
+
+  @override
+  String get set_cvOpHome => '最新バッチへ';
+
+  @override
+  String get set_cvWheel => 'ホイール';
+
+  @override
+  String get set_cvChannelTip => 'キャンバスの歯車からも同じ設定を変更できます。';
+
+  @override
+  String get set_scDesc => 'ページごとに分類。クリックして新しい組み合わせを記録します。重複は赤く表示されます。';
+
+  @override
+  String get set_scSearch => '操作やキーを検索（例：Ctrl+S）';
+
+  @override
+  String get set_scAll => 'すべて';
+
+  @override
+  String get set_scKeyboard => 'キーボード配置';
+
+  @override
+  String get set_scKeyboardSub => 'キーをクリックで絞り込み。青は使用中、赤は重複。';
+
+  @override
+  String get set_scNoMod => '修飾なし';
+
+  @override
+  String set_scLayer(Object context, Object mod) {
+    return '$context · $mod を押している間';
+  }
+
+  @override
+  String set_scLayerNone(Object context) {
+    return '$context · 修飾キーなし';
+  }
+
+  @override
+  String get set_scAction => '操作';
+
+  @override
+  String get set_scKeys => 'ショートカット';
+
+  @override
+  String get set_scDefault => '既定';
+
+  @override
+  String set_scDefaultIs(Object keys) {
+    return '既定 $keys';
+  }
+
+  @override
+  String set_scConflict(Object name) {
+    return '「$name」と重複';
+  }
+
+  @override
+  String get set_scRecording => '新しい組み合わせを押してください…';
+
+  @override
+  String get set_scRecordHint => 'Esc 取消 · Backspace 消去';
+
+  @override
+  String get set_scRecord => '記録';
+
+  @override
+  String get set_scClear => '消去';
+
+  @override
+  String get set_scDisplay => '表示';
+
+  @override
+  String get set_scEnabled => 'ショートカットを有効にする';
+
+  @override
+  String get set_scInTooltips => 'ツールチップに表示';
+
+  @override
+  String get set_scInMenus => 'メニューに表示';
+
+  @override
+  String get set_scBadges => 'ナビに番号を表示';
+
+  @override
+  String get set_scConflicts => '重複';
+
+  @override
+  String set_scConflictCount(Object n) {
+    return '$n 件';
+  }
+
+  @override
+  String set_scConflictLine(Object keys) {
+    return '$keys が 2 つの操作に割り当て';
+  }
+
+  @override
+  String set_scConflictSub(Object context, Object a, Object b) {
+    return '$context：$a、$b。重複中はどちらも動作しません。';
+  }
+
+  @override
+  String set_scFix(Object name, Object keys) {
+    return '$nameを $keys に戻す';
+  }
+
+  @override
+  String get set_scNoConflict => '重複なし';
+
+  @override
+  String get set_scConfig => 'ショートカット設定';
+
+  @override
+  String get set_scResetAll => 'すべて既定に戻す';
+
+  @override
+  String get set_scResetAllTitle => 'すべてのショートカットを既定に戻しますか？';
+
+  @override
+  String set_scResetAllBody(Object n) {
+    return 'カスタマイズした $n 件が元に戻ります。';
+  }
+
+  @override
+  String get set_scHelp => 'ショートカットのヘルプ';
+
+  @override
+  String set_scHelpTip(Object key) {
+    return '$key でそのページのショートカットを表示します。';
+  }
+
+  @override
+  String get set_scEmpty => '一致するショートカットはありません';
+
+  @override
+  String get set_gnDesc => 'Anlas の消費、リクエスト間隔、プロンプト入力補助を設定します。';
+
+  @override
+  String get set_gnCost => 'Anlas 保護';
+
+  @override
+  String get set_gnCostSub => 'しきい値を超えるリクエストは送信前に確認します。';
+
+  @override
+  String get set_gnWarn => '高コスト警告';
+
+  @override
+  String get set_gnWarnSub => 'しきい値超過時に確認';
+
+  @override
+  String get set_gnThreshold => 'しきい値';
+
+  @override
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  ) {
+    return '現在：$model · $w×$h · $steps ステップ · $n 枚';
+  }
+
+  @override
+  String get set_gnWillWarn => '警告あり';
+
+  @override
+  String get set_gnNoWarn => '警告なし';
+
+  @override
+  String get set_gnFree => '無料';
+
+  @override
+  String get set_gnPace => 'リクエスト間隔';
+
+  @override
+  String get set_gnPaceSub => '連続生成のリクエスト間に待機し、サーバー負荷を減らします。';
+
+  @override
+  String get set_gnLimit => '生成間隔を制限';
+
+  @override
+  String get set_gnInterval => '間隔';
+
+  @override
+  String get set_gnJitter => 'ランダム変動';
+
+  @override
+  String get set_gnJitterSub => '間隔をランダムに増減';
+
+  @override
+  String get set_gnTimeline => 'この設定では 10 回のリクエストはこのような間隔です';
+
+  @override
+  String get set_gnInput => 'プロンプト入力';
+
+  @override
+  String get set_gnWheel => 'ホイールで重み調整';
+
+  @override
+  String get set_gnWheelSub => 'タグ上でホイールを回して重みを変更';
+
+  @override
+  String get set_gnNoKey => 'キー不要';
+
+  @override
+  String get set_gnRelated => '関連タグの提案';
+
+  @override
+  String get set_gnRelatedSub => 'よく一緒に使われるタグを提案';
+
+  @override
+  String get set_gnRag => 'セマンティックなタグ提案';
+
+  @override
+  String get set_gnRagSub => 'セマンティック検索による文脈に応じた提案';
+
+  @override
+  String get set_gnReady => '準備完了';
+
+  @override
+  String get set_gnNotReady => '未準備';
+
+  @override
+  String get set_gnGoSettings => '設定へ';
+
+  @override
+  String get set_gnTranslate => 'プロンプト翻訳';
+
+  @override
+  String get set_gnTranslateSub => 'プロンプト翻訳に使うモデル';
+
+  @override
+  String get set_gnToday => '今日';
+
+  @override
+  String get set_gnUsed => 'Anlas 使用';
+
+  @override
+  String get set_gnNow => '現在';
+
+  @override
+  String get set_gnWarned => '高コスト警告';
+
+  @override
+  String set_gnTimes(Object n) {
+    return '$n 回';
+  }
+
+  @override
+  String get set_gnMaxSingle => '最大 1 回の消費';
+
+  @override
+  String get set_gnFreeTip => 'Opus の無料枠は計算済みです。しきい値は実際の消費だけを見ます。';
+
+  @override
+  String get set_stDesc => '画像の保存先、ギャラリーが読むフォルダー、容量と整理。';
+
+  @override
+  String get set_stUsage => '使用量';
+
+  @override
+  String set_stFree(Object disk, Object size) {
+    return '$disk 空き $size';
+  }
+
+  @override
+  String get set_stRecount => '再集計';
+
+  @override
+  String get set_stCounting => '集計中…';
+
+  @override
+  String get set_stImages => '画像';
+
+  @override
+  String get set_stUpscaleModels => '拡大モデル';
+
+  @override
+  String get set_stVibes => 'Vibe ライブラリ';
+
+  @override
+  String get set_stThumbs => 'サムネイルキャッシュ';
+
+  @override
+  String get set_stRag => 'セマンティック索引';
+
+  @override
+  String get set_stDict => '辞書とキャッシュ';
+
+  @override
+  String get set_stAgent => 'Agent';
+
+  @override
+  String get set_stSave => '保存';
+
+  @override
+  String get set_stSavePath => '画像の保存先';
+
+  @override
+  String get set_stAutoSave => '自動保存';
+
+  @override
+  String get set_stAutoSaveSub => '生成後すぐに保存します。オフではキャンバスと履歴にのみ残ります';
+
+  @override
+  String get set_stAssets => '素材と表示';
+
+  @override
+  String get set_stVibePath => 'Vibe ライブラリの場所';
+
+  @override
+  String get set_stQuality => 'ギャラリーの画質';
+
+  @override
+  String get set_stQualitySub => 'サムネイルの表示品質';
+
+  @override
+  String get set_stHigh => '高画質';
+
+  @override
+  String get set_stStandard => '標準';
+
+  @override
+  String get set_stRoots => 'ギャラリーのフォルダー';
+
+  @override
+  String get set_stRootsSub => '任意のフォルダーをギャラリーで閲覧・検索できます。自動保存の対象外です。';
+
+  @override
+  String get set_stPrimary => 'メイン';
+
+  @override
+  String set_stCount(Object n) {
+    return '$n 枚';
+  }
+
+  @override
+  String get set_stAddFolder => 'フォルダーを追加';
+
+  @override
+  String get set_stImportIndex => 'タグ索引をインポート (.jsonl)';
+
+  @override
+  String set_stLastScan(Object when, Object n) {
+    return '最終スキャン $when · $n 枚';
+  }
+
+  @override
+  String get set_stMaintain => 'メンテナンス';
+
+  @override
+  String get set_stRescan => 'ギャラリーを再スキャン';
+
+  @override
+  String get set_stRescanSub => '欠落ファイルの確認、新規ファイルの追加、メタデータの再読込';
+
+  @override
+  String get set_stScan => 'スキャン';
+
+  @override
+  String get set_stScanning => 'スキャン中…';
+
+  @override
+  String get set_stCleanThumbs => 'サムネイルキャッシュを整理';
+
+  @override
+  String get set_stCleanThumbsSub => '上限を超えたサムネイルを古い順に削除。元画像はそのまま';
+
+  @override
+  String get set_stClean => '整理';
+
+  @override
+  String get set_stCleanTitle => 'サムネイルキャッシュを整理しますか？';
+
+  @override
+  String get set_stCleanBody => '上限を超えたサムネイルを削除し、必要時に再生成します。';
+
+  @override
+  String get set_stAppData => 'アプリデータの場所';
+
+  @override
+  String get set_stAppDataSub => 'アカウント、履歴、ブロックなどのデータベース。変更後は再起動';
+
+  @override
+  String get set_stOpenFolders => 'フォルダーを開く';
+
+  @override
+  String get set_stLogs => 'ログ';
+
+  @override
+  String get set_stAppDataShort => 'アプリデータ';
+
+  @override
+  String get set_stDeleteTip => '画像の移動・削除はギャラリーで行い、「プライバシーと保護」の確認ルールに従います。';
+
+  @override
+  String get set_stRemoveRoot => 'このフォルダーを外す';
+
+  @override
+  String get set_dcDesc => 'タグデータとキャッシュ。補完がおかしいときにここで整理します。';
+
+  @override
+  String get set_dcTags => 'タグ辞書';
+
+  @override
+  String get set_dcTagsSub => '補完、タグ翻訳、提案に使うローカルデータ。';
+
+  @override
+  String get set_dcBase => '基本辞書';
+
+  @override
+  String set_dcBaseValue(Object n, Object version) {
+    return '$n タグ · データ $version';
+  }
+
+  @override
+  String get set_dcCooc => '共起データ';
+
+  @override
+  String get set_dcCoocSub => 'よく一緒に出るタグの提案に使います';
+
+  @override
+  String set_dcEntries(Object n) {
+    return '$n 件';
+  }
+
+  @override
+  String get set_dcTranslate => 'タグ翻訳';
+
+  @override
+  String get set_dcTranslateSub => '辞書に訳がないときに使います';
+
+  @override
+  String get set_dcCaches => 'キャッシュ';
+
+  @override
+  String get set_dcCachesSub => '消去しても必要時に再取得します。画像と設定には影響しません。';
+
+  @override
+  String get set_dcDanbooru => 'Danbooru キャッシュ';
+
+  @override
+  String get set_dcDanbooruSub => 'オンラインギャラリーとタグ百科の応答';
+
+  @override
+  String get set_dcTranslation => 'AI 翻訳キャッシュ';
+
+  @override
+  String get set_dcTranslationSub => '翻訳済みのタグとプロンプト';
+
+  @override
+  String set_dcCacheSize(Object n, Object size) {
+    return '$n 件 · $size';
+  }
+
+  @override
+  String set_dcClearTitle(Object name) {
+    return '$nameを消去しますか？';
+  }
+
+  @override
+  String get set_dcClearBody => '次に使うときに再取得します。';
+
+  @override
+  String get set_dcStats => 'キャッシュ統計';
+
+  @override
+  String get set_dcL1 => 'L1 メモリ';
+
+  @override
+  String get set_dcL2 => 'L2 Hive';
+
+  @override
+  String get set_dcL3 => 'L3 SQLite';
+
+  @override
+  String set_dcImagesUnit(Object n) {
+    return '$n 枚';
+  }
+
+  @override
+  String get set_dcAutoRefresh => '自動更新';
+
+  @override
+  String set_dcUpdated(Object when) {
+    return '最終更新 $when';
+  }
+
+  @override
+  String get set_dcResetStats => '統計をリセット';
+
+  @override
+  String get set_dcTip => 'ここのデータは再生成できます。個人データは「ストレージ → アプリデータの場所」にあります。';
+
+  @override
+  String get set_mdDesc =>
+      '翻訳・逆推定・タグ翻訳・Agent が使う LLM サービス。プロバイダーを追加し、機能ごとにモデルを選びます。';
+
+  @override
+  String get set_mdProviders => 'プロバイダー';
+
+  @override
+  String get set_mdTasks => '機能の割り当て';
+
+  @override
+  String get set_mdPresets => 'プロンプトプリセット';
+
+  @override
+  String get set_mdRequests => 'リクエスト履歴';
+
+  @override
+  String set_mdProviderCount(Object n) {
+    return '$n プロバイダー';
+  }
+
+  @override
+  String set_mdModelCount(Object n) {
+    return '$n モデル';
+  }
+
+  @override
+  String get set_mdDisabled => '無効';
+
+  @override
+  String get set_mdLocal => 'ローカル';
+
+  @override
+  String set_mdLatency(Object ms, Object when) {
+    return '$ms · $when';
+  }
+
+  @override
+  String get set_mdUnreachable => '接続失敗';
+
+  @override
+  String get set_mdName => '名前';
+
+  @override
+  String get set_mdBaseUrl => 'ベース URL';
+
+  @override
+  String get set_mdApiKey => 'API キー';
+
+  @override
+  String get set_mdApiKeyEmpty => '未入力';
+
+  @override
+  String get set_mdModels => 'モデル';
+
+  @override
+  String get set_mdRefreshModels => 'プロバイダーから取得';
+
+  @override
+  String get set_mdAddModel => '手動で追加';
+
+  @override
+  String set_mdUsedFor(Object tasks) {
+    return '$tasks に使用';
+  }
+
+  @override
+  String get set_mdRetired => '提供終了';
+
+  @override
+  String get set_mdCapTools => 'ツール';
+
+  @override
+  String get set_mdCapVision => 'ビジョン';
+
+  @override
+  String get set_mdCapReasoning => '推論';
+
+  @override
+  String get set_mdAdvanced => '詳細なリクエスト設定';
+
+  @override
+  String get set_mdDelete => 'プロバイダーを削除';
+
+  @override
+  String set_mdDeleteTitle(Object name) {
+    return '「$name」を削除しますか？';
+  }
+
+  @override
+  String get set_mdDeleteBody => '使用中の機能は別のプロバイダーに切り替わります。';
+
+  @override
+  String get set_mdRemoveModel => 'モデルを外す';
+
+  @override
+  String get set_mdTaskPrompt => 'プロンプト翻訳';
+
+  @override
+  String get set_mdTaskReverse => 'プロンプト逆推定';
+
+  @override
+  String get set_mdTaskTag => 'タグ翻訳';
+
+  @override
+  String get set_mdTaskWiki => '百科翻訳';
+
+  @override
+  String get set_mdFeature => '機能';
+
+  @override
+  String get set_mdProvider => 'プロバイダー';
+
+  @override
+  String get set_mdModel => 'モデル';
+
+  @override
+  String get set_mdPreset => 'プリセット';
+
+  @override
+  String get set_mdStatus => '状態';
+
+  @override
+  String get set_mdAvailable => '利用可';
+
+  @override
+  String get set_mdFallback => '最初の利用可能なプロバイダーを使用';
+
+  @override
+  String get set_mdNotChosen => '未選択';
+
+  @override
+  String get set_mdBuiltin => '内蔵';
+
+  @override
+  String get set_mdNewPreset => 'プリセットを作成';
+
+  @override
+  String get set_mdEdit => '編集';
+
+  @override
+  String get set_mdTime => '時刻';
+
+  @override
+  String set_mdTokens(Object n) {
+    return '$n トークン';
+  }
+
+  @override
+  String get set_mdFailed => '失敗';
+
+  @override
+  String get set_mdOk => '成功';
+
+  @override
+  String set_mdShowing(Object n, Object total) {
+    return '最新 $n 件 / 全 $total 件';
+  }
+
+  @override
+  String get set_mdImport => '設定をインポート';
+
+  @override
+  String get set_mdAddProvider => 'プロバイダーを追加';
+
+  @override
+  String get set_mdEmpty => 'プロバイダーがありません';
+
+  @override
+  String get set_mdEmptySub => '追加すると翻訳と逆推定が使えます。';
+
+  @override
+  String get set_agDesc => 'サイドバーアシスタントのモデル、指示、拡張、MCP ツール。';
+
+  @override
+  String get set_agModelSec => 'モデル';
+
+  @override
+  String get set_agModel => 'Agent のモデル';
+
+  @override
+  String get set_agModelSub => '思考の強さはチャット欄で調整します';
+
+  @override
+  String get set_agEnter => 'Enter で送信';
+
+  @override
+  String get set_agEnterSub => 'オフでは Ctrl+Enter で送信、Enter で改行';
+
+  @override
+  String get set_agMax => '1 タスクの最大リクエスト';
+
+  @override
+  String get set_agMaxSub => 'ループを防ぎます';
+
+  @override
+  String get set_agTimesUnit => '回';
+
+  @override
+  String get set_agInstr => '指示';
+
+  @override
+  String get set_agInstrSub => 'この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。';
+
+  @override
+  String get set_agOrderBuiltin => '内蔵プロンプト';
+
+  @override
+  String get set_agOrderPrefix => 'システム前置';
+
+  @override
+  String get set_agOrderGlobal => '全体の指示';
+
+  @override
+  String get set_agOrderWorkspace => 'ワークスペースの指示';
+
+  @override
+  String get set_agOrderTools => 'ツールマップ';
+
+  @override
+  String get set_agGlobal => '全体の指示';
+
+  @override
+  String get set_agPrefix => 'システム前置';
+
+  @override
+  String get set_agPrefixHint => '毎回のリクエストの先頭に入れる固定内容。';
+
+  @override
+  String get set_agBuiltin => '内蔵プロンプト';
+
+  @override
+  String get set_agFinal => '最終プロンプトを表示';
+
+  @override
+  String get set_agExt => '拡張';
+
+  @override
+  String get set_agExtSub => 'ワークスペースごとに読み込み。外部拡張はローカルコードを実行します。';
+
+  @override
+  String get set_agStudioExt => 'Studio 連携';
+
+  @override
+  String get set_agStudioExtSub => 'Studio の状態を読み、質問カードで回答を集めます';
+
+  @override
+  String get set_agRequired => '内蔵 · 必須';
+
+  @override
+  String get set_agAddFile => '拡張ファイルを追加';
+
+  @override
+  String get set_agAddDir => '拡張フォルダーを追加';
+
+  @override
+  String get set_agMcp => 'MCP サーバー';
+
+  @override
+  String get set_agMcpSub => 'CodeMode は必要時にツールを探し、一度にコンテキストへ入れません。';
+
+  @override
+  String get set_agBuiltinTools => 'NAI Studio · 内蔵ツール';
+
+  @override
+  String get set_agBuiltinToolsSub => 'プロンプト、ブロック、百科、画像、履歴、参照、生成、設定';
+
+  @override
+  String set_agConnected(Object n) {
+    return '接続済み · $n ツール';
+  }
+
+  @override
+  String get set_agConnecting => '接続中…';
+
+  @override
+  String get set_agNeedsLogin => 'ログインが必要';
+
+  @override
+  String get set_agMcpError => '接続失敗';
+
+  @override
+  String get set_agMcpOff => '無効';
+
+  @override
+  String get set_agAddMcp => 'MCP サーバーを追加';
+
+  @override
+  String get set_agTools => 'ツール';
+
+  @override
+  String set_agToolCount(Object n) {
+    return '$n 件';
+  }
+
+  @override
+  String get set_agToolsTip => '生成系ツールは必ず見積もりを出し、確認後に実行します。';
+
+  @override
+  String get set_agData => 'データフォルダー';
+
+  @override
+  String get set_agWorkspaces => 'ワークスペース';
+
+  @override
+  String get set_agSessions => 'セッション';
+
+  @override
+  String get set_agCostTip => '料金はプロバイダーが請求し、Studio はトークン数のみ表示します。';
+
+  @override
+  String get set_agOpen => 'Agent を開く';
+
+  @override
+  String get set_agEditMcp => '編集';
+
+  @override
+  String get set_agRemoveMcp => 'サーバーを外す';
+
+  @override
+  String get set_agRemoveExt => '拡張を外す';
+
+  @override
+  String get set_rgDesc => 'ローカル RAG。タグ提案、百科、ブロック、類似画像検索に使い、何もアップロードしません。';
+
+  @override
+  String get set_rgReady => 'セマンティック検索の準備完了';
+
+  @override
+  String get set_rgOff => 'セマンティック検索オフ';
+
+  @override
+  String get set_rgPartial => '一部構築中';
+
+  @override
+  String get set_rgAllDone => 'すべて完了';
+
+  @override
+  String get set_rgPool => 'すべてのソースが 1 つのローカルベクトルストアを共有し、差分更新します。';
+
+  @override
+  String get set_rgStepRuntime => '実行環境';
+
+  @override
+  String get set_rgStepEmbed => '埋め込み';
+
+  @override
+  String get set_rgStepRerank => '再ランク';
+
+  @override
+  String get set_rgStepDevice => 'デバイス';
+
+  @override
+  String get set_rgSources => 'ソース';
+
+  @override
+  String get set_rgSourcesSub => 'ソースごとに構築・切替。一時停止でき、完了分はすぐ使えます。';
+
+  @override
+  String get set_rgTags => 'タグ提案';
+
+  @override
+  String get set_rgTagsSub => '意味・共起・再ランクを組み合わせ、各入力欄ごとに計算';
+
+  @override
+  String get set_rgWiki => '百科のセマンティック検索';
+
+  @override
+  String get set_rgWikiSub => 'ローカル百科。名前の完全一致を優先し、意味検索で補完';
+
+  @override
+  String get set_rgBlocks => 'プロンプトブロック';
+
+  @override
+  String get set_rgBlocksSub => '保存済み・未アーカイブのブロックの名前、タグ、本文';
+
+  @override
+  String get set_rgGallery => 'ギャラリー（マルチモーダル）';
+
+  @override
+  String get set_rgGallerySub => '画像内容で類似検索。NAI のパラメーターは別途テキスト索引。元画像は変更しません';
+
+  @override
+  String set_rgCount(Object done, Object total) {
+    return '$done / $total';
+  }
+
+  @override
+  String set_rgSegments(Object done, Object total) {
+    return '$done / $total 段';
+  }
+
+  @override
+  String set_rgGalleryCount(Object done, Object total, Object n) {
+    return '画像 $done / $total · パラメーター $n 段';
+  }
+
+  @override
+  String get set_rgPaused => '一時停止中';
+
+  @override
+  String get set_rgBuilding => '構築中';
+
+  @override
+  String get set_rgError => 'エラー';
+
+  @override
+  String get set_rgClearIndex => '索引を消去';
+
+  @override
+  String set_rgClearTitle(Object name) {
+    return '「$name」の索引を消去しますか？';
+  }
+
+  @override
+  String get set_rgClearBody => '派生索引だけを削除し、元の内容とモデルは残ります。';
+
+  @override
+  String get set_rgContext => '提案の文脈';
+
+  @override
+  String get set_rgContextSub => 'どちらも最大 120 Gemma トークン、タグ単位で切り取り。';
+
+  @override
+  String get set_rgRange => '取得範囲';
+
+  @override
+  String get set_rgBefore => 'カーソルの前';
+
+  @override
+  String get set_rgAround => 'カーソルの前後';
+
+  @override
+  String get set_rgRuntime => 'モデルと実行環境';
+
+  @override
+  String get set_rgEmbedPath => '埋め込みモデルのフォルダー';
+
+  @override
+  String get set_rgRerankPath => '再ランクモデルのフォルダー';
+
+  @override
+  String get set_rgDevice => '実行デバイス';
+
+  @override
+  String get set_rgAuto => '自動';
+
+  @override
+  String get set_rgEnv => '実行環境';
+
+  @override
+  String get set_rgEnvSub => '独立した Python と推論依存。モデルの重みは含みません';
+
+  @override
+  String get set_rgCheck => '確認';
+
+  @override
+  String get set_rgReinstall => '再インストール';
+
+  @override
+  String get set_rgProgress => '構築の進捗';
+
+  @override
+  String get set_rgOverall => '全体';
+
+  @override
+  String get set_rgShortTags => 'タグ';
+
+  @override
+  String get set_rgShortWiki => '百科';
+
+  @override
+  String get set_rgShortBlocks => 'ブロック';
+
+  @override
+  String get set_rgShortGallery => 'ギャラリー';
+
+  @override
+  String get set_rgTip => 'ソースを消去しても派生索引だけが消え、元の内容とモデルは残ります。';
+
+  @override
+  String get set_rgNotReady => 'セマンティック検索はまだ使えません';
+
+  @override
+  String get set_rgNotReadySub => '実行環境をインストールし、2 つのモデルフォルダーを設定してください。';
+
+  @override
+  String get set_rgEmpty => '未構築';
+
+  @override
+  String get set_rgBuild => '索引を構築';
+
+  @override
+  String get set_rgContinue => '続きを構築';
+
+  @override
+  String set_rgSkipped(Object n) {
+    return '$n 枚スキップ';
+  }
+
+  @override
+  String get set_rgPlanLoading => '対象を集計中…';
+
+  @override
+  String set_rgPlanTags(Object n) {
+    return '$n 件のタグ、別名、ローカルの説明を収録します。';
+  }
+
+  @override
+  String set_rgPlanText(Object docs, Object n) {
+    return '$docs 件の資料を $n 個のテキスト片として収録します。';
+  }
+
+  @override
+  String set_rgPlanGallery(Object images, Object n) {
+    return '画像 $images 枚と NAI パラメーター $n 段を別々に収録します。';
+  }
+
+  @override
+  String get set_rgPlanNote => '初回は時間がかかります。いつでも一時停止でき、完了分はすぐ使えます。';
+
+  @override
+  String get set_rgPlanRebuild => '再構築するとこのソースの既存の索引を先に消去します。';
+
+  @override
+  String get set_rgStart => '開始';
+
+  @override
+  String get set_rgDownload => 'ダウンロード';
+
+  @override
+  String set_rgDownloading(Object done, Object total) {
+    return 'ダウンロード中 $done / $total';
+  }
+
+  @override
+  String set_rgDownloadingUnknown(Object done) {
+    return 'ダウンロード中 $done';
+  }
+
+  @override
+  String get set_rgVerifying => 'ファイルを検証中…';
+
+  @override
+  String get set_rgDiscover => 'ローカルモデルを探す';
+
+  @override
+  String get set_rgDiscoverSub =>
+      '04_工具/models で EmbeddingGemma 2 と Qwen3-Reranker 0.6B を探し、上の 2 つのフォルダーを埋めます。';
+
+  @override
+  String get set_rgFind => '探す';
+
+  @override
+  String get set_rgModelsMissing => '見つかりません。「ダウンロード」するか、重みのフォルダーを選んでください。';
+
+  @override
+  String get set_rgPython => 'Python インタープリター';
+
+  @override
+  String get set_rgPythonSub => '既定は自動インストールの独立環境。既存の python.exe も選べます。';
+
+  @override
+  String get set_rgPythonAuto => '自動';
+
+  @override
+  String get set_rgPythonNone => '未インストール';
+
+  @override
+  String get set_rgPythonPending => 'まだ使われていません。「このインタープリターを使う」で依存を入れ直します。';
+
+  @override
+  String get set_rgUsePython => 'このインタープリターを使う';
+
+  @override
+  String get set_rgEnvReady => '準備完了';
+
+  @override
+  String get set_rgEnvMissing => '未インストール';
+
+  @override
+  String get set_rgInstall => 'インストール';
+
+  @override
+  String get set_rgInstallHint =>
+      'Python と推論依存をダウンロードします（モデルの重みは含みません）。NVIDIA なら CUDA（数 GB）、それ以外は小さい CPU 版。';
+
+  @override
+  String get set_rgInstallCuda => 'CUDA · NVIDIA';
+
+  @override
+  String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgPhaseExisting => '既存の環境を確認中';
+
+  @override
+  String get set_rgPhaseDownload => 'インストーラーをダウンロード中';
+
+  @override
+  String get set_rgPhaseCreate => 'Python を準備中';
+
+  @override
+  String get set_rgPhaseCuda => 'CUDA コンポーネントをインストール中';
+
+  @override
+  String get set_rgPhasePackages => '依存をインストール中';
+
+  @override
+  String get set_rgPhaseCheck => '環境を検証中';
+
+  @override
+  String set_rgElapsed(Object time) {
+    return 'この段階 $time';
+  }
+
+  @override
+  String get set_upDesc => 'ローカルの拡大モデルとコンポーネントを管理します。ダウンロードは手動で開始します。';
+
+  @override
+  String set_upGpu(Object name, Object n) {
+    return '$name · $n GB';
+  }
+
+  @override
+  String get set_upNoGpu => '独立 GPU が見つかりません';
+
+  @override
+  String get set_upLocal => 'この PC で拡大し、Anlas を消費しません。';
+
+  @override
+  String get set_upEsrgan => '標準モデル';
+
+  @override
+  String get set_upEsrganSub => 'Real-ESRGAN NCNN、4 倍、高速。Vulkan 対応 GPU で動作。';
+
+  @override
+  String get set_upAnimeQuality => 'アニメ · 画質';
+
+  @override
+  String get set_upAnimeFast => 'アニメ · 高速';
+
+  @override
+  String get set_upGeneral => '汎用 · 写真';
+
+  @override
+  String get set_upBuiltin => '内蔵';
+
+  @override
+  String get set_upInstalled => 'インストール済み';
+
+  @override
+  String get set_upNotInstalled => '未インストール';
+
+  @override
+  String get set_upFailed => 'ダウンロード失敗';
+
+  @override
+  String get set_upImport => 'モデルをインポート';
+
+  @override
+  String get set_upImportHint => '対応する .param と .bin（4 倍 Real-ESRGAN NCNN）を選択';
+
+  @override
+  String get set_upSeed => 'SeedVR2 拡散拡大';
+
+  @override
+  String get set_upSeedSub =>
+      '高画質・低速、NVIDIA 必須。VAE（約 0.5 GB）と Python/CUDA 環境を共有。';
+
+  @override
+  String get set_upSeed3b => '3B · バランス';
+
+  @override
+  String get set_upSeed3bSub => '品質とリソースのバランス。普段使いに';
+
+  @override
+  String get set_upSeed7b => '7B · 高画質';
+
+  @override
+  String get set_upSeed7bSub => '高画質。VRAM と時間が多く必要';
+
+  @override
+  String get set_upSeed7bSharp => '7B · シャープ';
+
+  @override
+  String get set_upSeed7bSharpSub => 'よりシャープなディテール';
+
+  @override
+  String set_upVram(Object n) {
+    return 'VRAM ≥ $n GB';
+  }
+
+  @override
+  String set_upProgress(Object done, Object total, Object speed) {
+    return '$done / $total · $speed/s';
+  }
+
+  @override
+  String get set_upVramMode => 'VRAM モード';
+
+  @override
+  String get set_upRecommended => '推奨';
+
+  @override
+  String get set_upLowVram => '省 VRAM';
+
+  @override
+  String get set_upOffload => 'CPU オフロード層数';
+
+  @override
+  String get set_upOffloadSub => '多いほど VRAM を節約しますが遅くなります';
+
+  @override
+  String get set_upTiling => 'VAE タイル';
+
+  @override
+  String get set_upTilingSub => '小さいタイルは VRAM を節約。重なりで継ぎ目を軽減';
+
+  @override
+  String get set_upNoise => '実験的ノイズ';
+
+  @override
+  String set_upNoiseSub(Object a, Object b) {
+    return '入力 $a · 潜在 $b。0 で現状維持';
+  }
+
+  @override
+  String get set_upInputNoise => '入力ノイズ';
+
+  @override
+  String get set_upLatentNoise => '潜在ノイズ';
+
+  @override
+  String get set_upExperimental => '実験';
+
+  @override
+  String get set_upRtx => 'RTX Video';
+
+  @override
+  String get set_upRtxSub => 'NVIDIA RTX Video で高速拡大（約 64 MB）。';
+
+  @override
+  String get set_upRtxName => 'RTX Video Super Resolution';
+
+  @override
+  String get set_upRtxNeeds => '対応 RTX GPU とドライバーが必要';
+
+  @override
+  String get set_upDefault => '既定の拡大方法';
+
+  @override
+  String get set_upDefaultTip => '生成ページの「ローカル拡大」で使います。メニューでいつでも変更可。';
+
+  @override
+  String get set_upVramTip =>
+      'VRAM 不足でもモデルは自動で切り替わりません。3B、倍率を下げる、省 VRAM、VAE タイルを試してください。';
+
+  @override
+  String set_upRemoveTitle(Object name) {
+    return '$nameを削除しますか？';
+  }
+
+  @override
+  String get set_upRemoveBody => '使うときは再ダウンロードが必要です。';
+
+  @override
+  String get set_brDesc => 'この PC の他のアプリと連携：Krita、外部 Agent、ComfyUI。';
+
+  @override
+  String get set_brKritaSub => 'Krita から生成し、結果をレイヤーに戻します。';
+
+  @override
+  String get set_brKrita => 'Krita ブリッジ';
+
+  @override
+  String get set_brLoopback => '127.0.0.1 からの接続のみ受け付けます';
+
+  @override
+  String get set_brConnected => '接続済み';
+
+  @override
+  String get set_brWaiting => 'Krita の接続待ち';
+
+  @override
+  String get set_brRegenerate => 'セッションを再生成';
+
+  @override
+  String get set_brDiscovery => '検出ファイル';
+
+  @override
+  String get set_brAgents => '外部 Agent';
+
+  @override
+  String get set_brAgentsSub => 'Claude Code や Codex などがパラメーターの読み書きと生成を行えます。';
+
+  @override
+  String get set_brLocal => 'ローカルブリッジ';
+
+  @override
+  String set_brClients(Object n) {
+    return '$n 件の Agent が接続中';
+  }
+
+  @override
+  String get set_brNoClients => '接続中の Agent なし';
+
+  @override
+  String get set_brTakeover => '接続手順をコピー';
+
+  @override
+  String get set_brEnd => '接続を終了';
+
+  @override
+  String get set_brActivity => '最近のアクティビティ';
+
+  @override
+  String get set_brComfySub => 'ComfyUI のワークフローを読み込み Studio から実行します。';
+
+  @override
+  String get set_brComfyEnable => 'ComfyUI を有効にする';
+
+  @override
+  String get set_brComfyUrl => 'サーバーアドレス';
+
+  @override
+  String set_brComfyFailed(Object reason, Object when) {
+    return '接続失敗：$reason（$when）。ComfyUI が起動しているか確認してください。';
+  }
+
+  @override
+  String set_brComfyOk(Object when) {
+    return '接続正常（$when）';
+  }
+
+  @override
+  String get set_brStatus => '状態';
+
+  @override
+  String set_brAgentsShort(Object n) {
+    return '$n 件';
+  }
+
+  @override
+  String get set_brOff => '無効';
+
+  @override
+  String get set_brNoResponse => '応答なし';
+
+  @override
+  String get set_brTip => 'ブリッジはループバックのみで待ち受け、LAN には公開しません。プロキシは適用されません。';
+
+  @override
+  String get set_nwDesc => 'プロキシと接続状態。';
+
+  @override
+  String get set_nwProxy => 'プロキシ';
+
+  @override
+  String get set_nwProxySub => 'NovelAI、Danbooru、GitHub 更新、モデルサービスへの接続に使います。';
+
+  @override
+  String get set_nwUse => 'プロキシを使う';
+
+  @override
+  String get set_nwMode => '方式';
+
+  @override
+  String get set_nwSystem => 'システム';
+
+  @override
+  String get set_nwManual => '手動';
+
+  @override
+  String get set_nwAddress => 'アドレス';
+
+  @override
+  String set_nwDetected(Object addr) {
+    return 'システムプロキシ：$addr。外部リクエストのみ経由し、ローカルブリッジとモデルは経由しません。';
+  }
+
+  @override
+  String get set_nwNoSystem => 'システムプロキシは見つかりません。外部リクエストのみ経由します。';
+
+  @override
+  String get set_nwCheck => '接続チェック';
+
+  @override
+  String get set_nwCheckSub => '各サービスへの到達性をまとめて確認します。';
+
+  @override
+  String get set_nwNaiImage => 'NovelAI 画像生成';
+
+  @override
+  String get set_nwNaiApi => 'NovelAI アカウント';
+
+  @override
+  String get set_nwDanbooru => 'Danbooru';
+
+  @override
+  String get set_nwUpdate => 'アプリ更新';
+
+  @override
+  String get set_nwCheckAll => 'すべて確認';
+
+  @override
+  String set_nwChecked(Object when) {
+    return '最終確認 $when';
+  }
+
+  @override
+  String get set_nwViaProxy => 'プロキシ経由';
+
+  @override
+  String get set_nwDirect => '直接接続';
+
+  @override
+  String get set_nwNeverChecked => '未確認';
+
+  @override
+  String get set_nwFail => '失敗';
+
+  @override
+  String get set_nwTip => 'プロキシの変更は再起動後に反映されます。自動で再起動はしません。';
+
+  @override
+  String get set_pvDesc => '共有時に含める情報と、確認が必要な操作。';
+
+  @override
+  String get set_pvProtect => '保護';
+
+  @override
+  String get set_pvStrip => '共有時にメタデータを除去';
+
+  @override
+  String get set_pvStripSub => 'コピーやドラッグ時にプロンプトとパラメーターを除去。元ファイルはそのまま';
+
+  @override
+  String get set_pvExternal => '外部送信前に確認';
+
+  @override
+  String get set_pvExternalSub => '他のアプリやサイトへ送る前に確認';
+
+  @override
+  String get set_pvDanger => '危険な操作を確認';
+
+  @override
+  String get set_pvDangerSub => '削除・消去・上書きの前に確認';
+
+  @override
+  String get set_pvOverwrite => '保存時に上書きしない';
+
+  @override
+  String get set_pvOverwriteSub => '同名ファイルがあれば自動で名前を変更';
+
+  @override
+  String get set_pvBlacklist => 'オンラインギャラリーのブロックリスト';
+
+  @override
+  String get set_pvBlacklistSub => 'これらのタグを含む画像を非表示にします。';
+
+  @override
+  String get set_pvAddTag => 'タグを追加…';
+
+  @override
+  String get set_pvSync => 'Danbooru のブロックリストを同期';
+
+  @override
+  String set_pvSyncSub(Object user, Object when) {
+    return '$user でログイン中 · 最終同期 $when';
+  }
+
+  @override
+  String set_pvSyncNever(Object user) {
+    return '$user でログイン中 · 未同期';
+  }
+
+  @override
+  String get set_pvSyncSignedOut => 'Danbooru にログインすると同期できます';
+
+  @override
+  String get set_pvSyncNow => '今すぐ同期';
+
+  @override
+  String get set_pvSyncing => '同期中…';
+
+  @override
+  String get set_pvAutoSync => '起動時に自動同期';
+
+  @override
+  String get set_pvExported => 'エクスポートに含まれるもの';
+
+  @override
+  String get set_pvIncPrefs => '外観・操作・入力の設定';
+
+  @override
+  String get set_pvIncRules => '保護ルールとブロックリスト';
+
+  @override
+  String get set_pvIncCred => 'アカウント認証情報';
+
+  @override
+  String get set_pvIncPaths => 'ファイルパス';
+
+  @override
+  String get set_pvIncDrafts => '下書きとモデル設定';
+
+  @override
+  String get set_pvTip => '除去はコピーとドラッグのみ。保存した元画像はパラメーターを保持します。';
+
+  @override
+  String get set_bkDesc => '設定を他の端末へ移す、または既定に戻します。リセット前に必ずバックアップします。';
+
+  @override
+  String get set_bkPrefs => '設定';
+
+  @override
+  String get set_bkPrefsSub => '外観・操作・入力・保護ルール。認証情報、パス、下書き、モデル設定は含みません。';
+
+  @override
+  String get set_bkExport => 'エクスポート';
+
+  @override
+  String get set_bkExportSub => 'studio-preferences.json として保存';
+
+  @override
+  String get set_bkExportBtn => 'エクスポート…';
+
+  @override
+  String get set_bkImport => 'インポート';
+
+  @override
+  String get set_bkImportSub => '適用前に変更件数を表示し、現在の設定をバックアップします';
+
+  @override
+  String get set_bkImportBtn => 'ファイルを選択…';
+
+  @override
+  String get set_bkUndoImport => '前回のインポートを取り消す';
+
+  @override
+  String set_bkUndoImportSub(Object when) {
+    return '$when のインポート前に戻します';
+  }
+
+  @override
+  String get set_bkNoImport => 'インポート履歴なし';
+
+  @override
+  String get set_bkRestore => '復元';
+
+  @override
+  String get set_bkOther => 'その他の設定';
+
+  @override
+  String set_bkShortcutsSub(Object n, Object m) {
+    return '$n 件、$m 件をカスタマイズ';
+  }
+
+  @override
+  String get set_bkModelsSub => 'プロバイダー、割り当て、プリセット。API キーは既定で含みません';
+
+  @override
+  String get set_bkCopyConfig => '設定をコピー';
+
+  @override
+  String get set_bkReset => '既定に戻す';
+
+  @override
+  String get set_bkResetSub => 'リセットする範囲を選びます。その他はそのままです。';
+
+  @override
+  String get set_bkScopeAppearance => '外観と操作';
+
+  @override
+  String get set_bkScopeAppearanceSub => 'テーマ、フォント、言語、キャンバス、通知';
+
+  @override
+  String get set_bkScopeInput => '入力と補完';
+
+  @override
+  String get set_bkScopeInputSub => 'ホイール重み、関連タグ、補完';
+
+  @override
+  String get set_bkScopeProtect => 'プライバシーと生成保護';
+
+  @override
+  String get set_bkScopeProtectSub => 'メタデータ、確認、高コスト警告、間隔';
+
+  @override
+  String get set_bkScopeShortcuts => 'ショートカット';
+
+  @override
+  String set_bkScopeShortcutsSub(Object n) {
+    return '全 $n 件';
+  }
+
+  @override
+  String get set_bkResetBtn => '選択した項目を既定に戻す…';
+
+  @override
+  String get set_bkResetHint => '先にバックアップし、元に戻せます';
+
+  @override
+  String get set_bkResetTitle => '選択した設定を既定に戻しますか？';
+
+  @override
+  String set_bkResetBody(Object scopes) {
+    return '$scopes が既定に戻ります。現在の設定は先にバックアップされます。';
+  }
+
+  @override
+  String get set_bkAuto => '自動バックアップ';
+
+  @override
+  String get set_bkAutoSub => '直近 5 件を保持';
+
+  @override
+  String get set_bkKindImport => 'インポート前';
+
+  @override
+  String get set_bkKindReset => 'リセット前';
+
+  @override
+  String get set_bkKindUpgrade => '更新前';
+
+  @override
+  String get set_bkNoBackups => 'バックアップはまだありません';
+
+  @override
+  String set_bkRestoreTitle(Object name) {
+    return '「$name」のバックアップに戻しますか？';
+  }
+
+  @override
+  String get set_bkRestoreBody => '現在の設定は先にバックアップされます。';
+
+  @override
+  String get set_abDesc => 'バージョン、更新、診断。';
+
+  @override
+  String set_abNew(Object version) {
+    return '新しいバージョン $version';
+  }
+
+  @override
+  String get set_abLatest => '最新です';
+
+  @override
+  String get set_abChecking => '更新を確認中…';
+
+  @override
+  String get set_abCheckFailed => '更新の確認に失敗';
+
+  @override
+  String set_abDownloading(Object pct) {
+    return 'ダウンロード中 $pct';
+  }
+
+  @override
+  String set_abChecked(Object when) {
+    return '最終確認 $when';
+  }
+
+  @override
+  String set_abNotes(Object version) {
+    return '$version の更新内容';
+  }
+
+  @override
+  String get set_abInstall => 'ダウンロードしてインストール';
+
+  @override
+  String get set_abChangelog => '更新履歴';
+
+  @override
+  String get set_abPrerelease => 'プレリリースを含める';
+
+  @override
+  String get set_abCheck => '更新を確認';
+
+  @override
+  String get set_abDiag => '診断';
+
+  @override
+  String get set_abLog => 'ログファイルに記録';
+
+  @override
+  String get set_abLogSub => '問題調査時にオン。API キーや認証情報は含みません';
+
+  @override
+  String get set_abLogDir => 'ログフォルダー';
+
+  @override
+  String get set_abCopyDiag => '診断情報をコピー';
+
+  @override
+  String get set_abCopyDiagSub => 'バージョン、システム、GPU、各サービスの状態';
+
+  @override
+  String get set_abProject => 'プロジェクト';
+
+  @override
+  String get set_abRepo => 'ソースコード';
+
+  @override
+  String get set_abUpstream => '元のプロジェクト';
+
+  @override
+  String get set_abUpstreamSub => 'NAI Launcher をもとに開発。原作者の表記を保持';
+
+  @override
+  String get set_abFonts => 'フォントと素材';
+
+  @override
+  String get set_abLicenses => 'ライセンス';
+
+  @override
+  String get set_abView => '表示';
+
+  @override
+  String get set_abSystem => 'システム';
+
+  @override
+  String set_srQuoted(Object query) {
+    return '「$query」';
+  }
+
+  @override
+  String get set_srBalance => 'Anlas 残高';
+
+  @override
+  String get set_srSubscription => 'サブスクリプションと Anlas';
+
+  @override
+  String get set_agEnable => '有効にする';
+
+  @override
+  String get set_agDisable => '無効にする';
+
+  @override
+  String get set_listSep => '、';
+
+  @override
+  String get set_on => 'オン';
+
+  @override
+  String get set_off => 'オフ';
+
+  @override
+  String get set_unitSeconds => '秒';
 }

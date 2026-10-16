@@ -52,7 +52,7 @@ class SettingsPreferencesService {
   static bool validValue(String key, Object? value) {
     if (value == null) return true;
     if (key == StorageKeys.studioThemeMode) {
-      return ['dark', 'light'].contains(value);
+      return ['dark', 'light', 'system'].contains(value);
     }
     if (key == StorageKeys.locale) return AppLanguage.isStorageCode(value);
     if (key == StorageKeys.fontFamily) {

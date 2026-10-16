@@ -103,7 +103,15 @@ class Worker:
         if engine is None: raise ValueError('disabled_source')
         if op == 'preview': return engine.preview()
         if op == 'start':
-            if any(j['source']==source for j in self.jobs.values()): raise ValueError('index_busy')
+            # Validate before clearing, in this same serialized command.
+            engine.validate_plan(p['plan_id'])
+            if p.get('rebuild'):
+                if any(j['source']==source and not j['paused'] for j in self.jobs.values()): raise ValueError('index_busy')
+                for previous,job in list(self.jobs.items()):
+                    if job['source']==source:
+                        job['cancel'].set();job['generator'].close();self.jobs.pop(previous)
+                engine.clear()
+            elif any(j['source']==source for j in self.jobs.values()): raise ValueError('index_busy')
             job_id = uuid.uuid4().hex
             cancellation = threading.Event()
             generator = engine.build(p['plan_id'], cancellation.is_set)

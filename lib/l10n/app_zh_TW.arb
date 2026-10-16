@@ -9287,5 +9287,1362 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_title": "設定",
+  "set_search": "搜尋設定",
+  "set_searchResults": "搜尋結果",
+  "set_searchCount": "{count} 項",
+  "@set_searchCount": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_searchHint": "結果裡的開關和數值可以直接改；點右側箭頭跳到所在頁面並高亮這一行。",
+  "set_searchKeys": "選擇",
+  "set_searchJump": "跳轉",
+  "set_searchEmpty": "沒有找到“{query}”",
+  "@set_searchEmpty": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_searchEmptyHint": "試試“代理”“儲存”“快速鍵”或某個路徑",
+  "set_goTo": "跳到設定",
+  "set_hasUpdate": "有更新",
+  "set_groupPersonal": "個人",
+  "set_groupCreate": "創作",
+  "set_groupIntelligence": "智慧",
+  "set_groupConnect": "連線",
+  "set_groupSystem": "系統",
+  "set_pageOverview": "概覽",
+  "set_pageAccount": "帳號",
+  "set_pageAppearance": "外觀",
+  "set_pageCanvas": "畫布與瀏覽",
+  "set_pageShortcuts": "快速鍵",
+  "set_pageGeneration": "生成與額度",
+  "set_pageStorage": "儲存與圖庫",
+  "set_pageDictionaries": "詞庫與快取",
+  "set_pageModels": "模型與介面",
+  "set_pageAgent": "NAI Agent",
+  "set_pageRag": "語義檢索",
+  "set_pageUpscale": "本地放大",
+  "set_pageBridges": "橋接與整合",
+  "set_pageNetwork": "網路與代理",
+  "set_pagePrivacy": "隱私與保護",
+  "set_pageBackup": "備份與重設",
+  "set_pageAbout": "關於",
+  "set_resetDefault": "恢復預設",
+  "set_resetPage": "恢復本頁預設",
+  "set_needsRestart": "需重啟",
+  "set_isNew": "新",
+  "set_defaultTag": "預設",
+  "set_readOnly": "只讀",
+  "set_cancel": "取消",
+  "set_save": "儲存",
+  "set_discard": "放棄",
+  "set_later": "稍後",
+  "set_undo": "復原",
+  "set_open": "開啟",
+  "set_choose": "選擇",
+  "set_change": "更改",
+  "set_clear": "清除",
+  "set_delete": "刪除",
+  "set_copy": "複製",
+  "set_more": "更多",
+  "set_refresh": "重新整理",
+  "set_retry": "重試",
+  "set_test": "測試連線",
+  "set_testing": "檢測中…",
+  "set_importIt": "匯入",
+  "set_exportIt": "匯出",
+  "set_install": "安裝",
+  "set_download": "下載",
+  "set_resume": "繼續",
+  "set_pause": "暫停",
+  "set_rebuild": "重建",
+  "set_login": "登入",
+  "set_adjust": "調整",
+  "set_collapse": "收起",
+  "set_notSet": "未設定",
+  "set_defaultLocation": "預設位置",
+  "set_builtinSound": "內建音效",
+  "set_justNow": "剛剛",
+  "set_minutesAgo": "{n} 分鐘前",
+  "@set_minutesAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_todayAt": "今天 {time}",
+  "@set_todayAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_yesterday": "昨天",
+  "set_secondsAgo": "{n} 秒前",
+  "@set_secondsAgo": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_savedChange": "已儲存 · {title} {from} → {to}",
+  "@set_savedChange": {
+    "placeholders": {
+      "title": {},
+      "from": {},
+      "to": {}
+    }
+  },
+  "set_restartBanner": "設定已儲存，重啟 Studio 後生效。正在進行的生成不受影響。",
+  "set_restartNow": "立即重啟",
+  "set_unsavedInstructions": "全域指令有未儲存的修改",
+  "set_leaveTitle": "放棄未儲存的修改？",
+  "set_leaveBody": "Agent 指令還沒儲存，離開這一頁會丟掉修改。",
+  "set_resetPageTitle": "把“{page}”恢復預設？",
+  "@set_resetPageTitle": {
+    "placeholders": {
+      "page": {}
+    }
+  },
+  "set_resetPageBody": "這一頁改過的 {count} 項會回到預設值，可以在概覽裡復原。",
+  "@set_resetPageBody": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "set_ovDesc": "帳號、儲存、連線和智慧服務的狀態都在這裡。需要處理的事項排在最前，點卡片直接進入對應設定。",
+  "set_ovSwitchAccount": "切換帳號",
+  "set_ovTodayUsed": "今天已用",
+  "set_ovMonthly": "本月固定額度 {n}",
+  "@set_ovMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnAt": "高消耗提醒 ≥ {n} Anlas",
+  "@set_ovWarnAt": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_ovWarnOff": "高消耗提醒已關閉",
+  "set_ovRenews": "訂閱續期 {date}",
+  "@set_ovRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_ovSignedOut": "未登入",
+  "set_ovAttention": "需要處理",
+  "set_ovAllClear": "一切正常",
+  "set_attUpdate": "有新版本 {version}",
+  "@set_attUpdate": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_attRagPaused": "{source}語義索引已暫停",
+  "@set_attRagPaused": {
+    "placeholders": {
+      "source": {}
+    }
+  },
+  "set_attRagPausedSub": "已完成 {done} / {total}，已有部分可檢索",
+  "@set_attRagPausedSub": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_attBridgeDown": "{name} 地址無回應",
+  "@set_attBridgeDown": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCheckedAt": "{detail} · {when}檢測",
+  "@set_attCheckedAt": {
+    "placeholders": {
+      "detail": {},
+      "when": {}
+    }
+  },
+  "set_attCredential": "帳號“{name}”憑據已過期",
+  "@set_attCredential": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attCredentialSub": "更新後才能切換到這個帳號",
+  "set_attDiskLow": "{disk} 盤空間不足",
+  "@set_attDiskLow": {
+    "placeholders": {
+      "disk": {}
+    }
+  },
+  "set_attDiskLowSub": "剩餘 {size}，自動儲存可能失敗",
+  "@set_attDiskLowSub": {
+    "placeholders": {
+      "size": {}
+    }
+  },
+  "set_attProvider": "{name} 連線失敗",
+  "@set_attProvider": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_attProviderSub": "翻譯和反推會回落到其他服務商",
+  "set_attView": "檢視",
+  "set_attGo": "去看看",
+  "set_attUpdateCred": "更新憑據",
+  "set_tileStorage": "儲存",
+  "set_tileImages": "圖庫 {n} 張",
+  "@set_tileImages": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileSaveTo": "儲存到 {path}",
+  "@set_tileSaveTo": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "set_tileConnect": "連線",
+  "set_tileOnline": "{n} 項線上",
+  "@set_tileOnline": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileKrita": "Krita 已連線",
+  "set_tileKritaOff": "Krita 未連線",
+  "set_tileAgents": "外部 Agent {n} 個",
+  "@set_tileAgents": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileComfyDown": "ComfyUI 無回應",
+  "set_tileComfyOk": "ComfyUI 正常",
+  "set_tileComfyOff": "ComfyUI 未啟用",
+  "set_tileModels": "模型與介面",
+  "set_tileTranslateVia": "提示詞翻譯 · {ms}",
+  "@set_tileTranslateVia": {
+    "placeholders": {
+      "ms": {}
+    }
+  },
+  "set_tileAgentModel": "Agent · {model}",
+  "@set_tileAgentModel": {
+    "placeholders": {
+      "model": {}
+    }
+  },
+  "set_tileProviders": "{p} 個服務商 · {m} 個模型",
+  "@set_tileProviders": {
+    "placeholders": {
+      "p": {},
+      "m": {}
+    }
+  },
+  "set_tileNoModel": "未配置",
+  "set_tileRag": "語義檢索",
+  "set_tileReady": "就緒",
+  "set_tileRagDone": "{names}已完成",
+  "@set_tileRagDone": {
+    "placeholders": {
+      "names": {}
+    }
+  },
+  "set_tileRagPaused": "{name} {pct} · 已暫停",
+  "@set_tileRagPaused": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagBuilding": "{name} {pct} · 建庫中",
+  "@set_tileRagBuilding": {
+    "placeholders": {
+      "name": {},
+      "pct": {}
+    }
+  },
+  "set_tileRagEmpty": "{name}還沒建庫",
+  "@set_tileRagEmpty": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileRagError": "{name}建庫出錯",
+  "@set_tileRagError": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileUpscale": "本地放大",
+  "set_tileUpscaleModels": "{n} 個模型可用",
+  "@set_tileUpscaleModels": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_tileDefaultIs": "{name}（預設）",
+  "@set_tileDefaultIs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_tileSeedMissing": "SeedVR2 未安裝",
+  "set_tileSeedReady": "SeedVR2 已安裝",
+  "set_tileProtect": "保護",
+  "set_tileProtectOn": "{on} / {all} 已開啟",
+  "@set_tileProtectOn": {
+    "placeholders": {
+      "on": {},
+      "all": {}
+    }
+  },
+  "set_tileInterval": "生成間隔 {s} 秒 ± {p}%",
+  "@set_tileInterval": {
+    "placeholders": {
+      "s": {},
+      "p": {}
+    }
+  },
+  "set_tileIntervalOff": "不限制生成間隔",
+  "set_recent": "最近修改",
+  "set_recentSub": "自動儲存 · 可復原",
+  "set_recentEmpty": "還沒有修改",
+  "set_quick": "常用開關",
+  "set_quickSub": "在這裡直接改",
+  "set_quickDark": "深色模式",
+  "set_quickChannel": "畫布視覺通道",
+  "set_searchTip": "按 {keys} 搜尋任何設定；結果裡可以直接開關，不用跳頁。",
+  "@set_searchTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_accDesc": "管理 NovelAI 帳號、預設登入和訂閱額度。",
+  "set_accSaved": "已儲存帳號",
+  "set_accSavedSub": "新增後可以在這裡一鍵切換；憑據儲存在本機，不會出現在匯出的偏好檔案裡。",
+  "set_accCurrent": "當前",
+  "set_accInUse": "使用中",
+  "set_accSwitch": "切換",
+  "set_accEmail": "電子郵件登入",
+  "set_accToken": "令牌登入",
+  "set_accRenews": "訂閱續期 {date}",
+  "@set_accRenews": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accLastUsed": "上次使用 {date}",
+  "@set_accLastUsed": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accNoSub": "無訂閱",
+  "set_accExpired": "憑據已過期",
+  "set_accEdit": "編輯資料",
+  "set_accUpdate": "更新憑據",
+  "set_accMakeDefault": "設為預設帳號",
+  "set_accDelete": "刪除帳號",
+  "set_accDeleteTitle": "刪除帳號“{name}”？",
+  "@set_accDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_accDeleteBody": "只刪除本機儲存的憑據，NovelAI 上的帳號和圖片不受影響。",
+  "set_accAdd": "新增帳號",
+  "set_accAddHint": "支援電子郵件密碼或持久令牌",
+  "set_accLogin": "登入",
+  "set_accDefault": "預設帳號",
+  "set_accDefaultSub": "登入頁預先選中的帳號",
+  "set_accAutoLogin": "啟動時自動登入",
+  "set_accAutoLoginSub": "使用上次的會話；關掉後每次開啟都停在登入頁",
+  "set_accSub": "訂閱",
+  "set_accMonthly": "每月 {n} Anlas",
+  "@set_accMonthly": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accRemaining": "剩餘 {n}",
+  "@set_accRemaining": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_accResets": "{date} 重設",
+  "@set_accResets": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "set_accPortal": "開啟 NovelAI 帳戶頁",
+  "set_accSwitchHint": "切換帳號會保留當前草稿和畫布；生成佇列中的任務按原帳號完成。",
+  "set_apDesc": "主題、文字和提醒方式。所有修改即時儲存，可以復原。",
+  "set_apTheme": "主題",
+  "set_apThemeSub": "啟動頁、登入頁和所有工作頁面使用同一套主題。",
+  "set_apLight": "淺色",
+  "set_apDark": "深色",
+  "set_apSystem": "跟隨系統",
+  "set_apSystemSub": "按 Windows 設定自動切換",
+  "set_apText": "文字",
+  "set_apFont": "介面字型",
+  "set_apFontSub": "中文用 HarmonyOS Sans SC，數字與程式碼用 Geist Mono",
+  "set_apScale": "設定與對話方塊字號",
+  "set_apScaleSub": "只放大設定頁和彈窗，不影響畫布和圖片",
+  "set_apSampleTitle": "標題 · 生成完成",
+  "set_apSampleBody": "正文 · 結果已儲存到本地畫廊，可以繼續調整提示詞。",
+  "set_apSampleNote": "說明 · 拖動上面的滑塊，這裡即時預覽。",
+  "set_apLanguage": "語言",
+  "set_apLanguageSub": "切換後立即生效，無需重啟",
+  "set_apMotion": "動效與聲音",
+  "set_apReduceMotion": "減少動態效果",
+  "set_apReduceMotionSub": "關閉畫布飛行、縮放和麵板過渡動畫；視覺通道也會停止微動",
+  "set_apSound": "生成完成音效",
+  "set_apSoundSub": "一批圖片全部完成後播放",
+  "set_apSoundFile": "完成音效檔案",
+  "set_apPreviewSound": "試聽",
+  "set_apNotify": "通知樣式",
+  "set_apNotifySub": "提示從視窗右上角出現，3 秒後自動消失",
+  "set_apNotifyPreview": "預覽一條",
+  "set_apPreview": "預覽",
+  "set_apCurrent": "當前",
+  "set_apThemeTip": "快速鍵 {keys} 可以隨時切換深淺色。",
+  "@set_apThemeTip": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_cvDesc": "歷史、檢視器和無限畫布的行為。",
+  "set_cvBrowse": "瀏覽",
+  "set_cvHistoryClick": "點選歷史縮圖時",
+  "set_cvOpenDetail": "開啟詳情",
+  "set_cvOpenDetailSub": "彈出大圖檢視器，適合逐張細看",
+  "set_cvLinked": "聯動預覽",
+  "set_cvLinkedSub": "畫布跳到這張並選中，檢視器不彈出",
+  "set_cvViewer": "生成結果顯示在",
+  "set_cvCanvas": "無限畫布",
+  "set_cvCanvasSub": "按批次排成一列，可以平移、縮放、釘住對比",
+  "set_cvSimple": "簡潔檢視器",
+  "set_cvSimpleSub": "只顯示最新一張，最省資源",
+  "set_cvCanvasSec": "畫布",
+  "set_cvLock": "鎖定畫布視角",
+  "set_cvLockSub": "新圖出現時不自動飛過去，視角保持在你停下的位置",
+  "set_cvFill": "新圖縮放到填滿",
+  "set_cvFillSub": "聚焦單張時放大到可視區域，而不是按原始像素",
+  "set_cvChannel": "視覺通道",
+  "set_cvChannelSub": "畫布中間留空的長廊，按主題繪製裝飾，翻歷史時會依次經過各個主題。",
+  "set_cvMode": "模式",
+  "set_cvMinTwo": "隨機時至少保留兩個主題。",
+  "set_cvSession": "本次順序：{order}",
+  "@set_cvSession": {
+    "placeholders": {
+      "order": {}
+    }
+  },
+  "set_cvLevel": "濃淡",
+  "set_cvRuler": "時間刻度",
+  "set_cvRulerSub": "批次時間、日期分隔和右側刻度條",
+  "set_cvMotion": "空閒微動",
+  "set_cvMotionSub": "生成中和開啟“減少動態效果”時自動暫停",
+  "set_cvOps": "畫布操作",
+  "set_cvOpScroll": "上下翻",
+  "set_cvOpPan": "左右平移",
+  "set_cvOpZoom": "縮放",
+  "set_cvOpMove": "移動視角",
+  "set_cvOpAll": "看全域",
+  "set_cvOpHome": "回到最新一批",
+  "set_cvWheel": "滾輪",
+  "set_cvChannelTip": "畫布右下角的齒輪裡也能改視覺通道，兩處是同一份設定。",
+  "set_scDesc": "按頁面分組。點快速鍵直接錄製新組合；同一頁面裡重複時會標紅，並給出一鍵修復。",
+  "set_scSearch": "搜尋動作或按鍵，例如 Ctrl+S",
+  "set_scAll": "全部",
+  "set_scKeyboard": "鍵盤佈局",
+  "set_scKeyboardSub": "點按鍵篩選下面的列表；藍色是已佔用，紅色是衝突。",
+  "set_scNoMod": "無修飾",
+  "set_scLayer": "{context} · 按住 {mod} 時",
+  "@set_scLayer": {
+    "placeholders": {
+      "context": {},
+      "mod": {}
+    }
+  },
+  "set_scLayerNone": "{context} · 不按修飾鍵",
+  "@set_scLayerNone": {
+    "placeholders": {
+      "context": {}
+    }
+  },
+  "set_scAction": "動作",
+  "set_scKeys": "快速鍵",
+  "set_scDefault": "預設",
+  "set_scDefaultIs": "預設 {keys}",
+  "@set_scDefaultIs": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflict": "與“{name}”衝突",
+  "@set_scConflict": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_scRecording": "按下新的組合鍵…",
+  "set_scRecordHint": "Esc 取消 · Backspace 清除",
+  "set_scRecord": "錄製新組合",
+  "set_scClear": "清除快速鍵",
+  "set_scDisplay": "顯示",
+  "set_scEnabled": "啟用快速鍵",
+  "set_scInTooltips": "在懸停提示中顯示",
+  "set_scInMenus": "在選單中顯示",
+  "set_scBadges": "導航上顯示數字標識",
+  "set_scConflicts": "衝突",
+  "set_scConflictCount": "{n} 項",
+  "@set_scConflictCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scConflictLine": "{keys} 被兩個動作佔用",
+  "@set_scConflictLine": {
+    "placeholders": {
+      "keys": {}
+    }
+  },
+  "set_scConflictSub": "{context}：{a}、{b}。衝突時兩個都不觸發。",
+  "@set_scConflictSub": {
+    "placeholders": {
+      "context": {},
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_scFix": "恢復{name}為 {keys}",
+  "@set_scFix": {
+    "placeholders": {
+      "name": {},
+      "keys": {}
+    }
+  },
+  "set_scNoConflict": "沒有衝突",
+  "set_scConfig": "快速鍵配置",
+  "set_scResetAll": "全部恢復預設",
+  "set_scResetAllTitle": "把全部快速鍵恢復預設？",
+  "set_scResetAllBody": "{n} 個自訂的組合會被還原。",
+  "@set_scResetAllBody": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_scHelp": "快速鍵幫助",
+  "set_scHelpTip": "按 {key} 在任何頁面檢視當前頁可用的快速鍵。",
+  "@set_scHelpTip": {
+    "placeholders": {
+      "key": {}
+    }
+  },
+  "set_scEmpty": "沒有匹配的快速鍵",
+  "set_gnDesc": "控制 Anlas 消耗和請求節奏，以及寫提示詞時的輸入輔助。",
+  "set_gnCost": "額度保護",
+  "set_gnCostSub": "單次請求的消耗超過閾值時，先彈出確認再發送。",
+  "set_gnWarn": "高消耗提醒",
+  "set_gnWarnSub": "超過閾值時先確認",
+  "set_gnThreshold": "提醒閾值",
+  "set_gnEstimate": "當前生圖參數：{model} · {w}×{h} · {steps} 步 · 每次 {n} 張",
+  "@set_gnEstimate": {
+    "placeholders": {
+      "model": {},
+      "w": {},
+      "h": {},
+      "steps": {},
+      "n": {}
+    }
+  },
+  "set_gnWillWarn": "會提醒",
+  "set_gnNoWarn": "不會提醒",
+  "set_gnFree": "免費",
+  "set_gnPace": "請求節奏",
+  "set_gnPaceSub": "連續生成時每次請求之間等一會兒，減輕伺服器壓力，也讓佇列更像手動操作。",
+  "set_gnLimit": "限制生成間隔",
+  "set_gnInterval": "間隔",
+  "set_gnJitter": "隨機浮動",
+  "set_gnJitterSub": "在間隔上下隨機增減",
+  "set_gnTimeline": "按當前設定，連續 10 次請求大約這樣分佈",
+  "set_gnInput": "提示詞輸入",
+  "set_gnWheel": "滾輪調整權重",
+  "set_gnWheelSub": "游標放在標籤上滾動滾輪，直接加減權重",
+  "set_gnNoKey": "無需按鍵",
+  "set_gnRelated": "相關標籤擴展",
+  "set_gnRelatedSub": "輸入標籤時附帶推薦常一起出現的標籤",
+  "set_gnRag": "語義標籤推薦",
+  "set_gnRagSub": "結合上下文的智慧推薦，由“語義檢索”提供",
+  "set_gnReady": "已就緒",
+  "set_gnNotReady": "未就緒",
+  "set_gnGoSettings": "去設定",
+  "set_gnTranslate": "提示詞翻譯",
+  "set_gnTranslateSub": "在提示詞框裡中英互譯使用的模型",
+  "set_gnToday": "今天",
+  "set_gnUsed": "Anlas 已用",
+  "set_gnNow": "現在",
+  "set_gnWarned": "高消耗提醒觸發",
+  "set_gnTimes": "{n} 次",
+  "@set_gnTimes": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_gnMaxSingle": "最大單次消耗",
+  "set_gnFreeTip": "免費額度規則（Opus 小圖不扣 Anlas）由生圖頁按當前參數計算，這裡的閾值只看實際要扣的數。",
+  "set_stDesc": "圖片儲存在哪裡、畫廊讀哪些資料夾，以及佔用與清理。",
+  "set_stUsage": "佔用",
+  "set_stFree": "{disk} 盤剩餘 {size}",
+  "@set_stFree": {
+    "placeholders": {
+      "disk": {},
+      "size": {}
+    }
+  },
+  "set_stRecount": "重新統計",
+  "set_stCounting": "統計中…",
+  "set_stImages": "圖片",
+  "set_stUpscaleModels": "放大模型",
+  "set_stVibes": "Vibe 庫",
+  "set_stThumbs": "縮圖快取",
+  "set_stRag": "語義索引",
+  "set_stDict": "詞庫與快取",
+  "set_stAgent": "Agent",
+  "set_stSave": "儲存",
+  "set_stSavePath": "圖片儲存位置",
+  "set_stAutoSave": "自動儲存",
+  "set_stAutoSaveSub": "生成完成後立即寫入儲存位置；關掉後只留在畫布和歷史裡",
+  "set_stAssets": "素材與顯示",
+  "set_stVibePath": "Vibe 庫位置",
+  "set_stQuality": "本地畫廊清晰度",
+  "set_stQualitySub": "縮圖的顯示品質",
+  "set_stHigh": "高畫質",
+  "set_stStandard": "標清",
+  "set_stRoots": "圖庫來源",
+  "set_stRootsSub": "任何資料夾都可以加入本地畫廊瀏覽和搜尋，不參與自動儲存。",
+  "set_stPrimary": "主目錄",
+  "set_stCount": "{n} 張",
+  "@set_stCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_stAddFolder": "新增資料夾",
+  "set_stImportIndex": "匯入標籤索引 (.jsonl)",
+  "set_stLastScan": "上次掃描 {when} · {n} 張",
+  "@set_stLastScan": {
+    "placeholders": {
+      "when": {},
+      "n": {}
+    }
+  },
+  "set_stMaintain": "維護",
+  "set_stRescan": "重新掃描圖庫",
+  "set_stRescanSub": "檢查缺失檔案、補掃新檔案、重試未讀出的後設資料",
+  "set_stScan": "掃描",
+  "set_stScanning": "掃描中…",
+  "set_stCleanThumbs": "清理縮圖快取",
+  "set_stCleanThumbsSub": "按最近使用淘汰超出上限的縮圖，不碰原圖",
+  "set_stClean": "清理",
+  "set_stCleanTitle": "清理縮圖快取？",
+  "set_stCleanBody": "超出上限的縮圖會被刪除，之後瀏覽時重新生成。原圖不受影響。",
+  "set_stAppData": "應用資料位置",
+  "set_stAppDataSub": "帳號、歷史、塊庫等資料庫所在目錄；修改後需要重啟",
+  "set_stOpenFolders": "開啟資料夾",
+  "set_stLogs": "日誌",
+  "set_stAppDataShort": "應用資料",
+  "set_stDeleteTip": "移動或刪除單張圖片仍在畫廊裡操作，並遵循“隱私與保護”裡的確認規則。",
+  "set_stRemoveRoot": "移除這個資料夾",
+  "set_dcDesc": "標籤資料和各級快取。一般不用動，出現補全異常時可以在這裡清理。",
+  "set_dcTags": "標籤詞庫",
+  "set_dcTagsSub": "自動補全、標籤翻譯和相關推薦用到的本地資料。",
+  "set_dcBase": "基礎詞庫",
+  "set_dcBaseValue": "{n} 個標籤 · 資料版本 {version}",
+  "@set_dcBaseValue": {
+    "placeholders": {
+      "n": {},
+      "version": {}
+    }
+  },
+  "set_dcCooc": "共現資料",
+  "set_dcCoocSub": "用來推薦常一起出現的標籤",
+  "set_dcEntries": "{n} 條",
+  "@set_dcEntries": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcTranslate": "標籤翻譯",
+  "set_dcTranslateSub": "詞庫裡沒有中文釋義時，用這個介面補翻",
+  "set_dcCaches": "快取",
+  "set_dcCachesSub": "清除後會在使用時重新取得，不影響你的圖片和設定。",
+  "set_dcDanbooru": "Danbooru 快取",
+  "set_dcDanbooruSub": "線上畫廊與標籤百科的請求結果",
+  "set_dcTranslation": "AI 翻譯快取",
+  "set_dcTranslationSub": "已翻譯過的標籤和提示詞",
+  "set_dcCacheSize": "{n} 條 · {size}",
+  "@set_dcCacheSize": {
+    "placeholders": {
+      "n": {},
+      "size": {}
+    }
+  },
+  "set_dcClearTitle": "清除{name}？",
+  "@set_dcClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_dcClearBody": "下次用到時會重新取得。",
+  "set_dcStats": "快取統計",
+  "set_dcL1": "L1 記憶體",
+  "set_dcL2": "L2 Hive",
+  "set_dcL3": "L3 SQLite",
+  "set_dcImagesUnit": "{n} 張圖片",
+  "@set_dcImagesUnit": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcAutoRefresh": "自動重新整理",
+  "set_dcUpdated": "上次更新 {when}",
+  "@set_dcUpdated": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcResetStats": "重設統計",
+  "set_dcTip": "這一頁的資料都可以重新生成。真正的個人資料（帳號、歷史、塊庫）在“儲存與圖庫 → 應用資料位置”。",
+  "set_mdDesc": "翻譯、反推、標籤翻譯和 Agent 用到的大模型服務。先新增服務商，再在“功能分配”裡給每個功能選模型。",
+  "set_mdProviders": "服務商",
+  "set_mdTasks": "功能分配",
+  "set_mdPresets": "提示詞預設",
+  "set_mdRequests": "請求記錄",
+  "set_mdProviderCount": "{n} 個服務商",
+  "@set_mdProviderCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdModelCount": "{n} 個模型",
+  "@set_mdModelCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdDisabled": "已停用",
+  "set_mdLocal": "本機",
+  "set_mdLatency": "{ms} · {when}",
+  "@set_mdLatency": {
+    "placeholders": {
+      "ms": {},
+      "when": {}
+    }
+  },
+  "set_mdUnreachable": "連線失敗",
+  "set_mdName": "名稱",
+  "set_mdBaseUrl": "介面地址",
+  "set_mdApiKey": "API Key",
+  "set_mdApiKeyEmpty": "未填寫",
+  "set_mdModels": "模型",
+  "set_mdRefreshModels": "從服務商重新整理",
+  "set_mdAddModel": "手動新增",
+  "set_mdUsedFor": "用於 {tasks}",
+  "@set_mdUsedFor": {
+    "placeholders": {
+      "tasks": {}
+    }
+  },
+  "set_mdRetired": "服務商已下線",
+  "set_mdCapTools": "工具",
+  "set_mdCapVision": "視覺",
+  "set_mdCapReasoning": "推理",
+  "set_mdAdvanced": "進階請求參數",
+  "set_mdDelete": "刪除服務商",
+  "set_mdDeleteTitle": "刪除服務商“{name}”？",
+  "@set_mdDeleteTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_mdDeleteBody": "用到它的功能會回落到其他可用服務商。",
+  "set_mdRemoveModel": "移除模型",
+  "set_mdTaskPrompt": "提示詞翻譯",
+  "set_mdTaskReverse": "提示詞反推",
+  "set_mdTaskTag": "標籤翻譯",
+  "set_mdTaskWiki": "百科翻譯",
+  "set_mdFeature": "功能",
+  "set_mdProvider": "服務商",
+  "set_mdModel": "模型",
+  "set_mdPreset": "預設",
+  "set_mdStatus": "狀態",
+  "set_mdAvailable": "可用",
+  "set_mdFallback": "回落到第一個可用服務商",
+  "set_mdNotChosen": "未選擇",
+  "set_mdBuiltin": "內建",
+  "set_mdNewPreset": "新增預設",
+  "set_mdEdit": "編輯",
+  "set_mdTime": "時間",
+  "set_mdTokens": "{n} tokens",
+  "@set_mdTokens": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_mdFailed": "失敗",
+  "set_mdOk": "成功",
+  "set_mdShowing": "顯示最近 {n} 條，共 {total} 條",
+  "@set_mdShowing": {
+    "placeholders": {
+      "n": {},
+      "total": {}
+    }
+  },
+  "set_mdImport": "匯入配置",
+  "set_mdAddProvider": "新增服務商",
+  "set_mdEmpty": "還沒有服務商",
+  "set_mdEmptySub": "新增一個服務商後，翻譯和反推就能用了。",
+  "set_agDesc": "側欄助手的模型、指令、擴展和 MCP 工具。",
+  "set_agModelSec": "模型",
+  "set_agModel": "Agent 使用的模型",
+  "set_agModelSub": "思考強度在聊天框裡按任務調整",
+  "set_agEnter": "Enter 直接傳送",
+  "set_agEnterSub": "關掉後用 Ctrl+Enter 傳送，Enter 換行",
+  "set_agMax": "單次任務最多請求",
+  "set_agMaxSub": "防止 Agent 陷入迴圈",
+  "set_agTimesUnit": "次",
+  "set_agInstr": "指令",
+  "set_agInstrSub": "按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。",
+  "set_agOrderBuiltin": "內建提示詞",
+  "set_agOrderPrefix": "系統字首",
+  "set_agOrderGlobal": "全域指令",
+  "set_agOrderWorkspace": "工作區指令",
+  "set_agOrderTools": "工具地圖",
+  "set_agGlobal": "全域指令",
+  "set_agPrefix": "系統字首",
+  "set_agPrefixHint": "在每次請求最前面加入的固定內容，例如身份或輸出格式。",
+  "set_agBuiltin": "內建提示詞",
+  "set_agFinal": "檢視最終提示詞",
+  "set_agExt": "擴展",
+  "set_agExtSub": "各工作區獨立載入；外部擴展能執行原生代碼，請只新增可信來源。",
+  "set_agStudioExt": "Studio 互動",
+  "set_agStudioExtSub": "讀取當前 Studio 狀態，並通過問題卡片收集回答",
+  "set_agRequired": "內建 · 必需",
+  "set_agAddFile": "新增擴展檔案",
+  "set_agAddDir": "新增擴展目錄",
+  "set_agMcp": "MCP 伺服器",
+  "set_agMcpSub": "預設 CodeMode 按需發現，工具不會一次性塞進上下文。",
+  "set_agBuiltinTools": "NAI Studio · 內建工具組",
+  "set_agBuiltinToolsSub": "提示詞、塊、百科、圖片、歷史、參考圖、生圖與設定工具",
+  "set_agConnected": "已連線 · {n} 個工具",
+  "@set_agConnected": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agConnecting": "連線中…",
+  "set_agNeedsLogin": "需要登入",
+  "set_agMcpError": "連線失敗",
+  "set_agMcpOff": "已停用",
+  "set_agAddMcp": "新增 MCP 伺服器",
+  "set_agTools": "工具",
+  "set_agToolCount": "{n} 個",
+  "@set_agToolCount": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agToolsTip": "生圖類工具始終先報價，等你確認後才執行。",
+  "set_agData": "資料目錄",
+  "set_agWorkspaces": "工作區",
+  "set_agSessions": "會話",
+  "set_agCostTip": "費用由服務商計費，Studio 只顯示 token 用量。",
+  "set_agOpen": "開啟 Agent",
+  "set_agEditMcp": "編輯",
+  "set_agRemoveMcp": "移除伺服器",
+  "set_agRemoveExt": "移除擴展",
+  "set_rgDesc": "本地執行的 RAG：給標籤推薦、Wiki、提示詞塊和圖庫找相似提供語義能力，不上傳任何內容。",
+  "set_rgReady": "語義檢索已就緒",
+  "set_rgOff": "語義檢索已關閉",
+  "set_rgPartial": "部分來源建庫中",
+  "set_rgAllDone": "全部完成",
+  "set_rgPool": "所有來源共用一個本地向量池，新增內容自動增量更新。",
+  "set_rgStepRuntime": "執行環境",
+  "set_rgStepEmbed": "嵌入",
+  "set_rgStepRerank": "重排",
+  "set_rgStepDevice": "裝置",
+  "set_rgSources": "來源",
+  "set_rgSourcesSub": "每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。",
+  "set_rgTags": "標籤上下文推薦",
+  "set_rgTagsSub": "結合語義、共現與重排；各提示詞框、角色和正負面分開計算",
+  "set_rgWiki": "Wiki 語義搜尋",
+  "set_rgWikiSub": "本地百科正文，名稱精確匹配優先，語義結果補充",
+  "set_rgBlocks": "提示詞塊",
+  "set_rgBlocksSub": "已儲存、未歸檔塊的標題、標籤與正負面文字",
+  "set_rgGallery": "圖庫多模態",
+  "set_rgGallerySub": "分析畫面找相似圖；NAI 圖的參數另建文字索引，原圖不改寫",
+  "set_rgCount": "{done} / {total}",
+  "@set_rgCount": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgSegments": "{done} / {total} 段",
+  "@set_rgSegments": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgGalleryCount": "畫面 {done} / {total} · 參數 {n} 段",
+  "@set_rgGalleryCount": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "n": {}
+    }
+  },
+  "set_rgPaused": "已暫停",
+  "set_rgBuilding": "建庫中",
+  "set_rgError": "出錯",
+  "set_rgClearIndex": "清除索引",
+  "set_rgClearTitle": "清除“{name}”的索引？",
+  "@set_rgClearTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_rgClearBody": "只刪除派生索引，原始內容和模型都保留。",
+  "set_rgContext": "推薦上下文",
+  "set_rgContextSub": "兩種都最多取 120 個 Gemma token，按完整標籤擷取。",
+  "set_rgRange": "取樣範圍",
+  "set_rgBefore": "游標前",
+  "set_rgAround": "插入點前後",
+  "set_rgRuntime": "模型與執行環境",
+  "set_rgEmbedPath": "嵌入模型目錄",
+  "set_rgRerankPath": "重排模型目錄",
+  "set_rgDevice": "執行裝置",
+  "set_rgAuto": "自動",
+  "set_rgEnv": "執行環境",
+  "set_rgEnvSub": "獨立 Python 與推理依賴，不下載模型權重",
+  "set_rgCheck": "檢測",
+  "set_rgReinstall": "重新安裝",
+  "set_rgProgress": "建庫進度",
+  "set_rgOverall": "總體",
+  "set_rgShortTags": "標籤",
+  "set_rgShortWiki": "Wiki",
+  "set_rgShortBlocks": "塊",
+  "set_rgShortGallery": "圖庫",
+  "set_rgTip": "清除某個來源只刪除它的派生索引，原始內容和模型都保留。",
+  "set_rgNotReady": "語義檢索還不能用",
+  "set_rgNotReadySub": "先安裝執行環境，再選好兩個模型目錄。",
+  "set_rgEmpty": "未建立",
+  "set_rgBuild": "建立索引",
+  "set_rgContinue": "繼續建立",
+  "set_rgSkipped": "跳過 {n} 張",
+  "@set_rgSkipped": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanLoading": "正在統計要收錄的內容…",
+  "set_rgPlanTags": "將收錄 {n} 項標籤、別名與已有本地釋義。",
+  "@set_rgPlanTags": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_rgPlanText": "將收錄 {docs} 份資料，切成 {n} 個文字片段。",
+  "@set_rgPlanText": {
+    "placeholders": {
+      "docs": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanGallery": "將收錄 {images} 張圖片和 {n} 段 NAI 參數，畫面與參數分開索引。",
+  "@set_rgPlanGallery": {
+    "placeholders": {
+      "images": {},
+      "n": {}
+    }
+  },
+  "set_rgPlanNote": "首次處理可能較久，可以隨時暫停，已完成的部分立即可用。",
+  "set_rgPlanRebuild": "重建會先清掉這個來源的現有索引。",
+  "set_rgStart": "開始",
+  "set_rgDownload": "下載",
+  "set_rgDownloading": "正在下載 {done} / {total}",
+  "@set_rgDownloading": {
+    "placeholders": {
+      "done": {},
+      "total": {}
+    }
+  },
+  "set_rgDownloadingUnknown": "正在下載 {done}",
+  "@set_rgDownloadingUnknown": {
+    "placeholders": {
+      "done": {}
+    }
+  },
+  "set_rgVerifying": "正在校驗檔案…",
+  "set_rgDiscover": "查詢本地模型",
+  "set_rgDiscoverSub": "在工作區 04_工具/models 裡找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到後自動填好上面兩個目錄。",
+  "set_rgFind": "查詢",
+  "set_rgModelsMissing": "沒找到。可以點“下載”，或手動選擇已下載的權重目錄。",
+  "set_rgPython": "Python 直譯器",
+  "set_rgPythonSub": "預設用自動安裝的獨立環境；也可以選一個已有的 python.exe。",
+  "set_rgPythonAuto": "自動",
+  "set_rgPythonNone": "未安裝",
+  "set_rgPythonPending": "選的直譯器還沒啟用，點“使用此直譯器”會按它重新安裝依賴。",
+  "set_rgUsePython": "使用此直譯器",
+  "set_rgEnvReady": "已就緒",
+  "set_rgEnvMissing": "還沒有安裝",
+  "set_rgInstall": "安裝",
+  "set_rgInstallHint": "下載 Python 與推理依賴，不下載模型權重。NVIDIA 顯示卡選 CUDA（約需數 GB）；其他選 CPU，下載較小。",
+  "set_rgInstallCuda": "CUDA · NVIDIA",
+  "set_rgInstallCpu": "CPU",
+  "set_rgPhaseExisting": "正在檢測已有環境",
+  "set_rgPhaseDownload": "正在下載安裝工具",
+  "set_rgPhaseCreate": "正在準備 Python 環境",
+  "set_rgPhaseCuda": "正在安裝 CUDA 推理元件",
+  "set_rgPhasePackages": "正在安裝推理依賴",
+  "set_rgPhaseCheck": "正在校驗環境",
+  "set_rgElapsed": "此階段已用 {time}",
+  "@set_rgElapsed": {
+    "placeholders": {
+      "time": {}
+    }
+  },
+  "set_upDesc": "管理本機超分模型和元件。所有下載都需要你手動開始。",
+  "set_upGpu": "{name} · {n} GB",
+  "@set_upGpu": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "set_upNoGpu": "沒有檢測到獨立顯示卡",
+  "set_upLocal": "在本機放大圖片，不消耗 Anlas。",
+  "set_upEsrgan": "常規模型",
+  "set_upEsrganSub": "Real-ESRGAN NCNN，4 倍放大，速度快，任何支援 Vulkan 的顯示卡都能用。",
+  "set_upAnimeQuality": "動漫 · 畫質",
+  "set_upAnimeFast": "動漫 · 快速",
+  "set_upGeneral": "通用 · 攝影",
+  "set_upBuiltin": "內建",
+  "set_upInstalled": "已安裝",
+  "set_upNotInstalled": "未安裝",
+  "set_upFailed": "下載失敗",
+  "set_upImport": "匯入模型",
+  "set_upImportHint": "選擇配套的 .param 和 .bin（4 倍 Real-ESRGAN NCNN）",
+  "set_upSeed": "SeedVR2 擴散放大",
+  "set_upSeedSub": "畫質更好、更慢，需要 NVIDIA 顯示卡。型號共用 VAE（約 0.5 GB）和 Python/CUDA 環境。",
+  "set_upSeed3b": "3B · 均衡",
+  "set_upSeed3bSub": "兼顧效果與資源佔用，適合日常放大",
+  "set_upSeed7b": "7B · 高畫質",
+  "set_upSeed7bSub": "更高畫質潛力，需要更多視訊記憶體與時間",
+  "set_upSeed7bSharp": "7B · 銳利",
+  "set_upSeed7bSharpSub": "偏向更銳利的細節，適合強化紋理",
+  "set_upVram": "視訊記憶體 ≥ {n} GB",
+  "@set_upVram": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_upProgress": "{done} / {total} · {speed}/s",
+  "@set_upProgress": {
+    "placeholders": {
+      "done": {},
+      "total": {},
+      "speed": {}
+    }
+  },
+  "set_upVramMode": "視訊記憶體模式",
+  "set_upRecommended": "推薦",
+  "set_upLowVram": "低視訊記憶體",
+  "set_upOffload": "CPU 卸載層數",
+  "set_upOffloadSub": "卸載越多越省視訊記憶體，但更慢、佔更多記憶體",
+  "set_upTiling": "VAE 分塊",
+  "set_upTilingSub": "小分塊省視訊記憶體，重疊可以減輕接縫",
+  "set_upNoise": "實驗性噪聲",
+  "set_upNoiseSub": "輸入噪聲 {a} · 潛空間噪聲 {b}；保持 0 即沿用當前效果",
+  "@set_upNoiseSub": {
+    "placeholders": {
+      "a": {},
+      "b": {}
+    }
+  },
+  "set_upInputNoise": "輸入噪聲",
+  "set_upLatentNoise": "潛空間噪聲",
+  "set_upExperimental": "實驗",
+  "set_upRtx": "RTX Video",
+  "set_upRtxSub": "使用 NVIDIA RTX Video 快速放大，約 64 MB 獨立元件。",
+  "set_upRtxName": "RTX Video Super Resolution",
+  "set_upRtxNeeds": "需要相容的 RTX 顯示卡與驅動",
+  "set_upDefault": "預設放大方式",
+  "set_upDefaultTip": "生圖頁工具條上的“本地放大”預設用這個，選單裡隨時可換。",
+  "set_upVramTip": "視訊記憶體不足時不會自動換型號；可以改用 3B、降低倍率，或開啟低視訊記憶體與 VAE 分塊。",
+  "set_upRemoveTitle": "刪除{name}？",
+  "@set_upRemoveTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_upRemoveBody": "之後要用時需要重新下載。",
+  "set_brDesc": "和本機其他軟體協作：Krita、外部 Agent 和 ComfyUI。",
+  "set_brKritaSub": "在 Krita 裡直接呼叫 Studio 生圖，結果回到 Krita 圖層。",
+  "set_brKrita": "Krita 橋接",
+  "set_brLoopback": "本機監聽，只接受 127.0.0.1 的連線",
+  "set_brConnected": "已連線",
+  "set_brWaiting": "等待 Krita 連線",
+  "set_brRegenerate": "重新生成會話",
+  "set_brDiscovery": "發現檔案",
+  "set_brAgents": "外部 Agent",
+  "set_brAgentsSub": "讓 Claude Code、Codex 等能執行本機命令的 Agent 讀寫參數和生圖。",
+  "set_brLocal": "本機橋接",
+  "set_brClients": "{n} 個 Agent 已連線",
+  "@set_brClients": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brNoClients": "沒有 Agent 連線",
+  "set_brTakeover": "複製接管說明",
+  "set_brEnd": "結束連線",
+  "set_brActivity": "最近活動",
+  "set_brComfySub": "匯入 ComfyUI 工作流，在 Studio 裡填參執行。",
+  "set_brComfyEnable": "啟用 ComfyUI",
+  "set_brComfyUrl": "服務地址",
+  "set_brComfyFailed": "連線失敗：{reason}（{when}）。確認 ComfyUI 已啟動並允許本機存取。",
+  "@set_brComfyFailed": {
+    "placeholders": {
+      "reason": {},
+      "when": {}
+    }
+  },
+  "set_brComfyOk": "連線正常（{when}）",
+  "@set_brComfyOk": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_brStatus": "狀態",
+  "set_brAgentsShort": "{n} 個",
+  "@set_brAgentsShort": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_brOff": "未啟用",
+  "set_brNoResponse": "無回應",
+  "set_brTip": "所有橋接只在本機迴環地址上監聽，不對區域網開放。代理設定不影響這些連線。",
+  "set_nwDesc": "代理和連線狀態。",
+  "set_nwProxy": "代理",
+  "set_nwProxySub": "存取 NovelAI、Danbooru、GitHub 更新和第三方模型服務時使用。",
+  "set_nwUse": "使用代理",
+  "set_nwMode": "方式",
+  "set_nwSystem": "跟隨系統",
+  "set_nwManual": "手動",
+  "set_nwAddress": "地址",
+  "set_nwDetected": "系統代理檢測到 {addr}。代理只轉發上述外部請求，本機橋接和本地模型不經過代理。",
+  "@set_nwDetected": {
+    "placeholders": {
+      "addr": {}
+    }
+  },
+  "set_nwNoSystem": "沒有檢測到系統代理。代理只轉發外部請求，本機橋接和本地模型不經過代理。",
+  "set_nwCheck": "連線檢測",
+  "set_nwCheckSub": "一鍵檢查各服務是否可達，出錯時更容易判斷是網路還是服務的問題。",
+  "set_nwNaiImage": "NovelAI 生圖",
+  "set_nwNaiApi": "NovelAI 帳戶",
+  "set_nwDanbooru": "Danbooru",
+  "set_nwUpdate": "應用更新",
+  "set_nwCheckAll": "全部檢測",
+  "set_nwChecked": "上次檢測 {when}",
+  "@set_nwChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_nwViaProxy": "經過代理",
+  "set_nwDirect": "直連",
+  "set_nwNeverChecked": "還沒檢測過",
+  "set_nwFail": "失敗",
+  "set_nwTip": "改代理後需要重啟才會生效；Studio 會提醒，不會自動重啟打斷你的工作。",
+  "set_pvDesc": "分享圖片時帶出什麼資訊，以及哪些操作需要你確認。",
+  "set_pvProtect": "保護",
+  "set_pvStrip": "分享時去除後設資料",
+  "set_pvStripSub": "複製或拖出圖片時去掉提示詞和參數，原檔案不變",
+  "set_pvExternal": "傳送到外部前提醒",
+  "set_pvExternalSub": "把圖片發給其他軟體或網頁前先確認",
+  "set_pvDanger": "危險操作需確認",
+  "set_pvDangerSub": "刪除、清空、覆蓋等不可復原的操作先彈確認",
+  "set_pvOverwrite": "儲存時不覆蓋",
+  "set_pvOverwriteSub": "目標位置有同名檔案時自動改名",
+  "set_pvBlacklist": "線上畫廊黑名單",
+  "set_pvBlacklistSub": "含有這些標籤的圖片在線上畫廊裡直接隱藏。",
+  "set_pvAddTag": "新增標籤…",
+  "set_pvSync": "同步 Danbooru 黑名單",
+  "set_pvSyncSub": "已登入 {user} · 上次同步 {when}",
+  "@set_pvSyncSub": {
+    "placeholders": {
+      "user": {},
+      "when": {}
+    }
+  },
+  "set_pvSyncNever": "已登入 {user} · 還沒同步過",
+  "@set_pvSyncNever": {
+    "placeholders": {
+      "user": {}
+    }
+  },
+  "set_pvSyncSignedOut": "登入 Danbooru 後可以同步帳號裡的黑名單",
+  "set_pvSyncNow": "立即同步",
+  "set_pvSyncing": "同步中…",
+  "set_pvAutoSync": "啟動時自動同步",
+  "set_pvExported": "匯出時包含什麼",
+  "set_pvIncPrefs": "外觀、操作、輸入偏好",
+  "set_pvIncRules": "保護規則與黑名單",
+  "set_pvIncCred": "帳號憑據",
+  "set_pvIncPaths": "檔案路徑",
+  "set_pvIncDrafts": "草稿與模型繫結",
+  "set_pvTip": "後設資料保護只作用於“複製”和“拖出”，儲存到磁碟的原圖始終保留完整參數，方便日後複用。",
+  "set_bkDesc": "在裝置之間遷移偏好，或者回到預設狀態。所有重設都會先備份。",
+  "set_bkPrefs": "偏好設定",
+  "set_bkPrefsSub": "外觀、操作、輸入與保護規則。帳號憑據、路徑、草稿和模型繫結不會寫進檔案。",
+  "set_bkExport": "匯出",
+  "set_bkExportSub": "儲存為 studio-preferences.json",
+  "set_bkExportBtn": "匯出…",
+  "set_bkImport": "匯入",
+  "set_bkImportSub": "應用前會顯示將修改多少項，並自動備份當前設定",
+  "set_bkImportBtn": "選擇檔案…",
+  "set_bkUndoImport": "復原上次匯入",
+  "set_bkUndoImportSub": "回到 {when} 匯入前的狀態",
+  "@set_bkUndoImportSub": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_bkNoImport": "還沒有匯入過",
+  "set_bkRestore": "恢復",
+  "set_bkOther": "其他配置",
+  "set_bkShortcutsSub": "{n} 個動作，{m} 個已自訂",
+  "@set_bkShortcutsSub": {
+    "placeholders": {
+      "n": {},
+      "m": {}
+    }
+  },
+  "set_bkModelsSub": "服務商、功能分配和預設；API Key 預設不匯出",
+  "set_bkCopyConfig": "複製配置",
+  "set_bkReset": "恢復預設",
+  "set_bkResetSub": "選擇要重設的範圍；其他設定保持不變。",
+  "set_bkScopeAppearance": "外觀與操作",
+  "set_bkScopeAppearanceSub": "主題、字型、語言、畫布、提醒",
+  "set_bkScopeInput": "輸入與補全",
+  "set_bkScopeInputSub": "滾輪權重、標籤擴展、自動補全",
+  "set_bkScopeProtect": "隱私與生成保護",
+  "set_bkScopeProtectSub": "後設資料、確認、高消耗提醒、請求節奏",
+  "set_bkScopeShortcuts": "快速鍵",
+  "set_bkScopeShortcutsSub": "全部 {n} 個動作",
+  "@set_bkScopeShortcutsSub": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_bkResetBtn": "恢復所選為預設…",
+  "set_bkResetHint": "會先備份當前設定，可以復原",
+  "set_bkResetTitle": "恢復所選設定為預設？",
+  "set_bkResetBody": "{scopes} 會回到預設值。當前設定會先自動備份。",
+  "@set_bkResetBody": {
+    "placeholders": {
+      "scopes": {}
+    }
+  },
+  "set_bkAuto": "自動備份",
+  "set_bkAutoSub": "保留最近 5 份",
+  "set_bkKindImport": "匯入前",
+  "set_bkKindReset": "恢復預設前",
+  "set_bkKindUpgrade": "升級前",
+  "set_bkNoBackups": "還沒有自動備份",
+  "set_bkRestoreTitle": "恢復到“{name}”的備份？",
+  "@set_bkRestoreTitle": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_bkRestoreBody": "當前設定會先備份，之後可以再換回來。",
+  "set_abDesc": "版本、更新和問題診斷。",
+  "set_abNew": "有新版本 {version}",
+  "@set_abNew": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abLatest": "已是最新版本",
+  "set_abChecking": "正在檢查更新…",
+  "set_abCheckFailed": "檢查更新失敗",
+  "set_abDownloading": "正在下載 {pct}",
+  "@set_abDownloading": {
+    "placeholders": {
+      "pct": {}
+    }
+  },
+  "set_abChecked": "上次檢查 {when}",
+  "@set_abChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_abNotes": "{version} 更新內容",
+  "@set_abNotes": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "set_abInstall": "下載並安裝",
+  "set_abChangelog": "完整更新日誌",
+  "set_abPrerelease": "包含預發行版本",
+  "set_abCheck": "檢查更新",
+  "set_abDiag": "診斷",
+  "set_abLog": "寫入日誌檔案",
+  "set_abLogSub": "排查問題時開啟；日誌不含 API Key 和登入憑據",
+  "set_abLogDir": "日誌目錄",
+  "set_abCopyDiag": "複製診斷資訊",
+  "set_abCopyDiagSub": "版本、系統、顯示卡、各服務狀態，方便反饋問題",
+  "set_abProject": "專案",
+  "set_abRepo": "開源專案",
+  "set_abUpstream": "原專案",
+  "set_abUpstreamSub": "本專案基於 NAI Launcher 開發，保留原作者署名",
+  "set_abFonts": "字型與素材",
+  "set_abLicenses": "許可證",
+  "set_abView": "檢視",
+  "set_abSystem": "系統",
+  "set_srQuoted": "“{query}”",
+  "@set_srQuoted": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "set_srBalance": "Anlas 餘額",
+  "set_srSubscription": "訂閱與 Anlas 額度",
+  "set_agEnable": "啟用",
+  "set_agDisable": "停用",
+  "set_listSep": "、",
+  "set_on": "開",
+  "set_off": "關",
+  "set_unitSeconds": "秒"
 }

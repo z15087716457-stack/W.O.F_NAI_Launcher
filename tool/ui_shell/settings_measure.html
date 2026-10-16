@@ -1,0 +1,20 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1000px;border:0"></iframe><pre id="out"></pre>
+<script>
+// 设置页原型的元素位置（给 settings_measure.py 出偏差表）。键名和 settings_prototype_capture_test.dart 一致。
+// 坐标以设置页左上角（原型里扣掉 48px 主导航）为原点；滚动区按未滚动时的位置。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.src='/mockups/settings/mock.html#'+view;
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,800));
+  const B=e=>{const b=e.getBoundingClientRect();return [b.left-48,b.top,b.width,b.height]};
+  const m={};
+  const one=(k,s)=>{const e=d.querySelector(s);if(e)m[k]=B(e)};
+  const all=(k,s)=>d.querySelectorAll(s).forEach((e,i)=>m[k+i]=B(e));
+  one('search','.srch');all('nav','.nav .it');
+  one('eyebrow','.pc .eb');one('title','.pc h1');one('desc','.pc .pd');
+  all('sec','.pc .sec');all('card','.pc .sec > .card');all('row','.pc .rw');all('ac','.as .ac');all('tile','.tile');all('hero','.hero > *');
+  document.getElementById('out').textContent='@@'+JSON.stringify(m)+'@@';
+  fetch('/report?v='+encodeURIComponent(view),{method:'POST',body:JSON.stringify(m)});
+};
+</script></body></html>

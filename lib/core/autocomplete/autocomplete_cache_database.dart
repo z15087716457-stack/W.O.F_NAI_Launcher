@@ -163,6 +163,24 @@ class AutocompleteCacheDatabase {
     };
   }
 
+  /// Logical UTF-8 payload bytes; SQLite free pages/indexes are shared overhead.
+  Future<Map<String, int>> contentBytes() async {
+    await initialize();
+    Future<int> bytes(String sql) async {
+      final rows = await _database!.rawQuery(sql);
+      return (rows.first['bytes'] as num?)?.toInt() ?? 0;
+    }
+
+    return {
+      'danbooruCache': await bytes(
+        'SELECT SUM(LENGTH(CAST(payload AS BLOB))) AS bytes FROM remote_queries',
+      ),
+      'aiTranslations': await bytes(
+        'SELECT SUM(LENGTH(CAST(translation AS BLOB))) AS bytes FROM ai_translations',
+      ),
+    };
+  }
+
   Future<void> prune() async {
     await initialize();
     final cutoff = DateTime.now()

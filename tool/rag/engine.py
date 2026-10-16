@@ -135,12 +135,16 @@ class Engine:
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused',?)", ('1' if paused else '0',))
         self.db.commit()
 
-    def build(self, plan_id, cancelled):
-        if self.active: raise ValueError('index_busy')
+    def validate_plan(self, plan_id):
         if not self.plan or self.plan['plan_id'] != plan_id or self.plan['expires'] < time.monotonic():
             raise ValueError('invalid_plan')
         signature = self.sources.signature()
         if signature != self.plan['source_signature']: raise ValueError('source_changed')
+
+    def build(self, plan_id, cancelled):
+        if self.active: raise ValueError('index_busy')
+        self.validate_plan(plan_id)
+        signature = self.plan['source_signature']
         plan = self.plan; self.plan = None; self.active = True
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('consented','1')")
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused','0')")

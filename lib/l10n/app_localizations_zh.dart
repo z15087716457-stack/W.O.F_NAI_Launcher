@@ -16761,6 +16761,2561 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rag_useRuntime => '使用已有环境';
+
+  @override
+  String get set_title => '设置';
+
+  @override
+  String get set_search => '搜索设置';
+
+  @override
+  String get set_searchResults => '搜索结果';
+
+  @override
+  String set_searchCount(Object count) {
+    return '$count 项';
+  }
+
+  @override
+  String get set_searchHint => '结果里的开关和数值可以直接改；点右侧箭头跳到所在页面并高亮这一行。';
+
+  @override
+  String get set_searchKeys => '选择';
+
+  @override
+  String get set_searchJump => '跳转';
+
+  @override
+  String set_searchEmpty(Object query) {
+    return '没有找到“$query”';
+  }
+
+  @override
+  String get set_searchEmptyHint => '试试“代理”“保存”“快捷键”或某个路径';
+
+  @override
+  String get set_goTo => '跳到设置';
+
+  @override
+  String get set_hasUpdate => '有更新';
+
+  @override
+  String get set_groupPersonal => '个人';
+
+  @override
+  String get set_groupCreate => '创作';
+
+  @override
+  String get set_groupIntelligence => '智能';
+
+  @override
+  String get set_groupConnect => '连接';
+
+  @override
+  String get set_groupSystem => '系统';
+
+  @override
+  String get set_pageOverview => '概览';
+
+  @override
+  String get set_pageAccount => '账号';
+
+  @override
+  String get set_pageAppearance => '外观';
+
+  @override
+  String get set_pageCanvas => '画布与浏览';
+
+  @override
+  String get set_pageShortcuts => '快捷键';
+
+  @override
+  String get set_pageGeneration => '生成与额度';
+
+  @override
+  String get set_pageStorage => '存储与图库';
+
+  @override
+  String get set_pageDictionaries => '词库与缓存';
+
+  @override
+  String get set_pageModels => '模型与接口';
+
+  @override
+  String get set_pageAgent => 'NAI Agent';
+
+  @override
+  String get set_pageRag => '语义检索';
+
+  @override
+  String get set_pageUpscale => '本地放大';
+
+  @override
+  String get set_pageBridges => '桥接与集成';
+
+  @override
+  String get set_pageNetwork => '网络与代理';
+
+  @override
+  String get set_pagePrivacy => '隐私与保护';
+
+  @override
+  String get set_pageBackup => '备份与重置';
+
+  @override
+  String get set_pageAbout => '关于';
+
+  @override
+  String get set_resetDefault => '恢复默认';
+
+  @override
+  String get set_resetPage => '恢复本页默认';
+
+  @override
+  String get set_needsRestart => '需重启';
+
+  @override
+  String get set_isNew => '新';
+
+  @override
+  String get set_defaultTag => '默认';
+
+  @override
+  String get set_readOnly => '只读';
+
+  @override
+  String get set_cancel => '取消';
+
+  @override
+  String get set_save => '保存';
+
+  @override
+  String get set_discard => '放弃';
+
+  @override
+  String get set_later => '稍后';
+
+  @override
+  String get set_undo => '撤销';
+
+  @override
+  String get set_open => '打开';
+
+  @override
+  String get set_choose => '选择';
+
+  @override
+  String get set_change => '更改';
+
+  @override
+  String get set_clear => '清除';
+
+  @override
+  String get set_delete => '删除';
+
+  @override
+  String get set_copy => '复制';
+
+  @override
+  String get set_more => '更多';
+
+  @override
+  String get set_refresh => '刷新';
+
+  @override
+  String get set_retry => '重试';
+
+  @override
+  String get set_test => '测试连接';
+
+  @override
+  String get set_testing => '检测中…';
+
+  @override
+  String get set_importIt => '导入';
+
+  @override
+  String get set_exportIt => '导出';
+
+  @override
+  String get set_install => '安装';
+
+  @override
+  String get set_download => '下载';
+
+  @override
+  String get set_resume => '继续';
+
+  @override
+  String get set_pause => '暂停';
+
+  @override
+  String get set_rebuild => '重建';
+
+  @override
+  String get set_login => '登录';
+
+  @override
+  String get set_adjust => '调整';
+
+  @override
+  String get set_collapse => '收起';
+
+  @override
+  String get set_notSet => '未设置';
+
+  @override
+  String get set_defaultLocation => '默认位置';
+
+  @override
+  String get set_builtinSound => '内置音效';
+
+  @override
+  String get set_justNow => '刚刚';
+
+  @override
+  String set_minutesAgo(Object n) {
+    return '$n 分钟前';
+  }
+
+  @override
+  String set_todayAt(Object time) {
+    return '今天 $time';
+  }
+
+  @override
+  String get set_yesterday => '昨天';
+
+  @override
+  String set_secondsAgo(Object n) {
+    return '$n 秒前';
+  }
+
+  @override
+  String set_savedChange(Object title, Object from, Object to) {
+    return '已保存 · $title $from → $to';
+  }
+
+  @override
+  String get set_restartBanner => '设置已保存，重启 Studio 后生效。正在进行的生成不受影响。';
+
+  @override
+  String get set_restartNow => '立即重启';
+
+  @override
+  String get set_unsavedInstructions => '全局指令有未保存的修改';
+
+  @override
+  String get set_leaveTitle => '放弃未保存的修改？';
+
+  @override
+  String get set_leaveBody => 'Agent 指令还没保存，离开这一页会丢掉修改。';
+
+  @override
+  String set_resetPageTitle(Object page) {
+    return '把“$page”恢复默认？';
+  }
+
+  @override
+  String set_resetPageBody(Object count) {
+    return '这一页改过的 $count 项会回到默认值，可以在概览里撤销。';
+  }
+
+  @override
+  String get set_ovDesc => '账号、存储、连接和智能服务的状态都在这里。需要处理的事项排在最前，点卡片直接进入对应设置。';
+
+  @override
+  String get set_ovSwitchAccount => '切换账号';
+
+  @override
+  String get set_ovTodayUsed => '今天已用';
+
+  @override
+  String set_ovMonthly(Object n) {
+    return '本月固定额度 $n';
+  }
+
+  @override
+  String set_ovWarnAt(Object n) {
+    return '高消耗提醒 ≥ $n Anlas';
+  }
+
+  @override
+  String get set_ovWarnOff => '高消耗提醒已关闭';
+
+  @override
+  String set_ovRenews(Object date) {
+    return '订阅续期 $date';
+  }
+
+  @override
+  String get set_ovSignedOut => '未登录';
+
+  @override
+  String get set_ovAttention => '需要处理';
+
+  @override
+  String get set_ovAllClear => '一切正常';
+
+  @override
+  String set_attUpdate(Object version) {
+    return '有新版本 $version';
+  }
+
+  @override
+  String set_attRagPaused(Object source) {
+    return '$source语义索引已暂停';
+  }
+
+  @override
+  String set_attRagPausedSub(Object done, Object total) {
+    return '已完成 $done / $total，已有部分可检索';
+  }
+
+  @override
+  String set_attBridgeDown(Object name) {
+    return '$name 地址无响应';
+  }
+
+  @override
+  String set_attCheckedAt(Object detail, Object when) {
+    return '$detail · $when检测';
+  }
+
+  @override
+  String set_attCredential(Object name) {
+    return '账号“$name”凭据已过期';
+  }
+
+  @override
+  String get set_attCredentialSub => '更新后才能切换到这个账号';
+
+  @override
+  String set_attDiskLow(Object disk) {
+    return '$disk 盘空间不足';
+  }
+
+  @override
+  String set_attDiskLowSub(Object size) {
+    return '剩余 $size，自动保存可能失败';
+  }
+
+  @override
+  String set_attProvider(Object name) {
+    return '$name 连接失败';
+  }
+
+  @override
+  String get set_attProviderSub => '翻译和反推会回落到其他服务商';
+
+  @override
+  String get set_attView => '查看';
+
+  @override
+  String get set_attGo => '去看看';
+
+  @override
+  String get set_attUpdateCred => '更新凭据';
+
+  @override
+  String get set_tileStorage => '存储';
+
+  @override
+  String set_tileImages(Object n) {
+    return '图库 $n 张';
+  }
+
+  @override
+  String set_tileSaveTo(Object path) {
+    return '保存到 $path';
+  }
+
+  @override
+  String get set_tileConnect => '连接';
+
+  @override
+  String set_tileOnline(Object n) {
+    return '$n 项在线';
+  }
+
+  @override
+  String get set_tileKrita => 'Krita 已连接';
+
+  @override
+  String get set_tileKritaOff => 'Krita 未连接';
+
+  @override
+  String set_tileAgents(Object n) {
+    return '外部 Agent $n 个';
+  }
+
+  @override
+  String get set_tileComfyDown => 'ComfyUI 无响应';
+
+  @override
+  String get set_tileComfyOk => 'ComfyUI 正常';
+
+  @override
+  String get set_tileComfyOff => 'ComfyUI 未启用';
+
+  @override
+  String get set_tileModels => '模型与接口';
+
+  @override
+  String set_tileTranslateVia(Object ms) {
+    return '提示词翻译 · $ms';
+  }
+
+  @override
+  String set_tileAgentModel(Object model) {
+    return 'Agent · $model';
+  }
+
+  @override
+  String set_tileProviders(Object p, Object m) {
+    return '$p 个服务商 · $m 个模型';
+  }
+
+  @override
+  String get set_tileNoModel => '未配置';
+
+  @override
+  String get set_tileRag => '语义检索';
+
+  @override
+  String get set_tileReady => '就绪';
+
+  @override
+  String set_tileRagDone(Object names) {
+    return '$names已完成';
+  }
+
+  @override
+  String set_tileRagPaused(Object name, Object pct) {
+    return '$name $pct · 已暂停';
+  }
+
+  @override
+  String set_tileRagBuilding(Object name, Object pct) {
+    return '$name $pct · 建库中';
+  }
+
+  @override
+  String set_tileRagEmpty(Object name) {
+    return '$name还没建库';
+  }
+
+  @override
+  String set_tileRagError(Object name) {
+    return '$name建库出错';
+  }
+
+  @override
+  String get set_tileUpscale => '本地放大';
+
+  @override
+  String set_tileUpscaleModels(Object n) {
+    return '$n 个模型可用';
+  }
+
+  @override
+  String set_tileDefaultIs(Object name) {
+    return '$name（默认）';
+  }
+
+  @override
+  String get set_tileSeedMissing => 'SeedVR2 未安装';
+
+  @override
+  String get set_tileSeedReady => 'SeedVR2 已安装';
+
+  @override
+  String get set_tileProtect => '保护';
+
+  @override
+  String set_tileProtectOn(Object on, Object all) {
+    return '$on / $all 已开启';
+  }
+
+  @override
+  String set_tileInterval(Object s, Object p) {
+    return '生成间隔 $s 秒 ± $p%';
+  }
+
+  @override
+  String get set_tileIntervalOff => '不限制生成间隔';
+
+  @override
+  String get set_recent => '最近修改';
+
+  @override
+  String get set_recentSub => '自动保存 · 可撤销';
+
+  @override
+  String get set_recentEmpty => '还没有修改';
+
+  @override
+  String get set_quick => '常用开关';
+
+  @override
+  String get set_quickSub => '在这里直接改';
+
+  @override
+  String get set_quickDark => '深色模式';
+
+  @override
+  String get set_quickChannel => '画布视觉通道';
+
+  @override
+  String set_searchTip(Object keys) {
+    return '按 $keys 搜索任何设置；结果里可以直接开关，不用跳页。';
+  }
+
+  @override
+  String get set_accDesc => '管理 NovelAI 账号、默认登录和订阅额度。';
+
+  @override
+  String get set_accSaved => '已保存账号';
+
+  @override
+  String get set_accSavedSub => '添加后可以在这里一键切换；凭据保存在本机，不会出现在导出的偏好文件里。';
+
+  @override
+  String get set_accCurrent => '当前';
+
+  @override
+  String get set_accInUse => '使用中';
+
+  @override
+  String get set_accSwitch => '切换';
+
+  @override
+  String get set_accEmail => '邮箱登录';
+
+  @override
+  String get set_accToken => '令牌登录';
+
+  @override
+  String set_accRenews(Object date) {
+    return '订阅续期 $date';
+  }
+
+  @override
+  String set_accLastUsed(Object date) {
+    return '上次使用 $date';
+  }
+
+  @override
+  String get set_accNoSub => '无订阅';
+
+  @override
+  String get set_accExpired => '凭据已过期';
+
+  @override
+  String get set_accEdit => '编辑资料';
+
+  @override
+  String get set_accUpdate => '更新凭据';
+
+  @override
+  String get set_accMakeDefault => '设为默认账号';
+
+  @override
+  String get set_accDelete => '删除账号';
+
+  @override
+  String set_accDeleteTitle(Object name) {
+    return '删除账号“$name”？';
+  }
+
+  @override
+  String get set_accDeleteBody => '只删除本机保存的凭据，NovelAI 上的账号和图片不受影响。';
+
+  @override
+  String get set_accAdd => '添加账号';
+
+  @override
+  String get set_accAddHint => '支持邮箱密码或持久令牌';
+
+  @override
+  String get set_accLogin => '登录';
+
+  @override
+  String get set_accDefault => '默认账号';
+
+  @override
+  String get set_accDefaultSub => '登录页预先选中的账号';
+
+  @override
+  String get set_accAutoLogin => '启动时自动登录';
+
+  @override
+  String get set_accAutoLoginSub => '使用上次的会话；关掉后每次打开都停在登录页';
+
+  @override
+  String get set_accSub => '订阅';
+
+  @override
+  String set_accMonthly(Object n) {
+    return '每月 $n Anlas';
+  }
+
+  @override
+  String set_accRemaining(Object n) {
+    return '剩余 $n';
+  }
+
+  @override
+  String set_accResets(Object date) {
+    return '$date 重置';
+  }
+
+  @override
+  String get set_accPortal => '打开 NovelAI 账户页';
+
+  @override
+  String get set_accSwitchHint => '切换账号会保留当前草稿和画布；生成队列中的任务按原账号完成。';
+
+  @override
+  String get set_apDesc => '主题、文字和提醒方式。所有修改即时保存，可以撤销。';
+
+  @override
+  String get set_apTheme => '主题';
+
+  @override
+  String get set_apThemeSub => '启动页、登录页和所有工作页面使用同一套主题。';
+
+  @override
+  String get set_apLight => '浅色';
+
+  @override
+  String get set_apDark => '深色';
+
+  @override
+  String get set_apSystem => '跟随系统';
+
+  @override
+  String get set_apSystemSub => '按 Windows 设置自动切换';
+
+  @override
+  String get set_apText => '文字';
+
+  @override
+  String get set_apFont => '界面字体';
+
+  @override
+  String get set_apFontSub => '中文用 HarmonyOS Sans SC，数字与代码用 Geist Mono';
+
+  @override
+  String get set_apScale => '设置与对话框字号';
+
+  @override
+  String get set_apScaleSub => '只放大设置页和弹窗，不影响画布和图片';
+
+  @override
+  String get set_apSampleTitle => '标题 · 生成完成';
+
+  @override
+  String get set_apSampleBody => '正文 · 结果已保存到本地画廊，可以继续调整提示词。';
+
+  @override
+  String get set_apSampleNote => '说明 · 拖动上面的滑块，这里实时预览。';
+
+  @override
+  String get set_apLanguage => '语言';
+
+  @override
+  String get set_apLanguageSub => '切换后立即生效，无需重启';
+
+  @override
+  String get set_apMotion => '动效与声音';
+
+  @override
+  String get set_apReduceMotion => '减少动态效果';
+
+  @override
+  String get set_apReduceMotionSub => '关闭画布飞行、缩放和面板过渡动画；视觉通道也会停止微动';
+
+  @override
+  String get set_apSound => '生成完成音效';
+
+  @override
+  String get set_apSoundSub => '一批图片全部完成后播放';
+
+  @override
+  String get set_apSoundFile => '完成音效文件';
+
+  @override
+  String get set_apPreviewSound => '试听';
+
+  @override
+  String get set_apNotify => '通知样式';
+
+  @override
+  String get set_apNotifySub => '提示从窗口右上角出现，3 秒后自动消失';
+
+  @override
+  String get set_apNotifyPreview => '预览一条';
+
+  @override
+  String get set_apPreview => '预览';
+
+  @override
+  String get set_apCurrent => '当前';
+
+  @override
+  String set_apThemeTip(Object keys) {
+    return '快捷键 $keys 可以随时切换深浅色。';
+  }
+
+  @override
+  String get set_cvDesc => '历史、查看器和无限画布的行为。';
+
+  @override
+  String get set_cvBrowse => '浏览';
+
+  @override
+  String get set_cvHistoryClick => '点击历史缩略图时';
+
+  @override
+  String get set_cvOpenDetail => '打开详情';
+
+  @override
+  String get set_cvOpenDetailSub => '弹出大图查看器，适合逐张细看';
+
+  @override
+  String get set_cvLinked => '联动预览';
+
+  @override
+  String get set_cvLinkedSub => '画布跳到这张并选中，查看器不弹出';
+
+  @override
+  String get set_cvViewer => '生成结果显示在';
+
+  @override
+  String get set_cvCanvas => '无限画布';
+
+  @override
+  String get set_cvCanvasSub => '按批次排成一列，可以平移、缩放、钉住对比';
+
+  @override
+  String get set_cvSimple => '简洁查看器';
+
+  @override
+  String get set_cvSimpleSub => '只显示最新一张，最省资源';
+
+  @override
+  String get set_cvCanvasSec => '画布';
+
+  @override
+  String get set_cvLock => '锁定画布视角';
+
+  @override
+  String get set_cvLockSub => '新图出现时不自动飞过去，视角保持在你停下的位置';
+
+  @override
+  String get set_cvFill => '新图缩放到填满';
+
+  @override
+  String get set_cvFillSub => '聚焦单张时放大到可视区域，而不是按原始像素';
+
+  @override
+  String get set_cvChannel => '视觉通道';
+
+  @override
+  String get set_cvChannelSub => '画布中间留空的长廊，按主题绘制装饰，翻历史时会依次经过各个主题。';
+
+  @override
+  String get set_cvMode => '模式';
+
+  @override
+  String get set_cvMinTwo => '随机时至少保留两个主题。';
+
+  @override
+  String set_cvSession(Object order) {
+    return '本次顺序：$order';
+  }
+
+  @override
+  String get set_cvLevel => '浓淡';
+
+  @override
+  String get set_cvRuler => '时间刻度';
+
+  @override
+  String get set_cvRulerSub => '批次时间、日期分隔和右侧刻度条';
+
+  @override
+  String get set_cvMotion => '空闲微动';
+
+  @override
+  String get set_cvMotionSub => '生成中和开启“减少动态效果”时自动暂停';
+
+  @override
+  String get set_cvOps => '画布操作';
+
+  @override
+  String get set_cvOpScroll => '上下翻';
+
+  @override
+  String get set_cvOpPan => '左右平移';
+
+  @override
+  String get set_cvOpZoom => '缩放';
+
+  @override
+  String get set_cvOpMove => '移动视角';
+
+  @override
+  String get set_cvOpAll => '看全局';
+
+  @override
+  String get set_cvOpHome => '回到最新一批';
+
+  @override
+  String get set_cvWheel => '滚轮';
+
+  @override
+  String get set_cvChannelTip => '画布右下角的齿轮里也能改视觉通道，两处是同一份设置。';
+
+  @override
+  String get set_scDesc => '按页面分组。点快捷键直接录制新组合；同一页面里重复时会标红，并给出一键修复。';
+
+  @override
+  String get set_scSearch => '搜索动作或按键，例如 Ctrl+S';
+
+  @override
+  String get set_scAll => '全部';
+
+  @override
+  String get set_scKeyboard => '键盘布局';
+
+  @override
+  String get set_scKeyboardSub => '点按键筛选下面的列表；蓝色是已占用，红色是冲突。';
+
+  @override
+  String get set_scNoMod => '无修饰';
+
+  @override
+  String set_scLayer(Object context, Object mod) {
+    return '$context · 按住 $mod 时';
+  }
+
+  @override
+  String set_scLayerNone(Object context) {
+    return '$context · 不按修饰键';
+  }
+
+  @override
+  String get set_scAction => '动作';
+
+  @override
+  String get set_scKeys => '快捷键';
+
+  @override
+  String get set_scDefault => '默认';
+
+  @override
+  String set_scDefaultIs(Object keys) {
+    return '默认 $keys';
+  }
+
+  @override
+  String set_scConflict(Object name) {
+    return '与“$name”冲突';
+  }
+
+  @override
+  String get set_scRecording => '按下新的组合键…';
+
+  @override
+  String get set_scRecordHint => 'Esc 取消 · Backspace 清除';
+
+  @override
+  String get set_scRecord => '录制新组合';
+
+  @override
+  String get set_scClear => '清除快捷键';
+
+  @override
+  String get set_scDisplay => '显示';
+
+  @override
+  String get set_scEnabled => '启用快捷键';
+
+  @override
+  String get set_scInTooltips => '在悬停提示中显示';
+
+  @override
+  String get set_scInMenus => '在菜单中显示';
+
+  @override
+  String get set_scBadges => '导航上显示数字标识';
+
+  @override
+  String get set_scConflicts => '冲突';
+
+  @override
+  String set_scConflictCount(Object n) {
+    return '$n 项';
+  }
+
+  @override
+  String set_scConflictLine(Object keys) {
+    return '$keys 被两个动作占用';
+  }
+
+  @override
+  String set_scConflictSub(Object context, Object a, Object b) {
+    return '$context：$a、$b。冲突时两个都不触发。';
+  }
+
+  @override
+  String set_scFix(Object name, Object keys) {
+    return '恢复$name为 $keys';
+  }
+
+  @override
+  String get set_scNoConflict => '没有冲突';
+
+  @override
+  String get set_scConfig => '快捷键配置';
+
+  @override
+  String get set_scResetAll => '全部恢复默认';
+
+  @override
+  String get set_scResetAllTitle => '把全部快捷键恢复默认？';
+
+  @override
+  String set_scResetAllBody(Object n) {
+    return '$n 个自定义的组合会被还原。';
+  }
+
+  @override
+  String get set_scHelp => '快捷键帮助';
+
+  @override
+  String set_scHelpTip(Object key) {
+    return '按 $key 在任何页面查看当前页可用的快捷键。';
+  }
+
+  @override
+  String get set_scEmpty => '没有匹配的快捷键';
+
+  @override
+  String get set_gnDesc => '控制 Anlas 消耗和请求节奏，以及写提示词时的输入辅助。';
+
+  @override
+  String get set_gnCost => '额度保护';
+
+  @override
+  String get set_gnCostSub => '单次请求的消耗超过阈值时，先弹出确认再发送。';
+
+  @override
+  String get set_gnWarn => '高消耗提醒';
+
+  @override
+  String get set_gnWarnSub => '超过阈值时先确认';
+
+  @override
+  String get set_gnThreshold => '提醒阈值';
+
+  @override
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  ) {
+    return '当前生图参数：$model · $w×$h · $steps 步 · 每次 $n 张';
+  }
+
+  @override
+  String get set_gnWillWarn => '会提醒';
+
+  @override
+  String get set_gnNoWarn => '不会提醒';
+
+  @override
+  String get set_gnFree => '免费';
+
+  @override
+  String get set_gnPace => '请求节奏';
+
+  @override
+  String get set_gnPaceSub => '连续生成时每次请求之间等一会儿，减轻服务器压力，也让队列更像手动操作。';
+
+  @override
+  String get set_gnLimit => '限制生成间隔';
+
+  @override
+  String get set_gnInterval => '间隔';
+
+  @override
+  String get set_gnJitter => '随机浮动';
+
+  @override
+  String get set_gnJitterSub => '在间隔上下随机增减';
+
+  @override
+  String get set_gnTimeline => '按当前设置，连续 10 次请求大约这样分布';
+
+  @override
+  String get set_gnInput => '提示词输入';
+
+  @override
+  String get set_gnWheel => '滚轮调整权重';
+
+  @override
+  String get set_gnWheelSub => '光标放在标签上滚动滚轮，直接加减权重';
+
+  @override
+  String get set_gnNoKey => '无需按键';
+
+  @override
+  String get set_gnRelated => '相关标签扩展';
+
+  @override
+  String get set_gnRelatedSub => '输入标签时附带推荐常一起出现的标签';
+
+  @override
+  String get set_gnRag => '语义标签推荐';
+
+  @override
+  String get set_gnRagSub => '结合上下文的智能推荐，由“语义检索”提供';
+
+  @override
+  String get set_gnReady => '已就绪';
+
+  @override
+  String get set_gnNotReady => '未就绪';
+
+  @override
+  String get set_gnGoSettings => '去设置';
+
+  @override
+  String get set_gnTranslate => '提示词翻译';
+
+  @override
+  String get set_gnTranslateSub => '在提示词框里中英互译使用的模型';
+
+  @override
+  String get set_gnToday => '今天';
+
+  @override
+  String get set_gnUsed => 'Anlas 已用';
+
+  @override
+  String get set_gnNow => '现在';
+
+  @override
+  String get set_gnWarned => '高消耗提醒触发';
+
+  @override
+  String set_gnTimes(Object n) {
+    return '$n 次';
+  }
+
+  @override
+  String get set_gnMaxSingle => '最大单次消耗';
+
+  @override
+  String get set_gnFreeTip =>
+      '免费额度规则（Opus 小图不扣 Anlas）由生图页按当前参数计算，这里的阈值只看实际要扣的数。';
+
+  @override
+  String get set_stDesc => '图片保存在哪里、画廊读哪些文件夹，以及占用与清理。';
+
+  @override
+  String get set_stUsage => '占用';
+
+  @override
+  String set_stFree(Object disk, Object size) {
+    return '$disk 盘剩余 $size';
+  }
+
+  @override
+  String get set_stRecount => '重新统计';
+
+  @override
+  String get set_stCounting => '统计中…';
+
+  @override
+  String get set_stImages => '图片';
+
+  @override
+  String get set_stUpscaleModels => '放大模型';
+
+  @override
+  String get set_stVibes => 'Vibe 库';
+
+  @override
+  String get set_stThumbs => '缩略图缓存';
+
+  @override
+  String get set_stRag => '语义索引';
+
+  @override
+  String get set_stDict => '词库与缓存';
+
+  @override
+  String get set_stAgent => 'Agent';
+
+  @override
+  String get set_stSave => '保存';
+
+  @override
+  String get set_stSavePath => '图片保存位置';
+
+  @override
+  String get set_stAutoSave => '自动保存';
+
+  @override
+  String get set_stAutoSaveSub => '生成完成后立即写入保存位置；关掉后只留在画布和历史里';
+
+  @override
+  String get set_stAssets => '素材与显示';
+
+  @override
+  String get set_stVibePath => 'Vibe 库位置';
+
+  @override
+  String get set_stQuality => '本地画廊清晰度';
+
+  @override
+  String get set_stQualitySub => '缩略图的显示质量';
+
+  @override
+  String get set_stHigh => '高清';
+
+  @override
+  String get set_stStandard => '标清';
+
+  @override
+  String get set_stRoots => '图库来源';
+
+  @override
+  String get set_stRootsSub => '任何文件夹都可以加入本地画廊浏览和搜索，不参与自动保存。';
+
+  @override
+  String get set_stPrimary => '主目录';
+
+  @override
+  String set_stCount(Object n) {
+    return '$n 张';
+  }
+
+  @override
+  String get set_stAddFolder => '添加文件夹';
+
+  @override
+  String get set_stImportIndex => '导入标签索引 (.jsonl)';
+
+  @override
+  String set_stLastScan(Object when, Object n) {
+    return '上次扫描 $when · $n 张';
+  }
+
+  @override
+  String get set_stMaintain => '维护';
+
+  @override
+  String get set_stRescan => '重新扫描图库';
+
+  @override
+  String get set_stRescanSub => '检查缺失文件、补扫新文件、重试未读出的元数据';
+
+  @override
+  String get set_stScan => '扫描';
+
+  @override
+  String get set_stScanning => '扫描中…';
+
+  @override
+  String get set_stCleanThumbs => '清理缩略图缓存';
+
+  @override
+  String get set_stCleanThumbsSub => '按最近使用淘汰超出上限的缩略图，不碰原图';
+
+  @override
+  String get set_stClean => '清理';
+
+  @override
+  String get set_stCleanTitle => '清理缩略图缓存？';
+
+  @override
+  String get set_stCleanBody => '超出上限的缩略图会被删除，之后浏览时重新生成。原图不受影响。';
+
+  @override
+  String get set_stAppData => '应用数据位置';
+
+  @override
+  String get set_stAppDataSub => '账号、历史、块库等数据库所在目录；修改后需要重启';
+
+  @override
+  String get set_stOpenFolders => '打开文件夹';
+
+  @override
+  String get set_stLogs => '日志';
+
+  @override
+  String get set_stAppDataShort => '应用数据';
+
+  @override
+  String get set_stDeleteTip => '移动或删除单张图片仍在画廊里操作，并遵循“隐私与保护”里的确认规则。';
+
+  @override
+  String get set_stRemoveRoot => '移除这个文件夹';
+
+  @override
+  String get set_dcDesc => '标签数据和各级缓存。一般不用动，出现补全异常时可以在这里清理。';
+
+  @override
+  String get set_dcTags => '标签词库';
+
+  @override
+  String get set_dcTagsSub => '自动补全、标签翻译和相关推荐用到的本地数据。';
+
+  @override
+  String get set_dcBase => '基础词库';
+
+  @override
+  String set_dcBaseValue(Object n, Object version) {
+    return '$n 个标签 · 数据版本 $version';
+  }
+
+  @override
+  String get set_dcCooc => '共现数据';
+
+  @override
+  String get set_dcCoocSub => '用来推荐常一起出现的标签';
+
+  @override
+  String set_dcEntries(Object n) {
+    return '$n 条';
+  }
+
+  @override
+  String get set_dcTranslate => '标签翻译';
+
+  @override
+  String get set_dcTranslateSub => '词库里没有中文释义时，用这个接口补翻';
+
+  @override
+  String get set_dcCaches => '缓存';
+
+  @override
+  String get set_dcCachesSub => '清除后会在使用时重新获取，不影响你的图片和设置。';
+
+  @override
+  String get set_dcDanbooru => 'Danbooru 缓存';
+
+  @override
+  String get set_dcDanbooruSub => '在线画廊与标签百科的请求结果';
+
+  @override
+  String get set_dcTranslation => 'AI 翻译缓存';
+
+  @override
+  String get set_dcTranslationSub => '已翻译过的标签和提示词';
+
+  @override
+  String set_dcCacheSize(Object n, Object size) {
+    return '$n 条 · $size';
+  }
+
+  @override
+  String set_dcClearTitle(Object name) {
+    return '清除$name？';
+  }
+
+  @override
+  String get set_dcClearBody => '下次用到时会重新获取。';
+
+  @override
+  String get set_dcStats => '缓存统计';
+
+  @override
+  String get set_dcL1 => 'L1 内存';
+
+  @override
+  String get set_dcL2 => 'L2 Hive';
+
+  @override
+  String get set_dcL3 => 'L3 SQLite';
+
+  @override
+  String set_dcImagesUnit(Object n) {
+    return '$n 张图片';
+  }
+
+  @override
+  String get set_dcAutoRefresh => '自动刷新';
+
+  @override
+  String set_dcUpdated(Object when) {
+    return '上次更新 $when';
+  }
+
+  @override
+  String get set_dcResetStats => '重置统计';
+
+  @override
+  String get set_dcTip => '这一页的数据都可以重新生成。真正的个人数据（账号、历史、块库）在“存储与图库 → 应用数据位置”。';
+
+  @override
+  String get set_mdDesc =>
+      '翻译、反推、标签翻译和 Agent 用到的大模型服务。先添加服务商，再在“功能分配”里给每个功能选模型。';
+
+  @override
+  String get set_mdProviders => '服务商';
+
+  @override
+  String get set_mdTasks => '功能分配';
+
+  @override
+  String get set_mdPresets => '提示词预设';
+
+  @override
+  String get set_mdRequests => '请求记录';
+
+  @override
+  String set_mdProviderCount(Object n) {
+    return '$n 个服务商';
+  }
+
+  @override
+  String set_mdModelCount(Object n) {
+    return '$n 个模型';
+  }
+
+  @override
+  String get set_mdDisabled => '已停用';
+
+  @override
+  String get set_mdLocal => '本机';
+
+  @override
+  String set_mdLatency(Object ms, Object when) {
+    return '$ms · $when';
+  }
+
+  @override
+  String get set_mdUnreachable => '连接失败';
+
+  @override
+  String get set_mdName => '名称';
+
+  @override
+  String get set_mdBaseUrl => '接口地址';
+
+  @override
+  String get set_mdApiKey => 'API Key';
+
+  @override
+  String get set_mdApiKeyEmpty => '未填写';
+
+  @override
+  String get set_mdModels => '模型';
+
+  @override
+  String get set_mdRefreshModels => '从服务商刷新';
+
+  @override
+  String get set_mdAddModel => '手动添加';
+
+  @override
+  String set_mdUsedFor(Object tasks) {
+    return '用于 $tasks';
+  }
+
+  @override
+  String get set_mdRetired => '服务商已下线';
+
+  @override
+  String get set_mdCapTools => '工具';
+
+  @override
+  String get set_mdCapVision => '视觉';
+
+  @override
+  String get set_mdCapReasoning => '推理';
+
+  @override
+  String get set_mdAdvanced => '高级请求参数';
+
+  @override
+  String get set_mdDelete => '删除服务商';
+
+  @override
+  String set_mdDeleteTitle(Object name) {
+    return '删除服务商“$name”？';
+  }
+
+  @override
+  String get set_mdDeleteBody => '用到它的功能会回落到其他可用服务商。';
+
+  @override
+  String get set_mdRemoveModel => '移除模型';
+
+  @override
+  String get set_mdTaskPrompt => '提示词翻译';
+
+  @override
+  String get set_mdTaskReverse => '提示词反推';
+
+  @override
+  String get set_mdTaskTag => '标签翻译';
+
+  @override
+  String get set_mdTaskWiki => '百科翻译';
+
+  @override
+  String get set_mdFeature => '功能';
+
+  @override
+  String get set_mdProvider => '服务商';
+
+  @override
+  String get set_mdModel => '模型';
+
+  @override
+  String get set_mdPreset => '预设';
+
+  @override
+  String get set_mdStatus => '状态';
+
+  @override
+  String get set_mdAvailable => '可用';
+
+  @override
+  String get set_mdFallback => '回落到第一个可用服务商';
+
+  @override
+  String get set_mdNotChosen => '未选择';
+
+  @override
+  String get set_mdBuiltin => '内置';
+
+  @override
+  String get set_mdNewPreset => '新建预设';
+
+  @override
+  String get set_mdEdit => '编辑';
+
+  @override
+  String get set_mdTime => '时间';
+
+  @override
+  String set_mdTokens(Object n) {
+    return '$n tokens';
+  }
+
+  @override
+  String get set_mdFailed => '失败';
+
+  @override
+  String get set_mdOk => '成功';
+
+  @override
+  String set_mdShowing(Object n, Object total) {
+    return '显示最近 $n 条，共 $total 条';
+  }
+
+  @override
+  String get set_mdImport => '导入配置';
+
+  @override
+  String get set_mdAddProvider => '添加服务商';
+
+  @override
+  String get set_mdEmpty => '还没有服务商';
+
+  @override
+  String get set_mdEmptySub => '添加一个服务商后，翻译和反推就能用了。';
+
+  @override
+  String get set_agDesc => '侧栏助手的模型、指令、扩展和 MCP 工具。';
+
+  @override
+  String get set_agModelSec => '模型';
+
+  @override
+  String get set_agModel => 'Agent 使用的模型';
+
+  @override
+  String get set_agModelSub => '思考强度在聊天框里按任务调整';
+
+  @override
+  String get set_agEnter => 'Enter 直接发送';
+
+  @override
+  String get set_agEnterSub => '关掉后用 Ctrl+Enter 发送，Enter 换行';
+
+  @override
+  String get set_agMax => '单次任务最多请求';
+
+  @override
+  String get set_agMaxSub => '防止 Agent 陷入循环';
+
+  @override
+  String get set_agTimesUnit => '次';
+
+  @override
+  String get set_agInstr => '指令';
+
+  @override
+  String get set_agInstrSub => '按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。';
+
+  @override
+  String get set_agOrderBuiltin => '内置提示词';
+
+  @override
+  String get set_agOrderPrefix => '系统前缀';
+
+  @override
+  String get set_agOrderGlobal => '全局指令';
+
+  @override
+  String get set_agOrderWorkspace => '工作区指令';
+
+  @override
+  String get set_agOrderTools => '工具地图';
+
+  @override
+  String get set_agGlobal => '全局指令';
+
+  @override
+  String get set_agPrefix => '系统前缀';
+
+  @override
+  String get set_agPrefixHint => '在每次请求最前面加入的固定内容，例如身份或输出格式。';
+
+  @override
+  String get set_agBuiltin => '内置提示词';
+
+  @override
+  String get set_agFinal => '查看最终提示词';
+
+  @override
+  String get set_agExt => '扩展';
+
+  @override
+  String get set_agExtSub => '各工作区独立加载；外部扩展能运行本地代码，请只添加可信来源。';
+
+  @override
+  String get set_agStudioExt => 'Studio 交互';
+
+  @override
+  String get set_agStudioExtSub => '读取当前 Studio 状态，并通过问题卡片收集回答';
+
+  @override
+  String get set_agRequired => '内置 · 必需';
+
+  @override
+  String get set_agAddFile => '添加扩展文件';
+
+  @override
+  String get set_agAddDir => '添加扩展目录';
+
+  @override
+  String get set_agMcp => 'MCP 服务器';
+
+  @override
+  String get set_agMcpSub => '默认 CodeMode 按需发现，工具不会一次性塞进上下文。';
+
+  @override
+  String get set_agBuiltinTools => 'NAI Studio · 内置工具组';
+
+  @override
+  String get set_agBuiltinToolsSub => '提示词、块、百科、图片、历史、参考图、生图与设置工具';
+
+  @override
+  String set_agConnected(Object n) {
+    return '已连接 · $n 个工具';
+  }
+
+  @override
+  String get set_agConnecting => '连接中…';
+
+  @override
+  String get set_agNeedsLogin => '需要登录';
+
+  @override
+  String get set_agMcpError => '连接失败';
+
+  @override
+  String get set_agMcpOff => '已停用';
+
+  @override
+  String get set_agAddMcp => '添加 MCP 服务器';
+
+  @override
+  String get set_agTools => '工具';
+
+  @override
+  String set_agToolCount(Object n) {
+    return '$n 个';
+  }
+
+  @override
+  String get set_agToolsTip => '生图类工具始终先报价，等你确认后才执行。';
+
+  @override
+  String get set_agData => '数据目录';
+
+  @override
+  String get set_agWorkspaces => '工作区';
+
+  @override
+  String get set_agSessions => '会话';
+
+  @override
+  String get set_agCostTip => '费用由服务商计费，Studio 只显示 token 用量。';
+
+  @override
+  String get set_agOpen => '打开 Agent';
+
+  @override
+  String get set_agEditMcp => '编辑';
+
+  @override
+  String get set_agRemoveMcp => '移除服务器';
+
+  @override
+  String get set_agRemoveExt => '移除扩展';
+
+  @override
+  String get set_rgDesc => '本地运行的 RAG：给标签推荐、Wiki、提示词块和图库找相似提供语义能力，不上传任何内容。';
+
+  @override
+  String get set_rgReady => '语义检索已就绪';
+
+  @override
+  String get set_rgOff => '语义检索已关闭';
+
+  @override
+  String get set_rgPartial => '部分来源建库中';
+
+  @override
+  String get set_rgAllDone => '全部完成';
+
+  @override
+  String get set_rgPool => '所有来源共用一个本地向量池，新增内容自动增量更新。';
+
+  @override
+  String get set_rgStepRuntime => '运行环境';
+
+  @override
+  String get set_rgStepEmbed => '嵌入';
+
+  @override
+  String get set_rgStepRerank => '重排';
+
+  @override
+  String get set_rgStepDevice => '设备';
+
+  @override
+  String get set_rgSources => '来源';
+
+  @override
+  String get set_rgSourcesSub => '每个来源单独建库、单独开关；建库可以暂停，已完成的部分立即可用。';
+
+  @override
+  String get set_rgTags => '标签上下文推荐';
+
+  @override
+  String get set_rgTagsSub => '结合语义、共现与重排；各提示词框、角色和正负面分开计算';
+
+  @override
+  String get set_rgWiki => 'Wiki 语义搜索';
+
+  @override
+  String get set_rgWikiSub => '本地百科正文，名称精确匹配优先，语义结果补充';
+
+  @override
+  String get set_rgBlocks => '提示词块';
+
+  @override
+  String get set_rgBlocksSub => '已保存、未归档块的标题、标签与正负面文字';
+
+  @override
+  String get set_rgGallery => '图库多模态';
+
+  @override
+  String get set_rgGallerySub => '分析画面找相似图；NAI 图的参数另建文字索引，原图不改写';
+
+  @override
+  String set_rgCount(Object done, Object total) {
+    return '$done / $total';
+  }
+
+  @override
+  String set_rgSegments(Object done, Object total) {
+    return '$done / $total 段';
+  }
+
+  @override
+  String set_rgGalleryCount(Object done, Object total, Object n) {
+    return '画面 $done / $total · 参数 $n 段';
+  }
+
+  @override
+  String get set_rgPaused => '已暂停';
+
+  @override
+  String get set_rgBuilding => '建库中';
+
+  @override
+  String get set_rgError => '出错';
+
+  @override
+  String get set_rgClearIndex => '清除索引';
+
+  @override
+  String set_rgClearTitle(Object name) {
+    return '清除“$name”的索引？';
+  }
+
+  @override
+  String get set_rgClearBody => '只删除派生索引，原始内容和模型都保留。';
+
+  @override
+  String get set_rgContext => '推荐上下文';
+
+  @override
+  String get set_rgContextSub => '两种都最多取 120 个 Gemma token，按完整标签截取。';
+
+  @override
+  String get set_rgRange => '取样范围';
+
+  @override
+  String get set_rgBefore => '光标前';
+
+  @override
+  String get set_rgAround => '插入点前后';
+
+  @override
+  String get set_rgRuntime => '模型与运行环境';
+
+  @override
+  String get set_rgEmbedPath => '嵌入模型目录';
+
+  @override
+  String get set_rgRerankPath => '重排模型目录';
+
+  @override
+  String get set_rgDevice => '运行设备';
+
+  @override
+  String get set_rgAuto => '自动';
+
+  @override
+  String get set_rgEnv => '运行环境';
+
+  @override
+  String get set_rgEnvSub => '独立 Python 与推理依赖，不下载模型权重';
+
+  @override
+  String get set_rgCheck => '检测';
+
+  @override
+  String get set_rgReinstall => '重新安装';
+
+  @override
+  String get set_rgProgress => '建库进度';
+
+  @override
+  String get set_rgOverall => '总体';
+
+  @override
+  String get set_rgShortTags => '标签';
+
+  @override
+  String get set_rgShortWiki => 'Wiki';
+
+  @override
+  String get set_rgShortBlocks => '块';
+
+  @override
+  String get set_rgShortGallery => '图库';
+
+  @override
+  String get set_rgTip => '清除某个来源只删除它的派生索引，原始内容和模型都保留。';
+
+  @override
+  String get set_rgNotReady => '语义检索还不能用';
+
+  @override
+  String get set_rgNotReadySub => '先安装运行环境，再选好两个模型目录。';
+
+  @override
+  String get set_rgEmpty => '未建立';
+
+  @override
+  String get set_rgBuild => '建立索引';
+
+  @override
+  String get set_rgContinue => '继续建立';
+
+  @override
+  String set_rgSkipped(Object n) {
+    return '跳过 $n 张';
+  }
+
+  @override
+  String get set_rgPlanLoading => '正在统计要收录的内容…';
+
+  @override
+  String set_rgPlanTags(Object n) {
+    return '将收录 $n 项标签、别名与已有本地释义。';
+  }
+
+  @override
+  String set_rgPlanText(Object docs, Object n) {
+    return '将收录 $docs 份资料，切成 $n 个文字片段。';
+  }
+
+  @override
+  String set_rgPlanGallery(Object images, Object n) {
+    return '将收录 $images 张图片和 $n 段 NAI 参数，画面与参数分开索引。';
+  }
+
+  @override
+  String get set_rgPlanNote => '首次处理可能较久，可以随时暂停，已完成的部分立即可用。';
+
+  @override
+  String get set_rgPlanRebuild => '重建会先清掉这个来源的现有索引。';
+
+  @override
+  String get set_rgStart => '开始';
+
+  @override
+  String get set_rgDownload => '下载';
+
+  @override
+  String set_rgDownloading(Object done, Object total) {
+    return '正在下载 $done / $total';
+  }
+
+  @override
+  String set_rgDownloadingUnknown(Object done) {
+    return '正在下载 $done';
+  }
+
+  @override
+  String get set_rgVerifying => '正在校验文件…';
+
+  @override
+  String get set_rgDiscover => '查找本地模型';
+
+  @override
+  String get set_rgDiscoverSub =>
+      '在工作区 04_工具/models 里找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到后自动填好上面两个目录。';
+
+  @override
+  String get set_rgFind => '查找';
+
+  @override
+  String get set_rgModelsMissing => '没找到。可以点“下载”，或手动选择已下载的权重目录。';
+
+  @override
+  String get set_rgPython => 'Python 解释器';
+
+  @override
+  String get set_rgPythonSub => '默认用自动安装的独立环境；也可以选一个已有的 python.exe。';
+
+  @override
+  String get set_rgPythonAuto => '自动';
+
+  @override
+  String get set_rgPythonNone => '未安装';
+
+  @override
+  String get set_rgPythonPending => '选的解释器还没启用，点“使用此解释器”会按它重新安装依赖。';
+
+  @override
+  String get set_rgUsePython => '使用此解释器';
+
+  @override
+  String get set_rgEnvReady => '已就绪';
+
+  @override
+  String get set_rgEnvMissing => '还没有安装';
+
+  @override
+  String get set_rgInstall => '安装';
+
+  @override
+  String get set_rgInstallHint =>
+      '下载 Python 与推理依赖，不下载模型权重。NVIDIA 显卡选 CUDA（约需数 GB）；其他选 CPU，下载较小。';
+
+  @override
+  String get set_rgInstallCuda => 'CUDA · NVIDIA';
+
+  @override
+  String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgPhaseExisting => '正在检测已有环境';
+
+  @override
+  String get set_rgPhaseDownload => '正在下载安装工具';
+
+  @override
+  String get set_rgPhaseCreate => '正在准备 Python 环境';
+
+  @override
+  String get set_rgPhaseCuda => '正在安装 CUDA 推理组件';
+
+  @override
+  String get set_rgPhasePackages => '正在安装推理依赖';
+
+  @override
+  String get set_rgPhaseCheck => '正在校验环境';
+
+  @override
+  String set_rgElapsed(Object time) {
+    return '此阶段已用 $time';
+  }
+
+  @override
+  String get set_upDesc => '管理本机超分模型和组件。所有下载都需要你手动开始。';
+
+  @override
+  String set_upGpu(Object name, Object n) {
+    return '$name · $n GB';
+  }
+
+  @override
+  String get set_upNoGpu => '没有检测到独立显卡';
+
+  @override
+  String get set_upLocal => '在本机放大图片，不消耗 Anlas。';
+
+  @override
+  String get set_upEsrgan => '常规模型';
+
+  @override
+  String get set_upEsrganSub =>
+      'Real-ESRGAN NCNN，4 倍放大，速度快，任何支持 Vulkan 的显卡都能用。';
+
+  @override
+  String get set_upAnimeQuality => '动漫 · 画质';
+
+  @override
+  String get set_upAnimeFast => '动漫 · 快速';
+
+  @override
+  String get set_upGeneral => '通用 · 摄影';
+
+  @override
+  String get set_upBuiltin => '内置';
+
+  @override
+  String get set_upInstalled => '已安装';
+
+  @override
+  String get set_upNotInstalled => '未安装';
+
+  @override
+  String get set_upFailed => '下载失败';
+
+  @override
+  String get set_upImport => '导入模型';
+
+  @override
+  String get set_upImportHint => '选择配套的 .param 和 .bin（4 倍 Real-ESRGAN NCNN）';
+
+  @override
+  String get set_upSeed => 'SeedVR2 扩散放大';
+
+  @override
+  String get set_upSeedSub =>
+      '画质更好、更慢，需要 NVIDIA 显卡。型号共用 VAE（约 0.5 GB）和 Python/CUDA 环境。';
+
+  @override
+  String get set_upSeed3b => '3B · 均衡';
+
+  @override
+  String get set_upSeed3bSub => '兼顾效果与资源占用，适合日常放大';
+
+  @override
+  String get set_upSeed7b => '7B · 高画质';
+
+  @override
+  String get set_upSeed7bSub => '更高画质潜力，需要更多显存与时间';
+
+  @override
+  String get set_upSeed7bSharp => '7B · 锐利';
+
+  @override
+  String get set_upSeed7bSharpSub => '偏向更锐利的细节，适合强化纹理';
+
+  @override
+  String set_upVram(Object n) {
+    return '显存 ≥ $n GB';
+  }
+
+  @override
+  String set_upProgress(Object done, Object total, Object speed) {
+    return '$done / $total · $speed/s';
+  }
+
+  @override
+  String get set_upVramMode => '显存模式';
+
+  @override
+  String get set_upRecommended => '推荐';
+
+  @override
+  String get set_upLowVram => '低显存';
+
+  @override
+  String get set_upOffload => 'CPU 卸载层数';
+
+  @override
+  String get set_upOffloadSub => '卸载越多越省显存，但更慢、占更多内存';
+
+  @override
+  String get set_upTiling => 'VAE 分块';
+
+  @override
+  String get set_upTilingSub => '小分块省显存，重叠可以减轻接缝';
+
+  @override
+  String get set_upNoise => '实验性噪声';
+
+  @override
+  String set_upNoiseSub(Object a, Object b) {
+    return '输入噪声 $a · 潜空间噪声 $b；保持 0 即沿用当前效果';
+  }
+
+  @override
+  String get set_upInputNoise => '输入噪声';
+
+  @override
+  String get set_upLatentNoise => '潜空间噪声';
+
+  @override
+  String get set_upExperimental => '实验';
+
+  @override
+  String get set_upRtx => 'RTX Video';
+
+  @override
+  String get set_upRtxSub => '使用 NVIDIA RTX Video 快速放大，约 64 MB 独立组件。';
+
+  @override
+  String get set_upRtxName => 'RTX Video Super Resolution';
+
+  @override
+  String get set_upRtxNeeds => '需要兼容的 RTX 显卡与驱动';
+
+  @override
+  String get set_upDefault => '默认放大方式';
+
+  @override
+  String get set_upDefaultTip => '生图页工具条上的“本地放大”默认用这个，菜单里随时可换。';
+
+  @override
+  String get set_upVramTip => '显存不足时不会自动换型号；可以改用 3B、降低倍率，或开启低显存与 VAE 分块。';
+
+  @override
+  String set_upRemoveTitle(Object name) {
+    return '删除$name？';
+  }
+
+  @override
+  String get set_upRemoveBody => '之后要用时需要重新下载。';
+
+  @override
+  String get set_brDesc => '和本机其他软件协作：Krita、外部 Agent 和 ComfyUI。';
+
+  @override
+  String get set_brKritaSub => '在 Krita 里直接调用 Studio 生图，结果回到 Krita 图层。';
+
+  @override
+  String get set_brKrita => 'Krita 桥接';
+
+  @override
+  String get set_brLoopback => '本机监听，只接受 127.0.0.1 的连接';
+
+  @override
+  String get set_brConnected => '已连接';
+
+  @override
+  String get set_brWaiting => '等待 Krita 连接';
+
+  @override
+  String get set_brRegenerate => '重新生成会话';
+
+  @override
+  String get set_brDiscovery => '发现文件';
+
+  @override
+  String get set_brAgents => '外部 Agent';
+
+  @override
+  String get set_brAgentsSub => '让 Claude Code、Codex 等能执行本机命令的 Agent 读写参数和生图。';
+
+  @override
+  String get set_brLocal => '本机桥接';
+
+  @override
+  String set_brClients(Object n) {
+    return '$n 个 Agent 已连接';
+  }
+
+  @override
+  String get set_brNoClients => '没有 Agent 连接';
+
+  @override
+  String get set_brTakeover => '复制接管说明';
+
+  @override
+  String get set_brEnd => '结束连接';
+
+  @override
+  String get set_brActivity => '最近活动';
+
+  @override
+  String get set_brComfySub => '导入 ComfyUI 工作流，在 Studio 里填参运行。';
+
+  @override
+  String get set_brComfyEnable => '启用 ComfyUI';
+
+  @override
+  String get set_brComfyUrl => '服务地址';
+
+  @override
+  String set_brComfyFailed(Object reason, Object when) {
+    return '连接失败：$reason（$when）。确认 ComfyUI 已启动并允许本机访问。';
+  }
+
+  @override
+  String set_brComfyOk(Object when) {
+    return '连接正常（$when）';
+  }
+
+  @override
+  String get set_brStatus => '状态';
+
+  @override
+  String set_brAgentsShort(Object n) {
+    return '$n 个';
+  }
+
+  @override
+  String get set_brOff => '未启用';
+
+  @override
+  String get set_brNoResponse => '无响应';
+
+  @override
+  String get set_brTip => '所有桥接只在本机回环地址上监听，不对局域网开放。代理设置不影响这些连接。';
+
+  @override
+  String get set_nwDesc => '代理和连接状态。';
+
+  @override
+  String get set_nwProxy => '代理';
+
+  @override
+  String get set_nwProxySub => '访问 NovelAI、Danbooru、GitHub 更新和第三方模型服务时使用。';
+
+  @override
+  String get set_nwUse => '使用代理';
+
+  @override
+  String get set_nwMode => '方式';
+
+  @override
+  String get set_nwSystem => '跟随系统';
+
+  @override
+  String get set_nwManual => '手动';
+
+  @override
+  String get set_nwAddress => '地址';
+
+  @override
+  String set_nwDetected(Object addr) {
+    return '系统代理检测到 $addr。代理只转发上述外部请求，本机桥接和本地模型不经过代理。';
+  }
+
+  @override
+  String get set_nwNoSystem => '没有检测到系统代理。代理只转发外部请求，本机桥接和本地模型不经过代理。';
+
+  @override
+  String get set_nwCheck => '连接检测';
+
+  @override
+  String get set_nwCheckSub => '一键检查各服务是否可达，出错时更容易判断是网络还是服务的问题。';
+
+  @override
+  String get set_nwNaiImage => 'NovelAI 生图';
+
+  @override
+  String get set_nwNaiApi => 'NovelAI 账户';
+
+  @override
+  String get set_nwDanbooru => 'Danbooru';
+
+  @override
+  String get set_nwUpdate => '应用更新';
+
+  @override
+  String get set_nwCheckAll => '全部检测';
+
+  @override
+  String set_nwChecked(Object when) {
+    return '上次检测 $when';
+  }
+
+  @override
+  String get set_nwViaProxy => '经过代理';
+
+  @override
+  String get set_nwDirect => '直连';
+
+  @override
+  String get set_nwNeverChecked => '还没检测过';
+
+  @override
+  String get set_nwFail => '失败';
+
+  @override
+  String get set_nwTip => '改代理后需要重启才会生效；Studio 会提醒，不会自动重启打断你的工作。';
+
+  @override
+  String get set_pvDesc => '分享图片时带出什么信息，以及哪些操作需要你确认。';
+
+  @override
+  String get set_pvProtect => '保护';
+
+  @override
+  String get set_pvStrip => '分享时去除元数据';
+
+  @override
+  String get set_pvStripSub => '复制或拖出图片时去掉提示词和参数，原文件不变';
+
+  @override
+  String get set_pvExternal => '发送到外部前提醒';
+
+  @override
+  String get set_pvExternalSub => '把图片发给其他软件或网页前先确认';
+
+  @override
+  String get set_pvDanger => '危险操作需确认';
+
+  @override
+  String get set_pvDangerSub => '删除、清空、覆盖等不可撤销的操作先弹确认';
+
+  @override
+  String get set_pvOverwrite => '保存时不覆盖';
+
+  @override
+  String get set_pvOverwriteSub => '目标位置有同名文件时自动改名';
+
+  @override
+  String get set_pvBlacklist => '在线画廊黑名单';
+
+  @override
+  String get set_pvBlacklistSub => '含有这些标签的图片在在线画廊里直接隐藏。';
+
+  @override
+  String get set_pvAddTag => '添加标签…';
+
+  @override
+  String get set_pvSync => '同步 Danbooru 黑名单';
+
+  @override
+  String set_pvSyncSub(Object user, Object when) {
+    return '已登录 $user · 上次同步 $when';
+  }
+
+  @override
+  String set_pvSyncNever(Object user) {
+    return '已登录 $user · 还没同步过';
+  }
+
+  @override
+  String get set_pvSyncSignedOut => '登录 Danbooru 后可以同步账号里的黑名单';
+
+  @override
+  String get set_pvSyncNow => '立即同步';
+
+  @override
+  String get set_pvSyncing => '同步中…';
+
+  @override
+  String get set_pvAutoSync => '启动时自动同步';
+
+  @override
+  String get set_pvExported => '导出时包含什么';
+
+  @override
+  String get set_pvIncPrefs => '外观、操作、输入偏好';
+
+  @override
+  String get set_pvIncRules => '保护规则与黑名单';
+
+  @override
+  String get set_pvIncCred => '账号凭据';
+
+  @override
+  String get set_pvIncPaths => '文件路径';
+
+  @override
+  String get set_pvIncDrafts => '草稿与模型绑定';
+
+  @override
+  String get set_pvTip => '元数据保护只作用于“复制”和“拖出”，保存到磁盘的原图始终保留完整参数，方便日后复用。';
+
+  @override
+  String get set_bkDesc => '在设备之间迁移偏好，或者回到默认状态。所有重置都会先备份。';
+
+  @override
+  String get set_bkPrefs => '偏好设置';
+
+  @override
+  String get set_bkPrefsSub => '外观、操作、输入与保护规则。账号凭据、路径、草稿和模型绑定不会写进文件。';
+
+  @override
+  String get set_bkExport => '导出';
+
+  @override
+  String get set_bkExportSub => '保存为 studio-preferences.json';
+
+  @override
+  String get set_bkExportBtn => '导出…';
+
+  @override
+  String get set_bkImport => '导入';
+
+  @override
+  String get set_bkImportSub => '应用前会显示将修改多少项，并自动备份当前设置';
+
+  @override
+  String get set_bkImportBtn => '选择文件…';
+
+  @override
+  String get set_bkUndoImport => '撤销上次导入';
+
+  @override
+  String set_bkUndoImportSub(Object when) {
+    return '回到 $when 导入前的状态';
+  }
+
+  @override
+  String get set_bkNoImport => '还没有导入过';
+
+  @override
+  String get set_bkRestore => '恢复';
+
+  @override
+  String get set_bkOther => '其他配置';
+
+  @override
+  String set_bkShortcutsSub(Object n, Object m) {
+    return '$n 个动作，$m 个已自定义';
+  }
+
+  @override
+  String get set_bkModelsSub => '服务商、功能分配和预设；API Key 默认不导出';
+
+  @override
+  String get set_bkCopyConfig => '复制配置';
+
+  @override
+  String get set_bkReset => '恢复默认';
+
+  @override
+  String get set_bkResetSub => '选择要重置的范围；其他设置保持不变。';
+
+  @override
+  String get set_bkScopeAppearance => '外观与操作';
+
+  @override
+  String get set_bkScopeAppearanceSub => '主题、字体、语言、画布、提醒';
+
+  @override
+  String get set_bkScopeInput => '输入与补全';
+
+  @override
+  String get set_bkScopeInputSub => '滚轮权重、标签扩展、自动补全';
+
+  @override
+  String get set_bkScopeProtect => '隐私与生成保护';
+
+  @override
+  String get set_bkScopeProtectSub => '元数据、确认、高消耗提醒、请求节奏';
+
+  @override
+  String get set_bkScopeShortcuts => '快捷键';
+
+  @override
+  String set_bkScopeShortcutsSub(Object n) {
+    return '全部 $n 个动作';
+  }
+
+  @override
+  String get set_bkResetBtn => '恢复所选为默认…';
+
+  @override
+  String get set_bkResetHint => '会先备份当前设置，可以撤销';
+
+  @override
+  String get set_bkResetTitle => '恢复所选设置为默认？';
+
+  @override
+  String set_bkResetBody(Object scopes) {
+    return '$scopes 会回到默认值。当前设置会先自动备份。';
+  }
+
+  @override
+  String get set_bkAuto => '自动备份';
+
+  @override
+  String get set_bkAutoSub => '保留最近 5 份';
+
+  @override
+  String get set_bkKindImport => '导入前';
+
+  @override
+  String get set_bkKindReset => '恢复默认前';
+
+  @override
+  String get set_bkKindUpgrade => '升级前';
+
+  @override
+  String get set_bkNoBackups => '还没有自动备份';
+
+  @override
+  String set_bkRestoreTitle(Object name) {
+    return '恢复到“$name”的备份？';
+  }
+
+  @override
+  String get set_bkRestoreBody => '当前设置会先备份，之后可以再换回来。';
+
+  @override
+  String get set_abDesc => '版本、更新和问题诊断。';
+
+  @override
+  String set_abNew(Object version) {
+    return '有新版本 $version';
+  }
+
+  @override
+  String get set_abLatest => '已是最新版本';
+
+  @override
+  String get set_abChecking => '正在检查更新…';
+
+  @override
+  String get set_abCheckFailed => '检查更新失败';
+
+  @override
+  String set_abDownloading(Object pct) {
+    return '正在下载 $pct';
+  }
+
+  @override
+  String set_abChecked(Object when) {
+    return '上次检查 $when';
+  }
+
+  @override
+  String set_abNotes(Object version) {
+    return '$version 更新内容';
+  }
+
+  @override
+  String get set_abInstall => '下载并安装';
+
+  @override
+  String get set_abChangelog => '完整更新日志';
+
+  @override
+  String get set_abPrerelease => '包含预发布版本';
+
+  @override
+  String get set_abCheck => '检查更新';
+
+  @override
+  String get set_abDiag => '诊断';
+
+  @override
+  String get set_abLog => '写入日志文件';
+
+  @override
+  String get set_abLogSub => '排查问题时打开；日志不含 API Key 和登录凭据';
+
+  @override
+  String get set_abLogDir => '日志目录';
+
+  @override
+  String get set_abCopyDiag => '复制诊断信息';
+
+  @override
+  String get set_abCopyDiagSub => '版本、系统、显卡、各服务状态，方便反馈问题';
+
+  @override
+  String get set_abProject => '项目';
+
+  @override
+  String get set_abRepo => '开源项目';
+
+  @override
+  String get set_abUpstream => '原项目';
+
+  @override
+  String get set_abUpstreamSub => '本项目基于 NAI Launcher 开发，保留原作者署名';
+
+  @override
+  String get set_abFonts => '字体与素材';
+
+  @override
+  String get set_abLicenses => '许可证';
+
+  @override
+  String get set_abView => '查看';
+
+  @override
+  String get set_abSystem => '系统';
+
+  @override
+  String set_srQuoted(Object query) {
+    return '“$query”';
+  }
+
+  @override
+  String get set_srBalance => 'Anlas 余额';
+
+  @override
+  String get set_srSubscription => '订阅与 Anlas 额度';
+
+  @override
+  String get set_agEnable => '启用';
+
+  @override
+  String get set_agDisable => '停用';
+
+  @override
+  String get set_listSep => '、';
+
+  @override
+  String get set_on => '开';
+
+  @override
+  String get set_off => '关';
+
+  @override
+  String get set_unitSeconds => '秒';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -33520,4 +36075,2559 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get rag_useRuntime => '使用已有環境';
+
+  @override
+  String get set_title => '設定';
+
+  @override
+  String get set_search => '搜尋設定';
+
+  @override
+  String get set_searchResults => '搜尋結果';
+
+  @override
+  String set_searchCount(Object count) {
+    return '$count 項';
+  }
+
+  @override
+  String get set_searchHint => '結果裡的開關和數值可以直接改；點右側箭頭跳到所在頁面並高亮這一行。';
+
+  @override
+  String get set_searchKeys => '選擇';
+
+  @override
+  String get set_searchJump => '跳轉';
+
+  @override
+  String set_searchEmpty(Object query) {
+    return '沒有找到“$query”';
+  }
+
+  @override
+  String get set_searchEmptyHint => '試試“代理”“儲存”“快速鍵”或某個路徑';
+
+  @override
+  String get set_goTo => '跳到設定';
+
+  @override
+  String get set_hasUpdate => '有更新';
+
+  @override
+  String get set_groupPersonal => '個人';
+
+  @override
+  String get set_groupCreate => '創作';
+
+  @override
+  String get set_groupIntelligence => '智慧';
+
+  @override
+  String get set_groupConnect => '連線';
+
+  @override
+  String get set_groupSystem => '系統';
+
+  @override
+  String get set_pageOverview => '概覽';
+
+  @override
+  String get set_pageAccount => '帳號';
+
+  @override
+  String get set_pageAppearance => '外觀';
+
+  @override
+  String get set_pageCanvas => '畫布與瀏覽';
+
+  @override
+  String get set_pageShortcuts => '快速鍵';
+
+  @override
+  String get set_pageGeneration => '生成與額度';
+
+  @override
+  String get set_pageStorage => '儲存與圖庫';
+
+  @override
+  String get set_pageDictionaries => '詞庫與快取';
+
+  @override
+  String get set_pageModels => '模型與介面';
+
+  @override
+  String get set_pageAgent => 'NAI Agent';
+
+  @override
+  String get set_pageRag => '語義檢索';
+
+  @override
+  String get set_pageUpscale => '本地放大';
+
+  @override
+  String get set_pageBridges => '橋接與整合';
+
+  @override
+  String get set_pageNetwork => '網路與代理';
+
+  @override
+  String get set_pagePrivacy => '隱私與保護';
+
+  @override
+  String get set_pageBackup => '備份與重設';
+
+  @override
+  String get set_pageAbout => '關於';
+
+  @override
+  String get set_resetDefault => '恢復預設';
+
+  @override
+  String get set_resetPage => '恢復本頁預設';
+
+  @override
+  String get set_needsRestart => '需重啟';
+
+  @override
+  String get set_isNew => '新';
+
+  @override
+  String get set_defaultTag => '預設';
+
+  @override
+  String get set_readOnly => '只讀';
+
+  @override
+  String get set_cancel => '取消';
+
+  @override
+  String get set_save => '儲存';
+
+  @override
+  String get set_discard => '放棄';
+
+  @override
+  String get set_later => '稍後';
+
+  @override
+  String get set_undo => '復原';
+
+  @override
+  String get set_open => '開啟';
+
+  @override
+  String get set_choose => '選擇';
+
+  @override
+  String get set_change => '更改';
+
+  @override
+  String get set_clear => '清除';
+
+  @override
+  String get set_delete => '刪除';
+
+  @override
+  String get set_copy => '複製';
+
+  @override
+  String get set_more => '更多';
+
+  @override
+  String get set_refresh => '重新整理';
+
+  @override
+  String get set_retry => '重試';
+
+  @override
+  String get set_test => '測試連線';
+
+  @override
+  String get set_testing => '檢測中…';
+
+  @override
+  String get set_importIt => '匯入';
+
+  @override
+  String get set_exportIt => '匯出';
+
+  @override
+  String get set_install => '安裝';
+
+  @override
+  String get set_download => '下載';
+
+  @override
+  String get set_resume => '繼續';
+
+  @override
+  String get set_pause => '暫停';
+
+  @override
+  String get set_rebuild => '重建';
+
+  @override
+  String get set_login => '登入';
+
+  @override
+  String get set_adjust => '調整';
+
+  @override
+  String get set_collapse => '收起';
+
+  @override
+  String get set_notSet => '未設定';
+
+  @override
+  String get set_defaultLocation => '預設位置';
+
+  @override
+  String get set_builtinSound => '內建音效';
+
+  @override
+  String get set_justNow => '剛剛';
+
+  @override
+  String set_minutesAgo(Object n) {
+    return '$n 分鐘前';
+  }
+
+  @override
+  String set_todayAt(Object time) {
+    return '今天 $time';
+  }
+
+  @override
+  String get set_yesterday => '昨天';
+
+  @override
+  String set_secondsAgo(Object n) {
+    return '$n 秒前';
+  }
+
+  @override
+  String set_savedChange(Object title, Object from, Object to) {
+    return '已儲存 · $title $from → $to';
+  }
+
+  @override
+  String get set_restartBanner => '設定已儲存，重啟 Studio 後生效。正在進行的生成不受影響。';
+
+  @override
+  String get set_restartNow => '立即重啟';
+
+  @override
+  String get set_unsavedInstructions => '全域指令有未儲存的修改';
+
+  @override
+  String get set_leaveTitle => '放棄未儲存的修改？';
+
+  @override
+  String get set_leaveBody => 'Agent 指令還沒儲存，離開這一頁會丟掉修改。';
+
+  @override
+  String set_resetPageTitle(Object page) {
+    return '把“$page”恢復預設？';
+  }
+
+  @override
+  String set_resetPageBody(Object count) {
+    return '這一頁改過的 $count 項會回到預設值，可以在概覽裡復原。';
+  }
+
+  @override
+  String get set_ovDesc => '帳號、儲存、連線和智慧服務的狀態都在這裡。需要處理的事項排在最前，點卡片直接進入對應設定。';
+
+  @override
+  String get set_ovSwitchAccount => '切換帳號';
+
+  @override
+  String get set_ovTodayUsed => '今天已用';
+
+  @override
+  String set_ovMonthly(Object n) {
+    return '本月固定額度 $n';
+  }
+
+  @override
+  String set_ovWarnAt(Object n) {
+    return '高消耗提醒 ≥ $n Anlas';
+  }
+
+  @override
+  String get set_ovWarnOff => '高消耗提醒已關閉';
+
+  @override
+  String set_ovRenews(Object date) {
+    return '訂閱續期 $date';
+  }
+
+  @override
+  String get set_ovSignedOut => '未登入';
+
+  @override
+  String get set_ovAttention => '需要處理';
+
+  @override
+  String get set_ovAllClear => '一切正常';
+
+  @override
+  String set_attUpdate(Object version) {
+    return '有新版本 $version';
+  }
+
+  @override
+  String set_attRagPaused(Object source) {
+    return '$source語義索引已暫停';
+  }
+
+  @override
+  String set_attRagPausedSub(Object done, Object total) {
+    return '已完成 $done / $total，已有部分可檢索';
+  }
+
+  @override
+  String set_attBridgeDown(Object name) {
+    return '$name 地址無回應';
+  }
+
+  @override
+  String set_attCheckedAt(Object detail, Object when) {
+    return '$detail · $when檢測';
+  }
+
+  @override
+  String set_attCredential(Object name) {
+    return '帳號“$name”憑據已過期';
+  }
+
+  @override
+  String get set_attCredentialSub => '更新後才能切換到這個帳號';
+
+  @override
+  String set_attDiskLow(Object disk) {
+    return '$disk 盤空間不足';
+  }
+
+  @override
+  String set_attDiskLowSub(Object size) {
+    return '剩餘 $size，自動儲存可能失敗';
+  }
+
+  @override
+  String set_attProvider(Object name) {
+    return '$name 連線失敗';
+  }
+
+  @override
+  String get set_attProviderSub => '翻譯和反推會回落到其他服務商';
+
+  @override
+  String get set_attView => '檢視';
+
+  @override
+  String get set_attGo => '去看看';
+
+  @override
+  String get set_attUpdateCred => '更新憑據';
+
+  @override
+  String get set_tileStorage => '儲存';
+
+  @override
+  String set_tileImages(Object n) {
+    return '圖庫 $n 張';
+  }
+
+  @override
+  String set_tileSaveTo(Object path) {
+    return '儲存到 $path';
+  }
+
+  @override
+  String get set_tileConnect => '連線';
+
+  @override
+  String set_tileOnline(Object n) {
+    return '$n 項線上';
+  }
+
+  @override
+  String get set_tileKrita => 'Krita 已連線';
+
+  @override
+  String get set_tileKritaOff => 'Krita 未連線';
+
+  @override
+  String set_tileAgents(Object n) {
+    return '外部 Agent $n 個';
+  }
+
+  @override
+  String get set_tileComfyDown => 'ComfyUI 無回應';
+
+  @override
+  String get set_tileComfyOk => 'ComfyUI 正常';
+
+  @override
+  String get set_tileComfyOff => 'ComfyUI 未啟用';
+
+  @override
+  String get set_tileModels => '模型與介面';
+
+  @override
+  String set_tileTranslateVia(Object ms) {
+    return '提示詞翻譯 · $ms';
+  }
+
+  @override
+  String set_tileAgentModel(Object model) {
+    return 'Agent · $model';
+  }
+
+  @override
+  String set_tileProviders(Object p, Object m) {
+    return '$p 個服務商 · $m 個模型';
+  }
+
+  @override
+  String get set_tileNoModel => '未配置';
+
+  @override
+  String get set_tileRag => '語義檢索';
+
+  @override
+  String get set_tileReady => '就緒';
+
+  @override
+  String set_tileRagDone(Object names) {
+    return '$names已完成';
+  }
+
+  @override
+  String set_tileRagPaused(Object name, Object pct) {
+    return '$name $pct · 已暫停';
+  }
+
+  @override
+  String set_tileRagBuilding(Object name, Object pct) {
+    return '$name $pct · 建庫中';
+  }
+
+  @override
+  String set_tileRagEmpty(Object name) {
+    return '$name還沒建庫';
+  }
+
+  @override
+  String set_tileRagError(Object name) {
+    return '$name建庫出錯';
+  }
+
+  @override
+  String get set_tileUpscale => '本地放大';
+
+  @override
+  String set_tileUpscaleModels(Object n) {
+    return '$n 個模型可用';
+  }
+
+  @override
+  String set_tileDefaultIs(Object name) {
+    return '$name（預設）';
+  }
+
+  @override
+  String get set_tileSeedMissing => 'SeedVR2 未安裝';
+
+  @override
+  String get set_tileSeedReady => 'SeedVR2 已安裝';
+
+  @override
+  String get set_tileProtect => '保護';
+
+  @override
+  String set_tileProtectOn(Object on, Object all) {
+    return '$on / $all 已開啟';
+  }
+
+  @override
+  String set_tileInterval(Object s, Object p) {
+    return '生成間隔 $s 秒 ± $p%';
+  }
+
+  @override
+  String get set_tileIntervalOff => '不限制生成間隔';
+
+  @override
+  String get set_recent => '最近修改';
+
+  @override
+  String get set_recentSub => '自動儲存 · 可復原';
+
+  @override
+  String get set_recentEmpty => '還沒有修改';
+
+  @override
+  String get set_quick => '常用開關';
+
+  @override
+  String get set_quickSub => '在這裡直接改';
+
+  @override
+  String get set_quickDark => '深色模式';
+
+  @override
+  String get set_quickChannel => '畫布視覺通道';
+
+  @override
+  String set_searchTip(Object keys) {
+    return '按 $keys 搜尋任何設定；結果裡可以直接開關，不用跳頁。';
+  }
+
+  @override
+  String get set_accDesc => '管理 NovelAI 帳號、預設登入和訂閱額度。';
+
+  @override
+  String get set_accSaved => '已儲存帳號';
+
+  @override
+  String get set_accSavedSub => '新增後可以在這裡一鍵切換；憑據儲存在本機，不會出現在匯出的偏好檔案裡。';
+
+  @override
+  String get set_accCurrent => '當前';
+
+  @override
+  String get set_accInUse => '使用中';
+
+  @override
+  String get set_accSwitch => '切換';
+
+  @override
+  String get set_accEmail => '電子郵件登入';
+
+  @override
+  String get set_accToken => '令牌登入';
+
+  @override
+  String set_accRenews(Object date) {
+    return '訂閱續期 $date';
+  }
+
+  @override
+  String set_accLastUsed(Object date) {
+    return '上次使用 $date';
+  }
+
+  @override
+  String get set_accNoSub => '無訂閱';
+
+  @override
+  String get set_accExpired => '憑據已過期';
+
+  @override
+  String get set_accEdit => '編輯資料';
+
+  @override
+  String get set_accUpdate => '更新憑據';
+
+  @override
+  String get set_accMakeDefault => '設為預設帳號';
+
+  @override
+  String get set_accDelete => '刪除帳號';
+
+  @override
+  String set_accDeleteTitle(Object name) {
+    return '刪除帳號“$name”？';
+  }
+
+  @override
+  String get set_accDeleteBody => '只刪除本機儲存的憑據，NovelAI 上的帳號和圖片不受影響。';
+
+  @override
+  String get set_accAdd => '新增帳號';
+
+  @override
+  String get set_accAddHint => '支援電子郵件密碼或持久令牌';
+
+  @override
+  String get set_accLogin => '登入';
+
+  @override
+  String get set_accDefault => '預設帳號';
+
+  @override
+  String get set_accDefaultSub => '登入頁預先選中的帳號';
+
+  @override
+  String get set_accAutoLogin => '啟動時自動登入';
+
+  @override
+  String get set_accAutoLoginSub => '使用上次的會話；關掉後每次開啟都停在登入頁';
+
+  @override
+  String get set_accSub => '訂閱';
+
+  @override
+  String set_accMonthly(Object n) {
+    return '每月 $n Anlas';
+  }
+
+  @override
+  String set_accRemaining(Object n) {
+    return '剩餘 $n';
+  }
+
+  @override
+  String set_accResets(Object date) {
+    return '$date 重設';
+  }
+
+  @override
+  String get set_accPortal => '開啟 NovelAI 帳戶頁';
+
+  @override
+  String get set_accSwitchHint => '切換帳號會保留當前草稿和畫布；生成佇列中的任務按原帳號完成。';
+
+  @override
+  String get set_apDesc => '主題、文字和提醒方式。所有修改即時儲存，可以復原。';
+
+  @override
+  String get set_apTheme => '主題';
+
+  @override
+  String get set_apThemeSub => '啟動頁、登入頁和所有工作頁面使用同一套主題。';
+
+  @override
+  String get set_apLight => '淺色';
+
+  @override
+  String get set_apDark => '深色';
+
+  @override
+  String get set_apSystem => '跟隨系統';
+
+  @override
+  String get set_apSystemSub => '按 Windows 設定自動切換';
+
+  @override
+  String get set_apText => '文字';
+
+  @override
+  String get set_apFont => '介面字型';
+
+  @override
+  String get set_apFontSub => '中文用 HarmonyOS Sans SC，數字與程式碼用 Geist Mono';
+
+  @override
+  String get set_apScale => '設定與對話方塊字號';
+
+  @override
+  String get set_apScaleSub => '只放大設定頁和彈窗，不影響畫布和圖片';
+
+  @override
+  String get set_apSampleTitle => '標題 · 生成完成';
+
+  @override
+  String get set_apSampleBody => '正文 · 結果已儲存到本地畫廊，可以繼續調整提示詞。';
+
+  @override
+  String get set_apSampleNote => '說明 · 拖動上面的滑塊，這裡即時預覽。';
+
+  @override
+  String get set_apLanguage => '語言';
+
+  @override
+  String get set_apLanguageSub => '切換後立即生效，無需重啟';
+
+  @override
+  String get set_apMotion => '動效與聲音';
+
+  @override
+  String get set_apReduceMotion => '減少動態效果';
+
+  @override
+  String get set_apReduceMotionSub => '關閉畫布飛行、縮放和麵板過渡動畫；視覺通道也會停止微動';
+
+  @override
+  String get set_apSound => '生成完成音效';
+
+  @override
+  String get set_apSoundSub => '一批圖片全部完成後播放';
+
+  @override
+  String get set_apSoundFile => '完成音效檔案';
+
+  @override
+  String get set_apPreviewSound => '試聽';
+
+  @override
+  String get set_apNotify => '通知樣式';
+
+  @override
+  String get set_apNotifySub => '提示從視窗右上角出現，3 秒後自動消失';
+
+  @override
+  String get set_apNotifyPreview => '預覽一條';
+
+  @override
+  String get set_apPreview => '預覽';
+
+  @override
+  String get set_apCurrent => '當前';
+
+  @override
+  String set_apThemeTip(Object keys) {
+    return '快速鍵 $keys 可以隨時切換深淺色。';
+  }
+
+  @override
+  String get set_cvDesc => '歷史、檢視器和無限畫布的行為。';
+
+  @override
+  String get set_cvBrowse => '瀏覽';
+
+  @override
+  String get set_cvHistoryClick => '點選歷史縮圖時';
+
+  @override
+  String get set_cvOpenDetail => '開啟詳情';
+
+  @override
+  String get set_cvOpenDetailSub => '彈出大圖檢視器，適合逐張細看';
+
+  @override
+  String get set_cvLinked => '聯動預覽';
+
+  @override
+  String get set_cvLinkedSub => '畫布跳到這張並選中，檢視器不彈出';
+
+  @override
+  String get set_cvViewer => '生成結果顯示在';
+
+  @override
+  String get set_cvCanvas => '無限畫布';
+
+  @override
+  String get set_cvCanvasSub => '按批次排成一列，可以平移、縮放、釘住對比';
+
+  @override
+  String get set_cvSimple => '簡潔檢視器';
+
+  @override
+  String get set_cvSimpleSub => '只顯示最新一張，最省資源';
+
+  @override
+  String get set_cvCanvasSec => '畫布';
+
+  @override
+  String get set_cvLock => '鎖定畫布視角';
+
+  @override
+  String get set_cvLockSub => '新圖出現時不自動飛過去，視角保持在你停下的位置';
+
+  @override
+  String get set_cvFill => '新圖縮放到填滿';
+
+  @override
+  String get set_cvFillSub => '聚焦單張時放大到可視區域，而不是按原始像素';
+
+  @override
+  String get set_cvChannel => '視覺通道';
+
+  @override
+  String get set_cvChannelSub => '畫布中間留空的長廊，按主題繪製裝飾，翻歷史時會依次經過各個主題。';
+
+  @override
+  String get set_cvMode => '模式';
+
+  @override
+  String get set_cvMinTwo => '隨機時至少保留兩個主題。';
+
+  @override
+  String set_cvSession(Object order) {
+    return '本次順序：$order';
+  }
+
+  @override
+  String get set_cvLevel => '濃淡';
+
+  @override
+  String get set_cvRuler => '時間刻度';
+
+  @override
+  String get set_cvRulerSub => '批次時間、日期分隔和右側刻度條';
+
+  @override
+  String get set_cvMotion => '空閒微動';
+
+  @override
+  String get set_cvMotionSub => '生成中和開啟“減少動態效果”時自動暫停';
+
+  @override
+  String get set_cvOps => '畫布操作';
+
+  @override
+  String get set_cvOpScroll => '上下翻';
+
+  @override
+  String get set_cvOpPan => '左右平移';
+
+  @override
+  String get set_cvOpZoom => '縮放';
+
+  @override
+  String get set_cvOpMove => '移動視角';
+
+  @override
+  String get set_cvOpAll => '看全域';
+
+  @override
+  String get set_cvOpHome => '回到最新一批';
+
+  @override
+  String get set_cvWheel => '滾輪';
+
+  @override
+  String get set_cvChannelTip => '畫布右下角的齒輪裡也能改視覺通道，兩處是同一份設定。';
+
+  @override
+  String get set_scDesc => '按頁面分組。點快速鍵直接錄製新組合；同一頁面裡重複時會標紅，並給出一鍵修復。';
+
+  @override
+  String get set_scSearch => '搜尋動作或按鍵，例如 Ctrl+S';
+
+  @override
+  String get set_scAll => '全部';
+
+  @override
+  String get set_scKeyboard => '鍵盤佈局';
+
+  @override
+  String get set_scKeyboardSub => '點按鍵篩選下面的列表；藍色是已佔用，紅色是衝突。';
+
+  @override
+  String get set_scNoMod => '無修飾';
+
+  @override
+  String set_scLayer(Object context, Object mod) {
+    return '$context · 按住 $mod 時';
+  }
+
+  @override
+  String set_scLayerNone(Object context) {
+    return '$context · 不按修飾鍵';
+  }
+
+  @override
+  String get set_scAction => '動作';
+
+  @override
+  String get set_scKeys => '快速鍵';
+
+  @override
+  String get set_scDefault => '預設';
+
+  @override
+  String set_scDefaultIs(Object keys) {
+    return '預設 $keys';
+  }
+
+  @override
+  String set_scConflict(Object name) {
+    return '與“$name”衝突';
+  }
+
+  @override
+  String get set_scRecording => '按下新的組合鍵…';
+
+  @override
+  String get set_scRecordHint => 'Esc 取消 · Backspace 清除';
+
+  @override
+  String get set_scRecord => '錄製新組合';
+
+  @override
+  String get set_scClear => '清除快速鍵';
+
+  @override
+  String get set_scDisplay => '顯示';
+
+  @override
+  String get set_scEnabled => '啟用快速鍵';
+
+  @override
+  String get set_scInTooltips => '在懸停提示中顯示';
+
+  @override
+  String get set_scInMenus => '在選單中顯示';
+
+  @override
+  String get set_scBadges => '導航上顯示數字標識';
+
+  @override
+  String get set_scConflicts => '衝突';
+
+  @override
+  String set_scConflictCount(Object n) {
+    return '$n 項';
+  }
+
+  @override
+  String set_scConflictLine(Object keys) {
+    return '$keys 被兩個動作佔用';
+  }
+
+  @override
+  String set_scConflictSub(Object context, Object a, Object b) {
+    return '$context：$a、$b。衝突時兩個都不觸發。';
+  }
+
+  @override
+  String set_scFix(Object name, Object keys) {
+    return '恢復$name為 $keys';
+  }
+
+  @override
+  String get set_scNoConflict => '沒有衝突';
+
+  @override
+  String get set_scConfig => '快速鍵配置';
+
+  @override
+  String get set_scResetAll => '全部恢復預設';
+
+  @override
+  String get set_scResetAllTitle => '把全部快速鍵恢復預設？';
+
+  @override
+  String set_scResetAllBody(Object n) {
+    return '$n 個自訂的組合會被還原。';
+  }
+
+  @override
+  String get set_scHelp => '快速鍵幫助';
+
+  @override
+  String set_scHelpTip(Object key) {
+    return '按 $key 在任何頁面檢視當前頁可用的快速鍵。';
+  }
+
+  @override
+  String get set_scEmpty => '沒有匹配的快速鍵';
+
+  @override
+  String get set_gnDesc => '控制 Anlas 消耗和請求節奏，以及寫提示詞時的輸入輔助。';
+
+  @override
+  String get set_gnCost => '額度保護';
+
+  @override
+  String get set_gnCostSub => '單次請求的消耗超過閾值時，先彈出確認再發送。';
+
+  @override
+  String get set_gnWarn => '高消耗提醒';
+
+  @override
+  String get set_gnWarnSub => '超過閾值時先確認';
+
+  @override
+  String get set_gnThreshold => '提醒閾值';
+
+  @override
+  String set_gnEstimate(
+    Object model,
+    Object w,
+    Object h,
+    Object steps,
+    Object n,
+  ) {
+    return '當前生圖參數：$model · $w×$h · $steps 步 · 每次 $n 張';
+  }
+
+  @override
+  String get set_gnWillWarn => '會提醒';
+
+  @override
+  String get set_gnNoWarn => '不會提醒';
+
+  @override
+  String get set_gnFree => '免費';
+
+  @override
+  String get set_gnPace => '請求節奏';
+
+  @override
+  String get set_gnPaceSub => '連續生成時每次請求之間等一會兒，減輕伺服器壓力，也讓佇列更像手動操作。';
+
+  @override
+  String get set_gnLimit => '限制生成間隔';
+
+  @override
+  String get set_gnInterval => '間隔';
+
+  @override
+  String get set_gnJitter => '隨機浮動';
+
+  @override
+  String get set_gnJitterSub => '在間隔上下隨機增減';
+
+  @override
+  String get set_gnTimeline => '按當前設定，連續 10 次請求大約這樣分佈';
+
+  @override
+  String get set_gnInput => '提示詞輸入';
+
+  @override
+  String get set_gnWheel => '滾輪調整權重';
+
+  @override
+  String get set_gnWheelSub => '游標放在標籤上滾動滾輪，直接加減權重';
+
+  @override
+  String get set_gnNoKey => '無需按鍵';
+
+  @override
+  String get set_gnRelated => '相關標籤擴展';
+
+  @override
+  String get set_gnRelatedSub => '輸入標籤時附帶推薦常一起出現的標籤';
+
+  @override
+  String get set_gnRag => '語義標籤推薦';
+
+  @override
+  String get set_gnRagSub => '結合上下文的智慧推薦，由“語義檢索”提供';
+
+  @override
+  String get set_gnReady => '已就緒';
+
+  @override
+  String get set_gnNotReady => '未就緒';
+
+  @override
+  String get set_gnGoSettings => '去設定';
+
+  @override
+  String get set_gnTranslate => '提示詞翻譯';
+
+  @override
+  String get set_gnTranslateSub => '在提示詞框裡中英互譯使用的模型';
+
+  @override
+  String get set_gnToday => '今天';
+
+  @override
+  String get set_gnUsed => 'Anlas 已用';
+
+  @override
+  String get set_gnNow => '現在';
+
+  @override
+  String get set_gnWarned => '高消耗提醒觸發';
+
+  @override
+  String set_gnTimes(Object n) {
+    return '$n 次';
+  }
+
+  @override
+  String get set_gnMaxSingle => '最大單次消耗';
+
+  @override
+  String get set_gnFreeTip =>
+      '免費額度規則（Opus 小圖不扣 Anlas）由生圖頁按當前參數計算，這裡的閾值只看實際要扣的數。';
+
+  @override
+  String get set_stDesc => '圖片儲存在哪裡、畫廊讀哪些資料夾，以及佔用與清理。';
+
+  @override
+  String get set_stUsage => '佔用';
+
+  @override
+  String set_stFree(Object disk, Object size) {
+    return '$disk 盤剩餘 $size';
+  }
+
+  @override
+  String get set_stRecount => '重新統計';
+
+  @override
+  String get set_stCounting => '統計中…';
+
+  @override
+  String get set_stImages => '圖片';
+
+  @override
+  String get set_stUpscaleModels => '放大模型';
+
+  @override
+  String get set_stVibes => 'Vibe 庫';
+
+  @override
+  String get set_stThumbs => '縮圖快取';
+
+  @override
+  String get set_stRag => '語義索引';
+
+  @override
+  String get set_stDict => '詞庫與快取';
+
+  @override
+  String get set_stAgent => 'Agent';
+
+  @override
+  String get set_stSave => '儲存';
+
+  @override
+  String get set_stSavePath => '圖片儲存位置';
+
+  @override
+  String get set_stAutoSave => '自動儲存';
+
+  @override
+  String get set_stAutoSaveSub => '生成完成後立即寫入儲存位置；關掉後只留在畫布和歷史裡';
+
+  @override
+  String get set_stAssets => '素材與顯示';
+
+  @override
+  String get set_stVibePath => 'Vibe 庫位置';
+
+  @override
+  String get set_stQuality => '本地畫廊清晰度';
+
+  @override
+  String get set_stQualitySub => '縮圖的顯示品質';
+
+  @override
+  String get set_stHigh => '高畫質';
+
+  @override
+  String get set_stStandard => '標清';
+
+  @override
+  String get set_stRoots => '圖庫來源';
+
+  @override
+  String get set_stRootsSub => '任何資料夾都可以加入本地畫廊瀏覽和搜尋，不參與自動儲存。';
+
+  @override
+  String get set_stPrimary => '主目錄';
+
+  @override
+  String set_stCount(Object n) {
+    return '$n 張';
+  }
+
+  @override
+  String get set_stAddFolder => '新增資料夾';
+
+  @override
+  String get set_stImportIndex => '匯入標籤索引 (.jsonl)';
+
+  @override
+  String set_stLastScan(Object when, Object n) {
+    return '上次掃描 $when · $n 張';
+  }
+
+  @override
+  String get set_stMaintain => '維護';
+
+  @override
+  String get set_stRescan => '重新掃描圖庫';
+
+  @override
+  String get set_stRescanSub => '檢查缺失檔案、補掃新檔案、重試未讀出的後設資料';
+
+  @override
+  String get set_stScan => '掃描';
+
+  @override
+  String get set_stScanning => '掃描中…';
+
+  @override
+  String get set_stCleanThumbs => '清理縮圖快取';
+
+  @override
+  String get set_stCleanThumbsSub => '按最近使用淘汰超出上限的縮圖，不碰原圖';
+
+  @override
+  String get set_stClean => '清理';
+
+  @override
+  String get set_stCleanTitle => '清理縮圖快取？';
+
+  @override
+  String get set_stCleanBody => '超出上限的縮圖會被刪除，之後瀏覽時重新生成。原圖不受影響。';
+
+  @override
+  String get set_stAppData => '應用資料位置';
+
+  @override
+  String get set_stAppDataSub => '帳號、歷史、塊庫等資料庫所在目錄；修改後需要重啟';
+
+  @override
+  String get set_stOpenFolders => '開啟資料夾';
+
+  @override
+  String get set_stLogs => '日誌';
+
+  @override
+  String get set_stAppDataShort => '應用資料';
+
+  @override
+  String get set_stDeleteTip => '移動或刪除單張圖片仍在畫廊裡操作，並遵循“隱私與保護”裡的確認規則。';
+
+  @override
+  String get set_stRemoveRoot => '移除這個資料夾';
+
+  @override
+  String get set_dcDesc => '標籤資料和各級快取。一般不用動，出現補全異常時可以在這裡清理。';
+
+  @override
+  String get set_dcTags => '標籤詞庫';
+
+  @override
+  String get set_dcTagsSub => '自動補全、標籤翻譯和相關推薦用到的本地資料。';
+
+  @override
+  String get set_dcBase => '基礎詞庫';
+
+  @override
+  String set_dcBaseValue(Object n, Object version) {
+    return '$n 個標籤 · 資料版本 $version';
+  }
+
+  @override
+  String get set_dcCooc => '共現資料';
+
+  @override
+  String get set_dcCoocSub => '用來推薦常一起出現的標籤';
+
+  @override
+  String set_dcEntries(Object n) {
+    return '$n 條';
+  }
+
+  @override
+  String get set_dcTranslate => '標籤翻譯';
+
+  @override
+  String get set_dcTranslateSub => '詞庫裡沒有中文釋義時，用這個介面補翻';
+
+  @override
+  String get set_dcCaches => '快取';
+
+  @override
+  String get set_dcCachesSub => '清除後會在使用時重新取得，不影響你的圖片和設定。';
+
+  @override
+  String get set_dcDanbooru => 'Danbooru 快取';
+
+  @override
+  String get set_dcDanbooruSub => '線上畫廊與標籤百科的請求結果';
+
+  @override
+  String get set_dcTranslation => 'AI 翻譯快取';
+
+  @override
+  String get set_dcTranslationSub => '已翻譯過的標籤和提示詞';
+
+  @override
+  String set_dcCacheSize(Object n, Object size) {
+    return '$n 條 · $size';
+  }
+
+  @override
+  String set_dcClearTitle(Object name) {
+    return '清除$name？';
+  }
+
+  @override
+  String get set_dcClearBody => '下次用到時會重新取得。';
+
+  @override
+  String get set_dcStats => '快取統計';
+
+  @override
+  String get set_dcL1 => 'L1 記憶體';
+
+  @override
+  String get set_dcL2 => 'L2 Hive';
+
+  @override
+  String get set_dcL3 => 'L3 SQLite';
+
+  @override
+  String set_dcImagesUnit(Object n) {
+    return '$n 張圖片';
+  }
+
+  @override
+  String get set_dcAutoRefresh => '自動重新整理';
+
+  @override
+  String set_dcUpdated(Object when) {
+    return '上次更新 $when';
+  }
+
+  @override
+  String get set_dcResetStats => '重設統計';
+
+  @override
+  String get set_dcTip => '這一頁的資料都可以重新生成。真正的個人資料（帳號、歷史、塊庫）在“儲存與圖庫 → 應用資料位置”。';
+
+  @override
+  String get set_mdDesc =>
+      '翻譯、反推、標籤翻譯和 Agent 用到的大模型服務。先新增服務商，再在“功能分配”裡給每個功能選模型。';
+
+  @override
+  String get set_mdProviders => '服務商';
+
+  @override
+  String get set_mdTasks => '功能分配';
+
+  @override
+  String get set_mdPresets => '提示詞預設';
+
+  @override
+  String get set_mdRequests => '請求記錄';
+
+  @override
+  String set_mdProviderCount(Object n) {
+    return '$n 個服務商';
+  }
+
+  @override
+  String set_mdModelCount(Object n) {
+    return '$n 個模型';
+  }
+
+  @override
+  String get set_mdDisabled => '已停用';
+
+  @override
+  String get set_mdLocal => '本機';
+
+  @override
+  String set_mdLatency(Object ms, Object when) {
+    return '$ms · $when';
+  }
+
+  @override
+  String get set_mdUnreachable => '連線失敗';
+
+  @override
+  String get set_mdName => '名稱';
+
+  @override
+  String get set_mdBaseUrl => '介面地址';
+
+  @override
+  String get set_mdApiKey => 'API Key';
+
+  @override
+  String get set_mdApiKeyEmpty => '未填寫';
+
+  @override
+  String get set_mdModels => '模型';
+
+  @override
+  String get set_mdRefreshModels => '從服務商重新整理';
+
+  @override
+  String get set_mdAddModel => '手動新增';
+
+  @override
+  String set_mdUsedFor(Object tasks) {
+    return '用於 $tasks';
+  }
+
+  @override
+  String get set_mdRetired => '服務商已下線';
+
+  @override
+  String get set_mdCapTools => '工具';
+
+  @override
+  String get set_mdCapVision => '視覺';
+
+  @override
+  String get set_mdCapReasoning => '推理';
+
+  @override
+  String get set_mdAdvanced => '進階請求參數';
+
+  @override
+  String get set_mdDelete => '刪除服務商';
+
+  @override
+  String set_mdDeleteTitle(Object name) {
+    return '刪除服務商“$name”？';
+  }
+
+  @override
+  String get set_mdDeleteBody => '用到它的功能會回落到其他可用服務商。';
+
+  @override
+  String get set_mdRemoveModel => '移除模型';
+
+  @override
+  String get set_mdTaskPrompt => '提示詞翻譯';
+
+  @override
+  String get set_mdTaskReverse => '提示詞反推';
+
+  @override
+  String get set_mdTaskTag => '標籤翻譯';
+
+  @override
+  String get set_mdTaskWiki => '百科翻譯';
+
+  @override
+  String get set_mdFeature => '功能';
+
+  @override
+  String get set_mdProvider => '服務商';
+
+  @override
+  String get set_mdModel => '模型';
+
+  @override
+  String get set_mdPreset => '預設';
+
+  @override
+  String get set_mdStatus => '狀態';
+
+  @override
+  String get set_mdAvailable => '可用';
+
+  @override
+  String get set_mdFallback => '回落到第一個可用服務商';
+
+  @override
+  String get set_mdNotChosen => '未選擇';
+
+  @override
+  String get set_mdBuiltin => '內建';
+
+  @override
+  String get set_mdNewPreset => '新增預設';
+
+  @override
+  String get set_mdEdit => '編輯';
+
+  @override
+  String get set_mdTime => '時間';
+
+  @override
+  String set_mdTokens(Object n) {
+    return '$n tokens';
+  }
+
+  @override
+  String get set_mdFailed => '失敗';
+
+  @override
+  String get set_mdOk => '成功';
+
+  @override
+  String set_mdShowing(Object n, Object total) {
+    return '顯示最近 $n 條，共 $total 條';
+  }
+
+  @override
+  String get set_mdImport => '匯入配置';
+
+  @override
+  String get set_mdAddProvider => '新增服務商';
+
+  @override
+  String get set_mdEmpty => '還沒有服務商';
+
+  @override
+  String get set_mdEmptySub => '新增一個服務商後，翻譯和反推就能用了。';
+
+  @override
+  String get set_agDesc => '側欄助手的模型、指令、擴展和 MCP 工具。';
+
+  @override
+  String get set_agModelSec => '模型';
+
+  @override
+  String get set_agModel => 'Agent 使用的模型';
+
+  @override
+  String get set_agModelSub => '思考強度在聊天框裡按任務調整';
+
+  @override
+  String get set_agEnter => 'Enter 直接傳送';
+
+  @override
+  String get set_agEnterSub => '關掉後用 Ctrl+Enter 傳送，Enter 換行';
+
+  @override
+  String get set_agMax => '單次任務最多請求';
+
+  @override
+  String get set_agMaxSub => '防止 Agent 陷入迴圈';
+
+  @override
+  String get set_agTimesUnit => '次';
+
+  @override
+  String get set_agInstr => '指令';
+
+  @override
+  String get set_agInstrSub => '按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。';
+
+  @override
+  String get set_agOrderBuiltin => '內建提示詞';
+
+  @override
+  String get set_agOrderPrefix => '系統字首';
+
+  @override
+  String get set_agOrderGlobal => '全域指令';
+
+  @override
+  String get set_agOrderWorkspace => '工作區指令';
+
+  @override
+  String get set_agOrderTools => '工具地圖';
+
+  @override
+  String get set_agGlobal => '全域指令';
+
+  @override
+  String get set_agPrefix => '系統字首';
+
+  @override
+  String get set_agPrefixHint => '在每次請求最前面加入的固定內容，例如身份或輸出格式。';
+
+  @override
+  String get set_agBuiltin => '內建提示詞';
+
+  @override
+  String get set_agFinal => '檢視最終提示詞';
+
+  @override
+  String get set_agExt => '擴展';
+
+  @override
+  String get set_agExtSub => '各工作區獨立載入；外部擴展能執行原生代碼，請只新增可信來源。';
+
+  @override
+  String get set_agStudioExt => 'Studio 互動';
+
+  @override
+  String get set_agStudioExtSub => '讀取當前 Studio 狀態，並通過問題卡片收集回答';
+
+  @override
+  String get set_agRequired => '內建 · 必需';
+
+  @override
+  String get set_agAddFile => '新增擴展檔案';
+
+  @override
+  String get set_agAddDir => '新增擴展目錄';
+
+  @override
+  String get set_agMcp => 'MCP 伺服器';
+
+  @override
+  String get set_agMcpSub => '預設 CodeMode 按需發現，工具不會一次性塞進上下文。';
+
+  @override
+  String get set_agBuiltinTools => 'NAI Studio · 內建工具組';
+
+  @override
+  String get set_agBuiltinToolsSub => '提示詞、塊、百科、圖片、歷史、參考圖、生圖與設定工具';
+
+  @override
+  String set_agConnected(Object n) {
+    return '已連線 · $n 個工具';
+  }
+
+  @override
+  String get set_agConnecting => '連線中…';
+
+  @override
+  String get set_agNeedsLogin => '需要登入';
+
+  @override
+  String get set_agMcpError => '連線失敗';
+
+  @override
+  String get set_agMcpOff => '已停用';
+
+  @override
+  String get set_agAddMcp => '新增 MCP 伺服器';
+
+  @override
+  String get set_agTools => '工具';
+
+  @override
+  String set_agToolCount(Object n) {
+    return '$n 個';
+  }
+
+  @override
+  String get set_agToolsTip => '生圖類工具始終先報價，等你確認後才執行。';
+
+  @override
+  String get set_agData => '資料目錄';
+
+  @override
+  String get set_agWorkspaces => '工作區';
+
+  @override
+  String get set_agSessions => '會話';
+
+  @override
+  String get set_agCostTip => '費用由服務商計費，Studio 只顯示 token 用量。';
+
+  @override
+  String get set_agOpen => '開啟 Agent';
+
+  @override
+  String get set_agEditMcp => '編輯';
+
+  @override
+  String get set_agRemoveMcp => '移除伺服器';
+
+  @override
+  String get set_agRemoveExt => '移除擴展';
+
+  @override
+  String get set_rgDesc => '本地執行的 RAG：給標籤推薦、Wiki、提示詞塊和圖庫找相似提供語義能力，不上傳任何內容。';
+
+  @override
+  String get set_rgReady => '語義檢索已就緒';
+
+  @override
+  String get set_rgOff => '語義檢索已關閉';
+
+  @override
+  String get set_rgPartial => '部分來源建庫中';
+
+  @override
+  String get set_rgAllDone => '全部完成';
+
+  @override
+  String get set_rgPool => '所有來源共用一個本地向量池，新增內容自動增量更新。';
+
+  @override
+  String get set_rgStepRuntime => '執行環境';
+
+  @override
+  String get set_rgStepEmbed => '嵌入';
+
+  @override
+  String get set_rgStepRerank => '重排';
+
+  @override
+  String get set_rgStepDevice => '裝置';
+
+  @override
+  String get set_rgSources => '來源';
+
+  @override
+  String get set_rgSourcesSub => '每個來源單獨建庫、單獨開關；建庫可以暫停，已完成的部分立即可用。';
+
+  @override
+  String get set_rgTags => '標籤上下文推薦';
+
+  @override
+  String get set_rgTagsSub => '結合語義、共現與重排；各提示詞框、角色和正負面分開計算';
+
+  @override
+  String get set_rgWiki => 'Wiki 語義搜尋';
+
+  @override
+  String get set_rgWikiSub => '本地百科正文，名稱精確匹配優先，語義結果補充';
+
+  @override
+  String get set_rgBlocks => '提示詞塊';
+
+  @override
+  String get set_rgBlocksSub => '已儲存、未歸檔塊的標題、標籤與正負面文字';
+
+  @override
+  String get set_rgGallery => '圖庫多模態';
+
+  @override
+  String get set_rgGallerySub => '分析畫面找相似圖；NAI 圖的參數另建文字索引，原圖不改寫';
+
+  @override
+  String set_rgCount(Object done, Object total) {
+    return '$done / $total';
+  }
+
+  @override
+  String set_rgSegments(Object done, Object total) {
+    return '$done / $total 段';
+  }
+
+  @override
+  String set_rgGalleryCount(Object done, Object total, Object n) {
+    return '畫面 $done / $total · 參數 $n 段';
+  }
+
+  @override
+  String get set_rgPaused => '已暫停';
+
+  @override
+  String get set_rgBuilding => '建庫中';
+
+  @override
+  String get set_rgError => '出錯';
+
+  @override
+  String get set_rgClearIndex => '清除索引';
+
+  @override
+  String set_rgClearTitle(Object name) {
+    return '清除“$name”的索引？';
+  }
+
+  @override
+  String get set_rgClearBody => '只刪除派生索引，原始內容和模型都保留。';
+
+  @override
+  String get set_rgContext => '推薦上下文';
+
+  @override
+  String get set_rgContextSub => '兩種都最多取 120 個 Gemma token，按完整標籤擷取。';
+
+  @override
+  String get set_rgRange => '取樣範圍';
+
+  @override
+  String get set_rgBefore => '游標前';
+
+  @override
+  String get set_rgAround => '插入點前後';
+
+  @override
+  String get set_rgRuntime => '模型與執行環境';
+
+  @override
+  String get set_rgEmbedPath => '嵌入模型目錄';
+
+  @override
+  String get set_rgRerankPath => '重排模型目錄';
+
+  @override
+  String get set_rgDevice => '執行裝置';
+
+  @override
+  String get set_rgAuto => '自動';
+
+  @override
+  String get set_rgEnv => '執行環境';
+
+  @override
+  String get set_rgEnvSub => '獨立 Python 與推理依賴，不下載模型權重';
+
+  @override
+  String get set_rgCheck => '檢測';
+
+  @override
+  String get set_rgReinstall => '重新安裝';
+
+  @override
+  String get set_rgProgress => '建庫進度';
+
+  @override
+  String get set_rgOverall => '總體';
+
+  @override
+  String get set_rgShortTags => '標籤';
+
+  @override
+  String get set_rgShortWiki => 'Wiki';
+
+  @override
+  String get set_rgShortBlocks => '塊';
+
+  @override
+  String get set_rgShortGallery => '圖庫';
+
+  @override
+  String get set_rgTip => '清除某個來源只刪除它的派生索引，原始內容和模型都保留。';
+
+  @override
+  String get set_rgNotReady => '語義檢索還不能用';
+
+  @override
+  String get set_rgNotReadySub => '先安裝執行環境，再選好兩個模型目錄。';
+
+  @override
+  String get set_rgEmpty => '未建立';
+
+  @override
+  String get set_rgBuild => '建立索引';
+
+  @override
+  String get set_rgContinue => '繼續建立';
+
+  @override
+  String set_rgSkipped(Object n) {
+    return '跳過 $n 張';
+  }
+
+  @override
+  String get set_rgPlanLoading => '正在統計要收錄的內容…';
+
+  @override
+  String set_rgPlanTags(Object n) {
+    return '將收錄 $n 項標籤、別名與已有本地釋義。';
+  }
+
+  @override
+  String set_rgPlanText(Object docs, Object n) {
+    return '將收錄 $docs 份資料，切成 $n 個文字片段。';
+  }
+
+  @override
+  String set_rgPlanGallery(Object images, Object n) {
+    return '將收錄 $images 張圖片和 $n 段 NAI 參數，畫面與參數分開索引。';
+  }
+
+  @override
+  String get set_rgPlanNote => '首次處理可能較久，可以隨時暫停，已完成的部分立即可用。';
+
+  @override
+  String get set_rgPlanRebuild => '重建會先清掉這個來源的現有索引。';
+
+  @override
+  String get set_rgStart => '開始';
+
+  @override
+  String get set_rgDownload => '下載';
+
+  @override
+  String set_rgDownloading(Object done, Object total) {
+    return '正在下載 $done / $total';
+  }
+
+  @override
+  String set_rgDownloadingUnknown(Object done) {
+    return '正在下載 $done';
+  }
+
+  @override
+  String get set_rgVerifying => '正在校驗檔案…';
+
+  @override
+  String get set_rgDiscover => '查詢本地模型';
+
+  @override
+  String get set_rgDiscoverSub =>
+      '在工作區 04_工具/models 裡找 EmbeddingGemma 2 和 Qwen3-Reranker 0.6B，找到後自動填好上面兩個目錄。';
+
+  @override
+  String get set_rgFind => '查詢';
+
+  @override
+  String get set_rgModelsMissing => '沒找到。可以點“下載”，或手動選擇已下載的權重目錄。';
+
+  @override
+  String get set_rgPython => 'Python 直譯器';
+
+  @override
+  String get set_rgPythonSub => '預設用自動安裝的獨立環境；也可以選一個已有的 python.exe。';
+
+  @override
+  String get set_rgPythonAuto => '自動';
+
+  @override
+  String get set_rgPythonNone => '未安裝';
+
+  @override
+  String get set_rgPythonPending => '選的直譯器還沒啟用，點“使用此直譯器”會按它重新安裝依賴。';
+
+  @override
+  String get set_rgUsePython => '使用此直譯器';
+
+  @override
+  String get set_rgEnvReady => '已就緒';
+
+  @override
+  String get set_rgEnvMissing => '還沒有安裝';
+
+  @override
+  String get set_rgInstall => '安裝';
+
+  @override
+  String get set_rgInstallHint =>
+      '下載 Python 與推理依賴，不下載模型權重。NVIDIA 顯示卡選 CUDA（約需數 GB）；其他選 CPU，下載較小。';
+
+  @override
+  String get set_rgInstallCuda => 'CUDA · NVIDIA';
+
+  @override
+  String get set_rgInstallCpu => 'CPU';
+
+  @override
+  String get set_rgPhaseExisting => '正在檢測已有環境';
+
+  @override
+  String get set_rgPhaseDownload => '正在下載安裝工具';
+
+  @override
+  String get set_rgPhaseCreate => '正在準備 Python 環境';
+
+  @override
+  String get set_rgPhaseCuda => '正在安裝 CUDA 推理元件';
+
+  @override
+  String get set_rgPhasePackages => '正在安裝推理依賴';
+
+  @override
+  String get set_rgPhaseCheck => '正在校驗環境';
+
+  @override
+  String set_rgElapsed(Object time) {
+    return '此階段已用 $time';
+  }
+
+  @override
+  String get set_upDesc => '管理本機超分模型和元件。所有下載都需要你手動開始。';
+
+  @override
+  String set_upGpu(Object name, Object n) {
+    return '$name · $n GB';
+  }
+
+  @override
+  String get set_upNoGpu => '沒有檢測到獨立顯示卡';
+
+  @override
+  String get set_upLocal => '在本機放大圖片，不消耗 Anlas。';
+
+  @override
+  String get set_upEsrgan => '常規模型';
+
+  @override
+  String get set_upEsrganSub =>
+      'Real-ESRGAN NCNN，4 倍放大，速度快，任何支援 Vulkan 的顯示卡都能用。';
+
+  @override
+  String get set_upAnimeQuality => '動漫 · 畫質';
+
+  @override
+  String get set_upAnimeFast => '動漫 · 快速';
+
+  @override
+  String get set_upGeneral => '通用 · 攝影';
+
+  @override
+  String get set_upBuiltin => '內建';
+
+  @override
+  String get set_upInstalled => '已安裝';
+
+  @override
+  String get set_upNotInstalled => '未安裝';
+
+  @override
+  String get set_upFailed => '下載失敗';
+
+  @override
+  String get set_upImport => '匯入模型';
+
+  @override
+  String get set_upImportHint => '選擇配套的 .param 和 .bin（4 倍 Real-ESRGAN NCNN）';
+
+  @override
+  String get set_upSeed => 'SeedVR2 擴散放大';
+
+  @override
+  String get set_upSeedSub =>
+      '畫質更好、更慢，需要 NVIDIA 顯示卡。型號共用 VAE（約 0.5 GB）和 Python/CUDA 環境。';
+
+  @override
+  String get set_upSeed3b => '3B · 均衡';
+
+  @override
+  String get set_upSeed3bSub => '兼顧效果與資源佔用，適合日常放大';
+
+  @override
+  String get set_upSeed7b => '7B · 高畫質';
+
+  @override
+  String get set_upSeed7bSub => '更高畫質潛力，需要更多視訊記憶體與時間';
+
+  @override
+  String get set_upSeed7bSharp => '7B · 銳利';
+
+  @override
+  String get set_upSeed7bSharpSub => '偏向更銳利的細節，適合強化紋理';
+
+  @override
+  String set_upVram(Object n) {
+    return '視訊記憶體 ≥ $n GB';
+  }
+
+  @override
+  String set_upProgress(Object done, Object total, Object speed) {
+    return '$done / $total · $speed/s';
+  }
+
+  @override
+  String get set_upVramMode => '視訊記憶體模式';
+
+  @override
+  String get set_upRecommended => '推薦';
+
+  @override
+  String get set_upLowVram => '低視訊記憶體';
+
+  @override
+  String get set_upOffload => 'CPU 卸載層數';
+
+  @override
+  String get set_upOffloadSub => '卸載越多越省視訊記憶體，但更慢、佔更多記憶體';
+
+  @override
+  String get set_upTiling => 'VAE 分塊';
+
+  @override
+  String get set_upTilingSub => '小分塊省視訊記憶體，重疊可以減輕接縫';
+
+  @override
+  String get set_upNoise => '實驗性噪聲';
+
+  @override
+  String set_upNoiseSub(Object a, Object b) {
+    return '輸入噪聲 $a · 潛空間噪聲 $b；保持 0 即沿用當前效果';
+  }
+
+  @override
+  String get set_upInputNoise => '輸入噪聲';
+
+  @override
+  String get set_upLatentNoise => '潛空間噪聲';
+
+  @override
+  String get set_upExperimental => '實驗';
+
+  @override
+  String get set_upRtx => 'RTX Video';
+
+  @override
+  String get set_upRtxSub => '使用 NVIDIA RTX Video 快速放大，約 64 MB 獨立元件。';
+
+  @override
+  String get set_upRtxName => 'RTX Video Super Resolution';
+
+  @override
+  String get set_upRtxNeeds => '需要相容的 RTX 顯示卡與驅動';
+
+  @override
+  String get set_upDefault => '預設放大方式';
+
+  @override
+  String get set_upDefaultTip => '生圖頁工具條上的“本地放大”預設用這個，選單裡隨時可換。';
+
+  @override
+  String get set_upVramTip => '視訊記憶體不足時不會自動換型號；可以改用 3B、降低倍率，或開啟低視訊記憶體與 VAE 分塊。';
+
+  @override
+  String set_upRemoveTitle(Object name) {
+    return '刪除$name？';
+  }
+
+  @override
+  String get set_upRemoveBody => '之後要用時需要重新下載。';
+
+  @override
+  String get set_brDesc => '和本機其他軟體協作：Krita、外部 Agent 和 ComfyUI。';
+
+  @override
+  String get set_brKritaSub => '在 Krita 裡直接呼叫 Studio 生圖，結果回到 Krita 圖層。';
+
+  @override
+  String get set_brKrita => 'Krita 橋接';
+
+  @override
+  String get set_brLoopback => '本機監聽，只接受 127.0.0.1 的連線';
+
+  @override
+  String get set_brConnected => '已連線';
+
+  @override
+  String get set_brWaiting => '等待 Krita 連線';
+
+  @override
+  String get set_brRegenerate => '重新生成會話';
+
+  @override
+  String get set_brDiscovery => '發現檔案';
+
+  @override
+  String get set_brAgents => '外部 Agent';
+
+  @override
+  String get set_brAgentsSub => '讓 Claude Code、Codex 等能執行本機命令的 Agent 讀寫參數和生圖。';
+
+  @override
+  String get set_brLocal => '本機橋接';
+
+  @override
+  String set_brClients(Object n) {
+    return '$n 個 Agent 已連線';
+  }
+
+  @override
+  String get set_brNoClients => '沒有 Agent 連線';
+
+  @override
+  String get set_brTakeover => '複製接管說明';
+
+  @override
+  String get set_brEnd => '結束連線';
+
+  @override
+  String get set_brActivity => '最近活動';
+
+  @override
+  String get set_brComfySub => '匯入 ComfyUI 工作流，在 Studio 裡填參執行。';
+
+  @override
+  String get set_brComfyEnable => '啟用 ComfyUI';
+
+  @override
+  String get set_brComfyUrl => '服務地址';
+
+  @override
+  String set_brComfyFailed(Object reason, Object when) {
+    return '連線失敗：$reason（$when）。確認 ComfyUI 已啟動並允許本機存取。';
+  }
+
+  @override
+  String set_brComfyOk(Object when) {
+    return '連線正常（$when）';
+  }
+
+  @override
+  String get set_brStatus => '狀態';
+
+  @override
+  String set_brAgentsShort(Object n) {
+    return '$n 個';
+  }
+
+  @override
+  String get set_brOff => '未啟用';
+
+  @override
+  String get set_brNoResponse => '無回應';
+
+  @override
+  String get set_brTip => '所有橋接只在本機迴環地址上監聽，不對區域網開放。代理設定不影響這些連線。';
+
+  @override
+  String get set_nwDesc => '代理和連線狀態。';
+
+  @override
+  String get set_nwProxy => '代理';
+
+  @override
+  String get set_nwProxySub => '存取 NovelAI、Danbooru、GitHub 更新和第三方模型服務時使用。';
+
+  @override
+  String get set_nwUse => '使用代理';
+
+  @override
+  String get set_nwMode => '方式';
+
+  @override
+  String get set_nwSystem => '跟隨系統';
+
+  @override
+  String get set_nwManual => '手動';
+
+  @override
+  String get set_nwAddress => '地址';
+
+  @override
+  String set_nwDetected(Object addr) {
+    return '系統代理檢測到 $addr。代理只轉發上述外部請求，本機橋接和本地模型不經過代理。';
+  }
+
+  @override
+  String get set_nwNoSystem => '沒有檢測到系統代理。代理只轉發外部請求，本機橋接和本地模型不經過代理。';
+
+  @override
+  String get set_nwCheck => '連線檢測';
+
+  @override
+  String get set_nwCheckSub => '一鍵檢查各服務是否可達，出錯時更容易判斷是網路還是服務的問題。';
+
+  @override
+  String get set_nwNaiImage => 'NovelAI 生圖';
+
+  @override
+  String get set_nwNaiApi => 'NovelAI 帳戶';
+
+  @override
+  String get set_nwDanbooru => 'Danbooru';
+
+  @override
+  String get set_nwUpdate => '應用更新';
+
+  @override
+  String get set_nwCheckAll => '全部檢測';
+
+  @override
+  String set_nwChecked(Object when) {
+    return '上次檢測 $when';
+  }
+
+  @override
+  String get set_nwViaProxy => '經過代理';
+
+  @override
+  String get set_nwDirect => '直連';
+
+  @override
+  String get set_nwNeverChecked => '還沒檢測過';
+
+  @override
+  String get set_nwFail => '失敗';
+
+  @override
+  String get set_nwTip => '改代理後需要重啟才會生效；Studio 會提醒，不會自動重啟打斷你的工作。';
+
+  @override
+  String get set_pvDesc => '分享圖片時帶出什麼資訊，以及哪些操作需要你確認。';
+
+  @override
+  String get set_pvProtect => '保護';
+
+  @override
+  String get set_pvStrip => '分享時去除後設資料';
+
+  @override
+  String get set_pvStripSub => '複製或拖出圖片時去掉提示詞和參數，原檔案不變';
+
+  @override
+  String get set_pvExternal => '傳送到外部前提醒';
+
+  @override
+  String get set_pvExternalSub => '把圖片發給其他軟體或網頁前先確認';
+
+  @override
+  String get set_pvDanger => '危險操作需確認';
+
+  @override
+  String get set_pvDangerSub => '刪除、清空、覆蓋等不可復原的操作先彈確認';
+
+  @override
+  String get set_pvOverwrite => '儲存時不覆蓋';
+
+  @override
+  String get set_pvOverwriteSub => '目標位置有同名檔案時自動改名';
+
+  @override
+  String get set_pvBlacklist => '線上畫廊黑名單';
+
+  @override
+  String get set_pvBlacklistSub => '含有這些標籤的圖片在線上畫廊裡直接隱藏。';
+
+  @override
+  String get set_pvAddTag => '新增標籤…';
+
+  @override
+  String get set_pvSync => '同步 Danbooru 黑名單';
+
+  @override
+  String set_pvSyncSub(Object user, Object when) {
+    return '已登入 $user · 上次同步 $when';
+  }
+
+  @override
+  String set_pvSyncNever(Object user) {
+    return '已登入 $user · 還沒同步過';
+  }
+
+  @override
+  String get set_pvSyncSignedOut => '登入 Danbooru 後可以同步帳號裡的黑名單';
+
+  @override
+  String get set_pvSyncNow => '立即同步';
+
+  @override
+  String get set_pvSyncing => '同步中…';
+
+  @override
+  String get set_pvAutoSync => '啟動時自動同步';
+
+  @override
+  String get set_pvExported => '匯出時包含什麼';
+
+  @override
+  String get set_pvIncPrefs => '外觀、操作、輸入偏好';
+
+  @override
+  String get set_pvIncRules => '保護規則與黑名單';
+
+  @override
+  String get set_pvIncCred => '帳號憑據';
+
+  @override
+  String get set_pvIncPaths => '檔案路徑';
+
+  @override
+  String get set_pvIncDrafts => '草稿與模型繫結';
+
+  @override
+  String get set_pvTip => '後設資料保護只作用於“複製”和“拖出”，儲存到磁碟的原圖始終保留完整參數，方便日後複用。';
+
+  @override
+  String get set_bkDesc => '在裝置之間遷移偏好，或者回到預設狀態。所有重設都會先備份。';
+
+  @override
+  String get set_bkPrefs => '偏好設定';
+
+  @override
+  String get set_bkPrefsSub => '外觀、操作、輸入與保護規則。帳號憑據、路徑、草稿和模型繫結不會寫進檔案。';
+
+  @override
+  String get set_bkExport => '匯出';
+
+  @override
+  String get set_bkExportSub => '儲存為 studio-preferences.json';
+
+  @override
+  String get set_bkExportBtn => '匯出…';
+
+  @override
+  String get set_bkImport => '匯入';
+
+  @override
+  String get set_bkImportSub => '應用前會顯示將修改多少項，並自動備份當前設定';
+
+  @override
+  String get set_bkImportBtn => '選擇檔案…';
+
+  @override
+  String get set_bkUndoImport => '復原上次匯入';
+
+  @override
+  String set_bkUndoImportSub(Object when) {
+    return '回到 $when 匯入前的狀態';
+  }
+
+  @override
+  String get set_bkNoImport => '還沒有匯入過';
+
+  @override
+  String get set_bkRestore => '恢復';
+
+  @override
+  String get set_bkOther => '其他配置';
+
+  @override
+  String set_bkShortcutsSub(Object n, Object m) {
+    return '$n 個動作，$m 個已自訂';
+  }
+
+  @override
+  String get set_bkModelsSub => '服務商、功能分配和預設；API Key 預設不匯出';
+
+  @override
+  String get set_bkCopyConfig => '複製配置';
+
+  @override
+  String get set_bkReset => '恢復預設';
+
+  @override
+  String get set_bkResetSub => '選擇要重設的範圍；其他設定保持不變。';
+
+  @override
+  String get set_bkScopeAppearance => '外觀與操作';
+
+  @override
+  String get set_bkScopeAppearanceSub => '主題、字型、語言、畫布、提醒';
+
+  @override
+  String get set_bkScopeInput => '輸入與補全';
+
+  @override
+  String get set_bkScopeInputSub => '滾輪權重、標籤擴展、自動補全';
+
+  @override
+  String get set_bkScopeProtect => '隱私與生成保護';
+
+  @override
+  String get set_bkScopeProtectSub => '後設資料、確認、高消耗提醒、請求節奏';
+
+  @override
+  String get set_bkScopeShortcuts => '快速鍵';
+
+  @override
+  String set_bkScopeShortcutsSub(Object n) {
+    return '全部 $n 個動作';
+  }
+
+  @override
+  String get set_bkResetBtn => '恢復所選為預設…';
+
+  @override
+  String get set_bkResetHint => '會先備份當前設定，可以復原';
+
+  @override
+  String get set_bkResetTitle => '恢復所選設定為預設？';
+
+  @override
+  String set_bkResetBody(Object scopes) {
+    return '$scopes 會回到預設值。當前設定會先自動備份。';
+  }
+
+  @override
+  String get set_bkAuto => '自動備份';
+
+  @override
+  String get set_bkAutoSub => '保留最近 5 份';
+
+  @override
+  String get set_bkKindImport => '匯入前';
+
+  @override
+  String get set_bkKindReset => '恢復預設前';
+
+  @override
+  String get set_bkKindUpgrade => '升級前';
+
+  @override
+  String get set_bkNoBackups => '還沒有自動備份';
+
+  @override
+  String set_bkRestoreTitle(Object name) {
+    return '恢復到“$name”的備份？';
+  }
+
+  @override
+  String get set_bkRestoreBody => '當前設定會先備份，之後可以再換回來。';
+
+  @override
+  String get set_abDesc => '版本、更新和問題診斷。';
+
+  @override
+  String set_abNew(Object version) {
+    return '有新版本 $version';
+  }
+
+  @override
+  String get set_abLatest => '已是最新版本';
+
+  @override
+  String get set_abChecking => '正在檢查更新…';
+
+  @override
+  String get set_abCheckFailed => '檢查更新失敗';
+
+  @override
+  String set_abDownloading(Object pct) {
+    return '正在下載 $pct';
+  }
+
+  @override
+  String set_abChecked(Object when) {
+    return '上次檢查 $when';
+  }
+
+  @override
+  String set_abNotes(Object version) {
+    return '$version 更新內容';
+  }
+
+  @override
+  String get set_abInstall => '下載並安裝';
+
+  @override
+  String get set_abChangelog => '完整更新日誌';
+
+  @override
+  String get set_abPrerelease => '包含預發行版本';
+
+  @override
+  String get set_abCheck => '檢查更新';
+
+  @override
+  String get set_abDiag => '診斷';
+
+  @override
+  String get set_abLog => '寫入日誌檔案';
+
+  @override
+  String get set_abLogSub => '排查問題時開啟；日誌不含 API Key 和登入憑據';
+
+  @override
+  String get set_abLogDir => '日誌目錄';
+
+  @override
+  String get set_abCopyDiag => '複製診斷資訊';
+
+  @override
+  String get set_abCopyDiagSub => '版本、系統、顯示卡、各服務狀態，方便反饋問題';
+
+  @override
+  String get set_abProject => '專案';
+
+  @override
+  String get set_abRepo => '開源專案';
+
+  @override
+  String get set_abUpstream => '原專案';
+
+  @override
+  String get set_abUpstreamSub => '本專案基於 NAI Launcher 開發，保留原作者署名';
+
+  @override
+  String get set_abFonts => '字型與素材';
+
+  @override
+  String get set_abLicenses => '許可證';
+
+  @override
+  String get set_abView => '檢視';
+
+  @override
+  String get set_abSystem => '系統';
+
+  @override
+  String set_srQuoted(Object query) {
+    return '“$query”';
+  }
+
+  @override
+  String get set_srBalance => 'Anlas 餘額';
+
+  @override
+  String get set_srSubscription => '訂閱與 Anlas 額度';
+
+  @override
+  String get set_agEnable => '啟用';
+
+  @override
+  String get set_agDisable => '停用';
+
+  @override
+  String get set_listSep => '、';
+
+  @override
+  String get set_on => '開';
+
+  @override
+  String get set_off => '關';
+
+  @override
+  String get set_unitSeconds => '秒';
 }

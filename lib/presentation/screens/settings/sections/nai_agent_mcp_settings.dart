@@ -12,7 +12,7 @@ import '../../../widgets/nai_agent/nai_agent_shared.dart';
 class NaiAgentMcpSettings extends ConsumerWidget {
   const NaiAgentMcpSettings({super.key});
 
-  Future<void> _edit(
+  Future<void> edit(
     BuildContext context,
     WidgetRef ref, [
     AgentMcpServer? server,
@@ -209,7 +209,7 @@ class NaiAgentMcpSettings extends ConsumerWidget {
                           icon: const Icon(Icons.edit_outlined, size: 18),
                           onPressed: () => agentUiAction(
                             context,
-                            () => _edit(context, ref, server),
+                            () => edit(context, ref, server),
                           ),
                         ),
                         IconButton(
@@ -268,8 +268,7 @@ class NaiAgentMcpSettings extends ConsumerWidget {
             OutlinedButton.icon(
               icon: const Icon(Icons.add, size: 16),
               label: Text(l.naiAgent_mcpAdd),
-              onPressed: () =>
-                  agentUiAction(context, () => _edit(context, ref)),
+              onPressed: () => agentUiAction(context, () => edit(context, ref)),
             ),
             OutlinedButton.icon(
               icon: const Icon(Icons.refresh, size: 16),
