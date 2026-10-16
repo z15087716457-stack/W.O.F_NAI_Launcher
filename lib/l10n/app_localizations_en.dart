@@ -8376,6 +8376,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modelRequest_detailsOutput => 'Extracted result';
 
   @override
+  String get modelRequest_detailsAction => 'Details';
+
+  @override
   String get modelRequest_detailsTitle => 'Request log';
 
   @override

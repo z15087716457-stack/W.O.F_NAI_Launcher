@@ -15,6 +15,7 @@ import '../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../prompt_assistant/services/provider_model_list_cache.dart';
 import '../../screens/settings/widgets/ai_service_editor.dart';
 import '../../screens/settings/widgets/model_preset_editor.dart';
+import '../../screens/settings/widgets/model_request_details_dialog.dart';
 import '../../screens/settings/widgets/provider_picker.dart';
 import '../../ui/settings/settings_contract.dart';
 import 'settings_dialogs.dart';
@@ -149,6 +150,7 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
         for (final task in LauncherInterface.values)
           if (settingsHistoryTask(record.task) == task)
             SettingsRequestLog(
+              id: record.id,
               at: record.time,
               task: settingsTaskKind(task),
               provider: record.provider,
@@ -171,6 +173,11 @@ class SettingsModelActions {
   SettingsModelActions(this.context, this.ref);
   final BuildContext context;
   final WidgetRef ref;
+
+  Future<void> requestDetails(String id) => showDialog<void>(
+    context: context,
+    builder: (_) => ModelRequestDetailsDialog(recordId: id),
+  );
   PromptAssistantConfigNotifier get controller =>
       ref.read(promptAssistantConfigProvider.notifier);
   ProviderConfig provider(String id) => ref

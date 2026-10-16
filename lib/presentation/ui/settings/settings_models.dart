@@ -34,10 +34,12 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
   );
   String? _selected;
   final _taskScroll = ScrollController();
+  final _requestScroll = ScrollController();
 
   @override
   void dispose() {
     _taskScroll.dispose();
+    _requestScroll.dispose();
     super.dispose();
   }
 
@@ -553,22 +555,24 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
     final c = context.ui;
     final now = SettingsScope.of(context).data.now;
     final shown = m.requests.take(50).toList();
+    final scale = MediaQuery.textScalerOf(context).scale(1);
     final head = UiText.sans(11, weight: FontWeight.w500, color: c.faint);
     Widget line(List<Widget> cells, {EdgeInsets? pad}) => Padding(
-      padding: pad ?? const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+      padding: pad ?? const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
       child: Row(
         spacing: 16,
         children: [
-          SizedBox(width: 90, child: cells[0]),
-          SizedBox(width: 110, child: cells[1]),
+          SizedBox(width: 90 * scale, child: cells[0]),
+          SizedBox(width: 110 * scale, child: cells[1]),
           Expanded(child: cells[2]),
-          SizedBox(width: 70, child: cells[3]),
-          SizedBox(width: 70, child: cells[4]),
-          SizedBox(width: 100, child: cells[5]),
+          SizedBox(width: 70 * scale, child: cells[3]),
+          SizedBox(width: 70 * scale, child: cells[4]),
+          SizedBox(width: 100 * scale, child: cells[5]),
+          SizedBox(width: 80 * scale, child: cells[6]),
         ],
       ),
     );
-    return Column(
+    final table = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         line([
@@ -578,47 +582,75 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
           Text(l.set_mdStatus, style: head),
           const SizedBox(),
           const SizedBox(),
+          const SizedBox(),
         ], pad: const EdgeInsets.fromLTRB(18, 12, 18, 8)),
         for (final r in shown) ...[
           Container(height: 1, color: c.rowLine),
-          line([
-            Text(
-              SettingsFormat.ago(context, r.at, now),
-              style: UiText.mono(12, color: c.muted),
-            ),
-            Text(
-              SettingsFormat.task(context, r.task),
-              style: UiText.sans(12.5, color: c.ink),
-            ),
-            Text(
-              '${r.provider} · ${r.model}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: UiText.mono(12, color: c.ink),
-            ),
-            Row(
-              spacing: 6,
-              children: [
-                SettingsDot(r.ok ? SettingsTone.ok : SettingsTone.error),
-                Text(
-                  r.ok ? l.set_mdOk : l.set_mdFailed,
-                  style: UiText.sans(12, color: r.ok ? c.muted : c.error),
-                ),
-              ],
-            ),
-            Text(
-              r.latencyMs == null ? '' : SettingsFormat.ms(r.latencyMs!),
-              textAlign: TextAlign.right,
-              style: UiText.mono(12, color: c.muted),
-            ),
-            Text(
-              r.tokens == null
-                  ? ''
-                  : l.set_mdTokens(SettingsFormat.count(r.tokens!)),
-              textAlign: TextAlign.right,
-              style: UiText.mono(12, color: c.faint),
-            ),
-          ]),
+          _RequestHoverRow(
+            key: r.id == null ? ObjectKey(r) : ValueKey<String>(r.id!),
+            builder: (visible) => line([
+              Text(
+                SettingsFormat.ago(context, r.at, now),
+                style: UiText.mono(12, color: c.muted),
+              ),
+              Text(
+                SettingsFormat.task(context, r.task),
+                style: UiText.sans(12.5, color: c.ink),
+              ),
+              Text(
+                '${r.provider} · ${r.model}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: UiText.mono(12, color: c.ink),
+              ),
+              Row(
+                spacing: 6,
+                children: [
+                  SettingsDot(r.ok ? SettingsTone.ok : SettingsTone.error),
+                  Text(
+                    r.ok ? l.set_mdOk : l.set_mdFailed,
+                    style: UiText.sans(12, color: r.ok ? c.muted : c.error),
+                  ),
+                ],
+              ),
+              Text(
+                r.latencyMs == null ? '' : SettingsFormat.ms(r.latencyMs!),
+                textAlign: TextAlign.right,
+                style: UiText.mono(12, color: c.muted),
+              ),
+              Text(
+                r.tokens == null
+                    ? ''
+                    : l.set_mdTokens(SettingsFormat.count(r.tokens!)),
+                textAlign: TextAlign.right,
+                style: UiText.mono(12, color: c.faint),
+              ),
+              SizedBox(
+                height: 26,
+                child: r.id == null
+                    ? null
+                    : Visibility(
+                        visible: visible,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        maintainSize: true,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: SettingsBtn(
+                            key: Key('request-details-${r.id}'),
+                            label: l.modelRequest_detailsAction,
+                            small: true,
+                            tone: SettingsBtnTone.ghost,
+                            trailingChevron: true,
+                            onTap: () => SettingsScope.of(
+                              context,
+                            ).actions.onRequestDetails(r.id!),
+                          ),
+                        ),
+                      ),
+              ),
+            ]),
+          ),
         ],
         Container(height: 1, color: c.rowLine),
         Padding(
@@ -630,7 +662,44 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
         ),
       ],
     );
+    return LayoutBuilder(
+      builder: (context, constraints) => Scrollbar(
+        controller: _requestScroll,
+        thumbVisibility: true,
+        child: SingleChildScrollView(
+          key: const Key('models-request-scroll'),
+          controller: _requestScroll,
+          scrollDirection: Axis.horizontal,
+          child: SizedBox(
+            width: constraints.maxWidth < 900 * scale
+                ? 900 * scale
+                : constraints.maxWidth,
+            child: table,
+          ),
+        ),
+      ),
+    );
   }
+}
+
+/// Reserve the action slot so hovering never moves the log columns.
+class _RequestHoverRow extends StatefulWidget {
+  const _RequestHoverRow({super.key, required this.builder});
+  final Widget Function(bool visible) builder;
+
+  @override
+  State<_RequestHoverRow> createState() => _RequestHoverRowState();
+}
+
+class _RequestHoverRowState extends State<_RequestHoverRow> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+    onEnter: (_) => setState(() => _hover = true),
+    onExit: (_) => setState(() => _hover = false),
+    child: widget.builder(_hover),
+  );
 }
 
 class _ProviderDetail extends StatelessWidget {

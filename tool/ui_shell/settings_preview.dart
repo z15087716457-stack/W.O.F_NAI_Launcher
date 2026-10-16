@@ -214,6 +214,7 @@ class SettingsPreviewSim extends ChangeNotifier {
       onRescanGallery: () => log('onRescanGallery'),
       onTestProvider: (id) => log('onTestProvider($id)'),
       onDeleteProvider: (id) => log('onDeleteProvider($id)'),
+      onRequestDetails: (id) => log('onRequestDetails($id)'),
       onAssign:
           (
             task, {

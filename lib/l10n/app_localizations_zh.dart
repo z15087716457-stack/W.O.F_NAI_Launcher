@@ -7968,6 +7968,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modelRequest_detailsOutput => '提取结果';
 
   @override
+  String get modelRequest_detailsAction => '详情';
+
+  @override
   String get modelRequest_detailsTitle => '请求记录';
 
   @override
@@ -27416,6 +27419,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get modelRequest_detailsOutput => '提取結果';
+
+  @override
+  String get modelRequest_detailsAction => '詳情';
 
   @override
   String get modelRequest_detailsTitle => '請求記錄';

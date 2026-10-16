@@ -437,6 +437,7 @@ abstract final class SettingsFixture {
     requests: [
       for (var i = 0; i < 8; i++)
         SettingsRequestLog(
+          id: 'request-$i',
           at: _ago(m: 3 + i * 7),
           task: SettingsModelTask.values[i % 3],
           provider: i % 3 == 1 ? 'OpenAI' : 'DeepSeek',

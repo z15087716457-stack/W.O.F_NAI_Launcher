@@ -4499,6 +4499,7 @@
   "modelRequest_detailsIndex": "번호",
   "modelRequest_detailsResponses": "응답",
   "modelRequest_detailsOutput": "추출 결과",
+  "modelRequest_detailsAction": "상세",
   "modelRequest_detailsTitle": "요청 기록",
   "modelRequest_detailsCopied": "복사했습니다",
   "modelRequest_detailsCopyPage": "이 페이지 복사",

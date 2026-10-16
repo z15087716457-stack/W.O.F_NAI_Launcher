@@ -4499,6 +4499,7 @@
   "modelRequest_detailsIndex": "No.",
   "modelRequest_detailsResponses": "Responses",
   "modelRequest_detailsOutput": "Extracted result",
+  "modelRequest_detailsAction": "Details",
   "modelRequest_detailsTitle": "Request log",
   "modelRequest_detailsCopied": "Copied",
   "modelRequest_detailsCopyPage": "Copy this page",

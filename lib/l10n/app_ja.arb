@@ -4499,6 +4499,7 @@
   "modelRequest_detailsIndex": "番号",
   "modelRequest_detailsResponses": "レスポンス",
   "modelRequest_detailsOutput": "抽出結果",
+  "modelRequest_detailsAction": "詳細",
   "modelRequest_detailsTitle": "リクエスト記録",
   "modelRequest_detailsCopied": "コピーしました",
   "modelRequest_detailsCopyPage": "このページをコピー",

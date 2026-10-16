@@ -301,6 +301,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
             ),
           ),
       onEditPreset: (id) => _run(() => models.editPreset(id)),
+      onRequestDetails: (id) => _run(() => models.requestDetails(id)),
       onDeletePreset: (id) => _run(() => models.deletePreset(id)),
       onSaveInstructions:
           ({

@@ -14600,6 +14600,12 @@ abstract class AppLocalizations {
   /// **'Extracted result'**
   String get modelRequest_detailsOutput;
 
+  /// No description provided for @modelRequest_detailsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get modelRequest_detailsAction;
+
   /// No description provided for @modelRequest_detailsTitle.
   ///
   /// In en, this message translates to:

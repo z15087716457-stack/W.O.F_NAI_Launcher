@@ -1089,6 +1089,7 @@ class SettingsPreset {
 @immutable
 class SettingsRequestLog {
   const SettingsRequestLog({
+    this.id,
     required this.at,
     required this.task,
     required this.provider,
@@ -1098,6 +1099,8 @@ class SettingsRequestLog {
     this.tokens,
   });
 
+  /// Stable history identity; null for summaries without an inspectable record.
+  final String? id;
   final DateTime at;
   final SettingsModelTask task;
   final String provider;
@@ -1783,6 +1786,7 @@ class SettingsActions {
     this.onAssign = _noAssign,
     this.onEditPreset = _noIdOpt,
     this.onDeletePreset = _noId,
+    this.onRequestDetails = _noId,
     // Agent
     this.onSaveInstructions = _noInstructions,
     this.onSaveSystemPrompt = _noSystemPrompt,
@@ -1943,6 +1947,9 @@ class SettingsActions {
   /// 打开预设编辑器；null = 新建。
   final ValueChanged<String?> onEditPreset;
   final ValueChanged<String> onDeletePreset;
+
+  /// Open the existing, redacted HTTP transcript for this history record.
+  final ValueChanged<String> onRequestDetails;
 
   /// Await the write acknowledgement. False (including a stale-value rejection)
   /// keeps the submitted draft and the navigation guard active.

@@ -4499,6 +4499,7 @@
   "modelRequest_detailsIndex": "序號",
   "modelRequest_detailsResponses": "回應",
   "modelRequest_detailsOutput": "提取結果",
+  "modelRequest_detailsAction": "詳情",
   "modelRequest_detailsTitle": "請求記錄",
   "modelRequest_detailsCopied": "已複製",
   "modelRequest_detailsCopyPage": "複製當前頁",

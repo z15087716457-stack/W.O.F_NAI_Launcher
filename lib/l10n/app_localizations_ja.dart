@@ -8121,6 +8121,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modelRequest_detailsOutput => '抽出結果';
 
   @override
+  String get modelRequest_detailsAction => '詳細';
+
+  @override
   String get modelRequest_detailsTitle => 'リクエスト記録';
 
   @override

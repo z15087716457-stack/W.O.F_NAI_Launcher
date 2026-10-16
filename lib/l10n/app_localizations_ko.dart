@@ -8144,6 +8144,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelRequest_detailsOutput => '추출 결과';
 
   @override
+  String get modelRequest_detailsAction => '상세';
+
+  @override
   String get modelRequest_detailsTitle => '요청 기록';
 
   @override

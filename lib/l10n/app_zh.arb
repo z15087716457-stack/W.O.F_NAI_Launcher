@@ -4499,6 +4499,7 @@
   "modelRequest_detailsIndex": "序号",
   "modelRequest_detailsResponses": "响应",
   "modelRequest_detailsOutput": "提取结果",
+  "modelRequest_detailsAction": "详情",
   "modelRequest_detailsTitle": "请求记录",
   "modelRequest_detailsCopied": "已复制",
   "modelRequest_detailsCopyPage": "复制当前页",
