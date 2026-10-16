@@ -94,7 +94,8 @@ void main() {
                 );
                 image.dispose();
                 final dir = Directory(
-                  '.dart_tool/rag-gallery-20261015/captures',
+                  Platform.environment['GALLERY_RAG_MENU_CAPTURE_DIR'] ??
+                      '.dart_tool/rag-gallery-20261015/captures',
                 );
                 await dir.create(recursive: true);
                 await File(
@@ -107,6 +108,37 @@ void main() {
             await tester.tap(find.byKey(const Key('gallery-rag-menu')));
             await tester.pumpAndSettle();
             expect(tester.takeException(), isNull);
+            void expectMenuBelowSearch() {
+              final firstItem = find.byType(CheckedPopupMenuItem<String>).first;
+              final menu = tester.getRect(
+                find
+                    .ancestor(
+                      of: firstItem,
+                      matching: find.byWidgetPredicate(
+                        (w) => w is Material && w.type == MaterialType.card,
+                      ),
+                    )
+                    .first,
+              );
+              final field = find.byKey(const Key('gallery-search-field'));
+              final search = tester.getRect(
+                find
+                    .ancestor(
+                      of: field,
+                      matching: find.byType(AnimatedContainer),
+                    )
+                    .first,
+              );
+              final trigger = tester.getRect(
+                find.byKey(const Key('gallery-rag-menu')),
+              );
+              expect(menu.top, greaterThan(search.bottom));
+              expect(menu.top, greaterThan(trigger.bottom));
+              expect(menu.left, lessThanOrEqualTo(trigger.center.dx));
+              expect(menu.right, greaterThanOrEqualTo(trigger.center.dx));
+            }
+
+            expectMenuBelowSearch();
             await capture('menu');
             final context = tester.element(
               find.byKey(const Key('gallery-rag-menu')),
@@ -126,6 +158,7 @@ void main() {
             );
             await tester.tap(find.byKey(const Key('gallery-rag-menu')));
             await tester.pumpAndSettle();
+            expectMenuBelowSearch();
             await tester.tap(
               find.widgetWithText(
                 PopupMenuItem<String>,

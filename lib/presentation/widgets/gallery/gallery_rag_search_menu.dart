@@ -53,6 +53,9 @@ class GalleryRagSearchMenu extends ConsumerWidget {
         PopupMenuButton<String>(
           key: const Key('gallery-rag-menu'),
           tooltip: l.rag_gallerySearchOptions,
+          position: PopupMenuPosition.under,
+          // 标记比 34px 搜索框矮，菜单需让开外框下沿。
+          offset: const Offset(0, 12),
           onSelected: (value) async {
             final controller = ref.read(galleryRagQueryProvider.notifier);
             if (value == 'image') {
