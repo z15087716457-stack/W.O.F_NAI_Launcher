@@ -21,7 +21,6 @@ import '../../providers/online_gallery_blacklist_provider.dart';
 import '../../providers/rag_model_download_provider.dart';
 import '../../providers/rag_provider.dart';
 import '../../providers/settings_navigation_provider.dart';
-import '../../screens/settings/settings_screen.dart' as legacy;
 import '../../ui/settings/settings_contract.dart';
 import '../../ui/settings/settings_format.dart';
 import '../../ui/settings/settings_page.dart';
@@ -61,9 +60,25 @@ SettingsPageId settingsPageForLegacy(int section, {bool bridge = false}) =>
       _ => SettingsPageId.overview,
     };
 
-/// Backend adapter is staged separately from the active router. The final
-/// switch waits for nullable account facts and the old Agent editor contract.
-/// Reusable legacy dialogs remain owned by their original providers.
+SettingsPageId settingsPageFromUri(Uri uri) =>
+    uri.queryParameters['bridge'] == '1'
+    ? SettingsPageId.bridges
+    : switch (uri.queryParameters['section']) {
+        'local-upscale' || 'localUpscale' => SettingsPageId.upscale,
+        'storage' => SettingsPageId.storage,
+        'agent' => SettingsPageId.agent,
+        'rag' => SettingsPageId.rag,
+        'models' || 'promptAssistant' => SettingsPageId.models,
+        'integrations' => SettingsPageId.bridges,
+        'account' => SettingsPageId.account,
+        'appearance' => SettingsPageId.appearance,
+        'shortcuts' => SettingsPageId.shortcuts,
+        'privacy' => SettingsPageId.privacy,
+        'network' => SettingsPageId.network,
+        _ => SettingsPageId.overview,
+      };
+
+/// Reusable dialogs remain owned by their existing providers.
 class SettingsWiring extends ConsumerStatefulWidget {
   const SettingsWiring({
     super.key,
@@ -78,7 +93,6 @@ class SettingsWiring extends ConsumerStatefulWidget {
 
 class _SettingsWiringState extends ConsumerState<SettingsWiring> {
   late SettingsPageId _page = widget.initialPage;
-  String? _expectedGlobal, _expectedPrefix;
   Timer? _cacheTimer;
   @override
   void didUpdateWidget(covariant SettingsWiring oldWidget) {
@@ -143,13 +157,13 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     await SettingsStorageActions(context, ref).openFolder(folder);
   }
 
-  Future<bool> _instructions(String global, String prefix) async {
-    final expectedGlobal = _expectedGlobal;
-    final expectedPrefix = _expectedPrefix;
+  Future<bool> _instructions(
+    String global,
+    String prefix,
+    String expectedGlobal,
+    String expectedPrefix,
+  ) async {
     try {
-      if (expectedGlobal == null || expectedPrefix == null) {
-        throw StateError('Instructions are not loaded');
-      }
       await ref
           .read(settingsAgentBackendProvider)
           .saveInstructions(
@@ -158,12 +172,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
             expectedGlobal: expectedGlobal,
             expectedPrefix: expectedPrefix,
           );
-      if (mounted &&
-          _expectedGlobal == expectedGlobal &&
-          _expectedPrefix == expectedPrefix) {
-        _expectedGlobal = global;
-        _expectedPrefix = prefix;
-      }
       return true;
     } catch (_) {
       if (mounted) {
@@ -191,8 +199,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     return SettingsActions(
       onOpenPage: (page) => setState(() {
         _page = page;
-        _expectedGlobal = null;
-        _expectedPrefix = null;
       }),
       onChanged: (key, value) => _run(
         () => edits.change(
@@ -279,8 +285,33 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       ),
       onEditPreset: (id) => _run(() => models.editPreset(id)),
       onDeletePreset: (id) => _run(() => models.deletePreset(id)),
-      onSaveInstructions: ({required global, required prefix}) =>
-          _instructions(global, prefix),
+      onSaveInstructions:
+          ({
+            required global,
+            required prefix,
+            required expectedGlobal,
+            required expectedPrefix,
+          }) => _instructions(global, prefix, expectedGlobal, expectedPrefix),
+      onSaveSystemPrompt:
+          ({
+            required scope,
+            required text,
+            required workspaceId,
+            required expectedText,
+          }) async {
+            try {
+              await agentBackend.saveSystemPrompt(
+                scope: scope,
+                text: text,
+                workspaceId: workspaceId,
+                expectedGlobal: expectedText,
+                expectedWorkspace: expectedText,
+              );
+              return true;
+            } catch (_) {
+              return false;
+            }
+          },
       onViewBuiltinPrompt: () => _run(() => agent.viewPrompt(builtin: true)),
       onViewFinalPrompt: () => _run(agent.viewPrompt),
       onExtensionEnabled: (id, value) =>
@@ -423,15 +454,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       (_, __) => setState(() => _page = SettingsPageId.bridges),
     );
     final data = settingsViewData(context, ref, _page);
-    if (data == null || _page == SettingsPageId.agent) {
-      _cacheTimer?.cancel();
-      _cacheTimer = null;
-      // Final route activation is deferred. This fallback preserves missing
-      // nullable states, external MCP entries and both custom prompt editors.
-      return legacy.SettingsScreen(
-        initialSectionIndex: _page == SettingsPageId.agent ? 11 : 0,
-      );
-    }
     if (_page == SettingsPageId.dictionaries &&
         data.values.flag(SettingKey.cacheStatsAutoRefresh)) {
       _cacheTimer ??= Timer.periodic(const Duration(seconds: 10), (_) {
@@ -444,8 +466,6 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       _cacheTimer?.cancel();
       _cacheTimer = null;
     }
-    _expectedGlobal ??= data.agent.globalInstructions;
-    _expectedPrefix ??= data.agent.systemPrefix;
     return SettingsPage(
       data: data,
       actions: _actions(data),

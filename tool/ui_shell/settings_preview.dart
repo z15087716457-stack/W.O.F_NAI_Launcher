@@ -148,19 +148,30 @@ class SettingsPreviewSim extends ChangeNotifier {
       onShortcutRecorded: (id, keys) => _shortcut(id, (x) => keys),
       onShortcutCleared: (id) => _shortcut(id, (x) => const []),
       onShortcutReset: (id) => _shortcut(id, (x) => x.defaultKeys),
-      onSaveInstructions: ({required global, required prefix}) async {
-        _data = _data.copyWith(
-          agent: _data.agent.copyWith(
-            globalInstructions: global,
-            systemPrefix: prefix,
-          ),
-        );
-        log('onSaveInstructions');
-        notifyListeners();
-        return true;
-      },
+      onSaveInstructions:
+          ({
+            required global,
+            required prefix,
+            required expectedGlobal,
+            required expectedPrefix,
+          }) async {
+            _data = _data.copyWith(
+              agent: _data.agent.copyWith(
+                globalInstructions: global,
+                systemPrefix: prefix,
+              ),
+            );
+            log('onSaveInstructions');
+            notifyListeners();
+            return true;
+          },
       onSaveSystemPrompt:
-          ({required scope, required text, required workspaceId}) async {
+          ({
+            required scope,
+            required text,
+            required workspaceId,
+            required expectedText,
+          }) async {
             log(
               'onSaveSystemPrompt(${scope.name}, ${text == null ? 'null' : '${text.length} 字'}, $workspaceId)',
             );

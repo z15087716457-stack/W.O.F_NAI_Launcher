@@ -286,14 +286,30 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     _notify();
   }
 
-  Future<void> setWorkspacePrompt(String? text) async {
+  Future<void> setWorkspacePrompt(
+    String? text, {
+    String? expectedWorkspaceId,
+    bool checkPrompt = false,
+    String? expectedPrompt,
+  }) async {
     final id = selectedWorkspace!.id;
+    if (expectedWorkspaceId != null && expectedWorkspaceId != id) {
+      throw StateError('Selected workspace changed while editing');
+    }
     await store.updateWorkspace(
       id,
       customSystemPrompt: text,
       resetPrompt: text == null,
+      checkPrompt: checkPrompt,
+      expectedPrompt: expectedPrompt,
+      requireSelected: expectedWorkspaceId != null,
     );
-    selectedWorkspace = await store.getWorkspace(id);
+    final updated = await store.getWorkspace(id);
+    if (selectedWorkspace?.id == id) selectedWorkspace = updated;
+    workspaces = [
+      for (final workspace in workspaces)
+        if (workspace.id == id) updated else workspace,
+    ];
     for (final runtime in _runtimes.values.where((r) => r.workspace.id == id)) {
       if (runtime.client != null && !runtime.client!.isClosed) {
         await runtime.client!.setSystemPrompt(

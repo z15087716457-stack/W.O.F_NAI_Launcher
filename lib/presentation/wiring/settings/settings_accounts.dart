@@ -13,7 +13,7 @@ import '../../widgets/settings/account_credentials_dialog.dart';
 import '../../widgets/settings/account_profile_sheet.dart';
 import '../../ui/settings/settings_contract.dart';
 
-/// Unknown subscription/balance stay null until the frontend contract is ready.
+/// Unknown subscription/balance stay null.
 /// Reading settings never logs into every saved account to fill its row.
 class SettingsAccountFact {
   const SettingsAccountFact({
@@ -54,14 +54,10 @@ List<SettingsAccountFact> settingsAccountFacts(WidgetRef ref) {
   ];
 }
 
-/// The old account entry is retained when nullable facts cannot be projected.
-SettingsAccountData? settingsAccountsData(
+SettingsAccountData settingsAccountsData(
   List<SettingsAccountFact> facts, {
   int todayUsed = 0,
 }) {
-  if (facts.any((fact) => fact.balance == null || fact.tier == null)) {
-    return null;
-  }
   final current = facts.where((fact) => fact.current).firstOrNull;
   return SettingsAccountData(
     monthlyAnlas: switch (current?.tier) {
@@ -76,12 +72,13 @@ SettingsAccountData? settingsAccountsData(
           id: fact.account.id,
           name: fact.account.displayName,
           tier: switch (fact.tier) {
+            null => null,
             1 => SettingsTier.tablet,
             2 => SettingsTier.scroll,
             3 => SettingsTier.opus,
             _ => SettingsTier.none,
           },
-          anlas: fact.balance!,
+          anlas: fact.balance,
           loginKind: fact.account.accountType == AccountType.credentials
               ? SettingsLoginKind.email
               : SettingsLoginKind.token,

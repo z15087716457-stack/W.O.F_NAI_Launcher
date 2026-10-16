@@ -1882,7 +1882,12 @@ class SettingsActions {
 
   /// Await the write acknowledgement. False (including a stale-value rejection)
   /// keeps the submitted draft and the navigation guard active.
-  final Future<bool> Function({required String global, required String prefix})
+  final Future<bool> Function({
+    required String global,
+    required String prefix,
+    required String expectedGlobal,
+    required String expectedPrefix,
+  })
   onSaveInstructions;
 
   /// 保存基础提示词 [SettingsAgentData.systemPrompt]。[text] = null：全局恢复内置（界面已确认过）/
@@ -1892,6 +1897,7 @@ class SettingsActions {
     required SettingsPromptScope scope,
     required String? text,
     required String workspaceId,
+    required String? expectedText,
   })
   onSaveSystemPrompt;
   final VoidCallback onViewBuiltinPrompt;
@@ -2006,11 +2012,14 @@ class SettingsActions {
   static Future<bool> _noInstructions({
     required String global,
     required String prefix,
+    required String expectedGlobal,
+    required String expectedPrefix,
   }) async => false;
   static Future<bool> _noSystemPrompt({
     required SettingsPromptScope scope,
     required String? text,
     required String workspaceId,
+    required String? expectedText,
   }) async => true;
   static void _noMcpMode(String _, SettingsMcpMode _) {}
   static void _noRag(SettingsRagSourceKind _) {}

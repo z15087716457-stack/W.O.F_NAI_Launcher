@@ -519,8 +519,17 @@ class AgentWorkspaceStore {
     String? customSystemPrompt,
     bool resetPrompt = false,
     String? lastSessionId,
+    bool checkPrompt = false,
+    String? expectedPrompt,
+    bool requireSelected = false,
   }) => _write(() async {
     final old = await getWorkspace(id);
+    if (checkPrompt && old.customSystemPrompt != expectedPrompt) {
+      throw StateError('Workspace prompt changed while editing');
+    }
+    if (requireSelected && (await readSettings()).selectedWorkspaceId != id) {
+      throw StateError('Selected workspace changed while editing');
+    }
     if (name != null && name.trim().isEmpty) {
       throw const FormatException('Workspace name is empty');
     }

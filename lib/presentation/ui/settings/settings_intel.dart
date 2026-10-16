@@ -40,6 +40,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   var _useGlobal = false;
   var _baseSaved = ('', false);
   var _baseWs = '';
+  String? _baseOrigin;
   var _baseDirty = false;
   var _baseFailed = false;
   var _baseSaving = false;
@@ -101,6 +102,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     final inherit = ws && sp.workspace == null;
     final text = ws ? sp.workspace ?? sp.effectiveGlobal : sp.effectiveGlobal;
     _baseWs = sp.workspaceId;
+    _baseOrigin = ws ? sp.workspace : sp.global;
     _baseSaved = (text, inherit);
     _useGlobal = inherit;
     _setBase(text);
@@ -151,7 +153,9 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
     // Capture both layers before awaiting either callback. Later edits belong
     // to the next save; a successful layer only acknowledges this snapshot.
     final instructions = _instrDirty ? (_global!.text, _prefix!.text) : null;
+    final expectedInstructions = _instrSaved;
     final base = _baseDirty ? (_base.text, _useGlobal, _scope, _baseWs) : null;
+    final expectedBase = _baseOrigin;
     setState(() {
       _saveInFlight = true;
       _instrSaving = instructions != null;
@@ -164,6 +168,8 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           () => s.actions.onSaveInstructions(
             global: instructions.$1,
             prefix: instructions.$2,
+            expectedGlobal: expectedInstructions.$1,
+            expectedPrefix: expectedInstructions.$2,
           ),
         );
         if (!mounted) return;
@@ -182,13 +188,19 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 ? null
                 : base.$1,
             workspaceId: base.$4,
+            expectedText: expectedBase,
           ),
         );
         if (!mounted) return;
         setState(() {
           _baseSaving = false;
           _baseFailed = !ok;
-          if (ok) _baseSaved = (base.$1, base.$2);
+          if (ok) {
+            _baseSaved = (base.$1, base.$2);
+            _baseOrigin = base.$3 == SettingsPromptScope.workspace && base.$2
+                ? null
+                : base.$1;
+          }
           _baseDirty =
               _base.text != _baseSaved.$1 || _useGlobal != _baseSaved.$2;
         });
@@ -275,6 +287,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             scope: SettingsPromptScope.global,
             text: null,
             workspaceId: _baseWs,
+            expectedText: sp.global,
           ),
         );
         if (!mounted) return;
@@ -284,6 +297,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
           _baseFailed = !ok;
           if (ok) {
             _baseSaved = (sp.builtin, false);
+            _baseOrigin = null;
             _setBase(sp.builtin);
             _baseDirty = false;
           }

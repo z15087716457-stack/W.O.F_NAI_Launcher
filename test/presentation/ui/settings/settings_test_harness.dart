@@ -143,16 +143,27 @@ class SettingsHostState extends State<SettingsHost> {
         onShortcutRecorded: (id, keys) => call('record:$id:${keys.join('+')}'),
         onShortcutCleared: (id) => call('clearShortcut:$id'),
         onShortcutReset: (id) => call('resetShortcut:$id'),
-        onSaveInstructions: ({required global, required prefix}) async {
-          call('saveInstructions:$global');
-          return await r.saveInstructions?.call(
-                global: global,
-                prefix: prefix,
-              ) ??
-              true;
-        },
+        onSaveInstructions:
+            ({
+              required global,
+              required prefix,
+              required expectedGlobal,
+              required expectedPrefix,
+            }) async {
+              call('saveInstructions:$global');
+              return await r.saveInstructions?.call(
+                    global: global,
+                    prefix: prefix,
+                  ) ??
+                  true;
+            },
         onSaveSystemPrompt:
-            ({required scope, required text, required workspaceId}) async {
+            ({
+              required scope,
+              required text,
+              required workspaceId,
+              required expectedText,
+            }) async {
               call('savePrompt:${scope.name}:${text ?? 'null'}:$workspaceId');
               return await r.saveSystemPrompt?.call(
                     scope: scope,

@@ -21,7 +21,6 @@ import '../../providers/generation/image_workflow_controller.dart';
 import '../../providers/generation/local_upscale_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/online_gallery_blacklist_provider.dart';
-import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../providers/proxy_settings_provider.dart';
 import '../../providers/rag_model_download_provider.dart';
 import '../../providers/rag_provider.dart';
@@ -134,9 +133,7 @@ Map<SettingKey, List<SettingsOption>> settingsOptions(
   };
 }
 
-/// The nullable account projection deliberately gates activation until the new
-/// frontend can display unread facts. It must not turn unknown into zero.
-SettingsViewData? settingsViewData(
+SettingsViewData settingsViewData(
   BuildContext context,
   WidgetRef ref,
   SettingsPageId page,
@@ -147,10 +144,6 @@ SettingsViewData? settingsViewData(
     todayUsed:
         ref.watch(anlasStatisticsServiceProvider).valueOrNull?.todayCost ?? 0,
   );
-  if (accounts == null) return null;
-  if (ref.watch(naiAgentUiPreferencesProvider).settings.mcpServers.isNotEmpty) {
-    return null;
-  }
   final values = ref.watch(settingsValuesProvider);
   final edits = ref.watch(settingsEditsProvider);
   final config = ref.watch(promptAssistantConfigProvider);
@@ -281,7 +274,7 @@ SettingsViewData? settingsViewData(
               const SettingsDictionaryData()
         : const SettingsDictionaryData(),
     models: models,
-    agent: settingsAgentData(ref),
+    agent: settingsAgentData(ref, inspect: page == SettingsPageId.agent),
     rag: rag,
     upscale: settingsUpscaleData(
       upscaleModels,

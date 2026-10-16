@@ -65,7 +65,7 @@ void main() {
       expect(storage.values[StorageKeys.studioThemeMode], 'light');
     },
   );
-  test('unread account facts defer projection and known zero stays zero', () {
+  test('unread account facts stay null and known zero stays zero', () {
     final account = SavedAccount(
       id: 'fixture',
       email: 'name@example.invalid',
@@ -80,7 +80,9 @@ void main() {
           credentialExpired: false,
         ),
       ]),
-      isNull,
+      isA<SettingsAccountData>()
+          .having((value) => value.accounts.single.anlas, 'balance', isNull)
+          .having((value) => value.accounts.single.tier, 'tier', isNull),
     );
     final data = settingsAccountsData([
       SettingsAccountFact(
@@ -90,7 +92,7 @@ void main() {
         balance: 0,
         tier: 0,
       ),
-    ])!;
+    ]);
     expect(data.accounts.single.anlas, 0);
     expect(data.accounts.single.maskedId, isNot(contains('example.invalid')));
     expect(data.accounts.single.expired, isFalse);
@@ -103,7 +105,7 @@ void main() {
           balance: 8,
           tier: 3,
         ),
-      ])!.accounts.single.maskedId,
+      ]).accounts.single.maskedId,
       isEmpty,
     );
   });

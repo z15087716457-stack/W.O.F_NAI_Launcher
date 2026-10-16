@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../core/nai_agent/tool_catalog.dart';
+import '../../../core/nai_agent/mcp_config.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
@@ -15,19 +16,94 @@ import '../../ui/settings/settings_contract.dart';
 final settingsAgentBackendProvider = Provider(SettingsAgentBackend.new);
 
 class SettingsAgentInventory {
-  const SettingsAgentInventory(this.workspaces, this.sessions);
+  const SettingsAgentInventory(this.workspaces, this.sessions, this.selected);
   final int workspaces, sessions;
+  final AgentWorkspace? selected;
 }
 
 final settingsAgentInventoryProvider = FutureProvider.autoDispose((ref) async {
   final store = ref.watch(naiAgentWorkspaceStoreProvider);
+  final selected = ref.watch(
+    naiAgentUiPreferencesProvider.select(
+      (value) => value.settings.selectedWorkspaceId,
+    ),
+  );
   final workspaces = await store.listWorkspaces();
   var sessions = 0;
   for (final workspace in workspaces) {
     sessions += (await store.listChats(workspace.id)).length;
   }
-  return SettingsAgentInventory(workspaces.length, sessions);
+  return SettingsAgentInventory(
+    workspaces.length,
+    sessions,
+    workspaces.where((workspace) => workspace.id == selected).firstOrNull,
+  );
 });
+
+/// Query only an existing idle host; rendering settings cannot start one.
+final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
+  ref,
+) async {
+  if (!ref.exists(naiAgentControllerProvider)) return '';
+  final runtime = ref.watch(
+    naiAgentControllerProvider.select(
+      (value) => (
+        value.selected?.client,
+        value.selected?.running,
+        value.selected?.starting,
+        value.selected?.mcpStatus,
+        value.selected?.extensionSignature == value.settings.extensionSignature,
+      ),
+    ),
+  );
+  final client = runtime.$1;
+  if (!runtime.$5) return '';
+  if (client == null ||
+      client.isClosed ||
+      runtime.$2 == true ||
+      runtime.$3 == true) {
+    return runtime.$4 ?? '';
+  }
+  try {
+    final response = await client.mcpCommand('status');
+    return response['mcpStatus'] as String? ?? '';
+  } catch (_) {
+    return '';
+  }
+});
+
+SettingsMcpServer settingsMcpServer(AgentMcpServer server, String status) {
+  final line =
+      RegExp(
+        '^${RegExp.escape(server.name)}: (.+)\$',
+        multiLine: true,
+      ).firstMatch(status)?.group(1) ??
+      '';
+  final state = !server.enabled
+      ? SettingsMcpState.disabled
+      : line.startsWith('needs sign-in')
+      ? SettingsMcpState.needsLogin
+      : line.startsWith('connected')
+      ? SettingsMcpState.connected
+      : line.startsWith('connecting') || line.startsWith('starting')
+      ? SettingsMcpState.connecting
+      : line.startsWith('error') || line.startsWith('failed')
+      ? SettingsMcpState.error
+      : SettingsMcpState.unchecked;
+  return SettingsMcpServer(
+    id: server.configId,
+    name: server.name,
+    transport: server.transport,
+    state: state,
+    mode: SettingsMcpMode.values.byName(server.exposure),
+    enabled: server.enabled,
+    tools:
+        int.tryParse(
+          RegExp(r', (\d+) tools?').firstMatch(line)?.group(1) ?? '',
+        ) ??
+        0,
+  );
+}
 
 /// These settings can be read/edited without creating a workspace or Node child.
 class SettingsAgentBackend {
@@ -65,6 +141,43 @@ class SettingsAgentBackend {
       'systemPromptPrefix': expectedPrefix,
     },
   );
+
+  Future<void> saveSystemPrompt({
+    required SettingsPromptScope scope,
+    required String? text,
+    required String workspaceId,
+    required String? expectedGlobal,
+    required String? expectedWorkspace,
+  }) async {
+    if (scope == SettingsPromptScope.global) {
+      await update(
+        {'customSystemPrompt': text},
+        expected: {'customSystemPrompt': expectedGlobal},
+      );
+      return;
+    }
+    if (workspaceId.isEmpty) throw StateError('No selected workspace');
+    if (ref.exists(naiAgentControllerProvider)) {
+      final controller = ref.read(naiAgentControllerProvider);
+      await controller.ready;
+      await controller.setWorkspacePrompt(
+        text,
+        expectedWorkspaceId: workspaceId,
+        checkPrompt: true,
+        expectedPrompt: expectedWorkspace,
+      );
+    } else {
+      await store.updateWorkspace(
+        workspaceId,
+        customSystemPrompt: text,
+        resetPrompt: text == null,
+        checkPrompt: true,
+        expectedPrompt: expectedWorkspace,
+        requireSelected: true,
+      );
+    }
+    ref.invalidate(settingsAgentInventoryProvider);
+  }
 
   Future<void> extension(
     String path, {
@@ -222,12 +335,26 @@ class SettingsAgentActions {
   }
 }
 
-SettingsAgentData settingsAgentData(WidgetRef ref) {
+SettingsAgentData settingsAgentData(WidgetRef ref, {bool inspect = false}) {
   final settings = ref.watch(naiAgentUiPreferencesProvider).settings;
   final inventory = ref.watch(settingsAgentInventoryProvider).valueOrNull;
+  final controller = ref.exists(naiAgentControllerProvider)
+      ? ref.watch(naiAgentControllerProvider)
+      : null;
+  final workspace = controller?.selectedWorkspace ?? inventory?.selected;
+  final mcpStatus = inspect
+      ? ref.watch(settingsMcpStatusProvider).valueOrNull ?? ''
+      : '';
   return SettingsAgentData(
     globalInstructions: settings.globalInstructions,
     systemPrefix: settings.systemPromptPrefix,
+    systemPrompt: SettingsSystemPrompt(
+      builtin: naiAgentDefaultSystemPrompt,
+      global: settings.customSystemPrompt,
+      workspaceId: workspace?.id ?? '',
+      workspaceName: workspace?.name ?? '',
+      workspace: workspace?.customSystemPrompt,
+    ),
     extensions: [
       const SettingsExtension(
         id: 'builtin',
@@ -242,19 +369,21 @@ SettingsAgentData settingsAgentData(WidgetRef ref) {
           enabled: extension.enabled,
         ),
     ],
-    // External MCP status awaits a frontend "not checked" state; the old
-    // Agent entry remains until that contract can represent offline configs.
     mcp: [
       SettingsMcpServer(
         id: 'nai_studio',
         name: 'NAI Studio',
         transport: 'stdio',
-        state: SettingsMcpState.connected,
+        state: settings.studioMcpEnabled
+            ? SettingsMcpState.unchecked
+            : SettingsMcpState.disabled,
         mode: SettingsMcpMode.values.byName(settings.studioMcpExposure),
         enabled: settings.studioMcpEnabled,
         builtin: true,
         tools: naiAgentToolNames.length,
       ),
+      for (final server in settings.mcpServers)
+        settingsMcpServer(server, mcpStatus),
     ],
     tools: naiAgentDefaultToolNames,
     dataPath: ref.watch(naiAgentWorkspaceStoreProvider).root.path,

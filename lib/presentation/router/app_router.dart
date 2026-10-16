@@ -20,7 +20,8 @@ import '../screens/local_gallery/local_gallery_screen.dart';
 import '../wiring/image_viewer_session.dart';
 import '../wiring/image_viewer_wiring.dart';
 import '../wiring/online_wiring.dart';
-import '../screens/settings/settings_screen.dart';
+import '../wiring/settings/settings_wiring.dart';
+import '../screens/settings/widgets/settings_typography_scope.dart';
 import '../screens/slideshow_screen.dart';
 import '../screens/image_comparison_screen.dart';
 import '../wiring/statistics_wiring.dart';
@@ -285,23 +286,11 @@ GoRouter appRouter(Ref ref) {
                 path: AppRoutes.settings,
                 name: 'settings',
                 builder: (context, state) => WindowChromePage(
-                  child: SettingsScreen(
-                    initialIntegrationTab:
-                        state.uri.queryParameters['bridge'] == '1' ? 1 : null,
-                    initialSectionIndex:
-                        state.uri.queryParameters['section'] == 'local-upscale'
-                        ? 10
-                        : state.uri.queryParameters['section'] == 'storage'
-                        ? 3
-                        : state.uri.queryParameters['section'] == 'agent'
-                        ? 11
-                        : state.uri.queryParameters['section'] == 'rag'
-                        ? 12
-                        : state.uri.queryParameters['section'] == 'models'
-                        ? 7
-                        : state.uri.queryParameters['section'] == 'integrations'
-                        ? 8
-                        : 0,
+                  child: SettingsTypographyScope(
+                    child: SettingsWiring(
+                      initialPage: settingsPageFromUri(state.uri),
+                      initialQuery: state.uri.queryParameters['q'] ?? '',
+                    ),
                   ),
                 ),
               ),
