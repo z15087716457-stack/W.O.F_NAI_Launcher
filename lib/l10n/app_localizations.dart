@@ -33917,14 +33917,32 @@ abstract class AppLocalizations {
   /// No description provided for @set_rgStartupTitle.
   ///
   /// In en, this message translates to:
-  /// **'Initial index preparation may take a while'**
+  /// **'Prepare your local index'**
   String get set_rgStartupTitle;
 
   /// No description provided for @set_rgStartupBody.
   ///
   /// In en, this message translates to:
-  /// **'The first time you build or resume an index after starting Studio, the local runtime, models, and existing index need to be prepared. Large datasets may take several minutes or longer. Progress counts may stay unchanged during this step; please wait.'**
+  /// **'Before building or resuming an index, Studio prepares the local runtime, models, and existing data.'**
   String get set_rgStartupBody;
+
+  /// No description provided for @set_rgStartupWaitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This may take a few minutes or longer'**
+  String get set_rgStartupWaitTitle;
+
+  /// No description provided for @set_rgStartupWaitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress counts may stay unchanged during preparation. Please wait.'**
+  String get set_rgStartupWaitBody;
+
+  /// No description provided for @set_rgStartupFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown once per Studio session'**
+  String get set_rgStartupFrequency;
 
   /// No description provided for @set_rgPreparing.
   ///

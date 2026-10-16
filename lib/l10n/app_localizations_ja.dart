@@ -18834,11 +18834,19 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get set_rgStartupTitle => '初回のインデックス準備には時間がかかる場合があります';
+  String get set_rgStartupTitle => 'インデックスの準備';
 
   @override
-  String get set_rgStartupBody =>
-      'Studio の起動後、初めてインデックスを作成または再開するときは、ローカル実行環境、モデル、既存のインデックスを準備します。データが多い場合は数分以上かかることがあり、その間は進捗の数値が変わらない場合があります。しばらくお待ちください。';
+  String get set_rgStartupBody => '初めて作成または再開する前に、ローカル実行環境、モデル、既存データを準備します。';
+
+  @override
+  String get set_rgStartupWaitTitle => '数分以上かかる場合があります';
+
+  @override
+  String get set_rgStartupWaitBody => '準備中は進捗の数値が変わらないことがあります。しばらくお待ちください。';
+
+  @override
+  String get set_rgStartupFrequency => 'Studio の起動ごとに一度だけ表示';
 
   @override
   String get set_rgPreparing => 'インデックスを準備中';

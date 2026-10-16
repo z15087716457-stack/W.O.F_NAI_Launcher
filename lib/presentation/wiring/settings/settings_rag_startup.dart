@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/utils/localization_extension.dart';
 import '../../ui/settings/settings_contract.dart';
+import '../../ui/settings/settings_rag_startup_notice.dart';
 
 /// Kept for this application session, including when settings is closed.
 final settingsRagStartupProvider =
@@ -62,22 +62,9 @@ Future<void> runSettingsRagStartup(
 Future<bool> showSettingsRagStartupNotice(BuildContext context) async =>
     await showDialog<bool>(
       context: context,
-      builder: (dialog) => AlertDialog(
-        key: const Key('rag-startup-notice'),
-        title: Text(dialog.l10n.set_rgStartupTitle),
-        content: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: SingleChildScrollView(
-            child: Text(dialog.l10n.set_rgStartupBody),
-          ),
-        ),
-        actions: [
-          FilledButton(
-            key: const Key('rag-startup-notice-ok'),
-            onPressed: () => Navigator.pop(dialog, true),
-            child: Text(dialog.l10n.common_gotIt),
-          ),
-        ],
+      builder: (dialog) => SettingsRagStartupNotice(
+        onContinue: () => Navigator.pop(dialog, true),
+        onClose: () => Navigator.pop(dialog, false),
       ),
     ) ??
     false;

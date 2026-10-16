@@ -18616,11 +18616,19 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get set_rgStartupTitle => '首次准备索引可能较慢';
+  String get set_rgStartupTitle => '准备本地索引';
 
   @override
-  String get set_rgStartupBody =>
-      '每次启动 Studio 后，首次建立或继续索引时，需要准备本地运行环境、模型和已有索引。数据较多时可能需要几分钟或更久，期间进度数字可能暂时不变，请耐心等待。';
+  String get set_rgStartupBody => '首次建立或继续索引前，需要先准备本地运行环境、模型和已有数据。';
+
+  @override
+  String get set_rgStartupWaitTitle => '可能需要几分钟或更久';
+
+  @override
+  String get set_rgStartupWaitBody => '准备期间，进度数字可能暂时不变，请耐心等待。';
+
+  @override
+  String get set_rgStartupFrequency => '每次启动仅提示一次';
 
   @override
   String get set_rgPreparing => '正在准备索引';
@@ -38082,11 +38090,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get set_rgStartupTitle => '首次準備索引可能較慢';
+  String get set_rgStartupTitle => '準備本地索引';
 
   @override
-  String get set_rgStartupBody =>
-      '每次啟動 Studio 後，首次建立或繼續索引時，需要準備本地執行環境、模型和已有索引。資料較多時可能需要幾分鐘或更久，期間進度數字可能暫時不變，請耐心等待。';
+  String get set_rgStartupBody => '首次建立或繼續索引前，需要先準備本地執行環境、模型和已有資料。';
+
+  @override
+  String get set_rgStartupWaitTitle => '可能需要幾分鐘或更久';
+
+  @override
+  String get set_rgStartupWaitBody => '準備期間，進度數字可能暫時不變，請耐心等待。';
+
+  @override
+  String get set_rgStartupFrequency => '每次啟動僅提示一次';
 
   @override
   String get set_rgPreparing => '正在準備索引';
