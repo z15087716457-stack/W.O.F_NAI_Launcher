@@ -97,7 +97,9 @@ class ShortcutConfig with _$ShortcutConfig {
     return copyWith(bindings: {...defaults, ...bindings});
   }
 
-  ShortcutConfig withCurrentNavigationDefaults() {
+  /// Refresh shipped defaults while preserving explicit custom keys and flags.
+  /// New or changed defaults must not take a key already customized by the user.
+  ShortcutConfig withCurrentDefaults() {
     final defaults = ShortcutConfig.createDefault().bindings;
     final reserved = ShortcutConfig(
       bindings: {
@@ -106,12 +108,16 @@ class ShortcutConfig with _$ShortcutConfig {
       },
     );
     final migrated = {...bindings};
-    for (final id in DefaultShortcuts.navigation.keys) {
+    for (final id in defaults.keys) {
       final current = bindings[id];
+      final changed =
+          current == null ||
+          current.defaultShortcut != defaults[id]!.defaultShortcut;
       var binding = (current ?? defaults[id]!).copyWith(
         defaultShortcut: defaults[id]!.defaultShortcut,
       );
       if (binding.customShortcut == null &&
+          (changed || DefaultShortcuts.navigation.containsKey(id)) &&
           reserved
               .findConflicts(
                 binding.defaultShortcut,
@@ -138,19 +144,15 @@ class ShortcutConfig with _$ShortcutConfig {
 
   /// 重置所有快捷键为默认
   ShortcutConfig resetAllToDefault() {
-    return copyWith(
-      bindings: bindings.map(
-        (id, binding) => MapEntry(id, binding.resetToDefault()),
-      ),
-    );
+    return copyWith(bindings: ShortcutConfig.createDefault().bindings);
   }
 
   /// 重置指定快捷键为默认
   ShortcutConfig resetToDefault(String id) {
-    final binding = bindings[id];
-    if (binding == null) return this;
+    final binding = ShortcutConfig.createDefault().bindings[id];
+    if (binding == null || !bindings.containsKey(id)) return this;
 
-    return copyWith(bindings: {...bindings, id: binding.resetToDefault()});
+    return copyWith(bindings: {...bindings, id: binding});
   }
 
   /// 设置自定义快捷键

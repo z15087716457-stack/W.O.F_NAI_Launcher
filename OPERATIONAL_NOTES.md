@@ -204,6 +204,12 @@
 - 设置缓存统计与清除统一经过 `settings_caches.dart`：旧补全 SQL／内存、Danbooru 画廊与 Wiki 示例请求结果、现行 sidecar 翻译均纳入。只清请求／翻译缓存，不删图片、收藏、编辑器历史／草稿、原始库或 RAG 索引；在途旧任务不能回填。字节是 UTF-8 内容／核心响应快照，非物理文件／堆大小。L3 只报图片数，没有独立命中率。
 - 存储目录配置通过 `settingsStorageLocationsProvider` 先返回，占用通过串行 isolate 队列统计；Future 清理回调必须返回 void，不能返回从 pending 表移除的自身 Future。嵌套图库不重复计总占用；未知数量不映射成已知零。
 
+## 快捷键
+
+- 当前 58 个默认绑定须按实际上下文检测无冲突；不同页面可复用同键，全局绑定与所有上下文互斥。最小化 `Ctrl+Shift+M`、Vibe 库导出 `Ctrl+Shift+E`，正负面切换 `Ctrl+M`、Vibe 详情导出 `Ctrl+E`。
+- 读取／导入经 `withCurrentDefaults` 刷新旧默认，保留显式自定义（包括空字符串）及启用状态；新增／改动默认若撞用户自定义，默认一侧暂不绑定。单项／全部恢复使用当前登记绑定，保留无关项／显示偏好；设置备份确认保护保持。
+- 冲突摘要不以“已修改”为过滤条件，修复按钮优先对应自定义一侧；键盘图只用后端的上下文冲突结果，不能因“全部”下多个互斥页面复用键位就标红。见 `docs/shortcut-defaults-2026-10-16.md`。
+
 ## 构建与更新
 
 - Windows 内部数据统一经 `app_support_directory.dart` 使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；不依赖工作目录，不静默退回 C 盘。旧 AppData 数据必须在数据库打开前完整备份、SHA-256 校验和迁移；保留旧路径联接兼容已存绝对路径，两端有不同数据时拒绝合并。旧目录识别仍取自 `CompanyName=com.example` 与 `ProductName=nai_launcher`，原生身份保持稳定。更新、打包和卸载必须保护 `user-data/` 及迁移备份。

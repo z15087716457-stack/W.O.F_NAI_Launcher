@@ -34,6 +34,73 @@ class _DisabledConfig extends ShortcutConfigNotifier {
 }
 
 void main() {
+  for (final factory in [
+    _DefaultConfig.new,
+    _LoadingConfig.new,
+    _ErrorConfig.new,
+  ]) {
+    for (final page in [
+      ShortcutContext.generation,
+      ShortcutContext.vibeDetail,
+    ]) {
+      testWidgets(
+        'default local/global key dispatch stays separate: $factory $page',
+        (tester) async {
+          var local = 0, global = 0;
+          final generation = page == ShortcutContext.generation;
+          final focus = FocusNode();
+          addTearDown(focus.dispose);
+          await tester.pumpWidget(
+            ProviderScope(
+              overrides: [shortcutConfigNotifierProvider.overrideWith(factory)],
+              child: MaterialApp(
+                home: GlobalShortcuts(
+                  shortcuts: {
+                    generation
+                        ? ShortcutIds.minimizeToTray
+                        : ShortcutIds.vibeExport: () =>
+                        global++,
+                  },
+                  child: PageShortcuts(
+                    contextType: page,
+                    shortcuts: {
+                      generation
+                          ? ShortcutIds.togglePromptMode
+                          : ShortcutIds.vibeDetailExport: () =>
+                          local++,
+                    },
+                    child: Focus(
+                      focusNode: focus,
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          focus.requestFocus();
+          await tester.pump();
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+          await tester.sendKeyEvent(
+            generation ? LogicalKeyboardKey.keyM : LogicalKeyboardKey.keyE,
+          );
+          expect(local, 1);
+          expect(global, 0);
+          await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.sendKeyEvent(
+            generation ? LogicalKeyboardKey.keyM : LogicalKeyboardKey.keyE,
+          );
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+          await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+          expect(local, 1);
+          expect(global, 1);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+
   for (final nested in [false, true]) {
     testWidgets('F1 opens real help with page shortcuts: $nested', (
       tester,

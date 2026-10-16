@@ -1232,9 +1232,9 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
     for (final x in data.shortcuts) {
       final o = data.shortcuts.where((y) => y.id == x.conflictWith).firstOrNull;
       if (o != null &&
-          x.changed &&
-          !conflicts.any((p) => p.$1.id == o.id || p.$2.id == o.id)) {
-        conflicts.add((o, x));
+          !conflicts.any((p) => {p.$1.id, p.$2.id}.containsAll({o.id, x.id}))) {
+        // Prefer resetting the customized side, regardless of list order.
+        conflicts.add(!x.changed && o.changed ? (x, o) : (o, x));
       }
     }
     final customized = data.shortcuts.where((x) => x.changed).length;
@@ -1640,7 +1640,9 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
   ) {
     final c = context.ui;
     final isMod = k == _layer && _layer.isNotEmpty;
-    final conflict = hits.length > 1 || hits.any((x) => x.conflictWith != null);
+    // The same key can be valid in mutually exclusive pages. Use the backend's
+    // context-aware result instead of treating every duplicate in "All" as red.
+    final conflict = hits.any((x) => x.conflictWith != null);
     final bound = hits.isNotEmpty;
     final selected = _key == k;
     final (bg, border, ink) = isMod

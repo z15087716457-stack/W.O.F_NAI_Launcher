@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'settings_test_harness.dart';
@@ -197,6 +198,104 @@ void main() {
     await pumpSettings(t, page: SettingsPageId.shortcuts);
     expect(find.byKey(const Key('shortcut-conflicts')), findsOneWidget);
   });
+
+  testWidgets('全部视图允许互斥页面复用同一按键，不误标红', (t) async {
+    await pumpSettings(
+      t,
+      data: SettingsFixture.view(page: SettingsPageId.shortcuts).copyWith(
+        shortcuts: const SettingsShortcutsData(
+          contexts: [
+            SettingsShortcutContext(id: 'global', label: '全局'),
+            SettingsShortcutContext(id: 'generation', label: '生图'),
+            SettingsShortcutContext(id: 'viewer', label: '大图'),
+          ],
+          shortcuts: [
+            SettingsShortcut(
+              id: 'g',
+              context: 'generation',
+              label: '生图复用',
+              keys: ['Ctrl', 'R'],
+              defaultKeys: ['Ctrl', 'R'],
+            ),
+            SettingsShortcut(
+              id: 'v',
+              context: 'viewer',
+              label: '大图复用',
+              keys: ['Ctrl', 'R'],
+              defaultKeys: ['Ctrl', 'R'],
+            ),
+          ],
+        ),
+      ),
+    );
+    await t.tap(find.widgetWithText(SettingsChip, '全部'));
+    await t.pumpAndSettle();
+    final key = find.byKey(const Key('key-R'));
+    final box = t.widget<Container>(
+      find.descendant(of: key, matching: find.byType(Container)).first,
+    );
+    final border = (box.decoration! as BoxDecoration).border! as Border;
+    expect(border.top.color, isNot(t.element(key).ui.error));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('shortcut-conflicts')),
+        matching: find.text('没有冲突'),
+      ),
+      findsOneWidget,
+    );
+    expect(t.takeException(), isNull);
+  });
+
+  for (final customized in [false, true]) {
+    testWidgets('冲突摘要包含未改默认，优先修复自定义一侧：$customized', (t) async {
+      final rec = await pumpSettings(
+        t,
+        data: SettingsFixture.view(page: SettingsPageId.shortcuts).copyWith(
+          shortcuts: SettingsShortcutsData(
+            contexts: const [
+              SettingsShortcutContext(id: 'global', label: '全局'),
+              SettingsShortcutContext(id: 'generation', label: '生成页面'),
+            ],
+            shortcuts: [
+              const SettingsShortcut(
+                id: 'default',
+                context: 'global',
+                label: '全局动作',
+                keys: ['Ctrl', 'M'],
+                defaultKeys: ['Ctrl', 'M'],
+                conflictWith: 'local',
+              ),
+              SettingsShortcut(
+                id: 'local',
+                context: 'generation',
+                label: '页面动作',
+                keys: const ['Ctrl', 'M'],
+                defaultKeys: customized
+                    ? const ['Alt', 'M']
+                    : const ['Ctrl', 'M'],
+                conflictWith: 'default',
+              ),
+            ],
+          ),
+        ),
+      );
+      final aside = find.byKey(const Key('shortcut-conflicts'));
+      expect(
+        find.descendant(of: aside, matching: find.text('没有冲突')),
+        findsNothing,
+      );
+      expect(
+        find.descendant(of: aside, matching: find.text('1 项')),
+        findsOneWidget,
+      );
+      if (customized) {
+        await t.tap(find.byKey(const Key('shortcut-fix-local')));
+        await t.pumpAndSettle();
+        expect(rec.calls, ['resetShortcut:local']);
+      }
+      expect(t.takeException(), isNull);
+    });
+  }
 
   testWidgets('黑名单：回车添加，点叉移除', (t) async {
     final rec = await pumpSettings(t, page: SettingsPageId.privacy);

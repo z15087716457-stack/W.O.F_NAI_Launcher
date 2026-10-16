@@ -7,6 +7,136 @@ import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_storage.dart';
 
 void main() {
+  ShortcutConfig legacyDefaults() {
+    final defaults = ShortcutConfig.createDefault();
+    return defaults
+        .updateBinding(
+          defaults.bindings[ShortcutIds.minimizeToTray]!.copyWith(
+            defaultShortcut: 'ctrl+m',
+          ),
+        )
+        .updateBinding(
+          defaults.bindings[ShortcutIds.vibeExport]!.copyWith(
+            defaultShortcut: 'ctrl+e',
+          ),
+        );
+  }
+
+  test(
+    'load upgrades both duplicate defaults once and preserves customization',
+    () async {
+      final legacy = legacyDefaults()
+          .setCustomShortcut(ShortcutIds.generateImage, 'alt+g')
+          .setEnabled(ShortcutIds.generateImage, false)
+          .setCustomShortcut(ShortcutIds.saveImage, '')
+          .copyWith(showInMenus: true);
+      String? persisted;
+      var writes = 0;
+      final storage = ShortcutStorage.forTesting(
+        readConfig: () async => persisted ?? jsonEncode(legacy.toJson()),
+        writeConfig: (raw) async {
+          persisted = raw;
+          writes++;
+        },
+      );
+      final loaded = await storage.loadConfig();
+      expect(
+        loaded.getEffectiveShortcut(ShortcutIds.minimizeToTray),
+        'ctrl+shift+m',
+      );
+      expect(
+        loaded.getEffectiveShortcut(ShortcutIds.vibeExport),
+        'ctrl+shift+e',
+      );
+      expect(
+        loaded.bindings[ShortcutIds.generateImage],
+        legacy.bindings[ShortcutIds.generateImage],
+      );
+      expect(loaded.getEffectiveShortcut(ShortcutIds.saveImage), '');
+      expect(loaded.showInMenus, isTrue);
+      for (final binding in loaded.bindings.values.where(
+        (b) => b.enabled && b.effectiveShortcut?.isNotEmpty == true,
+      )) {
+        expect(
+          loaded.findConflicts(
+            binding.effectiveShortcut!,
+            context: binding.context,
+            excludeId: binding.id,
+          ),
+          isEmpty,
+          reason: binding.id,
+        );
+      }
+      expect(await storage.loadConfig(), loaded);
+      expect(writes, 1);
+    },
+  );
+
+  test(
+    'import also replaces obsolete defaults before returning or persisting',
+    () async {
+      String? persisted;
+      final storage = ShortcutStorage.forTesting(
+        readConfig: () async => persisted,
+        writeConfig: (raw) async => persisted = raw,
+      );
+      final imported = await storage.importConfig(
+        jsonEncode(legacyDefaults().toJson()),
+      );
+      expect(imported.bindings, ShortcutConfig.createDefault().bindings);
+      expect(await storage.loadConfig(), imported);
+      expect(await storage.resetToDefault(), ShortcutConfig.createDefault());
+    },
+  );
+
+  test('new default keys yield to existing user customizations', () async {
+    final legacy = legacyDefaults()
+        .setCustomShortcut(ShortcutIds.togglePromptMode, 'ctrl+shift+m')
+        .setCustomShortcut(ShortcutIds.vibeDetailExport, 'ctrl+shift+e');
+    String? persisted;
+    final storage = ShortcutStorage.forTesting(
+      readConfig: () async => persisted ?? jsonEncode(legacy.toJson()),
+      writeConfig: (raw) async => persisted = raw,
+    );
+    final loaded = await storage.loadConfig();
+    expect(
+      loaded.getEffectiveShortcut(ShortcutIds.togglePromptMode),
+      'ctrl+shift+m',
+    );
+    expect(
+      loaded.getEffectiveShortcut(ShortcutIds.vibeDetailExport),
+      'ctrl+shift+e',
+    );
+    expect(loaded.getEffectiveShortcut(ShortcutIds.minimizeToTray), isEmpty);
+    expect(loaded.getEffectiveShortcut(ShortcutIds.vibeExport), isEmpty);
+    expect(await storage.loadConfig(), loaded);
+  });
+
+  test(
+    'an explicit custom old key remains custom even when equal to the old default',
+    () async {
+      final legacy = legacyDefaults()
+          .setCustomShortcut(ShortcutIds.minimizeToTray, 'ctrl+m')
+          .setEnabled(ShortcutIds.minimizeToTray, false)
+          .setCustomShortcut(ShortcutIds.vibeExport, '');
+      final storage = ShortcutStorage.forTesting(
+        readConfig: () async => jsonEncode(legacy.toJson()),
+        writeConfig: (_) async {},
+      );
+      final loaded = await storage.loadConfig();
+      expect(
+        loaded.bindings[ShortcutIds.minimizeToTray]!.customShortcut,
+        'ctrl+m',
+      );
+      expect(loaded.bindings[ShortcutIds.minimizeToTray]!.enabled, isFalse);
+      expect(
+        loaded.bindings[ShortcutIds.minimizeToTray]!.defaultShortcut,
+        'ctrl+shift+m',
+      );
+      expect(loaded.getEffectiveShortcut(ShortcutIds.vibeExport), '');
+    },
+  );
+
   const customized = ShortcutBinding(
     id: ShortcutIds.generateImage,
     actionKey: 'shortcut_action_generate_image',

@@ -3,6 +3,60 @@ import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 
 void main() {
+  test(
+    'every shipped shortcut is parseable and has no active-context conflict',
+    () {
+      final config = ShortcutConfig.createDefault();
+      for (final binding in config.bindings.values) {
+        expect(
+          ShortcutParser.parse(binding.effectiveShortcut!),
+          isNotNull,
+          reason: binding.id,
+        );
+        expect(
+          config.findConflicts(
+            binding.effectiveShortcut!,
+            context: binding.context,
+            excludeId: binding.id,
+          ),
+          isEmpty,
+          reason: binding.id,
+        );
+      }
+    },
+  );
+
+  test(
+    'all and individual resets use current defaults, not serialized old keys',
+    () {
+      final fresh = ShortcutConfig.createDefault();
+      final legacy = fresh
+          .updateBinding(
+            fresh.bindings[ShortcutIds.minimizeToTray]!.copyWith(
+              defaultShortcut: 'ctrl+m',
+              customShortcut: 'alt+m',
+              enabled: false,
+            ),
+          )
+          .updateBinding(
+            fresh.bindings[ShortcutIds.vibeExport]!.copyWith(
+              defaultShortcut: 'ctrl+e',
+            ),
+          )
+          .setCustomShortcut(ShortcutIds.generateImage, 'alt+g');
+      final one = legacy.resetToDefault(ShortcutIds.minimizeToTray);
+      expect(
+        one.bindings[ShortcutIds.minimizeToTray],
+        fresh.bindings[ShortcutIds.minimizeToTray],
+      );
+      expect(one.getEffectiveShortcut(ShortcutIds.generateImage), 'alt+g');
+      final all = legacy.copyWith(showInMenus: true).resetAllToDefault();
+      expect(all.bindings, fresh.bindings);
+      expect(all.showInMenus, isTrue);
+      expect(all.withCurrentDefaults(), all);
+    },
+  );
+
   test('navigation defaults follow the new rail order', () {
     final config = ShortcutConfig.createDefault();
     const expected = {

@@ -152,14 +152,14 @@ class DefaultShortcuts {
     ShortcutIds.openFolder: 'ctrl+o',
 
     // 全局
-    ShortcutIds.minimizeToTray: 'ctrl+m',
+    ShortcutIds.minimizeToTray: 'ctrl+shift+m',
     ShortcutIds.quitApp: 'ctrl+q',
     ShortcutIds.showShortcutHelp: 'f1',
     ShortcutIds.toggleTheme: 'ctrl+shift+t',
 
     // Vibe库
     ShortcutIds.vibeImport: 'ctrl+i',
-    ShortcutIds.vibeExport: 'ctrl+e',
+    ShortcutIds.vibeExport: 'ctrl+shift+e',
 
     // Vibe详情页
     ShortcutIds.vibeDetailSendToGeneration: 'enter',

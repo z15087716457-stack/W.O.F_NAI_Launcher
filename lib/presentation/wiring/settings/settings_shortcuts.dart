@@ -148,7 +148,7 @@ class SettingsShortcutActions {
     if (!context.mounted) return;
     final parsed = ShortcutConfig.fromJson(
       Map<String, dynamic>.from(jsonDecode(raw) as Map),
-    ).withCurrentNavigationDefaults().mergedWithDefaults();
+    ).withCurrentDefaults();
     if (!context.mounted ||
         !await settingsConfirm(
           context,
