@@ -1011,6 +1011,7 @@ class SettingsProvider {
     required this.protocol,
     required this.mark,
     required this.color,
+    this.logoAsset,
     this.enabled = true,
     this.local = false,
     this.baseUrl = '',
@@ -1028,8 +1029,11 @@ class SettingsProvider {
   /// 已本地化的协议说明，例如“OpenAI Chat Completions 兼容”。
   final String protocol;
 
-  /// 图标上的 1–2 个字母。
-  final String mark;
+  /// 自定义端点的 1–2 个字母；已知厂商为 null。
+  final String? mark;
+
+  /// 随包厂商 SVG 的资源名；缺少品牌资源时显示通用服务图标。
+  final String? logoAsset;
 
   /// 图标底色（ARGB）。
   final int color;

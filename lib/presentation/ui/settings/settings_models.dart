@@ -220,7 +220,11 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
                           child: Row(
                             spacing: 10,
                             children: [
-                              SettingsLogo(mark: x.mark, color: x.color),
+                              SettingsLogo(
+                                mark: x.mark,
+                                color: x.color,
+                                logoAsset: x.logoAsset,
+                              ),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -723,7 +727,11 @@ class _ProviderDetail extends StatelessWidget {
           Row(
             spacing: 10,
             children: [
-              SettingsLogo(mark: p.mark, color: p.color),
+              SettingsLogo(
+                mark: p.mark,
+                color: p.color,
+                logoAsset: p.logoAsset,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

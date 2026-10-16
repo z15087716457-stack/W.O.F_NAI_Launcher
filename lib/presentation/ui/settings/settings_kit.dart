@@ -9,6 +9,7 @@ import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import 'settings_contract.dart';
 import 'settings_scope.dart';
@@ -65,37 +66,52 @@ abstract final class SettingsGlyphs {
   static const maximize = 'M6 6h12v12H6z';
 }
 
-/// 服务商小图标（原型 `.logo`）：字母 + 底色，Geist Mono 700。
+/// 服务商图标：已知厂商使用随包 SVG，自定义端点使用字母标记。
 class SettingsLogo extends StatelessWidget {
   const SettingsLogo({
     super.key,
     required this.mark,
     required this.color,
+    this.logoAsset,
     this.size = 28,
   });
-  final String mark;
+  final String? mark;
   final int color;
+  final String? logoAsset;
   final double size;
 
   @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    decoration: BoxDecoration(
-      color: Color(color),
-      borderRadius: BorderRadius.circular(size * .25),
-    ),
-    child: Text(
-      mark,
-      style: UiText.mono(
-        size * .43,
-        weight: FontWeight.w700,
-        color: Colors.white,
-        height: 1,
+  Widget build(BuildContext context) {
+    if (logoAsset case final asset?) {
+      return UiSvgIcon.asset(
+        'assets/icons/providers/$asset.svg',
+        size: size,
+        colorFilter: ColorFilter.mode(context.ui.ink, BlendMode.srcIn),
+        excludeFromSemantics: true,
+      );
+    }
+    if (mark == null) {
+      return UiGlyph(SettingsGlyphs.hub, size: size, color: context.ui.ink);
+    }
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: Color(color),
+        borderRadius: BorderRadius.circular(size * .25),
       ),
-    ),
-  );
+      child: Text(
+        mark!,
+        style: UiText.mono(
+          size * .43,
+          weight: FontWeight.w700,
+          color: Colors.white,
+          height: 1,
+        ),
+      ),
+    );
+  }
 }
 
 /// 搜索跳转的目标（不是 [SettingsRow] 的卡片、选项块）：滚到可见并闪一下强调色环。
