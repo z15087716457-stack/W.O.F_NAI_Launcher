@@ -18738,12 +18738,61 @@ class AppLocalizationsEn extends AppLocalizations {
       'Local data for autocomplete, tag translation and suggestions.';
 
   @override
-  String get set_dcBase => 'Base dictionary';
+  String get set_dcBase => 'Base database';
 
   @override
-  String set_dcBaseValue(Object n, Object version) {
-    return '$n tags · data $version';
+  String set_dcBaseValue(Object n, Object wiki) {
+    return '$n tags · $wiki wiki pages';
   }
+
+  @override
+  String get set_dcSupplement => 'Data updates';
+
+  @override
+  String get set_dcUpdateTags => 'Update tags';
+
+  @override
+  String get set_dcUpdateWiki => 'Add wiki pages';
+
+  @override
+  String set_dcSources(Object tagDate, Object wikiDate) {
+    return 'Available snapshots: Tag $tagDate · Wiki $wikiDate';
+  }
+
+  @override
+  String set_dcDownloading(Object received, Object total) {
+    return 'Downloading $received / $total';
+  }
+
+  @override
+  String get set_dcVerifying => 'Verifying download…';
+
+  @override
+  String set_dcImporting(Object n) {
+    return 'Adding local data · $n rows read';
+  }
+
+  @override
+  String get set_dcPublishing => 'Switching data revision…';
+
+  @override
+  String set_dcAdded(Object n) {
+    return '$n entries added and saved locally.';
+  }
+
+  @override
+  String get set_dcUpdateFailed =>
+      'Update failed. Existing data is preserved. Retry when ready.';
+
+  @override
+  String get set_dcUpdateCancelled =>
+      'Cancelled. Existing data remains available.';
+
+  @override
+  String get set_dcInstalled => 'Added';
+
+  @override
+  String get set_dcCancelling => 'Cancelling…';
 
   @override
   String get set_dcCooc => 'Co-occurrence';

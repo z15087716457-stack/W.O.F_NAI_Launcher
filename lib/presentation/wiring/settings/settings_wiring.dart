@@ -35,6 +35,7 @@ import 'settings_data.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
 import 'settings_caches.dart';
+import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
 import 'settings_shortcuts.dart';
@@ -264,6 +265,11 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onOpenFolder: (folder) => _run(() => storage.openFolder(folder)),
       onClearCache: (kind) => _run(() => storage.clearCache(kind)),
       onResetCacheStats: storage.resetStatistics,
+      onUpdateDictionary: (kind) => _run(
+        () => ref.read(settingsDictionaryUpdateProvider.notifier).start(kind),
+      ),
+      onCancelDictionaryUpdate: () =>
+          ref.read(settingsDictionaryUpdateProvider.notifier).cancel(),
       onAddProvider: () => _run(models.edit),
       onImportModelConfig: () => _run(models.importConfig),
       onCopyModelConfig: () => _run(models.copy),

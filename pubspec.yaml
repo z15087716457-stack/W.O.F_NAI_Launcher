@@ -115,6 +115,8 @@ dependencies:
   markdown: ^7.3.1
   flutter_markdown_plus: ^1.0.12
   flutter_svg: ^2.3.0
+  sqlite3: ^2.9.4
+  csv: ^6.0.0
 dev_dependencies:
   shared_preferences_platform_interface: any
   irondash_message_channel: any
@@ -130,9 +132,6 @@ dev_dependencies:
   # Mock 测试
   mocktail: ^1.0.3
   path_provider_platform_interface: any
-  sqlite3: ^2.9.4
-  # CSV 解析
-  csv: ^6.0.0
   analyzer: 6.4.1
   hive_generator: 2.0.1
   build_runner_core: 7.3.2

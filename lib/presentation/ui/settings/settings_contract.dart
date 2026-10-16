@@ -533,6 +533,7 @@ class SettingsViewData {
     SettingsAccountData? account,
     SettingsRagData? rag,
     SettingsUpscaleData? upscale,
+    SettingsDictionaryData? dictionaries,
   }) => SettingsViewData(
     page: page ?? this.page,
     values: values ?? this.values,
@@ -549,7 +550,7 @@ class SettingsViewData {
     shortcuts: shortcuts ?? this.shortcuts,
     generation: generation,
     storage: storage,
-    dictionaries: dictionaries,
+    dictionaries: dictionaries ?? this.dictionaries,
     models: models ?? this.models,
     agent: agent ?? this.agent,
     rag: rag ?? this.rag,
@@ -893,6 +894,8 @@ class SettingsDictionaryData {
   const SettingsDictionaryData({
     this.tagCount = 0,
     this.dataVersion = '',
+    this.wikiCount,
+    this.update,
     this.cooccurrence = 0,
     this.translationModel,
     this.caches = const {},
@@ -904,6 +907,8 @@ class SettingsDictionaryData {
 
   final int tagCount;
   final String dataVersion;
+  final int? wikiCount;
+  final SettingsDictionaryUpdate? update;
   final int cooccurrence;
   final String? translationModel;
 
@@ -913,6 +918,49 @@ class SettingsDictionaryData {
   final SettingsCacheStat? l2;
   final SettingsCacheStat? l3;
   final DateTime? statsUpdatedAt;
+}
+
+enum SettingsDictionaryKind { tags, wiki }
+
+enum SettingsDictionaryPhase {
+  idle,
+  downloading,
+  verifying,
+  importing,
+  publishing,
+  done,
+  cancelled,
+  failed,
+}
+
+@immutable
+class SettingsDictionaryUpdate {
+  const SettingsDictionaryUpdate({
+    this.kind,
+    this.phase = SettingsDictionaryPhase.idle,
+    this.received = 0,
+    this.total = 0,
+    this.rows = 0,
+    this.added = 0,
+    this.cancelling = false,
+    this.tagInstalled = false,
+    this.wikiInstalled = false,
+    this.tagDate = '',
+    this.wikiDate = '',
+    this.tagSource = '',
+    this.wikiSource = '',
+  });
+  final SettingsDictionaryKind? kind;
+  final SettingsDictionaryPhase phase;
+  final int received, total, rows, added;
+  final bool cancelling, tagInstalled, wikiInstalled;
+  final String tagDate, wikiDate, tagSource, wikiSource;
+  bool get busy => const {
+    SettingsDictionaryPhase.downloading,
+    SettingsDictionaryPhase.verifying,
+    SettingsDictionaryPhase.importing,
+    SettingsDictionaryPhase.publishing,
+  }.contains(phase);
 }
 
 // ── 模型与接口
@@ -1718,6 +1766,8 @@ class SettingsActions {
     // 词库
     this.onClearCache = _noCache,
     this.onResetCacheStats = _none,
+    this.onUpdateDictionary = _noDictionary,
+    this.onCancelDictionaryUpdate = _none,
     // 模型
     this.onAddProvider = _none,
     this.onImportModelConfig = _none,
@@ -1857,6 +1907,8 @@ class SettingsActions {
   /// 界面已确认过。
   final ValueChanged<SettingsCacheKind> onClearCache;
   final VoidCallback onResetCacheStats;
+  final ValueChanged<SettingsDictionaryKind> onUpdateDictionary;
+  final VoidCallback onCancelDictionaryUpdate;
 
   final VoidCallback onAddProvider;
   final VoidCallback onImportModelConfig;
@@ -2014,6 +2066,7 @@ class SettingsActions {
   static void _noShortcut(String _, List<String> _) {}
   static void _noFolder(SettingsFolder _) {}
   static void _noCache(SettingsCacheKind _) {}
+  static void _noDictionary(SettingsDictionaryKind _) {}
   static void _noField(String _, SettingsProviderField _, String _) {}
   static void _noAssign(
     SettingsModelTask _, {

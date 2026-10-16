@@ -290,7 +290,7 @@ packages:
     source: hosted
     version: "1.0.2"
   csv:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: csv
       sha256: c6aa2679b2a18cb57652920f674488d89712efaf4d3fdf2e537215b35fc19d6c
@@ -1371,7 +1371,7 @@ packages:
     source: hosted
     version: "2.4.1"
   sqlite3:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: sqlite3
       sha256: "3145bd74dcdb4fd6f5c6dda4d4e4490a8087d7f286a14dee5d37087290f0f8a2"

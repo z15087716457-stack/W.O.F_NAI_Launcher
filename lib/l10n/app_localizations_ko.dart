@@ -18244,12 +18244,59 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_dcTagsSub => '자동 완성, 태그 번역, 제안에 쓰는 로컬 데이터.';
 
   @override
-  String get set_dcBase => '기본 사전';
+  String get set_dcBase => '기본 데이터베이스';
 
   @override
-  String set_dcBaseValue(Object n, Object version) {
-    return '태그 $n개 · 데이터 $version';
+  String set_dcBaseValue(Object n, Object wiki) {
+    return '태그 $n개 · Wiki $wiki개';
   }
+
+  @override
+  String get set_dcSupplement => '데이터 보충';
+
+  @override
+  String get set_dcUpdateTags => '태그 업데이트';
+
+  @override
+  String get set_dcUpdateWiki => 'Wiki 보충';
+
+  @override
+  String set_dcSources(Object tagDate, Object wikiDate) {
+    return '사용 가능한 데이터: Tag $tagDate · Wiki $wikiDate';
+  }
+
+  @override
+  String set_dcDownloading(Object received, Object total) {
+    return '다운로드 중 $received / $total';
+  }
+
+  @override
+  String get set_dcVerifying => '다운로드 검증 중…';
+
+  @override
+  String set_dcImporting(Object n) {
+    return '로컬 데이터 보충 중 · $n개 읽음';
+  }
+
+  @override
+  String get set_dcPublishing => '데이터 버전 전환 중…';
+
+  @override
+  String set_dcAdded(Object n) {
+    return '$n개를 추가하여 로컬에 저장했습니다.';
+  }
+
+  @override
+  String get set_dcUpdateFailed => '보충하지 못했습니다. 기존 데이터는 유지됩니다. 다시 시도할 수 있습니다.';
+
+  @override
+  String get set_dcUpdateCancelled => '취소했습니다. 기존 데이터를 계속 사용할 수 있습니다.';
+
+  @override
+  String get set_dcInstalled => '보충 완료';
+
+  @override
+  String get set_dcCancelling => '취소 중…';
 
   @override
   String get set_dcCooc => '동시 출현 데이터';

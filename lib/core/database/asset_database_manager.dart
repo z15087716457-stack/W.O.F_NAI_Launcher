@@ -9,6 +9,7 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
+import 'dictionary_data_store.dart';
 
 class AssetDatabaseManager {
   static final AssetDatabaseManager _instance = AssetDatabaseManager._();
@@ -25,10 +26,18 @@ class AssetDatabaseManager {
   String? _cooccurrenceDbPath;
   String? _tagWikiDbPath;
   Future<String>? _wikiInstallation;
+  DictionaryDataStore? _dictionaryStore;
   static Future<void>? _initialization;
   static bool _initialized = false;
 
-  String get tagCatalogDbPath => _requirePath(_tagCatalogDbPath);
+  String get tagCatalogDbPath =>
+      _dictionaryStore?.activePath(DictionaryKind.tags) ??
+      _requirePath(_tagCatalogDbPath);
+  Future<DictionaryDataStore> dictionaryStore() async {
+    await initialize();
+    return _dictionaryStore!;
+  }
+
   String get cooccurrenceDbPath => _requirePath(_cooccurrenceDbPath);
 
   static Future<void> initialize() {
@@ -50,12 +59,15 @@ class AssetDatabaseManager {
     _instance._cooccurrenceDbPath = null;
     _instance._tagWikiDbPath = null;
     _instance._wikiInstallation = null;
+    _instance._dictionaryStore = null;
   }
 
   /// The wiki is only copied when a tag article is opened. Search startup
   /// therefore does not have to hash or install another 50 MB database.
   Future<String> ensureTagWikiDb() async {
-    if (_tagWikiDbPath case final path?) return path;
+    if (_tagWikiDbPath case final path?) {
+      return _dictionaryStore?.activePath(DictionaryKind.wiki) ?? path;
+    }
     await initialize();
     return _wikiInstallation ??= _installWiki().whenComplete(() {
       _wikiInstallation = null;
@@ -81,7 +93,7 @@ class AssetDatabaseManager {
       },
     );
     _tagWikiDbPath = targetPath;
-    return _tagWikiDbPath!;
+    return _dictionaryStore!.resolve(DictionaryKind.wiki, targetPath);
   }
 
   static Future<void> _initialize() async {
@@ -107,6 +119,10 @@ class AssetDatabaseManager {
       },
     );
     _instance._tagCatalogDbPath = catalogPath;
+    final store = _instance._dictionaryStore = DictionaryDataStore(
+      Directory(p.join(appDir.path, 'dictionary_updates')),
+    );
+    await store.resolve(DictionaryKind.tags, catalogPath);
     await _migrateLegacyAutocompleteData(appDir, assetDbDir);
 
     final cooccurrencePath = p.join(assetDbDir.path, cooccurrenceDb);

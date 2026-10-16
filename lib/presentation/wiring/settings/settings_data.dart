@@ -34,6 +34,7 @@ import 'settings_connections.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
 import 'settings_caches.dart';
+import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
 import 'settings_shortcuts.dart';
@@ -302,6 +303,8 @@ SettingsViewData settingsViewData(
         ? SettingsDictionaryData(
             tagCount: dictionary?.tagCount ?? 0,
             dataVersion: dictionary?.dataVersion ?? '',
+            wikiCount: dictionary?.wikiCount,
+            update: ref.watch(settingsDictionaryUpdateProvider),
             cooccurrence: dictionary?.cooccurrence ?? 0,
             caches: {
               if (cacheFootprint != null)

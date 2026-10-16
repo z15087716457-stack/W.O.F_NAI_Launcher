@@ -32729,14 +32729,92 @@ abstract class AppLocalizations {
   /// No description provided for @set_dcBase.
   ///
   /// In en, this message translates to:
-  /// **'Base dictionary'**
+  /// **'Base database'**
   String get set_dcBase;
 
   /// No description provided for @set_dcBaseValue.
   ///
   /// In en, this message translates to:
-  /// **'{n} tags · data {version}'**
-  String set_dcBaseValue(Object n, Object version);
+  /// **'{n} tags · {wiki} wiki pages'**
+  String set_dcBaseValue(Object n, Object wiki);
+
+  /// No description provided for @set_dcSupplement.
+  ///
+  /// In en, this message translates to:
+  /// **'Data updates'**
+  String get set_dcSupplement;
+
+  /// No description provided for @set_dcUpdateTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Update tags'**
+  String get set_dcUpdateTags;
+
+  /// No description provided for @set_dcUpdateWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Add wiki pages'**
+  String get set_dcUpdateWiki;
+
+  /// No description provided for @set_dcSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Available snapshots: Tag {tagDate} · Wiki {wikiDate}'**
+  String set_dcSources(Object tagDate, Object wikiDate);
+
+  /// No description provided for @set_dcDownloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {received} / {total}'**
+  String set_dcDownloading(Object received, Object total);
+
+  /// No description provided for @set_dcVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying download…'**
+  String get set_dcVerifying;
+
+  /// No description provided for @set_dcImporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding local data · {n} rows read'**
+  String set_dcImporting(Object n);
+
+  /// No description provided for @set_dcPublishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching data revision…'**
+  String get set_dcPublishing;
+
+  /// No description provided for @set_dcAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} entries added and saved locally.'**
+  String set_dcAdded(Object n);
+
+  /// No description provided for @set_dcUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Update failed. Existing data is preserved. Retry when ready.'**
+  String get set_dcUpdateFailed;
+
+  /// No description provided for @set_dcUpdateCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled. Existing data remains available.'**
+  String get set_dcUpdateCancelled;
+
+  /// No description provided for @set_dcInstalled.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get set_dcInstalled;
+
+  /// No description provided for @set_dcCancelling.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelling…'**
+  String get set_dcCancelling;
 
   /// No description provided for @set_dcCooc.
   ///

@@ -16,7 +16,82 @@ class TagCatalogRecord {
 }
 
 class TagCatalogRepository implements CompletionSource {
-  TagCatalogRepository({Database? database}) : _database = database;
+  TagCatalogRepository({Database? database, Future<String> Function()? path})
+    : _fixture = database == null
+          ? null
+          : _TagCatalogQueries(database: database),
+      _path = path;
+  final _TagCatalogQueries? _fixture;
+  final Future<String> Function()? _path;
+  final _versions = <String, Future<_TagCatalogQueries>>{};
+  bool _disposed = false;
+
+  Future<_TagCatalogQueries> _current() async {
+    if (_disposed) throw StateError('Catalog disposed');
+    if (_fixture case final fixture?) return fixture;
+    final path = _path != null
+        ? await _path()
+        : await (() async {
+            await AssetDatabaseManager.initialize();
+            return AssetDatabaseManager.instance.tagCatalogDbPath;
+          })();
+    if (_disposed) throw StateError('Catalog disposed');
+    // A query keeps its revision through every await. Previous connections are
+    // retained until disposal so in-flight alias lookups cannot mix tag IDs.
+    final opening = _versions.putIfAbsent(
+      path,
+      () async => _TagCatalogQueries(
+        database: await databaseFactoryFfi.openDatabase(
+          path,
+          options: OpenDatabaseOptions(readOnly: true, singleInstance: false),
+        ),
+      ),
+    );
+    try {
+      final result = await opening;
+      if (_disposed) throw StateError('Catalog disposed');
+      return result;
+    } catch (_) {
+      if (identical(_versions[path], opening)) _versions.remove(path);
+      rethrow;
+    }
+  }
+
+  Future<void> initialize() async {
+    await _current();
+  }
+
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async =>
+      (await _current()).search(query);
+  Future<List<CompletionCandidate>> searchContains(
+    String input, {
+    int limit = 20,
+  }) async => (await _current()).searchContains(input, limit: limit);
+  Future<List<CompletionCandidate>> popular({int limit = 12}) async =>
+      (await _current()).popular(limit: limit);
+  Future<int?> postCount(String tag) async => (await _current()).postCount(tag);
+  Future<Map<String, CompletionCandidate>> exactAliases(
+    Iterable<String> terms,
+  ) async => (await _current()).exactAliases(terms);
+  Future<Map<String, TagCatalogRecord>> recordsByCanonicalTag(
+    Iterable<String> tags,
+  ) async => (await _current()).recordsByCanonicalTag(tags);
+  Future<Map<String, String>> metadata() async => (await _current()).metadata();
+  Future<Map<TagCategory, int>> categoryCounts() async =>
+      (await _current()).categoryCounts();
+  Future<void> dispose() async {
+    _disposed = true;
+    await _fixture?.dispose();
+    for (final opening in _versions.values) {
+      await (await opening).dispose();
+    }
+    _versions.clear();
+  }
+}
+
+class _TagCatalogQueries implements CompletionSource {
+  _TagCatalogQueries({Database? database}) : _database = database;
 
   Database? _database;
   Future<Database>? _opening;

@@ -8,6 +8,8 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import '../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../core/cache/gallery_cache_manager.dart';
 import '../../../core/database/database_providers.dart';
+import '../../../core/database/asset_database_manager.dart';
+import '../../../core/database/dictionary_data_store.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/utils/app_logger.dart';
@@ -298,9 +300,15 @@ final settingsDictionaryDataProvider = FutureProvider<SettingsDictionaryData>((
   final catalog = await ref.read(tagCatalogRepositoryProvider).metadata();
   final database = await ref.read(databaseManagerProvider.future);
   final cooccurrence = await database.cooccurrenceDataSource.getCount();
+  final wikiPath = await AssetDatabaseManager.instance.ensureTagWikiDb();
+  final wikiCount = await validateDictionaryInBackground(
+    wikiPath,
+    DictionaryKind.wiki,
+  );
   return SettingsDictionaryData(
     tagCount: int.tryParse(catalog['tag_count'] ?? '') ?? 0,
     dataVersion: catalog['data_version'] ?? '',
+    wikiCount: wikiCount,
     cooccurrence: cooccurrence,
   );
 });

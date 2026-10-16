@@ -9968,14 +9968,49 @@
   "set_dcDesc": "標籤資料和各級快取。一般不用動，出現補全異常時可以在這裡清理。",
   "set_dcTags": "標籤詞庫",
   "set_dcTagsSub": "自動補全、標籤翻譯和相關推薦用到的本地資料。",
-  "set_dcBase": "基礎詞庫",
-  "set_dcBaseValue": "{n} 個標籤 · 資料版本 {version}",
+  "set_dcBase": "基礎資料庫",
+  "set_dcBaseValue": "標籤 {n} 條 · Wiki {wiki} 篇",
   "@set_dcBaseValue": {
     "placeholders": {
       "n": {},
-      "version": {}
+      "wiki": {}
     }
   },
+  "set_dcSupplement": "資料補充",
+  "set_dcUpdateTags": "更新 Tag",
+  "set_dcUpdateWiki": "補充 Wiki",
+  "set_dcSources": "可用資料：Tag {tagDate} · Wiki {wikiDate}",
+  "@set_dcSources": {
+    "placeholders": {
+      "tagDate": {},
+      "wikiDate": {}
+    }
+  },
+  "set_dcDownloading": "正在下載 {received} / {total}",
+  "@set_dcDownloading": {
+    "placeholders": {
+      "received": {},
+      "total": {}
+    }
+  },
+  "set_dcVerifying": "正在校驗下載內容…",
+  "set_dcImporting": "正在補充本地資料 · 已讀取 {n} 條",
+  "@set_dcImporting": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcPublishing": "正在切換資料版本…",
+  "set_dcAdded": "新增 {n} 條，已儲存在本地",
+  "@set_dcAdded": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_dcUpdateFailed": "補充失敗，已保留原資料。可重試。",
+  "set_dcUpdateCancelled": "已取消，原資料保持可用。",
+  "set_dcInstalled": "已補充",
+  "set_dcCancelling": "正在取消…",
   "set_dcCooc": "共現資料",
   "set_dcCoocSub": "用來推薦常一起出現的標籤",
   "set_dcEntries": "{n} 條",

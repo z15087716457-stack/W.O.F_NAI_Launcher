@@ -902,24 +902,165 @@ class SettingsDictionaryPage extends StatelessWidget {
           subtitle: l.set_dcTagsSub,
           children: [
             SettingsRow(
+              key: const Key('dictionary-base-row'),
               title: l.set_dcBase,
-              control: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 6,
-                children: [
-                  SettingsDot(
-                    dc.tagCount > 0 ? SettingsTone.ok : SettingsTone.idle,
-                  ),
-                  Text(
-                    l.set_dcBaseValue(
-                      SettingsFormat.count(dc.tagCount),
-                      dc.dataVersion,
+              control: Tooltip(
+                message: 'Tag · ${dc.dataVersion}',
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    SettingsDot(
+                      dc.tagCount > 0 ? SettingsTone.ok : SettingsTone.idle,
                     ),
-                    style: UiText.sans(12, color: c.ink),
-                  ),
-                ],
+                    Text(
+                      l.set_dcBaseValue(
+                        SettingsFormat.count(dc.tagCount),
+                        dc.wikiCount == null
+                            ? '—'
+                            : SettingsFormat.count(dc.wikiCount!),
+                      ),
+                      style: UiText.sans(12, color: c.ink),
+                    ),
+                  ],
+                ),
               ),
             ),
+            if (dc.update case final update?)
+              SettingsRow(
+                key: const Key('dictionary-supplement-row'),
+                title: l.set_dcSupplement,
+                subtitle: l.set_dcSources(update.tagDate, update.wikiDate),
+                control: Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    Tooltip(
+                      message:
+                          '${update.tagSource} · ${update.tagDate} · 5.6 MB',
+                      child: SettingsBtn(
+                        key: const Key('dictionary-update-tags'),
+                        label: update.tagInstalled
+                            ? 'Tag · ${l.set_dcInstalled}'
+                            : l.set_dcUpdateTags,
+                        small: true,
+                        onTap: update.busy || update.tagInstalled
+                            ? null
+                            : () => s.actions.onUpdateDictionary(
+                                SettingsDictionaryKind.tags,
+                              ),
+                      ),
+                    ),
+                    Tooltip(
+                      message:
+                          '${update.wikiSource} · ${update.wikiDate} · 138 MB',
+                      child: SettingsBtn(
+                        key: const Key('dictionary-update-wiki'),
+                        label: update.wikiInstalled
+                            ? 'Wiki · ${l.set_dcInstalled}'
+                            : l.set_dcUpdateWiki,
+                        small: true,
+                        onTap: update.busy || update.wikiInstalled
+                            ? null
+                            : () => s.actions.onUpdateDictionary(
+                                SettingsDictionaryKind.wiki,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+                below: update.phase == SettingsDictionaryPhase.idle
+                    ? null
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (update.busy) ...[
+                              LinearProgressIndicator(
+                                value:
+                                    update.phase ==
+                                            SettingsDictionaryPhase
+                                                .downloading &&
+                                        update.total > 0
+                                    ? (update.received / update.total).clamp(
+                                        0,
+                                        1,
+                                      )
+                                    : MediaQuery.disableAnimationsOf(context)
+                                    ? 0
+                                    : null,
+                                minHeight: 3,
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    update.cancelling
+                                        ? l.set_dcCancelling
+                                        : switch (update.phase) {
+                                            SettingsDictionaryPhase
+                                                .downloading =>
+                                              l.set_dcDownloading(
+                                                SettingsFormat.bytes(
+                                                  update.received,
+                                                ),
+                                                SettingsFormat.bytes(
+                                                  update.total,
+                                                ),
+                                              ),
+                                            SettingsDictionaryPhase.verifying =>
+                                              l.set_dcVerifying,
+                                            SettingsDictionaryPhase.importing =>
+                                              l.set_dcImporting(
+                                                SettingsFormat.count(
+                                                  update.rows,
+                                                ),
+                                              ),
+                                            SettingsDictionaryPhase
+                                                .publishing =>
+                                              l.set_dcPublishing,
+                                            SettingsDictionaryPhase.done =>
+                                              l.set_dcAdded(
+                                                SettingsFormat.count(
+                                                  update.added,
+                                                ),
+                                              ),
+                                            SettingsDictionaryPhase.failed =>
+                                              l.set_dcUpdateFailed,
+                                            SettingsDictionaryPhase.cancelled =>
+                                              l.set_dcUpdateCancelled,
+                                            _ => '',
+                                          },
+                                    style: UiText.sans(
+                                      11,
+                                      color:
+                                          update.phase ==
+                                              SettingsDictionaryPhase.failed
+                                          ? c.error
+                                          : c.muted,
+                                    ),
+                                  ),
+                                ),
+                                if (update.busy &&
+                                    update.phase !=
+                                        SettingsDictionaryPhase.publishing)
+                                  SettingsBtn(
+                                    key: const Key('dictionary-update-cancel'),
+                                    label: l.set_cancel,
+                                    small: true,
+                                    onTap: update.cancelling
+                                        ? null
+                                        : s.actions.onCancelDictionaryUpdate,
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+              ),
             SettingsRow(
               title: l.set_dcCooc,
               subtitle: l.set_dcCoocSub,

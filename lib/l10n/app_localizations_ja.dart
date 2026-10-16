@@ -18191,12 +18191,59 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_dcTagsSub => '補完、タグ翻訳、提案に使うローカルデータ。';
 
   @override
-  String get set_dcBase => '基本辞書';
+  String get set_dcBase => '基本データベース';
 
   @override
-  String set_dcBaseValue(Object n, Object version) {
-    return '$n タグ · データ $version';
+  String set_dcBaseValue(Object n, Object wiki) {
+    return 'タグ $n 件 · Wiki $wiki 件';
   }
+
+  @override
+  String get set_dcSupplement => 'データ補充';
+
+  @override
+  String get set_dcUpdateTags => 'タグを更新';
+
+  @override
+  String get set_dcUpdateWiki => 'Wiki を補充';
+
+  @override
+  String set_dcSources(Object tagDate, Object wikiDate) {
+    return '利用可能なデータ：Tag $tagDate · Wiki $wikiDate';
+  }
+
+  @override
+  String set_dcDownloading(Object received, Object total) {
+    return 'ダウンロード中 $received / $total';
+  }
+
+  @override
+  String get set_dcVerifying => 'ダウンロードを検証中…';
+
+  @override
+  String set_dcImporting(Object n) {
+    return 'ローカルデータを補充中 · $n 件読み込み済み';
+  }
+
+  @override
+  String get set_dcPublishing => 'データのバージョンを切り替え中…';
+
+  @override
+  String set_dcAdded(Object n) {
+    return '$n 件を追加し、ローカルに保存しました。';
+  }
+
+  @override
+  String get set_dcUpdateFailed => '補充できませんでした。既存データは保持されています。再試行できます。';
+
+  @override
+  String get set_dcUpdateCancelled => 'キャンセルしました。既存データは引き続き利用できます。';
+
+  @override
+  String get set_dcInstalled => '補充済み';
+
+  @override
+  String get set_dcCancelling => 'キャンセル中…';
 
   @override
   String get set_dcCooc => '共起データ';

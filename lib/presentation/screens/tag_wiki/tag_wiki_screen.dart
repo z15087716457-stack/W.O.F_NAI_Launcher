@@ -29,6 +29,7 @@ import '../../../core/wiki/wiki_directory.dart';
 import '../../../core/wiki/wiki_directory_labels.dart';
 import '../../../core/wiki/wiki_example_repository.dart';
 import '../../providers/data_source_cache_provider.dart';
+import '../../../core/database/dictionary_revision.dart';
 import '../../themes/studio_typography.dart';
 import '../../wiring/blocks_edit_wiring.dart';
 import '../../widgets/common/app_toast.dart';
@@ -323,9 +324,15 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
       _articleEntry = null;
     });
     _loadRelated(tag);
+    _watchArticle(tag, article);
+  }
+
+  void _watchArticle(String tag, Future<TagWikiEntry?> article) {
     unawaited(
       article.then((entry) {
-        if (!mounted || _selected != tag) return;
+        if (!mounted || _selected != tag || !identical(_article, article)) {
+          return;
+        }
         setState(() => _articleEntry = entry);
         if (entry?.body.trim().isNotEmpty != true) {
           return;
@@ -965,6 +972,21 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(dictionaryRevisionProvider, (_, next) {
+      scheduleMicrotask(() {
+        if (!mounted) return;
+        _load();
+        if (_selected case final tag?) {
+          ref.read(autoTagTranslationProvider).clearSurface(_articleSurface);
+          final article = ref.read(tagWikiRepositoryProvider).find(tag);
+          setState(() {
+            _article = article;
+            _articleEntry = null;
+          });
+          _watchArticle(tag, article);
+        }
+      });
+    });
     ref.listen(ragSettingsProvider, (previous, next) {
       if (previous?.enabledFor(RagSource.wiki) !=
               next.enabledFor(RagSource.wiki) ||

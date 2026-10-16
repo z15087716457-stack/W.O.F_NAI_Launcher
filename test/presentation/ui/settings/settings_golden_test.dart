@@ -77,6 +77,12 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     align.alignment = Alignment.topLeft;
     await t.pump();
     final masks = <Rect>[];
+    // F29: the base row now shows Tag/Wiki counts instead of a version hash.
+    // Supplement controls are capability-driven and covered by their own tests.
+    final dictionaryBase = find.byKey(const Key('dictionary-base-row'));
+    if (dictionaryBase.evaluate().isNotEmpty) {
+      masks.add(t.getRect(dictionaryBase));
+    }
     // F28：仅排除重排的三张主题卡及其 3px 选中光圈（含抗锯齿边缘）。
     // 比较工具另加 2px 容差，卡片外围和其余外观设置继续保持基准。
     for (final mode in ['system', 'light', 'dark']) {

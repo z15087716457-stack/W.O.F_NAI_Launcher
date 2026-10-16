@@ -8,6 +8,7 @@ import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/wiki/tag_wiki_repository.dart';
+import 'package:nai_launcher/core/database/dictionary_revision.dart';
 import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
@@ -80,10 +81,11 @@ class _Tags extends UnifiedTagRepository {
 }
 
 class _Wiki implements TagWikiRepository {
+  String body = 'Blue eyes are visible.';
   @override
   Future<TagWikiEntry?> find(String tag) async => TagWikiEntry(
     tag: tag,
-    body: 'Blue eyes are visible.',
+    body: body,
     sourceUrl: 'https://safebooru.donmai.us/wiki_pages/$tag',
   );
 }
@@ -179,6 +181,7 @@ void main() {
     Brightness brightness = Brightness.light,
     double width = 1200,
     GlobalKey? capture,
+    _Wiki? wiki,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -190,7 +193,7 @@ void main() {
           ragSettingsProvider.overrideWith(_RagSettings.new),
           ragControllerProvider.overrideWith(() => rag),
           unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
-          tagWikiRepositoryProvider.overrideWith((ref) => _Wiki()),
+          tagWikiRepositoryProvider.overrideWith((ref) => wiki ?? _Wiki()),
           cooccurrenceCompletionSourceProvider.overrideWithValue(
             _Cooccurrence(),
           ),
@@ -250,6 +253,28 @@ void main() {
       await tester.pump();
     }
   }
+
+  testWidgets(
+    'a completed dictionary update refreshes the selected Wiki article in place',
+    (tester) async {
+      final wiki = _Wiki();
+      await ragPage(tester, _Rag(), wiki: wiki);
+      await tester.tap(find.byKey(const Key('wiki-row-blue_eyes')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Blue eyes are visible.'), findsWidgets);
+      wiki.body = 'Fresh article after local supplement.';
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TagWikiScreen)),
+      );
+      container.read(dictionaryRevisionProvider.notifier).state++;
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Fresh article after local supplement.'),
+        findsWidgets,
+      );
+      expect(find.textContaining('Blue eyes are visible.'), findsNothing);
+    },
+  );
 
   testWidgets(
     'Wiki semantic matches supplement names and preserve folder scope',

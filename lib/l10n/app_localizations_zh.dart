@@ -17973,12 +17973,59 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_dcTagsSub => '自动补全、标签翻译和相关推荐用到的本地数据。';
 
   @override
-  String get set_dcBase => '基础词库';
+  String get set_dcBase => '基础数据库';
 
   @override
-  String set_dcBaseValue(Object n, Object version) {
-    return '$n 个标签 · 数据版本 $version';
+  String set_dcBaseValue(Object n, Object wiki) {
+    return '标签 $n 条 · Wiki $wiki 篇';
   }
+
+  @override
+  String get set_dcSupplement => '数据补充';
+
+  @override
+  String get set_dcUpdateTags => '更新 Tag';
+
+  @override
+  String get set_dcUpdateWiki => '补充 Wiki';
+
+  @override
+  String set_dcSources(Object tagDate, Object wikiDate) {
+    return '可用数据：Tag $tagDate · Wiki $wikiDate';
+  }
+
+  @override
+  String set_dcDownloading(Object received, Object total) {
+    return '正在下载 $received / $total';
+  }
+
+  @override
+  String get set_dcVerifying => '正在校验下载内容…';
+
+  @override
+  String set_dcImporting(Object n) {
+    return '正在补充本地数据 · 已读取 $n 条';
+  }
+
+  @override
+  String get set_dcPublishing => '正在切换数据版本…';
+
+  @override
+  String set_dcAdded(Object n) {
+    return '新增 $n 条，已保存在本地';
+  }
+
+  @override
+  String get set_dcUpdateFailed => '补充失败，已保留原数据。可重试。';
+
+  @override
+  String get set_dcUpdateCancelled => '已取消，原数据保持可用。';
+
+  @override
+  String get set_dcInstalled => '已补充';
+
+  @override
+  String get set_dcCancelling => '正在取消…';
 
   @override
   String get set_dcCooc => '共现数据';
@@ -37376,12 +37423,59 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_dcTagsSub => '自動補全、標籤翻譯和相關推薦用到的本地資料。';
 
   @override
-  String get set_dcBase => '基礎詞庫';
+  String get set_dcBase => '基礎資料庫';
 
   @override
-  String set_dcBaseValue(Object n, Object version) {
-    return '$n 個標籤 · 資料版本 $version';
+  String set_dcBaseValue(Object n, Object wiki) {
+    return '標籤 $n 條 · Wiki $wiki 篇';
   }
+
+  @override
+  String get set_dcSupplement => '資料補充';
+
+  @override
+  String get set_dcUpdateTags => '更新 Tag';
+
+  @override
+  String get set_dcUpdateWiki => '補充 Wiki';
+
+  @override
+  String set_dcSources(Object tagDate, Object wikiDate) {
+    return '可用資料：Tag $tagDate · Wiki $wikiDate';
+  }
+
+  @override
+  String set_dcDownloading(Object received, Object total) {
+    return '正在下載 $received / $total';
+  }
+
+  @override
+  String get set_dcVerifying => '正在校驗下載內容…';
+
+  @override
+  String set_dcImporting(Object n) {
+    return '正在補充本地資料 · 已讀取 $n 條';
+  }
+
+  @override
+  String get set_dcPublishing => '正在切換資料版本…';
+
+  @override
+  String set_dcAdded(Object n) {
+    return '新增 $n 條，已儲存在本地';
+  }
+
+  @override
+  String get set_dcUpdateFailed => '補充失敗，已保留原資料。可重試。';
+
+  @override
+  String get set_dcUpdateCancelled => '已取消，原資料保持可用。';
+
+  @override
+  String get set_dcInstalled => '已補充';
+
+  @override
+  String get set_dcCancelling => '正在取消…';
 
   @override
   String get set_dcCooc => '共現資料';
