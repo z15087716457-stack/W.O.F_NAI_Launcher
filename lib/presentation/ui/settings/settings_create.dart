@@ -510,7 +510,6 @@ class SettingsStoragePage extends StatelessWidget {
       children: [
         SettingsSection(
           title: l.set_stUsage,
-          badge: SettingsMini.isNew(context),
           children: [
             SettingsBlock(
               child: Column(

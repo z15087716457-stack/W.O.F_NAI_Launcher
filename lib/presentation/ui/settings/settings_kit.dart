@@ -23,9 +23,6 @@ extension SettingsColors on UiColors {
   /// 下沉底：路径框、提示框、预览框。
   Color get sunk => dark ? const Color(0xFF131313) : const Color(0xFFF7F7F7);
 
-  /// “新”标签的黄。
-  Color get newBadge => const Color(0xFFFFD21F);
-
   /// 搜索命中的底色。
   Color get mark => const Color(0x8CFFD21F);
 
@@ -316,13 +313,6 @@ class SettingsMini extends StatelessWidget {
   const SettingsMini(this.text, {super.key, this.tone = UiMiniTone.plain});
   final String text;
   final UiMiniTone tone;
-
-  /// 黄色“新”。
-  static Widget isNew(BuildContext context) => UiMini(
-    context.l10n.set_isNew,
-    background: context.ui.newBadge,
-    foreground: const Color(0xFF111111),
-  );
 
   @override
   Widget build(BuildContext context) => UiMini(text, tone: tone);
@@ -1641,12 +1631,16 @@ class SettingsAsideCard extends StatelessWidget {
     required this.title,
     this.trailing,
     this.badge,
+    this.minTitleHeight = 0,
     required this.child,
   });
 
   final String title;
   final String? trailing;
   final Widget? badge;
+
+  /// 保留原有标题行高度，移除标签时侧卡正文不挪动。
+  final double minTitleHeight;
   final Widget child;
 
   @override
@@ -1664,18 +1658,25 @@ class SettingsAsideCard extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Row(
-              spacing: 6,
-              children: [
-                Text(
-                  title,
-                  style: UiText.sans(12, weight: FontWeight.w600, color: c.ink),
-                ),
-                ?badge,
-                const Spacer(),
-                if (trailing != null)
-                  Text(trailing!, style: UiText.sans(11, color: c.faint)),
-              ],
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: minTitleHeight),
+              child: Row(
+                spacing: 6,
+                children: [
+                  Text(
+                    title,
+                    style: UiText.sans(
+                      12,
+                      weight: FontWeight.w600,
+                      color: c.ink,
+                    ),
+                  ),
+                  ?badge,
+                  const Spacer(),
+                  if (trailing != null)
+                    Text(trailing!, style: UiText.sans(11, color: c.faint)),
+                ],
+              ),
             ),
           ),
           child,

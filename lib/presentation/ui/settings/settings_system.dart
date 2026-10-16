@@ -418,7 +418,6 @@ class SettingsNetworkPage extends StatelessWidget {
         SettingsSection(
           title: l.set_nwCheck,
           subtitle: l.set_nwCheckSub,
-          badge: SettingsMini.isNew(context),
           children: [
             for (final e in n.endpoints)
               SettingsRow(
@@ -827,7 +826,7 @@ class _SettingsBackupPageState extends State<SettingsBackupPage> {
         SettingsAsideCard(
           title: l.set_bkAuto,
           trailing: l.set_bkAutoSub,
-          badge: SettingsMini.isNew(context),
+          minTitleHeight: 18,
           child: bk.backups.isEmpty
               ? Text(l.set_bkNoBackups, style: UiText.sans(12, color: c.faint))
               : SettingsAsideList(
@@ -1279,7 +1278,6 @@ class SettingsAboutPage extends StatelessWidget {
               anchor: 'diagnostics',
               title: l.set_abCopyDiag,
               subtitle: l.set_abCopyDiagSub,
-              badges: [SettingsMini.isNew(context)],
               control: SettingsBtn(
                 key: const Key('copy-diagnostics'),
                 label: l.set_copy,

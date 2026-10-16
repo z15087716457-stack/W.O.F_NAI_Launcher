@@ -95,22 +95,6 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
               l.channel_title,
               style: UiText.sans(13, weight: FontWeight.w700, color: c.ink),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-              decoration: BoxDecoration(
-                color: c.accent.withValues(alpha: .14),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                l.channel_new,
-                style: UiText.mono(
-                  10,
-                  weight: FontWeight.w500,
-                  color: c.accent,
-                  height: 1.3,
-                ),
-              ),
-            ),
             if (widget.generating && s.motion && !off)
               Flexible(
                 child: Text(

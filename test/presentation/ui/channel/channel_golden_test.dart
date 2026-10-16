@@ -6,8 +6,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_text.dart';
 
+import '../../../helpers/approved_visual_regions.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'channel_test_harness.dart';
 
@@ -67,9 +70,40 @@ void main() {
       final name = dark ? '$file-dark' : file;
       testWidgets('golden $name', skip: skip, (t) async {
         await pump(t, dark);
-        await expectLater(
+        final masks = <Rect>[];
+        // 同生图页基准：既有变体价签占位已获准调整，保留原图并排除该工具条。
+        final toolbar = find.byKey(const Key('gen-bar-top'));
+        if (toolbar.evaluate().isNotEmpty) {
+          masks.add(t.getRect(toolbar).inflate(22));
+        }
+        final settings = find.byKey(const Key('channel-settings'));
+        if (settings.evaluate().isNotEmpty) {
+          final l = AppLocalizations.of(t.element(settings))!;
+          expect(find.text(l.channel_new), findsNothing);
+          final title = t.getRect(find.text(l.channel_title));
+          final text = TextPainter(
+            text: TextSpan(
+              text: l.channel_new,
+              style: UiText.mono(10, weight: FontWeight.w500, height: 1.3),
+            ),
+            textDirection: TextDirection.ltr,
+          )..layout();
+          // 保留原 PNG，仅排除用户要求移除的 NEW 标签。
+          masks.add(
+            Rect.fromLTWH(
+              title.right + 6,
+              title.center.dy - 7.5,
+              text.width + 10,
+              15,
+            ),
+          );
+          text.dispose();
+        }
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('gen-capture')),
-          matchesGoldenFile('goldens/$name.png'),
+          'test/presentation/ui/channel/goldens/$name.png',
+          masks,
         );
       });
     }

@@ -536,9 +536,6 @@ class SettingsAppearancePage extends StatelessWidget {
                           'dark' => 'Geist Dark',
                           _ => l.set_apSystemSub,
                         },
-                        badge: k == 'system'
-                            ? SettingsMini.isNew(context)
-                            : null,
                         onTap: () =>
                             s.actions.onChanged(SettingKey.themeMode, k),
                       ),
@@ -1422,7 +1419,6 @@ class _SettingsShortcutsPageState extends State<SettingsShortcutsPage> {
         SettingsSection(
           title: l.set_scKeyboard,
           subtitle: l.set_scKeyboardSub,
-          badge: SettingsMini.isNew(context),
           children: [_keyboard(context, data)],
         ),
         for (final (ctx, list) in visible)

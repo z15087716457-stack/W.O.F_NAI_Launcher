@@ -2042,7 +2042,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
           radius: 11,
           child: SettingsAsideCard(
             title: l.set_upDefault,
-            badge: SettingsMini.isNew(context),
+            minTitleHeight: 18,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

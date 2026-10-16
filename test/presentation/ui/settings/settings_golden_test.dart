@@ -1,4 +1,4 @@
-// 保留原设置页基准；归一居中，仅排除获准修改的蓝点标题行、品牌与放大图标。
+// 保留原设置页基准；归一居中，仅排除获准修改的蓝点标题行、图标和已移除的新功能标签。
 // 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_text.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
@@ -75,6 +77,37 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     align.alignment = Alignment.topLeft;
     await t.pump();
     final masks = <Rect>[];
+    final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
+    expect(find.text(l.set_isNew), findsNothing);
+    // 只豁免旧“新”标签本身的矩形，标题、卡片及其下方的控件继续逐像素锁定。
+    final badgeText = TextPainter(
+      text: TextSpan(
+        text: l.set_isNew,
+        style: UiText.sans(10.5, weight: FontWeight.w600, height: 1.2),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final badgeWidth = badgeText.width + 12;
+    badgeText.dispose();
+    for (final (type, label, gap) in <(Type, String, double)>[
+      (SettingsOptionCard, l.set_apSystem, 8),
+      (SettingsSection, l.set_scKeyboard, 6),
+      (SettingsSection, l.set_stUsage, 6),
+      (SettingsSection, l.set_nwCheck, 6),
+      (SettingsAsideCard, l.set_bkAuto, 6),
+      (SettingsAsideCard, l.set_upDefault, 6),
+      (SettingsRow, l.set_abCopyDiag, 7),
+    ]) {
+      final title = find.descendant(
+        of: find.byType(type),
+        matching: find.text(label),
+      );
+      if (title.evaluate().isEmpty) continue;
+      final rect = t.getRect(title);
+      masks.add(
+        Rect.fromLTWH(rect.right + gap, rect.center.dy - 9, badgeWidth, 18),
+      );
+    }
     for (final element in find.byType(SettingsRow).evaluate()) {
       final row = element.widget as SettingsRow;
       if (!row.modified || row.sub) continue;
