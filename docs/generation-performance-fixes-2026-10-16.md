@@ -1,6 +1,8 @@
 # 生图页五项性能优化 · 2026-10-16
 
-用户在认可 r16 的两侧 65% 效果后，授权实施[调查报告](generation-performance-audit-2026-10-16.md)中的全部五项优化，要求保持现有视觉和交互。本批修改有效源码，桌面仍是 r16 / `2.0.0-preview+20`；未覆盖安装、启动、重启或热重载 Studio，未调用真实生成接口或模型。
+**已随 [r17 本机更新](cumulative-preview-r17-2026-10-16.md) 安装；下文保留实现阶段的基线和验证边界。**
+
+用户在认可 r16 的两侧 65% 效果后，授权实施[调查报告](generation-performance-audit-2026-10-16.md)中的全部五项优化，要求保持现有视觉和交互。实现阶段仅修改有效源码，安装基线为 r16 / `2.0.0-preview+20`；当时未覆盖安装、启动、重启或热重载 Studio，未调用真实生成接口或模型。
 
 ## 实现
 
@@ -40,6 +42,6 @@
 
 缩略图另测 DPR 1／1.25／1.5／2／3、极宽／极高裁切、小图原像素、档位复用、原图完整尺寸及调整宽度时的帧保留。合成渐变／细结构图在显示尺寸的平均颜色差小于一个 8-bit 色阶；缩小解码存在重采样，不承诺所有原图逐像素相同。原图功能保持全尺寸。
 
-验证结果见审计目录的 `regression-result.json`、`final-scope-tests.log`、`final-affected-tests.log`、`analyze-final.log`、`windows-build.log` 与 `protected-verification.json`。综合回归 973 项通过，随后新增构建器替换边界，受影响范围重新验证；最终不同检查合计 974 项，无跳过；最后一次分区调整后的受影响范围 308 项再次通过。全仓分析及最后 5 文件分析无诊断，Windows Release 构建通过，1516 项跟踪生产输入在最终构建前后保持哈希一致。完整结论见 `verification.json`；该构建用于编译验证，未组装或覆盖本机运行包。
+验证结果见审计目录的 `regression-result.json`、`final-scope-tests.log`、`final-affected-tests.log`、`analyze-final.log`、`windows-build.log` 与 `protected-verification.json`。综合回归 973 项通过，随后新增构建器替换边界，受影响范围重新验证；最终不同检查合计 974 项，无跳过；最后一次分区调整后的受影响范围 308 项再次通过。全仓分析及最后 5 文件分析无诊断，Windows Release 构建通过，1516 项跟踪生产输入在最终构建前后保持哈希一致。完整结论见 `verification.json`；实现阶段该构建用于编译验证；后续 r17 已重新构建并完成本机交付。
 
-修改未涉及依赖、数据库结构、国际化或生成输入，因此没有运行代码生成器。原有 DEVELOPMENT.md 与 .runs/ 保留；生成文件、原 PNG、共用玻璃组件与侧栏材质哈希核验通过。安装 AOT 仍为 `bea5ef593c1f4752048afee0a5be032a4390c71c6f7678bb89bea20041b60499`，本批尚待用户要求本机更新。
+修改未涉及依赖、数据库结构、国际化或生成输入，因此没有运行代码生成器。原有 DEVELOPMENT.md 与 .runs/ 保留；生成文件、原 PNG、共用玻璃组件与侧栏材质哈希核验通过。实现阶段的安装基线 AOT 为 `bea5ef593c1f4752048afee0a5be032a4390c71c6f7678bb89bea20041b60499`，当前安装状态以 r17 本机交付为准。
