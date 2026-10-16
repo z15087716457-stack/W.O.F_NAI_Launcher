@@ -522,7 +522,7 @@ class SettingsStoragePage extends StatelessWidget {
                     spacing: 8,
                     children: [
                       Text(
-                        SettingsFormat.gb(total),
+                        st.slices.isEmpty ? '—' : SettingsFormat.gb(total),
                         style: settingsBig(context, size: 28),
                       ),
                       Text('GB', style: UiText.sans(12, color: c.muted)),
@@ -681,7 +681,9 @@ class SettingsStoragePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: Text(
-                        l.set_stCount(SettingsFormat.count(r.images)),
+                        st.slices.isEmpty
+                            ? '—'
+                            : l.set_stCount(SettingsFormat.count(r.images)),
                         style: UiText.mono(12, color: c.muted),
                       ),
                     ),
@@ -754,7 +756,7 @@ class SettingsStoragePage extends StatelessWidget {
                 spacing: 8,
                 children: [
                   Text(
-                    '${SettingsFormat.gb(st.thumbnailBytes)} / ${SettingsFormat.bytes(st.thumbnailLimit)}',
+                    '${st.slices.isEmpty ? '—' : SettingsFormat.gb(st.thumbnailBytes)} / ${SettingsFormat.bytes(st.thumbnailLimit)}',
                     style: UiText.mono(12, color: c.muted),
                   ),
                   SettingsBtn(
@@ -802,7 +804,8 @@ class SettingsDictionaryPage extends StatelessWidget {
     final d = s.data;
     final dc = d.dictionaries;
     Widget cache(SettingsCacheKind k, String title, String sub) {
-      final (n, b) = dc.caches[k] ?? (0, 0);
+      final retained = dc.caches[k];
+      final (n, b) = retained ?? (0, 0);
       return SettingsRow(
         anchor: 'cache-${k.name}',
         title: title,
@@ -812,10 +815,12 @@ class SettingsDictionaryPage extends StatelessWidget {
           spacing: 8,
           children: [
             Text(
-              l.set_dcCacheSize(
-                SettingsFormat.count(n),
-                SettingsFormat.bytes(b),
-              ),
+              retained == null
+                  ? '—'
+                  : l.set_dcCacheSize(
+                      SettingsFormat.count(n),
+                      SettingsFormat.bytes(b),
+                    ),
               style: UiText.mono(12, color: c.muted),
             ),
             SettingsBtn(
@@ -849,7 +854,7 @@ class SettingsDictionaryPage extends StatelessWidget {
                 child: Text(title, style: UiText.sans(12, color: c.muted)),
               ),
               Text(
-                x == null ? '—' : SettingsFormat.percent(x.hitRate),
+                x?.hitRate == null ? '—' : SettingsFormat.percent(x!.hitRate!),
                 style: UiText.mono(12, weight: FontWeight.w500, color: c.ink),
               ),
             ],

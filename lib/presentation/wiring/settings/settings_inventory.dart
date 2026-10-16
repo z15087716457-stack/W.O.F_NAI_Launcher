@@ -20,6 +20,8 @@ import '../../ui/settings/settings_contract.dart';
 import '../../../core/cache/thumbnail_cache_service.dart';
 
 typedef SettingsDirectoryMeasurement = ({int bytes, int thumbs, int images});
+typedef SettingsDirectoryMeasure =
+    Future<SettingsDirectoryMeasurement> Function(String path, bool gallery);
 Future<SettingsDirectoryMeasurement> _backgroundMeasure(
   String path,
   bool gallery,
@@ -28,6 +30,10 @@ Future<SettingsDirectoryMeasurement> _backgroundMeasure(
 /// Share in-flight reads and bound disk traversal to one background job. Rapid
 /// refreshes cannot spawn overlapping recursive walks of the same directories.
 class SettingsDirectoryMeasurements {
+  SettingsDirectoryMeasurements({SettingsDirectoryMeasure? measure})
+    : _measure = measure ?? _backgroundMeasure;
+
+  final SettingsDirectoryMeasure _measure;
   final _pending = <(String, bool), Future<SettingsDirectoryMeasurement>>{};
   Future<void> _tail = Future.value();
   Future<SettingsDirectoryMeasurement> measure(
@@ -36,9 +42,11 @@ class SettingsDirectoryMeasurements {
   }) {
     final key = (p.normalize(p.absolute(path)), gallery);
     return _pending.putIfAbsent(key, () {
-      final result = _tail.then((_) => _backgroundMeasure(key.$1, gallery));
+      final result = _tail.then((_) => _measure(key.$1, gallery));
       _tail = result.then<void>((_) {}, onError: (Object _, StackTrace __) {});
-      return result.whenComplete(() => _pending.remove(key));
+      return result.whenComplete(() {
+        _pending.remove(key);
+      });
     });
   }
 }
@@ -151,17 +159,44 @@ final settingsDiskFreeProvider = Provider<SettingsDiskFree>(
   },
 );
 
+final settingsGalleryExtraRootsProvider = FutureProvider<List<String>>(
+  (ref) => GalleryFolderRepository.instance.getExtraRootPaths(),
+);
+
+/// Configuration is cheap and remains available while directory walks run.
+final settingsStorageLocationsProvider = FutureProvider<SettingsStorageData>((
+  ref,
+) async {
+  final folders = await ref.watch(settingsFoldersProvider.future);
+  final extraRoots = await ref.watch(settingsGalleryExtraRootsProvider.future);
+  final primary = folders[SettingsFolder.images]!;
+  return SettingsStorageData(
+    diskLabel: p.rootPrefix(primary),
+    roots: [
+      for (final path in [primary, ...extraRoots])
+        SettingsGalleryRoot(
+          id: path,
+          path: path,
+          images: 0,
+          primary: p.equals(path, primary),
+        ),
+    ],
+    thumbnailLimit: ThumbnailCacheService.defaultMaxCacheSizeMB * 1024 * 1024,
+    folderNames: {
+      for (final entry in folders.entries) entry.key: p.basename(entry.value),
+    },
+  );
+});
+
 final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   ref,
 ) async {
+  final locations = await ref.watch(settingsStorageLocationsProvider.future);
   final folders = await ref.watch(settingsFoldersProvider.future);
   final support = await getApplicationSupportDirectory();
   final rag = await ref.read(ragDirectoryProvider)();
   final primary = folders[SettingsFolder.images]!;
-  final registered = [
-    primary,
-    ...await GalleryFolderRepository.instance.getExtraRootPaths(),
-  ];
+  final registered = locations.roots.map((root) => root.path).toList();
   final roots = <String>[];
   // Nested roots refer to the same bytes and must not inflate totals.
   for (final path in registered) {
@@ -241,49 +276,31 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
       0,
       (sum, value) => sum + value.thumbs,
     ),
-    thumbnailLimit: ThumbnailCacheService.defaultMaxCacheSizeMB * 1024 * 1024,
-    folderNames: {
-      for (final entry in folders.entries) entry.key: p.basename(entry.value),
-    },
+    thumbnailLimit: locations.thumbnailLimit,
+    folderNames: locations.folderNames,
   );
 });
 
-final settingsCacheStatsProvider = FutureProvider.autoDispose(
-  (ref) => GalleryCacheManager().getStatistics(),
+final settingsGalleryCacheManagerProvider = Provider(
+  (ref) => GalleryCacheManager(),
 );
+
+final settingsCacheStatsProvider = FutureProvider.autoDispose((ref) {
+  final manager = ref.read(settingsGalleryCacheManagerProvider);
+  void invalidate() => ref.invalidateSelf();
+  manager.registerOnStatisticsInvalidated(invalidate);
+  ref.onDispose(() => manager.unregisterOnStatisticsInvalidated(invalidate));
+  return manager.getStatistics(refresh: true);
+});
 final settingsDictionaryDataProvider = FutureProvider<SettingsDictionaryData>((
   ref,
 ) async {
   final catalog = await ref.read(tagCatalogRepositoryProvider).metadata();
-  final cache = await ref.read(autocompleteCacheDatabaseProvider).statistics();
-  final bytes = await ref
-      .read(autocompleteCacheDatabaseProvider)
-      .contentBytes();
-  final stats = await ref.watch(settingsCacheStatsProvider.future);
   final database = await ref.read(databaseManagerProvider.future);
   final cooccurrence = await database.cooccurrenceDataSource.getCount();
   return SettingsDictionaryData(
     tagCount: int.tryParse(catalog['tag_count'] ?? '') ?? 0,
     dataVersion: catalog['data_version'] ?? '',
     cooccurrence: cooccurrence,
-    caches: {
-      SettingsCacheKind.danbooru: (
-        cache['danbooruCache'] ?? 0,
-        bytes['danbooruCache'] ?? 0,
-      ),
-      SettingsCacheKind.translation: (
-        cache['aiTranslations'] ?? 0,
-        bytes['aiTranslations'] ?? 0,
-      ),
-    },
-    l1: SettingsCacheStat(
-      hitRate: stats.l1HitRate,
-      entries: stats.l1MemorySize,
-    ),
-    l2: SettingsCacheStat(hitRate: stats.l2HitRate, entries: stats.l2HiveSize),
-    // L3 has an indexed-image count but no independent cache-hit telemetry.
-    // Null is the contract's honest "—" state, not the L1/L2 weighted rate.
-    l3: null,
-    statsUpdatedAt: stats.lastUpdated,
   );
 });

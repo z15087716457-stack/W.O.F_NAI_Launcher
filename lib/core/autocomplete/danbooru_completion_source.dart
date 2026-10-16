@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 
 import '../utils/app_logger.dart';
+import '../cache/cache_footprint.dart';
 import 'autocomplete_cache_database.dart';
 import 'completion_models.dart';
 
@@ -27,6 +28,7 @@ class DanbooruCompletionSource implements CompletionSource {
   final Dio _dio;
   final AutocompleteCacheDatabase _cache;
   final Map<String, _MemoryEntry> _memory = {};
+  int _memoryGeneration = -1;
   CancelToken? _cancelToken;
   DateTime? _lastRequestAt;
   DateTime? _breakerOpenUntil;
@@ -36,6 +38,26 @@ class DanbooruCompletionSource implements CompletionSource {
   bool get circuitOpen =>
       _breakerOpenUntil != null && DateTime.now().isBefore(_breakerOpenUntil!);
   String? get lastError => _lastError;
+
+  void _syncCacheGeneration() {
+    if (_memoryGeneration == _cache.remoteGeneration) return;
+    clearMemoryCache();
+    _memoryGeneration = _cache.remoteGeneration;
+  }
+
+  CacheFootprint get footprint {
+    _syncCacheGeneration();
+    return CacheFootprint.json(
+      _memory.values.map(
+        (entry) => entry.candidates.map(_encodeCandidate).toList(),
+      ),
+    );
+  }
+
+  void clearMemoryCache() {
+    cancelPending();
+    _memory.clear();
+  }
 
   void cancelPending() {
     _cancelToken?.cancel('Autocomplete query replaced');
@@ -48,6 +70,8 @@ class DanbooruCompletionSource implements CompletionSource {
     if (query.isChinese || token.length < 2) return const [];
     final key = 'tags:$token:${query.limit}';
     final now = DateTime.now();
+    _syncCacheGeneration();
+    final generation = _cache.remoteGeneration;
     final memory = _memory[key];
     if (memory != null &&
         now.difference(memory.storedAt) < const Duration(minutes: 5)) {
@@ -56,6 +80,7 @@ class DanbooruCompletionSource implements CompletionSource {
     }
 
     final disk = await _cache.getRemote(key);
+    if (generation != _cache.remoteGeneration) return const [];
     if (disk != null &&
         now.toUtc().difference(disk.fetchedAt) < const Duration(days: 7)) {
       final candidates = _decodeCandidates(disk.payload);
@@ -105,11 +130,16 @@ class DanbooruCompletionSource implements CompletionSource {
       _consecutiveFailures = 0;
       _lastError = null;
       final payload = candidates.map(_encodeCandidate).toList();
-      await _cache.putRemote(key, payload);
+      if (generation != _cache.remoteGeneration) return const [];
+      await _cache.putRemote(key, payload, expectedGeneration: generation);
+      if (generation != _cache.remoteGeneration) return const [];
       _memory[key] = _MemoryEntry(candidates, now);
       return candidates;
     } on DioException catch (error, stack) {
-      if (CancelToken.isCancel(error)) return const [];
+      if (CancelToken.isCancel(error) ||
+          generation != _cache.remoteGeneration) {
+        return const [];
+      }
       _lastError = error.message ?? error.toString();
       _registerFailure();
       AppLogger.w(
@@ -119,6 +149,7 @@ class DanbooruCompletionSource implements CompletionSource {
       AppLogger.d('$stack', 'Autocomplete');
       return _staleCandidates(disk, now);
     } catch (error, stack) {
+      if (generation != _cache.remoteGeneration) return const [];
       _lastError = error.toString();
       _registerFailure();
       AppLogger.e('Danbooru autocomplete response failed', error, stack);
@@ -139,6 +170,8 @@ class DanbooruCompletionSource implements CompletionSource {
         : limit.clamp(1, 500);
     final key = 'related:v3:$normalized:$requestedLimit';
     final now = DateTime.now();
+    _syncCacheGeneration();
+    final generation = _cache.remoteGeneration;
     final memory = _memory[key];
     if (memory != null &&
         now.difference(memory.storedAt) < const Duration(minutes: 5)) {
@@ -146,6 +179,7 @@ class DanbooruCompletionSource implements CompletionSource {
       return memory.candidates;
     }
     final disk = await _cache.getRemote(key);
+    if (generation != _cache.remoteGeneration) return const [];
     if (disk != null &&
         now.toUtc().difference(disk.fetchedAt) < const Duration(days: 7)) {
       final candidates = _decodeCandidates(disk.payload);
@@ -175,18 +209,28 @@ class DanbooruCompletionSource implements CompletionSource {
         response.data,
         requestedLimit,
       );
-      await _cache.putRemote(key, candidates.map(_encodeCandidate).toList());
+      if (generation != _cache.remoteGeneration) return const [];
+      await _cache.putRemote(
+        key,
+        candidates.map(_encodeCandidate).toList(),
+        expectedGeneration: generation,
+      );
+      if (generation != _cache.remoteGeneration) return const [];
       _memory[key] = _MemoryEntry(candidates, now);
       _consecutiveFailures = 0;
       _lastError = null;
       return candidates;
     } on DioException catch (error) {
-      if (CancelToken.isCancel(error)) return const [];
+      if (CancelToken.isCancel(error) ||
+          generation != _cache.remoteGeneration) {
+        return const [];
+      }
       _lastError = error.message ?? error.toString();
       _registerFailure();
       AppLogger.w('Danbooru related tags failed: $error');
       return _staleCandidates(disk, now);
     } catch (error) {
+      if (generation != _cache.remoteGeneration) return const [];
       _lastError = error.toString();
       _registerFailure();
       AppLogger.w('Danbooru related tags failed: $error');

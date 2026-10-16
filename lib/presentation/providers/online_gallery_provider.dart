@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/utils/app_logger.dart';
+import '../../core/cache/cache_footprint.dart';
 import '../../data/datasources/remote/danbooru_api_service.dart';
 import '../../data/datasources/remote/gelbooru_api_service.dart';
 import '../../data/datasources/remote/online_gallery/ai_tag_gallery_source_adapter.dart';
@@ -233,6 +234,30 @@ class OnlineGalleryAuthorReturnContext {
   final String cacheKey;
   final ModeCache cache;
   final OnlineGalleryQueryDrafts drafts;
+
+  OnlineGalleryAuthorReturnContext withCache(ModeCache value) =>
+      OnlineGalleryAuthorReturnContext(
+        viewMode: viewMode,
+        sourceId: sourceId,
+        popularSourceId: popularSourceId,
+        searchQuery: searchQuery,
+        promptQuery: promptQuery,
+        popularQuery: popularQuery,
+        popularPromptQuery: popularPromptQuery,
+        fuzzySearchEnabled: fuzzySearchEnabled,
+        selectedRatings: selectedRatings,
+        popularScale: popularScale,
+        popularDate: popularDate,
+        aiTagTimeRange: aiTagTimeRange,
+        aiTagPopularPeriod: aiTagPopularPeriod,
+        aiTagNaiOnly: aiTagNaiOnly,
+        aiTagModelVersion: aiTagModelVersion,
+        dateRangeStart: dateRangeStart,
+        dateRangeEnd: dateRangeEnd,
+        cacheKey: cacheKey,
+        cache: value,
+        drafts: drafts,
+      );
 }
 
 class OnlineGalleryState {
@@ -503,6 +528,72 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
   final Map<String, Future<GalleryDetail>> _detailRequests = {};
   final Map<String, GalleryDetail> _resolvedDetails = {};
   final Map<GallerySourceId, OnlineGalleryState> _sourceStates = {};
+
+  static bool _danbooruCacheKey(String key) =>
+      RegExp(r'^(search|popular|favorites):danbooru(?:[:|])').hasMatch(key);
+
+  CacheFootprint get danbooruCacheFootprint {
+    final caches = <String, ModeCache>{};
+    for (final snapshot in [..._sourceStates.values, state]) {
+      caches.addAll(
+        Map.fromEntries(
+          snapshot.caches.entries.where(
+            (entry) => _danbooruCacheKey(entry.key),
+          ),
+        ),
+      );
+      if (snapshot.caches.isEmpty &&
+          snapshot.currentSourceId == GallerySourceId.danbooru) {
+        caches[snapshot.currentCacheKey] = snapshot.currentCache;
+      }
+    }
+    return CacheFootprint.json([
+      for (final cache in caches.values)
+        if (cache.posts.isNotEmpty || cache.total != null || !cache.hasMore)
+          [for (final post in cache.posts) post.toSnapshotJson()],
+      for (final entry in _resolvedDetails.entries)
+        if (entry.key.startsWith('danbooru:'))
+          entry.value.item.toSnapshotJson(),
+    ]);
+  }
+
+  /// Drop only transient Danbooru responses. Query drafts, other sources and
+  /// favorite membership remain owned by their existing stores.
+  void clearDanbooruCache() {
+    if (state.currentSourceId == GallerySourceId.danbooru) {
+      _cancelCurrentRequest();
+    }
+    _resolvedDetails.removeWhere((key, _) => key.startsWith('danbooru:'));
+    _detailRequests.removeWhere((key, _) => key.startsWith('danbooru:'));
+    OnlineGalleryState clear(OnlineGalleryState snapshot) {
+      ModeCache legacy(ModeCache cache) =>
+          cache.posts.any((post) => post.sourceId == GallerySourceId.danbooru)
+          ? const ModeCache()
+          : cache;
+      return snapshot.copyWith(
+        authorReturnContext:
+            snapshot.authorReturnContext != null &&
+                _danbooruCacheKey(snapshot.authorReturnContext!.cacheKey)
+            ? snapshot.authorReturnContext!.withCache(const ModeCache())
+            : snapshot.authorReturnContext,
+        caches: {
+          for (final entry in snapshot.caches.entries)
+            if (!_danbooruCacheKey(entry.key)) entry.key: entry.value,
+          // Keep keyed-cache mode even when Danbooru was the only source.
+          if (snapshot.currentSourceId == GallerySourceId.danbooru)
+            snapshot.currentCacheKey: const ModeCache(),
+        },
+        searchCache: legacy(snapshot.searchCache),
+        popularCache: legacy(snapshot.popularCache),
+        danbooruFavoritesCache: const ModeCache(),
+      );
+    }
+
+    for (final key in _sourceStates.keys.toList()) {
+      _sourceStates[key] = clear(_sourceStates[key]!);
+    }
+    state = clear(state);
+  }
 
   Future<void> setActiveSource(GallerySourceId source) async {
     if (state.currentSourceId == source) return;
@@ -1318,23 +1409,31 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
       _detailRequests.remove(key);
       _resolvedDetails.remove(key);
     }
-    return _detailRequests.putIfAbsent(key, () async {
+    if (_resolvedDetails[key] case final cached?) return Future.value(cached);
+    if (_detailRequests[key] case final pending?) return pending;
+    late final Future<GalleryDetail> pending;
+    pending = () async {
       await _acquireDetailRequestSlot();
       try {
         final detail = await _adapters[item.sourceId]!.detail(item);
-        // 有界 LRU：详情 payload 大（整 work 的 ai_json），无界会单调涨内存
+        if (_disposed || !identical(_detailRequests[key], pending)) {
+          return detail;
+        }
+        // Completed futures must not form a second unbounded detail cache.
         if (_resolvedDetails.length >= _maxResolvedDetailsCache) {
           _resolvedDetails.remove(_resolvedDetails.keys.first);
         }
         _resolvedDetails[key] = detail;
         return detail;
-      } catch (_) {
-        _detailRequests.remove(key);
-        rethrow;
       } finally {
+        if (identical(_detailRequests[key], pending)) {
+          _detailRequests.remove(key);
+        }
         _releaseDetailRequestSlot();
       }
-    });
+    }();
+    _detailRequests[key] = pending;
+    return pending;
   }
 
   /// 已完成详情的同步读口：网格卡直接渲染，避免 FutureBuilder 闪 waiting 帧。

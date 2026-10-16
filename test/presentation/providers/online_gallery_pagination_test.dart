@@ -14,6 +14,96 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test(
+    'cache clear discards late gallery pages and retains other source caches',
+    () async {
+      final late = Completer<GalleryPage>();
+      final danbooru = _FakeGalleryAdapter(
+        GallerySourceId.danbooru,
+        onSearch: (_, __) => late.future,
+      );
+      final safebooru = _FakeGalleryAdapter(
+        GallerySourceId.safebooru,
+        onSearch: (request, _) async => _page(request.cursor, [
+          _item(22, source: GallerySourceId.safebooru),
+        ], nextCursor: null),
+      );
+      final container = _container(danbooru: danbooru, safebooru: safebooru);
+      addTearDown(container.dispose);
+      final notifier = container.read(onlineGalleryNotifierProvider.notifier);
+      final loading = notifier.setSource(GallerySourceId.danbooru);
+      while (danbooru.searchCursors.isEmpty) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      notifier.clearDanbooruCache();
+      late.complete(_page('1', [_item(99)], nextCursor: null));
+      await loading;
+      expect(container.read(onlineGalleryNotifierProvider).posts, isEmpty);
+      expect(container.read(onlineGalleryNotifierProvider).isLoading, isFalse);
+      await notifier.setSource(GallerySourceId.safebooru);
+      notifier.clearDanbooruCache();
+      expect(container.read(onlineGalleryNotifierProvider).posts.single.id, 22);
+      expect(notifier.danbooruCacheFootprint.entries, 0);
+    },
+  );
+
+  test(
+    'cache clear rejects late detail retention and allows a fresh detail',
+    () async {
+      final late = Completer<GalleryDetail>();
+      var calls = 0;
+      final danbooru = _FakeGalleryAdapter(
+        GallerySourceId.danbooru,
+        onSearch: (request, _) async =>
+            _page(request.cursor, [], nextCursor: null),
+        onDetail: (item) {
+          calls++;
+          return calls == 1
+              ? late.future
+              : Future.value(GalleryDetail(item: item, media: [item.cover]));
+        },
+      );
+      final container = _container(danbooru: danbooru);
+      addTearDown(container.dispose);
+      final notifier = container.read(onlineGalleryNotifierProvider.notifier);
+      final item = _item(11);
+      final loading = notifier.loadDetail(item);
+      while (calls == 0) {
+        await Future<void>.delayed(Duration.zero);
+      }
+      notifier.clearDanbooruCache();
+      late.complete(GalleryDetail(item: item, media: [item.cover]));
+      await loading;
+      expect(notifier.cachedDetailFor(item), isNull);
+      await notifier.loadDetail(item);
+      expect(calls, 2);
+      expect(notifier.cachedDetailFor(item), isNotNull);
+    },
+  );
+
+  test('completed detail futures respect the same bounded cache', () async {
+    var calls = 0;
+    final danbooru = _FakeGalleryAdapter(
+      GallerySourceId.danbooru,
+      onSearch: (request, _) async =>
+          _page(request.cursor, [], nextCursor: null),
+      onDetail: (item) async {
+        calls++;
+        return GalleryDetail(item: item, media: [item.cover]);
+      },
+    );
+    final container = _container(danbooru: danbooru);
+    addTearDown(container.dispose);
+    final notifier = container.read(onlineGalleryNotifierProvider.notifier);
+    for (var id = 0; id <= 300; id++) {
+      await notifier.loadDetail(_item(id));
+    }
+    expect(notifier.danbooruCacheFootprint.entries, 300);
+    expect(notifier.cachedDetailFor(_item(0)), isNull);
+    await notifier.loadDetail(_item(0));
+    expect(calls, 302);
+  });
+
+  test(
     'source caches are isolated and restored without a repeated request',
     () async {
       final danbooru = _FakeGalleryAdapter(
@@ -493,7 +583,8 @@ class _AuthorPopularGalleryNotifier extends OnlineGalleryNotifier {
 }
 
 class _FakeGalleryAdapter implements GallerySourceAdapter {
-  _FakeGalleryAdapter(this.sourceId, {required this.onSearch});
+  _FakeGalleryAdapter(this.sourceId, {required this.onSearch, this.onDetail});
+  final Future<GalleryDetail> Function(GalleryItem)? onDetail;
 
   @override
   final GallerySourceId sourceId;
@@ -537,6 +628,8 @@ class _FakeGalleryAdapter implements GallerySourceAdapter {
     GalleryItem item, {
     CancelToken? cancelToken,
   }) async {
-    return GalleryDetail(item: item, media: [item.cover]);
+    return onDetail != null
+        ? await onDetail!(item)
+        : GalleryDetail(item: item, media: [item.cover]);
   }
 }

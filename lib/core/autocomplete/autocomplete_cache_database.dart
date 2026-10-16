@@ -16,8 +16,14 @@ class CachedAutocompletePayload {
 }
 
 class AutocompleteCacheDatabase {
+  AutocompleteCacheDatabase({Future<String> Function()? databasePath})
+    : _databasePath = databasePath;
+  final Future<String> Function()? _databasePath;
   Database? _database;
   Future<void>? _initialization;
+  int _remoteGeneration = 0, _translationGeneration = 0;
+  int get remoteGeneration => _remoteGeneration;
+  int get translationGeneration => _translationGeneration;
 
   Future<void> initialize() {
     if (_database != null) return Future.value();
@@ -27,11 +33,17 @@ class AutocompleteCacheDatabase {
   }
 
   Future<void> _open() async {
-    final support = await getApplicationSupportDirectory();
-    final directory = Directory(p.join(support.path, 'autocomplete'));
+    final path = _databasePath != null
+        ? await _databasePath()
+        : p.join(
+            (await getApplicationSupportDirectory()).path,
+            'autocomplete',
+            'autocomplete_cache.db',
+          );
+    final directory = Directory(p.dirname(path));
     await directory.create(recursive: true);
     _database = await databaseFactoryFfi.openDatabase(
-      p.join(directory.path, 'autocomplete_cache.db'),
+      path,
       options: OpenDatabaseOptions(
         version: 1,
         onCreate: (db, version) async {
@@ -79,8 +91,14 @@ class AutocompleteCacheDatabase {
     );
   }
 
-  Future<void> putRemote(String key, List<Map<String, dynamic>> payload) async {
+  Future<void> putRemote(
+    String key,
+    List<Map<String, dynamic>> payload, {
+    int? expectedGeneration,
+  }) async {
+    final generation = expectedGeneration ?? _remoteGeneration;
     await initialize();
+    if (generation != _remoteGeneration) return;
     await _database!.insert('remote_queries', {
       'query_key': key,
       'payload': jsonEncode(payload),
@@ -120,9 +138,12 @@ class AutocompleteCacheDatabase {
     required String locale,
     required String routeFingerprint,
     required int promptVersion,
+    int? expectedGeneration,
   }) async {
     if (translations.isEmpty) return;
+    final generation = expectedGeneration ?? _translationGeneration;
     await initialize();
+    if (generation != _translationGeneration) return;
     final batch = _database!.batch();
     final now = DateTime.now().toUtc().millisecondsSinceEpoch;
     for (final entry in translations.entries) {
@@ -139,11 +160,13 @@ class AutocompleteCacheDatabase {
   }
 
   Future<int> clearDanbooruCache() async {
+    _remoteGeneration++;
     await initialize();
     return _database!.delete('remote_queries');
   }
 
   Future<int> clearAiTranslationCache() async {
+    _translationGeneration++;
     await initialize();
     return _database!.delete('ai_translations');
   }

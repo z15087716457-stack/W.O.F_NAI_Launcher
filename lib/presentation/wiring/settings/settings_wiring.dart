@@ -34,6 +34,7 @@ import 'settings_connections.dart';
 import 'settings_data.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
+import 'settings_caches.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
 import 'settings_shortcuts.dart';
@@ -460,6 +461,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
         if (mounted) {
           ref.invalidate(settingsCacheStatsProvider);
           ref.invalidate(settingsDictionaryDataProvider);
+          ref.invalidate(settingsCacheFootprintProvider);
         }
       });
     } else {

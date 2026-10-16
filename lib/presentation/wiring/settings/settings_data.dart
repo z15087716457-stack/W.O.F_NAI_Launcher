@@ -33,6 +33,7 @@ import 'settings_backups.dart';
 import 'settings_connections.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
+import 'settings_caches.dart';
 import 'settings_models.dart';
 import 'settings_rag.dart';
 import 'settings_shortcuts.dart';
@@ -217,6 +218,19 @@ SettingsViewData settingsViewData(
   ];
   final lastScan = ref.watch(settingsLastScanProvider);
   final measured = storage.valueOrNull;
+  final dictionary = page == SettingsPageId.dictionaries
+      ? ref.watch(settingsDictionaryDataProvider).valueOrNull
+      : null;
+  final cacheFootprint = page == SettingsPageId.dictionaries
+      ? ref.watch(settingsCacheFootprintProvider).valueOrNull
+      : null;
+  final cacheStats = page == SettingsPageId.dictionaries
+      ? ref.watch(settingsCacheStatsProvider).valueOrNull
+      : null;
+  final locations =
+      page == SettingsPageId.storage || page == SettingsPageId.overview
+      ? ref.watch(settingsStorageLocationsProvider).valueOrNull
+      : null;
   return SettingsViewData(
     page: page,
     values: values,
@@ -258,20 +272,63 @@ SettingsViewData settingsViewData(
     ),
     storage: SettingsStorageData(
       slices: measured?.slices ?? const [],
-      diskLabel: measured?.diskLabel ?? '',
+      diskLabel: measured?.diskLabel ?? locations?.diskLabel ?? '',
       diskFree: measured?.diskFree,
       computing: storage.isLoading,
-      roots: measured?.roots ?? const [],
+      roots:
+          locations?.roots.map((root) {
+            final previous = measured?.roots.where((r) => r.id == root.id);
+            final old = previous?.firstOrNull;
+            return old == null
+                ? root
+                : SettingsGalleryRoot(
+                    id: root.id,
+                    path: root.path,
+                    images: old.images,
+                    primary: root.primary,
+                  );
+          }).toList() ??
+          measured?.roots ??
+          const [],
       imageCount: measured?.imageCount ?? 0,
       lastScanAt: lastScan,
       scanning: ref.watch(settingsStorageBusyProvider),
       thumbnailBytes: measured?.thumbnailBytes ?? 0,
-      thumbnailLimit: measured?.thumbnailLimit ?? 0,
-      folderNames: measured?.folderNames ?? const {},
+      thumbnailLimit:
+          locations?.thumbnailLimit ?? measured?.thumbnailLimit ?? 0,
+      folderNames: locations?.folderNames ?? measured?.folderNames ?? const {},
     ),
     dictionaries: page == SettingsPageId.dictionaries
-        ? ref.watch(settingsDictionaryDataProvider).valueOrNull ??
-              const SettingsDictionaryData()
+        ? SettingsDictionaryData(
+            tagCount: dictionary?.tagCount ?? 0,
+            dataVersion: dictionary?.dataVersion ?? '',
+            cooccurrence: dictionary?.cooccurrence ?? 0,
+            caches: {
+              if (cacheFootprint != null)
+                for (final entry in cacheFootprint.entries)
+                  entry.key: (entry.value.entries, entry.value.bytes),
+            },
+            l1: cacheStats == null
+                ? null
+                : SettingsCacheStat(
+                    hitRate: cacheStats.l1HitRate,
+                    entries: cacheStats.l1MemorySize,
+                  ),
+            l2: cacheStats == null
+                ? null
+                : SettingsCacheStat(
+                    hitRate: cacheStats.l2HitRate,
+                    entries: cacheStats.l2HiveSize,
+                  ),
+            l3: cacheStats == null
+                ? null
+                : SettingsCacheStat(
+                    hitRate: null,
+                    entries: cacheStats.l3DatabaseImageCount,
+                    images: true,
+                  ),
+            statsUpdatedAt: cacheStats?.lastUpdated,
+          )
         : const SettingsDictionaryData(),
     models: models,
     agent: settingsAgentData(ref, inspect: page == SettingsPageId.agent),

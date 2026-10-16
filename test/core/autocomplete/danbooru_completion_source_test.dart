@@ -234,7 +234,11 @@ class _MemoryCache extends AutocompleteCacheDatabase {
   Future<CachedAutocompletePayload?> getRemote(String key) async => values[key];
 
   @override
-  Future<void> putRemote(String key, List<Map<String, dynamic>> payload) async {
+  Future<void> putRemote(
+    String key,
+    List<Map<String, dynamic>> payload, {
+    int? expectedGeneration,
+  }) async {
     values[key] = CachedAutocompletePayload(
       payload: payload,
       fetchedAt: DateTime.now().toUtc(),

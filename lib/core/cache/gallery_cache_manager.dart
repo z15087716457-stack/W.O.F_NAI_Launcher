@@ -338,9 +338,10 @@ class GalleryCacheManager {
   }
 
   /// 获取缓存统计（带缓存）
-  Future<CacheStatistics> getStatistics() async {
+  Future<CacheStatistics> getStatistics({bool refresh = false}) async {
     // 检查缓存是否有效
-    if (_cachedStatistics != null &&
+    if (!refresh &&
+        _cachedStatistics != null &&
         _statisticsCacheTime != null &&
         DateTime.now().difference(_statisticsCacheTime!) <
             _statisticsCacheValidity) {

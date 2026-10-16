@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/autocomplete/autocomplete_providers.dart';
 import '../../../core/cache/gallery_cache_manager.dart';
 import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -15,6 +14,7 @@ import '../../ui/settings/settings_contract.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
 import 'settings_dialogs.dart';
 import 'settings_inventory.dart';
+import 'settings_caches.dart';
 
 final settingsStorageBusyProvider = StateProvider<bool>((ref) => false);
 final settingsLastScanProvider = StateProvider<DateTime?>((ref) => null);
@@ -26,9 +26,12 @@ class SettingsStorageActions {
 
   void refresh() {
     ref.invalidate(settingsFoldersProvider);
+    ref.invalidate(settingsGalleryExtraRootsProvider);
+    ref.invalidate(settingsStorageLocationsProvider);
     ref.invalidate(settingsStorageDataProvider);
     ref.invalidate(settingsCacheStatsProvider);
     ref.invalidate(settingsDictionaryDataProvider);
+    ref.invalidate(settingsCacheFootprintProvider);
   }
 
   Future<void> open(String path) async {
@@ -127,14 +130,12 @@ class SettingsStorageActions {
   });
 
   Future<void> clearCache(SettingsCacheKind kind) async {
-    final db = ref.read(autocompleteCacheDatabaseProvider);
-    switch (kind) {
-      case SettingsCacheKind.danbooru:
-        await db.clearDanbooruCache();
-      case SettingsCacheKind.translation:
-        await db.clearAiTranslationCache();
+    try {
+      await ref.read(settingsCachesProvider).clear(kind);
+    } finally {
+      ref.invalidate(settingsCacheFootprintProvider);
+      ref.invalidate(settingsStorageDataProvider);
     }
-    refresh();
   }
 
   void resetStatistics() {

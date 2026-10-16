@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/datasources/remote/danbooru_api_service.dart';
 import '../utils/tag_normalizer.dart';
+import '../cache/cache_footprint.dart';
 
 bool isWikiExampleHeading(String title) => RegExp(
   r'^(examples?|示例|范例|範例|例子|示范|示範|用例|使用例|实例|實例|事例|作例|サンプル|例|예시|예제)(?:\s|[:：]|$)',
@@ -111,7 +112,29 @@ class WikiExampleRepository {
   final DateTime Function() _now;
   final _cache = <String, ({DateTime at, WikiExampleSet value})>{};
 
+  int _cacheGeneration = 0;
+
+  CacheFootprint get footprint => CacheFootprint.json(
+    _cache.values.map(
+      (entry) => [
+        for (final item in entry.value.items)
+          [
+            item.postId,
+            item.reference.caption,
+            item.thumbnailUrl,
+            item.largeUrl,
+          ],
+      ],
+    ),
+  );
+
+  void clearCache() {
+    _cacheGeneration++;
+    _cache.clear();
+  }
+
   Future<WikiExampleSet> forTag(String tag, {CancelToken? cancelToken}) async {
+    final generation = _cacheGeneration;
     final name = TagNormalizer.normalize(tag);
     if (name.isEmpty) return const WikiExampleSet([]);
     final cached = _cache.remove(name);
@@ -144,6 +167,7 @@ class WikiExampleRepository {
       for (final reference in selected)
         _image(reference, byId[reference.postId]),
     ], truncated: references.length > selected.length);
+    if (generation != _cacheGeneration) return result;
     _cache[name] = (at: _now(), value: result);
     while (_cache.length > 32) {
       _cache.remove(_cache.keys.first);

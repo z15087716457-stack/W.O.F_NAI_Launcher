@@ -43,6 +43,7 @@ class _Cache extends VisibleTagTranslationCache {
     required String route,
     required int promptVersion,
     required String wikiHash,
+    int? expectedGeneration,
     required String nameZh,
     String? wikiZh,
     String? wikiOriginal,
@@ -64,6 +65,11 @@ class _Cache extends VisibleTagTranslationCache {
 
   @override
   Future<void> close() async {}
+
+  @override
+  Future<void> clear() async {
+    records.clear();
+  }
 }
 
 Future<void> _until(bool Function() ready) async {
@@ -938,4 +944,51 @@ void main() {
     await _until(() => controller.activeRequests == 0);
     controller.dispose();
   });
+  test(
+    'clearing translations cancels old work without refilling the cache',
+    () async {
+      final assistant = _Assistant();
+      final completion = Completer<VisibleTagTranslationResult>();
+      final started = Completer<String>();
+      when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+      when(
+        () => assistant.translateVisibleTag(
+          tag: 'unfinished',
+          wikiBody: 'English context',
+          includeWikiTranslation: false,
+          existingNameZh: null,
+          category: null,
+          aliases: const [],
+          postCount: null,
+          relatedTo: null,
+          glossary: any(named: 'glossary'),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((invocation) {
+        started.complete(invocation.namedArguments[#sessionId] as String);
+        return completion.future;
+      });
+      when(
+        () => assistant.cancelCurrentTask(sessionId: any(named: 'sessionId')),
+      ).thenAnswer((_) async {});
+      final cache = _Cache();
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: cache,
+      );
+      await controller.setEnabled(true);
+      controller.observe(surface: 'list', tag: 'unfinished', visible: true);
+      final session = await started.future;
+      await controller.clearCache();
+      expect(controller.enabled, isTrue);
+      verify(() => assistant.cancelCurrentTask(sessionId: session)).called(1);
+      completion.complete(const VisibleTagTranslationResult(nameZh: '未完成'));
+      await _until(() => controller.activeRequests == 0);
+      expect(cache.writes, 0);
+      expect(controller.nameFor('unfinished'), isNull);
+      expect(controller.lastError, isNull);
+      controller.dispose();
+    },
+  );
 }

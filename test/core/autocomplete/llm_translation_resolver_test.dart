@@ -62,6 +62,7 @@ class _FakeAutocompleteCacheDatabase extends AutocompleteCacheDatabase {
 
   @override
   Future<void> putAiTranslations({
+    int? expectedGeneration,
     required Map<String, String> translations,
     required String locale,
     required String routeFingerprint,

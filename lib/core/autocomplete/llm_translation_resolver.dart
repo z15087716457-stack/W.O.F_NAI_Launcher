@@ -48,6 +48,7 @@ class LlmTranslationResolver
   }) async {
     _cancelActiveSession();
     final generation = ++_generation;
+    final cacheGeneration = _cache.translationGeneration;
     if (!_isEnabled() || !locale.toLowerCase().startsWith('zh')) {
       return const {};
     }
@@ -65,7 +66,10 @@ class LlmTranslationResolver
       routeFingerprint: route,
       promptVersion: PromptAssistantService.tagTranslationPromptVersion,
     );
-    if (generation != _generation) return const {};
+    if (generation != _generation ||
+        cacheGeneration != _cache.translationGeneration) {
+      return const {};
+    }
     final missing = tags.where((tag) => !cached.containsKey(tag)).toList();
     if (missing.isEmpty) return cached;
 
@@ -77,14 +81,21 @@ class LlmTranslationResolver
         missing,
         sessionId: sessionId,
       );
-      if (generation != _generation) return const {};
+      if (generation != _generation ||
+          cacheGeneration != _cache.translationGeneration) {
+        return const {};
+      }
       await _cache.putAiTranslations(
+        expectedGeneration: cacheGeneration,
         translations: response.translations,
         locale: locale,
         routeFingerprint: route,
         promptVersion: PromptAssistantService.tagTranslationPromptVersion,
       );
-      if (generation != _generation) return const {};
+      if (generation != _generation ||
+          cacheGeneration != _cache.translationGeneration) {
+        return const {};
+      }
       return {...cached, ...response.translations};
     } finally {
       if (_activeSessionId == sessionId) _activeSessionId = null;

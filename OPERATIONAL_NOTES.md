@@ -195,6 +195,9 @@
 - 拖入 / 粘贴 / 本地画廊共用 `widgets/drop/image_destination_dialog.dart`。主 / 负提示词、生成设置、种子、角色、参考图显式选择，种子默认关闭，角色可替换 / 追加；取消只关闭，确认时由原协调器重读并应用当前状态。此入口不能恢复旧 showOfficial 元数据选择界面。
 - 保护模式总开关已移除，各子项独立生效；旧键只为数据兼容。公开偏好导入 / 导出与恢复使用白名单，排除账号、密钥、模型配置、路径、草稿和图库，失败回滚不覆盖后续修改。
 
+- 设置缓存统计与清除统一经过 `settings_caches.dart`：旧补全 SQL／内存、Danbooru 画廊与 Wiki 示例请求结果、现行 sidecar 翻译均纳入。只清请求／翻译缓存，不删图片、收藏、编辑器历史／草稿、原始库或 RAG 索引；在途旧任务不能回填。字节是 UTF-8 内容／核心响应快照，非物理文件／堆大小。L3 只报图片数，没有独立命中率。
+- 存储目录配置通过 `settingsStorageLocationsProvider` 先返回，占用通过串行 isolate 队列统计；Future 清理回调必须返回 void，不能返回从 pending 表移除的自身 Future。嵌套图库不重复计总占用；未知数量不映射成已知零。
+
 ## 构建与更新
 
 - Windows 数据路径取自原生版本资源 `CompanyName=com.example` 与 `ProductName=nai_launcher`，不是 InternalName；品牌显示名使用 FileDescription / 窗口标题。构建后须检查实际 EXE 的版本资源，确保继续读取 `%APPDATA%/com.example/nai_launcher/`，不能把新空目录覆盖回原图库 / 块库目录。

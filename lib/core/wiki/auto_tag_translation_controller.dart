@@ -243,6 +243,23 @@ class AutoTagTranslationController extends ChangeNotifier {
     _queueVisible();
   }
 
+  /// Explicit maintenance does not enqueue fresh model calls or change drafts.
+  Future<void> clearCache() async {
+    _routeEpoch++;
+    _pending.clear();
+    for (final session in _sessions.values.toList()) {
+      unawaited(_assistant.cancelCurrentTask(sessionId: session));
+    }
+    _names.clear();
+    _definitions.clear();
+    _wikiBodies.clear();
+    _wikiOriginals.clear();
+    _nameErrors.clear();
+    _wikiErrors.clear();
+    await _cache.clear();
+    if (!_disposed) notifyListeners();
+  }
+
   Future<void> loadPreference() async {
     final prefs = await SharedPreferences.getInstance();
     if (_disposed || _preferenceChanged) return;
@@ -405,6 +422,7 @@ class AutoTagTranslationController extends ChangeNotifier {
 
   Future<void> _run(_VisibleTask task) async {
     final epoch = _routeEpoch;
+    final cacheGeneration = _cache.generation;
     try {
       final route = _assistant.translateRouteFingerprint();
       if (route.isEmpty) {
@@ -580,6 +598,7 @@ class AutoTagTranslationController extends ChangeNotifier {
         return;
       }
       await _cache.put(
+        expectedGeneration: cacheGeneration,
         tag: task.tag,
         route: route,
         promptVersion:

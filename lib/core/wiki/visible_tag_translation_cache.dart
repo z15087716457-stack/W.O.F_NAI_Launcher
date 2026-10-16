@@ -6,6 +6,8 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
+import '../cache/cache_footprint.dart';
+
 class CachedVisibleTagTranslation {
   const CachedVisibleTagTranslation({
     required this.nameZh,
@@ -42,6 +44,8 @@ class VisibleTagTranslationCache {
   final Future<String> Function() _databasePath;
   Database? _database;
   Future<Database>? _opening;
+  int _generation = 0;
+  int get generation => _generation;
 
   static Future<String> _defaultPath() async {
     final support = await getApplicationSupportDirectory();
@@ -161,8 +165,11 @@ class VisibleTagTranslationCache {
     String? definition,
     String nameLanguage = 'zh',
     String definitionLanguage = 'zh',
+    int? expectedGeneration,
   }) async {
+    final generation = expectedGeneration ?? _generation;
     final db = await _open();
+    if (generation != _generation) return;
     await db.insert('tag_translations', {
       'tag': tag,
       'route': route,
@@ -176,6 +183,28 @@ class VisibleTagTranslationCache {
       'definition_language': definitionLanguage,
       'updated_at': DateTime.now().toUtc().millisecondsSinceEpoch,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<CacheFootprint> footprint() async {
+    final db = await _open();
+    final row = (await db.rawQuery('''
+      SELECT COUNT(*) AS entries, COALESCE(SUM(
+        LENGTH(CAST(name_zh AS BLOB)) +
+        LENGTH(CAST(COALESCE(wiki_zh, '') AS BLOB)) +
+        LENGTH(CAST(COALESCE(wiki_original, '') AS BLOB)) +
+        LENGTH(CAST(COALESCE(definition, '') AS BLOB))
+      ), 0) AS bytes FROM tag_translations
+    ''')).single;
+    return CacheFootprint(
+      (row['entries'] as num).toInt(),
+      (row['bytes'] as num).toInt(),
+    );
+  }
+
+  Future<void> clear() async {
+    _generation++;
+    final db = await _open();
+    await db.delete('tag_translations');
   }
 
   /// Chinese terminology is reference data across interfaces and providers.

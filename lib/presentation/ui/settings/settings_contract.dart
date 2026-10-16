@@ -880,8 +880,8 @@ class SettingsCacheStat {
     this.images = false,
   });
 
-  /// 0–1。
-  final double hitRate;
+  /// 0–1；null 表示该层没有独立命中率计量。
+  final double? hitRate;
   final int entries;
 
   /// 计数单位是图片（L3）而不是条目。
