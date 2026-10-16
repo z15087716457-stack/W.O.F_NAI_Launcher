@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/common/upscale_brand_logo.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -2182,6 +2183,10 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
         ),
         SettingsSection(
           title: l.set_upSeed,
+          badge: const UpscaleBrandLogo.seedvr(
+            key: Key('settings-upscale-seed-logo'),
+            size: 18,
+          ),
           subtitle: l.set_upSeedSub,
           children: [
             SettingsBlock(
@@ -2272,6 +2277,10 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
         if (up.rtx != null)
           SettingsSection(
             title: l.set_upRtx,
+            badge: const UpscaleBrandLogo.nvidia(
+              key: Key('settings-upscale-rtx-logo'),
+              size: 18,
+            ),
             subtitle: l.set_upRtxSub,
             children: [
               SettingsRow(

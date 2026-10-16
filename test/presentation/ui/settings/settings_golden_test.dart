@@ -1,4 +1,4 @@
-// 保留原设置页基准；归一用户授权的整体居中，只排除修改蓝点移动的标题行。
+// 保留原设置页基准；归一整体居中，仅排除获准修改的蓝点标题行与放大图标。
 // 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
@@ -60,7 +60,7 @@ void main() {
 }
 
 // 只将已授权改变的横向锚点临时还原再实绘，避免平移旧 PNG 时
-// Skia 圆角边缘的栅格差异。仅排除蓝点移动的标题行，其余像素照常锁定。
+// Skia 圆角边缘的栅格差异。仅排除获准修改的蓝点标题行与图标，其余像素锁定。
 // 居中和蓝点的几何、窗口缩放及实绘由对应专项验证。
 Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
   final scroll = t.widget<SingleChildScrollView>(
@@ -105,6 +105,13 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       masks.add(
         Rect.fromLTRB(label.left - 13, label.top, label.right, label.bottom),
       );
+    }
+    for (final key in [
+      'settings-upscale-seed-logo',
+      'settings-upscale-rtx-logo',
+    ]) {
+      final logo = find.byKey(Key(key));
+      if (logo.evaluate().isNotEmpty) masks.add(t.getRect(logo));
     }
     await expectOutsideApprovedRegions(
       t,
