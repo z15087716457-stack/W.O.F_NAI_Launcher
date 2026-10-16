@@ -1933,7 +1933,8 @@ class SettingsPageTitle extends StatelessWidget {
   }
 }
 
-/// 页面框架：左内容（最宽 780）+ 右侧注（292），间距 40；窄时侧注移到内容下面。
+/// 页面框架：正文与侧注整体居中；正文最宽 780、侧注 292、间距 40。
+/// 窄时侧注移到正文下面。
 class SettingsPageFrame extends StatelessWidget {
   const SettingsPageFrame({
     super.key,
@@ -1984,9 +1985,10 @@ class SettingsPageFrame extends StatelessWidget {
         key: const Key('settings-scroll'),
         padding: EdgeInsets.fromLTRB(pad, 34, pad, 120),
         child: Align(
-          alignment: Alignment.topLeft,
+          alignment: Alignment.topCenter,
           child: side
               ? Row(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     content,

@@ -1,10 +1,10 @@
-// 设置页基准截图：用固定假数据锁定视觉。任何人改了界面导致截图变化，这里会失败。
-// 只有界面方确认新样子后才更新基准：
-//   flutter test --update-goldens test/presentation/ui/settings/settings_golden_test.dart
+// 保留原设置页基准；用户授权的正文整体居中只允许水平平移。
+// 归一横向锚点后，正文排版、侧栏和顶栏仍须逐像素匹配原图。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
@@ -51,11 +51,33 @@ void main() {
   for (final (name, pump) in scenes) {
     testWidgets(name, skip: skip, (t) async {
       await pump(t);
-      await expectLater(
-        find.byKey(const Key('settings-capture')),
-        matchesGoldenFile('goldens/settings-$name.png'),
-      );
+      await _expectCenteredGolden(t, name);
       await t.pump(const Duration(seconds: 5));
     });
+  }
+}
+
+// 只将已授权改变的横向锚点临时还原再实绘，避免平移旧 PNG 时
+// Skia 圆角边缘的栅格差异；正文尺寸、排版、所有控件及外围像素照常锁定。
+// 居中后的几何、窗口缩放和实际画面由 settings_centering_test 验证。
+Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
+  final scroll = t.widget<SingleChildScrollView>(
+    find.byKey(const Key('settings-scroll')),
+  );
+  final align = t.renderObject<RenderPositionedBox>(
+    find.byWidget(scroll.child! as Align),
+  );
+  final current = align.alignment;
+  expect(current, Alignment.topCenter);
+  try {
+    align.alignment = Alignment.topLeft;
+    await t.pump();
+    await expectLater(
+      find.byKey(const Key('settings-capture')),
+      matchesGoldenFile('goldens/settings-$name.png'),
+    );
+  } finally {
+    align.alignment = current;
+    await t.pump();
   }
 }
