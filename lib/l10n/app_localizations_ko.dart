@@ -16645,9 +16645,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get channel_title => '비주얼 채널';
 
   @override
-  String get channel_new => 'NEW';
-
-  @override
   String get channel_subtitle => '스크롤할 때 양쪽에 보이는 장식. 이미지 바깥에만 그려집니다';
 
   @override
@@ -17140,9 +17137,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_needsRestart => '재시작 필요';
-
-  @override
-  String get set_isNew => '새';
 
   @override
   String get set_defaultTag => '기본';
@@ -18542,10 +18536,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agInstrSub => '이 순서로 최종 프롬프트가 됩니다. 기존 채팅은 그대로, 이후 요청에 반영됩니다.';
 
   @override
-  String get set_agOrderBuiltin => '기본 프롬프트';
+  String get set_agOrderBuiltin => '내장 시스템 프롬프트';
 
   @override
-  String get set_agOrderPrefix => '시스템 접두사';
+  String get set_agOrderPrefix => '내장 프롬프트 앞';
 
   @override
   String get set_agOrderGlobal => '전역 지침';
@@ -18560,13 +18554,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agGlobal => '전역 지침';
 
   @override
-  String get set_agPrefix => '시스템 접두사';
+  String get set_agGlobalHint => '시스템 전체 AGENTS.md에 해당하며 모든 작업 공간에 적용됩니다.';
 
   @override
-  String get set_agPrefixHint => '매 요청 맨 앞에 넣는 고정 내용.';
+  String get set_agPrefix => '내장 프롬프트 앞';
 
   @override
-  String get set_agBuiltin => '내장 프롬프트';
+  String get set_agPrefixHint =>
+      '내장 시스템 프롬프트 앞에 넣는 고정 내용입니다. 역할이나 출력 형식 등을 지정할 수 있습니다.';
+
+  @override
+  String get set_agBuiltin => '내장 시스템 프롬프트';
 
   @override
   String get set_agFinal => '최종 프롬프트 보기';
@@ -19608,7 +19606,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_accBalanceUnread => '잔액을 불러오지 않음';
 
   @override
-  String get set_agBase => '기본 프롬프트';
+  String get set_agBase => '내장 시스템 프롬프트';
 
   @override
   String set_agBaseGlobalState(Object state) {
@@ -19656,20 +19654,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agBaseHint =>
-      '사용자 지정 내용이 내장 프롬프트를 대신하며 시스템 접두사 뒤에 붙습니다. 도구 맵은 앱이 덧붙입니다. 전역과 작업 공간은 따로 저장되고 기존 채팅은 그대로입니다.';
+      '사용자 지정 내용이 내장 시스템 프롬프트를 대신하며 “내장 프롬프트 앞”의 내용 뒤에 붙습니다. 도구 맵은 앱이 덧붙입니다. 전역과 작업 공간은 따로 저장되고 기존 채팅은 그대로입니다.';
 
   @override
   String get set_agBaseRestore => '내장으로 복원';
 
   @override
-  String get set_agBaseRestoreTitle => '내장 프롬프트로 복원할까요?';
+  String get set_agBaseRestoreTitle => '내장 시스템 프롬프트로 복원할까요?';
 
   @override
   String get set_agBaseRestoreBody =>
-      '전역 사용자 지정 기본 프롬프트를 내장 버전으로 되돌립니다. 이전 내용은 프롬프트 기록에 남습니다. 작업 공간별 프롬프트는 바뀌지 않습니다.';
+      '전역 사용자 지정 내용을 내장 시스템 프롬프트로 되돌립니다. 이전 내용은 프롬프트 기록에 남습니다. 작업 공간별 프롬프트는 바뀌지 않습니다.';
 
   @override
-  String get set_agBaseSwitchTitle => '기본 프롬프트 변경을 버릴까요?';
+  String get set_agBaseSwitchTitle => '내장 시스템 프롬프트 변경을 버릴까요?';
 
   @override
   String get set_agBaseSwitchBody => '범위를 바꾸면 저장하지 않은 변경이 사라집니다.';

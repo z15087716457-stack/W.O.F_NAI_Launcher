@@ -499,6 +499,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Wrap(
+                      key: const Key('agent-instruction-order'),
                       spacing: 6,
                       runSpacing: 6,
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -524,6 +525,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                       key: const Key('agent-global'),
                       controller: _global!,
                       minHeight: 92,
+                      hint: l.set_agGlobalHint,
                       onSave: _save,
                     ),
                     const SizedBox(height: 16),
@@ -556,6 +558,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                       ),
                     const SizedBox(height: 14),
                     Row(
+                      key: const Key('agent-prompt-actions'),
                       spacing: 8,
                       children: [
                         SettingsBtn(

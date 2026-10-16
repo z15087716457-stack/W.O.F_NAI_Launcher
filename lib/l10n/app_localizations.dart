@@ -29871,12 +29871,6 @@ abstract class AppLocalizations {
   /// **'Visual channel'**
   String get channel_title;
 
-  /// No description provided for @channel_new.
-  ///
-  /// In en, this message translates to:
-  /// **'NEW'**
-  String get channel_new;
-
   /// No description provided for @channel_subtitle.
   ///
   /// In en, this message translates to:
@@ -30769,12 +30763,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Restart'**
   String get set_needsRestart;
-
-  /// No description provided for @set_isNew.
-  ///
-  /// In en, this message translates to:
-  /// **'New'**
-  String get set_isNew;
 
   /// No description provided for @set_defaultTag.
   ///
@@ -33269,13 +33257,13 @@ abstract class AppLocalizations {
   /// No description provided for @set_agOrderBuiltin.
   ///
   /// In en, this message translates to:
-  /// **'Base prompt'**
+  /// **'Built-in system prompt'**
   String get set_agOrderBuiltin;
 
   /// No description provided for @set_agOrderPrefix.
   ///
   /// In en, this message translates to:
-  /// **'System prefix'**
+  /// **'Before built-in prompt'**
   String get set_agOrderPrefix;
 
   /// No description provided for @set_agOrderGlobal.
@@ -33302,22 +33290,28 @@ abstract class AppLocalizations {
   /// **'Global instructions'**
   String get set_agGlobal;
 
+  /// No description provided for @set_agGlobalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Like a system-wide AGENTS.md; applies to all workspaces.'**
+  String get set_agGlobalHint;
+
   /// No description provided for @set_agPrefix.
   ///
   /// In en, this message translates to:
-  /// **'System prefix'**
+  /// **'Before built-in prompt'**
   String get set_agPrefix;
 
   /// No description provided for @set_agPrefixHint.
   ///
   /// In en, this message translates to:
-  /// **'Fixed text placed before every request, such as a persona or output format.'**
+  /// **'Fixed text inserted before the built-in system prompt, such as a persona or output format.'**
   String get set_agPrefixHint;
 
   /// No description provided for @set_agBuiltin.
   ///
   /// In en, this message translates to:
-  /// **'Built-in prompt'**
+  /// **'Built-in system prompt'**
   String get set_agBuiltin;
 
   /// No description provided for @set_agFinal.
@@ -35231,7 +35225,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agBase.
   ///
   /// In en, this message translates to:
-  /// **'Base prompt'**
+  /// **'Built-in system prompt'**
   String get set_agBase;
 
   /// No description provided for @set_agBaseGlobalState.
@@ -35309,7 +35303,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agBaseHint.
   ///
   /// In en, this message translates to:
-  /// **'Custom text replaces the built-in prompt and follows the system prefix; the app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.'**
+  /// **'Custom text replaces the built-in system prompt and follows the “Before built-in prompt” text. The app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.'**
   String get set_agBaseHint;
 
   /// No description provided for @set_agBaseRestore.
@@ -35321,19 +35315,19 @@ abstract class AppLocalizations {
   /// No description provided for @set_agBaseRestoreTitle.
   ///
   /// In en, this message translates to:
-  /// **'Restore the built-in prompt?'**
+  /// **'Restore the built-in system prompt?'**
   String get set_agBaseRestoreTitle;
 
   /// No description provided for @set_agBaseRestoreBody.
   ///
   /// In en, this message translates to:
-  /// **'The global custom base prompt is replaced by the built-in one; the old text goes to prompt history. Workspace prompts are not affected.'**
+  /// **'The global custom text is replaced by the built-in system prompt; the old text goes to prompt history. Workspace prompts are not affected.'**
   String get set_agBaseRestoreBody;
 
   /// No description provided for @set_agBaseSwitchTitle.
   ///
   /// In en, this message translates to:
-  /// **'Discard base prompt changes?'**
+  /// **'Discard built-in system prompt changes?'**
   String get set_agBaseSwitchTitle;
 
   /// No description provided for @set_agBaseSwitchBody.

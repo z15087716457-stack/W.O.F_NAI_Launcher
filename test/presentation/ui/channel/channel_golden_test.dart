@@ -79,11 +79,11 @@ void main() {
         final settings = find.byKey(const Key('channel-settings'));
         if (settings.evaluate().isNotEmpty) {
           final l = AppLocalizations.of(t.element(settings))!;
-          expect(find.text(l.channel_new), findsNothing);
+          expect(find.text('NEW'), findsNothing);
           final title = t.getRect(find.text(l.channel_title));
           final text = TextPainter(
             text: TextSpan(
-              text: l.channel_new,
+              text: 'NEW',
               style: UiText.mono(10, weight: FontWeight.w500, height: 1.3),
             ),
             textDirection: TextDirection.ltr,

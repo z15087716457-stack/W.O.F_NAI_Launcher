@@ -16599,9 +16599,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_title => 'ビジュアルチャンネル';
 
   @override
-  String get channel_new => 'NEW';
-
-  @override
   String get channel_subtitle => 'スクロールすると両側に現れる装飾。画像の外側だけに描かれます';
 
   @override
@@ -17092,9 +17089,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_needsRestart => '要再起動';
-
-  @override
-  String get set_isNew => '新';
 
   @override
   String get set_defaultTag => '既定';
@@ -18488,10 +18482,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agInstrSub => 'この順で最終プロンプトになります。既存のチャットはそのまま、以降のリクエストに反映。';
 
   @override
-  String get set_agOrderBuiltin => 'ベースプロンプト';
+  String get set_agOrderBuiltin => '内蔵システムプロンプト';
 
   @override
-  String get set_agOrderPrefix => 'システム前置';
+  String get set_agOrderPrefix => '内蔵プロンプトの前';
 
   @override
   String get set_agOrderGlobal => '全体の指示';
@@ -18506,13 +18500,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agGlobal => '全体の指示';
 
   @override
-  String get set_agPrefix => 'システム前置';
+  String get set_agGlobalHint => 'システム全体の AGENTS.md に相当し、すべてのワークスペースに適用されます。';
 
   @override
-  String get set_agPrefixHint => '毎回のリクエストの先頭に入れる固定内容。';
+  String get set_agPrefix => '内蔵プロンプトの前';
 
   @override
-  String get set_agBuiltin => '内蔵プロンプト';
+  String get set_agPrefixHint => '内蔵システムプロンプトの前に追加する固定内容。役割や出力形式などを指定できます。';
+
+  @override
+  String get set_agBuiltin => '内蔵システムプロンプト';
 
   @override
   String get set_agFinal => '最終プロンプトを表示';
@@ -19545,7 +19542,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_accBalanceUnread => '残高は未取得';
 
   @override
-  String get set_agBase => 'ベースプロンプト';
+  String get set_agBase => '内蔵システムプロンプト';
 
   @override
   String set_agBaseGlobalState(Object state) {
@@ -19591,20 +19588,20 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agBaseHint =>
-      'カスタム内容は内蔵プロンプトを置き換え、システム前置の後に入ります。ツールマップはアプリが追加します。全体とワークスペースは別々に保存され、既存のチャットはそのままです。';
+      'カスタム内容で内蔵システムプロンプトを置き換え、「内蔵プロンプトの前」の内容に続けます。ツールマップはアプリが追加します。全体とワークスペースは別々に保存され、既存のチャットはそのままです。';
 
   @override
   String get set_agBaseRestore => '内蔵に戻す';
 
   @override
-  String get set_agBaseRestoreTitle => '内蔵プロンプトに戻しますか？';
+  String get set_agBaseRestoreTitle => '内蔵システムプロンプトに戻しますか？';
 
   @override
   String get set_agBaseRestoreBody =>
-      '全体のカスタムベースプロンプトを内蔵版に戻します。以前の内容はプロンプト履歴に残ります。ワークスペース個別のプロンプトは変わりません。';
+      '全体のカスタム内容を内蔵システムプロンプトに戻します。以前の内容はプロンプト履歴に残ります。ワークスペース個別のプロンプトは変わりません。';
 
   @override
-  String get set_agBaseSwitchTitle => 'ベースプロンプトの変更を破棄しますか？';
+  String get set_agBaseSwitchTitle => '内蔵システムプロンプトの変更を破棄しますか？';
 
   @override
   String get set_agBaseSwitchBody => '範囲を切り替えると未保存の変更は失われます。';

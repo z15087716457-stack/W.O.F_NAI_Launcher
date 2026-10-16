@@ -16384,9 +16384,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_title => '视觉通道';
 
   @override
-  String get channel_new => 'NEW';
-
-  @override
   String get channel_subtitle => '滚动时两侧的装饰，只画在图片之外，不挡图';
 
   @override
@@ -16873,9 +16870,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_needsRestart => '需重启';
-
-  @override
-  String get set_isNew => '新';
 
   @override
   String get set_defaultTag => '默认';
@@ -18270,10 +18264,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agInstrSub => '按下面的顺序拼成最终提示词；已有聊天保持原样，之后的请求使用新内容。';
 
   @override
-  String get set_agOrderBuiltin => '基础提示词';
+  String get set_agOrderBuiltin => '内置系统提示词';
 
   @override
-  String get set_agOrderPrefix => '系统前缀';
+  String get set_agOrderPrefix => '内置提示词前';
 
   @override
   String get set_agOrderGlobal => '全局指令';
@@ -18288,13 +18282,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agGlobal => '全局指令';
 
   @override
-  String get set_agPrefix => '系统前缀';
+  String get set_agGlobalHint => '相当于系统级 AGENTS.md，对所有工作区生效。';
 
   @override
-  String get set_agPrefixHint => '在每次请求最前面加入的固定内容，例如身份或输出格式。';
+  String get set_agPrefix => '内置提示词前';
 
   @override
-  String get set_agBuiltin => '内置提示词';
+  String get set_agPrefixHint => '在内置系统提示词之前加入的固定内容，例如身份或输出格式。';
+
+  @override
+  String get set_agBuiltin => '内置系统提示词';
 
   @override
   String get set_agFinal => '查看最终提示词';
@@ -19327,7 +19324,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_accBalanceUnread => '余额未读取';
 
   @override
-  String get set_agBase => '基础提示词';
+  String get set_agBase => '内置系统提示词';
 
   @override
   String set_agBaseGlobalState(Object state) {
@@ -19373,20 +19370,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agBaseHint =>
-      '自定义内容替换内置提示词，拼在系统前缀之后；工具地图由应用追加。全局和工作区分开保存，已有聊天保持原样。';
+      '可用自定义内容替换内置系统提示词，拼在“内置提示词前”的内容之后；工具地图由应用追加。全局和工作区分开保存，已有聊天保持原样。';
 
   @override
   String get set_agBaseRestore => '恢复内置';
 
   @override
-  String get set_agBaseRestoreTitle => '恢复内置提示词？';
+  String get set_agBaseRestoreTitle => '恢复内置系统提示词？';
 
   @override
   String get set_agBaseRestoreBody =>
-      '全局自定义的基础提示词会换回内置版本，旧内容存入提示词历史。各工作区单独的提示词不受影响。';
+      '全局自定义内容会换回内置系统提示词，旧内容存入提示词历史。各工作区单独的提示词不受影响。';
 
   @override
-  String get set_agBaseSwitchTitle => '放弃基础提示词的修改？';
+  String get set_agBaseSwitchTitle => '放弃内置系统提示词的修改？';
 
   @override
   String get set_agBaseSwitchBody => '切换范围会丢掉还没保存的修改。';
@@ -35787,9 +35784,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get channel_title => '視覺通道';
 
   @override
-  String get channel_new => 'NEW';
-
-  @override
   String get channel_subtitle => '滾動時兩側的裝飾，只畫在圖片之外，不擋圖';
 
   @override
@@ -36276,9 +36270,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_needsRestart => '需重啟';
-
-  @override
-  String get set_isNew => '新';
 
   @override
   String get set_defaultTag => '預設';
@@ -37673,10 +37664,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agInstrSub => '按下面的順序拼成最終提示詞；已有聊天保持原樣，之後的請求使用新內容。';
 
   @override
-  String get set_agOrderBuiltin => '基礎提示詞';
+  String get set_agOrderBuiltin => '內建系統提示詞';
 
   @override
-  String get set_agOrderPrefix => '系統字首';
+  String get set_agOrderPrefix => '內建提示詞前';
 
   @override
   String get set_agOrderGlobal => '全域指令';
@@ -37691,13 +37682,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agGlobal => '全域指令';
 
   @override
-  String get set_agPrefix => '系統字首';
+  String get set_agGlobalHint => '相當於系統級 AGENTS.md，對所有工作區生效。';
 
   @override
-  String get set_agPrefixHint => '在每次請求最前面加入的固定內容，例如身份或輸出格式。';
+  String get set_agPrefix => '內建提示詞前';
 
   @override
-  String get set_agBuiltin => '內建提示詞';
+  String get set_agPrefixHint => '在內建系統提示詞之前加入的固定內容，例如身份或輸出格式。';
+
+  @override
+  String get set_agBuiltin => '內建系統提示詞';
 
   @override
   String get set_agFinal => '檢視最終提示詞';
@@ -38730,7 +38724,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_accBalanceUnread => '餘額未讀取';
 
   @override
-  String get set_agBase => '基礎提示詞';
+  String get set_agBase => '內建系統提示詞';
 
   @override
   String set_agBaseGlobalState(Object state) {
@@ -38776,20 +38770,20 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agBaseHint =>
-      '自訂內容替換內建提示詞，拼在系統字首之後；工具地圖由應用追加。全域和工作區分開儲存，已有聊天保持原樣。';
+      '可用自訂內容替換內建系統提示詞，拼在“內建提示詞前”的內容之後；工具地圖由應用追加。全域和工作區分開儲存，已有聊天保持原樣。';
 
   @override
   String get set_agBaseRestore => '恢復內建';
 
   @override
-  String get set_agBaseRestoreTitle => '恢復內建提示詞？';
+  String get set_agBaseRestoreTitle => '恢復內建系統提示詞？';
 
   @override
   String get set_agBaseRestoreBody =>
-      '全域自訂的基礎提示詞會換回內建版本，舊內容存入提示詞歷史。各工作區單獨的提示詞不受影響。';
+      '全域自訂內容會換回內建系統提示詞，舊內容存入提示詞歷史。各工作區單獨的提示詞不受影響。';
 
   @override
-  String get set_agBaseSwitchTitle => '放棄基礎提示詞的修改？';
+  String get set_agBaseSwitchTitle => '放棄內建系統提示詞的修改？';
 
   @override
   String get set_agBaseSwitchBody => '切換範圍會丟掉還沒儲存的修改。';

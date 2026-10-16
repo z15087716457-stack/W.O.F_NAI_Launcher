@@ -17097,9 +17097,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get channel_title => 'Visual channel';
 
   @override
-  String get channel_new => 'NEW';
-
-  @override
   String get channel_subtitle =>
       'Decorations on both sides as you scroll — drawn only outside your images';
 
@@ -17602,9 +17599,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_needsRestart => 'Restart';
-
-  @override
-  String get set_isNew => 'New';
 
   @override
   String get set_defaultTag => 'Default';
@@ -19043,10 +19037,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Combined in this order. Existing chats keep their prompt; new requests use the new text.';
 
   @override
-  String get set_agOrderBuiltin => 'Base prompt';
+  String get set_agOrderBuiltin => 'Built-in system prompt';
 
   @override
-  String get set_agOrderPrefix => 'System prefix';
+  String get set_agOrderPrefix => 'Before built-in prompt';
 
   @override
   String get set_agOrderGlobal => 'Global instructions';
@@ -19061,14 +19055,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agGlobal => 'Global instructions';
 
   @override
-  String get set_agPrefix => 'System prefix';
+  String get set_agGlobalHint =>
+      'Like a system-wide AGENTS.md; applies to all workspaces.';
+
+  @override
+  String get set_agPrefix => 'Before built-in prompt';
 
   @override
   String get set_agPrefixHint =>
-      'Fixed text placed before every request, such as a persona or output format.';
+      'Fixed text inserted before the built-in system prompt, such as a persona or output format.';
 
   @override
-  String get set_agBuiltin => 'Built-in prompt';
+  String get set_agBuiltin => 'Built-in system prompt';
 
   @override
   String get set_agFinal => 'View final prompt';
@@ -20157,7 +20155,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_accBalanceUnread => 'Balance not loaded';
 
   @override
-  String get set_agBase => 'Base prompt';
+  String get set_agBase => 'Built-in system prompt';
 
   @override
   String set_agBaseGlobalState(Object state) {
@@ -20205,20 +20203,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agBaseHint =>
-      'Custom text replaces the built-in prompt and follows the system prefix; the app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.';
+      'Custom text replaces the built-in system prompt and follows the “Before built-in prompt” text. The app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.';
 
   @override
   String get set_agBaseRestore => 'Restore built-in';
 
   @override
-  String get set_agBaseRestoreTitle => 'Restore the built-in prompt?';
+  String get set_agBaseRestoreTitle => 'Restore the built-in system prompt?';
 
   @override
   String get set_agBaseRestoreBody =>
-      'The global custom base prompt is replaced by the built-in one; the old text goes to prompt history. Workspace prompts are not affected.';
+      'The global custom text is replaced by the built-in system prompt; the old text goes to prompt history. Workspace prompts are not affected.';
 
   @override
-  String get set_agBaseSwitchTitle => 'Discard base prompt changes?';
+  String get set_agBaseSwitchTitle => 'Discard built-in system prompt changes?';
 
   @override
   String get set_agBaseSwitchBody =>

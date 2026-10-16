@@ -1,4 +1,4 @@
-// 保留原设置页基准；归一居中，仅排除获准修改的蓝点标题行、图标和已移除的新功能标签。
+// 保留原设置页基准；归一居中，仅排除获准修改的标题行、图标、新标签与 Agent 指令文案。
 // 说明文字、控件、卡片与外围仍逐像素匹配，标题另做几何和实绘检查。
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
@@ -83,17 +83,30 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       masks.add(t.getRect(find.byWidget(label.widget)));
     }
     final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
-    expect(find.text(l.set_isNew), findsNothing);
+    expect(find.text('新'), findsNothing);
     // 只豁免旧“新”标签本身的矩形，标题、卡片及其下方的控件继续逐像素锁定。
     final badgeText = TextPainter(
       text: TextSpan(
-        text: l.set_isNew,
+        text: '新',
         style: UiText.sans(10.5, weight: FontWeight.w600, height: 1.2),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
     final badgeWidth = badgeText.width + 12;
     badgeText.dispose();
+    // F26：仅排除改名影响的顺序标签、前置内容标题／提示及查看按钮行。
+    for (final key in ['agent-instruction-order', 'agent-prompt-actions']) {
+      final region = find.byKey(Key(key));
+      if (region.evaluate().isNotEmpty) masks.add(t.getRect(region));
+    }
+    for (final title in find.text(l.set_agPrefix).evaluate()) {
+      masks.add(t.getRect(find.byWidget(title.widget)));
+    }
+    final prefixField = find.descendant(
+      of: find.byKey(const Key('agent-prefix')),
+      matching: find.byType(TextField),
+    );
+    if (prefixField.evaluate().isNotEmpty) masks.add(t.getRect(prefixField));
     for (final (type, label, gap) in <(Type, String, double)>[
       (SettingsOptionCard, l.set_apSystem, 8),
       (SettingsSection, l.set_scKeyboard, 6),

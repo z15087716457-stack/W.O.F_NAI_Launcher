@@ -1,6 +1,7 @@
 // 接线补齐：账号余额 / 订阅“未读取”；Agent 基础提示词（全局 / 工作区分开、沿用全局、恢复内置、保存保护）。
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
@@ -85,7 +86,48 @@ void main() {
     });
   });
 
-  testWidgets('生效顺序：系统前缀 → 基础提示词 → 全局指令 → 工作区规则 → 工具地图', (t) async {
+  testWidgets('全局 AGENTS.md 提示仅作空白提示，不写入指令或触发保存', (t) async {
+    for (final locale in ['zh', 'en', 'ja', 'ko', 'zh_TW']) {
+      await t.pumpWidget(const SizedBox.shrink());
+      final d = SettingsFixture.view(page: SettingsPageId.agent);
+      final rec = await pumpSettings(
+        t,
+        data: d.copyWith(agent: d.agent.copyWith(globalInstructions: '')),
+        locale: locale,
+      );
+      final global = find.byKey(const Key('agent-global'));
+      final l = AppLocalizations.of(t.element(global))!;
+      final input = find.descendant(
+        of: global,
+        matching: find.byType(TextField),
+      );
+      final decoration = find.descendant(
+        of: global,
+        matching: find.byType(InputDecorator),
+      );
+      expect(
+        t.widget<TextField>(input).decoration!.hintText,
+        l.set_agGlobalHint,
+      );
+      expect(t.widget<TextField>(input).controller!.text, isEmpty);
+      expect(t.widget<InputDecorator>(decoration).isEmpty, isTrue);
+      await t.enterText(input, 'fixture global rules');
+      await t.pump();
+      expect(t.widget<InputDecorator>(decoration).isEmpty, isFalse);
+      expect(
+        t.widget<TextField>(input).controller!.text,
+        'fixture global rules',
+      );
+      expect(rec.calls, isEmpty);
+      await t.enterText(input, '');
+      await t.pump();
+      expect(t.widget<InputDecorator>(decoration).isEmpty, isTrue);
+      expect(find.byKey(const Key('agent-unsaved')), findsNothing);
+      expect(rec.calls, isEmpty);
+    }
+  });
+
+  testWidgets('生效顺序：内置提示词前 → 内置系统提示词 → 全局指令 → 工作区规则 → 工具地图', (t) async {
     await pumpSettings(t, page: SettingsPageId.agent);
     double x(String s) => t
         .getTopLeft(
@@ -96,7 +138,7 @@ void main() {
         )
         .dx;
     final xs = [
-      for (final s in ['系统前缀', '基础提示词', '全局指令', '工作区规则', '工具地图']) x(s),
+      for (final s in ['内置提示词前', '内置系统提示词', '全局指令', '工作区规则', '工具地图']) x(s),
     ];
     expect([...xs]..sort(), xs);
   });
@@ -204,7 +246,7 @@ void main() {
       await t.enterText(find.byKey(const Key('agent-base-text')), '草稿');
       await t.pumpAndSettle();
       await tap(t, find.text('工作区 · 灵感'));
-      expect(find.text('放弃基础提示词的修改？'), findsOneWidget);
+      expect(find.text('放弃内置系统提示词的修改？'), findsOneWidget);
       await tapKey(t, 'confirm-cancel');
       expect(find.byKey(const Key('agent-base-inherit')), findsNothing);
       await tapKey(t, 'settings-nav-network');
@@ -248,7 +290,7 @@ void main() {
       await tapKey(t, 'agent-base-toggle');
       expect(find.text('我的全局'), findsOneWidget);
       await tapKey(t, 'agent-base-restore');
-      expect(find.text('恢复内置提示词？'), findsOneWidget);
+      expect(find.text('恢复内置系统提示词？'), findsOneWidget);
       await tapKey(t, 'confirm-ok');
       expect(rec.calls, ['savePrompt:global:null:inspire']);
       expect(find.text('内置正文'), findsOneWidget);
