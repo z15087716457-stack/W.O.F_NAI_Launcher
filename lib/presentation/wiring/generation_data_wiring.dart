@@ -345,7 +345,12 @@ final generationViewDataProvider = Provider.autoDispose
               subscription?.trainingStepsLeft?.fixedTrainingStepsLeft,
           purchasedAnlas:
               subscription?.trainingStepsLeft?.purchasedTrainingSteps,
-          opusPercent: usage?.displayPercent,
+          // 额度数字允许超过 100%；进度条仍使用 displayPercent。
+          opusPercent: usage == null
+              ? null
+              : usage.isNegative || usage.percent < 0
+              ? 0
+              : usage.percent,
           opusTip: usage == null ? null : generationOpusTip(l, usage),
         ),
         layout: generationLayoutView(layout),

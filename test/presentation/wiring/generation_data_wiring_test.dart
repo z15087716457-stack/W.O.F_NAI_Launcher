@@ -40,6 +40,8 @@ class DataGeneration extends ImageGenerationNotifier {
 }
 
 class DataSubscription extends SubscriptionNotifier {
+  void publish(SubscriptionState value) => state = value;
+
   @override
   SubscriptionState build() => const SubscriptionState.loaded(
     UserSubscription(
@@ -151,6 +153,28 @@ void main() {
     expect(data.refs.vibes, isNull);
     expect(data.refs.precise, isNull);
     expect(data.prompt.translate.route, 'Local · test-model');
+
+    final account = container.read(subscriptionNotifierProvider).subscription!;
+    for (final (usage, expected) in <(OpusUsage?, double?)>[
+      (const OpusUsage(percent: 141), 141),
+      (const OpusUsage(percent: 275.5), 275.5),
+      (const OpusUsage(percent: 12345), 12345),
+      (const OpusUsage(percent: 0), 0),
+      (const OpusUsage(percent: 141, isNegative: true), 0),
+      (const OpusUsage(percent: -4), 0),
+      (null, null),
+    ]) {
+      (container.read(subscriptionNotifierProvider.notifier)
+              as DataSubscription)
+          .publish(SubscriptionState.loaded(account.copyWith(usage: usage)));
+      final quota = container.read(provider).quota;
+      expect(quota.opusPercent, expected, reason: '$usage');
+      expect(quota.opusTip, usage == null ? null : generationOpusTip(l, usage));
+      expect(quota.anlas, 90);
+      if (usage != null) {
+        expect(usage.displayPercent, expected!.clamp(0, 100));
+      }
+    }
   });
   test('V4.5 有参考、网格与六角色，V3 隐藏角色且 Opus 格不误显示', () {
     final params = container.read(generationParamsNotifierProvider.notifier);

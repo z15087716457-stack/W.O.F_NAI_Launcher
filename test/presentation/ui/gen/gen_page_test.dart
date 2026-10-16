@@ -6,6 +6,7 @@ import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'gen_test_harness.dart';
 
 void main() {
@@ -113,7 +114,37 @@ void main() {
       expect(r.last('onFurryChanged'), 'onFurryChanged(true)');
     });
 
-    testWidgets('V4.5 没有 Opus 格，V3 没有模式格', (t) async {
+    testWidgets('额度数字允许超过 100%，旧模型仍隐藏对应格', (t) async {
+      for (final (percent, label) in <(double, String)>[
+        (141, '141%'),
+        (275.5, '275.5%'),
+        (12345, '12345%'),
+        (0, '0%'),
+      ]) {
+        await pump(
+          t,
+          GenFixture.view().copyWith(
+            quota: GenQuota(opusPercent: percent, anlas: 10668),
+          ),
+          1100,
+          700,
+        );
+        final header = find.byKey(const Key('gen-header'));
+        final value = find.descendant(of: header, matching: find.text(label));
+        expect(value, findsOneWidget);
+        expect(
+          find.descendant(of: header, matching: find.text('100%')),
+          findsNothing,
+        );
+        expect(t.getRect(header).contains(t.getCenter(value)), isTrue);
+        expect(t.takeException(), isNull);
+        await captureUiuxRegion(
+          t,
+          find.byKey(const Key('gen-capture')),
+          'quota-${percent.toString().replaceAll('.', '-')}',
+          t.getRect(header),
+        );
+      }
       await pump(t, GenFixture.view(v45: true));
       expect(find.text('147%'), findsNothing);
       await pump(t, GenFixture.v3());
