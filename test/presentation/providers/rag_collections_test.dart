@@ -12,7 +12,7 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 
 const _worker = r'''
 import sys,json,threading
-lock=threading.Lock();sources={};suspended=False
+lock=threading.Lock();sources={};suspended=False;slow=False
 def emit(v):
  with lock:print(json.dumps(v),flush=True)
 def status():
@@ -26,7 +26,9 @@ for line in sys.stdin:
  i=r['id']
  if op=='configure':
   sources={s:{'indexed':8,'total':8,'complete':True,'partial':False,'building':False,'paused':False,'auto_update_allowed':False} for s in p['sources']};result=status()
- elif op=='status':result=status()
+ elif op=='status':
+  result=status()
+  if slow:threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
  elif op=='preview':result={'plan_id':source,'documents':2,'total':8}
  elif op=='start':
   emit({'event':'index','source':source,'job_id':source,'phase':'complete',**sources[source]});result={'job_id':source}
@@ -38,8 +40,10 @@ for line in sys.stdin:
   result={'items':[{'id':source+'-hit','title':'Saved','snippet':'rain','section':'article'}]}
   if p['query']=='delay':threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
  elif op=='gallery_search':
+  if p['query']=='fail':emit({'id':i,'error':{'code':'rag_runtime_error'}});continue
   with open(p['scope'],encoding='utf-8') as f:paths=json.load(f)
   result={'items':[{'id':'gallery-hit','path':paths[0],'channel':'visual'}] if paths else []}
+  if p['query']=='delay':slow=True;threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
  else:result={}
  emit({'id':i,'result':result})
 ''';
@@ -93,6 +97,9 @@ void main() {
           () async => (catalog: 'fixture', runtime: '', wiki: 'fixture'),
         ),
         ragGalleryRootsProvider.overrideWithValue(() async => [root.path]),
+        ragStatusTimeoutProvider.overrideWithValue(
+          const Duration(milliseconds: 25),
+        ),
         ragClientStarterProvider.overrideWithValue(
           ({required python, required directory}) => RagClient.start(
             python: python,
@@ -236,6 +243,69 @@ void main() {
           ).readAsString();
           expect(raw, contains('rain'));
           expect(raw, isNot(contains('not-exported')));
+        },
+      );
+      test(
+        'a queued heartbeat timeout cannot fail an active gallery search',
+        () async {
+          await container
+              .read(ragSettingsProvider.notifier)
+              .update(
+                container
+                    .read(ragSettingsProvider)
+                    .copyWith(galleryEnabled: true),
+              );
+          await controller.preview(source: RagSource.gallery);
+          final search = controller.searchGallery(
+            query: 'delay',
+            allowed: ['${root.path}/image.png'],
+            cancellation: RagCancellation(),
+          );
+          for (var attempt = 0; attempt < 30; attempt++) {
+            if (container
+                    .read(ragControllerProvider)
+                    .forSource(RagSource.gallery)
+                    .searching >
+                0) {
+              break;
+            }
+            await Future<void>.delayed(const Duration(milliseconds: 5));
+          }
+          await controller.refresh();
+          final status = container
+              .read(ragControllerProvider)
+              .forSource(RagSource.gallery);
+          expect(status.available, isTrue);
+          expect(status.error, isNull);
+          expect(await search, hasLength(1));
+        },
+      );
+      test(
+        'gallery failures stay errors instead of pretending to be empty successful results',
+        () async {
+          await container
+              .read(ragSettingsProvider.notifier)
+              .update(
+                container
+                    .read(ragSettingsProvider)
+                    .copyWith(galleryEnabled: true),
+              );
+          await controller.preview(source: RagSource.gallery);
+          await expectLater(
+            controller.searchGallery(
+              query: 'fail',
+              allowed: ['${root.path}/image.png'],
+              cancellation: RagCancellation(),
+            ),
+            throwsA(isA<RagException>()),
+          );
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.gallery)
+                .error,
+            'rag_runtime_error',
+          );
         },
       );
       test(

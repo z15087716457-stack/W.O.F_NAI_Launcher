@@ -107,6 +107,9 @@ final ragDirectoryProvider = Provider<Future<Directory> Function()>(
 final ragControllerProvider = NotifierProvider<RagController, RagStatus>(
   RagController.new,
 );
+final ragStatusTimeoutProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 60),
+);
 
 typedef RagClientStarter =
     Future<RagClient> Function({
@@ -153,14 +156,25 @@ final ragRuntimeProbeFactoryProvider = Provider<RagRuntimeProbe Function()>(
   (ref) =>
       () => RagRuntimeProbe(),
 );
+// Compatibility belongs to the selected interpreter, not the settings page's
+// lifetime. Explicit recheck/install/path changes still invalidate this probe.
 final ragRuntimeInfoProvider = FutureProvider.autoDispose<RagRuntimeInfo>((
   ref,
 ) async {
   final python = ref.watch(ragSettingsProvider.select((s) => s.python));
   final probe = ref.read(ragRuntimeProbeFactoryProvider)();
-  ref.onDispose(probe.cancel);
+  var disposed = false;
+  ref.onDispose(() {
+    disposed = true;
+    probe.cancel();
+  });
   final root = await ref.read(ragDirectoryProvider)();
-  return probe.inspect(root, python);
+  final result = await probe.inspect(root, python);
+  // A failed/transient probe remains retryable on reopening settings.
+  if (result.ready && !disposed) {
+    ref.keepAlive();
+  }
+  return result;
 });
 
 class RagController extends Notifier<RagStatus> {
@@ -306,9 +320,11 @@ class RagController extends Notifier<RagStatus> {
         ],
       });
       if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+      if (client.isClosed) throw const RagException('worker_closed');
+      unawaited(_events?.cancel());
       _client = client;
       _events = client.events.listen((event) {
-        if (_disposed || epoch != _epoch) return;
+        if (_disposed || epoch != _epoch || !identical(_client, client)) return;
         if (event['event'] == 'lost') {
           for (final source in RagSource.values) {
             _change(
@@ -352,6 +368,7 @@ class RagController extends Notifier<RagStatus> {
         }
       });
       _apply(result);
+      _refresh?.cancel();
       _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
         if (!_disposed) unawaited(refresh(autoUpdate: true));
       });
@@ -479,7 +496,12 @@ class RagController extends Notifier<RagStatus> {
       if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
         await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
       }
-      final status = await c.request('status');
+      final status = await c.request(
+        'status',
+        const {},
+        null,
+        ref.read(ragStatusTimeoutProvider),
+      );
       if (_disposed || epoch != _epoch) return;
       _apply(status);
       final sources = status['sources'] as Map? ?? {'tags': status};
@@ -498,6 +520,13 @@ class RagController extends Notifier<RagStatus> {
         }
       }
     } catch (error) {
+      // The worker serializes inference and status. A heartbeat queued behind
+      // an active search timing out does not invalidate that search's results.
+      if (error is RagException &&
+          error.code == 'timeout' &&
+          RagSource.values.any((s) => state.forSource(s).searching > 0)) {
+        return;
+      }
       if (epoch == _epoch) {
         for (final source in RagSource.values) {
           if (ref.read(ragSettingsProvider).enabledFor(source)) {
@@ -761,8 +790,8 @@ class RagController extends Notifier<RagStatus> {
     String image = '',
     RagGalleryMode mode = RagGalleryMode.mixed,
   }) async {
+    if (_gpuHolds > 0) throw const RagException('resource_busy');
     if (!ref.read(ragSettingsProvider).enabledFor(RagSource.gallery) ||
-        _gpuHolds > 0 ||
         (query.trim().isEmpty && image.isEmpty) ||
         allowed.isEmpty) {
       return const [];
@@ -791,14 +820,22 @@ class RagController extends Notifier<RagStatus> {
       }
       counted = true;
       _change(RagSource.gallery, (s) => s.copyWith(searching: s.searching + 1));
-      final result = await client.request('gallery_search', {
-        'source': 'gallery',
-        'query': query,
-        'scope': scope.path,
-        'image': image,
-        'mode': mode.name,
-        'limit': 60,
-      }, cancellation);
+      final result = await client.request(
+        'gallery_search',
+        {
+          'source': 'gallery',
+          'query': query,
+          'scope': scope.path,
+          'image': image,
+          'mode': mode.name,
+          'limit': 60,
+        },
+        cancellation,
+        const Duration(minutes: 3),
+      );
+      if (result['fallback'] != null) {
+        throw const RagException('resource_busy');
+      }
       if (_disposed || epoch != _epoch || cancellation.isCancelled) {
         return const [];
       }
@@ -815,10 +852,11 @@ class RagController extends Notifier<RagStatus> {
       ];
     } catch (error) {
       if (epoch == _epoch &&
-          !(error is RagException && error.code == 'cancelled')) {
+          !(error is RagException &&
+              const {'cancelled', 'resource_busy'}.contains(error.code))) {
         _fail(error, source: RagSource.gallery);
       }
-      return const [];
+      rethrow;
     } finally {
       if (counted && !_disposed && epoch == _epoch) {
         _change(

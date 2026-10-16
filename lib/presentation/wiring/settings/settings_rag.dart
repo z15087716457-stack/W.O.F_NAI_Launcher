@@ -40,7 +40,10 @@ SettingsRagData settingsRagData(
   int indexBytes = 0,
 }) {
   final environment = runtime.valueOrNull;
-  final ready = environment?.ready == true;
+  final ready =
+      environment?.ready == true ||
+      (runtime.isLoading && environment == null && status.runtimeReady);
+  final python = environment?.python ?? settings.python;
   SettingsRagStep model(String name, String path, bool? available) =>
       SettingsRagStep(
         value: name,
@@ -59,7 +62,7 @@ SettingsRagData settingsRagData(
   };
   return SettingsRagData(
     runtime: SettingsRagStep(
-      value: environment?.python ?? '',
+      value: python,
       tone: ready ? SettingsTone.ok : SettingsTone.idle,
     ),
     embedder: model('EmbeddingGemma 2', settings.embedding, weights?.embedding),
@@ -104,7 +107,7 @@ SettingsRagData settingsRagData(
     checking: runtime.isLoading,
     runtimeReady: ready,
     runtimeCuda: environment?.cuda == true,
-    runtimePython: environment?.python ?? '',
+    runtimePython: python,
     pythonPending:
         settings.python.isNotEmpty &&
         environment != null &&

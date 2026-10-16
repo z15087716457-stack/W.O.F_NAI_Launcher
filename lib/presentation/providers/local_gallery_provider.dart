@@ -256,6 +256,8 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   int _timelineSerial = 0;
   RagCancellation? _ragCancellation;
   Timer? _ragRefresh;
+  ({FilterCriteria criteria, RagGalleryMode mode, String image})?
+  _semanticQuery;
 
   /// 最近软删路径键集（防复活屏）：服务层重建/重扫期间时间线可能从
   /// 尚未摘除的内存文件列表取回含被删图的旧数据，这里在出口强制过滤。
@@ -291,11 +293,18 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
       _ragCancellation?.cancel();
       _ragRefresh?.cancel();
     });
-    void refreshRag() {
+    void refreshRag({bool preserveSemantic = false}) {
       _ragCancellation?.cancel();
       _ragRefresh?.cancel();
       _ragRefresh = Timer(const Duration(milliseconds: 180), () {
-        if (state.isInitialized) unawaited(_reloadTimeline(newDataset: false));
+        if (state.isInitialized) {
+          unawaited(
+            _reloadTimeline(
+              newDataset: false,
+              preserveSemantic: preserveSemantic,
+            ),
+          );
+        }
       });
     }
 
@@ -307,9 +316,17 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     ref.listen(
       ragControllerProvider.select((s) {
         final g = s.forSource(RagSource.gallery);
-        return (g.available, g.complete, s.suspended);
+        return (g.available, g.complete, s.suspended, g.indexed > 0);
       }),
-      (_, __) => refreshRag(),
+      (previous, next) {
+        // Temporary errors and GPU suspension do not invalidate already
+        // completed results. Requery on recovery without first erasing them.
+        if (next.$1) {
+          refreshRag(preserveSemantic: true);
+        } else if (previous?.$4 == true && !next.$4) {
+          refreshRag(); // An explicitly cleared index has no semantic results.
+        }
+      },
     );
 
     return const LocalGalleryState();
@@ -324,6 +341,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _ragCancellation?.cancel();
     _ragRefresh?.cancel();
     _cachedState = null;
+    _semanticQuery = null;
     final service = _service;
     _service = null;
     _filterRequestSerial++;
@@ -497,7 +515,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   ///
   /// [newDataset] 为 true 表示筛选/范围/排序变化（视图回到顶部）；
   /// false 表示内容变化（保持滚动位置）。
-  Future<void> _reloadTimeline({required bool newDataset}) async {
+  Future<void> _reloadTimeline({
+    required bool newDataset,
+    bool preserveSemantic = false,
+  }) async {
     final serial = ++_timelineSerial;
     _ragCancellation?.cancel();
     try {
@@ -514,18 +535,32 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
             .toList(growable: false);
       }
       final current = state.timeline;
-      _setState(
-        state.copyWith(
-          timeline: GalleryTimeline(
-            entries,
-            datasetId: newDataset ? current.datasetId + 1 : current.datasetId,
+      final options = ref.read(galleryRagQueryProvider);
+      final keepSemantic =
+          preserveSemantic &&
+          !newDataset &&
+          current.semanticRanked &&
+          _semanticQuery ==
+              (
+                criteria: state.filterCriteria,
+                mode: options.mode,
+                image: options.image,
+              );
+      if (!keepSemantic) {
+        _semanticQuery = null;
+        _setState(
+          state.copyWith(
+            timeline: GalleryTimeline(
+              entries,
+              datasetId: newDataset ? current.datasetId + 1 : current.datasetId,
+            ),
+            filteredCount: service.filteredCount,
+            totalCount: service.totalCount,
+            contentRevision: state.contentRevision + 1,
+            isLoading: false,
           ),
-          filteredCount: service.filteredCount,
-          totalCount: service.totalCount,
-          contentRevision: state.contentRevision + 1,
-          isLoading: false,
-        ),
-      );
+        );
+      }
       if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
         unawaited(
           _loadGalleryRag(
@@ -534,6 +569,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
             entries,
             state.filterCriteria,
             ref.read(galleryRagQueryProvider),
+            preserveSemantic: keepSemantic,
           ),
         );
       }
@@ -573,8 +609,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     LocalGalleryService service,
     List<GalleryTimelineEntry> ordinary,
     FilterCriteria criteria,
-    RagGalleryQueryOptions options,
-  ) async {
+    RagGalleryQueryOptions options, {
+    bool preserveSemantic = false,
+  }) async {
     if (criteria.searchQuery.trim().isEmpty && options.image.isEmpty) return;
     final status = ref.read(ragControllerProvider).forSource(RagSource.gallery);
     if (status.indexed == 0 || status.suspended) {
@@ -623,13 +660,21 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           result.add(allowed[key]!);
         }
       }
-      if (result.length == count && options.image.isEmpty) return;
+      if (result.length == count &&
+          options.image.isEmpty &&
+          !preserveSemantic) {
+        return;
+      }
+      final ranked = result.length > count || options.image.isNotEmpty;
+      _semanticQuery = ranked
+          ? (criteria: criteria, mode: options.mode, image: options.image)
+          : null;
       _setState(
         state.copyWith(
           timeline: GalleryTimeline(
             result,
             datasetId: state.timeline.datasetId,
-            semanticRanked: true,
+            semanticRanked: ranked,
           ),
           filteredCount: result.length,
           contentRevision: state.contentRevision + 1,

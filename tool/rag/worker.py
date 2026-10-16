@@ -1,5 +1,6 @@
 """JSONL local worker; one model owner and resumable, low-priority build steps."""
 import importlib.metadata
+from contextlib import redirect_stdout
 import json
 import os
 import queue
@@ -15,12 +16,13 @@ from documents import TextEngine, WikiSources, BlockSources
 from gallery import GalleryEngine
 
 write_lock = threading.Lock()
+protocol_stdout = sys.stdout
 
 
 def emit(value):
     with write_lock:
-        sys.stdout.write(json.dumps(value, ensure_ascii=False, allow_nan=False) + '\n')
-        sys.stdout.flush()
+        protocol_stdout.write(json.dumps(value, ensure_ascii=False, allow_nan=False) + '\n')
+        protocol_stdout.flush()
 
 
 class Worker:
@@ -205,6 +207,12 @@ class Worker:
             if self.pool: self.pool.close()
 
     def main(self):
+        # Libraries may print progress to stdout. Keep the strict JSON pipe
+        # isolated, including imports and prints from the inference thread.
+        with redirect_stdout(sys.stderr):
+            self._main()
+
+    def _main(self):
         # Load native runtimes on the main thread before it blocks reading stdin.
         # On Windows, first importing NumPy/OpenBLAS from the executor thread
         # while the CRT is reading a pipe can deadlock inside DLL initialization.

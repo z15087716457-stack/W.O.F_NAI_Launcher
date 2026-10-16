@@ -1247,6 +1247,8 @@ class SettingsRagPage extends StatelessWidget {
                                   child: Text(
                                     !on
                                         ? l.set_rgOff
+                                        : rg.checking && !usable
+                                        ? l.set_testing
                                         : usable
                                         ? l.set_rgReady
                                         : l.set_rgNotReady,
@@ -1267,7 +1269,9 @@ class SettingsRagPage extends StatelessWidget {
                               ],
                             ),
                             Text(
-                              on && !usable
+                              on && rg.checking && !usable
+                                  ? l.set_rgEnvSub
+                                  : on && !usable
                                   ? l.set_rgNotReadySub
                                   : l.set_rgPool,
                               style: UiText.sans(12, color: c.muted),
@@ -1669,8 +1673,16 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
       subtitle: l.set_rgEnvSub,
       badges: [
         UiMini(
-          rg.runtimeReady ? l.set_rgEnvReady : l.set_rgEnvMissing,
-          tone: rg.runtimeReady ? UiMiniTone.ok : UiMiniTone.warn,
+          rg.runtimeReady
+              ? l.set_rgEnvReady
+              : rg.checking
+              ? l.set_testing
+              : l.set_rgEnvMissing,
+          tone: rg.runtimeReady
+              ? UiMiniTone.ok
+              : rg.checking
+              ? UiMiniTone.plain
+              : UiMiniTone.warn,
         ),
       ],
       below: !_choosing
@@ -1745,7 +1757,7 @@ class _RagRuntimeRowState extends State<_RagRuntimeRow> {
           ] else
             SettingsBtn(
               key: const Key('rag-install'),
-              label: l.set_rgInstall,
+              label: rg.checking ? l.set_testing : l.set_rgInstall,
               small: true,
               tone: SettingsBtnTone.primary,
               onTap: locked ? null : () => setState(() => _choosing = true),

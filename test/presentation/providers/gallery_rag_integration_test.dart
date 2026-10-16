@@ -27,6 +27,7 @@ class _Settings extends RagSettingsController {
 }
 
 class _Rag extends RagController {
+  void status(RagStatus value) => state = value;
   bool deferred = false;
   final requests =
       <
@@ -173,6 +174,49 @@ void main() {
     );
   });
   test(
+    'a transient worker error keeps completed semantic results and recovery refreshes in place',
+    () async {
+      await gallery.setSearchQuery('rain');
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+      rag.deferred = true;
+      rag.status(
+        const RagStatus(
+          sources: {
+            RagSource.gallery: RagStatus(
+              phase: 'error',
+              indexed: 10,
+              complete: true,
+              error: 'timeout',
+            ),
+          },
+        ),
+      );
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+      expect(rag.requests, hasLength(1));
+      rag.status(
+        const RagStatus(
+          sources: {
+            RagSource.gallery: RagStatus(
+              phase: 'ready',
+              indexed: 10,
+              complete: true,
+            ),
+          },
+        ),
+      );
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+      expect(rag.requests, hasLength(2));
+      rag.requests.last.result.complete(const [
+        RagGalleryHit(id: '2', path: '/gallery/forest.png', channel: 'visual'),
+      ]);
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+    },
+  );
+  test(
     'image queries contain only ranked matches and clear-all removes the query image',
     () async {
       container
@@ -193,6 +237,39 @@ void main() {
       await flush();
       expect(container.read(galleryRagQueryProvider).image, isEmpty);
       expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+    },
+  );
+  test(
+    'successful empty recovery replaces old matches and explicit disable clears them',
+    () async {
+      await gallery.setSearchQuery('rain');
+      await flush();
+      rag.deferred = true;
+      rag.status(
+        const RagStatus(
+          sources: {
+            RagSource.gallery: RagStatus(
+              phase: 'building',
+              indexed: 10,
+              complete: false,
+            ),
+          },
+        ),
+      );
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 2);
+      rag.requests.last.result.complete([]);
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 1);
+      expect(
+        container.read(localGalleryNotifierProvider).timeline.semanticRanked,
+        isFalse,
+      );
+      await container
+          .read(ragSettingsProvider.notifier)
+          .update(const RagSettings());
+      await flush();
+      expect(container.read(localGalleryNotifierProvider).timeline.length, 1);
     },
   );
   test(

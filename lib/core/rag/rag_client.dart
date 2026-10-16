@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
+import '../utils/app_logger.dart';
 import 'rag_process.dart';
 
 class RagException implements Exception {
@@ -42,9 +43,34 @@ class RagClient {
     _stdout = _process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(_receive, onError: (Object _) => _lost(), onDone: _lost);
-    _stderr = _process.stderr.listen((_) {});
-    unawaited(_process.exitCode.then((_) => _lost()));
+        .listen(
+          _receive,
+          onError: (Object _) => _lost('stdout_error'),
+          onDone: () => _lost('stdout_closed'),
+        );
+    _stderr = _process.stderr.listen((bytes) {
+      final text =
+          _stderrTail + utf8.decode(bytes, allowMalformed: true).toLowerCase();
+      for (final pattern in const {
+        'cuda out of memory': 'cuda_out_of_memory',
+        'paging file is too small': 'system_memory_limit',
+        'memoryerror': 'system_memory_limit',
+      }.entries) {
+        if (text.contains(pattern.key)) _diagnostic = pattern.value;
+      }
+      _stderrTail = text.substring(text.length > 1024 ? text.length - 1024 : 0);
+    });
+    unawaited(
+      _process.exitCode.then((code) {
+        if (!_closing || _unexpectedLoss) {
+          AppLogger.w(
+            'Worker exited: code=$code, diagnostic=$_diagnostic',
+            'RAG',
+          );
+        }
+        _lost('process_exit');
+      }),
+    );
     unawaited(_process.stdin.done.catchError((Object _) => _lost()));
   }
   final Process _process;
@@ -56,6 +82,8 @@ class RagClient {
   int _next = 0;
   bool _closed = false;
   bool _closing = false;
+  bool _unexpectedLoss = false;
+  String _stderrTail = '', _diagnostic = 'none';
   Future<void>? _closeFuture;
   bool get isClosed => _closed;
   Stream<Map<String, dynamic>> get events => _events.stream;
@@ -135,7 +163,7 @@ class RagClient {
         }
       }
     } catch (_) {
-      _lost();
+      _lost('protocol_error');
     }
   }
 
@@ -160,6 +188,7 @@ class RagClient {
     try {
       return await completion.future.timeout(timeout);
     } on TimeoutException {
+      AppLogger.w('Request timed out: operation=$op', 'RAG');
       _send({'op': 'cancel', 'target': id});
       _pending.remove(id);
       throw const RagException('timeout');
@@ -178,8 +207,15 @@ class RagClient {
     }
   }
 
-  void _lost() {
+  void _lost([String reason = 'transport_closed']) {
     if (_closed) return;
+    _unexpectedLoss = !_closing;
+    if (_unexpectedLoss) {
+      AppLogger.w(
+        'Worker disconnected: reason=$reason, pending=${_pending.length}, diagnostic=$_diagnostic',
+        'RAG',
+      );
+    }
     _closed = true;
     if (!_ready.isCompleted) {
       _ready.completeError(const RagException('runtime_missing'));
