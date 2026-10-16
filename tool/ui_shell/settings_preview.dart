@@ -214,8 +214,18 @@ class SettingsPreviewSim extends ChangeNotifier {
       onRescanGallery: () => log('onRescanGallery'),
       onTestProvider: (id) => log('onTestProvider($id)'),
       onDeleteProvider: (id) => log('onDeleteProvider($id)'),
-      onAssign: (task, {providerId, modelId, presetId}) =>
-          log('onAssign(${task.name}, $providerId, $modelId, $presetId)'),
+      onAssign:
+          (
+            task, {
+            providerId,
+            modelId,
+            presetId,
+            reasoningEffort,
+            clearReasoningEffort = false,
+          }) => log(
+            'onAssign(${task.name}, $providerId, $modelId, $presetId, '
+            '$reasoningEffort, clearReasoningEffort: $clearReasoningEffort)',
+          ),
       onRagSourceEnabled: (k, v) => _source(
         k,
         (x) => _src(
