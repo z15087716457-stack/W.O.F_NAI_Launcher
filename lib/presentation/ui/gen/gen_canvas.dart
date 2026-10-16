@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
-import '../../themes/presets/geist_theme.dart';
 import '../channel/channel_settings.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -120,17 +119,13 @@ class _GenCanvasState extends State<GenCanvas> {
                   left: 0,
                   right: 0,
                   child: _CanvasBarViewport(
-                    child: _CanvasFloatTheme(
-                      child: _TopBar(
-                        enhanceLink: _enhanceLink,
-                        upscaleLink: _upscaleLink,
-                      ),
+                    child: _TopBar(
+                      enhanceLink: _enhanceLink,
+                      upscaleLink: _upscaleLink,
                     ),
                   ),
                 ),
-                const Positioned.fill(
-                  child: _CanvasFloatTheme(child: _BottomBars()),
-                ),
+                const Positioned.fill(child: _BottomBars()),
               ],
               if (strip && sheet == null)
                 const Positioned(
@@ -178,27 +173,6 @@ class _GenCanvasState extends State<GenCanvas> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// The image controls keep their charcoal glass and light glyphs independently
-/// of the editor theme. This changes only the three small filtered surfaces;
-/// the canvas and the pre-blurred sidebar regions retain their own paint layers.
-class _CanvasFloatTheme extends StatelessWidget {
-  const _CanvasFloatTheme({required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (MediaQuery.highContrastOf(context) ||
-        theme.brightness == Brightness.dark) {
-      return child;
-    }
-    return Theme(
-      data: theme.copyWith(colorScheme: GeistTheme.dark.colorScheme),
-      child: child,
     );
   }
 }

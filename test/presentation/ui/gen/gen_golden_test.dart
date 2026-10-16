@@ -187,13 +187,13 @@ void main() {
           final row = t.getRect(translatePin);
           masks.add(Rect.fromLTWH(row.left, row.top, 30, row.height));
         }
-        // Preserve the original PNG. Only the three glass bars (including
-        // their shadows) have a user-authorized material/foreground change.
-        for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
-          final canvasToolbar = find.byKey(Key(name));
-          if (canvasToolbar.evaluate().isNotEmpty) {
-            masks.add(t.getRect(canvasToolbar).inflate(22));
-          }
+        // The user requested a persistent variation price slot. Preserve the
+        // original prototype PNG and compare every pixel outside this bar.
+        final canvasToolbar = find.byKey(const Key('gen-bar-top'));
+        if (canvasToolbar.evaluate().isNotEmpty) {
+          masks.add(
+            t.getRect(canvasToolbar).inflate(22),
+          ); // Includes its shadow.
         }
         await expectOutsideApprovedRegions(
           t,

@@ -1078,7 +1078,7 @@ void main() {
     for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
       expect(
         Theme.of(tester.element(find.byKey(Key(name)))).brightness,
-        Brightness.dark,
+        Brightness.light,
       );
     }
     expect(

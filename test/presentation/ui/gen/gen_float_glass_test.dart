@@ -34,7 +34,7 @@ class _Stripes extends CustomPainter {
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
-  testWidgets('三条独立深色玻璃实时取样，页面主题不变', (tester) async {
+  testWidgets('三条玻璃随明暗主题切换并实时取样', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1000, 800);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -71,7 +71,17 @@ void main() {
         final values = <int>[];
         for (final name in ['gen-bar-top', 'gen-bar-info', 'gen-bar-actions']) {
           final bar = find.byKey(Key(name));
-          expect(Theme.of(tester.element(bar)).brightness, Brightness.dark);
+          expect(
+            Theme.of(tester.element(bar)).brightness,
+            dark ? Brightness.dark : Brightness.light,
+          );
+          final icon = tester.widget<GenNaiIcon>(
+            find.descendant(of: bar, matching: find.byType(GenNaiIcon)).first,
+          );
+          expect(
+            icon.color,
+            (dark ? GeistTheme.dark : GeistTheme.light).colorScheme.onSurface,
+          );
           final rect = tester.getRect(bar);
           await tester.runAsync(() async {
             final boundary =
@@ -94,7 +104,7 @@ void main() {
           await captureUiuxRegion(
             tester,
             find.byKey(key),
-            'float-charcoal-${dark ? 'dark' : 'light'}',
+            'float-theme-${dark ? 'dark' : 'light'}',
             tester.getRect(find.byKey(const Key('gen-bar-top'))).inflate(20),
           );
         }
@@ -103,7 +113,7 @@ void main() {
       for (var i = 0; i < 6; i += 2) {
         expect(samples[0][i + 1], greaterThan(samples[0][i] + 20));
         expect(samples[1][i], greaterThan(samples[1][i + 1] + 20));
-        expect(samples[0][i + 1], lessThan(160));
+        expect(samples[0][i + 1], dark ? lessThan(160) : greaterThan(200));
       }
     }
   });
