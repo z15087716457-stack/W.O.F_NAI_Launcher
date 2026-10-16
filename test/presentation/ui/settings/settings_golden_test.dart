@@ -77,6 +77,11 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     align.alignment = Alignment.topLeft;
     await t.pump();
     final masks = <Rect>[];
+    // F25：只豁免新增的“命中率”小字，原进度条、百分比及数量仍逐像素锁定。
+    for (final label
+        in find.byKey(const Key('cache-hit-rate-label')).evaluate()) {
+      masks.add(t.getRect(find.byWidget(label.widget)));
+    }
     final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
     expect(find.text(l.set_isNew), findsNothing);
     // 只豁免旧“新”标签本身的矩形，标题、卡片及其下方的控件继续逐像素锁定。

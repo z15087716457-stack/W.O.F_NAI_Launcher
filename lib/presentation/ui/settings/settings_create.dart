@@ -852,9 +852,27 @@ class SettingsDictionaryPage extends StatelessWidget {
               Expanded(
                 child: Text(title, style: UiText.sans(12, color: c.muted)),
               ),
-              Text(
-                x?.hitRate == null ? '—' : SettingsFormat.percent(x!.hitRate!),
-                style: UiText.mono(12, weight: FontWeight.w500, color: c.ink),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 4,
+                children: [
+                  if (x?.hitRate != null && !x!.images)
+                    Text(
+                      l.settings_hitRate,
+                      key: const Key('cache-hit-rate-label'),
+                      style: UiText.sans(10.5, color: c.faint),
+                    ),
+                  Text(
+                    x?.hitRate == null
+                        ? '—'
+                        : SettingsFormat.percent(x!.hitRate!),
+                    style: UiText.mono(
+                      12,
+                      weight: FontWeight.w500,
+                      color: c.ink,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
