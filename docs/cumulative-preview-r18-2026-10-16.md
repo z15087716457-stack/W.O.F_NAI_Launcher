@@ -13,3 +13,5 @@
 原桌面快捷方式、user-data、Agent 数据、独立迁移备份、WebView2 根及旧 C 盘兼容联接保持；RAG 环境和索引不在覆盖范围。未自动启动／重启／热重载 Studio，便携包仍 r8，未推送 GitHub。DEVELOPMENT.md 与 .runs/ 原改动保持。
 
 证据：`.dart_tool/cumulative-r18-20261016/` 的 `reused-validation.json`、`build-result.json`、`build-verification.json`、`installer-fixtures.json`、`package-verification.json`、`install-result.json`、`final-verification.json`。正式收据与 `installed-delivery.json` 一致。
+
+2026-10-17 用户反馈“不错，流畅了很多”，确认本轮优化的实机流畅度明显改善；该反馈为主观交互体验，未据此新增 FPS 测量结论。
