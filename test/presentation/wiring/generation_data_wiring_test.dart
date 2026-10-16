@@ -137,6 +137,8 @@ void main() {
     final data = container.read(provider);
     expect(data.model, ImageModels.animeDiffusionV5Full);
     expect(data.quota.anlas, 90);
+    expect(data.quota.subscriptionAnlas, 70);
+    expect(data.quota.purchasedAnlas, 20);
     expect(data.quota.opusPercent, 27.5);
     expect(data.quota.opusTip, contains('27.5'));
     expect(data.image.count, 3);

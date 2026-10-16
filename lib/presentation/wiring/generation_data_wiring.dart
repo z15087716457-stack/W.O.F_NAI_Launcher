@@ -341,6 +341,10 @@ final generationViewDataProvider = Provider.autoDispose
         furry: spec.v4Prompts ? params.furryMode : null,
         quota: GenQuota(
           anlas: subscription?.anlasBalance,
+          subscriptionAnlas:
+              subscription?.trainingStepsLeft?.fixedTrainingStepsLeft,
+          purchasedAnlas:
+              subscription?.trainingStepsLeft?.purchasedTrainingSteps,
           opusPercent: usage?.displayPercent,
           opusTip: usage == null ? null : generationOpusTip(l, usage),
         ),

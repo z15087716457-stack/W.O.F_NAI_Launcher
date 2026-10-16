@@ -250,6 +250,12 @@ class _QuotaCapsule extends StatelessWidget {
       ?q.opusTip,
       if (q.anlas != null)
         context.l10n.gen_anlasTip(GenFormat.thousands(q.anlas!)),
+      if (q.subscriptionAnlas != null)
+        '${context.l10n.anlas_subscription}: '
+            '${GenFormat.thousands(q.subscriptionAnlas!)}',
+      if (q.purchasedAnlas != null)
+        '${context.l10n.anlas_purchased}: '
+            '${GenFormat.thousands(q.purchasedAnlas!)}',
     ].join('\n');
     return tip.isEmpty ? capsule : Tooltip(message: tip, child: capsule);
   }

@@ -112,7 +112,13 @@ class GenModel {
 /// 账号额度胶囊。
 @immutable
 class GenQuota {
-  const GenQuota({this.opusPercent, this.opusTip, this.anlas});
+  const GenQuota({
+    this.opusPercent,
+    this.opusTip,
+    this.anlas,
+    this.subscriptionAnlas,
+    this.purchasedAnlas,
+  });
 
   /// Opus 免费额度剩余百分比（`usage.percent`，V5 才有）；null = 不显示这一格。
   final double? opusPercent;
@@ -122,6 +128,12 @@ class GenQuota {
 
   /// Anlas 余额；null = 还没拿到（显示“—”）。
   final int? anlas;
+
+  /// 订阅赠送的 Anlas；null = 未取得明细，不从合计推算。
+  final int? subscriptionAnlas;
+
+  /// 付费购买的 Anlas；null = 未取得明细。
+  final int? purchasedAnlas;
 }
 
 /// 桥接（Krita / Agent）状态小图标，放在提示词页签后面（`AgentBridgeIndicator`）。

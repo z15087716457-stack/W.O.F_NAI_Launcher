@@ -12,21 +12,47 @@ void main() {
   setUpAll(loadStudioCaptureFonts);
   for (final locale in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
     for (final dark in [false, true]) {
-      testWidgets('Vibe re-encoding hint $locale dark=$dark', (t) async {
+      testWidgets('quota breakdown and Vibe hints $locale dark=$dark', (
+        t,
+      ) async {
         await pumpGen(
           t,
-          data: GenFixture.view(v45: true),
+          data: GenFixture.view(v45: true).copyWith(
+            quota: GenQuota(
+              anlas: 10668,
+              subscriptionAnlas: dark ? 10668 : 10000,
+              purchasedAnlas: dark ? 0 : 668,
+            ),
+          ),
           locale: locale,
           dark: dark,
         );
+        final quota = find.byKey(const Key('gen-quota'));
+        final l = AppLocalizations.of(t.element(quota))!;
+        final message =
+            '${l.gen_anlasTip('10,668')}\n'
+            '${l.anlas_subscription}: ${dark ? '10,668' : '10,000'}\n'
+            '${l.anlas_purchased}: ${dark ? '0' : '668'}';
+        final pointer = await hoverOver(t, quota);
+        await t.pump(const Duration(seconds: 1));
+        expect(find.text(message), findsOneWidget);
+        expect(t.takeException(), isNull);
+        await captureUiuxRegion(
+          t,
+          find.byKey(const Key('gen-capture')),
+          'quota-$locale-$dark',
+          const Rect.fromLTWH(0, 0, 650, 210),
+        );
+        await pointer.moveTo(Offset.zero);
+        await t.pumpAndSettle();
         await t.ensureVisible(find.byKey(const Key('gen-ref-vibe-row')));
         await tapKey(t, 'gen-ref-vibe-row');
         final info = find.byKey(const Key('gen-vibe-info-v1'));
         final label = find.descendant(of: info, matching: find.byType(Tooltip));
         await t.ensureVisible(label);
-        await hoverOver(t, label);
+        await pointer.moveTo(t.getCenter(label));
+        await t.pumpAndSettle();
         await t.pump(const Duration(seconds: 1));
-        final l = AppLocalizations.of(t.element(info))!;
         expect(find.text(l.gen_vibeInfoReencode), findsOneWidget);
         expect(t.takeException(), isNull);
         await t.pumpWidget(const SizedBox());
