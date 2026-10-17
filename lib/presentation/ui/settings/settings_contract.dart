@@ -1278,7 +1278,7 @@ class SettingsAgentData {
 enum SettingsRagSourceKind { tags, wiki, blocks, gallery }
 
 /// [empty] = 还没建过库（出“建立索引”）；[ready] 且 done < total = 部分完成（出“继续建立”）。
-enum SettingsRagState { empty, ready, building, paused, error, off }
+enum SettingsRagState { empty, ready, building, paused, error, off, loading }
 
 @immutable
 class SettingsRagSource {
@@ -1289,12 +1289,16 @@ class SettingsRagSource {
     this.done = 0,
     this.total = 0,
     this.secondary,
+    this.known = true,
     this.skipped = 0,
     this.error,
   });
 
   final SettingsRagSourceKind kind;
   final SettingsRagState state;
+
+  /// False until the worker has returned an authoritative index status.
+  final bool known;
   final bool enabled;
   final int done;
   final int total;
@@ -1426,6 +1430,10 @@ class SettingsRagData {
     this.modelsMissing = false,
     this.plan,
     this.preparing,
+    this.initializing = false,
+    this.initializationPhase = '',
+    this.initializationProcessed = 0,
+    this.initializationTotal = 0,
     this.error,
   });
 
@@ -1465,12 +1473,18 @@ class SettingsRagData {
 
   /// A user-requested index preview/start/resume is awaiting the local worker.
   final SettingsRagSourceKind? preparing;
+  final bool initializing;
+  final String initializationPhase;
+  final int initializationProcessed, initializationTotal;
+  bool get progressKnown =>
+      sources.where((s) => s.enabled).every((s) => s.known);
 
   /// 最近一次安装 / 下载失败的原因（原样显示在状态卡里）。
   final String? error;
 
   /// 安装、下载、建库任一在进行：别的重活按钮都不可点。
   bool get busy =>
+      initializing ||
       preparing != null ||
       install != null ||
       download != null ||

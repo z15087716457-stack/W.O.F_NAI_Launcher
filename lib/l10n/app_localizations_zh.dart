@@ -18631,6 +18631,29 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_rgStartupFrequency => '每次启动仅提示一次';
 
   @override
+  String get set_rgLoading => '正在载入索引';
+
+  @override
+  String get set_rgOpening => '正在连接本地工作进程，读取已有索引。';
+
+  @override
+  String get set_rgLoadingSaved => '正在载入已保存的检索索引。';
+
+  @override
+  String set_rgRestoring(String done, String total) {
+    return '正在恢复检索索引 $done / $total，已有向量会直接复用。';
+  }
+
+  @override
+  String get set_rgSaving => '正在保存恢复后的检索索引。';
+
+  @override
+  String get set_rgReadingSources => '正在读取各来源的索引状态。';
+
+  @override
+  String get set_rgLoadingTimeout => '索引载入长时间没有进展或已达到时间上限，请重试。已有数据保留。';
+
+  @override
   String get set_rgPreparing => '正在准备索引';
 
   @override
@@ -38103,6 +38126,29 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_rgStartupFrequency => '每次啟動僅提示一次';
+
+  @override
+  String get set_rgLoading => '正在載入索引';
+
+  @override
+  String get set_rgOpening => '正在連線本地工作程序，讀取已有索引。';
+
+  @override
+  String get set_rgLoadingSaved => '正在載入已儲存的檢索索引。';
+
+  @override
+  String set_rgRestoring(String done, String total) {
+    return '正在恢復檢索索引 $done / $total，已有向量會直接複用。';
+  }
+
+  @override
+  String get set_rgSaving => '正在儲存恢復後的檢索索引。';
+
+  @override
+  String get set_rgReadingSources => '正在讀取各來源的索引狀態。';
+
+  @override
+  String get set_rgLoadingTimeout => '索引載入長時間沒有進展或已達到時間上限，請重試。已有資料保留。';
 
   @override
   String get set_rgPreparing => '正在準備索引';

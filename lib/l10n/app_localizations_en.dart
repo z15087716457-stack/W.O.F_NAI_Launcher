@@ -19429,6 +19429,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_rgStartupFrequency => 'Shown once per Studio session';
 
   @override
+  String get set_rgLoading => 'Loading indexes';
+
+  @override
+  String get set_rgOpening =>
+      'Connecting to the local worker and reading existing indexes.';
+
+  @override
+  String get set_rgLoadingSaved => 'Loading the saved search index.';
+
+  @override
+  String set_rgRestoring(String done, String total) {
+    return 'Restoring the search index: $done / $total. Existing vectors are reused.';
+  }
+
+  @override
+  String get set_rgSaving => 'Saving the restored search index.';
+
+  @override
+  String get set_rgReadingSources => 'Reading index status for each source.';
+
+  @override
+  String get set_rgLoadingTimeout =>
+      'Index loading stopped making progress or reached its time limit. Please retry. Existing data is preserved.';
+
+  @override
   String get set_rgPreparing => 'Preparing index';
 
   @override

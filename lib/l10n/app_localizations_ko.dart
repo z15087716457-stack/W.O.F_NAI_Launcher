@@ -18911,6 +18911,30 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_rgStartupFrequency => 'Studio를 시작할 때마다 한 번만 표시';
 
   @override
+  String get set_rgLoading => '색인 불러오는 중';
+
+  @override
+  String get set_rgOpening => '로컬 작업 프로세스에 연결하여 기존 색인을 확인하고 있습니다.';
+
+  @override
+  String get set_rgLoadingSaved => '저장된 검색 색인을 불러오고 있습니다.';
+
+  @override
+  String set_rgRestoring(String done, String total) {
+    return '검색 색인 복원 중: $done / $total. 기존 벡터를 재사용합니다.';
+  }
+
+  @override
+  String get set_rgSaving => '복원된 검색 색인을 저장하고 있습니다.';
+
+  @override
+  String get set_rgReadingSources => '각 소스의 색인 상태를 읽고 있습니다.';
+
+  @override
+  String get set_rgLoadingTimeout =>
+      '색인 불러오기가 오랫동안 진행되지 않거나 제한 시간에 도달했습니다. 다시 시도하세요. 기존 데이터는 유지됩니다.';
+
+  @override
   String get set_rgPreparing => '색인 준비 중';
 
   @override

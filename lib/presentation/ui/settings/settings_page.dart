@@ -460,7 +460,9 @@ class _Sidebar extends StatelessWidget {
             : SettingsTone.ok;
         return SettingsDot(tone);
       case SettingsPageId.rag:
-        if (!d.values.flag(SettingKey.ragEnabled) || d.rag.sources.isEmpty) {
+        if (!d.values.flag(SettingKey.ragEnabled) ||
+            d.rag.sources.isEmpty ||
+            !d.rag.progressKnown) {
           return null;
         }
         final v = d.rag.overall;

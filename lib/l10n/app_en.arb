@@ -10211,6 +10211,24 @@
   "set_rgStartupWaitTitle": "This may take a few minutes or longer",
   "set_rgStartupWaitBody": "Progress counts may stay unchanged during preparation. Please wait.",
   "set_rgStartupFrequency": "Shown once per Studio session",
+  "set_rgLoading": "Loading indexes",
+  "set_rgOpening": "Connecting to the local worker and reading existing indexes.",
+  "set_rgLoadingSaved": "Loading the saved search index.",
+  "set_rgRestoring": "Restoring the search index: {done} / {total}. Existing vectors are reused.",
+  "set_rgSaving": "Saving the restored search index.",
+  "set_rgReadingSources": "Reading index status for each source.",
+  "set_rgLoadingTimeout": "Index loading stopped making progress or reached its time limit. Please retry. Existing data is preserved.",
+  "@set_rgRestoring": {
+    "description": "Actual local ANN recovery progress; existing embeddings are reused.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgPreparing": "Preparing index",
   "set_rgPreparingHint": "Preparing or checking the index. Large datasets may take a while, and progress counts may stay unchanged.",
   "set_rgPlanLoading": "Counting what will be indexed…",

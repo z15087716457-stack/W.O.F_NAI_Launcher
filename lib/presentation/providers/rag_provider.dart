@@ -38,6 +38,11 @@ class RagStatus {
     this.sources = const {},
     this.runtimeReady = false,
     this.details = const {},
+    this.indexKnown = false,
+    this.initializing = false,
+    this.initializationPhase = '',
+    this.initializationProcessed = 0,
+    this.initializationTotal = 0,
   });
   final String phase;
   final int indexed, processed, total, bytes, searching;
@@ -48,6 +53,10 @@ class RagStatus {
   final String installDetail;
   final Map<RagSource, RagStatus> sources;
   final Map<String, int> details;
+  final bool indexKnown, initializing;
+  final String initializationPhase;
+  final int initializationProcessed, initializationTotal;
+  bool get hasIndexStatus => indexKnown || indexed > 0 || total > 0 || complete;
   RagStatus forSource(RagSource source) => source == RagSource.tags
       ? this
       : (sources[source] ?? const RagStatus()).copyWith(suspended: suspended);
@@ -76,6 +85,11 @@ class RagStatus {
     Map<RagSource, RagStatus>? sources,
     bool? runtimeReady,
     Map<String, int>? details,
+    bool? indexKnown,
+    bool? initializing,
+    String? initializationPhase,
+    int? initializationProcessed,
+    int? initializationTotal,
   }) => RagStatus(
     phase: phase ?? this.phase,
     indexed: indexed ?? this.indexed,
@@ -95,6 +109,12 @@ class RagStatus {
     sources: sources ?? this.sources,
     runtimeReady: runtimeReady ?? this.runtimeReady,
     details: details ?? this.details,
+    indexKnown: indexKnown ?? this.indexKnown,
+    initializing: initializing ?? this.initializing,
+    initializationPhase: initializationPhase ?? this.initializationPhase,
+    initializationProcessed:
+        initializationProcessed ?? this.initializationProcessed,
+    initializationTotal: initializationTotal ?? this.initializationTotal,
   );
 }
 
@@ -109,6 +129,12 @@ final ragControllerProvider = NotifierProvider<RagController, RagStatus>(
 );
 final ragStatusTimeoutProvider = Provider<Duration>(
   (ref) => const Duration(seconds: 60),
+);
+final ragInitializationTimeoutProvider = Provider<Duration>(
+  (ref) => const Duration(minutes: 15),
+);
+final ragInitializationIdleTimeoutProvider = Provider<Duration>(
+  (ref) => const Duration(minutes: 2),
 );
 
 typedef RagClientStarter =
@@ -180,6 +206,8 @@ final ragRuntimeInfoProvider = FutureProvider.autoDispose<RagRuntimeInfo>((
 class RagController extends Notifier<RagStatus> {
   RagClient? _client;
   Future<RagClient>? _connecting;
+  RagClient? _openingClient;
+  RagCancellation? _initializationCancellation;
   StreamSubscription<Map<String, dynamic>>? _events;
   Timer? _refresh;
   RagRuntimeInstaller? _installer;
@@ -209,6 +237,8 @@ class RagController extends Notifier<RagStatus> {
       _epoch++;
       _refresh?.cancel();
       _installer?.cancel();
+      _initializationCancellation?.cancel();
+      await _openingClient?.close();
       await _client?.close();
       final opening = _connecting;
       if (opening != null) {
@@ -226,6 +256,8 @@ class RagController extends Notifier<RagStatus> {
       _epoch++;
       _refresh?.cancel();
       unawaited(_events?.cancel());
+      _initializationCancellation?.cancel();
+      unawaited(_openingClient?.close());
       unawaited(_client?.close());
       _installer?.dispose();
     });
@@ -244,12 +276,16 @@ class RagController extends Notifier<RagStatus> {
     final epoch = ++_epoch;
     _refresh?.cancel();
     _connecting = null;
+    _initializationCancellation?.cancel();
+    final opening = _openingClient;
+    _openingClient = null;
     _refreshToken = null;
     _finishedJobs.clear();
     _plans.clear();
     final old = _client;
     _client = null;
     await _events?.cancel();
+    await opening?.close();
     await old?.close();
     if (_disposed || epoch != _epoch) return;
     state = RagStatus(
@@ -276,110 +312,155 @@ class RagController extends Notifier<RagStatus> {
   Future<RagClient> _open() async {
     final epoch = _epoch;
     final settings = ref.read(ragSettingsProvider);
-    final root = await ref.read(ragDirectoryProvider)();
-    final python = settings.python.isEmpty
-        ? p.join(root.path, 'runtime', 'Scripts', 'python.exe')
-        : settings.python;
-    if (!await File(python).exists()) {
-      throw const RagException('runtime_missing');
-    }
-    if (settings.embedding.isEmpty || settings.reranker.isEmpty) {
-      throw const RagException('models_missing');
-    }
-    if (!_disposed && epoch == _epoch) {
-      for (final source in RagSource.values.where(settings.enabledFor)) {
-        _change(source, (s) => s.copyWith(phase: 'loading', clearError: true));
-      }
-    }
-    final paths = await ref.read(ragSourcePathsProvider)();
-    final snapshot = settings.blocksEnabled
-        ? await _writeBlockSnapshot(root)
-        : '';
-    final galleryRoots = settings.galleryEnabled
-        ? await _writeGalleryRoots(root)
-        : '';
-    final client = await ref.read(ragClientStarterProvider)(
-      python: python,
-      directory: root,
+    final cancellation = _initializationCancellation = RagCancellation();
+    state = state.copyWith(
+      initializing: true,
+      initializationPhase: 'opening',
+      initializationProcessed: 0,
+      initializationTotal: 0,
     );
     try {
-      final result = await client.request('configure', {
-        'embedding': settings.embedding,
-        'reranker': settings.reranker,
-        'device': settings.device.name,
-        'directory': p.join(root.path, 'indices'),
-        'catalog': paths.catalog,
-        'runtime': paths.runtime,
-        'wiki': paths.wiki,
-        'translations': await ref.read(ragWikiTranslationsPathProvider)(),
-        'blocks': snapshot,
-        'gallery_roots': galleryRoots,
-        'sources': [
-          for (final source in RagSource.values)
-            if (settings.enabledFor(source)) source.name,
-        ],
-      });
-      if (_disposed || epoch != _epoch) throw const RagException('cancelled');
-      if (client.isClosed) throw const RagException('worker_closed');
-      unawaited(_events?.cancel());
-      _client = client;
-      _events = client.events.listen((event) {
-        if (_disposed || epoch != _epoch || !identical(_client, client)) return;
-        if (event['event'] == 'lost') {
-          for (final source in RagSource.values) {
+      final root = await ref.read(ragDirectoryProvider)();
+      final python = settings.python.isEmpty
+          ? p.join(root.path, 'runtime', 'Scripts', 'python.exe')
+          : settings.python;
+      if (!await File(python).exists()) {
+        throw const RagException('runtime_missing');
+      }
+      if (settings.embedding.isEmpty || settings.reranker.isEmpty) {
+        throw const RagException('models_missing');
+      }
+      if (!_disposed && epoch == _epoch) {
+        for (final source in RagSource.values.where(settings.enabledFor)) {
+          _change(
+            source,
+            (s) => s.copyWith(phase: 'loading', clearError: true),
+          );
+        }
+      }
+      final paths = await ref.read(ragSourcePathsProvider)();
+      final snapshot = settings.blocksEnabled
+          ? await _writeBlockSnapshot(root)
+          : '';
+      final galleryRoots = settings.galleryEnabled
+          ? await _writeGalleryRoots(root)
+          : '';
+      final client = await ref.read(ragClientStarterProvider)(
+        python: python,
+        directory: root,
+      );
+      if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+        await client.close();
+        throw const RagException('cancelled');
+      }
+      _openingClient = client;
+      try {
+        final result = await client.configure(
+          {
+            'embedding': settings.embedding,
+            'reranker': settings.reranker,
+            'device': settings.device.name,
+            'directory': p.join(root.path, 'indices'),
+            'catalog': paths.catalog,
+            'runtime': paths.runtime,
+            'wiki': paths.wiki,
+            'translations': await ref.read(ragWikiTranslationsPathProvider)(),
+            'blocks': snapshot,
+            'gallery_roots': galleryRoots,
+            'sources': [
+              for (final source in RagSource.values)
+                if (settings.enabledFor(source)) source.name,
+            ],
+          },
+          cancellation: cancellation,
+          timeout: ref.read(ragInitializationTimeoutProvider),
+          idleTimeout: ref.read(ragInitializationIdleTimeoutProvider),
+          onProgress: (event) {
+            if (_disposed || epoch != _epoch || cancellation.isCancelled) {
+              return;
+            }
+            state = state.copyWith(
+              initializationPhase: event['phase'] as String? ?? 'opening',
+              initializationProcessed:
+                  (event['processed'] as num?)?.toInt() ?? 0,
+              initializationTotal: (event['total'] as num?)?.toInt() ?? 0,
+            );
+          },
+        );
+        if (_disposed || epoch != _epoch) throw const RagException('cancelled');
+        if (client.isClosed) throw const RagException('worker_closed');
+        unawaited(_events?.cancel());
+        _client = client;
+        _events = client.events.listen((event) {
+          if (_disposed || epoch != _epoch || !identical(_client, client)) {
+            return;
+          }
+          if (event['event'] == 'lost') {
+            for (final source in RagSource.values) {
+              _change(
+                source,
+                (s) => s.copyWith(
+                  phase: 'error',
+                  error: 'worker_closed',
+                  busy: false,
+                  clearJob: true,
+                ),
+              );
+            }
+            state = state.copyWith(runtimeReady: false);
+            return;
+          }
+          if (event['event'] == 'index') {
+            final source = RagSource.values.firstWhere(
+              (s) => s.name == event['source'],
+              orElse: () => RagSource.tags,
+            );
+            if (['complete', 'error'].contains(event['phase'])) {
+              _finishedJobs.add(event['job_id'] as String);
+              if (_finishedJobs.length > 32) {
+                _finishedJobs.remove(_finishedJobs.first);
+              }
+            }
+            _applyIndex(event, source);
             _change(
               source,
               (s) => s.copyWith(
-                phase: 'error',
-                error: 'worker_closed',
-                busy: false,
-                clearJob: true,
+                jobId: event['job_id'] as String?,
+                phase: event['phase'] == 'complete'
+                    ? (s.complete ? 'ready' : 'partial')
+                    : event['phase'] as String?,
+                busy: event['phase'] == 'building',
+                clearJob: ['complete', 'error'].contains(event['phase']),
+                error: event['code'] as String?,
+                clearError: event['phase'] != 'error',
               ),
             );
           }
-          state = state.copyWith(runtimeReady: false);
-          return;
+        });
+        _apply(result);
+        state = state.copyWith(initializing: false);
+        _refresh?.cancel();
+        _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
+          if (!_disposed) unawaited(refresh(autoUpdate: true));
+        });
+        if (_gpuHolds > 0) {
+          state = state.copyWith(suspended: true);
+          await client.request('suspend');
         }
-        if (event['event'] == 'index') {
-          final source = RagSource.values.firstWhere(
-            (s) => s.name == event['source'],
-            orElse: () => RagSource.tags,
-          );
-          if (['complete', 'error'].contains(event['phase'])) {
-            _finishedJobs.add(event['job_id'] as String);
-            if (_finishedJobs.length > 32) {
-              _finishedJobs.remove(_finishedJobs.first);
-            }
-          }
-          _applyIndex(event, source);
-          _change(
-            source,
-            (s) => s.copyWith(
-              jobId: event['job_id'] as String?,
-              phase: event['phase'] == 'complete'
-                  ? (s.complete ? 'ready' : 'partial')
-                  : event['phase'] as String?,
-              busy: event['phase'] == 'building',
-              clearJob: ['complete', 'error'].contains(event['phase']),
-              error: event['code'] as String?,
-              clearError: event['phase'] != 'error',
-            ),
-          );
-        }
-      });
-      _apply(result);
-      _refresh?.cancel();
-      _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
-        if (!_disposed) unawaited(refresh(autoUpdate: true));
-      });
-      if (_gpuHolds > 0) {
-        state = state.copyWith(suspended: true);
-        await client.request('suspend');
+        return client;
+      } catch (_) {
+        await client.close();
+        rethrow;
+      } finally {
+        if (identical(_openingClient, client)) _openingClient = null;
       }
-      return client;
-    } catch (_) {
-      await client.close();
-      rethrow;
+    } finally {
+      if (identical(_initializationCancellation, cancellation)) {
+        _initializationCancellation = null;
+        if (!_disposed && epoch == _epoch) {
+          state = state.copyWith(initializing: false);
+        }
+      }
     }
   }
 
@@ -432,6 +513,7 @@ class RagController extends Notifier<RagStatus> {
     _change(
       source,
       (s) => s.copyWith(
+        indexKnown: true,
         indexed: (result['indexed'] as num?)?.toInt(),
         processed: (result['processed'] as num?)?.toInt(),
         total: (result['total'] as num?)?.toInt(),
@@ -524,7 +606,8 @@ class RagController extends Notifier<RagStatus> {
       // an active search timing out does not invalidate that search's results.
       if (error is RagException &&
           error.code == 'timeout' &&
-          RagSource.values.any((s) => state.forSource(s).searching > 0)) {
+          (state.anyBusy ||
+              RagSource.values.any((s) => state.forSource(s).searching > 0))) {
         return;
       }
       if (epoch == _epoch) {

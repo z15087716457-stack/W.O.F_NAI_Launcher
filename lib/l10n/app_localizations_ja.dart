@@ -18849,6 +18849,30 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_rgStartupFrequency => 'Studio の起動ごとに一度だけ表示';
 
   @override
+  String get set_rgLoading => 'インデックスを読み込み中';
+
+  @override
+  String get set_rgOpening => 'ローカルワーカーに接続し、既存のインデックスを確認しています。';
+
+  @override
+  String get set_rgLoadingSaved => '保存済みの検索インデックスを読み込んでいます。';
+
+  @override
+  String set_rgRestoring(String done, String total) {
+    return '検索インデックスを復元中：$done / $total。既存のベクトルを再利用します。';
+  }
+
+  @override
+  String get set_rgSaving => '復元した検索インデックスを保存しています。';
+
+  @override
+  String get set_rgReadingSources => '各ソースのインデックス状態を読み込んでいます。';
+
+  @override
+  String get set_rgLoadingTimeout =>
+      '読み込みが長時間進まないか、制限時間に達しました。再試行してください。既存のデータは保持されています。';
+
+  @override
   String get set_rgPreparing => 'インデックスを準備中';
 
   @override

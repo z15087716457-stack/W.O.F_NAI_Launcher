@@ -62,6 +62,18 @@ SettingsRagData settingsRagData(
     RagSource.gallery => settings.galleryEnabled,
   };
   return SettingsRagData(
+    initializing:
+        settings.enabled &&
+        (status.initializing ||
+            RagSource.values.any(
+              (source) =>
+                  settings.enabledFor(source) &&
+                  !status.forSource(source).hasIndexStatus &&
+                  status.forSource(source).error == null,
+            )),
+    initializationPhase: status.initializationPhase,
+    initializationProcessed: status.initializationProcessed,
+    initializationTotal: status.initializationTotal,
     runtime: SettingsRagStep(
       value: python,
       tone: ready ? SettingsTone.ok : SettingsTone.idle,
@@ -87,6 +99,9 @@ SettingsRagData settingsRagData(
             enabled: sourceSelected(source),
             state: !settings.enabledFor(source)
                 ? SettingsRagState.off
+                : status.initializing ||
+                      (!item.hasIndexStatus && item.error == null)
+                ? SettingsRagState.loading
                 : item.busy
                 ? SettingsRagState.building
                 : item.phase == 'paused'
@@ -96,6 +111,7 @@ SettingsRagData settingsRagData(
                 : item.indexed > 0 || item.complete
                 ? SettingsRagState.ready
                 : SettingsRagState.empty,
+            known: item.hasIndexStatus,
             done: gallery ? item.details['visual_indexed'] ?? 0 : item.indexed,
             total: gallery ? item.details['images'] ?? 0 : item.total,
             secondary: gallery ? item.details['parameters_indexed'] ?? 0 : null,

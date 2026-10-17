@@ -31,7 +31,10 @@ for line in sys.stdin:
   if slow:threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
  elif op=='preview':result={'plan_id':source,'documents':2,'total':8}
  elif op=='start':
-  emit({'event':'index','source':source,'job_id':source,'phase':'complete',**sources[source]});result={'job_id':source}
+  if p.get('rebuild'):
+   sources[source]['building']=True;slow=True;result={'job_id':source}
+  else:
+   emit({'event':'index','source':source,'job_id':source,'phase':'complete',**sources[source]});result={'job_id':source}
  elif op=='clear':
   sources[source]={'indexed':0,'total':8,'complete':False,'building':False};result=sources[source]
  elif op=='suspend':suspended=True;result=status()
@@ -278,6 +281,24 @@ void main() {
           expect(status.available, isTrue);
           expect(status.error, isNull);
           expect(await search, hasLength(1));
+        },
+      );
+      test(
+        'a queued heartbeat timeout cannot fail background indexing',
+        () async {
+          final plan = await controller.preview(source: RagSource.wiki);
+          await controller.start(
+            plan['plan_id'] as String,
+            source: RagSource.wiki,
+            rebuild: true,
+          );
+          expect(container.read(ragControllerProvider).anyBusy, isTrue);
+          await controller.refresh();
+          final status = container.read(ragControllerProvider);
+          expect(status.forSource(RagSource.wiki).busy, isTrue);
+          expect(status.forSource(RagSource.wiki).indexed, 8);
+          expect(status.forSource(RagSource.wiki).error, isNull);
+          expect(status.forSource(RagSource.blocks).error, isNull);
         },
       );
       test(

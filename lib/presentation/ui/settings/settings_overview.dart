@@ -234,11 +234,19 @@ class SettingsOverviewPage extends StatelessWidget {
         spacing: 6,
         children: [
           Text(
-            ragOn ? SettingsFormat.percent(rg.overall) : '—',
+            ragOn && rg.progressKnown
+                ? SettingsFormat.percent(rg.overall)
+                : '—',
             style: UiText.mono(15, weight: FontWeight.w600, color: ink),
           ),
           Text(
-            ragOn ? l.set_tileReady : l.set_rgOff,
+            ragOn
+                ? (rg.initializing
+                      ? l.set_rgLoading
+                      : !rg.progressKnown
+                      ? l.set_rgError
+                      : l.set_tileReady)
+                : l.set_rgOff,
             style: UiText.sans(12, weight: FontWeight.w500, color: c.muted),
           ),
         ],
@@ -264,10 +272,12 @@ class SettingsOverviewPage extends StatelessWidget {
             switch (x.state) {
               SettingsRagState.paused => SettingsTone.warn,
               SettingsRagState.error => SettingsTone.error,
+              SettingsRagState.loading ||
               SettingsRagState.empty => SettingsTone.idle,
               _ => SettingsTone.ok,
             },
             switch (x.state) {
+              SettingsRagState.loading => l.set_rgLoading,
               SettingsRagState.paused => l.set_tileRagPaused(
                 SettingsFormat.ragShort(context, x.kind),
                 SettingsFormat.percent(x.fraction),

@@ -8,11 +8,12 @@ import os
 from pathlib import Path
 import re
 import sqlite3
+import time
 from types import SimpleNamespace
 
 
 class VectorPool:
-    def __init__(self, directory, fingerprint):
+    def __init__(self, directory, fingerprint, *, progress=None, cancelled=lambda: False):
         self.folder = Path(directory).resolve() / 'pool-v2' / fingerprint
         self.folder.mkdir(parents=True, exist_ok=True)
         self.path = self.folder / 'pool.sqlite'
@@ -31,36 +32,68 @@ class VectorPool:
             INSERT OR IGNORE INTO pool_state VALUES('generation',0);
             CREATE TRIGGER IF NOT EXISTS pool_insert AFTER INSERT ON pool_documents BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
-            CREATE TRIGGER IF NOT EXISTS pool_update AFTER UPDATE ON pool_documents BEGIN
+            BEGIN IMMEDIATE;
+            DROP TRIGGER IF EXISTS pool_update;
+            CREATE TRIGGER pool_update AFTER UPDATE ON pool_documents
+                WHEN OLD.id IS NOT NEW.id OR OLD.vector IS NOT NEW.vector
+                     OR OLD.collection IS NOT NEW.collection BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
             CREATE TRIGGER IF NOT EXISTS pool_delete AFTER DELETE ON pool_documents BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
+            COMMIT;
         ''')
         self.views = {}; self.ann = None
-        self.reload()
+        try:
+            rebuilt = self.reload(progress=progress, cancelled=cancelled)
+            if rebuilt:
+                if progress: progress('saving', 0, 0)
+                self.checkpoint(cancelled=cancelled)
+        except BaseException:
+            self.db.close()
+            raise
 
-    def reload(self):
+    def reload(self, *, progress=None, cancelled=lambda: False):
         import numpy as np
         from usearch.index import Index
-        self.ann = Index(ndim=768, metric='cos', dtype='f32')
+        def check():
+            if cancelled(): raise ValueError('cancelled')
+        check()
+        ann = Index(ndim=768, metric='cos', dtype='f32')
         generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
+        total = self.db.execute('SELECT COUNT(*) FROM pool_documents').fetchone()[0]
+        if progress: progress('loading', 0, total)
+        rebuilt = False
         try:
             saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
             if saved['generation'] != generation: raise ValueError('stale_ann')
-            self.ann.load(str(self.folder / 'vectors.usearch'))
-            if len(self.ann) != self.db.execute('SELECT COUNT(*) FROM pool_documents').fetchone()[0]:
+            ann.load(str(self.folder / 'vectors.usearch'))
+            if len(ann) != total:
                 raise ValueError('invalid_ann')
         except (OSError,ValueError,KeyError,RuntimeError):
-            self.ann = Index(ndim=768, metric='cos', dtype='f32')
+            check()
+            rebuilt = True
+            ann = Index(ndim=768, metric='cos', dtype='f32')
+            if progress: progress('restoring', 0, total)
+            processed = 0; last_report = time.monotonic()
             cursor=self.db.execute('SELECT id,vector FROM pool_documents')
             while batch:=cursor.fetchmany(256):
-                self.ann.add(np.array([r[0] for r in batch],dtype=np.uint64),
+                check()
+                ann.add(np.array([r[0] for r in batch],dtype=np.uint64),
                     np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
+                processed += len(batch)
+                if progress and (processed == total or time.monotonic() - last_report >= 1):
+                    progress('restoring', processed, total); last_report = time.monotonic()
+        check()
+        self.ann = ann
         for view in self.views.values(): view.refresh()
+        return rebuilt
 
-    def checkpoint(self):
+    def checkpoint(self, *, cancelled=lambda: False):
+        if cancelled(): raise ValueError('cancelled')
         temporary = self.folder / 'vectors.usearch.tmp'
-        self.ann.save(str(temporary)); os.replace(temporary,self.folder/'vectors.usearch')
+        self.ann.save(str(temporary))
+        if cancelled(): raise ValueError('cancelled')
+        os.replace(temporary,self.folder/'vectors.usearch')
         generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
         temp = self.folder/'ann.json.tmp'
         temp.write_text(json.dumps({'generation':generation,'count':len(self.ann)}),'utf-8')

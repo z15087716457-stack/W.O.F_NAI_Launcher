@@ -78,6 +78,7 @@ class RagClient {
   StreamSubscription<List<int>>? _stderr;
   final _ready = Completer<void>();
   final _pending = <int, Completer<Map<String, dynamic>>>{};
+  final _progress = <int, void Function(Map<String, dynamic>)>{};
   final _events = StreamController<Map<String, dynamic>>.broadcast();
   int _next = 0;
   bool _closed = false;
@@ -150,6 +151,9 @@ class RagClient {
           }
         }
       } else if (message.containsKey('event')) {
+        if (message['event'] == 'initialization') {
+          _progress[message['request_id']]?.call(message);
+        }
         _events.add(message);
       } else {
         final pending = _pending.remove(message['id']);
@@ -172,7 +176,35 @@ class RagClient {
     Map<String, dynamic> params = const {},
     RagCancellation? cancellation,
     Duration timeout = const Duration(seconds: 60),
-  ]) async {
+  ]) => _request(op, params, cancellation, timeout);
+
+  /// Restoring a large local ANN is different from a short command. Only
+  /// progress for this request renews its idle budget; the hard limit remains.
+  Future<Map<String, dynamic>> configure(
+    Map<String, dynamic> params, {
+    RagCancellation? cancellation,
+    Duration timeout = const Duration(minutes: 15),
+    Duration idleTimeout = const Duration(minutes: 2),
+    void Function(Map<String, dynamic>)? onProgress,
+  }) => _request(
+    'configure',
+    params,
+    cancellation,
+    timeout,
+    idleTimeout: idleTimeout,
+    onProgress: onProgress,
+    timeoutCode: 'initialization_timeout',
+  );
+
+  Future<Map<String, dynamic>> _request(
+    String op,
+    Map<String, dynamic> params,
+    RagCancellation? cancellation,
+    Duration timeout, {
+    Duration? idleTimeout,
+    void Function(Map<String, dynamic>)? onProgress,
+    String timeoutCode = 'timeout',
+  }) async {
     if (_closed) throw const RagException('worker_closed');
     if (cancellation?.isCancelled ?? false) {
       throw const RagException('cancelled');
@@ -180,19 +212,61 @@ class RagClient {
     final id = ++_next;
     final completion = Completer<Map<String, dynamic>>();
     _pending[id] = completion;
+    final elapsed = Stopwatch()..start();
+    void expire(String limit) {
+      if (!_pending.containsKey(id)) return;
+      AppLogger.w(
+        'Request timed out: operation=$op, limit=$limit, elapsedMs=${elapsed.elapsedMilliseconds}',
+        'RAG',
+      );
+      _send({'op': 'cancel', 'target': id});
+      _pending.remove(id)?.completeError(RagException(timeoutCode));
+    }
+
+    final deadline = Timer(timeout, () => expire('deadline'));
+    Timer? idle;
+    if (idleTimeout != null) {
+      (String, int, int)? lastProgress;
+      idle = Timer(idleTimeout, () => expire('idle'));
+      _progress[id] = (event) {
+        if (!_pending.containsKey(id)) return;
+        final phase = event['phase'];
+        final processed = event['processed'];
+        final total = event['total'];
+        if (phase is! String ||
+            !const {
+              'opening',
+              'loading',
+              'restoring',
+              'saving',
+              'sources',
+            }.contains(phase) ||
+            processed is! int ||
+            total is! int ||
+            processed < 0 ||
+            total < processed) {
+          return;
+        }
+        final progress = (phase, processed, total);
+        if (progress == lastProgress) return;
+        lastProgress = progress;
+        idle?.cancel();
+        idle = Timer(idleTimeout, () => expire('idle'));
+        onProgress?.call(event);
+      };
+    }
     _send({'id': id, 'op': op, 'params': params});
     final unlisten = cancellation?.listen(() {
       _send({'op': 'cancel', 'target': id});
       _pending.remove(id)?.completeError(const RagException('cancelled'));
     });
     try {
-      return await completion.future.timeout(timeout);
-    } on TimeoutException {
-      AppLogger.w('Request timed out: operation=$op', 'RAG');
-      _send({'op': 'cancel', 'target': id});
-      _pending.remove(id);
-      throw const RagException('timeout');
+      return await completion.future;
     } finally {
+      deadline.cancel();
+      idle?.cancel();
+      elapsed.stop();
+      _progress.remove(id);
       unlisten?.call();
     }
   }

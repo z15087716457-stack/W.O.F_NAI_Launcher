@@ -181,6 +181,7 @@ class SettingsHostState extends State<SettingsHost> {
         onRagSourceEnabled: (k, v) => call('ragEnabled:${k.name}:$v'),
         onRagBuild: (k) => call('ragBuild:${k.name}'),
         onRagRebuild: (k) => call('ragRebuild:${k.name}'),
+        onRagRefresh: () => call('ragRefresh'),
         onRagStartPlan: () => call('ragStartPlan'),
         onRagCancelPlan: () => call('ragCancelPlan'),
         onRagClear: (k) => call('ragClear:${k.name}'),

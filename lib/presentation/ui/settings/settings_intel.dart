@@ -1039,9 +1039,29 @@ class SettingsRagPage extends StatelessWidget {
     final a = s.actions;
     final on = d.values.flag(SettingKey.ragEnabled);
     final usable = on && rg.runtimeReady;
+    final loading = on && rg.initializing;
     final building = rg.sources.any(
       (x) => x.enabled && x.state != SettingsRagState.ready,
     );
+    final allDone =
+        rg.sources.any((x) => x.enabled) &&
+        rg.sources
+            .where((x) => x.enabled)
+            .every(
+              (x) => x.state == SettingsRagState.ready && x.done >= x.total,
+            );
+    String? errorText(String? value) =>
+        value == 'initialization_timeout' ? l.set_rgLoadingTimeout : value;
+    final loadingHint = switch (rg.initializationPhase) {
+      'loading' => l.set_rgLoadingSaved,
+      'restoring' => l.set_rgRestoring(
+        SettingsFormat.count(rg.initializationProcessed),
+        SettingsFormat.count(rg.initializationTotal),
+      ),
+      'saving' => l.set_rgSaving,
+      'sources' => l.set_rgReadingSources,
+      _ => l.set_rgOpening,
+    };
     Widget step(String n, SettingsRagStep x, bool first) => Expanded(
       child: Container(
         padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
@@ -1128,7 +1148,7 @@ class SettingsRagPage extends StatelessWidget {
               ),
             ],
           ),
-        if (x.state != SettingsRagState.empty)
+        if (x.known && x.state != SettingsRagState.empty)
           Row(
             spacing: 10,
             children: [
@@ -1158,7 +1178,7 @@ class SettingsRagPage extends StatelessWidget {
           ),
         if (x.error != null)
           Text(
-            x.error!,
+            errorText(x.error)!,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: UiText.sans(12, color: c.error, height: 1.5),
@@ -1190,7 +1210,7 @@ class SettingsRagPage extends StatelessWidget {
                 spacing: 6,
                 children: [
                   Text(
-                    SettingsFormat.percent(rg.overall),
+                    rg.progressKnown ? SettingsFormat.percent(rg.overall) : '—',
                     style: settingsBig(context, size: 26),
                   ),
                   Padding(
@@ -1217,14 +1237,14 @@ class SettingsRagPage extends StatelessWidget {
                       ),
                       Expanded(
                         child: SettingsBar(
-                          value: x.fraction,
+                          value: x.known ? x.fraction : 0,
                           color: x.fraction >= 1 ? c.ok : c.accent,
                         ),
                       ),
                       SizedBox(
                         width: 30,
                         child: Text(
-                          SettingsFormat.percent(x.fraction),
+                          x.known ? SettingsFormat.percent(x.fraction) : '—',
                           textAlign: TextAlign.right,
                           style: UiText.mono(11, color: c.ink),
                         ),
@@ -1261,8 +1281,12 @@ class SettingsRagPage extends StatelessWidget {
                                   child: Text(
                                     !on
                                         ? l.set_rgOff
+                                        : loading
+                                        ? l.set_rgLoading
                                         : rg.checking && !usable
                                         ? l.set_testing
+                                        : !rg.progressKnown && rg.error != null
+                                        ? l.set_rgNotReady
                                         : usable
                                         ? l.set_rgReady
                                         : l.set_rgNotReady,
@@ -1273,7 +1297,10 @@ class SettingsRagPage extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                if (usable)
+                                if (usable &&
+                                    !loading &&
+                                    rg.progressKnown &&
+                                    (building || allDone))
                                   UiMini(
                                     building
                                         ? l.set_rgPartial
@@ -1283,7 +1310,9 @@ class SettingsRagPage extends StatelessWidget {
                               ],
                             ),
                             Text(
-                              on && rg.checking && !usable
+                              loading
+                                  ? loadingHint
+                                  : on && rg.checking && !usable
                                   ? l.set_rgEnvSub
                                   : on && !usable
                                   ? l.set_rgNotReadySub
@@ -1294,7 +1323,7 @@ class SettingsRagPage extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
-                                  rg.error!,
+                                  errorText(rg.error)!,
                                   key: const Key('rag-error'),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -1313,7 +1342,7 @@ class SettingsRagPage extends StatelessWidget {
                         glyph: UiGlyphs.refresh,
                         small: true,
                         tone: SettingsBtnTone.ghost,
-                        onTap: a.onRagRefresh,
+                        onTap: loading ? null : a.onRagRefresh,
                       ),
                       const SetSwitch(SettingKey.ragEnabled),
                     ],
@@ -1345,7 +1374,9 @@ class SettingsRagPage extends StatelessWidget {
                 title: SettingsFormat.ragSource(context, x.kind),
                 subtitle: sub(x.kind),
                 badges: [
-                  if (rg.preparing == x.kind)
+                  if (x.enabled && x.state == SettingsRagState.loading)
+                    UiMini(l.set_rgLoading, tone: UiMiniTone.accent)
+                  else if (rg.preparing == x.kind)
                     UiMini(l.set_rgPreparing, tone: UiMiniTone.accent)
                   else ...[
                     if (x.enabled && x.state == SettingsRagState.empty)
@@ -1367,6 +1398,8 @@ class SettingsRagPage extends StatelessWidget {
                     children: [
                       if (!x.enabled)
                         const SizedBox.shrink()
+                      else if (x.state == SettingsRagState.loading)
+                        const UiSpinner()
                       else if (x.state == SettingsRagState.paused)
                         SettingsBtn(
                           key: Key('rag-resume-${x.kind.name}'),
@@ -1389,7 +1422,17 @@ class SettingsRagPage extends StatelessWidget {
                           label: l.set_retry,
                           glyph: UiGlyphs.refresh,
                           small: true,
-                          onTap: rg.busy ? null : () => a.onRagRebuild(x.kind),
+                          onTap: rg.busy
+                              ? null
+                              : () {
+                                  if (!x.known ||
+                                      x.error == 'initialization_timeout' ||
+                                      x.error == 'worker_closed') {
+                                    a.onRagRefresh();
+                                  } else {
+                                    a.onRagRebuild(x.kind);
+                                  }
+                                },
                         )
                       else if (x.state == SettingsRagState.empty ||
                           (x.state == SettingsRagState.ready &&
@@ -1406,7 +1449,9 @@ class SettingsRagPage extends StatelessWidget {
                               : () => a.onRagBuild(x.kind),
                         ),
                       if (x.enabled &&
+                          x.known &&
                           x.state != SettingsRagState.empty &&
+                          x.state != SettingsRagState.loading &&
                           x.state != SettingsRagState.building)
                         SettingsMoreButton(
                           key: Key('rag-more-${x.kind.name}'),

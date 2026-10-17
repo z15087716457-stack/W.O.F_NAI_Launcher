@@ -63,8 +63,10 @@ class Worker:
         code = str(error)
         return code if code in allowed else 'rag_runtime_error'
 
-    def execute(self, op, p, token):
+    def execute(self, op, p, token, progress=None):
         if op == 'configure':
+            if token.is_set(): raise ValueError('cancelled')
+            if progress: progress('opening', 0, 0)
             for job in self.jobs.values(): job['cancel'].set(); job['generator'].close()
             self.jobs.clear()
             if self.models: self.models.unload()
@@ -76,7 +78,8 @@ class Worker:
             enabled = p.get('sources',['tags'])
             if not isinstance(enabled,list) or any(s not in ('tags','wiki','blocks','gallery') for s in enabled): raise ValueError('invalid_source')
             root = os.path.abspath(p['directory'])
-            self.pool = VectorPool(root,models.fingerprint)
+            self.pool = VectorPool(root,models.fingerprint,progress=progress,cancelled=token.is_set)
+            if progress: progress('sources', 0, 0)
             if 'tags' in enabled:
                 self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki','')),pool=self.pool,collection='tags')
             if 'wiki' in enabled:
@@ -86,7 +89,8 @@ class Worker:
             if 'gallery' in enabled:
                 self.engines['gallery'] = GalleryEngine(os.path.join(root,'gallery-v1'),models,p['runtime'],p['gallery_roots'],pool=self.pool)
             self.settings = p; self.suspended = False
-            return self.status()
+            if token.is_set(): raise ValueError('cancelled')
+            return self.status(progress=progress, cancelled=token.is_set)
         if self.models is None: raise ValueError('not_configured')
         if op == 'status':
             return {**self.status(), **self.models.status()}
@@ -171,9 +175,11 @@ class Worker:
                 min(80,max(1,p.get('limit',40))),token.is_set,p.get('keyword',''))
         raise ValueError('unknown_operation')
 
-    def status(self):
+    def status(self, progress=None, cancelled=lambda: False):
         sources = {}
         for name,engine in self.engines.items():
+            if cancelled(): raise ValueError('cancelled')
+            if progress: progress('sources', len(sources), len(self.engines))
             status = engine.status()
             jobs = [j for j in self.jobs.values() if j['source'] == name]
             paused = status['paused'] or bool(jobs and all(j['paused'] for j in jobs))
@@ -194,7 +200,10 @@ class Worker:
             request_id = request['id']; token = self.tokens.get(request_id,threading.Event())
             try:
                 if token.is_set(): raise ValueError('cancelled')
-                result = self.execute(request['op'],request.get('params',{}),token)
+                def progress(phase, processed, total):
+                    emit({'event':'initialization','request_id':request_id,
+                          'phase':phase,'processed':processed,'total':total})
+                result = self.execute(request['op'],request.get('params',{}),token,progress)
                 if token.is_set(): raise ValueError('cancelled')
                 emit({'id':request_id,'result':result})
             except Exception as error:

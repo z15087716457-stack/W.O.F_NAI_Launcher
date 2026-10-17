@@ -15,7 +15,17 @@ for line in sys.stdin:
  if op=='shutdown': break
  if op=='cancel': cancelled.append(r['target']);continue
  i=r['id'];p=r.get('params',{})
- if op=='delay': threading.Timer(.12,emit,args=[{'id':i,'result':p}]).start()
+ if op=='configure':
+  mode=p.get('mode','progress')
+  def configure(i=i,mode=mode):
+   import time
+   for step in range(7):
+    if mode in ('progress','wrong-owner','same-progress'):
+     emit({'event':'initialization','request_id':i+(1 if mode=='wrong-owner' else 0),'phase':'restoring','processed':0 if mode=='same-progress' else step,'total':7})
+    time.sleep(.04)
+   emit({'id':i,'result':{'restored':True}})
+  threading.Thread(target=configure,daemon=True).start();continue
+ elif op=='delay': threading.Timer(.12,emit,args=[{'id':i,'result':p}]).start()
  elif op=='error': emit({'id':i,'error':{'code':'fixture_failure'}})
  elif op=='cancelled': emit({'id':i,'result':{'count':len(cancelled)}})
  elif op=='exit': break
@@ -43,6 +53,110 @@ void main() {
   group(
     'local JSON worker',
     () {
+      test('configure progress renews only the idle budget', () async {
+        final progress = <int>[];
+        expect(
+          await client.configure(
+            {},
+            idleTimeout: const Duration(milliseconds: 150),
+            timeout: const Duration(seconds: 2),
+            onProgress: (event) => progress.add(event['processed'] as int),
+          ),
+          {'restored': true},
+        );
+        expect(progress, [0, 1, 2, 3, 4, 5, 6]);
+      });
+      for (final mode in ['silent', 'wrong-owner']) {
+        test(
+          'configure $mode cannot bypass the no-progress deadline',
+          () async {
+            var callbacks = 0;
+            await expectLater(
+              client.configure(
+                {'mode': mode},
+                idleTimeout: const Duration(milliseconds: 120),
+                onProgress: (_) => callbacks++,
+              ),
+              throwsA(
+                isA<RagException>().having(
+                  (e) => e.code,
+                  'code',
+                  'initialization_timeout',
+                ),
+              ),
+            );
+            await Future<void>.delayed(const Duration(milliseconds: 350));
+            expect(callbacks, 0);
+            expect((await client.request('cancelled'))['count'], 1);
+            expect(await client.request('echo'), isEmpty);
+          },
+        );
+      }
+      test(
+        'configure still has a hard deadline despite continuous progress',
+        () async {
+          await expectLater(
+            client.configure(
+              {},
+              timeout: const Duration(milliseconds: 150),
+              idleTimeout: const Duration(seconds: 1),
+            ),
+            throwsA(
+              isA<RagException>().having(
+                (e) => e.code,
+                'code',
+                'initialization_timeout',
+              ),
+            ),
+          );
+        },
+      );
+      test(
+        'repeated unchanged progress cannot hide a stalled initializer',
+        () async {
+          var callbacks = 0;
+          await expectLater(
+            client.configure(
+              {'mode': 'same-progress'},
+              idleTimeout: const Duration(milliseconds: 150),
+              timeout: const Duration(seconds: 2),
+              onProgress: (_) => callbacks++,
+            ),
+            throwsA(
+              isA<RagException>().having(
+                (e) => e.code,
+                'code',
+                'initialization_timeout',
+              ),
+            ),
+          );
+          expect(callbacks, 1);
+        },
+      );
+      test(
+        'configure cancellation releases progress ownership immediately',
+        () async {
+          final cancellation = RagCancellation();
+          var callbacks = 0;
+          final pending = client.configure(
+            {},
+            cancellation: cancellation,
+            onProgress: (_) {
+              callbacks++;
+              cancellation.cancel();
+            },
+          );
+          await expectLater(
+            pending,
+            throwsA(
+              isA<RagException>().having((e) => e.code, 'code', 'cancelled'),
+            ),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 350));
+          expect(callbacks, 1);
+          expect(client.isClosed, isFalse);
+        },
+      );
       test('Unicode and concurrent replies retain request ownership', () async {
         final slow = client.request('delay', {'text': '雨🌧，夜景'});
         expect(await client.request('echo', {'text': '角色负面'}), {

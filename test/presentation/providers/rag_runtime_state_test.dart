@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/rag/rag_runtime_probe.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 import 'package:nai_launcher/presentation/providers/rag_model_download_provider.dart';
@@ -82,6 +83,60 @@ void main() {
         null,
       );
       expect(failed.runtimeReady, isFalse);
+    },
+  );
+  test(
+    'startup projection distinguishes unread, empty, reconnecting and failed indexes',
+    () {
+      const settings = RagSettings(enabled: true, wikiEnabled: true);
+      SettingsRagData project(RagStatus status) => settingsRagData(
+        settings,
+        status,
+        const AsyncData(RagRuntimeInfo(python: 'fixture', ready: true)),
+        const RagModelDownloadState(),
+        const SettingsRagSessionState(),
+        null,
+      );
+      final unread = project(const RagStatus());
+      expect(unread.initializing, isTrue);
+      expect(unread.progressKnown, isFalse);
+      expect(unread.sources.first.state, SettingsRagState.loading);
+      expect(unread.sources.first.known, isFalse);
+      final empty = project(
+        const RagStatus(
+          indexKnown: true,
+          sources: {RagSource.wiki: RagStatus(indexKnown: true)},
+        ),
+      );
+      expect(empty.initializing, isFalse);
+      expect(empty.progressKnown, isTrue);
+      expect(empty.sources.first.state, SettingsRagState.empty);
+      final reconnect = project(
+        const RagStatus(
+          initializing: true,
+          indexKnown: true,
+          indexed: 12,
+          total: 20,
+        ),
+      );
+      expect(reconnect.sources.first.state, SettingsRagState.loading);
+      expect(reconnect.sources.first.done, 12);
+      expect(reconnect.sources.first.known, isTrue);
+      final failed = project(
+        const RagStatus(
+          phase: 'error',
+          error: 'initialization_timeout',
+          sources: {
+            RagSource.wiki: RagStatus(
+              phase: 'error',
+              error: 'initialization_timeout',
+            ),
+          },
+        ),
+      );
+      expect(failed.initializing, isFalse);
+      expect(failed.sources.first.state, SettingsRagState.error);
+      expect(failed.progressKnown, isFalse);
     },
   );
 }

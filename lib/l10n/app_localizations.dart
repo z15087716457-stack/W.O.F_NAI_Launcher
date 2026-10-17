@@ -33944,6 +33944,48 @@ abstract class AppLocalizations {
   /// **'Shown once per Studio session'**
   String get set_rgStartupFrequency;
 
+  /// No description provided for @set_rgLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading indexes'**
+  String get set_rgLoading;
+
+  /// No description provided for @set_rgOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to the local worker and reading existing indexes.'**
+  String get set_rgOpening;
+
+  /// No description provided for @set_rgLoadingSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading the saved search index.'**
+  String get set_rgLoadingSaved;
+
+  /// Actual local ANN recovery progress; existing embeddings are reused.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring the search index: {done} / {total}. Existing vectors are reused.'**
+  String set_rgRestoring(String done, String total);
+
+  /// No description provided for @set_rgSaving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving the restored search index.'**
+  String get set_rgSaving;
+
+  /// No description provided for @set_rgReadingSources.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading index status for each source.'**
+  String get set_rgReadingSources;
+
+  /// No description provided for @set_rgLoadingTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Index loading stopped making progress or reached its time limit. Please retry. Existing data is preserved.'**
+  String get set_rgLoadingTimeout;
+
   /// No description provided for @set_rgPreparing.
   ///
   /// In en, this message translates to:
