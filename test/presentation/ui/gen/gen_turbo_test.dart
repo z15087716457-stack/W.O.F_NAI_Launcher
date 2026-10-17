@@ -15,10 +15,14 @@ void main() {
   setUpAll(loadStudioCaptureFonts);
   GenViewData data({required bool? turbo, bool furry = false}) =>
       GenFixture.view().copyWith(
-        model: turbo == true
+        model: turbo == null
+            ? ImageModels.animeDiffusionV5Curated
+            : turbo == true
             ? ImageModels.animeDiffusionV5FullMedium
             : ImageModels.animeDiffusionV5Full,
-        displayModel: ImageModels.animeDiffusionV5Full,
+        displayModel: turbo == null
+            ? ImageModels.animeDiffusionV5Curated
+            : ImageModels.animeDiffusionV5Full,
         models: const [
           GenModel(id: ImageModels.animeDiffusionV5Full, name: 'V5 Full'),
           GenModel(id: ImageModels.animeDiffusionV5Curated, name: 'V5 Curated'),
@@ -51,10 +55,10 @@ void main() {
                 height: 760,
               );
               final capsule = find.byKey(const Key('gen-model-capsule'));
-              // Measured from the original capsule with the same bundled font.
+              // Keep the mode segment compact without squeezing its contents.
               expect(
-                t.getSize(capsule).width,
-                closeTo(furry ? 212.024 : 217.172, .02),
+                t.getSize(find.byKey(const Key('gen-mode'))).width,
+                inExclusiveRange(32, 42),
               );
               expect(t.getSize(find.byKey(const Key('gen-header'))).height, 37);
               expect(
@@ -65,7 +69,12 @@ void main() {
                 findsOneWidget,
               );
               expect(
-                find.descendant(of: capsule, matching: find.text('V5 Full')),
+                find.descendant(
+                  of: capsule,
+                  matching: find.text(
+                    active == null ? 'V5 Curated' : 'V5 Full',
+                  ),
+                ),
                 findsOneWidget,
               );
               final count = r.calls

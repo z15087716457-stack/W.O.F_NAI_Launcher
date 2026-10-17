@@ -183,11 +183,20 @@ void main() {
         final modelCapsule = find.byKey(const Key('gen-model-capsule'));
         if (turbo.evaluate().isNotEmpty && modelCapsule.evaluate().isNotEmpty) {
           final button = t.getRect(turbo), capsule = t.getRect(modelCapsule);
+          final mode = find.byKey(const Key('gen-mode'));
+          final furry = find
+              .descendant(of: mode, matching: find.text('F'))
+              .evaluate()
+              .isNotEmpty;
+          // Retain the same pre-Turbo right edge after the user-requested
+          // narrowing; include only the pixels previously inside that capsule.
+          final originalRight =
+              capsule.right + (furry ? 43.164 : 48.312) - t.getSize(mode).width;
           masks.add(
             Rect.fromLTRB(
               button.left,
               capsule.top,
-              capsule.right,
+              originalRight,
               capsule.bottom,
             ),
           );

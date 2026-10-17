@@ -194,10 +194,11 @@ class _ModelCapsule extends StatelessWidget {
                 message: context.l10n.gen_modeTip,
                 child: compact
                     ? SizedBox(
-                        // V5 shares the old mode width with the 25px toggle.
-                        width: _originalModeWidth(context, furry) - 25,
                         height: 26,
-                        child: mode,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: mode,
+                        ),
                       )
                     : Padding(
                         padding: const EdgeInsets.only(left: 10, right: 9),
@@ -210,20 +211,6 @@ class _ModelCapsule extends StatelessWidget {
       ],
     );
   }
-}
-
-double _originalModeWidth(BuildContext context, bool furry) {
-  final text = TextPainter(
-    text: TextSpan(
-      text: furry ? 'Furry' : 'Anime',
-      style: UiText.sans(12, weight: FontWeight.w700),
-    ),
-    textDirection: Directionality.of(context),
-    textScaler: MediaQuery.textScalerOf(context),
-  )..layout();
-  final width = text.width + 19 + 13 + 5;
-  text.dispose();
-  return width;
 }
 
 class _TurboButton extends StatelessWidget {
