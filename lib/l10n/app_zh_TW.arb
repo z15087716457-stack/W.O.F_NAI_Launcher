@@ -4834,20 +4834,37 @@
   "blockAppearance_solid": "實心",
   "blockAppearance_gradient": "漸變",
   "blockAppearance_translation": "翻譯",
-  "opusUsage_exhausted": "帳號免費額度已用盡，V5 生成按 Anlas 計費",
+  "opusUsage_regularRemaining": "常規免費額度：{percent}%",
+  "@opusUsage_regularRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_reserveRemaining": "備用電池額度（已啟用）：{percent}%",
+  "@opusUsage_reserveRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_usingRegular": "優先使用常規額度，用盡後使用備用額度",
+  "opusUsage_usingReserve": "常規額度已用盡，正在使用備用電池額度",
+  "opusUsage_regularEmpty": "常規額度已用盡，暫無可用備用額度",
+  "opusUsage_exhausted": "帳號額度已用盡，V5 生成按 Anlas 計費",
   "opusUsage_remaining": "帳號免費額度剩餘 {percent}%",
   "@opusUsage_remaining": {
     "placeholders": {
       "percent": {}
     }
   },
-  "opusUsage_recharging": "回充中：下一 +1% 還需 {time}",
+  "opusUsage_recharging": "常規額度回充：下一 +1% 還需 {time}",
   "@opusUsage_recharging": {
     "placeholders": {
       "time": {}
     }
   },
-  "opusUsage_notRecharging": "當前不回充（池子在回充閾值之上或已用盡）",
+  "opusUsage_notRecharging": "常規額度當前無回充倒計時",
   "opusUsage_clickToRefresh": "點選重新整理",
   "opusUsage_hoursMinutes": "{hours} 小時 {minutes} 分",
   "@opusUsage_hoursMinutes": {

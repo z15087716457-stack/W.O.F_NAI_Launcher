@@ -162,6 +162,10 @@ void main() {
       (const OpusUsage(percent: 0), 0),
       (const OpusUsage(percent: 141, isNegative: true), 0),
       (const OpusUsage(percent: -4), 0),
+      (const OpusUsage(percent: 2, purchasedPercent: 200), 2),
+      (const OpusUsage(purchasedPercent: 200.5), 200.5),
+      (const OpusUsage(purchasedPercent: .25), .25),
+      (const OpusUsage(purchasedPercent: 100, isNegative: true), 0),
       (null, null),
     ]) {
       (container.read(subscriptionNotifierProvider.notifier)
@@ -169,6 +173,7 @@ void main() {
           .publish(SubscriptionState.loaded(account.copyWith(usage: usage)));
       final quota = container.read(provider).quota;
       expect(quota.opusPercent, expected, reason: '$usage');
+      expect(quota.opusUsingReserve, usage?.isUsingReserve ?? false);
       expect(quota.opusTip, usage == null ? null : generationOpusTip(l, usage));
       expect(quota.anlas, 90);
       if (usage != null) {

@@ -8822,7 +8822,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get blockAppearance_translation => '翻訳';
 
   @override
-  String get opusUsage_exhausted => 'アカウントの無料枠を使い切りました。V5 の生成は Anlas で課金されます';
+  String opusUsage_regularRemaining(Object percent) {
+    return '通常の無料枠：$percent%';
+  }
+
+  @override
+  String opusUsage_reserveRemaining(Object percent) {
+    return '予備電池の追加枠（有効化済み）：$percent%';
+  }
+
+  @override
+  String get opusUsage_usingRegular => '通常枠を優先し、使い切ると予備枠を消費します';
+
+  @override
+  String get opusUsage_usingReserve => '通常枠を使い切り、予備電池の枠を使用中';
+
+  @override
+  String get opusUsage_regularEmpty => '通常枠を使い切りました。利用可能な予備枠はありません';
+
+  @override
+  String get opusUsage_exhausted => 'アカウントの枠を使い切りました。V5 の生成は Anlas で課金されます';
 
   @override
   String opusUsage_remaining(Object percent) {
@@ -8831,11 +8850,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String opusUsage_recharging(Object time) {
-    return '回復中：次の +1% まで $time';
+    return '通常枠の回復中：次の +1% まで $time';
   }
 
   @override
-  String get opusUsage_notRecharging => '現在は回復しません（回復しきい値を超えているか、使い切っています）';
+  String get opusUsage_notRecharging => '通常枠の回復カウントダウンはありません';
 
   @override
   String get opusUsage_clickToRefresh => 'クリックして更新';

@@ -4834,20 +4834,37 @@
   "blockAppearance_solid": "단색",
   "blockAppearance_gradient": "그라데이션",
   "blockAppearance_translation": "번역",
-  "opusUsage_exhausted": "무료 계정 할당량을 모두 사용했습니다. V5 생성은 Anlas로 과금됩니다",
+  "opusUsage_regularRemaining": "기본 무료 할당량: {percent}%",
+  "@opusUsage_regularRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_reserveRemaining": "예비 배터리 할당량(활성화됨): {percent}%",
+  "@opusUsage_reserveRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_usingRegular": "기본 할당량을 먼저 사용하고 소진되면 예비 할당량을 사용합니다",
+  "opusUsage_usingReserve": "기본 할당량 소진, 예비 배터리 할당량 사용 중",
+  "opusUsage_regularEmpty": "기본 할당량을 모두 사용했으며 사용 가능한 예비 할당량이 없습니다",
+  "opusUsage_exhausted": "계정 할당량을 모두 사용했습니다. V5 생성은 Anlas로 과금됩니다",
   "opusUsage_remaining": "무료 계정 할당량 남음: {percent}%",
   "@opusUsage_remaining": {
     "placeholders": {
       "percent": {}
     }
   },
-  "opusUsage_recharging": "충전 중: 다음 +1%까지 {time}",
+  "opusUsage_recharging": "기본 할당량 충전 중: 다음 +1%까지 {time}",
   "@opusUsage_recharging": {
     "placeholders": {
       "time": {}
     }
   },
-  "opusUsage_notRecharging": "충전하지 않음(할당량이 기준값보다 많거나 모두 사용함)",
+  "opusUsage_notRecharging": "기본 할당량 충전 카운트다운 없음",
   "opusUsage_clickToRefresh": "클릭하여 새로 고침",
   "opusUsage_hoursMinutes": "{hours}시간 {minutes}분",
   "@opusUsage_hoursMinutes": {

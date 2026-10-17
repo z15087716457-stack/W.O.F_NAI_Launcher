@@ -4834,20 +4834,37 @@
   "blockAppearance_solid": "Solid",
   "blockAppearance_gradient": "Gradient",
   "blockAppearance_translation": "Translation",
-  "opusUsage_exhausted": "Free account quota used up; V5 generation is billed in Anlas",
+  "opusUsage_regularRemaining": "Regular free quota: {percent}%",
+  "@opusUsage_regularRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_reserveRemaining": "Backup quota (activated): {percent}%",
+  "@opusUsage_reserveRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_usingRegular": "Regular quota is used first, then backup quota",
+  "opusUsage_usingReserve": "Regular quota used up; using backup quota",
+  "opusUsage_regularEmpty": "Regular quota used up; no backup quota available",
+  "opusUsage_exhausted": "Account quota used up; V5 generation is billed in Anlas",
   "opusUsage_remaining": "Free account quota remaining: {percent}%",
   "@opusUsage_remaining": {
     "placeholders": {
       "percent": {}
     }
   },
-  "opusUsage_recharging": "Recharging: next +1% in {time}",
+  "opusUsage_recharging": "Regular quota recharging: next +1% in {time}",
   "@opusUsage_recharging": {
     "placeholders": {
       "time": {}
     }
   },
-  "opusUsage_notRecharging": "Not recharging (the pool is above the threshold or used up)",
+  "opusUsage_notRecharging": "No regular-quota recharge countdown available",
   "opusUsage_clickToRefresh": "Click to refresh",
   "opusUsage_hoursMinutes": "{hours} h {minutes} min",
   "@opusUsage_hoursMinutes": {

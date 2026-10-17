@@ -6,6 +6,8 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/models/user/user_subscription.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../ui/kit/ui_colors.dart';
+import '../../utils/opus_usage_presentation.dart';
 import '../../../core/utils/localization_extension.dart';
 
 /// Opus 免费额度芯片（V5 起）
@@ -53,9 +55,13 @@ class OpusUsageChip extends ConsumerWidget {
 
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final isLow = usage.isLow;
-    final accent = isLow ? scheme.error : scheme.primary;
-    final refilling = usage.timeUntilNextPercent > 0;
+    final warning = !usage.isUsingReserve && usage.activePercent < 20;
+    final accent = context.ui.quotaAccent(
+      usage.activePercent,
+      usingReserve: usage.isUsingReserve,
+    );
+    // The bar represents the active pool. Backup quota never recharges.
+    final refilling = !usage.isUsingReserve && usage.timeUntilNextPercent > 0;
 
     final chip = InkWell(
       onTap: () {
@@ -64,14 +70,13 @@ class OpusUsageChip extends ConsumerWidget {
       },
       borderRadius: BorderRadius.circular(8),
       child: Tooltip(
-        message: _tooltip(usage),
+        message: opusUsageTooltip(context.l10n, usage),
         child: compact
             ? _buildQuotaCell(
                 scheme,
-                text: usage.isNegative
-                    ? '0%'
-                    : '${_fmtPercent(usage.percent)}%',
-                warning: isLow,
+                text: '${_fmtPercent(usage.activePercent)}%',
+                accent: accent,
+                warning: warning,
                 inline: inline,
               )
             : Container(
@@ -80,19 +85,15 @@ class OpusUsageChip extends ConsumerWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: isLow
-                      ? scheme.errorContainer.withValues(alpha: 0.3)
+                  color: warning
+                      ? accent.withValues(alpha: 0.1)
                       : scheme.surfaceContainerHigh,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.bolt_outlined,
-                      size: 16,
-                      color: isLow ? scheme.error : accent,
-                    ),
+                    Icon(Icons.bolt_outlined, size: 16, color: accent),
                     const SizedBox(width: 5),
                     _QuotaBar(
                       value: usage.displayPercent / 100,
@@ -104,11 +105,9 @@ class OpusUsageChip extends ConsumerWidget {
                     ),
                     const SizedBox(width: 5),
                     Text(
-                      usage.isNegative
-                          ? '0%'
-                          : '${_fmtPercent(usage.percent)}%',
+                      '${_fmtPercent(usage.activePercent)}%',
                       style: TextStyle(
-                        color: isLow ? scheme.error : scheme.onSurfaceVariant,
+                        color: warning ? accent : scheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
                       ),
@@ -128,6 +127,7 @@ class OpusUsageChip extends ConsumerWidget {
   Widget _buildQuotaCell(
     ColorScheme scheme, {
     required String text,
+    required Color accent,
     required bool warning,
     bool inline = false,
   }) {
@@ -141,24 +141,20 @@ class OpusUsageChip extends ConsumerWidget {
           ? null
           : BoxDecoration(
               color: warning
-                  ? scheme.errorContainer.withValues(alpha: 0.3)
+                  ? accent.withValues(alpha: 0.1)
                   : scheme.surfaceContainerHigh,
               borderRadius: BorderRadius.circular(8),
             ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 闪电沿用主色蓝；额度低时换警示色
-          Icon(
-            Icons.bolt_outlined,
-            size: 16,
-            color: warning ? scheme.error : scheme.primary,
-          ),
+          // 常规额度蓝／黄／红，正在消耗备用额度时为紫色。
+          Icon(Icons.bolt_outlined, size: 16, color: accent),
           const SizedBox(width: 4),
           Text(
             text,
             style: TextStyle(
-              color: warning ? scheme.error : scheme.onSurfaceVariant,
+              color: warning ? accent : scheme.onSurfaceVariant,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -174,44 +170,6 @@ class OpusUsageChip extends ConsumerWidget {
     return rounded == rounded.roundToDouble()
         ? rounded.toStringAsFixed(0)
         : rounded.toStringAsFixed(1);
-  }
-
-  String _tooltip(OpusUsage usage) {
-    final lines = <String>[
-      usage.isNegative
-          ? currentL10n.opusUsage_exhausted
-          : currentL10n.opusUsage_remaining(usage.percent.toStringAsFixed(1)),
-    ];
-
-    lines.add(
-      usage.timeUntilNextPercent > 0
-          ? currentL10n.opusUsage_recharging(
-              _fmtCountdown(usage.timeUntilNextPercent),
-            )
-          : currentL10n.opusUsage_notRecharging,
-    );
-
-    lines.add(currentL10n.opusUsage_clickToRefresh);
-    return lines.join('\n');
-  }
-
-  /// 秒数倒计时格式化：1 小时 23 分 / 5 分 30 秒 / 42 秒
-  static String _fmtCountdown(int seconds) {
-    if (seconds >= 3600) {
-      final h = seconds ~/ 3600;
-      final m = (seconds % 3600) ~/ 60;
-      return m > 0
-          ? currentL10n.opusUsage_hoursMinutes(h, m)
-          : currentL10n.opusUsage_hours(h);
-    }
-    if (seconds >= 60) {
-      final m = seconds ~/ 60;
-      final s = seconds % 60;
-      return s > 0
-          ? currentL10n.opusUsage_minutesSeconds(m, s)
-          : currentL10n.opusUsage_minutes(m);
-    }
-    return currentL10n.opusUsage_seconds(seconds);
   }
 }
 

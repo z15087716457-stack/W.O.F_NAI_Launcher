@@ -9115,8 +9115,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blockAppearance_translation => 'Translation';
 
   @override
+  String opusUsage_regularRemaining(Object percent) {
+    return 'Regular free quota: $percent%';
+  }
+
+  @override
+  String opusUsage_reserveRemaining(Object percent) {
+    return 'Backup quota (activated): $percent%';
+  }
+
+  @override
+  String get opusUsage_usingRegular =>
+      'Regular quota is used first, then backup quota';
+
+  @override
+  String get opusUsage_usingReserve =>
+      'Regular quota used up; using backup quota';
+
+  @override
+  String get opusUsage_regularEmpty =>
+      'Regular quota used up; no backup quota available';
+
+  @override
   String get opusUsage_exhausted =>
-      'Free account quota used up; V5 generation is billed in Anlas';
+      'Account quota used up; V5 generation is billed in Anlas';
 
   @override
   String opusUsage_remaining(Object percent) {
@@ -9125,12 +9147,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String opusUsage_recharging(Object time) {
-    return 'Recharging: next +1% in $time';
+    return 'Regular quota recharging: next +1% in $time';
   }
 
   @override
   String get opusUsage_notRecharging =>
-      'Not recharging (the pool is above the threshold or used up)';
+      'No regular-quota recharge countdown available';
 
   @override
   String get opusUsage_clickToRefresh => 'Click to refresh';

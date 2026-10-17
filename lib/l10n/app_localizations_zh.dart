@@ -8649,7 +8649,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get blockAppearance_translation => '翻译';
 
   @override
-  String get opusUsage_exhausted => '账号免费额度已用尽，V5 生成按 Anlas 计费';
+  String opusUsage_regularRemaining(Object percent) {
+    return '常规免费额度：$percent%';
+  }
+
+  @override
+  String opusUsage_reserveRemaining(Object percent) {
+    return '备用电池额度（已激活）：$percent%';
+  }
+
+  @override
+  String get opusUsage_usingRegular => '优先使用常规额度，用尽后使用备用额度';
+
+  @override
+  String get opusUsage_usingReserve => '常规额度已用尽，正在使用备用电池额度';
+
+  @override
+  String get opusUsage_regularEmpty => '常规额度已用尽，暂无可用备用额度';
+
+  @override
+  String get opusUsage_exhausted => '账号额度已用尽，V5 生成按 Anlas 计费';
 
   @override
   String opusUsage_remaining(Object percent) {
@@ -8658,11 +8677,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String opusUsage_recharging(Object time) {
-    return '回充中：下一 +1% 还需 $time';
+    return '常规额度回充：下一 +1% 还需 $time';
   }
 
   @override
-  String get opusUsage_notRecharging => '当前不回充（池子在回充阈值之上或已用尽）';
+  String get opusUsage_notRecharging => '常规额度当前无回充倒计时';
 
   @override
   String get opusUsage_clickToRefresh => '点击刷新';
@@ -28191,7 +28210,26 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get blockAppearance_translation => '翻譯';
 
   @override
-  String get opusUsage_exhausted => '帳號免費額度已用盡，V5 生成按 Anlas 計費';
+  String opusUsage_regularRemaining(Object percent) {
+    return '常規免費額度：$percent%';
+  }
+
+  @override
+  String opusUsage_reserveRemaining(Object percent) {
+    return '備用電池額度（已啟用）：$percent%';
+  }
+
+  @override
+  String get opusUsage_usingRegular => '優先使用常規額度，用盡後使用備用額度';
+
+  @override
+  String get opusUsage_usingReserve => '常規額度已用盡，正在使用備用電池額度';
+
+  @override
+  String get opusUsage_regularEmpty => '常規額度已用盡，暫無可用備用額度';
+
+  @override
+  String get opusUsage_exhausted => '帳號額度已用盡，V5 生成按 Anlas 計費';
 
   @override
   String opusUsage_remaining(Object percent) {
@@ -28200,11 +28238,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String opusUsage_recharging(Object time) {
-    return '回充中：下一 +1% 還需 $time';
+    return '常規額度回充：下一 +1% 還需 $time';
   }
 
   @override
-  String get opusUsage_notRecharging => '當前不回充（池子在回充閾值之上或已用盡）';
+  String get opusUsage_notRecharging => '常規額度當前無回充倒計時';
 
   @override
   String get opusUsage_clickToRefresh => '點選重新整理';

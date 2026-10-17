@@ -216,7 +216,14 @@ class _QuotaCapsule extends StatelessWidget {
               child: Row(
                 spacing: 4,
                 children: [
-                  UiGlyph(UiGlyphs.bolt, size: 13, color: c.accent),
+                  UiGlyph(
+                    UiGlyphs.bolt,
+                    size: 13,
+                    color: c.quotaAccent(
+                      opus,
+                      usingReserve: q.opusUsingReserve,
+                    ),
+                  ),
                   Text(
                     GenFormat.percent(opus),
                     style: UiText.sans(

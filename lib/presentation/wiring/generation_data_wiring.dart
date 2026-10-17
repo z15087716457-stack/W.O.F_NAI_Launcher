@@ -44,6 +44,7 @@ import '../screens/generation/widgets/generation_controls/generate_button_copy.d
 import '../ui/gen/gen_contract.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import '../utils/official_image_variations.dart';
+import '../utils/opus_usage_presentation.dart';
 import 'generation_backend.dart';
 import 'generation_drop_wiring.dart';
 import 'generation_reference_identity.dart';
@@ -431,12 +432,9 @@ final generationViewDataProvider = Provider.autoDispose
               subscription?.trainingStepsLeft?.fixedTrainingStepsLeft,
           purchasedAnlas:
               subscription?.trainingStepsLeft?.purchasedTrainingSteps,
-          // 额度数字允许超过 100%；进度条仍使用 displayPercent。
-          opusPercent: usage == null
-              ? null
-              : usage.isNegative || usage.percent < 0
-              ? 0
-              : usage.percent,
+          // 常规优先，备用启用后展示备用余量；数字不裁剪到 100%。
+          opusPercent: usage?.activePercent,
+          opusUsingReserve: usage?.isUsingReserve ?? false,
           opusTip: usage == null ? null : generationOpusTip(l, usage),
         ),
         layout: generationLayoutView(layout),
@@ -652,17 +650,5 @@ String generationUcLabel(AppLocalizations l, UcPresetType value) =>
       UcPresetType.badAnatomy => l.ucPreset_badAnatomy,
     };
 String generationOpusTip(AppLocalizations l, OpusUsage usage) {
-  final seconds = usage.timeUntilNextPercent;
-  final time = seconds >= 3600
-      ? l.opusUsage_hoursMinutes(seconds ~/ 3600, (seconds % 3600) ~/ 60)
-      : seconds >= 60
-      ? l.opusUsage_minutesSeconds(seconds ~/ 60, seconds % 60)
-      : l.opusUsage_seconds(seconds);
-  return [
-    usage.isNegative
-        ? l.opusUsage_exhausted
-        : l.opusUsage_remaining(usage.percent.toStringAsFixed(1)),
-    seconds > 0 ? l.opusUsage_recharging(time) : l.opusUsage_notRecharging,
-    l.opusUsage_clickToRefresh,
-  ].join('\n');
+  return opusUsageTooltip(l, usage);
 }

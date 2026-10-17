@@ -134,16 +134,20 @@ class GenModel with _GenValue {
 class GenQuota with _GenValue {
   const GenQuota({
     this.opusPercent,
+    this.opusUsingReserve = false,
     this.opusTip,
     this.anlas,
     this.subscriptionAnlas,
     this.purchasedAnlas,
   });
 
-  /// Opus 免费额度剩余百分比（`usage.percent`，V5 才有）；null = 不显示这一格。
+  /// 当前使用的 Opus 额度池余量，保留超过 100% 的值；null = 不显示这一格。
   final double? opusPercent;
 
-  /// Opus 格的悬停说明（`OpusUsageChip._tooltip`）。
+  /// 常规额度已用尽，当前显示已激活的备用额度。
+  final bool opusUsingReserve;
+
+  /// Opus 格的悬停说明，分别列出常规与备用额度。
   final String? opusTip;
 
   /// Anlas 余额；null = 还没拿到（显示“—”）。
@@ -157,6 +161,7 @@ class GenQuota with _GenValue {
   @override
   List<Object?> get _values => [
     opusPercent,
+    opusUsingReserve,
     opusTip,
     anlas,
     subscriptionAnlas,

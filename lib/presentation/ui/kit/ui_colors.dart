@@ -26,6 +26,7 @@ class UiColors {
     required this.error,
     required this.ok,
     required this.amber,
+    required this.quotaReserve,
     required this.selectedSegment,
     required this.tipBg,
     required this.tipInk,
@@ -76,6 +77,7 @@ class UiColors {
       error: s.error,
       ok: dark ? const Color(0xFF3DD68C) : const Color(0xFF2B9A66),
       amber: dark ? const Color(0xFFF5B546) : const Color(0xFFF0A020),
+      quotaReserve: dark ? const Color(0xFFB49AFF) : const Color(0xFF7C3AED),
       selectedSegment: dark ? const Color(0xFF333333) : s.surfaceContainer,
       tipBg: dark ? const Color(0xFFECECEC) : const Color(0xFF1F1F1F),
       tipInk: dark ? const Color(0xFF171717) : const Color(0xFFF2F2F2),
@@ -147,6 +149,17 @@ class UiColors {
 
   /// Anlas 色。
   final Color amber;
+
+  /// 已激活的备用额度，独立于 Anlas 与普通告警色。
+  final Color quotaReserve;
+
+  Color quotaAccent(double percent, {bool usingReserve = false}) => usingReserve
+      ? quotaReserve
+      : percent < 5
+      ? error
+      : percent < 20
+      ? warn
+      : accent;
 
   /// 分段控件选中项的底。
   final Color selectedSegment;

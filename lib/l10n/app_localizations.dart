@@ -15860,10 +15860,40 @@ abstract class AppLocalizations {
   /// **'Translation'**
   String get blockAppearance_translation;
 
+  /// Separate Opus quota pool; backup means already activated usage boosts, not inventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular free quota: {percent}%'**
+  String opusUsage_regularRemaining(Object percent);
+
+  /// Separate Opus quota pool; backup means already activated usage boosts, not inventory.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup quota (activated): {percent}%'**
+  String opusUsage_reserveRemaining(Object percent);
+
+  /// No description provided for @opusUsage_usingRegular.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular quota is used first, then backup quota'**
+  String get opusUsage_usingRegular;
+
+  /// No description provided for @opusUsage_usingReserve.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular quota used up; using backup quota'**
+  String get opusUsage_usingReserve;
+
+  /// No description provided for @opusUsage_regularEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular quota used up; no backup quota available'**
+  String get opusUsage_regularEmpty;
+
   /// No description provided for @opusUsage_exhausted.
   ///
   /// In en, this message translates to:
-  /// **'Free account quota used up; V5 generation is billed in Anlas'**
+  /// **'Account quota used up; V5 generation is billed in Anlas'**
   String get opusUsage_exhausted;
 
   /// No description provided for @opusUsage_remaining.
@@ -15875,13 +15905,13 @@ abstract class AppLocalizations {
   /// No description provided for @opusUsage_recharging.
   ///
   /// In en, this message translates to:
-  /// **'Recharging: next +1% in {time}'**
+  /// **'Regular quota recharging: next +1% in {time}'**
   String opusUsage_recharging(Object time);
 
   /// No description provided for @opusUsage_notRecharging.
   ///
   /// In en, this message translates to:
-  /// **'Not recharging (the pool is above the threshold or used up)'**
+  /// **'No regular-quota recharge countdown available'**
   String get opusUsage_notRecharging;
 
   /// No description provided for @opusUsage_clickToRefresh.

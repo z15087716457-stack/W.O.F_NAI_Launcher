@@ -115,10 +115,13 @@ class OpusUsage with _$OpusUsage {
   const OpusUsage._();
 
   const factory OpusUsage({
-    /// 剩余额度百分比；[isNegative] 为真时该值表示超支深度
+    /// 常规剩余额度百分比；[isNegative] 为真时该值表示超支深度。
     @Default(0) double percent,
 
-    /// 额度是否已耗尽（负数额度）
+    /// 已激活备用电池的剩余额度，不包含库存中尚未启用的电池。
+    @Default(0) double purchasedPercent,
+
+    /// 服务端判定账号额度已耗尽；计费继续以此字段为准。
     @Default(false) bool isNegative,
 
     /// 回充 1% 所需秒数，0 表示不回充
@@ -128,12 +131,31 @@ class OpusUsage with _$OpusUsage {
   factory OpusUsage.fromJson(Map<String, dynamic> json) =>
       _$OpusUsageFromJson(json);
 
-  /// 进度条百分比，耗尽时归零并裁剪到 0-100。
-  double get displayPercent =>
-      isNegative ? 0 : percent.clamp(0, 100).toDouble();
+  /// 常规额度不设 100% 展示上限；超支深度不作为余额。
+  double get regularPercent => isNegative || !percent.isFinite
+      ? 0
+      : percent.clamp(0, double.infinity).toDouble();
+
+  double get reservePercent => purchasedPercent.isFinite
+      ? purchasedPercent.clamp(0, double.infinity).toDouble()
+      : 0;
+
+  /// 服务端尚未判定耗尽，常规额度用完后才显示正在使用备用额度。
+  bool get isUsingReserve =>
+      !isNegative && regularPercent == 0 && reservePercent > 0;
+
+  /// 顶栏展示当前使用的额度池，不把两份余额相加。
+  double get activePercent => isNegative
+      ? 0
+      : isUsingReserve
+      ? reservePercent
+      : regularPercent;
+
+  /// 进度条独立裁剪，顶部数字仍保留完整百分比。
+  double get displayPercent => activePercent.clamp(0, 100).toDouble();
 
   /// 额度是否处于告警区间（耗尽或不足 5%）。
-  bool get isLow => isNegative || percent < 5;
+  bool get isLow => isNegative || (regularPercent < 5 && reservePercent < 5);
 }
 
 /// Anlas 训练步数信息

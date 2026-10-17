@@ -4834,20 +4834,37 @@
   "blockAppearance_solid": "ベタ塗り",
   "blockAppearance_gradient": "グラデーション",
   "blockAppearance_translation": "翻訳",
-  "opusUsage_exhausted": "アカウントの無料枠を使い切りました。V5 の生成は Anlas で課金されます",
+  "opusUsage_regularRemaining": "通常の無料枠：{percent}%",
+  "@opusUsage_regularRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_reserveRemaining": "予備電池の追加枠（有効化済み）：{percent}%",
+  "@opusUsage_reserveRemaining": {
+    "description": "Separate Opus quota pool; backup means already activated usage boosts, not inventory.",
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "opusUsage_usingRegular": "通常枠を優先し、使い切ると予備枠を消費します",
+  "opusUsage_usingReserve": "通常枠を使い切り、予備電池の枠を使用中",
+  "opusUsage_regularEmpty": "通常枠を使い切りました。利用可能な予備枠はありません",
+  "opusUsage_exhausted": "アカウントの枠を使い切りました。V5 の生成は Anlas で課金されます",
   "opusUsage_remaining": "アカウントの無料枠の残り {percent}%",
   "@opusUsage_remaining": {
     "placeholders": {
       "percent": {}
     }
   },
-  "opusUsage_recharging": "回復中：次の +1% まで {time}",
+  "opusUsage_recharging": "通常枠の回復中：次の +1% まで {time}",
   "@opusUsage_recharging": {
     "placeholders": {
       "time": {}
     }
   },
-  "opusUsage_notRecharging": "現在は回復しません（回復しきい値を超えているか、使い切っています）",
+  "opusUsage_notRecharging": "通常枠の回復カウントダウンはありません",
   "opusUsage_clickToRefresh": "クリックして更新",
   "opusUsage_hoursMinutes": "{hours} 時間 {minutes} 分",
   "@opusUsage_hoursMinutes": {

@@ -8843,7 +8843,26 @@ class AppLocalizationsKo extends AppLocalizations {
   String get blockAppearance_translation => '번역';
 
   @override
-  String get opusUsage_exhausted => '무료 계정 할당량을 모두 사용했습니다. V5 생성은 Anlas로 과금됩니다';
+  String opusUsage_regularRemaining(Object percent) {
+    return '기본 무료 할당량: $percent%';
+  }
+
+  @override
+  String opusUsage_reserveRemaining(Object percent) {
+    return '예비 배터리 할당량(활성화됨): $percent%';
+  }
+
+  @override
+  String get opusUsage_usingRegular => '기본 할당량을 먼저 사용하고 소진되면 예비 할당량을 사용합니다';
+
+  @override
+  String get opusUsage_usingReserve => '기본 할당량 소진, 예비 배터리 할당량 사용 중';
+
+  @override
+  String get opusUsage_regularEmpty => '기본 할당량을 모두 사용했으며 사용 가능한 예비 할당량이 없습니다';
+
+  @override
+  String get opusUsage_exhausted => '계정 할당량을 모두 사용했습니다. V5 생성은 Anlas로 과금됩니다';
 
   @override
   String opusUsage_remaining(Object percent) {
@@ -8852,11 +8871,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String opusUsage_recharging(Object time) {
-    return '충전 중: 다음 +1%까지 $time';
+    return '기본 할당량 충전 중: 다음 +1%까지 $time';
   }
 
   @override
-  String get opusUsage_notRecharging => '충전하지 않음(할당량이 기준값보다 많거나 모두 사용함)';
+  String get opusUsage_notRecharging => '기본 할당량 충전 카운트다운 없음';
 
   @override
   String get opusUsage_clickToRefresh => '클릭하여 새로 고침';
