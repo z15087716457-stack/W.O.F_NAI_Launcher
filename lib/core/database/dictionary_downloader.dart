@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -15,11 +16,18 @@ class DictionarySource {
     this.sha256,
     this.bytes,
     this.date,
-    this.name,
-  );
+    this.name, {
+    this.gitBlobSha1 = '',
+  });
   final DictionaryKind kind;
   final String url, sha256, date, name;
   final int bytes;
+  final String gitBlobSha1;
+
+  bool matches(Map<String, dynamic>? record) =>
+      record != null &&
+      ((sha256.isNotEmpty && record['sourceHash'] == sha256) ||
+          (gitBlobSha1.isNotEmpty && record['sourceBlobSha1'] == gitBlobSha1));
 }
 
 const dictionarySources = <DictionaryKind, DictionarySource>{
@@ -30,6 +38,7 @@ const dictionarySources = <DictionaryKind, DictionarySource>{
     5602650,
     '2026-10-01',
     'DraconicDragon / Danbooru',
+    gitBlobSha1: 'acdc0685c5a52ac743363adfe4d6a9b4298331d0',
   ),
   DictionaryKind.wiki: DictionarySource(
     DictionaryKind.wiki,
@@ -123,9 +132,14 @@ class DictionaryDownloader {
       );
       checkDictionaryCancellation(_flag!.path);
       report(const DictionaryProgress(DictionaryPhase.verifying));
+      final digest = (await sha256.bind(input.openRead()).first).toString();
       if (await input.length() != source.bytes ||
-          (await sha256.bind(input.openRead()).first).toString() !=
-              source.sha256) {
+          (source.sha256.isEmpty && source.gitBlobSha1.isEmpty) ||
+          (source.sha256.isNotEmpty && digest != source.sha256) ||
+          (source.gitBlobSha1.isNotEmpty &&
+              (await sha1.bind(_gitBlob(input, source.bytes)).first)
+                      .toString() !=
+                  source.gitBlobSha1)) {
         throw StateError('dictionary_integrity');
       }
       checkDictionaryCancellation(_flag!.path);
@@ -136,7 +150,7 @@ class DictionaryDownloader {
         'input': input.path,
         'output': output.path,
         'cancel': _flag!.path,
-        'version': source.sha256.substring(0, 12),
+        'version': digest.substring(0, 12),
         'progress': port.sendPort,
       };
       final result = await buildDictionaryInBackground(args);
@@ -146,8 +160,11 @@ class DictionaryDownloader {
       await store.publish(source.kind, output, {
         'count': result['count'],
         'added': result['added'],
+        'updated': result['updated'] ?? 0,
+        'mergeVersion': source.kind == DictionaryKind.wiki ? 2 : 1,
         'date': source.date,
-        'sourceHash': source.sha256,
+        'sourceHash': digest,
+        if (source.gitBlobSha1.isNotEmpty) 'sourceBlobSha1': source.gitBlobSha1,
         'sourceName': source.name,
         'sourceUrl': source.url,
         'installedAt': DateTime.now().toUtc().toIso8601String(),
@@ -165,4 +182,9 @@ class DictionaryDownloader {
       _dio.close(force: true);
     }
   }
+}
+
+Stream<List<int>> _gitBlob(File input, int bytes) async* {
+  yield utf8.encode('blob $bytes\u0000');
+  yield* input.openRead();
 }

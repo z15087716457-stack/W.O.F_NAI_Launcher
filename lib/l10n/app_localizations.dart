@@ -32750,6 +32750,72 @@ abstract class AppLocalizations {
   /// **'Data updates'**
   String get set_dcSupplement;
 
+  /// No description provided for @set_dcCheckUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Check updates'**
+  String get set_dcCheckUpdates;
+
+  /// No description provided for @set_dcWikiRefreshAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Wiki articles can be refreshed'**
+  String get set_dcWikiRefreshAvailable;
+
+  /// No description provided for @set_dcCheckingUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get set_dcCheckingUpdates;
+
+  /// No description provided for @set_dcCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Check failed. Local data is still available. Retry.'**
+  String get set_dcCheckFailed;
+
+  /// No description provided for @set_dcLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to date'**
+  String get set_dcLatest;
+
+  /// No description provided for @set_dcUpdatesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Updates available'**
+  String get set_dcUpdatesAvailable;
+
+  /// No description provided for @set_dcLastChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Last checked {when}'**
+  String set_dcLastChecked(Object when);
+
+  /// No description provided for @set_dcRefreshWiki.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Wiki'**
+  String get set_dcRefreshWiki;
+
+  /// No description provided for @set_dcRefreshWikiTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Download the current Wiki data to refresh existing articles; personal translations are kept.'**
+  String get set_dcRefreshWikiTip;
+
+  /// No description provided for @set_dcChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Added {added}, updated {updated}. Saved locally.'**
+  String set_dcChanged(Object added, Object updated);
+
+  /// No description provided for @set_dcRagSyncTip.
+  ///
+  /// In en, this message translates to:
+  /// **'If you use semantic search, restart Studio, then sync the affected source indexes manually.'**
+  String get set_dcRagSyncTip;
+
   /// No description provided for @set_dcUpdateTags.
   ///
   /// In en, this message translates to:
@@ -32759,7 +32825,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_dcUpdateWiki.
   ///
   /// In en, this message translates to:
-  /// **'Add wiki pages'**
+  /// **'Update Wiki'**
   String get set_dcUpdateWiki;
 
   /// No description provided for @set_dcSources.

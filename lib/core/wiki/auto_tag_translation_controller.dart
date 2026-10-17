@@ -19,6 +19,7 @@ import '../utils/localization_extension.dart';
 import '../utils/fatal_diagnostics.dart';
 import '../tag_expansion/tag_semantics_repository.dart';
 import '../tag_expansion/tag_semantics_store.dart';
+import '../database/dictionary_revision.dart';
 
 final autoTagTranslationProvider =
     ChangeNotifierProvider<AutoTagTranslationController>((ref) {
@@ -41,6 +42,10 @@ final autoTagTranslationProvider =
         controller.routeChanged();
       });
       ref.listen(localeNotifierProvider, (_, __) => controller.routeChanged());
+      ref.listen(
+        dictionaryRevisionProvider,
+        (_, __) => controller.routeChanged(),
+      );
       unawaited(controller.loadPreference());
       return controller;
     });

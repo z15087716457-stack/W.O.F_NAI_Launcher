@@ -18752,10 +18752,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_dcSupplement => 'Data updates';
 
   @override
+  String get set_dcCheckUpdates => 'Check updates';
+
+  @override
+  String get set_dcWikiRefreshAvailable => 'Wiki articles can be refreshed';
+
+  @override
+  String get set_dcCheckingUpdates => 'Checking…';
+
+  @override
+  String get set_dcCheckFailed =>
+      'Check failed. Local data is still available. Retry.';
+
+  @override
+  String get set_dcLatest => 'Up to date';
+
+  @override
+  String get set_dcUpdatesAvailable => 'Updates available';
+
+  @override
+  String set_dcLastChecked(Object when) {
+    return 'Last checked $when';
+  }
+
+  @override
+  String get set_dcRefreshWiki => 'Refresh Wiki';
+
+  @override
+  String get set_dcRefreshWikiTip =>
+      'Download the current Wiki data to refresh existing articles; personal translations are kept.';
+
+  @override
+  String set_dcChanged(Object added, Object updated) {
+    return 'Added $added, updated $updated. Saved locally.';
+  }
+
+  @override
+  String get set_dcRagSyncTip =>
+      'If you use semantic search, restart Studio, then sync the affected source indexes manually.';
+
+  @override
   String get set_dcUpdateTags => 'Update tags';
 
   @override
-  String get set_dcUpdateWiki => 'Add wiki pages';
+  String get set_dcUpdateWiki => 'Update Wiki';
 
   @override
   String set_dcSources(Object tagDate, Object wikiDate) {

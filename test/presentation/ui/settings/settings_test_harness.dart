@@ -200,6 +200,7 @@ class SettingsHostState extends State<SettingsHost> {
         onDeleteProvider: (id) => call('deleteProvider:$id'),
         onRequestDetails: (id) => call('requestDetails:$id'),
         onUpdateDictionary: (kind) => call('updateDictionary:${kind.name}'),
+        onCheckDictionaryUpdates: () => call('checkDictionaryUpdates'),
         onCancelDictionaryUpdate: () => call('cancelDictionaryUpdate'),
         onExportTagSemantics: () => call('exportTagSemantics'),
         onImportTagSemantics: () => call('importTagSemantics'),

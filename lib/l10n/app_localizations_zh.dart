@@ -17988,10 +17988,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_dcSupplement => '数据补充';
 
   @override
+  String get set_dcCheckUpdates => '检查更新';
+
+  @override
+  String get set_dcWikiRefreshAvailable => 'Wiki 正文可刷新';
+
+  @override
+  String get set_dcCheckingUpdates => '正在检查…';
+
+  @override
+  String get set_dcCheckFailed => '检查失败，原数据仍可用。请重试。';
+
+  @override
+  String get set_dcLatest => '已是最新';
+
+  @override
+  String get set_dcUpdatesAvailable => '有可用更新';
+
+  @override
+  String set_dcLastChecked(Object when) {
+    return '上次检查 $when';
+  }
+
+  @override
+  String get set_dcRefreshWiki => '刷新 Wiki';
+
+  @override
+  String get set_dcRefreshWikiTip => '下载当前 Wiki 数据，更新此前未同步的已有正文；保留个人译文。';
+
+  @override
+  String set_dcChanged(Object added, Object updated) {
+    return '新增 $added 条，更新 $updated 条，已保存在本地';
+  }
+
+  @override
+  String get set_dcRagSyncTip => '如已使用语义检索，请重启 Studio 后手动同步相应来源的索引。';
+
+  @override
   String get set_dcUpdateTags => '更新 Tag';
 
   @override
-  String get set_dcUpdateWiki => '补充 Wiki';
+  String get set_dcUpdateWiki => '更新 Wiki';
 
   @override
   String set_dcSources(Object tagDate, Object wikiDate) {
@@ -37493,10 +37530,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_dcSupplement => '資料補充';
 
   @override
+  String get set_dcCheckUpdates => '檢查更新';
+
+  @override
+  String get set_dcWikiRefreshAvailable => 'Wiki 正文可重新整理';
+
+  @override
+  String get set_dcCheckingUpdates => '正在檢查…';
+
+  @override
+  String get set_dcCheckFailed => '檢查失敗，原資料仍可用。請重試。';
+
+  @override
+  String get set_dcLatest => '已是最新';
+
+  @override
+  String get set_dcUpdatesAvailable => '有可用更新';
+
+  @override
+  String set_dcLastChecked(Object when) {
+    return '上次檢查 $when';
+  }
+
+  @override
+  String get set_dcRefreshWiki => '重新整理 Wiki';
+
+  @override
+  String get set_dcRefreshWikiTip => '下載當前 Wiki 資料，更新此前未同步的已有正文；保留個人譯文。';
+
+  @override
+  String set_dcChanged(Object added, Object updated) {
+    return '新增 $added 條，更新 $updated 條，已儲存在本地';
+  }
+
+  @override
+  String get set_dcRagSyncTip => '如已使用語義檢索，請重啟 Studio 後手動同步相應來源的索引。';
+
+  @override
   String get set_dcUpdateTags => '更新 Tag';
 
   @override
-  String get set_dcUpdateWiki => '補充 Wiki';
+  String get set_dcUpdateWiki => '更新 Wiki';
 
   @override
   String set_dcSources(Object tagDate, Object wikiDate) {

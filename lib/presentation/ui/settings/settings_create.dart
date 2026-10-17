@@ -931,21 +931,42 @@ class SettingsDictionaryPage extends StatelessWidget {
                 key: const Key('dictionary-supplement-row'),
                 title: l.set_dcSupplement,
                 belowSpacing: update.busy ? 10 : 0,
-                subtitle: l.set_dcSources(update.tagDate, update.wikiDate),
+                subtitle: [
+                  l.set_dcSources(update.tagDate, update.wikiDate),
+                  if (update.checking)
+                    l.set_dcCheckingUpdates
+                  else if (update.checkFailed)
+                    '${l.set_dcCheckFailed}${update.checkedAt == null ? '' : ' · ${l.set_dcLastChecked('${SettingsFormat.date(update.checkedAt!.toLocal())} ${SettingsFormat.time(update.checkedAt!.toLocal())}')}'}'
+                  else if (update.checkedAt != null)
+                    '${update.tagInstalled && update.wikiInstalled ? (update.wikiNeedsRefresh ? l.set_dcWikiRefreshAvailable : l.set_dcLatest) : l.set_dcUpdatesAvailable} · ${l.set_dcLastChecked('${SettingsFormat.date(update.checkedAt!.toLocal())} ${SettingsFormat.time(update.checkedAt!.toLocal())}')}',
+                ].join('\n'),
                 control: Wrap(
                   spacing: 8,
                   runSpacing: 6,
                   children: [
+                    SettingsBtn(
+                      key: const Key('dictionary-check-updates'),
+                      label: update.checking
+                          ? l.set_dcCheckingUpdates
+                          : l.set_dcCheckUpdates,
+                      small: true,
+                      onTap: update.busy || update.checking
+                          ? null
+                          : s.actions.onCheckDictionaryUpdates,
+                    ),
                     Tooltip(
                       message:
-                          '${update.tagSource} · ${update.tagDate} · 5.6 MB',
+                          '${update.tagSource} · ${update.tagDate} · ${SettingsFormat.bytes(update.tagBytes)}${update.tagInstalledDate.isEmpty ? '' : '\n${l.set_dcInstalled} ${update.tagInstalledDate}'}',
                       child: SettingsBtn(
                         key: const Key('dictionary-update-tags'),
                         label: update.tagInstalled
                             ? 'Tag · ${l.set_dcInstalled}'
                             : l.set_dcUpdateTags,
                         small: true,
-                        onTap: update.busy || update.tagInstalled
+                        onTap:
+                            update.busy ||
+                                update.checking ||
+                                update.tagInstalled
                             ? null
                             : () => s.actions.onUpdateDictionary(
                                 SettingsDictionaryKind.tags,
@@ -954,14 +975,20 @@ class SettingsDictionaryPage extends StatelessWidget {
                     ),
                     Tooltip(
                       message:
-                          '${update.wikiSource} · ${update.wikiDate} · 138 MB',
+                          '${update.wikiSource} · ${update.wikiDate} · ${SettingsFormat.bytes(update.wikiBytes)}${update.wikiInstalledDate.isEmpty ? '' : '\n${l.set_dcInstalled} ${update.wikiInstalledDate}'}${update.wikiNeedsRefresh ? '\n${l.set_dcRefreshWikiTip}' : ''}',
                       child: SettingsBtn(
                         key: const Key('dictionary-update-wiki'),
-                        label: update.wikiInstalled
+                        label: update.wikiNeedsRefresh
+                            ? l.set_dcRefreshWiki
+                            : update.wikiInstalled
                             ? 'Wiki · ${l.set_dcInstalled}'
                             : l.set_dcUpdateWiki,
                         small: true,
-                        onTap: update.busy || update.wikiInstalled
+                        onTap:
+                            update.busy ||
+                                update.checking ||
+                                (update.wikiInstalled &&
+                                    !update.wikiNeedsRefresh)
                             ? null
                             : () => s.actions.onUpdateDictionary(
                                 SettingsDictionaryKind.wiki,
@@ -1024,9 +1051,12 @@ class SettingsDictionaryPage extends StatelessWidget {
                                                 .publishing =>
                                               l.set_dcPublishing,
                                             SettingsDictionaryPhase.done =>
-                                              l.set_dcAdded(
+                                              l.set_dcChanged(
                                                 SettingsFormat.count(
                                                   update.added,
+                                                ),
+                                                SettingsFormat.count(
+                                                  update.updated,
                                                 ),
                                               ),
                                             SettingsDictionaryPhase.failed =>
@@ -1058,6 +1088,15 @@ class SettingsDictionaryPage extends StatelessWidget {
                                   ),
                               ],
                             ),
+                            if (update.phase == SettingsDictionaryPhase.done &&
+                                update.added + update.updated > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  l.set_dcRagSyncTip,
+                                  style: UiText.sans(11, color: c.muted),
+                                ),
+                              ),
                           ],
                         ),
                       ),

@@ -89,6 +89,143 @@ void main() {
     },
   );
   testWidgets(
+    'installed versions keep Check updates available and checks never trigger downloads',
+    (t) async {
+      final data = _view(SettingsDictionaryPhase.idle).copyWith(
+        dictionaries: const SettingsDictionaryData(
+          update: SettingsDictionaryUpdate(
+            tagInstalled: true,
+            wikiInstalled: true,
+            tagDate: '2026-10-01',
+            wikiDate: '2026-06-01',
+          ),
+        ),
+      );
+      final rec = await pumpSettings(t, data: data);
+      for (final key in ['dictionary-update-tags', 'dictionary-update-wiki']) {
+        expect(t.widget<SettingsBtn>(find.byKey(Key(key))).onTap, isNull);
+      }
+      await t.tap(find.byKey(const Key('dictionary-check-updates')));
+      expect(rec.calls, ['checkDictionaryUpdates']);
+    },
+  );
+  testWidgets(
+    'checking, checked, failed and legacy refresh states fit every locale',
+    (t) async {
+      final checked = DateTime(2026, 10, 17, 13, 40);
+      final states = {
+        'checking': const SettingsDictionaryUpdate(
+          tagDate: '2026-10-01',
+          wikiDate: '2026-06-01',
+          checking: true,
+          tagInstalled: true,
+          wikiInstalled: true,
+        ),
+        'latest': SettingsDictionaryUpdate(
+          tagDate: '2026-10-01',
+          wikiDate: '2026-06-01',
+          checkedAt: checked,
+          tagInstalled: true,
+          wikiInstalled: true,
+        ),
+        'available': SettingsDictionaryUpdate(
+          tagDate: '2026-10-01',
+          wikiDate: '2026-06-01',
+          checkedAt: checked,
+          tagInstalled: false,
+          wikiInstalled: true,
+        ),
+        'failed': SettingsDictionaryUpdate(
+          tagDate: '2026-10-01',
+          wikiDate: '2026-06-01',
+          checkedAt: checked,
+          checkFailed: true,
+          tagInstalled: true,
+          wikiInstalled: true,
+        ),
+        'refresh': SettingsDictionaryUpdate(
+          tagDate: '2026-10-01',
+          wikiDate: '2026-06-01',
+          checkedAt: checked,
+          tagInstalled: true,
+          wikiInstalled: true,
+          wikiNeedsRefresh: true,
+        ),
+      };
+      for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+        for (final dark in [false, true]) {
+          for (final width in [900.0, 1280.0]) {
+            for (final entry in states.entries) {
+              await t.pumpWidget(const SizedBox.shrink());
+              final data = _view(SettingsDictionaryPhase.idle).copyWith(
+                dictionaries: SettingsDictionaryData(
+                  tagCount: 305815,
+                  wikiCount: 288187,
+                  cooccurrence: 3236959,
+                  translationModel: 'fixture-model',
+                  update: entry.value,
+                ),
+              );
+              await pumpSettings(
+                t,
+                data: data,
+                locale: language,
+                dark: dark,
+                window: width,
+                height: 1200,
+              );
+              final l = AppLocalizations.of(
+                t.element(find.byType(SettingsHost)),
+              )!;
+              final check = t.widget<SettingsBtn>(
+                find.byKey(const Key('dictionary-check-updates')),
+              );
+              expect(check.onTap == null, entry.value.checking);
+              if (entry.key == 'checking') {
+                expect(
+                  t
+                      .widget<SettingsBtn>(
+                        find.byKey(const Key('dictionary-update-tags')),
+                      )
+                      .onTap,
+                  isNull,
+                );
+                expect(find.textContaining(l.set_dcLatest), findsNothing);
+              }
+              if (entry.key == 'refresh') {
+                expect(find.text(l.set_dcRefreshWiki), findsOneWidget);
+                expect(
+                  t
+                      .widget<SettingsBtn>(
+                        find.byKey(const Key('dictionary-update-wiki')),
+                      )
+                      .onTap,
+                  isNotNull,
+                );
+              }
+              if (entry.key == 'failed') {
+                expect(find.textContaining(l.set_dcLatest), findsNothing);
+              }
+              expect(
+                t.takeException(),
+                isNull,
+                reason: '$language $dark $width ${entry.key}',
+              );
+              if (language == 'zh' &&
+                  width == 1280 &&
+                  ['latest', 'available', 'refresh'].contains(entry.key)) {
+                await _capture(
+                  t,
+                  'check-${entry.key}-${dark ? 'dark' : 'light'}',
+                );
+              }
+            }
+          }
+        }
+      }
+    },
+  );
+  testWidgets(
     'counts and the update row fit five languages, narrow windows and large text',
     (t) async {
       addTearDown(t.platformDispatcher.clearTextScaleFactorTestValue);

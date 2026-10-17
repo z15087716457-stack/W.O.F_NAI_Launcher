@@ -18206,10 +18206,49 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_dcSupplement => 'データ補充';
 
   @override
+  String get set_dcCheckUpdates => '更新を確認';
+
+  @override
+  String get set_dcWikiRefreshAvailable => 'Wiki 本文を再適用できます';
+
+  @override
+  String get set_dcCheckingUpdates => '確認中…';
+
+  @override
+  String get set_dcCheckFailed => '確認に失敗しました。ローカルデータは利用できます。再試行してください。';
+
+  @override
+  String get set_dcLatest => '最新です';
+
+  @override
+  String get set_dcUpdatesAvailable => '更新があります';
+
+  @override
+  String set_dcLastChecked(Object when) {
+    return '最終確認 $when';
+  }
+
+  @override
+  String get set_dcRefreshWiki => 'Wiki を再適用';
+
+  @override
+  String get set_dcRefreshWikiTip =>
+      '現在の Wiki データをダウンロードし、既存の記事を更新します。個人の翻訳は保持されます。';
+
+  @override
+  String set_dcChanged(Object added, Object updated) {
+    return '$added 件追加、$updated 件更新。ローカルに保存しました。';
+  }
+
+  @override
+  String get set_dcRagSyncTip =>
+      '意味検索を使用している場合は、Studio を再起動してから、該当ソースの索引を手動で同期してください。';
+
+  @override
   String get set_dcUpdateTags => 'タグを更新';
 
   @override
-  String get set_dcUpdateWiki => 'Wiki を補充';
+  String get set_dcUpdateWiki => 'Wiki を更新';
 
   @override
   String set_dcSources(Object tagDate, Object wikiDate) {

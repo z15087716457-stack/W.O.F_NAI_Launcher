@@ -18259,10 +18259,50 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_dcSupplement => '데이터 보충';
 
   @override
+  String get set_dcCheckUpdates => '업데이트 확인';
+
+  @override
+  String get set_dcWikiRefreshAvailable => 'Wiki 본문 새로 반영 가능';
+
+  @override
+  String get set_dcCheckingUpdates => '확인 중…';
+
+  @override
+  String get set_dcCheckFailed =>
+      '확인에 실패했습니다. 로컬 데이터는 계속 사용할 수 있습니다. 다시 시도하세요.';
+
+  @override
+  String get set_dcLatest => '최신 상태';
+
+  @override
+  String get set_dcUpdatesAvailable => '업데이트 있음';
+
+  @override
+  String set_dcLastChecked(Object when) {
+    return '최근 확인 $when';
+  }
+
+  @override
+  String get set_dcRefreshWiki => 'Wiki 새로 반영';
+
+  @override
+  String get set_dcRefreshWikiTip =>
+      '현재 Wiki 데이터를 다운로드하여 기존 본문을 갱신합니다. 개인 번역은 유지됩니다.';
+
+  @override
+  String set_dcChanged(Object added, Object updated) {
+    return '$added개 추가, $updated개 업데이트. 로컬에 저장했습니다.';
+  }
+
+  @override
+  String get set_dcRagSyncTip =>
+      '의미 검색을 사용 중이면 Studio를 다시 시작한 후 해당 소스의 색인을 수동으로 동기화하세요.';
+
+  @override
   String get set_dcUpdateTags => '태그 업데이트';
 
   @override
-  String get set_dcUpdateWiki => 'Wiki 보충';
+  String get set_dcUpdateWiki => 'Wiki 업데이트';
 
   @override
   String set_dcSources(Object tagDate, Object wikiDate) {

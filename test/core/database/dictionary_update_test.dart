@@ -123,7 +123,7 @@ void main() {
   );
 
   test(
-    'wiki adds valid missing articles and preserves existing text and markup',
+    'wiki adds missing articles, refreshes upstream text and preserves the original database',
     () async {
       final payload = [
         {'title': 'blue_eyes', 'body': 'Do not overwrite', 'is_deleted': false},
@@ -135,27 +135,130 @@ void main() {
         {'title': 'empty', 'body': '  ', 'is_deleted': false},
         {'title': 'deleted', 'body': 'gone', 'is_deleted': true},
       ].map(jsonEncode).join('\n');
+      final original = wiki.readAsBytesSync();
       final result = await downloader(
         payload,
       ).install(source(DictionaryKind.wiki, payload), wiki.path, (_) {});
       expect(result['added'], 1);
       expect(result['count'], 2);
+      expect(result['updated'], 1);
+      expect(wiki.readAsBytesSync(), original);
+      expect(store.record(DictionaryKind.wiki)!['mergeVersion'], 2);
       final reader = AssetTagWikiRepository(
         () async => store.activePath(DictionaryKind.wiki)!,
       );
-      expect((await reader.find('blue_eyes'))!.body, 'Keep original article');
+      expect((await reader.find('blue_eyes'))!.body, 'Do not overwrite');
       expect(
         (await reader.find('new_tag'))!.body,
         'h4. Heading\n\n[[blue_eyes]]',
       );
       expect(await reader.find('empty'), isNull);
       expect(await reader.find('deleted'), isNull);
+      final repeated = await downloader(payload).install(
+        source(DictionaryKind.wiki, payload),
+        store.activePath(DictionaryKind.wiki)!,
+        (_) {},
+      );
+      expect(repeated['added'], 0);
+      expect(repeated['updated'], 0);
       expect(
         await DictionaryDataStore(
           store.root,
         ).resolve(DictionaryKind.wiki, wiki.path),
         store.activePath(DictionaryKind.wiki),
       );
+    },
+  );
+
+  for (final good in [true, false]) {
+    test(
+      'Git blob verification ${good ? 'publishes a SHA256 revision' : 'rejects substituted bytes'}',
+      () async {
+        const payload = 'new_tag,0,20,""\n';
+        final bytes = utf8.encode(payload);
+        final blob = sha1.convert([
+          ...utf8.encode('blob ${bytes.length}\u0000'),
+          ...bytes,
+        ]).toString();
+        final candidate = DictionarySource(
+          DictionaryKind.tags,
+          'https://fixture.invalid/data',
+          '',
+          bytes.length,
+          '2026-10-01',
+          'Fixture',
+          gitBlobSha1: good ? blob : '0' * 40,
+        );
+        final job = downloader(payload);
+        if (good) {
+          await job.install(candidate, tags.path, (_) {});
+          expect(
+            store.record(DictionaryKind.tags)!['sourceHash'],
+            sha256.convert(bytes).toString(),
+          );
+          expect(store.record(DictionaryKind.tags)!['sourceBlobSha1'], blob);
+        } else {
+          await expectLater(
+            job.install(candidate, tags.path, (_) {}),
+            throwsStateError,
+          );
+          expect(store.activePath(DictionaryKind.tags), isNull);
+        }
+      },
+    );
+  }
+
+  test(
+    'duplicate Wiki titles prefer the newest dated text and count each existing article once',
+    () async {
+      final payload = [
+        {
+          'title': 'blue_eyes',
+          'body': 'middle',
+          'is_deleted': false,
+          'updated_at': '2026-10-01T00:00:00Z',
+        },
+        {
+          'title': 'BLUE_EYES',
+          'body': 'old',
+          'is_deleted': false,
+          'updated_at': '2025-01-01T00:00:00Z',
+        },
+        {
+          'title': 'blue_eyes',
+          'body': 'newest',
+          'is_deleted': false,
+          'updated_at': '2026-10-17T00:00:00Z',
+        },
+        {
+          'title': 'blue_eyes',
+          'body': 'newest',
+          'is_deleted': false,
+          'updated_at': '2026-10-17T00:00:00Z',
+        },
+        {
+          'title': 'new_tag',
+          'body': 'first',
+          'is_deleted': false,
+          'updated_at': '2026-10-01T00:00:00Z',
+        },
+        {
+          'title': 'new_tag',
+          'body': 'last',
+          'is_deleted': false,
+          'updated_at': '2026-10-17T00:00:00Z',
+        },
+      ].map(jsonEncode).join('\n');
+      final result = await downloader(
+        payload,
+      ).install(source(DictionaryKind.wiki, payload), wiki.path, (_) {});
+      expect(result['added'], 1);
+      expect(result['updated'], 1);
+      final reader = AssetTagWikiRepository(
+        () async => store.activePath(DictionaryKind.wiki)!,
+      );
+      expect((await reader.find('blue_eyes'))!.body, 'newest');
+      expect((await reader.find('new_tag'))!.body, 'last');
     },
   );
 

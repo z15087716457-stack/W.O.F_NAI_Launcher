@@ -942,6 +942,7 @@ class SettingsDictionaryUpdate {
     this.total = 0,
     this.rows = 0,
     this.added = 0,
+    this.updated = 0,
     this.cancelling = false,
     this.tagInstalled = false,
     this.wikiInstalled = false,
@@ -949,12 +950,23 @@ class SettingsDictionaryUpdate {
     this.wikiDate = '',
     this.tagSource = '',
     this.wikiSource = '',
+    this.tagBytes = 5602650,
+    this.wikiBytes = 137932215,
+    this.checking = false,
+    this.checkFailed = false,
+    this.checkedAt,
+    this.wikiNeedsRefresh = false,
+    this.tagInstalledDate = '',
+    this.wikiInstalledDate = '',
   });
   final SettingsDictionaryKind? kind;
   final SettingsDictionaryPhase phase;
-  final int received, total, rows, added;
+  final int received, total, rows, added, updated, tagBytes, wikiBytes;
   final bool cancelling, tagInstalled, wikiInstalled;
+  final bool checking, checkFailed, wikiNeedsRefresh;
+  final DateTime? checkedAt;
   final String tagDate, wikiDate, tagSource, wikiSource;
+  final String tagInstalledDate, wikiInstalledDate;
   bool get busy => const {
     SettingsDictionaryPhase.downloading,
     SettingsDictionaryPhase.verifying,
@@ -1793,6 +1805,7 @@ class SettingsActions {
     this.onClearCache = _noCache,
     this.onResetCacheStats = _none,
     this.onUpdateDictionary = _noDictionary,
+    this.onCheckDictionaryUpdates = _none,
     this.onCancelDictionaryUpdate = _none,
     this.onExportTagSemantics = _none,
     this.onImportTagSemantics = _none,
@@ -1937,6 +1950,7 @@ class SettingsActions {
   final ValueChanged<SettingsCacheKind> onClearCache;
   final VoidCallback onResetCacheStats;
   final ValueChanged<SettingsDictionaryKind> onUpdateDictionary;
+  final VoidCallback onCheckDictionaryUpdates;
   final VoidCallback onCancelDictionaryUpdate;
   final VoidCallback onExportTagSemantics, onImportTagSemantics;
 

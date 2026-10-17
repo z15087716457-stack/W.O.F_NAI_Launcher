@@ -269,6 +269,8 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onUpdateDictionary: (kind) => _run(
         () => ref.read(settingsDictionaryUpdateProvider.notifier).start(kind),
       ),
+      onCheckDictionaryUpdates: () =>
+          _run(ref.read(settingsDictionaryUpdateProvider.notifier).check),
       onCancelDictionaryUpdate: () =>
           ref.read(settingsDictionaryUpdateProvider.notifier).cancel(),
       onImportTagSemantics: () => _run(storage.importTagSemantics),

@@ -31,7 +31,7 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
   int count() =>
       db.select('SELECT COUNT(*) AS n FROM $table').first['n'] as int;
   final before = count();
-  var processed = 0, accepted = 0;
+  var processed = 0, accepted = 0, updated = 0;
   final statements = <PreparedStatement>[];
   PreparedStatement prepare(String sql) {
     final result = db.prepare(sql);
@@ -54,7 +54,7 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
         'INSERT INTO tags(name,category,post_count) VALUES(?,?,?) '
         'ON CONFLICT(name) DO UPDATE SET post_count=MAX(tags.post_count,excluded.post_count)',
       );
-      final find = prepare('SELECT id FROM tags WHERE name=?');
+      final find = prepare('SELECT id,post_count FROM tags WHERE name=?');
       final alias = prepare(
         'INSERT OR IGNORE INTO aliases(tag_id,alias) VALUES(?,?)',
       );
@@ -74,14 +74,19 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
             uses < 0) {
           throw const FormatException('dictionary_schema');
         }
+        final previous = find.select([name]);
+        var changed =
+            previous.isNotEmpty && uses > (previous.first['post_count'] as int);
         insert.execute([name, category, uses]);
         final id = find.select([name]).first['id'];
         for (final term in '${row[3]}'.split(',')) {
           final normalized = term.trim().toLowerCase();
           if (normalized != name && _validTag(normalized)) {
             alias.execute([id, normalized]);
+            if (db.updatedRows > 0) changed = true;
           }
         }
+        if (previous.isNotEmpty && changed) updated++;
         accepted++;
       }
       checkDictionaryCancellation(flag);
@@ -97,9 +102,16 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
       );
       db.execute("INSERT INTO tag_search(tag_search) VALUES('optimize')");
     } else {
-      final insert = prepare(
-        'INSERT OR IGNORE INTO wiki_pages(tag,body,source_url) VALUES(?,?,?)',
+      final previous = prepare(
+        'SELECT body,source_url FROM wiki_pages WHERE tag=?',
       );
+      final insert = prepare(
+        'INSERT INTO wiki_pages(tag,body,source_url) VALUES(?,?,?) '
+        'ON CONFLICT(tag) DO UPDATE SET body=excluded.body,source_url=excluded.source_url '
+        'WHERE wiki_pages.body!=excluded.body OR wiki_pages.source_url!=excluded.source_url',
+      );
+      final seen = <String, ({DateTime? at, bool existed})>{};
+      final changedArticles = <String>{};
       await for (final line in File(
         input,
       ).openRead().transform(utf8.decoder).transform(const LineSplitter())) {
@@ -127,13 +139,31 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
             body.isEmpty) {
           continue;
         }
-        insert.execute([
-          name,
-          body,
-          'https://danbooru.donmai.us/wiki_pages/${Uri.encodeComponent(name)}',
-        ]);
+        final stamp = value['updated_at'] is String
+            ? DateTime.tryParse(value['updated_at'] as String)
+            : null;
+        final prior = seen[name];
+        // Public snapshots can repeat normalized titles. Prefer
+        // the newest dated article; equal/unknown dates retain the first row.
+        if (prior != null &&
+            (stamp == null ||
+                (prior.at != null && !stamp.isAfter(prior.at!)))) {
+          continue;
+        }
+        final url =
+            'https://danbooru.donmai.us/wiki_pages/${Uri.encodeComponent(name)}';
+        final old = previous.select([name]);
+        final existed = prior?.existed ?? old.isNotEmpty;
+        seen[name] = (at: stamp, existed: existed);
+        if (existed &&
+            old.isNotEmpty &&
+            (old.first['body'] != body || old.first['source_url'] != url)) {
+          changedArticles.add(name);
+        }
+        insert.execute([name, body, url]);
         accepted++;
       }
+      updated = changedArticles.length;
     }
     checkDictionaryCancellation(flag);
     if (accepted == 0) throw const FormatException('dictionary_empty');
@@ -155,7 +185,12 @@ Future<Map<String, int>> buildDictionary(Map<String, Object> args) async {
     }
     db.execute('COMMIT');
     checkDictionaryCancellation(flag);
-    return {'count': total, 'added': total - before, 'processed': processed};
+    return {
+      'count': total,
+      'added': total - before,
+      'updated': updated,
+      'processed': processed,
+    };
   } catch (_) {
     try {
       db.execute('ROLLBACK');

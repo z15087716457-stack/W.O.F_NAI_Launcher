@@ -9978,8 +9978,30 @@
     }
   },
   "set_dcSupplement": "資料補充",
+  "set_dcCheckUpdates": "檢查更新",
+  "set_dcWikiRefreshAvailable": "Wiki 正文可重新整理",
+  "set_dcCheckingUpdates": "正在檢查…",
+  "set_dcCheckFailed": "檢查失敗，原資料仍可用。請重試。",
+  "set_dcLatest": "已是最新",
+  "set_dcUpdatesAvailable": "有可用更新",
+  "set_dcLastChecked": "上次檢查 {when}",
+  "@set_dcLastChecked": {
+    "placeholders": {
+      "when": {}
+    }
+  },
+  "set_dcRefreshWiki": "重新整理 Wiki",
+  "set_dcRefreshWikiTip": "下載當前 Wiki 資料，更新此前未同步的已有正文；保留個人譯文。",
+  "set_dcChanged": "新增 {added} 條，更新 {updated} 條，已儲存在本地",
+  "@set_dcChanged": {
+    "placeholders": {
+      "added": {},
+      "updated": {}
+    }
+  },
+  "set_dcRagSyncTip": "如已使用語義檢索，請重啟 Studio 後手動同步相應來源的索引。",
   "set_dcUpdateTags": "更新 Tag",
-  "set_dcUpdateWiki": "補充 Wiki",
+  "set_dcUpdateWiki": "更新 Wiki",
   "set_dcSources": "可用資料：Tag {tagDate} · Wiki {wikiDate}",
   "@set_dcSources": {
     "placeholders": {
