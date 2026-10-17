@@ -63,4 +63,4 @@ Worker ready 前导入推理栈；设置页首次兼容性 probe 也会在另一
 
 证据：`.dart_tool/rag-startup-performance-20261017/metadata-085433.json`、`metadata-085637.json`、`benchmark.py`／`benchmark-result.json`、`flow_probe.py`／`flow-result.json`。脚本只对临时合成目录写入，退出后清理；生产索引只有只读元数据核对，没有全量读取、重建或改写。原生 coremessaging.dll 崩溃与此前暂缓的图库“继续”完整专项不在此次已解决范围。
 
-用户随后授权的检查点、退出与重复统计优化已完成源码及隔离验证，尚未安装，见[实现与验证](rag-lifecycle-performance-fix-2026-10-17.md)。本页数值保留调查当时状态，不作为后续已安装状态。
+用户随后授权的检查点、退出与重复统计优化已完成源码及隔离验证，已随 r21 安装，见[实现与验证](rag-lifecycle-performance-fix-2026-10-17.md)。本页数值保留调查当时状态，不作为后续已安装状态。
