@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "source": "DanbooruSearchOnline Chinese tag semantic profiles",
+  "repository": "https://github.com/SuzumiyaAkizuki/DanbooruSearchOnline",
+  "commit": "4e99f95adfcd53a8cabd1eb097294b1c7af069a6",
+  "path": "origin_database/tags_enhanced.csv",
+  "url": "https://raw.githubusercontent.com/SuzumiyaAkizuki/DanbooruSearchOnline/4e99f95adfcd53a8cabd1eb097294b1c7af069a6/origin_database/tags_enhanced.csv",
+  "sha256": "dc1c602614d2423541b5b852ef7dd976bc0b37b894f382f42d8bd148905f2879",
+  "size": 8052270,
+  "encoding": "gbk",
+  "expectedRows": 53863,
+  "license": "GPL-3.0",
+  "licenseUrl": "https://github.com/SuzumiyaAkizuki/DanbooruSearchOnline/blob/4e99f95adfcd53a8cabd1eb097294b1c7af069a6/LICENSE",
+  "licenseSha256": "230184f60bae2feaf244f10a8bac053c8ff33a183bcc365b4d8b876d2b7f4809",
+  "coreRule": "first nonempty Chinese synonym; derived, not an upstream CSV column",
+  "expectedProfiles": 53860,
+  "expectedQuarantinedRows": 3,
+  "expectedMissingSummaries": 1
+}

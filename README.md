@@ -148,7 +148,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 ### 标签、翻译与隐私
 
-- 随包提供离线标签 / 别名 catalog 与本地英文 Wiki，不再分发或下载 ffdkj 中文词库；中文输入不参与本地标签检索。
+- 随包提供离线标签 / 别名 catalog 与本地英文 Wiki，不再分发或下载 ffdkj 中文词库。新增独立的中文语义补充资料，含 53,860 条标签的同义词、核心词及可用简释义；资料与按需读取入口已就绪，当前标签搜索尚未切换到新版检索链路。
 - 可选的标签 / Wiki 自动翻译默认关闭。开启后使用配置的「标签翻译」「百科翻译」接口，按最新可见范围优先调度，默认最多 5 个并发；标签名称请求包含可用的完整本地 Wiki 作为语义背景，正文仅在打开时请求翻译。
 - 提示词翻译向所选服务发送需要翻译的普通文字段与命中术语；双语块另存生成原文。共用术语表可带中文译名、简短释义及释义语言，缺少 / 过期中文释义时提供标明来源语言的短原文，不额外请求模型补表。
 - 译文写入独立本地缓存，不覆盖标签库 / Wiki，旧结果继续可读。所选服务的请求可能产生费用，按该服务配置和价格使用。
@@ -289,5 +289,7 @@ type(scope): 中文描述
 ## 📄 许可证
 
 本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
+
+第三方中文语义补充数据保留来源项目 DanbooruSearchOnline 的 GPL-3.0 许可；原始 CSV、固定来源与转换工具见 [数据说明](tool/tag_semantics/README.md)，完整归属见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
 界面使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 与韩文 Pretendard 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。

@@ -148,7 +148,7 @@ You can log in for the first time using your NovelAI account credentials or an A
 
 ### Tags, Translation & Privacy
 
-- The app includes an offline tag/alias catalog and local English wiki data. It neither bundles nor downloads the retired ffdkj Chinese dictionary; Chinese text is not used for local tag search.
+- The app includes an offline tag/alias catalog and local English wiki data. It neither bundles nor downloads the retired ffdkj Chinese dictionary. A separate Chinese semantic supplement now provides synonyms, core terms, and available short definitions for 53,860 tags. The data and lazy reader are ready; current tag search has not yet switched to the redesigned retrieval pipeline.
 - Optional automatic tag/wiki translation is off by default. When enabled, it uses the configured Tag translation and Wiki translation interfaces, prioritizes the latest visible tags, and allows up to five concurrent requests. Tag-name requests include the full available local wiki as context; full article translation is requested only when opened.
 - Prompt translation sends the selected plain-text segments and matched terminology to the configured service. Bilingual blocks retain a separate source projection for generation. Shared terminology can include a Chinese name, a brief definition, and its language; missing/expired Chinese definitions fall back to labeled source text without making extra requests.
 - Translations live in a separate local cache. They do not overwrite the tag/wiki databases, and existing results remain readable. Provider requests may incur API charges; use the selected service's terms and settings.
@@ -289,5 +289,7 @@ Contributions via Issues and Pull Requests are welcome. Before submitting a PR, 
 ## 📄 License
 
 This project is open-source under the MIT License. See [LICENSE](LICENSE) for details. Original copyright belongs to the upstream NAI Launcher Contributors; new work in this fork is copyrighted by W.O.F (z15087716457-stack).
+
+The third-party Chinese semantic supplement retains DanbooruSearchOnline's GPL-3.0 notice. Original source bytes, pinned provenance and the converter are documented in the [data guide](tool/tag_semantics/README.md); see [Third-Party Notices](THIRD_PARTY_NOTICES.md) for attribution.
 
 The interface bundles Geist Sans / Mono / Pixel Line, HarmonyOS Sans SC, and Pretendard (Korean) fonts, alongside the original interface icons. Fonts retain their own licenses; see the [asset guide](tool/branding/README.md) and [license files](assets/licenses/), also available from the app’s About page.

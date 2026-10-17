@@ -10,6 +10,8 @@ void registerStudioAssetLicenses() {
       'Pretendard': 'Pretendard-OFL.txt',
       'Lobe Icons (provider brand assets)': 'LobeIcons-LICENSE.txt',
       'SeedVR (ByteDance-Seed project logo)': 'SeedVR-Logo-LICENSE.txt',
+      'DanbooruSearchOnline (Chinese semantic data)':
+          'DanbooruSearchOnline-GPL-3.0.txt',
     }.entries) {
       yield LicenseEntryWithLineBreaks([
         entry.key,

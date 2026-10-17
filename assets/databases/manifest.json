@@ -16,6 +16,12 @@
       "dataVersion": "d017b2871814",
       "sha256": "d368fa876ff23f12e62c254b95b9a4c906cc61a38b25d64c4ef38ea2417c22c9",
       "size": 51851264
+    },
+    "tag_semantics.db": {
+      "schemaVersion": 1,
+      "dataVersion": "ab502f87e539",
+      "sha256": "1814ae269a6fbda6add512768f3fc391cd00661fce30e36db17c484e27421209",
+      "size": 18010112
     }
   }
 }

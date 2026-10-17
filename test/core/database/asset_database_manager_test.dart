@@ -34,9 +34,11 @@ void main() {
     final catalog = await _createCatalogFixture(tempDir.path);
     final cooccurrence = await _createCooccurrenceFixture(tempDir.path);
     final wiki = await _createWikiFixture(tempDir.path);
+    final semantics = await _createSemanticsFixture(tempDir.path);
     final catalogBytes = await catalog.readAsBytes();
     final cooccurrenceBytes = await cooccurrence.readAsBytes();
     final wikiBytes = await wiki.readAsBytes();
+    final semanticsBytes = await semantics.readAsBytes();
     manifest = {
       'databases': {
         AssetDatabaseManager.tagCatalogDb: {
@@ -57,6 +59,12 @@ void main() {
           'sha256': sha256.convert(wikiBytes).toString(),
           'size': wikiBytes.length,
         },
+        AssetDatabaseManager.tagSemanticsDb: {
+          'schemaVersion': 1,
+          'dataVersion': 'test-data',
+          'sha256': sha256.convert(semanticsBytes).toString(),
+          'size': semanticsBytes.length,
+        },
       },
     };
     assets = {
@@ -67,6 +75,7 @@ void main() {
       'assets/databases/${AssetDatabaseManager.cooccurrenceDb}':
           cooccurrenceBytes,
       'assets/databases/${AssetDatabaseManager.tagWikiDb}': wikiBytes,
+      'assets/databases/${AssetDatabaseManager.tagSemanticsDb}': semanticsBytes,
     };
     assetLoadCounts = <String, int>{};
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -137,6 +146,12 @@ void main() {
       await File(p.join(dbDir.path, AssetDatabaseManager.tagWikiDb)).exists(),
       isFalse,
     );
+    expect(
+      await File(
+        p.join(dbDir.path, AssetDatabaseManager.tagSemanticsDb),
+      ).exists(),
+      isFalse,
+    );
   });
 
   test('installs the wiki only on first article and reuses it', () async {
@@ -151,6 +166,50 @@ void main() {
       1,
     );
   });
+
+  test(
+    'semantic data is installed once on demand, including concurrent readers',
+    () async {
+      await AssetDatabaseManager.initialize();
+      const key = 'assets/databases/${AssetDatabaseManager.tagSemanticsDb}';
+      expect(assetLoadCounts[key], isNull);
+      final manager = AssetDatabaseManager.instance;
+      final paths = await Future.wait([
+        manager.ensureTagSemanticsDb(),
+        manager.ensureTagSemanticsDb(),
+      ]);
+      expect(paths[0], paths[1]);
+      expect(await File(paths.first).exists(), isTrue);
+      expect(await manager.ensureTagSemanticsDb(), paths.first);
+      expect(assetLoadCounts[key], 1);
+    },
+  );
+
+  test(
+    'failed semantic validation publishes nothing and can be retried',
+    () async {
+      await AssetDatabaseManager.initialize();
+      const key = 'assets/databases/${AssetDatabaseManager.tagSemanticsDb}';
+      final valid = assets[key]!;
+      assets[key] = Uint8List.fromList([1, 2, 3]);
+      final manager = AssetDatabaseManager.instance;
+      await expectLater(
+        manager.ensureTagSemanticsDb(),
+        throwsA(isA<StateError>()),
+      );
+      final target = File(
+        p.join(
+          appSupportDir.path,
+          'asset_databases',
+          AssetDatabaseManager.tagSemanticsDb,
+        ),
+      );
+      expect(await target.exists(), isFalse);
+      assets[key] = valid;
+      expect(await manager.ensureTagSemanticsDb(), target.path);
+      expect(await target.exists(), isTrue);
+    },
+  );
 
   test('legacy autocomplete migration preserves local gallery data', () async {
     final runtimeDir = await Directory(
@@ -238,6 +297,23 @@ Future<File> _createWikiFixture(String directory) async {
     INSERT INTO metadata VALUES ('data_version', 'test-data');
     CREATE TABLE wiki_pages(tag TEXT PRIMARY KEY, body TEXT NOT NULL, source_url TEXT NOT NULL);
     INSERT INTO wiki_pages VALUES ('blue_hair', 'Blue hair.', '');
+  ''');
+  db.dispose();
+  return file;
+}
+
+Future<File> _createSemanticsFixture(String directory) async {
+  final file = File(p.join(directory, 'semantics-fixture.db'));
+  final db = sqlite3.open(file.path);
+  db.execute('''
+    CREATE TABLE metadata(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+    INSERT INTO metadata VALUES ('schema_version', '1');
+    INSERT INTO metadata VALUES ('data_version', 'test-data');
+    CREATE TABLE tag_semantics(
+      tag TEXT PRIMARY KEY, synonyms_zh TEXT, core_zh TEXT, summary_zh TEXT,
+      category INTEGER, source_post_count INTEGER, sensitive INTEGER,
+      source_row INTEGER, source_row_sha256 TEXT
+    );
   ''');
   db.dispose();
   return file;

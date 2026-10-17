@@ -20,12 +20,15 @@ class AssetDatabaseManager {
   static const String tagCatalogDb = 'tag_catalog.db';
   static const String cooccurrenceDb = 'cooccurrence.db';
   static const String tagWikiDb = 'tag_wiki.db';
+  static const String tagSemanticsDb = 'tag_semantics.db';
   static const String _manifestAsset = 'assets/databases/manifest.json';
 
   String? _tagCatalogDbPath;
   String? _cooccurrenceDbPath;
   String? _tagWikiDbPath;
   Future<String>? _wikiInstallation;
+  String? _tagSemanticsDbPath;
+  Future<String>? _semanticsInstallation;
   DictionaryDataStore? _dictionaryStore;
   static Future<void>? _initialization;
   static bool _initialized = false;
@@ -59,6 +62,8 @@ class AssetDatabaseManager {
     _instance._cooccurrenceDbPath = null;
     _instance._tagWikiDbPath = null;
     _instance._wikiInstallation = null;
+    _instance._tagSemanticsDbPath = null;
+    _instance._semanticsInstallation = null;
     _instance._dictionaryStore = null;
   }
 
@@ -94,6 +99,47 @@ class AssetDatabaseManager {
     );
     _tagWikiDbPath = targetPath;
     return _dictionaryStore!.resolve(DictionaryKind.wiki, targetPath);
+  }
+
+  /// Independent Chinese profiles for the forthcoming tag retrieval engine.
+  /// Opening this data never replaces the catalog, Wiki or existing RAG index.
+  Future<String> ensureTagSemanticsDb() async {
+    if (_tagSemanticsDbPath case final path?) return path;
+    await initialize();
+    return _semanticsInstallation ??= _installSemantics().whenComplete(() {
+      _semanticsInstallation = null;
+    });
+  }
+
+  Future<String> _installSemantics() async {
+    final appDir = await getApplicationSupportDirectory();
+    final directory = Directory(p.join(appDir.path, 'asset_databases'));
+    await directory.create(recursive: true);
+    final manifest =
+        jsonDecode(await rootBundle.loadString(_manifestAsset))
+            as Map<String, dynamic>;
+    final databases = manifest['databases'] as Map<String, dynamic>;
+    final targetPath = p.join(directory.path, tagSemanticsDb);
+    await _install(
+      fileName: tagSemanticsDb,
+      targetPath: targetPath,
+      metadata: Map<String, dynamic>.from(databases[tagSemanticsDb] as Map),
+      requiredTables: const {
+        'metadata': {'key', 'value'},
+        'tag_semantics': {
+          'tag',
+          'synonyms_zh',
+          'core_zh',
+          'summary_zh',
+          'category',
+          'source_post_count',
+          'sensitive',
+          'source_row',
+          'source_row_sha256',
+        },
+      },
+    );
+    return _tagSemanticsDbPath = targetPath;
   }
 
   static Future<void> _initialize() async {

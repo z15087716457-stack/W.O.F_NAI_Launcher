@@ -1,6 +1,9 @@
 /# Auto detect text files and perform LF normalization
 * text=auto
 assets/databases/*.db filter=lfs diff=lfs merge=lfs -text
+# Preserve pinned upstream GBK source bytes and its exact license text.
+tool/tag_semantics/sources/* -text -whitespace
+assets/licenses/DanbooruSearchOnline-GPL-3.0.txt -text -whitespace
 # Keep exact pinned bytes, including upstream license and model line endings.
 assets/local_upscale/** -text -whitespace
 assets/local_upscale/models/*.bin filter=lfs diff=lfs merge=lfs -text

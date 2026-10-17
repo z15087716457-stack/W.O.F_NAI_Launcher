@@ -48,6 +48,27 @@ ComfyUI-Lora-Manager is GPL-3.0 licensed. Only its pinned copy of the
 Unlicense tag dataset is used here; no Python, JavaScript, or other GPL
 implementation code from that project is included in this application.
 
+## DanbooruSearchOnline Chinese Semantic Data
+
+`assets/databases/tag_semantics.db` is an independent Chinese semantic
+supplement derived from the `origin_database/tags_enhanced.csv` snapshot in
+[SuzumiyaAkizuki/DanbooruSearchOnline](https://github.com/SuzumiyaAkizuki/DanbooruSearchOnline),
+commit `4e99f95adfcd53a8cabd1eb097294b1c7af069a6`.
+The upstream repository declares GPL-3.0. This imported data retains that
+notice; it is not relicensed under the application code's MIT license.
+The complete upstream license is included as
+`assets/licenses/DanbooruSearchOnline-GPL-3.0.txt` and registered on the
+application's license page.
+
+The original GBK CSV is retained unchanged in `tool/tag_semantics/sources/`.
+`tool/tag_semantics/source_lock.json` records the pinned URL, size, SHA-256,
+license and expected counts; `build_profiles.py` is this project's converter.
+It parses Chinese synonyms, derives the first synonym as the core term,
+and keeps the supplied short explanation separate from the full Wiki.
+Three anomalous source rows are preserved in a review table instead of
+being used as canonical tags. No upstream application implementation is copied.
+See `tool/tag_semantics/README.md` for the conversion and coverage boundaries.
+
 ## Danbooru Co-occurrence Data
 
 The bundled `assets/databases/cooccurrence.db` is generated only from
