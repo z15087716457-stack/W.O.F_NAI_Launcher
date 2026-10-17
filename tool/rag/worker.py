@@ -39,6 +39,10 @@ class Worker:
     def _event(self, **values):
         emit({'event': 'index', **values})
 
+    def _settle_pool(self):
+        if self.pool and (self.suspended or not any(not j['paused'] for j in self.jobs.values())):
+            self.pool.checkpoint(remap=True)
+
     def _step(self, job_id):
         job = self.jobs.get(job_id)
         if job is None or job['paused'] or self.suspended: return
@@ -49,6 +53,10 @@ class Worker:
             self.enqueue({'_step':job_id}, 10)
         except StopIteration:
             self.jobs.pop(job_id, None)
+            try: self._settle_pool()
+            except Exception as error:
+                self._event(source=job['source'],job_id=job_id,phase='error',code=self.error_code(error),**engine.status())
+                return
             self._event(source=job['source'],job_id=job_id, phase='paused' if job['cancel'].is_set() else 'complete', **engine.status())
         except Exception as error:
             self.jobs.pop(job_id, None)
@@ -110,6 +118,7 @@ class Worker:
         if op in ('suspend','unload'):
             self.suspended = op == 'suspend'
             self.models.unload()
+            self._settle_pool()
             return {**self.status(),'suspended':self.suspended}
         if op == 'release':
             self.suspended = False
@@ -152,6 +161,7 @@ class Worker:
                 job['paused'] = op == 'pause'
                 if op == 'resume': self.enqueue({'_step':p['job_id']},10)
             engine.set_paused(op == 'pause')
+            if op == 'pause': self._settle_pool()
             return {'job_id':p['job_id'],'paused':op == 'pause',**engine.status()}
         if op == 'clear':
             for job_id,job in list(self.jobs.items()):

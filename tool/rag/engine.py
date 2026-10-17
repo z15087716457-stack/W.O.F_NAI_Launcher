@@ -150,6 +150,7 @@ class Engine:
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused','0')")
         self.db.commit()
         processed = 0; skipped = 0; closing = False
+        self.pool.begin_build()
         try:
             names = self.sources.ordered_names()
             while processed < plan['total']:
@@ -206,6 +207,7 @@ class Engine:
             raise
         finally:
             self.db.rollback(); self.active = False
+            self.pool.end_build()
             if not closing: self._checkpoint()
 
     def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):

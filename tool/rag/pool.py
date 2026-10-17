@@ -57,14 +57,52 @@ class VectorPool:
             COMMIT;
         ''')
         self.views = {}; self.ann = None; self._checkpoint_state = None; self._closed = False
+        self._mapped = False; self._builders = 0
         try:
             rebuilt = self.reload(progress=progress, cancelled=cancelled)
             if rebuilt:
                 if progress: progress('saving', 0, 0)
                 self.checkpoint(cancelled=cancelled)
         except BaseException:
+            if self.ann is not None: self.ann.reset()
             self.db.close()
             raise
+
+    @property
+    def mapped(self): return self._mapped
+
+    def _replace_ann(self, ann, *, mapped):
+        previous = self.ann
+        self.ann = ann; self._mapped = mapped
+        # Do not leave an old view holding vectors.usearch open on Windows.
+        if previous is not None and previous is not ann: previous.reset()
+
+    def writable(self):
+        if self._mapped:
+            # Native copy preserves graph, keys, precision and search settings.
+            # A failed copy leaves the usable read mapping untouched.
+            self._replace_ann(self.ann.copy(), mapped=False)
+        return self.ann
+
+    def begin_build(self): self._builders += 1
+
+    def end_build(self):
+        assert self._builders > 0
+        self._builders -= 1
+
+    def _map_checkpoint(self):
+        if self._mapped: return
+        from usearch.index import Index
+        candidate = Index(ndim=768, metric='cos', dtype='f32')
+        try:
+            candidate.view(str(self.folder/'vectors.usearch'))
+            if len(candidate) != len(self.ann): raise ValueError('invalid_ann')
+        except (OSError, ValueError, RuntimeError, MemoryError):
+            # Mapping is an optimization. Keep the current mutable ANN usable
+            # if the checkpoint cannot be mapped; a later idle save can retry.
+            candidate.reset()
+            return
+        self._replace_ann(candidate, mapped=True)
 
     def reload(self, *, progress=None, cancelled=lambda: False):
         import numpy as np
@@ -76,41 +114,60 @@ class VectorPool:
         generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
         total = self.db.execute('SELECT COUNT(*) FROM pool_documents').fetchone()[0]
         if progress: progress('loading', 0, total)
-        rebuilt = False
+        rebuilt = False; mapped = False
         try:
-            saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
-            if saved['generation'] != generation: raise ValueError('stale_ann')
-            ann.load(str(self.folder / 'vectors.usearch'))
-            if len(ann) != total:
-                raise ValueError('invalid_ann')
-        except (OSError,ValueError,KeyError,RuntimeError):
-            check()
-            rebuilt = True
-            ann = Index(ndim=768, metric='cos', dtype='f32')
-            if progress: progress('restoring', 0, total)
-            processed = 0; last_report = time.monotonic()
-            cursor=self.db.execute('SELECT id,vector FROM pool_documents')
-            while batch:=cursor.fetchmany(256):
+            try:
+                saved = json.loads((self.folder / 'ann.json').read_text('utf-8'))
+                if saved['generation'] != generation: raise ValueError('stale_ann')
+                try:
+                    ann.view(str(self.folder / 'vectors.usearch'))
+                    mapped = True
+                except (OSError,ValueError,RuntimeError):
+                    # A view failure alone must not rebuild a valid graph or
+                    # alter approximate neighbours: retain the old load path.
+                    ann.reset()
+                    ann = Index(ndim=768, metric='cos', dtype='f32')
+                    ann.load(str(self.folder / 'vectors.usearch'))
+                if len(ann) != total: raise ValueError('invalid_ann')
+            except (OSError,ValueError,KeyError,RuntimeError):
+                ann.reset()
                 check()
-                ann.add(np.array([r[0] for r in batch],dtype=np.uint64),
-                    np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
-                processed += len(batch)
-                if progress and (processed == total or time.monotonic() - last_report >= 1):
-                    progress('restoring', processed, total); last_report = time.monotonic()
-        check()
-        self.ann = ann
+                rebuilt = True
+                ann = Index(ndim=768, metric='cos', dtype='f32')
+                if progress: progress('restoring', 0, total)
+                processed = 0; last_report = time.monotonic()
+                cursor=self.db.execute('SELECT id,vector FROM pool_documents')
+                while batch:=cursor.fetchmany(256):
+                    check()
+                    ann.add(np.array([r[0] for r in batch],dtype=np.uint64),
+                        np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
+                    processed += len(batch)
+                    if progress and (processed == total or time.monotonic() - last_report >= 1):
+                        progress('restoring', processed, total); last_report = time.monotonic()
+            check()
+        except BaseException:
+            ann.reset()
+            raise
+        self._replace_ann(ann, mapped=mapped and not rebuilt)
         # Only a successfully loaded/published checkpoint can suppress saves.
         # A rebuild must replace even a corrupt file with matching metadata.
         self._checkpoint_state = None if rebuilt else (generation, total)
         for view in self.views.values(): view.refresh()
         return rebuilt
 
-    def checkpoint(self, *, cancelled=lambda: False):
+    def checkpoint(self, *, cancelled=lambda: False, remap=None):
         if cancelled(): raise ValueError('cancelled')
+        remap = not self._builders if remap is None else remap
         generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
         state = (generation, len(self.ann))
         if (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
-                and (self.folder/'ann.json').is_file()): return
+                and (self.folder/'ann.json').is_file()):
+            if remap: self._map_checkpoint()
+            return
+        # An unusual metadata-only publication can still arrive while mapped.
+        # Detach before replacing the mapped path; the live ANN remains usable
+        # if saving, cancellation or either atomic publication fails.
+        self.writable()
         temporary = self.folder / 'vectors.usearch.tmp'
         self.ann.save(str(temporary))
         if cancelled(): raise ValueError('cancelled')
@@ -119,6 +176,7 @@ class VectorPool:
         temp.write_text(json.dumps({'generation':generation,'count':len(self.ann)}),'utf-8')
         os.replace(temp,self.folder/'ann.json')
         self._checkpoint_state = state
+        if remap: self._map_checkpoint()
 
     def collection_bytes(self, name):
         row = self.db.execute('SELECT bytes FROM pool_sizes WHERE collection=?',(name,)).fetchone()
@@ -183,7 +241,7 @@ class VectorPool:
             cursor=self.db.execute('SELECT id,vector FROM pool_documents WHERE collection=?',(name,))
             while batch:=cursor.fetchmany(256):
                 batch=[r for r in batch if r[0] not in self.ann]
-                if batch:self.ann.add(np.array([r[0] for r in batch],dtype=np.uint64),np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
+                if batch:self.writable().add(np.array([r[0] for r in batch],dtype=np.uint64),np.stack([np.frombuffer(r[1],dtype=np.float32) for r in batch]))
             self.checkpoint()
         with self.db:
             self.db.execute("INSERT OR REPLACE INTO pool_metadata VALUES(?,'pool_migrated','1')",(name,))
@@ -191,10 +249,13 @@ class VectorPool:
 
     def close(self):
         if self._closed: return
-        try: self.checkpoint()
+        try: self.checkpoint(remap=False)
         finally:
-            self.db.close(); self._closed = True
-            self.views.clear(); self.ann = None
+            try: self.db.close()
+            finally:
+                self._closed = True; self.views.clear()
+                if self.ann is not None: self.ann.reset()
+                self.ann = None; self._mapped = False
 
 
 class CollectionAnn:
@@ -204,8 +265,8 @@ class CollectionAnn:
         self.keys={r[0] for r in self.pool.db.execute('SELECT id FROM pool_documents WHERE collection=?',(self.name,))}
     def __len__(self): return len(self.keys)
     def __contains__(self,key): return key in self.keys
-    def add(self,key,vector): self.pool.ann.add(key,vector);self.keys.add(key)
-    def remove(self,key): self.pool.ann.remove(key);self.keys.discard(key)
+    def add(self,key,vector): self.pool.writable().add(key,vector);self.keys.add(key)
+    def remove(self,key): self.pool.writable().remove(key);self.keys.discard(key)
     def search(self,vector,count):
         import numpy as np
         count=min(count,len(self.keys))

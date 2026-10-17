@@ -62,6 +62,8 @@ class LifecycleTests(unittest.TestCase):
 
     def test_missing_checkpoint_is_republished_even_when_generation_is_unchanged(self):
         self.build(self.tags)
+        # Simulate external loss after the reader has released its file view.
+        self.pool.writable()
         (self.pool.folder/'vectors.usearch').unlink()
         self.pool.checkpoint()
         with patch('usearch.index.Index.add',side_effect=AssertionError('Missing checkpoint not repaired')):
@@ -70,6 +72,7 @@ class LifecycleTests(unittest.TestCase):
 
     def test_corrupt_matching_checkpoint_is_restored_and_saved(self):
         self.build(self.tags)
+        self.pool.writable()  # A Windows mapping intentionally forbids truncation.
         (self.pool.folder/'vectors.usearch').write_bytes(b'broken fixture')
         reopened = VectorPool(self.root/'indices',self.models.fingerprint)
         try:

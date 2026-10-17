@@ -31,6 +31,7 @@ class StartupPoolTests(unittest.TestCase):
 
     def test_old_trigger_is_upgraded_and_vector_changes_still_invalidate(self):
         self.build(self.tags)
+        self.pool.writable()  # Release the other owner's mapping before fault injection.
         self.pool.db.executescript("DROP TRIGGER pool_update; CREATE TRIGGER pool_update AFTER UPDATE ON pool_documents BEGIN UPDATE pool_state SET value=value+1 WHERE key='generation'; END;")
         restored = VectorPool(self.root/'indices', self.models.fingerprint)
         try:
@@ -46,6 +47,7 @@ class StartupPoolTests(unittest.TestCase):
 
     def test_stale_checkpoint_recovery_is_saved_without_reembedding(self):
         self.build(self.tags)
+        self.pool.writable()  # Recovery owns publication; no second reader pins the file.
         with self.pool.db: self.pool.db.execute("UPDATE pool_state SET value=value+1 WHERE key='generation'")
         events=[]
         with patch.object(self.models, 'embed', side_effect=AssertionError('Recovery must reuse vectors')):
