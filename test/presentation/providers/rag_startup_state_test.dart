@@ -8,18 +8,28 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 
 const _worker = r'''
 import sys,json,time
+from pathlib import Path
+counts={'configure':0,'status':0};shutdown={}
 print(json.dumps({'event':'ready','protocol':1}),flush=True)
 for line in sys.stdin:
  r=json.loads(line);op=r['op'];p=r.get('params',{})
- if op=='shutdown' or op=='exit':break
+ if op=='shutdown':
+  time.sleep(shutdown.get('delay',0))
+  if shutdown.get('marker'):Path(shutdown['marker']).write_text('saved')
+  break
+ if op=='exit':break
  if op=='cancel':continue
+ if op in counts:counts[op]+=1
  if op=='configure':
   for step in range(8):
    if p['embedding']!='silent':
     print(json.dumps({'event':'initialization','request_id':r['id'],'phase':'restoring','processed':step,'total':8}),flush=True)
    time.sleep(.04)
   sources={s:{'indexed':8 if s=='tags' else 0,'total':8 if s=='tags' else 0,'complete':s=='tags','building':False} for s in p['sources']}
- print(json.dumps({'id':r['id'],'result':{'sources':sources,'jobs':[]}}),flush=True)
+ if op=='advance':sources['tags']['indexed']+=1
+ if op=='hold_shutdown':shutdown=p
+ result={'counts':counts} if op=='counters' else {'sources':sources,'jobs':[]}
+ print(json.dumps({'id':r['id'],'result':result}),flush=True)
 ''';
 
 class _Settings extends RagSettingsController {
@@ -48,6 +58,7 @@ void main() {
   late Directory root;
   ProviderContainer? container;
   final clients = <RagClient>[];
+  final retiredAtStart = <bool>[];
   Future<void> waitFor(bool Function() ready) async {
     for (var i = 0; i < 200; i++) {
       if (ready()) return;
@@ -80,6 +91,7 @@ void main() {
           required python,
           required directory,
         }) async {
+          retiredAtStart.add(File('${root.path}/retired').existsSync());
           final client = await RagClient.start(
             python: python,
             directory: directory,
@@ -97,6 +109,7 @@ void main() {
   setUp(() async {
     root = await Directory.systemTemp.createTemp('rag-startup-');
     clients.clear();
+    retiredAtStart.clear();
   });
   tearDown(() async {
     await DesktopAppShutdownService.prepareBackgroundShutdown();
@@ -107,6 +120,75 @@ void main() {
     await root.delete(recursive: true);
   });
   group('startup with isolated JSON worker', () {
+    test(
+      'application shutdown waits for a retiring worker and starts no replacement',
+      () async {
+        await open();
+        final c = container!;
+        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+        final marker = File('${root.path}/retired');
+        await clients.single.request('hold_shutdown', {
+          'delay': .3,
+          'marker': marker.path,
+        });
+        await c
+            .read(ragSettingsProvider.notifier)
+            .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
+        final refresh = c.read(ragControllerProvider.notifier).refresh();
+        await DesktopAppShutdownService.prepareBackgroundShutdown();
+        await refresh;
+        expect(await marker.readAsString(), 'saved');
+        expect(clients, hasLength(1));
+      },
+    );
+    test(
+      'initial configure is reused once and later refresh reads fresh status',
+      () async {
+        await open();
+        final c = container!;
+        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+        expect((await clients.single.request('counters'))['counts'], {
+          'configure': 1,
+          'status': 0,
+        });
+        await clients.single.request('advance');
+        await c.read(ragControllerProvider.notifier).refresh();
+        expect(c.read(ragControllerProvider).indexed, 9);
+        expect((await clients.single.request('counters'))['counts'], {
+          'configure': 1,
+          'status': 1,
+        });
+      },
+    );
+    test(
+      'reconfiguration waits for the old worker checkpoint before opening another',
+      () async {
+        await open();
+        final c = container!;
+        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+        await clients.single.request('hold_shutdown', {
+          'delay': .3,
+          'marker': '${root.path}/retired',
+        });
+        await c
+            .read(ragSettingsProvider.notifier)
+            .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
+        final refresh = c.read(ragControllerProvider.notifier).refresh();
+        await waitFor(
+          () =>
+              clients.length == 2 &&
+              c.read(ragControllerProvider).runtimeReady &&
+              !c.read(ragControllerProvider).initializing,
+        );
+        await refresh;
+        expect(retiredAtStart, [false, true]);
+        expect(clients.first.isClosed, isTrue);
+        expect((await clients.last.request('counters'))['counts'], {
+          'configure': 1,
+          'status': 0,
+        });
+      },
+    );
     test(
       'progress survives short command budgets and publishes authoritative empty state only after configure',
       () async {

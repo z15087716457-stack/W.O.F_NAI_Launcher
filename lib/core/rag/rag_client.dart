@@ -39,7 +39,10 @@ class RagCancellation {
 
 /// Owns a local JSON worker. No shell interpretation or remote model calls.
 class RagClient {
-  RagClient(this._process) {
+  RagClient(
+    this._process, {
+    Duration shutdownTimeout = const Duration(seconds: 60),
+  }) : _shutdownTimeout = shutdownTimeout {
     _stdout = _process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -74,6 +77,7 @@ class RagClient {
     unawaited(_process.stdin.done.catchError((Object _) => _lost()));
   }
   final Process _process;
+  final Duration _shutdownTimeout;
   StreamSubscription<String>? _stdout;
   StreamSubscription<List<int>>? _stderr;
   final _ready = Completer<void>();
@@ -93,6 +97,7 @@ class RagClient {
     required String python,
     required Directory directory,
     Future<String> Function(String)? loadAsset,
+    Duration shutdownTimeout = const Duration(seconds: 60),
   }) async {
     final loader = loadAsset ?? rootBundle.loadString;
     final files = <String, String>{};
@@ -128,7 +133,7 @@ class RagClient {
         'HF_HUB_DISABLE_TELEMETRY': '1',
       },
     );
-    final client = RagClient(process);
+    final client = RagClient(process, shutdownTimeout: shutdownTimeout);
     try {
       await client._ready.future.timeout(const Duration(seconds: 30));
     } catch (_) {
@@ -139,9 +144,15 @@ class RagClient {
   }
 
   void _receive(String line) {
-    if (_closed) return;
+    if (_closed && !_closing) return;
     try {
       final message = (jsonDecode(line) as Map).cast<String, dynamic>();
+      if (_closing) {
+        if (message['event'] == 'shutdown' && message['phase'] == 'failed') {
+          AppLogger.w('Worker checkpoint shutdown failed', 'RAG');
+        }
+        return;
+      }
       if (message['event'] == 'ready') {
         if (!_ready.isCompleted) {
           if (message['protocol'] != 1) {
@@ -309,20 +320,33 @@ class RagClient {
   }
 
   Future<void> _close() async {
-    if (!_closed) {
+    final graceful = !_closed;
+    if (graceful) {
       _send({'op': 'shutdown'});
     }
     _lost();
-    await _stdout?.cancel();
-    await _stderr?.cancel();
     try {
       await _process.stdin.close();
     } catch (_) {}
     try {
-      await _process.exitCode.timeout(const Duration(seconds: 3));
+      // Keep both output pipes drained until the worker finishes its final
+      // checkpoint. Cancelling subscriptions early can block/fail that writer.
+      await _process.exitCode.timeout(
+        graceful ? _shutdownTimeout : const Duration(seconds: 3),
+      );
     } catch (_) {
+      AppLogger.w(
+        'Worker shutdown deadline reached; terminating owned Job',
+        'RAG',
+      );
       _process.kill();
+      try {
+        await _process.exitCode.timeout(const Duration(seconds: 3));
+      } catch (_) {}
+    } finally {
+      await _stdout?.cancel();
+      await _stderr?.cancel();
+      await _events.close();
     }
-    await _events.close();
   }
 }

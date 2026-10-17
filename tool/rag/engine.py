@@ -101,7 +101,7 @@ class Engine:
         self._owns_pool = pool is None; self.collection = collection
         self.folder = self.pool.folder
         self.db,self.ann = self.pool.collection(collection,self.root/models.fingerprint)
-        self.plan = None; self.active = False; self._ann_generation = 0
+        self.plan = None; self.active = False; self._ann_generation = 0; self._closed = False
 
     def _load_ann(self):
         self.pool.reload()
@@ -114,7 +114,7 @@ class Engine:
         total = self.sources.count()
         row = self.db.execute("SELECT value FROM metadata WHERE key='complete_signature'").fetchone()
         complete = bool(row and row[0] == self.sources.signature())
-        size = self.db.execute('SELECT COALESCE(SUM(length(vector)+length(text)+length(name)),0) FROM documents').fetchone()[0]
+        size = self.pool.collection_bytes(self.collection)
         metadata = dict(self.db.execute('SELECT key,value FROM metadata'))
         return {'indexed': count, 'total': total, 'complete': complete,
                 'auto_update_allowed': metadata.get('consented') == '1' and metadata.get('paused') != '1',
@@ -149,7 +149,7 @@ class Engine:
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('consented','1')")
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused','0')")
         self.db.commit()
-        processed = 0; skipped = 0
+        processed = 0; skipped = 0; closing = False
         try:
             names = self.sources.ordered_names()
             while processed < plan['total']:
@@ -195,11 +195,18 @@ class Engine:
                     self.db.execute("INSERT OR REPLACE INTO metadata VALUES('ann_generation',?)",(str(self._ann_generation),))
                 self.db.execute("INSERT OR REPLACE INTO metadata VALUES('complete_signature',?)", (signature,))
                 self.db.commit()
+        except GeneratorExit:
+            # close() can only interrupt a suspended yield: both SQLite and
+            # ANN already contain the committed batch. The pool owner saves
+            # once after all builders/connections have been closed.
+            closing = True
+            raise
         except BaseException:
             self.db.rollback(); self._load_ann()
             raise
         finally:
-            self.db.rollback(); self.active = False; self._checkpoint()
+            self.db.rollback(); self.active = False
+            if not closing: self._checkpoint()
 
     def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
         import numpy as np
@@ -243,6 +250,6 @@ class Engine:
         self._load_ann(); self._checkpoint(); self.db.execute('VACUUM')
 
     def close(self):
-        self._checkpoint()
-        self.db.close()
+        if self._closed: return
+        self.db.close(); self._closed = True
         if self._owns_pool: self.pool.close()

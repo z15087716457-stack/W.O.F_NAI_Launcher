@@ -207,6 +207,7 @@ class RagController extends Notifier<RagStatus> {
   RagClient? _client;
   Future<RagClient>? _connecting;
   RagClient? _openingClient;
+  ({RagClient client, Map<String, dynamic> status})? _configuration;
   RagCancellation? _initializationCancellation;
   StreamSubscription<Map<String, dynamic>>? _events;
   Timer? _refresh;
@@ -216,6 +217,7 @@ class RagController extends Notifier<RagStatus> {
   int _epoch = 0, _gpuHolds = 0;
   final _finishedJobs = <String>{};
   Future<void> _snapshotWrites = Future.value();
+  Future<void> _retiring = Future.value();
   Object? _refreshToken;
   final _plans = <String, ({RagSource source, int epoch, DateTime expires})>{};
 
@@ -240,6 +242,7 @@ class RagController extends Notifier<RagStatus> {
       _initializationCancellation?.cancel();
       await _openingClient?.close();
       await _client?.close();
+      await _retiring;
       final opening = _connecting;
       if (opening != null) {
         try {
@@ -284,9 +287,16 @@ class RagController extends Notifier<RagStatus> {
     _plans.clear();
     final old = _client;
     _client = null;
-    await _events?.cancel();
-    await opening?.close();
-    await old?.close();
+    _configuration = null;
+    final events = _events;
+    final previousRetirement = _retiring;
+    final retirement = _retiring = () async {
+      await previousRetirement;
+      await events?.cancel();
+      await opening?.close();
+      await old?.close();
+    }();
+    await retirement;
     if (_disposed || epoch != _epoch) return;
     state = RagStatus(
       installPhase: state.installPhase,
@@ -302,10 +312,19 @@ class RagController extends Notifier<RagStatus> {
       return Future.value(client);
     }
     if (_connecting case final pending?) return pending;
+    final epoch = _epoch;
     late final Future<RagClient> attempt;
-    attempt = _open().whenComplete(() {
-      if (identical(_connecting, attempt)) _connecting = null;
-    });
+    attempt =
+        () async {
+          await _retiring;
+          if (_disposed || epoch != _epoch) {
+            throw const RagException('cancelled');
+          }
+          if (!_enabled) throw const RagException('disabled');
+          return _open();
+        }().whenComplete(() {
+          if (identical(_connecting, attempt)) _connecting = null;
+        });
     return _connecting = attempt;
   }
 
@@ -438,6 +457,7 @@ class RagController extends Notifier<RagStatus> {
           }
         });
         _apply(result);
+        _configuration = (client: client, status: result);
         state = state.copyWith(initializing: false);
         _refresh?.cancel();
         _refresh = Timer.periodic(const Duration(seconds: 30), (_) {
@@ -571,21 +591,35 @@ class RagController extends Notifier<RagStatus> {
     final refreshToken = _refreshToken = Object();
     final epoch = _epoch;
     try {
+      final previousClient = _client;
       final c = await _connect();
-      if (ref.read(ragSettingsProvider).enabledFor(RagSource.blocks)) {
-        await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
-      }
-      if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
-        await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
-      }
-      final status = await c.request(
-        'status',
-        const {},
-        null,
-        ref.read(ragStatusTimeoutProvider),
-      );
       if (_disposed || epoch != _epoch) return;
-      _apply(status);
+      // A refresh waiting for a new connection already received authoritative
+      // status and snapshots from configure. Existing connections still refresh
+      // normally; never replay an old configure result over live index events.
+      final configured =
+          !identical(previousClient, c) && identical(_configuration?.client, c)
+          ? _configuration?.status
+          : null;
+      final Map<String, dynamic> status;
+      if (configured != null) {
+        status = configured;
+      } else {
+        if (ref.read(ragSettingsProvider).enabledFor(RagSource.blocks)) {
+          await _writeBlockSnapshot(await ref.read(ragDirectoryProvider)());
+        }
+        if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+          await _writeGalleryRoots(await ref.read(ragDirectoryProvider)());
+        }
+        status = await c.request(
+          'status',
+          const {},
+          null,
+          ref.read(ragStatusTimeoutProvider),
+        );
+        if (_disposed || epoch != _epoch) return;
+        _apply(status);
+      }
       final sources = status['sources'] as Map? ?? {'tags': status};
       for (final source in RagSource.values) {
         final value = sources[source.name] as Map?;

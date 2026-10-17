@@ -5,16 +5,25 @@ import 'package:nai_launcher/core/rag/rag_client.dart';
 // A real child process exercises JSON framing, stream shutdown and cancellation
 // without loading models, opening user databases or making network requests.
 const _worker = r'''
-import sys,json,threading
-lock=threading.Lock(); cancelled=[]
+import sys,json,threading,time
+from pathlib import Path
+lock=threading.Lock(); cancelled=[];shutdown={}
 def emit(v):
  with lock: print(json.dumps(v,ensure_ascii=False),flush=True)
 emit({'event':'ready','protocol':1})
 for line in sys.stdin:
  r=json.loads(line);op=r['op']
- if op=='shutdown': break
+ if op=='shutdown':
+  time.sleep(shutdown.get('delay',0))
+  if shutdown.get('noise'):
+   sys.stderr.write('fixture drain\n'*20000);sys.stderr.flush()
+   emit({'event':'draining','fixture':'x'*262144})
+  if shutdown.get('marker'):Path(shutdown['marker']).write_text('saved')
+  emit({'event':'shutdown','phase':'complete'})
+  break
  if op=='cancel': cancelled.append(r['target']);continue
  i=r['id'];p=r.get('params',{})
+ if op=='shutdown_setup': shutdown=p;emit({'id':i,'result':{}});continue
  if op=='configure':
   mode=p.get('mode','progress')
   def configure(i=i,mode=mode):
@@ -53,6 +62,47 @@ void main() {
   group(
     'local JSON worker',
     () {
+      test(
+        'graceful close drains pipes and lets a checkpoint exceed three seconds',
+        () async {
+          final marker = File('${directory.path}/checkpoint-complete');
+          await client.request('shutdown_setup', {
+            'delay': 3.2,
+            'noise': true,
+            'marker': marker.path,
+          });
+          final pending = client.request('delay');
+          final failed = expectLater(pending, throwsA(isA<RagException>()));
+          final first = client.close();
+          expect(client.close(), same(first));
+          await failed;
+          await first;
+          expect(await marker.readAsString(), 'saved');
+          expect(client.isClosed, isTrue);
+        },
+      );
+      test(
+        'a hung shutdown has a bounded deadline and cannot publish late state',
+        () async {
+          await client.close();
+          client = await RagClient.start(
+            python: python!,
+            directory: directory,
+            shutdownTimeout: const Duration(milliseconds: 200),
+            loadAsset: (name) async =>
+                name.endsWith('worker.py') ? _worker : '',
+          );
+          final marker = File('${directory.path}/must-not-exist');
+          await client.request('shutdown_setup', {
+            'delay': 60,
+            'marker': marker.path,
+          });
+          final elapsed = Stopwatch()..start();
+          await client.close();
+          expect(elapsed.elapsed, lessThan(const Duration(seconds: 5)));
+          expect(await marker.exists(), isFalse);
+        },
+      );
       test('configure progress renews only the idle budget', () async {
         final progress = <int>[];
         expect(

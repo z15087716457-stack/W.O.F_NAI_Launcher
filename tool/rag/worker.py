@@ -63,16 +63,29 @@ class Worker:
         code = str(error)
         return code if code in allowed else 'rag_runtime_error'
 
+    def close(self):
+        # Release every owner even if one cleanup fails. Shared Engine.close()
+        # only closes its scoped connection; the pool publishes one checkpoint.
+        jobs, engines, pool, models = self.jobs, self.engines, self.pool, self.models
+        self.jobs = {}; self.engines = {}; self.engine = self.pool = self.models = None
+        error = None
+        def attempt(action):
+            nonlocal error
+            try: action()
+            except Exception as failure:
+                if error is None: error = failure
+        for job in jobs.values():
+            job['cancel'].set(); attempt(job['generator'].close)
+        for engine in engines.values(): attempt(engine.close)
+        if pool: attempt(pool.close)
+        if models: attempt(models.unload)
+        if error is not None: raise error
+
     def execute(self, op, p, token, progress=None):
         if op == 'configure':
             if token.is_set(): raise ValueError('cancelled')
             if progress: progress('opening', 0, 0)
-            for job in self.jobs.values(): job['cancel'].set(); job['generator'].close()
-            self.jobs.clear()
-            if self.models: self.models.unload()
-            for engine in self.engines.values(): engine.close()
-            if self.pool: self.pool.close()
-            self.engine = None; self.engines = {}
+            self.close()
             models = Models(p['embedding'], p['reranker'], p.get('device','auto'))
             self.models = models
             enabled = p.get('sources',['tags'])
@@ -209,11 +222,11 @@ class Worker:
             except Exception as error:
                 emit({'id':request_id,'error':{'code':self.error_code(error)}})
             finally: self.tokens.pop(request_id,None)
-        if self.models:
-            for job in self.jobs.values(): job['generator'].close()
-            self.models.unload()
-            for engine in self.engines.values(): engine.close()
-            if self.pool: self.pool.close()
+        try: self.close()
+        except Exception:
+            emit({'event':'shutdown','phase':'failed'})
+            raise
+        emit({'event':'shutdown','phase':'complete'})
 
     def main(self):
         # Libraries may print progress to stdout. Keep the strict JSON pipe
@@ -248,7 +261,9 @@ class Worker:
         self.running = False
         for token in self.tokens.values(): token.set()
         for job in list(self.jobs.values()): job['cancel'].set()
-        thread.join(timeout=15)
+        # The owning client bounds graceful shutdown and can terminate its Job.
+        # Do not abandon a daemon writer halfway through a large checkpoint.
+        thread.join()
 
 
 if __name__ == '__main__':

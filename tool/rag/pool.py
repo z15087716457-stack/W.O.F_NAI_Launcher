@@ -29,6 +29,7 @@ class VectorPool:
             CREATE TABLE IF NOT EXISTS pool_metadata(collection TEXT,key TEXT,value TEXT,PRIMARY KEY(collection,key));
             CREATE TABLE IF NOT EXISTS pool_state(key TEXT PRIMARY KEY,value INTEGER);
             CREATE TABLE IF NOT EXISTS pool_migrations(collection TEXT PRIMARY KEY);
+            CREATE TABLE IF NOT EXISTS pool_sizes(collection TEXT PRIMARY KEY,bytes INTEGER NOT NULL);
             INSERT OR IGNORE INTO pool_state VALUES('generation',0);
             CREATE TRIGGER IF NOT EXISTS pool_insert AFTER INSERT ON pool_documents BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
@@ -40,9 +41,22 @@ class VectorPool:
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
             CREATE TRIGGER IF NOT EXISTS pool_delete AFTER DELETE ON pool_documents BEGIN
                 UPDATE pool_state SET value=value+1 WHERE key='generation'; END;
+            CREATE TRIGGER IF NOT EXISTS pool_size_insert AFTER INSERT ON pool_documents BEGIN
+                UPDATE pool_sizes SET bytes=bytes+COALESCE(length(NEW.vector)+length(NEW.text)+length(NEW.name),0)
+                    WHERE collection=NEW.collection; END;
+            CREATE TRIGGER IF NOT EXISTS pool_size_delete AFTER DELETE ON pool_documents BEGIN
+                UPDATE pool_sizes SET bytes=bytes-COALESCE(length(OLD.vector)+length(OLD.text)+length(OLD.name),0)
+                    WHERE collection=OLD.collection; END;
+            CREATE TRIGGER IF NOT EXISTS pool_size_update AFTER UPDATE ON pool_documents
+                WHEN OLD.name IS NOT NEW.name OR OLD.text IS NOT NEW.text
+                     OR OLD.vector IS NOT NEW.vector OR OLD.collection IS NOT NEW.collection BEGIN
+                UPDATE pool_sizes SET bytes=bytes-COALESCE(length(OLD.vector)+length(OLD.text)+length(OLD.name),0)
+                    WHERE collection=OLD.collection;
+                UPDATE pool_sizes SET bytes=bytes+COALESCE(length(NEW.vector)+length(NEW.text)+length(NEW.name),0)
+                    WHERE collection=NEW.collection; END;
             COMMIT;
         ''')
-        self.views = {}; self.ann = None
+        self.views = {}; self.ann = None; self._checkpoint_state = None; self._closed = False
         try:
             rebuilt = self.reload(progress=progress, cancelled=cancelled)
             if rebuilt:
@@ -85,19 +99,39 @@ class VectorPool:
                     progress('restoring', processed, total); last_report = time.monotonic()
         check()
         self.ann = ann
+        # Only a successfully loaded/published checkpoint can suppress saves.
+        # A rebuild must replace even a corrupt file with matching metadata.
+        self._checkpoint_state = None if rebuilt else (generation, total)
         for view in self.views.values(): view.refresh()
         return rebuilt
 
     def checkpoint(self, *, cancelled=lambda: False):
         if cancelled(): raise ValueError('cancelled')
+        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
+        state = (generation, len(self.ann))
+        if (state == self._checkpoint_state and (self.folder/'vectors.usearch').is_file()
+                and (self.folder/'ann.json').is_file()): return
         temporary = self.folder / 'vectors.usearch.tmp'
         self.ann.save(str(temporary))
         if cancelled(): raise ValueError('cancelled')
         os.replace(temporary,self.folder/'vectors.usearch')
-        generation = self.db.execute("SELECT value FROM pool_state WHERE key='generation'").fetchone()[0]
         temp = self.folder/'ann.json.tmp'
         temp.write_text(json.dumps({'generation':generation,'count':len(self.ann)}),'utf-8')
         os.replace(temp,self.folder/'ann.json')
+        self._checkpoint_state = state
+
+    def collection_bytes(self, name):
+        row = self.db.execute('SELECT bytes FROM pool_sizes WHERE collection=?',(name,)).fetchone()
+        if row is None:
+            # Backfill old pools once per collection. INSERT...SELECT takes a
+            # write transaction; subsequent mutations update the same summary
+            # transactionally, including rollbacks and writes via TEMP views.
+            with self.db:
+                self.db.execute('''INSERT OR IGNORE INTO pool_sizes
+                    SELECT ?,COALESCE(SUM(length(vector)+length(text)+length(name)),0)
+                    FROM pool_documents WHERE collection=?''',(name,name))
+            row = self.db.execute('SELECT bytes FROM pool_sizes WHERE collection=?',(name,)).fetchone()
+        return row[0]
 
     def collection(self, name, legacy):
         if not re.fullmatch(r'[a-z0-9:_-]{1,120}',name): raise ValueError('invalid_source')
@@ -156,7 +190,11 @@ class VectorPool:
             self.db.execute('INSERT OR IGNORE INTO pool_migrations VALUES(?)',(name,))
 
     def close(self):
-        self.checkpoint(); self.db.close()
+        if self._closed: return
+        try: self.checkpoint()
+        finally:
+            self.db.close(); self._closed = True
+            self.views.clear(); self.ann = None
 
 
 class CollectionAnn:
