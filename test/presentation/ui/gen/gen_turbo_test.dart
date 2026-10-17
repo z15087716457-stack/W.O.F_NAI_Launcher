@@ -102,6 +102,72 @@ void main() {
       }
     }
   }
+  for (final locale in AppLocalizations.supportedLocales) {
+    for (final dark in [false, true]) {
+      testWidgets('pre-V5 keeps original mode capsule $locale dark=$dark', (
+        t,
+      ) async {
+        final recorder = GenRecorder();
+        for (final model in const [
+          GenModel(id: ImageModels.animeDiffusionV45Full, name: 'V4.5 Full'),
+          GenModel(
+            id: ImageModels.animeDiffusionV45Curated,
+            name: 'V4.5 Curated',
+          ),
+          GenModel(id: ImageModels.animeDiffusionV4Full, name: 'V4 Full'),
+          GenModel(id: ImageModels.animeDiffusionV4Curated, name: 'V4 Curated'),
+        ]) {
+          for (final furry in [false, true]) {
+            await pumpGen(
+              t,
+              data: GenFixture.view(
+                v45: true,
+              ).copyWith(model: model.id, models: [model], furry: furry),
+              actions: recorder.actions,
+              locale: locale.toString(),
+              dark: dark,
+            );
+            final mode = find.byKey(const Key('gen-mode'));
+            expect(find.byKey(const Key('gen-turbo')), findsNothing);
+            expect(
+              find.descendant(
+                of: mode,
+                matching: find.text(furry ? 'Furry' : 'Anime'),
+              ),
+              findsOneWidget,
+            );
+            expect(
+              t.getSize(mode).width,
+              closeTo(furry ? 68.164 : 73.312, .02),
+            );
+            await t.tap(mode);
+            await t.pumpAndSettle();
+            expect(
+              recorder.last('onFurryChanged'),
+              'onFurryChanged(${!furry})',
+            );
+            expect(t.takeException(), isNull);
+            if (locale == const Locale('zh') &&
+                !furry &&
+                model.id == ImageModels.animeDiffusionV45Full) {
+              await captureUiuxRegion(
+                t,
+                find.byKey(const Key('gen-capture')),
+                'legacy-v45-${dark ? 'dark' : 'light'}',
+                t.getRect(find.byKey(const Key('gen-header'))),
+              );
+            }
+          }
+        }
+      });
+    }
+  }
+  testWidgets('V3 keeps its original header without mode or Turbo', (t) async {
+    await pumpGen(t, data: GenFixture.v3());
+    expect(find.byKey(const Key('gen-mode')), findsNothing);
+    expect(find.byKey(const Key('gen-turbo')), findsNothing);
+    expect(t.takeException(), isNull);
+  });
   testWidgets('character negative selection survives Full Turbo Full', (
     t,
   ) async {

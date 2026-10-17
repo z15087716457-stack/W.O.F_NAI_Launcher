@@ -1237,6 +1237,7 @@ class GenViewData with _GenValue {
     required this.model,
     required this.models,
     this.displayModel,
+    this.turboVisible = false,
     this.turbo,
     this.furry,
     this.quota = const GenQuota(),
@@ -1258,6 +1259,9 @@ class GenViewData with _GenValue {
 
   /// The family selected in the menu; Turbo uses the Full family entry.
   final String? displayModel;
+
+  /// Only V5 uses the Turbo capsule and compact A/F mode label.
+  final bool turboVisible;
 
   /// null = unavailable, false = Full, true = Turbo (Medium Effort).
   final bool? turbo;
@@ -1288,6 +1292,7 @@ class GenViewData with _GenValue {
     String? model,
     List<GenModel>? models,
     String? displayModel,
+    bool? turboVisible,
     bool? turbo,
     bool clearTurbo = false,
     bool? furry,
@@ -1307,6 +1312,7 @@ class GenViewData with _GenValue {
     model: model ?? this.model,
     models: models ?? this.models,
     displayModel: displayModel ?? this.displayModel,
+    turboVisible: turboVisible ?? this.turboVisible,
     turbo: clearTurbo ? null : (turbo ?? this.turbo),
     furry: clearFurry ? null : (furry ?? this.furry),
     quota: quota ?? this.quota,
@@ -1326,6 +1332,7 @@ class GenViewData with _GenValue {
     model,
     models,
     displayModel,
+    turboVisible,
     turbo,
     furry,
     quota,

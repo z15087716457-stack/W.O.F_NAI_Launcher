@@ -52,6 +52,8 @@
 
 ## 模型与计费
 
+- 模型栏的 Turbo 胶囊与 A／F 紧凑标签仅由 V5 模型族开启，不复用 V4+ 通用的 Anime／Furry 能力作为显示条件。V5 Full 可切换，V5 Curated 显示不可用提示；V4／V4.5 等旧模型保留完整 Anime／Furry 和原留白。此范围修正源码完成、待本机更新，见 [修正与验证](docs/v5-turbo-capsule-scope-fix-2026-10-17.md)。
+
 - V5 Full 的 Turbo／Medium Effort 使用 `nai-diffusion-5-full-medium`，重绘为 `nai-diffusion-5-full-medium-inpainting`。固定 14 步、Euler Ancestral、Heavy UC，忽略自定义主／角色负面及 CFG Rescale，引导强度可调。固定值仅在请求投影中生效，存储的 Full 步数／采样器／UC 和负面草稿保留，切回 Full 恢复；界面不提供固定参数编辑。黑色胶囊仍显示 Full 家族，独立闪电表示实际模式，Anime／Furry 缩为 A／F，原胶囊宽度保持。桥接生效读数和 Agent 报价带 `model_constraints`，原始 `_draft`／`draft_summary` 不能被生效投影覆盖；元数据必须有明确 Medium 标记才认定为 Turbo，不根据 14 步推断。见 [实现与验证](docs/v5-turbo-support-2026-10-17.md)。
 - 云端 NAI 放大使用 image API `/ai/upscale`，`nai-diffusion-5-curated` / blur=0，固定 2x；输入面积≤3,145,728，费用按源图像素为 1 / 2 / 3 / 4，Opus 不免。不要恢复旧主域、4x / width / height 请求。
 - 图生图 / 增强 / 重绘以二进制 image / mask 和 JSON request 组成 multipart，重采样 PNG 提高无损压缩；原尺寸文件不重编码，用户透明度保留。流式错误共用映射，网关 HTML 不作为界面详情。断线可能发生在计费后，不自动重试；当前网络与节点情况见 `docs/image-tools-audit-2026-10-05.md`。

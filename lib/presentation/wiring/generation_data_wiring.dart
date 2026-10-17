@@ -417,6 +417,7 @@ final generationViewDataProvider = Provider.autoDispose
       return GenViewData(
         model: params.model,
         displayModel: ImageModels.baseModelForTurboModel(params.model),
+        turboVisible: spec.isV5,
         turbo: spec.supportsTurbo ? spec.isTurbo : null,
         models: [
           for (final id in {

@@ -204,6 +204,24 @@ void main() {
       expect(container.read(generationParamsNotifierProvider).steps, 37);
     },
   );
+  test('only V5 projects the Turbo capsule and compact mode labels', () {
+    final params = container.read(generationParamsNotifierProvider.notifier);
+    for (final (model, visible, turbo) in <(String, bool, bool?)>[
+      (ImageModels.animeDiffusionV5Full, true, false),
+      (ImageModels.animeDiffusionV5FullMedium, true, true),
+      (ImageModels.animeDiffusionV5Curated, true, null),
+      (ImageModels.animeDiffusionV45Full, false, null),
+      (ImageModels.animeDiffusionV45Curated, false, null),
+      (ImageModels.animeDiffusionV4Full, false, null),
+      (ImageModels.animeDiffusionV4Curated, false, null),
+      (ImageModels.animeDiffusionV3, false, null),
+    ]) {
+      params.updateModel(model);
+      final view = container.read(provider);
+      expect(view.turboVisible, visible, reason: model);
+      expect(view.turbo, turbo, reason: model);
+    }
+  });
   test('V4.5 有参考、网格与六角色，V3 隐藏角色且 Opus 格不误显示', () {
     final params = container.read(generationParamsNotifierProvider.notifier);
     params.updateModel(ImageModels.animeDiffusionV45Full);

@@ -162,38 +162,49 @@ class _ModelCapsule extends StatelessWidget {
           ),
         ),
         if (furry != null) ...[
-          const _TurboButton(),
+          if (data.turboVisible) const _TurboButton(),
           const _Vs(),
           UiPressable(
             key: const Key('gen-mode'),
             onTap: () => scope.actions.onFurryChanged(!furry),
-            builder: (context, hover) => Tooltip(
-              message: context.l10n.gen_modeTip,
-              child: SizedBox(
-                // Share the old Anime/Furry width with the new 25px toggle.
-                width: _originalModeWidth(context, furry) - 25,
-                height: 26,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  spacing: 5,
-                  children: [
-                    GenNaiIcon(
-                      furry ? 'furry' : 'sakura',
-                      size: 13,
+            builder: (context, hover) {
+              final compact = data.turboVisible;
+              final mode = Row(
+                mainAxisAlignment: compact
+                    ? MainAxisAlignment.center
+                    : MainAxisAlignment.start,
+                spacing: 5,
+                children: [
+                  GenNaiIcon(
+                    furry ? 'furry' : 'sakura',
+                    size: 13,
+                    color: hover ? c.ink : c.muted,
+                  ),
+                  Text(
+                    compact ? (furry ? 'F' : 'A') : (furry ? 'Furry' : 'Anime'),
+                    style: UiText.sans(
+                      12,
+                      weight: FontWeight.w700,
                       color: hover ? c.ink : c.muted,
                     ),
-                    Text(
-                      furry ? 'F' : 'A',
-                      style: UiText.sans(
-                        12,
-                        weight: FontWeight.w700,
-                        color: hover ? c.ink : c.muted,
+                  ),
+                ],
+              );
+              return Tooltip(
+                message: context.l10n.gen_modeTip,
+                child: compact
+                    ? SizedBox(
+                        // V5 shares the old mode width with the 25px toggle.
+                        width: _originalModeWidth(context, furry) - 25,
+                        height: 26,
+                        child: mode,
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 9),
+                        child: mode,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ],
