@@ -252,9 +252,24 @@ class AdvancedUpscaleComponentManager {
     final result = <LocalUpscaleModel>[];
     for (final model in advancedUpscaleCatalog) {
       final receipt = await _receipt(model.id);
+      final spec = _manifest[_key(model.id)] as Map<String, dynamic>?;
+      final field = model.method == LocalUpscaleMethod.seedvr2
+          ? 'models'
+          : 'files';
+      final files = (spec?[field] as List? ?? const [])
+          .cast<Map<String, dynamic>>()
+          .where(
+            (file) =>
+                model.method != LocalUpscaleMethod.seedvr2 ||
+                file['id'] == model.id,
+          );
       result.add(
         model.withInstalled(
           receipt != null,
+          modelBytes: files.fold<int>(
+            0,
+            (bytes, file) => bytes + (file['bytes'] as int),
+          ),
           diskBytes: receipt == null
               ? 0
               : model.method == LocalUpscaleMethod.seedvr2

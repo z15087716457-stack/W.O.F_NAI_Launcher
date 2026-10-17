@@ -224,6 +224,41 @@ void main() {
     },
   );
 
+  test('model sizes stay fixed independently of transfer totals and state', () {
+    const model = LocalUpscaleModel(
+      id: 'general',
+      name: 'General',
+      engineName: 'general',
+      scales: [4],
+      modelBytes: 33540549,
+    );
+    for (final installed in [false, true]) {
+      for (final total in [0, -1, 75000000]) {
+        for (final failed in [false, true]) {
+          final data = settingsUpscaleData(
+            [
+              model.withInstalled(
+                installed,
+                diskBytes: installed ? 40000000 : 0,
+              ),
+            ],
+            SettingsUpscaleOperation(
+              id: failed ? null : model.id,
+              received: 37500000,
+              total: total,
+              failedId: failed ? model.id : null,
+            ),
+            const AdvancedUpscaleInstallState(),
+            const UpscaleWorkflowSettings(),
+          ).esrgan.single;
+          expect(data.bytes, 33540549);
+          expect(data.total, failed ? 0 : total);
+          expect(data.received, failed ? 0 : 37500000);
+        }
+      }
+    }
+  });
+
   test(
     'directory measurement reads bytes without following external links',
     () async {

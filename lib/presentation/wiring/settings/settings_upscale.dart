@@ -195,11 +195,10 @@ SettingsUpscaleData settingsUpscaleData(
           : model.installed
           ? SettingsInstallState.installed
           : SettingsInstallState.notInstalled,
-      bytes: operation.id == model.id && operation.total > 0
-          ? operation.total
-          : model.diskBytes,
+      bytes: model.modelBytes,
       file: model.engineName,
       received: operation.id == model.id ? operation.received : 0,
+      total: operation.id == model.id ? operation.total : 0,
       speed: operation.id == model.id ? operation.speed : 0,
       isDefault:
           workflow.backend == UpscaleBackend.local &&

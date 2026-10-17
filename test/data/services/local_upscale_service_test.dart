@@ -87,6 +87,46 @@ void main() {
   );
 
   test(
+    'catalog sizes remain available before install and after removal',
+    () async {
+      final before = await manager.models();
+      expect(before.map((model) => model.modelBytes), [
+        8973790,
+        3751527,
+        33540549,
+      ]);
+      for (final model in before.skip(1)) {
+        final target = Directory(
+          p.join(manager.directory.path, 'models', model.id),
+        );
+        await target.create();
+        // Presence fixtures only: resolving/inference still requires real hashes.
+        for (final scale in model.scales) {
+          final stem = model.id == 'anime-fast'
+              ? '${model.engineName}-x$scale'
+              : model.engineName;
+          for (final extension in ['bin', 'param']) {
+            await File(
+              p.join(target.path, '$stem.$extension'),
+            ).writeAsBytes([1]);
+          }
+        }
+        final installed = (await manager.models()).firstWhere(
+          (m) => m.id == model.id,
+        );
+        expect(installed.installed, isTrue);
+        expect(installed.modelBytes, model.modelBytes);
+        await manager.delete(model.id);
+        final removed = (await manager.models()).firstWhere(
+          (m) => m.id == model.id,
+        );
+        expect(removed.installed, isFalse);
+        expect(removed.modelBytes, model.modelBytes);
+      }
+    },
+  );
+
+  test(
     'model import uses actual engine blob names, verifies copies, and cannot mutate active models',
     () async {
       await manager.initialize();
@@ -97,7 +137,12 @@ void main() {
         'assets/local_upscale/models/realesrgan-x4plus-anime.bin',
       );
       final id = await manager.importPair(param, weights);
-      expect((await manager.resolve(id)).$3.custom, isTrue);
+      final imported = (await manager.resolve(id)).$3;
+      expect(imported.custom, isTrue);
+      expect(
+        imported.modelBytes,
+        await param.length() + await weights.length(),
+      );
       manager.claimInference(id);
       await expectLater(
         manager.delete(id),

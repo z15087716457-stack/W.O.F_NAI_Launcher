@@ -347,6 +347,65 @@ void main() {
   );
 
   test(
+    'all six SeedVR2 sizes exclude shared files and survive install/delete',
+    () async {
+      final manager = seedFixture();
+      addTearDown(manager.dispose);
+      final before = (await manager.models())
+          .where((m) => m.method == LocalUpscaleMethod.seedvr2)
+          .toList();
+      expect(before.map((m) => m.modelBytes), [3, 4, 3, 2, 2, 2]);
+      for (final model in before) {
+        await manager.install(
+          model.id,
+          cancellation: LocalUpscaleCancellation(),
+        );
+        final installed = (await manager.models()).firstWhere(
+          (m) => m.id == model.id,
+        );
+        expect(installed.installed, isTrue);
+        expect(installed.modelBytes, model.modelBytes);
+        expect(installed.diskBytes, model.modelBytes);
+        await manager.delete(model.id);
+        final removed = (await manager.models()).firstWhere(
+          (m) => m.id == model.id,
+        );
+        expect(removed.installed, isFalse);
+        expect(removed.modelBytes, model.modelBytes);
+        expect(removed.diskBytes, 0);
+      }
+    },
+  );
+
+  test(
+    'pinned model sizes are available offline without installing weights',
+    () async {
+      final manager = AdvancedUpscaleComponentManager(
+        rootDirectory: () async => Directory(p.join(temporary.path, 'catalog')),
+        loadAsset: (name) => File('assets/local_upscale/$name').readAsBytes(),
+        dio: Dio()
+          ..httpClientAdapter = _Adapter(
+            (_) async => throw StateError('unexpected network'),
+          ),
+        startProcess: (_, __, ___) async =>
+            throw StateError('unexpected process'),
+      );
+      addTearDown(manager.dispose);
+      final models = await manager.models();
+      expect(models.every((m) => !m.installed && m.diskBytes == 0), isTrue);
+      expect(models.map((m) => m.modelBytes), [
+        3391544696,
+        8239729704,
+        8239729704,
+        3458259704,
+        8334897976,
+        8334897976,
+        19276679,
+      ]);
+    },
+  );
+
+  test(
     'SeedVR2 inference inherits the same early allocator and offline environment as installation',
     () async {
       Map<String, String>? environment;
@@ -1310,6 +1369,8 @@ void main() {
         onProbe: () => probes++,
       );
       addTearDown(manager.dispose);
+      final beforeSize = (await manager.models()).last.modelBytes;
+      expect(beforeSize, 16);
       await manager.install(
         'rtx-vsr',
         cancellation: LocalUpscaleCancellation(),
@@ -1318,6 +1379,7 @@ void main() {
       final models = await manager.models();
       expect(models.last.installed, isTrue);
       expect(models.last.diskBytes, greaterThan(0));
+      expect(models.last.modelBytes, beforeSize);
       final spec = await manager.command(
         'rtx-vsr',
         'input',

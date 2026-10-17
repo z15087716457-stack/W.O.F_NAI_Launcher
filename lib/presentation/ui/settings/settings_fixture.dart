@@ -591,6 +591,7 @@ abstract final class SettingsFixture {
         id: 'seed7b',
         state: SettingsInstallState.downloading,
         bytes: (15.2 * _gb) ~/ 1,
+        total: (15.2 * _gb) ~/ 1,
         received: (6.4 * _gb) ~/ 1,
         speed: 18 * _mb,
         vramGb: 12,

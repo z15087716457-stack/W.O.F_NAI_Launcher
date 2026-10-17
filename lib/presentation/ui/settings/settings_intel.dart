@@ -1968,7 +1968,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
       };
       final Widget action = downloading
           ? Text(
-              SettingsFormat.percent(m.bytes == 0 ? 0 : m.received / m.bytes),
+              SettingsFormat.percent(m.total <= 0 ? 0 : m.received / m.total),
               style: UiText.mono(11, color: c.accent),
             )
           : installed
@@ -2055,7 +2055,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
             ),
             if (downloading) ...[
               const SizedBox(height: 12),
-              SettingsBar(value: m.bytes == 0 ? 0 : m.received / m.bytes),
+              SettingsBar(value: m.total <= 0 ? 0 : m.received / m.total),
               const SizedBox(height: 6),
               Row(
                 children: [
@@ -2063,7 +2063,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                     child: Text(
                       l.set_upProgress(
                         SettingsFormat.bytes(m.received),
-                        SettingsFormat.bytes(m.bytes),
+                        m.total > 0 ? SettingsFormat.bytes(m.total) : '—',
                         SettingsFormat.bytes(m.speed),
                       ),
                       maxLines: 1,
@@ -2090,7 +2090,7 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
                   if (!seed)
                     Text(stateText, style: UiText.mono(11, color: c.faint)),
                   Text(
-                    SettingsFormat.bytes(m.bytes),
+                    m.bytes > 0 ? SettingsFormat.bytes(m.bytes) : '—',
                     style: UiText.mono(11, color: c.faint),
                   ),
                   if (m.vramGb != null)

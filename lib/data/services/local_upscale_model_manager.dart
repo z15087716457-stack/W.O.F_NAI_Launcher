@@ -171,7 +171,15 @@ class LocalUpscaleModelManager {
           ),
         ).exists();
       }
-      models.add(model.withInstalled(installed));
+      models.add(
+        model.withInstalled(
+          installed,
+          modelBytes: files.fold<int>(
+            0,
+            (bytes, file) => bytes + (file['size'] as int),
+          ),
+        ),
+      );
     }
     final root = Directory(p.join(directory.path, 'models'));
     if (await root.exists()) {
@@ -187,6 +195,15 @@ class LocalUpscaleModelManager {
                   )
                   as Map<String, dynamic>;
           final id = p.basename(entry.path);
+          final bin = await File(
+            p.join(entry.path, 'realesrgan-x4plus.bin'),
+          ).stat();
+          final param = await File(
+            p.join(entry.path, 'realesrgan-x4plus.param'),
+          ).stat();
+          final installed =
+              bin.type == FileSystemEntityType.file &&
+              param.type == FileSystemEntityType.file;
           models.add(
             LocalUpscaleModel(
               id: id,
@@ -194,13 +211,8 @@ class LocalUpscaleModelManager {
               engineName: 'realesrgan-x4plus',
               scales: const [4],
               custom: true,
-              installed:
-                  await File(
-                    p.join(entry.path, 'realesrgan-x4plus.bin'),
-                  ).exists() &&
-                  await File(
-                    p.join(entry.path, 'realesrgan-x4plus.param'),
-                  ).exists(),
+              installed: installed,
+              modelBytes: installed ? bin.size + param.size : 0,
             ),
           );
         } catch (_) {

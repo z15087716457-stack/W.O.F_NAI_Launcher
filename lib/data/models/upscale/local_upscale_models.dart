@@ -55,6 +55,7 @@ class LocalUpscaleModel {
     this.bundled = false,
     this.custom = false,
     this.method = LocalUpscaleMethod.standard,
+    this.modelBytes = 0,
     this.diskBytes = 0,
   });
   final String id;
@@ -65,6 +66,10 @@ class LocalUpscaleModel {
   final bool bundled;
   final bool custom;
   final LocalUpscaleMethod method;
+
+  /// Model files from the pinned manifest (or the imported pair), independent
+  /// of installation state. Shared runtimes and download archives are excluded.
+  final int modelBytes;
   final int diskBytes;
   bool get isSeedvr2Seven => const {
     'seedvr2-7b',
@@ -80,18 +85,22 @@ class LocalUpscaleModel {
     (scale) => scale >= requested,
     orElse: () => scales.last,
   );
-  LocalUpscaleModel withInstalled(bool value, {int? diskBytes}) =>
-      LocalUpscaleModel(
-        id: id,
-        name: name,
-        engineName: engineName,
-        scales: scales,
-        installed: value,
-        bundled: bundled,
-        custom: custom,
-        method: method,
-        diskBytes: diskBytes ?? this.diskBytes,
-      );
+  LocalUpscaleModel withInstalled(
+    bool value, {
+    int? modelBytes,
+    int? diskBytes,
+  }) => LocalUpscaleModel(
+    id: id,
+    name: name,
+    engineName: engineName,
+    scales: scales,
+    installed: value,
+    bundled: bundled,
+    custom: custom,
+    method: method,
+    modelBytes: modelBytes ?? this.modelBytes,
+    diskBytes: diskBytes ?? this.diskBytes,
+  );
 }
 
 const localUpscaleDefaultModel = 'anime';

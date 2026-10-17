@@ -1531,6 +1531,7 @@ class SettingsUpscaleModel {
     this.file = '',
     this.vramGb,
     this.received = 0,
+    this.total = 0,
     this.speed = 0,
     this.isDefault = false,
   });
@@ -1539,14 +1540,17 @@ class SettingsUpscaleModel {
   /// RTX Video：rtxVideo。名称和说明由界面按 id 给。
   final String id;
   final SettingsInstallState state;
+
+  /// Fixed model size, excluding shared runtimes and download archives.
   final int bytes;
 
   /// 模型文件名（常规模型显示）。
   final String file;
   final int? vramGb;
 
-  /// 下载中：已下载字节、每秒字节。
+  /// 下载中：已下载字节、传输总字节（可能为 0）、每秒字节。
   final int received;
+  final int total;
   final int speed;
   final bool isDefault;
 }
