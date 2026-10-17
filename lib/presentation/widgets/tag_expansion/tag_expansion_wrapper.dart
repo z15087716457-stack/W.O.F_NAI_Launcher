@@ -633,7 +633,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   void _queueSearch({bool immediate = false}) {
     _ragCancellation?.cancel();
     _ragLoading = false;
-    _selectionFrozen = _hoveredId != null || _focusedId != null;
+    _selectionFrozen = false;
+    _hoveredId = _focusedId = null;
     _autoTranslation.clearSurface(_searchSurface);
     _searchVisible.clear();
     _debounce?.cancel();
@@ -647,6 +648,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
       return;
     }
     _usingContext = false;
+    _results = const [];
+    _selectedIndex = 0;
     _searchLoading = true;
     _searchFailed = false;
     _markNeedsBuild();
@@ -681,7 +684,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
         );
       }
       if (!mounted || !_active || sequence != _searchSequence) return;
-      _results = results;
+      // Keep a stable leading group of cooccurrence recommendations. Semantic
+      // suggestions may fill the remaining slots, but cannot evict this group.
+      _results = _canRunRag('')
+          ? results.take(math.min(12, math.max(1, _resultLimit ~/ 2))).toList()
+          : results;
       _usingContext = usingContext;
       _selectedIndex = 0;
       _searchFailed = false;
@@ -706,7 +713,11 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             limit: _resultLimit,
           );
       if (!mounted || !_active || sequence != _searchSequence) return;
-      _results = results;
+      // Exact matches are immediately usable. Publish the other manual-search
+      // results once, after semantic retrieval/reranking has completed.
+      _results = _canRunRag(_searchController.text.trim())
+          ? results.where((c) => _exactKinds.contains(c.matchKind)).toList()
+          : results;
       _selectedIndex = 0;
       _searchFailed = false;
       unawaited(_runRag(sequence, results));
@@ -719,14 +730,24 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     _markNeedsBuild();
   }
 
-  Future<void> _runRag(int sequence, List<CompletionCandidate> lexical) async {
+  static const _exactKinds = {
+    CompletionMatchKind.englishExact,
+    CompletionMatchKind.aliasExact,
+    CompletionMatchKind.chineseExact,
+  };
+
+  bool _canRunRag(String keyword) {
     final settings = ref.read(ragSettingsProvider);
-    if (!widget.ragContext || !settings.enabled || !settings.tagsEnabled) {
-      return;
-    }
+    return (keyword.isNotEmpty || widget.ragContext) &&
+        settings.enabled &&
+        settings.tagsEnabled;
+  }
+
+  Future<void> _runRag(int sequence, List<CompletionCandidate> lexical) async {
+    final keyword = _searchController.text.trim();
+    if (!_canRunRag(keyword)) return;
     final cancellation = _ragCancellation = RagCancellation();
     final text = _openedText;
-    final keyword = _searchController.text.trim();
     _ragLoading = true;
     _markNeedsBuild();
     try {
@@ -747,20 +768,17 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
           cancellation.isCancelled ||
           sequence != _searchSequence ||
           widget.controller.text != text ||
-          _selectionFrozen ||
-          results.isEmpty) {
+          _selectionFrozen) {
         return;
       }
-      final exactKinds = {
-        CompletionMatchKind.englishExact,
-        CompletionMatchKind.aliasExact,
-        CompletionMatchKind.chineseExact,
-      };
       final merged = <String, CompletionCandidate>{};
       for (final candidate in [
-        ...lexical.where((c) => exactKinds.contains(c.matchKind)),
+        if (keyword.isEmpty)
+          ..._results
+        else
+          ...lexical.where((c) => _exactKinds.contains(c.matchKind)),
         ...results,
-        ...lexical,
+        if (keyword.isNotEmpty || results.isEmpty) ...lexical,
       ]) {
         merged.putIfAbsent(candidate.stableId, () => candidate);
       }
@@ -769,6 +787,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     } catch (_) {
       if (mounted && _active && sequence == _searchSequence) {
         _searchFailed = lexical.isEmpty;
+        if (!_selectionFrozen) _results = lexical;
       }
     } finally {
       if (mounted &&
@@ -1363,49 +1382,50 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
             style: Theme.of(context).textTheme.labelMedium,
           ),
         ),
-        if (widget.ragContext)
-          Consumer(
-            builder: (context, ref, _) {
-              final settings = ref.watch(ragSettingsProvider);
-              if (!settings.enabled || !settings.tagsEnabled) {
-                return const SizedBox.shrink();
-              }
-              final status = ref.watch(ragControllerProvider);
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: Tooltip(
-                  message: status.available
-                      ? (status.partial
-                            ? context.l10n.rag_partial
-                            : context.l10n.rag_badgeHint)
-                      : context.l10n.rag_unavailable,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (status.searching > 0)
-                        const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: SizedBox(
-                            width: 10,
-                            height: 10,
-                            child: CircularProgressIndicator(strokeWidth: 1.2),
-                          ),
-                        ),
-                      Text(
-                        'RAG',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
-                          color: status.available
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+        Consumer(
+          builder: (context, ref, _) {
+            final settings = ref.watch(ragSettingsProvider);
+            if (!settings.enabled ||
+                !settings.tagsEnabled ||
+                (!widget.ragContext && _searchController.text.trim().isEmpty)) {
+              return const SizedBox.shrink();
+            }
+            final status = ref.watch(ragControllerProvider);
+            return Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: status.available
+                    ? (status.partial
+                          ? context.l10n.rag_partial
+                          : context.l10n.rag_badgeHint)
+                    : context.l10n.rag_unavailable,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_ragLoading || status.searching > 0)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: SizedBox(
+                          width: 10,
+                          height: 10,
+                          child: CircularProgressIndicator(strokeWidth: 1.2),
                         ),
                       ),
-                    ],
-                  ),
+                    Text(
+                      'RAG',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: status.available
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
+        ),
         Builder(
           builder: (context) {
             final translation = ref.read(autoTagTranslationProvider);
@@ -2107,15 +2127,13 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.ragContext) {
-      ref.listen(ragSettingsProvider, (previous, next) {
-        if (previous?.mode != next.mode ||
-            previous?.connectionKey != next.connectionKey) {
-          _ragCancellation?.cancel();
-          if (_active) _queueSearch(immediate: true);
-        }
-      });
-    }
+    ref.listen(ragSettingsProvider, (previous, next) {
+      if (previous?.mode != next.mode ||
+          previous?.connectionKey != next.connectionKey) {
+        _ragCancellation?.cancel();
+        if (_active) _queueSearch(immediate: true);
+      }
+    });
     ref.listen<AutocompleteSettings>(autocompleteSettingsProvider, (_, next) {
       if (!next.relatedTagsEnabled) _close();
     });

@@ -142,6 +142,7 @@ class CompletionCandidate {
     this.relatedScore,
     this.cooccurrenceCount,
     this.score = 0,
+    this.retrievalOrigins = const [],
   });
 
   final String canonicalTag;
@@ -162,6 +163,9 @@ class CompletionCandidate {
   final int? cooccurrenceCount;
   final double score;
 
+  /// Local retrieval evidence; kept in memory, without persisting the query.
+  final List<String> retrievalOrigins;
+
   String get stableId => canonicalTag.toLowerCase();
 
   CompletionCandidate copyWith({
@@ -178,6 +182,7 @@ class CompletionCandidate {
     double? relatedScore,
     int? cooccurrenceCount,
     double? score,
+    List<String>? retrievalOrigins,
   }) {
     return CompletionCandidate(
       canonicalTag: canonicalTag,
@@ -193,6 +198,7 @@ class CompletionCandidate {
       relatedScore: relatedScore ?? this.relatedScore,
       cooccurrenceCount: cooccurrenceCount ?? this.cooccurrenceCount,
       score: score ?? this.score,
+      retrievalOrigins: retrievalOrigins ?? this.retrievalOrigins,
     );
   }
 }

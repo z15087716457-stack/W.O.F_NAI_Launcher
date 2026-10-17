@@ -7700,7 +7700,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modelTask_promptReverseTitle => 'Reading language → original';
 
   @override
-  String get modelTask_tagTranslateTitle => 'Tag name translation';
+  String get modelTask_tagTranslateTitle => 'Tag translation & semantics';
 
   @override
   String get modelTask_wikiTranslateTitle => 'Wiki article translation';
@@ -7715,7 +7715,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get modelTask_tagTranslateDescription =>
-      'Give visible tags concise, accurate names.';
+      'Translate visible tags and fill missing Chinese core names, synonyms and short meanings. Reuse existing reference data.';
 
   @override
   String get modelTask_wikiTranslateDescription =>
@@ -18809,10 +18809,18 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get set_dcTranslate => 'Tag translation';
+  String get set_dcSemantics => 'Personal semantic data';
 
   @override
-  String get set_dcTranslateSub => 'Fills in translations the dictionary lacks';
+  String get set_dcSemanticsSub =>
+      'Saved Chinese supplements are preserved when translation caches are cleared';
+
+  @override
+  String get set_dcTranslate => 'Tag translation & semantics';
+
+  @override
+  String get set_dcTranslateSub =>
+      'Reuse reference data and fill missing Chinese names, synonyms and short meanings';
 
   @override
   String get set_dcCaches => 'Caches';
@@ -18876,7 +18884,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      'Everything here can be rebuilt. Personal data (accounts, history, blocks) lives under Storage → App data folder.';
+      'Dictionaries and caches can be restored. Export personal semantic supplements here; other personal data is under Storage → App data folder.';
 
   @override
   String get set_mdDesc =>
@@ -18985,7 +18993,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_mdTaskReverse => 'Prompt reverse';
 
   @override
-  String get set_mdTaskTag => 'Tag translation';
+  String get set_mdTaskTag => 'Tag translation & semantics';
 
   @override
   String get set_mdTaskWiki => 'Wiki translation';

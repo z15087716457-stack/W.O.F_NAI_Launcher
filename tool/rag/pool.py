@@ -267,19 +267,29 @@ class CollectionAnn:
     def __contains__(self,key): return key in self.keys
     def add(self,key,vector): self.pool.writable().add(key,vector);self.keys.add(key)
     def remove(self,key): self.pool.writable().remove(key);self.keys.discard(key)
-    def search(self,vector,count):
+    def search(self,vector,count,*,categories=None):
         import numpy as np
-        count=min(count,len(self.keys))
+        eligible = self.keys
+        if categories is not None:
+            if not categories:return SimpleNamespace(keys=[])
+            eligible = {r[0] for r in self.pool.db.execute(
+                'SELECT id FROM pool_documents WHERE collection=? AND category IN ('+','.join('?' for _ in categories)+')',
+                (self.name,*categories))}
+        count=min(count,len(eligible))
         if not count:return SimpleNamespace(keys=[])
-        if len(self.keys)>16384:
-            overfetch=min(len(self.pool.ann),max(count,int(count*len(self.pool.ann)/len(self.keys)*2)))
-            candidates=[int(k) for k in self.pool.ann.search(vector,overfetch).keys if int(k) in self.keys]
+        if len(eligible)>16384:
+            overfetch=min(len(self.pool.ann),max(count,int(count*len(self.pool.ann)/len(eligible)*2)))
+            candidates=[int(k) for k in self.pool.ann.search(vector,overfetch).keys if int(k) in eligible]
             if len(candidates)>=count:return SimpleNamespace(keys=candidates[:count])
         # Exact filtered ranking avoids losing tiny sources to a large global
         # top-k. Read in bounded batches, never copy the entire pool in memory.
         import heapq
         best=[]
-        cursor=self.pool.db.execute('SELECT id,vector FROM pool_documents WHERE collection=?',(self.name,))
+        sql='SELECT id,vector FROM pool_documents WHERE collection=?'
+        args=(self.name,)
+        if categories is not None:
+            sql += ' AND category IN ('+','.join('?' for _ in categories)+')'; args += tuple(categories)
+        cursor=self.pool.db.execute(sql,args)
         while batch:=cursor.fetchmany(512):
             matrix=np.stack([np.frombuffer(row[1],dtype=np.float32) for row in batch])
             scores=(matrix@vector)/np.maximum(np.linalg.norm(matrix,axis=1),1e-8)

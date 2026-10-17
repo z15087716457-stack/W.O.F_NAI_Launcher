@@ -102,7 +102,7 @@ class Worker:
             self.pool = VectorPool(root,models.fingerprint,progress=progress,cancelled=token.is_set)
             if progress: progress('sources', 0, 0)
             if 'tags' in enabled:
-                self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki','')),pool=self.pool,collection='tags')
+                self.engine = self.engines['tags'] = Engine(root,models,Sources(p['catalog'],p.get('runtime',''),p.get('wiki',''),p.get('tag_semantics',''),p.get('tag_supplements','')),pool=self.pool,collection='tags')
             if 'wiki' in enabled:
                 self.engines['wiki'] = TextEngine(os.path.join(root,'wiki-v1'),models,WikiSources(p['wiki'],p['catalog'],p.get('translations','')),pool=self.pool,collection='wiki')
             if 'blocks' in enabled:

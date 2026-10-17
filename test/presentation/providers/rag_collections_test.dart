@@ -96,6 +96,9 @@ void main() {
         ragSettingsProvider.overrideWith(_Settings.new),
         promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
         ragDirectoryProvider.overrideWithValue(() async => root),
+        ragTagSemanticsPathsProvider.overrideWithValue(
+          () async => (base: '', supplements: ''),
+        ),
         ragSourcePathsProvider.overrideWithValue(
           () async => (catalog: 'fixture', runtime: '', wiki: 'fixture'),
         ),

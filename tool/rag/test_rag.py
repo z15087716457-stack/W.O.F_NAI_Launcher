@@ -22,7 +22,7 @@ class FakeModels:
             vectors[i,1] = int(hashlib.sha256(text.encode()).hexdigest()[:4],16)/65536
             vectors[i] /= np.linalg.norm(vectors[i])
         return vectors
-    def rerank(self, query, documents, negative=False):
+    def rerank(self, query, documents, negative=False, purpose='tags'):
         self.negative = negative
         return [float('rain' in d) for d in documents]
 

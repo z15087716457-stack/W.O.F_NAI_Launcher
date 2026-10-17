@@ -7501,7 +7501,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelTask_promptReverseTitle => '읽기 언어 → 원문';
 
   @override
-  String get modelTask_tagTranslateTitle => '태그 이름 번역';
+  String get modelTask_tagTranslateTitle => '태그 번역 및 의미 보충';
 
   @override
   String get modelTask_wikiTranslateTitle => '백과 문서 번역';
@@ -7515,7 +7515,8 @@ class AppLocalizationsKo extends AppLocalizations {
       '번역문에서 추가, 삭제, 수정한 내용을 원문에 반영한 뒤 검토할 수 있도록 돌려줍니다.';
 
   @override
-  String get modelTask_tagTranslateDescription => '보이는 태그에 간결하고 정확한 이름을 붙입니다.';
+  String get modelTask_tagTranslateDescription =>
+      '보이는 태그를 번역하고 기존 자료를 재사용하여 중국어 핵심 이름, 동의어, 짧은 설명을 보충합니다.';
 
   @override
   String get modelTask_wikiTranslateDescription =>
@@ -18313,10 +18314,16 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get set_dcTranslate => '태그 번역';
+  String get set_dcSemantics => '개인 의미 자료';
 
   @override
-  String get set_dcTranslateSub => '사전에 번역이 없을 때 사용';
+  String get set_dcSemanticsSub => '보충한 중국어 자료는 번역 캐시를 지워도 유지됩니다';
+
+  @override
+  String get set_dcTranslate => '태그 번역 및 의미 보충';
+
+  @override
+  String get set_dcTranslateSub => '기존 자료를 재사용하고 누락된 중국어 이름, 동의어, 짧은 설명을 보충';
 
   @override
   String get set_dcCaches => '캐시';
@@ -18379,7 +18386,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_dcTip =>
-      '여기 데이터는 모두 다시 만들 수 있습니다. 개인 데이터는 저장소 → 앱 데이터 위치에 있습니다.';
+      '사전과 캐시는 다시 받을 수 있습니다. 개인 의미 자료는 이 페이지에서 내보내세요. 다른 개인 데이터는 저장소 → 앱 데이터 위치에 있습니다.';
 
   @override
   String get set_mdDesc =>
@@ -18487,7 +18494,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_mdTaskReverse => '프롬프트 역추론';
 
   @override
-  String get set_mdTaskTag => '태그 번역';
+  String get set_mdTaskTag => '태그 번역 및 의미 보충';
 
   @override
   String get set_mdTaskWiki => '위키 번역';

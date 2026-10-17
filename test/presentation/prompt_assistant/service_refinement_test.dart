@@ -298,7 +298,7 @@ void main() {
       final api = _CaptureApi(
         output:
             '{"tag":"blue_eyes","name_zh":"蓝眼睛",'
-            '"definition":"Eyes with blue irises."}',
+            '"definition":"Eyes with blue irises.","core_zh":"蓝眼睛","synonyms_zh":["蓝眼睛"],"summary_zh":"蓝色虹膜的眼睛。"}',
       );
       final container = ProviderContainer(
         overrides: [

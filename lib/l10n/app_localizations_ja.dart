@@ -7483,7 +7483,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modelTask_promptReverseTitle => '表示言語 → 原文';
 
   @override
-  String get modelTask_tagTranslateTitle => 'タグ名の翻訳';
+  String get modelTask_tagTranslateTitle => 'タグ翻訳・意味情報';
 
   @override
   String get modelTask_wikiTranslateTitle => '百科本文の翻訳';
@@ -7497,7 +7497,8 @@ class AppLocalizationsJa extends AppLocalizations {
       '訳文での追加・削除・変更を原文に反映し、確認用に原文へ戻します。';
 
   @override
-  String get modelTask_tagTranslateDescription => '表示中のタグに簡潔で正確な名前を付けます。';
+  String get modelTask_tagTranslateDescription =>
+      '表示中のタグを翻訳し、既存資料を再利用して中国語の基本名・同義語・短い説明を補います。';
 
   @override
   String get modelTask_wikiTranslateDescription =>
@@ -18260,10 +18261,16 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get set_dcTranslate => 'タグ翻訳';
+  String get set_dcSemantics => '個人の意味情報';
 
   @override
-  String get set_dcTranslateSub => '辞書に訳がないときに使います';
+  String get set_dcSemanticsSub => '補足した中国語資料は翻訳キャッシュの削除後も保持';
+
+  @override
+  String get set_dcTranslate => 'タグ翻訳・意味情報';
+
+  @override
+  String get set_dcTranslateSub => '既存資料を再利用し、中国語の基本名・同義語・短い説明を補完';
 
   @override
   String get set_dcCaches => 'キャッシュ';
@@ -18325,7 +18332,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_dcResetStats => '統計をリセット';
 
   @override
-  String get set_dcTip => 'ここのデータは再生成できます。個人データは「ストレージ → アプリデータの場所」にあります。';
+  String get set_dcTip =>
+      '辞書とキャッシュは再取得できます。個人の意味情報はこのページから書き出してください。その他の個人データは「ストレージ → アプリデータの場所」にあります。';
 
   @override
   String get set_mdDesc =>
@@ -18432,7 +18440,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_mdTaskReverse => 'プロンプト逆推定';
 
   @override
-  String get set_mdTaskTag => 'タグ翻訳';
+  String get set_mdTaskTag => 'タグ翻訳・意味情報';
 
   @override
   String get set_mdTaskWiki => '百科翻訳';

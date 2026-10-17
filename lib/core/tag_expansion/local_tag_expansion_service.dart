@@ -16,12 +16,14 @@ class LocalTagExpansionService {
     required this.relatedTags,
     required this.substringSearch,
     required this.popularSearch,
+    this.semanticNames,
   });
 
   final CompletionSource catalog;
   final CompletionSource relatedTags;
   final SubstringTagSearch substringSearch;
   final PopularTagSearch popularSearch;
+  final SubstringTagSearch? semanticNames;
 
   Future<List<CompletionCandidate>> popular({
     required String locale,
@@ -60,7 +62,12 @@ class LocalTagExpansionService {
     final contains = token.runes.length < 2
         ? const <CompletionCandidate>[]
         : await substringSearch(token, limit: limit);
-    return _decorate(_unique([...prefix, ...contains], limit), existingTags);
+    final chinese =
+        await semanticNames?.call(input, limit: limit) ??
+        const <CompletionCandidate>[];
+    final candidates = [...prefix, ...chinese, ...contains]
+      ..sort((a, b) => a.matchKind.index.compareTo(b.matchKind.index));
+    return _decorate(_unique(candidates, limit), existingTags);
   }
 
   Future<List<CompletionCandidate>> related(

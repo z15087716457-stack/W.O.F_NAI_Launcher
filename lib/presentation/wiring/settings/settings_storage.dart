@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/cache/gallery_cache_manager.dart';
+import '../../../core/tag_expansion/tag_semantics_store.dart';
+import '../../../core/wiki/auto_tag_translation_controller.dart';
 import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/repositories/gallery_folder_repository.dart';
@@ -23,6 +26,35 @@ class SettingsStorageActions {
   SettingsStorageActions(this.context, this.ref);
   final BuildContext context;
   final WidgetRef ref;
+
+  Future<void> exportTagSemantics() async {
+    final raw = await ref.read(tagSemanticsStoreProvider).exportJson();
+    if (!context.mounted) return;
+    final path = await FilePicker.platform.saveFile(
+      fileName: 'tag-semantics.json',
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    if (path != null) await File(path).writeAsString(raw, flush: true);
+  }
+
+  Future<void> importTagSemantics() async {
+    final files = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['json'],
+    );
+    final path = files?.files.single.path;
+    if (path == null || !context.mounted) return;
+    final file = File(path);
+    if (await file.length() > 32 * 1024 * 1024) {
+      throw const FormatException('Semantic supplement is too large');
+    }
+    await ref
+        .read(tagSemanticsStoreProvider)
+        .importJson(await file.readAsString());
+    ref.read(autoTagTranslationProvider).routeChanged();
+    refresh();
+  }
 
   void refresh() {
     ref.invalidate(settingsFoldersProvider);

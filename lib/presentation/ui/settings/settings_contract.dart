@@ -1794,6 +1794,8 @@ class SettingsActions {
     this.onResetCacheStats = _none,
     this.onUpdateDictionary = _noDictionary,
     this.onCancelDictionaryUpdate = _none,
+    this.onExportTagSemantics = _none,
+    this.onImportTagSemantics = _none,
     // 模型
     this.onAddProvider = _none,
     this.onImportModelConfig = _none,
@@ -1936,6 +1938,7 @@ class SettingsActions {
   final VoidCallback onResetCacheStats;
   final ValueChanged<SettingsDictionaryKind> onUpdateDictionary;
   final VoidCallback onCancelDictionaryUpdate;
+  final VoidCallback onExportTagSemantics, onImportTagSemantics;
 
   final VoidCallback onAddProvider;
   final VoidCallback onImportModelConfig;

@@ -4,6 +4,62 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
 
 void main() {
+  test(
+    'semantic reference fields are bounded, distinct from reading and required for new requests',
+    () {
+      final value = <String, dynamic>{
+        'tag': 'grass',
+        'name_zh': '草原',
+        'definition': '日本語の説明',
+        'core_zh': '草地',
+        'synonyms_zh': ['草地', '草'],
+        'summary_zh': '植物覆盖的地面。',
+        'wiki_zh': null,
+        'wiki_original': null,
+      };
+      VisibleTagTranslationResult parse(Map<String, dynamic> input) =>
+          PromptAssistantService.validateVisibleTagTranslationResponse(
+            jsonEncode(input),
+            tag: 'grass',
+            includeWikiTranslation: false,
+            requireSemanticFields: true,
+          );
+      final result = parse(value);
+      expect(result.nameZh, '草原');
+      expect(result.coreZh, '草地');
+      expect(result.synonymsZh, ['草地', '草']);
+      for (final fields in [
+        {'synonyms_zh': 'not-an-array'},
+        {
+          'synonyms_zh': ['草地', '草地'],
+        },
+        {
+          'synonyms_zh': ['wrong-first'],
+        },
+        {'summary_zh': 'two\nlines'},
+        {'core_zh': '长' * 65},
+        {'summary_zh': '长' * 241},
+        {
+          'synonyms_zh': [42],
+        },
+      ]) {
+        expect(() => parse({...value, ...fields}), throwsFormatException);
+      }
+      expect(
+        () => parse({...value}..remove('summary_zh')),
+        throwsFormatException,
+      );
+      expect(
+        parse({
+          ...value,
+          'core_zh': null,
+          'synonyms_zh': [],
+          'summary_zh': null,
+        }).summaryZh,
+        isNull,
+      );
+    },
+  );
   test('name-only response retains a separate short definition', () {
     final result = PromptAssistantService.validateVisibleTagTranslationResponse(
       jsonEncode({

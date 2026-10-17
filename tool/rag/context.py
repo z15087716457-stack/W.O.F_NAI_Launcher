@@ -9,9 +9,24 @@ def cursor_index(text, utf16_offset):
 
 
 def clean_tag(value):
+    value = value.strip()
+    # Only unwrap a real outer group. A canonical name's disambiguation suffix
+    # (e.g. character_(work)) must keep its closing parenthesis.
+    pairs = {'(':')', '[':']', '{':'}'}
+    while value and value[0] in pairs:
+        opening, closing = value[0], pairs[value[0]]
+        depth = 0; end = None
+        for i, char in enumerate(value):
+            if char == opening: depth += 1
+            elif char == closing:
+                depth -= 1
+                if depth == 0: end = i; break
+        if end == len(value)-1: value = value[1:-1].strip()
+        elif end is None and opening != '(': value = value[1:].strip()
+        else: break
     value = re.sub(r'(^|\s)[+-]?(?:\d+(?:\.\d*)?|\.\d+)\s*::', ' ', value)
     value = re.sub(r':\s*-?\d+(?:\.\d+)?\s*$', '', value)
-    value = value.replace('::', '').strip(' \t\r\n{}[]()')
+    value = value.replace('::', '').strip()
     return value.replace('_', ' ').strip()
 
 

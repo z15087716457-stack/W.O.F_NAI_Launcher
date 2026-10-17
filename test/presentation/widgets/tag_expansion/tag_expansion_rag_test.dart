@@ -30,11 +30,17 @@ CompletionCandidate tag(String name) => CompletionCandidate(
 );
 
 class Source implements CompletionSource {
-  Source({this.empty = false});
+  Source({this.empty = false, this.count = 2});
   final bool empty;
+  final int count;
   @override
-  Future<List<CompletionCandidate>> search(CompletionQuery q) async =>
-      empty ? [] : [tag('blue_hair'), tag('red_hair')];
+  Future<List<CompletionCandidate>> search(CompletionQuery q) async => empty
+      ? []
+      : [
+          tag('blue_hair'),
+          tag('red_hair'),
+          for (var i = 2; i < count; i++) tag('fixture_$i'),
+        ];
 }
 
 class Wiki implements TagWikiRepository {
@@ -133,8 +139,10 @@ void main() {
     FakeRag rag, {
     bool negative = false,
     bool emptyLexical = false,
+    bool ragContext = true,
+    int idleCount = 2,
   }) async {
-    final source = Source(empty: emptyLexical);
+    final source = Source(empty: emptyLexical, count: idleCount);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -175,7 +183,7 @@ void main() {
                   width: 400,
                   height: 80,
                   child: TagExpansionWrapper(
-                    ragContext: true,
+                    ragContext: ragContext,
                     ragNegative: negative,
                     controller: controller,
                     child: TextField(
@@ -206,6 +214,83 @@ void main() {
     await tester.pump(const Duration(milliseconds: 160));
     await tester.pump();
   }
+
+  testWidgets(
+    'unavailable semantic results restore the full ordinary list without truncating it to the pinned group',
+    (tester) async {
+      final c = TextEditingController(text: 'rain, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag, idleCount: 40);
+      rag.requests.single.result.complete([]);
+      await tester.pump();
+      await tester.pump();
+      await tester.drag(
+        find.byKey(const ValueKey('tag-expansion-results')),
+        const Offset(0, -2000),
+      );
+      await tester.pump();
+      expect(find.text('fixture 39'), findsWidgets);
+      expect(c.text, 'rain, ');
+    },
+  );
+  testWidgets(
+    'idle cooccurrence remains in place when semantic suggestions finish',
+    (tester) async {
+      final c = TextEditingController(text: 'green_theme, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag);
+      expect(find.text('blue hair'), findsWidgets);
+      rag.requests.single.result.complete([tag('grass'), tag('forest')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('blue hair'), findsWidgets);
+      expect(find.text('red hair'), findsWidgets);
+      expect(find.text('grass'), findsWidgets);
+      expect(find.text('forest'), findsWidgets);
+      expect(c.text, 'green_theme, ');
+    },
+  );
+
+  testWidgets('manual search publishes nonexact results once after reranking', (
+    tester,
+  ) async {
+    final c = TextEditingController(text: 'rain, ');
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(tester, c, rag);
+    rag.requests.single.result.complete([]);
+    await tester.pump();
+    await typeQuery(tester, '绿色的植被');
+    expect(find.text('blue hair'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    rag.requests.last.result.complete([tag('grass')]);
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('grass'), findsWidgets);
+    expect(c.text, 'rain, ');
+    await capture(tester, 'stable-manual-results');
+  });
+
+  testWidgets(
+    'ordinary fields use explicit RAG queries without prompt context',
+    (tester) async {
+      final c = TextEditingController(text: 'unrelated_query');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag, ragContext: false);
+      expect(rag.requests, isEmpty);
+      await typeQuery(tester, '绿色的植被');
+      expect(rag.requests.single.keyword, '绿色的植被');
+      expect(rag.requests.single.text, isEmpty);
+      expect(rag.requests.single.cursor, 0);
+      rag.requests.single.result.complete([tag('grass')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('grass'), findsWidgets);
+    },
+  );
 
   testWidgets(
     'manual natural-language search excludes prompt context but retains existing-tag dedup',

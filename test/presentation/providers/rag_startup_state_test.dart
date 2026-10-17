@@ -74,6 +74,9 @@ void main() {
           silent ? _SilentSettings.new : _Settings.new,
         ),
         ragDirectoryProvider.overrideWithValue(() async => root),
+        ragTagSemanticsPathsProvider.overrideWithValue(
+          () async => (base: '', supplements: ''),
+        ),
         ragSourcePathsProvider.overrideWithValue(
           () async => (catalog: 'fixture', runtime: '', wiki: 'fixture'),
         ),

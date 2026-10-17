@@ -201,6 +201,8 @@ class SettingsHostState extends State<SettingsHost> {
         onRequestDetails: (id) => call('requestDetails:$id'),
         onUpdateDictionary: (kind) => call('updateDictionary:${kind.name}'),
         onCancelDictionaryUpdate: () => call('cancelDictionaryUpdate'),
+        onExportTagSemantics: () => call('exportTagSemantics'),
+        onImportTagSemantics: () => call('importTagSemantics'),
         onTestComfy: () => call('testComfy'),
         onUpscaleInstall: (id) => call('install:$id'),
         onAssign:

@@ -112,10 +112,11 @@ class Models:
                 model_kwargs={'torch_dtype': self._dtype()},
                 prompts={'positive': 'Retrieve real image tags that complement the existing visual prompt; prefer useful additional concepts over repeated synonyms.',
                          'negative': 'Retrieve real image tags that can complement the existing exclusion tags in a negative prompt.',
-                         'retrieval': 'Retrieve text passages relevant to the search query or useful for answering it.'},
+                         'retrieval': 'Retrieve text passages relevant to the search query or useful for answering it.',
+                         'tag_search': "Retrieve actual image tags that directly describe the query's subject, action, attributes, or setting. Judge the tag's own meaning, not incidental words in its wiki. Respect its category: an artist, character, or work name is relevant only when the query asks for that entity. A tag may express one part of a compound description."},
                 default_prompt_name='positive')
         scores = np.asarray(self.scorer.predict([(query, d) for d in documents],
-            prompt_name='retrieval' if purpose == 'retrieval' else ('negative' if negative else 'positive'),
+            prompt_name=purpose if purpose in ('retrieval','tag_search') else ('negative' if negative else 'positive'),
             batch_size=8, show_progress_bar=False), dtype=float).reshape(-1)
         if len(scores) != len(documents) or not np.isfinite(scores).all():
             raise RuntimeError('invalid_rerank_scores')

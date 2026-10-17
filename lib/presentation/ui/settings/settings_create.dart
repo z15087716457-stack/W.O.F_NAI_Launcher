@@ -1081,6 +1081,28 @@ class SettingsDictionaryPage extends StatelessWidget {
                 ),
               ),
             ),
+            SettingsRow(
+              title: l.set_dcSemantics,
+              subtitle: l.set_dcSemanticsSub,
+              control: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: [
+                  SettingsBtn(
+                    label: l.set_importIt,
+                    small: true,
+                    tone: SettingsBtnTone.ghost,
+                    onTap: s.actions.onImportTagSemantics,
+                  ),
+                  SettingsBtn(
+                    label: l.set_exportIt,
+                    small: true,
+                    tone: SettingsBtnTone.ghost,
+                    onTap: s.actions.onExportTagSemantics,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         SettingsSection(

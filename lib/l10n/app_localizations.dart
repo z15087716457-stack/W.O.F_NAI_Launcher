@@ -13441,7 +13441,7 @@ abstract class AppLocalizations {
   /// No description provided for @modelTask_tagTranslateTitle.
   ///
   /// In en, this message translates to:
-  /// **'Tag name translation'**
+  /// **'Tag translation & semantics'**
   String get modelTask_tagTranslateTitle;
 
   /// No description provided for @modelTask_wikiTranslateTitle.
@@ -13465,7 +13465,7 @@ abstract class AppLocalizations {
   /// No description provided for @modelTask_tagTranslateDescription.
   ///
   /// In en, this message translates to:
-  /// **'Give visible tags concise, accurate names.'**
+  /// **'Translate visible tags and fill missing Chinese core names, synonyms and short meanings. Reuse existing reference data.'**
   String get modelTask_tagTranslateDescription;
 
   /// No description provided for @modelTask_wikiTranslateDescription.
@@ -32840,16 +32840,28 @@ abstract class AppLocalizations {
   /// **'{n} entries'**
   String set_dcEntries(Object n);
 
+  /// No description provided for @set_dcSemantics.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal semantic data'**
+  String get set_dcSemantics;
+
+  /// No description provided for @set_dcSemanticsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Chinese supplements are preserved when translation caches are cleared'**
+  String get set_dcSemanticsSub;
+
   /// No description provided for @set_dcTranslate.
   ///
   /// In en, this message translates to:
-  /// **'Tag translation'**
+  /// **'Tag translation & semantics'**
   String get set_dcTranslate;
 
   /// No description provided for @set_dcTranslateSub.
   ///
   /// In en, this message translates to:
-  /// **'Fills in translations the dictionary lacks'**
+  /// **'Reuse reference data and fill missing Chinese names, synonyms and short meanings'**
   String get set_dcTranslateSub;
 
   /// No description provided for @set_dcCaches.
@@ -32957,7 +32969,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_dcTip.
   ///
   /// In en, this message translates to:
-  /// **'Everything here can be rebuilt. Personal data (accounts, history, blocks) lives under Storage → App data folder.'**
+  /// **'Dictionaries and caches can be restored. Export personal semantic supplements here; other personal data is under Storage → App data folder.'**
   String get set_dcTip;
 
   /// No description provided for @set_mdDesc.
@@ -33149,7 +33161,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_mdTaskTag.
   ///
   /// In en, this message translates to:
-  /// **'Tag translation'**
+  /// **'Tag translation & semantics'**
   String get set_mdTaskTag;
 
   /// No description provided for @set_mdTaskWiki.

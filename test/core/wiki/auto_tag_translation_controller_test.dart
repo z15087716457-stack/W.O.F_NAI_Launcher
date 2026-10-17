@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_semantics_repository.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_semantics_store.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -73,7 +75,7 @@ class _Cache extends VisibleTagTranslationCache {
 }
 
 Future<void> _until(bool Function() ready) async {
-  for (var attempt = 0; attempt < 100; attempt++) {
+  for (var attempt = 0; attempt < 1000; attempt++) {
     if (ready()) return;
     await Future<void>.delayed(const Duration(milliseconds: 1));
   }
@@ -104,6 +106,177 @@ void _respond(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  test(
+    'complete bundled semantics are readable without a configured remote model',
+    () async {
+      final assistant = _Assistant();
+      when(() => assistant.translateRouteFingerprint()).thenReturn('');
+      final cache = _Cache();
+      final repository = TagSemanticsRepository(
+        () async => File('assets/databases/tag_semantics.db').absolute.path,
+      );
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: cache,
+        semantics: repository,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.observe(surface: 'fixture', tag: 'grass', visible: true);
+      await _until(
+        () =>
+            controller.nameFor('grass') == '草地' &&
+            controller.activeRequests == 0,
+      );
+      expect(controller.definitionFor('grass'), isNotEmpty);
+      expect(controller.activityFor('grass'), isNull);
+      expect(cache.writes, 0);
+    },
+  );
+  test('bundled semantics do not replace a saved personal reading', () async {
+    final assistant = _Assistant();
+    when(() => assistant.translateRouteFingerprint()).thenReturn('route');
+    final cache = _Cache();
+    cache.records['grass'] = const CachedVisibleTagTranslation(
+      nameZh: '个人译名',
+      nameLanguage: 'zh',
+    );
+    final controller = AutoTagTranslationController(
+      assistant: assistant,
+      wiki: _Wiki('English context'),
+      cache: cache,
+      semantics: TagSemanticsRepository(
+        () async => File('assets/databases/tag_semantics.db').absolute.path,
+      ),
+    );
+    addTearDown(controller.dispose);
+    await controller.setEnabled(true);
+    controller.observe(surface: 'fixture', tag: 'grass', visible: true);
+    await _until(
+      () =>
+          controller.nameFor('grass') == '个人译名' &&
+          controller.activeRequests == 0,
+    );
+    expect(controller.activityFor('grass'), isNull);
+    expect(cache.writes, 0);
+  });
+
+  test(
+    'a cached label does not prevent missing semantic fields being supplemented',
+    () async {
+      final folder = await Directory.systemTemp.createTemp('semantic-queue-');
+      final store = TagSemanticsStore(
+        databasePath: () async => '${folder.path}/supplements.db',
+      );
+      final repository = TagSemanticsRepository(
+        () async => File('assets/databases/tag_semantics.db').absolute.path,
+        supplements: store,
+      );
+      final assistant = _Assistant();
+      final cache = _Cache();
+      var calls = 0;
+      final hash = sha256.convert(utf8.encode('English context')).toString();
+      cache.records['fixture_tag'] = CachedVisibleTagTranslation(
+        nameZh: '旧译名',
+        wikiHash: hash,
+        nameLanguage: 'zh',
+      );
+      _respond(assistant, (call) async {
+        calls++;
+        expect(call.namedArguments[#existingNameZh], '旧译名');
+        return const VisibleTagTranslationResult(
+          nameZh: '旧译名',
+          coreZh: '旧译名',
+          synonymsZh: ['旧译名', '补充称呼'],
+          summaryZh: '有依据的简释义',
+        );
+      });
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English context'),
+        cache: cache,
+        semantics: repository,
+        semanticStore: store,
+      );
+      try {
+        await controller.setEnabled(true);
+        controller.observe(
+          surface: 'fixture',
+          tag: 'fixture_tag',
+          visible: true,
+        );
+        await _until(() => calls == 1 && controller.activeRequests == 0);
+        expect((await repository.find('fixture_tag'))!.synonymsZh, [
+          '旧译名',
+          '补充称呼',
+        ]);
+        controller.observe(
+          surface: 'fixture',
+          tag: 'fixture_tag',
+          visible: true,
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        expect(calls, 1);
+        await controller.clearCache();
+        expect((await repository.find('fixture_tag'))!.summaryZh, '有依据的简释义');
+      } finally {
+        controller.dispose();
+        await store.close();
+        await folder.delete(recursive: true);
+      }
+    },
+  );
+
+  test('non-Chinese readings never enter Chinese semantic fields', () async {
+    final folder = await Directory.systemTemp.createTemp('semantic-language-');
+    final store = TagSemanticsStore(
+      databasePath: () async => '${folder.path}/supplements.db',
+    );
+    await store.put(
+      tag: 'fixture_tag',
+      coreZh: '',
+      synonymsZh: const [],
+      summaryZh: '',
+      wikiHash: sha256.convert(utf8.encode('English context')).toString(),
+      promptVersion: PromptAssistantService.visibleTagTranslationPromptVersion,
+      provenance: 'prior-unknown-attempt',
+    );
+    final repository = TagSemanticsRepository(
+      () async => File('assets/databases/tag_semantics.db').absolute.path,
+      supplements: store,
+    );
+    final assistant = _Assistant();
+    var calls = 0;
+    _respond(assistant, (call) async {
+      calls++;
+      return const VisibleTagTranslationResult(
+        nameZh: '日本語の名称',
+        coreZh: '中文名称',
+        synonymsZh: ['中文名称'],
+        summaryZh: '中文说明',
+      );
+    });
+    final controller = AutoTagTranslationController(
+      assistant: assistant,
+      wiki: _Wiki('English context'),
+      cache: _Cache(),
+      semantics: repository,
+      semanticStore: store,
+      readingLanguage: () => 'ja',
+    );
+    try {
+      await controller.setEnabled(true);
+      controller.observe(surface: 'fixture', tag: 'fixture_tag', visible: true);
+      await _until(() => calls == 1 && controller.activeRequests == 0);
+      expect(controller.nameFor('fixture_tag'), '日本語の名称');
+      expect((await repository.find('fixture_tag'))!.coreZh, '中文名称');
+    } finally {
+      controller.dispose();
+      await store.close();
+      await folder.delete(recursive: true);
+    }
+  });
   test(
     'shared activity separates queued tasks, per-tag errors and deduplicated manual retries',
     () async {

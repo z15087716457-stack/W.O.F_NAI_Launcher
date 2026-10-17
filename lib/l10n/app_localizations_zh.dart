@@ -7353,7 +7353,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modelTask_promptReverseTitle => '阅读语言 → 原文';
 
   @override
-  String get modelTask_tagTranslateTitle => '标签名称翻译';
+  String get modelTask_tagTranslateTitle => '标签翻译与语义补充';
 
   @override
   String get modelTask_wikiTranslateTitle => '百科正文翻译';
@@ -7365,7 +7365,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modelTask_promptReverseDescription => '结合原文落实译文中的增删修改，结果填回原文供确认。';
 
   @override
-  String get modelTask_tagTranslateDescription => '为可见标签提供简洁、准确的名称释义。';
+  String get modelTask_tagTranslateDescription =>
+      '翻译可见标签，补齐中文核心词、同义词和简释义；已有资料优先复用。';
 
   @override
   String get modelTask_wikiTranslateDescription => '翻译百科正文、整理排版，并按语境选择可点击标签。';
@@ -18042,10 +18043,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get set_dcTranslate => '标签翻译';
+  String get set_dcSemantics => '个人语义资料';
 
   @override
-  String get set_dcTranslateSub => '词库里没有中文释义时，用这个接口补翻';
+  String get set_dcSemanticsSub => '保存补充的中文资料；清理翻译缓存时保留';
+
+  @override
+  String get set_dcTranslate => '标签翻译与语义补充';
+
+  @override
+  String get set_dcTranslateSub => '复用已有资料，按需补齐中文核心词、同义词和简释义';
 
   @override
   String get set_dcCaches => '缓存';
@@ -18107,7 +18114,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_dcResetStats => '重置统计';
 
   @override
-  String get set_dcTip => '这一页的数据都可以重新生成。真正的个人数据（账号、历史、块库）在“存储与图库 → 应用数据位置”。';
+  String get set_dcTip =>
+      '词库和缓存可以重新获取。个人语义资料请在本页单独导出；账号、历史和块库的备份位置见“存储与图库 → 应用数据位置”。';
 
   @override
   String get set_mdDesc =>
@@ -18214,7 +18222,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_mdTaskReverse => '提示词反推';
 
   @override
-  String get set_mdTaskTag => '标签翻译';
+  String get set_mdTaskTag => '标签翻译与语义补充';
 
   @override
   String get set_mdTaskWiki => '百科翻译';
@@ -26850,7 +26858,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get modelTask_promptReverseTitle => '閱讀語言 → 原文';
 
   @override
-  String get modelTask_tagTranslateTitle => '標籤名稱翻譯';
+  String get modelTask_tagTranslateTitle => '標籤翻譯與語義補充';
 
   @override
   String get modelTask_wikiTranslateTitle => '百科正文翻譯';
@@ -26862,7 +26870,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get modelTask_promptReverseDescription => '結合原文落實譯文中的增刪修改，結果填回原文供確認。';
 
   @override
-  String get modelTask_tagTranslateDescription => '為可見標籤提供簡潔、準確的名稱釋義。';
+  String get modelTask_tagTranslateDescription =>
+      '翻譯可見標籤，補齊中文核心詞、同義詞和簡釋義；已有資料優先複用。';
 
   @override
   String get modelTask_wikiTranslateDescription => '翻譯百科正文、整理排版，並按語境選擇可點選標籤。';
@@ -37539,10 +37548,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get set_dcTranslate => '標籤翻譯';
+  String get set_dcSemantics => '個人語義資料';
 
   @override
-  String get set_dcTranslateSub => '詞庫裡沒有中文釋義時，用這個介面補翻';
+  String get set_dcSemanticsSub => '儲存補充的中文資料；清理翻譯快取時保留';
+
+  @override
+  String get set_dcTranslate => '標籤翻譯與語義補充';
+
+  @override
+  String get set_dcTranslateSub => '複用已有資料，按需補齊中文核心詞、同義詞和簡釋義';
 
   @override
   String get set_dcCaches => '快取';
@@ -37604,7 +37619,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_dcResetStats => '重設統計';
 
   @override
-  String get set_dcTip => '這一頁的資料都可以重新生成。真正的個人資料（帳號、歷史、塊庫）在“儲存與圖庫 → 應用資料位置”。';
+  String get set_dcTip =>
+      '詞庫和快取可以重新取得。個人語義資料請在本頁單獨匯出；帳號、歷史和塊庫的備份位置見“儲存與圖庫 → 應用資料位置”。';
 
   @override
   String get set_mdDesc =>
@@ -37711,7 +37727,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_mdTaskReverse => '提示詞反推';
 
   @override
-  String get set_mdTaskTag => '標籤翻譯';
+  String get set_mdTaskTag => '標籤翻譯與語義補充';
 
   @override
   String get set_mdTaskWiki => '百科翻譯';

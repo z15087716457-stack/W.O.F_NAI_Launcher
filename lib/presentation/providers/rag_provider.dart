@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 import '../../core/autocomplete/completion_models.dart';
 import '../../core/database/asset_database_manager.dart';
+import '../../core/tag_expansion/tag_semantics_store.dart';
 import '../../core/rag/rag_client.dart';
 import '../../core/rag/rag_maintenance.dart';
 import '../../core/rag/rag_settings.dart';
@@ -177,6 +178,15 @@ final ragWikiTranslationsPathProvider = Provider<Future<String> Function()>(
     );
   },
 );
+
+final ragTagSemanticsPathsProvider =
+    Provider<Future<({String base, String supplements})> Function()>(
+      (ref) =>
+          () async => (
+            base: await AssetDatabaseManager.instance.ensureTagSemanticsDb(),
+            supplements: await ref.read(tagSemanticsStoreProvider).readyPath(),
+          ),
+    );
 
 final ragRuntimeProbeFactoryProvider = Provider<RagRuntimeProbe Function()>(
   (ref) =>
@@ -364,6 +374,9 @@ class RagController extends Notifier<RagStatus> {
       final galleryRoots = settings.galleryEnabled
           ? await _writeGalleryRoots(root)
           : '';
+      final tagPaths = settings.tagsEnabled
+          ? await ref.read(ragTagSemanticsPathsProvider)()
+          : null;
       final client = await ref.read(ragClientStarterProvider)(
         python: python,
         directory: root,
@@ -383,6 +396,9 @@ class RagController extends Notifier<RagStatus> {
             'catalog': paths.catalog,
             'runtime': paths.runtime,
             'wiki': paths.wiki,
+            if (tagPaths != null) 'tag_semantics': tagPaths.base,
+            if (tagPaths != null && await File(tagPaths.supplements).exists())
+              'tag_supplements': tagPaths.supplements,
             'translations': await ref.read(ragWikiTranslationsPathProvider)(),
             'blocks': snapshot,
             'gallery_roots': galleryRoots,
@@ -1034,6 +1050,13 @@ class RagController extends Notifier<RagStatus> {
                 TagCategory.general,
             postCount: (raw['post_count'] as num).toInt(),
             aliases: List<String>.from(raw['aliases'] as List),
+            translation: (raw['core_zh'] as String?)?.isEmpty == false
+                ? raw['core_zh'] as String
+                : null,
+            score: (raw['score'] as num?)?.toDouble() ?? 0,
+            retrievalOrigins: List<String>.unmodifiable(
+              (raw['origins'] as List? ?? const []).cast<String>(),
+            ),
             matchKind: CompletionMatchKind.related,
             sources: const {CompletionSourceKind.base},
           ),

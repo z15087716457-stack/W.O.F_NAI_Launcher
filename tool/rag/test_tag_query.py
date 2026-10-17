@@ -25,7 +25,7 @@ class TagQueryTests(unittest.TestCase):
         result=self.engine.search('',0,'around',[],[],False,keyword='在阳光下奔跑')
         self.assertTrue(result['items'])
         self.assertEqual(self.models.queries,['在阳光下奔跑'])
-        self.assertEqual(self.models.ranked,[('在阳光下奔跑',False,'retrieval')])
+        self.assertEqual(self.models.ranked,[('在阳光下奔跑',False,'tag_search')])
 
     def test_existing_prompt_cursor_and_context_mode_cannot_change_manual_query(self):
         for text,cursor,mode in [('rain, night, ',0,'before'),('blue hair, city, ',16,'around')]:

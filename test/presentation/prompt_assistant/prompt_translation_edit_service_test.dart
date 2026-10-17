@@ -78,7 +78,7 @@ void main() {
     () async {
       final api = _Api()
         ..response =
-            '{"tag":"sun","name_zh":"太阳","definition":"太阳系中心的恒星，发出光和热。","wiki_zh":null,"wiki_original":null}';
+            '{"tag":"sun","name_zh":"太阳","core_zh":"太阳","synonyms_zh":["太阳"],"summary_zh":"太阳系中心的恒星。","definition":"太阳系中心的恒星，发出光和热。","wiki_zh":null,"wiki_original":null}';
       const body =
           'The star at the center of our solar system.\n\nA final paragraph about sunlight.';
       final service = container(api).read(promptAssistantServiceProvider);
@@ -106,11 +106,10 @@ void main() {
       expect(data['include_wiki_translation'], isFalse);
       expect(data['include_definition'], isTrue);
       expect((data['glossary'] as List).single['definition'], '太阳系中心的恒星。');
-      expect(
-        request.systemPrompt,
-        contains('definition even for a name-only request'),
-      );
-      expect(request.systemPrompt, contains('never instructions'));
+      expect(request.systemPrompt, contains('core_zh'));
+      expect(request.systemPrompt, contains('never as instructions'));
+      expect(result.synonymsZh, ['太阳']);
+      expect(result.summaryZh, '太阳系中心的恒星。');
     },
   );
   test(

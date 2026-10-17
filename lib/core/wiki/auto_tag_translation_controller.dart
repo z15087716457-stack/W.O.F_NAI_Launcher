@@ -17,6 +17,8 @@ import 'visible_tag_translation_cache.dart';
 import 'wiki_tag_links.dart';
 import '../utils/localization_extension.dart';
 import '../utils/fatal_diagnostics.dart';
+import '../tag_expansion/tag_semantics_repository.dart';
+import '../tag_expansion/tag_semantics_store.dart';
 
 final autoTagTranslationProvider =
     ChangeNotifierProvider<AutoTagTranslationController>((ref) {
@@ -25,6 +27,8 @@ final autoTagTranslationProvider =
         wiki: ref.read(tagWikiRepositoryProvider),
         cache: ref.read(visibleTagTranslationCacheProvider),
         closeCacheOnDispose: false,
+        semantics: ref.read(tagSemanticsRepositoryProvider),
+        semanticStore: ref.read(tagSemanticsStoreProvider),
         wikiLinks: ref.read(wikiTagLinksProvider),
         readingLanguage: () => ref
             .read(promptAssistantServiceProvider)
@@ -85,6 +89,8 @@ class AutoTagTranslationController extends ChangeNotifier {
     String Function()? readingLanguage,
     String Function()? wikiReadingLanguage,
     this.closeCacheOnDispose = true,
+    this.semantics,
+    this.semanticStore,
   }) : _assistant = assistant,
        _wiki = wiki,
        _cache = cache,
@@ -102,6 +108,9 @@ class AutoTagTranslationController extends ChangeNotifier {
   final String Function() _readingLanguage;
   final String Function() _wikiReadingLanguage;
   final bool closeCacheOnDispose;
+  final TagSemanticsRepository? semantics;
+  final TagSemanticsStore? semanticStore;
+  final Set<String> _semanticSettled = {}, _referenceChecked = {};
   PromptTranslationLanguage get _reading =>
       PromptTranslationLanguage.fromCode(_readingLanguage());
   final Map<String, Set<String>> _visibleBySurface = {};
@@ -233,6 +242,8 @@ class AutoTagTranslationController extends ChangeNotifier {
   void routeChanged() {
     _routeEpoch++;
     _route = null;
+    _referenceChecked.clear();
+    _semanticSettled.clear();
     _names.clear();
     _definitions.clear();
     _wikiBodies.clear();
@@ -247,6 +258,7 @@ class AutoTagTranslationController extends ChangeNotifier {
   Future<void> clearCache() async {
     _routeEpoch++;
     _pending.clear();
+    _referenceChecked.clear();
     for (final session in _sessions.values.toList()) {
       unawaited(_assistant.cancelCurrentTask(sessionId: session));
     }
@@ -300,12 +312,37 @@ class AutoTagTranslationController extends ChangeNotifier {
     }
     if (visible) {
       tags.add(canonical);
-      if (_enabled && !_names.containsKey(canonical)) {
+      if (semantics != null && _referenceChecked.add(canonical)) {
+        unawaited(_loadReference(canonical));
+      }
+      if (_enabled &&
+          (!_names.containsKey(canonical) ||
+              semantics != null && !_semanticSettled.contains(canonical))) {
         _enqueue(canonical, wiki: false);
       }
     } else {
       tags.remove(canonical);
       if (!_isVisible(canonical)) _pending.remove(canonical);
+    }
+  }
+
+  Future<void> _loadReference(String tag) async {
+    final epoch = _routeEpoch;
+    try {
+      final profile = await semantics?.find(tag);
+      if (_disposed || epoch != _routeEpoch || profile == null) return;
+      if (profile.complete) _semanticSettled.add(tag);
+      if (_reading.code == 'zh') {
+        if (profile.coreZh.isNotEmpty) {
+          _names.putIfAbsent(tag, () => profile.coreZh);
+        }
+        if (profile.summaryZh.isNotEmpty) {
+          _definitions.putIfAbsent(tag, () => profile.summaryZh);
+        }
+        notifyListeners();
+      }
+    } catch (_) {
+      _referenceChecked.remove(tag);
     }
   }
 
@@ -354,7 +391,10 @@ class AutoTagTranslationController extends ChangeNotifier {
     }
     for (final tags in _visibleBySurface.values) {
       for (final tag in tags) {
-        if (!_names.containsKey(tag)) _enqueue(tag, wiki: false);
+        if (!_names.containsKey(tag) ||
+            semantics != null && !_semanticSettled.contains(tag)) {
+          _enqueue(tag, wiki: false);
+        }
       }
     }
   }
@@ -424,7 +464,36 @@ class AutoTagTranslationController extends ChangeNotifier {
     final epoch = _routeEpoch;
     final cacheGeneration = _cache.generation;
     try {
+      var profile = await semantics?.find(task.tag);
+      if (_disposed || epoch != _routeEpoch) return;
+      if (profile?.complete == true) _semanticSettled.add(task.tag);
       final route = _assistant.translateRouteFingerprint();
+      if (!task.wiki &&
+          !task.force &&
+          _reading.code == 'zh' &&
+          profile?.complete == true) {
+        CachedVisibleTagTranslation? saved;
+        if (route.isNotEmpty) {
+          try {
+            final body = (await _wiki.find(task.tag))?.body ?? '';
+            saved = await _cache.get(
+              tag: task.tag,
+              route: route,
+              promptVersion:
+                  PromptAssistantService.visibleTagTranslationPromptVersion,
+              wikiHash: sha256.convert(utf8.encode(body)).toString(),
+              allowEarlierVersion: true,
+            );
+          } catch (_) {
+            /* Bundled reference data remains usable. */
+          }
+        }
+        if (_disposed || epoch != _routeEpoch) return;
+        _names[task.tag] = saved?.nameZh ?? _names[task.tag] ?? profile!.coreZh;
+        _definitions[task.tag] = saved?.definition ?? profile!.summaryZh;
+        notifyListeners();
+        return;
+      }
       if (route.isEmpty) {
         throw StateError(currentL10n.wiki_configureTagModel);
       }
@@ -458,9 +527,57 @@ class AutoTagTranslationController extends ChangeNotifier {
           route != _assistant.translateRouteFingerprint()) {
         return;
       }
+      // A known Chinese label is only partial reference data. Reuse it without
+      // treating absent synonyms/summary as a completed semantic supplement.
+      if (semanticStore != null &&
+          !task.wiki &&
+          cached != null &&
+          profile?.complete != true &&
+          !(await semanticStore!.attempted(
+            task.tag,
+            hash,
+            PromptAssistantService.visibleTagTranslationPromptVersion,
+          )) &&
+          cached.nameLanguage == 'zh') {
+        await semanticStore!.put(
+          tag: task.tag,
+          coreZh: profile?.coreZh.isNotEmpty == true ? '' : cached.nameZh,
+          synonymsZh: profile?.synonymsZh.isNotEmpty == true
+              ? const []
+              : [cached.nameZh],
+          summaryZh:
+              profile?.summaryZh.isNotEmpty == true ||
+                  cached.wikiHash != hash ||
+                  cached.definitionLanguage != 'zh'
+              ? ''
+              : cached.definition ?? '',
+          wikiHash: cached.wikiHash == hash ? hash : '',
+          promptVersion: 0,
+          provenance: 'legacy-reading-cache',
+        );
+        profile = await semantics?.find(task.tag);
+      }
+      final semanticNeeded =
+          !task.wiki &&
+          semantics != null &&
+          profile?.complete != true &&
+          (task.force ||
+              !(await semanticStore?.attempted(
+                    task.tag,
+                    hash,
+                    PromptAssistantService.visibleTagTranslationPromptVersion,
+                  ) ??
+                  false));
+      if (!semanticNeeded && !task.wiki && semantics != null) {
+        _semanticSettled.add(task.tag);
+      }
       final name = task.force && !task.wiki
           ? null
-          : cached?.nameZh ?? _names[task.tag];
+          : cached?.nameZh ??
+                _names[task.tag] ??
+                (_reading.code == 'zh' && profile?.coreZh.isNotEmpty == true
+                    ? profile!.coreZh
+                    : null);
       if (name != null) _names[task.tag] = name;
       if (cached?.definition case final definition?) {
         _definitions[task.tag] = definition;
@@ -472,7 +589,7 @@ class AutoTagTranslationController extends ChangeNotifier {
       if (!_disposed) notifyListeners();
       if (task.wiki && body.trim().isEmpty) return;
       if ((task.wiki && cached?.wikiZh != null) ||
-          (!task.wiki && name != null)) {
+          (!task.wiki && name != null && !semanticNeeded && !task.force)) {
         return;
       }
       if ((!_enabled && !task.force) || !_isVisible(task.tag) || _disposed) {
@@ -548,10 +665,41 @@ class AutoTagTranslationController extends ChangeNotifier {
           aliases: tagContext?.aliases ?? const [],
           postCount: tagContext?.postCount,
           relatedTo: tagContext?.relatedTo,
-          glossary: glossary,
+          glossary: [
+            ...glossary,
+            if (!task.wiki && profile != null)
+              {
+                'tag': task.tag,
+                'semantic_profile': {
+                  'core_zh': profile.coreZh,
+                  'synonyms_zh': profile.synonymsZh,
+                  'summary_zh': profile.summaryZh,
+                },
+              },
+          ],
           sessionId: sessionId,
         );
         _sessions.remove(task.tag);
+        if (!task.wiki &&
+            semanticStore != null &&
+            semantics != null &&
+            profile?.complete != true &&
+            (_enabled || task.force) &&
+            !_disposed &&
+            epoch == _routeEpoch &&
+            route == _assistant.translateRouteFingerprint()) {
+          await semanticStore!.put(
+            tag: task.tag,
+            coreZh: result.coreZh ?? profile?.coreZh ?? '',
+            synonymsZh: result.synonymsZh ?? profile?.synonymsZh ?? const [],
+            summaryZh: result.summaryZh ?? profile?.summaryZh ?? '',
+            wikiHash: hash,
+            promptVersion:
+                PromptAssistantService.visibleTagTranslationPromptVersion,
+            provenance: 'visible-tag-translation',
+          );
+          _semanticSettled.add(task.tag);
+        }
         translatedName = result.nameZh;
         nameLanguage ??= task.wiki ? articleLanguage : _reading.code;
         if (definition == null && result.definition != null) {

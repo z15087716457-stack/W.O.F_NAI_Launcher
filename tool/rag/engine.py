@@ -6,6 +6,7 @@ Draft windows are query data and are never written into the index or diagnostics
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import sqlite3
 import time
@@ -19,18 +20,44 @@ def readonly(path):
 
 
 class Sources:
-    def __init__(self, catalog, runtime='', wiki=''):
-        self.paths = [str(Path(p).resolve(strict=True)) if p else '' for p in (catalog, runtime, wiki)]
+    representation_version = 'tag-profile-v2'
+
+    def __init__(self, catalog, runtime='', wiki='', semantics='', supplements=''):
+        self.paths = [str(Path(p).resolve(strict=True)) if p else '' for p in (catalog, runtime, wiki, semantics, supplements)]
         self._count_cache = None
 
-    def signature(self):
+    def _file_signature(self, paths):
         records = []
-        for name in self.paths:
+        for name in paths:
             if not name: continue
             for p in (Path(name), Path(name + '-wal')):
                 if p.exists():
                     s = p.stat(); records.append((str(p), s.st_size, s.st_mtime_ns))
-        return hashlib.sha256(json.dumps(records).encode()).hexdigest()
+        return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
+
+    def change_state(self):
+        revision = 0
+        if self.paths[4]:
+            db = readonly(self.paths[4])
+            try: revision = db.execute('SELECT revision FROM semantic_state').fetchone()[0]
+            except sqlite3.OperationalError: revision = None
+            finally: db.close()
+        return {'base':self._file_signature(self.paths[:4]), 'revision':revision}
+
+    def signature(self):
+        state = self.change_state()
+        if state['revision'] is None: return self._file_signature(self.paths)
+        return hashlib.sha256(json.dumps([state,self.paths[4]]).encode()).hexdigest()
+
+    def changed_names(self, metadata):
+        state = self.change_state()
+        if (state['revision'] is None or not self.paths[4] or
+            metadata.get('source_base') != state['base'] or 'semantic_revision' not in metadata): return None
+        db, union = self.connect()
+        try:
+            return [r[0] for r in db.execute('SELECT c.tag FROM supplements.semantic_changes c JOIN ('+union+
+                ') t ON t.name=c.tag WHERE c.revision>? ORDER BY c.revision,c.tag', (int(metadata['semantic_revision']),))]
+        finally: db.close()
 
     def connect(self):
         db = readonly(self.paths[0])
@@ -40,6 +67,8 @@ class Sources:
             runtime = bool(db.execute("SELECT 1 FROM runtime.sqlite_master WHERE name='danbooru_tags'").fetchone())
         if self.paths[2]:
             db.execute('ATTACH DATABASE ? AS wiki', (Path(self.paths[2]).as_uri() + '?mode=ro',))
+        for schema, name in zip(('semantics', 'supplements'), self.paths[3:]):
+            if name: db.execute('ATTACH DATABASE ? AS ' + schema, (Path(name).as_uri() + '?mode=ro',))
         union = ('SELECT tag name, category, post_count FROM runtime.danbooru_tags UNION ALL '
                  'SELECT name, category, post_count FROM tags t WHERE NOT EXISTS '
                  '(SELECT 1 FROM runtime.danbooru_tags r WHERE r.tag=t.name)' if runtime else
@@ -47,13 +76,13 @@ class Sources:
         return db, union
 
     def count(self):
-        signature = self.signature()
+        signature = self._file_signature(self.paths[:2])
         if self._count_cache and self._count_cache[0] == signature:
             return self._count_cache[1]
         db, union = self.connect()
         try:
             total = db.execute('SELECT COUNT(*) FROM (' + union + ')').fetchone()[0]
-            if self.signature() == signature: self._count_cache = (signature, total)
+            if self._file_signature(self.paths[:2]) == signature: self._count_cache = (signature, total)
             return total
         finally: db.close()
 
@@ -69,18 +98,96 @@ class Sources:
             rows = db.execute(sql, args).fetchall(); result = []
             for name, category, count in rows:
                 aliases = [r[0] for r in db.execute('SELECT a.alias FROM aliases a JOIN tags t ON t.id=a.tag_id WHERE t.name=? ORDER BY a.alias LIMIT 24', (name,))]
-                body = ''
+                body = ''; full_body = ''
                 if self.paths[2]:
-                    row = db.execute('SELECT substr(body,1,500) FROM wiki.wiki_pages WHERE tag=?', (name,)).fetchone()
-                    if row: body = row[0] or ''
+                    row = db.execute('SELECT body FROM wiki.wiki_pages WHERE tag=?', (name,)).fetchone()
+                    if row: full_body = row[0] or ''; body = full_body[:500]
+                profile = {'core_zh':'', 'synonyms_zh':[], 'summary_zh':''}
+                for schema, path in zip(('semantics', 'supplements'), self.paths[3:]):
+                    if not path: continue
+                    row = db.execute('SELECT core_zh,synonyms_zh,summary_zh FROM '+schema+'.tag_semantics WHERE tag=?',(name,)).fetchone()
+                    if row:
+                        summary = row[2]
+                        if schema == 'supplements' and summary:
+                            columns = {r[1] for r in db.execute('PRAGMA supplements.table_info(tag_semantics)')}
+                            column = 'summary_hash' if 'summary_hash' in columns else 'wiki_hash'
+                            saved = db.execute('SELECT '+column+' FROM supplements.tag_semantics WHERE tag=?',(name,)).fetchone()[0]
+                            if saved != hashlib.sha256(full_body.encode()).hexdigest(): summary = ''
+                        for key, value in zip(profile, (row[0], json.loads(row[1]), summary)):
+                            if value: profile[key] = value
                 text = clean_tag(name)
+                if self.paths[3] or self.paths[4]:
+                    text = 'Tag: ' + text + '\nCategory: ' + category_name(category)
+                    if profile['core_zh']: text += '\nChinese name: ' + profile['core_zh']
+                    if profile['synonyms_zh']: text += '\nChinese synonyms: ' + '; '.join(profile['synonyms_zh'])
+                    if profile['summary_zh']: text += '\nMeaning: ' + profile['summary_zh']
                 if aliases: text += '; aliases: ' + ', '.join(aliases)
                 if body: text += '; description: ' + body
-                digest = hashlib.sha256(json.dumps([text, category], ensure_ascii=False).encode()).hexdigest()
+                digest = hashlib.sha256(json.dumps([self.representation_version, text, category], ensure_ascii=False).encode()).hexdigest()
                 result.append({'name': name, 'category': category, 'post_count': count,
-                    'aliases': aliases, 'text': text, 'digest': digest})
+                    'aliases': aliases, 'text': text, 'digest': digest, **profile})
             return result
         finally: db.close()
+
+    def exact_names(self, query, limit=80):
+        """Canonical/official aliases and Chinese names, always checked live."""
+        normalized = clean_tag(query).lower().replace(' ', '_')
+        db, union = self.connect()
+        try:
+            names = [r[0] for r in db.execute('SELECT name FROM ('+union+') WHERE name=?', (normalized,))]
+            names.extend(r[0] for r in db.execute('SELECT t.name FROM aliases a JOIN tags t ON t.id=a.tag_id WHERE a.alias=? LIMIT ?', (normalized, limit)))
+            for schema, path in zip(('semantics', 'supplements'), self.paths[3:]):
+                if not path: continue
+                # Expanded expressions are recall hints, not canonical aliases.
+                # For example "nature" in grass's profile must not pin grass as
+                # an exact identity match ahead of the semantic ranking.
+                names.extend(r[0] for r in db.execute('SELECT tag FROM '+schema+'''.tag_semantics s
+                    WHERE core_zh=? LIMIT ?''', (query, limit)))
+            return list(dict.fromkeys(names))[:limit]
+        finally: db.close()
+
+    def core_concepts(self, query, limit=4):
+        """Protect explicit known concepts in compound Chinese descriptions.
+
+        Broad expansion terms are not treated as identity evidence. A one-Han
+        core additionally needs a longer matching name from the same profile.
+        Negated mentions and nested shorter cores are not pinned.
+        """
+        if not re.search(r'[\u3400-\u9fff]',query): return []
+        db, _ = self.connect(); records = {}
+        try:
+            for schema,path in zip(('semantics','supplements'),self.paths[3:]):
+                if not path: continue
+                for name,core,terms in db.execute('SELECT tag,core_zh,synonyms_zh FROM '+schema+
+                    '.tag_semantics WHERE length(core_zh)>0 AND instr(?,core_zh)>0 ORDER BY length(core_zh) DESC,tag LIMIT 128',(query,)):
+                    start=query.find(core)
+                    if re.search(r'(?:不要|没有|不是|并非|不带|不含|避免|排除|无)[\u3400-\u9fff]{0,2}$',query[max(0,start-5):start]): continue
+                    if len(core)<2 and not any(len(t)>=2 and core in t and t in query for t in json.loads(terms)): continue
+                    records[name]=core
+        finally: db.close()
+        live={r['name']:r for r in self.rows(names=list(records),limit=256)}
+        groups={}
+        for name in records:
+            if name not in live: continue
+            core=live[name]['core_zh']
+            if not core or core not in query: continue
+            start=query.find(core)
+            if re.search(r'(?:不要|没有|不是|并非|不带|不含|避免|排除|无)[\u3400-\u9fff]{0,2}$',query[max(0,start-5):start]): continue
+            if len(core)<2 and not any(len(t)>=2 and core in t and t in query for t in live[name]['synonyms_zh']): continue
+            if live[name]['category'] in (0,7,5,14,12,15) or query.strip()==core:
+                groups.setdefault(core,[]).append(name)
+        selected=[]
+        for core in sorted(groups,key=lambda c:(-len(c),query.find(c),c)):
+            start=query.find(core);end=start+len(core)
+            if any(start<prior[1] and end>prior[0] for prior in selected): continue
+            names=groups[core]
+            # Same wording can label unrelated entities. Prefer ordinary tags
+            # for an ambiguous shared visual core, retaining exact-name search.
+            visual=[n for n in names if live[n]['category'] in (0,7)]
+            choices=sorted(visual or names,key=lambda n:(-live[n]['post_count'],n))[:8]
+            selected.append((start,end,choices))
+            if len(selected)>=limit: break
+        return [names for _,_,names in sorted(selected)]
 
     def ordered_names(self):
         # Sort once per pass, rather than sorting the entire catalogue again
@@ -90,6 +197,12 @@ class Sources:
         try:
             return [r[0] for r in db.execute('SELECT name FROM (' + union + ') ORDER BY post_count DESC, name')]
         finally: db.close()
+
+
+def category_name(category):
+    return {0:'general visual tag',7:'general visual tag',1:'artist',8:'artist',
+        3:'copyright / work',10:'copyright / work',4:'character',11:'character',
+        5:'meta',14:'meta',9:'contributor',12:'species',15:'lore'}.get(category,'unknown')
 
 
 class Engine:
@@ -125,8 +238,11 @@ class Engine:
         self.plan = {'source_signature': self.sources.signature(),
                      'model_fingerprint': self.models.fingerprint,
                      'total': self.sources.count(), 'expires': time.monotonic() + 1800}
+        if isinstance(self.sources,Sources):
+            changes = self.sources.changed_names(dict(self.db.execute('SELECT key,value FROM metadata')))
+            if changes is not None: self.plan['incremental_names'] = changes
         self.plan['plan_id'] = hashlib.sha256(json.dumps(self.plan, sort_keys=True).encode()).hexdigest()
-        return {k: v for k, v in self.plan.items() if k != 'expires'}
+        return {k: v for k, v in self.plan.items() if k not in ('expires','incremental_names')}
 
     def embed_rows(self, rows):
         return self.models.embed([item['text'] for item in rows])
@@ -152,8 +268,10 @@ class Engine:
         processed = 0; skipped = 0; closing = False
         self.pool.begin_build()
         try:
-            names = self.sources.ordered_names()
-            while processed < plan['total']:
+            incremental = 'incremental_names' in plan
+            names = plan['incremental_names'] if incremental else self.sources.ordered_names()
+            work_total = len(names) if incremental else plan['total']
+            while processed < work_total:
                 if cancelled(): break
                 if self.sources.signature() != signature: raise ValueError('source_changed')
                 batch = names[processed:processed+self.batch_size]
@@ -182,19 +300,24 @@ class Engine:
                 self.db.execute("INSERT OR REPLACE INTO metadata VALUES('skipped',?)", (str(skipped),))
                 self.db.commit(); processed += len(rows)
                 if processed % 32768 == 0: self._checkpoint()
-                yield {'processed': processed, 'total': plan['total'], **self.status()}
-            if not cancelled() and processed == plan['total']:
+                yield {'processed': plan['total']-work_total+processed, 'total': plan['total'], **self.status()}
+            if not cancelled() and processed == work_total:
                 if self.sources.signature() != signature: raise ValueError('source_changed')
-                stale = [r[0] for r in self.db.execute('SELECT id FROM documents WHERE seen != ?', (signature,))]
+                stale = [] if incremental else [r[0] for r in self.db.execute('SELECT id FROM documents WHERE seen != ?', (signature,))]
                 for key in stale:
                     if key in self.ann: self.ann.remove(key)
-                self.db.execute('DELETE FROM documents WHERE seen != ?', (signature,))
+                if not incremental: self.db.execute('DELETE FROM documents WHERE seen != ?', (signature,))
                 if stale:
                     # Invalidate a checkpoint saved just before final cleanup;
                     # a crash must not reload deleted IDs from that older ANN.
                     self._ann_generation += 1
                     self.db.execute("INSERT OR REPLACE INTO metadata VALUES('ann_generation',?)",(str(self._ann_generation),))
                 self.db.execute("INSERT OR REPLACE INTO metadata VALUES('complete_signature',?)", (signature,))
+                if isinstance(self.sources,Sources):
+                    state = self.sources.change_state()
+                    self.db.execute("INSERT OR REPLACE INTO metadata VALUES('source_base',?)", (state['base'],))
+                    if state['revision'] is not None:
+                        self.db.execute("INSERT OR REPLACE INTO metadata VALUES('semantic_revision',?)", (str(state['revision']),))
                 self.db.commit()
         except GeneratorExit:
             # close() can only interrupt a suspended yield: both SQLite and
@@ -213,44 +336,87 @@ class Engine:
     def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
         import numpy as np
         if mode not in ('before','around'): raise ValueError('invalid_context_mode')
+        if not len(self.ann): return {'items': [], 'context_tokens':0}
         manual = bool(keyword.strip())
         keyword = clean_tag(keyword[:1024])
         # A typed search is its own query. Prompt context is only used for
         # idle recommendations, including the existing 120-token window.
         window = ({'text':keyword,'tokens':self.models.count(keyword),'mode':'query'} if manual else
                   context_window(text, cursor, mode, self.models.count))
-        if not window['text'] or not len(self.ann): return {'items': [], 'context_tokens': window['tokens']}
+        if not window['text']: return {'items': [], 'context_tokens': window['tokens']}
         if cancelled(): raise ValueError('cancelled')
         query_text = window['text']
-        query = self.models.embed([query_text], query=True)[0]
-        matches = self.ann.search(query, min(80, len(self.ann)))
+        limit = max(1, min(limit, 80))
+        budget = max(80, limit * 2)
+        # Recall broadly; rank the requested count plus a small, batched margin.
+        # Showing 80 must not inherit the previous hidden 32-item ceiling.
+        rank_budget = min(budget, ((limit*6//5+7)//8)*8)
+        exact = self.sources.exact_names(query_text) if manual else []
+        concepts = self.sources.core_concepts(query_text) if manual else []
+        concept_names = {name for group in concepts for name in group}
+        direct = self.sources.rows(names=exact, limit=80)
+        entity_query = any(r['category'] in (1,3,4,8,9,10,11) for r in direct)
+        keys = []
+        if len(self.ann):
+            query = self.models.embed([query_text], query=True)[0]
+            # Reserve recall inside visual categories instead of filtering a
+            # small global top-k after artist/character names have filled it.
+            if not entity_query:
+                visual = list(self.ann.search(query, budget, categories=(0,7,5,14,12,15)).keys)
+                names = list(self.ann.search(query, max(budget//4,budget-len(visual)),
+                    categories=(1,3,4,8,9,10,11)).keys)
+                visual = visual[:budget-len(names)]
+                # Preserve a name lane for descriptive character/work queries.
+                # A scene must not silently turn into an absolute class filter.
+                while visual or names:
+                    keys.extend(visual[:3]); visual = visual[3:]
+                    keys.extend(names[:1]); names = names[1:]
+            else:
+                keys.extend(self.ann.search(query,budget).keys)
         candidates = {}
         ranks = {}
-        for rank, key in enumerate(matches.keys):
+        origins = {}
+        for rank, key in enumerate(dict.fromkeys(keys)):
             row = self.db.execute('SELECT name,category,post_count,aliases,text,digest FROM documents WHERE id=?', (int(key),)).fetchone()
-            if row: candidates[row[0]] = row; ranks[row[0]] = 1/(60+rank+1)
+            if row:
+                candidates[row[0]] = row; ranks[row[0]] = 1/(60+rank+1)
+                origins.setdefault(row[0],set()).add('semantic')
         # Cooccurrence and ordinary matches participate without becoming vectors
         # or requiring a complete index. Recheck all candidates against live data.
-        names = list(dict.fromkeys([*candidates, *lexical]))[:160]
-        live = {r['name']:r for r in self.sources.rows(names=names, limit=160)}
+        names = list(dict.fromkeys([*exact, *sorted(concept_names), *lexical, *candidates]))[:320]
+        live = {r['name']:r for r in self.sources.rows(names=names, limit=320)}
         excluded = {clean_tag(t).lower() for t in existing}
         valid = []
         for name in names:
             item = live.get(name)
             if not item or clean_tag(name).lower() in excluded: continue
             if any(clean_tag(a).lower() in excluded for a in item['aliases']): continue
-            if name in candidates and candidates[name][5] != item['digest'] and name not in lexical: continue
+            if name in candidates and candidates[name][5] != item['digest'] and name not in lexical and name not in exact and name not in concept_names: continue
             valid.append(item)
-        for rank, name in enumerate(lexical): ranks[name] = ranks.get(name, 0)+1/(60+rank+1)
-        valid.sort(key=lambda r:ranks.get(r['name'],0), reverse=True)
-        valid = valid[:32]
+        for rank, name in enumerate(lexical):
+            ranks[name] = ranks.get(name, 0)+1/(60+rank+1)
+            origins.setdefault(name,set()).add('lexical' if manual else 'cooccurrence')
+        for name in exact:
+            ranks[name] = ranks.get(name, 0)+1
+            origins.setdefault(name,set()).add('exact')
+        for name in concept_names: origins.setdefault(name,set()).add('concept')
+        valid.sort(key=lambda r:(r['name'] not in exact,r['name'] not in concept_names,-ranks.get(r['name'],0), -r['post_count'], r['name']))
+        valid = valid[:rank_budget]
         if cancelled(): raise ValueError('cancelled')
-        documents = [r['text'] for r in valid]
-        scores = (self.models.rerank(query_text, documents, negative, purpose='retrieval') if manual else
+        if not valid: return {'items': [], 'context_tokens':window['tokens'], 'context_mode':mode}
+        documents = ['Category: '+category_name(r['category'])+'\n'+r['text'] for r in valid]
+        scores = (self.models.rerank(query_text, documents, negative, purpose='tag_search') if manual else
                   self.models.rerank(query_text, documents, negative))
         if cancelled(): raise ValueError('cancelled')
-        order = sorted(range(len(valid)), key=lambda i: (-scores[i], -ranks.get(valid[i]['name'],0), valid[i]['name']))
-        return {'items':[{k:v for k,v in valid[i].items() if k in ('name','category','post_count','aliases')} for i in order[:max(1,min(limit,80))]],
+        order = sorted(range(len(valid)), key=lambda i: (valid[i]['name'] not in exact,
+            -scores[i], -ranks.get(valid[i]['name'],0), -valid[i]['post_count'], valid[i]['name']))
+        pinned=[i for i in order if valid[i]['name'] in exact]
+        for group in concepts:
+            choices=[i for i in order if valid[i]['name'] in group]
+            if choices and choices[0] not in pinned: pinned.append(choices[0])
+        order=[*pinned,*[i for i in order if i not in pinned]]
+        return {'items':[{**{k:v for k,v in valid[i].items() if k in ('name','category','post_count','aliases','core_zh')},
+                'score':float(scores[i]), 'origins':sorted(origins.get(valid[i]['name'],set()))} for i in order[:limit]],
                 'context_tokens': window['tokens'], 'context_mode': mode}
 
     def clear(self):
