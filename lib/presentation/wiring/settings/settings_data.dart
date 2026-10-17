@@ -181,6 +181,7 @@ SettingsViewData settingsViewData(
   final generation = ref.watch(generationRequestParamsProvider);
   final metrics = ref.watch(anlasUsageMetricsProvider).valueOrNull?.at(now);
   final translation = config.interfaceFor(LauncherInterface.translate);
+  final tagTranslation = config.interfaceFor(LauncherInterface.tagTranslate);
   final blacklist = ref.watch(onlineGalleryBlacklistNotifierProvider);
   final danbooru = ref.watch(danbooruAuthProvider);
   final network = ref.watch(settingsNetworkProvider);
@@ -308,6 +309,9 @@ SettingsViewData settingsViewData(
             wikiCount: dictionary?.wikiCount,
             update: ref.watch(settingsDictionaryUpdateProvider),
             cooccurrence: dictionary?.cooccurrence ?? 0,
+            translationModel: tagTranslation.isConfigured
+                ? tagTranslation.model
+                : null,
             caches: {
               if (cacheFootprint != null)
                 for (final entry in cacheFootprint.entries)
