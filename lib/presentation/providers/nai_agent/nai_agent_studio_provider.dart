@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/nai_agent/studio_tools.dart';
 import '../../../core/nai_agent/generation_tools.dart';
+import '../../../data/models/image/image_params.dart';
 import '../image_generation_provider.dart';
 import '../generation/preview_selection_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
@@ -191,6 +192,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       readDraft: () => readBridgeDraft(ref),
       readSummary: () {
         final state = ref.read(imageGenerationNotifierProvider);
+        final imageParams = ref.read(generationParamsNotifierProvider);
         final selected = image('selected');
         final draft = readBridgeDraft(ref);
         return {
@@ -228,6 +230,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
                 (draft.fields['negative_prompt'] as String).length,
             'character_count': (draft.fields['characters'] as List).length,
           },
+          'model_constraints': imageParams.modelSpec.requestConstraints,
         };
       },
       isGenerating: busy,

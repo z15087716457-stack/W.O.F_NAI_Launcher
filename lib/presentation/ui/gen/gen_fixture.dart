@@ -127,6 +127,7 @@ abstract final class GenFixture {
     return GenViewData(
       model: v45 ? 'nai-diffusion-4-5-full' : 'nai-diffusion-5',
       models: models,
+      turbo: v45 ? null : false,
       furry: false,
       quota: GenQuota(
         opusPercent: v45 ? null : 147,

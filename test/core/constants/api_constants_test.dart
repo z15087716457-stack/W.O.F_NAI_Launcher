@@ -200,6 +200,7 @@ void main() {
       ];
       const expected = <String, List<UcPresetType>>{
         ImageModels.animeDiffusionV5Full: heavyLightFurryHumanNone,
+        ImageModels.animeDiffusionV5FullMedium: [UcPresetType.heavy],
         ImageModels.animeDiffusionV5Curated: heavyLightFurryHumanNone,
         ImageModels.animeDiffusionV45Full: heavyLightFurryHumanNone,
         ImageModels.animeDiffusionV45Curated: heavyLightHumanNone,

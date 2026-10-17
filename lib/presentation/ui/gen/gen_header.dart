@@ -65,7 +65,7 @@ class GenHeader extends StatelessWidget {
 
 /// 胶囊外框（原型 `.cap`）：28 高、1px `--capb` 描边、圆角 8、窗口底、12 号字。
 class _Capsule extends StatelessWidget {
-  const _Capsule({required this.children});
+  const _Capsule({super.key, required this.children});
   final List<Widget> children;
 
   @override
@@ -112,6 +112,7 @@ class _ModelCapsule extends StatelessWidget {
     final furry = data.furry;
     final open = scope.controller.popoverTag == #model;
     return _Capsule(
+      key: const Key('gen-model-capsule'),
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 10, right: 6),
@@ -161,15 +162,19 @@ class _ModelCapsule extends StatelessWidget {
           ),
         ),
         if (furry != null) ...[
+          const _TurboButton(),
           const _Vs(),
           UiPressable(
             key: const Key('gen-mode'),
             onTap: () => scope.actions.onFurryChanged(!furry),
             builder: (context, hover) => Tooltip(
               message: context.l10n.gen_modeTip,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10, right: 9),
+              child: SizedBox(
+                // Share the old Anime/Furry width with the new 25px toggle.
+                width: _originalModeWidth(context, furry) - 25,
+                height: 26,
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   spacing: 5,
                   children: [
                     GenNaiIcon(
@@ -178,7 +183,7 @@ class _ModelCapsule extends StatelessWidget {
                       color: hover ? c.ink : c.muted,
                     ),
                     Text(
-                      furry ? 'Furry' : 'Anime',
+                      furry ? 'F' : 'A',
                       style: UiText.sans(
                         12,
                         weight: FontWeight.w700,
@@ -192,6 +197,78 @@ class _ModelCapsule extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+double _originalModeWidth(BuildContext context, bool furry) {
+  final text = TextPainter(
+    text: TextSpan(
+      text: furry ? 'Furry' : 'Anime',
+      style: UiText.sans(12, weight: FontWeight.w700),
+    ),
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
+  )..layout();
+  final width = text.width + 19 + 13 + 5;
+  text.dispose();
+  return width;
+}
+
+class _TurboButton extends StatelessWidget {
+  const _TurboButton();
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = GenScope.of(context, GenAspect.header);
+    final enabled =
+        scope.data.turbo != null && scope.actions.onTurboChanged != null;
+    final active = scope.data.turbo == true;
+    final c = context.ui;
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.only(right: 3),
+      child: Tooltip(
+        message: !enabled
+            ? l.gen_turboUnavailable
+            : active
+            ? l.gen_turboDisable
+            : l.gen_turboEnable,
+        child: Semantics(
+          button: true,
+          enabled: enabled,
+          toggled: active,
+          label: 'Turbo (Medium Effort)',
+          child: UiPressable(
+            key: const Key('gen-turbo'),
+            onTap: enabled
+                ? () => scope.actions.onTurboChanged!(!active)
+                : null,
+            builder: (context, hover) => Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                color: active
+                    ? c.warnBg
+                    : hover && enabled
+                    ? c.hover
+                    : c.control,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              alignment: Alignment.center,
+              child: UiGlyph(
+                active ? UiGlyphs.bolt : UiGlyphs.boltOff,
+                size: 14,
+                color: active
+                    ? c.warn
+                    : enabled
+                    ? c.muted
+                    : c.faint,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -286,7 +363,7 @@ class _ModelMenu extends StatelessWidget {
       ),
     );
     Widget item(GenModel m) {
-      final on = m.id == data.model;
+      final on = m.id == (data.displayModel ?? data.model);
       return UiPressable(
         key: Key('gen-model-${m.id}'),
         onTap: () {

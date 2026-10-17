@@ -30,6 +30,7 @@ class ToolsRecorder {
     return GenActions(
       onLayoutChanged: b.onLayoutChanged,
       onModelChanged: b.onModelChanged,
+      onTurboChanged: b.onTurboChanged,
       onFurryChanged: b.onFurryChanged,
       onOpenQuota: b.onOpenQuota,
       onNegativeTab: b.onNegativeTab,

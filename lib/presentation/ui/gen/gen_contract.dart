@@ -337,6 +337,7 @@ class GenTranslate with _GenValue {
 class GenPromptData with _GenValue {
   const GenPromptData({
     this.negative = false,
+    this.negativeSupported = true,
     this.positiveTokens = const GenTokens(0, 512),
     this.negativeTokens = const GenTokens(0, 512),
     this.qualityPresets = const [],
@@ -353,6 +354,7 @@ class GenPromptData with _GenValue {
 
   /// 当前看负面页签（快捷键“切换正 / 负面”也要能切，所以由接线方管）。
   final bool negative;
+  final bool negativeSupported;
   final GenTokens positiveTokens;
   final GenTokens negativeTokens;
 
@@ -381,6 +383,7 @@ class GenPromptData with _GenValue {
   @override
   List<Object?> get _values => [
     negative,
+    negativeSupported,
     positiveTokens,
     negativeTokens,
     qualityPresets,
@@ -723,6 +726,8 @@ class GenSmea with _GenValue {
 @immutable
 class GenParamsData with _GenValue {
   const GenParamsData({
+    this.fixedSampling = false,
+    this.cfgRescaleSupported = true,
     this.steps = 28,
     this.maxSteps = 50,
     this.scale = 5,
@@ -739,6 +744,8 @@ class GenParamsData with _GenValue {
     this.smea,
   });
 
+  final bool fixedSampling;
+  final bool cfgRescaleSupported;
   final int steps;
   final int maxSteps;
   final double scale;
@@ -773,6 +780,8 @@ class GenParamsData with _GenValue {
       samplers.where((s) => s.id == sampler).firstOrNull?.label ?? sampler;
   @override
   List<Object?> get _values => [
+    fixedSampling,
+    cfgRescaleSupported,
     steps,
     maxSteps,
     scale,
@@ -1227,6 +1236,8 @@ class GenViewData with _GenValue {
   const GenViewData({
     required this.model,
     required this.models,
+    this.displayModel,
+    this.turbo,
     this.furry,
     this.quota = const GenQuota(),
     this.layout = const GenLayout(),
@@ -1244,6 +1255,12 @@ class GenViewData with _GenValue {
   /// 当前模型 id，以及菜单里的全部模型。
   final String model;
   final List<GenModel> models;
+
+  /// The family selected in the menu; Turbo uses the Full family entry.
+  final String? displayModel;
+
+  /// null = unavailable, false = Full, true = Turbo (Medium Effort).
+  final bool? turbo;
 
   /// Anime / Furry 模式（`params.furryMode`）；null = 当前模型没有这一格（`spec.v4Prompts`）。
   final bool? furry;
@@ -1264,12 +1281,15 @@ class GenViewData with _GenValue {
   final DateTime? now;
 
   GenModel get currentModel =>
-      models.where((m) => m.id == model).firstOrNull ??
+      models.where((m) => m.id == (displayModel ?? model)).firstOrNull ??
       GenModel(id: model, name: model);
 
   GenViewData copyWith({
     String? model,
     List<GenModel>? models,
+    String? displayModel,
+    bool? turbo,
+    bool clearTurbo = false,
     bool? furry,
     bool clearFurry = false,
     GenQuota? quota,
@@ -1286,6 +1306,8 @@ class GenViewData with _GenValue {
   }) => GenViewData(
     model: model ?? this.model,
     models: models ?? this.models,
+    displayModel: displayModel ?? this.displayModel,
+    turbo: clearTurbo ? null : (turbo ?? this.turbo),
     furry: clearFurry ? null : (furry ?? this.furry),
     quota: quota ?? this.quota,
     layout: layout ?? this.layout,
@@ -1303,6 +1325,8 @@ class GenViewData with _GenValue {
   List<Object?> get _values => [
     model,
     models,
+    displayModel,
+    turbo,
     furry,
     quota,
     layout,
@@ -1408,6 +1432,7 @@ typedef GenAnchorCallback = void Function(Rect anchor);
 class GenActions {
   const GenActions({
     required this.onLayoutChanged,
+    this.onTurboChanged,
     required this.onModelChanged,
     required this.onFurryChanged,
     required this.onOpenQuota,
@@ -1505,6 +1530,7 @@ class GenActions {
   /// 每个回调只把名字和参数交给 [log]（测试、预览用）。
   factory GenActions.logging(ValueChanged<String> log) => GenActions(
     onLayoutChanged: (v) => log('onLayoutChanged($v)'),
+    onTurboChanged: (v) => log('onTurboChanged($v)'),
     onModelChanged: (v) => log('onModelChanged($v)'),
     onFurryChanged: (v) => log('onFurryChanged($v)'),
     onOpenQuota: () => log('onOpenQuota'),
@@ -1605,6 +1631,7 @@ class GenActions {
   GenActions withChannel(ValueChanged<ChannelSettings>? onChannelChanged) =>
       GenActions(
         onLayoutChanged: onLayoutChanged,
+        onTurboChanged: onTurboChanged,
         onModelChanged: onModelChanged,
         onFurryChanged: onFurryChanged,
         onOpenQuota: onOpenQuota,
@@ -1704,6 +1731,7 @@ class GenActions {
 
   // 顶栏
   final ValueChanged<String> onModelChanged;
+  final ValueChanged<bool>? onTurboChanged;
   final ValueChanged<bool> onFurryChanged;
 
   /// 点额度胶囊（打开订阅 / 余额说明）。

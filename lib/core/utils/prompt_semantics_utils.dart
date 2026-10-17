@@ -29,6 +29,11 @@ PromptSemanticsSnapshot buildPromptSemanticsSnapshot({
   required int ucPreset,
   bool transparentBackground = false,
 }) {
+  final spec = ModelSpecs.of(model);
+  if (!spec.customNegativePrompt) {
+    negativePrompt = '';
+    ucPreset = spec.fixedUcPreset!;
+  }
   // 官方 Transparent BG：把 transparent background 拼在质量词之前
   // （bundle 34342 rr() 把它前置到 quality suffix），仅 transparency 模型生效。
   var promptWithTransparency = prompt;

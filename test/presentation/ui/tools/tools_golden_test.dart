@@ -134,6 +134,20 @@ void main() {
       testWidgets('golden $name', skip: skip, (t) async {
         await pump(t, dark);
         final masks = <Rect>[];
+        // Same explicitly approved Turbo/A-F strip as the generation page.
+        final turbo = find.byKey(const Key('gen-turbo'));
+        final modelCapsule = find.byKey(const Key('gen-model-capsule'));
+        if (turbo.evaluate().isNotEmpty && modelCapsule.evaluate().isNotEmpty) {
+          final button = t.getRect(turbo), capsule = t.getRect(modelCapsule);
+          masks.add(
+            Rect.fromLTRB(
+              button.left,
+              capsule.top,
+              capsule.right,
+              capsule.bottom,
+            ),
+          );
+        }
         final toolbar = find.byKey(const Key('gen-bar-top'));
         if (toolbar.evaluate().isNotEmpty) {
           // Persistent variation pricing changes this bar and the attached

@@ -38,7 +38,8 @@ class GenParamStrip extends StatelessWidget {
           _Cell(
             key: const Key('gen-param-steps'),
             label: l.gen_steps,
-            onTap: toggle,
+            tooltip: p.fixedSampling ? l.gen_turboFixed : null,
+            onTap: p.fixedSampling ? null : toggle,
             child: Text('${p.steps}'),
           ),
           _Cell(
@@ -74,7 +75,8 @@ class GenParamStrip extends StatelessWidget {
               builder: (ctx) => _Cell(
                 key: const Key('gen-param-sampler'),
                 label: l.gen_sampler,
-                onTap: () => _samplerMenu(ctx, scope),
+                tooltip: p.fixedSampling ? l.gen_turboFixed : null,
+                onTap: p.fixedSampling ? null : () => _samplerMenu(ctx, scope),
                 child: Text(p.samplerLabel, overflow: TextOverflow.ellipsis),
               ),
             ),
@@ -411,26 +413,28 @@ class _Drawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: 12,
                 children: [
-                  const Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: 10,
                     children: [
-                      Expanded(child: _SeedField()),
-                      Expanded(child: _SamplerField()),
+                      const Expanded(child: _SeedField()),
+                      if (!p.fixedSampling)
+                        const Expanded(child: _SamplerField()),
                     ],
                   ),
                   if (p.noise != null) const _NoiseField(),
-                  GenSliderRow(
-                    key: const Key('gen-drawer-steps'),
-                    label: l.gen_steps,
-                    labelWidth: 72,
-                    value: p.steps.toDouble(),
-                    min: 1,
-                    max: p.maxSteps.toDouble(),
-                    decimals: 0,
-                    defaultValue: 28,
-                    onChanged: (v) => a.onParamChanged(GenParam.steps, v),
-                  ),
+                  if (!p.fixedSampling)
+                    GenSliderRow(
+                      key: const Key('gen-drawer-steps'),
+                      label: l.gen_steps,
+                      labelWidth: 72,
+                      value: p.steps.toDouble(),
+                      min: 1,
+                      max: p.maxSteps.toDouble(),
+                      decimals: 0,
+                      defaultValue: 28,
+                      onChanged: (v) => a.onParamChanged(GenParam.steps, v),
+                    ),
                   GenSliderRow(
                     key: const Key('gen-drawer-scale'),
                     label: l.gen_guidance,
@@ -442,15 +446,17 @@ class _Drawer extends StatelessWidget {
                     defaultValue: 5,
                     onChanged: (v) => a.onParamChanged(GenParam.scale, v),
                   ),
-                  GenSliderRow(
-                    key: const Key('gen-drawer-rescale'),
-                    label: l.gen_cfgRescale,
-                    labelWidth: 72,
-                    tooltip: l.gen_cfgRescaleTip,
-                    value: p.cfgRescale,
-                    defaultValue: 0,
-                    onChanged: (v) => a.onParamChanged(GenParam.cfgRescale, v),
-                  ),
+                  if (p.cfgRescaleSupported)
+                    GenSliderRow(
+                      key: const Key('gen-drawer-rescale'),
+                      label: l.gen_cfgRescale,
+                      labelWidth: 72,
+                      tooltip: l.gen_cfgRescaleTip,
+                      value: p.cfgRescale,
+                      defaultValue: 0,
+                      onChanged: (v) =>
+                          a.onParamChanged(GenParam.cfgRescale, v),
+                    ),
                   if (p.varietyPlus != null || p.decrisp != null)
                     Wrap(
                       spacing: 6,

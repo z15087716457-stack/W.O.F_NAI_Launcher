@@ -125,12 +125,19 @@ class _PromptHead extends StatelessWidget {
               Flexible(
                 child: _PreviewTip(
                   sections: p.negativePreview,
-                  title: l.gen_finalNegative,
+                  title: p.negativeSupported
+                      ? l.gen_finalNegative
+                      : l.gen_turboNegative,
+                  disabledHint: p.negativeSupported
+                      ? null
+                      : l.gen_turboNegative,
                   child: GenTab(
                     key: const Key('gen-tab-negative'),
                     label: l.gen_negative,
                     selected: p.negative,
-                    onTap: () => scope.actions.onNegativeTab(true),
+                    onTap: p.negativeSupported
+                        ? () => scope.actions.onNegativeTab(true)
+                        : null,
                   ),
                 ),
               ),
@@ -191,13 +198,18 @@ class _PreviewTip extends StatelessWidget {
     required this.sections,
     required this.title,
     required this.child,
+    this.disabledHint,
   });
   final List<GenPreviewSection> sections;
   final String title;
   final Widget child;
+  final String? disabledHint;
 
   @override
   Widget build(BuildContext context) {
+    if (disabledHint != null) {
+      return Tooltip(message: disabledHint!, child: child);
+    }
     if (sections.isEmpty) return child;
     final c = context.ui;
     return Tooltip(
@@ -761,7 +773,9 @@ class GenFullscreenEditor extends StatelessWidget {
     final l = context.l10n;
     final data = scope.data;
     final ch = target.character;
-    final negative = ch == null ? data.prompt.negative : target.negative;
+    final negative =
+        data.prompt.negativeSupported &&
+        (ch == null ? data.prompt.negative : target.negative);
     final t = ch == null
         ? GenEditorTarget.base(negative: negative, fullscreen: true)
         : GenEditorTarget.character(ch, negative: negative, fullscreen: true);
@@ -797,7 +811,9 @@ class GenFullscreenEditor extends StatelessWidget {
                     GenTab(
                       label: l.gen_negative,
                       selected: negative,
-                      onTap: () => scope.actions.onNegativeTab(true),
+                      onTap: data.prompt.negativeSupported
+                          ? () => scope.actions.onNegativeTab(true)
+                          : null,
                     ),
                   ] else
                     Text(

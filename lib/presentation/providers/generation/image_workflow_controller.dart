@@ -523,18 +523,20 @@ final generationRequestParamsProvider = Provider<ImageParams>((ref) {
   if (enabled ||
       workflow.isEnhance && !workflow.enhance.localUpscale ||
       workflow.isUpscale) {
-    return request;
+    return request.constrainedForModel;
   }
-  return request.copyWith(
-    model: ImageModels.resolveBaseModel(request.model),
-    action: ImageGenerationAction.generate,
-    sourceImage: null,
-    maskImage: null,
-    inpaintFocusRegion: null,
-    isOutpaint: false,
-    enhanceWorkflow: false,
-    upscaledEnhance: false,
-  );
+  return request
+      .copyWith(
+        model: ImageModels.resolveBaseModel(request.model),
+        action: ImageGenerationAction.generate,
+        sourceImage: null,
+        maskImage: null,
+        inpaintFocusRegion: null,
+        isOutpaint: false,
+        enhanceWorkflow: false,
+        upscaledEnhance: false,
+      )
+      .constrainedForModel;
 });
 
 /// The sidebar continues to show its own workflow while a canvas tool is open.

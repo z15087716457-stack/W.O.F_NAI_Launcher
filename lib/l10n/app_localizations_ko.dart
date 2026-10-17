@@ -8865,11 +8865,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get opusUsage_exhausted => '계정 할당량을 모두 사용했습니다. V5 생성은 Anlas로 과금됩니다';
 
   @override
-  String opusUsage_remaining(Object percent) {
-    return '무료 계정 할당량 남음: $percent%';
-  }
-
-  @override
   String opusUsage_recharging(Object time) {
     return '기본 할당량 충전 중: 다음 +1%까지 $time';
   }
@@ -8886,18 +8881,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String opusUsage_hours(Object hours) {
-    return '$hours시간';
-  }
-
-  @override
   String opusUsage_minutesSeconds(Object minutes, Object seconds) {
     return '$minutes분 $seconds초';
-  }
-
-  @override
-  String opusUsage_minutes(Object minutes) {
-    return '$minutes분';
   }
 
   @override
@@ -14486,6 +14471,29 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_modelsLegacy => '이전 모델';
 
   @override
+  String get gen_turboEnable =>
+      'Turbo(Medium Effort) 켜기\n14스텝과 Euler Ancestral로 고정됩니다. 사용자 지정 네거티브 초안은 Full용으로 유지됩니다.';
+
+  @override
+  String get gen_turboDisable =>
+      'Turbo(Medium Effort) 사용 중\n클릭하여 V5 Full로 돌아가면 이전 설정과 네거티브 초안이 복원됩니다.';
+
+  @override
+  String get gen_turboUnavailable => 'Turbo는 V5 Full에서만 사용할 수 있습니다';
+
+  @override
+  String get gen_turboFixed =>
+      'Turbo는 14스텝과 Euler Ancestral로 고정됩니다. CFG Rescale은 사용할 수 없습니다.';
+
+  @override
+  String get gen_turboNegative =>
+      'Turbo는 사용자 지정 네거티브를 사용하지 않습니다. 초안은 유지되며 Full로 돌아가면 복원됩니다.';
+
+  @override
+  String get generation_modelDesc_v5Turbo =>
+      'V5 Full의 Medium Effort 모드. 14스텝과 Euler Ancestral로 고정되며 Anlas와 Opus 할당량 소모가 줄어듭니다.';
+
+  @override
   String get gen_modeTip => '클릭하여 Anime / Furry 전환';
 
   @override
@@ -18343,11 +18351,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_dcPublishing => '데이터 버전 전환 중…';
-
-  @override
-  String set_dcAdded(Object n) {
-    return '$n개를 추가하여 로컬에 저장했습니다.';
-  }
 
   @override
   String get set_dcUpdateFailed => '보충하지 못했습니다. 기존 데이터는 유지됩니다. 다시 시도할 수 있습니다.';

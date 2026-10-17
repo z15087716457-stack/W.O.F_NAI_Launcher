@@ -52,16 +52,17 @@
 
 ## 模型与计费
 
+- V5 Full 的 Turbo／Medium Effort 使用 `nai-diffusion-5-full-medium`，重绘为 `nai-diffusion-5-full-medium-inpainting`。固定 14 步、Euler Ancestral、Heavy UC，忽略自定义主／角色负面及 CFG Rescale，引导强度可调。固定值仅在请求投影中生效，存储的 Full 步数／采样器／UC 和负面草稿保留，切回 Full 恢复；界面不提供固定参数编辑。黑色胶囊仍显示 Full 家族，独立闪电表示实际模式，Anime／Furry 缩为 A／F，原胶囊宽度保持。桥接生效读数和 Agent 报价带 `model_constraints`，原始 `_draft`／`draft_summary` 不能被生效投影覆盖；元数据必须有明确 Medium 标记才认定为 Turbo，不根据 14 步推断。见 [实现与验证](docs/v5-turbo-support-2026-10-17.md)。
 - 云端 NAI 放大使用 image API `/ai/upscale`，`nai-diffusion-5-curated` / blur=0，固定 2x；输入面积≤3,145,728，费用按源图像素为 1 / 2 / 3 / 4，Opus 不免。不要恢复旧主域、4x / width / height 请求。
 - 图生图 / 增强 / 重绘以二进制 image / mask 和 JSON request 组成 multipart，重采样 PNG 提高无损压缩；原尺寸文件不重编码，用户透明度保留。流式错误共用映射，网关 HTML 不作为界面详情。断线可能发生在计费后，不自动重试；当前网络与节点情况见 `docs/image-tools-audit-2026-10-05.md`。
 - 生成变体按官网直接投影所选图片的模型、提示词、角色和采样参数，固定强度 0.8 / 噪声 0.1，一次请求三张；源图在同组最前面标记原图，不计入生成槽位、计费或自动保存。当前启用的参考图参与请求；不导入元数据、不改草稿或随机块，不启动本地增强。PNG 参数优先，对象元数据兜底；超过 3MP 的源图明确拒绝。变体报价使用同一投影及固定三图，不受主生成数量影响。
 - Token 是两根独立预算：正向为全局段加所有角色框正向，UC 为全局段加所有角色框 UC。V4/V4.5 上限 512，V5 上限 1471；以桥接 `prompt_tokens`/`uc_tokens` 为准。
 - V5 能力由 `core/constants/model_spec.dart` 控制：没有 noise schedule 和 Variety+，有 Opus 额度、透明背景和 Max Enhance 能力位。
-- 生成请求的 `params_version` 在 `NAIImageRequestBuilder.buildV4Parameters()` 按模型区分：V5 Full/Curated 为 4，V4/V4.5 为 3；此值也用于变体/Fork 的 img2img 请求，不能全局固定为 4。
+- 生成请求的 `params_version` 在 `NAIImageRequestBuilder.buildV4Parameters()` 按模型区分：V5 Full/Curated/Turbo 为 4，V4/V4.5 为 3；此值也用于变体/Fork 的 img2img 请求，不能全局固定为 4。
 - V5 质量词档：Standard=`very aesthetic, masterpiece, no text`，Light=`very aesthetic, amazing quality, no text`，None 不追加；桥接优先接受 `quality_preset=standard|light|none`，`quality_toggle` 仅作旧兼容别名。
 - V5 透明背景开关会把 `transparent background` 拼到有效 prompt，并发送透明背景相关请求 hint；V5 Max Enhance 在源图面积低于约 2.5MP 时保持源尺寸并交给服务端端到端放大。非 Max 增强仍使用防糊追加词。
 - Opus 免费资格只看三条：单张请求、steps≤28、面积≤1MP；不再额外排除角色参考。满足条件时每请求免 1 张。PR 参考图另加每张 5 Anlas；img2img/infill 满足条件同样可免费。
-- V5 家族在 V4 系数结果上整体乘 1.5，乘在 SMEA 后、img2img 强度前；官网 bundle 是 V5 单价的权威来源，SDK 旧版本不含 V5 定价。
+- V5 家族在 V4 系数结果上整体乘 1.5，乘在 SMEA 后、img2img 强度前；Turbo 额外在步数项、首次向上取整之前乘 `1 / 1.06521739`，不能仅替换成 14 步。官网 bundle 是 V5 单价的权威来源，SDK 旧版本不含 V5 定价。
 - 账户每日消耗统计是账户差额口径（前后余额相减），与界面显示单价无关。
 - Anlas 高消耗提醒默认关闭，已有显式偏好继续生效；启用后预计消耗达到阈值才弹出独立确认窗口。确认、取消及取消关闭均沿用原生成保护链。
 - Opus 额度（V5）区分常规 `usage.percent` 和已激活备用 `usage.purchasedPercent`，不把两份余量或 Anlas 相加；只读既有订阅响应，不读取／启用库存电池。常规额度优先，服务端未判定耗尽且常规归零、备用大于零时，顶栏显示备用余量并将闪电改为紫色；常规 ≥20% 蓝、5–20% 黄、<5% 红。数字不裁剪到 100%，进度条独立裁剪；备用条不播放回充扫光，常规恢复余量后重新优先显示常规。悬停同时列出两池、消耗来源、常规回充及订阅／购买 Anlas。计费始终沿用服务端 `isNegative`，不依据显示百分比推断是否免除首张费用。[备用额度接线](docs/opus-backup-quota-2026-10-17.md)。

@@ -71,12 +71,14 @@ GenParamsData generationParamsView(ImageParams params, {int? lastSeed}) {
       params.sampler != Samplers.ddim &&
       params.sampler != Samplers.ddimV3;
   return GenParamsData(
-    steps: params.steps,
+    fixedSampling: spec.isTurbo,
+    cfgRescaleSupported: spec.cfgRescale,
+    steps: params.effectiveSteps,
     scale: params.scale,
-    cfgRescale: params.cfgRescale,
+    cfgRescale: params.effectiveCfgRescale,
     seed: params.seed == -1 ? lastSeed : params.seed,
     seedPinned: params.seed != -1,
-    sampler: params.sampler,
+    sampler: params.effectiveSampler,
     samplers: [
       for (final sampler in Samplers.samplersForModel(params.model))
         GenOption(

@@ -4852,12 +4852,6 @@
   "opusUsage_usingReserve": "常规额度已用尽，正在使用备用电池额度",
   "opusUsage_regularEmpty": "常规额度已用尽，暂无可用备用额度",
   "opusUsage_exhausted": "账号额度已用尽，V5 生成按 Anlas 计费",
-  "opusUsage_remaining": "账号免费额度剩余 {percent}%",
-  "@opusUsage_remaining": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
   "opusUsage_recharging": "常规额度回充：下一 +1% 还需 {time}",
   "@opusUsage_recharging": {
     "placeholders": {
@@ -4873,23 +4867,11 @@
       "minutes": {}
     }
   },
-  "opusUsage_hours": "{hours} 小时",
-  "@opusUsage_hours": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "opusUsage_minutesSeconds": "{minutes} 分 {seconds} 秒",
   "@opusUsage_minutesSeconds": {
     "placeholders": {
       "minutes": {},
       "seconds": {}
-    }
-  },
-  "opusUsage_minutes": "{minutes} 分",
-  "@opusUsage_minutes": {
-    "placeholders": {
-      "minutes": {}
     }
   },
   "opusUsage_seconds": "{seconds} 秒",
@@ -8111,6 +8093,12 @@
   "gen_generating": "生成中",
   "gen_modelsNew": "新模型",
   "gen_modelsLegacy": "旧模型",
+  "gen_turboEnable": "开启 Turbo（Medium Effort）\n固定 14 步与 Euler Ancestral；自定义负面草稿保留，切回 Full 后恢复。",
+  "gen_turboDisable": "正在使用 Turbo（Medium Effort）\n点击切回 V5 Full，恢复原来的参数与负面草稿。",
+  "gen_turboUnavailable": "Turbo 仅适用于 V5 Full",
+  "gen_turboFixed": "Turbo 固定 14 步、Euler Ancestral，不支持 CFG Rescale。",
+  "gen_turboNegative": "Turbo 不使用自定义负面。原草稿已保留，切回 Full 可恢复。",
+  "generation_modelDesc_v5Turbo": "V5 Full 的 Medium Effort 模式，固定 14 步、Euler Ancestral，降低 Anlas 与 Opus 额度消耗。",
   "gen_modeTip": "点一下切换 Anime / Furry",
   "gen_anlasTip": "Anlas 余额 {value}",
   "@gen_anlasTip": {
@@ -9946,8 +9934,6 @@
   "set_dcImporting": "正在补充本地数据 · 已读取 {n} 条",
   "@set_dcImporting": {"placeholders": {"n": {}}},
   "set_dcPublishing": "正在切换数据版本…",
-  "set_dcAdded": "新增 {n} 条，已保存在本地",
-  "@set_dcAdded": {"placeholders": {"n": {}}},
   "set_dcUpdateFailed": "补充失败，已保留原数据。可重试。",
   "set_dcUpdateCancelled": "已取消，原数据保持可用。",
   "set_dcInstalled": "已补充",
@@ -10247,6 +10233,7 @@
   "set_rgOpening": "正在连接本地工作进程，读取已有索引。",
   "set_rgLoadingSaved": "正在载入已保存的检索索引。",
   "set_rgRestoring": "正在恢复检索索引 {done} / {total}，已有向量会直接复用。",
+  "@set_rgRestoring": {"description": "Actual local ANN recovery progress; existing embeddings are reused.", "placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
   "set_rgSaving": "正在保存恢复后的检索索引。",
   "set_rgReadingSources": "正在读取各来源的索引状态。",
   "set_rgLoadingTimeout": "索引载入长时间没有进展或已达到时间上限，请重试。已有数据保留。",

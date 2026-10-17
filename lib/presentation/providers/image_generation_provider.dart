@@ -695,31 +695,33 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ).text;
 
     // NAI 官方预设保持为 API 开关；自定义预设展开成显式提示词，避免官方预设重复生效。
-    return effectiveParams.copyWith(
-      prompt: normalize(effectiveParams.prompt),
-      negativePrompt: normalize(effectiveParams.negativePrompt),
-      qualityToggle: useParamsQualityPreset
-          ? effectiveParams.effectiveQualityToggle
-          : presetResolution.qualityToggle,
-      qualityTagPreset: useParamsQualityPreset
-          ? effectiveParams.effectiveQualityTagPreset
-          : presetResolution.qualityTagPreset,
-      ucPreset: useParamsUcPreset
-          ? effectiveParams.ucPreset
-          : presetResolution.ucPreset,
-      characters: [
-        for (final character in apiCharacters)
-          character.copyWith(
-            prompt: normalize(character.prompt),
-            negativePrompt: normalize(character.negativePrompt),
-          ),
-      ],
-      useCoords:
-          apiCharacters.isNotEmpty &&
-          (useParamsCharacters
-              ? effectiveParams.useCoords
-              : !characterConfig.globalAiChoice),
-    );
+    return effectiveParams
+        .copyWith(
+          prompt: normalize(effectiveParams.prompt),
+          negativePrompt: normalize(effectiveParams.negativePrompt),
+          qualityToggle: useParamsQualityPreset
+              ? effectiveParams.effectiveQualityToggle
+              : presetResolution.qualityToggle,
+          qualityTagPreset: useParamsQualityPreset
+              ? effectiveParams.effectiveQualityTagPreset
+              : presetResolution.qualityTagPreset,
+          ucPreset: useParamsUcPreset
+              ? effectiveParams.ucPreset
+              : presetResolution.ucPreset,
+          characters: [
+            for (final character in apiCharacters)
+              character.copyWith(
+                prompt: normalize(character.prompt),
+                negativePrompt: normalize(character.negativePrompt),
+              ),
+          ],
+          useCoords:
+              apiCharacters.isNotEmpty &&
+              (useParamsCharacters
+                  ? effectiveParams.useCoords
+                  : !characterConfig.globalAiChoice),
+        )
+        .constrainedForModel;
   }
 
   ImageParams _applyPromptPipeline(ImageParams params) =>

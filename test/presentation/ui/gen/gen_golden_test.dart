@@ -177,6 +177,21 @@ void main() {
           await precacheGen(t, const []);
         }
         final masks = <Rect>[];
+        // Only the user-approved Turbo + A/F area changes. Keep the model
+        // button, quota, header size and all original PNGs under comparison.
+        final turbo = find.byKey(const Key('gen-turbo'));
+        final modelCapsule = find.byKey(const Key('gen-model-capsule'));
+        if (turbo.evaluate().isNotEmpty && modelCapsule.evaluate().isNotEmpty) {
+          final button = t.getRect(turbo), capsule = t.getRect(modelCapsule);
+          masks.add(
+            Rect.fromLTRB(
+              button.left,
+              capsule.top,
+              capsule.right,
+              capsule.bottom,
+            ),
+          );
+        }
         final tools = find.byKey(const Key('gen-tool-menu'));
         final prompt = find.byKey(const Key('gen-prompt'));
         if (tools.evaluate().isNotEmpty && prompt.evaluate().isNotEmpty) {

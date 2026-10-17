@@ -45,6 +45,36 @@ void main() {
 
   group('buildPromptTokenCountPayload', () {
     test(
+      'Turbo UC token budget excludes hidden drafts and custom preset blocks',
+      () {
+        final payload = buildPromptTokenCountPayload(
+          target: PromptTokenCountTarget.negative,
+          prompt: 'girl',
+          negativePrompt: 'OLD_NEGATIVE',
+          model: api.ImageModels.animeDiffusionV5FullMedium,
+          qualityToggle: true,
+          ucPreset: 3,
+          useCustomUcPreset: true,
+          ucPresetContent: 'OLD_CUSTOM_UC',
+          characters: [
+            CharacterPrompt.create(
+              prompt: 'girl',
+            ).copyWith(negativePrompt: 'OLD_CHARACTER_UC'),
+          ],
+          resolveAliases: (s) => s,
+        );
+        expect(
+          payload.mainText,
+          api.UcPresets.v5Presets[api.UcPresetType.heavy],
+        );
+        expect(payload.extraTexts, isEmpty);
+        expect(
+          payload.breakdown.expand((g) => g.texts).join(),
+          isNot(contains('OLD_')),
+        );
+      },
+    );
+    test(
       'positive payload should include request-aligned quality tags and raw enabled character prompts only',
       () {
         final payload = buildPromptTokenCountPayload(

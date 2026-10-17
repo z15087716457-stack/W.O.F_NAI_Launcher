@@ -75,6 +75,13 @@ class GenerationSettings {
   Future<void> model(String value) => _backend.mutate(() {
     if (ImageModels.allModels.contains(value)) _params.updateModel(value);
   });
+  Future<void> turbo(bool value) => _backend.mutate(() {
+    final current = ref.read(generationParamsNotifierProvider).model;
+    final target = value
+        ? ImageModels.turboModelForModel(current)
+        : ImageModels.baseModelForTurboModel(current);
+    if (target != null) _params.updateModel(target);
+  });
   Future<void> furry(bool value) => _backend.mutate(() {
     if (_spec.v4Prompts) _params.updateModelMode(value);
   });
@@ -99,11 +106,11 @@ class GenerationSettings {
     return _backend.mutate(() {
       switch (param) {
         case GenParam.steps:
-          _params.updateSteps(value.round().clamp(1, 50));
+          if (!_spec.isTurbo) _params.updateSteps(value.round().clamp(1, 50));
         case GenParam.scale:
           _params.updateScale(value.clamp(0, 10));
         case GenParam.cfgRescale:
-          _params.updateCfgRescale(value.clamp(0, 1));
+          if (_spec.cfgRescale) _params.updateCfgRescale(value.clamp(0, 1));
       }
     });
   }
@@ -122,6 +129,7 @@ class GenerationSettings {
     }
   });
   Future<void> sampler(String value) => _backend.mutate(() {
+    if (_spec.isTurbo) return;
     if (Samplers.samplersForModel(
       ref.read(generationParamsNotifierProvider).model,
     ).contains(value)) {
@@ -172,6 +180,7 @@ class GenerationSettings {
     }
   });
   Future<void> uc(String value) => _backend.mutate(() {
+    if (!_spec.customNegativePrompt) return;
     final native = UcPresetType.values
         .where((preset) => preset.name == value)
         .firstOrNull;

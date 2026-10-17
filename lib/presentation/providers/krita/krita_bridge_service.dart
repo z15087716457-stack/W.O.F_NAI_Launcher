@@ -418,7 +418,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
 
   Future<void> _sendParams(KritaGetParamsMessage message) async {
     final tokens = _readTokens == null ? null : await _readTokens.call();
-    final params = _readBaseParams();
+    final params = _readBaseParams().constrainedForModel;
     final promptSnapshot = _readPromptSnapshot(params);
     // 用局部变量 + collection-if 表达「值为 null 则整条省略」。
     // 等价写法 `'k': ?expr` 是 Dart 3.9 的 null-aware element，
@@ -433,6 +433,7 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'prompt': promptSnapshot.prompt,
       'negative_prompt': promptSnapshot.negativePrompt,
       'model': params.model,
+      'model_constraints': params.modelSpec.requestConstraints,
       'sampler': params.sampler,
       'steps': params.steps,
       'cfg_scale': params.scale,
@@ -456,7 +457,12 @@ class KritaBridgeService implements KritaBridgeMessageService {
       'smea_dyn': params.smeaDyn,
       'use_coords': params.useCoords,
       if (seedLock != null) 'seed_lock': seedLock,
-      if (characters != null) 'characters': characters,
+      if (characters != null)
+        'characters': params.modelSpec.customNegativePrompt
+            ? characters
+            : [
+                for (final character in characters) {...character, 'uc': ''},
+              ],
       // AI 接管扩展：UI 盲区三件套只读回读（桥接不可写，仅消除 get 盲区）
       'precise_references': [
         for (final r in params.preciseReferences)

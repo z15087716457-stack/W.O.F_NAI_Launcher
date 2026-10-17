@@ -192,14 +192,18 @@ class AnlasCalculator {
 
     // 确定模型版本
     final version = _getModelVersion(model);
+    final spec = ModelSpecs.of(model);
+    steps = spec.fixedSteps ?? steps;
 
     // 计算每张图的基础消耗
     double perSample;
 
     if (version >= 3) {
       // 网页端先对面积与步数公式向上取整，再应用 SMEA 与重绘强度。
-      final baseCost = (_areaCoefficient * r + _stepAreaCoefficient * r * steps)
-          .ceil();
+      final baseCost =
+          (_areaCoefficient * r +
+                  _stepAreaCoefficient * r * steps * spec.billingStepMultiplier)
+              .ceil();
       final smeaFactor = !smea ? 1.0 : (!smeaDyn ? 1.2 : 1.4);
       perSample = (baseCost * smeaFactor).ceilToDouble();
     } else {
@@ -287,7 +291,7 @@ class AnlasCalculator {
   }) {
     if (!isOpus) return false;
     if (opusUsageExhausted && params.modelSpec.opusUsageLimit) return false;
-    if (params.steps > 28) return false;
+    if (params.effectiveSteps > 28) return false;
     if (params.nSamples > 1) return false;
 
     final resolution = params.width * params.height;

@@ -9141,11 +9141,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Account quota used up; V5 generation is billed in Anlas';
 
   @override
-  String opusUsage_remaining(Object percent) {
-    return 'Free account quota remaining: $percent%';
-  }
-
-  @override
   String opusUsage_recharging(Object time) {
     return 'Regular quota recharging: next +1% in $time';
   }
@@ -9163,18 +9158,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String opusUsage_hours(Object hours) {
-    return '$hours h';
-  }
-
-  @override
   String opusUsage_minutesSeconds(Object minutes, Object seconds) {
     return '$minutes min $seconds s';
-  }
-
-  @override
-  String opusUsage_minutes(Object minutes) {
-    return '$minutes min';
   }
 
   @override
@@ -14877,6 +14862,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_modelsLegacy => 'Legacy models';
 
   @override
+  String get gen_turboEnable =>
+      'Enable Turbo (Medium Effort)\nFixed 14 steps and Euler Ancestral. Your custom negative draft is kept for Full.';
+
+  @override
+  String get gen_turboDisable =>
+      'Turbo (Medium Effort) is active\nClick to return to V5 Full and restore your previous settings and negative draft.';
+
+  @override
+  String get gen_turboUnavailable => 'Turbo is available only for V5 Full';
+
+  @override
+  String get gen_turboFixed =>
+      'Turbo uses 14 steps and Euler Ancestral. CFG Rescale is unavailable.';
+
+  @override
+  String get gen_turboNegative =>
+      'Turbo does not use custom negative prompts. Your draft is kept and returns with Full.';
+
+  @override
+  String get generation_modelDesc_v5Turbo =>
+      'V5 Full Medium Effort: fixed 14 steps and Euler Ancestral, with lower Anlas and Opus usage.';
+
+  @override
   String get gen_modeTip => 'Click to switch Anime / Furry';
 
   @override
@@ -18839,11 +18847,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_dcPublishing => 'Switching data revision…';
-
-  @override
-  String set_dcAdded(Object n) {
-    return '$n entries added and saved locally.';
-  }
 
   @override
   String get set_dcUpdateFailed =>

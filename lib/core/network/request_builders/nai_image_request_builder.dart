@@ -50,10 +50,11 @@ class NAIImageRequestBuildResult {
 
 class NAIImageRequestBuilder {
   NAIImageRequestBuilder({
-    required this.params,
+    required ImageParams params,
     required this.encodeVibe,
     List<PreciseReference>? preciseReferences,
-  }) : _preciseReferences =
+  }) : params = params.constrainedForModel,
+       _preciseReferences =
            (preciseReferences ??
                    (params.isV45Model
                        ? params.preciseReferences
@@ -76,7 +77,7 @@ class NAIImageRequestBuilder {
       'width': params.width,
       'height': params.height,
       'scale': NAIApiUtils.toJsonNumber(params.scale),
-      'sampler': sampler,
+      'sampler': params.modelSpec.fixedSampler ?? sampler,
       'steps': params.steps,
       'n_samples': params.nSamples,
       'ucPreset': UcPresets.requestValueForModel(

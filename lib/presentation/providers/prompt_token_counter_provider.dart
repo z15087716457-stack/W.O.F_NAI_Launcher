@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/api_constants.dart';
+import '../../core/constants/model_spec.dart';
 import '../../core/enums/quality_tag_preset.dart';
 import '../../core/services/prompt_token_counter_service.dart';
 import '../../core/utils/prompt_preset_resolution.dart';
@@ -345,6 +346,14 @@ PromptTokenCountPayload _buildNegativeTokenCountPayload({
   required List<ui_character.CharacterPrompt> characters,
   required String Function(String text) resolveAliases,
 }) {
+  if (!ModelSpecs.of(model).customNegativePrompt) {
+    negativePrompt = '';
+    ucPreset = 0;
+    ucPresetType = UcPresetType.heavy;
+    ucPresetContent = UcPresets.getPresetContent(model, UcPresetType.heavy);
+    useCustomUcPreset = false;
+    characters = const [];
+  }
   final resolvedPrompt = resolveAliases(prompt).trim();
   final resolvedNegativePrompt = resolveAliases(negativePrompt).trim();
   final resolvedQualityMode =

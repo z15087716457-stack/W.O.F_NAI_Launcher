@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
@@ -25,6 +26,43 @@ import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  test(
+    'Turbo bridge reports effective settings and keeps the original draft',
+    () async {
+      const raw = ImageParams(
+        model: ImageModels.animeDiffusionV5FullMedium,
+        steps: 37,
+        sampler: Samplers.kDpmpp2m,
+        cfgRescale: .65,
+        negativePrompt: 'retained negative',
+      );
+      final sent = <Map<String, dynamic>>[];
+      final service = KritaBridgeService(
+        readBaseParams: () => raw,
+        readCharacters: () => [
+          {'prompt': 'positive', 'uc': 'retained character negative'},
+        ],
+        send: sent.add,
+        isUiGenerating: () => false,
+        generateStream: (_) => throw StateError('read only'),
+        generateFallback: (_) => throw StateError('read only'),
+        registerExternalImage: (_, {required params, addToDisplay}) async =>
+            null,
+        cancelGeneration: () {},
+      );
+      await service.handle(const KritaGetParamsMessage(id: 'turbo-read'));
+      final reply = sent.single;
+      expect(reply['steps'], 14);
+      expect(reply['sampler'], Samplers.kEulerAncestral);
+      expect(reply['cfg_rescale'], 0);
+      expect(reply['negative_prompt'], isEmpty);
+      expect(reply['characters'].single['uc'], isEmpty);
+      expect(reply['model_constraints']['fixed_uc_preset'], 0);
+      expect(raw.steps, 37);
+      expect(raw.negativePrompt, 'retained negative');
+    },
+  );
 
   group('KritaBridgeService prompt freezing', () {
     late Directory hiveDirectory;

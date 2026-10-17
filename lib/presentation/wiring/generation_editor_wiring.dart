@@ -48,6 +48,12 @@ class GenerationEditorWiring extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final model = ref.watch(
+      generationParamsNotifierProvider.select((p) => p.model),
+    );
+    if (target.negative && !ModelSpecs.of(model).customNegativePrompt) {
+      return Text(context.l10n.gen_turboNegative);
+    }
     final input = ref.watch(
       generationParamsNotifierProvider.select(
         (params) => (

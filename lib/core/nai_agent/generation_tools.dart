@@ -82,6 +82,7 @@ class NaiAgentGenerationQuote {
     'account_name': input.accountName,
     'draft_version': input.draftVersion,
     'model': input.effective.model,
+    'model_constraints': input.effective.modelSpec.requestConstraints,
     'width': input.outputSize.width,
     'height': input.outputSize.height,
     if (input.sourceOperation != null) ...{

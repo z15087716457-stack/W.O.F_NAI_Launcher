@@ -29,6 +29,8 @@ abstract final class GalleryNaiVersions {
     ],
     '5': [
       ImageModels.animeDiffusionV5Full,
+      ImageModels.animeDiffusionV5FullMedium,
+      ImageModels.animeDiffusionV5FullMediumInpainting,
       ImageModels.animeDiffusionV5Curated,
       ImageModels.animeDiffusionV5FullInpainting,
       ImageModels.animeDiffusionV5CuratedInpainting,
@@ -47,6 +49,8 @@ abstract final class GalleryNaiVersions {
     ],
     '5': [
       ImageModels.animeDiffusionV5Full,
+      ImageModels.animeDiffusionV5FullMedium,
+      ImageModels.animeDiffusionV5FullMediumInpainting,
       ImageModels.animeDiffusionV5FullInpainting,
     ],
   };

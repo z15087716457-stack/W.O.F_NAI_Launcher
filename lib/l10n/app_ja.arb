@@ -4852,12 +4852,6 @@
   "opusUsage_usingReserve": "通常枠を使い切り、予備電池の枠を使用中",
   "opusUsage_regularEmpty": "通常枠を使い切りました。利用可能な予備枠はありません",
   "opusUsage_exhausted": "アカウントの枠を使い切りました。V5 の生成は Anlas で課金されます",
-  "opusUsage_remaining": "アカウントの無料枠の残り {percent}%",
-  "@opusUsage_remaining": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
   "opusUsage_recharging": "通常枠の回復中：次の +1% まで {time}",
   "@opusUsage_recharging": {
     "placeholders": {
@@ -4873,23 +4867,11 @@
       "minutes": {}
     }
   },
-  "opusUsage_hours": "{hours} 時間",
-  "@opusUsage_hours": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "opusUsage_minutesSeconds": "{minutes} 分 {seconds} 秒",
   "@opusUsage_minutesSeconds": {
     "placeholders": {
       "minutes": {},
       "seconds": {}
-    }
-  },
-  "opusUsage_minutes": "{minutes} 分",
-  "@opusUsage_minutes": {
-    "placeholders": {
-      "minutes": {}
     }
   },
   "opusUsage_seconds": "{seconds} 秒",
@@ -8111,6 +8093,12 @@
   "gen_generating": "生成中",
   "gen_modelsNew": "新しいモデル",
   "gen_modelsLegacy": "旧モデル",
+  "gen_turboEnable": "Turbo（Medium Effort）を有効化\n14 ステップと Euler Ancestral に固定。カスタム UC は Full 用に保持されます。",
+  "gen_turboDisable": "Turbo（Medium Effort）を使用中\nクリックで V5 Full に戻り、以前の設定と UC 下書きを復元します。",
+  "gen_turboUnavailable": "Turbo は V5 Full のみ利用できます",
+  "gen_turboFixed": "Turbo は 14 ステップ・Euler Ancestral 固定です。CFG Rescale は使えません。",
+  "gen_turboNegative": "Turbo はカスタム UC を使用しません。下書きは保持され、Full に戻すと復元されます。",
+  "generation_modelDesc_v5Turbo": "V5 Full の Medium Effort モード。14 ステップ・Euler Ancestral 固定で、Anlas と Opus 枠の消費を抑えます。",
   "gen_modeTip": "クリックで Anime / Furry を切り替え",
   "gen_anlasTip": "Anlas 残高 {value}",
   "@gen_anlasTip": {
@@ -9946,8 +9934,6 @@
   "set_dcImporting": "ローカルデータを補充中 · {n} 件読み込み済み",
   "@set_dcImporting": {"placeholders": {"n": {}}},
   "set_dcPublishing": "データのバージョンを切り替え中…",
-  "set_dcAdded": "{n} 件を追加し、ローカルに保存しました。",
-  "@set_dcAdded": {"placeholders": {"n": {}}},
   "set_dcUpdateFailed": "補充できませんでした。既存データは保持されています。再試行できます。",
   "set_dcUpdateCancelled": "キャンセルしました。既存データは引き続き利用できます。",
   "set_dcInstalled": "補充済み",
@@ -10247,6 +10233,7 @@
   "set_rgOpening": "ローカルワーカーに接続し、既存のインデックスを確認しています。",
   "set_rgLoadingSaved": "保存済みの検索インデックスを読み込んでいます。",
   "set_rgRestoring": "検索インデックスを復元中：{done} / {total}。既存のベクトルを再利用します。",
+  "@set_rgRestoring": {"description": "Actual local ANN recovery progress; existing embeddings are reused.", "placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
   "set_rgSaving": "復元した検索インデックスを保存しています。",
   "set_rgReadingSources": "各ソースのインデックス状態を読み込んでいます。",
   "set_rgLoadingTimeout": "読み込みが長時間進まないか、制限時間に達しました。再試行してください。既存のデータは保持されています。",

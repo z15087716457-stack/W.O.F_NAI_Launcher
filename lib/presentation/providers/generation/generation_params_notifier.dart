@@ -153,7 +153,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       model: storedModel,
       // 存储的采样器可能不被当前模型族支持（如 V5 下残留的 DDIM），
       // 归位到推荐采样器
-      sampler: Samplers.samplersForModel(storedModel).contains(storedSampler)
+      sampler:
+          Samplers.samplersForModel(
+            ImageModels.baseModelForTurboModel(storedModel) ?? storedModel,
+          ).contains(storedSampler)
           ? storedSampler
           : Samplers.kEulerAncestral,
       steps: storage.getDefaultSteps(),
@@ -243,7 +246,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   void updateModel(String model, {bool persist = true}) {
     // 当前采样器不被新模型族支持时归位到推荐采样器
     // （如切到 V5 时残留的 DDIM/DPM++ SDE）
-    final sampler = Samplers.samplersForModel(model).contains(state.sampler)
+    final sampler =
+        Samplers.samplersForModel(
+          ImageModels.baseModelForTurboModel(model) ?? model,
+        ).contains(state.sampler)
         ? state.sampler
         : Samplers.kEulerAncestral;
     state = state.copyWith(model: model, sampler: sampler);

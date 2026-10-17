@@ -7,6 +7,7 @@ import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -157,6 +158,53 @@ void main() {
     },
   );
 
+  test(
+    'Turbo native quote and synthetic request use fixed settings without editing drafts',
+    () async {
+      await configurePromptComposition(container);
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      notifier.updateModel(ImageModels.animeDiffusionV5FullMedium);
+      notifier.updateSteps(37);
+      notifier.updateSampler(Samplers.kDpmpp2m);
+      notifier.updateCfgRescale(.65);
+      final raw = container.read(generationParamsNotifierProvider);
+      final service = container.read(naiAgentStudioFactoryProvider)(
+        root,
+        root,
+        true,
+        owner: const NaiAgentConversationOwner('workspace', 'chat'),
+      );
+      final q = (await service.execute(
+        'generation_prepare',
+        {},
+        NaiAgentCancellation(),
+      ))['details']['quote'];
+      expect(q['model'], ImageModels.animeDiffusionV5FullMedium);
+      expect(q['steps'], 14);
+      expect(q['sampler'], Samplers.kEulerAncestral);
+      expect(q['model_constraints']['custom_negative_prompt'], isFalse);
+      final run = service.execute('generation_run', {
+        'quote_id': q['quote_id'],
+      }, NaiAgentCancellation());
+      final broker = container.read(naiAgentGenerationApprovalsProvider);
+      broker.decide(broker.forChat('chat').single.id, generate: true);
+      expect((await run)['details']['status'], 'completed');
+      final request = requests.single;
+      expect(request.model, ImageModels.animeDiffusionV5FullMedium);
+      expect(request.steps, 14);
+      expect(request.sampler, Samplers.kEulerAncestral);
+      expect(request.cfgRescale, 0);
+      expect(request.negativePrompt, isEmpty);
+      expect(request.characters.every((c) => c.negativePrompt.isEmpty), isTrue);
+      final after = container.read(generationParamsNotifierProvider);
+      expect(after.steps, raw.steps);
+      expect(after.sampler, raw.sampler);
+      expect(after.cfgRescale, raw.cfgRescale);
+      expect(after.negativePrompt, raw.negativePrompt);
+    },
+  );
   test(
     'real native Stop cancels only the admitted request and does not auto retry it',
     () async {

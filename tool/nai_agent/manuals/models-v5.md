@@ -8,4 +8,8 @@
 
 生成和增强费用从原生 prepare 返回，实际运行需可见确认。模型名称与服务端能力可能不同，不用旧模型报价或推断资格代替检查。
 
+V5 Full 的 Turbo（官方 Medium Effort）使用 `nai-diffusion-5-full-medium`，局部重绘使用 `nai-diffusion-5-full-medium-inpainting`。读取 `model_constraints` 判断当前限制：固定 14 步、Euler Ancestral、Heavy 负面预设，不支持自定义主／角色负面提示词与 CFG Rescale；引导强度仍可调整。界面中的 Full 家族名称与闪电开关共同表示实际模型，不能只看黑色胶囊的名称。
+
+Turbo 的固定设置在报价与请求时投影生效，`scope=draft`／`draft_summary` 仍可包含为切回 Full 保留的原始步数、采样器和负面内容。不要为了匹配固定值改写这些草稿；实际参数、价格及付费资格读取 `generation_prepare`。不能仅凭图片使用 14 步就认定为 Turbo。
+
 操作语义见 [studio.md](studio.md) 和 [generation.md](generation.md)。

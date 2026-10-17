@@ -4852,12 +4852,6 @@
   "opusUsage_usingReserve": "Regular quota used up; using backup quota",
   "opusUsage_regularEmpty": "Regular quota used up; no backup quota available",
   "opusUsage_exhausted": "Account quota used up; V5 generation is billed in Anlas",
-  "opusUsage_remaining": "Free account quota remaining: {percent}%",
-  "@opusUsage_remaining": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
   "opusUsage_recharging": "Regular quota recharging: next +1% in {time}",
   "@opusUsage_recharging": {
     "placeholders": {
@@ -4873,23 +4867,11 @@
       "minutes": {}
     }
   },
-  "opusUsage_hours": "{hours} h",
-  "@opusUsage_hours": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "opusUsage_minutesSeconds": "{minutes} min {seconds} s",
   "@opusUsage_minutesSeconds": {
     "placeholders": {
       "minutes": {},
       "seconds": {}
-    }
-  },
-  "opusUsage_minutes": "{minutes} min",
-  "@opusUsage_minutes": {
-    "placeholders": {
-      "minutes": {}
     }
   },
   "opusUsage_seconds": "{seconds} s",
@@ -8111,6 +8093,12 @@
   "gen_generating": "Generating",
   "gen_modelsNew": "Current models",
   "gen_modelsLegacy": "Legacy models",
+  "gen_turboEnable": "Enable Turbo (Medium Effort)\nFixed 14 steps and Euler Ancestral. Your custom negative draft is kept for Full.",
+  "gen_turboDisable": "Turbo (Medium Effort) is active\nClick to return to V5 Full and restore your previous settings and negative draft.",
+  "gen_turboUnavailable": "Turbo is available only for V5 Full",
+  "gen_turboFixed": "Turbo uses 14 steps and Euler Ancestral. CFG Rescale is unavailable.",
+  "gen_turboNegative": "Turbo does not use custom negative prompts. Your draft is kept and returns with Full.",
+  "generation_modelDesc_v5Turbo": "V5 Full Medium Effort: fixed 14 steps and Euler Ancestral, with lower Anlas and Opus usage.",
   "gen_modeTip": "Click to switch Anime / Furry",
   "gen_anlasTip": "Anlas balance {value}",
   "@gen_anlasTip": {
@@ -9946,8 +9934,6 @@
   "set_dcImporting": "Adding local data · {n} rows read",
   "@set_dcImporting": {"placeholders": {"n": {}}},
   "set_dcPublishing": "Switching data revision…",
-  "set_dcAdded": "{n} entries added and saved locally.",
-  "@set_dcAdded": {"placeholders": {"n": {}}},
   "set_dcUpdateFailed": "Update failed. Existing data is preserved. Retry when ready.",
   "set_dcUpdateCancelled": "Cancelled. Existing data remains available.",
   "set_dcInstalled": "Added",

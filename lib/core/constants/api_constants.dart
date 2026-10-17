@@ -93,9 +93,30 @@ class ImageModels {
       'nai-diffusion-5-curated-inpainting';
   static const String animeDiffusionV5FullInpainting =
       'nai-diffusion-5-full-inpainting';
+  static const String animeDiffusionV5FullMedium =
+      'nai-diffusion-5-full-medium';
+  static const String animeDiffusionV5FullMediumInpainting =
+      'nai-diffusion-5-full-medium-inpainting';
+
+  static bool isTurboModel(String model) =>
+      model == animeDiffusionV5FullMedium ||
+      model == animeDiffusionV5FullMediumInpainting;
+
+  static String? turboModelForModel(String model) => switch (model) {
+    animeDiffusionV5Full => animeDiffusionV5FullMedium,
+    animeDiffusionV5FullInpainting => animeDiffusionV5FullMediumInpainting,
+    _ => null,
+  };
+
+  static String? baseModelForTurboModel(String model) => switch (model) {
+    animeDiffusionV5FullMedium => animeDiffusionV5Full,
+    animeDiffusionV5FullMediumInpainting => animeDiffusionV5FullInpainting,
+    _ => null,
+  };
 
   static const List<String> allModels = [
     animeDiffusionV5Full,
+    animeDiffusionV5FullMedium,
     animeDiffusionV5Curated,
     animeDiffusionV45Full,
     animeDiffusionV45Curated,
@@ -108,6 +129,7 @@ class ImageModels {
 
   static const Map<String, String> modelDisplayNames = {
     animeDiffusionV5Full: 'NAI Diffusion V5 (Full)',
+    animeDiffusionV5FullMedium: 'NAI Diffusion V5 (Turbo / Medium)',
     animeDiffusionV5Curated: 'NAI Diffusion V5 (Curated)',
     animeDiffusionV45Full: 'NAI Diffusion V4.5 (Full)',
     animeDiffusionV45Curated: 'NAI Diffusion V4.5 (Curated)',
@@ -139,6 +161,7 @@ class ImageModels {
 
     return switch (model) {
       animeDiffusionV5Full => animeDiffusionV5FullInpainting,
+      animeDiffusionV5FullMedium => animeDiffusionV5FullMediumInpainting,
       animeDiffusionV5Curated => animeDiffusionV5CuratedInpainting,
       animeDiffusionV45Full => animeDiffusionV45FullInpainting,
       animeDiffusionV45Curated => animeDiffusionV45CuratedInpainting,
@@ -153,6 +176,7 @@ class ImageModels {
   static String resolveBaseModel(String model) {
     return switch (model) {
       animeDiffusionV5FullInpainting => animeDiffusionV5Full,
+      animeDiffusionV5FullMediumInpainting => animeDiffusionV5FullMedium,
       animeDiffusionV5CuratedInpainting => animeDiffusionV5Curated,
       animeDiffusionV45FullInpainting => animeDiffusionV45Full,
       animeDiffusionV45CuratedInpainting => animeDiffusionV45Curated,
@@ -169,6 +193,8 @@ class ImageModels {
     return switch (model) {
       animeDiffusionV5Full ||
       animeDiffusionV5FullInpainting ||
+      animeDiffusionV5FullMedium ||
+      animeDiffusionV5FullMediumInpainting ||
       animeDiffusionV5Curated ||
       animeDiffusionV5CuratedInpainting ||
       animeDiffusionV45Full ||
@@ -250,6 +276,7 @@ class Samplers {
 
   /// 按模型族返回可用采样器列表
   static List<String> samplersForModel(String model) {
+    if (ModelSpecs.of(model).fixedSampler case final sampler?) return [sampler];
     if (ModelSpecs.of(model).isV5) return v5Samplers;
     if (ModelSpecs.of(model).isV4OrLater) return v4Samplers;
     return allSamplers;
@@ -372,6 +399,7 @@ class QualityTags {
   static const Map<String, String> modelQualityTags = {
     // V5 系列 (官方 bundle 41179 f() 表)
     ImageModels.animeDiffusionV5Full: v5Standard,
+    ImageModels.animeDiffusionV5FullMedium: v5Standard,
     ImageModels.animeDiffusionV5Curated: v5Standard,
 
     // V4.5 系列 (添加到末尾)
@@ -640,6 +668,9 @@ class UcPresets {
 
   /// 根据模型获取对应的预设映射
   static Map<UcPresetType, String> getPresetsForModel(String model) {
+    if (ModelSpecs.of(model).isTurbo) {
+      return {UcPresetType.heavy: v5Presets[UcPresetType.heavy]!};
+    }
     switch (ImageModels.resolveBaseModel(model)) {
       case ImageModels.animeDiffusionV5Full:
       case ImageModels.animeDiffusionV5Curated:

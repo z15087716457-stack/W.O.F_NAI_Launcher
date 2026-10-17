@@ -119,6 +119,7 @@ abstract final class UiGlyphs {
   static const tag = 'M3 12V4h8l10 10-8 8zM7.5 8h.01';
   static const inbox = 'M4 13l3-8h10l3 8v6H4zM4 13h5l1 2h4l1-2h5';
   static const bolt = 'M13 3L5 14h6l-1 7 8-11h-6z';
+  static const boltOff = 'M13 3L5 14h6l-1 7 8-11h-6z M4 4l16 16';
   static const palette =
       'M12 3a9 9 0 000 18c1 0 1.6-.7 1.6-1.5 0-.4-.2-.8-.4-1-.3-.3-.4-.6-.4-1 0-.8.7-1.5 1.5-1.5H16a5 5 0 005-5c0-4.4-4-8-9-8zM7.5 12h.01M9.5 8h.01M14.5 8h.01M17 12h.01';
   static const personStar =

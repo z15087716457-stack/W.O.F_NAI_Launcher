@@ -416,8 +416,15 @@ final generationViewDataProvider = Provider.autoDispose
           : ref.watch(localUpscaleModelsProvider).valueOrNull;
       return GenViewData(
         model: params.model,
+        displayModel: ImageModels.baseModelForTurboModel(params.model),
+        turbo: spec.supportsTurbo ? spec.isTurbo : null,
         models: [
-          for (final id in {...ImageModels.allModels, params.model})
+          for (final id in {
+            ...ImageModels.allModels.where(
+              (id) => !ImageModels.isTurboModel(id),
+            ),
+            ImageModels.baseModelForTurboModel(params.model) ?? params.model,
+          })
             GenModel(
               id: id,
               name: ModelDisplay.shortNameOf(id),
@@ -439,7 +446,8 @@ final generationViewDataProvider = Provider.autoDispose
         ),
         layout: generationLayoutView(layout),
         prompt: GenPromptData(
-          negative: negative,
+          negative: spec.customNegativePrompt && negative,
+          negativeSupported: spec.customNegativePrompt,
           positiveTokens: tokens(positive),
           negativeTokens: tokens(negativeUsage),
           qualityPresets: [

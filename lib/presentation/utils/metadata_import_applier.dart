@@ -253,7 +253,8 @@ class MetadataImportApplier {
 
   static String? toImportableModelId(String? model) {
     if (model == null || model.isEmpty) return null;
-    return ImageModels.allModels.contains(model) ? model : null;
+    final base = ImageModels.resolveBaseModel(model);
+    return ImageModels.allModels.contains(base) ? base : null;
   }
 
   static String? resolveImportableModel(NaiImageMetadata metadata) {

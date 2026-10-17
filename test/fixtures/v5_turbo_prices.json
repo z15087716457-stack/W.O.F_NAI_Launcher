@@ -1,0 +1,655 @@
+{
+  "source": "https://novelai.net/_next/static/chunks/33ul2lw58_w11.js?dpl=b50892a-38995131626-1",
+  "sourceSha256": "334fe5dd5ba29bfd8a69d2c356a69e6101918b308e8a438ee53acb5bf1026349",
+  "method": "Exact public checkStableDiffusionPrice function, isolated with no network and non-Opus fixtures",
+  "cases": [
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 1,
+      "steps": 23,
+      "expected": 11
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 3,
+      "steps": 23,
+      "expected": 33
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 23,
+      "expected": 4
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 23,
+      "expected": 12
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 23,
+      "expected": 7
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 23,
+      "expected": 21
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 1,
+      "steps": 23,
+      "expected": 26
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 3,
+      "steps": 23,
+      "expected": 78
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 23,
+      "expected": 9
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 23,
+      "expected": 27
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 23,
+      "expected": 16
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 23,
+      "expected": 48
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 1,
+      "steps": 23,
+      "expected": 54
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 3,
+      "steps": 23,
+      "expected": 162
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 23,
+      "expected": 19
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 23,
+      "expected": 57
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 23,
+      "expected": 33
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 23,
+      "expected": 99
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 1,
+      "steps": 23,
+      "expected": 102
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 3,
+      "steps": 23,
+      "expected": 306
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 23,
+      "expected": 36
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 23,
+      "expected": 108
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 23,
+      "expected": 62
+    },
+    {
+      "model": "nai-diffusion-5-full",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 23,
+      "expected": 186
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 8
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 24
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 3
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 9
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 5
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 15
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 17
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 51
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 6
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 18
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 10
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 30
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 35
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 105
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 13
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 39
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 21
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 63
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 68
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 204
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 24
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 72
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 41
+    },
+    {
+      "model": "nai-diffusion-5-full-medium",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 123
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 8
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 24
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 3
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 9
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 5
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 512,
+      "height": 768,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 15
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 17
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 51
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 6
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 18
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 10
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 832,
+      "height": 1216,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 30
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 35
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 105
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 13
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 39
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 21
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 1472,
+      "height": 1472,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 63
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 1,
+      "steps": 14,
+      "expected": 68
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 1,
+      "count": 3,
+      "steps": 14,
+      "expected": 204
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 1,
+      "steps": 14,
+      "expected": 24
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.35,
+      "count": 3,
+      "steps": 14,
+      "expected": 72
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 1,
+      "steps": 14,
+      "expected": 41
+    },
+    {
+      "model": "nai-diffusion-5-full-medium-inpainting",
+      "width": 2048,
+      "height": 2048,
+      "strength": 0.6,
+      "count": 3,
+      "steps": 14,
+      "expected": 123
+    }
+  ]
+}

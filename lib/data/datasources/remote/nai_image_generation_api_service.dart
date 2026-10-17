@@ -144,7 +144,7 @@ class NAIImageGenerationApiService {
     ImageParams params, {
     void Function(int, int)? onProgress,
   }) async {
-    final effectiveParams = params;
+    final effectiveParams = params.constrainedForModel;
 
     // NovelAI 官方说明 Precise Reference 与 Vibe Transfer 不兼容。
     // 当前策略是保留 Precise Reference，并在请求构建阶段跳过 Vibe Transfer。
@@ -407,7 +407,7 @@ class NAIImageGenerationApiService {
       return;
     }
 
-    final effectiveParams = params;
+    final effectiveParams = params.constrainedForModel;
 
     // NovelAI 官方说明 Precise Reference 与 Vibe Transfer 不兼容。
     // 当前策略是保留 Precise Reference，并在请求构建阶段跳过 Vibe Transfer。

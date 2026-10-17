@@ -4852,12 +4852,6 @@
   "opusUsage_usingReserve": "常規額度已用盡，正在使用備用電池額度",
   "opusUsage_regularEmpty": "常規額度已用盡，暫無可用備用額度",
   "opusUsage_exhausted": "帳號額度已用盡，V5 生成按 Anlas 計費",
-  "opusUsage_remaining": "帳號免費額度剩餘 {percent}%",
-  "@opusUsage_remaining": {
-    "placeholders": {
-      "percent": {}
-    }
-  },
   "opusUsage_recharging": "常規額度回充：下一 +1% 還需 {time}",
   "@opusUsage_recharging": {
     "placeholders": {
@@ -4873,23 +4867,11 @@
       "minutes": {}
     }
   },
-  "opusUsage_hours": "{hours} 小時",
-  "@opusUsage_hours": {
-    "placeholders": {
-      "hours": {}
-    }
-  },
   "opusUsage_minutesSeconds": "{minutes} 分 {seconds} 秒",
   "@opusUsage_minutesSeconds": {
     "placeholders": {
       "minutes": {},
       "seconds": {}
-    }
-  },
-  "opusUsage_minutes": "{minutes} 分",
-  "@opusUsage_minutes": {
-    "placeholders": {
-      "minutes": {}
     }
   },
   "opusUsage_seconds": "{seconds} 秒",
@@ -8111,6 +8093,12 @@
   "gen_generating": "生成中",
   "gen_modelsNew": "新模型",
   "gen_modelsLegacy": "舊模型",
+  "gen_turboEnable": "開啟 Turbo（Medium Effort）\n固定 14 步與 Euler Ancestral；自訂負面草稿保留，切回 Full 後恢復。",
+  "gen_turboDisable": "正在使用 Turbo（Medium Effort）\n點選切回 V5 Full，恢復原來的參數與負面草稿。",
+  "gen_turboUnavailable": "Turbo 僅適用於 V5 Full",
+  "gen_turboFixed": "Turbo 固定 14 步、Euler Ancestral，不支援 CFG Rescale。",
+  "gen_turboNegative": "Turbo 不使用自訂負面。原草稿已保留，切回 Full 可恢復。",
+  "generation_modelDesc_v5Turbo": "V5 Full 的 Medium Effort 模式，固定 14 步、Euler Ancestral，降低 Anlas 與 Opus 額度消耗。",
   "gen_modeTip": "點一下切換 Anime / Furry",
   "gen_anlasTip": "Anlas 餘額 {value}",
   "@gen_anlasTip": {
@@ -10041,12 +10029,6 @@
     }
   },
   "set_dcPublishing": "正在切換資料版本…",
-  "set_dcAdded": "新增 {n} 條，已儲存在本地",
-  "@set_dcAdded": {
-    "placeholders": {
-      "n": {}
-    }
-  },
   "set_dcUpdateFailed": "補充失敗，已保留原資料。可重試。",
   "set_dcUpdateCancelled": "已取消，原資料保持可用。",
   "set_dcInstalled": "已補充",
@@ -10346,6 +10328,17 @@
   "set_rgOpening": "正在連線本地工作程序，讀取已有索引。",
   "set_rgLoadingSaved": "正在載入已儲存的檢索索引。",
   "set_rgRestoring": "正在恢復檢索索引 {done} / {total}，已有向量會直接複用。",
+  "@set_rgRestoring": {
+    "description": "Actual local ANN recovery progress; existing embeddings are reused.",
+    "placeholders": {
+      "done": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
   "set_rgSaving": "正在儲存恢復後的檢索索引。",
   "set_rgReadingSources": "正在讀取各來源的索引狀態。",
   "set_rgLoadingTimeout": "索引載入長時間沒有進展或已達到時間上限，請重試。已有資料保留。",

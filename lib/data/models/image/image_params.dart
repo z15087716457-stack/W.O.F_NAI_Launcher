@@ -267,6 +267,27 @@ class ImageParams with _$ImageParams {
 
 /// ImageParams 扩展方法
 extension ImageParamsExtension on ImageParams {
+  /// A request-only projection. Stored Full settings and negative drafts stay intact.
+  ImageParams get constrainedForModel {
+    final spec = modelSpec;
+    if (!spec.isTurbo) return this;
+    return copyWith(
+      steps: spec.fixedSteps!,
+      sampler: spec.fixedSampler!,
+      cfgRescale: 0,
+      ucPreset: spec.fixedUcPreset!,
+      negativePrompt: '',
+      characters: [
+        for (final character in characters)
+          character.copyWith(negativePrompt: ''),
+      ],
+    );
+  }
+
+  int get effectiveSteps => modelSpec.fixedSteps ?? steps;
+  String get effectiveSampler => modelSpec.fixedSampler ?? sampler;
+  double get effectiveCfgRescale => modelSpec.cfgRescale ? cfgRescale : 0;
+
   ({int width, int height}) get effectiveInpaintRequestSize =>
       action == ImageGenerationAction.infill && inpaintFocusRegion != null
       ? inpaintFocusRegion!.clamped(width, height).requestSize

@@ -8671,11 +8671,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get opusUsage_exhausted => '账号额度已用尽，V5 生成按 Anlas 计费';
 
   @override
-  String opusUsage_remaining(Object percent) {
-    return '账号免费额度剩余 $percent%';
-  }
-
-  @override
   String opusUsage_recharging(Object time) {
     return '常规额度回充：下一 +1% 还需 $time';
   }
@@ -8692,18 +8687,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String opusUsage_hours(Object hours) {
-    return '$hours 小时';
-  }
-
-  @override
   String opusUsage_minutesSeconds(Object minutes, Object seconds) {
     return '$minutes 分 $seconds 秒';
-  }
-
-  @override
-  String opusUsage_minutes(Object minutes) {
-    return '$minutes 分';
   }
 
   @override
@@ -14250,6 +14235,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_modelsLegacy => '旧模型';
 
   @override
+  String get gen_turboEnable =>
+      '开启 Turbo（Medium Effort）\n固定 14 步与 Euler Ancestral；自定义负面草稿保留，切回 Full 后恢复。';
+
+  @override
+  String get gen_turboDisable =>
+      '正在使用 Turbo（Medium Effort）\n点击切回 V5 Full，恢复原来的参数与负面草稿。';
+
+  @override
+  String get gen_turboUnavailable => 'Turbo 仅适用于 V5 Full';
+
+  @override
+  String get gen_turboFixed => 'Turbo 固定 14 步、Euler Ancestral，不支持 CFG Rescale。';
+
+  @override
+  String get gen_turboNegative => 'Turbo 不使用自定义负面。原草稿已保留，切回 Full 可恢复。';
+
+  @override
+  String get generation_modelDesc_v5Turbo =>
+      'V5 Full 的 Medium Effort 模式，固定 14 步、Euler Ancestral，降低 Anlas 与 Opus 额度消耗。';
+
+  @override
   String get gen_modeTip => '点一下切换 Anime / Furry';
 
   @override
@@ -18069,11 +18075,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_dcPublishing => '正在切换数据版本…';
-
-  @override
-  String set_dcAdded(Object n) {
-    return '新增 $n 条，已保存在本地';
-  }
 
   @override
   String get set_dcUpdateFailed => '补充失败，已保留原数据。可重试。';
@@ -28232,11 +28233,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get opusUsage_exhausted => '帳號額度已用盡，V5 生成按 Anlas 計費';
 
   @override
-  String opusUsage_remaining(Object percent) {
-    return '帳號免費額度剩餘 $percent%';
-  }
-
-  @override
   String opusUsage_recharging(Object time) {
     return '常規額度回充：下一 +1% 還需 $time';
   }
@@ -28253,18 +28249,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String opusUsage_hours(Object hours) {
-    return '$hours 小時';
-  }
-
-  @override
   String opusUsage_minutesSeconds(Object minutes, Object seconds) {
     return '$minutes 分 $seconds 秒';
-  }
-
-  @override
-  String opusUsage_minutes(Object minutes) {
-    return '$minutes 分';
   }
 
   @override
@@ -33811,6 +33797,27 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_modelsLegacy => '舊模型';
 
   @override
+  String get gen_turboEnable =>
+      '開啟 Turbo（Medium Effort）\n固定 14 步與 Euler Ancestral；自訂負面草稿保留，切回 Full 後恢復。';
+
+  @override
+  String get gen_turboDisable =>
+      '正在使用 Turbo（Medium Effort）\n點選切回 V5 Full，恢復原來的參數與負面草稿。';
+
+  @override
+  String get gen_turboUnavailable => 'Turbo 僅適用於 V5 Full';
+
+  @override
+  String get gen_turboFixed => 'Turbo 固定 14 步、Euler Ancestral，不支援 CFG Rescale。';
+
+  @override
+  String get gen_turboNegative => 'Turbo 不使用自訂負面。原草稿已保留，切回 Full 可恢復。';
+
+  @override
+  String get generation_modelDesc_v5Turbo =>
+      'V5 Full 的 Medium Effort 模式，固定 14 步、Euler Ancestral，降低 Anlas 與 Opus 額度消耗。';
+
+  @override
   String get gen_modeTip => '點一下切換 Anime / Furry';
 
   @override
@@ -37630,11 +37637,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_dcPublishing => '正在切換資料版本…';
-
-  @override
-  String set_dcAdded(Object n) {
-    return '新增 $n 條，已儲存在本地';
-  }
 
   @override
   String get set_dcUpdateFailed => '補充失敗，已保留原資料。可重試。';

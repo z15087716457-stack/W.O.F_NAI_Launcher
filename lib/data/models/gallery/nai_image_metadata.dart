@@ -180,7 +180,16 @@ class NaiImageMetadata with _$NaiImageMetadata {
   const NaiImageMetadata._();
 
   /// 从 PNG Source 字段解析出的可用模型 ID。
-  String? get sourceModel => _modelIdFromSource(source);
+  String? get sourceModel {
+    final resolved = _modelIdFromSource(source);
+    // Generic V5 fingerprints do not distinguish Full from its distilled mode.
+    if (resolved == ImageModels.animeDiffusionV5Full &&
+        model != null &&
+        ImageModels.isTurboModel(model!)) {
+      return ImageModels.resolveBaseModel(model!);
+    }
+    return resolved;
+  }
 
   /// 从 Source/Software 指纹文本解析模型 ID。
   ///
@@ -361,9 +370,15 @@ class NaiImageMetadata with _$NaiImageMetadata {
       );
     }
 
+    final paramsModel = _modelIdFromParams(commentData);
+    final fingerprintModel = _modelIdFromSource(source);
     final sourceModel =
-        _modelIdFromSource(source) ??
-        _modelIdFromParams(commentData) ??
+        (fingerprintModel == ImageModels.animeDiffusionV5Full &&
+                paramsModel != null &&
+                ImageModels.isTurboModel(paramsModel)
+            ? paramsModel
+            : fingerprintModel) ??
+        paramsModel ??
         // 部分转存件把 Source 指纹写进了 software 列（EXIF 工具链），兜底
         _modelIdFromSource(software);
     final importedUcPreset = _toInt(commentData['uc_preset']);
@@ -1182,6 +1197,9 @@ class NaiImageMetadata with _$NaiImageMetadata {
     // Official PNG Source fingerprints are exact model identifiers. Do not
     // fall back to prompt/UC inference when the Source text is ambiguous.
     if (normalized.contains('v5')) {
+      if (normalized.contains('medium') || normalized.contains('turbo')) {
+        return ImageModels.animeDiffusionV5FullMedium;
+      }
       if (normalized.contains('curated')) {
         return ImageModels.animeDiffusionV5Curated;
       }
@@ -1238,6 +1256,12 @@ class NaiImageMetadata with _$NaiImageMetadata {
   /// `version` 键在部分图里是官方 slug（nai-diffusion-*），数字则是
   /// schema 版本不可作模型判定。
   static String? _modelIdFromParams(Map<String, dynamic> commentData) {
+    for (final key in ['model', 'version', 'model_name']) {
+      final id = commentData[key]?.toString().toLowerCase();
+      if (id != null && ImageModels.isTurboModel(id)) {
+        return ImageModels.resolveBaseModel(id);
+      }
+    }
     final modelName = commentData['model_name']?.toString().toLowerCase() ?? '';
     if (modelName.isNotEmpty) {
       // 文本形（如 "NovelAI Diffusion V5"）与 Source 指纹同构，先走 Source 规则

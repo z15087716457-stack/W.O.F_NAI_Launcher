@@ -234,7 +234,8 @@ class _GenCharacterCardState extends State<GenCharacterCard> {
     final count = chars.list.length;
     final name = ch.name ?? l.gen_characterN(i + 1);
     final placed = !chars.aiPosition && ch.position != null;
-    final target = GenEditorTarget.character(i, negative: _negative);
+    final negative = _negative && scope.data.prompt.negativeSupported;
+    final target = GenEditorTarget.character(i, negative: negative);
     return Container(
       key: Key('gen-character-$i'),
       decoration: BoxDecoration(
@@ -382,7 +383,7 @@ class _GenCharacterCardState extends State<GenCharacterCard> {
                           onTap: () => scope.controller.openFullscreen(
                             GenEditorTarget.character(
                               i,
-                              negative: _negative,
+                              negative: negative,
                               fullscreen: true,
                             ),
                           ),
@@ -415,21 +416,23 @@ class _GenCharacterCardState extends State<GenCharacterCard> {
                       GenTab(
                         key: Key('gen-character-tab-pos-$i'),
                         label: l.gen_charPositive,
-                        selected: !_negative,
+                        selected: !negative,
                         onTap: () => setState(() => _negative = false),
                       ),
                       GenTab(
                         key: Key('gen-character-tab-neg-$i'),
                         label: l.gen_charNegative,
-                        selected: _negative,
-                        onTap: () => setState(() => _negative = true),
+                        selected: negative,
+                        onTap: scope.data.prompt.negativeSupported
+                            ? () => setState(() => _negative = true)
+                            : null,
                       ),
                     ],
                   ),
                 ),
                 GenEditorArea(target: target),
                 GenTokenBar(
-                  tokens: _negative ? ch.negativeTokens : ch.positiveTokens,
+                  tokens: negative ? ch.negativeTokens : ch.positiveTokens,
                   margin: const EdgeInsets.fromLTRB(12, 6, 12, 10),
                 ),
               ],

@@ -39,6 +39,11 @@ class ModelSpec {
     required this.transparency,
     required this.maxEnhance,
     this.billingVersion = 4,
+    this.fixedSteps,
+    this.fixedSampler,
+    this.fixedUcPreset,
+    this.cfgRescale = true,
+    this.billingStepMultiplier = 1,
   });
 
   /// 官方模型 id，例如 `nai-diffusion-5-full`。
@@ -98,6 +103,25 @@ class ModelSpec {
   ///
   /// V4/V4.5 = 4（现代系数）；V5 = 5（同一套系数，结果整体 ×1.5）。
   final int billingVersion;
+
+  final int? fixedSteps;
+  final String? fixedSampler;
+  final int? fixedUcPreset;
+  final bool cfgRescale;
+  final double billingStepMultiplier;
+  bool get isTurbo => fixedSteps != null;
+  bool get customNegativePrompt => fixedUcPreset == null;
+  bool get supportsTurbo =>
+      ImageModels.resolveBaseModel(id) == ImageModels.animeDiffusionV5Full ||
+      isTurbo;
+  Map<String, Object?> get requestConstraints => {
+    'turbo': isTurbo,
+    'custom_negative_prompt': customNegativePrompt,
+    'cfg_rescale_supported': cfgRescale,
+    if (fixedSteps != null) 'fixed_steps': fixedSteps,
+    if (fixedSampler != null) 'fixed_sampler': fixedSampler,
+    if (fixedUcPreset != null) 'fixed_uc_preset': fixedUcPreset,
+  };
 
   /// 是否为 V4 及更高版本（提示词结构维度）。
   bool get isV4OrLater => family == ModelFamily.v4 || family == ModelFamily.v5;
@@ -225,12 +249,23 @@ class ModelSpecs {
     transparency: base.transparency,
     maxEnhance: base.maxEnhance,
     billingVersion: base.billingVersion,
+    fixedSteps: ImageModels.isTurboModel(id) ? 14 : base.fixedSteps,
+    fixedSampler: ImageModels.isTurboModel(id)
+        ? 'k_euler_ancestral'
+        : base.fixedSampler,
+    fixedUcPreset: ImageModels.isTurboModel(id) ? 0 : base.fixedUcPreset,
+    cfgRescale: ImageModels.isTurboModel(id) ? false : base.cfgRescale,
+    billingStepMultiplier: ImageModels.isTurboModel(id)
+        ? 1 / 1.06521739
+        : base.billingStepMultiplier,
   );
 
   static final Map<String, ModelSpec> _specs = {
     for (final id in const [
       ImageModels.animeDiffusionV5Full,
       ImageModels.animeDiffusionV5FullInpainting,
+      ImageModels.animeDiffusionV5FullMedium,
+      ImageModels.animeDiffusionV5FullMediumInpainting,
       ImageModels.animeDiffusionV5Curated,
       ImageModels.animeDiffusionV5CuratedInpainting,
     ])

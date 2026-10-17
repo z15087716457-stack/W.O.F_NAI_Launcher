@@ -11,6 +11,8 @@ String galleryModelFriendlyName(String model) {
     'nai-diffusion-4-5-full' => 'NAI 4.5 Full',
     'nai-diffusion-5-curated' => 'NAI 5 Curated',
     'nai-diffusion-5-full' => 'NAI 5 Full',
+    'nai-diffusion-5-full-medium' ||
+    'nai-diffusion-5-full-medium-inpainting' => 'NAI 5 Turbo',
     _ => model,
   };
 }

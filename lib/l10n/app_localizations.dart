@@ -15896,12 +15896,6 @@ abstract class AppLocalizations {
   /// **'Account quota used up; V5 generation is billed in Anlas'**
   String get opusUsage_exhausted;
 
-  /// No description provided for @opusUsage_remaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Free account quota remaining: {percent}%'**
-  String opusUsage_remaining(Object percent);
-
   /// No description provided for @opusUsage_recharging.
   ///
   /// In en, this message translates to:
@@ -15926,23 +15920,11 @@ abstract class AppLocalizations {
   /// **'{hours} h {minutes} min'**
   String opusUsage_hoursMinutes(Object hours, Object minutes);
 
-  /// No description provided for @opusUsage_hours.
-  ///
-  /// In en, this message translates to:
-  /// **'{hours} h'**
-  String opusUsage_hours(Object hours);
-
   /// No description provided for @opusUsage_minutesSeconds.
   ///
   /// In en, this message translates to:
   /// **'{minutes} min {seconds} s'**
   String opusUsage_minutesSeconds(Object minutes, Object seconds);
-
-  /// No description provided for @opusUsage_minutes.
-  ///
-  /// In en, this message translates to:
-  /// **'{minutes} min'**
-  String opusUsage_minutes(Object minutes);
 
   /// No description provided for @opusUsage_seconds.
   ///
@@ -25799,6 +25781,42 @@ abstract class AppLocalizations {
   /// **'Legacy models'**
   String get gen_modelsLegacy;
 
+  /// No description provided for @gen_turboEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Turbo (Medium Effort)\nFixed 14 steps and Euler Ancestral. Your custom negative draft is kept for Full.'**
+  String get gen_turboEnable;
+
+  /// No description provided for @gen_turboDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turbo (Medium Effort) is active\nClick to return to V5 Full and restore your previous settings and negative draft.'**
+  String get gen_turboDisable;
+
+  /// No description provided for @gen_turboUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Turbo is available only for V5 Full'**
+  String get gen_turboUnavailable;
+
+  /// No description provided for @gen_turboFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Turbo uses 14 steps and Euler Ancestral. CFG Rescale is unavailable.'**
+  String get gen_turboFixed;
+
+  /// No description provided for @gen_turboNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Turbo does not use custom negative prompts. Your draft is kept and returns with Full.'**
+  String get gen_turboNegative;
+
+  /// No description provided for @generation_modelDesc_v5Turbo.
+  ///
+  /// In en, this message translates to:
+  /// **'V5 Full Medium Effort: fixed 14 steps and Euler Ancestral, with lower Anlas and Opus usage.'**
+  String get generation_modelDesc_v5Turbo;
+
   /// No description provided for @gen_modeTip.
   ///
   /// In en, this message translates to:
@@ -32887,12 +32905,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Switching data revision…'**
   String get set_dcPublishing;
-
-  /// No description provided for @set_dcAdded.
-  ///
-  /// In en, this message translates to:
-  /// **'{n} entries added and saved locally.'**
-  String set_dcAdded(Object n);
 
   /// No description provided for @set_dcUpdateFailed.
   ///

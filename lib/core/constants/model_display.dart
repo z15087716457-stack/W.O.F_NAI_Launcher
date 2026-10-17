@@ -31,6 +31,11 @@ class ModelDisplay {
   ModelDisplay._();
 
   static const Map<String, ModelDisplayInfo> _infos = {
+    ImageModels.animeDiffusionV5FullMedium: ModelDisplayInfo(
+      id: ImageModels.animeDiffusionV5FullMedium,
+      shortName: 'V5 Turbo',
+      group: ModelListGroup.newer,
+    ),
     ImageModels.animeDiffusionV5Curated: ModelDisplayInfo(
       id: ImageModels.animeDiffusionV5Curated,
       shortName: 'V5 Curated',
@@ -91,18 +96,18 @@ class ModelDisplay {
   static bool isNewModel(String model) => _infos[model]?.isNew ?? false;
 
   /// 下拉项简介文案（无简介的模型返回 null）
-  static String? descriptionOf(AppLocalizations l10n, String model) =>
-      switch (model) {
-        ImageModels.animeDiffusionV5Curated =>
-          l10n.generation_modelDesc_v5Curated,
-        ImageModels.animeDiffusionV5Full => l10n.generation_modelDesc_v5Full,
-        ImageModels.animeDiffusionV45Curated =>
-          l10n.generation_modelDesc_v45Curated,
-        ImageModels.animeDiffusionV45Full =>
-          l10n.generation_modelDesc_v45Full,
-        ImageModels.animeDiffusionV4Curated =>
-          l10n.generation_modelDesc_v4Curated,
-        ImageModels.animeDiffusionV4Full => l10n.generation_modelDesc_v4Full,
-        _ => null,
-      };
+  static String? descriptionOf(
+    AppLocalizations l10n,
+    String model,
+  ) => switch (model) {
+    ImageModels.animeDiffusionV5Curated => l10n.generation_modelDesc_v5Curated,
+    ImageModels.animeDiffusionV5Full => l10n.generation_modelDesc_v5Full,
+    ImageModels.animeDiffusionV5FullMedium => l10n.generation_modelDesc_v5Turbo,
+    ImageModels.animeDiffusionV45Curated =>
+      l10n.generation_modelDesc_v45Curated,
+    ImageModels.animeDiffusionV45Full => l10n.generation_modelDesc_v45Full,
+    ImageModels.animeDiffusionV4Curated => l10n.generation_modelDesc_v4Curated,
+    ImageModels.animeDiffusionV4Full => l10n.generation_modelDesc_v4Full,
+    _ => null,
+  };
 }

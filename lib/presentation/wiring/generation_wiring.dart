@@ -286,13 +286,17 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onLayoutChanged: (value) =>
             run(() => settings.layout(value, previous: currentData().layout)),
         onModelChanged: (value) => run(() => settings.model(value)),
+        onTurboChanged: (value) => run(() => settings.turbo(value)),
         onFurryChanged: (value) => run(() => settings.furry(value)),
         onOpenQuota: () => run(
           () =>
               ref.read(subscriptionNotifierProvider.notifier).refreshBalance(),
         ),
-        onNegativeTab: (value) =>
-            ref.read(generationNegativeTabProvider.notifier).state = value,
+        onNegativeTab: (value) {
+          if (currentData().prompt.negativeSupported) {
+            ref.read(generationNegativeTabProvider.notifier).state = value;
+          }
+        },
         onClearPrompt: (target) => run(
           () => operations.clearPrompt(
             target,

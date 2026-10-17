@@ -181,6 +181,29 @@ void main() {
       }
     }
   });
+  test(
+    'Turbo projects its real identity and fixed controls under the Full family entry',
+    () {
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updateModel(ImageModels.animeDiffusionV5FullMedium);
+      params.updateSteps(37);
+      final view = container.read(provider);
+      expect(view.model, ImageModels.animeDiffusionV5FullMedium);
+      expect(view.currentModel.id, ImageModels.animeDiffusionV5Full);
+      expect(view.turbo, isTrue);
+      expect(
+        view.models.where((m) => m.id == ImageModels.animeDiffusionV5Full),
+        hasLength(1),
+      );
+      expect(view.models.any((m) => ImageModels.isTurboModel(m.id)), isFalse);
+      expect(view.params.steps, 14);
+      expect(view.params.fixedSampling, isTrue);
+      expect(view.params.cfgRescaleSupported, isFalse);
+      expect(view.prompt.negativeSupported, isFalse);
+      expect(view.prompt.negative, isFalse);
+      expect(container.read(generationParamsNotifierProvider).steps, 37);
+    },
+  );
   test('V4.5 有参考、网格与六角色，V3 隐藏角色且 Opus 格不误显示', () {
     final params = container.read(generationParamsNotifierProvider.notifier);
     params.updateModel(ImageModels.animeDiffusionV45Full);

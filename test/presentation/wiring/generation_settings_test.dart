@@ -21,6 +21,7 @@ import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/wiring/generation_settings.dart';
+import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
     show
         MemoryCharacters,
@@ -60,6 +61,93 @@ void main() {
     await Hive.close();
     await directory.delete(recursive: true);
   });
+  test(
+    'Turbo toggles preserve Full settings, negative draft and saved defaults',
+    () async {
+      await settings.model(ImageModels.animeDiffusionV5Full);
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      notifier.updateSteps(37);
+      notifier.updateSampler(Samplers.kDpmpp2m);
+      notifier.updateCfgRescale(.65);
+      notifier.updateNegativePromptImmediately('keep my negative');
+      notifier.updateSeed(99);
+      await settings.uc('light');
+      final before = container.read(generationParamsNotifierProvider);
+      final settingsBefore = Map.of(
+        (container.read(localStorageServiceProvider) as MemoryDraftSettings)
+            .values,
+      );
+      for (var i = 0; i < 3; i++) {
+        await settings.turbo(true);
+        final raw = container.read(generationParamsNotifierProvider);
+        expect(raw.model, ImageModels.animeDiffusionV5FullMedium);
+        expect(raw.copyWith(model: before.model), before);
+        final request = container.read(generationRequestParamsProvider);
+        expect(request.steps, 14);
+        expect(request.sampler, Samplers.kEulerAncestral);
+        expect(request.cfgRescale, 0);
+        expect(request.ucPreset, 0);
+        expect(request.negativePrompt, isEmpty);
+        await settings.param(GenParam.steps, 50);
+        await settings.param(GenParam.cfgRescale, .8);
+        await settings.sampler(Samplers.kEulerAncestral);
+        await settings.uc('heavy');
+        expect(container.read(generationParamsNotifierProvider), raw);
+        await settings.turbo(false);
+        expect(container.read(generationParamsNotifierProvider), before);
+      }
+      expect(
+        (container.read(localStorageServiceProvider) as MemoryDraftSettings)
+            .values,
+        settingsBefore,
+      );
+    },
+  );
+
+  test('Turbo is unavailable for Curated and other families', () async {
+    for (final model in [
+      ImageModels.animeDiffusionV5Curated,
+      ImageModels.animeDiffusionV45Full,
+    ]) {
+      await settings.model(model);
+      final before = container.read(generationParamsNotifierProvider);
+      await settings.turbo(true);
+      expect(container.read(generationParamsNotifierProvider), before);
+    }
+  });
+  test(
+    'a restart in Turbo keeps Full defaults available for switching back',
+    () async {
+      await settings.model(ImageModels.animeDiffusionV5Full);
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      notifier.updateSteps(37);
+      notifier.updateSampler(Samplers.kDpmpp2m);
+      notifier.updateCfgRescale(.65);
+      notifier.updateNegativePromptImmediately('persistent negative');
+      await settings.turbo(true);
+      final storage = container.read(localStorageServiceProvider);
+      final restarted = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+      );
+      addTearDown(restarted.dispose);
+      final restored = restarted.read(generationParamsNotifierProvider);
+      expect(restored.model, ImageModels.animeDiffusionV5FullMedium);
+      expect(restored.steps, 37);
+      expect(restored.sampler, Samplers.kDpmpp2m);
+      expect(restored.cfgRescale, .65);
+      expect(restored.negativePrompt, 'persistent negative');
+      expect(restored.constrainedForModel.steps, 14);
+      restarted
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(ImageModels.animeDiffusionV5Full);
+      final full = restarted.read(generationParamsNotifierProvider);
+      expect(full.copyWith(model: restored.model), restored);
+    },
+  );
   test('切模型保留提示词与种子，迁移不支持的采样器', () async {
     final notifier = container.read(generationParamsNotifierProvider.notifier);
     notifier.updatePromptImmediately('keep prompt');
