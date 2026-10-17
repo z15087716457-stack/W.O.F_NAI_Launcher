@@ -210,11 +210,16 @@ class Engine:
 
     def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
         import numpy as np
-        window = context_window(text, cursor, mode, self.models.count)
+        if mode not in ('before','around'): raise ValueError('invalid_context_mode')
+        manual = bool(keyword.strip())
+        keyword = clean_tag(keyword[:1024])
+        # A typed search is its own query. Prompt context is only used for
+        # idle recommendations, including the existing 120-token window.
+        window = ({'text':keyword,'tokens':self.models.count(keyword),'mode':'query'} if manual else
+                  context_window(text, cursor, mode, self.models.count))
         if not window['text'] or not len(self.ann): return {'items': [], 'context_tokens': window['tokens']}
         if cancelled(): raise ValueError('cancelled')
         query_text = window['text']
-        if keyword.strip(): query_text = clean_tag(keyword[:1024]) + '; context: ' + query_text
         query = self.models.embed([query_text], query=True)[0]
         matches = self.ann.search(query, min(80, len(self.ann)))
         candidates = {}
@@ -238,7 +243,9 @@ class Engine:
         valid.sort(key=lambda r:ranks.get(r['name'],0), reverse=True)
         valid = valid[:32]
         if cancelled(): raise ValueError('cancelled')
-        scores = self.models.rerank(query_text, [r['text'] for r in valid], negative)
+        documents = [r['text'] for r in valid]
+        scores = (self.models.rerank(query_text, documents, negative, purpose='retrieval') if manual else
+                  self.models.rerank(query_text, documents, negative))
         if cancelled(): raise ValueError('cancelled')
         order = sorted(range(len(valid)), key=lambda i: (-scores[i], -ranks.get(valid[i]['name'],0), valid[i]['name']))
         return {'items':[{k:v for k,v in valid[i].items() if k in ('name','category','post_count','aliases')} for i in order[:max(1,min(limit,80))]],

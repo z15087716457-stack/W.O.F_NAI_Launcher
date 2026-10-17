@@ -161,6 +161,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   final _rowKeys = <int, GlobalKey>{};
   final _relatedRowKeys = <int, GlobalKey>{};
   bool _searchLoading = false;
+  bool _ragLoading = false;
   bool _relatedLoading = false;
   bool _searchFailed = false;
   bool _relatedFailed = false;
@@ -472,6 +473,8 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     if (_history.isEmpty) return;
     final visit = _history.removeLast();
     _debounce?.cancel();
+    _ragCancellation?.cancel();
+    _ragLoading = false;
     _searchSequence++;
     _relatedSequence++;
     _wikiSequence++;
@@ -629,6 +632,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   void _queueSearch({bool immediate = false}) {
     _ragCancellation?.cancel();
+    _ragLoading = false;
     _selectionFrozen = _hoveredId != null || _focusedId != null;
     _autoTranslation.clearSurface(_searchSurface);
     _searchVisible.clear();
@@ -722,43 +726,59 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
     }
     final cancellation = _ragCancellation = RagCancellation();
     final text = _openedText;
-    final results = await ref
-        .read(ragControllerProvider.notifier)
-        .recommend(
-          text: text,
-          cursor: _insertionOffset,
-          existing: _existingTags,
-          lexical: lexical,
-          negative: widget.ragNegative,
-          cancellation: cancellation,
-          keyword: _searchController.text,
-          limit: _resultLimit,
-        );
-    if (!mounted ||
-        !_active ||
-        cancellation.isCancelled ||
-        sequence != _searchSequence ||
-        widget.controller.text != text ||
-        _selectionFrozen ||
-        results.isEmpty) {
-      return;
-    }
-    final exactKinds = {
-      CompletionMatchKind.englishExact,
-      CompletionMatchKind.aliasExact,
-      CompletionMatchKind.chineseExact,
-    };
-    final merged = <String, CompletionCandidate>{};
-    for (final candidate in [
-      ...lexical.where((c) => exactKinds.contains(c.matchKind)),
-      ...results,
-      ...lexical,
-    ]) {
-      merged.putIfAbsent(candidate.stableId, () => candidate);
-    }
-    _results = merged.values.take(_resultLimit).toList(growable: false);
-    _selectedIndex = 0;
+    final keyword = _searchController.text.trim();
+    _ragLoading = true;
     _markNeedsBuild();
+    try {
+      final results = await ref
+          .read(ragControllerProvider.notifier)
+          .recommend(
+            text: keyword.isEmpty ? text : '',
+            cursor: keyword.isEmpty ? _insertionOffset : 0,
+            existing: _existingTags,
+            lexical: lexical,
+            negative: widget.ragNegative,
+            cancellation: cancellation,
+            keyword: keyword,
+            limit: _resultLimit,
+          );
+      if (!mounted ||
+          !_active ||
+          cancellation.isCancelled ||
+          sequence != _searchSequence ||
+          widget.controller.text != text ||
+          _selectionFrozen ||
+          results.isEmpty) {
+        return;
+      }
+      final exactKinds = {
+        CompletionMatchKind.englishExact,
+        CompletionMatchKind.aliasExact,
+        CompletionMatchKind.chineseExact,
+      };
+      final merged = <String, CompletionCandidate>{};
+      for (final candidate in [
+        ...lexical.where((c) => exactKinds.contains(c.matchKind)),
+        ...results,
+        ...lexical,
+      ]) {
+        merged.putIfAbsent(candidate.stableId, () => candidate);
+      }
+      _results = merged.values.take(_resultLimit).toList(growable: false);
+      _selectedIndex = 0;
+    } catch (_) {
+      if (mounted && _active && sequence == _searchSequence) {
+        _searchFailed = lexical.isEmpty;
+      }
+    } finally {
+      if (mounted &&
+          _active &&
+          sequence == _searchSequence &&
+          identical(_ragCancellation, cancellation)) {
+        _ragLoading = false;
+        _markNeedsBuild();
+      }
+    }
   }
 
   void _loadRelated(String tag) {
@@ -981,6 +1001,7 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
 
   void _close({bool restoreFocus = false, bool notify = true}) {
     _ragCancellation?.cancel();
+    _ragLoading = false;
     _surfaceEpoch++;
     _visibilityScheduled = false;
     _autoTranslation.clearSurface(_searchSurface);
@@ -1528,7 +1549,9 @@ class _TagExpansionWrapperState extends ConsumerState<TagExpansionWrapper>
   }
 
   Widget _buildSearchList(BuildContext context) {
-    if (_searchLoading && _results.isEmpty) return _loadingIndicator();
+    if ((_searchLoading || _ragLoading) && _results.isEmpty) {
+      return _loadingIndicator();
+    }
     if (_results.isEmpty) {
       return _message(
         _searchFailed

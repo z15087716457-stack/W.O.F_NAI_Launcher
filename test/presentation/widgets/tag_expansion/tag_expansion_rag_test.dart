@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:io';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
@@ -15,6 +19,7 @@ import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 import 'package:nai_launcher/presentation/widgets/tag_expansion/tag_expansion_wrapper.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 CompletionCandidate tag(String name) => CompletionCandidate(
   canonicalTag: name,
@@ -25,11 +30,11 @@ CompletionCandidate tag(String name) => CompletionCandidate(
 );
 
 class Source implements CompletionSource {
+  Source({this.empty = false});
+  final bool empty;
   @override
-  Future<List<CompletionCandidate>> search(CompletionQuery q) async => [
-    tag('blue_hair'),
-    tag('red_hair'),
-  ];
+  Future<List<CompletionCandidate>> search(CompletionQuery q) async =>
+      empty ? [] : [tag('blue_hair'), tag('red_hair')];
 }
 
 class Wiki implements TagWikiRepository {
@@ -42,6 +47,9 @@ class FakeRag extends RagController {
       <
         ({
           String text,
+          String keyword,
+          int cursor,
+          Set<String> existing,
           bool negative,
           RagCancellation cancellation,
           Completer<List<CompletionCandidate>> result,
@@ -64,6 +72,9 @@ class FakeRag extends RagController {
     final result = Completer<List<CompletionCandidate>>();
     requests.add((
       text: text,
+      keyword: keyword,
+      cursor: cursor,
+      existing: Set.of(existing),
       negative: negative,
       cancellation: cancellation,
       result: result,
@@ -73,7 +84,46 @@ class FakeRag extends RagController {
 }
 
 void main() {
+  final captureKey = GlobalKey();
+  final capturePath = Platform.environment['TAG_RAG_CAPTURE'];
+  setUpAll(() async {
+    if (capturePath != null) {
+      await loadStudioCaptureFonts();
+    }
+  });
+  Future<void> capture(WidgetTester tester, String name) async {
+    if (capturePath == null) return;
+    final boundary =
+        captureKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+    final shadows = debugDisableShadows;
+    debugDisableShadows = false;
+    try {
+      void repaint(RenderObject object) {
+        object.markNeedsPaint();
+        object.visitChildren(repaint);
+      }
+
+      repaint(boundary);
+      await tester.pump(const Duration(milliseconds: 180));
+      await tester.runAsync(() async {
+        final bitmap = await boundary.toImage(pixelRatio: 1);
+        try {
+          final data = await bitmap.toByteData(format: ui.ImageByteFormat.png);
+          await Directory(capturePath).create(recursive: true);
+          await File(
+            '$capturePath/$name.png',
+          ).writeAsBytes(data!.buffer.asUint8List());
+        } finally {
+          bitmap.dispose();
+        }
+      });
+    } finally {
+      debugDisableShadows = shadows;
+    }
+  }
+
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
     await Hive.openBox(StorageKeys.settingsBox, bytes: Uint8List(0));
   });
   tearDown(Hive.close);
@@ -82,8 +132,9 @@ void main() {
     TextEditingController controller,
     FakeRag rag, {
     bool negative = false,
+    bool emptyLexical = false,
   }) async {
-    final source = Source();
+    final source = Source(empty: emptyLexical);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -105,22 +156,32 @@ void main() {
             WikiTagLinks(exactLookup: (_) async => {}),
           ),
         ],
-        child: MaterialApp(
-          locale: const Locale('en'),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          home: Scaffold(
-            body: Center(
-              child: SizedBox(
-                width: 400,
-                height: 80,
-                child: TagExpansionWrapper(
-                  ragContext: true,
-                  ragNegative: negative,
-                  controller: controller,
-                  child: TextField(
-                    key: const Key('editor'),
+        child: RepaintBoundary(
+          key: captureKey,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: capturePath == null
+                ? null
+                : ThemeData(
+                    fontFamily: 'Geist',
+                    fontFamilyFallback: const ['HarmonyOS Sans SC'],
+                  ),
+            locale: const Locale('en'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: Scaffold(
+              body: Center(
+                child: SizedBox(
+                  width: 400,
+                  height: 80,
+                  child: TagExpansionWrapper(
+                    ragContext: true,
+                    ragNegative: negative,
                     controller: controller,
+                    child: TextField(
+                      key: const Key('editor'),
+                      controller: controller,
+                    ),
                   ),
                 ),
               ),
@@ -136,6 +197,112 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
     await tester.pump();
   }
+
+  Future<void> typeQuery(WidgetTester tester, String query) async {
+    await tester.enterText(
+      find.byKey(const Key('tag-expansion-search')),
+      query,
+    );
+    await tester.pump(const Duration(milliseconds: 160));
+    await tester.pump();
+  }
+
+  testWidgets(
+    'manual natural-language search excludes prompt context but retains existing-tag dedup',
+    (tester) async {
+      final c = TextEditingController(text: '1girl, blue_hair, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag, emptyLexical: true);
+      rag.requests.single.result.complete([]);
+      await tester.pump();
+      await typeQuery(tester, '在阳光下奔跑');
+      final query = rag.requests.last;
+      expect(query.keyword, '在阳光下奔跑');
+      expect(query.text, isEmpty);
+      expect(query.cursor, 0);
+      expect(query.existing, contains('blue_hair'));
+      expect(find.text('No local tags found'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      await capture(tester, 'natural-query-loading');
+      query.result.complete([tag('running'), tag('sunlight')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('running'), findsWidgets);
+      expect(find.text('sunlight'), findsWidgets);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(c.text, '1girl, blue_hair, ');
+      await capture(tester, 'natural-query-results');
+    },
+  );
+
+  testWidgets(
+    'a manual query can start from an empty editor; empty result appears only after RAG finishes',
+    (tester) async {
+      final c = TextEditingController();
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag, emptyLexical: true);
+      rag.requests.single.result.complete([]);
+      await tester.pump();
+      await typeQuery(tester, '在阳光下奔跑');
+      expect(rag.requests.last.keyword, '在阳光下奔跑');
+      expect(find.text('No local tags found'), findsNothing);
+      rag.requests.last.result.complete([]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('No local tags found'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(c.text, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'late cancelled search cannot overwrite a new query or clear its loading state',
+    (tester) async {
+      final c = TextEditingController(text: 'night, ');
+      final rag = FakeRag();
+      addTearDown(c.dispose);
+      await pump(tester, c, rag, emptyLexical: true);
+      rag.requests.single.result.complete([]);
+      await tester.pump();
+      await typeQuery(tester, '在阳光下奔跑');
+      final old = rag.requests.last;
+      await typeQuery(tester, '在雨中跳舞');
+      final current = rag.requests.last;
+      expect(old.cancellation.isCancelled, isTrue);
+      old.result.complete([tag('old_result')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('old result'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsWidgets);
+      current.result.complete([tag('dancing')]);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('dancing'), findsWidgets);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    },
+  );
+
+  testWidgets('clearing a manual query restores the original prompt context', (
+    tester,
+  ) async {
+    final c = TextEditingController(text: 'rain, ');
+    final rag = FakeRag();
+    addTearDown(c.dispose);
+    await pump(tester, c, rag, emptyLexical: true, negative: true);
+    rag.requests.single.result.complete([]);
+    await tester.pump();
+    await typeQuery(tester, '在阳光下奔跑');
+    rag.requests.last.result.complete([]);
+    await tester.pump();
+    await typeQuery(tester, '');
+    expect(rag.requests.last.keyword, isEmpty);
+    expect(rag.requests.last.text, c.text);
+    expect(rag.requests.last.negative, isTrue);
+    rag.requests.last.result.complete([]);
+    await tester.pump();
+  });
 
   testWidgets(
     'semantic results replace idle candidates; queries stay in their own negative field',
