@@ -1,5 +1,7 @@
 # V5 Full Turbo／Medium Effort 支持
 
+> 当前交付：已随 [r24 本机更新](cumulative-preview-r24-2026-10-17.md) 安装到原桌面入口，内部 `2.0.0-preview+28`。以下保留开发验证时的状态与边界。
+
 日期：2026-10-17。源码及 Windows Release 验证完成，尚未安装；桌面仍为 r23，本次未调用真实生成接口。
 
 ## 官方契约与实现
