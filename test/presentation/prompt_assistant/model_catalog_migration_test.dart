@@ -4,6 +4,24 @@ import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assista
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_task_definitions.dart';
 
 void main() {
+  test('provider retry defaults apply only when no saved value exists', () {
+    const fresh = ProviderConfig(
+      id: 'retry-default',
+      name: 'Retry default',
+      baseUrl: 'https://example.test',
+    );
+    final legacy = fresh.toJson()..remove('retryAttempts');
+    expect(fresh.retryAttempts, 1);
+    expect(ProviderConfig.fromJson(legacy).retryAttempts, 1);
+    for (final retries in [0, 1, 2, 3]) {
+      final saved = fresh.copyWith(retryAttempts: retries);
+      expect(ProviderConfig.fromJson(saved.toJson()).retryAttempts, retries);
+    }
+    for (final preset in ProviderPreset.values) {
+      expect(preset.createConfig().retryAttempts, 1);
+    }
+  });
+
   test('old task and preset overrides cannot replace model request values', () {
     final old = {
       'schemaVersion': 3,

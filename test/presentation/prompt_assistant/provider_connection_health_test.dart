@@ -294,7 +294,7 @@ void main() {
     () async {
       final storage = _Memory(), secrets = _Secrets();
       final adapter = _OfflineAdapter(
-        (_, call) => _response(call == 2 ? 503 : 200),
+        (_, call) => _response(call == 2 || call == 3 ? 503 : 200),
       );
       final container = await _container(storage, secrets, adapter);
       final health = container.read(providerConnectionHealthProvider);
@@ -385,7 +385,14 @@ void main() {
       });
       final client = _client(adapter, health);
       await expectLater(
-        client.complete(request: _request('limited')).toList(),
+        client
+            .complete(
+              request: _request(
+                'limited',
+                provider: _provider.copyWith(retryAttempts: 0),
+              ),
+            )
+            .toList(),
         throwsStateError,
       );
       expect(

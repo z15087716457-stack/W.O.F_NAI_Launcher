@@ -413,10 +413,7 @@ void main() {
       expect(calls, 1);
       expect(
         history.records.map((item) => item.status),
-        containsAll([
-          ModelRequestStatus.success,
-          ModelRequestStatus.cancelled,
-        ]),
+        containsAll([ModelRequestStatus.success, ModelRequestStatus.cancelled]),
       );
       expect(
         history.records.map((item) => item.parameters.toString()).join(),
@@ -431,7 +428,7 @@ void main() {
     },
   );
   test(
-    'configured transient retry preserves explicit parameters and records attempts',
+    'default transient retry preserves explicit parameters and records attempts',
     () async {
       final dio = _Dio();
       var calls = 0;
@@ -460,7 +457,7 @@ void main() {
           .complete(
             request: PromptAssistantRequest(
               sessionId: 'retry',
-              provider: _provider.copyWith(retryAttempts: 1),
+              provider: _provider,
               model: 'model',
               modelConfig: _model,
               systemPrompt: 'Test',
@@ -474,6 +471,52 @@ void main() {
       expect(history.records.single.status, ModelRequestStatus.success);
     },
   );
+
+  for (final spec in [
+    (name: 'default transient failure', status: 503, retries: null, calls: 2),
+    (name: 'explicitly disabled retry', status: 503, retries: 0, calls: 1),
+    (name: 'authentication failure', status: 401, retries: null, calls: 1),
+  ]) {
+    test('${spec.name} respects the retry budget', () async {
+      final dio = _Dio();
+      var calls = 0;
+      when(
+        () => dio.post<dynamic>(
+          any(),
+          data: any(named: 'data'),
+          options: any(named: 'options'),
+          cancelToken: any(named: 'cancelToken'),
+        ),
+      ).thenAnswer((_) async {
+        calls++;
+        throw DioException(
+          requestOptions: RequestOptions(path: '/test'),
+          type: DioExceptionType.badResponse,
+          response: _response(status: spec.status),
+        );
+      });
+      final history = ModelRequestHistory();
+      final client = PromptAssistantApiClient(dio: dio, history: history);
+      await expectLater(
+        client
+            .complete(
+              request: PromptAssistantRequest(
+                sessionId: 'retry-budget',
+                provider: _provider.copyWith(retryAttempts: spec.retries),
+                model: 'model',
+                systemPrompt: 'Test',
+                userParts: [PromptAssistantContentPart.text('test')],
+                apiKey: null,
+              ),
+            )
+            .toList(),
+        throwsStateError,
+      );
+      expect(calls, spec.calls);
+      expect(history.records.single.attempts, spec.calls);
+      expect(history.records.single.status, ModelRequestStatus.failed);
+    });
+  }
 
   test(
     'closing a preset test during credential loading prevents Wiki dispatch',

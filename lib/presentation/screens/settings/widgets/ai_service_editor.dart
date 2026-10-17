@@ -104,7 +104,7 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
   bool _allowImageInput = false;
   int _timeoutSeconds = 120;
   int _maxConcurrentRequests = 5;
-  int _retryAttempts = 0;
+  int _retryAttempts = ProviderConfig.defaultRetryAttempts;
   bool _editingConnection = false;
   bool _advancedExpanded = false;
   bool _enabled = true;
@@ -152,7 +152,8 @@ class _AiServiceEditorState extends ConsumerState<AiServiceEditor> {
         provider?.allowImageInput ?? _preset.defaultAllowImageInput;
     _timeoutSeconds = provider?.timeoutSeconds ?? 120;
     _maxConcurrentRequests = provider?.maxConcurrentRequests ?? 5;
-    _retryAttempts = provider?.retryAttempts ?? 0;
+    _retryAttempts =
+        provider?.retryAttempts ?? ProviderConfig.defaultRetryAttempts;
     _enabled = provider?.enabled ?? true;
     final saved = ref.read(promptAssistantConfigProvider);
     _selected = LinkedHashMap.fromEntries([

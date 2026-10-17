@@ -684,6 +684,8 @@ extension ProviderPresetDefaults on ProviderPreset {
 }
 
 class ProviderConfig {
+  static const defaultRetryAttempts = 1;
+
   final String id;
   final String name;
   final ProviderType type;
@@ -711,7 +713,7 @@ class ProviderConfig {
     this.allowImageInput = false,
     this.timeoutSeconds = 120,
     this.maxConcurrentRequests = 5,
-    this.retryAttempts = 0,
+    this.retryAttempts = defaultRetryAttempts,
     this.requestHeaders = const {},
   });
 
@@ -789,10 +791,9 @@ class ProviderConfig {
       ),
       maxConcurrentRequests:
           ((json['maxConcurrentRequests'] as num?)?.toInt() ?? 5).clamp(1, 20),
-      retryAttempts: ((json['retryAttempts'] as num?)?.toInt() ?? 0).clamp(
-        0,
-        3,
-      ),
+      retryAttempts:
+          ((json['retryAttempts'] as num?)?.toInt() ?? defaultRetryAttempts)
+              .clamp(0, 3),
     );
   }
 

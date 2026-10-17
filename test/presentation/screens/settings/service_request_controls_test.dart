@@ -74,6 +74,10 @@ void main() {
     await harness.capture(tester, 'request-controls-wide-default');
     expect(_text(tester, 'request-timeout'), '120');
     expect(_text(tester, 'max-concurrency'), '5');
+    expect(
+      tester.widget<ServiceRetrySegments>(_field('retry-attempts')).value,
+      1,
+    );
     _expectAlignedStepper(tester, 'request-timeout');
     _expectAlignedStepper(tester, 'max-concurrency');
     await harness.tapVisible(tester, _button('request-timeout', 'increase'));
@@ -127,6 +131,35 @@ void main() {
     expect(
       tester.widget<ServiceRetrySegments>(_field('retry-attempts')).value,
       2,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('new service defaults to one retry while saved zero stays off', (
+    tester,
+  ) async {
+    await harness.pumpManagement(
+      tester,
+      config: harness.sampleConfig.copyWith(
+        providers: [
+          harness.sampleConfig.providers.first.copyWith(retryAttempts: 0),
+        ],
+      ),
+    );
+    await _open(tester);
+    expect(
+      tester.widget<ServiceRetrySegments>(_field('retry-attempts')).value,
+      0,
+    );
+    await harness.tapVisible(tester, _field('add'));
+    await harness.tapVisible(
+      tester,
+      find.byKey(const ValueKey('choose-provider-openaiCompatibleChat')),
+    );
+    await _open(tester);
+    expect(
+      tester.widget<ServiceRetrySegments>(_field('retry-attempts')).value,
+      1,
     );
     expect(tester.takeException(), isNull);
   });
