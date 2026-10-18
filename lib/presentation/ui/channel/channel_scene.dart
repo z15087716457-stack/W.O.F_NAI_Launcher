@@ -10,6 +10,8 @@ import 'channel_palette.dart';
 import 'channel_themes_a.dart';
 import 'channel_themes_b.dart';
 import 'channel_themes_c.dart';
+import 'channel_themes_d.dart';
+import 'channel_themes_e.dart';
 
 typedef ChannelThemeDraw = void Function(ChannelPaint g);
 
@@ -22,6 +24,11 @@ const channelDraws = <ChannelTheme, ChannelThemeDraw>{
   ChannelTheme.arcade: paintArcade,
   ChannelTheme.abyss: paintAbyss,
   ChannelTheme.wave: paintWave,
+  ChannelTheme.caliber: paintCaliber,
+  ChannelTheme.strata: paintStrata,
+  ChannelTheme.metro: paintMetro,
+  ChannelTheme.score: paintScore,
+  ChannelTheme.luna: paintLuna,
 };
 
 /// 一帧通道场景的输入（不含图片光台和时间刻度）。

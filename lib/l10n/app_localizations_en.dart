@@ -17127,6 +17127,41 @@ class AppLocalizationsEn extends AppLocalizations {
       'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle';
 
   @override
+  String get channel_themeCaliber => 'Caliber';
+
+  @override
+  String get channel_themeStrata => 'Strata';
+
+  @override
+  String get channel_themeMetro => 'Metro';
+
+  @override
+  String get channel_themeScore => 'Score';
+
+  @override
+  String get channel_themeLuna => 'Luna';
+
+  @override
+  String get channel_descCaliber =>
+      'Bridges, Geneva stripes and gear trains that mesh at true ratios as you scroll; each section has a balance wheel that ticks when idle';
+
+  @override
+  String get channel_descStrata =>
+      'Older as you go down: a geologic time column, rock layers and period fossils; a drill bores down with the view';
+
+  @override
+  String get channel_descMetro =>
+      'Metro line maps with 45° turns, interchanges and station names; a train rides beside the view and lights the nearest stop';
+
+  @override
+  String get channel_descScore =>
+      'Vertical staves run downward; the playhead stays mid-view and lights the notes it passes; each section spins a record as you scroll';
+
+  @override
+  String get channel_descLuna =>
+      'A one-day-per-row moon calendar and a tide curve; a large moon follows the view and waxes or wanes as you scroll';
+
+  @override
   String get channel_title => 'Visual channel';
 
   @override

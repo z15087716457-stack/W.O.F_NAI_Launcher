@@ -14,10 +14,20 @@ export '../gen/gen_test_harness.dart' show tapKey, hoverOver, genRail;
 /// 固定种子：主题顺序与元素位置都固定，基准截图才稳定。
 const channelSeed = 7;
 
+/// 最早的六个主题。原基准截图按这个随机池录制；新主题另有 `goldens/v2/`。
+const channelLegacyThemes = {
+  ChannelTheme.circuit,
+  ChannelTheme.stars,
+  ChannelTheme.herb,
+  ChannelTheme.arcade,
+  ChannelTheme.abyss,
+  ChannelTheme.wave,
+};
+
 ChannelSettings channelSettings({
   ChannelMode mode = ChannelMode.random,
   ChannelTheme fixed = ChannelTheme.stars,
-  Set<ChannelTheme> pool = ChannelSettings.allThemes,
+  Set<ChannelTheme> pool = channelLegacyThemes,
   ChannelLevel level = ChannelLevel.standard,
   bool ruler = true,
   bool motion = true,

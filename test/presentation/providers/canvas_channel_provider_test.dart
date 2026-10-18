@@ -137,6 +137,35 @@ void main() {
     });
   }
 
+  test('v1 random pool gains themes added later; v2 pool is kept as saved', () {
+    final storage = MemoryDraftSettings();
+    storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
+      'version': 1,
+      'pool': ['stars', 'wave'],
+    });
+    final v1 = _container(storage, 5);
+    addTearDown(v1.dispose);
+    expect(v1.read(canvasChannelNotifierProvider).pool, {
+      ChannelTheme.stars,
+      ChannelTheme.wave,
+      ChannelTheme.caliber,
+      ChannelTheme.strata,
+      ChannelTheme.metro,
+      ChannelTheme.score,
+      ChannelTheme.luna,
+    });
+    storage.values[StorageKeys.canvasChannelPreferences] = jsonEncode({
+      'version': 2,
+      'pool': ['stars', 'luna'],
+    });
+    final v2 = _container(storage, 5);
+    addTearDown(v2.dispose);
+    expect(v2.read(canvasChannelNotifierProvider).pool, {
+      ChannelTheme.stars,
+      ChannelTheme.luna,
+    });
+  });
+
   test(
     'rapid changes write in order; a failed write does not break later saves',
     () async {

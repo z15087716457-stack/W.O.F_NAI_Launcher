@@ -16627,6 +16627,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get channel_descWave => '和柄の波が両側に集まり、朱の日輪と霞を添えます。待機中は光が波を渡ります';
 
   @override
+  String get channel_themeCaliber => 'ムーブメント';
+
+  @override
+  String get channel_themeStrata => '地層';
+
+  @override
+  String get channel_themeMetro => '地下鉄';
+
+  @override
+  String get channel_themeScore => '楽譜';
+
+  @override
+  String get channel_themeLuna => '月相';
+
+  @override
+  String get channel_descCaliber =>
+      '受け板、コート・ド・ジュネーブ、輪列。スクロールで歯車が実際の歯数比で噛み合い回ります。各区間のテンプは待機中に時を刻みます';
+
+  @override
+  String get channel_descStrata =>
+      '下るほど古くなります。地質年代柱、地層、その時代の化石。ドリルが視点と一緒に掘り進みます';
+
+  @override
+  String get channel_descMetro =>
+      '両側に路線図。45° の曲がり、乗換駅、駅名。列車が視点の横を走り、最寄り駅が点灯します';
+
+  @override
+  String get channel_descScore =>
+      '縦書きの五線譜が下へ続き、再生線が画面中央で通過した音符を光らせます。各区間のレコードはスクロールで回ります';
+
+  @override
+  String get channel_descLuna =>
+      '1 日 1 行の月齢カレンダーと潮汐曲線。大きな月が視点を追い、スクロールで満ち欠けします';
+
+  @override
   String get channel_title => 'ビジュアルチャンネル';
 
   @override

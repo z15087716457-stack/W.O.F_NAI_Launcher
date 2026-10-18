@@ -125,10 +125,10 @@ class _ChannelSettingsSectionState extends State<ChannelSettingsSection> {
           GridView(
             key: const Key('channel-cards'),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 4,
               mainAxisSpacing: 6,
               crossAxisSpacing: 6,
-              mainAxisExtent: 82.7,
+              mainAxisExtent: 66,
             ),
             shrinkWrap: true,
             padding: EdgeInsets.zero,
@@ -444,14 +444,14 @@ class _Card extends StatelessWidget {
                       ),
                     ),
                     Container(
-                      height: 25,
-                      padding: const EdgeInsets.symmetric(horizontal: 7),
+                      height: 24,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
                       decoration: BoxDecoration(
                         border: Border(top: BorderSide(color: c.border)),
                         color: c.bg,
                       ),
                       alignment: Alignment.centerLeft,
-                      child: ChannelSwatchName(theme: theme),
+                      child: ChannelSwatchName(theme: theme, compact: true),
                     ),
                   ],
                 ),
@@ -484,16 +484,23 @@ class _Card extends StatelessWidget {
   }
 }
 
-/// 卡片底部：7 方色块 + 主题名（11.5 / 500）。
+/// 卡片底部：7 方色块 + 主题名（11.5 / 500；弹层小卡 11）。
 class ChannelSwatchName extends StatelessWidget {
-  const ChannelSwatchName({super.key, required this.theme});
+  const ChannelSwatchName({
+    super.key,
+    required this.theme,
+    this.compact = false,
+  });
   final ChannelTheme theme;
+
+  /// 弹层里四列小卡：色块与字距收紧、字号 11。
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     return Row(
-      spacing: 5,
+      spacing: compact ? 4 : 5,
       children: [
         Container(
           width: 7,
@@ -508,7 +515,11 @@ class ChannelSwatchName extends StatelessWidget {
             ChannelFormat.name(context, theme),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: UiText.sans(11.5, weight: FontWeight.w500, color: c.ink),
+            style: UiText.sans(
+              compact ? 11 : 11.5,
+              weight: FontWeight.w500,
+              color: c.ink,
+            ),
           ),
         ),
       ],

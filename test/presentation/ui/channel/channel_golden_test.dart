@@ -1,5 +1,5 @@
 // 画布视觉通道基准截图（中文浅色 / 深色）：固定种子 + 假历史，锁定视觉。界面变了这里会失败。
-// 只有界面方确认新样子后才更新基准：
+// 原基准（goldens/*.png）保留不重录，只排除获准区域；--update-goldens 只会写 v2 目录：
 //   flutter test --update-goldens test/presentation/ui/channel/channel_golden_test.dart
 // 基准在 Windows + 内置真实字体下生成，其他系统跳过。
 import 'dart:io';
@@ -46,7 +46,7 @@ void main() {
   // (文件名, 装载, 也拍深色)
   final scenes = <(String, _Pump, bool)>[
     ('random', canvas(), true),
-    for (final th in ChannelTheme.values) (th.name, canvas(s: fixed(th)), true),
+    for (final th in channelLegacyThemes) (th.name, canvas(s: fixed(th)), true),
     ('overview', canvas(overview: true), true),
     ('transition', canvas(focusY: 4012, focusScale: .35), false),
     ('popover', canvas(popover: true), true),
@@ -76,6 +76,9 @@ void main() {
         if (toolbar.evaluate().isNotEmpty) {
           masks.add(t.getRect(toolbar).inflate(22));
         }
+        // 主题卡从 3 列 6 张改为 4 列 11 张，整个弹层的新样子由 v2 基准锁定。
+        final popover = find.byKey(const Key('gen-display-popover'));
+        if (popover.evaluate().isNotEmpty) masks.add(t.getRect(popover));
         final settings = find.byKey(const Key('channel-settings'));
         if (settings.evaluate().isNotEmpty) {
           final l = AppLocalizations.of(t.element(settings))!;
@@ -104,6 +107,34 @@ void main() {
           find.byKey(const Key('gen-capture')),
           'test/presentation/ui/channel/goldens/$name.png',
           masks,
+        );
+      });
+    }
+  }
+
+  // v2：后加的主题与 11 张卡的弹层。新文件，整图锁定（录制见文件头命令）。
+  final all = channelSettings(pool: ChannelSettings.allThemes);
+  final v2 = <(String, _Pump, bool)>[
+    for (final th in ChannelTheme.values)
+      if (!channelLegacyThemes.contains(th))
+        (th.name, canvas(s: fixed(th)), true),
+    ('random-all', canvas(s: all), true),
+    ('overview-all', canvas(s: all, overview: true), false),
+    ('popover', canvas(s: all, popover: true), true),
+    (
+      'popover-fixed',
+      canvas(s: fixed(ChannelTheme.metro), popover: true),
+      false,
+    ),
+  ];
+  for (final (file, pump, alsoDark) in v2) {
+    for (final dark in [false, if (alsoDark) true]) {
+      final name = dark ? '$file-dark' : file;
+      testWidgets('golden v2/$name', skip: skip, (t) async {
+        await pump(t, dark);
+        await expectLater(
+          find.byKey(const Key('gen-capture')),
+          matchesGoldenFile('goldens/v2/$name.png'),
         );
       });
     }

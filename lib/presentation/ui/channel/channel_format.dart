@@ -13,6 +13,11 @@ abstract final class ChannelFormat {
       ChannelTheme.arcade => l.channel_themeArcade,
       ChannelTheme.abyss => l.channel_themeAbyss,
       ChannelTheme.wave => l.channel_themeWave,
+      ChannelTheme.caliber => l.channel_themeCaliber,
+      ChannelTheme.strata => l.channel_themeStrata,
+      ChannelTheme.metro => l.channel_themeMetro,
+      ChannelTheme.score => l.channel_themeScore,
+      ChannelTheme.luna => l.channel_themeLuna,
     };
   }
 
@@ -30,6 +35,11 @@ abstract final class ChannelFormat {
       ChannelTheme.arcade => l.channel_descArcade,
       ChannelTheme.abyss => l.channel_descAbyss,
       ChannelTheme.wave => l.channel_descWave,
+      ChannelTheme.caliber => l.channel_descCaliber,
+      ChannelTheme.strata => l.channel_descStrata,
+      ChannelTheme.metro => l.channel_descMetro,
+      ChannelTheme.score => l.channel_descScore,
+      ChannelTheme.luna => l.channel_descLuna,
     };
   }
 

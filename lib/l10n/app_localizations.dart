@@ -29919,6 +29919,66 @@ abstract class AppLocalizations {
   /// **'Japanese wave patterns gather on both sides with a red sun and mist bands; light sweeps across them when idle'**
   String get channel_descWave;
 
+  /// No description provided for @channel_themeCaliber.
+  ///
+  /// In en, this message translates to:
+  /// **'Caliber'**
+  String get channel_themeCaliber;
+
+  /// No description provided for @channel_themeStrata.
+  ///
+  /// In en, this message translates to:
+  /// **'Strata'**
+  String get channel_themeStrata;
+
+  /// No description provided for @channel_themeMetro.
+  ///
+  /// In en, this message translates to:
+  /// **'Metro'**
+  String get channel_themeMetro;
+
+  /// No description provided for @channel_themeScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get channel_themeScore;
+
+  /// No description provided for @channel_themeLuna.
+  ///
+  /// In en, this message translates to:
+  /// **'Luna'**
+  String get channel_themeLuna;
+
+  /// No description provided for @channel_descCaliber.
+  ///
+  /// In en, this message translates to:
+  /// **'Bridges, Geneva stripes and gear trains that mesh at true ratios as you scroll; each section has a balance wheel that ticks when idle'**
+  String get channel_descCaliber;
+
+  /// No description provided for @channel_descStrata.
+  ///
+  /// In en, this message translates to:
+  /// **'Older as you go down: a geologic time column, rock layers and period fossils; a drill bores down with the view'**
+  String get channel_descStrata;
+
+  /// No description provided for @channel_descMetro.
+  ///
+  /// In en, this message translates to:
+  /// **'Metro line maps with 45° turns, interchanges and station names; a train rides beside the view and lights the nearest stop'**
+  String get channel_descMetro;
+
+  /// No description provided for @channel_descScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical staves run downward; the playhead stays mid-view and lights the notes it passes; each section spins a record as you scroll'**
+  String get channel_descScore;
+
+  /// No description provided for @channel_descLuna.
+  ///
+  /// In en, this message translates to:
+  /// **'A one-day-per-row moon calendar and a tide curve; a large moon follows the view and waxes or wanes as you scroll'**
+  String get channel_descLuna;
+
   /// No description provided for @channel_title.
   ///
   /// In en, this message translates to:

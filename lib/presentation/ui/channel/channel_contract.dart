@@ -11,8 +11,20 @@ import 'package:flutter/widgets.dart';
 /// 坐标：世界坐标与现有画布引擎一致（`canvas_feed_layout.dart`：组水平居中于 x = 0、组间距 340、
 /// 新组插在最上面），屏幕 = 世界 × scale + offset（同 `CanvasCamera`）。
 
-/// 六个主题；顺序 = 设置里卡片的顺序。
-enum ChannelTheme { circuit, stars, herb, arcade, abyss, wave }
+/// 十一个主题；顺序 = 设置里卡片的顺序。
+enum ChannelTheme {
+  circuit,
+  stars,
+  herb,
+  arcade,
+  abyss,
+  wave,
+  caliber,
+  strata,
+  metro,
+  score,
+  luna,
+}
 
 /// 关闭（保留现有底纹，本层什么都不画）／固定一个主题／每次随机一组顺序。
 enum ChannelMode { off, fixed, random }
@@ -47,6 +59,11 @@ class ChannelSettings {
     ChannelTheme.arcade,
     ChannelTheme.abyss,
     ChannelTheme.wave,
+    ChannelTheme.caliber,
+    ChannelTheme.strata,
+    ChannelTheme.metro,
+    ChannelTheme.score,
+    ChannelTheme.luna,
   };
 
   final ChannelMode mode;
