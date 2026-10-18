@@ -74,6 +74,42 @@ class ChannelPalette {
       accent: (Color(0xFFD44632), Color(0xFFE8624C)),
       code: 'SEIGAIHA',
     ),
+    ChannelTheme.caliber => const ChannelPalette(
+      swatch: Color(0xFF57534E),
+      bg: (Color(0xFFF8F7F5), Color(0xFF0F0F10)),
+      ink: (Color(0xFF484644), Color(0xFFACA8A2)),
+      accent: (Color(0xFFC81E46), Color(0xFFFF6080)),
+      code: 'CALIBER',
+    ),
+    ChannelTheme.strata => const ChannelPalette(
+      swatch: Color(0xFFCA8A04),
+      bg: (Color(0xFFFBF8F1), Color(0xFF12100C)),
+      bg2: (Color(0xFFEFE4CF), Color(0xFF090705)),
+      ink: (Color(0xFF6E5432), Color(0xFFCCB288)),
+      accent: (Color(0xFFC4601C), Color(0xFFF8A85C)),
+      code: 'STRATA',
+    ),
+    ChannelTheme.metro => const ChannelPalette(
+      swatch: Color(0xFF10B981),
+      bg: (Color(0xFFF7FAF9), Color(0xFF0B100F)),
+      ink: (Color(0xFF3C464C), Color(0xFF9CACB2)),
+      accent: (Color(0xFF009C68), Color(0xFF34DEA0)),
+      code: 'METRO',
+    ),
+    ChannelTheme.score => const ChannelPalette(
+      swatch: Color(0xFFC026D3),
+      bg: (Color(0xFFFBF9F5), Color(0xFF100E12)),
+      ink: (Color(0xFF383040), Color(0xFFC4BAD0)),
+      accent: (Color(0xFFA828BE), Color(0xFFE28CFF)),
+      code: 'SCORE',
+    ),
+    ChannelTheme.luna => const ChannelPalette(
+      swatch: Color(0xFF94A3B8),
+      bg: (Color(0xFFF6F7FA), Color(0xFF0A0D14)),
+      ink: (Color(0xFF3C4660), Color(0xFFB0BCD6)),
+      accent: (Color(0xFFB28A28), Color(0xFFFAE296)),
+      code: 'LUNA',
+    ),
   };
 
   /// 画布底色：段内按权重从“无主题”混到主题底色（[base] = 生图页画布原本的底色）。

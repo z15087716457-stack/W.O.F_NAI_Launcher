@@ -272,7 +272,7 @@ void main() {
       expect(SchedulerBinding.instance.transientCallbackCount, 0);
     });
 
-    testWidgets('六个主题在各种缩放、明暗、钉板下都能画', (t) async {
+    testWidgets('所有主题在各种缩放、明暗、钉板下都能画', (t) async {
       for (final dark in [false, true]) {
         for (final th in ChannelTheme.values) {
           for (final (scale, y) in [

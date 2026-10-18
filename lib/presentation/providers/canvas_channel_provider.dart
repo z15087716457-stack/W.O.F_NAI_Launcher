@@ -51,6 +51,8 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
           if (value['pool'] is List &&
               (value['pool'] as List).contains(theme.name))
             theme,
+        // v1 只认识前六个主题：旧随机池里没有后来加的主题，并入后新主题才会出现
+        if (value['version'] == 1) ..._addedAfterV1,
       };
       return ChannelSettings(
         mode: _named(ChannelMode.values, value['mode'], ChannelMode.random),
@@ -88,7 +90,7 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
     );
     state = next;
     final payload = jsonEncode({
-      'version': 1,
+      'version': _version,
       'mode': next.mode.name,
       'fixed': next.fixed.name,
       'pool': [
@@ -114,6 +116,17 @@ class CanvasChannelNotifier extends Notifier<ChannelSettings> {
     });
   }
 }
+
+const _version = 2;
+
+/// 存储 v1 之后新增的主题。
+const _addedAfterV1 = [
+  ChannelTheme.caliber,
+  ChannelTheme.strata,
+  ChannelTheme.metro,
+  ChannelTheme.score,
+  ChannelTheme.luna,
+];
 
 T _named<T extends Enum>(List<T> values, Object? name, T fallback) =>
     values.where((value) => value.name == name).firstOrNull ?? fallback;

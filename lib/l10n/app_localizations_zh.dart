@@ -16093,6 +16093,38 @@ class AppLocalizationsZh extends AppLocalizations {
   String get channel_descWave => '和风波纹在两侧聚散，配一轮朱日和几道霞；空闲时有光沿波纹扫过';
 
   @override
+  String get channel_themeCaliber => '机芯';
+
+  @override
+  String get channel_themeStrata => '地层';
+
+  @override
+  String get channel_themeMetro => '地铁';
+
+  @override
+  String get channel_themeScore => '乐谱';
+
+  @override
+  String get channel_themeLuna => '月相';
+
+  @override
+  String get channel_descCaliber =>
+      '夹板、日内瓦纹和齿轮串；滚动时齿轮按真实传动比啮合转动，每段一组摆轮游丝，空闲时滴答走动';
+
+  @override
+  String get channel_descStrata => '越往下越古老：左侧地质年代柱，两侧岩层和对应年代的化石；钻头跟着视口一路钻下去';
+
+  @override
+  String get channel_descMetro =>
+      '两侧是地铁线路图：45° 转弯、换乘站和站名；列车停在视口旁并点亮最近一站，另两条线空闲时自己跑';
+
+  @override
+  String get channel_descScore => '竖排五线谱一路往下，播放线停在视口中间，经过的音符会亮起；每段一张随滚动转动的唱片';
+
+  @override
+  String get channel_descLuna => '左侧一天一格的月相历，右侧潮汐曲线；一轮大月亮跟着视口走，滚动时盈亏随之变化';
+
+  @override
   String get channel_title => '视觉通道';
 
   @override
@@ -36130,6 +36162,38 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get channel_descWave => '和風波紋在兩側聚散，配一輪朱日和幾道霞；空閒時有光沿波紋掃過';
+
+  @override
+  String get channel_themeCaliber => '機芯';
+
+  @override
+  String get channel_themeStrata => '地層';
+
+  @override
+  String get channel_themeMetro => '地鐵';
+
+  @override
+  String get channel_themeScore => '樂譜';
+
+  @override
+  String get channel_themeLuna => '月相';
+
+  @override
+  String get channel_descCaliber =>
+      '夾板、日內瓦紋和齒輪串；滾動時齒輪按真實傳動比齧合轉動，每段一組擺輪遊絲，空閒時滴答走動';
+
+  @override
+  String get channel_descStrata => '越往下越古老：左側地質年代柱，兩側岩層和對應年代的化石；鑽頭跟著視口一路鑽下去';
+
+  @override
+  String get channel_descMetro =>
+      '兩側是地鐵線路圖：45° 轉彎、換乘站和站名；列車停在視口旁並點亮最近一站，另兩條線空閒時自己跑';
+
+  @override
+  String get channel_descScore => '豎排五線譜一路往下，播放線停在視口中間，經過的音符會亮起；每段一張隨滾動轉動的唱片';
+
+  @override
+  String get channel_descLuna => '左側一天一格的月相歷，右側潮汐曲線；一輪大月亮跟著視口走，滾動時盈虧隨之變化';
 
   @override
   String get channel_title => '視覺通道';
