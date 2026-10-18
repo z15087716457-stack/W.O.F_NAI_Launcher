@@ -378,6 +378,18 @@ class SettingsAgentBackend {
     }
   }
 
+  /// Opens a text file in the system editor, creating it empty if missing.
+  Future<void> openFile(String path) async {
+    final file = File(path);
+    if (!await file.exists()) {
+      await file.parent.create(recursive: true);
+      await file.writeAsString('', flush: true);
+    }
+    if (!await launchUrl(Uri.file(path))) {
+      throw StateError('Unable to open file');
+    }
+  }
+
   String skillFolder(String id) =>
       store.skillFolder(id, workspaceId: _workspaceId).path;
 

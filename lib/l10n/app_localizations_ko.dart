@@ -19570,6 +19570,10 @@ class AppLocalizationsKo extends AppLocalizations {
       '프롬프트에 들어가지 않아 Agent가 스스로 사용하지 않습니다. 채팅창에 /skill:이름을 입력하면 호출합니다.';
 
   @override
+  String get set_agWorkspaceRulesSub =>
+      '이 작업 공간에만 적용되는 추가 규칙입니다. 작업 공간의 instructions.md에 저장되며 전역 지시 뒤에 붙습니다. \"편집\"을 누르면 시스템 편집기로 열리고, 비워 두면 추가하지 않습니다.';
+
+  @override
   String get set_agSkillDescNaiPrompt =>
       'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
 

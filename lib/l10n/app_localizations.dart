@@ -35110,6 +35110,12 @@ abstract class AppLocalizations {
   /// **'Kept out of the prompt, so the Agent will not use it on its own; type /skill:name in the chat box to invoke it.'**
   String get set_agSkillManualTip;
 
+  /// No description provided for @set_agWorkspaceRulesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra rules for this workspace only, saved as instructions.md in the workspace and added after the global instructions. Edit opens it in your system editor; leave it empty to add nothing.'**
+  String get set_agWorkspaceRulesSub;
+
   /// No description provided for @set_agSkillDescNaiPrompt.
   ///
   /// In en, this message translates to:

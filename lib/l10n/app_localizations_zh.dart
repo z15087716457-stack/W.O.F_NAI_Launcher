@@ -19276,6 +19276,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agSkillManualTip => '不进提示词，Agent 不会自己用；在聊天框输入 /skill:名称 才会调用。';
 
   @override
+  String get set_agWorkspaceRulesSub =>
+      '只对当前工作区生效的补充要求，存为工作区里的 instructions.md，排在全局指令之后；点“编辑”用系统编辑器打开，留空就不加。';
+
+  @override
   String get set_agSkillDescNaiPrompt =>
       '按当前模型（V4／V4.5 或 V5）的规则，撰写或修改草稿里的 NovelAI 提示词：主提示词、负面、角色、积木与权重。改提示词前先读。';
 
@@ -39688,6 +39692,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agSkillManualTip => '不進提示詞，Agent 不會自己用；在聊天框輸入 /skill:名稱 才會呼叫。';
+
+  @override
+  String get set_agWorkspaceRulesSub =>
+      '只對當前工作區生效的補充要求，存為工作區裡的 instructions.md，排在全域指令之後；點“編輯”用系統編輯器開啟，留空就不加。';
 
   @override
   String get set_agSkillDescNaiPrompt =>

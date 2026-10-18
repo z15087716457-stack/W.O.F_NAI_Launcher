@@ -19503,6 +19503,10 @@ class AppLocalizationsJa extends AppLocalizations {
       'プロンプトに入らないため Agent は自分では使いません。チャット欄で /skill:名前 と入力すると呼び出します。';
 
   @override
+  String get set_agWorkspaceRulesSub =>
+      'このワークスペースだけに適用する追加ルールです。ワークスペース内の instructions.md に保存され、全体の指示の後に追加されます。「編集」でシステムのエディターが開きます。空なら何も追加しません。';
+
+  @override
   String get set_agSkillDescNaiPrompt =>
       'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
 

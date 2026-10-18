@@ -10635,6 +10635,7 @@
   "set_agSkillManual": "僅手動呼叫",
   "set_agSkillAutoTip": "提示詞裡只放名稱和一句話描述，任務對得上時 Agent 會自己讀取完整說明。",
   "set_agSkillManualTip": "不進提示詞，Agent 不會自己用；在聊天框輸入 /skill:名稱 才會呼叫。",
+  "set_agWorkspaceRulesSub": "只對當前工作區生效的補充要求，存為工作區裡的 instructions.md，排在全域指令之後；點“編輯”用系統編輯器開啟，留空就不加。",
   "set_agSkillDescNaiPrompt": "按當前模型（V4／V4.5 或 V5）的規則，撰寫或修改草稿裡的 NovelAI 提示詞：主提示詞、負面、角色、積木與權重。改提示詞前先讀。",
   "set_agSkillDescNaiStudio": "通過業務工具操作 NAI Studio：編輯草稿、檢視圖片、生成報價與執行、圖庫／歷史、原圖與 Vibe／精準參考、積木、畫風探索、影像工具、快照與偏好設定。除讀取當前狀態外，其他 Studio 操作前先讀。",
   "set_agSkillView": "檢視",

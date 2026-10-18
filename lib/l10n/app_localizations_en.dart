@@ -20119,6 +20119,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Kept out of the prompt, so the Agent will not use it on its own; type /skill:name in the chat box to invoke it.';
 
   @override
+  String get set_agWorkspaceRulesSub =>
+      'Extra rules for this workspace only, saved as instructions.md in the workspace and added after the global instructions. Edit opens it in your system editor; leave it empty to add nothing.';
+
+  @override
   String get set_agSkillDescNaiPrompt =>
       'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
 

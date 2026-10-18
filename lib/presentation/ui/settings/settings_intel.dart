@@ -658,7 +658,13 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
               SettingsRow(
                 anchor: 'agentWorkspaceRules',
                 title: l.ag_memoryWorkspace,
-                subtitle: path,
+                subtitleWidget: Tooltip(
+                  message: path,
+                  child: Text(
+                    l.set_agWorkspaceRulesSub,
+                    style: UiText.sans(12, color: c.muted, height: 1.5),
+                  ),
+                ),
                 control: SettingsBtn(
                   label: l.ag_memoryEdit,
                   small: true,

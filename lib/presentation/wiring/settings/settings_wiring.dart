@@ -338,7 +338,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
             .read(naiAgentControllerProvider)
             .selectedWorkspace;
         if (workspace != null) {
-          await agentBackend.openPath(
+          await agentBackend.openFile(
             p.join(workspace.directory.path, 'instructions.md'),
           );
         }

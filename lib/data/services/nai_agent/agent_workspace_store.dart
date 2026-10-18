@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import '../../../core/nai_agent/mcp_config.dart';
+import '../../../core/utils/app_language.dart';
+import '../../../core/utils/localization_extension.dart';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
@@ -9,12 +11,25 @@ import 'package:uuid/uuid.dart';
 import 'package:collection/collection.dart';
 
 const naiAgentDefaultPromptVersion = '2026-10-18.1';
-const naiAgentDefaultSystemPrompt = '''
+const _defaultSystemPromptZh = '''
 你是 NAI Agent，W.O.F NAI Studio 内的创作与工作区助手。用用户的语言，直接完成已授权的任务，说明结果与不确定性。
 涉及当前草稿、参数或图片时先用 studio_context 读取；修改沿工具的版本检查与回读。
 Studio 业务操作通过 codemode 调用 mcp__nai_studio，用法见 nai-studio skill；写或改提示词先读 nai-prompt skill。
 实际生成与付费操作必须有用户在界面上的确认；缺关键输入用 ask_user。不把计划、失败或未知费用说成完成。
 ''';
+const _defaultSystemPromptEn = '''
+You are NAI Agent, the creative and workspace assistant inside W.O.F NAI Studio. Reply in the user's language, complete authorized tasks directly, and state results and uncertainties.
+When the current draft, parameters or images matter, read them first with studio_context; make changes through the tools' version checks and read back.
+Studio operations go through codemode calling mcp__nai_studio; see the nai-studio skill for usage. Read the nai-prompt skill before writing or revising prompts.
+Actual generation and paid operations require the user's confirmation in the UI; use ask_user when key input is missing. Never report plans, failures or unknown costs as done.
+''';
+
+/// Built-in base prompt: Chinese for the Chinese interfaces, English otherwise.
+/// Saved custom prompts are never translated.
+String naiAgentDefaultSystemPromptFor(AppLanguage language) =>
+    language.isChinese ? _defaultSystemPromptZh : _defaultSystemPromptEn;
+String get naiAgentDefaultSystemPrompt =>
+    naiAgentDefaultSystemPromptFor(currentAppLanguage);
 
 /// Skill names follow the Agent Skills spec; the folder name is the identity.
 final naiAgentSkillName = RegExp(r'^[a-z0-9]+(?:-[a-z0-9]+)*$');
@@ -621,14 +636,19 @@ class AgentWorkspaceStore {
     final instructions = await File(
       p.join(workspace.directory.path, 'instructions.md'),
     ).readAsString();
+    final zh = currentAppLanguage.isChinese;
     return [
       if (settings.systemPromptPrefix.trim().isNotEmpty)
         settings.systemPromptPrefix,
       workspace.customSystemPrompt ?? settings.systemPrompt,
       if (settings.globalInstructions.trim().isNotEmpty)
-        '用户的全局指令：\n${settings.globalInstructions}',
-      if (instructions.trim().isNotEmpty) '用户的工作区规则：\n$instructions',
-      '工作区笔记在 notes/，产物在 outputs/。',
+        '${zh ? '用户的全局指令：' : 'User global instructions:'}\n'
+            '${settings.globalInstructions}',
+      if (instructions.trim().isNotEmpty)
+        '${zh ? '用户的工作区规则：' : 'User workspace rules:'}\n$instructions',
+      zh
+          ? '工作区笔记在 notes/，产物在 outputs/。'
+          : 'Workspace notes live in notes/; outputs go to outputs/.',
     ].join('\n\n');
   }
 
