@@ -236,8 +236,6 @@ class SettingsPreviewSim extends ChangeNotifier {
       onClearCache: (k) => log('onClearCache(${k.name})'),
       onCleanThumbnails: () => log('onCleanThumbnails'),
       onRescanGallery: () => log('onRescanGallery'),
-      onTestProvider: (id) => log('onTestProvider($id)'),
-      onDeleteProvider: (id) => log('onDeleteProvider($id)'),
       onRequestDetails: (id) => log('onRequestDetails($id)'),
       onAssign:
           (

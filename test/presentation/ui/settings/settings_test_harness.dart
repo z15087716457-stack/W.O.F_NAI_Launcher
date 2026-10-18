@@ -220,7 +220,6 @@ class SettingsHostState extends State<SettingsHost> {
         onAddBlacklistTag: (t) => call('addTag:$t'),
         onRemoveBlacklistTag: (t) => call('removeTag:$t'),
         onRestart: () => call('restart'),
-        onDeleteProvider: (id) => call('deleteProvider:$id'),
         onRequestDetails: (id) => call('requestDetails:$id'),
         onUpdateDictionary: (kind) => call('updateDictionary:${kind.name}'),
         onCheckDictionaryUpdates: () => call('checkDictionaryUpdates'),

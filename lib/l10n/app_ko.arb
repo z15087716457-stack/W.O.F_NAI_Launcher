@@ -9874,22 +9874,9 @@
     }
   },
   "set_mdDisabled": "사용 안 함",
-  "set_mdLocal": "로컬",
-  "set_mdLatency": "{ms} · {when}",
-  "@set_mdLatency": {
-    "placeholders": {
-      "ms": {},
-      "when": {}
-    }
-  },
   "set_mdUnreachable": "연결 실패",
-  "set_mdName": "이름",
   "set_mdBaseUrl": "기본 URL",
   "set_mdApiKey": "API 키",
-  "set_mdApiKeyEmpty": "입력 안 됨",
-  "set_mdModels": "모델",
-  "set_mdRefreshModels": "공급자에서 가져오기",
-  "set_mdAddModel": "직접 추가",
   "set_mdUsedFor": "{tasks}에 사용",
   "@set_mdUsedFor": {
     "placeholders": {
@@ -9897,10 +9884,6 @@
     }
   },
   "set_mdRetired": "공급자 지원 종료",
-  "set_mdCapTools": "도구",
-  "set_mdCapVision": "비전",
-  "set_mdCapReasoning": "추론",
-  "set_mdAdvanced": "고급 요청 옵션",
   "set_mdDelete": "공급자 삭제",
   "set_mdDeleteTitle": "“{name}”을(를) 삭제할까요?",
   "@set_mdDeleteTitle": {
@@ -9909,7 +9892,6 @@
     }
   },
   "set_mdDeleteBody": "사용하던 기능은 다른 공급자로 전환됩니다.",
-  "set_mdRemoveModel": "모델 제거",
   "set_mdTaskPrompt": "프롬프트 번역",
   "set_mdTaskReverse": "프롬프트 역추론",
   "set_mdTaskTag": "태그 번역 및 의미 보충",
@@ -10930,5 +10912,15 @@
   "mp_groupAggregatorFull": "집계 플랫폼",
   "mp_groupLocalFull": "로컬 및 사용자 지정",
   "mp_pickerFoot": "주소와 프로토콜은 프리셋으로 채워지며, 지역별로 같은 공급사를 여러 번 추가할 수 있습니다.",
-  "mp_pickerNext": "다음: 키 입력"
+  "mp_pickerNext": "다음: 키 입력",
+  "mp_duplicateKey": "요청 필드 이름이 중복됩니다.",
+  "mp_retryRange": "재시도 횟수는 0~3회여야 합니다.",
+  "mp_catalogCacheFailed": "모델 목록 캐시를 저장하지 못했습니다.",
+  "mp_errorAuthentication": "유효하지 않은 API 키",
+  "mp_errorPermission": "접근 권한 없음",
+  "mp_errorTimeout": "요청 시간 초과",
+  "mp_errorNetwork": "연결할 수 없음",
+  "mp_errorResponse": "잘못된 응답",
+  "mp_errorHttp": "요청 실패",
+  "mp_errorRateLimit": "요청 한도 초과"
 }

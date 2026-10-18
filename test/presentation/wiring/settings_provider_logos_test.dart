@@ -15,7 +15,7 @@ import 'package:nai_launcher/presentation/prompt_assistant/services/model_catalo
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
-import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
+import 'package:nai_launcher/presentation/ui/model_providers/model_providers_kit.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_models.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
@@ -160,11 +160,11 @@ void main() {
       expect(_asset('openai'), findsOneWidget);
       expect(find.text('CP'), findsOneWidget);
       expect(find.text('DE'), findsNothing);
-      final row = find.byKey(const Key('provider-deepseek'));
+      final row = find.byKey(const Key('mp-provider-deepseek'));
       final rowSize = tester.getSize(row);
       final icon = find.descendant(
         of: row,
-        matching: find.byType(SettingsLogo),
+        matching: find.byType(ProviderLogo),
       );
       expect(tester.getSize(icon), const Size(28, 28));
       final picture = tester.widget<SvgPicture>(_asset('deepseek-color').first);
@@ -177,22 +177,22 @@ void main() {
       );
       await _capture(tester, 'vendors-${spec.$1 ? 'dark' : 'light'}');
 
-      await tester.tap(find.byKey(const Key('provider-custom')));
+      await tester.tap(find.byKey(const Key('mp-provider-custom')));
       await tester.pumpAndSettle();
       expect(find.text('CP'), findsNWidgets(2));
       expect(_asset('deepseek-color'), findsOneWidget);
       expect(tester.getSize(row), rowSize);
       await _capture(tester, 'custom-${spec.$1 ? 'dark' : 'light'}');
 
-      await tester.tap(find.byKey(const Key('provider-openai_responses')));
+      await tester.tap(find.byKey(const Key('mp-provider-openai_responses')));
       await tester.pumpAndSettle();
       expect(_asset('openai'), findsNWidgets(2));
       expect(find.text('OP'), findsNothing);
       // The existing catalog lacks a MiMo SVG. Use its generic service symbol,
       // as the old UI did, instead of labeling a built-in vendor with letters.
-      await tester.tap(find.byKey(const Key('provider-xiaomi')));
+      await tester.tap(find.byKey(const Key('mp-provider-xiaomi')));
       await tester.pumpAndSettle();
-      final logos = tester.widgetList<SettingsLogo>(find.byType(SettingsLogo));
+      final logos = tester.widgetList<ProviderLogo>(find.byType(ProviderLogo));
       expect(logos.where((l) => l.mark != null).length, 1);
       expect(tester.takeException(), isNull);
     });

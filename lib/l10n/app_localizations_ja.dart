@@ -18142,18 +18142,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_mdDisabled => '無効';
 
   @override
-  String get set_mdLocal => 'ローカル';
-
-  @override
-  String set_mdLatency(Object ms, Object when) {
-    return '$ms · $when';
-  }
-
-  @override
   String get set_mdUnreachable => '接続失敗';
-
-  @override
-  String get set_mdName => '名前';
 
   @override
   String get set_mdBaseUrl => 'ベース URL';
@@ -18162,36 +18151,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_mdApiKey => 'API キー';
 
   @override
-  String get set_mdApiKeyEmpty => '未入力';
-
-  @override
-  String get set_mdModels => 'モデル';
-
-  @override
-  String get set_mdRefreshModels => 'プロバイダーから取得';
-
-  @override
-  String get set_mdAddModel => '手動で追加';
-
-  @override
   String set_mdUsedFor(Object tasks) {
     return '$tasks に使用';
   }
 
   @override
   String get set_mdRetired => '提供終了';
-
-  @override
-  String get set_mdCapTools => 'ツール';
-
-  @override
-  String get set_mdCapVision => 'ビジョン';
-
-  @override
-  String get set_mdCapReasoning => '推論';
-
-  @override
-  String get set_mdAdvanced => '詳細なリクエスト設定';
 
   @override
   String get set_mdDelete => 'プロバイダーを削除';
@@ -18203,9 +18168,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_mdDeleteBody => '使用中の機能は別のプロバイダーに切り替わります。';
-
-  @override
-  String get set_mdRemoveModel => 'モデルを外す';
 
   @override
   String get set_mdTaskPrompt => 'プロンプト翻訳';
@@ -20645,4 +20607,34 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mp_pickerNext => '次へ：キーを入力';
+
+  @override
+  String get mp_duplicateKey => 'リクエストのフィールド名が重複しています。';
+
+  @override
+  String get mp_retryRange => '再試行回数は 0～3 回にしてください。';
+
+  @override
+  String get mp_catalogCacheFailed => 'モデル一覧のキャッシュを保存できませんでした。';
+
+  @override
+  String get mp_errorAuthentication => 'API キーが無効';
+
+  @override
+  String get mp_errorPermission => 'アクセスが拒否されました';
+
+  @override
+  String get mp_errorTimeout => 'リクエストがタイムアウト';
+
+  @override
+  String get mp_errorNetwork => '接続できません';
+
+  @override
+  String get mp_errorResponse => '無効なレスポンス';
+
+  @override
+  String get mp_errorHttp => 'リクエスト失敗';
+
+  @override
+  String get mp_errorRateLimit => 'レート制限を超過';
 }

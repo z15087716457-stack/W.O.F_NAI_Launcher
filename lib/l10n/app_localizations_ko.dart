@@ -18195,18 +18195,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_mdDisabled => '사용 안 함';
 
   @override
-  String get set_mdLocal => '로컬';
-
-  @override
-  String set_mdLatency(Object ms, Object when) {
-    return '$ms · $when';
-  }
-
-  @override
   String get set_mdUnreachable => '연결 실패';
-
-  @override
-  String get set_mdName => '이름';
 
   @override
   String get set_mdBaseUrl => '기본 URL';
@@ -18215,36 +18204,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_mdApiKey => 'API 키';
 
   @override
-  String get set_mdApiKeyEmpty => '입력 안 됨';
-
-  @override
-  String get set_mdModels => '모델';
-
-  @override
-  String get set_mdRefreshModels => '공급자에서 가져오기';
-
-  @override
-  String get set_mdAddModel => '직접 추가';
-
-  @override
   String set_mdUsedFor(Object tasks) {
     return '$tasks에 사용';
   }
 
   @override
   String get set_mdRetired => '공급자 지원 종료';
-
-  @override
-  String get set_mdCapTools => '도구';
-
-  @override
-  String get set_mdCapVision => '비전';
-
-  @override
-  String get set_mdCapReasoning => '추론';
-
-  @override
-  String get set_mdAdvanced => '고급 요청 옵션';
 
   @override
   String get set_mdDelete => '공급자 삭제';
@@ -18256,9 +18221,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_mdDeleteBody => '사용하던 기능은 다른 공급자로 전환됩니다.';
-
-  @override
-  String get set_mdRemoveModel => '모델 제거';
 
   @override
   String get set_mdTaskPrompt => '프롬프트 번역';
@@ -20714,4 +20676,34 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mp_pickerNext => '다음: 키 입력';
+
+  @override
+  String get mp_duplicateKey => '요청 필드 이름이 중복됩니다.';
+
+  @override
+  String get mp_retryRange => '재시도 횟수는 0~3회여야 합니다.';
+
+  @override
+  String get mp_catalogCacheFailed => '모델 목록 캐시를 저장하지 못했습니다.';
+
+  @override
+  String get mp_errorAuthentication => '유효하지 않은 API 키';
+
+  @override
+  String get mp_errorPermission => '접근 권한 없음';
+
+  @override
+  String get mp_errorTimeout => '요청 시간 초과';
+
+  @override
+  String get mp_errorNetwork => '연결할 수 없음';
+
+  @override
+  String get mp_errorResponse => '잘못된 응답';
+
+  @override
+  String get mp_errorHttp => '요청 실패';
+
+  @override
+  String get mp_errorRateLimit => '요청 한도 초과';
 }

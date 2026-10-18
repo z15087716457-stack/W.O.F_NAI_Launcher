@@ -1888,17 +1888,8 @@ class SettingsActions {
     this.onExportTagSemantics = _none,
     this.onImportTagSemantics = _none,
     // 模型
-    this.onAddProvider = _none,
     this.onImportModelConfig = _none,
     this.onCopyModelConfig = _none,
-    this.onTestProvider = _noId,
-    this.onProviderEnabled = _noIdBool,
-    this.onProviderField = _noField,
-    this.onRefreshModels = _noId,
-    this.onAddModel = _noId,
-    this.onRemoveModel = _noIdId,
-    this.onProviderAdvanced = _noId,
-    this.onDeleteProvider = _noId,
     this.onAssign = _noAssign,
     this.onEditPreset = _noIdOpt,
     this.onDeletePreset = _noId,
@@ -2045,26 +2036,8 @@ class SettingsActions {
   final VoidCallback onCancelDictionaryUpdate;
   final VoidCallback onExportTagSemantics, onImportTagSemantics;
 
-  final VoidCallback onAddProvider;
   final VoidCallback onImportModelConfig;
   final VoidCallback onCopyModelConfig;
-  final ValueChanged<String> onTestProvider;
-  final void Function(String id, bool enabled) onProviderEnabled;
-
-  /// 服务商的名称 / 地址 / Key 编辑完（失焦或回车）。Key 传明文，接线方负责安全存储。
-  final void Function(String id, SettingsProviderField field, String value)
-  onProviderField;
-  final ValueChanged<String> onRefreshModels;
-
-  /// 手动添加模型（接线方弹现有的输入框）。
-  final ValueChanged<String> onAddModel;
-  final void Function(String providerId, String modelId) onRemoveModel;
-
-  /// 高级请求参数（接线方打开现有编辑器）。
-  final ValueChanged<String> onProviderAdvanced;
-
-  /// 界面已确认过。
-  final ValueChanged<String> onDeleteProvider;
   final void Function(
     SettingsModelTask task, {
     String? providerId,
@@ -2215,7 +2188,6 @@ class SettingsActions {
   static void _noKey(SettingKey _) {}
   static void _noId(String _) {}
   static void _noIdOpt(String? _) {}
-  static void _noIdId(String _, String _) {}
   static void _noIdBool(String _, bool _) {}
   static void _noBool(bool _) {}
   static void _noSkillSource(SettingsSkillSource _) {}
@@ -2225,7 +2197,6 @@ class SettingsActions {
   static void _noFolder(SettingsFolder _) {}
   static void _noCache(SettingsCacheKind _) {}
   static void _noDictionary(SettingsDictionaryKind _) {}
-  static void _noField(String _, SettingsProviderField _, String _) {}
   static void _noAssign(
     SettingsModelTask _, {
     String? providerId,
@@ -2253,5 +2224,3 @@ class SettingsActions {
   static void _noRagInstall({required bool cuda}) {}
   static void _noScopes(Set<SettingsResetScope> _) {}
 }
-
-enum SettingsProviderField { name, baseUrl, apiKey }
