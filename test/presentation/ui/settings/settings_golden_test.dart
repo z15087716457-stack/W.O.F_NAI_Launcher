@@ -143,6 +143,31 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       final region = find.byKey(Key(key));
       if (region.evaluate().isNotEmpty) masks.add(t.getRect(region));
     }
+    // D27：Skill 改造只排除 Agent 页说明行、侧栏（工具卡提示变长，新增两张侧卡使其下方
+    // 卡片下移），以及主栏从新 Skill 分区开始往下（扩展、MCP 随之下移）。
+    // 标题、模型区与整个指令区继续逐像素锁定；新区域另有实绘与行为检查。
+    final skillSection = find.ancestor(
+      of: find.byKey(const Key('skill-add')),
+      matching: find.byType(SettingsSection),
+    );
+    if (skillSection.evaluate().isNotEmpty) {
+      for (final e in find.text(l.set_agDesc).evaluate()) {
+        masks.add(t.getRect(find.byWidget(e.widget)));
+      }
+      final capture = t.getRect(find.byKey(const Key('settings-capture')));
+      final section = t.getRect(skillSection.first);
+      masks.add(
+        Rect.fromLTRB(section.left, section.top, section.right, capture.bottom),
+      );
+      final aside = find
+          .byType(SettingsAsideCard)
+          .evaluate()
+          .map((e) => t.getRect(find.byWidget(e.widget)));
+      final first = aside.reduce((a, b) => a.expandToInclude(b));
+      masks.add(
+        Rect.fromLTRB(first.left, first.top, first.right, capture.bottom),
+      );
+    }
     for (final title in find.text(l.set_agPrefix).evaluate()) {
       masks.add(t.getRect(find.byWidget(title.widget)));
     }

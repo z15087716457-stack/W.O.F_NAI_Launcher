@@ -1203,6 +1203,58 @@ class SettingsExtension {
   final bool enabled;
 }
 
+enum SettingsSkillSource { builtin, global, workspace }
+
+/// [active] 生效；[shadowed] 被更高优先级的同名 Skill 替代；[disabled] 用户关掉；[error] 读不进来。
+enum SettingsSkillState { active, shadowed, disabled, error }
+
+/// [description] 缺描述；[name] 名称不合规或与文件夹名不一致；[missing] 文件夹里没有 SKILL.md；[parse] 头部无法解析。
+enum SettingsSkillError { description, name, missing, parse }
+
+@immutable
+class SettingsSkill {
+  const SettingsSkill({
+    required this.id,
+    required this.name,
+    required this.source,
+    this.description = '',
+    this.path = '',
+    this.state = SettingsSkillState.active,
+    this.enabled = true,
+    this.manual = false,
+    this.error,
+  });
+
+  /// `<source>/<name>`，回调都用它。
+  final String id;
+  final String name;
+  final SettingsSkillSource source;
+  final String description;
+
+  /// SKILL.md 所在文件夹。
+  final String path;
+  final SettingsSkillState state;
+  final bool enabled;
+
+  /// 仅手动：不进提示词目录，只能 `/skill:名称` 调用。
+  final bool manual;
+  final SettingsSkillError? error;
+  bool get builtin => source == SettingsSkillSource.builtin;
+}
+
+/// 常驻上下文的估算（字符 / 4）；null = 还没算出来，不显示这一块。
+@immutable
+class SettingsAgentContext {
+  const SettingsAgentContext({
+    required this.promptTokens,
+    required this.skillTokens,
+    required this.skillCount,
+    required this.toolTokens,
+    required this.toolCount,
+  });
+  final int promptTokens, skillTokens, skillCount, toolTokens, toolCount;
+}
+
 enum SettingsPromptScope { global, workspace }
 
 /// 基础提示词（旧设置“内置提示词”里可编辑的那层，拼在系统前缀之后、全局指令之前）。
@@ -1246,6 +1298,9 @@ class SettingsAgentData {
     this.systemPrefix = '',
     this.systemPrompt,
     this.extensions = const [],
+    this.skills = const [],
+    this.skillFolders = const [],
+    this.context,
     this.mcp = const [],
     this.tools = const [],
     this.dataPath = '',
@@ -1260,6 +1315,13 @@ class SettingsAgentData {
   /// 基础提示词编辑；null = 不显示这一行（Agent 未初始化时）。
   final SettingsSystemPrompt? systemPrompt;
   final List<SettingsExtension> extensions;
+
+  /// 内置在前，再按全局、工作区排；同名的每个副本都单独一行。
+  final List<SettingsSkill> skills;
+
+  /// (来源, 文件夹路径)：全局一定有，工作区在有当前工作区时出现。
+  final List<(SettingsSkillSource, String)> skillFolders;
+  final SettingsAgentContext? context;
   final List<SettingsMcpServer> mcp;
 
   /// Agent 可用的工具名（只读展示）。
@@ -1277,6 +1339,9 @@ class SettingsAgentData {
     systemPrefix: systemPrefix ?? this.systemPrefix,
     systemPrompt: systemPrompt ?? this.systemPrompt,
     extensions: extensions,
+    skills: skills,
+    skillFolders: skillFolders,
+    context: context,
     mcp: mcp,
     tools: tools,
     dataPath: dataPath,
@@ -1837,6 +1902,14 @@ class SettingsActions {
     this.onExtensionEnabled = _noIdBool,
     this.onRemoveExtension = _noId,
     this.onAddExtension = _noBool,
+    this.onSkillEnabled = _noIdBool,
+    this.onSkillManual = _noIdBool,
+    this.onViewSkill = _noId,
+    this.onOpenSkillFolder = _noId,
+    this.onRemoveSkill = _noId,
+    this.onAddSkill = _none,
+    this.onNewSkill = _none,
+    this.onOpenSkillRoot = _noSkillSource,
     this.onMcpEnabled = _noIdBool,
     this.onMcpMode = _noMcpMode,
     this.onMcpLogin = _noId,
@@ -2022,6 +2095,24 @@ class SettingsActions {
 
   /// true = 选目录，false = 选文件。
   final ValueChanged<bool> onAddExtension;
+
+  /// 用户 Skill 开关；内置 Skill 没有开关。
+  final void Function(String id, bool enabled) onSkillEnabled;
+
+  /// true = 仅手动，false = 自动。
+  final void Function(String id, bool manual) onSkillManual;
+
+  /// 查看 SKILL.md（内置为只读，带“复制为我的 Skill”）。
+  final ValueChanged<String> onViewSkill;
+  final ValueChanged<String> onOpenSkillFolder;
+
+  /// 接线方先确认，再把文件夹移到 skill-trash。
+  final ValueChanged<String> onRemoveSkill;
+
+  /// 选文件夹 → 选位置 / 调用方式 → 复制进来。
+  final VoidCallback onAddSkill;
+  final VoidCallback onNewSkill;
+  final ValueChanged<SettingsSkillSource> onOpenSkillRoot;
   final void Function(String id, bool enabled) onMcpEnabled;
   final void Function(String id, SettingsMcpMode mode) onMcpMode;
   final ValueChanged<String> onMcpLogin;
@@ -2112,6 +2203,7 @@ class SettingsActions {
   static void _noIdId(String _, String _) {}
   static void _noIdBool(String _, bool _) {}
   static void _noBool(bool _) {}
+  static void _noSkillSource(SettingsSkillSource _) {}
   static void _noText(String _) {}
   static void _noChannel(ChannelSettings _) {}
   static void _noShortcut(String _, List<String> _) {}

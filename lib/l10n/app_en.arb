@@ -10079,7 +10079,7 @@
   "set_mdAddProvider": "Add provider",
   "set_mdEmpty": "No providers yet",
   "set_mdEmptySub": "Add one to enable translation and prompt reverse.",
-  "set_agDesc": "Model, instructions, extensions and MCP tools for the sidebar assistant.",
+  "set_agDesc": "Model, instructions, skills, extensions and MCP tools for the sidebar assistant.",
   "set_agModelSec": "Model",
   "set_agModel": "Agent model",
   "set_agModelSub": "Thinking effort is set per task in the chat box",
@@ -10094,7 +10094,6 @@
   "set_agOrderPrefix": "Before built-in prompt",
   "set_agOrderGlobal": "Global instructions",
   "set_agOrderWorkspace": "Workspace rules",
-  "set_agOrderTools": "Tool map",
   "set_agGlobal": "Global instructions",
   "set_agGlobalHint": "Like a system-wide AGENTS.md; applies to all workspaces.",
   "set_agPrefix": "Before built-in prompt",
@@ -10130,7 +10129,7 @@
       "n": {}
     }
   },
-  "set_agToolsTip": "Generation tools always quote a price and wait for your approval.",
+  "set_agToolsTip": "Business tools are discovered on demand through codemode; usage lives in the nai-studio skill. Generation tools always quote a price and wait for your approval.",
   "set_agData": "Data folder",
   "set_agWorkspaces": "Workspaces",
   "set_agSessions": "Sessions",
@@ -10663,5 +10662,75 @@
   "set_agBaseFailed": "Not saved: the workspace changed or the write failed. Your edits are kept.",
   "set_agMcpUnchecked": "Not checked",
   "set_agInstructionsSaving": "Saving instructions…",
-  "set_agInstructionsFailed": "Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again."
+  "set_agInstructionsFailed": "Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.",
+  "set_agOrderSkills": "Skill catalog",
+  "set_agSkills": "Skills",
+  "set_agSkillsSub": "Only names and one-line descriptions stay in the prompt; the Agent reads the full instructions when a task matches.",
+  "set_agSkillsLoaded": "{n} loaded",
+  "@set_agSkillsLoaded": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agSkillBuiltin": "Built-in",
+  "set_agSkillGlobal": "Global",
+  "set_agSkillWorkspace": "Workspace",
+  "set_agSkillAuto": "Auto",
+  "set_agSkillManual": "Manual only",
+  "set_agSkillView": "View",
+  "set_agSkillAdd": "Add skill folder",
+  "set_agSkillNew": "New skill",
+  "set_agSkillSlashHint": "Type /skill:name in the chat to invoke manually",
+  "set_agSkillTrust": "Skills can direct the Agent to read and write files and run commands. Only add trusted sources.",
+  "set_agSkillNotLoaded": "Not loaded",
+  "set_agSkillShadowed": "Replaced by a skill with the same name",
+  "set_agSkillErrDescription": "SKILL.md has no description and will not load",
+  "set_agSkillErrName": "Names may only use lowercase letters, digits and single hyphens, up to 64 characters",
+  "set_agSkillErrMissing": "The folder has no SKILL.md",
+  "set_agSkillErrParse": "Cannot read the SKILL.md front matter",
+  "set_agSkillOpenFolder": "Open folder",
+  "set_agSkillRemove": "Delete skill",
+  "set_agSkillRemoveConfirm": "Delete \"{name}\"? Its files move to the skill-trash folder in the Agent data folder.",
+  "@set_agSkillRemoveConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillCopy": "Copy as my skill",
+  "set_agSkillReadOnly": "Built-in skills update with the app and cannot be edited. A global copy with the same name replaces it.",
+  "set_agSkillAddTitle": "Add skill folder",
+  "set_agSkillPlace": "Location",
+  "set_agSkillPlaceWorkspace": "Current workspace \"{name}\"",
+  "@set_agSkillPlaceWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillMode": "Invocation",
+  "set_agSkillCopyNote": "The folder is copied into the Agent data folder; later changes to the original are not synced.",
+  "set_agSkillExists": "\"{name}\" already exists. Delete or rename it first.",
+  "@set_agSkillExists": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillNewName": "New skill name (lowercase letters, digits, hyphens)",
+  "set_agSkillPlaces": "Skill folders",
+  "set_agSkillPlacesTip": "Each subfolder holds one SKILL.md. On name conflicts the workspace wins, then global, then built-in.",
+  "set_agContext": "Always in context",
+  "set_agContextPrompt": "System prompt",
+  "set_agContextSkills": "Skill catalog · {n}",
+  "@set_agContextSkills": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTools": "Default tools · {n}",
+  "@set_agContextTools": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTip": "tokens · estimated from characters",
+  "set_agFinalPending": "No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list."
 }

@@ -18349,7 +18349,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_mdEmptySub => '添加一个服务商后，翻译和反推就能用了。';
 
   @override
-  String get set_agDesc => '侧栏助手的模型、指令、扩展和 MCP 工具。';
+  String get set_agDesc => '侧栏助手的模型、指令、Skill、扩展和 MCP 工具。';
 
   @override
   String get set_agModelSec => '模型';
@@ -18392,9 +18392,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agOrderWorkspace => '工作区规则';
-
-  @override
-  String get set_agOrderTools => '工具地图';
 
   @override
   String get set_agGlobal => '全局指令';
@@ -18476,7 +18473,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get set_agToolsTip => '生图类工具始终先报价，等你确认后才执行。';
+  String get set_agToolsTip =>
+      '业务工具经 codemode 按需发现，用法写在 nai-studio Skill。生图类工具始终先报价，等你确认后才执行。';
 
   @override
   String get set_agData => '数据目录';
@@ -19564,6 +19562,139 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agInstructionsFailed => '指令未保存：内容已变化或写入失败。草稿已保留，请重试。';
+
+  @override
+  String get set_agOrderSkills => 'Skill 目录';
+
+  @override
+  String get set_agSkills => 'Skill';
+
+  @override
+  String get set_agSkillsSub => '平时只把名称和一句话描述放进提示词；任务对得上时 Agent 才读取完整说明。';
+
+  @override
+  String set_agSkillsLoaded(Object n) {
+    return '$n 个已加载';
+  }
+
+  @override
+  String get set_agSkillBuiltin => '内置';
+
+  @override
+  String get set_agSkillGlobal => '全局';
+
+  @override
+  String get set_agSkillWorkspace => '工作区';
+
+  @override
+  String get set_agSkillAuto => '自动';
+
+  @override
+  String get set_agSkillManual => '仅手动';
+
+  @override
+  String get set_agSkillView => '查看';
+
+  @override
+  String get set_agSkillAdd => '添加 Skill 文件夹';
+
+  @override
+  String get set_agSkillNew => '新建 Skill';
+
+  @override
+  String get set_agSkillSlashHint => '聊天框输入 /skill:名称 手动调用';
+
+  @override
+  String get set_agSkillTrust => 'Skill 能指挥 Agent 读写文件和执行命令，请只添加可信来源。';
+
+  @override
+  String get set_agSkillNotLoaded => '未加载';
+
+  @override
+  String get set_agSkillShadowed => '已被同名 Skill 替代';
+
+  @override
+  String get set_agSkillErrDescription => 'SKILL.md 缺少 description，不会加载';
+
+  @override
+  String get set_agSkillErrName => '名称只能用小写字母、数字和单个连字符，最长 64 个字符';
+
+  @override
+  String get set_agSkillErrMissing => '文件夹里没有 SKILL.md';
+
+  @override
+  String get set_agSkillErrParse => '无法读取 SKILL.md 头部信息';
+
+  @override
+  String get set_agSkillOpenFolder => '打开文件夹';
+
+  @override
+  String get set_agSkillRemove => '删除 Skill';
+
+  @override
+  String set_agSkillRemoveConfirm(Object name) {
+    return '删除「$name」？文件会移到 Agent 数据目录的 skill-trash 文件夹。';
+  }
+
+  @override
+  String get set_agSkillCopy => '复制为我的 Skill';
+
+  @override
+  String get set_agSkillReadOnly => '内置 Skill 随版本更新，不能直接编辑；复制后，同名的全局副本会替代它。';
+
+  @override
+  String get set_agSkillAddTitle => '添加 Skill 文件夹';
+
+  @override
+  String get set_agSkillPlace => '放到';
+
+  @override
+  String set_agSkillPlaceWorkspace(Object name) {
+    return '当前工作区「$name」';
+  }
+
+  @override
+  String get set_agSkillMode => '调用方式';
+
+  @override
+  String get set_agSkillCopyNote => '会复制进 Agent 数据目录，原文件夹之后的修改不会自动同步。';
+
+  @override
+  String set_agSkillExists(Object name) {
+    return '「$name」已存在，请先删除或改名。';
+  }
+
+  @override
+  String get set_agSkillNewName => '新 Skill 名称（小写字母、数字、连字符）';
+
+  @override
+  String get set_agSkillPlaces => 'Skill 位置';
+
+  @override
+  String get set_agSkillPlacesTip => '每个子文件夹放一个 SKILL.md。同名时工作区优先，其次全局，最后内置。';
+
+  @override
+  String get set_agContext => '常驻上下文';
+
+  @override
+  String get set_agContextPrompt => '系统提示词';
+
+  @override
+  String set_agContextSkills(Object n) {
+    return 'Skill 目录 · $n 项';
+  }
+
+  @override
+  String set_agContextTools(Object n) {
+    return '默认工具 $n 个';
+  }
+
+  @override
+  String get set_agContextTip => 'tokens · 按字符估算';
+
+  @override
+  String get set_agFinalPending =>
+      '当前没有运行中的会话。以下是 Studio 组装的部分；会话启动时 Pi 还会追加 Skill 目录、工作目录和 MCP 服务列表。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -37911,7 +38042,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_mdEmptySub => '新增一個服務商後，翻譯和反推就能用了。';
 
   @override
-  String get set_agDesc => '側欄助手的模型、指令、擴展和 MCP 工具。';
+  String get set_agDesc => '側欄助手的模型、指令、Skill、擴展和 MCP 工具。';
 
   @override
   String get set_agModelSec => '模型';
@@ -37954,9 +38085,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agOrderWorkspace => '工作區規則';
-
-  @override
-  String get set_agOrderTools => '工具地圖';
 
   @override
   String get set_agGlobal => '全域指令';
@@ -38038,7 +38166,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get set_agToolsTip => '生圖類工具始終先報價，等你確認後才執行。';
+  String get set_agToolsTip =>
+      '業務工具經 codemode 按需發現，用法寫在 nai-studio Skill。生圖類工具始終先報價，等你確認後才執行。';
 
   @override
   String get set_agData => '資料目錄';
@@ -39126,4 +39255,137 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agInstructionsFailed => '指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。';
+
+  @override
+  String get set_agOrderSkills => 'Skill 目錄';
+
+  @override
+  String get set_agSkills => 'Skill';
+
+  @override
+  String get set_agSkillsSub => '平時只把名稱和一句話描述放進提示詞；任務對得上時 Agent 才讀取完整說明。';
+
+  @override
+  String set_agSkillsLoaded(Object n) {
+    return '$n 個已載入';
+  }
+
+  @override
+  String get set_agSkillBuiltin => '內建';
+
+  @override
+  String get set_agSkillGlobal => '全域';
+
+  @override
+  String get set_agSkillWorkspace => '工作區';
+
+  @override
+  String get set_agSkillAuto => '自動';
+
+  @override
+  String get set_agSkillManual => '僅手動';
+
+  @override
+  String get set_agSkillView => '檢視';
+
+  @override
+  String get set_agSkillAdd => '新增 Skill 資料夾';
+
+  @override
+  String get set_agSkillNew => '新增 Skill';
+
+  @override
+  String get set_agSkillSlashHint => '聊天框輸入 /skill:名稱 手動呼叫';
+
+  @override
+  String get set_agSkillTrust => 'Skill 能指揮 Agent 讀寫檔案和執行命令，請只新增可信來源。';
+
+  @override
+  String get set_agSkillNotLoaded => '未載入';
+
+  @override
+  String get set_agSkillShadowed => '已被同名 Skill 替代';
+
+  @override
+  String get set_agSkillErrDescription => 'SKILL.md 缺少 description，不會載入';
+
+  @override
+  String get set_agSkillErrName => '名稱只能用小寫字母、數字和單個連字元，最長 64 個字元';
+
+  @override
+  String get set_agSkillErrMissing => '資料夾裡沒有 SKILL.md';
+
+  @override
+  String get set_agSkillErrParse => '無法讀取 SKILL.md 頭部資訊';
+
+  @override
+  String get set_agSkillOpenFolder => '開啟資料夾';
+
+  @override
+  String get set_agSkillRemove => '刪除 Skill';
+
+  @override
+  String set_agSkillRemoveConfirm(Object name) {
+    return '刪除「$name」？檔案會移到 Agent 資料目錄的 skill-trash 資料夾。';
+  }
+
+  @override
+  String get set_agSkillCopy => '複製為我的 Skill';
+
+  @override
+  String get set_agSkillReadOnly => '內建 Skill 隨版本更新，不能直接編輯；複製後，同名的全域副本會替代它。';
+
+  @override
+  String get set_agSkillAddTitle => '新增 Skill 資料夾';
+
+  @override
+  String get set_agSkillPlace => '放到';
+
+  @override
+  String set_agSkillPlaceWorkspace(Object name) {
+    return '當前工作區「$name」';
+  }
+
+  @override
+  String get set_agSkillMode => '呼叫方式';
+
+  @override
+  String get set_agSkillCopyNote => '會複製進 Agent 資料目錄，原資料夾之後的修改不會自動同步。';
+
+  @override
+  String set_agSkillExists(Object name) {
+    return '「$name」已存在，請先刪除或改名。';
+  }
+
+  @override
+  String get set_agSkillNewName => '新 Skill 名稱（小寫字母、數字、連字元）';
+
+  @override
+  String get set_agSkillPlaces => 'Skill 位置';
+
+  @override
+  String get set_agSkillPlacesTip => '每個子資料夾放一個 SKILL.md。同名時工作區優先，其次全域，最後內建。';
+
+  @override
+  String get set_agContext => '常駐上下文';
+
+  @override
+  String get set_agContextPrompt => '系統提示詞';
+
+  @override
+  String set_agContextSkills(Object n) {
+    return 'Skill 目錄 · $n 項';
+  }
+
+  @override
+  String set_agContextTools(Object n) {
+    return '預設工具 $n 個';
+  }
+
+  @override
+  String get set_agContextTip => 'tokens · 按字元估算';
+
+  @override
+  String get set_agFinalPending =>
+      '當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。';
 }

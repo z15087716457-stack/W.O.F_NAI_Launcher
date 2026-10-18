@@ -61,7 +61,7 @@ function state() {
       .map(entry => ({ id: entry.id, parentId: entry.parentId, role: entry.message.role, timestamp: entry.message.timestamp })),
     userMessages: session.getUserMessagesForForking(), queue: queueState(),
     streaming: session.isStreaming, permissionMode: created.getPermissionMode(), ...usage(),
-    extensions: created.extensions, mcpStatus };
+    extensions: created.extensions, skills: created.skills, mcpStatus };
 }
 function requireIdle() {
   if (session.isStreaming || !session.isIdle) throw new Error('Wait for the current run or stop it first');

@@ -18626,7 +18626,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_mdEmptySub => '추가하면 번역과 역추론을 쓸 수 있습니다.';
 
   @override
-  String get set_agDesc => '사이드바 도우미의 모델, 지침, 확장, MCP 도구.';
+  String get set_agDesc => '사이드바 도우미의 모델, 지침, 스킬, 확장, MCP 도구.';
 
   @override
   String get set_agModelSec => '모델';
@@ -18669,9 +18669,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agOrderWorkspace => '작업 공간 규칙';
-
-  @override
-  String get set_agOrderTools => '도구 맵';
 
   @override
   String get set_agGlobal => '전역 지침';
@@ -18755,7 +18752,8 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get set_agToolsTip => '생성 도구는 항상 가격을 먼저 알리고 확인 후 실행합니다.';
+  String get set_agToolsTip =>
+      '업무 도구는 codemode를 통해 필요할 때 검색되고, 사용법은 nai-studio 스킬에 있습니다. 생성 도구는 항상 가격을 먼저 알리고 확인 후 실행합니다.';
 
   @override
   String get set_agData => '데이터 폴더';
@@ -19859,4 +19857,142 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get set_agInstructionsFailed =>
       '지침을 저장하지 못했습니다. 저장된 내용이 변경되었거나 쓰기에 실패했습니다. 초안은 유지됩니다. 다시 시도하세요.';
+
+  @override
+  String get set_agOrderSkills => '스킬 카탈로그';
+
+  @override
+  String get set_agSkills => '스킬';
+
+  @override
+  String get set_agSkillsSub =>
+      '평소에는 이름과 한 줄 설명만 프롬프트에 들어가며, 작업이 맞으면 Agent가 전체 설명을 읽습니다.';
+
+  @override
+  String set_agSkillsLoaded(Object n) {
+    return '$n개 읽음';
+  }
+
+  @override
+  String get set_agSkillBuiltin => '내장';
+
+  @override
+  String get set_agSkillGlobal => '전역';
+
+  @override
+  String get set_agSkillWorkspace => '작업 공간';
+
+  @override
+  String get set_agSkillAuto => '자동';
+
+  @override
+  String get set_agSkillManual => '수동 전용';
+
+  @override
+  String get set_agSkillView => '보기';
+
+  @override
+  String get set_agSkillAdd => '스킬 폴더 추가';
+
+  @override
+  String get set_agSkillNew => '새 스킬';
+
+  @override
+  String get set_agSkillSlashHint => '채팅창에 /skill:이름을 입력하면 수동으로 호출합니다';
+
+  @override
+  String get set_agSkillTrust =>
+      '스킬은 Agent가 파일을 읽고 쓰거나 명령을 실행하도록 지시할 수 있습니다. 신뢰할 수 있는 것만 추가하세요.';
+
+  @override
+  String get set_agSkillNotLoaded => '읽지 않음';
+
+  @override
+  String get set_agSkillShadowed => '같은 이름의 스킬로 대체됨';
+
+  @override
+  String get set_agSkillErrDescription => 'SKILL.md에 description이 없어 읽지 않습니다';
+
+  @override
+  String get set_agSkillErrName => '이름은 소문자, 숫자, 단일 하이픈만 사용할 수 있으며 최대 64자입니다';
+
+  @override
+  String get set_agSkillErrMissing => '폴더에 SKILL.md가 없습니다';
+
+  @override
+  String get set_agSkillErrParse => 'SKILL.md의 front matter를 읽을 수 없습니다';
+
+  @override
+  String get set_agSkillOpenFolder => '폴더 열기';
+
+  @override
+  String get set_agSkillRemove => '스킬 삭제';
+
+  @override
+  String set_agSkillRemoveConfirm(Object name) {
+    return '\"$name\"을(를) 삭제하시겠습니까? 파일은 Agent 데이터 폴더의 skill-trash 폴더로 이동합니다.';
+  }
+
+  @override
+  String get set_agSkillCopy => '내 스킬로 복사';
+
+  @override
+  String get set_agSkillReadOnly =>
+      '내장 스킬은 앱 업데이트와 함께 갱신되며 직접 편집할 수 없습니다. 복사하면 같은 이름의 전역 스킬이 대신 사용됩니다.';
+
+  @override
+  String get set_agSkillAddTitle => '스킬 폴더 추가';
+
+  @override
+  String get set_agSkillPlace => '위치';
+
+  @override
+  String set_agSkillPlaceWorkspace(Object name) {
+    return '현재 작업 공간 \"$name\"';
+  }
+
+  @override
+  String get set_agSkillMode => '호출 방식';
+
+  @override
+  String get set_agSkillCopyNote =>
+      'Agent 데이터 폴더로 복사되며, 원본 폴더의 이후 변경 사항은 자동으로 동기화되지 않습니다.';
+
+  @override
+  String set_agSkillExists(Object name) {
+    return '\"$name\"이(가) 이미 있습니다. 먼저 삭제하거나 이름을 바꾸세요.';
+  }
+
+  @override
+  String get set_agSkillNewName => '새 스킬 이름 (소문자, 숫자, 하이픈)';
+
+  @override
+  String get set_agSkillPlaces => '스킬 위치';
+
+  @override
+  String get set_agSkillPlacesTip =>
+      '각 하위 폴더에 SKILL.md를 하나씩 둡니다. 이름이 겹치면 작업 공간, 전역, 내장 순으로 우선합니다.';
+
+  @override
+  String get set_agContext => '상시 컨텍스트';
+
+  @override
+  String get set_agContextPrompt => '시스템 프롬프트';
+
+  @override
+  String set_agContextSkills(Object n) {
+    return '스킬 카탈로그 · $n개';
+  }
+
+  @override
+  String set_agContextTools(Object n) {
+    return '기본 도구 · $n개';
+  }
+
+  @override
+  String get set_agContextTip => '토큰 · 문자 기준 추정';
+
+  @override
+  String get set_agFinalPending =>
+      '실행 중인 세션이 없습니다. 아래는 Studio가 구성하는 부분이며, 세션이 시작되면 Pi가 스킬 카탈로그, 작업 디렉터리, MCP 서버 목록도 추가합니다.';
 }

@@ -127,7 +127,7 @@ void main() {
     }
   });
 
-  testWidgets('生效顺序：内置提示词前 → 内置系统提示词 → 全局指令 → 工作区规则 → 工具地图', (t) async {
+  testWidgets('生效顺序：内置提示词前 → 内置系统提示词 → 全局指令 → 工作区规则 → Skill 目录', (t) async {
     await pumpSettings(t, page: SettingsPageId.agent);
     double x(String s) => t
         .getTopLeft(
@@ -138,7 +138,7 @@ void main() {
         )
         .dx;
     final xs = [
-      for (final s in ['内置提示词前', '内置系统提示词', '全局指令', '工作区规则', '工具地图']) x(s),
+      for (final s in ['内置提示词前', '内置系统提示词', '全局指令', '工作区规则', 'Skill 目录']) x(s),
     ];
     expect([...xs]..sort(), xs);
   });

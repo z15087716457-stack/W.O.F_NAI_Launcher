@@ -11,6 +11,7 @@ import { createNaiInteractionExtension } from './extensions/interaction.mjs';
 import { createNaiPermissions } from './extensions/permissions.mjs';
 import { createStudioExtensionUi } from './extensions/ui.mjs';
 import { createStudioMcp, mcpRedactor, validateStudioMcp } from './mcp.mjs';
+import { builtinSkillsDirectory, resolveStudioSkills } from './skills.mjs';
 
 // Pi caches loader overrides on reload; Studio prompt edits apply on the next turn.
 class StudioResourceLoader extends DefaultResourceLoader {
@@ -19,21 +20,6 @@ class StudioResourceLoader extends DefaultResourceLoader {
     this.currentPrompt = currentPrompt;
   }
   getSystemPrompt() { return this.currentPrompt(); }
-}
-
-export const studioToolMap = [
-  'Tool map:',
-  '- Current draft/parameters/selected image: studio_context (scope=draft for raw fields and field_versions).',
-  '- See pixels or workspace images: image_read. For original attachment metadata only, use its message path with metadata_only=true; this returns no pixels and requires no vision.',
-  '- Change draft: prompt_update using the versions just read; inspect returned readback.',
-  '- Workspace files/manuals: read, write, edit, bash. Read NAI manuals only when needed.',
-].join('\n');
-
-export function studioToolMapFor(extraToolNames = []) {
-  return [studioToolMap,
-    ...domainTools.filter(tool => extraToolNames.includes(tool.name)).map(tool => '- ' + tool.route),
-    ...(extraToolNames.includes('ask_user') ? ['- Clarify missing inputs/preferences: ask_user; wait for its answer.'] : []),
-  ].join('\n');
 }
 
 export function studioTools(execute, extraToolNames = []) {
@@ -63,7 +49,7 @@ export function studioTools(execute, extraToolNames = []) {
 
 export async function createStudioSession({ config, cwd, agentDir, systemPrompt, executeTool,
   sessionDirectory, sessionFile, sessionName, acquireRequest, extraToolNames = [],
-  extensionPaths = [], mcp = {}, onSession, onExtensionUi, onExtensionError, deferBinding = false }) {
+  extensionPaths = [], mcp = {}, skills = {}, onSession, onExtensionUi, onExtensionError, deferBinding = false }) {
   if (!systemPrompt?.trim()) throw new Error('NAI system prompt is required');
   const data = resolve(agentDir), sessions = resolve(sessionDirectory ?? join(data, 'sessions'));
   await Promise.all([resolve(cwd), data, sessions].map(path => mkdir(path, { recursive: true })));
@@ -89,14 +75,16 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
   const interactionTools = definitions.filter(tool => ['studio_context', 'ask_user'].includes(tool.name));
   const businessTools = definitions.filter(tool => !interactionTools.includes(tool));
   const names = ['read', 'write', 'edit', 'bash', 'codemode', ...interactionTools.map(tool => tool.name)];
+  // Detailed tool usage lives in the built-in nai-studio skill; only the entry points stay here.
   const toolMap = ['Tool map:',
     '- Current Studio state: studio_context (scope=draft returns raw fields and field_versions).',
-    '- Workspace files/manuals: read, write, edit, bash. Read NAI manuals only when needed.',
-    '- Studio operations: use codemode searchTools with namespace mcp__nai_studio; describeTool/describeNamespace on demand.',
-    '- Read fresh versions before edits. Chain dependent operations sequentially; batch independent reads with Promise.allSettled.',
-    '- MCP results carry content, structuredContent and isError. Check errors; image(result.content[i]) shows pixels. Never print image base64.',
-    ...(extraToolNames.includes('ask_user') ? ['- Missing input/preferences: ask_user, a direct model-only interaction tool.'] : []),
+    '- Studio operations: codemode with namespace mcp__nai_studio. Read the nai-studio skill first.',
+    '- Workspace files: read, write, edit, bash.',
+    ...(extraToolNames.includes('ask_user') ? ['- Missing input/preferences: ask_user (direct tool, not from codemode).'] : []),
   ].join('\n');
+  const skillSet = resolveStudioSkills({ builtinDirectory: skills.builtinDirectory ?? builtinSkillsDirectory,
+    globalDirectory: skills.globalDirectory, workspaceDirectory: skills.workspaceDirectory,
+    disabled: skills.disabled, modes: skills.modes });
   if (!Array.isArray(extensionPaths) || extensionPaths.length > 64
     || extensionPaths.some(path => typeof path !== 'string' || !isAbsolute(path)))
     throw new Error('Extensions must be explicitly selected local absolute paths');
@@ -119,12 +107,14 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     cwd: root, agentDir: data, settingsManager,
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
     additionalExtensionPaths: [...new Set(extensionPaths)],
+    // Studio resolves sources, overrides and switches; Pi formats the catalog and expands /skill:.
+    skillsOverride: () => ({ skills: skillSet.active, diagnostics: [] }),
     extensionFactories: [createNaiInteractionExtension(interactionTools),
       { name: 'nai-codemode', factory: createCodemodeExtension({ mode: 'on', models: false }) },
       { name: 'nai-tool-search', factory: createToolSearchExtension() },
       { name: 'nai-mcp', factory: createStudioMcp({ mcp, definitions: businessTools,
         execute: executeTool, agentDir: data, redact, restoredMcpTools,
-        instructions: 'NAI Studio operations. Discover schemas on demand; observe real user confirmation and current versions.\n' + studioToolMapFor(extraToolNames) }) },
+        instructions: 'NAI Studio operations. Discover schemas on demand; observe real user confirmation and current versions. Usage guide: the nai-studio skill.' }) },
       permissions.extension,
     ],
     agentsFilesOverride: () => ({ agentsFiles: [] }),
@@ -170,6 +160,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     setPermissionMode: permissions.setMode, getPermissionMode: permissions.getMode,
     contextWindowKnown: Number.isFinite(config.contextWindow) && config.contextWindow > 0,
     extensions: extensions.extensions.map(extension => ({ path: extension.path })),
+    skills: skillSet.report,
     setSystemPrompt(text) {
       if (!text?.trim()) throw new Error('NAI system prompt is required');
       prompt = text;

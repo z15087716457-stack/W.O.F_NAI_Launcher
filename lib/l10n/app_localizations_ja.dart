@@ -18571,7 +18571,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_mdEmptySub => '追加すると翻訳と逆推定が使えます。';
 
   @override
-  String get set_agDesc => 'サイドバーアシスタントのモデル、指示、拡張、MCP ツール。';
+  String get set_agDesc => 'サイドバーアシスタントのモデル、指示、スキル、拡張、MCP ツール。';
 
   @override
   String get set_agModelSec => 'モデル';
@@ -18614,9 +18614,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agOrderWorkspace => 'ワークスペースのルール';
-
-  @override
-  String get set_agOrderTools => 'ツールマップ';
 
   @override
   String get set_agGlobal => '全体の指示';
@@ -18698,7 +18695,8 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get set_agToolsTip => '生成系ツールは必ず見積もりを出し、確認後に実行します。';
+  String get set_agToolsTip =>
+      '業務ツールは codemode 経由で必要時に検出され、使い方は nai-studio スキルにあります。生成系ツールは必ず見積もりを出し、確認後に実行します。';
 
   @override
   String get set_agData => 'データフォルダー';
@@ -19790,4 +19788,142 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get set_agInstructionsFailed =>
       '指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。';
+
+  @override
+  String get set_agOrderSkills => 'スキルカタログ';
+
+  @override
+  String get set_agSkills => 'スキル';
+
+  @override
+  String get set_agSkillsSub =>
+      '通常は名前と一行の説明だけがプロンプトに入り、タスクに合うときだけ Agent が完全な説明を読み込みます。';
+
+  @override
+  String set_agSkillsLoaded(Object n) {
+    return '$n 件読み込み済み';
+  }
+
+  @override
+  String get set_agSkillBuiltin => '内蔵';
+
+  @override
+  String get set_agSkillGlobal => '全体';
+
+  @override
+  String get set_agSkillWorkspace => 'ワークスペース';
+
+  @override
+  String get set_agSkillAuto => '自動';
+
+  @override
+  String get set_agSkillManual => '手動のみ';
+
+  @override
+  String get set_agSkillView => '表示';
+
+  @override
+  String get set_agSkillAdd => 'スキルフォルダーを追加';
+
+  @override
+  String get set_agSkillNew => '新規スキル';
+
+  @override
+  String get set_agSkillSlashHint => 'チャット欄で /skill:名前 を入力すると手動で呼び出せます';
+
+  @override
+  String get set_agSkillTrust =>
+      'スキルは Agent にファイルの読み書きやコマンド実行を指示できます。信頼できるものだけを追加してください。';
+
+  @override
+  String get set_agSkillNotLoaded => '未読み込み';
+
+  @override
+  String get set_agSkillShadowed => '同じ名前のスキルに置き換えられました';
+
+  @override
+  String get set_agSkillErrDescription => 'SKILL.md に description がなく、読み込まれません';
+
+  @override
+  String get set_agSkillErrName => '名前に使えるのは小文字、数字、単一のハイフンのみで、最大 64 文字です';
+
+  @override
+  String get set_agSkillErrMissing => 'フォルダーに SKILL.md がありません';
+
+  @override
+  String get set_agSkillErrParse => 'SKILL.md のフロントマターを読み取れません';
+
+  @override
+  String get set_agSkillOpenFolder => 'フォルダーを開く';
+
+  @override
+  String get set_agSkillRemove => 'スキルを削除';
+
+  @override
+  String set_agSkillRemoveConfirm(Object name) {
+    return '「$name」を削除しますか？ファイルは Agent データフォルダーの skill-trash フォルダーに移動します。';
+  }
+
+  @override
+  String get set_agSkillCopy => '自分のスキルとしてコピー';
+
+  @override
+  String get set_agSkillReadOnly =>
+      '内蔵スキルはアプリの更新に合わせて更新され、直接編集できません。コピーすると、同じ名前の全体スキルが代わりに使われます。';
+
+  @override
+  String get set_agSkillAddTitle => 'スキルフォルダーを追加';
+
+  @override
+  String get set_agSkillPlace => '場所';
+
+  @override
+  String set_agSkillPlaceWorkspace(Object name) {
+    return '現在のワークスペース「$name」';
+  }
+
+  @override
+  String get set_agSkillMode => '呼び出し方法';
+
+  @override
+  String get set_agSkillCopyNote =>
+      'Agent データフォルダーにコピーされるため、元のフォルダーの以降の変更は自動で同期されません。';
+
+  @override
+  String set_agSkillExists(Object name) {
+    return '「$name」はすでに存在します。先に削除するか名前を変更してください。';
+  }
+
+  @override
+  String get set_agSkillNewName => '新しいスキル名（小文字、数字、ハイフン）';
+
+  @override
+  String get set_agSkillPlaces => 'スキルの場所';
+
+  @override
+  String get set_agSkillPlacesTip =>
+      '各サブフォルダーに SKILL.md を1つ置きます。名前が重複する場合はワークスペース、全体、内蔵の順に優先されます。';
+
+  @override
+  String get set_agContext => '常時コンテキスト';
+
+  @override
+  String get set_agContextPrompt => 'システムプロンプト';
+
+  @override
+  String set_agContextSkills(Object n) {
+    return 'スキルカタログ · $n 件';
+  }
+
+  @override
+  String set_agContextTools(Object n) {
+    return 'デフォルトツール · $n 件';
+  }
+
+  @override
+  String get set_agContextTip => 'トークン · 文字数から推定';
+
+  @override
+  String get set_agFinalPending =>
+      '実行中のセッションはありません。以下は Studio が組み立てる部分です。セッション開始時には Pi がスキルカタログ、作業ディレクトリ、MCP サーバー一覧も追加します。';
 }

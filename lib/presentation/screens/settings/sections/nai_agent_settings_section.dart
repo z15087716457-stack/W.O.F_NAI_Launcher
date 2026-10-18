@@ -197,7 +197,8 @@ class NaiAgentSettingsSectionState
     final client = c.selected?.client;
     final prompt = client != null && !client.isClosed
         ? (await client.getSystemPrompt())['text'] as String
-        : '${await c.store.effectiveSystemPrompt(workspace.id)}\n\n$_toolMap';
+        : '[${context.l10n.set_agFinalPending}]\n\n'
+              '${await c.store.effectiveSystemPrompt(workspace.id)}';
     if (!mounted) return;
     await showDialog<void>(
       context: context,
@@ -240,7 +241,6 @@ class NaiAgentSettingsSectionState
   }
 
   // Checked against the official host tool map; live sessions expose Pi's final prompt.
-  static const _toolMap = naiAgentToolMap;
 
   Widget _section(String title, Widget child, {String? hint}) => Padding(
     padding: const EdgeInsets.only(bottom: 26),

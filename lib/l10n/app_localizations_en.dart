@@ -19130,7 +19130,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agDesc =>
-      'Model, instructions, extensions and MCP tools for the sidebar assistant.';
+      'Model, instructions, skills, extensions and MCP tools for the sidebar assistant.';
 
   @override
   String get set_agModelSec => 'Model';
@@ -19176,9 +19176,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agOrderWorkspace => 'Workspace rules';
-
-  @override
-  String get set_agOrderTools => 'Tool map';
 
   @override
   String get set_agGlobal => 'Global instructions';
@@ -19267,7 +19264,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agToolsTip =>
-      'Generation tools always quote a price and wait for your approval.';
+      'Business tools are discovered on demand through codemode; usage lives in the nai-studio skill. Generation tools always quote a price and wait for your approval.';
 
   @override
   String get set_agData => 'Data folder';
@@ -20416,4 +20413,146 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_agInstructionsFailed =>
       'Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.';
+
+  @override
+  String get set_agOrderSkills => 'Skill catalog';
+
+  @override
+  String get set_agSkills => 'Skills';
+
+  @override
+  String get set_agSkillsSub =>
+      'Only names and one-line descriptions stay in the prompt; the Agent reads the full instructions when a task matches.';
+
+  @override
+  String set_agSkillsLoaded(Object n) {
+    return '$n loaded';
+  }
+
+  @override
+  String get set_agSkillBuiltin => 'Built-in';
+
+  @override
+  String get set_agSkillGlobal => 'Global';
+
+  @override
+  String get set_agSkillWorkspace => 'Workspace';
+
+  @override
+  String get set_agSkillAuto => 'Auto';
+
+  @override
+  String get set_agSkillManual => 'Manual only';
+
+  @override
+  String get set_agSkillView => 'View';
+
+  @override
+  String get set_agSkillAdd => 'Add skill folder';
+
+  @override
+  String get set_agSkillNew => 'New skill';
+
+  @override
+  String get set_agSkillSlashHint =>
+      'Type /skill:name in the chat to invoke manually';
+
+  @override
+  String get set_agSkillTrust =>
+      'Skills can direct the Agent to read and write files and run commands. Only add trusted sources.';
+
+  @override
+  String get set_agSkillNotLoaded => 'Not loaded';
+
+  @override
+  String get set_agSkillShadowed => 'Replaced by a skill with the same name';
+
+  @override
+  String get set_agSkillErrDescription =>
+      'SKILL.md has no description and will not load';
+
+  @override
+  String get set_agSkillErrName =>
+      'Names may only use lowercase letters, digits and single hyphens, up to 64 characters';
+
+  @override
+  String get set_agSkillErrMissing => 'The folder has no SKILL.md';
+
+  @override
+  String get set_agSkillErrParse => 'Cannot read the SKILL.md front matter';
+
+  @override
+  String get set_agSkillOpenFolder => 'Open folder';
+
+  @override
+  String get set_agSkillRemove => 'Delete skill';
+
+  @override
+  String set_agSkillRemoveConfirm(Object name) {
+    return 'Delete \"$name\"? Its files move to the skill-trash folder in the Agent data folder.';
+  }
+
+  @override
+  String get set_agSkillCopy => 'Copy as my skill';
+
+  @override
+  String get set_agSkillReadOnly =>
+      'Built-in skills update with the app and cannot be edited. A global copy with the same name replaces it.';
+
+  @override
+  String get set_agSkillAddTitle => 'Add skill folder';
+
+  @override
+  String get set_agSkillPlace => 'Location';
+
+  @override
+  String set_agSkillPlaceWorkspace(Object name) {
+    return 'Current workspace \"$name\"';
+  }
+
+  @override
+  String get set_agSkillMode => 'Invocation';
+
+  @override
+  String get set_agSkillCopyNote =>
+      'The folder is copied into the Agent data folder; later changes to the original are not synced.';
+
+  @override
+  String set_agSkillExists(Object name) {
+    return '\"$name\" already exists. Delete or rename it first.';
+  }
+
+  @override
+  String get set_agSkillNewName =>
+      'New skill name (lowercase letters, digits, hyphens)';
+
+  @override
+  String get set_agSkillPlaces => 'Skill folders';
+
+  @override
+  String get set_agSkillPlacesTip =>
+      'Each subfolder holds one SKILL.md. On name conflicts the workspace wins, then global, then built-in.';
+
+  @override
+  String get set_agContext => 'Always in context';
+
+  @override
+  String get set_agContextPrompt => 'System prompt';
+
+  @override
+  String set_agContextSkills(Object n) {
+    return 'Skill catalog · $n';
+  }
+
+  @override
+  String set_agContextTools(Object n) {
+    return 'Default tools · $n';
+  }
+
+  @override
+  String get set_agContextTip => 'tokens · estimated from characters';
+
+  @override
+  String get set_agFinalPending =>
+      'No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list.';
 }

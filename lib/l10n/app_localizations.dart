@@ -33401,7 +33401,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agDesc.
   ///
   /// In en, this message translates to:
-  /// **'Model, instructions, extensions and MCP tools for the sidebar assistant.'**
+  /// **'Model, instructions, skills, extensions and MCP tools for the sidebar assistant.'**
   String get set_agDesc;
 
   /// No description provided for @set_agModelSec.
@@ -33487,12 +33487,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Workspace rules'**
   String get set_agOrderWorkspace;
-
-  /// No description provided for @set_agOrderTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Tool map'**
-  String get set_agOrderTools;
 
   /// No description provided for @set_agGlobal.
   ///
@@ -33647,7 +33641,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agToolsTip.
   ///
   /// In en, this message translates to:
-  /// **'Generation tools always quote a price and wait for your approval.'**
+  /// **'Business tools are discovered on demand through codemode; usage lives in the nai-studio skill. Generation tools always quote a price and wait for your approval.'**
   String get set_agToolsTip;
 
   /// No description provided for @set_agData.
@@ -35659,6 +35653,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.'**
   String get set_agInstructionsFailed;
+
+  /// No description provided for @set_agOrderSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill catalog'**
+  String get set_agOrderSkills;
+
+  /// No description provided for @set_agSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get set_agSkills;
+
+  /// No description provided for @set_agSkillsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Only names and one-line descriptions stay in the prompt; the Agent reads the full instructions when a task matches.'**
+  String get set_agSkillsSub;
+
+  /// No description provided for @set_agSkillsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} loaded'**
+  String set_agSkillsLoaded(Object n);
+
+  /// No description provided for @set_agSkillBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get set_agSkillBuiltin;
+
+  /// No description provided for @set_agSkillGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get set_agSkillGlobal;
+
+  /// No description provided for @set_agSkillWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace'**
+  String get set_agSkillWorkspace;
+
+  /// No description provided for @set_agSkillAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get set_agSkillAuto;
+
+  /// No description provided for @set_agSkillManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual only'**
+  String get set_agSkillManual;
+
+  /// No description provided for @set_agSkillView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get set_agSkillView;
+
+  /// No description provided for @set_agSkillAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add skill folder'**
+  String get set_agSkillAdd;
+
+  /// No description provided for @set_agSkillNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New skill'**
+  String get set_agSkillNew;
+
+  /// No description provided for @set_agSkillSlashHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type /skill:name in the chat to invoke manually'**
+  String get set_agSkillSlashHint;
+
+  /// No description provided for @set_agSkillTrust.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills can direct the Agent to read and write files and run commands. Only add trusted sources.'**
+  String get set_agSkillTrust;
+
+  /// No description provided for @set_agSkillNotLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not loaded'**
+  String get set_agSkillNotLoaded;
+
+  /// No description provided for @set_agSkillShadowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaced by a skill with the same name'**
+  String get set_agSkillShadowed;
+
+  /// No description provided for @set_agSkillErrDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'SKILL.md has no description and will not load'**
+  String get set_agSkillErrDescription;
+
+  /// No description provided for @set_agSkillErrName.
+  ///
+  /// In en, this message translates to:
+  /// **'Names may only use lowercase letters, digits and single hyphens, up to 64 characters'**
+  String get set_agSkillErrName;
+
+  /// No description provided for @set_agSkillErrMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The folder has no SKILL.md'**
+  String get set_agSkillErrMissing;
+
+  /// No description provided for @set_agSkillErrParse.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot read the SKILL.md front matter'**
+  String get set_agSkillErrParse;
+
+  /// No description provided for @set_agSkillOpenFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open folder'**
+  String get set_agSkillOpenFolder;
+
+  /// No description provided for @set_agSkillRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete skill'**
+  String get set_agSkillRemove;
+
+  /// No description provided for @set_agSkillRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{name}\"? Its files move to the skill-trash folder in the Agent data folder.'**
+  String set_agSkillRemoveConfirm(Object name);
+
+  /// No description provided for @set_agSkillCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy as my skill'**
+  String get set_agSkillCopy;
+
+  /// No description provided for @set_agSkillReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in skills update with the app and cannot be edited. A global copy with the same name replaces it.'**
+  String get set_agSkillReadOnly;
+
+  /// No description provided for @set_agSkillAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add skill folder'**
+  String get set_agSkillAddTitle;
+
+  /// No description provided for @set_agSkillPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get set_agSkillPlace;
+
+  /// No description provided for @set_agSkillPlaceWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Current workspace \"{name}\"'**
+  String set_agSkillPlaceWorkspace(Object name);
+
+  /// No description provided for @set_agSkillMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invocation'**
+  String get set_agSkillMode;
+
+  /// No description provided for @set_agSkillCopyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The folder is copied into the Agent data folder; later changes to the original are not synced.'**
+  String get set_agSkillCopyNote;
+
+  /// No description provided for @set_agSkillExists.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" already exists. Delete or rename it first.'**
+  String set_agSkillExists(Object name);
+
+  /// No description provided for @set_agSkillNewName.
+  ///
+  /// In en, this message translates to:
+  /// **'New skill name (lowercase letters, digits, hyphens)'**
+  String get set_agSkillNewName;
+
+  /// No description provided for @set_agSkillPlaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill folders'**
+  String get set_agSkillPlaces;
+
+  /// No description provided for @set_agSkillPlacesTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Each subfolder holds one SKILL.md. On name conflicts the workspace wins, then global, then built-in.'**
+  String get set_agSkillPlacesTip;
+
+  /// No description provided for @set_agContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Always in context'**
+  String get set_agContext;
+
+  /// No description provided for @set_agContextPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'System prompt'**
+  String get set_agContextPrompt;
+
+  /// No description provided for @set_agContextSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skill catalog · {n}'**
+  String set_agContextSkills(Object n);
+
+  /// No description provided for @set_agContextTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Default tools · {n}'**
+  String set_agContextTools(Object n);
+
+  /// No description provided for @set_agContextTip.
+  ///
+  /// In en, this message translates to:
+  /// **'tokens · estimated from characters'**
+  String get set_agContextTip;
+
+  /// No description provided for @set_agFinalPending.
+  ///
+  /// In en, this message translates to:
+  /// **'No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list.'**
+  String get set_agFinalPending;
 }
 
 class _AppLocalizationsDelegate

@@ -1,10 +1,10 @@
 import { Type } from 'typebox';
 
-// Only names supplied by the production Dart binding are enabled. Keeping
-// descriptions and routes beside the schemas prevents fictitious tool maps.
+// Only names supplied by the production Dart binding are enabled. Usage guidance
+// lives in skills/nai-studio; schemas and descriptions stay beside the executors.
 export const domainTools = [
   { name: 'snapshot',
-    route: 'Generation configuration: snapshot (save/list/read/load). Explicit load requires current draft_version and backs up images, references, pills, presets and native image workflow settings.',
+
     description: 'Save, list, inspect or explicitly restore Studio generation configurations in this workspace, including source/mask geometry and native enhance/upscale settings. Temporary canvas tools are excluded. read omits binary image data; workflow_settings_saved=false identifies older snapshots which retain current workflow preferences. load requires expected_version from fresh studio_context(scope=draft). Workspaces never auto-load. Changed library blocks restore as independent copies, preserving newer edits. Does not generate.',
     parameters: Type.Object({
       action: Type.Union(['save', 'list', 'read', 'load'].map(v => Type.Literal(v))),
@@ -14,7 +14,7 @@ export const domainTools = [
       limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 50 })),
     }),
   },
-  { name: 'wiki_query', route: 'Local encyclopedia source text: wiki_query; page long articles with offset/limit. include_examples=true for one tag discovers official illustrations; pass returned wiki:* image_id to image_read.',
+  { name: 'wiki_query',
     description: 'Read local Danbooru wiki source text for one to twenty canonical tags. Offline by default. include_examples=true fetches only official explicit example metadata for one tag; unavailable/deleted posts retain source links, never substituted search results. example_offset/example_limit page at most eight previews. Pixels load only through image_read using returned IDs and the native static preview cache. Returned language is source, not an invented translation. Follow source_url for attribution. Page long bodies by character offset/limit; limit is a total text budget shared across found pages. Follow each next_offset for more.',
     parameters: Type.Object({ tags: Type.Array(Type.String(), { minItems: 1, maxItems: 20 }),
       offset: Type.Optional(Type.Integer({ minimum: 0 })),
@@ -24,7 +24,7 @@ export const domainTools = [
       example_limit: Type.Optional(Type.Integer({minimum: 1, maximum: 8})),
     }),
   },
-  { name: 'tag_query', route: 'Find canonical tags, aliases, category/count and cached short definitions: tag_query (English tag query; local indexes only).',
+  { name: 'tag_query',
     description: 'Search bundled and locally synced tag indexes by English canonical name or alias. Returns counts, category, aliases, and available cached Chinese names/short definitions with language labels. No paid translation or online lookup. contains enables substring matching.',
     parameters: Type.Object({ query: Type.String({ minLength: 1, maxLength: 200 }),
       contains: Type.Optional(Type.Boolean()),
@@ -32,7 +32,7 @@ export const domainTools = [
     }),
   },
   { name: 'block_query',
-    route: 'Prompt block library: block_query (tree/search/id).',
+
     description: 'Read the real Studio prompt block library. kind=tree returns folders, collections and library_version; id returns one complete block and its version; otherwise returns paged summaries. Search title/content/tags, filter folder_id (null=root), favorites or collection_id. Archived snapshot dependencies are hidden unless explicitly included. No model or network request.',
     parameters: Type.Object({
       kind: Type.Optional(Type.Literal('tree')), id: Type.Optional(Type.String()),
@@ -45,7 +45,7 @@ export const domainTools = [
     }),
   },
   { name: 'block_manage',
-    route: 'Edit blocks/instances and organize their library: block_manage. Block edits use expected_version; folder_*/collection_* and block_reorder require library_version from block_query(kind=tree). Use draft documents for instance markers and raw offsets.',
+
     description: 'Manage real library blocks or current prompt block instances, with a complete library/draft backup. create requires changes.title/content. update/delete/insert require id and its expected_version from block_query(id). Editing content clears obsolete atom pools unless new atoms are supplied. insert and instance_update also require expected_draft_version from fresh studio_context(scope=draft). scope=main/negative/char:<ID>:pos/neg; omit offset to append with separator, explicit offsets use raw document UTF-16 positions. Double-sided blocks keep the native positive/negative bundle behavior. instance_update uses marker from that document and instance fields (settings, enabled, locked, evolutionEnabled); returns actual editor readback. Never generates. Organization actions require expected_library_version. Folder/collection create/update use changes (name, parentId, sortOrder; collection_create also isFolder). *_move uses parent_id (null=root), *_reorder uses complete ordered_ids under parent_id. folder_delete requires an empty folder. collection_delete removes its subtree and memberships while retaining blocks. collection_add/remove use id plus block_id, with explicit membership and native favorite semantics.',
     parameters: Type.Object({
       action: Type.Union(['create', 'update', 'delete', 'insert', 'instance_update', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove'].map(v => Type.Literal(v))),
@@ -64,17 +64,17 @@ export const domainTools = [
     }),
   },
   { name: 'settings_read',
-    route: 'Public application preferences: settings_read returns values, groups, allowed_keys and version; credentials, accounts, paths and model bindings are excluded.',
+
     description: 'Read the same public preference allowlist used by Settings import/export. keys optionally selects fields; version covers all public preferences. A null value means the native default. No credentials or secrets are returned.',
     parameters: Type.Object({keys: Type.Optional(Type.Array(Type.String(), {minItems: 1}))}),
   },
   { name: 'settings_update',
-    route: 'Change public preferences: settings_update(changes, expected_version from settings_read). Validates native values, saves a workspace backup and refreshes Settings providers.',
+
     description: 'Update existing allowed public preferences using the fresh settings_read version. changes is a key/value object; null resets to the native default. Unknown keys or invalid values fail before writing. Native conflict checks and guarded rollback preserve newer changes. Returns actual readback and backup_path.',
     parameters: Type.Object({changes: Type.Record(Type.String(), Type.Unknown()), expected_version: Type.String()}),
   },
   { name: 'explore_manage',
-    route: 'Style exploration: explore_manage (list/read/create/rename/complete/heart/folder_*/candidate_move; prepare/run/status/pause/cancel). Native runner rolls blocks; paid starts require visible price/balance confirmation. Only this chat owns pause/cancel; explore:* image IDs use image_read.',
+
     description: 'Manage native style exploration runs. list/read are paged, read includes actual roll snapshots and candidate image IDs. create freezes current recipe/parameters for documentation (name/count/expected_draft_version); execution follows the native current Studio recipe/parameters. Edits require id and fresh expected_version: rename(name), complete, heart(candidate_id,heart), folder_create/rename(name), folder_delete(folder_id; candidates become unfiled), candidate_move(candidate_id,folder_id or null). prepare(id,expected_version,mode=basic/retry/deep) returns a five-minute quote with all candidate costs; deep also needs existing family_id,parent_set_id,count. run(quote_id) waits for a real user button. No model authorization flags. Native progress, partial results, recovery and deep guards are retained. pause/cancel only affect this conversation admission and protect newer manual runs. Actual charges may remain unknown.',
     parameters: Type.Object({action: Type.Union(['list','read','create','rename','complete','heart','folder_create','folder_rename','folder_delete','candidate_move','prepare','run','status','pause','cancel'].map(v => Type.Literal(v))),
       id: Type.Optional(Type.String()), name: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
@@ -87,23 +87,23 @@ export const domainTools = [
     }),
   },
   { name: 'generation_prepare',
-    route: 'Generation price/account/batch: generation_prepare. No network request or generation; defaults to current Studio configuration.',
+
     description: 'Prepare a local generation quote for the current Studio draft, references, effective presets and NAI account. Defaults to configured request count and images per request. Optional batch overrides do not change the draft. Reports per-request Anlas, one-time encoding, estimated total, loaded account balance, local enhancement and readiness. No network/account refresh or generation. Quote expires after five minutes and belongs to this chat. Source/mask/reference setup uses Studio tools, never guessed from selected images.',
     parameters: Type.Object({requests: Type.Optional(Type.Integer({minimum: 1, maximum: 999})),
       images_per_request: Type.Optional(Type.Integer({minimum: 1, maximum: 4}))}),
   },
   { name: 'generation_run',
-    route: 'Generate: generation_run (quote_id); waits for a real user button and then native completion. Model text/flags never authorize. Changed/expired quotes and replay are rejected.',
+
     description: 'Request execution of a generation_prepare quote. This tool waits for the real user to press Generate on its visible price/balance card, then validates current draft/account/references/batch/price/balance, backs up and starts the native Studio pipeline. Cached prior tool messages or model authorization flags cannot approve it. Normal block rerolls, history, progress and auto local enhancement remain native. It waits for completion and returns actual image IDs/files or error/cancellation/partial results; real charged Anlas may remain unknown. An admitted quote is consumed once, even if generation fails. Do not repeat requests as chat questions.',
     parameters: Type.Object({quote_id: Type.String()}),
   },
   { name: 'generation_cancel',
-    route: "Stop this chat's admitted generation: generation_cancel (optional run_id); newer/manual runs are protected. Agent Stop also cancels its running generation tool.",
+
     description: 'Cancel the active native generation owned by this chat, optionally checking its returned run_id. Never cancels another chat or a newer manual generation. Cancellation does not guarantee a refund; already produced images remain available. User Agent Stop or main generation Stop can interrupt a waiting generation_run directly.',
     parameters: Type.Object({run_id: Type.Optional(Type.String())}),
   },
   { name: 'gallery_query',
-    route: 'Find actual pictures: gallery_query (scope=history/library; image_id for detail). Library queries reuse local filters and return gallery:<ID> for image_read, without changing visible filters. Indexing may leave image_id null; retry after indexing.',
+
     description: 'Read current canvas/history images (default) or the actual configured local gallery. image_id returns full available metadata; selected resolves the current canvas selection only for history. Library supports native text/tag/model/favorite/date filters and always orders modified time newest first. Dates are inclusive YYYY-MM-DD. No filter, selection, draft, scrolling or network changes. Search metadata comes from the current local index, which can still be indexing; unindexed items have no image_id yet. Use returned gallery:<ID> with image_read to see original library pixels. Deleted pool, stale/off-root index rows are excluded. History text search checks prompt and saved path; other filters require library scope.',
     parameters: Type.Object({
       scope: Type.Optional(Type.Union([Type.Literal('history'), Type.Literal('library')])),
@@ -118,7 +118,7 @@ export const domainTools = [
     }),
   },
   { name: 'gallery_manage',
-    route: 'Manage pictures/collections/files: gallery_manage (read/update/delete/export; trash/restore; collections and collection_*; folders and folder_*; move_file/copy_file). Read current image/collection/folder versions before writes. File transfer uses a library image and folders.file_path as target_folder. Native external moves ask the user; backups stay in workspace outputs.',
+
     description: 'Native gallery. Image read returns image_version; image writes/export require expected_image_version. Library update: desired favorite/replacement tags. Unfavorite removes all collection membership. History delete removes pin/preview/history, retaining saved files; library delete schedules startup cleanup. Library trash/restore uses the native pool; restore needs existing pixels. Collections use library scope by default: collections pages the tree and returns collection_version; collection_members pages leaf/folder descendant image IDs. Collection writes require expected_collection_version and back up the tree/members, never pixels: create uses changes.name/parent_id/is_folder; update changes.name/parent_id; delete allows a leaf or empty folder; reorder supplies every sibling ID once. add/remove take 1..20 image_ids and a leaf collection_id. Adding sets favorite; removing/deleting membership keeps favorite and original files. Collection folders are logical favorite folders; collection type cannot change. Physical folders: folders pages the native catalog, root_path and folder_version. Explicit folder_sync needs expected_folder_version, backs up and synchronizes the native tree with local on-disk changes; read folders again afterward. Folder writes need expected_folder_version; create changes.name/parent_id, rename folder_id/changes.name, move folder_id/parent_id (null=root), delete_empty folder_id only. Physical external folder trees/root are read-only; nonempty deletion is refused. Native folder relocation preserves index IDs, favorites, tags, memberships and pending deletion paths. move_file/copy_file take library image_id, expected_image_version and existing absolute target_folder. Moves preserve the image ID; copies get a fresh file/index, without cloning custom index tags/favorite. Collision filenames are returned; indexing can leave image_id null. External source/target moves always require actual UI confirmation, also honor native protection settings. No model-supplied authorization field. Original image backup precedes transfer; folder backup contains catalog/entries/pool rather than copying its image tree. Changed versions, current roots, busy/Stop and backup guards apply. Partial commits return ok=false/applied_fields/backup; read before retry. No recursive permanent delete, generation or network.',
     parameters: Type.Object({
       action: Type.Union(['read', 'update', 'delete', 'restore', 'export', 'trash', 'collections', 'collection_members', 'collection_create', 'collection_update', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove', 'folders', 'folder_create', 'folder_rename', 'folder_move', 'folder_delete_empty', 'folder_sync', 'move_file', 'copy_file'].map(Type.Literal)),
@@ -146,7 +146,7 @@ export const domainTools = [
     }),
   },
   { name: 'reference_manage',
-    route: 'Source/mask/Vibe/precise setup: reference_manage. list returns current indices, draft_version and draft:* image IDs for image_read. Writes require expected_draft_version, back up full configuration and use native workflows; no generation or paid encoding.',
+
     description: 'Inspect/configure native source, mask, Vibe and precise references. list (default) returns current indices, draft_version, effective participation/reasons and draft:* image IDs. Mutations require fresh expected_draft_version and full backup/recheck. Image actions use exactly one image_id or workspace-relative path with ORIGINAL pixels. set_source clears old mask/temporary tool and enters img2img; use_image_size defaults true, false keeps request dimensions. set_mask needs original source-sized pixels (white=repaint) and enters inpainting; optional source-pixel focus_region uses an eight-pixel grid and leaves an interior after context. clear_mask returns to img2img; clear_source restores base. Vibe: deferred encoding, finite free-form strength, info_extracted 0.01..1, max 16. Precise: native local PNG normalization, default type character. Other strength/noise/fidelity are 0..1. update/remove use current index and relevant fields only. Unsupported additions/updates reject; removal is allowed. Native precise priority/inpainting can exclude Vibe without disabling it. No generation/encoding request; generation_prepare quotes later costs.',
     parameters: Type.Object({
       action: Type.Optional(Type.Union(['list','set_source','clear_source','set_mask','clear_mask','add_vibe','update_vibe','remove_vibe','clear_vibes','add_precise','update_precise','remove_precise','clear_precise'].map(v => Type.Literal(v)))),
@@ -162,7 +162,7 @@ export const domainTools = [
     }),
   },
   { name: 'reference_library',
-    route: 'Reusable references: reference_library (query/read/apply/import/save/export/update/delete; Vibe categories). Read versions before changing entries/categories; apply also needs draft_version. Changes back up native files/settings; no hidden encoding or generation.',
+
     description: 'Native Vibe/precise library query/read/apply/import/save/export/update/delete and Vibe category actions. read returns versions, file_missing/file_invalid and child/image IDs. apply needs draft+entry versions; a whole bundle must fit 16 references. update/delete need entry_version and back up original file/native data without altering the draft. Bundle parameters need child_index. Information levels reuse exact existing/cached encodings; encoding_required directs apply, update draft, quote/approve generation, save. Category writes need category_version; deletion reparents children and optionally moves entries to the parent. Precise has no categories. Partial commits return ok=false, applied_fields and backup; deletion may remove the index entry while reporting a residual file. Read before retry. Files are workspace-relative. No hidden encoding/generation.',
     parameters: Type.Object({
       kind: Type.Optional(Type.Union(['vibe','precise'].map(v=>Type.Literal(v)))),
@@ -186,7 +186,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_tool',
-    route: "Image processing: image_tool. Local upscale uses list/upscale; pixel_snap is local. Cloud tools use prepare then run(quote_id), waiting for a real user confirmation with price/balance. Original image_id or workspace path; outputs/history preserve source metadata and current draft/display. status/cancel owns only this chat's job. No automatic downloads.",
+
     description: 'Native local image processing. list reads installed/bundled/custom models, methods, scales and bounded SeedVR2 defaults; never downloads. upscale requires model_id, scale=1..4 and exactly one image_id or workspace-relative path. Uses original pixels and the native task/model locks, progress and shutdown. SeedVR2 options use the listed native camelCase fields and model block limit. Returns exact-sized output, original source and operation metadata in a fresh workspace outputs folder, image artifact and history image_id if Studio remains idle; never changes the draft or current display. status gives this chat job_id/progress; cancel requires that job_id and never cancels another chat/manual job. Native failures preserve their error codes. Cloud prepare freezes source/tool/prompt/defry/emotion, account and native price without requests. run(quote_id) waits for a visible user button, rechecks account/endpoint/price/balance and creates a source/request backup before native admission. Quote replay and model authorization flags are rejected. pixel_snap uses native paletteMode/colors/avoidOverRefining/upscale options locally for zero Anlas. Cloud results include all variants. No paid encoding, generation or model installation.',
     parameters: Type.Object({
       action: Type.Union(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run'].map(Type.Literal)),
@@ -214,7 +214,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_generate',
-    route: 'Source generation: image_generate (prepare/run/status/cancel). Official variations make three images using source metadata when present; enhance freezes current prompts and native magnitude/scale/Max settings. Original image_id or workspace path; no draft import or block rerolls. Real price/balance confirmation, native canvas/history and workspace originals/results.',
+
     description: 'Generate from original source pixels without changing the Studio draft. prepare requires operation=variations/enhance and exactly one image_id or workspace path. Official variations preserve native three-image settings and metadata projection, with current prompts as fallback. Enhance uses current composed prompts/references and native settings: optional magnitude=1..5 or strength/noise=0..1, scale=1/1.5/2 where supported, or eligible V5 max=true without scale. prepare does not contact the account or generate, and reports frozen prompts, output dimensions, sample count, estimated Anlas and cached balance. run requires quote_id and waits for the real user confirmation card. Expired/changed account/endpoint/price/balance and replay are rejected. Native progress, focus, cancellation and history apply; originals and actual outputs are exported to this workspace. Cancel/Agent Stop only targets the owned run. No automatic local upscale or draft/pill mutation.',
     parameters: Type.Object({
       action: Type.Union(['prepare', 'run', 'status', 'cancel'].map(Type.Literal)),

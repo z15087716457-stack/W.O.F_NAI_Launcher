@@ -4,7 +4,7 @@
 
 直接使用官方 Pi 1.3.0。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
 
-在本目录运行 npm ci --ignore-scripts --no-audit --no-fund 和 npm test。Node 需要 >=22.19.0。本机 E8 交付将 Node 24.18.0、固定依赖、许可与按需手册放在 Studio 的 tools/nai-agent；调用方只使用包内 Node 和 host.mjs，不依赖用户安装 Node 或 Pi。
+在本目录运行 npm ci --ignore-scripts --no-audit --no-fund 和 npm test。Node 需要 >=22.19.0。本机 E8 交付将 Node 24.18.0、固定依赖、许可与内置 Skill（skills/nai-studio、skills/nai-prompt，取代原 manuals/）放在 Studio 的 tools/nai-agent；调用方只使用包内 Node 和 host.mjs，不依赖用户安装 Node 或 Pi。
 
 Flutter 入口为 lib/presentation/providers/nai_agent/：工作区控制器持久化目录、聊天元数据、输入与原始附件；starter 按需解析既有模型服务/安全存储并创建私有 stdio 子进程。读取 provider 不启动进程。聊天历史只由官方 Pi 保存；切工作区不自动改生图页。D 已接可见对话和设置。E9 已接官方 MCP／CodeMode，Windows 系统输入专项仍待后续。当前安装仍是 E8；本轮源码／新包尚未安装。
 
@@ -27,3 +27,5 @@ MCP 设置统一管理内置组和用户服务器。支持 stdio／Streamable HT
 CodeMode 使用官方 QuickJS，没有另造执行器。MCP 调用继续走原 Studio 的备份、版本校验、确认及取消；原生图片结果元数据通过 Pi 的 tool_result 扩展保存在官方会话 details，CodeMode 聚合图片路径，恢复聊天仍显示结果。内置 MCP 等待期限为 24 小时，避免把用户确认／长时间超分按外部服务器默认 60 秒超时处理；CodeMode 的显式 timeout_ms 仍是整个脚本的截止时间。
 
 Pi 1.1.0 适配读取官方会话中已声明的 MCP 工具名，在重连注册时恢复仍可用的工具；隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递，无新增历史或执行层。1.3.0 升级沿用同一适配：内部 MCP 辅助路径、会话恢复与旧 1.1.0 记录兼容已核对，不改宿主协议。
+
+Skill（2026-10-18）：宿主启用 Pi 原生 Skill，来源由 Studio 决定——内置 `skills/`（只读，随版本更新）、全局 `agent-data/skills/`、当前工作区 `skills/`，同名时工作区 > 全局 > 内置；不读取工作区内 `.agents/skills` 或 `.pi`。`lib/skills.mjs` 用 Pi 的加载器解析并应用开关／“仅手动”，Pi 负责目录格式与 `/skill:` 展开；`list-skills.mjs` 供设置页列出同一结果。系统提示词只留入口地图，业务工具用法在 `nai-studio`。

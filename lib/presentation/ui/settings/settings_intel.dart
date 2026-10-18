@@ -332,7 +332,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       l.set_agOrderBuiltin,
       l.set_agOrderGlobal,
       l.set_agOrderWorkspace,
-      l.set_agOrderTools,
+      l.set_agOrderSkills,
     ];
     String mcpState(SettingsMcpServer m) => switch (m.state) {
       SettingsMcpState.connected => l.set_agConnected('${m.tools}'),
@@ -398,6 +398,80 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             ],
           ),
         ),
+        if (ag.context != null)
+          SettingsAsideCard(
+            key: const Key('agent-context'),
+            title: l.set_agContext,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SettingsAsideList(
+                  rows: [
+                    for (final (label, tokens) in [
+                      (l.set_agContextPrompt, ag.context!.promptTokens),
+                      (
+                        l.set_agContextSkills('${ag.context!.skillCount}'),
+                        ag.context!.skillTokens,
+                      ),
+                      (
+                        l.set_agContextTools('${ag.context!.toolCount}'),
+                        ag.context!.toolTokens,
+                      ),
+                    ])
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              label,
+                              style: UiText.sans(12, color: c.ink),
+                            ),
+                          ),
+                          Text(
+                            '\u2248 ${SettingsFormat.count(tokens)}',
+                            style: UiText.mono(12, color: c.ink),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l.set_agContextTip,
+                  style: UiText.sans(11, color: c.faint, height: 1.5),
+                ),
+              ],
+            ),
+          ),
+        if (ag.skillFolders.isNotEmpty)
+          SettingsAsideCard(
+            key: const Key('agent-skill-folders'),
+            title: l.set_agSkillPlaces,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 6,
+              children: [
+                for (final (source, path) in ag.skillFolders)
+                  SettingsPathBox(
+                    path: path,
+                    tag: source == SettingsSkillSource.global
+                        ? l.set_agSkillGlobal
+                        : l.set_agSkillWorkspace,
+                    actions: [
+                      SettingsIconBtn(
+                        glyph: SettingsGlyphs.folder,
+                        tooltip: l.set_agSkillOpenFolder,
+                        onTap: () => a.onOpenSkillRoot(source),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 2),
+                Text(
+                  l.set_agSkillPlacesTip,
+                  style: UiText.sans(11, color: c.muted, height: 1.6),
+                ),
+              ],
+            ),
+          ),
         SettingsAsideCard(
           title: l.set_agData,
           child: Column(
@@ -582,6 +656,54 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             ),
             if (ag.systemPrompt != null)
               ..._basePrompt(context, ag.systemPrompt!),
+          ],
+        ),
+        SettingsSection(
+          title: l.set_agSkills,
+          subtitle: l.set_agSkillsSub,
+          trailing: Text(
+            l.set_agSkillsLoaded(
+              '${ag.skills.where((x) => x.state == SettingsSkillState.active).length}',
+            ),
+            style: UiText.mono(11, color: c.faint),
+          ),
+          children: [
+            for (final skill in ag.skills) _SkillRow(skill: skill),
+            SettingsBlock(
+              child: Row(
+                spacing: 8,
+                children: [
+                  SettingsBtn(
+                    key: const Key('skill-add'),
+                    label: l.set_agSkillAdd,
+                    glyph: SettingsGlyphs.folder,
+                    small: true,
+                    onTap: a.onAddSkill,
+                  ),
+                  SettingsBtn(
+                    key: const Key('skill-new'),
+                    label: l.set_agSkillNew,
+                    glyph: UiGlyphs.plus,
+                    small: true,
+                    onTap: a.onNewSkill,
+                  ),
+                  Expanded(
+                    child: Text(
+                      l.set_agSkillSlashHint,
+                      textAlign: TextAlign.end,
+                      style: UiText.sans(11, color: c.faint),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SettingsBlock(
+              child: SettingsHint.text(
+                context,
+                l.set_agSkillTrust,
+                glyph: SettingsGlyphs.warn,
+              ),
+            ),
           ],
         ),
         SettingsSection(
@@ -988,6 +1110,137 @@ class _TextAreaState extends State<_TextArea> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SkillRow extends StatelessWidget {
+  const _SkillRow({required this.skill});
+  final SettingsSkill skill;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.ui;
+    final a = SettingsScope.of(context).actions;
+    final k = skill;
+    final source = switch (k.source) {
+      SettingsSkillSource.builtin => UiMini(
+        l.set_agSkillBuiltin,
+        tone: UiMiniTone.accent,
+      ),
+      SettingsSkillSource.global => UiMini(l.set_agSkillGlobal),
+      SettingsSkillSource.workspace => UiMini(l.set_agSkillWorkspace),
+    };
+    final error = switch (k.error) {
+      SettingsSkillError.description => l.set_agSkillErrDescription,
+      SettingsSkillError.name => l.set_agSkillErrName,
+      SettingsSkillError.missing => l.set_agSkillErrMissing,
+      SettingsSkillError.parse => l.set_agSkillErrParse,
+      null => null,
+    };
+    final subtitle =
+        error ??
+        (k.state == SettingsSkillState.shadowed
+            ? '${l.set_agSkillShadowed} \u00b7 ${k.description}'
+            : k.description);
+    final menu = SettingsMoreButton(
+      items: [
+        (l.set_agSkillView, () => a.onViewSkill(k.id), false),
+        (l.set_agSkillOpenFolder, () => a.onOpenSkillFolder(k.id), false),
+        if (!k.builtin)
+          (l.set_agSkillRemove, () => a.onRemoveSkill(k.id), true),
+      ],
+    );
+    final Widget control;
+    if (k.error != null) {
+      control = Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          const SettingsDot(SettingsTone.error),
+          Text(l.set_agSkillNotLoaded, style: UiText.sans(12, color: c.error)),
+          menu,
+        ],
+      );
+    } else if (k.builtin) {
+      control = Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
+          SettingsBtn(
+            label: l.set_agSkillView,
+            glyph: UiGlyphs.eye,
+            small: true,
+            onTap: () => a.onViewSkill(k.id),
+          ),
+        ],
+      );
+    } else {
+      control = Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 8,
+        children: [
+          _SkillModeMenu(skill: k),
+          SettingsSwitch(
+            value: k.enabled,
+            onChanged: (v) => a.onSkillEnabled(k.id, v),
+          ),
+          menu,
+        ],
+      );
+    }
+    return SettingsRow(
+      key: Key('skill-${k.id}'),
+      title: k.name,
+      titleStyle: UiText.mono(13, weight: FontWeight.w500, color: c.ink),
+      badges: [source],
+      subtitleWidget: Text(
+        subtitle,
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: UiText.sans(
+          12,
+          color: k.error != null ? c.error : c.muted,
+          height: 1.5,
+        ),
+      ),
+      disabled: k.state == SettingsSkillState.shadowed,
+      control: control,
+    );
+  }
+}
+
+class _SkillModeMenu extends StatefulWidget {
+  const _SkillModeMenu({required this.skill});
+  final SettingsSkill skill;
+
+  @override
+  State<_SkillModeMenu> createState() => _SkillModeMenuState();
+}
+
+class _SkillModeMenuState extends State<_SkillModeMenu> {
+  var _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final a = SettingsScope.of(context).actions;
+    final k = widget.skill;
+    return SettingsPopupMenu(
+      open: _open,
+      onClose: () => setState(() => _open = false),
+      items: [
+        (l.set_agSkillAuto, () => a.onSkillManual(k.id, false), false),
+        (l.set_agSkillManual, () => a.onSkillManual(k.id, true), false),
+      ],
+      child: UiPressable(
+        key: Key('skill-mode-${k.id}'),
+        onTap: () => setState(() => _open = true),
+        builder: (context, _) =>
+            UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
       ),
     );
   }

@@ -10079,7 +10079,7 @@
   "set_mdAddProvider": "プロバイダーを追加",
   "set_mdEmpty": "プロバイダーがありません",
   "set_mdEmptySub": "追加すると翻訳と逆推定が使えます。",
-  "set_agDesc": "サイドバーアシスタントのモデル、指示、拡張、MCP ツール。",
+  "set_agDesc": "サイドバーアシスタントのモデル、指示、スキル、拡張、MCP ツール。",
   "set_agModelSec": "モデル",
   "set_agModel": "Agent のモデル",
   "set_agModelSub": "思考の強さはチャット欄で調整します",
@@ -10094,7 +10094,6 @@
   "set_agOrderPrefix": "内蔵プロンプトの前",
   "set_agOrderGlobal": "全体の指示",
   "set_agOrderWorkspace": "ワークスペースのルール",
-  "set_agOrderTools": "ツールマップ",
   "set_agGlobal": "全体の指示",
   "set_agGlobalHint": "システム全体の AGENTS.md に相当し、すべてのワークスペースに適用されます。",
   "set_agPrefix": "内蔵プロンプトの前",
@@ -10130,7 +10129,7 @@
       "n": {}
     }
   },
-  "set_agToolsTip": "生成系ツールは必ず見積もりを出し、確認後に実行します。",
+  "set_agToolsTip": "業務ツールは codemode 経由で必要時に検出され、使い方は nai-studio スキルにあります。生成系ツールは必ず見積もりを出し、確認後に実行します。",
   "set_agData": "データフォルダー",
   "set_agWorkspaces": "ワークスペース",
   "set_agSessions": "セッション",
@@ -10653,5 +10652,75 @@
   "set_agBaseFailed": "保存できませんでした。ワークスペースが変わったか、書き込みに失敗しました。変更は残っています。",
   "set_agMcpUnchecked": "未確認",
   "set_agInstructionsSaving": "指示を保存中…",
-  "set_agInstructionsFailed": "指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。"
+  "set_agInstructionsFailed": "指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。",
+  "set_agOrderSkills": "スキルカタログ",
+  "set_agSkills": "スキル",
+  "set_agSkillsSub": "通常は名前と一行の説明だけがプロンプトに入り、タスクに合うときだけ Agent が完全な説明を読み込みます。",
+  "set_agSkillsLoaded": "{n} 件読み込み済み",
+  "@set_agSkillsLoaded": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agSkillBuiltin": "内蔵",
+  "set_agSkillGlobal": "全体",
+  "set_agSkillWorkspace": "ワークスペース",
+  "set_agSkillAuto": "自動",
+  "set_agSkillManual": "手動のみ",
+  "set_agSkillView": "表示",
+  "set_agSkillAdd": "スキルフォルダーを追加",
+  "set_agSkillNew": "新規スキル",
+  "set_agSkillSlashHint": "チャット欄で /skill:名前 を入力すると手動で呼び出せます",
+  "set_agSkillTrust": "スキルは Agent にファイルの読み書きやコマンド実行を指示できます。信頼できるものだけを追加してください。",
+  "set_agSkillNotLoaded": "未読み込み",
+  "set_agSkillShadowed": "同じ名前のスキルに置き換えられました",
+  "set_agSkillErrDescription": "SKILL.md に description がなく、読み込まれません",
+  "set_agSkillErrName": "名前に使えるのは小文字、数字、単一のハイフンのみで、最大 64 文字です",
+  "set_agSkillErrMissing": "フォルダーに SKILL.md がありません",
+  "set_agSkillErrParse": "SKILL.md のフロントマターを読み取れません",
+  "set_agSkillOpenFolder": "フォルダーを開く",
+  "set_agSkillRemove": "スキルを削除",
+  "set_agSkillRemoveConfirm": "「{name}」を削除しますか？ファイルは Agent データフォルダーの skill-trash フォルダーに移動します。",
+  "@set_agSkillRemoveConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillCopy": "自分のスキルとしてコピー",
+  "set_agSkillReadOnly": "内蔵スキルはアプリの更新に合わせて更新され、直接編集できません。コピーすると、同じ名前の全体スキルが代わりに使われます。",
+  "set_agSkillAddTitle": "スキルフォルダーを追加",
+  "set_agSkillPlace": "場所",
+  "set_agSkillPlaceWorkspace": "現在のワークスペース「{name}」",
+  "@set_agSkillPlaceWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillMode": "呼び出し方法",
+  "set_agSkillCopyNote": "Agent データフォルダーにコピーされるため、元のフォルダーの以降の変更は自動で同期されません。",
+  "set_agSkillExists": "「{name}」はすでに存在します。先に削除するか名前を変更してください。",
+  "@set_agSkillExists": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillNewName": "新しいスキル名（小文字、数字、ハイフン）",
+  "set_agSkillPlaces": "スキルの場所",
+  "set_agSkillPlacesTip": "各サブフォルダーに SKILL.md を1つ置きます。名前が重複する場合はワークスペース、全体、内蔵の順に優先されます。",
+  "set_agContext": "常時コンテキスト",
+  "set_agContextPrompt": "システムプロンプト",
+  "set_agContextSkills": "スキルカタログ · {n} 件",
+  "@set_agContextSkills": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTools": "デフォルトツール · {n} 件",
+  "@set_agContextTools": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTip": "トークン · 文字数から推定",
+  "set_agFinalPending": "実行中のセッションはありません。以下は Studio が組み立てる部分です。セッション開始時には Pi がスキルカタログ、作業ディレクトリ、MCP サーバー一覧も追加します。"
 }

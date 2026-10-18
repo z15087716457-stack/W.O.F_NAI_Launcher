@@ -10174,7 +10174,7 @@
   "set_mdAddProvider": "新增服務商",
   "set_mdEmpty": "還沒有服務商",
   "set_mdEmptySub": "新增一個服務商後，翻譯和反推就能用了。",
-  "set_agDesc": "側欄助手的模型、指令、擴展和 MCP 工具。",
+  "set_agDesc": "側欄助手的模型、指令、Skill、擴展和 MCP 工具。",
   "set_agModelSec": "模型",
   "set_agModel": "Agent 使用的模型",
   "set_agModelSub": "思考強度在聊天框裡按任務調整",
@@ -10189,7 +10189,6 @@
   "set_agOrderPrefix": "內建提示詞前",
   "set_agOrderGlobal": "全域指令",
   "set_agOrderWorkspace": "工作區規則",
-  "set_agOrderTools": "工具地圖",
   "set_agGlobal": "全域指令",
   "set_agGlobalHint": "相當於系統級 AGENTS.md，對所有工作區生效。",
   "set_agPrefix": "內建提示詞前",
@@ -10225,7 +10224,7 @@
       "n": {}
     }
   },
-  "set_agToolsTip": "生圖類工具始終先報價，等你確認後才執行。",
+  "set_agToolsTip": "業務工具經 codemode 按需發現，用法寫在 nai-studio Skill。生圖類工具始終先報價，等你確認後才執行。",
   "set_agData": "資料目錄",
   "set_agWorkspaces": "工作區",
   "set_agSessions": "會話",
@@ -10771,5 +10770,75 @@
   "set_agBaseFailed": "沒有儲存：工作區已切換或寫入失敗，修改還在。",
   "set_agMcpUnchecked": "未檢測",
   "set_agInstructionsSaving": "正在儲存指令…",
-  "set_agInstructionsFailed": "指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。"
+  "set_agInstructionsFailed": "指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。",
+  "set_agOrderSkills": "Skill 目錄",
+  "set_agSkills": "Skill",
+  "set_agSkillsSub": "平時只把名稱和一句話描述放進提示詞；任務對得上時 Agent 才讀取完整說明。",
+  "set_agSkillsLoaded": "{n} 個已載入",
+  "@set_agSkillsLoaded": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agSkillBuiltin": "內建",
+  "set_agSkillGlobal": "全域",
+  "set_agSkillWorkspace": "工作區",
+  "set_agSkillAuto": "自動",
+  "set_agSkillManual": "僅手動",
+  "set_agSkillView": "檢視",
+  "set_agSkillAdd": "新增 Skill 資料夾",
+  "set_agSkillNew": "新增 Skill",
+  "set_agSkillSlashHint": "聊天框輸入 /skill:名稱 手動呼叫",
+  "set_agSkillTrust": "Skill 能指揮 Agent 讀寫檔案和執行命令，請只新增可信來源。",
+  "set_agSkillNotLoaded": "未載入",
+  "set_agSkillShadowed": "已被同名 Skill 替代",
+  "set_agSkillErrDescription": "SKILL.md 缺少 description，不會載入",
+  "set_agSkillErrName": "名稱只能用小寫字母、數字和單個連字元，最長 64 個字元",
+  "set_agSkillErrMissing": "資料夾裡沒有 SKILL.md",
+  "set_agSkillErrParse": "無法讀取 SKILL.md 頭部資訊",
+  "set_agSkillOpenFolder": "開啟資料夾",
+  "set_agSkillRemove": "刪除 Skill",
+  "set_agSkillRemoveConfirm": "刪除「{name}」？檔案會移到 Agent 資料目錄的 skill-trash 資料夾。",
+  "@set_agSkillRemoveConfirm": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillCopy": "複製為我的 Skill",
+  "set_agSkillReadOnly": "內建 Skill 隨版本更新，不能直接編輯；複製後，同名的全域副本會替代它。",
+  "set_agSkillAddTitle": "新增 Skill 資料夾",
+  "set_agSkillPlace": "放到",
+  "set_agSkillPlaceWorkspace": "當前工作區「{name}」",
+  "@set_agSkillPlaceWorkspace": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillMode": "呼叫方式",
+  "set_agSkillCopyNote": "會複製進 Agent 資料目錄，原資料夾之後的修改不會自動同步。",
+  "set_agSkillExists": "「{name}」已存在，請先刪除或改名。",
+  "@set_agSkillExists": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "set_agSkillNewName": "新 Skill 名稱（小寫字母、數字、連字元）",
+  "set_agSkillPlaces": "Skill 位置",
+  "set_agSkillPlacesTip": "每個子資料夾放一個 SKILL.md。同名時工作區優先，其次全域，最後內建。",
+  "set_agContext": "常駐上下文",
+  "set_agContextPrompt": "系統提示詞",
+  "set_agContextSkills": "Skill 目錄 · {n} 項",
+  "@set_agContextSkills": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTools": "預設工具 {n} 個",
+  "@set_agContextTools": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "set_agContextTip": "tokens · 按字元估算",
+  "set_agFinalPending": "當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。"
 }

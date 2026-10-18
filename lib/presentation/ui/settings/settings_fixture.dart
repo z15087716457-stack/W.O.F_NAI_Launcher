@@ -460,6 +460,60 @@ abstract final class SettingsFixture {
         path: r'C:\Users\Pie\.pi\extensions\prompt-lint',
       ),
     ],
+    skills: [
+      SettingsSkill(
+        id: 'builtin/nai-studio',
+        name: 'nai-studio',
+        source: SettingsSkillSource.builtin,
+        description: 'Studio 业务操作：生图报价与执行、图库、参考图、积木、画风探索、图像工具和设置。',
+      ),
+      SettingsSkill(
+        id: 'builtin/nai-prompt',
+        name: 'nai-prompt',
+        source: SettingsSkillSource.builtin,
+        description: '按当前模型（V4 / V4.5 / V5）写和改 NAI 提示词：标签规则、权重、角色与负面。',
+      ),
+      SettingsSkill(
+        id: 'global/style-replica',
+        name: 'style-replica',
+        source: SettingsSkillSource.global,
+        description: '画风复刻：分析参考图，拆出画师与画风标签，逐张迭代。',
+      ),
+      SettingsSkill(
+        id: 'global/artist-register',
+        name: 'artist-register',
+        source: SettingsSkillSource.global,
+        description: '画师收藏登记：查重、写入画师册、记录样图。',
+        manual: true,
+      ),
+      SettingsSkill(
+        id: 'workspace/cover-batch',
+        name: 'cover-batch',
+        source: SettingsSkillSource.workspace,
+        description: '本工作区：封面批量出图的固定参数与命名规则。',
+      ),
+      SettingsSkill(
+        id: 'global/old-notes',
+        name: 'old-notes',
+        source: SettingsSkillSource.global,
+        state: SettingsSkillState.error,
+        error: SettingsSkillError.description,
+      ),
+    ],
+    skillFolders: [
+      (SettingsSkillSource.global, r'%APPDATA%\nai_launcher\agent\skills'),
+      (
+        SettingsSkillSource.workspace,
+        r'%APPDATA%\nai_launcher\agent\workspaces\cover\skills',
+      ),
+    ],
+    context: SettingsAgentContext(
+      promptTokens: 200,
+      skillTokens: 300,
+      skillCount: 4,
+      toolTokens: 1300,
+      toolCount: 7,
+    ),
     mcp: [
       SettingsMcpServer(
         id: 'studio',

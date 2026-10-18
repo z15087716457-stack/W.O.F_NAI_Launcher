@@ -333,6 +333,24 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     _notify();
   }
 
+  Future<void> configureSkill(String key, {bool? enabled, String? mode}) async {
+    settings = await store.configureSkill(key, enabled: enabled, mode: mode);
+    _notify();
+  }
+
+  Future<void> removeSkill(String key, {String? workspaceId}) async {
+    settings = await store.removeSkill(key, workspaceId: workspaceId);
+    _notify();
+  }
+
+  /// Folder changes are only visible to a fresh host; idle chats restart on next send.
+  void skillFilesChanged() {
+    for (final runtime in _runtimes.values) {
+      runtime.extensionSignature = null;
+    }
+    _notify();
+  }
+
   Future<void> mcpCommand(String action, {String? name}) async {
     final runtime = selected;
     if (runtime == null || runtime.running || runtime.starting) {

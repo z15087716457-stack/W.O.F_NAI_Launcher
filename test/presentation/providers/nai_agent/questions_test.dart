@@ -141,7 +141,7 @@ void main() {
         expect(
           (await host.getSystemPrompt())['text'],
           contains(
-            'Missing input/preferences: ask_user, a direct model-only interaction tool.',
+            'Missing input/preferences: ask_user (direct tool, not from codemode).',
           ),
         );
       } finally {

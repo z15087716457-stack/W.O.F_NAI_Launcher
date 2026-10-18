@@ -113,6 +113,9 @@ final naiAgentClientFactoryProvider = Provider<AgentClientFactory>(
       systemPrompt: prompt,
       extraToolNames: const ['ask_user'],
       extensionPaths: settings.enabledExtensionPaths,
+      skills: ref
+          .read(naiAgentWorkspaceStoreProvider)
+          .skillConfig(workspace, settings),
       mcp: {
         'mcpServers': servers,
         'builtinEnabled': settings.studioMcpEnabled,

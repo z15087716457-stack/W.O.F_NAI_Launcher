@@ -342,6 +342,18 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onRemoveExtension: (id) =>
           _run(() => agentBackend.extension(id, remove: true)),
       onAddExtension: (directory) => _run(() => agent.addExtension(directory)),
+      onSkillEnabled: (id, value) =>
+          _run(() => agentBackend.skill(id, enabled: value)),
+      onSkillManual: (id, value) =>
+          _run(() => agentBackend.skill(id, manual: value)),
+      onViewSkill: (id) => _run(() => agent.viewSkill(id)),
+      onOpenSkillFolder: (id) =>
+          _run(() => agentBackend.openPath(agentBackend.skillFolder(id))),
+      onRemoveSkill: (id) => _run(() => agent.removeSkill(id)),
+      onAddSkill: () => _run(agent.addSkill),
+      onNewSkill: () => _run(agent.newSkill),
+      onOpenSkillRoot: (source) =>
+          _run(() => agentBackend.openPath(agentBackend.skillRoot(source))),
       onMcpEnabled: (id, value) =>
           _run(() => agentBackend.mcp(id, enabled: value)),
       onMcpMode: (id, mode) => _run(() => agentBackend.mcp(id, mode: mode)),
