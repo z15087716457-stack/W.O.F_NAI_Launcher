@@ -28847,60 +28847,6 @@ abstract class AppLocalizations {
   /// **'NAI Agent'**
   String get naiAgent_title;
 
-  /// No description provided for @naiAgent_local.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get naiAgent_local;
-
-  /// No description provided for @naiAgent_permissionMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Approval mode'**
-  String get naiAgent_permissionMode;
-
-  /// No description provided for @naiAgent_permissionAuto.
-  ///
-  /// In en, this message translates to:
-  /// **'Auto'**
-  String get naiAgent_permissionAuto;
-
-  /// No description provided for @naiAgent_permissionAsk.
-  ///
-  /// In en, this message translates to:
-  /// **'Ask'**
-  String get naiAgent_permissionAsk;
-
-  /// No description provided for @naiAgent_permissionReadOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Read only'**
-  String get naiAgent_permissionReadOnly;
-
-  /// No description provided for @naiAgent_permissionAutoHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Routine workspace edits run automatically. Commands, deletion and unknown tools still need approval. Generation confirmation stays enabled.'**
-  String get naiAgent_permissionAutoHint;
-
-  /// No description provided for @naiAgent_permissionAskHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Workspace reads run directly. Edits, commands and unknown tools need approval for each call. Generation uses its price confirmation.'**
-  String get naiAgent_permissionAskHint;
-
-  /// No description provided for @naiAgent_permissionReadOnlyHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Read and discuss only. Edits, generation and unknown tools are blocked. Switching stops current Agent tasks, not manual generation.'**
-  String get naiAgent_permissionReadOnlyHint;
-
-  /// No description provided for @naiAgent_useModelSetting.
-  ///
-  /// In en, this message translates to:
-  /// **'Use model setting'**
-  String get naiAgent_useModelSetting;
-
   /// No description provided for @naiAgent_permissionTitle.
   ///
   /// In en, this message translates to:
@@ -28925,130 +28871,6 @@ abstract class AppLocalizations {
   /// **'Deny'**
   String get naiAgent_permissionDeny;
 
-  /// No description provided for @naiAgent_thinking.
-  ///
-  /// In en, this message translates to:
-  /// **'Thinking effort · applies to the next run'**
-  String get naiAgent_thinking;
-
-  /// No description provided for @naiAgent_thinkingUnsupported.
-  ///
-  /// In en, this message translates to:
-  /// **'This model has no confirmed adjustable thinking levels. Check its model settings first.'**
-  String get naiAgent_thinkingUnsupported;
-
-  /// No description provided for @naiAgent_pasteImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste clipboard image'**
-  String get naiAgent_pasteImage;
-
-  /// No description provided for @naiAgent_contextUnknown.
-  ///
-  /// In en, this message translates to:
-  /// **'Context usage is unavailable until the model window and usage are known.'**
-  String get naiAgent_contextUnknown;
-
-  /// No description provided for @naiAgent_contextTooltip.
-  ///
-  /// In en, this message translates to:
-  /// **'Available context: {percent}%\n{remaining} / {window} tokens remaining\nClick for detailed statistics'**
-  String naiAgent_contextTooltip(
-    String percent,
-    String remaining,
-    String window,
-  );
-
-  /// No description provided for @naiAgent_statistics.
-  ///
-  /// In en, this message translates to:
-  /// **'Context and session statistics'**
-  String get naiAgent_statistics;
-
-  /// No description provided for @naiAgent_contextUsage.
-  ///
-  /// In en, this message translates to:
-  /// **'Current context usage · estimated'**
-  String get naiAgent_contextUsage;
-
-  /// No description provided for @naiAgent_contextRemaining.
-  ///
-  /// In en, this message translates to:
-  /// **'Remaining context'**
-  String get naiAgent_contextRemaining;
-
-  /// No description provided for @naiAgent_contextWindow.
-  ///
-  /// In en, this message translates to:
-  /// **'Model window'**
-  String get naiAgent_contextWindow;
-
-  /// No description provided for @naiAgent_sessionUsage.
-  ///
-  /// In en, this message translates to:
-  /// **'Cumulative session usage'**
-  String get naiAgent_sessionUsage;
-
-  /// No description provided for @naiAgent_tokensInput.
-  ///
-  /// In en, this message translates to:
-  /// **'Input'**
-  String get naiAgent_tokensInput;
-
-  /// No description provided for @naiAgent_tokensOutput.
-  ///
-  /// In en, this message translates to:
-  /// **'Output'**
-  String get naiAgent_tokensOutput;
-
-  /// No description provided for @naiAgent_tokensCacheRead.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache read'**
-  String get naiAgent_tokensCacheRead;
-
-  /// No description provided for @naiAgent_tokensCacheWrite.
-  ///
-  /// In en, this message translates to:
-  /// **'Cache write'**
-  String get naiAgent_tokensCacheWrite;
-
-  /// No description provided for @naiAgent_tokensTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Total tokens'**
-  String get naiAgent_tokensTotal;
-
-  /// No description provided for @naiAgent_cumulativeUsageHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Cumulative usage includes past requests and is not the current context size.'**
-  String get naiAgent_cumulativeUsageHint;
-
-  /// No description provided for @naiAgent_messageCounts.
-  ///
-  /// In en, this message translates to:
-  /// **'Conversation'**
-  String get naiAgent_messageCounts;
-
-  /// No description provided for @naiAgent_userAssistantMessages.
-  ///
-  /// In en, this message translates to:
-  /// **'User / assistant messages'**
-  String get naiAgent_userAssistantMessages;
-
-  /// No description provided for @naiAgent_toolCalls.
-  ///
-  /// In en, this message translates to:
-  /// **'Tool calls'**
-  String get naiAgent_toolCalls;
-
-  /// No description provided for @naiAgent_cost.
-  ///
-  /// In en, this message translates to:
-  /// **'Cost'**
-  String get naiAgent_cost;
-
   /// No description provided for @naiAgent_defaultWorkspace.
   ///
   /// In en, this message translates to:
@@ -29067,263 +28889,17 @@ abstract class AppLocalizations {
   /// **'Agent settings'**
   String get naiAgent_settings;
 
-  /// No description provided for @naiAgent_workspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Workspace'**
-  String get naiAgent_workspace;
-
-  /// No description provided for @naiAgent_createWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'New workspace'**
-  String get naiAgent_createWorkspace;
-
-  /// No description provided for @naiAgent_rename.
-  ///
-  /// In en, this message translates to:
-  /// **'Rename'**
-  String get naiAgent_rename;
-
-  /// No description provided for @naiAgent_name.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get naiAgent_name;
-
-  /// No description provided for @naiAgent_placeholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe an idea or ask a question…'**
-  String get naiAgent_placeholder;
-
-  /// No description provided for @naiAgent_welcome.
-  ///
-  /// In en, this message translates to:
-  /// **'Start with an idea'**
-  String get naiAgent_welcome;
-
-  /// No description provided for @naiAgent_welcomeHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Discuss prompts, inspect images, organize your workspace.\nTalk it through, then take action.'**
-  String get naiAgent_welcomeHint;
-
-  /// No description provided for @naiAgent_suggestCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'Inspect current draft'**
-  String get naiAgent_suggestCurrent;
-
-  /// No description provided for @naiAgent_suggestImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Analyze a reference'**
-  String get naiAgent_suggestImage;
-
-  /// No description provided for @naiAgent_suggestWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Organize workspace'**
-  String get naiAgent_suggestWorkspace;
-
-  /// No description provided for @naiAgent_brandEyebrow.
-  ///
-  /// In en, this message translates to:
-  /// **'YOUR CREATIVE CO-PILOT'**
-  String get naiAgent_brandEyebrow;
-
-  /// No description provided for @naiAgent_promptCurrent.
-  ///
-  /// In en, this message translates to:
-  /// **'Inspect my current draft and parameters without changing anything yet.'**
-  String get naiAgent_promptCurrent;
-
-  /// No description provided for @naiAgent_promptImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Analyze the composition and style of the current image without generating anything yet.'**
-  String get naiAgent_promptImage;
-
-  /// No description provided for @naiAgent_promptWorkspace.
-  ///
-  /// In en, this message translates to:
-  /// **'Review my current workspace and suggest how to organize it without changing anything yet.'**
-  String get naiAgent_promptWorkspace;
-
-  /// No description provided for @naiAgent_tipTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'TIPS / GETTING STARTED'**
-  String get naiAgent_tipTitle;
-
-  /// No description provided for @naiAgent_tipNext.
-  ///
-  /// In en, this message translates to:
-  /// **'Next tip'**
-  String get naiAgent_tipNext;
-
-  /// No description provided for @naiAgent_tipReadOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Explore in Read-only mode first, then decide what to change.'**
-  String get naiAgent_tipReadOnly;
-
-  /// No description provided for @naiAgent_tipAttachments.
-  ///
-  /// In en, this message translates to:
-  /// **'Drop a reference image here, or use + to add an attachment.'**
-  String get naiAgent_tipAttachments;
-
-  /// No description provided for @naiAgent_tipGeneration.
-  ///
-  /// In en, this message translates to:
-  /// **'Image generation shows its cost and waits for your confirmation.'**
-  String get naiAgent_tipGeneration;
-
-  /// No description provided for @naiAgent_welcomeFootnote.
-  ///
-  /// In en, this message translates to:
-  /// **'All actions follow your current approval mode'**
-  String get naiAgent_welcomeFootnote;
-
   /// No description provided for @naiAgent_chooseModel.
   ///
   /// In en, this message translates to:
   /// **'Choose model'**
   String get naiAgent_chooseModel;
 
-  /// No description provided for @naiAgent_modelSettings.
-  ///
-  /// In en, this message translates to:
-  /// **'Manage models and interfaces'**
-  String get naiAgent_modelSettings;
-
-  /// No description provided for @naiAgent_attach.
-  ///
-  /// In en, this message translates to:
-  /// **'Attach images'**
-  String get naiAgent_attach;
-
-  /// No description provided for @naiAgent_removeAttachment.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove attachment'**
-  String get naiAgent_removeAttachment;
-
-  /// No description provided for @naiAgent_selectedImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Attach selected image'**
-  String get naiAgent_selectedImage;
-
-  /// No description provided for @naiAgent_send.
-  ///
-  /// In en, this message translates to:
-  /// **'Send'**
-  String get naiAgent_send;
-
-  /// No description provided for @naiAgent_stop.
-  ///
-  /// In en, this message translates to:
-  /// **'Stop run'**
-  String get naiAgent_stop;
-
-  /// No description provided for @naiAgent_queue.
-  ///
-  /// In en, this message translates to:
-  /// **'Queue'**
-  String get naiAgent_queue;
-
-  /// No description provided for @naiAgent_steer.
-  ///
-  /// In en, this message translates to:
-  /// **'Steer'**
-  String get naiAgent_steer;
-
-  /// No description provided for @naiAgent_promote.
-  ///
-  /// In en, this message translates to:
-  /// **'Use as steering'**
-  String get naiAgent_promote;
-
-  /// No description provided for @naiAgent_waiting.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for your answer'**
-  String get naiAgent_waiting;
-
-  /// No description provided for @naiAgent_working.
-  ///
-  /// In en, this message translates to:
-  /// **'Working'**
-  String get naiAgent_working;
-
-  /// No description provided for @naiAgent_waitingSlot.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for a provider slot'**
-  String get naiAgent_waitingSlot;
-
-  /// No description provided for @naiAgent_starting.
-  ///
-  /// In en, this message translates to:
-  /// **'Opening chat'**
-  String get naiAgent_starting;
-
   /// No description provided for @naiAgent_interrupted.
   ///
   /// In en, this message translates to:
   /// **'The previous run was interrupted and was not resent.'**
   String get naiAgent_interrupted;
-
-  /// No description provided for @naiAgent_restorePending.
-  ///
-  /// In en, this message translates to:
-  /// **'Restore to composer'**
-  String get naiAgent_restorePending;
-
-  /// No description provided for @naiAgent_withdraw.
-  ///
-  /// In en, this message translates to:
-  /// **'Withdraw'**
-  String get naiAgent_withdraw;
-
-  /// No description provided for @naiAgent_newContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Jump to latest'**
-  String get naiAgent_newContent;
-
-  /// No description provided for @naiAgent_toolRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Running'**
-  String get naiAgent_toolRunning;
-
-  /// No description provided for @naiAgent_toolDone.
-  ///
-  /// In en, this message translates to:
-  /// **'Complete'**
-  String get naiAgent_toolDone;
-
-  /// No description provided for @naiAgent_toolFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Failed'**
-  String get naiAgent_toolFailed;
-
-  /// No description provided for @naiAgent_arguments.
-  ///
-  /// In en, this message translates to:
-  /// **'Arguments'**
-  String get naiAgent_arguments;
-
-  /// No description provided for @naiAgent_result.
-  ///
-  /// In en, this message translates to:
-  /// **'Result'**
-  String get naiAgent_result;
 
   /// No description provided for @naiAgent_systemPrompt.
   ///
@@ -29433,60 +29009,6 @@ abstract class AppLocalizations {
   /// **'Save or send the current input before restoring this message.'**
   String get naiAgent_composerNotEmpty;
 
-  /// No description provided for @naiAgent_compact.
-  ///
-  /// In en, this message translates to:
-  /// **'Compact chat context'**
-  String get naiAgent_compact;
-
-  /// No description provided for @naiAgent_export.
-  ///
-  /// In en, this message translates to:
-  /// **'Export chat'**
-  String get naiAgent_export;
-
-  /// No description provided for @naiAgent_copyMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy message'**
-  String get naiAgent_copyMessage;
-
-  /// No description provided for @naiAgent_editMessage.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit message'**
-  String get naiAgent_editMessage;
-
-  /// No description provided for @naiAgent_regenerate.
-  ///
-  /// In en, this message translates to:
-  /// **'Regenerate reply'**
-  String get naiAgent_regenerate;
-
-  /// No description provided for @naiAgent_submitAnswer.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit answer'**
-  String get naiAgent_submitAnswer;
-
-  /// No description provided for @naiAgent_customAnswer.
-  ///
-  /// In en, this message translates to:
-  /// **'Or write your own answer'**
-  String get naiAgent_customAnswer;
-
-  /// No description provided for @naiAgent_close.
-  ///
-  /// In en, this message translates to:
-  /// **'Collapse panel'**
-  String get naiAgent_close;
-
-  /// No description provided for @naiAgent_showChats.
-  ///
-  /// In en, this message translates to:
-  /// **'Chats'**
-  String get naiAgent_showChats;
-
   /// No description provided for @naiAgent_runtimeMissing.
   ///
   /// In en, this message translates to:
@@ -29498,24 +29020,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Model usage'**
   String get naiAgent_usage;
-
-  /// No description provided for @naiAgent_cancel.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel'**
-  String get naiAgent_cancel;
-
-  /// No description provided for @naiAgent_dropHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Drop to attach to this chat'**
-  String get naiAgent_dropHint;
-
-  /// No description provided for @naiAgent_emptyAttachment.
-  ///
-  /// In en, this message translates to:
-  /// **'Cannot read image'**
-  String get naiAgent_emptyAttachment;
 
   /// No description provided for @naiAgent_globalScope.
   ///
@@ -29529,89 +29033,11 @@ abstract class AppLocalizations {
   /// **'Current workspace'**
   String get naiAgent_workspaceScope;
 
-  /// No description provided for @naiAgent_generationTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Generation approval'**
-  String get naiAgent_generationTitle;
-
-  /// No description provided for @naiAgent_generationWaiting.
-  ///
-  /// In en, this message translates to:
-  /// **'Waiting for generation approval'**
-  String get naiAgent_generationWaiting;
-
-  /// No description provided for @naiAgent_generationAccount.
-  ///
-  /// In en, this message translates to:
-  /// **'Account: {name}'**
-  String naiAgent_generationAccount(Object name);
-
-  /// No description provided for @naiAgent_generationBatch.
-  ///
-  /// In en, this message translates to:
-  /// **'{requests} requests × {size} images · {total} total'**
-  String naiAgent_generationBatch(Object requests, Object size, Object total);
-
-  /// No description provided for @naiAgent_generationUnit.
-  ///
-  /// In en, this message translates to:
-  /// **'{cost} Anlas per request'**
-  String naiAgent_generationUnit(Object cost);
-
-  /// No description provided for @naiAgent_generationEncoding.
-  ///
-  /// In en, this message translates to:
-  /// **'Reference encoding: {cost} Anlas'**
-  String naiAgent_generationEncoding(Object cost);
-
-  /// No description provided for @naiAgent_generationTotal.
-  ///
-  /// In en, this message translates to:
-  /// **'Estimated {cost} Anlas'**
-  String naiAgent_generationTotal(Object cost);
-
-  /// No description provided for @naiAgent_generationBalance.
-  ///
-  /// In en, this message translates to:
-  /// **'Balance: {balance} Anlas'**
-  String naiAgent_generationBalance(Object balance);
-
-  /// No description provided for @naiAgent_generationEstimateNote.
-  ///
-  /// In en, this message translates to:
-  /// **'Cost is an estimate; the server determines the actual charge.'**
-  String get naiAgent_generationEstimateNote;
-
-  /// No description provided for @naiAgent_generationChanged.
-  ///
-  /// In en, this message translates to:
-  /// **'Configuration or quote changed. Prepare again.'**
-  String get naiAgent_generationChanged;
-
   /// No description provided for @naiAgent_generationLocalEnhance.
   ///
   /// In en, this message translates to:
   /// **'Local upscale after generation: {model} ×{scale}'**
   String naiAgent_generationLocalEnhance(Object model, Object scale);
-
-  /// No description provided for @naiAgent_generationText.
-  ///
-  /// In en, this message translates to:
-  /// **'Text to image'**
-  String get naiAgent_generationText;
-
-  /// No description provided for @naiAgent_generationImage.
-  ///
-  /// In en, this message translates to:
-  /// **'Image to image'**
-  String get naiAgent_generationImage;
-
-  /// No description provided for @naiAgent_generationInpaint.
-  ///
-  /// In en, this message translates to:
-  /// **'Inpaint'**
-  String get naiAgent_generationInpaint;
 
   /// No description provided for @naiAgent_galleryDeleteEmptyFolderConfirm.
   ///
@@ -29781,18 +29207,6 @@ abstract class AppLocalizations {
   /// **'CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.'**
   String get naiAgent_mcpHint;
 
-  /// No description provided for @generation_generate.
-  ///
-  /// In en, this message translates to:
-  /// **'Generate'**
-  String get generation_generate;
-
-  /// No description provided for @detail_imageDetails.
-  ///
-  /// In en, this message translates to:
-  /// **'Image Details'**
-  String get detail_imageDetails;
-
   /// No description provided for @promptBlockLibrary_title.
   ///
   /// In en, this message translates to:
@@ -29810,12 +29224,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Hold to compare the original image and inpaint area'**
   String get gen_compareOriginal;
-
-  /// No description provided for @naiAgent_importingImages.
-  ///
-  /// In en, this message translates to:
-  /// **'Reading images…'**
-  String get naiAgent_importingImages;
 
   /// No description provided for @naiAgent_imageTooLarge.
   ///
@@ -29840,12 +29248,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Added {added} images; {failed} failed.'**
   String naiAgent_importResult(int added, int failed);
-
-  /// No description provided for @naiAgent_attachmentMetadata.
-  ///
-  /// In en, this message translates to:
-  /// **'Original image metadata'**
-  String get naiAgent_attachmentMetadata;
 
   /// No description provided for @channel_themeCircuit.
   ///

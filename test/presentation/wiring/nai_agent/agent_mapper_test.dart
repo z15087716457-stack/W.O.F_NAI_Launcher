@@ -274,6 +274,64 @@ void main() {
   );
 
   test(
+    'CodeMode native projections recover guarded diffs, image ids and Anlas',
+    () async {
+      final backupDir = Directory(
+        '${runtime.workspace.agentDirectory.path}/draft-backups',
+      );
+      await backupDir.create(recursive: true);
+      final backup = File('${backupDir.path}/native.json');
+      await backup.writeAsString(
+        jsonEncode({
+          'fields': {'prompt': 'old'},
+        }),
+      );
+      await File(
+        '${runtime.workspace.directory.path}/out.png',
+      ).writeAsBytes(png);
+      runtime.messages = [
+        assistant([call('code', 'codemode')]),
+        result('code', {
+          'studio_results': [
+            {
+              'tool': 'mcp__nai_studio__prompt_update',
+              'applied': ['prompt'],
+              'backup_path': backup.path,
+              'draft': {
+                'fields': {'prompt': 'new'},
+                'draft_version': 'v1',
+              },
+            },
+            {
+              'tool': 'mcp__nai_studio__generation_run',
+              'image_ids': ['h1'],
+              'estimated_anlas': 40,
+              'artifacts': [
+                {'type': 'image', 'path': 'out.png'},
+              ],
+            },
+          ],
+          'artifacts': [
+            {'type': 'image', 'path': 'out.png'},
+          ],
+        }),
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      final mapped = mapper.map(runtime, draftVersion: 'v1');
+      final blocks = mapped.turns.single.reply!.blocks;
+      expect(
+        blocks.whereType<AgentDiffBlock>().single.diff.state,
+        AgentDiffState.applied,
+      );
+      final images = blocks.whereType<AgentImagesBlock>().single;
+      expect(images.anlasSpent, 40);
+      expect(images.images.single.historyId, 'h1');
+      expect(images.images.single.source, AgentImageSource.generated);
+    },
+  );
+
+  test(
     'resource security rejects traversal, missing/corrupt images and external backups',
     () async {
       final external = File('${root.path}/outside.json');

@@ -523,6 +523,32 @@ void main() {
   );
 
   testWidgets(
+    'recovered queue restore refuses nonempty composer then restores through controller',
+    (tester) async {
+      h.c.selected!.composer = const AgentComposerState(
+        text: 'do not overwrite',
+        pending: [
+          {'queueId': 'recovered', 'text': 'recover me', 'recovered': true},
+        ],
+      );
+      await h.pump(tester);
+      var actions = h.panel(tester).actions;
+      await expectLater(
+        actions.onRestoreQueued('recovered'),
+        throwsA(isA<NaiAgentToolError>()),
+      );
+      expect(h.c.selected!.composer.text, 'do not overwrite');
+      await h.c.saveComposer('');
+      await tester.pump();
+      actions = h.panel(tester).actions;
+      expect(await actions.onRestoreQueued('recovered'), true);
+      await tester.pump();
+      expect(h.c.selected!.composer.text, 'recover me');
+      expect(h.c.selected!.composer.pending, isEmpty);
+    },
+  );
+
+  testWidgets(
     'welcome fills composer only; errors and notices retain controller strings',
     (tester) async {
       await h.pump(tester);

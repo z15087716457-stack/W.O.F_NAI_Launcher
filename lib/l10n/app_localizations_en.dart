@@ -16525,36 +16525,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_title => 'NAI Agent';
 
   @override
-  String get naiAgent_local => 'Local';
-
-  @override
-  String get naiAgent_permissionMode => 'Approval mode';
-
-  @override
-  String get naiAgent_permissionAuto => 'Auto';
-
-  @override
-  String get naiAgent_permissionAsk => 'Ask';
-
-  @override
-  String get naiAgent_permissionReadOnly => 'Read only';
-
-  @override
-  String get naiAgent_permissionAutoHint =>
-      'Routine workspace edits run automatically. Commands, deletion and unknown tools still need approval. Generation confirmation stays enabled.';
-
-  @override
-  String get naiAgent_permissionAskHint =>
-      'Workspace reads run directly. Edits, commands and unknown tools need approval for each call. Generation uses its price confirmation.';
-
-  @override
-  String get naiAgent_permissionReadOnlyHint =>
-      'Read and discuss only. Edits, generation and unknown tools are blocked. Switching stops current Agent tasks, not manual generation.';
-
-  @override
-  String get naiAgent_useModelSetting => 'Use model setting';
-
-  @override
   String get naiAgent_permissionTitle => 'Tool approval required';
 
   @override
@@ -16567,75 +16537,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_permissionDeny => 'Deny';
 
   @override
-  String get naiAgent_thinking => 'Thinking effort · applies to the next run';
-
-  @override
-  String get naiAgent_thinkingUnsupported =>
-      'This model has no confirmed adjustable thinking levels. Check its model settings first.';
-
-  @override
-  String get naiAgent_pasteImage => 'Paste clipboard image';
-
-  @override
-  String get naiAgent_contextUnknown =>
-      'Context usage is unavailable until the model window and usage are known.';
-
-  @override
-  String naiAgent_contextTooltip(
-    String percent,
-    String remaining,
-    String window,
-  ) {
-    return 'Available context: $percent%\n$remaining / $window tokens remaining\nClick for detailed statistics';
-  }
-
-  @override
-  String get naiAgent_statistics => 'Context and session statistics';
-
-  @override
-  String get naiAgent_contextUsage => 'Current context usage · estimated';
-
-  @override
-  String get naiAgent_contextRemaining => 'Remaining context';
-
-  @override
-  String get naiAgent_contextWindow => 'Model window';
-
-  @override
-  String get naiAgent_sessionUsage => 'Cumulative session usage';
-
-  @override
-  String get naiAgent_tokensInput => 'Input';
-
-  @override
-  String get naiAgent_tokensOutput => 'Output';
-
-  @override
-  String get naiAgent_tokensCacheRead => 'Cache read';
-
-  @override
-  String get naiAgent_tokensCacheWrite => 'Cache write';
-
-  @override
-  String get naiAgent_tokensTotal => 'Total tokens';
-
-  @override
-  String get naiAgent_cumulativeUsageHint =>
-      'Cumulative usage includes past requests and is not the current context size.';
-
-  @override
-  String get naiAgent_messageCounts => 'Conversation';
-
-  @override
-  String get naiAgent_userAssistantMessages => 'User / assistant messages';
-
-  @override
-  String get naiAgent_toolCalls => 'Tool calls';
-
-  @override
-  String get naiAgent_cost => 'Cost';
-
-  @override
   String get naiAgent_defaultWorkspace => 'Workspace 1';
 
   @override
@@ -16645,142 +16546,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_settings => 'Agent settings';
 
   @override
-  String get naiAgent_workspace => 'Workspace';
-
-  @override
-  String get naiAgent_createWorkspace => 'New workspace';
-
-  @override
-  String get naiAgent_rename => 'Rename';
-
-  @override
-  String get naiAgent_name => 'Name';
-
-  @override
-  String get naiAgent_placeholder => 'Describe an idea or ask a question…';
-
-  @override
-  String get naiAgent_welcome => 'Start with an idea';
-
-  @override
-  String get naiAgent_welcomeHint =>
-      'Discuss prompts, inspect images, organize your workspace.\nTalk it through, then take action.';
-
-  @override
-  String get naiAgent_suggestCurrent => 'Inspect current draft';
-
-  @override
-  String get naiAgent_suggestImage => 'Analyze a reference';
-
-  @override
-  String get naiAgent_suggestWorkspace => 'Organize workspace';
-
-  @override
-  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
-
-  @override
-  String get naiAgent_promptCurrent =>
-      'Inspect my current draft and parameters without changing anything yet.';
-
-  @override
-  String get naiAgent_promptImage =>
-      'Analyze the composition and style of the current image without generating anything yet.';
-
-  @override
-  String get naiAgent_promptWorkspace =>
-      'Review my current workspace and suggest how to organize it without changing anything yet.';
-
-  @override
-  String get naiAgent_tipTitle => 'TIPS / GETTING STARTED';
-
-  @override
-  String get naiAgent_tipNext => 'Next tip';
-
-  @override
-  String get naiAgent_tipReadOnly =>
-      'Explore in Read-only mode first, then decide what to change.';
-
-  @override
-  String get naiAgent_tipAttachments =>
-      'Drop a reference image here, or use + to add an attachment.';
-
-  @override
-  String get naiAgent_tipGeneration =>
-      'Image generation shows its cost and waits for your confirmation.';
-
-  @override
-  String get naiAgent_welcomeFootnote =>
-      'All actions follow your current approval mode';
-
-  @override
   String get naiAgent_chooseModel => 'Choose model';
-
-  @override
-  String get naiAgent_modelSettings => 'Manage models and interfaces';
-
-  @override
-  String get naiAgent_attach => 'Attach images';
-
-  @override
-  String get naiAgent_removeAttachment => 'Remove attachment';
-
-  @override
-  String get naiAgent_selectedImage => 'Attach selected image';
-
-  @override
-  String get naiAgent_send => 'Send';
-
-  @override
-  String get naiAgent_stop => 'Stop run';
-
-  @override
-  String get naiAgent_queue => 'Queue';
-
-  @override
-  String get naiAgent_steer => 'Steer';
-
-  @override
-  String get naiAgent_promote => 'Use as steering';
-
-  @override
-  String get naiAgent_waiting => 'Waiting for your answer';
-
-  @override
-  String get naiAgent_working => 'Working';
-
-  @override
-  String get naiAgent_waitingSlot => 'Waiting for a provider slot';
-
-  @override
-  String get naiAgent_starting => 'Opening chat';
 
   @override
   String get naiAgent_interrupted =>
       'The previous run was interrupted and was not resent.';
-
-  @override
-  String get naiAgent_restorePending => 'Restore to composer';
-
-  @override
-  String get naiAgent_withdraw => 'Withdraw';
-
-  @override
-  String get naiAgent_newContent => 'Jump to latest';
-
-  @override
-  String get naiAgent_toolRunning => 'Running';
-
-  @override
-  String get naiAgent_toolDone => 'Complete';
-
-  @override
-  String get naiAgent_toolFailed => 'Failed';
-
-  @override
-  String get naiAgent_arguments => 'Arguments';
-
-  @override
-  String get naiAgent_result => 'Result';
 
   @override
   String get naiAgent_systemPrompt => 'System prompt';
@@ -16844,47 +16614,11 @@ class AppLocalizationsEn extends AppLocalizations {
       'Save or send the current input before restoring this message.';
 
   @override
-  String get naiAgent_compact => 'Compact chat context';
-
-  @override
-  String get naiAgent_export => 'Export chat';
-
-  @override
-  String get naiAgent_copyMessage => 'Copy message';
-
-  @override
-  String get naiAgent_editMessage => 'Edit message';
-
-  @override
-  String get naiAgent_regenerate => 'Regenerate reply';
-
-  @override
-  String get naiAgent_submitAnswer => 'Submit answer';
-
-  @override
-  String get naiAgent_customAnswer => 'Or write your own answer';
-
-  @override
-  String get naiAgent_close => 'Collapse panel';
-
-  @override
-  String get naiAgent_showChats => 'Chats';
-
-  @override
   String get naiAgent_runtimeMissing =>
       'Agent runtime is missing. Install the complete update package.';
 
   @override
   String get naiAgent_usage => 'Model usage';
-
-  @override
-  String get naiAgent_cancel => 'Cancel';
-
-  @override
-  String get naiAgent_dropHint => 'Drop to attach to this chat';
-
-  @override
-  String get naiAgent_emptyAttachment => 'Cannot read image';
 
   @override
   String get naiAgent_globalScope => 'Global default';
@@ -16893,62 +16627,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_workspaceScope => 'Current workspace';
 
   @override
-  String get naiAgent_generationTitle => 'Generation approval';
-
-  @override
-  String get naiAgent_generationWaiting => 'Waiting for generation approval';
-
-  @override
-  String naiAgent_generationAccount(Object name) {
-    return 'Account: $name';
-  }
-
-  @override
-  String naiAgent_generationBatch(Object requests, Object size, Object total) {
-    return '$requests requests × $size images · $total total';
-  }
-
-  @override
-  String naiAgent_generationUnit(Object cost) {
-    return '$cost Anlas per request';
-  }
-
-  @override
-  String naiAgent_generationEncoding(Object cost) {
-    return 'Reference encoding: $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationTotal(Object cost) {
-    return 'Estimated $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationBalance(Object balance) {
-    return 'Balance: $balance Anlas';
-  }
-
-  @override
-  String get naiAgent_generationEstimateNote =>
-      'Cost is an estimate; the server determines the actual charge.';
-
-  @override
-  String get naiAgent_generationChanged =>
-      'Configuration or quote changed. Prepare again.';
-
-  @override
   String naiAgent_generationLocalEnhance(Object model, Object scale) {
     return 'Local upscale after generation: $model ×$scale';
   }
-
-  @override
-  String get naiAgent_generationText => 'Text to image';
-
-  @override
-  String get naiAgent_generationImage => 'Image to image';
-
-  @override
-  String get naiAgent_generationInpaint => 'Inpaint';
 
   @override
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
@@ -17046,12 +16727,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.';
 
   @override
-  String get generation_generate => 'Generate';
-
-  @override
-  String get detail_imageDetails => 'Image Details';
-
-  @override
   String get promptBlockLibrary_title => 'Prompt Blocks';
 
   @override
@@ -17060,9 +16735,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gen_compareOriginal =>
       'Hold to compare the original image and inpaint area';
-
-  @override
-  String get naiAgent_importingImages => 'Reading images…';
 
   @override
   String get naiAgent_imageTooLarge =>
@@ -17080,9 +16752,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String naiAgent_importResult(int added, int failed) {
     return 'Added $added images; $failed failed.';
   }
-
-  @override
-  String get naiAgent_attachmentMetadata => 'Original image metadata';
 
   @override
   String get channel_themeCircuit => 'Circuit';

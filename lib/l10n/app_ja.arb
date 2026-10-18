@@ -8783,85 +8783,15 @@
   "tools_emoPlayful": "いたずら",
   "auth_logoutConfirm": "現在のアカウントからログアウトしますか？",
   "naiAgent_title": "NAI Agent",
-  "naiAgent_local": "ローカル",
-  "naiAgent_permissionMode": "承認モード",
-  "naiAgent_permissionAuto": "自動",
-  "naiAgent_permissionAsk": "確認",
-  "naiAgent_permissionReadOnly": "閲覧のみ",
-  "naiAgent_permissionAutoHint": "通常のワークスペース編集は自動実行。コマンド、削除、未知のツールには承認が必要です。生成の確認も維持します。",
-  "naiAgent_permissionAskHint": "ワークスペースの読み取りは直接実行。編集、コマンド、未知のツールは毎回承認が必要です。生成は料金確認を使います。",
-  "naiAgent_permissionReadOnlyHint": "閲覧と相談のみ。編集、生成、未知のツールは実行しません。切替時は Agent の処理を停止し、手動生成は維持します。",
-  "naiAgent_useModelSetting": "モデル設定を使用",
   "naiAgent_permissionTitle": "ツールの承認が必要です",
   "naiAgent_permissionOnce": "今回のみ許可",
   "naiAgent_permissionSession": "このセッションで同一の呼び出しを許可",
   "naiAgent_permissionDeny": "拒否",
-  "naiAgent_thinking": "思考の強度 · 次の処理から適用",
-  "naiAgent_thinkingUnsupported": "調整可能な思考レベルが確認されていません。モデル設定を確認してください。",
-  "naiAgent_pasteImage": "クリップボードの画像を貼り付け",
-  "naiAgent_contextUnknown": "モデルの上限と使用量が判明するまで、コンテキスト使用量は表示できません。",
-  "naiAgent_contextTooltip": "使用可能なコンテキスト: {percent}%\n残り {remaining} / {window} tokens\nクリックで詳細統計を表示",
-  "naiAgent_statistics": "コンテキストと会話の統計",
-  "naiAgent_contextUsage": "現在のコンテキスト使用量 · 推定",
-  "naiAgent_contextRemaining": "残りのコンテキスト",
-  "naiAgent_contextWindow": "モデルの上限",
-  "naiAgent_sessionUsage": "セッションの累計使用量",
-  "naiAgent_tokensInput": "入力",
-  "naiAgent_tokensOutput": "出力",
-  "naiAgent_tokensCacheRead": "キャッシュ読み取り",
-  "naiAgent_tokensCacheWrite": "キャッシュ書き込み",
-  "naiAgent_tokensTotal": "累計 tokens",
-  "naiAgent_cumulativeUsageHint": "累計使用量には過去のリクエストも含まれ、現在のコンテキスト量とは異なります。",
-  "naiAgent_messageCounts": "会話記録",
-  "naiAgent_userAssistantMessages": "ユーザー / アシスタント",
-  "naiAgent_toolCalls": "ツールの呼び出し",
-  "naiAgent_cost": "料金",
   "naiAgent_defaultWorkspace": "ワークスペース 1",
   "naiAgent_newChat": "新しいチャット",
   "naiAgent_settings": "Agent 設定",
-  "naiAgent_workspace": "ワークスペース",
-  "naiAgent_createWorkspace": "新規ワークスペース",
-  "naiAgent_rename": "名前を変更",
-  "naiAgent_name": "名前",
-  "naiAgent_placeholder": "アイデアや質問を入力…",
-  "naiAgent_welcome": "ひとつのアイデアから",
-  "naiAgent_welcomeHint": "プロンプトの相談、画像の分析、ワークスペースの整理。\nまず話し合ってから、作業を始めましょう。",
-  "naiAgent_suggestCurrent": "現在の下書きを確認",
-  "naiAgent_suggestImage": "参考画像を分析",
-  "naiAgent_suggestWorkspace": "ワークスペースを整理",
-  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
-  "naiAgent_promptCurrent": "現在の下書きとパラメータを確認してください。まだ変更しないでください。",
-  "naiAgent_promptImage": "現在の画像の構図と画風を分析してください。まだ生成しないでください。",
-  "naiAgent_promptWorkspace": "現在のワークスペースを確認し、整理方法を提案してください。まだ変更しないでください。",
-  "naiAgent_tipTitle": "TIPS / ヒント",
-  "naiAgent_tipNext": "次のヒント",
-  "naiAgent_tipReadOnly": "まず「読み取り専用」で確認してから、変更する内容を決めましょう。",
-  "naiAgent_tipAttachments": "参考画像をドロップするか、+ から添付して具体的に相談できます。",
-  "naiAgent_tipGeneration": "画像生成は費用を表示し、確認を待ってから実行します。",
-  "naiAgent_welcomeFootnote": "すべての操作は現在の承認モードに従います",
   "naiAgent_chooseModel": "モデルを選択",
-  "naiAgent_modelSettings": "モデルと接続を管理",
-  "naiAgent_attach": "画像を添付",
-  "naiAgent_removeAttachment": "添付を削除",
-  "naiAgent_selectedImage": "選択画像を添付",
-  "naiAgent_send": "送信",
-  "naiAgent_stop": "処理を停止",
-  "naiAgent_queue": "待機列",
-  "naiAgent_steer": "ガイド",
-  "naiAgent_promote": "ガイドに変更",
-  "naiAgent_waiting": "回答を待っています",
-  "naiAgent_working": "処理中",
-  "naiAgent_waitingSlot": "リクエスト枠を待機中",
-  "naiAgent_starting": "チャットを開いています",
   "naiAgent_interrupted": "前回の処理は中断され、自動再送はされません。",
-  "naiAgent_restorePending": "入力欄に戻す",
-  "naiAgent_withdraw": "取り消す",
-  "naiAgent_newContent": "最新メッセージへ",
-  "naiAgent_toolRunning": "実行中",
-  "naiAgent_toolDone": "完了",
-  "naiAgent_toolFailed": "失敗",
-  "naiAgent_arguments": "引数",
-  "naiAgent_result": "結果",
   "naiAgent_systemPrompt": "システムプロンプト",
   "naiAgent_promptHelp": "カスタム内容は既定プロンプトを置き換えます。ツール一覧はアプリが追加し、以降のリクエストに適用されます。",
   "naiAgent_restoreDefault": "既定に戻す",
@@ -8880,64 +8810,10 @@
   "naiAgent_inputChanged": "準備中に入力が変わりました。現在の下書きを送信してください。",
   "naiAgent_imageLimit": "画像形式が無効、またはアップロード上限を超えています。",
   "naiAgent_composerNotEmpty": "現在の入力を保存または送信してから戻してください。",
-  "naiAgent_compact": "チャットを要約",
-  "naiAgent_export": "チャットをエクスポート",
-  "naiAgent_copyMessage": "メッセージをコピー",
-  "naiAgent_editMessage": "メッセージを編集",
-  "naiAgent_regenerate": "回答を再生成",
-  "naiAgent_submitAnswer": "回答を送信",
-  "naiAgent_customAnswer": "自由に回答を入力できます",
-  "naiAgent_close": "パネルを閉じる",
-  "naiAgent_showChats": "チャット一覧",
   "naiAgent_runtimeMissing": "Agent 実行環境がありません。完全な更新パッケージを使用してください。",
   "naiAgent_usage": "モデル使用量",
-  "naiAgent_cancel": "キャンセル",
-  "naiAgent_dropHint": "ドロップしてこのチャットに添付",
-  "naiAgent_emptyAttachment": "画像を読み込めません",
   "naiAgent_globalScope": "全体の既定値",
   "naiAgent_workspaceScope": "現在のワークスペース",
-  "naiAgent_generationTitle": "生成の確認",
-  "naiAgent_generationWaiting": "生成の確認を待機中",
-  "naiAgent_generationAccount": "アカウント：{name}",
-  "@naiAgent_generationAccount": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "naiAgent_generationBatch": "{requests} 回 × {size} 枚 · 合計 {total} 枚",
-  "@naiAgent_generationBatch": {
-    "placeholders": {
-      "requests": {},
-      "size": {},
-      "total": {}
-    }
-  },
-  "naiAgent_generationUnit": "1 回あたり {cost} Anlas",
-  "@naiAgent_generationUnit": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationEncoding": "参照画像のエンコード：{cost} Anlas",
-  "@naiAgent_generationEncoding": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationTotal": "見積もり {cost} Anlas",
-  "@naiAgent_generationTotal": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationBalance": "現在の残高 {balance} Anlas",
-  "@naiAgent_generationBalance": {
-    "placeholders": {
-      "balance": {}
-    }
-  },
-  "naiAgent_generationEstimateNote": "料金は見積もりです。実際の請求額はサーバーで決まります。",
-  "naiAgent_generationChanged": "設定または見積もりが変わりました。再度準備してください。",
   "naiAgent_generationLocalEnhance": "生成後にローカルで拡大：{model} ×{scale}",
   "@naiAgent_generationLocalEnhance": {
     "placeholders": {
@@ -8945,9 +8821,6 @@
       "scale": {}
     }
   },
-  "naiAgent_generationText": "テキストから生成",
-  "naiAgent_generationImage": "画像から生成",
-  "naiAgent_generationInpaint": "部分修正",
   "naiAgent_galleryDeleteEmptyFolderConfirm": "この空のフォルダーとギャラリー分類を削除しますか？他のフォルダー内の画像は保持されます。\n{path}",
   "@naiAgent_galleryDeleteEmptyFolderConfirm": {
     "placeholders": {
@@ -8983,30 +8856,13 @@
   "naiAgent_mcpLogin": "ログイン",
   "naiAgent_mcpLogout": "ログアウト",
   "naiAgent_mcpHint": "既定では CodeMode で必要時に検索します。codemode：サンドボックスから呼び出す。deferred：検索後に直接呼び出す。direct：常時公開。hidden：非公開。変更は次の待機中の呼び出しに反映されます。接続確認はチャットモデルを呼び出しません。",
-  "generation_generate": "生成",
-  "detail_imageDetails": "画像の詳細",
   "promptBlockLibrary_title": "プロンプトブロック",
-  "@naiAgent_contextTooltip": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      },
-      "remaining": {
-        "type": "String"
-      },
-      "window": {
-        "type": "String"
-      }
-    }
-  },
   "gen_oldImageLabel": "OLD",
   "gen_compareOriginal": "押している間、元画像とインペイント範囲を比較",
-  "naiAgent_importingImages": "画像を読み込み中…",
   "naiAgent_imageTooLarge": "画像が64 MiBまたは6400万画素を超えています。",
   "naiAgent_linkOnlyImage": "このソースにはリンクしかありません。画像ファイルを保存してここにドラッグしてください。",
   "naiAgent_invalidImage": "画像を読み込めません。PNG、JPEG、WebP、GIF、BMPファイルを使用してください。",
   "naiAgent_importResult": "画像を{added}枚追加、{failed}枚失敗しました。",
-  "naiAgent_attachmentMetadata": "元画像のメタデータ",
   "@naiAgent_importResult": {
     "placeholders": {
       "added": {

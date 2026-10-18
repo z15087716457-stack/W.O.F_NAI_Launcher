@@ -10,6 +10,7 @@ import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_ba
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
 import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_glyphs.dart';
 
 import '../../helpers/studio_capture_fonts.dart';
 
@@ -156,6 +157,13 @@ void main() {
       );
       final toggle = find.byKey(const Key('nai-agent-toggle'));
       expect(toggle, findsOneWidget);
+      expect(find.byType(AgentToggleButton), findsOneWidget);
+      expect(
+        tester
+            .widget<AgentToggleButton>(find.byType(AgentToggleButton))
+            .expanded,
+        false,
+      );
       final capsule = find.byKey(const Key('window-update-capsule'));
       expect(
         tester.getRect(capsule).right,
@@ -166,6 +174,12 @@ void main() {
       await tester.tap(toggle);
       await tester.pumpAndSettle();
       expect(preferences.settings.panelExpanded, isTrue);
+      expect(
+        tester
+            .widget<AgentToggleButton>(find.byType(AgentToggleButton))
+            .expanded,
+        true,
+      );
       expect(window.docked, isTrue);
       expect(
         host.rect.width,

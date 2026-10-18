@@ -8783,98 +8783,15 @@
   "tools_emoPlayful": "Playful",
   "auth_logoutConfirm": "Sign out of the current account?",
   "naiAgent_title": "NAI Agent",
-  "naiAgent_local": "Local",
-  "naiAgent_permissionMode": "Approval mode",
-  "naiAgent_permissionAuto": "Auto",
-  "naiAgent_permissionAsk": "Ask",
-  "naiAgent_permissionReadOnly": "Read only",
-  "naiAgent_permissionAutoHint": "Routine workspace edits run automatically. Commands, deletion and unknown tools still need approval. Generation confirmation stays enabled.",
-  "naiAgent_permissionAskHint": "Workspace reads run directly. Edits, commands and unknown tools need approval for each call. Generation uses its price confirmation.",
-  "naiAgent_permissionReadOnlyHint": "Read and discuss only. Edits, generation and unknown tools are blocked. Switching stops current Agent tasks, not manual generation.",
-  "naiAgent_useModelSetting": "Use model setting",
   "naiAgent_permissionTitle": "Tool approval required",
   "naiAgent_permissionOnce": "Allow once",
   "naiAgent_permissionSession": "Allow identical calls this session",
   "naiAgent_permissionDeny": "Deny",
-  "naiAgent_thinking": "Thinking effort · applies to the next run",
-  "naiAgent_thinkingUnsupported": "This model has no confirmed adjustable thinking levels. Check its model settings first.",
-  "naiAgent_pasteImage": "Paste clipboard image",
-  "naiAgent_contextUnknown": "Context usage is unavailable until the model window and usage are known.",
-  "naiAgent_contextTooltip": "Available context: {percent}%\n{remaining} / {window} tokens remaining\nClick for detailed statistics",
-  "@naiAgent_contextTooltip": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      },
-      "remaining": {
-        "type": "String"
-      },
-      "window": {
-        "type": "String"
-      }
-    }
-  },
-  "naiAgent_statistics": "Context and session statistics",
-  "naiAgent_contextUsage": "Current context usage · estimated",
-  "naiAgent_contextRemaining": "Remaining context",
-  "naiAgent_contextWindow": "Model window",
-  "naiAgent_sessionUsage": "Cumulative session usage",
-  "naiAgent_tokensInput": "Input",
-  "naiAgent_tokensOutput": "Output",
-  "naiAgent_tokensCacheRead": "Cache read",
-  "naiAgent_tokensCacheWrite": "Cache write",
-  "naiAgent_tokensTotal": "Total tokens",
-  "naiAgent_cumulativeUsageHint": "Cumulative usage includes past requests and is not the current context size.",
-  "naiAgent_messageCounts": "Conversation",
-  "naiAgent_userAssistantMessages": "User / assistant messages",
-  "naiAgent_toolCalls": "Tool calls",
-  "naiAgent_cost": "Cost",
   "naiAgent_defaultWorkspace": "Workspace 1",
   "naiAgent_newChat": "New chat",
   "naiAgent_settings": "Agent settings",
-  "naiAgent_workspace": "Workspace",
-  "naiAgent_createWorkspace": "New workspace",
-  "naiAgent_rename": "Rename",
-  "naiAgent_name": "Name",
-  "naiAgent_placeholder": "Describe an idea or ask a question…",
-  "naiAgent_welcome": "Start with an idea",
-  "naiAgent_welcomeHint": "Discuss prompts, inspect images, organize your workspace.\nTalk it through, then take action.",
-  "naiAgent_suggestCurrent": "Inspect current draft",
-  "naiAgent_suggestImage": "Analyze a reference",
-  "naiAgent_suggestWorkspace": "Organize workspace",
-  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
-  "naiAgent_promptCurrent": "Inspect my current draft and parameters without changing anything yet.",
-  "naiAgent_promptImage": "Analyze the composition and style of the current image without generating anything yet.",
-  "naiAgent_promptWorkspace": "Review my current workspace and suggest how to organize it without changing anything yet.",
-  "naiAgent_tipTitle": "TIPS / GETTING STARTED",
-  "naiAgent_tipNext": "Next tip",
-  "naiAgent_tipReadOnly": "Explore in Read-only mode first, then decide what to change.",
-  "naiAgent_tipAttachments": "Drop a reference image here, or use + to add an attachment.",
-  "naiAgent_tipGeneration": "Image generation shows its cost and waits for your confirmation.",
-  "naiAgent_welcomeFootnote": "All actions follow your current approval mode",
   "naiAgent_chooseModel": "Choose model",
-  "naiAgent_modelSettings": "Manage models and interfaces",
-  "naiAgent_attach": "Attach images",
-  "naiAgent_removeAttachment": "Remove attachment",
-  "naiAgent_selectedImage": "Attach selected image",
-  "naiAgent_send": "Send",
-  "naiAgent_stop": "Stop run",
-  "naiAgent_queue": "Queue",
-  "naiAgent_steer": "Steer",
-  "naiAgent_promote": "Use as steering",
-  "naiAgent_waiting": "Waiting for your answer",
-  "naiAgent_working": "Working",
-  "naiAgent_waitingSlot": "Waiting for a provider slot",
-  "naiAgent_starting": "Opening chat",
   "naiAgent_interrupted": "The previous run was interrupted and was not resent.",
-  "naiAgent_restorePending": "Restore to composer",
-  "naiAgent_withdraw": "Withdraw",
-  "naiAgent_newContent": "Jump to latest",
-  "naiAgent_toolRunning": "Running",
-  "naiAgent_toolDone": "Complete",
-  "naiAgent_toolFailed": "Failed",
-  "naiAgent_arguments": "Arguments",
-  "naiAgent_result": "Result",
   "naiAgent_systemPrompt": "System prompt",
   "naiAgent_promptHelp": "Custom text replaces the default prompt. The app appends its tool map. Existing history stays intact; later requests use the new text.",
   "naiAgent_restoreDefault": "Restore default",
@@ -8893,64 +8810,10 @@
   "naiAgent_inputChanged": "Input changed while preparing. Send the current draft.",
   "naiAgent_imageLimit": "Invalid image format or image exceeds upload limits.",
   "naiAgent_composerNotEmpty": "Save or send the current input before restoring this message.",
-  "naiAgent_compact": "Compact chat context",
-  "naiAgent_export": "Export chat",
-  "naiAgent_copyMessage": "Copy message",
-  "naiAgent_editMessage": "Edit message",
-  "naiAgent_regenerate": "Regenerate reply",
-  "naiAgent_submitAnswer": "Submit answer",
-  "naiAgent_customAnswer": "Or write your own answer",
-  "naiAgent_close": "Collapse panel",
-  "naiAgent_showChats": "Chats",
   "naiAgent_runtimeMissing": "Agent runtime is missing. Install the complete update package.",
   "naiAgent_usage": "Model usage",
-  "naiAgent_cancel": "Cancel",
-  "naiAgent_dropHint": "Drop to attach to this chat",
-  "naiAgent_emptyAttachment": "Cannot read image",
   "naiAgent_globalScope": "Global default",
   "naiAgent_workspaceScope": "Current workspace",
-  "naiAgent_generationTitle": "Generation approval",
-  "naiAgent_generationWaiting": "Waiting for generation approval",
-  "naiAgent_generationAccount": "Account: {name}",
-  "@naiAgent_generationAccount": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "naiAgent_generationBatch": "{requests} requests × {size} images · {total} total",
-  "@naiAgent_generationBatch": {
-    "placeholders": {
-      "requests": {},
-      "size": {},
-      "total": {}
-    }
-  },
-  "naiAgent_generationUnit": "{cost} Anlas per request",
-  "@naiAgent_generationUnit": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationEncoding": "Reference encoding: {cost} Anlas",
-  "@naiAgent_generationEncoding": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationTotal": "Estimated {cost} Anlas",
-  "@naiAgent_generationTotal": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationBalance": "Balance: {balance} Anlas",
-  "@naiAgent_generationBalance": {
-    "placeholders": {
-      "balance": {}
-    }
-  },
-  "naiAgent_generationEstimateNote": "Cost is an estimate; the server determines the actual charge.",
-  "naiAgent_generationChanged": "Configuration or quote changed. Prepare again.",
   "naiAgent_generationLocalEnhance": "Local upscale after generation: {model} ×{scale}",
   "@naiAgent_generationLocalEnhance": {
     "placeholders": {
@@ -8958,9 +8821,6 @@
       "scale": {}
     }
   },
-  "naiAgent_generationText": "Text to image",
-  "naiAgent_generationImage": "Image to image",
-  "naiAgent_generationInpaint": "Inpaint",
   "naiAgent_galleryDeleteEmptyFolderConfirm": "Delete this empty folder and its gallery category? Images in other folders will be kept.\n{path}",
   "@naiAgent_galleryDeleteEmptyFolderConfirm": {
     "placeholders": {
@@ -8996,17 +8856,13 @@
   "naiAgent_mcpLogin": "Sign in",
   "naiAgent_mcpLogout": "Sign out",
   "naiAgent_mcpHint": "CodeMode discovers tools on demand by default. codemode: sandbox calls; deferred: search then call directly; direct: always declared; hidden: unavailable. Changes apply on the next idle call. Checking connections makes no chat model request.",
-  "generation_generate": "Generate",
-  "detail_imageDetails": "Image Details",
   "promptBlockLibrary_title": "Prompt Blocks",
   "gen_oldImageLabel": "OLD",
   "gen_compareOriginal": "Hold to compare the original image and inpaint area",
-  "naiAgent_importingImages": "Reading images…",
   "naiAgent_imageTooLarge": "Image exceeds 64 MiB or 64 million pixels.",
   "naiAgent_linkOnlyImage": "This source only provides a link. Save the image file and drag it here.",
   "naiAgent_invalidImage": "Unable to read this image. Use a PNG, JPEG, WebP, GIF or BMP file.",
   "naiAgent_importResult": "Added {added} images; {failed} failed.",
-  "naiAgent_attachmentMetadata": "Original image metadata",
   "@naiAgent_importResult": {
     "placeholders": {
       "added": {

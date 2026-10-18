@@ -106,6 +106,23 @@ test('CodeMode retains native image artifacts in official Pi history without dum
   } finally {await f.close();}
 });
 
+test('CodeMode persists prompt diff projections without exposing them in model content', async () => {
+  const native = { applied: ['prompt'], backup_path: 'draft-backups/before.json',
+    draft: { fields: { prompt: 'new prompt' }, draft_version: 'v1' } };
+  const f = await fixture('await tools.mcp__nai_studio__prompt_update({changes:{},expected:{}}); text("done");', {
+    execute: async () => ({ content:[{type:'text',text:'native-private-prompt'}], details:native }),
+  });
+  try {
+    await f.session.prompt('perform test');
+    assert.deepEqual(f.result().details.studio_results[0].draft, native.draft);
+    assert.equal(f.result().details.studio_results[0].tool, 'mcp__nai_studio__prompt_update');
+    assert.ok(!JSON.stringify(f.result().content).includes('native-private-prompt'));
+    const entries=(await readFile(f.session.sessionFile,'utf8')).trim().split('\n').map(line=>JSON.parse(line));
+    const message=entries.find(entry=>entry.message?.role==='toolResult').message;
+    assert.equal(message.details.studio_results[0].backup_path, native.backup_path);
+  } finally { await f.close(); }
+});
+
 test('direct and hidden exposures follow Pi loadouts, and disabled servers never start', async () => {
   const f = await fixture('text(await searchTools("snapshot"));', { session: { mcp: {
     builtinExposure: 'direct', mcpServers: { disabled: { command: 'does-not-exist', enabled: false } },

@@ -353,19 +353,28 @@ class AgentThreadMapper {
                 ),
               );
             }
-            final applied = details['applied'];
-            if (tool == 'prompt_update' &&
-                applied is List &&
-                details['backup_path'] is String) {
+            final projections = agentMaps(details['studio_results']);
+            for (final (projectionIndex, projection) in [
+              if (tool == 'prompt_update') details,
+              ...projections.where(
+                (p) =>
+                    agentToolName(p['tool'] as String? ?? '') ==
+                    'prompt_update',
+              ),
+            ].indexed) {
+              final applied = projection['applied'];
+              if (applied is! List || projection['backup_path'] is! String) {
+                continue;
+              }
               flushSteps();
               final backup = resources.snapshot(
                 runtime.workspace,
-                details['backup_path'] as String,
+                projection['backup_path'] as String,
               );
-              final after = agentMap(details['draft']);
+              final after = agentMap(projection['draft']);
               if (backup != null) {
                 for (final change in _diffs(
-                  '${runtime.chat.id}/$id',
+                  '${runtime.chat.id}/$id/$projectionIndex',
                   applied,
                   backup,
                   after,
@@ -392,6 +401,21 @@ class AgentThreadMapper {
             }
             final artifacts = agentMaps(details['artifacts']);
             final outputImages = <AgentImage>[];
+            final projectedImages = [
+              for (final p in projections)
+                for (final (i, a) in agentMaps(
+                  p['artifacts'],
+                ).where((a) => a['type'] == 'image').indexed)
+                  {
+                    ...a,
+                    'image_id':
+                        a['image_id'] ??
+                        (p['image_ids'] is List
+                            ? (p['image_ids'] as List).elementAtOrNull(i)
+                            : null),
+                    'tool': p['tool'],
+                  },
+            ];
             final historyIds = details['image_ids'] is List
                 ? details['image_ids'] as List
                 : const [];
@@ -403,8 +427,12 @@ class AgentThreadMapper {
                 file(path, bytes: agentInt(artifact['bytes']));
                 continue;
               }
+              final projected = projectedImages
+                  .where((a) => a['path'] == path)
+                  .firstOrNull;
               final historyId =
                   artifact['image_id'] as String? ??
+                  projected?['image_id'] as String? ??
                   historyIds.elementAtOrNull(imageIndex) as String?;
               imageIndex++;
               final provider = resources.image(runtime.workspace, path);
@@ -422,7 +450,9 @@ class AgentThreadMapper {
                       'generation_run',
                       'image_generate',
                       'explore_manage',
-                    ].contains(tool)
+                    ].contains(
+                      agentToolName(projected?['tool'] as String? ?? tool),
+                    )
                     ? AgentImageSource.generated
                     : AgentImageSource.tool,
               );
@@ -434,7 +464,15 @@ class AgentThreadMapper {
               blocks.add(
                 AgentImagesBlock(
                   images: outputImages,
-                  anlasSpent: agentInt(details['estimated_anlas']),
+                  anlasSpent:
+                      agentInt(details['estimated_anlas']) ??
+                      (projections.any((p) => p['estimated_anlas'] is num)
+                          ? projections.fold<int>(
+                              0,
+                              (sum, p) =>
+                                  sum + (agentInt(p['estimated_anlas']) ?? 0),
+                            )
+                          : null),
                 ),
               );
             }

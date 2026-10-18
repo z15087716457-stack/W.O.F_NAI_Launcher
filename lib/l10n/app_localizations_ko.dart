@@ -16086,36 +16086,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_title => 'NAI Agent';
 
   @override
-  String get naiAgent_local => '로컬';
-
-  @override
-  String get naiAgent_permissionMode => '승인 모드';
-
-  @override
-  String get naiAgent_permissionAuto => '자동';
-
-  @override
-  String get naiAgent_permissionAsk => '확인';
-
-  @override
-  String get naiAgent_permissionReadOnly => '읽기 전용';
-
-  @override
-  String get naiAgent_permissionAutoHint =>
-      '일반 작업 공간 편집은 자동 실행합니다. 명령, 삭제 및 알 수 없는 도구는 승인이 필요하며 이미지 생성 확인도 유지합니다.';
-
-  @override
-  String get naiAgent_permissionAskHint =>
-      '작업 공간 읽기는 바로 실행합니다. 편집, 명령 및 알 수 없는 도구는 매번 승인하며 이미지 생성은 비용 확인을 거칩니다.';
-
-  @override
-  String get naiAgent_permissionReadOnlyHint =>
-      '읽기와 대화만 가능하며 편집, 이미지 생성 및 알 수 없는 도구는 차단합니다. 전환 시 Agent 작업만 중지하고 수동 생성은 유지합니다.';
-
-  @override
-  String get naiAgent_useModelSetting => '모델 설정 사용';
-
-  @override
   String get naiAgent_permissionTitle => '도구 승인이 필요합니다';
 
   @override
@@ -16128,75 +16098,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_permissionDeny => '거부';
 
   @override
-  String get naiAgent_thinking => '사고 강도 · 다음 작업부터 적용';
-
-  @override
-  String get naiAgent_thinkingUnsupported =>
-      '조절 가능한 사고 수준이 확인되지 않았습니다. 먼저 모델 설정을 확인하세요.';
-
-  @override
-  String get naiAgent_pasteImage => '클립보드 이미지 붙여넣기';
-
-  @override
-  String get naiAgent_contextUnknown =>
-      '모델 컨텍스트 한도와 실제 사용량이 확인될 때까지 표시할 수 없습니다.';
-
-  @override
-  String naiAgent_contextTooltip(
-    String percent,
-    String remaining,
-    String window,
-  ) {
-    return '사용 가능한 컨텍스트 $percent%\n남은 토큰 $remaining / $window\n클릭하여 상세 통계 보기';
-  }
-
-  @override
-  String get naiAgent_statistics => '컨텍스트 및 대화 통계';
-
-  @override
-  String get naiAgent_contextUsage => '현재 컨텍스트 사용량 · 추정';
-
-  @override
-  String get naiAgent_contextRemaining => '남은 컨텍스트';
-
-  @override
-  String get naiAgent_contextWindow => '모델 컨텍스트 한도';
-
-  @override
-  String get naiAgent_sessionUsage => '세션 누적 사용량';
-
-  @override
-  String get naiAgent_tokensInput => '입력';
-
-  @override
-  String get naiAgent_tokensOutput => '출력';
-
-  @override
-  String get naiAgent_tokensCacheRead => '캐시 읽기';
-
-  @override
-  String get naiAgent_tokensCacheWrite => '캐시 쓰기';
-
-  @override
-  String get naiAgent_tokensTotal => '누적 토큰';
-
-  @override
-  String get naiAgent_cumulativeUsageHint =>
-      '누적 사용량에는 이전 요청이 포함되며 현재 컨텍스트 크기와 다릅니다.';
-
-  @override
-  String get naiAgent_messageCounts => '대화 기록';
-
-  @override
-  String get naiAgent_userAssistantMessages => '사용자 / 어시스턴트';
-
-  @override
-  String get naiAgent_toolCalls => '도구 호출';
-
-  @override
-  String get naiAgent_cost => '비용';
-
-  @override
   String get naiAgent_defaultWorkspace => '작업 공간 1';
 
   @override
@@ -16206,136 +16107,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_settings => 'Agent 설정';
 
   @override
-  String get naiAgent_workspace => '작업 공간';
-
-  @override
-  String get naiAgent_createWorkspace => '새 작업 공간';
-
-  @override
-  String get naiAgent_rename => '이름 변경';
-
-  @override
-  String get naiAgent_name => '이름';
-
-  @override
-  String get naiAgent_placeholder => '아이디어나 질문을 입력하세요…';
-
-  @override
-  String get naiAgent_welcome => '하나의 아이디어에서 시작';
-
-  @override
-  String get naiAgent_welcomeHint =>
-      '프롬프트를 논의하고 이미지를 분석하며 작업 공간을 정리하세요.\n먼저 이야기를 나눈 뒤 작업을 시작하세요.';
-
-  @override
-  String get naiAgent_suggestCurrent => '현재 초안 확인';
-
-  @override
-  String get naiAgent_suggestImage => '참조 이미지 분석';
-
-  @override
-  String get naiAgent_suggestWorkspace => '작업 공간 정리';
-
-  @override
-  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
-
-  @override
-  String get naiAgent_promptCurrent => '현재 초안과 매개변수를 확인해 주세요. 아직 변경하지 마세요.';
-
-  @override
-  String get naiAgent_promptImage => '현재 이미지의 구도와 화풍을 분석해 주세요. 아직 생성하지 마세요.';
-
-  @override
-  String get naiAgent_promptWorkspace =>
-      '현재 작업 공간을 살펴보고 정리 방법을 제안해 주세요. 아직 변경하지 마세요.';
-
-  @override
-  String get naiAgent_tipTitle => 'TIPS / 도움말';
-
-  @override
-  String get naiAgent_tipNext => '다음 도움말';
-
-  @override
-  String get naiAgent_tipReadOnly => '먼저 \'읽기 전용\' 모드로 살펴본 뒤 변경할 내용을 정하세요.';
-
-  @override
-  String get naiAgent_tipAttachments =>
-      '참조 이미지를 드래그하거나 + 로 첨부해 더 구체적으로 이야기하세요.';
-
-  @override
-  String get naiAgent_tipGeneration => '이미지 생성은 비용을 표시하고 확인을 받은 뒤 실행합니다.';
-
-  @override
-  String get naiAgent_welcomeFootnote => '모든 작업은 현재 승인 모드를 따릅니다';
-
-  @override
   String get naiAgent_chooseModel => '모델 선택';
 
   @override
-  String get naiAgent_modelSettings => '모델 및 인터페이스 관리';
-
-  @override
-  String get naiAgent_attach => '이미지 첨부';
-
-  @override
-  String get naiAgent_removeAttachment => '첨부 제거';
-
-  @override
-  String get naiAgent_selectedImage => '선택한 이미지 첨부';
-
-  @override
-  String get naiAgent_send => '보내기';
-
-  @override
-  String get naiAgent_stop => '작업 중지';
-
-  @override
-  String get naiAgent_queue => '대기열';
-
-  @override
-  String get naiAgent_steer => '지시 추가';
-
-  @override
-  String get naiAgent_promote => '지시로 전환';
-
-  @override
-  String get naiAgent_waiting => '답변을 기다리는 중';
-
-  @override
-  String get naiAgent_working => '처리 중';
-
-  @override
-  String get naiAgent_waitingSlot => '서비스 요청 슬롯 대기 중';
-
-  @override
-  String get naiAgent_starting => '채팅 여는 중';
-
-  @override
   String get naiAgent_interrupted => '이전 작업이 중단되었으며 자동으로 다시 보내지 않았습니다.';
-
-  @override
-  String get naiAgent_restorePending => '입력창으로 복원';
-
-  @override
-  String get naiAgent_withdraw => '회수';
-
-  @override
-  String get naiAgent_newContent => '최신 메시지로 이동';
-
-  @override
-  String get naiAgent_toolRunning => '실행 중';
-
-  @override
-  String get naiAgent_toolDone => '완료';
-
-  @override
-  String get naiAgent_toolFailed => '실패';
-
-  @override
-  String get naiAgent_arguments => '인수';
-
-  @override
-  String get naiAgent_result => '결과';
 
   @override
   String get naiAgent_systemPrompt => '시스템 프롬프트';
@@ -16395,46 +16170,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_composerNotEmpty => '현재 입력을 저장하거나 보낸 후 이 메시지를 복원하세요.';
 
   @override
-  String get naiAgent_compact => '채팅 컨텍스트 압축';
-
-  @override
-  String get naiAgent_export => '채팅 내보내기';
-
-  @override
-  String get naiAgent_copyMessage => '메시지 복사';
-
-  @override
-  String get naiAgent_editMessage => '메시지 편집';
-
-  @override
-  String get naiAgent_regenerate => '답변 다시 생성';
-
-  @override
-  String get naiAgent_submitAnswer => '답변 제출';
-
-  @override
-  String get naiAgent_customAnswer => '직접 답변을 입력할 수도 있습니다';
-
-  @override
-  String get naiAgent_close => '패널 접기';
-
-  @override
-  String get naiAgent_showChats => '채팅 목록';
-
-  @override
   String get naiAgent_runtimeMissing => 'Agent 런타임이 없습니다. 전체 업데이트 패키지를 사용하세요.';
 
   @override
   String get naiAgent_usage => '모델 사용량';
-
-  @override
-  String get naiAgent_cancel => '취소';
-
-  @override
-  String get naiAgent_dropHint => '놓아서 이 채팅에 첨부';
-
-  @override
-  String get naiAgent_emptyAttachment => '이미지를 읽을 수 없음';
 
   @override
   String get naiAgent_globalScope => '전역 기본값';
@@ -16443,60 +16182,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_workspaceScope => '현재 작업 공간';
 
   @override
-  String get naiAgent_generationTitle => '생성 승인';
-
-  @override
-  String get naiAgent_generationWaiting => '생성 승인 대기 중';
-
-  @override
-  String naiAgent_generationAccount(Object name) {
-    return '계정: $name';
-  }
-
-  @override
-  String naiAgent_generationBatch(Object requests, Object size, Object total) {
-    return '요청 $requests회 × $size장 · 총 $total장';
-  }
-
-  @override
-  String naiAgent_generationUnit(Object cost) {
-    return '요청당 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationEncoding(Object cost) {
-    return '참조 이미지 인코딩: $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationTotal(Object cost) {
-    return '예상 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationBalance(Object balance) {
-    return '현재 잔액 $balance Anlas';
-  }
-
-  @override
-  String get naiAgent_generationEstimateNote => '비용은 예상치이며 실제 차감액은 서버에서 결정합니다.';
-
-  @override
-  String get naiAgent_generationChanged => '설정 또는 견적이 변경되었습니다. 다시 준비해 주세요.';
-
-  @override
   String naiAgent_generationLocalEnhance(Object model, Object scale) {
     return '생성 후 로컬 업스케일: $model ×$scale';
   }
-
-  @override
-  String get naiAgent_generationText => '텍스트로 이미지 생성';
-
-  @override
-  String get naiAgent_generationImage => '이미지로 이미지 생성';
-
-  @override
-  String get naiAgent_generationInpaint => '인페인트';
 
   @override
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
@@ -16594,12 +16282,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '기본적으로 CodeMode가 필요할 때 도구를 검색합니다. codemode: 샌드박스 호출; deferred: 검색 후 직접 호출; direct: 항상 공개; hidden: 숨김. 변경은 다음 유휴 호출에 적용됩니다. 연결 확인은 채팅 모델을 호출하지 않습니다.';
 
   @override
-  String get generation_generate => '생성';
-
-  @override
-  String get detail_imageDetails => '이미지 상세 정보';
-
-  @override
   String get promptBlockLibrary_title => '프롬프트 블록';
 
   @override
@@ -16607,9 +16289,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_compareOriginal => '누르고 있는 동안 원본 이미지와 인페인트 영역 비교';
-
-  @override
-  String get naiAgent_importingImages => '이미지 읽는 중…';
 
   @override
   String get naiAgent_imageTooLarge => '이미지가 64 MiB 또는 6,400만 픽셀을 초과합니다.';
@@ -16626,9 +16305,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String naiAgent_importResult(int added, int failed) {
     return '이미지 $added개 추가, $failed개 실패했습니다.';
   }
-
-  @override
-  String get naiAgent_attachmentMetadata => '원본 이미지 메타데이터';
 
   @override
   String get channel_themeCircuit => '회로';

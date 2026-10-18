@@ -15840,35 +15840,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_title => 'NAI Agent';
 
   @override
-  String get naiAgent_local => '本地';
-
-  @override
-  String get naiAgent_permissionMode => '审批模式';
-
-  @override
-  String get naiAgent_permissionAuto => '自动';
-
-  @override
-  String get naiAgent_permissionAsk => '询问';
-
-  @override
-  String get naiAgent_permissionReadOnly => '只读';
-
-  @override
-  String get naiAgent_permissionAutoHint =>
-      '工作区内的常规修改自动执行；命令、删除和未知工具仍需审批。生图确认保留。';
-
-  @override
-  String get naiAgent_permissionAskHint => '工作区读取直接执行；修改、命令和未知工具逐次审批。生图仍走费用确认。';
-
-  @override
-  String get naiAgent_permissionReadOnlyHint =>
-      '只读取和讨论；禁止修改及生成，未知工具不执行。切换时停止 Agent 当前任务，不影响手动生图。';
-
-  @override
-  String get naiAgent_useModelSetting => '使用模型设置';
-
-  @override
   String get naiAgent_permissionTitle => '需要审批';
 
   @override
@@ -15881,72 +15852,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_permissionDeny => '拒绝';
 
   @override
-  String get naiAgent_thinking => '思考强度 · 下一次任务生效';
-
-  @override
-  String get naiAgent_thinkingUnsupported => '此模型没有已确认的可调思考档位，请先检查模型设置。';
-
-  @override
-  String get naiAgent_pasteImage => '粘贴剪贴板图片';
-
-  @override
-  String get naiAgent_contextUnknown => '上下文用量暂不可用，等待已知模型窗口及实际用量。';
-
-  @override
-  String naiAgent_contextTooltip(
-    String percent,
-    String remaining,
-    String window,
-  ) {
-    return '可用上下文 $percent%\n$remaining / $window tokens 剩余\n点击查看详细统计';
-  }
-
-  @override
-  String get naiAgent_statistics => '上下文与会话统计';
-
-  @override
-  String get naiAgent_contextUsage => '当前上下文占用 · 估算';
-
-  @override
-  String get naiAgent_contextRemaining => '剩余上下文';
-
-  @override
-  String get naiAgent_contextWindow => '模型窗口';
-
-  @override
-  String get naiAgent_sessionUsage => '本会话累计用量';
-
-  @override
-  String get naiAgent_tokensInput => '输入';
-
-  @override
-  String get naiAgent_tokensOutput => '输出';
-
-  @override
-  String get naiAgent_tokensCacheRead => '缓存读取';
-
-  @override
-  String get naiAgent_tokensCacheWrite => '缓存写入';
-
-  @override
-  String get naiAgent_tokensTotal => '累计 tokens';
-
-  @override
-  String get naiAgent_cumulativeUsageHint => '累计用量包含历次请求，不等于当前上下文占用。';
-
-  @override
-  String get naiAgent_messageCounts => '会话记录';
-
-  @override
-  String get naiAgent_userAssistantMessages => '用户 / 助手消息';
-
-  @override
-  String get naiAgent_toolCalls => '工具调用';
-
-  @override
-  String get naiAgent_cost => '费用';
-
-  @override
   String get naiAgent_defaultWorkspace => '工作区 1';
 
   @override
@@ -15956,133 +15861,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_settings => 'Agent 设置';
 
   @override
-  String get naiAgent_workspace => '工作区';
-
-  @override
-  String get naiAgent_createWorkspace => '新建工作区';
-
-  @override
-  String get naiAgent_rename => '重命名';
-
-  @override
-  String get naiAgent_name => '名称';
-
-  @override
-  String get naiAgent_placeholder => '描述想法，或问一个问题…';
-
-  @override
-  String get naiAgent_welcome => '从一个想法开始';
-
-  @override
-  String get naiAgent_welcomeHint => '讨论提示词、分析图片、整理工作区。\n先聊清楚，再动手。';
-
-  @override
-  String get naiAgent_suggestCurrent => '检查当前草稿';
-
-  @override
-  String get naiAgent_suggestImage => '分析参考图片';
-
-  @override
-  String get naiAgent_suggestWorkspace => '整理工作区';
-
-  @override
-  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
-
-  @override
-  String get naiAgent_promptCurrent => '看看当前草稿和参数，先不要修改。';
-
-  @override
-  String get naiAgent_promptImage => '分析当前图片的构图和画风，先不要生成。';
-
-  @override
-  String get naiAgent_promptWorkspace => '查看当前工作区，建议整理方式，先不要修改。';
-
-  @override
-  String get naiAgent_tipTitle => 'TIPS / 小提示';
-
-  @override
-  String get naiAgent_tipNext => '下一条提示';
-
-  @override
-  String get naiAgent_tipReadOnly => '先用「只读」模式探索，再决定要修改什么。';
-
-  @override
-  String get naiAgent_tipAttachments => '拖入参考图，或点击 + 添加附件，让讨论更具体。';
-
-  @override
-  String get naiAgent_tipGeneration => '生成前会显示费用并等待确认，不会直接生图。';
-
-  @override
-  String get naiAgent_welcomeFootnote => '所有操作遵循当前审批模式';
-
-  @override
   String get naiAgent_chooseModel => '选择模型';
 
   @override
-  String get naiAgent_modelSettings => '管理模型与接口';
-
-  @override
-  String get naiAgent_attach => '添加图片';
-
-  @override
-  String get naiAgent_removeAttachment => '移除附件';
-
-  @override
-  String get naiAgent_selectedImage => '附上当前图片';
-
-  @override
-  String get naiAgent_send => '发送';
-
-  @override
-  String get naiAgent_stop => '停止任务';
-
-  @override
-  String get naiAgent_queue => '排队';
-
-  @override
-  String get naiAgent_steer => '引导';
-
-  @override
-  String get naiAgent_promote => '转为引导';
-
-  @override
-  String get naiAgent_waiting => '等待你的回答';
-
-  @override
-  String get naiAgent_working => '正在处理';
-
-  @override
-  String get naiAgent_waitingSlot => '等待服务商请求额度';
-
-  @override
-  String get naiAgent_starting => '正在打开聊天';
-
-  @override
   String get naiAgent_interrupted => '上次任务已中断，未自动重发。';
-
-  @override
-  String get naiAgent_restorePending => '放回输入框';
-
-  @override
-  String get naiAgent_withdraw => '撤回';
-
-  @override
-  String get naiAgent_newContent => '回到最新消息';
-
-  @override
-  String get naiAgent_toolRunning => '执行中';
-
-  @override
-  String get naiAgent_toolDone => '完成';
-
-  @override
-  String get naiAgent_toolFailed => '失败';
-
-  @override
-  String get naiAgent_arguments => '参数';
-
-  @override
-  String get naiAgent_result => '结果';
 
   @override
   String get naiAgent_systemPrompt => '内置提示词';
@@ -16140,46 +15922,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_composerNotEmpty => '请先保存或发送当前输入，再恢复这条消息。';
 
   @override
-  String get naiAgent_compact => '压缩聊天上下文';
-
-  @override
-  String get naiAgent_export => '导出聊天';
-
-  @override
-  String get naiAgent_copyMessage => '复制消息';
-
-  @override
-  String get naiAgent_editMessage => '编辑消息';
-
-  @override
-  String get naiAgent_regenerate => '重新回答';
-
-  @override
-  String get naiAgent_submitAnswer => '提交回答';
-
-  @override
-  String get naiAgent_customAnswer => '也可以输入自己的回答';
-
-  @override
-  String get naiAgent_close => '收起面板';
-
-  @override
-  String get naiAgent_showChats => '聊天列表';
-
-  @override
   String get naiAgent_runtimeMissing => 'Agent 运行组件尚未安装，请使用完整更新包。';
 
   @override
   String get naiAgent_usage => '模型用量';
-
-  @override
-  String get naiAgent_cancel => '取消';
-
-  @override
-  String get naiAgent_dropHint => '松开以附加到此聊天';
-
-  @override
-  String get naiAgent_emptyAttachment => '图片读取失败';
 
   @override
   String get naiAgent_globalScope => '全局默认';
@@ -16188,60 +15934,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_workspaceScope => '当前工作区';
 
   @override
-  String get naiAgent_generationTitle => '生成授权';
-
-  @override
-  String get naiAgent_generationWaiting => '等待生成授权';
-
-  @override
-  String naiAgent_generationAccount(Object name) {
-    return '账号：$name';
-  }
-
-  @override
-  String naiAgent_generationBatch(Object requests, Object size, Object total) {
-    return '$requests 次请求 × $size 张 · 共 $total 张';
-  }
-
-  @override
-  String naiAgent_generationUnit(Object cost) {
-    return '每次请求 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationEncoding(Object cost) {
-    return '参考图编码 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationTotal(Object cost) {
-    return '预计 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationBalance(Object balance) {
-    return '当前余额 $balance Anlas';
-  }
-
-  @override
-  String get naiAgent_generationEstimateNote => '费用为预估，以服务端扣费为准。';
-
-  @override
-  String get naiAgent_generationChanged => '配置或报价已变化，请重新准备。';
-
-  @override
   String naiAgent_generationLocalEnhance(Object model, Object scale) {
     return '生成后本地超分：$model ×$scale';
   }
-
-  @override
-  String get naiAgent_generationText => '文生图';
-
-  @override
-  String get naiAgent_generationImage => '图生图';
-
-  @override
-  String get naiAgent_generationInpaint => '重绘';
 
   @override
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
@@ -16339,12 +16034,6 @@ class AppLocalizationsZh extends AppLocalizations {
       '默认使用 CodeMode 按需发现。codemode：沙盒调用；deferred：搜索后直接调用；direct：常驻；hidden：隐藏。配置变更在下一次空闲调用时生效。连接检查不会调用聊天模型。';
 
   @override
-  String get generation_generate => '生成';
-
-  @override
-  String get detail_imageDetails => '图片详情';
-
-  @override
   String get promptBlockLibrary_title => '提示词块';
 
   @override
@@ -16352,9 +16041,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_compareOriginal => '按住查看原图与局部重绘范围';
-
-  @override
-  String get naiAgent_importingImages => '正在读取图片…';
 
   @override
   String get naiAgent_imageTooLarge => '图片超过 64 MiB 或 6400 万像素。';
@@ -16369,9 +16055,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String naiAgent_importResult(int added, int failed) {
     return '已添加 $added 张图片，$failed 张失败。';
   }
-
-  @override
-  String get naiAgent_attachmentMetadata => '原图元数据';
 
   @override
   String get channel_themeCircuit => '像素电路';
@@ -36196,35 +35879,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_title => 'NAI Agent';
 
   @override
-  String get naiAgent_local => '本地';
-
-  @override
-  String get naiAgent_permissionMode => '審批模式';
-
-  @override
-  String get naiAgent_permissionAuto => '自動';
-
-  @override
-  String get naiAgent_permissionAsk => '詢問';
-
-  @override
-  String get naiAgent_permissionReadOnly => '只讀';
-
-  @override
-  String get naiAgent_permissionAutoHint =>
-      '工作區內的常規修改自動執行；命令、刪除和未知工具仍需審批。生圖確認保留。';
-
-  @override
-  String get naiAgent_permissionAskHint => '工作區讀取直接執行；修改、命令和未知工具逐次審批。生圖仍走費用確認。';
-
-  @override
-  String get naiAgent_permissionReadOnlyHint =>
-      '只讀取和討論；禁止修改及生成，未知工具不執行。切換時停止 Agent 當前任務，不影響手動生圖。';
-
-  @override
-  String get naiAgent_useModelSetting => '使用模型設定';
-
-  @override
   String get naiAgent_permissionTitle => '需要審批';
 
   @override
@@ -36237,72 +35891,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_permissionDeny => '拒絕';
 
   @override
-  String get naiAgent_thinking => '思考強度 · 下一次任務生效';
-
-  @override
-  String get naiAgent_thinkingUnsupported => '此模型沒有已確認的可調思考檔位，請先檢查模型設定。';
-
-  @override
-  String get naiAgent_pasteImage => '貼上剪貼簿圖片';
-
-  @override
-  String get naiAgent_contextUnknown => '上下文用量暫不可用，等待已知模型視窗及實際用量。';
-
-  @override
-  String naiAgent_contextTooltip(
-    String percent,
-    String remaining,
-    String window,
-  ) {
-    return '可用上下文 $percent%\n$remaining / $window tokens 剩餘\n點選檢視詳細統計';
-  }
-
-  @override
-  String get naiAgent_statistics => '上下文與會話統計';
-
-  @override
-  String get naiAgent_contextUsage => '當前上下文佔用 · 估算';
-
-  @override
-  String get naiAgent_contextRemaining => '剩餘上下文';
-
-  @override
-  String get naiAgent_contextWindow => '模型視窗';
-
-  @override
-  String get naiAgent_sessionUsage => '本會話累計用量';
-
-  @override
-  String get naiAgent_tokensInput => '輸入';
-
-  @override
-  String get naiAgent_tokensOutput => '輸出';
-
-  @override
-  String get naiAgent_tokensCacheRead => '快取讀取';
-
-  @override
-  String get naiAgent_tokensCacheWrite => '快取寫入';
-
-  @override
-  String get naiAgent_tokensTotal => '累計 tokens';
-
-  @override
-  String get naiAgent_cumulativeUsageHint => '累計用量包含歷次請求，不等於當前上下文佔用。';
-
-  @override
-  String get naiAgent_messageCounts => '會話記錄';
-
-  @override
-  String get naiAgent_userAssistantMessages => '使用者 / 助手訊息';
-
-  @override
-  String get naiAgent_toolCalls => '工具呼叫';
-
-  @override
-  String get naiAgent_cost => '費用';
-
-  @override
   String get naiAgent_defaultWorkspace => '工作區 1';
 
   @override
@@ -36312,133 +35900,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_settings => 'Agent 設定';
 
   @override
-  String get naiAgent_workspace => '工作區';
-
-  @override
-  String get naiAgent_createWorkspace => '新增工作區';
-
-  @override
-  String get naiAgent_rename => '重新命名';
-
-  @override
-  String get naiAgent_name => '名稱';
-
-  @override
-  String get naiAgent_placeholder => '描述想法，或問一個問題…';
-
-  @override
-  String get naiAgent_welcome => '從一個想法開始';
-
-  @override
-  String get naiAgent_welcomeHint => '討論提示詞、分析圖片、整理工作區。\n先聊清楚，再動手。';
-
-  @override
-  String get naiAgent_suggestCurrent => '檢查當前草稿';
-
-  @override
-  String get naiAgent_suggestImage => '分析參考圖片';
-
-  @override
-  String get naiAgent_suggestWorkspace => '整理工作區';
-
-  @override
-  String get naiAgent_brandEyebrow => 'YOUR CREATIVE CO-PILOT';
-
-  @override
-  String get naiAgent_promptCurrent => '看看當前草稿和參數，先不要修改。';
-
-  @override
-  String get naiAgent_promptImage => '分析當前圖片的構圖和畫風，先不要生成。';
-
-  @override
-  String get naiAgent_promptWorkspace => '檢視當前工作區，建議整理方式，先不要修改。';
-
-  @override
-  String get naiAgent_tipTitle => 'TIPS / 小提示';
-
-  @override
-  String get naiAgent_tipNext => '下一條提示';
-
-  @override
-  String get naiAgent_tipReadOnly => '先用「只讀」模式探索，再決定要修改什麼。';
-
-  @override
-  String get naiAgent_tipAttachments => '拖入參考圖，或點選 + 新增附件，讓討論更具體。';
-
-  @override
-  String get naiAgent_tipGeneration => '生成前會顯示費用並等待確認，不會直接生圖。';
-
-  @override
-  String get naiAgent_welcomeFootnote => '所有操作遵循當前審批模式';
-
-  @override
   String get naiAgent_chooseModel => '選擇模型';
 
   @override
-  String get naiAgent_modelSettings => '管理模型與介面';
-
-  @override
-  String get naiAgent_attach => '新增圖片';
-
-  @override
-  String get naiAgent_removeAttachment => '移除附件';
-
-  @override
-  String get naiAgent_selectedImage => '附上當前圖片';
-
-  @override
-  String get naiAgent_send => '傳送';
-
-  @override
-  String get naiAgent_stop => '停止任務';
-
-  @override
-  String get naiAgent_queue => '排隊';
-
-  @override
-  String get naiAgent_steer => '引導';
-
-  @override
-  String get naiAgent_promote => '轉為引導';
-
-  @override
-  String get naiAgent_waiting => '等待你的回答';
-
-  @override
-  String get naiAgent_working => '正在處理';
-
-  @override
-  String get naiAgent_waitingSlot => '等待服務商請求額度';
-
-  @override
-  String get naiAgent_starting => '正在開啟聊天';
-
-  @override
   String get naiAgent_interrupted => '上次任務已中斷，未自動重發。';
-
-  @override
-  String get naiAgent_restorePending => '放回輸入框';
-
-  @override
-  String get naiAgent_withdraw => '撤回';
-
-  @override
-  String get naiAgent_newContent => '回到最新訊息';
-
-  @override
-  String get naiAgent_toolRunning => '執行中';
-
-  @override
-  String get naiAgent_toolDone => '完成';
-
-  @override
-  String get naiAgent_toolFailed => '失敗';
-
-  @override
-  String get naiAgent_arguments => '參數';
-
-  @override
-  String get naiAgent_result => '結果';
 
   @override
   String get naiAgent_systemPrompt => '內建提示詞';
@@ -36496,46 +35961,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_composerNotEmpty => '請先儲存或傳送當前輸入，再恢復這條訊息。';
 
   @override
-  String get naiAgent_compact => '壓縮聊天上下文';
-
-  @override
-  String get naiAgent_export => '匯出聊天';
-
-  @override
-  String get naiAgent_copyMessage => '複製訊息';
-
-  @override
-  String get naiAgent_editMessage => '編輯訊息';
-
-  @override
-  String get naiAgent_regenerate => '重新回答';
-
-  @override
-  String get naiAgent_submitAnswer => '提交回答';
-
-  @override
-  String get naiAgent_customAnswer => '也可以輸入自己的回答';
-
-  @override
-  String get naiAgent_close => '收起面板';
-
-  @override
-  String get naiAgent_showChats => '聊天列表';
-
-  @override
   String get naiAgent_runtimeMissing => 'Agent 執行元件尚未安裝，請使用完整更新包。';
 
   @override
   String get naiAgent_usage => '模型用量';
-
-  @override
-  String get naiAgent_cancel => '取消';
-
-  @override
-  String get naiAgent_dropHint => '鬆開以附加到此聊天';
-
-  @override
-  String get naiAgent_emptyAttachment => '圖片讀取失敗';
 
   @override
   String get naiAgent_globalScope => '全域預設';
@@ -36544,60 +35973,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_workspaceScope => '當前工作區';
 
   @override
-  String get naiAgent_generationTitle => '生成授權';
-
-  @override
-  String get naiAgent_generationWaiting => '等待生成授權';
-
-  @override
-  String naiAgent_generationAccount(Object name) {
-    return '帳號：$name';
-  }
-
-  @override
-  String naiAgent_generationBatch(Object requests, Object size, Object total) {
-    return '$requests 次請求 × $size 張 · 共 $total 張';
-  }
-
-  @override
-  String naiAgent_generationUnit(Object cost) {
-    return '每次請求 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationEncoding(Object cost) {
-    return '參考圖編碼 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationTotal(Object cost) {
-    return '預計 $cost Anlas';
-  }
-
-  @override
-  String naiAgent_generationBalance(Object balance) {
-    return '當前餘額 $balance Anlas';
-  }
-
-  @override
-  String get naiAgent_generationEstimateNote => '費用為預估，以服務端扣費為準。';
-
-  @override
-  String get naiAgent_generationChanged => '配置或報價已變化，請重新準備。';
-
-  @override
   String naiAgent_generationLocalEnhance(Object model, Object scale) {
     return '生成後本地超分：$model ×$scale';
   }
-
-  @override
-  String get naiAgent_generationText => '文生圖';
-
-  @override
-  String get naiAgent_generationImage => '圖生圖';
-
-  @override
-  String get naiAgent_generationInpaint => '重繪';
 
   @override
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
@@ -36695,12 +36073,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '預設使用 CodeMode 按需發現。codemode：沙盒呼叫；deferred：搜尋後直接呼叫；direct：常駐；hidden：隱藏。配置變更在下一次空閒呼叫時生效。連線檢查不會呼叫聊天模型。';
 
   @override
-  String get generation_generate => '生成';
-
-  @override
-  String get detail_imageDetails => '圖片詳情';
-
-  @override
   String get promptBlockLibrary_title => '提示詞塊';
 
   @override
@@ -36708,9 +36080,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_compareOriginal => '按住檢視原圖與局部重繪範圍';
-
-  @override
-  String get naiAgent_importingImages => '正在讀取圖片…';
 
   @override
   String get naiAgent_imageTooLarge => '圖片超過 64 MiB 或 6400 萬像素。';
@@ -36725,9 +36094,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String naiAgent_importResult(int added, int failed) {
     return '已新增 $added 張圖片，$failed 張失敗。';
   }
-
-  @override
-  String get naiAgent_attachmentMetadata => '原圖後設資料';
 
   @override
   String get channel_themeCircuit => '像素電路';

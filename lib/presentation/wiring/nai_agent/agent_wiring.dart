@@ -561,7 +561,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             AgentModelOption(
               providerId: p.id,
               modelId: m.name,
-              label: m.displayName,
+              label: m.displayName.isEmpty ? m.name : m.displayName,
               provider: p.name,
               selected:
                   c.settings.providerId == p.id && c.settings.modelId == m.name,

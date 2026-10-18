@@ -8783,85 +8783,15 @@
   "tools_emoPlayful": "俏皮",
   "auth_logoutConfirm": "確定退出當前帳號？",
   "naiAgent_title": "NAI Agent",
-  "naiAgent_local": "本地",
-  "naiAgent_permissionMode": "審批模式",
-  "naiAgent_permissionAuto": "自動",
-  "naiAgent_permissionAsk": "詢問",
-  "naiAgent_permissionReadOnly": "只讀",
-  "naiAgent_permissionAutoHint": "工作區內的常規修改自動執行；命令、刪除和未知工具仍需審批。生圖確認保留。",
-  "naiAgent_permissionAskHint": "工作區讀取直接執行；修改、命令和未知工具逐次審批。生圖仍走費用確認。",
-  "naiAgent_permissionReadOnlyHint": "只讀取和討論；禁止修改及生成，未知工具不執行。切換時停止 Agent 當前任務，不影響手動生圖。",
-  "naiAgent_useModelSetting": "使用模型設定",
   "naiAgent_permissionTitle": "需要審批",
   "naiAgent_permissionOnce": "允許一次",
   "naiAgent_permissionSession": "本會話允許相同呼叫",
   "naiAgent_permissionDeny": "拒絕",
-  "naiAgent_thinking": "思考強度 · 下一次任務生效",
-  "naiAgent_thinkingUnsupported": "此模型沒有已確認的可調思考檔位，請先檢查模型設定。",
-  "naiAgent_pasteImage": "貼上剪貼簿圖片",
-  "naiAgent_contextUnknown": "上下文用量暫不可用，等待已知模型視窗及實際用量。",
-  "naiAgent_contextTooltip": "可用上下文 {percent}%\n{remaining} / {window} tokens 剩餘\n點選檢視詳細統計",
-  "naiAgent_statistics": "上下文與會話統計",
-  "naiAgent_contextUsage": "當前上下文佔用 · 估算",
-  "naiAgent_contextRemaining": "剩餘上下文",
-  "naiAgent_contextWindow": "模型視窗",
-  "naiAgent_sessionUsage": "本會話累計用量",
-  "naiAgent_tokensInput": "輸入",
-  "naiAgent_tokensOutput": "輸出",
-  "naiAgent_tokensCacheRead": "快取讀取",
-  "naiAgent_tokensCacheWrite": "快取寫入",
-  "naiAgent_tokensTotal": "累計 tokens",
-  "naiAgent_cumulativeUsageHint": "累計用量包含歷次請求，不等於當前上下文佔用。",
-  "naiAgent_messageCounts": "會話記錄",
-  "naiAgent_userAssistantMessages": "使用者 / 助手訊息",
-  "naiAgent_toolCalls": "工具呼叫",
-  "naiAgent_cost": "費用",
   "naiAgent_defaultWorkspace": "工作區 1",
   "naiAgent_newChat": "新聊天",
   "naiAgent_settings": "Agent 設定",
-  "naiAgent_workspace": "工作區",
-  "naiAgent_createWorkspace": "新增工作區",
-  "naiAgent_rename": "重新命名",
-  "naiAgent_name": "名稱",
-  "naiAgent_placeholder": "描述想法，或問一個問題…",
-  "naiAgent_welcome": "從一個想法開始",
-  "naiAgent_welcomeHint": "討論提示詞、分析圖片、整理工作區。\n先聊清楚，再動手。",
-  "naiAgent_suggestCurrent": "檢查當前草稿",
-  "naiAgent_suggestImage": "分析參考圖片",
-  "naiAgent_suggestWorkspace": "整理工作區",
-  "naiAgent_brandEyebrow": "YOUR CREATIVE CO-PILOT",
-  "naiAgent_promptCurrent": "看看當前草稿和參數，先不要修改。",
-  "naiAgent_promptImage": "分析當前圖片的構圖和畫風，先不要生成。",
-  "naiAgent_promptWorkspace": "檢視當前工作區，建議整理方式，先不要修改。",
-  "naiAgent_tipTitle": "TIPS / 小提示",
-  "naiAgent_tipNext": "下一條提示",
-  "naiAgent_tipReadOnly": "先用「只讀」模式探索，再決定要修改什麼。",
-  "naiAgent_tipAttachments": "拖入參考圖，或點選 + 新增附件，讓討論更具體。",
-  "naiAgent_tipGeneration": "生成前會顯示費用並等待確認，不會直接生圖。",
-  "naiAgent_welcomeFootnote": "所有操作遵循當前審批模式",
   "naiAgent_chooseModel": "選擇模型",
-  "naiAgent_modelSettings": "管理模型與介面",
-  "naiAgent_attach": "新增圖片",
-  "naiAgent_removeAttachment": "移除附件",
-  "naiAgent_selectedImage": "附上當前圖片",
-  "naiAgent_send": "傳送",
-  "naiAgent_stop": "停止任務",
-  "naiAgent_queue": "排隊",
-  "naiAgent_steer": "引導",
-  "naiAgent_promote": "轉為引導",
-  "naiAgent_waiting": "等待你的回答",
-  "naiAgent_working": "正在處理",
-  "naiAgent_waitingSlot": "等待服務商請求額度",
-  "naiAgent_starting": "正在開啟聊天",
   "naiAgent_interrupted": "上次任務已中斷，未自動重發。",
-  "naiAgent_restorePending": "放回輸入框",
-  "naiAgent_withdraw": "撤回",
-  "naiAgent_newContent": "回到最新訊息",
-  "naiAgent_toolRunning": "執行中",
-  "naiAgent_toolDone": "完成",
-  "naiAgent_toolFailed": "失敗",
-  "naiAgent_arguments": "參數",
-  "naiAgent_result": "結果",
   "naiAgent_systemPrompt": "內建提示詞",
   "naiAgent_promptHelp": "自訂內容替換預設提示詞；工具地圖由應用追加。已有聊天記錄保持原樣，後續請求使用新內容。",
   "naiAgent_restoreDefault": "恢復預設",
@@ -8880,64 +8810,10 @@
   "naiAgent_inputChanged": "準備期間輸入已改變，請傳送當前草稿。",
   "naiAgent_imageLimit": "圖片格式無效、檔案過大或超出上傳限制。",
   "naiAgent_composerNotEmpty": "請先儲存或傳送當前輸入，再恢復這條訊息。",
-  "naiAgent_compact": "壓縮聊天上下文",
-  "naiAgent_export": "匯出聊天",
-  "naiAgent_copyMessage": "複製訊息",
-  "naiAgent_editMessage": "編輯訊息",
-  "naiAgent_regenerate": "重新回答",
-  "naiAgent_submitAnswer": "提交回答",
-  "naiAgent_customAnswer": "也可以輸入自己的回答",
-  "naiAgent_close": "收起面板",
-  "naiAgent_showChats": "聊天列表",
   "naiAgent_runtimeMissing": "Agent 執行元件尚未安裝，請使用完整更新包。",
   "naiAgent_usage": "模型用量",
-  "naiAgent_cancel": "取消",
-  "naiAgent_dropHint": "鬆開以附加到此聊天",
-  "naiAgent_emptyAttachment": "圖片讀取失敗",
   "naiAgent_globalScope": "全域預設",
   "naiAgent_workspaceScope": "當前工作區",
-  "naiAgent_generationTitle": "生成授權",
-  "naiAgent_generationWaiting": "等待生成授權",
-  "naiAgent_generationAccount": "帳號：{name}",
-  "@naiAgent_generationAccount": {
-    "placeholders": {
-      "name": {}
-    }
-  },
-  "naiAgent_generationBatch": "{requests} 次請求 × {size} 張 · 共 {total} 張",
-  "@naiAgent_generationBatch": {
-    "placeholders": {
-      "requests": {},
-      "size": {},
-      "total": {}
-    }
-  },
-  "naiAgent_generationUnit": "每次請求 {cost} Anlas",
-  "@naiAgent_generationUnit": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationEncoding": "參考圖編碼 {cost} Anlas",
-  "@naiAgent_generationEncoding": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationTotal": "預計 {cost} Anlas",
-  "@naiAgent_generationTotal": {
-    "placeholders": {
-      "cost": {}
-    }
-  },
-  "naiAgent_generationBalance": "當前餘額 {balance} Anlas",
-  "@naiAgent_generationBalance": {
-    "placeholders": {
-      "balance": {}
-    }
-  },
-  "naiAgent_generationEstimateNote": "費用為預估，以服務端扣費為準。",
-  "naiAgent_generationChanged": "配置或報價已變化，請重新準備。",
   "naiAgent_generationLocalEnhance": "生成後本地超分：{model} ×{scale}",
   "@naiAgent_generationLocalEnhance": {
     "placeholders": {
@@ -8945,9 +8821,6 @@
       "scale": {}
     }
   },
-  "naiAgent_generationText": "文生圖",
-  "naiAgent_generationImage": "圖生圖",
-  "naiAgent_generationInpaint": "重繪",
   "naiAgent_galleryDeleteEmptyFolderConfirm": "刪除這個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n{path}",
   "@naiAgent_galleryDeleteEmptyFolderConfirm": {
     "placeholders": {
@@ -8983,30 +8856,13 @@
   "naiAgent_mcpLogin": "登入",
   "naiAgent_mcpLogout": "登出",
   "naiAgent_mcpHint": "預設使用 CodeMode 按需發現。codemode：沙盒呼叫；deferred：搜尋後直接呼叫；direct：常駐；hidden：隱藏。配置變更在下一次空閒呼叫時生效。連線檢查不會呼叫聊天模型。",
-  "generation_generate": "生成",
-  "detail_imageDetails": "圖片詳情",
   "promptBlockLibrary_title": "提示詞塊",
-  "@naiAgent_contextTooltip": {
-    "placeholders": {
-      "percent": {
-        "type": "String"
-      },
-      "remaining": {
-        "type": "String"
-      },
-      "window": {
-        "type": "String"
-      }
-    }
-  },
   "gen_oldImageLabel": "OLD",
   "gen_compareOriginal": "按住檢視原圖與局部重繪範圍",
-  "naiAgent_importingImages": "正在讀取圖片…",
   "naiAgent_imageTooLarge": "圖片超過 64 MiB 或 6400 萬像素。",
   "naiAgent_linkOnlyImage": "當前來源只提供連結，請儲存圖片檔案後拖入。",
   "naiAgent_invalidImage": "無法讀取圖片，請使用 PNG、JPEG、WebP、GIF 或 BMP 檔案。",
   "naiAgent_importResult": "已新增 {added} 張圖片，{failed} 張失敗。",
-  "naiAgent_attachmentMetadata": "原圖後設資料",
   "@naiAgent_importResult": {
     "placeholders": {
       "added": {
