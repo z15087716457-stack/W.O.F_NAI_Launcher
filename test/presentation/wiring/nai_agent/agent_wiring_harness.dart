@@ -197,7 +197,10 @@ class AgentWiringHarness {
   late AgentTestController c;
   late ProviderContainer container;
   Future<List<DataReader>> Function() clipboard = () async => [];
-  Future<void> init() async {
+  Future<void> init({
+    List<Override> overrides = const [],
+    NaiAgentSkillInventory? skills,
+  }) async {
     root = await Directory.systemTemp.createTemp('agent-command-desk-');
     c = AgentTestController(AgentTestStore(root));
     await c.initialize(restoreHistory: false);
@@ -212,8 +215,9 @@ class AgentWiringHarness {
         secureStorageServiceProvider.overrideWithValue(AgentTestSecrets()),
         authNotifierProvider.overrideWith(AgentTestAuth.new),
         naiAgentSkillsProvider.overrideWith(
-          (_, __) async => const NaiAgentSkillInventory([], 0, {}),
+          (_, __) async => skills ?? const NaiAgentSkillInventory([], 0, {}),
         ),
+        ...overrides,
       ],
     );
   }
