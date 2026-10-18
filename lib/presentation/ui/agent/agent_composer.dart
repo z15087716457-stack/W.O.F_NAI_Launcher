@@ -1,0 +1,1196 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../../../core/utils/localization_extension.dart';
+import '../kit/ui_colors.dart';
+import '../kit/ui_popover.dart';
+import '../kit/ui_text.dart';
+import 'agent_contract.dart';
+import 'agent_glyphs.dart';
+import 'agent_parts.dart';
+import 'agent_popovers.dart';
+import 'agent_scope.dart';
+
+/// 输入区：快捷任务 / 排队行 / 输入框（附件、`@` 引用、`/` 技能）/ 控制条。
+class AgentComposer extends StatefulWidget {
+  const AgentComposer({super.key, required this.chatId});
+
+  /// 换聊天时整体重建输入框文字。
+  final String chatId;
+
+  @override
+  State<AgentComposer> createState() => AgentComposerState();
+}
+
+class _PasteIntent extends Intent {
+  const _PasteIntent();
+}
+
+class AgentComposerState extends State<AgentComposer> {
+  final _text = TextEditingController();
+  final _focus = FocusNode(debugLabel: 'agent-composer');
+  final _panelKey = GlobalKey();
+
+  /// 最近一次交给 [AgentActions.onComposerChanged] 的文字；外部改写（编辑消息、放回输入框）才同步回来。
+  String? _sent;
+
+  // `@` / `/` 候选
+  ({int start, String query, bool slash})? _trigger;
+  var _index = 0;
+  AgentMentionKind? _category;
+
+  UiPopoverAnchor? _attach, _model, _permission;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final external = AgentScope.of(context).data.composer.text;
+    if (external != _sent) {
+      _sent = external;
+      if (external != _text.text) {
+        _text.value = TextEditingValue(
+          text: external,
+          selection: TextSelection.collapsed(offset: external.length),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  // ───────── 文字 ─────────
+
+  void _changed(String value) {
+    _sent = value;
+    AgentScope.of(context).actions.onComposerChanged(value);
+    _detect();
+  }
+
+  void _detect() {
+    final v = _text.value;
+    if (!v.selection.isValid || !v.selection.isCollapsed) {
+      _closeMention();
+      return;
+    }
+    final before = v.text.substring(0, v.selection.baseOffset);
+    final at = RegExp(r'(?:^|\s)@([^\s@]*)$').firstMatch(before);
+    final slash = RegExp(r'(?:^|\n)/([^\s/]*)$').firstMatch(before);
+    final m = at ?? slash;
+    if (m == null) {
+      _closeMention();
+      return;
+    }
+    final start = before.length - m.group(1)!.length - 1;
+    final next = (start: start, query: m.group(1)!, slash: at == null);
+    if (_trigger != next) {
+      setState(() {
+        if (_trigger?.query != next.query || _trigger?.slash != next.slash) {
+          _index = 0;
+        }
+        _trigger = next;
+      });
+    }
+  }
+
+  void _closeMention() {
+    if (_trigger != null) setState(() => _trigger = null);
+  }
+
+  /// 在光标处插入（[replace] = 换掉全部）。
+  void insert(String text, {bool replace = false}) {
+    final v = _text.value;
+    final String next;
+    final int caret;
+    if (replace || v.text.trim().isEmpty) {
+      next = text;
+      caret = text.length;
+    } else {
+      final sel = v.selection.isValid
+          ? v.selection
+          : TextSelection.collapsed(offset: v.text.length);
+      next = v.text.replaceRange(sel.start, sel.end, text);
+      caret = sel.start + text.length;
+    }
+    _text.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: caret),
+    );
+    _focus.requestFocus();
+    _changed(next);
+  }
+
+  void _pick(String insertText, String? imageId) {
+    final t = _trigger;
+    if (t == null) return;
+    final v = _text.value;
+    final end = v.selection.baseOffset;
+    final next = v.text.replaceRange(t.start, end, insertText);
+    _text.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: t.start + insertText.length),
+    );
+    _trigger = null;
+    _changed(next);
+    setState(() {});
+    if (imageId != null) {
+      final s = AgentScope.of(context);
+      unawaited(s.run(() => s.actions.onAttachImage(imageId)));
+    }
+  }
+
+  int _candidateCount() {
+    final t = _trigger!;
+    final d = AgentScope.of(context).data;
+    return t.slash
+        ? AgentMentionPanel.filterSkills(d.skills, t.query).length
+        : AgentMentionPanel.filter(d.mentions, t.query, _category).length;
+  }
+
+  void _pickIndex() {
+    final t = _trigger!;
+    final d = AgentScope.of(context).data;
+    if (t.slash) {
+      final list = AgentMentionPanel.filterSkills(d.skills, t.query);
+      if (_index < list.length) _pick('/skill:${list[_index].name} ', null);
+    } else {
+      final list = AgentMentionPanel.filter(d.mentions, t.query, _category);
+      if (_index < list.length) {
+        final m = list[_index];
+        _pick('@${m.label} ', m.kind == AgentMentionKind.image ? m.id : null);
+      }
+    }
+  }
+
+  // ───────── 键盘 ─────────
+
+  bool get _composing =>
+      _text.value.composing.isValid && !_text.value.composing.isCollapsed;
+
+  KeyEventResult _key(FocusNode node, KeyEvent event) {
+    if (_composing) return KeyEventResult.ignored;
+    if (_trigger != null) {
+      final n = _candidateCount();
+      return agentPanelKeys(
+        event,
+        up: () => setState(() => _index = n == 0 ? 0 : (_index - 1) % n),
+        down: () => setState(() => _index = n == 0 ? 0 : (_index + 1) % n),
+        pick: n == 0 ? _closeMention : _pickIndex,
+        tab: () {
+          if (_trigger!.slash) {
+            if (n > 0) _pickIndex();
+            return;
+          }
+          const order = [
+            null,
+            AgentMentionKind.prompt,
+            AgentMentionKind.image,
+            AgentMentionKind.block,
+          ];
+          setState(() {
+            _category = order[(order.indexOf(_category) + 1) % order.length];
+            _index = 0;
+          });
+        },
+        close: _closeMention,
+      );
+    }
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.enter) {
+      return KeyEventResult.ignored;
+    }
+    final k = HardwareKeyboard.instance;
+    if (k.isShiftPressed || k.isAltPressed) return KeyEventResult.ignored;
+    final enterSends = AgentScope.of(context).data.composer.enterSends;
+    if (enterSends || k.isControlPressed || k.isMetaPressed) {
+      _send(steer: false);
+      return KeyEventResult.handled;
+    }
+    return KeyEventResult.ignored;
+  }
+
+  void _send({required bool steer}) {
+    final s = AgentScope.of(context);
+    if (!s.data.composer.canSend || _composing) return;
+    unawaited(s.run(() => s.actions.onSend(steer: steer)));
+  }
+
+  Future<void> _paste() async {
+    final s = AgentScope.of(context);
+    final text = await s.actions.onPaste();
+    if (text != null && mounted) insert(text);
+  }
+
+  UiPopoverAnchor _above(BuildContext context, {bool right = false}) {
+    final box = context.findRenderObject()! as RenderBox;
+    final corner = right
+        ? box.size.topRight(const Offset(0, -6))
+        : box.size.topLeft(const Offset(0, -6));
+    return UiPopoverAnchor(
+      box.localToGlobal(corner),
+      alignBottom: true,
+      alignRight: right,
+    );
+  }
+
+  // ───────── 构建 ─────────
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final d = s.data;
+    final comp = d.composer;
+    final c = context.ui;
+    final l = context.l10n;
+    final running = d.status != AgentRunStatus.idle;
+    final focused = _focus.hasFocus;
+    return Container(
+      key: const Key('agent-composer'),
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: BoxDecoration(
+        color: c.bg,
+        border: Border(top: BorderSide(color: c.border)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
+        children: [
+          if (_trigger != null)
+            AgentMentionPanel(
+              key: _panelKey,
+              query: _trigger!.query,
+              slash: _trigger!.slash,
+              index: _index,
+              category: _category,
+              onCategory: (v) => setState(() {
+                _category = v;
+                _index = 0;
+              }),
+              onPick: _pick,
+            ),
+          if (d.notices.isNotEmpty) _Notices(lines: d.notices),
+          for (final q in comp.queue) _QueueLine(item: q),
+          if (!running &&
+              _text.text.isEmpty &&
+              _trigger == null &&
+              comp.queue.isEmpty)
+            const _QuickTasks(),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 120),
+            decoration: BoxDecoration(
+              color: c.card,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: focused ? c.accent : c.strong),
+              boxShadow: focused
+                  ? [
+                      BoxShadow(
+                        color: c.accent.withValues(alpha: .12),
+                        spreadRadius: 3,
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (comp.attachments.isNotEmpty || comp.importing > 0)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        for (final a in comp.attachments)
+                          _AttachmentChip(attachment: a),
+                        if (comp.importing > 0)
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 6,
+                            children: [
+                              const AgentStepDot(kind: AgentDotKind.running),
+                              Text(
+                                l.ag_importing(comp.importing),
+                                style: UiText.sans(11.5, color: c.muted),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                Shortcuts(
+                  shortcuts: const {
+                    SingleActivator(LogicalKeyboardKey.keyV, control: true):
+                        _PasteIntent(),
+                    SingleActivator(LogicalKeyboardKey.keyV, meta: true):
+                        _PasteIntent(),
+                  },
+                  child: Actions(
+                    actions: {
+                      _PasteIntent: CallbackAction<_PasteIntent>(
+                        onInvoke: (_) {
+                          unawaited(_paste());
+                          return null;
+                        },
+                      ),
+                      PasteTextIntent: CallbackAction<PasteTextIntent>(
+                        onInvoke: (_) {
+                          unawaited(_paste());
+                          return null;
+                        },
+                      ),
+                    },
+                    child: Focus(
+                      onKeyEvent: _key,
+                      onFocusChange: (_) => setState(() {}),
+                      child: TextField(
+                        key: const Key('agent-input'),
+                        controller: _text,
+                        focusNode: _focus,
+                        minLines: 1,
+                        maxLines: 8,
+                        onChanged: _changed,
+                        onTap: _detect,
+                        style: UiText.sans(13.5, color: c.ink, height: 1.6),
+                        cursorColor: c.accent,
+                        cursorWidth: 1.5,
+                        contextMenuBuilder: (context, editable) =>
+                            AdaptiveTextSelectionToolbar.buttonItems(
+                              anchors: editable.contextMenuAnchors,
+                              buttonItems: [
+                                for (final item
+                                    in editable.contextMenuButtonItems)
+                                  if (item.type == ContextMenuButtonType.paste)
+                                    ContextMenuButtonItem(
+                                      type: ContextMenuButtonType.paste,
+                                      onPressed: () {
+                                        ContextMenuController.removeAny();
+                                        unawaited(_paste());
+                                      },
+                                    )
+                                  else
+                                    item,
+                              ],
+                            ),
+                        decoration: agentBareInput(
+                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+                          constraints: const BoxConstraints(minHeight: 44),
+                          hint: l.ag_placeholder,
+                          hintMaxLines: 1,
+                          hintStyle: UiText.sans(
+                            13.5,
+                            color: c.faint,
+                            height: 1.6,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                if (comp.blocked == AgentSendBlock.noModel)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 2),
+                    child: Text(
+                      l.ag_noModel,
+                      style: UiText.sans(11.5, color: c.warn),
+                    ),
+                  ),
+                _bar(context),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _bar(BuildContext context) {
+    final s = AgentScope.of(context);
+    final d = s.data;
+    final comp = d.composer;
+    final c = context.ui;
+    final l = context.l10n;
+    final running = d.status != AgentRunStatus.idle;
+    final model = d.models.where((m) => m.selected).firstOrNull;
+    final thinking = d.thinking.followsModel
+        ? null
+        : d.thinking.options
+              .where((o) => o.$1 == d.thinking.selected)
+              .firstOrNull
+              ?.$2;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final narrow = box.maxWidth < 400;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(8, 6, 6, 6),
+          child: Row(
+            spacing: 4,
+            children: [
+              UiPopover(
+                anchor: _attach,
+                onDismiss: () => setState(() => _attach = null),
+                builder: (_) => _attachMenu(context),
+                child: Builder(
+                  builder: (context) => AgentIconButton(
+                    key: const Key('agent-attach'),
+                    small: true,
+                    glyph: AgentGlyphs.clip,
+                    tooltip: l.ag_attach,
+                    active: _attach != null,
+                    onPressed: () => setState(() => _attach = _above(context)),
+                  ),
+                ),
+              ),
+              AgentIconButton(
+                key: const Key('agent-mention'),
+                small: true,
+                glyph: AgentGlyphs.at,
+                tooltip: l.ag_mention,
+                onPressed: () {
+                  final v = _text.value;
+                  final before = v.selection.isValid
+                      ? v.text.substring(0, v.selection.start)
+                      : v.text;
+                  insert(
+                    before.isEmpty ||
+                            before.endsWith(' ') ||
+                            before.endsWith('\n')
+                        ? '@'
+                        : ' @',
+                  );
+                  _detect();
+                },
+              ),
+              const SizedBox(width: 2),
+              if (narrow)
+                UiPopover(
+                  anchor: _permission,
+                  onDismiss: () => setState(() => _permission = null),
+                  builder: (_) => AgentPermissionPopover(
+                    onClose: () => setState(() => _permission = null),
+                  ),
+                  child: Builder(
+                    builder: (context) => _Pill(
+                      key: const Key('agent-permission'),
+                      open: _permission != null,
+                      onTap: () =>
+                          setState(() => _permission = _above(context)),
+                      children: [
+                        AgentIcon(
+                          agentPermissionGlyph(d.permission),
+                          size: 12,
+                          color: c.ink,
+                        ),
+                        Text(
+                          agentPermissionLabel(context, d.permission),
+                          style: UiText.sans(
+                            11.5,
+                            weight: FontWeight.w500,
+                            color: c.ink,
+                            height: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              else
+                AgentSegments<AgentPermissionMode>(
+                  key: const Key('agent-permission'),
+                  values: const [
+                    AgentPermissionMode.readonly,
+                    AgentPermissionMode.ask,
+                    AgentPermissionMode.auto,
+                  ],
+                  selected: d.permission,
+                  label: (m) => agentPermissionLabel(context, m),
+                  glyph: agentPermissionGlyph,
+                  tooltip: (m) => agentPermissionHint(context, m),
+                  onChanged: (m) {
+                    if (m != d.permission) {
+                      s.run(() => s.actions.onPermission(m));
+                    }
+                  },
+                ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: UiPopover(
+                    anchor: _model,
+                    onDismiss: () => setState(() => _model = null),
+                    builder: (_) => AgentModelPopover(
+                      onClose: () => setState(() => _model = null),
+                    ),
+                    child: Builder(
+                      builder: (context) => _Pill(
+                        key: const Key('agent-model'),
+                        open: _model != null,
+                        tooltip: l.ag_modelPicker,
+                        onTap: () => setState(
+                          () => _model = _above(context, right: true),
+                        ),
+                        children: [
+                          Flexible(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxWidth: narrow ? 64 : 120,
+                              ),
+                              child: Text(
+                                model?.label ?? l.ag_modelNone,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(
+                                  11.5,
+                                  weight: FontWeight.w500,
+                                  color: model == null ? c.warn : c.ink,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (thinking != null)
+                            Text(
+                              thinking,
+                              style: UiText.sans(
+                                11.5,
+                                color: c.faint,
+                                height: 1.2,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 2),
+              if (running &&
+                  _text.text.trim().isEmpty &&
+                  comp.attachments.isEmpty)
+                AgentButton(
+                  key: const Key('agent-stop'),
+                  label: l.ag_stop,
+                  glyph: AgentGlyphs.stop,
+                  style: AgentButtonStyle.danger,
+                  height: 28,
+                  onPressed: () => s.run(s.actions.onStop),
+                )
+              else if (running) ...[
+                AgentIconButton(
+                  key: const Key('agent-stop'),
+                  glyph: AgentGlyphs.stop,
+                  tooltip: l.ag_stop,
+                  color: c.error,
+                  onPressed: () => s.run(s.actions.onStop),
+                ),
+                _QueueSend(
+                  enabled: comp.canSend,
+                  onSend: (steer) => _send(steer: steer),
+                ),
+              ] else
+                AgentButton(
+                  key: const Key('agent-send'),
+                  label: l.ag_send,
+                  style: AgentButtonStyle.primary,
+                  height: 28,
+                  onPressed: comp.canSend ? () => _send(steer: false) : null,
+                  trailing: Text(
+                    comp.enterSends ? '↵' : 'Ctrl ↵',
+                    style: UiText.mono(
+                      11,
+                      color: (comp.canSend ? c.bg : c.faint).withValues(
+                        alpha: .6,
+                      ),
+                      height: 1,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _attachMenu(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    void close() => setState(() => _attach = null);
+    Widget row(
+      Key key,
+      String glyph,
+      String label,
+      VoidCallback? onTap,
+    ) => AgentPopRow(
+      key: key,
+      onTap: onTap == null
+          ? null
+          : () {
+              close();
+              onTap();
+            },
+      child: Row(
+        spacing: 9,
+        children: [
+          AgentIcon(glyph, size: 14, color: onTap == null ? c.faint : c.muted),
+          Text(
+            label,
+            style: UiText.sans(12.5, color: onTap == null ? c.faint : c.ink),
+          ),
+        ],
+      ),
+    );
+    return UiPopoverSurface(
+      width: 220,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            row(
+              const Key('agent-attach-file'),
+              AgentGlyphs.folder,
+              l.ag_attachFile,
+              () => s.run(s.actions.onPickImages),
+            ),
+            row(
+              const Key('agent-attach-canvas'),
+              AgentGlyphs.image,
+              l.ag_attachCanvas,
+              s.data.composer.canAttachCanvas
+                  ? () => s.run(s.actions.onAttachCanvas)
+                  : null,
+            ),
+            row(
+              const Key('agent-attach-paste'),
+              AgentGlyphs.copy,
+              l.ag_attachPaste,
+              () => unawaited(_paste()),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Pill extends StatefulWidget {
+  const _Pill({
+    super.key,
+    required this.children,
+    required this.onTap,
+    this.open = false,
+    this.tooltip,
+  });
+  final List<Widget> children;
+  final VoidCallback onTap;
+  final bool open;
+  final String? tooltip;
+
+  @override
+  State<_Pill> createState() => _PillState();
+}
+
+class _PillState extends State<_Pill> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    Widget pill = MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          height: 26,
+          padding: const EdgeInsets.only(left: 8, right: 6),
+          decoration: BoxDecoration(
+            color: widget.open || _hover ? c.hover : c.control,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 4,
+            children: [
+              ...widget.children,
+              AgentIcon(AgentGlyphs.chevron, size: 12, color: c.faint),
+            ],
+          ),
+        ),
+      ),
+    );
+    if (widget.tooltip != null) {
+      pill = Tooltip(
+        message: widget.tooltip!,
+        waitDuration: const Duration(milliseconds: 500),
+        child: pill,
+      );
+    }
+    return pill;
+  }
+}
+
+/// 运行中有文字：排队发送 + 下拉「作为引导插入」。
+class _QueueSend extends StatefulWidget {
+  const _QueueSend({required this.enabled, required this.onSend});
+  final bool enabled;
+  final ValueChanged<bool> onSend;
+
+  @override
+  State<_QueueSend> createState() => _QueueSendState();
+}
+
+class _QueueSendState extends State<_QueueSend> {
+  UiPopoverAnchor? _menu;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    Widget row(Key key, String glyph, String title, String hint, bool steer) =>
+        AgentPopRow(
+          key: key,
+          height: 46,
+          onTap: () {
+            setState(() => _menu = null);
+            widget.onSend(steer);
+          },
+          child: Row(
+            spacing: 9,
+            children: [
+              AgentIcon(glyph, size: 14, color: c.muted),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: UiText.sans(
+                        12.5,
+                        weight: FontWeight.w500,
+                        color: c.ink,
+                      ),
+                    ),
+                    Text(hint, style: UiText.sans(11, color: c.faint)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+    return UiPopover(
+      anchor: _menu,
+      onDismiss: () => setState(() => _menu = null),
+      builder: (_) => UiPopoverSurface(
+        width: 240,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              row(
+                const Key('agent-send-queue'),
+                AgentGlyphs.clock,
+                l.ag_sendQueue,
+                l.ag_sendQueueHint,
+                false,
+              ),
+              row(
+                const Key('agent-send-steer'),
+                AgentGlyphs.steer,
+                l.ag_sendSteer,
+                l.ag_sendSteerHint,
+                true,
+              ),
+            ],
+          ),
+        ),
+      ),
+      child: Builder(
+        builder: (context) => AgentButton(
+          key: const Key('agent-send'),
+          label: l.ag_sendQueue,
+          style: AgentButtonStyle.primary,
+          height: 28,
+          onPressed: widget.enabled ? () => widget.onSend(false) : null,
+          trailing: GestureDetector(
+            key: const Key('agent-send-more'),
+            onTap: widget.enabled
+                ? () {
+                    final box = context.findRenderObject()! as RenderBox;
+                    setState(
+                      () => _menu = UiPopoverAnchor(
+                        box.localToGlobal(
+                          box.size.topRight(const Offset(0, -6)),
+                        ),
+                        alignBottom: true,
+                        alignRight: true,
+                      ),
+                    );
+                  }
+                : null,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 2),
+              child: AgentIcon(
+                AgentGlyphs.chevron,
+                size: 12,
+                color: widget.enabled ? c.bg : c.faint,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickTasks extends StatelessWidget {
+  const _QuickTasks();
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final l = context.l10n;
+    final tasks = [
+      (AgentGlyphs.wand, l.ag_quickOptimize, l.ag_quickOptimizePrompt),
+      (AgentGlyphs.compare, l.ag_quickCompare, l.ag_quickComparePrompt),
+      (AgentGlyphs.layers, l.ag_quickBlocks, l.ag_quickBlocksPrompt),
+      (AgentGlyphs.book, l.ag_quickTags, l.ag_quickTagsPrompt),
+    ];
+    return SizedBox(
+      key: const Key('agent-quick'),
+      height: 26,
+      child: ClipRect(
+        child: Wrap(
+          spacing: 6,
+          clipBehavior: Clip.hardEdge,
+          children: [
+            for (final (i, (glyph, label, prompt)) in tasks.indexed)
+              _QuickButton(
+                key: Key('agent-quick-$i'),
+                glyph: glyph,
+                label: label,
+                onTap: () => s.insert(prompt, replace: true),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickButton extends StatefulWidget {
+  const _QuickButton({
+    super.key,
+    required this.glyph,
+    required this.label,
+    required this.onTap,
+  });
+  final String glyph, label;
+  final VoidCallback onTap;
+
+  @override
+  State<_QuickButton> createState() => _QuickButtonState();
+}
+
+class _QuickButtonState extends State<_QuickButton> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final fg = _hover ? c.ink : c.muted;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          height: 26,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            color: _hover ? c.hover : c.card,
+            borderRadius: BorderRadius.circular(7),
+            border: Border.all(color: c.border),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 5,
+            children: [
+              AgentIcon(widget.glyph, size: 14, color: fg),
+              Text(
+                widget.label,
+                style: UiText.sans(12, color: fg, height: 1.2),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _QueueLine extends StatelessWidget {
+  const _QueueLine({required this.item});
+  final AgentQueued item;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final recovered = item.kind == AgentQueueKind.recovered;
+    return Container(
+      key: Key('agent-queue-${item.id}'),
+      height: 34,
+      padding: const EdgeInsets.only(left: 10, right: 4),
+      decoration: BoxDecoration(
+        color: agentSunk(c),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: recovered ? c.warn.withValues(alpha: .5) : c.border,
+        ),
+      ),
+      child: Row(
+        spacing: 8,
+        children: [
+          AgentIcon(
+            switch (item.kind) {
+              AgentQueueKind.queued => AgentGlyphs.clock,
+              AgentQueueKind.steer => AgentGlyphs.steer,
+              AgentQueueKind.recovered => AgentGlyphs.undo,
+            },
+            size: 14,
+            color: recovered ? c.warn : c.faint,
+          ),
+          Text(switch (item.kind) {
+            AgentQueueKind.queued => l.ag_queued,
+            AgentQueueKind.steer => l.ag_steering,
+            AgentQueueKind.recovered => l.ag_recovered,
+          }, style: UiText.sans(12, color: recovered ? c.warn : c.faint)),
+          Expanded(
+            child: Text(
+              item.text.replaceAll('\n', ' '),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12, color: c.ink),
+            ),
+          ),
+          if (recovered)
+            AgentButton(
+              label: l.ag_queueRestore,
+              style: AgentButtonStyle.ghost,
+              height: 24,
+              onPressed: () => s.run(() => s.actions.onRestoreQueued(item.id)),
+            )
+          else ...[
+            if (item.kind == AgentQueueKind.queued)
+              AgentButton(
+                key: Key('agent-queue-steer-${item.id}'),
+                label: l.ag_queueSteer,
+                style: AgentButtonStyle.ghost,
+                height: 24,
+                onPressed: () => s.run(() => s.actions.onSteerQueued(item.id)),
+              ),
+            AgentIconButton(
+              small: true,
+              glyph: AgentGlyphs.pen,
+              tooltip: l.ag_queueEdit,
+              onPressed: () => s.rename(
+                title: l.ag_queueEdit,
+                value: item.text,
+                save: (v) => s.actions.onEditQueued(item.id, v),
+              ),
+            ),
+          ],
+          AgentIconButton(
+            key: Key('agent-queue-withdraw-${item.id}'),
+            small: true,
+            glyph: AgentGlyphs.close,
+            tooltip: l.ag_queueWithdraw,
+            onPressed: () => s.run(() => s.actions.onWithdrawQueued(item.id)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AttachmentChip extends StatefulWidget {
+  const _AttachmentChip({required this.attachment});
+  final AgentAttachment attachment;
+
+  @override
+  State<_AttachmentChip> createState() => _AttachmentChipState();
+}
+
+class _AttachmentChipState extends State<_AttachmentChip> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final a = widget.attachment;
+    final size = a.width != null && a.height != null
+        ? '${a.width}×${a.height}'
+        : null;
+    return Tooltip(
+      message: a.image == null
+          ? '${a.name}  ${l.ag_attachmentBroken}'
+          : [
+              a.name,
+              ?size,
+              if (a.metadata != null) '\n${a.metadata}',
+            ].join('  '),
+      waitDuration: const Duration(milliseconds: 400),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              key: Key('agent-attachment-${a.id}'),
+              width: 48,
+              height: 48,
+              clipBehavior: Clip.antiAlias,
+              decoration: BoxDecoration(
+                color: c.control,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: c.border),
+              ),
+              child: a.image == null
+                  ? Center(
+                      child: AgentIcon(
+                        AgentGlyphs.alert,
+                        size: 16,
+                        color: c.faint,
+                      ),
+                    )
+                  : Image(
+                      image: a.image!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, _, _) => Center(
+                        child: AgentIcon(
+                          AgentGlyphs.alert,
+                          size: 16,
+                          color: c.faint,
+                        ),
+                      ),
+                    ),
+            ),
+            if (a.metadata != null)
+              Positioned(
+                left: 3,
+                bottom: 3,
+                child: Container(
+                  width: 14,
+                  height: 14,
+                  decoration: const BoxDecoration(
+                    color: Color(0x99000000),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const AgentIcon(
+                    AgentGlyphs.info,
+                    size: 10,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            if (_hover)
+              Positioned(
+                right: -5,
+                top: -5,
+                child: GestureDetector(
+                  key: Key('agent-attachment-remove-${a.id}'),
+                  onTap: () => s.run(() => s.actions.onRemoveAttachment(a.id)),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Tooltip(
+                      message: l.ag_attachmentRemove,
+                      child: Container(
+                        width: 18,
+                        height: 18,
+                        decoration: BoxDecoration(
+                          color: c.ink,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: c.card, width: 1.5),
+                        ),
+                        alignment: Alignment.center,
+                        child: AgentIcon(
+                          AgentGlyphs.close,
+                          size: 10,
+                          color: c.bg,
+                          stroke: 2.2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Notices extends StatelessWidget {
+  const _Notices({required this.lines});
+  final List<String> lines;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    return Container(
+      key: const Key('agent-notices'),
+      padding: const EdgeInsets.fromLTRB(10, 7, 4, 7),
+      decoration: BoxDecoration(
+        color: c.accent.withValues(alpha: .06),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: c.accent.withValues(alpha: .2)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 8,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: AgentIcon(AgentGlyphs.info, size: 14, color: c.accent),
+          ),
+          Expanded(
+            child: Text(
+              lines.join('\n'),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12, color: c.ink, height: 1.5),
+            ),
+          ),
+          AgentButton(
+            label: l.ag_dismiss,
+            style: AgentButtonStyle.ghost,
+            height: 22,
+            onPressed: s.actions.onDismissNotices,
+          ),
+        ],
+      ),
+    );
+  }
+}

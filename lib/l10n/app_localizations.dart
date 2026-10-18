@@ -35893,6 +35893,1254 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list.'**
   String get set_agFinalPending;
+
+  /// No description provided for @ag_tabChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get ag_tabChat;
+
+  /// No description provided for @ag_tabShelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Outputs'**
+  String get ag_tabShelf;
+
+  /// No description provided for @ag_tabMemory.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory'**
+  String get ag_tabMemory;
+
+  /// No description provided for @ag_newChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New chat'**
+  String get ag_newChat;
+
+  /// No description provided for @ag_more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get ag_more;
+
+  /// No description provided for @ag_close.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get ag_close;
+
+  /// No description provided for @ag_chatsSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search chats and workspaces'**
+  String get ag_chatsSearch;
+
+  /// No description provided for @ag_chatsSwitchWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch workspace'**
+  String get ag_chatsSwitchWorkspace;
+
+  /// No description provided for @ag_chatsNewWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'New workspace'**
+  String get ag_chatsNewWorkspace;
+
+  /// No description provided for @ag_chatsNoMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching chats'**
+  String get ag_chatsNoMatch;
+
+  /// No description provided for @ag_chatWaiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs you'**
+  String get ag_chatWaiting;
+
+  /// No description provided for @ag_chatRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get ag_chatRunning;
+
+  /// No description provided for @ag_menuRenameChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename chat'**
+  String get ag_menuRenameChat;
+
+  /// No description provided for @ag_menuRenameWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename workspace'**
+  String get ag_menuRenameWorkspace;
+
+  /// No description provided for @ag_menuOpenFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Open workspace folder'**
+  String get ag_menuOpenFolder;
+
+  /// No description provided for @ag_menuCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact context'**
+  String get ag_menuCompact;
+
+  /// No description provided for @ag_menuExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export chat'**
+  String get ag_menuExport;
+
+  /// No description provided for @ag_menuSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent settings'**
+  String get ag_menuSettings;
+
+  /// No description provided for @ag_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get ag_name;
+
+  /// No description provided for @ag_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get ag_save;
+
+  /// No description provided for @ag_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get ag_cancel;
+
+  /// No description provided for @ag_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'That didn\'t work'**
+  String get ag_failed;
+
+  /// No description provided for @ag_greetMorning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning — what are we making?'**
+  String get ag_greetMorning;
+
+  /// No description provided for @ag_greetAfternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon — what are we making?'**
+  String get ag_greetAfternoon;
+
+  /// No description provided for @ag_greetEvening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening — what are we making?'**
+  String get ag_greetEvening;
+
+  /// No description provided for @ag_greetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent reads your draft before acting, and always asks before spending Anlas.'**
+  String get ag_greetHint;
+
+  /// No description provided for @ag_draftEyebrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Current draft'**
+  String get ag_draftEyebrow;
+
+  /// No description provided for @ag_draftCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'{characters} characters · {blocks} blocks · {references} references'**
+  String ag_draftCounts(int characters, int blocks, int references);
+
+  /// No description provided for @ag_taskReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review draft'**
+  String get ag_taskReview;
+
+  /// No description provided for @ag_taskReviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find conflicts, redundancy and syntax the model ignores'**
+  String get ag_taskReviewHint;
+
+  /// No description provided for @ag_taskReviewPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Review the current draft and parameters for conflicts, redundancy and syntax this model ignores. Don\'t change anything yet.'**
+  String get ag_taskReviewPrompt;
+
+  /// No description provided for @ag_taskAnalyze.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze reference'**
+  String get ag_taskAnalyze;
+
+  /// No description provided for @ag_taskAnalyzeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Break down style, composition and usable tags'**
+  String get ag_taskAnalyzeHint;
+
+  /// No description provided for @ag_taskAnalyzePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Analyze the attached reference: style, composition, lighting and tags I can use directly. Don\'t generate yet.'**
+  String get ag_taskAnalyzePrompt;
+
+  /// No description provided for @ag_taskVariants.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations'**
+  String get ag_taskVariants;
+
+  /// No description provided for @ag_taskVariantsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change one thing, compare a few'**
+  String get ag_taskVariantsHint;
+
+  /// No description provided for @ag_taskVariantsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Make a few variations of the current draft that each change one thing. Tell me the plan and cost first; wait for my confirmation before generating.'**
+  String get ag_taskVariantsPrompt;
+
+  /// No description provided for @ag_taskBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize blocks'**
+  String get ag_taskBlocks;
+
+  /// No description provided for @ag_taskBlocksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Save reusable pieces to the block library'**
+  String get ag_taskBlocksHint;
+
+  /// No description provided for @ag_taskBlocksPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Find parts of the current draft worth turning into reusable blocks and list suggestions. Don\'t change anything yet.'**
+  String get ag_taskBlocksPrompt;
+
+  /// No description provided for @ag_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get ag_recent;
+
+  /// No description provided for @ag_you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get ag_you;
+
+  /// No description provided for @ag_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ag_edit;
+
+  /// No description provided for @ag_copy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get ag_copy;
+
+  /// No description provided for @ag_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get ag_copied;
+
+  /// No description provided for @ag_regenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Regenerate'**
+  String get ag_regenerate;
+
+  /// No description provided for @ag_thinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get ag_thinking;
+
+  /// No description provided for @ag_starting.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening chat'**
+  String get ag_starting;
+
+  /// No description provided for @ag_waitingSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for provider'**
+  String get ag_waitingSlot;
+
+  /// No description provided for @ag_waitingYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for you'**
+  String get ag_waitingYou;
+
+  /// No description provided for @ag_stepRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get ag_stepRunning;
+
+  /// No description provided for @ag_stepFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get ag_stepFailed;
+
+  /// No description provided for @ag_stepArguments.
+  ///
+  /// In en, this message translates to:
+  /// **'Arguments'**
+  String get ag_stepArguments;
+
+  /// No description provided for @ag_stepResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get ag_stepResult;
+
+  /// No description provided for @ag_stepsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more steps'**
+  String ag_stepsMore(int count);
+
+  /// No description provided for @ag_tool_studio_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current draft'**
+  String get ag_tool_studio_context;
+
+  /// No description provided for @ag_tool_image_read.
+  ///
+  /// In en, this message translates to:
+  /// **'View image'**
+  String get ag_tool_image_read;
+
+  /// No description provided for @ag_tool_prompt_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit prompt'**
+  String get ag_tool_prompt_update;
+
+  /// No description provided for @ag_tool_snapshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft snapshot'**
+  String get ag_tool_snapshot;
+
+  /// No description provided for @ag_tool_wiki_query.
+  ///
+  /// In en, this message translates to:
+  /// **'Search wiki'**
+  String get ag_tool_wiki_query;
+
+  /// No description provided for @ag_tool_tag_query.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up tags'**
+  String get ag_tool_tag_query;
+
+  /// No description provided for @ag_tool_block_query.
+  ///
+  /// In en, this message translates to:
+  /// **'Find blocks'**
+  String get ag_tool_block_query;
+
+  /// No description provided for @ag_tool_block_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit blocks'**
+  String get ag_tool_block_manage;
+
+  /// No description provided for @ag_tool_settings_read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read settings'**
+  String get ag_tool_settings_read;
+
+  /// No description provided for @ag_tool_settings_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Change settings'**
+  String get ag_tool_settings_update;
+
+  /// No description provided for @ag_tool_explore_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Style explore'**
+  String get ag_tool_explore_manage;
+
+  /// No description provided for @ag_tool_generation_prepare.
+  ///
+  /// In en, this message translates to:
+  /// **'Prepare generation'**
+  String get ag_tool_generation_prepare;
+
+  /// No description provided for @ag_tool_generation_run.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate images'**
+  String get ag_tool_generation_run;
+
+  /// No description provided for @ag_tool_generation_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel generation'**
+  String get ag_tool_generation_cancel;
+
+  /// No description provided for @ag_tool_gallery_query.
+  ///
+  /// In en, this message translates to:
+  /// **'Search gallery'**
+  String get ag_tool_gallery_query;
+
+  /// No description provided for @ag_tool_gallery_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Organize gallery'**
+  String get ag_tool_gallery_manage;
+
+  /// No description provided for @ag_tool_reference_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Set references'**
+  String get ag_tool_reference_manage;
+
+  /// No description provided for @ag_tool_reference_library.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference library'**
+  String get ag_tool_reference_library;
+
+  /// No description provided for @ag_tool_image_tool.
+  ///
+  /// In en, this message translates to:
+  /// **'Image tool'**
+  String get ag_tool_image_tool;
+
+  /// No description provided for @ag_tool_image_generate.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations / enhance'**
+  String get ag_tool_image_generate;
+
+  /// No description provided for @ag_tool_ask_user.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask you'**
+  String get ag_tool_ask_user;
+
+  /// No description provided for @ag_tool_read.
+  ///
+  /// In en, this message translates to:
+  /// **'Read file'**
+  String get ag_tool_read;
+
+  /// No description provided for @ag_tool_write.
+  ///
+  /// In en, this message translates to:
+  /// **'Write file'**
+  String get ag_tool_write;
+
+  /// No description provided for @ag_tool_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit file'**
+  String get ag_tool_edit;
+
+  /// No description provided for @ag_tool_bash.
+  ///
+  /// In en, this message translates to:
+  /// **'Run command'**
+  String get ag_tool_bash;
+
+  /// No description provided for @ag_field_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get ag_field_prompt;
+
+  /// No description provided for @ag_field_negative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative prompt'**
+  String get ag_field_negative;
+
+  /// No description provided for @ag_field_character.
+  ///
+  /// In en, this message translates to:
+  /// **'Character prompt'**
+  String get ag_field_character;
+
+  /// No description provided for @ag_field_characterNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Character negative'**
+  String get ag_field_characterNegative;
+
+  /// No description provided for @ag_diffApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Applied'**
+  String get ag_diffApplied;
+
+  /// No description provided for @ag_diffUndone.
+  ///
+  /// In en, this message translates to:
+  /// **'Undone'**
+  String get ag_diffUndone;
+
+  /// No description provided for @ag_diffLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft changed since'**
+  String get ag_diffLocked;
+
+  /// No description provided for @ag_diffUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get ag_diffUndo;
+
+  /// No description provided for @ag_diffCounts.
+  ///
+  /// In en, this message translates to:
+  /// **'+{added} −{removed}'**
+  String ag_diffCounts(int added, int removed);
+
+  /// No description provided for @ag_outputs.
+  ///
+  /// In en, this message translates to:
+  /// **'Outputs'**
+  String get ag_outputs;
+
+  /// No description provided for @ag_anlasSpent.
+  ///
+  /// In en, this message translates to:
+  /// **'{anlas} Anlas used'**
+  String ag_anlasSpent(String anlas);
+
+  /// No description provided for @ag_imageReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in history'**
+  String get ag_imageReveal;
+
+  /// No description provided for @ag_imageAttach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach to message'**
+  String get ag_imageAttach;
+
+  /// No description provided for @ag_imageZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'View larger'**
+  String get ag_imageZoom;
+
+  /// No description provided for @ag_askHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press 1–{count}'**
+  String ag_askHint(int count);
+
+  /// No description provided for @ag_askOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Something else…'**
+  String get ag_askOther;
+
+  /// No description provided for @ag_askSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer'**
+  String get ag_askSubmit;
+
+  /// No description provided for @ag_askSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get ag_askSkip;
+
+  /// No description provided for @ag_approvalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs your OK · {tool}'**
+  String ag_approvalTitle(String tool);
+
+  /// No description provided for @ag_gateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm · {action}'**
+  String ag_gateTitle(String action);
+
+  /// No description provided for @ag_gateText2img.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate {count}'**
+  String ag_gateText2img(int count);
+
+  /// No description provided for @ag_gateImg2img.
+  ///
+  /// In en, this message translates to:
+  /// **'Img2img ×{count}'**
+  String ag_gateImg2img(int count);
+
+  /// No description provided for @ag_gateInpaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inpaint ×{count}'**
+  String ag_gateInpaint(int count);
+
+  /// No description provided for @ag_gateVariations.
+  ///
+  /// In en, this message translates to:
+  /// **'Variations ×{count}'**
+  String ag_gateVariations(int count);
+
+  /// No description provided for @ag_gateEnhance.
+  ///
+  /// In en, this message translates to:
+  /// **'Enhance'**
+  String get ag_gateEnhance;
+
+  /// No description provided for @ag_gateModelSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Model · size'**
+  String get ag_gateModelSize;
+
+  /// No description provided for @ag_gateRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get ag_gateRequests;
+
+  /// No description provided for @ag_gateRequestsValue.
+  ///
+  /// In en, this message translates to:
+  /// **'{requests} × {batch}'**
+  String ag_gateRequestsValue(int requests, int batch);
+
+  /// No description provided for @ag_gateUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'Per request'**
+  String get ag_gateUnit;
+
+  /// No description provided for @ag_gateEncoding.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference encoding'**
+  String get ag_gateEncoding;
+
+  /// No description provided for @ag_gateAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get ag_gateAccount;
+
+  /// No description provided for @ag_gateTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total · balance {balance}'**
+  String ag_gateTotal(String balance);
+
+  /// No description provided for @ag_gateTotalNoBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get ag_gateTotalNoBalance;
+
+  /// No description provided for @ag_gateConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & generate'**
+  String get ag_gateConfirm;
+
+  /// No description provided for @ag_gateConfirmTool.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & run'**
+  String get ag_gateConfirmTool;
+
+  /// No description provided for @ag_gateChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings or price changed; ask Agent to prepare again'**
+  String get ag_gateChanged;
+
+  /// No description provided for @ag_gateExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote expired'**
+  String get ag_gateExpired;
+
+  /// No description provided for @ag_gateEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimate; the server charge is final'**
+  String get ag_gateEstimate;
+
+  /// No description provided for @ag_quickOptimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve prompt'**
+  String get ag_quickOptimize;
+
+  /// No description provided for @ag_quickOptimizePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Improve the current prompt for this model: list the changes and why first, and wait for my OK before writing to the draft.'**
+  String get ag_quickOptimizePrompt;
+
+  /// No description provided for @ag_quickCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare last 4'**
+  String get ag_quickCompare;
+
+  /// No description provided for @ag_quickComparePrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare the latest 4 images in history: what differs and what\'s wrong with each. Don\'t generate.'**
+  String get ag_quickComparePrompt;
+
+  /// No description provided for @ag_quickBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into blocks'**
+  String get ag_quickBlocks;
+
+  /// No description provided for @ag_quickBlocksPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Split the current prompt into reusable blocks. Show me the split before saving anything.'**
+  String get ag_quickBlocksPrompt;
+
+  /// No description provided for @ag_quickTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up tags'**
+  String get ag_quickTags;
+
+  /// No description provided for @ag_quickTagsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up tags: '**
+  String get ag_quickTagsPrompt;
+
+  /// No description provided for @ag_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell Agent what to do · @ to reference · / for skills'**
+  String get ag_placeholder;
+
+  /// No description provided for @ag_dropHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop to attach to this message'**
+  String get ag_dropHint;
+
+  /// No description provided for @ag_importing.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding {count} images…'**
+  String ag_importing(int count);
+
+  /// No description provided for @ag_attach.
+  ///
+  /// In en, this message translates to:
+  /// **'Add images'**
+  String get ag_attach;
+
+  /// No description provided for @ag_attachFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose files…'**
+  String get ag_attachFile;
+
+  /// No description provided for @ag_attachCanvas.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach current canvas image'**
+  String get ag_attachCanvas;
+
+  /// No description provided for @ag_attachPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste from clipboard'**
+  String get ag_attachPaste;
+
+  /// No description provided for @ag_mention.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference'**
+  String get ag_mention;
+
+  /// No description provided for @ag_attachmentRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get ag_attachmentRemove;
+
+  /// No description provided for @ag_attachmentBroken.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read'**
+  String get ag_attachmentBroken;
+
+  /// No description provided for @ag_send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get ag_send;
+
+  /// No description provided for @ag_sendQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Queue'**
+  String get ag_sendQueue;
+
+  /// No description provided for @ag_sendSteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Steer now'**
+  String get ag_sendSteer;
+
+  /// No description provided for @ag_sendQueueHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs after the current task'**
+  String get ag_sendQueueHint;
+
+  /// No description provided for @ag_sendSteerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Inserted before the next model request'**
+  String get ag_sendSteerHint;
+
+  /// No description provided for @ag_stop.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get ag_stop;
+
+  /// No description provided for @ag_noModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model with tool support'**
+  String get ag_noModel;
+
+  /// No description provided for @ag_queued.
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get ag_queued;
+
+  /// No description provided for @ag_steering.
+  ///
+  /// In en, this message translates to:
+  /// **'Steer'**
+  String get ag_steering;
+
+  /// No description provided for @ag_recovered.
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent last time'**
+  String get ag_recovered;
+
+  /// No description provided for @ag_queueSteer.
+  ///
+  /// In en, this message translates to:
+  /// **'Steer'**
+  String get ag_queueSteer;
+
+  /// No description provided for @ag_queueEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ag_queueEdit;
+
+  /// No description provided for @ag_queueWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw'**
+  String get ag_queueWithdraw;
+
+  /// No description provided for @ag_queueRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to input'**
+  String get ag_queueRestore;
+
+  /// No description provided for @ag_newContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to latest'**
+  String get ag_newContent;
+
+  /// No description provided for @ag_modeReadonly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get ag_modeReadonly;
+
+  /// No description provided for @ag_modeAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask'**
+  String get ag_modeAsk;
+
+  /// No description provided for @ag_modeAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get ag_modeAuto;
+
+  /// No description provided for @ag_modeReadonlyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Read and discuss only; no edits or generation'**
+  String get ag_modeReadonlyHint;
+
+  /// No description provided for @ag_modeAskHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Asks before edits, commands and unknown tools'**
+  String get ag_modeAskHint;
+
+  /// No description provided for @ag_modeAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Routine workspace edits run directly; spending still needs your OK'**
+  String get ag_modeAutoHint;
+
+  /// No description provided for @ag_modelPicker.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose model'**
+  String get ag_modelPicker;
+
+  /// No description provided for @ag_modelSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage models…'**
+  String get ag_modelSettings;
+
+  /// No description provided for @ag_modelNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No model'**
+  String get ag_modelNone;
+
+  /// No description provided for @ag_thinkingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking · applies next task'**
+  String get ag_thinkingTitle;
+
+  /// No description provided for @ag_thinkingFollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Use model setting'**
+  String get ag_thinkingFollow;
+
+  /// No description provided for @ag_thinkingUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This model has no adjustable thinking'**
+  String get ag_thinkingUnsupported;
+
+  /// No description provided for @ag_usageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Context & usage'**
+  String get ag_usageTitle;
+
+  /// No description provided for @ag_usageContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Current context · estimate'**
+  String get ag_usageContext;
+
+  /// No description provided for @ag_usageUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown after the model reports usage'**
+  String get ag_usageUnknown;
+
+  /// No description provided for @ag_usageRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{tokens} left'**
+  String ag_usageRemaining(String tokens);
+
+  /// No description provided for @ag_usageSession.
+  ///
+  /// In en, this message translates to:
+  /// **'This chat'**
+  String get ag_usageSession;
+
+  /// No description provided for @ag_usageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get ag_usageInput;
+
+  /// No description provided for @ag_usageOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get ag_usageOutput;
+
+  /// No description provided for @ag_usageCacheRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache read'**
+  String get ag_usageCacheRead;
+
+  /// No description provided for @ag_usageCacheWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache write'**
+  String get ag_usageCacheWrite;
+
+  /// No description provided for @ag_usageTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total tokens'**
+  String get ag_usageTotal;
+
+  /// No description provided for @ag_usageMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages · tool calls'**
+  String get ag_usageMessages;
+
+  /// No description provided for @ag_usageCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Billing is per your provider'**
+  String get ag_usageCost;
+
+  /// No description provided for @ag_usageCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact context'**
+  String get ag_usageCompact;
+
+  /// No description provided for @ag_shelfAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count}'**
+  String ag_shelfAll(int count);
+
+  /// No description provided for @ag_shelfGenerated.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {count}'**
+  String ag_shelfGenerated(int count);
+
+  /// No description provided for @ag_shelfAttachments.
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments {count}'**
+  String ag_shelfAttachments(int count);
+
+  /// No description provided for @ag_shelfFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Files {count}'**
+  String ag_shelfFiles(int count);
+
+  /// No description provided for @ag_shelfFilesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Files'**
+  String get ag_shelfFilesTitle;
+
+  /// No description provided for @ag_shelfHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click to enlarge · drag to canvas'**
+  String get ag_shelfHint;
+
+  /// No description provided for @ag_shelfEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing produced in this chat yet'**
+  String get ag_shelfEmpty;
+
+  /// No description provided for @ag_shelfEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Images Agent generates, images you attach and files it writes all land here.'**
+  String get ag_shelfEmptyHint;
+
+  /// No description provided for @ag_memoryGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'Global instructions'**
+  String get ag_memoryGlobal;
+
+  /// No description provided for @ag_memoryWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace rules'**
+  String get ag_memoryWorkspace;
+
+  /// No description provided for @ag_memorySkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Active skills'**
+  String get ag_memorySkills;
+
+  /// No description provided for @ag_memoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get ag_memoryEmpty;
+
+  /// No description provided for @ag_memoryEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ag_memoryEdit;
+
+  /// No description provided for @ag_memoryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'These go to Agent with every message. Changes apply from the next message.'**
+  String get ag_memoryHint;
+
+  /// No description provided for @ag_mentionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get ag_mentionAll;
+
+  /// No description provided for @ag_mentionDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get ag_mentionDraft;
+
+  /// No description provided for @ag_mentionImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get ag_mentionImages;
+
+  /// No description provided for @ag_mentionBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocks'**
+  String get ag_mentionBlocks;
+
+  /// No description provided for @ag_mentionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reference in this message'**
+  String get ag_mentionTitle;
+
+  /// No description provided for @ag_mentionEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing matches'**
+  String get ag_mentionEmpty;
+
+  /// No description provided for @ag_skillsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get ag_skillsTitle;
+
+  /// No description provided for @ag_keySelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get ag_keySelect;
+
+  /// No description provided for @ag_keyInsert.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert'**
+  String get ag_keyInsert;
+
+  /// No description provided for @ag_keyCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get ag_keyCategory;
+
+  /// No description provided for @ag_keyClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get ag_keyClose;
+
+  /// No description provided for @ag_dismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get ag_dismiss;
+
+  /// No description provided for @ag_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get ag_retry;
+
+  /// No description provided for @ag_initFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent couldn\'t start'**
+  String get ag_initFailed;
+
+  /// No description provided for @ag_toggle.
+  ///
+  /// In en, this message translates to:
+  /// **'NAI Agent'**
+  String get ag_toggle;
+
+  /// No description provided for @ag_yesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get ag_yesterday;
+
+  /// No description provided for @ag_attachmentTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached'**
+  String get ag_attachmentTag;
+
+  /// No description provided for @ag_zoomClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get ag_zoomClose;
 }
 
 class _AppLocalizationsDelegate

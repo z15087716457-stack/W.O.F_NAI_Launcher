@@ -10840,5 +10840,358 @@
     }
   },
   "set_agContextTip": "tokens · 按字元估算",
-  "set_agFinalPending": "當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。"
+  "set_agFinalPending": "當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。",
+  "ag_tabChat": "對話",
+  "ag_tabShelf": "產物",
+  "ag_tabMemory": "記憶",
+  "ag_newChat": "新聊天",
+  "ag_more": "更多",
+  "ag_close": "收起",
+  "ag_chatsSearch": "搜尋聊天和工作區",
+  "ag_chatsSwitchWorkspace": "切換工作區",
+  "ag_chatsNewWorkspace": "新增工作區",
+  "ag_chatsNoMatch": "沒有匹配的聊天",
+  "ag_chatWaiting": "等確認",
+  "ag_chatRunning": "進行中",
+  "ag_menuRenameChat": "重新命名聊天",
+  "ag_menuRenameWorkspace": "重新命名工作區",
+  "ag_menuOpenFolder": "開啟工作區資料夾",
+  "ag_menuCompact": "壓縮上下文",
+  "ag_menuExport": "匯出聊天",
+  "ag_menuSettings": "Agent 設定",
+  "ag_name": "名稱",
+  "ag_save": "儲存",
+  "ag_cancel": "取消",
+  "ag_failed": "操作沒有完成",
+  "ag_greetMorning": "上午好，今天畫什麼？",
+  "ag_greetAfternoon": "下午好，今天畫什麼？",
+  "ag_greetEvening": "晚上好，今天畫什麼？",
+  "ag_greetHint": "Agent 會先看草稿再動手；花 Anlas 前一定先問你。",
+  "ag_draftEyebrow": "當前草稿",
+  "ag_draftCounts": "角色 {characters} · {blocks} 個積木 · 參考圖 {references}",
+  "@ag_draftCounts": {
+    "placeholders": {
+      "characters": {
+        "type": "int"
+      },
+      "blocks": {
+        "type": "int"
+      },
+      "references": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_taskReview": "檢查草稿",
+  "ag_taskReviewHint": "找衝突、冗餘和模型不認的寫法",
+  "ag_taskReviewPrompt": "檢查當前草稿和參數，找出衝突、冗餘和當前模型不認的寫法，先不要修改。",
+  "ag_taskAnalyze": "分析參考圖",
+  "ag_taskAnalyzeHint": "拆出畫風、構圖和可用標籤",
+  "ag_taskAnalyzePrompt": "分析我附上的參考圖：畫風、構圖、光影，以及能直接用的標籤，先不要生成。",
+  "ag_taskVariants": "批次變體",
+  "ag_taskVariantsHint": "改一處，出幾張對比",
+  "ag_taskVariantsPrompt": "基於當前草稿，只改一個方向做幾組變體對比。先告訴我打算怎麼改和費用，等我確認再生成。",
+  "ag_taskBlocks": "整理積木",
+  "ag_taskBlocksHint": "把常用片段收進積木庫",
+  "ag_taskBlocksPrompt": "看看當前草稿裡哪些片段適合做成可複用的積木，列出建議，先不要修改。",
+  "ag_recent": "最近",
+  "ag_you": "你",
+  "ag_edit": "編輯",
+  "ag_copy": "複製",
+  "ag_copied": "已複製",
+  "ag_regenerate": "重新回答",
+  "ag_thinking": "正在思考",
+  "ag_starting": "正在開啟聊天",
+  "ag_waitingSlot": "等服務商額度",
+  "ag_waitingYou": "等你處理",
+  "ag_stepRunning": "進行中",
+  "ag_stepFailed": "失敗",
+  "ag_stepArguments": "參數",
+  "ag_stepResult": "結果",
+  "ag_stepsMore": "還有 {count} 步",
+  "@ag_stepsMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_tool_studio_context": "讀取當前草稿",
+  "ag_tool_image_read": "檢視圖片",
+  "ag_tool_prompt_update": "改寫提示詞",
+  "ag_tool_snapshot": "草稿快照",
+  "ag_tool_wiki_query": "查百科",
+  "ag_tool_tag_query": "查標籤",
+  "ag_tool_block_query": "查積木",
+  "ag_tool_block_manage": "整理積木",
+  "ag_tool_settings_read": "讀取設定",
+  "ag_tool_settings_update": "修改設定",
+  "ag_tool_explore_manage": "畫風探索",
+  "ag_tool_generation_prepare": "準備生成",
+  "ag_tool_generation_run": "生成圖片",
+  "ag_tool_generation_cancel": "取消生成",
+  "ag_tool_gallery_query": "查圖庫",
+  "ag_tool_gallery_manage": "整理圖庫",
+  "ag_tool_reference_manage": "設定參考圖",
+  "ag_tool_reference_library": "參考圖庫",
+  "ag_tool_image_tool": "影像工具",
+  "ag_tool_image_generate": "變體 / 增強",
+  "ag_tool_ask_user": "向你提問",
+  "ag_tool_read": "讀檔案",
+  "ag_tool_write": "寫檔案",
+  "ag_tool_edit": "改檔案",
+  "ag_tool_bash": "執行命令",
+  "ag_field_prompt": "基礎提示詞",
+  "ag_field_negative": "負面提示詞",
+  "ag_field_character": "角色提示詞",
+  "ag_field_characterNegative": "角色負面",
+  "ag_diffApplied": "已寫入",
+  "ag_diffUndone": "已復原",
+  "ag_diffLocked": "草稿已再次修改",
+  "ag_diffUndo": "復原",
+  "ag_diffCounts": "+{added} −{removed}",
+  "@ag_diffCounts": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "removed": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_outputs": "本次產物",
+  "ag_anlasSpent": "已用 {anlas} Anlas",
+  "@ag_anlasSpent": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_imageReveal": "在歷史中顯示",
+  "ag_imageAttach": "附到輸入框",
+  "ag_imageZoom": "放大檢視",
+  "ag_askHint": "按 1–{count}",
+  "@ag_askHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_askOther": "其他想法…",
+  "ag_askSubmit": "回答",
+  "ag_askSkip": "跳過",
+  "ag_approvalTitle": "需要你允許 · {tool}",
+  "@ag_approvalTitle": {
+    "placeholders": {
+      "tool": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_gateTitle": "需要你確認 · {action}",
+  "@ag_gateTitle": {
+    "placeholders": {
+      "action": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_gateText2img": "生成 {count} 張",
+  "@ag_gateText2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_gateImg2img": "圖生圖 {count} 張",
+  "@ag_gateImg2img": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_gateInpaint": "重繪 {count} 張",
+  "@ag_gateInpaint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_gateVariations": "變體 {count} 張",
+  "@ag_gateVariations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_gateEnhance": "增強",
+  "ag_gateModelSize": "模型 · 尺寸",
+  "ag_gateRequests": "請求",
+  "ag_gateRequestsValue": "{requests} 次 × {batch} 張",
+  "@ag_gateRequestsValue": {
+    "placeholders": {
+      "requests": {
+        "type": "int"
+      },
+      "batch": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_gateUnit": "單價",
+  "ag_gateEncoding": "參考圖編碼",
+  "ag_gateAccount": "帳號",
+  "ag_gateTotal": "合計 · 餘額 {balance}",
+  "@ag_gateTotal": {
+    "placeholders": {
+      "balance": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_gateTotalNoBalance": "合計",
+  "ag_gateConfirm": "確認並生成",
+  "ag_gateConfirmTool": "確認並執行",
+  "ag_gateChanged": "配置或報價已變化，請讓 Agent 重新準備",
+  "ag_gateExpired": "報價已失效",
+  "ag_gateEstimate": "預估，以服務端扣費為準",
+  "ag_quickOptimize": "最佳化當前提示詞",
+  "ag_quickOptimizePrompt": "按當前模型的規則最佳化當前提示詞：先列出要改的地方和理由，等我確認再寫入草稿。",
+  "ag_quickCompare": "對比最近 4 張",
+  "ag_quickComparePrompt": "對比歷史裡最近的 4 張圖，說說差別和各自的問題，先不要生成。",
+  "ag_quickBlocks": "拆成積木",
+  "ag_quickBlocksPrompt": "把當前提示詞拆成可複用的積木，先給我看拆法，再決定是否儲存。",
+  "ag_quickTags": "查標籤",
+  "ag_quickTagsPrompt": "幫我查標籤：",
+  "ag_placeholder": "告訴 Agent 要做什麼 · @ 引用 · / 技能",
+  "ag_dropHint": "鬆開以附加到這條訊息",
+  "ag_importing": "正在新增 {count} 張圖片…",
+  "@ag_importing": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_attach": "新增圖片",
+  "ag_attachFile": "從檔案選擇…",
+  "ag_attachCanvas": "附上畫布當前圖片",
+  "ag_attachPaste": "貼上剪貼簿圖片",
+  "ag_mention": "引用",
+  "ag_attachmentRemove": "移除",
+  "ag_attachmentBroken": "讀取失敗",
+  "ag_send": "傳送",
+  "ag_sendQueue": "排隊傳送",
+  "ag_sendSteer": "作為引導插入",
+  "ag_sendQueueHint": "等當前任務做完再處理",
+  "ag_sendSteerHint": "在下一次模型請求前插入",
+  "ag_stop": "停止",
+  "ag_noModel": "先選一個能用工具的模型",
+  "ag_queued": "排隊",
+  "ag_steering": "引導",
+  "ag_recovered": "上次沒發出",
+  "ag_queueSteer": "轉引導",
+  "ag_queueEdit": "編輯",
+  "ag_queueWithdraw": "撤回",
+  "ag_queueRestore": "放回輸入框",
+  "ag_newContent": "回到最新",
+  "ag_modeReadonly": "只讀",
+  "ag_modeAsk": "詢問",
+  "ag_modeAuto": "自動",
+  "ag_modeReadonlyHint": "只讀取和討論；不修改、不生成",
+  "ag_modeAskHint": "修改、命令和未知工具先問你",
+  "ag_modeAutoHint": "工作區內的常規修改直接執行；花錢仍要確認",
+  "ag_modelPicker": "選擇模型",
+  "ag_modelSettings": "管理模型與介面…",
+  "ag_modelNone": "未選擇模型",
+  "ag_thinkingTitle": "思考強度 · 下次任務生效",
+  "ag_thinkingFollow": "使用模型設定",
+  "ag_thinkingUnsupported": "這個模型沒有可調的思考檔位",
+  "ag_usageTitle": "上下文與用量",
+  "ag_usageContext": "當前上下文 · 估算",
+  "ag_usageUnknown": "等模型返回用量後顯示",
+  "ag_usageRemaining": "剩餘 {tokens}",
+  "@ag_usageRemaining": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_usageSession": "本聊天累計",
+  "ag_usageInput": "輸入",
+  "ag_usageOutput": "輸出",
+  "ag_usageCacheRead": "快取讀取",
+  "ag_usageCacheWrite": "快取寫入",
+  "ag_usageTotal": "累計 tokens",
+  "ag_usageMessages": "訊息 · 工具呼叫",
+  "ag_usageCost": "費用以服務商賬單為準",
+  "ag_usageCompact": "壓縮上下文",
+  "ag_shelfAll": "全部 {count}",
+  "@ag_shelfAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_shelfGenerated": "生成 {count}",
+  "@ag_shelfGenerated": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_shelfAttachments": "附件 {count}",
+  "@ag_shelfAttachments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_shelfFiles": "檔案 {count}",
+  "@ag_shelfFiles": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_shelfFilesTitle": "檔案",
+  "ag_shelfHint": "點圖放大 · 拖到畫布",
+  "ag_shelfEmpty": "這個聊天還沒有產物",
+  "ag_shelfEmptyHint": "Agent 生成的圖、你附上的圖和它寫的檔案都會收在這裡。",
+  "ag_memoryGlobal": "全域指令",
+  "ag_memoryWorkspace": "本工作區規則",
+  "ag_memorySkills": "生效的 Skill",
+  "ag_memoryEmpty": "還沒寫",
+  "ag_memoryEdit": "編輯",
+  "ag_memoryHint": "這些內容每次都會交給 Agent。改動從下一條訊息開始生效。",
+  "ag_mentionAll": "全部",
+  "ag_mentionDraft": "草稿",
+  "ag_mentionImages": "圖片",
+  "ag_mentionBlocks": "積木",
+  "ag_mentionTitle": "引用到這條訊息",
+  "ag_mentionEmpty": "沒有匹配的內容",
+  "ag_skillsTitle": "技能",
+  "ag_keySelect": "選擇",
+  "ag_keyInsert": "插入",
+  "ag_keyCategory": "切類別",
+  "ag_keyClose": "關閉",
+  "ag_dismiss": "知道了",
+  "ag_retry": "重試",
+  "ag_initFailed": "Agent 沒能啟動",
+  "ag_toggle": "NAI Agent",
+  "ag_yesterday": "昨天",
+  "ag_attachmentTag": "附件",
+  "ag_zoomClose": "關閉"
 }

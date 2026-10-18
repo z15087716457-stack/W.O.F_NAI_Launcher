@@ -20555,4 +20555,682 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_agFinalPending =>
       'No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list.';
+
+  @override
+  String get ag_tabChat => 'Chat';
+
+  @override
+  String get ag_tabShelf => 'Outputs';
+
+  @override
+  String get ag_tabMemory => 'Memory';
+
+  @override
+  String get ag_newChat => 'New chat';
+
+  @override
+  String get ag_more => 'More';
+
+  @override
+  String get ag_close => 'Hide';
+
+  @override
+  String get ag_chatsSearch => 'Search chats and workspaces';
+
+  @override
+  String get ag_chatsSwitchWorkspace => 'Switch workspace';
+
+  @override
+  String get ag_chatsNewWorkspace => 'New workspace';
+
+  @override
+  String get ag_chatsNoMatch => 'No matching chats';
+
+  @override
+  String get ag_chatWaiting => 'Needs you';
+
+  @override
+  String get ag_chatRunning => 'Running';
+
+  @override
+  String get ag_menuRenameChat => 'Rename chat';
+
+  @override
+  String get ag_menuRenameWorkspace => 'Rename workspace';
+
+  @override
+  String get ag_menuOpenFolder => 'Open workspace folder';
+
+  @override
+  String get ag_menuCompact => 'Compact context';
+
+  @override
+  String get ag_menuExport => 'Export chat';
+
+  @override
+  String get ag_menuSettings => 'Agent settings';
+
+  @override
+  String get ag_name => 'Name';
+
+  @override
+  String get ag_save => 'Save';
+
+  @override
+  String get ag_cancel => 'Cancel';
+
+  @override
+  String get ag_failed => 'That didn\'t work';
+
+  @override
+  String get ag_greetMorning => 'Good morning — what are we making?';
+
+  @override
+  String get ag_greetAfternoon => 'Good afternoon — what are we making?';
+
+  @override
+  String get ag_greetEvening => 'Good evening — what are we making?';
+
+  @override
+  String get ag_greetHint =>
+      'Agent reads your draft before acting, and always asks before spending Anlas.';
+
+  @override
+  String get ag_draftEyebrow => 'Current draft';
+
+  @override
+  String ag_draftCounts(int characters, int blocks, int references) {
+    return '$characters characters · $blocks blocks · $references references';
+  }
+
+  @override
+  String get ag_taskReview => 'Review draft';
+
+  @override
+  String get ag_taskReviewHint =>
+      'Find conflicts, redundancy and syntax the model ignores';
+
+  @override
+  String get ag_taskReviewPrompt =>
+      'Review the current draft and parameters for conflicts, redundancy and syntax this model ignores. Don\'t change anything yet.';
+
+  @override
+  String get ag_taskAnalyze => 'Analyze reference';
+
+  @override
+  String get ag_taskAnalyzeHint =>
+      'Break down style, composition and usable tags';
+
+  @override
+  String get ag_taskAnalyzePrompt =>
+      'Analyze the attached reference: style, composition, lighting and tags I can use directly. Don\'t generate yet.';
+
+  @override
+  String get ag_taskVariants => 'Variations';
+
+  @override
+  String get ag_taskVariantsHint => 'Change one thing, compare a few';
+
+  @override
+  String get ag_taskVariantsPrompt =>
+      'Make a few variations of the current draft that each change one thing. Tell me the plan and cost first; wait for my confirmation before generating.';
+
+  @override
+  String get ag_taskBlocks => 'Organize blocks';
+
+  @override
+  String get ag_taskBlocksHint => 'Save reusable pieces to the block library';
+
+  @override
+  String get ag_taskBlocksPrompt =>
+      'Find parts of the current draft worth turning into reusable blocks and list suggestions. Don\'t change anything yet.';
+
+  @override
+  String get ag_recent => 'Recent';
+
+  @override
+  String get ag_you => 'You';
+
+  @override
+  String get ag_edit => 'Edit';
+
+  @override
+  String get ag_copy => 'Copy';
+
+  @override
+  String get ag_copied => 'Copied';
+
+  @override
+  String get ag_regenerate => 'Regenerate';
+
+  @override
+  String get ag_thinking => 'Thinking';
+
+  @override
+  String get ag_starting => 'Opening chat';
+
+  @override
+  String get ag_waitingSlot => 'Waiting for provider';
+
+  @override
+  String get ag_waitingYou => 'Waiting for you';
+
+  @override
+  String get ag_stepRunning => 'Running';
+
+  @override
+  String get ag_stepFailed => 'Failed';
+
+  @override
+  String get ag_stepArguments => 'Arguments';
+
+  @override
+  String get ag_stepResult => 'Result';
+
+  @override
+  String ag_stepsMore(int count) {
+    return '$count more steps';
+  }
+
+  @override
+  String get ag_tool_studio_context => 'Read current draft';
+
+  @override
+  String get ag_tool_image_read => 'View image';
+
+  @override
+  String get ag_tool_prompt_update => 'Edit prompt';
+
+  @override
+  String get ag_tool_snapshot => 'Draft snapshot';
+
+  @override
+  String get ag_tool_wiki_query => 'Search wiki';
+
+  @override
+  String get ag_tool_tag_query => 'Look up tags';
+
+  @override
+  String get ag_tool_block_query => 'Find blocks';
+
+  @override
+  String get ag_tool_block_manage => 'Edit blocks';
+
+  @override
+  String get ag_tool_settings_read => 'Read settings';
+
+  @override
+  String get ag_tool_settings_update => 'Change settings';
+
+  @override
+  String get ag_tool_explore_manage => 'Style explore';
+
+  @override
+  String get ag_tool_generation_prepare => 'Prepare generation';
+
+  @override
+  String get ag_tool_generation_run => 'Generate images';
+
+  @override
+  String get ag_tool_generation_cancel => 'Cancel generation';
+
+  @override
+  String get ag_tool_gallery_query => 'Search gallery';
+
+  @override
+  String get ag_tool_gallery_manage => 'Organize gallery';
+
+  @override
+  String get ag_tool_reference_manage => 'Set references';
+
+  @override
+  String get ag_tool_reference_library => 'Reference library';
+
+  @override
+  String get ag_tool_image_tool => 'Image tool';
+
+  @override
+  String get ag_tool_image_generate => 'Variations / enhance';
+
+  @override
+  String get ag_tool_ask_user => 'Ask you';
+
+  @override
+  String get ag_tool_read => 'Read file';
+
+  @override
+  String get ag_tool_write => 'Write file';
+
+  @override
+  String get ag_tool_edit => 'Edit file';
+
+  @override
+  String get ag_tool_bash => 'Run command';
+
+  @override
+  String get ag_field_prompt => 'Prompt';
+
+  @override
+  String get ag_field_negative => 'Negative prompt';
+
+  @override
+  String get ag_field_character => 'Character prompt';
+
+  @override
+  String get ag_field_characterNegative => 'Character negative';
+
+  @override
+  String get ag_diffApplied => 'Applied';
+
+  @override
+  String get ag_diffUndone => 'Undone';
+
+  @override
+  String get ag_diffLocked => 'Draft changed since';
+
+  @override
+  String get ag_diffUndo => 'Undo';
+
+  @override
+  String ag_diffCounts(int added, int removed) {
+    return '+$added −$removed';
+  }
+
+  @override
+  String get ag_outputs => 'Outputs';
+
+  @override
+  String ag_anlasSpent(String anlas) {
+    return '$anlas Anlas used';
+  }
+
+  @override
+  String get ag_imageReveal => 'Show in history';
+
+  @override
+  String get ag_imageAttach => 'Attach to message';
+
+  @override
+  String get ag_imageZoom => 'View larger';
+
+  @override
+  String ag_askHint(int count) {
+    return 'Press 1–$count';
+  }
+
+  @override
+  String get ag_askOther => 'Something else…';
+
+  @override
+  String get ag_askSubmit => 'Answer';
+
+  @override
+  String get ag_askSkip => 'Skip';
+
+  @override
+  String ag_approvalTitle(String tool) {
+    return 'Needs your OK · $tool';
+  }
+
+  @override
+  String ag_gateTitle(String action) {
+    return 'Confirm · $action';
+  }
+
+  @override
+  String ag_gateText2img(int count) {
+    return 'Generate $count';
+  }
+
+  @override
+  String ag_gateImg2img(int count) {
+    return 'Img2img ×$count';
+  }
+
+  @override
+  String ag_gateInpaint(int count) {
+    return 'Inpaint ×$count';
+  }
+
+  @override
+  String ag_gateVariations(int count) {
+    return 'Variations ×$count';
+  }
+
+  @override
+  String get ag_gateEnhance => 'Enhance';
+
+  @override
+  String get ag_gateModelSize => 'Model · size';
+
+  @override
+  String get ag_gateRequests => 'Requests';
+
+  @override
+  String ag_gateRequestsValue(int requests, int batch) {
+    return '$requests × $batch';
+  }
+
+  @override
+  String get ag_gateUnit => 'Per request';
+
+  @override
+  String get ag_gateEncoding => 'Reference encoding';
+
+  @override
+  String get ag_gateAccount => 'Account';
+
+  @override
+  String ag_gateTotal(String balance) {
+    return 'Total · balance $balance';
+  }
+
+  @override
+  String get ag_gateTotalNoBalance => 'Total';
+
+  @override
+  String get ag_gateConfirm => 'Confirm & generate';
+
+  @override
+  String get ag_gateConfirmTool => 'Confirm & run';
+
+  @override
+  String get ag_gateChanged =>
+      'Settings or price changed; ask Agent to prepare again';
+
+  @override
+  String get ag_gateExpired => 'Quote expired';
+
+  @override
+  String get ag_gateEstimate => 'Estimate; the server charge is final';
+
+  @override
+  String get ag_quickOptimize => 'Improve prompt';
+
+  @override
+  String get ag_quickOptimizePrompt =>
+      'Improve the current prompt for this model: list the changes and why first, and wait for my OK before writing to the draft.';
+
+  @override
+  String get ag_quickCompare => 'Compare last 4';
+
+  @override
+  String get ag_quickComparePrompt =>
+      'Compare the latest 4 images in history: what differs and what\'s wrong with each. Don\'t generate.';
+
+  @override
+  String get ag_quickBlocks => 'Split into blocks';
+
+  @override
+  String get ag_quickBlocksPrompt =>
+      'Split the current prompt into reusable blocks. Show me the split before saving anything.';
+
+  @override
+  String get ag_quickTags => 'Look up tags';
+
+  @override
+  String get ag_quickTagsPrompt => 'Look up tags: ';
+
+  @override
+  String get ag_placeholder =>
+      'Tell Agent what to do · @ to reference · / for skills';
+
+  @override
+  String get ag_dropHint => 'Drop to attach to this message';
+
+  @override
+  String ag_importing(int count) {
+    return 'Adding $count images…';
+  }
+
+  @override
+  String get ag_attach => 'Add images';
+
+  @override
+  String get ag_attachFile => 'Choose files…';
+
+  @override
+  String get ag_attachCanvas => 'Attach current canvas image';
+
+  @override
+  String get ag_attachPaste => 'Paste from clipboard';
+
+  @override
+  String get ag_mention => 'Reference';
+
+  @override
+  String get ag_attachmentRemove => 'Remove';
+
+  @override
+  String get ag_attachmentBroken => 'Couldn\'t read';
+
+  @override
+  String get ag_send => 'Send';
+
+  @override
+  String get ag_sendQueue => 'Queue';
+
+  @override
+  String get ag_sendSteer => 'Steer now';
+
+  @override
+  String get ag_sendQueueHint => 'Runs after the current task';
+
+  @override
+  String get ag_sendSteerHint => 'Inserted before the next model request';
+
+  @override
+  String get ag_stop => 'Stop';
+
+  @override
+  String get ag_noModel => 'Choose a model with tool support';
+
+  @override
+  String get ag_queued => 'Queued';
+
+  @override
+  String get ag_steering => 'Steer';
+
+  @override
+  String get ag_recovered => 'Not sent last time';
+
+  @override
+  String get ag_queueSteer => 'Steer';
+
+  @override
+  String get ag_queueEdit => 'Edit';
+
+  @override
+  String get ag_queueWithdraw => 'Withdraw';
+
+  @override
+  String get ag_queueRestore => 'Back to input';
+
+  @override
+  String get ag_newContent => 'Jump to latest';
+
+  @override
+  String get ag_modeReadonly => 'Read-only';
+
+  @override
+  String get ag_modeAsk => 'Ask';
+
+  @override
+  String get ag_modeAuto => 'Auto';
+
+  @override
+  String get ag_modeReadonlyHint =>
+      'Read and discuss only; no edits or generation';
+
+  @override
+  String get ag_modeAskHint => 'Asks before edits, commands and unknown tools';
+
+  @override
+  String get ag_modeAutoHint =>
+      'Routine workspace edits run directly; spending still needs your OK';
+
+  @override
+  String get ag_modelPicker => 'Choose model';
+
+  @override
+  String get ag_modelSettings => 'Manage models…';
+
+  @override
+  String get ag_modelNone => 'No model';
+
+  @override
+  String get ag_thinkingTitle => 'Thinking · applies next task';
+
+  @override
+  String get ag_thinkingFollow => 'Use model setting';
+
+  @override
+  String get ag_thinkingUnsupported => 'This model has no adjustable thinking';
+
+  @override
+  String get ag_usageTitle => 'Context & usage';
+
+  @override
+  String get ag_usageContext => 'Current context · estimate';
+
+  @override
+  String get ag_usageUnknown => 'Shown after the model reports usage';
+
+  @override
+  String ag_usageRemaining(String tokens) {
+    return '$tokens left';
+  }
+
+  @override
+  String get ag_usageSession => 'This chat';
+
+  @override
+  String get ag_usageInput => 'Input';
+
+  @override
+  String get ag_usageOutput => 'Output';
+
+  @override
+  String get ag_usageCacheRead => 'Cache read';
+
+  @override
+  String get ag_usageCacheWrite => 'Cache write';
+
+  @override
+  String get ag_usageTotal => 'Total tokens';
+
+  @override
+  String get ag_usageMessages => 'Messages · tool calls';
+
+  @override
+  String get ag_usageCost => 'Billing is per your provider';
+
+  @override
+  String get ag_usageCompact => 'Compact context';
+
+  @override
+  String ag_shelfAll(int count) {
+    return 'All $count';
+  }
+
+  @override
+  String ag_shelfGenerated(int count) {
+    return 'Generated $count';
+  }
+
+  @override
+  String ag_shelfAttachments(int count) {
+    return 'Attachments $count';
+  }
+
+  @override
+  String ag_shelfFiles(int count) {
+    return 'Files $count';
+  }
+
+  @override
+  String get ag_shelfFilesTitle => 'Files';
+
+  @override
+  String get ag_shelfHint => 'Click to enlarge · drag to canvas';
+
+  @override
+  String get ag_shelfEmpty => 'Nothing produced in this chat yet';
+
+  @override
+  String get ag_shelfEmptyHint =>
+      'Images Agent generates, images you attach and files it writes all land here.';
+
+  @override
+  String get ag_memoryGlobal => 'Global instructions';
+
+  @override
+  String get ag_memoryWorkspace => 'Workspace rules';
+
+  @override
+  String get ag_memorySkills => 'Active skills';
+
+  @override
+  String get ag_memoryEmpty => 'Not set';
+
+  @override
+  String get ag_memoryEdit => 'Edit';
+
+  @override
+  String get ag_memoryHint =>
+      'These go to Agent with every message. Changes apply from the next message.';
+
+  @override
+  String get ag_mentionAll => 'All';
+
+  @override
+  String get ag_mentionDraft => 'Draft';
+
+  @override
+  String get ag_mentionImages => 'Images';
+
+  @override
+  String get ag_mentionBlocks => 'Blocks';
+
+  @override
+  String get ag_mentionTitle => 'Reference in this message';
+
+  @override
+  String get ag_mentionEmpty => 'Nothing matches';
+
+  @override
+  String get ag_skillsTitle => 'Skills';
+
+  @override
+  String get ag_keySelect => 'Select';
+
+  @override
+  String get ag_keyInsert => 'Insert';
+
+  @override
+  String get ag_keyCategory => 'Category';
+
+  @override
+  String get ag_keyClose => 'Close';
+
+  @override
+  String get ag_dismiss => 'Dismiss';
+
+  @override
+  String get ag_retry => 'Retry';
+
+  @override
+  String get ag_initFailed => 'Agent couldn\'t start';
+
+  @override
+  String get ag_toggle => 'NAI Agent';
+
+  @override
+  String get ag_yesterday => 'Yesterday';
+
+  @override
+  String get ag_attachmentTag => 'Attached';
+
+  @override
+  String get ag_zoomClose => 'Close';
 }

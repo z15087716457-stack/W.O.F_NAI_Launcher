@@ -19695,6 +19695,669 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get set_agFinalPending =>
       '当前没有运行中的会话。以下是 Studio 组装的部分；会话启动时 Pi 还会追加 Skill 目录、工作目录和 MCP 服务列表。';
+
+  @override
+  String get ag_tabChat => '对话';
+
+  @override
+  String get ag_tabShelf => '产物';
+
+  @override
+  String get ag_tabMemory => '记忆';
+
+  @override
+  String get ag_newChat => '新聊天';
+
+  @override
+  String get ag_more => '更多';
+
+  @override
+  String get ag_close => '收起';
+
+  @override
+  String get ag_chatsSearch => '搜索聊天和工作区';
+
+  @override
+  String get ag_chatsSwitchWorkspace => '切换工作区';
+
+  @override
+  String get ag_chatsNewWorkspace => '新建工作区';
+
+  @override
+  String get ag_chatsNoMatch => '没有匹配的聊天';
+
+  @override
+  String get ag_chatWaiting => '等确认';
+
+  @override
+  String get ag_chatRunning => '进行中';
+
+  @override
+  String get ag_menuRenameChat => '重命名聊天';
+
+  @override
+  String get ag_menuRenameWorkspace => '重命名工作区';
+
+  @override
+  String get ag_menuOpenFolder => '打开工作区文件夹';
+
+  @override
+  String get ag_menuCompact => '压缩上下文';
+
+  @override
+  String get ag_menuExport => '导出聊天';
+
+  @override
+  String get ag_menuSettings => 'Agent 设置';
+
+  @override
+  String get ag_name => '名称';
+
+  @override
+  String get ag_save => '保存';
+
+  @override
+  String get ag_cancel => '取消';
+
+  @override
+  String get ag_failed => '操作没有完成';
+
+  @override
+  String get ag_greetMorning => '上午好，今天画什么？';
+
+  @override
+  String get ag_greetAfternoon => '下午好，今天画什么？';
+
+  @override
+  String get ag_greetEvening => '晚上好，今天画什么？';
+
+  @override
+  String get ag_greetHint => 'Agent 会先看草稿再动手；花 Anlas 前一定先问你。';
+
+  @override
+  String get ag_draftEyebrow => '当前草稿';
+
+  @override
+  String ag_draftCounts(int characters, int blocks, int references) {
+    return '角色 $characters · $blocks 个积木 · 参考图 $references';
+  }
+
+  @override
+  String get ag_taskReview => '检查草稿';
+
+  @override
+  String get ag_taskReviewHint => '找冲突、冗余和模型不认的写法';
+
+  @override
+  String get ag_taskReviewPrompt => '检查当前草稿和参数，找出冲突、冗余和当前模型不认的写法，先不要修改。';
+
+  @override
+  String get ag_taskAnalyze => '分析参考图';
+
+  @override
+  String get ag_taskAnalyzeHint => '拆出画风、构图和可用标签';
+
+  @override
+  String get ag_taskAnalyzePrompt => '分析我附上的参考图：画风、构图、光影，以及能直接用的标签，先不要生成。';
+
+  @override
+  String get ag_taskVariants => '批量变体';
+
+  @override
+  String get ag_taskVariantsHint => '改一处，出几张对比';
+
+  @override
+  String get ag_taskVariantsPrompt =>
+      '基于当前草稿，只改一个方向做几组变体对比。先告诉我打算怎么改和费用，等我确认再生成。';
+
+  @override
+  String get ag_taskBlocks => '整理积木';
+
+  @override
+  String get ag_taskBlocksHint => '把常用片段收进积木库';
+
+  @override
+  String get ag_taskBlocksPrompt => '看看当前草稿里哪些片段适合做成可复用的积木，列出建议，先不要修改。';
+
+  @override
+  String get ag_recent => '最近';
+
+  @override
+  String get ag_you => '你';
+
+  @override
+  String get ag_edit => '编辑';
+
+  @override
+  String get ag_copy => '复制';
+
+  @override
+  String get ag_copied => '已复制';
+
+  @override
+  String get ag_regenerate => '重新回答';
+
+  @override
+  String get ag_thinking => '正在思考';
+
+  @override
+  String get ag_starting => '正在打开聊天';
+
+  @override
+  String get ag_waitingSlot => '等服务商额度';
+
+  @override
+  String get ag_waitingYou => '等你处理';
+
+  @override
+  String get ag_stepRunning => '进行中';
+
+  @override
+  String get ag_stepFailed => '失败';
+
+  @override
+  String get ag_stepArguments => '参数';
+
+  @override
+  String get ag_stepResult => '结果';
+
+  @override
+  String ag_stepsMore(int count) {
+    return '还有 $count 步';
+  }
+
+  @override
+  String get ag_tool_studio_context => '读取当前草稿';
+
+  @override
+  String get ag_tool_image_read => '查看图片';
+
+  @override
+  String get ag_tool_prompt_update => '改写提示词';
+
+  @override
+  String get ag_tool_snapshot => '草稿快照';
+
+  @override
+  String get ag_tool_wiki_query => '查百科';
+
+  @override
+  String get ag_tool_tag_query => '查标签';
+
+  @override
+  String get ag_tool_block_query => '查积木';
+
+  @override
+  String get ag_tool_block_manage => '整理积木';
+
+  @override
+  String get ag_tool_settings_read => '读取设置';
+
+  @override
+  String get ag_tool_settings_update => '修改设置';
+
+  @override
+  String get ag_tool_explore_manage => '画风探索';
+
+  @override
+  String get ag_tool_generation_prepare => '准备生成';
+
+  @override
+  String get ag_tool_generation_run => '生成图片';
+
+  @override
+  String get ag_tool_generation_cancel => '取消生成';
+
+  @override
+  String get ag_tool_gallery_query => '查图库';
+
+  @override
+  String get ag_tool_gallery_manage => '整理图库';
+
+  @override
+  String get ag_tool_reference_manage => '设置参考图';
+
+  @override
+  String get ag_tool_reference_library => '参考图库';
+
+  @override
+  String get ag_tool_image_tool => '图像工具';
+
+  @override
+  String get ag_tool_image_generate => '变体 / 增强';
+
+  @override
+  String get ag_tool_ask_user => '向你提问';
+
+  @override
+  String get ag_tool_read => '读文件';
+
+  @override
+  String get ag_tool_write => '写文件';
+
+  @override
+  String get ag_tool_edit => '改文件';
+
+  @override
+  String get ag_tool_bash => '运行命令';
+
+  @override
+  String get ag_field_prompt => '基础提示词';
+
+  @override
+  String get ag_field_negative => '负面提示词';
+
+  @override
+  String get ag_field_character => '角色提示词';
+
+  @override
+  String get ag_field_characterNegative => '角色负面';
+
+  @override
+  String get ag_diffApplied => '已写入';
+
+  @override
+  String get ag_diffUndone => '已撤销';
+
+  @override
+  String get ag_diffLocked => '草稿已再次修改';
+
+  @override
+  String get ag_diffUndo => '撤销';
+
+  @override
+  String ag_diffCounts(int added, int removed) {
+    return '+$added −$removed';
+  }
+
+  @override
+  String get ag_outputs => '本次产物';
+
+  @override
+  String ag_anlasSpent(String anlas) {
+    return '已用 $anlas Anlas';
+  }
+
+  @override
+  String get ag_imageReveal => '在历史中显示';
+
+  @override
+  String get ag_imageAttach => '附到输入框';
+
+  @override
+  String get ag_imageZoom => '放大查看';
+
+  @override
+  String ag_askHint(int count) {
+    return '按 1–$count';
+  }
+
+  @override
+  String get ag_askOther => '其他想法…';
+
+  @override
+  String get ag_askSubmit => '回答';
+
+  @override
+  String get ag_askSkip => '跳过';
+
+  @override
+  String ag_approvalTitle(String tool) {
+    return '需要你允许 · $tool';
+  }
+
+  @override
+  String ag_gateTitle(String action) {
+    return '需要你确认 · $action';
+  }
+
+  @override
+  String ag_gateText2img(int count) {
+    return '生成 $count 张';
+  }
+
+  @override
+  String ag_gateImg2img(int count) {
+    return '图生图 $count 张';
+  }
+
+  @override
+  String ag_gateInpaint(int count) {
+    return '重绘 $count 张';
+  }
+
+  @override
+  String ag_gateVariations(int count) {
+    return '变体 $count 张';
+  }
+
+  @override
+  String get ag_gateEnhance => '增强';
+
+  @override
+  String get ag_gateModelSize => '模型 · 尺寸';
+
+  @override
+  String get ag_gateRequests => '请求';
+
+  @override
+  String ag_gateRequestsValue(int requests, int batch) {
+    return '$requests 次 × $batch 张';
+  }
+
+  @override
+  String get ag_gateUnit => '单价';
+
+  @override
+  String get ag_gateEncoding => '参考图编码';
+
+  @override
+  String get ag_gateAccount => '账号';
+
+  @override
+  String ag_gateTotal(String balance) {
+    return '合计 · 余额 $balance';
+  }
+
+  @override
+  String get ag_gateTotalNoBalance => '合计';
+
+  @override
+  String get ag_gateConfirm => '确认并生成';
+
+  @override
+  String get ag_gateConfirmTool => '确认并执行';
+
+  @override
+  String get ag_gateChanged => '配置或报价已变化，请让 Agent 重新准备';
+
+  @override
+  String get ag_gateExpired => '报价已失效';
+
+  @override
+  String get ag_gateEstimate => '预估，以服务端扣费为准';
+
+  @override
+  String get ag_quickOptimize => '优化当前提示词';
+
+  @override
+  String get ag_quickOptimizePrompt => '按当前模型的规则优化当前提示词：先列出要改的地方和理由，等我确认再写入草稿。';
+
+  @override
+  String get ag_quickCompare => '对比最近 4 张';
+
+  @override
+  String get ag_quickComparePrompt => '对比历史里最近的 4 张图，说说差别和各自的问题，先不要生成。';
+
+  @override
+  String get ag_quickBlocks => '拆成积木';
+
+  @override
+  String get ag_quickBlocksPrompt => '把当前提示词拆成可复用的积木，先给我看拆法，再决定是否保存。';
+
+  @override
+  String get ag_quickTags => '查标签';
+
+  @override
+  String get ag_quickTagsPrompt => '帮我查标签：';
+
+  @override
+  String get ag_placeholder => '告诉 Agent 要做什么 · @ 引用 · / 技能';
+
+  @override
+  String get ag_dropHint => '松开以附加到这条消息';
+
+  @override
+  String ag_importing(int count) {
+    return '正在添加 $count 张图片…';
+  }
+
+  @override
+  String get ag_attach => '添加图片';
+
+  @override
+  String get ag_attachFile => '从文件选择…';
+
+  @override
+  String get ag_attachCanvas => '附上画布当前图片';
+
+  @override
+  String get ag_attachPaste => '粘贴剪贴板图片';
+
+  @override
+  String get ag_mention => '引用';
+
+  @override
+  String get ag_attachmentRemove => '移除';
+
+  @override
+  String get ag_attachmentBroken => '读取失败';
+
+  @override
+  String get ag_send => '发送';
+
+  @override
+  String get ag_sendQueue => '排队发送';
+
+  @override
+  String get ag_sendSteer => '作为引导插入';
+
+  @override
+  String get ag_sendQueueHint => '等当前任务做完再处理';
+
+  @override
+  String get ag_sendSteerHint => '在下一次模型请求前插入';
+
+  @override
+  String get ag_stop => '停止';
+
+  @override
+  String get ag_noModel => '先选一个能用工具的模型';
+
+  @override
+  String get ag_queued => '排队';
+
+  @override
+  String get ag_steering => '引导';
+
+  @override
+  String get ag_recovered => '上次没发出';
+
+  @override
+  String get ag_queueSteer => '转引导';
+
+  @override
+  String get ag_queueEdit => '编辑';
+
+  @override
+  String get ag_queueWithdraw => '撤回';
+
+  @override
+  String get ag_queueRestore => '放回输入框';
+
+  @override
+  String get ag_newContent => '回到最新';
+
+  @override
+  String get ag_modeReadonly => '只读';
+
+  @override
+  String get ag_modeAsk => '询问';
+
+  @override
+  String get ag_modeAuto => '自动';
+
+  @override
+  String get ag_modeReadonlyHint => '只读取和讨论；不修改、不生成';
+
+  @override
+  String get ag_modeAskHint => '修改、命令和未知工具先问你';
+
+  @override
+  String get ag_modeAutoHint => '工作区内的常规修改直接执行；花钱仍要确认';
+
+  @override
+  String get ag_modelPicker => '选择模型';
+
+  @override
+  String get ag_modelSettings => '管理模型与接口…';
+
+  @override
+  String get ag_modelNone => '未选择模型';
+
+  @override
+  String get ag_thinkingTitle => '思考强度 · 下次任务生效';
+
+  @override
+  String get ag_thinkingFollow => '使用模型设置';
+
+  @override
+  String get ag_thinkingUnsupported => '这个模型没有可调的思考档位';
+
+  @override
+  String get ag_usageTitle => '上下文与用量';
+
+  @override
+  String get ag_usageContext => '当前上下文 · 估算';
+
+  @override
+  String get ag_usageUnknown => '等模型返回用量后显示';
+
+  @override
+  String ag_usageRemaining(String tokens) {
+    return '剩余 $tokens';
+  }
+
+  @override
+  String get ag_usageSession => '本聊天累计';
+
+  @override
+  String get ag_usageInput => '输入';
+
+  @override
+  String get ag_usageOutput => '输出';
+
+  @override
+  String get ag_usageCacheRead => '缓存读取';
+
+  @override
+  String get ag_usageCacheWrite => '缓存写入';
+
+  @override
+  String get ag_usageTotal => '累计 tokens';
+
+  @override
+  String get ag_usageMessages => '消息 · 工具调用';
+
+  @override
+  String get ag_usageCost => '费用以服务商账单为准';
+
+  @override
+  String get ag_usageCompact => '压缩上下文';
+
+  @override
+  String ag_shelfAll(int count) {
+    return '全部 $count';
+  }
+
+  @override
+  String ag_shelfGenerated(int count) {
+    return '生成 $count';
+  }
+
+  @override
+  String ag_shelfAttachments(int count) {
+    return '附件 $count';
+  }
+
+  @override
+  String ag_shelfFiles(int count) {
+    return '文件 $count';
+  }
+
+  @override
+  String get ag_shelfFilesTitle => '文件';
+
+  @override
+  String get ag_shelfHint => '点图放大 · 拖到画布';
+
+  @override
+  String get ag_shelfEmpty => '这个聊天还没有产物';
+
+  @override
+  String get ag_shelfEmptyHint => 'Agent 生成的图、你附上的图和它写的文件都会收在这里。';
+
+  @override
+  String get ag_memoryGlobal => '全局指令';
+
+  @override
+  String get ag_memoryWorkspace => '本工作区规则';
+
+  @override
+  String get ag_memorySkills => '生效的 Skill';
+
+  @override
+  String get ag_memoryEmpty => '还没写';
+
+  @override
+  String get ag_memoryEdit => '编辑';
+
+  @override
+  String get ag_memoryHint => '这些内容每次都会交给 Agent。改动从下一条消息开始生效。';
+
+  @override
+  String get ag_mentionAll => '全部';
+
+  @override
+  String get ag_mentionDraft => '草稿';
+
+  @override
+  String get ag_mentionImages => '图片';
+
+  @override
+  String get ag_mentionBlocks => '积木';
+
+  @override
+  String get ag_mentionTitle => '引用到这条消息';
+
+  @override
+  String get ag_mentionEmpty => '没有匹配的内容';
+
+  @override
+  String get ag_skillsTitle => '技能';
+
+  @override
+  String get ag_keySelect => '选择';
+
+  @override
+  String get ag_keyInsert => '插入';
+
+  @override
+  String get ag_keyCategory => '切类别';
+
+  @override
+  String get ag_keyClose => '关闭';
+
+  @override
+  String get ag_dismiss => '知道了';
+
+  @override
+  String get ag_retry => '重试';
+
+  @override
+  String get ag_initFailed => 'Agent 没能启动';
+
+  @override
+  String get ag_toggle => 'NAI Agent';
+
+  @override
+  String get ag_yesterday => '昨天';
+
+  @override
+  String get ag_attachmentTag => '附件';
+
+  @override
+  String get ag_zoomClose => '关闭';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -39388,4 +40051,668 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get set_agFinalPending =>
       '當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。';
+
+  @override
+  String get ag_tabChat => '對話';
+
+  @override
+  String get ag_tabShelf => '產物';
+
+  @override
+  String get ag_tabMemory => '記憶';
+
+  @override
+  String get ag_newChat => '新聊天';
+
+  @override
+  String get ag_more => '更多';
+
+  @override
+  String get ag_close => '收起';
+
+  @override
+  String get ag_chatsSearch => '搜尋聊天和工作區';
+
+  @override
+  String get ag_chatsSwitchWorkspace => '切換工作區';
+
+  @override
+  String get ag_chatsNewWorkspace => '新增工作區';
+
+  @override
+  String get ag_chatsNoMatch => '沒有匹配的聊天';
+
+  @override
+  String get ag_chatWaiting => '等確認';
+
+  @override
+  String get ag_chatRunning => '進行中';
+
+  @override
+  String get ag_menuRenameChat => '重新命名聊天';
+
+  @override
+  String get ag_menuRenameWorkspace => '重新命名工作區';
+
+  @override
+  String get ag_menuOpenFolder => '開啟工作區資料夾';
+
+  @override
+  String get ag_menuCompact => '壓縮上下文';
+
+  @override
+  String get ag_menuExport => '匯出聊天';
+
+  @override
+  String get ag_menuSettings => 'Agent 設定';
+
+  @override
+  String get ag_name => '名稱';
+
+  @override
+  String get ag_save => '儲存';
+
+  @override
+  String get ag_cancel => '取消';
+
+  @override
+  String get ag_failed => '操作沒有完成';
+
+  @override
+  String get ag_greetMorning => '上午好，今天畫什麼？';
+
+  @override
+  String get ag_greetAfternoon => '下午好，今天畫什麼？';
+
+  @override
+  String get ag_greetEvening => '晚上好，今天畫什麼？';
+
+  @override
+  String get ag_greetHint => 'Agent 會先看草稿再動手；花 Anlas 前一定先問你。';
+
+  @override
+  String get ag_draftEyebrow => '當前草稿';
+
+  @override
+  String ag_draftCounts(int characters, int blocks, int references) {
+    return '角色 $characters · $blocks 個積木 · 參考圖 $references';
+  }
+
+  @override
+  String get ag_taskReview => '檢查草稿';
+
+  @override
+  String get ag_taskReviewHint => '找衝突、冗餘和模型不認的寫法';
+
+  @override
+  String get ag_taskReviewPrompt => '檢查當前草稿和參數，找出衝突、冗餘和當前模型不認的寫法，先不要修改。';
+
+  @override
+  String get ag_taskAnalyze => '分析參考圖';
+
+  @override
+  String get ag_taskAnalyzeHint => '拆出畫風、構圖和可用標籤';
+
+  @override
+  String get ag_taskAnalyzePrompt => '分析我附上的參考圖：畫風、構圖、光影，以及能直接用的標籤，先不要生成。';
+
+  @override
+  String get ag_taskVariants => '批次變體';
+
+  @override
+  String get ag_taskVariantsHint => '改一處，出幾張對比';
+
+  @override
+  String get ag_taskVariantsPrompt =>
+      '基於當前草稿，只改一個方向做幾組變體對比。先告訴我打算怎麼改和費用，等我確認再生成。';
+
+  @override
+  String get ag_taskBlocks => '整理積木';
+
+  @override
+  String get ag_taskBlocksHint => '把常用片段收進積木庫';
+
+  @override
+  String get ag_taskBlocksPrompt => '看看當前草稿裡哪些片段適合做成可複用的積木，列出建議，先不要修改。';
+
+  @override
+  String get ag_recent => '最近';
+
+  @override
+  String get ag_you => '你';
+
+  @override
+  String get ag_edit => '編輯';
+
+  @override
+  String get ag_copy => '複製';
+
+  @override
+  String get ag_copied => '已複製';
+
+  @override
+  String get ag_regenerate => '重新回答';
+
+  @override
+  String get ag_thinking => '正在思考';
+
+  @override
+  String get ag_starting => '正在開啟聊天';
+
+  @override
+  String get ag_waitingSlot => '等服務商額度';
+
+  @override
+  String get ag_waitingYou => '等你處理';
+
+  @override
+  String get ag_stepRunning => '進行中';
+
+  @override
+  String get ag_stepFailed => '失敗';
+
+  @override
+  String get ag_stepArguments => '參數';
+
+  @override
+  String get ag_stepResult => '結果';
+
+  @override
+  String ag_stepsMore(int count) {
+    return '還有 $count 步';
+  }
+
+  @override
+  String get ag_tool_studio_context => '讀取當前草稿';
+
+  @override
+  String get ag_tool_image_read => '檢視圖片';
+
+  @override
+  String get ag_tool_prompt_update => '改寫提示詞';
+
+  @override
+  String get ag_tool_snapshot => '草稿快照';
+
+  @override
+  String get ag_tool_wiki_query => '查百科';
+
+  @override
+  String get ag_tool_tag_query => '查標籤';
+
+  @override
+  String get ag_tool_block_query => '查積木';
+
+  @override
+  String get ag_tool_block_manage => '整理積木';
+
+  @override
+  String get ag_tool_settings_read => '讀取設定';
+
+  @override
+  String get ag_tool_settings_update => '修改設定';
+
+  @override
+  String get ag_tool_explore_manage => '畫風探索';
+
+  @override
+  String get ag_tool_generation_prepare => '準備生成';
+
+  @override
+  String get ag_tool_generation_run => '生成圖片';
+
+  @override
+  String get ag_tool_generation_cancel => '取消生成';
+
+  @override
+  String get ag_tool_gallery_query => '查圖庫';
+
+  @override
+  String get ag_tool_gallery_manage => '整理圖庫';
+
+  @override
+  String get ag_tool_reference_manage => '設定參考圖';
+
+  @override
+  String get ag_tool_reference_library => '參考圖庫';
+
+  @override
+  String get ag_tool_image_tool => '影像工具';
+
+  @override
+  String get ag_tool_image_generate => '變體 / 增強';
+
+  @override
+  String get ag_tool_ask_user => '向你提問';
+
+  @override
+  String get ag_tool_read => '讀檔案';
+
+  @override
+  String get ag_tool_write => '寫檔案';
+
+  @override
+  String get ag_tool_edit => '改檔案';
+
+  @override
+  String get ag_tool_bash => '執行命令';
+
+  @override
+  String get ag_field_prompt => '基礎提示詞';
+
+  @override
+  String get ag_field_negative => '負面提示詞';
+
+  @override
+  String get ag_field_character => '角色提示詞';
+
+  @override
+  String get ag_field_characterNegative => '角色負面';
+
+  @override
+  String get ag_diffApplied => '已寫入';
+
+  @override
+  String get ag_diffUndone => '已復原';
+
+  @override
+  String get ag_diffLocked => '草稿已再次修改';
+
+  @override
+  String get ag_diffUndo => '復原';
+
+  @override
+  String ag_diffCounts(int added, int removed) {
+    return '+$added −$removed';
+  }
+
+  @override
+  String get ag_outputs => '本次產物';
+
+  @override
+  String ag_anlasSpent(String anlas) {
+    return '已用 $anlas Anlas';
+  }
+
+  @override
+  String get ag_imageReveal => '在歷史中顯示';
+
+  @override
+  String get ag_imageAttach => '附到輸入框';
+
+  @override
+  String get ag_imageZoom => '放大檢視';
+
+  @override
+  String ag_askHint(int count) {
+    return '按 1–$count';
+  }
+
+  @override
+  String get ag_askOther => '其他想法…';
+
+  @override
+  String get ag_askSubmit => '回答';
+
+  @override
+  String get ag_askSkip => '跳過';
+
+  @override
+  String ag_approvalTitle(String tool) {
+    return '需要你允許 · $tool';
+  }
+
+  @override
+  String ag_gateTitle(String action) {
+    return '需要你確認 · $action';
+  }
+
+  @override
+  String ag_gateText2img(int count) {
+    return '生成 $count 張';
+  }
+
+  @override
+  String ag_gateImg2img(int count) {
+    return '圖生圖 $count 張';
+  }
+
+  @override
+  String ag_gateInpaint(int count) {
+    return '重繪 $count 張';
+  }
+
+  @override
+  String ag_gateVariations(int count) {
+    return '變體 $count 張';
+  }
+
+  @override
+  String get ag_gateEnhance => '增強';
+
+  @override
+  String get ag_gateModelSize => '模型 · 尺寸';
+
+  @override
+  String get ag_gateRequests => '請求';
+
+  @override
+  String ag_gateRequestsValue(int requests, int batch) {
+    return '$requests 次 × $batch 張';
+  }
+
+  @override
+  String get ag_gateUnit => '單價';
+
+  @override
+  String get ag_gateEncoding => '參考圖編碼';
+
+  @override
+  String get ag_gateAccount => '帳號';
+
+  @override
+  String ag_gateTotal(String balance) {
+    return '合計 · 餘額 $balance';
+  }
+
+  @override
+  String get ag_gateTotalNoBalance => '合計';
+
+  @override
+  String get ag_gateConfirm => '確認並生成';
+
+  @override
+  String get ag_gateConfirmTool => '確認並執行';
+
+  @override
+  String get ag_gateChanged => '配置或報價已變化，請讓 Agent 重新準備';
+
+  @override
+  String get ag_gateExpired => '報價已失效';
+
+  @override
+  String get ag_gateEstimate => '預估，以服務端扣費為準';
+
+  @override
+  String get ag_quickOptimize => '最佳化當前提示詞';
+
+  @override
+  String get ag_quickOptimizePrompt =>
+      '按當前模型的規則最佳化當前提示詞：先列出要改的地方和理由，等我確認再寫入草稿。';
+
+  @override
+  String get ag_quickCompare => '對比最近 4 張';
+
+  @override
+  String get ag_quickComparePrompt => '對比歷史裡最近的 4 張圖，說說差別和各自的問題，先不要生成。';
+
+  @override
+  String get ag_quickBlocks => '拆成積木';
+
+  @override
+  String get ag_quickBlocksPrompt => '把當前提示詞拆成可複用的積木，先給我看拆法，再決定是否儲存。';
+
+  @override
+  String get ag_quickTags => '查標籤';
+
+  @override
+  String get ag_quickTagsPrompt => '幫我查標籤：';
+
+  @override
+  String get ag_placeholder => '告訴 Agent 要做什麼 · @ 引用 · / 技能';
+
+  @override
+  String get ag_dropHint => '鬆開以附加到這條訊息';
+
+  @override
+  String ag_importing(int count) {
+    return '正在新增 $count 張圖片…';
+  }
+
+  @override
+  String get ag_attach => '新增圖片';
+
+  @override
+  String get ag_attachFile => '從檔案選擇…';
+
+  @override
+  String get ag_attachCanvas => '附上畫布當前圖片';
+
+  @override
+  String get ag_attachPaste => '貼上剪貼簿圖片';
+
+  @override
+  String get ag_mention => '引用';
+
+  @override
+  String get ag_attachmentRemove => '移除';
+
+  @override
+  String get ag_attachmentBroken => '讀取失敗';
+
+  @override
+  String get ag_send => '傳送';
+
+  @override
+  String get ag_sendQueue => '排隊傳送';
+
+  @override
+  String get ag_sendSteer => '作為引導插入';
+
+  @override
+  String get ag_sendQueueHint => '等當前任務做完再處理';
+
+  @override
+  String get ag_sendSteerHint => '在下一次模型請求前插入';
+
+  @override
+  String get ag_stop => '停止';
+
+  @override
+  String get ag_noModel => '先選一個能用工具的模型';
+
+  @override
+  String get ag_queued => '排隊';
+
+  @override
+  String get ag_steering => '引導';
+
+  @override
+  String get ag_recovered => '上次沒發出';
+
+  @override
+  String get ag_queueSteer => '轉引導';
+
+  @override
+  String get ag_queueEdit => '編輯';
+
+  @override
+  String get ag_queueWithdraw => '撤回';
+
+  @override
+  String get ag_queueRestore => '放回輸入框';
+
+  @override
+  String get ag_newContent => '回到最新';
+
+  @override
+  String get ag_modeReadonly => '只讀';
+
+  @override
+  String get ag_modeAsk => '詢問';
+
+  @override
+  String get ag_modeAuto => '自動';
+
+  @override
+  String get ag_modeReadonlyHint => '只讀取和討論；不修改、不生成';
+
+  @override
+  String get ag_modeAskHint => '修改、命令和未知工具先問你';
+
+  @override
+  String get ag_modeAutoHint => '工作區內的常規修改直接執行；花錢仍要確認';
+
+  @override
+  String get ag_modelPicker => '選擇模型';
+
+  @override
+  String get ag_modelSettings => '管理模型與介面…';
+
+  @override
+  String get ag_modelNone => '未選擇模型';
+
+  @override
+  String get ag_thinkingTitle => '思考強度 · 下次任務生效';
+
+  @override
+  String get ag_thinkingFollow => '使用模型設定';
+
+  @override
+  String get ag_thinkingUnsupported => '這個模型沒有可調的思考檔位';
+
+  @override
+  String get ag_usageTitle => '上下文與用量';
+
+  @override
+  String get ag_usageContext => '當前上下文 · 估算';
+
+  @override
+  String get ag_usageUnknown => '等模型返回用量後顯示';
+
+  @override
+  String ag_usageRemaining(String tokens) {
+    return '剩餘 $tokens';
+  }
+
+  @override
+  String get ag_usageSession => '本聊天累計';
+
+  @override
+  String get ag_usageInput => '輸入';
+
+  @override
+  String get ag_usageOutput => '輸出';
+
+  @override
+  String get ag_usageCacheRead => '快取讀取';
+
+  @override
+  String get ag_usageCacheWrite => '快取寫入';
+
+  @override
+  String get ag_usageTotal => '累計 tokens';
+
+  @override
+  String get ag_usageMessages => '訊息 · 工具呼叫';
+
+  @override
+  String get ag_usageCost => '費用以服務商賬單為準';
+
+  @override
+  String get ag_usageCompact => '壓縮上下文';
+
+  @override
+  String ag_shelfAll(int count) {
+    return '全部 $count';
+  }
+
+  @override
+  String ag_shelfGenerated(int count) {
+    return '生成 $count';
+  }
+
+  @override
+  String ag_shelfAttachments(int count) {
+    return '附件 $count';
+  }
+
+  @override
+  String ag_shelfFiles(int count) {
+    return '檔案 $count';
+  }
+
+  @override
+  String get ag_shelfFilesTitle => '檔案';
+
+  @override
+  String get ag_shelfHint => '點圖放大 · 拖到畫布';
+
+  @override
+  String get ag_shelfEmpty => '這個聊天還沒有產物';
+
+  @override
+  String get ag_shelfEmptyHint => 'Agent 生成的圖、你附上的圖和它寫的檔案都會收在這裡。';
+
+  @override
+  String get ag_memoryGlobal => '全域指令';
+
+  @override
+  String get ag_memoryWorkspace => '本工作區規則';
+
+  @override
+  String get ag_memorySkills => '生效的 Skill';
+
+  @override
+  String get ag_memoryEmpty => '還沒寫';
+
+  @override
+  String get ag_memoryEdit => '編輯';
+
+  @override
+  String get ag_memoryHint => '這些內容每次都會交給 Agent。改動從下一條訊息開始生效。';
+
+  @override
+  String get ag_mentionAll => '全部';
+
+  @override
+  String get ag_mentionDraft => '草稿';
+
+  @override
+  String get ag_mentionImages => '圖片';
+
+  @override
+  String get ag_mentionBlocks => '積木';
+
+  @override
+  String get ag_mentionTitle => '引用到這條訊息';
+
+  @override
+  String get ag_mentionEmpty => '沒有匹配的內容';
+
+  @override
+  String get ag_skillsTitle => '技能';
+
+  @override
+  String get ag_keySelect => '選擇';
+
+  @override
+  String get ag_keyInsert => '插入';
+
+  @override
+  String get ag_keyCategory => '切類別';
+
+  @override
+  String get ag_keyClose => '關閉';
+
+  @override
+  String get ag_dismiss => '知道了';
+
+  @override
+  String get ag_retry => '重試';
+
+  @override
+  String get ag_initFailed => 'Agent 沒能啟動';
+
+  @override
+  String get ag_toggle => 'NAI Agent';
+
+  @override
+  String get ag_yesterday => '昨天';
+
+  @override
+  String get ag_attachmentTag => '附件';
+
+  @override
+  String get ag_zoomClose => '關閉';
 }

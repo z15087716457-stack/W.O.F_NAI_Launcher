@@ -19926,4 +19926,673 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get set_agFinalPending =>
       '実行中のセッションはありません。以下は Studio が組み立てる部分です。セッション開始時には Pi がスキルカタログ、作業ディレクトリ、MCP サーバー一覧も追加します。';
+
+  @override
+  String get ag_tabChat => 'チャット';
+
+  @override
+  String get ag_tabShelf => '出力';
+
+  @override
+  String get ag_tabMemory => 'メモリ';
+
+  @override
+  String get ag_newChat => '新しいチャット';
+
+  @override
+  String get ag_more => 'その他';
+
+  @override
+  String get ag_close => '折りたたむ';
+
+  @override
+  String get ag_chatsSearch => 'チャットとワークスペースを検索';
+
+  @override
+  String get ag_chatsSwitchWorkspace => 'ワークスペースを切り替え';
+
+  @override
+  String get ag_chatsNewWorkspace => '新規ワークスペース';
+
+  @override
+  String get ag_chatsNoMatch => '一致するチャットがありません';
+
+  @override
+  String get ag_chatWaiting => '確認待ち';
+
+  @override
+  String get ag_chatRunning => '実行中';
+
+  @override
+  String get ag_menuRenameChat => 'チャットの名前を変更';
+
+  @override
+  String get ag_menuRenameWorkspace => 'ワークスペースの名前を変更';
+
+  @override
+  String get ag_menuOpenFolder => 'ワークスペースのフォルダーを開く';
+
+  @override
+  String get ag_menuCompact => 'コンテキストを圧縮';
+
+  @override
+  String get ag_menuExport => 'チャットをエクスポート';
+
+  @override
+  String get ag_menuSettings => 'Agent 設定';
+
+  @override
+  String get ag_name => '名前';
+
+  @override
+  String get ag_save => '保存';
+
+  @override
+  String get ag_cancel => 'キャンセル';
+
+  @override
+  String get ag_failed => '操作に失敗しました';
+
+  @override
+  String get ag_greetMorning => 'おはようございます、今日は何を描きますか？';
+
+  @override
+  String get ag_greetAfternoon => 'こんにちは、今日は何を描きますか？';
+
+  @override
+  String get ag_greetEvening => 'こんばんは、今日は何を描きますか？';
+
+  @override
+  String get ag_greetHint => 'Agent はまず下書きを読み、Anlas を使う前には必ず確認します。';
+
+  @override
+  String get ag_draftEyebrow => '現在の下書き';
+
+  @override
+  String ag_draftCounts(int characters, int blocks, int references) {
+    return 'キャラ $characters 体 · ブロック $blocks 個 · 参照画像 $references 枚';
+  }
+
+  @override
+  String get ag_taskReview => '下書きを確認';
+
+  @override
+  String get ag_taskReviewHint => '競合・重複・モデルが無視する書き方を探します';
+
+  @override
+  String get ag_taskReviewPrompt =>
+      '現在の下書きとパラメータを確認し、競合・重複・現在のモデルが無視する書き方を指摘してください。まだ変更はしないでください。';
+
+  @override
+  String get ag_taskAnalyze => '参照画像を分析';
+
+  @override
+  String get ag_taskAnalyzeHint => '画風・構図・使えるタグに分解します';
+
+  @override
+  String get ag_taskAnalyzePrompt =>
+      '添付した参照画像を分析してください。画風、構図、光と影、そのまま使えるタグを挙げて、まだ生成はしないでください。';
+
+  @override
+  String get ag_taskVariants => 'バリエーション';
+
+  @override
+  String get ag_taskVariantsHint => '1 か所だけ変えて数枚比較します';
+
+  @override
+  String get ag_taskVariantsPrompt =>
+      '現在の下書きをもとに、1 か所だけ変えたバリエーションを数組作ってください。変更内容と費用を先に伝えて、確認してから生成してください。';
+
+  @override
+  String get ag_taskBlocks => 'ブロックを整理';
+
+  @override
+  String get ag_taskBlocksHint => 'よく使う断片をブロックライブラリへ保存します';
+
+  @override
+  String get ag_taskBlocksPrompt =>
+      '現在の下書きの中で、再利用できるブロックに向く断片を探して提案してください。まだ変更はしないでください。';
+
+  @override
+  String get ag_recent => '最近';
+
+  @override
+  String get ag_you => 'あなた';
+
+  @override
+  String get ag_edit => '編集';
+
+  @override
+  String get ag_copy => 'コピー';
+
+  @override
+  String get ag_copied => 'コピーしました';
+
+  @override
+  String get ag_regenerate => '回答を再生成';
+
+  @override
+  String get ag_thinking => '考えています';
+
+  @override
+  String get ag_starting => 'チャットを開いています';
+
+  @override
+  String get ag_waitingSlot => 'リクエスト枠を待機中';
+
+  @override
+  String get ag_waitingYou => '対応待ち';
+
+  @override
+  String get ag_stepRunning => '実行中';
+
+  @override
+  String get ag_stepFailed => '失敗';
+
+  @override
+  String get ag_stepArguments => '引数';
+
+  @override
+  String get ag_stepResult => '結果';
+
+  @override
+  String ag_stepsMore(int count) {
+    return 'あと $count ステップ';
+  }
+
+  @override
+  String get ag_tool_studio_context => '現在の下書きを読み取り';
+
+  @override
+  String get ag_tool_image_read => '画像を表示';
+
+  @override
+  String get ag_tool_prompt_update => 'プロンプトを書き換え';
+
+  @override
+  String get ag_tool_snapshot => '下書きスナップショット';
+
+  @override
+  String get ag_tool_wiki_query => '百科を検索';
+
+  @override
+  String get ag_tool_tag_query => 'タグを検索';
+
+  @override
+  String get ag_tool_block_query => 'ブロックを検索';
+
+  @override
+  String get ag_tool_block_manage => 'ブロックを整理';
+
+  @override
+  String get ag_tool_settings_read => '設定を読み取り';
+
+  @override
+  String get ag_tool_settings_update => '設定を変更';
+
+  @override
+  String get ag_tool_explore_manage => '画風探索';
+
+  @override
+  String get ag_tool_generation_prepare => '生成の準備';
+
+  @override
+  String get ag_tool_generation_run => '画像を生成';
+
+  @override
+  String get ag_tool_generation_cancel => '生成をキャンセル';
+
+  @override
+  String get ag_tool_gallery_query => 'ギャラリーを検索';
+
+  @override
+  String get ag_tool_gallery_manage => 'ギャラリーを整理';
+
+  @override
+  String get ag_tool_reference_manage => '参照画像を設定';
+
+  @override
+  String get ag_tool_reference_library => '参照画像ライブラリ';
+
+  @override
+  String get ag_tool_image_tool => '画像ツール';
+
+  @override
+  String get ag_tool_image_generate => 'バリエーション / エンハンス';
+
+  @override
+  String get ag_tool_ask_user => 'あなたに質問';
+
+  @override
+  String get ag_tool_read => 'ファイルを読み取り';
+
+  @override
+  String get ag_tool_write => 'ファイルを書き込み';
+
+  @override
+  String get ag_tool_edit => 'ファイルを変更';
+
+  @override
+  String get ag_tool_bash => 'コマンドを実行';
+
+  @override
+  String get ag_field_prompt => 'ベースプロンプト';
+
+  @override
+  String get ag_field_negative => 'ネガティブプロンプト';
+
+  @override
+  String get ag_field_character => 'キャラクタープロンプト';
+
+  @override
+  String get ag_field_characterNegative => 'キャラ ネガティブ';
+
+  @override
+  String get ag_diffApplied => '書き込み済み';
+
+  @override
+  String get ag_diffUndone => '元に戻しました';
+
+  @override
+  String get ag_diffLocked => '下書きが再変更されました';
+
+  @override
+  String get ag_diffUndo => '元に戻す';
+
+  @override
+  String ag_diffCounts(int added, int removed) {
+    return '+$added −$removed';
+  }
+
+  @override
+  String get ag_outputs => '今回の出力';
+
+  @override
+  String ag_anlasSpent(String anlas) {
+    return '$anlas Anlas 使用';
+  }
+
+  @override
+  String get ag_imageReveal => '履歴で表示';
+
+  @override
+  String get ag_imageAttach => '入力欄に添付';
+
+  @override
+  String get ag_imageZoom => '拡大して表示';
+
+  @override
+  String ag_askHint(int count) {
+    return '1–$count で選択';
+  }
+
+  @override
+  String get ag_askOther => 'その他の案…';
+
+  @override
+  String get ag_askSubmit => '回答';
+
+  @override
+  String get ag_askSkip => 'スキップ';
+
+  @override
+  String ag_approvalTitle(String tool) {
+    return '許可が必要 · $tool';
+  }
+
+  @override
+  String ag_gateTitle(String action) {
+    return '確認が必要 · $action';
+  }
+
+  @override
+  String ag_gateText2img(int count) {
+    return '$count 枚生成';
+  }
+
+  @override
+  String ag_gateImg2img(int count) {
+    return '画像から $count 枚';
+  }
+
+  @override
+  String ag_gateInpaint(int count) {
+    return 'インペイント $count 枚';
+  }
+
+  @override
+  String ag_gateVariations(int count) {
+    return 'バリエーション $count 枚';
+  }
+
+  @override
+  String get ag_gateEnhance => 'エンハンス';
+
+  @override
+  String get ag_gateModelSize => 'モデル · サイズ';
+
+  @override
+  String get ag_gateRequests => 'リクエスト';
+
+  @override
+  String ag_gateRequestsValue(int requests, int batch) {
+    return '$requests 回 × $batch 枚';
+  }
+
+  @override
+  String get ag_gateUnit => '1 回あたり';
+
+  @override
+  String get ag_gateEncoding => '参照画像のエンコード';
+
+  @override
+  String get ag_gateAccount => 'アカウント';
+
+  @override
+  String ag_gateTotal(String balance) {
+    return '合計 · 残高 $balance';
+  }
+
+  @override
+  String get ag_gateTotalNoBalance => '合計';
+
+  @override
+  String get ag_gateConfirm => '確認して生成';
+
+  @override
+  String get ag_gateConfirmTool => '確認して実行';
+
+  @override
+  String get ag_gateChanged => '設定または見積もりが変わりました。Agent に再準備を依頼してください';
+
+  @override
+  String get ag_gateExpired => '見積もりが失効しました';
+
+  @override
+  String get ag_gateEstimate => '見積もりです。実際の請求額はサーバーで決まります';
+
+  @override
+  String get ag_quickOptimize => 'プロンプトを最適化';
+
+  @override
+  String get ag_quickOptimizePrompt =>
+      '現在のモデルのルールに合わせて現在のプロンプトを最適化してください。変更点と理由を先に挙げ、確認してから下書きに書き込んでください。';
+
+  @override
+  String get ag_quickCompare => '最近の 4 枚を比較';
+
+  @override
+  String get ag_quickComparePrompt =>
+      '履歴の直近 4 枚を比較して、違いとそれぞれの問題点を教えてください。まだ生成はしないでください。';
+
+  @override
+  String get ag_quickBlocks => 'ブロックに分割';
+
+  @override
+  String get ag_quickBlocksPrompt =>
+      '現在のプロンプトを再利用できるブロックに分割してください。まず分割案を見せてから、保存するか決めます。';
+
+  @override
+  String get ag_quickTags => 'タグを検索';
+
+  @override
+  String get ag_quickTagsPrompt => 'タグを調べてください：';
+
+  @override
+  String get ag_placeholder => 'Agent への指示 · @ で参照 · / でスキル';
+
+  @override
+  String get ag_dropHint => 'ドロップしてこのメッセージに添付';
+
+  @override
+  String ag_importing(int count) {
+    return '$count 枚の画像を追加中…';
+  }
+
+  @override
+  String get ag_attach => '画像を追加';
+
+  @override
+  String get ag_attachFile => 'ファイルを選択…';
+
+  @override
+  String get ag_attachCanvas => 'キャンバスの現在の画像を添付';
+
+  @override
+  String get ag_attachPaste => 'クリップボードの画像を貼り付け';
+
+  @override
+  String get ag_mention => '参照';
+
+  @override
+  String get ag_attachmentRemove => '削除';
+
+  @override
+  String get ag_attachmentBroken => '読み込めません';
+
+  @override
+  String get ag_send => '送信';
+
+  @override
+  String get ag_sendQueue => '待機列';
+
+  @override
+  String get ag_sendSteer => 'ガイドとして挿入';
+
+  @override
+  String get ag_sendQueueHint => '現在のタスクが終わってから処理します';
+
+  @override
+  String get ag_sendSteerHint => '次のモデルリクエストの前に挿入します';
+
+  @override
+  String get ag_stop => '停止';
+
+  @override
+  String get ag_noModel => 'ツール対応のモデルを選択してください';
+
+  @override
+  String get ag_queued => '待機';
+
+  @override
+  String get ag_steering => 'ガイド';
+
+  @override
+  String get ag_recovered => '前回未送信';
+
+  @override
+  String get ag_queueSteer => 'ガイドに変更';
+
+  @override
+  String get ag_queueEdit => '編集';
+
+  @override
+  String get ag_queueWithdraw => '取り消す';
+
+  @override
+  String get ag_queueRestore => '入力欄に戻す';
+
+  @override
+  String get ag_newContent => '最新メッセージへ';
+
+  @override
+  String get ag_modeReadonly => '閲覧のみ';
+
+  @override
+  String get ag_modeAsk => '確認';
+
+  @override
+  String get ag_modeAuto => '自動';
+
+  @override
+  String get ag_modeReadonlyHint => '閲覧と相談のみ。変更も生成もしません';
+
+  @override
+  String get ag_modeAskHint => '変更・コマンド・未知のツールは先に確認します';
+
+  @override
+  String get ag_modeAutoHint => 'ワークスペース内の通常の変更は自動実行。費用がかかる操作は確認します';
+
+  @override
+  String get ag_modelPicker => 'モデルを選択';
+
+  @override
+  String get ag_modelSettings => 'モデルと接続を管理…';
+
+  @override
+  String get ag_modelNone => 'モデル未選択';
+
+  @override
+  String get ag_thinkingTitle => '思考の強度 · 次の処理から適用';
+
+  @override
+  String get ag_thinkingFollow => 'モデル設定を使用';
+
+  @override
+  String get ag_thinkingUnsupported => 'このモデルには調整できる思考レベルがありません';
+
+  @override
+  String get ag_usageTitle => 'コンテキストと使用量';
+
+  @override
+  String get ag_usageContext => '現在のコンテキスト · 推定';
+
+  @override
+  String get ag_usageUnknown => 'モデルが使用量を返すと表示されます';
+
+  @override
+  String ag_usageRemaining(String tokens) {
+    return '残り $tokens';
+  }
+
+  @override
+  String get ag_usageSession => 'このチャットの累計';
+
+  @override
+  String get ag_usageInput => '入力';
+
+  @override
+  String get ag_usageOutput => '出力';
+
+  @override
+  String get ag_usageCacheRead => 'キャッシュ読み取り';
+
+  @override
+  String get ag_usageCacheWrite => 'キャッシュ書き込み';
+
+  @override
+  String get ag_usageTotal => '累計 tokens';
+
+  @override
+  String get ag_usageMessages => 'メッセージ · ツール呼び出し';
+
+  @override
+  String get ag_usageCost => '料金はプロバイダーの請求によります';
+
+  @override
+  String get ag_usageCompact => 'コンテキストを圧縮';
+
+  @override
+  String ag_shelfAll(int count) {
+    return 'すべて $count';
+  }
+
+  @override
+  String ag_shelfGenerated(int count) {
+    return '生成 $count';
+  }
+
+  @override
+  String ag_shelfAttachments(int count) {
+    return '添付 $count';
+  }
+
+  @override
+  String ag_shelfFiles(int count) {
+    return 'ファイル $count';
+  }
+
+  @override
+  String get ag_shelfFilesTitle => 'ファイル';
+
+  @override
+  String get ag_shelfHint => 'クリックで拡大 · キャンバスへドラッグ';
+
+  @override
+  String get ag_shelfEmpty => 'このチャットにはまだ出力がありません';
+
+  @override
+  String get ag_shelfEmptyHint => 'Agent が生成した画像、添付した画像、書き出したファイルがここにまとまります。';
+
+  @override
+  String get ag_memoryGlobal => '共通指示';
+
+  @override
+  String get ag_memoryWorkspace => 'ワークスペースのルール';
+
+  @override
+  String get ag_memorySkills => '有効なスキル';
+
+  @override
+  String get ag_memoryEmpty => '未設定';
+
+  @override
+  String get ag_memoryEdit => '編集';
+
+  @override
+  String get ag_memoryHint => 'この内容は毎回 Agent に渡されます。変更は次のメッセージから反映されます。';
+
+  @override
+  String get ag_mentionAll => 'すべて';
+
+  @override
+  String get ag_mentionDraft => '下書き';
+
+  @override
+  String get ag_mentionImages => '画像';
+
+  @override
+  String get ag_mentionBlocks => 'ブロック';
+
+  @override
+  String get ag_mentionTitle => 'このメッセージに参照';
+
+  @override
+  String get ag_mentionEmpty => '一致する内容がありません';
+
+  @override
+  String get ag_skillsTitle => 'スキル';
+
+  @override
+  String get ag_keySelect => '選択';
+
+  @override
+  String get ag_keyInsert => '挿入';
+
+  @override
+  String get ag_keyCategory => 'カテゴリ切替';
+
+  @override
+  String get ag_keyClose => '閉じる';
+
+  @override
+  String get ag_dismiss => '了解';
+
+  @override
+  String get ag_retry => '再試行';
+
+  @override
+  String get ag_initFailed => 'Agent を起動できませんでした';
+
+  @override
+  String get ag_toggle => 'NAI Agent';
+
+  @override
+  String get ag_yesterday => '昨日';
+
+  @override
+  String get ag_attachmentTag => '添付';
+
+  @override
+  String get ag_zoomClose => '閉じる';
 }
