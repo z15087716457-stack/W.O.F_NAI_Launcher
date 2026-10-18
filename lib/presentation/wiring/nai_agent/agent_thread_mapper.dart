@@ -36,6 +36,8 @@ String? agentPretty(Object? value) {
                     'base64',
                     'image_base64',
                     'imageBytes',
+                    'image',
+                    'image_data',
                   ].contains(e.key) ||
                   e.value is List<int>)
               ? '[redacted]'
@@ -209,10 +211,13 @@ class AgentThreadMapper {
     }
 
     void file(String path, {int? bytes}) {
+      final info = resources.file(runtime.workspace, path);
+      if (info == null) return;
+      path = info.$1;
       final id = '${runtime.chat.id}/file/$path';
       if (files.containsKey(id)) return;
       files[id] = path;
-      shelfFiles.add(AgentFile(id: id, name: path, bytes: bytes));
+      shelfFiles.add(AgentFile(id: id, name: path, bytes: bytes ?? info.$2));
     }
 
     for (var mi = 0; mi < runtime.messages.length; mi++) {
@@ -293,7 +298,11 @@ class AgentThreadMapper {
                 ? AgentStepStatus.waitingUser
                 : AgentStepStatus.running;
             final nested = agentMaps(
-              agentMap(value['nestedCalls'] ?? event['nestedCalls'])['calls'],
+              agentMap(
+                value['nestedCalls'] ??
+                    details['nestedCalls'] ??
+                    event['nestedCalls'],
+              )['calls'],
             );
             if (tool != 'codemode' &&
                 tool != 'code_mode' &&
@@ -355,7 +364,12 @@ class AgentThreadMapper {
               );
               final after = agentMap(details['draft']);
               if (backup != null) {
-                for (final change in _diffs(id, applied, backup, after)) {
+                for (final change in _diffs(
+                  '${runtime.chat.id}/$id',
+                  applied,
+                  backup,
+                  after,
+                )) {
                   diffs[change.$1.id] = change.$2;
                   blocks.add(
                     AgentDiffBlock(
@@ -381,6 +395,7 @@ class AgentThreadMapper {
             final historyIds = details['image_ids'] is List
                 ? details['image_ids'] as List
                 : const [];
+            var imageIndex = 0;
             for (final (ai, artifact) in artifacts.indexed) {
               if (artifact['path'] is! String) continue;
               final path = artifact['path'] as String;
@@ -388,6 +403,10 @@ class AgentThreadMapper {
                 file(path, bytes: agentInt(artifact['bytes']));
                 continue;
               }
+              final historyId =
+                  artifact['image_id'] as String? ??
+                  historyIds.elementAtOrNull(imageIndex) as String?;
+              imageIndex++;
               final provider = resources.image(runtime.workspace, path);
               if (provider == null) continue;
               final imageId = '${runtime.chat.id}/$id/artifact/$ai';
@@ -396,9 +415,8 @@ class AgentThreadMapper {
                 image: provider,
                 width: agentInt(artifact['width']),
                 height: agentInt(artifact['height']),
-                historyId:
-                    artifact['image_id'] as String? ??
-                    historyIds.elementAtOrNull(ai) as String?,
+                historyId: historyId,
+                label: path.split(RegExp(r'[/\\]')).last,
                 source:
                     [
                       'generation_run',

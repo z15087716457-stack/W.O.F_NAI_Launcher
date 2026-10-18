@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../core/constants/app_version.dart';
 import '../../../core/rag/rag_settings.dart';
@@ -87,9 +88,11 @@ class SettingsWiring extends ConsumerStatefulWidget {
     super.key,
     this.initialPage = SettingsPageId.overview,
     this.initialQuery = '',
+    this.initialAnchor,
   });
   final SettingsPageId initialPage;
   final String initialQuery;
+  final String? initialAnchor;
   @override
   ConsumerState<SettingsWiring> createState() => _SettingsWiringState();
 }
@@ -335,6 +338,16 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
               return false;
             }
           },
+      onEditWorkspaceRules: () => _run(() async {
+        final workspace = ref
+            .read(naiAgentControllerProvider)
+            .selectedWorkspace;
+        if (workspace != null) {
+          await agentBackend.openPath(
+            p.join(workspace.directory.path, 'instructions.md'),
+          );
+        }
+      }),
       onViewBuiltinPrompt: () => _run(() => agent.viewPrompt(builtin: true)),
       onViewFinalPrompt: () => _run(agent.viewPrompt),
       onExtensionEnabled: (id, value) =>
@@ -531,6 +544,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       data: data,
       actions: _actions(data),
       initialQuery: widget.initialQuery,
+      initialAnchor: widget.initialAnchor,
     );
   }
 }

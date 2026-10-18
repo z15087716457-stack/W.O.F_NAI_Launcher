@@ -636,6 +636,9 @@ SettingsAgentData settingsAgentData(WidgetRef ref, {bool inspect = false}) {
       : '';
   return SettingsAgentData(
     globalInstructions: settings.globalInstructions,
+    workspaceRulesPath: workspace == null
+        ? null
+        : p.join(workspace.directory.path, 'instructions.md'),
     systemPrefix: settings.systemPromptPrefix,
     systemPrompt: SettingsSystemPrompt(
       builtin: naiAgentDefaultSystemPrompt,

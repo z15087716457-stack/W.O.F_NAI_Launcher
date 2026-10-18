@@ -654,6 +654,17 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 ),
               ),
             ),
+            if (ag.workspaceRulesPath case final path?)
+              SettingsRow(
+                anchor: 'agentWorkspaceRules',
+                title: l.ag_memoryWorkspace,
+                subtitle: path,
+                control: SettingsBtn(
+                  label: l.ag_memoryEdit,
+                  small: true,
+                  onTap: a.onEditWorkspaceRules,
+                ),
+              ),
             if (ag.systemPrompt != null)
               ..._basePrompt(context, ag.systemPrompt!),
           ],
@@ -668,7 +679,14 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             style: UiText.mono(11, color: c.faint),
           ),
           children: [
-            for (final skill in ag.skills) _SkillRow(skill: skill),
+            SettingsAnchor(
+              anchor: 'agentSkills',
+              child: Column(
+                children: [
+                  for (final skill in ag.skills) _SkillRow(skill: skill),
+                ],
+              ),
+            ),
             SettingsBlock(
               child: Row(
                 spacing: 8,

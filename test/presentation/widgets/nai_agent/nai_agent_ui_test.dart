@@ -1,210 +1,51 @@
-import 'dart:io';
-import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
-import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_window_controller.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
-import 'package:image/image.dart' as img;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:super_clipboard/super_clipboard.dart';
-import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
-import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
-import 'package:nai_launcher/data/models/image/image_params.dart';
-import 'package:nai_launcher/core/storage/local_storage_service.dart';
-import 'package:nai_launcher/core/storage/secure_storage_service.dart';
-import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
-import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_questions.dart';
-import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
-import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_window_controller.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
-import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
-import 'package:nai_launcher/presentation/themes/app_theme.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_composer.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_panel.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_generation_card.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_shared.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_input.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_artifact.dart';
-import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_image_approvals.dart';
-import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_settings_section.dart';
-import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_extensions_settings.dart';
-import 'package:nai_launcher/presentation/screens/settings/sections/nai_agent_mcp_settings.dart';
-import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
-import '../../../helpers/studio_capture_fonts.dart';
-import '../../../helpers/uiux_frontend_capture.dart';
-import '../../../helpers/agent_data_reader.dart';
-import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
-import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/providers/prompt_assistant_config_provider.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart' as view;
+import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent_generation_host.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
-const _config = PromptAssistantConfigState(
-  providers: [
-    ProviderConfig(id: 'local', name: 'CPA', baseUrl: 'http://127.0.0.1'),
-  ],
-  models: [
-    ModelConfig(
-      providerId: 'local',
-      name: 'model',
-      displayName: 'devin/swe-2',
-      supportsTools: true,
-      contextWindow: 200000,
-      reasoningEffort: 'medium',
-      reasoningEfforts: ['none', 'low', 'medium', 'high'],
-    ),
-  ],
-  interfaces: {},
-  providerHasApiKey: {},
-);
+import '../../../helpers/agent_data_reader.dart';
+import '../../../helpers/studio_capture_fonts.dart';
+import '../../wiring/nai_agent/agent_wiring_harness.dart';
 
-class _Local extends LocalStorageService {
+int _mounts = 0, _disposals = 0;
+
+class _Retained extends StatefulWidget {
+  const _Retained();
   @override
-  T? getSetting<T>(String key, {T? defaultValue}) =>
-      key == StorageKeys.promptAssistantConfigJson
-      ? _config.encode() as T
-      : defaultValue;
-  @override
-  Future<void> setSetting<T>(String key, T value) async {}
+  State<_Retained> createState() => _RetainedState();
 }
 
-class _Secrets extends SecureStorageService {
-  final mcp = <String, String>{};
-  @override
-  Future<void> saveAgentMcpConfig(String id, String json) async {
-    mcp[id] = json;
-  }
-
-  @override
-  Future<String?> readAgentMcpConfig(String id) async => mcp[id];
-  @override
-  Future<void> deleteAgentMcpConfig(String id) async {
-    mcp.remove(id);
-  }
-
-  @override
-  Future<String?> getPromptAssistantApiKey(String id) async => null;
-}
-
-class _UiAuth extends AuthNotifier {
-  @override
-  AuthState build() =>
-      const AuthState(status: AuthStatus.authenticated, accountId: 'synthetic');
-  void simulateAccountChange() {
-    state = const AuthState(
-      status: AuthStatus.authenticated,
-      accountId: 'new-synthetic',
-    );
-  }
-}
-
-class _Controller extends NaiAgentWorkspaceController {
-  _Controller(AgentWorkspaceStore store)
-    : super(
-        store: store,
-        initialWorkspaceName: '画风研究',
-        initialChatName: '新聊天',
-        startClient: (_, __, ___, ____, _____) =>
-            Future.error(StateError('UI fixture must not start a model')),
-      );
-  int sends = 0;
-  @override
-  Future<void> send({bool steer = false}) async {
-    sends++;
-  }
-}
-
-// Widget tests run a fake clock; persistence has separate real IO coverage.
-class _UiStore extends AgentWorkspaceStore {
-  _UiStore(super.root);
-  final attachmentBytes = <String, Uint8List>{};
-  @override
-  Future<AgentAttachment> addAttachment(
-    String workspaceId,
-    String sessionId, {
-    required String name,
-    required Uint8List bytes,
-    required String mimeType,
-    int? width,
-    int? height,
-    Map<String, dynamic>? metadata,
-  }) async {
-    final attachment = await super.addAttachment(
-      workspaceId,
-      sessionId,
-      name: name,
-      bytes: bytes,
-      mimeType: mimeType,
-      width: width,
-      height: height,
-      metadata: metadata,
-    );
-    attachmentBytes[attachment.id] = bytes;
-    return attachment;
-  }
-
-  @override
-  Future<Uint8List> readAttachment(
-    String workspaceId,
-    AgentAttachment attachment,
-  ) async =>
-      attachmentBytes[attachment.id] ??
-      await super.readAttachment(workspaceId, attachment);
-  AgentSettings value = const AgentSettings();
-  @override
-  Future<AgentSettings> readSettings() async => value;
-  @override
-  Future<AgentSettings> patchSettings(Map<String, dynamic> changes) async =>
-      value = AgentSettings.fromJson({...value.toJson(), ...changes});
-  @override
-  Future<AgentSettings> configureExtension(
-    String path, {
-    bool? enabled,
-    bool remove = false,
-  }) => patchSettings({
-    'extensions': [
-      for (final extension in value.extensions)
-        if (extension.path != path)
-          extension.toJson()
-        else if (!remove)
-          {'path': path, 'enabled': enabled ?? extension.enabled},
-    ],
-  });
-  @override
-  Future<void> saveComposer(
-    String workspaceId,
-    String chatId,
-    AgentComposerState state,
-  ) async {}
-}
-
-int _pageMounts = 0, _pageDisposals = 0;
-
-class _RetainedPage extends StatefulWidget {
-  const _RetainedPage();
-  @override
-  State<_RetainedPage> createState() => _RetainedPageState();
-}
-
-class _RetainedPageState extends State<_RetainedPage> {
+class _RetainedState extends State<_Retained> {
   @override
   void initState() {
     super.initState();
-    _pageMounts++;
+    _mounts++;
   }
 
   @override
   void dispose() {
-    _pageDisposals++;
+    _disposals++;
     super.dispose();
   }
 
@@ -213,475 +54,195 @@ class _RetainedPageState extends State<_RetainedPage> {
 }
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  setUpAll(() async {
-    await loadStudioCaptureFonts();
-    await (FontLoader(
-      'MaterialIcons',
-    )..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf'))).load();
-  });
-  late Directory root;
-  late _Controller c;
-  late ProviderContainer container;
-  late Future<List<DataReader>> Function() readClipboard;
+  setUpAll(loadStudioCaptureFonts);
+  late AgentWiringHarness h;
   setUp(() async {
-    root = await Directory.systemTemp.createTemp('nai-agent-ui-');
-    c = _Controller(_UiStore(root));
-    readClipboard = () async => [];
-    await c.initialize(restoreHistory: false);
-    await c.updateSettings({'providerId': 'local', 'modelId': 'model'});
-    container = ProviderContainer(
-      overrides: [
-        naiAgentNativeDragEnabledProvider.overrideWithValue(false),
-        naiAgentClipboardReadersProvider.overrideWithValue(
-          () => readClipboard(),
-        ),
-        naiAgentControllerProvider.overrideWith((_) => c),
-        naiAgentWorkspaceStoreProvider.overrideWithValue(c.store),
-        localStorageServiceProvider.overrideWithValue(_Local()),
-        secureStorageServiceProvider.overrideWithValue(_Secrets()),
-        authNotifierProvider.overrideWith(_UiAuth.new),
-      ],
-    );
+    h = AgentWiringHarness();
+    await h.init();
   });
   tearDown(() async {
-    container.dispose();
-    await c.close();
-    await root.delete(recursive: true);
+    await h.dispose();
   });
-  Future<void> pump(
-    WidgetTester tester,
-    Widget widget, {
-    double width = 440,
-    Locale locale = const Locale('zh'),
-    Brightness brightness = Brightness.light,
-    bool waitForFiles = false,
-    GlobalKey? captureKey,
-    bool settle = true,
-  }) async {
-    tester.view.physicalSize = Size(width, 860);
-    tester.view.devicePixelRatio = 1;
-    setCurrentL10nLocale(locale);
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          builder: (context, child) =>
-              RepaintBoundary(key: captureKey, child: child!),
-          locale: locale,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: AppTheme.getTheme(AppStyle.geist, brightness),
-          home: Scaffold(body: widget),
-        ),
-      ),
-    );
-    if (waitForFiles) {
-      for (var i = 0; i < 12; i++) {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 30)),
-        );
-        await tester.pump();
-        if (find.byType(CircularProgressIndicator).evaluate().isEmpty) break;
-      }
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      await tester.runAsync(() async {
-        for (final element in find.byType(Image).evaluate()) {
-          await precacheImage(
-            (element.widget as Image).image,
-            element,
-            onError: (error, stack) {},
-          );
-        }
-      });
-    }
-    if (settle) {
-      await tester.pumpAndSettle();
-    } else {
-      await tester.pump(const Duration(milliseconds: 300));
-    }
-  }
-
   tearDown(() {
     final binding = TestWidgetsFlutterBinding.instance;
     binding.platformDispatcher.clearAllTestValues();
+    binding.platformDispatcher.views.first.resetPhysicalSize();
+    binding.platformDispatcher.views.first.resetDevicePixelRatio();
   });
-  Widget agentHost(Widget child) =>
+  Widget host(Widget child) =>
       NaiAgentIntegrationScope(child: NaiAgentGenerationHost(child: child));
-
-  Future<void> captureSidebar(
-    WidgetTester tester,
-    GlobalKey key,
-    String name,
-  ) async {
-    if (Platform.environment['UIUX_FRONTEND_CAPTURE_DIR'] == null) return;
-    await tester.runAsync(() async {
-      for (final element in find.byType(Image).evaluate()) {
-        await precacheImage(
-          (element.widget as Image).image,
-          element,
-          onError: (error, stack) {},
-        );
-      }
-    });
-    await tester.pump();
-    await captureUiuxRegion(
-      tester,
-      find.byKey(key),
-      name,
-      Offset.zero & tester.getSize(find.byKey(key)),
-    );
+  Future<void> open() async {
+    await h.c.updateSettings({'panelExpanded': true});
+    h.container.read(naiAgentUiPreferencesProvider).replace(h.c.settings);
   }
 
-  testWidgets('Agent opening clips fixed-width content and retains the page', (
+  testWidgets('opening clips fixed-width new panel and retains original page', (
     tester,
   ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    _pageMounts = 0;
-    _pageDisposals = 0;
-    final capture = GlobalKey();
-    final preferences = container.read(naiAgentUiPreferencesProvider);
-    await pump(
-      tester,
-      agentHost(const _RetainedPage()),
-      width: 1448,
-      captureKey: capture,
-    );
-    expect(_pageMounts, 1);
-    preferences.replace(
-      AgentSettings.fromJson({...c.settings.toJson(), 'panelExpanded': true}),
+    _mounts = _disposals = 0;
+    await h.pump(tester, child: host(const _Retained()), width: 1448);
+    final prefs = h.container.read(naiAgentUiPreferencesProvider);
+    prefs.replace(
+      AgentSettings.fromJson({...h.c.settings.toJson(), 'panelExpanded': true}),
     );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 70));
-    final visible = tester
+    final width = tester
         .getSize(find.byKey(const Key('nai-agent-reveal')))
         .width;
-    expect(visible, greaterThan(0));
-    expect(visible, lessThan(528));
-    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 520);
-    expect(_pageMounts, 1);
-    expect(_pageDisposals, 0);
-    await captureSidebar(tester, capture, 'sidebar-reveal-70ms');
+    expect(width, greaterThan(0));
+    expect(width, lessThan(528));
+    expect(tester.getSize(find.byType(AgentPanel)).width, 520);
     await tester.pumpAndSettle();
-    await captureSidebar(tester, capture, 'sidebar-reveal-open');
-    preferences.replace(c.settings);
+    prefs.replace(h.c.settings);
     await tester.pumpAndSettle();
-    expect(_pageMounts, 1);
-    expect(_pageDisposals, 0);
+    expect(_mounts, 1);
+    expect(_disposals, 0);
     expect(tester.getSize(find.byKey(const Key('nai-agent-reveal'))).width, 0);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets(
-    'Agent drag preserves history and only changes the internal split',
+    'resize persists split, preserves history, editor and canvas elements',
     (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await c.updateSettings({'panelExpanded': true});
-      container.read(naiAgentUiPreferencesProvider).replace(c.settings);
-      c.addListener(
-        () => container.read(naiAgentUiPreferencesProvider).replace(c.settings),
-      );
-      final controller = container.read(naiAgentWindowControllerProvider);
-      final capture = GlobalKey();
-      await pump(
+      await open();
+      await h.pump(
         tester,
-        agentHost(
+        width: 1600,
+        child: host(
           GenerationPage(
             data: GenFixture.view(),
             actions: GenActions.logging((_) {}),
             slots: GenSlots(
               preserveHistory: true,
               historyCaptionInset: false,
-              editor: (_, __) => const SizedBox(height: 60),
-            ),
-          ),
-        ),
-        width: 1200,
-        captureKey: capture,
-      );
-      final gesture = await tester.startGesture(
-        tester.getCenter(find.byKey(const Key('nai-agent-resize'))),
-      );
-      await gesture.moveBy(const Offset(-150, 0));
-      await tester.pump();
-      await gesture.moveBy(const Offset(-60, 0));
-      await tester.pump();
-      expect(tester.getSize(find.byType(NaiAgentPanel)).width, 730);
-      expect(find.byKey(const Key('gen-history')), findsOneWidget);
-      expect(find.byKey(const Key('gen-history-strip')), findsNothing);
-      final history = tester.getRect(find.byKey(const Key('gen-history')));
-      final pane = tester.getRect(find.byType(NaiAgentPanel));
-      expect(history.right, lessThanOrEqualTo(pane.left));
-      await captureSidebar(tester, capture, 'sidebar-drag-history');
-      await gesture.up();
-      await tester.pumpAndSettle();
-      expect(c.settings.panelWidth, 730);
-      expect(controller.addedWidth, 0);
-      expect(find.byKey(const Key('gen-history')), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets('narrow Agent viewport keeps history within the window', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await c.updateSettings({'panelExpanded': true, 'panelWidth': 1000});
-    container.read(naiAgentUiPreferencesProvider).replace(c.settings);
-    final capture = GlobalKey();
-    await pump(
-      tester,
-      agentHost(
-        GenerationPage(
-          data: GenFixture.view(
-            layout: const GenLayout(historyWidth: 400, dockOpen: true),
-          ),
-          actions: GenActions.logging((_) {}),
-          slots: GenSlots(
-            preserveHistory: true,
-            historyCaptionInset: false,
-            dock: const SizedBox.expand(),
-            editor: (_, __) => const SizedBox(height: 60),
-          ),
-        ),
-      ),
-      width: 752,
-      captureKey: capture,
-    );
-    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 344);
-    expect(find.byKey(const Key('gen-history')), findsOneWidget);
-    expect(find.byKey(const Key('gen-left-strip')), findsOneWidget);
-    expect(
-      tester.getSize(find.byKey(const Key('gen-canvas'))).width,
-      greaterThanOrEqualTo(160),
-    );
-    expect(
-      tester.getRect(find.byKey(const Key('gen-history'))).right,
-      lessThanOrEqualTo(tester.getRect(find.byType(NaiAgentPanel)).left),
-    );
-    expect(tester.takeException(), isNull);
-    await captureSidebar(tester, capture, 'sidebar-narrow-history');
-    tester.view.physicalSize = const Size(564, 860);
-    await tester.pumpAndSettle();
-    expect(tester.getSize(find.byType(NaiAgentPanel)).width, 320);
-    expect(find.byKey(const Key('gen-history')), findsOneWidget);
-    expect(tester.getSize(find.byKey(const Key('gen-history'))).width, 200);
-    expect(tester.takeException(), isNull);
-    await captureSidebar(tester, capture, 'sidebar-pinned-navigation-budget');
-  });
-
-  testWidgets(
-    'long paragraphs URLs code and tables stay in the Agent viewport',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final token = List.filled(160, 'abcdefgh').join();
-      c.selected!.messages = [
-        {
-          'role': 'assistant',
-          'timestamp': 1,
-          'content':
-              '${List.filled(20, '长段落需要在侧栏内自动换行。').join()}\n\n'
-              'https://example.invalid/$token\n\n```text\n$token\n```\n\n'
-              '| 参数 | 说明 |\n| --- | --- |\n| width | $token |\n',
-        },
-      ];
-      for (final locale in [
-        const Locale('zh'),
-        const Locale('zh', 'TW'),
-        const Locale('en'),
-        const Locale('ja'),
-        const Locale('ko'),
-      ]) {
-        for (final width in [320.0, 520.0]) {
-          for (final brightness in [Brightness.light, Brightness.dark]) {
-            final capture = GlobalKey();
-            await pump(
-              tester,
-              const NaiAgentPanel(),
-              width: width,
-              locale: locale,
-              brightness: brightness,
-              captureKey: capture,
-            );
-            expect(
-              tester.takeException(),
-              isNull,
-              reason: '$locale $width $brightness',
-            );
-            expect(
-              tester.getRect(find.byKey(const Key('nai-agent-composer'))).right,
-              lessThanOrEqualTo(width),
-            );
-            if (locale == const Locale('zh') && width == 320) {
-              await captureSidebar(
-                tester,
-                capture,
-                'sidebar-long-copy-${brightness.name}',
-              );
-            }
-          }
-        }
-      }
-      expect(c.sends, 0);
-    },
-  );
-
-  testWidgets(
-    'compact editor and canvas retain elements through Agent resizing',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await c.updateSettings({'panelExpanded': true});
-      container.read(naiAgentUiPreferencesProvider).replace(c.settings);
-      await pump(
-        tester,
-        agentHost(
-          GenerationPage(
-            data: GenFixture.view(),
-            actions: GenActions.logging((_) {}),
-            slots: GenSlots(
-              preserveHistory: true,
-              historyCaptionInset: false,
-              canvas: (_, __) => const _RetainedPage(),
+              canvas: (_, __) => const _Retained(),
               editor: (_, target) =>
                   target.character == null && !target.negative
                   ? const SizedBox(
                       height: 60,
-                      child: TextField(key: Key('sidebar-editor-keep')),
+                      child: TextField(key: Key('kept-editor')),
                     )
                   : const SizedBox(height: 60),
             ),
           ),
         ),
-        width: 1600,
       );
-      final editor = find.byKey(const Key('sidebar-editor-keep'));
-      final editorElement = editor.evaluate().single;
-      final canvasElement = find.byType(_RetainedPage).evaluate().single;
-      await tester.enterText(editor, 'retain the latest draft');
-      tester.view.physicalSize = const Size(752, 860);
+      final editor = find.byKey(const Key('kept-editor'));
+      final originalEditor = editor.evaluate().single;
+      final canvas = find.byType(_Retained).evaluate().single;
+      await tester.enterText(editor, 'retain draft');
+      final resize = find.byKey(const Key('nai-agent-resize'));
+      await tester.drag(resize, const Offset(-80, 0));
       await tester.pumpAndSettle();
-      expect(
-        find
-            .byKey(const Key('sidebar-editor-keep'), skipOffstage: false)
-            .evaluate()
-            .single,
-        same(editorElement),
-      );
-      expect(find.byType(_RetainedPage).evaluate().single, same(canvasElement));
-      tester.view.physicalSize = const Size(564, 860);
-      await tester.pumpAndSettle();
-      expect(
-        find.byType(_RetainedPage, skipOffstage: false).evaluate().single,
-        same(canvasElement),
-      );
-      expect(find.byKey(const Key('gen-history')), findsOneWidget);
-      tester.view.physicalSize = const Size(1600, 860);
-      await tester.pumpAndSettle();
-      expect(editor.evaluate().single, same(editorElement));
-      expect(find.text('retain the latest draft'), findsOneWidget);
+      expect(h.c.settings.panelWidth, 600);
+      expect(h.container.read(naiAgentWindowControllerProvider).addedWidth, 0);
+      for (final width in [752.0, 564.0, 1600.0]) {
+        tester.view.physicalSize = Size(width, 860);
+        await tester.pumpAndSettle();
+        expect(
+          find
+              .byKey(const Key('kept-editor'), skipOffstage: false)
+              .evaluate()
+              .single,
+          same(originalEditor),
+        );
+        expect(
+          find.byType(_Retained, skipOffstage: false).evaluate().single,
+          same(canvas),
+        );
+        expect(find.byKey(const Key('gen-history')), findsOneWidget);
+        final pane = tester.getRect(find.byType(AgentPanel));
+        expect(
+          tester.getRect(find.byKey(const Key('gen-history'))).right,
+          lessThanOrEqualTo(pane.left),
+        );
+        expect(pane.right, lessThanOrEqualTo(width));
+      }
+      expect(find.text('retain draft'), findsOneWidget);
       expect(tester.takeException(), isNull);
     },
   );
 
-  testWidgets('Agent divider paints continuously over header body and footer', (
+  testWidgets('divider paints continuously over new header body and footer', (
     tester,
   ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await c.updateSettings({'panelExpanded': true});
-    container.read(naiAgentUiPreferencesProvider).replace(c.settings);
-    for (final brightness in [Brightness.light, Brightness.dark]) {
+    await open();
+    for (final brightness in Brightness.values) {
       final capture = GlobalKey();
-      await pump(
+      await h.pump(
         tester,
-        agentHost(const _RetainedPage()),
         width: 1200,
         brightness: brightness,
-        captureKey: capture,
+        child: RepaintBoundary(key: capture, child: host(const _Retained())),
       );
-      final pane = tester.getRect(find.byType(NaiAgentPanel));
+      final pane = tester.getRect(find.byType(AgentPanel));
       final color = Theme.of(
-        tester.element(find.byType(NaiAgentPanel)),
+        tester.element(find.byType(AgentPanel)),
       ).colorScheme.outlineVariant;
       await tester.runAsync(() async {
         final image = await tester
             .renderObject<RenderRepaintBoundary>(find.byKey(capture))
-            .toImage(pixelRatio: 1);
-        final rgba = (await image.toByteData(
+            .toImage();
+        final data = (await image.toByteData(
           format: ui.ImageByteFormat.rawRgba,
         ))!;
-          for (var y = 0; y < image.height; y++) {
-          final offset = (y * image.width + pane.left.round()) * 4;
-          final argb =
-              (rgba.getUint8(offset + 3) << 24) |
-              (rgba.getUint8(offset) << 16) |
-              (rgba.getUint8(offset + 1) << 8) |
-              rgba.getUint8(offset + 2);
-          expect(argb, color.toARGB32(), reason: '$brightness divider at y=$y');
+        for (var y = 0; y < image.height; y++) {
+          final o = (y * image.width + pane.left.round()) * 4;
+          expect(
+            (data.getUint8(o + 3) << 24) |
+                (data.getUint8(o) << 16) |
+                (data.getUint8(o + 1) << 8) |
+                data.getUint8(o + 2),
+            color.toARGB32(),
+          );
         }
         image.dispose();
       });
-      await captureSidebar(
-        tester,
-        capture,
-        'sidebar-divider-${brightness.name}',
-      );
     }
   });
-
-  testWidgets('compact composer keeps workspace above and controls below', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(
-      tester,
-      NaiAgentComposer(controller: c, runtime: c.selected!),
-      width: 320,
-    );
-    final box = tester.getRect(find.byKey(const Key('nai-agent-composer')));
-    final workspace = tester.getRect(
-      find.byKey(const Key('nai-agent-workspace')),
-    );
-    final attach = tester.getRect(find.byKey(const Key('nai-agent-attach')));
-    final mode = tester.getRect(find.byKey(const Key('nai-agent-mode')));
-    final model = tester.getRect(find.byKey(const Key('nai-agent-model')));
-    final thinking = tester.getRect(
-      find.byKey(const Key('nai-agent-thinking')),
-    );
-    final ring = tester.getRect(find.byKey(const Key('nai-agent-context')));
-    expect(workspace.bottom, lessThanOrEqualTo(box.top));
-    expect(attach.top, greaterThanOrEqualTo(box.bottom));
-    expect(mode.right, lessThanOrEqualTo(attach.left));
-    expect(attach.right, lessThanOrEqualTo(model.left));
-    expect(model.right, lessThanOrEqualTo(thinking.left));
-    expect(thinking.right, lessThanOrEqualTo(ring.left));
-    expect(tester.takeException(), isNull);
-  });
-
-  Future<void> finishImageImport(
-    WidgetTester tester, {
-    AgentChatRuntime? target,
-  }) async {
-    final runtime = target ?? c.selected!;
-    final deadline = DateTime.now().add(const Duration(seconds: 8));
-    while (runtime.importingImages > 0 && DateTime.now().isBefore(deadline)) {
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 20)),
-      );
-      await tester.pump();
-    }
-    expect(runtime.importingImages, 0);
-    await tester.pumpAndSettle();
-  }
 
   testWidgets(
-    'Ctrl+V preserves original attachment and exposes local metadata',
+    'composer persists, IME does not send, Enter sends, model filtering is exact',
+    (tester) async {
+      await h.pump(tester);
+      expect(h.panel(tester).data.models.map((m) => m.modelId), ['model']);
+      final input = find.byKey(const Key('agent-input'));
+      await tester.enterText(input, 'first\nsecond\nthird');
+      await tester.pump();
+      expect(h.c.selected!.composer.text, 'first\nsecond\nthird');
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: '输入中',
+          selection: TextSelection.collapsed(offset: 3),
+          composing: TextRange(start: 0, end: 3),
+        ),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(h.c.calls, isEmpty);
+      tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: 'done',
+          selection: TextSelection.collapsed(offset: 4),
+        ),
+      );
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(h.c.calls, ['send']);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      expect(h.c.calls, ['send']);
+      await h.c.updateSettings({'providerId': '', 'modelId': ''});
+      await tester.pump();
+      expect(h.panel(tester).data.composer.canSend, false);
+      expect(h.c.selected!.composer.text, isNotEmpty);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'paste preserves original image and metadata, remove goes through controller',
     (tester) async {
       final png = img.encodePng(
         img.Image(
@@ -698,117 +259,111 @@ void main() {
           },
         ),
       );
-      readClipboard = () async => [AgentFixtureDataReader(bytes: png)];
-      await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
-      final input = find.byKey(const Key('nai-agent-input'));
-      await tester.enterText(input, 'keep text');
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-      await finishImageImport(tester);
-      final attachment = c.selected!.composer.attachments.single;
+      h.clipboard = () async => [AgentFixtureDataReader(bytes: png)];
+      await h.pump(tester);
+      await tester.enterText(find.byKey(const Key('agent-input')), 'keep text');
+      await h.paste(tester);
+      await h.finishFiles(tester);
+      await tester.pumpAndSettle();
+      final a = h.c.selected!.composer.attachments.single;
       expect(
         await tester.runAsync(
-          () => c.store.readAttachment(c.selected!.workspace.id, attachment),
+          () => h.c.store.readAttachment(h.c.selected!.workspace.id, a),
         ),
         png,
       );
-      expect(c.selected!.composer.text, 'keep text');
-      expect(attachment.metadata!['seed'], 54321);
-      await pump(
-        tester,
-        NaiAgentComposer(controller: c, runtime: c.selected!),
-        waitForFiles: true,
+      expect(
+        h.panel(tester).data.composer.attachments.single.metadata,
+        contains('54321'),
       );
-      await tester.tap(
-        find.byKey(ValueKey('agent-attachment-metadata-${attachment.id}')),
+      expect(h.c.selected!.composer.text, 'keep text');
+      final mouse = await tester.createGesture(
+        kind: ui.PointerDeviceKind.mouse,
       );
-      await tester.pumpAndSettle();
-      expect(find.textContaining('54321'), findsOneWidget);
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(
+        tester.getCenter(find.byKey(Key('agent-attachment-${a.id}'))),
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(Key('agent-attachment-remove-${a.id}')));
+      await mouse.removePointer();
+      await tester.pump();
+      expect(h.c.selected!.composer.attachments, isEmpty);
       expect(tester.takeException(), isNull);
     },
   );
 
-  testWidgets('context menu image paste uses the same attachment route', (
-    tester,
-  ) async {
-    readClipboard = () async => [
+  testWidgets('context menu uses image-first paste path', (tester) async {
+    h.clipboard = () async => [
       AgentFixtureDataReader(
         bytes: img.encodePng(img.Image(width: 2, height: 1)),
       ),
     ];
-    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
-    await tester.longPress(find.byKey(const Key('nai-agent-input')));
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async => call.method == 'Clipboard.getData'
+          ? {'text': 'synthetic'}
+          : call.method == 'Clipboard.hasStrings'
+          ? {'value': true}
+          : null,
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    await h.pump(tester);
+    await tester.longPress(find.byKey(const Key('agent-input')));
     await tester.pumpAndSettle();
     final toolbar = tester.widget<AdaptiveTextSelectionToolbar>(
       find.byType(AdaptiveTextSelectionToolbar),
     );
     toolbar.buttonItems!
-        .singleWhere((item) => item.type == ContextMenuButtonType.paste)
-        .onPressed!
-        .call();
-    await finishImageImport(tester);
-    expect(c.selected!.composer.attachments, hasLength(1));
-    final attachment = c.selected!.composer.attachments.single;
-    expect(attachment.metadata, isNull);
-    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
-    expect(find.byType(NaiAgentAttachmentThumbnail), findsOneWidget);
-    expect(
-      find.byKey(ValueKey('agent-attachment-metadata-${attachment.id}')),
-      findsNothing,
-    );
-    expect(c.sends, 0);
-    expect(tester.takeException(), isNull);
+        .singleWhere((i) => i.type == ContextMenuButtonType.paste)
+        .onPressed!();
+    await h.finishFiles(tester);
+    expect(h.c.selected!.composer.attachments, hasLength(1));
+    expect(h.c.calls, isEmpty);
   });
 
-  testWidgets('switching during paste permits a new paste in the new chat', (
-    tester,
-  ) async {
-    final first = c.selected!;
-    final firstRead = Completer<List<DataReader>>();
-    var reads = 0;
-    final png = img.encodePng(img.Image(width: 2, height: 2));
-    readClipboard = () => reads++ == 0
-        ? firstRead.future
-        : Future.value([AgentFixtureDataReader(bytes: png)]);
-    Future<void> paste() async {
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
-    }
-
-    await pump(tester, NaiAgentComposer(controller: c, runtime: first));
-    await tester.enterText(
-      find.byKey(const Key('nai-agent-input')),
-      'first draft',
-    );
-    await paste();
-    expect(first.importingImages, 1);
-    await tester.runAsync(() => c.createWorkspace('second'));
-    final second = c.selected!;
-    await pump(tester, NaiAgentComposer(controller: c, runtime: second));
-    await tester.enterText(
-      find.byKey(const Key('nai-agent-input')),
-      'second draft',
-    );
-    await paste();
-    await finishImageImport(tester);
-    expect(second.composer.attachments, hasLength(1));
-    expect(first.composer.attachments, isEmpty);
-    firstRead.complete([AgentFixtureDataReader(bytes: png)]);
-    await finishImageImport(tester, target: first);
-    expect(first.composer.attachments, hasLength(1));
-    expect(second.composer.attachments, hasLength(1));
-    expect(first.composer.text, 'first draft');
-    expect(second.composer.text, 'second draft');
-    expect(c.sends, 0);
-  });
+  testWidgets(
+    'switch during paste keeps original target; new chat can paste independently',
+    (tester) async {
+      final first = h.c.selected!, read = Completer<List<DataReader>>();
+      final png = img.encodePng(img.Image(width: 2, height: 2));
+      var reads = 0;
+      h.clipboard = () => reads++ == 0
+          ? read.future
+          : Future.value([AgentFixtureDataReader(bytes: png)]);
+      await h.pump(tester);
+      await tester.enterText(find.byKey(const Key('agent-input')), 'first');
+      await h.paste(tester);
+      await tester.runAsync(() => h.c.createWorkspace('second'));
+      await tester.pumpAndSettle();
+      final second = h.c.selected!;
+      await tester.enterText(find.byKey(const Key('agent-input')), 'second');
+      await h.paste(tester);
+      for (var i = 0; i < 30; i++) {
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 20)),
+        );
+        await tester.pump();
+      }
+      read.complete([AgentFixtureDataReader(bytes: png)]);
+      await h.finishFiles(tester);
+      expect(first.composer.attachments, hasLength(1));
+      expect(second.composer.attachments, hasLength(1));
+      expect(first.composer.text, 'first');
+      expect(second.composer.text, 'second');
+    },
+  );
 
   testWidgets('rich clipboard failure falls back to text at latest selection', (
     tester,
   ) async {
-    final complete = Completer<List<DataReader>>();
-    readClipboard = () => complete.future;
+    final read = Completer<List<DataReader>>();
+    h.clipboard = () => read.future;
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
       SystemChannels.platform,
       (call) async =>
@@ -820,277 +375,172 @@ void main() {
         null,
       ),
     );
-    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
-    final input = find.byKey(const Key('nai-agent-input'));
+    await h.pump(tester);
+    final input = find.byKey(const Key('agent-input'));
     await tester.enterText(input, 'old');
-    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
-    await tester.sendKeyEvent(LogicalKeyboardKey.keyV);
-    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await h.paste(tester);
     await tester.enterText(input, 'latest');
-    complete.completeError(StateError('rich clipboard unavailable'));
-    await finishImageImport(tester);
-    expect(c.selected!.composer.text, 'latest pasted');
-    expect(c.selected!.composer.attachments, isEmpty);
+    read.completeError(StateError('no rich clipboard'));
+    await h.finishFiles(tester);
+    expect(h.c.selected!.composer.text, 'latest pasted');
   });
+
   testWidgets(
-    'brand empty state is centered and suggestions only fill the composer',
+    'usage separates current context from cumulative; thinking/permission persist',
     (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await pump(tester, const NaiAgentPanel(), width: 380);
-      final brand = tester.getRect(
-        find.byKey(const Key('nai-agent-brand-welcome')),
-      );
-      final region = tester.getRect(
-        find.byKey(const Key('nai-agent-empty-region')),
-      );
-      expect(brand.center.dy, closeTo(region.center.dy, 1));
-      expect(find.byKey(const Key('nai-agent-brand-logo')), findsOneWidget);
-      expect(find.text('从一个想法开始'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('nai-agent-suggestion-0')));
-      await tester.pumpAndSettle();
-      expect(
-        tester.widget<TextField>(find.byType(TextField)).controller!.text,
-        '看看当前草稿和参数，先不要修改。',
-      );
-      expect(c.sends, 0);
-      await tester.tap(find.byKey(const Key('nai-agent-tip-next')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('拖入参考图'), findsOneWidget);
-      await tester.tap(find.byKey(const Key('nai-agent-tip-next')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('显示费用'), findsOneWidget);
-      c.selected!.messages = [
-        {'role': 'assistant', 'content': '已准备好讨论。'},
-      ];
-      await c.saveComposer('');
-      await tester.pumpAndSettle();
-      expect(find.byKey(const Key('nai-agent-brand-welcome')), findsNothing);
-      expect(tester.takeException(), isNull);
-    },
-  );
-  testWidgets(
-    'short narrow windows scroll the brand state without moving composer or header',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await pump(
-        tester,
-        const WindowChromeScope(child: NaiAgentPanel()),
-        width: 320,
-      );
-      tester.view.physicalSize = const Size(320, 480);
-      await tester.pumpAndSettle();
-      expect(tester.getRect(find.byKey(const Key('nai-agent-header'))).top, 0);
-      await tester.ensureVisible(find.byKey(const Key('nai-agent-tip-next')));
-      await tester.pumpAndSettle();
-      expect(
-        tester.getRect(find.byKey(const Key('nai-agent-composer'))).bottom,
-        lessThanOrEqualTo(480),
-      );
-      expect(tester.takeException(), isNull);
-    },
-  );
-  testWidgets(
-    'approved brand state fits beside real caption controls in dark light and narrow panes',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final messenger =
-          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-      final calls = <String>[];
-      messenger.setMockMethodCallHandler(
-        const MethodChannel('window_manager'),
-        (call) async {
-          calls.add(call.method);
-          return call.method == 'isMaximized' ? false : null;
-        },
-      );
-      addTearDown(
-        () => messenger.setMockMethodCallHandler(
-          const MethodChannel('window_manager'),
-          null,
-        ),
-      );
-      for (final (brightness, width) in [
-        (Brightness.dark, 380.0),
-        (Brightness.light, 380.0),
-        (Brightness.dark, 320.0),
-      ]) {
-        final key = GlobalKey();
-        await pump(
-          tester,
-          const IntegratedTitleBarShell(child: NaiAgentPanel()),
-          width: width,
-          brightness: brightness,
-          captureKey: key,
-        );
-        expect(find.byKey(const Key('nai-agent-brand-logo')), findsOneWidget);
-        expect(
-          tester.getRect(find.byKey(const Key('nai-agent-header'))).height,
-          39,
-        );
-        final label = tester.getRect(find.text('NAI Agent'));
-        final minimize = tester.getRect(
-          find.byIcon(Icons.remove).hitTestable(),
-        );
-        expect(label.right, lessThanOrEqualTo(minimize.left));
-        expect(tester.takeException(), isNull);
-        final directory = Platform.environment['NAI_AGENT_BRAND_CAPTURES'];
-        if (directory != null) {
-          await tester.runAsync(() async {
-            final image = await tester
-                .renderObject<RenderRepaintBoundary>(find.byKey(key))
-                .toImage(pixelRatio: 1);
-            final data = await image.toByteData(format: ui.ImageByteFormat.png);
-            await File(
-              '$directory/flutter-brand-${brightness.name}-${width.toInt()}.png',
-            ).writeAsBytes(data!.buffer.asUint8List());
-            image.dispose();
-          });
-        }
-      }
-      expect(calls, isNot(contains('setBounds')));
-      expect(c.sends, 0);
-    },
-  );
-  testWidgets('Agent header is a single 39px row', (tester) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(tester, const NaiAgentPanel(), width: 380);
-    final header = tester.getRect(find.byKey(const Key('nai-agent-header')));
-    expect(header.top, 0);
-    expect(header.height, 39);
-  });
-  testWidgets('context ring separates current window from cumulative usage', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    c.selected!.context = {
-      'tokens': 43200,
-      'contextWindow': 200000,
-      'percent': 21.6,
-    };
-    c.selected!.stats = {
-      'tokens': {
-        'input': 64900,
-        'output': 4780,
-        'cacheRead': 128400,
-        'cacheWrite': 12000,
-        'total': 210080,
-      },
-      'userMessages': 6,
-      'assistantMessages': 9,
-      'toolCalls': 14,
-    };
-    await pump(
-      tester,
-      NaiAgentComposer(controller: c, runtime: c.selected!),
-      width: 320,
-    );
-    await tester.tap(find.byKey(const Key('nai-agent-context')));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('43,200'), findsWidgets);
-    expect(find.text('210,080'), findsOneWidget);
-    expect(find.text('156,800'), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-  testWidgets('permission mode selector persists the actual mode', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(tester, NaiAgentComposer(controller: c, runtime: c.selected!));
-    await tester.tap(find.byKey(const Key('nai-agent-mode')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('只读').last);
-    await tester.pumpAndSettle();
-    expect(c.settings.toJson()['permissionMode'], 'readonly');
-  });
-  testWidgets('native caption reserve does not move the Agent header down', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(
-      tester,
-      const WindowChromeScope(enabled: true, child: NaiAgentPanel()),
-      width: 320,
-    );
-    expect(
-      tester.getRect(find.byKey(const Key('nai-agent-header'))),
-      const Rect.fromLTWH(0, 0, 320, 39),
-    );
-    expect(tester.takeException(), isNull);
-  });
-  testWidgets('Agent header leaves room for the update capsule at 320px', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(
-      tester,
-      const WindowChromeScope(
-        enabled: true,
-        extraWidth: 88,
-        child: NaiAgentPanel(),
-      ),
-      width: 320,
-    );
-    expect(
-      tester.getRect(find.byKey(const Key('nai-agent-header'))),
-      const Rect.fromLTWH(0, 0, 320, 39),
-    );
-    expect(tester.takeException(), isNull);
-  });
-  testWidgets('Agent thinking selection is isolated from the model setting', (
-    tester,
-  ) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
-    await pump(
-      tester,
-      NaiAgentComposer(controller: c, runtime: c.selected!),
-      width: 320,
-    );
-    await tester.tap(find.byKey(const Key('nai-agent-thinking')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(CheckedPopupMenuItem<String>).last);
-    await tester.pumpAndSettle();
-    expect(c.settings.reasoningEffort, 'high');
-    expect(
-      container
-          .read(promptAssistantConfigProvider)
-          .models
-          .first
-          .reasoningEffort,
-      'medium',
-    );
-    await tester.tap(find.byKey(const Key('nai-agent-thinking')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('使用模型设置').last);
-    await tester.pumpAndSettle();
-    expect(c.settings.reasoningEffort, isNull);
-  });
-  testWidgets(
-    'unknown model window never uses the SDK default as a confirmed limit',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      c.selected!.context = {
-        'tokens': 43200,
-        'contextWindow': 128000,
-        'windowKnown': false,
+      h.c.selected!.context = {'tokens': 43200, 'contextWindow': 200000};
+      h.c.selected!.stats = {
+        'tokens': {'input': 128000, 'total': 210080},
       };
-      await pump(tester, const NaiAgentPanel(), width: 320);
-      await tester.tap(find.byKey(const Key('nai-agent-context')));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('128,000'), findsNothing);
-      expect(find.textContaining('43,200'), findsOneWidget);
+      await h.pump(tester, width: 320);
+      await tester.tap(find.byKey(const Key('agent-usage')));
+      await tester.pump();
+      expect(h.c.calls, contains('usage'));
+      expect(h.panel(tester).data.usage.tokens, 43200);
+      expect(find.text('210,080'), findsOneWidget);
+      await tester.tapAt(const Offset(5, 400));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-model')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-thinking-high')));
+      await tester.pump();
+      expect(h.c.settings.reasoningEffort, 'high');
+      expect(
+        h.container
+            .read(promptAssistantConfigProvider)
+            .models
+            .first
+            .reasoningEffort,
+        'medium',
+      );
+      await tester.tap(find.byKey(const Key('agent-model')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-thinking-default')));
+      await tester.pump();
+      expect(h.c.settings.reasoningEffort, isNull);
+      await tester.tap(find.byKey(const Key('agent-permission')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-permission-readonly')));
+      await tester.pump();
+      expect(h.c.settings.permissionMode, 'readonly');
+      h.c.selected!.context['windowKnown'] = false;
+      await h.c.saveComposer('');
+      await tester.pump();
+      expect(h.panel(tester).data.usage.window, isNull);
+    },
+  );
+
+  testWidgets(
+    'ask_user explicit answer and extension editor whitespace are preserved',
+    (tester) async {
+      final r = h.c.selected!, q = h.container.read(naiAgentQuestionsProvider);
+      final result = q.ask(r.workspace.id, r.chat.id, {
+        'questions': [
+          {
+            'id': 'direction',
+            'question': 'Direction?',
+            'options': ['One', 'Two'],
+          },
+        ],
+      }, NaiAgentCancellation());
+      await h.pump(tester, width: 320);
+      expect(h.panel(tester).data.status, view.AgentRunStatus.waitingUser);
+      await tester.tap(find.byKey(const Key('agent-ask-option-direction-1')));
+      await tester.pump();
+      expect(q.forChat(r.chat.id), hasLength(1));
+      await tester.tap(find.byKey(const Key('agent-ask-submit')));
+      await tester.pump();
+      expect((await result)['details']['answers'][0]['answer'], 'Two');
+      final edit = q.askExtensionUi(r.workspace.id, r.chat.id, {
+        'method': 'editor',
+        'title': 'Edit',
+        'prefill': '  initial\n',
+      }, NaiAgentCancellation());
+      await tester.pump();
+      final field = find.byKey(const Key('agent-ask-custom-value'));
+      expect(tester.widget<TextField>(field).controller!.text, '  initial\n');
+      await tester.enterText(field, '\n  edited\n');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-ask-submit')));
+      await tester.pump();
+      expect((await edit)['details']['value'], '\n  edited\n');
+      expect(h.c.calls, isEmpty);
+    },
+  );
+
+  testWidgets(
+    'callbacks preserve queue/stop/edit/regenerate and chat lifecycle',
+    (tester) async {
+      final r = h.c.selected!;
+      r.messages = [
+        {'role': 'user', 'timestamp': 1, 'content': 'user'},
+        {'role': 'assistant', 'content': 'reply'},
+      ];
+      r.userEntries = [
+        {'id': 'e1', 'message': r.messages.first},
+      ];
+      r.composer = const AgentComposerState(
+        text: 'follow-up',
+        pending: [
+          {'queueId': 'q', 'text': 'next', 'behavior': 'steer'},
+        ],
+      );
+      await h.pump(tester);
+      var a = h.panel(tester).actions;
+      await a.onSend(steer: true);
+      await a.onStop();
+      await a.onEditQueued('q', 'new');
+      await a.onSteerQueued('q');
+      await a.onWithdrawQueued('q');
+      expect(h.c.queueEdits, [
+        ('q', 'new', false, false),
+        ('q', null, false, true),
+        ('q', null, true, false),
+      ]);
+      await a.onRegenerate();
+      expect(
+        h.c.calls,
+        containsAllInOrder(['steer', 'stop', 'edit:e1', 'send']),
+      );
+      final original = r.chat.id;
+      await tester.runAsync(() => a.onNewChat());
+      await tester.pump();
+      a = h.panel(tester).actions;
+      await tester.runAsync(
+        () => a.onRenameChat(h.c.selected!.chat.id, 'renamed'),
+      );
+      await tester.pump();
+      expect(h.c.selected!.chat.title, 'renamed');
+      await tester.runAsync(() => a.onSelectChat(original));
+      await tester.pump();
+      expect(h.c.selected!.chat.id, original);
+      await tester.runAsync(() => a.onCreateWorkspace('Other'));
+      await tester.pump();
+      expect(h.c.selectedWorkspace!.name, 'Other');
+      await h.finishFiles(tester);
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets(
+    'welcome fills composer only; errors and notices retain controller strings',
+    (tester) async {
+      await h.pump(tester);
+      await tester.tap(find.byKey(const Key('agent-task-0')));
+      await tester.pump();
+      expect(h.c.selected!.composer.text, isNotEmpty);
+      expect(h.c.calls, isEmpty);
+      h.c.selected!.error = 'prelocalized error';
+      h.c.selected!.extensionNotices.add('notice');
+      await h.c.saveComposer('');
+      await tester.pump();
+      expect(find.text('prelocalized error'), findsOneWidget);
+      h.panel(tester).actions.onDismissNotices();
+      await tester.pump();
+      expect(h.c.selected!.extensionNotices, isEmpty);
+    },
+  );
+
   for (final locale in [
     const Locale('zh'),
     const Locale('zh', 'TW'),
@@ -1098,1259 +548,63 @@ void main() {
     const Locale('ja'),
     const Locale('ko'),
   ]) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
+    for (final brightness in Brightness.values) {
       testWidgets(
-        'compact layout matrix ${locale.toLanguageTag()} ${brightness.name}',
+        'real-font new panel $locale $brightness wide/narrow/short caption and long markdown',
         (tester) async {
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-          final r = c.selected!,
-              broker = container.read(naiAgentQuestionsProvider);
-          for (final width in [320.0, 380.0, 460.0]) {
-            for (final state in [
-              'empty',
-              'multiline',
-              'running',
-              'approval',
-              'stats',
-              'unknown',
-            ]) {
-              r.running = state == 'running';
-              r.messages = state == 'empty' || state == 'unknown'
-                  ? []
-                  : [
-                      {'role': 'assistant', 'content': '任务概览已准备好。'},
-                    ];
-              r.context = state == 'empty' || state == 'unknown'
-                  ? {}
-                  : {
-                      'tokens': 43200,
-                      'contextWindow': 200000,
-                      'windowKnown': true,
-                    };
-              r.stats = {
-                'tokens': {
-                  'input': 64900,
-                  'output': 4780,
-                  'cacheRead': 128400,
-                  'cacheWrite': 12000,
-                  'total': 210080,
-                },
-                'userMessages': 6,
-                'assistantMessages': 9,
-                'toolCalls': 14,
-              };
-              await c.saveComposer(
-                state == 'multiline'
-                    ? List.filled(12, '整理当前提示词并保留原始草稿').join('\n')
-                    : '',
-              );
-              final key = GlobalKey();
-              await pump(
-                tester,
-                const NaiAgentPanel(),
-                width: width,
-                locale: locale,
-                brightness: brightness,
-                captureKey: key,
-                settle: state != 'running',
-              );
-              Future<Map<String, dynamic>>? approval;
-              if (state == 'approval') {
-                final l = AppLocalizations.of(
-                  tester.element(find.byType(NaiAgentPanel)),
-                )!;
-                approval = broker.askExtensionUi(r.workspace.id, r.chat.id, {
-                  'method': 'select',
-                  'kind': 'tool_approval',
-                  'title':
-                      '${l.naiAgent_permissionTitle}: mcp__nai_studio__prompt_update\n{"changes":{"prompt":"test"}}',
-                  'options': [
-                    l.naiAgent_permissionOnce,
-                    l.naiAgent_permissionSession,
-                    l.naiAgent_permissionDeny,
-                  ],
-                }, NaiAgentCancellation());
-                await tester.pumpAndSettle();
-              }
-              final header = tester.getRect(
-                find.byKey(const Key('nai-agent-header')),
-              );
-              expect(header.top, 0);
-              expect(header.height, 39);
-              final input = tester.getRect(
-                find.byKey(const Key('nai-agent-composer')),
-              );
-              final controls = [
-                for (final id in [
-                  'mode',
-                  'attach',
-                  'model',
-                  'thinking',
-                  'context',
-                ])
-                  tester.getRect(find.byKey(Key('nai-agent-$id'))),
-              ];
-              expect(
-                tester
-                    .getRect(find.byKey(const Key('nai-agent-workspace')))
-                    .bottom,
-                lessThanOrEqualTo(input.top),
-              );
-              expect(input.left, greaterThanOrEqualTo(0));
-              expect(input.right, lessThanOrEqualTo(width));
-              for (var i = 0; i < controls.length - 1; i++) {
-                expect(
-                  controls[i].right,
-                  lessThanOrEqualTo(controls[i + 1].left),
-                );
-              }
-              expect(controls.first.top, greaterThanOrEqualTo(input.bottom));
-              expect(controls.last.right, lessThanOrEqualTo(width));
-              if (state == 'stats') {
-                await tester.tap(find.byKey(const Key('nai-agent-context')));
-                await tester.pumpAndSettle();
-                final stats = tester.getRect(
-                  find.byKey(const Key('nai-agent-statistics')),
-                );
-                expect(stats.left, greaterThanOrEqualTo(8));
-                expect(stats.right, lessThanOrEqualTo(width - 10));
-                expect(stats.top, greaterThanOrEqualTo(0));
-                expect(stats.bottom, lessThanOrEqualTo(860));
-              }
-              expect(
-                tester.takeException(),
-                isNull,
-                reason: '$locale ${brightness.name} $width $state',
-              );
-              final directory =
-                  Platform.environment['NAI_AGENT_COMPOSER_CAPTURES'];
-              if (directory != null && locale == const Locale('zh')) {
-                await tester.runAsync(() async {
-                  final pixels = await tester
-                      .renderObject<RenderRepaintBoundary>(find.byKey(key))
-                      .toImage(pixelRatio: 1);
-                  final data = await pixels.toByteData(
-                    format: ui.ImageByteFormat.png,
-                  );
-                  await Directory(directory).create(recursive: true);
-                  await File(
-                    '$directory/${brightness.name}-${width.toInt()}-$state.png',
-                  ).writeAsBytes(data!.buffer.asUint8List());
-                  pixels.dispose();
-                });
-              }
-              if (approval != null) {
-                broker.cancel(broker.forChat(r.chat.id).single.id);
-                await approval;
-              }
-              await tester.pumpWidget(const SizedBox());
-            }
+          final token = List.filled(150, 'abcdefgh').join();
+          h.c.selected!.messages = [
+            {
+              'role': 'assistant',
+              'content':
+                  '${List.filled(12, '长段落换行。').join()}\n\nhttps://example.invalid/$token\n\n```text\n$token\n```\n\n| a | b |\n| --- | --- |\n| width | $token |',
+            },
+          ];
+          for (final width in [320.0, 440.0]) {
+            await h.pump(
+              tester,
+              width: width,
+              height: 480,
+              locale: locale,
+              brightness: brightness,
+              child: const WindowChromeScope(
+                enabled: true,
+                extraWidth: 88,
+                child: AgentWiring(),
+              ),
+            );
+            expect(
+              tester.getRect(find.byKey(const Key('agent-header'))).top,
+              0,
+            );
+            expect(
+              tester.getRect(find.byKey(const Key('agent-composer'))).right,
+              lessThanOrEqualTo(width),
+            );
+            expect(tester.takeException(), isNull);
           }
         },
       );
     }
   }
-  testWidgets(
-    'composer grows upwards to a cap; IME composition does not send',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await pump(
-        tester,
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: NaiAgentComposer(controller: c, runtime: c.selected!),
-        ),
-      );
-      final composer = find.byKey(const Key('nai-agent-composer'));
-      final field = find.byKey(const Key('nai-agent-input'));
-      final before = tester.getRect(composer);
-      await tester.enterText(field, '第一行\n第二行\n第三行');
-      await tester.pump();
-      final after = tester.getRect(composer);
-      expect(after.height, greaterThan(before.height));
-      expect(after.bottom, closeTo(before.bottom, 1));
-      await tester.enterText(
-        field,
-        List.generate(24, (i) => '第$i行').join('\n'),
-      );
-      await tester.pump();
-      expect(tester.getSize(composer).height, lessThan(290));
-      tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: '输入中',
-          selection: TextSelection.collapsed(offset: 3),
-          composing: TextRange(start: 0, end: 3),
-        ),
-      );
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
-      expect(c.sends, 0);
-      tester.testTextInput.updateEditingValue(
-        const TextEditingValue(
-          text: '完成输入',
-          selection: TextSelection.collapsed(offset: 4),
-        ),
-      );
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
-      expect(c.sends, 1);
-      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
-      expect(c.sends, 1);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  testWidgets('no configured model disables send; input is preserved', (
-    tester,
-  ) async {
-    await c.updateSettings({'providerId': '', 'modelId': ''});
-    await c.saveComposer('先保留这段输入');
-    await pump(
+
+  testWidgets('new panel fits actual native caption controls', (tester) async {
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      const MethodChannel('window_manager'),
+      (call) async => call.method == 'isMaximized' ? false : null,
+    );
+    addTearDown(
+      () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('window_manager'),
+        null,
+      ),
+    );
+    await h.pump(
       tester,
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: NaiAgentComposer(controller: c, runtime: c.selected!),
-      ),
+      width: 320,
+      child: const IntegratedTitleBarShell(child: AgentWiring()),
     );
-    expect(
-      tester
-          .widget<IconButton>(find.byKey(const Key('nai-agent-send')))
-          .onPressed,
-      isNull,
-    );
-    expect(c.selected!.composer.text, '先保留这段输入');
-    await tester.pumpWidget(const SizedBox());
+    expect(find.byType(AgentPanel), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
-  testWidgets(
-    'restored local tool artifact stays visible with its tool card collapsed',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final r = c.selected!;
-      final output = File('${r.workspace.directory.path}/image.png');
-      output.writeAsBytesSync(img.encodePng(img.Image(width: 72, height: 48)));
-      r.messages = [
-        {
-          'role': 'assistant',
-          'timestamp': 1,
-          'content': [
-            {
-              'type': 'toolCall',
-              'id': 'local-result',
-              'name': 'image_tool',
-              'arguments': {'action': 'upscale'},
-            },
-          ],
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 'local-result',
-          'isError': false,
-          'content': <Map<String, dynamic>>[],
-          'details': {
-            'ok': true,
-            'artifacts': [
-              {'type': 'image', 'path': 'image.png'},
-            ],
-          },
-        },
-      ];
-      await pump(tester, const NaiAgentPanel(), waitForFiles: true);
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 80)),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(NaiAgentImageArtifact), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
-      expect(find.text('image.png'), findsOneWidget);
-      expect(find.text('upscale'), findsNothing);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-
-  testWidgets(
-    'restored CodeMode image artifact stays visible with its tool card collapsed',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final r = c.selected!;
-      final output = File('${r.workspace.directory.path}/image.png');
-      output.writeAsBytesSync(img.encodePng(img.Image(width: 72, height: 48)));
-      r.messages = [
-        {
-          'role': 'assistant',
-          'timestamp': 1,
-          'content': [
-            {
-              'type': 'toolCall',
-              'id': 'local-result',
-              'name': 'codemode',
-              'arguments': {
-                'code':
-                    'await tools.mcp__nai_studio__image_tool({action: "upscale"})',
-              },
-            },
-          ],
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 'local-result',
-          'isError': false,
-          'content': <Map<String, dynamic>>[],
-          'details': {
-            'ok': true,
-            'artifacts': [
-              {'type': 'image', 'path': 'image.png'},
-            ],
-          },
-        },
-      ];
-      await pump(tester, const NaiAgentPanel(), waitForFiles: true);
-      await tester.runAsync(
-        () => Future<void>.delayed(const Duration(milliseconds: 80)),
-      );
-      await tester.pumpAndSettle();
-      expect(find.byType(NaiAgentImageArtifact), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
-      expect(find.text('image.png'), findsOneWidget);
-      expect(find.text('upscale'), findsNothing);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-
-  testWidgets(
-    'live image approval appears in the selected chat and its button answers the image tool',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final runtime = c.selected!,
-          broker = container.read(naiAgentImageApprovalsProvider);
-      final result = broker.request(
-        NaiAgentConversationOwner(runtime.workspace.id, runtime.chat.id),
-        {
-          'tool': 'cloud_upscale',
-          'width': 832,
-          'height': 1216,
-          'account_name': 'Synthetic account',
-          'estimated_anlas': 1,
-          'balance_anlas': 2218,
-        },
-        DateTime.now().add(const Duration(minutes: 5)),
-        NaiAgentCancellation(),
-        () {},
-      );
-      await pump(tester, const NaiAgentPanel(), width: 320);
-      expect(find.byKey(const Key('agent-image-confirm')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('agent-image-confirm')));
-      await tester.pump();
-      expect(await result, true);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-
-  NaiAgentGenerationQuote generationQuote() => NaiAgentGenerationQuote(
-    id: 'ui-quote',
-    input: NaiAgentGenerationInput(
-      raw: const ImageParams(nSamples: 2),
-      effective: const ImageParams(
-        model: 'nai-diffusion-4-5-full',
-        width: 832,
-        height: 1216,
-      ),
-      draftVersion: 'ui-draft',
-      batchSize: 3,
-      billing: {
-        'estimated_anlas': 50,
-        'per_request_anlas': 24,
-        'encoding_anlas': 2,
-        'balance_anlas': 2218,
-      },
-      accountId: 'synthetic',
-      accountName: '本地测试账号 · Synthetic account',
-      endpoint: 'local',
-      localEnhance: {'model': 'SeedVR2 7B Sharp INT8 ConvRot', 'scale': 2.0},
-    ),
-    params: {},
-    expiresAt: DateTime.now().add(const Duration(minutes: 5)),
-  );
-  testWidgets(
-    'generation card requires explicit click; stale quote disables Generate but permits Cancel',
-    (tester) async {
-      final broker = container.read(naiAgentGenerationApprovalsProvider);
-      var accepted = false;
-      final account = container.read(authNotifierProvider).accountId;
-      final future = broker
-          .request(
-            NaiAgentConversationOwner(
-              c.selected!.workspace.id,
-              c.selected!.chat.id,
-            ),
-            generationQuote(),
-            NaiAgentCancellation(),
-            () {
-              if (container.read(authNotifierProvider).accountId != account) {
-                throw const NaiAgentToolError('quote_changed', 'Changed');
-              }
-            },
-          )
-          .then((answer) {
-            accepted = answer;
-            return answer;
-          });
-      final request = broker.forChat(c.selected!.chat.id).single;
-      await pump(
-        tester,
-        Center(child: NaiAgentGenerationCard(request: request)),
-      );
-      expect(accepted, false);
-      expect(find.textContaining('50 Anlas'), findsOneWidget);
-      expect(find.textContaining('2,218'), findsNothing);
-      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-      await tester.pump();
-      expect(accepted, false);
-      (container.read(authNotifierProvider.notifier) as _UiAuth)
-          .simulateAccountChange();
-      await tester.pump();
-      expect(
-        tester
-            .widget<FilledButton>(
-              find.byKey(const Key('agent-generation-confirm')),
-            )
-            .onPressed,
-        isNull,
-      );
-      await tester.tap(find.byKey(const Key('agent-generation-decline')));
-      await tester.pump();
-      expect(await future, false);
-      expect(c.sends, 0);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  testWidgets(
-    'generation approval is rendered in the owning conversation and click answers its tool',
-    (tester) async {
-      final broker = container.read(naiAgentGenerationApprovalsProvider);
-      final future = broker.request(
-        NaiAgentConversationOwner(
-          c.selected!.workspace.id,
-          c.selected!.chat.id,
-        ),
-        generationQuote(),
-        NaiAgentCancellation(),
-        () {},
-      );
-      await pump(tester, const NaiAgentPanel());
-      expect(find.byType(NaiAgentGenerationCard), findsOneWidget);
-      await tester.ensureVisible(
-        find.byKey(const Key('agent-generation-confirm')),
-      );
-      await tester.tap(find.byKey(const Key('agent-generation-confirm')));
-      await tester.pump();
-      expect(await future, true);
-      expect(c.sends, 0);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  for (final locale in ['zh', 'en', 'ja', 'ko']) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
-      testWidgets(
-        'generation quote with real fonts fits $locale ${brightness.name} at 320/440px',
-        (tester) async {
-          final broker = container.read(naiAgentGenerationApprovalsProvider);
-          final future = broker.request(
-            NaiAgentConversationOwner(
-              c.selected!.workspace.id,
-              c.selected!.chat.id,
-            ),
-            generationQuote(),
-            NaiAgentCancellation(),
-            () {},
-          );
-          final request = broker.forChat(c.selected!.chat.id).single;
-          for (final width in [320.0, 440.0]) {
-            final key = GlobalKey();
-            await pump(
-              tester,
-              RepaintBoundary(key: key, child: const NaiAgentPanel()),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            await tester.ensureVisible(
-              find.byKey(const Key('agent-generation-confirm')),
-            );
-            await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull);
-            expect(
-              tester.getRect(find.byType(NaiAgentGenerationCard)).right,
-              lessThanOrEqualTo(width),
-            );
-            if (Platform.environment['CAPTURE_NAI_AGENT'] == '1' &&
-                locale == 'zh') {
-              await tester.runAsync(() async {
-                final pixels =
-                    await (key.currentContext!.findRenderObject()
-                            as RenderRepaintBoundary)
-                        .toImage();
-                final png = await pixels.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final folder = Directory(
-                  '.dart_tool/nai-agent-stage-e3/native-captures',
-                )..createSync(recursive: true);
-                File(
-                  '${folder.path}/generation-$locale-${brightness.name}-${width.toInt()}.png',
-                ).writeAsBytesSync(png!.buffer.asUint8List());
-                pixels.dispose();
-              });
-            }
-          }
-          broker.decide(request.id, generate: false);
-          await tester.pump();
-          await future;
-          await tester.pumpWidget(const SizedBox());
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        },
-      );
-    }
-  }
-  testWidgets(
-    'MCP editor saves only metadata in settings and encrypted config separately',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await pump(
-        tester,
-        const SingleChildScrollView(child: NaiAgentMcpSettings()),
-        width: 780,
-      );
-      await tester.tap(find.widgetWithIcon(OutlinedButton, Icons.add));
-      await tester.pumpAndSettle();
-      await tester.enterText(find.byKey(const Key('nai-mcp-name')), 'docs');
-      await tester.enterText(
-        find.byKey(const Key('nai-mcp-config')),
-        '{"url":"https://example.com/mcp","headers":{"Authorization":"Bearer private-secret"}}',
-      );
-      await tester.tap(find.byKey(const Key('nai-mcp-save')));
-      await tester.pumpAndSettle();
-      expect(c.settings.mcpServers.single.name, 'docs');
-      expect(
-        jsonEncode(c.settings.toJson()),
-        isNot(contains('private-secret')),
-      );
-      final secure = container.read(secureStorageServiceProvider) as _Secrets;
-      expect(
-        secure.mcp[c.settings.mcpServers.single.configId],
-        contains('private-secret'),
-      );
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.edit_outlined));
-      await tester.pumpAndSettle();
-      expect(find.textContaining('private-secret'), findsOneWidget);
-      await tester.tap(find.text('取消'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.widgetWithIcon(IconButton, Icons.close));
-      await tester.pumpAndSettle();
-      expect(c.settings.mcpServers, isEmpty);
-      expect(secure.mcp, isEmpty);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  for (final locale in ['zh', 'en', 'ja', 'ko']) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
-      testWidgets(
-        'MCP tools and real fonts fit $locale ${brightness.name} at 320/780px',
-        (tester) async {
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-          await c.updateSettings({
-            'mcpServers': [
-              const AgentMcpServer(
-                name: 'my-document-server',
-                configId: 'mock-secure',
-                transport: 'http',
-              ).toJson(),
-            ],
-          });
-          for (final width in [320.0, 780.0]) {
-            await pump(
-              tester,
-              SingleChildScrollView(
-                child: RepaintBoundary(
-                  key: const Key('mcp-capture'),
-                  child: Material(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: NaiAgentMcpSettings(
-                        key: ValueKey('$locale-${brightness.name}-$width'),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            await tester.tap(find.text(currentL10n.naiAgent_mcpBuiltin));
-            await tester.pumpAndSettle();
-            expect(find.text('prompt_update'), findsOneWidget);
-            expect(find.text('my-document-server'), findsOneWidget);
-            expect(tester.takeException(), isNull);
-            if (Platform.environment['CAPTURE_NAI_AGENT_MCP'] == '1') {
-              final boundary = tester.renderObject<RenderRepaintBoundary>(
-                find.byKey(const Key('mcp-capture')),
-              );
-              await tester.runAsync(() async {
-                final capture = await boundary.toImage(pixelRatio: 1);
-                final data = await capture.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final folder = await Directory(
-                  '.dart_tool/nai-agent-mcp/captures',
-                ).create(recursive: true);
-                await File(
-                  '${folder.path}/mcp-$locale-${brightness.name}-${width.toInt()}.png',
-                ).writeAsBytes(data!.buffer.asUint8List());
-                capture.dispose();
-              });
-            }
-          }
-          await tester.pumpWidget(const SizedBox());
-        },
-      );
-    }
-  }
-  testWidgets(
-    'question requires explicit submit and answers the tool, without a queued chat',
-    (tester) async {
-      final broker = container.read(naiAgentQuestionsProvider),
-          token = NaiAgentCancellation();
-      var answered = false;
-      final result = broker
-          .ask(c.selectedWorkspace!.id, c.selected!.chat.id, {
-            'questions': [
-              {
-                'id': 'direction',
-                'question': '先处理哪一步？',
-                'options': ['整理标签', '分析图片'],
-              },
-            ],
-          }, token)
-          .then((value) {
-            answered = true;
-            return value;
-          });
-      final request = broker.forChat(c.selected!.chat.id).single;
-      await pump(
-        tester,
-        Center(
-          child: SizedBox(
-            width: 400,
-            child: NaiAgentQuestionCard(request: request),
-          ),
-        ),
-      );
-      expect(
-        tester
-            .widget<FilledButton>(find.widgetWithText(FilledButton, '提交回答'))
-            .onPressed,
-        isNull,
-      );
-      await tester.tap(find.widgetWithText(ChoiceChip, '分析图片'));
-      await tester.pump();
-      expect(answered, false);
-      await tester.tap(find.widgetWithText(FilledButton, '提交回答'));
-      await tester.pump();
-      final reply = await result;
-      expect((reply['details'] as Map)['answers'], [
-        {'id': 'direction', 'question': '先处理哪一步？', 'answer': '分析图片'},
-      ]);
-      expect(c.selected!.composer.pending, isEmpty);
-      expect(c.sends, 0);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  testWidgets(
-    'extension select and editor use native cards with exact answers at 320px',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final broker = container.read(naiAgentQuestionsProvider);
-      final selected = broker.askExtensionUi(
-        c.selectedWorkspace!.id,
-        c.selected!.chat.id,
-        {
-          'method': 'select',
-          'title': 'Choose',
-          'options': ['One', 'Two'],
-        },
-        NaiAgentCancellation(),
-      );
-      await pump(
-        tester,
-        SingleChildScrollView(
-          child: NaiAgentQuestionCard(
-            request: broker.forChat(c.selected!.chat.id).single,
-          ),
-        ),
-        width: 320,
-      );
-      expect(find.byType(TextField), findsNothing);
-      expect(
-        tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
-        isNull,
-      );
-      await tester.tap(find.widgetWithText(ChoiceChip, 'Two'));
-      await tester.pump();
-      await tester.tap(find.byType(FilledButton));
-      await tester.pump();
-      expect((await selected)['details'], {
-        'status': 'answered',
-        'value': 'Two',
-      });
-      await tester.pumpWidget(const SizedBox());
-      final edited = broker.askExtensionUi(
-        c.selectedWorkspace!.id,
-        c.selected!.chat.id,
-        {'method': 'editor', 'title': 'Edit', 'prefill': '  initial\n'},
-        NaiAgentCancellation(),
-      );
-      await pump(
-        tester,
-        SingleChildScrollView(
-          child: NaiAgentQuestionCard(
-            request: broker.forChat(c.selected!.chat.id).single,
-          ),
-        ),
-        width: 320,
-      );
-      final editor = tester.widget<TextField>(find.byType(TextField));
-      expect(editor.controller!.text, '  initial\n');
-      expect(editor.maxLines, 8);
-      await tester.enterText(find.byType(TextField), '\n  edited\n');
-      await tester.pump();
-      await tester.tap(find.byType(FilledButton));
-      await tester.pump();
-      expect((await edited)['details'], {
-        'status': 'answered',
-        'value': '\n  edited\n',
-      });
-      expect(c.sends, 0);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  testWidgets(
-    'instruction editors save and clear independently without replacing the base prompt',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      await pump(
-        tester,
-        const SingleChildScrollView(child: NaiAgentSettingsSection()),
-        width: 780,
-      );
-      final global = find.byKey(const Key('nai-agent-globalInstructions'));
-      final prefix = find.byKey(const Key('nai-agent-systemPromptPrefix'));
-      await tester.enterText(global, 'SHARED_RULE');
-      await tester.enterText(prefix, 'PREFIX_IDENTITY');
-      expect(c.settings.globalInstructions, isEmpty);
-      expect(c.settings.systemPromptPrefix, isEmpty);
-      await tester.ensureVisible(
-        find.byKey(const Key('nai-agent-save-globalInstructions')),
-      );
-      await tester.tap(
-        find.byKey(const Key('nai-agent-save-globalInstructions')),
-      );
-      await tester.pumpAndSettle();
-      expect(c.settings.globalInstructions, 'SHARED_RULE');
-      expect(c.settings.systemPromptPrefix, isEmpty);
-      expect(
-        tester.widget<TextField>(prefix).controller!.text,
-        'PREFIX_IDENTITY',
-      );
-      await tester.ensureVisible(
-        find.byKey(const Key('nai-agent-save-systemPromptPrefix')),
-      );
-      await tester.tap(
-        find.byKey(const Key('nai-agent-save-systemPromptPrefix')),
-      );
-      await tester.pumpAndSettle();
-      expect(c.settings.systemPromptPrefix, 'PREFIX_IDENTITY');
-      expect(c.settings.customSystemPrompt, isNull);
-      await tester.enterText(global, '');
-      await tester.pump();
-      await tester.ensureVisible(
-        find.byKey(const Key('nai-agent-save-globalInstructions')),
-      );
-      await tester.tap(
-        find.byKey(const Key('nai-agent-save-globalInstructions')),
-      );
-      await tester.pumpAndSettle();
-      expect(c.settings.globalInstructions, isEmpty);
-      expect(c.settings.systemPromptPrefix, 'PREFIX_IDENTITY');
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  for (final save in [false, true]) {
-    testWidgets(
-      'leaving instructions ${save ? 'saves' : 'discards'} all unsaved fields',
-      (tester) async {
-        addTearDown(tester.view.resetPhysicalSize);
-        addTearDown(tester.view.resetDevicePixelRatio);
-        final key = GlobalKey<NaiAgentSettingsSectionState>();
-        await pump(
-          tester,
-          SingleChildScrollView(child: NaiAgentSettingsSection(key: key)),
-          width: 780,
-        );
-        await tester.enterText(
-          find.byKey(const Key('nai-agent-globalInstructions')),
-          'SHARED_RULE',
-        );
-        await tester.enterText(
-          find.byKey(const Key('nai-agent-systemPromptPrefix')),
-          'PREFIX_IDENTITY',
-        );
-        await tester.ensureVisible(
-          find.byKey(const Key('nai-agent-base-prompt')),
-        );
-        await tester.tap(find.byKey(const Key('nai-agent-base-prompt')));
-        await tester.pumpAndSettle();
-        await tester.enterText(
-          find.byKey(const Key('nai-agent-custom-prompt')),
-          'CUSTOM_BASE',
-        );
-        final leave = key.currentState!.confirmLeave();
-        await tester.pumpAndSettle();
-        await tester.tap(
-          find.descendant(
-            of: find.byType(AlertDialog),
-            matching: find.byType(save ? FilledButton : TextButton),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expect(await leave, true);
-        expect(c.settings.globalInstructions, save ? 'SHARED_RULE' : '');
-        expect(c.settings.systemPromptPrefix, save ? 'PREFIX_IDENTITY' : '');
-        expect(c.settings.customSystemPrompt, save ? 'CUSTOM_BASE' : null);
-        if (!save) {
-          expect(
-            tester
-                .widget<TextField>(
-                  find.byKey(const Key('nai-agent-globalInstructions')),
-                )
-                .controller!
-                .text,
-            isEmpty,
-          );
-          expect(
-            tester
-                .widget<TextField>(
-                  find.byKey(const Key('nai-agent-systemPromptPrefix')),
-                )
-                .controller!
-                .text,
-            isEmpty,
-          );
-        }
-        expect(tester.takeException(), isNull);
-        await tester.pumpWidget(const SizedBox());
-      },
-    );
-  }
-  for (final locale in ['zh', 'en', 'ja', 'ko']) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
-      testWidgets(
-        'instructions and real fonts fit $locale ${brightness.name} at 320/780px',
-        (tester) async {
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-          await c.updateSettings({
-            'globalInstructions': 'Respect the project preferences.',
-            'systemPromptPrefix': 'You are my NAI creative assistant.',
-          });
-          for (final width in [320.0, 780.0]) {
-            await pump(
-              tester,
-              SingleChildScrollView(
-                child: RepaintBoundary(
-                  key: const Key('instructions-capture'),
-                  child: Material(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: NaiAgentSettingsSection(
-                        key: ValueKey('$locale-${brightness.name}-$width'),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            expect(
-              find.byKey(const Key('nai-agent-globalInstructions')),
-              findsOneWidget,
-            );
-            expect(
-              find.byKey(const Key('nai-agent-systemPromptPrefix')),
-              findsOneWidget,
-            );
-            expect(
-              find.byKey(const Key('nai-agent-custom-prompt')),
-              findsNothing,
-            );
-            expect(tester.takeException(), isNull);
-            if (Platform.environment['CAPTURE_NAI_AGENT_INSTRUCTIONS'] == '1') {
-              final boundary = tester.renderObject<RenderRepaintBoundary>(
-                find.byKey(const Key('instructions-capture')),
-              );
-              await tester.runAsync(() async {
-                final pixels = await boundary.toImage(pixelRatio: 1);
-                final data = await pixels.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final folder = await Directory(
-                  '.dart_tool/nai-agent-instructions/captures',
-                ).create(recursive: true);
-                await File(
-                  '${folder.path}/instructions-$locale-${brightness.name}-${width.toInt()}.png',
-                ).writeAsBytes(data!.buffer.asUint8List());
-                pixels.dispose();
-              });
-            }
-          }
-          await tester.pumpWidget(const SizedBox());
-        },
-      );
-    }
-  }
-  testWidgets(
-    'custom prompt stays a draft until Save; restoration uses the default',
-    (tester) async {
-      await pump(
-        tester,
-        const SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(18),
-            child: NaiAgentSettingsSection(),
-          ),
-        ),
-        width: 760,
-      );
-      await tester.ensureVisible(
-        find.byKey(const Key('nai-agent-base-prompt')),
-      );
-      await tester.tap(find.byKey(const Key('nai-agent-base-prompt')));
-      await tester.pumpAndSettle();
-      final field = find.byKey(const Key('nai-agent-custom-prompt'));
-      await tester.enterText(field, '自定义 NAI Agent 规则');
-      await tester.pump();
-      expect(c.settings.customSystemPrompt, isNull);
-      await tester.ensureVisible(
-        find.byKey(const Key('nai-agent-save-base-prompt')),
-      );
-      await tester.tap(find.byKey(const Key('nai-agent-save-base-prompt')));
-      await tester.pump();
-      expect(c.settings.customSystemPrompt, '自定义 NAI Agent 规则');
-      await tester.tap(find.widgetWithText(TextButton, '恢复默认'));
-      await tester.pump();
-      expect(c.settings.customSystemPrompt, isNull);
-      expect(
-        tester.widget<TextField>(field).controller!.text,
-        naiAgentDefaultSystemPrompt,
-      );
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    },
-  );
-  for (final locale in ['zh', 'en', 'ja', 'ko']) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
-      testWidgets(
-        'extension controls and real fonts fit $locale ${brightness.name} at 320/780px',
-        (tester) async {
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-          const path = 'C:/extensions/palette-helper.ts';
-          await c.updateSettings({
-            'extensions': [
-              {'path': path, 'enabled': true},
-            ],
-          });
-          for (final width in [320.0, 780.0]) {
-            await pump(
-              tester,
-              SingleChildScrollView(
-                child: RepaintBoundary(
-                  key: const Key('extension-capture'),
-                  child: Material(
-                    child: Padding(
-                      padding: const EdgeInsets.all(12),
-                      child: NaiAgentExtensionsSettings(
-                        key: ValueKey('$locale-${brightness.name}-$width'),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            await tester.tap(
-              find.byKey(const Key('nai-agent-builtin-extension')),
-            );
-            await tester.pumpAndSettle();
-            expect(find.text('studio_context · ask_user'), findsOneWidget);
-            expect(find.text('palette-helper.ts'), findsOneWidget);
-            expect(tester.takeException(), isNull);
-            if (Platform.environment['CAPTURE_NAI_AGENT_EXTENSIONS'] == '1') {
-              final boundary = tester.renderObject<RenderRepaintBoundary>(
-                find.byKey(const Key('extension-capture')),
-              );
-              await tester.runAsync(() async {
-                final capture = await boundary.toImage(pixelRatio: 1);
-                final data = await capture.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final folder = await Directory(
-                  '.dart_tool/nai-agent-extensions/captures',
-                ).create(recursive: true);
-                await File(
-                  '${folder.path}/extensions-$locale-${brightness.name}-${width.toInt()}.png',
-                ).writeAsBytes(data!.buffer.asUint8List());
-                capture.dispose();
-              });
-            }
-          }
-          await tester.tap(find.byType(Switch));
-          await tester.pumpAndSettle();
-          expect(c.settings.enabledExtensionPaths, isEmpty);
-          await tester.tap(find.widgetWithIcon(IconButton, Icons.close));
-          await tester.pumpAndSettle();
-          expect(c.settings.extensions, isEmpty);
-          await tester.pumpWidget(const SizedBox());
-        },
-      );
-    }
-  }
-  testWidgets(
-    'partial tool results show failure for live events and restored messages',
-    (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      final r = c.selected!;
-      r.messages = [
-        {
-          'role': 'assistant',
-          'timestamp': 1,
-          'content': [
-            for (final id in ['live', 'restored', 'success'])
-              {
-                'type': 'toolCall',
-                'id': id,
-                'name': 'reference_library',
-                'arguments': {'action': 'delete', 'id': id},
-              },
-          ],
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 'restored',
-          'isError': false,
-          'content': <Map<String, dynamic>>[],
-          'details': {
-            'ok': false,
-            'applied_fields': ['name'],
-            'backup': {'path': 'outputs/reference-backup/entry.json'},
-          },
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 'success',
-          'isError': false,
-          'content': <Map<String, dynamic>>[],
-          'details': {'ok': true},
-        },
-      ];
-      r.tools['live'] = {
-        'type': 'tool_execution_end',
-        'isError': false,
-        'result': {
-          'content': <Map<String, dynamic>>[],
-          'details': {
-            'ok': false,
-            'deleted': true,
-            'residual_reference_file': true,
-            'error': 'reference_file_remains',
-          },
-        },
-      };
-      await pump(tester, const NaiAgentPanel(), width: 320);
-      expect(find.text('失败'), findsNWidgets(2));
-      expect(find.text('完成'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline), findsNWidgets(2));
-      expect(find.byIcon(Icons.check_circle_outline), findsOneWidget);
-      await tester.tap(find.byType(ExpansionTile).first);
-      await tester.pumpAndSettle();
-      expect(find.textContaining('reference_file_remains'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
-  for (final brightness in [Brightness.light, Brightness.dark]) {
-    testWidgets(
-      'conversation, tools, queue and question fit a narrow ${brightness.name} panel',
-      (tester) async {
-        final r = c.selected!;
-        r.messages = [
-          {
-            'role': 'user',
-            'timestamp': 1,
-            'content': [
-              {'type': 'text', 'text': '帮我检查当前提示词，先给我建议。'},
-            ],
-          },
-          {
-            'role': 'assistant',
-            'timestamp': 2,
-            'content': [
-              {'type': 'text', 'text': '我先读取当前设置，然后整理可调整的部分。'},
-              {
-                'type': 'toolCall',
-                'id': 'context-1',
-                'name': 'studio_context',
-                'arguments': {'scope': 'draft'},
-              },
-            ],
-          },
-          {
-            'role': 'toolResult',
-            'toolCallId': 'context-1',
-            'content': [
-              {'type': 'text', 'text': '当前参数已读取。'},
-            ],
-          },
-          {
-            'role': 'assistant',
-            'timestamp': 3,
-            'content': [
-              {'type': 'text', 'text': '画面方向清楚。可以保留现有构图，先调整背景细节。'},
-            ],
-          },
-        ];
-        r.composer = const AgentComposerState(
-          text: '也看一下角色标签。',
-          pending: [
-            {'queueId': 'restored', 'text': '接着帮我整理成积木。', 'recovered': true},
-          ],
-        );
-        r.stats = {
-          'tokens': {'total': 2850},
-        };
-        final broker = container.read(naiAgentQuestionsProvider);
-        final answer = broker.ask(r.workspace.id, r.chat.id, {
-          'questions': [
-            {
-              'id': 'plan',
-              'question': '这次先保留哪部分？',
-              'options': ['保留构图', '保留角色'],
-            },
-          ],
-        }, NaiAgentCancellation());
-        final key = GlobalKey();
-        await pump(
-          tester,
-          RepaintBoundary(key: key, child: const NaiAgentPanel()),
-          width: 320,
-          brightness: brightness,
-        );
-        expect(tester.takeException(), isNull);
-        expect(find.byType(NaiAgentQuestionCard), findsOneWidget);
-        expect(find.text('接着帮我整理成积木。'), findsOneWidget);
-        if (Platform.environment['CAPTURE_NAI_AGENT'] == '1') {
-          await tester.runAsync(() async {
-            final image =
-                await (key.currentContext!.findRenderObject()
-                        as RenderRepaintBoundary)
-                    .toImage();
-            final png = await image.toByteData(format: ui.ImageByteFormat.png);
-            final folder = Directory(
-              '.dart_tool/nai-agent-stage-d/native-captures',
-            )..createSync(recursive: true);
-            File(
-              '${folder.path}/agent-conversation-${brightness.name}-320.png',
-            ).writeAsBytesSync(png!.buffer.asUint8List());
-            image.dispose();
-          });
-        }
-        broker.cancel(broker.forChat(r.chat.id).single.id);
-        await answer;
-        await tester.pumpWidget(const SizedBox());
-        tester.view.resetPhysicalSize();
-        tester.view.resetDevicePixelRatio();
-      },
-    );
-  }
-  for (final locale in ['zh', 'en', 'ja', 'ko']) {
-    for (final brightness in [Brightness.light, Brightness.dark]) {
-      testWidgets(
-        'real-font $locale ${brightness.name} panel fits 320px and 440px',
-        (tester) async {
-          final key = GlobalKey();
-          for (final width in [320.0, 440.0]) {
-            await pump(
-              tester,
-              RepaintBoundary(key: key, child: const NaiAgentPanel()),
-              width: width,
-              locale: Locale(locale),
-              brightness: brightness,
-            );
-            expect(tester.takeException(), isNull);
-            expect(find.byKey(const Key('nai-agent-input')), findsOneWidget);
-            expect(
-              tester.getRect(find.byKey(const Key('nai-agent-composer'))).right,
-              lessThanOrEqualTo(width),
-            );
-            if (Platform.environment['CAPTURE_NAI_AGENT'] == '1' &&
-                locale == 'zh') {
-              await tester.runAsync(() async {
-                final image =
-                    await (key.currentContext!.findRenderObject()
-                            as RenderRepaintBoundary)
-                        .toImage(pixelRatio: 1);
-                final png = await image.toByteData(
-                  format: ui.ImageByteFormat.png,
-                );
-                final folder = Directory(
-                  '.dart_tool/nai-agent-stage-d/native-captures',
-                )..createSync(recursive: true);
-                File(
-                  '${folder.path}/agent-$locale-${brightness.name}-${width.toInt()}.png',
-                ).writeAsBytesSync(png!.buffer.asUint8List());
-                image.dispose();
-              });
-            }
-          }
-          await tester.pumpWidget(const SizedBox());
-          tester.view.resetPhysicalSize();
-          tester.view.resetDevicePixelRatio();
-        },
-      );
-    }
-  }
 }

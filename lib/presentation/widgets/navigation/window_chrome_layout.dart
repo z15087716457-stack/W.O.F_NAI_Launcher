@@ -322,7 +322,22 @@ class WindowPanelHeader extends StatelessWidget {
         minimumInlineWidth: 0,
         inlineDragWidth: 0,
         dragBackground: true,
-        child: SizedBox(height: headerHeight, child: child),
+        child: SizedBox(
+          height: headerHeight,
+          child: LayoutBuilder(
+            builder: (context, box) {
+              // A large caption accessory can leave less than one compact title
+              // row. Scale that row within its own reserved area; never paint or
+              // accept input underneath the native caption buttons.
+              if (box.maxWidth >= 112) return child;
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: SizedBox(width: 112, height: headerHeight, child: child),
+              );
+            },
+          ),
+        ),
       );
     }
     final height = WindowChromeScope.heightOf(context);

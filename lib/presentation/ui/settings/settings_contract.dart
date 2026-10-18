@@ -1295,6 +1295,7 @@ class SettingsSystemPrompt {
 class SettingsAgentData {
   const SettingsAgentData({
     this.globalInstructions = '',
+    this.workspaceRulesPath,
     this.systemPrefix = '',
     this.systemPrompt,
     this.extensions = const [],
@@ -1310,6 +1311,7 @@ class SettingsAgentData {
 
   /// 已保存的内容；界面里编辑的是草稿，点“保存”才回调。
   final String globalInstructions;
+  final String? workspaceRulesPath;
   final String systemPrefix;
 
   /// 基础提示词编辑；null = 不显示这一行（Agent 未初始化时）。
@@ -1337,6 +1339,7 @@ class SettingsAgentData {
   }) => SettingsAgentData(
     globalInstructions: globalInstructions ?? this.globalInstructions,
     systemPrefix: systemPrefix ?? this.systemPrefix,
+    workspaceRulesPath: workspaceRulesPath,
     systemPrompt: systemPrompt ?? this.systemPrompt,
     extensions: extensions,
     skills: skills,
@@ -1896,6 +1899,7 @@ class SettingsActions {
     this.onRequestDetails = _noId,
     // Agent
     this.onSaveInstructions = _noInstructions,
+    this.onEditWorkspaceRules = _none,
     this.onSaveSystemPrompt = _noSystemPrompt,
     this.onViewBuiltinPrompt = _none,
     this.onViewFinalPrompt = _none,
@@ -2088,6 +2092,7 @@ class SettingsActions {
     required String? expectedText,
   })
   onSaveSystemPrompt;
+  final VoidCallback onEditWorkspaceRules;
   final VoidCallback onViewBuiltinPrompt;
   final VoidCallback onViewFinalPrompt;
   final void Function(String id, bool enabled) onExtensionEnabled;

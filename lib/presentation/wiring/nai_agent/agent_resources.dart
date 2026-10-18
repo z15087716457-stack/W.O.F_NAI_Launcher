@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:isolate';
+
+import 'package:image/image.dart' as img;
 
 import 'package:flutter/painting.dart';
 import 'package:path/path.dart' as p;
@@ -20,6 +23,7 @@ class AgentResources {
   final _images = <String, MemoryImage?>{};
   final _snapshots = <String, Map<String, dynamic>?>{};
   final _rules = <String, String>{};
+  final _files = <String, (String, int)?>{};
   final _pending = <String, Future<void>>{};
   bool _disposed = false;
 
@@ -110,6 +114,23 @@ class AgentResources {
     return _rules[key]!;
   }
 
+  (String, int)? file(store.AgentWorkspace workspace, String path) {
+    final key = '${workspace.directory.path}/file/$path';
+    if (!_files.containsKey(key)) {
+      _files[key] = null;
+      _load(key, () async {
+        final root = await workspace.directory.resolveSymbolicLinks();
+        final candidate = p.isAbsolute(path) ? path : p.join(root, path);
+        final canonical = await File(candidate).resolveSymbolicLinks();
+        if (!p.isWithin(root, canonical)) return;
+        final file = File(canonical);
+        if (!await file.exists()) return;
+        _files[key] = (p.relative(canonical, from: root), await file.length());
+      });
+    }
+    return _files[key];
+  }
+
   /// Refresh on returning from settings (instructions.md may have been edited).
   void refreshRules() => _rules.clear();
 
@@ -122,6 +143,12 @@ class AgentResources {
         size.$1 * size.$2 > agentAttachmentMaxPixels) {
       throw const FormatException('Invalid or oversized Agent image');
     }
+    // Validate the full payload before the UI's zoom viewer (which deliberately
+    // has no provider/error handling). A valid header alone is not an image.
+    final valid = await Isolate.run(
+      () => img.decodeImage(bytes, frame: 0) != null,
+    );
+    if (!valid) throw const FormatException('Corrupt Agent image');
     return MemoryImage(await agentAttachmentVisualBytes(bytes, mime));
   }
 }

@@ -49,7 +49,7 @@ import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspac
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_panel.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
 import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_input.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
@@ -563,7 +563,7 @@ void main() {
       container.read(naiAgentControllerProvider).settings.panelExpanded,
       isTrue,
     );
-    expect(find.byType(NaiAgentPanel), findsOneWidget);
+    expect(find.byType(AgentPanel), findsOneWidget);
     expect(
       container.read(naiAgentUiPreferencesProvider).settings.panelExpanded,
       isTrue,
@@ -584,12 +584,12 @@ void main() {
 
     route.value = true;
     await tester.pumpAndSettle();
-    expect(find.byType(NaiAgentPanel), findsOneWidget);
+    expect(find.byType(AgentPanel), findsOneWidget);
     await tester.tap(toggle);
     await tester.pumpAndSettle();
     route.value = false;
     await tester.pumpAndSettle();
-    expect(find.byType(NaiAgentPanel), findsNothing);
+    expect(find.byType(AgentPanel), findsNothing);
     expect(tester.getSize(reveal).width, 0);
     expect(pills.values, documents);
     expect(container.read(generationParamsNotifierProvider), params);
@@ -623,9 +623,9 @@ void main() {
           container.read(naiAgentControllerProvider).settings.panelExpanded,
           isTrue,
         );
-        expect(find.byType(NaiAgentPanel), findsOneWidget);
+        expect(find.byType(AgentPanel), findsOneWidget);
         final page = tester.getRect(find.byType(StyleExplorePage));
-        final panel = tester.getRect(find.byType(NaiAgentPanel));
+        final panel = tester.getRect(find.byType(AgentPanel));
         expect(panel.left, greaterThanOrEqualTo(page.right));
         expect(panel.right, lessThanOrEqualTo(dark ? 1280 : 1800));
         expect(find.byKey(const Key('explore-editor')), findsOneWidget);

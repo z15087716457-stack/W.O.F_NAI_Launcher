@@ -33,6 +33,7 @@ class SettingsPage extends StatefulWidget {
     required this.data,
     required this.actions,
     this.initialQuery = '',
+    this.initialAnchor,
   });
 
   final SettingsViewData data;
@@ -40,6 +41,7 @@ class SettingsPage extends StatefulWidget {
 
   /// 打开时就在搜索（例如从命令面板“搜索设置”进来）。
   final String initialQuery;
+  final String? initialAnchor;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -62,7 +64,7 @@ class _Confirm {
 
 class _SettingsPageState extends State<SettingsPage> {
   late var _query = widget.initialQuery;
-  String? _highlight;
+  late String? _highlight = widget.initialAnchor;
   Timer? _highlightTimer;
   _Confirm? _confirm;
   var _dirty = false;
@@ -91,6 +93,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final c = widget.data.lastChange;
     if (c != null && c.id != old.data.lastChange?.id) _showToast(c);
     if (widget.data.page != old.data.page) _dirty = false;
+    if (widget.initialAnchor != old.initialAnchor) {
+      _open(widget.data.page, anchor: widget.initialAnchor);
+    }
   }
 
   @override

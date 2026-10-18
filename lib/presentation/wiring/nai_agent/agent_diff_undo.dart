@@ -30,6 +30,10 @@ class AgentDiffUndo {
   final Ref ref;
 
   Future<bool> restore(AgentDiffRestore diff, Directory directory) async {
+    if (diff.version.isEmpty ||
+        ref.read(bridgeDraftVersionProvider) != diff.version) {
+      return false;
+    }
     final fields = agentMap(diff.backup['fields']);
     final docs = agentMap(diff.backup['documents']);
     final patch = <String, dynamic>{};

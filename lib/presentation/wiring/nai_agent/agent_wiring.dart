@@ -66,6 +66,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   final _readingTargets = <AgentChatRuntime>{};
   var _revision = 0;
   AgentThreadMapping? _mapping;
+  final _recentImages = <String, AgentImage>{};
 
   void _resourceChanged() {
     if (mounted) setState(() => _revision++);
@@ -213,7 +214,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   Future<bool> _attachImage(String id) async {
     final target = controller.selected;
     if (target == null) return false;
-    final image = _mapping?.images[id];
+    final image = _mapping?.images[id] ?? _recentImages[id];
     if (image?.image case final MemoryImage memory) {
       return _import(target, [
         () async =>
@@ -413,6 +414,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         );
       }
     }
+    _recentImages
+      ..clear()
+      ..addEntries(recent.values.take(8).map((i) => MapEntry(i.id, i)));
     for (final image in recent.values.take(8)) {
       mentions.add(
         AgentMention(
@@ -682,7 +686,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         return ok;
       },
       onRevealImage: (id) {
-        final history = mapping?.images[id]?.historyId;
+        final history = (mapping?.images[id] ?? _recentImages[id])?.historyId;
         if (history != null) {
           ref.read(generationPreviewSelectionProvider.notifier).select(history);
         }

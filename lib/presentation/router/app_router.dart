@@ -290,6 +290,7 @@ GoRouter appRouter(Ref ref) {
                     child: SettingsWiring(
                       initialPage: settingsPageFromUri(state.uri),
                       initialQuery: state.uri.queryParameters['q'] ?? '',
+                      initialAnchor: state.uri.queryParameters['anchor'],
                     ),
                   ),
                 ),

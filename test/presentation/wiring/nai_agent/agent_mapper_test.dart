@@ -1,0 +1,322 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:image/image.dart' as img;
+import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_diff_undo.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_resources.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_thread_mapper.dart';
+
+void main() {
+  late Directory root;
+  late AgentChatRuntime runtime;
+  late AgentResources resources;
+  late AgentThreadMapper mapper;
+  setUp(() async {
+    root = await Directory.systemTemp.createTemp('agent-mapper-');
+    final store = AgentWorkspaceStore(root);
+    final workspace = await store.createWorkspace('Mapper');
+    final chat = await store.createChat(workspace.id, 'Thread');
+    runtime = AgentChatRuntime(workspace, chat, const AgentComposerState());
+    resources = AgentResources(() {});
+    mapper = AgentThreadMapper(resources);
+  });
+  tearDown(() async {
+    await resources.settle();
+    resources.dispose();
+    await root.delete(recursive: true);
+  });
+  Map<String, dynamic> call(
+    String id,
+    String name, [
+    Map<String, dynamic> args = const {},
+  ]) => {'type': 'toolCall', 'id': id, 'name': name, 'arguments': args};
+  Map<String, dynamic> assistant(List<Map<String, dynamic>> parts) => {
+    'role': 'assistant',
+    'content': parts,
+  };
+  Map<String, dynamic> result(String id, Map<String, dynamic> details) => {
+    'role': 'toolResult',
+    'toolCallId': id,
+    'details': details,
+  };
+  final png = Uint8List.fromList(
+    img.encodePng(img.Image(width: 12, height: 8)),
+  );
+
+  test(
+    'turns retain user entry, text, consecutive steps, live and regeneration',
+    () async {
+      runtime.userEntries = [
+        {
+          'id': 'entry',
+          'message': {'role': 'user', 'timestamp': 123},
+        },
+      ];
+      runtime.messages = [
+        {
+          'role': 'user',
+          'timestamp': 123,
+          'content': [
+            {'type': 'text', 'text': 'hello'},
+            {'type': 'image', 'data': base64Encode(png)},
+          ],
+        },
+        assistant([
+          {'type': 'text', 'text': 'before'},
+          call('a', 'mcp__nai_studio__wiki_query', {'query': 'watercolor'}),
+          call('b', 'prompt_update'),
+          {'type': 'text', 'text': 'after'},
+        ]),
+        result('a', {'ok': true}),
+        result('b', {'ok': false}),
+        {'role': 'user', 'timestamp': 456, 'content': 'next'},
+        assistant([call('c', 'ask_user')]),
+      ];
+      runtime.tools['a'] = {'durationMs': 82};
+      runtime.running = true;
+      mapper.map(runtime);
+      await resources.settle();
+      var mapped = mapper.map(runtime, waitingUser: true);
+      expect(mapped.turns, hasLength(2));
+      final first = mapped.turns.first;
+      expect(first.user.text, 'hello');
+      expect(first.user.entryId, 'entry');
+      expect(first.user.at.millisecondsSinceEpoch, 123);
+      expect(first.user.images, hasLength(1));
+      expect(first.reply!.live, false);
+      final steps = (first.reply!.blocks[1] as AgentStepsBlock).steps;
+      expect(steps.map((s) => s.tool), ['wiki_query', 'prompt_update']);
+      expect(steps.first.duration, const Duration(milliseconds: 82));
+      expect(steps.first.subject, 'watercolor');
+      expect(steps.last.status, AgentStepStatus.failed);
+      expect(mapped.turns.last.reply!.live, true);
+      expect(
+        (mapped.turns.last.reply!.blocks.single as AgentStepsBlock)
+            .steps
+            .single
+            .status,
+        AgentStepStatus.waitingUser,
+      );
+      runtime.running = false;
+      runtime.messages.removeRange(3, runtime.messages.length);
+      mapped = mapper.map(runtime);
+      expect(mapped.turns.single.reply!.canRegenerate, true);
+    },
+  );
+
+  test(
+    'nested CodeMode calls flatten, partial failures and details are safe and bounded',
+    () {
+      runtime.messages = [
+        assistant([call('code', 'codemode')]),
+        {
+          'role': 'toolResult',
+          'toolCallId': 'code',
+          'nestedCalls': {
+            'calls': [
+              {
+                'name': 'mcp__nai_studio__studio_context',
+                'status': 'ok',
+                'durationMs': 12,
+              },
+              {
+                'name': 'mcp__nai_studio__block_manage',
+                'status': 'error',
+                'error': 'partial failure',
+              },
+              {'name': 'bash', 'status': 'unfinished'},
+            ],
+          },
+        },
+      ];
+      final steps =
+          (mapper.map(runtime).turns.single.reply!.blocks.single
+                  as AgentStepsBlock)
+              .steps;
+      expect(steps.map((s) => s.tool), [
+        'studio_context',
+        'block_manage',
+        'bash',
+      ]);
+      expect(steps.map((s) => s.status), [
+        AgentStepStatus.done,
+        AgentStepStatus.failed,
+        AgentStepStatus.failed,
+      ]);
+      final text = agentPretty({
+        'data': 'private pixels',
+        'image': base64Encode(png),
+        'content': List.filled(1500, '汉字 text'),
+      })!;
+      expect(utf8.encode(text).length, lessThanOrEqualTo(4096));
+      expect(text, isNot(contains('private pixels')));
+      expect(text, isNot(contains(base64Encode(png))));
+      expect(
+        agentResultDetails({
+          'details': {
+            'structuredContent': {'ok': false},
+          },
+        })['ok'],
+        false,
+      );
+    },
+  );
+
+  test(
+    'artifacts and user images feed shelf; history ids ignore non-image artifacts',
+    () async {
+      final dir = runtime.workspace.directory;
+      await File('${dir.path}/out.png').writeAsBytes(png);
+      await File('${dir.path}/notes.md').writeAsString('notes');
+      runtime.messages = [
+        {
+          'role': 'user',
+          'content': [
+            {'type': 'image', 'data': base64Encode(png)},
+          ],
+        },
+        assistant([
+          call('gen', 'generation_run'),
+          call('write', 'write', {'path': 'notes.md'}),
+        ]),
+        result('gen', {
+          'artifacts': [
+            {'type': 'file', 'path': 'notes.md'},
+            {'type': 'image', 'path': 'out.png', 'width': 12, 'height': 8},
+          ],
+          'image_ids': ['history-1'],
+          'estimated_anlas': 27,
+        }),
+        result('write', {'ok': true}),
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      final mapped = mapper.map(runtime);
+      expect(mapped.shelf.imageCount, 2);
+      expect(mapped.shelf.files.single.name, 'notes.md');
+      expect(mapped.shelf.files.single.bytes, 5);
+      final block = mapped.turns.single.reply!.blocks
+          .whereType<AgentImagesBlock>()
+          .single;
+      expect(block.images.single.historyId, 'history-1');
+      expect(block.anlasSpent, 27);
+      expect(block.images.single.source, AgentImageSource.generated);
+      expect(mapped.images, hasLength(2));
+    },
+  );
+
+  test(
+    'prompt update reads backup and maps each field; stale and undone states',
+    () async {
+      final backupDir = Directory(
+        '${runtime.workspace.agentDirectory.path}/draft-backups',
+      );
+      await backupDir.create(recursive: true);
+      final backup = File('${backupDir.path}/before.json');
+      await backup.writeAsString(
+        jsonEncode({
+          'fields': {
+            'prompt': 'a, b',
+            'negative_prompt': 'bad',
+            'characters': [
+              {'id': 'c', 'name': 'Alice', 'prompt': 'red', 'uc': 'old'},
+            ],
+          },
+        }),
+      );
+      runtime.messages = [
+        assistant([call('update', 'mcp__nai_studio__prompt_update')]),
+        result('update', {
+          'applied': ['prompt', 'negative_prompt', 'characters(1)'],
+          'backup_path': backup.path,
+          'draft': {
+            'draft_version': 'v1',
+            'fields': {
+              'prompt': 'a, c',
+              'negative_prompt': 'worse',
+              'characters': [
+                {'id': 'c', 'name': 'Alice', 'prompt': 'blue', 'uc': 'new'},
+              ],
+            },
+          },
+        }),
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      var mapped = mapper.map(runtime, draftVersion: 'v1');
+      var diffs = mapped.turns.single.reply!.blocks
+          .whereType<AgentDiffBlock>()
+          .toList();
+      expect(diffs, hasLength(4));
+      expect(diffs.every((d) => d.diff.state == AgentDiffState.applied), true);
+      expect(diffs.first.diff.segments.map((s) => s.kind), [
+        AgentDiffKind.same,
+        AgentDiffKind.removed,
+        AgentDiffKind.added,
+      ]);
+      mapper.undone.add(diffs.first.diff.id);
+      mapped = mapper.map(runtime, draftVersion: 'v2');
+      diffs = mapped.turns.single.reply!.blocks
+          .whereType<AgentDiffBlock>()
+          .toList();
+      expect(diffs.first.diff.state, AgentDiffState.undone);
+      expect(
+        diffs.skip(1).every((d) => d.diff.state == AgentDiffState.locked),
+        true,
+      );
+      expect(mapped.diffs.values.last.characterId, 'c');
+    },
+  );
+
+  test(
+    'resource security rejects traversal, missing/corrupt images and external backups',
+    () async {
+      final external = File('${root.path}/outside.json');
+      await external.writeAsString('{"fields":{}}');
+      expect(resources.image(runtime.workspace, '../outside.png'), isNull);
+      expect(resources.image(runtime.workspace, 'missing.png'), isNull);
+      await File(
+        '${runtime.workspace.directory.path}/corrupt.png',
+      ).writeAsBytes(png.sublist(0, 33));
+      resources.image(runtime.workspace, 'corrupt.png');
+      expect(resources.snapshot(runtime.workspace, external.path), isNull);
+      resources.file(runtime.workspace, external.path);
+      await resources.settle();
+      expect(resources.image(runtime.workspace, 'corrupt.png'), isNull);
+      expect(resources.file(runtime.workspace, external.path), isNull);
+      expect(resources.snapshot(runtime.workspace, external.path), isNull);
+    },
+  );
+
+  test(
+    'undo guards before backup and again after asynchronous backup, writes synchronously',
+    () async {
+      var version = 'v1', backups = 0, writes = 0;
+      Future<bool> undo(String expected, {bool race = false}) =>
+          guardedAgentUndo(
+            expected: expected,
+            version: () => version,
+            backup: () async {
+              backups++;
+              if (race) version = 'changed';
+            },
+            apply: () {
+              writes++;
+            },
+          );
+      expect(await undo('stale'), false);
+      expect(backups, 0);
+      expect(await undo('v1', race: true), false);
+      expect(writes, 0);
+      version = 'v1';
+      expect(await undo('v1'), true);
+      expect(writes, 1);
+      expect(await undo(''), false);
+    },
+  );
+}

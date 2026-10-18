@@ -1,217 +1,177 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
-import 'package:nai_launcher/l10n/app_localizations.dart';
-import 'package:nai_launcher/presentation/themes/app_theme.dart';
+import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_image_approvals.dart';
-import 'package:nai_launcher/presentation/widgets/nai_agent/nai_agent_image_approval_card.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../wiring/nai_agent/agent_wiring_harness.dart';
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
-  const owner = NaiAgentConversationOwner('workspace', 'chat');
-  final pixels = Uint8List.fromList(
-    img.encodePng(
-      img.Image(width: 64, height: 48)..clear(img.ColorRgb8(56, 141, 185)),
-    ),
-  );
-  final quote = {
+  late AgentWiringHarness h;
+  setUp(() async {
+    h = AgentWiringHarness();
+    await h.init();
+  });
+  tearDown(() async {
+    await h.dispose();
+  });
+  final pixels = img.encodePng(img.Image(width: 64, height: 48));
+  const quote = {
     'tool': 'cloud_upscale',
     'width': 832,
     'height': 1216,
-    'account_name': 'Local test account',
+    'account_name': 'Synthetic',
     'estimated_anlas': 1,
     'balance_anlas': 2218,
   };
-  late ProviderContainer container;
-  late NaiAgentImageApprovals broker;
-  setUp(() {
-    container = ProviderContainer();
-    broker = container.read(naiAgentImageApprovalsProvider);
-  });
-  tearDown(() => container.dispose());
-  Future<void> pump(
-    WidgetTester tester,
-    AgentImageApproval request, {
-    String locale = 'zh',
-    Brightness brightness = Brightness.light,
-    double width = 440,
-    GlobalKey? key,
-  }) async {
-    tester.view.physicalSize = Size(width, 600);
-    tester.view.devicePixelRatio = 1;
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          locale: Locale(locale),
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: AppTheme.getTheme(AppStyle.geist, brightness),
-          home: Scaffold(
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(14),
-                child: RepaintBoundary(
-                  key: key,
-                  child: NaiAgentImageApprovalCard(request: request),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-    await tester.runAsync(() async {
-      for (final e in find.byType(Image).evaluate()) {
-        await precacheImage((e.widget as Image).image, e);
-      }
-    });
-    await tester.pumpAndSettle();
+  Future<bool> request({
+    void Function()? check,
+    NaiAgentCancellation? token,
+    DateTime? expires,
+  }) {
+    final r = h.c.selected!;
+    return h.container
+        .read(naiAgentImageApprovalsProvider)
+        .request(
+          NaiAgentConversationOwner(r.workspace.id, r.chat.id),
+          quote,
+          expires ?? DateTime.now().add(const Duration(minutes: 5)),
+          token ?? NaiAgentCancellation(),
+          check ?? () {},
+          sourceBytes: pixels,
+        );
   }
 
   testWidgets(
-    'image confirmation requires a real button; changed checks disable confirm but retain cancel',
+    'real image gate button only; account changes disable but retain cancel',
     (tester) async {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      var valid = true;
-      final future = broker.request(
-        owner,
-        quote,
-        DateTime.now().add(const Duration(minutes: 5)),
-        NaiAgentCancellation(),
-        () {
-          if (!valid) throw const NaiAgentToolError('quote_changed', 'changed');
+      final account = h.container.read(authNotifierProvider).accountId;
+      final answer = request(
+        check: () {
+          if (h.container.read(authNotifierProvider).accountId != account) {
+            throw const NaiAgentToolError('quote_changed', 'changed');
+          }
         },
-        sourceBytes: pixels,
       );
-      final request = broker.forChat('chat').single;
-      await pump(tester, request);
-      expect(find.byType(Image), findsOneWidget);
-      expect(broker.forChat('chat'), hasLength(1));
-      valid = false;
-      await pump(tester, request);
+      await h.pump(tester);
+      final gate = h.panel(tester).data.composer.pending.single as AgentGate;
+      expect(gate.ready, true);
+      expect(gate.changed, false);
+      expect(gate.expiresAt.isAfter(DateTime.now()), true);
+      expect(gate.totalAnlas, 1);
+      expect(gate.balanceAnlas, 2218);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       expect(
-        tester
-            .widget<FilledButton>(find.byKey(const Key('agent-image-confirm')))
-            .onPressed,
-        isNull,
+        h.container
+            .read(naiAgentImageApprovalsProvider)
+            .forChat(h.c.selected!.chat.id),
+        hasLength(1),
       );
-      await tester.tap(find.byKey(const Key('agent-image-decline')));
+      (h.container.read(authNotifierProvider.notifier) as AgentTestAuth)
+          .changeAccount();
       await tester.pump();
-      expect(await future, false);
-      final next = broker.request(
-        owner,
-        quote,
-        DateTime.now().add(const Duration(minutes: 5)),
-        NaiAgentCancellation(),
-        () {},
+      expect(
+        (h.panel(tester).data.composer.pending.single as AgentGate).ready,
+        false,
       );
-      await pump(tester, broker.forChat('chat').single);
-      await tester.tap(find.byKey(const Key('agent-image-confirm')));
+      await tester.tap(find.byKey(const Key('agent-gate-confirm')));
+      await tester.pump();
+      expect(
+        h.container
+            .read(naiAgentImageApprovalsProvider)
+            .forChat(h.c.selected!.chat.id),
+        hasLength(1),
+      );
+      await tester.tap(find.byKey(const Key('agent-gate-cancel')));
+      await tester.pump();
+      expect(await answer, false);
+      final next = request();
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-gate-confirm')));
       await tester.pump();
       expect(await next, true);
-      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
   );
-  test('image authorization expires and Stop completes its wait', () async {
-    final expired = broker.request(
-      owner,
-      quote,
-      DateTime.now().subtract(const Duration(seconds: 1)),
-      NaiAgentCancellation(),
-      () {},
+  testWidgets('decision rechecks even if the rendered image quote was ready', (
+    tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var valid = true;
+    final answer = request(
+      check: () {
+        if (!valid) throw const NaiAgentToolError('quote_changed', 'changed');
+      },
     );
+    final failure = expectLater(answer, throwsA(isA<NaiAgentToolError>()));
+    await h.pump(tester);
+    valid = false;
+    h
+        .panel(tester)
+        .actions
+        .onDecideGate(
+          h.panel(tester).data.composer.pending.single.id,
+          confirm: true,
+        );
+    await tester.pump();
+    await failure;
+    await tester.pumpWidget(const SizedBox());
+  });
+  test('image approval expiry and Stop fail their wait', () async {
     await expectLater(
-      expired,
+      request(expires: DateTime.now().subtract(const Duration(seconds: 1))),
       throwsA(
         isA<NaiAgentToolError>().having((e) => e.code, 'code', 'quote_expired'),
       ),
     );
-    final token = NaiAgentCancellation(),
-        pending = broker.request(
-          owner,
-          quote,
-          DateTime.now().add(const Duration(minutes: 5)),
-          token,
-          () {},
-        );
+    final token = NaiAgentCancellation();
+    final future = request(token: token);
     token.cancel();
     await expectLater(
-      pending,
+      future,
       throwsA(
         isA<NaiAgentToolError>().having((e) => e.code, 'code', 'cancelled'),
       ),
     );
-    expect(broker.forChat('chat'), isEmpty);
   });
   for (final locale in ['zh', 'en', 'ja', 'ko']) {
     for (final brightness in Brightness.values) {
-      {
-        testWidgets(
-          'real-font $locale ${brightness.name} image approval fits narrow chat',
-          (tester) async {
-            addTearDown(tester.view.resetPhysicalSize);
-            addTearDown(tester.view.resetDevicePixelRatio);
-            final pending = broker.request(
-                  owner,
-                  quote,
-                  DateTime.now().add(const Duration(minutes: 5)),
-                  NaiAgentCancellation(),
-                  () {},
-                  sourceBytes: pixels,
-                ),
-                request = broker.forChat('chat').single;
-            final key = GlobalKey();
-            for (final width in [320.0, 440.0]) {
-              await pump(
-                tester,
-                request,
-                locale: locale,
-                brightness: brightness,
-                width: width,
-                key: key,
-              );
-              expect(tester.takeException(), isNull);
-              expect(
-                tester.getRect(find.byType(NaiAgentImageApprovalCard)).right,
-                lessThanOrEqualTo(width),
-              );
-              if (Platform.environment['CAPTURE_NAI_AGENT'] == '1' &&
-                  locale == 'zh') {
-                await tester.runAsync(() async {
-                  final image =
-                          await (key.currentContext!.findRenderObject()
-                                  as RenderRepaintBoundary)
-                              .toImage(),
-                      bytes = await image.toByteData(
-                        format: ui.ImageByteFormat.png,
-                      );
-                  final directory = Directory(
-                    '.dart_tool/nai-agent-stage-e5b/native-captures',
-                  )..createSync(recursive: true);
-                  File(
-                    '${directory.path}/image-approval-${brightness.name}-${width.toInt()}.png',
-                  ).writeAsBytesSync(bytes!.buffer.asUint8List());
-                  image.dispose();
-                });
-              }
-            }
-            broker.decide(request.id, run: false);
-            await pending;
-            await tester.pumpWidget(const SizedBox());
-          },
-        );
-      }
+      testWidgets('real-font image gate $locale $brightness at 320/440', (
+        tester,
+      ) async {
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+        final future = request();
+        for (final width in [320.0, 440.0]) {
+          await h.pump(
+            tester,
+            width: width,
+            locale: Locale(locale),
+            brightness: brightness,
+          );
+          expect(find.byKey(const Key('agent-gate-confirm')), findsOneWidget);
+          expect(find.byType(Image), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        }
+        h
+            .panel(tester)
+            .actions
+            .onDecideGate(
+              h.panel(tester).data.composer.pending.single.id,
+              confirm: false,
+            );
+        await tester.pump();
+        await future;
+        await tester.pumpWidget(const SizedBox());
+      });
     }
   }
 }

@@ -6,7 +6,14 @@ import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/generation_tools.dart';
 
 class AgentImageApproval {
-  AgentImageApproval(this.owner, this.quote, this.check, this.sourceBytes);
+  AgentImageApproval(
+    this.owner,
+    this.quote,
+    this.check,
+    this.sourceBytes, {
+    this.expiresAt,
+  });
+  final DateTime? expiresAt;
   final String id = const Uuid().v4();
   final NaiAgentConversationOwner owner;
   final Map<String, dynamic> quote;
@@ -39,6 +46,7 @@ class NaiAgentImageApprovals extends ChangeNotifier {
       Map.unmodifiable(quote),
       check,
       sourceBytes,
+      expiresAt: expiresAt,
     );
     _pending[r.id] = r;
     notifyListeners();
