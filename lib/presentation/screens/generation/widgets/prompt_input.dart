@@ -44,7 +44,7 @@ import '../../../providers/pending_prompt_provider.dart';
 import 'generation_sidebar_style.dart';
 import '../../../widgets/common/translation_icon.dart';
 import '../../../widgets/bridge/agent_bridge_indicator.dart';
-import '../../../widgets/nai_agent/nai_agent_panel.dart';
+import '../../../wiring/nai_agent/agent_toggle_wiring.dart';
 import '../../../themes/studio_typography.dart';
 import '../../../providers/character_position_canvas_provider.dart';
 import '../../../wiring/style_explore_blocks_wiring.dart';
@@ -651,7 +651,7 @@ class _PromptInputWidgetState extends ConsumerState<PromptInputWidget> {
             const CharacterPromptButton(),
             const SizedBox(width: 2),
           ],
-          const NaiAgentToggleButton(),
+          const AgentToggleWiring(),
           // 模块图标位：「模块与开关」菜单钉住的工具，钉/收带动画。
           // 预留扩展槽给未来的翻译/Agent 动态提示钮，进同一钉机制。
           _PinnedToolSlot(

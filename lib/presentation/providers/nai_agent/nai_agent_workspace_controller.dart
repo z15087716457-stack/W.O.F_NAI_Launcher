@@ -71,6 +71,8 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   bool initialized = false, _disposed = false;
   Future<void>? _closeFuture;
   int _selectionRevision = 0;
+  /// Read-only inventory for sidebar chat status; never creates a runtime.
+  Iterable<AgentChatRuntime> get heldRuntimes => _runtimes.values;
   Iterable<AgentChatRuntime> get runningChats =>
       _runtimes.values.where((chat) => chat.running);
   void _notify() {

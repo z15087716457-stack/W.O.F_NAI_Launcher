@@ -1,4 +1,4 @@
-import '../nai_agent/nai_agent_panel.dart';
+import '../../wiring/nai_agent/agent_toggle_wiring.dart';
 import 'dart:async';
 
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -333,7 +333,7 @@ class _TitleBarState extends State<_TitleBar> with WindowListener {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.showNaiAgent) const NaiAgentToggleButton(),
+          if (widget.showNaiAgent) const AgentToggleWiring(),
           if (_showsLanguageButton(widget))
             SizedBox(
               width: IntegratedTitleBarShell.languageButtonWidth,

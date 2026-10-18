@@ -33,7 +33,7 @@ import 'generation_settings.dart';
 import '../providers/simple_output_viewer_provider.dart';
 import '../providers/nai_agent/nai_agent_window_controller.dart';
 import '../providers/nai_agent/nai_agent_workspace_provider.dart';
-import '../widgets/nai_agent/nai_agent_panel.dart';
+import 'nai_agent/agent_toggle_wiring.dart';
 import '../widgets/common/prompt_translation_guide.dart';
 import '../screens/generation/widgets/generation_welcome.dart';
 
@@ -258,7 +258,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
             GenerationPanelBackdropWiring(canvasViewport: viewport),
         emptyCanvas: (_) => const GenerationWelcome(),
         translationGuide: (_, onBack) => PromptTranslationGuide(onBack: onBack),
-        agentToggle: agentAvailable ? const NaiAgentToggleButton() : null,
+        agentToggle: agentAvailable ? const AgentToggleWiring() : null,
         historyCaptionInset: !agentExpanded,
         preserveHistory: agentExpanded,
         canvas: simpleViewer

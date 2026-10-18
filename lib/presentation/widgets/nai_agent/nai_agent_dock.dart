@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/nai_agent/panel_layout.dart';
 import '../../screens/generation/widgets/resize_handle.dart';
-import 'nai_agent_panel.dart';
+import '../../wiring/nai_agent/agent_wiring.dart';
 
 /// A fixed content viewport: the host clips the reveal instead of squeezing
 /// text through every intermediate opening width.
@@ -43,7 +43,7 @@ class NaiAgentDock extends StatelessWidget {
                 ),
               ),
             ),
-            child: const RepaintBoundary(child: NaiAgentPanel()),
+            child: const RepaintBoundary(child: AgentWiring()),
           ),
         ),
       ),
