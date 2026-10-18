@@ -2,7 +2,7 @@
 
 # NAI Agent 运行宿主
 
-直接使用官方 Pi 1.1.0。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
+直接使用官方 Pi 1.3.0。此目录是生产业务宿主；阶段 A 的模拟验证保留在相邻 nai_agent_sdk_probe。固定的 npm lockfile 和 PI-LICENSE 随源码保留，不能直接换成其他版本的示例。
 
 在本目录运行 npm ci --ignore-scripts --no-audit --no-fund 和 npm test。Node 需要 >=22.19.0。本机 E8 交付将 Node 24.18.0、固定依赖、许可与按需手册放在 Studio 的 tools/nai-agent；调用方只使用包内 Node 和 host.mjs，不依赖用户安装 Node 或 Pi。
 
@@ -26,4 +26,4 @@ MCP 设置统一管理内置组和用户服务器。支持 stdio／Streamable HT
 
 CodeMode 使用官方 QuickJS，没有另造执行器。MCP 调用继续走原 Studio 的备份、版本校验、确认及取消；原生图片结果元数据通过 Pi 的 tool_result 扩展保存在官方会话 details，CodeMode 聚合图片路径，恢复聊天仍显示结果。内置 MCP 等待期限为 24 小时，避免把用户确认／长时间超分按外部服务器默认 60 秒超时处理；CodeMode 的显式 timeout_ms 仍是整个脚本的截止时间。
 
-Pi 1.1.0 适配读取官方会话中已声明的 MCP 工具名，在重连注册时恢复仍可用的工具；隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递，无新增历史或执行层。
+Pi 1.1.0 适配读取官方会话中已声明的 MCP 工具名，在重连注册时恢复仍可用的工具；隐藏／禁用与后续卸载保持有效。agent_settled 的 aborted 和工具 durationMs 经原 JSONL 直接传递，无新增历史或执行层。1.3.0 升级沿用同一适配：内部 MCP 辅助路径、会话恢复与旧 1.1.0 记录兼容已核对，不改宿主协议。

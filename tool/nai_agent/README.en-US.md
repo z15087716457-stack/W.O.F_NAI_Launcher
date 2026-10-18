@@ -2,7 +2,7 @@
 
 # NAI Agent runtime host
 
-This is the production business host using official Pi 1.1.0 directly. The adjacent nai_agent_sdk_probe retains stage A mock verification. Keep the exact npm lockfile and PI-LICENSE with the source.
+This is the production business host using official Pi 1.3.0 directly. The adjacent nai_agent_sdk_probe retains stage A mock verification. Keep the exact npm lockfile and PI-LICENSE with the source.
 
 Run npm ci --ignore-scripts --no-audit --no-fund, then npm test in this directory. Node >=22.19.0 is required. The local E8 delivery bundles Node 24.18.0, pinned dependencies, licenses and on-demand manuals under Studio's tools/nai-agent. Production uses only its bundled Node and host.mjs; users do not need to install Node or Pi.
 
@@ -26,4 +26,4 @@ MCP settings manage the built-in group and user servers together. Supports stdio
 
 CodeMode runs official QuickJS; no replacement executor was added. MCP calls retain Studio backups, version checks, confirmations and cancellation. A Pi tool_result extension preserves native image metadata in official session details, aggregates CodeMode artifact paths and restores image previews with chat history. Built-in MCP uses a 24-hour deadline so user confirmation/long upscales are not cut off by the external-server default of 60 seconds; an explicit CodeMode timeout_ms remains a deadline for the whole script.
 
-Pi 1.1.0 adaptation restores MCP tool names declared in the official transcript as available tools reconnect. Hidden/disabled tools and later unloads stay respected. The existing JSONL passes agent_settled.aborted and tool durationMs without another history store or execution layer.
+Pi 1.1.0 adaptation restores MCP tool names declared in the official transcript as available tools reconnect. Hidden/disabled tools and later unloads stay respected. The existing JSONL passes agent_settled.aborted and tool durationMs without another history store or execution layer. The 1.3.0 upgrade keeps the same adapter: internal MCP helper paths, session restore and 1.1.0 transcript compatibility were rechecked without changing the host protocol.

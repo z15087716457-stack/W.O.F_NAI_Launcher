@@ -6,7 +6,7 @@ import { createMcpExtension } from '@earendil-works/pi-coding-agent';
 import { createInMemoryTransportPair } from '@earendil-works/pi-mcp/testing';
 import { redactor } from './model.mjs';
 
-// These adapter helpers are not re-exported at the SDK root in 1.1.0.
+// These adapter helpers are not re-exported at the SDK root (checked through 1.3.0).
 // Keep this version-specific surface here; never copy Pi's connector or OAuth.
 const sdkRoot = new URL('.', import.meta.resolve('@earendil-works/pi-coding-agent'));
 const { validateMcpServerConfig } = await import(new URL('core/mcp-servers.js', sdkRoot));

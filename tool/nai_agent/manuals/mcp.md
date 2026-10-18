@@ -18,4 +18,4 @@ ask_user 为模型直接提问工具，不能从 CodeMode 嵌套调用。用户�
 
 MCP 服务器在设置内添加与管理；支持 stdio 和 Streamable HTTP。外部服务器默认 codemode，deferred 通过 tool_search 后直调，direct 常驻，hidden 不可调用。设置变更于下一次空闲操作恢复同一会话。工作目录使用当前工作区；Pi 四个基础工具和用户服务器具有用户选择的本机权限，工作区绑定不是系统沙盒。
 
-参考固定版本的 [官方 MCP 文档](https://github.com/earendil-works/pi/blob/v1.1.0/packages/coding-agent/docs/mcp.md) 与 [CodeMode 文档](https://github.com/earendil-works/pi/blob/v1.1.0/packages/coding-agent/docs/codemode.md)。
+参考固定版本的 [官方 MCP 文档](https://github.com/earendil-works/pi/blob/v1.3.0/packages/coding-agent/docs/mcp.md) 与 [CodeMode 文档](https://github.com/earendil-works/pi/blob/v1.3.0/packages/coding-agent/docs/codemode.md)。
