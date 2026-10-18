@@ -36603,6 +36603,648 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get ag_zoomClose;
+
+  /// No description provided for @mp_protocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get mp_protocol;
+
+  /// No description provided for @mp_test.
+  ///
+  /// In en, this message translates to:
+  /// **'Test'**
+  String get mp_test;
+
+  /// No description provided for @mp_testing.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing…'**
+  String get mp_testing;
+
+  /// No description provided for @mp_notChecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked'**
+  String get mp_notChecked;
+
+  /// No description provided for @mp_rename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get mp_rename;
+
+  /// No description provided for @mp_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get mp_request;
+
+  /// No description provided for @mp_requestSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared by all models'**
+  String get mp_requestSub;
+
+  /// No description provided for @mp_timeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeout'**
+  String get mp_timeout;
+
+  /// No description provided for @mp_timeoutHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest wait for one request, 10–600 s'**
+  String get mp_timeoutHelp;
+
+  /// No description provided for @mp_concurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Concurrency'**
+  String get mp_concurrency;
+
+  /// No description provided for @mp_concurrencyHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests handled at once, 1–20'**
+  String get mp_concurrencyHelp;
+
+  /// No description provided for @mp_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retries'**
+  String get mp_retry;
+
+  /// No description provided for @mp_retryHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry on connection errors or when busy'**
+  String get mp_retryHelp;
+
+  /// No description provided for @mp_retryOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get mp_retryOff;
+
+  /// No description provided for @mp_imageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get mp_imageInput;
+
+  /// No description provided for @mp_imageInputHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Needed when features such as reverse prompting send images'**
+  String get mp_imageInputHelp;
+
+  /// No description provided for @mp_allow.
+  ///
+  /// In en, this message translates to:
+  /// **'On'**
+  String get mp_allow;
+
+  /// No description provided for @mp_noSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get mp_noSend;
+
+  /// No description provided for @mp_seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'s'**
+  String get mp_seconds;
+
+  /// No description provided for @mp_countUnit.
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get mp_countUnit;
+
+  /// No description provided for @mp_headers.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom headers'**
+  String get mp_headers;
+
+  /// No description provided for @mp_none.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get mp_none;
+
+  /// No description provided for @mp_addHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Add header'**
+  String get mp_addHeader;
+
+  /// No description provided for @mp_headerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get mp_headerName;
+
+  /// No description provided for @mp_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Value'**
+  String get mp_value;
+
+  /// No description provided for @mp_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get mp_added;
+
+  /// No description provided for @mp_catalog.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog'**
+  String get mp_catalog;
+
+  /// No description provided for @mp_filter.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get mp_filter;
+
+  /// No description provided for @mp_manualAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add manually'**
+  String get mp_manualAdd;
+
+  /// No description provided for @mp_dragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag to set the default order in Assignments'**
+  String get mp_dragHint;
+
+  /// No description provided for @mp_noModels.
+  ///
+  /// In en, this message translates to:
+  /// **'No models yet'**
+  String get mp_noModels;
+
+  /// No description provided for @mp_noModelsSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Add from the catalog or enter a model ID'**
+  String get mp_noModelsSub;
+
+  /// No description provided for @mp_manualHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ID, Enter to add'**
+  String get mp_manualHint;
+
+  /// No description provided for @mp_model.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get mp_model;
+
+  /// No description provided for @mp_alias.
+  ///
+  /// In en, this message translates to:
+  /// **'Display alias'**
+  String get mp_alias;
+
+  /// No description provided for @mp_aliasHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. fast'**
+  String get mp_aliasHint;
+
+  /// No description provided for @mp_context.
+  ///
+  /// In en, this message translates to:
+  /// **'Context'**
+  String get mp_context;
+
+  /// No description provided for @mp_maxOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Max output'**
+  String get mp_maxOutput;
+
+  /// No description provided for @mp_outputTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Output cannot exceed the context window'**
+  String get mp_outputTooLarge;
+
+  /// No description provided for @mp_thinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get mp_thinking;
+
+  /// No description provided for @mp_levels.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels'**
+  String get mp_levels;
+
+  /// No description provided for @mp_defaultLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Default level'**
+  String get mp_defaultLevel;
+
+  /// No description provided for @mp_defaultBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get mp_defaultBadge;
+
+  /// No description provided for @mp_followService.
+  ///
+  /// In en, this message translates to:
+  /// **'Service default'**
+  String get mp_followService;
+
+  /// No description provided for @mp_reasoningProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get mp_reasoningProtocol;
+
+  /// No description provided for @mp_standard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get mp_standard;
+
+  /// No description provided for @mp_adaptive.
+  ///
+  /// In en, this message translates to:
+  /// **'Adaptive'**
+  String get mp_adaptive;
+
+  /// No description provided for @mp_protocolNoReasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'This protocol has no thinking control'**
+  String get mp_protocolNoReasoning;
+
+  /// No description provided for @mp_unconfirmed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unconfirmed'**
+  String get mp_unconfirmed;
+
+  /// No description provided for @mp_unsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not supported'**
+  String get mp_unsupported;
+
+  /// No description provided for @mp_sampling.
+  ///
+  /// In en, this message translates to:
+  /// **'Sampling'**
+  String get mp_sampling;
+
+  /// No description provided for @mp_temperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get mp_temperature;
+
+  /// No description provided for @mp_topP.
+  ///
+  /// In en, this message translates to:
+  /// **'Top P'**
+  String get mp_topP;
+
+  /// No description provided for @mp_followDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'Service default'**
+  String get mp_followDefault;
+
+  /// No description provided for @mp_capabilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities'**
+  String get mp_capabilities;
+
+  /// No description provided for @mp_capVision.
+  ///
+  /// In en, this message translates to:
+  /// **'Image input'**
+  String get mp_capVision;
+
+  /// No description provided for @mp_capTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool calls'**
+  String get mp_capTools;
+
+  /// No description provided for @mp_capStructured.
+  ///
+  /// In en, this message translates to:
+  /// **'Structured output'**
+  String get mp_capStructured;
+
+  /// No description provided for @mp_capSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Native web search'**
+  String get mp_capSearch;
+
+  /// No description provided for @mp_bodyHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Body and headers'**
+  String get mp_bodyHeaders;
+
+  /// No description provided for @mp_notAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get mp_notAdded;
+
+  /// No description provided for @mp_field.
+  ///
+  /// In en, this message translates to:
+  /// **'Field'**
+  String get mp_field;
+
+  /// No description provided for @mp_header.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get mp_header;
+
+  /// No description provided for @mp_testModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Test this model'**
+  String get mp_testModel;
+
+  /// No description provided for @mp_copyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy model ID'**
+  String get mp_copyId;
+
+  /// No description provided for @mp_removeModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove model'**
+  String get mp_removeModel;
+
+  /// No description provided for @mp_removeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove model “{id}”?'**
+  String mp_removeTitle(Object id);
+
+  /// No description provided for @mp_removeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Features using it fall back to another available model.'**
+  String get mp_removeBody;
+
+  /// No description provided for @mp_catalogId.
+  ///
+  /// In en, this message translates to:
+  /// **'Model ID'**
+  String get mp_catalogId;
+
+  /// No description provided for @mp_catalogCtx.
+  ///
+  /// In en, this message translates to:
+  /// **'Context'**
+  String get mp_catalogCtx;
+
+  /// No description provided for @mp_catalogPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'In / out · per M'**
+  String get mp_catalogPrice;
+
+  /// No description provided for @mp_catalogFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} match · {total} total · fetched {when}'**
+  String mp_catalogFooter(Object n, Object total, Object when);
+
+  /// No description provided for @mp_catalogMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} more, type to narrow down'**
+  String mp_catalogMore(Object n);
+
+  /// No description provided for @mp_catalogIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog not loaded yet'**
+  String get mp_catalogIdle;
+
+  /// No description provided for @mp_catalogIdleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Loads this provider’s models with the saved URL and key'**
+  String get mp_catalogIdleSub;
+
+  /// No description provided for @mp_catalogLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading catalog…'**
+  String get mp_catalogLoading;
+
+  /// No description provided for @mp_catalogFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Catalog unavailable: {error}'**
+  String mp_catalogFailed(Object error);
+
+  /// No description provided for @mp_fetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch list'**
+  String get mp_fetch;
+
+  /// No description provided for @mp_noMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching models'**
+  String get mp_noMatch;
+
+  /// No description provided for @mp_picked.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} selected'**
+  String mp_picked(Object n);
+
+  /// No description provided for @mp_pickEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Tick models to add them'**
+  String get mp_pickEmpty;
+
+  /// No description provided for @mp_pickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Capabilities, context and thinking levels come from the local catalog; adjust them after adding.'**
+  String get mp_pickHint;
+
+  /// No description provided for @mp_addPicked.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {n} models'**
+  String mp_addPicked(Object n);
+
+  /// No description provided for @mp_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get mp_new;
+
+  /// No description provided for @mp_unsaved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name}: {n} unsaved changes'**
+  String mp_unsaved(Object name, Object n);
+
+  /// No description provided for @mp_saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get mp_saving;
+
+  /// No description provided for @mp_conflict.
+  ///
+  /// In en, this message translates to:
+  /// **'Changed elsewhere: latest values merged, review and save again'**
+  String get mp_conflict;
+
+  /// No description provided for @mp_saveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Save failed; changes kept'**
+  String get mp_saveFailed;
+
+  /// No description provided for @mp_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} fields need fixing'**
+  String mp_invalid(Object n);
+
+  /// No description provided for @mp_leaveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider changes are not saved. Leaving this page discards them.'**
+  String get mp_leaveBody;
+
+  /// No description provided for @mp_show.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get mp_show;
+
+  /// No description provided for @mp_hide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get mp_hide;
+
+  /// No description provided for @mp_keyHintLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional for local services'**
+  String get mp_keyHintLocal;
+
+  /// No description provided for @mp_keyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter this provider’s key'**
+  String get mp_keyHint;
+
+  /// No description provided for @mp_pickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add provider'**
+  String get mp_pickerTitle;
+
+  /// No description provided for @mp_pickerSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search vendors, platforms or local services'**
+  String get mp_pickerSearch;
+
+  /// No description provided for @mp_groupAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get mp_groupAll;
+
+  /// No description provided for @mp_groupDomestic.
+  ///
+  /// In en, this message translates to:
+  /// **'China'**
+  String get mp_groupDomestic;
+
+  /// No description provided for @mp_groupInternational.
+  ///
+  /// In en, this message translates to:
+  /// **'Global'**
+  String get mp_groupInternational;
+
+  /// No description provided for @mp_groupAggregator.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregators'**
+  String get mp_groupAggregator;
+
+  /// No description provided for @mp_groupLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'Local'**
+  String get mp_groupLocal;
+
+  /// No description provided for @mp_groupDomesticFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese vendors'**
+  String get mp_groupDomesticFull;
+
+  /// No description provided for @mp_groupInternationalFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Global vendors'**
+  String get mp_groupInternationalFull;
+
+  /// No description provided for @mp_groupAggregatorFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Aggregators'**
+  String get mp_groupAggregatorFull;
+
+  /// No description provided for @mp_groupLocalFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Local and custom'**
+  String get mp_groupLocalFull;
+
+  /// No description provided for @mp_pickerFoot.
+  ///
+  /// In en, this message translates to:
+  /// **'URL and protocol come from the preset; a vendor can be added more than once for different regions.'**
+  String get mp_pickerFoot;
+
+  /// No description provided for @mp_pickerNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next: enter key'**
+  String get mp_pickerNext;
 }
 
 class _AppLocalizationsDelegate

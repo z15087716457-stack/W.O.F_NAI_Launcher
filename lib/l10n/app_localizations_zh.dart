@@ -20073,6 +20073,343 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_zoomClose => '关闭';
+
+  @override
+  String get mp_protocol => '接口协议';
+
+  @override
+  String get mp_test => '测试';
+
+  @override
+  String get mp_testing => '测试中…';
+
+  @override
+  String get mp_notChecked => '未检测';
+
+  @override
+  String get mp_rename => '重命名';
+
+  @override
+  String get mp_request => '请求';
+
+  @override
+  String get mp_requestSub => '所有模型共用';
+
+  @override
+  String get mp_timeout => '请求超时';
+
+  @override
+  String get mp_timeoutHelp => '单次请求最长等待时间，10–600 秒';
+
+  @override
+  String get mp_concurrency => '最大并发';
+
+  @override
+  String get mp_concurrencyHelp => '此服务同时处理的请求数，1–20';
+
+  @override
+  String get mp_retry => '失败重试';
+
+  @override
+  String get mp_retryHelp => '连接失败或服务繁忙时重试';
+
+  @override
+  String get mp_retryOff => '关';
+
+  @override
+  String get mp_imageInput => '图片输入';
+
+  @override
+  String get mp_imageInputHelp => '反推等功能需要把图片发给模型';
+
+  @override
+  String get mp_allow => '允许';
+
+  @override
+  String get mp_noSend => '不发送';
+
+  @override
+  String get mp_seconds => '秒';
+
+  @override
+  String get mp_countUnit => '个';
+
+  @override
+  String get mp_headers => '自定义请求头';
+
+  @override
+  String get mp_none => '无';
+
+  @override
+  String get mp_addHeader => '添加请求头';
+
+  @override
+  String get mp_headerName => '名称';
+
+  @override
+  String get mp_value => '值';
+
+  @override
+  String get mp_added => '已添加';
+
+  @override
+  String get mp_catalog => '服务商目录';
+
+  @override
+  String get mp_filter => '筛选';
+
+  @override
+  String get mp_manualAdd => '手动添加';
+
+  @override
+  String get mp_dragHint => '拖动排序决定功能分配里的默认顺序';
+
+  @override
+  String get mp_noModels => '还没有模型';
+
+  @override
+  String get mp_noModelsSub => '从服务商目录添加，或手动输入模型 ID';
+
+  @override
+  String get mp_manualHint => '输入模型 ID，回车添加';
+
+  @override
+  String get mp_model => '模型';
+
+  @override
+  String get mp_alias => '显示别名';
+
+  @override
+  String get mp_aliasHint => '例如 fast';
+
+  @override
+  String get mp_context => '上下文窗口';
+
+  @override
+  String get mp_maxOutput => '最大输出';
+
+  @override
+  String get mp_outputTooLarge => '输出不能超过上下文窗口';
+
+  @override
+  String get mp_thinking => '思考';
+
+  @override
+  String get mp_levels => '可调档位';
+
+  @override
+  String get mp_defaultLevel => '默认档位';
+
+  @override
+  String get mp_defaultBadge => '默认';
+
+  @override
+  String get mp_followService => '跟随服务';
+
+  @override
+  String get mp_reasoningProtocol => '思考协议';
+
+  @override
+  String get mp_standard => '标准';
+
+  @override
+  String get mp_adaptive => '自适应';
+
+  @override
+  String get mp_protocolNoReasoning => '此接口协议不支持思考调节';
+
+  @override
+  String get mp_unconfirmed => '未确认';
+
+  @override
+  String get mp_unsupported => '不支持';
+
+  @override
+  String get mp_sampling => '采样';
+
+  @override
+  String get mp_temperature => '温度';
+
+  @override
+  String get mp_topP => 'Top P';
+
+  @override
+  String get mp_followDefault => '跟随服务默认';
+
+  @override
+  String get mp_capabilities => '能力';
+
+  @override
+  String get mp_capVision => '图片输入';
+
+  @override
+  String get mp_capTools => '工具调用';
+
+  @override
+  String get mp_capStructured => '结构化输出';
+
+  @override
+  String get mp_capSearch => '原生联网搜索';
+
+  @override
+  String get mp_bodyHeaders => '请求体与请求头';
+
+  @override
+  String get mp_notAdded => '未添加';
+
+  @override
+  String get mp_field => '字段';
+
+  @override
+  String get mp_header => '请求头';
+
+  @override
+  String get mp_testModel => '测试此模型';
+
+  @override
+  String get mp_copyId => '复制模型 ID';
+
+  @override
+  String get mp_removeModel => '移除模型';
+
+  @override
+  String mp_removeTitle(Object id) {
+    return '移除模型“$id”？';
+  }
+
+  @override
+  String get mp_removeBody => '用到它的功能会回落到其他可用模型。';
+
+  @override
+  String get mp_catalogId => '模型 ID';
+
+  @override
+  String get mp_catalogCtx => '上下文';
+
+  @override
+  String get mp_catalogPrice => '输入 / 输出 · 百万';
+
+  @override
+  String mp_catalogFooter(Object n, Object total, Object when) {
+    return '匹配 $n 个 · 共 $total 个 · $when 获取';
+  }
+
+  @override
+  String mp_catalogMore(Object n) {
+    return '还有 $n 个，输入筛选缩小范围';
+  }
+
+  @override
+  String get mp_catalogIdle => '还没读取过目录';
+
+  @override
+  String get mp_catalogIdleSub => '用已保存的地址和 Key 读取这个服务商提供的模型';
+
+  @override
+  String get mp_catalogLoading => '正在读取模型目录…';
+
+  @override
+  String mp_catalogFailed(Object error) {
+    return '目录不可用：$error';
+  }
+
+  @override
+  String get mp_fetch => '获取列表';
+
+  @override
+  String get mp_noMatch => '没有匹配的模型';
+
+  @override
+  String mp_picked(Object n) {
+    return '已选 $n 个';
+  }
+
+  @override
+  String get mp_pickEmpty => '在左边勾选要添加的模型';
+
+  @override
+  String get mp_pickHint => '能力、上下文和思考档位按本地目录预填，添加后可在右侧逐项调整。';
+
+  @override
+  String mp_addPicked(Object n) {
+    return '添加 $n 个模型';
+  }
+
+  @override
+  String get mp_new => '新';
+
+  @override
+  String mp_unsaved(Object name, Object n) {
+    return '$name 有 $n 项修改未保存';
+  }
+
+  @override
+  String get mp_saving => '正在保存…';
+
+  @override
+  String get mp_conflict => '配置已在别处修改：已合并最新值，确认后再保存';
+
+  @override
+  String get mp_saveFailed => '保存失败，修改已保留';
+
+  @override
+  String mp_invalid(Object n) {
+    return '有 $n 处需要修正';
+  }
+
+  @override
+  String get mp_leaveBody => '服务商配置还没保存，离开这一页会丢掉修改。';
+
+  @override
+  String get mp_show => '显示';
+
+  @override
+  String get mp_hide => '隐藏';
+
+  @override
+  String get mp_keyHintLocal => '本机服务可留空';
+
+  @override
+  String get mp_keyHint => '输入此服务商的 Key';
+
+  @override
+  String get mp_pickerTitle => '添加服务商';
+
+  @override
+  String get mp_pickerSearch => '搜索厂商、平台或本地服务';
+
+  @override
+  String get mp_groupAll => '全部';
+
+  @override
+  String get mp_groupDomestic => '国内';
+
+  @override
+  String get mp_groupInternational => '国际';
+
+  @override
+  String get mp_groupAggregator => '聚合';
+
+  @override
+  String get mp_groupLocal => '本地';
+
+  @override
+  String get mp_groupDomesticFull => '国内厂商';
+
+  @override
+  String get mp_groupInternationalFull => '国际厂商';
+
+  @override
+  String get mp_groupAggregatorFull => '聚合平台';
+
+  @override
+  String get mp_groupLocalFull => '本地与自定义';
+
+  @override
+  String get mp_pickerFoot => '地址与协议会按预设填好；同一厂商可以添加多次（例如国内 / 国际区域）。';
+
+  @override
+  String get mp_pickerNext => '下一步：填写 Key';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -40145,4 +40482,341 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_zoomClose => '關閉';
+
+  @override
+  String get mp_protocol => '介面協定';
+
+  @override
+  String get mp_test => '測試';
+
+  @override
+  String get mp_testing => '測試中…';
+
+  @override
+  String get mp_notChecked => '未檢測';
+
+  @override
+  String get mp_rename => '重新命名';
+
+  @override
+  String get mp_request => '請求';
+
+  @override
+  String get mp_requestSub => '所有模型共用';
+
+  @override
+  String get mp_timeout => '請求逾時';
+
+  @override
+  String get mp_timeoutHelp => '單次請求最長等待時間，10–600 秒';
+
+  @override
+  String get mp_concurrency => '最大併發';
+
+  @override
+  String get mp_concurrencyHelp => '此服務同時處理的請求數，1–20';
+
+  @override
+  String get mp_retry => '失敗重試';
+
+  @override
+  String get mp_retryHelp => '連線失敗或服務繁忙時重試';
+
+  @override
+  String get mp_retryOff => '關';
+
+  @override
+  String get mp_imageInput => '圖片輸入';
+
+  @override
+  String get mp_imageInputHelp => '反推等功能需要把圖片發給模型';
+
+  @override
+  String get mp_allow => '允許';
+
+  @override
+  String get mp_noSend => '不傳送';
+
+  @override
+  String get mp_seconds => '秒';
+
+  @override
+  String get mp_countUnit => '個';
+
+  @override
+  String get mp_headers => '自訂請求標頭';
+
+  @override
+  String get mp_none => '無';
+
+  @override
+  String get mp_addHeader => '新增請求標頭';
+
+  @override
+  String get mp_headerName => '名稱';
+
+  @override
+  String get mp_value => '值';
+
+  @override
+  String get mp_added => '已新增';
+
+  @override
+  String get mp_catalog => '服務商目錄';
+
+  @override
+  String get mp_filter => '篩選';
+
+  @override
+  String get mp_manualAdd => '手動新增';
+
+  @override
+  String get mp_dragHint => '拖動排序決定功能分配裡的預設順序';
+
+  @override
+  String get mp_noModels => '還沒有模型';
+
+  @override
+  String get mp_noModelsSub => '從服務商目錄新增，或手動輸入模型 ID';
+
+  @override
+  String get mp_manualHint => '輸入模型 ID，回車新增';
+
+  @override
+  String get mp_model => '模型';
+
+  @override
+  String get mp_alias => '顯示別名';
+
+  @override
+  String get mp_aliasHint => '例如 fast';
+
+  @override
+  String get mp_context => '上下文視窗';
+
+  @override
+  String get mp_maxOutput => '最大輸出';
+
+  @override
+  String get mp_outputTooLarge => '輸出不能超過上下文視窗';
+
+  @override
+  String get mp_thinking => '思考';
+
+  @override
+  String get mp_levels => '可調檔位';
+
+  @override
+  String get mp_defaultLevel => '預設檔位';
+
+  @override
+  String get mp_defaultBadge => '預設';
+
+  @override
+  String get mp_followService => '跟隨服務';
+
+  @override
+  String get mp_reasoningProtocol => '思考協定';
+
+  @override
+  String get mp_standard => '標準';
+
+  @override
+  String get mp_adaptive => '自適應';
+
+  @override
+  String get mp_protocolNoReasoning => '此介面協定不支援思考調節';
+
+  @override
+  String get mp_unconfirmed => '未確認';
+
+  @override
+  String get mp_unsupported => '不支援';
+
+  @override
+  String get mp_sampling => '取樣';
+
+  @override
+  String get mp_temperature => '溫度';
+
+  @override
+  String get mp_topP => 'Top P';
+
+  @override
+  String get mp_followDefault => '跟隨服務預設';
+
+  @override
+  String get mp_capabilities => '能力';
+
+  @override
+  String get mp_capVision => '圖片輸入';
+
+  @override
+  String get mp_capTools => '工具呼叫';
+
+  @override
+  String get mp_capStructured => '結構化輸出';
+
+  @override
+  String get mp_capSearch => '原生聯網搜尋';
+
+  @override
+  String get mp_bodyHeaders => '請求主體與請求標頭';
+
+  @override
+  String get mp_notAdded => '未新增';
+
+  @override
+  String get mp_field => '欄位';
+
+  @override
+  String get mp_header => '請求標頭';
+
+  @override
+  String get mp_testModel => '測試此模型';
+
+  @override
+  String get mp_copyId => '複製模型 ID';
+
+  @override
+  String get mp_removeModel => '移除模型';
+
+  @override
+  String mp_removeTitle(Object id) {
+    return '移除模型“$id”？';
+  }
+
+  @override
+  String get mp_removeBody => '用到它的功能會回落到其他可用模型。';
+
+  @override
+  String get mp_catalogId => '模型 ID';
+
+  @override
+  String get mp_catalogCtx => '上下文';
+
+  @override
+  String get mp_catalogPrice => '輸入 / 輸出 · 百萬';
+
+  @override
+  String mp_catalogFooter(Object n, Object total, Object when) {
+    return '匹配 $n 個 · 共 $total 個 · $when 取得';
+  }
+
+  @override
+  String mp_catalogMore(Object n) {
+    return '還有 $n 個，輸入篩選縮小範圍';
+  }
+
+  @override
+  String get mp_catalogIdle => '還沒讀取過目錄';
+
+  @override
+  String get mp_catalogIdleSub => '用已儲存的地址和 Key 讀取這個服務商提供的模型';
+
+  @override
+  String get mp_catalogLoading => '正在讀取模型目錄…';
+
+  @override
+  String mp_catalogFailed(Object error) {
+    return '目錄不可用：$error';
+  }
+
+  @override
+  String get mp_fetch => '取得列表';
+
+  @override
+  String get mp_noMatch => '沒有匹配的模型';
+
+  @override
+  String mp_picked(Object n) {
+    return '已選 $n 個';
+  }
+
+  @override
+  String get mp_pickEmpty => '在左邊勾選要新增的模型';
+
+  @override
+  String get mp_pickHint => '能力、上下文和思考檔位按本地目錄預填，新增後可在右側逐項調整。';
+
+  @override
+  String mp_addPicked(Object n) {
+    return '新增 $n 個模型';
+  }
+
+  @override
+  String get mp_new => '新';
+
+  @override
+  String mp_unsaved(Object name, Object n) {
+    return '$name 有 $n 項修改未儲存';
+  }
+
+  @override
+  String get mp_saving => '正在儲存…';
+
+  @override
+  String get mp_conflict => '配置已在別處修改：已合併最新值，確認後再儲存';
+
+  @override
+  String get mp_saveFailed => '儲存失敗，修改已保留';
+
+  @override
+  String mp_invalid(Object n) {
+    return '有 $n 處需要修正';
+  }
+
+  @override
+  String get mp_leaveBody => '服務商配置還沒儲存，離開這一頁會丟掉修改。';
+
+  @override
+  String get mp_show => '顯示';
+
+  @override
+  String get mp_hide => '隱藏';
+
+  @override
+  String get mp_keyHintLocal => '本機服務可留空';
+
+  @override
+  String get mp_keyHint => '輸入此服務商的 Key';
+
+  @override
+  String get mp_pickerTitle => '新增服務商';
+
+  @override
+  String get mp_pickerSearch => '搜尋廠商、平臺或本地服務';
+
+  @override
+  String get mp_groupAll => '全部';
+
+  @override
+  String get mp_groupDomestic => '國內';
+
+  @override
+  String get mp_groupInternational => '國際';
+
+  @override
+  String get mp_groupAggregator => '聚合';
+
+  @override
+  String get mp_groupLocal => '本地';
+
+  @override
+  String get mp_groupDomesticFull => '國內廠商';
+
+  @override
+  String get mp_groupInternationalFull => '國際廠商';
+
+  @override
+  String get mp_groupAggregatorFull => '聚合平臺';
+
+  @override
+  String get mp_groupLocalFull => '本地與自訂';
+
+  @override
+  String get mp_pickerFoot => '地址與協定會按預設填好；同一廠商可以新增多次（例如國內 / 國際區域）。';
+
+  @override
+  String get mp_pickerNext => '下一步：填寫 Key';
 }

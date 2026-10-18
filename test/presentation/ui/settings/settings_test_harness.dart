@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_contract.dart';
+import 'package:nai_launcher/presentation/ui/model_providers/model_providers_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_page.dart';
@@ -23,6 +24,8 @@ Future<SettingsRecorder> pumpSettings(
   String locale = 'zh',
   bool dark = false,
   String initialQuery = '',
+  ProvidersActions providers = const ProvidersActions(),
+  ValueChanged<SettingsHostState>? onHost,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(window - settingsRail, height);
@@ -52,6 +55,8 @@ Future<SettingsRecorder> pumpSettings(
                   SettingsFixture.view(page: page, scene: scene, dark: dark),
               rec: rec,
               initialQuery: initialQuery,
+              providers: providers,
+              onHost: onHost,
             ),
           ),
         ),
@@ -89,10 +94,14 @@ class SettingsHost extends StatefulWidget {
     required this.data,
     required this.rec,
     this.initialQuery = '',
+    this.providers = const ProvidersActions(),
+    this.onHost,
   });
   final SettingsViewData data;
   final SettingsRecorder rec;
   final String initialQuery;
+  final ProvidersActions providers;
+  final ValueChanged<SettingsHostState>? onHost;
 
   @override
   State<SettingsHost> createState() => SettingsHostState();
@@ -103,6 +112,12 @@ class SettingsHostState extends State<SettingsHost> {
   var _n = 0;
 
   void updateData(SettingsViewData next) => setState(() => data = next);
+
+  @override
+  void initState() {
+    super.initState();
+    widget.onHost?.call(this);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -226,6 +241,8 @@ class SettingsHostState extends State<SettingsHost> {
               'assign:${t.name}:$providerId:$modelId:$reasoningEffort:$clearReasoningEffort',
             ),
         onCopyDiagnostics: () => call('copyDiagnostics'),
+        onCopyModelConfig: () => call('copyModelConfig'),
+        providers: widget.providers,
       ),
     );
   }

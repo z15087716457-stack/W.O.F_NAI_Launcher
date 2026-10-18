@@ -11059,5 +11059,155 @@
   "ag_toggle": "NAI Agent",
   "ag_yesterday": "昨天",
   "ag_attachmentTag": "附件",
-  "ag_zoomClose": "關閉"
+  "ag_zoomClose": "關閉",
+  "mp_protocol": "介面協定",
+  "mp_test": "測試",
+  "mp_testing": "測試中…",
+  "mp_notChecked": "未檢測",
+  "mp_rename": "重新命名",
+  "mp_request": "請求",
+  "mp_requestSub": "所有模型共用",
+  "mp_timeout": "請求逾時",
+  "mp_timeoutHelp": "單次請求最長等待時間，10–600 秒",
+  "mp_concurrency": "最大併發",
+  "mp_concurrencyHelp": "此服務同時處理的請求數，1–20",
+  "mp_retry": "失敗重試",
+  "mp_retryHelp": "連線失敗或服務繁忙時重試",
+  "mp_retryOff": "關",
+  "mp_imageInput": "圖片輸入",
+  "mp_imageInputHelp": "反推等功能需要把圖片發給模型",
+  "mp_allow": "允許",
+  "mp_noSend": "不傳送",
+  "mp_seconds": "秒",
+  "mp_countUnit": "個",
+  "mp_headers": "自訂請求標頭",
+  "mp_none": "無",
+  "mp_addHeader": "新增請求標頭",
+  "mp_headerName": "名稱",
+  "mp_value": "值",
+  "mp_added": "已新增",
+  "mp_catalog": "服務商目錄",
+  "mp_filter": "篩選",
+  "mp_manualAdd": "手動新增",
+  "mp_dragHint": "拖動排序決定功能分配裡的預設順序",
+  "mp_noModels": "還沒有模型",
+  "mp_noModelsSub": "從服務商目錄新增，或手動輸入模型 ID",
+  "mp_manualHint": "輸入模型 ID，回車新增",
+  "mp_model": "模型",
+  "mp_alias": "顯示別名",
+  "mp_aliasHint": "例如 fast",
+  "mp_context": "上下文視窗",
+  "mp_maxOutput": "最大輸出",
+  "mp_outputTooLarge": "輸出不能超過上下文視窗",
+  "mp_thinking": "思考",
+  "mp_levels": "可調檔位",
+  "mp_defaultLevel": "預設檔位",
+  "mp_defaultBadge": "預設",
+  "mp_followService": "跟隨服務",
+  "mp_reasoningProtocol": "思考協定",
+  "mp_standard": "標準",
+  "mp_adaptive": "自適應",
+  "mp_protocolNoReasoning": "此介面協定不支援思考調節",
+  "mp_unconfirmed": "未確認",
+  "mp_unsupported": "不支援",
+  "mp_sampling": "取樣",
+  "mp_temperature": "溫度",
+  "mp_topP": "Top P",
+  "mp_followDefault": "跟隨服務預設",
+  "mp_capabilities": "能力",
+  "mp_capVision": "圖片輸入",
+  "mp_capTools": "工具呼叫",
+  "mp_capStructured": "結構化輸出",
+  "mp_capSearch": "原生聯網搜尋",
+  "mp_bodyHeaders": "請求主體與請求標頭",
+  "mp_notAdded": "未新增",
+  "mp_field": "欄位",
+  "mp_header": "請求標頭",
+  "mp_testModel": "測試此模型",
+  "mp_copyId": "複製模型 ID",
+  "mp_removeModel": "移除模型",
+  "mp_removeTitle": "移除模型“{id}”？",
+  "@mp_removeTitle": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "mp_removeBody": "用到它的功能會回落到其他可用模型。",
+  "mp_catalogId": "模型 ID",
+  "mp_catalogCtx": "上下文",
+  "mp_catalogPrice": "輸入 / 輸出 · 百萬",
+  "mp_catalogFooter": "匹配 {n} 個 · 共 {total} 個 · {when} 取得",
+  "@mp_catalogFooter": {
+    "placeholders": {
+      "n": {},
+      "total": {},
+      "when": {}
+    }
+  },
+  "mp_catalogMore": "還有 {n} 個，輸入篩選縮小範圍",
+  "@mp_catalogMore": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "mp_catalogIdle": "還沒讀取過目錄",
+  "mp_catalogIdleSub": "用已儲存的地址和 Key 讀取這個服務商提供的模型",
+  "mp_catalogLoading": "正在讀取模型目錄…",
+  "mp_catalogFailed": "目錄不可用：{error}",
+  "@mp_catalogFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "mp_fetch": "取得列表",
+  "mp_noMatch": "沒有匹配的模型",
+  "mp_picked": "已選 {n} 個",
+  "@mp_picked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "mp_pickEmpty": "在左邊勾選要新增的模型",
+  "mp_pickHint": "能力、上下文和思考檔位按本地目錄預填，新增後可在右側逐項調整。",
+  "mp_addPicked": "新增 {n} 個模型",
+  "@mp_addPicked": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "mp_new": "新",
+  "mp_unsaved": "{name} 有 {n} 項修改未儲存",
+  "@mp_unsaved": {
+    "placeholders": {
+      "name": {},
+      "n": {}
+    }
+  },
+  "mp_saving": "正在儲存…",
+  "mp_conflict": "配置已在別處修改：已合併最新值，確認後再儲存",
+  "mp_saveFailed": "儲存失敗，修改已保留",
+  "mp_invalid": "有 {n} 處需要修正",
+  "@mp_invalid": {
+    "placeholders": {
+      "n": {}
+    }
+  },
+  "mp_leaveBody": "服務商配置還沒儲存，離開這一頁會丟掉修改。",
+  "mp_show": "顯示",
+  "mp_hide": "隱藏",
+  "mp_keyHintLocal": "本機服務可留空",
+  "mp_keyHint": "輸入此服務商的 Key",
+  "mp_pickerTitle": "新增服務商",
+  "mp_pickerSearch": "搜尋廠商、平臺或本地服務",
+  "mp_groupAll": "全部",
+  "mp_groupDomestic": "國內",
+  "mp_groupInternational": "國際",
+  "mp_groupAggregator": "聚合",
+  "mp_groupLocal": "本地",
+  "mp_groupDomesticFull": "國內廠商",
+  "mp_groupInternationalFull": "國際廠商",
+  "mp_groupAggregatorFull": "聚合平臺",
+  "mp_groupLocalFull": "本地與自訂",
+  "mp_pickerFoot": "地址與協定會按預設填好；同一廠商可以新增多次（例如國內 / 國際區域）。",
+  "mp_pickerNext": "下一步：填寫 Key"
 }

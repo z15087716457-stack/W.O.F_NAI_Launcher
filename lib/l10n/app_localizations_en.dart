@@ -20937,4 +20937,348 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_zoomClose => 'Close';
+
+  @override
+  String get mp_protocol => 'Protocol';
+
+  @override
+  String get mp_test => 'Test';
+
+  @override
+  String get mp_testing => 'Testing…';
+
+  @override
+  String get mp_notChecked => 'Not checked';
+
+  @override
+  String get mp_rename => 'Rename';
+
+  @override
+  String get mp_request => 'Requests';
+
+  @override
+  String get mp_requestSub => 'Shared by all models';
+
+  @override
+  String get mp_timeout => 'Timeout';
+
+  @override
+  String get mp_timeoutHelp => 'Longest wait for one request, 10–600 s';
+
+  @override
+  String get mp_concurrency => 'Concurrency';
+
+  @override
+  String get mp_concurrencyHelp => 'Requests handled at once, 1–20';
+
+  @override
+  String get mp_retry => 'Retries';
+
+  @override
+  String get mp_retryHelp => 'Retry on connection errors or when busy';
+
+  @override
+  String get mp_retryOff => 'Off';
+
+  @override
+  String get mp_imageInput => 'Images';
+
+  @override
+  String get mp_imageInputHelp =>
+      'Needed when features such as reverse prompting send images';
+
+  @override
+  String get mp_allow => 'On';
+
+  @override
+  String get mp_noSend => 'Off';
+
+  @override
+  String get mp_seconds => 's';
+
+  @override
+  String get mp_countUnit => '';
+
+  @override
+  String get mp_headers => 'Custom headers';
+
+  @override
+  String get mp_none => 'None';
+
+  @override
+  String get mp_addHeader => 'Add header';
+
+  @override
+  String get mp_headerName => 'Name';
+
+  @override
+  String get mp_value => 'Value';
+
+  @override
+  String get mp_added => 'Added';
+
+  @override
+  String get mp_catalog => 'Catalog';
+
+  @override
+  String get mp_filter => 'Filter';
+
+  @override
+  String get mp_manualAdd => 'Add manually';
+
+  @override
+  String get mp_dragHint => 'Drag to set the default order in Assignments';
+
+  @override
+  String get mp_noModels => 'No models yet';
+
+  @override
+  String get mp_noModelsSub => 'Add from the catalog or enter a model ID';
+
+  @override
+  String get mp_manualHint => 'Model ID, Enter to add';
+
+  @override
+  String get mp_model => 'Model';
+
+  @override
+  String get mp_alias => 'Display alias';
+
+  @override
+  String get mp_aliasHint => 'e.g. fast';
+
+  @override
+  String get mp_context => 'Context';
+
+  @override
+  String get mp_maxOutput => 'Max output';
+
+  @override
+  String get mp_outputTooLarge => 'Output cannot exceed the context window';
+
+  @override
+  String get mp_thinking => 'Thinking';
+
+  @override
+  String get mp_levels => 'Levels';
+
+  @override
+  String get mp_defaultLevel => 'Default level';
+
+  @override
+  String get mp_defaultBadge => 'Default';
+
+  @override
+  String get mp_followService => 'Service default';
+
+  @override
+  String get mp_reasoningProtocol => 'Protocol';
+
+  @override
+  String get mp_standard => 'Standard';
+
+  @override
+  String get mp_adaptive => 'Adaptive';
+
+  @override
+  String get mp_protocolNoReasoning => 'This protocol has no thinking control';
+
+  @override
+  String get mp_unconfirmed => 'Unconfirmed';
+
+  @override
+  String get mp_unsupported => 'Not supported';
+
+  @override
+  String get mp_sampling => 'Sampling';
+
+  @override
+  String get mp_temperature => 'Temperature';
+
+  @override
+  String get mp_topP => 'Top P';
+
+  @override
+  String get mp_followDefault => 'Service default';
+
+  @override
+  String get mp_capabilities => 'Capabilities';
+
+  @override
+  String get mp_capVision => 'Image input';
+
+  @override
+  String get mp_capTools => 'Tool calls';
+
+  @override
+  String get mp_capStructured => 'Structured output';
+
+  @override
+  String get mp_capSearch => 'Native web search';
+
+  @override
+  String get mp_bodyHeaders => 'Body and headers';
+
+  @override
+  String get mp_notAdded => 'None';
+
+  @override
+  String get mp_field => 'Field';
+
+  @override
+  String get mp_header => 'Header';
+
+  @override
+  String get mp_testModel => 'Test this model';
+
+  @override
+  String get mp_copyId => 'Copy model ID';
+
+  @override
+  String get mp_removeModel => 'Remove model';
+
+  @override
+  String mp_removeTitle(Object id) {
+    return 'Remove model “$id”?';
+  }
+
+  @override
+  String get mp_removeBody =>
+      'Features using it fall back to another available model.';
+
+  @override
+  String get mp_catalogId => 'Model ID';
+
+  @override
+  String get mp_catalogCtx => 'Context';
+
+  @override
+  String get mp_catalogPrice => 'In / out · per M';
+
+  @override
+  String mp_catalogFooter(Object n, Object total, Object when) {
+    return '$n match · $total total · fetched $when';
+  }
+
+  @override
+  String mp_catalogMore(Object n) {
+    return '$n more, type to narrow down';
+  }
+
+  @override
+  String get mp_catalogIdle => 'Catalog not loaded yet';
+
+  @override
+  String get mp_catalogIdleSub =>
+      'Loads this provider’s models with the saved URL and key';
+
+  @override
+  String get mp_catalogLoading => 'Loading catalog…';
+
+  @override
+  String mp_catalogFailed(Object error) {
+    return 'Catalog unavailable: $error';
+  }
+
+  @override
+  String get mp_fetch => 'Fetch list';
+
+  @override
+  String get mp_noMatch => 'No matching models';
+
+  @override
+  String mp_picked(Object n) {
+    return '$n selected';
+  }
+
+  @override
+  String get mp_pickEmpty => 'Tick models to add them';
+
+  @override
+  String get mp_pickHint =>
+      'Capabilities, context and thinking levels come from the local catalog; adjust them after adding.';
+
+  @override
+  String mp_addPicked(Object n) {
+    return 'Add $n models';
+  }
+
+  @override
+  String get mp_new => 'New';
+
+  @override
+  String mp_unsaved(Object name, Object n) {
+    return '$name: $n unsaved changes';
+  }
+
+  @override
+  String get mp_saving => 'Saving…';
+
+  @override
+  String get mp_conflict =>
+      'Changed elsewhere: latest values merged, review and save again';
+
+  @override
+  String get mp_saveFailed => 'Save failed; changes kept';
+
+  @override
+  String mp_invalid(Object n) {
+    return '$n fields need fixing';
+  }
+
+  @override
+  String get mp_leaveBody =>
+      'Provider changes are not saved. Leaving this page discards them.';
+
+  @override
+  String get mp_show => 'Show';
+
+  @override
+  String get mp_hide => 'Hide';
+
+  @override
+  String get mp_keyHintLocal => 'Optional for local services';
+
+  @override
+  String get mp_keyHint => 'Enter this provider’s key';
+
+  @override
+  String get mp_pickerTitle => 'Add provider';
+
+  @override
+  String get mp_pickerSearch => 'Search vendors, platforms or local services';
+
+  @override
+  String get mp_groupAll => 'All';
+
+  @override
+  String get mp_groupDomestic => 'China';
+
+  @override
+  String get mp_groupInternational => 'Global';
+
+  @override
+  String get mp_groupAggregator => 'Aggregators';
+
+  @override
+  String get mp_groupLocal => 'Local';
+
+  @override
+  String get mp_groupDomesticFull => 'Chinese vendors';
+
+  @override
+  String get mp_groupInternationalFull => 'Global vendors';
+
+  @override
+  String get mp_groupAggregatorFull => 'Aggregators';
+
+  @override
+  String get mp_groupLocalFull => 'Local and custom';
+
+  @override
+  String get mp_pickerFoot =>
+      'URL and protocol come from the preset; a vendor can be added more than once for different regions.';
+
+  @override
+  String get mp_pickerNext => 'Next: enter key';
 }

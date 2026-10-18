@@ -20376,4 +20376,342 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_zoomClose => '닫기';
+
+  @override
+  String get mp_protocol => '프로토콜';
+
+  @override
+  String get mp_test => '테스트';
+
+  @override
+  String get mp_testing => '테스트 중…';
+
+  @override
+  String get mp_notChecked => '확인 안 함';
+
+  @override
+  String get mp_rename => '이름 변경';
+
+  @override
+  String get mp_request => '요청';
+
+  @override
+  String get mp_requestSub => '모든 모델 공통';
+
+  @override
+  String get mp_timeout => '타임아웃';
+
+  @override
+  String get mp_timeoutHelp => '요청 1회 최대 대기 시간, 10–600초';
+
+  @override
+  String get mp_concurrency => '최대 동시 요청';
+
+  @override
+  String get mp_concurrencyHelp => '동시에 처리하는 요청 수, 1–20';
+
+  @override
+  String get mp_retry => '재시도';
+
+  @override
+  String get mp_retryHelp => '연결 실패 또는 혼잡 시 재시도';
+
+  @override
+  String get mp_retryOff => '끔';
+
+  @override
+  String get mp_imageInput => '이미지 입력';
+
+  @override
+  String get mp_imageInputHelp => '역추론 등에서 이미지를 보낼 때 필요';
+
+  @override
+  String get mp_allow => '허용';
+
+  @override
+  String get mp_noSend => '안 보냄';
+
+  @override
+  String get mp_seconds => '초';
+
+  @override
+  String get mp_countUnit => '개';
+
+  @override
+  String get mp_headers => '사용자 지정 헤더';
+
+  @override
+  String get mp_none => '없음';
+
+  @override
+  String get mp_addHeader => '헤더 추가';
+
+  @override
+  String get mp_headerName => '이름';
+
+  @override
+  String get mp_value => '값';
+
+  @override
+  String get mp_added => '추가됨';
+
+  @override
+  String get mp_catalog => '카탈로그';
+
+  @override
+  String get mp_filter => '필터';
+
+  @override
+  String get mp_manualAdd => '직접 추가';
+
+  @override
+  String get mp_dragHint => '드래그로 기능 배정 기본 순서 결정';
+
+  @override
+  String get mp_noModels => '모델 없음';
+
+  @override
+  String get mp_noModelsSub => '카탈로그에서 추가하거나 모델 ID 입력';
+
+  @override
+  String get mp_manualHint => '모델 ID 입력 후 Enter';
+
+  @override
+  String get mp_model => '모델';
+
+  @override
+  String get mp_alias => '표시 별칭';
+
+  @override
+  String get mp_aliasHint => '예: fast';
+
+  @override
+  String get mp_context => '컨텍스트';
+
+  @override
+  String get mp_maxOutput => '최대 출력';
+
+  @override
+  String get mp_outputTooLarge => '출력이 컨텍스트를 넘을 수 없음';
+
+  @override
+  String get mp_thinking => '사고';
+
+  @override
+  String get mp_levels => '조절 단계';
+
+  @override
+  String get mp_defaultLevel => '기본 단계';
+
+  @override
+  String get mp_defaultBadge => '기본';
+
+  @override
+  String get mp_followService => '서비스 기본';
+
+  @override
+  String get mp_reasoningProtocol => '사고 프로토콜';
+
+  @override
+  String get mp_standard => '표준';
+
+  @override
+  String get mp_adaptive => '적응형';
+
+  @override
+  String get mp_protocolNoReasoning => '이 프로토콜은 사고 조절 미지원';
+
+  @override
+  String get mp_unconfirmed => '미확인';
+
+  @override
+  String get mp_unsupported => '미지원';
+
+  @override
+  String get mp_sampling => '샘플링';
+
+  @override
+  String get mp_temperature => '온도';
+
+  @override
+  String get mp_topP => 'Top P';
+
+  @override
+  String get mp_followDefault => '서비스 기본값';
+
+  @override
+  String get mp_capabilities => '기능';
+
+  @override
+  String get mp_capVision => '이미지 입력';
+
+  @override
+  String get mp_capTools => '도구 호출';
+
+  @override
+  String get mp_capStructured => '구조화 출력';
+
+  @override
+  String get mp_capSearch => '네이티브 웹 검색';
+
+  @override
+  String get mp_bodyHeaders => '본문과 헤더';
+
+  @override
+  String get mp_notAdded => '없음';
+
+  @override
+  String get mp_field => '필드';
+
+  @override
+  String get mp_header => '헤더';
+
+  @override
+  String get mp_testModel => '이 모델 테스트';
+
+  @override
+  String get mp_copyId => '모델 ID 복사';
+
+  @override
+  String get mp_removeModel => '모델 제거';
+
+  @override
+  String mp_removeTitle(Object id) {
+    return '모델 “$id”을(를) 제거할까요?';
+  }
+
+  @override
+  String get mp_removeBody => '이 모델을 쓰는 기능은 다른 모델로 대체됩니다.';
+
+  @override
+  String get mp_catalogId => '모델 ID';
+
+  @override
+  String get mp_catalogCtx => '컨텍스트';
+
+  @override
+  String get mp_catalogPrice => '입력 / 출력 · 백만';
+
+  @override
+  String mp_catalogFooter(Object n, Object total, Object when) {
+    return '일치 $n개 · 전체 $total개 · $when 가져옴';
+  }
+
+  @override
+  String mp_catalogMore(Object n) {
+    return '$n개 더, 필터로 좁히기';
+  }
+
+  @override
+  String get mp_catalogIdle => '카탈로그를 아직 불러오지 않음';
+
+  @override
+  String get mp_catalogIdleSub => '저장된 주소와 키로 모델 목록을 불러옴';
+
+  @override
+  String get mp_catalogLoading => '카탈로그 불러오는 중…';
+
+  @override
+  String mp_catalogFailed(Object error) {
+    return '카탈로그 사용 불가: $error';
+  }
+
+  @override
+  String get mp_fetch => '목록 가져오기';
+
+  @override
+  String get mp_noMatch => '일치하는 모델 없음';
+
+  @override
+  String mp_picked(Object n) {
+    return '$n개 선택';
+  }
+
+  @override
+  String get mp_pickEmpty => '추가할 모델 선택';
+
+  @override
+  String get mp_pickHint => '기능·컨텍스트·사고 단계는 로컬 카탈로그로 채워지며 추가 후 조정할 수 있습니다.';
+
+  @override
+  String mp_addPicked(Object n) {
+    return '모델 $n개 추가';
+  }
+
+  @override
+  String get mp_new => '새';
+
+  @override
+  String mp_unsaved(Object name, Object n) {
+    return '$name: 저장 안 된 변경 $n개';
+  }
+
+  @override
+  String get mp_saving => '저장 중…';
+
+  @override
+  String get mp_conflict => '다른 곳에서 변경됨: 최신 값을 병합했으니 확인 후 저장하세요';
+
+  @override
+  String get mp_saveFailed => '저장 실패, 변경 유지됨';
+
+  @override
+  String mp_invalid(Object n) {
+    return '$n곳 수정 필요';
+  }
+
+  @override
+  String get mp_leaveBody => '서비스 설정이 저장되지 않았습니다. 이동하면 변경이 사라집니다.';
+
+  @override
+  String get mp_show => '표시';
+
+  @override
+  String get mp_hide => '숨기기';
+
+  @override
+  String get mp_keyHintLocal => '로컬 서비스는 비워도 됨';
+
+  @override
+  String get mp_keyHint => '이 서비스의 키 입력';
+
+  @override
+  String get mp_pickerTitle => '서비스 추가';
+
+  @override
+  String get mp_pickerSearch => '공급사·플랫폼·로컬 검색';
+
+  @override
+  String get mp_groupAll => '전체';
+
+  @override
+  String get mp_groupDomestic => '중국';
+
+  @override
+  String get mp_groupInternational => '글로벌';
+
+  @override
+  String get mp_groupAggregator => '집계';
+
+  @override
+  String get mp_groupLocal => '로컬';
+
+  @override
+  String get mp_groupDomesticFull => '중국 공급사';
+
+  @override
+  String get mp_groupInternationalFull => '글로벌 공급사';
+
+  @override
+  String get mp_groupAggregatorFull => '집계 플랫폼';
+
+  @override
+  String get mp_groupLocalFull => '로컬 및 사용자 지정';
+
+  @override
+  String get mp_pickerFoot =>
+      '주소와 프로토콜은 프리셋으로 채워지며, 지역별로 같은 공급사를 여러 번 추가할 수 있습니다.';
+
+  @override
+  String get mp_pickerNext => '다음: 키 입력';
 }

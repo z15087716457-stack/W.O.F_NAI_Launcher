@@ -8,6 +8,8 @@ import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_text.dart';
+import '../model_providers/model_providers_controller.dart';
+import '../model_providers/model_providers_page.dart';
 import 'settings_contract.dart';
 import 'settings_controls.dart';
 import 'settings_format.dart';
@@ -36,8 +38,13 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
   final _taskScroll = ScrollController();
   final _requestScroll = ScrollController();
 
+  /// 工作台状态（选中项、草稿）跨标签保留。
+  final _workbench = ProvidersController();
+  String? _handled;
+
   @override
   void dispose() {
+    _workbench.dispose();
     _taskScroll.dispose();
     _requestScroll.dispose();
     super.dispose();
@@ -55,7 +62,7 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
       _Tab.presets: l.set_mdPresets,
       _Tab.requests: l.set_mdRequests,
     };
-    return SettingsPageFrame(
+    final page = SettingsPageFrame(
       wide: true,
       title: SettingsPageTitle(
         eyebrow: SettingsFormat.eyebrow(SettingsPageId.models),
@@ -134,12 +141,59 @@ class _SettingsModelsPageState extends State<SettingsModelsPage> {
           ),
       ],
     );
+    final wb = m.workbench;
+    if (wb == null) return page;
+    return Stack(
+      children: [
+        Positioned.fill(child: page),
+        Positioned.fill(
+          child: ModelProvidersOverlays(
+            data: wb,
+            actions: s.actions.providers,
+            controller: _workbench,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _providers(BuildContext context, SettingsModelsData m) {
     final l = context.l10n;
     final c = context.ui;
     final s = SettingsScope.of(context);
+    if (m.workbench case final wb?) {
+      final hl = s.highlight;
+      if (hl == 'provider-add' && _handled != hl) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _workbench.pickerOpen = true;
+        });
+      }
+      _handled = hl;
+      return ModelProvidersPanel(
+        data: wb,
+        actions: s.actions.providers,
+        now: s.data.now,
+        controller: _workbench,
+        selectedId:
+            hl != null && hl.startsWith('provider-') && hl != 'provider-add'
+            ? hl.substring(9)
+            : null,
+        onDirty: s.reportDirty,
+        confirm:
+            ({
+              required title,
+              required body,
+              required confirm,
+              required onConfirm,
+            }) => s.confirm(
+              title: title,
+              body: body,
+              confirm: confirm,
+              danger: true,
+              onConfirm: onConfirm,
+            ),
+      );
+    }
     if (m.providers.isEmpty) {
       return Padding(
         padding: const EdgeInsets.all(48),

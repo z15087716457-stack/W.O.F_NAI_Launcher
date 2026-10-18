@@ -120,7 +120,9 @@ class _SettingsPageState extends State<SettingsPage> {
     final l = context.l10n;
     _ask(
       title: l.set_leaveTitle,
-      body: l.set_leaveBody,
+      body: widget.data.page == SettingsPageId.models
+          ? l.mp_leaveBody
+          : l.set_leaveBody,
       confirm: l.set_discard,
       danger: true,
       onConfirm: () {
@@ -789,11 +791,30 @@ class _Header extends StatelessWidget {
           tone: SettingsBtnTone.ghost,
           onTap: a.onImportModelConfig,
         ),
+        if (s.data.models.workbench != null)
+          MediaQuery.sizeOf(context).width < 1100
+              ? SettingsIconBtn(
+                  key: const Key('models-copy-config'),
+                  glyph: SettingsGlyphs.copy,
+                  tooltip: l.set_bkCopyConfig,
+                  onTap: a.onCopyModelConfig,
+                )
+              : SettingsBtn(
+                  key: const Key('models-copy-config'),
+                  label: l.set_bkCopyConfig,
+                  glyph: SettingsGlyphs.copy,
+                  small: true,
+                  tone: SettingsBtnTone.ghost,
+                  onTap: a.onCopyModelConfig,
+                ),
         SettingsBtn(
           label: l.set_mdAddProvider,
           glyph: UiGlyphs.plus,
           small: true,
-          onTap: a.onAddProvider,
+          // 新工作台：在页面里开添加弹窗（借搜索跳转的高亮通道传给模型页）。
+          onTap: s.data.models.workbench != null
+              ? () => s.jump(SettingsPageId.models, anchor: 'provider-add')
+              : a.onAddProvider,
         ),
       ],
       SettingsPageId.agent => [

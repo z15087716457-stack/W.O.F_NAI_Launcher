@@ -20308,4 +20308,341 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_zoomClose => '閉じる';
+
+  @override
+  String get mp_protocol => 'プロトコル';
+
+  @override
+  String get mp_test => 'テスト';
+
+  @override
+  String get mp_testing => 'テスト中…';
+
+  @override
+  String get mp_notChecked => '未確認';
+
+  @override
+  String get mp_rename => '名前を変更';
+
+  @override
+  String get mp_request => 'リクエスト';
+
+  @override
+  String get mp_requestSub => '全モデル共通';
+
+  @override
+  String get mp_timeout => 'タイムアウト';
+
+  @override
+  String get mp_timeoutHelp => '1 回のリクエストの最大待ち時間（10–600 秒）';
+
+  @override
+  String get mp_concurrency => '最大同時数';
+
+  @override
+  String get mp_concurrencyHelp => '同時に処理するリクエスト数（1–20）';
+
+  @override
+  String get mp_retry => '再試行';
+
+  @override
+  String get mp_retryHelp => '接続失敗や混雑時に再試行';
+
+  @override
+  String get mp_retryOff => 'オフ';
+
+  @override
+  String get mp_imageInput => '画像入力';
+
+  @override
+  String get mp_imageInputHelp => '逆推などで画像をモデルに送る場合に必要';
+
+  @override
+  String get mp_allow => '許可';
+
+  @override
+  String get mp_noSend => '送信しない';
+
+  @override
+  String get mp_seconds => '秒';
+
+  @override
+  String get mp_countUnit => '件';
+
+  @override
+  String get mp_headers => 'カスタムヘッダー';
+
+  @override
+  String get mp_none => 'なし';
+
+  @override
+  String get mp_addHeader => 'ヘッダーを追加';
+
+  @override
+  String get mp_headerName => '名前';
+
+  @override
+  String get mp_value => '値';
+
+  @override
+  String get mp_added => '追加済み';
+
+  @override
+  String get mp_catalog => 'カタログ';
+
+  @override
+  String get mp_filter => '絞り込み';
+
+  @override
+  String get mp_manualAdd => '手動で追加';
+
+  @override
+  String get mp_dragHint => 'ドラッグで割り当ての既定順を変更';
+
+  @override
+  String get mp_noModels => 'モデルがありません';
+
+  @override
+  String get mp_noModelsSub => 'カタログから追加するか、モデル ID を入力';
+
+  @override
+  String get mp_manualHint => 'モデル ID を入力して Enter';
+
+  @override
+  String get mp_model => 'モデル';
+
+  @override
+  String get mp_alias => '表示名';
+
+  @override
+  String get mp_aliasHint => '例：fast';
+
+  @override
+  String get mp_context => 'コンテキスト';
+
+  @override
+  String get mp_maxOutput => '最大出力';
+
+  @override
+  String get mp_outputTooLarge => '出力はコンテキストを超えられません';
+
+  @override
+  String get mp_thinking => '思考';
+
+  @override
+  String get mp_levels => '調整可能な段階';
+
+  @override
+  String get mp_defaultLevel => '既定の段階';
+
+  @override
+  String get mp_defaultBadge => '既定';
+
+  @override
+  String get mp_followService => 'サービス既定';
+
+  @override
+  String get mp_reasoningProtocol => '思考プロトコル';
+
+  @override
+  String get mp_standard => '標準';
+
+  @override
+  String get mp_adaptive => '適応';
+
+  @override
+  String get mp_protocolNoReasoning => 'このプロトコルは思考調整に非対応';
+
+  @override
+  String get mp_unconfirmed => '未確認';
+
+  @override
+  String get mp_unsupported => '非対応';
+
+  @override
+  String get mp_sampling => 'サンプリング';
+
+  @override
+  String get mp_temperature => '温度';
+
+  @override
+  String get mp_topP => 'Top P';
+
+  @override
+  String get mp_followDefault => 'サービス既定';
+
+  @override
+  String get mp_capabilities => '機能';
+
+  @override
+  String get mp_capVision => '画像入力';
+
+  @override
+  String get mp_capTools => 'ツール呼び出し';
+
+  @override
+  String get mp_capStructured => '構造化出力';
+
+  @override
+  String get mp_capSearch => 'ネイティブ検索';
+
+  @override
+  String get mp_bodyHeaders => 'ボディとヘッダー';
+
+  @override
+  String get mp_notAdded => '未追加';
+
+  @override
+  String get mp_field => 'フィールド';
+
+  @override
+  String get mp_header => 'ヘッダー';
+
+  @override
+  String get mp_testModel => 'このモデルをテスト';
+
+  @override
+  String get mp_copyId => 'モデル ID をコピー';
+
+  @override
+  String get mp_removeModel => 'モデルを削除';
+
+  @override
+  String mp_removeTitle(Object id) {
+    return 'モデル「$id」を削除しますか？';
+  }
+
+  @override
+  String get mp_removeBody => 'このモデルを使う機能は他のモデルに切り替わります。';
+
+  @override
+  String get mp_catalogId => 'モデル ID';
+
+  @override
+  String get mp_catalogCtx => 'コンテキスト';
+
+  @override
+  String get mp_catalogPrice => '入力 / 出力 · 100万';
+
+  @override
+  String mp_catalogFooter(Object n, Object total, Object when) {
+    return '一致 $n 件 · 全 $total 件 · $when 取得';
+  }
+
+  @override
+  String mp_catalogMore(Object n) {
+    return '他に $n 件。絞り込みで探してください';
+  }
+
+  @override
+  String get mp_catalogIdle => 'カタログ未取得';
+
+  @override
+  String get mp_catalogIdleSub => '保存済みの URL とキーでモデル一覧を取得';
+
+  @override
+  String get mp_catalogLoading => 'カタログを取得中…';
+
+  @override
+  String mp_catalogFailed(Object error) {
+    return 'カタログを取得できません：$error';
+  }
+
+  @override
+  String get mp_fetch => '一覧を取得';
+
+  @override
+  String get mp_noMatch => '一致するモデルがありません';
+
+  @override
+  String mp_picked(Object n) {
+    return '$n 件選択';
+  }
+
+  @override
+  String get mp_pickEmpty => '追加するモデルを選択';
+
+  @override
+  String get mp_pickHint => '機能・コンテキスト・思考段階はローカルカタログから入力され、追加後に調整できます。';
+
+  @override
+  String mp_addPicked(Object n) {
+    return '$n 件のモデルを追加';
+  }
+
+  @override
+  String get mp_new => '新規';
+
+  @override
+  String mp_unsaved(Object name, Object n) {
+    return '$name に未保存の変更が $n 件';
+  }
+
+  @override
+  String get mp_saving => '保存中…';
+
+  @override
+  String get mp_conflict => '他の場所で変更されました。最新値を統合しました。確認して保存してください';
+
+  @override
+  String get mp_saveFailed => '保存に失敗しました。変更は保持されています';
+
+  @override
+  String mp_invalid(Object n) {
+    return '$n 件の修正が必要';
+  }
+
+  @override
+  String get mp_leaveBody => 'サービス設定は保存されていません。移動すると変更は失われます。';
+
+  @override
+  String get mp_show => '表示';
+
+  @override
+  String get mp_hide => '隠す';
+
+  @override
+  String get mp_keyHintLocal => 'ローカルサービスは空欄可';
+
+  @override
+  String get mp_keyHint => 'このサービスのキーを入力';
+
+  @override
+  String get mp_pickerTitle => 'サービスを追加';
+
+  @override
+  String get mp_pickerSearch => 'ベンダー・プラットフォーム・ローカルを検索';
+
+  @override
+  String get mp_groupAll => 'すべて';
+
+  @override
+  String get mp_groupDomestic => '国内';
+
+  @override
+  String get mp_groupInternational => '海外';
+
+  @override
+  String get mp_groupAggregator => '集約';
+
+  @override
+  String get mp_groupLocal => 'ローカル';
+
+  @override
+  String get mp_groupDomesticFull => '中国のベンダー';
+
+  @override
+  String get mp_groupInternationalFull => '海外ベンダー';
+
+  @override
+  String get mp_groupAggregatorFull => '集約プラットフォーム';
+
+  @override
+  String get mp_groupLocalFull => 'ローカルとカスタム';
+
+  @override
+  String get mp_pickerFoot => 'URL とプロトコルはプリセットで入力されます。地域違いで同じベンダーを複数追加できます。';
+
+  @override
+  String get mp_pickerNext => '次へ：キーを入力';
 }
