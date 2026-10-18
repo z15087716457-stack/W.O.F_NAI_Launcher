@@ -4,19 +4,22 @@
 
 ## 构建、测试与开发命令
 
-本机 SDK 为 Flutter 3.44.2 / Dart 3.12.2，最低约束以 `pubspec.yaml` 为准。Shell 使用 Bash，原生 `.ps1` 使用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
+当前整合分支使用登记的 `E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7/`（Flutter 3.47.7 / Dart 3.13.5），最低约束以 `pubspec.yaml` 为准。PATH / `C:/flutter` 上旧 3.44.2 不作为本分支验证入口，执行前核对 `flutter --version`。Shell 使用 Bash，原生 `.ps1` 使用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
 
 ```bash
+studio_sdk="E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7"
+export PATH="$studio_sdk/bin:$PATH"
+flutter --version
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run tool/generate.dart
 flutter gen-l10n
 flutter test test/core/utils/justified_layout_test.dart
 flutter analyze
-flutter build windows --release
+flutter build windows --release --no-tree-shake-icons
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/validate_windows_data_identity.ps1
 ```
 
-依赖改变后 `pub get`；Riverpod、Freezed、JSON、Hive 或路由生成输入改变后运行 `build_runner`。界面文案进入各语言 ARB，再运行本节下方的繁体生成与 `gen-l10n`。纯文档或纯注释维护不运行 Flutter 测试 / 构建，也不调用桥接写参、模型或生图接口。
+依赖改变后 `pub get`；Riverpod、Freezed、JSON、Hive 或路由生成输入改变后运行 `dart run tool/generate.dart`；该入口读取 `.devin/codegen.json`，定向生成并备份 / 恢复原有未提交生成文件，不能用宽范围 `build_runner --delete-conflicting-outputs` 覆盖它们。界面文案进入各语言 ARB，再运行本节下方的繁体生成与 `gen-l10n`。纯文档或纯注释维护不运行 Flutter 测试 / 构建，也不调用桥接写参、模型或生图接口。
 
 只有需要并获准建立独立开发会话时，才使用 `scripts/dev_hot_reload_window.ps1` / `scripts/dev_hot_reload.ps1`；已有同一开发会话时用 `scripts/trigger_hot_reload.ps1`，状态重置用 `-Restart`，不另开第二个 attach。`capture_dev_window.ps1` 捕获该 Debug 开发窗口，不能把它当当前安装包。用户自行实机核验时只交付，不自动热重载、重启或操作其运行实例。
 
@@ -36,7 +39,7 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
 
-Glass 组包通常用有效源码下 `.dart_tool/assemble_glass.py`，AOT 来自 `build/glass-bundle/windows/app.so`，资源来自 `build/glass-bundle/flutter_assets/`。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
+本机累计更新的交付材料按批次放在有效源码 `.dart_tool/cumulative-r<N>-<日期>/`（最近一批见工作区接手说明登记），复用上一批的 `snapshot` → `run_build` → `prepare` → `verify_package` → `install` → `finalize` 链；r26 起安装器支持带备份的退役文件删除，`tools/nai-agent` 按源码整树同步。历史 Glass 组包曾使用 `.dart_tool/assemble_glass.py` / `build/glass-bundle/`；这些不是当前批次固定入口，后续使用当次登记的构建输入与组包脚本。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
 
 覆盖前现场检查 `nai_launcher` 进程路径，等用户从托盘完全退出，备份当前程序 `data/` 与记录；安装后逐项复验并保存单步回退，不自动启动。不要用标准 `build/windows/x64/runner/Release/` 整目录覆盖既有 Glass 包，尤其不能移除其原生插件。Release 发布流程另按下方规范执行。
 
@@ -77,7 +80,7 @@ flutter gen-l10n
 
 独立品牌标题栏已经移除。页面内容直达顶边，窗口按钮由各路由页面绘制，Navigator 浮层在按钮上方；主工作区只有明确空白区可拖窗，登录 / 载入保留自己的原生命中区，原生 Acrylic 当前禁用。
 
-桌面 / Explorer 用完整长方形 Logo，窗口 / 任务栏 / 托盘用方形 W；`generate_windows_icons.cjs` 生成两套 ICO，原生图标修改需重编 Windows runner。原生 `CompanyName=com.example`、`ProductName=nai_launcher`、单实例身份和可执行文件名保持稳定，品牌显示名写 FileDescription / 窗口标题；否则数据目录会切到新位置。
+桌面 / Explorer 用完整长方形 Logo，窗口 / 任务栏 / 托盘用方形 W；`generate_windows_icons.cjs` 生成两套 ICO，原生图标修改需重编 Windows runner。原生 `CompanyName=com.example`、`ProductName=nai_launcher`、单实例身份和可执行文件名保持稳定，品牌显示名写 FileDescription / 窗口标题。Windows 内部数据统一放 EXE 旁 `user-data/`，原生版本身份只用于识别历史 AppData 目录并保留迁移兼容。迁移在数据库打开前创建独立备份、校验并切换，不能覆盖两端不同数据；打包拒绝含用户数据的运行目录，更新／卸载保留 `user-data/`、Agent 数据和迁移备份。
 
 构建后运行 `scripts/validate_windows_data_identity.ps1`，可用 `-ExecutablePath` 核对指定包。其检查只读 EXE；打包脚本也执行。字体、SVG / 图标字体、许可或资源清单变更须随完整资源交付，不只换 AOT。
 
