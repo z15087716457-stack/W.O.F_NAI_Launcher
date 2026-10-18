@@ -19562,6 +19562,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agSkillManual => '수동 전용';
 
   @override
+  String get set_agSkillAutoTip =>
+      '프롬프트에는 이름과 한 줄 설명만 들어가며, 작업이 맞으면 Agent가 직접 전체 설명을 읽습니다.';
+
+  @override
+  String get set_agSkillManualTip =>
+      '프롬프트에 들어가지 않아 Agent가 스스로 사용하지 않습니다. 채팅창에 /skill:이름을 입력하면 호출합니다.';
+
+  @override
+  String get set_agSkillDescNaiPrompt =>
+      'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
+
+  @override
+  String get set_agSkillDescNaiStudio =>
+      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+
+  @override
   String get set_agSkillView => '보기';
 
   @override

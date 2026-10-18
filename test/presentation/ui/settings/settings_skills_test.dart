@@ -45,7 +45,7 @@ void main() {
     expect(rec.calls, contains('skillEnabled:global/style-replica:false'));
     await t.tap(find.byKey(const Key('skill-mode-global/style-replica')));
     await t.pumpAndSettle();
-    await t.tap(find.text('仅手动').last);
+    await t.tap(find.text('仅手动调用').last);
     await t.pumpAndSettle();
     expect(rec.calls, contains('skillManual:global/style-replica:true'));
 

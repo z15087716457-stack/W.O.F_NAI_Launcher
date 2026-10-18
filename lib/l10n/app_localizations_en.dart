@@ -20111,6 +20111,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agSkillManual => 'Manual only';
 
   @override
+  String get set_agSkillAutoTip =>
+      'Only the name and one-line description stay in the prompt; the Agent reads the full instructions itself when a task matches.';
+
+  @override
+  String get set_agSkillManualTip =>
+      'Kept out of the prompt, so the Agent will not use it on its own; type /skill:name in the chat box to invoke it.';
+
+  @override
+  String get set_agSkillDescNaiPrompt =>
+      'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
+
+  @override
+  String get set_agSkillDescNaiStudio =>
+      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+
+  @override
   String get set_agSkillView => 'View';
 
   @override

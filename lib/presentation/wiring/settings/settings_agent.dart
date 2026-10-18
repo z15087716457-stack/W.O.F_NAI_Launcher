@@ -653,7 +653,7 @@ SettingsAgentData settingsAgentData(WidgetRef ref, {bool inspect = false}) {
           id: skill.key,
           name: skill.name,
           source: SettingsSkillSource.values.byName(skill.source),
-          description: skill.description,
+          description: skill.displayDescription(currentL10n),
           path: skill.directory,
           enabled: skill.enabled,
           manual: skill.mode == 'manual',

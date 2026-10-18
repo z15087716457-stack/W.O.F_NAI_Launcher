@@ -1187,7 +1187,10 @@ class _SkillRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: 8,
         children: [
-          UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
+          Tooltip(
+            message: k.manual ? l.set_agSkillManualTip : l.set_agSkillAutoTip,
+            child: UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
+          ),
           SettingsBtn(
             label: l.set_agSkillView,
             glyph: UiGlyphs.eye,
@@ -1254,11 +1257,14 @@ class _SkillModeMenuState extends State<_SkillModeMenu> {
         (l.set_agSkillAuto, () => a.onSkillManual(k.id, false), false),
         (l.set_agSkillManual, () => a.onSkillManual(k.id, true), false),
       ],
-      child: UiPressable(
-        key: Key('skill-mode-${k.id}'),
-        onTap: () => setState(() => _open = true),
-        builder: (context, _) =>
-            UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
+      child: Tooltip(
+        message: k.manual ? l.set_agSkillManualTip : l.set_agSkillAutoTip,
+        child: UiPressable(
+          key: Key('skill-mode-${k.id}'),
+          onTap: () => setState(() => _open = true),
+          builder: (context, _) =>
+              UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
+        ),
       ),
     );
   }

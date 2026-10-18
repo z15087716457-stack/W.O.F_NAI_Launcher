@@ -582,7 +582,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       mentions: mentions,
       skills: [
         for (final s in active)
-          AgentSkillOption(name: s.name, description: s.description),
+          AgentSkillOption(name: s.name, description: s.displayDescription(l)),
       ],
       draft: draft,
       status: r?.starting == true

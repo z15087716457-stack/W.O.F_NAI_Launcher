@@ -19495,6 +19495,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agSkillManual => '手動のみ';
 
   @override
+  String get set_agSkillAutoTip =>
+      'プロンプトには名前と一行説明だけが入り、作業が合うと Agent が自分で全文を読みます。';
+
+  @override
+  String get set_agSkillManualTip =>
+      'プロンプトに入らないため Agent は自分では使いません。チャット欄で /skill:名前 と入力すると呼び出します。';
+
+  @override
+  String get set_agSkillDescNaiPrompt =>
+      'Write or revise NovelAI prompts in the Studio draft - main/negative prompts, characters, blocks and weights - following the rules of the current model (V4/V4.5 or V5). Read before changing prompt text.';
+
+  @override
+  String get set_agSkillDescNaiStudio =>
+      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+
+  @override
   String get set_agSkillView => '表示';
 
   @override

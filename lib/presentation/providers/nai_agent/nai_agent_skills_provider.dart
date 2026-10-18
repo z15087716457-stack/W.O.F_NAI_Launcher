@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
+import '../../../l10n/app_localizations.dart';
 import 'nai_agent_workspace_provider.dart';
 
 /// One skill copy as resolved by the host (`tool/nai_agent/lib/skills.mjs`).
@@ -45,6 +46,17 @@ class NaiAgentSkill {
   final String? error;
   final String? shadowedBy;
   bool get builtin => source == 'builtin';
+
+  /// Settings / composer text. Built-ins ship an English SKILL.md for the
+  /// model; the UI shows the localized summary. Other skills show their own.
+  String displayDescription(AppLocalizations l) {
+    if (!builtin) return description;
+    return switch (name) {
+      'nai-prompt' => l.set_agSkillDescNaiPrompt,
+      'nai-studio' => l.set_agSkillDescNaiStudio,
+      _ => description,
+    };
+  }
 }
 
 class NaiAgentSkillInventory {

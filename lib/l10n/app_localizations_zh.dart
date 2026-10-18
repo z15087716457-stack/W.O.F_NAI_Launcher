@@ -19264,10 +19264,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agSkillWorkspace => '工作区';
 
   @override
-  String get set_agSkillAuto => '自动';
+  String get set_agSkillAuto => '自动调用';
 
   @override
-  String get set_agSkillManual => '仅手动';
+  String get set_agSkillManual => '仅手动调用';
+
+  @override
+  String get set_agSkillAutoTip => '提示词里只放名称和一句话描述，任务对得上时 Agent 会自己读取完整说明。';
+
+  @override
+  String get set_agSkillManualTip => '不进提示词，Agent 不会自己用；在聊天框输入 /skill:名称 才会调用。';
+
+  @override
+  String get set_agSkillDescNaiPrompt =>
+      '按当前模型（V4／V4.5 或 V5）的规则，撰写或修改草稿里的 NovelAI 提示词：主提示词、负面、角色、积木与权重。改提示词前先读。';
+
+  @override
+  String get set_agSkillDescNaiStudio =>
+      '通过业务工具操作 NAI Studio：编辑草稿、查看图片、生成报价与执行、图库／历史、原图与 Vibe／精准参考、积木、画风探索、图像工具、快照与偏好设置。除读取当前状态外，其他 Studio 操作前先读。';
 
   @override
   String get set_agSkillView => '查看';
@@ -39664,10 +39678,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agSkillWorkspace => '工作區';
 
   @override
-  String get set_agSkillAuto => '自動';
+  String get set_agSkillAuto => '自動呼叫';
 
   @override
-  String get set_agSkillManual => '僅手動';
+  String get set_agSkillManual => '僅手動呼叫';
+
+  @override
+  String get set_agSkillAutoTip => '提示詞裡只放名稱和一句話描述，任務對得上時 Agent 會自己讀取完整說明。';
+
+  @override
+  String get set_agSkillManualTip => '不進提示詞，Agent 不會自己用；在聊天框輸入 /skill:名稱 才會呼叫。';
+
+  @override
+  String get set_agSkillDescNaiPrompt =>
+      '按當前模型（V4／V4.5 或 V5）的規則，撰寫或修改草稿裡的 NovelAI 提示詞：主提示詞、負面、角色、積木與權重。改提示詞前先讀。';
+
+  @override
+  String get set_agSkillDescNaiStudio =>
+      '通過業務工具操作 NAI Studio：編輯草稿、檢視圖片、生成報價與執行、圖庫／歷史、原圖與 Vibe／精準參考、積木、畫風探索、影像工具、快照與偏好設定。除讀取當前狀態外，其他 Studio 操作前先讀。';
 
   @override
   String get set_agSkillView => '檢視';
