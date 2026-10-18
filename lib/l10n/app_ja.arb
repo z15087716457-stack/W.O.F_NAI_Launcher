@@ -10008,22 +10008,9 @@
     }
   },
   "set_mdDisabled": "無効",
-  "set_mdLocal": "ローカル",
-  "set_mdLatency": "{ms} · {when}",
-  "@set_mdLatency": {
-    "placeholders": {
-      "ms": {},
-      "when": {}
-    }
-  },
   "set_mdUnreachable": "接続失敗",
-  "set_mdName": "名前",
   "set_mdBaseUrl": "ベース URL",
   "set_mdApiKey": "API キー",
-  "set_mdApiKeyEmpty": "未入力",
-  "set_mdModels": "モデル",
-  "set_mdRefreshModels": "プロバイダーから取得",
-  "set_mdAddModel": "手動で追加",
   "set_mdUsedFor": "{tasks} に使用",
   "@set_mdUsedFor": {
     "placeholders": {
@@ -10031,10 +10018,6 @@
     }
   },
   "set_mdRetired": "提供終了",
-  "set_mdCapTools": "ツール",
-  "set_mdCapVision": "ビジョン",
-  "set_mdCapReasoning": "推論",
-  "set_mdAdvanced": "詳細なリクエスト設定",
   "set_mdDelete": "プロバイダーを削除",
   "set_mdDeleteTitle": "「{name}」を削除しますか？",
   "@set_mdDeleteTitle": {
@@ -10043,7 +10026,6 @@
     }
   },
   "set_mdDeleteBody": "使用中の機能は別のプロバイダーに切り替わります。",
-  "set_mdRemoveModel": "モデルを外す",
   "set_mdTaskPrompt": "プロンプト翻訳",
   "set_mdTaskReverse": "プロンプト逆推定",
   "set_mdTaskTag": "タグ翻訳・意味情報",
@@ -10768,5 +10750,15 @@
   "mp_groupAggregatorFull": "集約プラットフォーム",
   "mp_groupLocalFull": "ローカルとカスタム",
   "mp_pickerFoot": "URL とプロトコルはプリセットで入力されます。地域違いで同じベンダーを複数追加できます。",
-  "mp_pickerNext": "次へ：キーを入力"
+  "mp_pickerNext": "次へ：キーを入力",
+  "mp_duplicateKey": "リクエストのフィールド名が重複しています。",
+  "mp_retryRange": "再試行回数は 0～3 回にしてください。",
+  "mp_catalogCacheFailed": "モデル一覧のキャッシュを保存できませんでした。",
+  "mp_errorAuthentication": "API キーが無効",
+  "mp_errorPermission": "アクセスが拒否されました",
+  "mp_errorTimeout": "リクエストがタイムアウト",
+  "mp_errorNetwork": "接続できません",
+  "mp_errorResponse": "無効なレスポンス",
+  "mp_errorHttp": "リクエスト失敗",
+  "mp_errorRateLimit": "レート制限を超過"
 }

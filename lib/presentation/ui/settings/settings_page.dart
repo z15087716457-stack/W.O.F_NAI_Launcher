@@ -807,9 +807,7 @@ class _Header extends StatelessWidget {
           glyph: UiGlyphs.plus,
           small: true,
           // 新工作台：在页面里开添加弹窗（借搜索跳转的高亮通道传给模型页）。
-          onTap: s.data.models.workbench != null
-              ? () => s.jump(SettingsPageId.models, anchor: 'provider-add')
-              : a.onAddProvider,
+          onTap: () => s.jump(SettingsPageId.models, anchor: 'provider-add'),
         ),
       ],
       SettingsPageId.agent => [

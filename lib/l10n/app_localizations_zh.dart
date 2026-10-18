@@ -18207,18 +18207,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_mdDisabled => '已停用';
 
   @override
-  String get set_mdLocal => '本机';
-
-  @override
-  String set_mdLatency(Object ms, Object when) {
-    return '$ms · $when';
-  }
-
-  @override
   String get set_mdUnreachable => '连接失败';
-
-  @override
-  String get set_mdName => '名称';
 
   @override
   String get set_mdBaseUrl => '接口地址';
@@ -18227,36 +18216,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_mdApiKey => 'API Key';
 
   @override
-  String get set_mdApiKeyEmpty => '未填写';
-
-  @override
-  String get set_mdModels => '模型';
-
-  @override
-  String get set_mdRefreshModels => '从服务商刷新';
-
-  @override
-  String get set_mdAddModel => '手动添加';
-
-  @override
   String set_mdUsedFor(Object tasks) {
     return '用于 $tasks';
   }
 
   @override
   String get set_mdRetired => '服务商已下线';
-
-  @override
-  String get set_mdCapTools => '工具';
-
-  @override
-  String get set_mdCapVision => '视觉';
-
-  @override
-  String get set_mdCapReasoning => '推理';
-
-  @override
-  String get set_mdAdvanced => '高级请求参数';
 
   @override
   String get set_mdDelete => '删除服务商';
@@ -18268,9 +18233,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_mdDeleteBody => '用到它的功能会回落到其他可用服务商。';
-
-  @override
-  String get set_mdRemoveModel => '移除模型';
 
   @override
   String get set_mdTaskPrompt => '提示词翻译';
@@ -19901,6 +19863,36 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mp_pickerNext => '下一步：填写 Key';
+
+  @override
+  String get mp_duplicateKey => '请求字段名称重复。';
+
+  @override
+  String get mp_retryRange => '失败重试次数必须为 0–3 次。';
+
+  @override
+  String get mp_catalogCacheFailed => '无法保存模型目录缓存。';
+
+  @override
+  String get mp_errorAuthentication => 'API Key 无效';
+
+  @override
+  String get mp_errorPermission => '无访问权限';
+
+  @override
+  String get mp_errorTimeout => '请求超时';
+
+  @override
+  String get mp_errorNetwork => '连接不可用';
+
+  @override
+  String get mp_errorResponse => '响应无效';
+
+  @override
+  String get mp_errorHttp => '请求失败';
+
+  @override
+  String get mp_errorRateLimit => '请求过于频繁';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -38106,18 +38098,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_mdDisabled => '已停用';
 
   @override
-  String get set_mdLocal => '本機';
-
-  @override
-  String set_mdLatency(Object ms, Object when) {
-    return '$ms · $when';
-  }
-
-  @override
   String get set_mdUnreachable => '連線失敗';
-
-  @override
-  String get set_mdName => '名稱';
 
   @override
   String get set_mdBaseUrl => '介面地址';
@@ -38126,36 +38107,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_mdApiKey => 'API Key';
 
   @override
-  String get set_mdApiKeyEmpty => '未填寫';
-
-  @override
-  String get set_mdModels => '模型';
-
-  @override
-  String get set_mdRefreshModels => '從服務商重新整理';
-
-  @override
-  String get set_mdAddModel => '手動新增';
-
-  @override
   String set_mdUsedFor(Object tasks) {
     return '用於 $tasks';
   }
 
   @override
   String get set_mdRetired => '服務商已下線';
-
-  @override
-  String get set_mdCapTools => '工具';
-
-  @override
-  String get set_mdCapVision => '視覺';
-
-  @override
-  String get set_mdCapReasoning => '推理';
-
-  @override
-  String get set_mdAdvanced => '進階請求參數';
 
   @override
   String get set_mdDelete => '刪除服務商';
@@ -38167,9 +38124,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_mdDeleteBody => '用到它的功能會回落到其他可用服務商。';
-
-  @override
-  String get set_mdRemoveModel => '移除模型';
 
   @override
   String get set_mdTaskPrompt => '提示詞翻譯';
@@ -39800,4 +39754,34 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get mp_pickerNext => '下一步：填寫 Key';
+
+  @override
+  String get mp_duplicateKey => '請求欄位名稱重複。';
+
+  @override
+  String get mp_retryRange => '失敗重試次數必須為 0–3 次。';
+
+  @override
+  String get mp_catalogCacheFailed => '無法儲存模型目錄快取。';
+
+  @override
+  String get mp_errorAuthentication => 'API Key 無效';
+
+  @override
+  String get mp_errorPermission => '無存取權限';
+
+  @override
+  String get mp_errorTimeout => '請求逾時';
+
+  @override
+  String get mp_errorNetwork => '連線不可用';
+
+  @override
+  String get mp_errorResponse => '回應無效';
+
+  @override
+  String get mp_errorHttp => '請求失敗';
+
+  @override
+  String get mp_errorRateLimit => '請求過於頻繁';
 }

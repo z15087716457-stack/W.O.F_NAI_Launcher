@@ -37,6 +37,7 @@ import 'settings_inventory.dart';
 import 'settings_caches.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
+import 'providers_workbench.dart';
 import 'settings_rag.dart';
 import 'settings_rag_startup.dart';
 import 'settings_shortcuts.dart';
@@ -275,18 +276,12 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
           ref.read(settingsDictionaryUpdateProvider.notifier).cancel(),
       onImportTagSemantics: () => _run(storage.importTagSemantics),
       onExportTagSemantics: () => _run(storage.exportTagSemantics),
-      onAddProvider: () => _run(models.edit),
+      providers: workbenchActions(
+        ref.read(providersWorkbenchProvider.notifier),
+        _run,
+      ),
       onImportModelConfig: () => _run(models.importConfig),
       onCopyModelConfig: () => _run(models.copy),
-      onTestProvider: (id) => _run(() => models.test(id)),
-      onProviderEnabled: (id, value) => _run(() => models.enabled(id, value)),
-      onProviderField: (id, field, value) =>
-          _run(() => models.field(id, field, value)),
-      onRefreshModels: (id) => _run(() => models.refresh(id)),
-      onAddModel: (id) => _run(() => models.addModel(id)),
-      onRemoveModel: (id, model) => _run(() => models.removeModel(id, model)),
-      onProviderAdvanced: (id) => _run(() => models.edit(id)),
-      onDeleteProvider: (id) => _run(() => models.delete(id)),
       onAssign:
           (
             task, {

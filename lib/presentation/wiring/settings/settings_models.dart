@@ -11,17 +11,11 @@ import '../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../prompt_assistant/providers/model_request_history_provider.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../prompt_assistant/providers/provider_connection_health_provider.dart';
-import '../../prompt_assistant/services/prompt_assistant_service.dart';
-import '../../prompt_assistant/services/provider_model_list_cache.dart';
-import '../../screens/settings/widgets/ai_service_editor.dart';
+import 'providers_workbench.dart';
 import '../../screens/settings/widgets/model_preset_editor.dart';
 import '../../screens/settings/widgets/model_request_details_dialog.dart';
-import '../../screens/settings/widgets/provider_picker.dart';
 import '../../ui/settings/settings_contract.dart';
 import 'settings_dialogs.dart';
-
-final settingsBusyProvider = StateProvider<Set<String>>((ref) => {});
-final settingsProviderLatencies = StateProvider<Map<String, int>>((ref) => {});
 
 LauncherInterface? settingsHistoryTask(String title) => LauncherInterface.values
     .where(
@@ -47,8 +41,7 @@ SettingsModelTask settingsTaskKind(LauncherInterface task) => switch (task) {
 SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
   final config = ref.watch(promptAssistantConfigProvider);
   final health = ref.watch(providerConnectionHealthProvider);
-  final busy = ref.watch(settingsBusyProvider);
-  final latencies = ref.watch(settingsProviderLatencies);
+  final workbench = ref.watch(providersWorkbenchProvider);
   final history = ref.watch(modelRequestHistoryProvider).records;
   final assignments = [
     for (final task in LauncherInterface.values)
@@ -62,6 +55,7 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
       ),
   ];
   return SettingsModelsData(
+    workbench: providersViewData(config, workbench, health, context.l10n),
     providers: [
       for (final provider in config.providers)
         SettingsProvider(
@@ -77,20 +71,23 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
           logoAsset: provider.preset?.logoAsset,
           color: 0xff266eff,
           enabled: provider.enabled,
-          local: provider.type == ProviderType.ollama,
+          local:
+              provider.preset?.isLocal ??
+              (provider.type == ProviderType.ollama),
           baseUrl: provider.baseUrl,
           apiKeyMasked: config.providerHasApiKey[provider.id] == true
               ? '••••••••'
               : '',
-          status: switch (health.resultFor(provider.id).status) {
-            ProviderConnectionStatus.healthy => SettingsTone.ok,
-            ProviderConnectionStatus.limited => SettingsTone.warn,
-            ProviderConnectionStatus.failed => SettingsTone.error,
-            _ => SettingsTone.idle,
-          },
-          latencyMs: latencies[provider.id],
-          checkedAt: health.resultFor(provider.id).checkedAt,
-          testing: busy.contains('test:${provider.id}'),
+          status: connectionTone(
+            workbench.connections[provider.id]?.result ??
+                health.resultFor(provider.id),
+          ),
+          latencyMs: workbench.connections[provider.id]?.latencyMs,
+          checkedAt:
+              (workbench.connections[provider.id]?.result ??
+                      health.resultFor(provider.id))
+                  .checkedAt,
+          testing: workbench.connections[provider.id]?.testing ?? false,
           models: [
             for (final model in config.modelsForProvider(
               providerId: provider.id,
@@ -190,125 +187,6 @@ class SettingsModelActions {
       .read(promptAssistantConfigProvider)
       .providers
       .firstWhere((p) => p.id == id);
-
-  Future<void> _busy(String id, Future<void> Function() action) async {
-    final busy = ref.read(settingsBusyProvider.notifier);
-    if (busy.state.contains(id)) return;
-    busy.state = {...busy.state, id};
-    try {
-      await action();
-    } finally {
-      if (busy.mounted) busy.state = {...busy.state}..remove(id);
-    }
-  }
-
-  Future<void> field(
-    String id,
-    SettingsProviderField field,
-    String value,
-  ) async {
-    final current = provider(id);
-    if (field == SettingsProviderField.apiKey) {
-      if (value == '••••••••') return;
-      await controller.setProviderApiKey(id, value);
-    } else {
-      await controller.upsertProvider(
-        field == SettingsProviderField.name
-            ? current.copyWith(name: value.trim())
-            : current.copyWith(baseUrl: value.trim()),
-      );
-    }
-  }
-
-  Future<void> enabled(String id, bool value) =>
-      controller.upsertProvider(provider(id).copyWith(enabled: value));
-  Future<void> delete(String id) => controller.deleteProvider(id);
-
-  Future<void> edit([String? id]) async {
-    final preset = id == null ? await showProviderPicker(context) : null;
-    if (!context.mounted || id == null && preset == null) return;
-    final selected = id == null ? null : provider(id);
-    await showSettingsEditor(
-      context,
-      (dialog, dirty, saved, save) => AiServiceEditor(
-        provider: selected,
-        initialPreset: preset,
-        onSaved: saved,
-        onDirtyChanged: dirty,
-        saveController: save,
-      ),
-    );
-  }
-
-  Future<void> addModel(String id) async {
-    final name = await settingsTextInput(
-      context,
-      title: context.l10n.set_mdAddModel,
-    );
-    if (name == null || name.isEmpty || !context.mounted) return;
-    provider(id);
-    await controller.upsertModel(
-      ModelConfig(providerId: id, name: name, displayName: name),
-    );
-  }
-
-  Future<void> removeModel(String id, String model) async {
-    final selected = ref
-        .read(promptAssistantConfigProvider)
-        .models
-        .where((m) => m.providerId == id && m.name == model)
-        .firstOrNull;
-    if (selected != null) await controller.deleteModel(selected);
-  }
-
-  Future<void> test(String id) => _busy('test:$id', () async {
-    final current = provider(id);
-    final config = ref.read(promptAssistantConfigProvider);
-    final model = config
-        .modelsForProvider(providerId: id)
-        .where((m) => !m.isPlaceholder)
-        .firstOrNull;
-    final key = await controller.getProviderApiKey(id);
-    final headers = await controller.getProviderHeaders(id);
-    final clock = Stopwatch()..start();
-    final service = ref.read(promptAssistantServiceProvider);
-    if (model == null) {
-      await service.fetchModelsForDraft(current, key, headers);
-    } else {
-      await service.testModelForDraft(current, model, key, headers);
-    }
-    if (context.mounted) {
-      ref.read(settingsProviderLatencies.notifier).state = {
-        ...ref.read(settingsProviderLatencies),
-        id: clock.elapsedMilliseconds,
-      };
-    }
-  });
-  Future<void> refresh(String id) => _busy('refresh:$id', () async {
-    final current = provider(id);
-    final key = await controller.getProviderApiKey(id);
-    final headers = await controller.getProviderHeaders(id);
-    final fingerprint = ProviderModelListCache.fingerprint(
-      current,
-      key,
-      headers,
-    );
-    final names = await ref
-        .read(promptAssistantServiceProvider)
-        .fetchModelsForDraft(current, key, headers);
-    if (!context.mounted) return;
-    final latest = provider(id);
-    if (ProviderModelListCache.fingerprint(
-          latest,
-          await controller.getProviderApiKey(id),
-          await controller.getProviderHeaders(id),
-        ) !=
-        fingerprint) {
-      throw StateError('Connection changed while discovering models');
-    }
-    await ref.read(providerModelListCacheProvider).save(id, fingerprint, names);
-    // Discovery refreshes the catalog only, never auto-selects remote models.
-  });
 
   Future<void> assign(
     SettingsModelTask kind, {

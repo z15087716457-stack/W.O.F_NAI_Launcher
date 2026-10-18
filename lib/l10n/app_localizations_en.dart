@@ -18985,18 +18985,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_mdDisabled => 'Disabled';
 
   @override
-  String get set_mdLocal => 'Local';
-
-  @override
-  String set_mdLatency(Object ms, Object when) {
-    return '$ms · $when';
-  }
-
-  @override
   String get set_mdUnreachable => 'Unreachable';
-
-  @override
-  String get set_mdName => 'Name';
 
   @override
   String get set_mdBaseUrl => 'Base URL';
@@ -19005,36 +18994,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_mdApiKey => 'API key';
 
   @override
-  String get set_mdApiKeyEmpty => 'Not set';
-
-  @override
-  String get set_mdModels => 'Models';
-
-  @override
-  String get set_mdRefreshModels => 'Fetch from provider';
-
-  @override
-  String get set_mdAddModel => 'Add manually';
-
-  @override
   String set_mdUsedFor(Object tasks) {
     return 'used for $tasks';
   }
 
   @override
   String get set_mdRetired => 'Retired by provider';
-
-  @override
-  String get set_mdCapTools => 'Tools';
-
-  @override
-  String get set_mdCapVision => 'Vision';
-
-  @override
-  String get set_mdCapReasoning => 'Reasoning';
-
-  @override
-  String get set_mdAdvanced => 'Advanced request options';
 
   @override
   String get set_mdDelete => 'Delete provider';
@@ -19047,9 +19012,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_mdDeleteBody =>
       'Features that use it fall back to another provider.';
-
-  @override
-  String get set_mdRemoveModel => 'Remove model';
 
   @override
   String get set_mdTaskPrompt => 'Prompt translation';
@@ -20760,4 +20722,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mp_pickerNext => 'Next: enter key';
+
+  @override
+  String get mp_duplicateKey => 'Duplicate request field name.';
+
+  @override
+  String get mp_retryRange => 'Retries must be between 0 and 3.';
+
+  @override
+  String get mp_catalogCacheFailed => 'Could not save the model catalog cache.';
+
+  @override
+  String get mp_errorAuthentication => 'Invalid API key';
+
+  @override
+  String get mp_errorPermission => 'Access denied';
+
+  @override
+  String get mp_errorTimeout => 'Request timed out';
+
+  @override
+  String get mp_errorNetwork => 'Connection unavailable';
+
+  @override
+  String get mp_errorResponse => 'Invalid response';
+
+  @override
+  String get mp_errorHttp => 'Request failed';
+
+  @override
+  String get mp_errorRateLimit => 'Rate limit exceeded';
 }

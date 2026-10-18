@@ -190,6 +190,9 @@ class PromptAssistantConfigNotifier
     required List<ModelConfig> models,
     required Map<String, String> headers,
     String? apiKey,
+    // Workbench drafts are merged onto the latest enriched models already;
+    // re-enriching here would overwrite hidden fields the contract cannot edit.
+    bool enrichModels = true,
   }) async {
     final observed = state;
     final providers = [...observed.providers];
@@ -199,7 +202,9 @@ class PromptAssistantConfigNotifier
     } else {
       providers[index] = provider.copyWith(requestHeaders: const {});
     }
-    final selected = [for (final m in models) _enrich(m, providers)];
+    final selected = [
+      for (final m in models) enrichModels ? _enrich(m, providers) : m,
+    ];
     final names = selected.map((m) => m.name).toSet();
     for (final m in selected) {
       final error =
@@ -439,6 +444,71 @@ class PromptAssistantConfigNotifier
       }
     }
     state = state.copyWith(models: models, interfaces: interfaces);
+    await _save();
+  }
+
+  /// Batch discovery is additive; it never removes selected models or writes
+  /// their secure overrides. Load catalog facts before enriching new IDs.
+  Future<void> addProviderModels(
+    String providerId,
+    List<String> ids, {
+    bool manual = false,
+  }) async {
+    _catalog ??=
+        ModelCatalogRepository.cached ?? await ModelCatalogRepository.load();
+    if (!mounted) return;
+    if (!state.providers.any((p) => p.id == providerId)) {
+      throw StateError(currentL10n.modelConfig_modelChanged);
+    }
+    final models = [...state.models];
+    final names = {
+      for (final m in models)
+        if (m.providerId == providerId) m.name,
+    };
+    for (final raw in ids) {
+      final id = raw.trim();
+      if (id.isEmpty || id == 'default-model' || !names.add(id)) continue;
+      models.add(
+        _enrich(
+          ModelConfig(
+            providerId: providerId,
+            name: id,
+            displayName: id,
+            source: manual ? ModelSource.manual : ModelSource.api,
+          ),
+        ),
+      );
+    }
+    state = state.copyWith(models: models);
+    await _save();
+  }
+
+  /// Only real-model slots move. Placeholders, other providers, model metadata
+  /// and secure request overrides retain their exact values.
+  Future<void> reorderProviderModels(
+    String providerId,
+    List<String> ids,
+  ) async {
+    final selected = {
+      for (final m in state.models)
+        if (m.providerId == providerId && !m.isPlaceholder) m.name: m,
+    };
+    final ordered = <ModelConfig>[];
+    for (final id in ids) {
+      final model = selected.remove(id);
+      if (model != null) ordered.add(model);
+    }
+    ordered.addAll(selected.values);
+    var index = 0;
+    state = state.copyWith(
+      models: [
+        for (final m in state.models)
+          if (m.providerId == providerId && !m.isPlaceholder)
+            ordered[index++]
+          else
+            m,
+      ],
+    );
     await _save();
   }
 

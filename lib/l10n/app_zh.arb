@@ -10008,22 +10008,9 @@
     }
   },
   "set_mdDisabled": "已停用",
-  "set_mdLocal": "本机",
-  "set_mdLatency": "{ms} · {when}",
-  "@set_mdLatency": {
-    "placeholders": {
-      "ms": {},
-      "when": {}
-    }
-  },
   "set_mdUnreachable": "连接失败",
-  "set_mdName": "名称",
   "set_mdBaseUrl": "接口地址",
   "set_mdApiKey": "API Key",
-  "set_mdApiKeyEmpty": "未填写",
-  "set_mdModels": "模型",
-  "set_mdRefreshModels": "从服务商刷新",
-  "set_mdAddModel": "手动添加",
   "set_mdUsedFor": "用于 {tasks}",
   "@set_mdUsedFor": {
     "placeholders": {
@@ -10031,10 +10018,6 @@
     }
   },
   "set_mdRetired": "服务商已下线",
-  "set_mdCapTools": "工具",
-  "set_mdCapVision": "视觉",
-  "set_mdCapReasoning": "推理",
-  "set_mdAdvanced": "高级请求参数",
   "set_mdDelete": "删除服务商",
   "set_mdDeleteTitle": "删除服务商“{name}”？",
   "@set_mdDeleteTitle": {
@@ -10043,7 +10026,6 @@
     }
   },
   "set_mdDeleteBody": "用到它的功能会回落到其他可用服务商。",
-  "set_mdRemoveModel": "移除模型",
   "set_mdTaskPrompt": "提示词翻译",
   "set_mdTaskReverse": "提示词反推",
   "set_mdTaskTag": "标签翻译与语义补充",
@@ -10768,5 +10750,15 @@
   "mp_groupAggregatorFull": "聚合平台",
   "mp_groupLocalFull": "本地与自定义",
   "mp_pickerFoot": "地址与协议会按预设填好；同一厂商可以添加多次（例如国内 / 国际区域）。",
-  "mp_pickerNext": "下一步：填写 Key"
+  "mp_pickerNext": "下一步：填写 Key",
+  "mp_duplicateKey": "请求字段名称重复。",
+  "mp_retryRange": "失败重试次数必须为 0–3 次。",
+  "mp_catalogCacheFailed": "无法保存模型目录缓存。",
+  "mp_errorAuthentication": "API Key 无效",
+  "mp_errorPermission": "无访问权限",
+  "mp_errorTimeout": "请求超时",
+  "mp_errorNetwork": "连接不可用",
+  "mp_errorResponse": "响应无效",
+  "mp_errorHttp": "请求失败",
+  "mp_errorRateLimit": "请求过于频繁"
 }

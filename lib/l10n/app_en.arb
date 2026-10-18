@@ -10008,22 +10008,9 @@
     }
   },
   "set_mdDisabled": "Disabled",
-  "set_mdLocal": "Local",
-  "set_mdLatency": "{ms} · {when}",
-  "@set_mdLatency": {
-    "placeholders": {
-      "ms": {},
-      "when": {}
-    }
-  },
   "set_mdUnreachable": "Unreachable",
-  "set_mdName": "Name",
   "set_mdBaseUrl": "Base URL",
   "set_mdApiKey": "API key",
-  "set_mdApiKeyEmpty": "Not set",
-  "set_mdModels": "Models",
-  "set_mdRefreshModels": "Fetch from provider",
-  "set_mdAddModel": "Add manually",
   "set_mdUsedFor": "used for {tasks}",
   "@set_mdUsedFor": {
     "placeholders": {
@@ -10031,10 +10018,6 @@
     }
   },
   "set_mdRetired": "Retired by provider",
-  "set_mdCapTools": "Tools",
-  "set_mdCapVision": "Vision",
-  "set_mdCapReasoning": "Reasoning",
-  "set_mdAdvanced": "Advanced request options",
   "set_mdDelete": "Delete provider",
   "set_mdDeleteTitle": "Delete “{name}”?",
   "@set_mdDeleteTitle": {
@@ -10043,7 +10026,6 @@
     }
   },
   "set_mdDeleteBody": "Features that use it fall back to another provider.",
-  "set_mdRemoveModel": "Remove model",
   "set_mdTaskPrompt": "Prompt translation",
   "set_mdTaskReverse": "Prompt reverse",
   "set_mdTaskTag": "Tag translation & semantics",
@@ -10778,5 +10760,15 @@
   "mp_groupAggregatorFull": "Aggregators",
   "mp_groupLocalFull": "Local and custom",
   "mp_pickerFoot": "URL and protocol come from the preset; a vendor can be added more than once for different regions.",
-  "mp_pickerNext": "Next: enter key"
+  "mp_pickerNext": "Next: enter key",
+  "mp_duplicateKey": "Duplicate request field name.",
+  "mp_retryRange": "Retries must be between 0 and 3.",
+  "mp_catalogCacheFailed": "Could not save the model catalog cache.",
+  "mp_errorAuthentication": "Invalid API key",
+  "mp_errorPermission": "Access denied",
+  "mp_errorTimeout": "Request timed out",
+  "mp_errorNetwork": "Connection unavailable",
+  "mp_errorResponse": "Invalid response",
+  "mp_errorHttp": "Request failed",
+  "mp_errorRateLimit": "Rate limit exceeded"
 }

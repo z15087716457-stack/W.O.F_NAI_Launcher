@@ -10103,22 +10103,9 @@
     }
   },
   "set_mdDisabled": "已停用",
-  "set_mdLocal": "本機",
-  "set_mdLatency": "{ms} · {when}",
-  "@set_mdLatency": {
-    "placeholders": {
-      "ms": {},
-      "when": {}
-    }
-  },
   "set_mdUnreachable": "連線失敗",
-  "set_mdName": "名稱",
   "set_mdBaseUrl": "介面地址",
   "set_mdApiKey": "API Key",
-  "set_mdApiKeyEmpty": "未填寫",
-  "set_mdModels": "模型",
-  "set_mdRefreshModels": "從服務商重新整理",
-  "set_mdAddModel": "手動新增",
   "set_mdUsedFor": "用於 {tasks}",
   "@set_mdUsedFor": {
     "placeholders": {
@@ -10126,10 +10113,6 @@
     }
   },
   "set_mdRetired": "服務商已下線",
-  "set_mdCapTools": "工具",
-  "set_mdCapVision": "視覺",
-  "set_mdCapReasoning": "推理",
-  "set_mdAdvanced": "進階請求參數",
   "set_mdDelete": "刪除服務商",
   "set_mdDeleteTitle": "刪除服務商“{name}”？",
   "@set_mdDeleteTitle": {
@@ -10138,7 +10121,6 @@
     }
   },
   "set_mdDeleteBody": "用到它的功能會回落到其他可用服務商。",
-  "set_mdRemoveModel": "移除模型",
   "set_mdTaskPrompt": "提示詞翻譯",
   "set_mdTaskReverse": "提示詞反推",
   "set_mdTaskTag": "標籤翻譯與語義補充",
@@ -10921,5 +10903,15 @@
   "mp_groupAggregatorFull": "聚合平臺",
   "mp_groupLocalFull": "本地與自訂",
   "mp_pickerFoot": "地址與協定會按預設填好；同一廠商可以新增多次（例如國內 / 國際區域）。",
-  "mp_pickerNext": "下一步：填寫 Key"
+  "mp_pickerNext": "下一步：填寫 Key",
+  "mp_duplicateKey": "請求欄位名稱重複。",
+  "mp_retryRange": "失敗重試次數必須為 0–3 次。",
+  "mp_catalogCacheFailed": "無法儲存模型目錄快取。",
+  "mp_errorAuthentication": "API Key 無效",
+  "mp_errorPermission": "無存取權限",
+  "mp_errorTimeout": "請求逾時",
+  "mp_errorNetwork": "連線不可用",
+  "mp_errorResponse": "回應無效",
+  "mp_errorHttp": "請求失敗",
+  "mp_errorRateLimit": "請求過於頻繁"
 }

@@ -33134,29 +33134,11 @@ abstract class AppLocalizations {
   /// **'Disabled'**
   String get set_mdDisabled;
 
-  /// No description provided for @set_mdLocal.
-  ///
-  /// In en, this message translates to:
-  /// **'Local'**
-  String get set_mdLocal;
-
-  /// No description provided for @set_mdLatency.
-  ///
-  /// In en, this message translates to:
-  /// **'{ms} · {when}'**
-  String set_mdLatency(Object ms, Object when);
-
   /// No description provided for @set_mdUnreachable.
   ///
   /// In en, this message translates to:
   /// **'Unreachable'**
   String get set_mdUnreachable;
-
-  /// No description provided for @set_mdName.
-  ///
-  /// In en, this message translates to:
-  /// **'Name'**
-  String get set_mdName;
 
   /// No description provided for @set_mdBaseUrl.
   ///
@@ -33170,30 +33152,6 @@ abstract class AppLocalizations {
   /// **'API key'**
   String get set_mdApiKey;
 
-  /// No description provided for @set_mdApiKeyEmpty.
-  ///
-  /// In en, this message translates to:
-  /// **'Not set'**
-  String get set_mdApiKeyEmpty;
-
-  /// No description provided for @set_mdModels.
-  ///
-  /// In en, this message translates to:
-  /// **'Models'**
-  String get set_mdModels;
-
-  /// No description provided for @set_mdRefreshModels.
-  ///
-  /// In en, this message translates to:
-  /// **'Fetch from provider'**
-  String get set_mdRefreshModels;
-
-  /// No description provided for @set_mdAddModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Add manually'**
-  String get set_mdAddModel;
-
   /// No description provided for @set_mdUsedFor.
   ///
   /// In en, this message translates to:
@@ -33205,30 +33163,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retired by provider'**
   String get set_mdRetired;
-
-  /// No description provided for @set_mdCapTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Tools'**
-  String get set_mdCapTools;
-
-  /// No description provided for @set_mdCapVision.
-  ///
-  /// In en, this message translates to:
-  /// **'Vision'**
-  String get set_mdCapVision;
-
-  /// No description provided for @set_mdCapReasoning.
-  ///
-  /// In en, this message translates to:
-  /// **'Reasoning'**
-  String get set_mdCapReasoning;
-
-  /// No description provided for @set_mdAdvanced.
-  ///
-  /// In en, this message translates to:
-  /// **'Advanced request options'**
-  String get set_mdAdvanced;
 
   /// No description provided for @set_mdDelete.
   ///
@@ -33247,12 +33181,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Features that use it fall back to another provider.'**
   String get set_mdDeleteBody;
-
-  /// No description provided for @set_mdRemoveModel.
-  ///
-  /// In en, this message translates to:
-  /// **'Remove model'**
-  String get set_mdRemoveModel;
 
   /// No description provided for @set_mdTaskPrompt.
   ///
@@ -36301,6 +36229,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next: enter key'**
   String get mp_pickerNext;
+
+  /// No description provided for @mp_duplicateKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate request field name.'**
+  String get mp_duplicateKey;
+
+  /// No description provided for @mp_retryRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Retries must be between 0 and 3.'**
+  String get mp_retryRange;
+
+  /// No description provided for @mp_catalogCacheFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save the model catalog cache.'**
+  String get mp_catalogCacheFailed;
+
+  /// No description provided for @mp_errorAuthentication.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid API key'**
+  String get mp_errorAuthentication;
+
+  /// No description provided for @mp_errorPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Access denied'**
+  String get mp_errorPermission;
+
+  /// No description provided for @mp_errorTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timed out'**
+  String get mp_errorTimeout;
+
+  /// No description provided for @mp_errorNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection unavailable'**
+  String get mp_errorNetwork;
+
+  /// No description provided for @mp_errorResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid response'**
+  String get mp_errorResponse;
+
+  /// No description provided for @mp_errorHttp.
+  ///
+  /// In en, this message translates to:
+  /// **'Request failed'**
+  String get mp_errorHttp;
+
+  /// No description provided for @mp_errorRateLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate limit exceeded'**
+  String get mp_errorRateLimit;
 }
 
 class _AppLocalizationsDelegate
