@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0"><iframe id="f" style="width:1600px;height:1100px;border:0"></iframe>
+<script>
+// 服务商工作台原型（方案 B）的元素位置，给 model_providers_measure.py 出偏差表。键名和 model_providers_prototype_capture_test.dart 一致。
+// 坐标以设置页左上角（扣掉 48px 主导航）为原点。
+const view=location.hash.slice(1);
+const f=document.getElementById('f');
+f.src='/mockups/model-providers/mock.html#'+view;
+f.onload=async()=>{
+  const d=f.contentDocument; await d.fonts.ready; await new Promise(r=>setTimeout(r,1200));
+  const B=e=>{const b=e.getBoundingClientRect();return [b.left-48,b.top,b.width,b.height]};
+  const m={};
+  const one=(k,s,i=0)=>{const e=d.querySelectorAll(s)[i];if(e)m[k]=B(e)};
+  one('list','.plist.b');one('middle','.midB');one('inspector','.insB');
+  one('title','.midB b.s15');one('status','.midB .pill');one('test','.midB > .row .btn');
+  one('url','.midB .cgrid .inp',0);one('key','.midB .cgrid .inp',1);one('protocol','.midB .cgrid .sel');
+  one('timeout','.midB .strip .num',0);one('concurrency','.midB .strip .num',1);one('retry','.midB .strip .seg');
+  one('mode','.midB .sth .seg');one('models','.midB .mlist');one('catalog','.midB .mlist.cat');
+  one('alias','.insB .inp');one('levels','.insB .lvs');
+  const bs=d.querySelectorAll('.insB .isec:last-child .btn');if(bs.length)m.testModel=B(bs[0]);
+  d.querySelectorAll('.plist .pv').forEach((e,i)=>m['prov'+i]=B(e));
+  fetch('/report?v='+encodeURIComponent(view),{method:'POST',body:JSON.stringify(m)});
+};
+</script></body></html>

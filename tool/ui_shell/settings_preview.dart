@@ -3,14 +3,22 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/ui/model_providers/model_providers_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_search.dart';
 
+import 'model_providers_preview.dart';
+
 class SettingsPreviewSim extends ChangeNotifier {
-  SettingsPreviewSim({required this.log});
+  SettingsPreviewSim({required this.log}) {
+    providers.addListener(notifyListeners);
+  }
 
   final ValueChanged<String> log;
+
+  /// 模型与接口 → 服务商：新工作台（本地模拟器）。
+  late final providers = ModelProvidersPreviewSim(log: log);
 
   /// 主题设置改了：预览跟着切深浅色。
   ValueChanged<String>? onTheme;
@@ -52,6 +60,7 @@ class SettingsPreviewSim extends ChangeNotifier {
   @override
   void dispose() {
     _stopRag();
+    providers.dispose();
     super.dispose();
   }
 
@@ -74,9 +83,22 @@ class SettingsPreviewSim extends ChangeNotifier {
   }
 
   SettingsViewData data({required bool dark}) {
-    final v = _data.values.text(SettingKey.themeMode);
-    if (v == 'system' || (v == 'dark') == dark) return _data;
-    return _data.copyWith(
+    final m = _data.models;
+    final d = _data.copyWith(
+      models: SettingsModelsData(
+        providers: m.providers,
+        assignments: m.assignments,
+        presets: m.presets,
+        requests: m.requests,
+        requestTotal: m.requestTotal,
+        workbench: _scene == SettingsScene.fresh
+            ? ProvidersFixture.empty
+            : providers.data,
+      ),
+    );
+    final v = d.values.text(SettingKey.themeMode);
+    if (v == 'system' || (v == 'dark') == dark) return d;
+    return d.copyWith(
       values: _data.values.copyWith(
         SettingKey.themeMode,
         dark ? 'dark' : 'light',
@@ -117,6 +139,8 @@ class SettingsPreviewSim extends ChangeNotifier {
   SettingsActions actions(BuildContext context) {
     String t(SettingKey k) => settingTitle(context, k);
     return SettingsActions(
+      providers: providers.actions,
+      onCopyModelConfig: () => log('onCopyModelConfig'),
       onOpenPage: (p) {
         _page = p;
         _data = _data.copyWith(page: p);

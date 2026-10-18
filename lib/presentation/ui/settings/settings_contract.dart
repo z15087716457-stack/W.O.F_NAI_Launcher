@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../channel/channel_contract.dart';
+import '../model_providers/model_providers_contract.dart';
 
 /// 设置页（新界面）的唯一契约。界面只吃 [SettingsViewData]、只调 [SettingsActions]。
 ///
@@ -1134,9 +1135,14 @@ class SettingsModelsData {
     this.presets = const [],
     this.requests = const [],
     this.requestTotal = 0,
+    this.workbench,
   });
 
   final List<SettingsProvider> providers;
+
+  /// 新服务商工作台（`ui/model_providers/`）。非 null 时“服务商”标签显示新界面，
+  /// 回调走 [SettingsActions.providers]；null 时仍显示旧列表（接线切换前的兼容）。
+  final ProvidersViewData? workbench;
   final List<SettingsTaskAssignment> assignments;
   final List<SettingsPreset> presets;
 
@@ -1893,7 +1899,11 @@ class SettingsActions {
     this.onOpenRepository = _none,
     this.onOpenUpstream = _none,
     this.onOpenLicenses = _none,
+    this.providers = const ProvidersActions(),
   });
+
+  /// 新服务商工作台的回调（见 [SettingsModelsData.workbench]）。
+  final ProvidersActions providers;
 
   static const none = SettingsActions();
 
