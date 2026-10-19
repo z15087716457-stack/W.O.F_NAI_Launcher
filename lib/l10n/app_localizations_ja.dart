@@ -19914,10 +19914,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_positionApplied => '調整済み';
 
   @override
-  String get ag_positionMode => '位置指定';
+  String get ag_positionNone => '未指定';
 
   @override
-  String get ag_positionNone => '未指定';
+  String get ag_positionAiHint => 'AIにおまかせ中のため、位置は使われません。';
+
+  @override
+  String get ag_positionNew => '追加';
 
   @override
   String get ag_diffLocked => '下書きが再変更されました';

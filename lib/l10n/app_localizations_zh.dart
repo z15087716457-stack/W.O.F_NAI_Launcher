@@ -19680,10 +19680,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_positionApplied => '已调整';
 
   @override
-  String get ag_positionMode => '定位方式';
+  String get ag_positionNone => '未定位';
 
   @override
-  String get ag_positionNone => '未定位';
+  String get ag_positionAiHint => '当前为 AI 选择，坐标暂不生效。';
+
+  @override
+  String get ag_positionNew => '新增';
 
   @override
   String get ag_diffLocked => '草稿已再次修改';
@@ -40135,10 +40138,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_positionApplied => '已調整';
 
   @override
-  String get ag_positionMode => '定位方式';
+  String get ag_positionNone => '未定位';
 
   @override
-  String get ag_positionNone => '未定位';
+  String get ag_positionAiHint => '當前為 AI 選擇，座標暫不生效。';
+
+  @override
+  String get ag_positionNew => '新增';
 
   @override
   String get ag_diffLocked => '草稿已再次修改';

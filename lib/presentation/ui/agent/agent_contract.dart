@@ -244,32 +244,60 @@ final class AgentDiffBlock extends AgentBlock {
   final AgentPromptDiff diff;
 }
 
-/// 角色位置改动：一次 `prompt_update` 改了定位方式或角色格位时出一张，
-/// 和提示词差异卡并列显示（只提示，不带撤销）。
+/// 角色位置改动：一次 `prompt_update` 改了定位方式或角色位置时出一张，
+/// 画成迷你定位板（只提示，不带撤销）。
 final class AgentPositionBlock extends AgentBlock {
   const AgentPositionBlock({
     required this.id,
     this.customBefore,
     this.customAfter,
-    this.changes = const [],
+    this.marks = const [],
+    this.aspect,
   });
   final String id;
 
   /// 定位方式（true = 自定义坐标，false = AI 选择）；两者都非空且不同才算切换。
   final bool? customBefore, customAfter;
-  final List<AgentPositionChange> changes;
+
+  /// 改动后草稿里的全部角色（顺序 = 角色栏顺序，决定颜色和编号）。
+  final List<AgentPositionMark> marks;
+
+  /// 画面宽 / 高；null = 未知（按竖图 2:3 画）。
+  final double? aspect;
 
   bool get modeChanged =>
       customBefore != null &&
       customAfter != null &&
       customBefore != customAfter;
+
+  Iterable<AgentPositionMark> get moved => marks.where((m) => m.moved);
 }
 
-/// 一个角色的格位变化；格位是 NAI 5×5 网格名（`A1`…`E5`），null = 没有自定义位置。
+/// 一个角色在定位板上的位置；坐标为 0–1（x 向右、y 向下），null = 没有自定义位置。
 @immutable
-class AgentPositionChange {
-  const AgentPositionChange({this.name, this.before, this.after});
-  final String? name, before, after;
+class AgentPositionMark {
+  const AgentPositionMark({
+    required this.index,
+    this.name,
+    this.before,
+    this.after,
+    this.added = false,
+  });
+  final int index;
+  final String? name;
+  final Offset? before, after;
+
+  /// 本次新加的角色（没有“原位置”可比）。
+  final bool added;
+
+  bool get moved => added ? after != null : before != after;
+
+  /// 5 × 5 格名（`A1`…`E5`），与生成页定位板的分格一致。
+  static String cell(Offset p) {
+    final col = (p.dx * 5).floor().clamp(0, 4);
+    final row = (p.dy * 5).floor().clamp(0, 4);
+    return '${String.fromCharCode(65 + col)}${row + 1}';
+  }
 }
 
 /// 本轮产物（生成的图、工具出的图）。

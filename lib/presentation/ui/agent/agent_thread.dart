@@ -1016,10 +1016,25 @@ class AgentDiffView extends StatelessWidget {
   }
 }
 
-/// 角色位置改动卡：样式和提示词差异卡一致（标题行 + 浅底明细），只提示不撤销。
+/// 角色位置改动卡：左边迷你定位板（5 × 5 格，与生成页一致；虚线圈 = 原位置，
+/// 箭头指向新位置），右边图例逐个角色列出格位变化。只提示，不撤销。
 class AgentPositionView extends StatelessWidget {
   const AgentPositionView({super.key, required this.block});
   final AgentPositionBlock block;
+
+  /// 与生成页定位板 `GenPositionBoard.palette` 一致：同一角色在两处颜色相同。
+  static const palette = [
+    Color(0xFFE5484D),
+    Color(0xFF0090FF),
+    Color(0xFF30A46C),
+    Color(0xFFF76B15),
+    Color(0xFF8E4EC6),
+    Color(0xFF12A594),
+    Color(0xFFD6409F),
+    Color(0xFFAD7F58),
+  ];
+
+  static Color colorOf(int index) => palette[index % palette.length];
 
   @override
   Widget build(BuildContext context) {
@@ -1027,29 +1042,11 @@ class AgentPositionView extends StatelessWidget {
     final l = context.l10n;
     String mode(bool custom) =>
         custom ? l.characterCanvas_custom : l.characterCanvas_aiChoice;
-    final mono = UiText.mono(12, color: c.muted, height: 1.75);
-    final rows = <Widget>[
-      if (block.modeChanged)
-        _row(
-          context,
-          l.ag_positionMode,
-          mode(block.customBefore!),
-          mode(block.customAfter!),
-          mono,
-        ),
-      for (final ch in block.changes)
-        _row(
-          context,
-          ch.name ?? l.ag_field_character,
-          ch.before ?? l.ag_positionNone,
-          ch.after ?? l.ag_positionNone,
-          mono,
-        ),
-    ];
+    final ai = block.customAfter == false;
     return Column(
       key: Key('agent-position-${block.id}'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 8,
+      spacing: 10,
       children: [
         SizedBox(
           height: 24,
@@ -1058,11 +1055,30 @@ class AgentPositionView extends StatelessWidget {
             children: [
               AgentIcon(AgentGlyphs.hand, size: 14, color: c.muted),
               Expanded(
-                child: Text(
-                  l.ag_positionTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(12, weight: FontWeight.w600, color: c.ink),
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        l.ag_positionTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          12,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                        ),
+                      ),
+                    ),
+                    if (block.customAfter != null)
+                      _ModePill(
+                        key: Key('agent-position-mode-${block.id}'),
+                        text: block.modeChanged
+                            ? '${mode(block.customBefore!)} → ${mode(block.customAfter!)}'
+                            : mode(block.customAfter!),
+                        highlight: block.modeChanged,
+                      ),
+                  ],
                 ),
               ),
               AgentIcon(AgentGlyphs.check, size: 14, color: c.ok),
@@ -1070,58 +1086,288 @@ class AgentPositionView extends StatelessWidget {
             ],
           ),
         ),
-        Container(
-          padding: const EdgeInsets.fromLTRB(11, 7, 11, 7),
-          decoration: BoxDecoration(
-            color: agentSunk(c),
-            borderRadius: BorderRadius.circular(9),
-            border: Border.all(color: c.line),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: rows,
-          ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 14,
+          children: [
+            _MiniBoard(block: block, ai: ai),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 7,
+                  children: [
+                    for (final m in block.marks) _Legend(mark: m, ai: ai),
+                    if (ai)
+                      Text(
+                        l.ag_positionAiHint,
+                        style: UiText.sans(11.5, color: c.faint, height: 1.45),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
+}
 
-  Widget _row(
-    BuildContext context,
-    String label,
-    String before,
-    String after,
-    TextStyle mono,
-  ) {
+class _ModePill extends StatelessWidget {
+  const _ModePill({super.key, required this.text, required this.highlight});
+  final String text;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
     final c = context.ui;
-    return Row(
-      spacing: 8,
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: UiText.sans(12, color: c.ink, height: 1.75),
-          ),
+    final tone = highlight ? c.accent : c.muted;
+    return Container(
+      height: 20,
+      padding: const EdgeInsets.symmetric(horizontal: 7),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: tone.withValues(alpha: highlight ? .11 : .08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        style: UiText.sans(11, weight: FontWeight.w500, color: tone, height: 1),
+      ),
+    );
+  }
+}
+
+/// 迷你定位板：按画面比例，最长边 150。
+class _MiniBoard extends StatelessWidget {
+  const _MiniBoard({required this.block, required this.ai});
+  final AgentPositionBlock block;
+  final bool ai;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final aspect = (block.aspect ?? 2 / 3).clamp(.5, 2.0);
+    const long = 150.0;
+    final size = aspect >= 1
+        ? Size(long, long / aspect)
+        : Size(long * aspect, long);
+    const dot = 18.0;
+    return Container(
+      key: Key('agent-position-board-${block.id}'),
+      width: size.width,
+      height: size.height,
+      decoration: BoxDecoration(
+        color: agentSunk(c),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: c.line),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Opacity(
+        opacity: ai ? .45 : 1,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _MiniBoardPainter(line: c.line, marks: block.marks),
+              ),
+            ),
+            for (final m in block.marks)
+              if (m.after != null)
+                Positioned(
+                  left: (m.after!.dx * size.width - dot / 2).clamp(
+                    0.0,
+                    size.width - dot,
+                  ),
+                  top: (m.after!.dy * size.height - dot / 2).clamp(
+                    0.0,
+                    size.height - dot,
+                  ),
+                  child: _Dot(
+                    key: Key('agent-position-dot-${m.index}'),
+                    index: m.index,
+                    size: dot,
+                    dim: !m.moved,
+                  ),
+                ),
+          ],
         ),
-        Text(
-          before,
-          style: mono.copyWith(
-            color: c.error,
-            decoration: TextDecoration.lineThrough,
-            decorationColor: c.error,
-          ),
+      ),
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot({
+    super.key,
+    required this.index,
+    required this.size,
+    this.dim = false,
+  });
+  final int index;
+  final double size;
+  final bool dim;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = AgentPositionView.colorOf(index);
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: dim ? color.withValues(alpha: .45) : color,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 1.5),
+        boxShadow: dim
+            ? null
+            : const [
+                BoxShadow(
+                  color: Color(0x33000000),
+                  blurRadius: 4,
+                  offset: Offset(0, 1),
+                ),
+              ],
+      ),
+      child: Text(
+        '${index + 1}',
+        style: UiText.mono(
+          size * .55,
+          weight: FontWeight.w700,
+          color: Colors.white,
+          height: 1,
         ),
-        Text('→', style: mono.copyWith(color: c.faint)),
-        Text(
-          after,
-          style: mono.copyWith(
-            color: c.ok,
-            backgroundColor: c.ok.withValues(alpha: .13),
+      ),
+    );
+  }
+}
+
+class _MiniBoardPainter extends CustomPainter {
+  _MiniBoardPainter({required this.line, required this.marks});
+  final Color line;
+  final List<AgentPositionMark> marks;
+
+  static const _pi = 3.141592653589793;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final grid = Paint()
+      ..color = line
+      ..strokeWidth = 1;
+    for (var i = 1; i < 5; i++) {
+      final x = size.width * i / 5, y = size.height * i / 5;
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), grid);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    }
+    for (final m in marks) {
+      final from = m.before, to = m.after;
+      if (!m.moved || from == null) continue;
+      final color = AgentPositionView.colorOf(m.index);
+      final a = Offset(from.dx * size.width, from.dy * size.height);
+      // 原位置：虚线圈。
+      final ring = Paint()
+        ..color = color.withValues(alpha: .8)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.3;
+      const r = 8.0;
+      for (var k = 0; k < 12; k += 2) {
+        canvas.drawArc(
+          Rect.fromCircle(center: a, radius: r),
+          k * _pi / 6,
+          _pi / 6,
+          false,
+          ring,
+        );
+      }
+      if (to == null) continue;
+      final b = Offset(to.dx * size.width, to.dy * size.height);
+      final d = b - a;
+      final len = d.distance;
+      if (len < 24) continue;
+      final u = d / len;
+      final start = a + u * (r + 2), end = b - u * 11;
+      final paint = Paint()
+        ..color = color.withValues(alpha: .85)
+        ..strokeWidth = 1.5
+        ..strokeCap = StrokeCap.round;
+      canvas.drawLine(start, end, paint);
+      final n = Offset(-u.dy, u.dx);
+      final tip = end + u;
+      final back = end - u * 5;
+      canvas.drawPath(
+        Path()
+          ..moveTo(tip.dx, tip.dy)
+          ..lineTo(back.dx + n.dx * 3.5, back.dy + n.dy * 3.5)
+          ..lineTo(back.dx - n.dx * 3.5, back.dy - n.dy * 3.5)
+          ..close(),
+        Paint()..color = color.withValues(alpha: .85),
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_MiniBoardPainter old) =>
+      old.line != line || old.marks != marks;
+}
+
+class _Legend extends StatelessWidget {
+  const _Legend({required this.mark, required this.ai});
+  final AgentPositionMark mark;
+  final bool ai;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final m = mark;
+    final mono = UiText.mono(11.5, color: c.faint, height: 1.2);
+    String cell(Offset? p) =>
+        p == null ? l.ag_positionNone : AgentPositionMark.cell(p);
+    return Opacity(
+      opacity: m.moved || ai ? 1 : .55,
+      child: Row(
+        key: Key('agent-position-legend-${m.index}'),
+        spacing: 7,
+        children: [
+          _Dot(index: m.index, size: 16),
+          Expanded(
+            child: Text(
+              m.name ?? l.ag_field_character,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12, color: c.ink, height: 1.2),
+            ),
           ),
-        ),
-      ],
+          if (!m.moved)
+            Text(cell(m.after), style: mono)
+          else ...[
+            if (m.added)
+              Text(l.ag_positionNew, style: mono)
+            else ...[
+              Text(
+                cell(m.before),
+                style: mono.copyWith(
+                  decoration: TextDecoration.lineThrough,
+                  decorationColor: c.faint,
+                ),
+              ),
+              Text('→', style: mono),
+            ],
+            Text(
+              cell(m.after),
+              style: UiText.mono(
+                11.5,
+                weight: FontWeight.w600,
+                color: c.ok,
+                height: 1.2,
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }

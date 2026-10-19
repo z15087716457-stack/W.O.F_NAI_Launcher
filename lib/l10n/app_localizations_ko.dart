@@ -19980,10 +19980,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_positionApplied => '조정됨';
 
   @override
-  String get ag_positionMode => '위치 지정';
+  String get ag_positionNone => '지정 안 됨';
 
   @override
-  String get ag_positionNone => '지정 안 됨';
+  String get ag_positionAiHint => 'AI 선택 중이라 위치가 적용되지 않습니다.';
+
+  @override
+  String get ag_positionNew => '추가';
 
   @override
   String get ag_diffLocked => '초안이 다시 바뀌었습니다';

@@ -296,6 +296,8 @@ void main() {
         'draft': {
           'draft_version': 'v1',
           'fields': {
+            'width': 832,
+            'height': 1216,
             'use_coords': true,
             'characters': [
               {'id': 'a', 'name': 'Alice', 'prompt': 'x', 'x': 0.75, 'y': 0.5},
@@ -318,10 +320,18 @@ void main() {
     final card = blocks.whereType<AgentPositionBlock>().single;
     expect(card.modeChanged, isTrue);
     expect(card.customAfter, isTrue);
-    expect(card.changes.map((c) => (c.name, c.before, c.after)), [
-      ('Alice', 'B3', 'D3'),
-      ('Bob', null, 'A5'),
+    expect(card.aspect, closeTo(832 / 1216, 1e-9));
+    expect(card.marks.map((m) => (m.index, m.name, m.moved, m.added)), [
+      (0, 'Alice', true, false),
+      (1, 'Bob', true, false),
+      (2, 'Cat', false, false),
+      (3, 'New', false, true),
     ]);
+    expect(card.moved.map((m) => m.name), ['Alice', 'Bob']);
+    expect(AgentPositionMark.cell(card.marks[0].before!), 'B3');
+    expect(AgentPositionMark.cell(card.marks[0].after!), 'D3');
+    expect(card.marks[1].before, isNull);
+    expect(AgentPositionMark.cell(card.marks[1].after!), 'A5');
     // 只改提示词、位置没动：不出位置卡。
     runtime.messages = [
       assistant([call('txt', 'mcp__nai_studio__prompt_update')]),

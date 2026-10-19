@@ -35866,17 +35866,23 @@ abstract class AppLocalizations {
   /// **'Adjusted'**
   String get ag_positionApplied;
 
-  /// No description provided for @ag_positionMode.
-  ///
-  /// In en, this message translates to:
-  /// **'Positioning'**
-  String get ag_positionMode;
-
   /// No description provided for @ag_positionNone.
   ///
   /// In en, this message translates to:
   /// **'None'**
   String get ag_positionNone;
+
+  /// No description provided for @ag_positionAiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'AI\'s Choice is on, so these positions aren\'t used.'**
+  String get ag_positionAiHint;
+
+  /// No description provided for @ag_positionNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get ag_positionNew;
 
   /// No description provided for @ag_diffLocked.
   ///

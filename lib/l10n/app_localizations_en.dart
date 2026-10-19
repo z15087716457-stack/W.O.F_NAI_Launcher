@@ -20536,10 +20536,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_positionApplied => 'Adjusted';
 
   @override
-  String get ag_positionMode => 'Positioning';
+  String get ag_positionNone => 'None';
 
   @override
-  String get ag_positionNone => 'None';
+  String get ag_positionAiHint =>
+      'AI\'s Choice is on, so these positions aren\'t used.';
+
+  @override
+  String get ag_positionNew => 'New';
 
   @override
   String get ag_diffLocked => 'Draft changed since';

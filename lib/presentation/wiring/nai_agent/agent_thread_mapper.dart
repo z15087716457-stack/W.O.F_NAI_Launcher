@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'dart:ui' show Offset;
 
-import '../../../data/models/character/character_prompt.dart';
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../ui/agent/agent_contract.dart';
 import 'agent_resources.dart';
@@ -574,7 +574,7 @@ String? _subject(Map<String, dynamic> args) {
   return null;
 }
 
-/// 定位方式或角色格位有变化时给一张位置卡；只看真的变了的角色。
+/// 定位方式或角色位置有变化时给一张位置卡（带全部角色，供迷你定位板画上下文）。
 AgentPositionBlock? _positions(
   String id,
   List<dynamic> applied,
@@ -589,41 +589,35 @@ AgentPositionBlock? _positions(
   );
   if (!touched) return null;
   final old = agentMap(before['fields']), next = agentMap(after['fields']);
-  final customBefore = old['use_coords'] is bool
-      ? old['use_coords'] as bool
-      : null;
-  final customAfter = next['use_coords'] is bool
-      ? next['use_coords'] as bool
-      : null;
-  String? cell(Map<String, dynamic> c) => c['x'] is num && c['y'] is num
-      ? CharacterPosition(
-          mode: CharacterPositionMode.custom,
-          column: (c['x'] as num).toDouble(),
-          row: (c['y'] as num).toDouble(),
-        ).toNaiString()
+  bool? flag(Map<String, dynamic> f) =>
+      f['use_coords'] is bool ? f['use_coords'] as bool : null;
+  Offset? at(Map<String, dynamic>? c) =>
+      c != null && c['x'] is num && c['y'] is num
+      ? Offset((c['x'] as num).toDouble(), (c['y'] as num).toDouble())
       : null;
   final oldChars = agentMaps(old['characters']);
-  final changes = <AgentPositionChange>[];
-  for (final b in agentMaps(next['characters'])) {
-    final a = oldChars.where((c) => c['id'] == b['id']).firstOrNull;
-    // 新加的角色没有自定义位置就不算位置改动（提示词卡已经说明了新增）。
-    final was = a == null ? null : cell(a), now = cell(b);
-    if (was == now) continue;
-    changes.add(
-      AgentPositionChange(
-        name: (b['name'] ?? a?['name']) as String?,
-        before: was,
-        after: now,
-      ),
-    );
-  }
+  final marks = [
+    for (final (i, b) in agentMaps(next['characters']).indexed)
+      () {
+        final a = oldChars.where((c) => c['id'] == b['id']).firstOrNull;
+        return AgentPositionMark(
+          index: i,
+          name: (b['name'] ?? a?['name']) as String?,
+          before: at(a),
+          after: at(b),
+          added: a == null,
+        );
+      }(),
+  ];
+  final w = next['width'], h = next['height'];
   final block = AgentPositionBlock(
     id: id,
-    customBefore: customBefore,
-    customAfter: customAfter,
-    changes: changes,
+    customBefore: flag(old),
+    customAfter: flag(next),
+    marks: marks,
+    aspect: w is num && h is num && w > 0 && h > 0 ? w / h : null,
   );
-  return block.modeChanged || changes.isNotEmpty ? block : null;
+  return block.modeChanged || block.moved.isNotEmpty ? block : null;
 }
 
 Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(

@@ -188,7 +188,9 @@ void main() {
     });
   }
 
-  testWidgets('position card lists mode switch and cell moves', (tester) async {
+  testWidgets('position card draws a mini board with moves and legend', (
+    tester,
+  ) async {
     await _pump(
       tester,
       _view([
@@ -201,9 +203,25 @@ void main() {
                 id: 'p',
                 customBefore: false,
                 customAfter: true,
-                changes: [
-                  AgentPositionChange(name: 'Alice', before: 'B3', after: 'D3'),
-                  AgentPositionChange(name: 'Bob', after: 'A5'),
+                aspect: 832 / 1216,
+                marks: [
+                  AgentPositionMark(
+                    index: 0,
+                    name: 'Alice',
+                    before: Offset(.3, .5),
+                    after: Offset(.7, .5),
+                  ),
+                  AgentPositionMark(
+                    index: 1,
+                    name: 'Bob',
+                    after: Offset(.1, .9),
+                  ),
+                  AgentPositionMark(
+                    index: 2,
+                    name: 'Cat',
+                    before: Offset(.5, .1),
+                    after: Offset(.5, .1),
+                  ),
                 ],
               ),
             ],
@@ -213,24 +231,72 @@ void main() {
     );
     final card = find.byKey(const Key('agent-position-p'));
     expect(card, findsOneWidget);
+    final board = tester.getRect(
+      find.byKey(const Key('agent-position-board-p')),
+    );
+    expect(board.height, closeTo(150, .5));
+    expect(board.width, closeTo(150 * 832 / 1216, .5));
+    // 圆点按坐标落在板子上。
+    final alice = tester.getCenter(
+      find.byKey(const Key('agent-position-dot-0')),
+    );
+    expect(alice.dx, closeTo(board.left + board.width * .7, 1));
+    expect(alice.dy, closeTo(board.top + board.height * .5, 1));
     for (final t in [
       '角色位置',
+      'AI 选择 → 自定义',
       '已调整',
-      '定位方式',
-      'AI 选择',
-      '自定义',
       'Alice',
       'B3',
       'D3',
       'Bob',
       '未定位',
       'A5',
+      'Cat',
+      'C1',
     ]) {
-      expect(find.descendant(of: card, matching: find.text(t)), findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text(t)),
+        findsOneWidget,
+        reason: t,
+      );
     }
     expect(
       tester.getRect(find.text('已调整')).right,
       closeTo(tester.getRect(card).right, 1),
     );
+  });
+
+  testWidgets('position card under AI choice dims the board and explains', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      _view([
+        AgentTurn(
+          id: 't',
+          user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 19)),
+          reply: const AgentReply(
+            blocks: [
+              AgentPositionBlock(
+                id: 'p',
+                customBefore: true,
+                customAfter: false,
+                marks: [
+                  AgentPositionMark(
+                    index: 0,
+                    name: 'Alice',
+                    before: Offset(.5, .5),
+                    after: Offset(.5, .5),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ], 1),
+    );
+    expect(find.text('自定义 → AI 选择'), findsOneWidget);
+    expect(find.text('当前为 AI 选择，坐标暂不生效。'), findsOneWidget);
   });
 }
