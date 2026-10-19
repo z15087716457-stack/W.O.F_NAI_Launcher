@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../../data/models/character/character_prompt.dart';
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../ui/agent/agent_contract.dart';
 import 'agent_resources.dart';
@@ -409,6 +410,13 @@ class AgentThreadMapper {
                     ),
                   );
                 }
+                final position = _positions(
+                  '${runtime.chat.id}/$id/$projectionIndex/position',
+                  applied,
+                  backup,
+                  after,
+                );
+                if (position != null) blocks.add(position);
               }
             }
             final artifacts = agentMaps(details['artifacts']);
@@ -564,6 +572,58 @@ String? _subject(Map<String, dynamic> args) {
     }
   }
   return null;
+}
+
+/// 定位方式或角色格位有变化时给一张位置卡；只看真的变了的角色。
+AgentPositionBlock? _positions(
+  String id,
+  List<dynamic> applied,
+  Map<String, dynamic> before,
+  Map<String, dynamic> after,
+) {
+  final touched = applied.any(
+    (key) =>
+        key == 'use_coords' ||
+        key.toString().startsWith('characters') ||
+        key == 'clear_characters',
+  );
+  if (!touched) return null;
+  final old = agentMap(before['fields']), next = agentMap(after['fields']);
+  final customBefore = old['use_coords'] is bool
+      ? old['use_coords'] as bool
+      : null;
+  final customAfter = next['use_coords'] is bool
+      ? next['use_coords'] as bool
+      : null;
+  String? cell(Map<String, dynamic> c) => c['x'] is num && c['y'] is num
+      ? CharacterPosition(
+          mode: CharacterPositionMode.custom,
+          column: (c['x'] as num).toDouble(),
+          row: (c['y'] as num).toDouble(),
+        ).toNaiString()
+      : null;
+  final oldChars = agentMaps(old['characters']);
+  final changes = <AgentPositionChange>[];
+  for (final b in agentMaps(next['characters'])) {
+    final a = oldChars.where((c) => c['id'] == b['id']).firstOrNull;
+    // 新加的角色没有自定义位置就不算位置改动（提示词卡已经说明了新增）。
+    final was = a == null ? null : cell(a), now = cell(b);
+    if (was == now) continue;
+    changes.add(
+      AgentPositionChange(
+        name: (b['name'] ?? a?['name']) as String?,
+        before: was,
+        after: now,
+      ),
+    );
+  }
+  final block = AgentPositionBlock(
+    id: id,
+    customBefore: customBefore,
+    customAfter: customAfter,
+    changes: changes,
+  );
+  return block.modeChanged || changes.isNotEmpty ? block : null;
 }
 
 Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(

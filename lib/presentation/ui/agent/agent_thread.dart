@@ -373,6 +373,7 @@ class _TaskCard extends StatelessWidget {
         AgentThinkingBlock() => AgentThinking(block: b),
         AgentStepsBlock(:final steps) => AgentSteps(steps: steps),
         AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
+        AgentPositionBlock() => AgentPositionView(block: b),
         AgentImagesBlock() => AgentOutputs(block: b),
       });
     }
@@ -1008,6 +1009,116 @@ class AgentDiffView extends StatelessWidget {
             style: diff.state == AgentDiffState.undone
                 ? base.copyWith(color: c.faint)
                 : base,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 角色位置改动卡：样式和提示词差异卡一致（标题行 + 浅底明细），只提示不撤销。
+class AgentPositionView extends StatelessWidget {
+  const AgentPositionView({super.key, required this.block});
+  final AgentPositionBlock block;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    String mode(bool custom) =>
+        custom ? l.characterCanvas_custom : l.characterCanvas_aiChoice;
+    final mono = UiText.mono(12, color: c.muted, height: 1.75);
+    final rows = <Widget>[
+      if (block.modeChanged)
+        _row(
+          context,
+          l.ag_positionMode,
+          mode(block.customBefore!),
+          mode(block.customAfter!),
+          mono,
+        ),
+      for (final ch in block.changes)
+        _row(
+          context,
+          ch.name ?? l.ag_field_character,
+          ch.before ?? l.ag_positionNone,
+          ch.after ?? l.ag_positionNone,
+          mono,
+        ),
+    ];
+    return Column(
+      key: Key('agent-position-${block.id}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        SizedBox(
+          height: 24,
+          child: Row(
+            spacing: 6,
+            children: [
+              AgentIcon(AgentGlyphs.hand, size: 14, color: c.muted),
+              Expanded(
+                child: Text(
+                  l.ag_positionTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12, weight: FontWeight.w600, color: c.ink),
+                ),
+              ),
+              AgentIcon(AgentGlyphs.check, size: 14, color: c.ok),
+              Text(l.ag_positionApplied, style: UiText.sans(12, color: c.ok)),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(11, 7, 11, 7),
+          decoration: BoxDecoration(
+            color: agentSunk(c),
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: c.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: rows,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _row(
+    BuildContext context,
+    String label,
+    String before,
+    String after,
+    TextStyle mono,
+  ) {
+    final c = context.ui;
+    return Row(
+      spacing: 8,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: UiText.sans(12, color: c.ink, height: 1.75),
+          ),
+        ),
+        Text(
+          before,
+          style: mono.copyWith(
+            color: c.error,
+            decoration: TextDecoration.lineThrough,
+            decorationColor: c.error,
+          ),
+        ),
+        Text('→', style: mono.copyWith(color: c.faint)),
+        Text(
+          after,
+          style: mono.copyWith(
+            color: c.ok,
+            backgroundColor: c.ok.withValues(alpha: .13),
           ),
         ),
       ],

@@ -19974,6 +19974,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_diffUndone => '실행 취소했습니다';
 
   @override
+  String get ag_positionTitle => '캐릭터 위치';
+
+  @override
+  String get ag_positionApplied => '조정됨';
+
+  @override
+  String get ag_positionMode => '위치 지정';
+
+  @override
+  String get ag_positionNone => '지정 안 됨';
+
+  @override
   String get ag_diffLocked => '초안이 다시 바뀌었습니다';
 
   @override

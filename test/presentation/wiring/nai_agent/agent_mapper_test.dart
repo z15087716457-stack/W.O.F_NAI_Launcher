@@ -273,6 +273,87 @@ void main() {
     },
   );
 
+  test('character position changes map to one position card', () async {
+    final backupDir = Directory(
+      '${runtime.workspace.agentDirectory.path}/draft-backups',
+    );
+    await backupDir.create(recursive: true);
+    final backup = File('${backupDir.path}/pos.json');
+    final before = {
+      'use_coords': false,
+      'characters': [
+        {'id': 'a', 'name': 'Alice', 'prompt': 'x', 'x': 0.25, 'y': 0.5},
+        {'id': 'b', 'name': 'Bob', 'prompt': 'y'},
+        {'id': 'c', 'name': 'Cat', 'prompt': 'z', 'x': 0.5, 'y': 0.5},
+      ],
+    };
+    await backup.writeAsString(jsonEncode({'fields': before}));
+    runtime.messages = [
+      assistant([call('pos', 'mcp__nai_studio__prompt_update')]),
+      result('pos', {
+        'applied': ['use_coords', 'characters(4)'],
+        'backup_path': backup.path,
+        'draft': {
+          'draft_version': 'v1',
+          'fields': {
+            'use_coords': true,
+            'characters': [
+              {'id': 'a', 'name': 'Alice', 'prompt': 'x', 'x': 0.75, 'y': 0.5},
+              {'id': 'b', 'name': 'Bob', 'prompt': 'y', 'x': 0.0, 'y': 1.0},
+              {'id': 'c', 'name': 'Cat', 'prompt': 'z', 'x': 0.5, 'y': 0.5},
+              {'id': 'd', 'name': 'New', 'prompt': 'w'},
+            ],
+          },
+        },
+      }),
+    ];
+    mapper.map(runtime);
+    await resources.settle();
+    final blocks = mapper
+        .map(runtime, draftVersion: 'v1')
+        .turns
+        .single
+        .reply!
+        .blocks;
+    final card = blocks.whereType<AgentPositionBlock>().single;
+    expect(card.modeChanged, isTrue);
+    expect(card.customAfter, isTrue);
+    expect(card.changes.map((c) => (c.name, c.before, c.after)), [
+      ('Alice', 'B3', 'D3'),
+      ('Bob', null, 'A5'),
+    ]);
+    // 只改提示词、位置没动：不出位置卡。
+    runtime.messages = [
+      assistant([call('txt', 'mcp__nai_studio__prompt_update')]),
+      result('txt', {
+        'applied': ['characters(3)'],
+        'backup_path': backup.path,
+        'draft': {
+          'draft_version': 'v2',
+          'fields': {
+            ...before,
+            'characters': [
+              for (final c in before['characters'] as List)
+                {...c as Map, 'prompt': 'changed'},
+            ],
+          },
+        },
+      }),
+    ];
+    mapper.map(runtime);
+    await resources.settle();
+    expect(
+      mapper
+          .map(runtime, draftVersion: 'v2')
+          .turns
+          .single
+          .reply!
+          .blocks
+          .whereType<AgentPositionBlock>(),
+      isEmpty,
+    );
+  });
+
   test(
     'CodeMode native projections recover guarded diffs, image ids and Anlas',
     () async {

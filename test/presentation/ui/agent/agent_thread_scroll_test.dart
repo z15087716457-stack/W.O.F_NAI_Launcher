@@ -187,4 +187,50 @@ void main() {
       expect(tester.getRect(trailing).right, closeTo(diff.right, 1));
     });
   }
+
+  testWidgets('position card lists mode switch and cell moves', (tester) async {
+    await _pump(
+      tester,
+      _view([
+        AgentTurn(
+          id: 't',
+          user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 19)),
+          reply: const AgentReply(
+            blocks: [
+              AgentPositionBlock(
+                id: 'p',
+                customBefore: false,
+                customAfter: true,
+                changes: [
+                  AgentPositionChange(name: 'Alice', before: 'B3', after: 'D3'),
+                  AgentPositionChange(name: 'Bob', after: 'A5'),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ], 1),
+    );
+    final card = find.byKey(const Key('agent-position-p'));
+    expect(card, findsOneWidget);
+    for (final t in [
+      '角色位置',
+      '已调整',
+      '定位方式',
+      'AI 选择',
+      '自定义',
+      'Alice',
+      'B3',
+      'D3',
+      'Bob',
+      '未定位',
+      'A5',
+    ]) {
+      expect(find.descendant(of: card, matching: find.text(t)), findsOneWidget);
+    }
+    expect(
+      tester.getRect(find.text('已调整')).right,
+      closeTo(tester.getRect(card).right, 1),
+    );
+  });
 }

@@ -19908,6 +19908,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_diffUndone => '元に戻しました';
 
   @override
+  String get ag_positionTitle => 'キャラクター位置';
+
+  @override
+  String get ag_positionApplied => '調整済み';
+
+  @override
+  String get ag_positionMode => '位置指定';
+
+  @override
+  String get ag_positionNone => '未指定';
+
+  @override
   String get ag_diffLocked => '下書きが再変更されました';
 
   @override

@@ -35854,6 +35854,30 @@ abstract class AppLocalizations {
   /// **'Undone'**
   String get ag_diffUndone;
 
+  /// No description provided for @ag_positionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Character positions'**
+  String get ag_positionTitle;
+
+  /// No description provided for @ag_positionApplied.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjusted'**
+  String get ag_positionApplied;
+
+  /// No description provided for @ag_positionMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Positioning'**
+  String get ag_positionMode;
+
+  /// No description provided for @ag_positionNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get ag_positionNone;
+
   /// No description provided for @ag_diffLocked.
   ///
   /// In en, this message translates to:

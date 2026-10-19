@@ -20530,6 +20530,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_diffUndone => 'Undone';
 
   @override
+  String get ag_positionTitle => 'Character positions';
+
+  @override
+  String get ag_positionApplied => 'Adjusted';
+
+  @override
+  String get ag_positionMode => 'Positioning';
+
+  @override
+  String get ag_positionNone => 'None';
+
+  @override
   String get ag_diffLocked => 'Draft changed since';
 
   @override

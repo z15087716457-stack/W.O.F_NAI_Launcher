@@ -19674,6 +19674,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_diffUndone => '已撤销';
 
   @override
+  String get ag_positionTitle => '角色位置';
+
+  @override
+  String get ag_positionApplied => '已调整';
+
+  @override
+  String get ag_positionMode => '定位方式';
+
+  @override
+  String get ag_positionNone => '未定位';
+
+  @override
   String get ag_diffLocked => '草稿已再次修改';
 
   @override
@@ -40115,6 +40127,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_diffUndone => '已復原';
+
+  @override
+  String get ag_positionTitle => '角色位置';
+
+  @override
+  String get ag_positionApplied => '已調整';
+
+  @override
+  String get ag_positionMode => '定位方式';
+
+  @override
+  String get ag_positionNone => '未定位';
 
   @override
   String get ag_diffLocked => '草稿已再次修改';

@@ -244,6 +244,34 @@ final class AgentDiffBlock extends AgentBlock {
   final AgentPromptDiff diff;
 }
 
+/// 角色位置改动：一次 `prompt_update` 改了定位方式或角色格位时出一张，
+/// 和提示词差异卡并列显示（只提示，不带撤销）。
+final class AgentPositionBlock extends AgentBlock {
+  const AgentPositionBlock({
+    required this.id,
+    this.customBefore,
+    this.customAfter,
+    this.changes = const [],
+  });
+  final String id;
+
+  /// 定位方式（true = 自定义坐标，false = AI 选择）；两者都非空且不同才算切换。
+  final bool? customBefore, customAfter;
+  final List<AgentPositionChange> changes;
+
+  bool get modeChanged =>
+      customBefore != null &&
+      customAfter != null &&
+      customBefore != customAfter;
+}
+
+/// 一个角色的格位变化；格位是 NAI 5×5 网格名（`A1`…`E5`），null = 没有自定义位置。
+@immutable
+class AgentPositionChange {
+  const AgentPositionChange({this.name, this.before, this.after});
+  final String? name, before, after;
+}
+
 /// 本轮产物（生成的图、工具出的图）。
 final class AgentImagesBlock extends AgentBlock {
   const AgentImagesBlock({
