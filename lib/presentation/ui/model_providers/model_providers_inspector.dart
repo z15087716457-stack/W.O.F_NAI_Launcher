@@ -202,6 +202,7 @@ class ProvidersInspector extends StatelessWidget {
           ),
         ),
         Wrap(
+          key: const Key('mp-thinking-row'),
           spacing: 10,
           runSpacing: 10,
           crossAxisAlignment: WrapCrossAlignment.end,
@@ -238,17 +239,19 @@ class ProvidersInspector extends StatelessWidget {
                 ),
               ),
             ),
-            ProviderField(
-              label: l.mp_reasoningProtocol,
-              child: UiSeg<bool>(
-                key: const Key('mp-adaptive'),
-                values: const [false, true],
-                selected: m.adaptiveReasoning,
-                labelOf: (v) => v ? l.mp_adaptive : l.mp_standard,
-                onChanged: (v) =>
-                    onEdit((x) => x.copyWith(adaptiveReasoning: v)),
+            // 思考协议（标准 / 自适应）只在 Anthropic Messages 里生效，其他协议不显示。
+            if (protocol?.id == 'anthropicMessages')
+              ProviderField(
+                label: l.mp_reasoningProtocol,
+                child: UiSeg<bool>(
+                  key: const Key('mp-adaptive'),
+                  values: const [false, true],
+                  selected: m.adaptiveReasoning,
+                  labelOf: (v) => v ? l.mp_adaptive : l.mp_standard,
+                  onChanged: (v) =>
+                      onEdit((x) => x.copyWith(adaptiveReasoning: v)),
+                ),
               ),
-            ),
           ],
         ),
       ],

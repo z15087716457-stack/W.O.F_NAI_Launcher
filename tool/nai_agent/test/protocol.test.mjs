@@ -94,6 +94,22 @@ export async function sessionFixture(protocol, server, options = {}) {
   });
 }
 
+// 侧栏「最高」：Studio 把服务商勾选的档位写进请求体；Pi 内部档位虽被收成 high，
+// 发给服务商的仍是所选档位（2026-10-20 曾误判为“最高 = 高”）。
+test('selected max reasoning effort reaches the DeepSeek request body', async () => {
+  const server = await httpFixture('openaiChatCompletions');
+  const created = await sessionFixture('openaiChatCompletions',
+    { ...server, baseUrl: server.baseUrl + '/deepseek.com' }, { config: {
+      reasoning: true, thinkingLevel: 'xhigh',
+      payloadParameters: { thinking: { type: 'enabled' }, reasoning_effort: 'max' } } });
+  try {
+    await created.session.prompt('hi');
+    const body = server.requests[0].body;
+    assert.deepEqual(body.thinking, { type: 'enabled' });
+    assert.equal(body.reasoning_effort, 'max');
+  } finally { await created.close(); await server.close(); }
+});
+
 for (const protocol of ['openaiChatCompletions', 'openaiResponses', 'anthropicMessages',
   'geminiGenerateContent', 'ollamaChatCompletions']) {
   test(protocol + ': official CodeMode → Studio MCP → follow-up request', async () => {

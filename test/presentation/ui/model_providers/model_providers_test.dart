@@ -49,6 +49,19 @@ void main() {
     );
   });
 
+  testWidgets('思考协议只在 Anthropic Messages 显示', (t) async {
+    await pumpProviders(t);
+    // DeepSeek：OpenAI Chat Completions，选项没有作用，不显示；思考档位照常。
+    expect(find.byKey(const Key('mp-levels')), findsOneWidget);
+    expect(find.byKey(const Key('mp-default-level')), findsOneWidget);
+    expect(find.byKey(const Key('mp-adaptive')), findsNothing);
+    expect(find.text('思考协议'), findsNothing);
+    await t.tap(find.byKey(const Key('mp-provider-an')));
+    await t.pumpAndSettle();
+    expect(find.byKey(const Key('mp-adaptive')), findsOneWidget);
+    expect(find.text('思考协议'), findsOneWidget);
+  });
+
   testWidgets('编辑进草稿：保存条出现、计数、放弃还原', (t) async {
     final rec = await pumpProviders(t);
     expect(find.byKey(const Key('mp-dock')), findsNothing);

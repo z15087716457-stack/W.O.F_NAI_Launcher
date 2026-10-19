@@ -95,6 +95,22 @@ void main() {
             width: 18,
             height: 18,
           ),
+        // 2026-10-20：非 Anthropic 协议隐藏「思考协议」（用户确认）。只排除默认档位
+        // 那一行里、默认档位选择框右边原来放思考协议的位置；仍显示时照常逐像素比对。
+        if (find.byKey(const Key('mp-adaptive')).evaluate().isEmpty)
+          for (final e in find.byKey(const Key('mp-thinking-row')).evaluate())
+            () {
+              final row = t.getRect(find.byWidget(e.widget));
+              final picker = t.getRect(
+                find.byKey(const Key('mp-default-level')),
+              );
+              return Rect.fromLTRB(
+                picker.right,
+                row.top,
+                row.right,
+                row.bottom,
+              );
+            }(),
       ];
       await expectOutsideApprovedRegions(
         t,
