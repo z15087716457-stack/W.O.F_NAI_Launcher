@@ -4,6 +4,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/bridge/bridge_link_icon.dart';
+import '../agent/agent_glyphs.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -567,7 +568,7 @@ class _ToolsMenu extends StatelessWidget {
           if (scope.slots.agentToggle != null)
             pinRow(
               const Key('gen-pin-agent'),
-              Icon(Icons.auto_awesome_outlined, size: 15, color: c.muted),
+              AgentMark(size: 15, color: c.muted),
               l.naiAgent_title,
               GenPromptTool.agentPinned,
               t.agentPinned,

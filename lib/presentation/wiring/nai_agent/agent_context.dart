@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../data/models/image/image_params.dart';
+import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/prompt_block_library_provider.dart';
@@ -85,10 +86,10 @@ AgentDraftSummary agentDraftSummary(
 }
 
 List<AgentMention> agentBlockMentions(PromptBlockLibraryState? library) => [
-  for (final block in library?.blocks ?? [])
+  for (final block in library?.blocks ?? const <PromptBlock>[])
     AgentMention(
       id: 'block/${block.id}',
       kind: AgentMentionKind.block,
-      label: block.name,
+      label: block.title,
     ),
 ];
