@@ -15910,7 +15910,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_error => '操作未完成，请检查模型设置或工作区文件。';
 
   @override
-  String get naiAgent_visionDisabled => '此模型尚未启用图片输入，请在模型设置中确认支持后开启。';
+  String get naiAgent_visionDisabled =>
+      '当前图片输入不可用。请在 设置 → 模型与接口 中检查服务商的 请求 → 图片输入 是否为“允许”，并确认所选模型支持图片输入。';
+
+  @override
+  String get naiAgent_visionCurrentProvider => '当前服务商';
+
+  @override
+  String naiAgent_visionProviderBlocked(String providerName) {
+    return '服务商 $providerName 当前未允许发送图片。请到 设置 → 模型与接口 → $providerName → 请求 → 图片输入 改为“允许”。';
+  }
+
+  @override
+  String naiAgent_visionModelUnsupported(String providerName) {
+    return '服务商 $providerName 下的所选模型未声明支持图片输入。请在 设置 → 模型与接口 → $providerName → 模型 → 能力 → 图片输入 确认支持，或切换到支持图片输入的模型。';
+  }
+
+  @override
+  String naiAgent_visionAttachmentsSkipped(int count, String reason) {
+    return '本次有 $count 张图片附件没有发给模型，文字仍照常发送。$reason';
+  }
 
   @override
   String get naiAgent_inputChanged => '准备期间输入已改变，请发送当前草稿。';
@@ -20055,6 +20074,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_zoomClose => '关闭';
 
   @override
+  String get ag_thought => '已思考';
+
+  @override
+  String get ag_thinkingLive => '思考中';
+
+  @override
+  String ag_thoughtChars(int count) {
+    return '$count 字';
+  }
+
+  @override
   String get mp_protocol => '接口协议';
 
   @override
@@ -20100,7 +20130,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mp_imageInput => '图片输入';
 
   @override
-  String get mp_imageInputHelp => '反推等功能需要把图片发给模型';
+  String get mp_imageInputHelp =>
+      '关闭时本服务商所有模型都不会收到图片（含 NAI Agent 的看图和附件），即使模型能力里勾了“图片输入”';
 
   @override
   String get mp_allow => '允许';
@@ -36328,7 +36359,26 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_error => '操作未完成，請檢查模型設定或工作區檔案。';
 
   @override
-  String get naiAgent_visionDisabled => '此模型尚未啟用圖片輸入，請在模型設定中確認支援後開啟。';
+  String get naiAgent_visionDisabled =>
+      '當前圖片輸入不可用。請在 設定 → 模型與介面 中檢查服務商的 請求 → 圖片輸入 是否為“允許”，並確認所選模型支援圖片輸入。';
+
+  @override
+  String get naiAgent_visionCurrentProvider => '當前服務商';
+
+  @override
+  String naiAgent_visionProviderBlocked(String providerName) {
+    return '服務商 $providerName 當前未允許傳送圖片。請到 設定 → 模型與介面 → $providerName → 請求 → 圖片輸入 改為“允許”。';
+  }
+
+  @override
+  String naiAgent_visionModelUnsupported(String providerName) {
+    return '服務商 $providerName 下的所選模型未宣告支援圖片輸入。請在 設定 → 模型與介面 → $providerName → 模型 → 能力 → 圖片輸入 確認支援，或切換到支援圖片輸入的模型。';
+  }
+
+  @override
+  String naiAgent_visionAttachmentsSkipped(int count, String reason) {
+    return '本次有 $count 張圖片附件沒有發給模型，文字仍照常傳送。$reason';
+  }
 
   @override
   String get naiAgent_inputChanged => '準備期間輸入已改變，請傳送當前草稿。';
@@ -40474,6 +40524,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_zoomClose => '關閉';
 
   @override
+  String get ag_thought => '已思考';
+
+  @override
+  String get ag_thinkingLive => '思考中';
+
+  @override
+  String ag_thoughtChars(int count) {
+    return '$count 字';
+  }
+
+  @override
   String get mp_protocol => '介面協定';
 
   @override
@@ -40519,7 +40580,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mp_imageInput => '圖片輸入';
 
   @override
-  String get mp_imageInputHelp => '反推等功能需要把圖片發給模型';
+  String get mp_imageInputHelp =>
+      '關閉時本服務商所有模型都不會收到圖片（含 NAI Agent 的看圖和附件），即使模型能力裡勾了“圖片輸入”';
 
   @override
   String get mp_allow => '允許';

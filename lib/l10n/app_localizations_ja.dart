@@ -16119,7 +16119,26 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_error => '操作に失敗しました。モデル設定やファイルを確認してください。';
 
   @override
-  String get naiAgent_visionDisabled => '画像入力が有効ではありません。モデル設定で対応を確認してください。';
+  String get naiAgent_visionDisabled =>
+      '現在、画像入力を利用できません。「設定 → モデルとAPI」で、プロバイダーの「リクエスト → 画像入力」が「許可」であり、選択したモデルが画像入力に対応しているか確認してください。';
+
+  @override
+  String get naiAgent_visionCurrentProvider => '現在のプロバイダー';
+
+  @override
+  String naiAgent_visionProviderBlocked(String providerName) {
+    return 'プロバイダー $providerName は画像の送信を許可していません。「設定 → モデルとAPI → $providerName → リクエスト → 画像入力」を「許可」に変更してください。';
+  }
+
+  @override
+  String naiAgent_visionModelUnsupported(String providerName) {
+    return 'プロバイダー $providerName の選択中モデルは、画像入力への対応が確認されていません。「設定 → モデルとAPI → $providerName → モデル → 能力 → 画像入力」で対応を確認するか、画像対応モデルに切り替えてください。';
+  }
+
+  @override
+  String naiAgent_visionAttachmentsSkipped(int count, String reason) {
+    return '画像添付 $count 件はモデルに送信されませんでした。テキストは通常どおり送信されます。$reason';
+  }
 
   @override
   String get naiAgent_inputChanged => '準備中に入力が変わりました。現在の下書きを送信してください。';
@@ -20292,6 +20311,17 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_zoomClose => '閉じる';
 
   @override
+  String get ag_thought => '思考済み';
+
+  @override
+  String get ag_thinkingLive => '思考中';
+
+  @override
+  String ag_thoughtChars(int count) {
+    return '$count 文字';
+  }
+
+  @override
   String get mp_protocol => 'プロトコル';
 
   @override
@@ -20337,7 +20367,8 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mp_imageInput => '画像入力';
 
   @override
-  String get mp_imageInputHelp => '逆推などで画像をモデルに送る場合に必要';
+  String get mp_imageInputHelp =>
+      'オフの場合、モデルの能力で「画像入力」が有効でも、このプロバイダーのすべてのモデルに画像は送信されません（NAI Agent の画像読み取りと添付を含む）';
 
   @override
   String get mp_allow => '許可';

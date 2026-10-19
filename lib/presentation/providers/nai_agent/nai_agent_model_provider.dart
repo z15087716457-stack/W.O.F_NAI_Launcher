@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/nai_agent/vision_access.dart';
 import '../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../prompt_assistant/models/model_request_overrides.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
@@ -10,6 +11,8 @@ import '../../prompt_assistant/services/provider_adapters/prompt_assistant_adapt
 class NaiAgentModelConnection {
   NaiAgentModelConnection(
     this._private, {
+    this.visionBlockedByProvider,
+    this.providerName,
     NaiAgentModelConnection Function(String)? reasoningOverride,
     List<String> reasoningEfforts = const [],
   }) : _reasoningOverride = reasoningOverride,
@@ -18,6 +21,12 @@ class NaiAgentModelConnection {
   final NaiAgentModelConnection Function(String)? _reasoningOverride;
   final List<String> _reasoningEfforts;
   bool get allowsImages => _private['vision'] == true;
+  final bool? visionBlockedByProvider;
+  final String? providerName;
+  NaiAgentVisionAccess get visionAccess => NaiAgentVisionAccess(
+    blockedByProvider: visionBlockedByProvider,
+    providerName: providerName,
+  );
   bool supportsReasoningEffort(String effort) =>
       _reasoningEfforts.contains(effort);
   NaiAgentModelConnection withReasoningEffort(String effort) {
@@ -167,6 +176,10 @@ NaiAgentModelConnection mapNaiAgentModel(
       'retryAttempts': provider.retryAttempts.clamp(0, 5),
       'maxConcurrentRequests': provider.maxConcurrentRequests.clamp(1, 20),
     },
+    providerName: provider.name,
+    visionBlockedByProvider:
+        !provider.allowImageInput &&
+        (model.supportsVision ?? model.catalogEntry?.supportsVision) == true,
     reasoningEfforts: naiAgentReasoningEfforts(provider, model),
     reasoningOverride: (effort) {
       if (!naiAgentReasoningEfforts(provider, model).contains(effort)) {

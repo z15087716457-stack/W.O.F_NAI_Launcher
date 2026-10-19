@@ -28988,8 +28988,32 @@ abstract class AppLocalizations {
   /// No description provided for @naiAgent_visionDisabled.
   ///
   /// In en, this message translates to:
-  /// **'Image input is not enabled for this model. Confirm support in model settings.'**
+  /// **'Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.'**
   String get naiAgent_visionDisabled;
+
+  /// No description provided for @naiAgent_visionCurrentProvider.
+  ///
+  /// In en, this message translates to:
+  /// **'the current provider'**
+  String get naiAgent_visionCurrentProvider;
+
+  /// Provider-level image sending is off; providerName is the configured display name.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider {providerName} does not allow sending images. Go to Settings → Models & APIs → {providerName} → Requests → Images and select On.'**
+  String naiAgent_visionProviderBlocked(String providerName);
+
+  /// Model-level image support is false or unknown, independent of the provider sending switch.
+  ///
+  /// In en, this message translates to:
+  /// **'The selected model for provider {providerName} has no confirmed image-input support. Check Model → Capabilities → Image input in Settings → Models & APIs → {providerName}, or select a model that supports images.'**
+  String naiAgent_visionModelUnsupported(String providerName);
+
+  /// Run notice when image pixels are not sent; original files remain in the workspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Images not sent to the model: {count}. Text is still sent. {reason}'**
+  String naiAgent_visionAttachmentsSkipped(int count, String reason);
 
   /// No description provided for @naiAgent_inputChanged.
   ///
@@ -36562,6 +36586,24 @@ abstract class AppLocalizations {
   /// **'Close'**
   String get ag_zoomClose;
 
+  /// No description provided for @ag_thought.
+  ///
+  /// In en, this message translates to:
+  /// **'Thought'**
+  String get ag_thought;
+
+  /// No description provided for @ag_thinkingLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get ag_thinkingLive;
+
+  /// No description provided for @ag_thoughtChars.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} chars'**
+  String ag_thoughtChars(int count);
+
   /// No description provided for @mp_protocol.
   ///
   /// In en, this message translates to:
@@ -36655,7 +36697,7 @@ abstract class AppLocalizations {
   /// No description provided for @mp_imageInputHelp.
   ///
   /// In en, this message translates to:
-  /// **'Needed when features such as reverse prompting send images'**
+  /// **'When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input'**
   String get mp_imageInputHelp;
 
   /// No description provided for @mp_allow.

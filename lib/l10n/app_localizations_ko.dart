@@ -16158,7 +16158,25 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get naiAgent_visionDisabled =>
-      '이 모델의 이미지 입력이 활성화되지 않았습니다. 모델 설정에서 지원 여부를 확인하세요.';
+      '현재 이미지 입력을 사용할 수 없습니다. 설정 → 모델 및 API에서 제공자의 요청 → 이미지 입력이 허용인지, 선택한 모델이 이미지 입력을 지원하는지 확인하세요.';
+
+  @override
+  String get naiAgent_visionCurrentProvider => '현재 제공자';
+
+  @override
+  String naiAgent_visionProviderBlocked(String providerName) {
+    return '제공자 $providerName에서 이미지 전송을 허용하지 않습니다. 설정 → 모델 및 API → $providerName → 요청 → 이미지 입력을 허용으로 바꾸세요.';
+  }
+
+  @override
+  String naiAgent_visionModelUnsupported(String providerName) {
+    return '제공자 $providerName의 선택한 모델은 이미지 입력 지원이 확인되지 않았습니다. 설정 → 모델 및 API → $providerName → 모델 → 기능 → 이미지 입력에서 지원 여부를 확인하거나 이미지 지원 모델로 바꾸세요.';
+  }
+
+  @override
+  String naiAgent_visionAttachmentsSkipped(int count, String reason) {
+    return '이미지 첨부 $count개가 모델에 전송되지 않았습니다. 텍스트는 정상적으로 전송됩니다. $reason';
+  }
 
   @override
   String get naiAgent_inputChanged => '준비 중 입력이 변경되었습니다. 현재 초안을 보내세요.';
@@ -20360,6 +20378,17 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_zoomClose => '닫기';
 
   @override
+  String get ag_thought => '생각함';
+
+  @override
+  String get ag_thinkingLive => '생각 중';
+
+  @override
+  String ag_thoughtChars(int count) {
+    return '$count자';
+  }
+
+  @override
   String get mp_protocol => '프로토콜';
 
   @override
@@ -20405,7 +20434,8 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mp_imageInput => '이미지 입력';
 
   @override
-  String get mp_imageInputHelp => '역추론 등에서 이미지를 보낼 때 필요';
+  String get mp_imageInputHelp =>
+      '끄면 모델 능력에서 \"이미지 입력\"을 켜도 이 공급자의 모든 모델에 이미지가 전달되지 않습니다(NAI Agent 이미지 읽기와 첨부 포함)';
 
   @override
   String get mp_allow => '허용';

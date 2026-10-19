@@ -8806,7 +8806,38 @@
   "naiAgent_toolsHint": "Read current state, images, prompts and workspace files on demand. Load detailed NAI manuals for the selected model.",
   "naiAgent_unknownCost": "Actual cost is set by the provider",
   "naiAgent_error": "Operation failed. Check model settings or workspace files.",
-  "naiAgent_visionDisabled": "Image input is not enabled for this model. Confirm support in model settings.",
+  "naiAgent_visionDisabled": "Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.",
+  "naiAgent_visionCurrentProvider": "the current provider",
+  "naiAgent_visionProviderBlocked": "Provider {providerName} does not allow sending images. Go to Settings → Models & APIs → {providerName} → Requests → Images and select On.",
+  "@naiAgent_visionProviderBlocked": {
+    "description": "Provider-level image sending is off; providerName is the configured display name.",
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionModelUnsupported": "The selected model for provider {providerName} has no confirmed image-input support. Check Model → Capabilities → Image input in Settings → Models & APIs → {providerName}, or select a model that supports images.",
+  "@naiAgent_visionModelUnsupported": {
+    "description": "Model-level image support is false or unknown, independent of the provider sending switch.",
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionAttachmentsSkipped": "Images not sent to the model: {count}. Text is still sent. {reason}",
+  "@naiAgent_visionAttachmentsSkipped": {
+    "description": "Run notice when image pixels are not sent; original files remain in the workspace.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_inputChanged": "Input changed while preparing. Send the current draft.",
   "naiAgent_imageLimit": "Invalid image format or image exceeds upload limits.",
   "naiAgent_composerNotEmpty": "Save or send the current input before restoring this message.",
@@ -10813,6 +10844,16 @@
   "ag_yesterday": "Yesterday",
   "ag_attachmentTag": "Attached",
   "ag_zoomClose": "Close",
+  "ag_thought": "Thought",
+  "ag_thinkingLive": "Thinking",
+  "ag_thoughtChars": "{count} chars",
+  "@ag_thoughtChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mp_protocol": "Protocol",
   "mp_test": "Test",
   "mp_testing": "Testing…",
@@ -10828,7 +10869,7 @@
   "mp_retryHelp": "Retry on connection errors or when busy",
   "mp_retryOff": "Off",
   "mp_imageInput": "Images",
-  "mp_imageInputHelp": "Needed when features such as reverse prompting send images",
+  "mp_imageInputHelp": "When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input",
   "mp_allow": "On",
   "mp_noSend": "Off",
   "mp_seconds": "s",

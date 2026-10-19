@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/nai_agent/pi_host_client.dart';
 import '../../../core/nai_agent/attachment_image.dart';
+import '../../../core/nai_agent/vision_access.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
@@ -37,6 +38,13 @@ class AgentChatRuntime {
   final Map<String, String> extensionStatus = {};
   final Map<String, List<String>> extensionWidgets = {};
   final List<String> extensionNotices = [];
+  String? visionNotice;
+  int _visionNoticeRevision = 0;
+  void _clearVisionNotice() {
+    visionNotice = null;
+    _visionNoticeRevision++;
+  }
+
   bool running = false, starting = false, waitingForSlot = false;
   String? error, providerId, modelId, reasoningEffort;
   int usageRevision = 0;
@@ -71,6 +79,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   bool initialized = false, _disposed = false;
   Future<void>? _closeFuture;
   int _selectionRevision = 0;
+
   /// Read-only inventory for sidebar chat status; never creates a runtime.
   Iterable<AgentChatRuntime> get heldRuntimes => _runtimes.values;
   Iterable<AgentChatRuntime> get runningChats =>
@@ -92,7 +101,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       try {
         await _ensureClient(runtime);
       } catch (error) {
-        runtime.error = _error(error);
+        runtime.error = _error(error, runtime);
         _notify();
       }
     }
@@ -180,7 +189,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       try {
         await _ensureClient(runtime);
       } catch (error) {
-        runtime.error = _error(error);
+        runtime.error = _error(error, runtime);
         _notify();
       }
     }
@@ -221,9 +230,16 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     Map<String, dynamic> changes, {
     Map<String, dynamic>? expected,
   }) async {
+    final before = settings;
     settings = expected == null
         ? await store.patchSettings(changes)
         : await store.patchSettingsChecked(changes, expected: expected);
+    if (before.providerId != settings.providerId ||
+        before.modelId != settings.modelId) {
+      for (final runtime in _runtimes.values) {
+        runtime._clearVisionNotice();
+      }
+    }
     _notify();
     if (changes.containsKey('permissionMode')) {
       await Future.wait([
@@ -494,6 +510,11 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       runtime.extensionStatus.clear();
       runtime.extensionWidgets.clear();
       runtime.extensionNotices.clear();
+      if (runtime.providerId != selection.providerId ||
+          runtime.modelId != selection.modelId ||
+          runtime.modelRevision != revision) {
+        runtime._clearVisionNotice();
+      }
       runtime.providerId = selection.providerId;
       runtime.modelId = selection.modelId;
       runtime.reasoningEffort = selection.reasoningEffort;
@@ -590,6 +611,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
           'Input changed while preparing; send the current draft again',
         );
       }
+      final visionNotice = !vision && original.attachments.isNotEmpty
+          ? client.visionAccess.skippedAttachmentsNotice(
+              original.attachments.length,
+            )
+          : null;
+      final noticeRevision = ++runtime._visionNoticeRevision;
       final queueId = const Uuid().v4();
       runtime.composer = AgentComposerState(
         pending: [
@@ -603,6 +630,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         ],
       );
       runtime.running = true;
+      if (visionNotice != null) runtime.visionNotice = visionNotice;
       await _persist(runtime);
       _notify();
       final fileInfo = [
@@ -629,6 +657,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         queueId: queueId,
       );
       _applyState(runtime, reply);
+      if (runtime._visionNoticeRevision == noticeRevision &&
+          (visionNotice != null || runtime.error == null)) {
+        runtime.visionNotice = visionNotice;
+      }
       if (!wasRunning) {
         if (runtime.chat.title == initialChatName &&
             original.text.trim().isNotEmpty) {
@@ -647,7 +679,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       }
       await _persist(runtime);
     } catch (error) {
-      runtime.error = _error(error);
+      runtime.error = _error(error, runtime);
       if (!wasRunning) runtime.running = false;
       await _persist(runtime);
     } finally {
@@ -791,7 +823,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     try {
       _applyState(runtime, await client.compact());
     } catch (error) {
-      runtime.error = _error(error);
+      runtime.error = _error(error, runtime);
     } finally {
       runtime.running = false;
       await _persist(runtime);
@@ -935,6 +967,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   void dismissExtensionNotices(AgentChatRuntime runtime) {
     runtime.extensionNotices.clear();
+    runtime._clearVisionNotice();
     _notify();
   }
 
@@ -989,11 +1022,13 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       wasRunning: runtime.running,
     ),
   );
-  static String _error(Object error) {
+  static String _error(Object error, [AgentChatRuntime? runtime]) {
     final l = currentL10n;
     if (error is NaiAgentToolError) {
       return switch (error.code) {
-        'vision_disabled' => l.naiAgent_visionDisabled,
+        'vision_disabled' || 'vision_unavailable' =>
+          (runtime?.client?.visionAccess ?? const NaiAgentVisionAccess())
+              .unavailableMessage,
         'image_size' => l.naiAgent_imageLimit,
         'composer_changed' => l.naiAgent_inputChanged,
         'composer_not_empty' => l.naiAgent_composerNotEmpty,

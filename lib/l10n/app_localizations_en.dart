@@ -16599,7 +16599,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get naiAgent_visionDisabled =>
-      'Image input is not enabled for this model. Confirm support in model settings.';
+      'Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.';
+
+  @override
+  String get naiAgent_visionCurrentProvider => 'the current provider';
+
+  @override
+  String naiAgent_visionProviderBlocked(String providerName) {
+    return 'Provider $providerName does not allow sending images. Go to Settings → Models & APIs → $providerName → Requests → Images and select On.';
+  }
+
+  @override
+  String naiAgent_visionModelUnsupported(String providerName) {
+    return 'The selected model for provider $providerName has no confirmed image-input support. Check Model → Capabilities → Image input in Settings → Models & APIs → $providerName, or select a model that supports images.';
+  }
+
+  @override
+  String naiAgent_visionAttachmentsSkipped(int count, String reason) {
+    return 'Images not sent to the model: $count. Text is still sent. $reason';
+  }
 
   @override
   String get naiAgent_inputChanged =>
@@ -20921,6 +20939,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_zoomClose => 'Close';
 
   @override
+  String get ag_thought => 'Thought';
+
+  @override
+  String get ag_thinkingLive => 'Thinking';
+
+  @override
+  String ag_thoughtChars(int count) {
+    return '$count chars';
+  }
+
+  @override
   String get mp_protocol => 'Protocol';
 
   @override
@@ -20967,7 +20996,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mp_imageInputHelp =>
-      'Needed when features such as reverse prompting send images';
+      'When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input';
 
   @override
   String get mp_allow => 'On';

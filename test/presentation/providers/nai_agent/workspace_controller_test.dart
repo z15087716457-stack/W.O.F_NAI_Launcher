@@ -5,6 +5,9 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
+import 'package:nai_launcher/core/nai_agent/vision_access.dart';
+import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 
@@ -61,11 +64,17 @@ void main() {
     await server.close(force: true);
     await root.delete(recursive: true);
   });
-  NaiAgentWorkspaceController controller({bool vision = false}) {
+  NaiAgentWorkspaceController controller({
+    bool vision = false,
+    bool Function()? readVision,
+    int Function()? readModelRevision,
+    NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
+  }) {
     final value = NaiAgentWorkspaceController(
       store: AgentWorkspaceStore(root),
       initialWorkspaceName: '工作区',
       initialChatName: '新聊天',
+      readModelRevision: readModelRevision,
       startClient: (workspace, chat, settings, prompt, resume) =>
           PiHostClient.start(
             nodeExecutable: 'E:/node/node.exe',
@@ -77,6 +86,7 @@ void main() {
             sessionFile: resume,
             sessionName: chat.title,
             systemPrompt: prompt,
+            visionAccess: visionAccess,
             extensionPaths: settings.enabledExtensionPaths,
             mcp: {
               'builtinEnabled': settings.studioMcpEnabled,
@@ -88,7 +98,7 @@ void main() {
               'protocol': 'openaiChatCompletions',
               'baseUrl': 'http://127.0.0.1:${server.port}',
               'tools': true,
-              'vision': vision,
+              'vision': readVision?.call() ?? vision,
               'maxConcurrentRequests': 1,
               'maxRequestsPerRun': 32,
               'permissionMode': settings.permissionMode,
@@ -140,6 +150,9 @@ void main() {
     expect(sent, isNot(contains('large private prompt')));
     expect(sent, isNot(contains('private EXIF')));
     expect(sent, isNot(contains('image_url')));
+    expect(runtime.visionNotice, contains('2'));
+    expect(runtime.visionNotice, contains('文字仍照常发送'));
+    expect(runtime.visionNotice, contains('请求 → 图片输入'));
     expect(
       await c.store.readAttachment(runtime.workspace.id, originals.first),
       png,
@@ -149,6 +162,159 @@ void main() {
       ordinary,
     );
   });
+  test(
+    'provider-blocked attachments warn without pixels and clear on the next successful send',
+    () async {
+      var vision = false, revision = 0;
+      const access = NaiAgentVisionAccess(
+        blockedByProvider: true,
+        providerName: 'Synthetic Provider',
+      );
+      final c = controller(
+        readVision: () => vision,
+        readModelRevision: () => revision,
+        visionAccess: access,
+      );
+      await c.initialize();
+      final runtime = c.selected!;
+      final pixels = img.encodePng(img.Image(width: 3, height: 2));
+      await c.attach('retained.png', pixels, 'image/png');
+      final original = runtime.composer.attachments.single;
+      await c.saveComposer('text still reaches the model');
+      await c.send();
+      expect(runtime.error, isNull);
+      expect(calls, 1);
+      expect(
+        jsonEncode(requests.single['messages']),
+        contains('text still reaches the model'),
+      );
+      expect(
+        jsonEncode(requests.single['messages']),
+        isNot(contains('image_url')),
+      );
+      final user = runtime.messages.singleWhere((m) => m['role'] == 'user');
+      expect(
+        (user['content'] as List).where((p) => p['type'] == 'image'),
+        isEmpty,
+      );
+      expect(runtime.visionNotice, access.skippedAttachmentsNotice(1));
+      expect(runtime.visionNotice, contains('Synthetic Provider → 请求 → 图片输入'));
+      expect(
+        await c.store.readAttachment(runtime.workspace.id, original),
+        pixels,
+      );
+
+      await c.saveComposer('text only');
+      await c.send();
+      expect(runtime.error, isNull);
+      expect(runtime.visionNotice, isNull);
+
+      await c.attach('blocked-again.png', pixels, 'image/png');
+      await c.send();
+      expect(runtime.visionNotice, isNotNull);
+      vision = true;
+      revision++;
+      await c.attach('now-visible.png', pixels, 'image/png');
+      await c.saveComposer('now send the pixels');
+      await c.send();
+      expect(runtime.error, isNull);
+      expect(runtime.visionNotice, isNull);
+      expect(calls, 4);
+      expect(
+        jsonEncode(requests.last['messages']),
+        contains('data:image/png;base64,'),
+      );
+      expect(
+        await c.store.readAttachment(runtime.workspace.id, original),
+        pixels,
+      );
+    },
+  );
+
+  test(
+    'model-blocked attachments warn and changing the model clears the notice',
+    () async {
+      const access = NaiAgentVisionAccess(
+        blockedByProvider: false,
+        providerName: 'Text Provider',
+      );
+      final c = controller(visionAccess: access);
+      await c.initialize();
+      await c.attach(
+        'text-model.png',
+        img.encodePng(img.Image(width: 2, height: 2)),
+        'image/png',
+      );
+      await c.send();
+      expect(calls, 1);
+      expect(c.selected!.error, isNull);
+      expect(c.selected!.visionNotice, access.skippedAttachmentsNotice(1));
+      expect(c.selected!.visionNotice, contains('模型 → 能力 → 图片输入'));
+      await c.updateSettings({'providerId': 'other', 'modelId': 'other-model'});
+      expect(c.selected!.visionNotice, isNull);
+    },
+  );
+
+  test(
+    'a queued successful send is not overwritten by an older attachment warning',
+    () async {
+      final c = controller(
+        visionAccess: const NaiAgentVisionAccess(
+          blockedByProvider: true,
+          providerName: 'Queue Provider',
+        ),
+      );
+      await c.initialize();
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        if (!entered.isCompleted) entered.complete();
+        await release.future;
+      };
+      await c.attach(
+        'queued.png',
+        img.encodePng(img.Image(width: 2, height: 2)),
+        'image/png',
+      );
+      await c.saveComposer('first attachment run');
+      final run = c.send();
+      await entered.future.timeout(const Duration(seconds: 10));
+      try {
+        expect(c.selected!.visionNotice, isNotNull);
+        await c.saveComposer('text-only follow-up');
+        await c.send();
+        expect(c.selected!.visionNotice, isNull);
+      } finally {
+        release.complete();
+        await run;
+      }
+      expect(c.selected!.visionNotice, isNull);
+      expect(c.selected!.error, isNull);
+      expect(calls, 2);
+    },
+  );
+
+  for (final code in ['vision_disabled', 'vision_unavailable']) {
+    test(
+      '$code maps to the localized two-gate fallback without raw English',
+      () async {
+        final c = NaiAgentWorkspaceController(
+          store: AgentWorkspaceStore(root),
+          initialWorkspaceName: 'Workspace',
+          initialChatName: 'Chat',
+          startClient: (_, __, ___, ____, _____) =>
+              Future.error(NaiAgentToolError(code, 'old English image error')),
+        );
+        controllers.add(c);
+        await c.initialize();
+        await c.saveComposer('send');
+        await c.send();
+        expect(c.selected!.error, currentL10n.naiAgent_visionDisabled);
+        expect(c.selected!.error, isNot(contains('old English')));
+        expect(calls, 0);
+      },
+    );
+  }
+
   test('vision sends BMP as a PNG copy and retains the original BMP', () async {
     final c = controller(vision: true);
     await c.initialize();

@@ -8806,7 +8806,35 @@
   "naiAgent_toolsHint": "状態・画像・プロンプト・ファイルを必要に応じて取得し、モデル別の NAI マニュアルを参照します。",
   "naiAgent_unknownCost": "実際の料金は提供元によります",
   "naiAgent_error": "操作に失敗しました。モデル設定やファイルを確認してください。",
-  "naiAgent_visionDisabled": "画像入力が有効ではありません。モデル設定で対応を確認してください。",
+  "naiAgent_visionDisabled": "現在、画像入力を利用できません。「設定 → モデルとAPI」で、プロバイダーの「リクエスト → 画像入力」が「許可」であり、選択したモデルが画像入力に対応しているか確認してください。",
+  "naiAgent_visionCurrentProvider": "現在のプロバイダー",
+  "naiAgent_visionProviderBlocked": "プロバイダー {providerName} は画像の送信を許可していません。「設定 → モデルとAPI → {providerName} → リクエスト → 画像入力」を「許可」に変更してください。",
+  "@naiAgent_visionProviderBlocked": {
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionModelUnsupported": "プロバイダー {providerName} の選択中モデルは、画像入力への対応が確認されていません。「設定 → モデルとAPI → {providerName} → モデル → 能力 → 画像入力」で対応を確認するか、画像対応モデルに切り替えてください。",
+  "@naiAgent_visionModelUnsupported": {
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionAttachmentsSkipped": "画像添付 {count} 件はモデルに送信されませんでした。テキストは通常どおり送信されます。{reason}",
+  "@naiAgent_visionAttachmentsSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_inputChanged": "準備中に入力が変わりました。現在の下書きを送信してください。",
   "naiAgent_imageLimit": "画像形式が無効、またはアップロード上限を超えています。",
   "naiAgent_composerNotEmpty": "現在の入力を保存または送信してから戻してください。",
@@ -10803,6 +10831,16 @@
   "ag_yesterday": "昨日",
   "ag_attachmentTag": "添付",
   "ag_zoomClose": "閉じる",
+  "ag_thought": "思考済み",
+  "ag_thinkingLive": "思考中",
+  "ag_thoughtChars": "{count} 文字",
+  "@ag_thoughtChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mp_protocol": "プロトコル",
   "mp_test": "テスト",
   "mp_testing": "テスト中…",
@@ -10818,7 +10856,7 @@
   "mp_retryHelp": "接続失敗や混雑時に再試行",
   "mp_retryOff": "オフ",
   "mp_imageInput": "画像入力",
-  "mp_imageInputHelp": "逆推などで画像をモデルに送る場合に必要",
+  "mp_imageInputHelp": "オフの場合、モデルの能力で「画像入力」が有効でも、このプロバイダーのすべてのモデルに画像は送信されません（NAI Agent の画像読み取りと添付を含む）",
   "mp_allow": "許可",
   "mp_noSend": "送信しない",
   "mp_seconds": "秒",

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/nai_agent/studio_tools.dart';
+import '../../../core/nai_agent/vision_access.dart';
 import '../../../core/nai_agent/generation_tools.dart';
 import '../../../data/models/image/image_params.dart';
 import '../image_generation_provider.dart';
@@ -34,13 +35,20 @@ typedef NaiAgentStudioFactory =
       Directory workspace,
       Directory data,
       bool allowsImages, {
+      NaiAgentVisionAccess visionAccess,
       NaiAgentConversationOwner? owner,
     });
 
 final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
   var alive = true;
   ref.onDispose(() => alive = false);
-  return (workspace, data, allowsImages, {owner}) {
+  return (
+    workspace,
+    data,
+    allowsImages, {
+    visionAccess = const NaiAgentVisionAccess(),
+    owner,
+  }) {
     NaiAgentImage? image(String id) {
       if (id.startsWith('draft:')) {
         final params = ref.read(generationParamsNotifierProvider);
@@ -153,6 +161,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
     studio = NaiAgentStudioTools(
       workspaceDirectory: workspace,
       allowsImages: allowsImages,
+      visionAccess: visionAccess,
       isAlive: () => alive,
       domainTools: {
         'settings_read': settings.read,

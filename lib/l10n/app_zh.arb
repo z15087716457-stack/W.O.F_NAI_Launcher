@@ -8806,7 +8806,35 @@
   "naiAgent_toolsHint": "当前状态、图片、提示词和工作区文件按需调用。详细 NAI 手册按模型读取。",
   "naiAgent_unknownCost": "实际费用以服务商为准",
   "naiAgent_error": "操作未完成，请检查模型设置或工作区文件。",
-  "naiAgent_visionDisabled": "此模型尚未启用图片输入，请在模型设置中确认支持后开启。",
+  "naiAgent_visionDisabled": "当前图片输入不可用。请在 设置 → 模型与接口 中检查服务商的 请求 → 图片输入 是否为“允许”，并确认所选模型支持图片输入。",
+  "naiAgent_visionCurrentProvider": "当前服务商",
+  "naiAgent_visionProviderBlocked": "服务商 {providerName} 当前未允许发送图片。请到 设置 → 模型与接口 → {providerName} → 请求 → 图片输入 改为“允许”。",
+  "@naiAgent_visionProviderBlocked": {
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionModelUnsupported": "服务商 {providerName} 下的所选模型未声明支持图片输入。请在 设置 → 模型与接口 → {providerName} → 模型 → 能力 → 图片输入 确认支持，或切换到支持图片输入的模型。",
+  "@naiAgent_visionModelUnsupported": {
+    "placeholders": {
+      "providerName": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_visionAttachmentsSkipped": "本次有 {count} 张图片附件没有发给模型，文字仍照常发送。{reason}",
+  "@naiAgent_visionAttachmentsSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_inputChanged": "准备期间输入已改变，请发送当前草稿。",
   "naiAgent_imageLimit": "图片格式无效、文件过大或超出上传限制。",
   "naiAgent_composerNotEmpty": "请先保存或发送当前输入，再恢复这条消息。",
@@ -10803,6 +10831,16 @@
   "ag_yesterday": "昨天",
   "ag_attachmentTag": "附件",
   "ag_zoomClose": "关闭",
+  "ag_thought": "已思考",
+  "ag_thinkingLive": "思考中",
+  "ag_thoughtChars": "{count} 字",
+  "@ag_thoughtChars": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "mp_protocol": "接口协议",
   "mp_test": "测试",
   "mp_testing": "测试中…",
@@ -10818,7 +10856,7 @@
   "mp_retryHelp": "连接失败或服务繁忙时重试",
   "mp_retryOff": "关",
   "mp_imageInput": "图片输入",
-  "mp_imageInputHelp": "反推等功能需要把图片发给模型",
+  "mp_imageInputHelp": "关闭时本服务商所有模型都不会收到图片（含 NAI Agent 的看图和附件），即使模型能力里勾了“图片输入”",
   "mp_allow": "允许",
   "mp_noSend": "不发送",
   "mp_seconds": "秒",

@@ -7,6 +7,7 @@ import '../utils/nai_resolution_adapter.dart';
 import '../../presentation/prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 import 'agent_tool.dart';
 import 'attachment_image.dart';
+import 'vision_access.dart';
 
 class NaiAgentImage {
   const NaiAgentImage({required this.id, required this.bytes, this.metadata});
@@ -26,6 +27,7 @@ class NaiAgentStudioTools {
     required this.writeDraft,
     required this.readImage,
     required this.allowsImages,
+    this.visionAccess = const NaiAgentVisionAccess(),
     this.loadImageById,
     this.domainTools = const {},
     this.isAlive = _alive,
@@ -40,6 +42,7 @@ class NaiAgentStudioTools {
   final Future<NaiAgentImage?> Function(String, NaiAgentCancellation)?
   loadImageById;
   final bool allowsImages;
+  final NaiAgentVisionAccess visionAccess;
   final Map<
     String,
     Future<Map<String, dynamic>> Function(
@@ -147,9 +150,9 @@ class NaiAgentStudioTools {
   ) async {
     final metadataOnly = params['metadata_only'] == true;
     if (!allowsImages && !metadataOnly) {
-      throw const NaiAgentToolError(
+      throw NaiAgentToolError(
         'vision_unavailable',
-        'Image input is not enabled for this model',
+        visionAccess.unavailableMessage,
       );
     }
     final image = await loadImage(params, cancellation);

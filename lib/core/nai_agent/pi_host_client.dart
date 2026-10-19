@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'agent_tool.dart';
 import 'model_request_gate.dart';
+import 'vision_access.dart';
 
 /// Owns one official Pi child. It transports events/tools; Pi owns the loop.
 /// Node/script paths are explicit until runtime packaging in stage F.
@@ -13,6 +14,7 @@ class PiHostClient {
     this.executeTool,
     this._providerId,
     this._requestLimit,
+    this.visionAccess,
   ) {
     _stdout = _process.stdout
         .transform(utf8.decoder)
@@ -27,6 +29,7 @@ class PiHostClient {
   final NaiAgentToolExecutor executeTool;
   final String _providerId;
   final int _requestLimit;
+  final NaiAgentVisionAccess visionAccess;
   final _extensionEvents = <Map<String, dynamic>>[];
   late final StreamController<Map<String, dynamic>> _events =
       StreamController<Map<String, dynamic>>.broadcast(
@@ -65,6 +68,7 @@ class PiHostClient {
     required String systemPrompt,
     required Map<String, dynamic> privateModelConfig,
     required NaiAgentToolExecutor executeTool,
+    NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
     Directory? sessionDirectory,
     File? sessionFile,
     String? sessionName,
@@ -89,6 +93,7 @@ class PiHostClient {
       executeTool,
       providerId,
       (privateModelConfig['maxConcurrentRequests'] as int? ?? 1).clamp(1, 20),
+      visionAccess,
     );
     try {
       final ready = await client

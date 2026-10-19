@@ -137,6 +137,31 @@ void main() {
       expect(configured.reasoningEffort, 'medium');
     },
   );
+  test('image access reports the provider gate only for a vision model', () {
+    final blocked = mapNaiAgentModel(
+      provider.copyWith(allowImageInput: false),
+      model,
+    );
+    expect(blocked.allowsImages, isFalse);
+    expect(blocked.visionBlockedByProvider, isTrue);
+    expect(blocked.providerName, 'Synthetic');
+    expect(blocked.visionAccess.unavailableMessage, contains('Synthetic'));
+    expect(blocked.visionAccess.unavailableMessage, contains('请求 → 图片输入'));
+    expect(blocked.visionAccess.unavailableMessage, contains('“允许”'));
+    final unsupported = mapNaiAgentModel(
+      provider.copyWith(allowImageInput: false),
+      model.copyWith(supportsVision: false),
+    );
+    expect(unsupported.allowsImages, isFalse);
+    expect(unsupported.visionBlockedByProvider, isFalse);
+    expect(unsupported.visionAccess.unavailableMessage, contains('Synthetic'));
+    expect(unsupported.visionAccess.unavailableMessage, contains('模型 → 能力'));
+    expect(
+      unsupported.visionAccess.unavailableMessage,
+      isNot(contains('请求 →')),
+    );
+  });
+
   test(
     'unknown capabilities remain unknown, image access requires known support',
     () {

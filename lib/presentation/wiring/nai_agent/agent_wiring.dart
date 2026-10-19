@@ -599,6 +599,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           (r?.composer.interrupted == true ? l.naiAgent_interrupted : null),
       notices: [
         if (r != null) ...[
+          if (r.visionNotice != null) r.visionNotice!,
           ...r.extensionNotices,
           ...r.extensionStatus.values,
           ...r.extensionWidgets.values.expand((v) => v),

@@ -78,6 +78,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       workspace,
       data,
       model.allowsImages,
+      visionAccess: model.visionAccess,
       owner: NaiAgentConversationOwner(workspaceId, chatId ?? workspaceId),
     );
     final client = await PiHostClient.start(
@@ -87,6 +88,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       workspaceDirectory: workspace,
       agentDirectory: data,
       systemPrompt: systemPrompt,
+      visionAccess: model.visionAccess,
       privateModelConfig: {
         ...model.toPrivateJson(),
         'permissionMode': permissionMode ?? 'auto',

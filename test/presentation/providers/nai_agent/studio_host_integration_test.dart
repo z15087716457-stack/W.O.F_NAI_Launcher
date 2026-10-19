@@ -13,6 +13,7 @@ import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/core/nai_agent/tool_catalog.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
@@ -102,6 +103,91 @@ void main() {
     await Hive.close();
     await root.delete(recursive: true);
   });
+
+  for (final supportsVision in [true, false]) {
+    test(
+      'image_read explains ${supportsVision ? 'the provider switch' : 'model support'} to the model through the production session',
+      () async {
+        final requests = <Map<String, dynamic>>[];
+        final server = await bindFetchTestServer();
+        final serving = server.listen((request) async {
+          requests.add(
+            Map<String, dynamic>.from(
+              jsonDecode(await utf8.decoder.bind(request).join()) as Map,
+            ),
+          );
+          final delta = requests.length == 1
+              ? tool('look', 'image_read', {'image_id': 'selected'})
+              : <String, dynamic>{'role': 'assistant', 'content': 'done'};
+          request.response.headers.set('content-type', 'text/event-stream');
+          request.response.write(
+            'data: ${jsonEncode({
+              'id': 'vision-test',
+              'object': 'chat.completion.chunk',
+              'model': 'test',
+              'choices': [
+                {'index': 0, 'delta': delta, 'finish_reason': requests.length == 1 ? 'tool_calls' : 'stop'},
+              ],
+            })}\n\ndata: [DONE]\n\n',
+          );
+          await request.response.close();
+        });
+        connection = mapNaiAgentModel(
+          ProviderConfig(
+            id: 'vision-local',
+            name: 'Synthetic Vision Provider',
+            baseUrl: 'http://127.0.0.1:${server.port}',
+            allowImageInput: false,
+          ),
+          ModelConfig(
+            providerId: 'vision-local',
+            name: 'test',
+            displayName: 'Test model',
+            supportsTools: true,
+            supportsVision: supportsVision,
+          ),
+        );
+        PiHostClient? client;
+        try {
+          client = await container.read(naiAgentSessionStarterProvider)(
+            providerId: 'vision-local',
+            modelId: 'test',
+            workspaceId: 'vision-test',
+            workspace: root,
+            data: Directory('${root.path}/agent'),
+            nodeExecutable:
+                Platform.environment['NAI_AGENT_NODE'] ?? 'E:/node/node.exe',
+            hostScript: File('tool/nai_agent/host.mjs').absolute.path,
+            systemPrompt: 'Synthetic image-read test',
+            mcp: const {'builtinExposure': 'direct'},
+          );
+          expect(client.visionAccess.blockedByProvider, supportsVision);
+          expect(client.visionAccess.providerName, 'Synthetic Vision Provider');
+          final state = await client.prompt('inspect selected image');
+          expect(state['streaming'], isFalse);
+          expect(requests, hasLength(2));
+          final error = (requests.last['messages'] as List).lastWhere(
+            (m) => m['role'] == 'tool',
+          )['content'];
+          final text = error is String ? error : jsonEncode(error);
+          final expected = supportsVision
+              ? currentL10n.naiAgent_visionProviderBlocked(
+                  'Synthetic Vision Provider',
+                )
+              : currentL10n.naiAgent_visionModelUnsupported(
+                  'Synthetic Vision Provider',
+                );
+          expect(text, contains('vision_unavailable'));
+          expect(text, contains(expected));
+          expect(text, isNot(contains('Image input is not enabled')));
+        } finally {
+          await client?.close();
+          await serving.cancel();
+          await server.close(force: true);
+        }
+      },
+    );
+  }
 
   test(
     'official Pi invokes public settings, block organization and exploration bindings',
