@@ -35353,7 +35353,7 @@ abstract class AppLocalizations {
   /// No description provided for @ag_tabMemory.
   ///
   /// In en, this message translates to:
-  /// **'Memory'**
+  /// **'Instructions'**
   String get ag_tabMemory;
 
   /// No description provided for @ag_newChat.
@@ -36046,54 +36046,6 @@ abstract class AppLocalizations {
   /// **'Estimate; the server charge is final'**
   String get ag_gateEstimate;
 
-  /// No description provided for @ag_quickOptimize.
-  ///
-  /// In en, this message translates to:
-  /// **'Improve prompt'**
-  String get ag_quickOptimize;
-
-  /// No description provided for @ag_quickOptimizePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Improve the current prompt for this model: list the changes and why first, and wait for my OK before writing to the draft.'**
-  String get ag_quickOptimizePrompt;
-
-  /// No description provided for @ag_quickCompare.
-  ///
-  /// In en, this message translates to:
-  /// **'Compare last 4'**
-  String get ag_quickCompare;
-
-  /// No description provided for @ag_quickComparePrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Compare the latest 4 images in history: what differs and what\'s wrong with each. Don\'t generate.'**
-  String get ag_quickComparePrompt;
-
-  /// No description provided for @ag_quickBlocks.
-  ///
-  /// In en, this message translates to:
-  /// **'Split into blocks'**
-  String get ag_quickBlocks;
-
-  /// No description provided for @ag_quickBlocksPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Split the current prompt into reusable blocks. Show me the split before saving anything.'**
-  String get ag_quickBlocksPrompt;
-
-  /// No description provided for @ag_quickTags.
-  ///
-  /// In en, this message translates to:
-  /// **'Look up tags'**
-  String get ag_quickTags;
-
-  /// No description provided for @ag_quickTagsPrompt.
-  ///
-  /// In en, this message translates to:
-  /// **'Look up tags: '**
-  String get ag_quickTagsPrompt;
-
   /// No description provided for @ag_placeholder.
   ///
   /// In en, this message translates to:
@@ -36153,6 +36105,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t read'**
   String get ag_attachmentBroken;
+
+  /// No description provided for @ag_imageInfoSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} steps'**
+  String ag_imageInfoSteps(int count);
+
+  /// No description provided for @ag_imageInfoSeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Seed {seed}'**
+  String ag_imageInfoSeed(String seed);
+
+  /// No description provided for @ag_imageInfoCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 character} other{{count} characters}}'**
+  String ag_imageInfoCharacters(int count);
 
   /// No description provided for @ag_send.
   ///
@@ -36513,6 +36483,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Nothing matches'**
   String get ag_mentionEmpty;
+
+  /// No description provided for @ag_mentionSearchBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Search blocks'**
+  String get ag_mentionSearchBlocks;
 
   /// No description provided for @ag_skillsTitle.
   ///

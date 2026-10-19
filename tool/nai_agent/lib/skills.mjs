@@ -50,7 +50,7 @@ function scan(directory, source) {
 }
 
 /**
- * disabled: keys `<source>/<name>` the user switched off (built-ins cannot be switched off).
+ * disabled: keys `<source>/<name>` the user switched off (built-ins included).
  * modes: `<source>/<name>` -> 'auto' | 'manual'; missing keys keep the SKILL.md default.
  */
 export function resolveStudioSkills({ builtinDirectory = builtinSkillsDirectory, globalDirectory,
@@ -63,7 +63,7 @@ export function resolveStudioSkills({ builtinDirectory = builtinSkillsDirectory,
       const key = source + '/' + entry.name;
       const mode = modes?.[key] === 'manual' || modes?.[key] === 'auto' ? modes[key]
         : entry.manualDefault ? 'manual' : 'auto';
-      const enabled = source === 'builtin' || !off.has(key);
+      const enabled = !off.has(key);
       let state = entry.error ? 'error' : !enabled ? 'disabled' : winners.has(entry.name) ? 'shadowed' : 'active';
       if (state === 'active') {
         winners.set(entry.name, key);

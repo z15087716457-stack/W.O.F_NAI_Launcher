@@ -52,14 +52,14 @@ test('workspace beats global beats built-in; switches, modes and errors are repo
   assert.equal(report.find(item => item.key === 'global/shared').shadowedBy, 'workspace/shared');
   assert.equal(state['global/nai-studio'], 'active');
   assert.equal(state['builtin/nai-studio'], 'shadowed');
-  assert.equal(state['builtin/nai-prompt'], 'active', 'built-ins cannot be switched off');
+  assert.equal(state['builtin/nai-prompt'], 'disabled', 'built-ins can be switched off');
   assert.equal(state['global/off'], 'disabled');
   assert.equal(report.find(item => item.key === 'global/nodesc').error, 'description');
   assert.equal(report.find(item => item.key === 'global/Bad_Name').error, 'name');
   assert.equal(report.find(item => item.key === 'global/renamed').error, 'name');
   assert.equal(report.find(item => item.key === 'global/empty').error, 'missing');
   const byName = Object.fromEntries(active.map(item => [item.name, item]));
-  assert.deepEqual(Object.keys(byName).toSorted(), ['nai-prompt', 'nai-studio', 'quiet', 'shared']);
+  assert.deepEqual(Object.keys(byName).toSorted(), ['nai-studio', 'quiet', 'shared']);
   assert.equal(byName.shared.disableModelInvocation, true);
   assert.equal(byName.quiet.disableModelInvocation, false, 'explicit auto overrides the SKILL.md default');
   assert.ok(byName['nai-studio'].filePath.startsWith(global));

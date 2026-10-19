@@ -173,8 +173,7 @@ class AgentSettings {
     ]),
     disabledSkills: List.unmodifiable({
       for (final key in value['disabledSkills'] as List? ?? [])
-        if (key is String && isSkillKey(key) && !key.startsWith('builtin/'))
-          key,
+        if (key is String && isSkillKey(key)) key,
     }),
     skillModes: Map.unmodifiable({
       for (final entry in (value['skillModes'] as Map? ?? {}).entries)
@@ -684,9 +683,6 @@ class AgentWorkspaceStore {
   }) => _write(() async {
     if (!AgentSettings.isSkillKey(key)) {
       throw const FormatException('Invalid skill key');
-    }
-    if (enabled != null && key.startsWith('builtin/')) {
-      throw const FormatException('Built-in skills cannot be switched off');
     }
     if (mode != null && !const {'auto', 'manual'}.contains(mode)) {
       throw const FormatException('Invalid skill mode');

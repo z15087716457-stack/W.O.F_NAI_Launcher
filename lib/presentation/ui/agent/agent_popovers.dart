@@ -665,7 +665,15 @@ class AgentMentionPanel extends StatelessWidget {
     required this.category,
     required this.onCategory,
     required this.onPick,
+    this.search,
+    this.searchText = '',
   });
+
+  /// 积木搜索框当前文字（与 [search] 配套）。
+  final String searchText;
+
+  /// 积木分类下的搜索框（由输入框持有 controller / focus，便于键盘导航）。
+  final Widget? search;
 
   final String query;
   final bool slash;
@@ -677,13 +685,16 @@ class AgentMentionPanel extends StatelessWidget {
   static List<AgentMention> filter(
     List<AgentMention> all,
     String query,
-    AgentMentionKind? category,
-  ) {
+    AgentMentionKind? category, {
+    String search = '',
+  }) {
     final q = query.toLowerCase();
+    final extra = search.trim().toLowerCase();
     return [
       for (final m in all)
         if ((category == null || _group(m.kind) == _group(category)) &&
-            (q.isEmpty || m.label.toLowerCase().contains(q)))
+            (q.isEmpty || m.label.toLowerCase().contains(q)) &&
+            (extra.isEmpty || m.label.toLowerCase().contains(extra)))
           m,
     ];
   }
@@ -756,7 +767,7 @@ class AgentMentionPanel extends StatelessWidget {
       }
       if (skills.isEmpty) rows.add(_empty(context));
     } else {
-      final list = filter(d.mentions, query, category);
+      final list = filter(d.mentions, query, category, search: searchText);
       var group = -1;
       for (final (i, m) in list.indexed) {
         final g = _group(m.kind);
@@ -874,6 +885,7 @@ class AgentMentionPanel extends StatelessWidget {
                 ],
               ),
             ),
+          if (!slash && search != null) search!,
           ConstrainedBox(
             constraints: const BoxConstraints(maxHeight: 280),
             child: SingleChildScrollView(

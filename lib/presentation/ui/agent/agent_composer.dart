@@ -5,8 +5,10 @@ import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
+import '../kit/ui_lib_controls.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
+import '../kit/ui_tip.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
 import 'agent_parts.dart';
@@ -32,6 +34,10 @@ class AgentComposerState extends State<AgentComposer> {
   final _text = TextEditingController();
   final _focus = FocusNode(debugLabel: 'agent-composer');
   final _panelKey = GlobalKey();
+
+  /// 积木分类下面板顶部的搜索框；与 `@查询` 同时生效。
+  final _blockSearch = TextEditingController();
+  final _blockSearchFocus = FocusNode(debugLabel: 'agent-block-search');
 
   /// 最近一次交给 [AgentActions.onComposerChanged] 的文字；外部改写（编辑消息、放回输入框）才同步回来。
   String? _sent;
@@ -62,6 +68,8 @@ class AgentComposerState extends State<AgentComposer> {
   void dispose() {
     _text.dispose();
     _focus.dispose();
+    _blockSearch.dispose();
+    _blockSearchFocus.dispose();
     super.dispose();
   }
 
@@ -99,8 +107,124 @@ class AgentComposerState extends State<AgentComposer> {
     }
   }
 
+  /// @ 按钮再点一次：光标前正是刚插入、还没输入内容的 @，就删掉它（连同
+  /// 按钮补的前导空格）并收起面板，而不是再叠一个。
+  bool _toggleBareMention() {
+    final t = _trigger;
+    final v = _text.value;
+    if (t == null || t.slash || t.query.isNotEmpty) return false;
+    if (!v.selection.isValid || !v.selection.isCollapsed) return false;
+    final caret = v.selection.baseOffset;
+    if (caret != t.start + 1 || v.text[t.start] != '@') return false;
+    var start = t.start;
+    if (start > 0 &&
+        v.text[start - 1] == ' ' &&
+        (start == 1 || v.text[start - 2] != ' ')) {
+      start--;
+    }
+    final next = v.text.replaceRange(start, caret, '');
+    _text.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: start),
+    );
+    _focus.requestFocus();
+    _changed(next);
+    return true;
+  }
+
   void _closeMention() {
+    if (_blockSearch.text.isNotEmpty) _blockSearch.clear();
+    if (_blockSearchFocus.hasFocus) _focus.requestFocus();
     if (_trigger != null) setState(() => _trigger = null);
+  }
+
+  List<AgentMention> _mentions() {
+    final t = _trigger!;
+    return AgentMentionPanel.filter(
+      AgentScope.of(context).data.mentions,
+      t.query,
+      _category,
+      search: _category == AgentMentionKind.block ? _blockSearch.text : '',
+    );
+  }
+
+  KeyEventResult _panelKeys(FocusNode node, KeyEvent event) {
+    final n = _candidateCount();
+    return agentPanelKeys(
+      event,
+      up: () => setState(() => _index = n == 0 ? 0 : (_index - 1) % n),
+      down: () => setState(() => _index = n == 0 ? 0 : (_index + 1) % n),
+      pick: n == 0 ? _closeMention : _pickIndex,
+      tab: () {
+        if (_trigger!.slash) {
+          if (n > 0) _pickIndex();
+          return;
+        }
+        const order = [
+          null,
+          AgentMentionKind.prompt,
+          AgentMentionKind.image,
+          AgentMentionKind.block,
+        ];
+        _setCategory(order[(order.indexOf(_category) + 1) % order.length]);
+      },
+      close: _closeMention,
+    );
+  }
+
+  void _setCategory(AgentMentionKind? v) {
+    setState(() {
+      _category = v;
+      _index = 0;
+    });
+    if (v != AgentMentionKind.block) {
+      _blockSearch.clear();
+      if (_blockSearchFocus.hasFocus) _focus.requestFocus();
+    }
+  }
+
+  Widget _blockSearchBox(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 6, 10, 2),
+      child: Container(
+        height: 30,
+        padding: const EdgeInsets.symmetric(horizontal: 9),
+        decoration: BoxDecoration(
+          color: agentSunk(c),
+          borderRadius: BorderRadius.circular(7),
+          border: Border.all(
+            color: _blockSearchFocus.hasFocus ? c.accent : c.line,
+          ),
+        ),
+        child: Row(
+          spacing: 7,
+          children: [
+            AgentIcon(AgentGlyphs.search, size: 13, color: c.faint),
+            Expanded(
+              child: Focus(
+                onKeyEvent: _panelKeys,
+                onFocusChange: (_) => setState(() {}),
+                child: TextField(
+                  key: const Key('agent-block-search'),
+                  controller: _blockSearch,
+                  focusNode: _blockSearchFocus,
+                  style: UiText.sans(12.5, color: c.ink, height: 1.3),
+                  cursorColor: c.accent,
+                  cursorWidth: 1.5,
+                  onChanged: (_) => setState(() => _index = 0),
+                  decoration: uiBareDecoration(
+                    hintText: l.ag_mentionSearchBlocks,
+                    hintStyle: UiText.sans(12.5, color: c.faint, height: 1.3),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// 在光标处插入（[replace] = 换掉全部）。
@@ -150,7 +274,7 @@ class AgentComposerState extends State<AgentComposer> {
     final d = AgentScope.of(context).data;
     return t.slash
         ? AgentMentionPanel.filterSkills(d.skills, t.query).length
-        : AgentMentionPanel.filter(d.mentions, t.query, _category).length;
+        : _mentions().length;
   }
 
   void _pickIndex() {
@@ -160,7 +284,7 @@ class AgentComposerState extends State<AgentComposer> {
       final list = AgentMentionPanel.filterSkills(d.skills, t.query);
       if (_index < list.length) _pick('/skill:${list[_index].name} ', null);
     } else {
-      final list = AgentMentionPanel.filter(d.mentions, t.query, _category);
+      final list = _mentions();
       if (_index < list.length) {
         final m = list[_index];
         _pick('@${m.label} ', m.kind == AgentMentionKind.image ? m.id : null);
@@ -175,32 +299,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   KeyEventResult _key(FocusNode node, KeyEvent event) {
     if (_composing) return KeyEventResult.ignored;
-    if (_trigger != null) {
-      final n = _candidateCount();
-      return agentPanelKeys(
-        event,
-        up: () => setState(() => _index = n == 0 ? 0 : (_index - 1) % n),
-        down: () => setState(() => _index = n == 0 ? 0 : (_index + 1) % n),
-        pick: n == 0 ? _closeMention : _pickIndex,
-        tab: () {
-          if (_trigger!.slash) {
-            if (n > 0) _pickIndex();
-            return;
-          }
-          const order = [
-            null,
-            AgentMentionKind.prompt,
-            AgentMentionKind.image,
-            AgentMentionKind.block,
-          ];
-          setState(() {
-            _category = order[(order.indexOf(_category) + 1) % order.length];
-            _index = 0;
-          });
-        },
-        close: _closeMention,
-      );
-    }
+    if (_trigger != null) return _panelKeys(node, event);
     if (event is! KeyDownEvent ||
         event.logicalKey != LogicalKeyboardKey.enter) {
       return KeyEventResult.ignored;
@@ -248,7 +347,6 @@ class AgentComposerState extends State<AgentComposer> {
     final comp = d.composer;
     final c = context.ui;
     final l = context.l10n;
-    final running = d.status != AgentRunStatus.idle;
     final focused = _focus.hasFocus;
     return Container(
       key: const Key('agent-composer'),
@@ -269,19 +367,17 @@ class AgentComposerState extends State<AgentComposer> {
               slash: _trigger!.slash,
               index: _index,
               category: _category,
-              onCategory: (v) => setState(() {
-                _category = v;
-                _index = 0;
-              }),
+              onCategory: _setCategory,
               onPick: _pick,
+              search: _category == AgentMentionKind.block
+                  ? _blockSearchBox(context)
+                  : null,
+              searchText: _category == AgentMentionKind.block
+                  ? _blockSearch.text
+                  : '',
             ),
           if (d.notices.isNotEmpty) _Notices(lines: d.notices),
           for (final q in comp.queue) _QueueLine(item: q),
-          if (!running &&
-              _text.text.isEmpty &&
-              _trigger == null &&
-              comp.queue.isEmpty)
-            const _QuickTasks(),
           AnimatedContainer(
             duration: const Duration(milliseconds: 120),
             decoration: BoxDecoration(
@@ -454,6 +550,7 @@ class AgentComposerState extends State<AgentComposer> {
                 glyph: AgentGlyphs.at,
                 tooltip: l.ag_mention,
                 onPressed: () {
+                  if (_toggleBareMention()) return;
                   final v = _text.value;
                   final before = v.selection.isValid
                       ? v.text.substring(0, v.selection.start)
@@ -469,56 +566,38 @@ class AgentComposerState extends State<AgentComposer> {
                 },
               ),
               const SizedBox(width: 2),
-              if (narrow)
-                UiPopover(
-                  anchor: _permission,
-                  onDismiss: () => setState(() => _permission = null),
-                  builder: (_) => AgentPermissionPopover(
-                    onClose: () => setState(() => _permission = null),
-                  ),
-                  child: Builder(
-                    builder: (context) => _Pill(
-                      key: const Key('agent-permission'),
-                      open: _permission != null,
-                      onTap: () =>
-                          setState(() => _permission = _above(context)),
-                      children: [
-                        AgentIcon(
-                          agentPermissionGlyph(d.permission),
-                          size: 12,
-                          color: c.ink,
-                        ),
-                        Text(
-                          agentPermissionLabel(context, d.permission),
-                          style: UiText.sans(
-                            11.5,
-                            weight: FontWeight.w500,
-                            color: c.ink,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                AgentSegments<AgentPermissionMode>(
-                  key: const Key('agent-permission'),
-                  values: const [
-                    AgentPermissionMode.readonly,
-                    AgentPermissionMode.ask,
-                    AgentPermissionMode.auto,
-                  ],
-                  selected: d.permission,
-                  label: (m) => agentPermissionLabel(context, m),
-                  glyph: agentPermissionGlyph,
-                  tooltip: (m) => agentPermissionHint(context, m),
-                  onChanged: (m) {
-                    if (m != d.permission) {
-                      s.run(() => s.actions.onPermission(m));
-                    }
-                  },
+              UiPopover(
+                anchor: _permission,
+                onDismiss: () => setState(() => _permission = null),
+                builder: (_) => AgentPermissionPopover(
+                  onClose: () => setState(() => _permission = null),
                 ),
+                child: Builder(
+                  builder: (context) => _Pill(
+                    key: const Key('agent-permission'),
+                    open: _permission != null,
+                    tooltip: agentPermissionHint(context, d.permission),
+                    onTap: () => setState(() => _permission = _above(context)),
+                    children: [
+                      AgentIcon(
+                        agentPermissionGlyph(d.permission),
+                        size: 12,
+                        color: c.ink,
+                      ),
+                      Text(
+                        agentPermissionLabel(context, d.permission),
+                        style: UiText.sans(
+                          11.5,
+                          weight: FontWeight.w500,
+                          color: c.ink,
+                          height: 1.2,
+                        ),
+                      ),
+                      AgentIcon(AgentGlyphs.chevron, size: 11, color: c.faint),
+                    ],
+                  ),
+                ),
+              ),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerRight,
@@ -855,93 +934,6 @@ class _QueueSendState extends State<_QueueSend> {
   }
 }
 
-class _QuickTasks extends StatelessWidget {
-  const _QuickTasks();
-
-  @override
-  Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
-    final l = context.l10n;
-    final tasks = [
-      (AgentGlyphs.wand, l.ag_quickOptimize, l.ag_quickOptimizePrompt),
-      (AgentGlyphs.compare, l.ag_quickCompare, l.ag_quickComparePrompt),
-      (AgentGlyphs.layers, l.ag_quickBlocks, l.ag_quickBlocksPrompt),
-      (AgentGlyphs.book, l.ag_quickTags, l.ag_quickTagsPrompt),
-    ];
-    return SizedBox(
-      key: const Key('agent-quick'),
-      height: 26,
-      child: ClipRect(
-        child: Wrap(
-          spacing: 6,
-          clipBehavior: Clip.hardEdge,
-          children: [
-            for (final (i, (glyph, label, prompt)) in tasks.indexed)
-              _QuickButton(
-                key: Key('agent-quick-$i'),
-                glyph: glyph,
-                label: label,
-                onTap: () => s.insert(prompt, replace: true),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _QuickButton extends StatefulWidget {
-  const _QuickButton({
-    super.key,
-    required this.glyph,
-    required this.label,
-    required this.onTap,
-  });
-  final String glyph, label;
-  final VoidCallback onTap;
-
-  @override
-  State<_QuickButton> createState() => _QuickButtonState();
-}
-
-class _QuickButtonState extends State<_QuickButton> {
-  var _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ui;
-    final fg = _hover ? c.ink : c.muted;
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          height: 26,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          decoration: BoxDecoration(
-            color: _hover ? c.hover : c.card,
-            borderRadius: BorderRadius.circular(7),
-            border: Border.all(color: c.border),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 5,
-            children: [
-              AgentIcon(widget.glyph, size: 14, color: fg),
-              Text(
-                widget.label,
-                style: UiText.sans(12, color: fg, height: 1.2),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _QueueLine extends StatelessWidget {
   const _QueueLine({required this.item});
   final AgentQueued item;
@@ -1048,15 +1040,15 @@ class _AttachmentChipState extends State<_AttachmentChip> {
     final size = a.width != null && a.height != null
         ? '${a.width}×${a.height}'
         : null;
-    return Tooltip(
-      message: a.image == null
-          ? '${a.name}  ${l.ag_attachmentBroken}'
-          : [
-              a.name,
-              ?size,
-              if (a.metadata != null) '\n${a.metadata}',
-            ].join('  '),
-      waitDuration: const Duration(milliseconds: 400),
+    return UiTipHost(
+      tip: _hover
+          ? UiTip(
+              anchor: const Offset(0, -8),
+              followerAnchor: Alignment.bottomLeft,
+              width: 248,
+              child: _AttachmentInfo(attachment: a, size: size),
+            )
+          : null,
       child: MouseRegion(
         onEnter: (_) => setState(() => _hover = true),
         onExit: (_) => setState(() => _hover = false),
@@ -1148,6 +1140,66 @@ class _AttachmentChipState extends State<_AttachmentChip> {
       ),
     );
   }
+}
+
+/// 附件悬停卡：文件名、尺寸，以及图片自带的几项生成信息（不再整段贴元数据 JSON）。
+class _AttachmentInfo extends StatelessWidget {
+  const _AttachmentInfo({required this.attachment, required this.size});
+  final AgentAttachment attachment;
+  final String? size;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final a = attachment;
+    final m = a.metadata;
+    final sub = UiTipStyle.secondary(context);
+    final params = [
+      if (m?.steps != null) l.ag_imageInfoSteps(m!.steps!),
+      if (m?.scale != null) 'CFG ${_trim(m!.scale!)}',
+      ?m?.sampler,
+    ];
+    return Column(
+      key: Key('agent-attachment-info-${a.id}'),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 3,
+      children: [
+        Text(
+          a.name,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: UiTipStyle.strong(context),
+        ),
+        if (a.image == null)
+          Text(l.ag_attachmentBroken, style: sub)
+        else if (size != null || m?.model != null)
+          Text([?m?.model, ?size].join(' · '), style: sub),
+        if (params.isNotEmpty) Text(params.join(' · '), style: sub),
+        if (m?.seed != null)
+          Text(l.ag_imageInfoSeed(m!.seed!.toString()), style: sub),
+        if (m != null && m.characters > 0)
+          Text(l.ag_imageInfoCharacters(m.characters), style: sub),
+        if (m?.prompt != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 3),
+            child: Text(
+              m!.prompt!,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.mono(
+                11,
+                color: context.ui.tipInk.withValues(alpha: .82),
+                height: 1.45,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  static String _trim(double v) =>
+      v == v.roundToDouble() ? v.toStringAsFixed(0) : '$v';
 }
 
 class _Notices extends StatelessWidget {

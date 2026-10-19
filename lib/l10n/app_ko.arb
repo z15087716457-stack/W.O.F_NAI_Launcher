@@ -10606,7 +10606,7 @@
   "set_agFinalPending": "실행 중인 세션이 없습니다. 아래는 Studio가 구성하는 부분이며, 세션이 시작되면 Pi가 스킬 카탈로그, 작업 디렉터리, MCP 서버 목록도 추가합니다.",
   "ag_tabChat": "채팅",
   "ag_tabShelf": "산출물",
-  "ag_tabMemory": "메모리",
+  "ag_tabMemory": "지시",
   "ag_newChat": "새 채팅",
   "ag_more": "더 보기",
   "ag_close": "접기",
@@ -10735,14 +10735,6 @@
   "ag_gateChanged": "설정 또는 견적이 바뀌었습니다. Agent에게 다시 준비를 요청하세요",
   "ag_gateExpired": "견적이 만료되었습니다",
   "ag_gateEstimate": "예상치이며 실제 차감액은 서버에서 결정합니다",
-  "ag_quickOptimize": "프롬프트 최적화",
-  "ag_quickOptimizePrompt": "현재 모델의 규칙에 맞게 현재 프롬프트를 최적화해 주세요. 바꿀 부분과 이유를 먼저 알려 주고 확인을 받은 뒤 초안에 반영하세요.",
-  "ag_quickCompare": "최근 4장 비교",
-  "ag_quickComparePrompt": "기록의 최근 4장을 비교해 차이점과 각각의 문제를 알려 주세요. 아직 생성하지 마세요.",
-  "ag_quickBlocks": "블록으로 분할",
-  "ag_quickBlocksPrompt": "현재 프롬프트를 재사용할 수 있는 블록으로 나눠 주세요. 먼저 나눈 방식을 보여 주고 저장 여부를 정하겠습니다.",
-  "ag_quickTags": "태그 검색",
-  "ag_quickTagsPrompt": "태그를 찾아 주세요: ",
   "ag_placeholder": "Agent에게 지시 · @ 참조 · / 스킬",
   "ag_dropHint": "놓아서 이 메시지에 첨부",
   "ag_importing": "이미지 {count}장 추가 중…",
@@ -10754,6 +10746,30 @@
   "ag_mention": "참조",
   "ag_attachmentRemove": "제거",
   "ag_attachmentBroken": "읽을 수 없음",
+  "ag_imageInfoSteps": "{count}단계",
+  "@ag_imageInfoSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoSeed": "시드 {seed}",
+  "@ag_imageInfoSeed": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_imageInfoCharacters": "캐릭터 {count}명",
+  "@ag_imageInfoCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_send": "보내기",
   "ag_sendQueue": "대기열",
   "ag_sendSteer": "지시로 삽입",
@@ -10819,6 +10835,7 @@
   "ag_mentionBlocks": "블록",
   "ag_mentionTitle": "이 메시지에 참조",
   "ag_mentionEmpty": "일치하는 내용이 없습니다",
+  "ag_mentionSearchBlocks": "블록 검색",
   "ag_skillsTitle": "스킬",
   "ag_keySelect": "선택",
   "ag_keyInsert": "삽입",

@@ -907,22 +907,34 @@ class AgentDiffView extends StatelessWidget {
           child: Row(
             spacing: 6,
             children: [
-              Flexible(
-                child: Text(
-                  field,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(12, weight: FontWeight.w600, color: c.ink),
+              // 标题和计数一起占满剩余宽度，状态和撤销贴右边。
+              // （Flexible + Spacer 会平分空白，右侧留出一截。）
+              Expanded(
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        field,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          12,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l.ag_diffCounts(
+                        count(AgentDiffKind.added),
+                        count(AgentDiffKind.removed),
+                      ),
+                      style: UiText.mono(11.5, color: c.faint),
+                    ),
+                  ],
                 ),
               ),
-              Text(
-                l.ag_diffCounts(
-                  count(AgentDiffKind.added),
-                  count(AgentDiffKind.removed),
-                ),
-                style: UiText.mono(11.5, color: c.faint),
-              ),
-              const Spacer(),
               switch (diff.state) {
                 AgentDiffState.applied => Row(
                   spacing: 4,
@@ -938,6 +950,7 @@ class AgentDiffView extends StatelessWidget {
                 AgentDiffState.locked => Tooltip(
                   message: l.ag_diffLocked,
                   child: Row(
+                    key: Key('agent-diff-state-${diff.id}'),
                     spacing: 4,
                     children: [
                       AgentIcon(AgentGlyphs.check, size: 14, color: c.faint),

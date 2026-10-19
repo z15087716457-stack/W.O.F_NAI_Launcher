@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_preferences.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
@@ -33,6 +35,18 @@ class _Library extends PromptBlockLibraryNotifier {
       folders: data.folders,
       collections: data.collections,
     );
+  }
+}
+
+class _Preferences extends BlocksPreferencesNotifier {
+  bool fail = false;
+  int calls = 0;
+
+  @override
+  Future<void> recordUse(String id) {
+    calls++;
+    if (fail) return Future.error(StateError('Synthetic preference failure'));
+    return super.recordUse(id);
   }
 }
 
@@ -82,7 +96,10 @@ void main() {
   late PromptBlockStorage storage;
   late _Blocks repository;
   late ProviderContainer container;
+  late _Preferences preferences;
   setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    preferences = _Preferences();
     root = await Directory.systemTemp.createTemp('nai-agent-blocks-');
     workspace = await Directory('${root.path}/workspace').create();
     Hive.init(root.path);
@@ -99,6 +116,7 @@ void main() {
         vibeLibraryStorageServiceProvider.overrideWithValue(_Vibes()),
         imageGenerationNotifierProvider.overrideWith(IdleGeneration.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
+        blocksPreferencesProvider.overrideWith(() => preferences),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -428,6 +446,56 @@ void main() {
       expect(result['draft_version'], draft().acknowledgementVersion);
       await Future<void>.delayed(const Duration(milliseconds: 10));
       expect((await repository.getBlock(created['id'] as String))!.useCount, 1);
+    },
+  );
+
+  test(
+    'Agent insert records LRU once per bundle and ignores preference failures',
+    () async {
+      final first = await create({
+        'title': 'first',
+        'content': 'one',
+        'negativeContent': 'bad one',
+      });
+      final second = await create({'title': 'second', 'content': 'two'});
+      final a = first['id'] as String, b = second['id'] as String;
+      await container.read(blocksPreferencesProvider.future);
+      await insert(a);
+      await insert(b);
+      await insert(a);
+      // Drain the preference queue without recording an extra use.
+      await preferences.change((p) => p);
+      expect(preferences.calls, 3);
+      expect(container.read(blocksPreferencesProvider).requireValue.recentIds, [
+        a,
+        b,
+      ]);
+      expect(
+        (await SharedPreferences.getInstance()).getStringList(
+          'blocks_recent_ids',
+        ),
+        [a, b],
+      );
+
+      final before = preferences.calls;
+      await expectLater(
+        run('block_manage', {
+          'action': 'insert',
+          'id': b,
+          'expected_version': (await block(b))['version'],
+          'expected_draft_version': 'stale',
+        }),
+        throwsA(toolError('draft_conflict')),
+      );
+      expect(preferences.calls, before);
+
+      preferences.fail = true;
+      final result = await insert(b);
+      await Future<void>.delayed(Duration.zero);
+      expect(result['action'], 'insert');
+      expect(result['lanes']['main']['inserted_markers'], hasLength(1));
+      expect(result['draft_version'], draft().acknowledgementVersion);
+      expect(preferences.calls, before + 1);
     },
   );
 

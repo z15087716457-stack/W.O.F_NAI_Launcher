@@ -19648,7 +19648,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_tabShelf => '出力';
 
   @override
-  String get ag_tabMemory => 'メモリ';
+  String get ag_tabMemory => '指示';
 
   @override
   String get ag_newChat => '新しいチャット';
@@ -20026,33 +20026,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_gateEstimate => '見積もりです。実際の請求額はサーバーで決まります';
 
   @override
-  String get ag_quickOptimize => 'プロンプトを最適化';
-
-  @override
-  String get ag_quickOptimizePrompt =>
-      '現在のモデルのルールに合わせて現在のプロンプトを最適化してください。変更点と理由を先に挙げ、確認してから下書きに書き込んでください。';
-
-  @override
-  String get ag_quickCompare => '最近の 4 枚を比較';
-
-  @override
-  String get ag_quickComparePrompt =>
-      '履歴の直近 4 枚を比較して、違いとそれぞれの問題点を教えてください。まだ生成はしないでください。';
-
-  @override
-  String get ag_quickBlocks => 'ブロックに分割';
-
-  @override
-  String get ag_quickBlocksPrompt =>
-      '現在のプロンプトを再利用できるブロックに分割してください。まず分割案を見せてから、保存するか決めます。';
-
-  @override
-  String get ag_quickTags => 'タグを検索';
-
-  @override
-  String get ag_quickTagsPrompt => 'タグを調べてください：';
-
-  @override
   String get ag_placeholder => 'Agent への指示 · @ で参照 · / でスキル';
 
   @override
@@ -20083,6 +20056,21 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_attachmentBroken => '読み込めません';
+
+  @override
+  String ag_imageInfoSteps(int count) {
+    return '$count ステップ';
+  }
+
+  @override
+  String ag_imageInfoSeed(String seed) {
+    return 'シード $seed';
+  }
+
+  @override
+  String ag_imageInfoCharacters(int count) {
+    return 'キャラクター $count 人';
+  }
 
   @override
   String get ag_send => '送信';
@@ -20273,6 +20261,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_mentionEmpty => '一致する内容がありません';
+
+  @override
+  String get ag_mentionSearchBlocks => 'ブロックを検索';
 
   @override
   String get ag_skillsTitle => 'スキル';

@@ -24,17 +24,32 @@ void main() {
     return rec;
   }
 
-  testWidgets('Skill 分区：内置只读、用户可开关／改调用方式、出错行不给开关', (t) async {
+  testWidgets('Skill 分区：内置置顶且可开关／改调用方式、用户同样、出错行不给开关', (t) async {
     final rec = await open(t);
     final builtin = find.byKey(const Key('skill-builtin/nai-studio'));
     await t.ensureVisible(builtin);
     await t.pump();
-    expect(
-      find.descendant(of: builtin, matching: find.byType(SettingsSwitch)),
-      findsNothing,
+    final rows = find.byWidgetPredicate(
+      (w) =>
+          w.key is ValueKey<String> &&
+          (w.key! as ValueKey<String>).value.startsWith('skill-') &&
+          (w.key! as ValueKey<String>).value.contains('/'),
     );
-    await t.tap(find.descendant(of: builtin, matching: find.text('查看')));
-    expect(rec.calls, contains('viewSkill:builtin/nai-studio'));
+    final order = [
+      for (final e in rows.evaluate())
+        (e.widget.key! as ValueKey<String>).value,
+    ].where((k) => !k.startsWith('skill-mode-')).toList();
+    expect(order.take(2).every((k) => k.startsWith('skill-builtin/')), isTrue);
+    await t.tap(
+      find.descendant(of: builtin, matching: find.byType(SettingsSwitch)),
+    );
+    expect(rec.calls, contains('skillEnabled:builtin/nai-studio:false'));
+    await t.tap(find.byKey(const Key('skill-mode-builtin/nai-studio')));
+    await t.pumpAndSettle();
+    // 菜单项在弹层里（第一个匹配）；下面某行的“仅手动调用”标签也会被找到。
+    await t.tap(find.text('仅手动调用').first);
+    await t.pumpAndSettle();
+    expect(rec.calls, contains('skillManual:builtin/nai-studio:true'));
 
     final user = find.byKey(const Key('skill-global/style-replica'));
     await t.ensureVisible(user);

@@ -544,8 +544,29 @@ class AgentAttachment {
   final ImageProvider? image;
   final int? width, height;
 
-  /// 图片自带的生成信息（格式化好的原文）；null = 没有，不显示「信息」。
-  final String? metadata;
+  /// 图片自带的生成信息摘要；null = 没有，不显示「信息」角标。
+  /// 完整元数据留给 Agent 的 image_read(metadata_only)。
+  final AgentImageInfo? metadata;
+}
+
+/// 悬停卡片上的轻量生成信息：每项都可空，只显示有的。
+@immutable
+class AgentImageInfo {
+  const AgentImageInfo({
+    this.model,
+    this.steps,
+    this.scale,
+    this.sampler,
+    this.seed,
+    this.prompt,
+    this.characters = 0,
+  });
+  final String? model, sampler, prompt;
+  final int? steps, seed;
+  final double? scale;
+
+  /// 角色提示词条数。
+  final int characters;
 }
 
 enum AgentQueueKind { queued, steer, recovered }

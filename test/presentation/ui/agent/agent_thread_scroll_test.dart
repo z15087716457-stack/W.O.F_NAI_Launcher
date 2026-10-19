@@ -154,4 +154,37 @@ void main() {
     expect(agentDuration(const Duration(milliseconds: 6172)), '6.2s');
     expect(agentDuration(const Duration(seconds: 64)), '1m 04s');
   });
+
+  for (final state in AgentDiffState.values) {
+    testWidgets('diff header status sits at the right edge ($state)', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        _view([
+          AgentTurn(
+            id: 't',
+            user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 19)),
+            reply: AgentReply(
+              blocks: [
+                AgentDiffBlock(
+                  AgentPromptDiff(
+                    id: 'd',
+                    field: AgentPromptField.prompt,
+                    segments: const [AgentDiffSegment('a, b')],
+                    state: state,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ], 1),
+      );
+      final diff = tester.getRect(find.byKey(const Key('agent-diff-d')));
+      final trailing = state == AgentDiffState.applied
+          ? find.byKey(const Key('agent-diff-undo-d'))
+          : find.text(state == AgentDiffState.undone ? '已撤销' : '已写入');
+      expect(tester.getRect(trailing).right, closeTo(diff.right, 1));
+    });
+  }
 }

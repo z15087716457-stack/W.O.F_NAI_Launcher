@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/krita/bridge_draft_guard.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../data/models/image/image_params.dart';
-import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/pill_workspace_provider.dart';
 import '../../providers/prompt_block_library_provider.dart';
@@ -85,11 +84,33 @@ AgentDraftSummary agentDraftSummary(
   );
 }
 
-List<AgentMention> agentBlockMentions(PromptBlockLibraryState? library) => [
-  for (final block in library?.blocks ?? const <PromptBlock>[])
-    AgentMention(
-      id: 'block/${block.id}',
-      kind: AgentMentionKind.block,
-      label: block.title,
-    ),
-];
+List<AgentMention> agentBlockMentions(
+  PromptBlockLibraryState? library, {
+  List<String> recentIds = const [],
+}) {
+  final recent = <String, int>{};
+  for (final (index, id) in recentIds.indexed) {
+    recent.putIfAbsent(id, () => index);
+  }
+  final blocks = [...?library?.blocks];
+  blocks.sort((a, b) {
+    final aRecent = recent[a.id], bRecent = recent[b.id];
+    if (aRecent != null || bRecent != null) {
+      if (aRecent == null) return 1;
+      if (bRecent == null) return -1;
+      return aRecent.compareTo(bRecent);
+    }
+    final uses = b.useCount.compareTo(a.useCount);
+    if (uses != 0) return uses;
+    final updated = b.updatedAt.compareTo(a.updatedAt);
+    return updated != 0 ? updated : a.id.compareTo(b.id);
+  });
+  return [
+    for (final block in blocks)
+      AgentMention(
+        id: 'block/${block.id}',
+        kind: AgentMentionKind.block,
+        label: block.title,
+      ),
+  ];
+}

@@ -10724,7 +10724,7 @@
   "set_agFinalPending": "當前沒有執行中的會話。以下是 Studio 組裝的部分；會話啟動時 Pi 還會追加 Skill 目錄、工作目錄和 MCP 服務列表。",
   "ag_tabChat": "對話",
   "ag_tabShelf": "產物",
-  "ag_tabMemory": "記憶",
+  "ag_tabMemory": "指令",
   "ag_newChat": "新聊天",
   "ag_more": "更多",
   "ag_close": "收起",
@@ -10943,14 +10943,6 @@
   "ag_gateChanged": "配置或報價已變化，請讓 Agent 重新準備",
   "ag_gateExpired": "報價已失效",
   "ag_gateEstimate": "預估，以服務端扣費為準",
-  "ag_quickOptimize": "最佳化當前提示詞",
-  "ag_quickOptimizePrompt": "按當前模型的規則最佳化當前提示詞：先列出要改的地方和理由，等我確認再寫入草稿。",
-  "ag_quickCompare": "對比最近 4 張",
-  "ag_quickComparePrompt": "對比歷史裡最近的 4 張圖，說說差別和各自的問題，先不要生成。",
-  "ag_quickBlocks": "拆成積木",
-  "ag_quickBlocksPrompt": "把當前提示詞拆成可複用的積木，先給我看拆法，再決定是否儲存。",
-  "ag_quickTags": "查標籤",
-  "ag_quickTagsPrompt": "幫我查標籤：",
   "ag_placeholder": "告訴 Agent 要做什麼 · @ 引用 · / 技能",
   "ag_dropHint": "鬆開以附加到這條訊息",
   "ag_importing": "正在新增 {count} 張圖片…",
@@ -10968,6 +10960,30 @@
   "ag_mention": "引用",
   "ag_attachmentRemove": "移除",
   "ag_attachmentBroken": "讀取失敗",
+  "ag_imageInfoSteps": "{count} 步",
+  "@ag_imageInfoSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoSeed": "種子 {seed}",
+  "@ag_imageInfoSeed": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_imageInfoCharacters": "{count} 個角色",
+  "@ag_imageInfoCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_send": "傳送",
   "ag_sendQueue": "排隊傳送",
   "ag_sendSteer": "作為引導插入",
@@ -11063,6 +11079,7 @@
   "ag_mentionBlocks": "積木",
   "ag_mentionTitle": "引用到這條訊息",
   "ag_mentionEmpty": "沒有匹配的內容",
+  "ag_mentionSearchBlocks": "搜尋積木",
   "ag_skillsTitle": "技能",
   "ag_keySelect": "選擇",
   "ag_keyInsert": "插入",

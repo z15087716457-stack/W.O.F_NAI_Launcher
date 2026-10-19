@@ -19417,7 +19417,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_tabShelf => '产物';
 
   @override
-  String get ag_tabMemory => '记忆';
+  String get ag_tabMemory => '指令';
 
   @override
   String get ag_newChat => '新聊天';
@@ -19792,30 +19792,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_gateEstimate => '预估，以服务端扣费为准';
 
   @override
-  String get ag_quickOptimize => '优化当前提示词';
-
-  @override
-  String get ag_quickOptimizePrompt => '按当前模型的规则优化当前提示词：先列出要改的地方和理由，等我确认再写入草稿。';
-
-  @override
-  String get ag_quickCompare => '对比最近 4 张';
-
-  @override
-  String get ag_quickComparePrompt => '对比历史里最近的 4 张图，说说差别和各自的问题，先不要生成。';
-
-  @override
-  String get ag_quickBlocks => '拆成积木';
-
-  @override
-  String get ag_quickBlocksPrompt => '把当前提示词拆成可复用的积木，先给我看拆法，再决定是否保存。';
-
-  @override
-  String get ag_quickTags => '查标签';
-
-  @override
-  String get ag_quickTagsPrompt => '帮我查标签：';
-
-  @override
   String get ag_placeholder => '告诉 Agent 要做什么 · @ 引用 · / 技能';
 
   @override
@@ -19846,6 +19822,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_attachmentBroken => '读取失败';
+
+  @override
+  String ag_imageInfoSteps(int count) {
+    return '$count 步';
+  }
+
+  @override
+  String ag_imageInfoSeed(String seed) {
+    return '种子 $seed';
+  }
+
+  @override
+  String ag_imageInfoCharacters(int count) {
+    return '$count 个角色';
+  }
 
   @override
   String get ag_send => '发送';
@@ -20036,6 +20027,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_mentionEmpty => '没有匹配的内容';
+
+  @override
+  String get ag_mentionSearchBlocks => '搜索积木';
 
   @override
   String get ag_skillsTitle => '技能';
@@ -39866,7 +39860,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_tabShelf => '產物';
 
   @override
-  String get ag_tabMemory => '記憶';
+  String get ag_tabMemory => '指令';
 
   @override
   String get ag_newChat => '新聊天';
@@ -40241,31 +40235,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_gateEstimate => '預估，以服務端扣費為準';
 
   @override
-  String get ag_quickOptimize => '最佳化當前提示詞';
-
-  @override
-  String get ag_quickOptimizePrompt =>
-      '按當前模型的規則最佳化當前提示詞：先列出要改的地方和理由，等我確認再寫入草稿。';
-
-  @override
-  String get ag_quickCompare => '對比最近 4 張';
-
-  @override
-  String get ag_quickComparePrompt => '對比歷史裡最近的 4 張圖，說說差別和各自的問題，先不要生成。';
-
-  @override
-  String get ag_quickBlocks => '拆成積木';
-
-  @override
-  String get ag_quickBlocksPrompt => '把當前提示詞拆成可複用的積木，先給我看拆法，再決定是否儲存。';
-
-  @override
-  String get ag_quickTags => '查標籤';
-
-  @override
-  String get ag_quickTagsPrompt => '幫我查標籤：';
-
-  @override
   String get ag_placeholder => '告訴 Agent 要做什麼 · @ 引用 · / 技能';
 
   @override
@@ -40296,6 +40265,21 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_attachmentBroken => '讀取失敗';
+
+  @override
+  String ag_imageInfoSteps(int count) {
+    return '$count 步';
+  }
+
+  @override
+  String ag_imageInfoSeed(String seed) {
+    return '種子 $seed';
+  }
+
+  @override
+  String ag_imageInfoCharacters(int count) {
+    return '$count 個角色';
+  }
 
   @override
   String get ag_send => '傳送';
@@ -40486,6 +40470,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_mentionEmpty => '沒有匹配的內容';
+
+  @override
+  String get ag_mentionSearchBlocks => '搜尋積木';
 
   @override
   String get ag_skillsTitle => '技能';

@@ -10606,7 +10606,7 @@
   "set_agFinalPending": "実行中のセッションはありません。以下は Studio が組み立てる部分です。セッション開始時には Pi がスキルカタログ、作業ディレクトリ、MCP サーバー一覧も追加します。",
   "ag_tabChat": "チャット",
   "ag_tabShelf": "出力",
-  "ag_tabMemory": "メモリ",
+  "ag_tabMemory": "指示",
   "ag_newChat": "新しいチャット",
   "ag_more": "その他",
   "ag_close": "折りたたむ",
@@ -10735,14 +10735,6 @@
   "ag_gateChanged": "設定または見積もりが変わりました。Agent に再準備を依頼してください",
   "ag_gateExpired": "見積もりが失効しました",
   "ag_gateEstimate": "見積もりです。実際の請求額はサーバーで決まります",
-  "ag_quickOptimize": "プロンプトを最適化",
-  "ag_quickOptimizePrompt": "現在のモデルのルールに合わせて現在のプロンプトを最適化してください。変更点と理由を先に挙げ、確認してから下書きに書き込んでください。",
-  "ag_quickCompare": "最近の 4 枚を比較",
-  "ag_quickComparePrompt": "履歴の直近 4 枚を比較して、違いとそれぞれの問題点を教えてください。まだ生成はしないでください。",
-  "ag_quickBlocks": "ブロックに分割",
-  "ag_quickBlocksPrompt": "現在のプロンプトを再利用できるブロックに分割してください。まず分割案を見せてから、保存するか決めます。",
-  "ag_quickTags": "タグを検索",
-  "ag_quickTagsPrompt": "タグを調べてください：",
   "ag_placeholder": "Agent への指示 · @ で参照 · / でスキル",
   "ag_dropHint": "ドロップしてこのメッセージに添付",
   "ag_importing": "{count} 枚の画像を追加中…",
@@ -10754,6 +10746,30 @@
   "ag_mention": "参照",
   "ag_attachmentRemove": "削除",
   "ag_attachmentBroken": "読み込めません",
+  "ag_imageInfoSteps": "{count} ステップ",
+  "@ag_imageInfoSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoSeed": "シード {seed}",
+  "@ag_imageInfoSeed": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_imageInfoCharacters": "キャラクター {count} 人",
+  "@ag_imageInfoCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_send": "送信",
   "ag_sendQueue": "待機列",
   "ag_sendSteer": "ガイドとして挿入",
@@ -10819,6 +10835,7 @@
   "ag_mentionBlocks": "ブロック",
   "ag_mentionTitle": "このメッセージに参照",
   "ag_mentionEmpty": "一致する内容がありません",
+  "ag_mentionSearchBlocks": "ブロックを検索",
   "ag_skillsTitle": "スキル",
   "ag_keySelect": "選択",
   "ag_keyInsert": "挿入",

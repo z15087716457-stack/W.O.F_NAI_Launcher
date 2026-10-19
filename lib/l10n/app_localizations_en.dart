@@ -20267,7 +20267,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_tabShelf => 'Outputs';
 
   @override
-  String get ag_tabMemory => 'Memory';
+  String get ag_tabMemory => 'Instructions';
 
   @override
   String get ag_newChat => 'New chat';
@@ -20649,33 +20649,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_gateEstimate => 'Estimate; the server charge is final';
 
   @override
-  String get ag_quickOptimize => 'Improve prompt';
-
-  @override
-  String get ag_quickOptimizePrompt =>
-      'Improve the current prompt for this model: list the changes and why first, and wait for my OK before writing to the draft.';
-
-  @override
-  String get ag_quickCompare => 'Compare last 4';
-
-  @override
-  String get ag_quickComparePrompt =>
-      'Compare the latest 4 images in history: what differs and what\'s wrong with each. Don\'t generate.';
-
-  @override
-  String get ag_quickBlocks => 'Split into blocks';
-
-  @override
-  String get ag_quickBlocksPrompt =>
-      'Split the current prompt into reusable blocks. Show me the split before saving anything.';
-
-  @override
-  String get ag_quickTags => 'Look up tags';
-
-  @override
-  String get ag_quickTagsPrompt => 'Look up tags: ';
-
-  @override
   String get ag_placeholder =>
       'Tell Agent what to do · @ to reference · / for skills';
 
@@ -20707,6 +20680,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_attachmentBroken => 'Couldn\'t read';
+
+  @override
+  String ag_imageInfoSteps(int count) {
+    return '$count steps';
+  }
+
+  @override
+  String ag_imageInfoSeed(String seed) {
+    return 'Seed $seed';
+  }
+
+  @override
+  String ag_imageInfoCharacters(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count characters',
+      one: '1 character',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get ag_send => 'Send';
@@ -20901,6 +20895,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_mentionEmpty => 'Nothing matches';
+
+  @override
+  String get ag_mentionSearchBlocks => 'Search blocks';
 
   @override
   String get ag_skillsTitle => 'Skills';

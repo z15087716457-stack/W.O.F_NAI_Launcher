@@ -689,7 +689,12 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
               anchor: 'agentSkills',
               child: Column(
                 children: [
-                  for (final skill in ag.skills) _SkillRow(skill: skill),
+                  // 内置 Skill 置顶，其余保持后端给的顺序。
+                  for (final skill in [
+                    ...ag.skills.where((x) => x.builtin),
+                    ...ag.skills.where((x) => !x.builtin),
+                  ])
+                    _SkillRow(skill: skill),
                 ],
               ),
             ),
@@ -1186,23 +1191,6 @@ class _SkillRow extends StatelessWidget {
           const SettingsDot(SettingsTone.error),
           Text(l.set_agSkillNotLoaded, style: UiText.sans(12, color: c.error)),
           menu,
-        ],
-      );
-    } else if (k.builtin) {
-      control = Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 8,
-        children: [
-          Tooltip(
-            message: k.manual ? l.set_agSkillManualTip : l.set_agSkillAutoTip,
-            child: UiMini(k.manual ? l.set_agSkillManual : l.set_agSkillAuto),
-          ),
-          SettingsBtn(
-            label: l.set_agSkillView,
-            glyph: UiGlyphs.eye,
-            small: true,
-            onTap: () => a.onViewSkill(k.id),
-          ),
         ],
       );
     } else {

@@ -94,7 +94,11 @@ async function handle(message) {
     created = await createStudioSession({ ...message, executeTool, acquireRequest, deferBinding: true,
       onSession: value => { session = value; },
       onExtensionUi: event => {
-        if (readingMcpStatus && event.method === 'notify') mcpStatus = redact({ text: event.message }).text;
+        if (readingMcpStatus && event.method === 'notify' &&
+            (event.level ?? 'info') === 'info') {
+          mcpStatus = redact({ text: event.message }).text;
+          return;
+        }
         send({ type: 'extension_ui', ...event });
       },
       onExtensionError: error => send({ type: 'extension_error', path: error.extensionPath, message: error.error }),
@@ -146,9 +150,10 @@ async function handle(message) {
       const action = message.action ?? 'status';
       if (!['status', 'reconnect', 'login', 'logout'].includes(action)) throw new Error('Invalid MCP action');
       if (action !== 'status' && !/^[A-Za-z0-9_-]+$/.test(message.name ?? '')) throw new Error('Invalid MCP name');
+      // Action feedback remains a notice; only the following status read is private.
+      if (action !== 'status') await session.prompt('/mcp ' + action + ' ' + message.name);
       readingMcpStatus = true;
       try {
-        if (action !== 'status') await session.prompt('/mcp ' + action + ' ' + message.name);
         await session.prompt('/mcp');
       } finally { readingMcpStatus = false; }
       send({ type: 'response', id, ...state() });

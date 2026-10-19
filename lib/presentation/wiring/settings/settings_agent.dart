@@ -56,18 +56,18 @@ final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
         value.selected?.client,
         value.selected?.running,
         value.selected?.starting,
-        value.selected?.mcpStatus,
         value.selected?.extensionSignature == value.settings.extensionSignature,
       ),
     ),
   );
   final client = runtime.$1;
-  if (!runtime.$5) return '';
+  if (!runtime.$4) return '';
   if (client == null ||
       client.isClosed ||
       runtime.$2 == true ||
       runtime.$3 == true) {
-    return runtime.$4 ?? '';
+    // Read the cached fallback without subscribing to our query's output.
+    return ref.read(naiAgentControllerProvider).selected?.mcpStatus ?? '';
   }
   try {
     final response = await client.mcpCommand('status');

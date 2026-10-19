@@ -2,10 +2,13 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'agent_test_harness.dart';
@@ -94,7 +97,8 @@ void main() {
       await tester.tap(find.byKey(const Key('agent-ask-option-keep-0')));
       await tester.pump();
       await tester.tap(find.byKey(const Key('agent-ask-submit')));
-      final (id, answers) = rec.last('answer')! as (String, Map<String, String>);
+      final (id, answers) =
+          rec.last('answer')! as (String, Map<String, String>);
       expect(id, 'q1');
       expect(answers, {'keep': '保留构图，只换画风'});
     });
@@ -154,6 +158,116 @@ void main() {
       expect(find.byKey(const Key('agent-mention-panel')), findsNothing);
     });
 
+    testWidgets('@ 按钮再点一次撤掉刚插入的空 @，不叠加', (tester) async {
+      final rec = await pumpAgent(tester, scene: AgentScene.welcome);
+      final input = find.byKey(const Key('agent-input'));
+      await tester.enterText(input, '参考');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-mention')));
+      await tester.pump();
+      expect(rec.last('composer'), '参考 @');
+      expect(find.byKey(const Key('agent-mention-panel')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-mention')));
+      await tester.pump();
+      expect(rec.last('composer'), '参考');
+      expect(find.byKey(const Key('agent-mention-panel')), findsNothing);
+      // 已经输入了查询词的 @ 不动，按钮照常再插一个。
+      await tester.enterText(input, '@角');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-mention')));
+      await tester.pump();
+      expect(rec.last('composer'), '@角 @');
+    });
+
+    testWidgets('积木分类有搜索框：筛选后回车插入', (tester) async {
+      final rec = await pumpAgent(tester, scene: AgentScene.welcome);
+      await tester.enterText(find.byKey(const Key('agent-input')), '用 @');
+      await tester.pump();
+      expect(find.byKey(const Key('agent-block-search')), findsNothing);
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byKey(const Key('agent-mention-panel')),
+              matching: find.text('积木'),
+            )
+            .first,
+      );
+      await tester.pump();
+      expect(find.byKey(const Key('agent-block-search')), findsOneWidget);
+      expect(find.byKey(const Key('agent-mention-b400')), findsOneWidget);
+      expect(find.byKey(const Key('agent-mention-b-water')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-block-search')));
+      await tester.enterText(find.byKey(const Key('agent-block-search')), '水彩');
+      await tester.pump();
+      expect(find.byKey(const Key('agent-mention-panel')), findsOneWidget);
+      expect(find.byKey(const Key('agent-mention-b400')), findsNothing);
+      expect(find.byKey(const Key('agent-mention-b-water')), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pump();
+      expect(rec.last('composer'), '用 @水彩晕染 ');
+      expect(find.byKey(const Key('agent-mention-panel')), findsNothing);
+    });
+
+    testWidgets('附件悬停是轻量信息卡，不贴整段元数据', (tester) async {
+      final long = List.filled(80, 'masterpiece').join(', ');
+      await pumpAgent(
+        tester,
+        data: _withAttachments(AgentFixture.view(AgentScene.welcome), [
+          AgentAttachment(
+            id: 'a1',
+            name: 'nai-001.png',
+            image: UiFixtureImage.gradient('a1'),
+            width: 832,
+            height: 1216,
+            metadata: AgentImageInfo(
+              model: 'V4.5 Full',
+              steps: 28,
+              scale: 5,
+              sampler: 'k_euler_ancestral',
+              seed: 123456,
+              prompt: long,
+              characters: 2,
+            ),
+          ),
+        ]),
+      );
+      expect(find.byKey(const Key('agent-attachment-info-a1')), findsNothing);
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      addTearDown(mouse.removePointer);
+      await mouse.addPointer(location: Offset.zero);
+      await mouse.moveTo(
+        tester.getCenter(find.byKey(const Key('agent-attachment-a1'))),
+      );
+      await tester.pump();
+      await tester.pump();
+      final card = find.byKey(const Key('agent-attachment-info-a1'));
+      expect(card, findsOneWidget);
+      expect(
+        find.descendant(of: card, matching: find.text('V4.5 Full · 832×1216')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.text('28 步 · CFG 5 · k_euler_ancestral'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('种子 123456')),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(of: card, matching: find.text('2 个角色')),
+        findsOneWidget,
+      );
+      expect(tester.getSize(card).width, lessThanOrEqualTo(248));
+      expect(tester.getSize(card).height, lessThan(160));
+      await mouse.moveTo(Offset.zero);
+      await tester.pump();
+      expect(card, findsNothing);
+    });
+
     testWidgets('行首 / 弹出技能', (tester) async {
       final rec = await pumpAgent(tester, scene: AgentScene.welcome);
       await tester.enterText(find.byKey(const Key('agent-input')), '/nai-p');
@@ -176,19 +290,23 @@ void main() {
       expect(rec.last('withdrawQueued'), 'q1');
     });
 
-    testWidgets('权限三档；窄宽收成下拉', (tester) async {
-      var rec = await pumpAgent(tester, scene: AgentScene.welcome, width: 460);
-      await tester.tap(find.text('只读'));
-      await tester.pump();
-      expect(rec.last('permission'), AgentPermissionMode.readonly);
-
-      rec = await pumpAgent(tester, scene: AgentScene.welcome, width: 340);
-      expect(find.text('只读'), findsNothing);
-      await tester.tap(find.byKey(const Key('agent-permission')));
-      await tester.pump();
-      await tester.tap(find.byKey(const Key('agent-permission-ask')));
-      await tester.pump();
-      expect(rec.last('permission'), AgentPermissionMode.ask);
+    testWidgets('权限三档收成一个按钮，点开切换', (tester) async {
+      for (final width in [460.0, 340.0]) {
+        final rec = await pumpAgent(
+          tester,
+          scene: AgentScene.welcome,
+          width: width,
+        );
+        // 只显示当前档位（自动），另外两档收在弹层里。
+        expect(find.text('只读'), findsNothing);
+        expect(find.text('询问'), findsNothing);
+        await tester.tap(find.byKey(const Key('agent-permission')));
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('agent-permission-readonly')));
+        await tester.pump();
+        expect(rec.last('permission'), AgentPermissionMode.readonly);
+        expect(find.byKey(const Key('agent-permission-popover')), findsNothing);
+      }
     });
 
     testWidgets('模型弹层：换模型和思考档位', (tester) async {
@@ -368,3 +486,27 @@ AgentViewData _withPending(AgentViewData d, List<AgentPending> pending) =>
       status: d.status,
       revision: d.revision,
     );
+
+AgentViewData _withAttachments(
+  AgentViewData d,
+  List<AgentAttachment> attachments,
+) => AgentViewData(
+  now: d.now,
+  workspace: d.workspace,
+  chat: d.chat,
+  workspaces: d.workspaces,
+  chats: d.chats,
+  composer: AgentComposerData(text: d.composer.text, attachments: attachments),
+  thread: d.thread,
+  shelf: d.shelf,
+  memory: d.memory,
+  usage: d.usage,
+  models: d.models,
+  thinking: d.thinking,
+  permission: d.permission,
+  mentions: d.mentions,
+  skills: d.skills,
+  draft: d.draft,
+  status: d.status,
+  revision: d.revision,
+);

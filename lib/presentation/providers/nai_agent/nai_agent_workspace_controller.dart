@@ -869,9 +869,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       final key = envelope['key'] as String? ?? '';
       switch (envelope['method']) {
         case 'notify':
-          runtime.extensionNotices.add('${envelope['message'] ?? ''}');
-          if (runtime.extensionNotices.length > 4) {
-            runtime.extensionNotices.removeAt(0);
+          final text = '${envelope['message'] ?? ''}';
+          if (!runtime.extensionNotices.contains(text)) {
+            runtime.extensionNotices.add(text);
+            if (runtime.extensionNotices.length > 4) {
+              runtime.extensionNotices.removeAt(0);
+            }
           }
         case 'setStatus':
           if (envelope['text'] is String) {

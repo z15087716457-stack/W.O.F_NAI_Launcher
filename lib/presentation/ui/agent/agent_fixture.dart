@@ -143,6 +143,12 @@ abstract final class AgentFixture {
       label: '400精选画师池',
       detail: '32 个',
     ),
+    const AgentMention(
+      id: 'b-water',
+      kind: AgentMentionKind.block,
+      label: '水彩晕染',
+      detail: '6 个',
+    ),
   ];
 
   static const skills = [

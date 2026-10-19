@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +11,7 @@ import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../../data/services/nai_agent/agent_snapshot_files.dart';
 import '../../utils/prompt_block_bundle_insertion.dart';
+import '../../wiring/blocks_preferences.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import '../image_generation_provider.dart';
 import '../pill_roll_coordinator.dart';
@@ -113,6 +115,14 @@ NaiAgentBlockTools bindNaiAgentBlocks(
   bool Function() isBusy,
   bool Function() isAlive,
 ) {
+  Future<void> recordUse(String id) async {
+    try {
+      await ref.read(blocksPreferencesProvider.notifier).recordUse(id);
+    } catch (_) {
+      // Recent-use persistence is best effort, never fail an applied insertion.
+    }
+  }
+
   Future<PromptBlockLibraryData> library() async {
     await ref.read(promptBlockLibraryNotifierProvider.future);
     // Read the repository again; another editor may have saved since the last
@@ -315,6 +325,9 @@ NaiAgentBlockTools bindNaiAgentBlocks(
               .where((m) => !priorMarkers[key]!.contains(m))
               .toList(),
         };
+      }
+      if (params['action'] == 'insert') {
+        unawaited(recordUse(block!.id));
       }
       return {'action': params['action'], 'lanes': result};
     },

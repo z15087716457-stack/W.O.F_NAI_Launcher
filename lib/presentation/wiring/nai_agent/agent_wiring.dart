@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -45,8 +44,10 @@ import '../../utils/nai_agent_image_reader.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/draggable_memory_image.dart';
 import '../../widgets/nai_agent/nai_agent_image_input.dart';
+import '../blocks_preferences.dart';
 import 'agent_context.dart';
 import 'agent_diff_undo.dart';
+import 'agent_image_info.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
 import 'agent_thread_mapper.dart';
@@ -432,6 +433,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       mentions.addAll(
         agentBlockMentions(
           ref.watch(promptBlockLibraryNotifierProvider).valueOrNull,
+          recentIds:
+              ref.watch(blocksPreferencesProvider).valueOrNull?.recentIds ??
+              const [],
         ),
       );
     }
@@ -448,6 +452,11 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             )
             .toList() ??
         [];
+    // 与设置页一致：内置 Skill 置顶，其余保持宿主给的顺序。
+    final skillOptions = [
+      ...active.where((s) => s.builtin),
+      ...active.where((s) => !s.builtin),
+    ];
     AgentChatInfo chatInfo(store.AgentChat chat) {
       final runtime = c.heldRuntimes
           .where((r) => r.chat.id == chat.id)
@@ -500,9 +509,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
                 image: _resources.attachment(c.store, r.workspace, a),
                 width: a.width,
                 height: a.height,
-                metadata: a.metadata == null
-                    ? null
-                    : const JsonEncoder.withIndent('  ').convert(a.metadata),
+                metadata: agentImageInfo(a.metadata),
               ),
         ],
         queue: [
@@ -581,7 +588,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           AgentPermissionMode.auto,
       mentions: mentions,
       skills: [
-        for (final s in active)
+        for (final s in skillOptions)
           AgentSkillOption(name: s.name, description: s.displayDescription(l)),
       ],
       draft: draft,

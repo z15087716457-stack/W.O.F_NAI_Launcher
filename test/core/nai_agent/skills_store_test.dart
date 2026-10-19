@@ -27,34 +27,37 @@ void main() {
   });
   tearDown(() => root.delete(recursive: true));
 
-  test('settings keep only valid user skill switches and modes', () async {
-    final settings = AgentSettings.fromJson({
-      'disabledSkills': [
-        'global/a',
-        'builtin/nai-studio',
-        'bad',
-        'global/../x',
-        3,
-        'global/a',
-      ],
-      'skillModes': {
-        'workspace/b': 'manual',
-        'global/c': 'sometimes',
-        'nope': 'auto',
-      },
-    });
-    expect(settings.disabledSkills, ['global/a']);
-    expect(settings.skillModes, {'workspace/b': 'manual'});
-    expect(
-      AgentSettings.fromJson(settings.toJson()).toJson(),
-      settings.toJson(),
-    );
-    final changed = AgentSettings.fromJson({
-      ...settings.toJson(),
-      'skillModes': {},
-    });
-    expect(changed.extensionSignature, isNot(settings.extensionSignature));
-  });
+  test(
+    'settings keep only valid skill switches (built-ins included) and modes',
+    () async {
+      final settings = AgentSettings.fromJson({
+        'disabledSkills': [
+          'global/a',
+          'builtin/nai-studio',
+          'bad',
+          'global/../x',
+          3,
+          'global/a',
+        ],
+        'skillModes': {
+          'workspace/b': 'manual',
+          'global/c': 'sometimes',
+          'nope': 'auto',
+        },
+      });
+      expect(settings.disabledSkills, ['global/a', 'builtin/nai-studio']);
+      expect(settings.skillModes, {'workspace/b': 'manual'});
+      expect(
+        AgentSettings.fromJson(settings.toJson()).toJson(),
+        settings.toJson(),
+      );
+      final changed = AgentSettings.fromJson({
+        ...settings.toJson(),
+        'skillModes': {},
+      });
+      expect(changed.extensionSignature, isNot(settings.extensionSignature));
+    },
+  );
 
   test(
     'configure, import, create, copy and remove act only on user folders',
@@ -67,10 +70,12 @@ void main() {
       var settings = await store.readSettings();
       expect(settings.disabledSkills, ['global/mine']);
       expect(settings.skillModes, {'global/mine': 'manual'});
-      await expectLater(
-        store.configureSkill('builtin/nai-studio', enabled: false),
-        throwsFormatException,
-      );
+      await store.configureSkill('builtin/nai-studio', enabled: false);
+      expect((await store.readSettings()).disabledSkills, [
+        'global/mine',
+        'builtin/nai-studio',
+      ]);
+      await store.configureSkill('builtin/nai-studio', enabled: true);
       await store.configureSkill('builtin/nai-studio', mode: 'manual');
 
       final source = Directory(p.join(root.path, 'outside', 'style-replica'));

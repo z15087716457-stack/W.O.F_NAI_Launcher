@@ -53,6 +53,55 @@ void main() {
     },
   );
 
+  test(
+    'block mentions put LRU first, then usage and update time without changing the library',
+    () {
+      final old = DateTime.utc(2025), fresh = DateTime.utc(2026);
+      PromptBlock block(String id, int uses, DateTime updated) =>
+          PromptBlock.create(
+            title: id,
+            content: id,
+          ).copyWith(id: id, useCount: uses, updatedAt: updated);
+      final blocks = [
+        block('unused', 0, fresh),
+        block('popular-old', 10, old),
+        block('recent-old', 1, old),
+        block('popular-new', 10, fresh),
+        block('recent-new', 0, old),
+        block('less-used', 2, fresh),
+      ];
+      final library = PromptBlockLibraryState(
+        blocks: blocks,
+        folders: const [],
+      );
+      final originalIds = library.blocks.map((b) => b.id).toList();
+      expect(
+        agentBlockMentions(
+          library,
+          recentIds: ['missing', 'recent-new', 'recent-old', 'recent-new'],
+        ).map((m) => m.id),
+        [
+          'block/recent-new',
+          'block/recent-old',
+          'block/popular-new',
+          'block/popular-old',
+          'block/less-used',
+          'block/unused',
+        ],
+      );
+      expect(agentBlockMentions(library).map((m) => m.id), [
+        'block/popular-new',
+        'block/popular-old',
+        'block/less-used',
+        'block/recent-old',
+        'block/unused',
+        'block/recent-new',
+      ]);
+      expect(library.blocks.map((b) => b.id), originalIds);
+      expect(agentBlockMentions(null, recentIds: ['missing']), isEmpty);
+    },
+  );
+
   test('block mentions use the block title; archived blocks are left out', () {
     final kept = PromptBlock.create(title: '  晨光  ', content: 'dawn');
     final archived = PromptBlock.create(

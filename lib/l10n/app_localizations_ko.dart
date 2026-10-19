@@ -19714,7 +19714,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_tabShelf => '산출물';
 
   @override
-  String get ag_tabMemory => '메모리';
+  String get ag_tabMemory => '지시';
 
   @override
   String get ag_newChat => '새 채팅';
@@ -20092,33 +20092,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_gateEstimate => '예상치이며 실제 차감액은 서버에서 결정합니다';
 
   @override
-  String get ag_quickOptimize => '프롬프트 최적화';
-
-  @override
-  String get ag_quickOptimizePrompt =>
-      '현재 모델의 규칙에 맞게 현재 프롬프트를 최적화해 주세요. 바꿀 부분과 이유를 먼저 알려 주고 확인을 받은 뒤 초안에 반영하세요.';
-
-  @override
-  String get ag_quickCompare => '최근 4장 비교';
-
-  @override
-  String get ag_quickComparePrompt =>
-      '기록의 최근 4장을 비교해 차이점과 각각의 문제를 알려 주세요. 아직 생성하지 마세요.';
-
-  @override
-  String get ag_quickBlocks => '블록으로 분할';
-
-  @override
-  String get ag_quickBlocksPrompt =>
-      '현재 프롬프트를 재사용할 수 있는 블록으로 나눠 주세요. 먼저 나눈 방식을 보여 주고 저장 여부를 정하겠습니다.';
-
-  @override
-  String get ag_quickTags => '태그 검색';
-
-  @override
-  String get ag_quickTagsPrompt => '태그를 찾아 주세요: ';
-
-  @override
   String get ag_placeholder => 'Agent에게 지시 · @ 참조 · / 스킬';
 
   @override
@@ -20149,6 +20122,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_attachmentBroken => '읽을 수 없음';
+
+  @override
+  String ag_imageInfoSteps(int count) {
+    return '$count단계';
+  }
+
+  @override
+  String ag_imageInfoSeed(String seed) {
+    return '시드 $seed';
+  }
+
+  @override
+  String ag_imageInfoCharacters(int count) {
+    return '캐릭터 $count명';
+  }
 
   @override
   String get ag_send => '보내기';
@@ -20340,6 +20328,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_mentionEmpty => '일치하는 내용이 없습니다';
+
+  @override
+  String get ag_mentionSearchBlocks => '블록 검색';
 
   @override
   String get ag_skillsTitle => '스킬';

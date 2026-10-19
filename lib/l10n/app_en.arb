@@ -10619,7 +10619,7 @@
   "set_agFinalPending": "No session is running. This is the part Studio assembles; when a session starts, Pi also appends the skill catalog, working directory and MCP server list.",
   "ag_tabChat": "Chat",
   "ag_tabShelf": "Outputs",
-  "ag_tabMemory": "Memory",
+  "ag_tabMemory": "Instructions",
   "ag_newChat": "New chat",
   "ag_more": "More",
   "ag_close": "Hide",
@@ -10748,14 +10748,6 @@
   "ag_gateChanged": "Settings or price changed; ask Agent to prepare again",
   "ag_gateExpired": "Quote expired",
   "ag_gateEstimate": "Estimate; the server charge is final",
-  "ag_quickOptimize": "Improve prompt",
-  "ag_quickOptimizePrompt": "Improve the current prompt for this model: list the changes and why first, and wait for my OK before writing to the draft.",
-  "ag_quickCompare": "Compare last 4",
-  "ag_quickComparePrompt": "Compare the latest 4 images in history: what differs and what's wrong with each. Don't generate.",
-  "ag_quickBlocks": "Split into blocks",
-  "ag_quickBlocksPrompt": "Split the current prompt into reusable blocks. Show me the split before saving anything.",
-  "ag_quickTags": "Look up tags",
-  "ag_quickTagsPrompt": "Look up tags: ",
   "ag_placeholder": "Tell Agent what to do · @ to reference · / for skills",
   "ag_dropHint": "Drop to attach to this message",
   "ag_importing": "Adding {count} images…",
@@ -10767,6 +10759,30 @@
   "ag_mention": "Reference",
   "ag_attachmentRemove": "Remove",
   "ag_attachmentBroken": "Couldn't read",
+  "ag_imageInfoSteps": "{count} steps",
+  "@ag_imageInfoSteps": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoSeed": "Seed {seed}",
+  "@ag_imageInfoSeed": {
+    "placeholders": {
+      "seed": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_imageInfoCharacters": "{count, plural, =1{1 character} other{{count} characters}}",
+  "@ag_imageInfoCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "ag_send": "Send",
   "ag_sendQueue": "Queue",
   "ag_sendSteer": "Steer now",
@@ -10832,6 +10848,7 @@
   "ag_mentionBlocks": "Blocks",
   "ag_mentionTitle": "Reference in this message",
   "ag_mentionEmpty": "Nothing matches",
+  "ag_mentionSearchBlocks": "Search blocks",
   "ag_skillsTitle": "Skills",
   "ag_keySelect": "Select",
   "ag_keyInsert": "Insert",
