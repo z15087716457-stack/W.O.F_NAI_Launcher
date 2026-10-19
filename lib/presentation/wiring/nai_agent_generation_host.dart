@@ -109,6 +109,7 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
                 ? widget.child
                 : WindowChromeScope(
                     enabled: chrome.enabled && !expanded,
+                    draggable: chrome.draggable,
                     extraWidth: chrome.extraWidth,
                     captionHeight: chrome.captionHeight,
                     child: widget.child,

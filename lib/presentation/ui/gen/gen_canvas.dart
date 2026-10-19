@@ -101,7 +101,7 @@ class _GenCanvasState extends State<GenCanvas> {
                 else
                   const _Empty(),
             ],
-            if (!cv.positioning && WindowChromeScope.activeOf(context))
+            if (!cv.positioning && WindowChromeScope.dragOf(context))
               Positioned(
                 top: 0,
                 left: 0,

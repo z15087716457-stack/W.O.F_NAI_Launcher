@@ -629,7 +629,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                   isGenerating: widget.generationState.isGenerating,
                 ),
               ),
-              if (WindowChromeScope.activeOf(context)) _buildWindowDragStrip(),
+              if (WindowChromeScope.dragOf(context)) _buildWindowDragStrip(),
             ],
           );
         },
@@ -768,7 +768,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                         },
                       ),
                     ),
-                    if (!widget.embedded && WindowChromeScope.activeOf(context))
+                    if (!widget.embedded && WindowChromeScope.dragOf(context))
                       _buildWindowDragStrip(),
                     // 屏幕空间覆盖层：焦点组 edge bars（顶中/底左/底右）
                     if (showEdgeBars && !widget.embedded)

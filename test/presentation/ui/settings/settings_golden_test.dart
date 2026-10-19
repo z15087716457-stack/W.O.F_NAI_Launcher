@@ -233,6 +233,12 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       final logo = find.byKey(Key(key));
       if (logo.evaluate().isNotEmpty) masks.add(t.getRect(logo));
     }
+    // 2026-10-19：导航里 Agent 图标换成侧栏同款标志，只排除这个 18px 图标格。
+    for (final e
+        in find.byKey(const Key('settings-nav-agent-mark')).evaluate()) {
+      final mark = t.getRect(find.byWidget(e.widget));
+      masks.add(Rect.fromCenter(center: mark.center, width: 18, height: 18));
+    }
     final brand = find.byKey(const Key('about-brand-slot'));
     if (brand.evaluate().isNotEmpty) {
       masks.add(

@@ -13,10 +13,14 @@ import 'agent_glyphs.dart';
 import 'agent_parts.dart';
 import 'agent_scope.dart';
 
-/// 对话页：每轮 = 左侧黑线的用户句 + 一张任务卡；最后是待处理卡片。贴底滚动，
-/// 往上看时来了新内容显示「回到最新」。
+/// 对话页：每轮 = 左侧黑线的用户句 + 一张任务卡；最后是待处理卡片。
+/// 内容从上往下排；停在底部时跟随最新内容，往上翻就停止跟随，右下角出现
+/// 向下箭头，点一下回到底部并恢复跟随。
 class AgentThread extends StatefulWidget {
   const AgentThread({super.key});
+
+  /// 离底部多少像素以内算“在底部”。
+  static const followSlack = 24.0;
 
   @override
   State<AgentThread> createState() => _AgentThreadState();
@@ -24,26 +28,100 @@ class AgentThread extends StatefulWidget {
 
 class _AgentThreadState extends State<AgentThread> {
   final _scroll = ScrollController();
+  var _follow = true;
   var _away = false;
   var _fresh = false;
+  var _auto = false;
+  var _jumpQueued = false;
   int? _revision;
+  String? _chat;
 
-  @override
-  void initState() {
-    super.initState();
-    _scroll.addListener(() {
-      // reverse 列表：offset 0 = 最底。
-      final away = _scroll.hasClients && _scroll.offset > 48;
-      if (away != _away) setState(() => _away = away);
-      if (!away && _fresh) setState(() => _fresh = false);
+  bool get _atBottom =>
+      !_scroll.hasClients ||
+      _scroll.position.maxScrollExtent - _scroll.offset <=
+          AgentThread.followSlack;
+
+  void _syncAway() {
+    final away = !_atBottom;
+    if (away != _away || (!away && _fresh)) {
+      setState(() {
+        _away = away;
+        if (!away) _fresh = false;
+      });
+    }
+  }
+
+  void _queueJump() {
+    if (_jumpQueued) return;
+    _jumpQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _jumpQueued = false;
+      if (!mounted || !_follow || !_scroll.hasClients) return;
+      final max = _scroll.position.maxScrollExtent;
+      if (_scroll.offset != max) {
+        _auto = true;
+        _scroll.jumpTo(max);
+        _auto = false;
+      }
+      _syncAway();
     });
+  }
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth != 0) return false;
+    // 用户自己滚（拖动、滚轮、拖滚动条）才改跟随状态；程序跳底不算。
+    if (n is ScrollUpdateNotification && !_auto) _follow = _atBottom;
+    _syncAway();
+    return false;
+  }
+
+  bool _onMetrics(ScrollMetricsNotification n) {
+    if (n.depth != 0) return false;
+    // 内容变高（新消息、流式文字、卡片展开）：跟随中就贴到底。
+    if (_follow) {
+      _queueJump();
+    } else {
+      _syncAway();
+    }
+    return false;
+  }
+
+  Future<void> _jumpToLatest() async {
+    if (!_scroll.hasClients) return;
+    setState(() => _follow = true);
+    _auto = true;
+    try {
+      await _scroll.animateTo(
+        _scroll.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+      );
+    } finally {
+      _auto = false;
+    }
+    // 动画期间可能又来了内容。
+    _queueJump();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final r = AgentScope.of(context).data.revision;
-    if (_revision != null && r != _revision && _away) _fresh = true;
+    final d = AgentScope.of(context).data;
+    final r = d.revision;
+    if (_chat != null && d.chat.id != _chat) {
+      // 换了聊天：从最新处开始看。
+      _follow = true;
+      _fresh = false;
+      _queueJump();
+    }
+    _chat = d.chat.id;
+    if (_revision != null && r != _revision) {
+      if (_follow) {
+        _queueJump();
+      } else {
+        _fresh = true;
+      }
+    }
     _revision = r;
   }
 
@@ -57,6 +135,7 @@ class _AgentThreadState extends State<AgentThread> {
   Widget build(BuildContext context) {
     final s = AgentScope.of(context);
     final d = s.data;
+    final c = context.ui;
     final items = <Widget>[
       for (final (i, turn) in d.thread.indexed)
         _Turn(
@@ -71,16 +150,21 @@ class _AgentThreadState extends State<AgentThread> {
     return Stack(
       children: [
         Positioned.fill(
-          child: SelectionArea(
-            child: ListView.builder(
-              key: const Key('agent-thread'),
-              controller: _scroll,
-              reverse: true,
-              padding: const EdgeInsets.fromLTRB(14, 16, 14, 20),
-              itemCount: items.length,
-              itemBuilder: (_, i) => Padding(
-                padding: EdgeInsets.only(top: i == items.length - 1 ? 0 : 14),
-                child: items[items.length - 1 - i],
+          child: NotificationListener<ScrollMetricsNotification>(
+            onNotification: _onMetrics,
+            child: NotificationListener<ScrollNotification>(
+              onNotification: _onScroll,
+              child: SelectionArea(
+                child: ListView.builder(
+                  key: const Key('agent-thread'),
+                  controller: _scroll,
+                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 20),
+                  itemCount: items.length,
+                  itemBuilder: (_, i) => Padding(
+                    padding: EdgeInsets.only(top: i == 0 ? 0 : 14),
+                    child: items[i],
+                  ),
+                ),
               ),
             ),
           ),
@@ -91,18 +175,32 @@ class _AgentThreadState extends State<AgentThread> {
             left: 0,
             right: 0,
             child: Center(
-              child: AgentButton(
-                key: const Key('agent-jump-latest'),
-                label: context.l10n.ag_newContent,
-                glyph: AgentGlyphs.chevron,
-                height: 28,
-                style: _fresh
-                    ? AgentButtonStyle.primary
-                    : AgentButtonStyle.outline,
-                onPressed: () => _scroll.animateTo(
-                  0,
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOutCubic,
+              child: Tooltip(
+                message: context.l10n.ag_newContent,
+                waitDuration: const Duration(milliseconds: 400),
+                child: Material(
+                  key: const Key('agent-jump-latest'),
+                  color: _fresh ? c.accent : c.bg,
+                  shape: CircleBorder(
+                    side: BorderSide(color: _fresh ? c.accent : c.border),
+                  ),
+                  elevation: 2,
+                  shadowColor: Colors.black26,
+                  child: InkWell(
+                    customBorder: const CircleBorder(),
+                    onTap: _jumpToLatest,
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Center(
+                        child: AgentIcon(
+                          AgentGlyphs.chevron,
+                          size: 16,
+                          color: _fresh ? c.bg : c.ink,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -272,6 +370,7 @@ class _TaskCard extends StatelessWidget {
     for (final b in reply.blocks) {
       sections.add(switch (b) {
         AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
+        AgentThinkingBlock() => AgentThinking(block: b),
         AgentStepsBlock(:final steps) => AgentSteps(steps: steps),
         AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
         AgentImagesBlock() => AgentOutputs(block: b),
@@ -288,7 +387,8 @@ class _TaskCard extends StatelessWidget {
               padding: switch (w) {
                 _LiveLine() => const EdgeInsets.fromLTRB(14, 9, 14, 9),
                 // 步骤行自带 6px 内边距（悬停底色外扩）。
-                AgentSteps() => const EdgeInsets.fromLTRB(8, 9, 8, 9),
+                AgentSteps() ||
+                AgentThinking() => const EdgeInsets.fromLTRB(8, 9, 8, 9),
                 _ => const EdgeInsets.fromLTRB(14, 12, 14, 12),
               },
               child: w,
@@ -430,6 +530,63 @@ class AgentMarkdown extends StatelessWidget {
 // ─────────────────────────────── 步骤 ───────────────────────────────
 
 /// 步骤清单：状态圈 + 动作名 + 等宽工具名 + 右侧耗时；点一行展开参数 / 结果。超过 6 步折叠。
+/// 思考内容：默认一行“已思考 · N 字”，点开看原文；流式中显示“思考中”。
+class AgentThinking extends StatefulWidget {
+  const AgentThinking({super.key, required this.block});
+  final AgentThinkingBlock block;
+
+  @override
+  State<AgentThinking> createState() => _AgentThinkingState();
+}
+
+class _AgentThinkingState extends State<AgentThinking> {
+  var _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final b = widget.block;
+    final chars = b.text.runes.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _StepRow(
+          key: const Key('agent-thinking'),
+          dot: AgentStepDot(
+            kind: b.live ? AgentDotKind.running : AgentDotKind.done,
+          ),
+          label: b.live ? l.ag_thinkingLive : l.ag_thought,
+          subject: chars == 0 ? null : l.ag_thoughtChars(chars),
+          muted: true,
+          open: _open,
+          onTap: b.text.isEmpty ? null : () => setState(() => _open = !_open),
+        ),
+        if (_open)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(31, 2, 6, 6),
+            child: Container(
+              key: const Key('agent-thinking-text'),
+              constraints: const BoxConstraints(maxHeight: 260),
+              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              decoration: BoxDecoration(
+                color: agentSunk(c),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: c.line),
+              ),
+              child: SingleChildScrollView(
+                child: Text(
+                  b.text,
+                  style: UiText.sans(12, color: c.muted, height: 1.6),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class AgentSteps extends StatefulWidget {
   const AgentSteps({super.key, required this.steps});
   final List<AgentStep> steps;

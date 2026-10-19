@@ -377,4 +377,42 @@ void main() {
       expect(await undo(''), false);
     },
   );
+
+  test('thinking parts become a thinking block; live only while streaming', () {
+    runtime.messages = [
+      {'role': 'user', 'timestamp': 1, 'content': 'hi'},
+      assistant([
+        {'type': 'thinking', 'thinking': '  先读草稿再回答。  '},
+        {'type': 'text', 'text': 'hello'},
+      ]),
+      {'role': 'user', 'timestamp': 2, 'content': 'again'},
+      assistant([
+        {'type': 'thinking', 'thinking': '还在想'},
+      ]),
+    ];
+    runtime.running = true;
+    var turns = mapper.map(runtime).turns;
+    final first = turns.first.reply!.blocks;
+    expect(first.first, isA<AgentThinkingBlock>());
+    expect((first.first as AgentThinkingBlock).text, '先读草稿再回答。');
+    expect((first.first as AgentThinkingBlock).live, false);
+    expect(first.last, isA<AgentTextBlock>());
+    final live = turns.last.reply!.blocks.single as AgentThinkingBlock;
+    expect(live.live, true);
+    runtime.running = false;
+    turns = mapper.map(runtime).turns;
+    expect((turns.last.reply!.blocks.single as AgentThinkingBlock).live, false);
+    runtime.messages = [
+      {'role': 'user', 'timestamp': 3, 'content': 'x'},
+      assistant([
+        {'type': 'thinking', 'thinking': '   '},
+        {'type': 'text', 'text': 'ok'},
+      ]),
+    ];
+    expect(
+      mapper.map(runtime).turns.single.reply!.blocks.single,
+      isA<AgentTextBlock>(),
+      reason: 'empty thinking is dropped',
+    );
+  });
 }

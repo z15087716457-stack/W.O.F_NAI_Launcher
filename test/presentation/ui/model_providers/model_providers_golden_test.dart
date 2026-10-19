@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/approved_visual_regions.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'model_providers_harness.dart';
 
@@ -84,9 +85,22 @@ void main() {
         await act(t);
         await t.pumpAndSettle();
       }
-      await expectLater(
+      // 2026-10-19：设置导航的 Agent 图标换成侧栏同款标志，只排除这个
+      // 18px 图标格；原 PNG 不变，其余像素逐个锁定。
+      final masks = [
+        for (final e
+            in find.byKey(const Key('settings-nav-agent-mark')).evaluate())
+          Rect.fromCenter(
+            center: t.getRect(find.byWidget(e.widget)).center,
+            width: 18,
+            height: 18,
+          ),
+      ];
+      await expectOutsideApprovedRegions(
+        t,
         find.byKey(const Key('settings-capture')),
-        matchesGoldenFile('goldens/mp-$name.png'),
+        'test/presentation/ui/model_providers/goldens/mp-$name.png',
+        masks,
       );
     });
   }

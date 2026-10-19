@@ -224,6 +224,14 @@ final class AgentTextBlock extends AgentBlock {
   final String markdown;
 }
 
+/// 模型的思考内容（推理过程）。默认折叠，只显示“已思考 · N 字”；
+/// [live] = 这一段还在流式输出。
+final class AgentThinkingBlock extends AgentBlock {
+  const AgentThinkingBlock(this.text, {this.live = false});
+  final String text;
+  final bool live;
+}
+
 /// 一组连续的步骤（工具调用）。
 final class AgentStepsBlock extends AgentBlock {
   const AgentStepsBlock(this.steps);

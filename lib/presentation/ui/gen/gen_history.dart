@@ -223,101 +223,106 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: c.line)),
               ),
-              child: Row(
-                spacing: 8,
-                children: [
-                  Tooltip(
-                    message: l.gen_collapse,
-                    child: UiPressable(
-                      key: const Key('gen-collapse-history'),
-                      onTap: () => scope.actions.onLayoutChanged(
-                        scope.data.layout.copyWith(historyOpen: false),
-                      ),
-                      builder: (context, hover) => Container(
-                        width: 24,
-                        height: 24,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: hover ? c.hover : c.control,
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: UiGlyph(
-                          UiGlyphs.chevronRight,
-                          size: 13,
-                          color: hover ? c.ink : c.muted,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Row(
-                      spacing: 8,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            l.gen_history,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: UiText.sans(
-                              14,
-                              weight: FontWeight.w700,
-                              color: c.ink,
-                            ),
-                          ),
-                        ),
-                        if (h.total > 0) GenCount('${h.total}'),
-                      ],
-                    ),
-                  ),
-                  if (h.pinned > 0)
+              // Agent docked: this pane no longer reserves the captions, so the
+              // blank header space moves the window instead.
+              child: WindowHeaderDragSurface(
+                enabled: !scope.slots.historyCaptionInset,
+                child: Row(
+                  spacing: 8,
+                  children: [
                     Tooltip(
-                      message: l.gen_pinnedTip,
+                      message: l.gen_collapse,
                       child: UiPressable(
-                        key: const Key('gen-history-pins'),
-                        onTap: scope.actions.onFocusPins,
+                        key: const Key('gen-collapse-history'),
+                        onTap: () => scope.actions.onLayoutChanged(
+                          scope.data.layout.copyWith(historyOpen: false),
+                        ),
                         builder: (context, hover) => Container(
-                          height: 22,
-                          padding: const EdgeInsets.symmetric(horizontal: 7),
+                          width: 24,
+                          height: 24,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
-                            color: c.accent.withValues(
-                              alpha: hover ? .16 : .10,
-                            ),
-                            borderRadius: BorderRadius.circular(11),
+                            color: hover ? c.hover : c.control,
+                            borderRadius: BorderRadius.circular(5),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            spacing: 4,
-                            children: [
-                              GenNaiIcon(
-                                'pin-filled',
-                                size: 11,
-                                color: c.accent,
+                          child: UiGlyph(
+                            UiGlyphs.chevronRight,
+                            size: 13,
+                            color: hover ? c.ink : c.muted,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Row(
+                        spacing: 8,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              l.gen_history,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: UiText.sans(
+                                14,
+                                weight: FontWeight.w700,
+                                color: c.ink,
                               ),
-                              Text(
-                                '${h.pinned}',
-                                style: UiText.mono(
-                                  11,
-                                  weight: FontWeight.w600,
+                            ),
+                          ),
+                          if (h.total > 0) GenCount('${h.total}'),
+                        ],
+                      ),
+                    ),
+                    if (h.pinned > 0)
+                      Tooltip(
+                        message: l.gen_pinnedTip,
+                        child: UiPressable(
+                          key: const Key('gen-history-pins'),
+                          onTap: scope.actions.onFocusPins,
+                          builder: (context, hover) => Container(
+                            height: 22,
+                            padding: const EdgeInsets.symmetric(horizontal: 7),
+                            decoration: BoxDecoration(
+                              color: c.accent.withValues(
+                                alpha: hover ? .16 : .10,
+                              ),
+                              borderRadius: BorderRadius.circular(11),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 4,
+                              children: [
+                                GenNaiIcon(
+                                  'pin-filled',
+                                  size: 11,
                                   color: c.accent,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  '${h.pinned}',
+                                  style: UiText.mono(
+                                    11,
+                                    weight: FontWeight.w600,
+                                    color: c.accent,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                    GenIb(
+                      key: const Key('gen-history-select'),
+                      glyph: GenGlyphs.multi,
+                      glyphSize: 16,
+                      active: _selecting,
+                      color: _selecting ? c.accent : null,
+                      tooltip: _selecting ? l.gen_selectDone : l.gen_select,
+                      onTap: h.batches.isEmpty
+                          ? null
+                          : () => _setSelecting(!_selecting),
                     ),
-                  GenIb(
-                    key: const Key('gen-history-select'),
-                    glyph: GenGlyphs.multi,
-                    glyphSize: 16,
-                    active: _selecting,
-                    color: _selecting ? c.accent : null,
-                    tooltip: _selecting ? l.gen_selectDone : l.gen_select,
-                    onTap: h.batches.isEmpty
-                        ? null
-                        : () => _setSelecting(!_selecting),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             Expanded(

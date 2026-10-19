@@ -259,8 +259,20 @@ class AgentThreadMapper {
                 {'type': 'text', 'text': message['content']},
               ]
             : agentMaps(message['content']);
+        final streaming = runtime.running && mi == runtime.messages.length - 1;
         for (final (pi, part) in parts.indexed) {
-          if (part['type'] == 'text') {
+          if (part['type'] == 'thinking') {
+            final text = (part['thinking'] as String? ?? '').trim();
+            if (text.isNotEmpty || part['redacted'] == true) {
+              flushSteps();
+              blocks.add(
+                AgentThinkingBlock(
+                  text,
+                  live: streaming && pi == parts.length - 1,
+                ),
+              );
+            }
+          } else if (part['type'] == 'text') {
             flushSteps();
             if ((part['text'] as String? ?? '').isNotEmpty) {
               blocks.add(AgentTextBlock(part['text'] as String));

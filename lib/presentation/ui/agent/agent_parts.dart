@@ -705,9 +705,11 @@ String agentDay(DateTime t, DateTime now, String yesterday) {
   return '${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
 }
 
-/// 「0.2s」「3.1s」「1m 04s」。
+/// 「8ms」「420ms」「3.1s」「1m 04s」。本地工具常在几十毫秒内完成，
+/// 不足 1 秒按毫秒显示，避免全部变成 0.0s。
 String agentDuration(Duration d) {
   final ms = d.inMilliseconds;
+  if (ms < 1000) return '${ms}ms';
   if (ms < 60000) return '${(ms / 1000).toStringAsFixed(1)}s';
   final s = d.inSeconds;
   return '${s ~/ 60}m ${(s % 60).toString().padLeft(2, '0')}s';

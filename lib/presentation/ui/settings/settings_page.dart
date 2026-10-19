@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
+import '../agent/agent_glyphs.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_dialog.dart';
@@ -533,7 +534,14 @@ class _NavItem extends StatelessWidget {
               SizedBox(
                 width: 18,
                 child: Center(
-                  child: icon.icon != null
+                  // Agent uses the same mark as its sidebar and toggles.
+                  child: page == SettingsPageId.agent
+                      ? AgentMark(
+                          key: const Key('settings-nav-agent-mark'),
+                          size: 17,
+                          color: ink,
+                        )
+                      : icon.icon != null
                       ? Icon(icon.icon, size: 17, color: ink)
                       : UiGlyph(icon.glyph!, size: 16, color: ink),
                 ),

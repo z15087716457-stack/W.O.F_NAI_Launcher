@@ -11,10 +11,15 @@ class WindowChromeScope extends InheritedWidget {
     super.key,
     required super.child,
     this.enabled = true,
+    bool? draggable,
     this.extraWidth = 0,
     this.captionHeight = height,
-  });
+  }) : draggable = draggable ?? enabled;
   final bool enabled;
+
+  /// Blank page space can still move the window while an adjacent pane (the
+  /// docked Agent) owns the caption reserve and [enabled] is false.
+  final bool draggable;
   final double extraWidth;
   final double captionHeight;
 
@@ -25,6 +30,12 @@ class WindowChromeScope extends InheritedWidget {
       context
           .dependOnInheritedWidgetOfExactType<WindowChromeScope>()
           ?.enabled ??
+      false;
+
+  static bool dragOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<WindowChromeScope>()
+          ?.draggable ??
       false;
 
   static double heightOf(BuildContext context) =>
@@ -43,6 +54,7 @@ class WindowChromeScope extends InheritedWidget {
   @override
   bool updateShouldNotify(WindowChromeScope oldWidget) =>
       enabled != oldWidget.enabled ||
+      draggable != oldWidget.draggable ||
       extraWidth != oldWidget.extraWidth ||
       captionHeight != oldWidget.captionHeight;
 }
@@ -94,7 +106,7 @@ class WindowHeaderDragSurface extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!enabled || !WindowChromeScope.activeOf(context)) return child;
+    if (!enabled || !WindowChromeScope.dragOf(context)) return child;
     return Stack(
       children: [
         const Positioned.fill(

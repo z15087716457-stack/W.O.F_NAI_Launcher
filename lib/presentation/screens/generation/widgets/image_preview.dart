@@ -111,7 +111,7 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
               // The free canvas draws its own strip below its floating tools.
               // Other preview modes have no edge toolbar to protect here.
               if (content is! GenerationCanvasView &&
-                  WindowChromeScope.activeOf(context))
+                  WindowChromeScope.dragOf(context))
                 Positioned(
                   top: 0,
                   left: 0,
