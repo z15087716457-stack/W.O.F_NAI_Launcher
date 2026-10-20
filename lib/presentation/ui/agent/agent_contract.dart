@@ -357,13 +357,17 @@ class AgentPromptDiff {
     required this.field,
     required this.segments,
     this.label,
+    this.characterIndex,
     this.state = AgentDiffState.applied,
   });
   final String id;
   final AgentPromptField field;
 
-  /// [AgentPromptField.character] 时是「角色 1」这类名字；其他栏 null。
+  /// 角色栏的角色名；没起名时 null，界面按 [characterIndex] 显示「角色 N」。
   final String? label;
+
+  /// 角色栏在角色列表里的位置（从 0 起）；其他栏 null。
+  final int? characterIndex;
 
   /// 改动后的整栏文字，按「不变 / 新增 / 删除」切段。删除段是原来有、现在没有的文字。
   final List<AgentDiffSegment> segments;

@@ -188,6 +188,36 @@ void main() {
     });
   }
 
+  testWidgets('unnamed character diffs are titled 角色 N', (tester) async {
+    AgentDiffBlock block(String id, AgentPromptField field, int index) =>
+        AgentDiffBlock(
+          AgentPromptDiff(
+            id: id,
+            field: field,
+            label: '',
+            characterIndex: index,
+            segments: const [AgentDiffSegment('girl', AgentDiffKind.added)],
+          ),
+        );
+    await _pump(
+      tester,
+      _view([
+        AgentTurn(
+          id: 't',
+          user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 20)),
+          reply: AgentReply(
+            blocks: [
+              block('c0', AgentPromptField.character, 0),
+              block('n1', AgentPromptField.characterNegative, 1),
+            ],
+          ),
+        ),
+      ], 1),
+    );
+    expect(find.text('角色 1'), findsOneWidget);
+    expect(find.text('角色 2 · 角色负面'), findsOneWidget);
+  });
+
   testWidgets('position card draws a mini board with moves and legend', (
     tester,
   ) async {

@@ -19,6 +19,18 @@ class UiPopoverAnchor {
   final bool alignBottom;
   final bool alignRight;
 
+  // 按值比较：弹层用 `ValueKey(anchor)` 决定是否重放淡入，宿主每次重建都会新建
+  // 锚点；按引用比较时外层一刷新（如设置页 Agent 状态、Skill 列表），菜单就从透明重来，看着一直闪。
+  @override
+  bool operator ==(Object other) =>
+      other is UiPopoverAnchor &&
+      other.point == point &&
+      other.alignBottom == alignBottom &&
+      other.alignRight == alignRight;
+
+  @override
+  int get hashCode => Object.hash(point, alignBottom, alignRight);
+
   /// 贴在 [context] 对应组件的右侧：[dx] 是离右边缘的距离，[dy] 是相对顶边（或底边）的偏移。
   static UiPopoverAnchor beside(
     BuildContext context, {
@@ -60,6 +72,9 @@ class UiPopover extends StatefulWidget {
 class _UiPopoverState extends State<UiPopover> {
   final _portal = OverlayPortalController();
 
+  /// 每打开一次加一；淡入只按这个重放，锚点挪动或宿主重建不重放。
+  var _session = 0;
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +89,7 @@ class _UiPopoverState extends State<UiPopover> {
     super.didUpdateWidget(oldWidget);
     // 再次打开时提到最上层（多个浮层宿主、或大图查看器也在浮层里时，后打开的在上面）。
     if (oldWidget.anchor == null && widget.anchor != null) {
+      _session++;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _portal.show();
       });
@@ -120,7 +136,7 @@ class _UiPopoverState extends State<UiPopover> {
                   },
                   child: FocusTraversalGroup(
                     child: TweenAnimationBuilder<double>(
-                      key: ValueKey(anchor),
+                      key: ValueKey(_session),
                       tween: Tween(begin: reduce ? 1 : 0, end: 1),
                       duration: const Duration(milliseconds: 140),
                       curve: Curves.easeOutCubic,

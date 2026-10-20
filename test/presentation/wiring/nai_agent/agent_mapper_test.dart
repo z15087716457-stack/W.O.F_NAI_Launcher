@@ -273,6 +273,56 @@ void main() {
     },
   );
 
+  test(
+    'unchanged fields (+0 -0) are dropped; unnamed characters carry index',
+    () async {
+      final backupDir = Directory(
+        '${runtime.workspace.agentDirectory.path}/draft-backups',
+      );
+      await backupDir.create(recursive: true);
+      final backup = File('${backupDir.path}/empty.json');
+      await backup.writeAsString(
+        jsonEncode({
+          'fields': {'prompt': 'a', 'characters': <Object>[]},
+        }),
+      );
+      runtime.messages = [
+        assistant([call('add', 'mcp__nai_studio__prompt_update')]),
+        result('add', {
+          'applied': ['prompt', 'characters(2)'],
+          'backup_path': backup.path,
+          'draft': {
+            'draft_version': 'v1',
+            'fields': {
+              'prompt': 'a',
+              'characters': [
+                {'id': 'x', 'name': '', 'prompt': 'woman', 'uc': ''},
+                {'id': 'y', 'name': '', 'prompt': 'girl', 'uc': ' , '},
+              ],
+            },
+          },
+        }),
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      final diffs = mapper
+          .map(runtime, draftVersion: 'v1')
+          .turns
+          .single
+          .reply!
+          .blocks
+          .whereType<AgentDiffBlock>()
+          .map((b) => b.diff)
+          .toList();
+      // 基础提示词没变、两个角色负面都是空的：只剩两张角色提示词卡。
+      expect(diffs.map((d) => d.field), [
+        AgentPromptField.character,
+        AgentPromptField.character,
+      ]);
+      expect(diffs.map((d) => d.characterIndex), [0, 1]);
+    },
+  );
+
   test('character position changes map to one position card', () async {
     final backupDir = Directory(
       '${runtime.workspace.agentDirectory.path}/draft-backups',

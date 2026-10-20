@@ -888,14 +888,20 @@ class AgentDiffView extends StatelessWidget {
           (n, x) =>
               n + x.text.split(',').where((t) => t.trim().isNotEmpty).length,
         );
+    // 角色没起名时用「角色 N」，免得标题空着或只剩「· 角色负面」。
+    final who = (diff.label?.trim().isNotEmpty ?? false)
+        ? diff.label!.trim()
+        : diff.characterIndex == null
+        ? null
+        : l.gen_characterN(diff.characterIndex! + 1);
     final field = switch (diff.field) {
       AgentPromptField.prompt => l.ag_field_prompt,
       AgentPromptField.negative => l.ag_field_negative,
-      AgentPromptField.character => diff.label ?? l.ag_field_character,
+      AgentPromptField.character => who ?? l.ag_field_character,
       AgentPromptField.characterNegative =>
-        diff.label == null
+        who == null
             ? l.ag_field_characterNegative
-            : '${diff.label} · ${l.ag_field_characterNegative}',
+            : '$who · ${l.ag_field_characterNegative}',
     };
     final base = UiText.mono(12, color: c.muted, height: 1.75);
     return Column(
@@ -1335,7 +1341,9 @@ class _Legend extends StatelessWidget {
           _Dot(index: m.index, size: 16),
           Expanded(
             child: Text(
-              m.name ?? l.ag_field_character,
+              (m.name?.trim().isNotEmpty ?? false)
+                  ? m.name!.trim()
+                  : l.gen_characterN(m.index + 1),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: UiText.sans(12, color: c.ink, height: 1.2),

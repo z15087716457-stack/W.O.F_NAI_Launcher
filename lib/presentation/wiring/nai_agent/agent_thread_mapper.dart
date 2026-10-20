@@ -399,6 +399,7 @@ class AgentThreadMapper {
                         id: change.$1.id,
                         field: change.$1.field,
                         label: change.$1.label,
+                        characterIndex: change.$1.characterIndex,
                         segments: change.$1.segments,
                         state: undone.contains(change.$1.id)
                             ? AgentDiffState.undone
@@ -620,7 +621,21 @@ AgentPositionBlock? _positions(
   return block.modeChanged || block.moved.isNotEmpty ? block : null;
 }
 
+/// 只留真有增删的栏；「+0 −0」（如角色负面由 null 变成空串）不出卡。
 Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(
+  String callId,
+  List<dynamic> applied,
+  Map<String, dynamic> before,
+  Map<String, dynamic> after,
+) => _allDiffs(callId, applied, before, after).where(
+  (d) => d.$1.segments.any(
+    (x) =>
+        x.kind != AgentDiffKind.same &&
+        x.text.split(',').any((t) => t.trim().isNotEmpty),
+  ),
+);
+
+Iterable<(AgentPromptDiff, AgentDiffRestore)> _allDiffs(
   String callId,
   List<dynamic> applied,
   Map<String, dynamic> before,
@@ -636,6 +651,7 @@ Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(
     String? label,
     String? characterId,
     int? characterIndex,
+    int? displayIndex,
   }) {
     final id = '$callId/$key';
     return (
@@ -643,6 +659,7 @@ Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(
         id: id,
         field: field,
         label: label,
+        characterIndex: displayIndex,
         segments: agentTagDiff(a, b),
       ),
       AgentDiffRestore(
@@ -678,6 +695,7 @@ Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(
       final b = chars.where((c) => c['id'] == id).firstOrNull ?? {};
       for (final key in ['prompt', 'uc']) {
         if (a[key] == b[key]) continue;
+        final shown = chars.indexOf(b);
         yield diff(
           'characters/$id/$key',
           a[key] as String? ?? '',
@@ -688,6 +706,7 @@ Iterable<(AgentPromptDiff, AgentDiffRestore)> _diffs(
           label: (b['name'] ?? a['name']) as String?,
           characterId: id as String?,
           characterIndex: oldChars.indexOf(a),
+          displayIndex: shown >= 0 ? shown : oldChars.indexOf(a),
         );
       }
     }
