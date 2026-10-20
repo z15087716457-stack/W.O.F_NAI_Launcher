@@ -4254,14 +4254,14 @@
   "modelTask_wikiTranslateDescription": "百科本文を翻訳してレイアウトを整え、文脈に応じてクリックできるタグを選びます。",
   "modelTask_connectionTest": "モデル接続テスト",
   "modelReasoning_serviceDefault": "サービス既定",
-  "modelReasoning_off": "オフ",
-  "modelReasoning_on": "オン",
-  "modelReasoning_minimal": "最小",
-  "modelReasoning_low": "低",
-  "modelReasoning_medium": "中",
-  "modelReasoning_high": "高",
-  "modelReasoning_xhigh": "非常に高い",
-  "modelReasoning_max": "最大",
+  "modelReasoning_off": "Off",
+  "modelReasoning_on": "On",
+  "modelReasoning_minimal": "Minimal",
+  "modelReasoning_low": "Low",
+  "modelReasoning_medium": "Medium",
+  "modelReasoning_high": "High",
+  "modelReasoning_xhigh": "XHigh",
+  "modelReasoning_max": "Max",
   "modelProvider_custom": "カスタムサービス",
   "modelProvider_qwen": "Qwen · Alibaba Model Studio",
   "modelProvider_moonshot": "Kimi · Moonshot AI",
@@ -4297,8 +4297,6 @@
   "modelParams_temperatureRange": "Temperature は 0〜2 の範囲で指定してください。",
   "modelParams_topPRange": "Top P は 0 より大きく 1 以下で指定してください。",
   "modelParams_maxOutputPositive": "最大出力トークンは 0 より大きくしてください。",
-  "modelParams_anthropicTemperatureRange": "Anthropic の Temperature は 0〜1 の範囲で指定してください。",
-  "modelParams_anthropicSamplingConflict": "Anthropic では Temperature と Top P のどちらか一方を指定してください。モデルのパラメーターを確認してください。",
   "modelParams_thinkingBudgetTooSmall": "最大出力は思考予算の下限 {minimum} より大きくしてください。",
   "@modelParams_thinkingBudgetTooSmall": {
     "placeholders": {
@@ -8804,16 +8802,7 @@
   "naiAgent_toolsHint": "状態・画像・プロンプト・ファイルを必要に応じて取得します。Studio 操作の詳しい使い方は nai-studio・nai-prompt などの Skill にあり、必要なときだけ読み込みます。",
   "naiAgent_unknownCost": "実際の料金は提供元によります",
   "naiAgent_error": "操作に失敗しました。モデル設定やファイルを確認してください。",
-  "naiAgent_visionDisabled": "現在、画像入力を利用できません。「設定 → モデルとAPI」で、プロバイダーの「リクエスト → 画像入力」が「許可」であり、選択したモデルが画像入力に対応しているか確認してください。",
   "naiAgent_visionCurrentProvider": "現在のプロバイダー",
-  "naiAgent_visionProviderBlocked": "プロバイダー {providerName} は画像の送信を許可していません。「設定 → モデルとAPI → {providerName} → リクエスト → 画像入力」を「許可」に変更してください。",
-  "@naiAgent_visionProviderBlocked": {
-    "placeholders": {
-      "providerName": {
-        "type": "String"
-      }
-    }
-  },
   "naiAgent_visionModelUnsupported": "プロバイダー {providerName} の選択中モデルは、画像入力への対応が確認されていません。「設定 → モデルとAPI → {providerName} → モデル → 能力 → 画像入力」で対応を確認するか、画像対応モデルに切り替えてください。",
   "@naiAgent_visionModelUnsupported": {
     "placeholders": {
@@ -10817,6 +10806,8 @@
   "set_agFinalLive": "現在のチャットが実際にモデルへ送る完全なシステムプロンプトです。",
   "set_agBuiltinSub": "Studio 内蔵の基本プロンプト。バージョンとともに更新されます。",
   "set_agMcpEditTitle": "MCP サーバーを編集",
+  "set_agTabGeneral": "一般",
+  "set_agTabTools": "ツールと拡張",
   "ag_recent": "最近",
   "ag_you": "あなた",
   "ag_edit": "編集",
@@ -11103,10 +11094,6 @@
   "mp_retry": "再試行",
   "mp_retryHelp": "接続失敗や混雑時に再試行",
   "mp_retryOff": "オフ",
-  "mp_imageInput": "画像入力",
-  "mp_imageInputHelp": "オフの場合、モデルの能力で「画像入力」が有効でも、このプロバイダーのすべてのモデルに画像は送信されません（NAI Agent の画像読み取りと添付を含む）",
-  "mp_allow": "許可",
-  "mp_noSend": "送信しない",
   "mp_seconds": "秒",
   "mp_countUnit": "件",
   "mp_headers": "カスタムヘッダー",
@@ -11139,10 +11126,6 @@
   "mp_protocolNoReasoning": "このプロトコルは思考調整に非対応",
   "mp_unconfirmed": "未確認",
   "mp_unsupported": "非対応",
-  "mp_sampling": "サンプリング",
-  "mp_temperature": "温度",
-  "mp_topP": "Top P",
-  "mp_followDefault": "サービス既定",
   "mp_capabilities": "機能",
   "mp_capVision": "画像入力",
   "mp_capTools": "ツール呼び出し",

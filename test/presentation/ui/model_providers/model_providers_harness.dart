@@ -126,7 +126,7 @@ class ProvidersRecorder {
     },
     onTest: (id, edited, key) => calls.add('test:$id:${edited.baseUrl}:$key'),
     onTestModel: (id, m, edited, key) =>
-        calls.add('testModel:$id:$m:${edited.model(m)?.temperature}:$key'),
+        calls.add('testModel:$id:$m:${edited.model(m)?.maxOutput}:$key'),
     onSave:
         ({required providerId, required base, required edited, apiKey}) async {
           calls.add('save:$providerId');

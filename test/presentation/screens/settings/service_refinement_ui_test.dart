@@ -127,7 +127,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.widget<Text>(find.byKey(const Key('task-reasoning-value'))).data,
-        '关闭',
+        'Off',
       );
       await harness.tapVisible(tester, find.byKey(const Key('task-save')));
       expect(

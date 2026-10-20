@@ -106,7 +106,7 @@ void main() {
 
   for (final supportsVision in [true, false]) {
     test(
-      'image_read explains ${supportsVision ? 'the provider switch' : 'model support'} to the model through the production session',
+      'image_read uses model vision=$supportsVision despite provider flag=false in production session',
       () async {
         final requests = <Map<String, dynamic>>[];
         final server = await bindFetchTestServer();
@@ -161,7 +161,6 @@ void main() {
             systemPrompt: 'Synthetic image-read test',
             mcp: const {'builtinExposure': 'direct'},
           );
-          expect(client.visionAccess.blockedByProvider, supportsVision);
           expect(client.visionAccess.providerName, 'Synthetic Vision Provider');
           final state = await client.prompt('inspect selected image');
           expect(state['streaming'], isFalse);
@@ -170,15 +169,27 @@ void main() {
             (m) => m['role'] == 'tool',
           )['content'];
           final text = error is String ? error : jsonEncode(error);
-          final expected = supportsVision
-              ? currentL10n.naiAgent_visionProviderBlocked(
+          if (supportsVision) {
+            expect(text, isNot(contains('vision_unavailable')));
+            expect(
+              jsonEncode(requests.last),
+              contains('data:image/png;base64,'),
+            );
+          } else {
+            expect(text, contains('vision_unavailable'));
+            expect(
+              text,
+              contains(
+                currentL10n.naiAgent_visionModelUnsupported(
                   'Synthetic Vision Provider',
-                )
-              : currentL10n.naiAgent_visionModelUnsupported(
-                  'Synthetic Vision Provider',
-                );
-          expect(text, contains('vision_unavailable'));
-          expect(text, contains(expected));
+                ),
+              ),
+            );
+            expect(
+              jsonEncode(requests.last),
+              isNot(contains('data:image/png;base64,')),
+            );
+          }
           expect(text, isNot(contains('Image input is not enabled')));
         } finally {
           await client?.close();

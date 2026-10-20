@@ -25,6 +25,7 @@ import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../common/studio_icons.dart';
 import '../../../core/rag/rag_settings.dart';
 import 'gallery_rag_search_menu.dart';
+import '../../ui/kit/ui_text.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
@@ -406,7 +407,8 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           key: const Key('gallery-search-field'),
           controller: _searchController,
           focusNode: widget.searchFocusNode,
-          style: theme.textTheme.bodyMedium,
+          // 和其他搜索框一样用界面正文字体（鸿蒙黑体回退链），不用 Geist。
+          style: UiText.sans(13, color: colors.onSurface, height: 1.2),
           textAlignVertical: TextAlignVertical.center,
           decoration: InputDecoration(
             hintText: scopeLabel != null
@@ -418,8 +420,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                     firstEpoch: _tipMountEpoch ??= currentTipEpoch(),
                   ),
             hintMaxLines: 1,
-            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            hintStyle: UiText.sans(
+              13,
               color: colors.onSurfaceVariant.withValues(alpha: 0.8),
+              height: 1.2,
             ),
             prefixIcon: Icon(
               StudioIcons.gallerySearch,

@@ -7738,7 +7738,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modelReasoning_high => 'High';
 
   @override
-  String get modelReasoning_xhigh => 'Extra high';
+  String get modelReasoning_xhigh => 'XHigh';
 
   @override
   String get modelReasoning_max => 'Max';
@@ -7865,14 +7865,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get modelParams_maxOutputPositive =>
       'Max output tokens must be greater than 0.';
-
-  @override
-  String get modelParams_anthropicTemperatureRange =>
-      'Anthropic temperature must be between 0 and 1.';
-
-  @override
-  String get modelParams_anthropicSamplingConflict =>
-      'Anthropic accepts either temperature or Top P; check the model parameters.';
 
   @override
   String modelParams_thinkingBudgetTooSmall(Object minimum) {
@@ -16590,16 +16582,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Operation failed. Check model settings or workspace files.';
 
   @override
-  String get naiAgent_visionDisabled =>
-      'Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.';
-
-  @override
   String get naiAgent_visionCurrentProvider => 'the current provider';
-
-  @override
-  String naiAgent_visionProviderBlocked(String providerName) {
-    return 'Provider $providerName does not allow sending images. Go to Settings → Models & APIs → $providerName → Requests → Images and select On.';
-  }
 
   @override
   String naiAgent_visionModelUnsupported(String providerName) {
@@ -20932,6 +20915,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agMcpEditTitle => 'Edit MCP server';
 
   @override
+  String get set_agTabGeneral => 'General';
+
+  @override
+  String get set_agTabTools => 'Tools & extensions';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override
@@ -21638,19 +21627,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mp_retryOff => 'Off';
 
   @override
-  String get mp_imageInput => 'Images';
-
-  @override
-  String get mp_imageInputHelp =>
-      'When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input';
-
-  @override
-  String get mp_allow => 'On';
-
-  @override
-  String get mp_noSend => 'Off';
-
-  @override
   String get mp_seconds => 's';
 
   @override
@@ -21745,18 +21721,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mp_unsupported => 'Not supported';
-
-  @override
-  String get mp_sampling => 'Sampling';
-
-  @override
-  String get mp_temperature => 'Temperature';
-
-  @override
-  String get mp_topP => 'Top P';
-
-  @override
-  String get mp_followDefault => 'Service default';
 
   @override
   String get mp_capabilities => 'Capabilities';

@@ -7505,28 +7505,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get modelReasoning_serviceDefault => 'サービス既定';
 
   @override
-  String get modelReasoning_off => 'オフ';
+  String get modelReasoning_off => 'Off';
 
   @override
-  String get modelReasoning_on => 'オン';
+  String get modelReasoning_on => 'On';
 
   @override
-  String get modelReasoning_minimal => '最小';
+  String get modelReasoning_minimal => 'Minimal';
 
   @override
-  String get modelReasoning_low => '低';
+  String get modelReasoning_low => 'Low';
 
   @override
-  String get modelReasoning_medium => '中';
+  String get modelReasoning_medium => 'Medium';
 
   @override
-  String get modelReasoning_high => '高';
+  String get modelReasoning_high => 'High';
 
   @override
-  String get modelReasoning_xhigh => '非常に高い';
+  String get modelReasoning_xhigh => 'XHigh';
 
   @override
-  String get modelReasoning_max => '最大';
+  String get modelReasoning_max => 'Max';
 
   @override
   String get modelProvider_custom => 'カスタムサービス';
@@ -7646,14 +7646,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get modelParams_maxOutputPositive => '最大出力トークンは 0 より大きくしてください。';
-
-  @override
-  String get modelParams_anthropicTemperatureRange =>
-      'Anthropic の Temperature は 0〜1 の範囲で指定してください。';
-
-  @override
-  String get modelParams_anthropicSamplingConflict =>
-      'Anthropic では Temperature と Top P のどちらか一方を指定してください。モデルのパラメーターを確認してください。';
 
   @override
   String modelParams_thinkingBudgetTooSmall(Object minimum) {
@@ -16113,16 +16105,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_error => '操作に失敗しました。モデル設定やファイルを確認してください。';
 
   @override
-  String get naiAgent_visionDisabled =>
-      '現在、画像入力を利用できません。「設定 → モデルとAPI」で、プロバイダーの「リクエスト → 画像入力」が「許可」であり、選択したモデルが画像入力に対応しているか確認してください。';
-
-  @override
   String get naiAgent_visionCurrentProvider => '現在のプロバイダー';
-
-  @override
-  String naiAgent_visionProviderBlocked(String providerName) {
-    return 'プロバイダー $providerName は画像の送信を許可していません。「設定 → モデルとAPI → $providerName → リクエスト → 画像入力」を「許可」に変更してください。';
-  }
 
   @override
   String naiAgent_visionModelUnsupported(String providerName) {
@@ -20227,6 +20210,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agMcpEditTitle => 'MCP サーバーを編集';
 
   @override
+  String get set_agTabGeneral => '一般';
+
+  @override
+  String get set_agTabTools => 'ツールと拡張';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -20896,19 +20885,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mp_retryOff => 'オフ';
 
   @override
-  String get mp_imageInput => '画像入力';
-
-  @override
-  String get mp_imageInputHelp =>
-      'オフの場合、モデルの能力で「画像入力」が有効でも、このプロバイダーのすべてのモデルに画像は送信されません（NAI Agent の画像読み取りと添付を含む）';
-
-  @override
-  String get mp_allow => '許可';
-
-  @override
-  String get mp_noSend => '送信しない';
-
-  @override
   String get mp_seconds => '秒';
 
   @override
@@ -21003,18 +20979,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mp_unsupported => '非対応';
-
-  @override
-  String get mp_sampling => 'サンプリング';
-
-  @override
-  String get mp_temperature => '温度';
-
-  @override
-  String get mp_topP => 'Top P';
-
-  @override
-  String get mp_followDefault => 'サービス既定';
 
   @override
   String get mp_capabilities => '機能';

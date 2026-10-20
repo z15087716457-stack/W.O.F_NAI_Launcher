@@ -65,12 +65,6 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       'model': request.model,
       'stream': false,
       'messages': _buildMessages(request),
-      if (allowsModelSampling(request.modelConfig) &&
-          request.modelConfig?.temperature != null)
-        'temperature': request.modelConfig!.temperature,
-      if (allowsModelSampling(request.modelConfig) &&
-          request.modelConfig?.topP != null)
-        'top_p': request.modelConfig!.topP,
     };
     final settings = request.modelConfig;
     if (settings?.maxOutputTokens case final int limit) {
@@ -140,9 +134,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
       if (status == 400 &&
           request.modelConfig?.requestOverrides?.isEmpty != false &&
           request.modelConfig?.maxOutputTokens == null &&
-          request.modelConfig?.reasoningEffort == null &&
-          request.modelConfig?.temperature == null &&
-          request.modelConfig?.topP == null) {
+          request.modelConfig?.reasoningEffort == null) {
         return dio.post<dynamic>(
           endpoint,
           data: {
@@ -166,7 +158,7 @@ class OpenAiChatCompletionsAdapter extends PromptAssistantProviderAdapter {
     return [
       if (request.systemPrompt.trim().isNotEmpty)
         {'role': 'system', 'content': request.systemPrompt.trim()},
-      {'role': 'user', 'content': _buildUserContent(request.userParts)},
+      {'role': 'user', 'content': _buildUserContent(request.modelUserParts)},
     ];
   }
 

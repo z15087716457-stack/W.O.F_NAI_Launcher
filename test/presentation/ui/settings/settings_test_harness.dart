@@ -7,6 +7,7 @@ import 'package:nai_launcher/presentation/ui/model_providers/model_providers_con
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_page.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_intel.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
 /// 主导航宽度：页面可用宽度 = 窗口宽 − 48。
@@ -26,7 +27,11 @@ Future<SettingsRecorder> pumpSettings(
   String initialQuery = '',
   ProvidersActions providers = const ProvidersActions(),
   ValueChanged<SettingsHostState>? onHost,
+
+  /// Agent 页的分页（general / instructions / skills / tools）；装好后点过去。
+  String? agentTab,
 }) async {
+  SettingsAgentPage.resetTab();
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(window - settingsRail, height);
   addTearDown(tester.view.resetPhysicalSize);
@@ -64,7 +69,14 @@ Future<SettingsRecorder> pumpSettings(
     ),
   );
   await tester.pumpAndSettle();
+  if (agentTab != null) await openAgentTab(tester, agentTab);
   return rec;
+}
+
+/// 切到 Agent 页的某个分页（general / instructions / skills / tools）。
+Future<void> openAgentTab(WidgetTester tester, String tab) async {
+  await tester.tap(find.byKey(Key('agent-tab-$tab')));
+  await tester.pumpAndSettle();
 }
 
 /// 记录回调。

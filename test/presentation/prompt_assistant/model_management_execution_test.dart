@@ -306,72 +306,67 @@ void main() {
     ProviderProtocol.geminiGenerateContent,
     ProviderProtocol.anthropicMessages,
   ]) {
-    test('explicit sampling controls reach ${protocol.name} payload', () async {
-      final dio = _Dio();
-      Map<String, dynamic>? payload;
-      when(
-        () => dio.post<dynamic>(
-          any(),
-          data: any(named: 'data'),
-          options: any(named: 'options'),
-          cancelToken: any(named: 'cancelToken'),
-        ),
-      ).thenAnswer((invocation) async {
-        payload = invocation.namedArguments[#data] as Map<String, dynamic>;
-        return Response<dynamic>(
-          requestOptions: RequestOptions(path: '/test'),
-          statusCode: 200,
-          data: {
-            'choices': [
-              {
-                'message': {'content': 'OK'},
-              },
-            ],
-            'output_text': 'OK',
-            'content': [
-              {'type': 'text', 'text': 'OK'},
-            ],
-            'candidates': [
-              {
-                'content': {
-                  'parts': [
-                    {'text': 'OK'},
-                  ],
+    test(
+      'stored sampling controls do not reach ${protocol.name} payload',
+      () async {
+        final dio = _Dio();
+        Map<String, dynamic>? payload;
+        when(
+          () => dio.post<dynamic>(
+            any(),
+            data: any(named: 'data'),
+            options: any(named: 'options'),
+            cancelToken: any(named: 'cancelToken'),
+          ),
+        ).thenAnswer((invocation) async {
+          payload = invocation.namedArguments[#data] as Map<String, dynamic>;
+          return Response<dynamic>(
+            requestOptions: RequestOptions(path: '/test'),
+            statusCode: 200,
+            data: {
+              'choices': [
+                {
+                  'message': {'content': 'OK'},
                 },
-              },
-            ],
-          },
-        );
-      });
-      final parameters = _model.copyWith(
-        topP: protocol == ProviderProtocol.anthropicMessages ? null : 0.8,
-      );
-      await PromptAssistantApiClient(dio: dio)
-          .complete(
-            request: PromptAssistantRequest(
-              sessionId: 'parameters',
-              provider: _provider.copyWith(protocol: protocol),
-              model: 'model',
-              modelConfig: parameters,
-              systemPrompt: 'Test',
-              userParts: [PromptAssistantContentPart.text('test')],
-              apiKey: 'secret-key',
-            ),
-          )
-          .toList();
-      final sampling = protocol == ProviderProtocol.geminiGenerateContent
-          ? payload!['generationConfig'] as Map
-          : payload!;
-      expect(sampling['temperature'], 0.6);
-      if (protocol != ProviderProtocol.anthropicMessages) {
-        expect(
-          sampling[protocol == ProviderProtocol.geminiGenerateContent
-              ? 'topP'
-              : 'top_p'],
-          0.8,
-        );
-      }
-    });
+              ],
+              'output_text': 'OK',
+              'content': [
+                {'type': 'text', 'text': 'OK'},
+              ],
+              'candidates': [
+                {
+                  'content': {
+                    'parts': [
+                      {'text': 'OK'},
+                    ],
+                  },
+                },
+              ],
+            },
+          );
+        });
+        final parameters = _model.copyWith(topP: 0.8);
+        await PromptAssistantApiClient(dio: dio)
+            .complete(
+              request: PromptAssistantRequest(
+                sessionId: 'parameters',
+                provider: _provider.copyWith(protocol: protocol),
+                model: 'model',
+                modelConfig: parameters,
+                systemPrompt: 'Test',
+                userParts: [PromptAssistantContentPart.text('test')],
+                apiKey: 'secret-key',
+              ),
+            )
+            .toList();
+        final sampling = protocol == ProviderProtocol.geminiGenerateContent
+            ? payload!['generationConfig'] as Map
+            : payload!;
+        expect(sampling, isNot(contains('temperature')));
+        expect(sampling, isNot(contains('top_p')));
+        expect(sampling, isNot(contains('topP')));
+      },
+    );
   }
   test(
     'queued cancellation cannot dispatch and releases the service gate',
@@ -441,7 +436,11 @@ void main() {
         ),
       ).thenAnswer((invocation) async {
         calls++;
-        expect((invocation.namedArguments[#data] as Map)['temperature'], 0.6);
+        expect((invocation.namedArguments[#data] as Map)['max_tokens'], 500);
+        expect(
+          invocation.namedArguments[#data] as Map,
+          isNot(contains('temperature')),
+        );
         if (calls == 1) {
           throw DioException(
             requestOptions: RequestOptions(path: '/test'),

@@ -1000,28 +1000,6 @@ class _RequestStrip extends StatelessWidget {
                 onChanged: (v) => edit((x) => x.copyWith(retryAttempts: v)),
               ),
             ),
-            ProviderField(
-              label: l.mp_imageInput,
-              help: l.mp_imageInputHelp,
-              child: SizedBox(
-                height: 28,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    SettingsSwitch(
-                      key: const Key('mp-image'),
-                      value: s.imageInput,
-                      onChanged: (v) => edit((x) => x.copyWith(imageInput: v)),
-                    ),
-                    Text(
-                      s.imageInput ? l.mp_allow : l.mp_noSend,
-                      style: UiText.sans(12, color: c.muted),
-                    ),
-                  ],
-                ),
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 14),

@@ -29,6 +29,14 @@ class PromptAssistantRequest {
   final String model;
   final String systemPrompt;
   final List<PromptAssistantContentPart> userParts;
+
+  /// Stored provider flags are compatibility data, not capability gates.
+  List<PromptAssistantContentPart> get modelUserParts =>
+      (modelConfig?.supportsVision ??
+              modelConfig?.catalogEntry?.supportsVision) ==
+          true
+      ? userParts
+      : userParts.where((part) => part is! PromptAssistantImagePart).toList();
   final String? apiKey;
   final ModelConfig? modelConfig;
   final String? taskName;

@@ -42,11 +42,9 @@ void main() {
         'authorization': 'model-header',
         'x-test': 'two',
       });
-      expect(value['temperature'], 0.4);
-      expect(value['payloadParameters'], {
-        'reasoning_effort': 'medium',
-        'top_p': 0.6,
-      });
+      expect(value, isNot(contains('temperature')));
+      expect(value, isNot(contains('allowsSampling')));
+      expect(value['payloadParameters'], {'reasoning_effort': 'medium'});
       expect(value['contextWindow'], 100000);
       expect(value['maxTokens'], 8192);
       expect(connection.allowsImages, isTrue);
@@ -77,7 +75,7 @@ void main() {
         provider.copyWith(protocol: ProviderProtocol.anthropicMessages),
         adaptive,
       ).toPrivateJson();
-      expect(anthropic['allowsSampling'], isFalse);
+      expect(anthropic, isNot(contains('allowsSampling')));
       expect(anthropic['payloadParameters'], {
         'thinking': {'type': 'adaptive'},
         'output_config': {'effort': 'medium'},
@@ -93,6 +91,33 @@ void main() {
       });
     },
   );
+  for (final protocol in ProviderProtocol.values) {
+    test('Agent $protocol omits stored sampling but keeps custom body', () {
+      final body = protocol == ProviderProtocol.geminiGenerateContent
+          ? {
+              'generationConfig': {'temperature': .25, 'topP': .75},
+            }
+          : {'temperature': .25, 'top_p': .75};
+      final configured = model.copyWith(
+        reasoningProtocol: ModelReasoningProtocol.adaptive,
+        requestOverrides: ModelRequestOverrides(body: body),
+      );
+      final value = mapNaiAgentModel(
+        provider.copyWith(protocol: protocol),
+        configured,
+      ).toPrivateJson();
+      expect(value, isNot(contains('temperature')));
+      expect(value, isNot(contains('allowsSampling')));
+      expect(
+        value['payloadParameters'].toString(),
+        isNot(contains('temperature')),
+      );
+      expect(value['payloadParameters'].toString(), isNot(contains('top_p')));
+      expect(value['payloadParameters'].toString(), isNot(contains('topP')));
+      expect(value['body'], body);
+    });
+  }
+
   test(
     'Agent thinking override changes the request without changing the saved model',
     () {
@@ -137,30 +162,22 @@ void main() {
       expect(configured.reasoningEffort, 'medium');
     },
   );
-  test('image access reports the provider gate only for a vision model', () {
-    final blocked = mapNaiAgentModel(
-      provider.copyWith(allowImageInput: false),
-      model,
-    );
-    expect(blocked.allowsImages, isFalse);
-    expect(blocked.visionBlockedByProvider, isTrue);
-    expect(blocked.providerName, 'Synthetic');
-    expect(blocked.visionAccess.unavailableMessage, contains('Synthetic'));
-    expect(blocked.visionAccess.unavailableMessage, contains('请求 → 图片输入'));
-    expect(blocked.visionAccess.unavailableMessage, contains('“允许”'));
-    final unsupported = mapNaiAgentModel(
-      provider.copyWith(allowImageInput: false),
-      model.copyWith(supportsVision: false),
-    );
-    expect(unsupported.allowsImages, isFalse);
-    expect(unsupported.visionBlockedByProvider, isFalse);
-    expect(unsupported.visionAccess.unavailableMessage, contains('Synthetic'));
-    expect(unsupported.visionAccess.unavailableMessage, contains('模型 → 能力'));
-    expect(
-      unsupported.visionAccess.unavailableMessage,
-      isNot(contains('请求 →')),
-    );
-  });
+  for (final flag in [true, false]) {
+    test('model vision alone gates images with provider flag=$flag', () {
+      final configured = provider.copyWith(allowImageInput: flag);
+      expect(mapNaiAgentModel(configured, model).allowsImages, true);
+      final unsupported = mapNaiAgentModel(
+        configured,
+        model.copyWith(supportsVision: false),
+      );
+      expect(unsupported.allowsImages, false);
+      expect(unsupported.visionAccess.unavailableMessage, contains('模型 → 能力'));
+      expect(
+        unsupported.visionAccess.unavailableMessage,
+        isNot(contains('请求 →')),
+      );
+    });
+  }
 
   test(
     'unknown capabilities remain unknown, image access requires known support',
@@ -179,7 +196,7 @@ void main() {
           provider.copyWith(allowImageInput: false),
           model,
         ).allowsImages,
-        isFalse,
+        isTrue,
       );
       expect(
         () => mapNaiAgentModel(provider, model.copyWith(supportsTools: false)),

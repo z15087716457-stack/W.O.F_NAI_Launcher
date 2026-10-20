@@ -257,63 +257,6 @@ class ProvidersInspector extends StatelessWidget {
       ],
     ]);
 
-    Widget sampler(
-      String key,
-      String label,
-      double? value,
-      double max,
-      double fallback,
-      ProviderModelSettings Function(ProviderModelSettings, double?) set,
-    ) => ProviderField(
-      label: label,
-      child: SizedBox(
-        height: 22,
-        child: Row(
-          spacing: 10,
-          children: [
-            UiPressable(
-              key: Key('mp-$key-on'),
-              onTap: () =>
-                  onEdit((x) => set(x, value == null ? fallback : null)),
-              builder: (context, _) => UiCheckBox(value: value != null),
-            ),
-            if (value == null)
-              Text(l.mp_followDefault, style: UiText.sans(12, color: c.muted))
-            else
-              SettingsSlider(
-                key: Key('mp-$key'),
-                value: value,
-                min: 0,
-                max: max,
-                step: .05,
-                width: 132,
-                label: (v) => v.toStringAsFixed(2),
-                onChanged: (v) => onEdit((x) => set(x, v)),
-              ),
-          ],
-        ),
-      ),
-    );
-
-    final sampling = section(ProvidersGlyphs.sliders, l.mp_sampling, [
-      sampler(
-        'temp',
-        l.mp_temperature,
-        m.temperature,
-        2,
-        1,
-        (x, v) => x.copyWith(temperature: v, clearTemperature: v == null),
-      ),
-      sampler(
-        'topp',
-        l.mp_topP,
-        m.topP,
-        1,
-        1,
-        (x, v) => x.copyWith(topP: v, clearTopP: v == null),
-      ),
-    ]);
-
     final caps = section(ProvidersGlyphs.layers, l.mp_capabilities, [
       Wrap(
         spacing: 6,
@@ -475,7 +418,7 @@ class ProvidersInspector extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [header, basics, thinking, sampling, caps, overrides, test],
+      children: [header, basics, thinking, caps, overrides, test],
     );
   }
 }

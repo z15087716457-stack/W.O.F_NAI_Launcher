@@ -1055,7 +1055,7 @@ class AgentThinkingData {
     this.followsModel = true,
   });
 
-  /// (id, 已本地化的名字)，例如 ('high', '高')。
+  /// (id, 显示名)，例如 ('high', 'High')；档位名统一用英文，和实际传参一致。
   final List<(String, String)> options;
 
   /// 当前档位 id；null = 跟随模型设置。

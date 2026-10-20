@@ -111,6 +111,64 @@ void main() {
                 row.bottom,
               );
             }(),
+        // 2026-10-21：删掉服务商级「图片输入」开关和检查器「采样」一节，思考档位改用
+        // 英文原名（用户确认）。从「请求」一行往下的中栏和检查器整体上移，一起排除；
+        // 卡片缩短后底边上移，排除服务商列表下方到底部的条带。标题、页签、
+        // 服务商列表、接口地址 / Key / 协议和检查器上半部分照旧逐像素锁定。
+        ...() {
+          final capture = t.getRect(find.byKey(const Key('settings-capture')));
+          final retry = find.byKey(const Key('mp-retry'));
+          final url = find.byKey(const Key('mp-url'));
+          final first = find.byKey(const Key('mp-provider-ds'));
+          final last = find.byKey(const Key('mp-provider-relay'));
+          if (retry.evaluate().isEmpty || url.evaluate().isEmpty) {
+            return const <Rect>[];
+          }
+          final r = t.getRect(retry);
+          final u = t.getRect(url);
+          // 英文档位名宽度不同、换行位置变了：排除档位按钮所在的检查器区域。
+          final levels = find.byWidgetPredicate(
+            (w) =>
+                w.key is ValueKey<String> &&
+                (w.key! as ValueKey<String>).value.startsWith('mp-level-'),
+          );
+          return [
+            if (levels.evaluate().isNotEmpty)
+              () {
+                final box = levels
+                    .evaluate()
+                    .map((e) => t.getRect(find.byWidget(e.widget)))
+                    .reduce((a, b) => a.expandToInclude(b));
+                return Rect.fromLTRB(
+                  box.left - 4,
+                  box.top - 4,
+                  capture.right,
+                  capture.bottom,
+                );
+              }(),
+            Rect.fromLTRB(
+              u.left - 24,
+              r.top - 30,
+              capture.right,
+              capture.bottom,
+            ),
+            // 卡片左边框 2px 一列（卡片变矮后边框的抗锯齿随之变化）。
+            if (first.evaluate().isNotEmpty)
+              Rect.fromLTRB(
+                t.getRect(first).left - 14,
+                t.getRect(first).top,
+                t.getRect(first).left - 8,
+                capture.bottom,
+              ),
+            if (first.evaluate().isNotEmpty && last.evaluate().isNotEmpty)
+              Rect.fromLTRB(
+                t.getRect(first).left - 12,
+                t.getRect(last).bottom + 8,
+                capture.right,
+                capture.bottom,
+              ),
+          ];
+        }(),
       ];
       await expectOutsideApprovedRegions(
         t,

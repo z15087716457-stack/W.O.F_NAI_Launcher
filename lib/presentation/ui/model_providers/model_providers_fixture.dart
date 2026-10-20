@@ -198,7 +198,6 @@ abstract final class ProvidersFixture {
     maxOutput: 8000,
     reasoningLevels: ['none', 'high'],
     defaultLevel: 'none',
-    temperature: 1.3,
     capabilities: {
       ProviderCapability.vision,
       ProviderCapability.tools,
@@ -213,7 +212,6 @@ abstract final class ProvidersFixture {
     reasoningLevels: ['none', 'low', 'medium', 'high', 'max'],
     defaultLevel: 'high',
     adaptiveReasoning: true,
-    temperature: .7,
     capabilities: {ProviderCapability.tools, ProviderCapability.structured},
     body: [ProviderKeyValue('response_format', '{"type":"json_object"}')],
   );
@@ -232,7 +230,6 @@ abstract final class ProvidersFixture {
       name: 'DeepSeek',
       baseUrl: 'https://api.deepseek.com',
       protocolId: 'openaiChatCompletions',
-      imageInput: true,
       models: [_flash, _pro],
     ),
     models: const {
@@ -265,7 +262,6 @@ abstract final class ProvidersFixture {
         name: 'OpenAI',
         baseUrl: 'https://api.openai.com/v1',
         protocolId: 'openaiResponses',
-        imageInput: true,
         models: [
           ProviderModelSettings(
             id: 'gpt-4.1-mini',
@@ -317,7 +313,6 @@ abstract final class ProvidersFixture {
         timeoutSeconds: 180,
         maxConcurrency: 3,
         retryAttempts: 2,
-        imageInput: true,
         models: [
           ProviderModelSettings(
             id: 'claude-sonnet-5-5',
@@ -357,7 +352,6 @@ abstract final class ProvidersFixture {
         name: 'Google Gemini',
         baseUrl: 'https://generativelanguage.googleapis.com',
         protocolId: 'geminiGenerateContent',
-        imageInput: true,
         models: [
           ProviderModelSettings(
             id: 'gemini-3.8-flash',
@@ -390,7 +384,6 @@ abstract final class ProvidersFixture {
         baseUrl: 'https://openrouter.ai/api/v1',
         protocolId: 'openaiChatCompletions',
         maxConcurrency: 8,
-        imageInput: true,
         headers: [
           ProviderKeyValue('HTTP-Referer', 'https://wof.studio'),
           ProviderKeyValue('X-Title', 'W.O.F NAI Studio'),

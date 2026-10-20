@@ -19,7 +19,6 @@ ProviderSettings projectProviderSettings(
   timeoutSeconds: provider.timeoutSeconds,
   maxConcurrency: provider.maxConcurrentRequests,
   retryAttempts: provider.retryAttempts,
-  imageInput: provider.allowImageInput,
   headers: [for (final e in headers.entries) ProviderKeyValue(e.key, e.value)],
   models: [
     for (final m in models)
@@ -40,8 +39,6 @@ ProviderModelSettings projectProviderModel(
       : m.availableReasoningEfforts,
   defaultLevel: m.reasoningEffort,
   adaptiveReasoning: m.reasoningProtocol == ModelReasoningProtocol.adaptive,
-  temperature: m.temperature,
-  topP: m.topP,
   capabilities: {
     if ((m.supportsVision ?? m.catalogEntry?.supportsVision) == true)
       ProviderCapability.vision,
@@ -108,7 +105,6 @@ ProviderConfig mergeProviderSettings(
   timeoutSeconds: edited.timeoutSeconds,
   maxConcurrentRequests: edited.maxConcurrency,
   retryAttempts: edited.retryAttempts,
-  allowImageInput: edited.imageInput,
   requestHeaders: providerHeaders(edited.headers),
 );
 
@@ -164,17 +160,6 @@ ModelConfig mergeProviderModel(
           : ModelReasoningProtocol.standard,
     );
     fields.add('reasoningProtocol');
-  }
-  if (base.temperature != edited.temperature) {
-    next = next.copyWith(
-      temperature: edited.temperature,
-      clearTemperature: edited.temperature == null,
-    );
-    fields.add('temperature');
-  }
-  if (base.topP != edited.topP) {
-    next = next.copyWith(topP: edited.topP, clearTopP: edited.topP == null);
-    fields.add('topP');
   }
   for (final capability in ProviderCapability.values) {
     final value = edited.capabilities.contains(capability);

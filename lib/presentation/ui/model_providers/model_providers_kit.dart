@@ -21,7 +21,6 @@ abstract final class ProvidersGlyphs {
       'M8 4H7a2 2 0 00-2 2v3a2 2 0 01-2 2 2 2 0 012 2v3a2 2 0 002 2h1M16 4h1a2 2 0 012 2v3a2 2 0 002 2 2 2 0 00-2 2v3a2 2 0 01-2 2h-1';
   static const bulb =
       'M9 18h6M10 21h4M12 3a6 6 0 00-3.6 10.8c.4.3.6.8.6 1.3V16h6v-.9c0-.5.2-1 .6-1.3A6 6 0 0012 3z';
-  static const sliders = 'M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4';
   static const layers = 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5';
   static const alert = 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 8v5M12 16h.01';
   static const image = 'M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15.5 9.5h.01';

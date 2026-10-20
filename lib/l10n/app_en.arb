@@ -4260,7 +4260,7 @@
   "modelReasoning_low": "Low",
   "modelReasoning_medium": "Medium",
   "modelReasoning_high": "High",
-  "modelReasoning_xhigh": "Extra high",
+  "modelReasoning_xhigh": "XHigh",
   "modelReasoning_max": "Max",
   "modelProvider_custom": "Custom service",
   "modelProvider_qwen": "Qwen · Alibaba Model Studio",
@@ -4297,8 +4297,6 @@
   "modelParams_temperatureRange": "Temperature must be between 0 and 2.",
   "modelParams_topPRange": "Top P must be greater than 0 and at most 1.",
   "modelParams_maxOutputPositive": "Max output tokens must be greater than 0.",
-  "modelParams_anthropicTemperatureRange": "Anthropic temperature must be between 0 and 1.",
-  "modelParams_anthropicSamplingConflict": "Anthropic accepts either temperature or Top P; check the model parameters.",
   "modelParams_thinkingBudgetTooSmall": "Max output must be larger than the minimum thinking budget of {minimum}.",
   "@modelParams_thinkingBudgetTooSmall": {
     "placeholders": {
@@ -8804,17 +8802,7 @@
   "naiAgent_toolsHint": "Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.",
   "naiAgent_unknownCost": "Actual cost is set by the provider",
   "naiAgent_error": "Operation failed. Check model settings or workspace files.",
-  "naiAgent_visionDisabled": "Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.",
   "naiAgent_visionCurrentProvider": "the current provider",
-  "naiAgent_visionProviderBlocked": "Provider {providerName} does not allow sending images. Go to Settings → Models & APIs → {providerName} → Requests → Images and select On.",
-  "@naiAgent_visionProviderBlocked": {
-    "description": "Provider-level image sending is off; providerName is the configured display name.",
-    "placeholders": {
-      "providerName": {
-        "type": "String"
-      }
-    }
-  },
   "naiAgent_visionModelUnsupported": "The selected model for provider {providerName} has no confirmed image-input support. Check Model → Capabilities → Image input in Settings → Models & APIs → {providerName}, or select a model that supports images.",
   "@naiAgent_visionModelUnsupported": {
     "description": "Model-level image support is false or unknown, independent of the provider sending switch.",
@@ -10830,6 +10818,8 @@
   "set_agFinalLive": "The full system prompt the current chat actually sends to the model.",
   "set_agBuiltinSub": "The built-in base prompt shipped with Studio; it changes with updates.",
   "set_agMcpEditTitle": "Edit MCP server",
+  "set_agTabGeneral": "General",
+  "set_agTabTools": "Tools & extensions",
   "ag_recent": "Recent",
   "ag_you": "You",
   "ag_edit": "Edit",
@@ -11116,10 +11106,6 @@
   "mp_retry": "Retries",
   "mp_retryHelp": "Retry on connection errors or when busy",
   "mp_retryOff": "Off",
-  "mp_imageInput": "Images",
-  "mp_imageInputHelp": "When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input",
-  "mp_allow": "On",
-  "mp_noSend": "Off",
   "mp_seconds": "s",
   "mp_countUnit": "",
   "mp_headers": "Custom headers",
@@ -11152,10 +11138,6 @@
   "mp_protocolNoReasoning": "This protocol has no thinking control",
   "mp_unconfirmed": "Unconfirmed",
   "mp_unsupported": "Not supported",
-  "mp_sampling": "Sampling",
-  "mp_temperature": "Temperature",
-  "mp_topP": "Top P",
-  "mp_followDefault": "Service default",
   "mp_capabilities": "Capabilities",
   "mp_capVision": "Image input",
   "mp_capTools": "Tool calls",

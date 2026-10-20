@@ -137,7 +137,12 @@ void main() {
   testWidgets('失败：保留草稿并提示', (t) async {
     final rec = await pumpProviders(t);
     rec.saveResult = ProvidersSaveResult.failed;
-    await t.tap(find.byKey(const Key('mp-image')));
+    await t.tap(
+      find.descendant(
+        of: find.byKey(const Key('mp-retry')),
+        matching: find.text('3'),
+      ),
+    );
     await t.pumpAndSettle();
     await t.tap(find.byKey(const Key('dock-保存')));
     await t.pumpAndSettle();
@@ -216,7 +221,7 @@ void main() {
     await t.pump();
     expect(rec.calls, [
       'test:ds:https://api.deepseek.com:null',
-      'testModel:ds:deepseek-flash:1.3:null',
+      'testModel:ds:deepseek-flash:8000:null',
     ]);
   });
 
@@ -239,13 +244,12 @@ void main() {
     );
   });
 
-  testWidgets('温度：取消勾选 = 跟随服务默认', (t) async {
+  testWidgets('不再有服务商级图片开关和采样（温度 / Top P）', (t) async {
     await pumpProviders(t);
-    expect(find.byKey(const Key('mp-temp')), findsOneWidget);
-    await t.tap(find.byKey(const Key('mp-temp-on')));
-    await t.pumpAndSettle();
+    expect(find.byKey(const Key('mp-image')), findsNothing);
     expect(find.byKey(const Key('mp-temp')), findsNothing);
-    expect(find.text('跟随服务默认'), findsNWidgets(2));
+    expect(find.byKey(const Key('mp-topp-on')), findsNothing);
+    expect(find.byKey(const Key('mp-cap-vision')), findsOneWidget);
   });
 
   testWidgets('请求头：添加一行、非法名称标红', (t) async {

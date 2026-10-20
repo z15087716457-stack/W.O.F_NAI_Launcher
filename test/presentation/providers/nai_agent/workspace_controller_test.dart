@@ -7,7 +7,6 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/core/nai_agent/vision_access.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
-import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 
@@ -460,7 +459,7 @@ void main() {
     expect(sent, isNot(contains('image_url')));
     expect(runtime.visionNotice, contains('2'));
     expect(runtime.visionNotice, contains('文字仍照常发送'));
-    expect(runtime.visionNotice, contains('请求 → 图片输入'));
+    expect(runtime.visionNotice, contains('模型 → 能力 → 图片输入'));
     expect(
       await c.store.readAttachment(runtime.workspace.id, originals.first),
       png,
@@ -471,13 +470,10 @@ void main() {
     );
   });
   test(
-    'provider-blocked attachments warn without pixels and clear on the next successful send',
+    'unavailable model attachments warn without pixels and clear on the next successful send',
     () async {
       var vision = false, revision = 0;
-      const access = NaiAgentVisionAccess(
-        blockedByProvider: true,
-        providerName: 'Synthetic Provider',
-      );
+      const access = NaiAgentVisionAccess(providerName: 'Synthetic Provider');
       final c = controller(
         readVision: () => vision,
         readModelRevision: () => revision,
@@ -506,7 +502,10 @@ void main() {
         isEmpty,
       );
       expect(runtime.visionNotice, access.skippedAttachmentsNotice(1));
-      expect(runtime.visionNotice, contains('Synthetic Provider → 请求 → 图片输入'));
+      expect(
+        runtime.visionNotice,
+        contains('Synthetic Provider → 模型 → 能力 → 图片输入'),
+      );
       expect(
         await c.store.readAttachment(runtime.workspace.id, original),
         pixels,
@@ -542,10 +541,7 @@ void main() {
   test(
     'model-blocked attachments warn and changing the model clears the notice',
     () async {
-      const access = NaiAgentVisionAccess(
-        blockedByProvider: false,
-        providerName: 'Text Provider',
-      );
+      const access = NaiAgentVisionAccess(providerName: 'Text Provider');
       final c = controller(visionAccess: access);
       await c.initialize();
       await c.attach(
@@ -568,7 +564,6 @@ void main() {
     () async {
       final c = controller(
         visionAccess: const NaiAgentVisionAccess(
-          blockedByProvider: true,
           providerName: 'Queue Provider',
         ),
       );
@@ -603,7 +598,7 @@ void main() {
 
   for (final code in ['vision_disabled', 'vision_unavailable']) {
     test(
-      '$code maps to the localized two-gate fallback without raw English',
+      '$code maps to the localized model fallback without raw English',
       () async {
         final c = NaiAgentWorkspaceController(
           store: AgentWorkspaceStore(root),
@@ -616,7 +611,10 @@ void main() {
         await c.initialize();
         await c.saveComposer('send');
         await c.send();
-        expect(c.selected!.error, currentL10n.naiAgent_visionDisabled);
+        expect(
+          c.selected!.error,
+          const NaiAgentVisionAccess().unavailableMessage,
+        );
         expect(c.selected!.error, isNot(contains('old English')));
         expect(calls, 0);
       },

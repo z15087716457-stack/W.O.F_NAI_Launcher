@@ -176,6 +176,31 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
         Rect.fromLTRB(first.left, first.top, first.right, capture.bottom),
       );
     }
+    // 2026-10-21：Agent 页拆成 常规/指令/Skill/工具与扩展 分页（用户确认）：
+    // 标题和说明照旧逐像素锁定；从分页条开始往下的主栏、整列侧卡一起排除，
+    // 各分页的内容另有行为和截图检查。
+    final agentTabs = find.byKey(const Key('agent-tabs'));
+    if (agentTabs.evaluate().isNotEmpty) {
+      final capture = t.getRect(find.byKey(const Key('settings-capture')));
+      final tabs = t.getRect(agentTabs);
+      // D27 已批准的说明行（原先只在 Skill 分区可见时排除）。
+      for (final e in find.text(l.set_agDesc).evaluate()) {
+        masks.add(t.getRect(find.byWidget(e.widget)));
+      }
+      masks.add(
+        Rect.fromLTRB(tabs.left, tabs.top, tabs.right, capture.bottom),
+      );
+      final aside = find
+          .byType(SettingsAsideCard)
+          .evaluate()
+          .map((e) => t.getRect(find.byWidget(e.widget)));
+      if (aside.isNotEmpty) {
+        final first = aside.reduce((a, b) => a.expandToInclude(b));
+        masks.add(
+          Rect.fromLTRB(first.left, capture.top, capture.right, capture.bottom),
+        );
+      }
+    }
     // 2026-10-20：“Agent 使用的模型”改名“默认模型”、下拉按钮左边改用厂商图标（用户确认）：
     // 只排除这一行的标题和下拉按钮里的图标格。
     // 旧标题更长，排除整条标题行（到下拉按钮左边为止），副标题和按钮外框照旧锁定。

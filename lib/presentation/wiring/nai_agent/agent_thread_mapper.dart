@@ -67,13 +67,17 @@ String? agentPretty(Object? value) {
 }
 
 Map<String, dynamic> agentResultDetails(Map<String, dynamic> value) {
+  Map<String, dynamic> unwrap(Map<String, dynamic> details) =>
+      details['content'] is List && details['structuredContent'] is Map
+      ? agentMap(details['structuredContent'])
+      : details;
   if (value['structuredContent'] is Map) {
-    return agentMap(value['structuredContent']);
+    return unwrap(agentMap(value['structuredContent']));
   }
   if (value['details'] is Map) {
     final details = agentMap(value['details']);
     return details['structuredContent'] is Map
-        ? agentMap(details['structuredContent'])
+        ? unwrap(agentMap(details['structuredContent']))
         : details;
   }
   // Some MCP transports retain only the text content envelope in history.
@@ -452,11 +456,68 @@ class AgentThreadMapper {
                 : AgentStepStatus.running;
             final nested = agentMaps(
               agentMap(
-                value['nestedCalls'] ??
-                    details['nestedCalls'] ??
-                    event['nestedCalls'],
-              )['calls'],
+                    value['nestedCalls'] ??
+                        details['nestedCalls'] ??
+                        event['nestedCalls'],
+                  )['calls'] ??
+                  details['calls'],
             );
+            // Official Pi stores calls[].args as a possibly truncated JSON
+            // preview. Prefer complete live/projected arguments for native undo.
+            final projectionById = <String, Map<String, dynamic>>{
+              for (final projection in agentMaps(details['studio_results']))
+                if (projection['tool_call_id'] is String)
+                  projection['tool_call_id'] as String: projection,
+            };
+            Map<String, dynamic> nestedArgs(Map<String, dynamic> call) {
+              final raw =
+                  call['arguments'] ??
+                  runtime.tools[call['id']]?['args'] ??
+                  projectionById[call['id']]?['arguments'] ??
+                  call['args'];
+              if (raw is String) {
+                try {
+                  return agentMap(jsonDecode(raw));
+                } on FormatException {
+                  return {};
+                }
+              }
+              return agentMap(raw);
+            }
+
+            Map<String, dynamic> nestedDetails(Map<String, dynamic> call) {
+              final value =
+                  call['result'] ?? runtime.tools[call['id']]?['result'];
+              return value == null
+                  ? projectionById[call['id']] ?? {}
+                  : agentResultDetails(agentMap(value));
+            }
+
+            // A persisted projection and its live event represent one call.
+            // Retain stable call ids so undo state survives runtime eviction.
+            for (final call in nested) {
+              final child = runtime.tools[call['id']];
+              if (call['id'] is! String ||
+                  child == null ||
+                  child['type'] != 'tool_execution_end' ||
+                  child['isError'] == true ||
+                  projectionById.containsKey(call['id'])) {
+                continue;
+              }
+              projectionById[call['id'] as String] = {
+                ...nestedDetails(call),
+                'tool': call['name'],
+                'arguments': nestedArgs(call),
+                'tool_call_id': call['id'],
+              };
+            }
+            final projections = [
+              ...projectionById.values,
+              // Older sessions may contain projections without a call id.
+              ...agentMaps(
+                details['studio_results'],
+              ).where((projection) => projection['tool_call_id'] is! String),
+            ];
             final resultImages = [
               for (final (index, imagePart) in agentMaps(
                 value['content'],
@@ -523,48 +584,24 @@ class AgentThreadMapper {
                     'error' => AgentStepStatus.failed,
                     _ => done ? AgentStepStatus.failed : status,
                   },
-                  subject: _subject(agentMap(call['arguments'])),
+                  subject: _subject(nestedArgs(call)),
                   duration: agentDuration(call['durationMs']),
                   arguments: agentPretty(
-                    call['arguments'] ?? call['argumentsBytes'],
+                    call['arguments'] ?? call['args'] ?? call['argumentsBytes'],
                   ),
                   result: agentPretty(call['result'] ?? call['error']),
                   images: nestedImages(ni),
-                  tags: call['status'] == 'ok'
+                  tags:
+                      call['status'] == 'ok' &&
+                          nestedDetails(call)['ok'] != false &&
+                          runtime.tools[call['id']]?['isError'] != true
                       ? agentTagHits(
                           agentToolName(call['name'] as String? ?? ''),
-                          agentResultDetails(
-                            agentMap(
-                              call['result'] ??
-                                  runtime.tools[call['id']]?['result'],
-                            ),
-                          ),
+                          nestedDetails(call),
                         )
                       : const [],
                 ),
               );
-            }
-            // Pi's persisted nested log intentionally has no results. Live
-            // nested tool events still carry them; prefer persisted projections
-            // when available and use events only for the missing calls.
-            final projections = agentMaps(details['studio_results']);
-            for (final call in nested) {
-              final child = runtime.tools[call['id']];
-              if (child == null ||
-                  child['type'] != 'tool_execution_end' ||
-                  child['isError'] == true ||
-                  projections.any((p) => p['tool_call_id'] == call['id'])) {
-                continue;
-              }
-              final childDetails = agentResultDetails(
-                agentMap(child['result']),
-              );
-              projections.add({
-                ...childDetails,
-                'tool': call['name'],
-                'arguments': call['arguments'],
-                'tool_call_id': call['id'],
-              });
             }
             for (final (projectionIndex, projection) in [
               if (tool == 'prompt_update') details,
@@ -723,7 +760,8 @@ class AgentThreadMapper {
                                       (c) =>
                                           c['id'] == projection['tool_call_id'],
                                     )
-                                    .firstOrNull?['arguments'],
+                                    .map(nestedArgs)
+                                    .firstOrNull,
                           ),
                     projection,
                   );

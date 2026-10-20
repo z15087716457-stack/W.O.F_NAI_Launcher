@@ -54,8 +54,6 @@ class ProviderModelSettings {
     this.reasoningLevels,
     this.defaultLevel,
     this.adaptiveReasoning = false,
-    this.temperature,
-    this.topP,
     this.capabilities = const {},
     this.body = const [],
     this.headers = const [],
@@ -81,10 +79,6 @@ class ProviderModelSettings {
   /// 思考协议：false = 标准，true = 自适应（`ModelReasoningProtocol.adaptive`）。
   final bool adaptiveReasoning;
 
-  /// null = 不发送，由服务商决定。温度 0–2，Top P 0–1。
-  final double? temperature;
-  final double? topP;
-
   final Set<ProviderCapability> capabilities;
 
   /// 自定义请求体字段 / 请求头（`ModelRequestOverrides`，存安全存储）。
@@ -109,10 +103,6 @@ class ProviderModelSettings {
     String? defaultLevel,
     bool clearDefaultLevel = false,
     bool? adaptiveReasoning,
-    double? temperature,
-    bool clearTemperature = false,
-    double? topP,
-    bool clearTopP = false,
     Set<ProviderCapability>? capabilities,
     List<ProviderKeyValue>? body,
     List<ProviderKeyValue>? headers,
@@ -128,8 +118,6 @@ class ProviderModelSettings {
         : reasoningLevels ?? this.reasoningLevels,
     defaultLevel: clearDefaultLevel ? null : defaultLevel ?? this.defaultLevel,
     adaptiveReasoning: adaptiveReasoning ?? this.adaptiveReasoning,
-    temperature: clearTemperature ? null : temperature ?? this.temperature,
-    topP: clearTopP ? null : topP ?? this.topP,
     capabilities: capabilities ?? this.capabilities,
     body: body ?? this.body,
     headers: headers ?? this.headers,
@@ -143,8 +131,6 @@ class ProviderModelSettings {
     !_nullableListEquals(reasoningLevels, other.reasoningLevels),
     defaultLevel != other.defaultLevel,
     adaptiveReasoning != other.adaptiveReasoning,
-    temperature != other.temperature,
-    topP != other.topP,
     !setEquals(capabilities, other.capabilities),
     !listEquals(body, other.body),
     !listEquals(headers, other.headers),
@@ -183,12 +169,6 @@ class ProviderModelSettings {
         edited.adaptiveReasoning,
         latest.adaptiveReasoning,
       ),
-      temperature: pick(
-        base.temperature,
-        edited.temperature,
-        latest.temperature,
-      ),
-      topP: pick(base.topP, edited.topP, latest.topP),
       capabilities: pick(
         base.capabilities,
         edited.capabilities,
@@ -215,8 +195,6 @@ class ProviderModelSettings {
     reasoningLevels == null ? null : Object.hashAll(reasoningLevels!),
     defaultLevel,
     adaptiveReasoning,
-    temperature,
-    topP,
     Object.hashAllUnordered(capabilities),
     Object.hashAll(body),
     Object.hashAll(headers),
@@ -233,7 +211,6 @@ class ProviderSettings {
     this.timeoutSeconds = 120,
     this.maxConcurrency = 5,
     this.retryAttempts = 1,
-    this.imageInput = false,
     this.headers = const [],
     this.models = const [],
   });
@@ -252,9 +229,6 @@ class ProviderSettings {
 
   /// 失败重试 0–3 次；0 = 关闭。
   final int retryAttempts;
-
-  /// 允许把图片发给这个服务商（`ProviderConfig.allowImageInput`）。
-  final bool imageInput;
 
   /// 服务商级自定义请求头（`ProviderConfig.requestHeaders`，存安全存储）。
   final List<ProviderKeyValue> headers;
@@ -276,7 +250,6 @@ class ProviderSettings {
     int? timeoutSeconds,
     int? maxConcurrency,
     int? retryAttempts,
-    bool? imageInput,
     List<ProviderKeyValue>? headers,
     List<ProviderModelSettings>? models,
   }) => ProviderSettings(
@@ -286,7 +259,6 @@ class ProviderSettings {
     timeoutSeconds: timeoutSeconds ?? this.timeoutSeconds,
     maxConcurrency: maxConcurrency ?? this.maxConcurrency,
     retryAttempts: retryAttempts ?? this.retryAttempts,
-    imageInput: imageInput ?? this.imageInput,
     headers: headers ?? this.headers,
     models: models ?? this.models,
   );
@@ -304,7 +276,6 @@ class ProviderSettings {
       timeoutSeconds != other.timeoutSeconds,
       maxConcurrency != other.maxConcurrency,
       retryAttempts != other.retryAttempts,
-      imageInput != other.imageInput,
       !listEquals(headers, other.headers),
     ].where((x) => x).length;
     for (final m in models) {
@@ -342,7 +313,6 @@ class ProviderSettings {
         edited.retryAttempts,
         latest.retryAttempts,
       ),
-      imageInput: pick(base.imageInput, edited.imageInput, latest.imageInput),
       headers: listEquals(base.headers, edited.headers)
           ? latest.headers
           : edited.headers,
@@ -373,7 +343,6 @@ class ProviderSettings {
     timeoutSeconds,
     maxConcurrency,
     retryAttempts,
-    imageInput,
     Object.hashAll(headers),
     Object.hashAll(models),
   );

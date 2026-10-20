@@ -410,7 +410,7 @@ void main() {
             .complete(
               request: _request(
                 'invalid',
-                model: _model.copyWith(temperature: -1),
+                model: _model.copyWith(maxOutputTokens: -1),
               ),
             )
             .toList(),

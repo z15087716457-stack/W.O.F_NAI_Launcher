@@ -207,12 +207,10 @@ void main() {
           timeoutSeconds: 145,
           maxConcurrency: 8,
           retryAttempts: 3,
-          imageInput: true,
           headers: const [ProviderKeyValue('X-New', 'private')],
           models: [
             base.models.single.copyWith(
               alias: 'Alias',
-              temperature: .5,
               body: const [ProviderKeyValue('custom', '{"new":[1,true]}')],
               headers: const [ProviderKeyValue('X-Model', 'new')],
             ),
@@ -242,12 +240,7 @@ void main() {
         expect(m.supportsTools, isNull);
         expect(
           m.customFields,
-          containsAll([
-            'reasoningEffort',
-            'reasoningProtocol',
-            'displayName',
-            'temperature',
-          ]),
+          containsAll(['reasoningEffort', 'reasoningProtocol', 'displayName']),
         );
         expect(m.customFields, isNot(contains('supportsVision')));
         expect(h.config.encode(), isNot(contains('private')));
@@ -370,11 +363,6 @@ void main() {
     'output': (s) => s.withModel(s.models.single.copyWith(maxOutput: 0)),
     'output > context': (s) =>
         s.withModel(s.models.single.copyWith(maxOutput: 11, contextWindow: 10)),
-    'temperature': (s) => s.withModel(s.models.single.copyWith(temperature: 3)),
-    'topP': (s) => s.withModel(s.models.single.copyWith(topP: 0)),
-    'anthropic sampling': (s) => s
-        .copyWith(protocolId: ProviderProtocol.anthropicMessages.name)
-        .withModel(s.models.single.copyWith(temperature: .5, topP: .8)),
   };
   for (final entry in invalid.entries) {
     test('validation fails without any writes: ${entry.key}', () async {
@@ -386,6 +374,42 @@ void main() {
       expect(h.local.configWrites, 0);
       expect(h.secure.headers, before);
     });
+  }
+
+  for (final flag in [true, false]) {
+    test(
+      'projection save preserves hidden provider image flag=$flag and legacy sampling',
+      () {
+        final provider = _provider.copyWith(allowImageInput: flag);
+        const model = ModelConfig(
+          providerId: 'p',
+          name: 'legacy',
+          displayName: 'legacy',
+          temperature: 3,
+          topP: 0,
+        );
+        final base = projectProviderSettings(provider, [model], {});
+        final merged = mergeProviderSettings(
+          provider,
+          base.copyWith(name: 'Renamed'),
+        );
+        final next = mergeProviderModel(
+          model,
+          base.models.single,
+          base.models.single.copyWith(alias: 'Alias'),
+        );
+        expect(merged.toJson()['allowImageInput'], flag);
+        expect(next.toJson()['temperature'], 3);
+        expect(next.toJson()['topP'], 0);
+        expect(
+          () => validateProviderDraft(
+            merged.copyWith(protocol: ProviderProtocol.anthropicMessages),
+            [next],
+          ),
+          returnsNormally,
+        );
+      },
+    );
   }
 
   test(
@@ -447,8 +471,6 @@ void main() {
         base.models.single.copyWith(
           clearContextWindow: true,
           clearMaxOutput: true,
-          clearTemperature: true,
-          clearTopP: true,
           body: [],
           headers: [],
         ),
@@ -457,8 +479,10 @@ void main() {
       final m = h.config.models.single;
       expect(m.contextWindow, isNull);
       expect(m.maxOutputTokens, isNull);
-      expect(m.temperature, isNull);
-      expect(m.topP, isNull);
+      // Hidden legacy values survive unrelated UI saves unchanged.
+      expect(m.temperature, .5);
+      expect(m.topP, .8);
+      expect(h.config.providers.single.allowImageInput, false);
       expect(m.isDefault, isTrue);
       expect(m.reasoningFormat, 'legacy-format');
       expect(m.hasRequestOverrides, false);
@@ -687,7 +711,7 @@ void main() {
           )
           .withModel(
             base.models.single.copyWith(
-              temperature: .4,
+              maxOutput: 42,
               body: const [ProviderKeyValue('custom', '42')],
             ),
           );
@@ -709,7 +733,7 @@ void main() {
         ),
       ).captured;
       expect((captured[0] as ProviderConfig).baseUrl, 'https://draft.invalid');
-      expect((captured[1] as ModelConfig).temperature, .4);
+      expect((captured[1] as ModelConfig).maxOutputTokens, 42);
       expect((captured[1] as ModelConfig).requestOverrides!.body, {
         'custom': 42,
       });

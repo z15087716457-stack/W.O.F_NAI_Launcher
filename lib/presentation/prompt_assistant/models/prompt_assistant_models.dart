@@ -961,13 +961,6 @@ class ModelConfig {
     reasoningEfforts ?? [if (reasoningEffort != null) reasoningEffort!],
   );
 
-  bool get allowsSampling =>
-      catalogEntry?.supportsTemperature != false &&
-      reasoningProtocol != ModelReasoningProtocol.adaptive &&
-      !(reasoningFormat == 'anthropicBudget' &&
-          reasoningEffort != null &&
-          reasoningEffort != 'none');
-
   Set<String> get preservedFields =>
       customFields ??
       {
@@ -1253,23 +1246,9 @@ class RequestParameters {
     reasoningEffort: reasoningEffort,
   );
 
-  String? validateFor(ProviderProtocol protocol) {
-    final general = validationError;
-    if (general != null) return general;
-    if (protocol == ProviderProtocol.anthropicMessages) {
-      if (temperature != null && temperature! > 1) {
-        return currentL10n.modelParams_anthropicTemperatureRange;
-      }
-      if (temperature != null && topP != null) {
-        return currentL10n.modelParams_anthropicSamplingConflict;
-      }
-    }
-    return null;
-  }
+  String? validateFor(ProviderProtocol protocol) => validationError;
 
   factory RequestParameters.fromModel(ModelConfig model) => RequestParameters(
-    temperature: model.allowsSampling ? model.temperature : null,
-    topP: model.allowsSampling ? model.topP : null,
     maxOutputTokens: model.maxOutputTokens,
     reasoningEffort: model.reasoningEffort,
   );

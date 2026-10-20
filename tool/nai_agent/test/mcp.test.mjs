@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { createServer } from 'node:http';
 import { createStudioSession } from '../lib/session.mjs';
 import { validateStudioMcp } from '../lib/mcp.mjs';
+import { createNaiInteractionExtension } from '../lib/extensions/interaction.mjs';
 
 async function fixture(code, options = {}) {
   await mkdir('.runs', { recursive: true });
@@ -121,6 +122,112 @@ test('CodeMode persists prompt diff projections without exposing them in model c
     const message=entries.find(entry=>entry.message?.role==='toolResult').message;
     assert.equal(message.details.studio_results[0].backup_path, native.backup_path);
   } finally { await f.close(); }
+});
+
+test('CodeMode persists slim tag/wiki/search/settings/gallery projections with real call ids and undo arguments', async () => {
+  const natives = {
+    tag_query: { tags: Array.from({length:30}, (_,i) => ({tag:'tag_'+i, category:'general',
+      post_count:i, zh:'翻译', definition:'释'.repeat(300), ignored:'private'})) },
+    wiki_query: { pages:[{tag:'wiki',found:true,body:'🙂'.repeat(300),translated_body:'full private wiki'}] },
+    studio_search: {items:Array.from({length:30}, (_,i) => ({name:'tag_'+i,category:'artist',post_count:i,translation:'翻译',body:'private'}))},
+    settings_update: {ok:true, applied_fields:['font_scale'], before:{font_scale:1,ignored:'private'},
+      values:{font_scale:1.1,ignored:'private'}, version:'v1', ignored:'private'},
+    gallery_manage: {ok:true, action:'collection_add', image_ids:['gallery:1'], image_versions:{'gallery:1':'iv'},
+      collection_id:'c',collection_name:'Collection',collection_version:'cv',
+      before:{'gallery:1':{favorite:false,collection_ids:[],metadata:'private'}},
+      backup:{path:'backups/image.png',file_missing:false,data:'data:image/png;base64,AAAA'}},
+    image_read: {ok:true,artifacts:[{type:'image',path:'outputs/image.png'}],image_ids:['image:1']},
+    prompt_update: {ok:true,applied:['prompt'],backup_path:'backups/draft.json',draft:{fields:{prompt:'new'},draft_version:'v'}},
+  };
+  const f = await fixture(`
+    await tools.mcp__nai_studio__tag_query({query:'tag'});
+    await tools.mcp__nai_studio__wiki_query({tags:['wiki']});
+    await tools.mcp__nai_studio__studio_search({source:'tags',query:'tag'});
+    await tools.mcp__nai_studio__settings_update({changes:{font_scale:1.1},expected_version:'v0'});
+    await tools.mcp__nai_studio__gallery_manage({action:'collection_add',image_ids:['gallery:1'],collection_id:'c'});
+    await tools.mcp__nai_studio__image_read({image_id:'image:1'});
+    await tools.mcp__nai_studio__prompt_update({changes:{},expected:{}});
+    text('done');
+  `, {session:{extraToolNames:['tag_query','wiki_query','studio_search','settings_update','gallery_manage']},
+    execute:async name => ({content:[{type:'text',text:'private native'}],details:natives[name]})});
+  try {
+    await f.session.prompt('perform test');
+    const projections = f.result().details.studio_results;
+    assert.equal(projections.length,7, JSON.stringify(f.result()));
+    assert.ok(projections[0].tags, JSON.stringify(projections));
+    for (const projection of projections) {
+      assert.ok(f.result().details.calls.some(call => call.id === projection.tool_call_id && call.name === projection.tool));
+    }
+    assert.equal(projections[0].tags.length,24);
+    assert.equal([...projections[0].tags[0].definition].length,200);
+    assert.equal([...projections[1].pages[0].body].length,200);
+    assert.equal(projections[2].items.length,24);
+    assert.deepEqual(projections[3].before,{font_scale:1});
+    assert.deepEqual(projections[3].values,{font_scale:1.1});
+    assert.equal(projections[3].version,'v1');
+    assert.deepEqual(projections[4].arguments,{action:'collection_add',image_ids:['gallery:1']});
+    assert.deepEqual(projections[4].before,{'gallery:1':{favorite:false,collection_ids:[]}});
+    assert.equal(projections[4].collection_id,'c');
+    assert.ok(!JSON.stringify(projections).includes('private'));
+    assert.ok(!JSON.stringify(projections).includes('base64'));
+    assert.ok(!JSON.stringify(f.result().content).includes('private'));
+    const entries=(await readFile(f.session.sessionFile,'utf8')).trim().split('\n').map(JSON.parse);
+    assert.deepEqual(entries.find(entry=>entry.message?.role==='toolResult').message.details.studio_results, projections);
+  } finally { await f.close(); }
+});
+
+test('gallery update/file/collection projections retain only native undo and card fields', () => {
+  const handlers = new Map();
+  createNaiInteractionExtension([]).factory({on:(name,handler)=>handlers.set(name,handler),registerTool:()=>{}});
+  for(const action of ['update','delete','restore','move_file','copy_file','collection_add','collection_remove','export']) {
+    const collection = action.startsWith('collection');
+    const before = {favorite:true,tags:['old'],collection_ids:['old-collection'],metadata:'not needed'};
+    const native = {ok:true,scope:'library',image_id:'gallery:1',image_ids:['gallery:1'],
+      image_version:'iv',image_versions:{'gallery:1':'iv'},collection_id:'c',collection_name:'Collection',
+      collection_version:'cv',source_path:'/library/old/image.png',file_path:'/library/new/image.png',
+      before:collection?{'gallery:1':before}:before,backup:{path:'backups/image.png',file_missing:false},
+      unchanged:false,metadata:'not needed'};
+    handlers.get('tool_result')({toolName:'mcp__nai_studio__gallery_manage',toolCallId:action,parentToolCallId:'code',
+      input:{action,changes:{favorite:false,tags:['new']},target_folder:'/library/new',expected_image_version:'old'},
+      structuredContent:{content:[],structuredContent:native}});
+    const projection=handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}).details.studio_results[0];
+    assert.equal(projection.image_version,'iv');
+    assert.equal(projection.source_path,native.source_path);
+    assert.equal(projection.collection_id,'c');
+    assert.deepEqual(projection.image_versions,native.image_versions);
+    assert.deepEqual(projection.backup,native.backup);
+    assert.deepEqual(collection?projection.before['gallery:1']:projection.before,
+      {favorite:true,tags:['old'],collection_ids:['old-collection']});
+    assert.deepEqual(projection.arguments,{action,changes:{favorite:false,tags:['new']},target_folder:'/library/new'});
+    assert.ok(!JSON.stringify(projection).includes('not needed'));
+  }
+});
+
+test('Studio projections cap serialized UTF-8 to 64 KiB, evict chips first and never split undo snapshots', () => {
+  const handlers = new Map();
+  createNaiInteractionExtension([]).factory({on:(name,handler)=>handlers.set(name,handler), registerTool:()=>{}});
+  const emit = (name,id,native,input={}) => handlers.get('tool_result')({toolName:'mcp__nai_studio__'+name,
+    toolCallId:id,parentToolCallId:'code',input,structuredContent:{content:[],structuredContent:native}});
+  emit('settings_update','settings',{ok:true,applied_fields:['font_family'],before:{font_family:'old'},
+    values:{font_family:'new'},version:'v'});
+  for(let i=0;i<10;i++) emit('tag_query','tag'+i,{tags:Array.from({length:24},()=>({tag:'中'.repeat(1000),
+    category:'general',post_count:1,definition:'释'.repeat(300)}))});
+  emit('wiki_query','failed',{ok:false,pages:[{tag:'never',body:'private'}]});
+  const details=handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{calls:[]}}).details;
+  assert.ok(Buffer.byteLength(JSON.stringify({studio_results:details.studio_results}),'utf8')<=64*1024);
+  assert.equal(details.studio_results.find(result=>result.tool_call_id==='settings').version,'v');
+  assert.deepEqual(details.studio_results.find(result=>result.tool_call_id==='failed'),
+    {tool:'mcp__nai_studio__wiki_query',tool_call_id:'failed',ok:false});
+  assert.ok(details.studio_results.flatMap(result=>result.tags??[]).length<240);
+  emit('settings_update','oversized',{ok:true,applied_fields:['font_family'],before:{font_family:'old'},
+    values:{font_family:'中'.repeat(64000)},version:'v'});
+  assert.equal(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}),undefined);
+  emit('wiki_query','binary-wiki',{pages:[{tag:'safe',body:'A'.repeat(1000)}]});
+  const wiki=handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}).details;
+  assert.equal(wiki.studio_results[0].pages[0].body,undefined);
+  emit('gallery_manage','binary',{ok:true,image_id:'gallery:1',before:{tags:['A'.repeat(1000)]}},
+    {action:'update',changes:{tags:['data:image/png;base64,AAAA']}});
+  assert.equal(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}),undefined);
 });
 
 test('direct and hidden exposures follow Pi loadouts, and disabled servers never start', async () => {

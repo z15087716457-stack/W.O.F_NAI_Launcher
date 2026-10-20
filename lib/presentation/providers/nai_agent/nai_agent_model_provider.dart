@@ -11,7 +11,6 @@ import '../../prompt_assistant/services/provider_adapters/prompt_assistant_adapt
 class NaiAgentModelConnection {
   NaiAgentModelConnection(
     this._private, {
-    this.visionBlockedByProvider,
     this.providerName,
     NaiAgentModelConnection Function(String)? reasoningOverride,
     List<String> reasoningEfforts = const [],
@@ -21,12 +20,9 @@ class NaiAgentModelConnection {
   final NaiAgentModelConnection Function(String)? _reasoningOverride;
   final List<String> _reasoningEfforts;
   bool get allowsImages => _private['vision'] == true;
-  final bool? visionBlockedByProvider;
   final String? providerName;
-  NaiAgentVisionAccess get visionAccess => NaiAgentVisionAccess(
-    blockedByProvider: visionBlockedByProvider,
-    providerName: providerName,
-  );
+  NaiAgentVisionAccess get visionAccess =>
+      NaiAgentVisionAccess(providerName: providerName);
   bool supportsReasoningEffort(String effort) =>
       _reasoningEfforts.contains(effort);
   NaiAgentModelConnection withReasoningEffort(String effort) {
@@ -114,27 +110,18 @@ NaiAgentModelConnection mapNaiAgentModel(
     final error = overrides.validate(model.name);
     if (error != null) throw FormatException(error);
   }
-  final sampling = model.allowsSampling;
   final payload = switch (provider.protocol) {
     ProviderProtocol.openaiChatCompletions ||
     ProviderProtocol.ollamaChatCompletions => {
       ...chatReasoningOptions(provider, model),
-      if (sampling && model.topP != null) 'top_p': model.topP,
     },
     ProviderProtocol.openaiResponses => {
       if (model.reasoningEffort != null)
         'reasoning': {'effort': model.reasoningEffort},
-      if (sampling && model.topP != null) 'top_p': model.topP,
     },
-    ProviderProtocol.anthropicMessages => {
-      ...anthropicReasoningOptions(model),
-      if (sampling && model.topP != null) 'top_p': model.topP,
-    },
+    ProviderProtocol.anthropicMessages => {...anthropicReasoningOptions(model)},
     ProviderProtocol.geminiGenerateContent => {
       'generationConfig': {
-        if (sampling && model.temperature != null)
-          'temperature': model.temperature,
-        if (sampling && model.topP != null) 'topP': model.topP,
         if (model.reasoningEffort != null)
           'thinkingConfig': geminiThinkingOptions(model),
       },
@@ -153,13 +140,9 @@ NaiAgentModelConnection mapNaiAgentModel(
       'headers': promptAssistantHeaders(provider, {}, model: model),
       'body': overrides?.body ?? const {},
       'payloadParameters': payload,
-      'temperature': sampling ? model.temperature : null,
-      'allowsSampling': sampling,
       'contextWindow': model.contextWindow ?? model.catalogEntry?.contextLimit,
       'maxTokens': model.maxOutputTokens ?? model.catalogEntry?.outputLimit,
-      'vision': provider.allowImageInput
-          ? model.supportsVision ?? model.catalogEntry?.supportsVision
-          : false,
+      'vision': model.supportsVision ?? model.catalogEntry?.supportsVision,
       'tools': model.supportsTools ?? model.catalogEntry?.supportsToolCalling,
       'reasoning':
           model.reasoningEffort != null && model.reasoningEffort != 'none',
@@ -177,9 +160,6 @@ NaiAgentModelConnection mapNaiAgentModel(
       'maxConcurrentRequests': provider.maxConcurrentRequests.clamp(1, 20),
     },
     providerName: provider.name,
-    visionBlockedByProvider:
-        !provider.allowImageInput &&
-        (model.supportsVision ?? model.catalogEntry?.supportsVision) == true,
     reasoningEfforts: naiAgentReasoningEfforts(provider, model),
     reasoningOverride: (effort) {
       if (!naiAgentReasoningEfforts(provider, model).contains(effort)) {

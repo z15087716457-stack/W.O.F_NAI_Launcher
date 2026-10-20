@@ -94,6 +94,7 @@ void main() {
         t,
         data: d.copyWith(agent: d.agent.copyWith(globalInstructions: '')),
         locale: locale,
+        agentTab: 'instructions',
       );
       final global = find.byKey(const Key('agent-global'));
       final l = AppLocalizations.of(t.element(global))!;
@@ -128,7 +129,7 @@ void main() {
   });
 
   testWidgets('生效顺序：内置提示词前 → 内置系统提示词 → 全局指令 → 工作区规则 → Skill 目录', (t) async {
-    await pumpSettings(t, page: SettingsPageId.agent);
+    await pumpSettings(t, page: SettingsPageId.agent, agentTab: 'instructions');
     double x(String s) => t
         .getTopLeft(
           find.descendant(
@@ -161,6 +162,7 @@ void main() {
           tools: d.agent.tools,
         ),
       ),
+      agentTab: 'tools',
     );
     expect(
       find.descendant(
@@ -192,12 +194,20 @@ void main() {
     );
 
     testWidgets('没给数据就不显示', (t) async {
-      await pumpSettings(t, page: SettingsPageId.agent);
+      await pumpSettings(
+        t,
+        page: SettingsPageId.agent,
+        agentTab: 'instructions',
+      );
       expect(find.byKey(const Key('agent-base')), findsNothing);
     });
 
     testWidgets('全局：展开、编辑、底栏保存，带上工作区核对', (t) async {
-      final rec = await pumpSettings(t, data: withPrompt());
+      final rec = await pumpSettings(
+        t,
+        data: withPrompt(),
+        agentTab: 'instructions',
+      );
       expect(find.text('全局：内置 · 工作区「灵感」：沿用全局'), findsOneWidget);
       expect(find.byKey(const Key('agent-base-editor')), findsNothing);
       await tapKey(t, 'agent-base-toggle');
@@ -219,7 +229,11 @@ void main() {
     });
 
     testWidgets('工作区：沿用全局只读，关掉才单独保存；再打开存 null', (t) async {
-      final rec = await pumpSettings(t, data: withPrompt());
+      final rec = await pumpSettings(
+        t,
+        data: withPrompt(),
+        agentTab: 'instructions',
+      );
       await tapKey(t, 'agent-base-toggle');
       await tap(t, find.text('工作区 · 灵感'));
       final inherit = find.byKey(const Key('agent-base-inherit'));
@@ -241,7 +255,11 @@ void main() {
     });
 
     testWidgets('有草稿时切范围要确认；离开本页也要确认', (t) async {
-      final rec = await pumpSettings(t, data: withPrompt());
+      final rec = await pumpSettings(
+        t,
+        data: withPrompt(),
+        agentTab: 'instructions',
+      );
       await tapKey(t, 'agent-base-toggle');
       await t.enterText(find.byKey(const Key('agent-base-text')), '草稿');
       await t.pumpAndSettle();
@@ -261,7 +279,11 @@ void main() {
     });
 
     testWidgets('保存失败保留草稿并提示', (t) async {
-      final rec = await pumpSettings(t, data: withPrompt());
+      final rec = await pumpSettings(
+        t,
+        data: withPrompt(),
+        agentTab: 'instructions',
+      );
       rec.promptResult = false;
       await tapKey(t, 'agent-base-toggle');
       await t.enterText(find.byKey(const Key('agent-base-text')), '会失败');
@@ -285,6 +307,7 @@ void main() {
             workspace: '工作区正文',
           ),
         ),
+        agentTab: 'instructions',
       );
       expect(find.text('全局：已自定义 · 工作区「灵感」：单独设置'), findsOneWidget);
       await tapKey(t, 'agent-base-toggle');
@@ -300,6 +323,7 @@ void main() {
       await pumpSettings(
         t,
         data: withPrompt(const SettingsSystemPrompt(builtin: '内置正文')),
+        agentTab: 'instructions',
       );
       expect(find.text('全局：内置'), findsOneWidget);
       await tapKey(t, 'agent-base-toggle');

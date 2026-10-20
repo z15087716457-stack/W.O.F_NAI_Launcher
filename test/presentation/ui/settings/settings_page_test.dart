@@ -163,7 +163,11 @@ void main() {
   });
 
   testWidgets('Agent 指令是草稿：改了出底栏，保存才回调', (t) async {
-    final rec = await pumpSettings(t, page: SettingsPageId.agent);
+    final rec = await pumpSettings(
+      t,
+      page: SettingsPageId.agent,
+      agentTab: 'instructions',
+    );
     expect(find.byKey(const Key('agent-unsaved')), findsNothing);
     await t.enterText(find.byKey(const Key('agent-global')), '新指令');
     await t.pumpAndSettle();

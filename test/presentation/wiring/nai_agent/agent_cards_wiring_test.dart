@@ -59,96 +59,145 @@ void main() {
     view.resetDevicePixelRatio();
   });
 
-  testWidgets(
-    'settings and gallery ids route through both existing undo callbacks',
-    (tester) async {
-      h.c.selected!.messages = [
-        {'role': 'user', 'content': 'cards'},
-        {
-          'role': 'assistant',
-          'content': [
+  for (final persistedCodeMode in [false, true]) {
+    testWidgets(
+      'settings and gallery ids route through both existing undo callbacks, CodeMode=$persistedCodeMode',
+      (tester) async {
+        h.c.selected!.messages = [
+          {'role': 'user', 'content': 'cards'},
+          {
+            'role': 'assistant',
+            'content': [
+              {
+                'type': 'toolCall',
+                'id': 's',
+                'name': 'settings_update',
+                'arguments': {},
+              },
+              {
+                'type': 'toolCall',
+                'id': 'g',
+                'name': 'gallery_manage',
+                'arguments': {
+                  'action': 'delete',
+                  'scope': 'library',
+                  'image_id': 'history-non-gallery-test',
+                },
+              },
+            ],
+          },
+          {
+            'role': 'toolResult',
+            'toolCallId': 's',
+            'details': {
+              'applied_fields': ['font_scale'],
+              'before': {'font_scale': 1.0},
+              'values': {'font_scale': 1.1},
+              'version': 'v',
+            },
+          },
+          {
+            'role': 'toolResult',
+            'toolCallId': 'g',
+            'details': {
+              'ok': true,
+              'image_id': 'history-non-gallery-test',
+              'scope': 'library',
+              'image_version': 'iv',
+            },
+          },
+        ];
+        if (persistedCodeMode) {
+          final messages = h.c.selected!.messages;
+          final calls = (messages[1]['content'] as List)
+              .cast<Map<String, dynamic>>();
+          h.c.selected!.messages = [
+            messages.first,
             {
-              'type': 'toolCall',
-              'id': 's',
-              'name': 'settings_update',
-              'arguments': {},
+              'role': 'assistant',
+              'content': [
+                {
+                  'type': 'toolCall',
+                  'id': 'code',
+                  'name': 'codemode',
+                  'arguments': {},
+                },
+              ],
             },
             {
-              'type': 'toolCall',
-              'id': 'g',
-              'name': 'gallery_manage',
-              'arguments': {
-                'action': 'delete',
-                'scope': 'library',
-                'image_id': 'history-non-gallery-test',
+              'role': 'toolResult',
+              'toolCallId': 'code',
+              'details': {
+                'calls': [
+                  for (final call in calls)
+                    {
+                      'id': call['id'],
+                      'name': 'mcp__nai_studio__${call['name']}',
+                      'status': 'ok',
+                      'args': '{truncated',
+                    },
+                ],
+                'studio_results': [
+                  for (final call in calls)
+                    {
+                      'tool': 'mcp__nai_studio__${call['name']}',
+                      'tool_call_id': call['id'],
+                      'arguments': call['arguments'],
+                      ...messages.singleWhere(
+                            (m) => m['toolCallId'] == call['id'],
+                          )['details']
+                          as Map,
+                    },
+                ],
               },
             },
-          ],
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 's',
-          'details': {
-            'applied_fields': ['font_scale'],
-            'before': {'font_scale': 1.0},
-            'values': {'font_scale': 1.1},
-            'version': 'v',
-          },
-        },
-        {
-          'role': 'toolResult',
-          'toolCallId': 'g',
-          'details': {
-            'ok': true,
-            'image_id': 'history-non-gallery-test',
-            'scope': 'library',
-            'image_version': 'iv',
-          },
-        },
-      ];
-      await h.pump(tester);
-      final cards = h.panel(tester).data.thread.single.reply!.blocks;
-      final settings = cards.whereType<AgentSettingsBlock>().single;
-      final image = cards.whereType<AgentGalleryBlock>().single;
-      var restored = false;
-      await tester.runAsync(() async {
-        restored = await h.panel(tester).actions.onUndoDiffs([settings.id]);
-      });
-      expect(restored, true);
-      expect(storage.values['font_scale'], 1.0);
-      await tester.pumpAndSettle();
-      expect(
-        h
-            .panel(tester)
-            .data
-            .thread
-            .single
-            .reply!
-            .blocks
-            .whereType<AgentSettingsBlock>()
-            .single
-            .state,
-        AgentDiffState.undone,
-      );
-      expect(await h.panel(tester).actions.onUndoDiff(settings.id), false);
-      expect(await h.panel(tester).actions.onUndoDiff(image.id), true);
-      verify(() => gallery.undoManage(any(), any())).called(1);
-      await tester.pumpAndSettle();
-      expect(
-        h
-            .panel(tester)
-            .data
-            .thread
-            .single
-            .reply!
-            .blocks
-            .whereType<AgentGalleryBlock>()
-            .single
-            .state,
-        AgentDiffState.undone,
-      );
-    },
-  );
+          ];
+          expect(h.c.selected!.tools, isEmpty);
+        }
+        await h.pump(tester);
+        final cards = h.panel(tester).data.thread.single.reply!.blocks;
+        final settings = cards.whereType<AgentSettingsBlock>().single;
+        final image = cards.whereType<AgentGalleryBlock>().single;
+        var restored = false;
+        await tester.runAsync(() async {
+          restored = await h.panel(tester).actions.onUndoDiffs([settings.id]);
+        });
+        expect(restored, true);
+        expect(storage.values['font_scale'], 1.0);
+        await tester.pumpAndSettle();
+        expect(
+          h
+              .panel(tester)
+              .data
+              .thread
+              .single
+              .reply!
+              .blocks
+              .whereType<AgentSettingsBlock>()
+              .single
+              .state,
+          AgentDiffState.undone,
+        );
+        expect(await h.panel(tester).actions.onUndoDiff(settings.id), false);
+        expect(await h.panel(tester).actions.onUndoDiff(image.id), true);
+        verify(() => gallery.undoManage(any(), any())).called(1);
+        await tester.pumpAndSettle();
+        expect(
+          h
+              .panel(tester)
+              .data
+              .thread
+              .single
+              .reply!
+              .blocks
+              .whereType<AgentGalleryBlock>()
+              .single
+              .state,
+          AgentDiffState.undone,
+        );
+      },
+    );
+  }
 
   testWidgets('setting anchor callback keeps section and anchor in route', (
     tester,

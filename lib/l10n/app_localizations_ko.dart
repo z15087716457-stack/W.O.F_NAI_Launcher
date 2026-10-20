@@ -7523,28 +7523,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get modelReasoning_serviceDefault => '서비스 기본값';
 
   @override
-  String get modelReasoning_off => '끄기';
+  String get modelReasoning_off => 'Off';
 
   @override
-  String get modelReasoning_on => '켜기';
+  String get modelReasoning_on => 'On';
 
   @override
-  String get modelReasoning_minimal => '최소';
+  String get modelReasoning_minimal => 'Minimal';
 
   @override
-  String get modelReasoning_low => '낮음';
+  String get modelReasoning_low => 'Low';
 
   @override
-  String get modelReasoning_medium => '보통';
+  String get modelReasoning_medium => 'Medium';
 
   @override
-  String get modelReasoning_high => '높음';
+  String get modelReasoning_high => 'High';
 
   @override
-  String get modelReasoning_xhigh => '매우 높음';
+  String get modelReasoning_xhigh => 'XHigh';
 
   @override
-  String get modelReasoning_max => '최대';
+  String get modelReasoning_max => 'Max';
 
   @override
   String get modelProvider_custom => '사용자 지정 서비스';
@@ -7663,14 +7663,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get modelParams_maxOutputPositive => '최대 출력 토큰은 0보다 커야 합니다.';
-
-  @override
-  String get modelParams_anthropicTemperatureRange =>
-      'Anthropic Temperature는 0에서 1 사이여야 합니다.';
-
-  @override
-  String get modelParams_anthropicSamplingConflict =>
-      'Anthropic은 Temperature와 Top P 중 하나만 받습니다. 모델 매개변수를 확인하세요.';
 
   @override
   String modelParams_thinkingBudgetTooSmall(Object minimum) {
@@ -16151,16 +16143,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_error => '작업에 실패했습니다. 모델 설정이나 파일을 확인하세요.';
 
   @override
-  String get naiAgent_visionDisabled =>
-      '현재 이미지 입력을 사용할 수 없습니다. 설정 → 모델 및 API에서 제공자의 요청 → 이미지 입력이 허용인지, 선택한 모델이 이미지 입력을 지원하는지 확인하세요.';
-
-  @override
   String get naiAgent_visionCurrentProvider => '현재 제공자';
-
-  @override
-  String naiAgent_visionProviderBlocked(String providerName) {
-    return '제공자 $providerName에서 이미지 전송을 허용하지 않습니다. 설정 → 모델 및 API → $providerName → 요청 → 이미지 입력을 허용으로 바꾸세요.';
-  }
 
   @override
   String naiAgent_visionModelUnsupported(String providerName) {
@@ -20297,6 +20280,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agMcpEditTitle => 'MCP 서버 편집';
 
   @override
+  String get set_agTabGeneral => '일반';
+
+  @override
+  String get set_agTabTools => '도구 및 확장';
+
+  @override
   String get ag_recent => '최근';
 
   @override
@@ -20967,19 +20956,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mp_retryOff => '끔';
 
   @override
-  String get mp_imageInput => '이미지 입력';
-
-  @override
-  String get mp_imageInputHelp =>
-      '끄면 모델 능력에서 \"이미지 입력\"을 켜도 이 공급자의 모든 모델에 이미지가 전달되지 않습니다(NAI Agent 이미지 읽기와 첨부 포함)';
-
-  @override
-  String get mp_allow => '허용';
-
-  @override
-  String get mp_noSend => '안 보냄';
-
-  @override
   String get mp_seconds => '초';
 
   @override
@@ -21074,18 +21050,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mp_unsupported => '미지원';
-
-  @override
-  String get mp_sampling => '샘플링';
-
-  @override
-  String get mp_temperature => '온도';
-
-  @override
-  String get mp_topP => 'Top P';
-
-  @override
-  String get mp_followDefault => '서비스 기본값';
 
   @override
   String get mp_capabilities => '기능';

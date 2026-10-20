@@ -59,16 +59,9 @@ class AnthropicMessagesAdapter extends PromptAssistantProviderAdapter {
                       2048
                 : 2048),
         'system': request.systemPrompt,
-        if (allowsModelSampling(request.modelConfig) &&
-            request.modelConfig?.temperature != null)
-          'temperature': request.modelConfig!.temperature,
-        if (allowsModelSampling(request.modelConfig) &&
-            request.modelConfig?.temperature == null &&
-            request.modelConfig?.topP != null)
-          'top_p': request.modelConfig!.topP,
         ...anthropicReasoningOptions(request.modelConfig),
         'messages': [
-          {'role': 'user', 'content': _contentParts(request.userParts)},
+          {'role': 'user', 'content': _contentParts(request.modelUserParts)},
         ],
       }),
       options: Options(

@@ -2,8 +2,6 @@ import '../../models/model_catalog_entry.dart';
 import '../../models/prompt_assistant_models.dart';
 import '../../../../core/utils/localization_extension.dart';
 
-bool allowsModelSampling(ModelConfig? model) => model?.allowsSampling ?? true;
-
 /// Budget APIs have no named native effort levels. These are client presets,
 /// constrained by the catalog and by the requested total output budget.
 int modelThinkingBudget(ModelConfig model, {bool anthropic = false}) {

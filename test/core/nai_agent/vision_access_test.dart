@@ -13,42 +13,30 @@ void main() {
     const Locale('ja'),
     const Locale('ko'),
   ]) {
-    test('vision reasons and attachment count are localized for $locale', () {
-      setCurrentL10nLocale(locale);
-      final l = currentL10n;
-      const provider = NaiAgentVisionAccess(
-        blockedByProvider: true,
-        providerName: 'Synthetic Provider',
-      );
-      const model = NaiAgentVisionAccess(
-        blockedByProvider: false,
-        providerName: 'Synthetic Provider',
-      );
-      expect(
-        provider.unavailableMessage,
-        l.naiAgent_visionProviderBlocked('Synthetic Provider'),
-      );
-      expect(
-        model.unavailableMessage,
-        l.naiAgent_visionModelUnsupported('Synthetic Provider'),
-      );
-      expect(provider.unavailableMessage, isNot(model.unavailableMessage));
-      expect(
-        provider.skippedAttachmentsNotice(3),
-        l.naiAgent_visionAttachmentsSkipped(3, provider.unavailableMessage),
-      );
-      expect(provider.skippedAttachmentsNotice(3), contains('3'));
-      expect(
-        const NaiAgentVisionAccess(
-          blockedByProvider: true,
-          providerName: '  ',
-        ).unavailableMessage,
-        l.naiAgent_visionProviderBlocked(l.naiAgent_visionCurrentProvider),
-      );
-      expect(
-        const NaiAgentVisionAccess().unavailableMessage,
-        l.naiAgent_visionDisabled,
-      );
-    });
+    test(
+      'model vision reason and attachment count are localized for $locale',
+      () {
+        setCurrentL10nLocale(locale);
+        final l = currentL10n;
+        const model = NaiAgentVisionAccess(providerName: 'Synthetic Provider');
+        expect(
+          model.unavailableMessage,
+          l.naiAgent_visionModelUnsupported('Synthetic Provider'),
+        );
+        expect(
+          model.skippedAttachmentsNotice(3),
+          l.naiAgent_visionAttachmentsSkipped(3, model.unavailableMessage),
+        );
+        expect(model.skippedAttachmentsNotice(3), contains('3'));
+        expect(
+          const NaiAgentVisionAccess(providerName: '  ').unavailableMessage,
+          l.naiAgent_visionModelUnsupported(l.naiAgent_visionCurrentProvider),
+        );
+        expect(
+          const NaiAgentVisionAccess().unavailableMessage,
+          l.naiAgent_visionModelUnsupported(l.naiAgent_visionCurrentProvider),
+        );
+      },
+    );
   }
 }

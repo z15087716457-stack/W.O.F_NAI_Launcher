@@ -4254,14 +4254,14 @@
   "modelTask_wikiTranslateDescription": "翻译百科正文、整理排版，并按语境选择可点击标签。",
   "modelTask_connectionTest": "模型连接测试",
   "modelReasoning_serviceDefault": "服务默认",
-  "modelReasoning_off": "关闭",
-  "modelReasoning_on": "开启",
-  "modelReasoning_minimal": "极低",
-  "modelReasoning_low": "低",
-  "modelReasoning_medium": "中",
-  "modelReasoning_high": "高",
-  "modelReasoning_xhigh": "极高",
-  "modelReasoning_max": "最高",
+  "modelReasoning_off": "Off",
+  "modelReasoning_on": "On",
+  "modelReasoning_minimal": "Minimal",
+  "modelReasoning_low": "Low",
+  "modelReasoning_medium": "Medium",
+  "modelReasoning_high": "High",
+  "modelReasoning_xhigh": "XHigh",
+  "modelReasoning_max": "Max",
   "modelProvider_custom": "自定义服务",
   "modelProvider_qwen": "通义千问 · 百炼",
   "modelProvider_moonshot": "Kimi · 月之暗面",
@@ -4297,8 +4297,6 @@
   "modelParams_temperatureRange": "Temperature 应在 0–2 之间。",
   "modelParams_topPRange": "Top P 应大于 0 且不超过 1。",
   "modelParams_maxOutputPositive": "最大输出 token 必须大于 0。",
-  "modelParams_anthropicTemperatureRange": "Anthropic 的 Temperature 应在 0–1 之间。",
-  "modelParams_anthropicSamplingConflict": "Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。",
   "modelParams_thinkingBudgetTooSmall": "最大输出必须大于思考预算下限 {minimum}。",
   "@modelParams_thinkingBudgetTooSmall": {
     "placeholders": {
@@ -8804,16 +8802,7 @@
   "naiAgent_toolsHint": "当前状态、图片、提示词和工作区文件按需调用；业务操作的详细用法写在 nai-studio、nai-prompt 等 Skill 里，用到时才读取。",
   "naiAgent_unknownCost": "实际费用以服务商为准",
   "naiAgent_error": "操作未完成，请检查模型设置或工作区文件。",
-  "naiAgent_visionDisabled": "当前图片输入不可用。请在 设置 → 模型与接口 中检查服务商的 请求 → 图片输入 是否为“允许”，并确认所选模型支持图片输入。",
   "naiAgent_visionCurrentProvider": "当前服务商",
-  "naiAgent_visionProviderBlocked": "服务商 {providerName} 当前未允许发送图片。请到 设置 → 模型与接口 → {providerName} → 请求 → 图片输入 改为“允许”。",
-  "@naiAgent_visionProviderBlocked": {
-    "placeholders": {
-      "providerName": {
-        "type": "String"
-      }
-    }
-  },
   "naiAgent_visionModelUnsupported": "服务商 {providerName} 下的所选模型未声明支持图片输入。请在 设置 → 模型与接口 → {providerName} → 模型 → 能力 → 图片输入 确认支持，或切换到支持图片输入的模型。",
   "@naiAgent_visionModelUnsupported": {
     "placeholders": {
@@ -10817,6 +10806,8 @@
   "set_agFinalLive": "当前会话实际发给模型的完整系统提示词。",
   "set_agBuiltinSub": "Studio 内置的基础提示词，随版本更新。",
   "set_agMcpEditTitle": "编辑 MCP 服务器",
+  "set_agTabGeneral": "常规",
+  "set_agTabTools": "工具与扩展",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "编辑",
@@ -11103,10 +11094,6 @@
   "mp_retry": "失败重试",
   "mp_retryHelp": "连接失败或服务繁忙时重试",
   "mp_retryOff": "关",
-  "mp_imageInput": "图片输入",
-  "mp_imageInputHelp": "关闭时本服务商所有模型都不会收到图片（含 NAI Agent 的看图和附件），即使模型能力里勾了“图片输入”",
-  "mp_allow": "允许",
-  "mp_noSend": "不发送",
   "mp_seconds": "秒",
   "mp_countUnit": "个",
   "mp_headers": "自定义请求头",
@@ -11139,10 +11126,6 @@
   "mp_protocolNoReasoning": "此接口协议不支持思考调节",
   "mp_unconfirmed": "未确认",
   "mp_unsupported": "不支持",
-  "mp_sampling": "采样",
-  "mp_temperature": "温度",
-  "mp_topP": "Top P",
-  "mp_followDefault": "跟随服务默认",
   "mp_capabilities": "能力",
   "mp_capVision": "图片输入",
   "mp_capTools": "工具调用",

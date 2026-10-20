@@ -638,13 +638,23 @@ class AgentComposerState extends State<AgentComposer> {
                               ),
                             ),
                           ),
+                          // 档位名是英文（Medium、XHigh…），窄宽时和模型名一起让位。
                           if (thinking != null)
-                            Text(
-                              thinking,
-                              style: UiText.sans(
-                                11.5,
-                                color: c.faint,
-                                height: 1.2,
+                            Flexible(
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: narrow ? 40 : 72,
+                                ),
+                                child: Text(
+                                  thinking,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: UiText.sans(
+                                    11.5,
+                                    color: c.faint,
+                                    height: 1.2,
+                                  ),
+                                ),
                               ),
                             ),
                         ],

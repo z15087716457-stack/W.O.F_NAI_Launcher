@@ -14,6 +14,7 @@ void main() {
       t,
       page: SettingsPageId.agent,
       locale: locale,
+      agentTab: 'skills',
     );
     await t.scrollUntilVisible(
       find.byKey(const Key('skill-add')),
@@ -138,7 +139,11 @@ void main() {
   });
 
   testWidgets('侧栏：常驻上下文与 Skill 位置；指令顺序末环是 Skill 目录', (t) async {
-    final rec = await pumpSettings(t, page: SettingsPageId.agent);
+    final rec = await pumpSettings(
+      t,
+      page: SettingsPageId.agent,
+      agentTab: 'skills',
+    );
     expect(find.byKey(const Key('agent-context')), findsOneWidget);
     expect(find.text('Skill 目录 · 4 项'), findsOneWidget);
     expect(find.text('工具地图'), findsNothing);

@@ -224,52 +224,83 @@ void main() {
     'collection_remove': (AgentGalleryAction.collectionRemove, true),
     'export': (AgentGalleryAction.export, false),
   }.entries) {
-    test('gallery ${entry.key} projects count/target/undo', () {
-      final update = ['favorite', 'unfavorite', 'tags'].contains(entry.key);
-      final args = <String, dynamic>{
-        'action': update ? 'update' : entry.key,
-        'image_id': 'gallery:1',
-        'target_folder': '/library/target',
-        if (update)
-          'changes': entry.key == 'tags'
-              ? {
-                  'tags': ['new'],
-                }
-              : {'favorite': entry.key == 'favorite'},
-      };
-      final details = {
-        'ok': true,
-        'scope': 'library',
-        'image_id': 'gallery:1',
-        'image_version': 'v',
-        'source_path': '/library/original/a.png',
-        'collection_version': 'cv',
-        'before': entry.key.startsWith('collection')
-            ? {
-                'gallery:1': {'favorite': false, 'collection_ids': []},
-              }
-            : {'favorite': false, 'tags': []},
-        'image_versions': {'gallery:1': 'v'},
-        if (entry.key.startsWith('collection')) 'collection_name': 'Collection',
-      };
-      runtime.messages = [
-        assistant([call('gallery', 'gallery_manage', args)]),
-        result('gallery', details),
-      ];
-      final projected = blocks();
-      expect(projected.first, isA<AgentStepsBlock>());
-      final card = projected.whereType<AgentGalleryBlock>().single;
-      expect(card.action, entry.value.$1);
-      expect(card.undoable, entry.value.$2);
-      expect(card.count, 1);
-      if (entry.key.endsWith('_file')) expect(card.target, 'target');
-      if (entry.key.startsWith('collection')) expect(card.target, 'Collection');
-      mapper.undone.add(card.id);
-      expect(
-        blocks().whereType<AgentGalleryBlock>().single.state,
-        AgentDiffState.undone,
+    for (final persisted in [false, true]) {
+      test(
+        'gallery ${entry.key} projects count/target/undo persisted=$persisted',
+        () {
+          final update = ['favorite', 'unfavorite', 'tags'].contains(entry.key);
+          final args = <String, dynamic>{
+            'action': update ? 'update' : entry.key,
+            'image_id': 'gallery:1',
+            'target_folder': '/library/target',
+            if (update)
+              'changes': entry.key == 'tags'
+                  ? {
+                      'tags': ['new'],
+                    }
+                  : {'favorite': entry.key == 'favorite'},
+          };
+          final details = {
+            'ok': true,
+            'scope': 'library',
+            'image_id': 'gallery:1',
+            'image_version': 'v',
+            'source_path': '/library/original/a.png',
+            'collection_version': 'cv',
+            'before': entry.key.startsWith('collection')
+                ? {
+                    'gallery:1': {'favorite': false, 'collection_ids': []},
+                  }
+                : {'favorite': false, 'tags': []},
+            'image_versions': {'gallery:1': 'v'},
+            if (entry.key.startsWith('collection'))
+              'collection_name': 'Collection',
+          };
+          runtime.messages = [
+            assistant([call('gallery', 'gallery_manage', args)]),
+            result('gallery', details),
+          ];
+          if (persisted) {
+            runtime.messages = [
+              assistant([call('code', 'codemode')]),
+              result('code', {
+                'calls': [
+                  {
+                    'id': 'gallery',
+                    'name': 'mcp__nai_studio__gallery_manage',
+                    'status': 'ok',
+                    'args': '{truncated',
+                  },
+                ],
+                'studio_results': [
+                  {
+                    'tool': 'mcp__nai_studio__gallery_manage',
+                    'tool_call_id': 'gallery',
+                    'arguments': args,
+                    ...details,
+                  },
+                ],
+              }),
+            ];
+          }
+          final projected = blocks();
+          expect(projected.first, isA<AgentStepsBlock>());
+          final card = projected.whereType<AgentGalleryBlock>().single;
+          expect(card.action, entry.value.$1);
+          expect(card.undoable, entry.value.$2);
+          expect(card.count, 1);
+          if (entry.key.endsWith('_file')) expect(card.target, 'target');
+          if (entry.key.startsWith('collection')) {
+            expect(card.target, 'Collection');
+          }
+          mapper.undone.add(card.id);
+          expect(
+            blocks().whereType<AgentGalleryBlock>().single.state,
+            AgentDiffState.undone,
+          );
+        },
       );
-    });
+    }
   }
 
   test('gallery thumbnail loader caches and caps cards to eight', () async {
@@ -367,51 +398,169 @@ void main() {
     expect((blocks().first as AgentCompactionBlock).auto, false);
   });
 
-  test('live CodeMode nested event projects tags and cards once', () {
-    runtime.messages = [
-      assistant([call('code', 'codemode')]),
-      result('code', {
-        'nestedCalls': {
-          'calls': [
-            {'id': 'tag', 'name': 'tag_query', 'status': 'ok', 'arguments': {}},
-            {
-              'id': 'setting',
-              'name': 'settings_update',
-              'status': 'ok',
-              'arguments': {},
-            },
+  Map<String, dynamic> mcpResult(Map<String, dynamic> native) => {
+    'content': [
+      {'type': 'text', 'text': 'native result'},
+    ],
+    'details': {'server': 'nai_studio', 'tool': 'synthetic'},
+    'structuredContent': {
+      'content': [
+        {'type': 'text', 'text': 'native result'},
+      ],
+      'structuredContent': native,
+    },
+  };
+
+  test('result details unwrap only recognized MCP envelopes', () {
+    final native = {'tags': []};
+    expect(agentResultDetails(mcpResult(native)), native);
+    expect(agentResultDetails({'structuredContent': native}), native);
+    expect(agentResultDetails({'details': native}), native);
+    expect(agentResultDetails({'details': mcpResult(native)}), native);
+    final unrelated = {'structuredContent': native, 'custom': true};
+    expect(agentResultDetails({'structuredContent': unrelated}), unrelated);
+  });
+
+  for (final mode in ['live', 'persisted', 'both']) {
+    test('CodeMode real Pi shape: $mode chips/cards and guarded undo once', () {
+      const galleryArgs = {
+        'action': 'collection_add',
+        'image_ids': ['gallery:1'],
+      };
+      final native = <String, Map<String, dynamic>>{
+        'tag_query': {
+          'tags': [
+            {'tag': 'nested', 'category': 'character', 'post_count': 4},
           ],
         },
-      }),
+        'wiki_query': {
+          'pages': [
+            {'tag': 'wiki', 'found': true, 'body': 'short body'},
+          ],
+        },
+        'studio_search': {
+          'items': [
+            {'name': 'search', 'category': 'artist', 'post_count': 3},
+          ],
+        },
+        'settings_update': {
+          'applied_fields': ['font_scale'],
+          'before': {'font_scale': 1},
+          'values': {'font_scale': 1.1},
+          'version': 'v',
+        },
+        'gallery_manage': {
+          'ok': true,
+          'collection_id': 'collection',
+          'collection_name': 'Collection',
+          'collection_version': 'cv',
+          'image_ids': ['gallery:1'],
+          'before': {
+            'gallery:1': {'favorite': false, 'collection_ids': []},
+          },
+          'image_versions': {'gallery:1': 'iv'},
+        },
+      };
+      runtime.messages = [
+        assistant([call('code', 'codemode')]),
+        result('code', {
+          // Pi 1.3 persists calls directly, args is a truncated JSON preview.
+          'calls': [
+            for (final name in native.keys)
+              {
+                'id': name,
+                'name': 'mcp__nai_studio__$name',
+                'status': 'ok',
+                'args': name == 'gallery_manage' ? '{truncated' : '{}',
+              },
+          ],
+          if (mode != 'live')
+            'studio_results': [
+              for (final entry in native.entries)
+                {
+                  'tool': 'mcp__nai_studio__${entry.key}',
+                  'tool_call_id': entry.key,
+                  ...entry.value,
+                  if (entry.key == 'gallery_manage') 'arguments': galleryArgs,
+                },
+            ],
+        }),
+      ];
+      if (mode != 'persisted') {
+        runtime.tools.addAll({
+          for (final entry in native.entries)
+            entry.key: {
+              'type': 'tool_execution_end',
+              'args': entry.key == 'gallery_manage' ? galleryArgs : {},
+              'result': mcpResult(entry.value),
+            },
+        });
+      }
+      final mapped = mapper.map(runtime, preferences: {'font_scale': 1.1});
+      final projected = mapped.turns.single.reply!.blocks;
+      final hits = projected.whereType<AgentStepsBlock>().single.steps;
+      expect(hits.expand((step) => step.tags).map((tag) => tag.tag), [
+        'nested',
+        'wiki',
+        'search',
+      ]);
+      expect(projected.whereType<AgentSettingsBlock>(), hasLength(1));
+      expect(projected.whereType<AgentGalleryBlock>(), hasLength(1));
+      final setting = projected.whereType<AgentSettingsBlock>().single;
+      expect(setting.state, AgentDiffState.applied);
+      expect(mapped.settings[setting.id]!.matches({'font_scale': 1.1}), true);
+      final gallery = projected.whereType<AgentGalleryBlock>().single;
+      expect(gallery.undoable, true);
+      expect(gallery.target, 'Collection');
+      expect(mapped.gallery[gallery.id]!.arguments, galleryArgs);
+      expect(
+        mapped.gallery[gallery.id]!.details['collection_id'],
+        'collection',
+      );
+      mapper.undone.addAll([setting.id, gallery.id]);
+      final undone = blocks();
+      expect(
+        undone.whereType<AgentSettingsBlock>().single.state,
+        AgentDiffState.undone,
+      );
+      expect(
+        undone.whereType<AgentGalleryBlock>().single.state,
+        AgentDiffState.undone,
+      );
+    });
+  }
+
+  test('direct live MCP results also unwrap for chips and settings cards', () {
+    runtime.messages = [
+      assistant([
+        call('tag', 'mcp__nai_studio__tag_query'),
+        call('setting', 'mcp__nai_studio__settings_update'),
+      ]),
     ];
     runtime.tools.addAll({
       'tag': {
         'type': 'tool_execution_end',
-        'result': {
-          'details': {
-            'tags': [
-              {'tag': 'nested', 'category': 'character', 'post_count': 4},
-            ],
-          },
-        },
+        'result': mcpResult({
+          'tags': [
+            {'tag': 'direct'},
+          ],
+        }),
       },
       'setting': {
         'type': 'tool_execution_end',
-        'result': {
-          'details': {
-            'applied_fields': ['font_scale'],
-            'before': {'font_scale': 1},
-            'values': {'font_scale': 1.1},
-            'version': 'v',
-          },
-        },
+        'result': mcpResult({
+          'applied_fields': ['font_scale'],
+          'before': {'font_scale': 1},
+          'values': {'font_scale': 1.1},
+          'version': 'v',
+        }),
       },
     });
     final mapped = blocks(preferences: {'font_scale': 1.1});
     expect(mapped.whereType<AgentSettingsBlock>(), hasLength(1));
     expect(
       mapped.whereType<AgentStepsBlock>().single.steps.first.tags.single.tag,
-      'nested',
+      'direct',
     );
   });
 

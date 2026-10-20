@@ -196,7 +196,7 @@ void main() {
       expect(decoration.enabledBorder, isA<UnderlineInputBorder>());
       expect(decoration.filled, isFalse);
     }
-    expect(_reasoning(tester), '跟随模型（高）');
+    expect(_reasoning(tester), '跟随模型（High）');
     await harness.capture(tester, 'task-properties-wide');
     await harness.tapVisible(tester, find.byKey(const Key('task-language')));
     await tester.tap(find.text('日本語').last);

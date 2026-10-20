@@ -1,11 +1,9 @@
 import '../utils/localization_extension.dart';
 
-/// Request-scoped explanation of the provider/model image-input gate.
-/// A null reason means an older or synthetic client supplied no capability data.
+/// Request-scoped explanation of unavailable model image input.
+/// A null provider name means an older/synthetic client supplied no model context.
 class NaiAgentVisionAccess {
-  const NaiAgentVisionAccess({this.blockedByProvider, this.providerName});
-
-  final bool? blockedByProvider;
+  const NaiAgentVisionAccess({this.providerName});
   final String? providerName;
 
   String get unavailableMessage {
@@ -14,11 +12,7 @@ class NaiAgentVisionAccess {
     final name = provider == null || provider.isEmpty
         ? l.naiAgent_visionCurrentProvider
         : provider;
-    return switch (blockedByProvider) {
-      true => l.naiAgent_visionProviderBlocked(name),
-      false => l.naiAgent_visionModelUnsupported(name),
-      null => l.naiAgent_visionDisabled,
-    };
+    return l.naiAgent_visionModelUnsupported(name);
   }
 
   String skippedAttachmentsNotice(int count) =>

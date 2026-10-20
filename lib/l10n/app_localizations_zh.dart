@@ -7372,28 +7372,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modelReasoning_serviceDefault => '服务默认';
 
   @override
-  String get modelReasoning_off => '关闭';
+  String get modelReasoning_off => 'Off';
 
   @override
-  String get modelReasoning_on => '开启';
+  String get modelReasoning_on => 'On';
 
   @override
-  String get modelReasoning_minimal => '极低';
+  String get modelReasoning_minimal => 'Minimal';
 
   @override
-  String get modelReasoning_low => '低';
+  String get modelReasoning_low => 'Low';
 
   @override
-  String get modelReasoning_medium => '中';
+  String get modelReasoning_medium => 'Medium';
 
   @override
-  String get modelReasoning_high => '高';
+  String get modelReasoning_high => 'High';
 
   @override
-  String get modelReasoning_xhigh => '极高';
+  String get modelReasoning_xhigh => 'XHigh';
 
   @override
-  String get modelReasoning_max => '最高';
+  String get modelReasoning_max => 'Max';
 
   @override
   String get modelProvider_custom => '自定义服务';
@@ -7504,14 +7504,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get modelParams_maxOutputPositive => '最大输出 token 必须大于 0。';
-
-  @override
-  String get modelParams_anthropicTemperatureRange =>
-      'Anthropic 的 Temperature 应在 0–1 之间。';
-
-  @override
-  String get modelParams_anthropicSamplingConflict =>
-      'Anthropic 的 Temperature 与 Top P 请选择一项；请检查模型参数。';
 
   @override
   String modelParams_thinkingBudgetTooSmall(Object minimum) {
@@ -15905,16 +15897,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_error => '操作未完成，请检查模型设置或工作区文件。';
 
   @override
-  String get naiAgent_visionDisabled =>
-      '当前图片输入不可用。请在 设置 → 模型与接口 中检查服务商的 请求 → 图片输入 是否为“允许”，并确认所选模型支持图片输入。';
-
-  @override
   String get naiAgent_visionCurrentProvider => '当前服务商';
-
-  @override
-  String naiAgent_visionProviderBlocked(String providerName) {
-    return '服务商 $providerName 当前未允许发送图片。请到 设置 → 模型与接口 → $providerName → 请求 → 图片输入 改为“允许”。';
-  }
 
   @override
   String naiAgent_visionModelUnsupported(String providerName) {
@@ -19989,6 +19972,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agMcpEditTitle => '编辑 MCP 服务器';
 
   @override
+  String get set_agTabGeneral => '常规';
+
+  @override
+  String get set_agTabTools => '工具与扩展';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -20658,19 +20647,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mp_retryOff => '关';
 
   @override
-  String get mp_imageInput => '图片输入';
-
-  @override
-  String get mp_imageInputHelp =>
-      '关闭时本服务商所有模型都不会收到图片（含 NAI Agent 的看图和附件），即使模型能力里勾了“图片输入”';
-
-  @override
-  String get mp_allow => '允许';
-
-  @override
-  String get mp_noSend => '不发送';
-
-  @override
   String get mp_seconds => '秒';
 
   @override
@@ -20765,18 +20741,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mp_unsupported => '不支持';
-
-  @override
-  String get mp_sampling => '采样';
-
-  @override
-  String get mp_temperature => '温度';
-
-  @override
-  String get mp_topP => 'Top P';
-
-  @override
-  String get mp_followDefault => '跟随服务默认';
 
   @override
   String get mp_capabilities => '能力';
@@ -28352,28 +28316,28 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get modelReasoning_serviceDefault => '服務預設';
 
   @override
-  String get modelReasoning_off => '關閉';
+  String get modelReasoning_off => 'Off';
 
   @override
-  String get modelReasoning_on => '開啟';
+  String get modelReasoning_on => 'On';
 
   @override
-  String get modelReasoning_minimal => '極低';
+  String get modelReasoning_minimal => 'Minimal';
 
   @override
-  String get modelReasoning_low => '低';
+  String get modelReasoning_low => 'Low';
 
   @override
-  String get modelReasoning_medium => '中';
+  String get modelReasoning_medium => 'Medium';
 
   @override
-  String get modelReasoning_high => '高';
+  String get modelReasoning_high => 'High';
 
   @override
-  String get modelReasoning_xhigh => '極高';
+  String get modelReasoning_xhigh => 'XHigh';
 
   @override
-  String get modelReasoning_max => '最高';
+  String get modelReasoning_max => 'Max';
 
   @override
   String get modelProvider_custom => '自訂服務';
@@ -28484,14 +28448,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get modelParams_maxOutputPositive => '最大輸出 token 必須大於 0。';
-
-  @override
-  String get modelParams_anthropicTemperatureRange =>
-      'Anthropic 的 Temperature 應在 0–1 之間。';
-
-  @override
-  String get modelParams_anthropicSamplingConflict =>
-      'Anthropic 的 Temperature 與 Top P 請選擇一項；請檢查模型參數。';
 
   @override
   String modelParams_thinkingBudgetTooSmall(Object minimum) {
@@ -36885,16 +36841,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_error => '操作未完成，請檢查模型設定或工作區檔案。';
 
   @override
-  String get naiAgent_visionDisabled =>
-      '當前圖片輸入不可用。請在 設定 → 模型與介面 中檢查服務商的 請求 → 圖片輸入 是否為“允許”，並確認所選模型支援圖片輸入。';
-
-  @override
   String get naiAgent_visionCurrentProvider => '當前服務商';
-
-  @override
-  String naiAgent_visionProviderBlocked(String providerName) {
-    return '服務商 $providerName 當前未允許傳送圖片。請到 設定 → 模型與介面 → $providerName → 請求 → 圖片輸入 改為“允許”。';
-  }
 
   @override
   String naiAgent_visionModelUnsupported(String providerName) {
@@ -40969,6 +40916,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agMcpEditTitle => '編輯 MCP 伺服器';
 
   @override
+  String get set_agTabGeneral => '常規';
+
+  @override
+  String get set_agTabTools => '工具與擴展';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -41638,19 +41591,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mp_retryOff => '關';
 
   @override
-  String get mp_imageInput => '圖片輸入';
-
-  @override
-  String get mp_imageInputHelp =>
-      '關閉時本服務商所有模型都不會收到圖片（含 NAI Agent 的看圖和附件），即使模型能力裡勾了“圖片輸入”';
-
-  @override
-  String get mp_allow => '允許';
-
-  @override
-  String get mp_noSend => '不傳送';
-
-  @override
   String get mp_seconds => '秒';
 
   @override
@@ -41745,18 +41685,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get mp_unsupported => '不支援';
-
-  @override
-  String get mp_sampling => '取樣';
-
-  @override
-  String get mp_temperature => '溫度';
-
-  @override
-  String get mp_topP => 'Top P';
-
-  @override
-  String get mp_followDefault => '跟隨服務預設';
 
   @override
   String get mp_capabilities => '能力';

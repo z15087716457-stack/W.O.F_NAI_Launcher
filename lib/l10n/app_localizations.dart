@@ -13513,7 +13513,7 @@ abstract class AppLocalizations {
   /// No description provided for @modelReasoning_xhigh.
   ///
   /// In en, this message translates to:
-  /// **'Extra high'**
+  /// **'XHigh'**
   String get modelReasoning_xhigh;
 
   /// No description provided for @modelReasoning_max.
@@ -13731,18 +13731,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Max output tokens must be greater than 0.'**
   String get modelParams_maxOutputPositive;
-
-  /// No description provided for @modelParams_anthropicTemperatureRange.
-  ///
-  /// In en, this message translates to:
-  /// **'Anthropic temperature must be between 0 and 1.'**
-  String get modelParams_anthropicTemperatureRange;
-
-  /// No description provided for @modelParams_anthropicSamplingConflict.
-  ///
-  /// In en, this message translates to:
-  /// **'Anthropic accepts either temperature or Top P; check the model parameters.'**
-  String get modelParams_anthropicSamplingConflict;
 
   /// No description provided for @modelParams_thinkingBudgetTooSmall.
   ///
@@ -28973,23 +28961,11 @@ abstract class AppLocalizations {
   /// **'Operation failed. Check model settings or workspace files.'**
   String get naiAgent_error;
 
-  /// No description provided for @naiAgent_visionDisabled.
-  ///
-  /// In en, this message translates to:
-  /// **'Image input is unavailable. In Settings → Models & APIs, check that the provider’s Requests → Images is On and that the selected model supports image input.'**
-  String get naiAgent_visionDisabled;
-
   /// No description provided for @naiAgent_visionCurrentProvider.
   ///
   /// In en, this message translates to:
   /// **'the current provider'**
   String get naiAgent_visionCurrentProvider;
-
-  /// Provider-level image sending is off; providerName is the configured display name.
-  ///
-  /// In en, this message translates to:
-  /// **'Provider {providerName} does not allow sending images. Go to Settings → Models & APIs → {providerName} → Requests → Images and select On.'**
-  String naiAgent_visionProviderBlocked(String providerName);
 
   /// Model-level image support is false or unknown, independent of the provider sending switch.
   ///
@@ -36346,6 +36322,18 @@ abstract class AppLocalizations {
   /// **'Edit MCP server'**
   String get set_agMcpEditTitle;
 
+  /// No description provided for @set_agTabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get set_agTabGeneral;
+
+  /// No description provided for @set_agTabTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools & extensions'**
+  String get set_agTabTools;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:
@@ -37576,30 +37564,6 @@ abstract class AppLocalizations {
   /// **'Off'**
   String get mp_retryOff;
 
-  /// No description provided for @mp_imageInput.
-  ///
-  /// In en, this message translates to:
-  /// **'Images'**
-  String get mp_imageInput;
-
-  /// No description provided for @mp_imageInputHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'When off, no model from this provider receives images (including NAI Agent image reading and attachments), even if the model lists Image input'**
-  String get mp_imageInputHelp;
-
-  /// No description provided for @mp_allow.
-  ///
-  /// In en, this message translates to:
-  /// **'On'**
-  String get mp_allow;
-
-  /// No description provided for @mp_noSend.
-  ///
-  /// In en, this message translates to:
-  /// **'Off'**
-  String get mp_noSend;
-
   /// No description provided for @mp_seconds.
   ///
   /// In en, this message translates to:
@@ -37791,30 +37755,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not supported'**
   String get mp_unsupported;
-
-  /// No description provided for @mp_sampling.
-  ///
-  /// In en, this message translates to:
-  /// **'Sampling'**
-  String get mp_sampling;
-
-  /// No description provided for @mp_temperature.
-  ///
-  /// In en, this message translates to:
-  /// **'Temperature'**
-  String get mp_temperature;
-
-  /// No description provided for @mp_topP.
-  ///
-  /// In en, this message translates to:
-  /// **'Top P'**
-  String get mp_topP;
-
-  /// No description provided for @mp_followDefault.
-  ///
-  /// In en, this message translates to:
-  /// **'Service default'**
-  String get mp_followDefault;
 
   /// No description provided for @mp_capabilities.
   ///

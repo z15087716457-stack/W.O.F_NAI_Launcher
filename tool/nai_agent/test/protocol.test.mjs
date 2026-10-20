@@ -112,6 +112,24 @@ test('selected max reasoning effort reaches the DeepSeek request body', async ()
 
 for (const protocol of ['openaiChatCompletions', 'openaiResponses', 'anthropicMessages',
   'geminiGenerateContent', 'ollamaChatCompletions']) {
+  for (const custom of [false, true]) {
+    test(protocol + ': new Studio config omits sampling unless supplied in custom body=' + custom, async () => {
+      const server = await httpFixture(protocol, (_, res) => respond(protocol, res, false));
+      const body = protocol === 'geminiGenerateContent'
+        ? {generationConfig:{temperature:0.25,topP:0.75}} : {temperature:0.25,top_p:0.75};
+      const created = await sessionFixture(protocol, server, {config:{
+        temperature:undefined, allowsSampling:undefined, payloadParameters:{}, body:custom ? body : {},
+      }});
+      try {
+        await created.session.prompt('test sampling policy');
+        assert.equal(created.session.messages.at(-1).stopReason,'stop');
+        const payload = server.requests[0].body;
+        const sampling = protocol === 'geminiGenerateContent' ? payload.generationConfig ?? {} : payload;
+        assert.equal(sampling.temperature, custom ? 0.25 : undefined);
+        assert.equal(sampling[protocol === 'geminiGenerateContent' ? 'topP' : 'top_p'], custom ? 0.75 : undefined);
+      } finally { await created.close(); await server.close(); }
+    });
+  }
   test(protocol + ': official CodeMode → Studio MCP → follow-up request', async () => {
     const server = await httpFixture(protocol, (turn, res) => respond(protocol, res, turn === 1,
       'codemode', { code: 'const result = await tools.mcp__nai_studio__prompt_update({changes:{},expected:{}}); text(result.structuredContent);' }));

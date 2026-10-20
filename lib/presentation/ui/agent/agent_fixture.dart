@@ -109,7 +109,7 @@ abstract final class AgentFixture {
   ];
 
   static const thinking = AgentThinkingData(
-    options: [('low', '低'), ('medium', '中'), ('high', '高')],
+    options: [('low', 'Low'), ('medium', 'Medium'), ('high', 'High')],
     selected: 'medium',
     followsModel: false,
   );

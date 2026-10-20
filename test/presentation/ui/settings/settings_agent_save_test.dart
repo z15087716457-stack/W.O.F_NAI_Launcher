@@ -25,6 +25,7 @@ void main() {
       t,
       window: 900,
       locale: locale,
+      agentTab: 'instructions',
       data: data.copyWith(
         agent: data.agent.copyWith(systemPrompt: SettingsFixture.systemPrompt),
       ),

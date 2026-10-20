@@ -18,14 +18,123 @@ import 'settings_scope.dart';
 
 // ───────────────────────────── NAI Agent ─────────────────────────────
 
+/// Agent 页的分页。顺序 = 显示顺序。
+enum _AgentTab { general, instructions, skills, tools }
+
+/// 每个锚点所在的分页：搜索跳转 / “去设置”时先切到这一页再高亮。
+_AgentTab? _agentTabFor(String? anchor) => switch (anchor) {
+  null => null,
+  'agentModel' ||
+  'agentEnterToSend' ||
+  'agentMaxRequests' ||
+  'agentQuick' => _AgentTab.general,
+  'agentInstructions' ||
+  'agentWorkspaceRules' ||
+  'agentSystemPrompt' => _AgentTab.instructions,
+  'agentSkills' => _AgentTab.skills,
+  'agentMcp' || 'agentExtensions' => _AgentTab.tools,
+  _ when anchor.startsWith('mcp-') || anchor.startsWith('ext-') =>
+    _AgentTab.tools,
+  _ => null,
+};
+
+/// 记住上次看的分页（整个应用生命周期内）。
+var _lastAgentTab = _AgentTab.general;
+
 class SettingsAgentPage extends StatefulWidget {
   const SettingsAgentPage({super.key});
+
+  /// 测试之间清掉记住的分页。
+  @visibleForTesting
+  static void resetTab() => _lastAgentTab = _AgentTab.general;
 
   @override
   State<SettingsAgentPage> createState() => _SettingsAgentPageState();
 }
 
 class _SettingsAgentPageState extends State<SettingsAgentPage> {
+  var _tab = _lastAgentTab;
+  String? _jumped;
+
+  void _select(_AgentTab t) {
+    if (t == _tab) return;
+    setState(() => _tab = _lastAgentTab = t);
+  }
+
+  /// 分页条：标题下方一排文字标签，选中黑色下划线；有未保存修改的页带小圆点。
+  Widget _tabs(BuildContext context, SettingsAgentData ag) {
+    final l = context.l10n;
+    final c = context.ui;
+    final active = ag.skills.where((x) => x.state == SettingsSkillState.active);
+    final labels = {
+      _AgentTab.general: (l.set_agTabGeneral, null),
+      _AgentTab.instructions: (l.set_agInstr, null),
+      _AgentTab.skills: (l.set_agSkills, '${active.length}'),
+      _AgentTab.tools: (l.set_agTabTools, '${ag.mcp.length}'),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 22),
+      child: Container(
+        key: const Key('agent-tabs'),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: c.rowLine)),
+        ),
+        child: Row(
+          spacing: 4,
+          children: [
+            for (final t in _AgentTab.values)
+              UiPressable(
+                key: Key('agent-tab-${t.name}'),
+                onTap: () => _select(t),
+                builder: (context, hover) {
+                  final on = t == _tab;
+                  final (label, count) = labels[t]!;
+                  final dirty = t == _AgentTab.instructions && _protected;
+                  return Container(
+                    height: 38,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: on ? c.ink : Colors.transparent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      spacing: 6,
+                      children: [
+                        Text(
+                          label,
+                          style: UiText.sans(
+                            13,
+                            weight: on ? FontWeight.w600 : FontWeight.w400,
+                            color: on || hover ? c.ink : c.muted,
+                          ),
+                        ),
+                        if (count != null)
+                          Text(count, style: UiText.mono(11, color: c.faint)),
+                        if (dirty)
+                          Container(
+                            key: const Key('agent-tab-dirty'),
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: c.accent,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
   TextEditingController? _global;
   TextEditingController? _prefix;
   var _instrDirty = false;
@@ -63,6 +172,14 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // 搜索跳转 / “去设置”：锚点在别的分页就先切过去（高亮由锚点自己滚动）。
+    final hl = SettingsScope.of(context).highlight;
+    if (hl != _jumped) {
+      _jumped = hl;
+      if (_agentTabFor(hl) case final t? when t != _tab) {
+        _tab = _lastAgentTab = t;
+      }
+    }
     final a = SettingsScope.of(context).data.agent;
     final instructions = (a.globalInstructions, a.systemPrefix);
     if (_global == null) {
@@ -351,56 +468,52 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       SettingsMcpState.disabled => SettingsTone.idle,
       SettingsMcpState.unchecked => SettingsTone.idle,
     };
-    final page = SettingsPageFrame(
-      title: SettingsPageTitle(
-        eyebrow: SettingsFormat.eyebrow(SettingsPageId.agent),
-        title: l.set_pageAgent,
-        description: l.set_agDesc,
-      ),
-      aside: [
-        SettingsAsideCard(
-          title: l.set_agTools,
-          trailing: l.set_agToolCount('${ag.tools.length}'),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    // 分页：常规 / 指令 / Skill / 工具与扩展。各页只放自己的分区和侧卡。
+    final toolsCard = SettingsAsideCard(
+      title: l.set_agTools,
+      trailing: l.set_agToolCount('${ag.tools.length}'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
             children: [
-              Wrap(
-                spacing: 4,
-                runSpacing: 4,
-                children: [
-                  for (final t in ag.tools)
-                    Container(
-                      height: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      decoration: BoxDecoration(
-                        color: c.control,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Align(
-                        widthFactor: 1,
-                        child: Text(
-                          t,
-                          style: UiText.mono(
-                            10.5,
-                            weight: FontWeight.w500,
-                            color: c.muted,
-                            height: 1.2,
-                          ),
-                        ),
+              for (final t in ag.tools)
+                Container(
+                  height: 18,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  decoration: BoxDecoration(
+                    color: c.control,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Align(
+                    widthFactor: 1,
+                    child: Text(
+                      t,
+                      style: UiText.mono(
+                        10.5,
+                        weight: FontWeight.w500,
+                        color: c.muted,
+                        height: 1.2,
                       ),
                     ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Text(
-                l.set_agToolsTip,
-                style: UiText.sans(11, color: c.muted, height: 1.6),
-              ),
+                  ),
+                ),
             ],
           ),
-        ),
-        if (ag.context != null)
-          SettingsAsideCard(
+          const SizedBox(height: 10),
+          Text(
+            l.set_agToolsTip,
+            style: UiText.sans(11, color: c.muted, height: 1.6),
+          ),
+        ],
+      ),
+    );
+    final ctx = ag.context;
+    final contextCard = ctx == null
+        ? null
+        : SettingsAsideCard(
             key: const Key('agent-context'),
             title: l.set_agContext,
             child: Column(
@@ -409,14 +522,14 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 SettingsAsideList(
                   rows: [
                     for (final (label, tokens) in [
-                      (l.set_agContextPrompt, ag.context!.promptTokens),
+                      (l.set_agContextPrompt, ctx.promptTokens),
                       (
-                        l.set_agContextSkills('${ag.context!.skillCount}'),
-                        ag.context!.skillTokens,
+                        l.set_agContextSkills('${ctx.skillCount}'),
+                        ctx.skillTokens,
                       ),
                       (
-                        l.set_agContextTools('${ag.context!.toolCount}'),
-                        ag.context!.toolTokens,
+                        l.set_agContextTools('${ctx.toolCount}'),
+                        ctx.toolTokens,
                       ),
                     ])
                       Row(
@@ -442,468 +555,485 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                 ),
               ],
             ),
-          ),
-        if (ag.skillFolders.isNotEmpty)
-          SettingsAsideCard(
-            key: const Key('agent-skill-folders'),
-            title: l.set_agSkillPlaces,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 6,
-              children: [
-                for (final (source, path) in ag.skillFolders)
-                  SettingsPathBox(
-                    path: path,
-                    tag: source == SettingsSkillSource.global
-                        ? l.set_agSkillGlobal
-                        : l.set_agSkillWorkspace,
-                    actions: [
-                      SettingsIconBtn(
-                        glyph: SettingsGlyphs.folder,
-                        tooltip: l.set_agSkillOpenFolder,
-                        onTap: () => a.onOpenSkillRoot(source),
-                      ),
-                    ],
-                  ),
-                const SizedBox(height: 2),
-                Text(
-                  l.set_agSkillPlacesTip,
-                  style: UiText.sans(11, color: c.muted, height: 1.6),
+          );
+    final placesCard = SettingsAsideCard(
+      key: const Key('agent-skill-folders'),
+      title: l.set_agSkillPlaces,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 6,
+        children: [
+          for (final (source, path) in ag.skillFolders)
+            SettingsPathBox(
+              path: path,
+              tag: source == SettingsSkillSource.global
+                  ? l.set_agSkillGlobal
+                  : l.set_agSkillWorkspace,
+              actions: [
+                SettingsIconBtn(
+                  glyph: SettingsGlyphs.folder,
+                  tooltip: l.set_agSkillOpenFolder,
+                  onTap: () => a.onOpenSkillRoot(source),
                 ),
               ],
             ),
+          const SizedBox(height: 2),
+          Text(
+            l.set_agSkillPlacesTip,
+            style: UiText.sans(11, color: c.muted, height: 1.6),
           ),
-        SettingsAsideCard(
-          title: l.set_agData,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SettingsPathBox(
-                path: ag.dataPath,
-                actions: [
-                  SettingsIconBtn(
-                    glyph: SettingsGlyphs.external,
-                    tooltip: l.set_open,
-                    onTap: () => a.onOpenFolder(SettingsFolder.agent),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              SettingsAsideList(
-                rows: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.set_agWorkspaces,
-                          style: UiText.sans(12, color: c.ink),
-                        ),
-                      ),
-                      Text(
-                        '${ag.workspaces}',
-                        style: UiText.mono(12, color: c.ink),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          l.set_agSessions,
-                          style: UiText.sans(12, color: c.ink),
-                        ),
-                      ),
-                      Text(
-                        '${ag.sessions}',
-                        style: UiText.mono(12, color: c.ink),
-                      ),
-                    ],
-                  ),
-                ],
+        ],
+      ),
+    );
+    final dataCard = SettingsAsideCard(
+      title: l.set_agData,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SettingsPathBox(
+            path: ag.dataPath,
+            actions: [
+              SettingsIconBtn(
+                glyph: SettingsGlyphs.external,
+                tooltip: l.set_open,
+                onTap: () => a.onOpenFolder(SettingsFolder.agent),
               ),
             ],
           ),
-        ),
-        SettingsAsideCard(
-          key: const Key('agent-trash-card'),
-          title: l.set_agTrash,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 10,
-            children: [
-              Text(
-                l.set_agTrashSub,
-                style: UiText.sans(11, color: c.muted, height: 1.6),
+          const SizedBox(height: 6),
+          SettingsAsideList(
+            rows: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.set_agWorkspaces,
+                      style: UiText.sans(12, color: c.ink),
+                    ),
+                  ),
+                  Text(
+                    '${ag.workspaces}',
+                    style: UiText.mono(12, color: c.ink),
+                  ),
+                ],
               ),
               Row(
                 children: [
                   Expanded(
                     child: Text(
-                      ag.trashCount == 0
-                          ? l.set_agTrashEmpty
-                          : l.set_agTrashSummary(
-                              ag.trashCount,
-                              SettingsFormat.bytes(ag.trashBytes),
-                            ),
+                      l.set_agSessions,
                       style: UiText.sans(12, color: c.ink),
                     ),
                   ),
-                  SettingsBtn(
-                    key: const Key('agent-trash-open'),
-                    label: l.set_agTrashManage,
-                    small: true,
-                    glyph: UiGlyphs.archive,
-                    onTap: a.onOpenTrash,
-                  ),
+                  Text('${ag.sessions}', style: UiText.mono(12, color: c.ink)),
                 ],
               ),
             ],
           ),
-        ),
-        SettingsHint.text(context, l.set_agCostTip),
-      ],
+        ],
+      ),
+    );
+    final trashCard = SettingsAsideCard(
+      key: const Key('agent-trash-card'),
+      title: l.set_agTrash,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
+          Text(
+            l.set_agTrashSub,
+            style: UiText.sans(11, color: c.muted, height: 1.6),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  ag.trashCount == 0
+                      ? l.set_agTrashEmpty
+                      : l.set_agTrashSummary(
+                          ag.trashCount,
+                          SettingsFormat.bytes(ag.trashBytes),
+                        ),
+                  style: UiText.sans(12, color: c.ink),
+                ),
+              ),
+              SettingsBtn(
+                key: const Key('agent-trash-open'),
+                label: l.set_agTrashManage,
+                small: true,
+                glyph: UiGlyphs.archive,
+                onTap: a.onOpenTrash,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+    final costHint = SettingsHint.text(context, l.set_agCostTip);
+    final modelSection = SettingsSection(
+      title: l.set_agModelSec,
       children: [
-        SettingsSection(
-          title: l.set_agModelSec,
-          children: [
-            SettingKeyRow(
-              SettingKey.agentModel,
-              title: l.set_agModel,
-              subtitle: l.set_agModelSub,
-              control: SetSelect(
-                SettingKey.agentModel,
-                width: 230,
-                leading: model == null || !model.hasLogo
-                    ? null
-                    : SettingsLogo(
-                        mark: model.mark,
-                        color: model.color ?? 0xFF555555,
-                        logoAsset: model.logoAsset,
-                        size: 18,
-                      ),
-              ),
-            ),
-            SettingKeyRow(
-              SettingKey.agentEnterToSend,
-              title: l.set_agEnter,
-              subtitle: l.set_agEnterSub,
-              control: const SetSwitch(SettingKey.agentEnterToSend),
-            ),
-            SettingKeyRow(
-              SettingKey.agentMaxRequests,
-              title: l.set_agMax,
-              subtitle: l.set_agMaxSub,
-              control: SetStepper(
-                SettingKey.agentMaxRequests,
-                unit: l.set_agTimesUnit,
-              ),
-            ),
-          ],
+        SettingKeyRow(
+          SettingKey.agentModel,
+          title: l.set_agModel,
+          subtitle: l.set_agModelSub,
+          control: SetSelect(
+            SettingKey.agentModel,
+            width: 230,
+            leading: model == null || !model.hasLogo
+                ? null
+                : SettingsLogo(
+                    mark: model.mark,
+                    color: model.color ?? 0xFF555555,
+                    logoAsset: model.logoAsset,
+                    size: 18,
+                  ),
+          ),
         ),
-        SettingsSection(
-          title: l.set_agInstr,
-          subtitle: l.set_agInstrSub,
-          children: [
-            SettingsAnchor(
-              anchor: 'agentInstructions',
-              child: SettingsBlock(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        SettingKeyRow(
+          SettingKey.agentEnterToSend,
+          title: l.set_agEnter,
+          subtitle: l.set_agEnterSub,
+          control: const SetSwitch(SettingKey.agentEnterToSend),
+        ),
+        SettingKeyRow(
+          SettingKey.agentMaxRequests,
+          title: l.set_agMax,
+          subtitle: l.set_agMaxSub,
+          control: SetStepper(
+            SettingKey.agentMaxRequests,
+            unit: l.set_agTimesUnit,
+          ),
+        ),
+      ],
+    );
+    final instrSection = SettingsSection(
+      title: l.set_agInstr,
+      subtitle: l.set_agInstrSub,
+      children: [
+        SettingsAnchor(
+          anchor: 'agentInstructions',
+          child: SettingsBlock(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  key: const Key('agent-instruction-order'),
+                  spacing: 6,
+                  runSpacing: 6,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    Wrap(
-                      key: const Key('agent-instruction-order'),
-                      spacing: 6,
-                      runSpacing: 6,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        for (final (i, t) in order.indexed) ...[
-                          SettingsChip(label: t, selected: i == 2),
-                          if (i < order.length - 1)
-                            UiGlyph(
-                              UiGlyphs.chevronRight,
-                              size: 12,
-                              color: c.faint,
-                            ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    _label(
-                      context,
-                      l.set_agGlobal,
-                      _instrDirty && _global!.text != _instrSaved.$1,
-                    ),
-                    _TextArea(
-                      key: const Key('agent-global'),
-                      controller: _global!,
-                      minHeight: 92,
-                      hint: l.set_agGlobalHint,
-                      onSave: _save,
-                    ),
-                    const SizedBox(height: 16),
-                    _label(
-                      context,
-                      l.set_agPrefix,
-                      _instrDirty && _prefix!.text != _instrSaved.$2,
-                    ),
-                    _TextArea(
-                      key: const Key('agent-prefix'),
-                      controller: _prefix!,
-                      minHeight: 58,
-                      hint: l.set_agPrefixHint,
-                      onSave: _save,
-                    ),
-                    if (_instrSaving || _instrFailed)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6),
-                        child: Text(
-                          _instrSaving
-                              ? l.set_agInstructionsSaving
-                              : l.set_agInstructionsFailed,
-                          key: const Key('agent-instructions-status'),
-                          style: UiText.sans(
-                            11.5,
-                            color: _instrSaving ? c.muted : c.warn,
-                            height: 1.6,
-                          ),
+                    for (final (i, t) in order.indexed) ...[
+                      SettingsChip(label: t, selected: i == 2),
+                      if (i < order.length - 1)
+                        UiGlyph(
+                          UiGlyphs.chevronRight,
+                          size: 12,
+                          color: c.faint,
                         ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _label(
+                  context,
+                  l.set_agGlobal,
+                  _instrDirty && _global!.text != _instrSaved.$1,
+                ),
+                _TextArea(
+                  key: const Key('agent-global'),
+                  controller: _global!,
+                  minHeight: 92,
+                  hint: l.set_agGlobalHint,
+                  onSave: _save,
+                ),
+                const SizedBox(height: 16),
+                _label(
+                  context,
+                  l.set_agPrefix,
+                  _instrDirty && _prefix!.text != _instrSaved.$2,
+                ),
+                _TextArea(
+                  key: const Key('agent-prefix'),
+                  controller: _prefix!,
+                  minHeight: 58,
+                  hint: l.set_agPrefixHint,
+                  onSave: _save,
+                ),
+                if (_instrSaving || _instrFailed)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      _instrSaving
+                          ? l.set_agInstructionsSaving
+                          : l.set_agInstructionsFailed,
+                      key: const Key('agent-instructions-status'),
+                      style: UiText.sans(
+                        11.5,
+                        color: _instrSaving ? c.muted : c.warn,
+                        height: 1.6,
                       ),
-                    const SizedBox(height: 14),
-                    Row(
-                      key: const Key('agent-prompt-actions'),
-                      spacing: 8,
-                      children: [
-                        SettingsBtn(
-                          label: l.set_agBuiltin,
-                          small: true,
-                          tone: SettingsBtnTone.ghost,
-                          trailingChevron: true,
-                          onTap: a.onViewBuiltinPrompt,
-                        ),
-                        SettingsBtn(
-                          label: l.set_agFinal,
-                          glyph: UiGlyphs.eye,
-                          small: true,
-                          onTap: a.onViewFinalPrompt,
-                        ),
-                      ],
+                    ),
+                  ),
+                const SizedBox(height: 14),
+                Row(
+                  key: const Key('agent-prompt-actions'),
+                  spacing: 8,
+                  children: [
+                    SettingsBtn(
+                      label: l.set_agBuiltin,
+                      small: true,
+                      tone: SettingsBtnTone.ghost,
+                      trailingChevron: true,
+                      onTap: a.onViewBuiltinPrompt,
+                    ),
+                    SettingsBtn(
+                      label: l.set_agFinal,
+                      glyph: UiGlyphs.eye,
+                      small: true,
+                      onTap: a.onViewFinalPrompt,
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-            if (ag.workspaceRulesPath case final path?)
-              SettingsRow(
-                anchor: 'agentWorkspaceRules',
-                title: l.ag_memoryWorkspace,
-                subtitleWidget: Tooltip(
-                  message: path,
-                  child: Text(
-                    l.set_agWorkspaceRulesSub,
-                    style: UiText.sans(12, color: c.muted, height: 1.5),
-                  ),
-                ),
-                control: SettingsBtn(
-                  label: l.ag_memoryEdit,
-                  small: true,
-                  onTap: a.onEditWorkspaceRules,
-                ),
-              ),
-            if (ag.systemPrompt != null)
-              ..._basePrompt(context, ag.systemPrompt!),
-          ],
-        ),
-        const _QuickSection(),
-        SettingsSection(
-          title: l.set_agSkills,
-          subtitle: l.set_agSkillsSub,
-          trailing: Text(
-            l.set_agSkillsLoaded(
-              '${ag.skills.where((x) => x.state == SettingsSkillState.active).length}',
-            ),
-            style: UiText.mono(11, color: c.faint),
           ),
-          children: [
-            SettingsAnchor(
-              anchor: 'agentSkills',
-              child: Column(
-                children: [
-                  // 内置 Skill 置顶，其余保持后端给的顺序。
-                  for (final skill in [
-                    ...ag.skills.where((x) => x.builtin),
-                    ...ag.skills.where((x) => !x.builtin),
-                  ])
-                    _SkillRow(skill: skill),
-                ],
-              ),
-            ),
-            SettingsBlock(
-              child: Row(
-                spacing: 8,
-                children: [
-                  SettingsBtn(
-                    key: const Key('skill-add'),
-                    label: l.set_agSkillAdd,
-                    glyph: SettingsGlyphs.folder,
-                    small: true,
-                    onTap: a.onAddSkill,
-                  ),
-                  SettingsBtn(
-                    key: const Key('skill-new'),
-                    label: l.set_agSkillNew,
-                    glyph: UiGlyphs.plus,
-                    small: true,
-                    onTap: a.onNewSkill,
-                  ),
-                  Expanded(
-                    child: Text(
-                      l.set_agSkillSlashHint,
-                      textAlign: TextAlign.end,
-                      style: UiText.sans(11, color: c.faint),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SettingsBlock(
-              child: SettingsHint.text(
-                context,
-                l.set_agSkillTrust,
-                glyph: SettingsGlyphs.warn,
-              ),
-            ),
-          ],
         ),
-        SettingsSection(
-          title: l.set_agExt,
-          subtitle: l.set_agExtSub,
-          children: [
-            for (final e in ag.extensions)
-              e.builtin
-                  ? SettingsRow(
-                      title: l.set_agStudioExt,
-                      subtitle: l.set_agStudioExtSub,
-                      control: UiMini(l.set_agRequired),
-                    )
-                  : SettingsRow(
-                      key: Key('ext-${e.id}'),
-                      title: e.name,
-                      subtitle: e.path,
-                      control: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 8,
-                        children: [
-                          SettingsSwitch(
-                            value: e.enabled,
-                            onChanged: (v) => a.onExtensionEnabled(e.id, v),
-                          ),
-                          SettingsMoreButton(
-                            items: [
-                              (
-                                l.set_agRemoveExt,
-                                () => a.onRemoveExtension(e.id),
-                                true,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-            SettingsBlock(
-              child: Row(
-                spacing: 8,
-                children: [
-                  SettingsBtn(
-                    label: l.set_agAddFile,
-                    glyph: UiGlyphs.plus,
-                    small: true,
-                    onTap: () => a.onAddExtension(false),
-                  ),
-                  SettingsBtn(
-                    label: l.set_agAddDir,
-                    glyph: SettingsGlyphs.folder,
-                    small: true,
-                    onTap: () => a.onAddExtension(true),
-                  ),
-                ],
+        if (ag.workspaceRulesPath case final path?)
+          SettingsRow(
+            anchor: 'agentWorkspaceRules',
+            title: l.ag_memoryWorkspace,
+            subtitleWidget: Tooltip(
+              message: path,
+              child: Text(
+                l.set_agWorkspaceRulesSub,
+                style: UiText.sans(12, color: c.muted, height: 1.5),
               ),
             ),
-          ],
+            control: SettingsBtn(
+              label: l.ag_memoryEdit,
+              small: true,
+              onTap: a.onEditWorkspaceRules,
+            ),
+          ),
+        if (ag.systemPrompt != null) ..._basePrompt(context, ag.systemPrompt!),
+      ],
+    );
+    final skillSection = SettingsSection(
+      title: l.set_agSkills,
+      subtitle: l.set_agSkillsSub,
+      trailing: Text(
+        l.set_agSkillsLoaded(
+          '${ag.skills.where((x) => x.state == SettingsSkillState.active).length}',
         ),
-        SettingsSection(
-          title: l.set_agMcp,
-          subtitle: l.set_agMcpSub,
-          children: [
-            for (final m in ag.mcp)
-              SettingsRow(
-                key: Key('mcp-${m.id}'),
-                anchor: 'mcp-${m.id}',
-                title: m.builtin ? l.set_agBuiltinTools : m.name,
-                subtitle: m.builtin ? l.set_agBuiltinToolsSub : m.transport,
-                control: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
-                  children: [
-                    if (!m.builtin && m.enabled)
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        spacing: 6,
-                        children: [
-                          SettingsDot(mcpTone(m)),
-                          Text(
-                            mcpState(m),
-                            style: UiText.sans(
-                              12,
-                              color: m.state == SettingsMcpState.needsLogin
-                                  ? c.warn
-                                  : c.muted,
-                            ),
-                          ),
-                        ],
-                      ),
-                    if (m.state == SettingsMcpState.needsLogin && m.enabled)
-                      SettingsBtn(
-                        label: l.set_login,
-                        small: true,
-                        onTap: () => a.onMcpLogin(m.id),
-                      )
-                    else
-                      _ModeMenu(server: m),
-                    if (m.builtin)
+        style: UiText.mono(11, color: c.faint),
+      ),
+      children: [
+        SettingsAnchor(
+          anchor: 'agentSkills',
+          child: Column(
+            children: [
+              // 内置 Skill 置顶，其余保持后端给的顺序。
+              for (final skill in [
+                ...ag.skills.where((x) => x.builtin),
+                ...ag.skills.where((x) => !x.builtin),
+              ])
+                _SkillRow(skill: skill),
+            ],
+          ),
+        ),
+        SettingsBlock(
+          child: Row(
+            spacing: 8,
+            children: [
+              SettingsBtn(
+                key: const Key('skill-add'),
+                label: l.set_agSkillAdd,
+                glyph: SettingsGlyphs.folder,
+                small: true,
+                onTap: a.onAddSkill,
+              ),
+              SettingsBtn(
+                key: const Key('skill-new'),
+                label: l.set_agSkillNew,
+                glyph: UiGlyphs.plus,
+                small: true,
+                onTap: a.onNewSkill,
+              ),
+              Expanded(
+                child: Text(
+                  l.set_agSkillSlashHint,
+                  textAlign: TextAlign.end,
+                  style: UiText.sans(11, color: c.faint),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SettingsBlock(
+          child: SettingsHint.text(
+            context,
+            l.set_agSkillTrust,
+            glyph: SettingsGlyphs.warn,
+          ),
+        ),
+      ],
+    );
+    final extSection = SettingsSection(
+      title: l.set_agExt,
+      subtitle: l.set_agExtSub,
+      children: [
+        for (final e in ag.extensions)
+          e.builtin
+              ? SettingsRow(
+                  title: l.set_agStudioExt,
+                  subtitle: l.set_agStudioExtSub,
+                  control: UiMini(l.set_agRequired),
+                )
+              : SettingsRow(
+                  key: Key('ext-${e.id}'),
+                  title: e.name,
+                  subtitle: e.path,
+                  control: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
                       SettingsSwitch(
-                        value: m.enabled,
-                        onChanged: (v) => a.onMcpEnabled(m.id, v),
-                      )
-                    else
+                        value: e.enabled,
+                        onChanged: (v) => a.onExtensionEnabled(e.id, v),
+                      ),
                       SettingsMoreButton(
                         items: [
                           (
-                            m.enabled ? l.set_agDisable : l.set_agEnable,
-                            () => a.onMcpEnabled(m.id, !m.enabled),
-                            false,
+                            l.set_agRemoveExt,
+                            () => a.onRemoveExtension(e.id),
+                            true,
                           ),
-                          (l.set_agEditMcp, () => a.onEditMcp(m.id), false),
-                          (l.set_agRemoveMcp, () => a.onRemoveMcp(m.id), true),
                         ],
                       ),
-                  ],
-                ),
-              ),
-            SettingsBlock(
-              child: Row(
-                children: [
-                  SettingsBtn(
-                    label: l.set_agAddMcp,
-                    glyph: UiGlyphs.plus,
-                    small: true,
-                    onTap: () => a.onEditMcp(null),
+                    ],
                   ),
-                ],
+                ),
+        SettingsBlock(
+          child: Row(
+            spacing: 8,
+            children: [
+              SettingsBtn(
+                label: l.set_agAddFile,
+                glyph: UiGlyphs.plus,
+                small: true,
+                onTap: () => a.onAddExtension(false),
               ),
-            ),
-          ],
+              SettingsBtn(
+                label: l.set_agAddDir,
+                glyph: SettingsGlyphs.folder,
+                small: true,
+                onTap: () => a.onAddExtension(true),
+              ),
+            ],
+          ),
         ),
       ],
+    );
+    final mcpSection = SettingsSection(
+      title: l.set_agMcp,
+      subtitle: l.set_agMcpSub,
+      children: [
+        for (final m in ag.mcp)
+          SettingsRow(
+            key: Key('mcp-${m.id}'),
+            anchor: 'mcp-${m.id}',
+            title: m.builtin ? l.set_agBuiltinTools : m.name,
+            subtitle: m.builtin ? l.set_agBuiltinToolsSub : m.transport,
+            control: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 8,
+              children: [
+                if (!m.builtin && m.enabled)
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 6,
+                    children: [
+                      SettingsDot(mcpTone(m)),
+                      Text(
+                        mcpState(m),
+                        style: UiText.sans(
+                          12,
+                          color: m.state == SettingsMcpState.needsLogin
+                              ? c.warn
+                              : c.muted,
+                        ),
+                      ),
+                    ],
+                  ),
+                if (m.state == SettingsMcpState.needsLogin && m.enabled)
+                  SettingsBtn(
+                    label: l.set_login,
+                    small: true,
+                    onTap: () => a.onMcpLogin(m.id),
+                  )
+                else
+                  _ModeMenu(server: m),
+                if (m.builtin)
+                  SettingsSwitch(
+                    value: m.enabled,
+                    onChanged: (v) => a.onMcpEnabled(m.id, v),
+                  )
+                else
+                  SettingsMoreButton(
+                    items: [
+                      (
+                        m.enabled ? l.set_agDisable : l.set_agEnable,
+                        () => a.onMcpEnabled(m.id, !m.enabled),
+                        false,
+                      ),
+                      (l.set_agEditMcp, () => a.onEditMcp(m.id), false),
+                      (l.set_agRemoveMcp, () => a.onRemoveMcp(m.id), true),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        SettingsBlock(
+          child: Row(
+            children: [
+              SettingsBtn(
+                label: l.set_agAddMcp,
+                glyph: UiGlyphs.plus,
+                small: true,
+                onTap: () => a.onEditMcp(null),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    final tab = _tab;
+    final page = SettingsPageFrame(
+      title: SettingsPageTitle(
+        eyebrow: SettingsFormat.eyebrow(SettingsPageId.agent),
+        title: l.set_pageAgent,
+        description: l.set_agDesc,
+      ),
+      top: [_tabs(context, ag)],
+      aside: switch (tab) {
+        _AgentTab.general => [dataCard, trashCard, costHint],
+        _AgentTab.instructions => [?contextCard],
+        _AgentTab.skills => [
+          ?ag.skillFolders.isEmpty ? null : placesCard,
+          ?contextCard,
+        ],
+        _AgentTab.tools => [toolsCard, costHint],
+      },
+      children: switch (tab) {
+        _AgentTab.general => [modelSection, const _QuickSection()],
+        _AgentTab.instructions => [instrSection],
+        _AgentTab.skills => [skillSection],
+        _AgentTab.tools => [
+          SettingsAnchor(anchor: 'agentMcp', child: mcpSection),
+          SettingsAnchor(anchor: 'agentExtensions', child: extSection),
+        ],
+      },
     );
     return Stack(
       children: [
