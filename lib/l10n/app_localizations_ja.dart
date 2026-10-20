@@ -19917,7 +19917,47 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_positionNone => '未指定';
 
   @override
-  String get ag_positionAiHint => 'AIにおまかせ中のため、位置は使われません。';
+  String get ag_positionAiHint => 'AI おまかせ中：座標は使われず、モデルが配置します。';
+
+  @override
+  String ag_positionRestSame(int count) {
+    return 'ほか $count 人は変更なし';
+  }
+
+  @override
+  String ag_positionAllSame(int count) {
+    return '$count 人とも変更なし';
+  }
+
+  @override
+  String get ag_posTopLeft => '左上';
+
+  @override
+  String get ag_posTop => '上';
+
+  @override
+  String get ag_posTopRight => '右上';
+
+  @override
+  String get ag_posLeft => '左';
+
+  @override
+  String get ag_posCenter => '中央';
+
+  @override
+  String get ag_posRight => '右';
+
+  @override
+  String get ag_posBottomLeft => '左下';
+
+  @override
+  String get ag_posBottom => '下';
+
+  @override
+  String get ag_posBottomRight => '右下';
+
+  @override
+  String get ag_positionNudge => '微調整';
 
   @override
   String get ag_positionNew => '追加';
@@ -20075,6 +20115,11 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String ag_imageInfoSteps(int count) {
     return '$count ステップ';
+  }
+
+  @override
+  String ag_imageInfoRescale(String value) {
+    return 'リスケール $value';
   }
 
   @override

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_image_info.dart';
 
 void main() {
-  test('元数据收成悬停卡摘要：短模型名、参数、角色数、压平提示词', () {
+  test('元数据收成悬停卡：短模型名、参数、负面、各角色、压平提示词', () {
     final info = agentImageInfo({
       'prompt': '1girl,\n  solo,   watercolor',
       'seed': 42,
@@ -11,6 +11,12 @@ void main() {
       'sampler': 'k_euler',
       'model': 'nai-diffusion-4-5-full',
       'characterPrompts': ['a', 'b', 'c'],
+      'characterNegativePrompts': ['', 'no hat'],
+      'negativePrompt': 'lowres,\n bad',
+      'cfgRescale': 0.18,
+      'noiseSchedule': 'karras',
+      'smea': true,
+      'smeaDyn': true,
       'rawJson': '{"huge": true}',
     })!;
     expect(info.model, isNot('nai-diffusion-4-5-full'));
@@ -21,6 +27,15 @@ void main() {
     expect(info.sampler, 'k_euler');
     expect(info.characters, 3);
     expect(info.prompt, '1girl, solo, watercolor');
+    expect(info.negative, 'lowres, bad');
+    expect(info.cfgRescale, 0.18);
+    expect(info.noiseSchedule, 'karras');
+    expect(info.smea, 'SMEA DYN');
+    expect(info.characterPrompts.map((c) => c.negative), [
+      null,
+      'no hat',
+      null,
+    ]);
   });
 
   test('没有可显示的字段时返回 null', () {

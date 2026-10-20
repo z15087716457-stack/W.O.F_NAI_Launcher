@@ -1031,6 +1031,30 @@ class _AttachmentChip extends StatefulWidget {
 class _AttachmentChipState extends State<_AttachmentChip> {
   var _hover = false;
 
+  /// 鼠标在缩略图上 / 在信息卡里；两处都离开一小会儿才收起，
+  /// 免得从缩略图移到卡片中途经过空隙时闪掉。
+  var _onChip = false, _onCard = false;
+  Timer? _leave;
+
+  void _track({bool? chip, bool? card}) {
+    _onChip = chip ?? _onChip;
+    _onCard = card ?? _onCard;
+    _leave?.cancel();
+    if (_onChip || _onCard) {
+      if (!_hover) setState(() => _hover = true);
+      return;
+    }
+    _leave = Timer(const Duration(milliseconds: 150), () {
+      if (mounted && !_onChip && !_onCard) setState(() => _hover = false);
+    });
+  }
+
+  @override
+  void dispose() {
+    _leave?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = AgentScope.of(context);
@@ -1045,13 +1069,15 @@ class _AttachmentChipState extends State<_AttachmentChip> {
           ? UiTip(
               anchor: const Offset(0, -8),
               followerAnchor: Alignment.bottomLeft,
-              width: 248,
+              width: 300,
+              interactive: a.metadata != null,
+              onHover: (inside) => _track(card: inside),
               child: _AttachmentInfo(attachment: a, size: size),
             )
           : null,
       child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
+        onEnter: (_) => _track(chip: true),
+        onExit: (_) => _track(chip: false),
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -1142,25 +1168,63 @@ class _AttachmentChipState extends State<_AttachmentChip> {
   }
 }
 
-/// 附件悬停卡：文件名、尺寸，以及图片自带的几项生成信息（不再整段贴元数据 JSON）。
-class _AttachmentInfo extends StatelessWidget {
+/// 附件悬停卡：文件名、尺寸和图片自带的生成信息。内容多时卡内滚动（最高 360），
+/// 文字可选中复制；不整段贴元数据 JSON。
+class _AttachmentInfo extends StatefulWidget {
   const _AttachmentInfo({required this.attachment, required this.size});
   final AgentAttachment attachment;
   final String? size;
 
   @override
+  State<_AttachmentInfo> createState() => _AttachmentInfoState();
+}
+
+class _AttachmentInfoState extends State<_AttachmentInfo> {
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final a = attachment;
+    final a = widget.attachment;
     final m = a.metadata;
     final sub = UiTipStyle.secondary(context);
+    final ink = context.ui.tipInk;
+    final mono = UiText.mono(
+      11,
+      color: ink.withValues(alpha: .82),
+      height: 1.45,
+    );
+    final label = UiText.sans(
+      11,
+      weight: FontWeight.w600,
+      color: ink.withValues(alpha: .62),
+    );
     final params = [
       if (m?.steps != null) l.ag_imageInfoSteps(m!.steps!),
       if (m?.scale != null) 'CFG ${_trim(m!.scale!)}',
+      if (m?.cfgRescale != null && m!.cfgRescale! > 0)
+        l.ag_imageInfoRescale(_trim(m.cfgRescale!)),
       ?m?.sampler,
     ];
-    return Column(
-      key: Key('agent-attachment-info-${a.id}'),
+    final extra = [?m?.noiseSchedule, ?m?.smea];
+    Widget block(String title, String body) => Padding(
+      padding: const EdgeInsets.only(top: 5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 1,
+        children: [
+          Text(title, style: label),
+          Text(body, style: mono),
+        ],
+      ),
+    );
+    final content = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 3,
@@ -1173,28 +1237,52 @@ class _AttachmentInfo extends StatelessWidget {
         ),
         if (a.image == null)
           Text(l.ag_attachmentBroken, style: sub)
-        else if (size != null || m?.model != null)
-          Text([?m?.model, ?size].join(' · '), style: sub),
+        else if (widget.size != null || m?.model != null)
+          Text([?m?.model, ?widget.size].join(' · '), style: sub),
         if (params.isNotEmpty) Text(params.join(' · '), style: sub),
+        if (extra.isNotEmpty) Text(extra.join(' · '), style: sub),
         if (m?.seed != null)
           Text(l.ag_imageInfoSeed(m!.seed!.toString()), style: sub),
         if (m != null && m.characters > 0)
           Text(l.ag_imageInfoCharacters(m.characters), style: sub),
-        if (m?.prompt != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: Text(
-              m!.prompt!,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: UiText.mono(
-                11,
-                color: context.ui.tipInk.withValues(alpha: .82),
-                height: 1.45,
+        if (m?.prompt != null) block(l.ag_field_prompt, m!.prompt!),
+        if (m?.negative != null) block(l.ag_field_negative, m!.negative!),
+        if (m != null)
+          for (final (i, ch) in m.characterPrompts.indexed) ...[
+            if (ch.prompt.isNotEmpty) block(l.gen_characterN(i + 1), ch.prompt),
+            if (ch.negative != null)
+              block(
+                '${l.gen_characterN(i + 1)} · ${l.ag_field_characterNegative}',
+                ch.negative!,
               ),
-            ),
-          ),
+          ],
       ],
+    );
+    if (m == null) {
+      return KeyedSubtree(
+        key: Key('agent-attachment-info-${a.id}'),
+        child: content,
+      );
+    }
+    return ConstrainedBox(
+      key: Key('agent-attachment-info-${a.id}'),
+      constraints: const BoxConstraints(maxHeight: 360),
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: RawScrollbar(
+          controller: _scroll,
+          thumbVisibility: true,
+          thickness: 4,
+          radius: const Radius.circular(2),
+          thumbColor: ink.withValues(alpha: .28),
+          padding: const EdgeInsets.only(right: -8),
+          child: SingleChildScrollView(
+            key: Key('agent-attachment-info-scroll-${a.id}'),
+            controller: _scroll,
+            child: SelectionArea(child: content),
+          ),
+        ),
+      ),
     );
   }
 

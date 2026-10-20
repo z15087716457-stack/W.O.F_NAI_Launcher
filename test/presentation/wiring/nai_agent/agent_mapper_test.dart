@@ -378,10 +378,10 @@ void main() {
       (3, 'New', false, true),
     ]);
     expect(card.moved.map((m) => m.name), ['Alice', 'Bob']);
-    expect(AgentPositionMark.cell(card.marks[0].before!), 'B3');
-    expect(AgentPositionMark.cell(card.marks[0].after!), 'D3');
+    expect(card.marks[0].before, const Offset(.25, .5));
+    expect(AgentPositionMark.region(card.marks[0].after!), 5);
     expect(card.marks[1].before, isNull);
-    expect(AgentPositionMark.cell(card.marks[1].after!), 'A5');
+    expect(AgentPositionMark.region(card.marks[1].after!), 6);
     // 只改提示词、位置没动：不出位置卡。
     runtime.messages = [
       assistant([call('txt', 'mcp__nai_studio__prompt_update')]),

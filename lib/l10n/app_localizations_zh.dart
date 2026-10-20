@@ -19683,7 +19683,47 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_positionNone => '未定位';
 
   @override
-  String get ag_positionAiHint => '当前为 AI 选择，坐标暂不生效。';
+  String get ag_positionAiHint => '当前为 AI 选择，坐标不生效，由模型自行安排位置。';
+
+  @override
+  String ag_positionRestSame(int count) {
+    return '其余 $count 人位置未变';
+  }
+
+  @override
+  String ag_positionAllSame(int count) {
+    return '$count 人位置未变';
+  }
+
+  @override
+  String get ag_posTopLeft => '左上';
+
+  @override
+  String get ag_posTop => '中上';
+
+  @override
+  String get ag_posTopRight => '右上';
+
+  @override
+  String get ag_posLeft => '左中';
+
+  @override
+  String get ag_posCenter => '正中';
+
+  @override
+  String get ag_posRight => '右中';
+
+  @override
+  String get ag_posBottomLeft => '左下';
+
+  @override
+  String get ag_posBottom => '中下';
+
+  @override
+  String get ag_posBottomRight => '右下';
+
+  @override
+  String get ag_positionNudge => '微调';
 
   @override
   String get ag_positionNew => '新增';
@@ -19841,6 +19881,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String ag_imageInfoSteps(int count) {
     return '$count 步';
+  }
+
+  @override
+  String ag_imageInfoRescale(String value) {
+    return '重缩放 $value';
   }
 
   @override
@@ -40141,7 +40186,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_positionNone => '未定位';
 
   @override
-  String get ag_positionAiHint => '當前為 AI 選擇，座標暫不生效。';
+  String get ag_positionAiHint => '當前為 AI 選擇，座標不生效，由模型自行安排位置。';
+
+  @override
+  String ag_positionRestSame(int count) {
+    return '其餘 $count 人位置未變';
+  }
+
+  @override
+  String ag_positionAllSame(int count) {
+    return '$count 人位置未變';
+  }
+
+  @override
+  String get ag_posTopLeft => '左上';
+
+  @override
+  String get ag_posTop => '中上';
+
+  @override
+  String get ag_posTopRight => '右上';
+
+  @override
+  String get ag_posLeft => '左中';
+
+  @override
+  String get ag_posCenter => '正中';
+
+  @override
+  String get ag_posRight => '右中';
+
+  @override
+  String get ag_posBottomLeft => '左下';
+
+  @override
+  String get ag_posBottom => '中下';
+
+  @override
+  String get ag_posBottomRight => '右下';
+
+  @override
+  String get ag_positionNudge => '微調';
 
   @override
   String get ag_positionNew => '新增';
@@ -40299,6 +40384,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String ag_imageInfoSteps(int count) {
     return '$count 步';
+  }
+
+  @override
+  String ag_imageInfoRescale(String value) {
+    return '重縮放 $value';
   }
 
   @override

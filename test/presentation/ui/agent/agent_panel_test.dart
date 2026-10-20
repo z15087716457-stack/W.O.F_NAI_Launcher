@@ -208,7 +208,7 @@ void main() {
       expect(find.byKey(const Key('agent-mention-panel')), findsNothing);
     });
 
-    testWidgets('附件悬停是轻量信息卡，不贴整段元数据', (tester) async {
+    testWidgets('附件悬停信息卡：不贴整段元数据，可移入、卡内滚动', (tester) async {
       final long = List.filled(80, 'masterpiece').join(', ');
       await pumpAgent(
         tester,
@@ -226,7 +226,11 @@ void main() {
               sampler: 'k_euler_ancestral',
               seed: 123456,
               prompt: long,
-              characters: 2,
+              negative: 'lowres',
+              characterPrompts: const [
+                AgentImageCharacter(prompt: 'girl, red hair'),
+                AgentImageCharacter(prompt: 'boy', negative: 'hat'),
+              ],
             ),
           ),
         ]),
@@ -261,10 +265,37 @@ void main() {
         find.descendant(of: card, matching: find.text('2 个角色')),
         findsOneWidget,
       );
-      expect(tester.getSize(card).width, lessThanOrEqualTo(248));
-      expect(tester.getSize(card).height, lessThan(160));
+      expect(
+        find.descendant(of: card, matching: find.text('角色 2 · 角色负面')),
+        findsOneWidget,
+      );
+      // 卡宽 300 减内边距；高度封顶 360，长提示词在卡内滚动。
+      expect(tester.getSize(card).width, lessThanOrEqualTo(300));
+      expect(tester.getSize(card).height, lessThanOrEqualTo(360));
+      final scroll = find.byKey(const Key('agent-attachment-info-scroll-a1'));
+      final position = tester
+          .state<ScrollableState>(
+            find.descendant(of: scroll, matching: find.byType(Scrollable)),
+          )
+          .position;
+      expect(position.maxScrollExtent, greaterThan(0));
+      // 从缩略图移进卡片：中途短暂离开两者也不收起。
       await mouse.moveTo(Offset.zero);
+      await tester.pump(const Duration(milliseconds: 50));
+      await mouse.moveTo(tester.getCenter(card));
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(card, findsOneWidget);
+      await mouse.moveTo(tester.getCenter(card));
+      await tester.sendEventToBinding(
+        PointerScrollEvent(
+          position: tester.getCenter(card),
+          scrollDelta: const Offset(0, 120),
+        ),
+      );
       await tester.pump();
+      expect(position.pixels, greaterThan(0));
+      await mouse.moveTo(Offset.zero);
+      await tester.pump(const Duration(milliseconds: 200));
       expect(card, findsNothing);
     });
 

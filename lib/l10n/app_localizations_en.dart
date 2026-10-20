@@ -20540,7 +20540,59 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_positionAiHint =>
-      'AI\'s Choice is on, so these positions aren\'t used.';
+      'AI choice is on: coordinates are ignored and the model places characters.';
+
+  @override
+  String ag_positionRestSame(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count others unchanged',
+      one: '1 other unchanged',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_positionAllSame(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count characters unchanged',
+      one: '1 character unchanged',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ag_posTopLeft => 'top left';
+
+  @override
+  String get ag_posTop => 'top';
+
+  @override
+  String get ag_posTopRight => 'top right';
+
+  @override
+  String get ag_posLeft => 'left';
+
+  @override
+  String get ag_posCenter => 'center';
+
+  @override
+  String get ag_posRight => 'right';
+
+  @override
+  String get ag_posBottomLeft => 'bottom left';
+
+  @override
+  String get ag_posBottom => 'bottom';
+
+  @override
+  String get ag_posBottomRight => 'bottom right';
+
+  @override
+  String get ag_positionNudge => 'nudged';
 
   @override
   String get ag_positionNew => 'New';
@@ -20700,6 +20752,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String ag_imageInfoSteps(int count) {
     return '$count steps';
+  }
+
+  @override
+  String ag_imageInfoRescale(String value) {
+    return 'Rescale $value';
   }
 
   @override

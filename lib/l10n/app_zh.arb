@@ -10695,7 +10695,33 @@
   "ag_positionTitle": "角色位置",
   "ag_positionApplied": "已调整",
   "ag_positionNone": "未定位",
-  "ag_positionAiHint": "当前为 AI 选择，坐标暂不生效。",
+  "ag_positionAiHint": "当前为 AI 选择，坐标不生效，由模型自行安排位置。",
+  "ag_positionRestSame": "其余 {count} 人位置未变",
+  "@ag_positionRestSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_positionAllSame": "{count} 人位置未变",
+  "@ag_positionAllSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_posTopLeft": "左上",
+  "ag_posTop": "中上",
+  "ag_posTopRight": "右上",
+  "ag_posLeft": "左中",
+  "ag_posCenter": "正中",
+  "ag_posRight": "右中",
+  "ag_posBottomLeft": "左下",
+  "ag_posBottom": "中下",
+  "ag_posBottomRight": "右下",
+  "ag_positionNudge": "微调",
   "ag_positionNew": "新增",
   "ag_diffLocked": "草稿已再次修改",
   "ag_diffUndo": "撤销",
@@ -10756,6 +10782,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoRescale": "重缩放 {value}",
+  "@ag_imageInfoRescale": {
+    "placeholders": {
+      "value": {
+        "type": "String"
       }
     }
   },

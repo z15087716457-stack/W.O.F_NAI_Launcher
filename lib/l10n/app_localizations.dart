@@ -35875,8 +35875,80 @@ abstract class AppLocalizations {
   /// No description provided for @ag_positionAiHint.
   ///
   /// In en, this message translates to:
-  /// **'AI\'s Choice is on, so these positions aren\'t used.'**
+  /// **'AI choice is on: coordinates are ignored and the model places characters.'**
   String get ag_positionAiHint;
+
+  /// No description provided for @ag_positionRestSame.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 other unchanged} other{{count} others unchanged}}'**
+  String ag_positionRestSame(int count);
+
+  /// No description provided for @ag_positionAllSame.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 character unchanged} other{{count} characters unchanged}}'**
+  String ag_positionAllSame(int count);
+
+  /// No description provided for @ag_posTopLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'top left'**
+  String get ag_posTopLeft;
+
+  /// No description provided for @ag_posTop.
+  ///
+  /// In en, this message translates to:
+  /// **'top'**
+  String get ag_posTop;
+
+  /// No description provided for @ag_posTopRight.
+  ///
+  /// In en, this message translates to:
+  /// **'top right'**
+  String get ag_posTopRight;
+
+  /// No description provided for @ag_posLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get ag_posLeft;
+
+  /// No description provided for @ag_posCenter.
+  ///
+  /// In en, this message translates to:
+  /// **'center'**
+  String get ag_posCenter;
+
+  /// No description provided for @ag_posRight.
+  ///
+  /// In en, this message translates to:
+  /// **'right'**
+  String get ag_posRight;
+
+  /// No description provided for @ag_posBottomLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'bottom left'**
+  String get ag_posBottomLeft;
+
+  /// No description provided for @ag_posBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'bottom'**
+  String get ag_posBottom;
+
+  /// No description provided for @ag_posBottomRight.
+  ///
+  /// In en, this message translates to:
+  /// **'bottom right'**
+  String get ag_posBottomRight;
+
+  /// No description provided for @ag_positionNudge.
+  ///
+  /// In en, this message translates to:
+  /// **'nudged'**
+  String get ag_positionNudge;
 
   /// No description provided for @ag_positionNew.
   ///
@@ -36141,6 +36213,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} steps'**
   String ag_imageInfoSteps(int count);
+
+  /// No description provided for @ag_imageInfoRescale.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescale {value}'**
+  String ag_imageInfoRescale(String value);
 
   /// No description provided for @ag_imageInfoSeed.
   ///

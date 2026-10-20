@@ -19983,7 +19983,47 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_positionNone => '지정 안 됨';
 
   @override
-  String get ag_positionAiHint => 'AI 선택 중이라 위치가 적용되지 않습니다.';
+  String get ag_positionAiHint => 'AI 선택 중: 좌표는 무시되고 모델이 배치합니다.';
+
+  @override
+  String ag_positionRestSame(int count) {
+    return '나머지 $count명 변경 없음';
+  }
+
+  @override
+  String ag_positionAllSame(int count) {
+    return '$count명 모두 변경 없음';
+  }
+
+  @override
+  String get ag_posTopLeft => '왼쪽 위';
+
+  @override
+  String get ag_posTop => '위';
+
+  @override
+  String get ag_posTopRight => '오른쪽 위';
+
+  @override
+  String get ag_posLeft => '왼쪽';
+
+  @override
+  String get ag_posCenter => '가운데';
+
+  @override
+  String get ag_posRight => '오른쪽';
+
+  @override
+  String get ag_posBottomLeft => '왼쪽 아래';
+
+  @override
+  String get ag_posBottom => '아래';
+
+  @override
+  String get ag_posBottomRight => '오른쪽 아래';
+
+  @override
+  String get ag_positionNudge => '미세 조정';
 
   @override
   String get ag_positionNew => '추가';
@@ -20141,6 +20181,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String ag_imageInfoSteps(int count) {
     return '$count단계';
+  }
+
+  @override
+  String ag_imageInfoRescale(String value) {
+    return '리스케일 $value';
   }
 
   @override

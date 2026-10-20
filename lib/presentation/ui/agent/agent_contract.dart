@@ -245,7 +245,7 @@ final class AgentDiffBlock extends AgentBlock {
 }
 
 /// 角色位置改动：一次 `prompt_update` 改了定位方式或角色位置时出一张，
-/// 画成迷你定位板（只提示，不带撤销）。
+/// 画成按坐标落点的迷你板（只提示，不带撤销）。
 final class AgentPositionBlock extends AgentBlock {
   const AgentPositionBlock({
     required this.id,
@@ -292,11 +292,12 @@ class AgentPositionMark {
 
   bool get moved => added ? after != null : before != after;
 
-  /// 5 × 5 格名（`A1`…`E5`），与生成页定位板的分格一致。
-  static String cell(Offset p) {
-    final col = (p.dx * 5).floor().clamp(0, 4);
-    final row = (p.dy * 5).floor().clamp(0, 4);
-    return '${String.fromCharCode(65 + col)}${row + 1}';
+  /// 九宫方位（0 = 左上 … 4 = 正中 … 8 = 右下），只用于文字说明；
+  /// 定位本身是连续坐标（V4 起无极定位）。
+  static int region(Offset p) {
+    final col = (p.dx * 3).floor().clamp(0, 2);
+    final row = (p.dy * 3).floor().clamp(0, 2);
+    return row * 3 + col;
   }
 }
 
@@ -609,7 +610,7 @@ class AgentAttachment {
   final AgentImageInfo? metadata;
 }
 
-/// 悬停卡片上的轻量生成信息：每项都可空，只显示有的。
+/// 悬停卡片上的生成信息：每项都可空，只显示有的。卡片可滚动，提示词给全文。
 @immutable
 class AgentImageInfo {
   const AgentImageInfo({
@@ -619,14 +620,33 @@ class AgentImageInfo {
     this.sampler,
     this.seed,
     this.prompt,
-    this.characters = 0,
-  });
-  final String? model, sampler, prompt;
+    this.negative,
+    this.cfgRescale,
+    this.noiseSchedule,
+    this.smea,
+    this.characterPrompts = const [],
+    int? characters,
+  }) : _characters = characters;
+  final String? model, sampler, prompt, negative, noiseSchedule;
   final int? steps, seed;
-  final double? scale;
+  final double? scale, cfgRescale;
+
+  /// SMEA 开关描述（如「SMEA」「SMEA DYN」）；没开或不适用时 null。
+  final String? smea;
+
+  /// 各角色的提示词与负面，按顺序。
+  final List<AgentImageCharacter> characterPrompts;
+  final int? _characters;
 
   /// 角色提示词条数。
-  final int characters;
+  int get characters => _characters ?? characterPrompts.length;
+}
+
+@immutable
+class AgentImageCharacter {
+  const AgentImageCharacter({required this.prompt, this.negative});
+  final String prompt;
+  final String? negative;
 }
 
 enum AgentQueueKind { queued, steer, recovered }

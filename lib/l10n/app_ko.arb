@@ -10695,7 +10695,33 @@
   "ag_positionTitle": "캐릭터 위치",
   "ag_positionApplied": "조정됨",
   "ag_positionNone": "지정 안 됨",
-  "ag_positionAiHint": "AI 선택 중이라 위치가 적용되지 않습니다.",
+  "ag_positionAiHint": "AI 선택 중: 좌표는 무시되고 모델이 배치합니다.",
+  "ag_positionRestSame": "나머지 {count}명 변경 없음",
+  "@ag_positionRestSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_positionAllSame": "{count}명 모두 변경 없음",
+  "@ag_positionAllSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_posTopLeft": "왼쪽 위",
+  "ag_posTop": "위",
+  "ag_posTopRight": "오른쪽 위",
+  "ag_posLeft": "왼쪽",
+  "ag_posCenter": "가운데",
+  "ag_posRight": "오른쪽",
+  "ag_posBottomLeft": "왼쪽 아래",
+  "ag_posBottom": "아래",
+  "ag_posBottomRight": "오른쪽 아래",
+  "ag_positionNudge": "미세 조정",
   "ag_positionNew": "추가",
   "ag_diffLocked": "초안이 다시 바뀌었습니다",
   "ag_diffUndo": "실행 취소",
@@ -10756,6 +10782,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoRescale": "리스케일 {value}",
+  "@ag_imageInfoRescale": {
+    "placeholders": {
+      "value": {
+        "type": "String"
       }
     }
   },

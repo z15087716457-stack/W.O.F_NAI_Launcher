@@ -10708,7 +10708,33 @@
   "ag_positionTitle": "Character positions",
   "ag_positionApplied": "Adjusted",
   "ag_positionNone": "None",
-  "ag_positionAiHint": "AI's Choice is on, so these positions aren't used.",
+  "ag_positionAiHint": "AI choice is on: coordinates are ignored and the model places characters.",
+  "ag_positionRestSame": "{count, plural, =1{1 other unchanged} other{{count} others unchanged}}",
+  "@ag_positionRestSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_positionAllSame": "{count, plural, =1{1 character unchanged} other{{count} characters unchanged}}",
+  "@ag_positionAllSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_posTopLeft": "top left",
+  "ag_posTop": "top",
+  "ag_posTopRight": "top right",
+  "ag_posLeft": "left",
+  "ag_posCenter": "center",
+  "ag_posRight": "right",
+  "ag_posBottomLeft": "bottom left",
+  "ag_posBottom": "bottom",
+  "ag_posBottomRight": "bottom right",
+  "ag_positionNudge": "nudged",
   "ag_positionNew": "New",
   "ag_diffLocked": "Draft changed since",
   "ag_diffUndo": "Undo",
@@ -10769,6 +10795,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoRescale": "Rescale {value}",
+  "@ag_imageInfoRescale": {
+    "placeholders": {
+      "value": {
+        "type": "String"
       }
     }
   },

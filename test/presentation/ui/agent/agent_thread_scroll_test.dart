@@ -218,7 +218,7 @@ void main() {
     expect(find.text('角色 2 · 角色负面'), findsOneWidget);
   });
 
-  testWidgets('position card draws a mini board with moves and legend', (
+  testWidgets('position card: free-coordinate board, legend lists only moves', (
     tester,
   ) async {
     await _pump(
@@ -238,7 +238,7 @@ void main() {
                   AgentPositionMark(
                     index: 0,
                     name: 'Alice',
-                    before: Offset(.3, .5),
+                    before: Offset(.1, .1),
                     after: Offset(.7, .5),
                   ),
                   AgentPositionMark(
@@ -251,6 +251,12 @@ void main() {
                     name: 'Cat',
                     before: Offset(.5, .1),
                     after: Offset(.5, .1),
+                  ),
+                  AgentPositionMark(
+                    index: 3,
+                    name: 'Dan',
+                    before: Offset(.4, .4),
+                    after: Offset(.45, .42),
                   ),
                 ],
               ),
@@ -266,24 +272,28 @@ void main() {
     );
     expect(board.height, closeTo(150, .5));
     expect(board.width, closeTo(150 * 832 / 1216, .5));
-    // 圆点按坐标落在板子上。
+    // 圆点按坐标落在板子上（不再吸附到格子）。
     final alice = tester.getCenter(
       find.byKey(const Key('agent-position-dot-0')),
     );
     expect(alice.dx, closeTo(board.left + board.width * .7, 1));
     expect(alice.dy, closeTo(board.top + board.height * .5, 1));
+    // 没动的角色也画在板上，但图例只列动过的，其余合成一行。
+    expect(find.byKey(const Key('agent-position-dot-2')), findsOneWidget);
+    expect(find.byKey(const Key('agent-position-legend-2')), findsNothing);
     for (final t in [
       '角色位置',
       'AI 选择 → 自定义',
       '已调整',
       'Alice',
-      'B3',
-      'D3',
+      '左上',
+      '右中',
       'Bob',
       '未定位',
-      'A5',
-      'Cat',
-      'C1',
+      '左下',
+      'Dan',
+      '正中 · 微调', // 同一方位里小幅移动
+      '其余 1 人位置未变',
     ]) {
       expect(
         find.descendant(of: card, matching: find.text(t)),
@@ -291,15 +301,83 @@ void main() {
         reason: t,
       );
     }
+    for (final t in ['B3', 'D3', 'A5', 'C1']) {
+      expect(find.text(t), findsNothing, reason: '不再显示 5×5 格名');
+    }
     expect(
       tester.getRect(find.text('已调整')).right,
       closeTo(tester.getRect(card).right, 1),
     );
   });
 
-  testWidgets('position card under AI choice dims the board and explains', (
+  testWidgets('position card with 22 characters keeps every dot readable', (
     tester,
   ) async {
+    await _pump(
+      tester,
+      _view([
+        AgentTurn(
+          id: 't',
+          user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 20)),
+          reply: AgentReply(
+            blocks: [
+              AgentPositionBlock(
+                id: 'p',
+                customBefore: true,
+                customAfter: true,
+                aspect: 1,
+                marks: [
+                  for (var i = 0; i < 22; i++)
+                    () {
+                      // 前两个挤在同一点，其余按行排开；只有 0 号移动过。
+                      final at = i < 2
+                          ? const Offset(.5, .5)
+                          : Offset((i % 5 + .5) / 5, (i ~/ 5 + .5) / 5);
+                      return AgentPositionMark(
+                        index: i,
+                        before: i == 0 ? const Offset(.9, .9) : at,
+                        after: at,
+                      );
+                    }(),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ], 1),
+    );
+    final board = tester.getRect(
+      find.byKey(const Key('agent-position-board-p')),
+    );
+    expect(board.width, closeTo(180, .5), reason: '人多时板子放大');
+    final dots = [
+      for (var i = 0; i < 22; i++)
+        tester.getRect(find.byKey(Key('agent-position-dot-$i'))),
+    ];
+    expect(dots.first.width, 13, reason: '人多时圆点缩小');
+    for (final d in dots) {
+      expect(board.inflate(.5).contains(d.topLeft), isTrue);
+      expect(board.inflate(.5).contains(d.bottomRight), isTrue);
+    }
+    // 重合的两个圆点被推开，编号不叠在一起。
+    expect(
+      (dots[0].center - dots[1].center).distance,
+      greaterThanOrEqualTo(13),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('agent-position-board-p')),
+        matching: find.text('22'),
+      ),
+      findsOneWidget,
+    );
+    // 图例只有一行变化 + 一行汇总，不会拉成 22 行。
+    expect(find.byKey(const Key('agent-position-legend-0')), findsOneWidget);
+    expect(find.byKey(const Key('agent-position-legend-5')), findsNothing);
+    expect(find.text('其余 21 人位置未变'), findsOneWidget);
+  });
+
+  testWidgets('position card under AI choice skips the board', (tester) async {
     await _pump(
       tester,
       _view([
@@ -327,6 +405,7 @@ void main() {
       ], 1),
     );
     expect(find.text('自定义 → AI 选择'), findsOneWidget);
-    expect(find.text('当前为 AI 选择，坐标暂不生效。'), findsOneWidget);
+    expect(find.text('当前为 AI 选择，坐标不生效，由模型自行安排位置。'), findsOneWidget);
+    expect(find.byKey(const Key('agent-position-board-p')), findsNothing);
   });
 }

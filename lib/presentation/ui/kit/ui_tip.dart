@@ -14,6 +14,8 @@ class UiTip {
     this.width,
     this.targetAnchor = Alignment.topLeft,
     this.bare = false,
+    this.interactive = false,
+    this.onHover,
   });
 
   /// 相对 [targetAnchor] 的偏移。
@@ -27,9 +29,14 @@ class UiTip {
 
   /// true：[child] 自带外观（比如主导航的带尖角气泡），不再套 [UiTipBubble]。
   final bool bare;
+
+  /// true：提示框接收鼠标（可滚动、可选中文字）；鼠标进出时调 [onHover]，
+  /// 宿主据此决定何时收起。默认 false，提示不挡鼠标。
+  final bool interactive;
+  final ValueChanged<bool>? onHover;
 }
 
-/// 富内容悬停提示的宿主。提示画在应用浮层里，不会被相邻卡片盖住，也不挡鼠标。
+/// 富内容悬停提示的宿主。提示画在应用浮层里，不会被相邻卡片盖住，默认不挡鼠标（见 [UiTip.interactive]）。
 class UiTipHost extends StatefulWidget {
   const UiTipHost({super.key, required this.child, this.tip});
 
@@ -71,11 +78,19 @@ class _UiTipHostState extends State<UiTipHost> {
             targetAnchor: tip.targetAnchor,
             followerAnchor: tip.followerAnchor,
             offset: tip.anchor,
-            child: IgnorePointer(
-              child: tip.bare
-                  ? tip.child
-                  : UiTipBubble(width: tip.width, child: tip.child),
-            ),
+            child: tip.interactive
+                ? MouseRegion(
+                    onEnter: (_) => tip.onHover?.call(true),
+                    onExit: (_) => tip.onHover?.call(false),
+                    child: tip.bare
+                        ? tip.child
+                        : UiTipBubble(width: tip.width, child: tip.child),
+                  )
+                : IgnorePointer(
+                    child: tip.bare
+                        ? tip.child
+                        : UiTipBubble(width: tip.width, child: tip.child),
+                  ),
           ),
         );
       },

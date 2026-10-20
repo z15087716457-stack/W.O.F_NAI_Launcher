@@ -10695,7 +10695,33 @@
   "ag_positionTitle": "キャラクター位置",
   "ag_positionApplied": "調整済み",
   "ag_positionNone": "未指定",
-  "ag_positionAiHint": "AIにおまかせ中のため、位置は使われません。",
+  "ag_positionAiHint": "AI おまかせ中：座標は使われず、モデルが配置します。",
+  "ag_positionRestSame": "ほか {count} 人は変更なし",
+  "@ag_positionRestSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_positionAllSame": "{count} 人とも変更なし",
+  "@ag_positionAllSame": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_posTopLeft": "左上",
+  "ag_posTop": "上",
+  "ag_posTopRight": "右上",
+  "ag_posLeft": "左",
+  "ag_posCenter": "中央",
+  "ag_posRight": "右",
+  "ag_posBottomLeft": "左下",
+  "ag_posBottom": "下",
+  "ag_posBottomRight": "右下",
+  "ag_positionNudge": "微調整",
   "ag_positionNew": "追加",
   "ag_diffLocked": "下書きが再変更されました",
   "ag_diffUndo": "元に戻す",
@@ -10756,6 +10782,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "ag_imageInfoRescale": "リスケール {value}",
+  "@ag_imageInfoRescale": {
+    "placeholders": {
+      "value": {
+        "type": "String"
       }
     }
   },
