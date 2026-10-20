@@ -2,7 +2,7 @@
 
 ## snapshot
 
-`save` / `list` / `read` / `load` the complete generation configuration. Only an explicit `load` restores prompts, images, characters, blocks, references and native image workflow settings; it needs the current `draft_version` and backs everything up first. Switching Agent workspaces never loads a snapshot automatically.
+`save` / `list` / `read` / `load` the complete generation configuration (default list `limit=20`). `load` restores prompts, images, characters, blocks, references and native image workflow settings; send `expected_version` from fresh `studio_context(scope=draft)`. It backs everything up first. Switching Agent workspaces never loads a snapshot automatically.
 
 ## settings_read / settings_update
 

@@ -602,7 +602,7 @@ class _FileRowState extends State<_FileRow> {
   }
 }
 
-// ─────────────────────────────── 记忆 ───────────────────────────────
+// ─────────────────────────────── 指令 ───────────────────────────────
 
 class AgentMemory extends StatelessWidget {
   const AgentMemory({super.key});

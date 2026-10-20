@@ -15898,10 +15898,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_openFolder => '打开文件夹';
 
   @override
-  String get naiAgent_toolsManuals => '工具与手册';
+  String get naiAgent_toolsManuals => '工具与 Skill';
 
   @override
-  String get naiAgent_toolsHint => '当前状态、图片、提示词和工作区文件按需调用。详细 NAI 手册按模型读取。';
+  String get naiAgent_toolsHint =>
+      '当前状态、图片、提示词和工作区文件按需调用；业务操作的详细用法写在 nai-studio、nai-prompt 等 Skill 里，用到时才读取。';
 
   @override
   String get naiAgent_unknownCost => '实际费用以服务商为准';
@@ -19371,7 +19372,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agSkillDescNaiStudio =>
-      '通过业务工具操作 NAI Studio：编辑草稿、查看图片、生成报价与执行、图库／历史、原图与 Vibe／精准参考、积木、画风探索、图像工具、快照与偏好设置。除读取当前状态外，其他 Studio 操作前先读。';
+      '操作 NAI Studio：草稿、图片、生成、语义搜索、图库／历史、参考图、积木、画风探索、图像工具、快照与偏好设置。除读取当前状态外，其他 Studio 操作前先读。';
 
   @override
   String get set_agSkillView => '查看';
@@ -19796,6 +19797,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_tool_image_tool => '图像工具';
+
+  @override
+  String get ag_tool_studio_search => '语义搜索';
 
   @override
   String get ag_tool_image_generate => '变体 / 增强';
@@ -36586,10 +36590,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_openFolder => '開啟資料夾';
 
   @override
-  String get naiAgent_toolsManuals => '工具與手冊';
+  String get naiAgent_toolsManuals => '工具與 Skill';
 
   @override
-  String get naiAgent_toolsHint => '當前狀態、圖片、提示詞和工作區檔案按需呼叫。詳細 NAI 手冊按模型讀取。';
+  String get naiAgent_toolsHint =>
+      '當前狀態、圖片、提示詞和工作區檔案按需呼叫；業務操作的詳細用法寫在 nai-studio、nai-prompt 等 Skill 裡，用到時才讀取。';
 
   @override
   String get naiAgent_unknownCost => '實際費用以服務商為準';
@@ -40059,7 +40064,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agSkillDescNaiStudio =>
-      '通過業務工具操作 NAI Studio：編輯草稿、檢視圖片、生成報價與執行、圖庫／歷史、原圖與 Vibe／精準參考、積木、畫風探索、影像工具、快照與偏好設定。除讀取當前狀態外，其他 Studio 操作前先讀。';
+      '操作 NAI Studio：草稿、圖片、生成、語義搜尋、圖庫／歷史、參考圖、積木、畫風探索、影像工具、快照與偏好設定。除讀取當前狀態外，其他 Studio 操作前先讀。';
 
   @override
   String get set_agSkillView => '檢視';
@@ -40484,6 +40489,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_tool_image_tool => '影像工具';
+
+  @override
+  String get ag_tool_studio_search => '語義搜尋';
 
   @override
   String get ag_tool_image_generate => '變體 / 增強';

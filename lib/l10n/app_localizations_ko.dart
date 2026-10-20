@@ -16144,11 +16144,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_openFolder => '폴더 열기';
 
   @override
-  String get naiAgent_toolsManuals => '도구 및 매뉴얼';
+  String get naiAgent_toolsManuals => '도구 및 Skill';
 
   @override
   String get naiAgent_toolsHint =>
-      '현재 상태, 이미지, 프롬프트 및 작업 공간 파일을 필요할 때 호출하며 모델별 NAI 매뉴얼을 읽습니다.';
+      '현재 상태, 이미지, 프롬프트 및 작업 공간 파일을 필요할 때 호출합니다. Studio 작업의 자세한 사용법은 nai-studio, nai-prompt 등의 Skill에 있으며 필요할 때만 읽습니다.';
 
   @override
   String get naiAgent_unknownCost => '실제 비용은 서비스 제공자 기준';
@@ -19665,7 +19665,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agSkillDescNaiStudio =>
-      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+      'Operate NAI Studio drafts, images, generation, semantic search, gallery/history, references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before Studio operations beyond studio_context.';
 
   @override
   String get set_agSkillView => '보기';
@@ -20097,6 +20097,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_tool_image_tool => '이미지 도구';
+
+  @override
+  String get ag_tool_studio_search => '의미 검색';
 
   @override
   String get ag_tool_image_generate => '변형 / 향상';

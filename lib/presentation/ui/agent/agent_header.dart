@@ -12,7 +12,7 @@ import 'agent_parts.dart';
 import 'agent_popovers.dart';
 import 'agent_scope.dart';
 
-/// 顶栏两层：标志 + 「工作区 / 编号 · 聊天名 ▾」+ 新聊天 / 更多 / 收起；下面 对话 / 产物 / 记忆 + 上下文。
+/// 顶栏两层：标志 + 「工作区 / 编号 · 聊天名 ▾」+ 新聊天 / 更多 / 收起；下面 对话 / 产物 / 指令 + 上下文。
 class AgentHeader extends StatefulWidget {
   const AgentHeader({super.key, required this.tab, required this.onTab});
   final AgentTab tab;

@@ -7,10 +7,10 @@ const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'studio_s
 const readActions = {
   snapshot: new Set(['list', 'read']),
   reference_manage: new Set(['list']),
-  reference_library: new Set(['query', 'read', 'list', 'categories']),
+  reference_library: new Set(['query', 'read', 'categories']),
   gallery_manage: new Set(['read', 'trash', 'collections', 'collection_members', 'folders']),
   image_tool: new Set(['list', 'status', 'cancel', 'prepare']),
-  image_generate: new Set(['prepare']),
+  image_generate: new Set(['prepare', 'status', 'cancel']),
   explore_manage: new Set(['list', 'read', 'status', 'prepare', 'pause', 'cancel']),
 };
 const edits = new Set(['write', 'edit', 'prompt_update', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'image_tool', 'image_generate', 'explore_manage']);

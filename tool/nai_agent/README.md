@@ -8,7 +8,7 @@
 
 Flutter 入口为 lib/presentation/providers/nai_agent/：工作区控制器持久化目录、聊天元数据、输入与原始附件；starter 按需解析既有模型服务/安全存储并创建私有 stdio 子进程。读取 provider 不启动进程。聊天历史只由官方 Pi 保存；切工作区不自动改生图页。D 已接可见对话和设置。E9 已接官方 MCP／CodeMode，Windows 系统输入专项仍待后续。当前安装仍是 E8；本轮源码／新包尚未安装。
 
-默认声明 read/write/edit/bash、studio_context、model-only 的 ask_user 和官方 codemode 七个入口。十九个 Studio 业务工具经官方进程内 MCP 通道进入 nai_studio 组，默认 codemode 暴露，通过 searchTools／describeTool／describeNamespace 按需发现。调用方提供 NAI 系统提示词，宿主只追加简短路由，完整业务路线在 MCP namespace 内按需读取；显式 loader 不读取全局 Pi 配置、环境密钥、AGENTS、自动发现的扩展或网络模型目录。Pi 管理流式循环、工具执行、重试、压缩、排队/引导与会话文件。
+默认声明 read/write/edit/bash、studio_context、model-only 的 ask_user 和官方 codemode 七个入口。二十个 Studio 业务工具经官方进程内 MCP 通道进入 nai_studio 组，默认 codemode 暴露，通过 searchTools／describeTool／describeNamespace 按需发现。调用方提供 NAI 系统提示词，宿主只追加简短路由，完整业务路线在 MCP namespace 内按需读取；显式 loader 不读取全局 Pi 配置、环境密钥、AGENTS、自动发现的扩展或网络模型目录。Pi 管理流式循环、工具执行、重试、压缩、排队/引导与会话文件。
 
 E7 使用官方 DefaultResourceLoader 加载内置 nai-interaction（studio_context／model-only 的 ask_user）及 extensionPaths 明确选定的本地 Pi 扩展文件／包目录。设置可启停、移除；当前任务结束后下次发送按新配置恢复会话。工具、斜杠命令与 session_start／session_shutdown 由 Pi 管理。标准 select／confirm／input／editor 转原生问题卡，通知／状态／字符串 widget 转面板；停止取消启动及运行中的 UI 等待。终端自定义组件和其他桌面产品专有插件协议不支持。扩展运行本地代码，工作目录绑定不提供系统权限沙盒。
 

@@ -28964,13 +28964,13 @@ abstract class AppLocalizations {
   /// No description provided for @naiAgent_toolsManuals.
   ///
   /// In en, this message translates to:
-  /// **'Tools and manuals'**
+  /// **'Tools and skills'**
   String get naiAgent_toolsManuals;
 
   /// No description provided for @naiAgent_toolsHint.
   ///
   /// In en, this message translates to:
-  /// **'Read current state, images, prompts and workspace files on demand. Load detailed NAI manuals for the selected model.'**
+  /// **'Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.'**
   String get naiAgent_toolsHint;
 
   /// No description provided for @naiAgent_unknownCost.
@@ -35275,7 +35275,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agSkillDescNaiStudio.
   ///
   /// In en, this message translates to:
-  /// **'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.'**
+  /// **'Operate NAI Studio drafts, images, generation, semantic search, gallery/history, references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before Studio operations beyond studio_context.'**
   String get set_agSkillDescNaiStudio;
 
   /// No description provided for @set_agSkillView.
@@ -36075,6 +36075,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image tool'**
   String get ag_tool_image_tool;
+
+  /// No description provided for @ag_tool_studio_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Semantic search'**
+  String get ag_tool_studio_search;
 
   /// No description provided for @ag_tool_image_generate.
   ///

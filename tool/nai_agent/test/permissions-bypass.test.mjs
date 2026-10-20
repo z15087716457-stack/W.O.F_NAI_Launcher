@@ -90,3 +90,15 @@ test('readonly keeps blocking edits and paid calls, studio_search stays read-onl
     assert.equal(p.prompts.length, 0);
   } finally { await p.close(); }
 });
+
+test('readonly treats image_generate status/cancel as reads, like image_tool and explore_manage', async () => {
+  const p = await policy('readonly');
+  try {
+    for (const action of ['prepare', 'status', 'cancel']) {
+      assert.equal(await p.call('mcp__nai_studio__image_generate', { action }), undefined, action);
+    }
+    const blocked = await p.call('mcp__nai_studio__image_generate', { action: 'run' });
+    assert.equal(blocked?.block, true);
+    assert.equal(p.prompts.length, 0);
+  } finally { await p.close(); }
+});

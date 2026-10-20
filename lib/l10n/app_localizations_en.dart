@@ -16584,11 +16584,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_openFolder => 'Open folder';
 
   @override
-  String get naiAgent_toolsManuals => 'Tools and manuals';
+  String get naiAgent_toolsManuals => 'Tools and skills';
 
   @override
   String get naiAgent_toolsHint =>
-      'Read current state, images, prompts and workspace files on demand. Load detailed NAI manuals for the selected model.';
+      'Read current state, images, prompts and workspace files on demand. Detailed Studio usage lives in skills such as nai-studio and nai-prompt, loaded only when needed.';
 
   @override
   String get naiAgent_unknownCost => 'Actual cost is set by the provider';
@@ -20217,7 +20217,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agSkillDescNaiStudio =>
-      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+      'Operate NAI Studio drafts, images, generation, semantic search, gallery/history, references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before Studio operations beyond studio_context.';
 
   @override
   String get set_agSkillView => 'View';
@@ -20657,6 +20657,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_tool_image_tool => 'Image tool';
+
+  @override
+  String get ag_tool_studio_search => 'Semantic search';
 
   @override
   String get ag_tool_image_generate => 'Variations / enhance';

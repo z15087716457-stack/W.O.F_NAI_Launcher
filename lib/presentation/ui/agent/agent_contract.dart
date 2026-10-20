@@ -74,7 +74,7 @@ class AgentViewData {
   /// 「产物」标签页。
   final AgentShelfData shelf;
 
-  /// 「记忆」标签页；null = 不显示这个标签。
+  /// 「指令」标签页；null = 不显示这个标签。
   final AgentMemoryData? memory;
 
   /// 上下文与用量（标签栏右侧的圆环 + 统计弹层）。
@@ -790,7 +790,7 @@ class AgentQueued {
   final AgentQueueKind kind;
 }
 
-// ─────────────────────────────── 产物 / 记忆 ───────────────────────────────
+// ─────────────────────────────── 产物 / 指令 ───────────────────────────────
 
 @immutable
 class AgentShelfData {
@@ -1119,7 +1119,7 @@ class AgentActions {
   final VoidCallback onDismissNotices;
   final VoidCallback onRetryInit;
 
-  /// 「记忆」页的编辑：打开设置里对应的位置。
+  /// 「指令」页的编辑：打开设置里对应的位置。
   final void Function(AgentMemoryTarget target) onEditMemory;
 
   /// 删除聊天（移进回收区）；返回撤销凭据，null = 没删成。运行中的聊天界面已禁用。

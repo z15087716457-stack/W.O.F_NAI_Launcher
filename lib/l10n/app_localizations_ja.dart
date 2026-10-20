@@ -16106,11 +16106,11 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_openFolder => 'フォルダーを開く';
 
   @override
-  String get naiAgent_toolsManuals => 'ツールとマニュアル';
+  String get naiAgent_toolsManuals => 'ツールと Skill';
 
   @override
   String get naiAgent_toolsHint =>
-      '状態・画像・プロンプト・ファイルを必要に応じて取得し、モデル別の NAI マニュアルを参照します。';
+      '状態・画像・プロンプト・ファイルを必要に応じて取得します。Studio 操作の詳しい使い方は nai-studio・nai-prompt などの Skill にあり、必要なときだけ読み込みます。';
 
   @override
   String get naiAgent_unknownCost => '実際の料金は提供元によります';
@@ -19598,7 +19598,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agSkillDescNaiStudio =>
-      'Operate NAI Studio through its business tools - editing the draft, viewing images, generation quotes and runs, gallery/history, source images and Vibe/precise references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before any Studio operation beyond studio_context.';
+      'Operate NAI Studio drafts, images, generation, semantic search, gallery/history, references, prompt blocks, style exploration, image tools, snapshots and preferences. Read before Studio operations beyond studio_context.';
 
   @override
   String get set_agSkillView => '表示';
@@ -20030,6 +20030,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_tool_image_tool => '画像ツール';
+
+  @override
+  String get ag_tool_studio_search => 'セマンティック検索';
 
   @override
   String get ag_tool_image_generate => 'バリエーション / エンハンス';

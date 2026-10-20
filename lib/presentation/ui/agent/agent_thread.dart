@@ -882,6 +882,7 @@ String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
   'reference_library' => l.ag_tool_reference_library,
   'image_tool' => l.ag_tool_image_tool,
   'image_generate' => l.ag_tool_image_generate,
+  'studio_search' => l.ag_tool_studio_search,
   'ask_user' => l.ag_tool_ask_user,
   'read' => l.ag_tool_read,
   'write' => l.ag_tool_write,
