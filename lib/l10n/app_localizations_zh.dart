@@ -19684,6 +19684,84 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_deleteAgain => '再点一次删除';
 
   @override
+  String get ag_sloganBase =>
+      '研磨颜料中…\n翻翻画师册…\n数一数 tag…\n斟酌权重中…\n对一下构图…\n给角色摆个姿势…\n削铅笔中…\n调一调色温…\n挑一支合适的笔刷…\n往调色盘里挤颜料…\n退后两步看看整体…\n铺一层底色…\n把灵感捋一捋…\n找找参考…\n量一量比例…\n换个视角想想…\n把线条理顺…\n抿一口咖啡…\n和光影商量一下…\n在草稿纸上比划…';
+
+  @override
+  String get ag_sloganEgg =>
+      '正在说服 AI 把手画对…\n偷偷多画了一根手指…又擦掉了\nAnlas 一分没花（暂时）\n在画布角落签了个名…不行，擦掉\n和 Krita 交换眼神中…\n给猫耳找个好角度…\n数到第六根手指时停了下来…\nmasterpiece, best quality, 拜托了…';
+
+  @override
+  String get ag_sloganThink => '琢磨中…\n先在脑子里画一遍…\n换个角度想想…\n理一理思路…';
+
+  @override
+  String get ag_sloganRead => '翻资料中…\n查一查 tag 词典…\n看看草稿写了什么…\n翻翻旧作…';
+
+  @override
+  String get ag_sloganRun => '敲命令中…\n让终端跑一会儿…\n等脚本跑完…';
+
+  @override
+  String get ag_sloganImage => '盯着图看…\n端详细节中…\n数数有几个角色…\n凑近看看笔触…';
+
+  @override
+  String get ag_sloganWrite => '落笔中…\n改提示词中…\n擦掉重写一笔…\n调一调权重…';
+
+  @override
+  String get ag_sloganGen => '上色中…\n等显卡吃饭…\n颜料还没干…\n烘干画布中…';
+
+  @override
+  String get ag_sloganExternal => '和外部工具对暗号…\n等外面回话…';
+
+  @override
+  String get ag_foldDone => '已处理';
+
+  @override
+  String ag_foldTimes(String label, int count) {
+    return '$label $count 次';
+  }
+
+  @override
+  String get ag_kindThink => '思考';
+
+  @override
+  String get ag_kindRead => '读取';
+
+  @override
+  String get ag_kindRun => '运行命令';
+
+  @override
+  String get ag_kindImage => '看图';
+
+  @override
+  String get ag_kindWrite => '修改';
+
+  @override
+  String get ag_kindGen => '生图';
+
+  @override
+  String get ag_kindExternal => '外部工具';
+
+  @override
+  String get ag_kindAsk => '问你';
+
+  @override
+  String ag_limitTitle(int count) {
+    return '已达到单次任务步数上限（$count 步）';
+  }
+
+  @override
+  String get ag_limitBody => '进度已保存，点“继续”接着做。上限可以在设置里调整。';
+
+  @override
+  String get ag_limitContinue => '继续';
+
+  @override
+  String get ag_limitAdjust => '调整上限';
+
+  @override
+  String get ag_continueMessage => '继续';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -19702,9 +19780,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_regenerate => '重新回答';
 
   @override
-  String get ag_thinking => '正在思考';
-
-  @override
   String get ag_starting => '正在打开聊天';
 
   @override
@@ -19712,9 +19787,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_waitingYou => '等你处理';
-
-  @override
-  String get ag_stepRunning => '进行中';
 
   @override
   String get ag_stepFailed => '失败';
@@ -40365,6 +40437,84 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_deleteAgain => '再點一次刪除';
 
   @override
+  String get ag_sloganBase =>
+      '研磨顏料中…\n翻翻畫師冊…\n數一數 tag…\n斟酌權重中…\n對一下構圖…\n給角色擺個姿勢…\n削鉛筆中…\n調一調色溫…\n挑一支合適的筆刷…\n往調色盤裡擠顏料…\n退後兩步看看整體…\n鋪一層底色…\n把靈感捋一捋…\n找找參考…\n量一量比例…\n換個視角想想…\n把線條理順…\n抿一口咖啡…\n和光影商量一下…\n在草稿紙上比劃…';
+
+  @override
+  String get ag_sloganEgg =>
+      '正在說服 AI 把手畫對…\n偷偷多畫了一根手指…又擦掉了\nAnlas 一分沒花（暫時）\n在畫布角落簽了個名…不行，擦掉\n和 Krita 交換眼神中…\n給貓耳找個好角度…\n數到第六根手指時停了下來…\nmasterpiece, best quality, 拜託了…';
+
+  @override
+  String get ag_sloganThink => '琢磨中…\n先在腦子裡畫一遍…\n換個角度想想…\n理一理思路…';
+
+  @override
+  String get ag_sloganRead => '翻資料中…\n查一查 tag 詞典…\n看看草稿寫了什麼…\n翻翻舊作…';
+
+  @override
+  String get ag_sloganRun => '敲命令中…\n讓終端跑一會兒…\n等指令碼跑完…';
+
+  @override
+  String get ag_sloganImage => '盯著圖看…\n端詳細節中…\n數數有幾個角色…\n湊近看看筆觸…';
+
+  @override
+  String get ag_sloganWrite => '落筆中…\n改提示詞中…\n擦掉重寫一筆…\n調一調權重…';
+
+  @override
+  String get ag_sloganGen => '上色中…\n等顯示卡吃飯…\n顏料還沒幹…\n烘乾畫布中…';
+
+  @override
+  String get ag_sloganExternal => '和外部工具對暗號…\n等外面回話…';
+
+  @override
+  String get ag_foldDone => '已處理';
+
+  @override
+  String ag_foldTimes(String label, int count) {
+    return '$label $count 次';
+  }
+
+  @override
+  String get ag_kindThink => '思考';
+
+  @override
+  String get ag_kindRead => '讀取';
+
+  @override
+  String get ag_kindRun => '執行命令';
+
+  @override
+  String get ag_kindImage => '看圖';
+
+  @override
+  String get ag_kindWrite => '修改';
+
+  @override
+  String get ag_kindGen => '生圖';
+
+  @override
+  String get ag_kindExternal => '外部工具';
+
+  @override
+  String get ag_kindAsk => '問你';
+
+  @override
+  String ag_limitTitle(int count) {
+    return '已達到單次任務步數上限（$count 步）';
+  }
+
+  @override
+  String get ag_limitBody => '進度已儲存，點“繼續”接著做。上限可以在設定裡調整。';
+
+  @override
+  String get ag_limitContinue => '繼續';
+
+  @override
+  String get ag_limitAdjust => '調整上限';
+
+  @override
+  String get ag_continueMessage => '繼續';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -40383,9 +40533,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_regenerate => '重新回答';
 
   @override
-  String get ag_thinking => '正在思考';
-
-  @override
   String get ag_starting => '正在開啟聊天';
 
   @override
@@ -40393,9 +40540,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_waitingYou => '等你處理';
-
-  @override
-  String get ag_stepRunning => '進行中';
 
   @override
   String get ag_stepFailed => '失敗';

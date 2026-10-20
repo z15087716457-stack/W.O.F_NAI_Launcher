@@ -17,12 +17,14 @@ void main() {
   late StreamSubscription<HttpRequest> serving;
   final controllers = <NaiAgentWorkspaceController>[];
   var calls = 0;
+  var requestTool = false;
   final requests = <Map<String, dynamic>>[];
   Future<void> Function()? waitForResponse;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('nai-controller-');
     server = await bindFetchTestServer();
     calls = 0;
+    requestTool = false;
     requests.clear();
     waitForResponse = null;
     serving = server.listen((request) async {
@@ -45,8 +47,18 @@ void main() {
           'choices': [
             {
               'index': 0,
-              'delta': {'role': 'assistant', 'content': '完成'},
-              'finish_reason': 'stop',
+              'delta': requestTool ? {
+                      'role': 'assistant',
+                      'tool_calls': [
+                        {
+                          'index': 0,
+                          'id': 'context-call',
+                          'type': 'function',
+                          'function': {'name': 'studio_context', 'arguments': '{"scope":"summary"}'},
+                        },
+                      ],
+                    } : {'role': 'assistant', 'content': '完成'},
+              'finish_reason': requestTool ? 'tool_calls' : 'stop',
             },
           ],
         })}\n\ndata: [DONE]\n\n',
@@ -100,7 +112,7 @@ void main() {
               'tools': true,
               'vision': readVision?.call() ?? vision,
               'maxConcurrentRequests': 1,
-              'maxRequestsPerRun': 32,
+              'maxRequestsPerRun': settings.maxRequestsPerRun,
               'permissionMode': settings.permissionMode,
             },
             executeTool: (_, __, ___) async => {'content': []},
@@ -109,6 +121,45 @@ void main() {
     controllers.add(value);
     return value;
   }
+
+  test(
+    'real host limit persists in Pi history; Continue sends without consuming draft',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.updateSettings({'maxRequestsPerRun': 1});
+      requestTool = true;
+      await c.saveComposer('work until the limit');
+      await c.send();
+      final runtime = c.selected!;
+      expect(calls, 1);
+      expect(runtime.runLimitHit, 1);
+      expect(runtime.error, isNull);
+      final error = runtime.messages.lastWhere((m) => m['role'] == 'assistant');
+      expect(error['stopReason'], 'error');
+      expect(error['errorMessage'], contains('Run request limit reached'));
+      final raw = utf8.decode(await c.exportSession(runtime));
+      expect(raw, contains('Run request limit reached'));
+      await c.saveComposer('keep this draft');
+      await c.close();
+
+      final reopened = controller();
+      await reopened.initialize();
+      expect(calls, 1, reason: 'history restore makes no model request');
+      expect(reopened.selected!.runLimitHit, 1);
+      expect(reopened.selected!.error, isNull);
+      requestTool = false;
+      expect(await reopened.sendText('Continue'), true);
+      expect(calls, 2);
+      expect(reopened.selected!.runLimitHit, isNull);
+      expect(reopened.selected!.error, isNull);
+      expect(reopened.selected!.composer.text, 'keep this draft');
+      final user = reopened.selected!.messages.lastWhere(
+        (m) => m['role'] == 'user',
+      );
+      expect((user['content'] as List).single['text'], 'Continue');
+    },
+  );
 
   test(
     'new chats are one in-memory draft, first send persists and auto-titles',

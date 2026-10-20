@@ -19917,6 +19917,87 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_deleteAgain => 'もう一度クリックで削除';
 
   @override
+  String get ag_sloganBase =>
+      '顔料を練っています…\n画師帳をめくっています…\nタグを数えています…\n重みを調整中…\n構図を確認中…\nキャラにポーズを取らせています…\n鉛筆を削っています…\n色温度を整えています…\n筆を選んでいます…\nパレットに絵の具を出しています…\n一歩引いて全体を見ています…\n下塗り中…\nアイデアを整理中…\n資料を探しています…\n比率を測っています…\n別の角度から考えています…\n線を整えています…\nコーヒーをひと口…\n光と影に相談中…\n余白にスケッチ中…';
+
+  @override
+  String get ag_sloganEgg =>
+      'AI に手を正しく描くよう説得中…\n指を一本多く描いて…消しました\nAnlas は使っていません（今のところ）\nキャンバスの隅にサイン…やっぱり消す\nKrita と目配せ中…\n猫耳のいい角度を探しています…\n六本目の指で数えるのをやめました…\nmasterpiece, best quality, お願い…';
+
+  @override
+  String get ag_sloganThink => '考え中…\n頭の中で一度描いています…\n別の角度から考えています…\n段取りを整理中…';
+
+  @override
+  String get ag_sloganRead =>
+      '資料を読んでいます…\nタグ辞典を引いています…\n下書きを確認中…\n過去作をめくっています…';
+
+  @override
+  String get ag_sloganRun => 'コマンドを打っています…\nターミナルを走らせています…\nスクリプト待ち…';
+
+  @override
+  String get ag_sloganImage =>
+      '絵をじっと見ています…\n細部を観察中…\nキャラの人数を数えています…\n筆致を近くで見ています…';
+
+  @override
+  String get ag_sloganWrite => '筆を入れています…\nプロンプトを書き換え中…\n一筆描き直しています…\n重みを調整中…';
+
+  @override
+  String get ag_sloganGen =>
+      '色を塗っています…\nGPU に食事中…\n絵の具がまだ乾いていません…\nキャンバスを乾かしています…';
+
+  @override
+  String get ag_sloganExternal => '外部ツールと合言葉を交換中…\n返事待ち…';
+
+  @override
+  String get ag_foldDone => '処理済み';
+
+  @override
+  String ag_foldTimes(String label, int count) {
+    return '$label $count 回';
+  }
+
+  @override
+  String get ag_kindThink => '思考';
+
+  @override
+  String get ag_kindRead => '読み取り';
+
+  @override
+  String get ag_kindRun => 'コマンド';
+
+  @override
+  String get ag_kindImage => '画像確認';
+
+  @override
+  String get ag_kindWrite => '編集';
+
+  @override
+  String get ag_kindGen => '生成';
+
+  @override
+  String get ag_kindExternal => '外部ツール';
+
+  @override
+  String get ag_kindAsk => '確認';
+
+  @override
+  String ag_limitTitle(int count) {
+    return '1 回のタスクのステップ上限（$count）に達しました';
+  }
+
+  @override
+  String get ag_limitBody => '進捗は保存済みです。「続ける」で続きから再開できます。上限は設定で変更できます。';
+
+  @override
+  String get ag_limitContinue => '続ける';
+
+  @override
+  String get ag_limitAdjust => '上限を変更';
+
+  @override
+  String get ag_continueMessage => '続けて';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -19935,9 +20016,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_regenerate => '回答を再生成';
 
   @override
-  String get ag_thinking => '考えています';
-
-  @override
   String get ag_starting => 'チャットを開いています';
 
   @override
@@ -19945,9 +20023,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_waitingYou => '対応待ち';
-
-  @override
-  String get ag_stepRunning => '実行中';
 
   @override
   String get ag_stepFailed => '失敗';

@@ -737,6 +737,213 @@ void main() {
       expect(rec.names, contains('regenerate'));
     });
 
+    group('过程折叠与工作中提示', () {
+      DateTime at(int s) => DateTime(2026, 10, 20, 15, 0, s);
+      AgentStep step(
+        String id,
+        String tool, {
+        AgentStepStatus status = AgentStepStatus.done,
+        int s = 0,
+        List<AgentImage> images = const [],
+      }) => AgentStep(
+        id: id,
+        tool: tool,
+        status: status,
+        at: at(s),
+        duration: status == AgentStepStatus.done
+            ? const Duration(milliseconds: 130)
+            : null,
+        arguments: '{}',
+        images: images,
+      );
+      AgentThinkingBlock think(int s, {bool live = false}) =>
+          AgentThinkingBlock('想一想', at: at(s), live: live);
+      AgentViewData withReply(
+        List<AgentBlock> blocks, {
+        bool live = false,
+        AgentRunStatus? status,
+        int? limit,
+      }) {
+        final b = _copy(
+          AgentFixture.view(AgentScene.compose),
+          thread: [
+            AgentTurn(
+              id: 't',
+              user: AgentUserMessage(text: 'Q', at: at(0)),
+              reply: AgentReply(blocks: blocks, live: live),
+            ),
+          ],
+        );
+        return AgentViewData(
+          now: b.now,
+          workspace: b.workspace,
+          chat: b.chat,
+          workspaces: b.workspaces,
+          chats: b.chats,
+          composer: b.composer,
+          thread: b.thread,
+          shelf: b.shelf,
+          memory: b.memory,
+          usage: b.usage,
+          models: b.models,
+          thinking: b.thinking,
+          permission: b.permission,
+          mentions: b.mentions,
+          skills: b.skills,
+          status: status ?? b.status,
+          runLimit: limit,
+        );
+      }
+
+      testWidgets('出现结果后前面的过程收成一行，点开再收回；用时按消息时间', (tester) async {
+        await pumpAgent(
+          tester,
+          data: withReply([
+            think(1),
+            AgentStepsBlock([step('a', 'bash', s: 3), step('b', 'bash', s: 5)]),
+            think(8),
+            AgentTextBlock('中间回复', at: at(12)),
+            think(13),
+            AgentStepsBlock([step('c', 'studio_context', s: 14)]),
+            AgentTextBlock('结论', at: at(16)),
+          ]),
+        );
+        final fold = find.byKey(const Key('agent-fold-0'));
+        expect(fold, findsOneWidget);
+        expect(find.byKey(const Key('agent-step-a')), findsNothing);
+        expect(
+          find.descendant(
+            of: fold,
+            matching: find.textContaining('运行命令 2 次', findRichText: true),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: fold, matching: find.text('11.0s')),
+          findsOneWidget,
+        );
+        // 两条以内不折叠。
+        expect(find.byKey(const Key('agent-fold-2')), findsNothing);
+        expect(find.byKey(const Key('agent-step-c')), findsOneWidget);
+        await tester.tap(fold);
+        await tester.pump();
+        expect(find.byKey(const Key('agent-step-a')), findsOneWidget);
+        await tester.tap(fold);
+        await tester.pump();
+        expect(find.byKey(const Key('agent-step-a')), findsNothing);
+      });
+
+      testWidgets('运行中最后一段展开；等你处理、出错的段不收', (tester) async {
+        await pumpAgent(
+          tester,
+          data: withReply(
+            [
+              think(1),
+              AgentStepsBlock([
+                step('w1', 'bash', s: 2),
+                step('w2', 'ask_user', status: AgentStepStatus.waitingUser),
+              ]),
+              AgentTextBlock('问你一下', at: at(4)),
+              think(5),
+              AgentStepsBlock([
+                step('f1', 'bash', s: 6),
+                step('f2', 'krita__push', status: AgentStepStatus.failed, s: 7),
+              ]),
+              AgentTextBlock('推送失败了', at: at(8)),
+              think(9),
+              AgentStepsBlock([
+                step('r1', 'bash', s: 10),
+                step('r2', 'image_generate', status: AgentStepStatus.running),
+              ]),
+            ],
+            live: true,
+            status: AgentRunStatus.working,
+          ),
+        );
+        expect(find.byKey(const Key('agent-step-w2')), findsOneWidget);
+        expect(find.byKey(const Key('agent-step-f2')), findsOneWidget);
+        expect(find.byKey(const Key('agent-step-r2')), findsOneWidget);
+        expect(find.byKey(const Key('agent-fold-0')), findsNothing);
+        // 运行中的图标和失败图标。
+        expect(
+          find.byKey(const ValueKey('agent-activity-gen-running')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('agent-activity-external-failed')),
+          findsOneWidget,
+        );
+        // 工作中提示行：标语 + 用时，不再写“正在思考”。
+        expect(find.byKey(const Key('agent-live-slogan')), findsOneWidget);
+        expect(find.text('正在思考'), findsNothing);
+      });
+
+      testWidgets('看图步骤留在外面，前面的过程照样收起', (tester) async {
+        await pumpAgent(
+          tester,
+          data: withReply([
+            think(1),
+            AgentStepsBlock([
+              step('x1', 'studio_context', s: 2),
+              step('x2', 'bash', s: 3),
+              step(
+                'x3',
+                'image_read',
+                s: 4,
+                images: [AgentFixture.img('r1', source: AgentImageSource.tool)],
+              ),
+            ]),
+            AgentTextBlock('看完了', at: at(6)),
+          ]),
+        );
+        expect(find.byKey(const Key('agent-fold-0')), findsOneWidget);
+        expect(find.byKey(const Key('agent-step-images-x3')), findsOneWidget);
+      });
+
+      testWidgets('一轮结束后最后一串过程也收起，结束态是灰色类型图标', (tester) async {
+        await pumpAgent(
+          tester,
+          data: withReply([
+            AgentTextBlock('先说一句', at: at(1)),
+            think(2),
+            AgentStepsBlock([
+              step('y1', 'bash', s: 3),
+              step('y2', 'bash', s: 4),
+            ]),
+          ]),
+        );
+        final fold = find.byKey(const Key('agent-fold-1'));
+        expect(fold, findsOneWidget);
+        await tester.tap(fold);
+        await tester.pump();
+        expect(
+          find.byKey(const ValueKey('agent-activity-run-done')),
+          findsNWidgets(2),
+        );
+        expect(
+          find.byKey(const ValueKey('agent-activity-think-done')),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('步数上限：灰卡，继续发新消息，调整上限去设置', (tester) async {
+        final rec = await pumpAgent(
+          tester,
+          data: withReply([AgentTextBlock('做到一半', at: at(1))], limit: 32),
+        );
+        expect(find.byKey(const Key('agent-limit')), findsOneWidget);
+        expect(find.byKey(const Key('agent-error')), findsNothing);
+        expect(find.text('已达到单次任务步数上限（32 步）'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('agent-limit-continue')));
+        await tester.pump();
+        expect(rec.names, contains('continue'));
+        expect(rec.names, isNot(contains('regenerate')));
+        await tester.tap(find.byKey(const Key('agent-limit-adjust')));
+        await tester.pump();
+        expect(rec.names, contains('adjustLimit'));
+      });
+    });
+
     testWidgets('用量弹层显示本聊天生图花费估算', (tester) async {
       final base = AgentFixture.view(AgentScene.chat);
       await pumpAgent(tester, data: _copy(base, anlas: 48));
@@ -799,6 +1006,8 @@ void main() {
         onSearchChats: base.onSearchChats,
         onImageAction: base.onImageAction,
         onSilenceBypass: base.onSilenceBypass,
+        onContinue: base.onContinue,
+        onAdjustLimit: base.onAdjustLimit,
       );
       await pumpAgent(tester, actions: failing);
       await tester.tap(find.byKey(const Key('agent-new-chat')));

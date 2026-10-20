@@ -7,6 +7,7 @@ import '../../../l10n/app_localizations.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_preview_image.dart';
 import '../kit/ui_text.dart';
+import 'agent_activity.dart';
 import 'agent_cards.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
@@ -145,6 +146,8 @@ class _AgentThreadState extends State<AgentThread> {
         ),
       for (final p in d.composer.pending)
         AgentPendingCard(key: ValueKey('pending-${p.id}'), pending: p),
+      if (d.runLimit != null)
+        _LimitCard(limit: d.runLimit!, busy: d.status != AgentRunStatus.idle),
       if (d.error != null)
         _ErrorLine(
           d.error!,
@@ -216,6 +219,113 @@ class _AgentThreadState extends State<AgentThread> {
   }
 }
 
+/// 单次任务步数到上限：不是出错，用中性的灰卡。「继续」接着原来的进度做，
+/// 「调整上限」去设置里改「单次任务最多请求」。
+class _LimitCard extends StatelessWidget {
+  const _LimitCard({required this.limit, required this.busy});
+  final int limit;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    return Container(
+      key: const Key('agent-limit'),
+      padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+      decoration: BoxDecoration(
+        color: agentSunk(c),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: c.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: 10,
+        children: [
+          Container(
+            width: 22,
+            height: 22,
+            margin: const EdgeInsets.only(top: 1),
+            decoration: BoxDecoration(color: c.control, shape: BoxShape.circle),
+            alignment: Alignment.center,
+            child: CustomPaint(
+              size: const Size.square(10),
+              painter: _PausePainter(c.ink),
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                Text(
+                  l.ag_limitTitle(limit),
+                  style: UiText.sans(
+                    12.5,
+                    weight: FontWeight.w600,
+                    color: c.ink,
+                    height: 1.45,
+                  ),
+                ),
+                Text(
+                  l.ag_limitBody,
+                  style: UiText.sans(11.5, color: c.muted, height: 1.6),
+                ),
+                const SizedBox(height: 7),
+                Row(
+                  spacing: 6,
+                  children: [
+                    AgentButton(
+                      key: const Key('agent-limit-continue'),
+                      label: l.ag_limitContinue,
+                      style: AgentButtonStyle.primary,
+                      height: 26,
+                      onPressed: busy
+                          ? null
+                          : () => s.run(s.actions.onContinue),
+                    ),
+                    AgentButton(
+                      key: const Key('agent-limit-adjust'),
+                      label: l.ag_limitAdjust,
+                      style: AgentButtonStyle.ghost,
+                      height: 26,
+                      onPressed: s.actions.onAdjustLimit,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PausePainter extends CustomPainter {
+  const _PausePainter(this.color);
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final w = size.width;
+    for (final x in [.2, .6]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromLTWH(w * x, w * .15, w * .2, w * .7),
+          Radius.circular(w * .06),
+        ),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _PausePainter old) => old.color != color;
+}
+
 class _ErrorLine extends StatelessWidget {
   const _ErrorLine(this.text, {this.onRetry});
   final String text;
@@ -277,7 +387,7 @@ class _Turn extends StatelessWidget {
       children: [
         _UserLine(message: turn.user),
         if (reply != null && (reply.blocks.isNotEmpty || reply.live))
-          _TaskCard(reply: reply, last: last),
+          _TaskCard(reply: reply, last: last, since: turn.user.at),
       ],
     );
   }
@@ -373,47 +483,92 @@ class _UserLineState extends State<_UserLine> {
   }
 }
 
-/// 任务卡：步骤清单 / 结论 / 提示词改动 / 本次产物，各占一节。
+/// 任务卡：过程 / 结论 / 提示词改动 / 本次产物，各占一节。每出现一段结果，
+/// 它前面那串过程就收成一行「已处理 …」，点开看全部；正在进行、等你处理、
+/// 出错的那段保持展开；一轮结束后最后一串过程也收起。
 class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.reply, required this.last});
+  const _TaskCard({required this.reply, required this.last, this.since});
   final AgentReply reply;
   final bool last;
+
+  /// 这一轮开始的时间（用户这句的时间），工作中提示行的用时从这里算。
+  final DateTime? since;
 
   @override
   Widget build(BuildContext context) {
     final s = AgentScope.of(context);
     final l = context.l10n;
     final c = context.ui;
-    final sections = <Widget>[];
-    for (final b in reply.blocks) {
-      sections.add(switch (b) {
-        AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
-        AgentThinkingBlock() => AgentThinking(block: b),
-        AgentStepsBlock(:final steps) => AgentSteps(steps: steps),
-        AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
-        AgentPositionBlock() => AgentPositionView(block: b),
-        AgentParamBlock() => AgentParamView(block: b),
-        AgentChangeSummaryBlock() => AgentChangeSummaryView(block: b),
-        AgentImagesBlock() => AgentOutputs(block: b),
-      });
+    final segs = _segments(reply.blocks);
+    final finalText = !reply.live && segs.lastOrNull is _OutSeg
+        ? (segs.last as _OutSeg).item is AgentTextBlock
+        : false;
+    const proc = EdgeInsets.fromLTRB(8, 9, 8, 9);
+    final sections = <(Key, Widget, EdgeInsets)>[];
+    for (final (i, seg) in segs.indexed) {
+      switch (seg) {
+        case _ProcSeg(:final items):
+          final tail = i == segs.length - 1;
+          final next = segs.elementAtOrNull(i + 1);
+          sections.add((
+            ValueKey('seg-$i'),
+            _Process(
+              key: ValueKey('proc-$i'),
+              index: i,
+              items: items,
+              live: reply.live,
+              foldable:
+                  items.length > 2 &&
+                  items.every(_settled) &&
+                  (!tail || !reply.live),
+              took: _took(items, next is _OutSeg ? next.item : null),
+            ),
+            proc,
+          ));
+        case _OutSeg(:final item):
+          final isLast = i == segs.length - 1;
+          sections.add((
+            ValueKey('seg-$i'),
+            switch (item) {
+              AgentStep() => _ReadStep(key: ValueKey('read-$i'), step: item),
+              AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
+              AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
+              AgentPositionBlock() => AgentPositionView(block: item),
+              AgentParamBlock() => AgentParamView(block: item),
+              AgentChangeSummaryBlock() => AgentChangeSummaryView(block: item),
+              AgentImagesBlock() => AgentOutputs(block: item),
+              _ => const SizedBox.shrink(),
+            },
+            item is AgentStep
+                ? proc
+                : isLast && finalText
+                // 结论多留一点呼吸。
+                ? const EdgeInsets.fromLTRB(14, 15, 14, 14)
+                : const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          ));
+      }
     }
-    if (reply.live) sections.add(_LiveLine(status: s.data.status));
+    if (reply.live) {
+      final tail = segs.lastOrNull;
+      final current = tail is _ProcSeg
+          ? tail.items.where((x) => !_settled(x)).lastOrNull
+          : null;
+      sections.add((
+        const ValueKey('live'),
+        _LiveLine(
+          status: s.data.status,
+          kind: current == null ? null : _kindOf(current),
+          since: since,
+        ),
+        const EdgeInsets.fromLTRB(14, 9, 14, 9),
+      ));
+    }
     return AgentCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (i, w) in sections.indexed)
-            AgentSection(
-              first: i == 0,
-              padding: switch (w) {
-                _LiveLine() => const EdgeInsets.fromLTRB(14, 9, 14, 9),
-                // 步骤行自带 6px 内边距（悬停底色外扩）。
-                AgentSteps() ||
-                AgentThinking() => const EdgeInsets.fromLTRB(8, 9, 8, 9),
-                _ => const EdgeInsets.fromLTRB(14, 12, 14, 12),
-              },
-              child: w,
-            ),
+          for (final (i, (key, w, padding)) in sections.indexed)
+            AgentSection(key: key, first: i == 0, padding: padding, child: w),
           if (reply.canRegenerate && last)
             Container(
               padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
@@ -454,30 +609,38 @@ class _TaskCard extends StatelessWidget {
 }
 
 class _LiveLine extends StatelessWidget {
-  const _LiveLine({required this.status});
+  const _LiveLine({required this.status, this.kind, this.since});
   final AgentRunStatus status;
+  final AgentActivityKind? kind;
+  final DateTime? since;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l = context.l10n;
+    // 真实状态（开聊天 / 排队 / 等你）照实说；其余时候是工作中提示行。
+    final fixed = switch (status) {
+      AgentRunStatus.starting => l.ag_starting,
+      AgentRunStatus.waitingSlot => l.ag_waitingSlot,
+      AgentRunStatus.waitingUser => l.ag_waitingYou,
+      _ => null,
+    };
+    if (fixed == null) return AgentWorkingLine(kind: kind, since: since);
     final waiting = status == AgentRunStatus.waitingUser;
     return Row(
       key: const Key('agent-live'),
       spacing: 8,
       children: [
-        AgentStepDot(
-          kind: waiting ? AgentDotKind.waiting : AgentDotKind.running,
+        AgentActivityIcon(
+          kind: waiting ? AgentActivityKind.ask : AgentActivityKind.external,
+          state: waiting
+              ? AgentActivityState.waiting
+              : AgentActivityState.running,
         ),
         Text(
-          switch (status) {
-            AgentRunStatus.starting => l.ag_starting,
-            AgentRunStatus.waitingSlot => l.ag_waitingSlot,
-            AgentRunStatus.waitingUser => l.ag_waitingYou,
-            _ => l.ag_thinking,
-          },
+          fixed,
           style: UiText.sans(
-            12,
+            12.5,
             color: waiting ? c.warn : c.muted,
             weight: waiting ? FontWeight.w500 : FontWeight.w400,
           ),
@@ -548,13 +711,314 @@ class AgentMarkdown extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────── 步骤 ───────────────────────────────
+// ─────────────────────────────── 过程 ───────────────────────────────
 
-/// 步骤清单：状态圈 + 动作名 + 等宽工具名 + 右侧耗时；点一行展开参数 / 结果。超过 6 步折叠。
-/// 思考内容：默认一行“已思考 · N 字”，点开看原文；流式中显示“思考中”。
+/// 一轮回答按顺序切成若干段：连续的过程（思考 + 工具步骤）合成一段，
+/// 文字、改动卡、产物、带缩略图的看图步骤各自一段。
+sealed class _Seg {}
+
+final class _ProcSeg extends _Seg {
+  final items = <Object>[]; // AgentThinkingBlock | AgentStep
+}
+
+final class _OutSeg extends _Seg {
+  _OutSeg(this.item);
+  final Object item; // AgentBlock | AgentStep（看图）
+}
+
+List<_Seg> _segments(List<AgentBlock> blocks) {
+  final out = <_Seg>[];
+  _ProcSeg proc() {
+    if (out.lastOrNull case final _ProcSeg p) return p;
+    final p = _ProcSeg();
+    out.add(p);
+    return p;
+  }
+
+  for (final b in blocks) {
+    switch (b) {
+      case AgentThinkingBlock():
+        proc().items.add(b);
+      case AgentStepsBlock(:final steps):
+        for (final st in steps) {
+          if (st.tool == 'image_read' && st.images.isNotEmpty) {
+            out.add(_OutSeg(st));
+          } else {
+            proc().items.add(st);
+          }
+        }
+      default:
+        out.add(_OutSeg(b));
+    }
+  }
+  return out;
+}
+
+bool _settled(Object item) => switch (item) {
+  AgentThinkingBlock(:final live) => !live,
+  AgentStep(:final status) => status == AgentStepStatus.done,
+  _ => true,
+};
+
+DateTime? _at(Object item) => switch (item) {
+  AgentThinkingBlock(:final at) => at,
+  AgentTextBlock(:final at) => at,
+  AgentStep(:final at) => at,
+  _ => null,
+};
+
+/// 一段过程的大致用时：第一条的时间 → 下一段开始（或最后一步结束）。
+Duration? _took(List<Object> items, Object? next) {
+  final start = items.map(_at).nonNulls.firstOrNull;
+  if (start == null) return null;
+  var end = next == null ? null : _at(next);
+  if (end == null) {
+    for (final it in items) {
+      final at = _at(it);
+      if (at == null) continue;
+      final e = it is AgentStep && it.duration != null
+          ? at.add(it.duration!)
+          : at;
+      if (end == null || e.isAfter(end)) end = e;
+    }
+  }
+  if (end == null || !end.isAfter(start)) return null;
+  return end.difference(start);
+}
+
+AgentActivityKind _kindOf(Object item) =>
+    item is AgentStep ? agentActivityKind(item.tool) : AgentActivityKind.think;
+
+/// 一段过程：时间线（图标之间细竖线串起来）；收起时只剩一行
+/// 「已处理 · 思考 13 次 · 运行命令 12 次 · 1m 20s」，点开看全部。
+class _Process extends StatefulWidget {
+  const _Process({
+    super.key,
+    required this.index,
+    required this.items,
+    required this.foldable,
+    required this.live,
+    this.took,
+  });
+  final int index;
+  final List<Object> items;
+  final bool foldable, live;
+  final Duration? took;
+
+  @override
+  State<_Process> createState() => _ProcessState();
+}
+
+class _ProcessState extends State<_Process> {
+  static const _limit = 6;
+  var _open = false;
+  var _all = false;
+  final _detail = <String>{};
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.foldable) return _timeline(context, all: _all);
+    final still = MediaQuery.disableAnimationsOf(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _FoldRow(
+          key: Key('agent-fold-${widget.index}'),
+          items: widget.items,
+          took: widget.took,
+          open: _open,
+          onTap: () => setState(() => _open = !_open),
+        ),
+        if (still)
+          ?_body()
+        else
+          AnimatedSize(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: _body() ?? const SizedBox(width: double.infinity),
+          ),
+      ],
+    );
+  }
+
+  Widget? _body() => _open
+      ? Padding(
+          key: Key('agent-fold-body-${widget.index}'),
+          padding: const EdgeInsets.only(top: 2),
+          child: _timeline(context, all: true),
+        )
+      : null;
+
+  Widget _timeline(BuildContext context, {required bool all}) {
+    final l = context.l10n;
+    final items = widget.items;
+    // 进行中的长段只留最后几步（正在做 / 等你处理的总在最后）。
+    final hidden = !all && items.length > _limit
+        ? items.length - (_limit - 1)
+        : 0;
+    final shown = hidden > 0 ? items.sublist(hidden) : items;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 2,
+      children: [
+        if (hidden > 0)
+          _StepRow(
+            key: const Key('agent-steps-more'),
+            dot: const SizedBox.square(dimension: 16),
+            label: l.ag_stepsMore(hidden),
+            muted: true,
+            rail: true,
+            onTap: () => setState(() => _all = true),
+          ),
+        for (final (i, item) in shown.indexed)
+          AgentAppear(
+            key: ValueKey(
+              item is AgentStep ? 'step-${item.id}' : 'think-${hidden + i}',
+            ),
+            enabled: widget.live,
+            child: switch (item) {
+              AgentThinkingBlock() => AgentThinking(
+                block: item,
+                rail: i < shown.length - 1,
+              ),
+              AgentStep() => _step(context, item, rail: i < shown.length - 1),
+              _ => const SizedBox.shrink(),
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _step(BuildContext context, AgentStep step, {required bool rail}) {
+    final open = _detail.contains(step.id);
+    final expandable =
+        step.arguments != null || step.result != null || step.images.isNotEmpty;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _AgentStepRow(
+          step: step,
+          rail: rail && !open,
+          open: open,
+          onTap: expandable
+              ? () => setState(
+                  () => open ? _detail.remove(step.id) : _detail.add(step.id),
+                )
+              : null,
+        ),
+        if (open) _StepDetail(step: step),
+      ],
+    );
+  }
+}
+
+/// 收起的过程：类型小图标簇 + 「已处理」+ 汇总 + 用时 + 箭头。
+class _FoldRow extends StatefulWidget {
+  const _FoldRow({
+    super.key,
+    required this.items,
+    required this.took,
+    required this.open,
+    required this.onTap,
+  });
+  final List<Object> items;
+  final Duration? took;
+  final bool open;
+  final VoidCallback onTap;
+
+  @override
+  State<_FoldRow> createState() => _FoldRowState();
+}
+
+class _FoldRowState extends State<_FoldRow> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final counts = <AgentActivityKind, int>{};
+    for (final it in widget.items) {
+      counts.update(_kindOf(it), (n) => n + 1, ifAbsent: () => 1);
+    }
+    final summary = [
+      for (final e in counts.entries)
+        l.ag_foldTimes(agentActivityLabel(l, e.key), e.value),
+    ].join(' · ');
+    final still = MediaQuery.disableAnimationsOf(context);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: Container(
+          height: 26,
+          padding: const EdgeInsets.symmetric(horizontal: 6),
+          decoration: BoxDecoration(
+            color: _hover ? c.hover : null,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            spacing: 8,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 3,
+                children: [
+                  for (final k in counts.keys.take(4))
+                    AgentActivityGlyph(k, size: 12, color: c.muted),
+                ],
+              ),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: l.ag_foldDone,
+                        style: TextStyle(color: c.ink.withValues(alpha: .72)),
+                      ),
+                      TextSpan(text: '   $summary'),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12, color: c.muted, height: 1.2),
+                ),
+              ),
+              if (widget.took != null)
+                Text(
+                  agentDuration(widget.took!),
+                  style: UiText.mono(11, color: c.faint, height: 1),
+                ),
+              AnimatedRotation(
+                turns: widget.open ? .25 : 0,
+                duration: still
+                    ? Duration.zero
+                    : const Duration(milliseconds: 160),
+                child: AgentIcon(
+                  AgentGlyphs.chevronRight,
+                  size: 12,
+                  color: _hover || widget.open ? c.muted : c.faint,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 思考内容：默认一行「已思考 · N 字」，点开看原文；流式中「思考中 · N 字」带流光。
 class AgentThinking extends StatefulWidget {
-  const AgentThinking({super.key, required this.block});
+  const AgentThinking({super.key, required this.block, this.rail = false});
   final AgentThinkingBlock block;
+
+  /// 下面还有一步：图标下画一段细竖线连到下一行。
+  final bool rail;
 
   @override
   State<AgentThinking> createState() => _AgentThinkingState();
@@ -574,31 +1038,34 @@ class _AgentThinkingState extends State<AgentThinking> {
       children: [
         _StepRow(
           key: const Key('agent-thinking'),
-          dot: AgentStepDot(
-            kind: b.live ? AgentDotKind.running : AgentDotKind.done,
+          dot: AgentActivityIcon(
+            kind: AgentActivityKind.think,
+            state: b.live
+                ? AgentActivityState.running
+                : AgentActivityState.done,
           ),
           label: b.live ? l.ag_thinkingLive : l.ag_thought,
           subject: chars == 0 ? null : l.ag_thoughtChars(chars),
           muted: true,
+          shimmer: b.live,
+          rail: widget.rail && !_open,
           open: _open,
           onTap: b.text.isEmpty ? null : () => setState(() => _open = !_open),
         ),
         if (_open)
           Padding(
-            padding: const EdgeInsets.fromLTRB(31, 2, 6, 6),
+            padding: const EdgeInsets.fromLTRB(13, 2, 6, 8),
             child: Container(
               key: const Key('agent-thinking-text'),
               constraints: const BoxConstraints(maxHeight: 260),
-              padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+              padding: const EdgeInsets.fromLTRB(17, 2, 4, 2),
               decoration: BoxDecoration(
-                color: agentSunk(c),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: c.line),
+                border: Border(left: BorderSide(color: c.border, width: 1)),
               ),
               child: SingleChildScrollView(
                 child: Text(
                   b.text,
-                  style: UiText.sans(12, color: c.muted, height: 1.6),
+                  style: UiText.sans(11.5, color: c.muted, height: 1.65),
                 ),
               ),
             ),
@@ -608,89 +1075,90 @@ class _AgentThinkingState extends State<AgentThinking> {
   }
 }
 
-class AgentSteps extends StatefulWidget {
-  const AgentSteps({super.key, required this.steps});
-  final List<AgentStep> steps;
-
-  @override
-  State<AgentSteps> createState() => _AgentStepsState();
-}
-
-class _AgentStepsState extends State<AgentSteps> {
-  static const _limit = 6;
-  var _all = false;
-  final _open = <String>{};
+/// 一个工具步骤的行：类型图标 + 动作名 + 等宽工具名 + 右侧耗时。
+class _AgentStepRow extends StatelessWidget {
+  const _AgentStepRow({
+    required this.step,
+    this.rail = false,
+    this.open = false,
+    this.onTap,
+  });
+  final AgentStep step;
+  final bool rail, open;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final steps = widget.steps;
-    // 折叠时保留最后几步（正在进行 / 等你处理的总在最后）。
-    final hidden = !_all && steps.length > _limit
-        ? steps.length - (_limit - 1)
-        : 0;
-    final shown = hidden > 0 ? steps.sublist(hidden) : steps;
+    final d = step.duration;
+    return _StepRow(
+      key: Key('agent-step-${step.id}'),
+      dot: AgentActivityIcon(
+        kind: agentActivityKind(step.tool),
+        state: switch (step.status) {
+          AgentStepStatus.done => AgentActivityState.done,
+          AgentStepStatus.running => AgentActivityState.running,
+          AgentStepStatus.failed => AgentActivityState.failed,
+          AgentStepStatus.waitingUser => AgentActivityState.waiting,
+        },
+      ),
+      label: agentToolLabel(l, step.tool),
+      subject: step.subject,
+      tool: step.tool,
+      trailing: switch (step.status) {
+        AgentStepStatus.running => null,
+        AgentStepStatus.failed => l.ag_stepFailed,
+        _ => d == null ? null : agentDuration(d),
+      },
+      quiet: d != null && d.inMilliseconds < 1000,
+      shimmer: step.status == AgentStepStatus.running,
+      strong: step.status == AgentStepStatus.waitingUser,
+      error: step.status == AgentStepStatus.failed,
+      rail: rail,
+      open: open,
+      onTap: onTap,
+    );
+  }
+}
+
+/// 看图步骤单独成段：一行 + 缩略图（点开看大图），参数仍在展开里。
+class _ReadStep extends StatefulWidget {
+  const _ReadStep({super.key, required this.step});
+  final AgentStep step;
+
+  @override
+  State<_ReadStep> createState() => _ReadStepState();
+}
+
+class _ReadStepState extends State<_ReadStep> {
+  var _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final step = widget.step;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 2,
       children: [
-        if (hidden > 0)
-          _StepRow(
-            key: const Key('agent-steps-more'),
-            dot: const AgentStepDot(kind: AgentDotKind.done),
-            label: l.ag_stepsMore(hidden),
-            muted: true,
-            onTap: () => setState(() => _all = true),
+        _AgentStepRow(
+          step: step,
+          open: _open,
+          onTap: step.arguments == null && step.result == null
+              ? null
+              : () => setState(() => _open = !_open),
+        ),
+        Padding(
+          key: Key('agent-step-images-${step.id}'),
+          padding: const EdgeInsets.fromLTRB(31, 4, 6, 4),
+          child: Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final img in step.images)
+                AgentThumb(image: img, width: 64, height: 64),
+            ],
           ),
-        for (final step in shown) ...[
-          _StepRow(
-            key: Key('agent-step-${step.id}'),
-            dot: AgentStepDot(
-              kind: switch (step.status) {
-                AgentStepStatus.done => AgentDotKind.done,
-                AgentStepStatus.running => AgentDotKind.running,
-                AgentStepStatus.failed => AgentDotKind.failed,
-                AgentStepStatus.waitingUser => AgentDotKind.waiting,
-              },
-            ),
-            label: agentToolLabel(l, step.tool),
-            subject: step.subject,
-            tool: step.tool,
-            trailing: switch (step.status) {
-              AgentStepStatus.running => l.ag_stepRunning,
-              AgentStepStatus.failed => l.ag_stepFailed,
-              _ => step.duration == null ? null : agentDuration(step.duration!),
-            },
-            strong: step.status == AgentStepStatus.waitingUser,
-            error: step.status == AgentStepStatus.failed,
-            open: _open.contains(step.id),
-            onTap:
-                step.arguments == null &&
-                    step.result == null &&
-                    step.images.isEmpty
-                ? null
-                : () => setState(
-                    () => _open.contains(step.id)
-                        ? _open.remove(step.id)
-                        : _open.add(step.id),
-                  ),
-          ),
-          // 看图的步骤：缩略图直接放在这一行下面，点开看大图；参数仍在展开里。
-          if (step.tool == 'image_read' && step.images.isNotEmpty)
-            Padding(
-              key: Key('agent-step-images-${step.id}'),
-              padding: const EdgeInsets.fromLTRB(31, 2, 6, 6),
-              child: Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final img in step.images)
-                    AgentThumb(image: img, width: 64, height: 64),
-                ],
-              ),
-            ),
-          if (_open.contains(step.id)) _StepDetail(step: step),
-        ],
+        ),
+        if (_open) _StepDetail(step: step),
       ],
     );
   }
@@ -708,12 +1176,24 @@ class _StepRow extends StatefulWidget {
     this.muted = false,
     this.error = false,
     this.open = false,
+    this.rail = false,
+    this.shimmer = false,
+    this.quiet = false,
     this.onTap,
   });
   final Widget dot;
   final String label;
   final String? subject, tool, trailing;
   final bool strong, muted, error, open;
+
+  /// 下面还有一行：图标下画细竖线连过去（时间线）。
+  final bool rail;
+
+  /// 正在进行：文字带流光。
+  final bool shimmer;
+
+  /// 不到 1 秒的耗时用更淡的字色。
+  final bool quiet;
   final VoidCallback? onTap;
 
   @override
@@ -748,36 +1228,53 @@ class _StepRowState extends State<_StepRow> {
           child: Row(
             spacing: 9,
             children: [
-              widget.dot,
+              SizedBox.square(
+                dimension: 16,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    if (widget.rail)
+                      Positioned(
+                        left: 7.5,
+                        top: 20,
+                        child: Container(width: 1, height: 12, color: c.line),
+                      ),
+                    widget.dot,
+                  ],
+                ),
+              ),
               Expanded(
                 child: Row(
                   spacing: 8,
                   children: [
                     Flexible(
-                      child: Text.rich(
-                        TextSpan(
-                          children: [
-                            TextSpan(text: widget.label),
-                            if (widget.subject != null)
-                              TextSpan(
-                                text: ' ${widget.subject}',
-                                style: TextStyle(color: c.muted),
-                              ),
-                          ],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: UiText.sans(
-                          12.5,
-                          weight: widget.strong
-                              ? FontWeight.w500
-                              : FontWeight.w400,
-                          color: widget.muted
-                              ? c.muted
-                              : widget.error
-                              ? c.error
-                              : c.ink,
-                          height: 1.2,
+                      child: AgentShimmer(
+                        enabled: widget.shimmer,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: widget.label),
+                              if (widget.subject != null)
+                                TextSpan(
+                                  text: ' ${widget.subject}',
+                                  style: TextStyle(color: c.muted),
+                                ),
+                            ],
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: UiText.sans(
+                            12.5,
+                            weight: widget.strong
+                                ? FontWeight.w500
+                                : FontWeight.w400,
+                            color: widget.muted
+                                ? c.muted
+                                : widget.error
+                                ? c.error
+                                : c.ink,
+                            height: 1.2,
+                          ),
                         ),
                       ),
                     ),
@@ -798,7 +1295,11 @@ class _StepRowState extends State<_StepRow> {
                   widget.trailing!,
                   style: UiText.mono(
                     11,
-                    color: widget.error ? c.error : c.faint,
+                    color: widget.error
+                        ? c.error
+                        : widget.quiet
+                        ? c.faint.withValues(alpha: .6)
+                        : c.faint,
                     height: 1,
                   ),
                 ),

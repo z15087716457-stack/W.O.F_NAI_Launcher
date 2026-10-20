@@ -35854,6 +35854,150 @@ abstract class AppLocalizations {
   /// **'Click again to delete'**
   String get ag_deleteAgain;
 
+  /// No description provided for @ag_sloganBase.
+  ///
+  /// In en, this message translates to:
+  /// **'Grinding pigments…\nFlipping through the artist book…\nCounting tags…\nWeighing the weights…\nChecking the composition…\nPosing the characters…\nSharpening pencils…\nNudging the color temperature…\nPicking a brush…\nSqueezing paint onto the palette…\nStepping back to see the whole…\nLaying down a base coat…\nUntangling ideas…\nHunting for references…\nMeasuring proportions…\nTrying another angle…\nCleaning up the lines…\nSipping coffee…\nNegotiating with the light…\nSketching in the margins…'**
+  String get ag_sloganBase;
+
+  /// No description provided for @ag_sloganEgg.
+  ///
+  /// In en, this message translates to:
+  /// **'Convincing the AI to draw hands right…\nDrew an extra finger… erased it\nZero Anlas spent (so far)\nSigned the corner of the canvas… no, erasing\nExchanging glances with Krita…\nFinding the right angle for cat ears…\nStopped counting at finger six…\nmasterpiece, best quality, please…'**
+  String get ag_sloganEgg;
+
+  /// No description provided for @ag_sloganThink.
+  ///
+  /// In en, this message translates to:
+  /// **'Mulling it over…\nDrawing it in my head first…\nThinking from another angle…\nSorting out the plan…'**
+  String get ag_sloganThink;
+
+  /// No description provided for @ag_sloganRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading up…\nChecking the tag dictionary…\nSeeing what the draft says…\nLeafing through old work…'**
+  String get ag_sloganRead;
+
+  /// No description provided for @ag_sloganRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Typing commands…\nLetting the terminal run…\nWaiting for the script…'**
+  String get ag_sloganRun;
+
+  /// No description provided for @ag_sloganImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Staring at the picture…\nStudying the details…\nCounting the characters…\nLeaning in to see the strokes…'**
+  String get ag_sloganImage;
+
+  /// No description provided for @ag_sloganWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Putting pen to paper…\nEditing the prompt…\nRedrawing a stroke…\nTuning the weights…'**
+  String get ag_sloganWrite;
+
+  /// No description provided for @ag_sloganGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Coloring…\nFeeding the GPU…\nPaint is still wet…\nDrying the canvas…'**
+  String get ag_sloganGen;
+
+  /// No description provided for @ag_sloganExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Trading passwords with an outside tool…\nWaiting to hear back…'**
+  String get ag_sloganExternal;
+
+  /// No description provided for @ag_foldDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked'**
+  String get ag_foldDone;
+
+  /// No description provided for @ag_foldTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} ×{count}'**
+  String ag_foldTimes(String label, int count);
+
+  /// No description provided for @ag_kindThink.
+  ///
+  /// In en, this message translates to:
+  /// **'Thought'**
+  String get ag_kindThink;
+
+  /// No description provided for @ag_kindRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read'**
+  String get ag_kindRead;
+
+  /// No description provided for @ag_kindRun.
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get ag_kindRun;
+
+  /// No description provided for @ag_kindImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewed image'**
+  String get ag_kindImage;
+
+  /// No description provided for @ag_kindWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get ag_kindWrite;
+
+  /// No description provided for @ag_kindGen.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get ag_kindGen;
+
+  /// No description provided for @ag_kindExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'External tool'**
+  String get ag_kindExternal;
+
+  /// No description provided for @ag_kindAsk.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked you'**
+  String get ag_kindAsk;
+
+  /// No description provided for @ag_limitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reached the per-task step limit ({count} steps)'**
+  String ag_limitTitle(int count);
+
+  /// No description provided for @ag_limitBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress is saved. Press Continue to pick up where it left off. You can change the limit in Settings.'**
+  String get ag_limitBody;
+
+  /// No description provided for @ag_limitContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get ag_limitContinue;
+
+  /// No description provided for @ag_limitAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjust limit'**
+  String get ag_limitAdjust;
+
+  /// No description provided for @ag_continueMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get ag_continueMessage;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:
@@ -35890,12 +36034,6 @@ abstract class AppLocalizations {
   /// **'Regenerate'**
   String get ag_regenerate;
 
-  /// No description provided for @ag_thinking.
-  ///
-  /// In en, this message translates to:
-  /// **'Thinking'**
-  String get ag_thinking;
-
   /// No description provided for @ag_starting.
   ///
   /// In en, this message translates to:
@@ -35913,12 +36051,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for you'**
   String get ag_waitingYou;
-
-  /// No description provided for @ag_stepRunning.
-  ///
-  /// In en, this message translates to:
-  /// **'Running'**
-  String get ag_stepRunning;
 
   /// No description provided for @ag_stepFailed.
   ///

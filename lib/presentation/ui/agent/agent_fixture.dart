@@ -505,6 +505,8 @@ abstract final class AgentFixture {
       },
       onImageAction: (id, a) => ok('imageAction', (id, a)),
       onSilenceBypass: () => ok('silenceBypass'),
+      onContinue: () => ok('continue'),
+      onAdjustLimit: () => note('adjustLimit'),
     );
   }
 }

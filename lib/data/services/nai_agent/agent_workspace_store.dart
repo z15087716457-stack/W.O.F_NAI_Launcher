@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import '../../../core/nai_agent/attachment_manifest.dart';
 import '../../../core/nai_agent/mcp_config.dart';
 import '../../../core/utils/app_language.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -1543,7 +1544,7 @@ class AgentWorkspaceStore {
             continue;
           }
           final content = message['content'];
-          final text = content is String
+          final raw = content is String
               ? content
               : content is List
               ? [
@@ -1554,6 +1555,10 @@ class AgentWorkspaceStore {
                       part['text'] as String,
                 ].join('\n')
               : '';
+          // 发送时自动附上的附件清单不是用户写的话，不参与搜索。
+          final text = message['role'] == 'user'
+              ? stripAgentAttachmentManifest(raw)
+              : raw;
           final match = pattern.firstMatch(text);
           if (match == null) continue;
           // Bound extra snippet allocations even for very long message lines.

@@ -287,8 +287,12 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     return true;
   }
 
-  void _settings({bool models = false, AgentMemoryTarget? memory}) {
-    final anchor = switch (memory) {
+  void _settings({
+    bool models = false,
+    AgentMemoryTarget? memory,
+    String? anchor,
+  }) {
+    anchor ??= switch (memory) {
       AgentMemoryTarget.global => 'agentInstructions',
       AgentMemoryTarget.workspace => 'agentWorkspaceRules',
       AgentMemoryTarget.skills => 'agentSkills',
@@ -643,9 +647,13 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           : r?.running == true
           ? AgentRunStatus.working
           : AgentRunStatus.idle,
-      error:
-          r?.error ??
-          (r?.composer.interrupted == true ? l.naiAgent_interrupted : null),
+      runLimit: r?.runLimitHit,
+      error: r?.runLimitHit != null
+          ? null
+          : r?.error ??
+                (r?.composer.interrupted == true
+                    ? l.naiAgent_interrupted
+                    : null),
       notices: [
         if (r != null) ...[
           if (r.visionNotice != null) r.visionNotice!,
@@ -738,6 +746,14 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onSend: ({required steer}) => data.composer.canSend
           ? _run(() => c.send(steer: steer))
           : Future.value(false),
+      onContinue: () async {
+        try {
+          return await c.sendText(context.l10n.ag_continueMessage);
+        } catch (_) {
+          return false;
+        }
+      },
+      onAdjustLimit: () => _settings(anchor: 'agentMaxRequests'),
       onStop: () => _run(c.stop),
       onPickImages: _pick,
       onAttachCanvas: _attachCanvas,

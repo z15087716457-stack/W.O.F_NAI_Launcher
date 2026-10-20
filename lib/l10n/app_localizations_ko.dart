@@ -19984,6 +19984,90 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_deleteAgain => '한 번 더 누르면 삭제';
 
   @override
+  String get ag_sloganBase =>
+      '물감을 개는 중…\n화가 수첩을 넘기는 중…\n태그를 세는 중…\n가중치를 고민하는 중…\n구도를 확인하는 중…\n캐릭터 포즈를 잡는 중…\n연필을 깎는 중…\n색온도를 맞추는 중…\n붓을 고르는 중…\n팔레트에 물감을 짜는 중…\n한 걸음 물러나 전체를 보는 중…\n밑색을 까는 중…\n아이디어를 정리하는 중…\n참고 자료를 찾는 중…\n비율을 재는 중…\n다른 각도로 생각하는 중…\n선을 다듬는 중…\n커피 한 모금…\n빛과 그림자와 상의하는 중…\n여백에 스케치하는 중…';
+
+  @override
+  String get ag_sloganEgg =>
+      'AI에게 손을 제대로 그리라고 설득하는 중…\n손가락을 하나 더 그렸다가… 지웠어요\nAnlas 0 사용 (아직은)\n캔버스 구석에 사인을… 아니, 지우자\nKrita와 눈빛 교환 중…\n고양이 귀의 좋은 각도를 찾는 중…\n여섯 번째 손가락에서 세기를 멈췄어요…\nmasterpiece, best quality, 제발…';
+
+  @override
+  String get ag_sloganThink =>
+      '곰곰이 생각하는 중…\n머릿속으로 먼저 그려보는 중…\n다른 각도로 생각하는 중…\n순서를 정리하는 중…';
+
+  @override
+  String get ag_sloganRead =>
+      '자료를 읽는 중…\n태그 사전을 찾는 중…\n초안을 살펴보는 중…\n예전 작업을 넘겨보는 중…';
+
+  @override
+  String get ag_sloganRun => '명령을 입력하는 중…\n터미널을 돌리는 중…\n스크립트를 기다리는 중…';
+
+  @override
+  String get ag_sloganImage =>
+      '그림을 뚫어지게 보는 중…\n디테일을 살피는 중…\n캐릭터 수를 세는 중…\n붓질을 가까이서 보는 중…';
+
+  @override
+  String get ag_sloganWrite =>
+      '붓을 대는 중…\n프롬프트를 고치는 중…\n한 획을 다시 긋는 중…\n가중치를 조정하는 중…';
+
+  @override
+  String get ag_sloganGen =>
+      '채색하는 중…\nGPU 밥 주는 중…\n물감이 아직 안 말랐어요…\n캔버스를 말리는 중…';
+
+  @override
+  String get ag_sloganExternal => '외부 도구와 암호를 주고받는 중…\n답을 기다리는 중…';
+
+  @override
+  String get ag_foldDone => '처리함';
+
+  @override
+  String ag_foldTimes(String label, int count) {
+    return '$label $count회';
+  }
+
+  @override
+  String get ag_kindThink => '생각';
+
+  @override
+  String get ag_kindRead => '읽기';
+
+  @override
+  String get ag_kindRun => '명령';
+
+  @override
+  String get ag_kindImage => '이미지 보기';
+
+  @override
+  String get ag_kindWrite => '수정';
+
+  @override
+  String get ag_kindGen => '생성';
+
+  @override
+  String get ag_kindExternal => '외부 도구';
+
+  @override
+  String get ag_kindAsk => '질문';
+
+  @override
+  String ag_limitTitle(int count) {
+    return '작업당 단계 한도($count단계)에 도달했어요';
+  }
+
+  @override
+  String get ag_limitBody =>
+      '진행 상황은 저장되었어요. \'계속\'을 누르면 이어서 진행합니다. 한도는 설정에서 바꿀 수 있어요.';
+
+  @override
+  String get ag_limitContinue => '계속';
+
+  @override
+  String get ag_limitAdjust => '한도 조정';
+
+  @override
+  String get ag_continueMessage => '계속해 줘';
+
+  @override
   String get ag_recent => '최근';
 
   @override
@@ -20002,9 +20086,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_regenerate => '답변 다시 생성';
 
   @override
-  String get ag_thinking => '생각 중';
-
-  @override
   String get ag_starting => '채팅 여는 중';
 
   @override
@@ -20012,9 +20093,6 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_waitingYou => '처리 대기';
-
-  @override
-  String get ag_stepRunning => '실행 중';
 
   @override
   String get ag_stepFailed => '실패';

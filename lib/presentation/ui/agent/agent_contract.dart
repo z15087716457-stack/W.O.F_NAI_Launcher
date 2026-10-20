@@ -52,6 +52,7 @@ class AgentViewData {
     this.revision = 0,
     this.quick,
     this.bypassWarned = false,
+    this.runLimit,
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -120,6 +121,10 @@ class AgentViewData {
 
   /// 用户已勾过「不再提醒」：切到完全权限时不再弹风险确认。
   final bool bypassWarned;
+
+  /// 上一次运行因「单次任务最多请求」停下时的上限值；非 null 时对话末尾显示
+  /// 步数上限卡（继续 / 调整上限），不再把它当错误显示。发出新消息后清掉。
+  final int? runLimit;
 }
 
 /// 聊天正文搜索的一条命中。
@@ -257,16 +262,22 @@ sealed class AgentBlock {
 
 /// Markdown 正文。
 final class AgentTextBlock extends AgentBlock {
-  const AgentTextBlock(this.markdown);
+  const AgentTextBlock(this.markdown, {this.at});
   final String markdown;
+
+  /// 所在助手消息的时间戳；折叠行用它估算前面那段过程的用时。null = 不知道。
+  final DateTime? at;
 }
 
 /// 模型的思考内容（推理过程）。默认折叠，只显示“已思考 · N 字”；
 /// [live] = 这一段还在流式输出。
 final class AgentThinkingBlock extends AgentBlock {
-  const AgentThinkingBlock(this.text, {this.live = false});
+  const AgentThinkingBlock(this.text, {this.live = false, this.at});
   final String text;
   final bool live;
+
+  /// 所在助手消息的时间戳；null = 不知道。
+  final DateTime? at;
 }
 
 /// 一组连续的步骤（工具调用）。
@@ -444,8 +455,12 @@ class AgentStep {
     this.arguments,
     this.result,
     this.images = const [],
+    this.at,
   });
   final String id;
+
+  /// 发起这次调用的助手消息时间戳（≈ 开始时间）；null = 不知道。
+  final DateTime? at;
 
   /// 业务工具名，见库注释。外部 MCP 工具给 `server/tool` 原样字符串。
   final String tool;
@@ -1033,6 +1048,8 @@ class AgentActions {
     required this.onSearchChats,
     required this.onImageAction,
     required this.onSilenceBypass,
+    required this.onContinue,
+    required this.onAdjustLimit,
   });
 
   /// 收起侧栏。
@@ -1146,6 +1163,13 @@ class AgentActions {
 
   /// 完全权限风险提示勾了「不再提醒」。
   final Future<bool> Function() onSilenceBypass;
+
+  /// 步数上限卡的「继续」：以用户身份发一条「继续」，接着原来的进度做
+  /// （不是重新回答）；输入框里的草稿保持不动。
+  final Future<bool> Function() onContinue;
+
+  /// 步数上限卡的「调整上限」：打开设置并定位到「单次任务最多请求」。
+  final VoidCallback onAdjustLimit;
 }
 
 enum AgentMemoryTarget { global, workspace, skills, quick }

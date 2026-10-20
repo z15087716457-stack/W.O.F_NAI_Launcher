@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart' show StringCharacters;
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import '../../../core/nai_agent/agent_tool.dart';
+import '../../../core/nai_agent/attachment_manifest.dart';
 import '../../../core/nai_agent/pi_host_client.dart';
 import '../../../core/nai_agent/attachment_image.dart';
 import '../../../core/nai_agent/vision_access.dart';
@@ -53,6 +54,7 @@ class AgentChatRuntime {
   int modelRevision = -1;
   int uiRevision = 0;
   int? maxRequestsPerRun;
+  int? runLimitHit;
   String? extensionSignature;
   String mcpStatus = '';
 }
@@ -162,6 +164,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       await runtime.client?.close();
       runtime.client = null;
       runtime.messages = [];
+      runtime.runLimitHit = null;
       runtime.tools.clear();
     }
     final workspace = await store.getWorkspace(chat.workspaceId);
@@ -798,20 +801,33 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> send({bool steer = false}) async {
-    final runtime = selected!;
-    final original = runtime.composer;
-    if (_deletingChats.contains(runtime.chat.id) ||
+    await _send(steer: steer);
+  }
+
+  /// Sends a standalone message without consuming or restoring over the draft.
+  Future<bool> sendText(String text) => _send(text: text);
+
+  Future<bool> _send({bool steer = false, String? text}) async {
+    final runtime = selected;
+    if (runtime == null) return false;
+    final fromComposer = text == null;
+    final original = fromComposer
+        ? runtime.composer
+        : AgentComposerState(text: text);
+    if ((!fromComposer && runtime.running) ||
+        _deletingChats.contains(runtime.chat.id) ||
         _deletingWorkspaces.contains(runtime.workspace.id) ||
         _discardedDrafts.contains(runtime) ||
         (runtime.pendingSends > 0 && !runtime.running) ||
         runtime.starting ||
         runtime.importingImages > 0 ||
         (original.text.trim().isEmpty && original.attachments.isEmpty)) {
-      return;
+      return false;
     }
     final wasRunning = runtime.running;
     runtime.pendingSends++;
     runtime.error = null;
+    runtime.runLimitHit = null;
     try {
       if (runtime.chat.isDraft) {
         runtime.starting = true;
@@ -864,12 +880,17 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
           'data': base64Encode(image.bytes),
         });
       }
-      if (runtime.importingImages > 0 ||
-          original.text != runtime.composer.text ||
-          jsonEncode(original.attachments.map((a) => a.toJson()).toList()) !=
+      if (fromComposer &&
+          (runtime.importingImages > 0 ||
+              original.text != runtime.composer.text ||
               jsonEncode(
-                runtime.composer.attachments.map((a) => a.toJson()).toList(),
-              )) {
+                    original.attachments.map((a) => a.toJson()).toList(),
+                  ) !=
+                  jsonEncode(
+                    runtime.composer.attachments
+                        .map((a) => a.toJson())
+                        .toList(),
+                  ))) {
         throw const NaiAgentToolError(
           'composer_changed',
           'Input changed while preparing; send the current draft again',
@@ -883,8 +904,11 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       final noticeRevision = ++runtime._visionNoticeRevision;
       final queueId = const Uuid().v4();
       runtime.composer = AgentComposerState(
+        text: fromComposer ? '' : runtime.composer.text,
+        attachments: fromComposer ? const [] : runtime.composer.attachments,
+        interrupted: !fromComposer && runtime.composer.interrupted,
         pending: [
-          ...original.pending,
+          ...runtime.composer.pending,
           {
             'queueId': queueId,
             'text': original.text,
@@ -893,6 +917,9 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
           },
         ],
       );
+      // Client startup may have restored the previous run's terminal error.
+      runtime.error = null;
+      runtime.runLimitHit = null;
       runtime.running = true;
       if (visionNotice != null) runtime.visionNotice = visionNotice;
       await _persist(runtime);
@@ -942,10 +969,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         runtime.running = false;
       }
       await _persist(runtime);
+      return true;
     } catch (error) {
       runtime.error = _error(error, runtime);
       if (!wasRunning) runtime.running = false;
       await _persist(runtime);
+      return false;
     } finally {
       runtime.pendingSends--;
       _notify();
@@ -1028,6 +1057,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     final client = await _ensureClient(runtime);
     final reply = await client.navigate(entryId);
     _applyState(runtime, reply);
+    runtime.runLimitHit = null;
     final attachments = <AgentAttachment>[];
     for (final image in _maps(reply['editorImages'])) {
       attachments.add(
@@ -1042,7 +1072,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       );
     }
     runtime.composer = AgentComposerState(
-      text: reply['editorText'] as String? ?? '',
+      text: stripAgentAttachmentManifest(reply['editorText'] as String? ?? ''),
       attachments: attachments,
     );
     await _persist(runtime);
@@ -1083,10 +1113,12 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     final runtime = selected!;
     if (runtime.running) return;
     final client = await _ensureClient(runtime);
+    runtime.runLimitHit = null;
     runtime.running = true;
     _notify();
     try {
       _applyState(runtime, await client.compact());
+      runtime.runLimitHit = null;
     } catch (error) {
       runtime.error = _error(error, runtime);
     } finally {
@@ -1127,6 +1159,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     runtime.uiRevision++;
     if (envelope['type'] == 'usage') _applyUsage(runtime, envelope);
     if (envelope['type'] == 'extension_error') {
+      runtime.runLimitHit = null;
       runtime.error =
           '${currentL10n.naiAgent_extensionError}\n${envelope['message'] ?? ''}';
     }
@@ -1162,6 +1195,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     if (envelope['type'] == 'request_started') runtime.waitingForSlot = false;
     if (envelope['type'] == 'closed') {
       runtime.running = false;
+      runtime.runLimitHit = null;
       runtime.error = currentL10n.naiAgent_interrupted;
       runtime.composer = AgentComposerState(
         text: runtime.composer.text,
@@ -1210,8 +1244,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         final message = Map<String, dynamic>.from(event['message'] as Map);
         if (message['role'] == 'assistant' &&
             message['stopReason'] == 'error') {
-          runtime.error =
-              '${currentL10n.naiAgent_error}\n${message['errorMessage'] ?? ''}';
+          _applyAssistantError(runtime, message);
         }
         final index = runtime.messages.lastIndexWhere(
           (m) =>
@@ -1257,8 +1290,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         .where((m) => m['role'] == 'assistant')
         .lastOrNull;
     if (lastAssistant?['stopReason'] == 'error') {
-      runtime.error =
-          '${currentL10n.naiAgent_error}\n${lastAssistant?['errorMessage'] ?? ''}';
+      _applyAssistantError(runtime, lastAssistant!);
     }
     runtime.queue = _maps(value['queue']);
     _applyUsage(runtime, value);
@@ -1293,7 +1325,33 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
             wasRunning: runtime.running,
           ),
         );
-  static String _error(Object error, [AgentChatRuntime? runtime]) {
+  // Pi can serialize this as an assistant error, or reject the prompt itself.
+  // Match the host's stable phrase, allowing Pi's "Error: " prefix.
+  static const _runLimitMarker = 'Run request limit reached';
+
+  bool _recordRunLimit(AgentChatRuntime runtime, Object? error) {
+    if (!error.toString().contains(_runLimitMarker)) return false;
+    runtime.runLimitHit =
+        runtime.maxRequestsPerRun ?? settings.maxRequestsPerRun;
+    runtime.error = null;
+    return true;
+  }
+
+  void _applyAssistantError(
+    AgentChatRuntime runtime,
+    Map<String, dynamic> message,
+  ) {
+    if (_recordRunLimit(runtime, message['errorMessage'])) return;
+    runtime.runLimitHit = null;
+    runtime.error =
+        '${currentL10n.naiAgent_error}\n${message['errorMessage'] ?? ''}';
+  }
+
+  String? _error(Object error, [AgentChatRuntime? runtime]) {
+    if (runtime != null) {
+      if (_recordRunLimit(runtime, error)) return null;
+      runtime.runLimitHit = null;
+    }
     final l = currentL10n;
     if (error is NaiAgentToolError) {
       return switch (error.code) {

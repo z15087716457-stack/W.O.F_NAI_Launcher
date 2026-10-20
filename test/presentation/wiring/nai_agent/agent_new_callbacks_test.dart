@@ -1,6 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_wiring.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart' as view;
@@ -14,6 +20,14 @@ class _Controller extends AgentTestController {
   List<AgentChatSearchHit> hits = [];
   final deleted = <String>[];
   final restored = <String>[];
+  bool canSendText = true;
+
+  @override
+  Future<bool> sendText(String text) async {
+    check();
+    calls.add('sendText:$text');
+    return canSendText;
+  }
 
   void check() {
     if (failure != null) throw StateError(failure!);
@@ -78,6 +92,65 @@ void main() {
         TestWidgetsFlutterBinding.instance.platformDispatcher.views.first;
     view.resetPhysicalSize();
     view.resetDevicePixelRatio();
+  });
+
+  testWidgets('Continue uses localized standalone send and keeps the draft', (
+    tester,
+  ) async {
+    await tester.runAsync(() => c.saveComposer('unrelated draft'));
+    c.selected!.runLimitHit = 17;
+    c.selected!.error = 'stale error';
+    await h.pump(tester);
+    final panel = h.panel(tester);
+    expect(panel.data.runLimit, 17);
+    expect(panel.data.error, isNull);
+    expect(await panel.actions.onContinue(), true);
+    expect(c.calls, ['sendText:${currentL10n.ag_continueMessage}']);
+    expect(c.selected!.composer.text, 'unrelated draft');
+    c.canSendText = false;
+    expect(await panel.actions.onContinue(), false);
+    c.failure = 'cannot send';
+    expect(await panel.actions.onContinue(), false);
+    expect(c.calls, isNot(contains('send')));
+    expect(c.calls.where((s) => s.startsWith('edit:')), isEmpty);
+  });
+
+  testWidgets('Adjust limit opens Agent settings at agentMaxRequests', (
+    tester,
+  ) async {
+    await h.pump(tester);
+    final router = GoRouter(
+      routes: [
+        GoRoute(
+          path: '/',
+          builder: (_, __) => const Scaffold(body: AgentWiring()),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (_, __) => const Scaffold(body: Text('settings target')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: h.container,
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    h.panel(tester).actions.onAdjustLimit();
+    await tester.pumpAndSettle();
+    expect(router.routeInformationProvider.value.uri.path, '/settings');
+    expect(router.routeInformationProvider.value.uri.queryParameters, {
+      'section': 'agent',
+      'anchor': 'agentMaxRequests',
+    });
+    await tester.pumpWidget(const SizedBox());
   });
 
   testWidgets('chat trash token round trip restores draft without exporting', (

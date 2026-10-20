@@ -110,6 +110,54 @@ void main() {
     },
   );
 
+  test('assistant timestamps propagate to text, thinking and nested steps', () {
+    const timestamp = 1792456789123;
+    runtime.messages = [
+      {'role': 'user', 'content': 'start'},
+      {
+        ...assistant([
+          {'type': 'thinking', 'thinking': 'plan'},
+          {'type': 'text', 'text': 'before'},
+          call('plain', 'wiki_query'),
+          call('code', 'codemode'),
+          {'type': 'text', 'text': 'after'},
+        ]),
+        'timestamp': timestamp,
+      },
+      result('code', {
+        'nestedCalls': {
+          'calls': [
+            {'name': 'image_read', 'status': 'ok'},
+            {'name': 'bash', 'status': 'error'},
+          ],
+        },
+      }),
+      assistant([
+        {'type': 'thinking', 'thinking': 'no timestamp'},
+        {'type': 'text', 'text': 'unknown time'},
+        call('unknown', 'read'),
+      ]),
+    ];
+    final blocks = mapper.map(runtime).turns.single.reply!.blocks;
+    final at = DateTime.fromMillisecondsSinceEpoch(timestamp).toLocal();
+    final thinking = blocks.whereType<AgentThinkingBlock>().toList();
+    final texts = blocks.whereType<AgentTextBlock>().toList();
+    final steps = blocks
+        .whereType<AgentStepsBlock>()
+        .expand((b) => b.steps)
+        .toList();
+    expect(thinking.map((b) => b.at), [at, null]);
+    expect(texts.map((b) => b.at), [at, at, null]);
+    expect(steps.map((s) => s.id), [
+      'plain',
+      'code/nested/0',
+      'code/nested/1',
+      'unknown',
+    ]);
+    expect(steps.map((s) => s.at), [at, at, at, null]);
+    expect(texts.first.at!.isUtc, false);
+  });
+
   test(
     'Anlas sums image blocks across turns, zero/unknown stays null',
     () async {
@@ -162,7 +210,7 @@ void main() {
             {
               'type': 'text',
               'text':
-                  '$marker${jsonEncode([
+                  'inspect these originals\n\n$marker${jsonEncode([
                     {'path': 'attached.png'},
                     {'path': '../outside.png'},
                   ])}\nVisual pixels sent to model: true.',
@@ -174,7 +222,9 @@ void main() {
       ];
       mapper.map(runtime);
       await resources.settle();
-      final images = mapper.map(runtime).turns.single.user.images;
+      final user = mapper.map(runtime).turns.single.user;
+      expect(user.text, 'inspect these originals');
+      final images = user.images;
       expect(images.first.path, p.normalize(file.absolute.path));
       expect(images.last.path, isNull);
     },

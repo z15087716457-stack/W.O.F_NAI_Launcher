@@ -20542,6 +20542,92 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_deleteAgain => 'Click again to delete';
 
   @override
+  String get ag_sloganBase =>
+      'Grinding pigments…\nFlipping through the artist book…\nCounting tags…\nWeighing the weights…\nChecking the composition…\nPosing the characters…\nSharpening pencils…\nNudging the color temperature…\nPicking a brush…\nSqueezing paint onto the palette…\nStepping back to see the whole…\nLaying down a base coat…\nUntangling ideas…\nHunting for references…\nMeasuring proportions…\nTrying another angle…\nCleaning up the lines…\nSipping coffee…\nNegotiating with the light…\nSketching in the margins…';
+
+  @override
+  String get ag_sloganEgg =>
+      'Convincing the AI to draw hands right…\nDrew an extra finger… erased it\nZero Anlas spent (so far)\nSigned the corner of the canvas… no, erasing\nExchanging glances with Krita…\nFinding the right angle for cat ears…\nStopped counting at finger six…\nmasterpiece, best quality, please…';
+
+  @override
+  String get ag_sloganThink =>
+      'Mulling it over…\nDrawing it in my head first…\nThinking from another angle…\nSorting out the plan…';
+
+  @override
+  String get ag_sloganRead =>
+      'Reading up…\nChecking the tag dictionary…\nSeeing what the draft says…\nLeafing through old work…';
+
+  @override
+  String get ag_sloganRun =>
+      'Typing commands…\nLetting the terminal run…\nWaiting for the script…';
+
+  @override
+  String get ag_sloganImage =>
+      'Staring at the picture…\nStudying the details…\nCounting the characters…\nLeaning in to see the strokes…';
+
+  @override
+  String get ag_sloganWrite =>
+      'Putting pen to paper…\nEditing the prompt…\nRedrawing a stroke…\nTuning the weights…';
+
+  @override
+  String get ag_sloganGen =>
+      'Coloring…\nFeeding the GPU…\nPaint is still wet…\nDrying the canvas…';
+
+  @override
+  String get ag_sloganExternal =>
+      'Trading passwords with an outside tool…\nWaiting to hear back…';
+
+  @override
+  String get ag_foldDone => 'Worked';
+
+  @override
+  String ag_foldTimes(String label, int count) {
+    return '$label ×$count';
+  }
+
+  @override
+  String get ag_kindThink => 'Thought';
+
+  @override
+  String get ag_kindRead => 'Read';
+
+  @override
+  String get ag_kindRun => 'Command';
+
+  @override
+  String get ag_kindImage => 'Viewed image';
+
+  @override
+  String get ag_kindWrite => 'Edit';
+
+  @override
+  String get ag_kindGen => 'Generate';
+
+  @override
+  String get ag_kindExternal => 'External tool';
+
+  @override
+  String get ag_kindAsk => 'Asked you';
+
+  @override
+  String ag_limitTitle(int count) {
+    return 'Reached the per-task step limit ($count steps)';
+  }
+
+  @override
+  String get ag_limitBody =>
+      'Progress is saved. Press Continue to pick up where it left off. You can change the limit in Settings.';
+
+  @override
+  String get ag_limitContinue => 'Continue';
+
+  @override
+  String get ag_limitAdjust => 'Adjust limit';
+
+  @override
+  String get ag_continueMessage => 'Continue';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override
@@ -20560,9 +20646,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_regenerate => 'Regenerate';
 
   @override
-  String get ag_thinking => 'Thinking';
-
-  @override
   String get ag_starting => 'Opening chat';
 
   @override
@@ -20570,9 +20653,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_waitingYou => 'Waiting for you';
-
-  @override
-  String get ag_stepRunning => 'Running';
 
   @override
   String get ag_stepFailed => 'Failed';
