@@ -108,7 +108,7 @@ async function handle(message) {
     redact = created.redact;
     session.subscribe(event => {
       send({ type: 'event', event });
-      if (['message_end', 'auto_compaction_end', 'agent_settled'].includes(event.type))
+      if (['message_end', 'compaction_end', 'agent_settled'].includes(event.type))
         queueMicrotask(() => {
           if (!closing) send({ type: 'usage', ...usage() });
         });
@@ -206,12 +206,24 @@ async function handle(message) {
       send({ type: 'response', id, queue: queueState() }); break;
     }
     case 'navigate': {
+      await extensionsReady;
       requireIdle();
       const entry = created.manager.getEntry(message.entryId);
-      if (entry?.type !== 'message' || entry.message.role !== 'user') throw new Error('Select a user message to edit');
+      if (entry?.type !== 'message' || entry.message.role !== 'user'
+        || !created.manager.getBranch().some(item => item.id === entry.id)) throw new Error('Select a user message on the current branch to edit');
       const editorImages = Array.isArray(entry.message.content)
         ? entry.message.content.filter(part => part.type === 'image') : [];
-      send({ type: 'response', id, ...(await session.navigateTree(message.entryId, { summarize: false })), editorImages, ...state() });
+      const navigation = await session.navigateTree(message.entryId, { summarize: false });
+      // Pi treats navigating to the existing leaf as a no-op. A failed prompt
+      // can leave a user entry as the leaf: editing it must still fork at parent.
+      if (!navigation.cancelled && created.manager.getLeafId() === entry.id) {
+        if (entry.parentId === null) created.manager.resetLeaf();
+        else created.manager.branch(entry.parentId);
+        session.refreshContext();
+        navigation.editorText = typeof entry.message.content === 'string' ? entry.message.content
+          : entry.message.content.filter(part => part.type === 'text').map(part => part.text).join('');
+      }
+      send({ type: 'response', id, ...navigation, editorImages, ...state() });
       break; }
     case 'compact':
       requireIdle(); requestCount = 0;

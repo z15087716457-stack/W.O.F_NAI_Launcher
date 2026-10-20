@@ -11,6 +11,9 @@ import 'package:super_clipboard/super_clipboard.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/nai_agent/attachment_image.dart';
+import '../../../core/nai_agent/agent_tool.dart';
+import '../../../core/nai_agent/attachment_manifest.dart';
+
 import '../../../data/services/nai_agent/agent_workspace_store.dart' as store;
 import '../../../core/utils/file_name_sanitizer.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -53,6 +56,8 @@ import '../blocks_preferences.dart';
 import '../image_viewer_generation_target.dart';
 import 'agent_context.dart';
 import 'agent_diff_undo.dart';
+import 'agent_settings_undo.dart';
+import 'agent_gallery_undo.dart';
 import 'agent_image_info.dart';
 import 'agent_image_actions.dart';
 import 'agent_quick.dart';
@@ -111,9 +116,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   NaiAgentWorkspaceController get controller =>
       ref.read(naiAgentControllerProvider);
 
-  Future<bool> _run(Future<void> Function() action) async {
-    await action();
-    return true;
+  Future<bool> _run(Future<dynamic> Function() action) async {
+    final result = await action();
+    return result is bool ? result : true;
   }
 
   void _background(Future<void> Function() action) {
@@ -421,12 +426,26 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         selected == null ? null : MemoryImage(selected.bytes),
       );
     }
+    _resources.galleryLoader = r == null
+        ? null
+        : (id) async =>
+              (await ref
+                      .read(
+                        agentGalleryBindingProvider((
+                          r.workspace.directory.path,
+                          r.workspace.id,
+                          r.chat.id,
+                        )),
+                      )
+                      .loadImage(id, NaiAgentCancellation()))
+                  ?.bytes;
     final mapping = r == null
         ? null
         : _mapper.map(
             r,
             draftVersion: version,
             waitingUser: pending.isNotEmpty,
+            preferences: ref.watch(agentPreferencesProvider),
           );
     _mapping = mapping;
     final recent = <String, AgentImage>{};
@@ -742,6 +761,12 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onCompact: () => _run(c.compact),
       onExport: _export,
       onOpenSettings: _settings,
+      onOpenSettingAt: (section, anchor) => context.go(
+        Uri(
+          path: AppRoutes.settings,
+          queryParameters: {'section': section, 'anchor': anchor},
+        ).toString(),
+      ),
       onComposerChanged: (text) => _background(() => c.saveComposer(text)),
       onSend: ({required steer}) => data.composer.canSend
           ? _run(() => c.send(steer: steer))
@@ -765,16 +790,43 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onSteerQueued: (id) => _run(() => c.editQueue(id, steer: true)),
       onWithdrawQueued: (id) => _run(() => c.editQueue(id, remove: true)),
       onRestoreQueued: (id) => _run(() => c.restorePending(id)),
-      onEditMessage: (id) => _run(() => c.editMessage(id)),
-      onRegenerate: () async {
-        final id = mapping?.turns.lastOrNull?.user.entryId;
-        if (id == null || r?.running == true || r?.starting == true) {
+      onResendFrom: (entryId, text, keep) async {
+        if (r == null ||
+            !identical(c.selected, r) ||
+            r.running ||
+            r.starting ||
+            r.pendingSends > 0) {
           return false;
         }
-        await c.editMessage(id);
-        if (!identical(c.selected, r)) return false;
-        await c.send();
-        return true;
+        final indexes = agentUserImagePartIndexes(r, entryId, keep);
+        if (indexes == null) return false;
+        return _run(
+          () => c.resendFrom(entryId, text, keepImagePartIndexes: indexes),
+        );
+      },
+      onRegenerate: () async {
+        final user = mapping?.turns.lastOrNull?.user;
+        final id = user?.entryId;
+        if (id == null ||
+            r == null ||
+            !identical(c.selected, r) ||
+            r.running ||
+            r.starting ||
+            r.pendingSends > 0) {
+          return false;
+        }
+        final message = r.userMessageForEntry(id);
+        if (message == null) return false;
+        return _run(
+          () => c.resendFrom(
+            id,
+            stripAgentAttachmentManifest(agentMessageText(message)),
+            keepImagePartIndexes: [
+              for (final (pi, part) in agentMaps(message['content']).indexed)
+                if (part['type'] == 'image') pi,
+            ],
+          ),
+        );
       },
       onAnswer: questions.answer,
       onCancelAsk: questions.cancel,
@@ -796,13 +848,28 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         }
       },
       onUndoDiff: (id) async {
+        if (r == null || _mapper.undone.contains(id)) return false;
+        final settings = mapping?.settings[id];
+        final gallery = mapping?.gallery[id];
         final diff = mapping?.diffs[id];
-        if (diff == null || r == null || _mapper.undone.contains(id)) {
-          return false;
-        }
-        final ok = await ref
-            .read(agentDiffUndoProvider)
-            .restore(diff, r.workspace.agentDirectory);
+        final ok = settings != null
+            ? await ref
+                  .read(agentSettingsUndoProvider(r.workspace.directory.path))
+                  .restore(settings)
+            : gallery != null
+            ? await AgentGalleryUndo(
+                ref.read(
+                  agentGalleryBindingProvider((
+                    r.workspace.directory.path,
+                    r.workspace.id,
+                    r.chat.id,
+                  )),
+                ),
+              ).restore(gallery)
+            : diff != null &&
+                  await ref
+                      .read(agentDiffUndoProvider)
+                      .restore(diff, r.workspace.agentDirectory);
         if (ok) {
           _mapper.undone.add(id);
           if (mounted) setState(() => _revision++);
@@ -810,6 +877,40 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         return ok;
       },
       onUndoDiffs: (ids) async {
+        // Group undo is atomic only within one draft version. Settings/gallery
+        // cards each own one restore; do not silently ignore foreign ids.
+        final active = ids
+            .where((id) => !_mapper.undone.contains(id))
+            .toSet()
+            .toList();
+        if (active.length == 1 && r != null) {
+          final id = active.single;
+          final settings = mapping?.settings[id];
+          final gallery = mapping?.gallery[id];
+          if (settings != null || gallery != null) {
+            final ok = settings != null
+                ? await ref
+                      .read(
+                        agentSettingsUndoProvider(r.workspace.directory.path),
+                      )
+                      .restore(settings)
+                : await AgentGalleryUndo(
+                    ref.read(
+                      agentGalleryBindingProvider((
+                        r.workspace.directory.path,
+                        r.workspace.id,
+                        r.chat.id,
+                      )),
+                    ),
+                  ).restore(gallery!);
+            if (ok) {
+              _mapper.undone.add(id);
+              if (mounted) setState(() => _revision++);
+            }
+            return ok;
+          }
+        }
+        if (active.any((id) => mapping?.diffs[id] == null)) return false;
         final list = [
           for (final id in ids)
             if (!_mapper.undone.contains(id)) ?mapping?.diffs[id],

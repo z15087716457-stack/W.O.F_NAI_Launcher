@@ -6,6 +6,74 @@ import 'agent_glyphs.dart';
 
 /// 方案 B 的通用小件：图标按钮、描边按钮、黑色主按钮、小标签、分段、眉题。
 
+/// 会省略的文字：真被截断时，悬停约半秒弹出完整内容（[tooltip] 可换成别的说明）；
+/// 没截断不弹。要放在有界宽度里（Expanded / Flexible / 定宽）。
+class AgentOverflowText extends StatelessWidget {
+  const AgentOverflowText(
+    String this.text, {
+    super.key,
+    this.style,
+    this.maxLines = 1,
+    this.tooltip,
+    this.textKey,
+    this.textAlign,
+  }) : span = null;
+
+  const AgentOverflowText.rich(
+    InlineSpan this.span, {
+    super.key,
+    this.style,
+    this.maxLines = 1,
+    this.tooltip,
+    this.textKey,
+    this.textAlign,
+  }) : text = null;
+
+  final String? text;
+  final InlineSpan? span;
+  final TextStyle? style;
+  final int maxLines;
+  final String? tooltip;
+  final Key? textKey;
+  final TextAlign? textAlign;
+
+  @override
+  Widget build(BuildContext context) {
+    final inline = span ?? TextSpan(text: text);
+    final child = Text.rich(
+      inline,
+      key: textKey,
+      maxLines: maxLines,
+      overflow: TextOverflow.ellipsis,
+      style: style,
+      textAlign: textAlign,
+    );
+    return LayoutBuilder(
+      builder: (context, box) {
+        if (!box.maxWidth.isFinite) return child;
+        final tp = TextPainter(
+          text: TextSpan(
+            style: DefaultTextStyle.of(context).style.merge(style),
+            children: [inline],
+          ),
+          maxLines: maxLines,
+          textDirection: Directionality.of(context),
+          textScaler: MediaQuery.textScalerOf(context),
+        )..layout(maxWidth: box.maxWidth);
+        final over = tp.didExceedMaxLines;
+        tp.dispose();
+        if (!over) return child;
+        return Tooltip(
+          message: tooltip ?? inline.toPlainText(),
+          waitDuration: const Duration(milliseconds: 500),
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: child,
+        );
+      },
+    );
+  }
+}
+
 /// 28 × 28（[small] 24）图标按钮，悬停灰底。
 class AgentIconButton extends StatefulWidget {
   const AgentIconButton({

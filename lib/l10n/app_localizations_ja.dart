@@ -19998,6 +19998,139 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_continueMessage => '続けて';
 
   @override
+  String get ag_diffExpand => 'すべて表示';
+
+  @override
+  String get ag_diffCollapse => '折りたたむ';
+
+  @override
+  String ag_readImages(int count) {
+    return '画像確認 · $count 枚';
+  }
+
+  @override
+  String ag_turnTook(String time) {
+    return '所要 $time';
+  }
+
+  @override
+  String ag_turnAnlas(String anlas) {
+    return '$anlas Anlas';
+  }
+
+  @override
+  String ag_turnChanges(int count) {
+    return '変更 $count 件';
+  }
+
+  @override
+  String ag_turnTools(int count) {
+    return 'ツール $count 回';
+  }
+
+  @override
+  String ag_turnTokens(String input, String output) {
+    return '入力 $input · 出力 $output トークン';
+  }
+
+  @override
+  String get ag_settingsTitle => 'アプリ設定';
+
+  @override
+  String get ag_settingsGo => '設定を開く';
+
+  @override
+  String ag_tagCopied(String tag) {
+    return '$tag をコピーしました';
+  }
+
+  @override
+  String ag_tagCount(String count) {
+    return '$count 件';
+  }
+
+  @override
+  String ag_galleryFavorite(int count) {
+    return '$count 枚をお気に入りにしました';
+  }
+
+  @override
+  String ag_galleryUnfavorite(int count) {
+    return '$count 枚のお気に入りを外しました';
+  }
+
+  @override
+  String ag_galleryTags(int count) {
+    return '$count 枚のタグを変更しました';
+  }
+
+  @override
+  String ag_galleryMove(int count, String target) {
+    return '$count 枚を「$target」へ移動しました';
+  }
+
+  @override
+  String ag_galleryCopy(int count, String target) {
+    return '$count 枚を「$target」へコピーしました';
+  }
+
+  @override
+  String ag_galleryDelete(int count) {
+    return '$count 枚をゴミ箱へ移しました';
+  }
+
+  @override
+  String ag_galleryRestore(int count) {
+    return '$count 枚を復元しました';
+  }
+
+  @override
+  String ag_galleryCollectionAdd(int count, String target) {
+    return '$count 枚をコレクション「$target」に追加しました';
+  }
+
+  @override
+  String ag_galleryCollectionRemove(int count, String target) {
+    return '$count 枚をコレクション「$target」から外しました';
+  }
+
+  @override
+  String ag_galleryExport(int count) {
+    return '$count 枚を書き出しました';
+  }
+
+  @override
+  String ag_galleryMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get ag_compacted => 'これまでの会話を圧縮しました';
+
+  @override
+  String get ag_compactedAuto => 'コンテキストがいっぱいに近いため、これまでの会話を自動で圧縮しました';
+
+  @override
+  String ag_compactedTokens(String tokens) {
+    return '元 $tokens トークン';
+  }
+
+  @override
+  String get ag_compactedShow => '要約を見る';
+
+  @override
+  String get ag_compactedHide => '要約を閉じる';
+
+  @override
+  String get ag_editResend => '送信';
+
+  @override
+  String get ag_editHint => '送信すると、このメッセージ以降の会話は置き換えられます';
+
+  @override
+  String get ag_editRemoveImage => 'この画像を外す';
+
+  @override
   String get ag_recent => '最近';
 
   @override

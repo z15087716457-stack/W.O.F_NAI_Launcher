@@ -13,10 +13,21 @@ String stripAgentAttachmentManifest(String text) {
 }
 
 /// Original paths remain untrusted; callers must apply their workspace guard.
-List<String> agentAttachmentManifestPaths(String text) =>
-    _parse(text)?.paths ?? const [];
+List<String> agentAttachmentManifestPaths(String text) => [
+  for (final row in agentAttachmentManifestRows(text)) row['path'] as String,
+];
 
-({int start, List<String> paths})? _parse(String text) {
+/// Keep complete source rows (including metadata) when resending image subsets.
+/// Paths are still untrusted and must be guarded when opening a workspace file.
+List<Map<String, dynamic>> agentAttachmentManifestRows(String text) =>
+    _parse(text)?.rows ?? const [];
+
+String agentAttachmentManifest(
+  List<Map<String, dynamic>> rows, {
+  required bool vision,
+}) => rows.isEmpty ? '' : '\n\n$_marker${jsonEncode(rows)}$_pixels$vision.';
+
+({int start, List<Map<String, dynamic>> rows})? _parse(String text) {
   final markerStart = text.lastIndexOf(_prefix);
   if (markerStart < 0 ||
       (markerStart > 0 && text[markerStart - 1] != '\n') ||
@@ -35,15 +46,15 @@ List<String> agentAttachmentManifestPaths(String text) =>
       text.substring(markerStart + _marker.length, pixelsStart),
     );
     if (rows is! List || rows.isEmpty) return null;
-    final paths = <String>[];
+    final parsedRows = <Map<String, dynamic>>[];
     for (final row in rows) {
       if (row is! Map || row['path'] is! String) return null;
-      paths.add(row['path'] as String);
+      parsedRows.add(Map<String, dynamic>.from(row));
     }
     var start = markerStart;
     if (start > 0 && text[start - 1] == '\n') start--;
     if (start > 0 && text[start - 1] == '\n') start--;
-    return (start: start, paths: paths);
+    return (start: start, rows: parsedRows);
   } on FormatException {
     return null;
   }

@@ -156,6 +156,8 @@ class AgentTestController extends NaiAgentWorkspaceController {
       );
   final calls = <String>[];
   final queueEdits = <(String, String?, bool, bool)>[];
+  final resends = <(String, String, List<int>)>[];
+  bool canResend = true;
   @override
   Future<void> send({bool steer = false}) async {
     calls.add(steer ? 'steer' : 'send');
@@ -177,9 +179,14 @@ class AgentTestController extends NaiAgentWorkspaceController {
   }
 
   @override
-  Future<void> editMessage(String entryId) async {
-    calls.add('edit:$entryId');
-    await saveComposer('edited user');
+  Future<bool> resendFrom(
+    String entryId,
+    String text, {
+    required List<int> keepImagePartIndexes,
+  }) async {
+    calls.add('resend:$entryId');
+    resends.add((entryId, text, List.of(keepImagePartIndexes)));
+    return canResend;
   }
 
   @override

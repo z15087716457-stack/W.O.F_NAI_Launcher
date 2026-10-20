@@ -25,6 +25,7 @@ Future<AgentRecorder> pumpAgent(
   double height = 900,
   String locale = 'zh',
   bool dark = false,
+  bool animate = false,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(width, height);
@@ -43,7 +44,7 @@ Future<AgentRecorder> pumpAgent(
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: true),
+          data: MediaQuery.of(context).copyWith(disableAnimations: !animate),
           child: child!,
         ),
         home: Scaffold(
@@ -62,7 +63,24 @@ Future<AgentRecorder> pumpAgent(
       ),
     ),
   );
+  if (!animate) {
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+  return rec;
+}
+
+/// 开着动画装一次（同一棵树上再调就是「数据更新」）；[settle] 时把进场动画走完。
+Future<AgentRecorder> pumpAgentAnimated(
+  WidgetTester tester,
+  AgentViewData data, {
+  bool settle = true,
+}) async {
+  final rec = await pumpAgent(tester, data: data, animate: true);
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 50));
+  if (settle) {
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+  }
   return rec;
 }

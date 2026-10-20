@@ -462,7 +462,7 @@ abstract final class AgentFixture {
       onSteerQueued: (id) => ok('steerQueued', id),
       onWithdrawQueued: (id) => ok('withdrawQueued', id),
       onRestoreQueued: (id) => ok('restoreQueued', id),
-      onEditMessage: (id) => ok('editMessage', id),
+      onResendFrom: (id, text, keep) => ok('resendFrom', (id, text, keep)),
       onRegenerate: () => ok('regenerate'),
       onAnswer: (id, a) => note('answer', (id, a)),
       onCancelAsk: (id) => note('cancelAsk', id),
@@ -507,6 +507,8 @@ abstract final class AgentFixture {
       onSilenceBypass: () => ok('silenceBypass'),
       onContinue: () => ok('continue'),
       onAdjustLimit: () => note('adjustLimit'),
+      onOpenSettingAt: (section, anchor) =>
+          note('openSettingAt', '$section#$anchor'),
     );
   }
 }

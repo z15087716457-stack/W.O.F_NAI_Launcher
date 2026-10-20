@@ -35998,6 +35998,192 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get ag_continueMessage;
 
+  /// No description provided for @ag_diffExpand.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get ag_diffExpand;
+
+  /// No description provided for @ag_diffCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get ag_diffCollapse;
+
+  /// No description provided for @ag_readImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewed images · {count}'**
+  String ag_readImages(int count);
+
+  /// No description provided for @ag_turnTook.
+  ///
+  /// In en, this message translates to:
+  /// **'Took {time}'**
+  String ag_turnTook(String time);
+
+  /// No description provided for @ag_turnAnlas.
+  ///
+  /// In en, this message translates to:
+  /// **'{anlas} Anlas'**
+  String ag_turnAnlas(String anlas);
+
+  /// No description provided for @ag_turnChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change} other{{count} changes}}'**
+  String ag_turnChanges(int count);
+
+  /// No description provided for @ag_turnTools.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tool call} other{{count} tool calls}}'**
+  String ag_turnTools(int count);
+
+  /// No description provided for @ag_turnTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'{input} in · {output} out tokens'**
+  String ag_turnTokens(String input, String output);
+
+  /// No description provided for @ag_settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App settings'**
+  String get ag_settingsTitle;
+
+  /// No description provided for @ag_settingsGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get ag_settingsGo;
+
+  /// No description provided for @ag_tagCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied {tag}'**
+  String ag_tagCopied(String tag);
+
+  /// No description provided for @ag_tagCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} posts'**
+  String ag_tagCount(String count);
+
+  /// No description provided for @ag_galleryFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Favorited 1 image} other{Favorited {count} images}}'**
+  String ag_galleryFavorite(int count);
+
+  /// No description provided for @ag_galleryUnfavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Unfavorited 1 image} other{Unfavorited {count} images}}'**
+  String ag_galleryUnfavorite(int count);
+
+  /// No description provided for @ag_galleryTags.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Retagged 1 image} other{Retagged {count} images}}'**
+  String ag_galleryTags(int count);
+
+  /// No description provided for @ag_galleryMove.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Moved 1 image to “{target}”} other{Moved {count} images to “{target}”}}'**
+  String ag_galleryMove(int count, String target);
+
+  /// No description provided for @ag_galleryCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Copied 1 image to “{target}”} other{Copied {count} images to “{target}”}}'**
+  String ag_galleryCopy(int count, String target);
+
+  /// No description provided for @ag_galleryDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Moved 1 image to trash} other{Moved {count} images to trash}}'**
+  String ag_galleryDelete(int count);
+
+  /// No description provided for @ag_galleryRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Restored 1 image} other{Restored {count} images}}'**
+  String ag_galleryRestore(int count);
+
+  /// No description provided for @ag_galleryCollectionAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Added 1 image to “{target}”} other{Added {count} images to “{target}”}}'**
+  String ag_galleryCollectionAdd(int count, String target);
+
+  /// No description provided for @ag_galleryCollectionRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Removed 1 image from “{target}”} other{Removed {count} images from “{target}”}}'**
+  String ag_galleryCollectionRemove(int count, String target);
+
+  /// No description provided for @ag_galleryExport.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Exported 1 image} other{Exported {count} images}}'**
+  String ag_galleryExport(int count);
+
+  /// No description provided for @ag_galleryMore.
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String ag_galleryMore(int count);
+
+  /// No description provided for @ag_compacted.
+  ///
+  /// In en, this message translates to:
+  /// **'Earlier conversation compacted'**
+  String get ag_compacted;
+
+  /// No description provided for @ag_compactedAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Context was nearly full; earlier conversation compacted automatically'**
+  String get ag_compactedAuto;
+
+  /// No description provided for @ag_compactedTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'was {tokens} tokens'**
+  String ag_compactedTokens(String tokens);
+
+  /// No description provided for @ag_compactedShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show summary'**
+  String get ag_compactedShow;
+
+  /// No description provided for @ag_compactedHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide summary'**
+  String get ag_compactedHide;
+
+  /// No description provided for @ag_editResend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get ag_editResend;
+
+  /// No description provided for @ag_editHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending replaces everything after this message'**
+  String get ag_editHint;
+
+  /// No description provided for @ag_editRemoveImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove image'**
+  String get ag_editRemoveImage;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:

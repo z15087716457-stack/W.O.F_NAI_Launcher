@@ -10900,6 +10900,192 @@
   "ag_limitContinue": "繼續",
   "ag_limitAdjust": "調整上限",
   "ag_continueMessage": "繼續",
+  "ag_diffExpand": "展開全部",
+  "ag_diffCollapse": "收起",
+  "ag_readImages": "檢視圖片 · {count} 張",
+  "@ag_readImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_turnTook": "用時 {time}",
+  "@ag_turnTook": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_turnAnlas": "{anlas} Anlas",
+  "@ag_turnAnlas": {
+    "placeholders": {
+      "anlas": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_turnChanges": "改動 {count} 處",
+  "@ag_turnChanges": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_turnTools": "工具 {count} 次",
+  "@ag_turnTools": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_turnTokens": "輸入 {input} · 輸出 {output} token",
+  "@ag_turnTokens": {
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_settingsTitle": "應用設定",
+  "ag_settingsGo": "去設定",
+  "ag_tagCopied": "已複製 {tag}",
+  "@ag_tagCopied": {
+    "placeholders": {
+      "tag": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_tagCount": "{count} 張作品",
+  "@ag_tagCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_galleryFavorite": "已收藏 {count} 張",
+  "@ag_galleryFavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryUnfavorite": "已取消收藏 {count} 張",
+  "@ag_galleryUnfavorite": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryTags": "已改標籤 {count} 張",
+  "@ag_galleryTags": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryMove": "已移動 {count} 張到「{target}」",
+  "@ag_galleryMove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_galleryCopy": "已複製 {count} 張到「{target}」",
+  "@ag_galleryCopy": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_galleryDelete": "已移到回收區 {count} 張",
+  "@ag_galleryDelete": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryRestore": "已恢復 {count} 張",
+  "@ag_galleryRestore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryCollectionAdd": "已加入集合「{target}」{count} 張",
+  "@ag_galleryCollectionAdd": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_galleryCollectionRemove": "已移出集合「{target}」{count} 張",
+  "@ag_galleryCollectionRemove": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_galleryExport": "已匯出 {count} 張",
+  "@ag_galleryExport": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_galleryMore": "+{count}",
+  "@ag_galleryMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_compacted": "之前的對話已壓縮",
+  "ag_compactedAuto": "上下文快滿了，之前的對話已自動壓縮",
+  "ag_compactedTokens": "原 {tokens} token",
+  "@ag_compactedTokens": {
+    "placeholders": {
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_compactedShow": "看摘要",
+  "ag_compactedHide": "收起摘要",
+  "ag_editResend": "傳送",
+  "ag_editHint": "傳送後，這條之後的對話會被替換",
+  "ag_editRemoveImage": "去掉這張圖",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "編輯",

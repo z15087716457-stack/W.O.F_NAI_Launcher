@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
@@ -154,9 +155,13 @@ class _AgentPanelState extends State<AgentPanel> {
     );
   }
 
-  void _zoom(AgentImage image) {
+  void _zoom(AgentImage image, {List<AgentImage>? group}) {
     _openDialog(
-      (_) => _Zoom(image: image, onClose: () => setState(() => _dialog = null)),
+      (_) => _Zoom(
+        image: image,
+        group: group,
+        onClose: () => setState(() => _dialog = null),
+      ),
       contained: false,
     );
   }
@@ -486,58 +491,163 @@ class _NameDialogState extends State<_NameDialog> {
   }
 }
 
-class _Zoom extends StatelessWidget {
-  const _Zoom({required this.image, required this.onClose});
+class _Zoom extends StatefulWidget {
+  const _Zoom({required this.image, required this.onClose, this.group});
   final AgentImage image;
   final VoidCallback onClose;
+
+  /// 同一组的图（查看图片合并组、产物）：左右键 / 两侧箭头切换。
+  final List<AgentImage>? group;
+
+  @override
+  State<_Zoom> createState() => _ZoomState();
+}
+
+class _ZoomState extends State<_Zoom> {
+  late final _images = widget.group == null || widget.group!.length < 2
+      ? [widget.image]
+      : widget.group!;
+  late var _index = _images
+      .indexWhere((i) => i.id == widget.image.id)
+      .clamp(0, _images.length - 1);
+  final _focus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focus.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    super.dispose();
+  }
+
+  void _go(int delta) {
+    if (_images.length < 2) return;
+    setState(() => _index = (_index + delta) % _images.length);
+  }
 
   @override
   Widget build(BuildContext context) {
     final s = AgentScope.of(context);
     final l = context.l10n;
-    return GestureDetector(
-      onTap: onClose,
-      child: Stack(
-        key: const Key('agent-zoom'),
-        alignment: Alignment.center,
-        children: [
-          InteractiveViewer(
-            maxScale: 6,
-            child: Image(image: image.image, fit: BoxFit.contain),
-          ),
-          Positioned(
-            top: 0,
-            right: 0,
-            child: Row(
-              spacing: 6,
-              children: [
-                if (image.historyId != null)
-                  AgentButton(
-                    label: l.ag_imageReveal,
-                    glyph: AgentGlyphs.clock,
-                    onPressed: () {
-                      onClose();
-                      s.actions.onRevealImage(image.id);
-                    },
-                  ),
-                AgentButton(
-                  label: l.ag_imageAttach,
-                  glyph: AgentGlyphs.clip,
-                  onPressed: () {
-                    onClose();
-                    s.run(() => s.actions.onAttachImage(image.id));
-                  },
-                ),
-                AgentButton(
-                  key: const Key('agent-zoom-close'),
-                  label: l.ag_zoomClose,
-                  glyph: AgentGlyphs.close,
-                  onPressed: onClose,
-                ),
-              ],
+    final image = _images[_index];
+    final many = _images.length > 1;
+    Widget arrow(int delta) => Material(
+      key: Key(delta < 0 ? 'agent-zoom-prev' : 'agent-zoom-next'),
+      color: const Color(0x99000000),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => _go(delta),
+        child: SizedBox.square(
+          dimension: 36,
+          child: Center(
+            child: Transform.rotate(
+              angle: delta < 0 ? 3.14159 : 0,
+              child: const AgentIcon(
+                AgentGlyphs.chevronRight,
+                size: 18,
+                color: Colors.white,
+              ),
             ),
           ),
-        ],
+        ),
+      ),
+    );
+    return Focus(
+      focusNode: _focus,
+      onKeyEvent: (_, e) {
+        if (e is! KeyDownEvent && e is! KeyRepeatEvent) {
+          return KeyEventResult.ignored;
+        }
+        if (e.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          _go(-1);
+          return KeyEventResult.handled;
+        }
+        if (e.logicalKey == LogicalKeyboardKey.arrowRight) {
+          _go(1);
+          return KeyEventResult.handled;
+        }
+        if (e.logicalKey == LogicalKeyboardKey.escape) {
+          widget.onClose();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: GestureDetector(
+        onTap: widget.onClose,
+        // 占满弹层：图还没加载、或图很小时，两侧箭头和右上按钮也在可点范围里。
+        child: Stack(
+          key: const Key('agent-zoom'),
+          fit: StackFit.expand,
+          alignment: Alignment.center,
+          children: [
+            InteractiveViewer(
+              key: ValueKey(image.id),
+              maxScale: 6,
+              child: Image(image: image.image, fit: BoxFit.contain),
+            ),
+            if (many) ...[
+              Positioned(left: 8, child: arrow(-1)),
+              Positioned(right: 8, child: arrow(1)),
+              Positioned(
+                bottom: 8,
+                child: Container(
+                  key: const Key('agent-zoom-index'),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0x99000000),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    '${_index + 1} / ${_images.length}',
+                    style: UiText.mono(11, color: Colors.white, height: 1.2),
+                  ),
+                ),
+              ),
+            ],
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Row(
+                spacing: 6,
+                children: [
+                  if (image.historyId != null)
+                    AgentButton(
+                      label: l.ag_imageReveal,
+                      glyph: AgentGlyphs.clock,
+                      onPressed: () {
+                        widget.onClose();
+                        s.actions.onRevealImage(image.id);
+                      },
+                    ),
+                  AgentButton(
+                    label: l.ag_imageAttach,
+                    glyph: AgentGlyphs.clip,
+                    onPressed: () {
+                      widget.onClose();
+                      s.run(() => s.actions.onAttachImage(image.id));
+                    },
+                  ),
+                  AgentButton(
+                    key: const Key('agent-zoom-close'),
+                    label: l.ag_zoomClose,
+                    glyph: AgentGlyphs.close,
+                    onPressed: widget.onClose,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -112,6 +112,142 @@ class NaiAgentGalleryBinding {
     NaiAgentCancellation token,
   ) => _manage(params, token);
 
+  /// UI undo only: uses the same backup, conflict checks and native manage paths
+  /// as tools, but never asks the model to execute anything.
+  Future<bool> undoManage(
+    Map<String, dynamic> arguments,
+    Map<String, dynamic> result,
+  ) async {
+    final token = NaiAgentCancellation();
+    Map<String, dynamic> details(Map<String, dynamic> envelope) =>
+        Map<String, dynamic>.from(envelope['details'] as Map);
+    try {
+      _admit(token);
+      final action = arguments['action'];
+      final id = result['image_id'] as String?;
+      final before = Map<String, dynamic>.from(result['before'] as Map? ?? {});
+      if (action == 'collection_add' || action == 'collection_remove') {
+        final versions = Map<String, dynamic>.from(
+          result['image_versions'] as Map? ?? {},
+        );
+        if (versions.isEmpty || before.length != versions.length) return false;
+        for (final entry in versions.entries) {
+          if ((await _managed('library', entry.key, token)).version !=
+              entry.value) {
+            return false;
+          }
+        }
+        final source = ref.read(naiAgentGalleryDataSourceProvider);
+        if (_collectionVersion(await source.readCollectionManagementState()) !=
+            result['collection_version']) {
+          return false;
+        }
+        final collection = result['collection_id'];
+        final ids = <String>[];
+        for (final imageId in versions.keys) {
+          final old = Map<String, dynamic>.from(before[imageId] as Map);
+          final wasMember = (old['collection_ids'] as List).contains(
+            collection,
+          );
+          if (wasMember != (action == 'collection_add')) ids.add(imageId);
+        }
+        if (ids.isNotEmpty) {
+          final reversed = details(
+            await _collections(
+              {
+                'action': action == 'collection_add'
+                    ? 'collection_remove'
+                    : 'collection_add',
+                'collection_id': collection,
+                'image_ids': ids,
+                'expected_collection_version': result['collection_version'],
+              },
+              token,
+              expectedImageVersions: versions,
+            ),
+          );
+          if (reversed['ok'] != true) return false;
+        }
+        // Adding sets favorite. Removing membership alone does not undo that.
+        for (final imageId in versions.keys) {
+          final old = Map<String, dynamic>.from(before[imageId] as Map);
+          final now = await _managed('library', imageId, token);
+          if (old['favorite'] != now.data['favorite']) {
+            final reversed = details(
+              await manage({
+                'action': 'update',
+                'scope': 'library',
+                'image_id': imageId,
+                'expected_image_version': now.version,
+                'changes': {'favorite': old['favorite']},
+              }, token),
+            );
+            if (reversed['ok'] != true) return false;
+          }
+        }
+        return true;
+      }
+      if (id == null || result['image_version'] is! String) return false;
+      final current = await _managed('library', id, token);
+      if (current.version != result['image_version']) return false;
+      final reverse = <String, dynamic>{
+        'scope': 'library',
+        'image_id': id,
+        'expected_image_version': current.version,
+      };
+      if (action == 'update') {
+        final fields = (arguments['changes'] as Map).keys;
+        if (fields.any((k) => !before.containsKey(k))) return false;
+        reverse.addAll({
+          'action': 'update',
+          'changes': {for (final k in fields) k: before[k]},
+        });
+      } else if (action == 'delete' || action == 'restore') {
+        reverse['action'] = action == 'delete' ? 'restore' : 'delete';
+      } else if (action == 'move_file' && result['source_path'] is String) {
+        // Do not let collision renaming turn an undo into a different filename.
+        final original = result['source_path'] as String;
+        if (await FileSystemEntity.type(original, followLinks: false) !=
+            FileSystemEntityType.notFound) {
+          return false;
+        }
+        if (p.basename(current.data['file_path'] as String) !=
+            p.basename(original)) {
+          return false;
+        }
+        reverse.addAll({
+          'action': 'move_file',
+          'target_folder': p.dirname(original),
+        });
+      } else {
+        return false;
+      }
+      final reversed = details(await manage(reverse, token));
+      if (reversed['ok'] != true) return false;
+      if (action == 'update' &&
+          (arguments['changes'] as Map)['favorite'] == false) {
+        // Unfavorite also removed all memberships; restore the exact old set.
+        for (final collection in before['collection_ids'] as List? ?? []) {
+          final state = await _collections({'action': 'collections'}, token);
+          final added = details(
+            await manage({
+              'action': 'collection_add',
+              'collection_id': collection,
+              'image_ids': [id],
+              'expected_collection_version': details(
+                state,
+              )['collection_version'],
+            }, token),
+          );
+          if (added['ok'] != true) return false;
+        }
+      }
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   void _check(NaiAgentCancellation token) {
     token.check();
     if (!isAlive()) {

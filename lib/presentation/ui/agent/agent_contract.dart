@@ -246,8 +246,12 @@ class AgentReply {
     required this.blocks,
     this.live = false,
     this.canRegenerate = false,
+    this.summary,
   });
   final List<AgentBlock> blocks;
+
+  /// 一轮结束后的小结（淡色一行：用时 · Anlas · 改动 · token）；进行中或没有数据时 null。
+  final AgentTurnSummary? summary;
 
   /// 还在进行（最后显示「正在思考…」状态行）。
   final bool live;
@@ -425,6 +429,156 @@ class AgentPositionMark {
   }
 }
 
+/// 一轮小结。各项 null / 0 = 不显示该项。
+@immutable
+class AgentTurnSummary {
+  const AgentTurnSummary({
+    this.took,
+    this.anlas,
+    this.changes = 0,
+    this.inputTokens,
+    this.outputTokens,
+    this.toolCalls = 0,
+  });
+
+  /// 用户这句 → 最后一条回复的时间。
+  final Duration? took;
+
+  /// 本轮花掉的 Anlas（有产物的生成）；null / 0 = 不显示。
+  final int? anlas;
+
+  /// 本轮改动卡数（提示词各栏、参数、位置、设置、画廊）。
+  final int changes;
+
+  /// 本轮最后一次请求的上下文 token / 本轮输出 token 合计；null = 不知道。
+  final int? inputTokens, outputTokens;
+
+  /// 本轮工具调用次数。
+  final int toolCalls;
+}
+
+/// 应用设置改动：`settings_update` 改了哪些项，旧值 → 新值；整张一起撤销。
+final class AgentSettingsBlock extends AgentBlock {
+  const AgentSettingsBlock({
+    required this.id,
+    required this.changes,
+    this.state = AgentDiffState.applied,
+  });
+
+  /// 撤销 id（同 [AgentActions.onUndoDiff] 的 diffId 命名空间）。
+  final String id;
+  final List<AgentSettingChange> changes;
+  final AgentDiffState state;
+}
+
+@immutable
+class AgentSettingChange {
+  const AgentSettingChange({
+    required this.key,
+    required this.label,
+    required this.before,
+    required this.after,
+    this.anchor,
+  });
+
+  /// 存储键（`font_family`）。
+  final String key;
+
+  /// 显示名（已按界面语言给出；没有现成名字时给存储键）。
+  final String label;
+
+  /// 已格式化的值文字（「开」「关」「深色」「1.1×」「默认」）。
+  final String before, after;
+
+  /// 设置页定位：`section` + 行 anchor；null = 设置页没有这一行（不给「去设置」）。
+  final ({String section, String anchor})? anchor;
+}
+
+/// 查询结果：`tag_query` / `studio_search(tags)` 查到的标签、画师等，
+/// 放在那一行步骤下面（属于过程，会跟着折叠）。见 [AgentStep.tags]。
+@immutable
+class AgentTagHit {
+  const AgentTagHit({
+    required this.tag,
+    this.category = AgentTagCategory.general,
+    this.count,
+    this.translation,
+    this.summary,
+  });
+  final String tag;
+  final AgentTagCategory category;
+
+  /// 作品数（热度）；null = 不知道。
+  final int? count;
+
+  /// 中文名 / 译名。
+  final String? translation;
+
+  /// Wiki 简介（一两句，悬停看）。
+  final String? summary;
+}
+
+enum AgentTagCategory { general, artist, copyright, character, meta, other }
+
+/// 画廊操作：收藏、移动、复制、删除、恢复后出一张。删除走回收区，可撤销。
+final class AgentGalleryBlock extends AgentBlock {
+  const AgentGalleryBlock({
+    required this.id,
+    required this.action,
+    this.images = const [],
+    this.count = 0,
+    this.target,
+    this.state = AgentDiffState.applied,
+    this.undoable = false,
+  });
+
+  /// 撤销 id（同 [AgentActions.onUndoDiff]）。
+  final String id;
+  final AgentGalleryAction action;
+
+  /// 受影响的图（能拿到缩略图的）；可能少于 [count]。
+  final List<AgentImage> images;
+
+  /// 受影响张数。
+  final int count;
+
+  /// 目标文件夹 / 集合名（移动、复制、加入集合）。
+  final String? target;
+  final AgentDiffState state;
+
+  /// 能不能撤销（收藏、取消收藏、移动、删除、恢复、加入 / 移出集合可以；复制、导出不行）。
+  final bool undoable;
+}
+
+enum AgentGalleryAction {
+  favorite,
+  unfavorite,
+  tags,
+  move,
+  copy,
+  delete,
+  restore,
+  collectionAdd,
+  collectionRemove,
+  export,
+}
+
+/// 上下文压缩分隔线：之前的对话被压缩成 [summary]（点开看）。
+final class AgentCompactionBlock extends AgentBlock {
+  const AgentCompactionBlock({
+    required this.summary,
+    this.tokensBefore,
+    this.at,
+    this.auto = false,
+  });
+  final String summary;
+  final int? tokensBefore;
+  final DateTime? at;
+
+  /// 自动压缩（超出上下文阈值）而不是手动点的。
+  final bool auto;
+}
+
 /// 本轮产物（生成的图、工具出的图）。
 final class AgentImagesBlock extends AgentBlock {
   const AgentImagesBlock({
@@ -456,8 +610,12 @@ class AgentStep {
     this.result,
     this.images = const [],
     this.at,
+    this.tags = const [],
   });
   final String id;
+
+  /// 查询类步骤查到的标签（按热度排好、最多 24 个）；界面在步骤行下面排成一排小标签。
+  final List<AgentTagHit> tags;
 
   /// 发起这次调用的助手消息时间戳（≈ 开始时间）；null = 不知道。
   final DateTime? at;
@@ -1022,7 +1180,7 @@ class AgentActions {
     required this.onSteerQueued,
     required this.onWithdrawQueued,
     required this.onRestoreQueued,
-    required this.onEditMessage,
+    required this.onResendFrom,
     required this.onRegenerate,
     required this.onAnswer,
     required this.onCancelAsk,
@@ -1050,6 +1208,7 @@ class AgentActions {
     required this.onSilenceBypass,
     required this.onContinue,
     required this.onAdjustLimit,
+    required this.onOpenSettingAt,
   });
 
   /// 收起侧栏。
@@ -1100,8 +1259,15 @@ class AgentActions {
   /// 把恢复的排队消息放回输入框（输入框非空时转接层返回 false）。
   final Future<bool> Function(String queueId) onRestoreQueued;
 
-  /// 回到这句话重写（文字放回输入框）。
-  final Future<bool> Function(String entryId) onEditMessage;
+  /// 原地编辑历史消息后发送：从这句话重新开始，它之后的对话全部被新回答替换。
+  /// [text] 是改后的文字；[keepImages] 是保留下来的原图（[AgentUserMessage.images] 里的
+  /// [AgentImage.id]，只能删不能加）。底部输入框的草稿不受影响。运行中界面不给编辑。
+  final Future<bool> Function(
+    String entryId,
+    String text,
+    List<String> keepImages,
+  )
+  onResendFrom;
 
   /// 重新回答最后一轮。
   final Future<bool> Function() onRegenerate;
@@ -1170,6 +1336,9 @@ class AgentActions {
 
   /// 步数上限卡的「调整上限」：打开设置并定位到「单次任务最多请求」。
   final VoidCallback onAdjustLimit;
+
+  /// 设置改动卡的「去设置」：打开设置某一页并高亮那一行。
+  final void Function(String section, String anchor) onOpenSettingAt;
 }
 
 enum AgentMemoryTarget { global, workspace, skills, quick }

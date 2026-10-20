@@ -62,6 +62,8 @@ abstract final class AgentGlyphs {
   static const info =
       'M12 8v.01M11 12h1v5h1M12 3.5a8.5 8.5 0 100 17 8.5 8.5 0 000-17z';
   static const alert = 'M12 4l9 16H3zM12 10v4M12 17v.01';
+  static const gear =
+      'M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8';
   static const sliders = 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5v4M10 15v4';
   static const memory =
       'M8 4.5h8A3.5 3.5 0 0119.5 8v8a3.5 3.5 0 01-3.5 3.5H8A3.5 3.5 0 014.5 16V8A3.5 3.5 0 018 4.5zM9 9.5h6M9 12h6M9 14.5h4';

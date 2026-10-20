@@ -123,8 +123,9 @@ extension _GalleryCollections on NaiAgentGalleryBinding {
 
   Future<Map<String, dynamic>> _collections(
     Map<String, dynamic> params,
-    NaiAgentCancellation token,
-  ) async {
+    NaiAgentCancellation token, {
+    Map<String, dynamic>? expectedImageVersions,
+  }) async {
     final action = params['action'] as String;
     final allowed = switch (action) {
       'collections' => {'query', 'collection_id', 'offset', 'limit'},
@@ -358,6 +359,15 @@ extension _GalleryCollections on NaiAgentGalleryBinding {
         action == 'collection_add',
       );
     }
+    final beforeImages = <String, Map<String, dynamic>>{};
+    for (final input in inputs) {
+      final imageId = 'gallery:${input['id']}';
+      beforeImages[imageId] = (await _managed(
+        'library',
+        imageId,
+        token,
+      )).summary;
+    }
     final store = files;
     if (store == null) {
       throw const NaiAgentToolError('workspace_unavailable', 'No workspace');
@@ -396,6 +406,19 @@ extension _GalleryCollections on NaiAgentGalleryBinding {
         'image_conflict',
         'Target images changed during backup',
       );
+    }
+    // UI undo supplies the versions captured by the original write. Recheck
+    // after this operation's asynchronous backup, not only at button press.
+    if (expectedImageVersions != null) {
+      for (final expected in expectedImageVersions.entries) {
+        if ((await _managed('library', expected.key, token)).version !=
+            expected.value) {
+          throw const NaiAgentToolError(
+            'image_conflict',
+            'Image changed during undo backup',
+          );
+        }
+      }
     }
     _admit(token);
     final applied = <String>[];
@@ -477,6 +500,17 @@ extension _GalleryCollections on NaiAgentGalleryBinding {
       return naiAgentTextResult({
         'ok': true,
         'collection_id': resultId,
+        'collection_name': entry?['name'],
+        'image_ids': beforeImages.keys.toList(),
+        'before': beforeImages,
+        'image_versions': {
+          for (final imageId in beforeImages.keys)
+            imageId: (await _managed(
+              'library',
+              imageId,
+              NaiAgentCancellation(),
+            )).version,
+        },
         'applied_fields': applied,
         'backup': backup,
         'files_changed': false,

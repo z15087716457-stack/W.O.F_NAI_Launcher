@@ -19762,6 +19762,139 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_continueMessage => '继续';
 
   @override
+  String get ag_diffExpand => '展开全部';
+
+  @override
+  String get ag_diffCollapse => '收起';
+
+  @override
+  String ag_readImages(int count) {
+    return '查看图片 · $count 张';
+  }
+
+  @override
+  String ag_turnTook(String time) {
+    return '用时 $time';
+  }
+
+  @override
+  String ag_turnAnlas(String anlas) {
+    return '$anlas Anlas';
+  }
+
+  @override
+  String ag_turnChanges(int count) {
+    return '改动 $count 处';
+  }
+
+  @override
+  String ag_turnTools(int count) {
+    return '工具 $count 次';
+  }
+
+  @override
+  String ag_turnTokens(String input, String output) {
+    return '输入 $input · 输出 $output token';
+  }
+
+  @override
+  String get ag_settingsTitle => '应用设置';
+
+  @override
+  String get ag_settingsGo => '去设置';
+
+  @override
+  String ag_tagCopied(String tag) {
+    return '已复制 $tag';
+  }
+
+  @override
+  String ag_tagCount(String count) {
+    return '$count 张作品';
+  }
+
+  @override
+  String ag_galleryFavorite(int count) {
+    return '已收藏 $count 张';
+  }
+
+  @override
+  String ag_galleryUnfavorite(int count) {
+    return '已取消收藏 $count 张';
+  }
+
+  @override
+  String ag_galleryTags(int count) {
+    return '已改标签 $count 张';
+  }
+
+  @override
+  String ag_galleryMove(int count, String target) {
+    return '已移动 $count 张到「$target」';
+  }
+
+  @override
+  String ag_galleryCopy(int count, String target) {
+    return '已复制 $count 张到「$target」';
+  }
+
+  @override
+  String ag_galleryDelete(int count) {
+    return '已移到回收区 $count 张';
+  }
+
+  @override
+  String ag_galleryRestore(int count) {
+    return '已恢复 $count 张';
+  }
+
+  @override
+  String ag_galleryCollectionAdd(int count, String target) {
+    return '已加入集合「$target」$count 张';
+  }
+
+  @override
+  String ag_galleryCollectionRemove(int count, String target) {
+    return '已移出集合「$target」$count 张';
+  }
+
+  @override
+  String ag_galleryExport(int count) {
+    return '已导出 $count 张';
+  }
+
+  @override
+  String ag_galleryMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get ag_compacted => '之前的对话已压缩';
+
+  @override
+  String get ag_compactedAuto => '上下文快满了，之前的对话已自动压缩';
+
+  @override
+  String ag_compactedTokens(String tokens) {
+    return '原 $tokens token';
+  }
+
+  @override
+  String get ag_compactedShow => '看摘要';
+
+  @override
+  String get ag_compactedHide => '收起摘要';
+
+  @override
+  String get ag_editResend => '发送';
+
+  @override
+  String get ag_editHint => '发送后，这条之后的对话会被替换';
+
+  @override
+  String get ag_editRemoveImage => '去掉这张图';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -40513,6 +40646,139 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_continueMessage => '繼續';
+
+  @override
+  String get ag_diffExpand => '展開全部';
+
+  @override
+  String get ag_diffCollapse => '收起';
+
+  @override
+  String ag_readImages(int count) {
+    return '檢視圖片 · $count 張';
+  }
+
+  @override
+  String ag_turnTook(String time) {
+    return '用時 $time';
+  }
+
+  @override
+  String ag_turnAnlas(String anlas) {
+    return '$anlas Anlas';
+  }
+
+  @override
+  String ag_turnChanges(int count) {
+    return '改動 $count 處';
+  }
+
+  @override
+  String ag_turnTools(int count) {
+    return '工具 $count 次';
+  }
+
+  @override
+  String ag_turnTokens(String input, String output) {
+    return '輸入 $input · 輸出 $output token';
+  }
+
+  @override
+  String get ag_settingsTitle => '應用設定';
+
+  @override
+  String get ag_settingsGo => '去設定';
+
+  @override
+  String ag_tagCopied(String tag) {
+    return '已複製 $tag';
+  }
+
+  @override
+  String ag_tagCount(String count) {
+    return '$count 張作品';
+  }
+
+  @override
+  String ag_galleryFavorite(int count) {
+    return '已收藏 $count 張';
+  }
+
+  @override
+  String ag_galleryUnfavorite(int count) {
+    return '已取消收藏 $count 張';
+  }
+
+  @override
+  String ag_galleryTags(int count) {
+    return '已改標籤 $count 張';
+  }
+
+  @override
+  String ag_galleryMove(int count, String target) {
+    return '已移動 $count 張到「$target」';
+  }
+
+  @override
+  String ag_galleryCopy(int count, String target) {
+    return '已複製 $count 張到「$target」';
+  }
+
+  @override
+  String ag_galleryDelete(int count) {
+    return '已移到回收區 $count 張';
+  }
+
+  @override
+  String ag_galleryRestore(int count) {
+    return '已恢復 $count 張';
+  }
+
+  @override
+  String ag_galleryCollectionAdd(int count, String target) {
+    return '已加入集合「$target」$count 張';
+  }
+
+  @override
+  String ag_galleryCollectionRemove(int count, String target) {
+    return '已移出集合「$target」$count 張';
+  }
+
+  @override
+  String ag_galleryExport(int count) {
+    return '已匯出 $count 張';
+  }
+
+  @override
+  String ag_galleryMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get ag_compacted => '之前的對話已壓縮';
+
+  @override
+  String get ag_compactedAuto => '上下文快滿了，之前的對話已自動壓縮';
+
+  @override
+  String ag_compactedTokens(String tokens) {
+    return '原 $tokens token';
+  }
+
+  @override
+  String get ag_compactedShow => '看摘要';
+
+  @override
+  String get ag_compactedHide => '收起摘要';
+
+  @override
+  String get ag_editResend => '傳送';
+
+  @override
+  String get ag_editHint => '傳送後，這條之後的對話會被替換';
+
+  @override
+  String get ag_editRemoveImage => '去掉這張圖';
 
   @override
   String get ag_recent => '最近';

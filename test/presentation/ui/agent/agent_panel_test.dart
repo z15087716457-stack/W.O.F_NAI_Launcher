@@ -980,7 +980,7 @@ void main() {
         onSteerQueued: base.onSteerQueued,
         onWithdrawQueued: base.onWithdrawQueued,
         onRestoreQueued: base.onRestoreQueued,
-        onEditMessage: base.onEditMessage,
+        onResendFrom: base.onResendFrom,
         onRegenerate: base.onRegenerate,
         onAnswer: base.onAnswer,
         onCancelAsk: base.onCancelAsk,
@@ -1008,6 +1008,7 @@ void main() {
         onSilenceBypass: base.onSilenceBypass,
         onContinue: base.onContinue,
         onAdjustLimit: base.onAdjustLimit,
+        onOpenSettingAt: base.onOpenSettingAt,
       );
       await pumpAgent(tester, actions: failing);
       await tester.tap(find.byKey(const Key('agent-new-chat')));

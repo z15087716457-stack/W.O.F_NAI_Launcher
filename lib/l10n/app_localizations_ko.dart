@@ -20068,6 +20068,139 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_continueMessage => '계속해 줘';
 
   @override
+  String get ag_diffExpand => '모두 보기';
+
+  @override
+  String get ag_diffCollapse => '접기';
+
+  @override
+  String ag_readImages(int count) {
+    return '이미지 보기 · $count장';
+  }
+
+  @override
+  String ag_turnTook(String time) {
+    return '소요 $time';
+  }
+
+  @override
+  String ag_turnAnlas(String anlas) {
+    return '$anlas Anlas';
+  }
+
+  @override
+  String ag_turnChanges(int count) {
+    return '변경 $count곳';
+  }
+
+  @override
+  String ag_turnTools(int count) {
+    return '도구 $count회';
+  }
+
+  @override
+  String ag_turnTokens(String input, String output) {
+    return '입력 $input · 출력 $output 토큰';
+  }
+
+  @override
+  String get ag_settingsTitle => '앱 설정';
+
+  @override
+  String get ag_settingsGo => '설정 열기';
+
+  @override
+  String ag_tagCopied(String tag) {
+    return '$tag 복사함';
+  }
+
+  @override
+  String ag_tagCount(String count) {
+    return '작품 $count개';
+  }
+
+  @override
+  String ag_galleryFavorite(int count) {
+    return '$count장을 즐겨찾기에 추가함';
+  }
+
+  @override
+  String ag_galleryUnfavorite(int count) {
+    return '$count장의 즐겨찾기를 해제함';
+  }
+
+  @override
+  String ag_galleryTags(int count) {
+    return '$count장의 태그를 바꿈';
+  }
+
+  @override
+  String ag_galleryMove(int count, String target) {
+    return '$count장을 \'$target\'(으)로 옮김';
+  }
+
+  @override
+  String ag_galleryCopy(int count, String target) {
+    return '$count장을 \'$target\'(으)로 복사함';
+  }
+
+  @override
+  String ag_galleryDelete(int count) {
+    return '$count장을 휴지통으로 옮김';
+  }
+
+  @override
+  String ag_galleryRestore(int count) {
+    return '$count장을 복원함';
+  }
+
+  @override
+  String ag_galleryCollectionAdd(int count, String target) {
+    return '$count장을 컬렉션 \'$target\'에 추가함';
+  }
+
+  @override
+  String ag_galleryCollectionRemove(int count, String target) {
+    return '$count장을 컬렉션 \'$target\'에서 뺌';
+  }
+
+  @override
+  String ag_galleryExport(int count) {
+    return '$count장을 내보냄';
+  }
+
+  @override
+  String ag_galleryMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get ag_compacted => '이전 대화를 압축했어요';
+
+  @override
+  String get ag_compactedAuto => '컨텍스트가 거의 가득 차서 이전 대화를 자동으로 압축했어요';
+
+  @override
+  String ag_compactedTokens(String tokens) {
+    return '원래 $tokens 토큰';
+  }
+
+  @override
+  String get ag_compactedShow => '요약 보기';
+
+  @override
+  String get ag_compactedHide => '요약 접기';
+
+  @override
+  String get ag_editResend => '보내기';
+
+  @override
+  String get ag_editHint => '보내면 이 메시지 이후의 대화가 바뀝니다';
+
+  @override
+  String get ag_editRemoveImage => '이미지 빼기';
+
+  @override
   String get ag_recent => '최근';
 
   @override

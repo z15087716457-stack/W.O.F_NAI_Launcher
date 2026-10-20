@@ -20,6 +20,11 @@ import '../../../data/services/nai_agent/agent_workspace_store.dart' as store;
 class AgentResources {
   AgentResources(this.changed);
   final void Function() changed;
+
+  /// Injected native gallery loader, not a model/image_read invocation.
+  Future<Uint8List?> Function(String id)? galleryLoader;
+  final _gallery = <String, MemoryImage?>{};
+  Future<void> _galleryTail = Future.value();
   final _images = <String, MemoryImage?>{};
   final _snapshots = <String, Map<String, dynamic>?>{};
   final _rules = <String, String>{};
@@ -89,6 +94,35 @@ class AgentResources {
     return _images[key];
   }
 
+  MemoryImage? gallery(String id) {
+    if (!RegExp(r'^gallery:[1-9]\d*$').hasMatch(id) || galleryLoader == null) {
+      return null;
+    }
+    if (!_gallery.containsKey(id)) {
+      // A conversation can reference arbitrarily many images. Keep at most 64
+      // small previews (including failed lookups) and avoid streaming reloads.
+      if (_gallery.length >= 64) return null;
+      _gallery[id] = null;
+      final loader = galleryLoader!;
+      _load('gallery/$id', () {
+        final task = _galleryTail.then((_) async {
+          if (_disposed) return;
+          final bytes = await loader(id);
+          if (bytes == null || bytes.length > 64 * 1024 * 1024) return;
+          final size = NaiResolutionAdapter.readImageSize(bytes);
+          if (size == null || size.$1 * size.$2 > agentAttachmentMaxPixels) {
+            return;
+          }
+          final preview = await _galleryVisual(bytes);
+          if (preview != null) _gallery[id] = MemoryImage(preview);
+        });
+        _galleryTail = task.catchError((Object _) {});
+        return task;
+      });
+    }
+    return _gallery[id];
+  }
+
   Map<String, dynamic>? snapshot(store.AgentWorkspace workspace, String path) {
     final key = '${workspace.directory.path}/backup/$path';
     if (!_snapshots.containsKey(key)) {
@@ -133,6 +167,21 @@ class AgentResources {
 
   /// Refresh on returning from settings (instructions.md may have been edited).
   void refreshRules() => _rules.clear();
+
+  // Static boundary keeps the resource cache and its pending Futures out of
+  // the isolate closure's captured context.
+  static Future<Uint8List?> _galleryVisual(Uint8List bytes) => Isolate.run(() {
+    final decoded = img.decodeImage(bytes, frame: 0);
+    if (decoded == null) return null;
+    final small = decoded.width <= 320 && decoded.height <= 320
+        ? decoded
+        : img.copyResize(
+            decoded,
+            width: decoded.width >= decoded.height ? 320 : null,
+            height: decoded.height > decoded.width ? 320 : null,
+          );
+    return Uint8List.fromList(img.encodePng(small));
+  });
 
   static Future<MemoryImage> visual(Uint8List bytes) async {
     final size = NaiResolutionAdapter.readImageSize(bytes);

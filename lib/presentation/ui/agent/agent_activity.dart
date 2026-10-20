@@ -395,11 +395,58 @@ class _Slide extends GradientTransform {
       Matrix4.translationValues(bounds.width * percent, 0, 0);
 }
 
-/// 新出现的行：0.12 秒淡入并轻轻上移；[enabled] = false 或关掉动画时直接出现。
+/// 对话流里「哪些已经出现过」：打开 / 切换聊天的第一帧 [armed] = false，
+/// 那时建出来的内容直接显示并记为已出现；之后新出现的才做进场动画。
+class AgentAppearScope extends InheritedWidget {
+  const AgentAppearScope({
+    super.key,
+    required this.armed,
+    required super.child,
+  });
+  final bool armed;
+
+  static bool of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AgentAppearScope>()?.armed ??
+      true;
+
+  @override
+  bool updateShouldNotify(AgentAppearScope old) => old.armed != armed;
+}
+
+/// 新出现的内容：约 0.26 秒淡入、轻轻上浮，高度从 0 展开（下面的内容顺着让位）。
+/// 按 [id] 记住出现过的，重建、滚回来、切回聊天都不再动；[enabled] = false
+/// 或关掉动画时直接出现。
 class AgentAppear extends StatefulWidget {
-  const AgentAppear({super.key, required this.child, this.enabled = true});
+  const AgentAppear({
+    super.key,
+    required this.id,
+    required this.child,
+    this.enabled = true,
+    this.grow = true,
+  });
+  final String id;
   final Widget child;
   final bool enabled;
+
+  /// 高度一起展开；行内小件（步骤行）只淡入上浮。
+  final bool grow;
+
+  static const duration = Duration(milliseconds: 260);
+  static final _seen = <String>{};
+
+  /// 测试用：清掉记录。
+  @visibleForTesting
+  static void reset() => _seen.clear();
+
+  static bool _remember(String id) {
+    if (_seen.contains(id)) return false;
+    if (_seen.length > 6000) {
+      final drop = _seen.take(2000).toList();
+      _seen.removeAll(drop);
+    }
+    _seen.add(id);
+    return true;
+  }
 
   @override
   State<AgentAppear> createState() => _AgentAppearState();
@@ -409,9 +456,10 @@ class _AgentAppearState extends State<AgentAppear>
     with SingleTickerProviderStateMixin {
   late final _c = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 120),
+    duration: AgentAppear.duration,
     value: 1,
   );
+  late final _curve = CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
   var _started = false;
 
   @override
@@ -419,29 +467,52 @@ class _AgentAppearState extends State<AgentAppear>
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
-    if (widget.enabled && !MediaQuery.disableAnimationsOf(context)) {
+    final fresh = AgentAppear._remember(widget.id);
+    if (fresh &&
+        widget.enabled &&
+        AgentAppearScope.of(context) &&
+        !MediaQuery.disableAnimationsOf(context)) {
       _c.forward(from: 0);
     }
   }
 
   @override
   void dispose() {
+    _curve.dispose();
     _c.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) => AnimatedBuilder(
-    animation: _c,
-    child: widget.child,
-    builder: (_, child) => Opacity(
-      opacity: _c.value,
-      child: Transform.translate(
-        offset: Offset(0, 4 * (1 - _c.value)),
-        child: child,
-      ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    Widget child = AnimatedBuilder(
+      animation: _curve,
+      child: widget.child,
+      builder: (_, child) => _c.value == 1
+          ? child!
+          : Opacity(
+              opacity: _curve.value,
+              child: Transform.translate(
+                offset: Offset(0, 6 * (1 - _curve.value)),
+                child: child,
+              ),
+            ),
+    );
+    if (widget.grow) {
+      // SizeTransition 会放松宽度约束：按外面给的宽度撑满，免得窄内容缩到中间。
+      final inner = child;
+      child = LayoutBuilder(
+        builder: (_, box) => SizeTransition(
+          sizeFactor: _curve,
+          alignment: AlignmentDirectional.topStart,
+          child: box.hasBoundedWidth
+              ? SizedBox(width: box.maxWidth, child: inner)
+              : inner,
+        ),
+      );
+    }
+    return child;
+  }
 }
 
 /// 工作中提示行：呼吸的四角星 + 轮换小标语（按正在做的事换一组，偶尔冒彩蛋）

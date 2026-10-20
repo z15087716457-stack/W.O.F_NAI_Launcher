@@ -476,8 +476,9 @@ void main() {
         {'role': 'user', 'timestamp': 1, 'content': 'user'},
         {'role': 'assistant', 'content': 'reply'},
       ];
-      r.userEntries = [
-        {'id': 'e1', 'message': r.messages.first},
+      // Real host shape: flat current-branch entries.
+      r.entries = [
+        {'id': 'e1', 'parentId': null, 'role': 'user', 'timestamp': 1},
       ];
       r.composer = const AgentComposerState(
         text: 'follow-up',
@@ -500,7 +501,7 @@ void main() {
       await a.onRegenerate();
       expect(
         h.c.calls,
-        containsAllInOrder(['steer', 'stop', 'edit:e1', 'send']),
+        containsAllInOrder(['steer', 'stop', 'resend:e1']),
       );
       final original = r.chat.id;
       await tester.runAsync(() => a.onNewChat());

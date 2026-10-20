@@ -932,6 +932,97 @@ void main() {
   );
 
   test(
+    'card undo favorite/tags restores exact state and rejects newer image edits',
+    () async {
+      final args = {
+        'action': 'update',
+        'changes': {
+          'favorite': true,
+          'tags': ['new'],
+        },
+      };
+      final updated = await change(
+        'update',
+        changes: {
+          'favorite': true,
+          'tags': ['new'],
+        },
+      );
+      expect(updated['before'], isA<Map>());
+      expect(updated['image_version'], (await read())['image_version']);
+      expect(await binding.undoManage(args, updated), true);
+      expect((await read())['favorite'], false);
+      expect((await read())['tags'], isNot(contains('new')));
+      final again = await change('update', changes: {'favorite': true});
+      await source.setImageTags(id, ['user edit']);
+      expect(
+        await binding.undoManage({
+          'action': 'update',
+          'changes': {'favorite': true},
+        }, again),
+        false,
+      );
+      expect((await read())['favorite'], true);
+    },
+  );
+
+  test('card undo delete restores native index and pool', () async {
+    final deleted = await change('delete');
+    expect(await binding.undoManage({'action': 'delete'}, deleted), true);
+    expect((await read())['deleted'], false);
+    expect(await pool.load(), isNot(contains(image.path)));
+    expect(await image.exists(), true);
+  });
+
+  test(
+    'card undo move returns to original folder and refuses newer edits',
+    () async {
+      final target = await Directory(p.join(root.path, 'undo-target')).create();
+      final moved = await transfer('move_file', target.path);
+      expect(await binding.undoManage({'action': 'move_file'}, moved), true);
+      expect((await read())['file_path'], await image.resolveSymbolicLinks());
+      expect(await image.exists(), true);
+      final again = await transfer('move_file', target.path);
+      await source.setImageTags(id, ['newer']);
+      expect(await binding.undoManage({'action': 'move_file'}, again), false);
+      expect((await read())['file_path'], again['file_path']);
+    },
+  );
+
+  test(
+    'card undo unfavorite restores removed memberships; collection add reverses favorite side effect',
+    () async {
+      final collection = (await organize('collection_create', {
+        'changes': {'name': 'undo'},
+      }))['collection_id'];
+      await organize('collection_add', {
+        'collection_id': collection,
+        'image_ids': ['gallery:$id'],
+      });
+      final unfavorite = await change('update', changes: {'favorite': false});
+      expect(
+        await binding.undoManage({
+          'action': 'update',
+          'changes': {'favorite': false},
+        }, unfavorite),
+        true,
+      );
+      expect((await read())['collection_ids'], contains(collection));
+      await change('update', changes: {'favorite': false});
+      final added = await organize('collection_add', {
+        'collection_id': collection,
+        'image_ids': ['gallery:$id'],
+      });
+      expect(
+        await binding.undoManage({'action': 'collection_add'}, added),
+        true,
+      );
+      expect((await read())['collection_ids'], isNot(contains(collection)));
+      expect((await read())['favorite'], false);
+    },
+  );
+
+  test(
     'read and update use native tags/favorites/membership with exact original backup',
     () async {
       final collection = await source.createCollection(

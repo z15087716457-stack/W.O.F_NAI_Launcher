@@ -52,11 +52,12 @@ void main() {
   test(
     'turns retain user entry, text, consecutive steps, live and regeneration',
     () async {
+      runtime.entries = [
+        {'id': 'entry', 'parentId': null, 'role': 'user', 'timestamp': 123},
+      ];
       runtime.userEntries = [
-        {
-          'id': 'entry',
-          'message': {'role': 'user', 'timestamp': 123},
-        },
+        {'entryId': 'other-branch', 'text': 'another question'},
+        {'entryId': 'entry', 'text': 'hello'},
       ];
       runtime.messages = [
         {
@@ -109,6 +110,74 @@ void main() {
       expect(mapped.turns.single.reply!.canRegenerate, true);
     },
   );
+
+  test('current branch wins over nested legacy fork snapshots', () {
+    runtime.messages = [
+      {'role': 'user', 'timestamp': 1, 'content': 'hi'},
+    ];
+    runtime.entries = [
+      {'id': 'current', 'parentId': null, 'role': 'user', 'timestamp': 1},
+    ];
+    runtime.userEntries = [
+      {'id': 'legacy', 'message': runtime.messages.single},
+    ];
+    expect(mapper.map(runtime).turns.single.user.entryId, 'current');
+    expect(mapper.map(runtime).turns.single.reply!.canRegenerate, true);
+    runtime.pendingSends = 1;
+    expect(mapper.map(runtime).turns.single.reply!.canRegenerate, false);
+    runtime.entries = [];
+    expect(mapper.map(runtime).turns.single.user.entryId, 'legacy');
+    runtime.userEntries = [
+      {'entryId': 'menu-only', 'text': 'hi'},
+    ];
+    expect(mapper.map(runtime).turns.single.user.entryId, isNull);
+    runtime.messages = [
+      {'role': 'user', 'content': 'no timestamp'},
+    ];
+    expect(mapper.map(runtime).turns.single.user.entryId, isNull);
+  });
+
+  test('image id resolver uses exact entry and content part positions', () {
+    runtime.entries = [
+      {'id': 'a', 'parentId': null, 'role': 'user', 'timestamp': 1},
+      {'id': 'b', 'parentId': 'a', 'role': 'user', 'timestamp': 2},
+    ];
+    runtime.messages = [
+      {
+        'role': 'user',
+        'timestamp': 1,
+        'content': [
+          {'type': 'text', 'text': 'hi'},
+          {'type': 'image', 'data': base64Encode(png)},
+          {'type': 'text', 'text': 'middle'},
+          {'type': 'image', 'data': base64Encode(png)},
+        ],
+      },
+      {
+        'role': 'user',
+        'timestamp': 2,
+        'content': [
+          {'type': 'image', 'data': base64Encode(png)},
+        ],
+      },
+    ];
+    final prefix = '${runtime.chat.id}/turn/0/user/';
+    expect(agentUserImagePartIndexes(runtime, 'a', ['${prefix}3']), [3]);
+    expect(
+      agentUserImagePartIndexes(runtime, 'a', ['${prefix}3', '${prefix}1']),
+      [1, 3],
+    );
+    expect(agentUserImagePartIndexes(runtime, 'a', []), isEmpty);
+    for (final keep in [
+      ['${prefix}0'],
+      ['${prefix}9'],
+      ['${prefix}1', '${prefix}1'],
+      ['${runtime.chat.id}/turn/1/user/0'],
+    ]) {
+      expect(agentUserImagePartIndexes(runtime, 'a', keep), isNull);
+    }
+    expect(agentUserImagePartIndexes(runtime, 'missing', []), isNull);
+  });
 
   test('assistant timestamps propagate to text, thinking and nested steps', () {
     const timestamp = 1792456789123;

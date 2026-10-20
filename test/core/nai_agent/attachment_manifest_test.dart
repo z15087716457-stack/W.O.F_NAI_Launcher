@@ -28,6 +28,27 @@ void main() {
     );
   });
 
+  test('complete rows round trip and subsets preserve metadata', () {
+    final rows = [
+      {'name': 'a.png', 'path': 'attachments/a.png', 'width': 12},
+      {
+        'name': 'b.png',
+        'path': 'attachments/b.png',
+        'nai_metadata': {'seed': 123},
+      },
+    ];
+    final raw = 'question${agentAttachmentManifest(rows, vision: true)}';
+    expect(agentAttachmentManifestRows(raw), rows);
+    final subset =
+        'edited${agentAttachmentManifest([agentAttachmentManifestRows(raw).last], vision: false)}';
+    expect(stripAgentAttachmentManifest(subset), 'edited');
+    expect(agentAttachmentManifestRows(subset), [rows.last]);
+    expect(agentAttachmentManifestPaths(subset), ['attachments/b.png']);
+    expect(subset, endsWith('Visual pixels sent to model: false.'));
+    expect(agentAttachmentManifest([], vision: true), '');
+    expect(agentAttachmentManifestRows('invalid manifest'), isEmpty);
+  });
+
   test('malformed, quoted or nonterminal manifests stay untouched', () {
     for (final raw in [
       'ordinary text',

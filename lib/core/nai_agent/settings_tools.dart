@@ -84,6 +84,7 @@ class NaiAgentSettingsTools {
       );
       return naiAgentTextResult({
         'applied_fields': changes.keys.toList(),
+        'before': before,
         'backup_path': backup.path,
         'values': service.capture(),
         'version': naiAgentPreferencesVersion(service.capture()),

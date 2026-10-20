@@ -282,6 +282,13 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
         'source_image_id': image.id,
         'source_path': sourcePath,
         'file_path': destination,
+        'image_version': copy
+            ? null
+            : (await _managed(
+                'library',
+                image.id,
+                NaiAgentCancellation(),
+              )).version,
         'source_retained': copy,
         'indexing': targetId == null,
         'backup': backup,

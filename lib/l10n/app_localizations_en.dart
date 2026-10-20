@@ -20628,6 +20628,212 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_continueMessage => 'Continue';
 
   @override
+  String get ag_diffExpand => 'Show all';
+
+  @override
+  String get ag_diffCollapse => 'Collapse';
+
+  @override
+  String ag_readImages(int count) {
+    return 'Viewed images · $count';
+  }
+
+  @override
+  String ag_turnTook(String time) {
+    return 'Took $time';
+  }
+
+  @override
+  String ag_turnAnlas(String anlas) {
+    return '$anlas Anlas';
+  }
+
+  @override
+  String ag_turnChanges(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes',
+      one: '1 change',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_turnTools(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tool calls',
+      one: '1 tool call',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_turnTokens(String input, String output) {
+    return '$input in · $output out tokens';
+  }
+
+  @override
+  String get ag_settingsTitle => 'App settings';
+
+  @override
+  String get ag_settingsGo => 'Open settings';
+
+  @override
+  String ag_tagCopied(String tag) {
+    return 'Copied $tag';
+  }
+
+  @override
+  String ag_tagCount(String count) {
+    return '$count posts';
+  }
+
+  @override
+  String ag_galleryFavorite(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Favorited $count images',
+      one: 'Favorited 1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryUnfavorite(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Unfavorited $count images',
+      one: 'Unfavorited 1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryTags(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Retagged $count images',
+      one: 'Retagged 1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryMove(int count, String target) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Moved $count images to “$target”',
+      one: 'Moved 1 image to “$target”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryCopy(int count, String target) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Copied $count images to “$target”',
+      one: 'Copied 1 image to “$target”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryDelete(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Moved $count images to trash',
+      one: 'Moved 1 image to trash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryRestore(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Restored $count images',
+      one: 'Restored 1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryCollectionAdd(int count, String target) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Added $count images to “$target”',
+      one: 'Added 1 image to “$target”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryCollectionRemove(int count, String target) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Removed $count images from “$target”',
+      one: 'Removed 1 image from “$target”',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryExport(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Exported $count images',
+      one: 'Exported 1 image',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String ag_galleryMore(int count) {
+    return '+$count';
+  }
+
+  @override
+  String get ag_compacted => 'Earlier conversation compacted';
+
+  @override
+  String get ag_compactedAuto =>
+      'Context was nearly full; earlier conversation compacted automatically';
+
+  @override
+  String ag_compactedTokens(String tokens) {
+    return 'was $tokens tokens';
+  }
+
+  @override
+  String get ag_compactedShow => 'Show summary';
+
+  @override
+  String get ag_compactedHide => 'Hide summary';
+
+  @override
+  String get ag_editResend => 'Send';
+
+  @override
+  String get ag_editHint => 'Sending replaces everything after this message';
+
+  @override
+  String get ag_editRemoveImage => 'Remove image';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override

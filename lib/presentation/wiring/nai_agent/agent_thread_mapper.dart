@@ -8,6 +8,9 @@ import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../ui/agent/agent_contract.dart';
 import 'agent_param_diff.dart';
 import 'agent_resources.dart';
+import 'agent_settings_card.dart';
+import 'agent_gallery_card.dart';
+import 'agent_tag_hits.dart';
 
 Map<String, dynamic> agentMap(Object? value) =>
     value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
@@ -157,6 +160,8 @@ class AgentThreadMapping {
     this.files,
     this.diffs, {
     this.estimatedAnlas,
+    this.settings = const {},
+    this.gallery = const {},
   });
   final List<AgentTurn> turns;
   final AgentShelfData shelf;
@@ -164,6 +169,32 @@ class AgentThreadMapping {
   final Map<String, String> files;
   final Map<String, AgentDiffRestore> diffs;
   final int? estimatedAnlas;
+  final Map<String, AgentSettingsRestore> settings;
+  final Map<String, AgentGalleryRestore> gallery;
+}
+
+/// Resolve UI image ids against this entry's exact content-part positions.
+/// No string parsing: foreign-entry ids, stale ids and duplicates are rejected.
+List<int>? agentUserImagePartIndexes(
+  AgentChatRuntime runtime,
+  String entryId,
+  List<String> keepImages,
+) {
+  final message = runtime.userMessageForEntry(entryId);
+  if (message == null || keepImages.toSet().length != keepImages.length) {
+    return null;
+  }
+  final mi = runtime.messages.indexOf(message);
+  final ids = <String, int>{
+    for (final (pi, part) in agentMaps(message['content']).indexed)
+      if (part['type'] == 'image') '${runtime.chat.id}/turn/$mi/user/$pi': pi,
+  };
+  if (keepImages.any((id) => !ids.containsKey(id))) return null;
+  final keep = keepImages.toSet();
+  return [
+    for (final e in ids.entries)
+      if (keep.contains(e.key)) e.value,
+  ];
 }
 
 class AgentThreadMapper {
@@ -175,16 +206,22 @@ class AgentThreadMapper {
     AgentChatRuntime runtime, {
     String? draftVersion,
     bool waitingUser = false,
+    Map<String, Object?>? preferences,
   }) {
     final turns = <AgentTurn>[];
     final images = <String, AgentImage>{};
     final files = <String, String>{};
     final diffs = <String, AgentDiffRestore>{};
+    final settings = <String, AgentSettingsRestore>{};
+    final gallery = <String, AgentGalleryRestore>{};
     final shelfFiles = <AgentFile>[];
     AgentUserMessage? user;
     String turnId = '';
     var blocks = <AgentBlock>[];
     var steps = <AgentStep>[];
+    final leadingCompactions = <AgentCompactionBlock>[];
+    int? userTimestamp, assistantTimestamp, inputTokens, outputTokens;
+    var toolCalls = 0;
     final results = {
       for (final m in runtime.messages)
         if (m['role'] == 'toolResult') m['toolCallId']: m,
@@ -222,19 +259,60 @@ class AgentThreadMapper {
       steps = [];
     }
 
-    void flushTurn() {
+    void flushTurn({bool last = false}) {
       flushSteps();
       if (user == null && blocks.isEmpty) return;
+      if (leadingCompactions.isNotEmpty) {
+        blocks.insertAll(0, leadingCompactions);
+        leadingCompactions.clear();
+      }
+      final took =
+          userTimestamp != null &&
+              assistantTimestamp != null &&
+              assistantTimestamp! > userTimestamp!
+          ? Duration(milliseconds: assistantTimestamp! - userTimestamp!)
+          : null;
+      final anlas = blocks.whereType<AgentImagesBlock>().fold<int>(
+        0,
+        (n, b) => n + (b.anlasSpent ?? 0),
+      );
+      final changes = blocks
+          .where(
+            (b) =>
+                b is AgentDiffBlock ||
+                b is AgentParamBlock ||
+                b is AgentPositionBlock ||
+                b is AgentSettingsBlock ||
+                b is AgentGalleryBlock,
+          )
+          .length;
+      final summary =
+          !(last && (runtime.running || runtime.starting)) &&
+              (took != null || anlas > 0 || changes > 0)
+          ? AgentTurnSummary(
+              took: took,
+              anlas: anlas > 0 ? anlas : null,
+              changes: changes,
+              inputTokens: inputTokens,
+              outputTokens: outputTokens,
+              toolCalls: toolCalls,
+            )
+          : null;
       turns.add(
         AgentTurn(
           id: turnId,
           user:
               user ??
               AgentUserMessage(text: '', at: runtime.chat.createdAt.toLocal()),
-          reply: blocks.isEmpty ? null : AgentReply(blocks: List.of(blocks)),
+          reply: blocks.isEmpty
+              ? null
+              : AgentReply(blocks: List.of(blocks), summary: summary),
         ),
       );
       blocks = [];
+      user = null;
+      userTimestamp = assistantTimestamp = inputTokens = outputTokens = null;
+      toolCalls = 0;
     }
 
     void file(String path, {int? bytes}) {
@@ -249,16 +327,30 @@ class AgentThreadMapper {
 
     for (var mi = 0; mi < runtime.messages.length; mi++) {
       final message = runtime.messages[mi];
-      if (message['role'] == 'user') {
+      if (message['role'] == 'compactionSummary') {
+        flushSteps();
+        final divider = AgentCompactionBlock(
+          summary: message['summary'] as String? ?? '',
+          tokensBefore: agentInt(message['tokensBefore']),
+          at: message['timestamp'] is num
+              ? DateTime.fromMillisecondsSinceEpoch(
+                  agentInt(message['timestamp'])!,
+                ).toLocal()
+              : null,
+          auto: runtime.autoCompactions.contains(
+            AgentChatRuntime.compactionKey(message),
+          ),
+        );
+        if (user != null || blocks.isNotEmpty) {
+          blocks.add(divider);
+        } else {
+          leadingCompactions.add(divider);
+        }
+      } else if (message['role'] == 'user') {
         flushTurn();
+        userTimestamp = agentInt(message['timestamp']);
         turnId = '${runtime.chat.id}/turn/$mi';
-        final entry = [...runtime.userEntries, ...runtime.entries]
-            .where(
-              (e) =>
-                  agentMap(e['message'])['role'] == 'user' &&
-                  agentMap(e['message'])['timestamp'] == message['timestamp'],
-            )
-            .firstOrNull;
+        final entryId = runtime.userEntryId(message);
         final attachmentPaths = _attachmentPaths(message);
         var attachmentIndex = 0;
         user = AgentUserMessage(
@@ -268,7 +360,7 @@ class AgentThreadMapper {
                   (message['timestamp'] as num).toInt(),
                 ).toLocal()
               : runtime.chat.createdAt.toLocal(),
-          entryId: entry?['id'] as String?,
+          entryId: entryId,
           images: [
             for (final (pi, part) in agentMaps(message['content']).indexed)
               if (part['type'] == 'image')
@@ -283,6 +375,18 @@ class AgentThreadMapper {
           ],
         );
       } else if (message['role'] == 'assistant') {
+        assistantTimestamp = agentInt(message['timestamp']);
+        final usage = agentMap(message['usage']);
+        inputTokens =
+            usage.values.any((v) => v is num) &&
+                ['input', 'cacheRead', 'cacheWrite'].any((k) => usage[k] is num)
+            ? (agentInt(usage['input']) ?? 0) +
+                  (agentInt(usage['cacheRead']) ?? 0) +
+                  (agentInt(usage['cacheWrite']) ?? 0)
+            : null;
+        if (usage['output'] is num) {
+          outputTokens = (outputTokens ?? 0) + agentInt(usage['output'])!;
+        }
         if (turnId.isEmpty) turnId = '${runtime.chat.id}/turn/$mi';
         final at = message['timestamp'] is num
             ? DateTime.fromMillisecondsSinceEpoch(
@@ -322,6 +426,7 @@ class AgentThreadMapper {
             );
             if (image != null) blocks.add(AgentImagesBlock(images: [image]));
           } else if (part['type'] == 'toolCall') {
+            toolCalls++;
             final id = part['id'] as String? ?? '$mi/$pi';
             final event = runtime.tools[id] ?? {};
             final value = agentMap(
@@ -401,6 +506,9 @@ class AgentThreadMapper {
                   arguments: agentPretty(args),
                   result: agentPretty(value.isEmpty ? null : value),
                   images: resultImages,
+                  tags: done && !failed
+                      ? agentTagHits(tool, details)
+                      : const [],
                 ),
               );
             }
@@ -422,10 +530,42 @@ class AgentThreadMapper {
                   ),
                   result: agentPretty(call['result'] ?? call['error']),
                   images: nestedImages(ni),
+                  tags: call['status'] == 'ok'
+                      ? agentTagHits(
+                          agentToolName(call['name'] as String? ?? ''),
+                          agentResultDetails(
+                            agentMap(
+                              call['result'] ??
+                                  runtime.tools[call['id']]?['result'],
+                            ),
+                          ),
+                        )
+                      : const [],
                 ),
               );
             }
+            // Pi's persisted nested log intentionally has no results. Live
+            // nested tool events still carry them; prefer persisted projections
+            // when available and use events only for the missing calls.
             final projections = agentMaps(details['studio_results']);
+            for (final call in nested) {
+              final child = runtime.tools[call['id']];
+              if (child == null ||
+                  child['type'] != 'tool_execution_end' ||
+                  child['isError'] == true ||
+                  projections.any((p) => p['tool_call_id'] == call['id'])) {
+                continue;
+              }
+              final childDetails = agentResultDetails(
+                agentMap(child['result']),
+              );
+              projections.add({
+                ...childDetails,
+                'tool': call['name'],
+                'arguments': call['arguments'],
+                'tool_call_id': call['id'],
+              });
+            }
             for (final (projectionIndex, projection) in [
               if (tool == 'prompt_update') details,
               ...projections.where(
@@ -529,6 +669,109 @@ class AgentThreadMapper {
                 if (position != null) blocks.add(position);
               }
             }
+            if (done) {
+              for (final (index, projection) in [
+                {'tool': tool, 'arguments': args, ...details},
+                ...projections,
+              ].indexed) {
+                if ((index == 0 && failed) || projection['ok'] == false) {
+                  continue;
+                }
+                final name = agentToolName(projection['tool'] as String? ?? '');
+                final cardId =
+                    '${runtime.chat.id}/$id/card/${projection['tool_call_id'] ?? index}';
+                if (name == 'settings_update' &&
+                    projection['applied_fields'] is List &&
+                    projection['before'] is Map &&
+                    projection['values'] is Map &&
+                    projection['version'] is String) {
+                  final restore = AgentSettingsRestore(
+                    '$cardId/settings',
+                    projection['version'] as String,
+                    agentMap(projection['before']),
+                    agentMap(projection['values']),
+                    (projection['applied_fields'] as List)
+                        .whereType<String>()
+                        .toSet()
+                        .toList(),
+                  );
+                  final changes = restore.changes;
+                  if (changes.isEmpty) continue;
+                  settings[restore.id] = restore;
+                  flushSteps();
+                  blocks.add(
+                    AgentSettingsBlock(
+                      id: restore.id,
+                      changes: changes,
+                      state: undone.contains(restore.id)
+                          ? AgentDiffState.undone
+                          : preferences != null && restore.matches(preferences)
+                          ? AgentDiffState.applied
+                          : AgentDiffState.locked,
+                    ),
+                  );
+                } else if (name == 'gallery_manage' &&
+                    projection['ok'] == true) {
+                  final restore = AgentGalleryRestore(
+                    '$cardId/gallery',
+                    index == 0
+                        ? args
+                        : agentMap(
+                            projection['arguments'] ??
+                                nested
+                                    .where(
+                                      (c) =>
+                                          c['id'] == projection['tool_call_id'],
+                                    )
+                                    .firstOrNull?['arguments'],
+                          ),
+                    projection,
+                  );
+                  if (restore.action == null) continue;
+                  gallery[restore.id] = restore;
+                  final previews = <AgentImage>[];
+                  for (final imageId in restore.imageIds.take(8)) {
+                    var provider = resources.gallery(imageId);
+                    // Deleted entries intentionally disappear from the active
+                    // native loader. Reuse the already-created guarded backup
+                    // (not another preview export) for delete/history cards.
+                    final backup = agentMap(projection['backup']);
+                    if (provider == null &&
+                        backup['file_missing'] != true &&
+                        backup['path'] is String &&
+                        restore.imageIds.length == 1) {
+                      provider = resources.image(
+                        runtime.workspace,
+                        backup['path'] as String,
+                      );
+                    }
+                    if (provider == null) continue;
+                    final image = AgentImage(
+                      id: '${restore.id}/$imageId',
+                      image: provider,
+                      label: imageId,
+                      source: AgentImageSource.tool,
+                    );
+                    images[image.id] = image;
+                    previews.add(image);
+                  }
+                  flushSteps();
+                  blocks.add(
+                    AgentGalleryBlock(
+                      id: restore.id,
+                      action: restore.action!,
+                      images: previews,
+                      count: restore.imageIds.length,
+                      target: restore.target,
+                      undoable: restore.undoable,
+                      state: undone.contains(restore.id)
+                          ? AgentDiffState.undone
+                          : AgentDiffState.applied,
+                    ),
+                  );
+                }
+              }
+            }
             final artifacts = agentMaps(details['artifacts']);
             final outputImages = <AgentImage>[];
             final projectedImages = [
@@ -618,7 +861,7 @@ class AgentThreadMapper {
         }
       }
     }
-    flushTurn();
+    flushTurn(last: true);
     if (turns.isNotEmpty) {
       final last = turns.removeLast();
       turns.add(
@@ -627,10 +870,12 @@ class AgentThreadMapper {
           user: last.user,
           reply: AgentReply(
             blocks: last.reply?.blocks ?? const [],
+            summary: last.reply?.summary,
             live: runtime.running,
             canRegenerate:
                 !runtime.running &&
                 !runtime.starting &&
+                runtime.pendingSends == 0 &&
                 last.user.entryId != null,
           ),
         ),
@@ -655,6 +900,8 @@ class AgentThreadMapper {
       files,
       diffs,
       estimatedAnlas: _estimatedAnlas(turns),
+      settings: settings,
+      gallery: gallery,
     );
   }
 }
@@ -680,6 +927,8 @@ List<String> _attachmentPaths(Map<String, dynamic> message) =>
 List<AgentImage> _turnImages(AgentTurn turn) => [
   for (final block in turn.reply?.blocks ?? <AgentBlock>[])
     if (block is AgentImagesBlock)
+      ...block.images
+    else if (block is AgentGalleryBlock)
       ...block.images
     else if (block is AgentStepsBlock)
       for (final step in block.steps) ...step.images,

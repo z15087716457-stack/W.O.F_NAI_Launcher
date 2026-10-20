@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -36,6 +37,15 @@ class _AgentThreadState extends State<AgentThread> {
   var _jumpQueued = false;
   int? _revision;
   String? _chat;
+
+  /// 打开 / 换聊天后的第一帧不做进场动画（已有内容直接显示），之后新内容才动。
+  var _armed = false;
+
+  void _arm() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_armed) setState(() => _armed = true);
+    });
+  }
 
   bool get _atBottom =>
       !_scroll.hasClients ||
@@ -113,8 +123,10 @@ class _AgentThreadState extends State<AgentThread> {
       // 换了聊天：从最新处开始看。
       _follow = true;
       _fresh = false;
+      _armed = false;
       _queueJump();
     }
+    if (!_armed) _arm();
     _chat = d.chat.id;
     if (_revision != null && r != _revision) {
       if (_follow) {
@@ -145,15 +157,30 @@ class _AgentThreadState extends State<AgentThread> {
           last: i == d.thread.length - 1,
         ),
       for (final p in d.composer.pending)
-        AgentPendingCard(key: ValueKey('pending-${p.id}'), pending: p),
+        AgentAppear(
+          key: ValueKey('pending-${p.id}'),
+          id: '${d.chat.id}/pending/${p.id}',
+          child: AgentPendingCard(pending: p),
+        ),
       if (d.runLimit != null)
-        _LimitCard(limit: d.runLimit!, busy: d.status != AgentRunStatus.idle),
+        AgentAppear(
+          key: const ValueKey('limit'),
+          id: '${d.chat.id}/limit/${d.thread.lastOrNull?.id}',
+          child: _LimitCard(
+            limit: d.runLimit!,
+            busy: d.status != AgentRunStatus.idle,
+          ),
+        ),
       if (d.error != null)
-        _ErrorLine(
-          d.error!,
-          onRetry: d.status == AgentRunStatus.idle && d.thread.isNotEmpty
-              ? () => s.run(s.actions.onRegenerate)
-              : null,
+        AgentAppear(
+          key: const ValueKey('error'),
+          id: '${d.chat.id}/error/${d.thread.lastOrNull?.id}/${d.error}',
+          child: _ErrorLine(
+            d.error!,
+            onRetry: d.status == AgentRunStatus.idle && d.thread.isNotEmpty
+                ? () => s.run(s.actions.onRegenerate)
+                : null,
+          ),
         ),
     ];
     return Stack(
@@ -164,14 +191,17 @@ class _AgentThreadState extends State<AgentThread> {
             child: NotificationListener<ScrollNotification>(
               onNotification: _onScroll,
               child: SelectionArea(
-                child: ListView.builder(
-                  key: const Key('agent-thread'),
-                  controller: _scroll,
-                  padding: const EdgeInsets.fromLTRB(14, 16, 14, 20),
-                  itemCount: items.length,
-                  itemBuilder: (_, i) => Padding(
-                    padding: EdgeInsets.only(top: i == 0 ? 0 : 14),
-                    child: items[i],
+                child: AgentAppearScope(
+                  armed: _armed,
+                  child: ListView.builder(
+                    key: const Key('agent-thread'),
+                    controller: _scroll,
+                    padding: const EdgeInsets.fromLTRB(14, 16, 14, 20),
+                    itemCount: items.length,
+                    itemBuilder: (_, i) => Padding(
+                      padding: EdgeInsets.only(top: i == 0 ? 0 : 14),
+                      child: items[i],
+                    ),
                   ),
                 ),
               ),
@@ -385,15 +415,30 @@ class _Turn extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: 10,
       children: [
-        _UserLine(message: turn.user),
+        AgentAppear(
+          id: '${turn.id}/user',
+          enabled: last,
+          child: _UserLine(message: turn.user),
+        ),
         if (reply != null && (reply.blocks.isNotEmpty || reply.live))
-          _TaskCard(reply: reply, last: last, since: turn.user.at),
+          AgentAppear(
+            id: '${turn.id}/card',
+            enabled: last,
+            child: _TaskCard(
+              turnId: turn.id,
+              reply: reply,
+              last: last,
+              since: turn.user.at,
+            ),
+          ),
       ],
     );
   }
 }
 
 /// 用户这一句：左侧 2px 墨线，眉题「你 · 16:40」，悬停出现复制 / 编辑。
+/// 编辑在原地进行（双击文字也能进）：改文字、去掉图，「发送」后从这句重新开始，
+/// 它之后的对话被新回答替换；「取消」/ Esc 什么都不动。
 class _UserLine extends StatefulWidget {
   const _UserLine({required this.message});
   final AgentUserMessage message;
@@ -404,6 +449,58 @@ class _UserLine extends StatefulWidget {
 
 class _UserLineState extends State<_UserLine> {
   var _hover = false;
+  var _editing = false;
+  var _sending = false;
+  TextEditingController? _text;
+  final _focus = FocusNode();
+  var _keep = <String>[];
+
+  @override
+  void dispose() {
+    _text?.dispose();
+    _focus.dispose();
+    super.dispose();
+  }
+
+  bool _canEdit(AgentScope s) =>
+      widget.message.entryId != null && s.data.status == AgentRunStatus.idle;
+
+  void _startEdit() {
+    final m = widget.message;
+    _text?.dispose();
+    _text = TextEditingController(text: m.text);
+    _keep = [for (final i in m.images) i.id];
+    setState(() => _editing = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _focus.requestFocus();
+      _text!.selection = TextSelection.collapsed(offset: _text!.text.length);
+    });
+  }
+
+  void _cancel() => setState(() => _editing = false);
+
+  bool get _canSend =>
+      !_sending && (_text!.text.trim().isNotEmpty || _keep.isNotEmpty);
+
+  Future<void> _send(AgentScope s) async {
+    if (!_canSend) return;
+    setState(() => _sending = true);
+    var ok = false;
+    await s.run(() async {
+      ok = await s.actions.onResendFrom(
+        widget.message.entryId!,
+        _text!.text.trim(),
+        List.of(_keep),
+      );
+      return ok;
+    });
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      if (ok) _editing = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -411,13 +508,23 @@ class _UserLineState extends State<_UserLine> {
     final m = widget.message;
     final c = context.ui;
     final l = context.l10n;
+    final editable = _canEdit(s);
+    // 运行起来了（别处发了消息）就退出编辑，免得在跑的时候改历史。
+    if (_editing && !editable && !_sending) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _editing) setState(() => _editing = false);
+      });
+    }
     return MouseRegion(
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: Container(
+        key: Key('agent-user-${m.entryId ?? m.at.millisecondsSinceEpoch}'),
         padding: const EdgeInsets.fromLTRB(14, 2, 4, 0),
         decoration: BoxDecoration(
-          border: Border(left: BorderSide(color: c.ink, width: 2)),
+          border: Border(
+            left: BorderSide(color: _editing ? c.accent : c.ink, width: 2),
+          ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,7 +541,7 @@ class _UserLineState extends State<_UserLine> {
                     style: UiText.mono(11, color: c.faint, height: 1),
                   ),
                   const Spacer(),
-                  if (_hover) ...[
+                  if (_hover && !_editing) ...[
                     AgentIconButton(
                       small: true,
                       glyph: AgentGlyphs.copy,
@@ -444,38 +551,170 @@ class _UserLineState extends State<_UserLine> {
                         s.toast(l.ag_copied);
                       },
                     ),
-                    if (m.entryId != null &&
-                        s.data.status == AgentRunStatus.idle)
+                    if (editable)
                       AgentIconButton(
+                        key: Key('agent-edit-${m.entryId}'),
                         small: true,
                         glyph: AgentGlyphs.pen,
                         tooltip: l.ag_edit,
-                        onPressed: () =>
-                            s.run(() => s.actions.onEditMessage(m.entryId!)),
+                        onPressed: _startEdit,
                       ),
                   ],
                 ],
               ),
             ),
-            if (m.text.isNotEmpty)
-              Text(
-                m.text,
-                style: UiText.sans(
-                  13.5,
-                  weight: FontWeight.w500,
-                  color: c.ink,
-                  height: 1.6,
-                ),
+            if (_editing) _editor(s) else ..._view(s, editable),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _view(AgentScope s, bool editable) {
+    final m = widget.message;
+    final c = context.ui;
+    return [
+      if (m.text.isNotEmpty)
+        GestureDetector(
+          onDoubleTap: editable ? _startEdit : null,
+          child: Text(
+            m.text,
+            style: UiText.sans(
+              13.5,
+              weight: FontWeight.w500,
+              color: c.ink,
+              height: 1.6,
+            ),
+          ),
+        ),
+      if (m.images.isNotEmpty)
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            for (final img in m.images)
+              AgentThumb(image: img, width: 72, height: 72, group: m.images),
+          ],
+        ),
+    ];
+  }
+
+  Widget _editor(AgentScope s) {
+    final m = widget.message;
+    final c = context.ui;
+    final l = context.l10n;
+    final kept = [
+      for (final i in m.images)
+        if (_keep.contains(i.id)) i,
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(right: 6, bottom: 2),
+      child: Container(
+        key: Key('agent-edit-box-${m.entryId}'),
+        padding: const EdgeInsets.fromLTRB(10, 8, 8, 8),
+        decoration: BoxDecoration(
+          color: c.card,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: c.strong),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 8,
+          children: [
+            CallbackShortcuts(
+              bindings: {
+                const SingleActivator(LogicalKeyboardKey.escape): _cancel,
+                const SingleActivator(
+                  LogicalKeyboardKey.enter,
+                  control: true,
+                ): () =>
+                    _send(s),
+              },
+              child: TextField(
+                key: Key('agent-edit-text-${m.entryId}'),
+                controller: _text,
+                focusNode: _focus,
+                minLines: 1,
+                maxLines: 10,
+                onChanged: (_) => setState(() {}),
+                style: UiText.sans(13.5, color: c.ink, height: 1.6),
+                decoration: agentBareInput(),
               ),
-            if (m.images.isNotEmpty)
+            ),
+            if (kept.isNotEmpty)
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: [
-                  for (final img in m.images)
-                    AgentThumb(image: img, width: 72, height: 72),
+                  for (final img in kept)
+                    Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        AgentThumb(image: img, width: 56, height: 56),
+                        Positioned(
+                          right: -5,
+                          top: -5,
+                          child: Tooltip(
+                            message: l.ag_editRemoveImage,
+                            child: MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                key: Key('agent-edit-remove-${img.id}'),
+                                onTap: () =>
+                                    setState(() => _keep.remove(img.id)),
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: c.ink,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: c.card, width: 2),
+                                  ),
+                                  child: AgentIcon(
+                                    AgentGlyphs.close,
+                                    size: 9,
+                                    color: c.card,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                 ],
               ),
+            Row(
+              spacing: 6,
+              children: [
+                Expanded(
+                  child: AgentOverflowText(
+                    l.ag_editHint,
+                    style: UiText.sans(11.5, color: c.faint, height: 1.3),
+                  ),
+                ),
+                AgentButton(
+                  key: Key('agent-edit-cancel-${m.entryId}'),
+                  label: l.ag_cancel,
+                  style: AgentButtonStyle.ghost,
+                  height: 26,
+                  onPressed: _sending ? null : _cancel,
+                ),
+                Tooltip(
+                  message: 'Ctrl + Enter',
+                  waitDuration: const Duration(milliseconds: 600),
+                  child: AgentButton(
+                    key: Key('agent-edit-send-${m.entryId}'),
+                    label: l.ag_editResend,
+                    glyph: AgentGlyphs.send,
+                    style: AgentButtonStyle.primary,
+                    height: 26,
+                    onPressed: _canSend ? () => _send(s) : null,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -487,7 +726,13 @@ class _UserLineState extends State<_UserLine> {
 /// 它前面那串过程就收成一行「已处理 …」，点开看全部；正在进行、等你处理、
 /// 出错的那段保持展开；一轮结束后最后一串过程也收起。
 class _TaskCard extends StatelessWidget {
-  const _TaskCard({required this.reply, required this.last, this.since});
+  const _TaskCard({
+    required this.turnId,
+    required this.reply,
+    required this.last,
+    this.since,
+  });
+  final String turnId;
   final AgentReply reply;
   final bool last;
 
@@ -504,17 +749,18 @@ class _TaskCard extends StatelessWidget {
         ? (segs.last as _OutSeg).item is AgentTextBlock
         : false;
     const proc = EdgeInsets.fromLTRB(8, 9, 8, 9);
-    final sections = <(Key, Widget, EdgeInsets)>[];
+    final sections = <(String, Widget, EdgeInsets)>[];
     for (final (i, seg) in segs.indexed) {
       switch (seg) {
         case _ProcSeg(:final items):
           final tail = i == segs.length - 1;
           final next = segs.elementAtOrNull(i + 1);
           sections.add((
-            ValueKey('seg-$i'),
+            'seg-$i-proc',
             _Process(
               key: ValueKey('proc-$i'),
               index: i,
+              scope: turnId,
               items: items,
               live: reply.live,
               foldable:
@@ -528,19 +774,35 @@ class _TaskCard extends StatelessWidget {
         case _OutSeg(:final item):
           final isLast = i == segs.length - 1;
           sections.add((
-            ValueKey('seg-$i'),
+            'seg-$i-${switch (item) {
+              AgentTextBlock() => 'text',
+              _ReadGroup() => 'read',
+              AgentImagesBlock() => 'images',
+              _ => 'card',
+            }}',
             switch (item) {
-              AgentStep() => _ReadStep(key: ValueKey('read-$i'), step: item),
+              _ReadGroup() => _ReadGroupView(
+                key: ValueKey('read-$i'),
+                group: item,
+              ),
               AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
               AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
               AgentPositionBlock() => AgentPositionView(block: item),
               AgentParamBlock() => AgentParamView(block: item),
+              AgentSettingsBlock() => AgentSettingsView(block: item),
+              AgentGalleryBlock() => AgentGalleryView(block: item),
+              AgentCompactionBlock() => AgentCompactionView(
+                key: ValueKey('compaction-$i'),
+                block: item,
+              ),
               AgentChangeSummaryBlock() => AgentChangeSummaryView(block: item),
               AgentImagesBlock() => AgentOutputs(block: item),
               _ => const SizedBox.shrink(),
             },
-            item is AgentStep
+            item is _ReadGroup
                 ? proc
+                : item is AgentCompactionBlock
+                ? const EdgeInsets.fromLTRB(14, 8, 14, 8)
                 : isLast && finalText
                 // 结论多留一点呼吸。
                 ? const EdgeInsets.fromLTRB(14, 15, 14, 14)
@@ -554,7 +816,7 @@ class _TaskCard extends StatelessWidget {
           ? tail.items.where((x) => !_settled(x)).lastOrNull
           : null;
       sections.add((
-        const ValueKey('live'),
+        'live',
         _LiveLine(
           status: s.data.status,
           kind: current == null ? null : _kindOf(current),
@@ -563,46 +825,117 @@ class _TaskCard extends StatelessWidget {
         const EdgeInsets.fromLTRB(14, 9, 14, 9),
       ));
     }
+    final summary = reply.live ? null : reply.summary;
+    final bar = (reply.canRegenerate && last) || summary != null;
     return AgentCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           for (final (i, (key, w, padding)) in sections.indexed)
-            AgentSection(key: key, first: i == 0, padding: padding, child: w),
-          if (reply.canRegenerate && last)
-            Container(
-              padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: c.line)),
-              ),
-              child: Row(
-                children: [
-                  AgentButton(
-                    key: const Key('agent-regenerate'),
-                    label: l.ag_regenerate,
-                    glyph: AgentGlyphs.refresh,
-                    style: AgentButtonStyle.ghost,
-                    height: 24,
-                    onPressed: () => s.run(s.actions.onRegenerate),
+            AgentAppear(
+              key: ValueKey(key),
+              id: '$turnId/$key',
+              // 只有最后一轮会长出新内容；卡片刚出现时整张一起进场，第一节不再单独动。
+              enabled: last && i > 0,
+              child: AgentSection(first: i == 0, padding: padding, child: w),
+            ),
+          if (bar)
+            AgentAppear(
+              id: '$turnId/bar',
+              enabled: last,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: c.line)),
+                ),
+                child: SizedBox(
+                  height: 24,
+                  child: Row(
+                    spacing: 6,
+                    children: [
+                      if (reply.canRegenerate && last)
+                        AgentButton(
+                          key: const Key('agent-regenerate'),
+                          label: l.ag_regenerate,
+                          glyph: AgentGlyphs.refresh,
+                          style: AgentButtonStyle.ghost,
+                          height: 24,
+                          onPressed: () => s.run(s.actions.onRegenerate),
+                        ),
+                      Expanded(
+                        child: summary == null
+                            ? const SizedBox.shrink()
+                            : Padding(
+                                padding: EdgeInsets.only(
+                                  left: reply.canRegenerate && last ? 0 : 6,
+                                ),
+                                child: _TurnSummary(
+                                  key: Key('agent-turn-summary-$turnId'),
+                                  summary: summary,
+                                ),
+                              ),
+                      ),
+                      if (reply.canRegenerate && last)
+                        AgentIconButton(
+                          small: true,
+                          glyph: AgentGlyphs.copy,
+                          tooltip: l.ag_copy,
+                          onPressed: () async {
+                            final text = reply.blocks
+                                .whereType<AgentTextBlock>()
+                                .map((b) => b.markdown)
+                                .join('\n\n');
+                            await Clipboard.setData(ClipboardData(text: text));
+                            s.toast(l.ag_copied);
+                          },
+                        ),
+                    ],
                   ),
-                  const Spacer(),
-                  AgentIconButton(
-                    small: true,
-                    glyph: AgentGlyphs.copy,
-                    tooltip: l.ag_copy,
-                    onPressed: () async {
-                      final text = reply.blocks
-                          .whereType<AgentTextBlock>()
-                          .map((b) => b.markdown)
-                          .join('\n\n');
-                      await Clipboard.setData(ClipboardData(text: text));
-                      s.toast(l.ag_copied);
-                    },
-                  ),
-                ],
+                ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// 一轮小结：淡色一行「用时 1m 12s · 48 Anlas · 改动 5 处」，悬停看明细（含工具次数、token）。
+class _TurnSummary extends StatelessWidget {
+  const _TurnSummary({super.key, required this.summary});
+  final AgentTurnSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final x = summary;
+    final parts = [
+      if (x.took != null) l.ag_turnTook(agentDuration(x.took!)),
+      if ((x.anlas ?? 0) > 0) l.ag_turnAnlas(agentNumber(x.anlas!)),
+      if (x.changes > 0) l.ag_turnChanges(x.changes),
+    ];
+    final detail = [
+      ...parts,
+      if (x.toolCalls > 0) l.ag_turnTools(x.toolCalls),
+      if (x.inputTokens != null || x.outputTokens != null)
+        l.ag_turnTokens(
+          agentTokens(x.inputTokens ?? 0),
+          agentTokens(x.outputTokens ?? 0),
+        ),
+    ];
+    if (parts.isEmpty && detail.isEmpty) return const SizedBox.shrink();
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Tooltip(
+        message: detail.join('\n'),
+        waitDuration: const Duration(milliseconds: 500),
+        child: Text(
+          (parts.isEmpty ? detail : parts).join(' · '),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: UiText.mono(11, color: c.faint, height: 1.2),
+        ),
       ),
     );
   }
@@ -714,7 +1047,7 @@ class AgentMarkdown extends StatelessWidget {
 // ─────────────────────────────── 过程 ───────────────────────────────
 
 /// 一轮回答按顺序切成若干段：连续的过程（思考 + 工具步骤）合成一段，
-/// 文字、改动卡、产物、带缩略图的看图步骤各自一段。
+/// 文字、改动卡、产物各自一段；连续几次带缩略图的看图合成一组。
 sealed class _Seg {}
 
 final class _ProcSeg extends _Seg {
@@ -723,7 +1056,19 @@ final class _ProcSeg extends _Seg {
 
 final class _OutSeg extends _Seg {
   _OutSeg(this.item);
-  final Object item; // AgentBlock | AgentStep（看图）
+  final Object item; // AgentBlock | _ReadGroup
+}
+
+/// 连续几次看图（都已完成、都带图）合成一组；失败 / 进行中的单独一组、不再并入。
+final class _ReadGroup {
+  _ReadGroup(AgentStep first)
+    : mergeable = first.status == AgentStepStatus.done {
+    steps.add(first);
+  }
+  final steps = <AgentStep>[];
+  final bool mergeable;
+
+  List<AgentImage> get images => [for (final s in steps) ...s.images];
 }
 
 List<_Seg> _segments(List<AgentBlock> blocks) {
@@ -742,7 +1087,15 @@ List<_Seg> _segments(List<AgentBlock> blocks) {
       case AgentStepsBlock(:final steps):
         for (final st in steps) {
           if (st.tool == 'image_read' && st.images.isNotEmpty) {
-            out.add(_OutSeg(st));
+            final last = out.lastOrNull;
+            if (st.status == AgentStepStatus.done &&
+                last is _OutSeg &&
+                last.item is _ReadGroup &&
+                (last.item as _ReadGroup).mergeable) {
+              (last.item as _ReadGroup).steps.add(st);
+            } else {
+              out.add(_OutSeg(_ReadGroup(st)));
+            }
           } else {
             proc().items.add(st);
           }
@@ -764,6 +1117,7 @@ DateTime? _at(Object item) => switch (item) {
   AgentThinkingBlock(:final at) => at,
   AgentTextBlock(:final at) => at,
   AgentStep(:final at) => at,
+  _ReadGroup(:final steps) => steps.first.at,
   _ => null,
 };
 
@@ -795,12 +1149,16 @@ class _Process extends StatefulWidget {
   const _Process({
     super.key,
     required this.index,
+    required this.scope,
     required this.items,
     required this.foldable,
     required this.live,
     this.took,
   });
   final int index;
+
+  /// 所在这一轮的 id（记「出现过」用）。
+  final String scope;
   final List<Object> items;
   final bool foldable, live;
   final Duration? took;
@@ -817,28 +1175,51 @@ class _ProcessState extends State<_Process> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.foldable) return _timeline(context, all: _all);
     final still = MediaQuery.disableAnimationsOf(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        _FoldRow(
-          key: Key('agent-fold-${widget.index}'),
-          items: widget.items,
-          took: widget.took,
-          open: _open,
-          onTap: () => setState(() => _open = !_open),
-        ),
-        if (still)
-          ?_body()
-        else
-          AnimatedSize(
-            duration: const Duration(milliseconds: 180),
-            curve: Curves.easeOutCubic,
-            alignment: Alignment.topCenter,
-            child: _body() ?? const SizedBox(width: double.infinity),
+    final Widget content;
+    if (!widget.foldable) {
+      content = _timeline(context, all: _all);
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _FoldRow(
+            key: Key('agent-fold-${widget.index}'),
+            items: widget.items,
+            took: widget.took,
+            open: _open,
+            onTap: () => setState(() => _open = !_open),
           ),
-      ],
+          if (still)
+            ?_body()
+          else
+            AnimatedSize(
+              duration: const Duration(milliseconds: 220),
+              curve: Curves.easeOutCubic,
+              alignment: Alignment.topCenter,
+              child: _body() ?? const SizedBox(width: double.infinity),
+            ),
+        ],
+      );
+    }
+    if (still) return content;
+    // 一段过程收起 / 展开成时间线时：旧样子淡出、新样子淡入，高度一起变。
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 240),
+      curve: Curves.easeOutCubic,
+      alignment: Alignment.topCenter,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 240),
+        layoutBuilder: (current, previous) => Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            for (final p in previous)
+              Positioned(top: 0, left: 0, right: 0, child: p),
+            ?current,
+          ],
+        ),
+        child: KeyedSubtree(key: ValueKey(widget.foldable), child: content),
+      ),
     );
   }
 
@@ -876,7 +1257,10 @@ class _ProcessState extends State<_Process> {
             key: ValueKey(
               item is AgentStep ? 'step-${item.id}' : 'think-${hidden + i}',
             ),
+            id: '${widget.scope}/${item is AgentStep ? 'step-${item.id}' : 'think-${widget.index}-${hidden + i}'}',
             enabled: widget.live,
+            // 高度交给外层的 AnimatedSize 平滑，这里只淡入上浮。
+            grow: false,
             child: switch (item) {
               AgentThinkingBlock() => AgentThinking(
                 block: item,
@@ -907,6 +1291,8 @@ class _ProcessState extends State<_Process> {
                 )
               : null,
         ),
+        if (step.tags.isNotEmpty && step.status == AgentStepStatus.done)
+          _TagHits(step: step),
         if (open) _StepDetail(step: step),
       ],
     );
@@ -973,7 +1359,7 @@ class _FoldRowState extends State<_FoldRow> {
                 ],
               ),
               Expanded(
-                child: Text.rich(
+                child: AgentOverflowText.rich(
                   TextSpan(
                     children: [
                       TextSpan(
@@ -983,8 +1369,11 @@ class _FoldRowState extends State<_FoldRow> {
                       TextSpan(text: '   $summary'),
                     ],
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                  tooltip: [
+                    for (final e in counts.entries)
+                      l.ag_foldTimes(agentActivityLabel(l, e.key), e.value),
+                    if (widget.took != null) agentDuration(widget.took!),
+                  ].join('\n'),
                   style: UiText.sans(12, color: c.muted, height: 1.2),
                 ),
               ),
@@ -1121,45 +1510,257 @@ class _AgentStepRow extends StatelessWidget {
   }
 }
 
-/// 看图步骤单独成段：一行 + 缩略图（点开看大图），参数仍在展开里。
-class _ReadStep extends StatefulWidget {
-  const _ReadStep({super.key, required this.step});
-  final AgentStep step;
+/// 看图：连续几次合成一组，一行「查看图片 · 4 张」+ 总用时，下面缩略图排开（多了换行加高）。
+/// 点缩略图放大、组内左右切换；点标题行展开每次的参数。只有一次时和普通步骤行一样。
+class _ReadGroupView extends StatefulWidget {
+  const _ReadGroupView({super.key, required this.group});
+  final _ReadGroup group;
 
   @override
-  State<_ReadStep> createState() => _ReadStepState();
+  State<_ReadGroupView> createState() => _ReadGroupViewState();
 }
 
-class _ReadStepState extends State<_ReadStep> {
+class _ReadGroupViewState extends State<_ReadGroupView> {
   var _open = false;
 
   @override
   Widget build(BuildContext context) {
-    final step = widget.step;
+    final l = context.l10n;
+    final c = context.ui;
+    final steps = widget.group.steps;
+    final first = steps.first;
+    final single = steps.length == 1;
+    final images = widget.group.images;
+    final expandable = steps.any(
+      (s) => s.arguments != null || s.result != null,
+    );
+    var total = Duration.zero;
+    var known = true;
+    for (final s in steps) {
+      if (s.duration == null) {
+        known = false;
+      } else {
+        total += s.duration!;
+      }
+    }
+    final toggle = expandable ? () => setState(() => _open = !_open) : null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _AgentStepRow(
-          step: step,
-          open: _open,
-          onTap: step.arguments == null && step.result == null
-              ? null
-              : () => setState(() => _open = !_open),
-        ),
+        if (single)
+          _AgentStepRow(step: first, open: _open, onTap: toggle)
+        else
+          _StepRow(
+            key: Key('agent-read-group-${first.id}'),
+            dot: const AgentActivityIcon(
+              kind: AgentActivityKind.image,
+              state: AgentActivityState.done,
+            ),
+            label: l.ag_readImages(steps.length),
+            tool: 'image_read',
+            trailing: known ? agentDuration(total) : null,
+            quiet: known && total.inMilliseconds < 1000,
+            open: _open,
+            onTap: toggle,
+          ),
         Padding(
-          key: Key('agent-step-images-${step.id}'),
+          key: Key('agent-step-images-${first.id}'),
           padding: const EdgeInsets.fromLTRB(31, 4, 6, 4),
           child: Wrap(
             spacing: 6,
             runSpacing: 6,
             children: [
-              for (final img in step.images)
-                AgentThumb(image: img, width: 64, height: 64),
+              for (final s in steps)
+                for (final img in s.images)
+                  AgentThumb(
+                    image: img,
+                    width: 64,
+                    height: 64,
+                    group: images,
+                    tooltip: [
+                      ?s.subject,
+                      if (s.duration != null) agentDuration(s.duration!),
+                    ].join(' · '),
+                  ),
             ],
           ),
         ),
-        if (_open) _StepDetail(step: step),
+        if (_open)
+          for (final s in steps) ...[
+            if (!single)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(31, 4, 6, 0),
+                child: AgentOverflowText(
+                  [
+                    ?s.subject,
+                    if (s.duration != null) agentDuration(s.duration!),
+                  ].join(' · '),
+                  style: UiText.mono(11, color: c.faint, height: 1.4),
+                ),
+              ),
+            _StepDetail(step: s),
+          ],
       ],
+    );
+  }
+}
+
+/// 查询类步骤查到的标签：一排小标签（颜色 = 类别），悬停看译名 / 热度 / 简介，点一下复制。
+class _TagHits extends StatefulWidget {
+  const _TagHits({required this.step});
+  final AgentStep step;
+
+  @override
+  State<_TagHits> createState() => _TagHitsState();
+}
+
+class _TagHitsState extends State<_TagHits> {
+  static const _limit = 12;
+  var _all = false;
+
+  static Color color(UiColors c, AgentTagCategory k) => switch ((k, c.dark)) {
+    (AgentTagCategory.general, true) => const Color(0xff62b9f0),
+    (AgentTagCategory.general, false) => const Color(0xff176d9f),
+    (AgentTagCategory.artist, true) => const Color(0xffff7b78),
+    (AgentTagCategory.artist, false) => const Color(0xffb52c2a),
+    (AgentTagCategory.copyright, true) => const Color(0xffd083e0),
+    (AgentTagCategory.copyright, false) => const Color(0xff7b4389),
+    (AgentTagCategory.character, true) => const Color(0xff7bd27e),
+    (AgentTagCategory.character, false) => const Color(0xff2b7834),
+    (AgentTagCategory.meta, true) => const Color(0xffffb85c),
+    (AgentTagCategory.meta, false) => const Color(0xff925b08),
+    (AgentTagCategory.other, _) => c.muted,
+  };
+
+  static String category(AppLocalizations l, AgentTagCategory k) => switch (k) {
+    AgentTagCategory.general => l.autocomplete_categoryGeneral,
+    AgentTagCategory.artist => l.autocomplete_categoryArtist,
+    AgentTagCategory.copyright => l.autocomplete_categoryCopyright,
+    AgentTagCategory.character => l.autocomplete_categoryCharacter,
+    AgentTagCategory.meta => l.autocomplete_categoryMeta,
+    AgentTagCategory.other => '',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final step = widget.step;
+    final tags = step.tags;
+    final shown = _all || tags.length <= _limit
+        ? tags
+        : tags.sublist(0, _limit - 1);
+    Widget chip(AgentTagHit t) {
+      final tint = color(c, t.category);
+      final tip = [
+        [
+          t.tag,
+          if (t.translation != null && t.translation!.isNotEmpty)
+            t.translation!,
+        ].join(' · '),
+        [
+          category(l, t.category),
+          if (t.count != null) l.ag_tagCount(agentNumber(t.count!)),
+        ].where((x) => x.isNotEmpty).join(' · '),
+        if (t.summary != null && t.summary!.isNotEmpty) t.summary!,
+      ].where((x) => x.isNotEmpty).join('\n');
+      return Tooltip(
+        message: tip,
+        waitDuration: const Duration(milliseconds: 450),
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: _Chip(
+          key: Key('agent-tag-${step.id}-${t.tag}'),
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: t.tag));
+            s.toast(l.ag_tagCopied(t.tag));
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 5,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: tint, shape: BoxShape.circle),
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 180),
+                child: Text(
+                  t.tag,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.mono(11, color: c.ink, height: 1.2),
+                ),
+              ),
+              if (t.count != null)
+                Text(
+                  agentTokens(t.count!),
+                  style: UiText.mono(10, color: c.faint, height: 1.2),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      key: Key('agent-step-tags-${step.id}'),
+      padding: const EdgeInsets.fromLTRB(31, 2, 6, 6),
+      child: Wrap(
+        spacing: 4,
+        runSpacing: 4,
+        children: [
+          for (final t in shown) chip(t),
+          if (shown.length < tags.length)
+            _Chip(
+              key: Key('agent-tags-more-${step.id}'),
+              onTap: () => setState(() => _all = true),
+              child: Text(
+                l.ag_galleryMore(tags.length - shown.length),
+                style: UiText.mono(11, color: c.muted, height: 1.2),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Chip extends StatefulWidget {
+  const _Chip({super.key, required this.child, required this.onTap});
+  final Widget child;
+  final VoidCallback onTap;
+
+  @override
+  State<_Chip> createState() => _ChipState();
+}
+
+class _ChipState extends State<_Chip> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          height: 22,
+          padding: const EdgeInsets.symmetric(horizontal: 7),
+          decoration: BoxDecoration(
+            color: _hover ? c.hover : agentSunk(c),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: _hover ? c.border : c.line),
+          ),
+          child: widget.child,
+        ),
+      ),
     );
   }
 }
@@ -1250,7 +1851,7 @@ class _StepRowState extends State<_StepRow> {
                     Flexible(
                       child: AgentShimmer(
                         enabled: widget.shimmer,
-                        child: Text.rich(
+                        child: AgentOverflowText.rich(
                           TextSpan(
                             children: [
                               TextSpan(text: widget.label),
@@ -1261,8 +1862,6 @@ class _StepRowState extends State<_StepRow> {
                                 ),
                             ],
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                           style: UiText.sans(
                             12.5,
                             weight: widget.strong
@@ -1280,10 +1879,8 @@ class _StepRowState extends State<_StepRow> {
                     ),
                     if (showTool)
                       Flexible(
-                        child: Text(
+                        child: AgentOverflowText(
                           widget.tool!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                           style: UiText.mono(11, color: c.faint, height: 1),
                         ),
                       ),
@@ -1408,15 +2005,93 @@ String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
 
 // ─────────────────────────────── 提示词改动 ───────────────────────────────
 
-class AgentDiffView extends StatelessWidget {
+/// 提示词改动卡的正文窗口：按逗号切成 tag，只留改动附近（前后各 [context] 个），
+/// 两处改动中间隔太远、开头结尾没改的长段都换成「…」。
+@visibleForTesting
+List<AgentDiffSegment?> agentDiffWindow(
+  List<AgentDiffSegment> segments, {
+  int context = 3,
+}) {
+  // 切成一个个 tag：每个 tag 是若干小段（同一个 tag 里可能有删有加）。
+  final tags = <List<AgentDiffSegment>>[[]];
+  for (final seg in segments) {
+    var rest = seg.text;
+    while (rest.isNotEmpty) {
+      final comma = rest.indexOf(',');
+      if (comma < 0) {
+        tags.last.add(AgentDiffSegment(rest, seg.kind));
+        break;
+      }
+      tags.last.add(AgentDiffSegment(rest.substring(0, comma + 1), seg.kind));
+      tags.add([]);
+      rest = rest.substring(comma + 1);
+    }
+  }
+  if (tags.last.isEmpty) tags.removeLast();
+  final changed = [
+    for (final t in tags)
+      t.any((x) => x.kind != AgentDiffKind.same && x.text.trim().isNotEmpty),
+  ];
+  if (!changed.contains(true)) return segments;
+  final show = List.filled(tags.length, false);
+  for (var i = 0; i < tags.length; i++) {
+    if (!changed[i]) continue;
+    for (var j = i - context; j <= i + context; j++) {
+      if (j >= 0 && j < tags.length) show[j] = true;
+    }
+  }
+  // 只藏一个 tag 换成「…」不划算：直接显示。
+  for (var i = 0; i < tags.length; i++) {
+    if (show[i]) continue;
+    var j = i;
+    while (j < tags.length && !show[j]) {
+      j++;
+    }
+    if (j - i == 1) show[i] = true;
+    i = j;
+  }
+  final out = <AgentDiffSegment?>[];
+  for (var i = 0; i < tags.length; i++) {
+    if (show[i]) {
+      out.addAll(tags[i]);
+    } else if (i == 0 || show[i - 1]) {
+      out.add(null);
+    }
+  }
+  return out;
+}
+
+class AgentDiffView extends StatefulWidget {
   const AgentDiffView({super.key, required this.diff});
   final AgentPromptDiff diff;
+
+  /// 收起时正文最多几行。
+  static const maxLines = 14;
+
+  @override
+  State<AgentDiffView> createState() => _AgentDiffViewState();
+}
+
+class _AgentDiffViewState extends State<AgentDiffView> {
+  var _all = false;
+  final _taps = <TapGestureRecognizer>[];
+
+  @override
+  void dispose() {
+    for (final t in _taps) {
+      t.dispose();
+    }
+    super.dispose();
+  }
+
+  void _expand() => setState(() => _all = true);
 
   @override
   Widget build(BuildContext context) {
     final s = AgentScope.of(context);
     final c = context.ui;
     final l = context.l10n;
+    final diff = widget.diff;
     int count(AgentDiffKind k) => diff.segments
         .where((x) => x.kind == k)
         .fold(
@@ -1440,6 +2115,49 @@ class AgentDiffView extends StatelessWidget {
             : '$who · ${l.ag_field_characterNegative}',
     };
     final base = UiText.mono(12, color: c.muted, height: 1.75);
+    final style = diff.state == AgentDiffState.undone
+        ? base.copyWith(color: c.faint)
+        : base;
+    final window = agentDiffWindow(diff.segments);
+    final trimmed = window.contains(null);
+    for (final t in _taps) {
+      t.dispose();
+    }
+    _taps.clear();
+    TextStyle? kindStyle(AgentDiffKind k) => switch (k) {
+      AgentDiffKind.same => null,
+      AgentDiffKind.added => TextStyle(
+        color: c.ok,
+        backgroundColor: c.ok.withValues(alpha: .13),
+      ),
+      AgentDiffKind.removed => TextStyle(
+        color: c.error,
+        backgroundColor: c.error.withValues(alpha: .09),
+        decoration: TextDecoration.lineThrough,
+        decorationColor: c.error,
+      ),
+    };
+    TapGestureRecognizer tap() {
+      final t = TapGestureRecognizer()..onTap = _expand;
+      _taps.add(t);
+      return t;
+    }
+
+    final shown = _all ? diff.segments : window;
+    final span = TextSpan(
+      children: [
+        for (final seg in shown)
+          if (seg == null)
+            TextSpan(
+              text: ' … ',
+              style: TextStyle(color: c.faint, fontWeight: FontWeight.w600),
+              mouseCursor: SystemMouseCursors.click,
+              recognizer: tap(),
+            )
+          else
+            TextSpan(text: seg.text, style: kindStyle(seg.kind)),
+      ],
+    );
     return Column(
       key: Key('agent-diff-${diff.id}'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1457,10 +2175,8 @@ class AgentDiffView extends StatelessWidget {
                   spacing: 6,
                   children: [
                     Flexible(
-                      child: Text(
+                      child: AgentOverflowText(
                         field,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
                         style: UiText.sans(
                           12,
                           weight: FontWeight.w600,
@@ -1493,33 +2209,47 @@ class AgentDiffView extends StatelessWidget {
             borderRadius: BorderRadius.circular(9),
             border: Border.all(color: c.line),
           ),
-          child: Text.rich(
-            TextSpan(
-              children: [
-                for (final seg in diff.segments)
-                  TextSpan(
-                    text: seg.text,
-                    style: switch (seg.kind) {
-                      AgentDiffKind.same => null,
-                      AgentDiffKind.added => TextStyle(
-                        color: c.ok,
-                        backgroundColor: c.ok.withValues(alpha: .13),
-                      ),
-                      AgentDiffKind.removed => TextStyle(
-                        color: c.error,
-                        backgroundColor: c.error.withValues(alpha: .09),
-                        decoration: TextDecoration.lineThrough,
-                        decorationColor: c.error,
-                      ),
-                    },
+          child: LayoutBuilder(
+            builder: (context, box) {
+              var over = false;
+              if (!_all) {
+                final tp = TextPainter(
+                  text: TextSpan(style: style, children: [span]),
+                  maxLines: AgentDiffView.maxLines,
+                  textDirection: Directionality.of(context),
+                  textScaler: MediaQuery.textScalerOf(context),
+                )..layout(maxWidth: box.maxWidth);
+                over = tp.didExceedMaxLines;
+                tp.dispose();
+              }
+              final more = _all || trimmed || over;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text.rich(
+                    span,
+                    key: Key('agent-diff-text-${diff.id}'),
+                    maxLines: _all ? null : AgentDiffView.maxLines,
+                    overflow: _all ? null : TextOverflow.ellipsis,
+                    style: style,
                   ),
-              ],
-            ),
-            maxLines: 8,
-            overflow: TextOverflow.ellipsis,
-            style: diff.state == AgentDiffState.undone
-                ? base.copyWith(color: c.faint)
-                : base,
+                  if (more)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: AgentButton(
+                          key: Key('agent-diff-more-${diff.id}'),
+                          label: _all ? l.ag_diffCollapse : l.ag_diffExpand,
+                          style: AgentButtonStyle.ghost,
+                          height: 22,
+                          onPressed: () => setState(() => _all = !_all),
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
         ),
       ],
@@ -1583,6 +2313,359 @@ class _DiffStatus extends StatelessWidget {
             style: AgentButtonStyle.ghost,
             height: 24,
             onPressed: () => s.run(onUndo),
+          ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────── 设置 / 画廊 / 压缩 ───────────────────────────────
+
+/// 应用设置改动卡：每行「设置项  旧值 → 新值」+「去设置」，整张一起撤销。
+class AgentSettingsView extends StatelessWidget {
+  const AgentSettingsView({super.key, required this.block});
+  final AgentSettingsBlock block;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final undone = block.state == AgentDiffState.undone;
+    final old = UiText.mono(12, color: c.faint, height: 1.4);
+    final now = UiText.mono(
+      12,
+      weight: FontWeight.w600,
+      color: undone ? c.faint : c.ok,
+      height: 1.4,
+    );
+    return Column(
+      key: Key('agent-settings-${block.id}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        SizedBox(
+          height: 24,
+          child: Row(
+            spacing: 6,
+            children: [
+              AgentIcon(AgentGlyphs.gear, size: 14, color: c.muted),
+              Expanded(
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Flexible(
+                      child: AgentOverflowText(
+                        l.ag_settingsTitle,
+                        style: UiText.sans(
+                          12,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l.ag_paramCount(block.changes.length),
+                      style: UiText.mono(11.5, color: c.faint),
+                    ),
+                  ],
+                ),
+              ),
+              _DiffStatus(
+                id: block.id,
+                state: block.state,
+                onUndo: () => s.actions.onUndoDiff(block.id),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(11, 6, 6, 6),
+          decoration: BoxDecoration(
+            color: agentSunk(c),
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: c.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 2,
+            children: [
+              for (final ch in block.changes)
+                SizedBox(
+                  key: Key('agent-setting-${block.id}-${ch.key}'),
+                  height: 26,
+                  child: Row(
+                    spacing: 8,
+                    children: [
+                      SizedBox(
+                        width: 104,
+                        child: AgentOverflowText(
+                          ch.label,
+                          style: UiText.sans(12, color: c.muted, height: 1.4),
+                        ),
+                      ),
+                      Expanded(
+                        child: AgentOverflowText.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: ch.before,
+                                style: old.copyWith(
+                                  decoration: TextDecoration.lineThrough,
+                                  decorationColor: c.faint,
+                                ),
+                              ),
+                              TextSpan(text: '  →  ', style: old),
+                              TextSpan(text: ch.after, style: now),
+                            ],
+                          ),
+                        ),
+                      ),
+                      if (ch.anchor != null)
+                        AgentIconButton(
+                          key: Key('agent-setting-go-${block.id}-${ch.key}'),
+                          small: true,
+                          glyph: AgentGlyphs.chevronRight,
+                          tooltip: l.ag_settingsGo,
+                          onPressed: () => s.actions.onOpenSettingAt(
+                            ch.anchor!.section,
+                            ch.anchor!.anchor,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 画廊操作卡：一句话「已收藏 3 张」+ 缩略图；能撤销的带撤销。
+class AgentGalleryView extends StatelessWidget {
+  const AgentGalleryView({super.key, required this.block});
+  final AgentGalleryBlock block;
+
+  static const _thumbs = 8;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final n = block.count > 0 ? block.count : block.images.length;
+    final target = block.target ?? '—';
+    final text = switch (block.action) {
+      AgentGalleryAction.favorite => l.ag_galleryFavorite(n),
+      AgentGalleryAction.unfavorite => l.ag_galleryUnfavorite(n),
+      AgentGalleryAction.tags => l.ag_galleryTags(n),
+      AgentGalleryAction.move => l.ag_galleryMove(n, target),
+      AgentGalleryAction.copy => l.ag_galleryCopy(n, target),
+      AgentGalleryAction.delete => l.ag_galleryDelete(n),
+      AgentGalleryAction.restore => l.ag_galleryRestore(n),
+      AgentGalleryAction.collectionAdd => l.ag_galleryCollectionAdd(n, target),
+      AgentGalleryAction.collectionRemove => l.ag_galleryCollectionRemove(
+        n,
+        target,
+      ),
+      AgentGalleryAction.export => l.ag_galleryExport(n),
+    };
+    final glyph = switch (block.action) {
+      AgentGalleryAction.favorite ||
+      AgentGalleryAction.unfavorite => AgentGlyphs.star,
+      AgentGalleryAction.delete => AgentGlyphs.trash,
+      AgentGalleryAction.restore => AgentGlyphs.undo,
+      AgentGalleryAction.move ||
+      AgentGalleryAction.copy ||
+      AgentGalleryAction.export => AgentGlyphs.folder,
+      AgentGalleryAction.tags ||
+      AgentGalleryAction.collectionAdd ||
+      AgentGalleryAction.collectionRemove => AgentGlyphs.layers,
+    };
+    final shown = block.images.take(_thumbs).toList();
+    final extra = n - shown.length;
+    return Column(
+      key: Key('agent-gallery-${block.id}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        SizedBox(
+          height: 24,
+          child: Row(
+            spacing: 6,
+            children: [
+              AgentIcon(glyph, size: 14, color: c.muted),
+              Expanded(
+                child: AgentOverflowText(
+                  text,
+                  style: UiText.sans(
+                    12,
+                    weight: FontWeight.w600,
+                    color: block.state == AgentDiffState.undone
+                        ? c.faint
+                        : c.ink,
+                  ),
+                ),
+              ),
+              if (block.undoable || block.state == AgentDiffState.undone)
+                _DiffStatus(
+                  id: block.id,
+                  state: block.state,
+                  onUndo: () => s.actions.onUndoDiff(block.id),
+                ),
+            ],
+          ),
+        ),
+        if (shown.isNotEmpty)
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: [
+              for (final img in shown)
+                AgentThumb(
+                  image: img,
+                  width: 56,
+                  height: 56,
+                  group: block.images,
+                ),
+              if (extra > 0)
+                Container(
+                  width: 56,
+                  height: 56,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: c.control,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    l.ag_galleryMore(extra),
+                    style: UiText.mono(12, color: c.muted),
+                  ),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+/// 上下文压缩分隔线：「之前的对话已压缩」，点开看压缩后留下的摘要。
+class AgentCompactionView extends StatefulWidget {
+  const AgentCompactionView({super.key, required this.block});
+  final AgentCompactionBlock block;
+
+  @override
+  State<AgentCompactionView> createState() => _AgentCompactionViewState();
+}
+
+class _AgentCompactionViewState extends State<AgentCompactionView> {
+  var _open = false;
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final b = widget.block;
+    final still = MediaQuery.disableAnimationsOf(context);
+    final line = Expanded(child: Container(height: 1, color: c.line));
+    final body = _open
+        ? Container(
+            key: const Key('agent-compaction-summary'),
+            margin: const EdgeInsets.only(top: 6),
+            constraints: const BoxConstraints(maxHeight: 260),
+            padding: const EdgeInsets.fromLTRB(12, 2, 4, 2),
+            decoration: BoxDecoration(
+              border: Border(left: BorderSide(color: c.border)),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 4,
+                children: [
+                  if (b.tokensBefore != null)
+                    Text(
+                      l.ag_compactedTokens(agentTokens(b.tokensBefore!)),
+                      style: UiText.mono(11, color: c.faint, height: 1.4),
+                    ),
+                  Text(
+                    b.summary,
+                    style: UiText.sans(11.5, color: c.muted, height: 1.65),
+                  ),
+                ],
+              ),
+            ),
+          )
+        : null;
+    return Column(
+      key: const Key('agent-compaction'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Tooltip(
+          message: b.summary.isEmpty
+              ? ''
+              : _open
+              ? l.ag_compactedHide
+              : l.ag_compactedShow,
+          waitDuration: const Duration(milliseconds: 600),
+          child: MouseRegion(
+            cursor: b.summary.isEmpty
+                ? MouseCursor.defer
+                : SystemMouseCursors.click,
+            onEnter: (_) => setState(() => _hover = true),
+            onExit: (_) => setState(() => _hover = false),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: b.summary.isEmpty
+                  ? null
+                  : () => setState(() => _open = !_open),
+              child: SizedBox(
+                height: 22,
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    line,
+                    AgentIcon(AgentGlyphs.layers, size: 12, color: c.faint),
+                    Flexible(
+                      flex: 6,
+                      child: AgentOverflowText(
+                        b.auto ? l.ag_compactedAuto : l.ag_compacted,
+                        style: UiText.sans(
+                          11.5,
+                          color: _hover ? c.muted : c.faint,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
+                    if (b.summary.isNotEmpty)
+                      AnimatedRotation(
+                        turns: _open ? .5 : 0,
+                        duration: still
+                            ? Duration.zero
+                            : const Duration(milliseconds: 160),
+                        child: AgentIcon(
+                          AgentGlyphs.chevron,
+                          size: 12,
+                          color: _hover ? c.muted : c.faint,
+                        ),
+                      ),
+                    line,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        if (still)
+          ?body
+        else
+          AnimatedSize(
+            duration: const Duration(milliseconds: 220),
+            curve: Curves.easeOutCubic,
+            alignment: Alignment.topCenter,
+            child: body ?? const SizedBox(width: double.infinity),
           ),
       ],
     );
@@ -2284,6 +3367,7 @@ class AgentOutputs extends StatelessWidget {
                     width: w,
                     height: ratio.clamp(w * .5, w * 2),
                     badge: true,
+                    group: block.images,
                   ),
                 for (var i = 0; i < waiting; i++)
                   Container(
@@ -2324,9 +3408,17 @@ class AgentThumb extends StatefulWidget {
     required this.height,
     this.badge = false,
     this.source,
+    this.group,
+    this.tooltip,
   });
   final AgentImage image;
   final double width, height;
+
+  /// 同一组的图：放大后可以左右切换。
+  final List<AgentImage>? group;
+
+  /// 悬停说明（看图组：图片 id · 用时）。
+  final String? tooltip;
 
   /// 显示左下角编号 / 星标。
   final bool badge;
@@ -2352,7 +3444,7 @@ class _AgentThumbState extends State<AgentThumb> {
       onEnter: (_) => setState(() => _hover = true),
       onExit: (_) => setState(() => _hover = false),
       child: GestureDetector(
-        onTap: () => s.zoom(img),
+        onTap: () => s.zoom(img, group: widget.group),
         onSecondaryTapUp: (e) =>
             showAgentImageMenu(context, e.globalPosition, img),
         child: Container(
@@ -2383,6 +3475,13 @@ class _AgentThumbState extends State<AgentThumb> {
         ),
       ),
     );
+    if (widget.tooltip != null && widget.tooltip!.isNotEmpty) {
+      thumb = Tooltip(
+        message: widget.tooltip,
+        waitDuration: const Duration(milliseconds: 500),
+        child: thumb,
+      );
+    }
     final drag = s.slots.imageDrag;
     if (drag != null && img.historyId != null) {
       thumb = drag(context, img, thumb);

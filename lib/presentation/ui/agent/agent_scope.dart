@@ -35,8 +35,8 @@ class AgentScope extends InheritedWidget {
   })
   rename;
 
-  /// 放大看图。
-  final void Function(AgentImage image) zoom;
+  /// 放大看图；[group] 给同一组的图时可以左右切换。
+  final void Function(AgentImage image, {List<AgentImage>? group}) zoom;
 
   /// 往输入框光标处插入文字（快捷任务、`@` 引用、`/` 技能、欢迎页任务块）。
   /// [replace] 为 true 时替换整个输入框。

@@ -8,6 +8,8 @@ import 'package:nai_launcher/core/nai_agent/settings_tools.dart';
 import 'package:nai_launcher/core/settings/settings_preferences_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_settings_binding.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_settings_card.dart';
+import 'package:nai_launcher/presentation/wiring/nai_agent/agent_settings_undo.dart';
 import '../../../core/settings/settings_preferences_service_test.dart'
     show MemoryStorage;
 
@@ -91,6 +93,11 @@ void main() {
         StorageKeys.enableCooccurrenceRecommendation: false,
       }, (await read())['version'] as String);
       expect(result['values'][StorageKeys.fontScale], 1.3);
+      expect(result['before'][StorageKeys.fontScale], 1.1);
+      expect(
+        (result['before'] as Map).keys.toSet(),
+        SettingsPreferencesService.keys,
+      );
       final backup = jsonDecode(
         await File(result['backup_path'] as String).readAsString(),
       );
@@ -103,6 +110,65 @@ void main() {
       expect(storage.values.containsKey(StorageKeys.fontScale), isFalse);
     },
   );
+  test(
+    'card undo restores before including null, allows unrelated edits, rejects changed fields',
+    () async {
+      storage.values[StorageKeys.fontScale] = 1.1;
+      final result = await update({
+        StorageKeys.fontScale: 1.3,
+      }, (await read())['version'] as String);
+      final restore = AgentSettingsRestore(
+        'id',
+        result['version'] as String,
+        Map<String, Object?>.from(result['before'] as Map),
+        Map<String, Object?>.from(result['values'] as Map),
+        [StorageKeys.fontScale],
+      );
+      storage.values[StorageKeys.locale] = 'en';
+      expect(await AgentSettingsUndo(tools).restore(restore), true);
+      expect(storage.values[StorageKeys.fontScale], 1.1);
+      expect(storage.values[StorageKeys.locale], 'en');
+      storage.values[StorageKeys.fontScale] = 1.4;
+      expect(await AgentSettingsUndo(tools).restore(restore), false);
+      expect(storage.values[StorageKeys.fontScale], 1.4);
+      const reset = AgentSettingsRestore(
+        'reset',
+        'v',
+        {StorageKeys.fontScale: null},
+        {StorageKeys.fontScale: 1.4},
+        [StorageKeys.fontScale],
+      );
+      expect(await AgentSettingsUndo(tools).restore(reset), true);
+      expect(storage.values.containsKey(StorageKeys.fontScale), false);
+    },
+  );
+
+  test('card undo refuses changes during asynchronous backup', () async {
+    storage.values[StorageKeys.fontScale] = 1.3;
+    tools = NaiAgentSettingsTools(
+      _BackupSettings(
+        storage,
+        dir,
+        () => storage.values[StorageKeys.fontScale] = 1.4,
+      ),
+      isAlive: () => true,
+      refresh: () {},
+    );
+    expect(
+      await AgentSettingsUndo(tools).restore(
+        const AgentSettingsRestore(
+          'id',
+          'v',
+          {StorageKeys.fontScale: 1.1},
+          {StorageKeys.fontScale: 1.3},
+          [StorageKeys.fontScale],
+        ),
+      ),
+      false,
+    );
+    expect(storage.values[StorageKeys.fontScale], 1.4);
+  });
+
   test(
     'stale versions, unsupported keys and invalid native values never overwrite',
     () async {

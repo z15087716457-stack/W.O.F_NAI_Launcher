@@ -453,10 +453,13 @@ extension _GalleryManagement on NaiAgentGalleryBinding {
         }
         await _refreshManagedLibrary(service, restore: true);
       }
+      final after = await _managed(scope, image.id, NaiAgentCancellation());
       return naiAgentTextResult({
         'ok': true,
         'image_id': image.id,
         'scope': scope,
+        'before': image.summary,
+        'image_version': after.version,
         'applied_fields': applied,
         'backup': backup,
         'deleted': action == 'delete',
