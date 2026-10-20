@@ -440,6 +440,12 @@ void main() {
       await tester.tap(find.byKey(const Key('agent-permission')));
       await tester.pump();
       expect(find.text('完全权限'), findsOneWidget);
+      // 从低到高：只读 → 询问 → 自动 → 完全权限。
+      final ys = [
+        for (final m in ['readonly', 'ask', 'auto', 'bypass'])
+          tester.getTopLeft(find.byKey(Key('agent-permission-$m'))).dy,
+      ];
+      expect(ys, orderedEquals([...ys]..sort()));
       await tester.tap(find.byKey(const Key('agent-permission-bypass')));
       await tester.pump();
       expect(find.byKey(const Key('agent-confirm-dialog')), findsOneWidget);

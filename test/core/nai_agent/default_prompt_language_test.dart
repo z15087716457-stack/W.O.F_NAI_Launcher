@@ -44,6 +44,18 @@ void main() {
     }
   });
 
+  test('built-in prompt stays general: no defensive fallback lines', () {
+    final zh = naiAgentDefaultSystemPromptFor(AppLanguage.simplifiedChinese);
+    final en = naiAgentDefaultSystemPromptFor(AppLanguage.english);
+    expect(zh, contains('通用助手'));
+    expect(zh, contains('可以用 ask_user'));
+    expect(zh, isNot(contains('不把')));
+    expect(zh, isNot(contains('缺关键输入')));
+    expect(en, contains('general-purpose'));
+    expect(en, isNot(contains('Never report')));
+    expect(en, isNot(contains('key input is missing')));
+  });
+
   test(
     'effective prompt follows the interface language; custom text kept',
     () async {

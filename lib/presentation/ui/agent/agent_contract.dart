@@ -886,8 +886,8 @@ class AgentThinkingData {
   final bool followsModel;
 }
 
-/// 权限档：[bypass] = 不再询问（花 Anlas 仍单独确认）。
-enum AgentPermissionMode { bypass, auto, ask, readonly }
+/// 权限档，按权限从低到高排（菜单同序）；[bypass] = 不再询问（花 Anlas 仍单独确认）。
+enum AgentPermissionMode { readonly, ask, auto, bypass }
 
 @immutable
 class AgentUsageData {
