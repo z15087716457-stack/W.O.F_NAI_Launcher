@@ -18265,7 +18265,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agModelSec => 'モデル';
 
   @override
-  String get set_agModel => 'Agent のモデル';
+  String get set_agModel => 'デフォルトモデル';
 
   @override
   String get set_agModelSub => '思考の強さはチャット欄で調整します';
@@ -19866,14 +19866,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_delete => '削除';
 
   @override
-  String get ag_deleteChatTitle => 'チャットを削除しますか？';
-
-  @override
-  String ag_deleteChatBody(String title) {
-    return '「$title」はごみ箱に移動し、元に戻せます。生成した画像はギャラリーと履歴に残ります。';
-  }
-
-  @override
   String get ag_deleteWorkspaceTitle => 'ワークスペースを削除しますか？';
 
   @override
@@ -19920,6 +19912,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_usageAnlas => '画像生成の費用（概算）';
+
+  @override
+  String get ag_deleteAgain => 'もう一度クリックで削除';
 
   @override
   String get ag_recent => '最近';

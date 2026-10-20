@@ -14,12 +14,16 @@ class UiModal extends StatefulWidget {
     required this.dialog,
     required this.onDismiss,
     this.barrierDismissible = true,
+    this.contained = false,
   });
 
   final Widget child;
   final WidgetBuilder? dialog;
   final VoidCallback onDismiss;
   final bool barrierDismissible;
+
+  /// 遮罩和弹窗只盖住 [child] 自己的区域（例如侧栏），而不是整个窗口。
+  final bool contained;
 
   @override
   State<UiModal> createState() => _UiModalState();
@@ -62,56 +66,72 @@ class _UiModalState extends State<UiModal> {
   }
 
   @override
-  Widget build(BuildContext context) => OverlayPortal(
-    controller: _portal,
-    overlayChildBuilder: (context) {
-      final dialog = widget.dialog;
-      if (dialog == null) return const SizedBox.shrink();
-      final c = context.ui;
-      // 弹窗自带一个焦点域：里面的 autofocus（例如大图详情的方向键）不会被页面的焦点挡掉。
-      return Positioned.fill(
-        child: FocusScope(
-          child: Focus(
-            focusNode: _focus,
-            onKeyEvent: (_, e) {
-              if (e is KeyDownEvent &&
-                  e.logicalKey == LogicalKeyboardKey.escape) {
-                widget.onDismiss();
-                return KeyEventResult.handled;
-              }
-              return KeyEventResult.ignored;
-            },
-            child: Stack(
-              children: [
-                Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: widget.barrierDismissible ? widget.onDismiss : null,
-                    child: ColoredBox(
-                      color: c.dark
-                          ? const Color(0x99000000)
-                          : const Color(0x730A0A0A),
-                    ),
+  Widget build(BuildContext context) {
+    if (!widget.contained) {
+      return OverlayPortal(
+        controller: _portal,
+        overlayChildBuilder: (context) =>
+            widget.dialog == null ? const SizedBox.shrink() : _layer(context),
+        child: widget.child,
+      );
+    }
+    return OverlayPortal.overlayChildLayoutBuilder(
+      controller: _portal,
+      overlayChildBuilder: (context, info) {
+        if (widget.dialog == null) return const SizedBox.shrink();
+        final rect = MatrixUtils.transformRect(
+          info.childPaintTransform,
+          Offset.zero & info.childSize,
+        );
+        return Positioned.fromRect(rect: rect, child: _layer(context));
+      },
+      child: widget.child,
+    );
+  }
+
+  Widget _layer(BuildContext context) {
+    final dialog = widget.dialog!;
+    final c = context.ui;
+    // 弹窗自带一个焦点域：里面的 autofocus（例如大图详情的方向键）不会被页面的焦点挡掉。
+    return SizedBox.expand(
+      child: FocusScope(
+        child: Focus(
+          focusNode: _focus,
+          onKeyEvent: (_, e) {
+            if (e is KeyDownEvent &&
+                e.logicalKey == LogicalKeyboardKey.escape) {
+              widget.onDismiss();
+              return KeyEventResult.handled;
+            }
+            return KeyEventResult.ignored;
+          },
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: widget.barrierDismissible ? widget.onDismiss : null,
+                  child: ColoredBox(
+                    color: c.dark
+                        ? const Color(0x99000000)
+                        : const Color(0x730A0A0A),
                   ),
                 ),
-                Positioned.fill(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Center(
-                      child: FocusTraversalGroup(
-                        child: Builder(builder: dialog),
-                      ),
-                    ),
+              ),
+              Positioned.fill(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: FocusTraversalGroup(child: Builder(builder: dialog)),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      );
-    },
-    child: widget.child,
-  );
+      ),
+    );
+  }
 }
 
 /// 弹窗标题行：52 高、左 18 右 10、间距 8、下边线；标题 15 / w700。

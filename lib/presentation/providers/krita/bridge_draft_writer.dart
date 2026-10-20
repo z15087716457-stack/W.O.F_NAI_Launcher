@@ -90,7 +90,14 @@ final bridgeDraftWriterProvider = Provider<BridgeDraftWriter>((ref) {
     apply<bool>('smea_auto', flag('smea_auto'), notifier.updateSmeaAuto);
     apply<bool>('smea', flag('smea'), notifier.updateSmea);
     apply<bool>('smea_dyn', flag('smea_dyn'), notifier.updateSmeaDyn);
-    apply<bool>('use_coords', flag('use_coords'), notifier.updateUseCoords);
+    apply<bool>('use_coords', flag('use_coords'), (value) {
+      // Set the target mode before replaceAll normalizes the incoming characters;
+      // explicit custom x/y survive normalization, while missing positions fill in.
+      ref
+          .read(characterPromptNotifierProvider.notifier)
+          .setGlobalAiChoice(!value);
+      notifier.updateUseCoords(value);
+    });
 
     final w = integer('width');
     final h = integer('height');

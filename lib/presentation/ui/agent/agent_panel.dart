@@ -40,6 +40,9 @@ class _AgentPanelState extends State<AgentPanel> {
   late var _tab = widget.initialTab;
   final _composer = GlobalKey<AgentComposerState>();
   WidgetBuilder? _dialog;
+
+  /// 确认 / 改名弹窗只盖侧栏；看大图仍盖整个窗口。
+  var _dialogContained = true;
   String? _toast;
   Timer? _toastTimer;
   (String, Future<bool> Function())? _undo;
@@ -101,8 +104,8 @@ class _AgentPanelState extends State<AgentPanel> {
       if (mounted) setState(() => _dialog = null);
     }
 
-    setState(
-      () => _dialog = (_) => _ConfirmDialog(
+    _openDialog(
+      (_) => _ConfirmDialog(
         title: title,
         message: message,
         confirm: confirm,
@@ -116,6 +119,12 @@ class _AgentPanelState extends State<AgentPanel> {
   }
 
   VoidCallback? _dismissConfirm;
+
+  void _openDialog(WidgetBuilder builder, {bool contained = true}) =>
+      setState(() {
+        _dialogContained = contained;
+        _dialog = builder;
+      });
 
   Future<void> _run(Future<bool> Function() action) async {
     var ok = false;
@@ -132,8 +141,8 @@ class _AgentPanelState extends State<AgentPanel> {
     required String value,
     required Future<bool> Function(String value) save,
   }) {
-    setState(
-      () => _dialog = (_) => _NameDialog(
+    _openDialog(
+      (_) => _NameDialog(
         title: title,
         value: value,
         onCancel: () => setState(() => _dialog = null),
@@ -146,9 +155,9 @@ class _AgentPanelState extends State<AgentPanel> {
   }
 
   void _zoom(AgentImage image) {
-    setState(
-      () => _dialog = (_) =>
-          _Zoom(image: image, onClose: () => setState(() => _dialog = null)),
+    _openDialog(
+      (_) => _Zoom(image: image, onClose: () => setState(() => _dialog = null)),
+      contained: false,
     );
   }
 
@@ -222,6 +231,7 @@ class _AgentPanelState extends State<AgentPanel> {
       undoToast: _showUndo,
       child: UiModal(
         dialog: _dialog,
+        contained: _dialogContained,
         onDismiss: () {
           final dismiss = _dismissConfirm;
           _dismissConfirm = null;
@@ -413,7 +423,7 @@ class _NameDialogState extends State<_NameDialog> {
     final multi = widget.value.contains('\n') || widget.value.length > 60;
     return Container(
       key: const Key('agent-name-dialog'),
-      width: 380,
+      constraints: const BoxConstraints(maxWidth: 380),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: c.card,
@@ -560,7 +570,7 @@ class _ConfirmDialogState extends State<_ConfirmDialog> {
     final l = context.l10n;
     return Container(
       key: const Key('agent-confirm-dialog'),
-      width: 380,
+      constraints: const BoxConstraints(maxWidth: 380),
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: c.card,

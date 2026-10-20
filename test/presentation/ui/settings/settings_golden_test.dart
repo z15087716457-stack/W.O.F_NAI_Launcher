@@ -176,6 +176,24 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
         Rect.fromLTRB(first.left, first.top, first.right, capture.bottom),
       );
     }
+    // 2026-10-20：“Agent 使用的模型”改名“默认模型”、下拉按钮左边改用厂商图标（用户确认）：
+    // 只排除这一行的标题和下拉按钮里的图标格。
+    // 旧标题更长，排除整条标题行（到下拉按钮左边为止），副标题和按钮外框照旧锁定。
+    final modelSelect = find.byKey(const Key('select-agentModel'));
+    for (final title in find.text(l.set_agModel).evaluate()) {
+      final rect = t.getRect(find.byWidget(title.widget));
+      final right = modelSelect.evaluate().isEmpty
+          ? rect.right
+          : t.getRect(modelSelect).left - 8;
+      masks.add(Rect.fromLTRB(rect.left, rect.top, right, rect.bottom));
+    }
+    if (modelSelect.evaluate().isNotEmpty) {
+      final logo = find.descendant(
+        of: modelSelect,
+        matching: find.byType(SettingsLogo),
+      );
+      if (logo.evaluate().isNotEmpty) masks.add(t.getRect(logo));
+    }
     for (final title in find.text(l.set_agPrefix).evaluate()) {
       masks.add(t.getRect(find.byWidget(title.widget)));
     }

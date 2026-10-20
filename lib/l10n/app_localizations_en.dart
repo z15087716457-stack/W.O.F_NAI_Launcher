@@ -18812,7 +18812,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agModelSec => 'Model';
 
   @override
-  String get set_agModel => 'Agent model';
+  String get set_agModel => 'Default model';
 
   @override
   String get set_agModelSub =>
@@ -20491,14 +20491,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_delete => 'Delete';
 
   @override
-  String get ag_deleteChatTitle => 'Delete this chat?';
-
-  @override
-  String ag_deleteChatBody(String title) {
-    return '\"$title\" moves to the trash and can be undone. Generated images stay in the gallery and history.';
-  }
-
-  @override
   String get ag_deleteWorkspaceTitle => 'Delete this workspace?';
 
   @override
@@ -20545,6 +20537,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_usageAnlas => 'Image spend (estimate)';
+
+  @override
+  String get ag_deleteAgain => 'Click again to delete';
 
   @override
   String get ag_recent => 'Recent';

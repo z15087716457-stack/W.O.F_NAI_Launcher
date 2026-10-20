@@ -28,6 +28,15 @@ class _AgentHeaderState extends State<AgentHeader> {
   UiPopoverAnchor? _chats, _more, _usage;
   var _compact = false;
 
+  /// “⋯”菜单里删除对话分两步：第一次点把这一项变成“再点一次删除”，第二次才删；
+  /// 移开或关菜单作废。删除工作区影响整组聊天，仍走侧栏内的确认弹窗。
+  String? _arming;
+
+  void _closeMore() => setState(() {
+    _more = null;
+    _arming = null;
+  });
+
   UiPopoverAnchor _below(BuildContext context, {bool right = false}) {
     final box = context.findRenderObject()! as RenderBox;
     final corner = right
@@ -115,7 +124,7 @@ class _AgentHeaderState extends State<AgentHeader> {
                           ),
                         UiPopover(
                           anchor: _more,
-                          onDismiss: () => setState(() => _more = null),
+                          onDismiss: _closeMore,
                           builder: (_) => _moreMenu(context),
                           child: Builder(
                             builder: (context) => AgentIconButton(
@@ -205,10 +214,16 @@ class _AgentHeaderState extends State<AgentHeader> {
     final d = s.data, a = s.actions;
     final l = context.l10n;
     final busy = d.status != AgentRunStatus.idle;
-    void close() => setState(() => _more = null);
+    void arm(String? v) {
+      if (_arming != v) setState(() => _arming = v);
+    }
+
+    // 构建时定下：第二次点击时菜单先关（_arming 被清空）再执行 onTap。
+    final chatArmed = _arming == 'chat';
+
     return UiMenu(
       width: 220,
-      onClose: close,
+      onClose: _closeMore,
       items: [
         if (_compact)
           UiMenuItem(
@@ -268,10 +283,13 @@ class _AgentHeaderState extends State<AgentHeader> {
           key: const Key('agent-menu-delete-chat'),
           divider: true,
           danger: true,
-          label: l.ag_menuDeleteChat,
+          label: chatArmed ? l.ag_deleteAgain : l.ag_menuDeleteChat,
           glyph: AgentGlyphs.trash,
           enabled: !busy,
-          onTap: () => agentDeleteChat(context, d.chat),
+          keepOpen: !chatArmed,
+          onExit: () => arm(null),
+          onTap: () =>
+              chatArmed ? agentDeleteChat(context, d.chat) : arm('chat'),
         ),
         UiMenuItem(
           key: const Key('agent-menu-delete-workspace'),

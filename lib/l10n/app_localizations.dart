@@ -32815,7 +32815,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agModel.
   ///
   /// In en, this message translates to:
-  /// **'Agent model'**
+  /// **'Default model'**
   String get set_agModel;
 
   /// No description provided for @set_agModelSub.
@@ -35764,18 +35764,6 @@ abstract class AppLocalizations {
   /// **'Delete'**
   String get ag_delete;
 
-  /// No description provided for @ag_deleteChatTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete this chat?'**
-  String get ag_deleteChatTitle;
-
-  /// No description provided for @ag_deleteChatBody.
-  ///
-  /// In en, this message translates to:
-  /// **'\"{title}\" moves to the trash and can be undone. Generated images stay in the gallery and history.'**
-  String ag_deleteChatBody(String title);
-
   /// No description provided for @ag_deleteWorkspaceTitle.
   ///
   /// In en, this message translates to:
@@ -35859,6 +35847,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Image spend (estimate)'**
   String get ag_usageAnlas;
+
+  /// No description provided for @ag_deleteAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Click again to delete'**
+  String get ag_deleteAgain;
 
   /// No description provided for @ag_recent.
   ///

@@ -537,11 +537,12 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
               control: SetSelect(
                 SettingKey.agentModel,
                 width: 230,
-                leading: model?.mark == null
+                leading: model == null || !model.hasLogo
                     ? null
                     : SettingsLogo(
-                        mark: model!.mark!,
+                        mark: model.mark,
                         color: model.color ?? 0xFF555555,
+                        logoAsset: model.logoAsset,
                         size: 18,
                       ),
               ),

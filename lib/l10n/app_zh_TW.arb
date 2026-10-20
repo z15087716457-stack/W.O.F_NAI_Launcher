@@ -10050,7 +10050,7 @@
   "set_mdEmptySub": "新增一個服務商後，翻譯和反推就能用了。",
   "set_agDesc": "側欄助手的模型、指令、Skill、擴展和 MCP 工具。",
   "set_agModelSec": "模型",
-  "set_agModel": "Agent 使用的模型",
+  "set_agModel": "預設模型",
   "set_agModelSub": "思考強度在聊天框裡按任務調整",
   "set_agEnter": "Enter 直接傳送",
   "set_agEnterSub": "關掉後用 Ctrl+Enter 傳送，Enter 換行",
@@ -10823,15 +10823,6 @@
   "ag_menuDeleteChat": "刪除對話",
   "ag_menuDeleteWorkspace": "刪除工作區",
   "ag_delete": "刪除",
-  "ag_deleteChatTitle": "刪除對話？",
-  "ag_deleteChatBody": "「{title}」會移進回收區，可以復原。生成的圖片仍保留在圖庫和歷史中。",
-  "@ag_deleteChatBody": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
   "ag_deleteWorkspaceTitle": "刪除工作區？",
   "ag_deleteWorkspaceBody": "工作區「{name}」和裡面的全部對話會移進回收區，可以復原。生成的圖片仍保留在圖庫和歷史中。",
   "@ag_deleteWorkspaceBody": {
@@ -10867,6 +10858,7 @@
   "ag_imageReferenceDone": "已設為精確參考",
   "ag_imageParamsDone": "已載入生成參數",
   "ag_usageAnlas": "生圖花費（估算）",
+  "ag_deleteAgain": "再點一次刪除",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "編輯",

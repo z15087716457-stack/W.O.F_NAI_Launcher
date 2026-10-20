@@ -83,24 +83,28 @@ abstract final class AgentFixture {
       label: 'Sonnet 4.5',
       provider: 'Anthropic',
       selected: true,
+      logoAsset: 'anthropic',
     ),
     const AgentModelOption(
       providerId: 'anthropic',
       modelId: 'claude-opus-4-1',
       label: 'Opus 4.1',
       provider: 'Anthropic',
+      logoAsset: 'anthropic',
     ),
     const AgentModelOption(
       providerId: 'openai',
       modelId: 'gpt-5',
       label: 'GPT-5',
       provider: 'OpenAI',
+      logoAsset: 'openai',
     ),
     const AgentModelOption(
       providerId: 'deepseek',
       modelId: 'deepseek-chat',
       label: 'DeepSeek V3.2',
       provider: 'DeepSeek',
+      mark: 'DS',
     ),
   ];
 

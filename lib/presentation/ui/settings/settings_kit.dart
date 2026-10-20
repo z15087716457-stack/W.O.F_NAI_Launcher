@@ -1131,6 +1131,14 @@ class _SettingsSelectState extends State<SettingsSelect> {
               key: Key('settings-option-${o.value}'),
               label: o.label,
               trailing: o.detail,
+              leading: o.hasLogo
+                  ? SettingsLogo(
+                      mark: o.mark,
+                      color: o.color ?? 0xFF555555,
+                      logoAsset: o.logoAsset,
+                      size: 16,
+                    )
+                  : null,
               checked: o.value == widget.selected,
               onTap: () => widget.onSelected(o.value),
             ),

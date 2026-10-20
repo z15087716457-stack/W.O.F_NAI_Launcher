@@ -389,6 +389,7 @@ class SettingsOption {
     this.detail,
     this.mark,
     this.color,
+    this.logoAsset,
   });
   final String value;
   final String label;
@@ -396,9 +397,13 @@ class SettingsOption {
   /// 弱色补充，例如服务商名、显存要求。
   final String? detail;
 
-  /// 服务商小图标（Agent 模型下拉框里显示）：1–2 个字母 + 底色（ARGB）。
+  /// 服务商小图标（Agent 模型下拉框里显示）：预设服务商用 [logoAsset]
+  /// （`assets/icons/providers/<name>.svg`），自定义端点才用 1–2 个字母 + 底色（ARGB）。
   final String? mark;
   final int? color;
+  final String? logoAsset;
+
+  bool get hasLogo => logoAsset != null || mark != null;
 }
 
 /// 标量设置的当前值：bool / String / double / null（路径为 null = 默认位置）。

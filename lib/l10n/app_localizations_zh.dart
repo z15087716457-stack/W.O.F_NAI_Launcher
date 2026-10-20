@@ -18046,7 +18046,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agModelSec => '模型';
 
   @override
-  String get set_agModel => 'Agent 使用的模型';
+  String get set_agModel => '默认模型';
 
   @override
   String get set_agModelSub => '思考强度在聊天框里按任务调整';
@@ -19633,14 +19633,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_delete => '删除';
 
   @override
-  String get ag_deleteChatTitle => '删除对话？';
-
-  @override
-  String ag_deleteChatBody(String title) {
-    return '「$title」会移进回收区，可以撤销。生成的图片仍保留在图库和历史中。';
-  }
-
-  @override
   String get ag_deleteWorkspaceTitle => '删除工作区？';
 
   @override
@@ -19687,6 +19679,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_usageAnlas => '生图花费（估算）';
+
+  @override
+  String get ag_deleteAgain => '再点一次删除';
 
   @override
   String get ag_recent => '最近';
@@ -38732,7 +38727,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agModelSec => '模型';
 
   @override
-  String get set_agModel => 'Agent 使用的模型';
+  String get set_agModel => '預設模型';
 
   @override
   String get set_agModelSub => '思考強度在聊天框裡按任務調整';
@@ -40319,14 +40314,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_delete => '刪除';
 
   @override
-  String get ag_deleteChatTitle => '刪除對話？';
-
-  @override
-  String ag_deleteChatBody(String title) {
-    return '「$title」會移進回收區，可以復原。生成的圖片仍保留在圖庫和歷史中。';
-  }
-
-  @override
   String get ag_deleteWorkspaceTitle => '刪除工作區？';
 
   @override
@@ -40373,6 +40360,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_usageAnlas => '生圖花費（估算）';
+
+  @override
+  String get ag_deleteAgain => '再點一次刪除';
 
   @override
   String get ag_recent => '最近';

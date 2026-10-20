@@ -62,10 +62,7 @@ SettingsModelsData settingsModelsData(BuildContext context, WidgetRef ref) {
           id: provider.id,
           name: provider.name,
           protocol: provider.protocol.label,
-          mark:
-              provider.preset == null ||
-                  provider.preset == ProviderPreset.openaiCompatibleChat ||
-                  provider.preset == ProviderPreset.openaiCompatibleResponses
+          mark: providerUsesMark(provider)
               ? provider.name.characters.take(2).toString().toUpperCase()
               : null,
           logoAsset: provider.preset?.logoAsset,

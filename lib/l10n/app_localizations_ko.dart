@@ -18317,7 +18317,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agModelSec => '모델';
 
   @override
-  String get set_agModel => 'Agent 모델';
+  String get set_agModel => '기본 모델';
 
   @override
   String get set_agModelSub => '사고 강도는 채팅 창에서 작업별로 조정합니다';
@@ -19933,14 +19933,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_delete => '삭제';
 
   @override
-  String get ag_deleteChatTitle => '대화를 삭제할까요?';
-
-  @override
-  String ag_deleteChatBody(String title) {
-    return '\"$title\"은(는) 휴지통으로 이동하며 되돌릴 수 있습니다. 생성한 이미지는 갤러리와 기록에 남습니다.';
-  }
-
-  @override
   String get ag_deleteWorkspaceTitle => '작업 공간을 삭제할까요?';
 
   @override
@@ -19987,6 +19979,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_usageAnlas => '이미지 생성 비용(추정)';
+
+  @override
+  String get ag_deleteAgain => '한 번 더 누르면 삭제';
 
   @override
   String get ag_recent => '최근';

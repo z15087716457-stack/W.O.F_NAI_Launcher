@@ -675,6 +675,20 @@ class _AgentStepsState extends State<AgentSteps> {
                         : _open.add(step.id),
                   ),
           ),
+          // 看图的步骤：缩略图直接放在这一行下面，点开看大图；参数仍在展开里。
+          if (step.tool == 'image_read' && step.images.isNotEmpty)
+            Padding(
+              key: Key('agent-step-images-${step.id}'),
+              padding: const EdgeInsets.fromLTRB(31, 2, 6, 6),
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  for (final img in step.images)
+                    AgentThumb(image: img, width: 64, height: 64),
+                ],
+              ),
+            ),
           if (_open.contains(step.id)) _StepDetail(step: step),
         ],
       ],
@@ -845,7 +859,7 @@ class _StepDetail extends StatelessWidget {
           if (step.arguments != null)
             block(l.ag_stepArguments, step.arguments!),
           if (step.result != null) block(l.ag_stepResult, step.result!),
-          if (step.images.isNotEmpty)
+          if (step.images.isNotEmpty && step.tool != 'image_read')
             Wrap(
               spacing: 6,
               runSpacing: 6,

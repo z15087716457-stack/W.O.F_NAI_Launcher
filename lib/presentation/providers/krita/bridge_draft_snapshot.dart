@@ -153,7 +153,7 @@ BridgeDraftSnapshot readBridgeDraft(
       'smea_auto': p.smeaAuto,
       'smea': p.smea,
       'smea_dyn': p.smeaDyn,
-      'use_coords': p.useCoords,
+      'use_coords': !config.globalAiChoice,
       'characters': [
         for (final c in config.characters)
           {

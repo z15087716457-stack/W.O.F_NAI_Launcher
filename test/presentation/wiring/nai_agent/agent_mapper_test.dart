@@ -239,6 +239,71 @@ void main() {
   );
 
   test(
+    'CodeMode image_read: viewed pictures attach to the image_read sub-step',
+    () async {
+      List<AgentStep> steps() =>
+          (mapper.map(runtime).turns.single.reply!.blocks.single
+                  as AgentStepsBlock)
+              .steps;
+      runtime.messages = [
+        assistant([call('code', 'codemode')]),
+        {
+          'role': 'toolResult',
+          'toolCallId': 'code',
+          'content': [
+            {'type': 'text', 'text': 'Script completed'},
+            {
+              'type': 'image',
+              'mimeType': 'image/png',
+              'data': base64Encode(png),
+            },
+          ],
+          'nestedCalls': {
+            'calls': [
+              {'name': 'mcp__nai_studio__studio_context', 'status': 'ok'},
+              {
+                'name': 'mcp__nai_studio__image_read',
+                'status': 'ok',
+                'arguments': {'image_id': 'selected'},
+              },
+            ],
+          },
+        },
+      ];
+      steps();
+      await resources.settle();
+      final mapped = steps();
+      expect(mapped.map((s) => s.tool), ['studio_context', 'image_read']);
+      expect(mapped.first.images, isEmpty);
+      expect(mapped.last.images, hasLength(1));
+
+      // A failed image_read gets nothing; no image_read keeps images unattached.
+      runtime.messages = [
+        assistant([call('code2', 'codemode')]),
+        {
+          'role': 'toolResult',
+          'toolCallId': 'code2',
+          'content': [
+            {
+              'type': 'image',
+              'mimeType': 'image/png',
+              'data': base64Encode(png),
+            },
+          ],
+          'nestedCalls': {
+            'calls': [
+              {'name': 'mcp__nai_studio__image_read', 'status': 'error'},
+            ],
+          },
+        },
+      ];
+      steps();
+      await resources.settle();
+      expect(steps().single.images, isEmpty);
+    },
+  );
+
+  test(
     'artifacts and user images feed shelf; history ids ignore non-image artifacts',
     () async {
       final dir = runtime.workspace.directory;
@@ -446,6 +511,60 @@ void main() {
       expect(diffs.map((d) => d.characterIndex), [0, 1]);
     },
   );
+
+  test('custom position moves keep the board without a mode change', () async {
+    final backupDir = Directory(
+      '${runtime.workspace.agentDirectory.path}/draft-backups',
+    );
+    await backupDir.create(recursive: true);
+    final backup = File('${backupDir.path}/custom-pos.json');
+    final before = {
+      'use_coords': true,
+      'characters': [
+        {'id': 'a', 'name': 'Alice', 'prompt': 'x', 'x': 0.173, 'y': 0.827},
+      ],
+    };
+    await backup.writeAsString(jsonEncode({'fields': before}));
+    runtime.messages = [
+      assistant([call('custom-pos', 'mcp__nai_studio__prompt_update')]),
+      result('custom-pos', {
+        'applied': ['characters(1)'],
+        'backup_path': backup.path,
+        'draft': {
+          'draft_version': 'v1',
+          'fields': {
+            ...before,
+            'characters': [
+              {
+                'id': 'a',
+                'name': 'Alice',
+                'prompt': 'x',
+                'x': 0.912,
+                'y': 0.064,
+              },
+            ],
+          },
+        },
+      }),
+    ];
+    mapper.map(runtime);
+    await resources.settle();
+    final card = mapper
+        .map(runtime, draftVersion: 'v1')
+        .turns
+        .single
+        .reply!
+        .blocks
+        .whereType<AgentPositionBlock>()
+        .single;
+    expect(card.customBefore, true);
+    expect(card.customAfter, true);
+    expect(card.modeChanged, false);
+    expect(card.moved, isNotEmpty);
+    expect(card.moved.single.name, 'Alice');
+    expect(card.moved.single.before, const Offset(0.173, 0.827));
+    expect(card.moved.single.after, const Offset(0.912, 0.064));
+  });
 
   test('character position changes map to one position card', () async {
     final backupDir = Directory(

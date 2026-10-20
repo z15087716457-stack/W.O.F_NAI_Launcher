@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_popover.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
@@ -67,17 +68,11 @@ class _AgentPopRowState extends State<AgentPopRow> {
   }
 }
 
-/// 删除聊天：确认 → 移进回收区 → 底部可撤销提示。
+/// 删除聊天：调用方已在原地确认过（列表行内两个按钮 / 菜单项再点一次）→
+/// 移进回收区 → 底部可撤销提示。
 Future<void> agentDeleteChat(BuildContext context, AgentChatInfo chat) async {
   final s = AgentScope.of(context);
   final l = context.l10n;
-  final ok = await s.confirm(
-    title: l.ag_deleteChatTitle,
-    message: l.ag_deleteChatBody(chat.title),
-    confirm: l.ag_delete,
-    danger: true,
-  );
-  if (ok == null) return;
   String? token;
   await s.run(() async {
     token = await s.actions.onDeleteChat(chat.id);
@@ -89,7 +84,8 @@ Future<void> agentDeleteChat(BuildContext context, AgentChatInfo chat) async {
   }
 }
 
-/// 删除工作区：同上；只剩一个时调用方已禁用入口。
+/// 删除工作区：影响整组聊天，仍用确认弹窗（只盖侧栏）→ 回收区 → 可撤销提示；
+/// 只剩一个时调用方已禁用入口。
 Future<void> agentDeleteWorkspace(
   BuildContext context,
   AgentWorkspaceInfo workspace,
@@ -118,14 +114,66 @@ Future<void> agentDeleteWorkspace(
 }
 
 class _GroupLabel extends StatelessWidget {
-  const _GroupLabel(this.text);
+  const _GroupLabel(this.text, {this.leading});
   final String text;
+  final Widget? leading;
 
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
-    child: AgentEyebrow(text),
+    child: leading == null
+        ? AgentEyebrow(text)
+        : Row(
+            spacing: 6,
+            children: [
+              leading!,
+              Flexible(child: AgentEyebrow(text)),
+            ],
+          ),
   );
+}
+
+/// 模型分组标题前的服务商小图标：预设画品牌 SVG（单色跟随前景），自定义端点画字母块。
+class AgentProviderLogo extends StatelessWidget {
+  const AgentProviderLogo({
+    super.key,
+    this.logoAsset,
+    this.mark,
+    this.size = 13,
+  });
+  final String? logoAsset, mark;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    if (logoAsset case final asset?) {
+      return UiSvgIcon.asset(
+        'assets/icons/providers/$asset.svg',
+        size: size,
+        colorFilter: ColorFilter.mode(c.muted, BlendMode.srcIn),
+        excludeFromSemantics: true,
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: c.muted,
+        borderRadius: BorderRadius.circular(size * .25),
+      ),
+      child: Text(
+        mark ?? '',
+        style: UiText.mono(
+          size * .5,
+          weight: FontWeight.w700,
+          color: c.card,
+          height: 1,
+        ),
+      ),
+    );
+  }
 }
 
 /// 聊天列表：搜索 + 当前工作区的聊天 + 切换工作区 + 新建工作区。
@@ -144,6 +192,15 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
 
   /// 正文命中：(查的词, 结果)；结果为 null = 正在查。
   (String, List<AgentChatHit>?)? _hits;
+
+  /// 正在行内确认删除的聊天（同时只有一行）。
+  String? _confirming;
+
+  void _confirmDelete(String? id) {
+    setState(() => _confirming = id);
+    // 焦点留在列表里（搜索框在 Esc 处理之内），Esc 才先取消确认而不是关列表。
+    if (id != null) _focus.requestFocus();
+  }
 
   @override
   void dispose() {
@@ -195,255 +252,341 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
         )
         .toList();
     final width = (MediaQuery.sizeOf(context).width - 24).clamp(240.0, 320.0);
-    return UiPopoverSurface(
-      key: const Key('agent-chats-popover'),
-      width: width,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 460),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              height: 40,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: c.line)),
-              ),
-              child: Row(
-                spacing: 8,
-                children: [
-                  AgentIcon(AgentGlyphs.search, size: 14, color: c.faint),
-                  Expanded(
-                    child: TextField(
-                      key: const Key('agent-chats-search'),
-                      controller: _query,
-                      focusNode: _focus,
-                      autofocus: true,
-                      onChanged: _changed,
-                      style: UiText.sans(12.5, color: c.ink),
-                      cursorColor: c.accent,
-                      cursorWidth: 1.5,
-                      decoration: agentBareInput(
-                        hint: l.ag_chatsSearch,
-                        hintStyle: UiText.sans(12.5, color: c.faint),
+    // 行内确认时 Esc 先取消确认，不关列表。
+    return Focus(
+      canRequestFocus: false,
+      skipTraversal: true,
+      onKeyEvent: (_, e) {
+        if (_confirming != null &&
+            e is KeyDownEvent &&
+            e.logicalKey == LogicalKeyboardKey.escape) {
+          _confirmDelete(null);
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      },
+      child: UiPopoverSurface(
+        key: const Key('agent-chats-popover'),
+        width: width,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 460),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: c.line)),
+                ),
+                child: Row(
+                  spacing: 8,
+                  children: [
+                    AgentIcon(AgentGlyphs.search, size: 14, color: c.faint),
+                    Expanded(
+                      child: TextField(
+                        key: const Key('agent-chats-search'),
+                        controller: _query,
+                        focusNode: _focus,
+                        autofocus: true,
+                        onChanged: _changed,
+                        style: UiText.sans(12.5, color: c.ink),
+                        cursorColor: c.accent,
+                        cursorWidth: 1.5,
+                        decoration: agentBareInput(
+                          hint: l.ag_chatsSearch,
+                          hintStyle: UiText.sans(12.5, color: c.faint),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _GroupLabel(d.workspace.name),
-                    if (chats.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
-                        child: Text(
-                          l.ag_chatsNoMatch,
-                          style: UiText.sans(12, color: c.faint),
-                        ),
-                      ),
-                    for (final chat in chats)
-                      AgentPopRow(
-                        key: Key('agent-chat-${chat.id}'),
-                        selected: chat.id == d.chat.id,
-                        onTap: () {
-                          widget.onClose();
-                          if (chat.id != d.chat.id) {
-                            s.run(() => a.onSelectChat(chat.id));
-                          }
-                        },
-                        builder: (context, hover) => Row(
-                          spacing: 9,
-                          children: [
-                            Container(
-                              width: 7,
-                              height: 7,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: switch (chat.state) {
-                                  AgentChatState.waitingUser => c.warn,
-                                  AgentChatState.running => c.accent,
-                                  AgentChatState.idle =>
-                                    chat.id == d.chat.id
-                                        ? c.ink
-                                        : Colors.transparent,
-                                },
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                chat.title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: UiText.sans(
-                                  12.5,
-                                  weight: chat.id == d.chat.id
-                                      ? FontWeight.w500
-                                      : FontWeight.w400,
-                                  color: c.ink,
-                                ),
-                              ),
-                            ),
-                            if (hover &&
-                                chat.state == AgentChatState.idle &&
-                                !(chat.id == d.chat.id &&
-                                    d.status != AgentRunStatus.idle))
-                              AgentIconButton(
-                                key: Key('agent-chat-delete-${chat.id}'),
-                                small: true,
-                                glyph: AgentGlyphs.trash,
-                                tooltip: l.ag_menuDeleteChat,
-                                onPressed: () {
-                                  widget.onClose();
-                                  agentDeleteChat(context, chat);
-                                },
-                              )
-                            else
-                              Text(
-                                switch (chat.state) {
-                                  AgentChatState.waitingUser =>
-                                    l.ag_chatWaiting,
-                                  AgentChatState.running => l.ag_chatRunning,
-                                  AgentChatState.idle => agentDay(
-                                    chat.createdAt,
-                                    d.now,
-                                    l.ag_yesterday,
-                                  ),
-                                },
-                                style: UiText.mono(
-                                  11,
-                                  color:
-                                      chat.state == AgentChatState.waitingUser
-                                      ? c.warn
-                                      : c.faint,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    if (_hits case (
-                      final hq,
-                      final found,
-                    ) when hq == _query.text.trim()) ...[
-                      _GroupLabel(l.ag_chatsContent),
-                      if (found == null)
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
-                          child: Text(
-                            l.ag_chatsSearching,
-                            style: UiText.sans(12, color: c.faint),
-                          ),
-                        )
-                      else if (found.isEmpty)
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _GroupLabel(d.workspace.name),
+                      if (chats.isEmpty)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
                           child: Text(
                             l.ag_chatsNoMatch,
                             style: UiText.sans(12, color: c.faint),
                           ),
-                        )
-                      else
-                        for (final hit in found)
-                          AgentPopRow(
-                            key: Key('agent-chat-hit-${hit.chatId}'),
-                            height: 48,
-                            selected: hit.chatId == d.chat.id,
-                            onTap: () {
+                        ),
+                      for (final chat in chats)
+                        if (_confirming == chat.id)
+                          _DeleteConfirmRow(
+                            key: Key('agent-chat-${chat.id}'),
+                            id: chat.id,
+                            title: chat.title,
+                            onCancel: () => _confirmDelete(null),
+                            // 确认后关列表：列表的遮罩会挡住底部的撤销提示。
+                            onDelete: () {
                               widget.onClose();
-                              if (hit.chatId != d.chat.id) {
-                                s.run(() => a.onSelectChat(hit.chatId));
+                              agentDeleteChat(context, chat);
+                            },
+                          )
+                        else
+                          AgentPopRow(
+                            key: Key('agent-chat-${chat.id}'),
+                            selected: chat.id == d.chat.id,
+                            onTap: () {
+                              if (_confirming != null) {
+                                _confirmDelete(null);
+                                return;
+                              }
+                              widget.onClose();
+                              if (chat.id != d.chat.id) {
+                                s.run(() => a.onSelectChat(chat.id));
                               }
                             },
-                            child: Padding(
-                              // 和上面聊天行的标题对齐（让出状态点的 7 + 9）。
-                              padding: const EdgeInsets.only(left: 16),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                spacing: 2,
-                                children: [
+                            builder: (context, hover) => Row(
+                              spacing: 9,
+                              children: [
+                                Container(
+                                  width: 7,
+                                  height: 7,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: switch (chat.state) {
+                                      AgentChatState.waitingUser => c.warn,
+                                      AgentChatState.running => c.accent,
+                                      AgentChatState.idle =>
+                                        chat.id == d.chat.id
+                                            ? c.ink
+                                            : Colors.transparent,
+                                    },
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    chat.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: UiText.sans(
+                                      12.5,
+                                      weight: chat.id == d.chat.id
+                                          ? FontWeight.w500
+                                          : FontWeight.w400,
+                                      color: c.ink,
+                                    ),
+                                  ),
+                                ),
+                                if (hover &&
+                                    chat.state == AgentChatState.idle &&
+                                    !(chat.id == d.chat.id &&
+                                        d.status != AgentRunStatus.idle))
+                                  AgentIconButton(
+                                    key: Key('agent-chat-delete-${chat.id}'),
+                                    small: true,
+                                    glyph: AgentGlyphs.trash,
+                                    tooltip: l.ag_menuDeleteChat,
+                                    onPressed: () => _confirmDelete(chat.id),
+                                  )
+                                else
                                   Text(
-                                    hit.title,
+                                    switch (chat.state) {
+                                      AgentChatState.waitingUser =>
+                                        l.ag_chatWaiting,
+                                      AgentChatState.running =>
+                                        l.ag_chatRunning,
+                                      AgentChatState.idle => agentDay(
+                                        chat.createdAt,
+                                        d.now,
+                                        l.ag_yesterday,
+                                      ),
+                                    },
+                                    style: UiText.mono(
+                                      11,
+                                      color:
+                                          chat.state ==
+                                              AgentChatState.waitingUser
+                                          ? c.warn
+                                          : c.faint,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                      if (_hits case (
+                        final hq,
+                        final found,
+                      ) when hq == _query.text.trim()) ...[
+                        _GroupLabel(l.ag_chatsContent),
+                        if (found == null)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                            child: Text(
+                              l.ag_chatsSearching,
+                              style: UiText.sans(12, color: c.faint),
+                            ),
+                          )
+                        else if (found.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                            child: Text(
+                              l.ag_chatsNoMatch,
+                              style: UiText.sans(12, color: c.faint),
+                            ),
+                          )
+                        else
+                          for (final hit in found)
+                            AgentPopRow(
+                              key: Key('agent-chat-hit-${hit.chatId}'),
+                              height: 48,
+                              selected: hit.chatId == d.chat.id,
+                              onTap: () {
+                                widget.onClose();
+                                if (hit.chatId != d.chat.id) {
+                                  s.run(() => a.onSelectChat(hit.chatId));
+                                }
+                              },
+                              child: Padding(
+                                // 和上面聊天行的标题对齐（让出状态点的 7 + 9）。
+                                padding: const EdgeInsets.only(left: 16),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 2,
+                                  children: [
+                                    Text(
+                                      hit.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    _Snippet(text: hit.snippet, query: hq),
+                                  ],
+                                ),
+                              ),
+                            ),
+                      ],
+
+                      if (others.isNotEmpty) ...[
+                        _GroupLabel(l.ag_chatsSwitchWorkspace),
+                        for (final w in others)
+                          AgentPopRow(
+                            key: Key('agent-workspace-${w.id}'),
+                            onTap: () {
+                              widget.onClose();
+                              s.run(() => a.onSelectWorkspace(w.id));
+                            },
+                            child: Row(
+                              spacing: 9,
+                              children: [
+                                AgentIcon(
+                                  AgentGlyphs.folder,
+                                  size: 14,
+                                  color: c.faint,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    w.name,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  _Snippet(text: hit.snippet, query: hq),
-                                ],
-                              ),
+                                ),
+                                if (w.chatCount != null)
+                                  Text(
+                                    '${w.chatCount}',
+                                    style: UiText.mono(11, color: c.faint),
+                                  ),
+                              ],
                             ),
                           ),
+                      ],
                     ],
-
-                    if (others.isNotEmpty) ...[
-                      _GroupLabel(l.ag_chatsSwitchWorkspace),
-                      for (final w in others)
-                        AgentPopRow(
-                          key: Key('agent-workspace-${w.id}'),
-                          onTap: () {
-                            widget.onClose();
-                            s.run(() => a.onSelectWorkspace(w.id));
-                          },
-                          child: Row(
-                            spacing: 9,
-                            children: [
-                              AgentIcon(
-                                AgentGlyphs.folder,
-                                size: 14,
-                                color: c.faint,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  w.name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              if (w.chatCount != null)
-                                Text(
-                                  '${w.chatCount}',
-                                  style: UiText.mono(11, color: c.faint),
-                                ),
-                            ],
-                          ),
-                        ),
-                    ],
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: c.line)),
+                ),
+                child: Row(
+                  children: [
+                    AgentButton(
+                      key: const Key('agent-new-workspace'),
+                      label: l.ag_chatsNewWorkspace,
+                      glyph: AgentGlyphs.plus,
+                      style: AgentButtonStyle.ghost,
+                      height: 26,
+                      onPressed: () {
+                        widget.onClose();
+                        s.rename(
+                          title: l.ag_chatsNewWorkspace,
+                          value: '',
+                          save: a.onCreateWorkspace,
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: c.line)),
-              ),
-              child: Row(
-                children: [
-                  AgentButton(
-                    key: const Key('agent-new-workspace'),
-                    label: l.ag_chatsNewWorkspace,
-                    glyph: AgentGlyphs.plus,
-                    style: AgentButtonStyle.ghost,
-                    height: 26,
-                    onPressed: () {
-                      widget.onClose();
-                      s.rename(
-                        title: l.ag_chatsNewWorkspace,
-                        value: '',
-                        save: a.onCreateWorkspace,
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+/// 行内删除确认：这一行泛红，标题照常显示，右侧换成“取消 / 删除”。
+class _DeleteConfirmRow extends StatelessWidget {
+  const _DeleteConfirmRow({
+    super.key,
+    required this.id,
+    required this.title,
+    required this.onCancel,
+    required this.onDelete,
+  });
+  final String id, title;
+  final VoidCallback onCancel, onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    return Container(
+      height: 34,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      padding: const EdgeInsets.only(left: 8, right: 4),
+      decoration: BoxDecoration(
+        color: c.error.withValues(alpha: .08),
+        borderRadius: BorderRadius.circular(7),
+      ),
+      child: Row(
+        spacing: 6,
+        children: [
+          AgentIcon(AgentGlyphs.trash, size: 13, color: c.error),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12.5, color: c.ink, height: 1.2),
+            ),
+          ),
+          AgentButton(
+            key: Key('agent-chat-delete-cancel-$id'),
+            label: l.ag_cancel,
+            height: 24,
+            style: AgentButtonStyle.ghost,
+            onPressed: onCancel,
+          ),
+          AgentButton(
+            key: Key('agent-chat-delete-ok-$id'),
+            label: l.ag_delete,
+            height: 24,
+            style: AgentButtonStyle.danger,
+            onPressed: onDelete,
+          ),
+        ],
       ),
     );
   }
@@ -664,7 +807,18 @@ class AgentModelPopover extends StatelessWidget {
             children: [
               for (final MapEntry(key: provider, value: models)
                   in groups.entries) ...[
-                _GroupLabel(provider),
+                _GroupLabel(
+                  provider,
+                  leading:
+                      models.first.logoAsset == null &&
+                          models.first.mark == null
+                      ? null
+                      : AgentProviderLogo(
+                          key: Key('agent-model-logo-$provider'),
+                          logoAsset: models.first.logoAsset,
+                          mark: models.first.mark,
+                        ),
+                ),
                 for (final m in models)
                   AgentPopRow(
                     key: Key('agent-model-${m.providerId}-${m.modelId}'),

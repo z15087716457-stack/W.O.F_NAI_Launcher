@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_glyphs.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_thread.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
 
@@ -491,9 +493,19 @@ void main() {
       );
       final ctx = tester.element(find.byKey(const Key('agent-permission')));
       expect(label.style?.color, ctx.ui.error);
+      // 只有一个下拉箭头（按钮组件自带的那个）。
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('agent-permission')),
+          matching: find.byWidgetPredicate(
+            (w) => w is AgentIcon && w.path == AgentGlyphs.chevron,
+          ),
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('删除对话：悬停垃圾桶 → 确认 → 撤销提示；菜单删工作区', (tester) async {
+    testWidgets('删除对话：垃圾桶就地变成取消 / 删除，Esc 和点别处取消；删除后可撤销', (tester) async {
       final compose = AgentFixture.view(AgentScene.compose);
       final rec = await pumpAgent(
         tester,
@@ -507,18 +519,57 @@ void main() {
       );
       await tester.tap(find.byKey(const Key('agent-chats')));
       await tester.pump();
-      final row = find.byKey(const Key('agent-chat-c2'));
       final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await mouse.addPointer(location: tester.getCenter(row));
+      await mouse.addPointer(
+        location: tester.getCenter(find.byKey(const Key('agent-chat-c2'))),
+      );
       addTearDown(mouse.removePointer);
       await tester.pump();
-      // 等待用户的聊天（c3）不给删。
       expect(find.byKey(const Key('agent-chat-delete-c2')), findsOneWidget);
-      await tester.tap(find.byKey(const Key('agent-chat-delete-c2')));
-      await tester.pump();
-      expect(find.byKey(const Key('agent-confirm-dialog')), findsOneWidget);
+
+      Future<void> arm() async {
+        await mouse.moveTo(
+          tester.getCenter(find.byKey(const Key('agent-chat-c2'))),
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('agent-chat-delete-c2')));
+        await tester.pump();
+      }
+
+      // 点垃圾桶：列表不关、不弹窗，这一行出现取消 / 删除。
+      await arm();
+      expect(find.byKey(const Key('agent-chats-popover')), findsOneWidget);
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsOneWidget);
       expect(find.textContaining('厚涂对比三种光源'), findsWidgets);
-      await tester.tap(find.byKey(const Key('agent-confirm-ok')));
+      // 鼠标移开不会自动取消。
+      await mouse.moveTo(Offset.zero);
+      await tester.pump();
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsOneWidget);
+
+      // 取消按钮。
+      await tester.tap(find.byKey(const Key('agent-chat-delete-cancel-c2')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsNothing);
+      expect(rec.names, isNot(contains('deleteChat')));
+
+      // Esc 先取消确认，列表还在。
+      await arm();
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsNothing);
+      expect(find.byKey(const Key('agent-chats-popover')), findsOneWidget);
+
+      // 点别的行只取消，不切换。
+      await arm();
+      await tester.tap(find.byKey(const Key('agent-chat-c1')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsNothing);
+      expect(rec.names, isNot(contains('selectChat')));
+
+      // 确认删除 → 撤销提示。
+      await arm();
+      await tester.tap(find.byKey(const Key('agent-chat-delete-ok-c2')));
       await tester.pump();
       await tester.pump();
       expect(rec.last('deleteChat'), 'c2');
@@ -528,24 +579,132 @@ void main() {
       await tester.pump();
       expect(rec.last('undoDelete'), 'trash-c2');
       expect(find.byKey(const Key('agent-undo-toast')), findsNothing);
+    });
 
+    testWidgets('菜单删对话两步确认、移开作废；删工作区弹侧栏内确认框', (tester) async {
+      final compose = AgentFixture.view(AgentScene.compose);
+      final rec = await pumpAgent(
+        tester,
+        data: _copy(
+          compose,
+          chats: [
+            for (final c in compose.chats)
+              AgentChatInfo(id: c.id, title: c.title, createdAt: c.createdAt),
+          ],
+        ),
+      );
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await tester.tap(find.byKey(const Key('agent-more')));
+      await tester.pump();
+      final item = find.byKey(const Key('agent-menu-delete-chat'));
+      await mouse.moveTo(tester.getCenter(item));
+      await tester.pump();
+      await tester.tap(item);
+      await tester.pump();
+      expect(find.text('再点一次删除'), findsOneWidget);
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      expect(rec.names, isNot(contains('deleteChat')));
+      // 移开作废。
+      await mouse.moveTo(Offset.zero);
+      await tester.pump();
+      expect(find.text('再点一次删除'), findsNothing);
+      expect(find.text('删除对话'), findsOneWidget);
+      // 两次连点才删。
+      await mouse.moveTo(tester.getCenter(item));
+      await tester.pump();
+      await tester.tap(item);
+      await tester.pump();
+      await tester.tap(item);
+      await tester.pump();
+      await tester.pump();
+      expect(rec.names, contains('deleteChat'));
+      expect(find.byKey(const Key('agent-undo-toast')), findsOneWidget);
+
+      // 工作区影响整组聊天：仍弹确认框，但只盖侧栏。
       await tester.tap(find.byKey(const Key('agent-more')));
       await tester.pump();
       await tester.tap(find.byKey(const Key('agent-menu-delete-workspace')));
       await tester.pump();
+      final panel = tester.getRect(find.byKey(const Key('agent-panel')));
+      final dialog = tester.getRect(
+        find.byKey(const Key('agent-confirm-dialog')),
+      );
+      expect(panel.contains(dialog.center), isTrue);
+      expect(rec.names, isNot(contains('deleteWorkspace')));
       await tester.tap(find.byKey(const Key('agent-confirm-ok')));
       await tester.pump();
       await tester.pump();
       expect(rec.names, contains('deleteWorkspace'));
+
       // 等待用户时两个删除菜单都禁用。
       await pumpAgent(tester);
       await tester.tap(find.byKey(const Key('agent-more')));
       await tester.pump();
       await tester.tap(find.byKey(const Key('agent-menu-delete-chat')));
       await tester.pump();
-      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      expect(find.text('再点一次删除'), findsNothing);
       await tester.pump(const Duration(seconds: 7));
-      expect(find.byKey(const Key('agent-undo-toast')), findsNothing);
+    });
+
+    testWidgets('确认弹窗只盖侧栏，居中在侧栏里', (tester) async {
+      await pumpAgent(tester, width: 360);
+      await tester.tap(find.byKey(const Key('agent-permission')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-permission-bypass')));
+      await tester.pump();
+      await tester.pump();
+      final panel = tester.getRect(find.byKey(const Key('agent-panel')));
+      final dialog = tester.getRect(
+        find.byKey(const Key('agent-confirm-dialog')),
+      );
+      expect(panel.contains(dialog.topLeft), isTrue);
+      expect(panel.contains(dialog.bottomRight - const Offset(1, 1)), isTrue);
+      expect((dialog.center.dx - panel.center.dx).abs(), lessThan(1));
+    });
+
+    testWidgets('看图步骤：行下直接显示缩略图，不用展开参数；点开看大图', (tester) async {
+      final base = AgentFixture.view(AgentScene.compose);
+      await pumpAgent(
+        tester,
+        data: _copy(
+          base,
+          thread: [
+            AgentTurn(
+              id: 't-read',
+              user: AgentUserMessage(text: '看看这张', at: DateTime(2026, 10, 20)),
+              reply: AgentReply(
+                blocks: [
+                  AgentStepsBlock([
+                    AgentStep(
+                      id: 's-read',
+                      tool: 'image_read',
+                      status: AgentStepStatus.done,
+                      subject: 'selected',
+                      arguments: '{"image_id": "selected"}',
+                      images: [
+                        AgentFixture.img('r1', source: AgentImageSource.tool),
+                      ],
+                    ),
+                  ]),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+      final thumbs = find.byKey(const Key('agent-step-images-s-read'));
+      expect(thumbs, findsOneWidget);
+      expect(find.text('参数'), findsNothing);
+      await tester.tap(
+        find.descendant(of: thumbs, matching: find.byType(AgentThumb)),
+      );
+      await tester.pump();
+      expect(find.byKey(const Key('agent-zoom')), findsOneWidget);
+      // 展开参数时不重复显示缩略图。
+      await tester.tap(find.byKey(const Key('agent-step-s-read')));
+      await tester.pump();
     });
 
     testWidgets('聊天列表：输入两个字以上同时搜正文，命中点开切过去', (tester) async {
@@ -762,6 +921,7 @@ AgentViewData _copy(
   String? error,
   int? anlas,
   List<AgentChatInfo>? chats,
+  List<AgentTurn>? thread,
 }) => AgentViewData(
   now: b.now,
   workspace: b.workspace,
@@ -769,7 +929,7 @@ AgentViewData _copy(
   workspaces: b.workspaces,
   chats: chats ?? b.chats,
   composer: b.composer,
-  thread: b.thread,
+  thread: thread ?? b.thread,
   shelf: b.shelf,
   memory: b.memory,
   usage: anlas == null

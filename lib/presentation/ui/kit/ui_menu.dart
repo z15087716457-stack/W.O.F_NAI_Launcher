@@ -18,6 +18,9 @@ class UiMenuItem {
     this.trailing,
     this.enabled = true,
     this.indent = 0,
+    this.leading,
+    this.keepOpen = false,
+    this.onExit,
     this.key,
   });
   final String label;
@@ -35,6 +38,15 @@ class UiMenuItem {
 
   /// 子项缩进（分类树）。
   final double indent;
+
+  /// 左侧自定义图标（例如服务商标志）；有 [glyph] 时忽略。
+  final Widget? leading;
+
+  /// 点了不关菜单（例如“再点一次确认”的两步操作）。
+  final bool keepOpen;
+
+  /// 鼠标移出这一项（两步确认用来作废）。
+  final VoidCallback? onExit;
   final Key? key;
 }
 
@@ -73,66 +85,74 @@ class UiMenu extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(vertical: 4),
                     color: c.line,
                   ),
-                UiPressable(
-                  key: it.key,
-                  onTap: it.enabled
-                      ? () {
-                          onClose();
-                          it.onTap();
-                        }
-                      : null,
-                  builder: (context, hover) {
-                    final fg = !it.enabled
-                        ? c.faint
-                        : it.danger
-                        ? c.error
-                        : c.ink;
-                    return Container(
-                      height: 34,
-                      padding: EdgeInsets.only(left: 10 + it.indent, right: 10),
-                      decoration: BoxDecoration(
-                        color: hover ? c.control : null,
-                        borderRadius: BorderRadius.circular(7),
-                      ),
-                      child: Row(
-                        spacing: 10,
-                        children: [
-                          if (it.glyph != null)
-                            UiGlyph(
-                              it.glyph!,
-                              size: 15,
-                              color: it.danger ? c.error : c.muted,
-                            ),
-                          Expanded(
-                            child: Text(
-                              it.label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: UiText.sans(
-                                13,
-                                color: fg,
-                                weight: it.checked
-                                    ? FontWeight.w600
-                                    : FontWeight.w400,
+                _ExitRegion(
+                  onExit: it.onExit,
+                  child: UiPressable(
+                    key: it.key,
+                    onTap: it.enabled
+                        ? () {
+                            if (!it.keepOpen) onClose();
+                            it.onTap();
+                          }
+                        : null,
+                    builder: (context, hover) {
+                      final fg = !it.enabled
+                          ? c.faint
+                          : it.danger
+                          ? c.error
+                          : c.ink;
+                      return Container(
+                        height: 34,
+                        padding: EdgeInsets.only(
+                          left: 10 + it.indent,
+                          right: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: hover ? c.control : null,
+                          borderRadius: BorderRadius.circular(7),
+                        ),
+                        child: Row(
+                          spacing: 10,
+                          children: [
+                            if (it.glyph != null)
+                              UiGlyph(
+                                it.glyph!,
+                                size: 15,
+                                color: it.danger ? c.error : c.muted,
+                              )
+                            else
+                              ?it.leading,
+                            Expanded(
+                              child: Text(
+                                it.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: UiText.sans(
+                                  13,
+                                  color: fg,
+                                  weight: it.checked
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
                               ),
                             ),
-                          ),
-                          if (it.trailing != null)
-                            Text(
-                              it.trailing!,
-                              style: UiText.mono(11.5, color: c.faint),
-                            ),
-                          if (it.checked)
-                            UiGlyph(
-                              UiGlyphs.check,
-                              size: 14,
-                              strokeWidth: 2.4,
-                              color: c.accent,
-                            ),
-                        ],
-                      ),
-                    );
-                  },
+                            if (it.trailing != null)
+                              Text(
+                                it.trailing!,
+                                style: UiText.mono(11.5, color: c.faint),
+                              ),
+                            if (it.checked)
+                              UiGlyph(
+                                UiGlyphs.check,
+                                size: 14,
+                                strokeWidth: 2.4,
+                                color: c.accent,
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ],
@@ -141,4 +161,15 @@ class UiMenu extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ExitRegion extends StatelessWidget {
+  const _ExitRegion({required this.onExit, required this.child});
+  final VoidCallback? onExit;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => onExit == null
+      ? child
+      : MouseRegion(onExit: (_) => onExit!(), child: child);
 }

@@ -615,12 +615,7 @@ ProvidersViewData providersViewData(
         presetId: p.preset?.name,
         group: providerGroup(p.preset),
         logoAsset: p.preset?.logoAsset,
-        mark:
-            p.preset == null ||
-                {
-                  ProviderPreset.openaiCompatibleChat,
-                  ProviderPreset.openaiCompatibleResponses,
-                }.contains(p.preset)
+        mark: providerUsesMark(p)
             ? p.name.characters.take(2).toString().toUpperCase()
             : null,
         color: 0xff266eff,

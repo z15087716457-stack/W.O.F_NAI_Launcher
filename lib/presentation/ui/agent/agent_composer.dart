@@ -598,7 +598,6 @@ class AgentComposerState extends State<AgentComposer> {
                           height: 1.2,
                         ),
                       ),
-                      AgentIcon(AgentGlyphs.chevron, size: 11, color: c.faint),
                     ],
                   ),
                 ),

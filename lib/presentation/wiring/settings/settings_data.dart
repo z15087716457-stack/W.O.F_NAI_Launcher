@@ -123,7 +123,13 @@ Map<SettingKey, List<SettingsOption>> settingsOptions(
             value: jsonEncode([provider.id, model.name]),
             label: model.displayName,
             detail: provider.name,
-            mark: provider.name.characters.take(2).toString(),
+            // 与服务商设置页一致：预设用品牌图标，自定义 / OpenAI 兼容端点才用字母块。
+            logoAsset: providerUsesMark(provider)
+                ? null
+                : provider.preset?.logoAsset,
+            mark: providerUsesMark(provider)
+                ? provider.name.characters.take(2).toString().toUpperCase()
+                : null,
             color: 0xff266eff,
           ),
     ],

@@ -14,6 +14,7 @@ import '../../../core/nai_agent/attachment_image.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart' as store;
 import '../../../core/utils/file_name_sanitizer.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../prompt_assistant/models/prompt_assistant_models.dart';
 import '../../prompt_assistant/models/prompt_task_definitions.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -608,6 +609,10 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               provider: p.name,
               selected:
                   c.settings.providerId == p.id && c.settings.modelId == m.name,
+              logoAsset: providerUsesMark(p) ? null : p.preset?.logoAsset,
+              mark: providerUsesMark(p)
+                  ? p.name.characters.take(2).toString().toUpperCase()
+                  : null,
             ),
       ],
       thinking: AgentThinkingData(

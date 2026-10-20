@@ -24,6 +24,29 @@ void main() {
     return rec;
   }
 
+  testWidgets('默认模型：按钮和下拉项左边是厂商图标，自定义端点才用字母', (t) async {
+    await pumpSettings(t, page: SettingsPageId.agent);
+    expect(find.text('默认模型'), findsOneWidget);
+    final select = find.byKey(const Key('select-agentModel'));
+    // 当前选中的是 Anthropic 预设：按钮左边画品牌图标，不画字母块。
+    final current = t.widget<SettingsLogo>(
+      find.descendant(of: select, matching: find.byType(SettingsLogo)),
+    );
+    expect(current.logoAsset, 'anthropic');
+    await t.tap(select);
+    await t.pump();
+    SettingsLogo logo(String value) => t.widget<SettingsLogo>(
+      find.descendant(
+        of: find.byKey(Key('settings-option-$value')),
+        matching: find.byType(SettingsLogo),
+      ),
+    );
+    expect(logo('claude-sonnet-4.5').logoAsset, 'anthropic');
+    expect(logo('gpt-4.1').logoAsset, 'openai');
+    expect(logo('deepseek-chat').logoAsset, isNull);
+    expect(logo('deepseek-chat').mark, 'DS');
+  });
+
   testWidgets('快捷信息分区：列出、上下移、编辑、删除、新增、恢复默认', (t) async {
     final rec = await pumpSettings(t, page: SettingsPageId.agent);
     await t.scrollUntilVisible(

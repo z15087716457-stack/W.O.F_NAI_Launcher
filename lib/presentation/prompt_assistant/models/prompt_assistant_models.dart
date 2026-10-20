@@ -683,6 +683,13 @@ extension ProviderPresetDefaults on ProviderPreset {
   };
 }
 
+/// 服务商图标规则：没有预设或是 OpenAI 兼容端点（自定义）时用名字字母块，
+/// 其余预设用品牌图标 [ProviderPreset.logoAsset]。
+bool providerUsesMark(ProviderConfig provider) =>
+    provider.preset == null ||
+    provider.preset == ProviderPreset.openaiCompatibleChat ||
+    provider.preset == ProviderPreset.openaiCompatibleResponses;
+
 class ProviderConfig {
   static const defaultRetryAttempts = 1;
 

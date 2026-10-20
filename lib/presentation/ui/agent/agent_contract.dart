@@ -863,9 +863,15 @@ class AgentModelOption {
     required this.label,
     required this.provider,
     this.selected = false,
+    this.logoAsset,
+    this.mark,
   });
   final String providerId, modelId, label, provider;
   final bool selected;
+
+  /// 服务商图标：预设用 `assets/icons/providers/<logoAsset>.svg`；
+  /// 自定义端点只有 [mark]（1–2 个字母）；都为 null 时不画。
+  final String? logoAsset, mark;
 }
 
 @immutable

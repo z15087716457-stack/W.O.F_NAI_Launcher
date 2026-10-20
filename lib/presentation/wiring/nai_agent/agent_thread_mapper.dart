@@ -345,9 +345,42 @@ class AgentThreadMapper {
                     event['nestedCalls'],
               )['calls'],
             );
-            if (tool != 'codemode' &&
-                tool != 'code_mode' &&
-                !tool.endsWith('__codemode')) {
+            final resultImages = [
+              for (final (index, imagePart) in agentMaps(
+                value['content'],
+              ).indexed)
+                if (imagePart['type'] == 'image')
+                  if (inline(
+                        imagePart,
+                        '$id/result/$index',
+                        AgentImageSource.tool,
+                      )
+                      case final image?)
+                    image,
+            ];
+            final isCodemode =
+                tool == 'codemode' ||
+                tool == 'code_mode' ||
+                tool.endsWith('__codemode');
+            // CodeMode 脚本里看的图只出现在脚本结果里：按顺序挂到成功的 image_read 子步骤上，
+            // 最后一个 image_read 收下剩余的图；没有 image_read 就不挂（和以前一样）。
+            final readers = [
+              for (final (ni, call) in nested.indexed)
+                if (agentToolName(call['name'] as String? ?? '') ==
+                        'image_read' &&
+                    call['status'] == 'ok')
+                  ni,
+            ];
+            List<AgentImage> nestedImages(int ni) {
+              if (!isCodemode || readers.isEmpty) return const [];
+              final at = readers.indexOf(ni);
+              if (at < 0) return const [];
+              return at == readers.length - 1
+                  ? resultImages.skip(at).toList()
+                  : resultImages.skip(at).take(1).toList();
+            }
+
+            if (!isCodemode) {
               steps.add(
                 AgentStep(
                   id: id,
@@ -359,19 +392,7 @@ class AgentThreadMapper {
                   ),
                   arguments: agentPretty(args),
                   result: agentPretty(value.isEmpty ? null : value),
-                  images: [
-                    for (final (index, imagePart) in agentMaps(
-                      value['content'],
-                    ).indexed)
-                      if (imagePart['type'] == 'image')
-                        if (inline(
-                              imagePart,
-                              '$id/result/$index',
-                              AgentImageSource.tool,
-                            )
-                            case final image?)
-                          image,
-                  ],
+                  images: resultImages,
                 ),
               );
             }
@@ -391,6 +412,7 @@ class AgentThreadMapper {
                     call['arguments'] ?? call['argumentsBytes'],
                   ),
                   result: agentPretty(call['result'] ?? call['error']),
+                  images: nestedImages(ni),
                 ),
               );
             }

@@ -88,15 +88,13 @@ abstract final class SettingsFixture {
         value: 'claude-sonnet-4.5',
         label: 'Claude Sonnet 4.5',
         detail: 'Anthropic',
-        mark: 'A',
-        color: 0xFFD97757,
+        logoAsset: 'anthropic',
       ),
       SettingsOption(
         value: 'gpt-4.1',
         label: 'GPT-4.1',
         detail: 'OpenAI',
-        mark: 'AI',
-        color: 0xFF10A37F,
+        logoAsset: 'openai',
       ),
       SettingsOption(
         value: 'deepseek-chat',
