@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/wiring/generation_view_mapping.dart';
 import 'package:hive/hive.dart';
 import 'package:image/image.dart' as img;
 import 'package:mocktail/mocktail.dart';
@@ -135,6 +136,15 @@ void main() {
       }
       final state = container.read(imageGenerationNotifierProvider);
       expect(state.currentImages, hasLength(4));
+      // 进历史栏且和生图页一样成一组（同一 run，组内按序号），
+      // 历史栏按这一组画右下角的张数角标。
+      expect(state.history, hasLength(4));
+      expect(state.history.map((i) => i.generationRunId).toSet(), hasLength(1));
+      expect(
+        generationHistoryView(state).batches.single.count,
+        4,
+        reason: 'one Agent run = one history group',
+      );
       expect(result['images'], hasLength(4));
       expect(
         (result['images'] as List).map((r) => r['image_id']).toSet(),
