@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/upscale_brand_logo.dart';
+import '../agent/agent_glyphs.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
@@ -675,6 +676,7 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
               ..._basePrompt(context, ag.systemPrompt!),
           ],
         ),
+        const _QuickSection(),
         SettingsSection(
           title: l.set_agSkills,
           subtitle: l.set_agSkillsSub,
@@ -2659,6 +2661,127 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
               ),
             ],
           ),
+      ],
+    );
+  }
+}
+
+/// 欢迎页快捷信息：增删改、上下移、恢复默认（前 6 条显示在欢迎页）。
+class _QuickSection extends StatelessWidget {
+  const _QuickSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = context.ui;
+    final s = SettingsScope.of(context);
+    final ag = s.data.agent;
+    final a = s.actions;
+    final items = ag.quick;
+    return SettingsSection(
+      title: l.set_agQuick,
+      subtitle: l.set_agQuickSub,
+      trailing: Text(
+        l.set_agQuickShown(items.length.clamp(0, 6), items.length),
+        style: UiText.mono(11, color: c.faint),
+      ),
+      children: [
+        SettingsAnchor(
+          anchor: 'agentQuick',
+          child: Column(
+            children: [
+              if (items.isEmpty)
+                SettingsBlock(
+                  child: Text(
+                    l.set_agQuickEmpty,
+                    style: UiText.sans(12, color: c.muted, height: 1.5),
+                  ),
+                ),
+              for (final (i, q) in items.indexed)
+                SettingsRow(
+                  key: Key('quick-${q.id}'),
+                  titleLead: Container(
+                    width: 22,
+                    height: 22,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: c.control,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: AgentIcon(
+                      agentQuickGlyph(q.glyph),
+                      size: 13,
+                      color: c.ink,
+                    ),
+                  ),
+                  title: q.title,
+                  badges: [
+                    if (q.send) UiMini(l.set_agQuickSendBadge),
+                    if (i >= 6) UiMini(l.set_agQuickHidden),
+                  ],
+                  subtitleWidget: Text(
+                    q.hint.isNotEmpty ? q.hint : q.prompt,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.sans(12, color: c.muted, height: 1.5),
+                  ),
+                  control: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 2,
+                    children: [
+                      SettingsIconBtn(
+                        key: Key('quick-up-${q.id}'),
+                        glyph: UiGlyphs.chevronUp,
+                        tooltip: l.set_agQuickUp,
+                        onTap: i == 0 ? null : () => a.onMoveQuick(q.id, -1),
+                      ),
+                      SettingsIconBtn(
+                        key: Key('quick-down-${q.id}'),
+                        glyph: UiGlyphs.chevronDown,
+                        tooltip: l.set_agQuickDown,
+                        onTap: i == items.length - 1
+                            ? null
+                            : () => a.onMoveQuick(q.id, 1),
+                      ),
+                      SettingsIconBtn(
+                        key: Key('quick-edit-${q.id}'),
+                        glyph: UiGlyphs.pencil,
+                        tooltip: l.set_agQuickEditOne,
+                        onTap: () => a.onEditQuick(q.id),
+                      ),
+                      SettingsIconBtn(
+                        key: Key('quick-remove-${q.id}'),
+                        glyph: UiGlyphs.trash,
+                        tooltip: l.set_agQuickRemove,
+                        onTap: () => a.onRemoveQuick(q.id),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        SettingsBlock(
+          child: Row(
+            spacing: 8,
+            children: [
+              SettingsBtn(
+                key: const Key('quick-add'),
+                label: l.set_agQuickAdd,
+                glyph: UiGlyphs.plus,
+                small: true,
+                onTap: () => a.onEditQuick(null),
+              ),
+              SettingsBtn(
+                key: const Key('quick-restore'),
+                label: l.set_agQuickRestore,
+                small: true,
+                tone: SettingsBtnTone.ghost,
+                onTap: ag.quickDefault ? null : a.onRestoreQuick,
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }

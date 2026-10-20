@@ -78,6 +78,9 @@ void main() {
     'original PNG and parsed NAI metadata survive storage and reopening',
     () async {
       final bytes = metadataPng();
+      // Reopening persistence applies to sent/saved chats; new drafts stay in memory.
+      final selected = controller.selected!;
+      selected.chat = await controller.store.saveDraftChat(selected.chat);
       await controller.attach('原图.png', bytes, 'image/png');
       final runtime = controller.selected!;
       final attachment = runtime.composer.attachments.single;
@@ -229,6 +232,13 @@ void main() {
       expect(current.composer.attachments, isEmpty);
       expect(target.composer.attachments, hasLength(1));
       expect(target.importingImages, 0);
+      expect(
+        await Directory(
+          '${target.workspace.directory.path}/attachments/${target.chat.id}',
+        ).exists(),
+        false,
+      );
+      expect(await controller.store.listChats(target.workspace.id), isEmpty);
     },
   );
 

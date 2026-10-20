@@ -24,6 +24,38 @@ void main() {
     return rec;
   }
 
+  testWidgets('快捷信息分区：列出、上下移、编辑、删除、新增、恢复默认', (t) async {
+    final rec = await pumpSettings(t, page: SettingsPageId.agent);
+    await t.scrollUntilVisible(
+      find.byKey(const Key('quick-add')),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await t.pump();
+    expect(find.text('换成水彩'), findsOneWidget);
+    expect(find.text('直接发送'), findsOneWidget);
+    expect(find.text('欢迎页显示 2 / 2'), findsOneWidget);
+    await t.ensureVisible(find.byKey(const Key('quick-builtin-review')));
+    await t.pump();
+    final warn = t.takeException();
+    expect(warn, isNull);
+    await t.tap(find.byKey(const Key('quick-up-mine')));
+    await t.tap(find.byKey(const Key('quick-edit-mine')));
+    await t.tap(find.byKey(const Key('quick-remove-builtin-review')));
+    await t.tap(find.byKey(const Key('quick-add')));
+    await t.tap(find.byKey(const Key('quick-restore')));
+    // 第一条不能再上移，最后一条不能再下移。
+    await t.tap(find.byKey(const Key('quick-up-builtin-review')));
+    await t.tap(find.byKey(const Key('quick-down-mine')));
+    expect(rec.calls, [
+      'moveQuick:mine:-1',
+      'editQuick:mine',
+      'removeQuick:builtin-review',
+      'editQuick:null',
+      'restoreQuick',
+    ]);
+  });
+
   testWidgets('Skill 分区：内置置顶且可开关／改调用方式、用户同样、出错行不给开关', (t) async {
     final rec = await open(t);
     final builtin = find.byKey(const Key('skill-builtin/nai-studio'));

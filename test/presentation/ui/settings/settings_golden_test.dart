@@ -155,7 +155,15 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
         masks.add(t.getRect(find.byWidget(e.widget)));
       }
       final capture = t.getRect(find.byKey(const Key('settings-capture')));
-      final section = t.getRect(skillSection.first);
+      // 2026-10-20：快捷信息一节插在 Skill 分区前（用户确认），从它开始往下一起排除；
+      // 原 Skill 分区的顶边就是它现在的顶边，上方区域照旧逐像素锁定。
+      final quick = find.ancestor(
+        of: find.byKey(const Key('quick-add')),
+        matching: find.byType(SettingsSection),
+      );
+      final section = t.getRect(
+        quick.evaluate().isNotEmpty ? quick.first : skillSection.first,
+      );
       masks.add(
         Rect.fromLTRB(section.left, section.top, section.right, capture.bottom),
       );

@@ -19487,6 +19487,73 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agOrderSkills => 'スキルカタログ';
 
   @override
+  String get set_agQuick => 'クイックメッセージ';
+
+  @override
+  String get set_agQuickSub => 'サイドバーのウェルカム画面のカード。クリックで入力欄に入れるか、すぐ送信します。';
+
+  @override
+  String set_agQuickShown(int shown, int total) {
+    return 'ウェルカム画面に $shown / $total 件';
+  }
+
+  @override
+  String get set_agQuickEmpty => 'クイックメッセージがありません。ウェルカム画面には表示されません。';
+
+  @override
+  String get set_agQuickSendBadge => 'すぐ送信';
+
+  @override
+  String get set_agQuickHidden => '非表示';
+
+  @override
+  String get set_agQuickUp => '上へ';
+
+  @override
+  String get set_agQuickDown => '下へ';
+
+  @override
+  String get set_agQuickEditOne => '編集';
+
+  @override
+  String get set_agQuickRemove => '削除';
+
+  @override
+  String get set_agQuickAdd => 'クイックメッセージを追加';
+
+  @override
+  String get set_agQuickRestore => 'デフォルトに戻す';
+
+  @override
+  String get set_agQuickRestoreConfirm => '内蔵の 4 件に戻しますか？追加・編集した内容は置き換えられます。';
+
+  @override
+  String set_agQuickRemoveConfirm(String title) {
+    return 'クイックメッセージ「$title」を削除しますか？';
+  }
+
+  @override
+  String get set_agQuickNew => 'クイックメッセージを追加';
+
+  @override
+  String get set_agQuickEditTitle => 'クイックメッセージを編集';
+
+  @override
+  String get set_agQuickIcon => 'アイコン';
+
+  @override
+  String get set_agQuickTitle => 'タイトル';
+
+  @override
+  String get set_agQuickHint => '説明（任意）';
+
+  @override
+  String get set_agQuickPrompt => 'Agent に送る内容';
+
+  @override
+  String get set_agQuickSend => 'クリックですぐ送信（オフなら入力欄に入れる）';
+
+  @override
   String get set_agSkills => 'スキル';
 
   @override
@@ -19766,6 +19833,15 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get ag_taskBlocksPrompt =>
       '現在の下書きの中で、再利用できるブロックに向く断片を探して提案してください。まだ変更はしないでください。';
+
+  @override
+  String get ag_quickTitle => 'クイックメッセージ';
+
+  @override
+  String get ag_quickEdit => 'クイックメッセージを編集';
+
+  @override
+  String get ag_quickSends => 'クリックですぐ送信';
 
   @override
   String get ag_recent => '最近';

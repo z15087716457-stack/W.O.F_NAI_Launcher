@@ -10530,6 +10530,44 @@
   "set_agInstructionsSaving": "正在保存指令…",
   "set_agInstructionsFailed": "指令未保存：内容已变化或写入失败。草稿已保留，请重试。",
   "set_agOrderSkills": "Skill 目录",
+  "set_agQuick": "快捷信息",
+  "set_agQuickSub": "侧栏欢迎页的快捷卡片。点卡片把内容填进输入框，也可以设成直接发送。",
+  "set_agQuickShown": "欢迎页显示 {shown} / {total}",
+  "@set_agQuickShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_agQuickEmpty": "还没有快捷信息，欢迎页不显示这一块。",
+  "set_agQuickSendBadge": "直接发送",
+  "set_agQuickHidden": "不显示",
+  "set_agQuickUp": "上移",
+  "set_agQuickDown": "下移",
+  "set_agQuickEditOne": "编辑",
+  "set_agQuickRemove": "删除",
+  "set_agQuickAdd": "新增快捷信息",
+  "set_agQuickRestore": "恢复默认",
+  "set_agQuickRestoreConfirm": "恢复成内置的 4 条快捷信息？你新增和改过的会被替换。",
+  "set_agQuickRemoveConfirm": "删除快捷信息「{title}」？",
+  "@set_agQuickRemoveConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agQuickNew": "新增快捷信息",
+  "set_agQuickEditTitle": "编辑快捷信息",
+  "set_agQuickIcon": "图标",
+  "set_agQuickTitle": "标题",
+  "set_agQuickHint": "说明（可不填）",
+  "set_agQuickPrompt": "发给 Agent 的内容",
+  "set_agQuickSend": "点击后直接发送（不勾选则填进输入框）",
   "set_agSkills": "Skill",
   "set_agSkillsSub": "平时只把名称和一句话描述放进提示词；任务对得上时 Agent 才读取完整说明。",
   "set_agSkillsLoaded": "{n} 个已加载",
@@ -10645,6 +10683,9 @@
   "ag_taskBlocks": "整理积木",
   "ag_taskBlocksHint": "把常用片段收进积木库",
   "ag_taskBlocksPrompt": "看看当前草稿里哪些片段适合做成可复用的积木，列出建议，先不要修改。",
+  "ag_quickTitle": "快捷信息",
+  "ag_quickEdit": "编辑快捷信息",
+  "ag_quickSends": "点击直接发送",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "编辑",

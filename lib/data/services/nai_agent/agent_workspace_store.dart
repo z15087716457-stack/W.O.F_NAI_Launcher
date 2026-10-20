@@ -56,6 +56,7 @@ class AgentSettings {
     this.enterToSend = true,
     this.maxRequestsPerRun = 32,
     this.permissionMode = 'auto',
+    this.bypassWarned = false,
     this.reasoningEfforts = const {},
     this.extensions = const [],
     this.mcpServers = const [],
@@ -72,6 +73,14 @@ class AgentSettings {
   final int panelLayoutVersion;
   final int maxRequestsPerRun;
   final String permissionMode;
+  final bool bypassWarned;
+
+  AgentSettings copyWith({String? permissionMode, bool? bypassWarned}) =>
+      AgentSettings.fromJson({
+        ...toJson(),
+        if (permissionMode != null) 'permissionMode': permissionMode,
+        if (bypassWarned != null) 'bypassWarned': bypassWarned,
+      });
   final Map<String, String> reasoningEfforts;
   final List<AgentExtensionConfig> extensions;
   final List<AgentMcpServer> mcpServers;
@@ -113,6 +122,7 @@ class AgentSettings {
     'enterToSend': enterToSend,
     'maxRequestsPerRun': maxRequestsPerRun,
     'permissionMode': permissionMode,
+    'bypassWarned': bypassWarned,
     'reasoningEfforts': reasoningEfforts,
     'extensions': extensions.map((extension) => extension.toJson()).toList(),
     'mcpServers': mcpServers.map((server) => server.toJson()).toList(),
@@ -128,11 +138,17 @@ class AgentSettings {
     globalInstructions: value['globalInstructions'] as String? ?? '',
     systemPromptPrefix: value['systemPromptPrefix'] as String? ?? '',
     permissionMode:
-        const {'auto', 'ask', 'readonly'}.contains(value['permissionMode'])
+        const {
+          'auto',
+          'ask',
+          'readonly',
+          'bypass',
+        }.contains(value['permissionMode'])
         ? value['permissionMode'] as String
         : value['permissionMode'] == null
         ? 'auto'
         : 'ask',
+    bypassWarned: value['bypassWarned'] == true,
     reasoningEfforts: Map.unmodifiable({
       for (final entry in (value['reasoningEfforts'] as Map? ?? {}).entries)
         if (entry.key is String &&
@@ -282,7 +298,9 @@ class AgentChat {
     required this.title,
     required this.createdAt,
     this.sessionFile,
+    this.isDraft = false,
   });
+  final bool isDraft;
   final String id, workspaceId, title;
   final DateTime createdAt;
 
@@ -296,6 +314,47 @@ class AgentChat {
     'createdAt': createdAt.toIso8601String(),
     'sessionFile': sessionFile,
   };
+}
+
+/// A recoverable deletion. [files] are relative to the workspace (chat) or
+/// the trash entry (workspace, stored as `workspace/`).
+class AgentTrashEntry {
+  const AgentTrashEntry({
+    required this.id,
+    required this.kind,
+    required this.workspaceId,
+    required this.title,
+    required this.files,
+    required this.trashedAt,
+    this.chatId,
+    this.isDraft = false,
+  });
+  final String id, kind, workspaceId, title;
+  final String? chatId;
+  final bool isDraft;
+  final List<String> files;
+  final DateTime trashedAt;
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'kind': kind,
+    'isDraft': isDraft,
+    'workspaceId': workspaceId,
+    'chatId': chatId,
+    'title': title,
+    'files': files,
+    'trashedAt': trashedAt.toIso8601String(),
+  };
+}
+
+class AgentChatSearchHit {
+  const AgentChatSearchHit({
+    required this.chatId,
+    required this.title,
+    required this.snippet,
+    this.entryId,
+  });
+  final String chatId, title, snippet;
+  final String? entryId;
 }
 
 /// UI-only state. Pi JSONL remains the sole conversation history.
@@ -585,6 +644,7 @@ class AgentWorkspaceStore {
     String? customSystemPrompt,
     bool resetPrompt = false,
     String? lastSessionId,
+    bool clearLastSessionId = false,
     bool checkPrompt = false,
     String? expectedPrompt,
     bool requireSelected = false,
@@ -608,7 +668,9 @@ class AgentWorkspaceStore {
       customSystemPrompt: resetPrompt
           ? null
           : customSystemPrompt ?? old.customSystemPrompt,
-      lastSessionId: lastSessionId ?? old.lastSessionId,
+      lastSessionId: clearLastSessionId
+          ? null
+          : lastSessionId ?? old.lastSessionId,
     );
     if (value.customSystemPrompt != old.customSystemPrompt) {
       await _atomic(
@@ -869,15 +931,65 @@ class AgentWorkspaceStore {
         );
         return chat;
       });
+
+  /// Materialize an in-memory draft with its existing identity, never overwrite.
+  Future<AgentChat> saveDraftChat(AgentChat draft) => _write(() async {
+    _id(draft.id);
+    final workspace = await getWorkspace(draft.workspaceId);
+    final file = File(
+      p.join(workspace.directory.path, 'ui', 'chats', '${draft.id}.json'),
+    );
+    await _guard(file.path);
+    if (await FileSystemEntity.type(file.path, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      throw StateError('Chat already exists');
+    }
+    final chat = AgentChat(
+      id: draft.id,
+      workspaceId: draft.workspaceId,
+      title: draft.title,
+      createdAt: draft.createdAt,
+    );
+    await _atomic(file, chat.toJson());
+    return chat;
+  });
+
+  /// Draft composers stay in memory; only staged attachment files need cleanup.
+  Future<void> discardDraftChat(String workspaceId, String chatId) =>
+      _write(() async {
+        _id(chatId);
+        final workspace = await getWorkspace(workspaceId);
+        final chatFile = p.join(
+          workspace.directory.path,
+          'ui',
+          'chats',
+          '$chatId.json',
+        );
+        await _guard(chatFile);
+        if (await FileSystemEntity.type(chatFile, followLinks: false) !=
+            FileSystemEntityType.notFound) {
+          throw StateError('Cannot discard a saved chat');
+        }
+        for (final path in [
+          p.join(workspace.directory.path, 'attachments', chatId),
+          _composer(workspaceId, chatId).path,
+        ]) {
+          await _guardTree(path);
+          await _deleteEntity(path);
+        }
+      });
+
   Future<List<AgentChat>> listChats(String workspaceId) async {
     await getWorkspace(workspaceId);
     final dir = Directory(
       p.join(workspaceDirectory(workspaceId).path, 'ui', 'chats'),
     );
+    await _guard(dir.path);
     if (!await dir.exists()) return [];
     final result = <AgentChat>[];
     await for (final file in dir.list(followLinks: false)) {
       if (file is! File || p.extension(file.path) != '.json') continue;
+      await _guard(file.path);
       final value = await _read(file);
       final id = value['id'] as String;
       _id(id);
@@ -938,6 +1050,547 @@ class AgentWorkspaceStore {
     );
     return value;
   });
+
+  /// Reject traversal and links, including links hidden in existing ancestors.
+  Future<void> _guard(String path) async {
+    final base = p.normalize(p.absolute(root.path));
+    final target = p.normalize(p.absolute(path));
+    if (target != base && !p.isWithin(base, target)) {
+      throw const FormatException('Path leaves Agent data');
+    }
+    var current = base;
+    for (final part in p.split(p.relative(target, from: base))) {
+      if (part == '.') continue;
+      current = p.join(current, part);
+      if (await FileSystemEntity.type(current, followLinks: false) ==
+          FileSystemEntityType.link) {
+        throw const FormatException(
+          'Links are not allowed in Agent storage operations',
+        );
+      }
+    }
+  }
+
+  Future<void> _guardTree(String path) async {
+    await _guard(path);
+    if (await FileSystemEntity.type(path, followLinks: false) ==
+        FileSystemEntityType.directory) {
+      await for (final child in Directory(
+        path,
+      ).list(recursive: true, followLinks: false)) {
+        await _guard(child.path);
+      }
+    }
+  }
+
+  static String _sessionRelative(String relative) {
+    if (p.isAbsolute(relative) ||
+        p.dirname(p.normalize(relative)) != 'sessions' ||
+        p.extension(relative) != '.jsonl' ||
+        p.split(relative).contains('..')) {
+      throw const FormatException(
+        'Pi session reference leaves workspace sessions',
+      );
+    }
+    return p.normalize(relative);
+  }
+
+  static Future<void> _deleteEntity(String path) async {
+    final type = await FileSystemEntity.type(path, followLinks: false);
+    if (type == FileSystemEntityType.directory) {
+      await Directory(path).delete(recursive: true);
+    } else if (type == FileSystemEntityType.file) {
+      await File(path).delete();
+    } else if (type != FileSystemEntityType.notFound) {
+      throw const FormatException('Unsupported storage entity');
+    }
+  }
+
+  Future<void> _move(String from, String to) async {
+    final directory =
+        await FileSystemEntity.type(from, followLinks: false) ==
+        FileSystemEntityType.directory;
+    await Directory(p.dirname(to)).create(recursive: true);
+    try {
+      if (directory) {
+        await Directory(from).rename(to);
+      } else {
+        await File(from).rename(to);
+      }
+      return;
+    } on FileSystemException catch (error) {
+      // EXDEV on POSIX; ERROR_NOT_SAME_DEVICE on Windows. Other failures must
+      // not become a destructive copy/delete fallback.
+      if (!(Platform.isWindows ? const {17} : const {18}).contains(
+        error.osError?.errorCode,
+      )) {
+        rethrow;
+      }
+    }
+    final temporary = '$to.${const Uuid().v4()}.tmp';
+    try {
+      if (directory) {
+        await Directory(temporary).create();
+        await for (final child in Directory(
+          from,
+        ).list(recursive: true, followLinks: false)) {
+          final target = p.join(temporary, p.relative(child.path, from: from));
+          if (child is Directory) {
+            await Directory(target).create(recursive: true);
+          } else if (child is File) {
+            await File(target).parent.create(recursive: true);
+            await child.copy(target);
+          } else {
+            throw const FormatException('Unsupported storage entity');
+          }
+        }
+        await Directory(temporary).rename(to);
+      } else {
+        await File(from).copy(temporary);
+        await File(temporary).rename(to);
+      }
+    } finally {
+      await _deleteEntity(temporary);
+    }
+    // Recursive deletion can fail after removing part of a directory. Keep
+    // the complete destination on failure; deleting it would lose those files.
+    await _deleteEntity(from);
+  }
+
+  /// Preflight every destination before moving anything, roll back on I/O error.
+  Future<void> _transfer(List<({String from, String to})> moves) async {
+    for (final move in moves) {
+      await _guardTree(move.from);
+      await _guard(move.to);
+      if (await FileSystemEntity.type(move.from, followLinks: false) ==
+          FileSystemEntityType.notFound) {
+        throw StateError('Trash source is missing');
+      }
+      if (await FileSystemEntity.type(move.to, followLinks: false) !=
+          FileSystemEntityType.notFound) {
+        throw StateError('Restore destination already exists');
+      }
+    }
+    final done = <({String from, String to})>[];
+    try {
+      for (final move in moves) {
+        await _move(move.from, move.to);
+        done.add(move);
+      }
+    } catch (_) {
+      for (final move in done.reversed) {
+        await _move(move.to, move.from);
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _trashTransfer(
+    AgentTrashEntry entry,
+    Directory dir,
+    List<({String from, String to})> moves, {
+    Map<String, Map<String, dynamic>> extraFiles = const {},
+  }) async {
+    if (await FileSystemEntity.type(dir.path, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      throw StateError('Trash identity already exists');
+    }
+    await _atomic(File(p.join(dir.path, 'manifest.json')), entry.toJson());
+    try {
+      for (final file in extraFiles.entries) {
+        await _atomic(File(p.join(dir.path, file.key)), file.value);
+      }
+      await _transfer(moves);
+    } catch (_) {
+      // _transfer normally rolls back. Retain the manifest if rollback itself
+      // failed and some payload is still in trash, rather than lose user data.
+      if (await dir
+          .list(followLinks: false)
+          .every((item) => p.basename(item.path) == 'manifest.json')) {
+        await dir.delete(recursive: true);
+      }
+      rethrow;
+    }
+  }
+
+  Directory _trashDirectory(String kind, String id) {
+    if (!const {'chats', 'workspaces'}.contains(kind) ||
+        !RegExp(r'^\d+-[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}$').hasMatch(id)) {
+      throw const FormatException('Invalid trash identity');
+    }
+    return Directory(p.join(root.path, 'trash', kind, id));
+  }
+
+  Future<AgentTrashEntry> readTrashEntry(String kind, String trashId) async {
+    final dir = _trashDirectory(kind, trashId);
+    await _guardTree(dir.path);
+    final value = await _read(File(p.join(dir.path, 'manifest.json')));
+    final workspaceId = value['workspaceId'] as String;
+    _id(workspaceId);
+    final chatId = value['chatId'] as String?;
+    if (chatId != null) _id(chatId);
+    if (value['id'] != trashId ||
+        value['kind'] != kind ||
+        (kind == 'chats' && chatId == null)) {
+      throw const FormatException('Invalid trash manifest');
+    }
+    final files = List<String>.from(value['files'] as List);
+    final allowed = {
+      'ui/chats/$chatId.json',
+      'ui/$chatId.json',
+      'attachments/$chatId',
+    };
+    for (final file in files) {
+      final normalized = p.posix.normalize(file);
+      if (file != normalized ||
+          file.contains('\\') ||
+          p.posix.isAbsolute(file) ||
+          normalized.split('/').contains('..')) {
+        throw const FormatException('Invalid trash path');
+      }
+      if (kind == 'workspaces'
+          ? file != 'workspace'
+          : !allowed.contains(file) && !_isSessionPath(file)) {
+        throw const FormatException('Unexpected trash path');
+      }
+    }
+    if (files.toSet().length != files.length ||
+        (kind == 'chats' && !files.contains('ui/chats/$chatId.json')) ||
+        (kind == 'workspaces' &&
+            (files.length != 1 || files.single != 'workspace'))) {
+      throw const FormatException('Invalid trash file list');
+    }
+    return AgentTrashEntry(
+      id: trashId,
+      kind: kind,
+      workspaceId: workspaceId,
+      chatId: chatId,
+      isDraft: value['isDraft'] == true,
+      title: value['title'] as String,
+      files: List.unmodifiable(files),
+      trashedAt: DateTime.parse(value['trashedAt'] as String),
+    );
+  }
+
+  static bool _isSessionPath(String path) {
+    try {
+      _sessionRelative(path);
+      return true;
+    } on FormatException {
+      return false;
+    }
+  }
+
+  Future<AgentTrashEntry> trashChat(String workspaceId, String chatId) =>
+      _write(() async {
+        _id(chatId);
+        final workspace = await getWorkspace(workspaceId);
+        final chat = (await listChats(
+          workspaceId,
+        )).firstWhere((chat) => chat.id == chatId);
+        final files = <String>[];
+        for (final relative in [
+          'ui/chats/$chatId.json',
+          'ui/$chatId.json',
+          if (chat.sessionFile != null)
+            _sessionRelative(chat.sessionFile!).replaceAll('\\', '/'),
+          'attachments/$chatId',
+        ]) {
+          final path = p.join(workspace.directory.path, relative);
+          await _guardTree(path);
+          if (await FileSystemEntity.type(path, followLinks: false) !=
+              FileSystemEntityType.notFound) {
+            files.add(relative);
+          }
+        }
+        final now = DateTime.now();
+        final entry = AgentTrashEntry(
+          id: '${now.microsecondsSinceEpoch}-$chatId',
+          kind: 'chats',
+          workspaceId: workspaceId,
+          chatId: chatId,
+          title: chat.title,
+          files: List.unmodifiable(files),
+          trashedAt: now,
+        );
+        final dir = _trashDirectory(entry.kind, entry.id);
+        await _guard(dir.path);
+        await _trashTransfer(entry, dir, [
+          for (final file in files)
+            (
+              from: p.join(workspace.directory.path, file),
+              to: p.join(dir.path, file),
+            ),
+        ]);
+        return entry;
+      });
+
+  /// Explicitly deleted drafts live only in trash, never in ui/chats before send.
+  Future<AgentTrashEntry> trashDraftChat(
+    AgentChat chat,
+    AgentComposerState composer,
+  ) => _write(() async {
+    if (!chat.isDraft) throw StateError('Not a draft');
+    _id(chat.id);
+    final workspace = await getWorkspace(chat.workspaceId);
+    final chatPath = p.join(
+      workspace.directory.path,
+      'ui',
+      'chats',
+      '${chat.id}.json',
+    );
+    await _guard(chatPath);
+    if (await FileSystemEntity.type(chatPath, followLinks: false) !=
+        FileSystemEntityType.notFound) {
+      throw StateError('Draft was already saved');
+    }
+    final attachment = 'attachments/${chat.id}';
+    final from = p.join(workspace.directory.path, attachment);
+    await _guardTree(from);
+    final hasAttachments = await Directory(from).exists();
+    final now = DateTime.now();
+    final entry = AgentTrashEntry(
+      id: '${now.microsecondsSinceEpoch}-${chat.id}',
+      kind: 'chats',
+      workspaceId: chat.workspaceId,
+      chatId: chat.id,
+      title: chat.title,
+      files: [
+        'ui/chats/${chat.id}.json',
+        'ui/${chat.id}.json',
+        if (hasAttachments) attachment,
+      ],
+      trashedAt: now,
+      isDraft: true,
+    );
+    final dir = _trashDirectory(entry.kind, entry.id);
+    await _guard(dir.path);
+    await _trashTransfer(
+      entry,
+      dir,
+      [if (hasAttachments) (from: from, to: p.join(dir.path, attachment))],
+      extraFiles: {
+        'ui/chats/${chat.id}.json': chat.toJson(),
+        'ui/${chat.id}.json': composer.toJson(),
+      },
+    );
+    return entry;
+  });
+
+  Future<({AgentChat chat, AgentComposerState composer})> readTrashedDraft(
+    String trashId,
+  ) async {
+    final entry = await readTrashEntry('chats', trashId);
+    if (!entry.isDraft) throw StateError('Not a trashed draft');
+    final dir = _trashDirectory('chats', trashId);
+    final value = await _read(
+      File(p.join(dir.path, 'ui', 'chats', '${entry.chatId}.json')),
+    );
+    if (value['id'] != entry.chatId ||
+        value['workspaceId'] != entry.workspaceId ||
+        value['sessionFile'] != null) {
+      throw const FormatException('Invalid draft identity');
+    }
+    return (
+      chat: AgentChat(
+        id: entry.chatId!,
+        workspaceId: entry.workspaceId,
+        title: value['title'] as String,
+        createdAt: DateTime.parse(value['createdAt'] as String),
+        isDraft: true,
+      ),
+      composer: AgentComposerState.fromJson(
+        await _read(File(p.join(dir.path, 'ui', '${entry.chatId}.json'))),
+      ),
+    );
+  }
+
+  Future<void> restoreChat(String trashId) => _write(() async {
+    final entry = await readTrashEntry('chats', trashId);
+    final workspace = await getWorkspace(entry.workspaceId);
+    final dir = _trashDirectory(entry.kind, trashId);
+    // Draft metadata is restored in memory by the controller, but collisions
+    // at any original path still prevent restoring the entry.
+    for (final file in entry.files) {
+      final target = p.join(workspace.directory.path, file);
+      await _guard(target);
+      if (await FileSystemEntity.type(target, followLinks: false) !=
+          FileSystemEntityType.notFound) {
+        throw StateError('Restore destination already exists');
+      }
+    }
+    await _transfer([
+      for (final file in entry.files)
+        if (!entry.isDraft || file.startsWith('attachments/'))
+          (
+            from: p.join(dir.path, file),
+            to: p.join(workspace.directory.path, file),
+          ),
+    ]);
+    await dir.delete(recursive: true);
+  });
+
+  Future<AgentTrashEntry> trashWorkspace(String workspaceId) =>
+      _write(() async {
+        final workspace = await getWorkspace(workspaceId);
+        if ((await listWorkspaces()).length <= 1) {
+          throw StateError('last_workspace');
+        }
+        final now = DateTime.now();
+        final entry = AgentTrashEntry(
+          id: '${now.microsecondsSinceEpoch}-$workspaceId',
+          kind: 'workspaces',
+          workspaceId: workspaceId,
+          title: workspace.name,
+          files: const ['workspace'],
+          trashedAt: now,
+        );
+        final dir = _trashDirectory(entry.kind, entry.id);
+        await _guardTree(workspace.directory.path);
+        await _guard(dir.path);
+        await _trashTransfer(entry, dir, [
+          (from: workspace.directory.path, to: p.join(dir.path, 'workspace')),
+        ]);
+        return entry;
+      });
+
+  Future<void> restoreWorkspace(String trashId) => _write(() async {
+    final entry = await readTrashEntry('workspaces', trashId);
+    final dir = _trashDirectory(entry.kind, trashId);
+    await _transfer([
+      (
+        from: p.join(dir.path, 'workspace'),
+        to: workspaceDirectory(entry.workspaceId).path,
+      ),
+    ]);
+    await dir.delete(recursive: true);
+  });
+
+  Future<void> emptyTrash() => _write(() async {
+    final path = p.join(root.path, 'trash');
+    await _guardTree(path);
+    await _deleteEntity(path);
+  });
+
+  Future<({int count, int bytes})> trashUsage() => _write(() async {
+    final path = p.join(root.path, 'trash');
+    await _guardTree(path);
+    final dir = Directory(path);
+    var count = 0, bytes = 0;
+    if (await dir.exists()) {
+      await for (final item in dir.list(recursive: true, followLinks: false)) {
+        if (item is File) {
+          bytes += await item.length();
+          if (p.basename(item.path) == 'manifest.json' &&
+              p.dirname(p.dirname(p.dirname(item.path))) == path) {
+            count++;
+          }
+        }
+      }
+    }
+    return (count: count, bytes: bytes);
+  });
+
+  Future<List<AgentChatSearchHit>> searchChats(
+    String workspaceId,
+    String query, {
+    int limit = 20,
+  }) async {
+    final workspace = await getWorkspace(workspaceId);
+    if (query.trim().isEmpty || limit <= 0) return [];
+    final pattern = RegExp(
+      RegExp.escape(query.trim()),
+      caseSensitive: false,
+      unicode: true,
+    );
+    final candidates = <({AgentChat chat, File file, DateTime modified})>[];
+    for (final chat in await listChats(workspaceId)) {
+      if (chat.sessionFile == null) continue;
+      try {
+        final file = File(
+          p.join(workspace.directory.path, _sessionRelative(chat.sessionFile!)),
+        );
+        await _guard(file.path);
+        final stat = await file.stat();
+        if (stat.type == FileSystemEntityType.file) {
+          candidates.add((chat: chat, file: file, modified: stat.modified));
+        }
+      } on FileSystemException {
+        continue;
+      } on FormatException {
+        continue;
+      }
+    }
+    candidates.sort((a, b) => b.modified.compareTo(a.modified));
+    final hits = <AgentChatSearchHit>[];
+    for (final candidate in candidates) {
+      try {
+        await for (final line
+            in candidate.file
+                .openRead()
+                .transform(const Utf8Decoder(allowMalformed: true))
+                .transform(const LineSplitter())) {
+          dynamic entry;
+          try {
+            entry = jsonDecode(line);
+          } on FormatException {
+            continue;
+          }
+          if (entry is! Map || entry['type'] != 'message') continue;
+          final message = entry['message'];
+          if (message is! Map ||
+              !const {'user', 'assistant'}.contains(message['role'])) {
+            continue;
+          }
+          final content = message['content'];
+          final text = content is String
+              ? content
+              : content is List
+              ? [
+                  for (final part in content)
+                    if (part is Map &&
+                        part['type'] == 'text' &&
+                        part['text'] is String)
+                      part['text'] as String,
+                ].join('\n')
+              : '';
+          final match = pattern.firstMatch(text);
+          if (match == null) continue;
+          // Bound extra snippet allocations even for very long message lines.
+          final from = (match.start - 62).clamp(0, match.start);
+          final before = text.substring(from, match.start).runes.toList();
+          final after = text
+              .substring(
+                match.end,
+                (match.end + 64).clamp(match.end, text.length),
+              )
+              .runes
+              .take(31)
+              .toList();
+          final prefix = String.fromCharCodes(
+            before.skip((before.length - 30).clamp(0, before.length)),
+          );
+          final suffix = String.fromCharCodes(after.take(30));
+          final snippet =
+              '${from > 0 || before.length > 30 ? '…' : ''}'
+              '$prefix${match.group(0)}$suffix${after.length > 30 ? '…' : ''}';
+          hits.add(
+            AgentChatSearchHit(
+              chatId: candidate.chat.id,
+              title: candidate.chat.title,
+              snippet: snippet,
+              entryId: entry['id'] is String ? entry['id'] as String : null,
+            ),
+          );
+          break;
+        }
+      } on FileSystemException {
+        continue;
+      }
+      if (hits.length >= limit) break;
+    }
+    return hits;
+  }
 
   File _composer(String workspaceId, String sessionId) {
     _id(sessionId);

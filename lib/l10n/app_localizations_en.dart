@@ -20102,6 +20102,77 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agOrderSkills => 'Skill catalog';
 
   @override
+  String get set_agQuick => 'Quick messages';
+
+  @override
+  String get set_agQuickSub =>
+      'Cards on the sidebar welcome page. A card fills the composer, or sends right away if set to.';
+
+  @override
+  String set_agQuickShown(int shown, int total) {
+    return 'Welcome page shows $shown / $total';
+  }
+
+  @override
+  String get set_agQuickEmpty =>
+      'No quick messages; the welcome page hides this block.';
+
+  @override
+  String get set_agQuickSendBadge => 'Sends';
+
+  @override
+  String get set_agQuickHidden => 'Hidden';
+
+  @override
+  String get set_agQuickUp => 'Move up';
+
+  @override
+  String get set_agQuickDown => 'Move down';
+
+  @override
+  String get set_agQuickEditOne => 'Edit';
+
+  @override
+  String get set_agQuickRemove => 'Delete';
+
+  @override
+  String get set_agQuickAdd => 'Add quick message';
+
+  @override
+  String get set_agQuickRestore => 'Restore defaults';
+
+  @override
+  String get set_agQuickRestoreConfirm =>
+      'Restore the 4 built-in quick messages? Messages you added or edited are replaced.';
+
+  @override
+  String set_agQuickRemoveConfirm(String title) {
+    return 'Delete quick message \"$title\"?';
+  }
+
+  @override
+  String get set_agQuickNew => 'New quick message';
+
+  @override
+  String get set_agQuickEditTitle => 'Edit quick message';
+
+  @override
+  String get set_agQuickIcon => 'Icon';
+
+  @override
+  String get set_agQuickTitle => 'Title';
+
+  @override
+  String get set_agQuickHint => 'Description (optional)';
+
+  @override
+  String get set_agQuickPrompt => 'Message to send to the Agent';
+
+  @override
+  String get set_agQuickSend =>
+      'Send right away on click (otherwise fill the composer)';
+
+  @override
   String get set_agSkills => 'Skills';
 
   @override
@@ -20388,6 +20459,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get ag_taskBlocksPrompt =>
       'Find parts of the current draft worth turning into reusable blocks and list suggestions. Don\'t change anything yet.';
+
+  @override
+  String get ag_quickTitle => 'Quick messages';
+
+  @override
+  String get ag_quickEdit => 'Edit quick messages';
+
+  @override
+  String get ag_quickSends => 'Sends right away';
 
   @override
   String get ag_recent => 'Recent';

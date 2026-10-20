@@ -49,6 +49,7 @@ class AgentChatRuntime {
   String? error, providerId, modelId, reasoningEffort;
   int usageRevision = 0;
   int importingImages = 0;
+  int pendingSends = 0;
   int modelRevision = -1;
   int uiRevision = 0;
   int? maxRequestsPerRun;
@@ -74,6 +75,8 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   List<AgentWorkspace> workspaces = [];
   List<AgentChat> chats = [];
   final Map<String, AgentChatRuntime> _runtimes = {};
+  final Set<AgentChatRuntime> _discardedDrafts = {};
+  final Set<String> _deletingChats = {}, _deletingWorkspaces = {};
   AgentWorkspace? selectedWorkspace;
   AgentChatRuntime? selected;
   bool initialized = false, _disposed = false;
@@ -127,7 +130,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     final revision = ++_selectionRevision;
     final workspace = await store.getWorkspace(id);
     var listed = await store.listChats(id);
-    if (listed.isEmpty) listed = [await store.createChat(id, initialChatName)];
+    if (listed.isEmpty) listed = [_newDraft(id)];
     if (_disposed || revision != _selectionRevision) return;
     selectedWorkspace = workspace;
     chats = listed;
@@ -150,9 +153,11 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     int revision, {
     bool restoreHistory = true,
   }) async {
-    for (final runtime in _runtimes.values.where(
-      (r) => r.chat.id != chat.id && !r.running && !r.starting,
-    )) {
+    await _discardOtherDrafts(chat.id);
+    for (final runtime
+        in _runtimes.values
+            .where((r) => r.chat.id != chat.id && !_busy(r))
+            .toList()) {
       await runtime.subscription?.cancel();
       await runtime.client?.close();
       runtime.client = null;
@@ -165,7 +170,9 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       runtime = AgentChatRuntime(
         workspace,
         chat,
-        await store.readComposer(workspace.id, chat.id),
+        chat.isDraft
+            ? const AgentComposerState()
+            : await store.readComposer(workspace.id, chat.id),
       );
       if (runtime.composer.pending.isNotEmpty) {
         runtime.composer = AgentComposerState(
@@ -182,7 +189,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
     if (_disposed || revision != _selectionRevision) return;
     selected = runtime;
-    await store.updateWorkspace(workspace.id, lastSessionId: chat.id);
+    if (!chat.isDraft) await _rememberChat(workspace.id, chat.id);
     _notify();
     // Restoring history is entirely local; no prompt or model call is made.
     if (restoreHistory && chat.sessionFile != null && runtime.client == null) {
@@ -210,21 +217,243 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     _notify();
   }
 
+  AgentChat _newDraft(String workspaceId) => AgentChat(
+    id: const Uuid().v4(),
+    workspaceId: workspaceId,
+    title: initialChatName,
+    createdAt: DateTime.now(),
+    isDraft: true,
+  );
+
+  Future<void> _closeRuntime(AgentChatRuntime runtime) async {
+    await runtime.subscription?.cancel();
+    runtime.subscription = null;
+    await runtime.client?.close();
+    runtime.client = null;
+    _runtimes.remove(runtime.chat.id);
+  }
+
+  Future<void> _discardOtherDrafts(String selectedId) async {
+    for (final runtime
+        in _runtimes.values
+            .where(
+              (r) => r.chat.isDraft && r.chat.id != selectedId && !_busy(r),
+            )
+            .toList()) {
+      // An OS import owns its original target until its final callback. Hide the
+      // draft now, then remove any late attachment files when the import ends.
+      _discardedDrafts.add(runtime);
+      chats = chats.where((chat) => chat.id != runtime.chat.id).toList();
+      if (runtime.importingImages == 0) {
+        await _closeRuntime(runtime);
+        _discardedDrafts.remove(runtime);
+      }
+      await store.discardDraftChat(runtime.workspace.id, runtime.chat.id);
+    }
+  }
+
+  Future<void> _rememberChat(String workspaceId, String chatId) async {
+    final updated = await store.updateWorkspace(
+      workspaceId,
+      lastSessionId: chatId,
+    );
+    if (selectedWorkspace?.id == workspaceId) selectedWorkspace = updated;
+    workspaces = [
+      for (final item in workspaces)
+        if (item.id == workspaceId) updated else item,
+    ];
+  }
+
+  Future<void> _refreshChats(String workspaceId) async {
+    final listed = await store.listChats(workspaceId);
+    if (selectedWorkspace?.id != workspaceId) return;
+    final drafts = chats
+        .where(
+          (chat) =>
+              chat.isDraft &&
+              chat.workspaceId == workspaceId &&
+              !listed.any((saved) => saved.id == chat.id),
+        )
+        .toList();
+    chats = [...drafts, ...listed];
+  }
+
   Future<void> createChat() async {
     final workspace = selectedWorkspace!;
-    final chat = await store.createChat(workspace.id, initialChatName);
-    chats = await store.listChats(workspace.id);
+    // Publish the draft before the first await, so rapid '+' clicks coalesce.
+    final chat =
+        chats.where((chat) => chat.isDraft).firstOrNull ??
+        _newDraft(workspace.id);
+    chats = [chat, ...chats.where((item) => !item.isDraft)];
     await selectChat(chat.id);
   }
 
   Future<void> renameChat(String id, String title) async {
     final workspace = selectedWorkspace!;
-    final chat = await store.updateChat(workspace.id, id, title: title);
+    final old = chats.firstWhere((chat) => chat.id == id);
+    final chat = old.isDraft
+        ? AgentChat(
+            id: old.id,
+            workspaceId: old.workspaceId,
+            title: title,
+            createdAt: old.createdAt,
+            isDraft: true,
+          )
+        : await store.updateChat(workspace.id, id, title: title);
     _runtimes[id]?.chat = chat;
-    chats = await store.listChats(workspace.id);
+    chats = [
+      for (final item in chats)
+        if (item.id == id) chat else item,
+    ];
     await _runtimes[id]?.client?.rename(title);
     _notify();
   }
+
+  static bool _busy(AgentChatRuntime runtime) =>
+      runtime.running ||
+      runtime.starting ||
+      runtime.waitingForSlot ||
+      runtime.pendingSends > 0;
+
+  Future<String> deleteChat(String chatId) async {
+    final runtime = _runtimes[chatId];
+    final workspaceId = runtime?.workspace.id ?? selectedWorkspace!.id;
+    if (runtime != null && _busy(runtime)) throw StateError('running');
+    if (runtime != null && runtime.importingImages > 0) {
+      throw StateError('importing');
+    }
+    if (_deletingWorkspaces.contains(workspaceId) ||
+        !_deletingChats.add(chatId)) {
+      throw StateError('deleting');
+    }
+    try {
+      final listed = selectedWorkspace?.id == workspaceId
+          ? [...chats]
+          : await store.listChats(workspaceId);
+      final index = listed.indexWhere((chat) => chat.id == chatId);
+      if (index < 0) throw StateError('Chat missing');
+      final chat = listed[index];
+      if (runtime != null) await _closeRuntime(runtime);
+      if (selected?.chat.id == chatId) {
+        final next = index + 1 < listed.length
+            ? listed[index + 1]
+            : index > 0
+            ? listed[index - 1]
+            : null;
+        selected = null;
+        if (next != null) await selectChat(next.id);
+      }
+      final entry = chat.isDraft
+          ? await store.trashDraftChat(
+              chat,
+              runtime?.composer ?? const AgentComposerState(),
+            )
+          : await store.trashChat(workspaceId, chatId);
+      final workspace = await store.getWorkspace(workspaceId);
+      final remaining = await store.listChats(workspaceId);
+      if (workspace.lastSessionId == chatId) {
+        if (remaining.isEmpty) {
+          final updated = await store.updateWorkspace(
+            workspaceId,
+            clearLastSessionId: true,
+          );
+          if (selectedWorkspace?.id == workspaceId) selectedWorkspace = updated;
+          workspaces = [
+            for (final item in workspaces)
+              if (item.id == workspaceId) updated else item,
+          ];
+        } else {
+          await _rememberChat(workspaceId, remaining.first.id);
+        }
+      }
+      if (selectedWorkspace?.id == workspaceId) {
+        chats = chats.where((item) => item.id != chatId).toList();
+        await _refreshChats(workspaceId);
+        if (selected == null) {
+          if (chats.isEmpty) {
+            await createChat();
+          } else {
+            await selectChat(chats.first.id);
+          }
+        }
+      }
+      return entry.id;
+    } finally {
+      _deletingChats.remove(chatId);
+      _notify();
+    }
+  }
+
+  Future<void> undoDeleteChat(String trashId) async {
+    final entry = await store.readTrashEntry('chats', trashId);
+    final draft = entry.isDraft ? await store.readTrashedDraft(trashId) : null;
+    await store.restoreChat(trashId);
+    workspaces = await store.listWorkspaces();
+    if (selectedWorkspace?.id != entry.workspaceId) {
+      await selectWorkspace(entry.workspaceId, restoreHistory: false);
+    }
+    await _refreshChats(entry.workspaceId);
+    if (draft != null) {
+      await _discardOtherDrafts(draft.chat.id);
+      final workspace = await store.getWorkspace(entry.workspaceId);
+      _runtimes[draft.chat.id] = AgentChatRuntime(
+        workspace,
+        draft.chat,
+        draft.composer,
+      );
+      chats = [draft.chat, ...chats.where((chat) => !chat.isDraft)];
+    }
+    await selectChat(entry.chatId!);
+    _notify();
+  }
+
+  Future<String> deleteWorkspace(String workspaceId) async {
+    final owned = _runtimes.values
+        .where((r) => r.workspace.id == workspaceId)
+        .toList();
+    if (owned.any(_busy)) throw StateError('running');
+    if (owned.any((r) => r.importingImages > 0)) throw StateError('importing');
+    if (owned.any((runtime) => _deletingChats.contains(runtime.chat.id)) ||
+        !_deletingWorkspaces.add(workspaceId)) {
+      throw StateError('deleting');
+    }
+    try {
+      final listed = await store.listWorkspaces();
+      if (!listed.any((workspace) => workspace.id == workspaceId)) {
+        throw StateError('Workspace missing');
+      }
+      if (listed.length <= 1) throw StateError('last_workspace');
+      for (final runtime in owned) {
+        await _closeRuntime(runtime);
+      }
+      if (selectedWorkspace?.id == workspaceId) {
+        selected = null;
+        await selectWorkspace(
+          listed.firstWhere((workspace) => workspace.id != workspaceId).id,
+        );
+      }
+      final entry = await store.trashWorkspace(workspaceId);
+      workspaces = await store.listWorkspaces();
+      settings = await store.patchSettings({
+        'selectedWorkspaceId': selectedWorkspace!.id,
+      });
+      return entry.id;
+    } finally {
+      _deletingWorkspaces.remove(workspaceId);
+      _notify();
+    }
+  }
+
+  Future<void> undoDeleteWorkspace(String trashId) async {
+    final entry = await store.readTrashEntry('workspaces', trashId);
+    await store.restoreWorkspace(trashId);
+    workspaces = await store.listWorkspaces();
+    await selectWorkspace(entry.workspaceId);
+    _notify();
+  }
+
+  Future<List<AgentChatSearchHit>> searchChats(String query) =>
+      store.searchChats(selectedWorkspace!.id, query);
 
   Future<void> updateSettings(
     Map<String, dynamic> changes, {
@@ -443,6 +672,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       return await action();
     } finally {
       runtime.importingImages--;
+      if (runtime.importingImages == 0 && _discardedDrafts.remove(runtime)) {
+        await _closeRuntime(runtime);
+        await store.discardDraftChat(runtime.workspace.id, runtime.chat.id);
+      }
       _notify();
     }
   }
@@ -462,6 +695,11 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<PiHostClient> _ensureClient(AgentChatRuntime runtime) async {
+    if (_deletingChats.contains(runtime.chat.id) ||
+        _deletingWorkspaces.contains(runtime.workspace.id) ||
+        !identical(_runtimes[runtime.chat.id], runtime)) {
+      throw StateError('deleting');
+    }
     var client = runtime.client;
     final changed =
         runtime.providerId != settings.providerId ||
@@ -471,6 +709,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         runtime.maxRequestsPerRun != settings.maxRequestsPerRun ||
         runtime.extensionSignature != settings.extensionSignature;
     if (client != null && !client.isClosed && (!changed || runtime.running)) {
+      await _recordSessionFile(runtime, client);
       return client;
     }
     if (runtime.starting) {
@@ -522,23 +761,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       runtime.maxRequestsPerRun = selection.maxRequestsPerRun;
       runtime.extensionSignature = selection.extensionSignature;
       _applyState(runtime, client.initialState);
-      final path = client.initialState['sessionFile'] as String?;
-      if (path != null) {
-        final sessionFile = File(path);
-        // Pi may expand Windows short paths when reopening an existing session.
-        final canonical = await sessionFile.exists()
-            ? await sessionFile.resolveSymbolicLinks()
-            : p.join(
-                await sessionFile.parent.resolveSymbolicLinks(),
-                p.basename(path),
-              );
-        final root = await runtime.workspace.directory.resolveSymbolicLinks();
-        runtime.chat = await store.updateChat(
-          runtime.workspace.id,
-          chat.id,
-          sessionFile: p.relative(canonical, from: root),
-        );
-      }
+      await _recordSessionFile(runtime, client);
       runtime.subscription = client.events.listen(
         (event) => _event(runtime, event),
       );
@@ -549,17 +772,58 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
   }
 
+  Future<void> _recordSessionFile(
+    AgentChatRuntime runtime,
+    PiHostClient client,
+  ) async {
+    final path = client.initialState['sessionFile'] as String?;
+    if (path != null &&
+        !runtime.chat.isDraft &&
+        runtime.chat.sessionFile == null) {
+      final sessionFile = File(path);
+      // Pi may expand Windows short paths when reopening an existing session.
+      final canonical = await sessionFile.exists()
+          ? await sessionFile.resolveSymbolicLinks()
+          : p.join(
+              await sessionFile.parent.resolveSymbolicLinks(),
+              p.basename(path),
+            );
+      final root = await runtime.workspace.directory.resolveSymbolicLinks();
+      runtime.chat = await store.updateChat(
+        runtime.workspace.id,
+        runtime.chat.id,
+        sessionFile: p.relative(canonical, from: root),
+      );
+    }
+  }
+
   Future<void> send({bool steer = false}) async {
     final runtime = selected!;
     final original = runtime.composer;
-    if (runtime.starting ||
+    if (_deletingChats.contains(runtime.chat.id) ||
+        _deletingWorkspaces.contains(runtime.workspace.id) ||
+        _discardedDrafts.contains(runtime) ||
+        (runtime.pendingSends > 0 && !runtime.running) ||
+        runtime.starting ||
         runtime.importingImages > 0 ||
         (original.text.trim().isEmpty && original.attachments.isEmpty)) {
       return;
     }
     final wasRunning = runtime.running;
+    runtime.pendingSends++;
     runtime.error = null;
     try {
+      if (runtime.chat.isDraft) {
+        runtime.starting = true;
+        try {
+          runtime.chat = await store.saveDraftChat(runtime.chat);
+          await _persist(runtime);
+          await _rememberChat(runtime.workspace.id, runtime.chat.id);
+          await _refreshChats(runtime.workspace.id);
+        } finally {
+          runtime.starting = false;
+        }
+      }
       final client = await _ensureClient(runtime);
       final images = <Map<String, dynamic>>[];
       final vision = (client.initialState['model'] as Map?)?['vision'] == true;
@@ -672,7 +936,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
           );
           await client.rename(runtime.chat.title);
           if (selectedWorkspace?.id == runtime.workspace.id) {
-            chats = await store.listChats(runtime.workspace.id);
+            await _refreshChats(runtime.workspace.id);
           }
         }
         runtime.running = false;
@@ -683,6 +947,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       if (!wasRunning) runtime.running = false;
       await _persist(runtime);
     } finally {
+      runtime.pendingSends--;
       _notify();
     }
   }
@@ -1014,17 +1279,20 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     );
   }
 
-  Future<void> _persist(AgentChatRuntime runtime) => store.saveComposer(
-    runtime.workspace.id,
-    runtime.chat.id,
-    AgentComposerState(
-      text: runtime.composer.text,
-      attachments: runtime.composer.attachments,
-      pending: runtime.composer.pending,
-      interrupted: runtime.composer.interrupted,
-      wasRunning: runtime.running,
-    ),
-  );
+  Future<void> _persist(AgentChatRuntime runtime) =>
+      runtime.chat.isDraft || !identical(_runtimes[runtime.chat.id], runtime)
+      ? Future.value()
+      : store.saveComposer(
+          runtime.workspace.id,
+          runtime.chat.id,
+          AgentComposerState(
+            text: runtime.composer.text,
+            attachments: runtime.composer.attachments,
+            pending: runtime.composer.pending,
+            interrupted: runtime.composer.interrupted,
+            wasRunning: runtime.running,
+          ),
+        );
   static String _error(Object error, [AgentChatRuntime? runtime]) {
     final l = currentL10n;
     if (error is NaiAgentToolError) {
@@ -1046,10 +1314,13 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   Future<void> close() => _closeFuture ??= _close();
   Future<void> _close() async {
-    for (final runtime in _runtimes.values) {
+    for (final runtime in _runtimes.values.toList()) {
       await _persist(runtime);
       await runtime.subscription?.cancel();
       await runtime.client?.close();
+      if (runtime.chat.isDraft) {
+        await store.discardDraftChat(runtime.workspace.id, runtime.chat.id);
+      }
     }
   }
 

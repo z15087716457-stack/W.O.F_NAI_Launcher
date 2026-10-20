@@ -225,6 +225,9 @@ class RagController extends Notifier<RagStatus> {
   bool _runtimeInstallCancelled = false;
   bool _disposed = false;
   int _epoch = 0, _gpuHolds = 0;
+
+  /// Includes holds acquired before a worker exists (suspended can still be false).
+  bool get isGpuBusy => _gpuHolds > 0;
   final _finishedJobs = <String>{};
   Future<void> _snapshotWrites = Future.value();
   Future<void> _retiring = Future.value();
@@ -872,6 +875,9 @@ class RagController extends Notifier<RagStatus> {
         if (query.categories != null) 'categories': query.categories,
         'limit': 80,
       }, cancellation);
+      if (result['fallback'] == 'resource_busy') {
+        throw const RagException('resource_busy');
+      }
       if (_disposed || epoch != _epoch || cancellation.isCancelled) {
         return const [];
       }
@@ -880,6 +886,7 @@ class RagController extends Notifier<RagStatus> {
           RagSearchHit.fromJson((item as Map).cast<String, dynamic>()),
       ];
     } catch (error) {
+      if (error is RagException && error.code == 'resource_busy') rethrow;
       if (epoch == _epoch &&
           !(error is RagException && error.code == 'cancelled')) {
         _fail(error, source: query.source);
@@ -1038,6 +1045,9 @@ class RagController extends Notifier<RagStatus> {
         'keyword': keyword,
         'limit': limit,
       }, cancellation);
+      if (result['fallback'] == 'resource_busy') {
+        throw const RagException('resource_busy');
+      }
       if (_disposed || epoch != _epoch || cancellation.isCancelled) {
         return const [];
       }
@@ -1062,6 +1072,7 @@ class RagController extends Notifier<RagStatus> {
           ),
       ];
     } catch (error) {
+      if (error is RagException && error.code == 'resource_busy') rethrow;
       if (epoch == _epoch &&
           !(error is RagException && error.code == 'cancelled')) {
         _fail(error);

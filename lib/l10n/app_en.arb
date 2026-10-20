@@ -10543,6 +10543,44 @@
   "set_agInstructionsSaving": "Saving instructions…",
   "set_agInstructionsFailed": "Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.",
   "set_agOrderSkills": "Skill catalog",
+  "set_agQuick": "Quick messages",
+  "set_agQuickSub": "Cards on the sidebar welcome page. A card fills the composer, or sends right away if set to.",
+  "set_agQuickShown": "Welcome page shows {shown} / {total}",
+  "@set_agQuickShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_agQuickEmpty": "No quick messages; the welcome page hides this block.",
+  "set_agQuickSendBadge": "Sends",
+  "set_agQuickHidden": "Hidden",
+  "set_agQuickUp": "Move up",
+  "set_agQuickDown": "Move down",
+  "set_agQuickEditOne": "Edit",
+  "set_agQuickRemove": "Delete",
+  "set_agQuickAdd": "Add quick message",
+  "set_agQuickRestore": "Restore defaults",
+  "set_agQuickRestoreConfirm": "Restore the 4 built-in quick messages? Messages you added or edited are replaced.",
+  "set_agQuickRemoveConfirm": "Delete quick message \"{title}\"?",
+  "@set_agQuickRemoveConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agQuickNew": "New quick message",
+  "set_agQuickEditTitle": "Edit quick message",
+  "set_agQuickIcon": "Icon",
+  "set_agQuickTitle": "Title",
+  "set_agQuickHint": "Description (optional)",
+  "set_agQuickPrompt": "Message to send to the Agent",
+  "set_agQuickSend": "Send right away on click (otherwise fill the composer)",
   "set_agSkills": "Skills",
   "set_agSkillsSub": "Only names and one-line descriptions stay in the prompt; the Agent reads the full instructions when a task matches.",
   "set_agSkillsLoaded": "{n} loaded",
@@ -10658,6 +10696,9 @@
   "ag_taskBlocks": "Organize blocks",
   "ag_taskBlocksHint": "Save reusable pieces to the block library",
   "ag_taskBlocksPrompt": "Find parts of the current draft worth turning into reusable blocks and list suggestions. Don't change anything yet.",
+  "ag_quickTitle": "Quick messages",
+  "ag_quickEdit": "Edit quick messages",
+  "ag_quickSends": "Sends right away",
   "ag_recent": "Recent",
   "ag_you": "You",
   "ag_edit": "Edit",

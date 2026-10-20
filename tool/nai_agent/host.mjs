@@ -141,6 +141,7 @@ async function handle(message) {
   }
   switch (type) {
     case 'permission_mode':
+      if (!['auto', 'ask', 'readonly', 'bypass'].includes(message.mode)) throw new Error('Invalid permission mode');
       created.setPermissionMode(message.mode);
       send({ type: 'response', id, permissionMode: created.getPermissionMode() });
       break;

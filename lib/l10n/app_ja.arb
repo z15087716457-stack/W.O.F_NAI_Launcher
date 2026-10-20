@@ -10530,6 +10530,44 @@
   "set_agInstructionsSaving": "指示を保存中…",
   "set_agInstructionsFailed": "指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。",
   "set_agOrderSkills": "スキルカタログ",
+  "set_agQuick": "クイックメッセージ",
+  "set_agQuickSub": "サイドバーのウェルカム画面のカード。クリックで入力欄に入れるか、すぐ送信します。",
+  "set_agQuickShown": "ウェルカム画面に {shown} / {total} 件",
+  "@set_agQuickShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_agQuickEmpty": "クイックメッセージがありません。ウェルカム画面には表示されません。",
+  "set_agQuickSendBadge": "すぐ送信",
+  "set_agQuickHidden": "非表示",
+  "set_agQuickUp": "上へ",
+  "set_agQuickDown": "下へ",
+  "set_agQuickEditOne": "編集",
+  "set_agQuickRemove": "削除",
+  "set_agQuickAdd": "クイックメッセージを追加",
+  "set_agQuickRestore": "デフォルトに戻す",
+  "set_agQuickRestoreConfirm": "内蔵の 4 件に戻しますか？追加・編集した内容は置き換えられます。",
+  "set_agQuickRemoveConfirm": "クイックメッセージ「{title}」を削除しますか？",
+  "@set_agQuickRemoveConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agQuickNew": "クイックメッセージを追加",
+  "set_agQuickEditTitle": "クイックメッセージを編集",
+  "set_agQuickIcon": "アイコン",
+  "set_agQuickTitle": "タイトル",
+  "set_agQuickHint": "説明（任意）",
+  "set_agQuickPrompt": "Agent に送る内容",
+  "set_agQuickSend": "クリックですぐ送信（オフなら入力欄に入れる）",
   "set_agSkills": "スキル",
   "set_agSkillsSub": "通常は名前と一行の説明だけがプロンプトに入り、タスクに合うときだけ Agent が完全な説明を読み込みます。",
   "set_agSkillsLoaded": "{n} 件読み込み済み",
@@ -10645,6 +10683,9 @@
   "ag_taskBlocks": "ブロックを整理",
   "ag_taskBlocksHint": "よく使う断片をブロックライブラリへ保存します",
   "ag_taskBlocksPrompt": "現在の下書きの中で、再利用できるブロックに向く断片を探して提案してください。まだ変更はしないでください。",
+  "ag_quickTitle": "クイックメッセージ",
+  "ag_quickEdit": "クイックメッセージを編集",
+  "ag_quickSends": "クリックですぐ送信",
   "ag_recent": "最近",
   "ag_you": "あなた",
   "ag_edit": "編集",

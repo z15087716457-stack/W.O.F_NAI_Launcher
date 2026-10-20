@@ -340,7 +340,11 @@ SettingsViewData settingsViewData(
           )
         : const SettingsDictionaryData(),
     models: models,
-    agent: settingsAgentData(ref, inspect: page == SettingsPageId.agent),
+    agent: settingsAgentData(
+      ref,
+      context,
+      inspect: page == SettingsPageId.agent,
+    ),
     rag: rag,
     upscale: settingsUpscaleData(
       upscaleModels,

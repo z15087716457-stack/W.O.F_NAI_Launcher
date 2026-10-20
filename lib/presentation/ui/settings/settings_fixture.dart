@@ -450,6 +450,23 @@ abstract final class SettingsFixture {
   );
 
   static const _agent = SettingsAgentData(
+    quick: [
+      SettingsQuickMessage(
+        id: 'builtin-review',
+        glyph: 'eye',
+        title: '检查草稿',
+        hint: '找冲突、冗余和模型不认的写法',
+        prompt: '检查当前草稿和参数，先不要修改。',
+      ),
+      SettingsQuickMessage(
+        id: 'mine',
+        glyph: 'wand',
+        title: '换成水彩',
+        prompt: '把当前草稿改成水彩画风',
+        send: true,
+      ),
+    ],
+    quickDefault: false,
     globalInstructions:
         '回答时先给结论，再给理由。\n写提示词遵循当前模型的标签规则；涉及 V5 时不要套用 V4.5 的权重写法。\n生成前一定先报价并等待确认。',
     extensions: [

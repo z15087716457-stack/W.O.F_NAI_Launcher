@@ -50,6 +50,7 @@ class AgentViewData {
     this.initError,
     this.loading = false,
     this.revision = 0,
+    this.quick,
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -112,6 +113,24 @@ class AgentViewData {
   /// 对话内容每变一次 +1（流式文字、步骤状态、待处理卡片）。界面用它判断
   /// 「用户在往上看时来了新内容」，显示「回到最新」。
   final int revision;
+
+  /// 欢迎页快捷信息（已按界面语言取好文字）；null = 用内置四条，空列表 = 不显示这块。
+  final List<AgentQuickItem>? quick;
+}
+
+/// 欢迎页一张快捷卡。[send] = 点了直接发送，否则填进输入框。
+@immutable
+class AgentQuickItem {
+  const AgentQuickItem({
+    required this.id,
+    required this.glyph,
+    required this.title,
+    required this.prompt,
+    this.hint = '',
+    this.send = false,
+  });
+  final String id, glyph, title, prompt, hint;
+  final bool send;
 }
 
 /// 整个聊天此刻在做什么（标签栏下的细进度条、发送按钮状态、步骤末尾的状态行）。
@@ -1056,7 +1075,7 @@ class AgentActions {
   final void Function(AgentMemoryTarget target) onEditMemory;
 }
 
-enum AgentMemoryTarget { global, workspace, skills }
+enum AgentMemoryTarget { global, workspace, skills, quick }
 
 /// 需要平台能力的包装，由转接层提供；null = 不包。
 @immutable

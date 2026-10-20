@@ -35074,6 +35074,132 @@ abstract class AppLocalizations {
   /// **'Skill catalog'**
   String get set_agOrderSkills;
 
+  /// No description provided for @set_agQuick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick messages'**
+  String get set_agQuick;
+
+  /// No description provided for @set_agQuickSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards on the sidebar welcome page. A card fills the composer, or sends right away if set to.'**
+  String get set_agQuickSub;
+
+  /// No description provided for @set_agQuickShown.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome page shows {shown} / {total}'**
+  String set_agQuickShown(int shown, int total);
+
+  /// No description provided for @set_agQuickEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No quick messages; the welcome page hides this block.'**
+  String get set_agQuickEmpty;
+
+  /// No description provided for @set_agQuickSendBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends'**
+  String get set_agQuickSendBadge;
+
+  /// No description provided for @set_agQuickHidden.
+  ///
+  /// In en, this message translates to:
+  /// **'Hidden'**
+  String get set_agQuickHidden;
+
+  /// No description provided for @set_agQuickUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Move up'**
+  String get set_agQuickUp;
+
+  /// No description provided for @set_agQuickDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Move down'**
+  String get set_agQuickDown;
+
+  /// No description provided for @set_agQuickEditOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get set_agQuickEditOne;
+
+  /// No description provided for @set_agQuickRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get set_agQuickRemove;
+
+  /// No description provided for @set_agQuickAdd.
+  ///
+  /// In en, this message translates to:
+  /// **'Add quick message'**
+  String get set_agQuickAdd;
+
+  /// No description provided for @set_agQuickRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore defaults'**
+  String get set_agQuickRestore;
+
+  /// No description provided for @set_agQuickRestoreConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore the 4 built-in quick messages? Messages you added or edited are replaced.'**
+  String get set_agQuickRestoreConfirm;
+
+  /// No description provided for @set_agQuickRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete quick message \"{title}\"?'**
+  String set_agQuickRemoveConfirm(String title);
+
+  /// No description provided for @set_agQuickNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New quick message'**
+  String get set_agQuickNew;
+
+  /// No description provided for @set_agQuickEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit quick message'**
+  String get set_agQuickEditTitle;
+
+  /// No description provided for @set_agQuickIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get set_agQuickIcon;
+
+  /// No description provided for @set_agQuickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get set_agQuickTitle;
+
+  /// No description provided for @set_agQuickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get set_agQuickHint;
+
+  /// No description provided for @set_agQuickPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Message to send to the Agent'**
+  String get set_agQuickPrompt;
+
+  /// No description provided for @set_agQuickSend.
+  ///
+  /// In en, this message translates to:
+  /// **'Send right away on click (otherwise fill the composer)'**
+  String get set_agQuickSend;
+
   /// No description provided for @set_agSkills.
   ///
   /// In en, this message translates to:
@@ -35577,6 +35703,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Find parts of the current draft worth turning into reusable blocks and list suggestions. Don\'t change anything yet.'**
   String get ag_taskBlocksPrompt;
+
+  /// No description provided for @ag_quickTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick messages'**
+  String get ag_quickTitle;
+
+  /// No description provided for @ag_quickEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit quick messages'**
+  String get ag_quickEdit;
+
+  /// No description provided for @ag_quickSends.
+  ///
+  /// In en, this message translates to:
+  /// **'Sends right away'**
+  String get ag_quickSends;
 
   /// No description provided for @ag_recent.
   ///

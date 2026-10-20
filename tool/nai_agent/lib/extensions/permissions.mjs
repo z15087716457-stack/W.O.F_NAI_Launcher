@@ -2,8 +2,8 @@ import { createHash } from 'node:crypto';
 import { realpath } from 'node:fs/promises';
 import { dirname, resolve, relative, isAbsolute } from 'node:path';
 
-const modes = new Set(['auto', 'ask', 'readonly']);
-const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'ask_user', 'image_read', 'wiki_query', 'tag_query', 'block_query', 'settings_read', 'generation_prepare', 'gallery_query', 'generation_cancel', 'tool_search', 'codemode']);
+const modes = new Set(['auto', 'ask', 'readonly', 'bypass']);
+const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'studio_search', 'ask_user', 'image_read', 'wiki_query', 'tag_query', 'block_query', 'settings_read', 'generation_prepare', 'gallery_query', 'generation_cancel', 'tool_search', 'codemode']);
 const readActions = {
   snapshot: new Set(['list', 'read']),
   reference_manage: new Set(['list']),
@@ -76,7 +76,8 @@ export function createNaiPermissions({ cwd, mode = 'auto', labels = {}, redact =
           if (revision !== startRevision) return { block: true, reason: 'Permissions changed; retry under the current mode.' };
           if (kind === 'read') return;
           if (current === 'readonly' && kind !== 'external-read') return { block: true, reason: 'Read-only mode blocks this operation. Ask the user to change the permission mode.' };
-          if (kind === 'native-confirmation' || (current === 'auto' && kind === 'edit')) return;
+          // Native paid operations still reach Dart's independent confirmation gate.
+          if (kind === 'native-confirmation' || current === 'bypass' || (current === 'auto' && kind === 'edit')) return;
           const key = createHash('sha256').update(JSON.stringify({ tool: event.toolName, input: event.input })).digest('hex');
           if (approved.has(key)) return;
           if (!ctx.hasUI) return { block: true, reason: 'Tool approval requires a real user interface.' };

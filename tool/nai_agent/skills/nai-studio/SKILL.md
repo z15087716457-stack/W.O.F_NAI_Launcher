@@ -33,6 +33,7 @@ Call them as `await tools.mcp__nai_studio__<name>({...})`. Run dependent writes 
 | Quote / generate / stop | `generation_prepare`, `generation_run`, `generation_cancel` | [generation.md](references/generation.md) |
 | Variations, enhance, upscale, Pixel Snap, cloud director tools | `image_generate`, `image_tool` | [image-tools.md](references/image-tools.md) |
 | Style exploration runs | `explore_manage` | [explore.md](references/explore.md) |
+| Semantic picture search / image-to-image search / blocks / Wiki / tags | `studio_search` | [search.md](references/search.md) |
 | Find and manage pictures, collections, folders, files | `gallery_query`, `gallery_manage` | [gallery.md](references/gallery.md) |
 | Source image, mask, Vibe, precise reference, reference library | `reference_manage`, `reference_library` | [references.md](references/references.md) |
 | Prompt blocks and their library | `block_query`, `block_manage` | [blocks.md](references/blocks.md) |

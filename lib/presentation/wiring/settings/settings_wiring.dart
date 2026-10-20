@@ -30,6 +30,7 @@ import '../../widgets/common/app_toast.dart';
 import '../../widgets/danbooru_login_dialog.dart';
 import 'settings_accounts.dart';
 import 'settings_agent.dart';
+import 'settings_agent_quick.dart';
 import 'settings_backups.dart';
 import 'settings_connections.dart';
 import 'settings_data.dart';
@@ -196,6 +197,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
     final storage = SettingsStorageActions(context, ref);
     final models = SettingsModelActions(context, ref);
     final agent = SettingsAgentActions(context, ref);
+    final quick = SettingsQuickActions(context, ref);
     final agentBackend = ref.read(settingsAgentBackendProvider);
     final rag = ref.read(ragControllerProvider.notifier);
     final plans = ref.read(settingsRagSessionProvider.notifier);
@@ -368,6 +370,10 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onMcpLogin: (id) => _run(() => agentBackend.mcpLogin(id)),
       onEditMcp: (id) => _run(() => agent.editMcp(id)),
       onRemoveMcp: (id) => _run(() => agentBackend.mcp(id, remove: true)),
+      onEditQuick: (id) => _run(() => quick.edit(id)),
+      onRemoveQuick: (id) => _run(() => quick.remove(id)),
+      onMoveQuick: (id, delta) => _run(() => quick.move(id, delta)),
+      onRestoreQuick: () => _run(quick.restore),
       onOpenAgent: () => _run(() async {
         if (!ref.read(naiAgentUiPreferencesProvider).settings.panelExpanded) {
           await ref.read(naiAgentWindowControllerProvider).toggle();

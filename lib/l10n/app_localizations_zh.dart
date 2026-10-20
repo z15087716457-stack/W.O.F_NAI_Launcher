@@ -19263,6 +19263,73 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agOrderSkills => 'Skill 目录';
 
   @override
+  String get set_agQuick => '快捷信息';
+
+  @override
+  String get set_agQuickSub => '侧栏欢迎页的快捷卡片。点卡片把内容填进输入框，也可以设成直接发送。';
+
+  @override
+  String set_agQuickShown(int shown, int total) {
+    return '欢迎页显示 $shown / $total';
+  }
+
+  @override
+  String get set_agQuickEmpty => '还没有快捷信息，欢迎页不显示这一块。';
+
+  @override
+  String get set_agQuickSendBadge => '直接发送';
+
+  @override
+  String get set_agQuickHidden => '不显示';
+
+  @override
+  String get set_agQuickUp => '上移';
+
+  @override
+  String get set_agQuickDown => '下移';
+
+  @override
+  String get set_agQuickEditOne => '编辑';
+
+  @override
+  String get set_agQuickRemove => '删除';
+
+  @override
+  String get set_agQuickAdd => '新增快捷信息';
+
+  @override
+  String get set_agQuickRestore => '恢复默认';
+
+  @override
+  String get set_agQuickRestoreConfirm => '恢复成内置的 4 条快捷信息？你新增和改过的会被替换。';
+
+  @override
+  String set_agQuickRemoveConfirm(String title) {
+    return '删除快捷信息「$title」？';
+  }
+
+  @override
+  String get set_agQuickNew => '新增快捷信息';
+
+  @override
+  String get set_agQuickEditTitle => '编辑快捷信息';
+
+  @override
+  String get set_agQuickIcon => '图标';
+
+  @override
+  String get set_agQuickTitle => '标题';
+
+  @override
+  String get set_agQuickHint => '说明（可不填）';
+
+  @override
+  String get set_agQuickPrompt => '发给 Agent 的内容';
+
+  @override
+  String get set_agQuickSend => '点击后直接发送（不勾选则填进输入框）';
+
+  @override
   String get set_agSkills => 'Skill';
 
   @override
@@ -19532,6 +19599,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_taskBlocksPrompt => '看看当前草稿里哪些片段适合做成可复用的积木，列出建议，先不要修改。';
+
+  @override
+  String get ag_quickTitle => '快捷信息';
+
+  @override
+  String get ag_quickEdit => '编辑快捷信息';
+
+  @override
+  String get ag_quickSends => '点击直接发送';
 
   @override
   String get ag_recent => '最近';
@@ -39791,6 +39867,73 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agOrderSkills => 'Skill 目錄';
 
   @override
+  String get set_agQuick => '快捷資訊';
+
+  @override
+  String get set_agQuickSub => '側欄歡迎頁的快捷卡片。點卡片把內容填進輸入框，也可以設成直接傳送。';
+
+  @override
+  String set_agQuickShown(int shown, int total) {
+    return '歡迎頁顯示 $shown / $total';
+  }
+
+  @override
+  String get set_agQuickEmpty => '還沒有快捷資訊，歡迎頁不顯示這一塊。';
+
+  @override
+  String get set_agQuickSendBadge => '直接傳送';
+
+  @override
+  String get set_agQuickHidden => '不顯示';
+
+  @override
+  String get set_agQuickUp => '上移';
+
+  @override
+  String get set_agQuickDown => '下移';
+
+  @override
+  String get set_agQuickEditOne => '編輯';
+
+  @override
+  String get set_agQuickRemove => '刪除';
+
+  @override
+  String get set_agQuickAdd => '新增快捷資訊';
+
+  @override
+  String get set_agQuickRestore => '恢復預設';
+
+  @override
+  String get set_agQuickRestoreConfirm => '恢復成內建的 4 條快捷資訊？你新增和改過的會被替換。';
+
+  @override
+  String set_agQuickRemoveConfirm(String title) {
+    return '刪除快捷資訊「$title」？';
+  }
+
+  @override
+  String get set_agQuickNew => '新增快捷資訊';
+
+  @override
+  String get set_agQuickEditTitle => '編輯快捷資訊';
+
+  @override
+  String get set_agQuickIcon => '圖示';
+
+  @override
+  String get set_agQuickTitle => '標題';
+
+  @override
+  String get set_agQuickHint => '說明（可不填）';
+
+  @override
+  String get set_agQuickPrompt => '發給 Agent 的內容';
+
+  @override
+  String get set_agQuickSend => '點選後直接傳送（不勾選則填進輸入框）';
+
+  @override
   String get set_agSkills => 'Skill';
 
   @override
@@ -40060,6 +40203,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_taskBlocksPrompt => '看看當前草稿裡哪些片段適合做成可複用的積木，列出建議，先不要修改。';
+
+  @override
+  String get ag_quickTitle => '快捷資訊';
+
+  @override
+  String get ag_quickEdit => '編輯快捷資訊';
+
+  @override
+  String get ag_quickSends => '點選直接傳送';
 
   @override
   String get ag_recent => '最近';

@@ -193,3 +193,34 @@ class _AgentToggleButtonState extends State<AgentToggleButton> {
     );
   }
 }
+
+/// 快捷信息图标键 → 侧栏图标路径（设置页的图标选择用同一组键）。
+const agentQuickGlyphKeys = [
+  'eye',
+  'image',
+  'spark',
+  'layers',
+  'pen',
+  'search',
+  'book',
+  'wand',
+  'compare',
+  'star',
+  'sliders',
+  'folder',
+];
+
+String agentQuickGlyph(String key) => switch (key) {
+  'eye' => AgentGlyphs.eye,
+  'image' => AgentGlyphs.image,
+  'layers' => AgentGlyphs.layers,
+  'pen' => AgentGlyphs.pen,
+  'search' => AgentGlyphs.search,
+  'book' => AgentGlyphs.book,
+  'wand' => AgentGlyphs.wand,
+  'compare' => AgentGlyphs.compare,
+  'star' => AgentGlyphs.star,
+  'sliders' => AgentGlyphs.sliders,
+  'folder' => AgentGlyphs.folder,
+  _ => AgentGlyphs.gen,
+};

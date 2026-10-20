@@ -1313,7 +1313,15 @@ class SettingsAgentData {
     this.dataPath = '',
     this.workspaces = 0,
     this.sessions = 0,
+    this.quick = const [],
+    this.quickDefault = true,
   });
+
+  /// 欢迎页快捷信息（顺序 = 显示顺序；前 6 条显示在欢迎页）。
+  final List<SettingsQuickMessage> quick;
+
+  /// 和内置默认一致（「恢复默认」不可点）。
+  final bool quickDefault;
 
   /// 已保存的内容；界面里编辑的是草稿，点“保存”才回调。
   final String globalInstructions;
@@ -1356,7 +1364,24 @@ class SettingsAgentData {
     dataPath: dataPath,
     workspaces: workspaces,
     sessions: sessions,
+    quick: quick,
+    quickDefault: quickDefault,
   );
+}
+
+/// 设置页里一条快捷信息（文字已按界面语言取好）。[glyph] 是图标键。
+@immutable
+class SettingsQuickMessage {
+  const SettingsQuickMessage({
+    required this.id,
+    required this.glyph,
+    required this.title,
+    required this.prompt,
+    this.hint = '',
+    this.send = false,
+  });
+  final String id, glyph, title, prompt, hint;
+  final bool send;
 }
 
 // ── 语义检索
@@ -1917,6 +1942,10 @@ class SettingsActions {
     this.onEditMcp = _noIdOpt,
     this.onRemoveMcp = _noId,
     this.onOpenAgent = _none,
+    this.onEditQuick = _noIdOpt,
+    this.onRemoveQuick = _noId,
+    this.onMoveQuick = _noMove,
+    this.onRestoreQuick = _none,
     // 语义检索
     this.onRagSourceEnabled = _noRagBool,
     this.onRagPause = _noRag,
@@ -2108,6 +2137,14 @@ class SettingsActions {
   /// 编辑 MCP 服务器；null = 新建（接线方打开现有表单）。
   final ValueChanged<String?> onEditMcp;
   final ValueChanged<String> onRemoveMcp;
+
+  /// 编辑一条快捷信息；null = 新建（接线方打开编辑窗）。
+  final ValueChanged<String?> onEditQuick;
+  final ValueChanged<String> onRemoveQuick;
+
+  /// 上移（-1）/ 下移（+1）。
+  final void Function(String id, int delta) onMoveQuick;
+  final VoidCallback onRestoreQuick;
   final VoidCallback onOpenAgent;
 
   final void Function(SettingsRagSourceKind kind, bool enabled)
@@ -2189,6 +2226,7 @@ class SettingsActions {
   static void _noId(String _) {}
   static void _noIdOpt(String? _) {}
   static void _noIdBool(String _, bool _) {}
+  static void _noMove(String _, int _) {}
   static void _noBool(bool _) {}
   static void _noSkillSource(SettingsSkillSource _) {}
   static void _noText(String _) {}

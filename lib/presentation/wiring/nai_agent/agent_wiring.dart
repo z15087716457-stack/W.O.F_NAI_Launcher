@@ -27,6 +27,7 @@ import '../../providers/nai_agent/nai_agent_generation_approvals.dart';
 import '../../providers/nai_agent/nai_agent_image_approvals.dart';
 import '../../providers/nai_agent/nai_agent_model_provider.dart';
 import '../../providers/nai_agent/nai_agent_questions.dart';
+import '../../providers/nai_agent/nai_agent_quick_messages.dart';
 import '../../providers/nai_agent/nai_agent_skills_provider.dart';
 import '../../providers/nai_agent/nai_agent_window_controller.dart';
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
@@ -48,6 +49,7 @@ import '../blocks_preferences.dart';
 import 'agent_context.dart';
 import 'agent_diff_undo.dart';
 import 'agent_image_info.dart';
+import 'agent_quick.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
 import 'agent_thread_mapper.dart';
@@ -260,6 +262,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       AgentMemoryTarget.global => 'agentInstructions',
       AgentMemoryTarget.workspace => 'agentWorkspaceRules',
       AgentMemoryTarget.skills => 'agentSkills',
+      AgentMemoryTarget.quick => 'agentQuick',
       null => null,
     };
     context.go(
@@ -615,6 +618,10 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       initError: c.initializationError,
       loading: r == null,
       revision: _revision + (r?.uiRevision ?? 0),
+      quick: agentQuickItems(
+        context.l10n,
+        ref.watch(naiAgentQuickMessagesProvider).items,
+      ),
     );
     final actions = AgentActions(
       onClose: () =>

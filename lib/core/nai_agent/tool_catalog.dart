@@ -16,6 +16,7 @@ const naiAgentToolNames = [
   'generation_run',
   'generation_cancel',
   'gallery_query',
+  'studio_search',
   'gallery_manage',
   'reference_manage',
   'reference_library',

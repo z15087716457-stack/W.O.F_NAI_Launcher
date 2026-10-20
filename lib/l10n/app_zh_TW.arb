@@ -10648,6 +10648,44 @@
   "set_agInstructionsSaving": "正在儲存指令…",
   "set_agInstructionsFailed": "指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。",
   "set_agOrderSkills": "Skill 目錄",
+  "set_agQuick": "快捷資訊",
+  "set_agQuickSub": "側欄歡迎頁的快捷卡片。點卡片把內容填進輸入框，也可以設成直接傳送。",
+  "set_agQuickShown": "歡迎頁顯示 {shown} / {total}",
+  "@set_agQuickShown": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_agQuickEmpty": "還沒有快捷資訊，歡迎頁不顯示這一塊。",
+  "set_agQuickSendBadge": "直接傳送",
+  "set_agQuickHidden": "不顯示",
+  "set_agQuickUp": "上移",
+  "set_agQuickDown": "下移",
+  "set_agQuickEditOne": "編輯",
+  "set_agQuickRemove": "刪除",
+  "set_agQuickAdd": "新增快捷資訊",
+  "set_agQuickRestore": "恢復預設",
+  "set_agQuickRestoreConfirm": "恢復成內建的 4 條快捷資訊？你新增和改過的會被替換。",
+  "set_agQuickRemoveConfirm": "刪除快捷資訊「{title}」？",
+  "@set_agQuickRemoveConfirm": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agQuickNew": "新增快捷資訊",
+  "set_agQuickEditTitle": "編輯快捷資訊",
+  "set_agQuickIcon": "圖示",
+  "set_agQuickTitle": "標題",
+  "set_agQuickHint": "說明（可不填）",
+  "set_agQuickPrompt": "發給 Agent 的內容",
+  "set_agQuickSend": "點選後直接傳送（不勾選則填進輸入框）",
   "set_agSkills": "Skill",
   "set_agSkillsSub": "平時只把名稱和一句話描述放進提示詞；任務對得上時 Agent 才讀取完整說明。",
   "set_agSkillsLoaded": "{n} 個已載入",
@@ -10775,6 +10813,9 @@
   "ag_taskBlocks": "整理積木",
   "ag_taskBlocksHint": "把常用片段收進積木庫",
   "ag_taskBlocksPrompt": "看看當前草稿裡哪些片段適合做成可複用的積木，列出建議，先不要修改。",
+  "ag_quickTitle": "快捷資訊",
+  "ag_quickEdit": "編輯快捷資訊",
+  "ag_quickSends": "點選直接傳送",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "編輯",

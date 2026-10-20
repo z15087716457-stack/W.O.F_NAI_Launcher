@@ -15,6 +15,7 @@ import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import '../../providers/nai_agent/nai_agent_skills_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../screens/settings/sections/nai_agent_mcp_settings.dart';
+import 'settings_agent_quick.dart';
 import 'settings_dialogs.dart';
 import '../../ui/settings/settings_contract.dart';
 
@@ -635,7 +636,12 @@ class SettingsAgentActions {
   }
 }
 
-SettingsAgentData settingsAgentData(WidgetRef ref, {bool inspect = false}) {
+SettingsAgentData settingsAgentData(
+  WidgetRef ref,
+  BuildContext context, {
+  bool inspect = false,
+}) {
+  final quick = settingsQuickData(ref, context);
   final settings = ref.watch(naiAgentUiPreferencesProvider).settings;
   final inventory = ref.watch(settingsAgentInventoryProvider).valueOrNull;
   final controller = ref.exists(naiAgentControllerProvider)
@@ -728,6 +734,8 @@ SettingsAgentData settingsAgentData(WidgetRef ref, {bool inspect = false}) {
     dataPath: ref.watch(naiAgentWorkspaceStoreProvider).root.path,
     workspaces: inventory?.workspaces ?? 0,
     sessions: inventory?.sessions ?? 0,
+    quick: quick.$1,
+    quickDefault: quick.$2,
   );
 }
 

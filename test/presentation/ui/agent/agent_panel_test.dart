@@ -146,6 +146,58 @@ void main() {
       expect((rec.last('composer')! as String), contains('检查当前草稿'));
     });
 
+    testWidgets('自定义快捷信息：直接发送、齿轮去设置、空列表隐藏', (tester) async {
+      final base = AgentFixture.view(AgentScene.welcome);
+      AgentViewData withQuick(List<AgentQuickItem> quick) => AgentViewData(
+        now: base.now,
+        workspace: base.workspace,
+        chat: base.chat,
+        workspaces: base.workspaces,
+        chats: base.chats,
+        composer: base.composer,
+        thread: base.thread,
+        shelf: base.shelf,
+        memory: base.memory,
+        usage: base.usage,
+        models: base.models,
+        thinking: base.thinking,
+        permission: base.permission,
+        mentions: base.mentions,
+        skills: base.skills,
+        draft: base.draft,
+        status: base.status,
+        revision: base.revision,
+        quick: quick,
+      );
+      var rec = await pumpAgent(
+        tester,
+        data: withQuick(const [
+          AgentQuickItem(
+            id: 'q1',
+            glyph: 'wand',
+            title: '换成水彩',
+            prompt: '把当前草稿改成水彩画风',
+            send: true,
+          ),
+        ]),
+      );
+      expect(find.text('快捷信息'), findsOneWidget);
+      expect(find.text('换成水彩'), findsOneWidget);
+      expect(find.byKey(const Key('agent-task-1')), findsNothing);
+      await tester.tap(find.byKey(const Key('agent-task-0')));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(rec.last('composer'), '把当前草稿改成水彩画风');
+      expect(rec.names, contains('send'));
+      await tester.tap(find.byKey(const Key('agent-quick-edit')));
+      await tester.pump();
+      expect(rec.last('editMemory'), AgentMemoryTarget.quick);
+      rec = await pumpAgent(tester, data: withQuick(const []));
+      expect(find.text('快捷信息'), findsNothing);
+      expect(find.byKey(const Key('agent-task-0')), findsNothing);
+    });
+
     testWidgets('输入 @ 弹出引用面板，回车插入', (tester) async {
       final rec = await pumpAgent(tester, scene: AgentScene.welcome);
       await tester.enterText(find.byKey(const Key('agent-input')), '参考 @角');

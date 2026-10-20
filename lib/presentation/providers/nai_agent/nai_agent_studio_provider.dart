@@ -17,6 +17,7 @@ import 'nai_agent_generation_binding.dart';
 import 'nai_agent_source_generation_binding.dart';
 import 'nai_agent_image_tool_binding.dart';
 import 'nai_agent_gallery_binding.dart';
+import 'nai_agent_search_binding.dart';
 import 'nai_agent_reference_binding.dart';
 import 'nai_agent_reference_library_binding.dart';
 import 'nai_agent_settings_binding.dart';
@@ -122,6 +123,12 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       owner: owner,
     );
     late final NaiAgentStudioTools studio;
+    final search = NaiAgentSearchBinding(
+      ref,
+      workspace,
+      (params, token) => studio.loadImage(params, token),
+      () => alive,
+    );
     final references = NaiAgentReferenceBinding(
       ref,
       workspace,
@@ -171,6 +178,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
         if (sourceGeneration != null)
           'image_generate': sourceGeneration.execute,
         'gallery_query': gallery.query,
+        'studio_search': search.search,
         'gallery_manage': gallery.manage,
         'reference_manage': references.execute,
         'reference_library': referenceLibrary.execute,

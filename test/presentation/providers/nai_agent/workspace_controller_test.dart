@@ -110,6 +110,263 @@ void main() {
     return value;
   }
 
+  test(
+    'new chats are one in-memory draft, first send persists and auto-titles',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final workspace = c.selectedWorkspace!, draftId = c.selected!.chat.id;
+      expect(c.selected!.chat.isDraft, true);
+      expect(await c.store.listChats(workspace.id), isEmpty);
+      expect((await c.store.getWorkspace(workspace.id)).lastSessionId, isNull);
+      await Future.wait([c.createChat(), c.createChat(), c.createChat()]);
+      expect(c.chats, hasLength(1));
+      expect(c.selected!.chat.id, draftId);
+      await c.saveComposer('尚未发送');
+      expect(
+        await File('${workspace.directory.path}/ui/$draftId.json').exists(),
+        false,
+      );
+      await c.close();
+      expect(await c.store.listChats(workspace.id), isEmpty);
+      final reopened = controller();
+      await reopened.initialize();
+      expect(reopened.selected!.composer.text, '');
+      await reopened.saveComposer('  ${'标' * 40}  ');
+      await reopened.send();
+      expect(reopened.selected!.error, isNull);
+      expect(reopened.selected!.chat.isDraft, false);
+      expect(reopened.selected!.chat.title, '标' * 32);
+      expect(reopened.chats, hasLength(1));
+      expect(
+        (await reopened.store.listChats(workspace.id)).single.id,
+        reopened.selected!.chat.id,
+      );
+      expect(
+        (await reopened.store.getWorkspace(workspace.id)).lastSessionId,
+        reopened.selected!.chat.id,
+      );
+      expect(calls, 1);
+    },
+  );
+
+  test(
+    'switching away discards draft composer and staged attachments',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('saved');
+      await c.send();
+      final saved = c.selected!.chat.id;
+      await c.createChat();
+      final draft = c.selected!;
+      await c.saveComposer('never sent');
+      await c.attach(
+        'staged.png',
+        img.encodePng(img.Image(width: 1, height: 1)),
+        'image/png',
+      );
+      expect(c.chats.first.id, draft.chat.id);
+      expect(
+        (await c.store.getWorkspace(draft.workspace.id)).lastSessionId,
+        saved,
+      );
+      final attachmentDirectory = Directory(
+        '${draft.workspace.directory.path}/attachments/${draft.chat.id}',
+      );
+      expect(await attachmentDirectory.exists(), true);
+      await c.selectChat(saved);
+      expect(await attachmentDirectory.exists(), false);
+      expect(
+        c.heldRuntimes.any((runtime) => runtime.chat.id == draft.chat.id),
+        false,
+      );
+      expect(c.chats.map((chat) => chat.id), [saved]);
+      expect(await c.store.listChats(draft.workspace.id), hasLength(1));
+      await c.createChat();
+      final newDraftId = c.selected!.chat.id;
+      await c.createWorkspace('other');
+      expect(
+        await File(
+          '${draft.workspace.directory.path}/ui/chats/$newDraftId.json',
+        ).exists(),
+        false,
+      );
+      expect(c.selected!.chat.isDraft, true);
+      expect(await c.store.listChats(c.selectedWorkspace!.id), isEmpty);
+    },
+  );
+
+  test(
+    'explicitly deleted draft is undoable but stays off disk until first send',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('draft to undo');
+      await c.attach(
+        'staged.png',
+        img.encodePng(img.Image(width: 1, height: 1)),
+        'image/png',
+      );
+      final draft = c.selected!;
+      final trash = await c.deleteChat(draft.chat.id);
+      expect(await c.store.listChats(draft.workspace.id), isEmpty);
+      expect(c.selected!.chat.id, isNot(draft.chat.id));
+      await c.undoDeleteChat(trash);
+      expect(c.selected!.chat.id, draft.chat.id);
+      expect(c.selected!.chat.isDraft, true);
+      expect(c.selected!.composer.text, 'draft to undo');
+      expect(c.selected!.composer.attachments, hasLength(1));
+      expect(await c.store.listChats(draft.workspace.id), isEmpty);
+      expect(
+        (await c.store.getWorkspace(draft.workspace.id)).lastSessionId,
+        isNull,
+      );
+      await c.send();
+      expect(c.selected!.error, isNull);
+      expect(c.selected!.chat.title, 'draft to undo');
+      expect(await c.store.listChats(draft.workspace.id), hasLength(1));
+    },
+  );
+
+  test(
+    'delete cannot race the first draft send while metadata is being saved',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('first send');
+      final chat = c.selected!;
+      final sending = c.send();
+      await expectLater(c.deleteChat(chat.chat.id), throwsStateError);
+      await expectLater(c.deleteWorkspace(chat.workspace.id), throwsStateError);
+      await sending;
+      expect(chat.error, isNull);
+      expect(await c.store.listChats(chat.workspace.id), hasLength(1));
+    },
+  );
+
+  test(
+    'chat deletion closes runtime, selects adjacent, undo restores history and selection',
+    () async {
+      final c = controller();
+      var notifications = 0;
+      c.addListener(() => notifications++);
+      await c.initialize();
+      await c.saveComposer('first searchable body');
+      await c.send();
+      final first = c.selected!;
+      await c.createChat();
+      await c.saveComposer('second');
+      await c.send();
+      final second = c.selected!, client = c.selected!.client!;
+      final hits = await c.searchChats('SEARCHABLE');
+      expect(hits.single.chatId, first.chat.id);
+      final trash = await c.deleteChat(second.chat.id);
+      expect(client.isClosed, true);
+      expect(c.heldRuntimes.contains(second), false);
+      expect(c.selected!.chat.id, first.chat.id);
+      expect(
+        (await c.store.getWorkspace(first.workspace.id)).lastSessionId,
+        first.chat.id,
+      );
+      await c.undoDeleteChat(trash);
+      expect(c.selected!.chat.id, second.chat.id);
+      expect(
+        c.selected!.messages.where((message) => message['role'] == 'user'),
+        hasLength(1),
+      );
+      expect(
+        (await c.store.getWorkspace(first.workspace.id)).lastSessionId,
+        second.chat.id,
+      );
+      await c.deleteChat(first.chat.id);
+      final lastTrash = await c.deleteChat(second.chat.id);
+      expect(c.selected!.chat.isDraft, true);
+      expect(await c.store.listChats(first.workspace.id), isEmpty);
+      expect(
+        (await c.store.getWorkspace(first.workspace.id)).lastSessionId,
+        isNull,
+      );
+      await c.undoDeleteChat(lastTrash);
+      expect(c.chats, hasLength(1));
+      expect(c.selected!.chat.id, second.chat.id);
+      expect(calls, 2);
+      expect(notifications, greaterThan(10));
+    },
+  );
+
+  test(
+    'deletion rejects all busy states including background workspace chats',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final first = c.selected!;
+      for (final state in ['running', 'starting', 'waiting']) {
+        first.running = state == 'running';
+        first.starting = state == 'starting';
+        first.waitingForSlot = state == 'waiting';
+        final runningError = throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            'running',
+          ),
+        );
+        await expectLater(c.deleteChat(first.chat.id), runningError);
+        await expectLater(c.deleteWorkspace(first.workspace.id), runningError);
+      }
+      first.running = first.starting = first.waitingForSlot = false;
+      first.chat = await c.store.saveDraftChat(first.chat);
+      await c.createWorkspace('other');
+      first.waitingForSlot = true;
+      await expectLater(
+        c.deleteWorkspace(first.workspace.id),
+        throwsStateError,
+      );
+      first.waitingForSlot = false;
+      final trash = await c.deleteWorkspace(first.workspace.id);
+      expect(c.selectedWorkspace!.id, isNot(first.workspace.id));
+      expect(c.heldRuntimes.contains(first), false);
+      await c.undoDeleteWorkspace(trash);
+      expect(c.selectedWorkspace!.id, first.workspace.id);
+      expect(c.settings.selectedWorkspaceId, first.workspace.id);
+    },
+  );
+
+  test(
+    'workspace deletion switches selection and undo, at least one remains',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final firstWorkspace = c.selectedWorkspace!.id;
+      await expectLater(c.deleteWorkspace(firstWorkspace), throwsStateError);
+      await c.saveComposer('persisted');
+      await c.send();
+      final firstChat = c.selected!.chat.id;
+      await c.createWorkspace('other');
+      final otherWorkspace = c.selectedWorkspace!.id;
+      await c.selectWorkspace(firstWorkspace);
+      final client = c.selected!.client!;
+      final trash = await c.deleteWorkspace(firstWorkspace);
+      expect(client.isClosed, true);
+      expect(c.selectedWorkspace!.id, otherWorkspace);
+      expect(
+        (await c.store.readSettings()).selectedWorkspaceId,
+        otherWorkspace,
+      );
+      expect(c.workspaces, hasLength(1));
+      await c.undoDeleteWorkspace(trash);
+      expect(c.workspaces, hasLength(2));
+      expect(c.selectedWorkspace!.id, firstWorkspace);
+      expect(c.selected!.chat.id, firstChat);
+      expect(
+        (await c.store.readSettings()).selectedWorkspaceId,
+        firstWorkspace,
+      );
+      expect(calls, 1);
+    },
+  );
+
   test('nonvision sends only compact NAI summary and original paths', () async {
     final c = controller();
     await c.initialize();
@@ -342,6 +599,15 @@ void main() {
       await c.updateSettings({'permissionMode': 'ask'});
       expect(c.selected!.client, same(client));
       expect((await client.state())['permissionMode'], 'ask');
+      await c.updateSettings({
+        'permissionMode': 'bypass',
+        'bypassWarned': true,
+      });
+      expect((await client.state())['permissionMode'], 'bypass');
+      expect(c.settings.bypassWarned, true);
+      await c.updateSettings({'permissionMode': 'ask'});
+      expect((await client.state())['permissionMode'], 'ask');
+      expect(c.selected!.client, same(client));
       expect(calls, 1);
     },
   );
@@ -515,6 +781,8 @@ void main() {
       await entered.future.timeout(const Duration(seconds: 10));
       await c.createWorkspace('另一个项目');
       final secondWorkspace = c.selectedWorkspace!.id;
+      // Test composer persistence on a saved chat, not a disposable new draft.
+      c.selected!.chat = await c.store.saveDraftChat(c.selected!.chat);
       await c.saveComposer('第二个项目的草稿');
       expect(c.runningChats.single.chat.id, first.chat.id);
       expect(c.selected!.messages, isEmpty);
@@ -669,6 +937,7 @@ void main() {
       final c = controller();
       await c.initialize();
       final original = c.selected!;
+      original.chat = await c.store.saveDraftChat(original.chat);
       await c.createWorkspace('第二个工作区');
       await c.saveComposer('保留第二个项目的草稿');
       final selected = c.selected!;

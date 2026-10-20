@@ -257,6 +257,7 @@ void main() {
           view.AgentMemoryTarget.global => 'agentInstructions',
           view.AgentMemoryTarget.workspace => 'agentWorkspaceRules',
           view.AgentMemoryTarget.skills => 'agentSkills',
+          view.AgentMemoryTarget.quick => 'agentQuick',
         },
       );
       router.go('/');

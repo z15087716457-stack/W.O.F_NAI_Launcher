@@ -19553,6 +19553,74 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agOrderSkills => '스킬 카탈로그';
 
   @override
+  String get set_agQuick => '빠른 메시지';
+
+  @override
+  String get set_agQuickSub => '사이드바 시작 화면의 카드입니다. 누르면 입력창에 채우거나 바로 보냅니다.';
+
+  @override
+  String set_agQuickShown(int shown, int total) {
+    return '시작 화면 표시 $shown / $total';
+  }
+
+  @override
+  String get set_agQuickEmpty => '빠른 메시지가 없어 시작 화면에 표시되지 않습니다.';
+
+  @override
+  String get set_agQuickSendBadge => '바로 전송';
+
+  @override
+  String get set_agQuickHidden => '숨김';
+
+  @override
+  String get set_agQuickUp => '위로';
+
+  @override
+  String get set_agQuickDown => '아래로';
+
+  @override
+  String get set_agQuickEditOne => '편집';
+
+  @override
+  String get set_agQuickRemove => '삭제';
+
+  @override
+  String get set_agQuickAdd => '빠른 메시지 추가';
+
+  @override
+  String get set_agQuickRestore => '기본값 복원';
+
+  @override
+  String get set_agQuickRestoreConfirm =>
+      '기본 빠른 메시지 4개로 복원할까요? 추가하거나 편집한 항목은 바뀝니다.';
+
+  @override
+  String set_agQuickRemoveConfirm(String title) {
+    return '빠른 메시지 \"$title\"을(를) 삭제할까요?';
+  }
+
+  @override
+  String get set_agQuickNew => '빠른 메시지 추가';
+
+  @override
+  String get set_agQuickEditTitle => '빠른 메시지 편집';
+
+  @override
+  String get set_agQuickIcon => '아이콘';
+
+  @override
+  String get set_agQuickTitle => '제목';
+
+  @override
+  String get set_agQuickHint => '설명(선택)';
+
+  @override
+  String get set_agQuickPrompt => 'Agent에게 보낼 내용';
+
+  @override
+  String get set_agQuickSend => '누르면 바로 전송(끄면 입력창에 채움)';
+
+  @override
   String get set_agSkills => '스킬';
 
   @override
@@ -19832,6 +19900,15 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get ag_taskBlocksPrompt =>
       '현재 초안에서 재사용할 블록으로 만들 만한 조각을 찾아 제안해 주세요. 아직 수정하지 마세요.';
+
+  @override
+  String get ag_quickTitle => '빠른 메시지';
+
+  @override
+  String get ag_quickEdit => '빠른 메시지 편집';
+
+  @override
+  String get ag_quickSends => '클릭하면 바로 전송';
 
   @override
   String get ag_recent => '최근';

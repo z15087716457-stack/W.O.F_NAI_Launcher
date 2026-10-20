@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../../l10n/app_localizations.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_preview_image.dart';
 import '../kit/ui_text.dart';
@@ -27,32 +28,7 @@ class AgentWelcome extends StatelessWidget {
         ? l.ag_greetAfternoon
         : l.ag_greetEvening;
     final recent = d.chats.where((x) => x.id != d.chat.id).take(3).toList();
-    final tasks = [
-      (
-        AgentGlyphs.eye,
-        l.ag_taskReview,
-        l.ag_taskReviewHint,
-        l.ag_taskReviewPrompt,
-      ),
-      (
-        AgentGlyphs.image,
-        l.ag_taskAnalyze,
-        l.ag_taskAnalyzeHint,
-        l.ag_taskAnalyzePrompt,
-      ),
-      (
-        AgentGlyphs.gen,
-        l.ag_taskVariants,
-        l.ag_taskVariantsHint,
-        l.ag_taskVariantsPrompt,
-      ),
-      (
-        AgentGlyphs.layers,
-        l.ag_taskBlocks,
-        l.ag_taskBlocksHint,
-        l.ag_taskBlocksPrompt,
-      ),
-    ];
+    final tasks = (d.quick ?? agentDefaultQuick(l)).take(6).toList();
     return SingleChildScrollView(
       key: const Key('agent-welcome'),
       padding: const EdgeInsets.fromLTRB(16, 22, 16, 22),
@@ -74,29 +50,53 @@ class AgentWelcome extends StatelessWidget {
             const SizedBox(height: 18),
             _DraftCard(draft: d.draft!),
           ],
-          const SizedBox(height: 18),
-          LayoutBuilder(
-            builder: (context, box) {
-              final w = (box.maxWidth - 8) / 2;
-              return Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final (i, (glyph, title, hint, prompt)) in tasks.indexed)
-                    SizedBox(
-                      width: w,
-                      child: _Tile(
-                        key: Key('agent-task-$i'),
-                        glyph: glyph,
-                        title: title,
-                        hint: hint,
-                        onTap: () => s.insert(prompt, replace: true),
+          if (tasks.isNotEmpty) ...[
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                AgentEyebrow(l.ag_quickTitle),
+                const Spacer(),
+                AgentIconButton(
+                  key: const Key('agent-quick-edit'),
+                  glyph: AgentGlyphs.sliders,
+                  tooltip: l.ag_quickEdit,
+                  small: true,
+                  onPressed: () =>
+                      s.actions.onEditMemory(AgentMemoryTarget.quick),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            LayoutBuilder(
+              builder: (context, box) {
+                final w = (box.maxWidth - 8) / 2;
+                return Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final (i, t) in tasks.indexed)
+                      SizedBox(
+                        width: w,
+                        child: _Tile(
+                          key: Key('agent-task-$i'),
+                          glyph: agentQuickGlyph(t.glyph),
+                          title: t.title,
+                          hint: t.hint,
+                          send: t.send,
+                          onTap: () async {
+                            s.insert(t.prompt, replace: true);
+                            if (!t.send) return;
+                            // 等输入框把文字交给转接层（onComposerChanged）再发。
+                            await Future<void>.delayed(Duration.zero);
+                            s.run(() => s.actions.onSend(steer: false));
+                          },
+                        ),
                       ),
-                    ),
-                ],
-              );
-            },
-          ),
+                  ],
+                );
+              },
+            ),
+          ],
           if (recent.isNotEmpty) ...[
             const SizedBox(height: 18),
             Row(children: [AgentEyebrow(l.ag_recent), const Spacer()]),
@@ -199,9 +199,13 @@ class _Tile extends StatefulWidget {
     required this.title,
     required this.hint,
     required this.onTap,
+    this.send = false,
   });
   final String glyph, title, hint;
   final VoidCallback onTap;
+
+  /// 点了直接发送：右上角画一个小箭头。
+  final bool send;
 
   @override
   State<_Tile> createState() => _TileState();
@@ -241,15 +245,29 @@ class _TileState extends State<_Tile> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 8,
             children: [
-              Container(
-                width: 28,
-                height: 28,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: c.control,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: AgentIcon(widget.glyph, size: 16, color: c.ink),
+              Row(
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: c.control,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: AgentIcon(widget.glyph, size: 16, color: c.ink),
+                  ),
+                  const Spacer(),
+                  if (widget.send)
+                    Tooltip(
+                      message: context.l10n.ag_quickSends,
+                      child: AgentIcon(
+                        AgentGlyphs.send,
+                        size: 13,
+                        color: c.faint,
+                      ),
+                    ),
+                ],
               ),
               Text(
                 widget.title,
@@ -260,10 +278,13 @@ class _TileState extends State<_Tile> {
                   height: 1.3,
                 ),
               ),
-              Text(
-                widget.hint,
-                style: UiText.sans(12, color: c.muted, height: 1.4),
-              ),
+              if (widget.hint.isNotEmpty)
+                Text(
+                  widget.hint,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12, color: c.muted, height: 1.4),
+                ),
             ],
           ),
         ),
@@ -712,3 +733,35 @@ class AgentMemory extends StatelessWidget {
     );
   }
 }
+
+/// 内置四条快捷信息（按界面语言）；转接层没给自定义列表时用它。
+List<AgentQuickItem> agentDefaultQuick(AppLocalizations l) => [
+  AgentQuickItem(
+    id: 'builtin-review',
+    glyph: 'eye',
+    title: l.ag_taskReview,
+    hint: l.ag_taskReviewHint,
+    prompt: l.ag_taskReviewPrompt,
+  ),
+  AgentQuickItem(
+    id: 'builtin-analyze',
+    glyph: 'image',
+    title: l.ag_taskAnalyze,
+    hint: l.ag_taskAnalyzeHint,
+    prompt: l.ag_taskAnalyzePrompt,
+  ),
+  AgentQuickItem(
+    id: 'builtin-variants',
+    glyph: 'spark',
+    title: l.ag_taskVariants,
+    hint: l.ag_taskVariantsHint,
+    prompt: l.ag_taskVariantsPrompt,
+  ),
+  AgentQuickItem(
+    id: 'builtin-blocks',
+    glyph: 'layers',
+    title: l.ag_taskBlocks,
+    hint: l.ag_taskBlocksHint,
+    prompt: l.ag_taskBlocksPrompt,
+  ),
+];
