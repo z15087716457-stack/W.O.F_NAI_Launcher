@@ -264,6 +264,26 @@ class _AgentHeaderState extends State<AgentHeader> {
           glyph: AgentGlyphs.sliders,
           onTap: a.onOpenSettings,
         ),
+        UiMenuItem(
+          key: const Key('agent-menu-delete-chat'),
+          divider: true,
+          danger: true,
+          label: l.ag_menuDeleteChat,
+          glyph: AgentGlyphs.trash,
+          enabled: !busy,
+          onTap: () => agentDeleteChat(context, d.chat),
+        ),
+        UiMenuItem(
+          key: const Key('agent-menu-delete-workspace'),
+          danger: true,
+          label: l.ag_menuDeleteWorkspace,
+          glyph: AgentGlyphs.trash,
+          enabled:
+              !busy &&
+              d.workspaces.length > 1 &&
+              d.chats.every((x) => x.state == AgentChatState.idle),
+          onTap: () => agentDeleteWorkspace(context, d.workspace),
+        ),
       ],
     );
   }

@@ -20470,6 +20470,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_quickSends => 'Sends right away';
 
   @override
+  String get ag_modeBypass => 'Full access';
+
+  @override
+  String get ag_modeBypassHint =>
+      'Never asks; everything runs directly. Spending Anlas still needs your OK';
+
+  @override
+  String get ag_bypassConfirmTitle => 'Switch to full access?';
+
+  @override
+  String get ag_bypassConfirmBody =>
+      'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Anything that spends Anlas still asks first. Use it only for tasks you trust.';
+
+  @override
+  String get ag_bypassConfirmOk => 'Switch';
+
+  @override
+  String get ag_bypassConfirmSilence => 'Don’t remind me again';
+
+  @override
+  String get ag_menuDeleteChat => 'Delete chat';
+
+  @override
+  String get ag_menuDeleteWorkspace => 'Delete workspace';
+
+  @override
+  String get ag_delete => 'Delete';
+
+  @override
+  String get ag_deleteChatTitle => 'Delete this chat?';
+
+  @override
+  String ag_deleteChatBody(String title) {
+    return '\"$title\" moves to the trash and can be undone. Generated images stay in the gallery and history.';
+  }
+
+  @override
+  String get ag_deleteWorkspaceTitle => 'Delete this workspace?';
+
+  @override
+  String ag_deleteWorkspaceBody(String name) {
+    return 'Workspace \"$name\" and all its chats move to the trash and can be undone. Generated images stay in the gallery and history.';
+  }
+
+  @override
+  String ag_chatDeleted(String title) {
+    return 'Deleted \"$title\"';
+  }
+
+  @override
+  String ag_workspaceDeleted(String name) {
+    return 'Deleted workspace \"$name\"';
+  }
+
+  @override
+  String get ag_chatsContent => 'In messages';
+
+  @override
+  String get ag_chatsSearching => 'Searching messages…';
+
+  @override
+  String get ag_imageVibe => 'Use as Vibe';
+
+  @override
+  String get ag_imageReference => 'Use as precise reference';
+
+  @override
+  String get ag_imageParams => 'Load parameters';
+
+  @override
+  String get ag_imageFolder => 'Show in folder';
+
+  @override
+  String get ag_imageVibeDone => 'Added as a Vibe reference';
+
+  @override
+  String get ag_imageReferenceDone => 'Set as precise reference';
+
+  @override
+  String get ag_imageParamsDone => 'Generation parameters loaded';
+
+  @override
+  String get ag_usageAnlas => 'Image spend (estimate)';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override

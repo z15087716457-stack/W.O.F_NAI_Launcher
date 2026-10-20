@@ -16,6 +16,8 @@ class AgentScope extends InheritedWidget {
     required this.zoom,
     required this.insert,
     required this.toast,
+    required this.confirm,
+    required this.undoToast,
   });
 
   final AgentViewData data;
@@ -42,6 +44,20 @@ class AgentScope extends InheritedWidget {
 
   /// 轻提示（「已复制」）。
   final void Function(String text) toast;
+
+  /// 确认弹窗；[optOut] 非 null 时多一个「不再提醒」勾选框。
+  /// 返回 null = 取消；否则 `(勾选了不再提醒)`。
+  final Future<(bool,)?> Function({
+    required String title,
+    required String message,
+    required String confirm,
+    bool danger,
+    String? optOut,
+  })
+  confirm;
+
+  /// 带「撤销」的底部提示（约 6 秒），点撤销调 [onUndo]。
+  final void Function(String text, Future<bool> Function() onUndo) undoToast;
 
   static AgentScope of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<AgentScope>()!;

@@ -19610,6 +19610,90 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_quickSends => '点击直接发送';
 
   @override
+  String get ag_modeBypass => '完全权限';
+
+  @override
+  String get ag_modeBypassHint => '不再询问，所有操作直接执行；花 Anlas 仍要确认';
+
+  @override
+  String get ag_bypassConfirmTitle => '切换到完全权限？';
+
+  @override
+  String get ag_bypassConfirmBody =>
+      'Agent 将不再询问，直接修改文件、运行命令、调用未知工具，也能操作工作区以外的文件。花 Anlas 的操作仍会先请你确认。只在你信任当前任务时使用。';
+
+  @override
+  String get ag_bypassConfirmOk => '切换';
+
+  @override
+  String get ag_bypassConfirmSilence => '不再提醒';
+
+  @override
+  String get ag_menuDeleteChat => '删除对话';
+
+  @override
+  String get ag_menuDeleteWorkspace => '删除工作区';
+
+  @override
+  String get ag_delete => '删除';
+
+  @override
+  String get ag_deleteChatTitle => '删除对话？';
+
+  @override
+  String ag_deleteChatBody(String title) {
+    return '「$title」会移进回收区，可以撤销。生成的图片仍保留在图库和历史中。';
+  }
+
+  @override
+  String get ag_deleteWorkspaceTitle => '删除工作区？';
+
+  @override
+  String ag_deleteWorkspaceBody(String name) {
+    return '工作区「$name」和里面的全部对话会移进回收区，可以撤销。生成的图片仍保留在图库和历史中。';
+  }
+
+  @override
+  String ag_chatDeleted(String title) {
+    return '已删除「$title」';
+  }
+
+  @override
+  String ag_workspaceDeleted(String name) {
+    return '已删除工作区「$name」';
+  }
+
+  @override
+  String get ag_chatsContent => '内容匹配';
+
+  @override
+  String get ag_chatsSearching => '正在搜索对话内容…';
+
+  @override
+  String get ag_imageVibe => '设为 Vibe';
+
+  @override
+  String get ag_imageReference => '设为精确参考';
+
+  @override
+  String get ag_imageParams => '载入参数';
+
+  @override
+  String get ag_imageFolder => '在文件夹中显示';
+
+  @override
+  String get ag_imageVibeDone => '已加入 Vibe 参考';
+
+  @override
+  String get ag_imageReferenceDone => '已设为精确参考';
+
+  @override
+  String get ag_imageParamsDone => '已载入生成参数';
+
+  @override
+  String get ag_usageAnlas => '生图花费（估算）';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -40212,6 +40296,90 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_quickSends => '點選直接傳送';
+
+  @override
+  String get ag_modeBypass => '完全權限';
+
+  @override
+  String get ag_modeBypassHint => '不再詢問，所有操作直接執行；花 Anlas 仍要確認';
+
+  @override
+  String get ag_bypassConfirmTitle => '切換到完全權限？';
+
+  @override
+  String get ag_bypassConfirmBody =>
+      'Agent 將不再詢問，直接修改檔案、執行命令、呼叫未知工具，也能操作工作區以外的檔案。花 Anlas 的操作仍會先請你確認。只在你信任當前任務時使用。';
+
+  @override
+  String get ag_bypassConfirmOk => '切換';
+
+  @override
+  String get ag_bypassConfirmSilence => '不再提醒';
+
+  @override
+  String get ag_menuDeleteChat => '刪除對話';
+
+  @override
+  String get ag_menuDeleteWorkspace => '刪除工作區';
+
+  @override
+  String get ag_delete => '刪除';
+
+  @override
+  String get ag_deleteChatTitle => '刪除對話？';
+
+  @override
+  String ag_deleteChatBody(String title) {
+    return '「$title」會移進回收區，可以復原。生成的圖片仍保留在圖庫和歷史中。';
+  }
+
+  @override
+  String get ag_deleteWorkspaceTitle => '刪除工作區？';
+
+  @override
+  String ag_deleteWorkspaceBody(String name) {
+    return '工作區「$name」和裡面的全部對話會移進回收區，可以復原。生成的圖片仍保留在圖庫和歷史中。';
+  }
+
+  @override
+  String ag_chatDeleted(String title) {
+    return '已刪除「$title」';
+  }
+
+  @override
+  String ag_workspaceDeleted(String name) {
+    return '已刪除工作區「$name」';
+  }
+
+  @override
+  String get ag_chatsContent => '內容匹配';
+
+  @override
+  String get ag_chatsSearching => '正在搜尋對話內容…';
+
+  @override
+  String get ag_imageVibe => '設為 Vibe';
+
+  @override
+  String get ag_imageReference => '設為精確參考';
+
+  @override
+  String get ag_imageParams => '載入參數';
+
+  @override
+  String get ag_imageFolder => '在資料夾中顯示';
+
+  @override
+  String get ag_imageVibeDone => '已加入 Vibe 參考';
+
+  @override
+  String get ag_imageReferenceDone => '已設為精確參考';
+
+  @override
+  String get ag_imageParamsDone => '已載入生成參數';
+
+  @override
+  String get ag_usageAnlas => '生圖花費（估算）';
 
   @override
   String get ag_recent => '最近';

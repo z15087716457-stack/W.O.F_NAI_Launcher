@@ -19911,6 +19911,90 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_quickSends => '클릭하면 바로 전송';
 
   @override
+  String get ag_modeBypass => '전체 권한';
+
+  @override
+  String get ag_modeBypassHint => '묻지 않고 모두 바로 실행합니다. Anlas 사용만 확인합니다';
+
+  @override
+  String get ag_bypassConfirmTitle => '전체 권한으로 전환할까요?';
+
+  @override
+  String get ag_bypassConfirmBody =>
+      'Agent가 묻지 않고 파일 수정, 명령 실행, 알 수 없는 도구 호출을 하며 작업 공간 밖의 파일도 다룰 수 있습니다. Anlas를 쓰는 작업은 계속 먼저 확인합니다. 믿을 수 있는 작업에만 사용하세요.';
+
+  @override
+  String get ag_bypassConfirmOk => '전환';
+
+  @override
+  String get ag_bypassConfirmSilence => '다시 알리지 않기';
+
+  @override
+  String get ag_menuDeleteChat => '대화 삭제';
+
+  @override
+  String get ag_menuDeleteWorkspace => '작업 공간 삭제';
+
+  @override
+  String get ag_delete => '삭제';
+
+  @override
+  String get ag_deleteChatTitle => '대화를 삭제할까요?';
+
+  @override
+  String ag_deleteChatBody(String title) {
+    return '\"$title\"은(는) 휴지통으로 이동하며 되돌릴 수 있습니다. 생성한 이미지는 갤러리와 기록에 남습니다.';
+  }
+
+  @override
+  String get ag_deleteWorkspaceTitle => '작업 공간을 삭제할까요?';
+
+  @override
+  String ag_deleteWorkspaceBody(String name) {
+    return '작업 공간 \"$name\"과(와) 그 안의 모든 대화가 휴지통으로 이동하며 되돌릴 수 있습니다. 생성한 이미지는 갤러리와 기록에 남습니다.';
+  }
+
+  @override
+  String ag_chatDeleted(String title) {
+    return '\"$title\" 삭제됨';
+  }
+
+  @override
+  String ag_workspaceDeleted(String name) {
+    return '작업 공간 \"$name\" 삭제됨';
+  }
+
+  @override
+  String get ag_chatsContent => '메시지에서';
+
+  @override
+  String get ag_chatsSearching => '메시지 검색 중…';
+
+  @override
+  String get ag_imageVibe => 'Vibe로 사용';
+
+  @override
+  String get ag_imageReference => '정밀 참조로 사용';
+
+  @override
+  String get ag_imageParams => '매개변수 불러오기';
+
+  @override
+  String get ag_imageFolder => '폴더에서 보기';
+
+  @override
+  String get ag_imageVibeDone => 'Vibe 참조로 추가했습니다';
+
+  @override
+  String get ag_imageReferenceDone => '정밀 참조로 설정했습니다';
+
+  @override
+  String get ag_imageParamsDone => '생성 매개변수를 불러왔습니다';
+
+  @override
+  String get ag_usageAnlas => '이미지 생성 비용(추정)';
+
+  @override
   String get ag_recent => '최근';
 
   @override

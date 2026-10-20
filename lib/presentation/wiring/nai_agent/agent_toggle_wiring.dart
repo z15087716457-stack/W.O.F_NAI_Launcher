@@ -8,6 +8,7 @@ import '../../providers/nai_agent/nai_agent_window_controller.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../ui/agent/agent_glyphs.dart';
 import '../../widgets/common/app_toast.dart';
+import 'agent_toggle_badge.dart';
 
 class AgentToggleWiring extends ConsumerWidget {
   const AgentToggleWiring({super.key});
@@ -21,6 +22,11 @@ class AgentToggleWiring extends ConsumerWidget {
       key: const Key('nai-agent-toggle'),
       child: AgentToggleButton(
         expanded: expanded,
+        // 只在 Agent 已经启动过后看角标：别为了画一个点在启动时就初始化控制器。
+        // 第一次展开侧栏会创建控制器并通知窗口控制器，这里随之重建。
+        badge: ref.exists(naiAgentControllerProvider)
+            ? ref.watch(agentToggleBadgeProvider)
+            : AgentToggleBadge.none,
         tooltip: context.l10n.naiAgent_title,
         onPressed: () => unawaited(
           window.toggle().catchError((Object _) {

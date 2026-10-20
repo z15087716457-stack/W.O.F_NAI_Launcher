@@ -273,8 +273,8 @@ void main() {
         png,
       );
       expect(
-        h.panel(tester).data.composer.attachments.single.metadata,
-        contains('54321'),
+        h.panel(tester).data.composer.attachments.single.metadata?.seed,
+        54321,
       );
       expect(h.c.selected!.composer.text, 'keep text');
       final mouse = await tester.createGesture(

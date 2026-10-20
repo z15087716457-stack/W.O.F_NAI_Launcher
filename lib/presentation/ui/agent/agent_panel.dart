@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
+import '../kit/ui_lib_controls.dart';
 import '../kit/ui_text.dart';
 import 'agent_composer.dart';
 import 'agent_contract.dart';
@@ -41,6 +42,8 @@ class _AgentPanelState extends State<AgentPanel> {
   WidgetBuilder? _dialog;
   String? _toast;
   Timer? _toastTimer;
+  (String, Future<bool> Function())? _undo;
+  Timer? _undoTimer;
   var _dropping = false;
 
   @override
@@ -56,6 +59,7 @@ class _AgentPanelState extends State<AgentPanel> {
   @override
   void dispose() {
     _toastTimer?.cancel();
+    _undoTimer?.cancel();
     super.dispose();
   }
 
@@ -66,6 +70,52 @@ class _AgentPanelState extends State<AgentPanel> {
       if (mounted) setState(() => _toast = null);
     });
   }
+
+  void _showUndo(String text, Future<bool> Function() onUndo) {
+    _undoTimer?.cancel();
+    setState(() => _undo = (text, onUndo));
+    _undoTimer = Timer(const Duration(seconds: 6), () {
+      if (mounted) setState(() => _undo = null);
+    });
+  }
+
+  Future<void> _takeUndo() async {
+    final undo = _undo;
+    if (undo == null) return;
+    _undoTimer?.cancel();
+    setState(() => _undo = null);
+    await _run(undo.$2);
+  }
+
+  Future<(bool,)?> _confirm({
+    required String title,
+    required String message,
+    required String confirm,
+    bool danger = false,
+    String? optOut,
+  }) {
+    final done = Completer<(bool,)?>();
+    void finish((bool,)? v) {
+      _dismissConfirm = null;
+      if (!done.isCompleted) done.complete(v);
+      if (mounted) setState(() => _dialog = null);
+    }
+
+    setState(
+      () => _dialog = (_) => _ConfirmDialog(
+        title: title,
+        message: message,
+        confirm: confirm,
+        danger: danger,
+        optOut: optOut,
+        onDone: finish,
+      ),
+    );
+    _dismissConfirm = () => finish(null);
+    return done.future;
+  }
+
+  VoidCallback? _dismissConfirm;
 
   Future<void> _run(Future<bool> Function() action) async {
     var ok = false;
@@ -168,9 +218,19 @@ class _AgentPanelState extends State<AgentPanel> {
       zoom: _zoom,
       insert: _insert,
       toast: _showToast,
+      confirm: _confirm,
+      undoToast: _showUndo,
       child: UiModal(
         dialog: _dialog,
-        onDismiss: () => setState(() => _dialog = null),
+        onDismiss: () {
+          final dismiss = _dismissConfirm;
+          _dismissConfirm = null;
+          if (dismiss != null) {
+            dismiss();
+          } else {
+            setState(() => _dialog = null);
+          }
+        },
         child: Stack(
           children: [
             Positioned.fill(child: body),
@@ -181,6 +241,15 @@ class _AgentPanelState extends State<AgentPanel> {
                 right: 0,
                 bottom: 132,
                 child: IgnorePointer(child: Center(child: _Toast(_toast!))),
+              ),
+            if (_undo != null && _toast == null)
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 132,
+                child: Center(
+                  child: _UndoToast(text: _undo!.$1, onUndo: _takeUndo),
+                ),
               ),
           ],
         ),
@@ -457,6 +526,155 @@ class _Zoom extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ConfirmDialog extends StatefulWidget {
+  const _ConfirmDialog({
+    required this.title,
+    required this.message,
+    required this.confirm,
+    required this.danger,
+    required this.optOut,
+    required this.onDone,
+  });
+  final String title, message, confirm;
+  final bool danger;
+  final String? optOut;
+  final ValueChanged<(bool,)?> onDone;
+
+  @override
+  State<_ConfirmDialog> createState() => _ConfirmDialogState();
+}
+
+class _ConfirmDialogState extends State<_ConfirmDialog> {
+  var _silence = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    return Container(
+      key: const Key('agent-confirm-dialog'),
+      width: 380,
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: c.card,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: c.border),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            UiDialogHeader(
+              children: [
+                if (widget.danger)
+                  AgentIcon(AgentGlyphs.alert, size: 16, color: c.error),
+                Expanded(child: Text(widget.title)),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 14,
+                children: [
+                  Text(
+                    widget.message,
+                    style: UiText.sans(12.5, color: c.muted, height: 1.6),
+                  ),
+                  if (widget.optOut != null)
+                    GestureDetector(
+                      key: const Key('agent-confirm-optout'),
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => setState(() => _silence = !_silence),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: Row(
+                          spacing: 8,
+                          children: [
+                            UiCheckBox(value: _silence),
+                            Text(
+                              widget.optOut!,
+                              style: UiText.sans(12, color: c.ink),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            UiDialogFooter(
+              children: [
+                const Spacer(),
+                AgentButton(
+                  key: const Key('agent-confirm-cancel'),
+                  label: l.ag_cancel,
+                  onPressed: () => widget.onDone(null),
+                ),
+                AgentButton(
+                  key: const Key('agent-confirm-ok'),
+                  label: widget.confirm,
+                  style: widget.danger
+                      ? AgentButtonStyle.danger
+                      : AgentButtonStyle.primary,
+                  onPressed: () => widget.onDone((_silence,)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _UndoToast extends StatelessWidget {
+  const _UndoToast({required this.text, required this.onUndo});
+  final String text;
+  final VoidCallback onUndo;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return Container(
+      key: const Key('agent-undo-toast'),
+      constraints: const BoxConstraints(maxWidth: 340),
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: c.tipBg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12, color: c.tipInk, height: 1.3),
+            ),
+          ),
+          TextButton(
+            key: const Key('agent-undo-toast-undo'),
+            onPressed: onUndo,
+            style: TextButton.styleFrom(
+              foregroundColor: c.tipInk,
+              minimumSize: const Size(0, 28),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              textStyle: UiText.sans(12, weight: FontWeight.w600),
+            ),
+            child: Text(context.l10n.ag_diffUndo),
           ),
         ],
       ),

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,12 +16,16 @@ import 'agent_scope.dart';
 class AgentPopRow extends StatefulWidget {
   const AgentPopRow({
     super.key,
-    required this.child,
+    this.child,
     required this.onTap,
     this.selected = false,
     this.height = 34,
-  });
-  final Widget child;
+    this.builder,
+  }) : assert(child != null || builder != null);
+  final Widget? child;
+
+  /// 需要随悬停变化的内容（例如悬停才出现的删除按钮）。
+  final Widget Function(BuildContext context, bool hover)? builder;
   final VoidCallback? onTap;
   final bool selected;
   final double height;
@@ -53,10 +59,60 @@ class _AgentPopRowState extends State<AgentPopRow> {
           ),
           child: DefaultTextStyle.merge(
             style: UiText.sans(12.5, color: c.ink, height: 1.2),
-            child: widget.child,
+            child: widget.builder?.call(context, _hover) ?? widget.child!,
           ),
         ),
       ),
+    );
+  }
+}
+
+/// 删除聊天：确认 → 移进回收区 → 底部可撤销提示。
+Future<void> agentDeleteChat(BuildContext context, AgentChatInfo chat) async {
+  final s = AgentScope.of(context);
+  final l = context.l10n;
+  final ok = await s.confirm(
+    title: l.ag_deleteChatTitle,
+    message: l.ag_deleteChatBody(chat.title),
+    confirm: l.ag_delete,
+    danger: true,
+  );
+  if (ok == null) return;
+  String? token;
+  await s.run(() async {
+    token = await s.actions.onDeleteChat(chat.id);
+    return token != null;
+  });
+  final t = token;
+  if (t != null) {
+    s.undoToast(l.ag_chatDeleted(chat.title), () => s.actions.onUndoDelete(t));
+  }
+}
+
+/// 删除工作区：同上；只剩一个时调用方已禁用入口。
+Future<void> agentDeleteWorkspace(
+  BuildContext context,
+  AgentWorkspaceInfo workspace,
+) async {
+  final s = AgentScope.of(context);
+  final l = context.l10n;
+  final ok = await s.confirm(
+    title: l.ag_deleteWorkspaceTitle,
+    message: l.ag_deleteWorkspaceBody(workspace.name),
+    confirm: l.ag_delete,
+    danger: true,
+  );
+  if (ok == null) return;
+  String? token;
+  await s.run(() async {
+    token = await s.actions.onDeleteWorkspace(workspace.id);
+    return token != null;
+  });
+  final t = token;
+  if (t != null) {
+    s.undoToast(
+      l.ag_workspaceDeleted(workspace.name),
+      () => s.actions.onUndoDelete(t),
     );
   }
 }
@@ -84,12 +140,41 @@ class AgentChatsPopover extends StatefulWidget {
 class _AgentChatsPopoverState extends State<AgentChatsPopover> {
   final _query = TextEditingController();
   final _focus = FocusNode();
+  Timer? _debounce;
+
+  /// 正文命中：(查的词, 结果)；结果为 null = 正在查。
+  (String, List<AgentChatHit>?)? _hits;
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _query.dispose();
     _focus.dispose();
     super.dispose();
+  }
+
+  void _changed(String _) {
+    _debounce?.cancel();
+    final q = _query.text.trim();
+    if (q.length < 2) {
+      setState(() => _hits = null);
+      return;
+    }
+    setState(() {});
+    final search = AgentScope.of(context).actions.onSearchChats;
+    _debounce = Timer(const Duration(milliseconds: 300), () async {
+      if (!mounted) return;
+      setState(() => _hits = (q, null));
+      List<AgentChatHit> found;
+      try {
+        found = await search(q);
+      } catch (_) {
+        found = const [];
+      }
+      if (mounted && _query.text.trim() == q) {
+        setState(() => _hits = (q, found));
+      }
+    });
   }
 
   @override
@@ -135,7 +220,7 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                       controller: _query,
                       focusNode: _focus,
                       autofocus: true,
-                      onChanged: (_) => setState(() {}),
+                      onChanged: _changed,
                       style: UiText.sans(12.5, color: c.ink),
                       cursorColor: c.accent,
                       cursorWidth: 1.5,
@@ -173,7 +258,7 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                             s.run(() => a.onSelectChat(chat.id));
                           }
                         },
-                        child: Row(
+                        builder: (context, hover) => Row(
                           spacing: 9,
                           children: [
                             Container(
@@ -205,26 +290,96 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                                 ),
                               ),
                             ),
-                            Text(
-                              switch (chat.state) {
-                                AgentChatState.waitingUser => l.ag_chatWaiting,
-                                AgentChatState.running => l.ag_chatRunning,
-                                AgentChatState.idle => agentDay(
-                                  chat.createdAt,
-                                  d.now,
-                                  l.ag_yesterday,
+                            if (hover &&
+                                chat.state == AgentChatState.idle &&
+                                !(chat.id == d.chat.id &&
+                                    d.status != AgentRunStatus.idle))
+                              AgentIconButton(
+                                key: Key('agent-chat-delete-${chat.id}'),
+                                small: true,
+                                glyph: AgentGlyphs.trash,
+                                tooltip: l.ag_menuDeleteChat,
+                                onPressed: () {
+                                  widget.onClose();
+                                  agentDeleteChat(context, chat);
+                                },
+                              )
+                            else
+                              Text(
+                                switch (chat.state) {
+                                  AgentChatState.waitingUser =>
+                                    l.ag_chatWaiting,
+                                  AgentChatState.running => l.ag_chatRunning,
+                                  AgentChatState.idle => agentDay(
+                                    chat.createdAt,
+                                    d.now,
+                                    l.ag_yesterday,
+                                  ),
+                                },
+                                style: UiText.mono(
+                                  11,
+                                  color:
+                                      chat.state == AgentChatState.waitingUser
+                                      ? c.warn
+                                      : c.faint,
                                 ),
-                              },
-                              style: UiText.mono(
-                                11,
-                                color: chat.state == AgentChatState.waitingUser
-                                    ? c.warn
-                                    : c.faint,
                               ),
-                            ),
                           ],
                         ),
                       ),
+                    if (_hits case (
+                      final hq,
+                      final found,
+                    ) when hq == _query.text.trim()) ...[
+                      _GroupLabel(l.ag_chatsContent),
+                      if (found == null)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                          child: Text(
+                            l.ag_chatsSearching,
+                            style: UiText.sans(12, color: c.faint),
+                          ),
+                        )
+                      else if (found.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
+                          child: Text(
+                            l.ag_chatsNoMatch,
+                            style: UiText.sans(12, color: c.faint),
+                          ),
+                        )
+                      else
+                        for (final hit in found)
+                          AgentPopRow(
+                            key: Key('agent-chat-hit-${hit.chatId}'),
+                            height: 48,
+                            selected: hit.chatId == d.chat.id,
+                            onTap: () {
+                              widget.onClose();
+                              if (hit.chatId != d.chat.id) {
+                                s.run(() => a.onSelectChat(hit.chatId));
+                              }
+                            },
+                            child: Padding(
+                              // 和上面聊天行的标题对齐（让出状态点的 7 + 9）。
+                              padding: const EdgeInsets.only(left: 16),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                spacing: 2,
+                                children: [
+                                  Text(
+                                    hit.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  _Snippet(text: hit.snippet, query: hq),
+                                ],
+                              ),
+                            ),
+                          ),
+                    ],
+
                     if (others.isNotEmpty) ...[
                       _GroupLabel(l.ag_chatsSwitchWorkspace),
                       for (final w in others)
@@ -290,6 +445,37 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 正文命中片段：命中词加粗。
+class _Snippet extends StatelessWidget {
+  const _Snippet({required this.text, required this.query});
+  final String text, query;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final i = query.isEmpty
+        ? -1
+        : text.toLowerCase().indexOf(query.toLowerCase());
+    return Text.rich(
+      i < 0
+          ? TextSpan(text: text)
+          : TextSpan(
+              children: [
+                TextSpan(text: text.substring(0, i)),
+                TextSpan(
+                  text: text.substring(i, i + query.length),
+                  style: TextStyle(color: c.ink, fontWeight: FontWeight.w600),
+                ),
+                TextSpan(text: text.substring(i + query.length)),
+              ],
+            ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: UiText.sans(11, color: c.faint, height: 1.3),
     );
   }
 }
@@ -409,6 +595,25 @@ class AgentUsagePopover extends StatelessWidget {
               ],
             ),
           ),
+          if ((u.anlas ?? 0) > 0)
+            Padding(
+              key: const Key('agent-usage-anlas'),
+              padding: const EdgeInsets.symmetric(vertical: 2.5),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l.ag_usageAnlas,
+                      style: UiText.sans(12, color: c.muted),
+                    ),
+                  ),
+                  Text(
+                    '≈ ${u.anlas} Anlas',
+                    style: UiText.mono(12, color: c.ink),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: 4),
           Text(l.ag_usageCost, style: UiText.sans(11, color: c.faint)),
           const SizedBox(height: 12),
@@ -562,7 +767,29 @@ class AgentModelPopover extends StatelessWidget {
   }
 }
 
-/// 窄宽时权限三档收成下拉。
+/// 切换权限档；切到完全权限先确认一次风险（勾过「不再提醒」就不问）。
+Future<void> agentSwitchPermission(
+  BuildContext context,
+  AgentPermissionMode mode,
+) async {
+  final s = AgentScope.of(context);
+  final l = context.l10n;
+  if (mode == s.data.permission) return;
+  if (mode == AgentPermissionMode.bypass && !s.data.bypassWarned) {
+    final picked = await s.confirm(
+      title: l.ag_bypassConfirmTitle,
+      message: l.ag_bypassConfirmBody,
+      confirm: l.ag_bypassConfirmOk,
+      danger: true,
+      optOut: l.ag_bypassConfirmSilence,
+    );
+    if (picked == null) return;
+    if (picked.$1) await s.run(s.actions.onSilenceBypass);
+  }
+  await s.run(() => s.actions.onPermission(mode));
+}
+
+/// 权限四档下拉。
 class AgentPermissionPopover extends StatelessWidget {
   const AgentPermissionPopover({super.key, required this.onClose});
   final VoidCallback onClose;
@@ -585,9 +812,7 @@ class AgentPermissionPopover extends StatelessWidget {
                 height: 50,
                 onTap: () {
                   onClose();
-                  if (mode != s.data.permission) {
-                    s.run(() => s.actions.onPermission(mode));
-                  }
+                  agentSwitchPermission(context, mode);
                 },
                 child: Row(
                   spacing: 10,
@@ -595,7 +820,9 @@ class AgentPermissionPopover extends StatelessWidget {
                     AgentIcon(
                       agentPermissionGlyph(mode),
                       size: 15,
-                      color: c.ink,
+                      color: mode == AgentPermissionMode.bypass
+                          ? c.error
+                          : c.ink,
                     ),
                     Expanded(
                       child: Column(
@@ -607,7 +834,9 @@ class AgentPermissionPopover extends StatelessWidget {
                             style: UiText.sans(
                               12.5,
                               weight: FontWeight.w500,
-                              color: c.ink,
+                              color: mode == AgentPermissionMode.bypass
+                                  ? c.error
+                                  : c.ink,
                             ),
                           ),
                           Text(
@@ -632,6 +861,7 @@ class AgentPermissionPopover extends StatelessWidget {
 }
 
 String agentPermissionGlyph(AgentPermissionMode m) => switch (m) {
+  AgentPermissionMode.bypass => AgentGlyphs.alert,
   AgentPermissionMode.readonly => AgentGlyphs.eye,
   AgentPermissionMode.ask => AgentGlyphs.shield,
   AgentPermissionMode.auto => AgentGlyphs.bolt,
@@ -640,6 +870,7 @@ String agentPermissionGlyph(AgentPermissionMode m) => switch (m) {
 String agentPermissionLabel(BuildContext context, AgentPermissionMode m) {
   final l = context.l10n;
   return switch (m) {
+    AgentPermissionMode.bypass => l.ag_modeBypass,
     AgentPermissionMode.readonly => l.ag_modeReadonly,
     AgentPermissionMode.ask => l.ag_modeAsk,
     AgentPermissionMode.auto => l.ag_modeAuto,
@@ -649,6 +880,7 @@ String agentPermissionLabel(BuildContext context, AgentPermissionMode m) {
 String agentPermissionHint(BuildContext context, AgentPermissionMode m) {
   final l = context.l10n;
   return switch (m) {
+    AgentPermissionMode.bypass => l.ag_modeBypassHint,
     AgentPermissionMode.readonly => l.ag_modeReadonlyHint,
     AgentPermissionMode.ask => l.ag_modeAskHint,
     AgentPermissionMode.auto => l.ag_modeAutoHint,

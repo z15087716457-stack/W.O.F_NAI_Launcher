@@ -145,7 +145,13 @@ class _AgentThreadState extends State<AgentThread> {
         ),
       for (final p in d.composer.pending)
         AgentPendingCard(key: ValueKey('pending-${p.id}'), pending: p),
-      if (d.error != null) _ErrorLine(d.error!),
+      if (d.error != null)
+        _ErrorLine(
+          d.error!,
+          onRetry: d.status == AgentRunStatus.idle && d.thread.isNotEmpty
+              ? () => s.run(s.actions.onRegenerate)
+              : null,
+        ),
     ];
     return Stack(
       children: [
@@ -211,8 +217,11 @@ class _AgentThreadState extends State<AgentThread> {
 }
 
 class _ErrorLine extends StatelessWidget {
-  const _ErrorLine(this.text);
+  const _ErrorLine(this.text, {this.onRetry});
   final String text;
+
+  /// 非 null 时右侧给「重试」（重新回答最后一轮）。
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +248,15 @@ class _ErrorLine extends StatelessWidget {
               style: UiText.sans(12.5, color: c.ink, height: 1.55),
             ),
           ),
+          if (onRetry != null)
+            AgentButton(
+              key: const Key('agent-error-retry'),
+              label: context.l10n.ag_retry,
+              glyph: AgentGlyphs.refresh,
+              style: AgentButtonStyle.ghost,
+              height: 24,
+              onPressed: onRetry,
+            ),
         ],
       ),
     );
@@ -1839,6 +1857,11 @@ class _AgentThumbState extends State<AgentThumb> {
                 Positioned(left: 5, bottom: 5, child: _ImageTag(label)),
               if (widget.source != null)
                 Positioned(left: 5, top: 5, child: _ImageTag(widget.source!)),
+              if (_hover &&
+                  img.source != AgentImageSource.attachment &&
+                  widget.width >= 72 &&
+                  widget.height >= 56)
+                Positioned(right: 4, top: 4, child: _ThumbActions(image: img)),
             ],
           ),
         ),
@@ -1875,6 +1898,74 @@ class _ImageTag extends StatelessWidget {
       ),
     ),
   );
+}
+
+/// 缩略图悬停时右上角的一排快捷按钮。
+class _ThumbActions extends StatelessWidget {
+  const _ThumbActions({required this.image});
+  final AgentImage image;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    Widget button(AgentImageAction action, String glyph, String tip) => Tooltip(
+      message: tip,
+      waitDuration: const Duration(milliseconds: 400),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          key: Key('agent-image-action-${action.name}-${image.id}'),
+          onTap: () => agentImageAction(context, image, action),
+          child: Container(
+            width: 20,
+            height: 20,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: const Color(0xB3000000),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: AgentIcon(glyph, size: 12, color: Colors.white),
+          ),
+        ),
+      ),
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 3,
+      children: [
+        button(AgentImageAction.vibe, AgentGlyphs.wand, l.ag_imageVibe),
+        button(AgentImageAction.params, AgentGlyphs.sliders, l.ag_imageParams),
+        if (image.path != null)
+          button(AgentImageAction.folder, AgentGlyphs.folder, l.ag_imageFolder),
+      ],
+    );
+  }
+}
+
+/// 执行图片快捷动作；成功给一句轻提示（打开文件夹不提示）。
+Future<void> agentImageAction(
+  BuildContext context,
+  AgentImage image,
+  AgentImageAction action,
+) async {
+  final s = AgentScope.of(context);
+  final l = context.l10n;
+  var ok = false;
+  await s.run(() async {
+    ok = await s.actions.onImageAction(image.id, action);
+    return ok;
+  });
+  if (!ok) return;
+  switch (action) {
+    case AgentImageAction.vibe:
+      s.toast(l.ag_imageVibeDone);
+    case AgentImageAction.reference:
+      s.toast(l.ag_imageReferenceDone);
+    case AgentImageAction.params:
+      s.toast(l.ag_imageParamsDone);
+    case AgentImageAction.folder:
+      break;
+  }
 }
 
 /// 图片右键菜单。
@@ -1918,8 +2009,17 @@ Future<void> showAgentImageMenu(
       item('attach', AgentGlyphs.clip, l.ag_imageAttach),
       if (img.historyId != null)
         item('reveal', AgentGlyphs.clock, l.ag_imageReveal),
+      if (img.source != AgentImageSource.attachment) ...[
+        const PopupMenuDivider(height: 9),
+        item('vibe', AgentGlyphs.wand, l.ag_imageVibe),
+        item('reference', AgentGlyphs.image, l.ag_imageReference),
+        item('params', AgentGlyphs.sliders, l.ag_imageParams),
+      ],
+      if (img.path != null)
+        item('folder', AgentGlyphs.folder, l.ag_imageFolder),
     ],
   );
+  if (!context.mounted) return;
   switch (picked) {
     case 'zoom':
       s.zoom(img);
@@ -1927,5 +2027,13 @@ Future<void> showAgentImageMenu(
       await s.run(() => s.actions.onAttachImage(img.id));
     case 'reveal':
       s.actions.onRevealImage(img.id);
+    case 'vibe':
+      await agentImageAction(context, img, AgentImageAction.vibe);
+    case 'reference':
+      await agentImageAction(context, img, AgentImageAction.reference);
+    case 'params':
+      await agentImageAction(context, img, AgentImageAction.params);
+    case 'folder':
+      await agentImageAction(context, img, AgentImageAction.folder);
   }
 }

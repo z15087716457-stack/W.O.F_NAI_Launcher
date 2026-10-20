@@ -576,20 +576,25 @@ class AgentComposerState extends State<AgentComposer> {
                   builder: (context) => _Pill(
                     key: const Key('agent-permission'),
                     open: _permission != null,
+                    warn: d.permission == AgentPermissionMode.bypass,
                     tooltip: agentPermissionHint(context, d.permission),
                     onTap: () => setState(() => _permission = _above(context)),
                     children: [
                       AgentIcon(
                         agentPermissionGlyph(d.permission),
                         size: 12,
-                        color: c.ink,
+                        color: d.permission == AgentPermissionMode.bypass
+                            ? c.error
+                            : c.ink,
                       ),
                       Text(
                         agentPermissionLabel(context, d.permission),
                         style: UiText.sans(
                           11.5,
                           weight: FontWeight.w500,
-                          color: c.ink,
+                          color: d.permission == AgentPermissionMode.bypass
+                              ? c.error
+                              : c.ink,
                           height: 1.2,
                         ),
                       ),
@@ -767,11 +772,15 @@ class _Pill extends StatefulWidget {
     required this.children,
     required this.onTap,
     this.open = false,
+    this.warn = false,
     this.tooltip,
   });
   final List<Widget> children;
   final VoidCallback onTap;
   final bool open;
+
+  /// 警示色（完全权限）。
+  final bool warn;
   final String? tooltip;
 
   @override
@@ -794,7 +803,11 @@ class _PillState extends State<_Pill> {
           height: 26,
           padding: const EdgeInsets.only(left: 8, right: 6),
           decoration: BoxDecoration(
-            color: widget.open || _hover ? c.hover : c.control,
+            color: widget.warn
+                ? c.error.withValues(alpha: widget.open || _hover ? .16 : .1)
+                : widget.open || _hover
+                ? c.hover
+                : c.control,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(

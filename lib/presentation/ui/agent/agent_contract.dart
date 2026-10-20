@@ -51,6 +51,7 @@ class AgentViewData {
     this.loading = false,
     this.revision = 0,
     this.quick,
+    this.bypassWarned = false,
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -116,6 +117,23 @@ class AgentViewData {
 
   /// 欢迎页快捷信息（已按界面语言取好文字）；null = 用内置四条，空列表 = 不显示这块。
   final List<AgentQuickItem>? quick;
+
+  /// 用户已勾过「不再提醒」：切到完全权限时不再弹风险确认。
+  final bool bypassWarned;
+}
+
+/// 聊天正文搜索的一条命中。
+@immutable
+class AgentChatHit {
+  const AgentChatHit({
+    required this.chatId,
+    required this.title,
+    required this.snippet,
+  });
+  final String chatId, title;
+
+  /// 命中处前后一小段原文。
+  final String snippet;
 }
 
 /// 欢迎页一张快捷卡。[send] = 点了直接发送，否则填进输入框。
@@ -504,6 +522,7 @@ class AgentImage {
     this.starred = false,
     this.source = AgentImageSource.generated,
     this.historyId,
+    this.path,
   });
   final String id;
   final ImageProvider image;
@@ -516,9 +535,27 @@ class AgentImage {
 
   /// 历史库里的图片 id；非 null 才能「在历史中显示」、拖到画布。
   final String? historyId;
+
+  /// 磁盘上的完整路径（工具产物、图库图）；非 null 才能「在文件夹中显示」。
+  final String? path;
 }
 
 enum AgentImageSource { generated, attachment, tool }
+
+/// 图片上的快捷动作（悬停按钮 / 右键菜单）。
+enum AgentImageAction {
+  /// 设为 Vibe 参考（编码费用照生成页规则，在生成时计）。
+  vibe,
+
+  /// 设为精确参考图。
+  reference,
+
+  /// 把图里的生成参数载入生成页。
+  params,
+
+  /// 在资源管理器中显示（[AgentImage.path] 非 null）。
+  folder,
+}
 
 // ─────────────────────────────── 待处理卡片 ───────────────────────────────
 //
@@ -849,7 +886,8 @@ class AgentThinkingData {
   final bool followsModel;
 }
 
-enum AgentPermissionMode { auto, ask, readonly }
+/// 权限档：[bypass] = 不再询问（花 Anlas 仍单独确认）。
+enum AgentPermissionMode { bypass, auto, ask, readonly }
 
 @immutable
 class AgentUsageData {
@@ -864,6 +902,7 @@ class AgentUsageData {
     this.userMessages,
     this.assistantMessages,
     this.toolCalls,
+    this.anlas,
   });
 
   /// 当前上下文 tokens 与模型窗口；任一为 null = 未知（圆环显示虚线）。
@@ -872,6 +911,9 @@ class AgentUsageData {
   /// 本聊天累计用量。
   final int? input, output, cacheRead, cacheWrite, total;
   final int? userMessages, assistantMessages, toolCalls;
+
+  /// 本聊天里生图类工具的报价合计（估算，实际以账户为准）；null / 0 = 没花。
+  final int? anlas;
 
   double? get fraction => tokens == null || window == null || window! <= 0
       ? null
@@ -979,6 +1021,12 @@ class AgentActions {
     required this.onDismissNotices,
     required this.onRetryInit,
     required this.onEditMemory,
+    required this.onDeleteChat,
+    required this.onDeleteWorkspace,
+    required this.onUndoDelete,
+    required this.onSearchChats,
+    required this.onImageAction,
+    required this.onSilenceBypass,
   });
 
   /// 收起侧栏。
@@ -1073,6 +1121,25 @@ class AgentActions {
 
   /// 「记忆」页的编辑：打开设置里对应的位置。
   final void Function(AgentMemoryTarget target) onEditMemory;
+
+  /// 删除聊天（移进回收区）；返回撤销凭据，null = 没删成。运行中的聊天界面已禁用。
+  final Future<String?> Function(String chatId) onDeleteChat;
+
+  /// 删除工作区（连同里面的聊天）；只剩一个时界面已禁用。
+  final Future<String?> Function(String workspaceId) onDeleteWorkspace;
+
+  /// 用 [onDeleteChat] / [onDeleteWorkspace] 的凭据撤销删除。
+  final Future<bool> Function(String token) onUndoDelete;
+
+  /// 搜当前工作区的聊天正文（界面已防抖）。
+  final Future<List<AgentChatHit>> Function(String query) onSearchChats;
+
+  /// 图片快捷动作；[AgentImage.id] 同 [onAttachImage]。
+  final Future<bool> Function(String imageId, AgentImageAction action)
+  onImageAction;
+
+  /// 完全权限风险提示勾了「不再提醒」。
+  final Future<bool> Function() onSilenceBypass;
 }
 
 enum AgentMemoryTarget { global, workspace, skills, quick }

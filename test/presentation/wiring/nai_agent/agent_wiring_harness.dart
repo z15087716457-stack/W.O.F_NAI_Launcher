@@ -13,6 +13,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_skills_provider.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_quick_messages.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'package:nai_launcher/presentation/themes/app_theme.dart';
@@ -200,9 +201,10 @@ class AgentWiringHarness {
   Future<void> init({
     List<Override> overrides = const [],
     NaiAgentSkillInventory? skills,
+    AgentTestController Function(AgentWorkspaceStore)? controller,
   }) async {
     root = await Directory.systemTemp.createTemp('agent-command-desk-');
-    c = AgentTestController(AgentTestStore(root));
+    c = (controller ?? AgentTestController.new)(AgentTestStore(root));
     await c.initialize(restoreHistory: false);
     await c.updateSettings({'providerId': 'local', 'modelId': 'model'});
     container = ProviderContainer(
@@ -222,7 +224,10 @@ class AgentWiringHarness {
     );
   }
 
-  Future<void> dispose() async {
+  Future<void>? _disposal;
+  Future<void> dispose() => _disposal ??= _dispose();
+
+  Future<void> _dispose() async {
     container.dispose();
     await c.close();
     for (var i = 0; i < 20; i++) {
@@ -253,9 +258,34 @@ class AgentWiringHarness {
       _cleanupRegistered = true;
       addTearDown(() async {
         await tester.pumpWidget(const SizedBox());
+        final quick = container.exists(naiAgentQuickMessagesProvider)
+            ? container.read(naiAgentQuickMessagesProvider)
+            : null;
+        for (var i = 0; i < 200 && quick?.loaded == false; i++) {
+          await tester.pump();
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+        }
+        // Let resource reads started by the last frame release their handles.
         await tester.runAsync(
           () => Future<void>.delayed(const Duration(milliseconds: 100)),
         );
+        // Store/resource continuations can belong to the fake clock even when
+        // their filesystem I/O is real. Drain both while closing the draft and
+        // deleting its isolated directory, or Windows can retain read handles.
+        var disposed = false;
+        final disposing = dispose().whenComplete(() {
+          disposed = true;
+        });
+        for (var i = 0; i < 300 && !disposed; i++) {
+          await tester.pump(const Duration(milliseconds: 10));
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+        }
+        expect(disposed, true, reason: 'Agent draft cleanup did not finish');
+        await disposing;
       });
     }
     tester.view.physicalSize = Size(width, height);

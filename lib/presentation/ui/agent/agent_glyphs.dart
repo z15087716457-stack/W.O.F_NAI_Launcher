@@ -53,6 +53,8 @@ abstract final class AgentGlyphs {
   static const hand =
       'M12 21a7 7 0 01-7-7V9.5a1.5 1.5 0 013 0V12M8 12V5.5a1.5 1.5 0 013 0V11M11 11V4.5a1.5 1.5 0 013 0V11M14 11V6a1.5 1.5 0 013 0v8a7 7 0 01-5 7';
   static const pen = 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4';
+  static const trash =
+      'M4 7h16M9.5 7V4.5h5V7M6.5 7l1 13h9l1-13M10 11v5.5M14 11v5.5';
   static const terminal = 'M4 17l6-5-6-5M12 19h8';
   static const steer = 'M4 7h11M4 12h7M4 17h11M17 10l3 2-3 2';
   static const send = 'M12 19V5M5.5 11.5L12 5l6.5 6.5';
@@ -135,6 +137,20 @@ class AgentAnlas extends StatelessWidget {
   );
 }
 
+/// 侧栏收起时开关右上角的小圆点。
+enum AgentToggleBadge {
+  none,
+
+  /// 有聊天在跑（蓝）。
+  running,
+
+  /// 有提问 / 审批 / 付费确认在等你（橙）。
+  waiting,
+
+  /// 收起期间有任务跑完了，还没看（绿）。
+  done,
+}
+
 /// 工具栏里的 Agent 开关（生图页提示词工具区、窗口标题栏）。
 /// 开着时浅蓝底 + 蓝描边，和工具栏其他按钮同一套外观。
 class AgentToggleButton extends StatefulWidget {
@@ -144,11 +160,15 @@ class AgentToggleButton extends StatefulWidget {
     required this.onPressed,
     required this.tooltip,
     this.size = 28,
+    this.badge = AgentToggleBadge.none,
   });
   final bool expanded;
   final VoidCallback onPressed;
   final String tooltip;
   final double size;
+
+  /// 只在收起（[expanded] 为 false）时画。
+  final AgentToggleBadge badge;
 
   @override
   State<AgentToggleButton> createState() => _AgentToggleButtonState();
@@ -186,7 +206,32 @@ class _AgentToggleButtonState extends State<AgentToggleButton> {
                   ? Border.all(color: c.accent.withValues(alpha: .3))
                   : null,
             ),
-            child: AgentMark(size: 17, color: on ? c.accent : c.muted),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                AgentMark(size: 17, color: on ? c.accent : c.muted),
+                if (!on && widget.badge != AgentToggleBadge.none)
+                  Positioned(
+                    right: -5,
+                    top: -5,
+                    child: Container(
+                      key: Key('agent-toggle-badge-${widget.badge.name}'),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: switch (widget.badge) {
+                          AgentToggleBadge.running => c.accent,
+                          AgentToggleBadge.waiting => c.warn,
+                          _ => c.ok,
+                        },
+                        border: Border.all(color: c.bg, width: 1.5),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

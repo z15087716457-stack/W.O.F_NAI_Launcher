@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path/path.dart' as p;
 import 'package:super_clipboard/super_clipboard.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -44,11 +45,15 @@ import '../../utils/nai_agent_file_link.dart';
 import '../../utils/nai_agent_image_reader.dart';
 import '../../widgets/common/app_toast.dart';
 import '../../widgets/common/draggable_memory_image.dart';
+import '../../widgets/common/precise_reference_type_dialog.dart';
+import '../../widgets/drop/image_destination_dialog.dart';
 import '../../widgets/nai_agent/nai_agent_image_input.dart';
 import '../blocks_preferences.dart';
+import '../image_viewer_generation_target.dart';
 import 'agent_context.dart';
 import 'agent_diff_undo.dart';
 import 'agent_image_info.dart';
+import 'agent_image_actions.dart';
 import 'agent_quick.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
@@ -218,28 +223,52 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
     final target = controller.selected;
     if (target == null) return false;
     final image = _mapping?.images[id] ?? _recentImages[id];
-    if (image?.image case final MemoryImage memory) {
-      return _import(target, [
-        () async =>
-            DroppedFileData(fileName: 'agent-image.png', bytes: memory.bytes),
-      ]);
+    if (image?.image is! MemoryImage &&
+        image?.image is! FileImage &&
+        _historyBytes(image?.historyId ?? id) == null) {
+      return false;
     }
-    final historyId = image?.historyId ?? id;
-    if (ref.exists(imageGenerationNotifierProvider)) {
-      final history = ref
-          .read(imageGenerationNotifierProvider)
-          .findImageById(historyId);
-      if (history != null && history.canDrag) {
-        return _import(target, [
-          () async => DroppedFileData(
-            fileName: 'canvas_$historyId.png',
-            bytes: history.bytes,
-          ),
-        ]);
-      }
-    }
-    return false;
+    return _import(target, [
+      () async {
+        final bytes = await agentImageBytes(
+          image,
+          historyBytes: _historyBytes,
+          fallbackHistoryId: id,
+        );
+        return bytes == null
+            ? null
+            : DroppedFileData(fileName: 'agent-image.png', bytes: bytes);
+      },
+    ]);
   }
+
+  Uint8List? _historyBytes(String id) {
+    if (!ref.exists(imageGenerationNotifierProvider)) return null;
+    final image = ref.read(imageGenerationNotifierProvider).findImageById(id);
+    return image?.canDrag == true ? image!.bytes : null;
+  }
+
+  Future<bool> _imageAction(String id, AgentImageAction action) =>
+      AgentImageActions(
+        read: ref.read,
+        alive: () => mounted,
+        historyBytes: _historyBytes,
+        capture: () => ref
+            .read(imageViewerGenerationTargetProvider)
+            .capture(alive: () => mounted),
+        chooseReferenceType: () => PreciseReferenceTypeDialog.show(context),
+        chooseImportSelection: (bytes, metadata, fileName) async {
+          final result = await ImageDestinationDialog.show(
+            context,
+            imageBytes: bytes,
+            fileName: fileName,
+            metadata: metadata,
+          );
+          return result?.destination == ImageDestination.extractMetadata
+              ? result?.selection
+              : null;
+        },
+      ).perform(_mapping?.images[id] ?? _recentImages[id], action);
 
   Future<bool> _export() async {
     final runtime = controller.selected;
@@ -412,6 +441,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             id: image.id,
             image: MemoryImage(image.bytes),
             historyId: image.id,
+            path: image.filePath == null || image.filePath!.isEmpty
+                ? null
+                : p.normalize(p.absolute(image.filePath!)),
             width: image.width,
             height: image.height,
           ),
@@ -470,9 +502,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           imageApprovals.forChat(chat.id).isNotEmpty;
       return AgentChatInfo(
         id: chat.id,
-        title: chat.title,
+        title: chat.title.trim().isEmpty ? c.initialChatName : chat.title,
         createdAt: chat.createdAt.toLocal(),
-        canExport: chat.sessionFile != null,
+        canExport: !chat.isDraft && chat.sessionFile != null,
         state: waiting
             ? AgentChatState.waitingUser
             : runtime != null && (runtime.running || runtime.starting)
@@ -559,6 +591,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         userMessages: agentInt(r?.stats['userMessages']),
         assistantMessages: agentInt(r?.stats['assistantMessages']),
         toolCalls: agentInt(r?.stats['toolCalls']),
+        anlas: mapping?.estimatedAnlas,
       ),
       models: [
         for (final p in config.providers.where((p) => p.enabled))
@@ -589,6 +622,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               .where((m) => m.name == c.settings.permissionMode)
               .firstOrNull ??
           AgentPermissionMode.auto,
+      bypassWarned: c.settings.bypassWarned,
       mentions: mentions,
       skills: [
         for (final s in skillOptions)
@@ -629,6 +663,59 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onNewChat: () => _run(c.createChat),
       onSelectChat: (id) => _run(() => c.selectChat(id)),
       onRenameChat: (id, title) => _run(() => c.renameChat(id, title)),
+      onDeleteChat: (id) async {
+        try {
+          return 'chat:${await c.deleteChat(id)}';
+        } catch (_) {
+          return null;
+        }
+      },
+      onDeleteWorkspace: (id) async {
+        try {
+          return 'workspace:${await c.deleteWorkspace(id)}';
+        } catch (_) {
+          return null;
+        }
+      },
+      onUndoDelete: (token) async {
+        final separator = token.indexOf(':');
+        if (separator <= 0 || separator == token.length - 1) return false;
+        final id = token.substring(separator + 1);
+        try {
+          switch (token.substring(0, separator)) {
+            case 'chat':
+              await c.undoDeleteChat(id);
+            case 'workspace':
+              await c.undoDeleteWorkspace(id);
+            default:
+              return false;
+          }
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
+      onSearchChats: (query) async {
+        try {
+          return [
+            for (final hit in await c.searchChats(query))
+              AgentChatHit(
+                chatId: hit.chatId,
+                title: hit.title.trim().isNotEmpty
+                    ? hit.title
+                    : c.chats
+                              .where((chat) => chat.id == hit.chatId)
+                              .map(chatInfo)
+                              .firstOrNull
+                              ?.title ??
+                          c.initialChatName,
+                snippet: hit.snippet,
+              ),
+          ];
+        } catch (_) {
+          return const <AgentChatHit>[];
+        }
+      },
       onSelectWorkspace: (id) => _run(() => c.selectWorkspace(id)),
       onCreateWorkspace: (name) => _run(() => c.createWorkspace(name)),
       onRenameWorkspace: (id, name) => _run(() => c.renameWorkspace(id, name)),
@@ -650,6 +737,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       onPickImages: _pick,
       onAttachCanvas: _attachCanvas,
       onAttachImage: _attachImage,
+      onImageAction: _imageAction,
       onPaste: _paste,
       onRemoveAttachment: (id) => _run(() => c.removeAttachment(id)),
       onEditQueued: (id, text) => _run(() => c.editQueue(id, text: text)),
@@ -739,6 +827,14 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       ),
       onPermission: (mode) =>
           _run(() => c.updateSettings({'permissionMode': mode.name})),
+      onSilenceBypass: () async {
+        try {
+          await c.updateSettings({'bypassWarned': true});
+          return true;
+        } catch (_) {
+          return false;
+        }
+      },
       onRefreshUsage: () async {
         if (r != null) await c.refreshUsage(r);
       },

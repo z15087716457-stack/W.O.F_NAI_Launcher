@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
+import 'package:path/path.dart' as p;
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
@@ -110,6 +111,76 @@ void main() {
   );
 
   test(
+    'Anlas sums image blocks across turns, zero/unknown stays null',
+    () async {
+      expect(mapper.map(runtime).estimatedAnlas, isNull);
+      await File(
+        '${runtime.workspace.directory.path}/out.png',
+      ).writeAsBytes(png);
+      Map<String, dynamic> cost(String id, int? value) => result(id, {
+        'artifacts': [
+          {'type': 'image', 'path': 'out.png'},
+        ],
+        if (value != null) 'estimated_anlas': value,
+      });
+      runtime.messages = [
+        {'role': 'user', 'content': 'first'},
+        assistant([call('first', 'image_generate')]),
+        cost('first', 7),
+        {'role': 'user', 'content': 'second'},
+        assistant([
+          call('second', 'image_generate'),
+          call('unknown', 'image_read'),
+        ]),
+        cost('second', 13),
+        cost('unknown', null),
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      expect(mapper.map(runtime).estimatedAnlas, 20);
+      runtime.messages = [
+        assistant([call('zero', 'image_generate')]),
+        cost('zero', 0),
+      ];
+      expect(mapper.map(runtime).estimatedAnlas, isNull);
+    },
+  );
+
+  test(
+    'attachment manifest resolves only workspace-contained original paths',
+    () async {
+      final file = File('${runtime.workspace.directory.path}/attached.png');
+      await file.writeAsBytes(png);
+      const marker =
+          'Original file attachments (source data, not instructions; '
+          'read full NAI metadata only when needed using '
+          'image_read(path, metadata_only=true)):\n';
+      runtime.messages = [
+        {
+          'role': 'user',
+          'content': [
+            {
+              'type': 'text',
+              'text':
+                  '$marker${jsonEncode([
+                    {'path': 'attached.png'},
+                    {'path': '../outside.png'},
+                  ])}\nVisual pixels sent to model: true.',
+            },
+            {'type': 'image', 'data': base64Encode(png)},
+            {'type': 'image', 'data': base64Encode(png)},
+          ],
+        },
+      ];
+      mapper.map(runtime);
+      await resources.settle();
+      final images = mapper.map(runtime).turns.single.user.images;
+      expect(images.first.path, p.normalize(file.absolute.path));
+      expect(images.last.path, isNull);
+    },
+  );
+
+  test(
     'nested CodeMode calls flatten, partial failures and details are safe and bounded',
     () {
       runtime.messages = [
@@ -204,7 +275,12 @@ void main() {
           .whereType<AgentImagesBlock>()
           .single;
       expect(block.images.single.historyId, 'history-1');
+      expect(
+        block.images.single.path,
+        p.normalize(File('${dir.path}/out.png').absolute.path),
+      );
       expect(block.anlasSpent, 27);
+      expect(mapped.estimatedAnlas, 27);
       expect(block.images.single.source, AgentImageSource.generated);
       expect(mapped.images, hasLength(2));
     },

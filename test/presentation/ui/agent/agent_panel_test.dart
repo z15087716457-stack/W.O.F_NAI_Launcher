@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
@@ -434,6 +435,153 @@ void main() {
       expect(rec.last('renameChat'), ('c3', '水彩 v2'));
     });
 
+    testWidgets('完全权限：首次切换先确认，勾不再提醒；取消不切', (tester) async {
+      var rec = await pumpAgent(tester);
+      await tester.tap(find.byKey(const Key('agent-permission')));
+      await tester.pump();
+      expect(find.text('完全权限'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-permission-bypass')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-confirm-cancel')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      expect(rec.names, isNot(contains('permission')));
+
+      await tester.tap(find.byKey(const Key('agent-permission')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-permission-bypass')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-confirm-optout')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-confirm-ok')));
+      await tester.pump();
+      await tester.pump();
+      expect(rec.names, containsAllInOrder(['silenceBypass', 'permission']));
+      expect(rec.last('permission'), AgentPermissionMode.bypass);
+
+      // 已勾过不再提醒：直接切；当前档是完全权限时按钮用警示色文字。
+      final base = AgentFixture.view(AgentScene.chat);
+      rec = await pumpAgent(
+        tester,
+        data: _copy(base, permission: AgentPermissionMode.ask, warned: true),
+      );
+      await tester.tap(find.byKey(const Key('agent-permission')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-permission-bypass')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      expect(rec.last('permission'), AgentPermissionMode.bypass);
+      await pumpAgent(
+        tester,
+        data: _copy(base, permission: AgentPermissionMode.bypass),
+      );
+      final label = tester.widget<Text>(
+        find.descendant(
+          of: find.byKey(const Key('agent-permission')),
+          matching: find.text('完全权限'),
+        ),
+      );
+      final ctx = tester.element(find.byKey(const Key('agent-permission')));
+      expect(label.style?.color, ctx.ui.error);
+    });
+
+    testWidgets('删除对话：悬停垃圾桶 → 确认 → 撤销提示；菜单删工作区', (tester) async {
+      final compose = AgentFixture.view(AgentScene.compose);
+      final rec = await pumpAgent(
+        tester,
+        data: _copy(
+          compose,
+          chats: [
+            for (final c in compose.chats)
+              AgentChatInfo(id: c.id, title: c.title, createdAt: c.createdAt),
+          ],
+        ),
+      );
+      await tester.tap(find.byKey(const Key('agent-chats')));
+      await tester.pump();
+      final row = find.byKey(const Key('agent-chat-c2'));
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: tester.getCenter(row));
+      addTearDown(mouse.removePointer);
+      await tester.pump();
+      // 等待用户的聊天（c3）不给删。
+      expect(find.byKey(const Key('agent-chat-delete-c2')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-chat-delete-c2')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsOneWidget);
+      expect(find.textContaining('厚涂对比三种光源'), findsWidgets);
+      await tester.tap(find.byKey(const Key('agent-confirm-ok')));
+      await tester.pump();
+      await tester.pump();
+      expect(rec.last('deleteChat'), 'c2');
+      expect(find.byKey(const Key('agent-undo-toast')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-undo-toast-undo')));
+      await tester.pump();
+      await tester.pump();
+      expect(rec.last('undoDelete'), 'trash-c2');
+      expect(find.byKey(const Key('agent-undo-toast')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('agent-more')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-menu-delete-workspace')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-confirm-ok')));
+      await tester.pump();
+      await tester.pump();
+      expect(rec.names, contains('deleteWorkspace'));
+      // 等待用户时两个删除菜单都禁用。
+      await pumpAgent(tester);
+      await tester.tap(find.byKey(const Key('agent-more')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-menu-delete-chat')));
+      await tester.pump();
+      expect(find.byKey(const Key('agent-confirm-dialog')), findsNothing);
+      await tester.pump(const Duration(seconds: 7));
+      expect(find.byKey(const Key('agent-undo-toast')), findsNothing);
+    });
+
+    testWidgets('聊天列表：输入两个字以上同时搜正文，命中点开切过去', (tester) async {
+      final rec = await pumpAgent(tester);
+      await tester.tap(find.byKey(const Key('agent-chats')));
+      await tester.pump();
+      await tester.enterText(find.byKey(const Key('agent-chats-search')), '发');
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(rec.names, isNot(contains('searchChats')));
+      await tester.enterText(find.byKey(const Key('agent-chats-search')), '发型');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      expect(rec.last('searchChats'), '发型');
+      expect(find.text('内容匹配'), findsOneWidget);
+      expect(find.byKey(const Key('agent-chat-hit-c0')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('agent-chat-hit-c0')));
+      await tester.pump();
+      expect(rec.last('selectChat'), 'c0');
+    });
+
+    testWidgets('出错时给重试（重新回答最后一轮）', (tester) async {
+      final rec = await pumpAgent(
+        tester,
+        data: _copy(AgentFixture.view(AgentScene.compose), error: '连接断了'),
+      );
+      await tester.ensureVisible(find.byKey(const Key('agent-error-retry')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('agent-error-retry')));
+      await tester.pump();
+      expect(rec.names, contains('regenerate'));
+    });
+
+    testWidgets('用量弹层显示本聊天生图花费估算', (tester) async {
+      final base = AgentFixture.view(AgentScene.chat);
+      await pumpAgent(tester, data: _copy(base, anlas: 48));
+      await tester.tap(find.byKey(const Key('agent-usage')));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const Key('agent-usage-anlas')), findsOneWidget);
+      expect(find.text('≈ 48 Anlas'), findsOneWidget);
+    });
+
     testWidgets('操作失败显示提示', (tester) async {
       final base = AgentFixture.actions();
       final failing = AgentActions(
@@ -480,6 +628,12 @@ void main() {
         onDismissNotices: base.onDismissNotices,
         onRetryInit: base.onRetryInit,
         onEditMemory: base.onEditMemory,
+        onDeleteChat: base.onDeleteChat,
+        onDeleteWorkspace: base.onDeleteWorkspace,
+        onUndoDelete: base.onUndoDelete,
+        onSearchChats: base.onSearchChats,
+        onImageAction: base.onImageAction,
+        onSilenceBypass: base.onSilenceBypass,
       );
       await pumpAgent(tester, actions: failing);
       await tester.tap(find.byKey(const Key('agent-new-chat')));
@@ -593,4 +747,48 @@ AgentViewData _withAttachments(
   draft: d.draft,
   status: d.status,
   revision: d.revision,
+);
+
+AgentViewData _copy(
+  AgentViewData b, {
+  AgentPermissionMode? permission,
+  bool? warned,
+  String? error,
+  int? anlas,
+  List<AgentChatInfo>? chats,
+}) => AgentViewData(
+  now: b.now,
+  workspace: b.workspace,
+  chat: b.chat,
+  workspaces: b.workspaces,
+  chats: chats ?? b.chats,
+  composer: b.composer,
+  thread: b.thread,
+  shelf: b.shelf,
+  memory: b.memory,
+  usage: anlas == null
+      ? b.usage
+      : AgentUsageData(
+          tokens: b.usage.tokens,
+          window: b.usage.window,
+          input: b.usage.input,
+          output: b.usage.output,
+          total: b.usage.total,
+          userMessages: b.usage.userMessages,
+          assistantMessages: b.usage.assistantMessages,
+          toolCalls: b.usage.toolCalls,
+          anlas: anlas,
+        ),
+  models: b.models,
+  thinking: b.thinking,
+  permission: permission ?? b.permission,
+  mentions: b.mentions,
+  skills: b.skills,
+  draft: b.draft,
+  status: b.status,
+  error: error ?? b.error,
+  notices: b.notices,
+  revision: b.revision,
+  quick: b.quick,
+  bypassWarned: warned ?? b.bypassWarned,
 );

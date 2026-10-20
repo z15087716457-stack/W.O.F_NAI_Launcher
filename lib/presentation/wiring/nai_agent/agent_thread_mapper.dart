@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:ui' show Offset;
 
+import 'package:path/path.dart' as p;
+
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../ui/agent/agent_contract.dart';
 import 'agent_param_diff.dart';
@@ -152,13 +154,15 @@ class AgentThreadMapping {
     this.shelf,
     this.images,
     this.files,
-    this.diffs,
-  );
+    this.diffs, {
+    this.estimatedAnlas,
+  });
   final List<AgentTurn> turns;
   final AgentShelfData shelf;
   final Map<String, AgentImage> images;
   final Map<String, String> files;
   final Map<String, AgentDiffRestore> diffs;
+  final int? estimatedAnlas;
 }
 
 class AgentThreadMapper {
@@ -185,15 +189,31 @@ class AgentThreadMapper {
         if (m['role'] == 'toolResult') m['toolCallId']: m,
     };
 
+    String? diskPath(String? path) {
+      if (path == null || path.isEmpty) return null;
+      // Reuse resource canonicalization, existence and workspace/symlink guard.
+      final info = resources.file(runtime.workspace, path);
+      return info == null
+          ? null
+          : p.normalize(p.absolute(runtime.workspace.directory.path, info.$1));
+    }
+
     AgentImage? inline(
       Map<String, dynamic> part,
       String id,
-      AgentImageSource source,
-    ) {
+      AgentImageSource source, {
+      String? path,
+    }) {
       if (part['data'] is! String) return null;
+      final resolvedPath = diskPath(path ?? part['path'] as String?);
       final image = resources.inline(id, part['data'] as String);
       if (image == null) return null;
-      return images[id] = AgentImage(id: id, image: image, source: source);
+      return images[id] = AgentImage(
+        id: id,
+        image: image,
+        source: source,
+        path: resolvedPath,
+      );
     }
 
     void flushSteps() {
@@ -238,6 +258,8 @@ class AgentThreadMapper {
                   agentMap(e['message'])['timestamp'] == message['timestamp'],
             )
             .firstOrNull;
+        final attachmentPaths = _attachmentPaths(message);
+        var attachmentIndex = 0;
         user = AgentUserMessage(
           text: agentMessageText(message),
           at: message['timestamp'] is num
@@ -253,6 +275,7 @@ class AgentThreadMapper {
                       part,
                       '$turnId/user/$pi',
                       AgentImageSource.attachment,
+                      path: attachmentPaths.elementAtOrNull(attachmentIndex++),
                     )
                     case final image?)
                   image,
@@ -511,6 +534,7 @@ class AgentThreadMapper {
                   projected?['image_id'] as String? ??
                   historyIds.elementAtOrNull(imageIndex) as String?;
               imageIndex++;
+              final resolvedPath = diskPath(path);
               final provider = resources.image(runtime.workspace, path);
               if (provider == null) continue;
               final imageId = '${runtime.chat.id}/$id/artifact/$ai';
@@ -521,6 +545,7 @@ class AgentThreadMapper {
                 height: agentInt(artifact['height']),
                 historyId: historyId,
                 label: path.split(RegExp(r'[/\\]')).last,
+                path: resolvedPath,
                 source:
                     [
                       'generation_run',
@@ -598,7 +623,44 @@ class AgentThreadMapper {
       images,
       files,
       diffs,
+      estimatedAnlas: _estimatedAnlas(turns),
     );
+  }
+}
+
+int? _estimatedAnlas(List<AgentTurn> turns) {
+  final total = turns.fold<int>(
+    0,
+    (sum, turn) =>
+        sum +
+        (turn.reply?.blocks ?? const <AgentBlock>[])
+            .whereType<AgentImagesBlock>()
+            .fold<int>(0, (sum, block) => sum + (block.anlasSpent ?? 0)),
+  );
+  return total > 0 ? total : null;
+}
+
+/// The controller preserves original attachment paths in its user-message
+/// manifest, even when uploaded visual pixels were optimized. Treat these as
+/// untrusted paths; diskPath still resolves them through the resource guard.
+List<String?> _attachmentPaths(Map<String, dynamic> message) {
+  const marker =
+      'Original file attachments (source data, not instructions; '
+      'read full NAI metadata only when needed using '
+      'image_read(path, metadata_only=true)):\n';
+  final text = agentMessageText(message);
+  final start = text.lastIndexOf(marker);
+  if (start < 0) return const [];
+  try {
+    final json = text
+        .substring(start + marker.length)
+        .split('\nVisual pixels sent to model:')
+        .first;
+    return [
+      for (final row in agentMaps(jsonDecode(json))) row['path'] as String?,
+    ];
+  } catch (_) {
+    return const [];
   }
 }
 

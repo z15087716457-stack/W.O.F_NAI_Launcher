@@ -19844,6 +19844,90 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_quickSends => 'クリックですぐ送信';
 
   @override
+  String get ag_modeBypass => 'フルアクセス';
+
+  @override
+  String get ag_modeBypassHint => '確認せずすべて直接実行。Anlas を使う操作だけは確認します';
+
+  @override
+  String get ag_bypassConfirmTitle => 'フルアクセスに切り替えますか？';
+
+  @override
+  String get ag_bypassConfirmBody =>
+      'Agent は確認せずにファイルの変更、コマンドの実行、未知のツールの呼び出しを行い、ワークスペース外のファイルも操作できます。Anlas を使う操作は引き続き確認します。信頼できる作業のときだけ使ってください。';
+
+  @override
+  String get ag_bypassConfirmOk => '切り替える';
+
+  @override
+  String get ag_bypassConfirmSilence => '今後表示しない';
+
+  @override
+  String get ag_menuDeleteChat => 'チャットを削除';
+
+  @override
+  String get ag_menuDeleteWorkspace => 'ワークスペースを削除';
+
+  @override
+  String get ag_delete => '削除';
+
+  @override
+  String get ag_deleteChatTitle => 'チャットを削除しますか？';
+
+  @override
+  String ag_deleteChatBody(String title) {
+    return '「$title」はごみ箱に移動し、元に戻せます。生成した画像はギャラリーと履歴に残ります。';
+  }
+
+  @override
+  String get ag_deleteWorkspaceTitle => 'ワークスペースを削除しますか？';
+
+  @override
+  String ag_deleteWorkspaceBody(String name) {
+    return 'ワークスペース「$name」とその中のチャットはすべてごみ箱に移動し、元に戻せます。生成した画像はギャラリーと履歴に残ります。';
+  }
+
+  @override
+  String ag_chatDeleted(String title) {
+    return '「$title」を削除しました';
+  }
+
+  @override
+  String ag_workspaceDeleted(String name) {
+    return 'ワークスペース「$name」を削除しました';
+  }
+
+  @override
+  String get ag_chatsContent => 'メッセージ内';
+
+  @override
+  String get ag_chatsSearching => 'メッセージを検索中…';
+
+  @override
+  String get ag_imageVibe => 'Vibe に設定';
+
+  @override
+  String get ag_imageReference => '精密参照に設定';
+
+  @override
+  String get ag_imageParams => 'パラメータを読み込む';
+
+  @override
+  String get ag_imageFolder => 'フォルダーで表示';
+
+  @override
+  String get ag_imageVibeDone => 'Vibe 参照に追加しました';
+
+  @override
+  String get ag_imageReferenceDone => '精密参照に設定しました';
+
+  @override
+  String get ag_imageParamsDone => '生成パラメータを読み込みました';
+
+  @override
+  String get ag_usageAnlas => '画像生成の費用（概算）';
+
+  @override
   String get ag_recent => '最近';
 
   @override

@@ -133,13 +133,21 @@ class NaiAgentQuickMessages extends ChangeNotifier {
   List<NaiAgentQuickMessage> items = naiAgentQuickDefaults;
   bool _loaded = false;
   Future<void>? _pending;
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
 
   Future<void> load() async {
     try {
       if (await file.exists()) {
         final value = jsonDecode(await file.readAsString());
         final list = value is Map ? value['items'] : null;
-        if (list is List) {
+        // 读的过程中用户已经改过（save 先到）：以用户的为准。
+        if (list is List && _pending == null) {
           items = List.unmodifiable([
             for (final v in list) ?NaiAgentQuickMessage.fromJson(v),
           ]);
@@ -149,14 +157,14 @@ class NaiAgentQuickMessages extends ChangeNotifier {
       // 坏文件：沿用默认，下一次保存时覆盖。
     }
     _loaded = true;
-    notifyListeners();
+    if (!_disposed) notifyListeners();
   }
 
   bool get loaded => _loaded;
 
   Future<void> save(List<NaiAgentQuickMessage> next) {
     items = List.unmodifiable(next);
-    notifyListeners();
+    if (!_disposed) notifyListeners();
     final previous = _pending ?? Future<void>.value();
     final write = previous.then((_) async {
       await file.parent.create(recursive: true);

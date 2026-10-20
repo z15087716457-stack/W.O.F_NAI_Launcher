@@ -35722,6 +35722,156 @@ abstract class AppLocalizations {
   /// **'Sends right away'**
   String get ag_quickSends;
 
+  /// No description provided for @ag_modeBypass.
+  ///
+  /// In en, this message translates to:
+  /// **'Full access'**
+  String get ag_modeBypass;
+
+  /// No description provided for @ag_modeBypassHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Never asks; everything runs directly. Spending Anlas still needs your OK'**
+  String get ag_modeBypassHint;
+
+  /// No description provided for @ag_bypassConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to full access?'**
+  String get ag_bypassConfirmTitle;
+
+  /// No description provided for @ag_bypassConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The Agent will stop asking: it edits files, runs commands, calls unknown tools and can touch files outside the workspace. Anything that spends Anlas still asks first. Use it only for tasks you trust.'**
+  String get ag_bypassConfirmBody;
+
+  /// No description provided for @ag_bypassConfirmOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get ag_bypassConfirmOk;
+
+  /// No description provided for @ag_bypassConfirmSilence.
+  ///
+  /// In en, this message translates to:
+  /// **'Don’t remind me again'**
+  String get ag_bypassConfirmSilence;
+
+  /// No description provided for @ag_menuDeleteChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete chat'**
+  String get ag_menuDeleteChat;
+
+  /// No description provided for @ag_menuDeleteWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete workspace'**
+  String get ag_menuDeleteWorkspace;
+
+  /// No description provided for @ag_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get ag_delete;
+
+  /// No description provided for @ag_deleteChatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this chat?'**
+  String get ag_deleteChatTitle;
+
+  /// No description provided for @ag_deleteChatBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{title}\" moves to the trash and can be undone. Generated images stay in the gallery and history.'**
+  String ag_deleteChatBody(String title);
+
+  /// No description provided for @ag_deleteWorkspaceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this workspace?'**
+  String get ag_deleteWorkspaceTitle;
+
+  /// No description provided for @ag_deleteWorkspaceBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspace \"{name}\" and all its chats move to the trash and can be undone. Generated images stay in the gallery and history.'**
+  String ag_deleteWorkspaceBody(String name);
+
+  /// No description provided for @ag_chatDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{title}\"'**
+  String ag_chatDeleted(String title);
+
+  /// No description provided for @ag_workspaceDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted workspace \"{name}\"'**
+  String ag_workspaceDeleted(String name);
+
+  /// No description provided for @ag_chatsContent.
+  ///
+  /// In en, this message translates to:
+  /// **'In messages'**
+  String get ag_chatsContent;
+
+  /// No description provided for @ag_chatsSearching.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching messages…'**
+  String get ag_chatsSearching;
+
+  /// No description provided for @ag_imageVibe.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as Vibe'**
+  String get ag_imageVibe;
+
+  /// No description provided for @ag_imageReference.
+  ///
+  /// In en, this message translates to:
+  /// **'Use as precise reference'**
+  String get ag_imageReference;
+
+  /// No description provided for @ag_imageParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Load parameters'**
+  String get ag_imageParams;
+
+  /// No description provided for @ag_imageFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Show in folder'**
+  String get ag_imageFolder;
+
+  /// No description provided for @ag_imageVibeDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Added as a Vibe reference'**
+  String get ag_imageVibeDone;
+
+  /// No description provided for @ag_imageReferenceDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Set as precise reference'**
+  String get ag_imageReferenceDone;
+
+  /// No description provided for @ag_imageParamsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation parameters loaded'**
+  String get ag_imageParamsDone;
+
+  /// No description provided for @ag_usageAnlas.
+  ///
+  /// In en, this message translates to:
+  /// **'Image spend (estimate)'**
+  String get ag_usageAnlas;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:

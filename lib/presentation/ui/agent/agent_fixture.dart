@@ -478,6 +478,29 @@ abstract final class AgentFixture {
       onDismissNotices: () => note('dismissNotices'),
       onRetryInit: () => note('retryInit'),
       onEditMemory: (t) => note('editMemory', t),
+      onDeleteChat: (id) async {
+        note('deleteChat', id);
+        return 'trash-$id';
+      },
+      onDeleteWorkspace: (id) async {
+        note('deleteWorkspace', id);
+        return 'trash-$id';
+      },
+      onUndoDelete: (t) => ok('undoDelete', t),
+      onSearchChats: (q) async {
+        note('searchChats', q);
+        return [
+          for (final chat in AgentFixture.chats)
+            if (chat.title.contains('角色'))
+              AgentChatHit(
+                chatId: chat.id,
+                title: chat.title,
+                snippet: '…$q 出现在这段对话里…',
+              ),
+        ];
+      },
+      onImageAction: (id, a) => ok('imageAction', (id, a)),
+      onSilenceBypass: () => ok('silenceBypass'),
     );
   }
 }
