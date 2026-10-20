@@ -31,10 +31,14 @@ class PromptAssistantRequest {
   final List<PromptAssistantContentPart> userParts;
 
   /// Stored provider flags are compatibility data, not capability gates.
+  /// With a model config, images follow its capability (unknown = text only,
+  /// matching the unlit "image input" capability in the providers page).
+  /// Legacy raw-message callers without a model config keep sending images.
   List<PromptAssistantContentPart> get modelUserParts =>
-      (modelConfig?.supportsVision ??
-              modelConfig?.catalogEntry?.supportsVision) ==
-          true
+      modelConfig == null ||
+          (modelConfig!.supportsVision ??
+                  modelConfig!.catalogEntry?.supportsVision) ==
+              true
       ? userParts
       : userParts.where((part) => part is! PromptAssistantImagePart).toList();
   final String? apiKey;
