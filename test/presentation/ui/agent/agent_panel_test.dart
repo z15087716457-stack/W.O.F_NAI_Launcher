@@ -416,6 +416,7 @@ void main() {
         onCancelApproval: base.onCancelApproval,
         onDecideGate: base.onDecideGate,
         onUndoDiff: base.onUndoDiff,
+        onUndoDiffs: base.onUndoDiffs,
         onRevealImage: base.onRevealImage,
         onOpenFile: base.onOpenFile,
         onOpenLink: base.onOpenLink,

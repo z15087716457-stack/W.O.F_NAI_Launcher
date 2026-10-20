@@ -693,6 +693,21 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         }
         return ok;
       },
+      onUndoDiffs: (ids) async {
+        final list = [
+          for (final id in ids)
+            if (!_mapper.undone.contains(id)) ?mapping?.diffs[id],
+        ];
+        if (list.isEmpty || r == null) return false;
+        final ok = await ref
+            .read(agentDiffUndoProvider)
+            .restoreAll(list, r.workspace.agentDirectory);
+        if (ok) {
+          _mapper.undone.addAll(list.map((d) => d.id));
+          if (mounted) setState(() => _revision++);
+        }
+        return ok;
+      },
       onRevealImage: (id) {
         final history = (mapping?.images[id] ?? _recentImages[id])?.historyId;
         if (history != null) {

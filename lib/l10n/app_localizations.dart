@@ -35854,6 +35854,48 @@ abstract class AppLocalizations {
   /// **'Undone'**
   String get ag_diffUndone;
 
+  /// No description provided for @ag_changeSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 change} other{{count} changes}}'**
+  String ag_changeSummary(int count);
+
+  /// No description provided for @ag_diffUndoAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo all'**
+  String get ag_diffUndoAll;
+
+  /// No description provided for @ag_paramTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation settings'**
+  String get ag_paramTitle;
+
+  /// No description provided for @ag_paramCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 item} other{{count} items}}'**
+  String ag_paramCount(int count);
+
+  /// No description provided for @ag_paramSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get ag_paramSize;
+
+  /// No description provided for @ag_paramTransparent.
+  ///
+  /// In en, this message translates to:
+  /// **'Transparent background'**
+  String get ag_paramTransparent;
+
+  /// No description provided for @ag_paramNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get ag_paramNone;
+
   /// No description provided for @ag_positionTitle.
   ///
   /// In en, this message translates to:

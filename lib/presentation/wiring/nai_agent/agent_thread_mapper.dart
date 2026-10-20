@@ -3,6 +3,7 @@ import 'dart:ui' show Offset;
 
 import '../../providers/nai_agent/nai_agent_workspace_controller.dart';
 import '../../ui/agent/agent_contract.dart';
+import 'agent_param_diff.dart';
 import 'agent_resources.dart';
 
 Map<String, dynamic> agentMap(Object? value) =>
@@ -134,11 +135,15 @@ class AgentDiffRestore {
     required this.field,
     this.characterId,
     this.characterIndex,
+    this.params = const [],
   });
   final String id, version, field;
   final Map<String, dynamic> backup;
   final String? characterId;
   final int? characterIndex;
+
+  /// 参数卡（[field] == `params`）要写回的草稿键。
+  final List<String> params;
 }
 
 class AgentThreadMapping {
@@ -386,14 +391,28 @@ class AgentThreadMapper {
               );
               final after = agentMap(projection['draft']);
               if (backup != null) {
-                for (final change in _diffs(
-                  '${runtime.chat.id}/$id/$projectionIndex',
-                  applied,
-                  backup,
-                  after,
-                )) {
+                final callId = '${runtime.chat.id}/$id/$projectionIndex';
+                AgentDiffState state(AgentDiffRestore r) =>
+                    undone.contains(r.id)
+                    ? AgentDiffState.undone
+                    : draftVersion != r.version || r.version.isEmpty
+                    ? AgentDiffState.locked
+                    : AgentDiffState.applied;
+                final group = <AgentBlock>[];
+                final restores = <AgentDiffRestore>[];
+                var added = 0, removed = 0;
+                for (final change in _diffs(callId, applied, backup, after)) {
                   diffs[change.$1.id] = change.$2;
-                  blocks.add(
+                  restores.add(change.$2);
+                  for (final seg in change.$1.segments) {
+                    final n = seg.text
+                        .split(',')
+                        .where((t) => t.trim().isNotEmpty)
+                        .length;
+                    if (seg.kind == AgentDiffKind.added) added += n;
+                    if (seg.kind == AgentDiffKind.removed) removed += n;
+                  }
+                  group.add(
                     AgentDiffBlock(
                       AgentPromptDiff(
                         id: change.$1.id,
@@ -401,16 +420,52 @@ class AgentThreadMapper {
                         label: change.$1.label,
                         characterIndex: change.$1.characterIndex,
                         segments: change.$1.segments,
-                        state: undone.contains(change.$1.id)
-                            ? AgentDiffState.undone
-                            : draftVersion != change.$2.version ||
-                                  change.$2.version.isEmpty
-                            ? AgentDiffState.locked
-                            : AgentDiffState.applied,
+                        state: state(change.$2),
                       ),
                     ),
                   );
                 }
+                final params = agentParamChanges(
+                  applied,
+                  agentMap(backup['fields']),
+                  agentMap(after['fields']),
+                );
+                if (params.isNotEmpty) {
+                  final restore = AgentDiffRestore(
+                    id: '$callId/params',
+                    version: after['draft_version'] as String? ?? '',
+                    backup: backup,
+                    field: 'params',
+                    params: agentParamRestoreKeys(params),
+                  );
+                  diffs[restore.id] = restore;
+                  restores.add(restore);
+                  group.add(
+                    AgentParamBlock(
+                      id: restore.id,
+                      changes: params,
+                      state: state(restore),
+                    ),
+                  );
+                }
+                // 一次改了两处以上：前面加一行汇总，带「全部撤销」。
+                if (restores.length > 1) {
+                  final states = restores.map(state).toSet();
+                  blocks.add(
+                    AgentChangeSummaryBlock(
+                      id: '$callId/all',
+                      ids: [for (final r in restores) r.id],
+                      added: added,
+                      removed: removed,
+                      state: states.contains(AgentDiffState.locked)
+                          ? AgentDiffState.locked
+                          : states.contains(AgentDiffState.applied)
+                          ? AgentDiffState.applied
+                          : AgentDiffState.undone,
+                    ),
+                  );
+                }
+                blocks.addAll(group);
                 final position = _positions(
                   '${runtime.chat.id}/$id/$projectionIndex/position',
                   applied,

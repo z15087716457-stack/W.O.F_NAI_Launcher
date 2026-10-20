@@ -25,30 +25,66 @@ Future<bool> guardedAgentUndo({
 
 final agentDiffUndoProvider = Provider((ref) => AgentDiffUndo(ref));
 
+/// One restore folded into a patch plus the pill documents it brings back.
+class _Plan {
+  final patch = <String, dynamic>{};
+  final documents = <String, PillDocument>{};
+}
+
 class AgentDiffUndo {
   AgentDiffUndo(this.ref);
   final Ref ref;
 
-  Future<bool> restore(AgentDiffRestore diff, Directory directory) async {
-    if (diff.version.isEmpty ||
-        ref.read(bridgeDraftVersionProvider) != diff.version) {
+  Future<bool> restore(AgentDiffRestore diff, Directory directory) =>
+      restoreAll([diff], directory);
+
+  /// Restores several cards of the same change in a single guarded write.
+  /// Every card must still match the current draft version; otherwise nothing
+  /// is written.
+  Future<bool> restoreAll(
+    List<AgentDiffRestore> diffs,
+    Directory directory,
+  ) async {
+    if (diffs.isEmpty) return false;
+    final version = diffs.first.version;
+    if (version.isEmpty ||
+        diffs.any((d) => d.version != version) ||
+        ref.read(bridgeDraftVersionProvider) != version) {
       return false;
     }
-    final fields = agentMap(diff.backup['fields']);
-    final docs = agentMap(diff.backup['documents']);
-    final patch = <String, dynamic>{};
-    String? scope;
-    Map<String, dynamic>? document;
-    if (diff.characterId == null) {
-      if (diff.field != 'prompt' && diff.field != 'negative_prompt') {
-        return false;
+    final plan = _Plan();
+    // Character edits build on one working copy so several lanes combine.
+    List<Map<String, dynamic>>? characters;
+    for (final diff in diffs) {
+      final fields = agentMap(diff.backup['fields']);
+      final docs = agentMap(diff.backup['documents']);
+      if (diff.field == 'params') {
+        if (diff.params.isEmpty) return false;
+        for (final key in diff.params) {
+          if (!fields.containsKey(key)) return false;
+          plan.patch[key] = fields[key];
+        }
+        continue;
       }
-      if (fields[diff.field] is! String) return false;
-      patch[diff.field] = fields[diff.field];
-      scope = diff.field == 'prompt' ? PillScopes.main : PillScopes.negative;
-      document = agentMap(docs[diff.field]);
-    } else {
-      final current = agentMaps(readBridgeDraft(ref).fields['characters']);
+      if (diff.characterId == null) {
+        if (diff.field != 'prompt' && diff.field != 'negative_prompt') {
+          return false;
+        }
+        if (fields[diff.field] is! String) return false;
+        plan.patch[diff.field] = fields[diff.field];
+        final document = agentMap(docs[diff.field]);
+        // Parse before backup/check so malformed history cannot partially write.
+        if (document.isNotEmpty) {
+          plan.documents[diff.field == 'prompt'
+              ? PillScopes.main
+              : PillScopes.negative] = PillDocument.fromJson(
+            document,
+          );
+        }
+        continue;
+      }
+      characters ??= agentMaps(readBridgeDraft(ref).fields['characters']);
+      final current = characters;
       final old = agentMaps(
         fields['characters'],
       ).where((c) => c['id'] == diff.characterId).firstOrNull;
@@ -63,29 +99,31 @@ class AgentDiffUndo {
       } else {
         current[index] = {...current[index], key: old?[key] ?? ''};
       }
-      patch['characters'] = current;
-      scope = key == 'prompt'
-          ? PillScopes.charPos(diff.characterId!)
-          : PillScopes.charNeg(diff.characterId!);
+      plan.patch['characters'] = current;
       final lane = agentMap(
         agentMap(agentMap(docs['characters'])['lanes'])[diff.characterId],
       );
-      document = agentMap(lane[key == 'prompt' ? 'positive' : 'negative']);
+      final document = agentMap(
+        lane[key == 'prompt' ? 'positive' : 'negative'],
+      );
+      if (document.isNotEmpty) {
+        plan.documents[key == 'prompt'
+            ? PillScopes.charPos(diff.characterId!)
+            : PillScopes.charNeg(diff.characterId!)] = PillDocument.fromJson(
+          document,
+        );
+      }
     }
-    // Parse before backup/check so malformed history cannot partially write.
-    final restored = document.isEmpty ? null : PillDocument.fromJson(document);
     return guardedAgentUndo(
-      expected: diff.version,
+      expected: version,
       version: () => ref.read(bridgeDraftVersionProvider),
       backup: () async {
         await backupBridgeDraft(directory, readBridgeDraft(ref));
       },
       apply: () {
-        ref.read(bridgeDraftWriterProvider)(patch);
-        if (restored != null) {
-          ref
-              .read(pillWorkspaceProvider(scope!).notifier)
-              .restoreDocument(restored);
+        ref.read(bridgeDraftWriterProvider)(plan.patch);
+        for (final MapEntry(:key, :value) in plan.documents.entries) {
+          ref.read(pillWorkspaceProvider(key).notifier).restoreDocument(value);
         }
       },
     );

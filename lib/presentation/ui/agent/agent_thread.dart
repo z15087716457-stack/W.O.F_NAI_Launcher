@@ -374,6 +374,8 @@ class _TaskCard extends StatelessWidget {
         AgentStepsBlock(:final steps) => AgentSteps(steps: steps),
         AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
         AgentPositionBlock() => AgentPositionView(block: b),
+        AgentParamBlock() => AgentParamView(block: b),
+        AgentChangeSummaryBlock() => AgentChangeSummaryView(block: b),
         AgentImagesBlock() => AgentOutputs(block: b),
       });
     }
@@ -942,42 +944,11 @@ class AgentDiffView extends StatelessWidget {
                   ],
                 ),
               ),
-              switch (diff.state) {
-                AgentDiffState.applied => Row(
-                  spacing: 4,
-                  children: [
-                    AgentIcon(AgentGlyphs.check, size: 14, color: c.ok),
-                    Text(l.ag_diffApplied, style: UiText.sans(12, color: c.ok)),
-                  ],
-                ),
-                AgentDiffState.undone => Text(
-                  l.ag_diffUndone,
-                  style: UiText.sans(12, color: c.faint),
-                ),
-                AgentDiffState.locked => Tooltip(
-                  message: l.ag_diffLocked,
-                  child: Row(
-                    key: Key('agent-diff-state-${diff.id}'),
-                    spacing: 4,
-                    children: [
-                      AgentIcon(AgentGlyphs.check, size: 14, color: c.faint),
-                      Text(
-                        l.ag_diffApplied,
-                        style: UiText.sans(12, color: c.faint),
-                      ),
-                    ],
-                  ),
-                ),
-              },
-              if (diff.state == AgentDiffState.applied)
-                AgentButton(
-                  key: Key('agent-diff-undo-${diff.id}'),
-                  label: l.ag_diffUndo,
-                  glyph: AgentGlyphs.undo,
-                  style: AgentButtonStyle.ghost,
-                  height: 24,
-                  onPressed: () => s.run(() => s.actions.onUndoDiff(diff.id)),
-                ),
+              _DiffStatus(
+                id: diff.id,
+                state: diff.state,
+                onUndo: () => s.actions.onUndoDiff(diff.id),
+              ),
             ],
           ),
         ),
@@ -1015,6 +986,261 @@ class AgentDiffView extends StatelessWidget {
             style: diff.state == AgentDiffState.undone
                 ? base.copyWith(color: c.faint)
                 : base,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─────────────────────────────── 参数改动 ───────────────────────────────
+
+/// 改动卡右上角：已写入 / 已撤销 / 已写入（灰，草稿已变）+ 撤销按钮。
+class _DiffStatus extends StatelessWidget {
+  const _DiffStatus({
+    required this.id,
+    required this.state,
+    required this.onUndo,
+    this.undoLabel,
+  });
+  final String id;
+  final AgentDiffState state;
+  final Future<bool> Function() onUndo;
+  final String? undoLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 6,
+      children: [
+        switch (state) {
+          AgentDiffState.applied => Row(
+            spacing: 4,
+            children: [
+              AgentIcon(AgentGlyphs.check, size: 14, color: c.ok),
+              Text(l.ag_diffApplied, style: UiText.sans(12, color: c.ok)),
+            ],
+          ),
+          AgentDiffState.undone => Text(
+            l.ag_diffUndone,
+            style: UiText.sans(12, color: c.faint),
+          ),
+          AgentDiffState.locked => Tooltip(
+            message: l.ag_diffLocked,
+            child: Row(
+              key: Key('agent-diff-state-$id'),
+              spacing: 4,
+              children: [
+                AgentIcon(AgentGlyphs.check, size: 14, color: c.faint),
+                Text(l.ag_diffApplied, style: UiText.sans(12, color: c.faint)),
+              ],
+            ),
+          ),
+        },
+        if (state == AgentDiffState.applied)
+          AgentButton(
+            key: Key('agent-diff-undo-$id'),
+            label: undoLabel ?? l.ag_diffUndo,
+            glyph: AgentGlyphs.undo,
+            style: AgentButtonStyle.ghost,
+            height: 24,
+            onPressed: () => s.run(onUndo),
+          ),
+      ],
+    );
+  }
+}
+
+/// 一次改动出了几张卡时的汇总行：「本次改动 · 5 处  +21 −7」+ 全部撤销。
+class AgentChangeSummaryView extends StatelessWidget {
+  const AgentChangeSummaryView({super.key, required this.block});
+  final AgentChangeSummaryBlock block;
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    return SizedBox(
+      key: Key('agent-change-${block.id}'),
+      height: 24,
+      child: Row(
+        spacing: 6,
+        children: [
+          AgentIcon(AgentGlyphs.pen, size: 14, color: c.muted),
+          Expanded(
+            child: Row(
+              spacing: 6,
+              children: [
+                Flexible(
+                  child: Text(
+                    l.ag_changeSummary(block.ids.length),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.sans(
+                      12,
+                      weight: FontWeight.w600,
+                      color: c.ink,
+                    ),
+                  ),
+                ),
+                if (block.added + block.removed > 0)
+                  Text(
+                    l.ag_diffCounts(block.added, block.removed),
+                    style: UiText.mono(11.5, color: c.faint),
+                  ),
+              ],
+            ),
+          ),
+          _DiffStatus(
+            id: block.id,
+            state: block.state,
+            undoLabel: l.ag_diffUndoAll,
+            onUndo: () => s.actions.onUndoDiffs(block.ids),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 生图参数改动卡：每行「名称  旧值 → 新值」，整张一起撤销。
+class AgentParamView extends StatelessWidget {
+  const AgentParamView({super.key, required this.block});
+  final AgentParamBlock block;
+
+  static String label(AppLocalizations l, AgentParam p) => switch (p) {
+    AgentParam.model => l.generation_model,
+    AgentParam.size => l.ag_paramSize,
+    AgentParam.steps => l.gen_steps,
+    AgentParam.guidance => l.gen_guidance,
+    AgentParam.rescale => l.gen_cfgRescale,
+    AgentParam.sampler => l.gen_sampler,
+    AgentParam.noiseSchedule => l.gen_noiseSchedule,
+    AgentParam.seed => l.gen_seed,
+    AgentParam.count => l.gen_count,
+    AgentParam.variety => 'Variety+',
+    AgentParam.smea => 'SMEA',
+    AgentParam.qualityPreset => l.gen_qualityPreset,
+    AgentParam.ucPreset => l.gen_ucPreset,
+    AgentParam.transparent => l.ag_paramTransparent,
+  };
+
+  static String value(AppLocalizations l, AgentParamValue v) =>
+      v.text ??
+      switch (v.word!) {
+        AgentParamWord.random => l.gen_random,
+        AgentParamWord.on => l.set_on,
+        AgentParamWord.off => l.set_off,
+        AgentParamWord.none => l.ag_paramNone,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final s = AgentScope.of(context);
+    final c = context.ui;
+    final l = context.l10n;
+    final undone = block.state == AgentDiffState.undone;
+    final old = UiText.mono(12, color: c.faint, height: 1.4);
+    final now = UiText.mono(
+      12,
+      weight: FontWeight.w600,
+      color: undone ? c.faint : c.ok,
+      height: 1.4,
+    );
+    return Column(
+      key: Key('agent-params-${block.id}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 8,
+      children: [
+        SizedBox(
+          height: 24,
+          child: Row(
+            spacing: 6,
+            children: [
+              AgentIcon(AgentGlyphs.sliders, size: 14, color: c.muted),
+              Expanded(
+                child: Row(
+                  spacing: 6,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        l.ag_paramTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(
+                          12,
+                          weight: FontWeight.w600,
+                          color: c.ink,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      l.ag_paramCount(block.changes.length),
+                      style: UiText.mono(11.5, color: c.faint),
+                    ),
+                  ],
+                ),
+              ),
+              _DiffStatus(
+                id: block.id,
+                state: block.state,
+                onUndo: () => s.actions.onUndoDiff(block.id),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.fromLTRB(11, 8, 11, 8),
+          decoration: BoxDecoration(
+            color: agentSunk(c),
+            borderRadius: BorderRadius.circular(9),
+            border: Border.all(color: c.line),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 4,
+            children: [
+              for (final ch in block.changes)
+                Row(
+                  key: Key('agent-param-${block.id}-${ch.param.name}'),
+                  spacing: 8,
+                  children: [
+                    SizedBox(
+                      width: 88,
+                      child: Text(
+                        label(l, ch.param),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: UiText.sans(12, color: c.muted, height: 1.4),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: value(l, ch.before),
+                              style: old.copyWith(
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: c.faint,
+                              ),
+                            ),
+                            TextSpan(text: '  →  ', style: old),
+                            TextSpan(text: value(l, ch.after), style: now),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
           ),
         ),
       ],

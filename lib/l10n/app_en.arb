@@ -10705,6 +10705,27 @@
   "ag_field_characterNegative": "Character negative",
   "ag_diffApplied": "Applied",
   "ag_diffUndone": "Undone",
+  "ag_changeSummary": "{count, plural, =1{1 change} other{{count} changes}}",
+  "@ag_changeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_diffUndoAll": "Undo all",
+  "ag_paramTitle": "Generation settings",
+  "ag_paramCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@ag_paramCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_paramSize": "Size",
+  "ag_paramTransparent": "Transparent background",
+  "ag_paramNone": "None",
   "ag_positionTitle": "Character positions",
   "ag_positionApplied": "Adjusted",
   "ag_positionNone": "None",

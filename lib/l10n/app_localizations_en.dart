@@ -20530,6 +20530,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_diffUndone => 'Undone';
 
   @override
+  String ag_changeSummary(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count changes',
+      one: '1 change',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ag_diffUndoAll => 'Undo all';
+
+  @override
+  String get ag_paramTitle => 'Generation settings';
+
+  @override
+  String ag_paramCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count items',
+      one: '1 item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get ag_paramSize => 'Size';
+
+  @override
+  String get ag_paramTransparent => 'Transparent background';
+
+  @override
+  String get ag_paramNone => 'None';
+
+  @override
   String get ag_positionTitle => 'Character positions';
 
   @override

@@ -253,6 +253,11 @@ void main() {
           .whereType<AgentDiffBlock>()
           .toList();
       expect(diffs, hasLength(4));
+      final summary = mapped.turns.single.reply!.blocks
+          .whereType<AgentChangeSummaryBlock>()
+          .single;
+      expect(summary.ids, [for (final d in diffs) d.diff.id]);
+      expect(summary.state, AgentDiffState.applied);
       expect(diffs.every((d) => d.diff.state == AgentDiffState.applied), true);
       expect(diffs.first.diff.segments.map((s) => s.kind), [
         AgentDiffKind.same,
@@ -272,6 +277,49 @@ void main() {
       expect(mapped.diffs.values.last.characterId, 'c');
     },
   );
+
+  test('parameter changes map to one undoable params card', () async {
+    final backupDir = Directory(
+      '${runtime.workspace.agentDirectory.path}/draft-backups',
+    );
+    await backupDir.create(recursive: true);
+    final backup = File('${backupDir.path}/params.json');
+    final before = {
+      'model': 'nai-diffusion-4-5-full',
+      'prompt': 'a',
+      'steps': 28,
+      'cfg_scale': 5.0,
+      'seed': -1,
+      'sampler': 'k_euler_ancestral',
+    };
+    await backup.writeAsString(jsonEncode({'fields': before}));
+    runtime.messages = [
+      assistant([call('p', 'mcp__nai_studio__prompt_update')]),
+      result('p', {
+        'applied': ['steps', 'seed', 'cfg_scale'],
+        'backup_path': backup.path,
+        'draft': {
+          'draft_version': 'v1',
+          'fields': {...before, 'steps': 32, 'seed': 7},
+        },
+      }),
+    ];
+    mapper.map(runtime);
+    await resources.settle();
+    final mapped = mapper.map(runtime, draftVersion: 'v1');
+    final blocks = mapped.turns.single.reply!.blocks;
+    // 只有一张卡：不加汇总；引导写了同样的值，不列。
+    expect(blocks.whereType<AgentChangeSummaryBlock>(), isEmpty);
+    final card = blocks.whereType<AgentParamBlock>().single;
+    expect(card.changes.map((c) => c.param), [
+      AgentParam.steps,
+      AgentParam.seed,
+    ]);
+    expect(card.state, AgentDiffState.applied);
+    final restore = mapped.diffs[card.id]!;
+    expect(restore.field, 'params');
+    expect(restore.params, ['steps', 'seed']);
+  });
 
   test(
     'unchanged fields (+0 -0) are dropped; unnamed characters carry index',

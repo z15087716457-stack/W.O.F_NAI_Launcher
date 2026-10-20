@@ -10692,6 +10692,27 @@
   "ag_field_characterNegative": "キャラ ネガティブ",
   "ag_diffApplied": "書き込み済み",
   "ag_diffUndone": "元に戻しました",
+  "ag_changeSummary": "今回の変更 · {count} か所",
+  "@ag_changeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_diffUndoAll": "すべて元に戻す",
+  "ag_paramTitle": "生成パラメータ",
+  "ag_paramCount": "{count} 項目",
+  "@ag_paramCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_paramSize": "サイズ",
+  "ag_paramTransparent": "透過背景",
+  "ag_paramNone": "なし",
   "ag_positionTitle": "キャラクター位置",
   "ag_positionApplied": "調整済み",
   "ag_positionNone": "未指定",

@@ -19908,6 +19908,31 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_diffUndone => '元に戻しました';
 
   @override
+  String ag_changeSummary(int count) {
+    return '今回の変更 · $count か所';
+  }
+
+  @override
+  String get ag_diffUndoAll => 'すべて元に戻す';
+
+  @override
+  String get ag_paramTitle => '生成パラメータ';
+
+  @override
+  String ag_paramCount(int count) {
+    return '$count 項目';
+  }
+
+  @override
+  String get ag_paramSize => 'サイズ';
+
+  @override
+  String get ag_paramTransparent => '透過背景';
+
+  @override
+  String get ag_paramNone => 'なし';
+
+  @override
   String get ag_positionTitle => 'キャラクター位置';
 
   @override

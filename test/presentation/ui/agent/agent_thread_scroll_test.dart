@@ -188,6 +188,99 @@ void main() {
     });
   }
 
+  testWidgets('params card and change summary: rows, undo, undo all', (
+    tester,
+  ) async {
+    final calls = <(String, Object?)>[];
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(420, 700);
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: GeistTheme.light,
+        locale: const Locale('zh'),
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        home: Scaffold(
+          body: WindowChromeScope(
+            child: AgentPanel(
+              data: _view([
+                AgentTurn(
+                  id: 't',
+                  user: AgentUserMessage(text: 'Q', at: DateTime(2026, 10, 20)),
+                  reply: const AgentReply(
+                    blocks: [
+                      AgentChangeSummaryBlock(
+                        id: 'all',
+                        ids: ['d', 'p'],
+                        added: 3,
+                        removed: 1,
+                      ),
+                      AgentDiffBlock(
+                        AgentPromptDiff(
+                          id: 'd',
+                          field: AgentPromptField.prompt,
+                          segments: [
+                            AgentDiffSegment('a', AgentDiffKind.added),
+                          ],
+                        ),
+                      ),
+                      AgentParamBlock(
+                        id: 'p',
+                        changes: [
+                          AgentParamChange(
+                            AgentParam.steps,
+                            AgentParamValue.text('28'),
+                            AgentParamValue.text('32'),
+                          ),
+                          AgentParamChange(
+                            AgentParam.seed,
+                            AgentParamValue.word(AgentParamWord.random),
+                            AgentParamValue.text('1814808702'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ], 1),
+              actions: AgentFixture.actions(
+                record: (name, [arg]) => calls.add((name, arg)),
+              ),
+              initialTab: AgentTab.chat,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('本次改动 · 2 处'), findsOneWidget);
+    expect(find.text('生图参数'), findsOneWidget);
+    expect(find.text('2 项'), findsOneWidget);
+    final steps = find.byKey(const Key('agent-param-p-steps'));
+    expect(
+      find.descendant(of: steps, matching: find.text('步数')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('agent-param-p-seed')),
+        matching: find.textContaining('随机'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('agent-diff-undo-p')));
+    await tester.pump();
+    expect(calls.last, ('undoDiff', 'p'));
+    await tester.tap(find.byKey(const Key('agent-diff-undo-all')));
+    await tester.pump();
+    expect(calls.last.$1, 'undoDiffs');
+    expect(calls.last.$2, ['d', 'p']);
+    expect(find.text('全部撤销'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 3));
+  });
+
   testWidgets('unnamed character diffs are titled 角色 N', (tester) async {
     AgentDiffBlock block(String id, AgentPromptField field, int index) =>
         AgentDiffBlock(

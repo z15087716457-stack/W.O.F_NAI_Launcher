@@ -10692,6 +10692,27 @@
   "ag_field_characterNegative": "캐릭터 네거티브",
   "ag_diffApplied": "적용됨",
   "ag_diffUndone": "실행 취소했습니다",
+  "ag_changeSummary": "이번 변경 · {count}곳",
+  "@ag_changeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_diffUndoAll": "모두 실행 취소",
+  "ag_paramTitle": "생성 매개변수",
+  "ag_paramCount": "{count}개 항목",
+  "@ag_paramCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_paramSize": "크기",
+  "ag_paramTransparent": "투명 배경",
+  "ag_paramNone": "없음",
   "ag_positionTitle": "캐릭터 위치",
   "ag_positionApplied": "조정됨",
   "ag_positionNone": "지정 안 됨",

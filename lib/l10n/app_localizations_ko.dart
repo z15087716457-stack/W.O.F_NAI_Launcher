@@ -19974,6 +19974,31 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_diffUndone => '실행 취소했습니다';
 
   @override
+  String ag_changeSummary(int count) {
+    return '이번 변경 · $count곳';
+  }
+
+  @override
+  String get ag_diffUndoAll => '모두 실행 취소';
+
+  @override
+  String get ag_paramTitle => '생성 매개변수';
+
+  @override
+  String ag_paramCount(int count) {
+    return '$count개 항목';
+  }
+
+  @override
+  String get ag_paramSize => '크기';
+
+  @override
+  String get ag_paramTransparent => '투명 배경';
+
+  @override
+  String get ag_paramNone => '없음';
+
+  @override
   String get ag_positionTitle => '캐릭터 위치';
 
   @override

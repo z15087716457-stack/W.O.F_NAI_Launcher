@@ -244,6 +244,82 @@ final class AgentDiffBlock extends AgentBlock {
   final AgentPromptDiff diff;
 }
 
+/// 生图参数改动：一次 `prompt_update` 改了步数、采样器、种子等时出一张，
+/// 只列真的变了且当前模型用得上的项；整张一起撤销。
+final class AgentParamBlock extends AgentBlock {
+  const AgentParamBlock({
+    required this.id,
+    required this.changes,
+    this.state = AgentDiffState.applied,
+  });
+  final String id;
+  final List<AgentParamChange> changes;
+  final AgentDiffState state;
+}
+
+enum AgentParam {
+  model,
+  size,
+  steps,
+  guidance,
+  rescale,
+  sampler,
+  noiseSchedule,
+  seed,
+  count,
+  variety,
+  smea,
+  qualityPreset,
+  ucPreset,
+  transparent,
+}
+
+/// 参数值：直接显示的 [text]（如 `28`、`DPM++ 2M SDE`、`832×1216`），
+/// 或要按界面语言显示的 [word]（随机 / 开 / 关）。
+@immutable
+class AgentParamValue {
+  const AgentParamValue.text(String this.text) : word = null;
+  const AgentParamValue.word(AgentParamWord this.word) : text = null;
+  final String? text;
+  final AgentParamWord? word;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AgentParamValue && other.text == text && other.word == word;
+
+  @override
+  int get hashCode => Object.hash(text, word);
+}
+
+enum AgentParamWord { random, on, off, none }
+
+@immutable
+class AgentParamChange {
+  const AgentParamChange(this.param, this.before, this.after);
+  final AgentParam param;
+  final AgentParamValue before, after;
+}
+
+/// 一次改动出了两张以上可撤销的卡（提示词各栏、参数）时，放在它们前面的汇总行：
+/// 「本次改动 · 5 处」+ 全部撤销。[ids] 是这些卡的撤销 id。
+final class AgentChangeSummaryBlock extends AgentBlock {
+  const AgentChangeSummaryBlock({
+    required this.id,
+    required this.ids,
+    this.added = 0,
+    this.removed = 0,
+    this.state = AgentDiffState.applied,
+  });
+  final String id;
+  final List<String> ids;
+
+  /// 提示词各栏合计增删的标签数。
+  final int added, removed;
+
+  /// applied = 至少一张还能撤；undone = 全撤了；locked = 草稿已变。
+  final AgentDiffState state;
+}
+
 /// 角色位置改动：一次 `prompt_update` 改了定位方式或角色位置时出一张，
 /// 画成按坐标落点的迷你板（只提示，不带撤销）。
 final class AgentPositionBlock extends AgentBlock {
@@ -872,6 +948,7 @@ class AgentActions {
     required this.onCancelApproval,
     required this.onDecideGate,
     required this.onUndoDiff,
+    required this.onUndoDiffs,
     required this.onRevealImage,
     required this.onOpenFile,
     required this.onOpenLink,
@@ -950,8 +1027,11 @@ class AgentActions {
   /// 付费确认：true = 确认执行。
   final void Function(String gateId, {required bool confirm}) onDecideGate;
 
-  /// 撤销一栏提示词改动（草稿已变时转接层返回 false）。
+  /// 撤销一栏提示词改动或一张参数卡（草稿已变时转接层返回 false）。
   final Future<bool> Function(String diffId) onUndoDiff;
+
+  /// 一次撤销同一次改动里的几张卡（一次写入草稿；任一张过期就整体不写）。
+  final Future<bool> Function(List<String> diffIds) onUndoDiffs;
 
   /// 在历史栏里选中这张图（[AgentImage.historyId] 非 null 时可用）。
   final void Function(String imageId) onRevealImage;

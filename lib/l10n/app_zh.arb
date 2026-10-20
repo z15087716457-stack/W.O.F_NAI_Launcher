@@ -10692,6 +10692,27 @@
   "ag_field_characterNegative": "角色负面",
   "ag_diffApplied": "已写入",
   "ag_diffUndone": "已撤销",
+  "ag_changeSummary": "本次改动 · {count} 处",
+  "@ag_changeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_diffUndoAll": "全部撤销",
+  "ag_paramTitle": "生图参数",
+  "ag_paramCount": "{count} 项",
+  "@ag_paramCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_paramSize": "尺寸",
+  "ag_paramTransparent": "透明背景",
+  "ag_paramNone": "无",
   "ag_positionTitle": "角色位置",
   "ag_positionApplied": "已调整",
   "ag_positionNone": "未定位",

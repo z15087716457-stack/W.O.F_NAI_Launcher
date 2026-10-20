@@ -137,4 +137,58 @@ void main() {
       expect(c.thumbnailPath, 'local-thumbnail');
     },
   );
+  test(
+    'params card restores its keys; several cards undo in one write',
+    () async {
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updatePromptImmediately('before');
+      params.updateSteps(28);
+      params.updateSeed(-1);
+      final before = snapshot();
+      params.updatePromptImmediately('after');
+      params.updateSteps(40);
+      params.updateSeed(1234);
+      params.updateScale(7);
+      final current = version();
+      final restores = [
+        AgentDiffRestore(
+          id: 'p',
+          version: current,
+          backup: before,
+          field: 'prompt',
+        ),
+        AgentDiffRestore(
+          id: 'params',
+          version: current,
+          backup: before,
+          field: 'params',
+          params: const ['steps', 'seed'],
+        ),
+      ];
+      expect(
+        await container
+            .read(agentDiffUndoProvider)
+            .restoreAll(restores, directory),
+        true,
+      );
+      final now = snapshot()['fields'];
+      expect(now['prompt'], 'before');
+      expect(now['steps'], 28);
+      expect(now['seed'], -1);
+      // 卡上没有的参数（引导）保持用户当前值。
+      expect(now['cfg_scale'], 7);
+      expect(
+        Directory('${directory.path}/draft-backups').listSync(),
+        hasLength(1),
+        reason: '一次写入、一份备份',
+      );
+      // 草稿已变：整组都不写。
+      expect(
+        await container
+            .read(agentDiffUndoProvider)
+            .restoreAll(restores, directory),
+        false,
+      );
+    },
+  );
 }

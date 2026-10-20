@@ -10828,6 +10828,27 @@
   "ag_field_characterNegative": "角色負面",
   "ag_diffApplied": "已寫入",
   "ag_diffUndone": "已復原",
+  "ag_changeSummary": "本次改動 · {count} 處",
+  "@ag_changeSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_diffUndoAll": "全部復原",
+  "ag_paramTitle": "生圖參數",
+  "ag_paramCount": "{count} 項",
+  "@ag_paramCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_paramSize": "尺寸",
+  "ag_paramTransparent": "透明背景",
+  "ag_paramNone": "無",
   "ag_positionTitle": "角色位置",
   "ag_positionApplied": "已調整",
   "ag_positionNone": "未定位",

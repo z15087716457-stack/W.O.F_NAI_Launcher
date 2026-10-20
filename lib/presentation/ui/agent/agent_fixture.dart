@@ -466,6 +466,7 @@ abstract final class AgentFixture {
       onCancelApproval: (id) => note('cancelApproval', id),
       onDecideGate: (id, {required confirm}) => note('gate', (id, confirm)),
       onUndoDiff: (id) => ok('undoDiff', id),
+      onUndoDiffs: (ids) => ok('undoDiffs', ids),
       onRevealImage: (id) => note('reveal', id),
       onOpenFile: (id) => note('openFile', id),
       onOpenLink: (u) => note('openLink', u),

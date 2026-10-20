@@ -19674,6 +19674,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_diffUndone => '已撤销';
 
   @override
+  String ag_changeSummary(int count) {
+    return '本次改动 · $count 处';
+  }
+
+  @override
+  String get ag_diffUndoAll => '全部撤销';
+
+  @override
+  String get ag_paramTitle => '生图参数';
+
+  @override
+  String ag_paramCount(int count) {
+    return '$count 项';
+  }
+
+  @override
+  String get ag_paramSize => '尺寸';
+
+  @override
+  String get ag_paramTransparent => '透明背景';
+
+  @override
+  String get ag_paramNone => '无';
+
+  @override
   String get ag_positionTitle => '角色位置';
 
   @override
@@ -40175,6 +40200,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_diffUndone => '已復原';
+
+  @override
+  String ag_changeSummary(int count) {
+    return '本次改動 · $count 處';
+  }
+
+  @override
+  String get ag_diffUndoAll => '全部復原';
+
+  @override
+  String get ag_paramTitle => '生圖參數';
+
+  @override
+  String ag_paramCount(int count) {
+    return '$count 項';
+  }
+
+  @override
+  String get ag_paramSize => '尺寸';
+
+  @override
+  String get ag_paramTransparent => '透明背景';
+
+  @override
+  String get ag_paramNone => '無';
 
   @override
   String get ag_positionTitle => '角色位置';
