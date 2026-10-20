@@ -173,6 +173,40 @@ void main() {
     expect(find.text('sk-plain-ds'), findsOneWidget);
   });
 
+  testWidgets('显示 Key 时改 Key：保存后输入框是新 Key，不退回旧值', (t) async {
+    final rec = await pumpProviders(t);
+    await t.tap(find.byKey(const Key('mp-key-reveal')));
+    await t.pumpAndSettle();
+    await t.enterText(_field('mp-key'), 'sk-new');
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('dock-保存')));
+    await t.pumpAndSettle();
+    expect(rec.lastKey, 'sk-new');
+    // 离开输入框、切模型都不应退回显示时读到的旧 Key。
+    FocusManager.instance.primaryFocus?.unfocus();
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('mp-model-deepseek-v4-pro')));
+    await t.pumpAndSettle();
+    expect(t.widget<TextField>(_field('mp-key')).controller!.text, 'sk-new');
+    expect(find.text('DeepSeek 有 1 项修改未保存'), findsNothing);
+  });
+
+  testWidgets('显示 Key 时改了又放弃：回到原 Key', (t) async {
+    await pumpProviders(t);
+    await t.tap(find.byKey(const Key('mp-key-reveal')));
+    await t.pumpAndSettle();
+    await t.enterText(_field('mp-key'), 'sk-new');
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('dock-放弃')));
+    await t.pumpAndSettle();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await t.pumpAndSettle();
+    expect(
+      t.widget<TextField>(_field('mp-key')).controller!.text,
+      'sk-plain-ds',
+    );
+  });
+
   testWidgets('测试连接 / 测试模型带草稿', (t) async {
     final rec = await pumpProviders(t);
     await t.tap(find.byKey(const Key('mp-test')));

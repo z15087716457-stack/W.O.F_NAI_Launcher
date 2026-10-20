@@ -404,6 +404,10 @@ class _Middle extends StatefulWidget {
 class _MiddleState extends State<_Middle> {
   var _reveal = false;
   String? _revealed;
+
+  /// 上一帧草稿里的新 Key：从有到无（保存成功或放弃）时，[_revealed] 是旧 Key，
+  /// 要丢掉重新读，否则保存后输入框会退回旧值、复制也会复制旧 Key。
+  String? _lastDraftKey;
   var _renaming = false;
   var _manual = false;
 
@@ -499,6 +503,18 @@ class _MiddleState extends State<_Middle> {
       ],
     );
 
+    if (_lastDraftKey != null && draft?.apiKey == null && _revealed != null) {
+      _revealed = null;
+      if (_reveal) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          final k = await actions.onRevealApiKey(p.id);
+          if (mounted && _reveal && ctrl.draft(p.id)?.apiKey == null) {
+            setState(() => _revealed = k);
+          }
+        });
+      }
+    }
+    _lastDraftKey = draft?.apiKey;
     final keyValue = draft?.apiKey ?? _revealed ?? '';
     final keyField = ProviderInput(
       key: const Key('mp-key'),

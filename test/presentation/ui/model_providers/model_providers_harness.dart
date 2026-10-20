@@ -53,6 +53,9 @@ class ProvidersRecorder {
   ProviderSettings? lastSaved;
   String? lastKey;
 
+  /// 保存成功的明文 Key（显示 Key 时返回它，模拟后端已更新）。
+  final savedKeys = <String, String>{};
+
   bool has(String prefix) => calls.any((c) => c.startsWith(prefix));
 
   void replace(ProvidersViewData next) {
@@ -131,13 +134,14 @@ class ProvidersRecorder {
           lastSaved = edited;
           lastKey = apiKey;
           if (saveResult == ProvidersSaveResult.saved) {
+            if (apiKey != null) savedKeys[providerId] = apiKey;
             externalEdit(providerId, (_) => edited);
           }
           return saveResult;
         },
     onRevealApiKey: (id) async {
       calls.add('reveal:$id');
-      return 'sk-plain-$id';
+      return savedKeys[id] ?? 'sk-plain-$id';
     },
     onFetchCatalog: (id) => calls.add('fetch:$id'),
     onAddModels: (id, ids, {manual = false}) {

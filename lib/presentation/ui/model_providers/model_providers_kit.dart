@@ -356,7 +356,14 @@ class _ProviderInputState extends State<ProviderInput> {
     _focus.addListener(() {
       if (!mounted) return;
       setState(() {});
-      if (!_focus.hasFocus) widget.onSubmitted?.call(_ctrl.text);
+      if (_focus.hasFocus) return;
+      widget.onSubmitted?.call(_ctrl.text);
+      // 编辑期间外面的值变了（例如放弃草稿）而这一帧没再重建：失焦后补一次同步。
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && !_focus.hasFocus && widget.value != _ctrl.text) {
+          setState(() => _ctrl.text = widget.value);
+        }
+      });
     });
   }
 
