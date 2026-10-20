@@ -2,72 +2,81 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../screens/settings/widgets/model_draft_save_controller.dart';
+import '../../ui/kit/ui_colors.dart';
+import '../../ui/kit/ui_glyph.dart';
+import '../../ui/kit/ui_text.dart';
+import '../../ui/settings/settings_dialog_kit.dart';
+import '../../ui/settings/settings_kit.dart';
 
+/// 单项文字输入（设置页同款弹窗）。[validate] 返回错误文字时就地提示，不关窗。
 Future<String?> settingsTextInput(
   BuildContext context, {
   required String title,
   String initial = '',
   int maxLines = 1,
-}) async {
-  final controller = TextEditingController(text: initial);
-  try {
-    return await showDialog<String>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(title),
-        content: SizedBox(
-          width: maxLines == 1 ? 420 : 580,
-          child: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLines: maxLines,
-            onSubmitted: maxLines == 1
-                ? (value) => Navigator.pop(dialog, value.trim())
-                : null,
-          ),
+  String? subtitle,
+  String? label,
+  String? hint,
+  String? help,
+  bool mono = false,
+  String? confirm,
+  String? Function(String value)? validate,
+}) => showSettingsDialog<String>(
+  context,
+  (_) => SettingsTextDialog(
+    title: title,
+    initial: initial,
+    maxLines: maxLines,
+    subtitle: subtitle,
+    label: label,
+    hint: hint,
+    help: help,
+    mono: mono || maxLines > 1,
+    confirm: confirm,
+    validate: validate,
+  ),
+);
+
+/// 确认（设置页同款弹窗）。[danger] 用于删除类操作。
+Future<bool> settingsConfirm(
+  BuildContext context,
+  String title,
+  String body, {
+  String? confirm,
+  bool danger = false,
+}) async =>
+    await showSettingsDialog<bool>(
+      context,
+      (_) => SettingsConfirmDialog(
+        title: title,
+        body: body,
+        confirm: confirm,
+        danger: danger,
+      ),
+    ) ??
+    false;
+
+/// 只有“知道了”的提示（例如名称冲突）。
+Future<void> settingsNotice(BuildContext context, String title, String body) =>
+    showSettingsDialog<void>(
+      context,
+      (dialog) => SettingsDialogFrame(
+        width: 420,
+        title: title,
+        glyph: UiGlyphs.infoCircle,
+        body: Text(
+          body,
+          style: UiText.sans(13, color: dialog.ui.muted, height: 1.65),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialog),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialog, controller.text.trim()),
-            child: Text(context.l10n.common_save),
+          SettingsBtn(
+            label: dialog.l10n.common_gotIt,
+            tone: SettingsBtnTone.primary,
+            onTap: () => Navigator.pop(dialog),
           ),
         ],
       ),
     );
-  } finally {
-    // Dialog routes can remain mounted during their closing transition.
-    await Future<void>.delayed(const Duration(milliseconds: 220));
-    controller.dispose();
-  }
-}
-
-Future<bool> settingsConfirm(
-  BuildContext context,
-  String title,
-  String body,
-) async =>
-    await showDialog<bool>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(title),
-        content: Text(body),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialog, false),
-            child: Text(context.l10n.common_cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialog, true),
-            child: Text(context.l10n.common_confirm),
-          ),
-        ],
-      ),
-    ) ??
-    false;
 
 typedef SettingsEditorBuilder =
     Widget Function(

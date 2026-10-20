@@ -19702,11 +19702,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agSkillRemove => '스킬 삭제';
 
   @override
-  String set_agSkillRemoveConfirm(Object name) {
-    return '\"$name\"을(를) 삭제하시겠습니까? 파일은 Agent 데이터 폴더의 skill-trash 폴더로 이동합니다.';
-  }
-
-  @override
   String get set_agSkillCopy => '내 스킬로 복사';
 
   @override
@@ -19735,9 +19730,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String set_agSkillExists(Object name) {
     return '\"$name\"이(가) 이미 있습니다. 먼저 삭제하거나 이름을 바꾸세요.';
   }
-
-  @override
-  String get set_agSkillNewName => '새 스킬 이름 (소문자, 숫자, 하이픈)';
 
   @override
   String get set_agSkillPlaces => '스킬 위치';
@@ -20199,6 +20191,110 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_editRemoveImage => '이미지 빼기';
+
+  @override
+  String get set_agTrash => '휴지통';
+
+  @override
+  String get set_agTrashSub =>
+      '삭제한 대화, 작업 공간, Skill은 여기로 옮겨지며 복원할 수 있습니다. 완전히 삭제하면 되돌릴 수 없습니다.';
+
+  @override
+  String get set_agTrashManage => '관리';
+
+  @override
+  String set_agTrashSummary(int count, String size) {
+    return '$count개 · $size';
+  }
+
+  @override
+  String get set_agTrashEmpty => '휴지통이 비어 있습니다';
+
+  @override
+  String get set_agTrashAll => '전체';
+
+  @override
+  String get set_agTrashChats => '대화';
+
+  @override
+  String get set_agTrashWorkspaces => '작업 공간';
+
+  @override
+  String get set_agTrashSkills => 'Skill';
+
+  @override
+  String get set_agTrashRestore => '복원';
+
+  @override
+  String get set_agTrashPurge => '완전히 삭제';
+
+  @override
+  String get set_agTrashPurgeAll => '휴지통 비우기';
+
+  @override
+  String get set_agTrashPurgeTitle => '완전히 삭제할까요?';
+
+  @override
+  String set_agTrashPurgeBody(String name) {
+    return '\"$name\"이(가) 디스크에서 삭제되며 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String set_agTrashPurgeAllBody(int count) {
+    return '휴지통의 $count개 항목이 디스크에서 삭제되며 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String set_agTrashRestored(String name) {
+    return '\"$name\"을(를) 복원했습니다';
+  }
+
+  @override
+  String set_agTrashPurged(String name) {
+    return '\"$name\"을(를) 완전히 삭제했습니다';
+  }
+
+  @override
+  String get set_agTrashNeedWorkspace =>
+      '소속 작업 공간도 휴지통에 있습니다. 먼저 작업 공간을 복원하세요.';
+
+  @override
+  String get set_agTrashRestoreFailed => '복원 실패: 같은 이름의 항목이 이미 있습니다';
+
+  @override
+  String get set_agTrashGoneWorkspace => '삭제된 작업 공간';
+
+  @override
+  String set_agSkillRemoveBody(String name) {
+    return '\"$name\"은(는) 휴지통으로 이동합니다. Agent 설정의 \"휴지통\"에서 복원하거나 완전히 삭제할 수 있습니다.';
+  }
+
+  @override
+  String get set_agSkillName => '이름';
+
+  @override
+  String get set_agSkillNewHelp =>
+      '소문자, 숫자, 하이픈만 사용합니다(예: watercolor-style). 만든 뒤 폴더가 열리면 안의 SKILL.md를 편집하세요.';
+
+  @override
+  String get set_agSkillCreate => '만들기';
+
+  @override
+  String get set_agSkillAddConfirm => '추가';
+
+  @override
+  String set_agPromptStats(String chars, String tokens) {
+    return '$chars자 · 약 $tokens 토큰';
+  }
+
+  @override
+  String get set_agFinalLive => '현재 대화가 실제로 모델에 보내는 전체 시스템 프롬프트입니다.';
+
+  @override
+  String get set_agBuiltinSub => 'Studio에 내장된 기본 프롬프트로, 버전과 함께 업데이트됩니다.';
+
+  @override
+  String get set_agMcpEditTitle => 'MCP 서버 편집';
 
   @override
   String get ag_recent => '최근';

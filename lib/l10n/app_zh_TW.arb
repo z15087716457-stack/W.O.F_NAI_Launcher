@@ -10715,12 +10715,6 @@
   "set_agSkillErrParse": "無法讀取 SKILL.md 頭部資訊",
   "set_agSkillOpenFolder": "開啟資料夾",
   "set_agSkillRemove": "刪除 Skill",
-  "set_agSkillRemoveConfirm": "刪除「{name}」？檔案會移到 Agent 資料目錄的 skill-trash 資料夾。",
-  "@set_agSkillRemoveConfirm": {
-    "placeholders": {
-      "name": {}
-    }
-  },
   "set_agSkillCopy": "複製為我的 Skill",
   "set_agSkillReadOnly": "內建 Skill 隨版本更新，不能直接編輯；複製後，同名的全域副本會替代它。",
   "set_agSkillAddTitle": "新增 Skill 資料夾",
@@ -10739,7 +10733,6 @@
       "name": {}
     }
   },
-  "set_agSkillNewName": "新 Skill 名稱（小寫字母、數字、連字元）",
   "set_agSkillPlaces": "Skill 位置",
   "set_agSkillPlacesTip": "每個子資料夾放一個 SKILL.md。同名時工作區優先，其次全域，最後內建。",
   "set_agContext": "常駐上下文",
@@ -11086,6 +11079,90 @@
   "ag_editResend": "傳送",
   "ag_editHint": "傳送後，這條之後的對話會被替換",
   "ag_editRemoveImage": "去掉這張圖",
+  "set_agTrash": "回收區",
+  "set_agTrashSub": "刪除的對話、工作區和 Skill 先放進回收區，可以恢復；徹底刪除後不能找回。",
+  "set_agTrashManage": "管理",
+  "set_agTrashSummary": "{count} 項 · {size}",
+  "@set_agTrashSummary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agTrashEmpty": "回收區是空的",
+  "set_agTrashAll": "全部",
+  "set_agTrashChats": "對話",
+  "set_agTrashWorkspaces": "工作區",
+  "set_agTrashSkills": "Skill",
+  "set_agTrashRestore": "恢復",
+  "set_agTrashPurge": "徹底刪除",
+  "set_agTrashPurgeAll": "清空回收區",
+  "set_agTrashPurgeTitle": "徹底刪除？",
+  "set_agTrashPurgeBody": "「{name}」會從磁碟上刪除，不能找回。",
+  "@set_agTrashPurgeBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agTrashPurgeAllBody": "回收區裡的 {count} 項會從磁碟上刪除，不能找回。",
+  "@set_agTrashPurgeAllBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "set_agTrashRestored": "已恢復「{name}」",
+  "@set_agTrashRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agTrashPurged": "已徹底刪除「{name}」",
+  "@set_agTrashPurged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agTrashNeedWorkspace": "所屬工作區也在回收區裡，先恢復工作區",
+  "set_agTrashRestoreFailed": "恢復失敗：原位置已有同名內容",
+  "set_agTrashGoneWorkspace": "已刪除的工作區",
+  "set_agSkillRemoveBody": "「{name}」會移進回收區，之後可以在 Agent 設定的「回收區」裡恢復或徹底刪除。",
+  "@set_agSkillRemoveBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agSkillName": "名稱",
+  "set_agSkillNewHelp": "只用小寫字母、數字和連字元，例如 watercolor-style。建好後會開啟它的資料夾，編輯裡面的 SKILL.md 即可。",
+  "set_agSkillCreate": "建立",
+  "set_agSkillAddConfirm": "新增",
+  "set_agPromptStats": "{chars} 字元 · 約 {tokens} token",
+  "@set_agPromptStats": {
+    "placeholders": {
+      "chars": {
+        "type": "String"
+      },
+      "tokens": {
+        "type": "String"
+      }
+    }
+  },
+  "set_agFinalLive": "當前會話實際發給模型的完整系統提示詞。",
+  "set_agBuiltinSub": "Studio 內建的基礎提示詞，隨版本更新。",
+  "set_agMcpEditTitle": "編輯 MCP 伺服器",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "編輯",

@@ -327,4 +327,65 @@ void main() {
       expect(hits.single.snippet, '看看这张卡片');
     },
   );
+
+  test(
+    'trash view lists chats, workspaces and skills; restore and purge one; empty clears both folders',
+    () async {
+      final a = await store.createWorkspace('A');
+      final b = await store.createWorkspace('B');
+      final chat = await store.createChat(a.id, 'Hello');
+      await File('${a.directory.path}/ui/chats/${chat.id}.json').writeAsString(
+        await File(
+          '${a.directory.path}/ui/chats/${chat.id}.json',
+        ).readAsString(),
+      );
+      final chatEntry = await store.trashChat(a.id, chat.id);
+      final wsEntry = await store.trashWorkspace(b.id);
+      await store.createSkill('my-skill', source: 'global');
+      await store.removeSkill('global/my-skill');
+      final list = await store.listTrash();
+      expect(list.map((i) => i.kind).toSet(), {
+        AgentTrashKind.chat,
+        AgentTrashKind.workspace,
+        AgentTrashKind.skill,
+      });
+      final chatItem = list.firstWhere((i) => i.id == chatEntry.id);
+      expect(chatItem.title, 'Hello');
+      expect(chatItem.workspace, 'A');
+      final skill = list.firstWhere((i) => i.kind == AgentTrashKind.skill);
+      expect(skill.title, 'my-skill');
+      expect(skill.workspace, 'global');
+      expect(skill.bytes, greaterThan(0));
+      // Newest first.
+      expect(list.first.kind, AgentTrashKind.skill);
+
+      expect(await store.restoreSkill(skill.id), 'global/my-skill');
+      expect(
+        await File(
+          '${store.globalSkillsDirectory.path}/my-skill/SKILL.md',
+        ).exists(),
+        isTrue,
+      );
+      // Restoring onto an existing name refuses instead of overwriting.
+      await store.removeSkill('global/my-skill');
+      await store.createSkill('my-skill', source: 'global');
+      final again = (await store.listTrash()).firstWhere(
+        (i) => i.kind == AgentTrashKind.skill,
+      );
+      await expectLater(
+        store.restoreSkill(again.id),
+        throwsA(isA<AgentSkillExists>()),
+      );
+
+      await store.purgeTrash(AgentTrashKind.workspace, wsEntry.id);
+      expect((await store.listTrash()).any((i) => i.id == wsEntry.id), isFalse);
+      await expectLater(
+        store.purgeTrash(AgentTrashKind.skill, '../escape'),
+        throwsFormatException,
+      );
+      await store.emptyTrash();
+      expect(await store.listTrash(), isEmpty);
+      expect(await Directory('${root.path}/skill-trash').exists(), isFalse);
+    },
+  );
 }

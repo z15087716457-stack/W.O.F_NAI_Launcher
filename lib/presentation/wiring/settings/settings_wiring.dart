@@ -378,6 +378,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
       onRemoveQuick: (id) => _run(() => quick.remove(id)),
       onMoveQuick: (id, delta) => _run(() => quick.move(id, delta)),
       onRestoreQuick: () => _run(quick.restore),
+      onOpenTrash: () => _run(agent.openTrash),
       onOpenAgent: () => _run(() async {
         if (!ref.read(naiAgentUiPreferencesProvider).settings.panelExpanded) {
           await ref.read(naiAgentWindowControllerProvider).toggle();

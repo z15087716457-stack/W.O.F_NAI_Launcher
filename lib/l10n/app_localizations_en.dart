@@ -20255,11 +20255,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agSkillRemove => 'Delete skill';
 
   @override
-  String set_agSkillRemoveConfirm(Object name) {
-    return 'Delete \"$name\"? Its files move to the skill-trash folder in the Agent data folder.';
-  }
-
-  @override
   String get set_agSkillCopy => 'Copy as my skill';
 
   @override
@@ -20288,10 +20283,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String set_agSkillExists(Object name) {
     return '\"$name\" already exists. Delete or rename it first.';
   }
-
-  @override
-  String get set_agSkillNewName =>
-      'New skill name (lowercase letters, digits, hyphens)';
 
   @override
   String get set_agSkillPlaces => 'Skill folders';
@@ -20832,6 +20823,113 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_editRemoveImage => 'Remove image';
+
+  @override
+  String get set_agTrash => 'Trash';
+
+  @override
+  String get set_agTrashSub =>
+      'Deleted chats, workspaces and skills land here and can be restored. Deleting them for good cannot be undone.';
+
+  @override
+  String get set_agTrashManage => 'Manage';
+
+  @override
+  String set_agTrashSummary(int count, String size) {
+    return '$count items · $size';
+  }
+
+  @override
+  String get set_agTrashEmpty => 'Trash is empty';
+
+  @override
+  String get set_agTrashAll => 'All';
+
+  @override
+  String get set_agTrashChats => 'Chats';
+
+  @override
+  String get set_agTrashWorkspaces => 'Workspaces';
+
+  @override
+  String get set_agTrashSkills => 'Skills';
+
+  @override
+  String get set_agTrashRestore => 'Restore';
+
+  @override
+  String get set_agTrashPurge => 'Delete for good';
+
+  @override
+  String get set_agTrashPurgeAll => 'Empty trash';
+
+  @override
+  String get set_agTrashPurgeTitle => 'Delete for good?';
+
+  @override
+  String set_agTrashPurgeBody(String name) {
+    return '\"$name\" will be removed from disk. This cannot be undone.';
+  }
+
+  @override
+  String set_agTrashPurgeAllBody(int count) {
+    return 'All $count items in the trash will be removed from disk. This cannot be undone.';
+  }
+
+  @override
+  String set_agTrashRestored(String name) {
+    return 'Restored \"$name\"';
+  }
+
+  @override
+  String set_agTrashPurged(String name) {
+    return 'Deleted \"$name\" for good';
+  }
+
+  @override
+  String get set_agTrashNeedWorkspace =>
+      'Its workspace is in the trash too. Restore the workspace first.';
+
+  @override
+  String get set_agTrashRestoreFailed =>
+      'Restore failed: something with the same name is already there';
+
+  @override
+  String get set_agTrashGoneWorkspace => 'deleted workspace';
+
+  @override
+  String set_agSkillRemoveBody(String name) {
+    return '\"$name\" moves to the trash. You can restore it or delete it for good from Trash in Agent settings.';
+  }
+
+  @override
+  String get set_agSkillName => 'Name';
+
+  @override
+  String get set_agSkillNewHelp =>
+      'Lowercase letters, digits and hyphens only, e.g. watercolor-style. Its folder opens afterwards; edit the SKILL.md inside.';
+
+  @override
+  String get set_agSkillCreate => 'Create';
+
+  @override
+  String get set_agSkillAddConfirm => 'Add';
+
+  @override
+  String set_agPromptStats(String chars, String tokens) {
+    return '$chars characters · about $tokens tokens';
+  }
+
+  @override
+  String get set_agFinalLive =>
+      'The full system prompt the current chat actually sends to the model.';
+
+  @override
+  String get set_agBuiltinSub =>
+      'The built-in base prompt shipped with Studio; it changes with updates.';
+
+  @override
+  String get set_agMcpEditTitle => 'Edit MCP server';
 
   @override
   String get ag_recent => 'Recent';

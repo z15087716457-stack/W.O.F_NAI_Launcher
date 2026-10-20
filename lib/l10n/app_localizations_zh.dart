@@ -19408,11 +19408,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agSkillRemove => '删除 Skill';
 
   @override
-  String set_agSkillRemoveConfirm(Object name) {
-    return '删除「$name」？文件会移到 Agent 数据目录的 skill-trash 文件夹。';
-  }
-
-  @override
   String get set_agSkillCopy => '复制为我的 Skill';
 
   @override
@@ -19439,9 +19434,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String set_agSkillExists(Object name) {
     return '「$name」已存在，请先删除或改名。';
   }
-
-  @override
-  String get set_agSkillNewName => '新 Skill 名称（小写字母、数字、连字符）';
 
   @override
   String get set_agSkillPlaces => 'Skill 位置';
@@ -19893,6 +19885,108 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_editRemoveImage => '去掉这张图';
+
+  @override
+  String get set_agTrash => '回收区';
+
+  @override
+  String get set_agTrashSub => '删除的对话、工作区和 Skill 先放进回收区，可以恢复；彻底删除后不能找回。';
+
+  @override
+  String get set_agTrashManage => '管理';
+
+  @override
+  String set_agTrashSummary(int count, String size) {
+    return '$count 项 · $size';
+  }
+
+  @override
+  String get set_agTrashEmpty => '回收区是空的';
+
+  @override
+  String get set_agTrashAll => '全部';
+
+  @override
+  String get set_agTrashChats => '对话';
+
+  @override
+  String get set_agTrashWorkspaces => '工作区';
+
+  @override
+  String get set_agTrashSkills => 'Skill';
+
+  @override
+  String get set_agTrashRestore => '恢复';
+
+  @override
+  String get set_agTrashPurge => '彻底删除';
+
+  @override
+  String get set_agTrashPurgeAll => '清空回收区';
+
+  @override
+  String get set_agTrashPurgeTitle => '彻底删除？';
+
+  @override
+  String set_agTrashPurgeBody(String name) {
+    return '「$name」会从磁盘上删除，不能找回。';
+  }
+
+  @override
+  String set_agTrashPurgeAllBody(int count) {
+    return '回收区里的 $count 项会从磁盘上删除，不能找回。';
+  }
+
+  @override
+  String set_agTrashRestored(String name) {
+    return '已恢复「$name」';
+  }
+
+  @override
+  String set_agTrashPurged(String name) {
+    return '已彻底删除「$name」';
+  }
+
+  @override
+  String get set_agTrashNeedWorkspace => '所属工作区也在回收区里，先恢复工作区';
+
+  @override
+  String get set_agTrashRestoreFailed => '恢复失败：原位置已有同名内容';
+
+  @override
+  String get set_agTrashGoneWorkspace => '已删除的工作区';
+
+  @override
+  String set_agSkillRemoveBody(String name) {
+    return '「$name」会移进回收区，之后可以在 Agent 设置的「回收区」里恢复或彻底删除。';
+  }
+
+  @override
+  String get set_agSkillName => '名称';
+
+  @override
+  String get set_agSkillNewHelp =>
+      '只用小写字母、数字和连字符，例如 watercolor-style。建好后会打开它的文件夹，编辑里面的 SKILL.md 即可。';
+
+  @override
+  String get set_agSkillCreate => '创建';
+
+  @override
+  String get set_agSkillAddConfirm => '添加';
+
+  @override
+  String set_agPromptStats(String chars, String tokens) {
+    return '$chars 字符 · 约 $tokens token';
+  }
+
+  @override
+  String get set_agFinalLive => '当前会话实际发给模型的完整系统提示词。';
+
+  @override
+  String get set_agBuiltinSub => 'Studio 内置的基础提示词，随版本更新。';
+
+  @override
+  String get set_agMcpEditTitle => '编辑 MCP 服务器';
 
   @override
   String get ag_recent => '最近';
@@ -40294,11 +40388,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agSkillRemove => '刪除 Skill';
 
   @override
-  String set_agSkillRemoveConfirm(Object name) {
-    return '刪除「$name」？檔案會移到 Agent 資料目錄的 skill-trash 資料夾。';
-  }
-
-  @override
   String get set_agSkillCopy => '複製為我的 Skill';
 
   @override
@@ -40325,9 +40414,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String set_agSkillExists(Object name) {
     return '「$name」已存在，請先刪除或改名。';
   }
-
-  @override
-  String get set_agSkillNewName => '新 Skill 名稱（小寫字母、數字、連字元）';
 
   @override
   String get set_agSkillPlaces => 'Skill 位置';
@@ -40779,6 +40865,108 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_editRemoveImage => '去掉這張圖';
+
+  @override
+  String get set_agTrash => '回收區';
+
+  @override
+  String get set_agTrashSub => '刪除的對話、工作區和 Skill 先放進回收區，可以恢復；徹底刪除後不能找回。';
+
+  @override
+  String get set_agTrashManage => '管理';
+
+  @override
+  String set_agTrashSummary(int count, String size) {
+    return '$count 項 · $size';
+  }
+
+  @override
+  String get set_agTrashEmpty => '回收區是空的';
+
+  @override
+  String get set_agTrashAll => '全部';
+
+  @override
+  String get set_agTrashChats => '對話';
+
+  @override
+  String get set_agTrashWorkspaces => '工作區';
+
+  @override
+  String get set_agTrashSkills => 'Skill';
+
+  @override
+  String get set_agTrashRestore => '恢復';
+
+  @override
+  String get set_agTrashPurge => '徹底刪除';
+
+  @override
+  String get set_agTrashPurgeAll => '清空回收區';
+
+  @override
+  String get set_agTrashPurgeTitle => '徹底刪除？';
+
+  @override
+  String set_agTrashPurgeBody(String name) {
+    return '「$name」會從磁碟上刪除，不能找回。';
+  }
+
+  @override
+  String set_agTrashPurgeAllBody(int count) {
+    return '回收區裡的 $count 項會從磁碟上刪除，不能找回。';
+  }
+
+  @override
+  String set_agTrashRestored(String name) {
+    return '已恢復「$name」';
+  }
+
+  @override
+  String set_agTrashPurged(String name) {
+    return '已徹底刪除「$name」';
+  }
+
+  @override
+  String get set_agTrashNeedWorkspace => '所屬工作區也在回收區裡，先恢復工作區';
+
+  @override
+  String get set_agTrashRestoreFailed => '恢復失敗：原位置已有同名內容';
+
+  @override
+  String get set_agTrashGoneWorkspace => '已刪除的工作區';
+
+  @override
+  String set_agSkillRemoveBody(String name) {
+    return '「$name」會移進回收區，之後可以在 Agent 設定的「回收區」裡恢復或徹底刪除。';
+  }
+
+  @override
+  String get set_agSkillName => '名稱';
+
+  @override
+  String get set_agSkillNewHelp =>
+      '只用小寫字母、數字和連字元，例如 watercolor-style。建好後會開啟它的資料夾，編輯裡面的 SKILL.md 即可。';
+
+  @override
+  String get set_agSkillCreate => '建立';
+
+  @override
+  String get set_agSkillAddConfirm => '新增';
+
+  @override
+  String set_agPromptStats(String chars, String tokens) {
+    return '$chars 字元 · 約 $tokens token';
+  }
+
+  @override
+  String get set_agFinalLive => '當前會話實際發給模型的完整系統提示詞。';
+
+  @override
+  String get set_agBuiltinSub => 'Studio 內建的基礎提示詞，隨版本更新。';
+
+  @override
+  String get set_agMcpEditTitle => '編輯 MCP 伺服器';
 
   @override
   String get ag_recent => '最近';

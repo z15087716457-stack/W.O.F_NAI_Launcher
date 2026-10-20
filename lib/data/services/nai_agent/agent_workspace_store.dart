@@ -347,6 +347,28 @@ class AgentTrashEntry {
   };
 }
 
+enum AgentTrashKind { chat, workspace, skill }
+
+/// One row of the Agent "archive" (trash) view.
+class AgentTrashItem {
+  const AgentTrashItem({
+    required this.id,
+    required this.kind,
+    required this.title,
+    required this.trashedAt,
+    required this.bytes,
+    this.workspace,
+  });
+  final String id, title;
+  final AgentTrashKind kind;
+  final DateTime trashedAt;
+  final int bytes;
+
+  /// Chat: owning workspace name (null when that workspace is gone).
+  /// Skill: original source (`global` / `workspace`).
+  final String? workspace;
+}
+
 class AgentChatSearchHit {
   const AgentChatSearchHit({
     required this.chatId,
@@ -1467,10 +1489,129 @@ class AgentWorkspaceStore {
     await dir.delete(recursive: true);
   });
 
-  Future<void> emptyTrash() => _write(() async {
-    final path = p.join(root.path, 'trash');
+  /// Every recoverable entry in `trash/` (chats, workspaces) and the older
+  /// `skill-trash/` folders, newest first. Corrupt entries are skipped, not
+  /// deleted: they stay visible to "empty" and the data folder.
+  Future<List<AgentTrashItem>> listTrash() => _write(() async {
+    final items = <AgentTrashItem>[];
+    for (final kind in const ['chats', 'workspaces']) {
+      final dir = Directory(p.join(root.path, 'trash', kind));
+      await _guard(dir.path);
+      if (!await dir.exists()) continue;
+      await for (final child in dir.list(followLinks: false)) {
+        if (child is! Directory) continue;
+        try {
+          final entry = await readTrashEntry(kind, p.basename(child.path));
+          String? workspace;
+          if (kind == 'chats') {
+            try {
+              workspace = (await getWorkspace(entry.workspaceId)).name;
+            } catch (_) {
+              workspace = null;
+            }
+          }
+          items.add(
+            AgentTrashItem(
+              id: entry.id,
+              kind: kind == 'chats'
+                  ? AgentTrashKind.chat
+                  : AgentTrashKind.workspace,
+              title: entry.title,
+              trashedAt: entry.trashedAt,
+              bytes: await _treeBytes(child.path),
+              workspace: workspace,
+            ),
+          );
+        } catch (_) {
+          continue;
+        }
+      }
+    }
+    final skills = Directory(p.join(root.path, 'skill-trash'));
+    await _guard(skills.path);
+    if (await skills.exists()) {
+      await for (final child in skills.list(followLinks: false)) {
+        if (child is! Directory) continue;
+        final match = _skillTrashName.firstMatch(p.basename(child.path));
+        if (match == null) continue;
+        items.add(
+          AgentTrashItem(
+            id: p.basename(child.path),
+            kind: AgentTrashKind.skill,
+            title: match.group(3)!,
+            trashedAt: DateTime.fromMillisecondsSinceEpoch(
+              int.parse(match.group(1)!),
+            ),
+            bytes: await _treeBytes(child.path),
+            workspace: match.group(2),
+          ),
+        );
+      }
+    }
+    items.sort((a, b) => b.trashedAt.compareTo(a.trashedAt));
+    return items;
+  });
+
+  static final _skillTrashName = RegExp(
+    r'^(\d+)-(global|workspace)-([a-z0-9]+(?:-[a-z0-9]+)*)$',
+  );
+
+  Future<int> _treeBytes(String path) async {
+    var bytes = 0;
+    await for (final item in Directory(
+      path,
+    ).list(recursive: true, followLinks: false)) {
+      if (item is File) bytes += await item.length();
+    }
+    return bytes;
+  }
+
+  /// Put a removed skill back into the global folder (workspace skills go back
+  /// to the global folder too when their workspace is unknown).
+  Future<String> restoreSkill(
+    String trashId, {
+    String? workspaceId,
+  }) => _write(() async {
+    final match = _skillTrashName.firstMatch(trashId);
+    if (match == null) throw const FormatException('Invalid trash identity');
+    final from = Directory(p.join(root.path, 'skill-trash', trashId));
+    await _guardTree(from.path);
+    if (!await from.exists()) throw StateError('Trash entry missing');
+    final source = match.group(2) == 'workspace' && workspaceId != null
+        ? 'workspace'
+        : 'global';
+    final target = await _newSkillTarget(source, match.group(3)!, workspaceId);
+    await target.parent.create(recursive: true);
+    await from.rename(target.path);
+    return '$source/${match.group(3)}';
+  });
+
+  /// Permanently delete one entry. Irreversible; the UI confirms first.
+  Future<void> purgeTrash(AgentTrashKind kind, String id) => _write(() async {
+    final String path;
+    switch (kind) {
+      case AgentTrashKind.chat:
+      case AgentTrashKind.workspace:
+        path = _trashDirectory(
+          kind == AgentTrashKind.chat ? 'chats' : 'workspaces',
+          id,
+        ).path;
+      case AgentTrashKind.skill:
+        if (!_skillTrashName.hasMatch(id)) {
+          throw const FormatException('Invalid trash identity');
+        }
+        path = p.join(root.path, 'skill-trash', id);
+    }
     await _guardTree(path);
     await _deleteEntity(path);
+  });
+
+  Future<void> emptyTrash() => _write(() async {
+    for (final name in const ['trash', 'skill-trash']) {
+      final path = p.join(root.path, name);
+      await _guardTree(path);
+      await _deleteEntity(path);
+    }
   });
 
   Future<({int count, int bytes})> trashUsage() => _write(() async {

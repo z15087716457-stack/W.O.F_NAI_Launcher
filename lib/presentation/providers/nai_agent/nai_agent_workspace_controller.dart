@@ -492,6 +492,24 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     _notify();
   }
 
+  /// Restore from the settings trash view: unlike undo, keep the current
+  /// selection and only refresh lists that may now contain the item.
+  Future<void> restoreTrashed(AgentTrashKind kind, String id) async {
+    switch (kind) {
+      case AgentTrashKind.chat:
+        await store.restoreChat(id);
+      case AgentTrashKind.workspace:
+        await store.restoreWorkspace(id);
+      case AgentTrashKind.skill:
+        throw ArgumentError('Skills are restored through the skill store');
+    }
+    workspaces = await store.listWorkspaces();
+    if (selectedWorkspace case final workspace?) {
+      await _refreshChats(workspace.id);
+    }
+    _notify();
+  }
+
   Future<List<AgentChatSearchHit>> searchChats(String query) =>
       store.searchChats(selectedWorkspace!.id, query);
 

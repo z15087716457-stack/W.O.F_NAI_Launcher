@@ -19635,11 +19635,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agSkillRemove => 'スキルを削除';
 
   @override
-  String set_agSkillRemoveConfirm(Object name) {
-    return '「$name」を削除しますか？ファイルは Agent データフォルダーの skill-trash フォルダーに移動します。';
-  }
-
-  @override
   String get set_agSkillCopy => '自分のスキルとしてコピー';
 
   @override
@@ -19668,9 +19663,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String set_agSkillExists(Object name) {
     return '「$name」はすでに存在します。先に削除するか名前を変更してください。';
   }
-
-  @override
-  String get set_agSkillNewName => '新しいスキル名（小文字、数字、ハイフン）';
 
   @override
   String get set_agSkillPlaces => 'スキルの場所';
@@ -20129,6 +20121,110 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_editRemoveImage => 'この画像を外す';
+
+  @override
+  String get set_agTrash => 'ごみ箱';
+
+  @override
+  String get set_agTrashSub =>
+      '削除したチャット、ワークスペース、Skill はここに入り、元に戻せます。完全に削除すると戻せません。';
+
+  @override
+  String get set_agTrashManage => '管理';
+
+  @override
+  String set_agTrashSummary(int count, String size) {
+    return '$count 件 · $size';
+  }
+
+  @override
+  String get set_agTrashEmpty => 'ごみ箱は空です';
+
+  @override
+  String get set_agTrashAll => 'すべて';
+
+  @override
+  String get set_agTrashChats => 'チャット';
+
+  @override
+  String get set_agTrashWorkspaces => 'ワークスペース';
+
+  @override
+  String get set_agTrashSkills => 'Skill';
+
+  @override
+  String get set_agTrashRestore => '元に戻す';
+
+  @override
+  String get set_agTrashPurge => '完全に削除';
+
+  @override
+  String get set_agTrashPurgeAll => 'ごみ箱を空にする';
+
+  @override
+  String get set_agTrashPurgeTitle => '完全に削除しますか？';
+
+  @override
+  String set_agTrashPurgeBody(String name) {
+    return '「$name」はディスクから削除され、元に戻せません。';
+  }
+
+  @override
+  String set_agTrashPurgeAllBody(int count) {
+    return 'ごみ箱の $count 件はディスクから削除され、元に戻せません。';
+  }
+
+  @override
+  String set_agTrashRestored(String name) {
+    return '「$name」を元に戻しました';
+  }
+
+  @override
+  String set_agTrashPurged(String name) {
+    return '「$name」を完全に削除しました';
+  }
+
+  @override
+  String get set_agTrashNeedWorkspace =>
+      '所属するワークスペースもごみ箱にあります。先にワークスペースを元に戻してください。';
+
+  @override
+  String get set_agTrashRestoreFailed => '元に戻せません：同じ名前のものがすでにあります';
+
+  @override
+  String get set_agTrashGoneWorkspace => '削除済みワークスペース';
+
+  @override
+  String set_agSkillRemoveBody(String name) {
+    return '「$name」はごみ箱に移動します。Agent 設定の「ごみ箱」から元に戻すか完全に削除できます。';
+  }
+
+  @override
+  String get set_agSkillName => '名前';
+
+  @override
+  String get set_agSkillNewHelp =>
+      '小文字・数字・ハイフンのみ（例：watercolor-style）。作成後にフォルダーが開くので、中の SKILL.md を編集してください。';
+
+  @override
+  String get set_agSkillCreate => '作成';
+
+  @override
+  String get set_agSkillAddConfirm => '追加';
+
+  @override
+  String set_agPromptStats(String chars, String tokens) {
+    return '$chars 文字 · 約 $tokens トークン';
+  }
+
+  @override
+  String get set_agFinalLive => '現在のチャットが実際にモデルへ送る完全なシステムプロンプトです。';
+
+  @override
+  String get set_agBuiltinSub => 'Studio 内蔵の基本プロンプト。バージョンとともに更新されます。';
+
+  @override
+  String get set_agMcpEditTitle => 'MCP サーバーを編集';
 
   @override
   String get ag_recent => '最近';

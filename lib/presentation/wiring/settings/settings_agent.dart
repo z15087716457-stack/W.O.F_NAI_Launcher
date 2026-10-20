@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
@@ -17,6 +16,11 @@ import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../screens/settings/sections/nai_agent_mcp_settings.dart';
 import 'settings_agent_quick.dart';
 import 'settings_dialogs.dart';
+import '../../ui/kit/ui_glyph.dart';
+import '../../ui/settings/settings_agent_dialogs.dart';
+import '../../ui/settings/settings_dialog_kit.dart';
+import '../../ui/settings/settings_kit.dart';
+import '../../widgets/common/app_toast.dart';
 import '../../ui/settings/settings_contract.dart';
 
 final settingsAgentBackendProvider = Provider(SettingsAgentBackend.new);
@@ -45,6 +49,12 @@ final settingsAgentInventoryProvider = FutureProvider.autoDispose((ref) async {
     workspaces.where((workspace) => workspace.id == selected).firstOrNull,
   );
 });
+
+/// Archived chats, workspaces and skills (the Agent "trash").
+final settingsAgentTrashProvider =
+    FutureProvider.autoDispose<List<AgentTrashItem>>(
+      (ref) => ref.watch(naiAgentWorkspaceStoreProvider).listTrash(),
+    );
 
 /// Query only an existing idle host; rendering settings cannot start one.
 final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
@@ -391,6 +401,42 @@ class SettingsAgentBackend {
     }
   }
 
+  Future<List<AgentTrashItem>> trash() => store.listTrash();
+
+  /// Restore one archived item. Chats whose workspace is also archived fail
+  /// with `StateError('workspace_trashed')` so the UI can explain it.
+  Future<void> restoreTrash(AgentTrashItem item) async {
+    if (item.kind == AgentTrashKind.skill) {
+      await store.restoreSkill(item.id, workspaceId: _workspaceId);
+      skillFilesChanged();
+    } else {
+      if (item.kind == AgentTrashKind.chat && item.workspace == null) {
+        throw StateError('workspace_trashed');
+      }
+      if (ref.exists(naiAgentControllerProvider)) {
+        final controller = ref.read(naiAgentControllerProvider);
+        await controller.ready;
+        await controller.restoreTrashed(item.kind, item.id);
+      } else if (item.kind == AgentTrashKind.chat) {
+        await store.restoreChat(item.id);
+      } else {
+        await store.restoreWorkspace(item.id);
+      }
+    }
+    ref.invalidate(settingsAgentInventoryProvider);
+    ref.invalidate(settingsAgentTrashProvider);
+  }
+
+  Future<void> purgeTrash(AgentTrashItem item) async {
+    await store.purgeTrash(item.kind, item.id);
+    ref.invalidate(settingsAgentTrashProvider);
+  }
+
+  Future<void> emptyTrash() async {
+    await store.emptyTrash();
+    ref.invalidate(settingsAgentTrashProvider);
+  }
+
   String skillFolder(String id) =>
       store.skillFolder(id, workspaceId: _workspaceId).path;
 
@@ -417,78 +463,21 @@ class SettingsAgentActions {
     final folder = await FilePicker.platform.getDirectoryPath();
     if (folder == null || !context.mounted) return;
     final l = context.l10n;
-    final workspace = backend._workspaceName;
-    var toWorkspace = false, manual = false;
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (dialog) => StatefulBuilder(
-        builder: (dialog, setState) => AlertDialog(
-          title: Text(l.set_agSkillAddTitle),
-          content: SizedBox(
-            width: 520,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SelectableText(folder),
-                const SizedBox(height: 14),
-                Text(l.set_agSkillPlace),
-                const SizedBox(height: 6),
-                SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(
-                      value: false,
-                      label: Text(l.set_agSkillGlobal),
-                    ),
-                    if (workspace != null)
-                      ButtonSegment(
-                        value: true,
-                        label: Text(l.set_agSkillPlaceWorkspace(workspace)),
-                      ),
-                  ],
-                  selected: {toWorkspace},
-                  onSelectionChanged: (v) =>
-                      setState(() => toWorkspace = v.first),
-                ),
-                const SizedBox(height: 14),
-                Text(l.set_agSkillMode),
-                const SizedBox(height: 6),
-                SegmentedButton<bool>(
-                  segments: [
-                    ButtonSegment(value: false, label: Text(l.set_agSkillAuto)),
-                    ButtonSegment(
-                      value: true,
-                      label: Text(l.set_agSkillManual),
-                    ),
-                  ],
-                  selected: {manual},
-                  onSelectionChanged: (v) => setState(() => manual = v.first),
-                ),
-                const SizedBox(height: 14),
-                Text('${l.set_agSkillCopyNote} ${l.set_agSkillTrust}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialog, false),
-              child: Text(l.common_cancel),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(dialog, true),
-              child: Text(l.common_confirm),
-            ),
-          ],
-        ),
+    final choice = await showSettingsDialog<(bool, bool)>(
+      context,
+      (_) => SettingsSkillImportDialog(
+        folder: folder,
+        workspace: backend._workspaceName,
       ),
     );
-    if (ok != true) return;
+    if (choice == null) return;
+    final (toWorkspace, manual) = choice;
     final String name;
     try {
       name = await backend.importSkill(folder, workspace: toWorkspace);
     } on AgentSkillExists catch (error) {
       if (context.mounted) {
-        await settingsConfirm(
+        await settingsNotice(
           context,
           l.set_agSkillAddTitle,
           l.set_agSkillExists(error.name),
@@ -506,22 +495,29 @@ class SettingsAgentActions {
 
   Future<void> newSkill() async {
     final l = context.l10n;
-    final name = await settingsTextInput(context, title: l.set_agSkillNewName);
+    final name = await settingsTextInput(
+      context,
+      title: l.set_agSkillNew,
+      label: l.set_agSkillName,
+      hint: 'watercolor-style',
+      help: l.set_agSkillNewHelp,
+      mono: true,
+      confirm: l.set_agSkillCreate,
+      validate: (v) => naiAgentSkillName.hasMatch(v) && v.length <= 64
+          ? null
+          : l.set_agSkillErrName,
+    );
     if (name == null || name.isEmpty || !context.mounted) return;
     try {
       final created = await backend.createSkill(name, workspace: false);
       await backend.openPath(backend.skillFolder('global/$created'));
     } on AgentSkillExists catch (error) {
       if (context.mounted) {
-        await settingsConfirm(
+        await settingsNotice(
           context,
           l.set_agSkillNew,
           l.set_agSkillExists(error.name),
         );
-      }
-    } on FormatException {
-      if (context.mounted) {
-        await settingsConfirm(context, l.set_agSkillNew, l.set_agSkillErrName);
       }
     }
   }
@@ -532,11 +528,14 @@ class SettingsAgentActions {
     if (!await settingsConfirm(
       context,
       l.set_agSkillRemove,
-      l.set_agSkillRemoveConfirm(name),
+      l.set_agSkillRemoveBody(name),
+      confirm: l.set_delete,
+      danger: true,
     )) {
       return;
     }
     await backend.removeSkill(id);
+    ref.invalidate(settingsAgentTrashProvider);
   }
 
   Future<void> viewSkill(String id) async {
@@ -545,38 +544,25 @@ class SettingsAgentActions {
     final file = File(p.join(backend.skillFolder(id), 'SKILL.md'));
     final text = await file.exists() ? await file.readAsString() : '';
     if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(id.split('/').last),
-        content: SizedBox(
-          width: 800,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SelectableText(file.path),
-              if (builtin) ...[
-                const SizedBox(height: 6),
-                Text(l.set_agSkillReadOnly),
-              ],
-              const SizedBox(height: 10),
-              Flexible(
-                child: SingleChildScrollView(child: SelectableText(text)),
-              ),
-            ],
-          ),
-        ),
-        actions: [
+    await showSettingsDialog<void>(
+      context,
+      (dialog) => SettingsTextViewer(
+        glyph: SettingsGlyphs.spark,
+        title: id.split('/').last,
+        path: file.path,
+        notice: builtin ? l.set_agSkillReadOnly : null,
+        text: text,
+        extraActions: [
           if (builtin)
-            TextButton(
-              onPressed: () async {
+            SettingsBtn(
+              label: l.set_agSkillCopy,
+              onTap: () async {
                 Navigator.pop(dialog);
                 try {
                   await backend.copyBuiltinSkill(id.split('/').last);
                 } on AgentSkillExists catch (error) {
                   if (context.mounted) {
-                    await settingsConfirm(
+                    await settingsNotice(
                       context,
                       l.set_agSkillCopy,
                       l.set_agSkillExists(error.name),
@@ -584,17 +570,99 @@ class SettingsAgentActions {
                   }
                 }
               },
-              child: Text(l.set_agSkillCopy),
+            )
+          else
+            SettingsBtn(
+              label: l.set_agSkillOpenFolder,
+              glyph: SettingsGlyphs.folder,
+              onTap: () => backend.openPath(backend.skillFolder(id)),
             ),
-          TextButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: text)),
-            child: Text(l.common_copy),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialog),
-            child: Text(l.common_close),
-          ),
         ],
+      ),
+    );
+  }
+
+  Future<void> openTrash() async {
+    final l = context.l10n;
+    String kindOf(AgentTrashItem item) => switch (item.kind) {
+      AgentTrashKind.chat => item.workspace ?? l.set_agTrashGoneWorkspace,
+      AgentTrashKind.workspace => '',
+      AgentTrashKind.skill =>
+        item.workspace == 'workspace'
+            ? l.set_agSkillWorkspace
+            : l.set_agSkillGlobal,
+    };
+    final items = <String, AgentTrashItem>{};
+    await showSettingsDialog<void>(
+      context,
+      (dialog) => SettingsTrashDialog(
+        load: () async {
+          final list = await backend.trash();
+          items
+            ..clear()
+            ..addEntries(list.map((item) => MapEntry(item.id, item)));
+          return [
+            for (final item in list)
+              SettingsTrashRow(
+                id: item.id,
+                kind: SettingsTrashKind.values.byName(item.kind.name),
+                title: item.title,
+                at: item.trashedAt,
+                bytes: item.bytes,
+                detail: kindOf(item).isEmpty ? null : kindOf(item),
+                blocked:
+                    item.kind == AgentTrashKind.chat && item.workspace == null
+                    ? l.set_agTrashNeedWorkspace
+                    : null,
+              ),
+          ];
+        },
+        onRestore: (row) async {
+          try {
+            await backend.restoreTrash(items[row.id]!);
+            if (dialog.mounted) {
+              AppToast.success(dialog, l.set_agTrashRestored(row.title));
+            }
+            return null;
+          } on AgentSkillExists {
+            return l.set_agTrashRestoreFailed;
+          } on StateError catch (error) {
+            return error.message == 'workspace_trashed'
+                ? l.set_agTrashNeedWorkspace
+                : l.set_agTrashRestoreFailed;
+          } catch (_) {
+            return l.set_agTrashRestoreFailed;
+          }
+        },
+        onPurge: (row) async {
+          if (!await settingsConfirm(
+            dialog,
+            l.set_agTrashPurgeTitle,
+            l.set_agTrashPurgeBody(row.title),
+            confirm: l.set_agTrashPurge,
+            danger: true,
+          )) {
+            return false;
+          }
+          await backend.purgeTrash(items[row.id]!);
+          if (dialog.mounted) {
+            AppToast.success(dialog, l.set_agTrashPurged(row.title));
+          }
+          return true;
+        },
+        onEmpty: (count) async {
+          if (!await settingsConfirm(
+            dialog,
+            l.set_agTrashPurgeAll,
+            l.set_agTrashPurgeAllBody(count),
+            confirm: l.set_agTrashPurgeAll,
+            danger: true,
+          )) {
+            return false;
+          }
+          await backend.emptyTrash();
+          return true;
+        },
       ),
     );
   }
@@ -607,30 +675,26 @@ class SettingsAgentActions {
   }
 
   Future<void> viewPrompt({bool builtin = false}) async {
-    final text = builtin
+    final l = context.l10n;
+    final raw = builtin
         ? naiAgentDefaultSystemPrompt
         : await backend.finalPrompt();
     if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(
-          builtin ? context.l10n.set_agBuiltin : context.l10n.set_agFinal,
-        ),
-        content: SizedBox(
-          width: 800,
-          child: SingleChildScrollView(child: SelectableText(text)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: text)),
-            child: Text(context.l10n.common_copy),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(dialog),
-            child: Text(context.l10n.common_close),
-          ),
-        ],
+    // finalPrompt() prefixes "[pending notice]" when no live host exists;
+    // show that as a hint above the text instead of inside it.
+    final marker = '[${l.set_agFinalPending}]\n\n';
+    final pending = !builtin && raw.startsWith(marker);
+    final text = pending ? raw.substring(marker.length) : raw;
+    await showSettingsDialog<void>(
+      context,
+      (_) => SettingsTextViewer(
+        glyph: builtin ? SettingsGlyphs.lock : UiGlyphs.file,
+        title: builtin ? l.set_agBuiltin : l.set_agFinal,
+        subtitle: builtin
+            ? l.set_agBuiltinSub
+            : (pending ? null : l.set_agFinalLive),
+        notice: pending ? l.set_agFinalPending : null,
+        text: text,
       ),
     );
   }
@@ -644,6 +708,7 @@ SettingsAgentData settingsAgentData(
   final quick = settingsQuickData(ref, context);
   final settings = ref.watch(naiAgentUiPreferencesProvider).settings;
   final inventory = ref.watch(settingsAgentInventoryProvider).valueOrNull;
+  final trash = ref.watch(settingsAgentTrashProvider).valueOrNull;
   final controller = ref.exists(naiAgentControllerProvider)
       ? ref.watch(naiAgentControllerProvider)
       : null;
@@ -734,6 +799,8 @@ SettingsAgentData settingsAgentData(
     dataPath: ref.watch(naiAgentWorkspaceStoreProvider).root.path,
     workspaces: inventory?.workspaces ?? 0,
     sessions: inventory?.sessions ?? 0,
+    trashCount: trash?.length ?? 0,
+    trashBytes: trash?.fold<int>(0, (sum, item) => sum + item.bytes) ?? 0,
     quick: quick.$1,
     quickDefault: quick.$2,
   );

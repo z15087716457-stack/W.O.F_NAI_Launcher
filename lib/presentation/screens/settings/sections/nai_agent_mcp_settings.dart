@@ -8,6 +8,8 @@ import '../../../../core/storage/secure_storage_service.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../../widgets/nai_agent/nai_agent_shared.dart';
+import '../../../ui/settings/settings_dialog_kit.dart';
+import '../../../ui/settings/settings_kit.dart';
 
 class NaiAgentMcpSettings extends ConsumerWidget {
   const NaiAgentMcpSettings({super.key});
@@ -25,9 +27,9 @@ class NaiAgentMcpSettings extends ConsumerWidget {
       throw StateError('MCP configuration missing: ${server.name}');
     }
     if (!context.mounted) return;
-    final value = await showDialog<(String, Map<String, dynamic>)>(
-      context: context,
-      builder: (_) => _McpEditor(server: server, existing: existing),
+    final value = await showSettingsDialog<(String, Map<String, dynamic>)>(
+      context,
+      (_) => _McpEditor(server: server, existing: existing),
     );
     if (value == null || !context.mounted) return;
     await agentUiAction(context, () async {
@@ -331,63 +333,64 @@ class _McpEditorState extends State<_McpEditor> {
     super.dispose();
   }
 
+  void _save() {
+    try {
+      final name = _name.text.trim();
+      Navigator.pop(context, (name, parseAgentMcpConfig(name, _json.text)));
+    } catch (error) {
+      setState(() => _error = '$error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    return AlertDialog(
-      title: Text(l.naiAgent_mcpAdd),
-      content: SizedBox(
-        width: 560,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
+    return SettingsDialogFrame(
+      key: const Key('nai-mcp-editor'),
+      width: 600,
+      glyph: SettingsGlyphs.hub,
+      title: widget.server == null ? l.naiAgent_mcpAdd : l.set_agMcpEditTitle,
+      subtitle: Text(l.naiAgent_mcpConfigHint),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 16,
+          children: [
+            SettingsField(
+              label: l.naiAgent_mcpName,
+              child: SettingsTextArea(
                 key: const Key('nai-mcp-name'),
                 controller: _name,
-                decoration: InputDecoration(labelText: l.naiAgent_mcpName),
+                autofocus: widget.server == null,
+                hint: 'my-server',
+                mono: true,
               ),
-              const SizedBox(height: 12),
-              TextField(
+            ),
+            SettingsField(
+              label: l.naiAgent_mcpConfig,
+              error: _error,
+              child: SettingsTextArea(
                 key: const Key('nai-mcp-config'),
                 controller: _json,
-                minLines: 7,
-                maxLines: 16,
-                style: const TextStyle(fontSize: 12, fontFamily: 'Geist Mono'),
-                decoration: InputDecoration(
-                  labelText: l.naiAgent_mcpConfig,
-                  errorText: _error,
-                ),
+                minLines: 9,
+                maxLines: 18,
+                mono: true,
+                error: _error != null,
+                onChanged: (_) {
+                  if (_error != null) setState(() => _error = null);
+                },
               ),
-              const SizedBox(height: 10),
-              Text(
-                l.naiAgent_mcpConfigHint,
-                style: const TextStyle(fontSize: 12, height: 1.6),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(l.common_cancel),
-        ),
-        FilledButton(
+        SettingsBtn(label: l.set_cancel, onTap: () => Navigator.pop(context)),
+        SettingsBtn(
           key: const Key('nai-mcp-save'),
-          onPressed: () {
-            try {
-              final name = _name.text.trim();
-              Navigator.pop(context, (
-                name,
-                parseAgentMcpConfig(name, _json.text),
-              ));
-            } catch (error) {
-              setState(() => _error = '$error');
-            }
-          },
-          child: Text(l.common_save),
+          label: l.set_save,
+          tone: SettingsBtnTone.primary,
+          onTap: _save,
         ),
       ],
     );

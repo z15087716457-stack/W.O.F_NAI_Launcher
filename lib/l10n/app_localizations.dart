@@ -35344,12 +35344,6 @@ abstract class AppLocalizations {
   /// **'Delete skill'**
   String get set_agSkillRemove;
 
-  /// No description provided for @set_agSkillRemoveConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete \"{name}\"? Its files move to the skill-trash folder in the Agent data folder.'**
-  String set_agSkillRemoveConfirm(Object name);
-
   /// No description provided for @set_agSkillCopy.
   ///
   /// In en, this message translates to:
@@ -35397,12 +35391,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'\"{name}\" already exists. Delete or rename it first.'**
   String set_agSkillExists(Object name);
-
-  /// No description provided for @set_agSkillNewName.
-  ///
-  /// In en, this message translates to:
-  /// **'New skill name (lowercase letters, digits, hyphens)'**
-  String get set_agSkillNewName;
 
   /// No description provided for @set_agSkillPlaces.
   ///
@@ -36183,6 +36171,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove image'**
   String get ag_editRemoveImage;
+
+  /// No description provided for @set_agTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash'**
+  String get set_agTrash;
+
+  /// No description provided for @set_agTrashSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted chats, workspaces and skills land here and can be restored. Deleting them for good cannot be undone.'**
+  String get set_agTrashSub;
+
+  /// No description provided for @set_agTrashManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get set_agTrashManage;
+
+  /// No description provided for @set_agTrashSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items · {size}'**
+  String set_agTrashSummary(int count, String size);
+
+  /// No description provided for @set_agTrashEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash is empty'**
+  String get set_agTrashEmpty;
+
+  /// No description provided for @set_agTrashAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get set_agTrashAll;
+
+  /// No description provided for @set_agTrashChats.
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get set_agTrashChats;
+
+  /// No description provided for @set_agTrashWorkspaces.
+  ///
+  /// In en, this message translates to:
+  /// **'Workspaces'**
+  String get set_agTrashWorkspaces;
+
+  /// No description provided for @set_agTrashSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get set_agTrashSkills;
+
+  /// No description provided for @set_agTrashRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get set_agTrashRestore;
+
+  /// No description provided for @set_agTrashPurge.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for good'**
+  String get set_agTrashPurge;
+
+  /// No description provided for @set_agTrashPurgeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty trash'**
+  String get set_agTrashPurgeAll;
+
+  /// No description provided for @set_agTrashPurgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete for good?'**
+  String get set_agTrashPurgeTitle;
+
+  /// No description provided for @set_agTrashPurgeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" will be removed from disk. This cannot be undone.'**
+  String set_agTrashPurgeBody(String name);
+
+  /// No description provided for @set_agTrashPurgeAllBody.
+  ///
+  /// In en, this message translates to:
+  /// **'All {count} items in the trash will be removed from disk. This cannot be undone.'**
+  String set_agTrashPurgeAllBody(int count);
+
+  /// No description provided for @set_agTrashRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restored \"{name}\"'**
+  String set_agTrashRestored(String name);
+
+  /// No description provided for @set_agTrashPurged.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted \"{name}\" for good'**
+  String set_agTrashPurged(String name);
+
+  /// No description provided for @set_agTrashNeedWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Its workspace is in the trash too. Restore the workspace first.'**
+  String get set_agTrashNeedWorkspace;
+
+  /// No description provided for @set_agTrashRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore failed: something with the same name is already there'**
+  String get set_agTrashRestoreFailed;
+
+  /// No description provided for @set_agTrashGoneWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'deleted workspace'**
+  String get set_agTrashGoneWorkspace;
+
+  /// No description provided for @set_agSkillRemoveBody.
+  ///
+  /// In en, this message translates to:
+  /// **'\"{name}\" moves to the trash. You can restore it or delete it for good from Trash in Agent settings.'**
+  String set_agSkillRemoveBody(String name);
+
+  /// No description provided for @set_agSkillName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get set_agSkillName;
+
+  /// No description provided for @set_agSkillNewHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Lowercase letters, digits and hyphens only, e.g. watercolor-style. Its folder opens afterwards; edit the SKILL.md inside.'**
+  String get set_agSkillNewHelp;
+
+  /// No description provided for @set_agSkillCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get set_agSkillCreate;
+
+  /// No description provided for @set_agSkillAddConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get set_agSkillAddConfirm;
+
+  /// No description provided for @set_agPromptStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{chars} characters · about {tokens} tokens'**
+  String set_agPromptStats(String chars, String tokens);
+
+  /// No description provided for @set_agFinalLive.
+  ///
+  /// In en, this message translates to:
+  /// **'The full system prompt the current chat actually sends to the model.'**
+  String get set_agFinalLive;
+
+  /// No description provided for @set_agBuiltinSub.
+  ///
+  /// In en, this message translates to:
+  /// **'The built-in base prompt shipped with Studio; it changes with updates.'**
+  String get set_agBuiltinSub;
+
+  /// No description provided for @set_agMcpEditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit MCP server'**
+  String get set_agMcpEditTitle;
 
   /// No description provided for @ag_recent.
   ///

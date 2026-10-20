@@ -1320,7 +1320,13 @@ class SettingsAgentData {
     this.sessions = 0,
     this.quick = const [],
     this.quickDefault = true,
+    this.trashCount = 0,
+    this.trashBytes = 0,
   });
+
+  /// 回收区（删除的对话、工作区、Skill）里的条目数和占用。
+  final int trashCount;
+  final int trashBytes;
 
   /// 欢迎页快捷信息（顺序 = 显示顺序；前 6 条显示在欢迎页）。
   final List<SettingsQuickMessage> quick;
@@ -1371,6 +1377,8 @@ class SettingsAgentData {
     sessions: sessions,
     quick: quick,
     quickDefault: quickDefault,
+    trashCount: trashCount,
+    trashBytes: trashBytes,
   );
 }
 
@@ -1947,6 +1955,7 @@ class SettingsActions {
     this.onEditMcp = _noIdOpt,
     this.onRemoveMcp = _noId,
     this.onOpenAgent = _none,
+    this.onOpenTrash = _none,
     this.onEditQuick = _noIdOpt,
     this.onRemoveQuick = _noId,
     this.onMoveQuick = _noMove,
@@ -2151,6 +2160,9 @@ class SettingsActions {
   final void Function(String id, int delta) onMoveQuick;
   final VoidCallback onRestoreQuick;
   final VoidCallback onOpenAgent;
+
+  /// 打开回收区管理窗（恢复、彻底删除、清空）。
+  final VoidCallback onOpenTrash;
 
   final void Function(SettingsRagSourceKind kind, bool enabled)
   onRagSourceEnabled;

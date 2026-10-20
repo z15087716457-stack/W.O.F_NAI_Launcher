@@ -524,6 +524,42 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             ],
           ),
         ),
+        SettingsAsideCard(
+          key: const Key('agent-trash-card'),
+          title: l.set_agTrash,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 10,
+            children: [
+              Text(
+                l.set_agTrashSub,
+                style: UiText.sans(11, color: c.muted, height: 1.6),
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ag.trashCount == 0
+                          ? l.set_agTrashEmpty
+                          : l.set_agTrashSummary(
+                              ag.trashCount,
+                              SettingsFormat.bytes(ag.trashBytes),
+                            ),
+                      style: UiText.sans(12, color: c.ink),
+                    ),
+                  ),
+                  SettingsBtn(
+                    key: const Key('agent-trash-open'),
+                    label: l.set_agTrashManage,
+                    small: true,
+                    glyph: UiGlyphs.archive,
+                    onTap: a.onOpenTrash,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         SettingsHint.text(context, l.set_agCostTip),
       ],
       children: [
