@@ -1794,8 +1794,6 @@
   "shortcut_action_navigate_to_statistics": "Statistics",
   "shortcut_action_navigate_to_settings": "Settings",
   "shortcut_action_generate_image": "Generate Image",
-  "shortcut_action_generation_prev_image": "Previous preview (linked history)",
-  "shortcut_action_generation_next_image": "Next preview (linked history)",
   "shortcut_action_cancel_generation": "Cancel Generation",
   "shortcut_action_clear_prompt": "Clear Prompt",
   "shortcut_action_toggle_prompt_mode": "Toggle Prompt Mode",

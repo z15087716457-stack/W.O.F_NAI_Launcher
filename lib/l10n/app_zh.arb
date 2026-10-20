@@ -1790,8 +1790,6 @@
   "shortcut_action_navigate_to_statistics": "统计页面",
   "shortcut_action_navigate_to_settings": "设置页面",
   "shortcut_action_generate_image": "生成图像",
-  "shortcut_action_generation_prev_image": "预览上一张（历史联动）",
-  "shortcut_action_generation_next_image": "预览下一张（历史联动）",
   "shortcut_action_cancel_generation": "取消生成",
   "shortcut_action_clear_prompt": "清空提示词",
   "shortcut_action_toggle_prompt_mode": "切换正/负面模式",

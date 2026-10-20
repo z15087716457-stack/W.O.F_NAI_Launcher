@@ -77,26 +77,6 @@ void main() {
     }
   });
 
-  test(
-    'new generation navigation defaults use arrows in generation context',
-    () {
-      final config = ShortcutConfig.createDefault();
-
-      expect(
-        config.getEffectiveShortcut(ShortcutIds.generationPrevImage),
-        'arrowleft',
-      );
-      expect(
-        config.getEffectiveShortcut(ShortcutIds.generationNextImage),
-        'arrowright',
-      );
-      expect(
-        config.getBinding(ShortcutIds.generationPrevImage)?.context,
-        ShortcutContext.generation,
-      );
-    },
-  );
-
   test('mergedWithDefaults only adds missing ids', () {
     const customized = ShortcutBinding(
       id: ShortcutIds.generateImage,
@@ -114,7 +94,7 @@ void main() {
     final merged = stored.mergedWithDefaults();
 
     expect(merged.bindings[customized.id], customized);
-    expect(merged.bindings, contains(ShortcutIds.generationPrevImage));
+    expect(merged.bindings, contains(ShortcutIds.reuseParams));
     expect(merged.enableShortcuts, isFalse);
   });
 

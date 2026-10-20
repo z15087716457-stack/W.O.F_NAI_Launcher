@@ -3652,14 +3652,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcut_action_generate_image => 'Generate Image';
 
   @override
-  String get shortcut_action_generation_prev_image =>
-      'Previous preview (linked history)';
-
-  @override
-  String get shortcut_action_generation_next_image =>
-      'Next preview (linked history)';
-
-  @override
   String get shortcut_action_cancel_generation => 'Cancel Generation';
 
   @override

@@ -54,7 +54,6 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
     );
     GenViewData getData() => ref.read(generationViewDataProvider(context.l10n));
     final settings = ref.read(generationSettingsProvider);
-    final history = ref.read(generationHistoryActionsProvider);
     GenController? controller() => wiring.currentState?.controller;
     void focused(Future<void> Function(String) action) {
       final id = getData().canvas.info?.tileId;
@@ -97,21 +96,6 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
       );
     }
 
-    void step(int delta) {
-      final group = getData().canvas.focus;
-      final id = getData().canvas.info?.tileId;
-      if (group == null || group.tiles.isEmpty) return;
-      final index = group.tiles.indexWhere((tile) => tile.id == id);
-      final target =
-          group.tiles[(index + delta).clamp(0, group.tiles.length - 1)];
-      if (target.state == GenTileState.done) {
-        operations.run(() async {
-          await operations.closeToolSheet();
-          if (mounted) history.focusTile(target.id);
-        });
-      }
-    }
-
     return WindowChromePage(
       child: Material(
         type: MaterialType.transparency,
@@ -150,8 +134,6 @@ class _GenerationRouteState extends ConsumerState<GenerationRoute> {
                         previous: getData().layout,
                       ),
                     ),
-                    ShortcutIds.generationPrevImage: () => step(-1),
-                    ShortcutIds.generationNextImage: () => step(1),
                   },
                   child: NaiAgentGenerationHost(
                     child: GenerationWiring(key: wiring),

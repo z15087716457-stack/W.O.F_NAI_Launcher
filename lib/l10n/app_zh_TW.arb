@@ -1790,8 +1790,6 @@
   "shortcut_action_navigate_to_statistics": "統計頁面",
   "shortcut_action_navigate_to_settings": "設定頁面",
   "shortcut_action_generate_image": "生成影像",
-  "shortcut_action_generation_prev_image": "預覽上一張（歷史聯動）",
-  "shortcut_action_generation_next_image": "預覽下一張（歷史聯動）",
   "shortcut_action_cancel_generation": "取消生成",
   "shortcut_action_clear_prompt": "清空提示詞",
   "shortcut_action_toggle_prompt_mode": "切換正/負面模式",

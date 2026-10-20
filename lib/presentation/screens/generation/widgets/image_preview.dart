@@ -5,9 +5,6 @@ import 'dart:typed_data';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/shortcuts/default_shortcuts.dart';
-import '../../../../core/shortcuts/shortcut_config.dart';
-import '../../../../core/shortcuts/shortcut_manager.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/image/image_stream_chunk.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
@@ -15,7 +12,6 @@ import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/character_position_canvas_provider.dart';
 import '../../../providers/image_generation_provider.dart';
-import '../../../providers/shortcuts_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../widgets/character/character_position_canvas.dart';
 import '../../../widgets/common/selectable_image_card.dart';
@@ -24,55 +20,18 @@ import 'canvas/generated_image_card.dart' as canvas_card;
 import 'canvas/generation_canvas_view.dart';
 import 'generation_tool_panel.dart';
 
+/// 挂上生成预览的焦点节点。旧预览的左右切图快捷键已删除：它和输入框抢方向键，
+/// 新画布用 Q 跳组、F 飞回焦点代替。
 class PreviewNavShortcuts extends ConsumerWidget {
   const PreviewNavShortcuts({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final focusNode = ref.watch(generationPreviewFocusNodeProvider);
-    final behavior = ref.watch(historyClickBehaviorNotifierProvider);
-    if (behavior != HistoryClickBehavior.selectPreview) {
-      return Focus(focusNode: focusNode, child: child);
-    }
-
-    final config = ref
-        .watch(shortcutConfigNotifierProvider)
-        .when(
-          data: (value) => value,
-          loading: ShortcutConfig.createDefault,
-          error: (_, _) => ShortcutConfig.createDefault(),
-        );
-    final bindings = <ShortcutActivator, VoidCallback>{};
-    if (config.enableShortcuts) {
-      void register(String id, VoidCallback callback) {
-        final binding = config.bindings[id];
-        if (binding == null ||
-            !binding.enabled ||
-            binding.context != ShortcutContext.generation) {
-          return;
-        }
-        final activator = AppShortcutManager.parseActivator(
-          binding.effectiveShortcut,
-        );
-        if (activator != null) bindings.putIfAbsent(activator, () => callback);
-      }
-
-      register(
-        ShortcutIds.generationPrevImage,
-        ref.read(generationPreviewSelectionProvider.notifier).selectPrevious,
-      );
-      register(
-        ShortcutIds.generationNextImage,
-        ref.read(generationPreviewSelectionProvider.notifier).selectNext,
-      );
-    }
-
-    final focusedChild = Focus(focusNode: focusNode, child: child);
-    if (bindings.isEmpty) return focusedChild;
-    return CallbackShortcuts(bindings: bindings, child: focusedChild);
-  }
+  Widget build(BuildContext context, WidgetRef ref) => Focus(
+    focusNode: ref.watch(generationPreviewFocusNodeProvider),
+    child: child,
+  );
 }
 
 /// 图像预览组件

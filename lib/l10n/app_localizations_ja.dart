@@ -3559,12 +3559,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get shortcut_action_generate_image => '画像の生成';
 
   @override
-  String get shortcut_action_generation_prev_image => '前のプレビュー（履歴連動）';
-
-  @override
-  String get shortcut_action_generation_next_image => '次のプレビュー（履歴連動）';
-
-  @override
   String get shortcut_action_cancel_generation => '生成のキャンセル';
 
   @override

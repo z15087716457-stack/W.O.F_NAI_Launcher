@@ -6533,18 +6533,6 @@ abstract class AppLocalizations {
   /// **'Generate Image'**
   String get shortcut_action_generate_image;
 
-  /// No description provided for @shortcut_action_generation_prev_image.
-  ///
-  /// In en, this message translates to:
-  /// **'Previous preview (linked history)'**
-  String get shortcut_action_generation_prev_image;
-
-  /// No description provided for @shortcut_action_generation_next_image.
-  ///
-  /// In en, this message translates to:
-  /// **'Next preview (linked history)'**
-  String get shortcut_action_generation_next_image;
-
   /// No description provided for @shortcut_action_cancel_generation.
   ///
   /// In en, this message translates to:

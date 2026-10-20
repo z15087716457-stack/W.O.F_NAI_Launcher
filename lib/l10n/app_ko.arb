@@ -1788,8 +1788,6 @@
   "shortcut_action_navigate_to_statistics": "통계",
   "shortcut_action_navigate_to_settings": "설정",
   "shortcut_action_generate_image": "이미지 생성",
-  "shortcut_action_generation_prev_image": "이전 미리 보기(기록 연동)",
-  "shortcut_action_generation_next_image": "다음 미리 보기(기록 연동)",
   "shortcut_action_cancel_generation": "생성 취소",
   "shortcut_action_clear_prompt": "프롬프트 지우기",
   "shortcut_action_toggle_prompt_mode": "프롬프트 모드 전환",

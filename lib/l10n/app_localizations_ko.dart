@@ -3557,12 +3557,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get shortcut_action_generate_image => '이미지 생성';
 
   @override
-  String get shortcut_action_generation_prev_image => '이전 미리 보기(기록 연동)';
-
-  @override
-  String get shortcut_action_generation_next_image => '다음 미리 보기(기록 연동)';
-
-  @override
   String get shortcut_action_cancel_generation => '생성 취소';
 
   @override

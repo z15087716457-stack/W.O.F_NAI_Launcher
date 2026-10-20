@@ -3502,12 +3502,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcut_action_generate_image => '生成图像';
 
   @override
-  String get shortcut_action_generation_prev_image => '预览上一张（历史联动）';
-
-  @override
-  String get shortcut_action_generation_next_image => '预览下一张（历史联动）';
-
-  @override
   String get shortcut_action_cancel_generation => '取消生成';
 
   @override
@@ -24192,12 +24186,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get shortcut_action_generate_image => '生成影像';
-
-  @override
-  String get shortcut_action_generation_prev_image => '預覽上一張（歷史聯動）';
-
-  @override
-  String get shortcut_action_generation_next_image => '預覽下一張（歷史聯動）';
 
   @override
   String get shortcut_action_cancel_generation => '取消生成';

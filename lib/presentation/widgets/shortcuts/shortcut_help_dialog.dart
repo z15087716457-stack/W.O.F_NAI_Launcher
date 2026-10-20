@@ -417,10 +417,6 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         return l10n.shortcut_action_vibe_detail_next_sub_vibe;
       case 'shortcut_action_generate_image':
         return l10n.shortcut_action_generate_image;
-      case 'shortcut_action_generation_prev_image':
-        return l10n.shortcut_action_generation_prev_image;
-      case 'shortcut_action_generation_next_image':
-        return l10n.shortcut_action_generation_next_image;
       case 'shortcut_action_cancel_generation':
         return l10n.shortcut_action_cancel_generation;
       case 'shortcut_action_clear_prompt':

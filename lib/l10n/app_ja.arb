@@ -1788,8 +1788,6 @@
   "shortcut_action_navigate_to_statistics": "統計",
   "shortcut_action_navigate_to_settings": "設定",
   "shortcut_action_generate_image": "画像の生成",
-  "shortcut_action_generation_prev_image": "前のプレビュー（履歴連動）",
-  "shortcut_action_generation_next_image": "次のプレビュー（履歴連動）",
   "shortcut_action_cancel_generation": "生成のキャンセル",
   "shortcut_action_clear_prompt": "プロンプトをクリア",
   "shortcut_action_toggle_prompt_mode": "プロンプトモードの切り替え",

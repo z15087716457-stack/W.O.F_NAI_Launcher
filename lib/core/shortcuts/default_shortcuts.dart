@@ -27,8 +27,6 @@ class ShortcutIds {
   static const String openParamsPanel = 'open_params_panel';
   static const String openHistoryPanel = 'open_history_panel';
   static const String reuseParams = 'reuse_params';
-  static const String generationPrevImage = 'generation_prev_image';
-  static const String generationNextImage = 'generation_next_image';
 
   // 画廊快捷键（查看器）
   static const String previousImage = 'previous_image';
@@ -123,8 +121,6 @@ class DefaultShortcuts {
     ShortcutIds.openParamsPanel: 'alt+p',
     ShortcutIds.openHistoryPanel: 'alt+h',
     ShortcutIds.reuseParams: 'ctrl+r',
-    ShortcutIds.generationPrevImage: 'arrowleft',
-    ShortcutIds.generationNextImage: 'arrowright',
 
     // 画廊查看器
     ShortcutIds.previousImage: 'arrowleft',
@@ -204,8 +200,6 @@ class DefaultShortcuts {
       case ShortcutIds.openParamsPanel:
       case ShortcutIds.openHistoryPanel:
       case ShortcutIds.reuseParams:
-      case ShortcutIds.generationPrevImage:
-      case ShortcutIds.generationNextImage:
         return ShortcutContext.generation;
 
       // 画廊查看器

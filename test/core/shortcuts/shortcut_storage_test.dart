@@ -253,7 +253,7 @@ void main() {
 
       expect(loaded.bindings[ShortcutIds.generateImage], customized);
       expect(loaded.enableShortcuts, isFalse);
-      expect(loaded.bindings, contains(ShortcutIds.generationPrevImage));
+      expect(loaded.bindings, contains(ShortcutIds.reuseParams));
       expect(persisted, isNotNull);
       expect(
         ShortcutConfig.fromJson(jsonDecode(persisted!) as Map<String, dynamic>),
@@ -271,7 +271,7 @@ void main() {
     final loaded = await storage.loadConfig();
 
     expect(loaded.bindings[ShortcutIds.generateImage], customized);
-    expect(loaded.bindings, contains(ShortcutIds.generationNextImage));
+    expect(loaded.bindings, contains(ShortcutIds.openHistoryPanel));
     expect(loaded.enableShortcuts, isFalse);
   });
 
@@ -289,7 +289,7 @@ void main() {
       );
 
       expect(imported.bindings[ShortcutIds.generateImage], customized);
-      expect(imported.bindings, contains(ShortcutIds.generationPrevImage));
+      expect(imported.bindings, contains(ShortcutIds.reuseParams));
       expect(
         ShortcutConfig.fromJson(jsonDecode(persisted!) as Map<String, dynamic>),
         imported,
