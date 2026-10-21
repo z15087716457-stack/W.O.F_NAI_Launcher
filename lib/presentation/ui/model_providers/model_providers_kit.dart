@@ -33,7 +33,6 @@ abstract final class ProvidersGlyphs {
   static String capability(ProviderCapability c) => switch (c) {
     ProviderCapability.vision => image,
     ProviderCapability.tools => tool,
-    ProviderCapability.structured => braces,
     ProviderCapability.search => SettingsGlyphs.globe,
   };
 }
@@ -44,7 +43,6 @@ String providerCapabilityLabel(BuildContext context, ProviderCapability c) {
   return switch (c) {
     ProviderCapability.vision => l.mp_capVision,
     ProviderCapability.tools => l.mp_capTools,
-    ProviderCapability.structured => l.mp_capStructured,
     ProviderCapability.search => l.mp_capSearch,
   };
 }
@@ -847,9 +845,13 @@ class ProviderKeyValues extends StatelessWidget {
     this.json = false,
     this.errors = const {},
     this.keyPrefix = 'kv',
+    this.tag,
   });
 
   final List<ProviderKeyValue> items;
+
+  /// 行首小标（“请求体” / “请求头”），同一处混放两种时用来区分；null 不显示。
+  final String? tag;
   final ValueChanged<List<ProviderKeyValue>> onChanged;
 
   /// 值是 JSON（请求体）。
@@ -881,6 +883,27 @@ class ProviderKeyValues extends StatelessWidget {
               child: Row(
                 spacing: 6,
                 children: [
+                  if (tag != null)
+                    Container(
+                      key: Key('$keyPrefix-$i-tag'),
+                      height: 18,
+                      padding: const EdgeInsets.symmetric(horizontal: 5),
+                      margin: const EdgeInsets.only(left: 2),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: (json ? c.accent : c.ok).withValues(alpha: .10),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        tag!,
+                        style: UiText.sans(
+                          10.5,
+                          weight: FontWeight.w600,
+                          color: json ? c.accent : c.ok,
+                          height: 1.2,
+                        ),
+                      ),
+                    ),
                   Expanded(
                     flex: 4,
                     child: _Bare(
@@ -982,6 +1005,8 @@ class _BareState extends State<_Bare> {
     return Container(
       height: 26,
       padding: const EdgeInsets.symmetric(horizontal: 8),
+      // 文字垂直居中（以前贴顶，整行看着偏上）。
+      alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: _focus.hasFocus ? c.card : null,
         borderRadius: BorderRadius.circular(6),
@@ -999,6 +1024,7 @@ class _BareState extends State<_Bare> {
         style: style,
         cursorColor: c.accent,
         cursorHeight: 13,
+        textAlignVertical: TextAlignVertical.center,
         decoration: uiBareDecoration(
           hintText: widget.hint,
           hintStyle: style.copyWith(color: c.faint),

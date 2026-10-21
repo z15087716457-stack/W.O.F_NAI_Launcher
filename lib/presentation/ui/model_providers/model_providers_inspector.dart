@@ -294,6 +294,7 @@ class ProvidersInspector extends StatelessWidget {
           key: const Key('mp-body'),
           keyPrefix: 'mp-body',
           json: true,
+          tag: l.mp_bodyTag,
           items: m.body,
           errors: {
             for (final (i, _) in m.body.indexed)
@@ -305,6 +306,7 @@ class ProvidersInspector extends StatelessWidget {
         ProviderKeyValues(
           key: const Key('mp-model-headers'),
           keyPrefix: 'mp-mheader',
+          tag: l.mp_headerTag,
           items: m.headers,
           errors: {
             for (final (i, _) in m.headers.indexed)

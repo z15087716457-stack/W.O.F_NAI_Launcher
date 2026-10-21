@@ -20292,6 +20292,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get blocks_groupByFolder => '폴더별로 묶기';
 
   @override
+  String get mp_bodyTag => '본문';
+
+  @override
+  String get mp_headerTag => '헤더';
+
+  @override
   String get ag_recent => '최근';
 
   @override
@@ -21067,9 +21073,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mp_capTools => '도구 호출';
 
   @override
-  String get mp_capStructured => '구조화 출력';
-
-  @override
   String get mp_capSearch => '네이티브 웹 검색';
 
   @override
@@ -21079,7 +21082,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get mp_notAdded => '없음';
 
   @override
-  String get mp_field => '필드';
+  String get mp_field => '본문';
 
   @override
   String get mp_header => '헤더';

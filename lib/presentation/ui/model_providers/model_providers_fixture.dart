@@ -198,11 +198,7 @@ abstract final class ProvidersFixture {
     maxOutput: 8000,
     reasoningLevels: ['none', 'high'],
     defaultLevel: 'none',
-    capabilities: {
-      ProviderCapability.vision,
-      ProviderCapability.tools,
-      ProviderCapability.structured,
-    },
+    capabilities: {ProviderCapability.vision, ProviderCapability.tools},
   );
 
   static const _pro = ProviderModelSettings(
@@ -212,7 +208,7 @@ abstract final class ProvidersFixture {
     reasoningLevels: ['none', 'low', 'medium', 'high', 'max'],
     defaultLevel: 'high',
     adaptiveReasoning: true,
-    capabilities: {ProviderCapability.tools, ProviderCapability.structured},
+    capabilities: {ProviderCapability.tools},
     body: [ProviderKeyValue('response_format', '{"type":"json_object"}')],
   );
 
@@ -268,11 +264,7 @@ abstract final class ProvidersFixture {
             contextWindow: 1000000,
             maxOutput: 32000,
             reasoningLevels: [],
-            capabilities: {
-              ProviderCapability.vision,
-              ProviderCapability.tools,
-              ProviderCapability.structured,
-            },
+            capabilities: {ProviderCapability.vision, ProviderCapability.tools},
           ),
           ProviderModelSettings(
             id: 'gpt-6-astra',
@@ -283,7 +275,6 @@ abstract final class ProvidersFixture {
             capabilities: {
               ProviderCapability.vision,
               ProviderCapability.tools,
-              ProviderCapability.structured,
               ProviderCapability.search,
             },
           ),
@@ -320,11 +311,7 @@ abstract final class ProvidersFixture {
             maxOutput: 64000,
             reasoningLevels: ['none', 'low', 'medium', 'high', 'max'],
             defaultLevel: 'low',
-            capabilities: {
-              ProviderCapability.vision,
-              ProviderCapability.tools,
-              ProviderCapability.structured,
-            },
+            capabilities: {ProviderCapability.vision, ProviderCapability.tools},
           ),
           ProviderModelSettings(
             id: 'claude-haiku-5',
@@ -360,7 +347,6 @@ abstract final class ProvidersFixture {
             capabilities: {
               ProviderCapability.vision,
               ProviderCapability.tools,
-              ProviderCapability.structured,
               ProviderCapability.search,
             },
           ),

@@ -44,10 +44,6 @@ ProviderModelSettings projectProviderModel(
       ProviderCapability.vision,
     if ((m.supportsTools ?? m.catalogEntry?.supportsToolCalling) == true)
       ProviderCapability.tools,
-    if ((m.supportsStructuredOutput ??
-            m.catalogEntry?.supportsStructuredOutput) ==
-        true)
-      ProviderCapability.structured,
     if ((m.supportsNativeSearch ?? m.catalogEntry?.supportsNativeSearch) ==
         true)
       ProviderCapability.search,
@@ -171,9 +167,6 @@ ModelConfig mergeProviderModel(
       case ProviderCapability.tools:
         next = next.copyWith(supportsTools: value);
         fields.add('supportsTools');
-      case ProviderCapability.structured:
-        next = next.copyWith(supportsStructuredOutput: value);
-        fields.add('supportsStructuredOutput');
       case ProviderCapability.search:
         next = next.copyWith(supportsNativeSearch: value);
         fields.add('supportsNativeSearch');

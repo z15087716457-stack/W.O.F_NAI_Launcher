@@ -28,17 +28,49 @@ class PromptBlockPaletteButton extends ConsumerStatefulWidget {
   const PromptBlockPaletteButton({super.key, this.onInsert});
   final Future<void> Function(String id)? onInsert;
 
-  static Future<void> showAt(BuildContext context, Rect anchor) =>
-      showDialog<void>(
-        context: context,
-        barrierColor: Colors.transparent,
-        builder: (context) => _PromptBlockPaletteOverlay(
-          anchor: null,
-          anchorRect: anchor,
-          progress: const AlwaysStoppedAnimation(1),
-          onClose: () => Navigator.of(context).pop(),
-        ),
-      );
+  /// 新生成页（`gen_prompt` 头部按钮）打开的那一扇。
+  static OverlayEntry? _floating;
+
+  /// 新生成页入口：不挡页面的悬浮窗（不是对话框），框外照常点击、选中、
+  /// 拖块进来；只由 X 或再点一次按钮关闭。
+  static Future<void> showAt(BuildContext context, Rect anchor) async {
+    final open = _floating;
+    if (open != null) {
+      _floating = null;
+      open.remove();
+      open.dispose();
+      return;
+    }
+    late final OverlayEntry entry;
+    void close() {
+      if (!identical(_floating, entry)) return;
+      _floating = null;
+      entry.remove();
+      entry.dispose();
+    }
+
+    entry = OverlayEntry(
+      builder: (_) => _PromptBlockPaletteOverlay(
+        anchor: null,
+        anchorRect: anchor,
+        progress: const AlwaysStoppedAnimation(1),
+        onClose: close,
+      ),
+    );
+    _floating = entry;
+    Overlay.of(context, rootOverlay: true).insert(entry);
+  }
+
+  @visibleForTesting
+  static bool get floatingOpen => _floating != null;
+
+  /// 关掉新生成页打开的那一扇（离开生成页时调用）。
+  static void closeFloating() {
+    final open = _floating;
+    _floating = null;
+    open?.remove();
+    open?.dispose();
+  }
 
   @override
   ConsumerState<PromptBlockPaletteButton> createState() =>
@@ -205,7 +237,7 @@ class _PromptBlockPaletteButtonState
   }
 }
 
-/// 悬浮层：半透明屏障（点击窗外关闭）+ 可拖动卡片。
+/// 悬浮层：只有可拖动卡片，没有屏障——窗外的页面照常可用（拖块进来、点提示词框）。
 class _PromptBlockPaletteOverlay extends StatefulWidget {
   const _PromptBlockPaletteOverlay({
     required this.anchor,
@@ -271,12 +303,6 @@ class _PromptBlockPaletteOverlayState
     final screen = MediaQuery.sizeOf(context);
     return Stack(
       children: [
-        Positioned.fill(
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: widget.onClose,
-          ),
-        ),
         Positioned(
           left: _offset!.dx,
           top: _offset!.dy,
@@ -288,7 +314,7 @@ class _PromptBlockPaletteOverlayState
               scale: Tween<double>(begin: .94, end: 1).animate(widget.progress),
               alignment: Alignment.topLeft,
               child: GestureDetector(
-                // 卡片自身吃掉点击，避免触发屏障关闭
+                // 卡片自身吃掉点击，不漏到下面的页面
                 onTap: () {},
                 child: _PromptBlockPaletteCard(
                   width: _windowWidth,

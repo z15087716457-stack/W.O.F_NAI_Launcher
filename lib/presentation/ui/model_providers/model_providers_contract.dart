@@ -36,9 +36,6 @@ enum ProviderCapability {
   /// 工具调用。对应 `supportsTools`。
   tools,
 
-  /// 结构化输出。对应 `supportsStructuredOutput`。
-  structured,
-
   /// 原生联网搜索。对应 `supportsNativeSearch`。
   search,
 }

@@ -553,7 +553,7 @@ void main() {
     );
 
     testWidgets(
-      'opens on tap, shows empty hint, closes via X and outside tap',
+      'opens on tap, shows empty hint, closes via X; outside tap keeps it open',
       (tester) async {
         final container = ProviderContainer(
           overrides: [
@@ -601,16 +601,15 @@ void main() {
           findsNothing,
         );
 
-        // 再开 → 点窗外（左上角屏障）关闭。
+        // 再开 → 点窗外不关（用户要边开着边拖块、点提示词框）。
         await tester.tap(find.byKey(const Key('prompt-block-palette-toggle')));
         await tester.pump();
         expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
         await tester.tapAt(const Offset(10, 10));
         await tester.pumpAndSettle();
-        expect(
-          find.byKey(const Key('prompt-block-palette-close')),
-          findsNothing,
-        );
+        expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
+        await tester.tap(find.byKey(const Key('prompt-block-palette-close')));
+        await tester.pumpAndSettle();
       },
     );
 
@@ -627,6 +626,79 @@ void main() {
       return container;
     }
 
+    testWidgets(
+      'showAt (new gen page) floats without a barrier: page stays clickable',
+      (tester) async {
+        final container = emptyPalette();
+        var pageTaps = 0;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: const Locale('zh'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => Stack(
+                    children: [
+                      Positioned(
+                        left: 0,
+                        top: 0,
+                        width: 60,
+                        height: 60,
+                        child: GestureDetector(
+                          key: const Key('page-spot'),
+                          onTap: () => pageTaps++,
+                          child: const ColoredBox(color: Colors.red),
+                        ),
+                      ),
+                      Positioned(
+                        left: 100,
+                        top: 100,
+                        child: TextButton(
+                          key: const Key('open'),
+                          onPressed: () => PromptBlockPaletteButton.showAt(
+                            context,
+                            const Rect.fromLTWH(100, 100, 40, 20),
+                          ),
+                          child: const Text('open'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        addTearDown(PromptBlockPaletteButton.closeFloating);
+        await tester.tap(find.byKey(const Key('open')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
+        await tester.tap(find.byKey(const Key('page-spot')));
+        await tester.pumpAndSettle();
+        expect(pageTaps, 1);
+        expect(find.byKey(const Key('prompt-block-palette-close')), findsOne);
+        // 再点一次入口 = 关闭；X 也能关。
+        PromptBlockPaletteButton.showAt(
+          tester.element(find.byKey(const Key('open'))),
+          Rect.zero,
+        );
+        await tester.pumpAndSettle();
+        expect(PromptBlockPaletteButton.floatingOpen, isFalse);
+        await tester.tap(find.byKey(const Key('open')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('prompt-block-palette-close')));
+        await tester.pumpAndSettle();
+        expect(PromptBlockPaletteButton.floatingOpen, isFalse);
+        expect(
+          find.byKey(const Key('prompt-block-palette-close')),
+          findsNothing,
+        );
+      },
+    );
+
     double opacity(WidgetTester tester) => tester
         .widget<FadeTransition>(
           find.byKey(const Key('prompt-block-palette-fade')),
@@ -638,7 +710,7 @@ void main() {
     final close = find.byKey(const Key('prompt-block-palette-close'));
     final card = find.byKey(const Key('prompt-block-palette-card'));
 
-    for (final method in ['X', 'outside', 'toolbar']) {
+    for (final method in ['X', 'toolbar']) {
       testWidgets('closing via $method fades, shrinks and animates the icon', (
         tester,
       ) async {
@@ -656,8 +728,6 @@ void main() {
         switch (method) {
           case 'X':
             await tester.tap(close);
-          case 'outside':
-            await tester.tapAt(const Offset(10, 10));
           case 'toolbar':
             await tester.tap(toggle);
         }

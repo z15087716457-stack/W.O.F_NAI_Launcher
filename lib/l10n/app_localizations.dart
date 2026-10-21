@@ -36346,6 +36346,18 @@ abstract class AppLocalizations {
   /// **'Group by folder'**
   String get blocks_groupByFolder;
 
+  /// No description provided for @mp_bodyTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Body'**
+  String get mp_bodyTag;
+
+  /// No description provided for @mp_headerTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Header'**
+  String get mp_headerTag;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:
@@ -37786,12 +37798,6 @@ abstract class AppLocalizations {
   /// **'Tool calls'**
   String get mp_capTools;
 
-  /// No description provided for @mp_capStructured.
-  ///
-  /// In en, this message translates to:
-  /// **'Structured output'**
-  String get mp_capStructured;
-
   /// No description provided for @mp_capSearch.
   ///
   /// In en, this message translates to:
@@ -37813,7 +37819,7 @@ abstract class AppLocalizations {
   /// No description provided for @mp_field.
   ///
   /// In en, this message translates to:
-  /// **'Field'**
+  /// **'Body'**
   String get mp_field;
 
   /// No description provided for @mp_header.

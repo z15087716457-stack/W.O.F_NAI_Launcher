@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/utils/localization_extension.dart';
 import '../../core/shortcuts/default_shortcuts.dart';
+import '../widgets/prompt/blocks/prompt_block_palette.dart';
 import '../widgets/shortcuts/shortcut_aware_widget.dart';
 import '../widgets/navigation/integrated_title_bar.dart';
 import 'tools_generation_wiring.dart';
@@ -173,6 +174,13 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   GenActions? _actions;
   GenSlots? _slots;
   Object? _slotInputs;
+
+  @override
+  void dispose() {
+    // 积木悬浮窗不随页面点击关闭；离开生成页时一并收起。
+    PromptBlockPaletteButton.closeFloating();
+    super.dispose();
+  }
 
   GenController? get controller {
     GenController? result;

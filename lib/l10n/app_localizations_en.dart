@@ -20927,6 +20927,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get blocks_groupByFolder => 'Group by folder';
 
   @override
+  String get mp_bodyTag => 'Body';
+
+  @override
+  String get mp_headerTag => 'Header';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override
@@ -21738,9 +21744,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mp_capTools => 'Tool calls';
 
   @override
-  String get mp_capStructured => 'Structured output';
-
-  @override
   String get mp_capSearch => 'Native web search';
 
   @override
@@ -21750,7 +21753,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get mp_notAdded => 'None';
 
   @override
-  String get mp_field => 'Field';
+  String get mp_field => 'Body';
 
   @override
   String get mp_header => 'Header';

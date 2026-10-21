@@ -20222,6 +20222,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get blocks_groupByFolder => 'フォルダごとに表示';
 
   @override
+  String get mp_bodyTag => 'ボディ';
+
+  @override
+  String get mp_headerTag => 'ヘッダー';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -20996,9 +21002,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mp_capTools => 'ツール呼び出し';
 
   @override
-  String get mp_capStructured => '構造化出力';
-
-  @override
   String get mp_capSearch => 'ネイティブ検索';
 
   @override
@@ -21008,7 +21011,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get mp_notAdded => '未追加';
 
   @override
-  String get mp_field => 'フィールド';
+  String get mp_field => 'ボディ';
 
   @override
   String get mp_header => 'ヘッダー';

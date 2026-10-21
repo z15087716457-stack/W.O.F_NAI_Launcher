@@ -19984,6 +19984,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get blocks_groupByFolder => '按文件夹分组';
 
   @override
+  String get mp_bodyTag => '请求体';
+
+  @override
+  String get mp_headerTag => '请求头';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -20758,9 +20764,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mp_capTools => '工具调用';
 
   @override
-  String get mp_capStructured => '结构化输出';
-
-  @override
   String get mp_capSearch => '原生联网搜索';
 
   @override
@@ -20770,7 +20773,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get mp_notAdded => '未添加';
 
   @override
-  String get mp_field => '字段';
+  String get mp_field => '请求体';
 
   @override
   String get mp_header => '请求头';
@@ -40934,6 +40937,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get blocks_groupByFolder => '按資料夾分組';
 
   @override
+  String get mp_bodyTag => '請求主體';
+
+  @override
+  String get mp_headerTag => '請求標頭';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -41708,9 +41717,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mp_capTools => '工具呼叫';
 
   @override
-  String get mp_capStructured => '結構化輸出';
-
-  @override
   String get mp_capSearch => '原生聯網搜尋';
 
   @override
@@ -41720,7 +41726,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get mp_notAdded => '未新增';
 
   @override
-  String get mp_field => '欄位';
+  String get mp_field => '請求主體';
 
   @override
   String get mp_header => '請求標頭';
