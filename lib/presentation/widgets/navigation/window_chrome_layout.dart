@@ -108,6 +108,8 @@ class WindowHeaderDragSurface extends StatelessWidget {
   Widget build(BuildContext context) {
     if (!enabled || !WindowChromeScope.dragOf(context)) return child;
     return Stack(
+      // Adding a drag target must preserve the header's height constraints.
+      fit: StackFit.passthrough,
       children: [
         const Positioned.fill(
           child: WindowDragArea(key: Key('window-header-background-drag')),
