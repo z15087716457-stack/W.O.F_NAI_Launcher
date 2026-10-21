@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
@@ -235,11 +236,51 @@ void main() {
         findsOneWidget,
       );
       expect(cache.fetched.where((u) => u.contains('720x720')), hasLength(1));
-      await tester.tap(find.byTooltip('关闭'));
+      // 灯箱：序号、说明（DText 转纯文本）、→ 切到下一张、缩略图条跳转。
+      expect(find.byKey(const Key('wiki-viewer')), findsOneWidget);
+      expect(find.text('1 / 3'), findsOneWidget);
+      expect(
+        tester.widget<Text>(find.byKey(const Key('wiki-viewer-caption'))).data,
+        '1girl solo',
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      await _settleImages(tester);
+      expect(find.text('2 / 3'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('wiki-example-large-22')),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('wiki-viewer-thumb-33')));
+      await _settleImages(tester);
+      expect(find.text('3 / 3'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('wiki-viewer-next')));
+      await _settleImages(tester);
+      expect(find.text('1 / 3'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('wiki-viewer-close')));
       await tester.pumpAndSettle();
+      expect(find.byKey(const Key('wiki-viewer')), findsNothing);
       expect(tester.takeException(), isNull);
     },
   );
+
+  testWidgets('灯箱 Esc 关闭', (tester) async {
+    tester.view.physicalSize = const Size(900, 700);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await _mount(
+      tester,
+      repo: _repo(requested: () {}),
+      cache: _Cache(file),
+    );
+    await _settleImages(tester);
+    await tester.tap(find.byKey(const ValueKey('wiki-example-open-22')));
+    await _settleImages(tester);
+    expect(find.text('2 / 3'), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('wiki-viewer')), findsNothing);
+  });
 
   testWidgets(
     'offline metadata keeps local text and offers an explicit retry',
@@ -291,6 +332,33 @@ void main() {
   );
 
   if (Platform.environment['CAPTURE_WIKI_EXAMPLES'] == '1') {
+    testWidgets('viewer capture', (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await _mount(
+        tester,
+        repo: _repo(requested: () {}),
+        cache: _Cache(file),
+      );
+      await _settleImages(tester);
+      await tester.tap(find.byKey(const ValueKey('wiki-example-open-22')));
+      await _settleImages(tester);
+      await tester.runAsync(() async {
+        final layer = tester.binding.renderViews.first.debugLayer!;
+        final image = await (layer as OffsetLayer).toImage(
+          Offset.zero & const Size(1200, 800),
+        );
+        final data = await image.toByteData(format: ui.ImageByteFormat.png);
+        final folder = Directory('.dart_tool/wiki-examples-20261006/captures');
+        await folder.create(recursive: true);
+        await File(
+          '${folder.path}/viewer.png',
+        ).writeAsBytes(data!.buffer.asUint8List());
+        image.dispose();
+      });
+    });
     for (final locale in ['zh', 'zh-TW', 'en', 'ja', 'ko']) {
       for (final brightness in Brightness.values) {
         for (final width in [350.0, 750.0]) {

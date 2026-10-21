@@ -8,6 +8,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../core/wiki/wiki_example_repository.dart';
+import 'wiki_example_viewer.dart';
 
 final wikiExampleImageCacheProvider = Provider<BaseCacheManager>(
   (ref) => _WikiExampleImageCache.instance,
@@ -152,7 +153,7 @@ class _WikiExampleGalleryState extends ConsumerState<WikiExampleGallery> {
             spacing: 10,
             runSpacing: 10,
             children: [
-              for (final example in examples.items)
+              for (final (index, example) in examples.items.indexed)
                 Container(
                   key: ValueKey('wiki-example-card-${example.postId}'),
                   width: width,
@@ -164,7 +165,15 @@ class _WikiExampleGalleryState extends ConsumerState<WikiExampleGallery> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _WikiExampleImage(example: example),
+                      _WikiExampleImage(
+                        example: example,
+                        onOpen: () => showWikiExampleViewer(
+                          context,
+                          examples: examples.items,
+                          initial: index,
+                          cache: ref.read(wikiExampleImageCacheProvider),
+                        ),
+                      ),
                       if (example.reference.caption.isNotEmpty)
                         Padding(
                           padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
@@ -192,8 +201,9 @@ class _WikiExampleGalleryState extends ConsumerState<WikiExampleGallery> {
 }
 
 class _WikiExampleImage extends ConsumerStatefulWidget {
-  const _WikiExampleImage({required this.example});
+  const _WikiExampleImage({required this.example, required this.onOpen});
   final WikiExample example;
+  final VoidCallback onOpen;
   @override
   ConsumerState<_WikiExampleImage> createState() => _WikiExampleImageState();
 }
@@ -234,7 +244,7 @@ class _WikiExampleImageState extends ConsumerState<_WikiExampleImage> {
         color: scheme.surfaceContainerLow,
         child: InkWell(
           key: ValueKey('wiki-example-open-${example.postId}'),
-          onTap: url == null ? null : () => _preview(context, example),
+          onTap: url == null || example.largeUrl == null ? null : widget.onOpen,
           child: SizedBox(
             height: 180,
             child: url == null
@@ -266,62 +276,6 @@ class _WikiExampleImageState extends ConsumerState<_WikiExampleImage> {
                       ),
                     ),
                   ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _preview(BuildContext context, WikiExample example) {
-    final url = example.largeUrl;
-    if (url == null) return;
-    final cache = ref.read(wikiExampleImageCacheProvider);
-    showDialog<void>(
-      context: context,
-      builder: (context) => Dialog(
-        clipBehavior: Clip.antiAlias,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1000, maxHeight: 850),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16, right: 8, top: 4),
-                child: Row(
-                  children: [
-                    Expanded(child: Text(context.l10n.wiki_exampleImages)),
-                    TextButton.icon(
-                      onPressed: () => launchUrl(Uri.parse(example.sourceUrl)),
-                      icon: const Icon(Icons.open_in_new, size: 14),
-                      label: Text(context.l10n.wiki_source),
-                    ),
-                    IconButton(
-                      tooltip: context.l10n.common_close,
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: InteractiveViewer(
-                  minScale: 1,
-                  maxScale: 4,
-                  child: CachedNetworkImage(
-                    key: ValueKey('wiki-example-large-${example.postId}'),
-                    imageUrl: url,
-                    cacheManager: cache,
-                    fit: BoxFit.contain,
-                    placeholder: (context, url) =>
-                        const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(context.l10n.wiki_exampleImagesUnavailable),
-                    ),
-                  ),
-                ),
-              ),
-            ],
           ),
         ),
       ),
