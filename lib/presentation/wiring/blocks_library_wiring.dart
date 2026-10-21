@@ -265,6 +265,8 @@ class _BlocksLibraryWiringState extends ConsumerState<BlocksLibraryWiring> {
         (p) => p.copyWith(sort: sort, descending: descending),
       ),
       onViewChanged: (view) => host.preference((p) => p.copyWith(view: view)),
+      onGroupByFolderChanged: (value) =>
+          host.preference((p) => p.copyWith(groupByFolder: value)),
       onQuickChanged: (quick) => setState(() => _quick = Set.of(quick)),
       onCardSizeChanged: (size) => host.preference(
         (p) =>

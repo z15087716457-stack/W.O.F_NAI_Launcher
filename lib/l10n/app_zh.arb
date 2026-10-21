@@ -10808,6 +10808,8 @@
   "set_agMcpEditTitle": "编辑 MCP 服务器",
   "set_agTabGeneral": "常规",
   "set_agTabTools": "工具与扩展",
+  "blocks_viewMasonry": "瀑布流",
+  "blocks_groupByFolder": "按文件夹分组",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "编辑",

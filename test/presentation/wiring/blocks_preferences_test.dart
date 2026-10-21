@@ -29,6 +29,30 @@ void main() {
   );
 
   test(
+    'masonry becomes the default; old grid choice moves to masonry',
+    () async {
+      expect(
+        BlocksPreferences.read(await SharedPreferences.getInstance()).view,
+        BlocksView.masonry,
+      );
+      SharedPreferences.setMockInitialValues({'blocks_view': 'grid'});
+      var prefs = await SharedPreferences.getInstance();
+      expect(BlocksPreferences.read(prefs).view, BlocksView.masonry);
+      SharedPreferences.setMockInitialValues({'blocks_view': 'list'});
+      prefs = await SharedPreferences.getInstance();
+      expect(BlocksPreferences.read(prefs).view, BlocksView.list);
+
+      final state = BlocksPreferences.read(
+        prefs,
+      ).copyWith(view: BlocksView.grid, groupByFolder: true);
+      await state.save(prefs);
+      final restored = BlocksPreferences.read(prefs);
+      expect(restored.view, BlocksView.grid);
+      expect(restored.groupByFolder, isTrue);
+    },
+  );
+
+  test(
     'persists scope, panels, expanded folders and dock collapsed groups',
     () async {
       final container = ProviderContainer();

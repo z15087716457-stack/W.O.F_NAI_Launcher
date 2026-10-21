@@ -20216,6 +20216,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agTabTools => 'ツールと拡張';
 
   @override
+  String get blocks_viewMasonry => 'メイソンリー';
+
+  @override
+  String get blocks_groupByFolder => 'フォルダごとに表示';
+
+  @override
   String get ag_recent => '最近';
 
   @override

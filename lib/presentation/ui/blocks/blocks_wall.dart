@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
@@ -162,7 +163,7 @@ class BlocksToolbar extends StatelessWidget {
                     children: [
                       Flexible(
                         child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 300),
+                          constraints: const BoxConstraints(maxWidth: 480),
                           child: UiSearchField(
                             key: const Key('blocks-search'),
                             value: d.query,
@@ -201,12 +202,28 @@ class BlocksToolbar extends StatelessWidget {
                           selected: d.view,
                           onChanged: a.onViewChanged,
                           labelOf: (_) => '',
-                          glyphOf: (v) => v == BlocksView.grid
-                              ? UiGlyphs.grid
-                              : UiGlyphs.list,
-                          tooltipOf: (v) => v == BlocksView.grid
-                              ? l10n.blocks_viewGrid
-                              : l10n.blocks_viewList,
+                          glyphOf: (v) => switch (v) {
+                            BlocksView.masonry => UiGlyphs.masonryMedium,
+                            BlocksView.grid => UiGlyphs.grid,
+                            BlocksView.list => UiGlyphs.list,
+                          },
+                          tooltipOf: (v) => switch (v) {
+                            BlocksView.masonry => l10n.blocks_viewMasonry,
+                            BlocksView.grid => l10n.blocks_viewGrid,
+                            BlocksView.list => l10n.blocks_viewList,
+                          },
+                        ),
+                        UiIconBox(
+                          key: const Key('blocks-group-folders'),
+                          glyph: UiGlyphs.folder,
+                          tone: d.groupByFolder
+                              ? UiIconBoxTone.on
+                              : UiIconBoxTone.bordered,
+                          tooltip: l10n.blocks_groupByFolder,
+                          onTap: a.onGroupByFolderChanged == null
+                              ? null
+                              : () =>
+                                    a.onGroupByFolderChanged!(!d.groupByFolder),
                         ),
                       ],
                     ],
@@ -340,7 +357,7 @@ class BlocksFilterRow extends StatelessWidget {
           chip(BlocksQuick.negative, _negGlyph, l10n.blocks_quickNegative),
           chip(BlocksQuick.params, UiGlyphs.bolt, l10n.blocks_quickParams),
           const Spacer(),
-          if (d.view == BlocksView.grid) ...[
+          if (d.view != BlocksView.list) ...[
             Text(l10n.blocks_cardSize, style: UiText.sans(12, color: c.faint)),
             SizedBox(
               key: const Key('blocks-card-size'),
@@ -424,21 +441,164 @@ class BlocksWall extends StatelessWidget {
         final cols = columnsFor(box.maxWidth, ctrl.cardSize);
         final cardW = (box.maxWidth - 36 - 12 * (cols - 1)) / cols;
         final coverH = (cardW * .6).roundToDouble();
-        return GridView.builder(
+        if (d.loading) {
+          return GridView.builder(
+            key: const Key('blocks-grid'),
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 80),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: cols,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 14,
+              mainAxisExtent: coverH + 58,
+            ),
+            itemCount: cols * 3,
+            itemBuilder: (context, i) => _Skeleton(coverH: coverH),
+          );
+        }
+        final masonry = d.view == BlocksView.masonry;
+        Widget content(int start, int count) => masonry
+            ? SliverMasonryGrid.count(
+                crossAxisCount: cols,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 14,
+                childCount: count,
+                itemBuilder: (context, i) => _Card(
+                  key: ValueKey(d.blocks[start + i].id),
+                  block: d.blocks[start + i],
+                  coverH: null,
+                  width: cardW,
+                ),
+              )
+            : SliverGrid(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: cols,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 14,
+                  mainAxisExtent: coverH + 58,
+                ),
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => _Card(
+                    key: ValueKey(d.blocks[start + i].id),
+                    block: d.blocks[start + i],
+                    coverH: coverH,
+                    width: cardW,
+                  ),
+                  childCount: count,
+                ),
+              );
+        return _GroupedScroll(
           key: const Key('blocks-grid'),
-          padding: const EdgeInsets.fromLTRB(18, 4, 18, 80),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: cols,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 14,
-            mainAxisExtent: coverH + 58,
-          ),
-          itemCount: d.loading ? cols * 3 : d.blocks.length,
-          itemBuilder: (context, i) => d.loading
-              ? _Skeleton(coverH: coverH)
-              : _Card(block: d.blocks[i], coverH: coverH),
+          padding: const EdgeInsets.fromLTRB(18, 4, 18, 0),
+          content: content,
         );
       },
+    );
+  }
+}
+
+/// 卡片墙 / 列表的滚动体：不分组时一段内容；按文件夹分组时每组一个吸顶文件夹条，
+/// 下一组的条滚上来会把它顶走（`SliverMainAxisGroup` 把吸顶限制在本组范围内）。
+class _GroupedScroll extends StatelessWidget {
+  const _GroupedScroll({
+    super.key,
+    required this.padding,
+    required this.content,
+  });
+  final EdgeInsets padding;
+  final Widget Function(int start, int count) content;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = BlocksPageScope.of(context).data;
+    final groups = d.groups;
+    return CustomScrollView(
+      slivers: [
+        if (groups == null)
+          SliverPadding(padding: padding, sliver: content(0, d.blocks.length))
+        else
+          for (final g in groups)
+            SliverMainAxisGroup(
+              key: ValueKey('blocks-group-${g.folderId}'),
+              slivers: [
+                PinnedHeaderSliver(child: _FolderBar(group: g)),
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    padding.left,
+                    6,
+                    padding.right,
+                    18,
+                  ),
+                  sliver: content(g.start, g.count),
+                ),
+              ],
+            ),
+        const SliverToBoxAdapter(child: SizedBox(height: 80)),
+      ],
+    );
+  }
+}
+
+/// 吸顶文件夹条：文件夹图标 · 路径（父级弱色、当前级加粗）· 块数；根目录写“未分类”。
+class _FolderBar extends StatelessWidget {
+  const _FolderBar({required this.group});
+  final BlocksGroup group;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l10n = context.l10n;
+    final parts = group.folderId == null
+        ? [l10n.blocks_uncategorized]
+        : group.path.split(' / ');
+    return Container(
+      key: Key('blocks-folder-bar-${group.folderId}'),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 18),
+      decoration: BoxDecoration(
+        color: c.bg,
+        border: Border(bottom: BorderSide(color: c.line)),
+      ),
+      child: Row(
+        spacing: 8,
+        children: [
+          UiGlyph(
+            group.folderId == null ? UiGlyphs.box : UiGlyphs.folder,
+            size: 14,
+            color: c.muted,
+          ),
+          Flexible(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  for (final (i, p) in parts.indexed) ...[
+                    if (i > 0)
+                      TextSpan(
+                        text: '  /  ',
+                        style: UiText.sans(12.5, color: c.faint),
+                      ),
+                    TextSpan(
+                      text: p,
+                      style: i == parts.length - 1
+                          ? UiText.sans(
+                              13,
+                              weight: FontWeight.w600,
+                              color: c.ink,
+                            )
+                          : UiText.sans(12.5, color: c.muted),
+                    ),
+                  ],
+                ],
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Text(
+            '${group.count}',
+            style: UiText.mono(11.5, color: c.faint, height: 1.2),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -487,9 +647,17 @@ class _Skeleton extends StatelessWidget {
 /// 正文 8 / 10 / 9：图标 + 标题 13 / w600，“N 项 · 用过 N 次”11.5 弱色 + “负面”“参数”小标。
 /// 选中强调色描边 + 3px 浅环；悬停时封面底部浮出操作条（插入 · 收藏 · 编辑 · 更多）。
 class _Card extends StatefulWidget {
-  const _Card({required this.block, required this.coverH});
+  const _Card({
+    super.key,
+    required this.block,
+    required this.coverH,
+    required this.width,
+  });
   final BlockData block;
-  final double coverH;
+
+  /// 网格：固定封面高（卡宽 × 0.6）；null = 瀑布流，封面按内容 / 原图比例自然高。
+  final double? coverH;
+  final double width;
 
   @override
   State<_Card> createState() => _CardState();
@@ -554,13 +722,19 @@ class _CardState extends State<_Card> {
       ),
     );
 
+    final inset = picking ? 36.0 : 12.0;
     final cover = SizedBox(
       key: Key('blocks-cover-${b.id}'),
       height: widget.coverH,
       child: Stack(
-        fit: StackFit.expand,
+        fit: widget.coverH == null ? StackFit.loose : StackFit.expand,
         children: [
-          BlockCover(b, leftInset: picking ? 36 : 12),
+          if (widget.coverH != null)
+            BlockCover(b, leftInset: inset)
+          else if (b.thumb != null)
+            _MasonryThumb(thumb: b.thumb!, width: widget.width)
+          else
+            _MasonryTextCover(block: b, leftInset: inset),
           if (b.favorite)
             Positioned(
               right: 7,
@@ -808,6 +982,134 @@ class _CardState extends State<_Card> {
   }
 }
 
+/// 瀑布流封面（有预览图）：按原图比例显示整张图，比例夹在 0.5 ~ 1.6 倍宽之间；
+/// 图还没解码时先按 4:3 占位。
+class _MasonryThumb extends StatefulWidget {
+  const _MasonryThumb({required this.thumb, required this.width});
+  final BlockThumb thumb;
+  final double width;
+
+  @override
+  State<_MasonryThumb> createState() => _MasonryThumbState();
+}
+
+class _MasonryThumbState extends State<_MasonryThumb> {
+  static final _aspects = <ImageProvider, double>{};
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _resolve();
+  }
+
+  @override
+  void didUpdateWidget(_MasonryThumb old) {
+    super.didUpdateWidget(old);
+    if (old.thumb.image != widget.thumb.image) _resolve();
+  }
+
+  void _resolve() {
+    _stop();
+    final image = widget.thumb.image;
+    if (_aspects.containsKey(image)) return;
+    final stream = image.resolve(createLocalImageConfiguration(context));
+    final listener = ImageStreamListener((info, _) {
+      final i = info.image;
+      if (i.width > 0 && i.height > 0 && mounted) {
+        setState(() => _aspects[image] = i.width / i.height);
+      }
+      _stop();
+    }, onError: (_, _) => _stop());
+    _stream = stream;
+    _listener = listener;
+    stream.addListener(listener);
+  }
+
+  void _stop() {
+    if (_listener != null) _stream?.removeListener(_listener!);
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final aspect = _aspects[widget.thumb.image] ?? 4 / 3;
+    final w = widget.width;
+    final h = (w / aspect).clamp(w * .5, w * 1.6).roundToDouble();
+    final t = widget.thumb;
+    return SizedBox(
+      height: h,
+      width: double.infinity,
+      child: Image(
+        image: t.image,
+        fit: BoxFit.cover,
+        alignment: Alignment(t.offsetX.clamp(-1, 1), t.offsetY.clamp(-1, 1)),
+        gaplessPlayback: true,
+      ),
+    );
+  }
+}
+
+/// 瀑布流封面（无预览图）：内容按自然高度最多 8 行，短内容的卡就矮。
+class _MasonryTextCover extends StatelessWidget {
+  const _MasonryTextCover({required this.block, required this.leftInset});
+  final BlockData block;
+  final double leftInset;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final col = block.color;
+    final text = block.atoms.isEmpty
+        ? block.negativeAtoms.join(', ')
+        : block.content;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 72),
+      width: double.infinity,
+      color: Color.alphaBlend(
+        col.withValues(alpha: c.dark ? .10 : .07),
+        c.raised,
+      ),
+      padding: EdgeInsets.fromLTRB(leftInset, 11, 12, 12),
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: Text(
+              text,
+              maxLines: 8,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.mono(
+                11,
+                height: 1.6,
+                color: Color.lerp(c.muted, col, .55),
+              ),
+            ),
+          ),
+          Positioned(
+            right: -2,
+            bottom: -4,
+            child: UiBlockIcon(
+              block.icon,
+              size: 34,
+              color: col.withValues(alpha: .22),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 拖动时跟手的小卡：药丸 + “N 个”角标。
 class _DragFeedback extends StatelessWidget {
   const _DragFeedback({required this.block, required this.count});
@@ -958,11 +1260,15 @@ class _ListView extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(18, 2, 18, 80),
-            itemExtent: 44,
-            itemCount: d.blocks.length,
-            itemBuilder: (context, i) => _Row(block: d.blocks[i]),
+          child: _GroupedScroll(
+            padding: const EdgeInsets.fromLTRB(18, 2, 18, 0),
+            content: (start, count) => SliverFixedExtentList(
+              itemExtent: 44,
+              delegate: SliverChildBuilderDelegate(
+                (context, i) => _Row(block: d.blocks[start + i]),
+                childCount: count,
+              ),
+            ),
           ),
         ),
       ],

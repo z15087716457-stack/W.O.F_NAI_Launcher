@@ -152,6 +152,39 @@ void main() {
       expect(rec.calls.last, startsWith('size:'));
     });
 
+    testWidgets('瀑布流与按文件夹分组：吸顶文件夹条、开关回调', (t) async {
+      final base = BlocksFixture.library(
+        image: blocksTestImage,
+        view: BlocksView.masonry,
+      );
+      await lib(t, data: base);
+      expect(find.byKey(const Key('blocks-folder-bar-null')), findsNothing);
+      expect(find.byKey(const Key('blocks-card-y99')), findsOneWidget);
+      await tapKey(t, 'blocks-group-folders');
+      expect(rec.calls.last, 'group:true');
+
+      final blocks = base.blocks.take(6).toList();
+      final grouped = BlocksLibraryViewData(
+        now: base.now,
+        blocks: blocks,
+        counts: base.counts,
+        folders: base.folders,
+        view: BlocksView.masonry,
+        groupByFolder: true,
+        groups: const [
+          BlocksGroup(folderId: null, path: '', start: 0, count: 3),
+          BlocksGroup(folderId: 'f-char', path: '角色', start: 3, count: 3),
+        ],
+        catalog: base.catalog,
+      );
+      await lib(t, data: grouped);
+      expect(find.byKey(const Key('blocks-folder-bar-null')), findsOneWidget);
+      expect(find.text('未分类'), findsWidgets);
+      expect(find.byKey(const Key('blocks-folder-bar-f-char')), findsOneWidget);
+      await tapKey(t, 'blocks-group-folders');
+      expect(rec.calls.last, 'group:false');
+    });
+
     testWidgets('卡片：单击选中、悬停操作条、右键菜单、双击编辑', (t) async {
       await lib(t);
       await tapKey(t, 'blocks-card-pk');

@@ -36334,6 +36334,18 @@ abstract class AppLocalizations {
   /// **'Tools & extensions'**
   String get set_agTabTools;
 
+  /// No description provided for @blocks_viewMasonry.
+  ///
+  /// In en, this message translates to:
+  /// **'Masonry'**
+  String get blocks_viewMasonry;
+
+  /// No description provided for @blocks_groupByFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by folder'**
+  String get blocks_groupByFolder;
+
   /// No description provided for @ag_recent.
   ///
   /// In en, this message translates to:

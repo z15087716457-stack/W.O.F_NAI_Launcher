@@ -389,7 +389,25 @@ class BlocksScope {
 /// 排序（`PromptBlockSortField`）：自定义顺序 / 最近修改 / 名称 / 颜色 / 图标。
 enum BlocksSort { custom, updated, title, color, icon }
 
-enum BlocksView { grid, list }
+/// 卡片墙视图：瀑布流（默认，封面按内容 / 原图比例）、等高网格、列表。
+enum BlocksView { masonry, grid, list }
+
+/// 按文件夹分组时的一组：[blocks] 里从 [start] 起的 [count] 个块属于同一个文件夹。
+/// [folderId] 为 null 是根目录（未分类）；[path] 是 `A / B / C`。
+@immutable
+class BlocksGroup {
+  const BlocksGroup({
+    required this.folderId,
+    required this.path,
+    required this.start,
+    required this.count,
+  });
+  final String? folderId;
+  final String path;
+  final int start;
+  final int count;
+  int get end => start + count;
+}
 
 /// 快速筛选（纯前端过滤，可多选）：有预览图 / 含负面 / 附带参数。
 enum BlocksQuick { image, negative, params }
@@ -483,7 +501,9 @@ class BlocksLibraryViewData {
     this.query = '',
     this.sort = BlocksSort.updated,
     this.descending = true,
-    this.view = BlocksView.grid,
+    this.view = BlocksView.masonry,
+    this.groupByFolder = false,
+    this.groups,
     this.quick = const {},
     this.cardSize = .5,
     this.selectedId,
@@ -512,6 +532,12 @@ class BlocksLibraryViewData {
   final BlocksSort sort;
   final bool descending;
   final BlocksView view;
+
+  /// 按文件夹分组（顶部开关）：开着时 [groups] 给出分组，排序在各自文件夹内进行。
+  final bool groupByFolder;
+
+  /// 分组结果；null = 不分组。[blocks] 已按组排好。
+  final List<BlocksGroup>? groups;
   final Set<BlocksQuick> quick;
 
   /// 卡片大小 0…1（0 = 最小，约 180 宽一列；1 = 最大，约 300）。
@@ -540,6 +566,7 @@ class BlocksLibraryActions {
     required this.onQueryChanged,
     required this.onSortChanged,
     required this.onViewChanged,
+    this.onGroupByFolderChanged,
     required this.onQuickChanged,
     required this.onCardSizeChanged,
     required this.onSidebarChanged,
@@ -591,6 +618,9 @@ class BlocksLibraryActions {
   final void Function(BlocksSort sort, {required bool descending})
   onSortChanged;
   final ValueChanged<BlocksView> onViewChanged;
+
+  /// 顶部“按文件夹分组”开关。
+  final ValueChanged<bool>? onGroupByFolderChanged;
   final ValueChanged<Set<BlocksQuick>> onQuickChanged;
 
   /// 拖动结束才回调（拖动中界面自己跟手）。

@@ -55,6 +55,49 @@ void main() {
     expect(data.thumb, isNotNull);
   });
 
+  test(
+    'group by folder partitions in tree order and sorts inside each folder',
+    () {
+      final lib = PromptBlockLibraryState(
+        blocks: [
+          block('z1', folder: 'child'),
+          block('r2'),
+          block('p1', folder: 'parent'),
+          block('a1', folder: 'child'),
+          block('r1'),
+        ],
+        folders: library.folders,
+      );
+      final flat = mapBlocksLibrary(
+        lib,
+        preferences: const BlocksPreferences(
+          sort: BlocksSort.title,
+          descending: false,
+        ),
+      );
+      expect(flat.groups, isNull);
+      expect(flat.blocks.map((b) => b.id), ['a1', 'p1', 'r1', 'r2', 'z1']);
+
+      final grouped = mapBlocksLibrary(
+        lib,
+        preferences: const BlocksPreferences(
+          sort: BlocksSort.title,
+          descending: false,
+          groupByFolder: true,
+        ),
+      );
+      expect(grouped.groupByFolder, isTrue);
+      expect(grouped.blocks.map((b) => b.id), ['r1', 'r2', 'p1', 'a1', 'z1']);
+      expect(grouped.groups!.map((g) => g.folderId), [null, 'parent', 'child']);
+      expect(grouped.groups!.map((g) => (g.start, g.count)), [
+        (0, 2),
+        (2, 1),
+        (3, 2),
+      ]);
+      expect(grouped.groups!.last.path, 'Parent / Child');
+    },
+  );
+
   test('quick filters intersect without changing counts', () {
     final data = mapBlocksLibrary(
       library,

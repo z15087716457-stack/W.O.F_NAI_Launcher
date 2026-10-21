@@ -14,6 +14,7 @@ import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_quick.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
 
+import '../../../helpers/approved_visual_regions.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'blocks_test_harness.dart';
 
@@ -240,9 +241,14 @@ void main() {
           await interact(t);
           await t.pumpAndSettle();
         }
-        await expectLater(
+        // 2026-10-21：块库工具栏加长搜索框、视图分段加“瀑布流”、新增“按文件夹分组”
+        // 开关（用户确认）。只排除工具栏这一行；卡片墙仍按原网格逐像素比对。
+        final bar = find.byKey(const Key('blocks-toolbar'));
+        await expectOutsideApprovedRegions(
+          t,
           find.byKey(const Key('blocks-capture')),
-          matchesGoldenFile('goldens/$file.png'),
+          'test/presentation/ui/blocks/goldens/$file.png',
+          [if (bar.evaluate().isNotEmpty) t.getRect(bar).deflate(1)],
         );
         debugDisableShadows = true;
       });

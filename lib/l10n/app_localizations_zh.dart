@@ -19978,6 +19978,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agTabTools => '工具与扩展';
 
   @override
+  String get blocks_viewMasonry => '瀑布流';
+
+  @override
+  String get blocks_groupByFolder => '按文件夹分组';
+
+  @override
   String get ag_recent => '最近';
 
   @override
@@ -40920,6 +40926,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agTabTools => '工具與擴展';
+
+  @override
+  String get blocks_viewMasonry => '瀑布流';
+
+  @override
+  String get blocks_groupByFolder => '按資料夾分組';
 
   @override
   String get ag_recent => '最近';

@@ -10808,6 +10808,8 @@
   "set_agMcpEditTitle": "MCP 서버 편집",
   "set_agTabGeneral": "일반",
   "set_agTabTools": "도구 및 확장",
+  "blocks_viewMasonry": "메이슨리",
+  "blocks_groupByFolder": "폴더별로 묶기",
   "ag_recent": "최근",
   "ag_you": "나",
   "ag_edit": "편집",

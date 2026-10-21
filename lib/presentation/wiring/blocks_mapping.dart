@@ -262,6 +262,33 @@ BlocksLibraryViewData mapBlocksLibrary(
           : semantic[a.id]!.compareTo(semantic[b.id]!);
     });
   }
+  // 按文件夹分组：按文件夹树序（根目录在最前）稳定分区，组内保持上面排好的顺序，
+  // 于是每种排序都在各自文件夹内进行。
+  List<BlocksGroup>? groups;
+  if (preferences.groupByFolder && filtered.isNotEmpty) {
+    final order = library.folderTreeOrder();
+    final buckets = <String?, List<PromptBlock>>{};
+    for (final b in filtered) {
+      buckets.putIfAbsent(b.folderId, () => []).add(b);
+    }
+    final keys = buckets.keys.toList()
+      ..sort((a, b) => (order[a] ?? 1 << 30).compareTo(order[b] ?? 1 << 30));
+    filtered = [for (final k in keys) ...buckets[k]!];
+    var start = 0;
+    groups = [
+      for (final k in keys)
+        () {
+          final g = BlocksGroup(
+            folderId: k,
+            path: k == null ? '' : library.folderPath(k),
+            start: start,
+            count: buckets[k]!.length,
+          );
+          start += g.count;
+          return g;
+        }(),
+    ];
+  }
   final tags = <String, (BlockTag, int)>{};
   for (final b in library.blocks) {
     final seen = <String>{};
@@ -326,6 +353,8 @@ BlocksLibraryViewData mapBlocksLibrary(
     sort: preferences.sort,
     descending: preferences.descending,
     view: preferences.view,
+    groupByFolder: preferences.groupByFolder,
+    groups: groups,
     quick: quick,
     cardSize: preferences.cardSize,
     sidebarOpen: preferences.sidebarOpen,

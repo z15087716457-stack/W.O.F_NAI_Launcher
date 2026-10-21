@@ -20286,6 +20286,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agTabTools => '도구 및 확장';
 
   @override
+  String get blocks_viewMasonry => '메이슨리';
+
+  @override
+  String get blocks_groupByFolder => '폴더별로 묶기';
+
+  @override
   String get ag_recent => '최근';
 
   @override

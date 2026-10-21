@@ -89,6 +89,7 @@ class RecordingBlocks {
     onSortChanged: (s, {required descending}) =>
         _c('sort:${s.name}:$descending'),
     onViewChanged: (v) => _c('view:${v.name}'),
+    onGroupByFolderChanged: (v) => _c('group:$v'),
     onQuickChanged: (q) =>
         _c('quick:${(q.map((e) => e.name).toList()..sort()).join(',')}'),
     onCardSizeChanged: (v) => _c('size:${v.toStringAsFixed(2)}'),

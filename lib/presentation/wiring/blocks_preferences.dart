@@ -19,7 +19,8 @@ class BlocksPreferences {
     this.scope = const BlocksScope.all(),
     this.sort = BlocksSort.updated,
     this.descending = true,
-    this.view = BlocksView.grid,
+    this.view = BlocksView.masonry,
+    this.groupByFolder = false,
     this.cardSize = .5,
     this.sidebarOpen = true,
     this.inspectorOpen = true,
@@ -34,6 +35,7 @@ class BlocksPreferences {
   final BlocksSort sort;
   final bool descending;
   final BlocksView view;
+  final bool groupByFolder;
   final double cardSize;
   final bool sidebarOpen;
   final bool inspectorOpen;
@@ -76,10 +78,17 @@ class BlocksPreferences {
           prefs.getBool('blocks_descending') ??
           prefs.getBool(StorageKeys.promptBlockLibrarySortDescending) ??
           true,
+      // 瀑布流成为默认视图：新键 blocks_view_v2；旧值只保留“列表”，其余进瀑布流。
       view:
-          BlocksView.values.asNameMap()[prefs.getString('blocks_view') ??
-              prefs.getString(StorageKeys.promptBlockLibraryViewMode)] ??
-          BlocksView.grid,
+          BlocksView.values.asNameMap()[prefs.getString('blocks_view_v2')] ??
+          ((prefs.getString('blocks_view') ??
+                      prefs.getString(
+                        StorageKeys.promptBlockLibraryViewMode,
+                      )) ==
+                  'list'
+              ? BlocksView.list
+              : BlocksView.masonry),
+      groupByFolder: prefs.getBool('blocks_group_folders') ?? false,
       cardSize: size.isFinite ? size.clamp(0.0, 1.0) : .5,
       sidebarOpen: prefs.getBool('blocks_sidebar_open') ?? true,
       inspectorOpen: prefs.getBool('blocks_inspector_open') ?? true,
@@ -96,6 +105,7 @@ class BlocksPreferences {
     BlocksSort? sort,
     bool? descending,
     BlocksView? view,
+    bool? groupByFolder,
     double? cardSize,
     bool? sidebarOpen,
     bool? inspectorOpen,
@@ -109,6 +119,7 @@ class BlocksPreferences {
     sort: sort ?? this.sort,
     descending: descending ?? this.descending,
     view: view ?? this.view,
+    groupByFolder: groupByFolder ?? this.groupByFolder,
     cardSize: cardSize ?? this.cardSize,
     sidebarOpen: sidebarOpen ?? this.sidebarOpen,
     inspectorOpen: inspectorOpen ?? this.inspectorOpen,
@@ -127,7 +138,8 @@ class BlocksPreferences {
       ),
       prefs.setString('blocks_sort', sort.name),
       prefs.setBool('blocks_descending', descending),
-      prefs.setString('blocks_view', view.name),
+      prefs.setString('blocks_view_v2', view.name),
+      prefs.setBool('blocks_group_folders', groupByFolder),
       prefs.setDouble('blocks_card_size', cardSize),
       prefs.setBool('blocks_sidebar_open', sidebarOpen),
       prefs.setBool('blocks_inspector_open', inspectorOpen),

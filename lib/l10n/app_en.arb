@@ -10820,6 +10820,8 @@
   "set_agMcpEditTitle": "Edit MCP server",
   "set_agTabGeneral": "General",
   "set_agTabTools": "Tools & extensions",
+  "blocks_viewMasonry": "Masonry",
+  "blocks_groupByFolder": "Group by folder",
   "ag_recent": "Recent",
   "ag_you": "You",
   "ag_edit": "Edit",

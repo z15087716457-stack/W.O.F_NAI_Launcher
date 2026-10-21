@@ -10808,6 +10808,8 @@
   "set_agMcpEditTitle": "MCP サーバーを編集",
   "set_agTabGeneral": "一般",
   "set_agTabTools": "ツールと拡張",
+  "blocks_viewMasonry": "メイソンリー",
+  "blocks_groupByFolder": "フォルダごとに表示",
   "ag_recent": "最近",
   "ag_you": "あなた",
   "ag_edit": "編集",

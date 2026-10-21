@@ -20921,6 +20921,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_agTabTools => 'Tools & extensions';
 
   @override
+  String get blocks_viewMasonry => 'Masonry';
+
+  @override
+  String get blocks_groupByFolder => 'Group by folder';
+
+  @override
   String get ag_recent => 'Recent';
 
   @override

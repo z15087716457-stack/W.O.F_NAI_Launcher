@@ -11154,6 +11154,8 @@
   "set_agMcpEditTitle": "編輯 MCP 伺服器",
   "set_agTabGeneral": "常規",
   "set_agTabTools": "工具與擴展",
+  "blocks_viewMasonry": "瀑布流",
+  "blocks_groupByFolder": "按資料夾分組",
   "ag_recent": "最近",
   "ag_you": "你",
   "ag_edit": "編輯",
