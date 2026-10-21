@@ -8,6 +8,7 @@ import '../agent/agent_glyphs.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
+import '../kit/ui_keycap.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
@@ -50,9 +51,13 @@ class GenEditorArea extends StatelessWidget {
     super.key,
     required this.target,
     this.padding = const EdgeInsets.fromLTRB(12, 6, 32, 4),
+    this.clearButton = true,
   });
   final GenEditorTarget target;
   final EdgeInsets padding;
+
+  /// 右上角清空 ×；全屏编辑把清空放到顶栏，这里不再画。
+  final bool clearButton;
 
   @override
   Widget build(BuildContext context) {
@@ -65,28 +70,29 @@ class GenEditorArea extends StatelessWidget {
           padding: padding,
           child: scope.slots.editor(context, target),
         ),
-        Positioned(
-          right: 8,
-          top: padding.top,
-          child: Tooltip(
-            message: context.l10n.gen_clear,
-            child: UiPressable(
-              key: Key('gen-clear-$target'),
-              onTap: () => scope.actions.onClearPrompt(target),
-              builder: (context, hover) => SizedBox(
-                width: 18,
-                height: 18,
-                child: Center(
-                  child: UiGlyph(
-                    UiGlyphs.close,
-                    size: 14,
-                    color: hover ? c.ink : c.muted,
+        if (clearButton)
+          Positioned(
+            right: 8,
+            top: padding.top,
+            child: Tooltip(
+              message: context.l10n.gen_clear,
+              child: UiPressable(
+                key: Key('gen-clear-$target'),
+                onTap: () => scope.actions.onClearPrompt(target),
+                builder: (context, hover) => SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: Center(
+                    child: UiGlyph(
+                      UiGlyphs.close,
+                      size: 14,
+                      color: hover ? c.ink : c.muted,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -762,7 +768,9 @@ class _Checker extends CustomPainter {
   bool shouldRepaint(_Checker old) => old.a != a || old.b != b;
 }
 
-/// 全屏编辑：大弹窗里放同一块编辑器（宽 880、高到窗口的 82%），页签切正负面。
+/// 全屏编辑：大面板里放同一块编辑器（最宽 960、高到窗口的 86%）。
+/// 顶栏：标题 + 正 / 负面分段（角色卡显示角色名）、清空、关闭；
+/// 中间编辑区留足边距；底栏：用量条 + token 数 + Esc 提示。
 class GenFullscreenEditor extends StatelessWidget {
   const GenFullscreenEditor({super.key, required this.target});
   final GenEditorTarget target;
@@ -785,73 +793,131 @@ class GenFullscreenEditor extends StatelessWidget {
         : (negative
               ? data.characters!.list[ch].negativeTokens
               : data.characters!.list[ch].positiveTokens);
-    final h = MediaQuery.sizeOf(context).height;
+    final size = MediaQuery.sizeOf(context);
+    final ratio = tokens.limit <= 0 ? 0.0 : tokens.used / tokens.limit;
+    final tokenColor = ratio > 1
+        ? c.error
+        : ratio > .9
+        ? c.warn
+        : c.muted;
+    final title = ch == null
+        ? l.gen_basePrompt
+        : data.characters!.list[ch].name ?? l.gen_characterN(ch + 1);
     return UiPopoverSurface(
       key: const Key('gen-fullscreen-editor'),
-      width: 880,
+      width: (size.width - 96).clamp(560.0, 960.0),
+      radius: 14,
       child: SizedBox(
-        height: h * .82,
+        height: size.height * .86,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              height: 52,
-              padding: const EdgeInsets.only(left: 14, right: 10),
+              height: 56,
+              padding: const EdgeInsets.only(left: 20, right: 12),
               decoration: BoxDecoration(
                 border: Border(bottom: BorderSide(color: c.line)),
               ),
               child: Row(
-                spacing: 4,
+                spacing: 10,
                 children: [
-                  if (ch == null) ...[
-                    GenTab(
-                      label: l.gen_basePrompt,
-                      selected: !negative,
-                      onTap: () => scope.actions.onNegativeTab(false),
-                    ),
-                    GenTab(
-                      label: l.gen_negative,
-                      selected: negative,
-                      onTap: data.prompt.negativeSupported
-                          ? () => scope.actions.onNegativeTab(true)
-                          : null,
-                    ),
-                  ] else
-                    Text(
-                      data.characters!.list[ch].name ??
-                          l.gen_characterN(ch + 1),
+                  UiGlyph(UiGlyphs.expand, size: 15, color: c.muted),
+                  Flexible(
+                    child: Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: UiText.sans(
                         15,
-                        weight: FontWeight.w700,
+                        weight: FontWeight.w600,
                         color: c.ink,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                  if (ch == null && data.prompt.negativeSupported)
+                    UiSegmented<bool>(
+                      key: const Key('gen-fullscreen-tabs'),
+                      values: const [false, true],
+                      selected: negative,
+                      height: 28,
+                      itemPadding: 12,
+                      labelOf: (v) => v ? l.gen_negative : l.gen_positive,
+                      onChanged: scope.actions.onNegativeTab,
+                    )
+                  else if (ch != null && data.prompt.negativeSupported)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.control,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        negative ? l.gen_negative : l.gen_positive,
+                        style: UiText.sans(12, color: c.muted, height: 1.2),
                       ),
                     ),
                   const Spacer(),
-                  Text(
-                    '${tokens.used} / ${tokens.limit}',
-                    style: UiText.mono(12, color: c.muted),
+                  UiIconBox(
+                    key: Key('gen-clear-$t'),
+                    glyph: UiGlyphs.trash,
+                    tooltip: l.gen_clear,
+                    onTap: () => scope.actions.onClearPrompt(t),
                   ),
-                  const SizedBox(width: 6),
                   UiIconBox(
                     key: const Key('gen-fullscreen-close'),
                     glyph: UiGlyphs.close,
-                    tooltip: l.gen_close,
+                    tooltip: '${l.gen_close} (Esc)',
                     onTap: scope.controller.closeDialog,
                   ),
                 ],
               ),
             ),
             Expanded(
-              child: SingleChildScrollView(
-                child: GenEditorArea(
-                  target: t,
-                  padding: const EdgeInsets.fromLTRB(20, 16, 40, 16),
-                ),
+              child: GenEditorArea(
+                target: t,
+                clearButton: false,
+                padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
               ),
             ),
-            GenTokenBar(
-              tokens: tokens,
-              margin: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            Container(
+              height: 44,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              decoration: BoxDecoration(
+                color: c.control.withValues(alpha: .45),
+                border: Border(top: BorderSide(color: c.line)),
+              ),
+              child: Row(
+                spacing: 12,
+                children: [
+                  Expanded(
+                    child: GenTokenBar(
+                      key: const Key('gen-fullscreen-tokens'),
+                      tokens: tokens,
+                      margin: EdgeInsets.zero,
+                    ),
+                  ),
+                  Text(
+                    '${tokens.used} / ${tokens.limit}',
+                    key: const Key('gen-fullscreen-count'),
+                    style: UiText.mono(12, color: tokenColor, height: 1.2),
+                  ),
+                  Container(width: 1, height: 14, color: c.line),
+                  Row(
+                    spacing: 6,
+                    children: [
+                      const UiKeycap('Esc'),
+                      Text(
+                        l.gen_close,
+                        style: UiText.sans(12, color: c.muted, height: 1.2),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),

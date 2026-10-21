@@ -142,7 +142,20 @@ class GenerationEditorWiring extends ConsumerWidget {
         ref.read(pillRollCoordinatorProvider).syncLaneProjection(scope, value);
       },
     );
-    if (target.fullscreen) return SingleChildScrollView(child: editor(8));
+    if (target.fullscreen) {
+      // 全屏：最少行数撑满面板，点空白处也能落光标；长文在面板里滚动。
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final lineHeight =
+              MediaQuery.textScalerOf(context).scale(textStyle.fontSize!) *
+              textStyle.height!;
+          final lines = constraints.hasBoundedHeight
+              ? (constraints.maxHeight / lineHeight).floor().clamp(8, 80)
+              : 8;
+          return SingleChildScrollView(child: editor(lines));
+        },
+      );
+    }
     if (!target.isBase) return editor(1);
     return LayoutBuilder(
       builder: (context, constraints) {

@@ -231,9 +231,10 @@ void main() {
       1,
     );
     await pump(tester, const GenEditorTarget.base(fullscreen: true));
+    // 全屏按可用高度撑满（至少 8 行），点空白处也能落光标。
     expect(
       tester.widget<PromptPillEditor>(find.byType(PromptPillEditor)).minLines,
-      8,
+      greaterThan(8),
     );
     await tester.pumpWidget(const SizedBox());
   });
