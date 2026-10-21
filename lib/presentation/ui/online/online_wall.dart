@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
@@ -97,6 +98,15 @@ class _OnlineWallState extends State<OnlineWall> {
     if (!mounted || !aspect.isFinite || aspect <= 0) return;
     final old = _learned[key];
     if (old != null && (old - aspect).abs() < .01) return;
+    // 已缓存的缩略图会在卡片 didChangeDependencies（构建期间）同步回调：推到帧后再刷新。
+    if (SchedulerBinding.instance.schedulerPhase ==
+        SchedulerPhase.persistentCallbacks) {
+      _learned[key] = aspect;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (mounted) setState(() {});
+      });
+      return;
+    }
     setState(() => _learned[key] = aspect);
   }
 

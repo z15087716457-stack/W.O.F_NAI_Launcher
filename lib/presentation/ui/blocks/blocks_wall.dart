@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
@@ -101,6 +102,16 @@ class BlocksToolbar extends StatelessWidget {
           label: d.descending ? l10n.blocks_sortDesc : l10n.blocks_sortAsc,
           divider: true,
           onTap: () => a.onSortChanged(d.sort, descending: !d.descending),
+        ),
+      // 分组和排序同一处：窄屏工具栏放不下独立开关时也能在这里切。
+      if (a.onGroupByFolderChanged != null)
+        UiMenuItem(
+          key: const Key('blocks-sort-group'),
+          glyph: UiGlyphs.folder,
+          label: l10n.blocks_groupByFolder,
+          checked: d.groupByFolder,
+          divider: true,
+          onTap: () => a.onGroupByFolderChanged!(!d.groupByFolder),
         ),
     ];
 
@@ -213,18 +224,20 @@ class BlocksToolbar extends StatelessWidget {
                             BlocksView.list => l10n.blocks_viewList,
                           },
                         ),
-                        UiIconBox(
-                          key: const Key('blocks-group-folders'),
-                          glyph: UiGlyphs.folder,
-                          tone: d.groupByFolder
-                              ? UiIconBoxTone.on
-                              : UiIconBoxTone.bordered,
-                          tooltip: l10n.blocks_groupByFolder,
-                          onTap: a.onGroupByFolderChanged == null
-                              ? null
-                              : () =>
-                                    a.onGroupByFolderChanged!(!d.groupByFolder),
-                        ),
+                        if (!compact)
+                          UiIconBox(
+                            key: const Key('blocks-group-folders'),
+                            glyph: UiGlyphs.folder,
+                            tone: d.groupByFolder
+                                ? UiIconBoxTone.on
+                                : UiIconBoxTone.bordered,
+                            tooltip: l10n.blocks_groupByFolder,
+                            onTap: a.onGroupByFolderChanged == null
+                                ? null
+                                : () => a.onGroupByFolderChanged!(
+                                    !d.groupByFolder,
+                                  ),
+                          ),
                       ],
                     ],
                   ),
@@ -1018,7 +1031,12 @@ class _MasonryThumbState extends State<_MasonryThumb> {
     final listener = ImageStreamListener((info, _) {
       final i = info.image;
       if (i.width > 0 && i.height > 0 && mounted) {
-        setState(() => _aspects[image] = i.width / i.height);
+        _aspects[image] = i.width / i.height;
+        // 已缓存的图在构建期间同步回调：此时 build 还没跑，直接读到新比例即可。
+        if (SchedulerBinding.instance.schedulerPhase !=
+            SchedulerPhase.persistentCallbacks) {
+          setState(() {});
+        }
       }
       _stop();
     }, onError: (_, _) => _stop());

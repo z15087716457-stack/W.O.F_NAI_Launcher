@@ -183,6 +183,13 @@ void main() {
       expect(find.byKey(const Key('blocks-folder-bar-f-char')), findsOneWidget);
       await tapKey(t, 'blocks-group-folders');
       expect(rec.calls.last, 'group:false');
+
+      // 窄屏：独立开关收进排序菜单。
+      await lib(t, data: base, window: 1000);
+      expect(find.byKey(const Key('blocks-group-folders')), findsNothing);
+      await tapKey(t, 'blocks-sort');
+      await tapKey(t, 'blocks-sort-group');
+      expect(rec.calls.last, 'group:true');
     });
 
     testWidgets('卡片：单击选中、悬停操作条、右键菜单、双击编辑', (t) async {
