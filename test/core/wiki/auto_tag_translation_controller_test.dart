@@ -28,7 +28,22 @@ class _Wiki implements TagWikiRepository {
 
 class _Cache extends VisibleTagTranslationCache {
   final Map<String, CachedVisibleTagTranslation> records = {};
+
+  /// Rows saved under other routes: tag -> (wikiHash, language, wikiZh).
+  final Map<String, (String, String, String)> otherRoutes = {};
   int writes = 0;
+
+  @override
+  Future<({String wikiZh, String? wikiOriginal})?> wikiFromAnyRoute({
+    required String tag,
+    required String wikiHash,
+    required String language,
+    required int maxPromptVersion,
+  }) async {
+    final row = otherRoutes[tag];
+    if (row == null || row.$1 != wikiHash || row.$2 != language) return null;
+    return (wikiZh: row.$3, wikiOriginal: null);
+  }
 
   @override
   Future<CachedVisibleTagTranslation?> get({
@@ -1164,4 +1179,150 @@ void main() {
       controller.dispose();
     },
   );
+
+  group('Wiki 译文复用', () {
+    String hashOf(String body) => sha256.convert(utf8.encode(body)).toString();
+
+    test('换了模型（路由变了）但正文没变：直接用旧译文，不再请求', () async {
+      final assistant = _Assistant();
+      var calls = 0;
+      _respond(assistant, (_) async {
+        calls++;
+        return const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '新');
+      });
+      final cache = _Cache();
+      cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
+        nameZh: '蓝眼',
+      );
+      cache.otherRoutes['blue_eyes'] = (
+        hashOf('English wiki.'),
+        'zh',
+        '旧路由的译文',
+      );
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English wiki.'),
+        cache: cache,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'expansion', tag: 'blue_eyes');
+      await _until(
+        () =>
+            controller.wikiFor('blue_eyes') != null &&
+            controller.activeRequests == 0,
+      );
+      expect(controller.wikiFor('blue_eyes'), '旧路由的译文');
+      expect(calls, 0);
+    });
+
+    test('正文变了不复用；手动重译照样请求', () async {
+      final assistant = _Assistant();
+      var calls = 0;
+      _respond(assistant, (_) async {
+        calls++;
+        return const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '新');
+      });
+      final cache = _Cache();
+      cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
+        nameZh: '蓝眼',
+      );
+      cache.otherRoutes['blue_eyes'] = (hashOf('Old body.'), 'zh', '过期');
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English wiki.'),
+        cache: cache,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'expansion', tag: 'blue_eyes');
+      await _until(() => controller.wikiFor('blue_eyes') == '新');
+      expect(calls, 1);
+      controller.retranslateWiki(surface: 'expansion', tag: 'blue_eyes');
+      await _until(() => calls == 2 && controller.activeRequests == 0);
+    });
+
+    test('关掉浮层不打断已开始的长 Wiki 翻译，分片跑完照样进缓存', () async {
+      final assistant = _Assistant();
+      final first = Completer<VisibleTagTranslationResult>();
+      var calls = 0;
+      _respond(assistant, (_) {
+        calls++;
+        return calls == 1
+            ? first.future
+            : Future.value(
+                const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '后半'),
+              );
+      });
+      final cache = _Cache();
+      cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
+        nameZh: '蓝眼',
+      );
+      // 超过 5000 字会分两片翻译。
+      final body = [
+        'Long english paragraph. ' * 150,
+        'More text. ' * 300,
+      ].join('\n');
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki(body),
+        cache: cache,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      controller.requestWiki(surface: 'expansion', tag: 'blue_eyes');
+      await _until(() => calls == 1);
+      controller.clearSurface('expansion');
+      first.complete(
+        const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '前半'),
+      );
+      await _until(() => controller.activeRequests == 0);
+      expect(calls, 2);
+      expect(cache.records['blue_eyes']!.wikiZh, contains('后半'));
+      controller.requestWiki(surface: 'expansion', tag: 'blue_eyes');
+      await _until(() => controller.wikiFor('blue_eyes') != null);
+      expect(calls, 2);
+    });
+
+    test('名称重试排着队时打开 Wiki，不会被带成强制重译', () async {
+      final assistant = _Assistant();
+      final blocker = Completer<VisibleTagTranslationResult>();
+      var wikiCalls = 0;
+      _respond(assistant, (invocation) {
+        if (invocation.namedArguments[#tag] == 'other') return blocker.future;
+        if (invocation.namedArguments[#includeWikiTranslation] == true) {
+          wikiCalls++;
+        }
+        return Future.value(
+          const VisibleTagTranslationResult(nameZh: '蓝眼', wikiZh: '新'),
+        );
+      });
+      final cache = _Cache();
+      cache.records['blue_eyes'] = const CachedVisibleTagTranslation(
+        nameZh: '蓝眼',
+        wikiZh: '缓存译文',
+      );
+      final controller = AutoTagTranslationController(
+        assistant: assistant,
+        wiki: _Wiki('English wiki.'),
+        cache: cache,
+        maxConcurrentRequests: 1,
+      );
+      addTearDown(controller.dispose);
+      await controller.setEnabled(true);
+      // 占住唯一的并发位，让后面两个请求都在队列里合并。
+      controller.observe(surface: 'list', tag: 'other', visible: true);
+      await _until(() => controller.activeRequests == 1);
+      controller.retranslateName(surface: 'list', tag: 'blue_eyes');
+      controller.requestWiki(surface: 'expansion', tag: 'blue_eyes');
+      blocker.complete(const VisibleTagTranslationResult(nameZh: '别的'));
+      await _until(
+        () =>
+            controller.wikiFor('blue_eyes') != null &&
+            controller.activeRequests == 0,
+      );
+      expect(controller.wikiFor('blue_eyes'), '缓存译文');
+      expect(wikiCalls, 0);
+    });
+  });
 }

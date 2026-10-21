@@ -224,6 +224,49 @@ void main() {
     },
   );
   test(
+    'translation cache fingerprint ignores unrelated model edits but follows language',
+    () async {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(_Local()),
+          secureStorageServiceProvider.overrideWithValue(_Secrets()),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(promptAssistantConfigProvider.notifier);
+      await notifier.upsertProvider(_provider);
+      await notifier.replaceProviderModels('service', [_model]);
+      await notifier.saveInterface(
+        LauncherInterface.tagTranslate,
+        const InterfaceSlotConfig(providerId: 'service', model: 'model'),
+      );
+      final service = container.read(promptAssistantServiceProvider);
+      final before = service.translateRouteFingerprint();
+      expect(before, isNotEmpty);
+      // 加一个不相干的模型、改它的思考档位：已有译文不该失效。
+      await notifier.replaceProviderModels('service', [
+        _model,
+        const ModelConfig(
+          providerId: 'service',
+          name: 'other',
+          displayName: 'Other',
+          reasoningEffort: 'high',
+          maxOutputTokens: 900,
+        ),
+      ]);
+      expect(service.translateRouteFingerprint(), before);
+      await notifier.saveInterface(
+        LauncherInterface.tagTranslate,
+        const InterfaceSlotConfig(
+          providerId: 'service',
+          model: 'model',
+          targetLanguage: 'ja',
+        ),
+      );
+      expect(service.translateRouteFingerprint(), isNot(before));
+    },
+  );
+  test(
     'draft Wiki uses model parameters and preserves language, link contract and saved configuration',
     () async {
       final api = _CaptureApi();

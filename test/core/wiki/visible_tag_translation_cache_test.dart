@@ -277,4 +277,59 @@ void main() {
       );
     },
   );
+
+  test(
+    'wikiFromAnyRoute: same body and language across routes, newest first',
+    () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'wiki_cache_any_',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final cache = VisibleTagTranslationCache(
+        databasePath: () async => p.join(directory.path, 'cache.db'),
+      );
+      addTearDown(cache.close);
+      Future<void> put(String route, String hash, String zh, String lang) =>
+          cache.put(
+            tag: 'blue_eyes',
+            route: route,
+            promptVersion: 7,
+            wikiHash: hash,
+            nameZh: '蓝眼',
+            wikiZh: zh,
+            nameLanguage: lang,
+            definitionLanguage: lang,
+          );
+      await put('a', 'h1', '旧', 'zh');
+      await Future<void>.delayed(const Duration(milliseconds: 5));
+      await put('b', 'h1', '新', 'zh');
+      await put('c', 'h2', '别的正文', 'zh');
+      await put('d', 'h1', '日本語', 'ja');
+      final hit = await cache.wikiFromAnyRoute(
+        tag: 'blue_eyes',
+        wikiHash: 'h1',
+        language: 'zh',
+        maxPromptVersion: 7,
+      );
+      expect(hit?.wikiZh, '新');
+      expect(
+        await cache.wikiFromAnyRoute(
+          tag: 'blue_eyes',
+          wikiHash: 'h3',
+          language: 'zh',
+          maxPromptVersion: 7,
+        ),
+        isNull,
+      );
+      expect(
+        (await cache.wikiFromAnyRoute(
+          tag: 'blue_eyes',
+          wikiHash: 'h1',
+          language: 'ja',
+          maxPromptVersion: 7,
+        ))?.wikiZh,
+        '日本語',
+      );
+    },
+  );
 }

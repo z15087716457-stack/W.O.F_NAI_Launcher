@@ -872,16 +872,19 @@ Prompt version: $tagTranslationPromptVersion
       config,
       LauncherInterface.wikiTranslate,
     );
+    // 只放会改变译文的东西：两条路由、目标语言、自定义预设正文。
+    // 其他模型的增删改、思考档位、上下文等都不该让已有译文失效。
     final profiles = {
+      'wiki': wikiRoute == null
+          ? null
+          : '${wikiRoute.provider.id}/${wikiRoute.model.name}/${wikiRoute.provider.protocol.name}/${wikiRoute.provider.baseUrl}',
       for (final task in [
         LauncherInterface.tagTranslate,
         LauncherInterface.wikiTranslate,
       ])
         task.name: {
-          'slot': config.interfaceFor(task).toJson(),
-          'preset': presetFor(config, task).toJson(),
+          'preset': presetFor(config, task).prompt,
           'language': targetLanguageFor(task),
-          'models': config.models.map((item) => item.toJson()).toList(),
         },
     };
     final changed =
@@ -893,10 +896,7 @@ Prompt version: $tagTranslationPromptVersion
               (slot.presetId != null && !slot.presetId!.startsWith('builtin:'));
         }) ||
         wikiRoute?.provider.id != route.provider.id ||
-        wikiRoute?.model.name != route.model.name ||
-        config.models.any(
-          (model) => RequestParameters.fromModel(model).toJson().isNotEmpty,
-        );
+        wikiRoute?.model.name != route.model.name;
     return changed
         ? '$original/${sha256.convert(utf8.encode(jsonEncode(profiles)))}'
         : original;

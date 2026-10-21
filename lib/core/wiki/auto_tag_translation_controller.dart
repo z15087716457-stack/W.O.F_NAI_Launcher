@@ -413,11 +413,14 @@ class AutoTagTranslationController extends ChangeNotifier {
       return;
     }
     final previous = _pending[tag];
+    final merged = wiki || previous?.wiki == true;
     _pending[tag] = _VisibleTask(
       tag,
-      wiki || previous?.wiki == true,
+      merged,
       ++_priority,
-      force: previous?.force ?? false,
+      // A forced name retry must not turn an automatic Wiki request into a
+      // cache-bypassing one.
+      force: previous != null && previous.wiki == merged && previous.force,
     );
     notifyListeners();
     _pump();
@@ -591,6 +594,35 @@ class AutoTagTranslationController extends ChangeNotifier {
       if (cached?.wikiOriginal case final source?) {
         _wikiOriginals[task.tag] = source;
       }
+      // Same article text already translated under another route (model or
+      // preset edits): show it instead of paying again. Retranslate refreshes.
+      // Rows record name/definition languages only, so reuse is limited to the
+      // common case where tag and Wiki reading languages are the same.
+      if (task.wiki &&
+          !task.force &&
+          cached?.wikiZh == null &&
+          body.trim().isNotEmpty &&
+          _reading.code == _wikiReadingLanguage()) {
+        final reuse = await _cache.wikiFromAnyRoute(
+          tag: task.tag,
+          wikiHash: hash,
+          language: _wikiReadingLanguage(),
+          maxPromptVersion:
+              PromptAssistantService.visibleTagTranslationPromptVersion,
+        );
+        if (_disposed || epoch != _routeEpoch) return;
+        if (reuse != null) {
+          _wikiBodies[task.tag] = reuse.wikiZh;
+          if (reuse.wikiOriginal case final source?) {
+            _wikiOriginals[task.tag] = source;
+          } else {
+            _wikiOriginals.remove(task.tag);
+          }
+          _wikiErrors.remove(task.tag);
+          notifyListeners();
+          return;
+        }
+      }
       if (!_disposed) notifyListeners();
       if (task.wiki && body.trim().isEmpty) return;
       if ((task.wiki && cached?.wikiZh != null) ||
@@ -637,8 +669,10 @@ class AutoTagTranslationController extends ChangeNotifier {
         definitionLanguage = _reading.code;
       }
       for (var index = 0; index < chunks.length; index++) {
+        // A started Wiki translation finishes so it lands in the cache; closing
+        // the panel mid-article used to throw the paid chunks away.
         if ((!_enabled && !task.force) ||
-            !_isVisible(task.tag) ||
+            (!task.wiki && !_isVisible(task.tag)) ||
             _disposed ||
             epoch != _routeEpoch) {
           return;
@@ -654,7 +688,7 @@ class AutoTagTranslationController extends ChangeNotifier {
         if (_disposed ||
             epoch != _routeEpoch ||
             (!_enabled && !task.force) ||
-            !_isVisible(task.tag)) {
+            (!task.wiki && !_isVisible(task.tag))) {
           return;
         }
         final sessionId =

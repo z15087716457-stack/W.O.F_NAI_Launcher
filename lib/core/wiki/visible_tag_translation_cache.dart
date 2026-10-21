@@ -154,6 +154,35 @@ class VisibleTagTranslationCache {
     );
   }
 
+  /// Latest Wiki translation of exactly this body in [language], from any
+  /// route. Used when the route changed but the article text did not, so an
+  /// already translated article is not paid for again. Legacy rows without a
+  /// recorded language are skipped.
+  Future<({String wikiZh, String? wikiOriginal})?> wikiFromAnyRoute({
+    required String tag,
+    required String wikiHash,
+    required String language,
+    required int maxPromptVersion,
+  }) async {
+    final db = await _open();
+    final rows = await db.query(
+      'tag_translations',
+      columns: ['wiki_zh', 'wiki_original'],
+      where:
+          'tag = ? AND wiki_hash = ? AND wiki_zh IS NOT NULL AND '
+          'name_language = ? AND definition_language = ? AND '
+          'prompt_version <= ?',
+      whereArgs: [tag, wikiHash, language, language, maxPromptVersion],
+      orderBy: 'updated_at DESC',
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    return (
+      wikiZh: rows.single['wiki_zh'] as String,
+      wikiOriginal: rows.single['wiki_original'] as String?,
+    );
+  }
+
   Future<void> put({
     required String tag,
     required String route,
