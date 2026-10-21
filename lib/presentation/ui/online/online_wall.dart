@@ -89,6 +89,20 @@ class _OnlineWallState extends State<OnlineWall> {
   List<OnlineWork> _items = const [];
   String? _lastSelected;
 
+  /// 不知道原图尺寸的作品（AI TAG 列表）：缩略图加载后量出来的宽高比。
+  /// 按真实比例排版，缩略图不再被裁成方块（人物头被裁掉要一张张点开看）。
+  final Map<String, double> _learned = {};
+
+  void _learn(String key, double aspect) {
+    if (!mounted || !aspect.isFinite || aspect <= 0) return;
+    final old = _learned[key];
+    if (old != null && (old - aspect).abs() < .01) return;
+    setState(() => _learned[key] = aspect);
+  }
+
+  double _aspectOf(OnlineWork w) =>
+      w.width > 0 && w.height > 0 ? w.aspect : _learned[w.key] ?? w.aspect;
+
   static const _skeletonAspects = [
     .68,
     1.46,
@@ -215,7 +229,7 @@ class _OnlineWallState extends State<OnlineWall> {
             : (list.loadingMore
                   ? List<double>.filled(cols * 2, .75)
                   : const <double>[]);
-        final aspects = [for (final w in items) w.aspect, ...skeletons];
+        final aspects = [for (final w in items) _aspectOf(w), ...skeletons];
         final capEst = OnlineLayout.captionEstimate(aiTag: ai, small: small);
         final cap = OnlineLayout.captionHeight(aiTag: ai, small: small);
         final estimates = [
@@ -302,6 +316,25 @@ class _OnlineWallState extends State<OnlineWall> {
                                           work: items[s.index],
                                           imageHeight: s.rect.height - cap,
                                           small: small,
+                                          clamped: () {
+                                            final a = aspects[s.index];
+                                            final raw = cw / a;
+                                            return (OnlineLayout.imageHeight(
+                                                          cw,
+                                                          a,
+                                                        ) -
+                                                        raw)
+                                                    .abs() >
+                                                1;
+                                          }(),
+                                          onAspect:
+                                              items[s.index].width > 0 &&
+                                                  items[s.index].height > 0
+                                              ? null
+                                              : (a) => _learn(
+                                                  items[s.index].key,
+                                                  a,
+                                                ),
                                         )
                                       : _SkeletonCard(
                                           imageHeight: s.rect.height - cap,
@@ -335,11 +368,19 @@ class OnlineCard extends StatefulWidget {
     required this.work,
     required this.imageHeight,
     required this.small,
+    this.onAspect,
+    this.clamped = false,
   });
+
+  /// 图高被夹在 80 ~ 宽 × 2.5 之间（极端比例）：缩略图完整显示而不是裁切。
+  final bool clamped;
 
   final OnlineWork work;
   final double imageHeight;
   final bool small;
+
+  /// 原图尺寸未知时：缩略图解码后报告真实宽高比，墙按它重新排版。
+  final ValueChanged<double>? onAspect;
 
   @override
   State<OnlineCard> createState() => _OnlineCardState();
@@ -348,6 +389,52 @@ class OnlineCard extends StatefulWidget {
 class _OnlineCardState extends State<OnlineCard> {
   var _hover = false;
   DateTime? _lastTap;
+  ImageStream? _stream;
+  ImageStreamListener? _listener;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _measure();
+  }
+
+  @override
+  void didUpdateWidget(OnlineCard old) {
+    super.didUpdateWidget(old);
+    if (old.work.thumb != widget.work.thumb ||
+        (old.onAspect == null) != (widget.onAspect == null)) {
+      _measure();
+    }
+  }
+
+  void _measure() {
+    _stopMeasure();
+    final thumb = widget.work.thumb;
+    if (widget.onAspect == null || thumb == null) return;
+    final stream = thumb.resolve(createLocalImageConfiguration(context));
+    final listener = ImageStreamListener((info, _) {
+      final img = info.image;
+      if (img.width > 0 && img.height > 0) {
+        widget.onAspect?.call(img.width / img.height);
+      }
+      _stopMeasure();
+    }, onError: (_, _) => _stopMeasure());
+    _stream = stream;
+    _listener = listener;
+    stream.addListener(listener);
+  }
+
+  void _stopMeasure() {
+    if (_listener != null) _stream?.removeListener(_listener!);
+    _stream = null;
+    _listener = null;
+  }
+
+  @override
+  void dispose() {
+    _stopMeasure();
+    super.dispose();
+  }
 
   void _tap(OnlineScope scope) {
     final w = widget.work;
@@ -494,9 +581,10 @@ class _OnlineCardState extends State<OnlineCard> {
           children: [
             ColoredBox(color: c.control),
             if (w.thumb != null)
+              // 比例已知时铺满；极端长图 / 宽图被夹高后改成完整显示，不裁掉内容。
               Image(
                 image: w.thumb!,
-                fit: BoxFit.cover,
+                fit: widget.clamped ? BoxFit.contain : BoxFit.cover,
                 gaplessPlayback: true,
                 errorBuilder: (_, _, _) => const SizedBox.shrink(),
               ),

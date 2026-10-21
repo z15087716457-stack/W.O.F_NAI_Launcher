@@ -11,6 +11,8 @@ import 'package:nai_launcher/presentation/ui/online/online_contract.dart';
 import 'package:nai_launcher/presentation/ui/online/online_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
+import 'package:nai_launcher/presentation/ui/online/online_wall.dart';
+
 import '../../../helpers/approved_visual_regions.dart';
 import 'online_test_harness.dart';
 
@@ -185,7 +187,26 @@ void main() {
         }
         final jump = find.byKey(const Key('online-jump'));
         // F30: only the complete jump label; keep the original button sizing.
-        final regions = <Rect>[if (jump.evaluate().isNotEmpty) t.getRect(jump)];
+        final regions = <Rect>[
+          if (jump.evaluate().isNotEmpty) t.getRect(jump),
+          // 2026-10-21：卡片大小改成三枚瀑布流图标（用户确认）。分段变窄，搜索框和
+          // 左侧控件随之横移：排除工具栏这一行从搜索框起到分段控件为止的部分。
+          for (final e in find.byKey(const Key('online-card-size')).evaluate())
+            () {
+              final seg = t.getRect(find.byWidget(e.widget));
+              final bar = t.getRect(find.byKey(const Key('online-toolbar')));
+              return Rect.fromLTRB(
+                bar.left,
+                bar.top,
+                seg.right,
+                bar.bottom - 1,
+              );
+            }(),
+          // 极端比例（图高被夹）的卡片改为完整显示缩略图，只排除这些卡片的图片区。
+          for (final e in find.byType(OnlineCard).evaluate())
+            if ((e.widget as OnlineCard).clamped)
+              t.getRect(find.byWidget(e.widget)),
+        ];
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('online-capture')),

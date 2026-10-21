@@ -206,9 +206,11 @@ class UiSeg<T> extends StatelessWidget {
     this.glyphOf,
     this.tooltipOf,
     this.small = true,
+    this.glyphSize = 13,
   });
 
   final List<T> values;
+  final double glyphSize;
   final T selected;
   final ValueChanged<T> onChanged;
   final String Function(T value)? labelOf;
@@ -241,6 +243,7 @@ class UiSeg<T> extends StatelessWidget {
               tooltip: tooltipOf?.call(v),
               selected: v == selected,
               small: small,
+              glyphSize: glyphSize,
               onTap: () => onChanged(v),
             ),
         ],
@@ -258,8 +261,10 @@ class _SegItem extends StatelessWidget {
     required this.selected,
     required this.small,
     required this.onTap,
+    this.glyphSize = 13,
   });
 
+  final double glyphSize;
   final String? label;
   final String? glyph;
   final String? tooltip;
@@ -292,7 +297,7 @@ class _SegItem extends StatelessWidget {
                 : null,
           ),
           child: glyph != null
-              ? UiGlyph(glyph!, size: 13, color: fg)
+              ? UiGlyph(glyph!, size: glyphSize, color: fg)
               : Text(
                   label ?? '',
                   maxLines: 1,

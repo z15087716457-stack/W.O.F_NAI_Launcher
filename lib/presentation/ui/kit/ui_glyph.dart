@@ -78,6 +78,13 @@ abstract final class UiGlyphs {
       'M12 20s-7.5-4.6-9.2-9.4C1.6 7 4 4 7.3 4c2 0 3.6 1.1 4.7 2.7C13.1 5.1 14.7 4 16.7 4 20 4 22.4 7 21.2 10.6 19.5 15.4 12 20 12 20z';
   static const folder = 'M3 6h6l2 2h10v11H3z';
   static const grid = 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z';
+
+  // 瀑布流卡片大小：小（三列）→ 中（两列）→ 大（一列），错落的块表示瀑布流。
+  static const masonrySmall =
+      'M3.5 4h4v6h-4zM3.5 12.5h4v7.5h-4zM10 4h4v9h-4zM10 15.5h4v4.5h-4zM16.5 4h4v4h-4zM16.5 10.5h4v9.5h-4z';
+  static const masonryMedium =
+      'M4 4h6.5v9H4zM4 15.5h6.5V20H4zM13.5 4H20v5h-6.5zM13.5 11.5H20V20h-6.5z';
+  static const masonryLarge = 'M5 4h14v10H5zM5 16.5h14V20H5z';
   static const select =
       'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM14.5 16.5l2 2 3.5-4';
   static const panel = 'M4 5h16v14H4zM15 5v14';

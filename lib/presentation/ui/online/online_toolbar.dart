@@ -76,17 +76,20 @@ class OnlineToolbar extends StatelessWidget {
       else ...[
         UiSeg<OnlineCardSize>(
           key: const Key('online-card-size'),
+          glyphSize: 16,
           values: OnlineCardSize.values,
           selected: data.cardSize,
           onChanged: a.onCardSizeChanged,
-          glyphOf: (v) => v == OnlineCardSize.small ? UiGlyphs.grid : null,
-          labelOf: (v) => switch (v) {
-            OnlineCardSize.small => '',
+          glyphOf: (v) => switch (v) {
+            OnlineCardSize.small => UiGlyphs.masonrySmall,
+            OnlineCardSize.medium => UiGlyphs.masonryMedium,
+            OnlineCardSize.large => UiGlyphs.masonryLarge,
+          },
+          tooltipOf: (v) => switch (v) {
+            OnlineCardSize.small => l10n.online_sizeSmall,
             OnlineCardSize.medium => l10n.online_sizeMedium,
             OnlineCardSize.large => l10n.online_sizeLarge,
           },
-          tooltipOf: (v) =>
-              v == OnlineCardSize.small ? l10n.online_sizeSmall : null,
         ),
         UiBtn(
           key: const Key('online-multi'),

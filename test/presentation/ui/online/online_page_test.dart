@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/online/online_contract.dart';
 import 'package:nai_launcher/presentation/ui/online/online_fixture.dart';
 import 'package:nai_launcher/presentation/ui/online/online_format.dart';
+import 'package:nai_launcher/presentation/ui/online/online_wall.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'online_test_harness.dart';
@@ -92,6 +93,36 @@ void main() {
   });
 
   group('卡片墙', () {
+    testWidgets('不知道原图尺寸：缩略图加载后按真实比例排版，不裁成方块', (t) async {
+      // 夹具缩略图是 24×32（竖图）；作品尺寸传 0 = 未知（AI TAG 列表）。
+      final base = OnlineFixture.aiTagWorks().first;
+      final work = OnlineWork(
+        key: base.key,
+        id: base.id,
+        thumb: base.thumb,
+        width: 0,
+        height: 0,
+        title: base.title,
+        author: base.author,
+      );
+      await pumpOnline(
+        t,
+        data: OnlineFixture.view(
+          list: OnlineList(key: 'unknown', items: [work]),
+        ),
+      );
+      await t.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 50)),
+      );
+      await t.pumpAndSettle();
+      final card = find.byKey(Key('online-card-${work.key}'));
+      final image = t.widget<OnlineCard>(
+        find.ancestor(of: card, matching: find.byType(OnlineCard)),
+      );
+      final width = t.getSize(card).width;
+      expect(image.imageHeight / width, closeTo(32 / 24, .02));
+    });
+
     testWidgets('单击选中、双击打开大图、Esc 关闭', (t) async {
       await pumpOnline(t, data: OnlineFixture.view(), actions: rec.actions);
       await t.tap(_k('online-card-c14'));
@@ -454,7 +485,7 @@ void main() {
 
     testWidgets('卡片大小、多选、刷新、检查器、收起左栏', (t) async {
       await pumpOnline(t, data: OnlineFixture.view(), actions: rec.actions);
-      await t.tap(find.text('大'));
+      await t.tap(find.byTooltip('大'));
       await tap(t, 'online-refresh');
       await tap(t, 'online-inspector-toggle');
       await t.tap(find.byTooltip('收起左栏'));
