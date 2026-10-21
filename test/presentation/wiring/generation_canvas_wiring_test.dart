@@ -341,6 +341,38 @@ void main() {
     });
   }
 
+  Future<List<Color>> menuFills(WidgetTester tester, List<Rect> buttons) =>
+      tester
+          .runAsync(() async {
+            final target =
+                boundary.currentContext!.findRenderObject()
+                    as RenderRepaintBoundary;
+            final snapshot = await target.toImage(pixelRatio: 1);
+            final data = (await snapshot.toByteData(
+              format: ui.ImageByteFormat.rawRgba,
+            ))!;
+            final width = snapshot.width;
+            final result = [
+              for (final button in buttons)
+                () {
+                  final point = target.globalToLocal(
+                    Offset(button.center.dx, button.top + 5),
+                  );
+                  final offset =
+                      (point.dy.floor() * width + point.dx.floor()) * 4;
+                  return Color.fromARGB(
+                    data.getUint8(offset + 3),
+                    data.getUint8(offset),
+                    data.getUint8(offset + 1),
+                    data.getUint8(offset + 2),
+                  );
+                }(),
+            ];
+            snapshot.dispose();
+            return result;
+          })
+          .then((colors) => colors!);
+
   testWidgets('滚轮自动切图后往返报价不闪空，工具条逐帧保持位置', (tester) async {
     final sources = [
       for (final (run, steps) in [(60, 28), (61, 50)])
@@ -1892,6 +1924,20 @@ void main() {
           tester,
           'compact-menu-$language-${dark ? 'dark' : 'light'}',
         );
+        final menuSurface = find.ancestor(
+          of: find.byKey(const Key('gen-canvas-menu-save')),
+          matching: find.byWidgetPredicate(
+            (widget) =>
+                widget is Material &&
+                widget.color == colors.raised &&
+                widget.shape is RoundedRectangleBorder,
+          ),
+        );
+        final menuRect = tester.getRect(menuSurface.first);
+        expect(save.top - menuRect.top, closeTo(6, .001));
+        expect(save.left - menuRect.left, closeTo(8, .001));
+        expect(menuRect.right - copy.right, closeTo(8, .001));
+        expect(copy.left - save.right, closeTo(4, .001));
         await tester.tap(find.byKey(const Key('gen-canvas-menu-edit-group')));
         await tester.pumpAndSettle();
         expect(
@@ -1928,6 +1974,37 @@ void main() {
         await tester.pumpAndSettle();
         expect(events, ['onEditImage(1-0)', 'onReveal(1-0)']);
         expect(find.byKey(const Key('image-action-menu')), findsNothing);
+        await tester.tap(
+          find.byKey(const Key('gen-tile-1-0')),
+          buttons: kSecondaryMouseButton,
+        );
+        await tester.pumpAndSettle();
+        final quickButtons = [save, copy];
+        expect(await menuFills(tester, quickButtons), [
+          colors.raised,
+          colors.raised,
+        ], reason: 'Quick actions blend into the menu until hovered.');
+        final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await mouse.addPointer(location: Offset.zero);
+        addTearDown(mouse.removePointer);
+        for (var index = 0; index < quickButtons.length; index++) {
+          await mouse.moveTo(quickButtons[index].center);
+          await tester.pumpAndSettle();
+          expect(await menuFills(tester, quickButtons), [
+            for (var i = 0; i < quickButtons.length; i++)
+              i == index ? colors.control : colors.raised,
+          ]);
+          await capture(
+            tester,
+            'compact-menu-hover-$index-$language-${dark ? 'dark' : 'light'}',
+          );
+        }
+        await mouse.moveTo(Offset.zero);
+        await tester.pumpAndSettle();
+        expect(await menuFills(tester, quickButtons), [
+          colors.raised,
+          colors.raised,
+        ]);
         expect(tester.takeException(), isNull);
       });
       testWidgets('$language ${dark ? 'dark' : 'light'} 生成文案实绘和布局', (

@@ -33,7 +33,6 @@ abstract final class UiImageMenu {
       appearance: ImageActionMenuStyle(
         menu: MenuStyle(
           backgroundColor: WidgetStatePropertyAll(c.raised),
-          padding: const WidgetStatePropertyAll(EdgeInsets.all(4)),
           shape: WidgetStatePropertyAll(
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -49,7 +48,7 @@ abstract final class UiImageMenu {
             EdgeInsets.symmetric(horizontal: 6),
           ),
           textStyle: WidgetStatePropertyAll(UiText.sans(12)),
-          backgroundColor: WidgetStatePropertyAll(c.control),
+          backgroundColor: const WidgetStatePropertyAll(Colors.transparent),
         ),
         iconSize: 15,
         disabledColor: c.faint,
