@@ -509,7 +509,9 @@ class _BatchItem extends StatelessWidget {
     final b = batch;
     final cover = b.images.firstOrNull;
     final maxH = (width * .98).clamp(150.0, 330.0);
-    final ratio = cover == null ? 832 / 1216 : cover.width / cover.height;
+    final ratio = cover == null
+        ? (b.pendingWidth ?? 832) / (b.pendingHeight ?? 1216)
+        : cover.width / cover.height;
     final h = (width / ratio).clamp(0.0, maxH);
     final w = h * ratio;
     final time = b.time.toLocal();

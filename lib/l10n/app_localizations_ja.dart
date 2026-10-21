@@ -18806,6 +18806,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_upSeed7bSharpSub => 'よりシャープなディテール';
 
   @override
+  String get set_upSeed3bInt8 => '3B · バランス INT8';
+
+  @override
+  String get set_upSeed3bInt8Sub => '3B バランスモデルの INT8 量子化版';
+
+  @override
+  String get set_upSeed7bInt8 => '7B · 高画質 INT8';
+
+  @override
+  String get set_upSeed7bInt8Sub => '7B 高画質モデルの INT8 量子化版';
+
+  @override
+  String get set_upSeed7bSharpInt8 => '7B · シャープ INT8';
+
+  @override
+  String get set_upSeed7bSharpInt8Sub => '7B シャープモデルの INT8 量子化版';
+
+  @override
   String set_upVram(Object n) {
     return 'VRAM ≥ $n GB';
   }

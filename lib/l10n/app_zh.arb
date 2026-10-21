@@ -10197,6 +10197,12 @@
   "set_upSeed7bSub": "更高画质潜力，需要更多显存与时间",
   "set_upSeed7bSharp": "7B · 锐利",
   "set_upSeed7bSharpSub": "偏向更锐利的细节，适合强化纹理",
+  "set_upSeed3bInt8": "3B · 均衡 INT8",
+  "set_upSeed3bInt8Sub": "3B 均衡型号的 INT8 量化版本",
+  "set_upSeed7bInt8": "7B · 高画质 INT8",
+  "set_upSeed7bInt8Sub": "7B 高画质型号的 INT8 量化版本",
+  "set_upSeed7bSharpInt8": "7B · 锐利 INT8",
+  "set_upSeed7bSharpInt8Sub": "7B 锐利型号的 INT8 量化版本",
   "set_upVram": "显存 ≥ {n} GB",
   "@set_upVram": {
     "placeholders": {

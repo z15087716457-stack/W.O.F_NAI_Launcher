@@ -2386,6 +2386,9 @@ class _SettingsUpscalePageState extends State<SettingsUpscalePage> {
       'seed3b' => l.set_upSeed3bSub,
       'seed7b' => l.set_upSeed7bSub,
       'seed7bSharp' => l.set_upSeed7bSharpSub,
+      'seedvr2-3b-int8' => l.set_upSeed3bInt8Sub,
+      'seedvr2-7b-int8' => l.set_upSeed7bInt8Sub,
+      'seedvr2-7b-sharp-int8' => l.set_upSeed7bSharpInt8Sub,
       _ => m.file,
     };
     void remove(SettingsUpscaleModel m) => s.confirm(

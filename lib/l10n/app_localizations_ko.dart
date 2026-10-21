@@ -18867,6 +18867,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_upSeed7bSharpSub => '더 선명한 디테일';
 
   @override
+  String get set_upSeed3bInt8 => '3B · 균형 INT8';
+
+  @override
+  String get set_upSeed3bInt8Sub => '3B 균형 모델의 INT8 양자화 버전';
+
+  @override
+  String get set_upSeed7bInt8 => '7B · 고화질 INT8';
+
+  @override
+  String get set_upSeed7bInt8Sub => '7B 고화질 모델의 INT8 양자화 버전';
+
+  @override
+  String get set_upSeed7bSharpInt8 => '7B · 선명 INT8';
+
+  @override
+  String get set_upSeed7bSharpInt8Sub => '7B 선명 모델의 INT8 양자화 버전';
+
+  @override
   String set_upVram(Object n) {
     return 'VRAM ≥ $n GB';
   }

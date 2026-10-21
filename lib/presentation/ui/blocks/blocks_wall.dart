@@ -469,7 +469,13 @@ class BlocksWall extends StatelessWidget {
           );
         }
         final masonry = d.view == BlocksView.masonry;
-        Widget content(int start, int count) => masonry
+        Widget content(int start, int count) => masonry && d.groups != null
+            ? _GroupedMasonry(
+                blocks: d.blocks.sublist(start, start + count),
+                columns: cols,
+                width: cardW,
+              )
+            : masonry
             ? SliverMasonryGrid.count(
                 crossAxisCount: cols,
                 crossAxisSpacing: 12,
@@ -546,6 +552,108 @@ class _GroupedScroll extends StatelessWidget {
               ],
             ),
         const SliverToBoxAdapter(child: SizedBox(height: 80)),
+      ],
+    );
+  }
+}
+
+/// 分组瀑布流使用并排的懒加载列表。旧 SliverMasonryGrid 在整组滚出
+/// 缓存区后会错误请求回退校正，把外层滚动位置拉回上一组。
+class _GroupedMasonry extends StatefulWidget {
+  const _GroupedMasonry({
+    required this.blocks,
+    required this.columns,
+    required this.width,
+  });
+  final List<BlockData> blocks;
+  final int columns;
+  final double width;
+
+  @override
+  State<_GroupedMasonry> createState() => _GroupedMasonryState();
+}
+
+class _GroupedMasonryState extends State<_GroupedMasonry> {
+  bool _relayoutQueued = false;
+
+  void _thumbnailResolved() {
+    if (_relayoutQueued) return;
+    _relayoutQueued = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _relayoutQueued = false;
+      if (mounted) setState(() {});
+    });
+  }
+
+  double _height(BuildContext context, BlockData block) {
+    final thumb = block.thumb;
+    double cover;
+    if (thumb != null) {
+      final aspect = _MasonryThumbState._aspects[thumb.image] ?? 4 / 3;
+      cover = (widget.width / aspect)
+          .clamp(widget.width * .5, widget.width * 1.6)
+          .roundToDouble();
+    } else {
+      final picking = BlocksPageScope.of(context).controller.picking;
+      final painter = TextPainter(
+        text: TextSpan(
+          text: block.atoms.isEmpty
+              ? block.negativeAtoms.join(', ')
+              : block.content,
+          style: UiText.mono(11, height: 1.6),
+        ),
+        maxLines: 8,
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout(maxWidth: math.max(1, widget.width - (picking ? 66 : 42)));
+      cover = math.max(72, painter.height + 23);
+      painter.dispose();
+    }
+    // 标题、计数与内边距高度相近；估算只决定放到哪列，卡片仍按自然高度布局。
+    return cover + 58;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final columns = List.generate(widget.columns, (_) => <BlockData>[]);
+    final heights = List.filled(widget.columns, 0.0);
+    for (final block in widget.blocks) {
+      var column = 0;
+      for (var i = 1; i < heights.length; i++) {
+        if (heights[i] < heights[column]) column = i;
+      }
+      columns[column].add(block);
+      heights[column] += _height(context, block) + 14;
+    }
+    return SliverCrossAxisGroup(
+      slivers: [
+        for (var column = 0; column < columns.length; column++) ...[
+          if (column > 0)
+            const SliverConstrainedCrossAxis(
+              maxExtent: 12,
+              sliver: SliverToBoxAdapter(child: SizedBox.shrink()),
+            ),
+          SliverConstrainedCrossAxis(
+            maxExtent: widget.width,
+            sliver: SliverList.separated(
+              itemCount: columns[column].length,
+              findItemIndexCallback: (key) {
+                final index = columns[column].indexWhere(
+                  (block) => ValueKey(block.id) == key,
+                );
+                return index < 0 ? null : index;
+              },
+              separatorBuilder: (_, _) => const SizedBox(height: 14),
+              itemBuilder: (context, i) => _Card(
+                key: ValueKey(columns[column][i].id),
+                block: columns[column][i],
+                coverH: null,
+                width: widget.width,
+                onThumbnailResolved: _thumbnailResolved,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -665,12 +773,14 @@ class _Card extends StatefulWidget {
     required this.block,
     required this.coverH,
     required this.width,
+    this.onThumbnailResolved,
   });
   final BlockData block;
 
   /// 网格：固定封面高（卡宽 × 0.6）；null = 瀑布流，封面按内容 / 原图比例自然高。
   final double? coverH;
   final double width;
+  final VoidCallback? onThumbnailResolved;
 
   @override
   State<_Card> createState() => _CardState();
@@ -745,7 +855,11 @@ class _CardState extends State<_Card> {
           if (widget.coverH != null)
             BlockCover(b, leftInset: inset)
           else if (b.thumb != null)
-            _MasonryThumb(thumb: b.thumb!, width: widget.width)
+            _MasonryThumb(
+              thumb: b.thumb!,
+              width: widget.width,
+              onResolved: widget.onThumbnailResolved,
+            )
           else
             _MasonryTextCover(block: b, leftInset: inset),
           if (b.favorite)
@@ -998,9 +1112,14 @@ class _CardState extends State<_Card> {
 /// 瀑布流封面（有预览图）：按原图比例显示整张图，比例夹在 0.5 ~ 1.6 倍宽之间；
 /// 图还没解码时先按 4:3 占位。
 class _MasonryThumb extends StatefulWidget {
-  const _MasonryThumb({required this.thumb, required this.width});
+  const _MasonryThumb({
+    required this.thumb,
+    required this.width,
+    this.onResolved,
+  });
   final BlockThumb thumb;
   final double width;
+  final VoidCallback? onResolved;
 
   @override
   State<_MasonryThumb> createState() => _MasonryThumbState();
@@ -1032,6 +1151,7 @@ class _MasonryThumbState extends State<_MasonryThumb> {
       final i = info.image;
       if (i.width > 0 && i.height > 0 && mounted) {
         _aspects[image] = i.width / i.height;
+        widget.onResolved?.call();
         // 已缓存的图在构建期间同步回调：此时 build 还没跑，直接读到新比例即可。
         if (SchedulerBinding.instance.schedulerPhase !=
             SchedulerPhase.persistentCallbacks) {

@@ -130,6 +130,9 @@ class _BlocksDockState extends State<BlocksDock> {
           onSecondaryTapUp: (e) => _openMenu(b, e.globalPosition),
           child: Draggable<Object>(
             data: a.dragDataOf(b.id),
+            // 页面在分支 Navigator 内，预览须与积木浮窗同处根浮层，
+            // 否则拖到浮窗上方时会被卡片遮住。
+            rootOverlay: true,
             dragAnchorStrategy: pointerDragAnchorStrategy,
             onDragStarted: _exit,
             feedback: Material(

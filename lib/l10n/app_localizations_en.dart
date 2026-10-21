@@ -19387,6 +19387,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_upSeed7bSharpSub => 'Sharper details for textures';
 
   @override
+  String get set_upSeed3bInt8 => '3B · balanced INT8';
+
+  @override
+  String get set_upSeed3bInt8Sub =>
+      'INT8-quantized version of the balanced 3B model';
+
+  @override
+  String get set_upSeed7bInt8 => '7B · quality INT8';
+
+  @override
+  String get set_upSeed7bInt8Sub =>
+      'INT8-quantized version of the high-quality 7B model';
+
+  @override
+  String get set_upSeed7bSharpInt8 => '7B · sharp INT8';
+
+  @override
+  String get set_upSeed7bSharpInt8Sub =>
+      'INT8-quantized version of the sharp 7B model';
+
+  @override
   String set_upVram(Object n) {
     return 'VRAM ≥ $n GB';
   }

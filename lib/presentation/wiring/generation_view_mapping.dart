@@ -175,6 +175,12 @@ GenHistoryData generationHistoryView(
               ),
           ],
           pending: math.max(0, batch.count - batch.images.length),
+          pendingWidth: batch.isGenerating
+              ? state.batchWidth ?? state.displayWidth
+              : null,
+          pendingHeight: batch.isGenerating
+              ? state.batchHeight ?? state.displayHeight
+              : null,
         ),
     ],
   );

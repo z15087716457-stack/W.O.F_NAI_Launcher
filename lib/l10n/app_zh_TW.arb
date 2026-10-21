@@ -10302,6 +10302,12 @@
   "set_upSeed7bSub": "更高畫質潛力，需要更多視訊記憶體與時間",
   "set_upSeed7bSharp": "7B · 銳利",
   "set_upSeed7bSharpSub": "偏向更銳利的細節，適合強化紋理",
+  "set_upSeed3bInt8": "3B · 均衡 INT8",
+  "set_upSeed3bInt8Sub": "3B 均衡型號的 INT8 量化版本",
+  "set_upSeed7bInt8": "7B · 高畫質 INT8",
+  "set_upSeed7bInt8Sub": "7B 高畫質型號的 INT8 量化版本",
+  "set_upSeed7bSharpInt8": "7B · 銳利 INT8",
+  "set_upSeed7bSharpInt8Sub": "7B 銳利型號的 INT8 量化版本",
   "set_upVram": "視訊記憶體 ≥ {n} GB",
   "@set_upVram": {
     "placeholders": {

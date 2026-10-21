@@ -143,15 +143,25 @@ final generationHistoryBatchesProvider = Provider<List<GenBatch>>((ref) {
   final panel = ref.watch(generationPanelImagesProvider);
   final active = ref.watch(
     imageGenerationNotifierProvider.select(
-      (state) => (state.isGenerating, state.generationRunId, state.totalImages),
+      (state) => (
+        generating: state.isGenerating,
+        runId: state.generationRunId,
+        count: state.totalImages,
+        width: state.batchWidth ?? state.displayWidth,
+        height: state.batchHeight ?? state.displayHeight,
+      ),
     ),
   );
   return generationHistoryView(
     ImageGenerationState(
       history: panel,
-      status: active.$1 ? GenerationStatus.generating : GenerationStatus.idle,
-      generationRunId: active.$2,
-      totalImages: active.$3,
+      status: active.generating
+          ? GenerationStatus.generating
+          : GenerationStatus.idle,
+      generationRunId: active.runId,
+      totalImages: active.count,
+      batchWidth: active.width,
+      batchHeight: active.height,
     ),
     favorites:
         ref.watch(generationFavoriteImagesProvider).valueOrNull ?? const {},

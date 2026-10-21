@@ -18586,6 +18586,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_upSeed7bSharpSub => '偏向更锐利的细节，适合强化纹理';
 
   @override
+  String get set_upSeed3bInt8 => '3B · 均衡 INT8';
+
+  @override
+  String get set_upSeed3bInt8Sub => '3B 均衡型号的 INT8 量化版本';
+
+  @override
+  String get set_upSeed7bInt8 => '7B · 高画质 INT8';
+
+  @override
+  String get set_upSeed7bInt8Sub => '7B 高画质型号的 INT8 量化版本';
+
+  @override
+  String get set_upSeed7bSharpInt8 => '7B · 锐利 INT8';
+
+  @override
+  String get set_upSeed7bSharpInt8Sub => '7B 锐利型号的 INT8 量化版本';
+
+  @override
   String set_upVram(Object n) {
     return '显存 ≥ $n GB';
   }
@@ -39537,6 +39555,24 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_upSeed7bSharpSub => '偏向更銳利的細節，適合強化紋理';
+
+  @override
+  String get set_upSeed3bInt8 => '3B · 均衡 INT8';
+
+  @override
+  String get set_upSeed3bInt8Sub => '3B 均衡型號的 INT8 量化版本';
+
+  @override
+  String get set_upSeed7bInt8 => '7B · 高畫質 INT8';
+
+  @override
+  String get set_upSeed7bInt8Sub => '7B 高畫質型號的 INT8 量化版本';
+
+  @override
+  String get set_upSeed7bSharpInt8 => '7B · 銳利 INT8';
+
+  @override
+  String get set_upSeed7bSharpInt8Sub => '7B 銳利型號的 INT8 量化版本';
 
   @override
   String set_upVram(Object n) {

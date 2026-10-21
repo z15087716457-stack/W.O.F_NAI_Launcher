@@ -10197,6 +10197,12 @@
   "set_upSeed7bSub": "더 높은 화질, VRAM과 시간이 더 필요",
   "set_upSeed7bSharp": "7B · 선명",
   "set_upSeed7bSharpSub": "더 선명한 디테일",
+  "set_upSeed3bInt8": "3B · 균형 INT8",
+  "set_upSeed3bInt8Sub": "3B 균형 모델의 INT8 양자화 버전",
+  "set_upSeed7bInt8": "7B · 고화질 INT8",
+  "set_upSeed7bInt8Sub": "7B 고화질 모델의 INT8 양자화 버전",
+  "set_upSeed7bSharpInt8": "7B · 선명 INT8",
+  "set_upSeed7bSharpInt8Sub": "7B 선명 모델의 INT8 양자화 버전",
   "set_upVram": "VRAM ≥ {n} GB",
   "@set_upVram": {
     "placeholders": {

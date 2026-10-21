@@ -1189,6 +1189,8 @@ class GenBatch with _GenValue {
     required this.time,
     required this.images,
     this.pending = 0,
+    this.pendingWidth,
+    this.pendingHeight,
   });
 
   final String id;
@@ -1198,9 +1200,21 @@ class GenBatch with _GenValue {
   /// 这一批还在出的张数（生成中的那一批放在最上面，封面用占位）。
   final int pending;
 
+  /// 首图返回前的占位尺寸，取本次生成捕获的批次分辨率。
+  /// 未提供时保留旧界面的默认比例；成图之后使用图片自身尺寸。
+  final int? pendingWidth;
+  final int? pendingHeight;
+
   int get count => images.length + pending;
   @override
-  List<Object?> get _values => [id, time, images, pending];
+  List<Object?> get _values => [
+    id,
+    time,
+    images,
+    pending,
+    pendingWidth,
+    pendingHeight,
+  ];
 }
 
 @immutable

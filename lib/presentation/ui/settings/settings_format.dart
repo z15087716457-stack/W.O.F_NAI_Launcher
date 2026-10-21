@@ -202,6 +202,9 @@ abstract final class SettingsFormat {
       'seed3b' => l.set_upSeed3b,
       'seed7b' => l.set_upSeed7b,
       'seed7bSharp' => l.set_upSeed7bSharp,
+      'seedvr2-3b-int8' => l.set_upSeed3bInt8,
+      'seedvr2-7b-int8' => l.set_upSeed7bInt8,
+      'seedvr2-7b-sharp-int8' => l.set_upSeed7bSharpInt8,
       'rtxVideo' => l.set_upRtx,
       _ => id,
     };

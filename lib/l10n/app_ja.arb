@@ -10197,6 +10197,12 @@
   "set_upSeed7bSub": "高画質。VRAM と時間が多く必要",
   "set_upSeed7bSharp": "7B · シャープ",
   "set_upSeed7bSharpSub": "よりシャープなディテール",
+  "set_upSeed3bInt8": "3B · バランス INT8",
+  "set_upSeed3bInt8Sub": "3B バランスモデルの INT8 量子化版",
+  "set_upSeed7bInt8": "7B · 高画質 INT8",
+  "set_upSeed7bInt8Sub": "7B 高画質モデルの INT8 量子化版",
+  "set_upSeed7bSharpInt8": "7B · シャープ INT8",
+  "set_upSeed7bSharpInt8Sub": "7B シャープモデルの INT8 量子化版",
   "set_upVram": "VRAM ≥ {n} GB",
   "@set_upVram": {
     "placeholders": {

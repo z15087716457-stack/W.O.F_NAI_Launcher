@@ -33832,6 +33832,42 @@ abstract class AppLocalizations {
   /// **'Sharper details for textures'**
   String get set_upSeed7bSharpSub;
 
+  /// No description provided for @set_upSeed3bInt8.
+  ///
+  /// In en, this message translates to:
+  /// **'3B · balanced INT8'**
+  String get set_upSeed3bInt8;
+
+  /// No description provided for @set_upSeed3bInt8Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'INT8-quantized version of the balanced 3B model'**
+  String get set_upSeed3bInt8Sub;
+
+  /// No description provided for @set_upSeed7bInt8.
+  ///
+  /// In en, this message translates to:
+  /// **'7B · quality INT8'**
+  String get set_upSeed7bInt8;
+
+  /// No description provided for @set_upSeed7bInt8Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'INT8-quantized version of the high-quality 7B model'**
+  String get set_upSeed7bInt8Sub;
+
+  /// No description provided for @set_upSeed7bSharpInt8.
+  ///
+  /// In en, this message translates to:
+  /// **'7B · sharp INT8'**
+  String get set_upSeed7bSharpInt8;
+
+  /// No description provided for @set_upSeed7bSharpInt8Sub.
+  ///
+  /// In en, this message translates to:
+  /// **'INT8-quantized version of the sharp 7B model'**
+  String get set_upSeed7bSharpInt8Sub;
+
   /// No description provided for @set_upVram.
   ///
   /// In en, this message translates to:
