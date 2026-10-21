@@ -8,11 +8,49 @@ import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/core/utils/comfyui_prompt_parser.dart';
 import 'package:nai_launcher/core/utils/file_picker_utils.dart';
 import 'package:nai_launcher/core/utils/image_save_utils.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
 
 void main() {
+  test(
+    'new gallery saves share one folder across days without changing bytes',
+    () async {
+      final root = await Directory.systemTemp.createTemp('gallery_default_');
+      addTearDown(() => root.delete(recursive: true));
+      final old = File('${root.path}/2026-10-01/old.png');
+      await old.create(recursive: true);
+      await old.writeAsString('historical image');
+      final bytes = Uint8List.fromList([1, 2, 3, 4]);
+      final paths = await Future.wait([
+        for (final day in [21, 22, 22])
+          ImageSaveUtils.saveBytesToGalleryPath(
+            rootPath: root.path,
+            bytes: bytes,
+            seed: 123,
+            now: DateTime(2026, 10, day, 10, 20, 30),
+          ),
+      ]);
+      expect(paths.toSet(), hasLength(3));
+      for (final path in paths) {
+        expect(File(path).parent.path, galleryUncategorizedPath(root.path));
+        expect(await File(path).readAsBytes(), bytes);
+      }
+      expect(await old.readAsString(), 'historical image');
+      expect(await Directory('${root.path}/2026-10-22').exists(), isFalse);
+      expect(
+        await ImageSaveUtils.findIdenticalGalleryFile(
+          rootPath: root.path,
+          bytes: bytes,
+          seed: 123,
+          now: DateTime(2026, 11, 1),
+        ),
+        isIn(paths),
+      );
+    },
+  );
+
   group('ComfyuiPromptParser pipe syntax', () {
     test('should parse single-line whitespace pipe character prompts', () {
       const prompt =
@@ -377,7 +415,7 @@ void main() {
     );
   });
 
-  group('ImageSaveUtils.findIdenticalDatedFile', () {
+  group('ImageSaveUtils.findIdenticalGalleryFile', () {
     final day = DateTime(2026, 8, 19);
     final bytes = Uint8List.fromList(List.generate(1024, (i) => i % 251));
 
@@ -395,7 +433,7 @@ void main() {
         final dir = await createDatedDir(tempDir);
         await File('${dir.path}/22-59-55-12345.png').writeAsBytes(bytes);
 
-        final found = await ImageSaveUtils.findIdenticalDatedFile(
+        final found = await ImageSaveUtils.findIdenticalGalleryFile(
           rootPath: tempDir.path,
           bytes: bytes,
           seed: 12345,
@@ -415,7 +453,7 @@ void main() {
         final dir = await createDatedDir(tempDir);
         await File('${dir.path}/22-59-55-12345-2.png').writeAsBytes(bytes);
 
-        final found = await ImageSaveUtils.findIdenticalDatedFile(
+        final found = await ImageSaveUtils.findIdenticalGalleryFile(
           rootPath: tempDir.path,
           bytes: bytes,
           seed: 12345,
@@ -436,7 +474,7 @@ void main() {
         final other = Uint8List.fromList(List.generate(1024, (i) => i % 250));
         await File('${dir.path}/22-59-55-12345.png').writeAsBytes(other);
 
-        final found = await ImageSaveUtils.findIdenticalDatedFile(
+        final found = await ImageSaveUtils.findIdenticalGalleryFile(
           rootPath: tempDir.path,
           bytes: bytes,
           seed: 12345,
@@ -456,7 +494,7 @@ void main() {
         final dir = await createDatedDir(tempDir);
         await File('${dir.path}/22-59-55-12345.png').writeAsBytes(bytes);
 
-        final found = await ImageSaveUtils.findIdenticalDatedFile(
+        final found = await ImageSaveUtils.findIdenticalGalleryFile(
           rootPath: tempDir.path,
           bytes: bytes,
           seed: null,
@@ -477,7 +515,7 @@ void main() {
         // seed=12345 不应命中 "...-912345.png"
         await File('${dir.path}/22-59-55-912345.png').writeAsBytes(bytes);
 
-        final found = await ImageSaveUtils.findIdenticalDatedFile(
+        final found = await ImageSaveUtils.findIdenticalGalleryFile(
           rootPath: tempDir.path,
           bytes: bytes,
           seed: 12345,

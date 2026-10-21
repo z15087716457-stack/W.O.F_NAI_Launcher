@@ -2876,6 +2876,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_dateFolders => '日期文件夹';
 
   @override
+  String get localGallery_uncategorizedFolder => '未分类文件夹';
+
+  @override
   String localGallery_indexSynced(String count) {
     return '索引已同步 · $count';
   }
@@ -23845,6 +23848,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_dateFolders => '日期資料夾';
+
+  @override
+  String get localGallery_uncategorizedFolder => '未分類資料夾';
 
   @override
   String localGallery_indexSynced(String count) {

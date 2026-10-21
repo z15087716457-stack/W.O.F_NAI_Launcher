@@ -11,6 +11,7 @@ import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/gallery_path_utils.dart';
+import '../../core/utils/gallery_storage_layout.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../models/gallery/gallery_category.dart';
 import '../services/gallery/gallery_delete_pool_store.dart';
@@ -726,6 +727,10 @@ class GalleryCategoryRepository {
   ) async {
     final rootPath = await getRootPath();
     if (rootPath == null) return existingCategories;
+
+    // One stable destination for new images. Existing directories are scanned
+    // as before; no historical image or category is moved during this change.
+    await Directory(galleryUncategorizedPath(rootPath)).create(recursive: true);
 
     final updatedCategories = <GalleryCategory>[];
     final existingPaths = existingCategories

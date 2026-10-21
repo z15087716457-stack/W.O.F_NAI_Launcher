@@ -2,6 +2,36 @@ import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import '../common/studio_icons.dart';
 import 'gallery_nai_versions.dart';
 
+/// Compact single-choice row shared by the gallery's small filter menus.
+class GalleryChoiceMenuItem<T> extends PopupMenuItem<T> {
+  GalleryChoiceMenuItem({
+    super.key,
+    required T super.value,
+    required bool selected,
+    required String label,
+  }) : super(
+         height: 34,
+         padding: const EdgeInsets.symmetric(horizontal: 10),
+         textStyle: const TextStyle(fontSize: 13),
+         child: Semantics(
+           selected: selected,
+           child: Row(
+             mainAxisSize: MainAxisSize.min,
+             children: [
+               SizedBox(
+                 width: 16,
+                 child: selected
+                     ? const Icon(StudioIcons.galleryCheck, size: 16)
+                     : null,
+               ),
+               const SizedBox(width: 8),
+               Text(label),
+             ],
+           ),
+         ),
+       );
+}
+
 class GalleryFilterChip extends StatelessWidget {
   const GalleryFilterChip({
     super.key,
@@ -247,22 +277,24 @@ class _VariantMenu extends StatelessWidget {
       position: PopupMenuPosition.under,
       offset: const Offset(0, 6),
       padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 112, maxWidth: 240),
+      menuPadding: const EdgeInsets.symmetric(vertical: 4),
       onSelected: (value) => onSelected(value == 'all' ? null : value),
       itemBuilder: (context) => [
-        CheckedPopupMenuItem(
+        GalleryChoiceMenuItem(
           value: 'all',
-          checked: active == null,
-          child: Text(allLabel),
+          selected: active == null,
+          label: allLabel,
         ),
-        CheckedPopupMenuItem(
+        GalleryChoiceMenuItem(
           value: 'F',
-          checked: active == 'F',
-          child: const Text('Full'),
+          selected: active == 'F',
+          label: 'Full',
         ),
-        CheckedPopupMenuItem(
+        GalleryChoiceMenuItem(
           value: 'C',
-          checked: active == 'C',
-          child: const Text('Curated'),
+          selected: active == 'C',
+          label: 'Curated',
         ),
       ],
       child: Padding(

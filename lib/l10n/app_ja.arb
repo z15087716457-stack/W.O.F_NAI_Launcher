@@ -1375,6 +1375,7 @@
   "localGallery_sectionCollections": "コレクション",
   "localGallery_sectionFolders": "フォルダー",
   "localGallery_dateFolders": "日付フォルダー",
+  "localGallery_uncategorizedFolder": "未分類フォルダー",
   "localGallery_indexSynced": "インデックス同期済み · {count}",
   "@localGallery_indexSynced": {
     "placeholders": {

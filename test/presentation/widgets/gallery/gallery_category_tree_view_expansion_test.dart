@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -88,6 +89,49 @@ void main() {
       }
     });
   }
+
+  testWidgets(
+    'uncategorized is a selectable archive and old dates remain accessible',
+    (tester) async {
+      await withHive(tester, () async {
+        String? selected;
+        final folders = [
+          GalleryCategory.create(
+            name: galleryUncategorizedFolderName,
+            folderPath: galleryUncategorizedFolderName,
+          ),
+          GalleryCategory.create(name: '2026-10-01', folderPath: '2026-10-01'),
+          GalleryCategory.create(name: '2026-10-02', folderPath: '2026-10-02'),
+        ];
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              locale: const Locale('zh'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: GalleryCategoryTreeView(
+                  categories: folders,
+                  totalImageCount: 0,
+                  onCategorySelected: (id) => selected = id,
+                ),
+              ),
+            ),
+          ),
+        );
+        await settle(tester);
+        expect(find.text('未分类文件夹'), findsOneWidget);
+        expect(find.byIcon(StudioIcons.galleryArchive), findsOneWidget);
+        expect(find.text('日期文件夹'), findsNothing);
+        expect(find.text('2026-10-01'), findsOneWidget);
+        expect(find.text('2026-10-02'), findsOneWidget);
+        await tester.tap(
+          find.byKey(const Key('gallery-sidebar-uncategorized')),
+        );
+        expect(selected, folders.first.id);
+      });
+    },
+  );
 
   testWidgets('expansion persists to storage and restores on rebuild', (
     tester,

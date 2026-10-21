@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/data/repositories/gallery_category_repository.dart';
 import 'package:path/path.dart' as p;
@@ -56,8 +57,40 @@ void main() {
 
       final syncedCategories = await repository.syncWithFileSystem(const []);
 
-      expect(syncedCategories, isEmpty);
+      expect(syncedCategories.map((c) => c.folderPath), [
+        galleryUncategorizedFolderName,
+      ]);
       expect(await folder.exists(), isTrue);
+    },
+  );
+
+  test(
+    'sync discovers a single default folder and keeps historical paths and ids',
+    () async {
+      final old = GalleryCategory.create(
+        name: '2026-10-01',
+        folderPath: '2026-10-01',
+      );
+      final original = File(
+        p.join(galleryRoot.path, old.folderPath, 'old.png'),
+      );
+      await original.create(recursive: true);
+      await original.writeAsString('old bytes');
+      final once = await repository.syncWithFileSystem([old]);
+      final twice = await repository.syncWithFileSystem(once);
+      expect(
+        twice.where((c) => isGalleryUncategorizedFolder(c.folderPath)),
+        hasLength(1),
+      );
+      expect(
+        twice.firstWhere((c) => c.id == old.id).folderPath,
+        old.folderPath,
+      );
+      expect(await original.readAsString(), 'old bytes');
+      expect(
+        await Directory(galleryUncategorizedPath(galleryRoot.path)).exists(),
+        isTrue,
+      );
     },
   );
 

@@ -14,6 +14,7 @@ enum LocalImageContextAction {
   sendToKrita,
   upscale,
   importMetadata,
+  placeOnCanvas,
   copyPrompt,
   copySeed,
   moveTo,
@@ -32,6 +33,7 @@ class LocalImageContextMenu {
     required bool hasPrompt,
     required bool hasSeed,
     required bool isKritaConnected,
+    bool canPlaceOnCanvas = true,
   }) {
     final l = context.l10n;
     ImageMenuAction<LocalImageContextAction> item(
@@ -81,6 +83,12 @@ class LocalImageContextMenu {
             l.localGallery_importImageMetadata,
             StudioIcons.galleryImport,
           ),
+        item(
+          LocalImageContextAction.placeOnCanvas,
+          l.img2img_placeOnCanvas,
+          Icons.crop_free,
+          enabled: canPlaceOnCanvas,
+        ),
         item(
           LocalImageContextAction.showInFolder,
           l.localGallery_showInFolder,

@@ -1375,6 +1375,7 @@
   "localGallery_sectionCollections": "컬렉션",
   "localGallery_sectionFolders": "폴더",
   "localGallery_dateFolders": "날짜 폴더",
+  "localGallery_uncategorizedFolder": "미분류 폴더",
   "localGallery_indexSynced": "색인 동기화됨 · {count}",
   "@localGallery_indexSynced": {
     "placeholders": {

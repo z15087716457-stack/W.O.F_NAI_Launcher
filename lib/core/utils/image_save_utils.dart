@@ -13,6 +13,7 @@ import '../constants/api_constants.dart';
 import '../enums/precise_ref_type.dart';
 import '../enums/quality_tag_preset.dart';
 import 'app_logger.dart';
+import 'gallery_storage_layout.dart';
 import 'prompt_semantics_utils.dart';
 
 /// 统一图像保存工具类
@@ -589,7 +590,7 @@ class ImageSaveUtils {
     return null;
   }
 
-  /// 原子保存图片到日期分类目录：<根目录>/yyyy-MM-dd/HH-mm-ss-<seed>.png
+  /// 原子保存图片到未分类目录：<根目录>/Uncategorized/HH-mm-ss-<seed>.png
   ///
   /// 所有图库保存入口必须走这里：路径选择、独占防冲突、写入、
   /// 失败清理都在一个方法内完成，调用方无需感知占位文件。
@@ -598,7 +599,7 @@ class ImageSaveUtils {
   /// - 写入失败时删除占位文件后重新抛出，不留空 PNG 进图库扫描
   /// - 仅名称冲突（候选已存在）才追加 -2、-3 序号；目录只读、磁盘满等
   ///   不可恢复错误直接抛出，避免无限循环
-  static Future<String> saveBytesToDatedPath({
+  static Future<String> saveBytesToGalleryPath({
     required String rootPath,
     required Uint8List bytes,
     int? seed,
@@ -606,8 +607,7 @@ class ImageSaveUtils {
   }) async {
     final time = now ?? DateTime.now();
     String two(int v) => v.toString().padLeft(2, '0');
-    final dateFolder = '${time.year}-${two(time.month)}-${two(time.day)}';
-    final dir = Directory(p.join(rootPath, dateFolder));
+    final dir = Directory(galleryUncategorizedPath(rootPath));
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
@@ -646,7 +646,7 @@ class ImageSaveUtils {
     return candidate;
   }
 
-  /// 在今日日期目录中查找与 [bytes] 完全一致的已保存文件。
+  /// 在未分类目录中查找与 [bytes] 完全一致的文件，再兼容当日旧日期目录。
   ///
   /// 按文件名中的 seed 粗筛（含 `-2`、`-3` 冲突序号变体），再按长度和
   /// 逐字节比对确认，命中返回文件路径，未命中返回 null。
@@ -654,7 +654,7 @@ class ImageSaveUtils {
   ///
   /// 用于「打开文件夹」「保存图像」等手动入口的去重：当图像对象缺失
   /// filePath 回写时，避免把相同字节重复另存为副本。
-  static Future<String?> findIdenticalDatedFile({
+  static Future<String?> findIdenticalGalleryFile({
     required String rootPath,
     required Uint8List bytes,
     required int? seed,
@@ -666,25 +666,30 @@ class ImageSaveUtils {
     final time = now ?? DateTime.now();
     String two(int v) => v.toString().padLeft(2, '0');
     final dateFolder = '${time.year}-${two(time.month)}-${two(time.day)}';
-    final dir = Directory(p.join(rootPath, dateFolder));
-    if (!await dir.exists()) return null;
+    final directories = [
+      Directory(galleryUncategorizedPath(rootPath)),
+      Directory(p.join(rootPath, dateFolder)),
+    ];
 
     final plainSuffix = '-$seed.png';
     final variantPattern = RegExp('-$seed-\\d+\\.png\$');
-    await for (final entity in dir.list()) {
-      if (entity is! File) continue;
-      final name = p.basename(entity.path);
-      if (hasSeed &&
-          !name.endsWith(plainSuffix) &&
-          !variantPattern.hasMatch(name)) {
-        continue;
-      }
-      if (!hasSeed && p.extension(name).toLowerCase() != '.png') continue;
-      try {
-        if (await entity.length() != bytes.length) continue;
-        if (await _fileBytesEqual(entity, bytes)) return entity.path;
-      } catch (_) {
-        // 单个候选读取失败不影响其余候选
+    for (final dir in directories) {
+      if (!await dir.exists()) continue;
+      await for (final entity in dir.list(followLinks: false)) {
+        if (entity is! File) continue;
+        final name = p.basename(entity.path);
+        if (hasSeed &&
+            !name.endsWith(plainSuffix) &&
+            !variantPattern.hasMatch(name)) {
+          continue;
+        }
+        if (!hasSeed && p.extension(name).toLowerCase() != '.png') continue;
+        try {
+          if (await entity.length() != bytes.length) continue;
+          if (await _fileBytesEqual(entity, bytes)) return entity.path;
+        } catch (_) {
+          // 单个候选读取失败不影响其余候选
+        }
       }
     }
     return null;
@@ -712,7 +717,7 @@ class ImageSaveUtils {
 
   /// 解析图片的真实 seed：优先用已有元数据，否则从 PNG 字节解析。
   ///
-  /// 用于保存入口的日期分类文件名，保证非自动保存路径（详情页保存、
+  /// 用于保存入口的文件名，保证非自动保存路径（详情页保存、
   /// 历史补存、批量保存、定位前补存等）也能拿到真实 seed。
   /// 解析不到时返回 null，由调用方决定文件名兜底。
   static Future<int?> resolveSeed({

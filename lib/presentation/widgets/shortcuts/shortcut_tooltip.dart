@@ -102,30 +102,28 @@ class _RichTooltipContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // Tooltip supplies its resolved text style, including theme overrides.
+    // WidgetSpan children must inherit that foreground instead of fixing white.
+    final style = DefaultTextStyle.of(context).style;
+    final foreground = style.color ?? Theme.of(context).colorScheme.onSurface;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 300),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Flexible(
-            child: Text(
-              message,
-              style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white),
-            ),
-          ),
+          Flexible(child: Text(message, style: style)),
           const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: foreground.withValues(alpha: 0.09),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               shortcutLabel,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Colors.white,
+              style: style.copyWith(
+                color: foreground,
                 fontWeight: FontWeight.w600,
                 fontFamily: StudioTypography.mono,
                 fontFamilyFallback: StudioTypography.fallback,

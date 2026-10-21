@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/rag/rag_gallery_search.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
@@ -36,6 +37,25 @@ import '../../../helpers/studio_capture_fonts.dart';
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets(
+    'default folder breadcrumb and search scope use its localized label',
+    (tester) async {
+      await _pumpToolbar(
+        tester,
+        state: const LocalGalleryState(
+          isInitialized: true,
+          filterCriteria: FilterCriteria(categoryId: 'uncategorized'),
+        ),
+      );
+      expect(find.text('未分类文件夹'), findsOneWidget);
+      expect(find.text(galleryUncategorizedFolderName), findsNothing);
+      final field = tester.widget<TextField>(
+        find.byKey(const Key('gallery-search-field')),
+      );
+      expect(field.decoration!.hintText, contains('未分类文件夹'));
+    },
+  );
 
   testWidgets(
     'query image remains retryable after an error and waits during GPU hold',
@@ -647,6 +667,7 @@ class _FakeCategoryNotifier extends GalleryCategoryNotifier {
         category('root', '01_图库', null),
         category('v45', 'NAI 4.5', 'root'),
         category('normal', '正常向', 'v45'),
+        category('uncategorized', galleryUncategorizedFolderName, null),
       ],
     );
   }

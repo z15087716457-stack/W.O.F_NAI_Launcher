@@ -200,7 +200,7 @@ class GenerationSaveService {
       metadata: existingMetadata,
       bytes: imageBytes,
     );
-    final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+    final identicalPath = await ImageSaveUtils.findIdenticalGalleryFile(
       rootPath: rootPath,
       bytes: finalBytes,
       seed: seed,
@@ -208,7 +208,7 @@ class GenerationSaveService {
     );
     final path =
         identicalPath ??
-        await ImageSaveUtils.saveBytesToDatedPath(
+        await ImageSaveUtils.saveBytesToGalleryPath(
           rootPath: rootPath,
           bytes: finalBytes,
           seed: seed,

@@ -1371,6 +1371,7 @@
   "localGallery_sectionCollections": "收藏集",
   "localGallery_sectionFolders": "文件夹",
   "localGallery_dateFolders": "日期文件夹",
+  "localGallery_uncategorizedFolder": "未分类文件夹",
   "localGallery_indexSynced": "索引已同步 · {count}",
   "@localGallery_indexSynced": {
     "placeholders": {

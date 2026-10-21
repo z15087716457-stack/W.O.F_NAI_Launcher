@@ -50,9 +50,17 @@ import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart'
 import 'package:nai_launcher/presentation/widgets/gallery/timeline/gallery_timeline_view.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
+import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 import '../../../helpers/fake_local_gallery_service.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/light_theme_contrast.dart'
+    show InMemoryLocalStorageService;
 
 /// 本地画廊三栏布局：深浅主题、多语言、宽窄窗口下的实际渲染回归。
 ///
@@ -115,6 +123,71 @@ void main() {
     ),
     (const Locale('zh', 'TW'), true, const Size(1600, 1000), 'zh-TW-dark-wide'),
   ];
+
+  testWidgets(
+    'gallery context action imports original onto canvas and navigates home',
+    (tester) async {
+      final generation = _CanvasImportGeneration();
+      final router = GoRouter(
+        initialLocation: '/gallery',
+        routes: [
+          GoRoute(
+            path: '/gallery',
+            builder: (context, state) => const LocalGalleryScreen(),
+          ),
+          GoRoute(
+            path: '/',
+            builder: (context, state) =>
+                const Scaffold(body: Text('canvas-home')),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        router: router,
+        extraOverrides: [
+          imageGenerationNotifierProvider.overrideWith(() => generation),
+          localStorageServiceProvider.overrideWith(
+            (ref) => InMemoryLocalStorageService(),
+          ),
+        ],
+      );
+      final draft = container.read(generationParamsNotifierProvider);
+      final record = records.first;
+      final original = await tester.runAsync(
+        () => File(record.path).readAsBytes(),
+      );
+      await tester.tap(_cardFor(record), buttons: kSecondaryMouseButton);
+      await _settle(tester);
+      expect(find.text('放入画布'), findsOneWidget);
+      await _capture(tester, 'canvas-context-action');
+      await tester.tap(find.text('放入画布'));
+      await _settle(tester);
+      expect(find.text('canvas-home'), findsOneWidget);
+      final image = container
+          .read(imageGenerationNotifierProvider)
+          .currentImages
+          .single;
+      expect(image.bytes, original);
+      expect(image.filePath, isNull);
+      expect(container.read(generationPreviewSelectionProvider), image.id);
+      expect(
+        container.read(canvasHistoryFocusRequestProvider)!.imageId,
+        image.id,
+      );
+      expect(container.read(generationParamsNotifierProvider), same(draft));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+  );
 
   for (final (locale, dark, size, name) in cases) {
     testWidgets('local gallery three-pane layout $name', (tester) async {
@@ -507,6 +580,8 @@ Future<ProviderContainer> _pumpScreen(
   required Size size,
   Future<PillDocument> Function(PillDocument, String)? translator,
   ValueNotifier<GalleryNavigationRequest?>? navigation,
+  GoRouter? router,
+  List<Override> extraOverrides = const [],
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -515,6 +590,7 @@ Future<ProviderContainer> _pumpScreen(
   final service = FakeLocalGalleryService(records, dimensions: dimensions);
   final container = ProviderContainer(
     overrides: [
+      ...extraOverrides,
       if (translator != null)
         detailPromptTranslatorProvider.overrideWithValue(translator),
       galleryServiceProvider.overrideWith(
@@ -538,24 +614,37 @@ Future<ProviderContainer> _pumpScreen(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        theme: theme,
-        builder: (context, child) => RepaintBoundary(
-          key: _captureKey,
-          child: WindowChromeScope(child: _CaptionStub(child: child!)),
-        ),
-        home: navigation == null
-            ? const LocalGalleryScreen()
-            : ValueListenableBuilder<GalleryNavigationRequest?>(
-                valueListenable: navigation,
-                builder: (context, request, _) =>
-                    LocalGalleryScreen(navigationRequest: request),
+      child: router != null
+          ? MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              locale: locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: theme,
+              routerConfig: router,
+              builder: (context, child) => RepaintBoundary(
+                key: _captureKey,
+                child: WindowChromeScope(child: _CaptionStub(child: child!)),
               ),
-      ),
+            )
+          : MaterialApp(
+              debugShowCheckedModeBanner: false,
+              locale: locale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: theme,
+              builder: (context, child) => RepaintBoundary(
+                key: _captureKey,
+                child: WindowChromeScope(child: _CaptionStub(child: child!)),
+              ),
+              home: navigation == null
+                  ? const LocalGalleryScreen()
+                  : ValueListenableBuilder<GalleryNavigationRequest?>(
+                      valueListenable: navigation,
+                      builder: (context, request, _) =>
+                          LocalGalleryScreen(navigationRequest: request),
+                    ),
+            ),
     ),
   );
   await _settle(tester, rounds: 30);
@@ -633,6 +722,11 @@ class _TestKritaBridgeNotifier extends KritaBridgeNotifier {
   Future<void> close() async {}
 }
 
+class _CanvasImportGeneration extends ImageGenerationNotifier {
+  @override
+  ImageGenerationState build() => const ImageGenerationState();
+}
+
 class _FakeShortcutConfigNotifier extends ShortcutConfigNotifier {
   @override
   Future<ShortcutConfig> build() async => ShortcutConfig.createDefault();
@@ -706,6 +800,7 @@ class _FakeCategoryNotifier extends GalleryCategoryNotifier {
         category('v5', 'NAI 5', 17543, parent: 'root', order: 3),
         category('misc', '_杂物', 0, parent: 'root', order: 4),
         category('explore', 'style_explore_runs', 32, order: 1),
+        category('uncategorized', galleryUncategorizedFolderName, 32, order: 1),
         category('d1', '2026-09-09', 3, order: 2),
         category('d2', '2026-09-13', 2, order: 3),
         category('d3', '2026-09-21', 1, order: 4),

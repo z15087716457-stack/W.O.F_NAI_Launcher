@@ -12,8 +12,8 @@ import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
 import '../../../providers/generation/generation_params_selectors.dart';
-import '../../../providers/generation/preview_selection_provider.dart';
 import '../../../providers/image_generation_provider.dart';
+import '../../../services/image_workflow_launcher.dart';
 import '../../../providers/generation/image_workflow_controller.dart';
 import '../../../utils/dropped_file_reader.dart';
 import '../../../widgets/common/app_toast.dart';
@@ -31,7 +31,6 @@ import '../../../wiring/refs_platform.dart';
 import 'local_upscale_panel.dart';
 import '../../../providers/generation/cloud_upscale_provider.dart';
 import 'img2img_preview_cache.dart';
-import 'canvas/canvas_feed_layout.dart';
 
 /// Img2Img 面板组件
 class Img2ImgPanel extends ConsumerStatefulWidget {
@@ -299,23 +298,9 @@ class _Img2ImgPanelState extends ConsumerState<Img2ImgPanel> {
     if (source == null) return;
     final generation = ref.read(imageGenerationNotifierProvider);
     if (generation.isGenerating) return;
-    final image = ref
-        .read(imageGenerationNotifierProvider.notifier)
-        .registerSourceImage(source);
-    if (image == null) {
+    if (!ImageWorkflowLauncher.placeOnCanvas(ref, source)) {
       AppToast.error(context, context.l10n.img2img_decodeSourceFailed);
-      return;
     }
-    ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
-    final request = ref.read(canvasHistoryFocusRequestProvider.notifier);
-    request.state = (
-      group: image.generationRunId == null
-          ? 'img:${image.id}'
-          : 'run:${image.generationRunId}',
-      imageId: image.id,
-      revision: (request.state?.revision ?? 0) + 1,
-    );
-    ref.read(generationPreviewFocusNodeProvider).requestFocus();
   }
 
   /// 行内“导入图片”落点：拖入图片即设为底图（官网式）。

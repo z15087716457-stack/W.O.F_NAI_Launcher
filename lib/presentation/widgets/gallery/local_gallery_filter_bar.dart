@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/gallery/gallery_group_mode.dart';
@@ -81,15 +82,7 @@ class LocalGalleryFilterBar extends ConsumerWidget {
       _DateRangeChip(
         start: criteria.dateStart,
         end: criteria.displayDateEnd,
-        onPick: () async {
-          final result = await showDateRangePickerDialog(
-            context,
-            initialStart: criteria.dateStart,
-            initialEnd: criteria.displayDateEnd,
-          );
-          if (result == null) return;
-          await notifier.setDateRange(result.start, result.end);
-        },
+        onPick: (result) => notifier.setDateRange(result.start, result.end),
         onClear: () => notifier.setDateRange(null, null),
       ),
       for (final tag in criteria.selectedTags)
@@ -160,7 +153,7 @@ class _DateRangeChip extends StatelessWidget {
 
   final DateTime? start;
   final DateTime? end;
-  final Future<void> Function() onPick;
+  final ValueChanged<DateRangeSelectionState> onPick;
   final VoidCallback onClear;
 
   @override
@@ -169,6 +162,7 @@ class _DateRangeChip extends StatelessWidget {
     final locale = Localizations.localeOf(context).toLanguageTag();
     final active = start != null || end != null;
     final format = DateFormat.MMMd(locale);
+    final controller = MenuController();
     String label;
     if (!active) {
       label = l10n.localGallery_dateRangeChip;
@@ -181,14 +175,38 @@ class _DateRangeChip extends StatelessWidget {
     } else {
       label = '– ${format.format(end!)}';
     }
-    return GalleryFilterChip(
-      key: const Key('gallery-filter-date'),
-      label: label,
-      tooltip: l10n.localGallery_dateRangeChip,
-      active: active,
-      icon: StudioIcons.galleryCalendar,
-      onTap: () => unawaited(onPick()),
-      onClear: active ? onClear : null,
+    return MenuAnchor(
+      controller: controller,
+      alignmentOffset: const Offset(0, 6),
+      useRootOverlay: true,
+      style: const MenuStyle(padding: WidgetStatePropertyAll(EdgeInsets.zero)),
+      builder: (context, controller, child) => GalleryFilterChip(
+        key: const Key('gallery-filter-date'),
+        label: label,
+        tooltip: l10n.localGallery_dateRangeChip,
+        active: active,
+        icon: StudioIcons.galleryCalendar,
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+        onClear: active ? onClear : null,
+      ),
+      menuChildren: [
+        CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.escape): controller.close,
+          },
+          child: Focus(
+            autofocus: true,
+            child: GalleryDateRangePicker(
+              initialStart: start,
+              initialEnd: end,
+              onSelected: (result) {
+                controller.close();
+                if (result != null) onPick(result);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -214,13 +232,15 @@ class _GroupModeButton extends StatelessWidget {
       tooltip: l10n.localGallery_groupModeTooltip,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 4),
+      constraints: const BoxConstraints(minWidth: 112, maxWidth: 240),
+      menuPadding: const EdgeInsets.symmetric(vertical: 4),
       onSelected: onChanged,
       itemBuilder: (context) => [
         for (final mode in GalleryGroupMode.values)
-          CheckedPopupMenuItem(
+          GalleryChoiceMenuItem(
             value: mode,
-            checked: mode == value,
-            child: Text(label(mode)),
+            selected: mode == value,
+            label: label(mode),
           ),
       ],
       child: Container(

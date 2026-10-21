@@ -70,6 +70,14 @@ void main() {
       expect(find.text('Copy Prompt'), findsOneWidget);
       expect(find.text('Copy Seed'), findsOneWidget);
       expect(
+        tester.getTopLeft(find.text('Place on canvas')).dy,
+        greaterThan(tester.getTopLeft(find.text('Import Image Metadata')).dy),
+      );
+      expect(
+        tester.getTopLeft(find.text('Place on canvas')).dy,
+        lessThan(tester.getTopLeft(find.text('Show in Folder')).dy),
+      );
+      expect(
         tester.getTopLeft(find.text('Details')).dy,
         lessThan(tester.getTopLeft(find.text('Image2Image')).dy),
       );
@@ -144,6 +152,40 @@ void main() {
     expect(selected, LocalImageContextAction.details);
     expect(find.byType(MenuAnchor), findsNothing);
   });
+
+  testWidgets(
+    'plain image can be placed on canvas and returns its own action',
+    (tester) async {
+      LocalImageContextAction? selected;
+      await tester.pumpWidget(
+        _MenuHarness(
+          hasImportableMetadata: false,
+          isKritaConnected: false,
+          onSelected: (action) => selected = action,
+        ),
+      );
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Place on canvas'));
+      await tester.pumpAndSettle();
+      expect(selected, LocalImageContextAction.placeOnCanvas);
+      expect(find.byType(MenuAnchor), findsNothing);
+    },
+  );
+  testWidgets('running generation disables place on canvas', (tester) async {
+    await tester.pumpWidget(
+      const _MenuHarness(isKritaConnected: false, canPlaceOnCanvas: false),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    final button = tester.widget<MenuItemButton>(
+      find.ancestor(
+        of: find.text('Place on canvas'),
+        matching: find.byType(MenuItemButton),
+      ),
+    );
+    expect(button.onPressed, isNull);
+  });
 }
 
 class _MenuHarness extends StatelessWidget {
@@ -154,9 +196,11 @@ class _MenuHarness extends StatelessWidget {
     required this.isKritaConnected,
     this.onSelected,
     this.position = const Offset(20, 20),
+    this.canPlaceOnCanvas = true,
   });
 
   final Offset position;
+  final bool canPlaceOnCanvas;
   final bool hasImportableMetadata;
   final bool hasPrompt;
   final bool hasSeed;
@@ -180,6 +224,7 @@ class _MenuHarness extends StatelessWidget {
                 hasPrompt: hasPrompt,
                 hasSeed: hasSeed,
                 isKritaConnected: isKritaConnected,
+                canPlaceOnCanvas: canPlaceOnCanvas,
               );
               onSelected?.call(selected);
             },

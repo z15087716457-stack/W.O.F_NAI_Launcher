@@ -18,6 +18,7 @@ import '../../providers/gallery_scan_progress_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/themed_input.dart';
 import 'gallery_scan_progress_panel.dart';
 import '../../../core/storage/local_storage_service.dart';
+import '../../utils/gallery_category_label.dart';
 import '../common/studio_icons.dart';
 
 String? galleryInternalDragPathFromLocalData(Object? localData) {
@@ -123,8 +124,6 @@ class GalleryCategoryTreeView extends StatefulWidget {
 class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
   static const _collectionsSection = 'collections';
   static const _foldersSection = 'folders';
-  static const _dateFoldersId = '__date_folders__';
-  static final _datePattern = RegExp(r'^\d{4}-\d{2}-\d{2}$');
 
   final Set<String> _expandedIds = {};
   final Set<String> _collapsedSections = {};
@@ -311,11 +310,15 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
     final hasChildren = children.isNotEmpty;
     final isExpanded = _expandedIds.contains(category.id);
     // 外部图库源分类只读：禁用重命名/删除/子分类/移动/移入
-    final isReadOnly = category.isExternal;
+    final uncategorized = category.isUncategorizedFolder;
+    final isReadOnly = category.isExternal || uncategorized;
 
     Widget categoryItem = _CategoryItem(
-      icon: StudioIcons.galleryFolder,
-      label: category.displayName,
+      key: uncategorized ? const Key('gallery-sidebar-uncategorized') : null,
+      icon: uncategorized
+          ? StudioIcons.galleryArchive
+          : StudioIcons.galleryFolder,
+      label: category.galleryLabel(context),
       count: category.imageCount,
       isSelected: widget.selectedCategoryId == category.id,
       depth: depth,
@@ -381,6 +384,9 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
   /// 根级条目是否可拖拽：根级（含外部图源，同级排序）或可移动的内部分类
   bool _isDraggableCategory(GalleryCategory category, bool isReadOnly) {
+    if (category.isUncategorizedFolder) {
+      return false;
+    }
     if (category.parentId == null && widget.onCategoryReorder != null) {
       return true;
     }
@@ -389,17 +395,10 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
 
   /// 根级分类条目（条目间穿插插入条，支持同级拖拽排序）。
   ///
-  /// 以日期命名（yyyy-MM-dd）的根文件夹在 2 个以上时收进「日期文件夹」
-  /// 分组，只改变侧栏展示；排序索引仍按完整根列表计算。
+  /// 未分类使用一个真实目录，历史日期目录继续按原分类访问。
   List<Widget> _buildRootCategoryEntries(ThemeData theme) {
     final roots = widget.categories.rootCategories.sortedByOrder();
-    final dated = roots
-        .where((c) => _datePattern.hasMatch(c.displayName))
-        .toList();
-    final groupDates = dated.length >= 2;
-    final normal = groupDates
-        ? roots.where((c) => !dated.contains(c)).toList()
-        : roots;
+    final normal = roots;
     final entries = <Widget>[];
 
     for (var i = 0; i < normal.length; i++) {
@@ -435,37 +434,6 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
           ),
         ),
       );
-    }
-
-    if (groupDates) {
-      final expanded = _expandedIds.contains(_dateFoldersId);
-      void toggle() {
-        setState(() {
-          if (!_expandedIds.remove(_dateFoldersId)) {
-            _expandedIds.add(_dateFoldersId);
-          }
-        });
-        _persistExpandedIds();
-      }
-
-      entries.add(
-        _CategoryItem(
-          key: const Key('gallery-sidebar-date-folders'),
-          icon: StudioIcons.galleryCalendar,
-          label: context.l10n.localGallery_dateFolders,
-          count: dated.fold<int>(0, (sum, c) => sum + c.imageCount),
-          isSelected: false,
-          hasChildren: true,
-          isExpanded: expanded,
-          onTap: toggle,
-          onExpand: toggle,
-        ),
-      );
-      if (expanded) {
-        for (final category in dated) {
-          entries.add(_buildCategoryNode(theme, category, 1));
-        }
-      }
     }
 
     return entries;

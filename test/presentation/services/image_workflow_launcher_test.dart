@@ -16,6 +16,8 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/services/image_workflow_launcher.dart';
 
@@ -75,6 +77,83 @@ class _Cooldown extends GenerationCooldownNotifier {
 }
 
 void main() {
+  testWidgets(
+    'place on canvas preserves source and draft, reuses tile and requests focus each time',
+    (tester) async {
+      final container = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWith((ref) => _MemoryStorage()),
+          imageGenerationNotifierProvider.overrideWith(
+            () => _Generation(false),
+          ),
+          generationParamsNotifierProvider.overrideWith(_Params.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final params = container.read(generationParamsNotifierProvider);
+      final workflow = container.read(imageWorkflowControllerProvider);
+      final bytes = await ImageSaveUtils.buildPrebuiltMetadataBytes(
+        imageBytes: Uint8List.fromList(
+          img.encodePng(img.Image(width: 8, height: 12)),
+        ),
+        metadata: {
+          'Software': 'NovelAI',
+          'Comment': '{"prompt":"original","seed":321}',
+        },
+      );
+      late WidgetRef widgetRef;
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: Consumer(
+            builder: (context, ref, child) {
+              widgetRef = ref;
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+      expect(ImageWorkflowLauncher.placeOnCanvas(widgetRef, bytes), isTrue);
+      final first = container
+          .read(imageGenerationNotifierProvider)
+          .currentImages
+          .single;
+      final focus = container.read(canvasHistoryFocusRequestProvider)!;
+      expect(first.bytes, bytes);
+      expect((first.width, first.height), (8, 12));
+      expect(first.filePath, isNull);
+      expect(container.read(generationPreviewSelectionProvider), first.id);
+      expect(focus.imageId, first.id);
+      expect(
+        ImageWorkflowLauncher.placeOnCanvas(
+          widgetRef,
+          Uint8List.fromList(bytes),
+        ),
+        isTrue,
+      );
+      expect(
+        container.read(imageGenerationNotifierProvider).currentImages.single.id,
+        first.id,
+      );
+      expect(
+        container.read(canvasHistoryFocusRequestProvider)!.revision,
+        focus.revision + 1,
+      );
+      expect(container.read(generationParamsNotifierProvider), same(params));
+      expect(container.read(imageWorkflowControllerProvider), same(workflow));
+      expect(
+        ImageWorkflowLauncher.placeOnCanvas(widgetRef, Uint8List(0)),
+        isFalse,
+      );
+      expect(
+        container.read(canvasHistoryFocusRequestProvider)!.revision,
+        focus.revision + 1,
+      );
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(seconds: 5));
+    },
+  );
+
   late Directory isolatedHive;
   setUpAll(() async {
     isolatedHive = await Directory.systemTemp.createTemp(

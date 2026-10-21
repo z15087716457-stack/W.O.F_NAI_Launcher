@@ -2931,6 +2931,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_dateFolders => '日付フォルダー';
 
   @override
+  String get localGallery_uncategorizedFolder => '未分類フォルダー';
+
+  @override
   String localGallery_indexSynced(String count) {
     return 'インデックス同期済み · $count';
   }

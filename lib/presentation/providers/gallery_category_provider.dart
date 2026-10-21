@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/gallery_path_utils.dart';
+import '../../core/utils/gallery_storage_layout.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/repositories/gallery_category_repository.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
@@ -109,10 +110,16 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
     try {
       final categories = await _repository.loadCategories();
 
-      // 新安装首次启动检查：若无分类配置文件且未读出分类，标记需要在加载完成后触发首次同步
+      // 新安装或旧版尚未登记未分类目录时，在加载结束后同步一次。
       final hasConfigFile = await _repository.hasCategoriesConfigFile();
-      if (!hasConfigFile && categories.isEmpty) {
-        state = state.copyWith(isLoading: false);
+      if ((!hasConfigFile && categories.isEmpty) ||
+          !categories.any(
+            (category) =>
+                category.isRoot &&
+                !category.isExternal &&
+                isGalleryUncategorizedFolder(category.folderPath),
+          )) {
+        state = state.copyWith(categories: categories, isLoading: false);
         return true;
       }
 

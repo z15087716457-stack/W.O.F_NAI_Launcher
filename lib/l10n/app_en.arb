@@ -1375,6 +1375,7 @@
   "localGallery_sectionCollections": "Collections",
   "localGallery_sectionFolders": "Folders",
   "localGallery_dateFolders": "Dated folders",
+  "localGallery_uncategorizedFolder": "Uncategorized",
   "localGallery_indexSynced": "Index up to date · {count}",
   "@localGallery_indexSynced": {
     "placeholders": {

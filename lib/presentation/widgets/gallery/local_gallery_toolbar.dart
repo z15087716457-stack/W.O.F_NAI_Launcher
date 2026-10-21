@@ -19,6 +19,7 @@ import '../../providers/gallery_category_provider.dart';
 import '../../providers/local_gallery_provider.dart';
 import '../../providers/selection_mode_provider.dart';
 import '../../providers/tips_provider.dart';
+import '../../utils/gallery_category_label.dart';
 import '../shortcuts/shortcut_tooltip.dart';
 import '../navigation/window_chrome_layout.dart';
 import '../tag_expansion/tag_expansion_wrapper.dart';
@@ -334,7 +335,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     if (categoryId != null) {
       final categories = ref.watch(galleryCategoryNotifierProvider).categories;
       final path = categories.getPath(categoryId);
-      if (path.isNotEmpty) return [for (final c in path) c.displayName];
+      if (path.isNotEmpty) {
+        return [for (final c in path) c.galleryLabel(context)];
+      }
     }
     return [l10n.localGallery_allImages];
   }
@@ -358,7 +361,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           .read(galleryCategoryNotifierProvider)
           .categories
           .findById(criteria.categoryId!);
-      if (category != null) return category.displayName;
+      if (category != null) return category.galleryLabel(context);
     }
     return null;
   }

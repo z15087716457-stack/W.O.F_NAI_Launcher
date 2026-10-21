@@ -5,6 +5,8 @@ import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/gallery_category_provider.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/category_picker_dialog.dart';
+import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
+import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 class _MockCategoryNotifier extends GalleryCategoryNotifier {
   final List<GalleryCategory> _categories;
@@ -16,6 +18,39 @@ class _MockCategoryNotifier extends GalleryCategoryNotifier {
 }
 
 void main() {
+  testWidgets(
+    'default folder uses a translated archive label and is searchable',
+    (tester) async {
+      final category = GalleryCategory.create(
+        name: galleryUncategorizedFolderName,
+        folderPath: galleryUncategorizedFolderName,
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            galleryCategoryNotifierProvider.overrideWith(
+              () => _MockCategoryNotifier([category]),
+            ),
+          ],
+          child: const MaterialApp(
+            locale: Locale('zh'),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(body: CategoryPickerDialog(title: '移动到…')),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('未分类文件夹'), findsOneWidget);
+      expect(find.byIcon(StudioIcons.galleryArchive), findsOneWidget);
+      await tester.enterText(find.byType(TextField), '未分类文件夹');
+      await tester.pumpAndSettle();
+      expect(
+        find.byWidgetPredicate((w) => w is Text && w.data == '未分类文件夹'),
+        findsOneWidget,
+      );
+    },
+  );
   final now = DateTime.now();
   final List<GalleryCategory> testCategories = [
     GalleryCategory(
@@ -90,30 +125,31 @@ void main() {
     },
   );
 
-  testWidgets('expanding a category reveals children, tapping again collapses', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      buildTestWidget(child: const CategoryPickerDialog(title: '移动到…')),
-    );
-    await tester.pumpAndSettle();
+  testWidgets(
+    'expanding a category reveals children, tapping again collapses',
+    (tester) async {
+      await tester.pumpWidget(
+        buildTestWidget(child: const CategoryPickerDialog(title: '移动到…')),
+      );
+      await tester.pumpAndSettle();
 
-    expect(find.text('Drafts'), findsNothing);
+      expect(find.text('Drafts'), findsNothing);
 
-    // 点展开箭头 → 子分类出现
-    await tester.tap(
-      find.byKey(const ValueKey('category_picker_expand_cat-1')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Drafts'), findsOneWidget);
+      // 点展开箭头 → 子分类出现
+      await tester.tap(
+        find.byKey(const ValueKey('category_picker_expand_cat-1')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Drafts'), findsOneWidget);
 
-    // 再点 → 收起
-    await tester.tap(
-      find.byKey(const ValueKey('category_picker_expand_cat-1')),
-    );
-    await tester.pumpAndSettle();
-    expect(find.text('Drafts'), findsNothing);
-  });
+      // 再点 → 收起
+      await tester.tap(
+        find.byKey(const ValueKey('category_picker_expand_cat-1')),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Drafts'), findsNothing);
+    },
+  );
 
   testWidgets('search filters categories by displayName', (tester) async {
     await tester.pumpWidget(

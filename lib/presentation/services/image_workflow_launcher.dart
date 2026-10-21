@@ -10,6 +10,8 @@ import '../../core/utils/nai_resolution_adapter.dart';
 import '../../data/services/image_metadata_service.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/generation/preview_selection_provider.dart';
+import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../wiring/tools_director_wiring.dart';
 import '../wiring/generation_backend.dart';
@@ -20,6 +22,25 @@ import '../widgets/image_editor/image_editor_screen.dart';
 
 class ImageWorkflowLauncher {
   const ImageWorkflowLauncher._();
+
+  /// Reuse the original bytes and existing canvas tile; never changes a draft.
+  static bool placeOnCanvas(WidgetRef ref, Uint8List imageBytes) {
+    final image = ref
+        .read(imageGenerationNotifierProvider.notifier)
+        .registerSourceImage(imageBytes);
+    if (image == null) return false;
+    ref.read(generationPreviewSelectionProvider.notifier).select(image.id);
+    final request = ref.read(canvasHistoryFocusRequestProvider.notifier);
+    request.state = (
+      group: image.generationRunId == null
+          ? 'img:${image.id}'
+          : 'run:${image.generationRunId}',
+      imageId: image.id,
+      revision: (request.state?.revision ?? 0) + 1,
+    );
+    ref.read(generationPreviewFocusNodeProvider).requestFocus();
+    return true;
+  }
 
   /// 「生成变体」同动作占位：元数据解析是异步的，解析完成前
   /// `state.isGenerating` 仍为 false，仅靠它挡不住双击；

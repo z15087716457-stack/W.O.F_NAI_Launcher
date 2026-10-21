@@ -1708,8 +1708,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             }
           }
 
-          // 原子保存：日期分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
-          final filePath = await ImageSaveUtils.saveBytesToDatedPath(
+          // 原子保存：未分类路径 + 独占防冲突 + 失败清理，全部在工具内完成
+          final filePath = await ImageSaveUtils.saveBytesToGalleryPath(
             rootPath: saveDirPath,
             bytes:
                 hasEmbeddedMetadata || image.operation == ImageOperation.upscale

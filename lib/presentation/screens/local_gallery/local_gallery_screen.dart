@@ -41,6 +41,7 @@ import '../../router/app_router.dart';
 import '../../router/gallery_navigation_request.dart';
 import '../../services/image_workflow_launcher.dart';
 import '../../utils/asset_protection_guard.dart';
+import '../../utils/gallery_category_label.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
 import '../../utils/image_viewer_opener.dart';
 import '../../utils/krita_send_helper.dart';
@@ -535,7 +536,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         initialIndex: index,
         scopeName:
             collection?.name ??
-            category?.displayName ??
+            category?.galleryLabel(context) ??
             (criteria.searchQuery.isEmpty ? null : criteria.searchQuery),
       ),
     );
@@ -802,7 +803,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         count: 1,
         sourceExternal: sourceExternal,
         targetExternal: targetExternal,
-        targetName: targetCategory?.displayName,
+        targetName: targetCategory?.galleryLabel(context),
       );
       if (!confirmed || !mounted) return;
     }
@@ -1240,7 +1241,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         count: paths.length,
         sourceExternal: sourceExternal,
         targetExternal: targetExternal,
-        targetName: resolvedTargetCategory?.displayName,
+        targetName: resolvedTargetCategory?.galleryLabel(context),
       );
       if (!confirmed || !mounted) return;
     }
@@ -1761,6 +1762,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
       hasImportableMetadata: metadata?.hasData == true,
       hasPrompt: metadata?.prompt.isNotEmpty == true,
       hasSeed: metadata?.seed != null,
+      canPlaceOnCanvas: !ref.read(imageGenerationNotifierProvider).isGenerating,
       isKritaConnected:
           ref.read(kritaBridgeNotifierProvider).status ==
           KritaBridgeStatus.connected,
@@ -1796,6 +1798,8 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         await _sendToUpscale(record);
       case LocalImageContextAction.importMetadata:
         await _importImageMetadata(record);
+      case LocalImageContextAction.placeOnCanvas:
+        await _placeOnCanvas(record);
       case LocalImageContextAction.copyPrompt:
         if (availableMetadata?.fullPrompt.isNotEmpty == true) {
           await Clipboard.setData(
@@ -1825,6 +1829,32 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     }
   }
 
+  Future<void> _placeOnCanvas(LocalImageRecord record) async {
+    if (ref.read(imageGenerationNotifierProvider).isGenerating) return;
+    try {
+      final file = File(record.path);
+      if (!await file.exists()) {
+        if (mounted) {
+          AppToast.info(context, context.l10n.localGallery_imageFileMissing);
+        }
+        return;
+      }
+      final bytes = await file.readAsBytes();
+      if (!mounted || ref.read(imageGenerationNotifierProvider).isGenerating) {
+        return;
+      }
+      if (!ImageWorkflowLauncher.placeOnCanvas(ref, bytes)) {
+        AppToast.error(context, context.l10n.img2img_decodeSourceFailed);
+        return;
+      }
+      context.go(AppRoutes.home);
+    } catch (error) {
+      if (mounted) {
+        AppToast.error(context, context.l10n.gallery_readImageFailed('$error'));
+      }
+    }
+  }
+
   Future<void> _moveSingleImage(LocalImageRecord record) async {
     final l10n = context.l10n;
     final imagePath = record.path;
@@ -1848,7 +1878,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         count: 1,
         sourceExternal: sourceExternal,
         targetExternal: targetExternal,
-        targetName: targetCategory?.displayName,
+        targetName: targetCategory?.galleryLabel(context),
       );
       if (!confirmed || !mounted) return;
     }
@@ -2040,7 +2070,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   /// Ctrl+G：选一天，时间线滚动到该日（按时间排序时）；其他排序下改为按日期筛选
   Future<void> _jumpToDate() async {
     final state = ref.read(localGalleryNotifierProvider);
-    final result = await showDateRangePickerDialog(
+    final result = await showGalleryDateRangePicker(
       context,
       initialStart: state.filterCriteria.dateStart,
       initialEnd: state.filterCriteria.displayDateEnd,

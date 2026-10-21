@@ -3012,6 +3012,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_dateFolders => 'Dated folders';
 
   @override
+  String get localGallery_uncategorizedFolder => 'Uncategorized';
+
+  @override
   String localGallery_indexSynced(String count) {
     return 'Index up to date · $count';
   }

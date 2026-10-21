@@ -5,6 +5,7 @@ import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/gallery_category_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
+import '../../utils/gallery_category_label.dart';
 
 /// 分类选择结果
 ///
@@ -130,9 +131,14 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
     final visibleCategories = isSearching
         ? _flattenCategories(allCategories)
               .where(
-                (item) => item.category.displayName.toLowerCase().contains(
-                  _searchQuery,
-                ),
+                (item) =>
+                    item.category
+                        .galleryLabel(context)
+                        .toLowerCase()
+                        .contains(_searchQuery) ||
+                    item.category.displayName.toLowerCase().contains(
+                      _searchQuery,
+                    ),
               )
               .toList()
         : _flattenVisible(allCategories);
@@ -318,7 +324,11 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
             else
               const SizedBox(width: 22),
             Icon(
-              isExternal ? Icons.folder_shared_outlined : Icons.folder_outlined,
+              category.isUncategorizedFolder
+                  ? StudioIcons.galleryArchive
+                  : isExternal
+                  ? Icons.folder_shared_outlined
+                  : Icons.folder_outlined,
               size: 20,
               color: isExternal
                   ? theme.colorScheme.tertiary
@@ -327,7 +337,7 @@ class _CategoryPickerDialogState extends ConsumerState<CategoryPickerDialog> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                category.displayName,
+                category.galleryLabel(context),
                 style: theme.textTheme.bodyMedium,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

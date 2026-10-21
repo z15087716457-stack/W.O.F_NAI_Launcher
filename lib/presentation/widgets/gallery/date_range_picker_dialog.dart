@@ -51,7 +51,7 @@ class DateRangeSelectionState {
 ///
 /// 确定后返回 [DateRangeSelectionState]（单日 = start == end），
 /// 取消返回 null。禁选未来日期。
-class DateRangePickerDialog extends StatefulWidget {
+class GalleryDateRangePicker extends StatefulWidget {
   /// 初始选择的起始日（可为 null）
   final DateTime? initialStart;
 
@@ -61,18 +61,23 @@ class DateRangePickerDialog extends StatefulWidget {
   /// 可选的起始日期（默认 2020-01-01）
   final DateTime? firstDate;
 
-  const DateRangePickerDialog({
+  /// Supplied by an anchored menu; without it this remains a dialog for keyboard
+  /// and other entry points that have no visible anchor.
+  final ValueChanged<DateRangeSelectionState?>? onSelected;
+
+  const GalleryDateRangePicker({
     super.key,
     this.initialStart,
     this.initialEnd,
     this.firstDate,
+    this.onSelected,
   });
 
   @override
-  State<DateRangePickerDialog> createState() => _DateRangePickerDialogState();
+  State<GalleryDateRangePicker> createState() => _GalleryDateRangePickerState();
 }
 
-class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
+class _GalleryDateRangePickerState extends State<GalleryDateRangePicker> {
   late DateTime _visibleMonth;
   late DateRangeSelectionState _selection;
   late DateTime _today;
@@ -95,6 +100,14 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
       DateTime(value.year, value.month, value.day);
 
   DateTime get _firstDate => widget.firstDate ?? DateTime(2020);
+
+  void _complete([DateRangeSelectionState? selection]) {
+    if (widget.onSelected case final onSelected?) {
+      onSelected(selection);
+    } else {
+      Navigator.of(context).pop(selection);
+    }
+  }
 
   void _changeMonth(int delta) {
     setState(() {
@@ -132,9 +145,10 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
     );
     final days = List.generate(42, (i) => gridStart.add(Duration(days: i)));
 
-    return Dialog(
-      child: SizedBox(
-        width: 336,
+    final calendar = SizedBox(
+      width: 336,
+      child: SingleChildScrollView(
+        primary: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Column(
@@ -198,11 +212,18 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
               ),
               const SizedBox(height: 4),
               // 6×7 日期格子
-              GridView.count(
-                crossAxisCount: 7,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: [for (final day in days) _buildDayCell(theme, day)],
+              SizedBox(
+                // Menus measure their children intrinsically. Give the calendar
+                // viewport an explicit six-row extent instead of asking a lazy
+                // shrink-wrapping viewport for intrinsic dimensions.
+                height: 6 * (336 - 32) / 7,
+                child: GridView.count(
+                  primary: false,
+                  crossAxisCount: 7,
+                  padding: EdgeInsets.zero,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [for (final day in days) _buildDayCell(theme, day)],
+                ),
               ),
               const SizedBox(height: 8),
               // 清除 / 取消 / 确定
@@ -214,21 +235,19 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
                   TextButton(
                     onPressed:
                         widget.initialStart != null || widget.initialEnd != null
-                        ? () => Navigator.of(
-                            context,
-                          ).pop(const DateRangeSelectionState())
+                        ? () => _complete(const DateRangeSelectionState())
                         : null,
                     child: Text(l10n.localGallery_dateRangeClear),
                   ),
                   const SizedBox(width: 8),
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: _complete,
                     child: Text(l10n.common_cancel),
                   ),
                   const SizedBox(width: 8),
                   FilledButton(
                     onPressed: _selection.hasSelection
-                        ? () => Navigator.of(context).pop(_selection)
+                        ? () => _complete(_selection)
                         : null,
                     child: Text(l10n.common_confirm),
                   ),
@@ -238,6 +257,16 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
           ),
         ),
       ),
+    );
+    if (widget.onSelected == null) return Dialog(child: calendar);
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight:
+            MediaQuery.sizeOf(context).height -
+            MediaQuery.paddingOf(context).vertical -
+            16,
+      ),
+      child: calendar,
     );
   }
 
@@ -256,6 +285,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
 
     return Center(
       child: GestureDetector(
+        key: ValueKey(day),
         onTap: disabled ? null : () => _onDayTapped(day),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 120),
@@ -297,7 +327,7 @@ class _DateRangePickerDialogState extends State<DateRangePickerDialog> {
 /// 打开日期范围选择对话框
 ///
 /// 返回 null 表示取消；否则为确定后的选择（单日 = start == end）。
-Future<DateRangeSelectionState?> showDateRangePickerDialog(
+Future<DateRangeSelectionState?> showGalleryDateRangePicker(
   BuildContext context, {
   DateTime? initialStart,
   DateTime? initialEnd,
@@ -305,7 +335,7 @@ Future<DateRangeSelectionState?> showDateRangePickerDialog(
 }) {
   return showDialog<DateRangeSelectionState>(
     context: context,
-    builder: (context) => DateRangePickerDialog(
+    builder: (context) => GalleryDateRangePicker(
       initialStart: initialStart,
       initialEnd: initialEnd,
       firstDate: firstDate,

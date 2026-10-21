@@ -260,7 +260,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
 
   /// 画布工具条等外部调用：保存图像字节到画廊目录（原子保存+去重+toast）。
   ///
-  /// 与卡片实例的 [_saveImage] 走同一套 ImageSaveUtils 管线（日期分类路径、
+  /// 与卡片实例的 [_saveImage] 走同一套 ImageSaveUtils 管线（未分类路径、
   /// 字节级去重、独占防冲突）；无 filePath 回写（外部调用无 imageIdentity）。
   static Future<void> saveImageBytesToGallery(
     BuildContext context,
@@ -275,7 +275,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
         return;
       }
       final seed = await ImageSaveUtils.resolveSeed(bytes: bytes);
-      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+      final identicalPath = await ImageSaveUtils.findIdenticalGalleryFile(
         rootPath: rootPath,
         bytes: bytes,
         seed: seed,
@@ -284,7 +284,7 @@ class SelectableImageCard extends ConsumerStatefulWidget {
         AppToast.successOnOverlay(overlay, l10n.toast_savedTo(rootPath));
         return;
       }
-      await ImageSaveUtils.saveBytesToDatedPath(
+      await ImageSaveUtils.saveBytesToGalleryPath(
         rootPath: rootPath,
         bytes: bytes,
         seed: seed,
@@ -1596,7 +1596,7 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
       final seed = await ImageSaveUtils.resolveSeed(bytes: bytes);
 
       // 去重：字节一致的文件今日已存在则视为已保存，不再另存副本
-      final identicalPath = await ImageSaveUtils.findIdenticalDatedFile(
+      final identicalPath = await ImageSaveUtils.findIdenticalGalleryFile(
         rootPath: rootPath,
         bytes: bytes,
         seed: seed,
@@ -1607,8 +1607,8 @@ class _SelectableImageCardState extends ConsumerState<SelectableImageCard>
         return;
       }
 
-      // 统一解析 seed 并原子保存：日期分类路径 + 独占防冲突 + 失败清理
-      final savedPath = await ImageSaveUtils.saveBytesToDatedPath(
+      // 统一解析 seed 并原子保存：未分类路径 + 独占防冲突 + 失败清理
+      final savedPath = await ImageSaveUtils.saveBytesToGalleryPath(
         rootPath: rootPath,
         bytes: bytes,
         seed: seed,
