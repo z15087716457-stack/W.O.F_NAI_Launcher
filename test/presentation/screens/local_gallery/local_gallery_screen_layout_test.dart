@@ -40,6 +40,8 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import 'package:nai_launcher/presentation/providers/font_provider.dart';
 import 'package:nai_launcher/presentation/widgets/drop/image_destination_dialog.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/gallery_inspector_panel.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/gallery_add_menu_button.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_section.dart';
 import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
@@ -124,6 +126,26 @@ void main() {
         dark: dark,
         size: size,
       );
+
+      if (size.width > 800) {
+        await _capture(tester, '$name-header');
+        final l = AppLocalizations.of(
+          tester.element(find.byType(LocalGalleryScreen)),
+        )!;
+        final title = find.text(l.localGallery_title);
+        final toolbar = find.byType(LocalGalleryToolbar);
+        final rowCenter = tester.getCenter(toolbar).dy;
+        final breadcrumb = find.descendant(
+          of: toolbar,
+          matching: find.text(l.localGallery_allImages),
+        );
+        expect(tester.getCenter(breadcrumb).dy, closeTo(rowCenter, .6));
+        expect(tester.getCenter(title).dy, closeTo(rowCenter, .6));
+        expect(
+          tester.getCenter(find.byType(GalleryAddMenuButton)).dy,
+          closeTo(rowCenter, .6),
+        );
+      }
 
       // 单击第二张：进入查看，详情面板显示参数
       final cards = find.byType(LocalImageCard);
@@ -559,11 +581,12 @@ Future<void> _capture(WidgetTester tester, String name) async {
     final image = await boundary.toImage();
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     final dir = Directory(
-      Platform.environment['GALLERY_FOLLOWUP_CAPTURE'] == '1'
-          ? '.dart_tool/gallery-followup-captures/gallery'
-          : Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1'
-          ? '.dart_tool/gallery-feedback-captures/gallery'
-          : '.dart_tool/local-gallery-captures',
+      Platform.environment['LOCAL_GALLERY_CAPTURE_DIR'] ??
+          (Platform.environment['GALLERY_FOLLOWUP_CAPTURE'] == '1'
+              ? '.dart_tool/gallery-followup-captures/gallery'
+              : Platform.environment['GALLERY_FEEDBACK_CAPTURE'] == '1'
+              ? '.dart_tool/gallery-feedback-captures/gallery'
+              : '.dart_tool/local-gallery-captures'),
     )..createSync(recursive: true);
     File('${dir.path}/$name.png').writeAsBytesSync(bytes!.buffer.asUint8List());
     image.dispose();

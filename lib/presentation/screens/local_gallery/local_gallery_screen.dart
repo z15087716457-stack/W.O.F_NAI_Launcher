@@ -362,46 +362,47 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         color: theme.colorScheme.surfaceContainerLow,
         border: Border(right: BorderSide(color: theme.dividerColor)),
       ),
-      child: Transform.translate(
-        offset: const Offset(0, -1),
-        child: Column(
-          children: [
-            SizedBox(
-              height: localGalleryToolbarHeight,
-              child: Stack(
-                children: [
-                  if (WindowChromeScope.activeOf(context))
-                    const Positioned.fill(
-                      child: WindowDragArea(key: Key('gallery-sidebar-drag')),
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 10),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: IgnorePointer(
-                            child: Text(
-                              context.l10n.localGallery_title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: localGalleryToolbarHeight,
+            child: Stack(
+              fit: StackFit.passthrough,
+              children: [
+                if (WindowChromeScope.activeOf(context))
+                  const Positioned.fill(
+                    child: WindowDragArea(key: Key('gallery-sidebar-drag')),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 10),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: IgnorePointer(
+                          child: Text(
+                            context.l10n.localGallery_title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
-                        GalleryAddMenuButton(
-                          onCreateCategory: _createCategory,
-                          onImportFolder: _importFolder,
-                        ),
-                      ],
-                    ),
+                      ),
+                      GalleryAddMenuButton(
+                        onCreateCategory: _createCategory,
+                        onImportFolder: _importFolder,
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            Expanded(
+          ),
+          Expanded(
+            child: Transform.translate(
+              offset: const Offset(0, -1),
               child: GalleryCategoryTreeView(
                 categories: categoryState.categories,
                 totalImageCount: totalCount,
@@ -433,8 +434,8 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                 indexedCount: totalCount,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
