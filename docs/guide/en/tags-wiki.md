@@ -32,7 +32,7 @@ With [local semantic search](rag.md) enabled, tag suggestions also use the promp
 Open “Tag Wiki” in the left navigation.
 
 - Browse the official category tree or search tags and aliases. Filter by “Has description / No description yet” and sort by popularity or name.
-- Switch the article between translation, original and side-by-side views (requires a “Wiki translation” model; automatic translation is off by default).
+- Switch the article between translation, original and side-by-side views (requires a “Wiki translation” model; automatic translation is off by default). When translating tag names and articles, tags matched in the text and their local definitions are sent to the model as a glossary, helping it distinguish artists, works and ordinary words with the same name. See [Translation blocks · Matched-term glossary](translation.md#preventing-mistranslations-a-glossary-of-matched-terms).
 - “Often used with” lists related tags: click to view, or `Shift+click` to add to a block.
 - Add bookmarks and create bookmark collections.
 - “Add to blocks” opens the block save dialog with the tag already filled in.

@@ -54,10 +54,10 @@ See [Quick start](docs/guide/en/quick-start.md) for details.
 
 <img src="docs/images/readme/en/blocks-library.webp" alt="Block library" width="100%">
 
-Save common snippets—artist pools, quality tags, negative tags and clothing lists—as “blocks,” then drag them into a prompt. Each block has three modes:
+Save common snippets—artist pools, quality tags, negative tags and clothing lists—as “blocks,” then drag them into a prompt. A block can also carry negative tags and generation settings, letting you save a whole favorite style as a “style block” and apply its settings in one click after inserting it. Each block has three modes:
 
 - **Fixed**: Inserts the content unchanged each time; good for quality and negative tags.
-- **Sequential**: Moves to the next item with each generation; good for trying a set of outfits or scenes one by one.
+- **Sequential**: Moves to the next item with each generation; good for trying a set of outfits or scenes one by one, or writing a story as a series of scenes and advancing through them.
 - **Random**: Draws a few items from the pool each time. Set the count, chance of appearing and random weights to try artist combinations in batches.
 
 When you get a result you like, **lock** it and reroll the other blocks. → [Blocks guide](docs/guide/en/blocks.md)
@@ -77,7 +77,7 @@ Not sure which artists mix well? Add a random artist pool in Style Explore and d
   </tr>
   <tr>
     <td>
-      <b>Translation blocks</b>: Translate English prompts into Chinese right where they are. Middle-click to switch between the original and the translation. Generation always uses the original; translations are just for reading. → <a href="docs/guide/en/translation.md">Guide</a>
+      <b>Translation blocks</b>: Translate English prompts into Chinese right where they are. Middle-click to switch between the original and the translation. Generation always uses the original; translations are just for reading. Translation requests include a glossary of matches from the local tag database and Wiki to keep the model from mistaking artist or work names for ordinary words. → <a href="docs/guide/en/translation.md">Guide</a>
     </td>
     <td>
       <b>Tag expansion</b>: <code>Ctrl+click</code> a tag in your prompt to search the local tag database; <code>Ctrl+drag-select</code> a passage to see which tags often appear with it. → <a href="docs/guide/en/tags-wiki.md">Guide</a>

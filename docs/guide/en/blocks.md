@@ -19,7 +19,9 @@ Blocks (labeled “Blocks” in the interface) let you save and reuse common pro
 - Press `Ctrl+N` in the block library to create one.
 - Or select some prompt text, right-click and choose “Save as block.”
 
-A block can contain multiple items (for example, an artist pool with 30 artists), along with negative content and generation settings. Attached settings are not applied automatically when you insert the block; click “Apply attached settings” in the block when needed.
+A block can contain multiple items (for example, an artist pool with 30 artists), along with both **negative content** and **generation settings**. See [Style blocks](#style-blocks-positive-negative-and-settings-in-one-package) below.
+
+Pressing Enter or a comma while entering content creates an item; pasted text is automatically split at commas and line breaks. To keep a passage containing commas as **one item**, wrap it in `1::…::`, for example `1::sunrise, on a hill, wind::` (a weight of 1 leaves the strength unchanged). Write one item per line, then paste them all at once.
 
 ## Three modes: Fixed, Sequential and Random
 
@@ -42,6 +44,24 @@ You can set different modes for separate insertions of the same block.
 - Locking stops automatic advancement.
 
 **Example**: Save `school uniform`, `hoodie`, `kimono` and `maid outfit` as a sequential block. Generate four times in a row to get the same character in four outfits.
+
+#### Advance a story with a sequential block
+
+Sequential blocks are not just for changing outfits: they work for **anything that needs to follow an order**. Split a story into scenes, write each scene as one item, and name the block after the story. Each generation advances one scene:
+
+```text
+Block name: Homeward on a Rainy Night (Sequential)
+1::train station, night, rain, holding umbrella, waiting::
+1::walking, wet street, neon lights, reflection::
+1::convenience store, warm light, buying drink::
+1::apartment door, looking back, smile, rain stopped::
+```
+
+- Wrap a scene with multiple tags in `1::…::` so the whole scene counts as one item instead of being split at commas.
+- Use ← → on the card to jump to any scene and generate it again. If you are not satisfied, lock that scene and keep trying.
+- **Pair it with different characters**: Add a character block. Set it to Random for “the same story, a different character in each scene.” Lock the story block and reroll only the character for “the same scene, played by several characters.” Run two sequential blocks together to advance through scenes with fixed character-and-setting pairings.
+
+The same idea works for expression sequences, times of day (dawn → noon → dusk → late night), framing (full body → upper body → close-up), seasons, and more.
 
 ### Random
 
@@ -71,6 +91,16 @@ Expand “Advanced” to adjust the shape of the weight distribution:
 - **Reroll**: Draw again manually (unlock first if locked).
 - **Disable**: Temporarily excludes this block from generation without removing it from your prompt.
 
+## Style blocks: positive, negative and settings in one package
+
+A block can carry **negative content** and **generation settings** as well as positive content. Save a whole style you like—artist strings, quality tags, matching negative tags and the settings that work best—as a “style block,” ready to reuse in one click.
+
+- **Negative content**: When you insert the block, the positive part goes at the cursor and the negative part is automatically placed in the matching negative field (main prompt to main negative, character prompt to that character’s negative). Both parts are managed as a pair.
+- **Generation settings**: Attach the model, steps, guidance, rescale, sampler and noise schedule. While editing the block, click “Use current” to save the current settings from the generation page.
+- **Apply settings in one click**: Inserting a block does **not** change your settings automatically, to avoid accidental changes. When needed, click “Apply attached settings” in the block library’s context menu or details, or open the block’s card in your prompt and apply them there. Your current settings are replaced with those saved in the block. The button is unavailable if the settings are incompatible with the current model.
+
+**Example workflow**: Once you get an image you like, select the artist string and quality tags and save them as a block. In the editor, add the negative tags, click “Use current” to save the settings, and name it “Watercolor · Clarity.” Later, insert this block into any new prompt and click “Apply attached settings” to return to the same style setup.
+
 ## Organize the block library
 
 - Folders and collections are on the left; view blocks in a grid, list or masonry layout.
@@ -85,6 +115,8 @@ Expand “Advanced” to adjust the shape of the weight distribution:
 3. **Outfit / scene rotation**: A sequential block to try the whole set in one run.
 4. **Occasional details**: Random, draw 1 item, chance 30%, to add a little variety to some images.
 5. **A great combination**: Lock the artist pool and reroll only clothing and backgrounds.
+6. **Storyboards**: Write several story scenes in a sequential block, pair it with a character block, and generate one scene at a time.
+7. **Style blocks**: Package artist strings + negative tags + settings into one block. Insert it and apply its settings to switch styles.
 
 ## Working with other features
 
