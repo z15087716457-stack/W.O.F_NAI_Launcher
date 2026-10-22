@@ -7,6 +7,69 @@
     "bytes": 116462
   },
   {
+    "name": "agent-card-ask",
+    "locale": "en",
+    "w": 920,
+    "h": 636,
+    "bytes": 12990
+  },
+  {
+    "name": "agent-card-diff",
+    "locale": "en",
+    "w": 920,
+    "h": 1016,
+    "bytes": 39026
+  },
+  {
+    "name": "agent-card-gallery",
+    "locale": "en",
+    "w": 920,
+    "h": 300,
+    "bytes": 19996
+  },
+  {
+    "name": "agent-card-gate",
+    "locale": "en",
+    "w": 920,
+    "h": 640,
+    "bytes": 22980
+  },
+  {
+    "name": "agent-card-images",
+    "locale": "en",
+    "w": 920,
+    "h": 515,
+    "bytes": 30128
+  },
+  {
+    "name": "agent-card-position",
+    "locale": "en",
+    "w": 920,
+    "h": 492,
+    "bytes": 13514
+  },
+  {
+    "name": "agent-card-settings",
+    "locale": "en",
+    "w": 920,
+    "h": 380,
+    "bytes": 9662
+  },
+  {
+    "name": "agent-card-tags",
+    "locale": "en",
+    "w": 920,
+    "h": 418,
+    "bytes": 16736
+  },
+  {
+    "name": "agent-card-thinking",
+    "locale": "en",
+    "w": 920,
+    "h": 388,
+    "bytes": 12934
+  },
+  {
     "name": "agent-chat",
     "locale": "en",
     "w": 1600,
@@ -243,6 +306,69 @@
     "w": 1600,
     "h": 3422,
     "bytes": 114586
+  },
+  {
+    "name": "agent-card-ask",
+    "locale": "zh",
+    "w": 920,
+    "h": 636,
+    "bytes": 11356
+  },
+  {
+    "name": "agent-card-diff",
+    "locale": "zh",
+    "w": 920,
+    "h": 1016,
+    "bytes": 38816
+  },
+  {
+    "name": "agent-card-gallery",
+    "locale": "zh",
+    "w": 920,
+    "h": 300,
+    "bytes": 19234
+  },
+  {
+    "name": "agent-card-gate",
+    "locale": "zh",
+    "w": 920,
+    "h": 640,
+    "bytes": 21698
+  },
+  {
+    "name": "agent-card-images",
+    "locale": "zh",
+    "w": 920,
+    "h": 515,
+    "bytes": 30590
+  },
+  {
+    "name": "agent-card-position",
+    "locale": "zh",
+    "w": 920,
+    "h": 492,
+    "bytes": 11848
+  },
+  {
+    "name": "agent-card-settings",
+    "locale": "zh",
+    "w": 920,
+    "h": 380,
+    "bytes": 8854
+  },
+  {
+    "name": "agent-card-tags",
+    "locale": "zh",
+    "w": 920,
+    "h": 418,
+    "bytes": 14950
+  },
+  {
+    "name": "agent-card-thinking",
+    "locale": "zh",
+    "w": 920,
+    "h": 388,
+    "bytes": 13352
   },
   {
     "name": "agent-chat",

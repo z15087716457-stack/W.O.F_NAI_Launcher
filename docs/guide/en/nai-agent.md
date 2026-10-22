@@ -2,7 +2,7 @@
 
 # NAI Agent
 
-NAI Agent is the AI assistant built into Studio. Tell it what you want in chat, and it uses Studio’s tools to do it: edit prompts, look up tags and wiki entries, organize blocks and images, set reference images, prepare generation and more.
+NAI Agent is the AI assistant built into Studio. Tell it what you want in chat, and it uses Studio’s tools to do it: edit prompts, look up tags and wiki entries, organize blocks and gallery images, set reference images, prepare generation and more. Each action produces a corresponding **card** in the conversation, showing what changed. Most changes can be undone in one click.
 
 <img src="../../images/readme/en/gen-agent.webp" alt="NAI Agent on the generation page" width="100%">
 
@@ -22,14 +22,76 @@ A few examples:
 - “Look up `wet hair` in the wiki. Is there a more common way to write it?”
 - “Move all artist blocks in the library to the ‘Styles’ folder.”
 - “Set this image as a Vibe Transfer reference.” (You can paste or drag in an image.)
-- “Find all night scenes I made last week and move them to a new folder.”
+- “Find all night scenes I made last week in the gallery and move them to a new folder.”
 - “Prepare 4 images with the current settings and give me a quote.”
 
-Available Studio tools include reading the current draft, viewing images, rewriting prompts, draft snapshots, wiki lookup, tag lookup, finding and organizing blocks, reading / changing settings, Style Explore, preparing generation, generating images, canceling generation, finding and organizing gallery images, semantic search, setting reference images, reference libraries, image tools, and variations / enhance. It can also read and write workspace files, run commands and ask you questions when needed.
+Available Studio tools include: Read current draft, View image, Edit prompt, Draft snapshot, Search wiki, Look up tags, Find blocks, Edit blocks, Read settings / Change settings, Style explore, Prepare generation, Generate images, Cancel generation, Search gallery, Organize gallery, Semantic search, Set references, Reference library, Image tool, and Variations / enhance. It can also read and write workspace files, run commands and ask you questions when needed.
 
-<img src="../../images/readme/en/agent-run.webp" alt="Agent running" width="50%">
+## Cards in the conversation
 
-## Permissions and confirmation
+Agent does not make changes behind your back. Here are the kinds of cards you will see in the conversation.
+
+### Progress: thinking and steps
+
+<img src="../../images/readme/en/agent-card-thinking.webp" alt="Thinking and steps" width="460">
+
+The model’s thinking is collapsed by default, showing only “Thought.” Each tool call appears as a step in order (for example, Read current draft → Search wiki → Edit prompt). Expand a step to see its parameters and results.
+
+### Tag results
+
+<img src="../../images/readme/en/agent-card-tags.webp" alt="Tag lookup results" width="460">
+
+Results from Look up tags or Semantic search appear directly below that step: the canonical tag name, Chinese name and post count. Hover over a tag to see a Wiki summary.
+
+### Prompt and parameter changes
+
+<img src="../../images/readme/en/agent-card-diff.webp" alt="Prompt and parameter changes" width="460">
+
+Each prompt field edited gets a diff card: green for additions, red for deletions. Changes to parameters such as steps, sampler and size get a separate card showing old value → new value. If several things change at once, a summary at the top shows “N changes.” Choose **Undo all**, or use “Undo” on just one card. If you have manually edited the draft since then, undo is locked to avoid overwriting your newer changes.
+
+### Character positions
+
+<img src="../../images/readme/en/agent-card-position.webp" alt="Character positions" width="460">
+
+When character positions change, a miniature scene marks each character’s location so you can see at a glance who is on the left and who is on the right.
+
+### App settings
+
+<img src="../../images/readme/en/agent-card-settings.webp" alt="Settings changes" width="460">
+
+Ask it to change settings (such as switching to a dark theme or enabling visual channels), and it lists old value → new value for each item. You can undo the whole card or click “Open settings” to jump to the relevant setting.
+
+### Organizing the gallery
+
+<img src="../../images/readme/en/agent-card-gallery.webp" alt="Gallery actions" width="460">
+
+After favoriting, moving, copying, deleting or adding images to a collection, a card shows thumbnails and the number of affected images. Deletions go to the recycle area, and most actions can be undone.
+
+### Asking you a question
+
+<img src="../../images/readme/en/agent-card-ask.webp" alt="A question for you" width="460">
+
+When something is unclear, Agent pauses to ask you. It offers a few options, or you can type your own answer.
+
+### Asking for permission
+
+<img src="../../images/readme/en/agent-approval.webp" alt="Confirmation card" width="460">
+
+In “Ask” mode, this card appears before changes, deletions, moves or commands. It shows the exact parameters of the planned action, and you can choose “Allow once,” “Allow identical calls this session” or “Deny.”
+
+### Before spending Anlas: the price card
+
+<img src="../../images/readme/en/agent-card-gate.webp" alt="Price confirmation card" width="460">
+
+When Agent wants to generate images, make variations / enhance images or use cloud image tools, it first shows this price card: model and size, number of requests, unit price, reference image encoding cost, total and current balance. Studio calculates the price; the model cannot change it. **Anlas is spent only when you click “Confirm & generate”**, at every permission level. Quotes expire; if the configuration changes or the quote expires, ask Agent to prepare it again.
+
+### Outputs and summary
+
+<img src="../../images/readme/en/agent-card-images.webp" alt="Outputs from this run" width="460">
+
+Generated images appear in the conversation (and on the “Outputs” page), along with the Anlas spent in this run. Each run ends with a one-line summary: elapsed time, Anlas, number of changes, tool calls and tokens used.
+
+## Permission levels
 
 Choose a permission level at the bottom of the sidebar:
 
@@ -40,13 +102,7 @@ Choose a permission level at the bottom of the sidebar:
 | **Auto** | Makes routine changes within the workspace directly; spending still requires confirmation |
 | **Full access** | Runs all actions without asking; spending Anlas still requires confirmation (a risk warning appears before switching) |
 
-When confirmation is needed, a card offers “Allow once,” “Allow identical calls this session” or “Deny.” Actions such as deleting, moving and running commands fall under operations that require confirmation.
-
-<img src="../../images/readme/en/agent-approval.webp" alt="Confirmation card" width="50%">
-
-### Generating images always needs your confirmation
-
-When Agent wants to generate images, it first uses “Prepare generation” and shows a price card in Studio: Anlas per request, estimated total and current balance. **Generation starts only after you confirm on the price card**, at every permission level. Quotes are valid for 5 minutes. Click stop during generation, or use stop in the main interface, to interrupt it.
+During generation, click Agent’s stop button or the stop button in the main interface to interrupt a pending generation.
 
 ## Skills (Skill)
 
@@ -71,6 +127,7 @@ Use `@` in the input field to reference files or images, and `/` to invoke skill
 - All data lives in `agent-data/` in the program directory.
 - The “Instructions” page lets you write global instructions and workspace rules that affect later requests.
 - Each run defaults to at most 32 model requests, adjustable in settings (1–200).
+- Use “Edit” to resend a message you have sent (the conversation after it will be replaced), or “Regenerate” on the last reply.
 
 ## Tips
 

@@ -47,6 +47,7 @@ import '../../test/presentation/ui/settings/settings_test_harness.dart'
     show SettingsHost, SettingsRecorder;
 import '../../test/presentation/ui/viewer/viewer_test_harness.dart'
     show RecordingViewerActions;
+import 'agent_scenes.dart';
 import 'canvas_scene.dart';
 import 'images.dart';
 import 'readme_data.dart';
@@ -60,6 +61,7 @@ Widget shotApp(
   Widget page,
   ReadmeData data, {
   bool dark = false,
+  bool tickers = false,
   NavPage? nav,
 }) => RepaintBoundary(
   key: captureKey,
@@ -71,7 +73,7 @@ Widget shotApp(
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     builder: (context, child) => MediaQuery(
       data: MediaQuery.of(context).copyWith(disableAnimations: true),
-      child: TickerMode(enabled: false, child: child!),
+      child: TickerMode(enabled: tickers, child: child!),
     ),
     home: Scaffold(
       body: WindowChromeScope(
@@ -291,15 +293,19 @@ Future<void> capture(
       bitmap.dispose();
     }
   });
-  final content = name == 'blocks-rules'
+  final content = name.startsWith('agent-card-')
+      ? null
+      : name == 'blocks-rules'
       ? find.byKey(const Key('block-rules'))
       : name.startsWith('agent-')
       ? find.byType(AgentPanel)
       : name.startsWith('theme-')
       ? find.byKey(const Key('channel-fixture-canvas'))
       : null;
-  if (content != null) {
-    final r = t.getRect(content);
+  if (content != null || name.startsWith('agent-card-')) {
+    final r = name.startsWith('agent-card-')
+        ? agentCardFrame(t)
+        : t.getRect(content!);
     File('${out.path}/$name.frame.json').writeAsStringSync(
       jsonEncode({
         'box': [r.left * 2, r.top * 2, r.right * 2, r.bottom * 2],
@@ -408,6 +414,7 @@ void main() {
     'agent-chat',
     'agent-approval',
     'agent-run',
+    ...agentCardNames,
     'translation',
     'tag-expansion',
     'wiki',
@@ -427,7 +434,9 @@ void main() {
         final oldShadows = debugDisableShadows;
         debugDisableShadows = false;
         t.view.devicePixelRatio = 1;
-        t.view.physicalSize = name.startsWith('agent-')
+        t.view.physicalSize = name.startsWith('agent-card-')
+            ? const Size(460, 1200)
+            : name.startsWith('agent-')
             ? const Size(460, 1000)
             : name.startsWith('blocks-') &&
                   !['blocks-library', 'blocks-dock'].contains(name)
@@ -563,6 +572,8 @@ void main() {
             SettingsAgentPage.resetTab();
             page = SettingsHost(data: data, rec: SettingsRecorder());
             nav = NavPage.settings;
+          } else if (name.startsWith('agent-card-')) {
+            page = agentCardScene(d, name);
           } else if (name.startsWith('agent-')) {
             page = AgentPanel(
               data: d.agent(name.substring(6)),
@@ -657,7 +668,13 @@ void main() {
             page = name == 'wiki' ? wikiScene(d) : expansionScene(d);
             nav = name == 'wiki' ? NavPage.tagWiki : null;
           }
-          final app = shotApp(page, d, dark: name.endsWith('-dark'), nav: nav);
+          final app = shotApp(
+            page,
+            d,
+            dark: name.endsWith('-dark'),
+            tickers: name == 'agent-card-tags',
+            nav: nav,
+          );
           Future<void> render() async {
             await t.pumpWidget(
               name == 'tag-expansion'
@@ -669,6 +686,9 @@ void main() {
             if (name == 'gallery') await prepareGallery(t, d);
             if (name == 'wiki') await prepareWiki(t);
             if (name == 'tag-expansion') await prepareExpansion(t);
+            if (name.startsWith('agent-card-')) {
+              await prepareAgentCard(t, d, name);
+            }
             if (name == 'settings-agent') await tap(t, 'agent-tab-skills');
             if (name == 'blocks-rules') await tap(t, 'block-rules-advanced');
             if (name == 'explore-evolution' || name == 'explore-compare') {

@@ -21,6 +21,11 @@ THEMES = {
     'score': ('乐谱', 'Music score'),
     'moon': ('月相', 'Moon phases'),
 }
+AGENT_CARDS = [
+    'agent-card-diff', 'agent-card-position', 'agent-card-settings',
+    'agent-card-gallery', 'agent-card-tags', 'agent-card-ask',
+    'agent-card-gate', 'agent-card-images', 'agent-card-thinking',
+]
 TOTAL_LIMIT = 10_000_000
 
 
@@ -45,16 +50,22 @@ def content_frame(path: Path, image: Image.Image, padding: int) -> Image.Image:
     return result
 
 
-def encode(image: Image.Image, name: str, quality: int) -> bytes:
+def encode(image: Image.Image, name: str, quality: int, agent_panel_width: int = 1600) -> bytes:
+    card = name in AGENT_CARDS
+    agent_panel = name.startswith('agent-') and not card
     width = 2400 if name.startswith('hero') or name == 'channel-themes' else 1920
-    if name.startswith('agent-') or name.startswith('blocks-') and name != 'blocks-library' and name != 'blocks-dock':
+    if card:
+        width = 920
+    elif agent_panel:
+        width = agent_panel_width
+    elif name.startswith('blocks-') and name not in {'blocks-library', 'blocks-dock'}:
         width = 1600
-    limit = 700_000 if name.startswith('hero') else 400_000
+    limit = 200_000 if card else 700_000 if name.startswith('hero') else 400_000
     image = image.convert('RGB')
     while True:
-        content_width = width - 48 if name.startswith('agent-') else width
+        content_width = width - 48 if agent_panel else width
         resized = image.resize((content_width, round(image.height * content_width / image.width)), Image.Resampling.LANCZOS)
-        if name.startswith('agent-'):
+        if agent_panel:
             padded = Image.new('RGB', (width, resized.height + 48), '#f5f5f7')
             padded.paste(resized, (24, 24))
             resized = padded
@@ -66,7 +77,7 @@ def encode(image: Image.Image, name: str, quality: int) -> bytes:
             data = output.getvalue()
             if len(data) <= limit:
                 return data
-        if width == 1600 or name.startswith('hero'):
+        if card or agent_panel or width == 1600 or name.startswith('hero'):
             raise ValueError(f'{name}: cannot meet byte limit without sacrificing minimum resolution')
         width = max(1600, width - 160)
 
@@ -89,6 +100,29 @@ def collage(panels: list[tuple[str, Image.Image]], columns=3, width=768, ratio=.
         y = gap+(i // columns)*(h+label)
         result.paste(pic, (x+(width-pic.width)//2, y+(h-pic.height)//2))
         draw.text((x+8, y+h+8), name, fill='#202734', font=font(28 if label > 50 else 19))
+    return result
+
+
+def agent_contact() -> Image.Image:
+    """Nine zh cards, full aspect ratios, in three compact masonry columns."""
+    gap, width, label = 20, 640, 44
+    columns: list[list[tuple[str, Image.Image]]] = [[], [], []]
+    heights = [gap, gap, gap]
+    for i, name in enumerate(AGENT_CARDS):
+        with Image.open(DEST / 'zh' / f'{name}.webp') as source:
+            image = source.convert('RGB')
+        image = image.resize((width, round(image.height * width / image.width)), Image.Resampling.LANCZOS)
+        column = i % 3
+        columns[column].append((name, image))
+        heights[column] += image.height + label + gap
+    result = Image.new('RGB', (2000, max(heights)), '#edf0f5')
+    draw = ImageDraw.Draw(result)
+    for column, cards in enumerate(columns):
+        x, y = gap + column * (width + gap), gap
+        for name, image in cards:
+            result.paste(image, (x, y))
+            draw.text((x + 8, y + image.height + 8), name, fill='#202734', font=font(23))
+            y += image.height + label + gap
     return result
 
 
@@ -115,7 +149,15 @@ def collect(locale: str) -> list[tuple[str, Image.Image]]:
             continue  # Only consume the six explicitly requested theme captures below.
         with Image.open(path) as source:
             image = source.convert('RGB')
-        if path.stem == 'blocks-rules' or path.stem.startswith('agent-'):
+        if path.stem in AGENT_CARDS:
+            panel = content_frame(path, image, 0)
+            if panel.width != 920:
+                raise ValueError(f'{locale}/{path.stem}: expected 460 logical px at 2x')
+            # Preserve exact width/side margins and add only vertical breathing
+            # room, without leaking any part of the preceding user message.
+            image = Image.new('RGB', (920, panel.height + 72), '#ffffff')
+            image.paste(panel, (0, 36))
+        elif path.stem == 'blocks-rules' or path.stem.startswith('agent-'):
             image = content_frame(path, image, 32 if path.stem == 'blocks-rules' else 0)
         elif path.stem in PANELS:
             image = trim(image)
@@ -127,8 +169,8 @@ def collect(locale: str) -> list[tuple[str, Image.Image]]:
             image = content_frame(path, source.convert('RGB'), 0)
         panels.append((labels[0 if locale == 'zh' else 1], theme_detail(image)))
     outputs.append(('channel-themes', collage(panels, ratio=.90, label=64)))
-    if len(outputs) != 34:
-        raise ValueError(f'{locale}: expected 34 scenes, got {len(outputs)}')
+    if len(outputs) != 34 + len(AGENT_CARDS):
+        raise ValueError(f'{locale}: expected {34 + len(AGENT_CARDS)} scenes, got {len(outputs)}')
     return outputs
 
 
@@ -140,8 +182,10 @@ def main():
     existing = DEST / 'manifest.json'
     manifest = {(e['locale'], e['name']): e for e in json.loads(existing.read_text('utf-8'))} if existing.exists() else {}
     captures = {locale: collect(locale) for locale in ['zh', 'en']}
-    for quality in [82, 78, 74, 70, 66]:
-        encoded = {(locale, name): encode(image, name, quality) for locale, scenes in captures.items() for name, image in scenes}
+    # Keep existing resolution unless the new card set exceeds the total cap.
+    attempts = [(82, 1600)] + [(q, 1200) for q in [82, 78, 74, 70, 66]]
+    for quality, agent_panel_width in attempts:
+        encoded = {(locale, name): encode(image, name, quality, agent_panel_width) for locale, scenes in captures.items() for name, image in scenes}
         # Count preserved files too: exporting never silently deletes old images.
         untouched = sum(p.stat().st_size for p in DEST.rglob('*') if p.is_file() and p != existing and (p.parent.name, p.stem) not in encoded)
         # Leave room for the JSON manifest itself.
@@ -164,11 +208,12 @@ def main():
         overview = collage([(name, Image.open(DEST/locale/f'{name}.webp').convert('RGB')) for name, _ in scenes], columns=4, width=480)
         assert overview.width == 2000
         overview.save(args.contact_dir/f'contact-{locale}.jpg', quality=90)
+    agent_contact().save(args.contact_dir / 'contact-agent-cards.jpg', quality=90)
     existing.write_text(json.dumps(sorted(manifest.values(), key=lambda e: (e['locale'], e['name'])), ensure_ascii=False, indent=2)+'\n', 'utf-8')
     total = sum(p.stat().st_size for p in DEST.rglob('*') if p.is_file())
     if total > TOTAL_LIMIT:
         raise ValueError(f'Combined output too large: {total} bytes')
-    print(f'TOTAL: {total:,} bytes; quality ceiling {quality}; metadata/size checks passed')
+    print(f'TOTAL: {total:,} bytes; quality ceiling {quality}; Agent panels {agent_panel_width}px; metadata/size checks passed')
 
 
 if __name__ == '__main__':
