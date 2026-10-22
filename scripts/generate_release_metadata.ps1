@@ -162,7 +162,7 @@ if ($windowsBadges.Count -gt 0) {
 $changelogSection = Get-ChangelogSection -Version ($Version -replace '\+.*$', '')
 
 $releaseLines = @(
-  "# NAI Launcher $Tag",
+  "# W.O.F NAI Studio $Tag",
   "",
   "## 📥 按系统下载",
   "",
