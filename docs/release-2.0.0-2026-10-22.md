@@ -29,13 +29,13 @@ CI 中 `scripts/prepare_windows_node_runtime.ps1` 下载 Node 24.18.0 官方 win
 
 | 产物 | 字节数 | SHA-256 |
 |---|---:|---|
-| `dist/WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | 199838404 | `fcead8c286c374fa1d5197f22b72fa95953fea05ca539858461882605841fc17` |
-| `dist/WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | 322189986 | `e56f7adc7c8eb4c187489a20e3ac3b3286dd0989cf448bb9aa5a85bbc1980532` |
+| `dist/WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | 199975501 | `1e5cfa4cad3d31e1f1cb63815f68bdee7b94cb97d08b0f893f028636896c36b0` |
+| `dist/WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | 322315134 | `1dc8b89fe78b05021890aeae467549809d308e0fa5e94d9315c18189c6071734` |
 
-程序载荷共 **15,300 文件 / 842,760,833 字节**。应用清单 15,298 条，另有清单自身和 SHA256SUMS；SUMS 有 15,299 条。ZIP 条目数 15,300；安装后为同一载荷加 `Uninstall.exe`（运行时可能额外生成诊断日志）。
+程序载荷共 **15,300 文件 / 842,991,740 字节**。应用清单 15,298 条，另有清单自身和 SHA256SUMS；SUMS 有 15,299 条。ZIP 条目数 15,300；安装后为同一载荷加 `Uninstall.exe`（运行时可能额外生成诊断日志）。
 
 - AOT SHA-256：`d1d3e39f4954fe2f5aaaacceaf3ab9f058aba16590b0fe9ccdb6de4a512a38e5`。
-- sourceCommit：`8d19325ae5fc5dd1be08795a4d072eb1d6a8f649`。本任务禁止提交，因此此值是构建时 HEAD，**不代表本任务未提交修改已经包含在该提交中**。
+- sourceCommit：`d55842ba911b49e7afcafc8751b024738362f405`。最终包从该提交的干净工作树重新组装（`-SkipFlutterBuild`，复用同一 Release 构建，AOT 不变），之后重跑便携包、安装／升级／卸载和最终审计，全部通过。
 - Flutter 3.47.7 / Dart 3.13.5 / Node v24.18.0 / Pi 1.3.0。
 
 ## 验证结果
