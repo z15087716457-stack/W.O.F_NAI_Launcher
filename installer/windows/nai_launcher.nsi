@@ -345,6 +345,21 @@ FunctionEnd
 !insertmacro DefineProcessFunctions "" "install"
 !insertmacro DefineProcessFunctions "un." "uninstall"
 
+; 1.x in-app updates run this installer silently and then restart the old
+; executable path, so upgrade a legacy installation in place instead of
+; installing a second copy into the new default directory.
+Function .onInit
+  ; An explicit /D= target always wins.
+  StrCmp $INSTDIR "${INSTALL_DIR}" 0 legacy_location_done
+  ReadRegStr $0 HKCU "${UNINSTALL_KEY}" "InstallLocation"
+  StrCmp $0 "" 0 legacy_location_done
+  ReadRegStr $0 HKCU "${LEGACY_UNINSTALL_KEY}" "InstallLocation"
+  StrCmp $0 "" legacy_location_done
+  IfFileExists "$0\${APP_EXE}" 0 legacy_location_done
+  StrCpy $INSTDIR $0
+legacy_location_done:
+FunctionEnd
+
 Section "${APP_NAME}" SecMain
   SectionIn RO
 
