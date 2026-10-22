@@ -1,295 +1,210 @@
-# W.O.F NAI Studio
-
 <p align="center">
-  简体中文 | <a href="README.en-US.md">English</a>
+  <img src="assets/images/wof_logo_full.png" alt="W.O.F NAI Studio" width="300">
 </p>
 
 <p align="center">
-  <img src="assets/images/wof_logo_full.png" alt="W.O.F NAI Studio Logo" width="240">
+  <strong>简体中文</strong> ·
+  <a href="README.zh-TW.md">繁體中文</a> ·
+  <a href="README.en-US.md">English</a> ·
+  <a href="README.ja.md">日本語</a> ·
+  <a href="README.ko.md">한국어</a>
+</p>
+
+<h3 align="center">把 NovelAI 生图变成一套可以积累、可以复用的创作工作台</h3>
+
+<p align="center">
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest"><img src="https://img.shields.io/github/v/release/z15087716457-stack/W.O.F_NAI_Launcher?label=%E4%B8%8B%E8%BD%BD&color=2f80ed" alt="下载"></a>
+  <img src="https://img.shields.io/badge/Windows-10%20%2F%2011%20x64-0078D4?logo=windows11&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/%E7%95%8C%E9%9D%A2-%E7%AE%80%E4%B8%AD%20%2F%20%E7%B9%81%E4%B8%AD%20%2F%20EN%20%2F%20%E6%97%A5%E6%9C%AC%E8%AA%9E%20%2F%20%ED%95%9C%EA%B5%AD%EC%96%B4-555" alt="五种界面语言">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT"></a>
 </p>
 
 <p align="center">
-  <strong>面向 NovelAI 图像生成的第三方桌面客户端</strong>
+  <img src="docs/images/readme/zh/hero.webp" alt="W.O.F NAI Studio 生图页" width="100%">
 </p>
 
-<p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version"></a>
-  <img src="https://img.shields.io/badge/Flutter-3.47.7-blue?logo=flutter" alt="Flutter">
-  <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
-</p>
+W.O.F NAI Studio 是一个 Windows 桌面上的 NovelAI 第三方客户端。它不只是把官网搬到桌面：常用的提示词可以存成**积木**反复使用，画师组合可以交给**画风遗传**一代代筛选，看不懂的标签有**翻译、标签百科和本地语义检索**帮忙，生成、整理、修图的杂活还可以交给内置的 **NAI Agent**。
 
-> **本仓库是 [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher)（MIT）的个人分支（W.O.F 版）**，功能基线为上游 v1.5.3，版本号从 1.0.0 重新编排。本分支持续维护 V5 模型、桥接填参、画风探索遗传等扩展功能，与上游作者无关，问题反馈请提到本仓库的 Issues。
->
-> 画风探索的遗传算法思路参考自 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库中的实现为 Dart 重写，未复制其源码，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+> 这是非官方项目，与 NovelAI 无关。请使用你自己的 NovelAI 账号，并遵守 NovelAI 的服务条款。
 
-W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。它把图像生成、图生图、局部重绘、Vibe / Precise Reference、本地图库、在线图库、生成队列、Krita 联动和统计工具整合在一个桌面应用里，适合日常生成、批量出图和长期管理本地作品。
+## 下载
 
-> 本项目不是 NovelAI 官方产品。使用前请确保你拥有自己的 NovelAI 账号，并遵守 NovelAI 的服务条款。
+到 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/latest) 下载最新版本，二选一：
 
-
-> 本文描述当前源码能力。近期 Studio、翻译与图库改动仍列在 CHANGELOG 的 `[Unreleased]`；下载包具备哪些功能，以该包对应 Release 的说明为准。既有界面截图保留为早期示意。
-
-> 当前版本为 **2.0.0 正式版**：提供 Windows x64 安装版与便携版，用户数据在程序目录 `user-data/`，卸载保留；请使用自己的账号。产物与验证见 [正式版记录](docs/release-2.0.0-2026-10-22.md)，当前仅本地出包，尚未发布 GitHub Release。
-
-## ✨ 功能概览
-
-| 能力 | 说明 |
+| 文件 | 适合谁 |
 | --- | --- |
-| 🎨 图像生成 | 支持 NovelAI Diffusion V1/V2/V3/V4/V4.5/V5（Full / Curated）、Furry 系列、常用采样器、尺寸预设、多角色参数和 Anlas 估算。 |
-| 🖼️ 图生图与编辑 | 支持图生图、局部重绘、Outpaint、虚拟画布扩图、硬边蒙版和点击式区域填充。 |
-| 🌈 参考与风格 | 支持 Vibe Transfer、Precise Reference、多图参考、Vibe 整包导入导出、PNG 元数据嵌入导出。 |
-| ✍️ Prompt 工具 | 内置完整离线 Danbooru/e621 合并标签、别名及 Danbooru 共现关系补全，支持 `Ctrl/⌘+Shift+Space` 查询光标前标签的相关词、固定来源标签后连续选词、Danbooru 在线相关标签补充与 AI 标签汉化，以及 NAI/SD 权重语法辅助、Token 统计、提示词框内搜索和固定词；另有贯穿全器的 pill 提示词块系统，见下方特色介绍。 |
-| 📚 本地图库 | 支持多图库源递归扫描、侧栏/图片墙/详情三栏、按天分组连续浏览与时间轴、SQLite 全文搜索、分类/收藏集/删除池、模型版本过滤、详情面板一键复用参数、批量操作和大图预览。 |
-| 🌐 在线图库 | 支持 Danbooru / Safebooru / Gelbooru / AI TAG 搜索、真实排行榜、多图详情、元数据复用和批量下载。 |
-| 📦 生成队列 | 支持任务排序、批量生成、暂停/继续、失败策略、进度统计和队列导入导出。 |
-| 🔌 外部联动 | 支持 Krita 全参数桥接（AI 接管）、ComfyUI 本地工作流、系统代理、图片复制和文件定位。 |
+| `WOF_NAI_Studio_Windows_<版本>_Setup.exe` | **大多数人选这个。** 装到当前用户目录，不需要管理员权限，有开始菜单和桌面快捷方式。 |
+| `WOF_NAI_Studio_Windows_<版本>_Portable.zip` | 想放在自己指定的文件夹、U 盘或多台电脑之间带着走。解压后运行 `nai_launcher.exe`。 |
 
-### 在线画廊来源
+两个版本都支持应用内更新。你的设置、图库数据库和 Agent 数据都放在程序旁边的 `user-data/` 和 `agent-data/` 里，升级和卸载都不会删除它们。
 
-- **Danbooru / Safebooru**：支持标签、日期搜索，以及指定日期的日榜、周榜和月榜；Danbooru 可登录并管理收藏，Safebooru 使用 `safebooru.donmai.us` 匿名只读访问。
-- **Gelbooru**：支持公开搜索；配置 API 凭据后可加速搜索并浏览只读网站收藏，不提供伪造的本地排行榜。
-- **AI TAG**：支持作品/作者/标题/标签/模型综合搜索和原样 Prompt 语法搜索（如 `::artist:`），时间范围由来源实时配置；支持实时月榜、历史月榜和旧月份归档。多图详情可切换、预取和逐图复用 NAI / Stable Diffusion / ComfyUI 元数据，并支持下载当前图片或作品全部图片。本分支新增**本地收藏系统**：作品收藏（可归入子集）与作者收藏保存在本地独立数据库、收藏列表离线可看，无需站点账号；详情页可收藏作者并一键查看该作者的作品——直接在前端筛选呈现、不跳外部链接，搜索栏保留返回入口，随时回到你当前的浏览进度。
+> 安装包暂未做代码签名，第一次运行时 Windows 可能提示“已保护你的电脑”。点“更多信息 → 仍要运行”即可。每个版本都附有 SHA-256 校验值。
 
-## 🚀 W.O.F 版特色
+## 三步上手
 
-> 本分支基于上游 v1.5.3，围绕「提示词资产化 + 画风定向探索」重做了多个子系统。完整变更见 [CHANGELOG.md](CHANGELOG.md)。
+1. **登录**：用 NovelAI 的 API Token（推荐）或账号密码登录；也可以先用游客身份进入，体验本地功能。
+2. **生成**：在左侧写提示词，按 `Ctrl+Enter`。结果会一批批铺在中间的画布上。
+3. **积累**：把常用的画师串、质量词存成积木；满意的图自动进本地画廊，随时复用参数。
 
-### 💊 pill 提示词块系统 —— 贯穿全器的提示词中枢
+更详细的说明见 [快速上手](docs/guide/zh-CN/quick-start.md)。
 
-把提示词拆成可复用的「块」：画师池、质量词、UC 预设、画风串都是块。生成页右侧常驻块库面板，点一下就把块插进当前提示词；块在正文里以药丸形态内联显示，分块高亮、即点即改，正向、负向、角色框全部通用。
+## 能做什么
 
-- **三种实例模式**：固定原样输出；顺序按序轮转（药丸角标 →，卡片内 ←→ 逐幕步进）；随机抽取支持数量范围、Split-Beta 权重分布、触发概率，一次生成多张时逐张重抽。
-- **块管理页**：文件夹树 + ⭐收藏集双区侧栏（比例可拖并持久化）、网格/列表/瀑布流三视图按子文件夹分段吸顶浏览、多选批量操作、块缩略图与取景裁剪、颜色与标签自定义、悬停预览 + 右侧详情面板、正负配对内容；内置 NovelAI 官方预设块。旧单块 TXT 导出入口已改为标签管理。
-- **积木悬浮板 + 生图页块库面板**：常用块拖进积木悬浮板即点即插；块库面板按文件夹子树过滤、上下分割比例可拖且持久化。
-- **实例级锁定与「进化目标」DNA 角标**：标定哪些块参与变异——这是画风探索的接口。
+### 积木：写一次，反复用
 
-<p align="center">
-  <img src="screenshots/generation_pill_block_library.png" alt="生成主界面：pill 药丸编辑器与块库面板" width="80%">
-  <br>
-  <em>早期生图界面示意。当前源码采用 A 精修模块卡片、紧凑参数行与批次历史；本轮尚未安装，见 CHANGELOG。</em>
-</p>
+<img src="docs/images/readme/zh/blocks-library.webp" alt="积木库" width="100%">
 
-<table align="center">
+把画师池、质量词、负面词、服装清单这些常用片段存成“积木”，拖进提示词就能用。每个积木可以设成三种方式：
+
+- **固定**：每次原样放入，适合质量词和负面词；
+- **顺序**：每次生成往后换一项，适合把一组服装或场景挨个试一遍；
+- **随机**：每次从池里抽几项，还能设抽几个、出现概率和随机权重，适合批量试画师组合。
+
+抽到满意的结果就**锁定**它，再去重抽别的积木。→ [积木教程](docs/guide/zh-CN/blocks.md)
+
+### 画风遗传：让好看的组合自己“进化”
+
+<img src="docs/images/readme/zh/explore-evolution.webp" alt="画风探索与遗传" width="100%">
+
+不知道哪几位画师混在一起好看？在画风探索里放一个随机画师池，一次抽几十张候选。挑出喜欢的几张，开始进化：程序会对它们的画师串做交叉、变异和注入新画师，生成下一代。你只管挑，几代之后画风就会朝你想要的方向靠拢。满意的组合可以一键存成积木。→ [画风遗传教程](docs/guide/zh-CN/style-explore.md)
+
+### 翻译块、标签扩展与标签百科：看懂每一个标签
+
+<table>
   <tr>
-    <td width="62%"><img src="screenshots/prompt_block_manager.png" alt="提示词块管理页"></td>
-    <td width="38%"><img src="screenshots/block_instance_settings.png" alt="块实例设置"></td>
+    <td width="50%"><img src="docs/images/readme/zh/translation.webp" alt="翻译块"></td>
+    <td width="50%"><img src="docs/images/readme/zh/tag-expansion.webp" alt="标签扩展"></td>
   </tr>
   <tr>
-    <td align="center"><em>块管理页：文件夹树、多选批量操作</em></td>
-    <td align="center"><em>块实例设置：三种模式与权重分布</em></td>
+    <td>
+      <b>翻译块</b>：把英文提示词翻成中文在原位显示，中键一点就能在原文和译文之间切换。生成时永远使用原文，翻译只帮你读。→ <a href="docs/guide/zh-CN/translation.md">教程</a>
+    </td>
+    <td>
+      <b>标签扩展</b>：<code>Ctrl+单击</code>提示词里的标签，搜索本地标签库；<code>Ctrl+拖选</code>一段，看哪些标签常和它一起出现。→ <a href="docs/guide/zh-CN/tags-wiki.md">教程</a>
+    </td>
   </tr>
 </table>
 
-### 🧬 画风探索 · 多池遗传
+<img src="docs/images/readme/zh/wiki.webp" alt="标签百科" width="100%">
 
-对着一个画风方向批量出候选，再用遗传算法逐代收敛：基础轮每张候选独立快照留档；挑中喜欢的设为父本，深度轮对父本做变异 / 交叉 / 随机注入产出下一代；两两比较打偏好分，谱系面板可回溯任意子代的完整祖先链。选定的画风串一键「收编为块」，回到 pill 系统直接参与生成。
+**标签百科**随软件附带本地 Danbooru Wiki，离线就能查一个标签是什么意思、常和什么一起用，并一键加进积木。
 
-- 三栏探索页 + 网格 / 牌堆双视图，分区可拖拽调宽。
-- 全屏正式筛选：键盘 T/S/R 打标、固化模板、Reject 批量删图。
-- 基础轮逐张快照、深度轮不污染当前草稿。
-- 算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本仓库为 Dart 重写实现，未复制其源码。
+### 本地语义检索（RAG）：用意思找东西
 
-> 📖 不会用？看图文教程：[docs/style-exploration.md](docs/style-exploration.md)（从开遗传到建家族、深度迭代、收编为块全流程）。
+<img src="docs/images/readme/zh/settings-rag.webp" alt="语义检索设置" width="100%">
 
-### 🎨 NovelAI Diffusion V5（N5）完整支持
+可选组件。开启后，标签推荐、标签百科、积木库和本地画廊都能按“意思”搜索：输入“下雨的街道”也能找到相关的英文标签、积木和你以前画过的图，还能用一张图找相似的图。全部在你的电脑上运行，不上传任何内容。→ [语义检索教程](docs/guide/zh-CN/rag.md)
 
-能力位注册表驱动：V5 Full / Curated（含 inpainting 互转）、最多 32 个角色框、token 上限 1471、官网口径 ×1.5 计价、透明背景开关（straight_alpha）、Enhance Max✨ 服务端 e2e 放大、V5 质量词与 UC 预设。
+### NAI Agent：把杂活交给 AI 助手
 
-### 🔌 开放桥接 · 任意 Agent 直接接管
+<table>
+  <tr>
+    <td width="62%"><img src="docs/images/readme/zh/gen-agent.webp" alt="生图页里的 NAI Agent"></td>
+    <td width="38%"><img src="docs/images/readme/zh/agent-approval.webp" alt="Agent 操作确认"></td>
+  </tr>
+</table>
 
-启动器内置本地桥接协议，**任何外部 Agent 工具、脚本或工作流都能直接接入**——使用每次启动生成的本地端口与 secret 认证，按当前协议控制支持的操作：
+在生图页或画风探索页打开侧栏，用聊天的方式让 AI 帮你改提示词、查标签和百科、整理积木和图库、设置参考图，甚至准备一次生成。它使用你自己在“模型与接口”里配置的大模型服务。
 
-- **参数控制**：`set_params` 写入支持的提示词、尺寸、种子、采样与角色等字段，`generate` 经桥接返回图片路径；复杂参考图有独立读写边界，使用前核对当前 CLI 和 handler。
-- **状态回读**：`get_params` 返回生效提示词、角色、模型参数、参考图与 Token 用量；能读不代表每个字段都能原样回写，角色数组写入会替换整表。
-- **配套工具链**：`tool/nai_bridge_client.py` CLI（get / set / set-json / gen / ui-gen / cancel）、`tool/nai_fill.py` 一键读图填入、`tool/bridge_selfcheck.py` 按范围自检——照着 CLI 的源码即可写出任意语言的接入方。
-- 应用内自动更新接入本仓库 Releases（v1.0.1 起），桥接扩展不会被上游更新覆盖。
+- 修改、删除、运行命令前会先问你，权限分只读、询问、自动、完全四档；
+- **花 Anlas 的生成在任何档位都要你在价格卡上亲自确认**；
+- 支持技能（Skill）、MCP 服务器和 CodeMode，可以按自己的工作流扩展。
 
-### 🖼️ 画廊大版本
+→ [NAI Agent 教程](docs/guide/zh-CN/nai-agent.md)
 
-本地画廊采用资料库 / 收藏集 / 文件夹侧栏、连续图片墙和详情检查器。网格、瀑布流、火车流共用缩略图大小；默认火车流按等高行排版、保持原比例不裁切，未满末行靠左。没有分页，可按天 / 月分组、拖时间轴定位、单图查看、多选和复用参数；顶栏搜索自适应，标题和空白可拖窗。多图库源、删除池、NAI / 模型 / 标签 / 日期筛选、高清 / 标清缩略图、向外拖出与字节去重保留。在线画廊仍使用独立的本地收藏和 AI TAG 作者查询。
+### 无限画布与视觉通道
 
-<p align="center">
-  <img src="screenshots/local_gallery_masonry.png" alt="本地画廊瀑布流" width="80%">
-  <br>
-  <em>历史图库截图；当前为上文描述的三栏连续时间线布局。</em>
-</p>
+<img src="docs/images/readme/zh/channel.webp" alt="无限画布与视觉通道" width="100%">
 
-### ➕ 更多改进
+生成结果按批次铺在一张可以无限拖动的画布上，滚轮平移、`Ctrl+滚轮`缩放、WASD 导航，按住空格看局部重绘前的原图。画布两侧可以开启“视觉通道”装饰：星图、像素电路、深海、地铁等 11 种主题，只画在图片之外，不挡图。→ [画布教程](docs/guide/zh-CN/canvas.md)
 
-- 角色卡官网式常驻编辑器：选中跟随焦点，输入框随内容自增高（3~12 行）。
-- Opus 免费额度芯片：官方 `usage.percent` + 回充倒计时；免费资格对齐官方实证，PR / img2img / 局部重绘不再误取消免费。
-- 游客模式：登录页可跳过登录，离线使用全部本地功能，纯内存会话不驻留。
-- 统一 NAI 词法扫描器与数值权重尾守卫；移除失焦空格自动转下划线；元数据按 Magic Byte 解析 PNG / WebP / JPEG；AI TAG 在线画廊反防盗链。
+### 本地画廊与在线画廊
 
-### 🌐 翻译、模型配置与多语言
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/readme/zh/gallery.webp" alt="本地画廊"></td>
+    <td width="50%"><img src="docs/images/readme/zh/online.webp" alt="在线画廊"></td>
+  </tr>
+</table>
 
-- 双语提示词块支持整组 / 单块切换、编辑、重译、原文还原与撤销；阅读译文不改变保存的生成原文。
-- 「模型与接口」提供服务管理、目录 / 已选模型双栏、手动模型 ID、目录持久缓存和连接测试；上下文、最大输出、推理与采样参数属于模型，功能接口和提示词预设不覆盖参数。能力标记是配置记录，不代表内置 Agent 执行端已接入。
-- 界面支持简体中文、台湾正体、英文、日文与韩文。主界面字号固定 100%，设置页、菜单与弹窗共用自己的缩放。
-- 拖入、粘贴与画廊参数复用共用紧凑图片使用窗口，明确选择导入项；种子默认不勾选，角色可以替换或追加。
+- **本地画廊**：多个图库文件夹统一浏览，按天或月分组的连续时间线，按提示词搜索，收藏集、批量移动和删除池；任何一张 NAI 图都能一键复用参数。
+- **在线画廊**：Danbooru、Safebooru、Gelbooru、AI TAG 四个来源，支持排行榜、收藏和黑名单，看到喜欢的作品可以直接复用它的生成参数。
 
-## 🧩 平台支持
+→ [画廊教程](docs/guide/zh-CN/gallery.md)
 
-| 平台 | 状态 | 说明 |
-| --- | --- | --- |
-| Windows | 可用 | 唯一开发和发布平台，支持系统托盘、窗口状态保存、视频播放、剪贴板和文件定位。 |
+### 参考图、导演工具、局部重绘与放大
 
-## 📦 下载与安装
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/readme/zh/tools-inpaint.webp" alt="局部重绘"></td>
+    <td width="50%"><img src="docs/images/readme/zh/tools-upscale.webp" alt="放大"></td>
+  </tr>
+</table>
 
-前往 [Releases](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases) 下载最新版本。应用会在登录前后持续提示可用更新（更新源指向本仓库），并完整渲染 Release 中的 GitHub Flavored Markdown 更新日志（标题、列表、表格、引用、代码、链接与图片）。
+- **风格迁移与精准参考**：参考图库统一管理 Vibe 和精准参考，编码过的 Vibe 可以重复使用；
+- **导演工具**：背景移除、线稿提取、上色、表情修复、像素对齐等；
+- **局部重绘**：画笔、选区、魔棒、图层齐全的全屏编辑器，画完直接“应用并生成”；
+- **放大**：NovelAI 云端放大，或在本机用 Real-ESRGAN、NVIDIA RTX Video、SeedVR2 放大，不花 Anlas。
 
-| 平台 | 下载文件 | 使用方式 |
-| --- | --- | --- |
-| Windows | `WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
-| Windows | `WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
+→ [图像工具教程](docs/guide/zh-CN/image-tools.md)
 
-首次登录可以使用 NovelAI 账号密码或 API Token。账号数据仅保存在本地设备，桌面端使用系统安全存储保存敏感信息。
+### 还有这些
 
-### 标签、翻译与隐私
+- **NovelAI 全模型**：V1 到 V4.5、V5（Full / Curated）、多角色框和角色定位、透明背景、Anlas 实时估算和高消耗提醒；
+- **统计**：创作日历、模型与产量、Anlas 消耗，点图表直接跳到当天的图；
+- **本机桥接**：外部脚本或 AI 工具可以通过随附的 `studio-bridge.exe` 读写参数，生图前同样要报价确认；也支持 Krita 插件联动；
+- **快捷键**：按 `F1` 查看全部快捷键，都能自定义；
+- **五种界面语言、浅色和深色主题**。
 
-- 随包提供离线标签 / 别名 catalog 与本地英文 Wiki，不再分发或下载 ffdkj 中文词库。新增独立的中文语义补充资料，含 53,860 条标签的同义词、核心词及可用简释义；资料与按需读取入口已就绪，当前标签搜索尚未切换到新版检索链路。
-- 可选的标签 / Wiki 自动翻译默认关闭。开启后使用配置的「标签翻译」「百科翻译」接口，按最新可见范围优先调度，默认最多 5 个并发；标签名称请求包含可用的完整本地 Wiki 作为语义背景，正文仅在打开时请求翻译。
-- 提示词翻译向所选服务发送需要翻译的普通文字段与命中术语；双语块另存生成原文。共用术语表可带中文译名、简短释义及释义语言，缺少 / 过期中文释义时提供标明来源语言的短原文，不额外请求模型补表。
-- 译文写入独立本地缓存，不覆盖标签库 / Wiki，旧结果继续可读。所选服务的请求可能产生费用，按该服务配置和价格使用。
-- 可选 Danbooru 在线关联只发送相关标签，不发送完整提示词；相关控制与清缓存位于「设置 → 词库与缓存」。
+## 隐私与网络
 
-## 🛠️ 从源码构建
+- 账号 Token 和各家 API 密钥保存在 Windows 系统安全存储里，只在本机使用。
+- 只有这些情况会联网：调用 NovelAI 接口；使用你自己配置的翻译或 Agent 模型服务；浏览在线画廊；检查更新；以及你主动点击下载的可选组件（语义检索模型、放大模型等）。
+- 语义检索、本地放大、图库整理都在本机完成。
+- 自动翻译默认关闭；Danbooru 在线关联标签只发送相关的标签，不发送完整提示词。
 
-### 环境要求
+更多问题见 [常见问题](docs/guide/zh-CN/faq.md)。
 
-- Flutter `3.44.2`（项目最低要求 Flutter `3.35.0` / Dart `3.10.7`）
-- Git LFS，用于拉取 `assets/databases/*.db`
-- Visual Studio 2022 Desktop development with C++
-- [NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools)，`nuget.exe` 所在目录必须加入 `PATH`
+## 教程目录
 
-### 通用步骤
+| 教程 | 内容 |
+| --- | --- |
+| [快速上手](docs/guide/zh-CN/quick-start.md) | 安装、登录、第一次生成、数据位置 |
+| [积木](docs/guide/zh-CN/blocks.md) | 固定 / 顺序 / 随机、锁定、权重规则、典型用法 |
+| [画风遗传](docs/guide/zh-CN/style-explore.md) | 抽候选、开始进化、两两比较、存为积木 |
+| [翻译块](docs/guide/zh-CN/translation.md) | 配置翻译模型、双语阅读、切换与还原 |
+| [标签扩展与标签百科](docs/guide/zh-CN/tags-wiki.md) | 本地标签搜索、关联标签、离线百科 |
+| [本地语义检索](docs/guide/zh-CN/rag.md) | 安装、建库、在哪些地方能用 |
+| [NAI Agent](docs/guide/zh-CN/nai-agent.md) | 配置模型、权限、生图确认、技能与 MCP |
+| [无限画布与视觉通道](docs/guide/zh-CN/canvas.md) | 画布操作、原图对比、装饰主题 |
+| [画廊](docs/guide/zh-CN/gallery.md) | 本地画廊整理、在线画廊浏览与复用 |
+| [图像工具](docs/guide/zh-CN/image-tools.md) | 参考图、导演工具、局部重绘、放大 |
+| [常见问题](docs/guide/zh-CN/faq.md) | 安装提示、数据备份、旧版迁移、隐私 |
+
+<details>
+<summary><b>从源码构建</b></summary>
+
+需要 Windows 10/11 x64、Flutter 3.47.7（见 `tool/flutter-sdk.json`）、Visual Studio 2022 的“使用 C++ 的桌面开发”、Git LFS 和 NuGet CLI。
 
 ```bash
 git clone https://github.com/z15087716457-stack/W.O.F_NAI_Launcher.git
 cd W.O.F_NAI_Launcher
-
-git lfs install
-git lfs pull --include="assets/databases/*.db"
-
+git lfs install && git lfs pull
 flutter pub get
-dart run build_runner build --delete-conflicting-outputs
+dart run tool/generate.dart
 flutter gen-l10n
-flutter analyze
-flutter test
+flutter build windows --release --no-tree-shake-icons
 ```
 
-### Windows
+打包安装版与便携版用 `scripts/package_windows_release.ps1`。开发约定见 [DEVELOPMENT.md](DEVELOPMENT.md)，版本记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/verify_nuget.ps1
-flutter build windows --release
-```
+</details>
 
-`flutter_inappwebview` 的 Windows 实现会在编译阶段通过 NuGet 获取 WebView2 SDK 等原生依赖。`verify_nuget.ps1` 检查失败时，请先安装 NuGet CLI，并确认新 PowerShell 窗口中可以直接运行 `nuget help`。
+## 致谢与许可
 
-产物目录：
+- 本项目分支自 [Aaalice233/Aaalice_NAI_Launcher](https://github.com/Aaalice233/Aaalice_NAI_Launcher)（MIT），感谢原作者的开源工作。本分支与上游作者无关，问题请提到本仓库的 Issues。
+- 画风遗传的算法思路参考 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），本项目为独立的 Dart 实现，未复制其源码。
+- NAI Agent 基于 [Pi](https://github.com/earendil-works/pi)（MIT）。
+- 本项目以 [MIT License](LICENSE) 开源；随附的数据、字体和组件遵循各自许可，详见 [第三方声明](THIRD_PARTY_NOTICES.md)。
 
-```text
-build/windows/x64/runner/Release/
-```
-
-Windows 桌面开发可启动独立热重载会话：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/dev_hot_reload_window.ps1
-```
-
-代码修改后可从任意终端安全触发现有会话，不会启动第二个 `flutter attach`：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/trigger_hot_reload.ps1
-# 需要重置应用状态时：
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/trigger_hot_reload.ps1 -Restart
-```
-
-需要检查实际桌面窗口时，可直接截图到项目临时目录（窗口被遮挡时也可直接渲染）：
-
-```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1
-# 自定义输出路径或不激活窗口：
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/capture_dev_window.ps1 -OutputPath tool/.tmp/ui.png -NoActivate
-```
-
-## 🚀 发布流程
-
-发布由 GitHub Actions 的 `Release` workflow 处理。推送 `v*` tag 后，工作流会构建 Windows 安装版与便携版，并生成 `release_manifest.json`、`checksums.txt` 与 Release notes。Release 页面会生成带平台图标的 Setup / Portable 直达下载按钮。
-
-```bash
-git tag v1.0.0
-git push origin main
-git push origin v1.0.0
-```
-
-发布前请确保：
-
-- `pubspec.yaml` 版本号已更新；tag 必须匹配去掉 `+build` 后的版本，例如 `1.0.0+17` 对应 `v1.0.0`。
-- `CHANGELOG.md` 已按 `✨ 新增`、`🛠 改进`、`🐛 修复` 分类补好；发布文件表由脚本自动生成，不要写入 Changelog。
-- `assets/databases/tag_catalog.db` 与 `assets/databases/cooccurrence.db` 是真实 SQLite 文件而不是 Git LFS pointer，并已通过 `dart run tool/tag_catalog/verify_bundled_databases.dart` 校验。
-- Windows 打包依赖登记的 Flutter SDK、Python 3、NSIS 与 VS x64 CRT；CI 先完成依赖解析和代码生成，本地使用现有生成文件。运行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_release.ps1 -NodeRuntimeDirectory "<Node 24.18.0 运行时目录>"`（目录需含 `node.exe`、`NODE-LICENSE`、`PI-LICENSE`；可加 `-CrtDirectory "<微软 x64 CRT 目录>"`）。脚本独立暂存、生成 ZIP64 / 安装器及 SHA-256，不修改运行包。
-- 正式签名可配置 GitHub Secrets `WINDOWS_SIGNING_CERT_BASE64`（PFX 的 Base64）和 `WINDOWS_SIGNING_CERT_PASSWORD`。工作流会在打包前签名便携版主程序、打包后签名安装器，并用 `signtool verify` 强制验证；未配置证书时保持当前无签名构建。
-- 本地签名统一使用 `scripts/sign_windows_binary.ps1`，例如：`pwsh -File scripts/sign_windows_binary.ps1 -Path dist/setup.exe -CertificatePath cert.pfx -CertificatePassword '<password>'`。
-
-## 🗂️ 项目结构
-
-```text
-nai_launcher/
-├── assets/                 # 图标、截图、音效、标签数据、预置数据库
-├── installer/              # 安装器脚本
-├── krita_plugin/           # Krita 插件与打包/验收脚本
-├── lib/
-│   ├── core/               # 网络、数据库、缓存、加密、文件、快捷键等基础能力
-│   ├── data/               # API、模型、仓库和业务数据服务
-│   ├── l10n/               # 简中/繁中/英/日/韩界面文案与生成文件
-│   └── presentation/       # 页面、组件、状态管理、主题和路由
-├── scripts/                # 构建、打包、签名、热重载与校验脚本
-├── test/                   # 单元测试和组件测试
-├── tool/                   # 开发工具、数据处理、图标生成和诊断脚本
-└── windows/                # Windows runner
-```
-
-## 💻 开发约定
-
-常用命令：
-
-```bash
-flutter pub get
-dart run build_runner build --delete-conflicting-outputs
-dart format lib test
-flutter analyze
-flutter test
-```
-
-提交信息使用：
-
-```text
-type(scope): 中文描述
-```
-
-常用 type：`feat`、`fix`、`refactor`、`perf`、`style`、`docs`、`test`、`chore`。
-
-## 🤝 贡献
-
-欢迎通过 Issue 和 Pull Request 参与。提交 PR 前请说明变更目标、影响范围、验证方式；涉及 UI 行为时，尽量附上截图或录屏。
-
-## 🙏 致谢
-
-- 感谢 [Aaalice233](https://github.com/Aaalice233/Aaalice_NAI_Launcher) 创作并开源上游项目（MIT），本分支在其 v1.5.3 基线上开发。
-- 画风探索的遗传算法思路参考自 [monineko/PromptCard-Studio](https://github.com/monineko/PromptCard-Studio)（GPL-3.0），实现为 Dart 重写，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
-- [NovelAI](https://novelai.net/) 提供图像生成服务。
-- [Flutter](https://flutter.dev/) 提供跨平台 UI 能力。
-- [Riverpod](https://riverpod.dev/) 提供状态管理能力。
-- 感谢所有贡献者和测试用户。
-
-## 📄 许可证
-
-本项目基于 MIT License 开源，详见 [LICENSE](LICENSE)。原版权归属上游 NAI Launcher Contributors，本分支新增部分的版权归 W.O.F (z15087716457-stack)。
-
-第三方中文语义补充数据保留来源项目 DanbooruSearchOnline 的 GPL-3.0 许可；原始 CSV、固定来源与转换工具见 [数据说明](tool/tag_semantics/README.md)，完整归属见 [第三方声明](THIRD_PARTY_NOTICES.md)。
-
-界面使用随包提供的 Geist Sans / Mono / Pixel Line、HarmonyOS Sans SC 与韩文 Pretendard 字体，界面图标沿用原有图标。字体遵循各自许可，见 [素材说明](tool/branding/README.md) 与 [许可文件](assets/licenses/)；应用「关于」页亦可查看。
+README 中的界面截图使用演示数据渲染，示例提示词与画师名均为虚构。

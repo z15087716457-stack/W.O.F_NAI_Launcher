@@ -1,0 +1,478 @@
+[
+  {
+    "name": "agent-approval",
+    "locale": "en",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 116462
+  },
+  {
+    "name": "agent-chat",
+    "locale": "en",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 95658
+  },
+  {
+    "name": "agent-run",
+    "locale": "en",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 93078
+  },
+  {
+    "name": "blocks-dock",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 173148
+  },
+  {
+    "name": "blocks-library",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 218538
+  },
+  {
+    "name": "blocks-locked",
+    "locale": "en",
+    "w": 1600,
+    "h": 1918,
+    "bytes": 79508
+  },
+  {
+    "name": "blocks-random",
+    "locale": "en",
+    "w": 1600,
+    "h": 1918,
+    "bytes": 79644
+  },
+  {
+    "name": "blocks-rules",
+    "locale": "en",
+    "w": 1600,
+    "h": 3114,
+    "bytes": 117808
+  },
+  {
+    "name": "blocks-sequential",
+    "locale": "en",
+    "w": 1600,
+    "h": 1963,
+    "bytes": 100848
+  },
+  {
+    "name": "channel",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 163920
+  },
+  {
+    "name": "channel-dark",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 163636
+  },
+  {
+    "name": "channel-themes",
+    "locale": "en",
+    "w": 2400,
+    "h": 1547,
+    "bytes": 125490
+  },
+  {
+    "name": "explore-compare",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 151534
+  },
+  {
+    "name": "explore-evolution",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 98544
+  },
+  {
+    "name": "explore-main",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 239012
+  },
+  {
+    "name": "gallery",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 202296
+  },
+  {
+    "name": "gen-agent",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 157550
+  },
+  {
+    "name": "hero",
+    "locale": "en",
+    "w": 2400,
+    "h": 1500,
+    "bytes": 228260
+  },
+  {
+    "name": "hero-dark",
+    "locale": "en",
+    "w": 2400,
+    "h": 1500,
+    "bytes": 228656
+  },
+  {
+    "name": "online",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 245608
+  },
+  {
+    "name": "refs-precise",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 246354
+  },
+  {
+    "name": "refs-vibe",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 238132
+  },
+  {
+    "name": "settings-agent",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 55394
+  },
+  {
+    "name": "settings-dictionaries",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 68176
+  },
+  {
+    "name": "settings-models",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 70760
+  },
+  {
+    "name": "settings-rag",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 78964
+  },
+  {
+    "name": "stats",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 100862
+  },
+  {
+    "name": "tag-expansion",
+    "locale": "en",
+    "w": 1920,
+    "h": 1380,
+    "bytes": 41850
+  },
+  {
+    "name": "tools-director",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 169636
+  },
+  {
+    "name": "tools-inpaint",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 107928
+  },
+  {
+    "name": "tools-upscale",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 153142
+  },
+  {
+    "name": "translation",
+    "locale": "en",
+    "w": 1920,
+    "h": 1433,
+    "bytes": 62832
+  },
+  {
+    "name": "viewer",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 117846
+  },
+  {
+    "name": "wiki",
+    "locale": "en",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 38384
+  },
+  {
+    "name": "agent-approval",
+    "locale": "zh",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 114586
+  },
+  {
+    "name": "agent-chat",
+    "locale": "zh",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 92866
+  },
+  {
+    "name": "agent-run",
+    "locale": "zh",
+    "w": 1600,
+    "h": 3422,
+    "bytes": 89700
+  },
+  {
+    "name": "blocks-dock",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 165836
+  },
+  {
+    "name": "blocks-library",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 213864
+  },
+  {
+    "name": "blocks-locked",
+    "locale": "zh",
+    "w": 1600,
+    "h": 1951,
+    "bytes": 84426
+  },
+  {
+    "name": "blocks-random",
+    "locale": "zh",
+    "w": 1600,
+    "h": 1951,
+    "bytes": 84636
+  },
+  {
+    "name": "blocks-rules",
+    "locale": "zh",
+    "w": 1600,
+    "h": 3114,
+    "bytes": 115314
+  },
+  {
+    "name": "blocks-sequential",
+    "locale": "zh",
+    "w": 1600,
+    "h": 1980,
+    "bytes": 104350
+  },
+  {
+    "name": "channel",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 159948
+  },
+  {
+    "name": "channel-dark",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 159878
+  },
+  {
+    "name": "channel-themes",
+    "locale": "zh",
+    "w": 2400,
+    "h": 1547,
+    "bytes": 124096
+  },
+  {
+    "name": "explore-compare",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 150838
+  },
+  {
+    "name": "explore-evolution",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 121574
+  },
+  {
+    "name": "explore-main",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 207820
+  },
+  {
+    "name": "gallery",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 199002
+  },
+  {
+    "name": "gen-agent",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 153578
+  },
+  {
+    "name": "hero",
+    "locale": "zh",
+    "w": 2400,
+    "h": 1500,
+    "bytes": 226258
+  },
+  {
+    "name": "hero-dark",
+    "locale": "zh",
+    "w": 2400,
+    "h": 1500,
+    "bytes": 226792
+  },
+  {
+    "name": "online",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 239668
+  },
+  {
+    "name": "refs-precise",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 244212
+  },
+  {
+    "name": "refs-vibe",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 234452
+  },
+  {
+    "name": "settings-agent",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 46860
+  },
+  {
+    "name": "settings-dictionaries",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 59090
+  },
+  {
+    "name": "settings-models",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 65410
+  },
+  {
+    "name": "settings-rag",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 70614
+  },
+  {
+    "name": "stats",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 95670
+  },
+  {
+    "name": "tag-expansion",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1384,
+    "bytes": 39696
+  },
+  {
+    "name": "tools-director",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 165926
+  },
+  {
+    "name": "tools-inpaint",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 106856
+  },
+  {
+    "name": "tools-upscale",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 150276
+  },
+  {
+    "name": "translation",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1867,
+    "bytes": 78470
+  },
+  {
+    "name": "viewer",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 117128
+  },
+  {
+    "name": "wiki",
+    "locale": "zh",
+    "w": 1920,
+    "h": 1200,
+    "bytes": 35840
+  }
+]
