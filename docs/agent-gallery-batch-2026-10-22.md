@@ -1,6 +1,6 @@
 # Agent 图库批量移动／批量删空文件夹 · 2026-10-22
 
-用户反馈：Agent 整理图库时每移动一张图片都弹一次确认，删除图库文件夹也逐个确认，要求合并。用户说“开工”后实施；勘察派给 DeepSeek v4.1 Flash（max），后端派给 GPT 6.1 Sol（xhigh），主窗口补 l10n 并复核。有效源码提交 `02745d1d6`，尚未安装，待累计更新。
+用户反馈：Agent 整理图库时每移动一张图片都弹一次确认，删除图库文件夹也逐个确认，要求合并。用户说“开工”后实施；勘察派给 DeepSeek v4.1 Flash（max），后端派给 GPT 6.1 Sol（xhigh），主窗口补 l10n 并复核。有效源码提交 `02745d1d6`，已随 [r37 累计更新](cumulative-preview-r37-2026-10-22.md) 安装到原桌面入口。
 
 ## 根因
 
@@ -24,7 +24,7 @@
 - `flutter test --no-pub test/presentation/providers/nai_agent test/presentation/wiring/nai_agent test/core/nai_agent test/l10n/zh_tw_resources_test.dart`：**578 项全部通过**（新增批量移动／复制／撤销／目录删除等 18 项提供器用例，卡片 mapper 4 项、wiring 2 项，均使用真实临时文件与 SQLite）。
 - Node `tool/nai_agent` 全部 **84 项通过**。
 - `flutter analyze --no-pub lib test tool/nai_agent`：无问题。全仓 analyze 另有 1 个既有问题，位于 `tool/ui_shell/model_providers_preview.dart:122`（r33 移除采样字段后遗留的预览脚本），与本批无关，未改。
-- 未构建、安装、启动程序，未操作真实图库。
+- 已随 r37 构建安装；未启动程序，未操作真实图库。
 
 ## 边界
 
