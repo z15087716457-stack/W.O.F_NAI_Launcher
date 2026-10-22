@@ -220,6 +220,8 @@ mask_upload_*.md
 flutter_windows.zip
 dist/*.zip
 dist/*.exe
+dist/*.sha256
+dist/checksums.txt
 .claude_settings.json
 .worktrees/
 .kimi/
