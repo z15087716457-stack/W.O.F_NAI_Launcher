@@ -187,6 +187,48 @@ class NaiAgentGalleryBinding {
         }
         return true;
       }
+      if (action == 'move_file' && result['image_ids'] is List) {
+        final ids = _galleryBatchIds(result['image_ids']);
+        final versions = result['image_versions'];
+        final originals = result['source_paths'];
+        if (versions is! Map || originals is! Map || result['ok'] == false) {
+          return false;
+        }
+        final groups = <String, List<String>>{};
+        // Validate ALL groups before the first mutation, so one stale image or
+        // occupied original path cannot produce a knowingly partial undo.
+        for (final imageId in ids) {
+          if (versions[imageId] is! String || originals[imageId] is! String) {
+            return false;
+          }
+          final current = await _managed('library', imageId, token);
+          final original = originals[imageId] as String;
+          if (current.version != versions[imageId] ||
+              await FileSystemEntity.type(original, followLinks: false) !=
+                  FileSystemEntityType.notFound ||
+              p.basename(current.data['file_path'] as String) !=
+                  p.basename(original)) {
+            return false;
+          }
+          final folder = await _folderPath(p.dirname(original));
+          groups.putIfAbsent(folder, () => []).add(imageId);
+        }
+        for (final group in groups.entries) {
+          final reversed = details(
+            await manage({
+              'action': 'move_file',
+              'scope': 'library',
+              'image_ids': group.value,
+              'expected_image_versions': {
+                for (final imageId in group.value) imageId: versions[imageId],
+              },
+              'target_folder': group.key,
+            }, token),
+          );
+          if (reversed['ok'] != true) return false;
+        }
+        return true;
+      }
       if (id == null || result['image_version'] is! String) return false;
       final current = await _managed('library', id, token);
       if (current.version != result['image_version']) return false;

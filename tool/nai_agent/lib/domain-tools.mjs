@@ -133,13 +133,15 @@ export const domainTools = [
   },
   { name: 'gallery_manage',
 
-    description: 'Native gallery. Images: read returns image_version; update/delete/restore/export require expected_image_version; trash lists the native pool. update sets changes.favorite/tags. Collections default to library scope: collections returns collection_version; collection_members pages image IDs; collection_* writes require expected_collection_version. create/update use changes; reorder needs every sibling in ordered_collection_ids; add/remove need a leaf collection_id and 1..20 image_ids. Physical folders use library scope: folders returns root_path/folder_version; folder_create/folder_rename/folder_move/folder_delete_empty/folder_sync require expected_folder_version. move_file/copy_file use a library image_id, expected_image_version and existing absolute target_folder. External moves require user confirmation in Studio; native protection settings may also prompt. See nai-studio references/gallery.md for field mappings, file semantics, backups and partial results.',
+    description: 'Native gallery. read returns image_version; update/delete/restore/export need expected_image_version; update uses changes.favorite/tags; trash lists native pool. Collections (library): collections returns collection_version; collection_members pages IDs; writes need expected_collection_version. create/update use changes; reorder needs all siblings in ordered_collection_ids; add/remove need a leaf collection_id and only 1..20 image_ids. Physical folders (library): folders returns root_path/folder_version; folder_* writes need expected_folder_version. folder_delete_empty takes folder_id OR 1..50 unique folder_ids (selected empty parent/child trees allowed; no files). move_file/copy_file take image_id + expected_image_version OR 1..50 unique image_ids + expected_image_versions (every ID mapped to its read version), plus existing absolute target_folder. Never mix single/batch forms. ONE Studio confirmation per call when required by external-move risk/protection. Batch whole reorganizations: one move_file per target folder, then one folder_delete_empty for all emptied folders; never loop single-image calls. Partial failures stop immediately: re-read before retrying. See nai-studio references/gallery.md for backups/results.',
     parameters: Type.Object({
       action: Type.Union(['read', 'update', 'delete', 'restore', 'export', 'trash', 'collections', 'collection_members', 'collection_create', 'collection_update', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove', 'folders', 'folder_create', 'folder_rename', 'folder_move', 'folder_delete_empty', 'folder_sync', 'move_file', 'copy_file'].map(Type.Literal)),
       scope: Type.Optional(Type.Union(['history', 'library'].map(Type.Literal))),
       image_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       expected_image_version: Type.Optional(Type.String()),
+      expected_image_versions: Type.Optional(Type.Record(Type.String(), Type.String())),
       folder_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
+      folder_ids: Type.Optional(Type.Array(Type.String({minLength: 1, maxLength: 200}), {minItems: 1, maxItems: 50})),
       expected_folder_version: Type.Optional(Type.String()),
       target_folder: Type.Optional(Type.String({minLength: 1, maxLength: 4096})),
       collection_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
@@ -147,7 +149,7 @@ export const domainTools = [
       query: Type.Optional(Type.String({maxLength: 200})),
       parent_id: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       ordered_collection_ids: Type.Optional(Type.Array(Type.String(), {minItems: 1, maxItems: 1000})),
-      image_ids: Type.Optional(Type.Array(Type.String({minLength: 1, maxLength: 200}), {minItems: 1, maxItems: 20})),
+      image_ids: Type.Optional(Type.Array(Type.String({minLength: 1, maxLength: 200}), {minItems: 1, maxItems: 50})),
       changes: Type.Optional(Type.Object({
         favorite: Type.Optional(Type.Boolean()),
         tags: Type.Optional(Type.Array(Type.String({minLength: 1, maxLength: 200}), {maxItems: 100})),

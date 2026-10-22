@@ -21,6 +21,7 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 - Writes take the version the last read returned (`field_versions`, `expected_version`, `library_version` or `draft_version`); a stale version is rejected, so re-read and retry. Trust the returned readback.
 - Paid actions require a user request: prepare -> report price and balance -> `run(quote_id)`, which waits for confirmation in Studio.
 - `ask_user` is a direct tool, outside codemode. Report actual outputs, partial results and unresolved status.
+- Gallery reorganizations: batch `move_file` once per target folder, then `folder_delete_empty(folder_ids=[...])` once for emptied folders (1..50 each). Each call needs at most one Studio confirmation; never loop single-image transfers.
 
 ## Tool index
 

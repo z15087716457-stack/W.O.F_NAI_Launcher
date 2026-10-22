@@ -186,13 +186,18 @@ test('gallery update/file/collection projections retain only native undo and car
       image_version:'iv',image_versions:{'gallery:1':'iv'},collection_id:'c',collection_name:'Collection',
       collection_version:'cv',source_path:'/library/old/image.png',file_path:'/library/new/image.png',
       before:collection?{'gallery:1':before}:before,backup:{path:'backups/image.png',file_missing:false},
-      unchanged:false,metadata:'not needed'};
+      source_paths:{'gallery:1':'/library/old/image.png'}, file_paths:{'gallery:1':'/library/new/image.png'},
+      unchanged_ids:['gallery:2'], unchanged:false,metadata:'not needed'};
     handlers.get('tool_result')({toolName:'mcp__nai_studio__gallery_manage',toolCallId:action,parentToolCallId:'code',
-      input:{action,changes:{favorite:false,tags:['new']},target_folder:'/library/new',expected_image_version:'old'},
+      input:{action,changes:{favorite:false,tags:['new']},target_folder:'/library/new',expected_image_version:'old',
+        expected_image_versions:{'gallery:1':'old'}},
       structuredContent:{content:[],structuredContent:native}});
     const projection=handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}).details.studio_results[0];
     assert.equal(projection.image_version,'iv');
     assert.equal(projection.source_path,native.source_path);
+    assert.deepEqual(projection.source_paths,native.source_paths);
+    assert.deepEqual(projection.file_paths,native.file_paths);
+    assert.deepEqual(projection.unchanged_ids,native.unchanged_ids);
     assert.equal(projection.collection_id,'c');
     assert.deepEqual(projection.image_versions,native.image_versions);
     assert.deepEqual(projection.backup,native.backup);
@@ -228,6 +233,18 @@ test('Studio projections cap serialized UTF-8 to 64 KiB, evict chips first and n
   emit('gallery_manage','binary',{ok:true,image_id:'gallery:1',before:{tags:['A'.repeat(1000)]}},
     {action:'update',changes:{tags:['data:image/png;base64,AAAA']}});
   assert.equal(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}),undefined);
+  emit('gallery_manage','binary-batch',{ok:true,image_ids:['gallery:1'],
+    source_paths:{'gallery:1':'data:image/png;base64,AAAA'},file_paths:{'gallery:1':'/safe/image.png'}},
+    {action:'move_file',image_ids:['gallery:1']});
+  assert.equal(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}),undefined);
+  emit('gallery_manage','oversized-batch',{ok:true,image_ids:['gallery:1'],
+    source_paths:{'gallery:1':'/old/'+'中'.repeat(32000)},file_paths:{'gallery:1':'/new/image.png'}},
+    {action:'move_file',image_ids:['gallery:1']});
+  assert.equal(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}),undefined);
+  emit('gallery_manage','partial-batch',{ok:false,completed:{image_ids:['gallery:1'],source_paths:{'gallery:1':'private'}}},
+    {action:'move_file',image_ids:['gallery:1','gallery:2']});
+  assert.deepEqual(handlers.get('tool_result')({toolName:'codemode',toolCallId:'code',details:{}}).details.studio_results,
+    [{tool:'mcp__nai_studio__gallery_manage',tool_call_id:'partial-batch',ok:false}]);
 });
 
 test('direct and hidden exposures follow Pi loadouts, and disabled servers never start', async () => {

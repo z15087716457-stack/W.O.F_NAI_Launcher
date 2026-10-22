@@ -16633,6 +16633,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths) {
+    return 'Delete these $count empty folders and their gallery categories? Images in other folders will be kept.\n$paths';
+  }
+
+  @override
+  String naiAgent_galleryMoreItems(int count) {
+    return '…and $count more';
+  }
+
+  @override
   String get naiAgent_extensions => 'Extensions';
 
   @override

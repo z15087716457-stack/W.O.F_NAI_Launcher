@@ -16190,6 +16190,16 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths) {
+    return '빈 폴더 $count개와 갤러리 분류를 삭제할까요? 다른 폴더의 이미지는 유지됩니다.\n$paths';
+  }
+
+  @override
+  String naiAgent_galleryMoreItems(int count) {
+    return '…외 $count개';
+  }
+
+  @override
   String get naiAgent_extensions => '확장';
 
   @override

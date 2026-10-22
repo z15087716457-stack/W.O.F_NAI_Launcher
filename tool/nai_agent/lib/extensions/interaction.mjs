@@ -42,7 +42,7 @@ function studioProjection(event, native) {
   } else if (tool === 'gallery_manage') {
     projection = pick(native, ['ok', 'action', 'scope', 'unchanged', 'image_id', 'image_ids',
       'image_version', 'image_versions', 'collection_id', 'collection_name', 'collection_version',
-      'source_path', 'target_folder', 'file_path', 'target', 'count']);
+      'source_path', 'source_paths', 'target_folder', 'file_path', 'file_paths', 'unchanged_ids', 'target', 'count']);
     // Pi's calls[].args is only a truncated string preview, not safe undo input.
     projection.arguments = pick(event.input, ['action', 'changes', 'image_id', 'image_ids', 'target_folder']);
     const beforeFields = ['favorite', 'tags', 'collection_ids'];

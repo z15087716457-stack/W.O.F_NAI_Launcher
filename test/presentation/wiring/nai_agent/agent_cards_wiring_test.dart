@@ -199,6 +199,103 @@ void main() {
     );
   }
 
+  for (final persisted in [false, true]) {
+    testWidgets(
+      'batch move card routes complete undo snapshots persisted=$persisted',
+      (tester) async {
+        final ids = ['gallery:1', 'gallery:2', 'gallery:3'];
+        final args = <String, dynamic>{
+          'action': 'move_file',
+          'scope': 'library',
+          'image_ids': ids,
+          'target_folder': '/library/batch-target',
+        };
+        final details = <String, dynamic>{
+          'ok': true,
+          'action': 'move_file',
+          'scope': 'library',
+          'image_ids': ids,
+          'count': 3,
+          'target_folder': '/library/batch-target',
+          'image_versions': {for (final id in ids) id: 'moved-version'},
+          'source_paths': {
+            for (final id in ids) id: '/library/original/$id.png',
+          },
+          'file_paths': {
+            for (final id in ids) id: '/library/batch-target/$id.png',
+          },
+        };
+        h.c.selected!.messages = [
+          {'role': 'user', 'content': 'batch cards'},
+          {
+            'role': 'assistant',
+            'content': [
+              {
+                'type': 'toolCall',
+                'id': persisted ? 'code' : 'batch',
+                'name': persisted ? 'codemode' : 'gallery_manage',
+                'arguments': persisted ? <String, dynamic>{} : args,
+              },
+            ],
+          },
+          {
+            'role': 'toolResult',
+            'toolCallId': persisted ? 'code' : 'batch',
+            'details': persisted
+                ? {
+                    'studio_results': [
+                      {
+                        'tool': 'mcp__nai_studio__gallery_manage',
+                        'tool_call_id': 'batch',
+                        'arguments': args,
+                        ...details,
+                      },
+                    ],
+                  }
+                : details,
+          },
+        ];
+        await h.pump(tester);
+        final card = h
+            .panel(tester)
+            .data
+            .thread
+            .single
+            .reply!
+            .blocks
+            .whereType<AgentGalleryBlock>()
+            .single;
+        expect(card.count, 3);
+        expect(card.target, 'batch-target');
+        expect(card.undoable, true);
+        expect(await h.panel(tester).actions.onUndoDiff(card.id), true);
+        final captured = verify(
+          () => gallery.undoManage(captureAny(), captureAny()),
+        ).captured;
+        expect(captured[0], args);
+        expect((captured[1] as Map)['source_paths'], details['source_paths']);
+        expect(
+          (captured[1] as Map)['image_versions'],
+          details['image_versions'],
+        );
+        await tester.pumpAndSettle();
+        expect(
+          h
+              .panel(tester)
+              .data
+              .thread
+              .single
+              .reply!
+              .blocks
+              .whereType<AgentGalleryBlock>()
+              .single
+              .state,
+          AgentDiffState.undone,
+        );
+      },
+    );
+  }
+
   testWidgets('setting anchor callback keeps section and anchor in route', (
     tester,
   ) async {

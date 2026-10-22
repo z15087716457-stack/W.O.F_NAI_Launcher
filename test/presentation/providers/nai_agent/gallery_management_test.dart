@@ -86,6 +86,34 @@ class _AfterExport extends AgentWorkspaceFiles {
   }
 }
 
+class _BatchDeleteRepository extends GalleryCategoryRepository {
+  _BatchDeleteRepository({this.afterDelete}) : super.forTesting();
+  final Future<void> Function(String id)? afterDelete;
+  int saves = 0;
+  @override
+  Future<bool> saveCategories(List<GalleryCategory> categories) async {
+    saves++;
+    return super.saveCategories(categories);
+  }
+
+  @override
+  Future<bool> deleteCategory(
+    GalleryCategory category,
+    List<GalleryCategory> allCategories, {
+    bool deleteFolder = true,
+    bool recursive = false,
+  }) async {
+    final result = await super.deleteCategory(
+      category,
+      allCategories,
+      deleteFolder: deleteFolder,
+      recursive: recursive,
+    );
+    if (result) await afterDelete?.call(category.id);
+    return result;
+  }
+}
+
 class _RejectPreferences extends InMemorySharedPreferencesStore {
   _RejectPreferences(super.data) : super.withData();
   @override
@@ -290,12 +318,13 @@ void main() {
     'expected_image_version': (await read())['image_version'],
     'target_folder': destination,
   }, token: token);
-  Future<AgentQuestionRequest> question() async {
+  Future<AgentQuestionRequest> question({String? excluding}) async {
     for (var i = 0; i < 100; i++) {
       final rows = container
           .read(naiAgentQuestionsProvider)
           .forChat('test-chat');
-      if (rows.isNotEmpty) return rows.single;
+      final fresh = rows.where((row) => row.id != excluding).toList();
+      if (fresh.isNotEmpty) return fresh.single;
       await Future<void>.delayed(const Duration(milliseconds: 20));
     }
     throw StateError('No actual UI question');
@@ -309,6 +338,783 @@ void main() {
     height: 12,
     createdAt: DateTime(2026),
     modifiedAt: DateTime(2026),
+  );
+
+  Future<List<String>> batchImages(int count, {Directory? external}) async {
+    final ids = ['gallery:$id'];
+    for (var i = 1; i < count; i++) {
+      final file = await image.copy(
+        p.join((external ?? root).path, 'batch-$i.png'),
+      );
+      ids.add('gallery:${await indexFile(file)}');
+    }
+    return ids;
+  }
+
+  Future<Map<String, dynamic>> batchParams(
+    String action,
+    List<String> ids,
+    String target,
+  ) async => {
+    'action': action,
+    'image_ids': ids,
+    'expected_image_versions': {
+      for (final id in ids) id: (await read(imageId: id))['image_version'],
+    },
+    'target_folder': target,
+  };
+
+  Future<void> protect() => container
+      .read(shareImageSettingsProvider.notifier)
+      .setConfirmDangerousActions(true);
+  void answer(AgentQuestionRequest request, {bool confirm = true}) =>
+      container.read(naiAgentQuestionsProvider).answer(request.id, {
+        'gallery_change': confirm
+            ? currentL10n.common_confirm
+            : currentL10n.common_cancel,
+      });
+  void noQuestions() => expect(
+    container.read(naiAgentQuestionsProvider).forChat('test-chat'),
+    isEmpty,
+  );
+
+  test(
+    'batch internal move confirms once, decline is inert, and preserves native data',
+    () async {
+      final ids = await batchImages(3);
+      final target = await Directory(
+        p.join(root.path, 'batch-target'),
+      ).create();
+      final collection = await source.createCollection('Batch members');
+      for (final imageId in ids) {
+        final native = int.parse(imageId.split(':').last);
+        await source.setImageTags(native, ['kept']);
+        await source.addFavorite(native);
+        await source.addImageToCollection(collection, native);
+      }
+      await protect();
+      final params = await batchParams('move_file', ids, target.path);
+      final declined = run(params);
+      final declineError = expectLater(declined, error('declined'));
+      final first = await question();
+      expect(
+        first.questions.single.text,
+        contains(currentL10n.localGallery_protectedBulkMoveContent(3)),
+      );
+      expect(
+        container.read(naiAgentQuestionsProvider).forChat('test-chat'),
+        hasLength(1),
+      );
+      expect(await backups(), 0);
+      answer(first, confirm: false);
+      await declineError;
+      expect(await target.list().length, 0);
+      for (final imageId in ids) {
+        expect((await read(imageId: imageId))['file_missing'], false);
+      }
+      final request = run(params);
+      answer(await question());
+      final result = await request.timeout(const Duration(seconds: 10));
+      noQuestions();
+      expect(result['ok'], true);
+      expect(result['action'], 'move_file');
+      expect(result['scope'], 'library');
+      expect(result['target_folder'], await target.resolveSymbolicLinks());
+      expect(result['count'], 3);
+      expect(result['image_ids'], ids);
+      expect(result['source_image_ids'], ids);
+      expect(result['unchanged_ids'], isEmpty);
+      expect(result['indexing_ids'], isEmpty);
+      expect(result['image_versions'], hasLength(3));
+      expect(result['applied_fields'], ['file_moved', 'index_updated']);
+      expect(result['backups'], hasLength(3));
+      expect(await backups(), 3);
+      for (final imageId in ids) {
+        final native = int.parse(imageId.split(':').last);
+        expect(await source.getImageTags(native), ['kept']);
+        expect(await source.isFavorite(native), true);
+        expect(
+          await source.getCollectionIdsForImage(native),
+          contains(collection),
+        );
+        expect(
+          await File(
+            (result['source_paths'] as Map)[imageId] as String,
+          ).exists(),
+          false,
+        );
+        final actual = (result['file_paths'] as Map)[imageId] as String;
+        expect(p.dirname(actual), await target.resolveSymbolicLinks());
+        expect(
+          (await read(imageId: imageId))['image_version'],
+          (result['image_versions'] as Map)[imageId],
+        );
+        final backup = (result['backups'] as List).cast<Map>().singleWhere(
+          (b) => b['image_id'] == imageId,
+        );
+        expect(
+          await File(
+            p.join(workspace.path, backup['path'] as String),
+          ).readAsBytes(),
+          await File(actual).readAsBytes(),
+        );
+      }
+    },
+  );
+
+  test(
+    'batch external source warning uses real count and one question with protection off',
+    () async {
+      final external = await Directory(
+        p.join(temp.path, 'ExternalBatch'),
+      ).create();
+      await Hive.box(
+        StorageKeys.settingsBox,
+      ).put(StorageKeys.galleryExtraRoots, [external.path]);
+      final ids = await batchImages(2);
+      final externalFile = await image.copy(
+        p.join(external.path, 'external.png'),
+      );
+      ids.add('gallery:${await indexFile(externalFile)}');
+      final target = await Directory(
+        p.join(root.path, 'ExternalTarget'),
+      ).create();
+      final request = run(await batchParams('move_file', ids, target.path));
+      final pending = await question();
+      expect(
+        pending.questions.single.text,
+        startsWith(
+          currentL10n.localGallery_externalSourceMoveConfirmContent(3),
+        ),
+      );
+      answer(pending);
+      expect((await request.timeout(const Duration(seconds: 10)))['count'], 3);
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch transfer preflight version conflict on second ID never asks or changes files',
+    () async {
+      final ids = await batchImages(3);
+      final target = await Directory(p.join(root.path, 'Conflict')).create();
+      final params = await batchParams('move_file', ids, target.path);
+      (params['expected_image_versions'] as Map)[ids[1]] = 'old';
+      await protect();
+      await expectLater(run(params), error('image_conflict'));
+      noQuestions();
+      expect(await target.list().length, 0);
+      expect(await backups(), 0);
+      for (final id in ids) {
+        expect((await read(imageId: id))['file_missing'], false);
+      }
+    },
+  );
+
+  test(
+    'batch second source edited during confirmation stops after first, reporting partial',
+    () async {
+      final ids = await batchImages(3);
+      final second = File(
+        (await read(imageId: ids[1]))['resolved_path'] as String,
+      );
+      final target = await Directory(
+        p.join(root.path, 'PartialBatch'),
+      ).create();
+      final params = await batchParams('move_file', ids, target.path);
+      await protect();
+      final request = run(params);
+      final pending = await question();
+      await second.writeAsString('edited during confirmation');
+      answer(pending);
+      final result = await request;
+      expect(result['ok'], false);
+      expect(result['error'], 'image_conflict');
+      expect(result['failed_image_id'], ids[1]);
+      expect(result['remaining_image_ids'], [ids[2]]);
+      final completed = result['completed'] as Map;
+      expect(completed['count'], 1);
+      expect(completed['image_ids'], [ids[0]]);
+      expect(completed['backups'], hasLength(1));
+      expect(result['backups'], hasLength(2));
+      expect(await target.list().length, 1);
+      expect(await second.readAsString(), 'edited during confirmation');
+      expect((await read(imageId: ids[2]))['file_missing'], false);
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch native index failure reports physical application and stops later files',
+    () async {
+      final ids = await batchImages(3);
+      final target = await Directory(p.join(root.path, 'IndexBatch')).create();
+      await source.execute(
+        'inject batch failure',
+        (db) => db.execute('''
+      CREATE TRIGGER reject_batch_update BEFORE UPDATE OF file_path ON gallery_images
+      WHEN OLD.id = ${ids[1].split(':').last}
+      BEGIN SELECT RAISE(ABORT, 'batch injected failure'); END
+    '''),
+      );
+      final result = await run(
+        await batchParams('move_file', ids, target.path),
+      );
+      expect(result['ok'], false);
+      expect(result['failed_image_id'], ids[1]);
+      expect(result['remaining_image_ids'], [ids[2]]);
+      expect((result['completed'] as Map)['count'], 2);
+      expect((result['completed'] as Map)['file_paths'], hasLength(2));
+      expect((result['completed'] as Map)['image_versions'], hasLength(1));
+      expect(await target.list().length, 2);
+      expect((await read(imageId: ids[2]))['file_missing'], false);
+    },
+  );
+
+  test(
+    'batch skips unchanged items; all unchanged never asks or backs up',
+    () async {
+      final ids = await batchImages(3);
+      await protect();
+      final unchanged = await run(
+        await batchParams('move_file', ids, root.path),
+      );
+      expect(unchanged['ok'], true);
+      expect(unchanged['unchanged'], true);
+      expect(unchanged['count'], 0);
+      expect(unchanged['image_ids'], isEmpty);
+      expect(unchanged['unchanged_ids'], ids);
+      expect(await backups(), 0);
+      noQuestions();
+      await container
+          .read(shareImageSettingsProvider.notifier)
+          .setConfirmDangerousActions(false);
+      final target = await Directory(p.join(root.path, 'Skip')).create();
+      final first = await run(
+        await batchParams('move_file', [ids.first], target.path),
+      );
+      await protect();
+      final request = run(await batchParams('move_file', ids, target.path));
+      final pending = await question();
+      expect(
+        pending.questions.single.text,
+        contains(currentL10n.localGallery_protectedBulkMoveContent(2)),
+      );
+      answer(pending);
+      final result = await request;
+      expect(result['count'], 2);
+      expect(result['unchanged_ids'], [ids.first]);
+      expect(result['image_ids'], ids.skip(1).toList());
+      expect(
+        (await read(imageId: ids.first))['image_version'],
+        (first['image_versions'] as Map)[ids.first],
+      );
+      noQuestions();
+    },
+  );
+
+  test('batch copy confirms once and retains all sources', () async {
+    final ids = await batchImages(2);
+    final target = await Directory(p.join(root.path, 'BatchCopies')).create();
+    await protect();
+    final request = run(await batchParams('copy_file', ids, target.path));
+    final pending = await question();
+    expect(
+      pending.questions.single.text,
+      startsWith(currentL10n.localGallery_confirmCopyContent),
+    );
+    answer(pending);
+    final result = await request.timeout(const Duration(seconds: 10));
+    expect(result['ok'], true);
+    expect(result['count'], 2);
+    expect(result['source_image_ids'], ids);
+    expect(result['image_versions'], isNull);
+    expect(
+      (result['image_ids'] as List).length +
+          (result['indexing_ids'] as List).length,
+      2,
+    );
+    expect(result['backups'], hasLength(2));
+    expect(await target.list().length, 2);
+    for (final id in ids) {
+      expect((await read(imageId: id))['file_missing'], false);
+      expect(
+        await File((result['file_paths'] as Map)[id] as String).exists(),
+        true,
+      );
+    }
+    noQuestions();
+  });
+
+  test(
+    'batch confirmation truncates filenames to five and uses remainder line',
+    () async {
+      final ids = await batchImages(7);
+      final target = await Directory(p.join(root.path, 'Many')).create();
+      await protect();
+      final request = run(await batchParams('move_file', ids, target.path));
+      final rejected = expectLater(request, error('declined'));
+      final pending = await question();
+      final text = pending.questions.single.text;
+      expect(' → '.allMatches(text), hasLength(5));
+      expect(text, contains(currentL10n.naiAgent_galleryMoreItems(2)));
+      expect(text, endsWith(await target.resolveSymbolicLinks()));
+      answer(pending, confirm: false);
+      await rejected;
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch move undo groups original folders and rejects any stale or occupied original before changes',
+    () async {
+      final original = await Directory(
+        p.join(root.path, 'other-original'),
+      ).create();
+      final ids = await batchImages(3, external: original);
+      final target = await Directory(p.join(root.path, 'UndoBatch')).create();
+      var moved = await run(await batchParams('move_file', ids, target.path));
+      await protect();
+      final undo = binding.undoManage({'action': 'move_file'}, moved);
+      final first = await question();
+      answer(first);
+      final second = await question(excluding: first.id);
+      expect(second.id, isNot(first.id));
+      answer(second);
+      expect(await undo.timeout(const Duration(seconds: 10)), true);
+      expect(await image.exists(), true);
+      expect(await original.list().length, 2);
+      noQuestions();
+      await container
+          .read(shareImageSettingsProvider.notifier)
+          .setConfirmDangerousActions(false);
+      moved = await run(await batchParams('move_file', ids, target.path));
+      await source.setImageTags(int.parse(ids.last.split(':').last), ['newer']);
+      expect(await binding.undoManage({'action': 'move_file'}, moved), false);
+      expect(await target.list().length, 3);
+      expect(await image.exists(), false);
+      // Fresh versions, but one occupied original path still blocks every group.
+      final versions = moved['image_versions'] as Map;
+      versions[ids.last] = (await read(imageId: ids.last))['image_version'];
+      await image.writeAsString('new unrelated file');
+      expect(await binding.undoManage({'action': 'move_file'}, moved), false);
+      expect(await target.list().length, 3);
+      expect(await image.readAsString(), 'new unrelated file');
+      noQuestions();
+    },
+  );
+
+  test('batch transfer strict argument validation and 50 item limit', () async {
+    final ids = await batchImages(2);
+    final params = await batchParams('move_file', ids, root.path);
+    for (final invalid in [
+      {...params, 'image_id': ids.first},
+      {...params, 'expected_image_version': 'smuggled'},
+      {
+        ...params,
+        'expected_image_versions': {ids.first: 'v'},
+      },
+      {
+        ...params,
+        'expected_image_versions': {ids.first: 1, ids.last: 'v'},
+      },
+      {
+        ...params,
+        'image_ids': [ids.first, ids.first],
+      },
+      {...params, 'image_ids': <String>[]},
+      {...params, 'image_ids': List.generate(51, (i) => 'gallery:${i + 1}')},
+      {...params, 'authorized': true},
+    ]) {
+      await expectLater(run(invalid), error('invalid_gallery'));
+    }
+    noQuestions();
+    expect(await backups(), 0);
+    // 50 is accepted structurally and reaches real preflight, not a 20-item cap.
+    await expectLater(
+      run({
+        ...params,
+        'image_ids': List.generate(50, (i) => 'gallery:${i + 1}'),
+        'expected_image_versions': {
+          for (var i = 1; i <= 50; i++) 'gallery:$i': 'stale',
+        },
+      }),
+      error('image_conflict'),
+    );
+  });
+
+  test(
+    'batch empty parent and selected child delete deepest-first with one confirmation, backup and catalog save',
+    () async {
+      final parent = await createFolder('ParentBatch');
+      final child = await createFolder(
+        'ChildBatch',
+        parent: parent['folder_id'] as String,
+      );
+      final repo = _BatchDeleteRepository();
+      binding = container.read(
+        Provider(
+          (ref) => NaiAgentGalleryBinding(
+            ref,
+            () => alive,
+            workspace: workspace,
+            owner: const NaiAgentConversationOwner(
+              'test-workspace',
+              'test-chat',
+            ),
+            categoryRepository: repo,
+          ),
+        ),
+      );
+      await protect();
+      final request = folderAction('folder_delete_empty', {
+        'folder_ids': [parent['folder_id'], child['folder_id']],
+      });
+      final pending = await question();
+      expect(
+        pending.questions.single.text,
+        currentL10n.naiAgent_galleryDeleteEmptyFoldersConfirm(
+          2,
+          '${await Directory(parent['file_path'] as String).resolveSymbolicLinks()}\n${await Directory(child['file_path'] as String).resolveSymbolicLinks()}',
+        ),
+      );
+      answer(pending);
+      final result = await request.timeout(const Duration(seconds: 10));
+      expect(result['ok'], true);
+      expect(result['deleted'], true);
+      expect(result['count'], 2);
+      expect(result['folder_ids'], [child['folder_id'], parent['folder_id']]);
+      expect(repo.saves, 1);
+      expect(await Directory(parent['file_path'] as String).exists(), false);
+      final record =
+          jsonDecode(
+                await File(
+                  p.join(workspace.path, result['backup'] as String),
+                ).readAsString(),
+              )
+              as Map;
+      expect(record['folders'], hasLength(2));
+      expect(
+        (record['categories'] as List).map((c) => c['id']),
+        containsAll([parent['folder_id'], child['folder_id']]),
+      );
+      expect(record['delete_pool'], isEmpty);
+      expect(
+        ((await folders())['folders'] as List).map((f) => f['folder_id']),
+        isNot(contains(anyOf(parent['folder_id'], child['folder_id']))),
+      );
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch folder preflight rejects unselected child, visible/hidden files and unmanaged dirs without asking',
+    () async {
+      final parent = await createFolder('NonemptyParent');
+      final child = await createFolder(
+        'Child',
+        parent: parent['folder_id'] as String,
+      );
+      await protect();
+      await expectLater(
+        folderAction('folder_delete_empty', {
+          'folder_ids': [parent['folder_id']],
+        }),
+        error('folder_not_empty'),
+      );
+      final path = parent['file_path'] as String;
+      for (final name in ['file.txt', '.hidden']) {
+        final file = await File(p.join(path, name)).writeAsString('keep');
+        await expectLater(
+          folderAction('folder_delete_empty', {
+            'folder_ids': [parent['folder_id'], child['folder_id']],
+          }),
+          error('folder_not_empty'),
+        );
+        await file.delete();
+      }
+      final unselected = await Directory(p.join(path, 'unmanaged')).create();
+      await expectLater(
+        folderAction('folder_delete_empty', {
+          'folder_ids': [parent['folder_id'], child['folder_id']],
+        }),
+        error('folder_not_empty'),
+      );
+      expect(await unselected.exists(), true);
+      expect(await Directory(child['file_path'] as String).exists(), true);
+      expect(await backups(), 2); // only the two folder creations
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch folder deletion persists completed catalog after listing conflict',
+    () async {
+      final parent = await createFolder('PartialParent');
+      final child = await createFolder(
+        'Child',
+        parent: parent['folder_id'] as String,
+      );
+      final repo = _BatchDeleteRepository(
+        afterDelete: (_) async {
+          await File(
+            p.join(parent['file_path'] as String, 'arrived.txt'),
+          ).writeAsString('concurrent');
+        },
+      );
+      binding = container.read(
+        Provider(
+          (ref) => NaiAgentGalleryBinding(
+            ref,
+            () => alive,
+            workspace: workspace,
+            categoryRepository: repo,
+          ),
+        ),
+      );
+      final result = await folderAction('folder_delete_empty', {
+        'folder_ids': [parent['folder_id'], child['folder_id']],
+      });
+      expect(result['ok'], false);
+      expect(result['error'], 'folder_conflict');
+      expect(result['deleted_folder_ids'], [child['folder_id']]);
+      expect(result['failed_folder_id'], parent['folder_id']);
+      expect(result['remaining_folder_ids'], [parent['folder_id']]);
+      expect(repo.saves, 1);
+      expect(result['applied_fields'], contains('catalog_saved'));
+      expect(
+        ((await folders())['folders'] as List).map((f) => f['folder_id']),
+        contains(parent['folder_id']),
+      );
+      expect(
+        ((await folders())['folders'] as List).map((f) => f['folder_id']),
+        isNot(contains(child['folder_id'])),
+      );
+      expect(await Directory(child['file_path'] as String).exists(), false);
+      expect(
+        await File(
+          p.join(parent['file_path'] as String, 'arrived.txt'),
+        ).exists(),
+        true,
+      );
+    },
+  );
+
+  test(
+    'batch folder deletion retains concurrent catalog edits while removing completed IDs',
+    () async {
+      final parent = await createFolder('ConcurrentParent');
+      final child = await createFolder(
+        'Child',
+        parent: parent['folder_id'] as String,
+      );
+      final unrelated = await createFolder('Unrelated');
+      final repo = _BatchDeleteRepository(
+        afterDelete: (_) async {
+          final categories = await GalleryCategoryRepository.instance
+              .loadCategories();
+          await GalleryCategoryRepository.instance.saveCategories(
+            categories
+                .map(
+                  (c) => c.id == unrelated['folder_id']
+                      ? c.copyWith(name: 'newer edit')
+                      : c,
+                )
+                .toList(),
+          );
+        },
+      );
+      binding = container.read(
+        Provider(
+          (ref) => NaiAgentGalleryBinding(
+            ref,
+            () => alive,
+            workspace: workspace,
+            categoryRepository: repo,
+          ),
+        ),
+      );
+      final result = await folderAction('folder_delete_empty', {
+        'folder_ids': [parent['folder_id'], child['folder_id']],
+      });
+      expect(result['ok'], false);
+      expect(result['error'], 'folder_conflict');
+      expect(result['deleted_folder_ids'], [child['folder_id']]);
+      expect(repo.saves, 1);
+      final categories = await repo.loadCategories();
+      expect(categories.findById(child['folder_id'] as String), isNull);
+      expect(
+        categories.findById(unrelated['folder_id'] as String)!.name,
+        'newer edit',
+      );
+      expect(await Directory(parent['file_path'] as String).exists(), true);
+    },
+  );
+
+  test(
+    'batch folder backup freshness and argument validation reject before deletion',
+    () async {
+      final folder = await createFolder('FreshBatch');
+      final params = {
+        'action': 'folder_delete_empty',
+        'folder_ids': [folder['folder_id']],
+        'expected_folder_version': (await folders())['folder_version'],
+      };
+      for (final invalid in [
+        {...params, 'folder_id': folder['folder_id']},
+        {
+          ...params,
+          'folder_ids': [folder['folder_id'], folder['folder_id']],
+        },
+        {...params, 'folder_ids': <String>[]},
+        {...params, 'folder_ids': List.generate(51, (i) => '$i')},
+        {...params, 'recursive': true},
+      ]) {
+        await expectLater(run(invalid), error('invalid_gallery'));
+      }
+      binding = hooked(
+        () => File(
+          p.join(folder['file_path'] as String, 'after-backup'),
+        ).writeAsString('keep'),
+      );
+      await expectLater(run(params), error('folder_conflict'));
+      expect(await Directory(folder['file_path'] as String).exists(), true);
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch folder confirmation truncates paths and decline leaves every folder',
+    () async {
+      final entries = <Map<String, dynamic>>[];
+      for (var i = 0; i < 7; i++) {
+        entries.add(await createFolder('ManyFolders-$i'));
+      }
+      await protect();
+      final request = folderAction('folder_delete_empty', {
+        'folder_ids': entries.map((entry) => entry['folder_id']).toList(),
+      });
+      final rejected = expectLater(request, error('declined'));
+      final pending = await question();
+      final paths = [
+        for (final entry in entries)
+          await Directory(entry['file_path'] as String).resolveSymbolicLinks(),
+      ];
+      expect(
+        pending.questions.single.text,
+        currentL10n.naiAgent_galleryDeleteEmptyFoldersConfirm(
+          7,
+          '${paths.take(5).join('\n')}\n${currentL10n.naiAgent_galleryMoreItems(2)}',
+        ),
+      );
+      answer(pending, confirm: false);
+      await rejected;
+      for (final path in paths) {
+        expect(await Directory(path).exists(), true);
+      }
+      expect(await backups(), 7); // folder creations only
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch folders reject root and external category trees in preflight',
+    () async {
+      final external = await Directory(
+        p.join(temp.path, 'ExternalFolders'),
+      ).create();
+      final externalChild = await Directory(
+        p.join(external.path, 'Child'),
+      ).create();
+      await Hive.box(
+        StorageKeys.settingsBox,
+      ).put(StorageKeys.galleryExtraRoots, [external.path]);
+      await folders();
+      final categories = await GalleryCategoryRepository.instance
+          .loadCategories();
+      final now = DateTime(2026);
+      await GalleryCategoryRepository.instance.saveCategories([
+        ...categories,
+        GalleryCategory(
+          id: 'fake-root',
+          name: 'root',
+          folderPath: '.',
+          createdAt: now,
+          updatedAt: now,
+        ),
+        GalleryCategory(
+          id: 'external',
+          name: 'external',
+          folderPath: external.path,
+          createdAt: now,
+          updatedAt: now,
+        ),
+        GalleryCategory(
+          id: 'external-child',
+          name: 'child',
+          folderPath: externalChild.path,
+          parentId: 'external',
+          createdAt: now,
+          updatedAt: now,
+        ),
+      ]);
+      await protect();
+      for (final folderId in [
+        'fake-root',
+        'external',
+        'external-child',
+        'unknown',
+      ]) {
+        await expectLater(
+          folderAction('folder_delete_empty', {
+            'folder_ids': [folderId],
+          }),
+          error('invalid_folder'),
+        );
+      }
+      expect(await external.exists(), true);
+      expect(await externalChild.exists(), true);
+      expect(await root.exists(), true);
+      noQuestions();
+    },
+  );
+
+  test(
+    'batch folder cleanup saves deleted IDs even after binding closes',
+    () async {
+      final parent = await createFolder('ClosedParent');
+      final child = await createFolder(
+        'Child',
+        parent: parent['folder_id'] as String,
+      );
+      final repo = _BatchDeleteRepository(
+        afterDelete: (_) async {
+          alive = false;
+        },
+      );
+      binding = container.read(
+        Provider(
+          (ref) => NaiAgentGalleryBinding(
+            ref,
+            () => alive,
+            workspace: workspace,
+            categoryRepository: repo,
+          ),
+        ),
+      );
+      final result = await folderAction('folder_delete_empty', {
+        'folder_ids': [parent['folder_id'], child['folder_id']],
+      });
+      expect(result['ok'], false);
+      expect(result['error'], 'closed');
+      expect(result['deleted_folder_ids'], [child['folder_id']]);
+      expect(result['failed_folder_id'], parent['folder_id']);
+      expect(repo.saves, 1);
+      final categories = await repo.loadCategories();
+      expect(categories.findById(child['folder_id'] as String), isNull);
+      expect(categories.findById(parent['folder_id'] as String), isNotNull);
+      expect(await Directory(parent['file_path'] as String).exists(), true);
+    },
   );
 
   test(
@@ -547,7 +1353,10 @@ void main() {
       expect(result['ok'], true);
       expect(await Directory(path).exists(), false);
       expect(await image.exists(), true);
-      expect((await folders())['folders'], isEmpty);
+      expect(
+        ((await folders())['folders'] as List).map((f) => f['folder_id']),
+        isNot(contains(entry['folder_id'])),
+      );
     },
   );
 
@@ -730,7 +1539,7 @@ void main() {
         expect(await Directory(p.join(root.path, 'Failed')).exists(), false);
         expect(
           (await GalleryCategoryRepository.instance.loadCategories())
-              .single
+              .findById(entry['folder_id'] as String)!
               .name,
           'Rollback',
         );
@@ -829,11 +1638,12 @@ void main() {
       final added = await Directory(
         p.join(root.path, 'Outside UI', 'Nested'),
       ).create(recursive: true);
-      expect((await folders())['folders'], hasLength(1));
+      final before = (await folders())['folders'] as List;
+      expect(before.map((f) => f['name']), contains('Known'));
       final result = await folderAction('folder_sync', {});
       expect(result['ok'], true);
       final rows = (await folders())['folders'] as List;
-      expect(rows, hasLength(3));
+      expect(rows, hasLength(before.length + 2));
       expect(
         rows.any((f) => f['file_path'] == added.resolveSymbolicLinksSync()),
         true,
@@ -845,8 +1655,8 @@ void main() {
                 ).readAsString(),
               )
               as List;
-      expect(backup, hasLength(1));
-      expect(backup.single['name'], 'Known');
+      expect(backup, hasLength(before.length));
+      expect(backup.map((c) => c['name']), contains('Known'));
       expect(await image.exists(), true);
     },
   );
@@ -895,7 +1705,10 @@ void main() {
         final categories = await GalleryCategoryRepository.instance
             .loadCategories();
         await GalleryCategoryRepository.instance.saveCategories([
-          categories.single.copyWith(name: 'User just edited this label'),
+          for (final category in categories)
+            category.id == entry['folder_id']
+                ? category.copyWith(name: 'User just edited this label')
+                : category,
         ]);
       });
       binding = container.read(
@@ -921,7 +1734,9 @@ void main() {
       ]);
       expect(await Directory(p.join(root.path, 'Moved')).exists(), true);
       expect(
-        (await repo.loadCategories()).single.name,
+        (await repo.loadCategories())
+            .findById(entry['folder_id'] as String)!
+            .name,
         'User just edited this label',
       );
       expect(

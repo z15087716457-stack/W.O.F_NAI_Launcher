@@ -29039,6 +29039,18 @@ abstract class AppLocalizations {
   /// **'Delete this empty folder and its gallery category? Images in other folders will be kept.\n{path}'**
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path);
 
+  /// No description provided for @naiAgent_galleryDeleteEmptyFoldersConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete these {count} empty folders and their gallery categories? Images in other folders will be kept.\n{paths}'**
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths);
+
+  /// No description provided for @naiAgent_galleryMoreItems.
+  ///
+  /// In en, this message translates to:
+  /// **'…and {count} more'**
+  String naiAgent_galleryMoreItems(int count);
+
   /// No description provided for @naiAgent_extensions.
   ///
   /// In en, this message translates to:

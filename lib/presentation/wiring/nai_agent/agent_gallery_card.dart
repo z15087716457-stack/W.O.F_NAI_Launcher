@@ -26,17 +26,25 @@ class AgentGalleryRestore {
     _ => null,
   };
 
-  List<String> get imageIds => {
-    if (details['image_ids'] is List)
-      ...(details['image_ids'] as List).whereType<String>(),
-    if (details['image_id'] is String) details['image_id'] as String,
-    if (details['image_ids'] == null &&
-        details['image_id'] == null &&
-        arguments['image_ids'] is List)
-      ...(arguments['image_ids'] as List).whereType<String>(),
-    if (details['image_id'] == null && arguments['image_id'] is String)
-      arguments['image_id'] as String,
-  }.toList();
+  List<String> get imageIds {
+    // Pending copy indexing must not shrink the card count or lose thumbnails.
+    if (action == AgentGalleryAction.copy && details['file_paths'] is Map) {
+      return (details['file_paths'] as Map).keys.whereType<String>().toList();
+    }
+    return {
+      if (details['image_ids'] is List)
+        ...(details['image_ids'] as List).whereType<String>(),
+      if (details['image_id'] is String) details['image_id'] as String,
+      if (details['image_ids'] == null &&
+          details['image_id'] == null &&
+          arguments['image_ids'] is List)
+        ...(arguments['image_ids'] as List).whereType<String>(),
+      if (details['image_ids'] == null &&
+          details['image_id'] == null &&
+          arguments['image_id'] is String)
+        arguments['image_id'] as String,
+    }.toList();
+  }
 
   String? get target {
     if (details['collection_name'] is String) {
@@ -69,6 +77,16 @@ class AgentGalleryRestore {
         return details['scope'] == 'library' &&
             details['image_version'] is String;
       case AgentGalleryAction.move:
+        if (details['image_ids'] is List) {
+          return imageIds.isNotEmpty &&
+              details['image_versions'] is Map &&
+              details['source_paths'] is Map &&
+              imageIds.every(
+                (id) =>
+                    (details['image_versions'] as Map)[id] is String &&
+                    (details['source_paths'] as Map)[id] is String,
+              );
+        }
         return details['image_version'] is String &&
             details['source_path'] is String;
       case AgentGalleryAction.collectionAdd:

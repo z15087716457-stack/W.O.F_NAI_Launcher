@@ -35,6 +35,28 @@ test('studio_search schema exposes only supported sources and bounded inputs', (
   // dates) are additionally enforced by the production Dart binding.
 });
 
+test('gallery batch schema exposes bounded IDs and per-image versions with batching guidance', () => {
+  const tool = domainTools.find(tool => tool.name === 'gallery_manage');
+  const schema = tool.parameters;
+  assert.equal(schema.properties.image_ids.maxItems, 50);
+  assert.equal(schema.properties.folder_ids.maxItems, 50);
+  const image_ids = Array.from({length:50}, (_,i) => 'gallery:'+(i+1));
+  assert.equal(Value.Check(schema, {action:'move_file', image_ids,
+    expected_image_versions:Object.fromEntries(image_ids.map(id=>[id,'version'])), target_folder:'/library/target'}), true);
+  assert.equal(Value.Check(schema, {action:'folder_delete_empty', folder_ids:['a','b'], expected_folder_version:'v'}), true);
+  for (const image_ids of [[], Array.from({length:51}, (_,i)=>'gallery:'+i)]) {
+    assert.equal(Value.Check(schema, {action:'move_file',image_ids}), false);
+  }
+  assert.equal(Value.Check(schema, {action:'move_file',expected_image_versions:{'gallery:1':42}}), false);
+  assert.equal(Value.Check(schema, {action:'folder_delete_empty',folder_ids:[]}), false);
+  assert.equal(Value.Check(schema, {action:'folder_delete_empty',folder_ids:Array(51).fill('a')}), false);
+  assert.ok(tool.description.length <= 1300);
+  assert.match(tool.description, /ONE Studio confirmation per call/);
+  assert.match(tool.description, /never loop single-image calls/);
+  assert.match(tool.description, /only 1\.\.20 image_ids/);
+  // Exact-form/unique-ID/per-ID completeness validation belongs to Dart.
+});
+
 test('only registered domain tools enter the Pi tool list', async () => {
   const calls = [];
   const tools = studioTools(async (...args) => { calls.push(args); return { content: [{ type: 'text', text: 'saved' }] }; },

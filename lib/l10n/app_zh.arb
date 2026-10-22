@@ -8845,6 +8845,8 @@
       }
     }
   },
+  "naiAgent_galleryDeleteEmptyFoldersConfirm": "删除这 {count} 个空文件夹及其图库分类？其他文件夹中的图片会保留。\n{paths}",
+  "naiAgent_galleryMoreItems": "……另有 {count} 项",
   "naiAgent_extensions": "扩展",
   "naiAgent_interactionExtension": "Studio 交互",
   "naiAgent_extensionRequired": "内置 · 必需",

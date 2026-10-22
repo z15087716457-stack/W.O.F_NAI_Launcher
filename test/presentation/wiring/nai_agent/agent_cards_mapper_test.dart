@@ -303,6 +303,60 @@ void main() {
     }
   }
 
+  for (final persisted in [false, true]) {
+    for (final copy in [false, true]) {
+      test(
+        'batch gallery card count target undo copy=$copy persisted=$persisted',
+        () {
+          final ids = ['gallery:1', 'gallery:2', 'gallery:3'];
+          final args = {
+            'action': copy ? 'copy_file' : 'move_file',
+            'image_ids': ids,
+            'target_folder': '/library/batch-target',
+          };
+          final details = {
+            'ok': true, 'scope': 'library', 'count': 3,
+            // Copies may still be indexing; count/thumbnails use source paths.
+            'image_ids': copy ? ['gallery:11'] : ids,
+            'image_versions': {for (final id in ids) id: 'v'},
+            'source_paths': {for (final id in ids) id: '/library/old/$id.png'},
+            'file_paths': {
+              for (final id in ids) id: '/library/batch-target/$id.png',
+            },
+            'target_folder': '/library/batch-target',
+            'unchanged_ids': ['gallery:4'],
+          };
+          runtime.messages = persisted
+              ? [
+                  assistant([call('code', 'codemode')]),
+                  result('code', {
+                    'studio_results': [
+                      {
+                        'tool': 'mcp__nai_studio__gallery_manage',
+                        'tool_call_id': 'batch',
+                        'arguments': args,
+                        ...details,
+                      },
+                    ],
+                  }),
+                ]
+              : [
+                  assistant([call('batch', 'gallery_manage', args)]),
+                  result('batch', details),
+                ];
+          final card = blocks().whereType<AgentGalleryBlock>().single;
+          expect(
+            card.action,
+            copy ? AgentGalleryAction.copy : AgentGalleryAction.move,
+          );
+          expect(card.count, 3);
+          expect(card.target, 'batch-target');
+          expect(card.undoable, !copy);
+        },
+      );
+    }
+  }
+
   test('gallery thumbnail loader caches and caps cards to eight', () async {
     var reads = 0;
     final bytes = Uint8List.fromList(

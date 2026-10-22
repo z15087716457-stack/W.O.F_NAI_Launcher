@@ -8845,6 +8845,8 @@
       }
     }
   },
+  "naiAgent_galleryDeleteEmptyFoldersConfirm": "これら {count} 個の空のフォルダーとギャラリー分類を削除しますか？他のフォルダー内の画像は保持されます。\n{paths}",
+  "naiAgent_galleryMoreItems": "…ほか {count} 件",
   "naiAgent_extensions": "拡張機能",
   "naiAgent_interactionExtension": "Studio 連携",
   "naiAgent_extensionRequired": "内蔵 · 必須",

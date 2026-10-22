@@ -8845,6 +8845,8 @@
       }
     }
   },
+  "naiAgent_galleryDeleteEmptyFoldersConfirm": "刪除這 {count} 個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n{paths}",
+  "naiAgent_galleryMoreItems": "……另有 {count} 項",
   "naiAgent_extensions": "擴展",
   "naiAgent_interactionExtension": "Studio 互動",
   "naiAgent_extensionRequired": "內建 · 必需",

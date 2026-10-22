@@ -15944,6 +15944,16 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths) {
+    return '删除这 $count 个空文件夹及其图库分类？其他文件夹中的图片会保留。\n$paths';
+  }
+
+  @override
+  String naiAgent_galleryMoreItems(int count) {
+    return '……另有 $count 项';
+  }
+
+  @override
   String get naiAgent_extensions => '扩展';
 
   @override
@@ -36915,6 +36925,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String naiAgent_galleryDeleteEmptyFolderConfirm(String path) {
     return '刪除這個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n$path';
+  }
+
+  @override
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths) {
+    return '刪除這 $count 個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n$paths';
+  }
+
+  @override
+  String naiAgent_galleryMoreItems(int count) {
+    return '……另有 $count 項';
   }
 
   @override

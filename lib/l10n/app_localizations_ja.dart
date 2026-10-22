@@ -16152,6 +16152,16 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
+  String naiAgent_galleryDeleteEmptyFoldersConfirm(int count, String paths) {
+    return 'これら $count 個の空のフォルダーとギャラリー分類を削除しますか？他のフォルダー内の画像は保持されます。\n$paths';
+  }
+
+  @override
+  String naiAgent_galleryMoreItems(int count) {
+    return '…ほか $count 件';
+  }
+
+  @override
   String get naiAgent_extensions => '拡張機能';
 
   @override

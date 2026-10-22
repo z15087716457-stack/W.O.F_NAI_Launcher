@@ -8845,6 +8845,8 @@
       }
     }
   },
+  "naiAgent_galleryDeleteEmptyFoldersConfirm": "빈 폴더 {count}개와 갤러리 분류를 삭제할까요? 다른 폴더의 이미지는 유지됩니다.\n{paths}",
+  "naiAgent_galleryMoreItems": "…외 {count}개",
   "naiAgent_extensions": "확장",
   "naiAgent_interactionExtension": "Studio 연동",
   "naiAgent_extensionRequired": "내장 · 필수",

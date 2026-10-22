@@ -11,7 +11,63 @@ const _fileActions = {
   'copy_file',
 };
 
+// Preflight deliberately retains no pixels or metadata snapshots for the batch.
+class _GalleryTransferInput {
+  _GalleryTransferInput(_ManagedGalleryImage image)
+    : id = image.id,
+      version = image.version,
+      path = image.data['resolved_path'] as String,
+      hash = image.data['sha256'] as String,
+      nativeId = (image.data['record'] as Map)['id'] as int;
+  final String id, version, path, hash;
+  final int nativeId;
+}
+
+List<String> _galleryBatchIds(dynamic value) {
+  if (value is! List ||
+      value.isEmpty ||
+      value.length > 50 ||
+      value.any((id) => id is! String || id.isEmpty || id.length > 200) ||
+      value.toSet().length != value.length) {
+    throw const NaiAgentToolError('invalid_gallery', 'Use 1..50 unique IDs');
+  }
+  return value.cast<String>();
+}
+
 extension _GalleryFiles on NaiAgentGalleryBinding {
+  String _listedGalleryItems(List<String> items) => [
+    ...items.take(5),
+    if (items.length > 5)
+      currentL10n.naiAgent_galleryMoreItems(items.length - 5),
+  ].join('\n');
+
+  String _transferWarning({
+    required bool copy,
+    required bool sourceExternal,
+    required bool targetExternal,
+    required int count,
+    required String target,
+  }) {
+    final l10n = currentL10n;
+    return copy
+        ? l10n.localGallery_confirmCopyContent
+        : sourceExternal && targetExternal
+        ? l10n.localGallery_externalBothMoveConfirmContent(
+            count,
+            p.basename(target),
+          )
+        : sourceExternal
+        ? l10n.localGallery_externalSourceMoveConfirmContent(count)
+        : targetExternal
+        ? l10n.localGallery_externalTargetMoveConfirmContent(
+            count,
+            p.basename(target),
+          )
+        : count == 1
+        ? l10n.localGallery_confirmMoveImageContent
+        : l10n.localGallery_protectedBulkMoveContent(count);
+  }
+
   Future<String> _folderPath(String path) async {
     if (!p.isAbsolute(path) || !await Directory(path).exists()) {
       throw const NaiAgentToolError(
@@ -128,6 +184,10 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
     Map<String, dynamic> params,
     NaiAgentCancellation token,
   ) async {
+    if (params.containsKey('image_ids') ||
+        params.containsKey('expected_image_versions')) {
+      return _transferFiles(params, token);
+    }
     const allowed = {
       'action',
       'scope',
@@ -175,27 +235,21 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
     }
     final sourceExternal = await _externalFilePath(sourcePath);
     final targetExternal = await _externalFilePath(target);
-    final l10n = currentL10n;
     final protected = ref
         .read(shareImageSettingsProvider)
         .effectiveConfirmDangerousActions;
     if ((!copy && (sourceExternal || targetExternal)) || protected) {
-      final warning = copy
-          ? l10n.localGallery_confirmCopyContent
-          : sourceExternal && targetExternal
-          ? l10n.localGallery_externalBothMoveConfirmContent(
-              1,
-              p.basename(target),
-            )
-          : sourceExternal
-          ? l10n.localGallery_externalSourceMoveConfirmContent(1)
-          : targetExternal
-          ? l10n.localGallery_externalTargetMoveConfirmContent(
-              1,
-              p.basename(target),
-            )
-          : l10n.localGallery_confirmMoveImageContent;
-      await _confirmFileChange('$warning\n$sourcePath → $target', token);
+      final warning = _transferWarning(
+        copy: copy,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        count: 1,
+        target: target,
+      );
+      await _confirmFileChange(
+        '$warning\n${p.basename(sourcePath)} → ${p.basename(target)}\n$target',
+        token,
+      );
     }
     final backup = await _imageBackup(image, token);
     Future<void> checkFresh() async {
@@ -312,6 +366,255 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
     }
   }
 
+  Future<Map<String, dynamic>> _transferFiles(
+    Map<String, dynamic> params,
+    NaiAgentCancellation token,
+  ) async {
+    const allowed = {
+      'action',
+      'scope',
+      'image_ids',
+      'expected_image_versions',
+      'target_folder',
+    };
+    if (params.keys.any((key) => !allowed.contains(key)) ||
+        (params['scope'] ?? 'library') != 'library' ||
+        params['target_folder'] is! String) {
+      throw const NaiAgentToolError(
+        'invalid_gallery',
+        'Invalid batch transfer fields',
+      );
+    }
+    final ids = _galleryBatchIds(params['image_ids']);
+    final versions = params['expected_image_versions'];
+    if (versions is! Map ||
+        versions.length != ids.length ||
+        ids.any((id) => versions[id] is! String)) {
+      throw const NaiAgentToolError(
+        'invalid_gallery',
+        'Provide a version from read for every image ID',
+      );
+    }
+    final copy = params['action'] == 'copy_file';
+    final target = await _folderPath(params['target_folder'] as String);
+    final inputs = <_GalleryTransferInput>[];
+    final unchanged = <String>[];
+    var sourceExternal = false;
+    for (final id in ids) {
+      final image = await _managed('library', id, token);
+      _admit(token);
+      if (image.version != versions[id]) {
+        throw NaiAgentToolError(
+          'image_conflict',
+          'Read the current image version: $id',
+        );
+      }
+      if (image.bytes == null || image.data['deleted'] == true) {
+        throw NaiAgentToolError(
+          'image_missing',
+          'Transfer requires an active original: $id',
+        );
+      }
+      final input = _GalleryTransferInput(image);
+      if (!copy && galleryFilePathsEqual(p.dirname(input.path), target)) {
+        unchanged.add(id);
+      } else {
+        inputs.add(input);
+        sourceExternal = await _externalFilePath(input.path) || sourceExternal;
+      }
+    }
+    final targetExternal = await _externalFilePath(target);
+    if (inputs.isNotEmpty &&
+        ((!copy && (sourceExternal || targetExternal)) ||
+            ref
+                .read(shareImageSettingsProvider)
+                .effectiveConfirmDangerousActions)) {
+      final warning = _transferWarning(
+        copy: copy,
+        sourceExternal: sourceExternal,
+        targetExternal: targetExternal,
+        count: inputs.length,
+        target: target,
+      );
+      final listing = _listedGalleryItems([
+        for (final input in inputs)
+          '${p.basename(input.path)} → ${p.basename(target)}',
+      ]);
+      await _confirmFileChange('$warning\n$listing\n$target', token);
+    }
+
+    final data = ref.read(naiAgentGalleryDataSourceProvider);
+    final backups = <Map<String, dynamic>>[];
+    final destinations = <String, String>{};
+    final applied = <String>{};
+    final imageVersions = <String, String>{};
+    Object? failure;
+    String? failedId;
+    var next = 0;
+    for (; next < inputs.length; next++) {
+      final input = inputs[next];
+      try {
+        // Re-read just this item. Never retain all original bytes in memory.
+        final backup = await _imageBackup(
+          await _managed('library', input.id, token),
+          token,
+        );
+        backups.add({'image_id': input.id, 'path': backup['path']});
+        Future<void> checkFresh() async {
+          _admit(token);
+          if ((await _managed('library', input.id, token)).version !=
+                  input.version ||
+              !galleryFilePathsEqual(
+                await _folderPath(params['target_folder'] as String),
+                target,
+              )) {
+            throw const NaiAgentToolError(
+              'image_conflict',
+              'Source or target changed during confirmation/backup',
+            );
+          }
+          _admit(token);
+        }
+
+        await checkFresh();
+        final destination = await GalleryFolderRepository.instance
+            .transferImageToFolder(
+              input.path,
+              target,
+              copy: copy,
+              updateIndex: false,
+              beforeTransfer: checkFresh,
+              afterTransfer: (actual) async {
+                // Record physical application before any fallible index bookkeeping.
+                destinations[input.id] = actual;
+                applied.add(copy ? 'file_copied' : 'file_moved');
+                if (!copy) {
+                  await data.updateFilePath(
+                    input.nativeId,
+                    actual,
+                    newFileName: p.basename(actual),
+                  );
+                  final row = await data.readImageForManagement(input.nativeId);
+                  if (row == null ||
+                      !galleryFilePathsEqual(row.filePath, actual)) {
+                    throw const NaiAgentToolError(
+                      'index_update_failed',
+                      'Moved path was not persisted',
+                    );
+                  }
+                  applied.add('index_updated');
+                }
+              },
+              validator: (sourceFile, destinationFile) async {
+                await checkFresh();
+                return sha256
+                            .convert(
+                              await AgentWorkspaceFiles.readBounded(sourceFile),
+                            )
+                            .toString() ==
+                        input.hash &&
+                    sha256
+                            .convert(
+                              await AgentWorkspaceFiles.readBounded(
+                                destinationFile,
+                              ),
+                            )
+                            .toString() ==
+                        input.hash;
+              },
+            );
+        if (destination == null) {
+          _admit(token);
+          throw const NaiAgentToolError(
+            'transfer_failed',
+            'Native file transfer failed',
+          );
+        }
+        if (!copy) {
+          imageVersions[input.id] = (await _managed(
+            'library',
+            input.id,
+            NaiAgentCancellation(),
+          )).version;
+        }
+      } catch (error) {
+        if (destinations.isEmpty) rethrow;
+        failure = error;
+        failedId = input.id;
+        break;
+      }
+    }
+    if (destinations.isNotEmpty) {
+      try {
+        await _refreshFileLibrary(
+          await _service(NaiAgentCancellation()),
+          scan: copy,
+        );
+      } catch (error) {
+        failure ??= error;
+        failedId ??= destinations.keys.last;
+      }
+    }
+    var copiedIds = <String, int?>{};
+    if (copy && destinations.isNotEmpty) {
+      try {
+        copiedIds = await data.getImageIdsByPaths(destinations.values.toList());
+      } catch (error) {
+        failure ??= error;
+        failedId ??= destinations.keys.last;
+      }
+    }
+    final done = inputs
+        .where((input) => destinations.containsKey(input.id))
+        .toList();
+    final completed = <String, dynamic>{
+      'action': params['action'],
+      'scope': 'library',
+      'target_folder': target,
+      'count': done.length,
+      'image_ids': [
+        for (final input in done)
+          if (!copy)
+            input.id
+          else if (copiedIds[destinations[input.id]] != null)
+            'gallery:${copiedIds[destinations[input.id]]}',
+      ],
+      'source_image_ids': [for (final input in done) input.id],
+      'source_paths': {for (final input in done) input.id: input.path},
+      'file_paths': destinations,
+      if (!copy) 'image_versions': imageVersions,
+      'unchanged_ids': unchanged,
+      'indexing_ids': [
+        if (copy)
+          for (final input in done)
+            if (copiedIds[destinations[input.id]] == null) input.id,
+      ],
+      'backups': backups
+          .where((backup) => destinations.containsKey(backup['image_id']))
+          .toList(),
+      'applied_fields': applied.toList(),
+    };
+    return naiAgentTextResult(
+      failure == null
+          ? {'ok': true, ...completed, if (inputs.isEmpty) 'unchanged': true}
+          : {
+              'ok': false,
+              'error': failure is NaiAgentToolError
+                  ? failure.code
+                  : 'native_gallery_failed',
+              'message':
+                  'Read the actual sources and destinations before retrying; native changes may be applied.',
+              'completed': completed,
+              'failed_image_id': failedId,
+              'remaining_image_ids': inputs
+                  .skip(next + 1)
+                  .map((input) => input.id)
+                  .toList(),
+              'backups': backups,
+            },
+    );
+  }
+
   Future<(List<GalleryCategory>, String, String)> _folderCatalog(
     NaiAgentCancellation token,
   ) async {
@@ -383,6 +686,302 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
     return result..sort();
   }
 
+  Future<Map<String, dynamic>> _deleteEmptyFolders(
+    Map<String, dynamic> params,
+    NaiAgentCancellation token,
+    List<GalleryCategory> categories,
+    String root,
+    String version,
+    LocalGalleryService service,
+  ) async {
+    final ids = _galleryBatchIds(params['folder_ids']);
+    final selected = ids.toSet();
+    final roots = (await GalleryFolderRepository.instance.getAllRootDirs())
+        .map((dir) => dir.path)
+        .toList();
+    final paths = <String, String>{};
+    final listings = <String, List<String>>{};
+    final children = <String, Map<String, String>>{};
+    for (final id in ids) {
+      final category = categories.findById(id);
+      var ancestor = category;
+      final ancestors = <String>{};
+      var external = false;
+      while (ancestor != null && ancestors.add(ancestor.id)) {
+        external = external || ancestor.isExternal;
+        ancestor = ancestor.parentId == null
+            ? null
+            : categories.findById(ancestor.parentId!);
+      }
+      if (category == null || external) {
+        throw const NaiAgentToolError(
+          'invalid_folder',
+          'Use non-root main-library categories',
+        );
+      }
+      final path = await _categoryPath(category, root);
+      if (!galleryPathIsWithin(root, path) ||
+          galleryFilePathsEqual(root, path) ||
+          await _externalFilePath(path)) {
+        throw const NaiAgentToolError(
+          'invalid_folder',
+          'Root and external folder trees are read-only',
+        );
+      }
+      paths[id] = path;
+    }
+    for (final id in ids) {
+      final path = paths[id]!;
+      if (categories
+          .getChildren(id)
+          .any((child) => !selected.contains(child.id))) {
+        throw NaiAgentToolError(
+          'folder_not_empty',
+          'Unselected category in $path',
+        );
+      }
+      final entries = await _directoryEntries(path);
+      final allowedChildren = <String, String>{};
+      await for (final entry in Directory(path).list(followLinks: false)) {
+        final childId = ids
+            .where(
+              (other) =>
+                  other != id &&
+                  galleryFilePathsEqual(paths[other]!, entry.path),
+            )
+            .firstOrNull;
+        if (childId == null ||
+            await FileSystemEntity.type(entry.path, followLinks: false) !=
+                FileSystemEntityType.directory) {
+          throw NaiAgentToolError(
+            'folder_not_empty',
+            'Folder contains unselected entries: $path',
+          );
+        }
+        allowedChildren[p.basename(entry.path)] = childId;
+      }
+      if (jsonEncode(entries) != jsonEncode(await _directoryEntries(path))) {
+        throw NaiAgentToolError(
+          'folder_conflict',
+          'Directory changed during preflight: $path',
+        );
+      }
+      children[id] = allowedChildren;
+      listings[id] = entries;
+      _admit(token);
+    }
+    // The preflight allows only selected physical children; descendants first
+    // leaves each directory truly empty when native non-recursive deletion runs.
+    final ordered = [...ids]
+      ..sort((a, b) {
+        final physical = p
+            .split(paths[b]!)
+            .length
+            .compareTo(p.split(paths[a]!).length);
+        if (physical != 0) return physical;
+        return categories
+            .getDescendantIds(a)
+            .length
+            .compareTo(categories.getDescendantIds(b).length);
+      });
+    if (ref.read(shareImageSettingsProvider).effectiveConfirmDangerousActions) {
+      await _confirmFileChange(
+        ids.length == 1
+            ? currentL10n.naiAgent_galleryDeleteEmptyFolderConfirm(
+                paths[ids.single]!,
+              )
+            : currentL10n.naiAgent_galleryDeleteEmptyFoldersConfirm(
+                ids.length,
+                _listedGalleryItems(ids.map((id) => paths[id]!).toList()),
+              ),
+        token,
+      );
+    }
+    final store = files;
+    if (store == null) {
+      throw const NaiAgentToolError('workspace_unavailable', 'No workspace');
+    }
+    final backup = await store.export(
+      'folders.json',
+      Uint8List.fromList(
+        utf8.encode(
+          jsonEncode({
+            'folders': [
+              for (final id in ids)
+                {'id': id, 'old_path': paths[id], 'entries': listings[id]},
+            ],
+            'categories': categories.map((c) => c.toJson()).toList(),
+            'delete_pool': await const GalleryDeletePoolStore().load(),
+          }),
+        ),
+      ),
+      () => _check(token),
+    );
+    final (_, latestRoot, latestVersion) = await _folderCatalog(token);
+    _admit(token);
+    if (latestVersion != version || !galleryFilePathsEqual(root, latestRoot)) {
+      throw const NaiAgentToolError(
+        'folder_conflict',
+        'Folder catalog changed during confirmation/backup; read again',
+      );
+    }
+    for (final id in ids) {
+      if (!galleryFilePathsEqual(
+            await _categoryPath(categories.findById(id), root),
+            paths[id]!,
+          ) ||
+          jsonEncode(listings[id]) !=
+              jsonEncode(await _directoryEntries(paths[id]!))) {
+        throw NaiAgentToolError(
+          'folder_conflict',
+          'Folder changed during confirmation/backup: ${paths[id]}',
+        );
+      }
+    }
+    final deleted = <String>[];
+    final applied = <String>[];
+    Object? failure;
+    String? failedId;
+    var remaining = categories;
+    for (final id in ordered) {
+      try {
+        _admit(token);
+        final (latest, currentRoot, _) = await _folderCatalog(token);
+        if (!galleryFilePathsEqual(root, currentRoot) ||
+            jsonEncode(roots) !=
+                jsonEncode(
+                  (await GalleryFolderRepository.instance.getAllRootDirs())
+                      .map((dir) => dir.path)
+                      .toList(),
+                ) ||
+            jsonEncode(
+                  latest
+                      .where((c) => !deleted.contains(c.id))
+                      .map((c) => c.toJson())
+                      .toList(),
+                ) !=
+                jsonEncode(remaining.map((c) => c.toJson()).toList())) {
+          throw const NaiAgentToolError(
+            'folder_conflict',
+            'Other catalog entries changed; read again',
+          );
+        }
+        final expected = listings[id]!
+            .where(
+              (entry) => !children[id]!.entries.any(
+                (child) =>
+                    deleted.contains(child.value) &&
+                    entry.startsWith('${child.key}:'),
+              ),
+            )
+            .toList();
+        if (!galleryFilePathsEqual(
+              await _categoryPath(remaining.findById(id), root),
+              paths[id]!,
+            ) ||
+            jsonEncode(expected) !=
+                jsonEncode(await _directoryEntries(paths[id]!))) {
+          throw NaiAgentToolError(
+            'folder_conflict',
+            'Directory changed before deletion: ${paths[id]}',
+          );
+        }
+        _admit(token);
+        if (!await categoryRepository.deleteCategory(
+          remaining.findById(id)!,
+          remaining,
+        )) {
+          throw NaiAgentToolError(
+            'folder_delete_failed',
+            'Native empty-folder deletion failed: ${paths[id]}',
+          );
+        }
+        deleted.add(id);
+        remaining = remaining.where((c) => c.id != id).toList();
+      } catch (error) {
+        if (deleted.isEmpty) rethrow;
+        failure = error;
+        failedId = id;
+        break;
+      }
+    }
+    if (deleted.isNotEmpty) {
+      applied.add('filesystem_changed');
+      try {
+        // Always persist applied deletions, even after Stop or a later conflict;
+        // retain concurrent edits to all other categories rather than overwrite.
+        // Cleanup must survive cancellation/binding disposal after admission.
+        final latest = await categoryRepository.loadCategories();
+        if (latest.isEmpty &&
+            !await categoryRepository.isCategoriesConfigGenuinelyEmpty()) {
+          throw const NaiAgentToolError(
+            'folder_catalog_failed',
+            'Invalid native catalog was retained',
+          );
+        }
+        if (jsonEncode(
+              latest
+                  .where((c) => !deleted.contains(c.id))
+                  .map((c) => c.toJson())
+                  .toList(),
+            ) !=
+            jsonEncode(remaining.map((c) => c.toJson()).toList())) {
+          failure ??= const NaiAgentToolError(
+            'folder_conflict',
+            'Newer native catalog edits were retained',
+          );
+        }
+        remaining = latest.where((c) => !deleted.contains(c.id)).toList();
+        if (!await categoryRepository.saveCategories(remaining)) {
+          throw const NaiAgentToolError(
+            'folder_catalog_failed',
+            'Native catalog could not be saved',
+          );
+        }
+        applied.add('catalog_saved');
+      } catch (error) {
+        failure ??= error;
+      }
+      try {
+        await _refreshFileLibrary(
+          service,
+          categoryPaths: {
+            for (final item in remaining) item.id: item.folderPath,
+          },
+          removed: deleted.toSet(),
+        );
+      } catch (error) {
+        failure ??= error;
+      }
+    }
+    return naiAgentTextResult(
+      failure == null
+          ? {
+              'ok': true,
+              'deleted': true,
+              'folder_ids': deleted,
+              'count': deleted.length,
+              'backup': backup,
+              'applied_fields': applied,
+            }
+          : {
+              'ok': false,
+              'error': failure is NaiAgentToolError
+                  ? failure.code
+                  : 'native_gallery_failed',
+              'message':
+                  'Read actual folders and the catalog before retrying; completed deletions were retained.',
+              'deleted_folder_ids': deleted,
+              'failed_folder_id': failedId,
+              'remaining_folder_ids': ordered
+                  .where((id) => !deleted.contains(id))
+                  .toList(),
+              'backup': backup,
+              'applied_fields': applied,
+            },
+    );
+  }
+
   Future<Map<String, dynamic>> _manageFolders(
     Map<String, dynamic> params,
     NaiAgentCancellation token,
@@ -410,6 +1009,13 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
         'scope',
         'folder_id',
         'parent_id',
+        'expected_folder_version',
+      },
+      'folder_delete_empty' => {
+        'action',
+        'scope',
+        'folder_id',
+        'folder_ids',
         'expected_folder_version',
       },
       _ => {'action', 'scope', 'folder_id', 'expected_folder_version'},
@@ -521,6 +1127,22 @@ extension _GalleryFiles on NaiAgentGalleryBinding {
         'folder_version': (await _folderCatalog(NaiAgentCancellation())).$3,
         'notice': 'Read folders again to page the synchronized native catalog.',
       });
+    }
+    if (action == 'folder_delete_empty' && params.containsKey('folder_ids')) {
+      if (params.containsKey('folder_id')) {
+        throw const NaiAgentToolError(
+          'invalid_gallery',
+          'Use folder_id or folder_ids, not both',
+        );
+      }
+      return _deleteEmptyFolders(
+        params,
+        token,
+        categories,
+        root,
+        version,
+        nativeService,
+      );
     }
     final folderId = params['folder_id'];
     final category = folderId is String ? categories.findById(folderId) : null;

@@ -8847,6 +8847,25 @@
       }
     }
   },
+  "naiAgent_galleryDeleteEmptyFoldersConfirm": "Delete these {count} empty folders and their gallery categories? Images in other folders will be kept.\n{paths}",
+  "@naiAgent_galleryDeleteEmptyFoldersConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
+  "naiAgent_galleryMoreItems": "…and {count} more",
+  "@naiAgent_galleryMoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "naiAgent_extensions": "Extensions",
   "naiAgent_interactionExtension": "Studio interaction",
   "naiAgent_extensionRequired": "Built in · Required",
