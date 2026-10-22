@@ -21,7 +21,24 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_
 6. 附带中英文 README、CHANGELOG、THIRD_PARTY_NOTICES 与 LICENSE.txt；写 package-info、应用文件清单及 SHA256SUMS。Release 或暂存目录发现私有数据、内部恢复材料时拒绝打包；已有暂存目录也先拒绝私有数据再清空。
 7. 验证 `com.example/nai_launcher` 原生身份；Python zipfile 生成支持 ZIP64 的 Deflate ZIP，顶层固定 `WOF_NAI_Studio_2.0.0/`；NSIS 编译安装包；生成每个产物的 `.sha256` 和 `dist/checksums.txt`。
 
-CI 中 `scripts/prepare_windows_node_runtime.ps1` 下载 Node 24.18.0 官方 win-x64 ZIP，对照官方 SHASUMS256 校验，用该运行时的 npm ci 安装 Agent，再准备 Node/Pi 许可并显式传入运行时目录。当前 pi-coding-agent 包没有 LICENSE，因此新增源码 `tool/nai_agent/PI-LICENSE`，内容只读复制自登记运行目录的 PI-LICENSE。两个工作流均已改新文件名与登记 SDK；CI 未远程执行。
+CI 中 `scripts/prepare_windows_node_runtime.ps1` 下载 Node 24.18.0 官方 win-x64 ZIP，对照官方 SHASUMS256 校验，用该运行时的 npm ci 安装 Agent，再准备 Node/Pi 许可并显式传入运行时目录。当前 pi-coding-agent 包没有 LICENSE，因此新增源码 `tool/nai_agent/PI-LICENSE`，内容只读复制自登记运行目录的 PI-LICENSE。两个工作流均已改新文件名与登记 SDK；2026-10-23 已在 GitHub runner 实跑通过。
+
+## 正式发布（2026-10-23）
+
+GitHub Release `v2.0.0` 由 `release.yml` 在 GitHub runner 上构建发布，tag 指向 `9032e904d`（在 `d55842ba9` 之后补了 1.x 升级修复，见下）。Release 资源即正式分发包：
+
+| 产物 | 字节数 | SHA-256 |
+|---|---:|---|
+| `WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | 199823470 | `e9770276fa405b42998df9772f4771557869386d009d6a2435fac8e02905b73a` |
+| `WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | 322185425 | `cc0eb3e6e44fe907f58f88ab6f406c646574a412ced03f6fc23855c9bb0e2353` |
+
+- CI 包 AOT `eefde9f10e6b0286e61c4f71a679a74ece684a15d1f9b6d9bf314524f7194356`，sourceCommit `9032e904d2aeb174cef5d9e64bd1331014dcfc4c`。
+- 下载回本机复验：`checksums.txt` 两项一致；便携包按原脚本（去掉与本地暂存目录逐字节比较一项）通过 ZIP、清单、15299 条 SUMS、SQLite×4、Node v24.18.0、两项内置 Skill、Agent 合成冒烟与数据身份检查；与本地包相比只有原生二进制（runner 重新编译）和文本换行不同，无内容差异。Setup ProductVersion `2.0.0+42`，未签名。
+- **1.x 升级修复（`9032e904d`）**：1.x 应用内更新只用 `/S` 静默运行安装包并重启旧 exe 路径。安装器 `.onInit` 在没有新键 InstallLocation、且未显式 `/D=` 时，沿用旧键 `Aaalice NAI Launcher` 的目录（目录内须有 exe），就地升级并迁移注册项。`.dart_tool/release-2.0.0/verify_legacy_upgrade.ps1` 四种场景通过：旧版就地升级、再次升级留原地、旧键指向不存在目录时装到新默认、显式 `/D=` 优先。
+- 推送：本机代理单连接上传约 100 KB/s 且长连接会被重置，整推失败；按首父链切成每批约 20 MB 原始大小逐批推送（`.devin/runs/release-2.0.0/chunk_push.sh`）。本地旧的未推送 tag `v2.0.0`（指向 8 月旧提交）已改存为 `refs/backup/old-tag-v2.0.0`。
+- 远程除 `main` 外 160 个分支已删除，备份见 `04_工具/发布包/github-branches-backup-20261022/`；tag 与 1.x Releases 保留。
+
+以下“本地最终产物”与验证是发布前本机出包的记录。
 
 ## 本地最终产物
 
@@ -63,6 +80,6 @@ CI 中 `scripts/prepare_windows_node_runtime.ps1` 下载 Node 24.18.0 官方 win
 ## 分发边界与遗留风险
 
 - **未签名**：本地产物未配置发布者签名，Windows SmartScreen 可能警告；随包 CRT 的微软签名均有效。CI 保留可选签名，并在签安装器后刷新产物校验文件。
-- **未发布 GitHub**，未打 tag、未 commit/stash/checkout、未替换正在运行的正式版本；用户数据、正式快捷方式和正式卸载键未写入。
+- 本机出包与验证阶段未替换正在运行的正式版本；用户数据、正式快捷方式和正式卸载键未写入。
 - 升级采用保守覆盖，不实现旧 app_files_manifest 的退役文件删除，避免根据可被用户修改的 JSON 误删未知文件。旧程序退役文件可能残留；升级不会主动删除清单之外文件。卸载延续原行为：仅明确保护四类私有目录，其余安装目录内容删除。
-- CI 仅静态验证，尚未在 GitHub runner 实跑；首次构建依赖第三方下载、VS CRT 和 NSIS 环境。未启动真实 GUI，因此不宣称完成交互式安装向导或应用界面人工验收。
+- CI 已在 GitHub runner 实跑并发布 v2.0.0。未启动真实 GUI，因此不宣称完成交互式安装向导或应用界面人工验收。
