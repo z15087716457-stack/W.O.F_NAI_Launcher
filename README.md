@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0%20Preview-blue" alt="Version"></a>
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.47.7-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
@@ -30,7 +30,7 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 > 本文描述当前源码能力。近期 Studio、翻译与图库改动仍列在 CHANGELOG 的 `[Unreleased]`；下载包具备哪些功能，以该包对应 Release 的说明为准。既有界面截图保留为早期示意。
 
-> 当前版本为 **2.0 Preview**（Windows x64 本地便携预览通道），包含 UIUX 九页整合、完整 NAI Agent 及后续画布、图标、工具条、Vibe 编码和 OLD 对比修复。便携包解压后运行，配置仍使用原有应用数据目录；请使用自己的账号。来源见 [整合记录](docs/uiux-integration-2026-10-13.md)，本批交付见 [2.0 Preview 记录](docs/studio-2-preview-2026-10-14.md)。本地交付不代表已经发布 GitHub Release。
+> 当前版本为 **2.0.0 正式版**：提供 Windows x64 安装版与便携版，用户数据在程序目录 `user-data/`，卸载保留；请使用自己的账号。产物与验证见 [正式版记录](docs/release-2.0.0-2026-10-22.md)，当前仅本地出包，尚未发布 GitHub Release。
 
 ## ✨ 功能概览
 
@@ -141,8 +141,8 @@ W.O.F NAI Studio 是一个使用 Flutter 构建的 NovelAI 第三方客户端。
 
 | 平台 | 下载文件 | 使用方式 |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
+| Windows | `WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | 安装版，推荐普通用户，安装到当前用户目录；支持应用内断点下载、校验、自动安装并重启。手动运行安装包时也会检测并关闭托盘中的旧版本。 |
+| Windows | `WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | 便携版，解压后运行 `nai_launcher.exe`；应用内更新会暂存新版、保留用户文件、原子切换目录，失败时自动回滚并重启旧版。 |
 
 首次登录可以使用 NovelAI 账号密码或 API Token。账号数据仅保存在本地设备，桌面端使用系统安全存储保存敏感信息。
 
@@ -231,7 +231,7 @@ git push origin v1.0.0
 - `pubspec.yaml` 版本号已更新；tag 必须匹配去掉 `+build` 后的版本，例如 `1.0.0+17` 对应 `v1.0.0`。
 - `CHANGELOG.md` 已按 `✨ 新增`、`🛠 改进`、`🐛 修复` 分类补好；发布文件表由脚本自动生成，不要写入 Changelog。
 - `assets/databases/tag_catalog.db` 与 `assets/databases/cooccurrence.db` 是真实 SQLite 文件而不是 Git LFS pointer，并已通过 `dart run tool/tag_catalog/verify_bundled_databases.dart` 校验。
-- Windows 安装器依赖 NSIS；本地打包可运行 `pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_release.ps1`。
+- Windows 打包依赖登记的 Flutter SDK、Python 3、NSIS 与 VS x64 CRT；CI 先完成依赖解析和代码生成，本地使用现有生成文件。运行 `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_release.ps1 -NodeRuntimeDirectory "<Node 24.18.0 运行时目录>"`（目录需含 `node.exe`、`NODE-LICENSE`、`PI-LICENSE`；可加 `-CrtDirectory "<微软 x64 CRT 目录>"`）。脚本独立暂存、生成 ZIP64 / 安装器及 SHA-256，不修改运行包。
 - 正式签名可配置 GitHub Secrets `WINDOWS_SIGNING_CERT_BASE64`（PFX 的 Base64）和 `WINDOWS_SIGNING_CERT_PASSWORD`。工作流会在打包前签名便携版主程序、打包后签名安装器，并用 `signtool verify` 强制验证；未配置证书时保持当前无签名构建。
 - 本地签名统一使用 `scripts/sign_windows_binary.ps1`，例如：`pwsh -File scripts/sign_windows_binary.ps1 -Path dist/setup.exe -CertificatePath cert.pfx -CertificatePassword '<password>'`。
 

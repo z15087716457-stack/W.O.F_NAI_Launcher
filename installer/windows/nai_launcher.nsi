@@ -5,20 +5,26 @@
   !define VERSION "0.0.0"
 !endif
 
+!ifndef BUILD_VERSION
+  !define BUILD_VERSION "${VERSION}+0"
+!endif
+!searchparse "${VERSION}-" "" VERSION_CORE "-"
+!searchparse "${BUILD_VERSION}+0" "+" VERSION_BUILD "+"
+
 !ifndef SOURCE_DIR
   !define SOURCE_DIR "..\..\build\windows\x64\runner\Release"
 !endif
 
 !ifndef OUT_FILE
-  !define OUT_FILE "NAI_Launcher_Windows_Setup.exe"
+  !define OUT_FILE "WOF_NAI_Studio_Windows_Setup.exe"
 !endif
 
 !ifndef INSTALL_DIR
-  !define INSTALL_DIR "$LOCALAPPDATA\Programs\Aaalice NAI Launcher"
+  !define INSTALL_DIR "$LOCALAPPDATA\Programs\W.O.F NAI Studio"
 !endif
 
 !ifndef APP_NAME
-  !define APP_NAME "Aaalice NAI Launcher"
+  !define APP_NAME "W.O.F NAI Studio"
 !endif
 
 !ifndef APP_EXE
@@ -26,11 +32,17 @@
 !endif
 
 !ifndef PUBLISHER
-  !define PUBLISHER "Aaalice"
+  !define PUBLISHER "W.O.F"
 !endif
 
 !ifndef UNINSTALL_KEY
-  !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher"
+  !define UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\W.O.F NAI Studio"
+!endif
+!ifndef LEGACY_UNINSTALL_KEY
+  !define LEGACY_UNINSTALL_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher"
+!endif
+!ifndef LEGACY_APP_NAME
+  !define LEGACY_APP_NAME "Aaalice NAI Launcher"
 !endif
 
 !ifndef PROCESS_QUERY_ACCESS
@@ -45,9 +57,19 @@ RequestExecutionLevel user
 SetCompressor /SOLID lzma
 Unicode true
 
+VIProductVersion "${VERSION_CORE}.${VERSION_BUILD}"
+VIAddVersionKey /LANG=1033 "ProductName" "${APP_NAME}"
+VIAddVersionKey /LANG=1033 "CompanyName" "${PUBLISHER}"
+VIAddVersionKey /LANG=1033 "FileDescription" "${APP_NAME} Setup"
+VIAddVersionKey /LANG=1033 "FileVersion" "${BUILD_VERSION}"
+VIAddVersionKey /LANG=1033 "ProductVersion" "${BUILD_VERSION}"
+VIAddVersionKey /LANG=1033 "LegalCopyright" "Copyright (C) W.O.F and NAI Launcher Contributors"
+
 !define /math PROCESS_PATH_BUFFER_BYTES ${NSIS_MAX_STRLEN} * 2
 !define PROCESS_ENTRY_SIZE 556
 
+!define MUI_ICON "..\..\windows\runner\resources\app_icon.ico"
+!define MUI_UNICON "..\..\windows\runner\resources\app_icon.ico"
 !define MUI_ABORTWARNING
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_EXE}"
 !insertmacro MUI_PAGE_WELCOME
@@ -327,15 +349,35 @@ Section "${APP_NAME}" SecMain
   SectionIn RO
 
   Call EnsureAppClosed
+  ; Do not infer obsolete files from arbitrary user-controlled JSON. This
+  ; conservative upgrade overwrites only shipped files, keeping unknown files
+  ; and private state; retired-file pruning is deliberately not performed.
   SetOverwrite on
   SetOutPath "$INSTDIR"
   File /r /x user-data /x agent-data /x nai_launcher.exe.WebView2 /x .studio-data-* "${SOURCE_DIR}\*.*"
 
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
+  ; Migrate only the registration for this exact directory, never a side-by-side install.
+  ReadRegStr $0 HKCU "${LEGACY_UNINSTALL_KEY}" "InstallLocation"
+  StrCmp $0 "" legacy_registration_done
+  GetFullPathName $0 "$0"
+  GetFullPathName $1 "$INSTDIR"
+  System::Call 'kernel32::lstrcmpiW(w r0, w r1) i .r2'
+  StrCmp $2 "0" 0 legacy_registration_done
+  DeleteRegKey HKCU "${LEGACY_UNINSTALL_KEY}"
+!ifndef NO_SHORTCUTS
+  Delete "$SMPROGRAMS\${LEGACY_APP_NAME}\${LEGACY_APP_NAME}.lnk"
+  Delete "$SMPROGRAMS\${LEGACY_APP_NAME}\Uninstall ${LEGACY_APP_NAME}.lnk"
+  RMDir "$SMPROGRAMS\${LEGACY_APP_NAME}"
+!endif
+legacy_registration_done:
+
+!ifndef NO_SHORTCUTS
   CreateDirectory "$SMPROGRAMS\${APP_NAME}"
   CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
   CreateShortCut "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk" "$INSTDIR\Uninstall.exe"
+!endif
 
   WriteRegStr HKCU "${UNINSTALL_KEY}" "DisplayName" "${APP_NAME}"
   WriteRegStr HKCU "${UNINSTALL_KEY}" "DisplayVersion" "${VERSION}"
@@ -348,17 +390,21 @@ Section "${APP_NAME}" SecMain
   WriteRegDWORD HKCU "${UNINSTALL_KEY}" "NoRepair" 1
 SectionEnd
 
+!ifndef NO_SHORTCUTS
 Section "Desktop Shortcut" SecDesktop
   CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}"
 SectionEnd
+!endif
 
 Section "Uninstall"
   Call un.EnsureAppClosed
 
+!ifndef NO_SHORTCUTS
   Delete "$DESKTOP\${APP_NAME}.lnk"
   Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
   Delete "$SMPROGRAMS\${APP_NAME}\Uninstall ${APP_NAME}.lnk"
   RMDir "$SMPROGRAMS\${APP_NAME}"
+!endif
 
   DeleteRegKey HKCU "${UNINSTALL_KEY}"
   ; Keep adjacent private state and migration backups when uninstalling.

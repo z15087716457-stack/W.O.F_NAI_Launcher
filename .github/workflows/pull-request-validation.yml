@@ -29,7 +29,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  FLUTTER_VERSION: "3.44.2"
+  FLUTTER_VERSION: "3.47.7"
 
 jobs:
   windows-validation:
@@ -79,7 +79,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run tool/generate.dart
 
       - name: Verify generated files
         shell: pwsh
@@ -94,11 +94,15 @@ jobs:
         run: flutter analyze
 
       - name: Build Windows release
-        run: flutter build windows --release
+        run: flutter build windows --release --no-pub --no-tree-shake-icons
 
       - name: Validate installer process handling
         shell: pwsh
         run: ./scripts/validate_windows_installer_process_handling.ps1
+
+      - name: Prepare Node runtime and Agent dependencies
+        shell: pwsh
+        run: ./scripts/prepare_windows_node_runtime.ps1 -OutputDirectory (Join-Path $env:RUNNER_TEMP 'wof-node-runtime')
 
       - name: Package Windows artifacts
         shell: pwsh
@@ -108,10 +112,11 @@ jobs:
           if (!$match) {
             throw 'pubspec.yaml does not contain a version field.'
           }
-          $version = $match.Matches[0].Groups[1].Value.Trim() -replace '\+.*$', ''
+          $version = $match.Matches[0].Groups[1].Value.Trim()
           ./scripts/package_windows_release.ps1 `
             -Version $version `
-            -SkipFlutterBuild
+            -SkipFlutterBuild `
+            -NodeRuntimeDirectory (Join-Path $env:RUNNER_TEMP 'wof-node-runtime')
 
       - name: Verify packaged artifacts
         shell: pwsh
@@ -120,8 +125,8 @@ jobs:
           $match = Select-String -Path pubspec.yaml -Pattern '^version:\s*(.+)$'
           $version = $match.Matches[0].Groups[1].Value.Trim() -replace '\+.*$', ''
           $required = @(
-            "dist/NAI_Launcher_Windows_${version}_Setup.exe",
-            "dist/NAI_Launcher_Windows_${version}_Portable.zip"
+            "dist/WOF_NAI_Studio_Windows_${version}_Setup.exe",
+            "dist/WOF_NAI_Studio_Windows_${version}_Portable.zip"
           )
           foreach ($path in $required) {
             if (!(Test-Path -LiteralPath $path)) {

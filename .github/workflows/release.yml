@@ -15,7 +15,7 @@ permissions:
   contents: write
 
 env:
-  FLUTTER_VERSION: "3.44.2"
+  FLUTTER_VERSION: "3.47.7"
   RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
 jobs:
@@ -131,10 +131,10 @@ jobs:
         run: flutter gen-l10n
 
       - name: Generate code
-        run: dart run build_runner build --delete-conflicting-outputs
+        run: dart run tool/generate.dart
 
       - name: Build Windows release
-        run: flutter build windows --release
+        run: flutter build windows --release --no-pub --no-tree-shake-icons
 
       - name: Sign Windows application
         shell: pwsh
@@ -157,13 +157,18 @@ jobs:
             -CertificatePath $certificatePath `
             -CertificatePassword $env:WINDOWS_SIGNING_CERT_PASSWORD
 
+      - name: Prepare Node runtime and Agent dependencies
+        shell: pwsh
+        run: ./scripts/prepare_windows_node_runtime.ps1 -OutputDirectory (Join-Path $env:RUNNER_TEMP 'wof-node-runtime')
+
       - name: Package Windows artifacts
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           ./scripts/package_windows_release.ps1 `
             -Version '${{ needs.prepare.outputs.version }}' `
-            -SkipFlutterBuild
+            -SkipFlutterBuild `
+            -NodeRuntimeDirectory (Join-Path $env:RUNNER_TEMP 'wof-node-runtime')
 
       - name: Sign Windows installer
         shell: pwsh
@@ -177,9 +182,13 @@ jobs:
             exit 0
           }
           ./scripts/sign_windows_binary.ps1 `
-            -Path 'dist/NAI_Launcher_Windows_${{ needs.prepare.outputs.version }}_Setup.exe' `
+            -Path 'dist/WOF_NAI_Studio_Windows_${{ needs.prepare.outputs.public_version }}_Setup.exe' `
             -CertificatePath $certificatePath `
             -CertificatePassword $env:WINDOWS_SIGNING_CERT_PASSWORD
+
+      - name: Refresh signed artifact checksums
+        shell: pwsh
+        run: python scripts/windows_release_payload.py checksums --output 'dist/WOF_NAI_Studio_Windows_${{ needs.prepare.outputs.public_version }}_Setup.exe' --output 'dist/WOF_NAI_Studio_Windows_${{ needs.prepare.outputs.public_version }}_Portable.zip'
 
       - name: Remove signing certificate
         if: ${{ always() }}
@@ -191,8 +200,10 @@ jobs:
         with:
           name: windows-release
           path: |
-            dist/NAI_Launcher_Windows_*_Setup.exe
-            dist/NAI_Launcher_Windows_*_Portable.zip
+            dist/WOF_NAI_Studio_Windows_*_Setup.exe
+            dist/WOF_NAI_Studio_Windows_*_Portable.zip
+            dist/*.sha256
+            dist/checksums.txt
           if-no-files-found: error
 
   publish:
@@ -232,7 +243,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          name: NAI Launcher ${{ env.RELEASE_TAG }}
+          name: W.O.F NAI Studio ${{ env.RELEASE_TAG }}
           body_path: release-assets/release_notes_${{ env.RELEASE_TAG }}.md
           files: release-assets/*
           draft: false

@@ -10,8 +10,11 @@ enum AppInstallationType { windowsInstaller, windowsPortable, unsupported }
 
 /// 判断当前应用是安装版还是便携版。
 class AppInstallationService {
-  static const uninstallRegistryPath =
-      r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher';
+  /// New installations take priority; 1.x installations remain updatable.
+  static const uninstallRegistryPaths = [
+    r'Software\Microsoft\Windows\CurrentVersion\Uninstall\W.O.F NAI Studio',
+    r'Software\Microsoft\Windows\CurrentVersion\Uninstall\Aaalice NAI Launcher',
+  ];
 
   AppInstallationType getInstallationType() {
     if (!Platform.isWindows) {
@@ -39,24 +42,32 @@ class AppInstallationService {
   }
 
   bool _isInstalledWindowsApp() {
-    final installLocation = readWindowsInstallLocation();
-    if (installLocation == null || installLocation.isEmpty) {
-      return false;
-    }
-    return isExecutableInsideInstallDir(
-      executablePath: Platform.resolvedExecutable,
-      installLocation: installLocation,
-    );
+    // Both versions may coexist in different directories. Match the running
+    // executable, not merely the first registry key that exists.
+    return uninstallRegistryPaths.any((path) {
+      final location = _readInstallLocation(path);
+      return location != null &&
+          location.isNotEmpty &&
+          isExecutableInsideInstallDir(
+            executablePath: Platform.resolvedExecutable,
+            installLocation: location,
+          );
+    });
   }
 
   String? readWindowsInstallLocation() {
     if (!Platform.isWindows) return null;
+    for (final path in uninstallRegistryPaths) {
+      final location = _readInstallLocation(path);
+      if (location != null && location.isNotEmpty) return location;
+    }
+    return null;
+  }
+
+  static String? _readInstallLocation(String path) {
     RegistryKey? key;
     try {
-      key = Registry.openPath(
-        RegistryHive.currentUser,
-        path: uninstallRegistryPath,
-      );
+      key = Registry.openPath(RegistryHive.currentUser, path: path);
       return key.getValueAsString('InstallLocation');
     } catch (_) {
       return null;

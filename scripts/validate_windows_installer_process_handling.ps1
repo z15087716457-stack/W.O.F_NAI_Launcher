@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$MakensisPath
 )
 
@@ -47,10 +47,12 @@ function Invoke-Makensis {
     '/INPUTCHARSET',
     'UTF8',
     '/DVERSION=0.0.0-test',
-    '/DAPP_NAME=Aaalice NAI Launcher Process Test',
+    '/DAPP_NAME=W.O.F NAI Studio Process Test',
+    '/DNO_SHORTCUTS',
     '/DAPP_EXE=nai_launcher_process_test.exe',
-    '/DPUBLISHER=Aaalice Test',
+    '/DPUBLISHER=W.O.F Test',
     "/DUNINSTALL_KEY=$UninstallKey",
+    "/DLEGACY_UNINSTALL_KEY=$UninstallKey-Legacy",
     "/DINSTALL_DIR=$InstallPath",
     "/DSOURCE_DIR=$SourcePath",
     "/DOUT_FILE=$OutputPath"
@@ -285,13 +287,13 @@ try {
   }
 
   # 兜底清理测试安装器创建的快捷方式（正常路径由场景内卸载器回收）
-  $testMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Aaalice NAI Launcher Process Test'
+  $testMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\W.O.F NAI Studio Process Test'
   if (Test-Path -LiteralPath $testMenuDir) {
     Remove-Item -LiteralPath $testMenuDir -Recurse -Force
   }
   $testDesktopLink = Join-Path `
     ([Environment]::GetFolderPath('Desktop')) `
-    'Aaalice NAI Launcher Process Test.lnk'
+    'W.O.F NAI Studio Process Test.lnk'
   if (Test-Path -LiteralPath $testDesktopLink) {
     Remove-Item -LiteralPath $testDesktopLink -Force
   }

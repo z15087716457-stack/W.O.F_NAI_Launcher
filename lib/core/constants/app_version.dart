@@ -45,8 +45,8 @@ class AppVersion {
           prerelease.substring(0, 1).toUpperCase() + prerelease.substring(1);
       return '$core-$capitalized';
     }
-    // 如果没有 prerelease 部分，直接返回版本号
-    return version;
+    // Stable releases never expose build metadata in the display label.
+    return version.split('+').first;
   }
 
   /// 完整版本号

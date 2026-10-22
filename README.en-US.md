@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0%20Preview-blue" alt="Version"></a>
+  <a href="https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases"><img src="https://img.shields.io/badge/version-2.0.0-blue" alt="Version"></a>
   <img src="https://img.shields.io/badge/Flutter-3.47.7-blue?logo=flutter" alt="Flutter">
   <img src="https://img.shields.io/badge/platform-Windows-lightgrey" alt="Platforms">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
@@ -30,7 +30,7 @@ W.O.F NAI Studio is a third-party client for NovelAI built with Flutter. It inte
 
 > This README describes the current source tree. New Studio, translation, and gallery work remains under `[Unreleased]` in CHANGELOG; the feature set of a downloaded package is determined by its own release notes. Existing interface screenshots are retained as historical illustrations.
 
-> The current version is **2.0 Preview**, a local Windows x64 portable preview with the nine-page UIUX integration, full NAI Agent, and subsequent canvas, icon, toolbar, Vibe encoding and OLD comparison fixes. Extract and run the package using your own account; settings continue to use the existing application data directory. See the [integration record](docs/uiux-integration-2026-10-13.md) and [2.0 Preview delivery record](docs/studio-2-preview-2026-10-14.md). Local delivery is separate from publishing a GitHub Release.
+> The current version is **2.0.0 stable**, with Windows x64 installer and portable packages; user data lives in `user-data/` beside the application and is preserved on uninstall. Use your own account. See the [release verification record](docs/release-2.0.0-2026-10-22.md). Packages have been built locally, not yet published to GitHub Releases.
 
 ## ✨ Features Overview
 
@@ -141,8 +141,8 @@ Download the latest version from [Releases](https://github.com/z15087716457-stac
 
 | Platform | Download File | Usage |
 | --- | --- | --- |
-| Windows | `NAI_Launcher_Windows_<version>_Setup.exe` | Installer version, recommended for general users. Supports resumable in-app downloads, verification, automatic installation, and restart. Manual setup also detects and closes an older version still running in the tray. |
-| Windows | `NAI_Launcher_Windows_<version>_Portable.zip` | Portable version. In-app updates stage the new version, preserve user files, atomically swap directories, and automatically roll back and restart the previous version on failure. |
+| Windows | `WOF_NAI_Studio_Windows_2.0.0_Setup.exe` | Installer version, recommended for general users. Supports resumable in-app downloads, verification, automatic installation, and restart. Manual setup also detects and closes an older version still running in the tray. |
+| Windows | `WOF_NAI_Studio_Windows_2.0.0_Portable.zip` | Portable version. In-app updates stage the new version, preserve user files, atomically swap directories, and automatically roll back and restart the previous version on failure. |
 
 You can log in for the first time using your NovelAI account credentials or an API Token. Account data is stored locally on the device only. The desktop app uses the system's secure storage for sensitive information.
 
@@ -231,7 +231,7 @@ Before releasing, please ensure:
 - The version number in `pubspec.yaml` has been updated; the tag must match the version without the `+build` suffix, e.g., `1.0.0+17` corresponds to `v1.0.0`.
 - `CHANGELOG.md` has been updated under `✨ Added`, `🛠 Improved`, and `🐛 Fixed`; do not add a release-file table because the release script generates it automatically.
 - `assets/databases/tag_catalog.db` and `assets/databases/cooccurrence.db` are actual SQLite files rather than Git LFS pointers and pass `dart run tool/tag_catalog/verify_bundled_databases.dart`.
-- The Windows installer depends on NSIS; for local packaging, you can run `pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_release.ps1`.
+- Packaging requires the registered Flutter SDK, Python 3, NSIS and Microsoft x64 CRT. CI resolves dependencies and generates code first; local packaging uses existing generated files. Run `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/package_windows_release.ps1 -NodeRuntimeDirectory "<Node 24.18.0 runtime directory>"` (containing `node.exe`, `NODE-LICENSE`, `PI-LICENSE`; optionally pass `-CrtDirectory "<Microsoft x64 CRT directory>"`). The pipeline uses an isolated stage, creates ZIP64 / installer artifacts and SHA-256 checksums, and never modifies the installed runtime.
 - For Authenticode signing, configure the GitHub Secrets `WINDOWS_SIGNING_CERT_BASE64` (Base64-encoded PFX) and `WINDOWS_SIGNING_CERT_PASSWORD`. The workflow signs the portable executable before packaging, signs the installer afterward, and requires `signtool verify` to pass. Builds remain unsigned when no certificate is configured.
 - Use `scripts/sign_windows_binary.ps1` for local signing, for example: `pwsh -File scripts/sign_windows_binary.ps1 -Path dist/setup.exe -CertificatePath cert.pfx -CertificatePassword '<password>'`.
 

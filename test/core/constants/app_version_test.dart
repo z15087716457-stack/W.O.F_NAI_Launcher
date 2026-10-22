@@ -29,13 +29,24 @@ void main() {
       expect(AppVersion.fullVersion, '2.0.0-preview+6');
       expect(AppVersion.buildNumber, '6');
       expect((AppVersion.major, AppVersion.minor, AppVersion.patch), (2, 0, 0));
-      // pubspec 每次交付都会升 build 号，只锁定 2.0 Preview 系列格式。
-      expect(
-        File('pubspec.yaml').readAsStringSync(),
-        matches(RegExp(r'^version: 2\.0\.0-preview\+\d+\s*$', multiLine: true)),
-      );
     },
   );
+
+  test('stable build 42 displays 2.0.0 and retains the full version', () async {
+    for (final name in ['2.0.0', '2.0.0+42']) {
+      await version(name, '42');
+      expect(AppVersion.versionName, '2.0.0');
+      expect(AppVersion.fullVersion, '2.0.0+42');
+      expect(
+        AppVersion.getDisplayName('W.O.F NAI Studio'),
+        'W.O.F NAI Studio 2.0.0',
+      );
+    }
+    expect(
+      File('pubspec.yaml').readAsStringSync(),
+      matches(RegExp(r'^version: 2\.0\.0\+42\s*$', multiLine: true)),
+    );
+  });
 
   test('full version does not duplicate embedded build numbers', () async {
     await version('2.0.0-preview+6', '6');
