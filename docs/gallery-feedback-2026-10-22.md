@@ -1,6 +1,6 @@
 # 本地画廊五项修正 · 2026-10-22
 
-用户先集中登记问题，再明确说“动手”后统一实施。有效源码为 `.devin/wt/ui-integration` 的 `codex/uiux-integration`。本批完成源码修改与合成验证，待下一次本机累计安装；当前桌面仍为 r35 / `2.0.0-preview+39`。
+用户先集中登记问题，再明确说“动手”后统一实施。有效源码为 `.devin/wt/ui-integration` 的 `codex/uiux-integration`。本批已随 [r36 累计更新](cumulative-preview-r36-2026-10-22.md) 安装到原桌面入口，内部版本 `2.0.0-preview+40`。
 
 ## 最终行为
 
@@ -25,4 +25,4 @@
 
 实绘：[日期范围](../.dart_tool/gallery-feedback-20261022/captures/date-zh-light.png)、[深色日历](../.dart_tool/gallery-feedback-20261022/captures/date-en-dark.png)、[变体菜单](../.dart_tool/gallery-feedback-20261022/captures/variant-zh-light.png)、[分组菜单](../.dart_tool/gallery-feedback-20261022/captures/group-en-light.png)、[快捷键提示](../.dart_tool/gallery-feedback-20261022/captures/tooltip-light.png)、[未分类入口](../.dart_tool/gallery-feedback-20261022/captures/zh-light-wide-header.png)、[放入画布](../.dart_tool/gallery-feedback-20261022/captures/canvas-context-action.png)。
 
-原始用户截图与需求见工作区 [本批待办](../../../../04_工具/开发计划/待办清单.md)。桌面安装以工作区当前接手说明和正式安装收据为准，本批未构建／替换运行包、自动启动或推送 GitHub。
+原始用户截图与需求见工作区 [本批待办](../../../../04_工具/开发计划/待办清单.md)。桌面安装以工作区当前接手说明和正式安装收据为准，本批已完成构建与本机安装，未自动启动或推送 GitHub。
