@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/rag/rag_client.dart';
+import '../../helpers/rag_test_python.dart';
 
 // A real child process exercises JSON framing, stream shutdown and cancellation
 // without loading models, opening user databases or making network requests.
@@ -44,7 +45,7 @@ for line in sys.stdin:
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final python = Platform.environment['RAG_TEST_PYTHON'];
+  final python = ragTestPython();
   late Directory directory;
   late RagClient client;
   setUp(() async {
@@ -276,7 +277,7 @@ void main() {
       }
     },
     skip: python == null
-        ? 'Set RAG_TEST_PYTHON to an isolated Python for IPC tests'
+        ? 'Set RAG_TEST_PYTHON or create .dart_tool/rag-runtime/venv to an isolated Python for IPC tests'
         : false,
   );
 }

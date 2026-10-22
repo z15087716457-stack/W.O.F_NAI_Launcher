@@ -118,9 +118,7 @@ class ModelProvidersPreviewSim extends ChangeNotifier {
       });
     },
     onTestModel: (id, model, edited, key) {
-      log(
-        'onTestModel($id, $model, temperature: ${edited.model(model)?.temperature})',
-      );
+      log('onTestModel($id, $model)');
       void info(ProviderModelInfo Function(ProviderModelInfo) f) => _provider(
         id,
         (p) => copy(p, models: {...p.models, model: f(p.info(model))}),

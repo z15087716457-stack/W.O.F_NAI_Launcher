@@ -2926,9 +2926,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_sectionFolders => '폴더';
 
   @override
-  String get localGallery_dateFolders => '날짜 폴더';
-
-  @override
   String get localGallery_uncategorizedFolder => '미분류 폴더';
 
   @override

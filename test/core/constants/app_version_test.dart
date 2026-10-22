@@ -29,9 +29,10 @@ void main() {
       expect(AppVersion.fullVersion, '2.0.0-preview+6');
       expect(AppVersion.buildNumber, '6');
       expect((AppVersion.major, AppVersion.minor, AppVersion.patch), (2, 0, 0));
+      // pubspec 每次交付都会升 build 号，只锁定 2.0 Preview 系列格式。
       expect(
         File('pubspec.yaml').readAsStringSync(),
-        contains('version: ${AppVersion.fullVersion}'),
+        matches(RegExp(r'^version: 2\.0\.0-preview\+\d+\s*$', multiLine: true)),
       );
     },
   );

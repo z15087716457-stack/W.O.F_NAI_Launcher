@@ -9,6 +9,7 @@ import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import '../../helpers/rag_test_python.dart';
 
 const _worker = r'''
 import sys,json,threading
@@ -60,7 +61,7 @@ class _Settings extends RagSettingsController {
     blocksEnabled: true,
     embedding: 'fixture',
     reranker: 'fixture',
-    python: Platform.environment['RAG_TEST_PYTHON']!,
+    python: ragTestPython()!,
   );
   @override
   Future<void> update(RagSettings value) async {
@@ -85,7 +86,7 @@ class _Blocks extends PromptBlockLibraryNotifier {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final python = Platform.environment['RAG_TEST_PYTHON'];
+  final python = ragTestPython();
   late Directory root;
   late ProviderContainer container;
   late RagController controller;
@@ -442,7 +443,7 @@ void main() {
       );
     },
     skip: python == null
-        ? 'Set RAG_TEST_PYTHON for isolated process integration'
+        ? 'Set RAG_TEST_PYTHON or create .dart_tool/rag-runtime/venv for isolated process integration'
         : false,
   );
 }

@@ -2873,9 +2873,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_sectionFolders => '文件夹';
 
   @override
-  String get localGallery_dateFolders => '日期文件夹';
-
-  @override
   String get localGallery_uncategorizedFolder => '未分类文件夹';
 
   @override
@@ -23855,9 +23852,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_sectionFolders => '資料夾';
-
-  @override
-  String get localGallery_dateFolders => '日期資料夾';
 
   @override
   String get localGallery_uncategorizedFolder => '未分類資料夾';

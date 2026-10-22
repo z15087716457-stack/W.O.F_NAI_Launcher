@@ -55,6 +55,19 @@ Future<void> expectOutsideApprovedRegions(
       }
     }
   }
+  // UPDATE_APPROVED_BASELINES=1：用户确认以现状为准时，只覆盖不一致的基准图。
+  if (changed > 0 &&
+      Platform.environment['UPDATE_APPROVED_BASELINES'] == '1') {
+    final actual = img.Image.fromBytes(
+      width: width,
+      height: height,
+      bytes: pixels.buffer,
+      numChannels: 4,
+      order: img.ChannelOrder.rgba,
+    );
+    File(baseline).writeAsBytesSync(img.encodePng(actual));
+    return;
+  }
   expect(
     changed,
     0,

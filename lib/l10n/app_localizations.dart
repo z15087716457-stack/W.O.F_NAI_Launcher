@@ -5442,12 +5442,6 @@ abstract class AppLocalizations {
   /// **'Folders'**
   String get localGallery_sectionFolders;
 
-  /// No description provided for @localGallery_dateFolders.
-  ///
-  /// In en, this message translates to:
-  /// **'Dated folders'**
-  String get localGallery_dateFolders;
-
   /// No description provided for @localGallery_uncategorizedFolder.
   ///
   /// In en, this message translates to:

@@ -3009,9 +3009,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_sectionFolders => 'Folders';
 
   @override
-  String get localGallery_dateFolders => 'Dated folders';
-
-  @override
   String get localGallery_uncategorizedFolder => 'Uncategorized';
 
   @override

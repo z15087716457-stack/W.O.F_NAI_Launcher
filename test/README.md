@@ -26,6 +26,10 @@ flutter test test/core/wiki/auto_tag_translation_controller_test.dart
 | `data/services/advanced_upscale_component_manager_test.dart` 的真实 RTX 服务链 | 1 | Windows、可用 RTX GPU，`RUN_ADVANCED_UPSCALE_AUDIT=1`，以及 `.dart_tool/advanced-upscale-20261005/rtx-video-sdk-1.1.0.zip` |
 | `tool/online_gallery_ai_tag_live_test.dart` 的生产站配置 / 详情 / 图片 / 临时收藏库 | 1 | `--dart-define=LIVE_AI_TAG=true`；会联网读取公开内容，不能当作离线单测 |
 
+RAG 进程通信测试（`core/rag/rag_client_test.dart`、`presentation/providers/rag_collections_test.dart`、`rag_startup_state_test.dart`，共 32 项）默认使用 `RAG_TEST_PYTHON`，未设置时用登记的开发环境 `.dart_tool/rag-runtime/venv`；两者都没有才跳过。它们只启动合成夹具脚本，不加载模型、不读写用户索引。`presentation/ui/agent/agent_panel_test.dart` 的 `capture` 组默认做全部场景的深浅色／360／460 宽实绘冒烟，设 `CAPTURE_AGENT=1` 才导出 PNG。
+
+截图基准图（`expectOutsideApprovedRegions`）在用户确认以当前画面为准时，用 `UPDATE_APPROVED_BASELINES=1 flutter test --no-pub <测试文件>` 只覆盖不一致的 PNG，再不带变量复跑确认。2026-10-22 已按用户决定，以当前画面更新通道 24 张、设置 3 张基准图。
+
 非 Windows 还可能跳过平台专属路径分隔符回归。实际通过 / 跳过 / 失败以当次输出为准；原生缓存或设备缺失应明确报错，不伪造 GPU 通过。
 
 三个旧悬浮按钮测试现在检查现行行为：悬浮不显示按钮，右键动作仍可用、回调只执行一次且菜单关闭。PNG 参数导入测试在内存中构造带 NovelAI `Software` / `Source` / `Comment` 的完整图片，不依赖私人图片或某台电脑的绝对路径；真实 PNG / WebP 夹具回归继续由 `data/services/metadata/unified_metadata_parser_test.dart` 覆盖。

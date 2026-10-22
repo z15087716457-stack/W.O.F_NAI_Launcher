@@ -26,6 +26,7 @@ import 'package:nai_launcher/presentation/providers/image_generation_provider.da
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_contract.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_director.dart';
@@ -147,6 +148,12 @@ void main() {
   testWidgets(
     'enhance uses locked sheet, backups and request projection; draft source stays intact',
     (tester) async {
+      // The channel backdrop has a continuous idle ticker, unrelated to tools.
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
       final image = GeneratedImage(
         id: 'source',
         bytes: png(832, 1216),
@@ -213,12 +220,21 @@ void main() {
         ),
       );
       await tester.pumpWidget(const SizedBox());
+      // Cancel the route's periodic tip timer inside the widget-test zone.
+      container.invalidate(tipEpochProvider);
+      await tester.pump();
     },
   );
 
   testWidgets(
     'upscale arrow opens settings; method and SeedVR2 options persist without taking draft image',
     (tester) async {
+      // The channel backdrop has a continuous idle ticker, unrelated to tools.
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
       final image = GeneratedImage(
         id: 'upscale',
         bytes: png(256),
@@ -265,6 +281,9 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
+      // Cancel the route's periodic tip timer inside the widget-test zone.
+      container.invalidate(tipEpochProvider);
+      await tester.pump();
     },
   );
 

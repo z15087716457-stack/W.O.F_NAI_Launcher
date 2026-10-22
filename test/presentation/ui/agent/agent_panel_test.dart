@@ -1018,6 +1018,7 @@ void main() {
     });
   });
 
+  // 默认对每个场景做深浅色／两种宽度的实绘冒烟；需要导出 PNG 时：
   // CAPTURE_AGENT=1 flutter test test/presentation/ui/agent/agent_panel_test.dart --plain-name capture
   group('capture', () {
     final out =
@@ -1057,6 +1058,8 @@ void main() {
               }
             });
             await tester.pump();
+            expect(tester.takeException(), isNull);
+            if (!on) return;
             final boundary = tester.renderObject<RenderRepaintBoundary>(
               find.byKey(const Key('agent-capture')),
             );
@@ -1071,7 +1074,7 @@ void main() {
               f.parent.createSync(recursive: true);
               f.writeAsBytesSync(bytes!.buffer.asUint8List());
             });
-          }, skip: !on);
+          });
         }
       }
     }

@@ -1374,7 +1374,6 @@
   "localGallery_sectionLibrary": "라이브러리",
   "localGallery_sectionCollections": "컬렉션",
   "localGallery_sectionFolders": "폴더",
-  "localGallery_dateFolders": "날짜 폴더",
   "localGallery_uncategorizedFolder": "미분류 폴더",
   "localGallery_indexSynced": "색인 동기화됨 · {count}",
   "@localGallery_indexSynced": {
@@ -8846,7 +8845,24 @@
     }
   },
   "naiAgent_galleryDeleteEmptyFoldersConfirm": "빈 폴더 {count}개와 갤러리 분류를 삭제할까요? 다른 폴더의 이미지는 유지됩니다.\n{paths}",
+  "@naiAgent_galleryDeleteEmptyFoldersConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_galleryMoreItems": "…외 {count}개",
+  "@naiAgent_galleryMoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "naiAgent_extensions": "확장",
   "naiAgent_interactionExtension": "Studio 연동",
   "naiAgent_extensionRequired": "내장 · 필수",

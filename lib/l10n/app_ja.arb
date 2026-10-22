@@ -1374,7 +1374,6 @@
   "localGallery_sectionLibrary": "ライブラリ",
   "localGallery_sectionCollections": "コレクション",
   "localGallery_sectionFolders": "フォルダー",
-  "localGallery_dateFolders": "日付フォルダー",
   "localGallery_uncategorizedFolder": "未分類フォルダー",
   "localGallery_indexSynced": "インデックス同期済み · {count}",
   "@localGallery_indexSynced": {
@@ -8846,7 +8845,24 @@
     }
   },
   "naiAgent_galleryDeleteEmptyFoldersConfirm": "これら {count} 個の空のフォルダーとギャラリー分類を削除しますか？他のフォルダー内の画像は保持されます。\n{paths}",
+  "@naiAgent_galleryDeleteEmptyFoldersConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_galleryMoreItems": "…ほか {count} 件",
+  "@naiAgent_galleryMoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "naiAgent_extensions": "拡張機能",
   "naiAgent_interactionExtension": "Studio 連携",
   "naiAgent_extensionRequired": "内蔵 · 必須",

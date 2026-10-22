@@ -1370,7 +1370,6 @@
   "localGallery_sectionLibrary": "資料庫",
   "localGallery_sectionCollections": "收藏集",
   "localGallery_sectionFolders": "資料夾",
-  "localGallery_dateFolders": "日期資料夾",
   "localGallery_uncategorizedFolder": "未分類資料夾",
   "localGallery_indexSynced": "索引已同步 · {count}",
   "@localGallery_indexSynced": {
@@ -8846,7 +8845,24 @@
     }
   },
   "naiAgent_galleryDeleteEmptyFoldersConfirm": "刪除這 {count} 個空資料夾及其圖庫分類？其他資料夾中的圖片會保留。\n{paths}",
+  "@naiAgent_galleryDeleteEmptyFoldersConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "paths": {
+        "type": "String"
+      }
+    }
+  },
   "naiAgent_galleryMoreItems": "……另有 {count} 項",
+  "@naiAgent_galleryMoreItems": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "naiAgent_extensions": "擴展",
   "naiAgent_interactionExtension": "Studio 互動",
   "naiAgent_extensionRequired": "內建 · 必需",

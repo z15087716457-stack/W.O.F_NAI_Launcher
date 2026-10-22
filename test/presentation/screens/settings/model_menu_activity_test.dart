@@ -159,7 +159,15 @@ void main() {
       addTearDown(dio.close);
       await harness.pumpManagement(
         tester,
-        config: _config,
+        // The failure branch rejects one request; do not leave a retry pending.
+        config: success
+            ? _config
+            : _config.copyWith(
+                providers: [
+                  for (final provider in _config.providers)
+                    provider.copyWith(retryAttempts: 0),
+                ],
+              ),
         dio: dio,
         secrets: harness.MemorySecrets()..keys['deepseek'] = 'offline-test',
       );

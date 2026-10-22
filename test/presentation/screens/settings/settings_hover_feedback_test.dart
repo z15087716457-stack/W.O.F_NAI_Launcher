@@ -17,7 +17,7 @@ import 'package:nai_launcher/presentation/themes/app_theme.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import 'model_management_section_test.dart' as harness;
 
-const _reasoningAdvice = '纯翻译通常无需开启思考；为兼顾打标、语义分类等处理，建议开启该模型支持的最低思考档位。';
+const _reasoningAdvice = '翻译通常不需要开启思考；考虑到接口使用结构化输出，建议选择该模型支持的最低思考档位。';
 final _config = harness.sampleConfig.copyWith(
   models: [
     harness.sampleConfig.models.first.copyWith(

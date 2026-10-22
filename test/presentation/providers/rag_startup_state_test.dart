@@ -5,6 +5,7 @@ import 'package:nai_launcher/core/rag/rag_client.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/presentation/providers/rag_provider.dart';
+import '../../helpers/rag_test_python.dart';
 
 const _worker = r'''
 import sys,json,time
@@ -39,7 +40,7 @@ class _Settings extends RagSettingsController {
     wikiEnabled: true,
     embedding: 'fixture',
     reranker: 'fixture',
-    python: Platform.environment['RAG_TEST_PYTHON']!,
+    python: ragTestPython()!,
   );
   @override
   Future<void> update(RagSettings value) async {
@@ -54,7 +55,7 @@ class _SilentSettings extends _Settings {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  final python = Platform.environment['RAG_TEST_PYTHON'];
+  final python = ragTestPython();
   late Directory root;
   ProviderContainer? container;
   final clients = <RagClient>[];
@@ -122,153 +123,159 @@ void main() {
     }
     await root.delete(recursive: true);
   });
-  group('startup with isolated JSON worker', () {
-    test(
-      'application shutdown waits for a retiring worker and starts no replacement',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
-        final marker = File('${root.path}/retired');
-        await clients.single.request('hold_shutdown', {
-          'delay': .3,
-          'marker': marker.path,
-        });
-        await c
-            .read(ragSettingsProvider.notifier)
-            .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
-        final refresh = c.read(ragControllerProvider.notifier).refresh();
-        await DesktopAppShutdownService.prepareBackgroundShutdown();
-        await refresh;
-        expect(await marker.readAsString(), 'saved');
-        expect(clients, hasLength(1));
-      },
-    );
-    test(
-      'initial configure is reused once and later refresh reads fresh status',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
-        expect((await clients.single.request('counters'))['counts'], {
-          'configure': 1,
-          'status': 0,
-        });
-        await clients.single.request('advance');
-        await c.read(ragControllerProvider.notifier).refresh();
-        expect(c.read(ragControllerProvider).indexed, 9);
-        expect((await clients.single.request('counters'))['counts'], {
-          'configure': 1,
-          'status': 1,
-        });
-      },
-    );
-    test(
-      'reconfiguration waits for the old worker checkpoint before opening another',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
-        await clients.single.request('hold_shutdown', {
-          'delay': .3,
-          'marker': '${root.path}/retired',
-        });
-        await c
-            .read(ragSettingsProvider.notifier)
-            .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
-        final refresh = c.read(ragControllerProvider.notifier).refresh();
-        await waitFor(
-          () =>
-              clients.length == 2 &&
-              c.read(ragControllerProvider).runtimeReady &&
-              !c.read(ragControllerProvider).initializing,
-        );
-        await refresh;
-        expect(retiredAtStart, [false, true]);
-        expect(clients.first.isClosed, isTrue);
-        expect((await clients.last.request('counters'))['counts'], {
-          'configure': 1,
-          'status': 0,
-        });
-      },
-    );
-    test(
-      'progress survives short command budgets and publishes authoritative empty state only after configure',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(
-          () => c.read(ragControllerProvider).initializationProcessed >= 1,
-        );
-        final loading = c.read(ragControllerProvider);
-        expect(loading.initializing, isTrue);
-        expect(loading.hasIndexStatus, isFalse);
-        expect(loading.forSource(RagSource.wiki).hasIndexStatus, isFalse);
-        final refresh = c.read(ragControllerProvider.notifier).refresh();
-        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
-        await refresh;
-        final ready = c.read(ragControllerProvider);
-        expect(ready.initializing, isFalse);
-        expect(ready.indexed, 8);
-        expect(ready.indexKnown, isTrue);
-        expect(ready.forSource(RagSource.wiki).indexed, 0);
-        expect(ready.forSource(RagSource.wiki).indexKnown, isTrue);
-        expect(clients, hasLength(1));
-      },
-    );
-    test(
-      'an idle initialization fails honestly without claiming an empty index',
-      () async {
-        await open(silent: true);
-        final c = container!;
-        await waitFor(() => c.read(ragControllerProvider).error != null);
-        final failed = c.read(ragControllerProvider);
-        expect(failed.initializing, isFalse);
-        expect(failed.error, 'initialization_timeout');
-        expect(failed.indexKnown, isFalse);
-        expect(
-          failed.forSource(RagSource.wiki).error,
-          'initialization_timeout',
-        );
-        expect(clients.single.isClosed, isTrue);
-      },
-    );
-    test(
-      'disabling while restoring closes the opening worker and ignores late state',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(
-          () => c.read(ragControllerProvider).initializationProcessed >= 1,
-        );
-        await c
-            .read(ragSettingsProvider.notifier)
-            .update(c.read(ragSettingsProvider).copyWith(enabled: false));
-        await waitFor(() => clients.single.isClosed);
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-        expect(c.read(ragControllerProvider).runtimeReady, isFalse);
-        expect(c.read(ragControllerProvider).initializing, isFalse);
-        expect(c.read(ragControllerProvider).error, isNull);
-      },
-    );
-    test(
-      'reconnect keeps previously known counts during restoration',
-      () async {
-        await open();
-        final c = container!;
-        await waitFor(() => c.read(ragControllerProvider).runtimeReady);
-        await expectLater(
-          clients.single.request('exit'),
-          throwsA(isA<RagException>()),
-        );
-        final refresh = c.read(ragControllerProvider.notifier).refresh();
-        await waitFor(() => c.read(ragControllerProvider).initializing);
-        expect(c.read(ragControllerProvider).indexed, 8);
-        expect(c.read(ragControllerProvider).indexKnown, isTrue);
-        await refresh;
-        expect(c.read(ragControllerProvider).error, isNull);
-        expect(c.read(ragControllerProvider).indexed, 8);
-      },
-    );
-  }, skip: python == null ? 'Set RAG_TEST_PYTHON for isolated IPC' : false);
+  group(
+    'startup with isolated JSON worker',
+    () {
+      test(
+        'application shutdown waits for a retiring worker and starts no replacement',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          final marker = File('${root.path}/retired');
+          await clients.single.request('hold_shutdown', {
+            'delay': .3,
+            'marker': marker.path,
+          });
+          await c
+              .read(ragSettingsProvider.notifier)
+              .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
+          final refresh = c.read(ragControllerProvider.notifier).refresh();
+          await DesktopAppShutdownService.prepareBackgroundShutdown();
+          await refresh;
+          expect(await marker.readAsString(), 'saved');
+          expect(clients, hasLength(1));
+        },
+      );
+      test(
+        'initial configure is reused once and later refresh reads fresh status',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          expect((await clients.single.request('counters'))['counts'], {
+            'configure': 1,
+            'status': 0,
+          });
+          await clients.single.request('advance');
+          await c.read(ragControllerProvider.notifier).refresh();
+          expect(c.read(ragControllerProvider).indexed, 9);
+          expect((await clients.single.request('counters'))['counts'], {
+            'configure': 1,
+            'status': 1,
+          });
+        },
+      );
+      test(
+        'reconfiguration waits for the old worker checkpoint before opening another',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          await clients.single.request('hold_shutdown', {
+            'delay': .3,
+            'marker': '${root.path}/retired',
+          });
+          await c
+              .read(ragSettingsProvider.notifier)
+              .update(c.read(ragSettingsProvider).copyWith(embedding: 'next'));
+          final refresh = c.read(ragControllerProvider.notifier).refresh();
+          await waitFor(
+            () =>
+                clients.length == 2 &&
+                c.read(ragControllerProvider).runtimeReady &&
+                !c.read(ragControllerProvider).initializing,
+          );
+          await refresh;
+          expect(retiredAtStart, [false, true]);
+          expect(clients.first.isClosed, isTrue);
+          expect((await clients.last.request('counters'))['counts'], {
+            'configure': 1,
+            'status': 0,
+          });
+        },
+      );
+      test(
+        'progress survives short command budgets and publishes authoritative empty state only after configure',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(
+            () => c.read(ragControllerProvider).initializationProcessed >= 1,
+          );
+          final loading = c.read(ragControllerProvider);
+          expect(loading.initializing, isTrue);
+          expect(loading.hasIndexStatus, isFalse);
+          expect(loading.forSource(RagSource.wiki).hasIndexStatus, isFalse);
+          final refresh = c.read(ragControllerProvider.notifier).refresh();
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          await refresh;
+          final ready = c.read(ragControllerProvider);
+          expect(ready.initializing, isFalse);
+          expect(ready.indexed, 8);
+          expect(ready.indexKnown, isTrue);
+          expect(ready.forSource(RagSource.wiki).indexed, 0);
+          expect(ready.forSource(RagSource.wiki).indexKnown, isTrue);
+          expect(clients, hasLength(1));
+        },
+      );
+      test(
+        'an idle initialization fails honestly without claiming an empty index',
+        () async {
+          await open(silent: true);
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).error != null);
+          final failed = c.read(ragControllerProvider);
+          expect(failed.initializing, isFalse);
+          expect(failed.error, 'initialization_timeout');
+          expect(failed.indexKnown, isFalse);
+          expect(
+            failed.forSource(RagSource.wiki).error,
+            'initialization_timeout',
+          );
+          expect(clients.single.isClosed, isTrue);
+        },
+      );
+      test(
+        'disabling while restoring closes the opening worker and ignores late state',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(
+            () => c.read(ragControllerProvider).initializationProcessed >= 1,
+          );
+          await c
+              .read(ragSettingsProvider.notifier)
+              .update(c.read(ragSettingsProvider).copyWith(enabled: false));
+          await waitFor(() => clients.single.isClosed);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          expect(c.read(ragControllerProvider).runtimeReady, isFalse);
+          expect(c.read(ragControllerProvider).initializing, isFalse);
+          expect(c.read(ragControllerProvider).error, isNull);
+        },
+      );
+      test(
+        'reconnect keeps previously known counts during restoration',
+        () async {
+          await open();
+          final c = container!;
+          await waitFor(() => c.read(ragControllerProvider).runtimeReady);
+          await expectLater(
+            clients.single.request('exit'),
+            throwsA(isA<RagException>()),
+          );
+          final refresh = c.read(ragControllerProvider.notifier).refresh();
+          await waitFor(() => c.read(ragControllerProvider).initializing);
+          expect(c.read(ragControllerProvider).indexed, 8);
+          expect(c.read(ragControllerProvider).indexKnown, isTrue);
+          await refresh;
+          expect(c.read(ragControllerProvider).error, isNull);
+          expect(c.read(ragControllerProvider).indexed, 8);
+        },
+      );
+    },
+    skip: python == null
+        ? 'Set RAG_TEST_PYTHON or create .dart_tool/rag-runtime/venv for isolated IPC'
+        : false,
+  );
 }
