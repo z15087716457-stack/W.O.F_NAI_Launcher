@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../widgets/common/drag_preview_divider.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_menu.dart';
@@ -184,7 +185,8 @@ class _StyleExplorePageState extends State<StyleExplorePage>
   var _renamingRun = false;
   var _narrow = false;
   var _drawer = false;
-  double? _dragWidth;
+  double? _committedWidth;
+  final _widthPreview = DragPreviewController();
 
   UiPopoverAnchor? _popAnchor;
   var _runMenu = false;
@@ -212,6 +214,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
   @override
   void didUpdateWidget(covariant StyleExplorePage old) {
     super.didUpdateWidget(old);
+    if (old.data.editorWidth != _data.editorWidth) _committedWidth = null;
     final run = _run;
     if (old.data.run?.id != run?.id) {
       _selecting = false;
@@ -259,6 +262,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
 
   @override
   void dispose() {
+    _widthPreview.dispose();
     _undoTimer?.cancel();
     _focusNode.dispose();
     super.dispose();
@@ -809,7 +813,7 @@ class _StyleExplorePageState extends State<StyleExplorePage>
                       ? 0.0
                       : StyleExplorePage.dockWidth;
                   final w = box.maxWidth - dock;
-                  final want = (_dragWidth ?? data.editorWidth).clamp(
+                  final want = (_committedWidth ?? data.editorWidth).clamp(
                     StyleExplorePage.minEditor,
                     StyleExplorePage.maxEditor,
                   );
@@ -854,19 +858,34 @@ class _StyleExplorePageState extends State<StyleExplorePage>
                           bottom: 0,
                           width: 8,
                           child: _ResizeHandle(
-                            onDrag: (dx) => setState(
-                              () => _dragWidth = ((_dragWidth ?? editor) + dx)
-                                  .clamp(
+                            onStart: () => _widthPreview.start(editor, editor),
+                            onDrag: (dx) => _widthPreview.move(
+                              dx,
+                              resolve: (v) => math.max(
+                                StyleExplorePage.minEditor,
+                                math.min(
+                                  v.clamp(
                                     StyleExplorePage.minEditor,
                                     StyleExplorePage.maxEditor,
                                   ),
+                                  w - StyleExplorePage.minStage,
+                                ),
+                              ),
+                              position: (v) => v,
                             ),
+                            onCancel: _widthPreview.cancel,
                             onEnd: () {
-                              final v = _dragWidth;
-                              setState(() => _dragWidth = null);
-                              if (v != null) _actions.onEditorWidthChanged(v);
+                              final v = _widthPreview.finish();
+                              if (v == null) return;
+                              setState(() => _committedWidth = v);
+                              _actions.onEditorWidthChanged(v);
                             },
                           ),
+                        ),
+                        DragPreviewDivider(
+                          key: const Key('explore-editor-resize-preview'),
+                          controller: _widthPreview,
+                          color: c.accent,
                         ),
                         if (_narrow && _drawer && _hasRun)
                           Positioned(
@@ -923,9 +942,14 @@ class _StyleExplorePageState extends State<StyleExplorePage>
 
 /// 编辑列右缘的拖动条：8 宽，悬停 / 拖动时显示 2px 强调色线。
 class _ResizeHandle extends StatefulWidget {
-  const _ResizeHandle({required this.onDrag, required this.onEnd});
+  const _ResizeHandle({
+    required this.onDrag,
+    required this.onEnd,
+    required this.onStart,
+    required this.onCancel,
+  });
   final ValueChanged<double> onDrag;
-  final VoidCallback onEnd;
+  final VoidCallback onStart, onEnd, onCancel;
 
   @override
   State<_ResizeHandle> createState() => _ResizeHandleState();
@@ -938,25 +962,35 @@ class _ResizeHandleState extends State<_ResizeHandle> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return MouseRegion(
-      key: const Key('explore-editor-resize'),
-      cursor: SystemMouseCursors.resizeColumn,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragStart: (_) => setState(() => _drag = true),
-        onHorizontalDragUpdate: (d) => widget.onDrag(d.delta.dx),
-        onHorizontalDragEnd: (_) {
-          setState(() => _drag = false);
-          widget.onEnd();
-        },
-        child: Center(
-          child: Container(
-            width: 2,
-            color: _hover || _drag
-                ? c.accent.withValues(alpha: .6)
-                : Colors.transparent,
+    return Listener(
+      onPointerCancel: (_) => widget.onCancel(),
+      child: MouseRegion(
+        key: const Key('explore-editor-resize'),
+        cursor: SystemMouseCursors.resizeColumn,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: (_) {
+            setState(() => _drag = true);
+            widget.onStart();
+          },
+          onHorizontalDragCancel: () {
+            setState(() => _drag = false);
+            widget.onCancel();
+          },
+          onHorizontalDragUpdate: (d) => widget.onDrag(d.delta.dx),
+          onHorizontalDragEnd: (_) {
+            setState(() => _drag = false);
+            widget.onEnd();
+          },
+          child: Center(
+            child: Container(
+              width: 2,
+              color: _hover || _drag
+                  ? c.accent.withValues(alpha: .6)
+                  : Colors.transparent,
+            ),
           ),
         ),
       ),

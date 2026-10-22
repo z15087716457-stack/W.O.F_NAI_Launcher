@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
+import '../../widgets/common/drag_preview_divider.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_dialog.dart';
 import '../kit/ui_glyph.dart';
@@ -332,13 +333,21 @@ class _GenLayoutRow extends StatefulWidget {
 }
 
 class _GenLayoutRowState extends State<_GenLayoutRow> {
-  double? _dragLeft;
-  double? _dragHistory;
+  final _leftPreview = DragPreviewController();
+  final _historyPreview = DragPreviewController();
+  GenLayout? _committedLayout, _sourceLayout;
+
+  @override
+  void dispose() {
+    _leftPreview.dispose();
+    _historyPreview.dispose();
+    super.dispose();
+  }
 
   void _commit(GenScope scope, GenLayout next) {
     setState(() {
-      _dragLeft = null;
-      _dragHistory = null;
+      _sourceLayout = scope.data.layout;
+      _committedLayout = next;
     });
     if (next != scope.data.layout) scope.actions.onLayoutChanged(next);
   }
@@ -347,29 +356,25 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, box) => _row(context, box.biggest));
 
-  Widget _row(BuildContext context, Size size) {
-    final w = size.width;
-    final scope = GenScope.of(context, GenAspect.layout);
-    final layout = scope.data.layout;
-    final actions = scope.actions;
-    var dock = layout.dockOpen && scope.slots.dock != null
-        ? GenerationPage.dockWidth
-        : 0.0;
+  /// One pure calculation for both the committed row and its drag preview.
+  ({
+    double left,
+    double history,
+    double dock,
+    bool leftOpen,
+    bool historyOpen,
+    bool canvasVisible,
+  })
+  _geometry(GenLayout layout, double w, bool keepHistory, bool hasDock) {
+    var dock = layout.dockOpen && hasDock ? GenerationPage.dockWidth : 0.0;
     var leftOpen = layout.leftOpen;
     var left = leftOpen
-        ? (_dragLeft ?? layout.leftWidth).clamp(
-            GenLayout.minLeft,
-            GenLayout.maxLeft,
-          )
+        ? layout.leftWidth.clamp(GenLayout.minLeft, GenLayout.maxLeft)
         : GenerationPage.strip;
     var historyOpen = layout.historyOpen;
     var history = historyOpen
-        ? (_dragHistory ?? layout.historyWidth).clamp(
-            GenLayout.minHistory,
-            GenLayout.maxHistory,
-          )
+        ? layout.historyWidth.clamp(GenLayout.minHistory, GenLayout.maxHistory)
         : GenerationPage.strip;
-    final keepHistory = scope.slots.preserveHistory;
     final minimumCanvas = keepHistory ? 160.0 : GenerationPage.minCanvas;
     if (keepHistory) {
       // The Agent has its own width budget. Preserve the user's history pane,
@@ -405,6 +410,37 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
     }
     final canvasVisible =
         !keepHistory || w - left - dock - history >= minimumCanvas;
+    return (
+      left: left,
+      history: history,
+      dock: dock,
+      leftOpen: leftOpen,
+      historyOpen: historyOpen,
+      canvasVisible: canvasVisible,
+    );
+  }
+
+  Widget _row(BuildContext context, Size size) {
+    final w = size.width;
+    final scope = GenScope.of(context, GenAspect.layout);
+    if (_sourceLayout != scope.data.layout) _committedLayout = null;
+    final layout = _committedLayout ?? scope.data.layout;
+    final actions = scope.actions;
+    final keepHistory = scope.slots.preserveHistory;
+    final minimumCanvas = keepHistory ? 160.0 : GenerationPage.minCanvas;
+    final geometry = _geometry(
+      layout,
+      w,
+      keepHistory,
+      scope.slots.dock != null,
+    );
+    final (:left, :history, :dock, :leftOpen, :historyOpen, :canvasVisible) =
+        geometry;
+    double previewPosition(GenLayout next, {required bool isLeft}) {
+      final g = _geometry(next, w, keepHistory, scope.slots.dock != null);
+      return isLeft ? g.left : w - g.history;
+    }
+
     return Stack(
       children: [
         if (scope.slots.panelBackdrop case final backdrop?)
@@ -526,14 +562,20 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
             width: 8,
             child: _ResizeHandle(
               key: const Key('gen-left-resize'),
-              onDrag: (dx) => setState(
-                () => _dragLeft = ((_dragLeft ?? left) + dx).clamp(
-                  GenLayout.minLeft,
-                  GenLayout.maxLeft,
+              onStart: () => _leftPreview.start(left, left),
+              onDrag: (dx) => _leftPreview.move(
+                dx,
+                resolve: (v) => v.clamp(GenLayout.minLeft, GenLayout.maxLeft),
+                position: (v) => previewPosition(
+                  layout.copyWith(leftWidth: v),
+                  isLeft: true,
                 ),
               ),
-              onEnd: () =>
-                  _commit(scope, layout.copyWith(leftWidth: _dragLeft ?? left)),
+              onCancel: _leftPreview.cancel,
+              onEnd: () {
+                final v = _leftPreview.finish();
+                if (v != null) _commit(scope, layout.copyWith(leftWidth: v));
+              },
             ),
           ),
         if (historyOpen)
@@ -544,18 +586,33 @@ class _GenLayoutRowState extends State<_GenLayoutRow> {
             width: 8,
             child: _ResizeHandle(
               key: const Key('gen-history-resize'),
-              onDrag: (dx) => setState(
-                () => _dragHistory = ((_dragHistory ?? history) - dx).clamp(
-                  GenLayout.minHistory,
-                  GenLayout.maxHistory,
+              onStart: () => _historyPreview.start(history, w - history),
+              onDrag: (dx) => _historyPreview.move(
+                -dx,
+                resolve: (v) =>
+                    v.clamp(GenLayout.minHistory, GenLayout.maxHistory),
+                position: (v) => previewPosition(
+                  layout.copyWith(historyWidth: v),
+                  isLeft: false,
                 ),
               ),
-              onEnd: () => _commit(
-                scope,
-                layout.copyWith(historyWidth: _dragHistory ?? history),
-              ),
+              onCancel: _historyPreview.cancel,
+              onEnd: () {
+                final v = _historyPreview.finish();
+                if (v != null) _commit(scope, layout.copyWith(historyWidth: v));
+              },
             ),
           ),
+        DragPreviewDivider(
+          key: const Key('gen-left-resize-preview'),
+          controller: _leftPreview,
+          color: context.ui.accent,
+        ),
+        DragPreviewDivider(
+          key: const Key('gen-history-resize-preview'),
+          controller: _historyPreview,
+          color: context.ui.accent,
+        ),
       ],
     );
   }
@@ -713,9 +770,15 @@ class _Strip extends StatelessWidget {
 
 /// 栏边拖动条：8 宽，悬停 / 拖动时显示 2px 强调色线。
 class _ResizeHandle extends StatefulWidget {
-  const _ResizeHandle({super.key, required this.onDrag, required this.onEnd});
+  const _ResizeHandle({
+    super.key,
+    required this.onDrag,
+    required this.onEnd,
+    required this.onStart,
+    required this.onCancel,
+  });
   final ValueChanged<double> onDrag;
-  final VoidCallback onEnd;
+  final VoidCallback onStart, onEnd, onCancel;
 
   @override
   State<_ResizeHandle> createState() => _ResizeHandleState();
@@ -728,24 +791,34 @@ class _ResizeHandleState extends State<_ResizeHandle> {
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    return MouseRegion(
-      cursor: SystemMouseCursors.resizeColumn,
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragStart: (_) => setState(() => _drag = true),
-        onHorizontalDragUpdate: (d) => widget.onDrag(d.delta.dx),
-        onHorizontalDragEnd: (_) {
-          setState(() => _drag = false);
-          widget.onEnd();
-        },
-        child: Center(
-          child: Container(
-            width: 2,
-            color: _hover || _drag
-                ? c.accent.withValues(alpha: .6)
-                : Colors.transparent,
+    return Listener(
+      onPointerCancel: (_) => widget.onCancel(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.resizeColumn,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: (_) {
+            setState(() => _drag = true);
+            widget.onStart();
+          },
+          onHorizontalDragCancel: () {
+            setState(() => _drag = false);
+            widget.onCancel();
+          },
+          onHorizontalDragUpdate: (d) => widget.onDrag(d.delta.dx),
+          onHorizontalDragEnd: (_) {
+            setState(() => _drag = false);
+            widget.onEnd();
+          },
+          child: Center(
+            child: Container(
+              width: 2,
+              color: _hover || _drag
+                  ? c.accent.withValues(alpha: .6)
+                  : Colors.transparent,
+            ),
           ),
         ),
       ),

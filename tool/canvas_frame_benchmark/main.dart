@@ -160,6 +160,7 @@ Future<void> main(List<String> args) async {
   final provider = MemoryImage(images.first);
   final base = GenFixture.view(images: (_) => provider);
   final data = base.copyWith(
+    layout: base.layout.copyWith(historyOpen: true),
     canvas: GenCanvasData(
       focus: GenGroup(
         id: 'run:$count',
@@ -325,6 +326,49 @@ Future<void> main(List<String> args) async {
       smooth: true,
     );
   });
+  // Find the production divider, not a synthetic width-driving wrapper.
+  RenderBox? historyHandle;
+  void findHandle(Element element) {
+    if (element.widget.key == const Key('gen-history-resize')) {
+      historyHandle = element.findRenderObject()! as RenderBox;
+    }
+    element.visitChildren(findHandle);
+  }
+
+  WidgetsBinding.instance.rootElement!.visitChildren(findHandle);
+  final handle = historyHandle ?? (throw StateError('History handle missing'));
+  final start = handle.localToGlobal(handle.size.center(Offset.zero));
+  var previousPanel = start;
+  await drive('panel_drag', (t, i) {
+    if (i == 0) {
+      GestureBinding.instance.handlePointerEvent(
+        PointerDownEvent(
+          pointer: 2,
+          kind: PointerDeviceKind.mouse,
+          position: start,
+          buttons: kPrimaryMouseButton,
+        ),
+      );
+    }
+    final position = start + Offset(120 * math.sin(t * math.pi), 0);
+    GestureBinding.instance.handlePointerEvent(
+      PointerMoveEvent(
+        pointer: 2,
+        kind: PointerDeviceKind.mouse,
+        position: position,
+        delta: position - previousPanel,
+        buttons: kPrimaryMouseButton,
+      ),
+    );
+    previousPanel = position;
+  });
+  GestureBinding.instance.handlePointerEvent(
+    PointerUpEvent(
+      pointer: 2,
+      kind: PointerDeviceKind.mouse,
+      position: previousPanel,
+    ),
+  );
   SchedulerBinding.instance.removeTimingsCallback(timings);
   final view = WidgetsBinding.instance.platformDispatcher.views.first;
   (container.read(canvasChannelNotifierProvider.notifier) as ProbeChannel)

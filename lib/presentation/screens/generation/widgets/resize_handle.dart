@@ -23,30 +23,33 @@ class ResizeHandle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return MouseRegion(
-      cursor: SystemMouseCursors.resizeColumn,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onHorizontalDragStart: onDragStart != null
-            ? (_) => onDragStart!()
-            : null,
-        onHorizontalDragEnd: onDragEnd != null ? (_) => onDragEnd!() : null,
-        onHorizontalDragCancel: onDragCancel,
-        onHorizontalDragUpdate: (details) {
-          final delta = details.primaryDelta ?? details.delta.dx;
-          if (delta == 0) return;
-          onDrag(delta);
-        },
-        child: Container(
-          width: width,
-          color: Colors.transparent,
-          child: Center(
-            child: Container(
-              width: 2,
-              height: 40,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(1),
+    return Listener(
+      onPointerCancel: onDragCancel == null ? null : (_) => onDragCancel!(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.resizeColumn,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onHorizontalDragStart: onDragStart != null
+              ? (_) => onDragStart!()
+              : null,
+          onHorizontalDragEnd: onDragEnd != null ? (_) => onDragEnd!() : null,
+          onHorizontalDragCancel: onDragCancel,
+          onHorizontalDragUpdate: (details) {
+            final delta = details.primaryDelta ?? details.delta.dx;
+            if (delta == 0) return;
+            onDrag(delta);
+          },
+          child: Container(
+            width: width,
+            color: Colors.transparent,
+            child: Center(
+              child: Container(
+                width: 2,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(1),
+                ),
               ),
             ),
           ),

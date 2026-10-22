@@ -6,6 +6,7 @@ import '../providers/nai_agent/nai_agent_window_controller.dart';
 import '../widgets/nai_agent/nai_agent_shared.dart';
 import '../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../widgets/nai_agent/nai_agent_dock.dart';
+import '../widgets/common/drag_preview_divider.dart';
 import '../widgets/navigation/window_chrome_layout.dart';
 
 /// The application enables its existing runtime around the router. Standalone
@@ -44,10 +45,12 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
   bool _waitingNativeSurface = false;
   double _closedWidth = 0;
   double? _dragWidth;
+  final _preview = DragPreviewController();
   int _dragRevision = 0;
 
   @override
   void dispose() {
+    _preview.dispose();
     _reveal.dispose();
     super.dispose();
   }
@@ -118,69 +121,103 @@ class _GenerationHostState extends ConsumerState<NaiAgentGenerationHost>
               final fraction = waitingForSurface
                   ? 0.0
                   : Curves.easeOutCubic.transform(_reveal.value);
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              return Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Same element, position and parent for every transition.
-                  Expanded(child: child!),
-                  SizedBox(
-                    key: const Key('nai-agent-reveal'),
-                    width: (width + AgentPanelLayout.handle) * fraction,
-                    child: ClipRect(
-                      child: OverflowBox(
-                        alignment: Alignment.centerLeft,
-                        minWidth: width + AgentPanelLayout.handle,
-                        maxWidth: width + AgentPanelLayout.handle,
-                        child: Offstage(
-                          offstage: fraction == 0,
-                          child: TickerMode(
-                            enabled: expanded,
-                            child: ExcludeFocus(
-                              excluding: !expanded,
-                              child: IgnorePointer(
-                                ignoring: !expanded,
-                                child: _opened
-                                    ? NaiAgentDock(
-                                        width: width,
-                                        onDragStart: () {
-                                          _dragRevision++;
-                                          setState(() => _dragWidth = width);
-                                        },
-                                        onDrag: (dx) => setState(() {
-                                          _dragWidth = AgentPanelLayout.resolve(
-                                            (_dragWidth ?? width) - dx,
-                                            constraints.maxWidth,
-                                            minimumPageWidth:
-                                                widget.minimumPageWidth,
-                                          );
-                                        }),
-                                        onDragCancel: () =>
-                                            setState(() => _dragWidth = null),
-                                        onDragEnd: () {
-                                          final revision = _dragRevision;
-                                          final preferred = _dragWidth ?? width;
-                                          agentUiAction(context, () async {
-                                            await ref
-                                                .read(
-                                                  naiAgentControllerProvider,
-                                                )
-                                                .updateSettings({
-                                                  'panelWidth': preferred,
-                                                });
-                                            if (mounted &&
-                                                revision == _dragRevision) {
-                                              setState(() => _dragWidth = null);
-                                            }
-                                          });
-                                        },
-                                      )
-                                    : const SizedBox.shrink(),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Same element, position and parent for every transition.
+                      Expanded(child: child!),
+                      SizedBox(
+                        key: const Key('nai-agent-reveal'),
+                        width: (width + AgentPanelLayout.handle) * fraction,
+                        child: ClipRect(
+                          child: OverflowBox(
+                            alignment: Alignment.centerLeft,
+                            minWidth: width + AgentPanelLayout.handle,
+                            maxWidth: width + AgentPanelLayout.handle,
+                            child: Offstage(
+                              offstage: fraction == 0,
+                              child: TickerMode(
+                                enabled: expanded,
+                                child: ExcludeFocus(
+                                  excluding: !expanded,
+                                  child: IgnorePointer(
+                                    ignoring: !expanded,
+                                    child: _opened
+                                        ? NaiAgentDock(
+                                            width: width,
+                                            onDragStart: () {
+                                              _dragRevision++;
+                                              _preview.start(
+                                                width,
+                                                constraints.maxWidth -
+                                                    width -
+                                                    AgentPanelLayout.handle / 2,
+                                              );
+                                            },
+                                            onDrag: (dx) => _preview.move(
+                                              -dx,
+                                              resolve: (v) =>
+                                                  AgentPanelLayout.resolve(
+                                                    v,
+                                                    constraints.maxWidth,
+                                                    minimumPageWidth:
+                                                        widget.minimumPageWidth,
+                                                  ),
+                                              position: (v) =>
+                                                  constraints.maxWidth -
+                                                  v -
+                                                  AgentPanelLayout.handle / 2,
+                                            ),
+                                            onDragCancel: _preview.cancel,
+                                            onDragEnd: () {
+                                              final preferred = _preview
+                                                  .finish();
+                                              if (preferred == null) return;
+                                              final revision = _dragRevision;
+                                              setState(
+                                                () => _dragWidth = preferred,
+                                              );
+                                              agentUiAction(context, () async {
+                                                await ref
+                                                    .read(
+                                                      naiAgentControllerProvider,
+                                                    )
+                                                    .updateSettings({
+                                                      'panelWidth': preferred,
+                                                    });
+                                                if (mounted &&
+                                                    revision == _dragRevision &&
+                                                    ref
+                                                            .read(
+                                                              naiAgentUiPreferencesProvider,
+                                                            )
+                                                            .settings
+                                                            .panelWidth ==
+                                                        preferred) {
+                                                  // Preferences already notify the host;
+                                                  // clearing the equal override needs no frame.
+                                                  _dragWidth = null;
+                                                }
+                                              });
+                                            },
+                                          )
+                                        : const SizedBox.shrink(),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
+                  ),
+                  DragPreviewDivider(
+                    key: const Key('nai-agent-resize-preview'),
+                    controller: _preview,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
                 ],
               );
