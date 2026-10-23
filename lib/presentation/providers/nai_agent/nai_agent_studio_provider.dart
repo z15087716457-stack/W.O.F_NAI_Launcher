@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/nai_agent/studio_tools.dart';
 import '../../../core/nai_agent/vision_access.dart';
 import '../../../core/nai_agent/generation_tools.dart';
+import '../../../core/nai_agent/prompt_set_tools.dart';
 import '../../../data/models/image/image_params.dart';
 import '../image_generation_provider.dart';
 import '../generation/preview_selection_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import '../krita/bridge_draft_writer.dart';
-import '../krita/krita_bridge_notifier.dart';
 import '../../router/app_router.dart';
 import 'nai_agent_knowledge_tools.dart';
 import 'nai_agent_snapshot_binding.dart';
@@ -23,11 +23,6 @@ import 'nai_agent_reference_library_binding.dart';
 import 'nai_agent_settings_binding.dart';
 import 'nai_agent_wiki_images.dart';
 import 'nai_agent_explore_binding.dart';
-import '../style_explore/explore_run_runner.dart';
-import '../generation/image_workflow_controller.dart';
-import '../generation/local_upscale_provider.dart';
-import '../generation/cloud_upscale_provider.dart';
-import '../director_tools_notifier.dart';
 import '../prompt_block_library_provider.dart';
 
 /// Explicit dependencies supplied by the workspace/session owner (stage C/D).
@@ -90,20 +85,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
             );
     }
 
-    bool busy() =>
-        ref.read(imageGenerationNotifierProvider).isGenerating ||
-        (ref.exists(exploreRunRunnerProvider) &&
-            ref.read(exploreRunRunnerProvider).isRunning) ||
-        (ref.exists(imageWorkflowControllerProvider) &&
-            ref.read(imageWorkflowControllerProvider).isToolRunning) ||
-        (ref.exists(localUpscaleTaskProvider) &&
-            ref.read(localUpscaleTaskProvider).running) ||
-        (ref.exists(cloudUpscaleTaskProvider) &&
-            ref.read(cloudUpscaleTaskProvider).running) ||
-        (ref.exists(directorToolsNotifierProvider) &&
-            ref.read(directorToolsNotifierProvider).isRunning) ||
-        (ref.exists(kritaBridgeNotifierProvider) &&
-            ref.read(kritaBridgeNotifierProvider).isBridgeGenerating);
+    bool busy() => naiAgentGenerationBusy(ref);
     final snapshots = bindNaiAgentSnapshots(ref, workspace, busy, () => alive);
     final blocks = bindNaiAgentBlocks(ref, workspace, busy, () => alive);
     final settings = bindNaiAgentSettings(ref, workspace, () => alive);
@@ -171,6 +153,7 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       visionAccess: visionAccess,
       isAlive: () => alive,
       domainTools: {
+        'prompt_set': NaiAgentPromptSets(data, chatId: owner?.chatId).execute,
         'settings_read': settings.read,
         'settings_update': settings.update,
         'explore_manage': exploration.execute,

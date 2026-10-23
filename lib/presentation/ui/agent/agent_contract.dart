@@ -260,6 +260,79 @@ class AgentReply {
   final bool canRegenerate;
 }
 
+class AgentPromptSetShared {
+  const AgentPromptSetShared({
+    this.main = '',
+    this.characters = const [],
+    this.negative = '',
+  });
+  final String main, negative;
+  final List<String> characters;
+}
+
+class AgentPromptSetItem {
+  const AgentPromptSetItem({
+    required this.icon,
+    required this.title,
+    this.note = '',
+    this.main = '',
+    this.characters = const [],
+  });
+  final String icon, title, note, main;
+  final List<String> characters;
+}
+
+class AgentPromptSet {
+  const AgentPromptSet({
+    required this.setId,
+    required this.revision,
+    required this.kind,
+    required this.kindIcon,
+    required this.title,
+    required this.unit,
+    required this.ordered,
+    required this.shared,
+    required this.items,
+    this.changedItems = const [],
+    this.images = const {},
+    this.unitAnlas,
+    this.importedIndex,
+    this.canUndoImport = false,
+    this.busyIndex,
+  });
+  final String setId, kind, kindIcon, title, unit;
+  final int revision;
+  final bool ordered;
+  final AgentPromptSetShared shared;
+  final List<AgentPromptSetItem> items;
+  final List<int> changedItems;
+  final Map<int, List<AgentImage>> images;
+  final int? unitAnlas, importedIndex, busyIndex;
+  final bool canUndoImport;
+}
+
+final class AgentPromptSetBlock extends AgentBlock {
+  const AgentPromptSetBlock({
+    required this.setId,
+    required this.revision,
+    this.changedItems = const [],
+    this.data,
+  });
+  final String setId;
+  final int revision;
+  final List<int> changedItems;
+  final AgentPromptSet? data;
+}
+
+enum AgentPromptSetAction {
+  import,
+  generate,
+  undo,
+  saveBlock,
+  copyItem,
+  copyAll,
+}
+
 sealed class AgentBlock {
   const AgentBlock();
 }
@@ -1209,7 +1282,15 @@ class AgentActions {
     required this.onContinue,
     required this.onAdjustLimit,
     required this.onOpenSettingAt,
+    this.onPromptSetAction,
   });
+
+  final Future<bool> Function(
+    String setId,
+    int index,
+    AgentPromptSetAction action,
+  )?
+  onPromptSetAction;
 
   /// 收起侧栏。
   final VoidCallback onClose;

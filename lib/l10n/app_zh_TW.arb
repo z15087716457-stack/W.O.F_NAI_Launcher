@@ -11719,5 +11719,132 @@
   "mp_errorNetwork": "連線不可用",
   "mp_errorResponse": "回應無效",
   "mp_errorHttp": "請求失敗",
-  "mp_errorRateLimit": "請求過於頻繁"
+  "mp_errorRateLimit": "請求過於頻繁",
+  "ag_tool_prompt_set": "提示片語",
+  "ag_psCount": "{count} {unit}",
+  "@ag_psCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psPosition": "第 {index} {unit} / 共 {count} {unit}",
+  "@ag_psPosition": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psOverview": "總覽全部",
+  "ag_psSingle": "回到單項",
+  "ag_psPrompt": "提示詞",
+  "ag_psShared": "共同設定",
+  "ag_psThisItem": "這一{unit}",
+  "@ag_psThisItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psMain": "主提示詞",
+  "ag_psCharacter": "角色 {index}",
+  "@ag_psCharacter": {
+    "placeholders": {
+      "index": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_psNegative": "負面",
+  "ag_psImport": "匯入畫布",
+  "ag_psImportTip": "寫入主提示詞、角色和負面；參數和參考圖不變",
+  "ag_psImported": "已把「{title}」寫入提示詞",
+  "@ag_psImported": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psGenerate": "生成",
+  "ag_psGenerating": "生成中",
+  "ag_psRevision": "v{revision} · 已改 {count} 項",
+  "@ag_psRevision": {
+    "placeholders": {
+      "revision": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_psSaveBlock": "存成積木",
+  "ag_psSavedBlock": "已存成積木「{title}」· {count} 項",
+  "@ag_psSavedBlock": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_psCopyItem": "複製這一{unit}的提示詞",
+  "@ag_psCopyItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psCopyAll": "複製全部",
+  "ag_psEditItem": "讓 Agent 修改這一{unit}",
+  "@ag_psEditItem": {
+    "placeholders": {
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psEditDraft": "修改「{title}」第 {index} {unit}（{item}）：",
+  "@ag_psEditDraft": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "index": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      },
+      "item": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_psTooManyCharacters": "當前模型最多支援 {count} 個角色",
+  "@ag_psTooManyCharacters": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_psNoCharacters": "當前模型不支援角色提示詞",
+  "ag_psMissing": "這張卡的資料已不在"
 }

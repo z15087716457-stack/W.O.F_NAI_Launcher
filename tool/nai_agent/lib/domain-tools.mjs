@@ -1,8 +1,27 @@
 import { Type } from 'typebox';
 
+export const promptSetIcons = ["film","book","star","heart","spark","camera","flag","sword","shield","bolt","flame","skull","wind","rain","snow","sun","moon","leaf","umbrella","coffee","music","mail","door","shirt","dress","hat","mask","smile","home","tree","mountain","wave","car","gift","palette"];
+const promptSetIcon = Type.Union(promptSetIcons.map(v => Type.Literal(v)));
+const promptSetContent = {kind: Type.String({minLength:1,maxLength:24}), kind_icon: promptSetIcon,
+      title: Type.String({minLength:1,maxLength:60}), unit: Type.String({minLength:1,maxLength:8}), ordered: Type.Boolean(),
+      shared: Type.Object({ main: Type.Optional(Type.String({maxLength:2000})),
+        characters: Type.Optional(Type.Array(Type.String({maxLength:1000}), {maxItems:6})),
+        negative: Type.Optional(Type.String({maxLength:2000})) }),
+      items: Type.Array(Type.Object({icon:promptSetIcon, title:Type.String({minLength:1,maxLength:40}),
+        note:Type.Optional(Type.String({maxLength:240})), main:Type.Optional(Type.String({maxLength:1000})),
+        characters:Type.Optional(Type.Array(Type.String({maxLength:600}), {maxItems:6}))}), {minItems:2,maxItems:24})};
+
 // Only names supplied by the production Dart binding are enabled. Usage guidance
 // lives in skills/nai-studio; schemas and descriptions stay beside the executors.
 export const domainTools = [
+  { name: 'prompt_set',
+    description: 'Write 2–24 prompts at once for stories, scenes, outfits or variations as ONE conversation card. Put stable quality, style, character appearance and negative tags in shared ONCE; items contain ONLY differences, with positive character additions aligned by index. Use English NAI-style tags; titles and 1–2 sentence notes use the user’s language. Choose kind, title, unit and allowlisted line icons yourself. ordered=true for a sequence, false for parallel options. create returns set_id and revision. To change any part of an existing set, read if needed then update with the SAME set_id, expected_revision and FULL content; never create a duplicate. read retrieves the stored set after context compaction. The card lets the user import or generate ONE item at a time with native price/balance confirmation. Do NOT also call prompt_update or generation tools for this set unless asked.',
+    parameters: Type.Union([
+      Type.Object({action:Type.Literal('create'), ...promptSetContent}),
+      Type.Object({action:Type.Literal('update'), set_id:Type.String({pattern:'^[a-f0-9]{12}$'}), expected_revision:Type.Integer({minimum:1}), ...promptSetContent}),
+      Type.Object({action:Type.Literal('read'), set_id:Type.String({pattern:'^[a-f0-9]{12}$'})}),
+    ]),
+  },
   { name: 'snapshot',
 
     description: 'Save, list, inspect or explicitly restore Studio generation configurations in this workspace, including source/mask geometry and native enhance/upscale settings. Temporary canvas tools are excluded. read omits binary image data; workflow_settings_saved=false identifies older snapshots which retain current workflow preferences. load requires expected_version from fresh studio_context(scope=draft). Changed library blocks restore as independent copies, preserving newer edits. Default list limit 20.',

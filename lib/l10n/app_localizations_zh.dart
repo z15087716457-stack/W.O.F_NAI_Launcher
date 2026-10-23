@@ -20983,6 +20983,106 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mp_errorRateLimit => '请求过于频繁';
+
+  @override
+  String get ag_tool_prompt_set => '提示词组';
+
+  @override
+  String ag_psCount(int count, String unit) {
+    return '$count $unit';
+  }
+
+  @override
+  String ag_psPosition(int index, int count, String unit) {
+    return '第 $index $unit / 共 $count $unit';
+  }
+
+  @override
+  String get ag_psOverview => '总览全部';
+
+  @override
+  String get ag_psSingle => '回到单项';
+
+  @override
+  String get ag_psPrompt => '提示词';
+
+  @override
+  String get ag_psShared => '共同设定';
+
+  @override
+  String ag_psThisItem(String unit) {
+    return '这一$unit';
+  }
+
+  @override
+  String get ag_psMain => '主提示词';
+
+  @override
+  String ag_psCharacter(int index) {
+    return '角色 $index';
+  }
+
+  @override
+  String get ag_psNegative => '负面';
+
+  @override
+  String get ag_psImport => '导入画布';
+
+  @override
+  String get ag_psImportTip => '写入主提示词、角色和负面；参数和参考图不变';
+
+  @override
+  String ag_psImported(String title) {
+    return '已把「$title」写入提示词';
+  }
+
+  @override
+  String get ag_psGenerate => '生成';
+
+  @override
+  String get ag_psGenerating => '生成中';
+
+  @override
+  String ag_psRevision(int revision, int count) {
+    return 'v$revision · 已改 $count 项';
+  }
+
+  @override
+  String get ag_psSaveBlock => '存成积木';
+
+  @override
+  String ag_psSavedBlock(String title, int count) {
+    return '已存成积木「$title」· $count 项';
+  }
+
+  @override
+  String ag_psCopyItem(String unit) {
+    return '复制这一$unit的提示词';
+  }
+
+  @override
+  String get ag_psCopyAll => '复制全部';
+
+  @override
+  String ag_psEditItem(String unit) {
+    return '让 Agent 修改这一$unit';
+  }
+
+  @override
+  String ag_psEditDraft(String title, int index, String unit, String item) {
+    return '修改「$title」第 $index $unit（$item）：';
+  }
+
+  @override
+  String ag_psTooManyCharacters(int count) {
+    return '当前模型最多支持 $count 个角色';
+  }
+
+  @override
+  String get ag_psNoCharacters => '当前模型不支持角色提示词';
+
+  @override
+  String get ag_psMissing => '这张卡的数据已不在';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -41964,4 +42064,104 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get mp_errorRateLimit => '請求過於頻繁';
+
+  @override
+  String get ag_tool_prompt_set => '提示片語';
+
+  @override
+  String ag_psCount(int count, String unit) {
+    return '$count $unit';
+  }
+
+  @override
+  String ag_psPosition(int index, int count, String unit) {
+    return '第 $index $unit / 共 $count $unit';
+  }
+
+  @override
+  String get ag_psOverview => '總覽全部';
+
+  @override
+  String get ag_psSingle => '回到單項';
+
+  @override
+  String get ag_psPrompt => '提示詞';
+
+  @override
+  String get ag_psShared => '共同設定';
+
+  @override
+  String ag_psThisItem(String unit) {
+    return '這一$unit';
+  }
+
+  @override
+  String get ag_psMain => '主提示詞';
+
+  @override
+  String ag_psCharacter(int index) {
+    return '角色 $index';
+  }
+
+  @override
+  String get ag_psNegative => '負面';
+
+  @override
+  String get ag_psImport => '匯入畫布';
+
+  @override
+  String get ag_psImportTip => '寫入主提示詞、角色和負面；參數和參考圖不變';
+
+  @override
+  String ag_psImported(String title) {
+    return '已把「$title」寫入提示詞';
+  }
+
+  @override
+  String get ag_psGenerate => '生成';
+
+  @override
+  String get ag_psGenerating => '生成中';
+
+  @override
+  String ag_psRevision(int revision, int count) {
+    return 'v$revision · 已改 $count 項';
+  }
+
+  @override
+  String get ag_psSaveBlock => '存成積木';
+
+  @override
+  String ag_psSavedBlock(String title, int count) {
+    return '已存成積木「$title」· $count 項';
+  }
+
+  @override
+  String ag_psCopyItem(String unit) {
+    return '複製這一$unit的提示詞';
+  }
+
+  @override
+  String get ag_psCopyAll => '複製全部';
+
+  @override
+  String ag_psEditItem(String unit) {
+    return '讓 Agent 修改這一$unit';
+  }
+
+  @override
+  String ag_psEditDraft(String title, int index, String unit, String item) {
+    return '修改「$title」第 $index $unit（$item）：';
+  }
+
+  @override
+  String ag_psTooManyCharacters(int count) {
+    return '當前模型最多支援 $count 個角色';
+  }
+
+  @override
+  String get ag_psNoCharacters => '當前模型不支援角色提示詞';
+
+  @override
+  String get ag_psMissing => '這張卡的資料已不在';
 }

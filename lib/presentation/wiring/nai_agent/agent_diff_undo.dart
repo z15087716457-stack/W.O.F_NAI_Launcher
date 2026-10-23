@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../data/models/prompt_block/pill_document.dart';
+import '../../../data/models/character/character_prompt.dart';
+import '../../providers/character_prompt_provider.dart';
 import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/krita/bridge_draft_writer.dart';
 import '../../providers/pill_workspace_provider.dart';
@@ -29,6 +31,7 @@ final agentDiffUndoProvider = Provider((ref) => AgentDiffUndo(ref));
 class _Plan {
   final patch = <String, dynamic>{};
   final documents = <String, PillDocument>{};
+  CharacterPromptConfig? characters;
 }
 
 class AgentDiffUndo {
@@ -58,6 +61,28 @@ class AgentDiffUndo {
     for (final diff in diffs) {
       final fields = agentMap(diff.backup['fields']);
       final docs = agentMap(diff.backup['documents']);
+      if (diff.field == 'characters') {
+        final config = agentMap(agentMap(docs['characters'])['config']);
+        if (config.isNotEmpty) {
+          plan.characters = CharacterPromptConfig.fromJson(config);
+        }
+        plan.patch['characters'] = agentMaps(fields['characters']);
+        for (final lane in agentMap(
+          agentMap(docs['characters'])['lanes'],
+        ).entries) {
+          for (final side in ['positive', 'negative']) {
+            final document = agentMap(agentMap(lane.value)[side]);
+            if (document.isNotEmpty) {
+              plan.documents[side == 'positive'
+                  ? PillScopes.charPos(lane.key)
+                  : PillScopes.charNeg(lane.key)] = PillDocument.fromJson(
+                document,
+              );
+            }
+          }
+        }
+        continue;
+      }
       if (diff.field == 'params') {
         if (diff.params.isEmpty) return false;
         for (final key in diff.params) {
@@ -122,6 +147,11 @@ class AgentDiffUndo {
       },
       apply: () {
         ref.read(bridgeDraftWriterProvider)(plan.patch);
+        if (plan.characters case final config?) {
+          ref
+              .read(characterPromptNotifierProvider.notifier)
+              .restoreAgentSnapshot(config);
+        }
         for (final MapEntry(:key, :value) in plan.documents.entries) {
           ref.read(pillWorkspaceProvider(key).notifier).restoreDocument(value);
         }

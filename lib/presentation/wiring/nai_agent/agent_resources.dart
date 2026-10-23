@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../core/nai_agent/attachment_image.dart';
+import '../../../core/nai_agent/prompt_set_tools.dart';
 import '../../../core/utils/nai_resolution_adapter.dart';
 import '../../../data/services/nai_agent/agent_workspace_files.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart' as store;
@@ -26,13 +27,67 @@ class AgentResources {
   final _gallery = <String, MemoryImage?>{};
   Future<void> _galleryTail = Future.value();
   final _images = <String, MemoryImage?>{};
+  final _promptSets = <String, Map<String, dynamic>?>{};
+  final _setRevisions = <String, int>{};
+  final _setWatchers = <String, StreamSubscription<FileSystemEvent>>{};
   final _snapshots = <String, Map<String, dynamic>?>{};
   final _rules = <String, String>{};
   final _files = <String, (String, int)?>{};
   final _pending = <String, Future<void>>{};
   bool _disposed = false;
 
-  void dispose() => _disposed = true;
+  void dispose() {
+    _disposed = true;
+    for (final watcher in _setWatchers.values) {
+      unawaited(watcher.cancel());
+    }
+  }
+
+  void refreshPromptSets() {
+    _promptSets.clear();
+  }
+
+  Map<String, dynamic>? promptSet(
+    store.AgentWorkspace workspace,
+    String setId, {
+    int? revision,
+  }) {
+    if (!NaiAgentPromptSets.idPattern.hasMatch(setId)) return null;
+    final key = '${workspace.agentDirectory.path}/prompt-sets/$setId.json';
+    if (revision != null && _setRevisions[key] != revision) {
+      _setRevisions[key] = revision;
+      _promptSets.remove(key);
+    }
+    if (!_promptSets.containsKey(key)) {
+      _promptSets[key] = null;
+      _load('set/$key', () async {
+        _promptSets[key] = await NaiAgentPromptSets(
+          workspace.agentDirectory,
+        ).read(setId);
+        // null was cached before loading; revision changes invalidate it.
+        final dir = Directory(p.dirname(key));
+        if (!_setWatchers.containsKey(dir.path) &&
+            await dir.exists() &&
+            !_disposed) {
+          _setWatchers[dir.path] = dir.watch().listen(
+            (event) {
+              if (!event.path.endsWith('.json') &&
+                  !(event is FileSystemMoveEvent &&
+                      (event.destination?.endsWith('.json') ?? false))) {
+                return;
+              }
+              _promptSets.clear();
+              if (!_disposed) changed();
+            },
+            onError: (Object _) {
+              /* Explicit tool/action refresh remains available. */
+            },
+          );
+        }
+      });
+    }
+    return _promptSets[key];
+  }
 
   Future<void> settle() async {
     while (_pending.isNotEmpty) {

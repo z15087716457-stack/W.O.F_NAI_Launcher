@@ -4,6 +4,7 @@ const naiAgentToolNames = [
   'studio_context',
   'image_read',
   'prompt_update',
+  'prompt_set',
   'snapshot',
   'wiki_query',
   'tag_query',

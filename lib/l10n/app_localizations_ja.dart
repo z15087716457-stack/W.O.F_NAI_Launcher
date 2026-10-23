@@ -21221,4 +21221,104 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get mp_errorRateLimit => 'レート制限を超過';
+
+  @override
+  String get ag_tool_prompt_set => 'プロンプトセット';
+
+  @override
+  String ag_psCount(int count, String unit) {
+    return '$count $unit';
+  }
+
+  @override
+  String ag_psPosition(int index, int count, String unit) {
+    return '第$index$unit / 全$count$unit';
+  }
+
+  @override
+  String get ag_psOverview => '一覧表示';
+
+  @override
+  String get ag_psSingle => '1件ずつ表示';
+
+  @override
+  String get ag_psPrompt => 'プロンプト';
+
+  @override
+  String get ag_psShared => '共通設定';
+
+  @override
+  String ag_psThisItem(String unit) {
+    return 'この$unit';
+  }
+
+  @override
+  String get ag_psMain => 'メインプロンプト';
+
+  @override
+  String ag_psCharacter(int index) {
+    return 'キャラクター $index';
+  }
+
+  @override
+  String get ag_psNegative => 'ネガティブ';
+
+  @override
+  String get ag_psImport => 'キャンバスに読み込む';
+
+  @override
+  String get ag_psImportTip => 'メインプロンプト・キャラクター・ネガティブを書き込みます。パラメータと参照画像は変わりません';
+
+  @override
+  String ag_psImported(String title) {
+    return '「$title」をプロンプトに書き込みました';
+  }
+
+  @override
+  String get ag_psGenerate => '生成';
+
+  @override
+  String get ag_psGenerating => '生成中';
+
+  @override
+  String ag_psRevision(int revision, int count) {
+    return 'v$revision · $count件変更';
+  }
+
+  @override
+  String get ag_psSaveBlock => 'ブロックとして保存';
+
+  @override
+  String ag_psSavedBlock(String title, int count) {
+    return 'ブロック「$title」を保存しました · $count件';
+  }
+
+  @override
+  String ag_psCopyItem(String unit) {
+    return 'この$unitのプロンプトをコピー';
+  }
+
+  @override
+  String get ag_psCopyAll => 'すべてコピー';
+
+  @override
+  String ag_psEditItem(String unit) {
+    return 'この$unitの修正を Agent に頼む';
+  }
+
+  @override
+  String ag_psEditDraft(String title, int index, String unit, String item) {
+    return '「$title」の第$index$unit（$item）を修正：';
+  }
+
+  @override
+  String ag_psTooManyCharacters(int count) {
+    return '現在のモデルのキャラクターは最大 $count 人です';
+  }
+
+  @override
+  String get ag_psNoCharacters => '現在のモデルはキャラクタープロンプトに対応していません';
+
+  @override
+  String get ag_psMissing => 'このカードのデータは見つかりません';
 }

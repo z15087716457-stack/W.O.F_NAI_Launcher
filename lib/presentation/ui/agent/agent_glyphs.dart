@@ -1,10 +1,63 @@
 import 'package:flutter/material.dart';
+export '../../../core/nai_agent/prompt_set_icons.dart';
 
 import '../kit/ui_colors.dart';
 import '../kit/ui_svg_icon.dart';
 
 /// 侧栏用到的线性图标（24 网格、1.7 描边），照抄 `.devin/mockups/agent-redesign/mock.html` 的 `const P`。
 abstract final class AgentGlyphs {
+  static const psGrid =
+      'M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z';
+  static const psfilm =
+      'M7 4v16M17 4v16M3 9h4M3 15h4M17 9h4M17 15h4M3 4h18v16h-18z';
+  static const psheart =
+      'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z';
+  static const pscamera =
+      'M4 7h3l2-3h6l2 3h3a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zM8.5 13a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0';
+  static const psflag = 'M5 21V4M5 4h11l-2 4 2 4H5';
+  static const pssword =
+      'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2';
+  static const psflame =
+      'M12 21a6 6 0 0 0 6-6c0-4-3-6-4-10-2 2-3 4-3 6-1-1-2-2-2-3.5C7 9 6 11.5 6 15a6 6 0 0 0 6 6z';
+  static const psskull =
+      'M12 3a8 8 0 0 0-5 14.2V20h10v-2.8A8 8 0 0 0 12 3zM7.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0M13.5 12a1.5 1.5 0 1 0 3 0a1.5 1.5 0 1 0 -3 0';
+  static const pswind = 'M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7';
+  static const psrain =
+      'M7 15a4 4 0 0 1 .4-8A5.5 5.5 0 0 1 18 8.5 3.3 3.3 0 0 1 17.5 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3';
+  static const pssnow =
+      'M12 2v20M4 6.5l16 11M20 6.5l-16 11M9 3.5l3 2 3-2M9 20.5l3-2 3 2';
+  static const pssun =
+      'M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4M8 12a4 4 0 1 0 8 0a4 4 0 1 0 -8 0';
+  static const psmoon = 'M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z';
+  static const psleaf = 'M5 19c0-8 5-14 15-14 0 10-6 15-14 15M5 19l7-7';
+  static const psumbrella =
+      'M3 12a9 9 0 0 1 18 0zM12 12v6a2 2 0 0 1-4 0M12 3v0';
+  static const pscoffee =
+      'M4 9h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3v3M12 3v3';
+  static const psmusic =
+      'M9 18V5l11-2v13M3 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0M14 16a3 3 0 1 0 6 0a3 3 0 1 0 -6 0';
+  static const psmail = 'm3 7 9 6 9-6M3 5h18v14h-18z';
+  static const psdoor =
+      'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18M14.5 12h.01';
+  static const psshirt =
+      'M8 3 4 6l2 4 2-1v12h8V9l2 1 2-4-4-3c-.5 1.5-2 2.5-4 2.5S8.5 4.5 8 3z';
+  static const psdress = 'M9 3h6l-1 5 4.5 13h-13L10 8zM10 8h4';
+  static const pshat = 'M2.5 17.5h19M6 17.5c0-6 2.4-10 6-10s6 4 6 10M9 13h6';
+  static const psmask =
+      'M4 5l8 3 8-3v8c0 5-8 8-8 8s-8-3-8-8zM7 11h2M15 11h2M9 16q3-2 6 0';
+  static const pssmile =
+      'M12 3a9 9 0 100 18 9 9 0 000-18M8 9v1M16 9v1M8 14q4 5 8 0';
+  static const pshome = 'M3 11l9-8 9 8M6 9v12h12V9M10 21v-7h4v7';
+  static const pstree = 'M12 2L5 10h3l-5 7h7v5h4v-5h7l-5-7h3z';
+  static const psmountain = 'M2 21L10 4l5 10 3-5 5 12zM7 10l3 2 3-2';
+  static const pswave =
+      'M2 8q3-4 6 0t6 0 6 0M2 13q3-4 6 0t6 0 6 0M2 18q3-4 6 0t6 0 6 0';
+  static const pscar =
+      'M4 11l2-6h12l2 6v8H4zM4 11h16M7 15h1M16 15h1M6 19v2M18 19v2';
+  static const psgift =
+      'M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8C3 8 5 1 9 4zM12 8c9 0 7-7 3-4z';
+  static const pspalette =
+      'M12 3a9 9 0 100 18h2a2 2 0 000-4h-1a2 2 0 010-4h4c6 0 4-10-5-10zM7 9v.01M10 6v.01M15 6v.01M18 9v.01';
   static const plus = 'M12 5v14M5 12h14';
   static const chevron = 'M6 9l6 6 6-6';
   static const chevronRight = 'M9 6l6 6-6 6';
@@ -68,6 +121,45 @@ abstract final class AgentGlyphs {
   static const memory =
       'M8 4.5h8A3.5 3.5 0 0119.5 8v8a3.5 3.5 0 01-3.5 3.5H8A3.5 3.5 0 014.5 16V8A3.5 3.5 0 018 4.5zM9 9.5h6M9 12h6M9 14.5h4';
 }
+
+String agentPromptSetGlyph(String name) => switch (name) {
+  'film' => AgentGlyphs.psfilm,
+  'book' => AgentGlyphs.book,
+  'star' => AgentGlyphs.star,
+  'heart' => AgentGlyphs.psheart,
+  'spark' => AgentGlyphs.gen,
+  'camera' => AgentGlyphs.pscamera,
+  'flag' => AgentGlyphs.psflag,
+  'sword' => AgentGlyphs.pssword,
+  'shield' => AgentGlyphs.shield,
+  'bolt' => AgentGlyphs.bolt,
+  'flame' => AgentGlyphs.psflame,
+  'skull' => AgentGlyphs.psskull,
+  'wind' => AgentGlyphs.pswind,
+  'rain' => AgentGlyphs.psrain,
+  'snow' => AgentGlyphs.pssnow,
+  'sun' => AgentGlyphs.pssun,
+  'moon' => AgentGlyphs.psmoon,
+  'leaf' => AgentGlyphs.psleaf,
+  'umbrella' => AgentGlyphs.psumbrella,
+  'coffee' => AgentGlyphs.pscoffee,
+  'music' => AgentGlyphs.psmusic,
+  'mail' => AgentGlyphs.psmail,
+  'door' => AgentGlyphs.psdoor,
+  'shirt' => AgentGlyphs.psshirt,
+  'dress' => AgentGlyphs.psdress,
+  'hat' => AgentGlyphs.pshat,
+  'mask' => AgentGlyphs.psmask,
+  'smile' => AgentGlyphs.pssmile,
+  'home' => AgentGlyphs.pshome,
+  'tree' => AgentGlyphs.pstree,
+  'mountain' => AgentGlyphs.psmountain,
+  'wave' => AgentGlyphs.pswave,
+  'car' => AgentGlyphs.pscar,
+  'gift' => AgentGlyphs.psgift,
+  'palette' => AgentGlyphs.pspalette,
+  _ => throw ArgumentError.value(name, 'name', 'Unknown prompt-set glyph'),
+};
 
 /// 线性图标。
 class AgentIcon extends StatelessWidget {

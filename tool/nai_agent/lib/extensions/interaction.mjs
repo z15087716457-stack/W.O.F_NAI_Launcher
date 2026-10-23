@@ -25,9 +25,13 @@ function withoutBinary(value) {
 function studioProjection(event, native) {
   const tool = event.toolName.replace(/^mcp__nai_studio__/, '');
   const identity = { tool: event.toolName, tool_call_id: event.toolCallId };
+  if (tool === 'prompt_set' && event.input?.action === 'read') return undefined;
   if (native.ok === false || event.isError) return { ...identity, ok: false };
   let projection;
-  if (tool === 'tag_query') projection = { tags: rows(native.tags).map(row => ({
+  if (tool === 'prompt_set') {
+    if (event.input?.action === 'read' || !native.set_id || !native.count) return undefined;
+    projection = pick(native, ['ok', 'set_id', 'revision', 'changed_items', 'count', 'title']);
+  } else if (tool === 'tag_query') projection = { tags: rows(native.tags).map(row => ({
     ...pick(row, ['tag', 'category', 'post_count', 'zh', 'translation']), definition: short(row.definition),
   })) };
   else if (tool === 'wiki_query') projection = { pages: rows(native.pages).map(row => ({

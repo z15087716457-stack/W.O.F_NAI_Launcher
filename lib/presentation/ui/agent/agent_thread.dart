@@ -11,6 +11,9 @@ import '../kit/ui_text.dart';
 import 'agent_activity.dart';
 import 'agent_cards.dart';
 import 'agent_contract.dart';
+import 'agent_prompt_set_card.dart';
+import 'agent_tag_window.dart';
+export 'agent_tag_window.dart' show agentDiffWindow;
 import 'agent_glyphs.dart';
 import 'agent_parts.dart';
 import 'agent_scope.dart';
@@ -744,6 +747,47 @@ class _TaskCard extends StatelessWidget {
     final s = AgentScope.of(context);
     final l = context.l10n;
     final c = context.ui;
+    // Prompt sets are standalone cards (not a card nested in the task shell).
+    // Leave all existing block-only replies on their original rendering path.
+    if (reply.blocks.any((block) => block is AgentPromptSetBlock)) {
+      final groups = <Widget>[];
+      var ordinary = <AgentBlock>[];
+      void flush({bool tail = false}) {
+        if (ordinary.isEmpty && !tail) return;
+        if (ordinary.isEmpty && reply.summary == null && !reply.canRegenerate) {
+          return;
+        }
+        groups.add(
+          _TaskCard(
+            turnId: '$turnId/part-${groups.length}',
+            last: last && tail,
+            since: since,
+            reply: AgentReply(
+              blocks: List.of(ordinary),
+              live: reply.live && tail,
+              summary: tail ? reply.summary : null,
+              canRegenerate: tail && reply.canRegenerate,
+            ),
+          ),
+        );
+        ordinary = [];
+      }
+
+      for (final block in reply.blocks) {
+        if (block is AgentPromptSetBlock) {
+          flush();
+          groups.add(_promptSetView(context, block));
+        } else {
+          ordinary.add(block);
+        }
+      }
+      flush(tail: true);
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 12,
+        children: groups,
+      );
+    }
     final segs = _segments(reply.blocks);
     final finalText = !reply.live && segs.lastOrNull is _OutSeg
         ? (segs.last as _OutSeg).item is AgentTextBlock
@@ -786,6 +830,7 @@ class _TaskCard extends StatelessWidget {
                 group: item,
               ),
               AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
+              AgentPromptSetBlock() => _promptSetView(context, item),
               AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
               AgentPositionBlock() => AgentPositionView(block: item),
               AgentParamBlock() => AgentParamView(block: item),
@@ -899,6 +944,22 @@ class _TaskCard extends StatelessWidget {
     );
   }
 }
+
+Widget _promptSetView(BuildContext context, AgentPromptSetBlock block) =>
+    AgentPromptSetCard(
+      key: ValueKey('prompt-set-${block.setId}'),
+      data: block.data,
+      onAction: (index, action) async {
+        final scope = AgentScope.of(context),
+            callback = AgentScope.of(context).actions.onPromptSetAction;
+        if (callback != null) {
+          await scope.run(() => callback(block.setId, index, action));
+        }
+      },
+      onEdit: (text) => AgentScope.of(context).insert(text),
+      onImage: (image, group) =>
+          AgentScope.of(context).zoom(image, group: group),
+    );
 
 /// 一轮小结：淡色一行「用时 1m 12s · 48 Anlas · 改动 5 处」，悬停看明细（含工具次数、token）。
 class _TurnSummary extends StatelessWidget {
@@ -1976,6 +2037,7 @@ class _StepDetail extends StatelessWidget {
 String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
   'studio_context' => l.ag_tool_studio_context,
   'image_read' => l.ag_tool_image_read,
+  'prompt_set' => l.ag_tool_prompt_set,
   'prompt_update' => l.ag_tool_prompt_update,
   'snapshot' => l.ag_tool_snapshot,
   'wiki_query' => l.ag_tool_wiki_query,
@@ -2007,59 +2069,6 @@ String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
 
 /// 提示词改动卡的正文窗口：按逗号切成 tag，只留改动附近（前后各 [context] 个），
 /// 两处改动中间隔太远、开头结尾没改的长段都换成「…」。
-@visibleForTesting
-List<AgentDiffSegment?> agentDiffWindow(
-  List<AgentDiffSegment> segments, {
-  int context = 3,
-}) {
-  // 切成一个个 tag：每个 tag 是若干小段（同一个 tag 里可能有删有加）。
-  final tags = <List<AgentDiffSegment>>[[]];
-  for (final seg in segments) {
-    var rest = seg.text;
-    while (rest.isNotEmpty) {
-      final comma = rest.indexOf(',');
-      if (comma < 0) {
-        tags.last.add(AgentDiffSegment(rest, seg.kind));
-        break;
-      }
-      tags.last.add(AgentDiffSegment(rest.substring(0, comma + 1), seg.kind));
-      tags.add([]);
-      rest = rest.substring(comma + 1);
-    }
-  }
-  if (tags.last.isEmpty) tags.removeLast();
-  final changed = [
-    for (final t in tags)
-      t.any((x) => x.kind != AgentDiffKind.same && x.text.trim().isNotEmpty),
-  ];
-  if (!changed.contains(true)) return segments;
-  final show = List.filled(tags.length, false);
-  for (var i = 0; i < tags.length; i++) {
-    if (!changed[i]) continue;
-    for (var j = i - context; j <= i + context; j++) {
-      if (j >= 0 && j < tags.length) show[j] = true;
-    }
-  }
-  // 只藏一个 tag 换成「…」不划算：直接显示。
-  for (var i = 0; i < tags.length; i++) {
-    if (show[i]) continue;
-    var j = i;
-    while (j < tags.length && !show[j]) {
-      j++;
-    }
-    if (j - i == 1) show[i] = true;
-    i = j;
-  }
-  final out = <AgentDiffSegment?>[];
-  for (var i = 0; i < tags.length; i++) {
-    if (show[i]) {
-      out.addAll(tags[i]);
-    } else if (i == 0 || show[i - 1]) {
-      out.add(null);
-    }
-  }
-  return out;
-}
 
 class AgentDiffView extends StatefulWidget {
   const AgentDiffView({super.key, required this.diff});

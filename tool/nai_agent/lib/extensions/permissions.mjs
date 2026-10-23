@@ -5,6 +5,7 @@ import { dirname, resolve, relative, isAbsolute } from 'node:path';
 const modes = new Set(['auto', 'ask', 'readonly', 'bypass']);
 const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'studio_search', 'ask_user', 'image_read', 'wiki_query', 'tag_query', 'block_query', 'settings_read', 'generation_prepare', 'gallery_query', 'generation_cancel', 'tool_search', 'codemode']);
 const readActions = {
+  prompt_set: new Set(['read']),
   snapshot: new Set(['list', 'read']),
   reference_manage: new Set(['list']),
   reference_library: new Set(['query', 'read', 'categories']),
@@ -13,7 +14,7 @@ const readActions = {
   image_generate: new Set(['prepare', 'status', 'cancel']),
   explore_manage: new Set(['list', 'read', 'status', 'prepare', 'pause', 'cancel']),
 };
-const edits = new Set(['write', 'edit', 'prompt_update', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'image_tool', 'image_generate', 'explore_manage']);
+const edits = new Set(['write', 'edit', 'prompt_update', 'prompt_set', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'image_tool', 'image_generate', 'explore_manage']);
 const destructive = /(?:^|_)(?:delete|delete_empty|move|move_file|remove)(?:$|_)/;
 
 async function canonical(path) {

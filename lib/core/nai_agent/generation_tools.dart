@@ -284,6 +284,18 @@ class NaiAgentGenerationTools {
     }
   }
 
+  /// UI actions use the exact same quote, approval, recheck and native start.
+  Future<Map<String, dynamic>> requestUserGeneration(
+    NaiAgentCancellation token,
+  ) async {
+    final prepared = await prepare({
+      'requests': 1,
+      'images_per_request': 1,
+    }, token);
+    final quote = (prepared['details'] as Map)['quote'] as Map;
+    return run({'quote_id': quote['quote_id']}, token);
+  }
+
   Future<Map<String, dynamic>> cancel(
     Map<String, dynamic> params,
     NaiAgentCancellation token,

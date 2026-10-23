@@ -21293,4 +21293,104 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get mp_errorRateLimit => '요청 한도 초과';
+
+  @override
+  String get ag_tool_prompt_set => '프롬프트 세트';
+
+  @override
+  String ag_psCount(int count, String unit) {
+    return '$count $unit';
+  }
+
+  @override
+  String ag_psPosition(int index, int count, String unit) {
+    return '$unit $index / $count';
+  }
+
+  @override
+  String get ag_psOverview => '전체 보기';
+
+  @override
+  String get ag_psSingle => '하나씩 보기';
+
+  @override
+  String get ag_psPrompt => '프롬프트';
+
+  @override
+  String get ag_psShared => '공통 설정';
+
+  @override
+  String ag_psThisItem(String unit) {
+    return '이 $unit';
+  }
+
+  @override
+  String get ag_psMain => '메인 프롬프트';
+
+  @override
+  String ag_psCharacter(int index) {
+    return '캐릭터 $index';
+  }
+
+  @override
+  String get ag_psNegative => '네거티브';
+
+  @override
+  String get ag_psImport => '캔버스로 가져오기';
+
+  @override
+  String get ag_psImportTip => '메인 프롬프트, 캐릭터, 네거티브만 씁니다. 파라미터와 참조 이미지는 그대로입니다';
+
+  @override
+  String ag_psImported(String title) {
+    return '‘$title’을(를) 프롬프트에 넣었습니다';
+  }
+
+  @override
+  String get ag_psGenerate => '생성';
+
+  @override
+  String get ag_psGenerating => '생성 중';
+
+  @override
+  String ag_psRevision(int revision, int count) {
+    return 'v$revision · $count개 수정';
+  }
+
+  @override
+  String get ag_psSaveBlock => '블록으로 저장';
+
+  @override
+  String ag_psSavedBlock(String title, int count) {
+    return '블록 ‘$title’ 저장 · $count개';
+  }
+
+  @override
+  String ag_psCopyItem(String unit) {
+    return '이 $unit의 프롬프트 복사';
+  }
+
+  @override
+  String get ag_psCopyAll => '모두 복사';
+
+  @override
+  String ag_psEditItem(String unit) {
+    return '이 $unit 수정을 Agent에 요청';
+  }
+
+  @override
+  String ag_psEditDraft(String title, int index, String unit, String item) {
+    return '‘$title’ $unit $index($item) 수정: ';
+  }
+
+  @override
+  String ag_psTooManyCharacters(int count) {
+    return '현재 모델은 캐릭터를 최대 $count명까지 지원합니다';
+  }
+
+  @override
+  String get ag_psNoCharacters => '현재 모델은 캐릭터 프롬프트를 지원하지 않습니다';
+
+  @override
+  String get ag_psMissing => '이 카드의 데이터를 찾을 수 없습니다';
 }

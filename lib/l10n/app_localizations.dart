@@ -38199,6 +38199,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Rate limit exceeded'**
   String get mp_errorRateLimit;
+
+  /// No description provided for @ag_tool_prompt_set.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt set'**
+  String get ag_tool_prompt_set;
+
+  /// No description provided for @ag_psCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} {unit}'**
+  String ag_psCount(int count, String unit);
+
+  /// No description provided for @ag_psPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} {index} / {count}'**
+  String ag_psPosition(int index, int count, String unit);
+
+  /// No description provided for @ag_psOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get ag_psOverview;
+
+  /// No description provided for @ag_psSingle.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to one'**
+  String get ag_psSingle;
+
+  /// No description provided for @ag_psPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt'**
+  String get ag_psPrompt;
+
+  /// No description provided for @ag_psShared.
+  ///
+  /// In en, this message translates to:
+  /// **'Shared'**
+  String get ag_psShared;
+
+  /// No description provided for @ag_psThisItem.
+  ///
+  /// In en, this message translates to:
+  /// **'This {unit}'**
+  String ag_psThisItem(String unit);
+
+  /// No description provided for @ag_psMain.
+  ///
+  /// In en, this message translates to:
+  /// **'Main prompt'**
+  String get ag_psMain;
+
+  /// No description provided for @ag_psCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Character {index}'**
+  String ag_psCharacter(int index);
+
+  /// No description provided for @ag_psNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Negative'**
+  String get ag_psNegative;
+
+  /// No description provided for @ag_psImport.
+  ///
+  /// In en, this message translates to:
+  /// **'Import to canvas'**
+  String get ag_psImport;
+
+  /// No description provided for @ag_psImportTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Writes the main prompt, characters and negative; parameters and references stay as they are'**
+  String get ag_psImportTip;
+
+  /// No description provided for @ag_psImported.
+  ///
+  /// In en, this message translates to:
+  /// **'Imported “{title}” into the prompt'**
+  String ag_psImported(String title);
+
+  /// No description provided for @ag_psGenerate.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate'**
+  String get ag_psGenerate;
+
+  /// No description provided for @ag_psGenerating.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating'**
+  String get ag_psGenerating;
+
+  /// No description provided for @ag_psRevision.
+  ///
+  /// In en, this message translates to:
+  /// **'v{revision} · {count} changed'**
+  String ag_psRevision(int revision, int count);
+
+  /// No description provided for @ag_psSaveBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as block'**
+  String get ag_psSaveBlock;
+
+  /// No description provided for @ag_psSavedBlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved block “{title}” · {count} items'**
+  String ag_psSavedBlock(String title, int count);
+
+  /// No description provided for @ag_psCopyItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy this {unit}\'s prompt'**
+  String ag_psCopyItem(String unit);
+
+  /// No description provided for @ag_psCopyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get ag_psCopyAll;
+
+  /// No description provided for @ag_psEditItem.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask Agent to edit this {unit}'**
+  String ag_psEditItem(String unit);
+
+  /// No description provided for @ag_psEditDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit “{title}”, {unit} {index} ({item}): '**
+  String ag_psEditDraft(String title, int index, String unit, String item);
+
+  /// No description provided for @ag_psTooManyCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'The current model supports up to {count} characters'**
+  String ag_psTooManyCharacters(int count);
+
+  /// No description provided for @ag_psNoCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'The current model doesn\'t support character prompts'**
+  String get ag_psNoCharacters;
+
+  /// No description provided for @ag_psMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This card\'s data is no longer available'**
+  String get ag_psMissing;
 }
 
 class _AppLocalizationsDelegate

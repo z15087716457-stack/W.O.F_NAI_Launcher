@@ -18,14 +18,40 @@ import '../generation/image_workflow_snapshot.dart';
 import '../prompt_block_library_provider.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import 'nai_agent_generation_approvals.dart';
+import '../style_explore/explore_run_runner.dart';
+import '../generation/local_upscale_provider.dart';
+import '../generation/cloud_upscale_provider.dart';
+import '../director_tools_notifier.dart';
+import '../krita/krita_bridge_notifier.dart';
+
+/// Same native busy boundary for model calls and idle prompt-set buttons.
+bool naiAgentGenerationBusy(Ref ref) =>
+    ref.read(imageGenerationNotifierProvider).isGenerating ||
+    (ref.exists(exploreRunRunnerProvider) &&
+        ref.read(exploreRunRunnerProvider).isRunning) ||
+    (ref.exists(imageWorkflowControllerProvider) &&
+        ref.read(imageWorkflowControllerProvider).isToolRunning) ||
+    (ref.exists(localUpscaleTaskProvider) &&
+        ref.read(localUpscaleTaskProvider).running) ||
+    (ref.exists(cloudUpscaleTaskProvider) &&
+        ref.read(cloudUpscaleTaskProvider).running) ||
+    (ref.exists(directorToolsNotifierProvider) &&
+        ref.read(directorToolsNotifierProvider).isRunning) ||
+    (ref.exists(kritaBridgeNotifierProvider) &&
+        ref.read(kritaBridgeNotifierProvider).isBridgeGenerating);
 
 NaiAgentGenerationTools bindNaiAgentGeneration(
   Ref ref,
   Directory workspace,
   NaiAgentConversationOwner owner,
   bool Function() busy,
-  bool Function() alive,
-) {
+  bool Function() alive, {
+  Future<Map<String, dynamic>> Function(
+    Map<String, dynamic>,
+    List<GeneratedImage>,
+  )?
+  completed,
+}) {
   NaiAgentGenerationInput read(Map<String, dynamic> params) {
     final current = ref.read(generationParamsNotifierProvider);
     final requests = params['requests'] as int? ?? current.nSamples;
@@ -146,7 +172,8 @@ NaiAgentGenerationTools bindNaiAgentGeneration(
           }, backup: true);
       return saved['path'] as String;
     },
-    start: (input) => startNaiAgentNativeGeneration(ref, input, alive),
+    start: (input) =>
+        startNaiAgentNativeGeneration(ref, input, alive, completed: completed),
   );
 }
 

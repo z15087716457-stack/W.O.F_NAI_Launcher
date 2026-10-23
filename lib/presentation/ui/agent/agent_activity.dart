@@ -26,6 +26,7 @@ AgentActivityKind agentActivityKind(String tool) => switch (tool) {
   'read' => AgentActivityKind.read,
   'bash' || 'codemode' || 'code_mode' => AgentActivityKind.run,
   'image_read' || 'image_tool' => AgentActivityKind.image,
+  'prompt_set' ||
   'prompt_update' ||
   'block_manage' ||
   'settings_update' ||

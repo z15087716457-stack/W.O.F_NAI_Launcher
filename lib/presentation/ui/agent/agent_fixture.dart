@@ -15,6 +15,7 @@ enum AgentScene {
   empty,
   error,
   approval,
+  promptSets,
 }
 
 abstract final class AgentFixture {
@@ -252,7 +253,140 @@ abstract final class AgentFixture {
     ],
   ];
 
+  static AgentPromptSet promptSet({bool ordered = true}) => AgentPromptSet(
+    setId: ordered ? '012345abcdef' : 'fedcba543210',
+    revision: ordered ? 2 : 1,
+    kind: ordered ? '分镜卡' : '试衣卡',
+    kindIcon: ordered ? 'film' : 'shirt',
+    title: ordered ? '雨夜咖啡馆' : '夏日衣橱',
+    unit: ordered ? '幕' : '套',
+    ordered: ordered,
+    shared: const AgentPromptSetShared(
+      main:
+          'masterpiece, best quality, very aesthetic, absurdres, cinematic lighting, film grain, night, rain, 1girl, solo',
+      characters: [
+        'girl, silver hair, long hair, blue eyes, white blouse, black skirt, black pantyhose, ribbon',
+      ],
+      negative:
+          'lowres, bad anatomy, bad hands, text, watermark, blurry, jpeg artifacts, extra digits',
+    ),
+    items: ordered
+        ? [
+            for (final entry in [
+              (
+                'rain',
+                '大雨',
+                '夜里突然下起大雨，她在街上小跑，找地方躲雨。',
+                'city street, heavy rain, running, wide shot',
+                'running, wet hair, holding bag over head',
+              ),
+              (
+                'door',
+                '推门',
+                '街角咖啡馆还亮着灯，她推门进去，风铃响了。',
+                'cafe entrance, warm light from inside, door bell',
+                'opening door, looking inside, wet clothes',
+              ),
+              (
+                'umbrella',
+                '借伞的人',
+                '门口只剩一把黑伞，旁边贴着“请自取”。',
+                'umbrella stand, note on wall, close-up',
+                'curious, hand on chin',
+              ),
+              (
+                'coffee',
+                '热可可',
+                '她捧着杯子慢慢暖和起来。',
+                'cafe interior, window seat, bokeh',
+                'sitting, holding mug, slight smile',
+              ),
+              (
+                'sun',
+                '雨停的早晨',
+                '第二天放晴，她把伞还回来，店里洒满阳光。',
+                'morning, sunlight, light rays, daytime',
+                'returning umbrella, bowing, happy',
+              ),
+              (
+                'mail',
+                '留言',
+                '伞柄上挂着一张没署名的小卡片。',
+                'close-up, small card',
+                'reading card, blush',
+              ),
+              (
+                'music',
+                '唱片机',
+                '她跟着老唱片的节奏轻轻晃脚。',
+                'record player, cozy cafe',
+                'sitting, eyes closed, listening',
+              ),
+              (
+                'heart',
+                '再来一次',
+                '雨又开始下了，她这次是特意来的。',
+                'night, rain, through window',
+                'holding black umbrella, smiling',
+              ),
+            ])
+              AgentPromptSetItem(
+                icon: entry.$1,
+                title: entry.$2,
+                note: entry.$3,
+                main: entry.$4,
+                characters: [entry.$5],
+              ),
+          ]
+        : [
+            for (final entry in [
+              ('dress', '白色连衣裙', 'white sundress, straw hat, sandals'),
+              ('flag', '水手服', 'serafuku, red neckerchief'),
+              ('leaf', '浴衣', 'yukata, floral print'),
+              ('bolt', '运动套装', 'sportswear, ponytail'),
+              ('hat', '牛仔背带', 'denim overalls, bucket hat'),
+              ('snow', '针织开衫', 'thin knit cardigan, long skirt'),
+            ])
+              AgentPromptSetItem(
+                icon: entry.$1,
+                title: entry.$2,
+                note: '只替换衣服和配饰，保持同一个角色。',
+                characters: [entry.$3],
+              ),
+          ],
+    changedItems: ordered ? [4] : [],
+    unitAnlas: 5,
+    images: ordered
+        ? {
+            0: [img('ps-rain')],
+            2: [img('ps-umbrella-1'), img('ps-umbrella-2')],
+          }
+        : {},
+  );
+
   static List<AgentTurn> thread(AgentScene s) {
+    if (s == AgentScene.promptSets) {
+      return [
+        AgentTurn(
+          id: 'prompt-sets',
+          user: AgentUserMessage(text: '设计一个雨夜咖啡馆的 8 幕故事，再出几套衣服。', at: now),
+          reply: AgentReply(
+            blocks: [
+              AgentPromptSetBlock(
+                setId: '012345abcdef',
+                revision: 2,
+                data: promptSet(),
+              ),
+              AgentPromptSetBlock(
+                setId: 'fedcba543210',
+                revision: 1,
+                data: promptSet(ordered: false),
+              ),
+            ],
+          ),
+        ),
+      ];
+    }
     final blocks = <AgentBlock>[
       AgentStepsBlock(_steps(s)),
       const AgentTextBlock(

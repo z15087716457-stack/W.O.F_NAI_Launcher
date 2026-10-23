@@ -64,6 +64,9 @@ import 'agent_quick.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
 import 'agent_thread_mapper.dart';
+import '../../../core/nai_agent/prompt_set_tools.dart';
+import 'agent_prompt_set_actions.dart';
+import 'agent_prompt_set_mapper.dart';
 
 /// The only provider-aware adapter for the sidebar. The controller and Dart
 /// paid gates retain ownership; AgentPanel receives read-only projections.
@@ -81,6 +84,119 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   var _revision = 0;
   AgentThreadMapping? _mapping;
   final _recentImages = <String, AgentImage>{};
+  final _promptImports = <String, AgentPromptSetImport>{};
+  final _promptBusy = <String, int>{};
+  final _promptTokens = <NaiAgentCancellation>{};
+  String? _promptOwner;
+
+  String _promptKey(AgentChatRuntime r, String id) =>
+      '${r.workspace.id}/${r.chat.id}/$id';
+
+  Future<bool> _promptAction(
+    AgentChatRuntime r,
+    String id,
+    int index,
+    AgentPromptSetAction action,
+  ) async {
+    final key = _promptKey(r, id);
+    final service = ref.read(agentPromptSetActionsProvider);
+    void toast(String text) {
+      if (mounted) AppToast.info(context, text);
+    }
+
+    if (action == AgentPromptSetAction.undo) {
+      final entry = _promptImports[key];
+      if (entry == null) return false;
+      final ok = await ref
+          .read(agentDiffUndoProvider)
+          .restoreAll(entry.restores, r.workspace.agentDirectory);
+      if (ok) {
+        _promptImports.remove(key);
+        if (mounted) setState(() => _revision++);
+      }
+      return ok;
+    }
+    if (_promptBusy.containsKey(key)) return false;
+    final set = await NaiAgentPromptSets(r.workspace.agentDirectory).read(id);
+    if (!mounted ||
+        !identical(controller.selected, r) ||
+        set == null ||
+        index >= (set['items'] as List).length) {
+      return false;
+    }
+    if (_promptBusy.containsKey(key)) return false;
+    switch (action) {
+      case AgentPromptSetAction.import:
+      case AgentPromptSetAction.generate:
+        final token = NaiAgentCancellation();
+        _promptTokens.add(token);
+        setState(() => _promptBusy[key] = index);
+        try {
+          final imported = await service.importItem(
+            r.workspace,
+            set,
+            index,
+            toast,
+            check: token.check,
+          );
+          if (imported == null) return false;
+          _promptImports[key] = imported;
+          if (mounted) setState(() => _revision++);
+          if (action == AgentPromptSetAction.generate) {
+            token.check();
+            await ref.read(promptBlockLibraryNotifierProvider.future);
+            final generation = ref.read(
+              agentPromptSetGenerationProvider((
+                r.workspace.directory.path,
+                r.workspace.id,
+                r.chat.id,
+              )),
+            );
+            final response = await generation.requestUserGeneration(token);
+            if (agentMap(response['details'])['status'] == 'cancelled' &&
+                mounted) {
+              toast(context.l10n.ag_cancel);
+            }
+            await recordAgentPromptSetImages(
+              workspace: r.workspace,
+              setId: id,
+              index: index,
+              result: agentMap(response['details']),
+              check: token.check,
+            );
+            _resources.refreshPromptSets();
+          }
+          return true;
+        } on NaiAgentToolError catch (error) {
+          if (mounted) AppToast.error(context, error.message);
+          return true; // Already presented the native generation error.
+        } finally {
+          _promptTokens.remove(token);
+          _promptBusy.remove(key);
+          if (mounted) setState(() => _revision++);
+        }
+      case AgentPromptSetAction.saveBlock:
+        await service.saveBlock(set);
+        if (!mounted) return true;
+        toast(
+          context.l10n.ag_psSavedBlock(
+            set['title'] as String,
+            (set['items'] as List).length,
+          ),
+        );
+        return true;
+      case AgentPromptSetAction.copyItem:
+      case AgentPromptSetAction.copyAll:
+        await service.copy(
+          set,
+          action == AgentPromptSetAction.copyItem ? index : null,
+        );
+        if (mounted) toast(context.l10n.ag_copied);
+        return true;
+      case AgentPromptSetAction.undo:
+        return false;
+    }
+  }
 
   void _resourceChanged() {
     if (mounted) setState(() => _revision++);
@@ -109,6 +225,9 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    for (final token in _promptTokens) {
+      token.cancel();
+    }
     _resources.dispose();
     super.dispose();
   }
@@ -373,6 +492,31 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   Widget build(BuildContext context) {
     final c = ref.watch(naiAgentControllerProvider), r = c.selected;
     final l = context.l10n;
+    final ownerKey = r == null ? null : '${r.workspace.id}/${r.chat.id}';
+    if (_promptOwner != ownerKey) {
+      for (final token in _promptTokens) {
+        token.cancel();
+      }
+      _promptOwner = ownerKey;
+    }
+    int? promptPrice;
+    if (r != null && ref.exists(generationParamsNotifierProvider)) {
+      final generation = ref.watch(
+        agentPromptSetGenerationProvider((
+          r.workspace.directory.path,
+          r.workspace.id,
+          r.chat.id,
+        )),
+      );
+      try {
+        promptPrice = generation.readInput({
+          'requests': 1,
+          'images_per_request': 1,
+        }).estimate;
+      } catch (_) {
+        /* Unknown quote: no price pill. */
+      }
+    }
     final questions = ref.watch(naiAgentQuestionsProvider);
     final generations = ref.watch(naiAgentGenerationApprovalsProvider);
     final imageApprovals = ref.watch(naiAgentImageApprovalsProvider);
@@ -446,6 +590,20 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             draftVersion: version,
             waitingUser: pending.isNotEmpty,
             preferences: ref.watch(agentPreferencesProvider),
+            promptSetView: (value, images) {
+              final id = value['set_id'] as String;
+              final imported = _promptImports[_promptKey(r, id)];
+              return agentPromptSetData(
+                value,
+                r.workspace,
+                _resources,
+                images,
+                unitAnlas: promptPrice,
+                importedIndex: imported?.index,
+                canUndoImport: imported != null && imported.version == version,
+                busyIndex: _promptBusy[_promptKey(r, id)],
+              );
+            },
           );
     _mapping = mapping;
     final recent = <String, AgentImage>{};
@@ -690,6 +848,8 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       ),
     );
     final actions = AgentActions(
+      onPromptSetAction: (id, index, action) async =>
+          r != null && await _promptAction(r, id, index, action),
       onClose: () =>
           _background(ref.read(naiAgentWindowControllerProvider).close),
       onNewChat: () => _run(c.createChat),

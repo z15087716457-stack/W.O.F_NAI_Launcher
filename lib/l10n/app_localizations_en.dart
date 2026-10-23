@@ -21972,4 +21972,106 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mp_errorRateLimit => 'Rate limit exceeded';
+
+  @override
+  String get ag_tool_prompt_set => 'Prompt set';
+
+  @override
+  String ag_psCount(int count, String unit) {
+    return '$count $unit';
+  }
+
+  @override
+  String ag_psPosition(int index, int count, String unit) {
+    return '$unit $index / $count';
+  }
+
+  @override
+  String get ag_psOverview => 'Show all';
+
+  @override
+  String get ag_psSingle => 'Back to one';
+
+  @override
+  String get ag_psPrompt => 'Prompt';
+
+  @override
+  String get ag_psShared => 'Shared';
+
+  @override
+  String ag_psThisItem(String unit) {
+    return 'This $unit';
+  }
+
+  @override
+  String get ag_psMain => 'Main prompt';
+
+  @override
+  String ag_psCharacter(int index) {
+    return 'Character $index';
+  }
+
+  @override
+  String get ag_psNegative => 'Negative';
+
+  @override
+  String get ag_psImport => 'Import to canvas';
+
+  @override
+  String get ag_psImportTip =>
+      'Writes the main prompt, characters and negative; parameters and references stay as they are';
+
+  @override
+  String ag_psImported(String title) {
+    return 'Imported “$title” into the prompt';
+  }
+
+  @override
+  String get ag_psGenerate => 'Generate';
+
+  @override
+  String get ag_psGenerating => 'Generating';
+
+  @override
+  String ag_psRevision(int revision, int count) {
+    return 'v$revision · $count changed';
+  }
+
+  @override
+  String get ag_psSaveBlock => 'Save as block';
+
+  @override
+  String ag_psSavedBlock(String title, int count) {
+    return 'Saved block “$title” · $count items';
+  }
+
+  @override
+  String ag_psCopyItem(String unit) {
+    return 'Copy this $unit\'s prompt';
+  }
+
+  @override
+  String get ag_psCopyAll => 'Copy all';
+
+  @override
+  String ag_psEditItem(String unit) {
+    return 'Ask Agent to edit this $unit';
+  }
+
+  @override
+  String ag_psEditDraft(String title, int index, String unit, String item) {
+    return 'Edit “$title”, $unit $index ($item): ';
+  }
+
+  @override
+  String ag_psTooManyCharacters(int count) {
+    return 'The current model supports up to $count characters';
+  }
+
+  @override
+  String get ag_psNoCharacters =>
+      'The current model doesn\'t support character prompts';
+
+  @override
+  String get ag_psMissing => 'This card\'s data is no longer available';
 }

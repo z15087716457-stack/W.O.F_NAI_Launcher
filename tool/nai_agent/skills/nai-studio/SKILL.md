@@ -27,6 +27,7 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 
 | Task | Tool | Details |
 |---|---|---|
+| Story / outfit / variation prompt sets | `prompt_set` | [prompt-sets.md](references/prompt-sets.md) |
 | Edit prompts | `prompt_update` | `nai-prompt` skill |
 | Quote / generate / stop | `generation_prepare`, `generation_run`, `generation_cancel` | [generation.md](references/generation.md) |
 | Variations, enhance, upscale, Pixel Snap, cloud tools | `image_generate`, `image_tool` | [image-tools.md](references/image-tools.md) |
