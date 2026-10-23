@@ -26,7 +26,7 @@ import 'presentation/providers/subscription_provider.dart'
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 import 'presentation/wiring/nai_agent_generation_host.dart';
-import 'presentation/widgets/navigation/window_resize_viewport.dart';
+import 'presentation/widgets/navigation/window_resize_scope.dart';
 
 double windowCaptionHeightForRoute(String path) => switch (path) {
   AppRoutes.localGallery => 62,
@@ -211,7 +211,7 @@ class NAILauncherApp extends ConsumerWidget {
                   onToggleTheme: () =>
                       ref.read(themeNotifierProvider.notifier).nextTheme(),
                   child: NumpadEditingShortcuts(
-                    child: WindowResizeViewport(
+                    child: WindowResizeScope(
                       child: child ?? const SizedBox.shrink(),
                     ),
                   ),

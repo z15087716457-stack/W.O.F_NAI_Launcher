@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:nai_launcher/presentation/widgets/navigation/window_resize_viewport.dart';
+import 'package:nai_launcher/presentation/widgets/navigation/window_resize_scope.dart';
 import 'package:window_manager/window_manager.dart';
 
 void _event({required bool end}) {
@@ -74,9 +74,7 @@ void main() {
     const Size(800, 400),
     const Size(1100, 850),
   ]) {
-    testWidgets('native drag retains layout until release at $target', (
-      t,
-    ) async {
+    testWidgets('native drag lays out every live size at $target', (t) async {
       t.view.devicePixelRatio = 1;
       t.view.physicalSize = const Size(800, 600);
       addTearDown(t.view.resetDevicePixelRatio);
@@ -86,7 +84,7 @@ void main() {
       addTearDown(editor.dispose);
       await t.pumpWidget(
         MaterialApp(
-          builder: (context, child) => WindowResizeViewport(child: child!),
+          builder: (context, child) => WindowResizeScope(child: child!),
           home: _Probe(
             counts,
             child: Scaffold(body: TextField(controller: editor)),
@@ -98,18 +96,21 @@ void main() {
       _event(end: false);
       await t.pump();
       final before = (counts.builds, counts.layouts);
+      final fieldHeight = t.getSize(find.byType(TextField)).height;
       for (var step = 1; step <= 12; step++) {
         _event(end: false);
         await _size(t, Size.lerp(const Size(800, 600), target, step / 12)!);
-        expect((counts.builds, counts.layouts), before);
-        expect(counts.media, const Size(800, 600));
-        expect(counts.constraints, const Size(800, 600));
+        final live = Size.lerp(const Size(800, 600), target, step / 12)!;
+        expect(counts.media, live);
+        expect(counts.constraints, live);
+        expect(counts.layouts, before.$2 + step);
+        expect(t.getSize(find.byType(TextField)).height, fieldHeight);
       }
       _event(end: true);
       await t.pump();
       expect(counts.media, target);
       expect(counts.constraints, target);
-      expect(counts.layouts, before.$2 + 1);
+      expect(counts.layouts, before.$2 + 12);
       expect(t.state(find.byType(TextField)), same(state));
       expect(editor.text, 'latest draft');
       expect(t.takeException(), isNull);
@@ -126,7 +127,7 @@ void main() {
     final counts = _Counts();
     await t.pumpWidget(
       MaterialApp(
-        builder: (context, child) => WindowResizeViewport(child: child!),
+        builder: (context, child) => WindowResizeScope(child: child!),
         home: _Probe(counts, child: const SizedBox.expand()),
       ),
     );
@@ -147,7 +148,7 @@ void main() {
     final counts = _Counts();
     await t.pumpWidget(
       MaterialApp(
-        builder: (context, child) => WindowResizeViewport(child: child!),
+        builder: (context, child) => WindowResizeScope(child: child!),
         home: _Probe(counts, child: const SizedBox.expand()),
       ),
     );
@@ -159,74 +160,71 @@ void main() {
     expect(counts.media, const Size(800, 600));
     _event(end: false);
     await _size(t, const Size(900, 800));
-    expect(counts.media, const Size(800, 600));
+    expect(counts.media, const Size(900, 800));
     _event(end: true);
     await t.pump();
     expect(counts.media, const Size(900, 800));
     _event(end: false);
     await _size(t, const Size(1100, 500));
-    expect(counts.media, const Size(900, 800));
+    expect(counts.media, const Size(1100, 500));
     _event(end: true);
     await t.pump();
     expect(counts.media, const Size(1100, 500));
   });
 
   for (final color in [Colors.white, const Color(0xff15191c)]) {
-    testWidgets(
-      'scaled content fills the viewport without blank edges $color',
-      (t) async {
-        t.view.devicePixelRatio = 1;
-        t.view.physicalSize = const Size(800, 600);
-        addTearDown(t.view.resetDevicePixelRatio);
-        addTearDown(t.view.resetPhysicalSize);
-        final key = GlobalKey();
-        await t.pumpWidget(
-          MaterialApp(
-            builder: (context, child) => RepaintBoundary(
-              key: key,
-              child: WindowResizeViewport(child: child!),
-            ),
-            home: ColoredBox(color: color),
+    testWidgets('live content fills the viewport without blank edges $color', (
+      t,
+    ) async {
+      t.view.devicePixelRatio = 1;
+      t.view.physicalSize = const Size(800, 600);
+      addTearDown(t.view.resetDevicePixelRatio);
+      addTearDown(t.view.resetPhysicalSize);
+      final key = GlobalKey();
+      await t.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => RepaintBoundary(
+            key: key,
+            child: WindowResizeScope(child: child!),
           ),
-        );
-        _event(end: false);
-        await _size(t, const Size(1100, 400));
-        await t.runAsync(() async {
-          final image =
-              await (key.currentContext!.findRenderObject()!
-                      as RenderRepaintBoundary)
-                  .toImage();
-          final bytes = (await image.toByteData())!;
-          for (final (x, y) in [(0, 0), (1099, 0), (0, 399), (1099, 399)]) {
-            final offset = (y * image.width + x) * 4;
-            expect(bytes.getUint8(offset), color.r * 255);
-            expect(bytes.getUint8(offset + 1), color.g * 255);
-            expect(bytes.getUint8(offset + 2), color.b * 255);
-            expect(bytes.getUint8(offset + 3), 255);
-          }
-          image.dispose();
-        });
-        _event(end: true);
-        await t.pump();
-      },
-    );
+          home: ColoredBox(color: color),
+        ),
+      );
+      _event(end: false);
+      await _size(t, const Size(1100, 400));
+      await t.runAsync(() async {
+        final image =
+            await (key.currentContext!.findRenderObject()!
+                    as RenderRepaintBoundary)
+                .toImage();
+        final bytes = (await image.toByteData())!;
+        for (final (x, y) in [(0, 0), (1099, 0), (0, 399), (1099, 399)]) {
+          final offset = (y * image.width + x) * 4;
+          expect(bytes.getUint8(offset), color.r * 255);
+          expect(bytes.getUint8(offset + 1), color.g * 255);
+          expect(bytes.getUint8(offset + 2), color.b * 255);
+          expect(bytes.getUint8(offset + 3), 255);
+        }
+        image.dispose();
+      });
+      _event(end: true);
+      await t.pump();
+    });
   }
 
-  testWidgets('listener is removed when the viewport is disposed', (t) async {
+  testWidgets('listener is removed when the scope is disposed', (t) async {
     final before = windowManager.listeners.length;
     await t.pumpWidget(
-      const MaterialApp(home: WindowResizeViewport(child: SizedBox.expand())),
+      const MaterialApp(home: WindowResizeScope(child: SizedBox.expand())),
     );
     expect(windowManager.listeners.length, before + 1);
     await t.pumpWidget(const SizedBox.shrink());
     expect(windowManager.listeners.length, before);
   });
 
-  testWidgets('animations pause during resize and resume on release', (
-    t,
-  ) async {
+  testWidgets('content animations stay live during resize', (t) async {
     await t.pumpWidget(
-      const MaterialApp(home: WindowResizeViewport(child: _AnimatedProbe())),
+      const MaterialApp(home: WindowResizeScope(child: _AnimatedProbe())),
     );
     final state = t.state<_AnimatedProbeState>(find.byType(_AnimatedProbe));
     await t.pump(const Duration(milliseconds: 100));
@@ -234,7 +232,7 @@ void main() {
     await t.pump();
     final value = state.animation.value;
     await t.pump(const Duration(milliseconds: 600));
-    expect(state.animation.value, value);
+    expect(state.animation.value, isNot(value));
     _event(end: true);
     await t.pump();
     await t.pump(const Duration(milliseconds: 70));
@@ -242,9 +240,7 @@ void main() {
     await t.pumpWidget(const SizedBox.shrink());
   });
 
-  testWidgets('release uses current logical size after a DPI change', (
-    t,
-  ) async {
+  testWidgets('resize uses current logical size after a DPI change', (t) async {
     t.view.devicePixelRatio = 1;
     t.view.physicalSize = const Size(800, 600);
     addTearDown(t.view.resetDevicePixelRatio);
@@ -252,14 +248,14 @@ void main() {
     final counts = _Counts();
     await t.pumpWidget(
       MaterialApp(
-        builder: (context, child) => WindowResizeViewport(child: child!),
+        builder: (context, child) => WindowResizeScope(child: child!),
         home: _Probe(counts, child: const SizedBox.expand()),
       ),
     );
     _event(end: false);
     t.view.devicePixelRatio = 2;
     await _size(t, const Size(2000, 1400));
-    expect(counts.media, const Size(800, 600));
+    expect(counts.media, const Size(1000, 700));
     _event(end: true);
     await t.pump();
     expect(counts.media, const Size(1000, 700));

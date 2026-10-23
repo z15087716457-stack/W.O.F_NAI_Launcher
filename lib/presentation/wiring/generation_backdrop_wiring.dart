@@ -10,6 +10,7 @@ import '../providers/simple_output_viewer_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import '../ui/channel/channel_contract.dart';
 import '../ui/channel/channel_layer.dart';
+import '../widgets/common/resize_decoration_cache.dart';
 
 /// Paint and pre-blur only the two sidebar regions. The central canvas retains
 /// its own decoration and the three floating toolbars retain their material.
@@ -92,28 +93,30 @@ class _GenerationPanelBackdropWiringState
           );
           return Positioned.fromRect(
             rect: rect,
-            child: ClipRect(
-              child: RepaintBoundary(
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: -bleed,
-                      top: -bleed,
-                      width: rect.width + bleed * 2,
-                      height: rect.height + bleed * 2,
-                      child: blur
-                          ? ImageFiltered(
-                              imageFilter: ui.ImageFilter.blur(
-                                sigmaX: 10,
-                                sigmaY: 10,
-                                tileMode: ui.TileMode.clamp,
-                              ),
-                              child: scene,
-                            )
-                          : scene,
-                    ),
-                  ],
+            child: ResizeDecorationCache(
+              child: ClipRect(
+                child: RepaintBoundary(
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: -bleed,
+                        top: -bleed,
+                        width: rect.width + bleed * 2,
+                        height: rect.height + bleed * 2,
+                        child: blur
+                            ? ImageFiltered(
+                                imageFilter: ui.ImageFilter.blur(
+                                  sigmaX: 10,
+                                  sigmaY: 10,
+                                  tileMode: ui.TileMode.clamp,
+                                ),
+                                child: scene,
+                              )
+                            : scene,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
