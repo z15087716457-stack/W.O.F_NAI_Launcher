@@ -112,6 +112,12 @@ class FileHashCalculator {
   /// 获取路径对应的哈希
   String? getHashForPath(String path) => _pathToHashMap[path];
 
+  /// A native content change invalidates only this path's hash mapping.
+  void invalidatePath(String path) {
+    final hash = _pathToHashMap.remove(path);
+    if (hash != null) _hashToPathsMap[hash]?.remove(path);
+  }
+
   /// 清除所有缓存
   void clearCache() {
     _pathToHashMap.clear();

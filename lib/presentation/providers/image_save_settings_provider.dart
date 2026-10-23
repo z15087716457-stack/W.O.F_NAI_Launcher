@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/local_storage_service.dart';
+import '../../data/repositories/gallery_folder_repository.dart';
 
 part 'image_save_settings_provider.g.dart';
 
@@ -57,6 +58,7 @@ class ImageSaveSettingsNotifier extends _$ImageSaveSettingsNotifier {
       await storage.setImageSavePath('');
       state = state.copyWith(clearCustomPath: true);
     }
+    GalleryFolderRepository.instance.notifyRootsChanged();
   }
 
   /// 重置为默认路径

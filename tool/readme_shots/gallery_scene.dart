@@ -7,6 +7,7 @@ import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:super_native_extensions/src/native/context.dart';
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -154,6 +155,9 @@ Widget galleryScene(ReadmeData d) {
   }
   return ProviderScope(
     overrides: [
+      galleryFileMonitorProvider.overrideWith(
+        (ref) => fakeGalleryFileMonitor(),
+      ),
       galleryServiceProvider.overrideWith(
         () => FakeGalleryServiceNotifier(
           FakeLocalGalleryService(records, dimensions: dimensions),

@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -17,6 +18,7 @@ import '../../data/models/gallery/nai_image_metadata.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
+import '../../data/services/gallery/gallery_file_changes.dart';
 import '../../data/services/gallery/gallery_group_mode.dart';
 import '../../data/services/gallery/gallery_thumbnail_quality_store.dart';
 import '../../data/services/gallery/gallery_sort.dart';
@@ -31,9 +33,34 @@ import '../../core/rag/rag_gallery_search.dart';
 import 'rag_provider.dart';
 import 'gallery_rag_query_provider.dart';
 import 'collection_provider.dart';
+import 'gallery_category_provider.dart';
 
 part 'local_gallery_provider.freezed.dart';
 part 'local_gallery_provider.g.dart';
+
+final galleryFileMonitorProvider = Provider<GalleryFileMonitor>((ref) {
+  final folders = GalleryFolderRepository.instance;
+  final monitor = GalleryFileMonitor(
+    loadRoots: folders.getAllRootDirs,
+    rootsChanged: folders.rootsChanged,
+    apply: (changes) async {
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .applyFileChanges(changes);
+      await ref
+          .read(galleryCategoryNotifierProvider.notifier)
+          .applyFileChanges(changes);
+    },
+    onError: (error, stack) {
+      AppLogger.e('Gallery file update failed', error, stack, 'LocalGallery');
+      ref
+          .read(localGalleryNotifierProvider.notifier)
+          .reportFileChangeError(error);
+    },
+  );
+  ref.onDispose(() => unawaited(monitor.dispose()));
+  return monitor;
+});
 
 enum LocalGalleryErrorCode {
   permissionDenied,
@@ -884,6 +911,32 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         ),
       );
     }
+  }
+
+  /// Update event paths while keeping the dataset and unrelated record caches.
+  Future<void> applyFileChanges(GalleryFileChanges changes) async {
+    final service = await getService();
+    final changed = await service.applyFileChanges(changes);
+    if (changed.isEmpty) return;
+    _recordGeneration++;
+    for (final path in changed) {
+      await FileImage(File(path)).evict();
+      final key = galleryFilePathKey(path);
+      _staleRecordKeys.add(key);
+      _unavailableRecordKeys.remove(key);
+    }
+    await _reloadTimeline(newDataset: false);
+  }
+
+  void reportFileChangeError(Object error) {
+    _setState(
+      state.copyWith(
+        error: LocalGalleryError(
+          LocalGalleryErrorCode.refreshFailed,
+          details: error.toString(),
+        ),
+      ),
+    );
   }
 
   /// 添加新生成的图像到画廊（即时显示优化）

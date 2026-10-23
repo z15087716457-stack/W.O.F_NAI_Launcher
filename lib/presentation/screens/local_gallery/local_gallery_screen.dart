@@ -31,7 +31,6 @@ import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
-import '../../providers/gallery_scan_progress_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_focus_provider.dart';
@@ -111,14 +110,19 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   bool _galleryReady = false;
   GalleryNavigationRequest? _handledNavigationRequest;
 
-  // 防抖计时器，防止频繁触发刷新
-  Timer? _refreshDebounceTimer;
+  late final _fileMonitor = ref.read(galleryFileMonitorProvider);
+  bool _pageActive = false;
+  bool _appActive = true;
 
-  // 上次刷新时间，用于限制刷新频率
-  DateTime? _lastRefreshTime;
+  void _updateFileMonitoring() =>
+      _fileMonitor.setActive(_galleryReady && _pageActive && _appActive);
 
-  // 最小刷新间隔（毫秒）
-  static const int _minRefreshIntervalMs = 5000; // 5秒
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _pageActive = TickerMode.valuesOf(context).enabled;
+    _updateFileMonitoring();
+  }
 
   late final Map<String, VoidCallback> _shortcuts = {
     ShortcutIds.previousPage: () => _timelineController.scrollByViewport(-1),
@@ -140,26 +144,29 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
       await _initializeGallery();
       if (!mounted) return;
       _galleryReady = true;
+      try {
+        await _fileMonitor.start();
+      } catch (error) {
+        if (!mounted) return;
+        ref
+            .read(localGalleryNotifierProvider.notifier)
+            .reportFileChangeError(error);
+      }
+      if (!mounted) return;
+      _updateFileMonitoring();
       await _applyNavigationRequest();
       if (mounted && widget.navigationRequest?.addFolder != true) {
         await _showFirstTimeTip();
       }
     });
 
+    _appActive =
+        WidgetsBinding.instance.lifecycleState == null ||
+        WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed;
     _lifecycleListener = AppLifecycleListener(
-      onResume: () {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            _autoRefresh().catchError((e, stack) {
-              AppLogger.e(
-                'Auto refresh on resume failed',
-                e,
-                stack,
-                'LocalGalleryScreen',
-              );
-            });
-          }
-        });
+      onStateChange: (state) {
+        _appActive = state == AppLifecycleState.resumed;
+        _updateFileMonitoring();
       },
     );
   }
@@ -197,15 +204,23 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
 
   @override
   void dispose() {
-    _refreshDebounceTimer?.cancel();
+    _fileMonitor.setActive(false);
     _lifecycleListener?.dispose();
     _shortcutsFocusNode.dispose();
     _searchFocusNode.dispose();
     super.dispose();
   }
 
-  void _refreshGallery() {
-    ref.read(localGalleryNotifierProvider.notifier).refresh();
+  void _refreshGallery() async {
+    await ref.read(localGalleryNotifierProvider.notifier).refresh();
+    if (mounted) {
+      await _fileMonitor.updateRoots();
+    }
+    if (mounted) {
+      await ref
+          .read(galleryCategoryNotifierProvider.notifier)
+          .syncWithFileSystem();
+    }
   }
 
   void _focusSearch() {
@@ -843,60 +858,6 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     if (mounted) {
       AppToast.success(context, context.l10n.localGallery_categoriesSynced);
     }
-  }
-
-  Future<void> _autoRefresh() async {
-    // 取消之前的防抖计时器
-    _refreshDebounceTimer?.cancel();
-
-    // 设置防抖延迟，避免频繁触发
-    _refreshDebounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      if (!mounted) return;
-
-      // 检查当前是否仍在本地画廊页面
-      final router = GoRouter.of(context);
-      final currentPath = router.routeInformationProvider.value.uri.path;
-      if (currentPath != '/local-gallery') {
-        AppLogger.d(
-          '[AutoRefresh] Skipped: not on local gallery page (current: $currentPath)',
-          'LocalGalleryScreen',
-        );
-        return;
-      }
-
-      // 检查刷新频率限制
-      final now = DateTime.now();
-      if (_lastRefreshTime != null) {
-        final elapsed = now.difference(_lastRefreshTime!).inMilliseconds;
-        if (elapsed < _minRefreshIntervalMs) {
-          AppLogger.d(
-            '[AutoRefresh] Skipped: too frequent (${elapsed}ms < ${_minRefreshIntervalMs}ms)',
-            'LocalGalleryScreen',
-          );
-          return;
-        }
-      }
-
-      // 检查是否有扫描正在进行
-      final scanState = ref.read(galleryScanProgressProvider);
-      if (scanState.isScanning) {
-        AppLogger.d(
-          '[AutoRefresh] Skipped: scan in progress',
-          'LocalGalleryScreen',
-        );
-        return;
-      }
-
-      AppLogger.i('[AutoRefresh] Executing auto refresh', 'LocalGalleryScreen');
-      _lastRefreshTime = now;
-
-      await ref
-          .read(localGalleryNotifierProvider.notifier)
-          .refresh(scan: false);
-      await ref
-          .read(galleryCategoryNotifierProvider.notifier)
-          .syncWithFileSystem();
-    });
   }
 
   void _handleKeyEvent(KeyEvent event, BulkOperationState bulkOpState) {

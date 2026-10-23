@@ -10,11 +10,17 @@ import '../../../core/utils/gallery_path_utils.dart';
 import '../../models/gallery/local_image_record.dart';
 import '../../models/gallery/nai_image_metadata.dart';
 import '../image_metadata_service.dart';
+import '../metadata/hash_calculator.dart';
 import 'scan_config.dart';
 import 'scan_state_manager.dart';
 import 'tag_index_import_service.dart';
 
 typedef ExistingFileCacheEntry = (int, int, int, MetadataStatus, DateTime?);
+
+class GalleryFileIndexUpdate {
+  final Map<String, FileStat> files = {};
+  final Set<String> changed = {};
+}
 
 /// 文件处理阶段
 enum FileProcessingStage {
@@ -174,6 +180,101 @@ class GalleryStreamScanner {
   /// an old path after the file and its native index have been relocated.
   Future<T> withFilesystemMutation<T>(Future<T> Function() action) =>
       _scanLock.synchronized(action);
+
+  /// Index only event paths under the same lock used by native file operations.
+  /// Missing paths in this batch provide rename candidates; unrelated files and
+  /// the scan progress state are untouched.
+  Future<GalleryFileIndexUpdate> indexChangedPaths(
+    List<String> paths, {
+    Map<String, String> directoryMoves = const {},
+  }) => _scanLock.synchronized(() async {
+    final result = GalleryFileIndexUpdate();
+    for (final move in directoryMoves.entries) {
+      await _dataSource.relocateDirectoryRecords(move.key, move.value);
+    }
+    final records = await _dataSource.readImagesForPaths(paths);
+    final byPath = {for (final record in records) record.filePath: record};
+    final missing = <String, GalleryImageRecord>{};
+    for (final path in paths) {
+      final stat = await File(path).stat();
+      final record = byPath[path];
+      if (stat.type == FileSystemEntityType.file && record?.isDeleted != true) {
+        result.files[path] = stat;
+      } else if (record != null && !record.isDeleted) {
+        missing[path] = record;
+      }
+    }
+    final pending = <GalleryImageRecord>[];
+    final metadata = <NaiImageMetadata>[];
+    for (final entry in result.files.entries) {
+      final path = entry.key, stat = entry.value;
+      var existing = byPath[path];
+      if (existing == null) {
+        final source = missing.values
+            .where(
+              (record) =>
+                  record.fileSize == stat.size &&
+                  record.modifiedAt.millisecondsSinceEpoch ==
+                      stat.modified.millisecondsSinceEpoch,
+            )
+            .firstOrNull;
+        if (source != null) {
+          await _dataSource.updateFilePath(
+            source.id!,
+            path,
+            newFileName: p.basename(path),
+          );
+          existing = source.copyWith(filePath: path);
+          missing.remove(source.filePath);
+          result.changed.addAll([source.filePath, path]);
+        }
+      }
+      if (existing != null &&
+          existing.fileSize == stat.size &&
+          existing.modifiedAt.millisecondsSinceEpoch ==
+              stat.modified.millisecondsSinceEpoch &&
+          existing.lastScannedAt != null) {
+        continue;
+      }
+      FileHashCalculator().invalidatePath(path);
+      final parsed = await _metadataService.getMetadataForScan(path);
+      final width = parsed?.width, height = parsed?.height;
+      pending.add(
+        GalleryImageRecord(
+          filePath: path,
+          fileName: p.basename(path),
+          fileSize: stat.size,
+          width: width,
+          height: height,
+          aspectRatio: _calculateAspectRatio(width, height),
+          createdAt: existing?.createdAt ?? stat.modified,
+          modifiedAt: stat.modified,
+          indexedAt: DateTime.now(),
+          dateYmd:
+              stat.modified.year * 10000 +
+              stat.modified.month * 100 +
+              stat.modified.day,
+          lastScannedAt: DateTime.now(),
+          metadataStatus: parsed?.hasData == true
+              ? MetadataStatus.success
+              : MetadataStatus.none,
+          resolutionKey: width != null && height != null
+              ? '${width}x$height'
+              : null,
+          isFavorite: existing?.isFavorite ?? false,
+        ),
+      );
+      metadata.add(parsed ?? const NaiImageMetadata());
+      result.changed.add(path);
+    }
+    final ids = await _dataSource.batchUpsertImages(pending);
+    await _dataSource.batchUpsertMetadata([
+      for (var i = 0; i < ids.length; i++) MapEntry(ids[i], metadata[i]),
+    ]);
+    await _dataSource.batchMarkAsDeleted(missing.keys.toList());
+    result.changed.addAll(missing.keys);
+    return result;
+  });
 
   // 统计
   final _statsController = StreamController<StreamScanStats>.broadcast();

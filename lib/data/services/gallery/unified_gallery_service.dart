@@ -8,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/database/database.dart';
+import '../../../core/cache/thumbnail_cache_service.dart';
 import '../../../core/exceptions/gallery_exceptions.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/gallery_path_utils.dart';
@@ -16,6 +17,7 @@ import '../../models/gallery/nai_image_metadata.dart';
 import '../../repositories/gallery_folder_repository.dart';
 import '../image_metadata_service.dart';
 import 'gallery_filter_service.dart';
+import 'gallery_file_changes.dart';
 import 'gallery_sort.dart';
 import 'gallery_stream_scanner.dart';
 import 'scan_state_manager.dart';
@@ -228,6 +230,9 @@ abstract class LocalGalleryService {
   /// 可能抛出：
   /// - [GalleryScanException] 扫描失败
   Future<void> refresh({bool scan = true});
+
+  /// Reconcile native filesystem events without enumerating other directories.
+  Future<Set<String>> applyFileChanges(GalleryFileChanges changes);
 
   /// 立即添加新图像到画廊（不触发全量扫描）
   ///
@@ -1728,6 +1733,105 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   // ============================================================
 
   @override
+  Future<Set<String>> applyFileChanges(GalleryFileChanges changes) async {
+    _ensureInitialized();
+    final folders = GalleryFolderRepository.instance;
+    final roots = [
+      (await folders.getRootPath())!,
+      ...await folders.getExtraRootPaths(),
+    ];
+    bool inLibrary(String path) =>
+        roots.any((root) => galleryPathIsWithin(root, path));
+    final candidates = {
+      for (final path in changes.files)
+        if (inLibrary(path)) galleryFilePathKey(path): path,
+    };
+    final directories = changes.directories
+        .where(
+          (directory) =>
+              inLibrary(directory) &&
+              !changes.directories.any(
+                (parent) =>
+                    parent != directory &&
+                    galleryPathIsWithin(parent, directory),
+              ),
+        )
+        .toList();
+    for (final directory in directories) {
+      for (final file in _allFiles) {
+        if (galleryPathIsWithin(directory, file.path)) {
+          candidates[galleryFilePathKey(file.path)] = file.path;
+        }
+      }
+      if (!await Directory(directory).exists()) continue;
+      await for (final entity in Directory(
+        directory,
+      ).list(recursive: true, followLinks: false)) {
+        if (entity is File &&
+            const ScanConfig().isSupportedExtension(entity.path) &&
+            !const ScanConfig().isThumbnailPath(entity.path)) {
+          candidates[galleryFilePathKey(entity.path)] = entity.path;
+        }
+      }
+    }
+    final tracked = {
+      for (final file in _allFiles) galleryFilePathKey(file.path): file.path,
+    };
+    final paths = [
+      for (final entry in candidates.entries) tracked[entry.key] ?? entry.value,
+    ];
+    final index = await GalleryStreamScanner.instance(dataSource: _dataSource)
+        .indexChangedPaths(
+          paths,
+          directoryMoves: {
+            for (final move in changes.directoryMoves.entries)
+              if (inLibrary(move.key) && inLibrary(move.value))
+                move.key: move.value,
+          },
+        );
+    final changed = index.changed.toSet();
+    for (final path in paths) {
+      if (tracked.containsKey(galleryFilePathKey(path)) !=
+          index.files.containsKey(path)) {
+        changed.add(path);
+      }
+    }
+    if (changed.isEmpty) return changed;
+    removeImagesFromMemory(changed.toList());
+    for (final path in changed) {
+      _dimensions.remove(path);
+      _dimensionsChecked.remove(path);
+      await ThumbnailCacheService.instance.deleteThumbnail(path);
+    }
+    final added = <File>[];
+    for (final path in changed) {
+      final stat = index.files[path];
+      if (stat == null) continue;
+      final file = File(path);
+      _fileStats[path] = (
+        modified: stat.modified,
+        created: stat.modified,
+        size: stat.size,
+        area: 0,
+      );
+      added.add(file);
+    }
+    await _ensureFileStats(added);
+    if (_allFilesNeedsResort) {
+      _allFiles.addAll(added);
+      await _sortFileList(_allFiles);
+      _allFilesNeedsResort = false;
+    } else {
+      for (final file in added) {
+        _allFiles.add(file);
+        _moveFileToSortedPosition(file);
+      }
+    }
+    await applyFilter(_currentFilter);
+    return changed;
+  }
+
+  @override
   Future<void> refresh({bool scan = true}) async {
     _ensureInitialized();
 
@@ -1971,6 +2075,10 @@ class ErrorGalleryService implements LocalGalleryService {
   Future<void> refresh({bool scan = true}) => _throwError();
 
   @override
+  Future<Set<String>> applyFileChanges(GalleryFileChanges changes) =>
+      _throwError();
+
+  @override
   Future<bool> addNewImageImmediately(
     String filePath, {
     NaiImageMetadata? metadata,
@@ -2080,6 +2188,10 @@ class _PlaceholderGalleryService implements LocalGalleryService {
 
   @override
   Future<void> refresh({bool scan = true}) => _throwNotInitialized();
+
+  @override
+  Future<Set<String>> applyFileChanges(GalleryFileChanges changes) =>
+      _throwNotInitialized();
 
   @override
   Future<bool> addNewImageImmediately(

@@ -6,6 +6,7 @@ import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/utils/gallery_storage_layout.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/data/repositories/gallery_category_repository.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_file_changes.dart';
 import 'package:path/path.dart' as p;
 
 void main() {
@@ -61,6 +62,61 @@ void main() {
         galleryUncategorizedFolderName,
       ]);
       expect(await folder.exists(), isTrue);
+    },
+  );
+
+  test(
+    'file events recount only their own folder and aggregate ancestors',
+    () async {
+      final parent = await Directory(
+        p.join(galleryRoot.path, 'parent'),
+      ).create();
+      final sub = await Directory(p.join(parent.path, 'sub')).create();
+      final other = await Directory(p.join(galleryRoot.path, 'other')).create();
+      await File(p.join(sub.path, 'old.png')).create();
+      final initial = await repository.syncWithFileSystem([]);
+      final added = await File(p.join(sub.path, 'new.png')).create();
+      // Deliberately omit this event: a local update must not enumerate it.
+      await File(p.join(other.path, 'unreported.png')).create();
+      final updated = await repository.syncChangedPaths(
+        initial,
+        GalleryFileChanges()..files.add(added.path),
+      );
+      final byName = {for (final category in updated) category.name: category};
+      expect(byName['sub']!.imageCount, 2);
+      expect(byName['parent']!.imageCount, 2);
+      expect(byName['other']!.imageCount, 0);
+      expect(byName['sub']!.id, initial.firstWhere((c) => c.name == 'sub').id);
+    },
+  );
+
+  test(
+    'directory moves preserve category IDs; deleted subtrees disappear',
+    () async {
+      final old = await Directory(p.join(galleryRoot.path, 'old')).create();
+      final sub = await Directory(p.join(old.path, 'sub')).create();
+      await File(p.join(sub.path, 'a.png')).create();
+      final initial = await repository.syncWithFileSystem([]);
+      final target = p.join(galleryRoot.path, 'new');
+      await old.rename(target);
+      final changes = GalleryFileChanges()
+        ..directories.addAll([old.path, target])
+        ..directoryMoves[old.path] = target;
+      final moved = await repository.syncChangedPaths(initial, changes);
+      expect(
+        moved.firstWhere((c) => c.name == 'new').id,
+        initial.firstWhere((c) => c.name == 'old').id,
+      );
+      expect(
+        moved.firstWhere((c) => c.name == 'sub').id,
+        initial.firstWhere((c) => c.name == 'sub').id,
+      );
+      await Directory(target).delete(recursive: true);
+      final removed = await repository.syncChangedPaths(
+        moved,
+        GalleryFileChanges()..directories.add(target),
+      );
+      expect(removed.any((c) => c.name == 'new' || c.name == 'sub'), isFalse);
     },
   );
 

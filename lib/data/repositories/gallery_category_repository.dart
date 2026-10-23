@@ -15,6 +15,7 @@ import '../../core/utils/gallery_storage_layout.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import '../models/gallery/gallery_category.dart';
 import '../services/gallery/gallery_delete_pool_store.dart';
+import '../services/gallery/gallery_file_changes.dart';
 import '../services/gallery/gallery_stream_scanner.dart';
 
 /// 画廊分类仓库
@@ -801,6 +802,135 @@ class GalleryCategoryRepository {
     // 父节点需要递归总数，才能与选中后按路径前缀过滤的实际图数一致
     // （例如外部图库源根节点 01_图库 = 其下所有子目录图片之和）。
     return updatedCategories.withAggregatedImageCounts();
+  }
+
+  /// Recount only event folders; retain all other direct counts and category IDs.
+  Future<List<GalleryCategory>> syncChangedPaths(
+    List<GalleryCategory> existing,
+    GalleryFileChanges changes,
+  ) async {
+    final root = (await getRootPath())!;
+    final roots = [
+      root,
+      ...await GalleryFolderRepository.instance.getExtraRootPaths(),
+    ];
+    final suppressed = await _loadSuppressedFolderPaths();
+    String absolute(GalleryCategory category) => category.isExternal
+        ? category.folderPath
+        : p.join(root, category.folderPath);
+    String stored(String path) =>
+        galleryPathIsWithin(root, path) ? p.relative(path, from: root) : path;
+    final directCounts = {
+      for (final category in existing) category.id: category.imageCount,
+    };
+    for (final category in existing) {
+      final parent = category.parentId;
+      if (parent != null && directCounts.containsKey(parent)) {
+        directCounts[parent] = directCounts[parent]! - category.imageCount;
+      }
+    }
+    final byPath = <String, GalleryCategory>{};
+    for (var category in existing) {
+      var path = absolute(category);
+      for (final move in changes.directoryMoves.entries) {
+        if (galleryPathIsWithin(move.key, path)) {
+          path = p.normalize(
+            p.join(move.value, p.relative(path, from: move.key)),
+          );
+          category = category.copyWith(
+            folderPath: stored(path),
+            name: p.basename(path),
+          );
+        }
+      }
+      byPath[galleryFilePathKey(path)] = category;
+    }
+    final affected = <String>{
+      for (final path in changes.files) p.dirname(path),
+      ...changes.directories,
+    };
+    // A directory move/delete may contain known descendants. Only its own
+    // subtree needs enumeration; ancestors are updated by count aggregation.
+    for (final directory in changes.directories) {
+      for (final category in byPath.values) {
+        if (galleryPathIsWithin(directory, absolute(category))) {
+          affected.add(absolute(category));
+        }
+      }
+      if (await Directory(directory).exists()) {
+        await for (final entity in Directory(
+          directory,
+        ).list(recursive: true, followLinks: false)) {
+          if (entity is Directory) affected.add(entity.path);
+        }
+      }
+    }
+    Future<GalleryCategory?> ensure(String path) async {
+      final key = galleryFilePathKey(path);
+      if (byPath.containsKey(key)) return byPath[key];
+      final owner = roots
+          .where((candidate) => galleryPathIsWithin(candidate, path))
+          .firstOrNull;
+      if (owner == null || galleryFilePathsEqual(path, root)) return null;
+      if (p
+              .split(p.relative(path, from: owner))
+              .any(
+                (part) =>
+                    (part != '.' && part.startsWith('.')) || part == 'thumbs',
+              ) ||
+          suppressed.contains(_normalizeCategoryPath(stored(path)))) {
+        return null;
+      }
+      if (!await Directory(path).exists()) return null;
+      final parent = galleryFilePathsEqual(path, owner)
+          ? null
+          : await ensure(p.dirname(path));
+      if (!galleryFilePathsEqual(path, owner) &&
+          !galleryFilePathsEqual(p.dirname(path), root) &&
+          parent == null) {
+        return null;
+      }
+      final category = GalleryCategory.create(
+        name: p.basename(path),
+        folderPath: stored(path),
+        parentId: parent?.id,
+        sortOrder: byPath.values.where((c) => c.parentId == parent?.id).length,
+      );
+      byPath[key] = category;
+      directCounts[category.id] = await _countImagesInFolder(path);
+      return category;
+    }
+
+    for (final path in affected) {
+      final key = galleryFilePathKey(path);
+      if (!await Directory(path).exists()) {
+        byPath.remove(key);
+      } else {
+        final category = await ensure(path);
+        if (category != null) {
+          directCounts[category.id] = await _countImagesInFolder(path);
+        }
+      }
+    }
+    final direct = [
+      for (final category in byPath.values)
+        category.copyWith(
+          parentId:
+              byPath[galleryFilePathKey(p.dirname(absolute(category)))]?.id,
+          imageCount: directCounts[category.id]!,
+        ),
+    ];
+    final originals = {for (final category in existing) category.id: category};
+    return [
+      for (final category in direct.withAggregatedImageCounts())
+        if (originals[category.id] case final old?)
+          if (category.copyWith(updatedAt: old.updatedAt) == old)
+            old
+          else
+            category
+        else
+          category,
+    ];
   }
 
   /// 递归扫描并添加新文件夹

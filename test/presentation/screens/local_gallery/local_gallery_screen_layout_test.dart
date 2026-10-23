@@ -124,6 +124,36 @@ void main() {
     (const Locale('zh', 'TW'), true, const Size(1600, 1000), 'zh-TW-dark-wide'),
   ];
 
+  testWidgets('repeated app focus changes do not reload the gallery', (
+    tester,
+  ) async {
+    final container = await _pumpScreen(
+      tester,
+      records: records,
+      dimensions: dimensions,
+      locale: const Locale('zh'),
+      dark: false,
+      size: const Size(1600, 1000),
+    );
+    final service =
+        container.read(galleryServiceProvider) as FakeLocalGalleryService;
+    final timelineRequests = service.timelineRequests;
+    final before = container.read(localGalleryNotifierProvider).timeline;
+    for (var i = 0; i < 3; i++) {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pump(const Duration(seconds: 6));
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump(const Duration(seconds: 6));
+    }
+    expect(service.refreshCount, 0);
+    expect(service.timelineRequests, timelineRequests);
+    expect(container.read(localGalleryNotifierProvider).timeline, same(before));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    container.dispose();
+    await tester.pump(const Duration(minutes: 1));
+  });
+
   testWidgets(
     'gallery context action imports original onto canvas and navigates home',
     (tester) async {
@@ -617,6 +647,9 @@ Future<ProviderContainer> _pumpScreen(
   final container = ProviderContainer(
     overrides: [
       ...extraOverrides,
+      galleryFileMonitorProvider.overrideWith(
+        (ref) => fakeGalleryFileMonitor(),
+      ),
       if (translator != null)
         detailPromptTranslatorProvider.overrideWithValue(translator),
       galleryServiceProvider.overrideWith(

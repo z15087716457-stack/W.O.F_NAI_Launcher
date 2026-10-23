@@ -6,6 +6,7 @@ import '../../core/utils/gallery_path_utils.dart';
 import '../../core/utils/gallery_storage_layout.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/repositories/gallery_category_repository.dart';
+import '../../data/services/gallery/gallery_file_changes.dart';
 import '../../data/repositories/gallery_folder_repository.dart';
 import 'category_operation_error.dart';
 
@@ -234,6 +235,24 @@ class GalleryCategoryNotifier extends _$GalleryCategoryNotifier {
         ),
       );
     }
+  }
+
+  /// Apply directory events without synchronizing unrelated folders.
+  Future<void> applyFileChanges(GalleryFileChanges changes) async {
+    await _loadInFlight;
+    await _syncInFlight;
+    final categories = await _repository.syncChangedPaths(
+      state.categories,
+      changes,
+    );
+    if (categories.length == state.categories.length &&
+        Iterable<int>.generate(categories.length).every(
+          (index) => identical(categories[index], state.categories[index]),
+        )) {
+      return;
+    }
+    await _repository.saveCategories(categories);
+    state = state.copyWith(categories: categories);
   }
 
   /// 选择分类

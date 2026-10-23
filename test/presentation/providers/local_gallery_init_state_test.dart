@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_file_changes.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -38,6 +39,42 @@ void main() {
   });
 
   group('LocalGalleryNotifier preference restoration sequence (A-2)', () {
+    test(
+      'file updates retain other records and the current dataset identity',
+      () async {
+        final service = _service();
+        final container = ProviderContainer(
+          overrides: [
+            galleryServiceProvider.overrideWith(
+              () => FakeGalleryServiceNotifier(service),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final notifier = container.read(localGalleryNotifierProvider.notifier);
+        await notifier.initialize();
+        await notifier.loadRecords(['C:/gallery/0.png', 'C:/gallery/1.png']);
+        final cached = notifier.cachedRecord('C:/gallery/1.png');
+        final dataset = container
+            .read(localGalleryNotifierProvider)
+            .timeline
+            .datasetId;
+        service.recordRequests.clear();
+        await notifier.applyFileChanges(
+          GalleryFileChanges()..files.add('C:/gallery/0.png'),
+        );
+        await notifier.loadRecords(['C:/gallery/0.png', 'C:/gallery/1.png']);
+        expect(service.recordRequests, [
+          ['C:/gallery/0.png'],
+        ]);
+        expect(notifier.cachedRecord('C:/gallery/1.png'), same(cached));
+        expect(
+          container.read(localGalleryNotifierProvider).timeline.datasetId,
+          dataset,
+        );
+        expect(service.refreshCount, 0);
+      },
+    );
     test('初始化前设置排序和NAI-only只暂存状态，不触发服务层查询与加载', () async {
       final fakeService = _service();
       final container = ProviderContainer(

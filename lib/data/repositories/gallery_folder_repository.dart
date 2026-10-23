@@ -23,8 +23,9 @@ class GalleryFolderRepository {
 
   final _localStorage = LocalStorageService();
   GalleryDataSource get _dataSource => GalleryDataSource();
-  StreamSubscription<FileSystemEvent>? _watchSubscription;
-  void Function()? _onFoldersChanged;
+  final _rootsChanged = StreamController<void>.broadcast();
+  Stream<void> get rootsChanged => _rootsChanged.stream;
+  void notifyRootsChanged() => _rootsChanged.add(null);
 
   static const _supportedExtensions = {'.png', '.jpg', '.jpeg', '.webp'};
 
@@ -76,6 +77,7 @@ class GalleryFolderRepository {
       if (seen.add(key)) normalized.add(item);
     }
     await _localStorage.setSetting(StorageKeys.galleryExtraRoots, normalized);
+    notifyRootsChanged();
   }
 
   /// 添加额外图库源路径
@@ -454,39 +456,6 @@ class GalleryFolderRepository {
       if (await copyImageToFolder(imagePath, targetFolderPath)) successCount++;
     }
     return successCount;
-  }
-
-  /// 开始监听文件夹变化
-  Future<void> startWatching({void Function()? onChanged}) async {
-    _onFoldersChanged = onChanged;
-
-    final rootPath = await getRootPath();
-    if (rootPath == null || rootPath.isEmpty) return;
-
-    final rootDir = Directory(rootPath);
-    if (!await rootDir.exists()) return;
-
-    await stopWatching();
-
-    try {
-      _watchSubscription = rootDir.watch().listen((event) {
-        if (event is FileSystemCreateEvent || event is FileSystemDeleteEvent) {
-          final entity = FileSystemEntity.typeSync(event.path);
-          if (entity == FileSystemEntityType.directory ||
-              event is FileSystemDeleteEvent) {
-            _onFoldersChanged?.call();
-          }
-        }
-      });
-    } catch (e) {
-      AppLogger.e('启动文件夹监听失败', e);
-    }
-  }
-
-  /// 停止监听
-  Future<void> stopWatching() async {
-    await _watchSubscription?.cancel();
-    _watchSubscription = null;
   }
 
   /// 获取根目录下的图片总数

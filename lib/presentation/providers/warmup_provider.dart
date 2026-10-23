@@ -18,6 +18,7 @@ import '../../data/services/thumbnail_service.dart';
 import 'auth_provider.dart';
 import 'font_provider.dart';
 import 'subscription_provider.dart';
+import 'local_gallery_provider.dart';
 import '../../data/services/vibe_library_migration_service.dart';
 
 part 'warmup_provider.g.dart';
@@ -407,6 +408,7 @@ class WarmupNotifier extends _$WarmupNotifier {
     // L8 性能优化：推迟 2.5 秒启动全局扫描，避免与首屏页面加载争夺磁盘 I/O 和数据库连接
     Future.delayed(const Duration(milliseconds: 2500), () async {
       try {
+        await ref.read(galleryFileMonitorProvider).start();
         // 【修复】读取 provider 会触发 GalleryService 的创建和初始化
         // 但需要等待真正的初始化完成，扫描才会开始
         var attempts = 0;

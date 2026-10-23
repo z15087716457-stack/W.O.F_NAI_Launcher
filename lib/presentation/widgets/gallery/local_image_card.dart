@@ -135,12 +135,32 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
   void didUpdateWidget(LocalImageCard oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.record.path != widget.record.path) {
+    if (oldWidget.record.path != widget.record.path ||
+        oldWidget.record.modifiedAt != widget.record.modifiedAt ||
+        oldWidget.record.size != widget.record.size) {
+      final previousPath = _displayPath;
       _displayPath = null;
       _loadState = _ImageLoadState.idle;
       _failureRetryScheduled = false;
       _failureRetryTimer?.cancel();
-      unawaited(_loadThumbnail());
+      unawaited(() async {
+        if (previousPath != null) {
+          final decode = thumbnailCoverDecodeSize(
+            cardWidth: widget.width,
+            cardHeight: widget.height,
+            imageAspect: _imageAspect,
+            devicePixelRatio: _devicePixelRatio,
+            quality: _requestedQuality!,
+            tier: _requestedSize ?? _pickSizeForCurrentWidth(),
+          );
+          await ResizeImage.resizeIfNeeded(
+            decode.width,
+            decode.height,
+            FileImage(File(previousPath)),
+          ).evict();
+        }
+        if (mounted) await _loadThumbnail();
+      }());
       return;
     }
 
@@ -205,6 +225,13 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
 
     _isLoadingThumbnail = true;
     final path = widget.record.path;
+    final modifiedAt = widget.record.modifiedAt;
+    final fileSize = widget.record.size;
+    bool isCurrent() =>
+        mounted &&
+        widget.record.path == path &&
+        widget.record.modifiedAt == modifiedAt &&
+        widget.record.size == fileSize;
     final fileName = path.split(Platform.pathSeparator).last;
     final quality = ref.read(localGalleryNotifierProvider).thumbnailQuality;
     final size = _pickSizeForCurrentWidth();
@@ -232,7 +259,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       if (existingPath != null) {
         _failureRetryTimer?.cancel();
         _failureRetryScheduled = false;
-        if (mounted && widget.record.path == path) {
+        if (isCurrent()) {
           setState(() {
             _displayPath = existingPath;
             _loadState = _ImageLoadState.loaded;
@@ -255,7 +282,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
         priority: widget.priority,
       );
 
-      if (!mounted || widget.record.path != path) return;
+      if (!isCurrent()) return;
 
       if (generatedPath != null) {
         _failureRetryTimer?.cancel();
@@ -271,14 +298,15 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       }
     } catch (e, stack) {
       AppLogger.e('[CardLoad] ERROR: $fileName', e, stack, 'LocalImageCard');
-      _markThumbnailFailed();
+      if (isCurrent()) _markThumbnailFailed();
     } finally {
       _isLoadingThumbnail = false;
       if (mounted) {
         final currentQuality = ref
             .read(localGalleryNotifierProvider)
             .thumbnailQuality;
-        if (currentQuality != _requestedQuality ||
+        if (!isCurrent() ||
+            currentQuality != _requestedQuality ||
             _pickSizeForCurrentWidth() != _requestedSize) {
           _scheduleDebouncedReload();
         }

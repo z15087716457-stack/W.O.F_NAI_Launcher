@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_file_changes.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 
@@ -15,6 +16,13 @@ class FakeGalleryServiceNotifier extends GalleryService {
   @override
   LocalGalleryService build() => service;
 }
+
+GalleryFileMonitor fakeGalleryFileMonitor() => GalleryFileMonitor(
+  loadRoots: () async => [],
+  rootsChanged: const Stream.empty(),
+  apply: (_) async {},
+  onError: (error, stack) => Error.throwWithStackTrace(error, stack),
+);
 
 /// 内存版本地画廊服务：按给定记录提供时间线、记录与收藏，记录调用次数。
 ///
@@ -41,6 +49,14 @@ class FakeLocalGalleryService implements LocalGalleryService {
   int setSortCount = 0;
   int timelineRequests = 0;
   int refreshCount = 0;
+  final List<GalleryFileChanges> fileChanges = [];
+
+  @override
+  Future<Set<String>> applyFileChanges(GalleryFileChanges changes) async {
+    fileChanges.add(changes);
+    return changes.files;
+  }
+
   final List<List<String>> recordRequests = [];
   final List<String> addedImages = [];
 
