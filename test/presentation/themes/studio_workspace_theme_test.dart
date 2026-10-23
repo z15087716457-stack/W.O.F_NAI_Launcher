@@ -60,6 +60,7 @@ import 'package:nai_launcher/presentation/widgets/settings/studio_theme_picker.d
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/light_theme_contrast.dart';
+import '../../helpers/fake_local_gallery_service.dart';
 import '../../helpers/studio_capture_fonts.dart';
 
 class _Palette extends PromptBlockPaletteNotifier {
@@ -258,6 +259,9 @@ void main() {
         await tester.pumpWidget(
           ProviderScope(
             overrides: [
+              galleryFileMonitorProvider.overrideWith(
+                (ref) => fakeGalleryFileMonitor(),
+              ),
               onlineGalleryNotifierProvider.overrideWith(_Online.new),
               generationParamsNotifierProvider.overrideWith(_OnlineParams.new),
               characterPromptNotifierProvider.overrideWith(
