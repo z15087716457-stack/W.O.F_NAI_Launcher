@@ -160,6 +160,18 @@ void main() {
       expect(r.last('onNegativeTab'), 'onNegativeTab(true)');
     });
 
+    testWidgets('没有角色时第一个页签同样叫“基础提示词”', (t) async {
+      await pump(t, GenFixture.empty());
+      expect(find.text('基础提示词'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('gen-tab-positive')),
+          matching: find.text('正面'),
+        ),
+        findsNothing,
+      );
+    });
+
     testWidgets('编辑器槽位按目标填：基础正面 + 角色 0 正面', (t) async {
       final targets = <GenEditorTarget>[];
       await pumpGen(

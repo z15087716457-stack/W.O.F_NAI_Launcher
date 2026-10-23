@@ -761,6 +761,20 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('delete undo notice dismisses itself after a few seconds', (
+    tester,
+  ) async {
+    await mount(tester, const BlocksLibraryWiring());
+    page(tester).actions.onDelete([blockId]);
+    await flush(tester);
+    expect(find.text('撤销'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(find.text('撤销'), findsNothing);
+    expect(backend.library.blocks, isEmpty);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'repeated library reveal clears filters and reselects the same block',
     (tester) async {

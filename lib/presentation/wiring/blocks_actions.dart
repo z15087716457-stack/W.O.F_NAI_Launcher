@@ -16,6 +16,7 @@ import '../providers/pill_roll_coordinator.dart';
 import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../router/app_router.dart';
+import '../widgets/common/undo_snack_bar.dart';
 import '../widgets/prompt/blocks/curation_import_preview_dialog.dart';
 import '../widgets/prompt/blocks/prompt_block_folder_delete_dialog.dart';
 import '../ui/blocks/blocks_contract.dart';
@@ -276,12 +277,10 @@ class BlocksActions {
     final deletion = await run(() => service.delete(ids));
     if (deletion == null || (!alive() || !context.mounted)) return;
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(
+      undoSnackBar(
         content: Text(context.l10n.promptBlockLibrary_deleted),
-        action: SnackBarAction(
-          label: context.l10n.common_undo,
-          onPressed: () => unawaited(run(() => service.undo(deletion))),
-        ),
+        undoLabel: context.l10n.common_undo,
+        onUndo: () => unawaited(run(() => service.undo(deletion))),
       ),
     );
   }

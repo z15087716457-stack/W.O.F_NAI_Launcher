@@ -108,7 +108,6 @@ class _PromptHead extends StatelessWidget {
     final data = scope.data;
     final p = data.prompt;
     final l = context.l10n;
-    final hasChars = data.characters?.list.isNotEmpty ?? false;
     final tools = p.tools;
     return Row(
       spacing: 2,
@@ -123,7 +122,7 @@ class _PromptHead extends StatelessWidget {
                   title: l.gen_finalPositive,
                   child: GenTab(
                     key: const Key('gen-tab-positive'),
-                    label: hasChars ? l.gen_basePrompt : l.gen_positive,
+                    label: l.gen_basePrompt,
                     selected: !p.negative,
                     onTap: () => scope.actions.onNegativeTab(false),
                   ),
