@@ -172,7 +172,10 @@ void main() {
       expect(calls.last, contains('pool: [circuit, stars, herb]'));
 
       await tapKey(t, 'channel-reroll');
-      expect(calls.last, isNot(contains('seed: $channelSeed')));
+      final seed = int.parse(
+        RegExp(r'seed: (\d+)').firstMatch(calls.last)!.group(1)!,
+      );
+      expect(seed, isNot(channelSeed));
     });
 
     testWidgets('关闭时卡片和开关不可点', (t) async {
