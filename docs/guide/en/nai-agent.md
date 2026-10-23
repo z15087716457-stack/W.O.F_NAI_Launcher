@@ -59,7 +59,7 @@ Ask it to write several prompts at once (a few story scenes, a set of outfits, s
 - **Switch items**: use the left and right arrows, the small icons below, or the keyboard ← → keys after selecting the card. The grid button at the top right shows all items at once.
 - **Prompts**: collapsed by default. When expanded, gray text shows the settings shared by every item (style, character appearance and negative prompt), while highlighted text is specific to this item. Shared text farther away is abbreviated with “…”; click “Show all” to read the full original text.
 - **Import to canvas**: writes only this item’s main prompt, characters and negative prompt into the draft. Parameters, seed, size and reference images stay unchanged. You can undo the import from the card. If Agent has placed the characters (for example, one on the left and one on the right), expanding the prompts shows a small position board, and importing writes those positions too. Prompt sets without positions don’t show the board.
-- **Generate**: imports this item first, then opens the price card. After you confirm, it generates **1 image**. If you are not happy with it, click again for a fresh result. Generated images stay below that item, and its small icon gets a green dot.
+- **Generate**: one click imports the current item and generates **1 image**, with no second confirmation at the bottom of the conversation. Studio still checks the price, balance and current state before starting. If you are not happy with it, click again for a fresh result. Generated images stay below that item, and its small icon gets a green dot.
 - **⋯ menu**: “Save as block” (one entry per item; you can set it to sequential or random later), “Copy this item's prompt” or “Copy all,” and “Ask Agent to edit this item.”
 - **Revisions**: ask Agent to “Make scene 5 daytime,” and it updates the same card directly. The card shows “v2 · 1 changed,” and edited items get a yellow dot. The card and its generated images are still there after a restart.
 
@@ -98,6 +98,8 @@ In “Ask” mode, this card appears before changes, deletions, moves or command
 <img src="../../images/readme/en/agent-card-gate.webp" alt="Price confirmation card" width="460">
 
 When Agent wants to generate images, make variations / enhance images or use cloud image tools, it first shows this price card: model and size, number of requests, unit price, reference image encoding cost, total and current balance. Studio calculates the price; the model cannot change it. **Anlas is spent only when you click “Confirm & generate”**, at every permission level. Quotes expire; if the configuration changes or the quote expires, ask Agent to prepare it again.
+
+The prompt-set card is a direct user control: clicking its “Generate” button authorizes one image for that item, so no additional price confirmation card appears. The confirmation requirement above still applies when the model calls generation tools itself.
 
 ### Outputs and summary
 

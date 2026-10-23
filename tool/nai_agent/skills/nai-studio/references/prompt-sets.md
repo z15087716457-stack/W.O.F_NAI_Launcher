@@ -17,4 +17,4 @@ text(await tools.mcp__nai_studio__prompt_set({
 }));
 ```
 
-Keep the returned set_id/revision. Later use read(set_id), then update with that SAME id, expected_revision and FULL new content; do not create a duplicate. Updates mark changed indexes and preserve generated images. The card imports or generates one item per user click, with native price/balance confirmation. Do not also call prompt_update/generation unless asked.
+Keep the returned set_id/revision. Later use read(set_id), then update with that SAME id, expected_revision and FULL new content; do not create a duplicate. Updates mark changed indexes and preserve generated images. The card imports one item per user click. A human click on the card’s Generate button directly authorizes ONE image of the current item: there is no second price gate. The per-item price pill and native price/balance/readiness checks remain. This authorization is only for that human UI action; model generation calls (generation_run, image_generate/image_tool/explore run) still require genuine native approval, including 0 Anlas and all permission modes. Do not also call prompt_update/generation unless asked.

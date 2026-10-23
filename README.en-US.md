@@ -107,7 +107,7 @@ An optional component. Once enabled, tag suggestions, Tag Wiki, the block librar
 Open the sidebar on the generation or Style Explore page and chat with an AI to edit prompts, look up tags and wiki entries, organize blocks and images, set reference images, or even prepare a generation. It uses the model service you configure in “Models & APIs.”
 
 - It asks before making changes, deleting things or running commands. There are four permission levels: Read-only, Ask, Auto and Full access.
-- **Generation that costs Anlas always needs your own confirmation on the price card, at every permission level.**
+- **Model-initiated generation needs your confirmation on the price card at every permission level.** On a prompt-set card, your click on “Generate” directly authorizes one image, with no second confirmation.
 - Write a set of prompts at once (a few story scenes, a set of outfits to try on, or storyboard panels), then switch between items, import to canvas or generate one image at a time from the prompt set card.
 - Supports skills (Skill), MCP servers and CodeMode so you can extend it for your own workflow.
 

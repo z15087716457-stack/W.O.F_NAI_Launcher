@@ -149,10 +149,10 @@ class NaiAgentGenerationTools {
   String? _lastRunId;
   String? get activeId => _active?.id;
 
-  Future<Map<String, dynamic>> prepare(
+  NaiAgentGenerationQuote _prepareQuote(
     Map<String, dynamic> params,
     NaiAgentCancellation token,
-  ) async {
+  ) {
     token.check();
     if (!isAlive()) {
       throw const NaiAgentToolError('closed', 'Studio owner closed');
@@ -166,7 +166,19 @@ class NaiAgentGenerationTools {
         'Use 1 to 999 requests and 1 to 4 images per request',
       );
     }
-    final input = readInput(params);
+    return NaiAgentGenerationQuote(
+      id: const Uuid().v4(),
+      input: readInput(params),
+      params: Map.unmodifiable(params),
+      expiresAt: clock().add(const Duration(minutes: 5)),
+    );
+  }
+
+  Future<Map<String, dynamic>> prepare(
+    Map<String, dynamic> params,
+    NaiAgentCancellation token,
+  ) async {
+    final quote = _prepareQuote(params, token);
     _quotes.removeWhere(
       (_, quote) => !quote.expiresAt.isAfter(clock()) && !quote.reserved,
     );
@@ -180,12 +192,6 @@ class NaiAgentGenerationTools {
       }
       _quotes.remove(disposable.id);
     }
-    final quote = NaiAgentGenerationQuote(
-      id: const Uuid().v4(),
-      input: input,
-      params: Map.unmodifiable(params),
-      expiresAt: clock().add(const Duration(minutes: 5)),
-    );
     _quotes[quote.id] = quote;
     return naiAgentTextResult({'quote': quote.toJson()});
   }
@@ -202,6 +208,14 @@ class NaiAgentGenerationTools {
         'Prepare a new generation quote in this chat',
       );
     }
+    return _run(quote, token);
+  }
+
+  Future<Map<String, dynamic>> _run(
+    NaiAgentGenerationQuote quote,
+    NaiAgentCancellation token, {
+    bool userButton = false,
+  }) async {
     if (quote.reserved) {
       throw const NaiAgentToolError(
         'quote_in_use',
@@ -234,7 +248,7 @@ class NaiAgentGenerationTools {
     quote.reserved = true;
     try {
       check();
-      if (!quote.approved) {
+      if (!userButton && !quote.approved) {
         final accepted = await approve(quote, token, check);
         if (!accepted) {
           _quotes.remove(quote.id);
@@ -284,17 +298,18 @@ class NaiAgentGenerationTools {
     }
   }
 
-  /// UI actions use the exact same quote, approval, recheck and native start.
+  /// Only the human prompt-set card action calls this Dart entry point. That
+  /// click authorizes one image, not a reusable approval for a model tool.
+  /// Keep its fresh quote out of _quotes, including on backup/admission failure.
+  /// All readiness, backup, rechecks, native ownership and collection stay in
+  /// the shared pipeline. No model parameter can select this authorization.
   Future<Map<String, dynamic>> requestUserGeneration(
     NaiAgentCancellation token,
-  ) async {
-    final prepared = await prepare({
-      'requests': 1,
-      'images_per_request': 1,
-    }, token);
-    final quote = (prepared['details'] as Map)['quote'] as Map;
-    return run({'quote_id': quote['quote_id']}, token);
-  }
+  ) async => _run(
+    _prepareQuote({'requests': 1, 'images_per_request': 1}, token),
+    token,
+    userButton: true,
+  );
 
   Future<Map<String, dynamic>> cancel(
     Map<String, dynamic> params,
