@@ -339,8 +339,8 @@ Future<void> capture(
         .toList();
     expect(
       promptFields,
-      hasLength(3),
-      reason: 'Main, character and negative expanded',
+      hasLength(4),
+      reason: 'Main, two characters and negative expanded',
     );
     expect(promptFields.first.textSpan!.toPlainText(), contains('… '));
     expect(

@@ -124,13 +124,17 @@ AgentPromptSet _promptSet(ReadmeData d) {
           'night, rain, cafe window, warm light',
           'holding umbrella, happy',
         ),
-      ])
+      ].indexed)
         AgentPromptSetItem(
-          icon: entry.$1,
-          title: entry.$2,
-          note: entry.$3,
-          main: entry.$4,
-          characters: [entry.$5],
+          icon: entry.$2.$1,
+          title: entry.$2.$2,
+          note: entry.$2.$3,
+          main: entry.$2.$4,
+          characters: [entry.$2.$5],
+          // 第 3 幕示范角色位置：女孩在左、店员在右。
+          positions: entry.$1 == 2
+              ? const [Offset(.3, .55), Offset(.72, .5)]
+              : const [],
         ),
     ],
     changedItems: const [4],
