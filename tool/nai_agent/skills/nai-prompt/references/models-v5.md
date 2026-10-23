@@ -2,6 +2,7 @@
 
 For the `nai-diffusion-5` family. Check the full model ID, current workflow and native capabilities with `studio_context` first. Do not apply V4/V4.5 rules or guess support from tag names.
 
+- Use natural-language descriptions freely, with tags as optional anchors.
 - The user's current parameters are the basis of the task. Write raw main/negative prompts and characters only through the fields and versions returned by `scope=draft`; keep blocks, translation originals and enabled states. The effective preset projection never overwrites editor text.
 - Source image, mask and reference support follows the current `reference_manage` configuration and model capabilities. Do not assume the old samplers, weight syntax, quality tags, character positions or Vibe encoding parameters are identical in V5. For specific rules, read user-provided V5 material or verify official docs with available network tools; state unverified limits.
 - Generation and enhance costs come from native prepare; runs need visible confirmation. Model names and server capabilities may differ; do not substitute old model prices or inferred eligibility for the check.
