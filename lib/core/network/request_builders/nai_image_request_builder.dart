@@ -398,7 +398,7 @@ class NAIImageRequestBuilder {
       final imageBytes =
           NAIApiUtils.isKnownNormalizedPreciseReferencePng(reference.image)
           ? reference.image
-          : await NAIApiUtils.ensurePngFormatAsync(reference.image);
+          : await NAIApiUtils.normalizePreciseReference(reference.image);
       referenceImages.add(base64Encode(imageBytes));
     }
 

@@ -162,6 +162,7 @@ class UiNumBox extends StatefulWidget {
     this.changed = false,
     this.placeholder,
     this.max = 1,
+    this.inputMax,
     this.min = 0,
     this.decimals = 2,
     this.suffix,
@@ -178,6 +179,7 @@ class UiNumBox extends StatefulWidget {
 
   /// 输入上限（精准参考可以填超过 1 的值）。
   final double max;
+  final double? inputMax;
 
   /// 输入下限（随机权重可以是负数）。
   final double min;
@@ -237,7 +239,9 @@ class _UiNumBoxState extends State<UiNumBox> {
     if (v != null) {
       final k = math.pow(10, widget.decimals);
       widget.onSubmitted?.call(
-        (v.clamp(widget.min, widget.max) * k).roundToDouble() / k,
+        (v.clamp(widget.min, widget.inputMax ?? widget.max) * k)
+                .roundToDouble() /
+            k,
       );
     }
   }

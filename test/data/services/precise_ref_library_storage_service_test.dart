@@ -151,19 +151,21 @@ void main() {
       _pngBytes(),
       name: '测试参考',
       type: PreciseRefType.style,
-      strength: 0.8,
-      fidelity: 0.6,
+      strength: 1.5,
+      fidelity: 1.5,
     );
 
     expect(entry.name, '测试参考');
     expect(entry.type, PreciseRefType.style);
-    expect(entry.strength, 0.8);
-    expect(entry.fidelity, 0.6);
+    expect(entry.strength, 1.5);
+    expect(entry.fidelity, 1.5);
     expect(p.basename(entry.imagePath), '${entry.id}.png');
     expect(File(entry.imagePath).existsSync(), isTrue);
 
     final entries = await storage.getAllEntries();
     expect(entries.single.id, entry.id);
+    expect(entries.single.strength, 1.5);
+    expect(entries.single.fidelity, 1.5);
   });
 
   test('importFromBytes 对 JPEG 内容使用 .jpg 扩展名', () async {

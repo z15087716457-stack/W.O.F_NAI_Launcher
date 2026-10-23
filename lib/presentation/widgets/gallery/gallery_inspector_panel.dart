@@ -570,6 +570,7 @@ class _HeaderButton extends StatelessWidget {
       icon: Icon(icon, size: 18),
       visualDensity: VisualDensity.compact,
       style: IconButton.styleFrom(
+        padding: EdgeInsets.zero,
         minimumSize: const Size(32, 32),
         fixedSize: const Size(32, 32),
       ),

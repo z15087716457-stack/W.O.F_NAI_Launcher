@@ -1558,6 +1558,7 @@ class SettingsRagData {
     this.initializationPhase = '',
     this.initializationProcessed = 0,
     this.initializationTotal = 0,
+    this.indexBusy = false,
     this.error,
   });
 
@@ -1600,6 +1601,9 @@ class SettingsRagData {
   final bool initializing;
   final String initializationPhase;
   final int initializationProcessed, initializationTotal;
+
+  /// Includes read-only index verification without presenting it as a build.
+  final bool indexBusy;
   bool get progressKnown =>
       sources.where((s) => s.enabled).every((s) => s.known);
 
@@ -1608,6 +1612,7 @@ class SettingsRagData {
 
   /// 安装、下载、建库任一在进行：别的重活按钮都不可点。
   bool get busy =>
+      indexBusy ||
       initializing ||
       preparing != null ||
       install != null ||

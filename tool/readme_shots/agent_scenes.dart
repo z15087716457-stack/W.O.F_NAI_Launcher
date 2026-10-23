@@ -4,6 +4,7 @@ import 'package:nai_launcher/presentation/ui/agent/agent_cards.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_parts.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_prompt_set_card.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_scope.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_thread.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_colors.dart';
@@ -21,6 +22,7 @@ const agentCardNames = [
   'agent-card-gate',
   'agent-card-images',
   'agent-card-thinking',
+  'agent-card-promptset',
 ];
 
 const _galleryFiles = [
@@ -44,12 +46,117 @@ List<AgentImage> _pictures(ReadmeData d, List<String> files) => [
     ),
 ];
 
+AgentPromptSet _promptSet(ReadmeData d) {
+  final pictures = _pictures(d, ['s07.jpg', 's09.jpg', 's15.jpg']);
+  return AgentPromptSet(
+    setId: 'sample-storyboard',
+    revision: 2,
+    kind: d.tr('分镜卡', 'Storyboard'),
+    kindIcon: 'film',
+    title: d.tr('雨夜咖啡馆', 'Rainy-night cafe'),
+    unit: d.tr('幕', 'scene'),
+    ordered: true,
+    shared: const AgentPromptSetShared(
+      main:
+          'masterpiece, best quality, very aesthetic, cinematic lighting, night, rain, 1girl, solo',
+      characters: [
+        'girl, silver hair, long hair, blue eyes, white blouse, black skirt',
+      ],
+      negative: 'lowres, bad anatomy, bad hands, text, watermark, blurry',
+    ),
+    items: [
+      for (final entry in [
+        (
+          'rain',
+          d.tr('大雨', 'Sudden rain'),
+          d.tr('大雨突至，她沿街寻找避雨处。', 'She runs down the street, seeking shelter.'),
+          'city street, heavy rain, running, wide shot',
+          'running, wet hair',
+        ),
+        (
+          'door',
+          d.tr('推门', 'An open door'),
+          d.tr(
+            '街角灯光温暖，推门时风铃响起。',
+            'A warm cafe glows; the door chimes as she enters.',
+          ),
+          'cafe entrance, door bell, warm light',
+          'opening door, looking inside',
+        ),
+        (
+          'umbrella',
+          d.tr('借伞的人', 'An umbrella to borrow'),
+          d.tr(
+            '门口留着一把伞，纸条写着“请自取”。',
+            'An umbrella by the door has a note: “Please borrow.”',
+          ),
+          'umbrella stand, note on wall, close-up, warm indoor light',
+          'looking at umbrella, curious',
+        ),
+        (
+          'coffee',
+          d.tr('热咖啡', 'A warm cup'),
+          d.tr(
+            '她捧着热咖啡，看雨滴滑过玻璃。',
+            'She warms her hands on a cup, watching the rain.',
+          ),
+          'cafe interior, window seat, coffee mug, bokeh',
+          'sitting, holding mug, slight smile',
+        ),
+        (
+          'sun',
+          d.tr('雨后晨光', 'Morning after rain'),
+          d.tr(
+            '雨停了，她迎着晨光回来还伞。',
+            'The rain has stopped; she returns the umbrella at dawn.',
+          ),
+          'morning, sunlight, light rays, cafe entrance',
+          'returning umbrella, smiling',
+        ),
+        (
+          'heart',
+          d.tr('再次相遇', 'A reason to return'),
+          d.tr(
+            '又逢雨夜，这一次她为重逢而来。',
+            'Another rainy night; this time she comes to meet a friend.',
+          ),
+          'night, rain, cafe window, warm light',
+          'holding umbrella, happy',
+        ),
+      ])
+        AgentPromptSetItem(
+          icon: entry.$1,
+          title: entry.$2,
+          note: entry.$3,
+          main: entry.$4,
+          characters: [entry.$5],
+        ),
+    ],
+    changedItems: const [4],
+    images: {
+      0: [pictures[0]],
+      2: [pictures[1], pictures[2]],
+    },
+    unitAnlas: 20,
+  );
+}
+
 AgentViewData agentCardData(ReadmeData d, String name) {
   final base = d.agent('chat');
   final blocks = <AgentBlock>[];
   final pending = <AgentPending>[];
   AgentTurnSummary? summary;
   switch (name) {
+    case 'agent-card-promptset':
+      final data = _promptSet(d);
+      blocks.add(
+        AgentPromptSetBlock(
+          setId: data.setId,
+          revision: data.revision,
+          changedItems: data.changedItems,
+          data: data,
+        ),
+      );
     case 'agent-card-diff':
       blocks.addAll([
         AgentTextBlock(
@@ -362,6 +469,16 @@ Widget agentCardScene(ReadmeData d, String name) => Builder(
 );
 
 Future<void> prepareAgentCard(WidgetTester t, ReadmeData d, String name) async {
+  if (name == 'agent-card-promptset') {
+    // Selection and prompt expansion are real widget-internal state.
+    for (var i = 0; i < 2; i++) {
+      await t.tap(find.byKey(const Key('agent-ps-next')));
+      await t.pump();
+    }
+    expect(find.byKey(const Key('agent-ps-more-prompt')), findsNothing);
+    await t.tap(find.byKey(const Key('agent-ps-prompt')));
+    await t.pump();
+  }
   if (name == 'agent-card-thinking') {
     await t.tap(find.byKey(const Key('agent-fold-0')));
     await t.pump();
@@ -424,6 +541,8 @@ Rect agentCardFrame(WidgetTester t) {
     for (final element in find.byType(AgentCard).evaluate())
       t.getRect(find.byWidget(element.widget)),
     for (final element in find.byType(AgentGateCard).evaluate())
+      t.getRect(find.byWidget(element.widget)),
+    for (final element in find.byType(AgentPromptSetCard).evaluate())
       t.getRect(find.byWidget(element.widget)),
     for (final element in find.byType(Tooltip).evaluate())
       if (element.widget is Tooltip) ...[

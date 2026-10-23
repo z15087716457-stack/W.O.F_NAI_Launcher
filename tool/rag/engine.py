@@ -214,7 +214,7 @@ class Engine:
         self._owns_pool = pool is None; self.collection = collection
         self.folder = self.pool.folder
         self.db,self.ann = self.pool.collection(collection,self.root/models.fingerprint)
-        self.plan = None; self.active = False; self._ann_generation = 0; self._closed = False
+        self.plan = None; self.active = False; self.writing = False; self._ann_generation = 0; self._closed = False
 
     def _load_ann(self):
         self.pool.reload()
@@ -231,7 +231,8 @@ class Engine:
         metadata = dict(self.db.execute('SELECT key,value FROM metadata'))
         return {'indexed': count, 'total': total, 'complete': complete,
                 'auto_update_allowed': metadata.get('consented') == '1' and metadata.get('paused') != '1',
-                'partial': bool(count and not complete), 'bytes': size, 'building': self.active,
+                'partial': bool(count and not complete), 'bytes': size,
+                'building': self.active and self.writing, 'checking': self.active and not self.writing,
                 'paused': metadata.get('paused') == '1', 'skipped': int(metadata.get('skipped','0'))}
 
     def preview(self):
@@ -257,11 +258,11 @@ class Engine:
         signature = self.sources.signature()
         if signature != self.plan['source_signature']: raise ValueError('source_changed')
 
-    def build(self, plan_id, cancelled):
+    def build(self, plan_id, cancelled, progress=None):
         if self.active: raise ValueError('index_busy')
         self.validate_plan(plan_id)
         signature = self.plan['source_signature']
-        plan = self.plan; self.plan = None; self.active = True
+        plan = self.plan; self.plan = None; self.active = True; self.writing = False
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('consented','1')")
         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('paused','0')")
         self.db.commit()
@@ -282,7 +283,9 @@ class Engine:
                     old = self.db.execute('SELECT digest FROM documents WHERE name=?', (item['name'],)).fetchone()
                     if not old or old[0] != item['digest']: pending.append(item)
                     else: self.db.execute('UPDATE documents SET seen=?, post_count=? WHERE name=?', (signature, item['post_count'], item['name']))
+                self.writing = bool(pending)
                 if pending:
+                    if progress: progress({'processed':plan['total']-work_total+processed, **self.status()})
                     vectors = self.embed_rows(pending)
                     if cancelled(): break
                     for item, vector in zip(pending, vectors):
@@ -304,6 +307,9 @@ class Engine:
             if not cancelled() and processed == work_total:
                 if self.sources.signature() != signature: raise ValueError('source_changed')
                 stale = [] if incremental else [r[0] for r in self.db.execute('SELECT id FROM documents WHERE seen != ?', (signature,))]
+                if stale:
+                    self.writing = True
+                    if progress: progress({'processed':plan['total'], **self.status()})
                 for key in stale:
                     if key in self.ann: self.ann.remove(key)
                 if not incremental: self.db.execute('DELETE FROM documents WHERE seen != ?', (signature,))
@@ -329,7 +335,7 @@ class Engine:
             self.db.rollback(); self._load_ann()
             raise
         finally:
-            self.db.rollback(); self.active = False
+            self.db.rollback(); self.active = False; self.writing = False
             self.pool.end_build()
             if not closing: self._checkpoint()
 

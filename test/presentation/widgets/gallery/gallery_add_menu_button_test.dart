@@ -30,7 +30,15 @@ void main() {
     );
 
     final button = find.byTooltip('新建/导入');
-    final buttonBottom = tester.getRect(button).bottom;
+    final buttonRect = tester.getRect(button);
+    final icon = find.descendant(of: button, matching: find.byType(Icon));
+    expect(tester.getRect(icon).center, buttonRect.center);
+    final ink = find.descendant(
+      of: button,
+      matching: find.byWidgetPredicate((w) => w is InkResponse),
+    );
+    expect(tester.getRect(icon).center, tester.getRect(ink).center);
+    final buttonBottom = buttonRect.bottom;
     await tester.tap(button);
     await tester.pumpAndSettle();
 

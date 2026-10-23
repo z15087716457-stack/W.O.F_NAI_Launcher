@@ -11,6 +11,8 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_parts.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_prompt_set_card.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_dock.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
 import 'package:nai_launcher/presentation/ui/blocks/blocks_page.dart';
@@ -21,6 +23,7 @@ import 'package:nai_launcher/presentation/ui/explore/explore_contract.dart';
 import 'package:nai_launcher/presentation/ui/explore/explore_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_preview_image.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
 import 'package:nai_launcher/presentation/ui/online/online_contract.dart';
@@ -270,6 +273,103 @@ Future<void> capture(
   await warmImages(t, images);
   await t.pump(const Duration(milliseconds: 250));
   final texts = scanText(t, '$locale/$name');
+  if (name == 'agent-card-promptset') {
+    final card = find.byType(AgentPromptSetCard);
+    expect(card, findsOneWidget);
+    final data = t.widget<AgentPromptSetCard>(card).data!;
+    expect(data.ordered, isTrue);
+    expect(data.kindIcon, 'film');
+    expect(data.items.map((item) => item.icon), [
+      'rain',
+      'door',
+      'umbrella',
+      'coffee',
+      'sun',
+      'heart',
+    ]);
+    expect(data.revision, 2);
+    expect(data.changedItems, [4]);
+    expect(data.images[0], hasLength(1));
+    final pictures = data.images.values.expand((images) => images).toList();
+    expect(pictures.map((image) => image.image).toSet(), hasLength(3));
+    expect(
+      find.text(locale == 'zh' ? 'v2 · 已改 1 项' : 'v2 · 1 changed'),
+      findsOneWidget,
+    );
+    expect(find.text('3 / 6'), findsOneWidget);
+    expect(find.text(data.items[2].title), findsOneWidget);
+    expect(find.byKey(const Key('agent-ps-dot-0')), findsOneWidget);
+    expect(find.byKey(const Key('agent-ps-dot-4')), findsOneWidget);
+    final thumbs = t
+        .widgetList<UiPreviewImage>(
+          find.descendant(of: card, matching: find.byType(UiPreviewImage)),
+        )
+        .toList();
+    expect(thumbs, hasLength(2));
+    expect(
+      thumbs.map((image) => image.image).toList(),
+      data.images[2]!.map((image) => image.image).toList(),
+    );
+    expect(
+      find.descendant(of: card, matching: find.byType(Image)),
+      findsNWidgets(2),
+    );
+    expect(find.text('#1'), findsOneWidget);
+    expect(find.text('#2'), findsOneWidget);
+    expect(find.text(locale == 'zh' ? '共同设定' : 'Shared'), findsOneWidget);
+    expect(find.text(locale == 'zh' ? '这一幕' : 'This scene'), findsOneWidget);
+    final more = find.byKey(const Key('agent-ps-more-prompt'));
+    expect(
+      more,
+      findsOneWidget,
+      reason: 'Prompt expanded, tag window retained',
+    );
+    expect(
+      find.descendant(
+        of: more,
+        matching: find.text(locale == 'zh' ? '展开全部' : 'Show all'),
+      ),
+      findsOneWidget,
+    );
+    final promptFields = t
+        .widgetList<Text>(
+          find.descendant(of: card, matching: find.byType(Text)),
+        )
+        .where((text) => text.textSpan != null)
+        .toList();
+    expect(
+      promptFields,
+      hasLength(3),
+      reason: 'Main, character and negative expanded',
+    );
+    expect(promptFields.first.textSpan!.toPlainText(), contains('… '));
+    expect(
+      promptFields.first.textSpan!.toPlainText(),
+      contains('umbrella stand,'),
+    );
+    expect(
+      promptFields[1].textSpan!.toPlainText(),
+      contains('looking at umbrella,'),
+    );
+    final segments = (promptFields.first.textSpan! as TextSpan).children!
+        .cast<TextSpan>();
+    expect(
+      segments.any((span) => span.style?.backgroundColor != null),
+      isTrue,
+      reason: 'Item tags are highlighted',
+    );
+    expect(
+      segments.any((span) => span.style?.backgroundColor == null),
+      isTrue,
+      reason: 'Shared tags are not highlighted',
+    );
+    final generate = find.byKey(const Key('agent-ps-generate'));
+    expect(t.widget<AgentButton>(generate).onPressed, isNotNull);
+    expect(
+      find.descendant(of: generate, matching: find.text('20')),
+      findsOneWidget,
+    );
+  }
   if (name == 'translation' || name == 'tag-expansion') {
     final expected = name == 'translation'
         ? (locale == 'en' ? 'Prompt · Bilingual reading' : '提示词 · 双语阅读')

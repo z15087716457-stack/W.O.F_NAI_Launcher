@@ -300,8 +300,8 @@ void main() {
       final added = await apply('add_precise', {
         'path': 'input.png',
         'type': 'characterAndStyle',
-        'strength': 0.8,
-        'fidelity': 0.3,
+        'strength': 1.5,
+        'fidelity': 1.5,
       });
       final ref = container
           .read(generationParamsNotifierProvider)
@@ -309,6 +309,12 @@ void main() {
           .single;
       expect(NAIApiUtils.isKnownNormalizedPreciseReferencePng(ref.image), true);
       expect(added['precise'].single['type'], 'characterAndStyle');
+      expect(added['precise'].single['strength'], 1.5);
+      expect(added['precise'].single['fidelity'], 1.5);
+      await expectLater(
+        apply('update_precise', {'index': 0, 'strength': 10.1}),
+        code('invalid_reference'),
+      );
       final read = await tools().execute('image_read', {
         'image_id': 'draft:precise:0',
       }, NaiAgentCancellation());
@@ -318,7 +324,7 @@ void main() {
         'index': 0,
         'type': 'style',
         'enabled': false,
-        'fidelity': 0.6,
+        'fidelity': 10.0,
       });
       expect(updated['precise'].single['type'], 'style');
       expect(updated['precise'].single['enabled'], false);

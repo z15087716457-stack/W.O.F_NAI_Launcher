@@ -25,6 +25,7 @@ AGENT_CARDS = [
     'agent-card-diff', 'agent-card-position', 'agent-card-settings',
     'agent-card-gallery', 'agent-card-tags', 'agent-card-ask',
     'agent-card-gate', 'agent-card-images', 'agent-card-thinking',
+    'agent-card-promptset',
 ]
 TOTAL_LIMIT = 10_000_000
 
@@ -104,7 +105,7 @@ def collage(panels: list[tuple[str, Image.Image]], columns=3, width=768, ratio=.
 
 
 def agent_contact() -> Image.Image:
-    """Nine zh cards, full aspect ratios, in three compact masonry columns."""
+    """Zh cards, full aspect ratios, in three compact masonry columns."""
     gap, width, label = 20, 640, 44
     columns: list[list[tuple[str, Image.Image]]] = [[], [], []]
     heights = [gap, gap, gap]
@@ -177,6 +178,8 @@ def collect(locale: str) -> list[tuple[str, Image.Image]]:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--contact-dir', type=Path, default=ROOT / '.dart_tool/readme-shots')
+    parser.add_argument('--scene', action='append', choices=AGENT_CARDS,
+                        help='Export only this card (repeatable); preserve other WebPs and refresh contact sheets')
     args = parser.parse_args()
     args.contact_dir.mkdir(parents=True, exist_ok=True)
     existing = DEST / 'manifest.json'
@@ -185,7 +188,9 @@ def main():
     # Keep existing resolution unless the new card set exceeds the total cap.
     attempts = [(82, 1600)] + [(q, 1200) for q in [82, 78, 74, 70, 66]]
     for quality, agent_panel_width in attempts:
-        encoded = {(locale, name): encode(image, name, quality, agent_panel_width) for locale, scenes in captures.items() for name, image in scenes}
+        encoded = {(locale, name): encode(image, name, quality, agent_panel_width)
+                   for locale, scenes in captures.items() for name, image in scenes
+                   if not args.scene or name in args.scene}
         # Count preserved files too: exporting never silently deletes old images.
         untouched = sum(p.stat().st_size for p in DEST.rglob('*') if p.is_file() and p != existing and (p.parent.name, p.stem) not in encoded)
         # Leave room for the JSON manifest itself.
@@ -195,6 +200,8 @@ def main():
         raise ValueError('Cannot meet combined 10 MB budget')
     for locale, scenes in captures.items():
         for name, _ in scenes:
+            if (locale, name) not in encoded:
+                continue
             output = DEST / locale / f'{name}.webp'
             output.parent.mkdir(parents=True, exist_ok=True)
             data = encoded[locale, name]

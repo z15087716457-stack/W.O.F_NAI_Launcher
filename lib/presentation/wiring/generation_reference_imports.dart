@@ -119,21 +119,19 @@ class GenerationReferenceImports {
         if (vibes.isEmpty) return;
         await write(() => _params.addVibeReferences(vibes));
       case GenDropTarget.precise:
-        final references = <(GenerationReferenceFile, Uint8List)>[];
-        for (final file in selected) {
-          references.add((file, await decoder.precise(file)));
-        }
         await write(() {
           if (replaceRequested?.call() == true) {
             _params.clearPreciseReferences();
           }
-          for (final reference in references) {
-            _params.addPreciseReference(
-              reference.$2,
-              type: reference.$1.type,
-              strength: reference.$1.strength,
-              fidelity: reference.$1.fidelity,
-              isNormalizedPng: true,
+          for (final file in selected) {
+            unawaited(
+              _params.addPreciseReferenceFromImage(
+                file.bytes,
+                type: file.type,
+                strength: file.strength,
+                fidelity: file.fidelity,
+                normalize: (_) => decoder.precise(file),
+              ),
             );
           }
           onApplied?.call();

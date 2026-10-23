@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -80,15 +81,74 @@ ThumbnailSize pickThumbnailSize(
   return ThumbnailSize.large;
 }
 
-/// 根据列宽、DPR 和本地画廊质量解析缩略图档位。
+// Match the generator's fit-inside sizing and integer rounding.
+({int width, int height}) _fittedThumbnailSize(
+  ThumbnailSize tier,
+  double aspect,
+) => aspect > tier.width / tier.height
+    ? (width: tier.width, height: (tier.width / aspect).round())
+    : (width: (tier.height * aspect).round(), height: tier.height);
+
+/// Choose by the fitted thumbnail's pixels, not the enclosing tier's width.
+/// All local-gallery layouts (including prefetch) share the same cover rule.
 ThumbnailSize resolveThumbnailTier(
   double columnWidth,
   double devicePixelRatio,
-  GalleryThumbnailQuality quality,
-) {
-  return quality == GalleryThumbnailQuality.sd
-      ? ThumbnailSize.small
-      : pickThumbnailSize(columnWidth, devicePixelRatio);
+  GalleryThumbnailQuality quality, {
+  double? cardHeight,
+  double? imageAspect,
+}) {
+  if (quality == GalleryThumbnailQuality.sd) return ThumbnailSize.small;
+  if (cardHeight == null ||
+      imageAspect == null ||
+      imageAspect <= 0 ||
+      !imageAspect.isFinite) {
+    return pickThumbnailSize(columnWidth, devicePixelRatio);
+  }
+  final requiredWidth =
+      math.max(columnWidth, cardHeight * imageAspect) * devicePixelRatio * 1.5;
+  for (final tier in [ThumbnailSize.small, ThumbnailSize.medium]) {
+    final fitted = _fittedThumbnailSize(tier, imageAspect);
+    if (fitted.width >= requiredWidth &&
+        fitted.height >= requiredWidth / imageAspect) {
+      return tier;
+    }
+  }
+  return ThumbnailSize.large;
+}
+
+/// Decode only one axis: specifying both axes can distort cover-cropped images.
+/// Never upscale a tier in the decoder; large remains the memory ceiling.
+({int? width, int? height}) thumbnailCoverDecodeSize({
+  required double cardWidth,
+  required double cardHeight,
+  required double imageAspect,
+  required double devicePixelRatio,
+  required GalleryThumbnailQuality quality,
+  required ThumbnailSize tier,
+}) {
+  final multiplier = quality == GalleryThumbnailQuality.hd ? 1.5 : 1.0;
+  if (imageAspect <= 0 || !imageAspect.isFinite) {
+    return (width: null, height: null);
+  }
+  if (imageAspect <= cardWidth / cardHeight) {
+    final fitted = _fittedThumbnailSize(tier, imageAspect).width;
+    return (
+      width: math.max(
+        1,
+        math.min(fitted, (cardWidth * devicePixelRatio * multiplier).ceil()),
+      ),
+      height: null,
+    );
+  }
+  final fitted = _fittedThumbnailSize(tier, imageAspect).height;
+  return (
+    width: null,
+    height: math.max(
+      1,
+      math.min(fitted, (cardHeight * devicePixelRatio * multiplier).ceil()),
+    ),
+  );
 }
 
 /// 缩略图信息
@@ -489,17 +549,14 @@ class ThumbnailCacheService {
         await thumbDir.create(recursive: true);
       }
 
-      final result = await ComputeGate().runCompute(
-        _generateThumbnailBytesInIsolate,
-        <String, Object?>{
-          'originalPath': originalPath,
-          'maxFileSizeBytes': _maxFileSizeBytes,
-          'targetWidth': size.width,
-          'targetHeight': size.height,
-          'jpegQuality': jpegQuality,
-        },
-        debugLabel: 'thumbnail_${p.basename(originalPath)}',
-      );
+      final result = await ComputeGate()
+          .runCompute(_generateThumbnailBytesInIsolate, <String, Object?>{
+            'originalPath': originalPath,
+            'maxFileSizeBytes': _maxFileSizeBytes,
+            'targetWidth': size.width,
+            'targetHeight': size.height,
+            'jpegQuality': jpegQuality,
+          }, debugLabel: 'thumbnail_${p.basename(originalPath)}');
 
       final thumbBytes = result['bytes'] as Uint8List;
 

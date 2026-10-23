@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -9,7 +10,6 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../../core/constants/model_spec.dart';
 import '../../core/utils/localization_extension.dart';
-import '../../core/utils/nai_api_utils.dart';
 import '../../data/models/image/image_params.dart';
 import '../../data/models/precise_ref/precise_ref_library_entry.dart';
 import '../../data/models/vibe/vibe_library_entry.dart';
@@ -285,21 +285,26 @@ class RefsGenerationTarget {
         if (bytes == null) {
           throw StateError(currentL10n.preciseRefLib_imageMissing);
         }
-        final normalized = await NAIApiUtils.ensurePngFormatAsync(bytes);
         check(snapshot, alive);
-        prepared.add((entry: entry, bytes: normalized));
+        prepared.add((entry: entry, bytes: bytes));
       }
       if (prepared.isEmpty) return const RefsSendResult(0);
       await _commit(snapshot, alive, () {
         final params = ref.read(generationParamsNotifierProvider.notifier);
         if (replace) params.clearPreciseReferences();
         for (final item in prepared) {
-          params.addPreciseReference(
-            item.bytes,
-            type: item.entry.type,
-            strength: item.entry.strength,
-            fidelity: item.entry.fidelity,
-            isNormalizedPng: true,
+          unawaited(
+            params.addPreciseReferenceFromImage(
+              item.bytes,
+              type: item.entry.type,
+              strength: item.entry.strength,
+              fidelity: item.entry.fidelity,
+              onNormalized: (_, after) {
+                _origins[after] = item.entry.id;
+                preciseOrigins[refsBytesFingerprint(after.image)] =
+                    item.entry.id;
+              },
+            ),
           );
           _origins[ref
                   .read(generationParamsNotifierProvider)

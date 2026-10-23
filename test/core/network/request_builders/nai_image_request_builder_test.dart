@@ -556,8 +556,8 @@ void main() {
           PreciseReference(
             image: _validPngBytes(),
             type: PreciseRefType.character,
-            strength: 2.5,
-            fidelity: -1.25,
+            strength: 1.5,
+            fidelity: 1.5,
           ),
         ],
       );
@@ -569,12 +569,12 @@ void main() {
 
       expect(
         result.requestParameters['director_reference_strength_values'],
-        equals([2.5]),
+        equals([1.5]),
       );
       expect(
         result
             .requestParameters['director_reference_secondary_strength_values'],
-        equals([2.25]),
+        equals([-0.5]),
       );
     });
 

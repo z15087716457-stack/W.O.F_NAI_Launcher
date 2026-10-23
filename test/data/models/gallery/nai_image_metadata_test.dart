@@ -682,16 +682,16 @@ void main() {
           'prompt': '1girl',
           'uc': 'bad hands',
           'director_reference_images': [referenceImage],
-          'director_reference_strengths': [2.65],
-          'director_reference_secondary_strengths': [3.2],
+          'director_reference_strengths': [1.5],
+          'director_reference_secondary_strengths': [-0.5],
         }),
         'Software': 'NovelAI',
         'Source': 'NovelAI Diffusion V4.5 4BDE2A90',
       });
 
       expect(metadata.preciseReferences, hasLength(1));
-      expect(metadata.preciseReferences[0].strength, 2.65);
-      expect(metadata.preciseReferences[0].fidelity, closeTo(-2.2, 1e-12));
+      expect(metadata.preciseReferences[0].strength, 1.5);
+      expect(metadata.preciseReferences[0].fidelity, 1.5);
     });
 
     test('fromNaiComment should parse structured negative fixed tags', () {

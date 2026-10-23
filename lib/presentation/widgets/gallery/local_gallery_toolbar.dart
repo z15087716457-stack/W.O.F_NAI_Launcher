@@ -829,6 +829,7 @@ class _ToolbarIconButton extends StatelessWidget {
       isSelected: active,
       icon: Icon(icon, size: 18),
       style: IconButton.styleFrom(
+        padding: EdgeInsets.zero,
         fixedSize: const Size(32, 32),
         minimumSize: const Size(32, 32),
         backgroundColor: active ? colors.surfaceContainerHighest : null,

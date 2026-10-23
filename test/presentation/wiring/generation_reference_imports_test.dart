@@ -8,6 +8,8 @@ import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/utils/nai_api_utils.dart';
+import 'package:nai_launcher/core/network/request_builders/nai_image_request_builder.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
@@ -28,6 +30,7 @@ import 'generation_backend_test.dart'
     show MemoryGenerationPlatform, RecordingGeneration, SwitchingAuth;
 
 class ImportStorage extends VibeLibraryStorageService {
+  String? generationJson;
   final entries = <String, VibeLibraryEntry>{};
   @override
   Future<VibeLibraryEntry?> findMatchingEntry(VibeReference vibe) async => null;
@@ -44,12 +47,23 @@ class ImportStorage extends VibeLibraryStorageService {
     int limit = 20,
   }) async => entries.values.take(limit).toList();
   @override
-  Future<void> saveGenerationStateJson(String stateJson) async {}
+  Future<void> saveGenerationStateJson(String stateJson) async {
+    generationJson = stateJson;
+  }
+
   @override
-  Future<String?> loadGenerationStateJson() async => null;
+  Future<String?> loadGenerationStateJson() async => generationJson;
 }
 
 class ImportDecoder extends GenerationReferenceDecoder {
+  final pending = <Uint8List, Completer<Uint8List>>{};
+  int normalizations = 0;
+  @override
+  Future<Uint8List> precise(GenerationReferenceFile file) {
+    normalizations++;
+    return (pending[file.bytes] ??= Completer<Uint8List>()).future;
+  }
+
   @override
   Future<List<VibeReference>> vibes(GenerationReferenceFile file) async => [
     VibeReference(displayName: file.name, vibeEncoding: 'offline-data'),
@@ -63,6 +77,8 @@ void main() {
   late MemoryGenerationPlatform platform;
   late GenerationReferenceImports imports;
   late List<String> encoded;
+  late ImportDecoder decoder;
+  late ImportStorage storage;
   Completer<String?>? pendingEncoding;
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -74,6 +90,8 @@ void main() {
     encoded = [];
     pendingEncoding = null;
     platform = MemoryGenerationPlatform();
+    decoder = ImportDecoder();
+    storage = ImportStorage();
     container = ProviderContainer(
       overrides: [
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
@@ -82,8 +100,8 @@ void main() {
         imageGenerationNotifierProvider.overrideWith(RecordingGeneration.new),
         authNotifierProvider.overrideWith(SwitchingAuth.new),
         generationPlatformProvider.overrideWithValue(platform),
-        generationReferenceDecoderProvider.overrideWithValue(ImportDecoder()),
-        vibeLibraryStorageServiceProvider.overrideWithValue(ImportStorage()),
+        generationReferenceDecoderProvider.overrideWithValue(decoder),
+        vibeLibraryStorageServiceProvider.overrideWithValue(storage),
         estimatedCostProvider.overrideWithValue(12),
         generationVibeEncoderProvider.overrideWithValue((vibe, model) {
           encoded.add(model);
@@ -115,6 +133,193 @@ void main() {
     );
     return container.read(generationReferenceIdentityProvider).vibes.single;
   }
+
+  test(
+    'precise stages immediately, generate shares normalization, saves final PNG',
+    () async {
+      final raw = Uint8List.fromList([1, 2, 3]);
+      var applied = 0;
+      await imports.files(
+        GenDropTarget.precise,
+        () async => [GenerationReferenceFile('ref.png', raw)],
+        replaceRequested: () => true,
+        onApplied: () => applied++,
+      );
+      final writer = container.read(generationParamsNotifierProvider.notifier);
+      final staged = container.read(generationParamsNotifierProvider);
+      final idBefore = container
+          .read(generationReferenceIdentityProvider)
+          .precise
+          .single;
+      expect(staged.preciseReferences.single.image, raw);
+      expect(applied, 1);
+      expect(platform.backups, hasLength(1));
+      final request = NAIImageRequestBuilder(
+        params: staged,
+        encodeVibe: (_, {required model, informationExtracted = 1}) async =>
+            'unused',
+      );
+      final payload = <String, dynamic>{};
+      final generating = request.buildPreciseReferenceParameters(payload);
+      writer.updatePreciseReference(0, strength: 1.5);
+      final normalized = Uint8List.fromList([9, 8, 7]);
+      decoder.pending[raw]!.complete(normalized);
+      await generating;
+      await Future<void>.delayed(Duration.zero);
+      expect(decoder.normalizations, 1);
+      final finalRef = container
+          .read(generationParamsNotifierProvider)
+          .preciseReferences
+          .single;
+      expect(finalRef.image, same(normalized));
+      expect(
+        container.read(generationReferenceIdentityProvider).precise.single,
+        idBefore,
+      );
+      expect(finalRef.strength, 1.5);
+      await writer.saveGenerationState();
+      final restoredContainer = ProviderContainer(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
+          vibeLibraryStorageServiceProvider.overrideWithValue(storage),
+        ],
+      );
+      addTearDown(restoredContainer.dispose);
+      await restoredContainer
+          .read(generationParamsNotifierProvider.notifier)
+          .restoreGenerationState();
+      final restored = restoredContainer
+          .read(generationParamsNotifierProvider)
+          .preciseReferences
+          .single;
+      expect(restored.image, normalized);
+      expect(restored.strength, 1.5);
+      expect(
+        NAIApiUtils.isKnownNormalizedPreciseReferencePng(restored.image),
+        true,
+      );
+      expect(
+        NAIApiUtils.isKnownNormalizedPreciseReferencePng(finalRef.image),
+        true,
+      );
+    },
+  );
+
+  test(
+    'normalization follows byte identity through reorder, never fills a removed slot',
+    () async {
+      final a = Uint8List.fromList([1]);
+      final b = Uint8List.fromList([2]);
+      await imports.files(
+        GenDropTarget.precise,
+        () async => [
+          GenerationReferenceFile('a.png', a),
+          GenerationReferenceFile('b.png', b),
+        ],
+      );
+      final writer = container.read(generationParamsNotifierProvider.notifier);
+      final before = container.read(generationParamsNotifierProvider);
+      writer.restoreAgentSnapshot(
+        before.copyWith(
+          preciseReferences: before.preciseReferences.reversed.toList(),
+        ),
+      );
+      decoder.pending[a]!.complete(Uint8List.fromList([11]));
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container
+            .read(generationParamsNotifierProvider)
+            .preciseReferences
+            .last
+            .image,
+        [11],
+      );
+      writer.removePreciseReference(0);
+      writer.addPreciseReference(
+        Uint8List.fromList([3]),
+        type: before.preciseReferences.first.type,
+      );
+      decoder.pending[b]!.complete(Uint8List.fromList([22]));
+      await Future<void>.delayed(Duration.zero);
+      expect(
+        container
+            .read(generationParamsNotifierProvider)
+            .preciseReferences
+            .map((r) => r.image.first),
+        [11, 3],
+      );
+    },
+  );
+
+  test(
+    'remove then re-add of the exact input object never accepts the old result',
+    () async {
+      final raw = Uint8List.fromList([1]);
+      final old = Completer<Uint8List>();
+      final fresh = Completer<Uint8List>();
+      final writer = container.read(generationParamsNotifierProvider.notifier);
+      final type = GenerationReferenceFile('x', raw).type;
+      final first = writer.addPreciseReferenceFromImage(
+        raw,
+        type: type,
+        normalize: (_) => old.future,
+      );
+      writer.removePreciseReference(0);
+      final second = writer.addPreciseReferenceFromImage(
+        raw,
+        type: type,
+        normalize: (_) => fresh.future,
+      );
+      old.complete(Uint8List.fromList([9]));
+      await first;
+      expect(
+        container
+            .read(generationParamsNotifierProvider)
+            .preciseReferences
+            .single
+            .image,
+        [1],
+      );
+      fresh.complete(Uint8List.fromList([8]));
+      await second;
+      expect(
+        container
+            .read(generationParamsNotifierProvider)
+            .preciseReferences
+            .single
+            .image,
+        [8],
+      );
+    },
+  );
+
+  test(
+    'precise file picker still rejects a newer draft before staging or decoding',
+    () async {
+      final selected = Completer<List<GenerationReferenceFile>>();
+      var applied = false;
+      final importing = imports.files(
+        GenDropTarget.precise,
+        () => selected.future,
+        replaceRequested: () => true,
+        onApplied: () => applied = true,
+      );
+      final rejected = expectLater(importing, throwsStateError);
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updatePromptImmediately('new draft');
+      selected.complete([
+        GenerationReferenceFile('x.png', Uint8List.fromList([1])),
+      ]);
+      await rejected;
+      expect(decoder.normalizations, 0);
+      expect(applied, false);
+      expect(
+        container.read(generationParamsNotifierProvider).preciseReferences,
+        isEmpty,
+      );
+    },
+  );
 
   test('文件选择取消不备份；导入只解析并写入，不调用编码', () async {
     await imports.files(GenDropTarget.vibe, () async => []);

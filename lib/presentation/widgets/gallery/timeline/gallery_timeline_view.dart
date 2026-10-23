@@ -549,6 +549,12 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
                 _layout.tiles[index].width,
                 dpr,
                 quality,
+                cardHeight: _layout.tiles[index].height,
+                imageAspect:
+                    (entries[index].width ?? 0) > 0 &&
+                        (entries[index].height ?? 0) > 0
+                    ? entries[index].width! / entries[index].height!
+                    : _layout.tiles[index].width / _layout.tiles[index].height,
               ),
               priority: ThumbnailPriority.low,
             ),

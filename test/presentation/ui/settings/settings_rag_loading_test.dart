@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_kit.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_controls.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_fixture.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -12,6 +13,50 @@ import 'settings_test_harness.dart';
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
+  testWidgets(
+    'finished verification has ready controls, no build badge or pause',
+    (t) async {
+      final base = SettingsFixture.view(page: SettingsPageId.rag);
+      await pumpSettings(
+        t,
+        data: base.copyWith(
+          values: base.values.copyWith(SettingKey.ragEnabled, true),
+          rag: const SettingsRagData(
+            runtimeReady: true,
+            indexBusy: false,
+            sources: [
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.tags,
+                state: SettingsRagState.ready,
+                done: 638024,
+                total: 638024,
+              ),
+              SettingsRagSource(
+                kind: SettingsRagSourceKind.blocks,
+                state: SettingsRagState.ready,
+                done: 727,
+                total: 727,
+              ),
+            ],
+          ),
+        ),
+      );
+      final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
+      expect(find.text(l.set_rgBuilding), findsNothing);
+      expect(find.text(l.set_rgPartial), findsNothing);
+      expect(find.text(l.set_pause), findsNothing);
+      for (final kind in [
+        SettingsRagSourceKind.tags,
+        SettingsRagSourceKind.blocks,
+      ]) {
+        final more = find.byKey(Key('rag-more-${kind.name}'));
+        expect(more, findsOneWidget);
+        expect(t.widget<SettingsMoreButton>(more).enabled, true);
+      }
+      expect(t.takeException(), isNull);
+    },
+  );
+
   testWidgets(
     'unread indexes are loading rather than empty; known counts survive reconnect',
     (t) async {

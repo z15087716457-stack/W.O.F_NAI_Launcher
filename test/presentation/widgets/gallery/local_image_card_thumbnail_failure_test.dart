@@ -96,6 +96,57 @@ void main() {
     return result;
   }
 
+  testWidgets('portrait square card decodes one cover axis from the large tier', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetDevicePixelRatio);
+    late File original;
+    late Directory temp;
+    await tester.runAsync(() async {
+      temp = await Directory.systemTemp.createTemp('card-cover-');
+      original = File('${temp.path}/portrait.png');
+      await original.writeAsString('original is not decoded');
+      final thumbs = Directory(
+        '${temp.path}/${ThumbnailCacheService.thumbsDirName}',
+      );
+      await thumbs.create();
+      for (final tier in ThumbnailSize.values) {
+        await File(
+          '${thumbs.path}/${ThumbnailCacheService.buildThumbnailFileNameForTest(original.path, size: tier)}',
+        ).writeAsBytes(img.encodeJpg(img.Image(width: 602, height: 880)));
+      }
+    });
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: LocalImageCard(
+              record: record(original.path),
+              width: 250,
+              height: 250,
+              imageWidth: 832,
+              imageHeight: 1216,
+            ),
+          ),
+        ),
+      ),
+    );
+    await settleUntil(tester, () => find.byType(Image).evaluate().isNotEmpty);
+    final image = tester.widget<Image>(find.byType(Image).first);
+    final resize = image.image as ResizeImage;
+    expect(resize.width, 375);
+    expect(resize.height, isNull);
+    expect((resize.imageProvider as FileImage).file.path, contains('.large.'));
+    await tester.pumpWidget(const SizedBox.shrink());
+    ThumbnailService.instance.cancelAll();
+    PaintingBinding.instance.imageCache.clear();
+    PaintingBinding.instance.imageCache.clearLiveImages();
+    await tester.runAsync(() => temp.delete(recursive: true));
+  });
+
   testWidgets('缩略图生成失败：显示失败占位，不解码原图', (tester) async {
     late final File original;
 

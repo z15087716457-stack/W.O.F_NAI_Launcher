@@ -49,7 +49,7 @@ class Worker:
         engine = self.engines[job['source']]
         try:
             progress = next(job['generator'])
-            self._event(source=job['source'],job_id=job_id, phase='building', **progress)
+            self._event(source=job['source'],job_id=job_id, phase='building' if progress.get('building') else 'checking', **progress)
             self.enqueue({'_step':job_id}, 10)
         except StopIteration:
             self.jobs.pop(job_id, None)
@@ -142,7 +142,8 @@ class Worker:
             elif any(j['source']==source for j in self.jobs.values()): raise ValueError('index_busy')
             job_id = uuid.uuid4().hex
             cancellation = threading.Event()
-            generator = engine.build(p['plan_id'], cancellation.is_set)
+            generator = engine.build(p['plan_id'], cancellation.is_set,
+                progress=lambda value: self._event(source=source,job_id=job_id,phase='building',**value))
             # Validate the plan before acknowledging start; first work is queued.
             if not engine.plan or engine.plan['plan_id'] != p['plan_id']:
                 raise ValueError('invalid_plan')
@@ -156,7 +157,8 @@ class Worker:
                 if op == 'resume' and job['signature'] != engine.sources.signature():
                     job['cancel'].set();job['generator'].close()
                     plan = engine.preview(); cancellation = threading.Event()
-                    job.update(generator=engine.build(plan['plan_id'],cancellation.is_set),cancel=cancellation,
+                    job.update(generator=engine.build(plan['plan_id'],cancellation.is_set,
+                        progress=lambda value: self._event(source=source,job_id=p['job_id'],phase='building',**value)),cancel=cancellation,
                                signature=engine.sources.signature())
                 job['paused'] = op == 'pause'
                 if op == 'resume': self.enqueue({'_step':p['job_id']},10)
@@ -206,7 +208,10 @@ class Worker:
             status = engine.status()
             jobs = [j for j in self.jobs.values() if j['source'] == name]
             paused = status['paused'] or bool(jobs and all(j['paused'] for j in jobs))
-            sources[name] = {**status,'paused':paused,'building':bool(jobs and not paused and not self.suspended)}
+            running = bool(jobs and not paused and not self.suspended)
+            sources[name] = {**status,'paused':paused,
+                'building':running and status['building'],
+                'checking':running and not status['building']}
         tags = sources.get('tags',{'indexed':0,'total':0,'bytes':0,'complete':False,'partial':False,'building':False,'paused':False})
         return {**tags,'sources':sources,'suspended':self.suspended,
                 'jobs':[{k:v for k,v in j.items() if k in ('id','paused','source')} for j in self.jobs.values()]}

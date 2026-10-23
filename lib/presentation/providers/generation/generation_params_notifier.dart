@@ -1158,10 +1158,18 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     required PreciseRefType type,
     double strength = 1.0,
     double fidelity = 1.0,
+    Future<Uint8List> Function(Uint8List)? normalize,
+    void Function(PreciseReference before, PreciseReference after)?
+    onNormalized,
   }) async {
-    final index = state.preciseReferences.length;
+    // A separate byte identity per entry also distinguishes repeated imports of
+    // the same source object, without copying its pixels.
+    final staged = Uint8List.sublistView(image);
+    if (NAIApiUtils.isKnownNormalizedPreciseReferencePng(image)) {
+      NAIApiUtils.markNormalizedPreciseReferencePng(staged);
+    }
     addPreciseReference(
-      image,
+      staged,
       type: type,
       strength: strength,
       fidelity: fidelity,
@@ -1169,7 +1177,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
     final Uint8List normalizedImage;
     try {
-      normalizedImage = await NAIApiUtils.ensurePngFormatAsync(image);
+      normalizedImage = await NAIApiUtils.normalizePreciseReference(
+        staged,
+        normalize: normalize,
+      );
     } catch (e, stackTrace) {
       AppLogger.e(
         'Failed to normalize precise reference image',
@@ -1179,18 +1190,19 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       );
       return;
     }
-    if (_isDisposed || index >= state.preciseReferences.length) {
-      return;
-    }
-
+    if (_isDisposed) return;
+    final index = state.preciseReferences.indexWhere(
+      (r) => identical(r.image, staged),
+    );
+    if (index < 0) return;
     final current = state.preciseReferences[index];
-    if (!identical(current.image, image)) {
-      return;
-    }
 
     final newList = [...state.preciseReferences];
     NAIApiUtils.markNormalizedPreciseReferencePng(normalizedImage);
-    newList[index] = current.copyWith(image: normalizedImage);
+    NAIApiUtils.retainPreciseReferenceIdentity(staged, normalizedImage);
+    final replacement = current.copyWith(image: normalizedImage);
+    newList[index] = replacement;
+    onNormalized?.call(current, replacement);
     state = state.copyWith(preciseReferences: newList);
     _scheduleGenerationStateSave(immediate: true);
   }

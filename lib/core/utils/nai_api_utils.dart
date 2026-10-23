@@ -24,6 +24,33 @@ class NAIApiUtils {
     return _normalizedPreciseReferencePngCache[imageBytes] == true;
   }
 
+  static final _preciseNormalizations = Expando<Future<Uint8List>>();
+  static final _preciseIdentities = Expando<Object>();
+
+  static Object preciseReferenceIdentity(Uint8List bytes) =>
+      _preciseIdentities[bytes] ??= Object();
+
+  static void retainPreciseReferenceIdentity(
+    Uint8List before,
+    Uint8List after,
+  ) {
+    _preciseIdentities[after] = preciseReferenceIdentity(before);
+  }
+
+  /// Share background/import/request work by byte-object identity, never by index.
+  static Future<Uint8List> normalizePreciseReference(
+    Uint8List image, {
+    Future<Uint8List> Function(Uint8List)? normalize,
+  }) {
+    if (isKnownNormalizedPreciseReferencePng(image)) return Future.value(image);
+    return _preciseNormalizations[image] ??=
+        Future.sync(
+          () => (normalize ?? ensurePngFormatAsync)(image),
+        ).then(markNormalizedPreciseReferencePng).whenComplete(() {
+          _preciseNormalizations[image] = null;
+        });
+  }
+
   /// 将 double 转换为 JSON 数值（整数或浮点数）
   /// 如果是整数值（如 5.0），返回 int；否则返回 double
   static num toJsonNumber(double value) {

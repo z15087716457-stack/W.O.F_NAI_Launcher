@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/utils/nai_api_utils.dart';
 import '../../data/models/image/image_params.dart';
 import '../../data/models/vibe/vibe_reference.dart';
 import '../providers/image_generation_provider.dart';
@@ -25,7 +26,7 @@ class GenerationReferenceIdentity {
   );
   final _precise = _ReferenceIds<PreciseReference>(
     'precise',
-    (value) => value.image,
+    (value) => NAIApiUtils.preciseReferenceIdentity(value.image),
   );
 
   void sync(ImageParams params) {

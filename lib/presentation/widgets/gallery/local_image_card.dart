@@ -144,7 +144,13 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
       return;
     }
 
-    final widthChanged = oldWidget.width != widget.width;
+    final widthChanged =
+        oldWidget.width != widget.width ||
+        oldWidget.height != widget.height ||
+        oldWidget.imageWidth != widget.imageWidth ||
+        oldWidget.imageHeight != widget.imageHeight ||
+        oldWidget.record.metadata?.width != widget.record.metadata?.width ||
+        oldWidget.record.metadata?.height != widget.record.metadata?.height;
     final sizeChanged =
         widthChanged &&
         _displayPath != null &&
@@ -172,10 +178,18 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     });
   }
 
+  double get _imageAspect {
+    final w = widget.imageWidth ?? widget.record.metadata?.width ?? 0;
+    final h = widget.imageHeight ?? widget.record.metadata?.height ?? 0;
+    return w > 0 && h > 0 ? w / h : widget.width / widget.height;
+  }
+
   ThumbnailSize _pickSizeForCurrentWidth() => resolveThumbnailTier(
     widget.width,
     _devicePixelRatio,
     ref.read(localGalleryNotifierProvider).thumbnailQuality,
+    cardHeight: widget.height,
+    imageAspect: _imageAspect,
   );
 
   Future<void> _initAndLoadThumbnail() async {
@@ -193,7 +207,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     final path = widget.record.path;
     final fileName = path.split(Platform.pathSeparator).last;
     final quality = ref.read(localGalleryNotifierProvider).thumbnailQuality;
-    final size = resolveThumbnailTier(widget.width, _devicePixelRatio, quality);
+    final size = _pickSizeForCurrentWidth();
     _requestedSize = size;
     _requestedQuality = quality;
 
@@ -597,12 +611,19 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
     GalleryThumbnailQuality quality,
   ) {
     final pixelRatio = MediaQuery.of(context).devicePixelRatio;
-    final multiplier = quality == GalleryThumbnailQuality.hd ? 1.5 : 1.0;
+    final decode = thumbnailCoverDecodeSize(
+      cardWidth: widget.width,
+      cardHeight: widget.height,
+      imageAspect: _imageAspect,
+      devicePixelRatio: pixelRatio,
+      quality: quality,
+      tier: _requestedSize ?? _pickSizeForCurrentWidth(),
+    );
     return Image.file(
       File(imagePath),
       fit: BoxFit.cover,
-      cacheWidth: (widget.width * pixelRatio * multiplier).toInt(),
-      cacheHeight: (widget.height * pixelRatio * multiplier).toInt(),
+      cacheWidth: decode.width,
+      cacheHeight: decode.height,
       gaplessPlayback: true,
       frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
         if (wasSynchronouslyLoaded || frame != null) return child;

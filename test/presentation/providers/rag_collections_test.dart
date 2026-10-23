@@ -30,6 +30,9 @@ for line in sys.stdin:
  elif op=='status':
   result=status()
   if slow:threading.Timer(.2,emit,args=[{'id':i,'result':result}]).start();continue
+ elif op=='verification':
+  sources[source].update(checking=p['active'],building=False)
+  emit({'event':'index','source':source,'job_id':'check','phase':'checking' if p['active'] else 'complete',**sources[source]});result={}
  elif op=='preview':result={'plan_id':source,'documents':2,'total':8}
  elif op=='start':
   if p.get('rebuild'):
@@ -90,6 +93,7 @@ void main() {
   late Directory root;
   late ProviderContainer container;
   late RagController controller;
+  late RagClient client;
   setUp(() async {
     root = await Directory.systemTemp.createTemp('rag-collections-');
     container = ProviderContainer(
@@ -108,12 +112,13 @@ void main() {
           const Duration(milliseconds: 25),
         ),
         ragClientStarterProvider.overrideWithValue(
-          ({required python, required directory}) => RagClient.start(
-            python: python,
-            directory: directory,
-            loadAsset: (name) async =>
-                name.endsWith('worker.py') ? _worker : '',
-          ),
+          ({required python, required directory}) async =>
+              client = await RagClient.start(
+                python: python,
+                directory: directory,
+                loadAsset: (name) async =>
+                    name.endsWith('worker.py') ? _worker : '',
+              ),
         ),
       ],
     );
@@ -128,6 +133,53 @@ void main() {
   group(
     'collection routing with a real JSON child',
     () {
+      test(
+        'verification stays busy across heartbeat, completion clears it',
+        () async {
+          await client.request('verification', {
+            'source': 'wiki',
+            'active': true,
+          });
+          await Future<void>.delayed(Duration.zero);
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .phase,
+            'checking',
+          );
+          expect(container.read(ragControllerProvider).anyBusy, true);
+          await controller.refresh();
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .phase,
+            'checking',
+          );
+          expect(container.read(ragControllerProvider).anyBusy, true);
+          await client.request('verification', {
+            'source': 'wiki',
+            'active': false,
+          });
+          await Future<void>.delayed(Duration.zero);
+          expect(container.read(ragControllerProvider).anyBusy, false);
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .phase,
+            'ready',
+          );
+          expect(
+            container
+                .read(ragControllerProvider)
+                .forSource(RagSource.wiki)
+                .jobId,
+            isNull,
+          );
+        },
+      );
       test(
         'discarded and consumed plans cannot start or clear a live index',
         () async {

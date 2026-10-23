@@ -822,7 +822,7 @@ class GenFullscreenEditor extends StatelessWidget {
                 spacing: 10,
                 children: [
                   UiGlyph(UiGlyphs.expand, size: 15, color: c.muted),
-                  Flexible(
+                  Expanded(
                     child: Text(
                       title,
                       maxLines: 1,
@@ -860,7 +860,6 @@ class GenFullscreenEditor extends StatelessWidget {
                         style: UiText.sans(12, color: c.muted, height: 1.2),
                       ),
                     ),
-                  const Spacer(),
                   UiIconBox(
                     key: Key('gen-clear-$t'),
                     glyph: UiGlyphs.trash,

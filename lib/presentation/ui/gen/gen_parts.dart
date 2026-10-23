@@ -541,6 +541,7 @@ class GenSliderRow extends StatefulWidget {
     required this.onChanged,
     this.min = 0,
     this.max = 1,
+    this.inputMax,
     this.decimals = 2,
     this.defaultValue,
     this.labelWidth = 64,
@@ -554,6 +555,7 @@ class GenSliderRow extends StatefulWidget {
   final ValueChanged<double> onChanged;
   final double min;
   final double max;
+  final double? inputMax;
   final int decimals;
   final double? defaultValue;
   final double labelWidth;
@@ -613,6 +615,7 @@ class _GenSliderRowState extends State<GenSliderRow> {
           value: v,
           min: widget.min,
           max: widget.max,
+          inputMax: widget.inputMax,
           decimals: widget.decimals,
           compact: widget.compact,
           onSubmitted: widget.enabled ? widget.onChanged : null,

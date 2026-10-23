@@ -103,9 +103,11 @@ class AgentImageActions {
             return false;
           }
           await commit(() {
-            read(
-              generationParamsNotifierProvider.notifier,
-            ).addPreciseReference(bytes, type: type);
+            unawaited(
+              read(
+                generationParamsNotifierProvider.notifier,
+              ).addPreciseReferenceFromImage(bytes, type: type),
+            );
           });
         case AgentImageAction.params:
           final metadata = await readMetadata(bytes);

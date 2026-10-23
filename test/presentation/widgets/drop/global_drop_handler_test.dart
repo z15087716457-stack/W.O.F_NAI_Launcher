@@ -123,7 +123,11 @@ void main() {
             .read(generationParamsNotifierProvider)
             .preciseReferences;
         expect(references, hasLength(1));
-        expect(identical(references.single.image, image), isTrue);
+        expect(references.single.image, image);
+        // Per-entry identity is a zero-copy view, so remove/re-add of the same
+        // input bytes cannot receive a stale normalization result.
+        expect(identical(references.single.image, image), isFalse);
+        expect(references.single.image.offsetInBytes, image.offsetInBytes);
       },
     );
   });

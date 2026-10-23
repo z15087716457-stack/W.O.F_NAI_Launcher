@@ -30,6 +30,26 @@ class LifecycleTests(unittest.TestCase):
         self.tags.ann.remove(key); self.tags.ann.add(key,vector)
         self.tags.db.commit()
 
+    def test_worker_noop_events_and_heartbeat_never_report_building(self):
+        self.build(self.tags)
+        worker = Worker(); worker.engines = {'tags': self.tags}
+        generator = self.tags.build(self.tags.preview()['plan_id'], lambda: False)
+        worker.jobs['check'] = {'id':'check', 'source':'tags', 'generator':generator,
+            'cancel':threading.Event(), 'paused':False}
+        events = []
+        with patch.object(worker, '_event', side_effect=lambda **v: events.append(v)):
+            worker._step('check')
+            self.assertEqual(events[-1]['phase'], 'checking')
+            self.assertFalse(events[-1]['building'])
+            heartbeat = worker.status()['sources']['tags']
+            self.assertTrue(heartbeat['checking'])
+            self.assertFalse(heartbeat['building'])
+            worker._step('check')
+        self.assertEqual(events[-1]['phase'], 'complete')
+        self.assertFalse(worker.jobs)
+        self.assertFalse(worker.status()['sources']['tags']['checking'])
+        self.assertFalse(worker.status()['sources']['tags']['building'])
+
     def test_clean_seen_and_metadata_changes_do_not_rewrite_ann(self):
         self.build(self.tags)
         ann = weakref.ref(self.pool.ann)

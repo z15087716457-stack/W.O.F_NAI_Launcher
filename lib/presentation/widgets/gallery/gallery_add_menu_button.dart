@@ -93,6 +93,7 @@ class _GalleryAddMenuButtonState extends State<GalleryAddMenuButton> {
       icon: const Icon(StudioIcons.galleryPlus, size: 18),
       visualDensity: VisualDensity.compact,
       style: IconButton.styleFrom(
+        padding: EdgeInsets.zero,
         fixedSize: const Size(30, 30),
         minimumSize: const Size(30, 30),
       ),

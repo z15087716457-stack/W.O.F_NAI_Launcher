@@ -39,10 +39,11 @@ double? _scalar(
   String key, {
   bool free = false,
   double min = 0,
+  double max = 1,
 }) {
   final v = p[key];
   if (v == null) return null;
-  if (v is! num || !v.isFinite || (!free && (v < min || v > 1))) {
+  if (v is! num || !v.isFinite || (!free && (v < min || v > max))) {
     throw NaiAgentToolError('invalid_reference', 'Invalid $key');
   }
   return v.toDouble();
@@ -265,9 +266,14 @@ class NaiAgentReferenceBinding {
         p.containsKey('use_image_size') && p['use_image_size'] is! bool) {
       throw const NaiAgentToolError('invalid_reference', 'Expected a boolean');
     }
-    _scalar(p, 'strength', free: action.endsWith('_vibe'));
+    _scalar(
+      p,
+      'strength',
+      free: action.endsWith('_vibe'),
+      max: action.endsWith('_precise') ? 10 : 1,
+    );
     _scalar(p, 'noise');
-    _scalar(p, 'fidelity');
+    _scalar(p, 'fidelity', max: action.endsWith('_precise') ? 10 : 1);
     _scalar(p, 'info_extracted', min: VibeReference.minInfoExtracted);
     if (p.containsKey('type') &&
         !PreciseRefType.values.asNameMap().containsKey(p['type'])) {
@@ -510,16 +516,16 @@ class NaiAgentReferenceBinding {
           type:
               PreciseRefType.values.asNameMap()[p['type']] ??
               PreciseRefType.character,
-          strength: _scalar(p, 'strength') ?? 1,
-          fidelity: _scalar(p, 'fidelity') ?? 1,
+          strength: _scalar(p, 'strength', max: 10) ?? 1,
+          fidelity: _scalar(p, 'fidelity', max: 10) ?? 1,
           isNormalizedPng: true,
         );
       case 'update_precise':
         writer.updatePreciseReference(
           p['index'] as int,
           type: PreciseRefType.values.asNameMap()[p['type']],
-          strength: _scalar(p, 'strength'),
-          fidelity: _scalar(p, 'fidelity'),
+          strength: _scalar(p, 'strength', max: 10),
+          fidelity: _scalar(p, 'fidelity', max: 10),
           enabled: p['enabled'] as bool?,
         );
       case 'remove_precise':

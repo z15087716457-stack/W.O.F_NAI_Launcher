@@ -62,6 +62,7 @@ SettingsRagData settingsRagData(
     RagSource.gallery => settings.galleryEnabled,
   };
   return SettingsRagData(
+    indexBusy: status.anyBusy,
     initializing:
         settings.enabled &&
         (status.initializing ||
@@ -102,8 +103,10 @@ SettingsRagData settingsRagData(
                 : status.initializing ||
                       (!item.hasIndexStatus && item.error == null)
                 ? SettingsRagState.loading
-                : item.busy
+                : item.busy && item.phase == 'building'
                 ? SettingsRagState.building
+                : item.busy && !(item.complete || item.indexed >= item.total)
+                ? SettingsRagState.loading
                 : item.phase == 'paused'
                 ? SettingsRagState.paused
                 : item.error != null
@@ -112,7 +115,11 @@ SettingsRagData settingsRagData(
                 ? SettingsRagState.ready
                 : SettingsRagState.empty,
             known: item.hasIndexStatus,
-            done: gallery ? item.details['visual_indexed'] ?? 0 : item.indexed,
+            done: gallery
+                ? item.details['visual_indexed'] ?? 0
+                : item.busy && item.phase == 'building'
+                ? item.processed
+                : item.indexed,
             total: gallery ? item.details['images'] ?? 0 : item.total,
             secondary: gallery ? item.details['parameters_indexed'] ?? 0 : null,
             skipped: item.details['skipped'] ?? 0,

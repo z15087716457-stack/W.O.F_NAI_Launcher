@@ -38,6 +38,25 @@ void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
+  testWidgets('compact toolbar icons are centred inside their ink bounds', (
+    tester,
+  ) async {
+    await _pumpToolbar(tester);
+    final buttons = tester
+        .widgetList<IconButton>(find.byType(IconButton))
+        .where((b) => b.style?.fixedSize?.resolve({}) == const Size(32, 32));
+    expect(buttons, isNotEmpty);
+    for (final button in buttons) {
+      final host = find.byWidget(button);
+      final icon = find.descendant(of: host, matching: find.byType(Icon));
+      final ink = find.descendant(
+        of: host,
+        matching: find.byWidgetPredicate((w) => w is InkResponse),
+      );
+      expect(tester.getRect(icon).center, tester.getRect(ink).center);
+    }
+  });
+
   testWidgets(
     'default folder breadcrumb and search scope use its localized label',
     (tester) async {

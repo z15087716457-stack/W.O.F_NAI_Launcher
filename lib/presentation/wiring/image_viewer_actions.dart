@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -181,9 +183,11 @@ class ImageViewerActionHost {
           throw StateError(l10n.toast_styleReferenceLimit(16));
         }
         await commit(() {
-          ref
-              .read(generationParamsNotifierProvider.notifier)
-              .addPreciseReference(bytes, type: type);
+          unawaited(
+            ref
+                .read(generationParamsNotifierProvider.notifier)
+                .addPreciseReferenceFromImage(bytes, type: type),
+          );
         });
         _success(l10n.drop_addedToCharacterRef);
       } else if (action == ViewerAction.styleTransfer) {

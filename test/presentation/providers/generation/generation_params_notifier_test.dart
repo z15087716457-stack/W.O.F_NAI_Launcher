@@ -610,8 +610,8 @@ void main() {
     notifier.addPreciseReference(
       preciseBytes,
       type: PreciseRefType.style,
-      strength: 0.4,
-      fidelity: 0.8,
+      strength: 1.5,
+      fidelity: 1.5,
       isNormalizedPng: true,
     );
     notifier.updatePreciseReference(0, enabled: false);
@@ -643,8 +643,8 @@ void main() {
     final restoredPrecise = restored.preciseReferences.single;
     expect(restoredPrecise.image, preciseBytes);
     expect(restoredPrecise.type, PreciseRefType.style);
-    expect(restoredPrecise.strength, 0.4);
-    expect(restoredPrecise.fidelity, 0.8);
+    expect(restoredPrecise.strength, 1.5);
+    expect(restoredPrecise.fidelity, 1.5);
     expect(restoredPrecise.enabled, isFalse);
     expect(
       NAIApiUtils.isKnownNormalizedPreciseReferencePng(restoredPrecise.image),

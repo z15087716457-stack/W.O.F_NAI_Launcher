@@ -222,10 +222,12 @@ class GalleryEngine:
         for engine,plan in zip((self.visual,self.text),self.plan['plans']):
             engine.validate_plan(plan['plan_id'])
 
-    def build(self,plan_id,cancelled):
+    def build(self,plan_id,cancelled,progress=None):
         self.validate_plan(plan_id)
         plans = self.plan['plans'];self.plan = None
-        generators = [engine.build(plan['plan_id'],cancelled) for engine,plan in zip((self.visual,self.text),plans)]
+        generators = [engine.build(plan['plan_id'],cancelled,
+            progress=(lambda value: progress({**self.status(),'building':True,'processed':sum(processed)})) if progress else None)
+            for engine,plan in zip((self.visual,self.text),plans)]
         processed = [0,0];active = {0,1}
         try:
             while active and not cancelled():

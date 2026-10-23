@@ -78,6 +78,28 @@ class IndexTests(unittest.TestCase):
         self.assertEqual(self.engine.preview()['total'],70)
         self.assertEqual(self.models.embedded,[])
         self.assertFalse(self.engine.status()['auto_update_allowed'])
+    def test_noop_verification_is_not_a_vector_build(self):
+        signals = []
+        plan = self.engine.preview()
+        def signal(value):
+            self.assertTrue(value['building'])
+            self.assertEqual(len(self.models.embedded), value['processed'])
+            signals.append(value)
+        first = list(self.engine.build(plan['plan_id'], lambda:False, progress=signal))
+        self.assertEqual(len(signals), 3)
+        self.assertTrue(all(p['building'] and not p['checking'] for p in first))
+        self.models.embedded.clear()
+        db = sqlite3.connect(self.source)
+        db.execute('UPDATE tags SET post_count=post_count+1'); db.commit(); db.close()
+        self.assertFalse(self.engine.status()['complete'])
+        checked = self.build()
+        self.assertTrue(all(p['checking'] and not p['building'] for p in checked))
+        self.assertTrue(all(p['indexed'] == p['total'] for p in checked))
+        self.assertEqual(self.models.embedded, [])
+        self.assertFalse(self.engine.status()['checking'])
+        self.assertFalse(self.engine.status()['building'])
+        self.assertTrue(self.engine.status()['complete'])
+
     def test_wrong_plan_rejected(self):
         self.engine.preview()
         with self.assertRaises(ValueError): list(self.engine.build('wrong',lambda:False))

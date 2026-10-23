@@ -196,6 +196,60 @@ void main() {
   );
 
   test(
+    'RAG verification is ready at full progress, real writes stay building',
+    () {
+      SettingsRagState project(RagStatus status) => settingsRagData(
+        const RagSettings(enabled: true),
+        status,
+        const AsyncData(RagRuntimeInfo(python: 'fixture', ready: true)),
+        const RagModelDownloadState(),
+        const SettingsRagSessionState(),
+        null,
+      ).sources.first.state;
+      expect(
+        project(
+          const RagStatus(busy: true, phase: 'checking', indexed: 8, total: 8),
+        ),
+        SettingsRagState.ready,
+      );
+      final writing = settingsRagData(
+        const RagSettings(enabled: true),
+        const RagStatus(
+          busy: true,
+          phase: 'building',
+          indexed: 8,
+          total: 8,
+          processed: 3,
+        ),
+        const AsyncData(RagRuntimeInfo(python: 'fixture', ready: true)),
+        const RagModelDownloadState(),
+        const SettingsRagSessionState(),
+        null,
+      );
+      expect(writing.sources.first.done, 3);
+      expect(writing.indexBusy, true);
+      expect(writing.busy, true);
+      expect(
+        project(
+          const RagStatus(busy: true, phase: 'checking', indexed: 4, total: 8),
+        ),
+        SettingsRagState.loading,
+      );
+      // A same-count digest change is still a real incremental write.
+      expect(
+        project(
+          const RagStatus(busy: true, phase: 'building', indexed: 8, total: 8),
+        ),
+        SettingsRagState.building,
+      );
+      expect(
+        project(const RagStatus(phase: 'ready', indexed: 8, total: 8)),
+        SettingsRagState.ready,
+      );
+    },
+  );
+
+  test(
     'all upscale variants retain manager IDs and per-model offload bounds',
     () {
       const workflow = UpscaleWorkflowSettings(localModel: 'seedvr2-7b-int8');

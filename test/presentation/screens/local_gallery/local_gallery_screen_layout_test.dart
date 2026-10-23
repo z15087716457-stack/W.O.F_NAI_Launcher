@@ -218,6 +218,13 @@ void main() {
           tester.getCenter(find.byType(GalleryAddMenuButton)).dy,
           closeTo(rowCenter, .6),
         );
+        final add = find.byType(GalleryAddMenuButton);
+        final addIcon = find.descendant(of: add, matching: find.byType(Icon));
+        final addInk = find.descendant(
+          of: add,
+          matching: find.byWidgetPredicate((w) => w is InkResponse),
+        );
+        expect(tester.getRect(addIcon).center, tester.getRect(addInk).center);
       }
 
       // 单击第二张：进入查看，详情面板显示参数
@@ -230,6 +237,25 @@ void main() {
       final inspector = find.byType(GalleryInspectorPanel);
       if (size.width >= 1300) {
         expect(inspector, findsOneWidget);
+        for (final button
+            in tester
+                .widgetList<IconButton>(
+                  find.descendant(
+                    of: inspector,
+                    matching: find.byType(IconButton),
+                  ),
+                )
+                .where(
+                  (b) => b.style?.fixedSize?.resolve({}) == const Size(32, 32),
+                )) {
+          final host = find.byWidget(button);
+          final icon = find.descendant(of: host, matching: find.byType(Icon));
+          final ink = find.descendant(
+            of: host,
+            matching: find.byWidgetPredicate((w) => w is InkResponse),
+          );
+          expect(tester.getRect(icon).center, tester.getRect(ink).center);
+        }
         expect(
           find.byKey(const Key('gallery-inspector-reuse')),
           findsOneWidget,
