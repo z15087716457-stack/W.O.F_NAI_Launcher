@@ -17,6 +17,7 @@ import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
+import 'package:nai_launcher/presentation/providers/krita/bridge_draft_writer.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_diff_undo.dart';
@@ -178,6 +179,145 @@ void main() {
       );
     },
   );
+  for (final model in [
+    ImageModels.animeDiffusionV4Full,
+    ImageModels.animeDiffusionV45Full,
+    ImageModels.animeDiffusionV5Full,
+  ]) {
+    test(
+      'positions import into UI + generation params, partial inheritance and undo: $model',
+      () async {
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateModel(model);
+        container.read(bridgeDraftWriterProvider)({
+          'use_coords': false,
+          'characters': [
+            {'id': 'first', 'prompt': 'old first', 'x': .1, 'y': .2},
+            {'id': 'second', 'prompt': 'old second', 'x': .8, 'y': .9},
+            {'id': 'third', 'prompt': 'old third'},
+          ],
+        });
+        // A dormant saved position must survive enabling custom mode too.
+        final characters = container.read(characterPromptNotifierProvider);
+        container
+            .read(characterPromptNotifierProvider.notifier)
+            .restoreAgentSnapshot(
+              characters.copyWith(
+                characters: [
+                  characters.characters[0],
+                  characters.characters[1].copyWith(
+                    positionMode: CharacterPositionMode.aiChoice,
+                  ),
+                  characters.characters[2],
+                ],
+              ),
+            );
+        final before = container.read(characterPromptNotifierProvider);
+        final paramsBefore = container.read(generationParamsNotifierProvider);
+        final set = promptSetInput();
+        set['shared']['characters'] = [
+          'silver hair',
+          'brown hair',
+          'green hair',
+          'red hair',
+        ];
+        set['shared']['positions'] = [
+          {'x': .05, 'y': .95},
+          null,
+          null,
+          {'x': .9, 'y': .1},
+        ];
+        set['items'][0]['positions'] = [
+          {'x': .25, 'y': .6},
+          null,
+          null,
+          null,
+        ];
+        final imported = (await container
+            .read(agentPromptSetActionsProvider)
+            .importItem(workspace, set, 0, (_) {}))!;
+        final config = container.read(characterPromptNotifierProvider);
+        final params = container.read(generationParamsNotifierProvider);
+        expect(config.globalAiChoice, isFalse);
+        expect(params.useCoords, isTrue);
+        expect(config.characters, hasLength(4));
+        expect(config.characters.first.prompt, 'silver hair, running');
+        expect(config.characters.first.customPosition!.column, .25);
+        expect(config.characters.first.customPosition!.row, .6);
+        expect(
+          config.characters[1].customPosition,
+          before.characters[1].customPosition,
+        );
+        expect(
+          config.characters[2].customPosition,
+          isNotNull,
+        ); // Existing normalization fills.
+        expect(config.characters[3].customPosition!.column, .9);
+        expect(config.characters[3].customPosition!.row, .1);
+        for (var j = 0; j < 4; j++) {
+          expect(
+            config.characters[j].positionMode,
+            CharacterPositionMode.custom,
+          );
+          expect(
+            params.characters[j].positionX,
+            config.characters[j].customPosition!.column,
+          );
+          expect(
+            params.characters[j].positionY,
+            config.characters[j].customPosition!.row,
+          );
+        }
+        expect(imported.restores.map((r) => r.field), contains('use_coords'));
+        expect(
+          await container
+              .read(agentDiffUndoProvider)
+              .restoreAll(imported.restores, workspace.agentDirectory),
+          isTrue,
+        );
+        expect(container.read(characterPromptNotifierProvider), before);
+        final restored = container.read(generationParamsNotifierProvider);
+        expect(restored.useCoords, isFalse);
+        expect(restored.characters, paramsBefore.characters);
+      },
+    );
+  }
+  for (final useCoords in [false, true]) {
+    test(
+      'no effective positions leaves existing coordinates and mode unchanged: $useCoords',
+      () async {
+        container.read(bridgeDraftWriterProvider)({
+          'use_coords': useCoords,
+          'characters': [
+            {'id': 'old', 'prompt': 'old', 'x': .18, 'y': .87},
+          ],
+        });
+        final before = container.read(characterPromptNotifierProvider);
+        final paramsBefore = container.read(generationParamsNotifierProvider);
+        final set = promptSetInput();
+        set['shared']['positions'] = [null];
+        set['items'][0]['positions'] = [null];
+        final imported = (await container
+            .read(agentPromptSetActionsProvider)
+            .importItem(workspace, set, 0, (_) {}))!;
+        final after = container.read(characterPromptNotifierProvider);
+        expect(after.globalAiChoice, before.globalAiChoice);
+        expect(
+          after.characters.single.copyWith(prompt: 'old'),
+          before.characters.single,
+        );
+        final paramsAfter = container.read(generationParamsNotifierProvider);
+        expect(paramsAfter.useCoords, paramsBefore.useCoords);
+        expect(paramsAfter.characters.single.positionX, .18);
+        expect(paramsAfter.characters.single.positionY, .87);
+        expect(
+          imported.restores.map((r) => r.field),
+          isNot(contains('use_coords')),
+        );
+      },
+    );
+  }
   test(
     'add missing slots, undo removes added slot and restores original configuration',
     () async {
@@ -208,9 +348,22 @@ void main() {
           .updateModel(ImageModels.animeDiffusionV3);
       final old = container.read(characterPromptNotifierProvider),
           toasts = <String>[];
-      await container
+      final params = container.read(generationParamsNotifierProvider);
+      final set = promptSetInput();
+      set['shared']['positions'] = [
+        {'x': .2, 'y': .7},
+      ];
+      final imported = (await container
           .read(agentPromptSetActionsProvider)
-          .importItem(workspace, promptSetInput(), 0, toasts.add);
+          .importItem(workspace, set, 0, toasts.add))!;
+      expect(
+        container.read(generationParamsNotifierProvider).useCoords,
+        params.useCoords,
+      );
+      expect(
+        imported.restores.map((r) => r.field),
+        isNot(contains('use_coords')),
+      );
       expect(toasts, hasLength(1));
       expect(container.read(characterPromptNotifierProvider), old);
       expect(
@@ -222,6 +375,17 @@ void main() {
   test('defensive character limit truncates and warns', () async {
     final set = promptSetInput();
     set['shared']['characters'] = List.generate(7, (i) => 'character $i');
+    set['items'][0]['positions'] = [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      {'x': .2, 'y': .8},
+    ];
+    final before = container.read(characterPromptNotifierProvider);
+    final paramsBefore = container.read(generationParamsNotifierProvider);
     final messages = <String>[];
     await container
         .read(agentPromptSetActionsProvider)
@@ -231,6 +395,14 @@ void main() {
       hasLength(6),
     );
     expect(messages, hasLength(1));
+    expect(
+      container.read(characterPromptNotifierProvider).globalAiChoice,
+      before.globalAiChoice,
+    );
+    expect(
+      container.read(generationParamsNotifierProvider).useCoords,
+      paramsBefore.useCoords,
+    );
   });
   test(
     'cancel during backup blocks synchronous write and leaves draft intact',
@@ -260,6 +432,35 @@ void main() {
       expect(
         Directory('${workspace.agentDirectory.path}/draft-backups').listSync(),
         hasLength(1),
+      );
+    },
+  );
+  test(
+    'copy text appends effective coordinates with two decimals, keeping missing entries plain',
+    () {
+      final service = container.read(agentPromptSetActionsProvider),
+          set = promptSetInput();
+      set['shared']['characters'] = ['silver hair', 'brown hair', 'green hair'];
+      set['shared']['positions'] = [
+        {'x': .25, 'y': .6},
+        {'x': 1, 'y': 0},
+      ];
+      set['items'][0]['positions'] = [
+        null,
+        {'x': .1234, 'y': .9876},
+      ];
+      expect(
+        service.copyText(set, 0),
+        contains('[character 1] silver hair, running @ (0.25, 0.60)'),
+      );
+      expect(
+        service.copyText(set, 0),
+        contains('[character 2] brown hair @ (0.12, 0.99)'),
+      );
+      expect(service.copyText(set, 0), contains('[character 3] green hair\n'));
+      expect(
+        service.copyText(set, 1),
+        contains('[character 2] brown hair @ (1.00, 0.00)'),
       );
     },
   );

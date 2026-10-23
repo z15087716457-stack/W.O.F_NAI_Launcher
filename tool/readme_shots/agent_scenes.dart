@@ -58,9 +58,10 @@ AgentPromptSet _promptSet(ReadmeData d) {
     ordered: true,
     shared: const AgentPromptSetShared(
       main:
-          'masterpiece, best quality, very aesthetic, cinematic lighting, night, rain, 1girl, solo',
+          'masterpiece, best quality, very aesthetic, cinematic lighting, night, rain, 1girl, 1boy',
       characters: [
         'girl, silver hair, long hair, blue eyes, white blouse, black skirt',
+        'boy, brown hair, green eyes, apron',
       ],
       negative: 'lowres, bad anatomy, bad hands, text, watermark, blurry',
     ),

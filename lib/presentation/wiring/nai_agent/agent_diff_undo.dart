@@ -83,6 +83,11 @@ class AgentDiffUndo {
         }
         continue;
       }
+      if (diff.field == 'use_coords') {
+        if (fields['use_coords'] is! bool) return false;
+        plan.patch['use_coords'] = fields['use_coords'];
+        continue;
+      }
       if (diff.field == 'params') {
         if (diff.params.isEmpty) return false;
         for (final key in diff.params) {

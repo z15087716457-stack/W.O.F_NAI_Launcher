@@ -80,6 +80,116 @@ void main() {
     },
   );
   test(
+    'positions validate, persist/read and mark own/shared effective changes',
+    () async {
+      final input = promptSetInput();
+      input['shared']['characters'] = ['silver hair', 'brown hair'];
+      input['shared']['positions'] = [
+        null,
+        {'x': 1, 'y': 0},
+      ];
+      input['items'][0]['positions'] = [
+        {'x': 0, 'y': 1},
+        null,
+      ];
+      final created =
+          (await sets.execute(input, NaiAgentCancellation()))['details'] as Map;
+      final id = created['set_id'] as String;
+      final restarted = NaiAgentPromptSets(dir);
+      final stored = (await restarted.read(id))!;
+      expect(stored['shared']['positions'], input['shared']['positions']);
+      expect(stored['items'][0]['positions'], input['items'][0]['positions']);
+      expect(
+        effectiveAgentPromptSetPositions(
+          stored['shared'] as Map,
+          stored['items'][0] as Map,
+        ),
+        [(x: 0.0, y: 1.0), (x: 1.0, y: 0.0)],
+      );
+      final read =
+          (await restarted.execute({
+                'action': 'read',
+                'set_id': id,
+              }, NaiAgentCancellation()))['details']
+              as Map;
+      expect(read['shared'], stored['shared']);
+      expect(read['items'], stored['items']);
+      final update = clone(input)
+        ..addAll({'action': 'update', 'set_id': id, 'expected_revision': 1});
+      update['items'][0]['positions'][0] = {'x': .2, 'y': .3};
+      var result =
+          (await sets.execute(update, NaiAgentCancellation()))['details']
+              as Map;
+      expect(result['changed_items'], [0]);
+      update['expected_revision'] = 2;
+      update['shared']['positions'][0] = {'x': .8, 'y': .4};
+      result =
+          (await sets.execute(update, NaiAgentCancellation()))['details']
+              as Map;
+      expect(result['changed_items'], [
+        1,
+      ]); // Item 0 overrides this shared entry.
+      update['expected_revision'] = 3;
+      update['shared']['positions'][1] = {'x': .5, 'y': .5};
+      result =
+          (await sets.execute(update, NaiAgentCancellation()))['details']
+              as Map;
+      expect(result['changed_items'], [
+        0,
+        1,
+      ]); // Explicit item null inherits too.
+    },
+  );
+  test(
+    'positions reject non-finite/range/shape and index overflow on both scopes',
+    () {
+      for (final bad in [
+        null,
+        {},
+        'left',
+        [0],
+        [
+          [.2, .3],
+        ],
+        [
+          {'x': .2},
+        ],
+        [
+          {'x': .2, 'y': .3, 'z': 0},
+        ],
+        [
+          {'x': '0', 'y': 0},
+        ],
+        [
+          {'x': -.01, 'y': 0},
+        ],
+        [
+          {'x': 0, 'y': 1.01},
+        ],
+        [
+          {'x': double.nan, 'y': 0},
+        ],
+        [
+          {'x': 0, 'y': double.infinity},
+        ],
+        [null, null],
+      ]) {
+        for (final shared in [false, true]) {
+          final input = clone(promptSetInput());
+          final Map target = shared
+              ? input['shared'] as Map
+              : input['items'][0] as Map;
+          target['positions'] = bad;
+          expect(
+            () => NaiAgentPromptSets.validate(input),
+            throwsA(isA<NaiAgentToolError>()),
+            reason: '$shared: $bad',
+          );
+        }
+      }
+    },
+  );
+  test(
     'invalid icons, sizes, every string bound and character alignment rejected',
     () async {
       final invalid = <Map<String, dynamic>>[

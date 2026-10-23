@@ -1035,7 +1035,7 @@ void main() {
               tester,
               scene: scene,
               width: width,
-              height: 1000,
+              height: scene == AgentScene.promptSets && on ? 1400 : 1000,
               dark: dark,
               tab: switch (scene) {
                 AgentScene.shelf => AgentTab.shelf,
@@ -1043,6 +1043,21 @@ void main() {
                 _ => AgentTab.chat,
               },
             );
+            if (scene == AgentScene.promptSets && on) {
+              final prompt = find.byKey(const Key('agent-ps-prompt')).first;
+              await tester.ensureVisible(prompt);
+              await tester.tap(prompt);
+              await tester.pumpAndSettle();
+              await tester.ensureVisible(
+                find.byKey(const Key('agent-ps-position-preview')),
+              );
+              await tester.pumpAndSettle();
+              final thread = tester.widget<ListView>(
+                find.byKey(const Key('agent-thread')),
+              );
+              thread.controller!.jumpTo(0);
+              await tester.pumpAndSettle();
+            }
             if (scene == AgentScene.compose) {
               await tester.showKeyboard(find.byKey(const Key('agent-input')));
               await tester.enterText(

@@ -8,6 +8,7 @@ import '../kit/ui_text.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
 import 'agent_parts.dart';
+import 'agent_position_board.dart';
 import 'agent_tag_window.dart';
 
 /// Conversation-only view: no providers, disk access or draft writes.
@@ -142,6 +143,7 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
         agentDiffWindow(_segments(field.$2, field.$3), windowUnchanged: true),
     ];
     final hidden = windows.any((w) => w.contains(null));
+    final marks = item.positionMarks(data.shared);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 0),
       child: _box(
@@ -234,6 +236,23 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
                         ),
                         style: UiText.mono(11.8, height: 1.6),
                       ),
+                      if (i == data.shared.characters.length &&
+                          marks.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: AgentPositionBoard(
+                              key: const Key('agent-ps-position-preview'),
+                              height: 84,
+                              block: AgentPositionBlock(
+                                id: 'prompt-set/${data.setId}/$_index',
+                                aspect: data.aspect,
+                                marks: marks,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                     if (hidden || _all)
                       Align(

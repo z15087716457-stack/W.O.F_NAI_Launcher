@@ -85,6 +85,13 @@ class AgentPromptSetActions {
     final prompts = patch.remove('characters') as List<String>;
     final model = ref.read(generationParamsNotifierProvider).modelSpec;
     final allowed = model.characterPrompts ? model.maxCharacters : 0;
+    final positions = effectiveAgentPromptSetPositions(
+      set['shared'] as Map,
+      (set['items'] as List)[index] as Map,
+    );
+    // V4/V4.5 accept coordinates too; freeformCharacterPosition is V5-only.
+    final importPositions =
+        model.isV4OrLater && positions.take(allowed).any((p) => p != null);
     if (prompts.isNotEmpty && allowed == 0) {
       toast(currentL10n.ag_psNoCharacters);
     } else if (prompts.length > allowed) {
@@ -102,18 +109,37 @@ class AgentPromptSetActions {
       }
       patch['characters'] = chars;
       nextCharacters = originalCharacters.copyWith(
+        globalAiChoice: importPositions
+            ? false
+            : originalCharacters.globalAiChoice,
         characters: [
           for (var j = 0; j < chars.length; j++)
-            (j < originalCharacters.characters.length
-                    ? originalCharacters.characters[j]
-                    : CharacterPrompt(id: chars[j]['id'] as String))
-                .copyWith(
-                  prompt: j < prompts.length && j < allowed
-                      ? prompts[j]
-                      : originalCharacters.characters[j].prompt,
-                ),
+            _importCharacter(
+              j < originalCharacters.characters.length
+                  ? originalCharacters.characters[j]
+                  : CharacterPrompt(id: chars[j]['id'] as String),
+              j < prompts.length && j < allowed
+                  ? prompts[j]
+                  : originalCharacters.characters[j].prompt,
+              importPositions && j < allowed && j < positions.length
+                  ? positions[j]
+                  : null,
+              custom: importPositions,
+            ),
         ],
       );
+      if (importPositions) {
+        patch['use_coords'] = true;
+        nextCharacters = nextCharacters.normalizeCustomPositions();
+        // Carry normalization into generation params too, not only the UI.
+        for (var j = 0; j < chars.length; j++) {
+          final position = nextCharacters.characters[j].customPosition;
+          if (position != null) {
+            chars[j]['x'] = position.column;
+            chars[j]['y'] = position.row;
+          }
+        }
+      }
     }
     validateBridgePatch(patch);
     final ok = await guardedAgentUndo(
@@ -148,6 +174,28 @@ class AgentPromptSetActions {
     ]);
   }
 
+  CharacterPrompt _importCharacter(
+    CharacterPrompt original,
+    String prompt,
+    AgentPromptSetPosition? position, {
+    required bool custom,
+  }) => position == null
+      ? original.copyWith(
+          prompt: prompt,
+          positionMode: custom && original.customPosition != null
+              ? CharacterPositionMode.custom
+              : original.positionMode,
+        )
+      : original.copyWith(
+          prompt: prompt,
+          positionMode: CharacterPositionMode.custom,
+          customPosition: CharacterPosition(
+            mode: CharacterPositionMode.custom,
+            column: position.x,
+            row: position.y,
+          ),
+        );
+
   Future<void> saveBlock(Map<String, dynamic> set) async {
     final atoms = [
       for (var i = 0; i < (set['items'] as List).length; i++)
@@ -167,7 +215,18 @@ class AgentPromptSetActions {
   String copyText(Map<String, dynamic> set, int index) {
     final value = merged(set, index);
     final chars = value['characters'] as List<String>;
-    return '# ${index + 1}. ${(set['items'] as List)[index]['title']}\n${value['prompt']}\n${[for (var j = 0; j < chars.length; j++) '[character ${j + 1}] ${chars[j]}'].join('\n')}\n[negative] ${value['negative_prompt']}';
+    final positions = effectiveAgentPromptSetPositions(
+      set['shared'] as Map,
+      (set['items'] as List)[index] as Map,
+    );
+    String coordinates(int j) {
+      final p = positions[j];
+      return p == null
+          ? ''
+          : ' @ (${p.x.toStringAsFixed(2)}, ${p.y.toStringAsFixed(2)})';
+    }
+
+    return '# ${index + 1}. ${(set['items'] as List)[index]['title']}\n${value['prompt']}\n${[for (var j = 0; j < chars.length; j++) '[character ${j + 1}] ${chars[j]}${coordinates(j)}'].join('\n')}\n[negative] ${value['negative_prompt']}';
   }
 
   Future<void> copy(Map<String, dynamic> set, int? index) => Clipboard.setData(

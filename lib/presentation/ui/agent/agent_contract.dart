@@ -265,9 +265,11 @@ class AgentPromptSetShared {
     this.main = '',
     this.characters = const [],
     this.negative = '',
+    this.positions = const [],
   });
   final String main, negative;
   final List<String> characters;
+  final List<Offset?> positions;
 }
 
 class AgentPromptSetItem {
@@ -277,9 +279,21 @@ class AgentPromptSetItem {
     this.note = '',
     this.main = '',
     this.characters = const [],
+    this.positions = const [],
   });
   final String icon, title, note, main;
   final List<String> characters;
+  final List<Offset?> positions;
+
+  Offset? positionAt(AgentPromptSetShared shared, int index) =>
+      (index < positions.length ? positions[index] : null) ??
+      (index < shared.positions.length ? shared.positions[index] : null);
+
+  List<AgentPositionMark> positionMarks(AgentPromptSetShared shared) => [
+    for (var j = 0; j < shared.characters.length; j++)
+      if (positionAt(shared, j) case final position?)
+        AgentPositionMark(index: j, after: position, added: true),
+  ];
 }
 
 class AgentPromptSet {
@@ -299,6 +313,7 @@ class AgentPromptSet {
     this.importedIndex,
     this.canUndoImport = false,
     this.busyIndex,
+    this.aspect,
   });
   final String setId, kind, kindIcon, title, unit;
   final int revision;
@@ -309,6 +324,7 @@ class AgentPromptSet {
   final Map<int, List<AgentImage>> images;
   final int? unitAnlas, importedIndex, busyIndex;
   final bool canUndoImport;
+  final double? aspect;
 }
 
 final class AgentPromptSetBlock extends AgentBlock {

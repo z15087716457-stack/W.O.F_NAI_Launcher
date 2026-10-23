@@ -33,6 +33,23 @@ test('prompt_set schema bounds, action requirements and exact Dart icon catalog'
   for (const name of promptSetIcons) assert.match(glyphs,new RegExp("'"+name+"' => AgentGlyphs\\."));
 });
 
+test('prompt_set accepts optional per-character positions and rejects invalid shapes/ranges', () => {
+  const schema = domainTools.find(t => t.name === 'prompt_set').parameters;
+  for (const action of ['create', 'update']) {
+    const base = {action, set_id:'012345abcdef', expected_revision:1, ...content};
+    for (const positions of [[], [null], [{x:0,y:1}], [{x:0.25,y:0.75}]]) {
+      const value = {...base, shared:{...content.shared, positions},
+        items:[{...content.items[0], positions}, content.items[1]]};
+      assert.equal(Value.Check(schema,value),true,JSON.stringify(value));
+    }
+    for (const positions of [null, {}, [0], [[0,1]], [{x:0}], [{x:0,y:1,z:0}],
+      [{x:-0.01,y:0}], [{x:0,y:1.01}], [{x:'0',y:0}], [{x:NaN,y:0}], [{x:0,y:Infinity}], Array(7).fill(null)]) {
+      assert.equal(Value.Check(schema,{...base,shared:{...content.shared,positions}}),false);
+      assert.equal(Value.Check(schema,{...base,items:[{...content.items[0],positions},content.items[1]]}),false);
+    }
+  }
+});
+
 test('prompt_set create/update projections are compact, read has no projection', () => {
   const handlers = new Map();
   createNaiInteractionExtension([]).factory({on:(name,handler)=>handlers.set(name,handler),registerTool:()=>{}});

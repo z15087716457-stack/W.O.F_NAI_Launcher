@@ -261,11 +261,13 @@ abstract final class AgentFixture {
     title: ordered ? '雨夜咖啡馆' : '夏日衣橱',
     unit: ordered ? '幕' : '套',
     ordered: ordered,
-    shared: const AgentPromptSetShared(
-      main:
-          'masterpiece, best quality, very aesthetic, absurdres, cinematic lighting, film grain, night, rain, 1girl, solo',
+    shared: AgentPromptSetShared(
+      main: ordered
+          ? 'masterpiece, best quality, very aesthetic, absurdres, cinematic lighting, film grain, night, rain, 1girl, 1boy'
+          : 'masterpiece, best quality, very aesthetic, absurdres, cinematic lighting, film grain, night, rain, 1girl, solo',
       characters: [
         'girl, silver hair, long hair, blue eyes, white blouse, black skirt, black pantyhose, ribbon',
+        if (ordered) 'boy, brown hair, green eyes, apron',
       ],
       negative:
           'lowres, bad anatomy, bad hands, text, watermark, blurry, jpeg artifacts, extra digits',
@@ -335,7 +337,10 @@ abstract final class AgentFixture {
                 title: entry.$2,
                 note: entry.$3,
                 main: entry.$4,
-                characters: [entry.$5],
+                characters: [entry.$5, 'standing, looking at viewer'],
+                positions: entry.$1 == 'rain' || entry.$1 == 'coffee'
+                    ? const [Offset(.25, .55), Offset(.75, .55)]
+                    : const [],
               ),
           ]
         : [

@@ -14,6 +14,28 @@ String mergeAgentPrompt(String shared, String item) => [shared, item]
     .where((s) => s.isNotEmpty)
     .join(', ');
 
+typedef AgentPromptSetPosition = ({double x, double y});
+
+/// Item null/missing entries inherit the shared default, by character index.
+List<AgentPromptSetPosition?> effectiveAgentPromptSetPositions(
+  Map shared,
+  Map item,
+) {
+  final defaults = shared['positions'] as List? ?? const [];
+  final overrides = item['positions'] as List? ?? const [];
+  return [
+    for (var j = 0; j < (shared['characters'] as List? ?? []).length; j++)
+      switch ((j < overrides.length ? overrides[j] : null) ??
+          (j < defaults.length ? defaults[j] : null)) {
+        final Map p => (
+          x: (p['x'] as num).toDouble(),
+          y: (p['y'] as num).toDouble(),
+        ),
+        _ => null,
+      },
+  ];
+}
+
 /// Validation and persistence are independent of the UI and the Pi session.
 class NaiAgentPromptSets {
   NaiAgentPromptSets(this.agentDirectory, {this.chatId});
@@ -149,6 +171,32 @@ class NaiAgentPromptSets {
       ];
     }
 
+    List<Map<String, double>?> positions(Map value, int length) {
+      final list = value['positions'];
+      if (list is! List || list.length > length) invalid('positions');
+      return [
+        for (final entry in list)
+          if (entry == null)
+            null
+          else if (entry is Map &&
+              entry.length == 2 &&
+              entry['x'] is num &&
+              entry['y'] is num &&
+              (entry['x'] as num).isFinite &&
+              (entry['y'] as num).isFinite &&
+              (entry['x'] as num) >= 0 &&
+              (entry['x'] as num) <= 1 &&
+              (entry['y'] as num) >= 0 &&
+              (entry['y'] as num) <= 1)
+            {
+              'x': (entry['x'] as num).toDouble(),
+              'y': (entry['y'] as num).toDouble(),
+            }
+          else
+            invalid('positions'),
+      ];
+    }
+
     final shared = input['shared'];
     final items = input['items'];
     if (shared is! Map ||
@@ -168,6 +216,8 @@ class NaiAgentPromptSets {
       'shared': {
         'main': string(shared, 'main', 2000),
         'characters': chars,
+        if (shared.containsKey('positions'))
+          'positions': positions(shared, chars.length),
         'negative': string(shared, 'negative', 2000),
       },
       'items': [
@@ -179,6 +229,8 @@ class NaiAgentPromptSets {
               'note': string(item, 'note', 240),
               'main': string(item, 'main', 1000),
               'characters': characters(item, 600, chars.length),
+              if (item.containsKey('positions'))
+                'positions': positions(item, chars.length),
             }
           else
             invalid('item'),
@@ -228,12 +280,23 @@ class NaiAgentPromptSets {
     }
     final content = validate(params);
     final items = content['items'] as List;
-    final previous = old?['items'] as List? ?? [];
+    final previousContent = old == null ? null : validate(old);
+    final previous = previousContent?['items'] as List? ?? [];
     final changed = [
       if (old != null)
         for (var i = 0; i < items.length; i++)
           if (i >= previous.length ||
-              !const DeepCollectionEquality().equals(items[i], previous[i]))
+              !const DeepCollectionEquality().equals(items[i], previous[i]) ||
+              !const DeepCollectionEquality().equals(
+                effectiveAgentPromptSetPositions(
+                  content['shared'] as Map,
+                  items[i] as Map,
+                ),
+                effectiveAgentPromptSetPositions(
+                  previousContent!['shared'] as Map,
+                  previous[i] as Map,
+                ),
+              ))
             i,
     ];
     String id;

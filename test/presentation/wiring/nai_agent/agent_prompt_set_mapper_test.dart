@@ -54,6 +54,13 @@ void main() {
             'expected_revision': 1,
           });
         update['items'][1]['note'] = 'Changed';
+        update['shared']['positions'] = [
+          {'x': .25, 'y': .6},
+        ];
+        // Map both shared defaults and an explicit item entry.
+        update['items'][0]['positions'] = [
+          {'x': .25, 'y': .6},
+        ];
         final second =
             (await sets.execute(update, NaiAgentCancellation()))['details']
                 as Map<String, dynamic>;
@@ -99,11 +106,18 @@ void main() {
         }
         expect(cards(), hasLength(1));
         expect(cards().single.revision, 2);
-        expect(cards().single.changedItems, [1]);
+        expect(cards().single.changedItems, [0, 1]);
         await resources.settle();
         final card = cards().single;
         expect(card.data!.title, 'Rain');
         expect(card.data!.items[1].note, 'Changed');
+        expect(card.data!.shared.positions, [const Offset(.25, .6)]);
+        expect(card.data!.items[0].positions, [const Offset(.25, .6)]);
+        expect(card.data!.items[1].positions, isEmpty);
+        expect(
+          card.data!.items[1].positionAt(card.data!.shared, 0),
+          const Offset(.25, .6),
+        );
         resources.dispose();
         resources = AgentResources(() {});
         mapper = AgentThreadMapper(resources);

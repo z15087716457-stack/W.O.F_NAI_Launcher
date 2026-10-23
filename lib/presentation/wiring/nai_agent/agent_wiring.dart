@@ -599,6 +599,12 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
                 _resources,
                 images,
                 unitAnlas: promptPrice,
+                aspect:
+                    draft?.width != null &&
+                        draft?.height != null &&
+                        draft!.height! > 0
+                    ? draft.width! / draft.height!
+                    : null,
                 importedIndex: imported?.index,
                 canUndoImport: imported != null && imported.version == version,
                 busyIndex: _promptBusy[_promptKey(r, id)],

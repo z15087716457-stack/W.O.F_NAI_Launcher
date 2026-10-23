@@ -1,3 +1,4 @@
+import 'dart:ui' show Offset;
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import 'package:path/path.dart' as p;
 import '../../ui/agent/agent_contract.dart';
@@ -12,7 +13,17 @@ AgentPromptSet agentPromptSetData(
   int? importedIndex,
   bool canUndoImport = false,
   int? busyIndex,
+  double? aspect,
 }) {
+  List<Offset?> positions(Map source) => [
+    for (final entry in source['positions'] as List? ?? const [])
+      entry == null
+          ? null
+          : Offset(
+              (entry['x'] as num).toDouble(),
+              (entry['y'] as num).toDouble(),
+            ),
+  ];
   final shared = value['shared'] as Map;
   final images = <int, List<AgentImage>>{};
   for (final entry in (value['images'] as Map? ?? {}).entries) {
@@ -53,6 +64,7 @@ AgentPromptSet agentPromptSetData(
       main: shared['main'] as String? ?? '',
       negative: shared['negative'] as String? ?? '',
       characters: (shared['characters'] as List? ?? []).cast<String>(),
+      positions: positions(shared),
     ),
     items: [
       for (final item in value['items'] as List)
@@ -62,6 +74,7 @@ AgentPromptSet agentPromptSetData(
           note: item['note'] as String? ?? '',
           main: item['main'] as String? ?? '',
           characters: (item['characters'] as List? ?? []).cast<String>(),
+          positions: positions(item as Map),
         ),
     ],
     changedItems: (value['changed_items'] as List? ?? []).cast<int>(),
@@ -73,5 +86,6 @@ AgentPromptSet agentPromptSetData(
         : null,
     canUndoImport: canUndoImport,
     busyIndex: busyIndex,
+    aspect: aspect,
   );
 }
