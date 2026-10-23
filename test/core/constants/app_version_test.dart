@@ -42,10 +42,26 @@ void main() {
         'W.O.F NAI Studio 2.0.0',
       );
     }
-    expect(
-      File('pubspec.yaml').readAsStringSync(),
-      matches(RegExp(r'^version: 2\.0\.0\+42\s*$', multiLine: true)),
-    );
+  });
+
+  test('current pubspec version displays without build metadata', () async {
+    final declared = RegExp(
+      r'^version:\s*(\d+\.\d+\.\d+)\+(\d+)\s*$',
+      multiLine: true,
+    ).firstMatch(File('pubspec.yaml').readAsStringSync());
+    expect(declared, isNotNull);
+    final name = declared!.group(1)!;
+    final build = declared.group(2)!;
+    for (final value in [name, '$name+$build']) {
+      await version(value, build);
+      expect(AppVersion.versionName, name);
+      expect(AppVersion.fullVersion, '$name+$build');
+      expect(AppVersion.buildNumber, build);
+      expect(
+        AppVersion.getDisplayName('W.O.F NAI Studio'),
+        'W.O.F NAI Studio $name',
+      );
+    }
   });
 
   test('full version does not duplicate embedded build numbers', () async {
