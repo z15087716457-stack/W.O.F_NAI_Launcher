@@ -1,5 +1,4 @@
 import '../../../../widgets/navigation/window_chrome_layout.dart';
-import '../../../../widgets/common/resize_decoration_cache.dart';
 import '../../../../providers/layout_state_provider.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -695,9 +694,7 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                             children: [
                               if (channel != null)
                                 Positioned.fill(
-                                  child: ResizeDecorationCache(
-                                    child: ChannelBackdrop(data: channel),
-                                  ),
+                                  child: ChannelBackdrop(data: channel),
                                 )
                               else if (!widget.embedded)
                                 Positioned.fill(
