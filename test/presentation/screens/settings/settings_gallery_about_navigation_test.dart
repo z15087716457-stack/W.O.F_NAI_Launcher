@@ -472,7 +472,18 @@ void main() {
       final defaultPath = await tester.runAsync(
         () => VibeLibraryPathHelper.instance.getPath(),
       );
-      await tester.pumpAndSettle();
+      // The button has its own disk IO. A separate getPath() and
+      // pumpAndSettle do not await that action's FutureBuilder update.
+      for (var frame = 0; frame < 100; frame++) {
+        await tester.pump();
+        final tile = tester.widget<SettingsPathTile>(
+          find.byKey(const Key('vibe-library-path-setting')),
+        );
+        if (tile.path == defaultPath) break;
+        await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+      }
       expect(
         tester
             .widget<SettingsPathTile>(
