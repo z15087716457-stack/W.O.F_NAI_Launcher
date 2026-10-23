@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_preview_image.dart';
+import '../kit/ui_svg_icon.dart';
 import '../kit/ui_text.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
@@ -740,7 +741,6 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
                     AgentButton(
                       key: const Key('agent-ps-generate'),
                       label: l.ag_psGenerate,
-                      glyph: AgentGlyphs.gen,
                       style: AgentButtonStyle.primary,
                       trailing: data.unitAnlas == null
                           ? null
@@ -749,11 +749,19 @@ class _AgentPromptSetCardState extends State<AgentPromptSetCard> {
                                 mainAxisSize: MainAxisSize.min,
                                 spacing: 3,
                                 children: [
-                                  AgentAnlas(size: 12, color: c.warn),
                                   _text(
                                     '${data.unitAnlas}',
                                     size: 11.5,
                                     color: c.bg,
+                                  ),
+                                  UiSvgIcon.asset(
+                                    'assets/icons/nai-icon-anlas.svg',
+                                    size: 12,
+                                    colorFilter: ColorFilter.mode(
+                                      c.warn,
+                                      BlendMode.srcIn,
+                                    ),
+                                    excludeFromSemantics: true,
                                   ),
                                 ],
                               ),
