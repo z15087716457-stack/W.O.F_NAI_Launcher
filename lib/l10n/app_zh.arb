@@ -11261,5 +11261,20 @@
   "ag_psTooManyCharacters": "当前模型最多支持 {count} 个角色",
   "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
   "ag_psNoCharacters": "当前模型不支持角色提示词",
-  "ag_psMissing": "这张卡的数据已不在"
+  "ag_psMissing": "这张卡的数据已不在",
+  "startup_dataTitle": "无法准备应用数据",
+  "startup_dataHelp": "应用数据尚未准备完成，请保留现有文件。内容不同的文件不会合并或覆盖。请先备份并核对数据目录，检查磁盘空间和访问权限，再重试。",
+  "startup_dataCurrent": "当前数据目录",
+  "startup_dataLegacy": "旧数据目录",
+  "startup_dataOpenCurrent": "打开当前目录",
+  "startup_dataOpenLegacy": "打开旧目录",
+  "startup_dataDetails": "错误详情",
+  "startup_dataActionFailed": "操作失败：{error}",
+  "@startup_dataActionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

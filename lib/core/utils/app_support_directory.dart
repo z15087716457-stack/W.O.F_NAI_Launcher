@@ -8,7 +8,22 @@ import '../services/adjacent_app_data_migration.dart';
 export 'package:path_provider/path_provider.dart'
     hide getApplicationSupportDirectory, getTemporaryDirectory;
 
-Future<Directory>? _applicationSupportDirectory;
+final _applicationSupportDirectory = ApplicationSupportDirectoryResolver(
+  _prepareAdjacentData,
+);
+
+/// Share in-flight preparation, but allow recovery UI to retry a failed attempt.
+class ApplicationSupportDirectoryResolver {
+  ApplicationSupportDirectoryResolver(this.prepare);
+  final Future<Directory> Function() prepare;
+  Future<Directory>? _resolved;
+
+  Future<Directory> resolve() => _resolved ??= Future<Directory>.sync(prepare)
+      .onError<Object>((error, stackTrace) {
+        _resolved = null;
+        Error.throwWithStackTrace(error, stackTrace);
+      });
+}
 
 bool get _usesAdjacentData =>
     Platform.isWindows && Platform.environment['FLUTTER_TEST'] != 'true';
@@ -17,7 +32,7 @@ bool get _usesAdjacentData =>
 /// directory. Tests retain the injected path_provider implementation.
 Future<Directory> getApplicationSupportDirectory() {
   if (!_usesAdjacentData) return system_paths.getApplicationSupportDirectory();
-  return _applicationSupportDirectory ??= _prepareAdjacentData();
+  return _applicationSupportDirectory.resolve();
 }
 
 Future<Directory> _prepareAdjacentData() async {

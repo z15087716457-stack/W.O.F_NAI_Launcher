@@ -38355,6 +38355,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This card\'s data is no longer available'**
   String get ag_psMissing;
+
+  /// No description provided for @startup_dataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not prepare application data'**
+  String get startup_dataTitle;
+
+  /// No description provided for @startup_dataHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Application data is not ready. Keep existing files; files with different contents are not merged or overwritten. Back up and check your data folders, free disk space and permissions, then retry.'**
+  String get startup_dataHelp;
+
+  /// No description provided for @startup_dataCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Current data folder'**
+  String get startup_dataCurrent;
+
+  /// No description provided for @startup_dataLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous data folder'**
+  String get startup_dataLegacy;
+
+  /// No description provided for @startup_dataOpenCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Open current folder'**
+  String get startup_dataOpenCurrent;
+
+  /// No description provided for @startup_dataOpenLegacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Open previous folder'**
+  String get startup_dataOpenLegacy;
+
+  /// No description provided for @startup_dataDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Error details'**
+  String get startup_dataDetails;
+
+  /// No description provided for @startup_dataActionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed: {error}'**
+  String startup_dataActionFailed(String error);
 }
 
 class _AppLocalizationsDelegate

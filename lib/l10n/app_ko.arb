@@ -11261,5 +11261,20 @@
   "ag_psTooManyCharacters": "현재 모델은 캐릭터를 최대 {count}명까지 지원합니다",
   "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
   "ag_psNoCharacters": "현재 모델은 캐릭터 프롬프트를 지원하지 않습니다",
-  "ag_psMissing": "이 카드의 데이터를 찾을 수 없습니다"
+  "ag_psMissing": "이 카드의 데이터를 찾을 수 없습니다",
+  "startup_dataTitle": "앱 데이터를 준비하지 못했습니다",
+  "startup_dataHelp": "앱 데이터가 아직 준비되지 않았습니다. 기존 파일을 보존하세요. 내용이 다른 파일은 병합하거나 덮어쓰지 않습니다. 데이터 폴더를 백업하고 확인한 뒤 디스크 여유 공간과 접근 권한을 점검하고 다시 시도하세요.",
+  "startup_dataCurrent": "현재 데이터 폴더",
+  "startup_dataLegacy": "이전 데이터 폴더",
+  "startup_dataOpenCurrent": "현재 폴더 열기",
+  "startup_dataOpenLegacy": "이전 폴더 열기",
+  "startup_dataDetails": "오류 세부 정보",
+  "startup_dataActionFailed": "작업 실패: {error}",
+  "@startup_dataActionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

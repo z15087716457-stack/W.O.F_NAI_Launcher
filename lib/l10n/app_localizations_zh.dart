@@ -21083,6 +21083,33 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_psMissing => '这张卡的数据已不在';
+
+  @override
+  String get startup_dataTitle => '无法准备应用数据';
+
+  @override
+  String get startup_dataHelp =>
+      '应用数据尚未准备完成，请保留现有文件。内容不同的文件不会合并或覆盖。请先备份并核对数据目录，检查磁盘空间和访问权限，再重试。';
+
+  @override
+  String get startup_dataCurrent => '当前数据目录';
+
+  @override
+  String get startup_dataLegacy => '旧数据目录';
+
+  @override
+  String get startup_dataOpenCurrent => '打开当前目录';
+
+  @override
+  String get startup_dataOpenLegacy => '打开旧目录';
+
+  @override
+  String get startup_dataDetails => '错误详情';
+
+  @override
+  String startup_dataActionFailed(String error) {
+    return '操作失败：$error';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42164,4 +42191,31 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_psMissing => '這張卡的資料已不在';
+
+  @override
+  String get startup_dataTitle => '無法準備應用資料';
+
+  @override
+  String get startup_dataHelp =>
+      '應用資料尚未準備完成，請保留現有檔案。內容不同的檔案不會合並或覆蓋。請先備份並核對資料目錄，檢查磁碟空間和存取權限，再重試。';
+
+  @override
+  String get startup_dataCurrent => '當前資料目錄';
+
+  @override
+  String get startup_dataLegacy => '舊資料目錄';
+
+  @override
+  String get startup_dataOpenCurrent => '開啟當前目錄';
+
+  @override
+  String get startup_dataOpenLegacy => '開啟舊目錄';
+
+  @override
+  String get startup_dataDetails => '錯誤詳情';
+
+  @override
+  String startup_dataActionFailed(String error) {
+    return '操作失敗：$error';
+  }
 }

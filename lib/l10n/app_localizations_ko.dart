@@ -21393,4 +21393,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_psMissing => '이 카드의 데이터를 찾을 수 없습니다';
+
+  @override
+  String get startup_dataTitle => '앱 데이터를 준비하지 못했습니다';
+
+  @override
+  String get startup_dataHelp =>
+      '앱 데이터가 아직 준비되지 않았습니다. 기존 파일을 보존하세요. 내용이 다른 파일은 병합하거나 덮어쓰지 않습니다. 데이터 폴더를 백업하고 확인한 뒤 디스크 여유 공간과 접근 권한을 점검하고 다시 시도하세요.';
+
+  @override
+  String get startup_dataCurrent => '현재 데이터 폴더';
+
+  @override
+  String get startup_dataLegacy => '이전 데이터 폴더';
+
+  @override
+  String get startup_dataOpenCurrent => '현재 폴더 열기';
+
+  @override
+  String get startup_dataOpenLegacy => '이전 폴더 열기';
+
+  @override
+  String get startup_dataDetails => '오류 세부 정보';
+
+  @override
+  String startup_dataActionFailed(String error) {
+    return '작업 실패: $error';
+  }
 }

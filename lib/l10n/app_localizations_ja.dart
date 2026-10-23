@@ -21321,4 +21321,31 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_psMissing => 'このカードのデータは見つかりません';
+
+  @override
+  String get startup_dataTitle => 'アプリのデータを準備できませんでした';
+
+  @override
+  String get startup_dataHelp =>
+      'アプリのデータを準備できていません。既存のファイルを保持してください。内容の異なるファイルは統合も上書きもしません。データフォルダーをバックアップして確認し、ディスクの空き容量とアクセス権を確認してから再試行してください。';
+
+  @override
+  String get startup_dataCurrent => '現在のデータフォルダー';
+
+  @override
+  String get startup_dataLegacy => '以前のデータフォルダー';
+
+  @override
+  String get startup_dataOpenCurrent => '現在のフォルダーを開く';
+
+  @override
+  String get startup_dataOpenLegacy => '以前のフォルダーを開く';
+
+  @override
+  String get startup_dataDetails => 'エラーの詳細';
+
+  @override
+  String startup_dataActionFailed(String error) {
+    return '操作に失敗しました：$error';
+  }
 }

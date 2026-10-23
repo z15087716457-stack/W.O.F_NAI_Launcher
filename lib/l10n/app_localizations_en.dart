@@ -22074,4 +22074,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_psMissing => 'This card\'s data is no longer available';
+
+  @override
+  String get startup_dataTitle => 'Could not prepare application data';
+
+  @override
+  String get startup_dataHelp =>
+      'Application data is not ready. Keep existing files; files with different contents are not merged or overwritten. Back up and check your data folders, free disk space and permissions, then retry.';
+
+  @override
+  String get startup_dataCurrent => 'Current data folder';
+
+  @override
+  String get startup_dataLegacy => 'Previous data folder';
+
+  @override
+  String get startup_dataOpenCurrent => 'Open current folder';
+
+  @override
+  String get startup_dataOpenLegacy => 'Open previous folder';
+
+  @override
+  String get startup_dataDetails => 'Error details';
+
+  @override
+  String startup_dataActionFailed(String error) {
+    return 'Action failed: $error';
+  }
 }

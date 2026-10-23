@@ -8,6 +8,16 @@ import '../utils/file_sha256.dart';
 typedef CompatibilityDirectoryCreator =
     Future<void> Function(Directory legacy, Directory destination);
 
+class AdjacentAppDataException extends FileSystemException {
+  AdjacentAppDataException(
+    FileSystemException cause, {
+    required this.legacyPath,
+    required this.destinationPath,
+  }) : super(cause.message, cause.path, cause.osError);
+
+  final String legacyPath, destinationPath;
+}
+
 /// Moves only this application's support directory, before any database opens.
 /// A verified, independent backup remains beside the executable. The old name
 /// becomes a junction so saved absolute paths and Python environments still work.
@@ -29,6 +39,21 @@ class AdjacentAppDataMigration {
   final void Function(String)? onPhase;
 
   Future<Directory> prepare() async {
+    try {
+      return await _prepare();
+    } on FileSystemException catch (error, stackTrace) {
+      Error.throwWithStackTrace(
+        AdjacentAppDataException(
+          error,
+          legacyPath: legacy.absolute.path,
+          destinationPath: destination.absolute.path,
+        ),
+        stackTrace,
+      );
+    }
+  }
+
+  Future<Directory> _prepare() async {
     final oldPath = p.normalize(legacy.absolute.path);
     final newPath = p.normalize(destination.absolute.path);
     if (p.equals(oldPath, newPath) ||
@@ -80,15 +105,18 @@ class AdjacentAppDataMigration {
     if (await destination.exists() &&
         !await destination.list(followLinks: false).isEmpty) {
       if (hasLegacy) {
+        if (await _recoverPluginSplit()) return destination;
         throw const FileSystemException(
           'Both application data directories contain data; refusing to merge',
         );
       }
+      await _ensureCompatibilityDirectory();
       return destination;
     }
     if (!hasLegacy) {
       await destination.create(recursive: true);
       await _writeMarker(null);
+      await _ensureCompatibilityDirectory();
       return destination;
     }
 
@@ -181,13 +209,216 @@ class AdjacentAppDataMigration {
     return destination;
   }
 
-  Future<void> _writeMarker(Directory? backup) async {
+  /// Fresh profiles need the same alias as migrated profiles: native plugins
+  /// continue to resolve the historical Windows path independently of Dart.
+  Future<void> _ensureCompatibilityDirectory() async {
+    final type = await FileSystemEntity.type(legacy.path, followLinks: false);
+    if (type == FileSystemEntityType.link) {
+      if (await _isOurCompatibilityDirectory()) return;
+      throw const FileSystemException(
+        'Legacy application data points to another installation',
+      );
+    }
+    if (type != FileSystemEntityType.directory &&
+        type != FileSystemEntityType.notFound) {
+      throw const FileSystemException('Legacy data path is not a directory');
+    }
+    final existed = type == FileSystemEntityType.directory;
+    if (existed) await legacy.delete(); // Nonrecursive; never removes data.
+    await legacy.parent.create(recursive: true);
+    try {
+      await _createCompatibilityDirectory(legacy, destination);
+      if (!await _isOurCompatibilityDirectory()) {
+        throw const FileSystemException(
+          'Compatibility directory verification failed',
+        );
+      }
+    } catch (_) {
+      if (await _isOurCompatibilityDirectory()) {
+        await Link(legacy.path).delete();
+      }
+      if (existed && !await legacy.exists()) await legacy.create();
+      rethrow;
+    }
+  }
+
+  Future<bool> _isOurCompatibilityDirectory() async =>
+      await FileSystemEntity.type(legacy.path, followLinks: false) ==
+          FileSystemEntityType.link &&
+      await legacy.exists() &&
+      p.equals(
+        await legacy.resolveSymbolicLinks(),
+        await destination.resolveSymbolicLinks(),
+      );
+
+  /// Repair only the missing-alias bug in a recorded fresh profile. This is not
+  /// a general profile merge: unknown files, links, untrusted markers and any
+  /// differing same-name file keep both directories intact and stop startup.
+  Future<bool> _recoverPluginSplit() async {
+    bool pluginFile(String name) =>
+        name == 'flutter_secure_storage.dat' ||
+        name == 'shared_preferences.json' ||
+        (name.endsWith('.secure') && name.length > '.secure'.length);
+    final marker = File(p.join(destination.path, markerName));
+    if (await FileSystemEntity.type(marker.path, followLinks: false) !=
+        FileSystemEntityType.file) {
+      return false;
+    }
+    final markerText = await marker.readAsString();
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(markerText);
+    } on FormatException {
+      return false;
+    }
+    if (decoded is! Map ||
+        decoded['schema'] != 1 ||
+        decoded['layout'] != 'executable-adjacent' ||
+        !decoded.containsKey('backup') ||
+        decoded['backup'] != null ||
+        decoded['legacy'] is! String ||
+        !p.equals(
+          p.normalize(decoded['legacy'] as String),
+          p.normalize(legacy.absolute.path),
+        )) {
+      return false;
+    }
+    // Inspect the root first, without traversing arbitrary user directories.
+    await for (final entry in legacy.list(followLinks: false)) {
+      final name = p.basename(entry.path);
+      if (await FileSystemEntity.type(entry.path, followLinks: false) !=
+              FileSystemEntityType.file ||
+          !pluginFile(name)) {
+        return false;
+      }
+    }
+    final snapshot = await _snapshot(legacy);
+    if (snapshot.entries.any(
+      (entry) => entry.value.bytes < 0 || !pluginFile(entry.key),
+    )) {
+      return false;
+    }
+    final missing = <String>{};
+    Future<bool> targetsUnchanged() async {
+      if (await marker.readAsString() != markerText) return false;
+      for (final entry in snapshot.entries) {
+        final file = File(p.join(destination.path, entry.key));
+        final type = await FileSystemEntity.type(file.path, followLinks: false);
+        if (type == FileSystemEntityType.notFound &&
+            missing.contains(entry.key)) {
+          continue;
+        }
+        if (type != FileSystemEntityType.file ||
+            missing.contains(entry.key) ||
+            await file.length() != entry.value.bytes ||
+            await fileSha256(file) != entry.value.digest) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    for (final entry in snapshot.entries) {
+      final file = File(p.join(destination.path, entry.key));
+      if (await FileSystemEntity.type(file.path, followLinks: false) ==
+          FileSystemEntityType.notFound) {
+        missing.add(entry.key);
+      }
+    }
+    if (!await targetsUnchanged()) return false;
+    final backup = await destination.parent.createTemp('.studio-data-backup-');
+    onPhase?.call('Backing up split plugin data');
+    await _copyVerified(legacy, backup, snapshot);
+    await beforeCommit?.call();
+    await _verifySnapshot(legacy, snapshot);
+    if (!await targetsUnchanged()) {
+      throw const FileSystemException(
+        'Application data changed during recovery; originals preserved',
+      );
+    }
+    final retired = Directory(
+      p.join(
+        legacy.parent.path,
+        '.nai_launcher-recovered-${p.basename(backup.path)}',
+      ),
+    );
+    await legacy.rename(retired.path);
+    final created = <String>{};
+    try {
+      for (final name in missing) {
+        final file = File(p.join(destination.path, name));
+        final bytes = await File(p.join(backup.path, name)).readAsBytes();
+        await file.create(exclusive: true); // Never overwrite an existing file.
+        created.add(name);
+        final handle = await file.open(mode: FileMode.append);
+        try {
+          await handle.lock(FileLock.exclusive);
+          if (await handle.length() != 0) {
+            throw const FileSystemException(
+              'Application data changed during recovery; originals preserved',
+            );
+          }
+          await handle.writeFrom(bytes);
+          await handle.flush();
+        } finally {
+          await handle.close();
+        }
+        await file.setLastModified(snapshot[name]!.modified);
+        if (await fileSha256(file) != snapshot[name]!.digest) {
+          throw const FileSystemException(
+            'Recovered plugin data failed verification',
+          );
+        }
+      }
+      await _verifySnapshot(retired, snapshot);
+      for (final entry in snapshot.entries) {
+        final file = File(p.join(destination.path, entry.key));
+        if (await FileSystemEntity.type(file.path, followLinks: false) !=
+                FileSystemEntityType.file ||
+            await fileSha256(file) != entry.value.digest) {
+          throw const FileSystemException(
+            'Application data changed during recovery; originals preserved',
+          );
+        }
+      }
+      await _ensureCompatibilityDirectory();
+      await _writeMarker(backup, recoveredLegacy: retired);
+    } catch (_) {
+      try {
+        if (await _isOurCompatibilityDirectory()) {
+          await Link(legacy.path).delete();
+        }
+        for (final name in created) {
+          final file = File(p.join(destination.path, name));
+          if (await FileSystemEntity.type(file.path, followLinks: false) ==
+                  FileSystemEntityType.file &&
+              await fileSha256(file) == snapshot[name]!.digest) {
+            await file.delete();
+          }
+        }
+      } finally {
+        if (await FileSystemEntity.type(legacy.path, followLinks: false) ==
+            FileSystemEntityType.notFound) {
+          await retired.rename(legacy.path);
+        }
+      }
+      rethrow;
+    }
+    return true;
+  }
+
+  Future<void> _writeMarker(
+    Directory? backup, {
+    Directory? recoveredLegacy,
+  }) async {
     await File(p.join(destination.path, markerName)).writeAsString(
       jsonEncode({
         'schema': 1,
         'layout': 'executable-adjacent',
         'legacy': legacy.absolute.path,
         'backup': backup?.absolute.path,
+        if (recoveredLegacy != null)
+          'recovered_legacy': recoveredLegacy.absolute.path,
       }),
       flush: true,
     );

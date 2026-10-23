@@ -241,6 +241,7 @@
 ## 构建与更新
 
 - Windows 内部数据统一经 `app_support_directory.dart` 使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；不依赖工作目录，不静默退回 C 盘。旧 AppData 数据必须在数据库打开前完整备份、SHA-256 校验和迁移；保留旧路径联接兼容已存绝对路径，两端有不同数据时拒绝合并。旧目录识别仍取自 `CompanyName=com.example` 与 `ProductName=nai_launcher`，原生身份保持稳定。更新、打包和卸载必须保护 `user-data/` 及迁移备份。
+- 首次新建、旧目录为空或仅已有相邻数据时，同样在插件启动前建立并验证兼容联接。历史缺联接造成的分叉只允许恢复标记中 `schema=1`、`layout=executable-adjacent`、原路径匹配且 `backup=null` 的首次新建配置；旧目录只能包含根级 `flutter_secure_storage.dat`、`shared_preferences.json`、`*.secure` 普通文件。先独立备份，SHA-256 复核，独占创建缺失目标；同名内容必须相同，未知条目／链接／真实冲突拒绝处理，保留旧原件与备份。数据准备失败显示独立五语言恢复页，重试先重新准备目录，成功后才打开数据库。见 [修复与验证](docs/startup-data-recovery-2026-10-23.md)。
 
 - 正常覆盖构建需目标文件未被运行实例锁定；用户要求自行核验时，不自动关闭程序，可使用独立 CMake 产物目录。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
 - 安装器（`installer/windows/nai_launcher.nsi`）进程检测自 2026-09-09 起为「软化 fail-closed」语义：进程枚举/查询失败时不再直接阻断，改为以 `CreateFileW(GENERIC_WRITE, share=0)` 探 `$INSTDIR\nai_launcher.exe` 文件锁——文件可写打开或不存在（全新安装）则放行，共享冲突/拒绝访问（文件真被占用）或其他未知错误仍阻断（静默退出码 3 不变）。每次检查失败会把失败阶段、GetLastError、疑似 PID、探锁结果追加写入 `$INSTDIR\install_diagnostics.log`（UTF-16，随卸载删除）。验证脚本已覆盖四场景：目标在跑阻断 / 他目录实例放行 / 查询失败+无锁放行+落诊断 / 全新目录放行。

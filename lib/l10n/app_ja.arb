@@ -11261,5 +11261,20 @@
   "ag_psTooManyCharacters": "現在のモデルのキャラクターは最大 {count} 人です",
   "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
   "ag_psNoCharacters": "現在のモデルはキャラクタープロンプトに対応していません",
-  "ag_psMissing": "このカードのデータは見つかりません"
+  "ag_psMissing": "このカードのデータは見つかりません",
+  "startup_dataTitle": "アプリのデータを準備できませんでした",
+  "startup_dataHelp": "アプリのデータを準備できていません。既存のファイルを保持してください。内容の異なるファイルは統合も上書きもしません。データフォルダーをバックアップして確認し、ディスクの空き容量とアクセス権を確認してから再試行してください。",
+  "startup_dataCurrent": "現在のデータフォルダー",
+  "startup_dataLegacy": "以前のデータフォルダー",
+  "startup_dataOpenCurrent": "現在のフォルダーを開く",
+  "startup_dataOpenLegacy": "以前のフォルダーを開く",
+  "startup_dataDetails": "エラーの詳細",
+  "startup_dataActionFailed": "操作に失敗しました：{error}",
+  "@startup_dataActionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

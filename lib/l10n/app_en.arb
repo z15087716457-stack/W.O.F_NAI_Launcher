@@ -11273,5 +11273,20 @@
   "ag_psTooManyCharacters": "The current model supports up to {count} characters",
   "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
   "ag_psNoCharacters": "The current model doesn't support character prompts",
-  "ag_psMissing": "This card's data is no longer available"
+  "ag_psMissing": "This card's data is no longer available",
+  "startup_dataTitle": "Could not prepare application data",
+  "startup_dataHelp": "Application data is not ready. Keep existing files; files with different contents are not merged or overwritten. Back up and check your data folders, free disk space and permissions, then retry.",
+  "startup_dataCurrent": "Current data folder",
+  "startup_dataLegacy": "Previous data folder",
+  "startup_dataOpenCurrent": "Open current folder",
+  "startup_dataOpenLegacy": "Open previous folder",
+  "startup_dataDetails": "Error details",
+  "startup_dataActionFailed": "Action failed: {error}",
+  "@startup_dataActionFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

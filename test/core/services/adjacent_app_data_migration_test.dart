@@ -37,7 +37,12 @@ void main() {
     legacy: legacy,
     destination: target,
     beforeCommit: beforeCommit,
-    createCompatibilityDirectory: createLink,
+    createCompatibilityDirectory:
+        createLink ??
+        (Platform.isWindows
+            ? null
+            : (old, destination) =>
+                  Link(old.path).create(destination.path, recursive: true)),
   );
 
   test(
@@ -45,7 +50,10 @@ void main() {
     () async {
       expect(await migration().prepare(), target);
       expect(await target.exists(), isTrue);
-      expect(await legacy.exists(), isFalse);
+      expect(
+        await legacy.resolveSymbolicLinks(),
+        await target.resolveSymbolicLinks(),
+      );
       final marker =
           jsonDecode(
                 await File(
@@ -55,8 +63,396 @@ void main() {
               as Map;
       expect(marker['layout'], 'executable-adjacent');
       expect(marker['backup'], isNull);
+      // Native plugins still use this path after the first frame. A second
+      // process/start must see the same data instead of two separate profiles.
+      await write('flutter_secure_storage.dat', 'synthetic encrypted account');
+      await write('shared_preferences.json', '{"synthetic":true}');
+      await migration().prepare();
+      expect(
+        await File(
+          p.join(target.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'synthetic encrypted account',
+      );
     },
   );
+
+  test(
+    'an empty legacy directory is replaced without losing adjacent data',
+    () async {
+      await legacy.create(recursive: true);
+      await write('draft.json', 'adjacent draft', root: target);
+      await migration().prepare();
+      expect(
+        await legacy.resolveSymbolicLinks(),
+        await target.resolveSymbolicLinks(),
+      );
+      expect(
+        await File(p.join(legacy.path, 'draft.json')).readAsString(),
+        'adjacent draft',
+      );
+      await migration().prepare();
+    },
+  );
+
+  test('fresh junction failure keeps data and can be retried', () async {
+    await legacy.create(recursive: true);
+    await expectLater(
+      migration(
+        createLink: (_, __) async {
+          throw const FileSystemException('synthetic junction failure');
+        },
+      ).prepare(),
+      throwsA(isA<AdjacentAppDataException>()),
+    );
+    expect(
+      await FileSystemEntity.type(legacy.path, followLinks: false),
+      FileSystemEntityType.directory,
+    );
+    expect(
+      await File(
+        p.join(target.path, AdjacentAppDataMigration.markerName),
+      ).exists(),
+      true,
+    );
+    await migration().prepare();
+    expect(
+      await legacy.resolveSymbolicLinks(),
+      await target.resolveSymbolicLinks(),
+    );
+  });
+
+  Future<void> splitProfile({
+    Map<String, Object?> markerPatch = const {},
+  }) async {
+    await write('hive/settings.hive', 'current settings', root: target);
+    await write(
+      AdjacentAppDataMigration.markerName,
+      jsonEncode({
+        'schema': 1,
+        'layout': 'executable-adjacent',
+        'legacy': legacy.absolute.path,
+        'backup': null,
+        ...markerPatch,
+      }),
+      root: target,
+    );
+    await write('flutter_secure_storage.dat', 'encrypted synthetic account');
+    await write('shared_preferences.json', '{"synthetic":true}');
+    await write('danbooru_api_key.secure', 'synthetic legacy secure value');
+  }
+
+  test(
+    'recorded fresh split recovers plugin files with independent backups',
+    () async {
+      await splitProfile();
+      await migration().prepare();
+      expect(
+        await legacy.resolveSymbolicLinks(),
+        await target.resolveSymbolicLinks(),
+      );
+      expect(
+        await File(p.join(target.path, 'hive/settings.hive')).readAsString(),
+        'current settings',
+      );
+      expect(
+        await File(
+          p.join(target.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'encrypted synthetic account',
+      );
+      expect(
+        await File(
+          p.join(target.path, 'danbooru_api_key.secure'),
+        ).readAsString(),
+        'synthetic legacy secure value',
+      );
+      final marker =
+          jsonDecode(
+                await File(
+                  p.join(target.path, AdjacentAppDataMigration.markerName),
+                ).readAsString(),
+              )
+              as Map;
+      for (final path in [marker['backup'], marker['recovered_legacy']]) {
+        expect(
+          await File(
+            p.join(path as String, 'flutter_secure_storage.dat'),
+          ).readAsString(),
+          'encrypted synthetic account',
+        );
+      }
+      await write('flutter_secure_storage.dat', 'new account', root: target);
+      expect(
+        await File(
+          p.join(marker['backup'] as String, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'encrypted synthetic account',
+      );
+      await migration().prepare();
+      expect(
+        await File(
+          p.join(target.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'new account',
+      );
+    },
+  );
+
+  test(
+    'identical plugin files are kept without rewriting destination timestamps',
+    () async {
+      await splitProfile();
+      await write(
+        'shared_preferences.json',
+        '{"synthetic":true}',
+        root: target,
+      );
+      final file = File(p.join(target.path, 'shared_preferences.json'));
+      final modified = DateTime.utc(2020, 1, 2);
+      await file.setLastModified(modified);
+      await migration().prepare();
+      expect((await file.stat()).modified.toUtc(), modified);
+    },
+  );
+
+  for (final invalid in [
+    'different token',
+    'unknown file',
+    'nested profile',
+    'wrong marker',
+    'prior migration',
+    'missing marker',
+    'malformed marker',
+  ]) {
+    test(
+      'split recovery refuses $invalid and preserves both originals',
+      () async {
+        await splitProfile(
+          markerPatch: {
+            if (invalid == 'wrong marker')
+              'legacy': p.join(fixture.path, 'someone-else'),
+            if (invalid == 'prior migration')
+              'backup': p.join(fixture.path, 'old-backup'),
+          },
+        );
+        if (invalid == 'different token') {
+          await write(
+            'flutter_secure_storage.dat',
+            'different current token',
+            root: target,
+          );
+        }
+        if (invalid == 'unknown file') await write('draft.json', 'old draft');
+        if (invalid == 'nested profile') {
+          await write('hive/settings.hive', 'old settings');
+        }
+        final marker = File(
+          p.join(target.path, AdjacentAppDataMigration.markerName),
+        );
+        if (invalid == 'missing marker') await marker.delete();
+        if (invalid == 'malformed marker') await marker.writeAsString('{bad');
+        await expectLater(
+          migration().prepare(),
+          throwsA(isA<AdjacentAppDataException>()),
+        );
+        expect(
+          await File(
+            p.join(legacy.path, 'flutter_secure_storage.dat'),
+          ).readAsString(),
+          'encrypted synthetic account',
+        );
+        expect(
+          await File(p.join(target.path, 'hive/settings.hive')).readAsString(),
+          'current settings',
+        );
+        if (invalid == 'different token') {
+          expect(
+            await File(
+              p.join(target.path, 'flutter_secure_storage.dat'),
+            ).readAsString(),
+            'different current token',
+          );
+        } else {
+          expect(
+            await File(
+              p.join(target.path, 'flutter_secure_storage.dat'),
+            ).exists(),
+            false,
+          );
+        }
+        expect(
+          await FileSystemEntity.type(legacy.path, followLinks: false),
+          FileSystemEntityType.directory,
+        );
+      },
+    );
+  }
+
+  for (final change in ['source', 'new target', 'existing target', 'marker']) {
+    test('split recovery rechecks $change after backup', () async {
+      await splitProfile();
+      if (change == 'existing target') {
+        await write(
+          'shared_preferences.json',
+          '{"synthetic":true}',
+          root: target,
+        );
+      }
+      await expectLater(
+        migration(
+          beforeCommit: () async {
+            switch (change) {
+              case 'source':
+                await write('flutter_secure_storage.dat', 'edited source');
+              case 'new target':
+                await write(
+                  'flutter_secure_storage.dat',
+                  'new target',
+                  root: target,
+                );
+              case 'existing target':
+                await write(
+                  'shared_preferences.json',
+                  'edited target',
+                  root: target,
+                );
+              case 'marker':
+                await write(
+                  AdjacentAppDataMigration.markerName,
+                  '{}',
+                  root: target,
+                );
+            }
+          },
+        ).prepare(),
+        throwsA(isA<AdjacentAppDataException>()),
+      );
+      expect(
+        await FileSystemEntity.type(legacy.path, followLinks: false),
+        FileSystemEntityType.directory,
+      );
+      expect(
+        await File(p.join(target.path, 'hive/settings.hive')).readAsString(),
+        'current settings',
+      );
+      expect(
+        await File(
+          p.join(legacy.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        change == 'source' ? 'edited source' : 'encrypted synthetic account',
+      );
+      if (change == 'new target') {
+        expect(
+          await File(
+            p.join(target.path, 'flutter_secure_storage.dat'),
+          ).readAsString(),
+          'new target',
+        );
+      }
+      if (change == 'existing target') {
+        expect(
+          await File(
+            p.join(target.path, 'shared_preferences.json'),
+          ).readAsString(),
+          'edited target',
+        );
+      }
+    });
+  }
+
+  test(
+    'failed split junction rolls back only files created by recovery',
+    () async {
+      await splitProfile();
+      await expectLater(
+        migration(
+          createLink: (_, __) async {
+            throw const FileSystemException('synthetic junction failure');
+          },
+        ).prepare(),
+        throwsA(isA<AdjacentAppDataException>()),
+      );
+      expect(
+        await File(
+          p.join(legacy.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'encrypted synthetic account',
+      );
+      expect(
+        await File(p.join(target.path, 'flutter_secure_storage.dat')).exists(),
+        false,
+      );
+      expect(
+        await File(p.join(target.path, 'hive/settings.hive')).readAsString(),
+        'current settings',
+      );
+      await migration().prepare();
+      expect(
+        await legacy.resolveSymbolicLinks(),
+        await target.resolveSymbolicLinks(),
+      );
+    },
+  );
+
+  test(
+    'rollback preserves a destination file edited after recovery copied it',
+    () async {
+      await splitProfile();
+      await expectLater(
+        migration(
+          createLink: (_, __) async {
+            await write(
+              'flutter_secure_storage.dat',
+              'new user edit',
+              root: target,
+            );
+            throw const FileSystemException('synthetic junction failure');
+          },
+        ).prepare(),
+        throwsA(isA<AdjacentAppDataException>()),
+      );
+      expect(
+        await File(
+          p.join(legacy.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'encrypted synthetic account',
+      );
+      expect(
+        await File(
+          p.join(target.path, 'flutter_secure_storage.dat'),
+        ).readAsString(),
+        'new user edit',
+      );
+    },
+  );
+
+  test('a split plugin file link cannot import external bytes', () async {
+    await splitProfile();
+    final external = File(p.join(fixture.path, 'outside', 'private.dat'));
+    await external.parent.create();
+    await external.writeAsString('external bytes');
+    final file = File(p.join(legacy.path, 'flutter_secure_storage.dat'));
+    await file.delete();
+    if (Platform.isWindows) {
+      await AdjacentAppDataMigration.createWindowsCompatibilityDirectory(
+        Directory(file.path),
+        external.parent,
+      );
+    } else {
+      await Link(file.path).create(external.path);
+    }
+    await expectLater(
+      migration().prepare(),
+      throwsA(isA<AdjacentAppDataException>()),
+    );
+    expect(await external.readAsString(), 'external bytes');
+    expect(
+      await File(p.join(target.path, 'flutter_secure_storage.dat')).exists(),
+      false,
+    );
+    await Link(file.path).delete();
+  });
 
   test(
     'verified migration preserves absolute paths and an independent backup',

@@ -26,6 +26,7 @@ import 'core/network/system_proxy_http_overrides.dart';
 import 'core/shortcuts/shortcut_storage.dart';
 import 'core/database/database_manager.dart';
 import 'core/services/data_migration_service.dart';
+import 'core/services/app_data_startup.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
 import 'core/services/sqflite_bootstrap_service.dart';
 import 'core/utils/app_error_reporter.dart';
@@ -53,6 +54,7 @@ import 'data/services/temp_image_service.dart';
 import 'data/services/thumbnail_service.dart';
 import 'presentation/providers/online_gallery_blacklist_provider.dart';
 import 'presentation/screens/splash/app_bootstrap.dart';
+import 'presentation/screens/splash/startup_data_recovery.dart';
 
 AppLanguage _storedLanguage() => AppLanguage.fromStorage(
   Hive.box(StorageKeys.settingsBox).get(StorageKeys.locale) as String?,
@@ -324,8 +326,59 @@ Future<void> _bootstrapApplication() async {
   );
   AppLogger.i('Application starting', 'Main');
 
+  await _prepareDataAndStart();
+}
+
+Future<void> _prepareDataAndStart() => startWithPreparedAppData(
+  prepare: getApplicationSupportDirectory,
+  start: _bootstrapPreparedApplication,
+  onFailure: (error, stackTrace) async {
+    AppErrorReporter.reportError(
+      error,
+      stackTrace,
+      source: 'Application data preparation',
+      fatal: true,
+    );
+    runApp(
+      StartupDataRecoveryApp(
+        error: error,
+        onRetry: () async {
+          await getApplicationSupportDirectory();
+          runApp(const StartupDataLoadingApp());
+          unawaited(_bootstrapPreparedApplication());
+        },
+        onCopy: (text) => Clipboard.setData(ClipboardData(text: text)),
+        onOpenDirectory: (path) async {
+          final directory = Directory(path);
+          await Process.run('explorer.exe', [
+            await directory.exists() ? directory.path : directory.parent.path,
+          ]);
+        },
+        onClose: () => windowManager.close(),
+      ),
+    );
+    if (Platform.isWindows) {
+      await windowManager.ensureInitialized();
+      await windowManager.waitUntilReadyToShow(
+        const WindowOptions(
+          size: Size(900, 700),
+          minimumSize: Size(480, 360),
+          center: true,
+          title: Brand.name,
+          titleBarStyle: TitleBarStyle.normal,
+        ),
+        () async {
+          await windowManager.show();
+          await windowManager.focus();
+        },
+      );
+    }
+  },
+);
+
+Future<void> _bootstrapPreparedApplication() async {
   // Finish storage migration before Hive, SQLite or background services open.
-  await getApplicationSupportDirectory();
+  // _prepareDataAndStart has completed it; retry never repeats opened services.
 
   await _runNonFatalStartupStep('Fatal diagnostics initialization', () async {
     await FatalDiagnostics.initialize();
