@@ -24,8 +24,9 @@ A few examples:
 - “Set this image as a Vibe Transfer reference.” (You can paste or drag in an image.)
 - “Find all night scenes I made last week in the gallery and move them to a new folder.”
 - “Prepare 4 images with the current settings and give me a quote.”
+- “Design an 8-scene short story set in a café on a rainy night.” “Give the same character 6 summer outfits. I want to try them one by one.”
 
-Available Studio tools include: Read current draft, View image, Edit prompt, Draft snapshot, Search wiki, Look up tags, Find blocks, Edit blocks, Read settings / Change settings, Style explore, Prepare generation, Generate images, Cancel generation, Search gallery, Organize gallery, Semantic search, Set references, Reference library, Image tool, and Variations / enhance. It can also read and write workspace files, run commands and ask you questions when needed.
+Available Studio tools include: Read current draft, View image, Edit prompt, Prompt set, Draft snapshot, Search wiki, Look up tags, Find blocks, Edit blocks, Read settings / Change settings, Style explore, Prepare generation, Generate images, Cancel generation, Search gallery, Organize gallery, Semantic search, Set references, Reference library, Image tool, and Variations / enhance. It can also read and write workspace files, run commands and ask you questions when needed.
 
 ## Cards in the conversation
 
@@ -48,6 +49,19 @@ Results from Look up tags or Semantic search appear directly below that step: th
 <img src="../../images/readme/en/agent-card-diff.webp" alt="Prompt and parameter changes" width="460">
 
 Each prompt field edited gets a diff card: green for additions, red for deletions. Changes to parameters such as steps, sampler and size get a separate card showing old value → new value. If several things change at once, a summary at the top shows “N changes.” Choose **Undo all**, or use “Undo” on just one card. If you have manually edited the draft since then, undo is locked to avoid overwriting your newer changes.
+
+### Prompt set: stories, try-ons and storyboards
+
+<img src="../../images/readme/en/agent-card-promptset.webp" alt="Prompt set card" width="460">
+
+Ask it to write several prompts at once (a few story scenes, a set of outfits, several battle shots, a set of expressions, etc.), and a prompt set card appears in the conversation. Agent chooses the card’s name (Storyboard, Try-on, Battle scenes, etc.), as well as each item’s title, icon and description.
+
+- **Switch items**: use the left and right arrows, the small icons below, or the keyboard ← → keys after selecting the card. The grid button at the top right shows all items at once.
+- **Prompts**: collapsed by default. When expanded, gray text shows the settings shared by every item (style, character appearance and negative prompt), while highlighted text is specific to this item. Shared text farther away is abbreviated with “…”; click “Show all” to read the full original text.
+- **Import to canvas**: writes only this item’s main prompt, characters and negative prompt into the draft. Parameters, seed, size and reference images stay unchanged. You can undo the import from the card.
+- **Generate**: imports this item first, then opens the price card. After you confirm, it generates **1 image**. If you are not happy with it, click again for a fresh result. Generated images stay below that item, and its small icon gets a green dot.
+- **⋯ menu**: “Save as block” (one entry per item; you can set it to sequential or random later), “Copy this item's prompt” or “Copy all,” and “Ask Agent to edit this item.”
+- **Revisions**: ask Agent to “Make scene 5 daytime,” and it updates the same card directly. The card shows “v2 · 1 changed,” and edited items get a yellow dot. The card and its generated images are still there after a restart.
 
 ### Character positions
 

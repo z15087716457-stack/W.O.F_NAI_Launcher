@@ -108,6 +108,7 @@ Open the sidebar on the generation or Style Explore page and chat with an AI to 
 
 - It asks before making changes, deleting things or running commands. There are four permission levels: Read-only, Ask, Auto and Full access.
 - **Generation that costs Anlas always needs your own confirmation on the price card, at every permission level.**
+- Write a set of prompts at once (a few story scenes, a set of outfits to try on, or storyboard panels), then switch between items, import to canvas or generate one image at a time from the prompt set card.
 - Supports skills (Skill), MCP servers and CodeMode so you can extend it for your own workflow.
 
 → [NAI Agent guide](docs/guide/en/nai-agent.md)

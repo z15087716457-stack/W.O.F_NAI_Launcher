@@ -49,6 +49,13 @@
     "bytes": 13514
   },
   {
+    "name": "agent-card-promptset",
+    "locale": "en",
+    "w": 920,
+    "h": 1234,
+    "bytes": 45170
+  },
+  {
     "name": "agent-card-settings",
     "locale": "en",
     "w": 920,
@@ -348,6 +355,13 @@
     "w": 920,
     "h": 492,
     "bytes": 11848
+  },
+  {
+    "name": "agent-card-promptset",
+    "locale": "zh",
+    "w": 920,
+    "h": 1200,
+    "bytes": 41430
   },
   {
     "name": "agent-card-settings",
