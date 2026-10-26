@@ -38403,6 +38403,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action failed: {error}'**
   String startup_dataActionFailed(String error);
+
+  /// No description provided for @blocks_expandToText.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand to text'**
+  String get blocks_expandToText;
 }
 
 class _AppLocalizationsDelegate

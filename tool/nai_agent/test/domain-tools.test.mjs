@@ -57,6 +57,20 @@ test('gallery batch schema exposes bounded IDs and per-image versions with batch
   // Exact-form/unique-ID/per-ID completeness validation belongs to Dart.
 });
 
+test('block schema accepts presets and occurrence-local content, rejects invalid values', () => {
+  const tool = domainTools.find(tool=>tool.name==='block_manage');
+  for (const action of ['create','update']) {
+    assert.equal(Value.Check(tool.parameters, {action,changes:{title:'preset',content:'text',generationSettings:{qualityPreset:'light',ucPreset:7,qualityCustomBlockId:'q',ucCustomBlockId:'u'}}}), true);
+    for (const generationSettings of [{qualityPreset:'invalid'},{ucPreset:4},{ucPreset:1.5},{qualityCustomBlockId:5}]) {
+      assert.equal(Value.Check(tool.parameters,{action,changes:{generationSettings}}),false);
+    }
+  }
+  assert.match(tool.description, /instance_update content edits only this occurrence as a temporary block; library block unchanged/);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_update',marker:'x',occurrence:1,instance:{content:'new',negative_content:'UC'}}),true);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_update',instance:{content:42}}),false);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_update',occurrence:-1,instance:{content:'new'}}),false);
+});
+
 test('only registered domain tools enter the Pi tool list', async () => {
   const calls = [];
   const tools = studioTools(async (...args) => { calls.push(args); return { content: [{ type: 'text', text: 'saved' }] }; },

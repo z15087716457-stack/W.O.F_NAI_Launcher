@@ -21110,6 +21110,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作失败：$error';
   }
+
+  @override
+  String get blocks_expandToText => '展开为文本';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42218,4 +42221,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String startup_dataActionFailed(String error) {
     return '操作失敗：$error';
   }
+
+  @override
+  String get blocks_expandToText => '展開為文本';
 }

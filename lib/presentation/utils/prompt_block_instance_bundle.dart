@@ -42,10 +42,17 @@ PromptBlockInstanceBundle readPromptBlockInstanceBundle(
   String scope,
   String marker,
 ) {
-  final local = ref
-      .read(pillWorkspaceProvider(scope))
-      .document
-      .instances[marker];
+  return readPromptBlockInstanceBundleWithReader(ref.read, scope, marker);
+}
+
+PromptBlockInstanceBundle readPromptBlockInstanceBundleWithReader(
+  T Function<T>(ProviderListenable<T>) read,
+  String scope,
+  String marker, {
+  PillDocument? localDocument,
+}) {
+  final document = localDocument ?? read(pillWorkspaceProvider(scope)).document;
+  final local = document.instances[marker];
   if (local == null) return const PromptBlockInstanceBundle(null, null);
   final self = BundleMember(scope, marker, local);
   final id = local.bundleId;
@@ -68,7 +75,9 @@ PromptBlockInstanceBundle readPromptBlockInstanceBundle(
   }
   BundleMember? find(String? targetScope, bool negative) {
     if (targetScope == null) return null;
-    final document = ref.read(pillWorkspaceProvider(targetScope)).document;
+    final document = targetScope == scope
+        ? (localDocument ?? read(pillWorkspaceProvider(scope)).document)
+        : read(pillWorkspaceProvider(targetScope)).document;
     for (final entry in document.instances.entries) {
       if (entry.value.bundleId == id &&
           entry.value.useNegativeContent == negative) {

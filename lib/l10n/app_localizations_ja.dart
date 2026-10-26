@@ -21348,4 +21348,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作に失敗しました：$error';
   }
+
+  @override
+  String get blocks_expandToText => 'テキストに展開';
 }

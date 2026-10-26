@@ -1,6 +1,19 @@
 import { Type } from 'typebox';
 
 export const promptSetIcons = ["film","book","star","heart","spark","camera","flag","sword","shield","bolt","flame","skull","wind","rain","snow","sun","moon","leaf","umbrella","coffee","music","mail","door","shirt","dress","hat","mask","smile","home","tree","mountain","wave","car","gift","palette"];
+const blockGenerationSettings = Type.Object({
+  model: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  width: Type.Optional(Type.Union([Type.Integer(), Type.Null()])), height: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),
+  steps: Type.Optional(Type.Union([Type.Integer({minimum:1,maximum:50}), Type.Null()])),
+  scale: Type.Optional(Type.Union([Type.Number({minimum:1,maximum:20}), Type.Null()])),
+  sampler: Type.Optional(Type.Union([Type.String(), Type.Null()])), noiseSchedule: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  cfgRescale: Type.Optional(Type.Union([Type.Number({minimum:0,maximum:1}), Type.Null()])),
+  qualityPreset: Type.Optional(Type.Union(['standard','light','none'].map(v=>Type.Literal(v)).concat([Type.Null()]))),
+  ucPreset: Type.Optional(Type.Union([0,1,2,3,7,8,9].map(v=>Type.Literal(v)).concat([Type.Null()]))),
+  qualityCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  ucCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+}, {additionalProperties:false});
+const blockChanges = Type.Object({generationSettings:Type.Optional(Type.Union([blockGenerationSettings, Type.Null()]))}, {additionalProperties:true});
 const promptSetIcon = Type.Union(promptSetIcons.map(v => Type.Literal(v)));
 const promptSetPositions = Type.Optional(Type.Array(Type.Union([Type.Null(), Type.Object({
   x:Type.Number({minimum:0,maximum:1}), y:Type.Number({minimum:0,maximum:1})
@@ -68,7 +81,7 @@ export const domainTools = [
   },
   { name: 'block_manage',
 
-    description: 'Manage real library blocks or current prompt block instances, with a complete library/draft backup. create requires changes.title/content. update/delete/insert require id and its expected_version from block_query(id). Editing content clears obsolete atom pools unless new atoms are supplied. insert and instance_update also require expected_draft_version from fresh studio_context(scope=draft). scope=main/negative/char:<ID>:pos/neg; omit offset to append with separator, explicit offsets use raw document UTF-16 positions. Double-sided blocks keep the native positive/negative bundle behavior. instance_update uses marker from that document and instance fields (settings, enabled, locked, evolutionEnabled); returns actual editor readback. Organization actions require expected_library_version. Folder/collection create/update use changes (name, parentId, sortOrder; collection_create also isFolder). *_move uses parent_id (null=root), *_reorder uses complete ordered_ids under parent_id. folder_delete requires an empty folder. collection_delete removes its subtree and memberships while retaining blocks. collection_add/remove use id plus block_id, with explicit membership and native favorite semantics.',
+    description: 'Manage real library blocks or current prompt block instances, with a complete library/draft backup. create requires changes.title/content. update/delete/insert require id and its expected_version from block_query(id). Editing content clears obsolete atom pools unless new atoms are supplied. changes.generationSettings accepts model, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (standard/light/none), ucPreset (0/1/2/3/7/8/9), qualityCustomBlockId and ucCustomBlockId (existing library preset IDs; custom replaces native preset). insert and instance_update also require expected_draft_version from fresh studio_context(scope=draft). scope=main/negative/char:<ID>:pos/neg; omit offset to append with separator, explicit offsets use raw document UTF-16 positions. Double-sided blocks keep the native positive/negative bundle behavior. instance_update content edits only this occurrence as a temporary block; library block unchanged. instance_update uses marker and optional zero-based occurrence from that document and instance fields (settings, enabled, locked, evolutionEnabled, content, negative_content); returns actual editor readback. Organization actions require expected_library_version. Folder/collection create/update use changes (name, parentId, sortOrder; collection_create also isFolder). *_move uses parent_id (null=root), *_reorder uses complete ordered_ids under parent_id. folder_delete requires an empty folder. collection_delete removes its subtree and memberships while retaining blocks. collection_add/remove use id plus block_id, with explicit membership and native favorite semantics.',
     parameters: Type.Object({
       action: Type.Union(['create', 'update', 'delete', 'insert', 'instance_update', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove'].map(v => Type.Literal(v))),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),
@@ -77,8 +90,11 @@ export const domainTools = [
       ordered_ids: Type.Optional(Type.Array(Type.String())), block_id: Type.Optional(Type.String()),
       expected_draft_version: Type.Optional(Type.String()), scope: Type.Optional(Type.String()),
       offset: Type.Optional(Type.Integer({ minimum: 0 })), marker: Type.Optional(Type.String()),
-      changes: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+      changes: Type.Optional(blockChanges),
+      occurrence: Type.Optional(Type.Integer({minimum: 0})),
       instance: Type.Optional(Type.Object({
+        content: Type.Optional(Type.String({maxLength: 100000})),
+        negative_content: Type.Optional(Type.String({maxLength: 100000})),
         enabled: Type.Optional(Type.Boolean()), locked: Type.Optional(Type.Boolean()),
         evolutionEnabled: Type.Optional(Type.Boolean()),
         settings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),

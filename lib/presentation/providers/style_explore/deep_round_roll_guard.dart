@@ -59,7 +59,8 @@ class DeepRoundRollGuard {
       final laneKinds = <String, DeepRoundRollOverrideKind>{};
       for (final instanceEntry in entry.value.instances.entries) {
         final instance = instanceEntry.value;
-        if (!instance.enabled ||
+        if (instance.temporary ||
+            !instance.enabled ||
             !instance.settings.hasRoll ||
             !instance.evolutionEnabled) {
           continue;

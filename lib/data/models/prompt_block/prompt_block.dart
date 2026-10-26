@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/utils/pill_roll_engine.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 
 part 'prompt_block.freezed.dart';
 part 'prompt_block.g.dart';
@@ -32,6 +33,10 @@ class PromptBlockGenerationSettings with _$PromptBlockGenerationSettings {
     String? sampler,
     String? noiseSchedule,
     double? cfgRescale,
+    QualityTagPreset? qualityPreset,
+    String? qualityCustomBlockId,
+    int? ucPreset,
+    String? ucCustomBlockId,
   }) = _PromptBlockGenerationSettings;
 
   factory PromptBlockGenerationSettings.fromJson(Map<String, dynamic> json) =>
@@ -43,7 +48,11 @@ class PromptBlockGenerationSettings with _$PromptBlockGenerationSettings {
       scale == null &&
       sampler == null &&
       noiseSchedule == null &&
-      cfgRescale == null;
+      cfgRescale == null &&
+      qualityPreset == null &&
+      qualityCustomBlockId == null &&
+      ucPreset == null &&
+      ucCustomBlockId == null;
 }
 
 /// 可复用的全局 Prompt 块。

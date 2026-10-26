@@ -1,4 +1,5 @@
 import 'package:nai_launcher/presentation/widgets/common/translation_icon.dart';
+import 'package:nai_launcher/presentation/utils/prompt_block_bundle_insertion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -219,6 +220,274 @@ void main() {
       );
     },
   );
+
+  for (final scope in [
+    PillScopes.main,
+    PillScopes.negative,
+    PillScopes.charPos('c1'),
+    PillScopes.charNeg('c1'),
+  ]) {
+    testWidgets('text reconciliation removes reading bundle from $scope', (
+      tester,
+    ) async {
+      final block = _block(
+        'reading-pair',
+        '双面',
+        'bright',
+      ).copyWith(negativeContent: 'muted', readingTranslationZh: '明亮');
+      final container = await _pump(
+        tester,
+        pillScope: scope,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      insertPromptBlockBundleWithReader(
+        container.read,
+        scope: scope,
+        offset: 0,
+        blockId: block.id,
+      );
+      final positiveScope = scope.startsWith('char:')
+          ? PillScopes.charPos('c1')
+          : PillScopes.main;
+      final negativeScope = scope.startsWith('char:')
+          ? PillScopes.charNeg('c1')
+          : PillScopes.negative;
+      final pos = container
+          .read(pillWorkspaceProvider(positiveScope))
+          .document
+          .instances
+          .values
+          .single;
+      final neg = container
+          .read(pillWorkspaceProvider(negativeScope))
+          .document
+          .instances
+          .values
+          .single;
+      expect(pos.translation, isNotNull);
+      expect(pos.bundleId, neg.bundleId);
+      expect(pos.rollScopeMask, neg.rollScopeMask);
+      await tester.pump();
+      // TextField's edit path is also used by cut and selection replacement.
+      await tester.enterText(find.byType(TextField).first, 'replacement');
+      await tester.pumpAndSettle();
+      for (final lane in [positiveScope, negativeScope]) {
+        expect(
+          container.read(pillWorkspaceProvider(lane)).document.instances,
+          isEmpty,
+        );
+        expect(
+          container.read(pillWorkspaceProvider(lane)).projection,
+          lane == scope ? 'replacement' : '',
+        );
+      }
+    });
+  }
+
+  testWidgets(
+    'menu expands selected shared occurrence and paired UC in place',
+    (tester) async {
+      final block = _block(
+        'pair-expand',
+        'Pair',
+        '1.2::bright::',
+      ).copyWith(negativeContent: 'muted');
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      insertPromptBlockBundleWithReader(
+        container.read,
+        scope: PillScopes.main,
+        offset: 0,
+        blockId: block.id,
+      );
+      container
+          .read(pillWorkspaceProvider(PillScopes.main).notifier)
+          .setText('$markerA / $markerA');
+      container
+          .read(pillWorkspaceProvider(PillScopes.negative).notifier)
+          .setText('$markerA / $markerA');
+      await tester.pump();
+      final posSend = container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .projection;
+      final negSend = container
+          .read(pillWorkspaceProvider(PillScopes.negative))
+          .projection;
+      await tester.tap(find.byType(UiBlockPill).at(1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-card-more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('block-card-expand')));
+      await tester.pumpAndSettle();
+      final pos = container.read(pillWorkspaceProvider(PillScopes.main));
+      final neg = container.read(pillWorkspaceProvider(PillScopes.negative));
+      expect(pos.document.text, '$markerA / 1.2::bright::');
+      expect(neg.document.text, '$markerA / muted');
+      expect(pos.projection, posSend);
+      expect(neg.projection, negSend);
+      expect(find.byType(BlockInstanceCard), findsNothing);
+    },
+  );
+
+  for (final key in [LogicalKeyboardKey.backspace, LogicalKeyboardKey.delete]) {
+    testWidgets('keyboard ${key.keyLabel} removes both bundle sides', (
+      tester,
+    ) async {
+      final block = _block(
+        'keys',
+        'Pair',
+        'bright',
+      ).copyWith(negativeContent: 'muted');
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      insertPromptBlockBundleWithReader(
+        container.read,
+        scope: PillScopes.main,
+        offset: 0,
+        blockId: block.id,
+      );
+      await tester.pump();
+      final field = find.byType(TextField).first;
+      await tester.tap(field);
+      final controller = tester.widget<TextField>(field).controller!;
+      controller.selection = TextSelection.collapsed(
+        offset: key == LogicalKeyboardKey.backspace ? 1 : 0,
+      );
+      await tester.sendKeyEvent(key);
+      await tester.pumpAndSettle();
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+        isEmpty,
+      );
+      expect(
+        container
+            .read(pillWorkspaceProvider(PillScopes.negative))
+            .document
+            .text,
+        isEmpty,
+      );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  }
+
+  testWidgets(
+    'temporary pill exposes fixed send and card integration callbacks',
+    (tester) async {
+      final block = _block('temp-view', 'Temporary view', 'library');
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: [block],
+          folders: const [],
+        ),
+        overrides: [
+          generationParamsNotifierProvider.overrideWith(
+            _FakeGenerationParamsNotifier.new,
+          ),
+        ],
+      );
+      final notifier = container.read(
+        pillWorkspaceProvider(PillScopes.main).notifier,
+      );
+      notifier.insertBlockAt(offset: 0, blockId: block.id);
+      notifier.editTempContent(markerA, 'temporary', null);
+      await tester.pump();
+      expect(
+        tester.widget<UiBlockPill>(find.byType(UiBlockPill).first).temporary,
+        isTrue,
+      );
+      await tester.tap(find.byType(UiBlockPill).first);
+      await tester.pumpAndSettle();
+      final card = tester.widget<BlockInstanceCard>(
+        find.byType(BlockInstanceCard),
+      );
+      expect(card.data.temporary, isTrue);
+      expect(card.data.tempContent, 'temporary');
+      expect(card.data.originalContent, 'library');
+      expect(card.data.editedBy, 'user');
+      expect(card.data.editedAt, isNotNull);
+      expect(card.data.send, 'temporary');
+      expect(card.actions.onEditTempContent, isNotNull);
+      expect(card.actions.onRevertTemp, isNotNull);
+      expect(card.actions.onSaveTempAsNewBlock, isNotNull);
+    },
+  );
+
+  testWidgets('cutting one side removes the paired marker and projection', (
+    tester,
+  ) async {
+    final block = _block(
+      'cut-pair',
+      'Pair',
+      'bright',
+    ).copyWith(negativeContent: 'muted');
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
+      overrides: [
+        generationParamsNotifierProvider.overrideWith(
+          _FakeGenerationParamsNotifier.new,
+        ),
+      ],
+    );
+    insertPromptBlockBundleWithReader(
+      container.read,
+      scope: PillScopes.main,
+      offset: 0,
+      blockId: block.id,
+    );
+    await tester.pump();
+    final field = find.byType(TextField).first;
+    await tester.tap(field);
+    tester.widget<TextField>(field).controller!.selection = const TextSelection(
+      baseOffset: 0,
+      extentOffset: 1,
+    );
+    await _controlKey(tester, LogicalKeyboardKey.keyX);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.instances,
+      isEmpty,
+    );
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.negative))
+          .document
+          .instances,
+      isEmpty,
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.negative)).projection,
+      '',
+    );
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
   testWidgets('stale post-frame projection callbacks are discarded', (
     tester,

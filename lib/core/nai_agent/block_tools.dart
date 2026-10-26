@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../constants/api_constants.dart';
 import 'package:crypto/crypto.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/repositories/prompt_block_repository.dart';
@@ -141,18 +142,38 @@ Map<String, dynamic> validateNaiAgentBlockChanges(
       'sampler': 'sampler',
       'noiseSchedule': 'noise_schedule',
       'cfgRescale': 'cfg_rescale',
+      'qualityPreset': 'quality_preset',
+      'ucPreset': 'uc_preset',
     };
+    const customKeys = {'qualityCustomBlockId', 'ucCustomBlockId'};
     if (rawSettings is! Map ||
-        rawSettings.keys.any((k) => !mapping.containsKey(k))) {
+        rawSettings.keys.any(
+          (k) => !mapping.containsKey(k) && !customKeys.contains(k),
+        )) {
       throw const NaiAgentToolError(
         'invalid_changes',
         'Unknown block generation setting',
       );
     }
+    for (final key in customKeys) {
+      if (rawSettings[key] != null && rawSettings[key] is! String) {
+        throw const NaiAgentToolError(
+          'invalid_changes',
+          'Custom preset must be a block ID',
+        );
+      }
+    }
+    if (rawSettings['ucPreset'] != null &&
+        !UcPresetType.values
+            .map(UcPresets.toApiValue)
+            .contains(rawSettings['ucPreset'])) {
+      throw const NaiAgentToolError('invalid_changes', 'Invalid UC preset');
+    }
     try {
       validateBridgePatch({
         for (final e in rawSettings.entries)
-          if (e.value != null) mapping[e.key]!: e.value,
+          if (e.value != null && mapping.containsKey(e.key))
+            mapping[e.key]!: e.value,
       });
     } on FormatException catch (error) {
       throw NaiAgentToolError('invalid_changes', error.message);
@@ -245,8 +266,40 @@ class NaiAgentBlockTools {
     }
     if (params['id'] case final String id) {
       final block = library.getBlock(id);
+      final draft = readDraft();
+      final lanes = <String, dynamic>{};
+      for (final e in draft.documents.entries) {
+        if (e.value is Map && (e.value as Map)['instances'] is Map) {
+          lanes[e.key == 'prompt'
+                  ? 'main'
+                  : e.key == 'negative_prompt'
+                  ? 'negative'
+                  : e.key] =
+              e.value;
+        }
+      }
+      final characters = draft.documents['characters'];
+      if (characters is Map && characters['lanes'] is Map) {
+        for (final e in (characters['lanes'] as Map).entries) {
+          if (e.value is Map) {
+            lanes['char:${e.key}:pos'] = (e.value as Map)['positive'];
+            lanes['char:${e.key}:neg'] = (e.value as Map)['negative'];
+          }
+        }
+      }
       return naiAgentTextResult({
         'block': block == null ? null : naiAgentBlockResult(block, full: true),
+        'instances': [
+          for (final lane in lanes.entries)
+            if (lane.value is Map && (lane.value as Map)['instances'] is Map)
+              for (final e in ((lane.value as Map)['instances'] as Map).entries)
+                if (e.value is Map && (e.value as Map)['blockId'] == id)
+                  {
+                    'scope': lane.key,
+                    'marker': e.key,
+                    ...Map<String, dynamic>.from(e.value as Map),
+                  },
+        ],
       });
     }
     final query = params['query'] ?? '',

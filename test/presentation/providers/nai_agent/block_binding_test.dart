@@ -1,4 +1,13 @@
 import 'dart:convert';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
+import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
+import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
+import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_actions.dart';
+import 'package:nai_launcher/presentation/wiring/blocks_mapping.dart';
+import 'package:nai_launcher/presentation/utils/prompt_block_generation_settings_applier.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
@@ -140,6 +149,63 @@ void main() {
   Future<Map<String, dynamic>> create(Map<String, dynamic> changes) async =>
       await run('block_manage', {'action': 'create', 'changes': changes});
   BridgeDraftSnapshot draft() => container.read(_draftProvider)();
+  test(
+    'quality and UC capture save reload apply round trip, native and custom',
+    () async {
+      final preset = await repository.createBlock(
+        title: 'custom preset',
+        content: 'custom words',
+      );
+      await container
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .refresh();
+      for (final custom in [false, true]) {
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateModel(ImageModels.animeDiffusionV5Full);
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateQualityPreset(QualityTagPreset.light);
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateUcPreset(UcPresets.toApiValue(UcPresetType.humanFocus));
+        if (custom) {
+          container
+              .read(qualityPresetNotifierProvider.notifier)
+              .setCustomEntry(preset.id);
+          container
+              .read(ucPresetNotifierProvider.notifier)
+              .setCustomEntry(preset.id);
+        }
+        final captured = storedBlockParams(captureBlockParams(container.read))!;
+        final created = await create({
+          'title': 'saved',
+          'content': 'prompt',
+          'generationSettings': captured.toJson(),
+        });
+        final saved = await repository.getBlock(
+          (created['block'] as Map)['id'] as String,
+        );
+        final reloaded = PromptBlock.fromJson(
+          saved!.toJson(),
+        ).generationSettings!;
+        expect(reloaded, captured);
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateQualityPreset(QualityTagPreset.none);
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateUcPreset(3);
+        applyPromptBlockGenerationSettingsWithReader(container.read, reloaded);
+        expect(storedBlockParams(captureBlockParams(container.read)), captured);
+      }
+      expect(
+        PromptBlockGenerationSettings.fromJson({'steps': 28}).qualityPreset,
+        isNull,
+      );
+    },
+  );
+
   Future<Map<String, dynamic>> insert(
     String id, {
     String scope = 'main',
@@ -152,6 +218,277 @@ void main() {
     'scope': scope,
     if (offset != null) 'offset': offset,
   });
+
+  test(
+    'Agent temporary edits isolate one shared occurrence, persist, revert and save as new',
+    () async {
+      final created = await create({
+        'title': 'original',
+        'content': 'old',
+        'negativeContent': 'old UC',
+        'color': '#FF123456',
+        'appearance': 'dots',
+        'iconName': 'star',
+        'tags': [
+          {'name': 'tag'},
+        ],
+        'generationSettings': {'qualityPreset': 'light', 'ucPreset': 1},
+      });
+      final id = (created['block'] as Map)['id'] as String;
+      await insert(id);
+      const m = '\uE000';
+      final pos = container.read(pillWorkspaceProvider('main').notifier);
+      final neg = container.read(pillWorkspaceProvider('negative').notifier);
+      pos.setText('$m / $m');
+      neg.setText('$m / $m');
+      final result = await run('block_manage', {
+        'action': 'instance_update',
+        'scope': 'main',
+        'marker': m,
+        'occurrence': 1,
+        'expected_draft_version': draft().acknowledgementVersion,
+        'instance': {'content': 'new', 'negative_content': 'new UC'},
+      });
+      final document = container.read(pillWorkspaceProvider('main')).document;
+      final tempMarker = document.instances.keys.singleWhere((key) => key != m);
+      expect(document.text, '$m / $tempMarker');
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'old / new',
+      );
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        'old UC / new UC',
+      );
+      expect((await repository.getBlock(id))!.content, 'old');
+      expect(document.instances[m]!.temp, isNull);
+      expect(document.instances[tempMarker]!.temp!.editedBy, 'agent');
+      expect(
+        ((result['lanes'] as Map)['main'] as Map)['document'],
+        document.toJson(),
+      );
+      final roundTrip = PillDocument.fromJson(
+        jsonDecode(jsonEncode(document.toJson())) as Map<String, dynamic>,
+      );
+      expect(roundTrip, document);
+      pos.restoreDocument(roundTrip);
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'old / new',
+      );
+      final queried = await run('block_query', {'id': id});
+      expect(
+        (queried['instances'] as List).where(
+          (e) => (e as Map)['temporary'] == true,
+        ),
+        hasLength(2),
+      );
+      pos.revertTemp(tempMarker);
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'old / old',
+      );
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        'old UC / old UC',
+      );
+      pos.editTempContent(tempMarker, 'saved text', 'saved UC');
+      final saved = await pos.saveTempAsNewBlock(
+        tempMarker,
+        title: 'new library block',
+      );
+      expect(saved!.id, isNot(id));
+      expect(saved.content, 'saved text');
+      expect(saved.negativeContent, 'saved UC');
+      final original = (await repository.getBlock(id))!;
+      expect(original.content, 'old');
+      expect(saved.color, original.color);
+      expect(saved.appearance, original.appearance);
+      expect(saved.iconName, original.iconName);
+      expect(saved.tags, original.tags);
+      expect(saved.generationSettings, original.generationSettings);
+      final actual = container.read(pillWorkspaceProvider('main'));
+      expect(actual.document.instances[tempMarker]!.blockId, saved.id);
+      expect(actual.document.instances[tempMarker]!.temporary, isFalse);
+      expect(actual.projection, 'old / saved text');
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        'old UC / saved UC',
+      );
+    },
+  );
+
+  test(
+    'temporary draft survives provider restart and library edits, including a reading block',
+    () async {
+      await Hive.openBox<String>(PillWorkspaceStorage.boxName);
+      final created = await create({
+        'title': 'reading',
+        'content': 'source',
+        'negativeContent': 'UC',
+        'readingTranslationZh': '译文',
+      });
+      final id = (created['block'] as Map)['id'] as String;
+      await insert(id);
+      final lane = container.read(pillWorkspaceProvider('main').notifier);
+      lane.editTempContent(
+        '\uE000',
+        'local source',
+        'local UC',
+        editedBy: 'agent',
+      );
+      final expected = container.read(pillWorkspaceProvider('main')).document;
+      await container
+          .read(pillWorkspaceStorageProvider)
+          .persist('main', expected);
+      container.invalidate(pillWorkspaceProvider('main'));
+      expect(container.read(pillWorkspaceProvider('main')).document, expected);
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'local source',
+      );
+      final original = (await repository.getBlock(id))!;
+      await repository.updateBlock(
+        original.copyWith(content: 'library changed'),
+      );
+      await container
+          .read(promptBlockLibraryNotifierProvider.notifier)
+          .refresh();
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'local source',
+      );
+      final saved = await container
+          .read(pillWorkspaceProvider('main').notifier)
+          .saveTempAsNewBlock('\uE000', title: 'new fixed');
+      final actual = container.read(pillWorkspaceProvider('main'));
+      expect(actual.document.instances.values.single.translation, isNull);
+      expect(actual.projection, 'local source');
+      expect(actual.document.instances.values.single.blockId, saved!.id);
+      expect((await repository.getBlock(id))!.content, 'library changed');
+    },
+  );
+
+  test(
+    'negative-only Agent temp edit preserves the positive temporary content',
+    () async {
+      final created = await create({
+        'title': 'two sides',
+        'content': 'positive',
+        'negativeContent': 'negative',
+      });
+      await insert((created['block'] as Map)['id'] as String);
+      await run('block_manage', {
+        'action': 'instance_update',
+        'scope': 'negative',
+        'marker': '\uE000',
+        'expected_draft_version': draft().acknowledgementVersion,
+        'instance': {'negative_content': 'new negative'},
+      });
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'positive',
+      );
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        'new negative',
+      );
+    },
+  );
+
+  test(
+    'temporary random instance is fixed and independent of another instance of the same block',
+    () async {
+      final created = await create({'title': 'pool', 'content': 'one, two'});
+      final id = (created['block'] as Map)['id'] as String;
+      await insert(id, offset: 0);
+      await insert(id, offset: 1);
+      final lane = container.read(pillWorkspaceProvider('main').notifier);
+      lane.updateInstanceSettings(
+        '\uE000',
+        const PillInstanceSettings(mode: PillRollMode.random),
+      );
+      final old = container
+          .read(pillWorkspaceProvider('main'))
+          .document
+          .instances['\uE000']!;
+      lane.editTempContent('\uE000', 'fixed', null);
+      lane.rollMarker('\uE000');
+      lane.rollAllRandom();
+      final actual = container.read(pillWorkspaceProvider('main'));
+      expect(actual.projection, 'fixedone, two');
+      expect(actual.document.instances['\uE000']!.currentRoll, old.currentRoll);
+      expect(actual.document.instances['\uE001']!.temporary, isFalse);
+      lane.revertTemp('\uE000');
+      expect(
+        container
+            .read(pillWorkspaceProvider('main'))
+            .document
+            .instances['\uE000']!
+            .settings
+            .mode,
+        PillRollMode.random,
+      );
+    },
+  );
+
+  test(
+    'partial temporary content edits freeze the other side current roll, not the whole library pool',
+    () async {
+      final created = await create({
+        'title': 'rolled pair',
+        'content': 'a, b',
+        'negativeContent': 'c, d',
+      });
+      await insert((created['block'] as Map)['id'] as String);
+      final pos = container.read(pillWorkspaceProvider('main').notifier);
+      final neg = container.read(pillWorkspaceProvider('negative').notifier);
+      pos.updateInstanceSettings(
+        '\uE000',
+        const PillInstanceSettings(mode: PillRollMode.sequential),
+      );
+      neg.updateInstanceSettings(
+        '\uE000',
+        const PillInstanceSettings(mode: PillRollMode.sequential),
+      );
+      final positive = container.read(pillWorkspaceProvider('main')).projection;
+      await run('block_manage', {
+        'action': 'instance_update',
+        'scope': 'negative',
+        'marker': '\uE000',
+        'expected_draft_version': draft().acknowledgementVersion,
+        'instance': {'negative_content': 'edited UC'},
+      });
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        positive,
+      );
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        'edited UC',
+      );
+      pos.revertTemp('\uE000');
+      await Future<void>.delayed(Duration.zero);
+      final negative = container
+          .read(pillWorkspaceProvider('negative'))
+          .projection;
+      await run('block_manage', {
+        'action': 'instance_update',
+        'scope': 'main',
+        'marker': '\uE000',
+        'expected_draft_version': draft().acknowledgementVersion,
+        'instance': {'content': 'edited positive'},
+      });
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'edited positive',
+      );
+      expect(
+        container.read(pillWorkspaceProvider('negative')).projection,
+        negative,
+      );
+    },
+  );
 
   Future<Map<String, dynamic>> organize(
     String action, [

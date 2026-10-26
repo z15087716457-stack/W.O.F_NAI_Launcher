@@ -75,7 +75,8 @@ List<String> buildExploreInjectionPool(Ref ref, ExploreRun run) {
   final pool = <String>[];
   final seen = <String>{};
   for (final instance in run.recipeSnapshot.positive.instances.values) {
-    if (!instance.enabled ||
+    if (instance.temporary ||
+        !instance.enabled ||
         !instance.settings.hasRoll ||
         !instance.evolutionEnabled) {
       continue;
@@ -127,7 +128,7 @@ List<ExploreInstanceRoll> _laneInstanceRolls(
 ) {
   return [
     for (final entry in workspace.document.instances.entries)
-      if (entry.value.enabled &&
+      if (!entry.value.temporary && entry.value.enabled &&
           entry.value.settings.hasRoll &&
           entry.value.evolutionEnabled)
         ExploreInstanceRoll(

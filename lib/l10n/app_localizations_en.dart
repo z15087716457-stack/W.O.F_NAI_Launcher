@@ -22101,4 +22101,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return 'Action failed: $error';
   }
+
+  @override
+  String get blocks_expandToText => 'Expand to text';
 }

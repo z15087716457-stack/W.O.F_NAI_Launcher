@@ -186,7 +186,7 @@ class _BlocksLibraryWiringState extends ConsumerState<BlocksLibraryWiring> {
       quick: _quick,
       loading: libraryAsync.isLoading || preferencesAsync.isLoading,
       selectedId: requested,
-      catalog: blocksParamCatalog,
+      catalog: blocksParamCatalogWithReader(ref.read),
       paletteIds: palette?.blocks.map((b) => b.id).toSet() ?? {},
       sourceStates: {
         if (selected != null && source != null) selected.id: source,

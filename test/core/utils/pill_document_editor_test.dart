@@ -239,6 +239,126 @@ void main() {
     });
   });
 
+  test(
+    'expansion preserves send text for fixed/rolled/translation/disabled/shared',
+    () {
+      for (final instance in [
+        const PillInstance(blockId: 'b'),
+        const PillInstance(
+          blockId: 'b',
+          settings: PillInstanceSettings(mode: PillRollMode.random),
+          currentRoll: '1.2::rolled::',
+        ),
+        const PillInstance(
+          blockId: 'b',
+          settings: PillInstanceSettings(mode: PillRollMode.sequential),
+          currentRoll: 'next',
+        ),
+        const PillInstance(
+          blockId: '',
+          translation: TranslationPill(source: 'source', zh: '译文'),
+        ),
+        const PillInstance(
+          blockId: '',
+          enabled: false,
+          translation: TranslationPill(source: 'hidden', zh: '禁用'),
+        ),
+      ]) {
+        const marker = '\uE000';
+        final doc = PillDocument(
+          text: 'a${marker}b${marker}c',
+          instances: {marker: instance},
+        );
+        String? resolve(String _, PillInstance i) =>
+            i.settings.hasRoll ? i.currentRoll : 'fixed';
+        final send = PillDocumentEditor.projectWithMarker(doc, resolve);
+        final expanded = PillDocumentEditor.expandOccurrence(
+          doc,
+          marker,
+          occurrence: 1,
+          resolveMarker: resolve,
+        );
+        expect(PillDocumentEditor.projectWithMarker(expanded, resolve), send);
+        expect(expanded.text.startsWith('a${marker}b'), isTrue);
+        expect(expanded.instances[marker], instance);
+        if (instance.translation != null) {
+          expect(
+            PillDocumentEditor.projectWithMarker(
+              PillDocumentEditor.unwrapAllTranslations(doc),
+              resolve,
+            ),
+            send,
+          );
+          expect(
+            PillDocumentEditor.projectWithMarker(
+              PillDocumentEditor.unwrapTranslation(
+                doc,
+                marker,
+                source: instance.translation!.source,
+              ),
+              resolve,
+            ),
+            send,
+          );
+        }
+      }
+    },
+  );
+
+  test(
+    'temporary content wins over translation and roll, round trips and can be cleared',
+    () {
+      final temp = PillTempContent(
+        content: 'fixed temp',
+        negativeContent: 'temp UC',
+        originalContent: 'old',
+        editedAt: DateTime(2026, 10, 26),
+        editedBy: 'agent',
+      );
+      final instance = PillInstance(
+        blockId: 'b',
+        temp: temp,
+        translation: const TranslationPill(source: 'old source', zh: '译文'),
+        settings: const PillInstanceSettings(mode: PillRollMode.random),
+        currentRoll: 'old roll',
+      );
+      final document = PillDocument(
+        text: markerA,
+        instances: {markerA: instance},
+      );
+      expect(
+        PillDocumentEditor.project(document, (_) => 'library'),
+        'fixed temp',
+      );
+      expect(
+        PillDocumentEditor.project(
+          document.copyWith(
+            instances: {markerA: instance.copyWith(useNegativeContent: true)},
+          ),
+          (_) => 'library',
+        ),
+        'temp UC',
+      );
+      final disabled = document.copyWith(
+        instances: {markerA: instance.copyWith(enabled: false)},
+      );
+      expect(PillDocumentEditor.unwrapAllTranslations(disabled).text, '');
+      expect(
+        PillDocumentEditor.unwrapAllTranslations(document).text,
+        'fixed temp',
+      );
+      final expanded = PillDocumentEditor.expandOccurrence(
+        document,
+        markerA,
+        resolveMarker: (_, __) => 'library',
+      );
+      expect(expanded.text, 'fixed temp');
+      expect(PillDocument.fromJson(document.toJson()), document);
+      expect(instance.copyWith().temp, temp);
+      expect(instance.copyWith(temp: null).temp, isNull);
+    },
+  );
+
   group('project / stripMarkers', () {
     test('enabled instances expand, disabled and unknown vanish', () {
       const doc = PillDocument(

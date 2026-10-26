@@ -49,8 +49,10 @@ class PromptPill extends StatelessWidget {
     this.label,
     this.trailing,
     this.multiline = false,
+    this.temporary = false,
   });
 
+  final bool temporary;
   final String title;
   final Color color;
   final String appearance;

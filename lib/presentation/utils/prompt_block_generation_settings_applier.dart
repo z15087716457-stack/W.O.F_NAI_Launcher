@@ -4,17 +4,45 @@ import '../../core/constants/api_constants.dart';
 import '../../core/constants/model_spec.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../providers/generation/generation_params_notifier.dart';
+import '../providers/prompt_block_library_provider.dart';
+import '../providers/uc_preset_provider.dart';
 
 /// 只在用户明确点击「应用设置」时，把块内指定的字段写入当前生图参数。
 void applyPromptBlockGenerationSettings(
   WidgetRef ref,
   PromptBlockGenerationSettings settings,
 ) {
-  final current = ref.read(generationParamsNotifierProvider);
+  applyPromptBlockGenerationSettingsWithReader(ref.read, settings);
+}
+
+void applyPromptBlockGenerationSettingsWithReader(
+  T Function<T>(ProviderListenable<T>) read,
+  PromptBlockGenerationSettings settings,
+) {
+  final current = read(generationParamsNotifierProvider);
   final model = settings.model ?? current.model;
   validatePromptBlockGenerationSettings(settings, model);
-  final notifier = ref.read(generationParamsNotifierProvider.notifier);
+  for (final id in [settings.qualityCustomBlockId, settings.ucCustomBlockId]) {
+    if (id != null &&
+        read(promptBlockLibraryNotifierProvider).valueOrNull?.blockById(id) ==
+            null) {
+      throw StateError('Custom preset block no longer exists');
+    }
+  }
+  final notifier = read(generationParamsNotifierProvider.notifier);
   if (settings.model != null) notifier.updateModel(settings.model!);
+  if (settings.qualityPreset != null) {
+    notifier.updateQualityPreset(settings.qualityPreset!);
+  }
+  if (settings.qualityCustomBlockId != null) {
+    notifier.updateCustomQualityPreset(settings.qualityCustomBlockId!);
+  }
+  if (settings.ucPreset != null) notifier.updateUcPreset(settings.ucPreset!);
+  if (settings.ucCustomBlockId != null) {
+    read(
+      ucPresetNotifierProvider.notifier,
+    ).setCustomEntry(settings.ucCustomBlockId!);
+  }
   if (settings.steps != null) notifier.updateSteps(settings.steps!);
   if (settings.scale != null) notifier.updateScale(settings.scale!);
   if (settings.sampler != null) notifier.updateSampler(settings.sampler!);
@@ -32,6 +60,12 @@ void validatePromptBlockGenerationSettings(
   String targetModel,
 ) {
   final spec = ModelSpecs.of(targetModel);
+  if (settings.ucPreset != null &&
+      !UcPresetType.values
+          .map(UcPresets.toApiValue)
+          .contains(settings.ucPreset)) {
+    throw StateError('Invalid UC preset');
+  }
   if (settings.model != null &&
       !ImageModels.allModels.contains(settings.model)) {
     throw StateError('Unknown model');

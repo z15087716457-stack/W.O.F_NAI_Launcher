@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import '../../core/enums/quality_tag_preset.dart';
 
 import 'package:flutter/painting.dart';
 
@@ -31,6 +32,10 @@ BlockParams? blockParamsOf(
         width: value.width,
         height: value.height,
         incompatible: incompatible,
+        qualityPreset: value.qualityPreset?.name,
+        qualityCustomBlockId: value.qualityCustomBlockId,
+        ucPreset: value.ucPreset,
+        ucCustomBlockId: value.ucCustomBlockId,
       );
 PromptBlockGenerationSettings? storedBlockParams(BlockParams? value) =>
     value == null
@@ -44,6 +49,10 @@ PromptBlockGenerationSettings? storedBlockParams(BlockParams? value) =>
         noiseSchedule: value.noiseSchedule,
         width: value.width,
         height: value.height,
+        qualityPreset: QualityTagPreset.tryParse(value.qualityPreset),
+        qualityCustomBlockId: value.qualityCustomBlockId,
+        ucPreset: value.ucPreset,
+        ucCustomBlockId: value.ucCustomBlockId,
       );
 
 Map<String, dynamic> blockDraftSnapshot(BlockDraft draft) {
