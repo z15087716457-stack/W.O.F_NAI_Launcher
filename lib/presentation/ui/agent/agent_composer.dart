@@ -48,6 +48,7 @@ class AgentComposerState extends State<AgentComposer> {
   AgentMentionKind? _category;
 
   UiPopoverAnchor? _attach, _model, _permission;
+  final _modelKey = GlobalKey();
 
   @override
   void initState() {
@@ -232,6 +233,13 @@ class AgentComposerState extends State<AgentComposer> {
     );
   }
 
+  /// 打开模型 / 思考档位弹层（`/model` `/thinking`）。
+  void openModelPicker() {
+    final ctx = _modelKey.currentContext;
+    if (ctx == null) return;
+    setState(() => _model = _above(ctx, right: true));
+  }
+
   /// 在光标处插入（[replace] = 换掉全部）。
   void insert(String text, {bool replace = false}) {
     final v = _text.value;
@@ -273,11 +281,32 @@ class AgentComposerState extends State<AgentComposer> {
     }
   }
 
+  /// `/` 选中：无参 Studio 命令直接执行并清掉 `/查询`；其余替换成插入文本。
+  void _command(AgentSlashCommand cmd) {
+    final s = AgentScope.of(context);
+    if (cmd.executesOnSelect && s.actions.onSelectSlashCommand != null) {
+      _detect();
+      final t = _trigger;
+      if (t != null) {
+        final v = _text.value;
+        final next = v.text.replaceRange(t.start, v.selection.baseOffset, '');
+        _text.value = TextEditingValue(
+          text: next,
+          selection: TextSelection.collapsed(offset: t.start),
+        );
+        _changed(next);
+      }
+      unawaited(s.run(() => s.actions.onSelectSlashCommand!(cmd)));
+      return;
+    }
+    _pick(cmd.insertion, null);
+  }
+
   int _candidateCount() {
     final t = _trigger!;
     final d = AgentScope.of(context).data;
     return t.slash
-        ? AgentMentionPanel.filterSkills(d.skills, t.query).length
+        ? AgentMentionPanel.filterCommands(d, t.query).length
         : _mentions().length;
   }
 
@@ -285,8 +314,8 @@ class AgentComposerState extends State<AgentComposer> {
     final t = _trigger!;
     final d = AgentScope.of(context).data;
     if (t.slash) {
-      final list = AgentMentionPanel.filterSkills(d.skills, t.query);
-      if (_index < list.length) _pick('/skill:${list[_index].name} ', null);
+      final list = AgentMentionPanel.filterCommands(d, t.query);
+      if (_index < list.length) _command(list[_index]);
     } else {
       final list = _mentions();
       if (_index < list.length) {
@@ -304,6 +333,13 @@ class AgentComposerState extends State<AgentComposer> {
   KeyEventResult _key(FocusNode node, KeyEvent event) {
     if (_composing) return KeyEventResult.ignored;
     if (_trigger != null) return _panelKeys(node, event);
+    if (event is KeyDownEvent &&
+        event.logicalKey == LogicalKeyboardKey.tab &&
+        !HardwareKeyboard.instance.isShiftPressed &&
+        _suggestion != null) {
+      _acceptSuggestion();
+      return KeyEventResult.handled;
+    }
     if (event is! KeyDownEvent ||
         event.logicalKey != LogicalKeyboardKey.enter) {
       return KeyEventResult.ignored;
@@ -316,6 +352,21 @@ class AgentComposerState extends State<AgentComposer> {
       return KeyEventResult.handled;
     }
     return KeyEventResult.ignored;
+  }
+
+  /// 下一句建议：只在输入框为空时有效。
+  String? get _suggestion {
+    final s = AgentScope.of(context);
+    final text = s.data.composer.suggestion;
+    if (text == null || text.isEmpty || _text.text.isNotEmpty) return null;
+    if (s.actions.onAcceptSuggestion == null) return null;
+    return text;
+  }
+
+  void _acceptSuggestion() {
+    final s = AgentScope.of(context);
+    _focus.requestFocus();
+    unawaited(s.run(() => s.actions.onAcceptSuggestion!()));
   }
 
   void _send({required bool steer}) {
@@ -373,6 +424,7 @@ class AgentComposerState extends State<AgentComposer> {
               category: _category,
               onCategory: _setCategory,
               onPick: _pick,
+              onCommand: _command,
               search: _category == AgentMentionKind.block
                   ? _blockSearchBox(context)
                   : null,
@@ -492,6 +544,16 @@ class AgentComposerState extends State<AgentComposer> {
                       ),
                     ),
                   ),
+                ),
+                ValueListenableBuilder(
+                  valueListenable: _text,
+                  builder: (context, _, _) => switch (_suggestion) {
+                    final hint? => _SuggestionRow(
+                      text: hint,
+                      onAccept: _acceptSuggestion,
+                    ),
+                    null => const SizedBox.shrink(),
+                  },
                 ),
                 if (comp.blocked == AgentSendBlock.noModel)
                   Padding(
@@ -615,6 +677,7 @@ class AgentComposerState extends State<AgentComposer> {
                       onClose: () => setState(() => _model = null),
                     ),
                     child: Builder(
+                      key: _modelKey,
                       builder: (context) => _Pill(
                         key: const Key('agent-model'),
                         open: _model != null,
@@ -1355,6 +1418,49 @@ class _Notices extends StatelessWidget {
             onPressed: s.actions.onDismissNotices,
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 下一句建议（10-25）：输入框下方一行灰字，右侧 Tab 键帽；点或按 Tab 采纳（只填入不发送）。
+class _SuggestionRow extends StatelessWidget {
+  const _SuggestionRow({required this.text, required this.onAccept});
+  final String text;
+  final VoidCallback onAccept;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    return Tooltip(
+      message: l.ag_suggestionAccept,
+      waitDuration: const Duration(milliseconds: 500),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          key: const Key('agent-suggestion'),
+          behavior: HitTestBehavior.opaque,
+          onTap: onAccept,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(12, 0, 10, 2),
+            child: Row(
+              spacing: 8,
+              children: [
+                AgentIcon(AgentGlyphs.wand, size: 12, color: c.faint),
+                Expanded(
+                  child: Text(
+                    text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.sans(12.5, color: c.faint, height: 1.4),
+                  ),
+                ),
+                const AgentKey('Tab'),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

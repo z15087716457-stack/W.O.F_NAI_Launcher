@@ -11470,9 +11470,22 @@
   "set_agNextSuggestion": "下一句建议",
   "set_agNextSuggestionSub": "使用当前对话模型预测你的下一句消息，会额外消耗 token；按 Tab 采纳。",
   "set_agCacheWarming": "提示缓存预热",
-  "set_agCacheWarmingSub": "Pi 仅在预计节省至少 $0.05 时预热；未声明缓存寿命或价格的模型不参与。",
+  "set_agCacheWarmingSub": "在提示缓存快过期前用 1 token 的请求续上（按 5 分钟寿命，适配所有模型），下一步读缓存而不是重发整段上下文。",
   "set_agCacheOff": "关闭",
   "set_agCacheStreaming": "只在 Agent 运行时",
   "set_agCacheIdle": "空闲时也预热",
-  "set_agCacheIdleCost": "空闲预热会产生额外模型费用。"
+  "set_agCacheIdleCost": "空闲时也预热（最多 30 分钟）会产生额外模型费用。",
+  "ag_suggestionAccept": "按 Tab 填入这句建议",
+  "ag_cacheWarmTitle": "缓存预热",
+  "ag_cacheWarmOff": "已关闭",
+  "ag_cacheWarmRefreshing": "正在续期缓存…",
+  "ag_cacheWarmIdle": "待机，下次运行时开始",
+  "ag_cacheWarmNext": "{time} 后续期",
+  "@ag_cacheWarmNext": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

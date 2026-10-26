@@ -11470,9 +11470,22 @@
   "set_agNextSuggestion": "次のメッセージ候補",
   "set_agNextSuggestionSub": "現在の会話モデルで次のメッセージを予測します。追加のトークンを使用します。Tab で採用。",
   "set_agCacheWarming": "プロンプトキャッシュの予熱",
-  "set_agCacheWarmingSub": "Pi は推定節約額が $0.05 以上の場合のみ予熱します。有効期間や料金が不明なモデルは対象外です。",
+  "set_agCacheWarmingSub": "プロンプトキャッシュが切れる直前に 1 トークンのリクエストで延長します（寿命 5 分、全モデル対象）。次のステップはコンテキスト全体を再送せずキャッシュを読みます。",
   "set_agCacheOff": "オフ",
   "set_agCacheStreaming": "Agent の実行中のみ",
   "set_agCacheIdle": "待機中も予熱",
-  "set_agCacheIdleCost": "待機中の予熱には追加のモデル料金が発生します。"
+  "set_agCacheIdleCost": "待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。",
+  "ag_suggestionAccept": "Tab でこの提案を入力",
+  "ag_cacheWarmTitle": "キャッシュのウォームアップ",
+  "ag_cacheWarmOff": "オフ",
+  "ag_cacheWarmRefreshing": "キャッシュを延長中…",
+  "ag_cacheWarmIdle": "待機中 — 次の実行で開始",
+  "ag_cacheWarmNext": "{time} 後に延長",
+  "@ag_cacheWarmNext": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

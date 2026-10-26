@@ -39007,7 +39007,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agCacheWarmingSub.
   ///
   /// In en, this message translates to:
-  /// **'Pi warms eligible caches only when estimated savings reach \$0.05. Models without cache lifetime or pricing are not eligible.'**
+  /// **'Keeps the model\'s prompt cache warm with a 1-token request just before it expires (5-minute lifetime, all models), so the next step reads the cache instead of resending the whole context.'**
   String get set_agCacheWarmingSub;
 
   /// No description provided for @set_agCacheOff.
@@ -39031,8 +39031,44 @@ abstract class AppLocalizations {
   /// No description provided for @set_agCacheIdleCost.
   ///
   /// In en, this message translates to:
-  /// **'Idle warming incurs additional model charges.'**
+  /// **'Warming while idle (up to 30 minutes) costs extra model usage.'**
   String get set_agCacheIdleCost;
+
+  /// No description provided for @ag_suggestionAccept.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab to fill in this suggestion'**
+  String get ag_suggestionAccept;
+
+  /// No description provided for @ag_cacheWarmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache warming'**
+  String get ag_cacheWarmTitle;
+
+  /// No description provided for @ag_cacheWarmOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get ag_cacheWarmOff;
+
+  /// No description provided for @ag_cacheWarmRefreshing.
+  ///
+  /// In en, this message translates to:
+  /// **'Refreshing the cache…'**
+  String get ag_cacheWarmRefreshing;
+
+  /// No description provided for @ag_cacheWarmIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting — starts with the next run'**
+  String get ag_cacheWarmIdle;
+
+  /// No description provided for @ag_cacheWarmNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next refresh in {time}'**
+  String ag_cacheWarmNext(String time);
 }
 
 class _AppLocalizationsDelegate

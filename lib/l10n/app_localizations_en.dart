@@ -22451,7 +22451,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agCacheWarmingSub =>
-      'Pi warms eligible caches only when estimated savings reach \$0.05. Models without cache lifetime or pricing are not eligible.';
+      'Keeps the model\'s prompt cache warm with a 1-token request just before it expires (5-minute lifetime, all models), so the next step reads the cache instead of resending the whole context.';
 
   @override
   String get set_agCacheOff => 'Off';
@@ -22464,5 +22464,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agCacheIdleCost =>
-      'Idle warming incurs additional model charges.';
+      'Warming while idle (up to 30 minutes) costs extra model usage.';
+
+  @override
+  String get ag_suggestionAccept => 'Tab to fill in this suggestion';
+
+  @override
+  String get ag_cacheWarmTitle => 'Cache warming';
+
+  @override
+  String get ag_cacheWarmOff => 'Off';
+
+  @override
+  String get ag_cacheWarmRefreshing => 'Refreshing the cache…';
+
+  @override
+  String get ag_cacheWarmIdle => 'Waiting — starts with the next run';
+
+  @override
+  String ag_cacheWarmNext(String time) {
+    return 'Next refresh in $time';
+  }
 }

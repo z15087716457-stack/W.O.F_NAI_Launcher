@@ -162,6 +162,48 @@ abstract final class AgentFixture {
     AgentSkillOption(name: 'style-replica', description: '画风复刻：拆解参考图并逐步逼近'),
   ];
 
+  /// `/` 三组：Skill / 提示词模板 / Studio 命令。
+  static const slashCommands = [
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.skill,
+      name: 'nai-prompt',
+      description: 'NovelAI 提示词写法与模型差异',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.skill,
+      name: 'nai-studio',
+      description: 'Studio 工具与工作流参考',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.template,
+      name: 'review-draft',
+      description: '审一遍当前草稿的标签冲突',
+      argumentHint: '[重点]',
+      source: 'workspace',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.builtin,
+      name: 'new',
+      description: '新建对话',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.builtin,
+      name: 'compact',
+      description: '压缩上下文',
+      argumentHint: '[说明]',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.builtin,
+      name: 'model',
+      description: '选择模型',
+    ),
+    AgentSlashCommand(
+      kind: AgentSlashCommandKind.builtin,
+      name: 'history',
+      description: '打开会话历史',
+    ),
+  ];
+
   static final draft = AgentDraftSummary(
     model: 'V4.5 Full',
     prompt:
@@ -517,6 +559,7 @@ abstract final class AgentFixture {
         pending: pending,
         canSend: s == AgentScene.compose || s == AgentScene.run,
         canAttachCanvas: true,
+        suggestion: s == AgentScene.shelf ? '再出 4 张，把背景换成黄昏' : null,
         queue: s == AgentScene.run
             ? const [
                 AgentQueued(
@@ -543,12 +586,17 @@ abstract final class AgentFixture {
         userMessages: 3,
         assistantMessages: 3,
         toolCalls: 11,
+        cacheWarming: AgentCacheWarmingData(
+          mode: 'streaming',
+          state: 'inactive',
+        ),
       ),
       models: models,
       thinking: thinking,
       permission: AgentPermissionMode.auto,
       mentions: mentions,
       skills: skills,
+      slashCommands: slashCommands,
       draft: draft,
       status: switch (s) {
         AgentScene.run => AgentRunStatus.working,
@@ -648,6 +696,8 @@ abstract final class AgentFixture {
       onAdjustLimit: () => note('adjustLimit'),
       onOpenSettingAt: (section, anchor) =>
           note('openSettingAt', '$section#$anchor'),
+      onSelectSlashCommand: (cmd) => ok('slash', cmd.name),
+      onAcceptSuggestion: () => ok('acceptSuggestion'),
     );
   }
 }

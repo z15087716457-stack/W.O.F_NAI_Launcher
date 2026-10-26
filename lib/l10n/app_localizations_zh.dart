@@ -21442,7 +21442,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agCacheWarmingSub =>
-      'Pi 仅在预计节省至少 \$0.05 时预热；未声明缓存寿命或价格的模型不参与。';
+      '在提示缓存快过期前用 1 token 的请求续上（按 5 分钟寿命，适配所有模型），下一步读缓存而不是重发整段上下文。';
 
   @override
   String get set_agCacheOff => '关闭';
@@ -21454,7 +21454,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agCacheIdle => '空闲时也预热';
 
   @override
-  String get set_agCacheIdleCost => '空闲预热会产生额外模型费用。';
+  String get set_agCacheIdleCost => '空闲时也预热（最多 30 分钟）会产生额外模型费用。';
+
+  @override
+  String get ag_suggestionAccept => '按 Tab 填入这句建议';
+
+  @override
+  String get ag_cacheWarmTitle => '缓存预热';
+
+  @override
+  String get ag_cacheWarmOff => '已关闭';
+
+  @override
+  String get ag_cacheWarmRefreshing => '正在续期缓存…';
+
+  @override
+  String get ag_cacheWarmIdle => '待机，下次运行时开始';
+
+  @override
+  String ag_cacheWarmNext(String time) {
+    return '$time 后续期';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42895,7 +42915,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agCacheWarmingSub =>
-      'Pi 僅在預計節省至少 \$0.05 時預熱；未宣告快取壽命或價格的模型不參與。';
+      '在提示快取快過期前用 1 token 的請求續上（按 5 分鐘壽命，適配所有模型），下一步讀快取而不是重發整段上下文。';
 
   @override
   String get set_agCacheOff => '關閉';
@@ -42907,5 +42927,25 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agCacheIdle => '空閒時也預熱';
 
   @override
-  String get set_agCacheIdleCost => '空閒預熱會產生額外模型費用。';
+  String get set_agCacheIdleCost => '空閒時也預熱（最多 30 分鐘）會產生額外模型費用。';
+
+  @override
+  String get ag_suggestionAccept => '按 Tab 填入這句建議';
+
+  @override
+  String get ag_cacheWarmTitle => '快取預熱';
+
+  @override
+  String get ag_cacheWarmOff => '已關閉';
+
+  @override
+  String get ag_cacheWarmRefreshing => '正在續期快取…';
+
+  @override
+  String get ag_cacheWarmIdle => '待機，下次執行時開始';
+
+  @override
+  String ag_cacheWarmNext(String time) {
+    return '$time 後續期';
+  }
 }

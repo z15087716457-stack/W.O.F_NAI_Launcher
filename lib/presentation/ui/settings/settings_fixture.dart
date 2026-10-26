@@ -45,6 +45,8 @@ abstract final class SettingsFixture {
     SettingKey.intervalJitter: 20.0,
     SettingKey.imageSavePath: r'E:\A.I\NovelAI\outputs',
     SettingKey.agentModel: 'claude-sonnet-4.5',
+    SettingKey.agentNextSuggestion: true,
+    SettingKey.agentCacheWarming: 'streaming',
     SettingKey.upscaleDefault: 'animeQuality',
     SettingKey.seedCpuOffload: 8.0,
     SettingKey.seedVaeTiling: true,

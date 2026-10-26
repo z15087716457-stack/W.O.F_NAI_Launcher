@@ -249,6 +249,9 @@ abstract final class SettingsFormat {
       (SettingKey.seedVramMode, 'low') => l.set_upLowVram,
       (SettingKey.proxyMode, 'system') => l.set_nwSystem,
       (SettingKey.proxyMode, 'manual') => l.set_nwManual,
+      (SettingKey.agentCacheWarming, 'off') => l.set_agCacheOff,
+      (SettingKey.agentCacheWarming, 'streaming') => l.set_agCacheStreaming,
+      (SettingKey.agentCacheWarming, 'idle') => l.set_agCacheIdle,
       _ => value,
     };
   }

@@ -705,6 +705,20 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
             unit: l.set_agTimesUnit,
           ),
         ),
+        SettingKeyRow(
+          SettingKey.agentNextSuggestion,
+          title: l.set_agNextSuggestion,
+          subtitle: l.set_agNextSuggestionSub,
+          control: const SetSwitch(SettingKey.agentNextSuggestion),
+        ),
+        SettingKeyRow(
+          SettingKey.agentCacheWarming,
+          title: l.set_agCacheWarming,
+          subtitle: s.data.values.text(SettingKey.agentCacheWarming) == 'idle'
+              ? '${l.set_agCacheWarmingSub} ${l.set_agCacheIdleCost}'
+              : l.set_agCacheWarmingSub,
+          control: const SetSelect(SettingKey.agentCacheWarming, width: 200),
+        ),
       ],
     );
     final instrSection = SettingsSection(

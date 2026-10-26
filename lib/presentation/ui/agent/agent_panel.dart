@@ -138,6 +138,20 @@ class _AgentPanelState extends State<AgentPanel> {
     }
     // 新聊天 / 切聊天：回到对话页。
     if (oldWidget.data.chat.id != widget.data.chat.id) _tab = AgentTab.chat;
+    // `/model` `/thinking` `/history`：每个 revision 打开一次对应的现有面板。
+    final action = widget.data.localAction;
+    if (action != null &&
+        widget.data.localActionRevision != oldWidget.data.localActionRevision) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (action == AgentLocalAction.history) {
+          if (_history == null) _toggleHistory();
+        } else {
+          if (_tab != AgentTab.chat) setState(() => _tab = AgentTab.chat);
+          _composer.currentState?.openModelPicker();
+        }
+      });
+    }
   }
 
   @override

@@ -21687,7 +21687,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_agCacheWarmingSub =>
-      'Pi は推定節約額が \$0.05 以上の場合のみ予熱します。有効期間や料金が不明なモデルは対象外です。';
+      'プロンプトキャッシュが切れる直前に 1 トークンのリクエストで延長します（寿命 5 分、全モデル対象）。次のステップはコンテキスト全体を再送せずキャッシュを読みます。';
 
   @override
   String get set_agCacheOff => 'オフ';
@@ -21699,5 +21699,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agCacheIdle => '待機中も予熱';
 
   @override
-  String get set_agCacheIdleCost => '待機中の予熱には追加のモデル料金が発生します。';
+  String get set_agCacheIdleCost => '待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。';
+
+  @override
+  String get ag_suggestionAccept => 'Tab でこの提案を入力';
+
+  @override
+  String get ag_cacheWarmTitle => 'キャッシュのウォームアップ';
+
+  @override
+  String get ag_cacheWarmOff => 'オフ';
+
+  @override
+  String get ag_cacheWarmRefreshing => 'キャッシュを延長中…';
+
+  @override
+  String get ag_cacheWarmIdle => '待機中 — 次の実行で開始';
+
+  @override
+  String ag_cacheWarmNext(String time) {
+    return '$time 後に延長';
+  }
 }

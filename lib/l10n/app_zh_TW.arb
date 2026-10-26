@@ -12055,9 +12055,22 @@
   "set_agNextSuggestion": "下一句建議",
   "set_agNextSuggestionSub": "使用當前對話模型預測你的下一句訊息，會額外消耗 token；按 Tab 採納。",
   "set_agCacheWarming": "提示快取預熱",
-  "set_agCacheWarmingSub": "Pi 僅在預計節省至少 $0.05 時預熱；未宣告快取壽命或價格的模型不參與。",
+  "set_agCacheWarmingSub": "在提示快取快過期前用 1 token 的請求續上（按 5 分鐘壽命，適配所有模型），下一步讀快取而不是重發整段上下文。",
   "set_agCacheOff": "關閉",
   "set_agCacheStreaming": "只在 Agent 執行時",
   "set_agCacheIdle": "空閒時也預熱",
-  "set_agCacheIdleCost": "空閒預熱會產生額外模型費用。"
+  "set_agCacheIdleCost": "空閒時也預熱（最多 30 分鐘）會產生額外模型費用。",
+  "ag_suggestionAccept": "按 Tab 填入這句建議",
+  "ag_cacheWarmTitle": "快取預熱",
+  "ag_cacheWarmOff": "已關閉",
+  "ag_cacheWarmRefreshing": "正在續期快取…",
+  "ag_cacheWarmIdle": "待機，下次執行時開始",
+  "ag_cacheWarmNext": "{time} 後續期",
+  "@ag_cacheWarmNext": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

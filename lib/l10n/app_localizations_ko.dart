@@ -21759,7 +21759,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agCacheWarmingSub =>
-      'Pi는 예상 절감액이 \$0.05 이상일 때만 예열합니다. 캐시 수명이나 가격이 없는 모델은 제외됩니다.';
+      '프롬프트 캐시가 만료되기 직전 1토큰 요청으로 연장합니다(수명 5분, 모든 모델). 다음 단계는 전체 컨텍스트를 다시 보내지 않고 캐시를 읽습니다.';
 
   @override
   String get set_agCacheOff => '끄기';
@@ -21771,5 +21771,25 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agCacheIdle => '대기 중에도 예열';
 
   @override
-  String get set_agCacheIdleCost => '대기 중 예열에는 추가 모델 요금이 발생합니다.';
+  String get set_agCacheIdleCost => '대기 중 예열(최대 30분)은 추가 모델 비용이 발생합니다.';
+
+  @override
+  String get ag_suggestionAccept => 'Tab으로 이 제안 입력';
+
+  @override
+  String get ag_cacheWarmTitle => '캐시 예열';
+
+  @override
+  String get ag_cacheWarmOff => '꺼짐';
+
+  @override
+  String get ag_cacheWarmRefreshing => '캐시 연장 중…';
+
+  @override
+  String get ag_cacheWarmIdle => '대기 중 — 다음 실행 시 시작';
+
+  @override
+  String ag_cacheWarmNext(String time) {
+    return '$time 후 연장';
+  }
 }

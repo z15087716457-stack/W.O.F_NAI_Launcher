@@ -679,9 +679,13 @@ class AgentUsagePopover extends StatelessWidget {
                 ),
               ),
               if (u.tokens != null && u.window != null)
-                Text(
-                  '${agentTokens(u.tokens!)} / ${agentTokens(u.window!)}',
-                  style: UiText.mono(11.5, color: c.faint),
+                Flexible(
+                  child: Text(
+                    '${agentTokens(u.tokens!)} / ${agentTokens(u.window!)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: UiText.mono(11.5, color: c.faint),
+                  ),
                 ),
             ],
           ),
@@ -757,6 +761,14 @@ class AgentUsagePopover extends StatelessWidget {
                 ],
               ),
             ),
+          if (u.cacheWarming case final w?) ...[
+            Container(
+              height: 1,
+              color: c.line,
+              margin: const EdgeInsets.symmetric(vertical: 10),
+            ),
+            AgentCacheWarmingSection(data: w),
+          ],
           const SizedBox(height: 4),
           Text(l.ag_usageCost, style: UiText.sans(11, color: c.faint)),
           const SizedBox(height: 12),
@@ -774,6 +786,115 @@ class AgentUsagePopover extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 上下文弹窗里的「缓存预热」一节（10-25）：模式 · 状态点 · 下次续期倒计时 / 停止原因。
+/// 只显示 Pi 给的状态；价格未知时不显示预计节省。
+class AgentCacheWarmingSection extends StatefulWidget {
+  const AgentCacheWarmingSection({super.key, required this.data});
+  final AgentCacheWarmingData data;
+
+  @override
+  State<AgentCacheWarmingSection> createState() =>
+      _AgentCacheWarmingSectionState();
+}
+
+class _AgentCacheWarmingSectionState extends State<AgentCacheWarmingSection> {
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _sync();
+  }
+
+  @override
+  void didUpdateWidget(covariant AgentCacheWarmingSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _sync();
+  }
+
+  void _sync() {
+    final ticking = widget.data.nextWarmAt != null;
+    if (ticking && _tick == null) {
+      _tick = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (mounted) setState(() {});
+      });
+    } else if (!ticking) {
+      _tick?.cancel();
+      _tick = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final w = widget.data;
+    final active = w.state == 'scheduled' || w.state == 'refreshing';
+    final mode = switch (w.mode) {
+      'off' => l.set_agCacheOff,
+      'idle' => l.set_agCacheIdle,
+      _ => l.set_agCacheStreaming,
+    };
+    String status;
+    if (w.mode == 'off') {
+      status = l.ag_cacheWarmOff;
+    } else if (w.state == 'refreshing') {
+      status = l.ag_cacheWarmRefreshing;
+    } else if (w.state == 'scheduled' && w.nextWarmAt != null) {
+      final left = w.nextWarmAt!.difference(DateTime.now());
+      final sec = left.isNegative ? 0 : left.inSeconds;
+      status = l.ag_cacheWarmNext(
+        '${sec ~/ 60}:${(sec % 60).toString().padLeft(2, '0')}',
+      );
+    } else {
+      status = l.ag_cacheWarmIdle;
+    }
+    return Column(
+      key: const Key('agent-usage-cache-warming'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 5,
+      children: [
+        Row(
+          children: [
+            Expanded(child: AgentEyebrow(l.ag_cacheWarmTitle)),
+            Text(mode, style: UiText.sans(11.5, color: c.muted)),
+          ],
+        ),
+        Row(
+          spacing: 7,
+          children: [
+            Container(
+              width: 7,
+              height: 7,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: active ? c.ok : c.faint.withValues(alpha: .6),
+              ),
+            ),
+            Expanded(
+              child: Text(
+                status,
+                style: UiText.sans(12, color: active ? c.ink : c.muted),
+              ),
+            ),
+            if (w.expectedSavings case final saving?)
+              Text(
+                '\$${saving.toStringAsFixed(3)}',
+                style: UiText.mono(11.5, color: c.faint),
+              ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -1041,6 +1162,89 @@ String agentPermissionHint(BuildContext context, AgentPermissionMode m) {
   };
 }
 
+/// `/` 命令的一行：类型图标 │ `/名称` + 参数提示 │ 说明；模板标注来源。
+class AgentSlashRow extends StatelessWidget {
+  const AgentSlashRow({
+    super.key,
+    required this.command,
+    required this.selected,
+    required this.onTap,
+  });
+  final AgentSlashCommand command;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final cmd = command;
+    final name = cmd.kind == AgentSlashCommandKind.skill
+        ? 'skill:${cmd.name}'
+        : cmd.name;
+    return AgentPopRow(
+      key: Key(
+        cmd.kind == AgentSlashCommandKind.skill
+            ? 'agent-skill-${cmd.name}'
+            : 'agent-slash-${cmd.kind.name}-${cmd.name}',
+      ),
+      height: 44,
+      selected: selected,
+      onTap: onTap,
+      child: Row(
+        spacing: 9,
+        children: [
+          AgentIcon(
+            switch (cmd.kind) {
+              AgentSlashCommandKind.skill => AgentGlyphs.book,
+              AgentSlashCommandKind.template => AgentGlyphs.file,
+              AgentSlashCommandKind.builtin => AgentGlyphs.terminal,
+            },
+            size: 14,
+            color: c.muted,
+          ),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '/$name',
+                        style: UiText.mono(
+                          12,
+                          weight: FontWeight.w500,
+                          color: c.ink,
+                        ),
+                      ),
+                      if (cmd.argumentHint case final hint?)
+                        TextSpan(
+                          text: ' $hint',
+                          style: UiText.mono(11.5, color: c.faint),
+                        ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  cmd.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(11, color: c.faint),
+                ),
+              ],
+            ),
+          ),
+          if (cmd.source case final source?)
+            Text(source, style: UiText.mono(10.5, color: c.faint)),
+        ],
+      ),
+    );
+  }
+}
+
 /// `@` 引用 / `/` 技能候选面板，贴在输入框上方。键盘：↑↓ 选、Enter / Tab 插入、Esc 关。
 class AgentMentionPanel extends StatelessWidget {
   const AgentMentionPanel({
@@ -1051,9 +1255,13 @@ class AgentMentionPanel extends StatelessWidget {
     required this.category,
     required this.onCategory,
     required this.onPick,
+    required this.onCommand,
     this.search,
     this.searchText = '',
   });
+
+  /// 选中一条 `/` 命令（插入、或无参 Studio 命令直接执行由输入框决定）。
+  final ValueChanged<AgentSlashCommand> onCommand;
 
   /// 积木搜索框当前文字（与 [search] 配套）。
   final String searchText;
@@ -1096,6 +1304,35 @@ class AgentMentionPanel extends StatelessWidget {
     ];
   }
 
+  /// `/` 候选：Skill / 提示词模板 / Studio 命令三组，按名称或说明过滤，组内保持来源顺序。
+  /// 接线方没给 [AgentViewData.slashCommands] 时退回只列 Skill。
+  static List<AgentSlashCommand> filterCommands(AgentViewData d, String query) {
+    final all = d.slashCommands.isNotEmpty
+        ? d.slashCommands
+        : [
+            for (final s in d.skills)
+              AgentSlashCommand(
+                kind: AgentSlashCommandKind.skill,
+                name: s.name,
+                description: s.description,
+              ),
+          ];
+    final q = query.toLowerCase();
+    final hit = [
+      for (final c in all)
+        if (q.isEmpty ||
+            c.name.toLowerCase().contains(q) ||
+            (q.startsWith('skill:') &&
+                c.kind == AgentSlashCommandKind.skill &&
+                c.name.toLowerCase().contains(q.substring(6))))
+          c,
+    ];
+    return [
+      for (final k in AgentSlashCommandKind.values)
+        ...hit.where((c) => c.kind == k),
+    ];
+  }
+
   static int _group(AgentMentionKind k) => switch (k) {
     AgentMentionKind.prompt ||
     AgentMentionKind.negative ||
@@ -1111,47 +1348,28 @@ class AgentMentionPanel extends StatelessWidget {
     final l = context.l10n;
     final rows = <Widget>[];
     if (slash) {
-      final skills = filterSkills(d.skills, query);
-      rows.add(_GroupLabel(l.ag_skillsTitle));
-      for (final (i, s) in skills.indexed) {
+      final list = filterCommands(d, query);
+      AgentSlashCommandKind? group;
+      for (final (i, cmd) in list.indexed) {
+        if (cmd.kind != group) {
+          group = cmd.kind;
+          rows.add(
+            _GroupLabel(switch (cmd.kind) {
+              AgentSlashCommandKind.skill => l.ag_slashGroupSkills,
+              AgentSlashCommandKind.template => l.ag_slashGroupTemplates,
+              AgentSlashCommandKind.builtin => l.ag_slashGroupBuiltin,
+            }),
+          );
+        }
         rows.add(
-          AgentPopRow(
-            key: Key('agent-skill-${s.name}'),
-            height: 44,
+          AgentSlashRow(
+            command: cmd,
             selected: i == index,
-            onTap: () => onPick('/skill:${s.name} ', null),
-            child: Row(
-              spacing: 9,
-              children: [
-                AgentIcon(AgentGlyphs.book, size: 14, color: c.muted),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        s.name,
-                        style: UiText.mono(
-                          12,
-                          weight: FontWeight.w500,
-                          color: c.ink,
-                        ),
-                      ),
-                      Text(
-                        s.description,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: UiText.sans(11, color: c.faint),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            onTap: () => onCommand(cmd),
           ),
         );
       }
-      if (skills.isEmpty) rows.add(_empty(context));
+      if (list.isEmpty) rows.add(_empty(context));
     } else {
       final list = filter(d.mentions, query, category, search: searchText);
       var group = -1;
