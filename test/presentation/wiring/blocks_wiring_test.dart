@@ -742,6 +742,24 @@ void main() {
           expect(lane.projection, 'left selected right');
           expect(platform.backups, hasLength(1));
           expect(controller.text, 'left \uE000 right');
+          final notifier = container.read(
+            pillWorkspaceProvider(PillScopes.main).notifier,
+          );
+          notifier.undo();
+          final restored = container.read(
+            pillWorkspaceProvider(PillScopes.main),
+          );
+          expect(
+            restored.document.text,
+            'left selected right',
+            reason: 'selection-to-block must undo as a single operation',
+          );
+          expect(restored.document.instances, isEmpty);
+          notifier.redo();
+          expect(
+            container.read(pillWorkspaceProvider(PillScopes.main)).document,
+            lane.document,
+          );
         }
         expect(tester.takeException(), isNull);
       },

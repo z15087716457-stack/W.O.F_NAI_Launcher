@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../widgets/common/text_editing_shortcuts.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -180,12 +181,19 @@ class _SettingsPageState extends State<SettingsPage> {
   KeyEventResult _onKey(FocusNode _, KeyEvent e) {
     if (e is! KeyDownEvent) return KeyEventResult.ignored;
     final ctrl = HardwareKeyboard.instance.isControlPressed;
+    if (ctrl &&
+        (e.logicalKey == LogicalKeyboardKey.keyZ ||
+            e.logicalKey == LogicalKeyboardKey.keyY) &&
+        hasEditableTextFocus) {
+      return KeyEventResult.ignored;
+    }
     if (ctrl && e.logicalKey == LogicalKeyboardKey.keyF) {
       _searchFocus.requestFocus();
       return KeyEventResult.handled;
     }
     if (ctrl &&
         e.logicalKey == LogicalKeyboardKey.keyZ &&
+        !HardwareKeyboard.instance.isShiftPressed &&
         _toast != null &&
         _toast!.undoable) {
       widget.actions.onUndo(_toast!.id);

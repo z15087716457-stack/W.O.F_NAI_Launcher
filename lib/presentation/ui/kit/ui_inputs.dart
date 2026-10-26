@@ -56,7 +56,12 @@ class _UiSearchFieldState extends State<UiSearchField> {
     if (widget.value != _synced) {
       _debounce?.cancel();
       _synced = widget.value;
-      if (_ctrl.text != widget.value) _ctrl.text = widget.value;
+      if (_ctrl.text != widget.value) {
+        _ctrl.value = TextEditingValue(
+          text: widget.value,
+          selection: TextSelection.collapsed(offset: widget.value.length),
+        );
+      }
     }
   }
 

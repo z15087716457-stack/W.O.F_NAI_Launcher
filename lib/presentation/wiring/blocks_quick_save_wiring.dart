@@ -88,15 +88,18 @@ Future<void> showBlockQuickSave(
       final committed = await guard.commit(
         () {
           final notifier = ref.read(pillWorkspaceProvider(scope).notifier);
-          notifier.setText(
-            before.text.replaceRange(selection.start, selection.end, ''),
-          );
-          final added = insertPromptBlockBundle(
-            ref,
-            scope: scope,
-            offset: selection.start,
-            blockId: block.id,
-          );
+          late int added;
+          notifier.editAsSingleStep(() {
+            notifier.setText(
+              before.text.replaceRange(selection.start, selection.end, ''),
+            );
+            added = insertPromptBlockBundle(
+              ref,
+              scope: scope,
+              offset: selection.start,
+              blockId: block.id,
+            );
+          });
           final next = ref.read(pillWorkspaceProvider(scope)).document.text;
           controller.value = TextEditingValue(
             text: next,

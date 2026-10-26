@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/autocomplete/completion_models.dart';
 import '../../../../core/autocomplete/prompt_token_parser.dart';
+import '../../../../core/utils/draft_history.dart';
 import '../../../../core/utils/prompt_translation_edit.dart';
 import '../../../../core/utils/prompt_translation_language.dart';
 import '../../../../core/utils/tag_normalizer.dart';
@@ -211,8 +212,8 @@ class _TranslationPillEditPopoverState
   int _annotationVersion = 0;
   final _sourceFocus = FocusNode();
   final _zhFocus = FocusNode();
-  late final _DraftHistory _sourceHistory;
-  late final _DraftHistory _zhHistory;
+  late final TextDraftHistory _sourceHistory;
+  late final TextDraftHistory _zhHistory;
   late String _lastZh = widget.initial.zh;
   late String _baselineSource = widget.initial.source;
   late String _baselineZh = widget.initial.zh;
@@ -245,8 +246,8 @@ class _TranslationPillEditPopoverState
   @override
   void initState() {
     super.initState();
-    _sourceHistory = _DraftHistory(_source);
-    _zhHistory = _DraftHistory(_zh);
+    _sourceHistory = TextDraftHistory(_source);
+    _zhHistory = TextDraftHistory(_zh);
     _marks = widget.initial.marks;
     _rememberReadingLanguage();
     _source.addListener(_sourceChanged);
@@ -904,80 +905,5 @@ class _TranslationPillEditPopoverState
       );
     }
     return field;
-  }
-}
-
-/// Independent field histories make a model replacement one immediate undo
-/// step. Flutter's throttled text history can otherwise lose redo when undo is
-/// pressed before the replacement's 500 ms timer has flushed.
-class _DraftHistory {
-  _DraftHistory(this.controller) : _values = [controller.value] {
-    controller.addListener(_record);
-  }
-  final TextEditingController controller;
-  final List<TextEditingValue> _values;
-  int _index = 0;
-  bool _applying = false;
-  bool _groupOpen = false;
-  Timer? _groupTimer;
-
-  void _record() {
-    if (_applying ||
-        !controller.value.composing.isCollapsed &&
-            controller.value.composing.isValid) {
-      return;
-    }
-    final value = controller.value.copyWith(composing: TextRange.empty);
-    if (value.text == _values[_index].text) {
-      _values[_index] = value;
-      return;
-    }
-    _values.removeRange(_index + 1, _values.length);
-    if (_groupOpen && _index > 0) {
-      _values[_index] = value;
-    } else {
-      _values.add(value);
-      _index++;
-    }
-    _groupOpen = true;
-    _groupTimer?.cancel();
-    _groupTimer = Timer(const Duration(milliseconds: 500), _closeGroup);
-  }
-
-  void _closeGroup() {
-    _groupTimer?.cancel();
-    _groupOpen = false;
-  }
-
-  void replace(TextEditingValue value) {
-    _closeGroup();
-    controller.value = value;
-    _closeGroup();
-  }
-
-  void undo() {
-    _closeGroup();
-    if (_index > 0) _restore(--_index);
-  }
-
-  void redo() {
-    _closeGroup();
-    if (_index + 1 < _values.length) _restore(++_index);
-  }
-
-  void _restore(int index) {
-    _applying = true;
-    final value = _values[index];
-    controller.value = value.copyWith(
-      selection: value.selection.isValid
-          ? value.selection
-          : TextSelection.collapsed(offset: value.text.length),
-    );
-    _applying = false;
-  }
-
-  void dispose() {
-    _groupTimer?.cancel();
-    controller.removeListener(_record);
   }
 }

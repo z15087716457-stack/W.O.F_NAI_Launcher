@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'nai_agent_generation_host.dart';
 import 'package:flutter/material.dart';
+import '../widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -275,9 +276,12 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         preserveHistory: agentExpanded,
         viewerControls: simpleViewer ? const SimpleViewerGroupControl() : null,
         canvas: simpleViewer
-            ? (context, tile) =>
-                  const SimpleViewerNavigation(child: GenSimpleStage())
-            : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),
+            ? (context, tile) => const PromptUndoBoundary(
+                child: SimpleViewerNavigation(child: GenSimpleStage()),
+              )
+            : (context, tile) => PromptUndoBoundary(
+                child: GenerationCanvasWiring(tileBuilder: tile),
+              ),
         editor: (context, target) => GenerationEditorWiring(
           target: target,
           explore: widget.explore,
@@ -288,7 +292,9 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         dock: operations.dock(data.prompt.negative),
         drop: operations.drop,
         historyDrag: operations.historyDrag,
-        toolSheet: const ToolsGenerationSheetWiring(),
+        toolSheet: const PromptUndoBoundary(
+          child: ToolsGenerationSheetWiring(),
+        ),
       );
     }
     final page = widget.builder(

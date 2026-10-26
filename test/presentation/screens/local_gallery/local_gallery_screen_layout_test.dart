@@ -12,6 +12,8 @@ import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/router/gallery_navigation_request.dart';
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
+import 'package:nai_launcher/presentation/providers/bulk_operation_provider.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,6 +108,78 @@ void main() {
       StorageKeys.hasSeenLocalGalleryTip: true,
     });
   });
+
+  testWidgets(
+    'R2 gallery bulk undo/redo never runs while search text is focused',
+    (tester) async {
+      final bulk = _RecordingBulkOperations();
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: false,
+        size: const Size(1600, 1000),
+        extraOverrides: [
+          bulkOperationNotifierProvider.overrideWith(() => bulk),
+        ],
+      );
+      final field = find
+          .descendant(
+            of: find.byType(LocalGalleryToolbar),
+            matching: find.byType(TextField),
+          )
+          .first;
+      await tester.tap(field);
+      await tester.pump();
+      Future<void> type(String text) async {
+        tester.testTextInput.updateEditingValue(
+          TextEditingValue(
+            text: text,
+            selection: TextSelection.collapsed(offset: text.length),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 550));
+      }
+
+      Future<void> key(LogicalKeyboardKey key, {bool shift = false}) async {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        if (shift) await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyEvent(key);
+        if (shift) await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pump();
+      }
+
+      final controller = tester.widget<TextField>(field).controller!;
+      await type('blue');
+      await type('blue eyes');
+      await key(LogicalKeyboardKey.keyZ);
+      expect(controller.text, 'blue');
+      await key(LogicalKeyboardKey.keyY);
+      expect(controller.text, 'blue eyes');
+      await key(LogicalKeyboardKey.keyZ);
+      await key(LogicalKeyboardKey.keyZ, shift: true);
+      expect(controller.text, 'blue eyes');
+      expect(bulk.calls, isEmpty);
+      FocusManager.instance.primaryFocus!.unfocus();
+      await tester.pump();
+      tester
+          .widget<KeyboardListener>(find.byType(KeyboardListener).first)
+          .focusNode
+          .requestFocus();
+      await tester.pump();
+      await key(LogicalKeyboardKey.keyZ);
+      await _settle(tester);
+      await key(LogicalKeyboardKey.keyY);
+      await _settle(tester);
+      expect(bulk.calls, ['undo', 'redo']);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+    variant: TargetPlatformVariant.only(TargetPlatform.windows),
+  );
 
   final cases = <(Locale, bool, Size, String)>[
     (const Locale('zh'), false, const Size(1600, 1000), 'zh-light-wide'),
@@ -627,6 +701,22 @@ Finder _cardFor(LocalImageRecord record) => find.byWidgetPredicate(
   (widget) => widget is LocalImageCard && widget.record.path == record.path,
 );
 
+class _RecordingBulkOperations extends BulkOperationNotifier {
+  final calls = <String>[];
+  @override
+  BulkOperationState build() =>
+      const BulkOperationState(canUndo: true, canRedo: true);
+  @override
+  Future<void> undo() async {
+    calls.add('undo');
+  }
+
+  @override
+  Future<void> redo() async {
+    calls.add('redo');
+  }
+}
+
 Future<ProviderContainer> _pumpScreen(
   WidgetTester tester, {
   required List<LocalImageRecord> records,
@@ -683,7 +773,9 @@ Future<ProviderContainer> _pumpScreen(
               routerConfig: router,
               builder: (context, child) => RepaintBoundary(
                 key: _captureKey,
-                child: WindowChromeScope(child: _CaptionStub(child: child!)),
+                child: TextEditingShortcuts(
+                  child: WindowChromeScope(child: _CaptionStub(child: child!)),
+                ),
               ),
             )
           : MaterialApp(
@@ -694,7 +786,9 @@ Future<ProviderContainer> _pumpScreen(
               theme: theme,
               builder: (context, child) => RepaintBoundary(
                 key: _captureKey,
-                child: WindowChromeScope(child: _CaptionStub(child: child!)),
+                child: TextEditingShortcuts(
+                  child: WindowChromeScope(child: _CaptionStub(child: child!)),
+                ),
               ),
               home: navigation == null
                   ? const LocalGalleryScreen()

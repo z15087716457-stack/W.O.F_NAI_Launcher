@@ -5,6 +5,7 @@ import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
+import '../../widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -861,7 +862,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   }
 
   void _handleKeyEvent(KeyEvent event, BulkOperationState bulkOpState) {
-    if (event is! KeyDownEvent) return;
+    if (event is! KeyDownEvent || hasEditableTextFocus) return;
 
     final isCtrlPressed = HardwareKeyboard.instance.isControlPressed;
     if (!isCtrlPressed) return;
