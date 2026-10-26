@@ -61,7 +61,7 @@ function queueState() {
 }
 function usage() {
   const context = session.getContextUsage();
-  return { cacheWarming: { mode: session.settingsManager.getCacheWarmingMode(), ...session.cacheWarmingStatus },
+  return { cacheWarming: created.cacheWarming?.status ?? { mode: session.settingsManager.getCacheWarmingMode(), ...session.cacheWarmingStatus },
     stats: session.getSessionStats(), context: context ? { ...context, windowKnown: created.contextWindowKnown } : null };
 }
 function state() {
@@ -106,6 +106,9 @@ async function handle(message) {
     const create = message.sessionKind === 'translation' ? createTranslationSession : createStudioSession;
     created = await create({ ...message, executeTool, acquireRequest, deferBinding: true,
       onSession: value => { session = value; },
+      onCacheWarmingChange: () => queueMicrotask(() => {
+        if (!closing) send({ type: 'usage', ...usage() });
+      }),
       onExtensionUi: event => {
         if (readingMcpStatus && event.method === 'notify' &&
             (event.level ?? 'info') === 'info') {

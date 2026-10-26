@@ -8,6 +8,7 @@ import { getCurrentSystemMessage } from '@earendil-works/pi-ai';
 import { createStudioModelRuntime } from './model.mjs';
 import { domainTools } from './domain-tools.mjs';
 import { createNaiInteractionExtension } from './extensions/interaction.mjs';
+import { StudioCacheWarming } from './extensions/cache-warming.mjs';
 import { createNaiPermissions } from './extensions/permissions.mjs';
 import { createStudioExtensionUi } from './extensions/ui.mjs';
 import { createStudioMcp, mcpRedactor, validateStudioMcp } from './mcp.mjs';
@@ -50,7 +51,7 @@ export function studioTools(execute, extraToolNames = []) {
 
 export async function createStudioSession({ config, cwd, agentDir, systemPrompt, executeTool,
   sessionDirectory, sessionFile, sessionName, acquireRequest, extraToolNames = [],
-  extensionPaths = [], mcp = {}, skills = {}, prompts = {}, onSession, onExtensionUi, onExtensionError, deferBinding = false }) {
+  extensionPaths = [], mcp = {}, skills = {}, prompts = {}, onSession, onExtensionUi, onExtensionError, onCacheWarmingChange, deferBinding = false }) {
   if (!systemPrompt?.trim()) throw new Error('NAI system prompt is required');
   const data = resolve(agentDir), sessions = resolve(sessionDirectory ?? join(data, 'sessions'));
   await Promise.all([resolve(cwd), data, sessions].map(path => mkdir(path, { recursive: true })));
@@ -94,6 +95,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     images: { autoResize: false },
     cacheWarming: config.cacheWarming ?? 'streaming',
   });
+  const cacheWarming = new StudioCacheWarming({ model, settingsManager, onChange: onCacheWarmingChange });
   const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search',
     'read', 'write', 'edit', 'bash', 'powershell', 'grep', 'find', 'ls']);
   function validateExtensions(extensions) {
@@ -113,7 +115,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     promptsOverride: () => ({ prompts: templateSet.prompts, diagnostics: templateSet.diagnostics }),
     // Studio resolves sources, overrides and switches; Pi formats the catalog and expands /skill:.
     skillsOverride: () => ({ skills: skillSet.active, diagnostics: [] }),
-    extensionFactories: [createNaiInteractionExtension(interactionTools),
+    extensionFactories: [cacheWarming.extension, createNaiInteractionExtension(interactionTools),
       { name: 'nai-codemode', factory: createCodemodeExtension({ mode: 'on', models: false }) },
       { name: 'nai-tool-search', factory: createToolSearchExtension() },
       { name: 'nai-mcp', factory: createStudioMcp({ mcp, definitions: businessTools,
@@ -139,6 +141,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     sessionManager: manager,
     resourceLoader, settingsManager,
   });
+  cacheWarming.attach(session);
   const ui = createStudioExtensionUi(executeTool, onExtensionUi);
   let closed = false, binding;
   const bind = () => binding ??= session.bindExtensions({
@@ -159,7 +162,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     try { await bind(); } catch (error) { await close(); throw error; }
   }
   if (sessionName && manager.getSessionName() !== sessionName) session.setSessionName(sessionName);
-  return { session, manager, redact, model, sessionDirectory: sessions,
+  return { session, manager, redact, model, cacheWarming, sessionDirectory: sessions,
     close, bind, cancelExtensionUi: () => ui.cancel(),
     setPermissionMode: permissions.setMode, getPermissionMode: permissions.getMode,
     contextWindowKnown: Number.isFinite(config.contextWindow) && config.contextWindow > 0,

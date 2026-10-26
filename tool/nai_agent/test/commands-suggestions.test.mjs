@@ -17,9 +17,15 @@ test('cache warming defaults to streaming; init and live changes reach Pi', asyn
       if (mode === 'off') assert.match(result.cacheWarming.reason, /disabled/);
     }
     await assert.rejects(f.request('settings', { cacheWarming: 'bad' }), /Invalid/);
+    const started = Date.now();
     const run = f.request('prompt', { text: 'stay streaming' });
     await f.wait(() => f.requests.length === 1);
-    assert.equal((await f.request('state')).streaming, true);
+    const running = await f.request('state');
+    assert.equal(running.streaming, true);
+    assert.equal(running.cacheWarming.state, 'scheduled');
+    assert.equal(running.cacheWarming.ttlSeconds, 300);
+    assert.ok(running.cacheWarming.nextWarmAt >= started + 270000);
+    assert.ok(running.cacheWarming.nextWarmAt <= Date.now() + 270000);
     assert.equal((await f.request('settings', { cacheWarming: 'off' })).cacheWarming.mode, 'off');
     await f.request('abort'); await run;
   } finally { await f.close(); }

@@ -1256,12 +1256,17 @@ class AgentCacheWarmingData {
     required this.mode,
     required this.state,
     this.nextWarmAt,
+    this.lastWarmAt,
+    this.warmCount = 0,
+    this.ttlSeconds,
     this.expectedSavings,
     this.action,
     this.reason,
   });
   final String mode, state;
-  final DateTime? nextWarmAt;
+  final DateTime? nextWarmAt, lastWarmAt;
+  final int warmCount;
+  final int? ttlSeconds;
   final double? expectedSavings;
   final String? action, reason;
   factory AgentCacheWarmingData.fromJson(Map<String, dynamic> value) {
@@ -1274,6 +1279,13 @@ class AgentCacheWarmingData {
               (value['nextWarmAt'] as num).toInt(),
             )
           : null,
+      lastWarmAt: value['lastWarmAt'] is num
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (value['lastWarmAt'] as num).toInt(),
+            )
+          : null,
+      warmCount: (value['warmCount'] as num?)?.toInt() ?? 0,
+      ttlSeconds: (value['ttlSeconds'] as num?)?.toInt(),
       expectedSavings: (decision?['expectedSavings'] as num?)?.toDouble(),
       action: decision?['action'] as String?,
       reason: value['reason'] as String?,

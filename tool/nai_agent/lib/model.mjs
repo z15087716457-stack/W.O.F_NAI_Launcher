@@ -117,6 +117,8 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
     contextWindow: config.contextWindow ?? 32768, maxTokens: config.maxTokens ?? 4096,
     // CPA/custom-provider billing is not established by the upstream model catalog.
     cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+    promptCache: { short: Number.isInteger(config.promptCacheSeconds) && config.promptCacheSeconds > 0
+      ? config.promptCacheSeconds : 300 },
     headers: config.headers ?? {},
   };
   const wrap = method => (current, context, options = {}) => lazyStream(current, async () => {
