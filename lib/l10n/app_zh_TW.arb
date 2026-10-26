@@ -12072,5 +12072,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "set_stOther": "其他檔案",
+  "set_stIncomplete": "部分目錄讀取失敗，數字不完整；懸停分類可檢視來源目錄。",
+  "set_stSliceIncomplete": "未完整讀取",
+  "localGallery_searchHistoryTitle": "最近搜尋",
+  "localGallery_searchHistoryClear": "清空",
+  "localGallery_searchHistoryRemove": "從歷史中刪除"
 }

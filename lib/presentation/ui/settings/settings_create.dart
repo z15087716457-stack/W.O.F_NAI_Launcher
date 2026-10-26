@@ -452,6 +452,7 @@ class SettingsStoragePage extends StatelessWidget {
       SettingsStorageKind.ragIndex => l.set_stRag,
       SettingsStorageKind.dictionaries => l.set_stDict,
       SettingsStorageKind.agent => l.set_stAgent,
+      SettingsStorageKind.other => l.set_stOther,
     };
     String folderName(SettingsFolder f) => switch (f) {
       SettingsFolder.images => l.set_stImages,
@@ -587,36 +588,61 @@ class SettingsStoragePage extends StatelessWidget {
                           for (final p in st.slices)
                             SizedBox(
                               width: w,
-                              child: Row(
-                                spacing: 8,
-                                children: [
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    decoration: BoxDecoration(
-                                      color: c.storage(p.kind),
-                                      borderRadius: BorderRadius.circular(2),
+                              child: Tooltip(
+                                key: Key('storage-slice-${p.kind.name}'),
+                                message: [
+                                  if (p.incomplete) l.set_stSliceIncomplete,
+                                  ...p.paths,
+                                ].join('\n'),
+                                waitDuration: const Duration(milliseconds: 400),
+                                child: Row(
+                                  spacing: 8,
+                                  children: [
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        color: c.storage(p.kind),
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      kindName(p.kind),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: UiText.sans(12, color: c.muted),
+                                    Expanded(
+                                      child: Text(
+                                        kindName(p.kind),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: UiText.sans(12, color: c.muted),
+                                      ),
                                     ),
-                                  ),
-                                  Text(
-                                    SettingsFormat.bytes(p.bytes),
-                                    style: UiText.mono(12, color: c.ink),
-                                  ),
-                                ],
+                                    if (p.incomplete)
+                                      UiGlyph(
+                                        UiGlyphs.alert,
+                                        key: Key(
+                                          'storage-incomplete-${p.kind.name}',
+                                        ),
+                                        size: 12,
+                                        color: c.warn,
+                                      ),
+                                    Text(
+                                      SettingsFormat.bytes(p.bytes),
+                                      style: UiText.mono(12, color: c.ink),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                         ],
                       );
                     },
                   ),
+                  if (st.incomplete) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      l.set_stIncomplete,
+                      key: const Key('storage-incomplete'),
+                      style: UiText.sans(11.5, color: c.warn),
+                    ),
+                  ],
                 ],
               ),
             ),

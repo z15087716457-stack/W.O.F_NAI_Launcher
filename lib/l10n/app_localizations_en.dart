@@ -22485,4 +22485,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String ag_cacheWarmNext(String time) {
     return 'Next refresh in $time';
   }
+
+  @override
+  String get set_stOther => 'Other files';
+
+  @override
+  String get set_stIncomplete =>
+      'Some folders could not be read; totals are partial. Hover a category to see its sources.';
+
+  @override
+  String get set_stSliceIncomplete => 'Partially read';
+
+  @override
+  String get localGallery_searchHistoryTitle => 'Recent searches';
+
+  @override
+  String get localGallery_searchHistoryClear => 'Clear';
+
+  @override
+  String get localGallery_searchHistoryRemove => 'Remove from history';
 }

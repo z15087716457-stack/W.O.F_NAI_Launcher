@@ -68,7 +68,12 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
       expect(find.text('Copy Prompt'), findsOneWidget);
-      expect(find.text('Copy Seed'), findsOneWidget);
+      expect(find.text('Copy image'), findsOneWidget);
+      expect(find.text('Copy Seed'), findsNothing);
+      expect(
+        tester.getTopLeft(find.text('Copy image')).dx,
+        lessThan(tester.getTopLeft(find.text('Copy Prompt')).dx),
+      );
       expect(
         tester.getTopLeft(find.text('Place on canvas')).dy,
         greaterThan(tester.getTopLeft(find.text('Import Image Metadata')).dy),
@@ -119,7 +124,14 @@ void main() {
     );
     await tester.tap(find.text('Open'));
     await tester.pumpAndSettle();
-    expect(find.text('Copy Prompt'), findsNothing);
+    expect(find.text('Copy image'), findsOneWidget);
+    final prompt = tester.widget<MenuItemButton>(
+      find.ancestor(
+        of: find.text('Copy Prompt'),
+        matching: find.byType(MenuItemButton),
+      ),
+    );
+    expect(prompt.onPressed, isNull);
     expect(find.text('Copy Seed'), findsNothing);
     expect(find.text('Import Image Metadata'), findsNothing);
     await tester.tap(find.text('File actions'));
@@ -129,6 +141,31 @@ void main() {
     await tester.tap(find.text('Move to…'));
     await tester.pumpAndSettle();
     expect(selected, LocalImageContextAction.moveTo);
+  });
+
+  testWidgets('plain image copy closes menu before dispatching exactly once', (
+    tester,
+  ) async {
+    var calls = 0;
+    LocalImageContextAction? selected;
+    await tester.pumpWidget(
+      _MenuHarness(
+        hasPrompt: false,
+        hasImportableMetadata: false,
+        isKritaConnected: false,
+        onSelected: (action) {
+          expect(find.byType(MenuAnchor), findsNothing);
+          calls++;
+          selected = action;
+        },
+      ),
+    );
+    await tester.tap(find.text('Open'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Copy image'));
+    await tester.pumpAndSettle();
+    expect(calls, 1);
+    expect(selected, LocalImageContextAction.copyImage);
   });
 
   testWidgets('details closes the menu and returns the viewer action', (

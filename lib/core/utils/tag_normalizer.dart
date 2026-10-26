@@ -83,6 +83,22 @@ class TagNormalizer {
     ).replaceAll(_leadingBracketPattern, '').trim();
   }
 
+  /// Gallery query identity: preserve literal punctuation except NAI weights.
+  static String normalizeGalleryQuery(String value) {
+    var text = value.toLowerCase();
+    if (weightPattern.hasMatch(text)) {
+      text = text.replaceAll(weightPattern, '').replaceAll('::', '');
+    }
+    return text.replaceAll(RegExp(r'[{}\[\]]'), '').replaceAll('_', ' ').trim();
+  }
+
+  /// Match a whole positive tag, not a prefix such as `blue eyes shadow`.
+  static bool containsGalleryTag(String text, String tag) {
+    return text
+        .split(RegExp(r'[,，\n\r|]+'))
+        .any((part) => normalizeGalleryQuery(part) == tag);
+  }
+
   /// 标准化画廊搜索文本；下划线按空格处理以便包含匹配。
   static String normalizeSearchText(String value) {
     return value

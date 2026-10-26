@@ -11487,5 +11487,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "set_stOther": "기타 파일",
+  "set_stIncomplete": "일부 폴더를 읽지 못해 합계가 불완전합니다. 분류에 마우스를 올리면 출처 폴더가 표시됩니다.",
+  "set_stSliceIncomplete": "일부만 읽음",
+  "localGallery_searchHistoryTitle": "최근 검색",
+  "localGallery_searchHistoryClear": "지우기",
+  "localGallery_searchHistoryRemove": "기록에서 삭제"
 }

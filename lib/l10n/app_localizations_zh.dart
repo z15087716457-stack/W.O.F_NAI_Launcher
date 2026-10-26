@@ -21475,6 +21475,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String ag_cacheWarmNext(String time) {
     return '$time 后续期';
   }
+
+  @override
+  String get set_stOther => '其他文件';
+
+  @override
+  String get set_stIncomplete => '部分目录读取失败，数字不完整；悬停分类可查看来源目录。';
+
+  @override
+  String get set_stSliceIncomplete => '未完整读取';
+
+  @override
+  String get localGallery_searchHistoryTitle => '最近搜索';
+
+  @override
+  String get localGallery_searchHistoryClear => '清空';
+
+  @override
+  String get localGallery_searchHistoryRemove => '从历史中删除';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42948,4 +42966,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ag_cacheWarmNext(String time) {
     return '$time 後續期';
   }
+
+  @override
+  String get set_stOther => '其他檔案';
+
+  @override
+  String get set_stIncomplete => '部分目錄讀取失敗，數字不完整；懸停分類可檢視來源目錄。';
+
+  @override
+  String get set_stSliceIncomplete => '未完整讀取';
+
+  @override
+  String get localGallery_searchHistoryTitle => '最近搜尋';
+
+  @override
+  String get localGallery_searchHistoryClear => '清空';
+
+  @override
+  String get localGallery_searchHistoryRemove => '從歷史中刪除';
 }

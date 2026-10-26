@@ -39069,6 +39069,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Next refresh in {time}'**
   String ag_cacheWarmNext(String time);
+
+  /// No description provided for @set_stOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other files'**
+  String get set_stOther;
+
+  /// No description provided for @set_stIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Some folders could not be read; totals are partial. Hover a category to see its sources.'**
+  String get set_stIncomplete;
+
+  /// No description provided for @set_stSliceIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially read'**
+  String get set_stSliceIncomplete;
+
+  /// No description provided for @localGallery_searchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent searches'**
+  String get localGallery_searchHistoryTitle;
+
+  /// No description provided for @localGallery_searchHistoryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get localGallery_searchHistoryClear;
+
+  /// No description provided for @localGallery_searchHistoryRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from history'**
+  String get localGallery_searchHistoryRemove;
 }
 
 class _AppLocalizationsDelegate

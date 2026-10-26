@@ -26,7 +26,11 @@ import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../common/studio_icons.dart';
 import '../../../core/rag/rag_settings.dart';
 import 'gallery_rag_search_menu.dart';
+import '../../ui/kit/ui_colors.dart';
+import '../../ui/kit/ui_glyph.dart';
+import '../../ui/kit/ui_popover.dart';
 import '../../ui/kit/ui_text.dart';
+import '../../wiring/gallery_search_history.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
@@ -52,6 +56,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
     this.onUndo,
     this.onRedo,
     this.enableSearchAutocomplete = true,
+    this.onSearchHistoryChanged,
   });
 
   final FocusNode searchFocusNode;
@@ -70,6 +75,9 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
   /// Whether explicit tag search is enabled for the gallery search field.
   final bool enableSearchAutocomplete;
 
+  /// Contract for the history popup supplied by the frontend owner.
+  final ValueChanged<GallerySearchHistoryViewData>? onSearchHistoryChanged;
+
   @override
   ConsumerState<LocalGalleryToolbar> createState() =>
       _LocalGalleryToolbarState();
@@ -78,6 +86,98 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
 class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
+  bool _tagExpansionActive = false;
+  bool _historyPopupOpen = false;
+
+  /// 搜索历史浮层（B02）：聚焦且输入为空时出现在搜索框下方；Esc 关到下次聚焦/清空。
+  final _historyLink = LayerLink();
+  final _searchFieldKey = GlobalKey();
+  OverlayEntry? _historyEntry;
+  bool _historyDismissed = false;
+
+  bool get _historyWanted =>
+      widget.searchFocusNode.hasFocus &&
+      _searchController.text.isEmpty &&
+      !_historyDismissed &&
+      !_tagExpansionActive &&
+      (ref.read(gallerySearchHistoryProvider).valueOrNull ?? const [])
+          .isNotEmpty;
+
+  void _syncHistory() {
+    if (!mounted) return;
+    final want = _historyWanted;
+    if (want && _historyEntry == null) {
+      _historyEntry = OverlayEntry(builder: _buildHistoryOverlay);
+      // 不占用 _historyPopupOpen：Ctrl 点击仍可打开标签扩展，历史随即让位。
+      Overlay.of(context, rootOverlay: true).insert(_historyEntry!);
+    } else if (!want && _historyEntry != null) {
+      _removeHistory();
+    } else {
+      _historyEntry?.markNeedsBuild();
+    }
+  }
+
+  void _removeHistory() {
+    _historyEntry?.remove();
+    _historyEntry?.dispose();
+    _historyEntry = null;
+  }
+
+  Widget _buildHistoryOverlay(BuildContext context) {
+    final items =
+        ref.read(gallerySearchHistoryProvider).valueOrNull ?? const <String>[];
+    final box = _searchFieldKey.currentContext?.findRenderObject();
+    final width = box is RenderBox && box.hasSize ? box.size.width : 320.0;
+    final notifier = ref.read(gallerySearchHistoryProvider.notifier);
+    return Positioned(
+      left: 0,
+      top: 0,
+      child: CompositedTransformFollower(
+        link: _historyLink,
+        targetAnchor: Alignment.bottomLeft,
+        offset: const Offset(0, 4),
+        child: TextFieldTapRegion(
+          child: GallerySearchHistoryPopup(
+            width: width,
+            items: items,
+            onSelect: (text) {
+              _selectSearchHistory(text);
+              _syncHistory();
+            },
+            onRemove: (text) => unawaited(notifier.remove(text)),
+            onClear: () => unawaited(notifier.clear()),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _publishSearchHistory() {
+    if (!mounted) return;
+    widget.onSearchHistoryChanged?.call(
+      GallerySearchHistoryViewData(
+        items: ref.read(gallerySearchHistoryProvider).valueOrNull ?? const [],
+        select: _selectSearchHistory,
+        remove: ref.read(gallerySearchHistoryProvider.notifier).remove,
+        clear: ref.read(gallerySearchHistoryProvider.notifier).clear,
+        tagExpansionActive: _tagExpansionActive,
+        setPopupOpen: (open) {
+          if (mounted) setState(() => _historyPopupOpen = open);
+        },
+      ),
+    );
+  }
+
+  void _selectSearchHistory(String text) {
+    if (!mounted) return;
+    _debounceTimer?.cancel();
+    _searchController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    ref.read(localGalleryNotifierProvider.notifier).setSearchQuery(text);
+    setState(() {});
+  }
 
   /// 挂载时的 tip 轮次：首轮固定出使用说明句（FEAT-60）。
   /// 懒初始化而非 initState 赋值——热重载不重跑 initState。
@@ -88,6 +188,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     super.initState();
     widget.searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
     widget.searchFocusNode.addListener(_onSearchFocusChanged);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _publishSearchHistory(),
+    );
   }
 
   @override
@@ -102,6 +205,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   @override
   void dispose() {
+    _removeHistory();
     widget.searchFocusNode.removeListener(_onSearchFocusChanged);
     _searchController.dispose();
     _debounceTimer?.cancel();
@@ -109,7 +213,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   }
 
   void _onSearchFocusChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    if (widget.searchFocusNode.hasFocus) _historyDismissed = false;
+    setState(() {});
+    _syncHistory();
   }
 
   /// Search with debounce
@@ -123,6 +230,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   KeyEventResult _handleSearchKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
     final keyboard = HardwareKeyboard.instance;
+    if (event.logicalKey == LogicalKeyboardKey.escape &&
+        _historyEntry != null) {
+      _historyDismissed = true;
+      _syncHistory();
+      return KeyEventResult.handled;
+    }
     if (event.logicalKey == LogicalKeyboardKey.escape &&
         _searchController.text.isEmpty) {
       node.unfocus();
@@ -143,6 +256,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(gallerySearchHistoryProvider, (_, __) {
+      _publishSearchHistory();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _syncHistory());
+    });
     final state = ref.watch(localGalleryChromeStateProvider);
     final selectionActive = ref.watch(
       localGallerySelectionNotifierProvider.select((s) => s.isActive),
@@ -386,6 +503,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
                   .read(localGalleryNotifierProvider.notifier)
                   .setSearchQuery('');
               setState(() {});
+              _syncHistory();
             },
           )
         : focused
@@ -395,6 +513,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
             child: _KeyHint(label: 'Ctrl F'),
           );
     final searchField = AnimatedContainer(
+      key: _searchFieldKey,
       duration: const Duration(milliseconds: 120),
       height: 34,
       decoration: BoxDecoration(
@@ -454,10 +573,15 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           ),
           onChanged: (value) {
             setState(() {}); // 更新清除按钮可见性
+            if (value.isEmpty) _historyDismissed = false;
+            _syncHistory();
             _onSearchChanged(value);
           },
           onSubmitted: (value) {
             _debounceTimer?.cancel();
+            unawaited(
+              ref.read(gallerySearchHistoryProvider.notifier).add(value),
+            );
             ref
                 .read(localGalleryNotifierProvider.notifier)
                 .setSearchQuery(value);
@@ -466,11 +590,21 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       ),
     );
 
-    if (!widget.enableSearchAutocomplete) return searchField;
+    final anchored = CompositedTransformTarget(
+      link: _historyLink,
+      child: searchField,
+    );
+    if (!widget.enableSearchAutocomplete) return anchored;
 
     return TagExpansionWrapper(
       controller: _searchController,
       focusNode: widget.searchFocusNode,
+      enabled: !_historyPopupOpen,
+      onActiveChanged: (active) {
+        _tagExpansionActive = active;
+        _publishSearchHistory();
+        _syncHistory();
+      },
       onTagSelected: (tag) {
         _debounceTimer?.cancel();
         ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([
@@ -479,7 +613,7 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
         _searchController.clear();
         setState(() {});
       },
-      child: searchField,
+      child: anchored,
     );
   }
 
@@ -871,6 +1005,196 @@ class _KeyHint extends StatelessWidget {
           color: colors.onSurfaceVariant,
           fontSize: 11,
           fontWeight: FontWeight.w400,
+        ),
+      ),
+    );
+  }
+}
+
+/// 搜索历史浮层：最多显示 5 行，其余滚动（最多存 12 条）；行尾 × 删除单条，顶部清空。
+class GallerySearchHistoryPopup extends StatelessWidget {
+  const GallerySearchHistoryPopup({
+    super.key,
+    required this.width,
+    required this.items,
+    required this.onSelect,
+    required this.onRemove,
+    required this.onClear,
+  });
+
+  static const rowHeight = 32.0;
+  final double width;
+  final List<String> items;
+  final ValueChanged<String> onSelect;
+  final ValueChanged<String> onRemove;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    return UiPopoverSurface(
+      key: const Key('gallery-search-history'),
+      width: width,
+      radius: 8,
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 6, 2),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l.localGallery_searchHistoryTitle,
+                    style: UiText.sans(11, color: c.faint),
+                  ),
+                ),
+                _HistoryTextButton(
+                  key: const Key('gallery-search-history-clear'),
+                  label: l.localGallery_searchHistoryClear,
+                  onTap: onClear,
+                ),
+              ],
+            ),
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxHeight: rowHeight * GallerySearchHistoryViewData.visibleItems,
+            ),
+            child: ListView(
+              key: const Key('gallery-search-history-list'),
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              children: [
+                for (final (i, text) in items.indexed)
+                  _HistoryRow(
+                    key: Key('gallery-search-history-$i'),
+                    text: text,
+                    onTap: () => onSelect(text),
+                    onRemove: () => onRemove(text),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryRow extends StatefulWidget {
+  const _HistoryRow({
+    super.key,
+    required this.text,
+    required this.onTap,
+    required this.onRemove,
+  });
+  final String text;
+  final VoidCallback onTap;
+  final VoidCallback onRemove;
+
+  @override
+  State<_HistoryRow> createState() => _HistoryRowState();
+}
+
+class _HistoryRowState extends State<_HistoryRow> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: Container(
+          height: GallerySearchHistoryPopup.rowHeight,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: const EdgeInsets.only(left: 8, right: 2),
+          decoration: BoxDecoration(
+            color: _hover ? c.hover : null,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            spacing: 8,
+            children: [
+              UiGlyph(UiGlyphs.clock, size: 13, color: c.faint),
+              Expanded(
+                child: Text(
+                  widget.text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(13, color: c.ink, height: 1.2),
+                ),
+              ),
+              Opacity(
+                opacity: _hover ? 1 : 0,
+                child: Tooltip(
+                  message: context.l10n.localGallery_searchHistoryRemove,
+                  child: GestureDetector(
+                    key: const Key('gallery-search-history-remove'),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.onRemove,
+                    child: SizedBox(
+                      width: 26,
+                      height: 26,
+                      child: Center(
+                        child: UiGlyph(
+                          UiGlyphs.close,
+                          size: 12,
+                          color: c.muted,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _HistoryTextButton extends StatefulWidget {
+  const _HistoryTextButton({
+    super.key,
+    required this.label,
+    required this.onTap,
+  });
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  State<_HistoryTextButton> createState() => _HistoryTextButtonState();
+}
+
+class _HistoryTextButtonState extends State<_HistoryTextButton> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          child: Text(
+            widget.label,
+            style: UiText.sans(11.5, color: _hover ? c.ink : c.muted),
+          ),
         ),
       ),
     );

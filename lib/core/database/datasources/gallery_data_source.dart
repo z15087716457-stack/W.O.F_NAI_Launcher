@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:uuid/uuid.dart';
@@ -1675,8 +1674,8 @@ class GalleryDataSource extends EnhancedBaseDataSource
     return query
         .toLowerCase()
         .trim()
-        .split(RegExp(r'[\s,]+'))
-        .map((term) => term.trim())
+        .split(RegExp(r'[,，]+'))
+        .map(TagNormalizer.normalizeGalleryQuery)
         .where((term) => term.isNotEmpty)
         .toList(growable: false);
   }
@@ -1694,7 +1693,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
     // 缓存键
     final cacheKey = _QueryCacheKey('searchFullText', {
-      'query': searchTerms.join(' '),
+      'query': searchTerms.join(','),
       'limit': limit,
     });
 
@@ -1709,8 +1708,8 @@ class GalleryDataSource extends EnhancedBaseDataSource
         String escapeFts5(String input) => input.replaceAll('"', '""');
 
         final searchQuery = searchTerms
-            .map((term) => '"${escapeFts5(term)}"*')
-            .join(' OR ');
+            .map((term) => '"${escapeFts5(term)}"')
+            .join(' AND ');
 
         final results = await execute(
           'searchFullText',
@@ -1754,7 +1753,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     if (searchTerms.isEmpty) return [];
 
     final cacheKey = _QueryCacheKey('searchByFileName', {
-      'query': searchTerms.join(' '),
+      'query': searchTerms.join(','),
       'limit': limit,
     });
 
@@ -1765,12 +1764,16 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
     return _trackQuery('searchByFileName', () async {
       try {
+        final likeArgs = <String>[];
         final likeConditions = searchTerms
-            .map((_) => r"LOWER(file_name) LIKE ? ESCAPE '\'")
-            .join(' OR ');
-        final likeArgs = searchTerms
-            .map((term) => '%${_escapeLikePattern(term)}%')
-            .toList(growable: false);
+            .map((term) {
+              final variants = {term, term.replaceAll(' ', '_')};
+              likeArgs.addAll(
+                variants.map((v) => '%${_escapeLikePattern(v)}%'),
+              );
+              return '(${variants.map((_) => r"LOWER(file_name) LIKE ? ESCAPE '\'").join(' OR ')})';
+            })
+            .join(' AND ');
 
         final results = await execute(
           'searchByFileName',
@@ -1813,7 +1816,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     if (searchTerms.isEmpty) return [];
 
     final cacheKey = _QueryCacheKey('searchByMetadataText', {
-      'query': searchTerms.join(' '),
+      'query': searchTerms.join(','),
       'limit': limit,
     });
 
@@ -1827,27 +1830,24 @@ class GalleryDataSource extends EnhancedBaseDataSource
         // 可搜索列统一收敛到 positive_prompt_text：主/角色负面提示词
         // 不命中（见 _buildSearchablePromptText 口径），且单列 LIKE 比
         // 逐列 OR 少一次表达式求值。
-        const searchableColumns = ['m.positive_prompt_text'];
-
         final termConditions = <String>[];
         final likeArgs = <String>[];
 
         for (final term in searchTerms) {
+          final variants = {term, term.replaceAll(' ', '_')};
           termConditions.add(
-            searchableColumns
-                .map((column) => "LOWER($column) LIKE ? ESCAPE '\\'")
+            variants
+                .map((variant) {
+                  likeArgs.add('%${_escapeLikePattern(variant)}%');
+                  return r"LOWER(m.positive_prompt_text) LIKE ? ESCAPE '\'";
+                })
                 .join(' OR '),
           );
-
-          final pattern = '%${_escapeLikePattern(term)}%';
-          for (var i = 0; i < searchableColumns.length; i++) {
-            likeArgs.add(pattern);
-          }
         }
 
         final whereClause = termConditions
             .map((condition) => '($condition)')
-            .join(' OR ');
+            .join(' AND ');
 
         final results = await execute(
           'searchByMetadataText',
@@ -1890,170 +1890,102 @@ class GalleryDataSource extends EnhancedBaseDataSource
     int limit = 100,
     List<String>? candidatePaths,
   }) async {
-    final searchSegments = segments
-        .map(_normalizeDelimitedSearchSegment)
-        .where((segment) => segment.isNotEmpty)
-        .toSet()
-        .toList(growable: false);
-    if (searchSegments.isEmpty) return [];
-
-    final candidatePathList = candidatePaths
-        ?.where((path) => path.isNotEmpty)
-        .toSet()
-        .toList(growable: false);
-    if (candidatePaths != null && candidatePathList!.isEmpty) return [];
-
-    final cacheKey = _QueryCacheKey('searchByDelimitedTextSegments', {
-      'segments': searchSegments.join(','),
-      'limit': limit,
-      // 候选路径指纹：长度 + 逐元素 hash 组合，代替 Object.hashAll 的
-      // 单一 32 位整型（元素多时碰撞概率不可忽略，撞键会返回错视图结果）
-      if (candidatePathList != null)
-        'candidateFingerprint':
-            '${candidatePathList.length}:${candidatePathList.fold<int>(0, (h, p) => h * 31 + p.hashCode)}',
-    });
-
-    final cached = _queryCache.get(cacheKey);
-    if (cached != null) {
-      return cached.cast<int>();
+    if (!segments.any(
+      (s) => TagNormalizer.normalizeGalleryQuery(s).isNotEmpty,
+    )) {
+      return [];
     }
-
-    return _trackQuery('searchByDelimitedTextSegments', () async {
-      try {
-        // 文件名/路径 + 正向可搜索文本（positive_prompt_text 已含
-        // 主/角色正向提示词与 model/sampler/software/source/version，
-        // 负面提示词不参与匹配）。
-        const searchableTextExpression = '''
-            LOWER(
-              COALESCE(i.file_name, '') || ' ' ||
-              COALESCE(i.file_path, '') || ' ' ||
-              COALESCE(m.positive_prompt_text, '')
-            )
-          ''';
-
-        final segmentConditions = <String>[];
-        final args = <String>[];
-
-        for (final segment in searchSegments) {
-          final variants = _buildDelimitedSearchVariants(segment);
-          final variantConditions = <String>[];
-
-          for (final variant in variants) {
-            final pattern = '%${_escapeLikePattern(variant)}%';
-            variantConditions.add(
-              "$searchableTextExpression LIKE ? ESCAPE '\\'",
-            );
-            args.add(pattern);
-          }
-
-          segmentConditions.add('(${variantConditions.join(' OR ')})');
-        }
-
-        final whereClause = segmentConditions.join(' AND ');
-
-        final results = await execute(
-          'searchByDelimitedTextSegments',
-          (db) async {
-            final dbResults = <Map<String, Object?>>[];
-
-            if (candidatePathList == null) {
-              dbResults.addAll(
-                await db.rawQuery(
-                  '''
-                    SELECT i.id, i.modified_at
-                    FROM $_imagesTable i
-                    LEFT JOIN $_metadataTable m ON m.image_id = i.id
-                    WHERE i.is_deleted = 0 AND $whereClause
-                    ORDER BY i.modified_at DESC
-                    LIMIT ?
-                    ''',
-                  [...args, limit],
-                ),
-              );
-            } else {
-              const pathChunkSize = 800;
-              for (
-                var i = 0;
-                i < candidatePathList.length;
-                i += pathChunkSize
-              ) {
-                final end = min(i + pathChunkSize, candidatePathList.length);
-                final pathChunk = candidatePathList.sublist(i, end);
-                final pathPlaceholders = List.filled(
-                  pathChunk.length,
-                  '?',
-                ).join(',');
-
-                dbResults.addAll(
-                  await db.rawQuery(
-                    '''
-                      SELECT i.id, i.modified_at
-                      FROM $_imagesTable i
-                      LEFT JOIN $_metadataTable m ON m.image_id = i.id
-                      WHERE i.is_deleted = 0
-                        AND i.file_path IN ($pathPlaceholders)
-                        AND $whereClause
-                      ORDER BY i.modified_at DESC
-                      ''',
-                    [...pathChunk, ...args],
-                  ),
-                );
-              }
-            }
-
-            dbResults.sort((a, b) {
-              final aModified = (a['modified_at'] as num?)?.toInt() ?? 0;
-              final bModified = (b['modified_at'] as num?)?.toInt() ?? 0;
-              return bModified.compareTo(aModified);
-            });
-
-            return dbResults
-                .take(limit)
-                .map((row) => (row['id'] as num).toInt())
-                .toList();
-          },
-          timeout: const Duration(seconds: 10),
-          maxRetries: 3,
-        );
-
-        _queryCache.put(cacheKey, results);
-        return results;
-      } catch (e, stack) {
-        AppLogger.e(
-          'Failed to search by delimited text segments: ${searchSegments.join(",")}',
-          e,
-          stack,
-          'GalleryDS',
-        );
-        return [];
-      }
-    }, details: 'segments="${searchSegments.join(",")}"');
-  }
-
-  String _normalizeDelimitedSearchSegment(String value) {
-    return TagNormalizer.normalizeDelimitedSearchSegment(value);
-  }
-
-  Set<String> _buildDelimitedSearchVariants(String segment) {
-    final normalized = _normalizeDelimitedSearchSegment(segment);
-    final variants = <String>{};
-
-    final original = segment.toLowerCase().trim();
-    if (original.isNotEmpty) {
-      variants.add(original);
-    }
-    if (normalized.isNotEmpty) {
-      variants.add(normalized);
-      variants.add(normalized.replaceAll(' ', '_'));
-      variants.add(normalized.replaceAll('_', ' '));
-    }
-
-    return variants.where((variant) => variant.isNotEmpty).toSet();
+    return (await advancedSearchResult(
+      textQuery: segments.join(','),
+      candidatePaths: candidatePaths,
+      limit: limit,
+    )).ids;
   }
 
   // ============================================================
   // 标签操作
   // ============================================================
+
+  Future<Set<String>> _knownSearchTags(DatabaseExecutor db) async {
+    const key = _QueryCacheKey('knownSearchTags', {});
+    final cached = _queryCache.get(key);
+    if (cached != null) return cached.cast<String>().toSet();
+    final rows = await db.query(_tagsTable, columns: ['name']);
+    final tags = rows
+        .map((r) => TagNormalizer.normalizeGalleryQuery(r['name'] as String))
+        .toSet();
+    _queryCache.put(key, tags.toList());
+    return tags;
+  }
+
+  Future<List<int>> _exactTagImageIds(
+    DatabaseExecutor db,
+    String tag,
+    List<String>? candidatePaths,
+  ) async {
+    final tagRows = await db.query(_tagsTable, columns: ['name']);
+    final matchingNames = tagRows
+        .map((row) => row['name'] as String)
+        .where((name) => TagNormalizer.normalizeGalleryQuery(name) == tag)
+        .toList();
+    final rows = await db.rawQuery(
+      '''
+      SELECT i.id, m.prompt, m.raw_json,
+        i.id IN (SELECT it.image_id FROM $_imageTagsTable it
+          JOIN $_tagsTable t ON t.id = it.tag_id
+          WHERE t.name IN (SELECT value FROM json_each(?))) AS has_tag
+      FROM $_imagesTable i
+      LEFT JOIN $_metadataTable m ON m.image_id = i.id
+      WHERE i.is_deleted = 0
+      ${candidatePaths == null ? '' : 'AND i.file_path IN (SELECT value FROM json_each(?))'}
+      AND (has_tag OR LOWER(REPLACE(m.positive_prompt_text, '_', ' ')) LIKE ? ESCAPE '\\')
+    ''',
+      [
+        jsonEncode(matchingNames),
+        if (candidatePaths != null) jsonEncode(candidatePaths),
+        '%${_escapeLikePattern(tag)}%',
+      ],
+    );
+    return rows
+        .where((row) {
+          if ((row['has_tag'] as num).toInt() != 0) {
+            return true;
+          }
+          if (TagNormalizer.containsGalleryTag(
+            row['prompt'] as String? ?? '',
+            tag,
+          )) {
+            return true;
+          }
+          final raw = row['raw_json'] as String?;
+          if (raw == null || !raw.contains('char_captions')) return false;
+          final metadata = NovelAiParser().parse({'Comment': raw});
+          return metadata?.characterPrompts.any(
+                (p) => TagNormalizer.containsGalleryTag(p, tag),
+              ) ??
+              false;
+        })
+        .map((r) => (r['id'] as num).toInt())
+        .toList();
+  }
+
+  /// Shared whole-tag semantics for typed known tags and selected tag chips.
+  Future<List<int>> searchByExactTags(
+    List<String> tags, {
+    required List<String> candidatePaths,
+  }) {
+    return execute('searchByExactTags', (db) async {
+      Set<int>? matches;
+      for (final tag
+          in tags
+              .map(TagNormalizer.normalizeGalleryQuery)
+              .where((t) => t.isNotEmpty)) {
+        final ids = (await _exactTagImageIds(db, tag, candidatePaths)).toSet();
+        matches = matches == null ? ids : matches.intersection(ids);
+      }
+      return matches?.toList() ?? <int>[];
+    });
+  }
 
   Future<void> addTag(int imageId, String tagName) async {
     if (tagName.trim().isEmpty) return;

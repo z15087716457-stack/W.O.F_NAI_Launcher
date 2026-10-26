@@ -15,7 +15,14 @@ import '../../core/utils/localization_extension.dart';
 ///
 /// 无法解码时抛出 [FormatException]，由调用方走「复制失败」提示，而不是把
 /// 损坏字节塞进剪贴板。当前平台无系统剪贴板时抛出 [UnsupportedError]。
-Future<void> writeImageBytesToClipboardAsPng(Uint8List bytes) async {
+Future<void> writeImageBytesToClipboardAsPng(
+  Uint8List bytes, {
+  Future<void> Function(Uint8List)? writePng,
+}) async {
+  if (writePng != null) {
+    await writePng(await _ensurePngBytes(bytes));
+    return;
+  }
   final clipboard = SystemClipboard.instance;
   if (clipboard == null) {
     throw UnsupportedError(currentL10n.clipboard_unsupportedPlatform);

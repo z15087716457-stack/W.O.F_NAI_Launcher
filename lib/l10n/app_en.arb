@@ -11499,5 +11499,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "set_stOther": "Other files",
+  "set_stIncomplete": "Some folders could not be read; totals are partial. Hover a category to see its sources.",
+  "set_stSliceIncomplete": "Partially read",
+  "localGallery_searchHistoryTitle": "Recent searches",
+  "localGallery_searchHistoryClear": "Clear",
+  "localGallery_searchHistoryRemove": "Remove from history"
 }

@@ -21720,4 +21720,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String ag_cacheWarmNext(String time) {
     return '$time 後に延長';
   }
+
+  @override
+  String get set_stOther => 'その他のファイル';
+
+  @override
+  String get set_stIncomplete =>
+      '一部のフォルダを読み取れなかったため、合計は不完全です。カテゴリにカーソルを合わせると参照元を表示します。';
+
+  @override
+  String get set_stSliceIncomplete => '一部のみ読み取り';
+
+  @override
+  String get localGallery_searchHistoryTitle => '最近の検索';
+
+  @override
+  String get localGallery_searchHistoryClear => 'クリア';
+
+  @override
+  String get localGallery_searchHistoryRemove => '履歴から削除';
 }

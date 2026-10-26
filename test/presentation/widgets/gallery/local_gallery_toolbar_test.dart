@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,12 +32,193 @@ import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/presentation/wiring/gallery_search_history.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 /// 顶栏：范围面包屑与数量、搜索标签、排序菜单、视图切换、多选与详情开关。
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets(
+    'typing does not record; enter records; history selection cancels pending input',
+    (tester) async {
+      GallerySearchHistoryViewData? history;
+      final notifier = await _pumpToolbar(
+        tester,
+        state: const LocalGalleryState(
+          isInitialized: true,
+          filterCriteria: FilterCriteria(naiOnly: true, selectedTags: ['solo']),
+        ),
+        onSearchHistoryChanged: (value) => history = value,
+      );
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.enterText(field, 'first');
+      await tester.pump(const Duration(milliseconds: 310));
+      expect(history!.items, isEmpty);
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(history!.items, ['first']);
+      await tester.enterText(field, 'pending');
+      history!.select('chosen');
+      await tester.pump();
+      expect(notifier.current.filterCriteria.searchQuery, 'chosen');
+      expect(tester.widget<TextField>(field).controller!.text, 'chosen');
+      await tester.pump(const Duration(milliseconds: 310));
+      expect(notifier.current.filterCriteria.searchQuery, 'chosen');
+      expect(notifier.current.filterCriteria.naiOnly, isTrue);
+      expect(notifier.current.filterCriteria.selectedTags, ['solo']);
+      expect(history!.items, ['first']);
+    },
+  );
+
+  group('search history popup', () {
+    final twelve = [for (var i = 0; i < 12; i++) 'query $i'];
+
+    testWidgets(
+      'appears on focus with empty input; 5 rows visible, rest scroll',
+      (tester) async {
+        SharedPreferences.setMockInitialValues({
+          StorageKeys.localGallerySearchHistory: twelve,
+        });
+        await _pumpToolbar(tester);
+        expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+        await tester.tap(find.byKey(const Key('gallery-search-field')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('gallery-search-history')), findsOneWidget);
+        final list = tester.getSize(
+          find.byKey(const Key('gallery-search-history-list')),
+        );
+        expect(list.height, 32.0 * 5);
+        expect(
+          find.byKey(const Key('gallery-search-history-11')),
+          findsNothing,
+        );
+        await tester.drag(
+          find.byKey(const Key('gallery-search-history-list')),
+          const Offset(0, -400),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const Key('gallery-search-history-11')),
+          findsOneWidget,
+        );
+        // 输入后收起，清空后回来。
+        await tester.enterText(
+          find.byKey(const Key('gallery-search-field')),
+          'a',
+        );
+        await tester.pump();
+        expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+        await tester.enterText(
+          find.byKey(const Key('gallery-search-field')),
+          '',
+        );
+        await tester.pump();
+        expect(find.byKey(const Key('gallery-search-history')), findsOneWidget);
+        // Esc 先关浮层，不失焦。
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await tester.pump();
+        expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('gallery-search-field')))
+              .focusNode!
+              .hasFocus,
+          isTrue,
+        );
+      },
+    );
+
+    testWidgets('select fills and searches; remove and clear update the list', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        StorageKeys.localGallerySearchHistory: ['blue eyes', 'aokumo'],
+      });
+      final notifier = await _pumpToolbar(tester);
+      await tester.tap(find.byKey(const Key('gallery-search-field')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('gallery-search-history-1')));
+      await tester.pumpAndSettle();
+      expect(notifier.current.filterCriteria.searchQuery, 'aokumo');
+      expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+      await tester.enterText(find.byKey(const Key('gallery-search-field')), '');
+      await tester.pumpAndSettle();
+      final row = find.byKey(const Key('gallery-search-history-0'));
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: tester.getCenter(row));
+      addTearDown(mouse.removePointer);
+      await tester.pump();
+      await tester.tap(
+        find.descendant(
+          of: row,
+          matching: find.byKey(const Key('gallery-search-history-remove')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('blue eyes'), findsNothing);
+      expect(find.text('aokumo'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('gallery-search-history-clear')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+      final prefs = await SharedPreferences.getInstance();
+      expect(
+        prefs.getStringList(StorageKeys.localGallerySearchHistory),
+        isEmpty,
+      );
+    });
+
+    testWidgets('history popup closes when Ctrl tag expansion opens', (
+      tester,
+    ) async {
+      SharedPreferences.setMockInitialValues({
+        StorageKeys.localGallerySearchHistory: ['blue eyes'],
+      });
+      await _pumpToolbar(tester, autocomplete: true);
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.tap(field);
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('gallery-search-history')), findsOneWidget);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(find.byKey(const Key('tag-expansion-search')), findsOneWidget);
+      expect(find.byKey(const Key('gallery-search-history')), findsNothing);
+    });
+  });
+
+  testWidgets(
+    'history and Ctrl tag expansion are mutually exclusive through contract',
+    (tester) async {
+      GallerySearchHistoryViewData? history;
+      await _pumpToolbar(
+        tester,
+        autocomplete: true,
+        onSearchHistoryChanged: (value) => history = value,
+      );
+      history!.setPopupOpen(true);
+      await tester.pump();
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(find.byKey(const Key('tag-expansion-search')), findsNothing);
+      history!.setPopupOpen(false);
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(history!.tagExpansionActive, isTrue);
+      expect(find.byKey(const Key('tag-expansion-search')), findsOneWidget);
+    },
+  );
 
   testWidgets('compact toolbar icons are centred inside their ink bounds', (
     tester,
@@ -521,6 +703,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
   bool windowChrome = false,
   ThemeData? theme,
   Locale locale = const Locale('zh'),
+  ValueChanged<GallerySearchHistoryViewData>? onSearchHistoryChanged,
 }) async {
   tester.view.physicalSize = Size(width * pixelRatio, 400 * pixelRatio);
   tester.view.devicePixelRatio = pixelRatio;
@@ -574,6 +757,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
                   showCategoryPanel: true,
                   onToggleCategoryPanel: () {},
                   enableSearchAutocomplete: autocomplete,
+                  onSearchHistoryChanged: onSearchHistoryChanged,
                 ),
               ),
             ),

@@ -235,6 +235,8 @@ class StorageKeys {
   /// 本地画廊排序字段（GallerySortField.name 字符串）
   static const String localGallerySortField = 'local_gallery_sort_field';
 
+  static const String localGallerySearchHistory = 'local_gallery_search_history';
+
   /// 本地画廊排序方向（GallerySortDirection.name 字符串）
   static const String localGallerySortDirection =
       'local_gallery_sort_direction';

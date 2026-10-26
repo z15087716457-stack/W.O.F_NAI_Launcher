@@ -834,13 +834,21 @@ enum SettingsStorageKind {
   ragIndex,
   dictionaries,
   agent,
+  other,
 }
 
 @immutable
 class SettingsStorageSlice {
-  const SettingsStorageSlice(this.kind, this.bytes);
+  const SettingsStorageSlice(
+    this.kind,
+    this.bytes, {
+    this.paths = const [],
+    this.incomplete = false,
+  });
   final SettingsStorageKind kind;
   final int bytes;
+  final List<String> paths;
+  final bool incomplete;
 }
 
 @immutable
@@ -877,6 +885,7 @@ class SettingsStorageData {
     this.thumbnailBytes = 0,
     this.thumbnailLimit = 0,
     this.folderNames = const {},
+    this.incomplete = false,
   });
 
   /// 占用分类（新增：后台统计各目录大小，可缓存）；空 = 还没统计。
@@ -896,6 +905,7 @@ class SettingsStorageData {
   /// 侧注里每个目录的末级名（`outputs`、`vibes`……）。
   final Map<SettingsFolder, String> folderNames;
 
+  final bool incomplete;
   int get totalBytes => slices.fold(0, (s, e) => s + e.bytes);
 }
 

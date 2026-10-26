@@ -11487,5 +11487,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "set_stOther": "その他のファイル",
+  "set_stIncomplete": "一部のフォルダを読み取れなかったため、合計は不完全です。カテゴリにカーソルを合わせると参照元を表示します。",
+  "set_stSliceIncomplete": "一部のみ読み取り",
+  "localGallery_searchHistoryTitle": "最近の検索",
+  "localGallery_searchHistoryClear": "クリア",
+  "localGallery_searchHistoryRemove": "履歴から削除"
 }

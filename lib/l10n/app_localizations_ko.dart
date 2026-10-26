@@ -21792,4 +21792,23 @@ class AppLocalizationsKo extends AppLocalizations {
   String ag_cacheWarmNext(String time) {
     return '$time 후 연장';
   }
+
+  @override
+  String get set_stOther => '기타 파일';
+
+  @override
+  String get set_stIncomplete =>
+      '일부 폴더를 읽지 못해 합계가 불완전합니다. 분류에 마우스를 올리면 출처 폴더가 표시됩니다.';
+
+  @override
+  String get set_stSliceIncomplete => '일부만 읽음';
+
+  @override
+  String get localGallery_searchHistoryTitle => '최근 검색';
+
+  @override
+  String get localGallery_searchHistoryClear => '지우기';
+
+  @override
+  String get localGallery_searchHistoryRemove => '기록에서 삭제';
 }

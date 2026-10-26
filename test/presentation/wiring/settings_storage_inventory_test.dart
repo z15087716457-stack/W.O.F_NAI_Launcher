@@ -8,6 +8,7 @@ import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_inventory.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_storage_measurement.dart';
 
 class _Paths extends PathProviderPlatform {
   _Paths(this.root);
@@ -40,18 +41,19 @@ void main() {
         identical(first, worker.measure(p.join(temp.path, '.'), gallery: true)),
         isTrue,
       );
-      expect(await first.timeout(const Duration(seconds: 5)), (
-        bytes: 3,
-        thumbs: 2,
-        images: 1,
-      ));
+      final measured = await first.timeout(const Duration(seconds: 5));
+      expect(measured.bytes, 3);
+      expect(measured.thumbs, 2);
+      expect(measured.images, 1);
+      expect(measured.other, 7);
+      expect(measured.incomplete, isFalse);
       await File(p.join(temp.path, 'b.jpg')).writeAsBytes([6]);
-      expect(
-        await worker
-            .measure(temp.path, gallery: true)
-            .timeout(const Duration(seconds: 5)),
-        (bytes: 4, thumbs: 2, images: 2),
-      );
+      final refreshed = await worker
+          .measure(temp.path, gallery: true)
+          .timeout(const Duration(seconds: 5));
+      expect(refreshed.bytes, 4);
+      expect(refreshed.thumbs, 2);
+      expect(refreshed.images, 2);
     },
   );
 
@@ -64,7 +66,7 @@ void main() {
         measure: (path, gallery) async {
           started.add(p.basename(path));
           if (p.basename(path) == 'first') return blocked.future;
-          return (bytes: 9, thumbs: 0, images: 0);
+          return const SettingsDirectoryMeasurement(bytes: 9);
         },
       );
       final first = worker.measure(p.join(temp.path, 'first'));
@@ -115,11 +117,134 @@ void main() {
       expect(locations.thumbnailLimit, 20 * 1024 * 1024 * 1024);
       expect(locations.folderNames[SettingsFolder.images], 'images');
       expect(container.read(settingsStorageDataProvider).isLoading, isTrue);
-      blocked.complete((bytes: 3, thumbs: 2, images: 1));
+      blocked.complete(
+        const SettingsDirectoryMeasurement(bytes: 3, thumbs: 2, images: 1),
+      );
       final measured = await pending.timeout(const Duration(seconds: 2));
       expect(measured.roots, hasLength(2));
-      expect(measured.imageCount, 2);
+      expect(measured.imageCount, 0);
       expect(measured.diskFree, 456);
+    },
+  );
+
+  test(
+    'Vibe is shallow, unrelated files are separate and overlaps are counted once',
+    () async {
+      final images = Directory(p.join(temp.path, 'images'))..createSync();
+      final vibes = Directory(p.join(images.path, 'vibes'))..createSync();
+      final child = Directory(p.join(vibes.path, 'child'))..createSync();
+      File(p.join(images.path, 'a.png')).writeAsBytesSync(List.filled(3, 1));
+      File(
+        p.join(images.path, 'notes.txt'),
+      ).writeAsBytesSync(List.filled(11, 1));
+      File(
+        p.join(vibes.path, 'a.naiv4vibe'),
+      ).writeAsBytesSync(List.filled(7, 1));
+      File(
+        p.join(vibes.path, 'b.NAIV4VIBEBUNDLE'),
+      ).writeAsBytesSync(List.filled(13, 1));
+      File(
+        p.join(vibes.path, 'unrelated.bin'),
+      ).writeAsBytesSync(List.filled(1000, 1));
+      File(
+        p.join(child.path, 'nested.naiv4vibe'),
+      ).writeAsBytesSync(List.filled(17, 1));
+      File(
+        p.join(vibes.path, 'preview.jpg'),
+      ).writeAsBytesSync(List.filled(5, 1));
+      final container = ProviderContainer(
+        overrides: [
+          settingsFoldersProvider.overrideWith(
+            (ref) async => {
+              for (final folder in SettingsFolder.values)
+                folder: folder == SettingsFolder.vibes
+                    ? vibes.path
+                    : p.join(temp.path, folder.name),
+            },
+          ),
+          settingsGalleryExtraRootsProvider.overrideWith(
+            (ref) async => [vibes.path, images.path],
+          ),
+          ragDirectoryProvider.overrideWithValue(
+            () async => Directory(p.join(temp.path, 'rag')),
+          ),
+          settingsDiskFreeProvider.overrideWithValue((_) async => null),
+        ],
+      );
+      addTearDown(container.dispose);
+      final result = await container.read(settingsStorageDataProvider.future);
+      int bytes(SettingsStorageKind kind) =>
+          result.slices.firstWhere((s) => s.kind == kind).bytes;
+      expect(bytes(SettingsStorageKind.vibes), 20);
+      expect(bytes(SettingsStorageKind.images), 3);
+      expect(bytes(SettingsStorageKind.other), 1033);
+      expect(result.totalBytes, 1056);
+      expect(
+        result.slices
+            .firstWhere((s) => s.kind == SettingsStorageKind.other)
+            .paths,
+        containsAll([images.path, vibes.path]),
+      );
+    },
+  );
+
+  test(
+    'missing or non-directory traversal marks incomplete rather than successful zero',
+    () async {
+      final missing = settingsMeasureDirectory(p.join(temp.path, 'missing'));
+      expect(missing.bytes, 0);
+      expect(missing.incomplete, isTrue);
+      final file = File(p.join(temp.path, 'not-a-directory'))
+        ..writeAsStringSync('x');
+      expect(settingsMeasureDirectory(file.path).incomplete, isTrue);
+    },
+  );
+
+  test(
+    'same directory image/Vibe/Agent roots and failed reads retain unique totals',
+    () async {
+      File(p.join(temp.path, 'image.jpg')).writeAsBytesSync(List.filled(3, 1));
+      File(
+        p.join(temp.path, 'asset.naiv4vibe'),
+      ).writeAsBytesSync(List.filled(5, 1));
+      File(p.join(temp.path, 'notes.txt')).writeAsBytesSync(List.filled(7, 1));
+      final worker = SettingsDirectoryMeasurements();
+      final gallery = await worker.measure(temp.path, gallery: true);
+      final plain = await worker.measure(temp.path);
+      final failedPath = p.join(temp.path, 'absent');
+      final failed = await worker.measure(failedPath);
+      final slices = settingsClassifyStorage(
+        galleries: {temp.path: gallery},
+        categories: {
+          SettingsStorageKind.vibes: {temp.path: plain, failedPath: failed},
+          SettingsStorageKind.agent: {temp.path: plain},
+        },
+      );
+      expect(slices.fold<int>(0, (sum, s) => sum + s.bytes), 15);
+      expect(
+        slices.firstWhere((s) => s.kind == SettingsStorageKind.vibes).bytes,
+        5,
+      );
+      expect(
+        slices.firstWhere((s) => s.kind == SettingsStorageKind.images).bytes,
+        0,
+      );
+      expect(
+        slices.firstWhere((s) => s.kind == SettingsStorageKind.agent).bytes,
+        0,
+      );
+      expect(
+        slices
+            .firstWhere((s) => s.kind == SettingsStorageKind.vibes)
+            .incomplete,
+        isTrue,
+      );
+      expect(
+        slices
+            .firstWhere((s) => s.kind == SettingsStorageKind.other)
+            .incomplete,
+        isTrue,
+      );
     },
   );
 

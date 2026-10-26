@@ -11487,5 +11487,11 @@
         "type": "String"
       }
     }
-  }
+  },
+  "set_stOther": "其他文件",
+  "set_stIncomplete": "部分目录读取失败，数字不完整；悬停分类可查看来源目录。",
+  "set_stSliceIncomplete": "未完整读取",
+  "localGallery_searchHistoryTitle": "最近搜索",
+  "localGallery_searchHistoryClear": "清空",
+  "localGallery_searchHistoryRemove": "从历史中删除"
 }
