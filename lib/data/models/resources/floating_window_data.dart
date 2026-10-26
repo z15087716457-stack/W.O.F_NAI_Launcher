@@ -2,8 +2,9 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
-/// Stable resource identifiers shared by opening actions, state and hosts.
-enum FloatingResourceKind { gallery, blocks, vibe, precise }
+import '../../../presentation/ui/kit/ui_resource_kind.dart';
+
+export '../../../presentation/ui/kit/ui_resource_kind.dart';
 
 @immutable
 class FloatingResourceScope {

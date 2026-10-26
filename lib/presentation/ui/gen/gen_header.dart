@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../../../data/models/resources/floating_window_data.dart';
+import '../kit/ui_resource_kind.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';

@@ -22522,4 +22522,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shortcut_action_open_resource_window => 'Open resource window';
+
+  @override
+  String get set_workspaceFontScaleSub =>
+      'Text in prompt boxes, character boxes, blocks and the viewer prompt. Independent of the interface size above.';
+
+  @override
+  String get set_promptAutocompleteSub =>
+      'Suggest tags from the local library while typing in prompt and character boxes; ↑↓ to choose, Tab or Enter to accept, Esc to close.';
+
+  @override
+  String get floating_open => 'Resource windows';
+
+  @override
+  String get floating_searchGallery => 'Search (whole phrase / exact tag)';
+
+  @override
+  String get floating_searchName => 'Search by name';
+
+  @override
+  String get floating_collapse => 'Collapse to title bar';
+
+  @override
+  String get floating_expand => 'Expand';
+
+  @override
+  String get floating_empty => 'Nothing here';
+
+  @override
+  String get floating_loadFailed => 'Could not load';
+
+  @override
+  String get floating_loadMore => 'Load more';
+
+  @override
+  String get blocks_iconsMore => 'More icons';
+
+  @override
+  String get blocks_iconsLess => 'Fewer icons';
+
+  @override
+  String get blocks_iconsNsfwShow => 'Show NSFW icons';
+
+  @override
+  String get blocks_iconsNsfwHide => 'Hide NSFW icons';
 }

@@ -11518,5 +11518,19 @@
   },
   "set_workspaceFontScale": "창작 영역 글자 크기",
   "set_promptAutocomplete": "프롬프트 자동 완성",
-  "shortcut_action_open_resource_window": "리소스 창 열기"
+  "shortcut_action_open_resource_window": "리소스 창 열기",
+  "set_workspaceFontScaleSub": "프롬프트 칸, 캐릭터 칸, 블록, 뷰어 프롬프트의 글자. 위 인터페이스 글자 크기와 별도로 조절합니다.",
+  "set_promptAutocompleteSub": "프롬프트 칸과 캐릭터 칸에 입력할 때 로컬 태그 사전에서 후보를 보여 줍니다. ↑↓ 선택, Tab 또는 Enter 적용, Esc 닫기.",
+  "floating_open": "리소스 창",
+  "floating_searchGallery": "검색 (전체 구문 / 정확한 태그)",
+  "floating_searchName": "이름 검색",
+  "floating_collapse": "제목 표시줄로 접기",
+  "floating_expand": "펼치기",
+  "floating_empty": "항목 없음",
+  "floating_loadFailed": "불러오지 못했습니다",
+  "floating_loadMore": "더 불러오기",
+  "blocks_iconsMore": "아이콘 더 보기",
+  "blocks_iconsLess": "접기",
+  "blocks_iconsNsfwShow": "NSFW 아이콘 표시",
+  "blocks_iconsNsfwHide": "NSFW 아이콘 숨기기"
 }

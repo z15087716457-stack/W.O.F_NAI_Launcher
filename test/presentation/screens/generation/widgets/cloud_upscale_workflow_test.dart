@@ -146,9 +146,16 @@ void main() {
         } else {
           pending.complete(_png(128, 192));
         }
-        await tester.runAsync(() async {
-          await Future<void>.delayed(const Duration(milliseconds: 100));
-        });
+        // 结果登记会在后台 isolate 里算哈希/解析元数据（N03），给真实时间跑完。
+        for (var i = 0; i < 50; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 100)),
+          );
+          await tester.pump();
+          if (!container.read(imageWorkflowControllerProvider).isToolRunning) {
+            break;
+          }
+        }
         await tester.pumpAndSettle();
         expect(
           container.read(imageWorkflowControllerProvider).isToolRunning,

@@ -567,6 +567,17 @@ class SettingsAppearancePage extends StatelessWidget {
                 label: (x) => '${(x * 100).round()}%',
               ),
             ),
+            SettingKeyRow(
+              SettingKey.workspaceFontScale,
+              title: l.set_workspaceFontScale,
+              subtitle: l.set_workspaceFontScaleSub,
+              control: SetSlider(
+                SettingKey.workspaceFontScale,
+                width: 180,
+                ticks: 7,
+                label: (x) => '${(x * 100).round()}%',
+              ),
+            ),
             SettingsBlock(
               padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
               child: Container(

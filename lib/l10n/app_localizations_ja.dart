@@ -21757,4 +21757,48 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get shortcut_action_open_resource_window => 'リソースウィンドウを開く';
+
+  @override
+  String get set_workspaceFontScaleSub =>
+      'プロンプト欄・キャラクター欄・ブロック・ビューアのプロンプトの文字。上のUI文字サイズとは別に調整します。';
+
+  @override
+  String get set_promptAutocompleteSub =>
+      'プロンプト欄とキャラクター欄の入力中にローカルのタグ辞書から候補を表示します。↑↓で選択、Tab か Enter で確定、Esc で閉じます。';
+
+  @override
+  String get floating_open => 'リソース小窓';
+
+  @override
+  String get floating_searchGallery => '検索（フレーズ全体 / 完全一致タグ）';
+
+  @override
+  String get floating_searchName => '名前で検索';
+
+  @override
+  String get floating_collapse => 'タイトルバーに畳む';
+
+  @override
+  String get floating_expand => '展開';
+
+  @override
+  String get floating_empty => '何もありません';
+
+  @override
+  String get floating_loadFailed => '読み込めませんでした';
+
+  @override
+  String get floating_loadMore => 'さらに読み込む';
+
+  @override
+  String get blocks_iconsMore => 'その他のアイコン';
+
+  @override
+  String get blocks_iconsLess => '閉じる';
+
+  @override
+  String get blocks_iconsNsfwShow => 'NSFW アイコンを表示';
+
+  @override
+  String get blocks_iconsNsfwHide => 'NSFW アイコンを隠す';
 }

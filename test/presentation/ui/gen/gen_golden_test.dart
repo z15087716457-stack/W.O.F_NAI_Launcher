@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_popover.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture_editor.dart';
@@ -206,6 +207,29 @@ void main() {
         if (tools.evaluate().isNotEmpty && prompt.evaluate().isNotEmpty) {
           final row = t.getRect(tools), card = t.getRect(prompt);
           masks.add(Rect.fromLTWH(card.left, row.top, card.width, row.height));
+        }
+        // 2026-10-27 D04（用户确认）：工具菜单里「全屏编辑」下新增「资源小窗」一行，
+        // 菜单从这一行往下整体下移；只排除菜单本体从新行顶边到菜单底边，菜单外照旧锁定。
+        final resources = find.byKey(const Key('gen-resource-windows'));
+        if (resources.evaluate().isNotEmpty) {
+          final row = t.getRect(resources);
+          final menu = t.getRect(
+            find
+                .ancestor(
+                  of: resources,
+                  matching: find.byType(UiPopoverSurface),
+                )
+                .first,
+          );
+          masks.add(
+            // 含菜单阴影（模糊约 30px，向下偏移）。
+            Rect.fromLTRB(
+              menu.left - 44,
+              row.top,
+              menu.right + 44,
+              menu.bottom + 60,
+            ),
+          );
         }
         final translatePin = find.byKey(const Key('gen-pin-translate'));
         if (translatePin.evaluate().isNotEmpty) {

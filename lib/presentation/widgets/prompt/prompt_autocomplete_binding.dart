@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/autocomplete/prompt_autocomplete_controller.dart';
+import 'prompt_autocomplete_popup.dart';
 
 /// Optional presentation hook. Implementations listen to controller.value and
 /// render a non-focusable overlay; child is the original prompt editor.
@@ -14,7 +15,7 @@ typedef PromptAutocompleteBuilder =
     );
 
 final promptAutocompleteBuilderProvider = Provider<PromptAutocompleteBuilder?>(
-  (ref) => null,
+  (ref) => promptAutocompletePopupBuilder,
 );
 
 /// Lifecycle/keyboard adapter only; no popup, visuals or focus transfer.

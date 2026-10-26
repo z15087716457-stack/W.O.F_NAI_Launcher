@@ -39129,6 +39129,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open resource window'**
   String get shortcut_action_open_resource_window;
+
+  /// No description provided for @set_workspaceFontScaleSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Text in prompt boxes, character boxes, blocks and the viewer prompt. Independent of the interface size above.'**
+  String get set_workspaceFontScaleSub;
+
+  /// No description provided for @set_promptAutocompleteSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggest tags from the local library while typing in prompt and character boxes; ↑↓ to choose, Tab or Enter to accept, Esc to close.'**
+  String get set_promptAutocompleteSub;
+
+  /// No description provided for @floating_open.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource windows'**
+  String get floating_open;
+
+  /// No description provided for @floating_searchGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Search (whole phrase / exact tag)'**
+  String get floating_searchGallery;
+
+  /// No description provided for @floating_searchName.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name'**
+  String get floating_searchName;
+
+  /// No description provided for @floating_collapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse to title bar'**
+  String get floating_collapse;
+
+  /// No description provided for @floating_expand.
+  ///
+  /// In en, this message translates to:
+  /// **'Expand'**
+  String get floating_expand;
+
+  /// No description provided for @floating_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing here'**
+  String get floating_empty;
+
+  /// No description provided for @floating_loadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load'**
+  String get floating_loadFailed;
+
+  /// No description provided for @floating_loadMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Load more'**
+  String get floating_loadMore;
+
+  /// No description provided for @blocks_iconsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More icons'**
+  String get blocks_iconsMore;
+
+  /// No description provided for @blocks_iconsLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Fewer icons'**
+  String get blocks_iconsLess;
+
+  /// No description provided for @blocks_iconsNsfwShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Show NSFW icons'**
+  String get blocks_iconsNsfwShow;
+
+  /// No description provided for @blocks_iconsNsfwHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide NSFW icons'**
+  String get blocks_iconsNsfwHide;
 }
 
 class _AppLocalizationsDelegate

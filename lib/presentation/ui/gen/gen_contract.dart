@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../data/models/resources/floating_window_data.dart';
+import '../kit/ui_resource_kind.dart';
 import '../channel/channel_contract.dart';
 
 export '../channel/channel_contract.dart' show ChannelSettings;

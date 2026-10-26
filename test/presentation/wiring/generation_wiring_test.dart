@@ -177,13 +177,18 @@ void main() {
   }
 
   testWidgets(
-    'header resource callback opens each kind without a visual button',
+    'prompt tools menu opens each resource window kind',
     (tester) async {
       await pump(tester);
       final header = tester.widget<GenHeader>(find.byType(GenHeader).first);
       expect(header.onOpenResourceWindow, isNotNull);
       for (final kind in FloatingResourceKind.values) {
-        header.onOpenResourceWindow!(kind);
+        await tester.tap(find.byKey(const Key('gen-tool-menu')).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('gen-resource-windows')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(Key('gen-resource-${kind.name}')));
+        await tester.pumpAndSettle();
       }
       expect(
         container

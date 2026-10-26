@@ -19,6 +19,9 @@ import 'gen_format.dart';
 
 /// 生图页原型里有、kit 里没有的图标路径（`mock.html` 的 `const P`）。
 abstract final class GenGlyphs {
+  /// 资源小窗（四格不等分）。
+  static const resourceWindows =
+      'M4 5h7v7H4zM13 5h7v4h-7zM13 11h7v8h-7zM4 14h7v5H4z';
   static const save2 = 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6';
   static const autosave = 'M5 4h11l3 3v13H5zM8 4v4h7V4M12 12v6M9 15h6';
   static const multi = 'M8 4h12v12H8zM4 8v12h12M11 10l2 2 4-4';

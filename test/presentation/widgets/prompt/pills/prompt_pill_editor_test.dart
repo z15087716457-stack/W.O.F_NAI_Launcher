@@ -163,6 +163,59 @@ void main() {
       },
     );
   }
+  testWidgets('default popup shows candidates under the token; click accepts', (
+    tester,
+  ) async {
+    final source = _AutocompleteSource();
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(
+        blocks: const [],
+        folders: const [],
+      ),
+      overrides: [
+        localTagExpansionServiceProvider.overrideWith(
+          (ref) => LocalTagExpansionService(
+            catalog: source,
+            relatedTags: source,
+            substringSearch: (_, {int limit = 40}) async => [],
+            popularSearch: ({int limit = 12}) async => [],
+          ),
+        ),
+      ],
+    );
+    await container
+        .read(promptAutocompleteEnabledProvider.notifier)
+        .setEnabled(true);
+    await tester.pump();
+    final field = find
+        .descendant(
+          of: find.byType(PromptPillEditor),
+          matching: find.byType(TextField),
+        )
+        .first;
+    await tester.tap(field);
+    await tester.enterText(field, 'bl');
+    await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump();
+    final popup = find.byKey(const Key('prompt-autocomplete'));
+    expect(popup, findsOneWidget);
+    expect(
+      tester.getTopLeft(popup).dy,
+      greaterThan(tester.getTopLeft(field).dy),
+    );
+    await tester.tap(find.byKey(const Key('prompt-autocomplete-1')));
+    await tester.pump();
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+      'blue hair, ',
+    );
+    expect(popup, findsNothing);
+    expect(tester.widget<TextField>(field).focusNode!.hasPrimaryFocus, true);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('creative scale updates editor and inline chips exactly once', (
     tester,
   ) async {

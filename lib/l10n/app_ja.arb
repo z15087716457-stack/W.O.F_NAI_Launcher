@@ -11518,5 +11518,19 @@
   },
   "set_workspaceFontScale": "創作エリアの文字サイズ",
   "set_promptAutocomplete": "プロンプトの自動補完",
-  "shortcut_action_open_resource_window": "リソースウィンドウを開く"
+  "shortcut_action_open_resource_window": "リソースウィンドウを開く",
+  "set_workspaceFontScaleSub": "プロンプト欄・キャラクター欄・ブロック・ビューアのプロンプトの文字。上のUI文字サイズとは別に調整します。",
+  "set_promptAutocompleteSub": "プロンプト欄とキャラクター欄の入力中にローカルのタグ辞書から候補を表示します。↑↓で選択、Tab か Enter で確定、Esc で閉じます。",
+  "floating_open": "リソース小窓",
+  "floating_searchGallery": "検索（フレーズ全体 / 完全一致タグ）",
+  "floating_searchName": "名前で検索",
+  "floating_collapse": "タイトルバーに畳む",
+  "floating_expand": "展開",
+  "floating_empty": "何もありません",
+  "floating_loadFailed": "読み込めませんでした",
+  "floating_loadMore": "さらに読み込む",
+  "blocks_iconsMore": "その他のアイコン",
+  "blocks_iconsLess": "閉じる",
+  "blocks_iconsNsfwShow": "NSFW アイコンを表示",
+  "blocks_iconsNsfwHide": "NSFW アイコンを隠す"
 }

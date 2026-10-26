@@ -150,7 +150,7 @@ void main() {
         (span) =>
             span.text!.contains('强光') &&
             span.style?.backgroundColor?.toARGB32() != null &&
-            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0xED5807,
+            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0xFFF1DC,
       ),
       isTrue,
     );
@@ -159,7 +159,7 @@ void main() {
         (span) =>
             span.text!.contains('阴影') &&
             span.style?.backgroundColor?.toARGB32() != null &&
-            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0x079CED,
+            (span.style!.backgroundColor!.toARGB32() & 0xFFFFFF) == 0xE6F0FF,
       ),
       isTrue,
     );

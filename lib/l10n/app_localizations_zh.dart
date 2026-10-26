@@ -21511,6 +21511,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shortcut_action_open_resource_window => '打开资源小窗';
+
+  @override
+  String get set_workspaceFontScaleSub => '提示词框、角色框、块与大图提示词里的文字；和上面的界面字号分开调。';
+
+  @override
+  String get set_promptAutocompleteSub =>
+      '在提示词框和角色框输入时，从本地标签库给出候选；↑↓ 选择，Tab 或 Enter 采纳，Esc 关闭。';
+
+  @override
+  String get floating_open => '资源小窗';
+
+  @override
+  String get floating_searchGallery => '搜索（整段 / 完整标签）';
+
+  @override
+  String get floating_searchName => '搜索名称';
+
+  @override
+  String get floating_collapse => '收起为标题条';
+
+  @override
+  String get floating_expand => '展开';
+
+  @override
+  String get floating_empty => '没有内容';
+
+  @override
+  String get floating_loadFailed => '加载失败';
+
+  @override
+  String get floating_loadMore => '加载更多';
+
+  @override
+  String get blocks_iconsMore => '更多图标';
+
+  @override
+  String get blocks_iconsLess => '收起';
+
+  @override
+  String get blocks_iconsNsfwShow => '显示 NSFW 图标';
+
+  @override
+  String get blocks_iconsNsfwHide => '隐藏 NSFW 图标';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43020,4 +43063,47 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get shortcut_action_open_resource_window => '開啟資源小窗';
+
+  @override
+  String get set_workspaceFontScaleSub => '提示詞框、角色框、塊與大圖提示詞裡的文字；和上面的介面字號分開調。';
+
+  @override
+  String get set_promptAutocompleteSub =>
+      '在提示詞框和角色框輸入時，從本地標籤庫給出候選；↑↓ 選擇，Tab 或 Enter 採納，Esc 關閉。';
+
+  @override
+  String get floating_open => '資源小窗';
+
+  @override
+  String get floating_searchGallery => '搜尋（整段 / 完整標籤）';
+
+  @override
+  String get floating_searchName => '搜尋名稱';
+
+  @override
+  String get floating_collapse => '收起為標題條';
+
+  @override
+  String get floating_expand => '展開';
+
+  @override
+  String get floating_empty => '沒有內容';
+
+  @override
+  String get floating_loadFailed => '載入失敗';
+
+  @override
+  String get floating_loadMore => '載入更多';
+
+  @override
+  String get blocks_iconsMore => '更多圖示';
+
+  @override
+  String get blocks_iconsLess => '收起';
+
+  @override
+  String get blocks_iconsNsfwShow => '顯示 NSFW 圖示';
+
+  @override
+  String get blocks_iconsNsfwHide => '隱藏 NSFW 圖示';
 }

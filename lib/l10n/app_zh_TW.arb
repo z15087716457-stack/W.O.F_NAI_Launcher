@@ -12103,5 +12103,19 @@
   },
   "set_workspaceFontScale": "創作區文字字號",
   "set_promptAutocomplete": "提示詞自動補全",
-  "shortcut_action_open_resource_window": "開啟資源小窗"
+  "shortcut_action_open_resource_window": "開啟資源小窗",
+  "set_workspaceFontScaleSub": "提示詞框、角色框、塊與大圖提示詞裡的文字；和上面的介面字號分開調。",
+  "set_promptAutocompleteSub": "在提示詞框和角色框輸入時，從本地標籤庫給出候選；↑↓ 選擇，Tab 或 Enter 採納，Esc 關閉。",
+  "floating_open": "資源小窗",
+  "floating_searchGallery": "搜尋（整段 / 完整標籤）",
+  "floating_searchName": "搜尋名稱",
+  "floating_collapse": "收起為標題條",
+  "floating_expand": "展開",
+  "floating_empty": "沒有內容",
+  "floating_loadFailed": "載入失敗",
+  "floating_loadMore": "載入更多",
+  "blocks_iconsMore": "更多圖示",
+  "blocks_iconsLess": "收起",
+  "blocks_iconsNsfwShow": "顯示 NSFW 圖示",
+  "blocks_iconsNsfwHide": "隱藏 NSFW 圖示"
 }

@@ -12,6 +12,7 @@ import '../kit/ui_keycap.dart';
 import '../kit/ui_lib_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
+import '../kit/ui_resource_kind.dart';
 import '../kit/ui_text.dart';
 import 'gen_contract.dart';
 import 'gen_format.dart';
@@ -556,6 +557,75 @@ class _ToolsMenu extends StatelessWidget {
               ),
             ),
           ),
+          if (scope.actions.onOpenResourceWindow case final open?)
+            Builder(
+              builder: (context) => UiPressable(
+                key: const Key('gen-resource-windows'),
+                onTap: () => scope.controller.openMenu(
+                  genBelow(context, dy: 2),
+                  [
+                    for (final (kind, glyph, label) in [
+                      (
+                        FloatingResourceKind.gallery,
+                        UiGlyphs.picture,
+                        l.localGallery_title,
+                      ),
+                      (
+                        FloatingResourceKind.blocks,
+                        UiGlyphs.layers,
+                        l.blocks_title,
+                      ),
+                      (
+                        FloatingResourceKind.vibe,
+                        UiGlyphs.spark,
+                        l.refs_vibeTitle,
+                      ),
+                      (
+                        FloatingResourceKind.precise,
+                        UiGlyphs.personStar,
+                        l.refs_preciseTitle,
+                      ),
+                    ])
+                      UiMenuItem(
+                        key: Key('gen-resource-${kind.name}'),
+                        label: label,
+                        glyph: glyph,
+                        onTap: () => open(kind),
+                      ),
+                  ],
+                  tag: #resourceWindows,
+                  width: 200,
+                ),
+                builder: (context, hover) => Container(
+                  height: 34,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: hover ? c.control : null,
+                    borderRadius: BorderRadius.circular(7),
+                  ),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        child: UiGlyph(
+                          GenGlyphs.resourceWindows,
+                          size: 15,
+                          color: c.muted,
+                        ),
+                      ),
+                      Expanded(
+                        child: Text(
+                          l.floating_open,
+                          style: UiText.sans(13, color: c.ink),
+                        ),
+                      ),
+                      UiGlyph(UiGlyphs.chevronRight, size: 13, color: c.faint),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           _MenuSection(l.gen_toolsPinned),
           pinRow(
             const Key('gen-pin-palette'),

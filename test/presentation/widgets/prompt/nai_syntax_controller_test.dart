@@ -19,12 +19,12 @@ void main() {
     );
     for (final (weight, color) in [
       (2.5, colors.weightTop),
-      (1.5, colors.highIntensityColor),
-      (.7, colors.lowIntensityColor),
+      (1.5, colors.weightHigh),
+      (.7, colors.weightLow),
       (.3, colors.weightBottom),
       (-1.0, colors.weightNegative),
-      (2.0, colors.highIntensityColor),
-      (.5, colors.lowIntensityColor),
+      (2.0, colors.weightHigh),
+      (.5, colors.weightLow),
     ]) {
       final controller = NaiSyntaxController(text: '$weight::tag');
       final spans = await _buildTextSpanChildren(tester, controller);
@@ -64,7 +64,8 @@ void main() {
         ]),
       );
       expect(_plainText(children), equals(', , '));
-      expect(_rgb(children[0].style!.backgroundColor!), 0xED5807);
+      expect(_rgb(children[0].style!.backgroundColor!), 0xFFF1DC);
+      expect(_rgb(children[0].style!.color!), 0xA85B00);
       expect(_rgb(children[1].style!.backgroundColor!), 0x7ACC29);
     });
 
@@ -109,7 +110,8 @@ void main() {
       final outerColor = children[0].style!.backgroundColor!;
       final nestedColor = children[1].style!.backgroundColor!;
       expect(children[2].style!.backgroundColor, outerColor);
-      expect(nestedColor.a, greaterThan(outerColor.a));
+      // 同一档（>1 且 ≤2）同色：分档表达强弱，不再靠透明度。
+      expect(nestedColor, outerColor);
     });
 
     testWidgets('does not treat unmatched brackets as syntax errors', (
@@ -145,7 +147,7 @@ void main() {
       final children = await _buildTextSpanChildren(tester, controller);
 
       expect(_highlightedTexts(children), equals(['.5::coat']));
-      expect(_rgb(children.single.style!.backgroundColor!), 0x079CED);
+      expect(_rgb(children.single.style!.backgroundColor!), 0xE6F0FF);
     });
 
     testWidgets('disables numerical emphasis for models before V4', (

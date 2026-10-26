@@ -11530,5 +11530,19 @@
   },
   "set_workspaceFontScale": "Creative text size",
   "set_promptAutocomplete": "Prompt autocomplete",
-  "shortcut_action_open_resource_window": "Open resource window"
+  "shortcut_action_open_resource_window": "Open resource window",
+  "set_workspaceFontScaleSub": "Text in prompt boxes, character boxes, blocks and the viewer prompt. Independent of the interface size above.",
+  "set_promptAutocompleteSub": "Suggest tags from the local library while typing in prompt and character boxes; ↑↓ to choose, Tab or Enter to accept, Esc to close.",
+  "floating_open": "Resource windows",
+  "floating_searchGallery": "Search (whole phrase / exact tag)",
+  "floating_searchName": "Search by name",
+  "floating_collapse": "Collapse to title bar",
+  "floating_expand": "Expand",
+  "floating_empty": "Nothing here",
+  "floating_loadFailed": "Could not load",
+  "floating_loadMore": "Load more",
+  "blocks_iconsMore": "More icons",
+  "blocks_iconsLess": "Fewer icons",
+  "blocks_iconsNsfwShow": "Show NSFW icons",
+  "blocks_iconsNsfwHide": "Hide NSFW icons"
 }

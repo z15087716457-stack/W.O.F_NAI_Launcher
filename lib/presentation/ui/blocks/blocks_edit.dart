@@ -10,6 +10,7 @@ import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
+import '../kit/ui_extra_icons.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_inputs.dart';
 import '../kit/ui_lib_controls.dart';
@@ -22,9 +23,10 @@ import 'blocks_contract.dart';
 import 'blocks_format.dart';
 import 'blocks_parts.dart';
 
-/// 图标网格（原型 `.icg`）：每格 30、圆角 7、间距 4，一行 10 个；第一格是默认图标，后面是全部 40 个。
+/// 图标网格（原型 `.icg`）：每格 30、圆角 7、间距 4，一行 10 个；第一格是默认图标，后面是原 40 个。
 /// 选中：块色 14% 底 + 1.5px 块色内描边 + 块色图标。
-class BlockIconGrid extends StatelessWidget {
+/// C03：第 42 格「更多」展开新增图标；NSFW 一组默认不显示，展开后再点末格才出现。
+class BlockIconGrid extends StatefulWidget {
   const BlockIconGrid({
     super.key,
     required this.selected,
@@ -33,7 +35,6 @@ class BlockIconGrid extends StatelessWidget {
     this.iconKeys = UiBlockIcon.legacyKeys,
   });
 
-  /// Data hook for the grouped picker; preserve the current visual draft.
   final List<String> iconKeys;
   final String? selected;
   final Color color;
@@ -42,13 +43,34 @@ class BlockIconGrid extends StatelessWidget {
   final ValueChanged<String?> onChanged;
 
   @override
+  State<BlockIconGrid> createState() => _BlockIconGridState();
+}
+
+class _BlockIconGridState extends State<BlockIconGrid> {
+  static final _extra = [
+    for (final k in UiBlockIcon.keys)
+      if (!UiBlockIcon.legacyKeys.contains(k) && !UiExtraIcons.nsfw.contains(k))
+        k,
+  ];
+  static final _nsfw = [
+    for (final k in UiBlockIcon.keys)
+      if (UiExtraIcons.nsfw.contains(k)) k,
+  ];
+
+  // 当前选中的是新增 / NSFW 图标时直接展开，免得选中项被藏起来。
+  late var _more = _extra.contains(widget.selected) || _showNsfw;
+  late var _showNsfw = _nsfw.contains(widget.selected);
+
+  @override
   Widget build(BuildContext context) {
     final c = context.ui;
+    final l = context.l10n;
+    final color = widget.color;
     Widget cell(String? key) {
-      final on = key == selected;
+      final on = key == widget.selected;
       return UiPressable(
         key: Key('block-icon-${key ?? 'default'}'),
-        onTap: () => onChanged(key),
+        onTap: () => widget.onChanged(key),
         builder: (context, hover) => Container(
           width: 30,
           height: 30,
@@ -63,12 +85,70 @@ class BlockIconGrid extends StatelessWidget {
       );
     }
 
+    Widget toggle(Key key, String tooltip, Widget child, VoidCallback onTap) =>
+        Tooltip(
+          message: tooltip,
+          waitDuration: const Duration(milliseconds: 400),
+          child: UiPressable(
+            key: key,
+            onTap: onTap,
+            builder: (context, hover) => Container(
+              width: 30,
+              height: 30,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: hover ? c.hover : null,
+                borderRadius: BorderRadius.circular(7),
+                border: Border.all(color: c.border),
+              ),
+              child: child,
+            ),
+          ),
+        );
+
+    final legacyOnly = identical(widget.iconKeys, UiBlockIcon.legacyKeys);
     return SizedBox(
       width: 30 * 10 + 4 * 9,
       child: Wrap(
         spacing: 4,
         runSpacing: 4,
-        children: [cell(null), for (final k in iconKeys) cell(k)],
+        children: [
+          cell(null),
+          for (final k in widget.iconKeys) cell(k),
+          if (legacyOnly) ...[
+            toggle(
+              const Key('block-icon-more'),
+              _more ? l.blocks_iconsLess : l.blocks_iconsMore,
+              UiGlyph(
+                _more ? UiGlyphs.chevronUp : UiGlyphs.more,
+                size: 14,
+                color: c.muted,
+              ),
+              () => setState(() {
+                _more = !_more;
+                if (!_more) _showNsfw = false;
+              }),
+            ),
+            if (_more) ...[
+              for (final k in _extra) cell(k),
+              toggle(
+                const Key('block-icon-nsfw'),
+                _showNsfw ? l.blocks_iconsNsfwHide : l.blocks_iconsNsfwShow,
+                Text(
+                  '18+',
+                  style: UiText.sans(
+                    10,
+                    weight: FontWeight.w700,
+                    color: _showNsfw ? c.fav : c.faint,
+                  ),
+                ),
+                () => setState(() => _showNsfw = !_showNsfw),
+              ),
+              if (_showNsfw)
+                for (final k in _nsfw) cell(k),
+            ],
+          ],
+        ],
       ),
     );
   }

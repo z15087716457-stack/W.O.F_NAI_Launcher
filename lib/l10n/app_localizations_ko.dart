@@ -21829,4 +21829,48 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get shortcut_action_open_resource_window => '리소스 창 열기';
+
+  @override
+  String get set_workspaceFontScaleSub =>
+      '프롬프트 칸, 캐릭터 칸, 블록, 뷰어 프롬프트의 글자. 위 인터페이스 글자 크기와 별도로 조절합니다.';
+
+  @override
+  String get set_promptAutocompleteSub =>
+      '프롬프트 칸과 캐릭터 칸에 입력할 때 로컬 태그 사전에서 후보를 보여 줍니다. ↑↓ 선택, Tab 또는 Enter 적용, Esc 닫기.';
+
+  @override
+  String get floating_open => '리소스 창';
+
+  @override
+  String get floating_searchGallery => '검색 (전체 구문 / 정확한 태그)';
+
+  @override
+  String get floating_searchName => '이름 검색';
+
+  @override
+  String get floating_collapse => '제목 표시줄로 접기';
+
+  @override
+  String get floating_expand => '펼치기';
+
+  @override
+  String get floating_empty => '항목 없음';
+
+  @override
+  String get floating_loadFailed => '불러오지 못했습니다';
+
+  @override
+  String get floating_loadMore => '더 불러오기';
+
+  @override
+  String get blocks_iconsMore => '아이콘 더 보기';
+
+  @override
+  String get blocks_iconsLess => '접기';
+
+  @override
+  String get blocks_iconsNsfwShow => 'NSFW 아이콘 표시';
+
+  @override
+  String get blocks_iconsNsfwHide => 'NSFW 아이콘 숨기기';
 }

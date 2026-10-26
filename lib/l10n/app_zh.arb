@@ -11518,5 +11518,19 @@
   },
   "set_workspaceFontScale": "创作区文字字号",
   "set_promptAutocomplete": "提示词自动补全",
-  "shortcut_action_open_resource_window": "打开资源小窗"
+  "shortcut_action_open_resource_window": "打开资源小窗",
+  "set_workspaceFontScaleSub": "提示词框、角色框、块与大图提示词里的文字；和上面的界面字号分开调。",
+  "set_promptAutocompleteSub": "在提示词框和角色框输入时，从本地标签库给出候选；↑↓ 选择，Tab 或 Enter 采纳，Esc 关闭。",
+  "floating_open": "资源小窗",
+  "floating_searchGallery": "搜索（整段 / 完整标签）",
+  "floating_searchName": "搜索名称",
+  "floating_collapse": "收起为标题条",
+  "floating_expand": "展开",
+  "floating_empty": "没有内容",
+  "floating_loadFailed": "加载失败",
+  "floating_loadMore": "加载更多",
+  "blocks_iconsMore": "更多图标",
+  "blocks_iconsLess": "收起",
+  "blocks_iconsNsfwShow": "显示 NSFW 图标",
+  "blocks_iconsNsfwHide": "隐藏 NSFW 图标"
 }

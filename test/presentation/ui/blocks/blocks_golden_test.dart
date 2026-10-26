@@ -248,7 +248,12 @@ void main() {
           t,
           find.byKey(const Key('blocks-capture')),
           'test/presentation/ui/blocks/goldens/$file.png',
-          [if (bar.evaluate().isNotEmpty) t.getRect(bar).deflate(1)],
+          [
+            if (bar.evaluate().isNotEmpty) t.getRect(bar).deflate(1),
+            // 2026-10-27 C03（用户确认）：图标网格末尾新增「更多图标」格，只排除这一格。
+            for (final e in find.byKey(const Key('block-icon-more')).evaluate())
+              t.getRect(find.byWidget(e.widget)).inflate(1),
+          ],
         );
         debugDisableShadows = true;
       });

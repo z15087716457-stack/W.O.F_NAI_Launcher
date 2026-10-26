@@ -32,6 +32,7 @@ import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 import 'presentation/wiring/nai_agent_generation_host.dart';
 import 'presentation/wiring/clipboard_history_paste.dart';
+import 'presentation/wiring/floating_resource_window.dart';
 import 'presentation/wiring/floating_resource_windows_host.dart';
 import 'presentation/providers/floating_resource_windows_provider.dart';
 
@@ -230,6 +231,7 @@ class NAILauncherApp extends ConsumerWidget {
                     child: NumpadEditingShortcuts(
                       child: TextEditingShortcuts(
                         child: FloatingResourceWindowsHost(
+                          builder: floatingResourceWindowBuilder,
                           child: child ?? const SizedBox.shrink(),
                         ),
                       ),

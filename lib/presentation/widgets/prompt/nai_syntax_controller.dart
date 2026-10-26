@@ -4,6 +4,7 @@ import '../../../core/utils/alias_parser.dart';
 import '../../../core/utils/weight_tier.dart';
 import '../../../core/utils/pill_document_editor.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../ui/kit/ui_colors.dart';
 
 /// 药丸 span 构建器：把文本中的块标记字符渲染为内联 widget。
 ///
@@ -547,33 +548,48 @@ class _SpanDecoration {
 /// 官网强调高亮的默认主题色。
 class NaiSyntaxColors {
   final bool isDark;
-  final Color weightTop;
-  final Color weightBottom;
-  final Color weightNegative;
-  final Color highIntensityColor;
-  final Color lowIntensityColor;
+
+  /// 权重档：浅底 + 字色（与大图色板一致，见 [UiColors]）。
+  final Color weightTop, weightTopInk;
+  final Color weightHigh, weightHighInk;
+  final Color weightLow, weightLowInk;
+  final Color weightBottom, weightBottomInk;
+  final Color weightNegative, weightNegativeInk;
+
+  /// `::` 语法标记。
   final Color midIntensityColor;
   final Color pipeColor;
 
   const NaiSyntaxColors._({
     required this.isDark,
     required this.weightTop,
+    required this.weightTopInk,
+    required this.weightHigh,
+    required this.weightHighInk,
+    required this.weightLow,
+    required this.weightLowInk,
     required this.weightBottom,
+    required this.weightBottomInk,
     required this.weightNegative,
-    required this.highIntensityColor,
-    required this.lowIntensityColor,
+    required this.weightNegativeInk,
     required this.midIntensityColor,
     required this.pipeColor,
   });
 
   factory NaiSyntaxColors.fromTheme(ThemeData theme) {
+    final c = UiColors.fromTheme(theme);
     return NaiSyntaxColors._(
       isDark: theme.brightness == Brightness.dark,
-      weightTop: const Color(0xFFED5807),
-      weightBottom: const Color(0xFF079CED),
-      weightNegative: const Color(0xFF079CED),
-      highIntensityColor: const Color(0xFFED5807),
-      lowIntensityColor: const Color(0xFF079CED),
+      weightTop: c.weightTop,
+      weightTopInk: c.weightTopInk,
+      weightHigh: c.weightUp,
+      weightHighInk: c.weightUpInk,
+      weightLow: c.weightDown,
+      weightLowInk: c.weightDownInk,
+      weightBottom: c.weightBottom,
+      weightBottomInk: c.weightBottomInk,
+      weightNegative: c.weightNeg,
+      weightNegativeInk: c.weightNegInk,
       midIntensityColor: const Color(0xFF7ACC29),
       pipeColor: theme.colorScheme.onSurface,
     );
@@ -581,11 +597,18 @@ class NaiSyntaxColors {
 
   int get cacheSignature => Object.hash(
     isDark,
-    weightTop,
-    weightBottom,
-    weightNegative,
-    highIntensityColor,
-    lowIntensityColor,
+    Object.hashAll([
+      weightTop,
+      weightTopInk,
+      weightHigh,
+      weightHighInk,
+      weightLow,
+      weightLowInk,
+      weightBottom,
+      weightBottomInk,
+      weightNegative,
+      weightNegativeInk,
+    ]),
     midIntensityColor,
     pipeColor,
   );
@@ -598,7 +621,10 @@ class NaiSyntaxColors {
     var style = baseStyle.copyWith(height: lineHeight ?? 1.35);
     final mark = decoration.background;
     if (mark != null) {
-      style = style.copyWith(backgroundColor: _getBackgroundColor(mark));
+      style = style.copyWith(
+        backgroundColor: _getBackgroundColor(mark),
+        color: _getInkColor(mark) ?? style.color,
+      );
     }
     if (decoration.pipe != null) {
       style = style.copyWith(color: pipeColor, fontWeight: FontWeight.w800);
@@ -606,24 +632,31 @@ class NaiSyntaxColors {
     return style;
   }
 
-  Color _getBackgroundColor(_HighlightMark mark) {
-    final baseColor = switch (mark.tone) {
-      _HighlightTone.top => weightTop,
-      _HighlightTone.bottom => weightBottom,
-      _HighlightTone.negative => weightNegative,
-      _HighlightTone.high => highIntensityColor,
-      _HighlightTone.low => lowIntensityColor,
-      _HighlightTone.mid => midIntensityColor,
-      _HighlightTone.alias => HSLColor.fromAHSL(
-        isDark ? 0.55 : 0.50,
-        180,
-        0.60,
-        0.35,
-      ).toColor(),
-    };
-    if (mark.tone == _HighlightTone.alias) return baseColor;
-    return baseColor.withAlpha((mark.opacity * 255).round());
-  }
+  Color _getBackgroundColor(_HighlightMark mark) => switch (mark.tone) {
+    _HighlightTone.top => weightTop,
+    _HighlightTone.high => weightHigh,
+    _HighlightTone.low => weightLow,
+    _HighlightTone.bottom => weightBottom,
+    _HighlightTone.negative => weightNegative,
+    _HighlightTone.mid => midIntensityColor.withAlpha(
+      (mark.opacity * 255).round(),
+    ),
+    _HighlightTone.alias => HSLColor.fromAHSL(
+      isDark ? 0.55 : 0.50,
+      180,
+      0.60,
+      0.35,
+    ).toColor(),
+  };
+
+  Color? _getInkColor(_HighlightMark mark) => switch (mark.tone) {
+    _HighlightTone.top => weightTopInk,
+    _HighlightTone.high => weightHighInk,
+    _HighlightTone.low => weightLowInk,
+    _HighlightTone.bottom => weightBottomInk,
+    _HighlightTone.negative => weightNegativeInk,
+    _ => null,
+  };
 
   Color _getSearchColor(bool active) {
     if (active) {

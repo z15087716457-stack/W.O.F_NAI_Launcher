@@ -121,6 +121,15 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       final card = find.byKey(Key('theme-$mode'));
       if (card.evaluate().isNotEmpty) masks.add(t.getRect(card).inflate(2));
     }
+    // 2026-10-27 B05/B06（用户确认）：新增「创作区文字字号」「提示词自动补全」两行，
+    // 从新行顶边往下的主栏一起排除（下方各行整体下移）；新行上方与侧栏照旧逐像素锁定。
+    for (final key in ['workspaceFontScale', 'promptAutocomplete']) {
+      final row = find.byKey(Key('setting-$key'));
+      if (row.evaluate().isEmpty) continue;
+      final capture = t.getRect(find.byKey(const Key('settings-capture')));
+      final r = t.getRect(row);
+      masks.add(Rect.fromLTRB(r.left, r.top, r.right, capture.bottom));
+    }
     // F25：只豁免新增的“命中率”小字，原进度条、百分比及数量仍逐像素锁定。
     for (final label
         in find.byKey(const Key('cache-hit-rate-label')).evaluate()) {

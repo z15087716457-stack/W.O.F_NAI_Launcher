@@ -209,6 +209,12 @@ class SettingsGenerationPage extends StatelessWidget {
               ),
             ),
             SettingKeyRow(
+              SettingKey.promptAutocomplete,
+              title: l.set_promptAutocomplete,
+              subtitle: l.set_promptAutocompleteSub,
+              control: const SetSwitch(SettingKey.promptAutocomplete),
+            ),
+            SettingKeyRow(
               SettingKey.relatedTags,
               title: l.set_gnRelated,
               subtitle: l.set_gnRelatedSub,
