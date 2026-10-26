@@ -38889,6 +38889,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.'**
   String get blocks_presetHint;
+
+  /// No description provided for @set_stOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other files'**
+  String get set_stOther;
 }
 
 class _AppLocalizationsDelegate

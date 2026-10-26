@@ -1361,11 +1361,11 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   Future<void> _applyFilters() async {
     if (!state.isInitialized) return;
 
-    _setState(state.copyWith(isLoading: true));
+    final criteria = state.filterCriteria;
+    final requestSerial = ++_filterRequestSerial;
+    _setState(state.copyWith(isLoading: true, error: null));
     try {
       final service = await getService();
-      final criteria = state.filterCriteria;
-      final requestSerial = ++_filterRequestSerial;
 
       AppLogger.d(
         'Applying filters: hasFilters=${criteria.hasFilters}, search="${criteria.searchQuery}", '
@@ -1383,7 +1383,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           'Ignoring stale filter result: search="${criteria.searchQuery}", tags=${criteria.selectedTags}',
           'LocalGalleryNotifier',
         );
-        _setState(state.copyWith(isLoading: false));
         return;
       }
 
@@ -1402,6 +1401,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
 
       await _reloadTimeline(newDataset: true);
     } on GalleryFilterException catch (e) {
+      if (requestSerial != _filterRequestSerial ||
+          state.filterCriteria != criteria) {
+        return;
+      }
       AppLogger.e('Filter failed', e, null, 'LocalGalleryNotifier');
       _setState(
         state.copyWith(
@@ -1413,6 +1416,10 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
         ),
       );
     } catch (e) {
+      if (requestSerial != _filterRequestSerial ||
+          state.filterCriteria != criteria) {
+        return;
+      }
       AppLogger.e('Failed to apply filters', e, null, 'LocalGalleryNotifier');
       _setState(state.copyWith(isLoading: false));
     }

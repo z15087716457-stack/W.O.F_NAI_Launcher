@@ -22,6 +22,7 @@ import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.
 import 'package:nai_launcher/presentation/providers/local_gallery_focus_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
+import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
@@ -145,6 +146,7 @@ void main() {
         showCopyButton: !failed,
       );
   late ProviderContainer container;
+  final clipboardWrites = <Uint8List>[];
   late _Platform platform;
   late _Gallery gallery;
   late GoRouter router;
@@ -153,10 +155,19 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     platform = _Platform();
+    clipboardWrites.clear();
     translator = (document, session) async => document;
     container = ProviderContainer(
       overrides: [
         imageViewerPlatformProvider.overrideWithValue(platform),
+        imageClipboardServiceProvider.overrideWithValue(
+          ImageClipboardService(
+            stripMetadata: () => false,
+            write: (value) async {
+              clipboardWrites.add(value);
+            },
+          ),
+        ),
         detailPromptTranslatorProvider.overrideWithValue(
           (document, session) => translator(document, session),
         ),
@@ -290,6 +301,17 @@ void main() {
       );
     },
   );
+
+  testWidgets('viewer copy routes original bytes through shared service once', (
+    tester,
+  ) async {
+    await pump(tester, viewer: session());
+    page(tester).actions.onAction('0', ViewerAction.copyImage);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(clipboardWrites.length, 1);
+    expect(clipboardWrites.single, bytes);
+  });
 
   testWidgets('img2img action backs up then writes live image parameters', (
     tester,

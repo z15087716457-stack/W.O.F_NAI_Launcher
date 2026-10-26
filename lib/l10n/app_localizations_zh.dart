@@ -21380,6 +21380,9 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '应用附带参数时质量词和负面预设一并还原。换到别的模型时，档位按目标模型自动换算；Turbo 沿用现有处理。';
+
+  @override
+  String get set_stOther => '其他文件';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42758,4 +42761,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get blocks_presetHint =>
       '應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。';
+
+  @override
+  String get set_stOther => '其他檔案';
 }

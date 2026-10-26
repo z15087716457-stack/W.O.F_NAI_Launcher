@@ -11,6 +11,38 @@ void main() {
       );
     });
 
+    test(
+      'gallery query keeps literal punctuation but strips weight syntax',
+      () {
+        expect(
+          TagNormalizer.normalizeGalleryQuery(' 1.25::{{Blue_Eyes}}:: '),
+          'blue eyes',
+        );
+        expect(
+          TagNormalizer.normalizeGalleryQuery(' hero_(game) '),
+          'hero (game)',
+        );
+        expect(
+          TagNormalizer.normalizeGalleryQuery('a/b\\\\c|d::e;100%'),
+          'a/b\\\\c|d::e;100%',
+        );
+        expect(
+          TagNormalizer.containsGalleryTag(
+            'blue eyes shadow, solo',
+            'blue eyes',
+          ),
+          isFalse,
+        );
+        expect(
+          TagNormalizer.containsGalleryTag(
+            '1.2::blue_eyes::, solo',
+            'blue eyes',
+          ),
+          isTrue,
+        );
+      },
+    );
+
     test('keeps underscores for database delimited variants', () {
       expect(
         TagNormalizer.normalizeDelimitedSearchSegment('Sweet_One|Shycocoa'),

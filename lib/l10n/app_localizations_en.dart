@@ -22388,4 +22388,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.';
+
+  @override
+  String get set_stOther => 'Other files';
 }

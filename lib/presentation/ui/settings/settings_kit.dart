@@ -35,7 +35,8 @@ extension SettingsColors on UiColors {
     SettingsStorageKind.thumbnails => const Color(0xFFD48A00),
     SettingsStorageKind.ragIndex => const Color(0xFFE5484D),
     SettingsStorageKind.dictionaries => const Color(0xFFA8A8A8),
-    SettingsStorageKind.agent => const Color(0xFF7A7A7A),
+    SettingsStorageKind.agent ||
+    SettingsStorageKind.other => const Color(0xFF7A7A7A),
   };
 }
 

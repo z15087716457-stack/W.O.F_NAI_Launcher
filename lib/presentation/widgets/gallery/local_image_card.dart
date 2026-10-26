@@ -8,14 +8,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/cache/thumbnail_cache_service.dart';
 import '../../../core/utils/app_logger.dart';
-import '../../../core/utils/image_share_sanitizer.dart';
+import '../../services/image_clipboard_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/models/gallery/local_image_record.dart';
 import '../../../data/services/thumbnail_service.dart';
 import '../../providers/canvas_settings_provider.dart';
 import '../../providers/local_gallery_provider.dart';
-import '../../providers/share_image_settings_provider.dart';
-import '../../utils/clipboard_image.dart';
 import '../common/app_toast.dart';
 import 'gallery_nai_versions.dart';
 import '../common/studio_icons.dart';
@@ -363,22 +361,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
         return;
       }
 
-      final stripMetadata = ref
-          .read(shareImageSettingsProvider)
-          .effectiveStripMetadataForCopyAndDrag;
-      final sourceParts = sourceFile.path.split(RegExp(r'[/\\]'));
-      final sourceName = sourceParts.isNotEmpty
-          ? sourceParts.last
-          : 'shared.png';
-      final originalBytes = await sourceFile.readAsBytes();
-      final shareImage = await ImageShareSanitizer.prepareForCopyOrDrag(
-        originalBytes,
-        fileName: sourceName,
-        stripMetadata: stripMetadata,
-      );
-
-      // 统一规范化为 PNG，避免 jpg/webp 原始字节被当成 PNG 导致粘贴失败。
-      await writeImageBytesToClipboardAsPng(shareImage.bytes);
+      await ref.read(imageClipboardServiceProvider).copyFile(sourceFile.path);
 
       if (mounted) {
         AppToast.success(context, context.l10n.gallery_copiedToClipboard);

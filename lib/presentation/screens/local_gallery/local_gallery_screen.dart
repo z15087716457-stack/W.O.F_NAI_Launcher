@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import '../../services/image_clipboard_service.dart';
+
 import 'package:collection/collection.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
@@ -1722,7 +1724,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
       context,
       position: position,
       hasImportableMetadata: metadata?.hasData == true,
-      hasPrompt: metadata?.prompt.isNotEmpty == true,
+      hasPrompt: metadata?.fullPrompt.isNotEmpty == true,
       hasSeed: metadata?.seed != null,
       canPlaceOnCanvas: !ref.read(imageGenerationNotifierProvider).isGenerating,
       isKritaConnected:
@@ -1762,6 +1764,23 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         await _importImageMetadata(record);
       case LocalImageContextAction.placeOnCanvas:
         await _placeOnCanvas(record);
+      case LocalImageContextAction.copyImage:
+        try {
+          if (!await File(record.path).exists()) {
+            if (mounted) {
+              AppToast.error(context, context.l10n.gallery_fileMissing);
+            }
+            return;
+          }
+          await ref.read(imageClipboardServiceProvider).copyFile(record.path);
+          if (mounted) {
+            AppToast.success(context, context.l10n.gallery_copiedToClipboard);
+          }
+        } catch (e) {
+          if (mounted) {
+            AppToast.error(context, context.l10n.gallery_copyFailed('$e'));
+          }
+        }
       case LocalImageContextAction.copyPrompt:
         if (availableMetadata?.fullPrompt.isNotEmpty == true) {
           await Clipboard.setData(

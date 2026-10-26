@@ -27,6 +27,7 @@ import '../common/studio_icons.dart';
 import '../../../core/rag/rag_settings.dart';
 import 'gallery_rag_search_menu.dart';
 import '../../ui/kit/ui_text.dart';
+import '../../wiring/gallery_search_history.dart';
 
 /// 顶栏高度（与块库等资料页一致）
 const double localGalleryToolbarHeight = 62;
@@ -52,6 +53,7 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
     this.onUndo,
     this.onRedo,
     this.enableSearchAutocomplete = true,
+    this.onSearchHistoryChanged,
   });
 
   final FocusNode searchFocusNode;
@@ -70,6 +72,9 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
   /// Whether explicit tag search is enabled for the gallery search field.
   final bool enableSearchAutocomplete;
 
+  /// Contract for the history popup supplied by the frontend owner.
+  final ValueChanged<GallerySearchHistoryViewData>? onSearchHistoryChanged;
+
   @override
   ConsumerState<LocalGalleryToolbar> createState() =>
       _LocalGalleryToolbarState();
@@ -78,6 +83,35 @@ class LocalGalleryToolbar extends ConsumerStatefulWidget {
 class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounceTimer;
+  bool _tagExpansionActive = false;
+  bool _historyPopupOpen = false;
+
+  void _publishSearchHistory() {
+    if (!mounted) return;
+    widget.onSearchHistoryChanged?.call(
+      GallerySearchHistoryViewData(
+        items: ref.read(gallerySearchHistoryProvider).valueOrNull ?? const [],
+        select: _selectSearchHistory,
+        remove: ref.read(gallerySearchHistoryProvider.notifier).remove,
+        clear: ref.read(gallerySearchHistoryProvider.notifier).clear,
+        tagExpansionActive: _tagExpansionActive,
+        setPopupOpen: (open) {
+          if (mounted) setState(() => _historyPopupOpen = open);
+        },
+      ),
+    );
+  }
+
+  void _selectSearchHistory(String text) {
+    if (!mounted) return;
+    _debounceTimer?.cancel();
+    _searchController.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+    ref.read(localGalleryNotifierProvider.notifier).setSearchQuery(text);
+    setState(() {});
+  }
 
   /// 挂载时的 tip 轮次：首轮固定出使用说明句（FEAT-60）。
   /// 懒初始化而非 initState 赋值——热重载不重跑 initState。
@@ -88,6 +122,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     super.initState();
     widget.searchFocusNode.onKeyEvent = _handleSearchKeyEvent;
     widget.searchFocusNode.addListener(_onSearchFocusChanged);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _publishSearchHistory(),
+    );
   }
 
   @override
@@ -143,6 +180,10 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(
+      gallerySearchHistoryProvider,
+      (_, __) => _publishSearchHistory(),
+    );
     final state = ref.watch(localGalleryChromeStateProvider);
     final selectionActive = ref.watch(
       localGallerySelectionNotifierProvider.select((s) => s.isActive),
@@ -458,6 +499,9 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           },
           onSubmitted: (value) {
             _debounceTimer?.cancel();
+            unawaited(
+              ref.read(gallerySearchHistoryProvider.notifier).add(value),
+            );
             ref
                 .read(localGalleryNotifierProvider.notifier)
                 .setSearchQuery(value);
@@ -471,6 +515,11 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
     return TagExpansionWrapper(
       controller: _searchController,
       focusNode: widget.searchFocusNode,
+      enabled: !_historyPopupOpen,
+      onActiveChanged: (active) {
+        _tagExpansionActive = active;
+        _publishSearchHistory();
+      },
       onTagSelected: (tag) {
         _debounceTimer?.cancel();
         ref.read(localGalleryNotifierProvider.notifier).addSelectedTags([

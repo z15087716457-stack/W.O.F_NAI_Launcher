@@ -452,6 +452,7 @@ class SettingsStoragePage extends StatelessWidget {
       SettingsStorageKind.ragIndex => l.set_stRag,
       SettingsStorageKind.dictionaries => l.set_stDict,
       SettingsStorageKind.agent => l.set_stAgent,
+      SettingsStorageKind.other => l.set_stOther,
     };
     String folderName(SettingsFolder f) => switch (f) {
       SettingsFolder.images => l.set_stImages,

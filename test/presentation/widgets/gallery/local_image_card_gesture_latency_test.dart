@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:image/image.dart' as img;
+import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,8 +32,14 @@ void main() {
     double width = 200,
     double height = 260,
     Future<void> Function()? onUseImage,
+    LocalImageRecord? imageRecord,
+    ImageClipboardService? clipboard,
   }) {
     return ProviderScope(
+      overrides: [
+        if (clipboard != null)
+          imageClipboardServiceProvider.overrideWithValue(clipboard),
+      ],
       child: MaterialApp(
         locale: const Locale('en'),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -36,7 +47,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: LocalImageCard(
-              record: record(r'C:\gallery\missing\a.png'),
+              record: imageRecord ?? record(r'C:\gallery\missing\a.png'),
               width: width,
               height: height,
               imageWidth: 832,
@@ -64,6 +75,54 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     return mouse;
   }
+
+  testWidgets('card copy uses shared service once with original bytes', (
+    tester,
+  ) async {
+    late Directory temp;
+    late File file;
+    final original = Uint8List.fromList(
+      img.encodePng(img.Image(width: 6, height: 9)),
+    );
+    await tester.runAsync(() async {
+      temp = await Directory.systemTemp.createTemp('card-copy-');
+      file = File('${temp.path}/original.png');
+      await file.writeAsBytes(original);
+    });
+    addTearDown(() => temp.delete(recursive: true));
+    final writes = <Uint8List>[];
+    late Completer<void> copied;
+    await tester.runAsync(() async {
+      copied = Completer<void>();
+    });
+    final clipboard = ImageClipboardService(
+      stripMetadata: () => false,
+      write: (bytes) async {
+        writes.add(bytes);
+        copied.complete();
+      },
+    );
+    await tester.pumpWidget(
+      cardApp(imageRecord: record(file.path), clipboard: clipboard),
+    );
+    await hover(tester);
+    final button = tester.widget<GestureDetector>(
+      find
+          .ancestor(
+            of: find.byIcon(StudioIcons.galleryCopy),
+            matching: find.byType(GestureDetector),
+          )
+          .first,
+    );
+    await tester.runAsync(() async {
+      button.onTapUp!(TapUpDetails(kind: PointerDeviceKind.mouse));
+      await copied.future.timeout(const Duration(seconds: 5));
+    });
+    await tester.pump();
+    expect(writes.length, 1);
+    expect(writes.single, original);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets('single tap fires immediately without waiting for double tap', (
     tester,

@@ -3,6 +3,7 @@ import 'package:irondash_message_channel/irondash_message_channel.dart';
 // ignore: implementation_imports, depend_on_referenced_packages
 import 'package:super_native_extensions/src/native/context.dart';
 import 'dart:convert';
+import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -63,6 +64,13 @@ import '../../../helpers/fake_local_gallery_service.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 import '../../../helpers/light_theme_contrast.dart'
     show InMemoryLocalStorageService;
+
+class _RecordingClipboard extends ImageClipboardService {
+  _RecordingClipboard(this.onCopy) : super(stripMetadata: () => false);
+  final void Function(String) onCopy;
+  @override
+  Future<void> copyFile(String path) async => onCopy(path);
+}
 
 /// 本地画廊三栏布局：深浅主题、多语言、宽窄窗口下的实际渲染回归。
 ///
@@ -286,6 +294,60 @@ void main() {
         image.id,
       );
       expect(container.read(generationParamsNotifierProvider), same(draft));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(minutes: 1));
+    },
+  );
+
+  testWidgets(
+    'context copy uses captured original once and permits character-only Prompt',
+    (tester) async {
+      final record = records.first.copyWith(
+        metadata: const NaiImageMetadata(
+          prompt: '',
+          characterPrompts: ['blue eyes'],
+        ),
+      );
+      final copies = <String>[];
+      final clipboard = _RecordingClipboard(copies.add);
+      final container = await _pumpScreen(
+        tester,
+        records: [record, ...records.skip(1)],
+        dimensions: dimensions,
+        locale: const Locale('en'),
+        dark: false,
+        size: const Size(1600, 1000),
+        extraOverrides: [
+          imageClipboardServiceProvider.overrideWithValue(clipboard),
+        ],
+      );
+      await tester.tap(_cardFor(record), buttons: kSecondaryMouseButton);
+      await _settle(tester);
+      final prompt = tester.widget<MenuItemButton>(
+        find.ancestor(
+          of: find.text('Copy Prompt'),
+          matching: find.byType(MenuItemButton),
+        ),
+      );
+      expect(prompt.onPressed, isNotNull);
+      final button = tester.widget<MenuItemButton>(
+        find.ancestor(
+          of: find.text('Copy image'),
+          matching: find.byType(MenuItemButton),
+        ),
+      );
+      button.onPressed!();
+      await tester.pump();
+      for (var i = 0; i < 10 && copies.isEmpty; i++) {
+        await tester.runAsync(
+          () async => Future<void>.delayed(const Duration(milliseconds: 10)),
+        );
+        await tester.pump();
+      }
+      expect(find.byKey(const Key('image-action-menu')), findsNothing);
+      expect(copies, [record.path]);
       expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox.shrink());
       container.dispose();

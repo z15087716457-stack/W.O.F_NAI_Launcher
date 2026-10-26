@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 
 import '../../core/utils/file_explorer_utils.dart';
-import '../../core/utils/image_share_sanitizer.dart';
+import '../services/image_clipboard_service.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
@@ -16,14 +16,12 @@ import '../providers/gallery_category_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/local_gallery_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
-import '../providers/share_image_settings_provider.dart';
 import '../services/image_workflow_launcher.dart';
 import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_quick.dart';
 import '../ui/kit/ui_dialog.dart';
 import '../ui/viewer/viewer_contract.dart';
 import '../utils/asset_protection_guard.dart';
-import '../utils/clipboard_image.dart';
 import '../utils/krita_send_helper.dart';
 import '../utils/local_gallery_reference_factory.dart';
 import '../utils/metadata_import_coordinator.dart';
@@ -81,15 +79,12 @@ class ImageViewerActionHost {
       await FileExplorerUtils.revealFile(path);
       return false;
     } else if (action == ViewerAction.copyImage) {
-      final strip = ref
-          .read(shareImageSettingsProvider)
-          .effectiveStripMetadataForCopyAndDrag;
-      final image = await ImageShareSanitizer.prepareForCopyOrDrag(
-        await source.getImageBytes(),
-        fileName: path == null ? 'shared.png' : p.basename(path),
-        stripMetadata: strip,
-      );
-      await writeImageBytesToClipboardAsPng(image.bytes);
+      await ref
+          .read(imageClipboardServiceProvider)
+          .copyBytes(
+            source.getImageBytes,
+            fileName: path == null ? 'shared.png' : p.basename(path),
+          );
       _success(l10n.image_copiedToClipboard);
       return false;
     } else if (action == ViewerAction.saveAsBlock) {

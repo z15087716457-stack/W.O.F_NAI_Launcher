@@ -21624,4 +21624,7 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。';
+
+  @override
+  String get set_stOther => 'その他のファイル';
 }

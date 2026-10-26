@@ -463,7 +463,7 @@ class GalleryFilterService {
 
       if (criteria.searchQuery.isNotEmpty) {
         if (_hasDelimitedSearchQuery(criteria.searchQuery)) {
-          // 逗号分隔搜索使用后台 AND 过滤，避免 FTS 多词搜索的 OR 语义。
+          // Segments remain AND; each resolves to a known tag or a phrase.
           filtered = allFiles;
           if (_hasDatabasePreSearchFilters(criteria)) {
             filtered = await _searchInDatabase(
@@ -594,8 +594,7 @@ class GalleryFilterService {
     } catch (e) {
       if (criteria.indexedDate || criteria.hasMetadata != null) rethrow;
       AppLogger.w('Search failed: $e', 'GalleryFilterService');
-      // 回退到本地过滤
-      return _applyLocalFilters(allFiles, criteria, cancelToken);
+      rethrow;
     }
   }
 
@@ -735,7 +734,7 @@ class GalleryFilterService {
     return filtered;
   }
 
-  /// 按逗号分隔的搜索片段做 AND 包含匹配。
+  /// 按逗号分隔的搜索片段做 AND（完整标签或整段短语）。
   Future<List<File>> _filterByDelimitedSearchQuery(
     List<File> files,
     String searchQuery,
@@ -765,7 +764,7 @@ class GalleryFilterService {
         'Failed to filter by delimited search query: $e',
         'GalleryFilterService',
       );
-      return files;
+      rethrow;
     }
   }
 
@@ -776,50 +775,20 @@ class GalleryFilterService {
     CancelToken cancelToken,
   ) async {
     try {
-      final requiredTags = tags
-          .map(TagNormalizer.normalizeTagForMatch)
-          .where((tag) => tag.isNotEmpty)
-          .toSet();
-      if (requiredTags.isEmpty) return files;
-
-      // 获取文件路径到图片 ID 的映射
-      final pathToIdMap = await _dataSource.getImageIdsByPaths(
-        files.map((f) => f.path).toList(),
+      if (!tags.any((t) => TagNormalizer.normalizeGalleryQuery(t).isNotEmpty)) {
+        return files;
+      }
+      final ids = await _dataSource.searchByExactTags(
+        tags,
+        candidatePaths: files.map((f) => f.path).toList(),
       );
-
-      // 获取所有图片的标签；元数据只取参与匹配的正向提示词一列
-      // （全库约 4.9 万行：拉全行约 518MB 文本 → 84MB）。
-      // 兜底匹配用 positive_prompt_text：负面提示词里的词不算命中
-      // （标签 chip 语义 = 画面内容，UC 常驻词不该带出无关图）。
-      final imageIds = pathToIdMap.values.whereType<int>().toList();
-      final tagsMap = await _dataSource.getTagsByImageIds(imageIds);
-      final promptTextsMap = await _dataSource.getPositivePromptTextsByImageIds(
-        imageIds,
-      );
-
-      return files.where((file) {
-        if (cancelToken.isCancelled) return false;
-
-        final imageId = pathToIdMap[file.path];
-        if (imageId == null) return false;
-
-        final fileTags = (tagsMap[imageId] ?? [])
-            .map(TagNormalizer.normalizeTagForMatch)
-            .where((tag) => tag.isNotEmpty)
-            .toSet();
-        final metadataText = TagNormalizer.normalizeTagForMatch(
-          promptTextsMap[imageId] ?? '',
-        );
-
-        return requiredTags.every(
-          (tag) =>
-              fileTags.contains(tag) ||
-              _normalizedTextContainsTag(metadataText, tag),
-        );
-      }).toList();
+      if (cancelToken.isCancelled) return [];
+      final images = await _dataSource.getImagesByIds(ids);
+      final paths = images.map((i) => i.filePath).toSet();
+      return files.where((f) => paths.contains(f.path)).toList();
     } catch (e) {
       AppLogger.w('Failed to filter by tags: $e', 'GalleryFilterService');
-      return files;
+      rethrow;
     }
   }
 
@@ -837,13 +806,11 @@ class GalleryFilterService {
   }
 
   List<String> _parseDelimitedSearchSegments(String value) {
-    return TagNormalizer.parseDelimitedSearchSegments(value);
-  }
-
-  bool _normalizedTextContainsTag(String normalizedText, String normalizedTag) {
-    if (normalizedText.isEmpty || normalizedTag.isEmpty) return false;
-
-    return ' $normalizedText '.contains(' $normalizedTag ');
+    return value
+        .split(RegExp(r'[,，]+'))
+        .map(TagNormalizer.normalizeGalleryQuery)
+        .where((s) => s.isNotEmpty)
+        .toList();
   }
 
   /// 按日期范围过滤

@@ -31,12 +31,74 @@ import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_toolbar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:nai_launcher/presentation/wiring/gallery_search_history.dart';
 import '../../../helpers/studio_capture_fonts.dart';
 
 /// 顶栏：范围面包屑与数量、搜索标签、排序菜单、视图切换、多选与详情开关。
 void main() {
   setUpAll(loadStudioCaptureFonts);
   setUp(() => SharedPreferences.setMockInitialValues({}));
+
+  testWidgets(
+    'typing does not record; enter records; history selection cancels pending input',
+    (tester) async {
+      GallerySearchHistoryViewData? history;
+      final notifier = await _pumpToolbar(
+        tester,
+        state: const LocalGalleryState(
+          isInitialized: true,
+          filterCriteria: FilterCriteria(naiOnly: true, selectedTags: ['solo']),
+        ),
+        onSearchHistoryChanged: (value) => history = value,
+      );
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.enterText(field, 'first');
+      await tester.pump(const Duration(milliseconds: 310));
+      expect(history!.items, isEmpty);
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await tester.pumpAndSettle();
+      expect(history!.items, ['first']);
+      await tester.enterText(field, 'pending');
+      history!.select('chosen');
+      await tester.pump();
+      expect(notifier.current.filterCriteria.searchQuery, 'chosen');
+      expect(tester.widget<TextField>(field).controller!.text, 'chosen');
+      await tester.pump(const Duration(milliseconds: 310));
+      expect(notifier.current.filterCriteria.searchQuery, 'chosen');
+      expect(notifier.current.filterCriteria.naiOnly, isTrue);
+      expect(notifier.current.filterCriteria.selectedTags, ['solo']);
+      expect(history!.items, ['first']);
+    },
+  );
+
+  testWidgets(
+    'history and Ctrl tag expansion are mutually exclusive through contract',
+    (tester) async {
+      GallerySearchHistoryViewData? history;
+      await _pumpToolbar(
+        tester,
+        autocomplete: true,
+        onSearchHistoryChanged: (value) => history = value,
+      );
+      history!.setPopupOpen(true);
+      await tester.pump();
+      final field = find.byKey(const Key('gallery-search-field'));
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(find.byKey(const Key('tag-expansion-search')), findsNothing);
+      history!.setPopupOpen(false);
+      await tester.pump();
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.tap(field);
+      await tester.pump();
+      await tester.pump();
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      expect(history!.tagExpansionActive, isTrue);
+      expect(find.byKey(const Key('tag-expansion-search')), findsOneWidget);
+    },
+  );
 
   testWidgets('compact toolbar icons are centred inside their ink bounds', (
     tester,
@@ -521,6 +583,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
   bool windowChrome = false,
   ThemeData? theme,
   Locale locale = const Locale('zh'),
+  ValueChanged<GallerySearchHistoryViewData>? onSearchHistoryChanged,
 }) async {
   tester.view.physicalSize = Size(width * pixelRatio, 400 * pixelRatio);
   tester.view.devicePixelRatio = pixelRatio;
@@ -574,6 +637,7 @@ Future<_FakeGalleryNotifier> _pumpToolbar(
                   showCategoryPanel: true,
                   onToggleCategoryPanel: () {},
                   enableSearchAutocomplete: autocomplete,
+                  onSearchHistoryChanged: onSearchHistoryChanged,
                 ),
               ),
             ),

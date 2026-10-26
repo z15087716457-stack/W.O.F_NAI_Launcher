@@ -20,8 +20,44 @@ import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../providers/rag_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import '../../../core/cache/thumbnail_cache_service.dart';
+import 'settings_storage_measurement.dart';
 
-typedef SettingsDirectoryMeasurement = ({int bytes, int thumbs, int images});
+class SettingsMeasuredFile {
+  const SettingsMeasuredFile(
+    this.path,
+    this.bytes, {
+    this.image = false,
+    this.thumbnail = false,
+  });
+  final String path;
+  final int bytes;
+  final bool image;
+  final bool thumbnail;
+}
+
+class SettingsDirectoryMeasurement {
+  const SettingsDirectoryMeasurement({
+    this.bytes = 0,
+    this.thumbs = 0,
+    this.images = 0,
+    this.other = 0,
+    this.incomplete = false,
+    this.files = const {},
+    this.rootPath,
+  });
+  final int bytes, thumbs, images, other;
+  final bool incomplete;
+  final String? rootPath;
+
+  /// Canonical physical paths allow cross-category and configured-alias dedup.
+  final Map<String, SettingsMeasuredFile> files;
+}
+
+String _physicalPath(String path) {
+  final normalized = p.normalize(p.absolute(path));
+  return Platform.isWindows ? normalized.toLowerCase() : normalized;
+}
+
 typedef SettingsDirectoryMeasure =
     Future<SettingsDirectoryMeasurement> Function(String path, bool gallery);
 Future<SettingsDirectoryMeasurement> _backgroundMeasure(
@@ -78,11 +114,12 @@ final settingsFoldersProvider = FutureProvider<Map<SettingsFolder, String>>((
   final images = save.hasCustomPath
       ? save.customPath!
       : p.join(docs.path, 'NAI_Launcher', 'images');
+  final vibePath = storage.getSetting<String>(StorageKeys.vibeLibrarySavePath);
   return {
     SettingsFolder.images: images,
-    SettingsFolder.vibes:
-        storage.getSetting<String>(StorageKeys.vibeLibrarySavePath) ??
-        p.join(docs.path, 'NAI_Launcher', 'vibes'),
+    SettingsFolder.vibes: vibePath == null || vibePath.trim().isEmpty
+        ? p.join(docs.path, 'NAI_Launcher', 'vibes')
+        : vibePath,
     SettingsFolder.thumbnails: p.join(images, '.thumbs'),
     SettingsFolder.appData: await HiveStorageHelper.instance.getPath(),
     SettingsFolder.logs:
@@ -92,16 +129,22 @@ final settingsFoldersProvider = FutureProvider<Map<SettingsFolder, String>>((
 });
 
 /// No image decode, model loading, vector work, symlink traversal or writes.
-({int bytes, int thumbs, int images}) settingsMeasureDirectory(
+SettingsDirectoryMeasurement settingsMeasureDirectory(
   String path, {
   bool gallery = false,
 }) {
-  var bytes = 0, thumbs = 0, images = 0;
+  var bytes = 0, thumbs = 0, images = 0, other = 0;
+  var incomplete = false;
   final seen = <String>{};
+  final files = <String, SettingsMeasuredFile>{};
+  String? rootPath;
   void visit(Directory directory, bool thumbnail) {
-    final canonical = p.normalize(directory.absolute.path).toLowerCase();
-    if (!seen.add(canonical)) return;
     try {
+      final canonical = _physicalPath(directory.resolveSymbolicLinksSync());
+      rootPath ??= canonical;
+      if (!seen.add(canonical)) {
+        return;
+      }
       for (final item in directory.listSync(followLinks: false)) {
         if (item is Directory) {
           visit(
@@ -110,10 +153,12 @@ final settingsFoldersProvider = FutureProvider<Map<SettingsFolder, String>>((
           );
         } else if (item is File) {
           try {
+            final canonical = _physicalPath(item.resolveSymbolicLinksSync());
+            if (files.containsKey(canonical)) continue;
             final size = item.lengthSync();
-            if (thumbnail) {
-              thumbs += size;
-            } else if (!gallery ||
+            final image =
+                gallery &&
+                !thumbnail &&
                 const {
                   '.png',
                   '.jpg',
@@ -122,22 +167,42 @@ final settingsFoldersProvider = FutureProvider<Map<SettingsFolder, String>>((
                   '.bmp',
                   '.gif',
                   '.avif',
-                }.contains(p.extension(item.path).toLowerCase())) {
+                }.contains(p.extension(item.path).toLowerCase());
+            files[canonical] = SettingsMeasuredFile(
+              canonical,
+              size,
+              image: image,
+              thumbnail: thumbnail,
+            );
+            if (thumbnail) {
+              thumbs += size;
+            } else if (!gallery || image) {
               bytes += size;
-              if (gallery) images++;
+              if (image) images++;
+            } else {
+              other += size;
             }
           } on FileSystemException {
-            /* A file may be removed during measurement. */
+            incomplete = true;
           }
         }
       }
     } on FileSystemException {
-      /* Unavailable directories do not stop other sources. */
+      incomplete = true;
     }
   }
 
-  if (Directory(path).existsSync()) visit(Directory(path), false);
-  return (bytes: bytes, thumbs: thumbs, images: images);
+  // Nonexistent directories are not silently reported as successfully empty.
+  visit(Directory(path), false);
+  return SettingsDirectoryMeasurement(
+    bytes: bytes,
+    thumbs: thumbs,
+    images: images,
+    other: other,
+    incomplete: incomplete,
+    files: files,
+    rootPath: rootPath,
+  );
 }
 
 typedef SettingsDiskFree = Future<int?> Function(String path);
@@ -236,14 +301,17 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     ],
     SettingsStorageKind.agent: [folders[SettingsFolder.agent]!],
   };
-  final sizes = <SettingsStorageKind, int>{};
+  final categoryMeasurements =
+      <SettingsStorageKind, Map<String, SettingsDirectoryMeasurement>>{};
   for (final entry in categories.entries) {
-    var total = 0;
-    for (final path in entry.value) {
-      total += (await worker.measure(path)).bytes;
-    }
-    sizes[entry.key] = total;
+    categoryMeasurements[entry.key] = {
+      for (final path in entry.value) path: await worker.measure(path),
+    };
   }
+  final slices = settingsClassifyStorage(
+    galleries: measurements,
+    categories: categoryMeasurements,
+  );
   final rootRows = <SettingsGalleryRoot>[];
   for (final path in registered) {
     final normalized = p.normalize(p.absolute(path));
@@ -258,26 +326,19 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     );
   }
   return SettingsStorageData(
-    slices: [
-      SettingsStorageSlice(
-        SettingsStorageKind.images,
-        measurements.values.fold(0, (sum, value) => sum + value.bytes),
-      ),
-      SettingsStorageSlice(
-        SettingsStorageKind.thumbnails,
-        measurements.values.fold(0, (sum, value) => sum + value.thumbs),
-      ),
-      for (final entry in sizes.entries)
-        SettingsStorageSlice(entry.key, entry.value),
-    ],
+    slices: slices,
+    incomplete: slices.any((s) => s.incomplete),
     diskLabel: p.rootPrefix(primary),
     diskFree: await ref.read(settingsDiskFreeProvider)(primary),
     roots: rootRows,
-    imageCount: measurements.values.fold(0, (sum, value) => sum + value.images),
-    thumbnailBytes: measurements.values.fold(
-      0,
-      (sum, value) => sum + value.thumbs,
-    ),
+    imageCount: {
+      for (final measurement in measurements.values)
+        for (final file in measurement.files.entries)
+          if (file.value.image) file.key,
+    }.length,
+    thumbnailBytes: slices
+        .firstWhere((s) => s.kind == SettingsStorageKind.thumbnails)
+        .bytes,
     thumbnailLimit: locations.thumbnailLimit,
     folderNames: locations.folderNames,
   );

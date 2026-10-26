@@ -15,6 +15,7 @@ enum LocalImageContextAction {
   upscale,
   importMetadata,
   placeOnCanvas,
+  copyImage,
   copyPrompt,
   copySeed,
   moveTo,
@@ -53,18 +54,17 @@ class LocalImageContextMenu {
       context,
       position: position,
       quickActions: [
-        if (hasPrompt)
-          item(
-            LocalImageContextAction.copyPrompt,
-            l.localGallery_copyPrompt,
-            StudioIcons.galleryCopy,
-          ),
-        if (hasSeed)
-          item(
-            LocalImageContextAction.copySeed,
-            l.localGallery_copySeed,
-            StudioIcons.galleryHash,
-          ),
+        item(
+          LocalImageContextAction.copyImage,
+          l.imageViewer_copyImage,
+          StudioIcons.galleryCopy,
+        ),
+        item(
+          LocalImageContextAction.copyPrompt,
+          l.localGallery_copyPrompt,
+          StudioIcons.galleryCopy,
+          enabled: hasPrompt,
+        ),
       ],
       actions: [
         item(
