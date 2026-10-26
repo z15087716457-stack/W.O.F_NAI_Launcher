@@ -11377,8 +11377,6 @@
   "gen_groupBatches": "Group",
   "gen_translateAdjustPickHint": "Click blocks on the left to reference",
   "gen_translateAdjustClearRefs": "Clear references",
-  "gen_translateAdjustStepRead": "Read blocks",
-  "gen_translateAdjustStepEdit": "Edit blocks",
   "gen_translateAdjustSplitInto": "{source} → {count} blocks",
   "@gen_translateAdjustSplitInto": {
     "placeholders": {

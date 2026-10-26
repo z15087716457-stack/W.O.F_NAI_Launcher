@@ -38704,18 +38704,6 @@ abstract class AppLocalizations {
   /// **'Clear references'**
   String get gen_translateAdjustClearRefs;
 
-  /// No description provided for @gen_translateAdjustStepRead.
-  ///
-  /// In en, this message translates to:
-  /// **'Read blocks'**
-  String get gen_translateAdjustStepRead;
-
-  /// No description provided for @gen_translateAdjustStepEdit.
-  ///
-  /// In en, this message translates to:
-  /// **'Edit blocks'**
-  String get gen_translateAdjustStepEdit;
-
   /// No description provided for @gen_translateAdjustSplitInto.
   ///
   /// In en, this message translates to:

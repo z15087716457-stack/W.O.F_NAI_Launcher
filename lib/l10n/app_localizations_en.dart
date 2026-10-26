@@ -22277,12 +22277,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_translateAdjustClearRefs => 'Clear references';
 
   @override
-  String get gen_translateAdjustStepRead => 'Read blocks';
-
-  @override
-  String get gen_translateAdjustStepEdit => 'Edit blocks';
-
-  @override
   String gen_translateAdjustSplitInto(String source, int count) {
     return '$source → $count blocks';
   }

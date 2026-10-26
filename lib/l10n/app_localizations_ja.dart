@@ -21518,12 +21518,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_translateAdjustClearRefs => '参照をクリア';
 
   @override
-  String get gen_translateAdjustStepRead => 'ブロックを読む';
-
-  @override
-  String get gen_translateAdjustStepEdit => 'ブロックを調整';
-
-  @override
   String gen_translateAdjustSplitInto(String source, int count) {
     return '$source → $count ブロック';
   }

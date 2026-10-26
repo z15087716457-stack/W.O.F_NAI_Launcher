@@ -11365,8 +11365,6 @@
   "gen_groupBatches": "グループ",
   "gen_translateAdjustPickHint": "左のブロックをクリックで参照",
   "gen_translateAdjustClearRefs": "参照をクリア",
-  "gen_translateAdjustStepRead": "ブロックを読む",
-  "gen_translateAdjustStepEdit": "ブロックを調整",
   "gen_translateAdjustSplitInto": "{source} → {count} ブロック",
   "gen_translateAdjustContextNote": "コンテキスト：今回の原文・ブロック・訳文",
   "ag_historyStats": "発言 {messages} · カード {cards}",
@@ -11397,5 +11395,60 @@
   "gen_groupBatchesOn": "バッチごとに表示中 · クリックで1枚ずつ",
   "gen_groupBatchesOff": "1枚ずつ表示中 · クリックでバッチごと",
   "blocks_presetCustom": "カスタム",
-  "blocks_presetHint": "付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。"
+  "blocks_presetHint": "付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。",
+  "@gen_translateAdjustSplitInto": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_historyStats": {
+    "placeholders": {
+      "messages": {
+        "type": "int"
+      },
+      "cards": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempEditedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempEditedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempExplain": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempAddedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempRemovedHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

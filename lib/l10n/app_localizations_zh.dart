@@ -21274,12 +21274,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_translateAdjustClearRefs => '清除引用';
 
   @override
-  String get gen_translateAdjustStepRead => '读取翻译块';
-
-  @override
-  String get gen_translateAdjustStepEdit => '调整翻译块';
-
-  @override
   String gen_translateAdjustSplitInto(String source, int count) {
     return '$source → $count 块';
   }
@@ -42656,12 +42650,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_translateAdjustClearRefs => '清除引用';
-
-  @override
-  String get gen_translateAdjustStepRead => '讀取翻譯塊';
-
-  @override
-  String get gen_translateAdjustStepEdit => '調整翻譯塊';
 
   @override
   String gen_translateAdjustSplitInto(String source, int count) {

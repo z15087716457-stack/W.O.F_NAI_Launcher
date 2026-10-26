@@ -21590,12 +21590,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_translateAdjustClearRefs => '참조 지우기';
 
   @override
-  String get gen_translateAdjustStepRead => '블록 읽기';
-
-  @override
-  String get gen_translateAdjustStepEdit => '블록 조정';
-
-  @override
   String gen_translateAdjustSplitInto(String source, int count) {
     return '$source → $count개 블록';
   }

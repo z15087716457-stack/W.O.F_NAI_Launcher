@@ -11950,8 +11950,6 @@
   "gen_groupBatches": "分組",
   "gen_translateAdjustPickHint": "在左側點塊可引用",
   "gen_translateAdjustClearRefs": "清除引用",
-  "gen_translateAdjustStepRead": "讀取翻譯塊",
-  "gen_translateAdjustStepEdit": "調整翻譯塊",
   "gen_translateAdjustSplitInto": "{source} → {count} 塊",
   "gen_translateAdjustContextNote": "上下文：本次翻譯的原文、切塊和譯文",
   "ag_historyStats": "{messages} 條發言 · {cards} 張卡片",
@@ -11982,5 +11980,60 @@
   "gen_groupBatchesOn": "按批次分組 · 點選改為逐張顯示",
   "gen_groupBatchesOff": "逐張顯示 · 點選按批次分組",
   "blocks_presetCustom": "自訂",
-  "blocks_presetHint": "應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。"
+  "blocks_presetHint": "應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。",
+  "@gen_translateAdjustSplitInto": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_historyStats": {
+    "placeholders": {
+      "messages": {
+        "type": "int"
+      },
+      "cards": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempEditedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempEditedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempExplain": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempAddedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempRemovedHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -193,15 +193,17 @@ class _AgentHeaderState extends State<AgentHeader> {
                     ),
                   ],
                   const SizedBox(width: 10),
-                  Center(
-                    child: _HistoryButton(
-                      on: widget.historyOpen,
-                      label: l.ag_historyButton,
-                      tooltip: l.ag_historyTitle,
-                      onTap: widget.onHistory,
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: _HistoryButton(
+                        on: widget.historyOpen,
+                        label: l.ag_historyButton,
+                        tooltip: l.ag_historyTitle,
+                        onTap: widget.onHistory,
+                      ),
                     ),
                   ),
-                  const Spacer(),
                   UiPopover(
                     anchor: _usage,
                     onDismiss: () => setState(() => _usage = null),
@@ -534,36 +536,47 @@ class _HistoryButton extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: on,
-        child: UiPressable(
-          key: const Key('agent-history-toggle'),
-          onTap: onTap,
-          builder: (context, hover) {
-            final fg = on || hover ? c.ink : c.muted;
-            return Container(
-              height: 28,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              decoration: BoxDecoration(
-                color: on ? c.control : (hover ? c.hover : null),
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 5,
-                children: [
-                  AgentIcon(AgentGlyphs.clock, size: 15, color: fg),
-                  Text(
-                    label,
-                    style: UiText.sans(
-                      12.5,
-                      color: fg,
-                      weight: on ? FontWeight.w600 : FontWeight.w400,
-                      height: 1.2,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+        child: LayoutBuilder(
+          builder: (context, box) => UiPressable(
+            key: const Key('agent-history-toggle'),
+            onTap: onTap,
+            builder: (context, hover) {
+              // Narrow panels (long tab labels) keep only the clock icon.
+              final iconOnly = box.maxWidth < 64;
+              final fg = on || hover ? c.ink : c.muted;
+              return Container(
+                height: 28,
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: on ? c.control : (hover ? c.hover : null),
+                  borderRadius: BorderRadius.circular(7),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 5,
+                  children: [
+                    AgentIcon(AgentGlyphs.clock, size: 15, color: fg),
+                    if (!iconOnly)
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.clip,
+                          softWrap: false,
+                          style: UiText.sans(
+                            12.5,
+                            color: fg,
+                            weight: on ? FontWeight.w600 : FontWeight.w400,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );

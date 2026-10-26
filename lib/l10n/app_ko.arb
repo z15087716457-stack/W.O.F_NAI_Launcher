@@ -11365,8 +11365,6 @@
   "gen_groupBatches": "그룹",
   "gen_translateAdjustPickHint": "왼쪽 블록을 클릭해 참조",
   "gen_translateAdjustClearRefs": "참조 지우기",
-  "gen_translateAdjustStepRead": "블록 읽기",
-  "gen_translateAdjustStepEdit": "블록 조정",
   "gen_translateAdjustSplitInto": "{source} → {count}개 블록",
   "gen_translateAdjustContextNote": "컨텍스트: 이번 번역의 원문, 블록, 번역문",
   "ag_historyStats": "발언 {messages} · 카드 {cards}",
@@ -11397,5 +11395,60 @@
   "gen_groupBatchesOn": "배치별 묶음 · 클릭하면 한 장씩",
   "gen_groupBatchesOff": "한 장씩 표시 · 클릭하면 배치별 묶음",
   "blocks_presetCustom": "사용자 지정",
-  "blocks_presetHint": "부가 매개변수를 적용하면 품질 태그와 네거티브 프리셋도 함께 복원됩니다. 다른 모델에서는 단계를 자동 환산하며 Turbo는 기존 처리를 따릅니다."
+  "blocks_presetHint": "부가 매개변수를 적용하면 품질 태그와 네거티브 프리셋도 함께 복원됩니다. 다른 모델에서는 단계를 자동 환산하며 Turbo는 기존 처리를 따릅니다.",
+  "@gen_translateAdjustSplitInto": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@ag_historyStats": {
+    "placeholders": {
+      "messages": {
+        "type": "int"
+      },
+      "cards": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempEditedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempEditedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempExplain": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@blocks_tempAddedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@blocks_tempRemovedHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
