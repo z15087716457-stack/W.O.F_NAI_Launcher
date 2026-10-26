@@ -21136,9 +21136,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_historyQuestions => '问答';
 
   @override
-  String get ag_historyKeys => '↑↓ 选择 · Enter 跳到对话 · Esc 关闭';
-
-  @override
   String get ag_historyEmpty => '没有匹配的条目';
 
   @override
@@ -21289,6 +21286,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_translateAdjustContextNote => '上下文：本次翻译的原文、切块和译文';
+
+  @override
+  String ag_historyStats(int messages, int cards) {
+    return '$messages 条发言 · $cards 张卡片';
+  }
+
+  @override
+  String get ag_historyKeySelect => '选择';
+
+  @override
+  String get ag_historyKeyJump => '跳到对话';
+
+  @override
+  String get ag_historyKeyClose => '关闭';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42423,9 +42434,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_historyQuestions => '問答';
 
   @override
-  String get ag_historyKeys => '↑↓ 選擇 · Enter 跳到對話 · Esc 關閉';
-
-  @override
   String get ag_historyEmpty => '沒有匹配的條目';
 
   @override
@@ -42576,4 +42584,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_translateAdjustContextNote => '上下文：本次翻譯的原文、切塊和譯文';
+
+  @override
+  String ag_historyStats(int messages, int cards) {
+    return '$messages 條發言 · $cards 張卡片';
+  }
+
+  @override
+  String get ag_historyKeySelect => '選擇';
+
+  @override
+  String get ag_historyKeyJump => '跳到對話';
+
+  @override
+  String get ag_historyKeyClose => '關閉';
 }

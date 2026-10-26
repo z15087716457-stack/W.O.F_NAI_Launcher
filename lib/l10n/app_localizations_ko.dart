@@ -21446,9 +21446,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_historyQuestions => '질문과 답변';
 
   @override
-  String get ag_historyKeys => '↑↓ 선택 · Enter 이동 · Esc 닫기';
-
-  @override
   String get ag_historyEmpty => '일치하는 항목 없음';
 
   @override
@@ -21605,4 +21602,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_translateAdjustContextNote => '컨텍스트: 이번 번역의 원문, 블록, 번역문';
+
+  @override
+  String ag_historyStats(int messages, int cards) {
+    return '발언 $messages · 카드 $cards';
+  }
+
+  @override
+  String get ag_historyKeySelect => '선택';
+
+  @override
+  String get ag_historyKeyJump => '대화로 이동';
+
+  @override
+  String get ag_historyKeyClose => '닫기';
 }

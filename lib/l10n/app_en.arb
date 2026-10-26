@@ -11297,7 +11297,6 @@
   "ag_historyMine": "My messages",
   "ag_historyCards": "Cards",
   "ag_historyQuestions": "Q&A",
-  "ag_historyKeys": "↑↓ Select · Enter Jump · Esc Close",
   "ag_historyEmpty": "No matching entries",
   "ag_historyBeforeCompaction": "This was before compaction. Click to read the summary.",
   "ag_historyAuto": "Auto compaction",
@@ -11391,5 +11390,19 @@
       }
     }
   },
-  "gen_translateAdjustContextNote": "Context: this translation's source, blocks and output"
+  "gen_translateAdjustContextNote": "Context: this translation's source, blocks and output",
+  "ag_historyStats": "{messages} messages · {cards} cards",
+  "@ag_historyStats": {
+    "placeholders": {
+      "messages": {
+        "type": "int"
+      },
+      "cards": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyKeySelect": "Select",
+  "ag_historyKeyJump": "Jump to chat",
+  "ag_historyKeyClose": "Close"
 }

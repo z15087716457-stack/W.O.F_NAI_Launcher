@@ -22127,9 +22127,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_historyQuestions => 'Q&A';
 
   @override
-  String get ag_historyKeys => '↑↓ Select · Enter Jump · Esc Close';
-
-  @override
   String get ag_historyEmpty => 'No matching entries';
 
   @override
@@ -22293,4 +22290,18 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gen_translateAdjustContextNote =>
       'Context: this translation\'s source, blocks and output';
+
+  @override
+  String ag_historyStats(int messages, int cards) {
+    return '$messages messages · $cards cards';
+  }
+
+  @override
+  String get ag_historyKeySelect => 'Select';
+
+  @override
+  String get ag_historyKeyJump => 'Jump to chat';
+
+  @override
+  String get ag_historyKeyClose => 'Close';
 }

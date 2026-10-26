@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_colors.dart';
+import '../kit/ui_controls.dart';
 import '../kit/ui_menu.dart';
 import '../kit/ui_popover.dart';
 import '../kit/ui_text.dart';
@@ -192,52 +193,12 @@ class _AgentHeaderState extends State<AgentHeader> {
                     ),
                   ],
                   const SizedBox(width: 10),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Semantics(
-                        button: true,
-                        selected: widget.historyOpen,
-                        child: InkWell(
-                          key: const Key('agent-history-toggle'),
-                          onTap: widget.onHistory,
-                          borderRadius: BorderRadius.circular(5),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 7,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: widget.historyOpen
-                                  ? c.accent.withValues(alpha: .08)
-                                  : null,
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 4,
-                              children: [
-                                AgentIcon(
-                                  AgentGlyphs.clock,
-                                  size: 14,
-                                  color: widget.historyOpen
-                                      ? c.accent
-                                      : c.muted,
-                                ),
-                                Text(
-                                  l.ag_historyButton,
-                                  style: UiText.sans(
-                                    12,
-                                    color: widget.historyOpen
-                                        ? c.accent
-                                        : c.muted,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                  Center(
+                    child: _HistoryButton(
+                      on: widget.historyOpen,
+                      label: l.ag_historyButton,
+                      tooltip: l.ag_historyTitle,
+                      onTap: widget.onHistory,
                     ),
                   ),
                   const Spacer(),
@@ -547,6 +508,62 @@ class _UsageButtonState extends State<_UsageButton> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// 「指令」右边的「历史」：高 28、圆角 7，开着时控件底 + 墨色加粗（原型 `.hbtn`）。
+class _HistoryButton extends StatelessWidget {
+  const _HistoryButton({
+    required this.on,
+    required this.label,
+    required this.tooltip,
+    required this.onTap,
+  });
+  final bool on;
+  final String label, tooltip;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        button: true,
+        selected: on,
+        child: UiPressable(
+          key: const Key('agent-history-toggle'),
+          onTap: onTap,
+          builder: (context, hover) {
+            final fg = on || hover ? c.ink : c.muted;
+            return Container(
+              height: 28,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              decoration: BoxDecoration(
+                color: on ? c.control : (hover ? c.hover : null),
+                borderRadius: BorderRadius.circular(7),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 5,
+                children: [
+                  AgentIcon(AgentGlyphs.clock, size: 15, color: fg),
+                  Text(
+                    label,
+                    style: UiText.sans(
+                      12.5,
+                      color: fg,
+                      weight: on ? FontWeight.w600 : FontWeight.w400,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

@@ -85,8 +85,11 @@ class _AgentPanelState extends State<AgentPanel> {
             _historyAnchor.currentContext!.findRenderObject()! as RenderBox;
         final root = overlay.context.findRenderObject()! as RenderBox;
         final origin = box.localToGlobal(Offset.zero, ancestor: root);
-        final width = root.size.width < 348 ? root.size.width : 348.0;
-        final left = origin.dx >= width
+        final width = root.size.width < AgentHistory.width
+            ? root.size.width
+            : AgentHistory.width;
+        final outsideLeft = origin.dx >= width;
+        final left = outsideLeft
             ? origin.dx - width
             : root.size.width - origin.dx - box.size.width >= width
             ? origin.dx + box.size.width
@@ -97,6 +100,7 @@ class _AgentPanelState extends State<AgentPanel> {
           width: width,
           height: box.size.height,
           child: AgentHistory(
+            edge: outsideLeft ? AxisDirection.left : AxisDirection.right,
             entries: widget.data.history,
             navigation: _navigation,
             onClose: _closeHistory,

@@ -11870,7 +11870,6 @@
   "ag_historyMine": "我的發言",
   "ag_historyCards": "卡片",
   "ag_historyQuestions": "問答",
-  "ag_historyKeys": "↑↓ 選擇 · Enter 跳到對話 · Esc 關閉",
   "ag_historyEmpty": "沒有匹配的條目",
   "ag_historyBeforeCompaction": "這段在壓縮之前，點看摘要",
   "ag_historyAuto": "自動壓縮",
@@ -11954,5 +11953,9 @@
   "gen_translateAdjustStepRead": "讀取翻譯塊",
   "gen_translateAdjustStepEdit": "調整翻譯塊",
   "gen_translateAdjustSplitInto": "{source} → {count} 塊",
-  "gen_translateAdjustContextNote": "上下文：本次翻譯的原文、切塊和譯文"
+  "gen_translateAdjustContextNote": "上下文：本次翻譯的原文、切塊和譯文",
+  "ag_historyStats": "{messages} 條發言 · {cards} 張卡片",
+  "ag_historyKeySelect": "選擇",
+  "ag_historyKeyJump": "跳到對話",
+  "ag_historyKeyClose": "關閉"
 }

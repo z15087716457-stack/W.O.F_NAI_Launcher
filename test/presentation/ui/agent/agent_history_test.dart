@@ -120,6 +120,8 @@ void main() {
         'Message 4',
       );
       await t.pump();
+      // 初始无选中：第一次 ↓ 选中第一条（Message 4），第二次到 Message 40。
+      await t.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await t.sendKeyEvent(LogicalKeyboardKey.arrowDown);
       await t.sendKeyEvent(LogicalKeyboardKey.enter);
       await _frames(t);

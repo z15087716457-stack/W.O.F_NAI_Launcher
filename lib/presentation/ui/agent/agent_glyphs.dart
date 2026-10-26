@@ -58,7 +58,8 @@ abstract final class AgentGlyphs {
       'M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8C3 8 5 1 9 4zM12 8c9 0 7-7 3-4z';
   static const pspalette =
       'M12 3a9 9 0 100 18h2a2 2 0 000-4h-1a2 2 0 010-4h4c6 0 4-10-5-10zM7 9v.01M10 6v.01M15 6v.01M18 9v.01';
-  static const help = 'M12 3a9 9 0 100 18 9 9 0 000-18M9.5 9a2.5 2.5 0 115 0c0 2-2.5 2-2.5 4M12 17v.01';
+  static const help =
+      'M12 3a9 9 0 100 18 9 9 0 000-18M9.5 9a2.5 2.5 0 115 0c0 2-2.5 2-2.5 4M12 17v.01';
   static const plus = 'M12 5v14M5 12h14';
   static const chevron = 'M6 9l6 6 6-6';
   static const chevronRight = 'M9 6l6 6-6 6';

@@ -11285,7 +11285,6 @@
   "ag_historyMine": "自分の発言",
   "ag_historyCards": "カード",
   "ag_historyQuestions": "質問と回答",
-  "ag_historyKeys": "↑↓ 選択 · Enter 移動 · Esc 閉じる",
   "ag_historyEmpty": "一致する項目はありません",
   "ag_historyBeforeCompaction": "この部分は圧縮前です。クリックして要約を確認。",
   "ag_historyAuto": "自動圧縮",
@@ -11369,5 +11368,9 @@
   "gen_translateAdjustStepRead": "ブロックを読む",
   "gen_translateAdjustStepEdit": "ブロックを調整",
   "gen_translateAdjustSplitInto": "{source} → {count} ブロック",
-  "gen_translateAdjustContextNote": "コンテキスト：今回の原文・ブロック・訳文"
+  "gen_translateAdjustContextNote": "コンテキスト：今回の原文・ブロック・訳文",
+  "ag_historyStats": "発言 {messages} · カード {cards}",
+  "ag_historyKeySelect": "選択",
+  "ag_historyKeyJump": "会話へ移動",
+  "ag_historyKeyClose": "閉じる"
 }

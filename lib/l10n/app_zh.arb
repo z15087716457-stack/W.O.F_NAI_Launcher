@@ -11285,7 +11285,6 @@
   "ag_historyMine": "我的发言",
   "ag_historyCards": "卡片",
   "ag_historyQuestions": "问答",
-  "ag_historyKeys": "↑↓ 选择 · Enter 跳到对话 · Esc 关闭",
   "ag_historyEmpty": "没有匹配的条目",
   "ag_historyBeforeCompaction": "这段在压缩之前，点看摘要",
   "ag_historyAuto": "自动压缩",
@@ -11369,5 +11368,9 @@
   "gen_translateAdjustStepRead": "读取翻译块",
   "gen_translateAdjustStepEdit": "调整翻译块",
   "gen_translateAdjustSplitInto": "{source} → {count} 块",
-  "gen_translateAdjustContextNote": "上下文：本次翻译的原文、切块和译文"
+  "gen_translateAdjustContextNote": "上下文：本次翻译的原文、切块和译文",
+  "ag_historyStats": "{messages} 条发言 · {cards} 张卡片",
+  "ag_historyKeySelect": "选择",
+  "ag_historyKeyJump": "跳到对话",
+  "ag_historyKeyClose": "关闭"
 }

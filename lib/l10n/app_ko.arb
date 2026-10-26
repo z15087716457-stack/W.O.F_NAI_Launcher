@@ -11285,7 +11285,6 @@
   "ag_historyMine": "내 메시지",
   "ag_historyCards": "카드",
   "ag_historyQuestions": "질문과 답변",
-  "ag_historyKeys": "↑↓ 선택 · Enter 이동 · Esc 닫기",
   "ag_historyEmpty": "일치하는 항목 없음",
   "ag_historyBeforeCompaction": "압축 이전의 내용입니다. 눌러 요약을 확인하세요.",
   "ag_historyAuto": "자동 압축",
@@ -11369,5 +11368,9 @@
   "gen_translateAdjustStepRead": "블록 읽기",
   "gen_translateAdjustStepEdit": "블록 조정",
   "gen_translateAdjustSplitInto": "{source} → {count}개 블록",
-  "gen_translateAdjustContextNote": "컨텍스트: 이번 번역의 원문, 블록, 번역문"
+  "gen_translateAdjustContextNote": "컨텍스트: 이번 번역의 원문, 블록, 번역문",
+  "ag_historyStats": "발언 {messages} · 카드 {cards}",
+  "ag_historyKeySelect": "선택",
+  "ag_historyKeyJump": "대화로 이동",
+  "ag_historyKeyClose": "닫기"
 }

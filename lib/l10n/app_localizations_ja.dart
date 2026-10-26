@@ -21374,9 +21374,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_historyQuestions => '質問と回答';
 
   @override
-  String get ag_historyKeys => '↑↓ 選択 · Enter 移動 · Esc 閉じる';
-
-  @override
   String get ag_historyEmpty => '一致する項目はありません';
 
   @override
@@ -21533,4 +21530,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_translateAdjustContextNote => 'コンテキスト：今回の原文・ブロック・訳文';
+
+  @override
+  String ag_historyStats(int messages, int cards) {
+    return '発言 $messages · カード $cards';
+  }
+
+  @override
+  String get ag_historyKeySelect => '選択';
+
+  @override
+  String get ag_historyKeyJump => '会話へ移動';
+
+  @override
+  String get ag_historyKeyClose => '閉じる';
 }

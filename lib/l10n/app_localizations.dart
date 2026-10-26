@@ -38452,12 +38452,6 @@ abstract class AppLocalizations {
   /// **'Q&A'**
   String get ag_historyQuestions;
 
-  /// No description provided for @ag_historyKeys.
-  ///
-  /// In en, this message translates to:
-  /// **'↑↓ Select · Enter Jump · Esc Close'**
-  String get ag_historyKeys;
-
   /// No description provided for @ag_historyEmpty.
   ///
   /// In en, this message translates to:
@@ -38733,6 +38727,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Context: this translation\'s source, blocks and output'**
   String get gen_translateAdjustContextNote;
+
+  /// No description provided for @ag_historyStats.
+  ///
+  /// In en, this message translates to:
+  /// **'{messages} messages · {cards} cards'**
+  String ag_historyStats(int messages, int cards);
+
+  /// No description provided for @ag_historyKeySelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get ag_historyKeySelect;
+
+  /// No description provided for @ag_historyKeyJump.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to chat'**
+  String get ag_historyKeyJump;
+
+  /// No description provided for @ag_historyKeyClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get ag_historyKeyClose;
 }
 
 class _AppLocalizationsDelegate
