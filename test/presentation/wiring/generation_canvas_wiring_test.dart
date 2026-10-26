@@ -391,14 +391,18 @@ void main() {
           ),
         ),
     ];
+    // Create the real isolate work in runAsync before the widget can start it
+    // in the fake async zone (which cannot deliver compute completions).
+    await tester.runAsync(() async {
+      for (final image in sources) {
+        await container.read(generatedImageMetadataProvider(image).future);
+      }
+    });
     publish(ImageGenerationState(history: sources));
     await pump(tester);
     final initialBar = tester.getRect(find.byKey(const Key('gen-bar-top')));
     final initialDraft = container.read(generationParamsNotifierProvider);
     final prices = <String, int>{};
-    for (final image in sources) {
-      await container.read(generatedImageMetadataProvider(image).future);
-    }
     await tester.pumpAndSettle();
 
     for (final image in [...sources, ...sources, ...sources]) {

@@ -4,8 +4,46 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
+import 'package:nai_launcher/core/utils/isolate_pool.dart';
 
 void main() {
+  test(
+    'multi-file normalization cannot bypass the shared compute limit',
+    () async {
+      final gate = ComputeGate();
+      final release = Completer<void>();
+      final entered = [
+        for (var i = 0; i < gate.maxConcurrentTasks; i++) Completer<void>(),
+      ];
+      final blockers = [
+        for (final started in entered)
+          gate.run(() async {
+            started.complete();
+            await release.future;
+          }),
+      ];
+      await Future.wait(entered.map((e) => e.future));
+      var completed = 0;
+      final conversions = [
+        for (var i = 0; i < 8; i++)
+          NAIApiUtils.ensurePngFormatAsync(Uint8List(32)..[0] = i).then((
+            bytes,
+          ) {
+            completed++;
+            return bytes;
+          }),
+      ];
+      // All permits are held. Even invalid images must queue, not spawn isolates.
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      final blockedCount = completed;
+      release.complete();
+      await Future.wait(blockers);
+      await Future.wait(conversions);
+      expect(blockedCount, 0);
+      expect(completed, 8);
+    },
+  );
+
   test(
     '832x1216 PNG uses byte-identical normalization; record isolated timing',
     () async {

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 
 import '../../core/utils/app_logger.dart';
 import '../../core/utils/gallery_path_utils.dart';
+import '../../core/utils/isolate_pool.dart';
 import '../models/gallery/nai_image_metadata.dart';
 import 'metadata/cache_manager.dart';
 import 'metadata/hash_calculator.dart';
@@ -125,7 +126,13 @@ class ImageMetadataService {
   static final ImageMetadataService _instance =
       ImageMetadataService._internal();
   factory ImageMetadataService() => _instance;
-  ImageMetadataService._internal();
+  ImageMetadataService._internal() : _computeGate = ComputeGate();
+
+  @visibleForTesting
+  ImageMetadataService.forTesting({required ComputeGate computeGate})
+    : _computeGate = computeGate;
+
+  final ComputeGate _computeGate;
 
   // 子组件
   final _cacheManager = MetadataCacheManager();
@@ -354,9 +361,10 @@ class ImageMetadataService {
     return task.completer.future;
   }
 
-  /// 从字节数组获取元数据
+  /// 从字节数组获取元数据。哈希和解析均在有并发上限的后台 isolate 执行。
+  /// 先取哈希再查共享缓存，命中缓存或同内容的在途任务时不重复解码。
   Future<NaiImageMetadata?> getMetadataFromBytes(Uint8List bytes) async {
-    final hash = _hashCalculator.calculateFromBytes(bytes);
+    final hash = await _computeGate.runCompute(_hashMetadataBytes, bytes);
 
     // 检查 L1 内存缓存
     final memoryCached = _cacheManager.getFromMemory(hash);
@@ -558,7 +566,10 @@ class ImageMetadataService {
         return null;
       }
 
-      final result = UnifiedMetadataParser.parseFromImageBytes(bytes);
+      final result = await _computeGate.runCompute(
+        UnifiedMetadataParser.parseFromImageBytes,
+        bytes,
+      );
       final metadata = result.success ? result.metadata : null;
 
       if (metadata != null && metadata.hasData) {
@@ -582,6 +593,9 @@ class ImageMetadataService {
     }
   }
 }
+
+String _hashMetadataBytes(Uint8List bytes) =>
+    FileHashCalculator().calculateFromBytes(bytes);
 
 /// 生成图像信息
 class GeneratedImageInfo {
