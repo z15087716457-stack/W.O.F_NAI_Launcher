@@ -13,6 +13,7 @@ import '../../../data/repositories/gallery_folder_repository.dart';
 import '../../../data/services/gallery/index.dart';
 import '../../../data/services/thumbnail_service.dart';
 import '../../providers/local_gallery_provider.dart';
+import '../../providers/thumbnail_cache_limit_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import '../../utils/gallery_extra_root_add_flow.dart';
 import 'settings_dialogs.dart';
@@ -155,10 +156,9 @@ class SettingsStorageActions {
   // deletes only generated .thumbs entries and never touches original images.
   Future<void> cleanThumbnails() => _exclusive(() async {
     final service = ref.read(thumbnailServiceProvider);
-    for (final root
-        in await GalleryFolderRepository.instance.getAllRootDirs()) {
-      await service.evictThumbnailCache(root.path);
-    }
+    ref.read(thumbnailCacheLimitGbProvider);
+    final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+    await service.evictThumbnailCaches(roots.map((root) => root.path));
   });
 
   Future<void> clearCache(SettingsCacheKind kind) async {

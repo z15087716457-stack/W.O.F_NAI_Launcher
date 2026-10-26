@@ -37,6 +37,7 @@ abstract final class SettingsFixture {
     SettingKey.historyClick: 'linkedPreview',
     SettingKey.outputViewer: 'canvas',
     SettingKey.simpleViewerGroupBatches: false,
+    SettingKey.thumbnailCacheLimitGb: 20.0,
     SettingKey.canvasZoomToFill: true,
     SettingKey.costWarning: true,
     SettingKey.costThreshold: 50.0,
@@ -278,7 +279,7 @@ abstract final class SettingsFixture {
     imageCount: 12408,
     lastScanAt: DateTime(2026, 10, 14, 9, 12),
     thumbnailBytes: (1.2 * _gb) ~/ 1,
-    thumbnailLimit: 2 * _gb,
+    thumbnailLimit: 20 * _gb,
     folderNames: const {
       SettingsFolder.images: 'outputs',
       SettingsFolder.vibes: 'vibes',

@@ -7,6 +7,37 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
+  test('V5 retained Vibes and infill carry no Vibe charges', () {
+    for (final model in [
+      'nai-diffusion-5-full',
+      'nai-diffusion-5-curated',
+      'nai-diffusion-5-full-medium',
+      'nai-diffusion-4-5-full',
+    ]) {
+      final params = ImageParams(
+        model: model,
+        action: model.contains('4-5')
+            ? ImageGenerationAction.infill
+            : ImageGenerationAction.generate,
+        vibeReferencesV4: List.generate(
+          6,
+          (_) => VibeReference(
+            displayName: 'raw',
+            vibeEncoding: '',
+            rawImageData: Uint8List.fromList([1]),
+          ),
+        ),
+      );
+      expect(AnlasCalculator.usesVibeReferences(params), isFalse);
+      expect(AnlasCalculator.resolveVibeEncodingCost(params), 0);
+      expect(AnlasCalculator.resolveVibeReferenceExtraCost(params), 0);
+      expect(
+        AnlasCalculator.calculate(params),
+        AnlasCalculator.calculate(params.copyWith(vibeReferencesV4: [])),
+      );
+      expect(params.vibeReferencesV4, hasLength(6));
+    }
+  });
   const model = 'nai-diffusion-4-5-full';
 
   group('AnlasCalculator base pricing', () {

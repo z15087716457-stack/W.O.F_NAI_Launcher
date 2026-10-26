@@ -13,6 +13,7 @@ import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/data/models/prompt/prompt_preset_mode.dart';
@@ -523,6 +524,51 @@ void main() {
     expect(prepared.single.encodingModel, 'nai-diffusion-4-5-full');
     expect(apiService.callCount, 1);
   });
+
+  test(
+    'V5 and infill pre-encoding is skipped without changing the draft',
+    () async {
+      final api = _FakeEnhancementApiService();
+      final container = ProviderContainer(
+        overrides: [
+          naiImageEnhancementApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final notifier = container.read(
+        generationParamsNotifierProvider.notifier,
+      );
+      final vibes = [
+        VibeReference(
+          displayName: 'retained',
+          vibeEncoding: '',
+          rawImageData: Uint8List.fromList([1]),
+        ),
+      ];
+      for (final model in [
+        'nai-diffusion-5-full',
+        'nai-diffusion-5-curated',
+        'nai-diffusion-5-full-medium',
+        'nai-diffusion-4-5-full',
+      ]) {
+        final params = ImageParams(
+          model: model,
+          vibeReferencesV4: vibes,
+          action: model.contains('4-5')
+              ? ImageGenerationAction.infill
+              : ImageGenerationAction.generate,
+        );
+        final result = await notifier.ensureVibeReferencesEncoded(
+          vibes,
+          requestParams: params,
+          syncCurrentState: false,
+        );
+        expect(result, same(vibes));
+        expect(result.single.enabled, isTrue);
+      }
+      expect(api.callCount, 0);
+    },
+  );
 
   test('生成前不会编码已禁用的原图 Vibe', () async {
     final apiService = _FakeEnhancementApiService();

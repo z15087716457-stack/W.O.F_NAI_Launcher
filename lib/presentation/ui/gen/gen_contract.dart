@@ -660,6 +660,7 @@ class GenRefsData with _GenValue {
     this.vibes,
     this.precise,
     this.dropHover,
+    this.vibeSuspendedForInpaint = false,
   });
 
   final GenImg2Img img2img;
@@ -673,7 +674,15 @@ class GenRefsData with _GenValue {
   /// 文件正拖在哪一行上（接线方的 [GenSlots.drop] 报进出），界面画投放高亮。
   final GenDropTarget? dropHover;
   @override
-  List<Object?> get _values => [img2img, vibes, precise, dropHover];
+  List<Object?> get _values => [
+    img2img,
+    vibes,
+    precise,
+    dropHover,
+    vibeSuspendedForInpaint,
+  ];
+
+  final bool vibeSuspendedForInpaint;
 }
 
 // ───────────────────────── 图像 ─────────────────────────
@@ -1209,6 +1218,7 @@ class GenBatch with _GenValue {
     this.pending = 0,
     this.pendingWidth,
     this.pendingHeight,
+    this.pendingPreview,
   });
 
   final String id;
@@ -1222,6 +1232,7 @@ class GenBatch with _GenValue {
   /// 未提供时保留旧界面的默认比例；成图之后使用图片自身尺寸。
   final int? pendingWidth;
   final int? pendingHeight;
+  final ImageProvider? pendingPreview;
 
   int get count => images.length + pending;
   @override
@@ -1232,6 +1243,7 @@ class GenBatch with _GenValue {
     pending,
     pendingWidth,
     pendingHeight,
+    pendingPreview,
   ];
 }
 

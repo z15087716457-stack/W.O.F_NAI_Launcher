@@ -21696,4 +21696,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '부가 매개변수를 적용하면 품질 태그와 네거티브 프리셋도 함께 복원됩니다. 다른 모델에서는 단계를 자동 환산하며 Turbo는 기존 처리를 따릅니다.';
+
+  @override
+  String get gen_vibeInpaintUnsupported =>
+      'Vibe는 부분 다시 그리기(Inpainting)를 지원하지 않으므로 이번 생성에는 적용되지 않습니다.';
+
+  @override
+  String get set_stThumbnailCacheLimit => '썸네일 캐시 한도';
 }

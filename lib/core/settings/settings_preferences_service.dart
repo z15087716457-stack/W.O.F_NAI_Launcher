@@ -26,6 +26,7 @@ class SettingsPreferencesService {
       StorageKeys.historyClickBehavior,
       StorageKeys.simpleOutputViewer,
       StorageKeys.simpleViewerGroupBatches,
+      StorageKeys.thumbnailCacheLimitGb,
       StorageKeys.canvasLockCamera,
       StorageKeys.canvasReducedMotion,
       StorageKeys.canvasZoomToFill,
@@ -61,6 +62,9 @@ class SettingsPreferencesService {
     }
     if (key == StorageKeys.fontScale || key == StorageKeys.settingsFontScale) {
       return value is num && value.isFinite && value >= .8 && value <= 1.5;
+    }
+    if (key == StorageKeys.thumbnailCacheLimitGb) {
+      return value is int && value >= 1 && value <= 50;
     }
     if (key == StorageKeys.historyClickBehavior) {
       return ['open_detail', 'select_preview'].contains(value);

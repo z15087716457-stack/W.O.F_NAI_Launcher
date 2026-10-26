@@ -704,6 +704,14 @@ class ThumbnailService {
     );
   }
 
+  /// Apply one global LRU budget across all configured gallery roots.
+  Future<ThumbnailEvictionResult> evictThumbnailCaches(
+    Iterable<String> rootPaths,
+  ) async {
+    _ensureInitialized();
+    return _cacheService!.evictLRUGlobal(rootPaths);
+  }
+
   /// 清理嵌套的缩略图目录
   ///
   /// 修复缩略图递归生成bug遗留的嵌套目录问题

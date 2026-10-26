@@ -30,6 +30,7 @@ import 'presentation/providers/subscription_provider.dart'
 import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 import 'presentation/wiring/nai_agent_generation_host.dart';
+import 'presentation/wiring/clipboard_history_paste.dart';
 
 double windowCaptionHeightForRoute(String path) => switch (path) {
   AppRoutes.localGallery => 62,
@@ -67,6 +68,7 @@ class AppBootstrapEffects extends ConsumerStatefulWidget {
 }
 
 class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
+  final _clipboardHistoryPaste = ClipboardHistoryPaste();
   ProviderSubscription<dynamic>? _anlasWatcherSubscription;
   ProviderSubscription<dynamic>? _backgroundRefreshSubscription;
   ProviderSubscription<dynamic>? _kritaBridgeSubscription;
@@ -76,6 +78,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
   @override
   void initState() {
     super.initState();
+    _clipboardHistoryPaste.register();
     _anlasWatcherSubscription = ref.listenManual(
       widget.anlasWatcher ?? anlasBalanceWatcherProvider,
       (_, __) {},
@@ -102,6 +105,7 @@ class _AppBootstrapEffectsState extends ConsumerState<AppBootstrapEffects> {
 
   @override
   void dispose() {
+    _clipboardHistoryPaste.dispose();
     _anlasWatcherSubscription?.close();
     _backgroundRefreshSubscription?.close();
     _kritaBridgeSubscription?.close();

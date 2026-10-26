@@ -22,6 +22,7 @@ class FlutterWindow : public Win32Window {
   // Win32Window:
   bool OnCreate() override;
   void OnDestroy() override;
+  void OnClipboardHistoryPaste() override;
   LRESULT MessageHandler(HWND window, UINT const message, WPARAM const wparam,
                          LPARAM const lparam) noexcept override;
 
@@ -33,6 +34,7 @@ class FlutterWindow : public Win32Window {
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> material_channel_;
   std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> reveal_channel_;
   std::unique_ptr<WindowReveal> reveal_;
+  std::unique_ptr<flutter::MethodChannel<flutter::EncodableValue>> clipboard_history_channel_;
 
   // The project to run.
   flutter::DartProject project_;

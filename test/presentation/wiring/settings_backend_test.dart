@@ -14,6 +14,8 @@ import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
 import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
 import 'package:nai_launcher/presentation/providers/proxy_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
+import 'package:nai_launcher/presentation/providers/thumbnail_cache_limit_provider.dart';
+import 'package:nai_launcher/core/cache/thumbnail_cache_service.dart';
 import 'package:nai_launcher/core/services/settings_gpu_probe.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
@@ -47,6 +49,45 @@ class _SystemBrightness extends StudioSystemBrightness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'thumbnail limit persists, clamps and applies capacity/file budget',
+    () async {
+      final storage = MemoryStorage();
+      final container = ProviderContainer(
+        overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+      );
+      addTearDown(container.dispose);
+      expect(container.read(thumbnailCacheLimitGbProvider), 20);
+      expect(ThumbnailCacheService.instance.cacheLimits, (
+        maxSizeMB: 20480,
+        maxFiles: 500000,
+      ));
+      await container
+          .read(settingsValueStoreProvider)
+          .write(SettingKey.thumbnailCacheLimitGb, 50);
+      expect(storage.values[StorageKeys.thumbnailCacheLimitGb], 50);
+      expect(ThumbnailCacheService.instance.cacheLimits, (
+        maxSizeMB: 51200,
+        maxFiles: 1250000,
+      ));
+      await container
+          .read(thumbnailCacheLimitGbProvider.notifier)
+          .setLimit(100);
+      expect(container.read(thumbnailCacheLimitGbProvider), 50);
+      await container.read(thumbnailCacheLimitGbProvider.notifier).setLimit(-1);
+      expect(container.read(thumbnailCacheLimitGbProvider), 1);
+      container.invalidate(thumbnailCacheLimitGbProvider);
+      expect(container.read(thumbnailCacheLimitGbProvider), 1);
+      expect(normalizeThumbnailCacheLimitGb('bad'), 20);
+      expect(normalizeThumbnailCacheLimitGb(double.nan), 20);
+      final spec = SettingSpec.of(SettingKey.thumbnailCacheLimitGb);
+      expect(
+        (spec.min, spec.max, spec.step, spec.defaultValue),
+        (1, 50, 1, 20),
+      );
+      await container.read(thumbnailCacheLimitGbProvider.notifier).setLimit(20);
+    },
+  );
   test('simple viewer grouping persists, defaults off and reloads', () async {
     final storage = MemoryStorage();
     ProviderContainer create() => ProviderContainer(

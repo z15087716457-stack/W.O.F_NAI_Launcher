@@ -577,6 +577,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final encodedVibes = await notifier.ensureVibeReferencesEncoded(
       params.vibeReferencesV4,
       model: params.model,
+      requestParams: params,
       syncCurrentState: syncCurrentState,
     );
 

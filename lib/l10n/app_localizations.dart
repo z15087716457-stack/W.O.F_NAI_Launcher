@@ -38889,6 +38889,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.'**
   String get blocks_presetHint;
+
+  /// No description provided for @gen_vibeInpaintUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Vibe does not support Inpainting and will not apply to this generation.'**
+  String get gen_vibeInpaintUnsupported;
+
+  /// No description provided for @set_stThumbnailCacheLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Thumbnail cache limit'**
+  String get set_stThumbnailCacheLimit;
 }
 
 class _AppLocalizationsDelegate

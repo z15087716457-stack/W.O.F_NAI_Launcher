@@ -25,6 +25,7 @@ import '../../providers/share_image_settings_provider.dart';
 import '../../providers/shortcuts_provider.dart';
 import '../../providers/simple_output_viewer_provider.dart';
 import '../../providers/simple_viewer_group_batches_provider.dart';
+import '../../providers/thumbnail_cache_limit_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import 'settings_dialogs.dart';
@@ -99,6 +100,7 @@ class SettingsBackupActions {
     ref.invalidate(historyClickBehaviorNotifierProvider);
     ref.invalidate(simpleOutputViewerNotifierProvider);
     ref.invalidate(simpleViewerGroupBatchesProvider);
+    ref.invalidate(thumbnailCacheLimitGbProvider);
     ref.invalidate(canvasLockCameraNotifierProvider);
     ref.invalidate(canvasReducedMotionNotifierProvider);
     ref.invalidate(canvasZoomToFillNotifierProvider);

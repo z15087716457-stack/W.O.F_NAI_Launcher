@@ -15,6 +15,7 @@ import '../../../providers/locale_provider.dart';
 import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
 import '../../../providers/simple_viewer_group_batches_provider.dart';
+import '../../../providers/thumbnail_cache_limit_provider.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/notification_settings_provider.dart';
 import '../../../providers/share_image_settings_provider.dart';
@@ -64,6 +65,7 @@ class _SettingsPreferencesPanelState
     ref.invalidate(historyClickBehaviorNotifierProvider);
     ref.invalidate(simpleOutputViewerNotifierProvider);
     ref.invalidate(simpleViewerGroupBatchesProvider);
+    ref.invalidate(thumbnailCacheLimitGbProvider);
     ref.invalidate(canvasLockCameraNotifierProvider);
     ref.invalidate(canvasReducedMotionNotifierProvider);
     ref.invalidate(canvasZoomToFillNotifierProvider);

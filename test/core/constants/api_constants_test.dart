@@ -108,6 +108,28 @@ void main() {
       );
     });
 
+    test('all official user/image paths avoid the deprecated main host', () {
+      const official = NaiApiEndpointConfig.official;
+      for (final path in [
+        ApiConstants.loginEndpoint,
+        '/user/information',
+        ApiConstants.userDataEndpoint,
+        ApiConstants.userSubscriptionEndpoint,
+      ]) {
+        expect(Uri.parse(official.userUrl(path)).host, 'image.novelai.net');
+      }
+      for (final path in [
+        ApiConstants.generateImageEndpoint,
+        ApiConstants.generateImageStreamEndpoint,
+        ApiConstants.upscaleEndpoint,
+        ApiConstants.encodeVibeEndpoint,
+        ApiConstants.augmentImageEndpoint,
+        ApiConstants.annotateImageEndpoint,
+        ApiConstants.suggestTagsEndpoint,
+      ]) {
+        expect(Uri.parse(official.imageUrl(path)).host, 'image.novelai.net');
+      }
+    });
     test('routes official user endpoints through image host', () {
       expect(
         NaiApiEndpointConfig.official.userUrl(ApiConstants.loginEndpoint),

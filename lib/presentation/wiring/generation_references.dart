@@ -39,6 +39,7 @@ GenRefsData generationRefsView(
   final spec = ModelSpecs.of(params.model);
   return GenRefsData(
     dropHover: dropHover,
+    vibeSuspendedForInpaint: workflow.isInpaint && params.hasVibeReferencesV4,
     img2img: GenImg2Img(
       image: params.sourceImage == null
           ? null

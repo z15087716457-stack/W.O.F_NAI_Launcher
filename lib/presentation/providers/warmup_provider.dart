@@ -19,6 +19,7 @@ import 'auth_provider.dart';
 import 'font_provider.dart';
 import 'subscription_provider.dart';
 import 'local_gallery_provider.dart';
+import 'thumbnail_cache_limit_provider.dart';
 import '../../data/services/vibe_library_migration_service.dart';
 
 part 'warmup_provider.g.dart';
@@ -449,13 +450,12 @@ class WarmupNotifier extends _$WarmupNotifier {
         }
 
         final roots = await GalleryFolderRepository.instance.getAllRootDirs();
-        var evictedCount = 0;
-        var evictedBytes = 0;
-        for (final dir in roots) {
-          final result = await service.evictThumbnailCache(dir.path);
-          evictedCount += result.evictedCount;
-          evictedBytes += result.evictedBytes;
-        }
+        ref.read(thumbnailCacheLimitGbProvider);
+        final result = await service.evictThumbnailCaches(
+          roots.map((dir) => dir.path),
+        );
+        final evictedCount = result.evictedCount;
+        final evictedBytes = result.evictedBytes;
 
         if (evictedCount > 0) {
           AppLogger.i(

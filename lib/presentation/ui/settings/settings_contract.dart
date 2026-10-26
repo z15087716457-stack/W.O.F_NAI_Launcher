@@ -97,6 +97,7 @@ enum SettingKey {
   autoSave,
   vibePath,
   galleryQuality, // high / standard
+  thumbnailCacheLimitGb, // global GiB, 1..50
   appDataPath, // Hive 目录，改后需重启
   // 词库与缓存
   cacheStatsAutoRefresh,
@@ -234,6 +235,14 @@ class SettingSpec {
       _cv,
       choices: ['canvas', 'simple'],
       defaultValue: 'canvas',
+    ),
+    SettingKey.thumbnailCacheLimitGb: SettingSpec._(
+      _n,
+      _st,
+      min: 1,
+      max: 50,
+      step: 1,
+      defaultValue: 20.0,
     ),
     SettingKey.simpleViewerGroupBatches: SettingSpec._(
       _t,

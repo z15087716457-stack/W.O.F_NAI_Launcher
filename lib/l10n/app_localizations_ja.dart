@@ -21624,4 +21624,11 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。';
+
+  @override
+  String get gen_vibeInpaintUnsupported =>
+      'Vibe は部分再描画（Inpainting）に対応していないため、今回は適用されません。';
+
+  @override
+  String get set_stThumbnailCacheLimit => 'サムネイルキャッシュの上限';
 }

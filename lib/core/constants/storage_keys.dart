@@ -53,6 +53,7 @@ class StorageKeys {
   static const String historyClickBehavior = 'history_click_behavior';
   static const String simpleOutputViewer = 'simple_output_viewer';
   static const String simpleViewerGroupBatches = 'simple_viewer_group_batches';
+  static const String thumbnailCacheLimitGb = 'thumbnail_cache_limit_gb';
   static const String canvasLockCamera = 'canvas_lock_camera';
   static const String canvasReducedMotion = 'canvas_reduced_motion';
   static const String canvasZoomToFill = 'canvas_zoom_to_fill';

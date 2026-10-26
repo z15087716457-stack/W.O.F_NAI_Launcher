@@ -14,6 +14,7 @@ import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
   test(
@@ -47,6 +48,73 @@ void main() {
   );
 
   for (final streamed in [false, true]) {
+    test(
+      'V4.5 img2img and pre-encoded Vibe multipart stream=$streamed',
+      () async {
+        final adapter = _PendingDioAdapter();
+        final dio = Dio()..httpClientAdapter = adapter;
+        final endpoint = NaiApiEndpointService();
+        final service = NAIImageGenerationApiService(
+          dio,
+          NAIImageEnhancementApiService(dio, endpoint),
+          endpoint,
+        );
+        final source = _solidPng(width: 256, height: 256, r: 10, g: 20, b: 30);
+        final params = ImageParams(
+          model: 'nai-diffusion-4-5-full',
+          action: ImageGenerationAction.img2img,
+          sourceImage: source,
+          width: 256,
+          height: 256,
+          vibeReferencesV4: const [
+            VibeReference(
+              displayName: 'encoded',
+              vibeEncoding: 'test-encoding',
+              strength: .6,
+              infoExtracted: .7,
+            ),
+          ],
+        );
+        final operation = streamed
+            ? service.generateImageStream(params).drain<Object?>()
+            : service.generateImage(params).then<Object?>((_) => null);
+        final handled = operation.catchError((_) => null);
+        await _waitForRequestCount(adapter, 1);
+        final request = adapter.requests.single;
+        final parts = Map.fromEntries((request.options.data as FormData).files);
+        expect(parts.keys, unorderedEquals(['image', 'request']));
+        final payload =
+            jsonDecode(
+                  utf8.decode(
+                    await parts['request']!
+                        .clone()
+                        .finalize()
+                        .expand((b) => b)
+                        .toList(),
+                  ),
+                )
+                as Map;
+        expect(payload['action'], 'img2img');
+        expect(payload['model'], 'nai-diffusion-4-5-full');
+        final parameters = payload['parameters'] as Map;
+        expect(parameters['image'], 'image');
+        expect(parameters['reference_image_multiple'], ['test-encoding']);
+        expect(parameters['reference_strength_multiple'], [.6]);
+        expect(parameters['reference_information_extracted_multiple'], [.7]);
+        expect(
+          await parts['image']!.clone().finalize().expand((b) => b).toList(),
+          source,
+        );
+        // A stray /encode-vibe would be the first request, and fail these assertions.
+        expect(adapter.requests, hasLength(1));
+        if (streamed) {
+          request.completeWithEmptyStream();
+        } else {
+          request.completeWithEmptyZip();
+        }
+        await handled;
+      },
+    );
     test(
       'uploads source and mask as binary multipart (stream=$streamed)',
       () async {

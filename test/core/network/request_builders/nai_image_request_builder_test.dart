@@ -12,6 +12,86 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
+  test(
+    'unsupported V5 and infill never encode or send retained Vibes',
+    () async {
+      for (final model in [
+        'nai-diffusion-5-full',
+        'nai-diffusion-5-curated',
+        'nai-diffusion-5-full-medium',
+        'nai-diffusion-4-5-full',
+      ]) {
+        for (final stream in [false, true]) {
+          var encodes = 0;
+          final params = ImageParams(
+            model: model,
+            action: model.contains('4-5')
+                ? ImageGenerationAction.infill
+                : ImageGenerationAction.generate,
+            vibeReferencesV4: [
+              VibeReference(
+                displayName: 'retained',
+                vibeEncoding: 'old',
+                rawImageData: Uint8List.fromList([1]),
+              ),
+            ],
+          );
+          final payload = <String, dynamic>{};
+          final result = await NAIImageRequestBuilder(
+            params: params,
+            encodeVibe:
+                (image, {required model, informationExtracted = 1}) async {
+                  encodes++;
+                  return 'unexpected';
+                },
+          ).buildVibeTransferParameters(payload, isStream: stream);
+          expect(payload, isEmpty);
+          expect(result, isEmpty);
+          expect(encodes, 0);
+          expect(params.vibeReferencesV4.single.enabled, isTrue);
+        }
+      }
+    },
+  );
+  test(
+    'V5 encoded-only remnants and infill omit Vibe arrays in full requests',
+    () async {
+      for (final model in [
+        'nai-diffusion-5-full',
+        'nai-diffusion-5-curated',
+        'nai-diffusion-5-full-medium',
+        'nai-diffusion-4-5-full',
+      ]) {
+        for (final stream in [false, true]) {
+          final params = ImageParams(
+            model: model,
+            action: model.contains('4-5')
+                ? ImageGenerationAction.infill
+                : ImageGenerationAction.img2img,
+            sourceImage: _validPngBytes(),
+            vibeReferencesV4: const [
+              VibeReference(displayName: 'old', vibeEncoding: 'v45-encoding'),
+            ],
+          );
+          final built = await NAIImageRequestBuilder(
+            params: params,
+            encodeVibe:
+                (image, {required model, informationExtracted = 1}) async {
+                  fail('encoding must not be called');
+                },
+          ).build(sampler: Samplers.kEuler, isStream: stream);
+          for (final key in [
+            'reference_image_multiple',
+            'reference_strength_multiple',
+            'reference_information_extracted_multiple',
+          ]) {
+            expect(built.requestParameters.containsKey(key), isFalse);
+          }
+          expect(params.vibeReferencesV4.single.vibeEncoding, 'v45-encoding');
+        }
+      }
+    },
+  );
   group('NAIImageRequestBuilder.build', () {
     test(
       'old Furry uses prefix quality and its model-specific UC id',

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import '../../constants/api_constants.dart';
+import '../../constants/model_spec.dart';
+import '../../services/effective_vibe_references.dart';
 import '../../enums/precise_ref_type.dart';
 import '../../utils/app_logger.dart';
 import '../../utils/inpaint_mask_utils.dart';
@@ -224,17 +226,14 @@ class NAIImageRequestBuilder {
     required bool isStream,
   }) async {
     final vibeEncodingMap = <int, String>{};
-    if (_preciseReferences.isNotEmpty) {
-      // NovelAI 官方说明 Precise Reference 与 Vibe Transfer 不兼容，
-      // 因此两者同时存在时优先保留 Precise Reference，避免结果偏离网页端。
-      return vibeEncodingMap;
-    }
-    if (params.action == ImageGenerationAction.infill) {
-      // NovelAI 的 infill 请求会直接携带 image + mask，继续附带
-      // Vibe Transfer payload 会触发服务端 500，因此局部重绘时跳过。
-      return vibeEncodingMap;
-    }
-    if (!params.hasVibeReferencesV4) {
+    final spec = ModelSpecs.of(params.model);
+    final effective = effectiveVibeReferences(
+      params.copyWith(preciseReferences: _preciseReferences),
+      spec,
+    );
+    if (!spec.encodedVibes ||
+        effective.isEmpty ||
+        _preciseReferences.isNotEmpty) {
       return vibeEncodingMap;
     }
 

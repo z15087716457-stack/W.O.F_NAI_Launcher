@@ -10,6 +10,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/model_spec.dart';
+import '../../../core/services/effective_vibe_references.dart';
 import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/storage/local_storage_service.dart';
@@ -673,13 +675,23 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   Future<List<VibeReference>> ensureVibeReferencesEncoded(
     List<VibeReference> vibes, {
     String? model,
+    ImageParams? requestParams,
     bool syncCurrentState = true,
   }) async {
     if (vibes.isEmpty) {
       return vibes;
     }
 
-    final resolvedModel = model ?? state.model;
+    final resolvedModel = model ?? requestParams?.model ?? state.model;
+    final spec = ModelSpecs.of(resolvedModel);
+    final effective = effectiveVibeReferences(
+      (requestParams ?? state).copyWith(
+        model: resolvedModel,
+        vibeReferencesV4: vibes,
+      ),
+      spec,
+    );
+    if (!spec.encodedVibes || effective.isEmpty) return vibes;
     var changed = false;
     final encodedVibes = <VibeReference>[];
 

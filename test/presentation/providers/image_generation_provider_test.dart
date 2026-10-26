@@ -48,6 +48,7 @@ class _PendingVibeParams extends GenerationParamsNotifier {
   Future<List<VibeReference>> ensureVibeReferencesEncoded(
     List<VibeReference> vibes, {
     String? model,
+    ImageParams? requestParams,
     bool syncCurrentState = true,
   }) => prepared.future;
 }
@@ -1459,6 +1460,84 @@ void main() {
         expect(
           container.read(canvasFeedLayoutProvider).items.single.worldRect,
           placeholder.worldRect,
+        );
+      },
+    );
+
+    test(
+      'V5 and infill skip the real pre-encoding entry and retain draft Vibes',
+      () async {
+        final api = MockNAIImageGenerationApiService();
+        final enhancement = FakeNAIImageEnhancementApiService();
+        final captured = <ImageParams>[];
+        when(
+          () => api.generateImage(any(), onProgress: any(named: 'onProgress')),
+        ).thenAnswer((invocation) async {
+          captured.add(invocation.positionalArguments.first as ImageParams);
+          return ([_validImageBytes(width: 512, height: 768)], <int, String>{});
+        });
+        when(
+          () => api.generateImageStream(any()),
+        ).thenAnswer((_) => const Stream.empty());
+        container.dispose();
+        container = ProviderContainer(
+          overrides: [
+            naiImageGenerationApiServiceProvider.overrideWithValue(api),
+            naiImageEnhancementApiServiceProvider.overrideWithValue(
+              enhancement,
+            ),
+            subscriptionNotifierProvider.overrideWith(
+              TestSubscriptionNotifier.new,
+            ),
+          ],
+        );
+        await container
+            .read(notificationSettingsNotifierProvider.notifier)
+            .setSoundEnabled(false);
+        final paramsNotifier = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        paramsNotifier.addVibeReference(
+          VibeReference(
+            displayName: 'draft',
+            vibeEncoding: '',
+            rawImageData: _validImageBytes(width: 256, height: 256),
+          ),
+        );
+        final draft = container
+            .read(generationParamsNotifierProvider)
+            .vibeReferencesV4;
+        for (final model in [
+          'nai-diffusion-5-full',
+          'nai-diffusion-5-curated',
+          'nai-diffusion-5-full-medium',
+          'nai-diffusion-4-5-full',
+        ]) {
+          await container
+              .read(imageGenerationNotifierProvider.notifier)
+              .generate(
+                container
+                    .read(generationParamsNotifierProvider)
+                    .copyWith(
+                      model: model,
+                      action: model.contains('4-5')
+                          ? ImageGenerationAction.infill
+                          : ImageGenerationAction.generate,
+                    ),
+              );
+        }
+        expect(captured, hasLength(4));
+        expect(
+          container.read(generationParamsNotifierProvider).vibeReferencesV4,
+          draft,
+        );
+        expect(draft.single.enabled, isTrue);
+        verifyNever(
+          () => enhancement.encodeVibe(
+            any(),
+            model: any(named: 'model'),
+            informationExtracted: any(named: 'informationExtracted'),
+          ),
         );
       },
     );

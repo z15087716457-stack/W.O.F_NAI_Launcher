@@ -58,11 +58,7 @@ void main() {
     'NumLock on passes number keys through to native text input',
     (tester) => onWindows(() async {
       final controller = await editor(tester);
-      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
-      expect(
-        HardwareKeyboard.instance.lockModesEnabled,
-        contains(KeyboardLockMode.numLock),
-      );
+      // Reproduce startup with NumLock on but absent from lockModesEnabled.
       expect(
         await tester.sendKeyEvent(LogicalKeyboardKey.numpad4, character: '4'),
         isFalse,
@@ -77,9 +73,77 @@ void main() {
       );
       await tester.pump();
       expect(controller.text, 'Flutter4');
-      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
       await tester.sendKeyEvent(LogicalKeyboardKey.numpad4);
       expect(controller.selection, const TextSelection.collapsed(offset: 7));
+    }),
+  );
+
+  testWidgets(
+    'all digit and decimal events pass even without lock state',
+    (tester) => onWindows(() async {
+      final controller = await editor(tester);
+      for (final (key, character) in [
+        (LogicalKeyboardKey.numpad0, '0'),
+        (LogicalKeyboardKey.numpad1, '1'),
+        (LogicalKeyboardKey.numpad2, '2'),
+        (LogicalKeyboardKey.numpad3, '3'),
+        (LogicalKeyboardKey.numpad4, '4'),
+        (LogicalKeyboardKey.numpad5, '5'),
+        (LogicalKeyboardKey.numpad6, '6'),
+        (LogicalKeyboardKey.numpad7, '7'),
+        (LogicalKeyboardKey.numpad8, '8'),
+        (LogicalKeyboardKey.numpad9, '9'),
+        (LogicalKeyboardKey.numpadDecimal, '.'),
+      ]) {
+        final before = controller.value;
+        expect(await simulateKeyDownEvent(key, character: character), isFalse);
+        await simulateKeyUpEvent(key);
+        expect(controller.value, before);
+        tester.testTextInput.updateEditingValue(
+          TextEditingValue(
+            text: before.text + character,
+            selection: TextSelection.collapsed(offset: before.text.length + 1),
+          ),
+        );
+        await tester.pump();
+        expect(controller.text, before.text + character);
+      }
+    }),
+  );
+
+  testWidgets(
+    'event beats stale locked state; Ctrl/Shift Home/End stay intact',
+    (tester) => onWindows(() async {
+      final controller = await editor(tester);
+      controller.text = 'one two\nthree four';
+      controller.selection = const TextSelection.collapsed(offset: 12);
+      await tester.pump();
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
+      expect(
+        HardwareKeyboard.instance.lockModesEnabled,
+        contains(KeyboardLockMode.numLock),
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad7);
+      expect(controller.selection.extentOffset, 8);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad1);
+      expect(controller.selection.extentOffset, 18);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad7);
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 18, extentOffset: 0),
+      );
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numpad1);
+      expect(controller.selection.extentOffset, 18);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.altLeft);
+      final before = controller.selection;
+      expect(await tester.sendKeyEvent(LogicalKeyboardKey.numpad4), isFalse);
+      expect(controller.selection, before);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.altLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.numLock);
     }),
   );
 
@@ -120,8 +184,7 @@ void main() {
             final activator = entry.key as SingleActivator;
             return activator.trigger == key &&
                 activator.shift == shift &&
-                !activator.control &&
-                activator.numLock == LockState.unlocked;
+                !activator.control;
           }).value;
           expect(intent.runtimeType, type);
           final directional = intent as DirectionalCaretMovementIntent;
@@ -131,7 +194,8 @@ void main() {
       }
       expect(
         shortcuts.shortcuts.keys.cast<SingleActivator>().every(
-          (a) => a.numLock == LockState.unlocked,
+          (a) =>
+              a is NumpadNavigationActivator && a.numLock == LockState.ignored,
         ),
         isTrue,
       );
