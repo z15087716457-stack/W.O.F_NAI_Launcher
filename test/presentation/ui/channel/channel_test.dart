@@ -172,7 +172,8 @@ void main() {
       expect(calls.last, contains('pool: [circuit, stars, herb]'));
 
       await tapKey(t, 'channel-reroll');
-      expect(calls.last, isNot(contains('seed: $channelSeed')));
+      // 整数匹配：新种子可能以同样的数字开头（例如 7 → 734271340）。
+      expect(calls.last, isNot(contains('seed: $channelSeed)')));
     });
 
     testWidgets('关闭时卡片和开关不可点', (t) async {
