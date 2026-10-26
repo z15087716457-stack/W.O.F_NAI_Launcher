@@ -1208,6 +1208,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
     final requestId = ++_sourceImageRequestId;
     final params = _params;
+    final importContext = _sourceImportContext;
     final importInfo = await NaiResolutionAdapter.describeImageForImportAsync(
       imageBytes,
       currentWidth: sourceWidth ?? params.width,
@@ -1215,7 +1216,11 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       isStableDiffusionFamily: _usesStableDiffusionImportBounds(params.model),
     );
 
-    if (_isDisposed || requestId != _sourceImageRequestId) return;
+    if (_isDisposed ||
+        requestId != _sourceImageRequestId ||
+        importContext != _sourceImportContext) {
+      return;
+    }
 
     _commitSourceImage(
       imageBytes,
@@ -1224,6 +1229,18 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
       importInfo: importInfo,
     );
   }
+
+  // Only source-dependent edits cancel an import; prompt edits remain valid.
+  Object get _sourceImportContext => (
+    _params.sourceImage,
+    _params.maskImage,
+    _params.width,
+    _params.height,
+    _params.model,
+    state.mode,
+    state.isOutpaint,
+    state.isToolRunning,
+  );
 
   void _commitSourceImage(
     Uint8List effectiveBytes, {
@@ -1289,6 +1306,7 @@ class ImageWorkflowController extends Notifier<ImageWorkflowState> {
 
   void clearSourceImage() {
     if (state.isToolRunning) return;
+    _sourceImageRequestId++;
     if (state.temporaryEnhanceSource != null) closeTemporaryTool();
     if (state.baseWidth != null || state.baseHeight != null) {
       _restoreBaseParams();

@@ -21,32 +21,24 @@ async def main():
     check('只有一个启动器进程', n == 1, f'{n} 个实例')
 
     b = Bridge()
-    # 2. 认证
     try:
-        await b.connect()
-        check('WebSocket 认证', True, 'pong')
-    except Exception as e:
-        check('WebSocket 认证', False, str(e))
-        return
-    try:
+        # 2. 认证
+        try:
+            await b.connect()
+            check('WebSocket 认证', True, 'pong')
+        except Exception as e:
+            check('WebSocket 认证', False, str(e))
+            return
         # 3. get_params 字段完整性
         p = await b.rpc('get_params')
         need = ['prompt','negative_prompt','model','sampler','steps','cfg_scale','seed','width','height']
         missing = [k for k in need if k not in p]
         check('get_params 字段完整', not missing, f"缺: {missing}" if missing else '9 项核心字段全')
-        orig_steps = p['steps']
-
-        # 4. set_params 往返
-        r1 = await b.rpc('set_params', {'steps': orig_steps + 1})
-        ok1 = r1.get('type') == 'params_set' and 'steps' in r1.get('applied', [])
-        p2 = await b.rpc('get_params')
-        ok2 = p2['steps'] == orig_steps + 1
-        r2 = await b.rpc('set_params', {'steps': orig_steps})
-        p3 = await b.rpc('get_params')
-        ok3 = p3['steps'] == orig_steps
-        check('set_params 写入', ok1, str(r1.get('applied')))
-        check('set_params 读回验证', ok2, f"steps={p2['steps']}")
-        check('set_params 还原', ok3, f"steps={p3['steps']}")
+        # 4. 空更新验证协议回路，不临时改写用户参数
+        r1 = await b.rpc('set_params', {})
+        check('set_params 空更新',
+              r1.get('type') == 'params_set' and r1.get('applied') == [],
+              str(r1.get('applied')))
 
         # 5. 未知键被忽略
         r = await b.rpc('set_params', {'foo_bar_baz': 123})
@@ -55,7 +47,7 @@ async def main():
         # 6. 错误类型被忽略（steps 传字符串）
         r = await b.rpc('set_params', {'steps': 'abc'})
         p4 = await b.rpc('get_params')
-        check('错误类型忽略', r.get('applied') == [] and p4['steps'] == orig_steps, str(r.get('applied')))
+        check('错误类型忽略', r.get('applied') == [] and isinstance(p4['steps'], int), str(r.get('applied')))
 
         # 7. 错误 id 能正确回传（空 id 的 decode 错误）
         await b.ws.send(json.dumps({'type': 'set_params', 'payload': {}}))
@@ -64,9 +56,11 @@ async def main():
 
         # 8. 快速重连（模拟批量命令的开关连接）
         b2 = Bridge()
-        await b2.connect()
-        r = await b2.rpc('get_params')
-        await b2.close()
+        try:
+            await b2.connect()
+            r = await b2.rpc('get_params')
+        finally:
+            await b2.close()
         check('快速重连', r.get('type') == 'params', '')
     finally:
         await b.close()

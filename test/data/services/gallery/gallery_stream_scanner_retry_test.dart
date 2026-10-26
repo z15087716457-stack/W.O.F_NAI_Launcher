@@ -122,7 +122,7 @@ void main() {
     );
 
     test(
-      'should mark stale none records as failed when retry finds no metadata',
+      'should keep none status when retry confirms a valid image has no metadata',
       () async {
         final file = File(p.join(tempDir.path, 'stale_failed.png'));
         await file.writeAsBytes(_buildBasePngBytes());
@@ -138,8 +138,8 @@ void main() {
         ]))[imageId];
 
         expect(imageRecord, isNotNull);
-        expect(imageRecord!.metadataStatus, MetadataStatus.failed);
-        expect(metadata, isNull);
+        expect(imageRecord!.metadataStatus, MetadataStatus.none);
+        expect(metadata?.prompt ?? '', isEmpty);
       },
     );
 

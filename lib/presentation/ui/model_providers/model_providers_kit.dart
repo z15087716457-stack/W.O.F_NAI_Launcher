@@ -317,6 +317,7 @@ class ProviderInput extends StatefulWidget {
     required this.value,
     this.onChanged,
     this.onSubmitted,
+    this.submitOnBlur = true,
     this.hint,
     this.ghost,
     this.mono = false,
@@ -330,6 +331,7 @@ class ProviderInput extends StatefulWidget {
   final String value;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final bool submitOnBlur;
   final String? hint;
   final String? ghost;
   final bool mono;
@@ -354,7 +356,7 @@ class _ProviderInputState extends State<ProviderInput> {
       if (!mounted) return;
       setState(() {});
       if (_focus.hasFocus) return;
-      widget.onSubmitted?.call(_ctrl.text);
+      if (widget.submitOnBlur) widget.onSubmitted?.call(_ctrl.text);
       // 编辑期间外面的值变了（例如放弃草稿）而这一帧没再重建：失焦后补一次同步。
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && !_focus.hasFocus && widget.value != _ctrl.text) {
@@ -502,6 +504,7 @@ class ProviderNumBox extends StatefulWidget {
 
 class _ProviderNumBoxState extends State<ProviderNumBox> {
   var _editing = false;
+  var _beforeEdit = '';
   final _ctrl = TextEditingController();
   final _focus = FocusNode();
 
@@ -530,6 +533,7 @@ class _ProviderNumBoxState extends State<ProviderNumBox> {
   void _commit() {
     final t = _ctrl.text.trim();
     setState(() => _editing = false);
+    if (t == _beforeEdit) return;
     if (t.isEmpty) return widget.onChanged(null);
     final v = widget.parse?.call(t) ?? int.tryParse(t);
     if (v != null) _set(v);
@@ -610,7 +614,8 @@ class _ProviderNumBoxState extends State<ProviderNumBox> {
                       behavior: HitTestBehavior.opaque,
                       onTap: () => setState(() {
                         _editing = true;
-                        _ctrl.text = v == null ? '' : _fmt(v);
+                        _ctrl.text = v == null ? '' : '$v';
+                        _beforeEdit = _ctrl.text;
                         _ctrl.selection = TextSelection(
                           baseOffset: 0,
                           extentOffset: _ctrl.text.length,

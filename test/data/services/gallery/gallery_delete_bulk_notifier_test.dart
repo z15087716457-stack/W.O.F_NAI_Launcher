@@ -3,12 +3,15 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/database/connection_pool_holder.dart';
+import 'package:nai_launcher/core/database/database_manager.dart';
+import 'package:nai_launcher/core/database/database_providers.dart';
 import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart';
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/services/bulk_operation_service.dart'
@@ -18,6 +21,10 @@ import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/presentation/providers/bulk_operation_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
+
+import '../../../helpers/app_logger_test_isolation.dart';
+
+class _DatabaseManager extends Mock implements DatabaseManager {}
 
 class _InjectedGalleryService extends GalleryService {
   _InjectedGalleryService(this._injected);
@@ -62,14 +69,18 @@ void main() {
     late GalleryDataSource dataSource;
     late LocalGalleryServiceImpl service;
     late ProviderContainer container;
+    late bool databaseUnavailable;
 
     setUpAll(() async {
+      AppLoggerTestIsolation.setUp();
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
       await AppLogger.initialize(isTestEnvironment: true);
     });
+    tearDownAll(AppLoggerTestIsolation.tearDown);
 
     setUp(() async {
+      databaseUnavailable = false;
       SharedPreferences.setMockInitialValues({});
       tempDir = await Directory.systemTemp.createTemp(
         'nai_launcher_delete_bulk_',
@@ -109,8 +120,17 @@ void main() {
       }
       await service.initialize();
 
+      final manager = _DatabaseManager();
+      when(
+        () => manager.getDataSource<GalleryDataSource>('gallery'),
+      ).thenReturn(dataSource);
+
       container = ProviderContainer(
         overrides: [
+          databaseManagerProvider.overrideWith((_) async {
+            if (databaseUnavailable) throw StateError('database unavailable');
+            return manager;
+          }),
           galleryServiceProvider.overrideWith(
             () => _InjectedGalleryService(service),
           ),
@@ -124,10 +144,10 @@ void main() {
     });
 
     tearDown(() async {
-      addTearDown(container.dispose);
+      container.dispose();
       await const GalleryDeletePoolStore().clear();
-      await ConnectionPoolHolder.getInstanceOrNull()?.dispose();
       await dataSource.dispose();
+      await ConnectionPoolHolder.dispose();
       await Hive.close();
       await tempDir.delete(recursive: true);
     });
@@ -152,5 +172,47 @@ void main() {
       expect(paths(), hasLength(2));
       expect(state.totalCount, 2);
     });
+
+    test(
+      'failed delete undo retains history and succeeds after database recovery',
+      () async {
+        final path = container
+            .read(localGalleryNotifierProvider)
+            .timeline
+            .entries
+            .first
+            .path;
+        final notifier = container.read(bulkOperationNotifierProvider.notifier);
+        await notifier.bulkDelete([path]);
+        databaseUnavailable = true;
+        await notifier.undo();
+        var state = container.read(bulkOperationNotifierProvider);
+        expect(state.error?.code, BulkOperationErrorCode.undoFailed);
+        expect(state.canUndo, isTrue);
+        expect(state.canRedo, isFalse);
+        expect(await const GalleryDeletePoolStore().load(), contains(path));
+        expect(await dataSource.getDeletedImagePaths(), contains(path));
+
+        databaseUnavailable = false;
+        container.invalidate(databaseManagerProvider);
+        await notifier.undo();
+        state = container.read(bulkOperationNotifierProvider);
+        expect(state.error, isNull);
+        expect(state.canUndo, isFalse);
+        expect(state.canRedo, isTrue);
+        expect(
+          await const GalleryDeletePoolStore().load(),
+          isNot(contains(path)),
+        );
+        expect(await dataSource.getDeletedImagePaths(), isNot(contains(path)));
+        await notifier.redo();
+        state = container.read(bulkOperationNotifierProvider);
+        expect(state.error, isNull);
+        expect(state.canUndo, isTrue);
+        expect(state.canRedo, isFalse);
+        expect(await const GalleryDeletePoolStore().load(), contains(path));
+        expect(await dataSource.getDeletedImagePaths(), contains(path));
+      },
+    );
   });
 }

@@ -94,10 +94,7 @@ class _ExploreDetailState extends State<ExploreDetail> {
       zoomHintSeen: _hintSeen,
     );
     final actions = ViewerActions(
-      onClose: ({required keyboard}) {
-        if (scope.data.fullscreen) a.onFullscreenChanged(false);
-        widget.onClose();
-      },
+      onClose: ({required keyboard}) => widget.onClose(),
       onSelect: widget.onStep,
       onStep: (d) => _go(index + d),
       onJump: ({required last}) => _go(last ? keys.length - 1 : 0),

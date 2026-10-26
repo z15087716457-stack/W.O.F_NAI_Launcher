@@ -447,6 +447,13 @@ class InputHandler {
     }
   }
 
+  /// 取消未提交的工具交互，并释放本次手势状态。
+  void handlePointerCancel() {
+    state.currentTool?.onPointerCancel(state);
+    gesture.reset();
+    onStateChanged();
+  }
+
   /// 处理指针移动
   void handlePointerMove(PointerMoveEvent event) {
     // 中键平移

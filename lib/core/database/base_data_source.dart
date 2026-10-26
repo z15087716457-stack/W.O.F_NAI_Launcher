@@ -38,6 +38,19 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
   static const int _defaultMaxRetries = 3;
   static const int _defaultBatchSize = 50;
 
+  /// 写操作及开启写事务的查询共用数据库写锁，普通查询可并发。
+  Future<T> executeWrite<T>(
+    String operationName,
+    Future<T> Function(Database db) operation, {
+    Duration? timeout,
+    int? maxRetries,
+  }) => execute(
+    operationName,
+    (db) => ConnectionPoolHolder.instance.runWrite(() => operation(db)),
+    timeout: timeout,
+    maxRetries: maxRetries,
+  );
+
   Future<T> execute<T>(
     String operationName,
     Future<T> Function(Database db) operation, {
@@ -52,64 +65,59 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
 
     while (attempt < effectiveMaxRetries) {
       ConnectionLease? lease;
+      var operationStarted = false;
 
       try {
         lease = await _acquireLease(operationId: operationId);
 
-        final result = await lease
-            .execute(operation, validateBefore: true, autoRetry: false)
-            .timeout(effectiveTimeout);
+        final ownedLease = lease;
+        final execution = ownedLease
+            .execute(
+              (db) {
+                operationStarted = true;
+                return operation(db);
+              },
+              validateBefore: true,
+              autoRetry: false,
+            )
+            .whenComplete(ownedLease.dispose);
+        // 超时只结束调用方等待；连接仍由实际操作持有，完成后归还。
+        lease = null;
+        final result = await execution.timeout(effectiveTimeout);
 
         stopwatch.stop();
         _logOperationDuration(operationId, stopwatch.elapsedMilliseconds);
 
         return result;
-      } on ConnectionVersionMismatchException catch (e) {
-        attempt++;
-        _logRetry(
-          operationId,
-          attempt,
-          effectiveMaxRetries,
-          'version mismatch',
-          e,
-        );
-        await Future.delayed(Duration(milliseconds: 200 * attempt));
-      } on ConnectionInvalidException catch (e) {
-        attempt++;
-        _logRetry(
-          operationId,
-          attempt,
-          effectiveMaxRetries,
-          'connection invalid',
-          e,
-        );
-        await Future.delayed(Duration(milliseconds: 200 * attempt));
-      } on TimeoutException catch (e) {
-        attempt++;
-        _logRetry(operationId, attempt, effectiveMaxRetries, 'timeout', e);
-        await Future.delayed(Duration(milliseconds: 500 * attempt));
       } catch (e) {
-        if (_isRetryableError(e) && attempt < effectiveMaxRetries - 1) {
-          attempt++;
-          _logRetry(
-            operationId,
-            attempt,
-            effectiveMaxRetries,
-            'database error',
-            e,
-          );
-          final isDbClosed = e.toString().toLowerCase().contains(
-            'database has already been closed',
-          );
-          final delayMs = isDbClosed ? 500 * attempt : 200 * attempt;
-          await Future.delayed(Duration(milliseconds: delayMs));
-        } else {
+        final retryable =
+            e is ConnectionVersionMismatchException ||
+            e is ConnectionInvalidException ||
+            _isRetryableError(e);
+        if (operationStarted ||
+            e is TimeoutException ||
+            !retryable ||
+            attempt >= effectiveMaxRetries - 1) {
           throw DataSourceOperationException(
             message: 'Operation failed: $e',
             operationName: operationId,
             originalError: e,
           );
         }
+        attempt++;
+        _logRetry(
+          operationId,
+          attempt,
+          effectiveMaxRetries,
+          'connection unavailable before operation',
+          e,
+        );
+        final isDbClosed = e.toString().toLowerCase().contains(
+          'database has already been closed',
+        );
+        await Future.delayed(
+          Duration(milliseconds: (isDbClosed ? 500 : 200) * attempt),
+        );
       } finally {
         await lease?.dispose();
       }
@@ -170,7 +178,7 @@ abstract class EnhancedBaseDataSource extends ds.BaseDataSource {
     Future<T> Function(Transaction txn) operation, {
     Duration? timeout,
   }) async {
-    return execute(
+    return executeWrite(
       '$operationName.txn',
       (db) async => db.transaction((txn) async => operation(txn)),
       timeout: timeout ?? _defaultTransactionTimeout,

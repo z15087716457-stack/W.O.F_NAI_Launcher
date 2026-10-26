@@ -50,6 +50,12 @@ class AgentComposerState extends State<AgentComposer> {
   UiPopoverAnchor? _attach, _model, _permission;
 
   @override
+  void initState() {
+    super.initState();
+    _text.addListener(_detect);
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final external = AgentScope.of(context).data.composer.text;
@@ -78,7 +84,6 @@ class AgentComposerState extends State<AgentComposer> {
   void _changed(String value) {
     _sent = value;
     AgentScope.of(context).actions.onComposerChanged(value);
-    _detect();
   }
 
   void _detect() {
@@ -251,6 +256,7 @@ class AgentComposerState extends State<AgentComposer> {
   }
 
   void _pick(String insertText, String? imageId) {
+    _detect();
     final t = _trigger;
     if (t == null) return;
     final v = _text.value;
@@ -260,9 +266,7 @@ class AgentComposerState extends State<AgentComposer> {
       text: next,
       selection: TextSelection.collapsed(offset: t.start + insertText.length),
     );
-    _trigger = null;
     _changed(next);
-    setState(() {});
     if (imageId != null) {
       final s = AgentScope.of(context);
       unawaited(s.run(() => s.actions.onAttachImage(imageId)));
@@ -453,7 +457,6 @@ class AgentComposerState extends State<AgentComposer> {
                         minLines: 1,
                         maxLines: 8,
                         onChanged: _changed,
-                        onTap: _detect,
                         style: UiText.sans(13.5, color: c.ink, height: 1.6),
                         cursorColor: c.accent,
                         cursorWidth: 1.5,

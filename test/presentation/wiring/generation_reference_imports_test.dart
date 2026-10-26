@@ -5,10 +5,12 @@ import 'dart:typed_data';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
+import 'package:image/image.dart' as img;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
+import 'package:nai_launcher/core/utils/vibe_export_utils.dart';
 import 'package:nai_launcher/core/network/request_builders/nai_image_request_builder.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
@@ -56,6 +58,7 @@ class ImportStorage extends VibeLibraryStorageService {
 }
 
 class ImportDecoder extends GenerationReferenceDecoder {
+  Future<List<VibeReference>> Function(GenerationReferenceFile)? parseVibes;
   final pending = <Uint8List, Completer<Uint8List>>{};
   int normalizations = 0;
   @override
@@ -65,9 +68,10 @@ class ImportDecoder extends GenerationReferenceDecoder {
   }
 
   @override
-  Future<List<VibeReference>> vibes(GenerationReferenceFile file) async => [
-    VibeReference(displayName: file.name, vibeEncoding: 'offline-data'),
-  ];
+  Future<List<VibeReference>> vibes(GenerationReferenceFile file) async =>
+      parseVibes != null
+      ? await parseVibes!(file)
+      : [VibeReference(displayName: file.name, vibeEncoding: 'offline-data')];
 }
 
 void main() {
@@ -132,6 +136,51 @@ void main() {
       ],
     );
     return container.read(generationReferenceIdentityProvider).vibes.single;
+  }
+
+  for (final count in [16, 17]) {
+    test(
+      'encoded PNG with $count references respects the existing limit',
+      () async {
+        decoder.parseVibes = const GenerationReferenceDecoder().vibes;
+        final png = Uint8List.fromList(
+          img.encodePng(img.Image(width: 16, height: 16)),
+        );
+        final bytes = await VibeExportUtils.buildEmbeddedPngBytes(
+          vibes: [
+            for (var i = 0; i < count; i++)
+              VibeReference(
+                displayName: 'v$i',
+                vibeEncoding: 'offline-$i',
+                encodingModel: ImageModels.animeDiffusionV45Full,
+              ),
+          ],
+          carrierImageBytes: png,
+        );
+        final importing = imports.files(
+          GenDropTarget.vibe,
+          () async => [GenerationReferenceFile('bundle.png', bytes)],
+        );
+        if (count == 17) {
+          await expectLater(importing, throwsStateError);
+          expect(
+            container.read(generationParamsNotifierProvider).vibeReferencesV4,
+            isEmpty,
+          );
+          expect(platform.backups, isEmpty);
+        } else {
+          await importing;
+          final actual = container
+              .read(generationParamsNotifierProvider)
+              .vibeReferencesV4;
+          expect(actual, hasLength(16));
+          expect(actual.map((v) => v.vibeEncoding), [
+            for (var i = 0; i < 16; i++) 'offline-$i',
+          ]);
+        }
+        expect(encoded, isEmpty);
+      },
+    );
   }
 
   test(

@@ -478,7 +478,8 @@ class _Summary extends StatelessWidget {
     final l10n = context.l10n;
     var sum = 0, active = 0, days = 0, best = 0;
     DateTime? bestDay;
-    for (var d = window.start; !d.isAfter(window.last); d = addDays(d, 1)) {
+    final start = year == null ? window.start : DateTime(year!);
+    for (var d = start; !d.isAfter(window.last); d = addDays(d, 1)) {
       final v = countOn(daily, d);
       days++;
       sum += v;

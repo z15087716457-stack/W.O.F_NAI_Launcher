@@ -35,6 +35,8 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
   late bool _newPreset;
   late String? _observedPreset;
   late String? _observedInterfacePreset;
+  late TaskPresetConfig _savedPreset;
+  int _draftRevision = 0;
   int _tab = 0;
   bool get _builtin => widget.preset.id.startsWith('builtin:');
   @override
@@ -45,6 +47,7 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
       text: _builtin ? widget.preset.task.title : widget.preset.name,
     );
     _prompt = TextEditingController(text: widget.preset.prompt);
+    _savedPreset = widget.preset;
     _newPreset =
         !_builtin &&
         !ref
@@ -74,17 +77,21 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
     prompt: _prompt.text.trim(),
   );
   void _changed(String _) {
+    _draftRevision++;
     setState(() {});
-    widget.onDirtyChanged(
-      !_builtin &&
-          (_newPreset ||
-              _name.text != widget.preset.name ||
-              _prompt.text != widget.preset.prompt),
-    );
+    widget.onDirtyChanged(_hasChanges);
   }
+
+  bool get _hasChanges =>
+      !_builtin &&
+      (_newPreset ||
+          _name.text != _savedPreset.name ||
+          _prompt.text != _savedPreset.prompt);
 
   Future<bool> _save() async {
     if (_busy || _builtin || !_form.currentState!.validate()) return false;
+    final submitted = _draft;
+    final revision = _draftRevision;
     setState(() => _busy = true);
     try {
       final latest = ref
@@ -105,11 +112,17 @@ class _ModelPresetEditorState extends ConsumerState<ModelPresetEditor> {
       }
       await ref
           .read(promptAssistantConfigProvider.notifier)
-          .savePreset(_draft, applyToInterface: _newPreset);
-      if (mounted) {
-        widget.onDirtyChanged(false);
-        widget.onSaved(widget.preset.id);
+          .savePreset(submitted, applyToInterface: _newPreset);
+      if (!mounted) return false;
+      _savedPreset = submitted;
+      _observedPreset = submitted.toJson().toString();
+      _newPreset = false;
+      if (revision != _draftRevision) {
+        widget.onDirtyChanged(_hasChanges);
+        return false;
       }
+      widget.onDirtyChanged(false);
+      widget.onSaved(submitted.id);
       return true;
     } catch (error) {
       if (mounted) setState(() => _message = '$error');

@@ -38,40 +38,27 @@ class CollectionRepository {
   Future<void> _migrateLegacyHiveCollectionsIfNeeded() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool(_legacyMigrationDoneKey) ?? false) return;
+      if (!Hive.isBoxOpen(StorageKeys.collectionsBox)) return;
+      final box = Hive.box(StorageKeys.collectionsBox);
+      if (box.isEmpty && (prefs.getBool(_legacyMigrationDoneKey) ?? false)) {
+        return;
+      }
 
-      if (Hive.isBoxOpen(StorageKeys.collectionsBox)) {
-        final box = Hive.box(StorageKeys.collectionsBox);
-        if (box.isNotEmpty &&
-            (await _dataSource.listCollectionsWithCounts()).isEmpty) {
-          final entries = box.values
-              .map(
-                (data) => ImageCollection.fromJson(
-                  Map<String, dynamic>.from(data as Map),
-                ),
-              )
-              .toList();
-          final allPaths = {
-            for (final entry in entries) ...entry.imagePaths,
-          }.toList();
-          final pathToId = await _dataSource.getImageIdsByPaths(allPaths);
-
-          for (final entry in entries) {
-            if (entry.name.trim().isEmpty) continue;
-            final id = await _dataSource.createCollection(entry.name);
-            for (final path in entry.imagePaths) {
-              final imageId = pathToId[path];
-              if (imageId != null) {
-                await _dataSource.addImageToCollection(id, imageId);
-              }
-            }
-          }
-          AppLogger.i(
-            'Migrated ${entries.length} legacy collections to gallery DB',
-            'CollectionRepo',
-          );
-          await box.clear();
-        }
+      if (box.isNotEmpty) {
+        await prefs.remove(_legacyMigrationDoneKey);
+        final entries = box.values
+            .map(
+              (data) => ImageCollection.fromJson(
+                Map<String, dynamic>.from(data as Map),
+              ),
+            )
+            .toList();
+        if (!await _dataSource.migrateLegacyCollections(entries)) return;
+        AppLogger.i(
+          'Migrated ${entries.length} legacy collections to gallery DB',
+          'CollectionRepo',
+        );
+        await box.clear();
       }
       await prefs.setBool(_legacyMigrationDoneKey, true);
     } catch (e) {
@@ -121,17 +108,14 @@ class CollectionRepository {
     try {
       final ok = await _dataSource.moveCollection(id, newParentId);
       if (ok) {
-        AppLogger.i('Moved collection $id -> ${newParentId ?? 'root'}',
-            'CollectionRepo');
+        AppLogger.i(
+          'Moved collection $id -> ${newParentId ?? 'root'}',
+          'CollectionRepo',
+        );
       }
       return ok;
     } catch (e) {
-      AppLogger.e(
-        'Failed to move collection: $id',
-        e,
-        null,
-        'CollectionRepo',
-      );
+      AppLogger.e('Failed to move collection: $id', e, null, 'CollectionRepo');
       return false;
     }
   }
@@ -182,7 +166,10 @@ class CollectionRepository {
     String? parentId,
   }) async {
     try {
-      return await _dataSource.reorderCollections(orderedIds, parentId: parentId);
+      return await _dataSource.reorderCollections(
+        orderedIds,
+        parentId: parentId,
+      );
     } catch (e) {
       AppLogger.e('Failed to reorder collections', e, null, 'CollectionRepo');
       return false;
@@ -365,9 +352,8 @@ class CollectionRepository {
       return depth;
     }
 
-    final ordered = [...infos]..sort(
-        (a, b) => depthOf(b.id).compareTo(depthOf(a.id)),
-      );
+    final ordered = [...infos]
+      ..sort((a, b) => depthOf(b.id).compareTo(depthOf(a.id)));
     for (final info in ordered) {
       await _dataSource.deleteCollection(info.id);
     }

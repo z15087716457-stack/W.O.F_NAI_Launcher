@@ -12,6 +12,8 @@ import 'package:nai_launcher/core/database/dictionary_revision.dart';
 import 'package:nai_launcher/core/wiki/wiki_example_repository.dart';
 import 'package:nai_launcher/core/wiki/auto_tag_translation_controller.dart';
 import 'package:nai_launcher/core/wiki/wiki_directory.dart';
+import 'package:nai_launcher/core/wiki/wiki_bookmark_store.dart';
+import 'package:nai_launcher/presentation/screens/tag_wiki/wiki_sidebar.dart';
 import 'package:nai_launcher/core/wiki/wiki_tag_links.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -169,6 +171,15 @@ class _Rag extends RagController {
   }
 }
 
+class _HeldBookmarkDelete extends WikiBookmarkStore {
+  final gate = Completer<void>();
+  @override
+  Future<void> deleteCollection(String id) async {
+    await super.deleteCollection(id);
+    await gate.future;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -182,6 +193,7 @@ void main() {
     double width = 1200,
     GlobalKey? capture,
     _Wiki? wiki,
+    WikiBookmarkStore? bookmarks,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
@@ -190,6 +202,8 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          if (bookmarks != null)
+            wikiBookmarkStoreProvider.overrideWith((ref) => bookmarks),
           ragSettingsProvider.overrideWith(_RagSettings.new),
           ragControllerProvider.overrideWith(() => rag),
           unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
@@ -253,6 +267,132 @@ void main() {
       await tester.pump();
     }
   }
+
+  Future<(WikiBookmarkStore, WikiBookmarkCollection, WikiBookmarkCollection)>
+  collectionPage(
+    WidgetTester tester,
+    int depth, {
+    WikiBookmarkStore? store,
+  }) async {
+    final bookmarks = store ?? WikiBookmarkStore();
+    await bookmarks.load();
+    final parent = await bookmarks.createCollection('Fixture Parent');
+    var selected = parent;
+    for (var i = 0; i < depth; i++) {
+      selected = await bookmarks.createCollection(
+        'Fixture Child $i',
+        parentId: selected.id,
+      );
+    }
+    await bookmarks.addToCollection('blue_eyes', selected.id);
+    await bookmarks.toggle('short_hair');
+    await ragPage(tester, _Rag(), bookmarks: bookmarks);
+    await tester.tap(find.text(selected.name));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('wiki-row-blue_eyes')), findsOneWidget);
+    expect(find.byKey(const Key('wiki-row-short_hair')), findsNothing);
+    return (bookmarks, parent, selected);
+  }
+
+  Future<void> deleteParent(
+    WidgetTester tester,
+    WikiBookmarkCollection parent,
+  ) async {
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PopupMenuButton<String> && w.tooltip == parent.name,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (w) => w is PopupMenuItem<String> && w.value == 'delete',
+      ),
+    );
+    await tester.pumpAndSettle();
+    final labels = AppLocalizations.of(
+      tester.element(find.byType(TagWikiScreen)),
+    )!;
+    await tester.tap(
+      find.widgetWithText(FilledButton, labels.wiki_deleteCollection),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  WikiScope selection(WidgetTester tester) =>
+      tester.widget<WikiSidebar>(find.byType(WikiSidebar)).selection;
+  for (final depth in [0, 1, 2]) {
+    testWidgets(
+      'deleting a collection containing the selected scope resets live results, depth=$depth',
+      (tester) async {
+        final (store, parent, _) = await collectionPage(tester, depth);
+        await deleteParent(tester, parent);
+        expect(store.collections, isEmpty);
+        expect(selection(tester).kind, WikiScopeKind.bookmarks);
+        expect(selection(tester).id, isNull);
+        expect(find.byKey(const Key('wiki-row-blue_eyes')), findsOneWidget);
+        expect(find.byKey(const Key('wiki-row-short_hair')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+  testWidgets('deleting another branch preserves the selected sibling', (
+    tester,
+  ) async {
+    final (store, parent, _) = await collectionPage(tester, 1);
+    final sibling = await store.createCollection('Fixture Sibling');
+    await store.addToCollection('short_hair', sibling.id);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(sibling.name));
+    await tester.pumpAndSettle();
+    await deleteParent(tester, parent);
+    expect(selection(tester).id, sibling.id);
+    expect(find.byKey(const Key('wiki-row-short_hair')), findsOneWidget);
+    expect(find.byKey(const Key('wiki-row-blue_eyes')), findsNothing);
+  });
+  testWidgets(
+    'external store deletion also invalidates the current collection scope',
+    (tester) async {
+      final (store, _, current) = await collectionPage(tester, 1);
+      await store.deleteCollection(current.id);
+      await tester.pumpAndSettle();
+      expect(selection(tester).kind, WikiScopeKind.bookmarks);
+      expect(find.byKey(const Key('wiki-row-short_hair')), findsOneWidget);
+    },
+  );
+  testWidgets('deleting collections preserves an all-tags selection', (
+    tester,
+  ) async {
+    final (_, parent, _) = await collectionPage(tester, 0);
+    final labels = AppLocalizations.of(
+      tester.element(find.byType(TagWikiScreen)),
+    )!;
+    await tester.tap(find.text(labels.wiki_allTags).first);
+    await tester.pumpAndSettle();
+    await deleteParent(tester, parent);
+    expect(selection(tester).kind, WikiScopeKind.all);
+  });
+  testWidgets(
+    'delayed deletion completion cannot replace a newer valid selection',
+    (tester) async {
+      final held = _HeldBookmarkDelete();
+      addTearDown(() {
+        if (!held.gate.isCompleted) held.gate.complete();
+      });
+      final (store, parent, _) = await collectionPage(tester, 0, store: held);
+      final sibling = await store.createCollection('Fixture Sibling');
+      await store.addToCollection('short_hair', sibling.id);
+      await tester.pumpAndSettle();
+      await deleteParent(tester, parent);
+      await tester.tap(find.text(sibling.name));
+      await tester.pumpAndSettle();
+      held.gate.complete();
+      await tester.pumpAndSettle();
+      expect(selection(tester).id, sibling.id);
+      expect(find.byKey(const Key('wiki-row-short_hair')), findsOneWidget);
+      expect(find.byKey(const Key('wiki-row-blue_eyes')), findsNothing);
+    },
+  );
 
   testWidgets(
     'a completed dictionary update refreshes the selected Wiki article in place',

@@ -52,7 +52,7 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
     /// 候选路径（当前视图内文件路径列表）
     ///
     /// 传入后查询只在候选路径内进行：DB 残留行（源外/未软删的陈旧记录）
-    /// 不再占用 LIMIT 名额挤掉真实文件，且文本候选会先与视图求交。
+    /// 不再占用 LIMIT 名额挤掉真实文件；范围、文本和属性筛选共同完成后再排序取数。
     List<String>? candidatePaths,
     int limit = 100,
   }) async {
@@ -109,48 +109,39 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
     }
 
     return _trackQuery('advancedSearch', () async {
-      // 1. 预取搜索候选，兼容 prompt 与文件名两条搜索链路
-      List<int>? textSearchIds;
-      if (textQuery != null && textQuery.trim().isNotEmpty) {
-        final fullTextIds = await searchFullText(textQuery, limit: limit * 2);
-        final fileNameIds = await searchByFileName(textQuery, limit: limit * 2);
-        final metadataTextIds = await searchByMetadataText(
-          textQuery,
-          limit: limit * 2,
-        );
-        textSearchIds = {
-          ...fullTextIds,
-          ...fileNameIds,
-          ...metadataTextIds,
-        }.toList();
-        if (textSearchIds.isEmpty) {
-          return AdvancedSearchResult.empty;
-        }
-      }
-
-      // 1.5 候选路径限定：Mode A（有文本）优化
-      // 文本候选命中小集合后，直接按这批 id 查 file_path，在 Dart 内存与 candidatePaths Set 求交。
-      // 不再把 candidatePathList 全量丢进 getImageIdsByPaths。
-      if (candidatePathList != null && textSearchIds != null) {
-        final candidateSet = candidatePathList.toSet();
-        final records = await getImagesByIds(textSearchIds);
-        final inViewIds = <int>{};
-        for (final record in records) {
-          final id = record.id;
-          if (id != null && candidateSet.contains(record.filePath)) {
-            inViewIds.add(id);
-          }
-        }
-        textSearchIds = textSearchIds.where(inViewIds.contains).toList();
-        if (textSearchIds.isEmpty) {
-          return AdvancedSearchResult.empty;
-        }
-      }
+      final searchTerms = _extractSearchTerms(textQuery ?? '');
 
       return await execute('advancedSearch', (db) async {
         // 2. 构建查询条件
         final conditions = <String>['i.is_deleted = 0'];
         final args = <dynamic>[];
+
+        if (candidatePathList != null) {
+          conditions.add('i.file_path IN (SELECT value FROM json_each(?))');
+          args.add(jsonEncode(candidatePathList));
+        }
+
+        if (searchTerms.isNotEmpty) {
+          final textConditions = <String>[];
+          for (final term in searchTerms) {
+            textConditions.add(
+              r"(LOWER(i.file_name) LIKE ? ESCAPE '\' OR "
+              r"LOWER(m.positive_prompt_text) LIKE ? ESCAPE '\')",
+            );
+            final pattern = '%${_escapeLikePattern(term)}%';
+            args.addAll([pattern, pattern]);
+          }
+          textConditions.add(
+            'i.id IN (SELECT image_id FROM ${GalleryDataSource._ftsIndexTable} '
+            'WHERE ${GalleryDataSource._ftsIndexTable} MATCH ?)',
+          );
+          args.add(
+            searchTerms
+                .map((term) => '"${term.replaceAll('"', '""')}"*')
+                .join(' OR '),
+          );
+          conditions.add('(${textConditions.join(' OR ')})');
+        }
 
         if (favoritesOnly) {
           conditions.add('f.image_id IS NOT NULL');
@@ -225,6 +216,7 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
 
         // ---- 元数据过滤（model/sampler/resolution/方向/steps/cfg/NSFW/NAI-only）----
         final needsMetadataJoin =
+            searchTerms.isNotEmpty ||
             models != null ||
             samplers != null ||
             minSteps != null ||
@@ -329,105 +321,22 @@ extension GalleryDataSourceAdvancedSearch on GalleryDataSource {
               ${needsMetadataJoin ? 'LEFT JOIN ${GalleryDataSource._metadataTable} m ON m.image_id = i.id' : ''}
               ''';
 
-        // 3. 执行查询
-        const textIdChunkSize = 900;
-        final ids = <int>[];
-        final paths = <String>[];
-        final seenIds = <int>{};
-
-        if (candidatePathList != null) {
-          if (textSearchIds != null && textSearchIds.isNotEmpty) {
-            // Mode A：有文本 + 候选路径限定
-            // textSearchIds 已在内存与 candidatePaths 求交，此处按 900 分块执行 SQL 属性过滤与排序
-            for (var i = 0; i < textSearchIds.length; i += textIdChunkSize) {
-              final end = min(i + textIdChunkSize, textSearchIds.length);
-              final idChunk = textSearchIds.sublist(i, end);
-              final placeholders = List.filled(idChunk.length, '?').join(',');
-              final results = await db.rawQuery(
-                '''
-                  $selectPrefix
-                  WHERE $whereClause AND i.id IN ($placeholders)
-                  ORDER BY $sortColumn $orderDirection
-                  LIMIT ?
-                  ''',
-                [...args, ...idChunk, limit],
-              );
-              for (final row in results) {
-                final id = (row['id'] as num).toInt();
-                if (seenIds.add(id)) {
-                  ids.add(id);
-                  paths.add(row['file_path'] as String);
-                }
-              }
-            }
-          } else {
-            // Mode B：无文本 + 候选路径限定
-            // 单次 SQL 查出所有符合条件的记录，在 Dart 内存与候选路径 Set 求交。
-            // 不带 ORDER BY（结果交给调用方排序），消除 800/块的分块循环与无效排序。
-            final results = await db.rawQuery('''
-                $selectPrefix
-                WHERE $whereClause
-                ''', args);
-            final candidateSet = candidatePathList.toSet();
-            for (final row in results) {
-              final path = row['file_path'] as String?;
-              if (path != null && candidateSet.contains(path)) {
-                final id = (row['id'] as num).toInt();
-                if (seenIds.add(id)) {
-                  ids.add(id);
-                  paths.add(path);
-                }
-              }
-            }
-          }
-        } else {
-          // 无候选路径（兼容旧调用）
-          if (textSearchIds != null && textSearchIds.isNotEmpty) {
-            // 恢复旧语义：无候选路径且 textSearchIds 非空时，按 900 分块 AND i.id IN (...) 约束结果
-            for (var i = 0; i < textSearchIds.length; i += textIdChunkSize) {
-              final end = min(i + textIdChunkSize, textSearchIds.length);
-              final idChunk = textSearchIds.sublist(i, end);
-              final placeholders = List.filled(idChunk.length, '?').join(',');
-              final results = await db.rawQuery(
-                '''
-                  $selectPrefix
-                  WHERE $whereClause AND i.id IN ($placeholders)
-                  ORDER BY $sortColumn $orderDirection
-                  LIMIT ?
-                  ''',
-                [...args, ...idChunk, limit],
-              );
-              for (final row in results) {
-                final id = (row['id'] as num).toInt();
-                if (seenIds.add(id)) {
-                  ids.add(id);
-                  paths.add(row['file_path'] as String);
-                }
-              }
-            }
-          } else {
-            // 无文本搜索且无候选路径：单查询带 ORDER BY 与 LIMIT
-            final results = await db.rawQuery(
-              '''
-                $selectPrefix
-                WHERE $whereClause
-                ORDER BY $sortColumn $orderDirection
-                LIMIT ?
-                ''',
-              [...args, limit],
-            );
-            for (final row in results) {
-              final id = (row['id'] as num).toInt();
-              if (seenIds.add(id)) {
-                ids.add(id);
-                paths.add(row['file_path'] as String);
-              }
-            }
-          }
-        }
-
-        final resultIds = ids.take(limit).toList(growable: false);
-        final resultPaths = paths.take(limit).toList(growable: false);
+        // 范围、文本和属性筛选在同一查询中完成，最后排序和限制数量。
+        final results = await db.rawQuery(
+          '''
+            $selectPrefix
+            WHERE $whereClause
+            ORDER BY $sortColumn $orderDirection
+            LIMIT ?
+          ''',
+          [...args, limit],
+        );
+        final resultIds = results
+            .map((row) => (row['id'] as num).toInt())
+            .toList(growable: false);
+        final resultPaths = results
+            .map((row) => row['file_path'] as String)
+            .toList(growable: false);
         final searchResult = AdvancedSearchResult(
           ids: resultIds,
           filePaths: resultPaths,

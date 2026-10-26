@@ -8,7 +8,7 @@ extension GalleryImageManagementQueries on GalleryDataSource {
     String newRoot, {
     Map<String, String> aliases = const {},
   }) async {
-    final count = await execute(
+    final count = await executeWrite(
       'relocateDirectoryRecords',
       (db) => db.transaction((txn) async {
         final rows = await txn.query(
@@ -51,7 +51,7 @@ extension GalleryImageManagementQueries on GalleryDataSource {
     return count;
   }
 
-  Future<Map<String, dynamic>> readCollectionManagementState() => execute(
+  Future<Map<String, dynamic>> readCollectionManagementState() => executeWrite(
     'readCollectionManagementState',
     (db) => db.transaction((txn) async {
       final collections = await txn.query(

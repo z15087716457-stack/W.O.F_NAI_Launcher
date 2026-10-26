@@ -404,11 +404,21 @@ class VibeLibraryStorageService
     try {
       var entryToSave = entry.normalizedForLibraryStorage();
       final filePath = entryToSave.filePath;
+      var stored = false;
       if (filePath == null || filePath.isEmpty) {
-        entryToSave = await _saveEntryFile(entryToSave);
+        final previous = await _readStoredEntry(entry.id);
+        final previousPath = previous?.filePath;
+        if (previousPath != null && previousPath.isNotEmpty) {
+          entryToSave = await _replaceEntryFile(entryToSave, previousPath, [
+            entryToSave.toVibeReference(),
+          ], bundle: false);
+          stored = true;
+        } else {
+          entryToSave = await _saveEntryFile(entryToSave);
+        }
       }
 
-      await _putStoredEntry(entryToSave);
+      if (!stored) await _putStoredEntry(entryToSave);
       await _upsertDisplayEntryIfReady(entryToSave);
       await _deleteDisplayThumbnailCache(entryToSave.id);
       AppLogger.d('Entry saved: ${entryToSave.displayName}', _tag);
@@ -417,6 +427,29 @@ class VibeLibraryStorageService
       AppLogger.e('Failed to save entry', e, stackTrace, _tag);
       rethrow;
     }
+  }
+
+  Future<VibeLibraryEntry> _replaceEntryFile(
+    VibeLibraryEntry entry,
+    String previousPath,
+    List<VibeReference> vibes, {
+    required bool bundle,
+  }) async {
+    late VibeLibraryEntry saved;
+    await _fileStorage.replaceLibraryFile(
+      previousPath: previousPath,
+      name: entry.name,
+      vibes: vibes,
+      bundle: bundle,
+      onCommit: (path) async {
+        saved = entry.copyWith(
+          filePath: path,
+          bundleId: bundle ? p.basenameWithoutExtension(path) : null,
+        );
+        await _putStoredEntry(saved);
+      },
+    );
+    return saved;
   }
 
   /// Parsed .naiv4vibe/.naiv4vibebundle import, preserving the original file's
@@ -577,26 +610,11 @@ class VibeLibraryStorageService
     try {
       if (vibes.isEmpty) throw ArgumentError('vibes cannot be empty');
 
-      final existingPath = replaceEntry?.filePath;
-      final canOverwriteExistingBundle =
-          existingPath != null &&
-          existingPath.isNotEmpty &&
-          p.extension(existingPath).toLowerCase() == '.naiv4vibebundle' &&
-          await File(existingPath).exists();
-      late final String filePath;
-      if (canOverwriteExistingBundle) {
-        filePath = existingPath;
-        await _fileStorage.overwriteBundleFile(filePath, vibes);
-      } else {
-        filePath = await _fileStorage.saveBundleToFile(vibes, bundleName: name);
-      }
-
       var entry = VibeLibraryEntry.fromVibeReference(
-        name: p.basenameWithoutExtension(filePath),
+        name: name,
         vibeData: vibes.first,
         categoryId: categoryId,
         tags: tags,
-        filePath: filePath,
       );
 
       final existingEntry = replaceEntry;
@@ -611,7 +629,6 @@ class VibeLibraryStorageService
       }
 
       entry = entry.copyWith(
-        bundleId: p.basenameWithoutExtension(filePath),
         bundledVibeNames: vibes.map((v) => v.displayName).toList(),
         bundledVibePreviews: () {
           final previews = vibes
@@ -627,7 +644,26 @@ class VibeLibraryStorageService
         bundledVibeEncodingModels: vibes.map((v) => v.encodingModel).toList(),
       );
 
-      await _putStoredEntry(entry);
+      final previousPath = replaceEntry?.filePath;
+      if (previousPath != null && previousPath.isNotEmpty) {
+        entry = await _replaceEntryFile(
+          entry,
+          previousPath,
+          vibes,
+          bundle: true,
+        );
+      } else {
+        final filePath = await _fileStorage.saveBundleToFile(
+          vibes,
+          bundleName: name,
+        );
+        entry = entry.copyWith(
+          name: p.basenameWithoutExtension(filePath),
+          filePath: filePath,
+          bundleId: p.basenameWithoutExtension(filePath),
+        );
+        await _putStoredEntry(entry);
+      }
       await _upsertDisplayEntryIfReady(entry);
       await _deleteDisplayThumbnailCache(entry.id);
       AppLogger.d('Bundle entry saved: ${entry.displayName}', _tag);

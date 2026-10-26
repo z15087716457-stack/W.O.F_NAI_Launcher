@@ -141,7 +141,8 @@ class IsolateMetadataService {
 
   /// 是否已初始化
   bool _initialized = false;
-  bool _fallbackToInlineParsing = false;
+  Future<void>? _initialization;
+  int _lifecycle = 0;
   String? _workerStartupError;
 
   /// 统计信息
@@ -152,15 +153,17 @@ class IsolateMetadataService {
   int _timeoutTasks = 0;
 
   /// 初始化服务
-  Future<void> initialize() async {
-    if (_initialized) return;
+  Future<void> initialize() {
+    if (_initialized) return Future.value();
+    return _initialization ??= _initialize(_lifecycle);
+  }
 
+  Future<void> _initialize(int lifecycle) async {
     AppLogger.i(
       '[IsolateMetadata] Initializing with $_maxWorkers workers',
       'IsolateMetadataService',
     );
 
-    _fallbackToInlineParsing = false;
     _workerStartupError = null;
 
     final initializedWorkers = <_ParseWorker>[];
@@ -180,6 +183,12 @@ class IsolateMetadataService {
 
         initializedWorkers.add(pendingWorker);
         pendingWorker = null;
+        if (lifecycle != _lifecycle) {
+          for (final worker in initializedWorkers) {
+            worker.dispose();
+          }
+          return;
+        }
       }
 
       _workers.addAll(initializedWorkers);
@@ -190,13 +199,13 @@ class IsolateMetadataService {
       for (final worker in initializedWorkers) {
         worker.dispose();
       }
+      if (lifecycle != _lifecycle) return;
       _workers.clear();
       _taskQueue.clear();
-      _fallbackToInlineParsing = true;
       _workerStartupError = e.toString();
 
       AppLogger.e(
-        '[IsolateMetadata] Worker startup failed, falling back to inline parsing',
+        '[IsolateMetadata] Worker startup failed',
         e,
         stackTrace,
         'IsolateMetadataService',
@@ -242,17 +251,24 @@ class IsolateMetadataService {
     required IsolateParseConfig config,
     required bool Function(String hash)? hashDecider,
   }) async {
-    await initialize();
-
+    final lifecycle = _lifecycle;
     final stopwatch = Stopwatch()..start();
     _totalTasks++;
+    await initialize();
+    if (lifecycle != _lifecycle) {
+      _cancelledTasks++;
+      return IsolateParseResult.error(
+        'Cancelled during worker startup',
+        parseTime: stopwatch.elapsed,
+        wasCancelled: true,
+      );
+    }
 
-    if (_fallbackToInlineParsing || _workers.isEmpty) {
-      return _parseInline(
-        filePath,
-        config,
-        stopwatch,
-        hashDecider: hashDecider,
+    if (_workers.isEmpty) {
+      _failedTasks++;
+      return IsolateParseResult.error(
+        'Metadata workers unavailable: $_workerStartupError',
+        parseTime: stopwatch.elapsed,
       );
     }
 
@@ -418,7 +434,6 @@ class IsolateMetadataService {
     'successRate': _totalTasks > 0 ? _successfulTasks / _totalTasks : 0.0,
     'activeWorkers': _workers.where((w) => w.isBusy).length,
     'queuedTasks': _taskQueue.length,
-    'fallbackToInlineParsing': _fallbackToInlineParsing,
     'workerStartupError': _workerStartupError,
   };
 
@@ -443,126 +458,12 @@ class IsolateMetadataService {
     }
     _workers.clear();
     _initialized = false;
-    _fallbackToInlineParsing = false;
+    _initialization = null;
+    _lifecycle++;
     _workerStartupError = null;
   }
 
   // ==================== 私有方法 ====================
-
-  Future<IsolateParseResult> _parseInline(
-    String filePath,
-    IsolateParseConfig config,
-    Stopwatch stopwatch, {
-    bool Function(String hash)? hashDecider,
-  }) async {
-    try {
-      if (hashDecider != null) {
-        // 与 worker 路径同语义：单次读取，先算哈希交调用方决策
-        final file = File(filePath);
-        if (!await file.exists()) {
-          stopwatch.stop();
-          _failedTasks++;
-          return IsolateParseResult.error(
-            'File not found: $filePath',
-            parseTime: stopwatch.elapsed,
-          );
-        }
-        final bytes = await file.readAsBytes();
-        final fileHash = sha256.convert(bytes).toString();
-
-        bool shouldParse;
-        try {
-          shouldParse = hashDecider(fileHash);
-        } catch (_) {
-          shouldParse = true;
-        }
-        if (!shouldParse) {
-          stopwatch.stop();
-          return IsolateParseResult.skipped(fileHash);
-        }
-
-        final metadataResult = await Future<MetadataParseResult>.sync(
-          () => config.useGradualRead
-              ? UnifiedMetadataParser.parseFromBytesGradual(
-                  bytes,
-                  filePathForLog: filePath,
-                  useCache: config.useCache,
-                )
-              : UnifiedMetadataParser.parseFromImageBytes(
-                  bytes,
-                  filePathForLog: filePath,
-                  useCache: config.useCache,
-                ),
-        );
-
-        stopwatch.stop();
-
-        final hashResult =
-            metadataResult.success && metadataResult.metadata != null
-            ? IsolateParseResult.success(
-                metadataResult.metadata!,
-                parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-                bytesRead: metadataResult.bytesRead,
-                fileHash: fileHash,
-              )
-            : IsolateParseResult.error(
-                metadataResult.errorMessage ?? 'Failed to parse metadata',
-                parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-                fileHash: fileHash,
-              );
-
-        if (hashResult.success) {
-          _successfulTasks++;
-        } else {
-          _failedTasks++;
-        }
-
-        return hashResult;
-      }
-
-      final metadataResult = await Future<MetadataParseResult>.sync(
-        () => UnifiedMetadataParser.parseFromFile(
-          filePath,
-          useGradualRead: config.useGradualRead,
-          useCache: config.useCache,
-        ),
-      );
-
-      stopwatch.stop();
-
-      final result = metadataResult.success && metadataResult.metadata != null
-          ? IsolateParseResult.success(
-              metadataResult.metadata!,
-              parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-              bytesRead: metadataResult.bytesRead,
-            )
-          : IsolateParseResult.error(
-              metadataResult.errorMessage ?? 'Failed to parse metadata',
-              parseTime: metadataResult.parseTime ?? stopwatch.elapsed,
-            );
-
-      if (result.success) {
-        _successfulTasks++;
-      } else {
-        _failedTasks++;
-      }
-
-      return result;
-    } catch (e, stackTrace) {
-      stopwatch.stop();
-      _failedTasks++;
-      AppLogger.e(
-        '[IsolateMetadata] Inline parse error: $e',
-        e,
-        stackTrace,
-        'IsolateMetadataService',
-      );
-      return IsolateParseResult.error(
-        'Inline parse error: $e',
-        parseTime: stopwatch.elapsed,
-      );
-    }
-  }
 
   Future<IsolateParseResult> _executeTask(
     _ParseWorker worker,
@@ -1071,11 +972,11 @@ void _handleParseRequest(_ParseRequest request, SendPort sendPort) {
 
     stopwatch.stop();
 
-    if (result.success && result.metadata != null) {
+    if (result.metadataAbsent || (result.success && result.metadata != null)) {
       sendPort.send(
         _ParseResponse(
           requestId: request.requestId,
-          metadata: result.metadata,
+          metadata: result.metadata ?? const NaiImageMetadata(),
           parseTime: stopwatch.elapsed,
           bytesRead: readInIsolate ? null : request.bytes.length,
           wasCancelled: false,
@@ -1138,11 +1039,11 @@ void _handleParseContinue(_ParseContinueRequest request, SendPort sendPort) {
 
     stopwatch.stop();
 
-    if (result.success && result.metadata != null) {
+    if (result.metadataAbsent || (result.success && result.metadata != null)) {
       sendPort.send(
         _ParseResponse(
           requestId: request.requestId,
-          metadata: result.metadata,
+          metadata: result.metadata ?? const NaiImageMetadata(),
           parseTime: stopwatch.elapsed,
           bytesRead: retained.useGradualRead ? null : retained.bytes.length,
           wasCancelled: false,

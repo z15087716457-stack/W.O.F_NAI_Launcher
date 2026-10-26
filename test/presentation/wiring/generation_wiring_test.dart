@@ -40,6 +40,7 @@ import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
+import 'package:nai_launcher/presentation/wiring/generation_operations.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
@@ -141,6 +142,74 @@ void main() {
     final params = container.read(generationParamsNotifierProvider);
     return target.negative ? params.negativePrompt : params.prompt;
   }
+
+  testWidgets(
+    'placing img2img source preserves bytes, reuses tile and focuses it',
+    (tester) async {
+      final bytes = Uint8List.fromList(
+        img.encodePng(img.Image(width: 16, height: 16)),
+      );
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .setSourceImage(bytes);
+      await pump(tester);
+      final host = tester.state<ConsumerState>(find.byType(GenerationWiring));
+      final operations = GenerationOperations(
+        host.ref,
+        host.context,
+        () => host.mounted,
+      );
+      await tester.runAsync(operations.placeSource);
+      final generation = container.read(imageGenerationNotifierProvider);
+      expect(generation.history, hasLength(1));
+      final id = generation.history.single.id;
+      expect(generation.history.single.bytes, orderedEquals(bytes));
+      expect(container.read(generationPreviewSelectionProvider), id);
+      final otherBytes = Uint8List.fromList(
+        img.encodePng(img.Image(width: 17, height: 17)),
+      );
+      container
+          .read(imageGenerationNotifierProvider.notifier)
+          .registerSourceImage(otherBytes);
+      await tester.runAsync(operations.placeSource);
+      expect(
+        container.read(imageGenerationNotifierProvider).history,
+        hasLength(2),
+      );
+      expect(container.read(generationPreviewSelectionProvider), id);
+      expect(
+        container.read(generationParamsNotifierProvider).prompt,
+        'current prompt',
+      );
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+  testWidgets('placing img2img source is blocked during generation', (
+    tester,
+  ) async {
+    final bytes = Uint8List.fromList(
+      img.encodePng(img.Image(width: 16, height: 16)),
+    );
+    container
+        .read(generationParamsNotifierProvider.notifier)
+        .setSourceImage(bytes);
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(
+          const ImageGenerationState(status: GenerationStatus.generating),
+        );
+    await pump(tester);
+    final host = tester.state<ConsumerState>(find.byType(GenerationWiring));
+    await tester.runAsync(
+      GenerationOperations(
+        host.ref,
+        host.context,
+        () => host.mounted,
+      ).placeSource,
+    );
+    expect(container.read(imageGenerationNotifierProvider).history, isEmpty);
+    expect(container.read(generationPreviewSelectionProvider), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
 
   for (final target in const [
     GenEditorTarget.base(),

@@ -1079,7 +1079,8 @@ class _ManualAddState extends State<_ManualAdd> {
           Expanded(
             child: ProviderInput(
               key: const Key('mp-manual-input'),
-              value: '',
+              value: _v,
+              submitOnBlur: false,
               mono: true,
               autofocus: true,
               hint: l.mp_manualHint,

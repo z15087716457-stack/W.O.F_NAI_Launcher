@@ -72,8 +72,8 @@ class NaiResolutionAdapter {
     final fitsCurrent =
         currentWidth != null &&
         currentHeight != null &&
-        orientedWidth <= currentWidth &&
-        orientedHeight <= currentHeight;
+        sourceWidth <= currentWidth &&
+        sourceHeight <= currentHeight;
 
     if (currentMatchesAspect && fitsCurrent) {
       return (

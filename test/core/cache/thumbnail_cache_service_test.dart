@@ -21,7 +21,7 @@ void main() {
           r'G:\AIdarw\novelai/NAI_1775993430335.png',
           size: ThumbnailSize.small,
         ),
-        'NAI_1775993430335.small.thumb.jpg',
+        'NAI_1775993430335.png.small.thumb.jpg',
       );
     });
 

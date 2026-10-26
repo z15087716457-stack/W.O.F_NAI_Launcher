@@ -11,6 +11,7 @@ from krita import InfoObject, Krita
 MAX_V1_CANVAS_EDGE = 4096
 PREVIEW_LAYER_NAME = "NAI Preview"
 MASK_SOURCE_SELECTION = "selection"
+_preview = None
 
 
 def active_document():
@@ -115,15 +116,24 @@ def export_inpaint_mask_png(source: str = MASK_SOURCE_SELECTION) -> bytes:
 
 
 def write_png_preview(image_png: bytes) -> None:
-    if not _write_png_as_layer(image_png, PREVIEW_LAYER_NAME, replace_existing=True):
+    global _preview
+    doc = active_document()
+    layer = _write_png_as_layer(image_png, PREVIEW_LAYER_NAME)
+    if not layer:
         raise RuntimeError("Krita failed to add preview layer")
+    remove_preview_layer()
+    _preview = (doc, layer)
 
 
 def remove_preview_layer() -> None:
-    doc = active_document()
-    if doc is not None:
-        _remove_layers_named(doc, PREVIEW_LAYER_NAME)
-        doc.refreshProjection()
+    global _preview
+    if _preview is None:
+        return
+    doc, layer = _preview
+    _preview = None
+    _remove_node(doc.rootNode(), layer)
+    _wait_for_done(doc)
+    doc.refreshProjection()
 
 
 def write_png_result(image_png: bytes, name: str) -> str:
@@ -164,9 +174,7 @@ def write_png_as_new_document(image_png: bytes, name: str) -> str:
 def _write_png_as_layer(
     image_png: bytes,
     name: str,
-    *,
-    replace_existing: bool = False,
-) -> bool:
+):
     doc = active_document()
     if doc is None:
         return False
@@ -183,10 +191,6 @@ def _write_png_as_layer(
         return False
     if width != doc.width() or height != doc.height():
         return False
-
-    if replace_existing:
-        _remove_layers_named(doc, name)
-        _wait_for_done(doc)
 
     byte_count = (
         image.sizeInBytes() if hasattr(image, "sizeInBytes") else image.byteCount()
@@ -206,7 +210,7 @@ def _write_png_as_layer(
         return False
     _wait_for_done(doc)
     doc.refreshProjection()
-    return True
+    return layer
 
 
 def _rgba8888_to_krita_bgra(raw: bytes) -> bytes:
@@ -237,19 +241,6 @@ def _selection_pixel_value(selection, x: int, y: int) -> int:
     if not raw:
         return 0
     return raw[0]
-
-
-def _remove_layers_named(doc, name: str) -> None:
-    root = doc.rootNode()
-    stack = list(root.childNodes())
-    while stack:
-        node = stack.pop()
-        node_name = node.name() if hasattr(node, "name") else ""
-        if node_name == name:
-            _remove_node(root, node)
-            continue
-        if hasattr(node, "childNodes"):
-            stack.extend(node.childNodes())
 
 
 def _remove_node(root, node) -> None:

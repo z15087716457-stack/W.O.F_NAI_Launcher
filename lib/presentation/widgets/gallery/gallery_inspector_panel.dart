@@ -54,28 +54,41 @@ class GalleryInspectorPanel extends ConsumerStatefulWidget {
 
 class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
   String? _loadedPath;
+  LocalImageRecord? _loadedRecord;
   NaiImageMetadata? _metadata;
   bool _loading = false;
   bool _negativeExpanded = false;
   int _loadSerial = 0;
 
-  void _ensureLoaded(String? path) {
-    if (path == _loadedPath) return;
+  void _ensureLoaded(String? path, LocalImageRecord? cached) {
+    final pathChanged = path != _loadedPath;
+    if (!pathChanged &&
+        cached?.metadata == _loadedRecord?.metadata &&
+        cached?.modifiedAt == _loadedRecord?.modifiedAt &&
+        cached?.size == _loadedRecord?.size) {
+      return;
+    }
     _loadedPath = path;
-    _metadata = null;
-    _negativeExpanded = false;
-    if (path == null) return;
+    _loadedRecord = cached;
     final serial = ++_loadSerial;
+    _metadata = cached?.metadata?.upgradeFromRawJsonIfNeeded();
+    if (_metadata?.hasData != true) _metadata = null;
+    if (pathChanged) _negativeExpanded = false;
+    _loading = false;
+    if (path == null || (!pathChanged && _metadata != null)) return;
     _loading = true;
     unawaited(() async {
-      final notifier = ref.read(localGalleryNotifierProvider.notifier);
-      final records = await notifier.loadRecords([path]);
-      NaiImageMetadata? metadata;
-      if (records.isNotEmpty) {
-        metadata = records.first.metadata?.upgradeFromRawJsonIfNeeded();
-        if (metadata?.hasData != true) {
-          metadata = await resolveLocalGalleryMetadata(records.first);
-        }
+      var record = cached;
+      if (pathChanged || record == null) {
+        final notifier = ref.read(localGalleryNotifierProvider.notifier);
+        final records = await notifier.loadRecords([path]);
+        if (!mounted || serial != _loadSerial) return;
+        _loadedRecord = notifier.cachedRecord(path);
+        record = _loadedRecord ?? records.firstOrNull;
+      }
+      var metadata = record?.metadata?.upgradeFromRawJsonIfNeeded();
+      if (record != null && metadata?.hasData != true) {
+        metadata = await resolveLocalGalleryMetadata(record);
       }
       if (!mounted || serial != _loadSerial) return;
       setState(() {
@@ -102,13 +115,13 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
     final resultCount = ref.watch(
       localGalleryNotifierProvider.select((s) => s.resultCount),
     );
-    _ensureLoaded(focused);
-
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    final cached = focused == null ? null : notifier.cachedRecord(focused);
+    _ensureLoaded(focused, cached);
     final index = focused == null ? -1 : timeline.indexOfPath(focused);
     final record = focused == null
         ? null
-        : notifier.cachedRecord(focused) ??
+        : cached ??
               (index >= 0 ? notifier.recordFor(timeline.entries[index]) : null);
 
     return DecoratedBox(

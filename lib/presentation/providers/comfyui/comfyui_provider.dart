@@ -37,9 +37,9 @@ class ComfyUISettings extends _$ComfyUISettings {
   }
 
   void setServerUrl(String url) {
-    final trimmed = url.trim();
-    if (trimmed == state.serverUrl) return;
-    state = state.copyWith(serverUrl: trimmed);
+    final normalized = normalizeComfyUIBaseUrl(url);
+    if (normalized == state.serverUrl) return;
+    state = state.copyWith(serverUrl: normalized);
     _persist();
   }
 
@@ -81,6 +81,15 @@ class ComfyUIConnection extends _$ComfyUIConnection {
 
   @override
   ComfyUIConnectionStatus build() {
+    ref.listen(
+      comfyUISettingsProvider.select((settings) => settings.serverUrl),
+      (previous, next) {
+        if (_manager != null &&
+            _manager!.serverUrl != normalizeComfyUIBaseUrl(next)) {
+          disconnect();
+        }
+      },
+    );
     ref.onDispose(() {
       _manager?.dispose();
       _manager = null;
@@ -93,24 +102,26 @@ class ComfyUIConnection extends _$ComfyUIConnection {
   Future<bool> connect() async {
     final settings = ref.read(comfyUISettingsProvider);
     _manager?.dispose();
-    _manager = ComfyUIConnectionManager(serverUrl: settings.serverUrl);
+    final manager = ComfyUIConnectionManager(serverUrl: settings.serverUrl);
+    _manager = manager;
 
     state = ComfyUIConnectionStatus.connecting;
-    final ok = await _manager!.connect();
+    final ok = await manager.connect();
+    if (!identical(_manager, manager)) return false;
     state = ok
         ? ComfyUIConnectionStatus.connected
         : ComfyUIConnectionStatus.error;
 
     if (ok) {
-      _manager!.statusStream.listen((s) {
-        state = s;
+      manager.statusStream.listen((s) {
+        if (identical(_manager, manager)) state = s;
       });
     }
     return ok;
   }
 
   void disconnect() {
-    _manager?.disconnect();
+    _manager?.dispose();
     _manager = null;
     state = ComfyUIConnectionStatus.disconnected;
   }

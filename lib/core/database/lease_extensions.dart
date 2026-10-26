@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import '../utils/app_logger.dart';
@@ -31,7 +33,7 @@ abstract class LeaseBasedDataSource {
   /// - 连接获取
   /// - 健康检查
   /// - 版本检测
-  /// - 自动重试
+  /// - 操作开始前的连接失效重试
   /// - 连接释放
   Future<T> withLease<T>(
     String operationName,
@@ -45,6 +47,7 @@ abstract class LeaseBasedDataSource {
 
     while (attempt < maxRetries) {
       ConnectionLease? lease;
+      var operationStarted = false;
 
       try {
         // 获取连接租借（大数据操作需要更长超时）
@@ -54,12 +57,21 @@ abstract class LeaseBasedDataSource {
         );
 
         // 执行操作
-        final result = await lease
-            .execute(operation)
-            .timeout(timeout ?? const Duration(seconds: 30));
+        final ownedLease = lease;
+        final execution = ownedLease
+            .execute((db) {
+              operationStarted = true;
+              return operation(db);
+            })
+            .whenComplete(ownedLease.dispose);
+        lease = null;
+        final result = await execution.timeout(
+          timeout ?? const Duration(seconds: 30),
+        );
 
         return result;
       } on ConnectionVersionMismatchException {
+        if (operationStarted) rethrow;
         attempt++;
         AppLogger.w(
           '[$operationId] Version mismatch, retrying ($attempt/$maxRetries)',
@@ -67,6 +79,7 @@ abstract class LeaseBasedDataSource {
         );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } on ConnectionInvalidException {
+        if (operationStarted) rethrow;
         attempt++;
         AppLogger.w(
           '[$operationId] Connection invalid, retrying ($attempt/$maxRetries)',
@@ -74,6 +87,7 @@ abstract class LeaseBasedDataSource {
         );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } catch (e) {
+        if (operationStarted || e is TimeoutException) rethrow;
         final errorStr = e.toString().toLowerCase();
         if (errorStr.contains('database_closed') ||
             errorStr.contains('databaseexception')) {
@@ -162,7 +176,19 @@ class SimpleLeaseHelper {
 
   SimpleLeaseHelper(this.dataSourceName);
 
-  /// 执行数据库操作，带完整防护
+  Future<T> executeWrite<T>(
+    String operationName,
+    Future<T> Function(Database db) operation, {
+    Duration? timeout,
+    int maxRetries = 3,
+  }) => execute(
+    operationName,
+    (db) => ConnectionPoolHolder.instance.runWrite(() => operation(db)),
+    timeout: timeout,
+    maxRetries: maxRetries,
+  );
+
+  /// 执行数据库操作，仅在调用前连接失效时重试。
   Future<T> execute<T>(
     String operationName,
     Future<T> Function(Database db) operation, {
@@ -175,6 +201,7 @@ class SimpleLeaseHelper {
 
     while (attempt < maxRetries) {
       ConnectionLease? lease;
+      var operationStarted = false;
 
       try {
         // 等待连接池就绪
@@ -195,12 +222,21 @@ class SimpleLeaseHelper {
         );
 
         // 执行操作
-        final result = await lease
-            .execute((db) => operation(db), validateBefore: true)
-            .timeout(timeout ?? const Duration(seconds: 30));
+        final ownedLease = lease;
+        final execution = ownedLease
+            .execute((db) {
+              operationStarted = true;
+              return operation(db);
+            }, validateBefore: true)
+            .whenComplete(ownedLease.dispose);
+        lease = null;
+        final result = await execution.timeout(
+          timeout ?? const Duration(seconds: 30),
+        );
 
         return result;
       } on ConnectionVersionMismatchException {
+        if (operationStarted) rethrow;
         attempt++;
         AppLogger.w(
           '[$operationId] Version mismatch, retrying ($attempt/$maxRetries)',
@@ -208,6 +244,7 @@ class SimpleLeaseHelper {
         );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } on ConnectionInvalidException {
+        if (operationStarted) rethrow;
         attempt++;
         AppLogger.w(
           '[$operationId] Connection invalid, retrying ($attempt/$maxRetries)',
@@ -215,6 +252,7 @@ class SimpleLeaseHelper {
         );
         await Future.delayed(Duration(milliseconds: 200 * attempt));
       } catch (e, stack) {
+        if (operationStarted || e is TimeoutException) rethrow;
         final errorStr = e.toString().toLowerCase();
         // 记录所有错误详情以便诊断
         AppLogger.e(

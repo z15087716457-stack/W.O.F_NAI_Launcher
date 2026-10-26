@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -176,28 +177,101 @@ void main() {
       },
     );
 
-    test('falls back to inline parsing when worker startup fails', () async {
-      final fallbackService = IsolateMetadataService.forTesting(
-        workerInitializer: (_, _) async {
-          throw StateError('spawn failed');
+    test(
+      'reports unavailable workers without parsing on the caller isolate',
+      () async {
+        final unavailableService = IsolateMetadataService.forTesting(
+          workerInitializer: (_, _) async {
+            throw StateError('spawn failed');
+          },
+        );
+
+        addTearDown(unavailableService.dispose);
+
+        await expectLater(unavailableService.initialize(), completes);
+
+        final statistics = unavailableService.getStatistics();
+        expect(statistics['activeWorkers'], 0);
+        expect(statistics['workerStartupError'], contains('spawn failed'));
+        final image = File('${tempDir.path}/valid.png');
+        await image.writeAsBytes(
+          await _pngWithNovelAiMetadata(prompt: 'offline fixture'),
+        );
+        final result = await unavailableService.parseMetadata(image.path);
+
+        expect(result.success, isFalse);
+        expect(result.error, contains('workers unavailable'));
+      },
+    );
+
+    test('concurrent dispatches initialize one worker pool', () async {
+      final entered = Completer<void>(), release = Completer<void>();
+      var starts = 0;
+      final cold = IsolateMetadataService.forTesting(
+        workerInitializer: (_, initialize) async {
+          starts++;
+          if (starts == 1) {
+            entered.complete();
+            await release.future;
+          }
+          await initialize();
         },
       );
-
-      addTearDown(fallbackService.dispose);
-
-      await expectLater(fallbackService.initialize(), completes);
-
-      final statistics = fallbackService.getStatistics();
-      expect(statistics['fallbackToInlineParsing'], isTrue);
-      expect(statistics['workerStartupError'], contains('spawn failed'));
-
-      final result = await fallbackService.parseMetadata(
-        '${tempDir.path}/missing.png',
+      addTearDown(cold.dispose);
+      final file = File('${tempDir.path}/cold.png');
+      await file.writeAsBytes(
+        await _pngWithNovelAiMetadata(prompt: 'cold fixture'),
       );
-
-      expect(result.success, isFalse);
-      expect(result.error, contains('File not found'));
+      final first = cold.parseMetadata(file.path);
+      await entered.future;
+      final second = cold.parseMetadata(file.path);
+      try {
+        await Future<void>.delayed(const Duration(milliseconds: 15));
+        expect(starts, 1);
+      } finally {
+        release.complete();
+        await Future.wait([first, second]);
+      }
+      expect(starts, 2);
+      expect(
+        (await cold.parseMetadata(file.path)).metadata!.prompt,
+        'cold fixture',
+      );
     });
+
+    test(
+      'disposed startup cannot overwrite a newer initialized pool',
+      () async {
+        final entered = Completer<void>(), release = Completer<void>();
+        var starts = 0;
+        final cold = IsolateMetadataService.forTesting(
+          workerInitializer: (_, initialize) async {
+            starts++;
+            if (starts == 1) {
+              entered.complete();
+              await release.future;
+            }
+            await initialize();
+          },
+        );
+        addTearDown(cold.dispose);
+        final file = File('${tempDir.path}/current.png');
+        await file.writeAsBytes(
+          await _pngWithNovelAiMetadata(prompt: 'current fixture'),
+        );
+        final old = cold.parseMetadata(file.path);
+        await entered.future;
+        cold.dispose();
+        await cold.initialize();
+        release.complete();
+        expect((await old).wasCancelled, isTrue);
+        expect(starts, 3);
+        expect(
+          (await cold.parseMetadata(file.path)).metadata!.prompt,
+          'current fixture',
+        );
+      },
+    );
 
     test('两阶段：先回传哈希，继续解析结果与单阶段一致', () async {
       final file = File('${tempDir.path}/two_phase.png');

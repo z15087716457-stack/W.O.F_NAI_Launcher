@@ -178,6 +178,7 @@ class GenerationViewerWiring extends ConsumerStatefulWidget {
 
 class _GenerationViewerWiringState
     extends ConsumerState<GenerationViewerWiring> {
+  late final List<GeneratedImage> _images;
   late String current;
   final metadata = <String, NaiImageMetadata?>{};
   final loading = <String>{};
@@ -196,6 +197,7 @@ class _GenerationViewerWiringState
   @override
   void initState() {
     super.initState();
+    _images = List.of(widget.request.images);
     current = widget.request.selected;
     window = GenerationViewerWindow(ref.read(generationViewerPlatformProvider));
     chrome = ref.read(generationViewerWindowProvider.notifier);
@@ -210,7 +212,7 @@ class _GenerationViewerWiringState
           defaultValue: false,
         ) ??
         false;
-    for (final image in widget.request.images) {
+    for (final image in _images) {
       if (image.metadata != null) metadata[image.id] = image.metadata;
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -224,7 +226,7 @@ class _GenerationViewerWiringState
     final id = current;
     if (metadata.containsKey(id) || loading.contains(id)) return;
     loading.add(id);
-    final image = widget.request.images.firstWhere((image) => image.id == id);
+    final image = _images.firstWhere((image) => image.id == id);
     final value =
         image.metadata ??
         await ImageMetadataService().getMetadataFromBytes(image.bytes);
@@ -236,7 +238,7 @@ class _GenerationViewerWiringState
   }
 
   void select(String id) {
-    if (!widget.request.images.any((image) => image.id == id)) return;
+    if (!_images.any((image) => image.id == id)) return;
     setState(() {
       current = id;
       revision++;
@@ -270,6 +272,21 @@ class _GenerationViewerWiringState
   Future<void> close() async {
     await restore();
     if (mounted) context.pop();
+  }
+
+  Future<void> delete(String id) async {
+    await ref.read(generationHistoryActionsProvider).delete([id]);
+    if (!mounted) return;
+    final index = _images.indexWhere((image) => image.id == id);
+    if (index < 0) return;
+    if (_images.length == 1) {
+      await close();
+      return;
+    }
+    setState(() => _images.removeAt(index));
+    if (current == id) {
+      select(_images[index.clamp(0, _images.length - 1)].id);
+    }
   }
 
   String partText(String id, ViewerPart part) {
@@ -389,7 +406,7 @@ class _GenerationViewerWiringState
 
   @override
   Widget build(BuildContext context) {
-    final sequence = widget.request.images;
+    final sequence = _images;
     final index = sequence.indexWhere((image) => image.id == current);
     final history = ref.watch(imageGenerationNotifierProvider);
     final latest = {
@@ -484,9 +501,7 @@ class _GenerationViewerWiringState
           onCreateCollection: (id) => run(() async {
             throw UnsupportedError(context.l10n.bridge_conflict);
           }),
-          onDelete: (id) => run(
-            () => ref.read(generationHistoryActionsProvider).delete([id]),
-          ),
+          onDelete: (id) => run(() => delete(id)),
           onUndoDelete: () => run(() async {
             throw UnsupportedError(context.l10n.bridge_conflict);
           }),

@@ -363,7 +363,7 @@ class VibeImageEmbedder {
       _validatePngDimensions(imageBytes);
 
       // Try iTXt chunk first (NAI official format)
-      final naiData = _extractNaiDataFromITxt(imageBytes);
+      final naiData = extractNaiDataFromPng(imageBytes);
       if (naiData != null) {
         final result = _parseNaiVibeData(naiData);
         return _ExtractVibeResult(
@@ -484,7 +484,9 @@ class VibeImageEmbedder {
     return VibeSourceType.png;
   }
 
-  static Map<String, dynamic>? _extractNaiDataFromITxt(Uint8List imageBytes) {
+  /// 读取官方 iTXt 原始信封，供文件解析器复用；未包含该块时返回 null。
+  static Map<String, dynamic>? extractNaiDataFromPng(Uint8List imageBytes) {
+    _validatePngSignature(imageBytes);
     return _findChunkData(imageBytes, _itxtChunkType, (chunkData) {
       final result = _parseITxtChunk(chunkData);
       if (result != null && result['keyword'] == _naiDataKeyword) {
@@ -548,17 +550,23 @@ class VibeImageEmbedder {
       if (keywordEnd <= 0) return null;
 
       final keyword = utf8.decode(data.sublist(0, keywordEnd));
+      if (keyword != _naiDataKeyword) return null;
       var offset = keywordEnd + 1;
 
-      if (offset + 2 > data.length) return null;
+      if (offset + 2 > data.length) {
+        throw const FormatException('Incomplete Vibe iTXt header');
+      }
 
       final compressionFlag = data[offset];
+      if (compressionFlag > 1 || data[offset + 1] != 0) {
+        throw const FormatException('Invalid Vibe iTXt compression');
+      }
       offset += 2; // Skip compression flag and method
 
       // Skip language tag and translated keyword
       for (var i = 0; i < 2; i++) {
         final end = data.indexOf(0, offset);
-        if (end < 0) return null;
+        if (end < 0) throw const FormatException('Incomplete Vibe iTXt header');
         offset = end + 1;
       }
 
@@ -576,8 +584,7 @@ class VibeImageEmbedder {
     } on VibeExtractException {
       rethrow;
     } catch (e) {
-      AppLogger.w('Failed to parse iTXt chunk: $e', 'VibeImageEmbedder');
-      return null;
+      throw VibeExtractException('Failed to parse Vibe iTXt chunk: $e');
     }
   }
 

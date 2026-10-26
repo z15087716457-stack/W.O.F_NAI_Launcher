@@ -319,12 +319,16 @@ class FakeCanvasIO:
         self.preview_error = None
         self.write_error = None
         self.write_result_mode = "layer"
-        self.active_document = True
+        self.document_available = True
+        self.document = object()
         self.mask_sources = []
         self.events = []
 
     def has_active_document(self):
-        return self.active_document
+        return self.document_available
+
+    def active_document(self):
+        return self.document if self.document_available else None
 
     def export_active_document_png(self):
         self.events.append("export_canvas")
@@ -483,7 +487,7 @@ class DockerStateTests(unittest.TestCase):
         self.assertTrue(docker._inpaint_button._enabled)
         self.assertFalse(docker._cancel_button._enabled)
 
-        fake_canvas.active_document = False
+        fake_canvas.document_available = False
         docker._update_buttons()
 
         self.assertTrue(docker._params_button._enabled)
@@ -492,7 +496,7 @@ class DockerStateTests(unittest.TestCase):
         self.assertIn("请先打开 Krita 文档", docker._img2img_button._tooltip)
 
         docker._client.is_connected = False
-        fake_canvas.active_document = True
+        fake_canvas.document_available = True
         docker._update_buttons()
 
         self.assertFalse(docker._params_button._enabled)

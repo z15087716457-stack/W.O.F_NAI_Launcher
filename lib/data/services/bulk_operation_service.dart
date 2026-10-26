@@ -253,6 +253,8 @@ class BulkOperationService {
     List<String> tagsToAdd = const [],
     List<String> tagsToRemove = const [],
     BulkProgressCallback? onProgress,
+    bool Function()? isCancelled,
+    void Function(String path)? onEdited,
   }) async {
     final stopwatch = Stopwatch()..start();
     var successCount = 0;
@@ -275,6 +277,7 @@ class BulkOperationService {
     final dataSource = await _getDataSource();
 
     for (var i = 0; i < imagePaths.length; i++) {
+      if (isCancelled?.call() == true) break;
       final imagePath = imagePaths[i];
       onProgress?.call(
         current: i,
@@ -311,7 +314,9 @@ class BulkOperationService {
           ..addAll(tagsToAdd.where((tag) => !currentTags.contains(tag)))
           ..removeWhere((tag) => tagsToRemove.contains(tag));
 
+        if (isCancelled?.call() == true) break;
         await dataSource.setImageTags(imageId, updatedTags);
+        onEdited?.call(imagePath);
         successCount++;
         AppLogger.d(
           'Updated tags for $imagePath: ${currentTags.length} -> ${updatedTags.length} ($successCount/${imagePaths.length})',
@@ -330,10 +335,10 @@ class BulkOperationService {
     }
 
     onProgress?.call(
-      current: imagePaths.length,
+      current: successCount + failedCount,
       total: imagePaths.length,
       currentItem: '',
-      isComplete: true,
+      isComplete: isCancelled?.call() != true,
     );
     stopwatch.stop();
     AppLogger.i(

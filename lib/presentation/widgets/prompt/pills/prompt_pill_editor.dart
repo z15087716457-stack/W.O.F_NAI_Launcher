@@ -278,6 +278,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                 showCursor: _focusNode.hasPrimaryFocus ? null : false,
                 config: effectiveConfig,
                 decoration: widget.decoration,
+                beginComfyuiImport: widget.beginComfyuiImport,
                 onComfyuiImport: widget.onComfyuiImport == null
                     ? null
                     : _handleComfyuiImport,

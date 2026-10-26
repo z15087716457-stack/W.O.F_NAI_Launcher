@@ -47,17 +47,20 @@ class ComfyUIWebSocketService {
   Future<void> connect() async {
     if (_disposed) return;
     await disconnect();
+    if (_disposed) return;
 
     final uri = buildComfyUIWebSocketUri(baseUrl: baseUrl, clientId: clientId);
 
     AppLogger.i('Connecting to $uri', _tag);
 
     try {
-      _channel = WebSocketChannel.connect(uri);
-      await _channel!.ready;
+      final channel = WebSocketChannel.connect(uri);
+      _channel = channel;
+      await channel.ready;
+      if (_disposed || !identical(_channel, channel)) return;
       AppLogger.i('WebSocket connected', _tag);
 
-      _subscription = _channel!.stream.listen(
+      _subscription = channel.stream.listen(
         _onMessage,
         onError: (error) {
           AppLogger.e('WebSocket error: $error', _tag);

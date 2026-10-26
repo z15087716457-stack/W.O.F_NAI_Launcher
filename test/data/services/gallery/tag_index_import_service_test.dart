@@ -253,8 +253,8 @@ void main() {
       expect(result.errorMessages, isNotEmpty);
     });
 
-    test('扫描器不会冲刷已导入的元数据与标签（解析失败只改状态）', () async {
-      // 真实存在的普通 PNG（无 NAI 元数据，扫描器解析会失败）
+    test('无嵌入参数时保留外部导入的元数据、标签及来源状态', () async {
+      // 普通 PNG 没有嵌入参数，外部索引仍是参数来源。
       final pngPath = p.join(tempDir.path, 'plain.png');
       final pngBytes = _buildBasePngBytes();
       await File(pngPath).writeAsBytes(pngBytes);
@@ -286,13 +286,13 @@ void main() {
       ]))[imageId];
       expect(metadata!.prompt, 'imported_prompt_tag');
 
-      // 扫描（普通 PNG 解析失败 → metadata_status 变为 failed）
+      // 扫描校正文件签名，保留 imported 来源以支持后续重扫。
       final scanner = GalleryStreamScanner(dataSource: dataSource);
       await scanner.startScanning([tempDir]);
 
       final record = await dataSource.getImageById(imageId);
       expect(record, isNotNull);
-      expect(record!.metadataStatus, MetadataStatus.failed);
+      expect(record!.metadataStatus, MetadataStatus.imported);
       // size 被扫描器校正为实际值
       expect(record.fileSize, pngBytes.length);
 

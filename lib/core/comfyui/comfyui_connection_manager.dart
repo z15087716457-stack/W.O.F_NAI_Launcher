@@ -24,6 +24,7 @@ class ComfyUIConnectionManager {
   ComfyUIApiService? _apiService;
   ComfyUIWebSocketService? _wsService;
   Timer? _heartbeatTimer;
+  int _connectionRevision = 0;
 
   final _statusController =
       StreamController<ComfyUIConnectionStatus>.broadcast();
@@ -46,39 +47,44 @@ class ComfyUIConnectionManager {
     final normalizedUrl = normalizeComfyUIBaseUrl(url);
     if (normalizedUrl == _serverUrl) return;
     _serverUrl = normalizedUrl;
-    if (_status == ComfyUIConnectionStatus.connected) {
-      disconnect();
-    }
+    disconnect();
   }
 
   /// 连接到 ComfyUI
   Future<bool> connect() async {
-    if (_status == ComfyUIConnectionStatus.connecting) return false;
-
+    if (_statusController.isClosed ||
+        _status == ComfyUIConnectionStatus.connecting) {
+      return false;
+    }
+    disconnect();
+    final revision = _connectionRevision;
     _setStatus(ComfyUIConnectionStatus.connecting);
 
     try {
-      _apiService?.dispose();
-      _apiService = ComfyUIApiService(baseUrl: _serverUrl);
+      final api = ComfyUIApiService(baseUrl: _serverUrl);
+      _apiService = api;
 
-      final ok = await _apiService!.testConnection();
+      final ok = await api.testConnection();
+      if (revision != _connectionRevision) return false;
       if (!ok) {
         _setStatus(ComfyUIConnectionStatus.error);
         return false;
       }
 
-      _wsService?.dispose();
-      _wsService = ComfyUIWebSocketService(
+      final ws = ComfyUIWebSocketService(
         baseUrl: _serverUrl,
         clientId: clientId,
       );
-      await _wsService!.connect();
+      _wsService = ws;
+      await ws.connect();
+      if (revision != _connectionRevision) return false;
 
       _startHeartbeat();
       _setStatus(ComfyUIConnectionStatus.connected);
       AppLogger.i('Connected to ComfyUI at $_serverUrl', _tag);
       return true;
     } catch (e) {
+      if (revision != _connectionRevision) return false;
       AppLogger.e('Failed to connect: $e', _tag);
       _setStatus(ComfyUIConnectionStatus.error);
       return false;
@@ -87,6 +93,8 @@ class ComfyUIConnectionManager {
 
   /// 断开连接
   void disconnect() {
+    if (_statusController.isClosed) return;
+    _connectionRevision++;
     _heartbeatTimer?.cancel();
     _heartbeatTimer = null;
     _wsService?.dispose();
@@ -111,17 +119,14 @@ class ComfyUIConnectionManager {
 
   void _startHeartbeat() {
     _heartbeatTimer?.cancel();
+    final revision = _connectionRevision;
+    final api = _apiService!;
     _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      if (_apiService == null) return;
-      try {
-        final ok = await _apiService!.testConnection();
-        if (!ok && _status == ComfyUIConnectionStatus.connected) {
-          _setStatus(ComfyUIConnectionStatus.error);
-        }
-      } catch (_) {
-        if (_status == ComfyUIConnectionStatus.connected) {
-          _setStatus(ComfyUIConnectionStatus.error);
-        }
+      final ok = await api.testConnection();
+      if (revision == _connectionRevision &&
+          !ok &&
+          _status == ComfyUIConnectionStatus.connected) {
+        _setStatus(ComfyUIConnectionStatus.error);
       }
     });
   }

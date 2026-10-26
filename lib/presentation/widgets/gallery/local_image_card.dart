@@ -247,7 +247,7 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
           '[CardLoad] Original file NOT FOUND: $path',
           'LocalImageCard',
         );
-        if (mounted) setState(() => _loadState = _ImageLoadState.error);
+        if (isCurrent()) setState(() => _loadState = _ImageLoadState.error);
         return;
       }
 
@@ -305,8 +305,9 @@ class _LocalImageCardState extends ConsumerState<LocalImageCard> {
         final currentQuality = ref
             .read(localGalleryNotifierProvider)
             .thumbnailQuality;
-        if (!isCurrent() ||
-            currentQuality != _requestedQuality ||
+        if (!isCurrent()) {
+          unawaited(_loadThumbnail());
+        } else if (currentQuality != _requestedQuality ||
             _pickSizeForCurrentWidth() != _requestedSize) {
           _scheduleDebouncedReload();
         }

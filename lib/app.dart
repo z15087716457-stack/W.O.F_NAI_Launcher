@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'core/services/desktop_app_shutdown_service.dart';
 import 'presentation/widgets/common/update_capsule.dart';
 import 'presentation/widgets/common/update_check_dialog.dart';
 import 'presentation/widgets/branding/entry_language_button.dart';
@@ -164,7 +167,7 @@ class NAILauncherApp extends ConsumerWidget {
         windowManager.hide();
       },
       ShortcutIds.quitApp: () {
-        windowManager.close();
+        unawaited(DesktopAppShutdownService.shutdownAndExit(0));
       },
       ShortcutIds.toggleTheme: () {
         ref.read(themeNotifierProvider.notifier).nextTheme();

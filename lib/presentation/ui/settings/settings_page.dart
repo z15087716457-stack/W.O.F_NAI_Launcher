@@ -204,14 +204,10 @@ class _SettingsPageState extends State<SettingsPage> {
     final c = context.ui;
     final data = widget.data;
     final searching = _query.trim().isNotEmpty;
-    final page = searching
-        ? SettingsSearchResults(
-            query: _query.trim(),
-            selected: _sel,
-            onHits: (h) => _hits = h,
-            onJump: (p, anchor) => _open(p, anchor: anchor),
-          )
-        : KeyedSubtree(key: ValueKey(data.page), child: _pageOf(data.page));
+    final page = KeyedSubtree(
+      key: ValueKey(data.page),
+      child: _pageOf(data.page),
+    );
     return SettingsScope(
       data: data,
       actions: widget.actions,
@@ -259,7 +255,23 @@ class _SettingsPageState extends State<SettingsPage> {
                           Expanded(
                             child: Stack(
                               children: [
-                                Positioned.fill(child: page),
+                                Positioned.fill(
+                                  child: Visibility(
+                                    visible: !searching,
+                                    maintainState: true,
+                                    child: page,
+                                  ),
+                                ),
+                                if (searching)
+                                  Positioned.fill(
+                                    child: SettingsSearchResults(
+                                      query: _query.trim(),
+                                      selected: _sel,
+                                      onHits: (h) => _hits = h,
+                                      onJump: (p, anchor) =>
+                                          _open(p, anchor: anchor),
+                                    ),
+                                  ),
                                 if (_toast != null && !searching)
                                   Positioned(
                                     left: 0,

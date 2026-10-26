@@ -92,6 +92,8 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
         widget.data.draft.text ??
         (widget.data.draft.atoms ?? const []).join(', '),
   );
+  final _positiveEditor = GlobalKey<_AtomEditorState>();
+  final _negativeEditor = GlobalKey<_AtomEditorState>();
   var _confirmDelete = false;
   UiPopoverAnchor? _pop;
   WidgetBuilder? _popBuilder;
@@ -106,9 +108,19 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
 
   List<String> get _atoms => _d.atoms ?? BlocksFormat.split(_text.text);
 
-  bool get _valid => _atoms.isNotEmpty || _d.negativeAtoms.isNotEmpty;
+  _AtomEditorState? get _activeEditor => switch (_tab) {
+    _Tab.positive => _positiveEditor.currentState,
+    _Tab.negative => _negativeEditor.currentState,
+    _Tab.text => null,
+  };
+
+  bool get _valid =>
+      _atoms.isNotEmpty ||
+      _d.negativeAtoms.isNotEmpty ||
+      _activeEditor?.hasPendingInput == true;
 
   void _save() {
+    _activeEditor?.commitPending();
     if (!_valid) return;
     final d = _tab == _Tab.text
         ? _d.copyWith(plain: true, text: _text.text)
@@ -465,15 +477,23 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
     final p = _d.params;
 
     final content = switch (_tab) {
-      _Tab.positive => _AtomEditor(
+      _Tab.positive => KeyedSubtree(
         key: const Key('block-edit-atoms'),
-        atoms: _d.atoms ?? const [],
-        onChanged: (v) => _set(_d.copyWith(atoms: v)),
+        child: _AtomEditor(
+          key: _positiveEditor,
+          atoms: _d.atoms ?? const [],
+          onChanged: (v) => _set(_d.copyWith(atoms: v)),
+          onPendingChanged: () => setState(() {}),
+        ),
       ),
-      _Tab.negative => _AtomEditor(
+      _Tab.negative => KeyedSubtree(
         key: const Key('block-edit-negative'),
-        atoms: _d.negativeAtoms,
-        onChanged: (v) => _set(_d.copyWith(negativeAtoms: v)),
+        child: _AtomEditor(
+          key: _negativeEditor,
+          atoms: _d.negativeAtoms,
+          onChanged: (v) => _set(_d.copyWith(negativeAtoms: v)),
+          onPendingChanged: () => setState(() {}),
+        ),
       ),
       _Tab.text => Container(
         height: 150,
@@ -604,6 +624,7 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
               },
               onTap: (t) {
                 if (t == _tab) return;
+                _activeEditor?.commitPending();
                 if (t == _Tab.text) {
                   _text.text = (_d.atoms ?? const []).join(', ');
                   _set(_d.copyWith(plain: true));
@@ -1005,9 +1026,15 @@ class _Crop extends StatelessWidget {
 /// 内容编辑（原型 `.aed`）：已有项是小块（Geist Mono 11.5、24 高），末尾一个输入框；
 /// Enter 或逗号成为一项，粘贴一段自动拆分；点一项拿回输入框里改，悬停出 ×，空输入框按退格删最后一项。
 class _AtomEditor extends StatefulWidget {
-  const _AtomEditor({super.key, required this.atoms, required this.onChanged});
+  const _AtomEditor({
+    super.key,
+    required this.atoms,
+    required this.onChanged,
+    required this.onPendingChanged,
+  });
   final List<String> atoms;
   final ValueChanged<List<String>> onChanged;
+  final VoidCallback onPendingChanged;
 
   @override
   State<_AtomEditor> createState() => _AtomEditorState();
@@ -1018,6 +1045,12 @@ class _AtomEditorState extends State<_AtomEditor> {
   final _focus = FocusNode();
   int? _editing;
   int? _hover;
+
+  bool get hasPendingInput => _ctrl.text.trim().isNotEmpty;
+
+  void commitPending() {
+    if (hasPendingInput) _commit(_ctrl.text);
+  }
 
   @override
   void dispose() {
@@ -1088,9 +1121,17 @@ class _AtomEditorState extends State<_AtomEditor> {
                             top: -5,
                             child: UiPressable(
                               key: Key('block-atom-remove-$i'),
-                              onTap: () => widget.onChanged(
-                                [...widget.atoms]..removeAt(i),
-                              ),
+                              onTap: () {
+                                setState(() {
+                                  if (_editing != null && i < _editing!) {
+                                    _editing = _editing! - 1;
+                                  }
+                                  _hover = null;
+                                });
+                                widget.onChanged(
+                                  [...widget.atoms]..removeAt(i),
+                                );
+                              },
                               builder: (_, h) => Container(
                                 width: 15,
                                 height: 15,
@@ -1148,10 +1189,14 @@ class _AtomEditorState extends State<_AtomEditor> {
                         hintStyle: UiText.sans(12, color: c.faint),
                       ),
                       onChanged: (v) {
-                        if (v.contains(',') || v.contains('\n')) _commit(v);
+                        if (v.contains(',') || v.contains('\n')) {
+                          _commit(v);
+                        } else {
+                          widget.onPendingChanged();
+                        }
                       },
-                      onSubmitted: (v) {
-                        if (v.trim().isNotEmpty) _commit(v);
+                      onSubmitted: (_) {
+                        commitPending();
                         _focus.requestFocus();
                       },
                     ),
@@ -1220,6 +1265,7 @@ class _TagPickerState extends State<_TagPicker> {
           UiTextInput(
             key: const Key('block-tag-name'),
             value: '',
+            submitOnBlur: false,
             hint: l10n.blocks_tagName,
             height: 30,
             onChanged: (v) => setState(() => _name = v),

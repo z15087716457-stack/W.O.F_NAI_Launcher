@@ -16,6 +16,8 @@ class ProviderDraft {
   ProviderDraft(this.base, this.edited);
   ProviderSettings base;
   ProviderSettings edited;
+  // Saved snapshot plus only the user's edits made while saving.
+  ProviderSettings? _afterSave;
 
   /// 新 Key；null = 不改，空串 = 清除。
   String? apiKey;
@@ -129,10 +131,16 @@ class ProvidersController extends ChangeNotifier {
   /// 改草稿：先以最新已保存配置为底重新定基，再套用 [f]。
   void edit(ProviderItem p, ProviderSettings Function(ProviderSettings) f) {
     final d = _drafts[p.id];
-    final next = f(display(p));
+    final before = display(p);
+    final next = f(before);
     if (d == null) {
       _drafts[p.id] = ProviderDraft(p.settings, next);
     } else {
+      if (d._afterSave case final pending?) {
+        // Model membership is immediate; only this edit's changed fields are pending.
+        final projection = ProviderSettings.merge(before, pending, before);
+        d._afterSave = ProviderSettings.merge(before, next, projection);
+      }
       d
         ..base = p.settings
         ..edited = next
@@ -191,6 +199,9 @@ class ProvidersController extends ChangeNotifier {
     final sent = d.display(p.settings);
     final sentKey = d.apiKey;
     d
+      ..base = p.settings
+      ..edited = sent
+      .._afterSave = sent
       ..saving = true
       ..result = null;
     _notify();
@@ -205,13 +216,22 @@ class ProvidersController extends ChangeNotifier {
     } catch (_) {
       r = ProvidersSaveResult.failed;
     }
-    if (_disposed) return r;
+    if (_disposed || !identical(_drafts[p.id], d)) return r;
     d.saving = false;
+    final afterSave = d._afterSave!;
+    d._afterSave = null;
     if (r == ProvidersSaveResult.saved) {
-      d.base = sent;
+      // Models added after submission use their observed settings as the base.
+      d
+        ..base = sent.copyWith(
+          models: [
+            for (final model in d.base.models) sent.model(model.id) ?? model,
+          ],
+        )
+        ..edited = afterSave;
       if (d.apiKey == sentKey) d.apiKey = null;
       // 成功后若已无差异，在下一次数据同步 / 这里清掉。
-      if (d.display(sent).differences(sent) == 0 && d.apiKey == null) {
+      if (d.changes(d.base) == 0) {
         _drafts.remove(p.id);
       }
     } else {

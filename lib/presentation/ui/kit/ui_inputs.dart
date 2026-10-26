@@ -11,7 +11,7 @@ import 'ui_text.dart';
 
 /// 搜索框：控件底、圆角 9（[height] 32 时圆角 7）；聚焦时抬起底 + 强调色环。
 /// 停 300ms 回调；有字时尾部是清除，空着且没聚焦时显示 “/” 键帽。Esc 先清空、再失焦。
-/// [value] 是外部的当前值：外部改了（例如切范围时清空搜索）会同步进来，正在输入时不覆盖。
+/// [value] 是外部当前值：外部修改会取消待提交搜索；确认上次提交的同值不会覆盖后续输入。
 class UiSearchField extends StatefulWidget {
   const UiSearchField({
     super.key,
@@ -38,16 +38,23 @@ class UiSearchField extends StatefulWidget {
 
 class _UiSearchFieldState extends State<UiSearchField> {
   late final _ctrl = TextEditingController(text: widget.value);
-  late var _synced = widget.value;
+  late String _synced;
   Timer? _debounce;
   FocusNode? _own;
 
   FocusNode get _focus => widget.focusNode ?? (_own ??= FocusNode());
 
   @override
+  void initState() {
+    super.initState();
+    _synced = widget.value;
+  }
+
+  @override
   void didUpdateWidget(covariant UiSearchField old) {
     super.didUpdateWidget(old);
-    if (widget.value != _synced && _debounce?.isActive != true) {
+    if (widget.value != _synced) {
+      _debounce?.cancel();
       _synced = widget.value;
       if (_ctrl.text != widget.value) _ctrl.text = widget.value;
     }
@@ -161,6 +168,7 @@ class UiTextInput extends StatefulWidget {
     required this.value,
     this.onChanged,
     this.onSubmitted,
+    this.submitOnBlur = true,
     this.hint,
     this.autofocus = false,
     this.selectAll = false,
@@ -172,6 +180,7 @@ class UiTextInput extends StatefulWidget {
   final String value;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final bool submitOnBlur;
   final String? hint;
   final bool autofocus;
 
@@ -203,7 +212,9 @@ class _UiTextInputState extends State<UiTextInput> {
   }
 
   void _onFocus() {
-    if (!_focus.hasFocus) widget.onSubmitted?.call(_ctrl.text);
+    if (!_focus.hasFocus && widget.submitOnBlur) {
+      widget.onSubmitted?.call(_ctrl.text);
+    }
   }
 
   @override

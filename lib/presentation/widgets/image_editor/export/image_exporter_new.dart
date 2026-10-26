@@ -111,6 +111,7 @@ class ImageExporterNew {
         _drawMaskLayer(
           canvas,
           layer,
+          bounds: bounds,
           includeBaseImage: !excludedBaseImageLayerIds.contains(layer.id),
           forceHardEdges: forceHardEdges,
         );
@@ -188,8 +189,12 @@ class ImageExporterNew {
         return null;
       }
 
-      operations.addAll(
-        layer.toHardEdgeMaskOperations(includeBaseImage: includeBaseImage),
+      operations.add(
+        HardEdgeMaskLayerOperation(
+          operations: layer.toHardEdgeMaskOperations(
+            includeBaseImage: includeBaseImage,
+          ),
+        ),
       );
     }
 
@@ -219,9 +224,12 @@ class ImageExporterNew {
   static void _drawMaskLayer(
     Canvas canvas,
     Layer layer, {
+    required Rect bounds,
     bool includeBaseImage = true,
     bool forceHardEdges = false,
   }) {
+    final isolate = layer.strokes.any((stroke) => stroke.isEraser);
+    if (isolate) canvas.saveLayer(bounds, Paint());
     if (includeBaseImage && layer.baseImage != null) {
       canvas.drawImage(layer.baseImage!, layer.baseImageOffset, Paint());
     }
@@ -229,6 +237,7 @@ class ImageExporterNew {
     for (final stroke in layer.strokes) {
       _drawMaskStroke(canvas, stroke, forceHardEdges: forceHardEdges);
     }
+    if (isolate) canvas.restore();
   }
 
   static void _drawMaskStroke(

@@ -95,10 +95,28 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   CancelToken? _downloadCancelToken;
   Timer? _reminderTimer;
   bool _initialized = false;
+  bool _disposed = false;
+  int _checkRevision = 0;
+  Future<void>? _checkFuture;
+  bool _manualCheck = false;
+
+  bool get _packageBusy =>
+      state.status == UpdateStatus.downloading ||
+      state.status == UpdateStatus.installing ||
+      state.hasDownloadedUpdate;
+  bool _canPublishCheck(int revision) =>
+      !_disposed && revision == _checkRevision && !_packageBusy;
+  int _invalidateCheck() {
+    _checkFuture = null;
+    return ++_checkRevision;
+  }
 
   @override
   UpdateState build() {
+    _disposed = false;
     ref.onDispose(() {
+      _disposed = true;
+      _invalidateCheck();
       _downloadCancelToken?.cancel();
       _reminderTimer?.cancel();
     });
@@ -168,20 +186,30 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   ///
   /// 自动检查保持安静，仅在发现新版本时显示全局提示；手动检查会展示
   /// “已是最新版”和错误状态，并允许重新查看曾经跳过的版本。
-  Future<void> checkForUpdates({bool manual = false}) async {
-    if (state.status == UpdateStatus.downloading ||
-        state.status == UpdateStatus.downloaded ||
-        state.status == UpdateStatus.installing) {
-      return;
-    }
-    final service = ref.read(updateCheckServiceProvider);
-    if (manual) {
-      await service.clearReminder();
-      state = const UpdateState(status: UpdateStatus.checking);
-    }
+  Future<void> checkForUpdates({bool manual = false}) {
+    if (_disposed || _packageBusy) return Future.value();
+    final pending = _checkFuture;
+    if (pending != null && (!manual || _manualCheck)) return pending;
+    final revision = ++_checkRevision;
+    _manualCheck = manual;
+    late final Future<void> task;
+    task = _runCheck(revision, manual).whenComplete(() {
+      if (identical(_checkFuture, task)) _checkFuture = null;
+    });
+    _checkFuture = task;
+    return task;
+  }
 
+  Future<void> _runCheck(int revision, bool manual) async {
+    final service = ref.read(updateCheckServiceProvider);
     try {
+      if (manual) {
+        await service.clearReminder();
+        if (!_canPublishCheck(revision)) return;
+        state = const UpdateState(status: UpdateStatus.checking);
+      }
       final versionInfo = await service.checkForUpdates(ignoreSkipped: manual);
+      if (!_canPublishCheck(revision)) return;
       if (versionInfo != null) {
         state = UpdateState(
           status: UpdateStatus.available,
@@ -194,6 +222,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
         state = const UpdateState();
       }
     } catch (error, stackTrace) {
+      if (!_canPublishCheck(revision)) return;
       AppLogger.w('Update check failed: $error', 'UpdateNotifier');
       AppLogger.d('$stackTrace', 'UpdateNotifier');
       if (manual) {
@@ -212,7 +241,9 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   }
 
   Future<void> skipVersion(String version) async {
+    final revision = _invalidateCheck();
     await ref.read(updateCheckServiceProvider).skipVersion(version);
+    if (_disposed || revision != _checkRevision) return;
     _reminderTimer?.cancel();
     state = const UpdateState();
   }
@@ -259,6 +290,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   Future<void> downloadUpdate() async {
     final versionInfo = state.versionInfo;
     if (versionInfo == null) return;
+    _invalidateCheck();
 
     final cancelToken = CancelToken();
     _downloadCancelToken?.cancel();
@@ -331,6 +363,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   Future<void> installAndRestart() async {
     final downloaded = state.downloadedUpdate;
     if (downloaded == null) return;
+    _invalidateCheck();
 
     state = state.copyWith(
       status: UpdateStatus.installing,
@@ -362,6 +395,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   }
 
   void reset() {
+    _invalidateCheck();
     _downloadCancelToken?.cancel();
     _downloadCancelToken = null;
     _reminderTimer?.cancel();

@@ -49,6 +49,7 @@ class _FavoriteMenuPanel extends ConsumerStatefulWidget {
 class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
   /// 该图所在收藏集 ID 集合；null 表示正在异步拉取或拉取失败
   Set<String>? _memberCollectionIds;
+  bool _loadingMembership = true;
 
   /// 菜单内折叠的收藏文件夹 ID
   final Set<String> _collapsedFolderIds = {};
@@ -69,14 +70,19 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
   Future<void> _loadMembership() async {
     Set<String>? ids;
     try {
-      ids = await ref
-          .read(collectionNotifierProvider.notifier)
-          .getCollectionIdsForImage(widget.record.path);
+      ids = Set.of(
+        await ref
+            .read(collectionNotifierProvider.notifier)
+            .getCollectionIdsForImage(widget.record.path),
+      );
     } catch (_) {
       ids = null; // 失败降级：只显示收藏 toggle
     }
     if (!mounted) return;
-    setState(() => _memberCollectionIds = ids ?? const {});
+    setState(() {
+      _loadingMembership = false;
+      _memberCollectionIds = ids;
+    });
   }
 
   /// 切换收藏：先就地翻转红心给即时反馈，落库结果回来再以服务端口径校准。
@@ -96,7 +102,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
   }
 
   Future<void> _toggleCollection(String collectionId) async {
-    if (_busy) return;
+    if (_busy || _memberCollectionIds == null) return;
     setState(() {
       _busy = true;
       // 先就地翻转勾选给即时反馈，落库回来后以真实成员关系校准
@@ -109,32 +115,28 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
         }
       }
     });
-    final nowMember = await ref
-        .read(collectionNotifierProvider.notifier)
-        .toggleImageInCollection(collectionId, widget.record.path);
-    // 入子集即入根：同步当前页记录，缩略图/预览图红心即时点亮
-    final syncedIsFav = await ref
-        .read(localGalleryNotifierProvider.notifier)
-        .syncFavoriteStatus(widget.record.path);
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      // null=查询失败，保持原状态
-      if (syncedIsFav != null) _isFavorite = syncedIsFav;
-      if (_memberCollectionIds != null) {
-        if (nowMember) {
-          _memberCollectionIds!.add(collectionId);
-        } else {
-          _memberCollectionIds!.remove(collectionId);
-        }
-      }
-    });
-    // 若画廊正按该收藏集过滤，重放当前页让图片即时增减
-    final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
-    if (criteria.collectionId == collectionId) {
+    try {
       await ref
+          .read(collectionNotifierProvider.notifier)
+          .toggleImageInCollection(collectionId, widget.record.path);
+      if (!mounted) return;
+      await _loadMembership();
+      if (!mounted) return;
+      // 入子集即入根：同步当前页记录，缩略图/预览图红心即时点亮
+      final syncedIsFav = await ref
           .read(localGalleryNotifierProvider.notifier)
-          .refresh(scan: false);
+          .syncFavoriteStatus(widget.record.path);
+      if (!mounted) return;
+      if (syncedIsFav != null) setState(() => _isFavorite = syncedIsFav);
+      // 若画廊正按该收藏集过滤，重放当前页让图片即时增减
+      final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
+      if (criteria.collectionId == collectionId) {
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .refresh(scan: false);
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
   }
 
@@ -191,7 +193,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                         alpha: 0.4,
                       ),
                     ),
-                    if (_memberCollectionIds == null)
+                    if (_loadingMembership)
                       const Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Center(
@@ -202,7 +204,8 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                           ),
                         ),
                       )
-                    else if (collections.isEmpty)
+                    else if (_memberCollectionIds != null &&
+                        collections.isEmpty)
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 12,
@@ -227,7 +230,7 @@ class _FavoriteMenuPanelState extends ConsumerState<_FavoriteMenuPanel> {
                           ],
                         ),
                       )
-                    else
+                    else if (_memberCollectionIds != null)
                       ..._buildCollectionMenuRows(collections, null, 0),
                   ],
                 ),

@@ -201,8 +201,8 @@ class Layer {
   /// 是否正在更新合成缓存
   bool _isCompositing = false;
 
-  /// 笔画版本号（每次笔画变化时递增，用于检测竞态）
-  int _strokeGeneration = 0;
+  /// 图层内容版本，笔画、底图和位置变化使在途缓存失效。
+  int _contentRevision = 0;
 
   /// 图层边界（用于空间剔除优化）
   /// 当笔画或基础图像变化时需要更新
@@ -360,11 +360,11 @@ class Layer {
     _strokes
       ..clear()
       ..addAll(translatedStrokes);
-    _strokeGeneration++;
     _invalidateRasterState();
   }
 
   void _invalidateRasterState() {
+    _contentRevision++;
     _rasterizedStrokeCount = 0;
     _needsRasterize = true;
     _needsComposite = true;
@@ -393,7 +393,7 @@ class Layer {
   /// 添加笔画
   void addStroke(StrokeData stroke) {
     _strokes.add(stroke);
-    _strokeGeneration++; // 递增版本号
+    _contentRevision++; // 递增版本号
     _lastStrokeTime = DateTime.now();
     _needsRasterize = true;
     _needsComposite = true;
@@ -410,7 +410,7 @@ class Layer {
   /// 调用者负责在批量操作结束后设置标志
   void addStrokeInternal(StrokeData stroke) {
     _strokes.add(stroke);
-    _strokeGeneration++; // 递增版本号
+    _contentRevision++; // 递增版本号
     _needsRasterize = true;
     _needsComposite = true;
     _needsThumbnailUpdate = true;
@@ -419,14 +419,14 @@ class Layer {
 
   /// 移除最后一个笔画
   ///
-  /// 注意：通过 _strokeGeneration 版本号机制避免与 rasterize() 的竞态条件。
+  /// 注意：通过 _contentRevision 版本号机制避免与 rasterize() 的竞态条件。
   StrokeData? removeLastStroke() {
     if (_strokes.isEmpty) return null;
 
     // 在移除前检查该笔画是否已光栅化
     final wasRasterized = _rasterizedStrokeCount >= _strokes.length;
     final stroke = _strokes.removeLast();
-    _strokeGeneration++; // 递增版本号，使正在进行的光栅化失效
+    _contentRevision++; // 递增版本号，使正在进行的光栅化失效
 
     if (wasRasterized) {
       // 需要重新光栅化所有内容
@@ -452,7 +452,7 @@ class Layer {
   List<StrokeData> clearStrokes() {
     final oldStrokes = List<StrokeData>.from(_strokes);
     _strokes.clear();
-    _strokeGeneration++; // 递增版本号
+    _contentRevision++; // 递增版本号
     _rasterizedStrokeCount = 0;
     _needsRasterize = true;
     _needsComposite = true;
@@ -708,7 +708,7 @@ class Layer {
     try {
       // 快照当前状态，用于检测竞态条件
       final strokeCount = _strokes.length;
-      final startGeneration = _strokeGeneration;
+      final startGeneration = _contentRevision;
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
@@ -753,21 +753,22 @@ class Layer {
       }
 
       final picture = recorder.endRecording();
-      final oldImage = _rasterizedImage;
-      _rasterizedImage = await picture.toImage(
+      final image = await picture.toImage(
         canvasSize.width.toInt(),
         canvasSize.height.toInt(),
       );
       picture.dispose();
-      oldImage?.dispose();
-
-      // 检查版本号：如果笔画在光栅化期间被修改，不更新计数
-      // 这避免了 removeLastStroke/clearStrokes 与 rasterize 的竞态条件
-      if (_strokeGeneration == startGeneration) {
-        _rasterizedStrokeCount = strokeCount;
-        _needsRasterize = false;
+      if (_contentRevision != startGeneration) {
+        image.dispose();
+        _rasterizedImage?.dispose();
+        _rasterizedImage = null;
+        _rasterizedStrokeCount = 0;
+        return;
       }
-      // 如果版本号变化，保持 _needsRasterize = true，下次调用会重新光栅化
+      _rasterizedImage?.dispose();
+      _rasterizedImage = image;
+      _rasterizedStrokeCount = strokeCount;
+      _needsRasterize = false;
       _needsComposite = true;
     } finally {
       _isRasterizing = false;
@@ -781,11 +782,13 @@ class Layer {
     if (canvasSize.width <= 0 || canvasSize.height <= 0) return;
 
     _isCompositing = true;
+    final revision = _contentRevision;
     try {
       // 确保笔画已光栅化
       if (_needsRasterize && _strokes.isNotEmpty) {
         await rasterize(canvasSize);
       }
+      if (_contentRevision != revision) return;
 
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
@@ -824,14 +827,17 @@ class Layer {
       }
 
       final picture = recorder.endRecording();
-      final oldCache = _compositedCache;
-      _compositedCache = await picture.toImage(
+      final image = await picture.toImage(
         canvasSize.width.toInt(),
         canvasSize.height.toInt(),
       );
       picture.dispose();
-      oldCache?.dispose();
-
+      if (_contentRevision != revision) {
+        image.dispose();
+        return;
+      }
+      _compositedCache?.dispose();
+      _compositedCache = image;
       _needsComposite = false;
     } finally {
       _isCompositing = false;
@@ -1007,7 +1013,6 @@ class Layer {
 
         _strokes.clear();
         _strokes.addAll(transformedStrokes);
-        _strokeGeneration++;
         _invalidateRasterState();
         break;
     }
@@ -1035,7 +1040,7 @@ class Layer {
 
     // 重置计数器和标志
     _rasterizedStrokeCount = 0;
-    _strokeGeneration = 0;
+    _contentRevision++;
     _needsRasterize = true;
     _needsComposite = true;
     _needsThumbnailUpdate = true;

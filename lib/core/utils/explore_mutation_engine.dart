@@ -279,7 +279,9 @@ abstract final class ExploreMutationEngine {
     ExploreMutationConfig config,
     math.Random rng,
   ) {
-    final parentWeight = double.parse(match.group(1)!);
+    final parentWeight = double.parse(
+      match.group(1)!,
+    ).clamp(config.weightMin, config.weightMax).toDouble();
     final content = match.group(2)!;
     final lo = math.max(
       config.weightMin,
@@ -294,7 +296,7 @@ abstract final class ExploreMutationEngine {
         weightEnabled: true,
         weightMin: lo,
         weightMax: hi,
-        weightAverage: parentWeight.clamp(lo, hi).toDouble(),
+        weightAverage: parentWeight,
         leftDispersion: config.dispersion,
         rightDispersion: config.dispersion,
       ),

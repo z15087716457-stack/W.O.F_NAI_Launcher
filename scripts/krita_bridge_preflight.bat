@@ -16,39 +16,34 @@ echo.
 set "PYTHON_CMD="
 set "WSL_CWD="
 where py >nul 2>nul
-if %errorlevel% equ 0 (
-    set "PYTHON_CMD=py -3"
-) else (
-    where python >nul 2>nul
-    if %errorlevel% equ 0 (
-        set "PYTHON_CMD=python"
-    )
-)
+if errorlevel 1 goto :find_python
+set "PYTHON_CMD=py -3"
+goto :run_python
 
-if "%PYTHON_CMD%"=="" (
-    where wsl.exe >nul 2>nul
-    if %errorlevel% equ 0 (
-        for /f "usebackq delims=" %%p in (`wsl.exe wslpath -a "%CD%"`) do set "WSL_CWD=%%p"
-    )
-)
+:find_python
+where python >nul 2>nul
+if errorlevel 1 goto :find_wsl
+set "PYTHON_CMD=python"
+goto :run_python
 
-if not "%PYTHON_CMD%"=="" (
-    %PYTHON_CMD% krita_plugin\preflight.py %*
-    set "EXIT_CODE=%errorlevel%"
-    goto :after_preflight
-)
+:find_wsl
+where wsl.exe >nul 2>nul
+if errorlevel 1 goto :no_python
+for /f "usebackq delims=" %%p in (`wsl.exe wslpath -a "%CD%"`) do set "WSL_CWD=%%p"
+if not defined WSL_CWD goto :no_python
+wsl.exe --cd "%WSL_CWD%" python3 krita_plugin/preflight.py %*
+set "EXIT_CODE=%errorlevel%"
+goto :after_preflight
 
-if not "%WSL_CWD%"=="" (
-    wsl.exe --cd "%WSL_CWD%" python3 krita_plugin/preflight.py %*
-    set "EXIT_CODE=%errorlevel%"
-    goto :after_preflight
-)
+:run_python
+%PYTHON_CMD% krita_plugin\preflight.py %*
+set "EXIT_CODE=%errorlevel%"
+goto :after_preflight
 
-if "%PYTHON_CMD%"=="" if "%WSL_CWD%"=="" (
-    echo [ERROR] Python was not found on PATH.
-    echo Install Python 3 or run from WSL: python3 krita_plugin/preflight.py %*
-    exit /b 1
-)
+:no_python
+echo [ERROR] Python was not found on PATH.
+echo Install Python 3 or run from WSL: python3 krita_plugin/preflight.py %*
+exit /b 1
 
 :after_preflight
 if not "%EXIT_CODE%"=="0" (

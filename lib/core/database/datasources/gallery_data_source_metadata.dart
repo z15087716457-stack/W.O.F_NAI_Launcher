@@ -37,6 +37,6 @@ extension GalleryDataSourceMetadataQueries on GalleryDataSource {
   ///
   /// 逻辑与启动迁移 [_migrateBackfillModelColumn] 完全一致，返回更新行数。
   Future<int> backfillModelColumn() {
-    return execute('backfillModelColumn', _backfillModelColumnImpl);
+    return executeWrite('backfillModelColumn', _backfillModelColumnImpl);
   }
 }

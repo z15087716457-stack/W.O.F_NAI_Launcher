@@ -290,7 +290,9 @@ Future<ConnectionLease> acquireLease({
 
       final poolVersion = ConnectionPoolHolder.version;
       final pool = ConnectionPoolHolder.instance;
-      final connection = await pool.acquire();
+      final connection = await pool.acquire(
+        timeout: timeout - stopwatch.elapsed,
+      );
 
       // 验证连接
       try {
@@ -361,9 +363,8 @@ Future<T> withLease<T>(
     timeout: acquireTimeout,
   );
 
-  try {
-    return await lease.execute(operation).timeout(operationTimeout);
-  } finally {
-    await lease.dispose();
-  }
+  return lease
+      .execute(operation)
+      .whenComplete(lease.dispose)
+      .timeout(operationTimeout);
 }

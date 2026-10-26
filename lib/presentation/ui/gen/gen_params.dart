@@ -613,12 +613,17 @@ class _SeedField extends StatefulWidget {
 class _SeedFieldState extends State<_SeedField> {
   final _c = TextEditingController();
   final _f = FocusNode();
+  var _beforeEdit = '';
 
   @override
   void initState() {
     super.initState();
     _f.addListener(() {
-      if (!_f.hasFocus) _commit();
+      if (_f.hasFocus) {
+        _beforeEdit = _c.text;
+      } else {
+        _commit();
+      }
       setState(() {});
     });
   }
@@ -631,6 +636,8 @@ class _SeedFieldState extends State<_SeedField> {
   }
 
   void _commit() {
+    if (_c.text == _beforeEdit) return;
+    _beforeEdit = _c.text;
     final v = int.tryParse(_c.text.trim());
     if (v != null) {
       GenScope.of(context, GenAspect.params).actions.onSeedChanged(v);

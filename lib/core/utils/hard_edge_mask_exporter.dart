@@ -67,6 +67,12 @@ abstract class HardEdgeMaskOperation {
   const HardEdgeMaskOperation();
 }
 
+class HardEdgeMaskLayerOperation extends HardEdgeMaskOperation {
+  const HardEdgeMaskLayerOperation({required this.operations});
+
+  final List<HardEdgeMaskOperation> operations;
+}
+
 class HardEdgeMaskBaseImageOperation extends HardEdgeMaskOperation {
   const HardEdgeMaskBaseImageOperation({required this.baseMask});
 
@@ -153,6 +159,18 @@ class HardEdgeMaskExporter {
   }
 
   static void _applyOperation(img.Image mask, HardEdgeMaskOperation operation) {
+    if (operation is HardEdgeMaskLayerOperation) {
+      final layer = img.Image(
+        width: mask.width,
+        height: mask.height,
+        numChannels: 4,
+      );
+      for (final child in operation.operations) {
+        _applyOperation(layer, child);
+      }
+      img.compositeImage(mask, layer);
+      return;
+    }
     if (operation is HardEdgeMaskBaseImageOperation) {
       _pasteBaseMask(mask, operation.baseMask);
       return;
@@ -232,7 +250,14 @@ class HardEdgeMaskExporter {
         final value = stroke.isEraser ? 0 : 255;
         for (var y = top; y < bottom; y++) {
           for (var x = left; x < right; x++) {
-            mask.setPixelRgba(x, y, value, value, value, 255);
+            mask.setPixelRgba(
+              x,
+              y,
+              value,
+              value,
+              value,
+              stroke.isEraser ? 0 : 255,
+            );
           }
         }
       }
@@ -387,7 +412,7 @@ class HardEdgeMaskExporter {
         final distanceX = pixelCenterX - center.dx;
         final distanceY = pixelCenterY - center.dy;
         if (distanceX * distanceX + distanceY * distanceY <= radiusSquared) {
-          _setMaskPixel(mask, x, y, masked: masked);
+          _setMaskPixel(mask, x, y, masked: masked, clear: !masked);
         }
       }
     }
@@ -398,12 +423,13 @@ class HardEdgeMaskExporter {
     int x,
     int y, {
     required bool masked,
+    bool clear = false,
   }) {
     if (x < 0 || x >= mask.width || y < 0 || y >= mask.height) {
       return;
     }
 
     final value = masked ? 255 : 0;
-    mask.setPixelRgba(x, y, value, value, value, 255);
+    mask.setPixelRgba(x, y, value, value, value, clear ? 0 : 255);
   }
 }

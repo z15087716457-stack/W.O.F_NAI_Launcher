@@ -233,7 +233,7 @@ class GalleryEngine:
             while active and not cancelled():
                 for i in list(active):
                     try:
-                        progress = next(generators[i]);processed[i] = progress['processed']
+                        status = next(generators[i]);processed[i] = status['processed']
                         yield {'processed':sum(processed),**self.status()}
                     except StopIteration: active.remove(i)
         finally:

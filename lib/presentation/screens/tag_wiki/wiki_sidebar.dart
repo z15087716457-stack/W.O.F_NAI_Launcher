@@ -102,11 +102,6 @@ class WikiSidebar extends StatelessWidget {
     );
     if (!confirmed) return;
     await bookmarks.deleteCollection(collection.id);
-    if (selection.id == collection.id && context.mounted) {
-      onSelect(
-        WikiScope(WikiScopeKind.bookmarks, null, context.l10n.wiki_bookmarks),
-      );
-    }
   }
 
   Widget _collection(

@@ -5,12 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
 import '../../data/models/vibe/vibe_reference.dart';
+import '../../data/services/metadata/unified_metadata_parser.dart';
 import 'app_logger.dart';
 import 'novelai_vibe_codec.dart';
+import 'vibe_image_embedder.dart';
 import 'localization_extension.dart';
-
-// 注意：已移除 png_chunks_extract 依赖，使用 image 包替代
-// image 包的 PngDecoder.startDecode() 提供纯 Dart 的 PNG chunks 解析
 
 /// Vibe 文件解析器
 ///
@@ -86,9 +85,7 @@ class VibeFileParser {
 
     switch (extension) {
       case 'png':
-        return [
-          await fromPng(fileName, bytes, defaultStrength: defaultStrength),
-        ];
+        return _fromPngReferences(fileName, bytes, defaultStrength);
 
       case 'naiv4vibe':
         return [
@@ -120,390 +117,115 @@ class VibeFileParser {
     }
   }
 
-  /// 从 PNG 文件解析 Vibe 参考（使用 Isolate 避免阻塞 UI）
-  ///
-  /// 尝试从 iTXt 块中提取预编码的 Vibe 数据
-  /// 如果没有找到，尝试检测是否包含 JSON bundle 数据（Embed Into Image 格式）
-  /// 如果都没有找到，则作为原始图片处理
+  /// 单条读取接口；文件导入使用列表接口保留 Bundle 全部内容。
   static Future<VibeReference> fromPng(
     String fileName,
     Uint8List bytes, {
     double defaultStrength = 0.6,
-  }) async {
-    // 文件大小检查
-    if (bytes.length > _maxFileSize) {
-      AppLogger.w(
-        'PNG file too large (${bytes.length} bytes), treating as raw image: $fileName',
-        'VibeParser',
-      );
-      return VibeReference(
-        displayName: fileName,
-        vibeEncoding: '',
-        thumbnail: bytes,
-        rawImageData: bytes,
-        strength: defaultStrength,
-        sourceType: VibeSourceType.rawImage,
-      );
-    }
+  }) async =>
+      (await _fromPngReferences(fileName, bytes, defaultStrength)).first;
 
-    try {
-      // 使用 compute 将耗时操作移到 Isolate
-      final result = await compute(
-        _parsePngIsolate,
-        _PngParseParams(
-          fileName: fileName,
-          bytes: bytes,
-          defaultStrength: defaultStrength,
-        ),
-      ).timeout(_parseTimeout);
-      return result;
-    } on TimeoutException {
-      AppLogger.w(
-        'PNG parsing timeout, treating as raw image: $fileName',
-        'VibeParser',
-      );
-      return VibeReference(
+  static Future<List<VibeReference>> _fromPngReferences(
+    String fileName,
+    Uint8List bytes,
+    double defaultStrength,
+  ) async {
+    final references = await extractBundleFromPng(
+      bytes,
+      fileName: fileName,
+      defaultStrength: defaultStrength,
+    );
+    if (references.isNotEmpty) return references;
+    return [
+      VibeReference(
         displayName: fileName,
         vibeEncoding: '',
         thumbnail: bytes,
         rawImageData: bytes,
         strength: defaultStrength,
         sourceType: VibeSourceType.rawImage,
-      );
-    } catch (e, stack) {
-      // 解析失败 - 记录错误日志，作为原始图片处理
-      AppLogger.e(
-        'Failed to parse Vibe from PNG: $fileName, '
-            'falling back to raw image mode',
-        e,
-        stack,
-        'VibeParser',
-      );
-
-      return VibeReference(
-        displayName: fileName,
-        vibeEncoding: '',
-        thumbnail: bytes,
-        rawImageData: bytes,
-        strength: defaultStrength,
-        sourceType: VibeSourceType.rawImage,
-      );
-    }
+      ),
+    ];
   }
 
-  /// 从 PNG 文件提取所有 Vibe 数据（支持 Bundle）
-  ///
-  /// 用于拖放保存到库时检测是否为 bundle 格式
-  /// 返回列表，如果是单个 vibe 则列表长度为 1
+  /// 读取 PNG 内的全部参考；仅未包含参考数据时返回空列表。
   static Future<List<VibeReference>> extractBundleFromPng(
     Uint8List bytes, {
+    String fileName = 'bundle.png',
     double defaultStrength = 0.6,
   }) async {
-    try {
-      final result = await compute(
-        _extractBundleFromPngIsolate,
-        _PngParseParams(
-          fileName: 'bundle.png',
-          bytes: bytes,
-          defaultStrength: defaultStrength,
-        ),
-      ).timeout(_parseTimeout);
-      return result;
-    } catch (e, stack) {
-      AppLogger.e('Failed to extract bundle from PNG', e, stack, 'VibeParser');
-      return [];
+    if (bytes.length > _maxFileSize) {
+      throw const FormatException('Vibe PNG exceeds the 20MB size limit');
     }
+    return compute(
+      _parsePngIsolate,
+      _PngParseParams(
+        fileName: fileName,
+        bytes: bytes,
+        defaultStrength: defaultStrength,
+      ),
+    ).timeout(_parseTimeout);
   }
 
-  /// 从 PNG 提取 Bundle 的 Isolate 方法
-  static Future<List<VibeReference>> _extractBundleFromPngIsolate(
+  static Future<List<VibeReference>> _parsePngIsolate(
     _PngParseParams params,
   ) async {
-    final results = <VibeReference>[];
+    final info = img.PngDecoder().startDecode(params.bytes);
+    if (info is! img.PngInfo) throw const FormatException('Invalid PNG image');
 
-    try {
-      // 使用 image 包的 PngDecoder - 纯 Dart 实现
-      final decoder = img.PngDecoder();
-      final info = decoder.startDecode(params.bytes);
-
-      if (info == null) {
-        return results;
-      }
-
-      // 从 PngInfo 获取 textData
-      final pngInfo = info as img.PngInfo;
-      final textData = pngInfo.textData;
-
-      // 查找 iTXt chunk（NovelAI_Vibe_Encoding_Base64 或 naidata）
-      for (final entry in textData.entries) {
-        final keyword = entry.key;
-        final content = entry.value;
-
-        if (keyword == _naiDataKeyword) {
-          // naidata 格式：Base64 编码的 JSON bundle
-          try {
-            final jsonBytes = base64.decode(content);
-            final jsonData =
-                jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
-
-            final vibes = jsonData['vibes'] as List<dynamic>?;
-            if (vibes != null && vibes.isNotEmpty) {
-              for (var i = 0; i < vibes.length; i++) {
-                final vibeJson = vibes[i] as Map<String, dynamic>;
-                final extractedEncoding = _extractEncodingFromNaiVibe(vibeJson);
-
-                if (extractedEncoding != null && extractedEncoding.isNotEmpty) {
-                  final name =
-                      vibeJson['name'] as String? ?? '${params.fileName}#$i';
-                  double strength = params.defaultStrength;
-                  var infoExtracted = 0.7;
-                  final importInfo =
-                      vibeJson['importInfo'] as Map<String, dynamic>?;
-                  if (importInfo != null && importInfo['strength'] != null) {
-                    strength = (importInfo['strength'] as num).toDouble();
-                  }
-                  infoExtracted = _extractInformationExtracted(
-                    importInfo,
-                    infoExtracted,
-                  );
-
-                  // 提取 vibe 自己的缩略图，如果没有则使用原图
-                  final thumbnail =
-                      _extractThumbnailFromJson(vibeJson) ?? params.bytes;
-                  final rawImageData = _extractRawImageFromJson(vibeJson);
-
-                  results.add(
-                    VibeReference(
-                      displayName: name,
-                      vibeEncoding: extractedEncoding,
-                      thumbnail: thumbnail,
-                      rawImageData: rawImageData,
-                      strength: VibeReference.sanitizeStrength(strength),
-                      infoExtracted: infoExtracted,
-                      encodingModel: _extractEncodingModelFromJson(vibeJson),
-                      sourceType: VibeSourceType.png,
-                    ),
-                  );
-                }
-              }
-              return results;
-            }
-          } catch (e) {
-            AppLogger.w('Failed to parse naidata bundle: $e', 'VibeParser');
-          }
-        } else if (keyword == _iTXtKeyword) {
-          // NovelAI_Vibe_Encoding_Base64 格式：单个 encoding
-          if (content.isNotEmpty) {
-            results.add(
-              VibeReference(
-                displayName: params.fileName,
-                vibeEncoding: content,
-                thumbnail: params.bytes,
-                rawImageData: params.bytes,
-                strength: params.defaultStrength,
-                sourceType: VibeSourceType.png,
+    Future<List<VibeReference>> parsePayload(
+      Map<String, dynamic> payload,
+    ) async {
+      final bytes = Uint8List.fromList(utf8.encode(jsonEncode(payload)));
+      final references = payload.containsKey('vibes')
+          ? await fromBundle(
+              params.fileName,
+              bytes,
+              defaultStrength: params.defaultStrength,
+            )
+          : [
+              await fromNaiV4Vibe(
+                params.fileName,
+                bytes,
+                defaultStrength: params.defaultStrength,
               ),
-            );
-            return results;
-          }
-        }
-      }
-
-      // 没有找到 iTXt 数据，尝试检测 PNG 中是否包含 JSON 文本
-      final embeddedJson = _extractEmbeddedJsonFromTextData(textData);
-      if (embeddedJson != null) {
-        try {
-          final jsonData = jsonDecode(embeddedJson) as Map<String, dynamic>;
-          final extractedEncoding = _extractEncodingFromJson(jsonData);
-          if (extractedEncoding != null) {
-            final name = jsonData['name'] as String? ?? params.fileName;
-            double strength = params.defaultStrength;
-            var infoExtracted = 0.7;
-            final importInfo = jsonData['importInfo'] as Map<String, dynamic>?;
-            if (importInfo != null && importInfo['strength'] != null) {
-              strength = (importInfo['strength'] as num).toDouble();
-            }
-            infoExtracted = _extractInformationExtracted(
-              importInfo,
-              infoExtracted,
-            );
-
-            results.add(
-              VibeReference(
-                displayName: name,
-                vibeEncoding: extractedEncoding,
-                thumbnail: params.bytes,
-                rawImageData: _extractRawImageFromJson(jsonData),
-                strength: VibeReference.sanitizeStrength(strength),
-                infoExtracted: infoExtracted,
-                encodingModel: _extractEncodingModelFromJson(jsonData),
-                sourceType: VibeSourceType.png,
-              ),
-            );
-            return results;
-          }
-        } catch (e) {
-          // 忽略 JSON 解析错误
-        }
-      }
-    } catch (e) {
-      AppLogger.w('Error extracting bundle from PNG: $e', 'VibeParser');
+            ];
+      return [
+        for (final reference in references)
+          reference.copyWith(
+            sourceType: VibeSourceType.png,
+            thumbnail: reference.thumbnail ?? params.bytes,
+          ),
+      ];
     }
 
-    return results;
-  }
-
-  /// PNG 解析参数
-  static Future<VibeReference> _parsePngIsolate(_PngParseParams params) async {
-    String? iTxtContent;
-    String? foundKeyword;
-
-    try {
-      // 使用 image 包的 PngDecoder - 纯 Dart 实现
-      final decoder = img.PngDecoder();
-      final info = decoder.startDecode(params.bytes);
-
-      if (info == null) {
-        return VibeReference(
+    final naiData = VibeImageEmbedder.extractNaiDataFromPng(params.bytes);
+    if (naiData != null) return parsePayload(naiData);
+    final textData = UnifiedMetadataParser.extractPngTextData(params.bytes);
+    final encodedBundle = textData[_naiDataKeyword];
+    if (encodedBundle != null) {
+      return parsePayload(
+        jsonDecode(utf8.decode(base64Decode(encodedBundle)))
+            as Map<String, dynamic>,
+      );
+    }
+    final encoding = textData[_iTXtKeyword];
+    if (encoding != null) {
+      if (encoding.isEmpty) throw const FormatException('Empty Vibe encoding');
+      return [
+        VibeReference(
           displayName: params.fileName,
-          vibeEncoding: '',
+          vibeEncoding: encoding,
           thumbnail: params.bytes,
           rawImageData: params.bytes,
           strength: params.defaultStrength,
-          sourceType: VibeSourceType.rawImage,
-        );
-      }
-
-      // 从 PngInfo 获取 textData
-      final pngInfo = info as img.PngInfo;
-      final textData = pngInfo.textData;
-
-      for (final entry in textData.entries) {
-        final keyword = entry.key;
-        final content = entry.value;
-
-        // 只处理我们关心的关键字
-        if (keyword == _iTXtKeyword || keyword == _naiDataKeyword) {
-          iTxtContent = content;
-          foundKeyword = keyword;
-          break;
-        }
-      }
-
-      if (iTxtContent != null && iTxtContent.isNotEmpty) {
-        // 根据 keyword 类型处理数据
-        if (foundKeyword == _naiDataKeyword) {
-          // naidata 格式：Base64 编码的 JSON bundle
-          try {
-            final jsonBytes = base64.decode(iTxtContent);
-            final jsonData =
-                jsonDecode(utf8.decode(jsonBytes)) as Map<String, dynamic>;
-
-            // 从 bundle 中提取第一个 vibe
-            final vibes = jsonData['vibes'] as List<dynamic>?;
-            if (vibes != null && vibes.isNotEmpty) {
-              final firstVibe = vibes.first as Map<String, dynamic>;
-              final extractedEncoding = _extractEncodingFromNaiVibe(firstVibe);
-
-              if (extractedEncoding != null && extractedEncoding.isNotEmpty) {
-                final name = firstVibe['name'] as String? ?? params.fileName;
-                double strength = params.defaultStrength;
-                var infoExtracted = 0.7;
-                final importInfo =
-                    firstVibe['importInfo'] as Map<String, dynamic>?;
-                if (importInfo != null && importInfo['strength'] != null) {
-                  strength = (importInfo['strength'] as num).toDouble();
-                }
-                infoExtracted = _extractInformationExtracted(
-                  importInfo,
-                  infoExtracted,
-                );
-
-                return VibeReference(
-                  displayName: name,
-                  vibeEncoding: extractedEncoding,
-                  thumbnail: params.bytes,
-                  rawImageData: _extractRawImageFromJson(firstVibe),
-                  strength: VibeReference.sanitizeStrength(strength),
-                  infoExtracted: infoExtracted,
-                  encodingModel: _extractEncodingModelFromJson(firstVibe),
-                  sourceType: VibeSourceType.png,
-                );
-              }
-            }
-          } catch (e) {
-            AppLogger.w('Failed to parse naidata format: $e', 'VibeParser');
-          }
-        } else {
-          // NovelAI_Vibe_Encoding_Base64 格式：直接是 encoding
-          return VibeReference(
-            displayName: params.fileName,
-            vibeEncoding: iTxtContent,
-            thumbnail: params.bytes,
-            rawImageData: params.bytes,
-            strength: params.defaultStrength,
-            sourceType: VibeSourceType.png,
-          );
-        }
-      }
-
-      // 没有找到 iTXt 数据，尝试检测 PNG 中是否包含 JSON 文本
-      final embeddedJson = _extractEmbeddedJsonFromTextData(textData);
-      if (embeddedJson != null) {
-        try {
-          final jsonData = jsonDecode(embeddedJson) as Map<String, dynamic>;
-
-          // 检查是否为单个 vibe
-          final extractedEncoding = _extractEncodingFromJson(jsonData);
-          if (extractedEncoding != null) {
-            final name = jsonData['name'] as String? ?? params.fileName;
-            double strength = params.defaultStrength;
-            var infoExtracted = 0.7;
-            final importInfo = jsonData['importInfo'] as Map<String, dynamic>?;
-            if (importInfo != null && importInfo['strength'] != null) {
-              strength = (importInfo['strength'] as num).toDouble();
-            }
-            infoExtracted = _extractInformationExtracted(
-              importInfo,
-              infoExtracted,
-            );
-
-            return VibeReference(
-              displayName: name,
-              vibeEncoding: extractedEncoding,
-              thumbnail: params.bytes,
-              rawImageData: _extractRawImageFromJson(jsonData) ?? params.bytes,
-              strength: VibeReference.sanitizeStrength(strength),
-              infoExtracted: infoExtracted,
-              encodingModel: _extractEncodingModelFromJson(jsonData),
-              sourceType: VibeSourceType.png,
-            );
-          }
-        } catch (e) {
-          // 忽略 JSON 解析错误
-        }
-      }
-
-      // 没有找到任何 Vibe 数据 - 作为原始图片处理
-      return VibeReference(
-        displayName: params.fileName,
-        vibeEncoding: '',
-        thumbnail: params.bytes,
-        rawImageData: params.bytes,
-        strength: params.defaultStrength,
-        sourceType: VibeSourceType.rawImage,
-      );
-    } catch (e) {
-      // 解析失败 - 作为原始图片处理
-      return VibeReference(
-        displayName: params.fileName,
-        vibeEncoding: '',
-        thumbnail: params.bytes,
-        rawImageData: params.bytes,
-        strength: params.defaultStrength,
-        sourceType: VibeSourceType.rawImage,
-      );
+          sourceType: VibeSourceType.png,
+        ),
+      ];
     }
+    final embeddedJson = _extractEmbeddedJsonFromTextData(textData);
+    if (embeddedJson == null) return [];
+    return parsePayload(jsonDecode(embeddedJson) as Map<String, dynamic>);
   }
 
   /// 从 textData 中提取嵌入的 JSON 数据
@@ -534,11 +256,6 @@ class VibeFileParser {
       }
     }
     return null;
-  }
-
-  /// 从 NAI vibe 数据中提取 encoding。
-  static String? _extractEncodingFromNaiVibe(Map<String, dynamic> vibe) {
-    return _extractEncodingDetails(vibe)?.encoding;
   }
 
   /// 从导入信息中提取强度值
@@ -765,11 +482,6 @@ class VibeFileParser {
     }
 
     return results;
-  }
-
-  /// 从 JSON 数据中提取 Vibe 编码
-  static String? _extractEncodingFromJson(Map<String, dynamic> jsonData) {
-    return _extractEncodingDetails(jsonData)?.encoding;
   }
 
   static String? _extractEncodingModelFromJson(Map<String, dynamic> jsonData) {

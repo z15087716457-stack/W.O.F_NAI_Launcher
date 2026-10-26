@@ -1422,17 +1422,13 @@ class _ImageEditorScreenState extends State<ImageEditorScreen> {
         return;
       }
 
-      final layer = await _state.layerManager.addLayerFromImage(
-        layerBytes,
-        name: _droppedImageLayerName(fileName),
-        index: _isInpaintMode ? 0 : null,
-      );
-      if (!mounted) {
-        return;
-      }
-      if (layer == null) {
-        AppToast.error(context, l10n.editor_parseImageFailed);
-        return;
+      final layer = Layer(name: _droppedImageLayerName(fileName));
+      try {
+        await layer.setBaseImage(layerBytes);
+        if (!mounted) return;
+        _state.historyManager.execute(ImportImageLayerAction(layer), _state);
+      } finally {
+        layer.dispose();
       }
 
       _state.clearSelection(saveHistory: false);

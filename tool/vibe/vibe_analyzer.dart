@@ -286,7 +286,7 @@ Future<void> saveDebugFile(String fileName, Uint8List bytes) async {
     if (!await tempDir.exists()) {
       await tempDir.create(recursive: true);
     }
-    final file = File('${tempDir.path}\$fileName');
+    final file = File(p.join(tempDir.path, fileName));
     await file.writeAsBytes(bytes);
     print('  💾 Saved to: ${file.path}');
   } catch (e) {

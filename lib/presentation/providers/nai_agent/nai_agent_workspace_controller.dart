@@ -26,10 +26,21 @@ typedef AgentClientFactory =
 
 /// Live projections and UI drafts only. Official Pi owns messages and execution.
 class AgentChatRuntime {
-  AgentChatRuntime(this.workspace, this.chat, this.composer);
+  AgentChatRuntime(this.workspace, this.chat, AgentComposerState composer)
+    : _composer = composer;
   final AgentWorkspace workspace;
   AgentChat chat;
-  AgentComposerState composer;
+  AgentComposerState _composer;
+  int _composerRevision = 0;
+  AgentComposerState get composer => _composer;
+  set composer(AgentComposerState value) {
+    if (value.text != _composer.text ||
+        !listEquals(value.attachments, _composer.attachments)) {
+      _composerRevision++;
+    }
+    _composer = value;
+  }
+
   PiHostClient? client;
   StreamSubscription<Map<String, dynamic>>? subscription;
   List<Map<String, dynamic>> messages = [], queue = [];
@@ -1202,8 +1213,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   }
 
   Future<void> restorePending(String id) async {
+    if (_disposed || _closeFuture != null) return;
     final runtime = selected!;
     final item = runtime.composer.pending.firstWhere((p) => p['queueId'] == id);
+    final revision = runtime._composerRevision;
     if (runtime.composer.text.isNotEmpty ||
         runtime.composer.attachments.isNotEmpty) {
       throw const NaiAgentToolError(
@@ -1213,7 +1226,34 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
     if (runtime.queue.any((p) => p['queueId'] == id)) {
       await runtime.client!.editQueue(id, remove: true);
+      if (_disposed ||
+          _closeFuture != null ||
+          !identical(_runtimes[runtime.chat.id], runtime)) {
+        return;
+      }
       runtime.queue.removeWhere((p) => p['queueId'] == id);
+      // The host no longer owns this message. Keep it recoverable if the user
+      // edited the composer or a host state update already removed its row.
+      final current = runtime.composer;
+      runtime.composer = AgentComposerState(
+        text: current.text,
+        attachments: current.attachments,
+        interrupted: current.interrupted,
+        wasRunning: current.wasRunning,
+        pending: [
+          for (final pending in current.pending)
+            pending['queueId'] == id
+                ? {...pending, 'recovered': true}
+                : pending,
+          if (!current.pending.any((pending) => pending['queueId'] == id))
+            {...item, 'recovered': true},
+        ],
+      );
+      if (revision != runtime._composerRevision) {
+        await _persist(runtime);
+        _notify();
+        return;
+      }
     }
     runtime.composer = AgentComposerState(
       text: item['text'] as String? ?? '',

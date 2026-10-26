@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:hive/hive.dart';
 
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/gallery_path_utils.dart';
 import '../models/gallery/nai_image_metadata.dart';
 import 'metadata/cache_manager.dart';
 import 'metadata/hash_calculator.dart';
@@ -30,19 +31,10 @@ class ParseCancelToken {
 
 /// 解析任务信息
 class _ParseTaskInfo {
-  final String hash;
-  final DateTime startTime;
-  final ParseCancelToken? cancelToken;
+  final String key;
   final Completer<NaiImageMetadata?> completer;
 
-  _ParseTaskInfo({
-    required this.hash,
-    required this.startTime,
-    this.cancelToken,
-    required this.completer,
-  });
-
-  bool get isCancelled => cancelToken?.isCancelled ?? false;
+  _ParseTaskInfo({required this.key, required this.completer});
 }
 
 /// 解析统计信息
@@ -167,125 +159,25 @@ class ImageMetadataService {
   Future<NaiImageMetadata?> getMetadataImmediate(
     String path, {
     ParseCancelToken? cancelToken,
+  }) => _getFileMetadata(
+    path,
+    cancelToken: cancelToken,
+    timeout: _highPriorityTimeout,
+    semaphore: _highPrioritySemaphore,
+  );
+
+  /// 扫描读取：与前台共用内容哈希缓存和常驻 worker 的单次文件读取。
+  /// 有效图片无参数时返回空对象；读取失败抛出文件异常，超时／取消返回 null。
+  Future<NaiImageMetadata?> getMetadataForScan(String path) =>
+      _readFileMetadata(path);
+
+  Future<NaiImageMetadata?> _readFileMetadata(
+    String path, {
+    Duration timeout = const Duration(seconds: 10),
+    bool Function()? isCurrent,
   }) async {
-    // AppLogger.i('[MetadataFlow] getMetadataImmediate START: path=$path', 'ImageMetadataService');
-    final stopwatch = Stopwatch()..start();
-
-    // 检查取消
-    if (cancelToken?.isCancelled ?? false) {
-      _statistics.recordCancelled();
-      return null;
-    }
-
-    final hash = await _hashCalculator.calculate(path);
-
-    // 检查 L1 内存缓存
-    final memoryCached = _cacheManager.getFromMemory(hash);
-    if (memoryCached != null) {
-      stopwatch.stop();
-      _statistics.recordCacheHit();
-      return memoryCached;
-    }
-
-    // 检查 L2 持久化缓存
-    final persistentCached = _cacheManager.getFromPersistent(hash);
-    if (persistentCached != null) {
-      stopwatch.stop();
-      _statistics.recordCacheHit();
-      return persistentCached;
-    }
-
-    // 检查是否有正在进行的解析
-    final existingTask = _pendingTasks[hash];
-    if (existingTask != null) {
-      return existingTask.completer.future;
-    }
-
-    // 高优先级解析
-    await _highPrioritySemaphore.acquire();
-
-    // 创建任务
-    final taskCompleter = Completer<NaiImageMetadata?>();
-    final taskInfo = _ParseTaskInfo(
-      hash: hash,
-      startTime: DateTime.now(),
-      cancelToken: cancelToken,
-      completer: taskCompleter,
-    );
-    _pendingTasks[hash] = taskInfo;
-
-    // 设置超时
-    final timeoutTimer = Timer(_highPriorityTimeout, () {
-      if (!taskCompleter.isCompleted) {
-        AppLogger.w(
-          '[MetadataFlow] Parse timeout for: $path',
-          'ImageMetadataService',
-        );
-        _statistics.recordTimeout();
-        taskCompleter.complete(null);
-      }
-    });
-    _activeTimeouts[hash] = timeoutTimer;
-
-    try {
-      // 执行解析
-      final result = await _parseAndCache(
-        path,
-        hash: hash,
-        cancelToken: cancelToken,
-        isHighPriority: true,
-      );
-
-      stopwatch.stop();
-
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(result);
-      }
-
-      // AppLogger.i('[MetadataFlow] Parse completed (${stopwatch.elapsedMilliseconds}ms): hasData=${result?.hasData}', 'ImageMetadataService');
-
-      return result;
-    } on _ParseCancelledException {
-      _statistics.recordCancelled();
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(null);
-      }
-      return null;
-    } catch (e, stack) {
-      AppLogger.e(
-        '[MetadataFlow] Parse error',
-        e,
-        stack,
-        'ImageMetadataService',
-      );
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(null);
-      }
-      return null;
-    } finally {
-      _cleanupTask(hash);
-      _highPrioritySemaphore.release();
-    }
-  }
-
-  /// 扫描专用解析入口（不阻塞 UI isolate）
-  ///
-  /// 与 [getMetadataImmediate] 的区别：
-  /// - L1/L2 缓存命中走快速路径（同 [getMetadataImmediate]，不进 isolate）
-  /// - 未命中时解析交给 [IsolateMetadataService] 的常驻 worker 池：
-  ///   worker **单次读取文件**，先算 SHA256 回传，主 isolate 依哈希查缓存；
-  ///   未命中才复用同次读取继续解析（PNG 解码 + stealth LSB 提取全部在
-  ///   worker 内完成）。主 isolate 不再整文件读入 + 同步哈希，worker 也不再
-  ///   二次读盘；避免扫描上万张剥 tEXt 的 PNG 时 UI isolate 连续阻塞
-  ///
-  /// 裁决点留痕（P4）：L1（内存 LRU）与 L2（Hive Box）都无法下沉 worker——
-  /// Hive Box 绑定主 isolate，L1 是与统计共享的可变缓存。故采用「哈希先行、
-  /// 主 isolate 决策」的两阶段形态：文件读取次数由旧实现的两次（主 isolate
-  /// 哈希一次 + worker 解析一次）降为一次，SHA256 CPU 从主 isolate 移入
-  /// worker；哈希已知且缓存命中的场景仍零文件读取直接返回。
-  ///
-  /// [path] 文件路径
-  Future<NaiImageMetadata?> getMetadataForScan(String path) async {
+    bool active() => isCurrent?.call() ?? true;
+    if (!active()) return null;
     final stopwatch = Stopwatch()..start();
 
     // 快速路径：路径哈希已知且缓存命中时不进 isolate、不做任何文件读取
@@ -310,12 +202,13 @@ class ImageMetadataService {
     NaiImageMetadata? cachedCandidate;
     final result = await IsolateMetadataService.instance.parseMetadataWithHash(
       path,
-      config: const IsolateParseConfig(
-        timeout: Duration(seconds: 10),
+      config: IsolateParseConfig(
+        timeout: timeout,
         useGradualRead: true,
         useCache: false,
       ),
       shouldParseWithHash: (hash) {
+        if (!active()) return false;
         // 已知哈希的缓存未命中在快速路径已查过同一份缓存，无需重复计数
         if (hash == knownHash) return true;
 
@@ -334,34 +227,29 @@ class ImageMetadataService {
       },
     );
 
+    if (!active()) return null;
     final hash = result.fileHash;
     if (hash == null) {
-      // worker 未读回文件字节（文件在扫描间隙消失/被锁，或任务被取消）。
-      // 保持与旧实现一致的失败语义：沿旧哈希路径取得同样的文件异常
       stopwatch.stop();
-      if (!result.wasTimeout && !result.wasCancelled) {
-        await _hashCalculator.calculate(path);
-      }
       _statistics.recordFailure(
-        result.error ?? 'no_metadata',
+        result.error ?? 'file_read_failed',
         stopwatch.elapsed,
       );
-      return null;
+      if (result.wasTimeout || result.wasCancelled) return null;
+      throw FileSystemException(
+        result.error ?? 'Failed to read image metadata',
+        path,
+      );
     }
 
     // 哈希回填路径映射，语义等同旧实现 calculate() 的缓存写入
     _hashCalculator.registerComputedHash(path, hash);
 
     if (result.wasSkipped) {
-      // 决策阶段已确认缓存命中，worker 丢弃了字节，直接返回缓存值
+      // 仅当前任务的缓存命中会跳过 worker 解析。
       stopwatch.stop();
-      final cached = cachedCandidate;
-      if (cached != null) {
-        _statistics.recordCacheHit();
-        return cached;
-      }
-      _statistics.recordFailure('cache_skip_without_value', stopwatch.elapsed);
-      return null;
+      _statistics.recordCacheHit();
+      return cachedCandidate!;
     }
 
     stopwatch.stop();
@@ -369,6 +257,7 @@ class ImageMetadataService {
     final metadata = result.success ? result.metadata : null;
     if (metadata != null && metadata.hasData) {
       await _cacheManager.save(hash, metadata);
+      if (!active()) return null;
       _statistics.recordSuccess(stopwatch.elapsed);
     } else {
       _statistics.recordFailure(
@@ -396,104 +285,73 @@ class ImageMetadataService {
     String path, {
     ParseCancelToken? cancelToken,
     Duration? timeout,
-  }) async {
-    final stopwatch = Stopwatch()..start();
+  }) => _getFileMetadata(
+    path,
+    cancelToken: cancelToken,
+    timeout: timeout ?? _defaultParseTimeout,
+    semaphore: _fileSemaphore,
+  );
 
-    // 检查取消
+  Future<NaiImageMetadata?> _getFileMetadata(
+    String path, {
+    required Duration timeout,
+    required _Semaphore semaphore,
+    ParseCancelToken? cancelToken,
+  }) {
     if (cancelToken?.isCancelled ?? false) {
       _statistics.recordCancelled();
-      return null;
+      return Future.value(null);
     }
-
-    final hash = await _hashCalculator.calculate(path);
-
-    // 检查 L1 内存缓存
-    final memoryCached = _cacheManager.getFromMemory(hash);
-    if (memoryCached != null) {
-      _statistics.recordCacheHit();
-      return memoryCached;
-    }
-
-    // 检查 L2 持久化缓存
-    final persistentCached = _cacheManager.getFromPersistent(hash);
-    if (persistentCached != null) {
-      _statistics.recordCacheHit();
-      return persistentCached;
-    }
-
-    // 检查是否有正在进行的解析
-    final existingTask = _pendingTasks[hash];
-    if (existingTask != null) {
-      return existingTask.completer.future;
-    }
-
-    await _fileSemaphore.acquire();
-
-    // 创建任务
-    final taskCompleter = Completer<NaiImageMetadata?>();
-    final taskInfo = _ParseTaskInfo(
-      hash: hash,
-      startTime: DateTime.now(),
-      cancelToken: cancelToken,
-      completer: taskCompleter,
+    final key = 'file:${galleryFilePathKey(path)}';
+    final existing = _pendingTasks[key];
+    if (existing != null) return existing.completer.future;
+    final task = _ParseTaskInfo(
+      key: key,
+      completer: Completer<NaiImageMetadata?>(),
     );
-    _pendingTasks[hash] = taskInfo;
-
-    // 设置超时
-    final actualTimeout = timeout ?? _defaultParseTimeout;
-    final timeoutTimer = Timer(actualTimeout, () {
-      if (!taskCompleter.isCompleted) {
-        AppLogger.w(
-          '[MetadataFlow] Parse timeout for: $path',
-          'ImageMetadataService',
-        );
-        _statistics.recordTimeout();
-        taskCompleter.complete(null);
-      }
+    _pendingTasks[key] = task;
+    bool active() =>
+        identical(_pendingTasks[key], task) && !task.completer.isCompleted;
+    _activeTimeouts[key] = Timer(timeout, () {
+      if (!active()) return;
+      _statistics.recordTimeout();
+      task.completer.complete(null);
+      _cleanupTask(task);
     });
-    _activeTimeouts[hash] = timeoutTimer;
-
-    try {
-      final result = await _parseAndCache(
-        path,
-        hash: hash,
-        cancelToken: cancelToken,
+    if (cancelToken != null) {
+      unawaited(
+        cancelToken.onCancelled.then((_) {
+          if (active()) _cancelTask(key);
+        }),
       );
-
-      stopwatch.stop();
-      if (stopwatch.elapsedMilliseconds > 50) {
-        AppLogger.w(
-          '[PERF] Slow getMetadata: ${stopwatch.elapsedMilliseconds}ms for $path',
-          'ImageMetadataService',
-        );
-      }
-
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(result);
-      }
-
-      return result;
-    } on _ParseCancelledException {
-      _statistics.recordCancelled();
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(null);
-      }
-      return null;
-    } catch (e, stack) {
-      AppLogger.e(
-        '[MetadataFlow] Parse error',
-        e,
-        stack,
-        'ImageMetadataService',
-      );
-      if (!taskCompleter.isCompleted) {
-        taskCompleter.complete(null);
-      }
-      return null;
-    } finally {
-      _cleanupTask(hash);
-      _fileSemaphore.release();
     }
+    // 首调用也只观察 task.completer；排队、读取与解析共享同一个期限。
+    unawaited(() async {
+      await semaphore.acquire();
+      try {
+        if (!active()) return;
+        final result = await _readFileMetadata(
+          path,
+          timeout: timeout,
+          isCurrent: active,
+        );
+        if (active()) task.completer.complete(result);
+      } catch (e, stack) {
+        if (active()) {
+          AppLogger.e(
+            'Failed to read image metadata: $path',
+            e,
+            stack,
+            'ImageMetadataService',
+          );
+          task.completer.complete(null);
+        }
+      } finally {
+        _cleanupTask(task);
+        semaphore.release();
+      }
+    }());
+    return task.completer.future;
   }
 
   /// 从字节数组获取元数据
@@ -518,11 +376,7 @@ class ImageMetadataService {
 
     // 创建任务
     final taskCompleter = Completer<NaiImageMetadata?>();
-    final taskInfo = _ParseTaskInfo(
-      hash: hash,
-      startTime: DateTime.now(),
-      completer: taskCompleter,
-    );
+    final taskInfo = _ParseTaskInfo(key: hash, completer: taskCompleter);
     _pendingTasks[hash] = taskInfo;
 
     try {
@@ -540,7 +394,7 @@ class ImageMetadataService {
       }
       return null;
     } finally {
-      _cleanupTask(hash);
+      _cleanupTask(taskInfo);
     }
   }
 
@@ -594,10 +448,7 @@ class ImageMetadataService {
 
   /// 取消指定路径的解析任务
   void cancelParse(String path) {
-    final hash = _hashCalculator.getHashForPath(path);
-    if (hash != null) {
-      _cancelTask(hash);
-    }
+    _cancelTask('file:${galleryFilePathKey(path)}');
   }
 
   /// 取消所有进行中的解析任务
@@ -680,130 +531,18 @@ class ImageMetadataService {
 
   // ==================== 私有方法 ====================
 
-  void _cleanupTask(String hash) {
-    _pendingTasks.remove(hash);
-    _activeTimeouts[hash]?.cancel();
-    _activeTimeouts.remove(hash);
+  void _cleanupTask(_ParseTaskInfo task) {
+    if (!identical(_pendingTasks[task.key], task)) return;
+    _pendingTasks.remove(task.key);
+    _activeTimeouts.remove(task.key)?.cancel();
   }
 
-  void _cancelTask(String hash) {
-    final task = _pendingTasks[hash];
+  void _cancelTask(String key) {
+    final task = _pendingTasks[key];
     if (task != null && !task.completer.isCompleted) {
+      _statistics.recordCancelled();
       task.completer.complete(null);
-      _cleanupTask(hash);
-      // AppLogger.d('Parse task cancelled for hash: $hash', 'ImageMetadataService');
-    }
-  }
-
-  void _checkCancelled(ParseCancelToken? token) {
-    if (token?.isCancelled ?? false) {
-      throw const _ParseCancelledException();
-    }
-  }
-
-  Future<NaiImageMetadata?> _parseAndCache(
-    String path, {
-    required String hash,
-    ParseCancelToken? cancelToken,
-    bool isHighPriority = false,
-  }) async {
-    final totalStopwatch = Stopwatch()..start();
-
-    try {
-      _checkCancelled(cancelToken);
-
-      final file = File(path);
-      // 检查文件是否存在
-      if (!await file.exists()) {
-        AppLogger.w(
-          '[MetadataFlow] File NOT FOUND: $path',
-          'ImageMetadataService',
-        );
-        _statistics.recordFailure('file_not_found', totalStopwatch.elapsed);
-        return null;
-      }
-      // AppLogger.d('[MetadataFlow] File exists, size=${await file.length()} bytes', 'ImageMetadataService');
-
-      _checkCancelled(cancelToken);
-
-      // 检查是否是PNG文件
-      // 检查是否是PNG文件
-      if (!path.toLowerCase().endsWith('.png')) {
-        AppLogger.w(
-          '[MetadataFlow] Not a PNG file: $path',
-          'ImageMetadataService',
-        );
-        _statistics.recordFailure('not_png', totalStopwatch.elapsed);
-        return null;
-      }
-
-      NaiImageMetadata? metadata;
-
-      // 使用统一解析器（带渐进式读取策略）
-      // 使用统一解析器（带渐进式读取策略）
-      final parseStopwatch = Stopwatch()..start();
-
-      try {
-        _checkCancelled(cancelToken);
-
-        final result = UnifiedMetadataParser.parseFromFile(
-          path,
-          useGradualRead: true,
-          useCache: true,
-        );
-
-        parseStopwatch.stop();
-
-        if (result.success && result.metadata != null) {
-          metadata = result.metadata;
-        }
-      } catch (e) {
-        parseStopwatch.stop();
-        AppLogger.w(
-          '[MetadataFlow] Unified parse error: $e',
-          'ImageMetadataService',
-        );
-        metadata = null;
-      }
-
-      _checkCancelled(cancelToken);
-
-      // 缓存结果
-      if (metadata != null && metadata.hasData) {
-        await _cacheManager.save(hash, metadata);
-        _statistics.recordSuccess(totalStopwatch.elapsed);
-      } else {
-        if (metadata == null) {
-          _statistics.recordFailure('no_metadata', totalStopwatch.elapsed);
-        } else {
-          _statistics.recordFailure('empty_metadata', totalStopwatch.elapsed);
-        }
-      }
-
-      totalStopwatch.stop();
-      if (totalStopwatch.elapsedMilliseconds > 100) {
-        AppLogger.w(
-          '[PERF] Slow _parseAndCache: ${totalStopwatch.elapsedMilliseconds}ms for $path',
-          'ImageMetadataService',
-        );
-      }
-
-      return metadata;
-    } on _ParseCancelledException {
-      rethrow;
-    } catch (e, stack) {
-      totalStopwatch.stop();
-      _statistics.recordFailure(
-        'exception: ${e.runtimeType}',
-        totalStopwatch.elapsed,
-      );
-      AppLogger.e(
-        '[MetadataFlow] Parse FAILED: $path',
-        e,
-        stack,
-        'ImageMetadataService',
-      );
-      return null;
+      _cleanupTask(task);
     }
   }
 
@@ -853,12 +592,6 @@ class GeneratedImageInfo {
   GeneratedImageInfo({required this.id, this.filePath, this.bytes});
 }
 
-/// 解析取消异常
-class _ParseCancelledException implements Exception {
-  const _ParseCancelledException();
-}
-
-/// 信号量
 class _Semaphore {
   final int maxCount;
   int _currentCount = 0;

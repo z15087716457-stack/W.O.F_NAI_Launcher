@@ -111,6 +111,49 @@ class GalleryTests(unittest.TestCase):
             self.engine.search('rain',None,'','visual',20,lambda:True)
         self.engine.clear();self.assertEqual(self.engine.status()['indexed'],0)
         self.assertEqual(self.engine.sources.document_count(),4)
+    def test_progress_callback_survives_visual_and_parameter_build_batches(self):
+        events=[]
+        plan=self.engine.preview()
+        batches=list(self.engine.build(plan['plan_id'],lambda:False,progress=events.append))
+        self.assertTrue(events)
+        self.assertGreaterEqual(len(batches),2)
+        status=self.engine.status()
+        self.assertTrue(status['complete'])
+        self.assertEqual(status['visual_indexed'],3)
+        self.assertGreater(status['parameters_indexed'],0)
+        processed=[event['processed'] for event in events]
+        self.assertEqual(processed,sorted(processed))
+
+    def test_worker_completes_gallery_build_with_its_progress_callback(self):
+        from unittest.mock import patch
+        from worker import Worker
+        worker=Worker();worker.models=self.models
+        worker.engines={'gallery':self.engine}
+        token=threading.Event()
+        plan=worker.execute('preview',{'source':'gallery'},token)
+        job=worker.execute('start',{'source':'gallery','plan_id':plan['plan_id']},token)['job_id']
+        events=[]
+        with patch('worker.emit',side_effect=events.append):
+            for _ in range(30):
+                if job not in worker.jobs:break
+                worker._step(job)
+        self.assertNotIn(job,worker.jobs)
+        self.assertNotIn('error',[event['phase'] for event in events])
+        self.assertEqual(events[-1]['phase'],'complete')
+        self.assertTrue(events[-1]['complete'])
+        self.assertGreater(events[-1]['parameters_indexed'],0)
+
+    def test_cancel_between_visual_and_parameter_batches_keeps_partial_index(self):
+        cancelled=False;events=[]
+        plan=self.engine.preview()
+        generator=self.engine.build(plan['plan_id'],lambda:cancelled,progress=events.append)
+        next(generator)
+        cancelled=True
+        self.assertEqual(list(generator),[])
+        self.assertTrue(events)
+        self.assertFalse(self.engine.status()['complete'])
+        self.assertEqual(self.engine.status()['visual_indexed'],3)
+
     def test_bfloat_rounding_is_renormalized_before_storing_cosine_vectors(self):
         import numpy as np
         from models import Models

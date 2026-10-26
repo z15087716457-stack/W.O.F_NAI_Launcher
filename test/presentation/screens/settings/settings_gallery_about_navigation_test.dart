@@ -472,7 +472,19 @@ void main() {
       final defaultPath = await tester.runAsync(
         () => VibeLibraryPathHelper.instance.getPath(),
       );
-      await tester.pumpAndSettle();
+      for (
+        var i = 0;
+        i < 30 &&
+            tester
+                    .widget<SettingsPathTile>(
+                      find.byKey(const Key('vibe-library-path-setting')),
+                    )
+                    .path !=
+                defaultPath;
+        i++
+      ) {
+        await settle(tester);
+      }
       expect(
         tester
             .widget<SettingsPathTile>(

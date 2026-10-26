@@ -85,9 +85,7 @@ class OnlineViewer extends StatefulWidget {
 }
 
 class _OnlineViewerState extends State<OnlineViewer> {
-  var _media = 0;
   var _info = true;
-  late String _key = widget.workKey;
   final _focus = FocusNode(debugLabel: 'online-viewer');
 
   @override
@@ -105,15 +103,6 @@ class _OnlineViewerState extends State<OnlineViewer> {
     super.dispose();
   }
 
-  @override
-  void didUpdateWidget(covariant OnlineViewer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.workKey != _key) {
-      _key = widget.workKey;
-      _media = 0;
-    }
-  }
-
   void _work(int delta) {
     final scope = OnlineScope.of(context);
     final items = scope.data.list.items;
@@ -121,7 +110,6 @@ class _OnlineViewerState extends State<OnlineViewer> {
     final j = i + delta;
     if (i < 0 || j < 0 || j >= items.length) return;
     final key = items[j].key;
-    scope.actions.onSelect(key);
     widget.onWorkChanged(key);
   }
 
@@ -142,9 +130,9 @@ class _OnlineViewerState extends State<OnlineViewer> {
       if (shift) {
         _work(d);
       } else {
-        final next = _media + d;
+        final next = scope.controller.mediaIndex(widget.workKey) + d;
         if (next >= 0 && next < mediaCount) {
-          setState(() => _media = next);
+          scope.controller.setMedia(widget.workKey, next);
         } else {
           _work(d);
         }
@@ -187,7 +175,7 @@ class _OnlineViewerState extends State<OnlineViewer> {
             ),
           ]
         : detail.media;
-    final m = _media.clamp(0, media.length - 1);
+    final m = scope.controller.mediaIndex(w.key).clamp(0, media.length - 1);
     final current = media[m];
     const fg = Color(0xFFEEEEEE);
     const dim = Color(0xFF999999);
@@ -321,7 +309,9 @@ class _OnlineViewerState extends State<OnlineViewer> {
               arrow(
                 UiGlyphs.chevronLeft,
                 canPrev
-                    ? () => m > 0 ? setState(() => _media = m - 1) : _work(-1)
+                    ? () => m > 0
+                          ? scope.controller.setMedia(w.key, m - 1)
+                          : _work(-1)
                     : null,
                 left: true,
               ),
@@ -329,7 +319,7 @@ class _OnlineViewerState extends State<OnlineViewer> {
                 UiGlyphs.chevronRight,
                 canNext
                     ? () => m < media.length - 1
-                          ? setState(() => _media = m + 1)
+                          ? scope.controller.setMedia(w.key, m + 1)
                           : _work(1)
                     : null,
                 left: false,
@@ -354,7 +344,7 @@ class _OnlineViewerState extends State<OnlineViewer> {
                       children: [
                         for (final (i, x) in media.indexed)
                           UiPressable(
-                            onTap: () => setState(() => _media = i),
+                            onTap: () => scope.controller.setMedia(w.key, i),
                             builder: (context, hover) => Opacity(
                               opacity: i == m ? 1 : (hover ? .8 : .5),
                               child: Container(

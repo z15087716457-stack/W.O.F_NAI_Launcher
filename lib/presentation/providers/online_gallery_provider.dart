@@ -139,6 +139,7 @@ class ModeCache {
     this.scrollOffset = 0,
     this.appendErrorCode,
     this.endedByDuplicatePage = false,
+    this.loadedFavoriteKeys = const {},
   });
 
   final List<GalleryItem> posts;
@@ -150,6 +151,9 @@ class ModeCache {
   final OnlineGalleryErrorCode? appendErrorCode;
   final bool endedByDuplicatePage;
 
+  /// 收藏分页读过的原始身份，包括被本地筛选隐藏的图片。
+  final Set<String> loadedFavoriteKeys;
+
   ModeCache copyWith({
     List<GalleryItem>? posts,
     int? page,
@@ -160,6 +164,7 @@ class ModeCache {
     OnlineGalleryErrorCode? appendErrorCode,
     bool clearAppendError = false,
     bool? endedByDuplicatePage,
+    Set<String>? loadedFavoriteKeys,
   }) {
     return ModeCache(
       posts: posts ?? this.posts,
@@ -172,6 +177,7 @@ class ModeCache {
           ? null
           : (appendErrorCode ?? this.appendErrorCode),
       endedByDuplicatePage: endedByDuplicatePage ?? this.endedByDuplicatePage,
+      loadedFavoriteKeys: loadedFavoriteKeys ?? this.loadedFavoriteKeys,
     );
   }
 }
@@ -1348,7 +1354,11 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
       final base = refresh ? const <GalleryItem>[] : cache.posts;
       final keys = base.map(onlineGalleryPostKey).toSet();
       final added = filtered.where((item) => keys.add(item.stableKey)).toList();
-      final duplicatePage = !refresh && rawCount > 0 && added.isEmpty;
+      final rawKeys = raw.map(onlineGalleryPostKey).toSet();
+      final duplicatePage =
+          !refresh &&
+          rawKeys.isNotEmpty &&
+          rawKeys.every(cache.loadedFavoriteKeys.contains);
       final favorites = {...state.favoritedPostKeys}
         ..addAll(filtered.map(onlineGalleryPostKey));
       final nextCache = ModeCache(
@@ -1358,6 +1368,10 @@ class OnlineGalleryNotifier extends _$OnlineGalleryNotifier {
         hasMore: !duplicatePage && rawCount >= _pageSize,
         scrollOffset: refresh ? 0 : cache.scrollOffset,
         endedByDuplicatePage: duplicatePage,
+        loadedFavoriteKeys: Set.unmodifiable({
+          if (!refresh) ...cache.loadedFavoriteKeys,
+          ...rawKeys,
+        }),
       );
       state = state
           .copyWith(

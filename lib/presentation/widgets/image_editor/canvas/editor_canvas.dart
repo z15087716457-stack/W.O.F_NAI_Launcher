@@ -213,6 +213,7 @@ class _EditorCanvasState extends State<EditorCanvas>
     if (_suppressedPointers.remove(event.pointer)) {
       return;
     }
+    _inputHandler.handlePointerCancel();
   }
 
   bool _shouldSuppressPointer(PointerDownEvent event) {

@@ -77,6 +77,7 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
   var _picking = false;
   final _picked = <String>{};
   double? _liveSize;
+  int wallColumns = 1;
 
   UiPopoverAnchor? _menuAnchor;
   WidgetBuilder? _pop;
@@ -231,9 +232,7 @@ class BlocksLibraryPageState extends State<BlocksLibraryPage> {
       setPicked(items.map((b) => b.id));
       return KeyEventResult.handled;
     }
-    final cols = _data.view == BlocksView.list
-        ? 1
-        : BlocksWall.columnsOf(context, cardSize);
+    final cols = _data.view == BlocksView.list ? 1 : wallColumns;
     final dir = switch (k) {
       LogicalKeyboardKey.arrowLeft => -1,
       LogicalKeyboardKey.arrowRight => 1,

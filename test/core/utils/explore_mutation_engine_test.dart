@@ -91,6 +91,51 @@ void main() {
   });
 
   group('权重扰动', () {
+    for (final weight in [-3.0, 0.0, 0.1, 2.0, 3.0]) {
+      test('父权重 $weight 先限制到输出范围再扰动', () {
+        final results = ExploreMutationEngine.generateDeepCandidates(
+          parents: [_parent('p', '$weight::artist:a::')],
+          count: 1,
+          config: const ExploreMutationConfig(
+            weightPerturbProbability: 1,
+            deleteProbability: 0,
+            assignWeightProbability: 0,
+          ),
+          rng: Random(42),
+        );
+        expect(results, hasLength(1));
+        final text = results.single.text;
+        final match = RegExp(
+          r'^([-+]?\d+(?:\.\d+)?)::artist:a::$',
+        ).firstMatch(text);
+        final actual = match == null ? 1.0 : double.parse(match.group(1)!);
+        final center = weight.clamp(0.1, 2.0);
+        expect(
+          actual,
+          inInclusiveRange(max(0.1, center - 0.4), min(2.0, center + 0.4)),
+        );
+        expect(text, contains('artist:a'));
+      });
+    }
+
+    test('范围外父权重在零幅度时使用自定义边界', () {
+      for (final (input, expected) in [(4.0, 1.5), (-2.0, 0.5)]) {
+        final results = ExploreMutationEngine.generateDeepCandidates(
+          parents: [_parent('p', '$input::artist:a::')],
+          count: 1,
+          config: const ExploreMutationConfig(
+            weightMin: 0.5,
+            weightMax: 1.5,
+            weightAmplitude: 0,
+            weightPerturbProbability: 1,
+            deleteProbability: 0,
+          ),
+          rng: Random(42),
+        );
+        expect(results.single.text, '$expected::artist:a::');
+      }
+    });
+
     test('以父权重为众数在 ±幅度内重采样，0.1 网格，内容不变', () {
       final results = ExploreMutationEngine.generateDeepCandidates(
         parents: [_parent('p1', '0.8::artist:a::, 0.8::artist:b::')],

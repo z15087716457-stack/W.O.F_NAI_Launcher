@@ -772,6 +772,7 @@ class VibeImportService {
         bundledVibeStrengths: bundleData.strengths,
         bundledVibeInfoExtracted: bundleData.infoExtracted,
         bundledVibeEncodingModels: bundleData.encodingModels,
+        bundleId: null,
         filePath: bundleFileName,
       );
     }

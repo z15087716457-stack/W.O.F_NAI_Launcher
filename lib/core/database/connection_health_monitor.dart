@@ -230,6 +230,7 @@ class ConnectionHealthMonitor {
   final HealthAlertCallback? _onAlert;
 
   Timer? _checkTimer;
+  int _checkGeneration = 0;
   ConnectionHealthStatus _currentStatus = ConnectionHealthStatus.healthy;
   HealthCheckResult? _lastResult;
   final ConnectionMetricsCollector _metricsCollector;
@@ -274,6 +275,7 @@ class ConnectionHealthMonitor {
 
   /// 停止健康检查
   void stop() {
+    _checkGeneration++;
     _checkTimer?.cancel();
     _checkTimer = null;
     AppLogger.i('Health monitor stopped', 'ConnectionHealthMonitor');
@@ -288,6 +290,8 @@ class ConnectionHealthMonitor {
   Future<HealthCheckResult> _performCheck() async {
     final stopwatch = Stopwatch()..start();
     final timestamp = DateTime.now();
+    final generation = _checkGeneration;
+    final poolVersion = ConnectionPoolHolder.version;
 
     if (_config.verboseLogging) {
       AppLogger.d('Performing health check...', 'ConnectionHealthMonitor');
@@ -302,13 +306,16 @@ class ConnectionHealthMonitor {
         connectionAcquireLatency: stopwatch.elapsed,
         validationQuerySuccess: false,
         validationError: 'Connection pool not initialized',
-        poolVersion: ConnectionPoolHolder.version,
+        poolVersion: poolVersion,
         activeConnections: 0,
         availableConnections: 0,
         metricsSnapshot: _metricsCollector.snapshot,
       );
 
-      await _updateStatus(result);
+      if (generation == _checkGeneration &&
+          poolVersion == ConnectionPoolHolder.version) {
+        await _updateStatus(result);
+      }
       return result;
     }
 
@@ -319,11 +326,12 @@ class ConnectionHealthMonitor {
     int activeConnections = 0;
     int availableConnections = 0;
     Database? testConnection;
+    final pool = ConnectionPoolHolder.instance;
 
     try {
       final acquireStopwatch = Stopwatch()..start();
-      testConnection = await ConnectionPoolHolder.instance.acquire().timeout(
-        _config.connectionAcquireTimeoutThreshold * 2,
+      testConnection = await pool.acquire(
+        timeout: _config.connectionAcquireTimeoutThreshold * 2,
       );
       acquireLatency = acquireStopwatch.elapsed;
 
@@ -348,13 +356,8 @@ class ConnectionHealthMonitor {
       }
 
       // 获取连接池统计
-      final pool = ConnectionPoolHolder.instance;
       activeConnections = pool.inUseCount;
       availableConnections = pool.availableCount;
-
-      // 释放测试连接
-      await ConnectionPoolHolder.instance.release(testConnection);
-      testConnection = null;
     } on TimeoutException {
       acquireLatency = stopwatch.elapsed;
       validationError = 'Connection acquisition timeout';
@@ -377,7 +380,7 @@ class ConnectionHealthMonitor {
       // 确保释放连接
       if (testConnection != null) {
         try {
-          await ConnectionPoolHolder.instance.release(testConnection);
+          await pool.release(testConnection);
         } catch (e) {
           AppLogger.d('Failed to release test connection', 'HealthMonitor');
         }
@@ -391,6 +394,7 @@ class ConnectionHealthMonitor {
       acquireLatency: acquireLatency,
       validationSuccess: validationSuccess,
       activeConnections: activeConnections,
+      availableConnections: availableConnections,
     );
 
     // 5. 创建检查结果
@@ -400,14 +404,17 @@ class ConnectionHealthMonitor {
       connectionAcquireLatency: acquireLatency,
       validationQuerySuccess: validationSuccess,
       validationError: validationError,
-      poolVersion: ConnectionPoolHolder.version,
+      poolVersion: poolVersion,
       activeConnections: activeConnections,
       availableConnections: availableConnections,
       metricsSnapshot: _metricsCollector.snapshot,
     );
 
     // 6. 更新状态
-    await _updateStatus(result);
+    if (generation == _checkGeneration &&
+        poolVersion == ConnectionPoolHolder.version) {
+      await _updateStatus(result);
+    }
 
     if (_config.verboseLogging) {
       AppLogger.d(
@@ -426,6 +433,7 @@ class ConnectionHealthMonitor {
     required Duration acquireLatency,
     required bool validationSuccess,
     required int activeConnections,
+    required int availableConnections,
   }) {
     int severity = 0;
 
@@ -452,14 +460,11 @@ class ConnectionHealthMonitor {
     }
 
     // 检查活跃连接数
-    if (ConnectionPoolHolder.isInitialized) {
-      final pool = ConnectionPoolHolder.instance;
-      final activeRatio =
-          activeConnections /
-          math.max(1, pool.inUseCount + pool.availableCount);
-      if (activeRatio * 100 >= _config.activeConnectionWarningThreshold) {
-        severity++;
-      }
+    final activeRatio =
+        activeConnections /
+        math.max(1, activeConnections + availableConnections);
+    if (activeRatio * 100 >= _config.activeConnectionWarningThreshold) {
+      severity++;
     }
 
     if (severity == 0) {

@@ -301,6 +301,12 @@ class FakeLoadedQImage:
 
 
 class CanvasIOMaskTests(unittest.TestCase):
+    def setUp(self):
+        canvas_io.remove_preview_layer()
+
+    def tearDown(self):
+        canvas_io.remove_preview_layer()
+
     def test_has_active_document_returns_false_without_document(self):
         self.assertFalse(canvas_io.has_active_document())
 
@@ -406,16 +412,19 @@ class CanvasIOMaskTests(unittest.TestCase):
         original_qimage = canvas_io.QImage
         try:
             doc = FakeLayerDoc(64, 64)
-            doc.root.added.append((FakeLayer(canvas_io.PREVIEW_LAYER_NAME), None))
+            user = FakeLayer(canvas_io.PREVIEW_LAYER_NAME)
+            doc.root.added.append((user, None))
             canvas_io.active_document = lambda: doc
             canvas_io.QImage = FakeLoadedQImage
 
-            canvas_io.write_png_preview(b"png")
+            canvas_io.write_png_preview(b"first")
+            canvas_io.write_png_preview(b"second")
 
-            self.assertGreaterEqual(doc.wait_count, 1)
-            self.assertEqual(doc.refresh_count, 1)
-            self.assertEqual(len(doc.root.added), 1)
-            self.assertEqual(doc.root.added[0][0].name(), canvas_io.PREVIEW_LAYER_NAME)
+            self.assertGreaterEqual(doc.wait_count, 2)
+            self.assertGreaterEqual(doc.refresh_count, 2)
+            self.assertEqual(len(doc.root.added), 2)
+            self.assertIs(doc.root.added[0][0], user)
+            self.assertEqual(doc.root.added[1][0].name(), canvas_io.PREVIEW_LAYER_NAME)
         finally:
             canvas_io.active_document = original_doc
             canvas_io.QImage = original_qimage

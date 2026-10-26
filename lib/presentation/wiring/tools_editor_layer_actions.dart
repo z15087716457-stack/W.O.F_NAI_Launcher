@@ -29,12 +29,21 @@ class ToolsEditorLayerAction extends EditorAction {
   @override
   final String description;
   List<_ToolsLayerSnapshot>? _before;
-  String? active;
+  List<_ToolsLayerSnapshot>? _after;
+  String? _activeBefore;
+  String? _activeAfter;
   @override
   void execute(EditorState state) {
-    _before ??= state.layerManager.layers.map(_ToolsLayerSnapshot.new).toList();
-    active ??= state.layerManager.activeLayerId;
+    final after = _after;
+    if (after != null) {
+      _restore(state, after, _activeAfter);
+      return;
+    }
+    _before = state.layerManager.layers.map(_ToolsLayerSnapshot.new).toList();
+    _activeBefore = state.layerManager.activeLayerId;
     change(state);
+    _after = state.layerManager.layers.map(_ToolsLayerSnapshot.new).toList();
+    _activeAfter = state.layerManager.activeLayerId;
     state.requestUiUpdate();
   }
 
@@ -42,6 +51,14 @@ class ToolsEditorLayerAction extends EditorAction {
   void undo(EditorState state) {
     final layers = _before;
     if (layers == null) return;
+    _restore(state, layers, _activeBefore);
+  }
+
+  void _restore(
+    EditorState state,
+    List<_ToolsLayerSnapshot> layers,
+    String? active,
+  ) {
     state.layerManager.runBatch(() {
       state.layerManager.clear();
       for (var i = 0; i < layers.length; i++) {
@@ -53,7 +70,7 @@ class ToolsEditorLayerAction extends EditorAction {
         }
         layer.model3d = saved.model;
       }
-      if (active != null) state.layerManager.setActiveLayer(active!);
+      if (active != null) state.layerManager.setActiveLayer(active);
       state.layerManager.notifyRasterChange();
     });
     state.requestUiUpdate();
@@ -61,7 +78,7 @@ class ToolsEditorLayerAction extends EditorAction {
 
   @override
   void dispose() {
-    for (final layer in _before ?? <_ToolsLayerSnapshot>[]) {
+    for (final layer in [...?_before, ...?_after]) {
       layer.dispose();
     }
   }

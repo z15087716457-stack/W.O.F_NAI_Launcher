@@ -165,6 +165,72 @@ class VibeFileStorageService {
     }
   }
 
+  /// 用完整新文件替换库条目；索引提交失败时恢复原文件。
+  Future<void> replaceLibraryFile({
+    required String previousPath,
+    required String name,
+    required List<VibeReference> vibes,
+    required bool bundle,
+    required Future<void> Function(String filePath) onCommit,
+  }) async {
+    if (vibes.isEmpty || (!bundle && vibes.length != 1)) {
+      throw ArgumentError('Invalid replacement reference count');
+    }
+    final extension = bundle ? _bundleFileExtension : _singleFileExtension;
+    final targetPath = p.setExtension(previousPath, extension);
+    final samePath = _normalizePath(targetPath) == _normalizePath(previousPath);
+    if (!samePath && await File(targetPath).exists()) {
+      throw FileSystemException(
+        'Replacement target already exists',
+        targetPath,
+      );
+    }
+    final parent = await Directory(
+      p.dirname(previousPath),
+    ).resolveSymbolicLinks();
+    final staging = await Directory(parent).createTemp('.vibe-replace-');
+    final staged = File(p.join(staging.path, 'replacement.tmp'));
+    final backup = File(p.join(staging.path, 'previous.tmp'));
+    var movedPrevious = false;
+    var installed = false;
+    var retainStaging = false;
+    try {
+      final content = bundle
+          ? _buildBundleJson(vibes, defaultModel: NovelAiVibeCodec.defaultModel)
+          : _buildNaiv4VibeJson(
+              vibes.single,
+              displayName: name,
+              defaultModel: NovelAiVibeCodec.defaultModel,
+            );
+      await staged.writeAsString(content, flush: true);
+      if (await File(previousPath).exists()) {
+        await File(previousPath).rename(backup.path);
+        movedPrevious = true;
+      }
+      await staged.rename(targetPath);
+      installed = true;
+      await onCommit(targetPath);
+    } catch (error) {
+      try {
+        if (installed) await File(targetPath).delete();
+        if (movedPrevious) await backup.rename(previousPath);
+      } catch (rollbackError) {
+        retainStaging = true;
+        throw StateError(
+          '$error; Vibe replacement rollback failed: $rollbackError; retained: ${staging.path}',
+        );
+      }
+      rethrow;
+    } finally {
+      if (!retainStaging) {
+        if (!p.isWithin(parent, p.absolute(staging.path))) {
+          throw StateError('Vibe replacement staging escaped its parent');
+        }
+        await staging.delete(recursive: true);
+      }
+    }
+  }
+
   /// 覆盖已有 .naiv4vibebundle 文件
   Future<void> overwriteBundleFile(
     String filePath,
@@ -469,23 +535,14 @@ class VibeFileStorageService {
   }
 
   /// 获取 vibes 文件夹中所有 Vibe 文件
-  Future<List<FileSystemEntity>> listVibeFiles() async {
-    final directoryPath = await _ensureVibeDirectory();
-
-    try {
-      final entities = await Directory(directoryPath).list().toList();
-      return entities.where((entity) {
-        if (entity is! File) {
-          return false;
-        }
-        final extension = p.extension(entity.path).toLowerCase();
-        return extension == _singleFileExtension ||
-            extension == _bundleFileExtension;
-      }).toList();
-    } catch (e, stackTrace) {
-      AppLogger.e('列出 Vibe 文件失败: $directoryPath', e, stackTrace, _tag);
-      return const [];
-    }
+  Future<List<FileSystemEntity>> _listVibeFiles(String directoryPath) async {
+    final entities = await Directory(directoryPath).list().toList();
+    return entities.where((entity) {
+      if (entity is! File) return false;
+      final extension = p.extension(entity.path).toLowerCase();
+      return extension == _singleFileExtension ||
+          extension == _bundleFileExtension;
+    }).toList();
   }
 
   /// 扫描文件夹并与 Hive 条目同步（不直接操作 Hive）
@@ -507,7 +564,9 @@ class VibeFileStorageService {
     };
 
     final currentPathSet = <String>{};
-    final files = await listVibeFiles();
+    final directoryPath = await VibeLibraryPathHelper.instance.getPath();
+    final files = await _listVibeFiles(directoryPath);
+    final root = _normalizePath(directoryPath);
 
     // 分批并行处理文件，避免同时打开太多文件句柄
     const batchSize = 4;
@@ -568,6 +627,7 @@ class VibeFileStorageService {
       for (final entry in existingEntries) {
         final filePath = entry.filePath;
         if (filePath == null || filePath.isEmpty) continue;
+        if (_normalizePath(p.dirname(filePath)) != root) continue;
 
         final normalizedPath = _normalizePath(filePath);
         if (currentPathSet.contains(normalizedPath)) continue;

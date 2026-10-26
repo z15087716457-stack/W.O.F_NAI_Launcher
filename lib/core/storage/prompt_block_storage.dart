@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:hive/hive.dart';
@@ -30,6 +31,7 @@ class PromptBlockStorage {
   final String? _hivePath;
   Box<String>? _box;
   Future<void>? _initFuture;
+  Future<void> _paletteMutation = Future.value();
 
   /// 确保块库 Box 和 schema 已就绪。
   Future<void> init() async {
@@ -448,6 +450,25 @@ class PromptBlockStorage {
         'updatedAt': DateTime.now().toIso8601String(),
       }),
     );
+  }
+
+  /// 颜料版的读取、变换和写入按调用顺序完成，避免并发操作覆盖彼此。
+  /// [transform] 返回 null 表示无变更；写入错误由当前调用者处理。
+  Future<bool> updatePaletteBlockIds(
+    List<String>? Function(List<String> ids) transform,
+  ) async {
+    final previous = _paletteMutation;
+    final finished = Completer<void>();
+    _paletteMutation = finished.future;
+    try {
+      await previous;
+      final next = transform(await getPaletteBlockIds());
+      if (next == null) return false;
+      await putPaletteBlockIds(next);
+      return true;
+    } finally {
+      finished.complete();
+    }
   }
 
   /// 读取块库级 meta 键（迁移标记等一次性旗标）。

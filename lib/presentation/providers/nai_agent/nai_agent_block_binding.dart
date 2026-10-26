@@ -237,7 +237,8 @@ NaiAgentBlockTools bindNaiAgentBlocks(
           if (key == scope && params['offset'] != null) continue;
           final provider = pillWorkspaceProvider(key);
           final doc = ref.read(provider).document;
-          if (doc.text.isNotEmpty && !RegExp(r'[,$s]$').hasMatch(doc.text)) {
+          final tail = doc.text.trimRight();
+          if (tail.isNotEmpty && !tail.endsWith(',')) {
             ref.read(provider.notifier).setText('${doc.text}, ');
           }
         }

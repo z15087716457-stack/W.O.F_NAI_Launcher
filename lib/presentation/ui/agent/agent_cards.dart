@@ -100,7 +100,19 @@ class _AgentAskCardState extends State<AgentAskCard> {
         if (e is! KeyDownEvent) return KeyEventResult.ignored;
         final q = qs[_active];
         final digit = int.tryParse(e.character ?? '');
-        if (digit != null && digit >= 1 && digit <= q.options.length) {
+        final keys = HardwareKeyboard.instance;
+        final focused = FocusManager.instance.primaryFocus?.context;
+        final typing =
+            focused?.widget is EditableText ||
+            focused?.findAncestorWidgetOfExactType<EditableText>() != null;
+        if (digit != null &&
+            digit >= 1 &&
+            digit <= q.options.length &&
+            !typing &&
+            !keys.isControlPressed &&
+            !keys.isMetaPressed &&
+            !keys.isAltPressed &&
+            !keys.isShiftPressed) {
           _pick(_active, q.options[digit - 1]);
           return KeyEventResult.handled;
         }

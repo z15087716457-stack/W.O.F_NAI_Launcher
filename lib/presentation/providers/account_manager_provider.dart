@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:hive/hive.dart';
@@ -46,10 +47,15 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
   static const String _accountApiEndpointsKey = 'account_api_endpoints';
 
   Box? _box;
+  Future<void> _loading = Future.value();
+  Future<void> _mutations = Future.value();
+  bool _disposed = false;
 
   @override
   AccountManagerState build() {
-    _loadAccounts();
+    _disposed = false;
+    ref.onDispose(() => _disposed = true);
+    _loading = _loadAccounts();
     return const AccountManagerState(isLoading: true);
   }
 
@@ -83,13 +89,16 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
         );
       }
 
+      if (_disposed) return;
       state = AccountManagerState(
         accounts: accounts,
         accountApiEndpoints: accountApiEndpoints,
         isLoading: false,
       );
     } catch (e) {
-      state = AccountManagerState(isLoading: false, error: e.toString());
+      if (!_disposed) {
+        state = AccountManagerState(isLoading: false, error: e.toString());
+      }
     }
   }
 
@@ -151,7 +160,7 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
     bool setAsDefault = false,
     AccountType accountType = AccountType.token,
     NaiApiEndpointConfig apiEndpoint = NaiApiEndpointConfig.official,
-  }) async {
+  }) => _mutate(() async {
     // 检查是否已存在相同标识符的账号
     final existingIndex = state.accounts.indexWhere(
       (a) => a.email == identifier,
@@ -234,10 +243,10 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
       accountApiEndpoints: endpoints,
     );
     return newAccount;
-  }
+  });
 
   /// 删除账号
-  Future<void> removeAccount(String accountId) async {
+  Future<void> removeAccount(String accountId) => _mutate(() async {
     // 删除 Token
     await _deleteAccountToken(accountId);
     // 删除 accessKey（用于 token 刷新）
@@ -263,25 +272,41 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
       accounts: newAccounts,
       accountApiEndpoints: endpoints,
     );
-  }
+  });
 
-  /// 更新账号信息
-  Future<void> updateAccount(SavedAccount account) async {
-    final newAccounts = state.accounts.map((a) {
-      if (a.id == account.id) return account;
-      return a;
-    }).toList();
+  /// 资料只提交用户本次编辑的字段，其他字段在执行时取最新值。
+  Future<void> updateNickname(String accountId, String nickname) =>
+      _updateAccount(
+        accountId,
+        (account) => account.copyWith(nickname: nickname),
+      );
 
-    await _saveAccounts(newAccounts);
-    state = state.copyWith(accounts: newAccounts);
-  }
+  Future<void> updateAvatar(String accountId, String? avatarPath) =>
+      _updateAccount(
+        accountId,
+        (account) => account.copyWith(avatarPath: avatarPath),
+      );
+
+  Future<void> _updateAccount(
+    String accountId,
+    SavedAccount Function(SavedAccount current) transform,
+  ) => _mutate(() async {
+    final index = state.accounts.indexWhere(
+      (account) => account.id == accountId,
+    );
+    if (index < 0) return;
+    final accounts = List<SavedAccount>.of(state.accounts);
+    accounts[index] = transform(accounts[index]);
+    await _saveAccounts(accounts);
+    state = state.copyWith(accounts: accounts);
+  });
 
   /// 设置默认账号
   Future<void> setDefaultAccount(String accountId) async {
     await setDefaultAccountId(accountId);
   }
 
-  Future<void> setDefaultAccountId(String? accountId) async {
+  Future<void> setDefaultAccountId(String? accountId) => _mutate(() async {
     if (accountId != null && !state.accounts.any((a) => a.id == accountId)) {
       throw ArgumentError.value(accountId, 'accountId');
     }
@@ -291,10 +316,10 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
 
     await _saveAccounts(newAccounts);
     state = state.copyWith(accounts: newAccounts);
-  }
+  });
 
   /// 更新最后使用时间
-  Future<void> updateLastUsed(String accountId) async {
+  Future<void> updateLastUsed(String accountId) => _mutate(() async {
     final newAccounts = state.accounts.map((a) {
       if (a.id == accountId) {
         return a.copyWith(lastUsedAt: DateTime.now());
@@ -304,30 +329,28 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
 
     await _saveAccounts(newAccounts);
     state = state.copyWith(accounts: newAccounts);
-  }
+  });
 
   /// 更新账号订阅到期时间（Unix 时间戳秒）
   ///
   /// 若账号不存在或到期时间未发生变化，则直接返回（幂等防抖，避免频繁写盘）。
-  Future<void> updateSubscriptionExpiry(
-    String accountId,
-    int? expiresAt,
-  ) async {
-    final index = state.accounts.indexWhere((a) => a.id == accountId);
-    if (index < 0) return;
+  Future<void> updateSubscriptionExpiry(String accountId, int? expiresAt) =>
+      _mutate(() async {
+        final index = state.accounts.indexWhere((a) => a.id == accountId);
+        if (index < 0) return;
 
-    final current = state.accounts[index];
-    if (current.subscriptionExpiresAt == expiresAt) {
-      return;
-    }
+        final current = state.accounts[index];
+        if (current.subscriptionExpiresAt == expiresAt) {
+          return;
+        }
 
-    final updated = current.copyWith(subscriptionExpiresAt: expiresAt);
-    final newAccounts = List<SavedAccount>.from(state.accounts);
-    newAccounts[index] = updated;
+        final updated = current.copyWith(subscriptionExpiresAt: expiresAt);
+        final newAccounts = List<SavedAccount>.from(state.accounts);
+        newAccounts[index] = updated;
 
-    await _saveAccounts(newAccounts);
-    state = state.copyWith(accounts: newAccounts);
-  }
+        await _saveAccounts(newAccounts);
+        state = state.copyWith(accounts: newAccounts);
+      });
 
   /// 根据邮箱查找账号
   SavedAccount? findByEmail(String email) {
@@ -335,8 +358,27 @@ class AccountManagerNotifier extends _$AccountManagerNotifier {
   }
 
   /// 更新账号的 Token（用于 token 刷新后更新）
-  Future<void> updateAccountToken(String accountId, String newToken) async {
-    await _saveAccountToken(accountId, newToken);
+  Future<void> updateAccountToken(String accountId, String newToken) =>
+      _mutate(() async {
+        if (!state.accounts.any((account) => account.id == accountId)) {
+          throw StateError('Account no longer exists');
+        }
+        await _saveAccountToken(accountId, newToken);
+      });
+
+  Future<T> _mutate<T>(Future<T> Function() operation) async {
+    final previous = _mutations;
+    final finished = Completer<void>();
+    _mutations = finished.future;
+    try {
+      await previous;
+      await _loading;
+      if (_disposed) throw StateError('Account manager disposed');
+      if (state.error != null) throw StateError(state.error!);
+      return await operation();
+    } finally {
+      finished.complete();
+    }
   }
 
   /// 按最后使用时间排序的账号列表（最近使用的在前）

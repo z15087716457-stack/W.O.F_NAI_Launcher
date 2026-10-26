@@ -82,7 +82,7 @@ try {
 \$PendingMetadataPath = '${_escape(pendingMetadataPath)}'
 \$LogPath = '${_escape(logPath)}'
 \$ScriptPath = \$MyInvocation.MyCommand.Path
-\$Swapped = \$false
+\$OldAppMoved = \$false
 
 function Move-ProtectedApplicationData {
   param([string]\$From, [string]\$To)
@@ -105,7 +105,9 @@ try {
   Wait-ApplicationExit
 
   Remove-Item -LiteralPath \$ExtractDir -Recurse -Force -ErrorAction SilentlyContinue
-  Remove-Item -LiteralPath \$BackupDir -Recurse -Force -ErrorAction SilentlyContinue
+  if (Test-Path -LiteralPath \$BackupDir) {
+    throw "Update backup already exists; preserve it before retrying: \$BackupDir"
+  }
   Write-UpdateLog "Extracting update package to \$ExtractDir"
   Expand-Archive -LiteralPath \$ZipPath -DestinationPath \$ExtractDir -Force
 
@@ -145,8 +147,8 @@ try {
 
   Write-UpdateLog "Moving current application to backup: \$BackupDir"
   Move-Item -LiteralPath \$AppDir -Destination \$BackupDir
+  \$OldAppMoved = \$true
   Move-Item -LiteralPath \$SourceDir -Destination \$AppDir
-  \$Swapped = \$true
 
   # Preserve adjacent state even when the old application has no manifest.
   # Moving avoids duplicating model environments and keeps junction targets stable.
@@ -182,27 +184,29 @@ try {
   \$FailureMessage = \$_.Exception.Message
   Write-UpdateLog "Portable update failed: \$FailureMessage"
 
-  if (Test-Path -LiteralPath \$BackupDir) {
-    if (Test-Path -LiteralPath \$AppDir) {
-      Move-ProtectedApplicationData -From \$AppDir -To \$BackupDir
-      Remove-Item -LiteralPath \$AppDir -Recurse -Force -ErrorAction SilentlyContinue
+  if (\$OldAppMoved) {
+    try {
+      if (Test-Path -LiteralPath \$AppDir) {
+        Move-ProtectedApplicationData -From \$AppDir -To \$BackupDir
+        Remove-Item -LiteralPath \$AppDir -Recurse -Force
+      }
+      Move-Item -LiteralPath \$BackupDir -Destination \$AppDir
+      \$OldAppMoved = \$false
+      Write-UpdateLog 'Previous application version restored.'
+    } catch {
+      \$FailureMessage += "; Rollback failed: \$(\$_.Exception.Message). Backup preserved at \$BackupDir"
+      Write-UpdateLog \$FailureMessage
     }
-    Move-Item -LiteralPath \$BackupDir -Destination \$AppDir
-    \$Swapped = \$false
-    Write-UpdateLog 'Previous application version restored.'
   }
 
   Write-UpdateResult -Success \$false -Message \$FailureMessage
   \$RestoredExePath = Join-Path \$AppDir \$ExeName
-  if (Test-Path -LiteralPath \$RestoredExePath) {
+  if (!\$OldAppMoved -and (Test-Path -LiteralPath \$RestoredExePath)) {
     Start-Process -FilePath \$RestoredExePath -ErrorAction SilentlyContinue
   }
   exit 1
 } finally {
   Remove-Item -LiteralPath \$ExtractDir -Recurse -Force -ErrorAction SilentlyContinue
-  if (!\$Swapped) {
-    Remove-Item -LiteralPath \$BackupDir -Recurse -Force -ErrorAction SilentlyContinue
-  }
   Remove-Item -LiteralPath \$ScriptPath -Force -ErrorAction SilentlyContinue
 }
 ''';

@@ -74,112 +74,116 @@ Future<(int, int)> _importTagIndexEntries(
     final batch = entries.sublist(i, end);
     final batchIndex = i ~/ batchSize;
 
-    final (created, touched) = await dataSource.executeTransaction(
-      'importTagIndexEntries#batch$batchIndex',
-      (txn) async {
-        var created = 0;
-        var touched = 0;
+    final (created, touched) = await dataSource.executeWrite(
+      'importTagIndexEntries#batch$batchIndex.txn',
+      (db) async {
+        final committed = await db.transaction((txn) async {
+          var created = 0;
+          var touched = 0;
 
-        // 1. 批量查询现有记录（一次查询），并保留收藏状态
-        final filePaths = batch.map((e) => e.filePath).toList();
-        final placeholders = List.filled(filePaths.length, '?').join(',');
-        final existingResults = await txn.rawQuery('''
+          // 1. 批量查询现有记录（一次查询），并保留收藏状态
+          final filePaths = batch.map((e) => e.filePath).toList();
+          final placeholders = List.filled(filePaths.length, '?').join(',');
+          final existingResults = await txn.rawQuery('''
           SELECT id, file_path, is_favorite FROM ${GalleryDataSource._imagesTable}
           WHERE file_path IN ($placeholders)
           ''', filePaths);
 
-        final pathToIdMap = <String, int>{};
-        final pathToFavorite = <String, bool>{};
-        for (final row in existingResults) {
-          final path = row['file_path'] as String?;
-          final id = (row['id'] as num?)?.toInt();
-          if (path != null && id != null) {
-            pathToIdMap[path] = id;
-            pathToFavorite[path] = (row['is_favorite'] as num?)?.toInt() == 1;
+          final pathToIdMap = <String, int>{};
+          final pathToFavorite = <String, bool>{};
+          for (final row in existingResults) {
+            final path = row['file_path'] as String?;
+            final id = (row['id'] as num?)?.toInt();
+            if (path != null && id != null) {
+              pathToIdMap[path] = id;
+              pathToFavorite[path] = (row['is_favorite'] as num?)?.toInt() == 1;
+            }
           }
-        }
 
-        // 1.5 批量取旧 is_nsfw 分级（metadata 表；REPLACE 会整行覆盖，
-        // JSONL 无 nsfw 字段时保留已有分级，显式 true/false 才覆盖）
-        final existingImageIds = pathToIdMap.values
-            .where((id) => id > 0)
-            .toList();
-        final pathToNsfw = <String, int>{};
-        if (existingImageIds.isNotEmpty) {
-          final idPlaceholders = List.filled(
-            existingImageIds.length,
-            '?',
-          ).join(',');
-          final nsfwRows = await txn.rawQuery('''
+          // 1.5 批量取旧 is_nsfw 分级（metadata 表；REPLACE 会整行覆盖，
+          // JSONL 无 nsfw 字段时保留已有分级，显式 true/false 才覆盖）
+          final existingImageIds = pathToIdMap.values
+              .where((id) => id > 0)
+              .toList();
+          final pathToNsfw = <String, int>{};
+          if (existingImageIds.isNotEmpty) {
+            final idPlaceholders = List.filled(
+              existingImageIds.length,
+              '?',
+            ).join(',');
+            final nsfwRows = await txn.rawQuery('''
             SELECT image_id, is_nsfw FROM ${GalleryDataSource._metadataTable}
             WHERE image_id IN ($idPlaceholders)
             ''', existingImageIds);
-          final idToNsfw = <int, int>{
-            for (final row in nsfwRows)
-              if (row['image_id'] != null)
-                (row['image_id'] as num).toInt():
-                    (row['is_nsfw'] as num?)?.toInt() ?? 0,
-          };
-          for (final entry in pathToIdMap.entries) {
-            pathToNsfw[entry.key] = idToNsfw[entry.value] ?? 0;
-          }
-        }
-
-        final now = DateTime.now();
-        final ftsUpdates = <int, String>{};
-
-        for (final entry in batch) {
-          final existingId = pathToIdMap[entry.filePath];
-          final imageMap = {
-            'file_path': entry.filePath,
-            'file_name': entry.fileName,
-            'file_size': entry.fileSize,
-            'width': entry.width,
-            'height': entry.height,
-            'aspect_ratio':
-                entry.width != null && entry.height != null && entry.height! > 0
-                ? entry.width! / entry.height!
-                : null,
-            'modified_at': entry.modifiedAt.millisecondsSinceEpoch,
-            'created_at': entry.modifiedAt.millisecondsSinceEpoch,
-            'indexed_at': now.millisecondsSinceEpoch,
-            'last_scanned_at': now.millisecondsSinceEpoch,
-            'date_ymd': dataSource._formatDateYmd(entry.modifiedAt),
-            'resolution_key': entry.width != null && entry.height != null
-                ? '${entry.width}x${entry.height}'
-                : null,
-            'metadata_status': MetadataStatus.imported.index,
-            'is_favorite': (pathToFavorite[entry.filePath] ?? false) ? 1 : 0,
-            'is_deleted': 0,
-          };
-
-          final int imageId;
-          if (existingId != null) {
-            dataSource._imageCache.remove(existingId);
-            await txn.update(
-              GalleryDataSource._imagesTable,
-              imageMap,
-              where: 'id = ?',
-              whereArgs: [existingId],
-            );
-            imageId = existingId;
-            touched++;
-          } else {
-            imageId = await txn.insert(
-              GalleryDataSource._imagesTable,
-              imageMap,
-              conflictAlgorithm: ConflictAlgorithm.abort,
-            );
-            pathToIdMap[entry.filePath] = imageId;
-            created++;
+            final idToNsfw = <int, int>{
+              for (final row in nsfwRows)
+                if (row['image_id'] != null)
+                  (row['image_id'] as num).toInt():
+                      (row['is_nsfw'] as num?)?.toInt() ?? 0,
+            };
+            for (final entry in pathToIdMap.entries) {
+              pathToNsfw[entry.key] = idToNsfw[entry.value] ?? 0;
+            }
           }
 
-          // 2. 元数据（整行覆盖，幂等）
-          final fullPromptText = _buildImportedFullPromptText(entry);
-          final positivePromptText = _buildImportedSearchableText(entry);
-          await txn.insert(
-            GalleryDataSource._metadataTable,
-            {
+          final now = DateTime.now();
+          final ftsUpdates = <int, String>{};
+
+          for (final entry in batch) {
+            final existingId = pathToIdMap[entry.filePath];
+            final imageMap = {
+              'file_path': entry.filePath,
+              'file_name': entry.fileName,
+              'file_size': entry.fileSize,
+              'width': entry.width,
+              'height': entry.height,
+              'aspect_ratio':
+                  entry.width != null &&
+                      entry.height != null &&
+                      entry.height! > 0
+                  ? entry.width! / entry.height!
+                  : null,
+              'modified_at': entry.modifiedAt.millisecondsSinceEpoch,
+              'created_at': entry.modifiedAt.millisecondsSinceEpoch,
+              'indexed_at': now.millisecondsSinceEpoch,
+              'last_scanned_at': now.millisecondsSinceEpoch,
+              'date_ymd': dataSource._formatDateYmd(entry.modifiedAt),
+              'resolution_key': entry.width != null && entry.height != null
+                  ? '${entry.width}x${entry.height}'
+                  : null,
+              'metadata_status': MetadataStatus.imported.index,
+              'is_favorite': (pathToFavorite[entry.filePath] ?? false) ? 1 : 0,
+              'is_deleted': 0,
+            };
+
+            final int imageId;
+            if (existingId != null) {
+              dataSource._imageCache.remove(existingId);
+              await txn.update(
+                GalleryDataSource._imagesTable,
+                imageMap,
+                where: 'id = ?',
+                whereArgs: [existingId],
+              );
+              imageId = existingId;
+              touched++;
+            } else {
+              imageId = await txn.insert(
+                GalleryDataSource._imagesTable,
+                imageMap,
+                conflictAlgorithm: ConflictAlgorithm.abort,
+              );
+              pathToIdMap[entry.filePath] = imageId;
+              created++;
+            }
+
+            // 2. 元数据（整行覆盖，幂等）
+            final fullPromptText = _buildImportedFullPromptText(entry);
+            final positivePromptText = _buildImportedSearchableText(entry);
+            final nsfw = (entry.nsfw ?? (pathToNsfw[entry.filePath] ?? 0) == 1)
+                ? 1
+                : 0;
+            await txn.insert(GalleryDataSource._metadataTable, {
               'image_id': imageId,
               'prompt': entry.prompt ?? '',
               'negative_prompt': entry.negativePrompt ?? '',
@@ -207,72 +211,71 @@ Future<(int, int)> _importTagIndexEntries(
                   ? 1
                   : 0,
               // JSONL 无 nsfw 字段（null）时保留已有分级，显式 true/false 才覆盖
-              'is_nsfw': (entry.nsfw ?? (pathToNsfw[entry.filePath] ?? 0) == 1)
-                  ? 1
-                  : 0,
+              'is_nsfw': nsfw,
               'full_prompt_text': fullPromptText,
               'positive_prompt_text': positivePromptText,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
+            pathToNsfw[entry.filePath] = nsfw;
 
-          ftsUpdates[imageId] = positivePromptText;
+            ftsUpdates[imageId] = positivePromptText;
 
-          // 3. 标签：先清旧关联再插入（幂等可重导）
-          final oldTagRows = await txn.rawQuery(
-            'SELECT tag_id FROM ${GalleryDataSource._imageTagsTable} WHERE image_id = ?',
-            [imageId],
-          );
-          await txn.delete(
-            GalleryDataSource._imageTagsTable,
-            where: 'image_id = ?',
-            whereArgs: [imageId],
-          );
-
-          final normalizedTags = entry.tags
-              .map((t) => t.trim())
-              .where((t) => t.isNotEmpty)
-              .toSet()
-              .toList();
-          final affectedTagIds = oldTagRows
-              .map((row) => row['tag_id'] as String)
-              .toSet();
-
-          for (final tagName in normalizedTags) {
-            final tagId = dataSource._generateTagId(tagName);
-            affectedTagIds.add(tagId);
-
-            await txn.insert(
-              GalleryDataSource._tagsTable,
-              {'id': tagId, 'name': tagName, 'usage_count': 0},
-              conflictAlgorithm: ConflictAlgorithm.ignore,
+            // 3. 标签：先清旧关联再插入（幂等可重导）
+            final oldTagRows = await txn.rawQuery(
+              'SELECT tag_id FROM ${GalleryDataSource._imageTagsTable} WHERE image_id = ?',
+              [imageId],
             );
-            await txn.insert(
+            await txn.delete(
               GalleryDataSource._imageTagsTable,
-              {'image_id': imageId, 'tag_id': tagId},
-              conflictAlgorithm: ConflictAlgorithm.ignore,
+              where: 'image_id = ?',
+              whereArgs: [imageId],
             );
-          }
 
-          // 重新统计受影响标签的使用次数
-          for (final tagId in affectedTagIds) {
-            await txn.rawUpdate(
-              '''
+            final normalizedTags = entry.tags
+                .map((t) => t.trim())
+                .where((t) => t.isNotEmpty)
+                .toSet()
+                .toList();
+            final affectedTagIds = oldTagRows
+                .map((row) => row['tag_id'] as String)
+                .toSet();
+
+            for (final tagName in normalizedTags) {
+              final tagId = dataSource._generateTagId(tagName);
+              affectedTagIds.add(tagId);
+
+              await txn.insert(GalleryDataSource._tagsTable, {
+                'id': tagId,
+                'name': tagName,
+                'usage_count': 0,
+              }, conflictAlgorithm: ConflictAlgorithm.ignore);
+              await txn.insert(GalleryDataSource._imageTagsTable, {
+                'image_id': imageId,
+                'tag_id': tagId,
+              }, conflictAlgorithm: ConflictAlgorithm.ignore);
+            }
+
+            // 重新统计受影响标签的使用次数
+            for (final tagId in affectedTagIds) {
+              await txn.rawUpdate(
+                '''
               UPDATE ${GalleryDataSource._tagsTable}
               SET usage_count = (
                 SELECT COUNT(*) FROM ${GalleryDataSource._imageTagsTable} WHERE tag_id = ?
               )
               WHERE id = ?
               ''',
-              [tagId, tagId],
-            );
+                [tagId, tagId],
+              );
+            }
           }
-        }
 
-        // 4. FTS 索引：与元数据写入同路维护（先删后插）
-        await dataSource._batchUpdateFtsIndex(txn, ftsUpdates);
+          // 4. FTS 索引：与元数据写入同路维护（先删后插）
+          await dataSource._batchUpdateFtsIndex(txn, ftsUpdates);
 
-        return (created, touched);
+          return (created, touched);
+        });
+        dataSource._markDataChanged();
+        return committed;
       },
       timeout: const Duration(seconds: 60),
     );
@@ -284,8 +287,6 @@ Future<(int, int)> _importTagIndexEntries(
       await Future.delayed(const Duration(milliseconds: 10));
     }
   }
-
-  dataSource._markDataChanged();
 
   AppLogger.i(
     'Imported ${entries.length} tag index entries: '

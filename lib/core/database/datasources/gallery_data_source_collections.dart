@@ -8,6 +8,70 @@ part of 'gallery_data_source.dart';
 /// 层级模型：`parent_id` 指向父节点（NULL=收藏根级平铺）；`is_folder=1`
 /// 为纯组织节点，不参与成员关系，只有文件夹可拥有子节点。
 extension GalleryDataSourceCollections on GalleryDataSource {
+  /// 旧 Hive 集合完整入库后才允许清理来源；缺索引时整批保留待下次迁移。
+  Future<bool> migrateLegacyCollections(
+    List<ImageCollection> collections,
+  ) => executeWrite('migrateLegacyCollections', (db) async {
+    final migrated = await db.transaction((txn) async {
+      final paths = {for (final entry in collections) ...entry.imagePaths};
+      final rows = await txn.rawQuery(
+        'SELECT id, file_path FROM ${GalleryDataSource._imagesTable} '
+        'WHERE file_path IN (SELECT value FROM json_each(?)) AND is_deleted = 0',
+        [jsonEncode(paths.toList())],
+      );
+      final ids = {
+        for (final row in rows) row['file_path'] as String: row['id'] as int,
+      };
+      if (ids.length != paths.length) return false;
+      final sort = await txn.rawQuery(
+        'SELECT COALESCE(MAX(sort_order), -1) + 1 AS next '
+        'FROM ${GalleryDataSource._collectionsTable} WHERE parent_id IS NULL',
+      );
+      var nextOrder = sort.single['next'] as int;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      for (final entry in collections) {
+        if (entry.name.trim().isEmpty) {
+          throw ArgumentError('Legacy collection name is empty');
+        }
+        // 保留旧 ID：提交后清理来源失败时，重试不重复建集或覆盖新名称。
+        await txn.insert(GalleryDataSource._collectionsTable, {
+          'id': entry.id,
+          'name': entry.name.trim(),
+          'sort_order': nextOrder++,
+          'created_at': entry.createdAt.millisecondsSinceEpoch,
+        }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        for (final path in entry.imagePaths) {
+          await txn.insert(GalleryDataSource._collectionItemsTable, {
+            'collection_id': entry.id,
+            'image_id': ids[path]!,
+            'added_at': now,
+          }, conflictAlgorithm: ConflictAlgorithm.ignore);
+        }
+      }
+      return true;
+    });
+    if (migrated) _markDataChanged();
+    return migrated;
+  });
+
+  static bool _canReparentCollections(
+    List<Map<String, Object?>> rows,
+    Set<String> movingIds,
+    String? parentId,
+  ) {
+    final byId = {for (final row in rows) row['id'] as String: row};
+    if (!movingIds.every(byId.containsKey)) return false;
+    final seen = <String>{};
+    var ancestor = parentId;
+    while (ancestor != null) {
+      if (movingIds.contains(ancestor) || !seen.add(ancestor)) return false;
+      final row = byId[ancestor];
+      if (row == null || row['is_folder'] != 1) return false;
+      ancestor = row['parent_id'] as String?;
+    }
+    return true;
+  }
+
   /// 创建收藏集，返回新收藏集 ID
   ///
   /// [parentId] 父文件夹 ID（须为文件夹节点；null=收藏根级平铺）。
@@ -18,7 +82,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   }) async {
     final id = const Uuid().v4();
     final now = DateTime.now().millisecondsSinceEpoch;
-    await execute('createCollection', (db) async {
+    await executeWrite('createCollection', (db) async {
       if (parentId != null) {
         final parent = await db.rawQuery(
           'SELECT is_folder FROM ${GalleryDataSource._collectionsTable} '
@@ -45,14 +109,14 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         'parent_id': parentId,
         'is_folder': isFolder ? 1 : 0,
       });
+      _markDataChanged();
     });
-    _markDataChanged();
     return id;
   }
 
   /// 重命名收藏集
   Future<bool> renameCollection(String id, String newName) async {
-    final updated = await execute('renameCollection', (db) async {
+    final updated = await executeWrite('renameCollection', (db) async {
       return db.update(
         GalleryDataSource._collectionsTable,
         {'name': newName.trim()},
@@ -68,15 +132,15 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   ///
   /// 非空文件夹禁止删除：子节点存在时返回 false，由上层提示先清空。
   Future<bool> deleteCollection(String id) async {
-    final deleted = await execute('deleteCollection', (db) async {
-      return db.transaction((txn) async {
+    final deleted = await executeWrite('deleteCollection', (db) async {
+      final count = await db.transaction((txn) async {
         final childCount =
             (await txn.rawQuery(
-              'SELECT COUNT(*) AS cnt FROM ${GalleryDataSource._collectionsTable} '
-              'WHERE parent_id = ?',
-              [id],
-            ))
-                .first['cnt'] as int? ??
+                  'SELECT COUNT(*) AS cnt FROM ${GalleryDataSource._collectionsTable} '
+                  'WHERE parent_id = ?',
+                  [id],
+                )).first['cnt']
+                as int? ??
             0;
         if (childCount > 0) return 0;
 
@@ -91,8 +155,9 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           whereArgs: [id],
         );
       });
+      if (count > 0) _markDataChanged();
+      return count;
     });
-    if (deleted > 0) _markDataChanged();
     return deleted > 0;
   }
 
@@ -102,30 +167,12 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   /// 移入后 sort_order 追加到目标父级末尾。
   Future<bool> moveCollection(String id, String? newParentId) async {
     if (id == newParentId) return false;
-    final moved = await execute('moveCollection', (db) async {
-      if (newParentId != null) {
-        final parent = await db.rawQuery(
-          'SELECT is_folder FROM ${GalleryDataSource._collectionsTable} '
-          'WHERE id = ?',
-          [newParentId],
-        );
-        if (parent.isEmpty || (parent.first['is_folder'] as num?) != 1) {
-          return 0;
-        }
-      }
-
-      // 防环：目标不能在自身的子孙子树内（含自身）
+    final moved = await executeWrite('moveCollection', (db) async {
       final allRows = await db.rawQuery(
-        'SELECT id, parent_id FROM ${GalleryDataSource._collectionsTable}',
+        'SELECT id, parent_id, is_folder '
+        'FROM ${GalleryDataSource._collectionsTable}',
       );
-      final parentById = <String, String?>{
-        for (final row in allRows) row['id'] as String: row['parent_id'] as String?,
-      };
-      var ancestor = newParentId;
-      while (ancestor != null) {
-        if (ancestor == id) return 0;
-        ancestor = parentById[ancestor];
-      }
+      if (!_canReparentCollections(allRows, {id}, newParentId)) return 0;
 
       final sortResult = await db.rawQuery(
         'SELECT COALESCE(MAX(sort_order), -1) + 1 AS next '
@@ -135,14 +182,15 @@ extension GalleryDataSourceCollections on GalleryDataSource {
       );
       final nextSortOrder = (sortResult.first['next'] as num?)?.toInt() ?? 0;
 
-      return db.update(
+      final count = await db.update(
         GalleryDataSource._collectionsTable,
         {'parent_id': newParentId, 'sort_order': nextSortOrder},
         where: 'id = ?',
         whereArgs: [id],
       );
+      if (count > 0) _markDataChanged();
+      return count;
     });
-    if (moved > 0) _markDataChanged();
     return moved > 0;
   }
 
@@ -183,11 +231,13 @@ extension GalleryDataSourceCollections on GalleryDataSource {
         };
         for (final info in infos) {
           if (!info.isFolder) continue;
-          final descendantIds = _descendantsOf(info.id, parentById,
-              includeSelf: true);
+          final descendantIds = _descendantsOf(
+            info.id,
+            parentById,
+            includeSelf: true,
+          );
           if (descendantIds.isEmpty) continue;
-          final placeholders =
-              List.filled(descendantIds.length, '?').join(',');
+          final placeholders = List.filled(descendantIds.length, '?').join(',');
           final countRow = await db.rawQuery('''
             SELECT COUNT(DISTINCT ci.image_id) AS cnt
             FROM ${GalleryDataSource._collectionItemsTable} ci
@@ -223,12 +273,14 @@ extension GalleryDataSourceCollections on GalleryDataSource {
       if (parent == null) return;
       childrenOf.putIfAbsent(parent, () => []).add(child);
     });
-    final result = <String>[
-      if (includeSelf) id,
-    ];
+    final result = <String>[if (includeSelf) id];
+    final visited = <String>{id};
     final queue = [...?childrenOf[id]];
     while (queue.isNotEmpty) {
       final current = queue.removeLast();
+      if (!visited.add(current)) {
+        throw StateError('Collection hierarchy contains a cycle at $current');
+      }
       result.add(current);
       queue.addAll(childrenOf[current] ?? const []);
     }
@@ -259,8 +311,15 @@ extension GalleryDataSourceCollections on GalleryDataSource {
   }) async {
     if (orderedIds.isEmpty) return false;
 
-    final ok = await execute('reorderCollections', (db) async {
-      return db.transaction((txn) async {
+    return executeWrite('reorderCollections', (db) async {
+      final rows = await db.rawQuery(
+        'SELECT id, parent_id, is_folder '
+        'FROM ${GalleryDataSource._collectionsTable}',
+      );
+      if (!_canReparentCollections(rows, orderedIds.toSet(), parentId)) {
+        return false;
+      }
+      await db.transaction((txn) async {
         for (var i = 0; i < orderedIds.length; i++) {
           await txn.update(
             GalleryDataSource._collectionsTable,
@@ -269,16 +328,15 @@ extension GalleryDataSourceCollections on GalleryDataSource {
             whereArgs: [orderedIds[i]],
           );
         }
-        return true;
       });
+      _markDataChanged();
+      return true;
     });
-    if (ok) _markDataChanged();
-    return ok;
   }
 
   /// 添加图片到收藏集（幂等；返回是否真正新插入，已在集合中返回 false）
   Future<bool> addImageToCollection(String collectionId, int imageId) async {
-    final changed = await execute('addImageToCollection', (db) async {
+    final changed = await executeWrite('addImageToCollection', (db) async {
       // db.insert 返回 rowid 而非受影响行数（表非空时恒 >1，不能用来判定
       // 是否插入成功）；rawUpdate 返回 sqlite3_changes()：插入成功=1、被
       // OR IGNORE 跳过=0，才是可靠的幂等结果
@@ -297,7 +355,7 @@ extension GalleryDataSourceCollections on GalleryDataSource {
     String collectionId,
     int imageId,
   ) async {
-    final deleted = await execute('removeImageFromCollection', (db) async {
+    final deleted = await executeWrite('removeImageFromCollection', (db) async {
       return db.delete(
         GalleryDataSource._collectionItemsTable,
         where: 'collection_id = ? AND image_id = ?',
@@ -319,15 +377,18 @@ extension GalleryDataSourceCollections on GalleryDataSource {
     const batchSize = 900;
     for (final chunk in chunk(imageIds, batchSize)) {
       final placeholders = List.filled(chunk.length, '?').join(',');
-      removed += await execute('removeImagesFromAllCollections', (db) async {
-        return db.rawDelete(
+      removed += await executeWrite('removeImagesFromAllCollections', (
+        db,
+      ) async {
+        final count = await db.rawDelete(
           'DELETE FROM ${GalleryDataSource._collectionItemsTable} '
           'WHERE image_id IN ($placeholders)',
           chunk,
         );
+        if (count > 0) _markDataChanged();
+        return count;
       });
     }
-    if (removed > 0) _markDataChanged();
     return removed;
   }
 
@@ -344,26 +405,25 @@ extension GalleryDataSourceCollections on GalleryDataSource {
           'SELECT id, parent_id FROM ${GalleryDataSource._collectionsTable}',
         );
         final parentById = <String, String?>{
-          for (final row in rows) row['id'] as String: row['parent_id'] as String?,
+          for (final row in rows)
+            row['id'] as String: row['parent_id'] as String?,
         };
-        final targetIds = _descendantsOf(collectionId, parentById,
-            includeSelf: true);
+        final targetIds = _descendantsOf(
+          collectionId,
+          parentById,
+          includeSelf: true,
+        );
         if (!parentById.containsKey(collectionId)) return const <int>[];
 
         final placeholders = List.filled(targetIds.length, '?').join(',');
-        final memberRows = await db.rawQuery(
-          '''
+        final memberRows = await db.rawQuery('''
           SELECT image_id, MIN(added_at) AS first_added
           FROM ${GalleryDataSource._collectionItemsTable}
           WHERE collection_id IN ($placeholders)
           GROUP BY image_id
           ORDER BY first_added ASC
-        ''',
-          targetIds,
-        );
-        return [
-          for (final row in memberRows) (row['image_id'] as num).toInt(),
-        ];
+        ''', targetIds);
+        return [for (final row in memberRows) (row['image_id'] as num).toInt()];
       });
     });
   }

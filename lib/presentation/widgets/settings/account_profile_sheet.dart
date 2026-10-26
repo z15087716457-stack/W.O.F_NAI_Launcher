@@ -61,10 +61,9 @@ class _AccountProfileBottomSheetState
       final result = await _avatarService.pickAndSaveAvatar(currentAccount);
 
       if (result.isSuccess && result.path != null) {
-        final updatedAccount = currentAccount.copyWith(avatarPath: result.path);
         await ref
             .read(accountManagerNotifierProvider.notifier)
-            .updateAccount(updatedAccount);
+            .updateAvatar(currentAccount.id, result.path);
 
         // 刷新 UI
         setState(() {});
@@ -98,10 +97,9 @@ class _AccountProfileBottomSheetState
     try {
       await _avatarService.removeAvatar(currentAccount);
 
-      final updatedAccount = currentAccount.copyWith(avatarPath: null);
       await ref
           .read(accountManagerNotifierProvider.notifier)
-          .updateAccount(updatedAccount);
+          .updateAvatar(currentAccount.id, null);
 
       // 刷新 UI
       setState(() {});
@@ -156,7 +154,7 @@ class _AccountProfileBottomSheetState
     try {
       await ref
           .read(accountManagerNotifierProvider.notifier)
-          .updateAccount(currentAccount.copyWith(nickname: value));
+          .updateNickname(currentAccount.id, value);
       if (mounted) {
         AppToast.success(context, context.l10n.settings_nicknameUpdated);
       }

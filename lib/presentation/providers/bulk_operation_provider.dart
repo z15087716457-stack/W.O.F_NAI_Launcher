@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -431,6 +432,7 @@ BulkOperationService bulkOperationService(Ref ref) {
 class BulkOperationNotifier extends _$BulkOperationNotifier {
   late final BulkOperationService _service;
   late final UndoRedoHistory _history;
+  ({Completer<void> done, void Function() cancel})? _metadataEdit;
 
   @override
   BulkOperationState build() {
@@ -509,7 +511,7 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
         ref,
         imagePaths,
       );
-      _history.push(command);
+      await _history.push(command);
 
       state = state.copyWith(
         isOperationInProgress: false,
@@ -647,6 +649,14 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
       return (success: 0, failed: 0, errors: <String>[]);
     }
 
+    var cancelled = false;
+    final operation = (
+      done: Completer<void>(),
+      cancel: () {
+        cancelled = true;
+      },
+    );
+    _metadataEdit = operation;
     state = state.copyWith(
       currentOperation: BulkOperationType.metadataEdit,
       isOperationInProgress: true,
@@ -661,6 +671,7 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
       final dataSource = await _getDataSource();
       final originalTags = <String, List<String>>{};
       for (final path in imagePaths) {
+        if (cancelled) break;
         final imageId = await dataSource.getImageIdByPath(path);
         if (imageId != null) {
           originalTags[path] = await dataSource.getImageTags(imageId);
@@ -669,10 +680,13 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
         }
       }
 
+      final editedPaths = <String>[];
       final result = await _service.bulkEditMetadata(
         imagePaths,
         tagsToAdd: tagsToAdd,
         tagsToRemove: tagsToRemove,
+        isCancelled: () => cancelled,
+        onEdited: editedPaths.add,
         onProgress:
             ({
               required current,
@@ -689,21 +703,23 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
             },
       );
 
-      // Add to history
-      final command = _BulkMetadataEditCommand(
-        'Edit metadata for ${imagePaths.length} images',
-        ref,
-        imagePaths,
-        tagsToAdd,
-        tagsToRemove,
-        originalTags,
-      );
-      _history.push(command);
+      if (editedPaths.isNotEmpty) {
+        final command = _BulkMetadataEditCommand(
+          'Edit metadata for ${editedPaths.length} images',
+          ref,
+          editedPaths,
+          tagsToAdd,
+          tagsToRemove,
+          originalTags,
+        );
+        await _history.push(command);
+      }
 
       state = state.copyWith(
         isOperationInProgress: false,
         lastResult: result,
-        isCompleted: true,
+        currentProgress: result.success + result.failed,
+        isCompleted: !cancelled,
         canUndo: _history.canUndo,
         canRedo: _history.canRedo,
       );
@@ -729,7 +745,18 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
         'BulkOperationNotifier',
       );
       rethrow;
+    } finally {
+      if (_metadataEdit?.done == operation.done) _metadataEdit = null;
+      operation.done.complete();
     }
+  }
+
+  /// Stop before another metadata write and await the current write/history.
+  Future<void> cancelMetadataEdit() async {
+    final operation = _metadataEdit;
+    if (operation == null) return;
+    operation.cancel();
+    await operation.done.future;
   }
 
   /// Bulk toggle favorite status
@@ -796,7 +823,7 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
         originalStates,
         isFavorite,
       );
-      _history.push(command);
+      await _history.push(command);
 
       state = state.copyWith(
         isOperationInProgress: false,
@@ -924,6 +951,8 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
           BulkOperationErrorCode.undoFailed,
           details: '$e',
         ),
+        canUndo: _history.canUndo,
+        canRedo: _history.canRedo,
       );
       AppLogger.e('Undo failed', e, null, 'BulkOperationNotifier');
     }
@@ -956,6 +985,8 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
           BulkOperationErrorCode.redoFailed,
           details: '$e',
         ),
+        canUndo: _history.canUndo,
+        canRedo: _history.canRedo,
       );
       AppLogger.e('Redo failed', e, null, 'BulkOperationNotifier');
     }
@@ -964,8 +995,8 @@ class BulkOperationNotifier extends _$BulkOperationNotifier {
   /// Clear operation history
   ///
   /// 清空操作历史
-  void clearHistory() {
-    _history.clear();
+  Future<void> clearHistory() async {
+    await _history.clear();
     state = state.copyWith(canUndo: false, canRedo: false);
     AppLogger.d('Operation history cleared', 'BulkOperationNotifier');
   }

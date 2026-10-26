@@ -528,6 +528,49 @@ void main() {
     },
   );
 
+  for (final (input, prefix) in const [
+    ('dress', 'dress, '),
+    ('eyes', 'eyes, '),
+    ('cat', 'cat, '),
+    (r'cat$', r'cat$, '),
+    ('cat ', 'cat , '),
+    ('cat,', 'cat,'),
+    ('cat,  ', 'cat,  '),
+    ('', ''),
+    (' \t ', ' \t '),
+  ]) {
+    test(
+      'append keeps tag boundaries in both lanes: ${jsonEncode(input)}',
+      () async {
+        final created = await create({
+          'title': 'Fixture',
+          'content': 'blue_eyes',
+          'negativeContent': 'bad_hands',
+        });
+        for (final scope in [PillScopes.main, PillScopes.negative]) {
+          container
+              .read(pillWorkspaceProvider(scope).notifier)
+              .replaceWithPlainText(input);
+        }
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updatePromptImmediately(input);
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updateNegativePromptImmediately(input);
+        await insert(created['id'] as String);
+        expect(
+          container.read(pillWorkspaceProvider(PillScopes.main)).projection,
+          '${prefix}blue_eyes',
+        );
+        expect(
+          container.read(pillWorkspaceProvider(PillScopes.negative)).projection,
+          '${prefix}bad_hands',
+        );
+      },
+    );
+  }
+
   test(
     'character insertion preserves identity/metadata and supports explicit raw offsets',
     () async {

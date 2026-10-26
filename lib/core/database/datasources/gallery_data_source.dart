@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -7,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import '../../../data/models/gallery/local_image_record.dart'
     show MetadataStatus;
 import '../../../data/models/gallery/gallery_collection_info.dart';
+import '../../../data/models/gallery/image_collection.dart';
 import '../../../data/models/gallery/gallery_dashboard_snapshot.dart';
 import '../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../data/services/image_metadata_service.dart';
@@ -126,23 +128,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     _queryCache.clear();
   }
 
-  Future<String> getStatisticsSignature() => execute(
-    'getStatisticsSignature',
-    (db) => db.transaction((txn) async {
-      final rows = await txn.query(
-        _galleryMetaTable,
-        where: 'key IN (?, ?)',
-        whereArgs: ['statistics_instance', 'statistics_revision'],
-      );
-      final values = {for (final row in rows) row['key']: row['value']};
-      if (values['statistics_instance'] == null ||
-          values['statistics_revision'] == null) {
-        throw StateError('Statistics revision is unavailable');
-      }
-      final schema = await txn.rawQuery('PRAGMA schema_version');
-      return 'dashboard_v2:${values['statistics_instance']}:${values['statistics_revision']}:${schema.first.values.single}';
-    }),
-  );
+  Future<String> getStatisticsSignature() => _readStatisticsSignature();
 
   /// 获取缓存统计
   Map<String, dynamic> getCacheStatistics() => {
@@ -207,7 +193,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     bool? isFavorite,
     DateTime? lastScannedAt,
   }) async {
-    final id = await execute(
+    final id = await executeWrite(
       'upsertImage',
       (db) async {
         final dateYmd = _formatDateYmd(modifiedAt);
@@ -304,7 +290,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     String? newFileName,
   }) async {
     try {
-      await execute(
+      await executeWrite(
         'updateFilePath',
         (db) async {
           final fileName =
@@ -623,7 +609,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   }
 
   Future<void> markAsDeleted(String filePath) async {
-    await execute('markAsDeleted', (db) async {
+    await executeWrite('markAsDeleted', (db) async {
       try {
         final result = await db.rawQuery(
           'SELECT id FROM $_imagesTable WHERE file_path = ?',
@@ -680,76 +666,81 @@ class GalleryDataSource extends EnhancedBaseDataSource
         final batch = records.sublist(i, end);
         final batchIndex = i ~/ batchSize;
 
-        final batchResults = await executeTransaction(
-          'batchUpsertImages#batch$batchIndex',
-          (txn) async {
-            final batchIds = <int>[];
+        final batchResults = await executeWrite(
+          'batchUpsertImages#batch$batchIndex.txn',
+          (db) async {
+            final committed = await db.transaction((txn) async {
+              final batchIds = <int>[];
 
-            // 1. 批量查询现有记录（一次查询）
-            final filePaths = batch.map((r) => r.filePath).toList();
-            final placeholders = List.filled(filePaths.length, '?').join(',');
-            final existingResults = await txn.rawQuery('''
+              // 1. 批量查询现有记录（一次查询）
+              final filePaths = batch.map((r) => r.filePath).toList();
+              final placeholders = List.filled(filePaths.length, '?').join(',');
+              final existingResults = await txn.rawQuery('''
                 SELECT id, file_path FROM $_imagesTable
                 WHERE file_path IN ($placeholders)
                 ''', filePaths);
 
-            // 构建路径到 ID 的映射
-            final pathToIdMap = <String, int>{};
-            for (final row in existingResults) {
-              final path = row['file_path'] as String?;
-              final id = (row['id'] as num?)?.toInt();
-              if (path != null && id != null) {
-                pathToIdMap[path] = id;
-              }
-            }
-
-            // 2. 批量插入/更新
-            for (final record in batch) {
-              final dateYmd = _formatDateYmd(record.modifiedAt);
-              final existingId = pathToIdMap[record.filePath];
-
-              if (existingId != null) {
-                _imageCache.remove(existingId);
+              // 构建路径到 ID 的映射
+              final pathToIdMap = <String, int>{};
+              for (final row in existingResults) {
+                final path = row['file_path'] as String?;
+                final id = (row['id'] as num?)?.toInt();
+                if (path != null && id != null) {
+                  pathToIdMap[path] = id;
+                }
               }
 
-              final map = {
-                'file_path': record.filePath,
-                'file_name': record.fileName,
-                'file_size': record.fileSize,
-                'width': record.width,
-                'height': record.height,
-                'aspect_ratio': record.aspectRatio,
-                'created_at': record.createdAt.millisecondsSinceEpoch,
-                'modified_at': record.modifiedAt.millisecondsSinceEpoch,
-                'indexed_at': now.millisecondsSinceEpoch,
-                'last_scanned_at': record.lastScannedAt?.millisecondsSinceEpoch,
-                'date_ymd': dateYmd,
-                'resolution_key': record.resolutionKey,
-                'metadata_status': record.metadataStatus.index,
-                'is_favorite': record.isFavorite ? 1 : 0,
-                'is_deleted': record.isDeleted ? 1 : 0,
-              };
+              // 2. 批量插入/更新
+              for (final record in batch) {
+                final dateYmd = _formatDateYmd(record.modifiedAt);
+                final existingId = pathToIdMap[record.filePath];
 
-              final id =
-                  existingId ??
-                  await txn.insert(
+                if (existingId != null) {
+                  _imageCache.remove(existingId);
+                }
+
+                final map = {
+                  'file_path': record.filePath,
+                  'file_name': record.fileName,
+                  'file_size': record.fileSize,
+                  'width': record.width,
+                  'height': record.height,
+                  'aspect_ratio': record.aspectRatio,
+                  'created_at': record.createdAt.millisecondsSinceEpoch,
+                  'modified_at': record.modifiedAt.millisecondsSinceEpoch,
+                  'indexed_at': now.millisecondsSinceEpoch,
+                  'last_scanned_at':
+                      record.lastScannedAt?.millisecondsSinceEpoch,
+                  'date_ymd': dateYmd,
+                  'resolution_key': record.resolutionKey,
+                  'metadata_status': record.metadataStatus.index,
+                  'is_favorite': record.isFavorite ? 1 : 0,
+                  'is_deleted': record.isDeleted ? 1 : 0,
+                };
+
+                final id =
+                    existingId ??
+                    await txn.insert(
+                      _imagesTable,
+                      map,
+                      conflictAlgorithm: ConflictAlgorithm.abort,
+                    );
+                if (existingId != null) {
+                  await txn.update(
                     _imagesTable,
                     map,
-                    conflictAlgorithm: ConflictAlgorithm.abort,
+                    where: 'id = ?',
+                    whereArgs: [existingId],
                   );
-              if (existingId != null) {
-                await txn.update(
-                  _imagesTable,
-                  map,
-                  where: 'id = ?',
-                  whereArgs: [existingId],
-                );
+                }
+
+                batchIds.add(id);
               }
 
-              batchIds.add(id);
-            }
-
-            return batchIds;
+              return batchIds;
+            });
+            _markDataChanged();
+            return committed;
           },
           timeout: const Duration(seconds: 60),
         );
@@ -769,14 +760,13 @@ class GalleryDataSource extends EnhancedBaseDataSource
       return results;
     }, details: '${records.length} records');
 
-    _markDataChanged();
     return result;
   }
 
   Future<void> batchMarkAsDeleted(List<String> filePaths) async {
     if (filePaths.isEmpty) return;
 
-    await execute('batchMarkAsDeleted', (db) async {
+    await executeWrite('batchMarkAsDeleted', (db) async {
       try {
         final idsToInvalidate = <int>{};
 
@@ -814,6 +804,8 @@ class GalleryDataSource extends EnhancedBaseDataSource
           _imageCache.remove(id);
         }
 
+        _markDataChanged();
+
         AppLogger.d(
           'Batch marked as deleted: ${filePaths.length} files',
           'GalleryDS',
@@ -823,8 +815,6 @@ class GalleryDataSource extends EnhancedBaseDataSource
         rethrow;
       }
     });
-
-    _markDataChanged();
   }
 
   /// 批量恢复软删（is_deleted=1 → 0），用于删除撤销。
@@ -833,7 +823,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   Future<void> batchRestoreDeleted(List<String> filePaths) async {
     if (filePaths.isEmpty) return;
 
-    await execute('batchRestoreDeleted', (db) async {
+    await executeWrite('batchRestoreDeleted', (db) async {
       try {
         final idsToInvalidate = <int>{};
 
@@ -871,6 +861,8 @@ class GalleryDataSource extends EnhancedBaseDataSource
           _imageCache.remove(id);
         }
 
+        _markDataChanged();
+
         AppLogger.d(
           'Batch restored deleted: ${filePaths.length} files',
           'GalleryDS',
@@ -880,8 +872,6 @@ class GalleryDataSource extends EnhancedBaseDataSource
         rethrow;
       }
     });
-
-    _markDataChanged();
   }
 
   /// 获取所有软删除（is_deleted=1）文件的路径集合。
@@ -1005,7 +995,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
       final fullPromptText = _buildFullPromptText(metadata);
       final positivePromptText = _buildSearchablePromptText(metadata);
 
-      await execute(
+      await executeWrite(
         'upsertMetadata',
         (db) async {
           // REPLACE 会整行覆盖，先取旧 is_nsfw 以免冲掉导入器写入的分级
@@ -1126,7 +1116,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   }
 
   Future<void> _updateFtsIndex(int imageId, String promptText) async {
-    await execute(
+    await executeWrite(
       '_updateFtsIndex',
       (db) async {
         try {
@@ -1165,81 +1155,85 @@ class GalleryDataSource extends EnhancedBaseDataSource
       final batch = metadataList.sublist(i, end);
       final batchIndex = i ~/ batchSize;
 
-      await executeTransaction('batchUpsertMetadata#batch$batchIndex', (
-        txn,
+      await executeWrite('batchUpsertMetadata#batch$batchIndex.txn', (
+        db,
       ) async {
-        final ftsUpdates = <int, String>{};
+        await db.transaction((txn) async {
+          final ftsUpdates = <int, String>{};
 
-        // REPLACE 会整行覆盖，先按 image_id 批量取旧 is_nsfw，
-        // 避免冲掉导入器写入的分级（与单条 upsertMetadata 同口径）。
-        final existingNsfw = <int, int>{};
-        if (batch.isNotEmpty) {
-          final batchImageIds = batch.map((entry) => entry.key).toList();
-          final placeholders = List.filled(batchImageIds.length, '?').join(',');
-          try {
-            final oldRows = await txn.rawQuery(
-              'SELECT image_id, is_nsfw FROM $_metadataTable '
-              'WHERE image_id IN ($placeholders)',
-              batchImageIds,
-            );
-            for (final row in oldRows) {
-              final imageId = (row['image_id'] as num?)?.toInt();
-              if (imageId == null) continue;
-              existingNsfw[imageId] = (row['is_nsfw'] as num?)?.toInt() ?? 0;
+          // REPLACE 会整行覆盖，先按 image_id 批量取旧 is_nsfw，
+          // 避免冲掉导入器写入的分级（与单条 upsertMetadata 同口径）。
+          final existingNsfw = <int, int>{};
+          if (batch.isNotEmpty) {
+            final batchImageIds = batch.map((entry) => entry.key).toList();
+            final placeholders = List.filled(
+              batchImageIds.length,
+              '?',
+            ).join(',');
+            try {
+              final oldRows = await txn.rawQuery(
+                'SELECT image_id, is_nsfw FROM $_metadataTable '
+                'WHERE image_id IN ($placeholders)',
+                batchImageIds,
+              );
+              for (final row in oldRows) {
+                final imageId = (row['image_id'] as num?)?.toInt();
+                if (imageId == null) continue;
+                existingNsfw[imageId] = (row['is_nsfw'] as num?)?.toInt() ?? 0;
+              }
+            } catch (_) {
+              // 旧库迁移缺失该列时忽略，保持默认 0
             }
-          } catch (_) {
-            // 旧库迁移缺失该列时忽略，保持默认 0
           }
-        }
 
-        for (final entry in batch) {
-          final imageId = entry.key;
-          final metadata = entry.value;
-          final fullPromptText = _buildFullPromptText(metadata);
-          final positivePromptText = _buildSearchablePromptText(metadata);
+          for (final entry in batch) {
+            final imageId = entry.key;
+            final metadata = entry.value;
+            final fullPromptText = _buildFullPromptText(metadata);
+            final positivePromptText = _buildSearchablePromptText(metadata);
 
-          await txn.insert(_metadataTable, {
-            'image_id': imageId,
-            'prompt': metadata.prompt,
-            'negative_prompt': metadata.negativePrompt,
-            'seed': metadata.seed,
-            'sampler': metadata.sampler,
-            'steps': metadata.steps,
-            'cfg_scale': metadata.scale,
-            'width': metadata.width,
-            'height': metadata.height,
-            'model': metadata.model,
-            'smea': metadata.smea == true ? 1 : 0,
-            'smea_dyn': metadata.smeaDyn == true ? 1 : 0,
-            'noise_schedule': metadata.noiseSchedule,
-            'cfg_rescale': metadata.cfgRescale,
-            'uc_preset': metadata.ucPreset,
-            'quality_toggle': metadata.qualityToggle == true ? 1 : 0,
-            'is_img2img': metadata.isImg2Img ? 1 : 0,
-            'strength': metadata.strength,
-            'noise': metadata.noise,
-            'software': metadata.software,
-            'source': metadata.source,
-            'version': metadata.version,
-            'raw_json': metadata.rawJson,
-            'has_metadata': metadata.hasData ? 1 : 0,
-            'is_nsfw': existingNsfw[imageId] ?? 0,
-            'full_prompt_text': fullPromptText,
-            'positive_prompt_text': positivePromptText,
-          }, conflictAlgorithm: ConflictAlgorithm.replace);
+            await txn.insert(_metadataTable, {
+              'image_id': imageId,
+              'prompt': metadata.prompt,
+              'negative_prompt': metadata.negativePrompt,
+              'seed': metadata.seed,
+              'sampler': metadata.sampler,
+              'steps': metadata.steps,
+              'cfg_scale': metadata.scale,
+              'width': metadata.width,
+              'height': metadata.height,
+              'model': metadata.model,
+              'smea': metadata.smea == true ? 1 : 0,
+              'smea_dyn': metadata.smeaDyn == true ? 1 : 0,
+              'noise_schedule': metadata.noiseSchedule,
+              'cfg_rescale': metadata.cfgRescale,
+              'uc_preset': metadata.ucPreset,
+              'quality_toggle': metadata.qualityToggle == true ? 1 : 0,
+              'is_img2img': metadata.isImg2Img ? 1 : 0,
+              'strength': metadata.strength,
+              'noise': metadata.noise,
+              'software': metadata.software,
+              'source': metadata.source,
+              'version': metadata.version,
+              'raw_json': metadata.rawJson,
+              'has_metadata': metadata.hasData ? 1 : 0,
+              'is_nsfw': existingNsfw[imageId] ?? 0,
+              'full_prompt_text': fullPromptText,
+              'positive_prompt_text': positivePromptText,
+            }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-          ftsUpdates[imageId] = positivePromptText;
-        }
+            ftsUpdates[imageId] = positivePromptText;
+          }
 
-        await _batchUpdateFtsIndex(txn, ftsUpdates);
+          await _batchUpdateFtsIndex(txn, ftsUpdates);
+        });
+        _markDataChanged();
       }, timeout: const Duration(seconds: 60));
 
       if (end < metadataList.length) {
         await Future.delayed(const Duration(milliseconds: 10));
       }
     }
-
-    _markDataChanged();
 
     AppLogger.i(
       'Batch upserted ${metadataList.length} metadata in ${(metadataList.length / batchSize).ceil()} batches',
@@ -1455,7 +1449,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   ///
   /// 返回是否真正新插入。
   Future<bool> addFavorite(int imageId) async {
-    final inserted = await execute('addFavorite', (db) async {
+    final inserted = await executeWrite('addFavorite', (db) async {
       // rawUpdate 返回 sqlite3_changes()：新插入=1、OR IGNORE 跳过=0
       return db.rawUpdate(
         'INSERT OR IGNORE INTO $_favoritesTable (image_id, favorited_at) '
@@ -1480,7 +1474,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     const batchSize = 900;
     for (final chunk in chunk(imageIds, batchSize)) {
       final placeholders = List.filled(chunk.length, '?').join(',');
-      removed += await execute(
+      removed += await executeWrite(
         'removeFavorites',
         (db) async {
           return db.rawDelete(
@@ -1503,7 +1497,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   }
 
   Future<bool> toggleFavorite(int imageId) async {
-    final isFavorite = await execute(
+    final isFavorite = await executeWrite(
       'toggleFavorite',
       (db) async {
         final exists = await db.rawQuery(
@@ -2067,7 +2061,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     final normalizedTag = tagName.trim();
     final tagId = _generateTagId(normalizedTag);
 
-    await execute('addTag', (db) async {
+    await executeWrite('addTag', (db) async {
       await db.transaction((txn) async {
         await txn.insert(_tagsTable, {
           'id': tagId,
@@ -2104,7 +2098,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
     final normalizedTag = tagName.trim();
     final tagId = _generateTagId(normalizedTag);
 
-    await execute('removeTag', (db) async {
+    await executeWrite('removeTag', (db) async {
       await db.transaction((txn) async {
         await txn.delete(
           _imageTagsTable,
@@ -2207,7 +2201,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
         .toSet()
         .toList();
 
-    await execute('setImageTags', (db) async {
+    await executeWrite('setImageTags', (db) async {
       await db.transaction((txn) async {
         final currentTagsResult = await txn.rawQuery(
           '''
@@ -2401,7 +2395,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   /// 用于深度清除画廊数据，强制下次重新扫描
   Future<void> deleteAllImages() async {
     try {
-      await execute(
+      await executeWrite(
         'deleteAllImages',
         (db) async {
           // 先删除关联的元数据（外键约束）
@@ -2429,7 +2423,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
   /// 删除所有元数据记录
   Future<void> deleteAllMetadata() async {
     try {
-      await execute(
+      await executeWrite(
         'deleteAllMetadata',
         (db) async {
           final count = await db.delete(_metadataTable);

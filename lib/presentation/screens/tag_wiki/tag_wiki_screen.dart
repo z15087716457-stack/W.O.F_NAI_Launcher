@@ -972,6 +972,19 @@ class _TagWikiScreenState extends ConsumerState<_TagWikiContents> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(wikiBookmarkStoreProvider, (_, bookmarks) {
+      scheduleMicrotask(() {
+        if (!mounted ||
+            !bookmarks.isLoaded ||
+            _scope?.kind != WikiScopeKind.collection ||
+            bookmarks.collections.any((item) => item.id == _scope?.id)) {
+          return;
+        }
+        _selectScope(
+          WikiScope(WikiScopeKind.bookmarks, null, context.l10n.wiki_bookmarks),
+        );
+      });
+    });
     ref.listen(dictionaryRevisionProvider, (_, next) {
       scheduleMicrotask(() {
         if (!mounted) return;

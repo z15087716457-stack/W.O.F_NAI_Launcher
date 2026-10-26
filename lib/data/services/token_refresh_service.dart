@@ -50,6 +50,7 @@ class TokenRefreshService extends _$TokenRefreshService {
   /// 执行刷新逻辑
   Future<bool> _performRefresh() async {
     final storage = ref.read(secureStorageServiceProvider);
+    final authRevision = storage.authRevision;
     final accountManager = ref.read(accountManagerNotifierProvider.notifier);
     final accounts = ref.read(accountManagerNotifierProvider).accounts;
 
@@ -113,15 +114,30 @@ class TokenRefreshService extends _$TokenRefreshService {
     final loginResponse = await apiService.loginWithKey(accessKey);
     final newToken = loginResponse['accessToken'] as String;
 
-    // 7. 保存新 token 到全局存储
+    if (!await _matchesSavedCredentials(
+      currentAccount,
+      currentToken,
+      accessKey,
+    )) {
+      return false;
+    }
+    final accountId = currentAccount.id;
+    await accountManager.updateAccountToken(accountId, newToken);
+
+    // 刷新已保存账号不等于切换活动会话。
+    if (await storage.getAccessToken() != currentToken ||
+        storage.authRevision != authRevision ||
+        !ref
+            .read(accountManagerNotifierProvider)
+            .accounts
+            .any((a) => a.id == accountId)) {
+      return false;
+    }
     await storage.saveAuth(
       accessToken: newToken,
       expiry: DateTime.now().add(const Duration(days: 30)),
       email: currentAccount.email,
     );
-
-    // 8. 更新账号管理器中的 token
-    await accountManager.updateAccountToken(currentAccount.id, newToken);
 
     AppLogger.d('Token refreshed successfully', 'TokenRefresh');
     return true;
@@ -133,6 +149,8 @@ class TokenRefreshService extends _$TokenRefreshService {
   Future<String?> refreshTokenForAccount(String accountId) async {
     try {
       final storage = ref.read(secureStorageServiceProvider);
+      final authRevision = storage.authRevision;
+      final currentToken = await storage.getAccessToken();
       final accountManager = ref.read(accountManagerNotifierProvider.notifier);
       final accounts = ref.read(accountManagerNotifierProvider).accounts;
 
@@ -152,6 +170,8 @@ class TokenRefreshService extends _$TokenRefreshService {
         return null;
       }
 
+      final accountToken = await accountManager.getAccountToken(accountId);
+
       // 获取 accessKey
       final accessKey = await storage.getAccountAccessKey(accountId);
       if (accessKey == null || accessKey.isEmpty) {
@@ -164,13 +184,24 @@ class TokenRefreshService extends _$TokenRefreshService {
       final loginResponse = await apiService.loginWithKey(accessKey);
       final newToken = loginResponse['accessToken'] as String;
 
-      // 保存新 token
-      await storage.saveAuth(
-        accessToken: newToken,
-        expiry: DateTime.now().add(const Duration(days: 30)),
-        email: account.email,
-      );
+      if (!await _matchesSavedCredentials(account, accountToken, accessKey)) {
+        return null;
+      }
       await accountManager.updateAccountToken(accountId, newToken);
+      if (accountToken != null &&
+          currentToken == accountToken &&
+          await storage.getAccessToken() == currentToken &&
+          storage.authRevision == authRevision &&
+          ref
+              .read(accountManagerNotifierProvider)
+              .accounts
+              .any((a) => a.id == accountId)) {
+        await storage.saveAuth(
+          accessToken: newToken,
+          expiry: DateTime.now().add(const Duration(days: 30)),
+          email: account.email,
+        );
+      }
 
       AppLogger.d('Token refreshed for account $accountId', 'TokenRefresh');
       return newToken;
@@ -183,6 +214,26 @@ class TokenRefreshService extends _$TokenRefreshService {
       );
       return null;
     }
+  }
+
+  Future<bool> _matchesSavedCredentials(
+    SavedAccount account,
+    String? token,
+    String accessKey,
+  ) async {
+    final storage = ref.read(secureStorageServiceProvider);
+    final manager = ref.read(accountManagerNotifierProvider.notifier);
+    final savedToken = await manager.getAccountToken(account.id);
+    final savedKey = await storage.getAccountAccessKey(account.id);
+    final saved = ref
+        .read(accountManagerNotifierProvider)
+        .accounts
+        .where((a) => a.id == account.id)
+        .firstOrNull;
+    return saved?.accountType == AccountType.credentials &&
+        saved?.email == account.email &&
+        savedToken == token &&
+        savedKey == accessKey;
   }
 
   /// 检查当前 token 是否即将过期，如果是则刷新

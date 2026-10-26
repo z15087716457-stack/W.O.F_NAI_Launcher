@@ -18,21 +18,13 @@ import 'online_parts.dart';
 import 'online_popovers.dart';
 
 /// 右侧检查器 340：头部 62（来源 · 作品号 · 在网站打开）、可滚动的详情、底部操作。
-class OnlineInspector extends StatefulWidget {
+class OnlineInspector extends StatelessWidget {
   const OnlineInspector({super.key, this.width = 340, this.viewer = false});
 
   final double width;
 
   /// 大图查看器右侧的信息栏：不显示预览图，头部不给窗口按钮让位。
   final bool viewer;
-
-  @override
-  State<OnlineInspector> createState() => _OnlineInspectorState();
-}
-
-class _OnlineInspectorState extends State<OnlineInspector> {
-  var _media = 0;
-  String? _key;
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +36,7 @@ class _OnlineInspectorState extends State<OnlineInspector> {
     final work = data.list.items
         .where((w) => w.key == data.selectedKey)
         .firstOrNull;
-    if (_key != data.selectedKey) {
-      _key = data.selectedKey;
-      _media = 0;
-    }
+    final media = work == null ? 0 : scope.controller.mediaIndex(work.key);
     final ai = data.status.promptQuery;
 
     final header = Row(
@@ -72,16 +61,16 @@ class _OnlineInspectorState extends State<OnlineInspector> {
     );
 
     return Container(
-      key: Key(widget.viewer ? 'online-viewer-info' : 'online-inspector'),
-      width: widget.width,
+      key: Key(viewer ? 'online-viewer-info' : 'online-inspector'),
+      width: width,
       decoration: BoxDecoration(
         color: c.panel,
-        border: widget.viewer ? null : Border(left: BorderSide(color: c.line)),
+        border: viewer ? null : Border(left: BorderSide(color: c.line)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (widget.viewer)
+          if (viewer)
             Container(
               height: 62,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -122,13 +111,13 @@ class _OnlineInspectorState extends State<OnlineInspector> {
                     child: OnlineDetailBody(
                       work: work,
                       detail: detail,
-                      preview: !widget.viewer,
-                      media: _media,
-                      onMedia: (i) => setState(() => _media = i),
+                      preview: !viewer,
+                      media: media,
+                      onMedia: (i) => scope.controller.setMedia(work.key, i),
                     ),
                   ),
           ),
-          if (work != null) _Footer(work: work, detail: detail, media: _media),
+          if (work != null) _Footer(work: work, detail: detail, media: media),
         ],
       ),
     );

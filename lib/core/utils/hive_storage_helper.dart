@@ -6,6 +6,7 @@ import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import '../constants/storage_keys.dart';
 import 'app_logger.dart';
+import 'file_sha256.dart';
 import 'file_system_utils.dart';
 
 /// Hive 存储路径管理助手
@@ -247,15 +248,23 @@ class HiveStorageHelper {
           }
         }
 
+        final staging = await Directory(newPath).createTemp('.hive-migration-');
         try {
-          if (await newFile.exists()) {
-            await newFile.delete();
+          final sourceHash = await fileSha256(oldFile);
+          final staged = await oldFile.copy(p.join(staging.path, fileName));
+          if (await fileSha256(staged) != sourceHash) {
+            throw FileSystemException(
+              'Hive migration copy verification failed',
+              oldFile.path,
+            );
           }
-          await oldFile.copy(newFilePath);
+          await staged.rename(newFilePath);
           migratedCount++;
           AppLogger.i('已迁移: $fileName', 'HiveStorage');
         } catch (e) {
           AppLogger.e('迁移失败 $fileName: $e', 'HiveStorage');
+        } finally {
+          await staging.delete(recursive: true);
         }
       }
 
@@ -263,68 +272,10 @@ class HiveStorageHelper {
         AppLogger.i('Hive 数据迁移完成: $migratedCount 个文件', 'HiveStorage');
       }
 
-      // 清理旧位置的已迁移文件（含 .hive/.lock/.crc）
-      final cleanedCount = await _cleanupMigratedOldFiles(
-        oldLocations: oldLocations,
-        newPath: newPath,
-        migratedHiveFileNames: filesToMigrate.keys.toSet(),
-      );
-      if (cleanedCount > 0) {
-        AppLogger.i('旧位置清理完成: $cleanedCount 个文件', 'HiveStorage');
-      }
+      // 旧源保留为迁移备份；复制成功与失败均不清理旧位置。
     } catch (e, stackTrace) {
       AppLogger.e('迁移过程出错: $e', 'HiveStorage', stackTrace);
     }
-  }
-
-  /// 清理旧位置中已迁移的 Hive 文件
-  ///
-  /// 仅清理本次迁移识别到的目标文件，避免误删无关文件。
-  Future<int> _cleanupMigratedOldFiles({
-    required List<String> oldLocations,
-    required String newPath,
-    required Set<String> migratedHiveFileNames,
-  }) async {
-    var deletedCount = 0;
-
-    for (final oldLocation in oldLocations) {
-      if (oldLocation == newPath) continue;
-
-      final oldFiles = await _findAllHiveRelatedFiles(oldLocation);
-      for (final oldFile in oldFiles) {
-        final fileName = p.basename(oldFile.path);
-        final ext = p.extension(fileName).toLowerCase();
-
-        final shouldDelete = switch (ext) {
-          '.hive' => migratedHiveFileNames.contains(fileName),
-          '.lock' || '.crc' => migratedHiveFileNames.contains(
-            '${p.basenameWithoutExtension(fileName)}.hive',
-          ),
-          _ => false,
-        };
-
-        if (!shouldDelete) continue;
-
-        // 对于 .hive 文件，要求新位置已存在同名文件；.lock/.crc 直接清理。
-        if (ext == '.hive') {
-          final newFilePath = p.join(newPath, fileName);
-          final newFile = File(newFilePath);
-          if (!await newFile.exists()) {
-            AppLogger.w('跳过删除旧文件（新位置不存在）: $fileName', 'HiveStorage');
-            continue;
-          }
-        }
-
-        try {
-          await oldFile.delete();
-          deletedCount++;
-        } catch (e) {
-          AppLogger.w('删除旧文件失败 ${oldFile.path}: $e', 'HiveStorage');
-        }
-      }
-    }
-
-    return deletedCount;
   }
 
   /// 查找旧位置的 Hive 文件
@@ -349,68 +300,6 @@ class HiveStorageHelper {
     }
 
     return files;
-  }
-
-  /// 获取所有 Hive 相关的文件（包括 .hive, .lock, .crc）
-  Future<List<File>> _findAllHiveRelatedFiles(String appDirPath) async {
-    final files = <File>[];
-    final extensions = ['.hive', '.lock', '.crc'];
-
-    try {
-      final dir = Directory(appDirPath);
-      if (!await dir.exists()) {
-        return files;
-      }
-
-      await for (final entity in dir.list()) {
-        if (entity is File) {
-          final ext = p.extension(entity.path).toLowerCase();
-          if (extensions.contains(ext)) {
-            files.add(entity);
-          }
-        }
-      }
-    } catch (e) {
-      AppLogger.e('查找 Hive 相关文件失败: $e', 'HiveStorage');
-    }
-
-    return files;
-  }
-
-  /// 清理旧位置的 Hive 文件（迁移成功后调用）
-  ///
-  /// ⚠️ 警告：此操作会删除旧位置的 Hive 文件，仅在确认迁移成功后调用
-  Future<void> cleanupOldFiles() async {
-    try {
-      final appDir = await getApplicationDocumentsDirectory();
-      final newPath = await getPath();
-
-      final newDir = Directory(newPath);
-      if (!await newDir.exists()) {
-        AppLogger.w('新位置不存在，取消清理', 'HiveStorage');
-        return;
-      }
-
-      final oldLocations = [
-        appDir.path,
-        p.join(appDir.path, 'NAI_Launcher', _defaultSubDir),
-      ];
-
-      // 仅清理旧位置中有对应新 .hive 的文件（含 .lock/.crc）
-      final newHiveFiles = await _findOldHiveFiles(newPath);
-      final hiveNames = newHiveFiles.map((f) => p.basename(f.path)).toSet();
-      final deletedCount = await _cleanupMigratedOldFiles(
-        oldLocations: oldLocations,
-        newPath: newPath,
-        migratedHiveFileNames: hiveNames,
-      );
-
-      if (deletedCount > 0) {
-        AppLogger.i('已清理 $deletedCount 个旧文件', 'HiveStorage');
-      }
-    } catch (e, stackTrace) {
-      AppLogger.e('清理旧文件失败: $e', 'HiveStorage', stackTrace);
-    }
   }
 
   /// 获取用于显示的存储路径

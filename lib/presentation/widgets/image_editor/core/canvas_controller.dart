@@ -244,92 +244,20 @@ class CanvasController extends ChangeNotifier {
     fitToViewport(canvasSize);
   }
 
-  /// 将屏幕坐标转换为画布坐标（考虑旋转和镜像）
+  /// 将屏幕坐标转换为画布坐标，使用绘制矩阵的逆变换。
   Offset screenToCanvas(Offset screenPoint, {Size? canvasSize}) {
-    // 如果没有旋转和镜像，使用简单计算
-    if (_rotation == 0 && !_isMirroredHorizontally) {
-      return (screenPoint - _offset) / _scale;
-    }
-
-    // 需要画布尺寸来计算旋转中心
-    if (canvasSize == null) {
-      // 回退到简单计算
-      return (screenPoint - _offset) / _scale;
-    }
-
-    // 1. 减去偏移
-    var point = screenPoint - _offset;
-
-    // 2. 计算旋转/镜像中心（在缩放后的屏幕坐标系中）
-    final centerX = canvasSize.width * _scale / 2;
-    final centerY = canvasSize.height * _scale / 2;
-
-    // 3. 移到中心
-    point = Offset(point.dx - centerX, point.dy - centerY);
-
-    // 4. 逆向镜像（镜像是自逆的）
-    if (_isMirroredHorizontally) {
-      point = Offset(-point.dx, point.dy);
-    }
-
-    // 5. 逆向旋转
-    if (_rotation != 0) {
-      final cos = math.cos(-_rotation);
-      final sin = math.sin(-_rotation);
-      point = Offset(
-        point.dx * cos - point.dy * sin,
-        point.dx * sin + point.dy * cos,
-      );
-    }
-
-    // 6. 移回原点
-    point = Offset(point.dx + centerX, point.dy + centerY);
-
-    // 7. 除以缩放
-    return point / _scale;
+    final matrix = canvasSize == null
+        ? transformMatrix
+        : getTransformMatrix(canvasSize);
+    return MatrixUtils.transformPoint(Matrix4.inverted(matrix), screenPoint);
   }
 
-  /// 将画布坐标转换为屏幕坐标（考虑旋转和镜像）
+  /// 将画布坐标转换为屏幕坐标，保持与绘制变换一致。
   Offset canvasToScreen(Offset canvasPoint, {Size? canvasSize}) {
-    // 如果没有旋转和镜像，使用简单计算
-    if (_rotation == 0 && !_isMirroredHorizontally) {
-      return canvasPoint * _scale + _offset;
-    }
-
-    if (canvasSize == null) {
-      return canvasPoint * _scale + _offset;
-    }
-
-    // 1. 应用缩放
-    var point = canvasPoint * _scale;
-
-    // 2. 计算中心
-    final centerX = canvasSize.width * _scale / 2;
-    final centerY = canvasSize.height * _scale / 2;
-
-    // 3. 移到中心
-    point = Offset(point.dx - centerX, point.dy - centerY);
-
-    // 4. 应用旋转
-    if (_rotation != 0) {
-      final cos = math.cos(_rotation);
-      final sin = math.sin(_rotation);
-      point = Offset(
-        point.dx * cos - point.dy * sin,
-        point.dx * sin + point.dy * cos,
-      );
-    }
-
-    // 5. 应用镜像
-    if (_isMirroredHorizontally) {
-      point = Offset(-point.dx, point.dy);
-    }
-
-    // 6. 移回并加偏移
-    return Offset(
-      point.dx + centerX + _offset.dx,
-      point.dy + centerY + _offset.dy,
-    );
+    final matrix = canvasSize == null
+        ? transformMatrix
+        : getTransformMatrix(canvasSize);
+    return MatrixUtils.transformPoint(matrix, canvasPoint);
   }
 
   /// 获取变换矩阵（包含旋转和镜像）

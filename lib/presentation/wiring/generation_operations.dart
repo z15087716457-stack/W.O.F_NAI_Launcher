@@ -397,18 +397,9 @@ class GenerationOperations {
   }
 
   Future<void> placeSource() async {
-    final params = ref.read(generationParamsNotifierProvider);
-    final bytes = params.sourceImage;
-    if (bytes == null) return;
-    final id = await ref
-        .read(imageGenerationNotifierProvider.notifier)
-        .registerExternalImage(
-          bytes,
-          params: params,
-          addToDisplay: true,
-          canApply: () => mounted,
-        );
-    if (id != null && mounted) history.focusTile(id);
+    if (!mounted || backend.busy) return;
+    final bytes = ref.read(generationParamsNotifierProvider).sourceImage;
+    if (bytes != null) ImageWorkflowLauncher.placeOnCanvas(ref, bytes);
   }
 
   GeneratedImage input(String id) {

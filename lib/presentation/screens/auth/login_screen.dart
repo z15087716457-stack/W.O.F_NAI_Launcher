@@ -488,7 +488,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (result.isSuccess && result.path != null) {
         await ref
             .read(accountManagerNotifierProvider.notifier)
-            .updateAccount(account.copyWith(avatarPath: result.path));
+            .updateAvatar(account.id, result.path);
         if (mounted) AppToast.success(context, context.l10n.common_success);
       } else if (result.isFailure && mounted) {
         AppToast.error(
@@ -506,7 +506,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       await _avatarService.removeAvatar(account);
       await ref
           .read(accountManagerNotifierProvider.notifier)
-          .updateAccount(account.copyWith(avatarPath: null));
+          .updateAvatar(account.id, null);
       if (mounted) AppToast.success(context, context.l10n.common_success);
     } catch (e) {
       if (mounted) AppToast.error(context, context.l10n.common_error);

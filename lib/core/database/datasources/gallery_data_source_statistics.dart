@@ -1,6 +1,24 @@
 part of 'gallery_data_source.dart';
 
 extension GalleryDataSourceStatistics on GalleryDataSource {
+  Future<String> _readStatisticsSignature() => executeWrite(
+    'getStatisticsSignature',
+    (db) => db.transaction((txn) async {
+      final rows = await txn.query(
+        GalleryDataSource._galleryMetaTable,
+        where: 'key IN (?, ?)',
+        whereArgs: ['statistics_instance', 'statistics_revision'],
+      );
+      final values = {for (final row in rows) row['key']: row['value']};
+      if (values['statistics_instance'] == null ||
+          values['statistics_revision'] == null) {
+        throw StateError('Statistics revision is unavailable');
+      }
+      final schema = await txn.rawQuery('PRAGMA schema_version');
+      return 'dashboard_v2:${values['statistics_instance']}:${values['statistics_revision']}:${schema.first.values.single}';
+    }),
+  );
+
   /// Loads only aggregate values required by the statistics dashboard.
   Future<GalleryDashboardSnapshot> getDashboardStatistics({
     DateTime? dateStart,
@@ -14,7 +32,7 @@ extension GalleryDataSourceStatistics on GalleryDataSource {
     );
     final history = _statisticsWhere(naiOnly: naiOnly);
     return _trackQuery('getDashboardStatistics', () async {
-      return execute(
+      return executeWrite(
         'getDashboardStatistics',
         (db) => db.transaction((txn) async {
           final libraryRows = await txn.rawQuery(

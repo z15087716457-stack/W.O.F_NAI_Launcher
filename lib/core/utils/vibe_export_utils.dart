@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show compute;
+import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 
 import '../../data/models/vibe/vibe_library_entry.dart';
@@ -12,6 +14,7 @@ import '../../data/models/vibe/vibe_reference.dart';
 import 'app_logger.dart';
 import 'file_name_sanitizer.dart';
 import 'novelai_vibe_codec.dart';
+import 'thumbnail_image_normalizer.dart';
 import 'vibe_file_parser.dart';
 import 'vibe_image_embedder.dart';
 import 'localization_extension.dart';
@@ -121,8 +124,11 @@ class VibeExportUtils {
     required Uint8List carrierImageBytes,
     String defaultModel = NovelAiVibeCodec.defaultModel,
   }) async {
+    final pngBytes = img.PngDecoder().isValidFile(carrierImageBytes)
+        ? carrierImageBytes
+        : await compute(normalizeThumbnailImageToPng, carrierImageBytes);
     return VibeImageEmbedder.embedVibesToImage(
-      carrierImageBytes,
+      pngBytes,
       vibes,
       defaultModel: defaultModel,
     );

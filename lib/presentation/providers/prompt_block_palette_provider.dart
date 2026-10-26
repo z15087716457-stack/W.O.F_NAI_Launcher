@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/models/prompt_block/prompt_block.dart';
@@ -44,17 +42,22 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
     final ids = await _storage.getPaletteBlockIds();
 
     final resolved = <PromptBlock>[];
-    final liveIds = <String>[];
+    final missingIds = <String>{};
     for (final id in ids) {
       final block = library.blockById(id);
       if (block != null) {
         resolved.add(block);
-        liveIds.add(id);
+      } else {
+        missingIds.add(id);
       }
     }
     // 库删块 → 板上引用同步消失，回写清理后的 id 表。
-    if (liveIds.length != ids.length) {
-      unawaited(_storage.putPaletteBlockIds(liveIds));
+    if (missingIds.isNotEmpty) {
+      await _storage.updatePaletteBlockIds(
+        (current) => current.any(missingIds.contains)
+            ? current.where((id) => !missingIds.contains(id)).toList()
+            : null,
+      );
     }
     return PromptBlockPaletteState(blocks: resolved, folders: library.folders);
   }
@@ -113,9 +116,8 @@ class PromptBlockPaletteNotifier extends _$PromptBlockPaletteNotifier {
     // storage 走 build 期缓存的字段，写完统一 invalidateSelf 让重建
     // 按库最新状态重新解析。
     await future;
-    final next = transform(await _storage.getPaletteBlockIds());
-    if (next == null) return;
-    await _storage.putPaletteBlockIds(next);
-    ref.invalidateSelf();
+    if (await _storage.updatePaletteBlockIds(transform)) {
+      ref.invalidateSelf();
+    }
   }
 }

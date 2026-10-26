@@ -24,6 +24,7 @@ class ConnectionPool {
   final Map<Database, DateTime> _evictingStartTimes =
       {}; // 记录连接被标记为 evicting 的时间
   final _lock = Mutex();
+  final _writeLock = Mutex();
 
   // 条件变量通知机制 - 当连接被释放时通知等待者
   final List<Completer<void>> _waiters = [];
@@ -91,10 +92,42 @@ class ConnectionPool {
     );
   }
 
-  /// 获取数据库连接
-  ///
-  /// 从池中获取连接，如果连接已失效则自动创建新连接替代
-  Future<Database> acquire() async {
+  /// 写操作按实际完成顺序串行，普通 WAL 查询不使用此锁。
+  Future<T> runWrite<T>(Future<T> Function() operation) async {
+    // SQLite 只允许一个写者；在 Dart 层等待，避免 busy_timeout 阻塞
+    // 共用的 FFI 工作线程，导致另一个连接的 COMMIT 无法执行。
+    await _writeLock.acquire();
+    try {
+      return await operation();
+    } finally {
+      _writeLock.release();
+    }
+  }
+
+  /// 从池中获取连接，超时后的晚到连接仍会归还。
+  Future<Database> acquire({Duration? timeout}) {
+    final acquiring = _acquire();
+    if (timeout == null) return acquiring;
+
+    var expired = false;
+    return acquiring
+        .then((connection) async {
+          if (expired) {
+            await release(connection);
+            throw TimeoutException('Connection acquisition timeout', timeout);
+          }
+          return connection;
+        })
+        .timeout(
+          timeout,
+          onTimeout: () {
+            expired = true;
+            throw TimeoutException('Connection acquisition timeout', timeout);
+          },
+        );
+  }
+
+  Future<Database> _acquire() async {
     if (_disposed) {
       throw StateError('ConnectionPool has been disposed');
     }

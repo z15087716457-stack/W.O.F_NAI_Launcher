@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'nai_agent_generation_host.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,6 +176,20 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
   GenActions? _actions;
   GenSlots? _slots;
   Object? _slotInputs;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        unawaited(
+          ref
+              .read(generationParamsNotifierProvider.notifier)
+              .restoreGenerationState(),
+        );
+      }
+    });
+  }
 
   @override
   void dispose() {

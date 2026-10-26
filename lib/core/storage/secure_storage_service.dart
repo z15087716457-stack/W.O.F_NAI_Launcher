@@ -37,6 +37,10 @@ class SecureStorageService {
 
   /// 内存缓存 - 解决 Windows 上 secure storage 写入后立即读取为 null 的问题
   static final Map<String, String> _memoryCache = {};
+  static int _authRevision = 0;
+
+  /// 当前认证写入版本；同一个 Token 的重新登录也属于新会话。
+  int get authRevision => _authRevision;
 
   SecureStorageService({FlutterSecureStorage? storage})
     : _storage =
@@ -50,6 +54,7 @@ class SecureStorageService {
 
   /// 保存 Access Token
   Future<void> saveAccessToken(String token) async {
+    _authRevision++;
     final normalizedToken = _normalizeToken(token);
 
     // 先保存到内存缓存
@@ -68,6 +73,7 @@ class SecureStorageService {
 
   /// 获取 Access Token
   Future<String?> getAccessToken() async {
+    final revision = _authRevision;
     // 优先从内存缓存读取
     final cached = _memoryCache[StorageKeys.accessToken];
     if (cached != null && cached.isNotEmpty) {
@@ -77,6 +83,9 @@ class SecureStorageService {
     // 从持久化存储读取
     try {
       final token = await _storage.read(key: StorageKeys.accessToken);
+      if (revision != _authRevision) {
+        return _memoryCache[StorageKeys.accessToken];
+      }
       if (token != null && token.isNotEmpty) {
         final normalizedToken = _normalizeToken(token);
         // 同步到内存缓存
@@ -145,6 +154,7 @@ class SecureStorageService {
 
   /// 清除所有认证信息
   Future<void> clearAuth() async {
+    _authRevision++;
     // 清除内存缓存
     _memoryCache.remove(StorageKeys.accessToken);
 
@@ -157,6 +167,7 @@ class SecureStorageService {
 
   /// 清除所有存储数据
   Future<void> clearAll() async {
+    _authRevision++;
     // 清除所有内存缓存
     _memoryCache.clear();
 

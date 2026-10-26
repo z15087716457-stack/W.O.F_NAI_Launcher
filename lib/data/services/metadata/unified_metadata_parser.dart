@@ -18,6 +18,9 @@ class MetadataParseResult {
   final Duration? parseTime;
   final int? bytesRead;
 
+  /// 图片可正常解码，但没有可读取的生成元数据；与读取／解码失败区分。
+  final bool metadataAbsent;
+
   const MetadataParseResult({
     this.success = false,
     this.metadata,
@@ -27,6 +30,7 @@ class MetadataParseResult {
     this.errorMessage,
     this.parseTime,
     this.bytesRead,
+    this.metadataAbsent = false,
   });
 
   factory MetadataParseResult.failed(
@@ -34,6 +38,7 @@ class MetadataParseResult {
     String error, {
     Duration? parseTime,
     int? bytesRead,
+    bool metadataAbsent = false,
   }) {
     return MetadataParseResult(
       success: false,
@@ -41,6 +46,7 @@ class MetadataParseResult {
       errorMessage: error,
       parseTime: parseTime,
       bytesRead: bytesRead,
+      metadataAbsent: metadataAbsent,
     );
   }
 
@@ -417,8 +423,7 @@ class UnifiedMetadataParser {
         );
       }
 
-      final pngInfo = info as img.PngInfo;
-      final textData = pngInfo.textData;
+      final textData = extractPngTextData(bytes);
 
       // PortableLogger.d(
       //   'PNG decoded successfully, ${fileInfo}textData fields: ${textData.keys.toList()}',
@@ -428,7 +433,24 @@ class UnifiedMetadataParser {
       // 使用 textData 解析
       var result = parseFromTextData(textData);
       if (!result.success) {
-        final stealthText = _extractStealthMetadataText(bytes);
+        img.Image? decoded;
+        try {
+          decoded = img.decodePng(bytes);
+        } catch (e) {
+          return MetadataParseResult.failed(
+            triedParsers,
+            'Failed to decode PNG: $e',
+            bytesRead: bytes.length,
+          );
+        }
+        if (decoded == null) {
+          return MetadataParseResult.failed(
+            triedParsers,
+            'Failed to decode PNG',
+            bytesRead: bytes.length,
+          );
+        }
+        final stealthText = _extractStealthMetadataTextFromImage(decoded);
         if (stealthText != null) {
           final stealthResult = parseFromTextData({'Comment': stealthText});
           if (stealthResult.success && stealthResult.metadata != null) {
@@ -441,6 +463,15 @@ class UnifiedMetadataParser {
               bytesRead: bytes.length,
             );
           }
+        }
+        if (!result.success) {
+          result = MetadataParseResult.failed(
+            result.triedParsers,
+            result.errorMessage ?? 'No metadata found in PNG',
+            parseTime: stopwatch.elapsed,
+            bytesRead: bytes.length,
+            metadataAbsent: true,
+          );
         }
       }
 
@@ -534,9 +565,11 @@ class UnifiedMetadataParser {
         }
       }
 
+      var imageDecoded = false;
       // 2. alpha LSB 隐写回退（需要完整文件解码）
       try {
         final image = img.decodeWebP(bytes);
+        imageDecoded = image != null;
         if (image != null && image.hasAlpha) {
           final stealthText = _extractStealthMetadataTextFromImage(image);
           if (stealthText != null) {
@@ -566,6 +599,7 @@ class UnifiedMetadataParser {
         error,
         parseTime: stopwatch.elapsed,
         bytesRead: bytes.length,
+        metadataAbsent: imageDecoded,
       );
       _updateStatistics(result, stopwatch.elapsed);
       return result;
@@ -618,11 +652,18 @@ class UnifiedMetadataParser {
 
       final error =
           'No metadata found in JPEG, ${fileInfo}bytes length=${bytes.length}';
+      var imageDecoded = false;
+      try {
+        imageDecoded = img.decodeJpg(bytes) != null;
+      } catch (_) {
+        // 渐进式前缀和损坏图均不作为“有效图片无元数据”。
+      }
       final result = MetadataParseResult.failed(
         triedParsers,
         error,
         parseTime: stopwatch.elapsed,
         bytesRead: bytes.length,
+        metadataAbsent: imageDecoded,
       );
       _updateStatistics(result, stopwatch.elapsed);
       return result;
@@ -972,10 +1013,10 @@ class UnifiedMetadataParser {
 
     // 完整路径：stealth + tEXt（保持最大兼容性）
     final stealthBytes = await _embedStealthData(imageBytes, metadataJson);
-    return _updateTextChunk(stealthBytes, metadataJson);
+    return embedTextChunkOnly(stealthBytes, 'Comment', metadataJson);
   }
 
-  /// 仅嵌入 tEXt chunk（不重新编码 PNG，性能提升 50-100 倍）
+  /// 更新 PNG 文本块；Latin1 使用 tEXt，其余文本使用 UTF-8 iTXt。
   ///
   /// 直接操作 PNG chunks，避免调用 img.decodePng/img.encodePng，
   /// 保留所有原始 chunks，包括非标准 chunks。
@@ -988,68 +1029,18 @@ class UnifiedMetadataParser {
     String keyword,
     String text,
   ) {
-    try {
-      final chunks = _parsePngChunks(originalPng);
-      final output = BytesBuilder();
-
-      // 写入 PNG 签名
-      output.add(originalPng.sublist(0, 8));
-
-      var textChunkAdded = false;
-      var idatIndex = -1;
-
-      // 找到第一个 IDAT 的位置（用于决定插入位置）
-      for (var i = 0; i < chunks.length; i++) {
-        if (chunks[i].type == 'IDAT') {
-          idatIndex = i;
-          break;
-        }
-      }
-
-      for (var i = 0; i < chunks.length; i++) {
-        final chunk = chunks[i];
-
-        // 如果存在相同 keyword 的 chunk，替换它
-        if (chunk.type == 'tEXt' && !textChunkAdded) {
-          final nullIndex = chunk.data.indexOf(0);
-          if (nullIndex > 0) {
-            final existingKeyword = latin1.decode(
-              chunk.data.sublist(0, nullIndex),
-            );
-            if (existingKeyword == keyword) {
-              _writeTextChunk(output, keyword, text);
-              textChunkAdded = true;
-              continue; // 跳过原始 chunk
-            }
-          }
-        }
-
-        // 在第一个 IDAT 之前插入新 chunk（PNG 规范建议）
-        if (i == idatIndex && !textChunkAdded) {
-          _writeTextChunk(output, keyword, text);
-          textChunkAdded = true;
-        }
-
-        // 写入原始 chunk
-        _writeChunk(output, chunk.type, chunk.data);
-      }
-
-      // 如果还没添加（没有 IDAT 的情况），追加到末尾
-      if (!textChunkAdded) {
+    final chunks = _parsePngChunks(originalPng);
+    final output = BytesBuilder()..add(originalPng.sublist(0, 8));
+    var added = false;
+    for (final chunk in chunks) {
+      if (_pngTextKeyword(chunk) == keyword) continue;
+      if (chunk.type == 'IDAT' && !added) {
         _writeTextChunk(output, keyword, text);
+        added = true;
       }
-
-      return output.toBytes();
-    } catch (e, stack) {
-      PortableLogger.e(
-        '[UnifiedMetadataParser] Failed to embed text chunk',
-        e,
-        stack,
-        _tag,
-      );
-      // 失败时返回原始数据
-      return originalPng;
+      _writeChunk(output, chunk.type, chunk.data);
     }
+    return output.toBytes();
   }
 
   /// 渐进式读取策略
@@ -1181,36 +1172,84 @@ class UnifiedMetadataParser {
     }
   }
 
-  /// 手动解析 PNG chunks
-  static List<_PngChunk> _parsePngChunks(Uint8List bytes) {
+  /// 按文件顺序读取三种 PNG 文本块，也支持渐进读取中的完整前缀块。
+  static Map<String, String> extractPngTextData(Uint8List bytes) {
+    final result = <String, String>{};
+    for (final chunk in _parsePngChunks(bytes, allowPartial: true)) {
+      final keyword = _pngTextKeyword(chunk);
+      if (keyword == null) continue;
+      final data = chunk.data;
+      var offset = data.indexOf(0) + 1;
+      switch (chunk.type) {
+        case 'tEXt':
+          result[keyword] = latin1.decode(data.sublist(offset));
+        case 'zTXt':
+          if (offset >= data.length || data[offset++] != 0) {
+            throw const FormatException('Invalid zTXt compression method');
+          }
+          result[keyword] = latin1.decode(zlib.decode(data.sublist(offset)));
+        case 'iTXt':
+          if (offset + 2 > data.length ||
+              data[offset] > 1 ||
+              data[offset + 1] != 0) {
+            throw const FormatException('Invalid iTXt compression header');
+          }
+          final compressed = data[offset] == 1;
+          offset += 2;
+          // language tag 与 translated keyword 均以 NUL 结束。
+          for (var i = 0; i < 2; i++) {
+            final end = data.indexOf(0, offset);
+            if (end < 0) throw const FormatException('Incomplete iTXt header');
+            offset = end + 1;
+          }
+          final text = data.sublist(offset);
+          result[keyword] = utf8.decode(compressed ? zlib.decode(text) : text);
+      }
+    }
+    return result;
+  }
+
+  static String? _pngTextKeyword(_PngChunk chunk) {
+    if (chunk.type != 'tEXt' && chunk.type != 'iTXt' && chunk.type != 'zTXt') {
+      return null;
+    }
+    final end = chunk.data.indexOf(0);
+    return end > 0 ? latin1.decode(chunk.data.sublist(0, end)) : null;
+  }
+
+  static List<_PngChunk> _parsePngChunks(
+    Uint8List bytes, {
+    bool allowPartial = false,
+  }) {
+    if (!isPngHeader(bytes)) {
+      throw const FormatException('Invalid PNG signature');
+    }
     final chunks = <_PngChunk>[];
-    var offset = 8; // 跳过 PNG 文件头
-
-    while (offset < bytes.length) {
-      if (offset + 12 > bytes.length) break;
-
-      // 读取 chunk 长度（4字节，大端序）
-      final length = ByteData.sublistView(
-        bytes,
-        offset,
-        offset + 4,
-      ).getUint32(0);
-
-      // 读取 chunk 类型（4字节）
-      final type = latin1.decode(bytes.sublist(offset + 4, offset + 8));
-
-      // 检查数据边界
+    var offset = 8;
+    var hasImageData = false;
+    while (offset + 12 <= bytes.length) {
+      final length = ByteData.sublistView(bytes, offset).getUint32(0);
       if (offset + 12 + length > bytes.length) break;
-
-      // 读取 chunk 数据
-      final data = bytes.sublist(offset + 8, offset + 8 + length);
-
+      final type = latin1.decode(bytes.sublist(offset + 4, offset + 8));
+      if (chunks.isEmpty && (type != 'IHDR' || length != 13)) {
+        throw const FormatException('Invalid PNG IHDR');
+      }
+      final data = Uint8List.sublistView(
+        bytes,
+        offset + 8,
+        offset + 8 + length,
+      );
       chunks.add(_PngChunk(type, data));
-
-      // 移动到下一个 chunk (length + type + data + crc)
+      if (type == 'IDAT') hasImageData = true;
+      if (type == 'IEND') {
+        if (!hasImageData || length != 0) {
+          throw const FormatException('Invalid PNG image data');
+        }
+        return chunks;
+      }
       offset += 12 + length;
     }
-
+    if (!allowPartial) throw const FormatException('Incomplete PNG image');
     return chunks;
   }
 
@@ -1221,14 +1260,18 @@ class UnifiedMetadataParser {
     String text,
   ) {
     final keywordBytes = latin1.encode(keyword);
-    final textBytes = latin1.encode(text);
-
-    final data = Uint8List(keywordBytes.length + 1 + textBytes.length);
+    if (keywordBytes.isEmpty ||
+        keywordBytes.length > 79 ||
+        keywordBytes.contains(0)) {
+      throw const FormatException('Invalid PNG text keyword');
+    }
+    final unicode = text.runes.any((codePoint) => codePoint > 255);
+    final textBytes = unicode ? utf8.encode(text) : latin1.encode(text);
+    final headerSize = keywordBytes.length + (unicode ? 5 : 1);
+    final data = Uint8List(headerSize + textBytes.length);
     data.setAll(0, keywordBytes);
-    data[keywordBytes.length] = 0; // null separator
-    data.setAll(keywordBytes.length + 1, textBytes);
-
-    _writeChunk(builder, 'tEXt', data);
+    data.setAll(headerSize, textBytes);
+    _writeChunk(builder, unicode ? 'iTXt' : 'tEXt', data);
   }
 
   /// 写入 PNG chunk（带 length + type + data + crc 结构）
@@ -1251,130 +1294,6 @@ class UnifiedMetadataParser {
     final crc = _crc32(crcInput);
     final crcBytes = ByteData(4)..setUint32(0, crc);
     builder.add(crcBytes.buffer.asUint8List());
-  }
-
-  /// 更新 PNG 的 tEXt chunk 中的 Comment 字段
-  static Future<Uint8List> _updateTextChunk(
-    Uint8List bytes,
-    String metadataJson,
-  ) async {
-    try {
-      final chunks = _parsePngChunks(bytes);
-      final output = BytesBuilder();
-
-      // 写入 PNG 文件头
-      output.add(bytes.sublist(0, 8));
-
-      var commentUpdated = false;
-
-      for (final chunk in chunks) {
-        if (chunk.type == 'tEXt' && !commentUpdated) {
-          // 解析现有的 tEXt chunk
-          final nullIndex = chunk.data.indexOf(0);
-
-          if (nullIndex > 0) {
-            final keyword = latin1.decode(chunk.data.sublist(0, nullIndex));
-
-            if (keyword == 'Comment') {
-              // 更新 Comment chunk
-              final newComment = _createTextChunk('Comment', metadataJson);
-              output.add(newComment);
-              commentUpdated = true;
-              continue; // 跳过原始 chunk
-            }
-          }
-        }
-
-        // 写入原始 chunk
-        output.add(_createChunk(chunk.type, chunk.data));
-      }
-
-      // 如果没有找到 Comment chunk，添加一个新的
-      if (!commentUpdated) {
-        final newComment = _createTextChunk('Comment', metadataJson);
-        // 在 IHDR 之后插入（通常是第二个位置）
-        final ihdrEnd = _findChunkEnd(bytes, 'IHDR');
-        if (ihdrEnd > 0) {
-          final result = output.toBytes();
-          final before = result.sublist(0, ihdrEnd);
-          final after = result.sublist(ihdrEnd);
-          return Uint8List.fromList([...before, ...newComment, ...after]);
-        }
-      }
-
-      return output.toBytes();
-    } catch (e) {
-      PortableLogger.w(
-        '[UnifiedMetadataParser] Failed to update tEXt chunk: $e',
-        _tag,
-      );
-      return bytes; // 失败时返回原始数据
-    }
-  }
-
-  /// 创建 tEXt chunk
-  static Uint8List _createTextChunk(String keyword, String text) {
-    final keywordBytes = latin1.encode(keyword);
-    final textBytes = latin1.encode(text);
-    final data = Uint8List(keywordBytes.length + 1 + textBytes.length);
-
-    data.setRange(0, keywordBytes.length, keywordBytes);
-    data[keywordBytes.length] = 0; // null separator
-    data.setRange(keywordBytes.length + 1, data.length, textBytes);
-
-    return _createChunk('tEXt', data);
-  }
-
-  /// 创建 PNG chunk
-  static Uint8List _createChunk(String type, Uint8List data) {
-    final output = BytesBuilder();
-
-    // Length (4 bytes, big-endian)
-    final lengthBytes = ByteData(4)..setUint32(0, data.length);
-    output.add(lengthBytes.buffer.asUint8List());
-
-    // Type (4 bytes)
-    final typeBytes = latin1.encode(type);
-    output.add(typeBytes);
-
-    // Data
-    output.add(data);
-
-    // CRC32 (type + data)
-    final crcInput = Uint8List(typeBytes.length + data.length);
-    crcInput.setRange(0, typeBytes.length, typeBytes);
-    crcInput.setRange(typeBytes.length, crcInput.length, data);
-    final crc = _crc32(crcInput);
-    final crcBytes = ByteData(4)..setUint32(0, crc);
-    output.add(crcBytes.buffer.asUint8List());
-
-    return output.toBytes();
-  }
-
-  /// 查找 chunk 的结束位置
-  static int _findChunkEnd(Uint8List bytes, String chunkType) {
-    var offset = 8; // 跳过 PNG 文件头
-
-    while (offset < bytes.length) {
-      if (offset + 8 > bytes.length) break;
-
-      final length = ByteData.sublistView(
-        bytes,
-        offset,
-        offset + 4,
-      ).getUint32(0);
-      final type = latin1.decode(bytes.sublist(offset + 4, offset + 8));
-
-      if (type == chunkType) {
-        return offset +
-            12 +
-            length; // length(4) + type(4) + data(length) + crc(4)
-      }
-
-      offset += 12 + length;
-    }
-
-    return 0;
   }
 
   /// CRC32 计算（PNG 标准）
@@ -1680,18 +1599,6 @@ class UnifiedMetadataParser {
     return img.encodePng(image);
   }
 
-  /// 从 NovelAI stealth_pngcomp alpha LSB 数据中读取元数据。
-  static String? _extractStealthMetadataText(Uint8List imageBytes) {
-    try {
-      final image = img.decodePng(imageBytes);
-      if (image == null) return null;
-      return _extractStealthMetadataTextFromImage(image);
-    } catch (e) {
-      PortableLogger.d('Failed to extract stealth_pngcomp metadata: $e', _tag);
-      return null;
-    }
-  }
-
   /// 从已解码图片的 alpha LSB 中读取 stealth_pngcomp 元数据。
   ///
   /// 泛化版本：PNG / WebP（含 alpha）通用，JPEG 无 alpha 不适用。
@@ -1824,7 +1731,10 @@ class UnifiedMetadataParser {
       final value = entry.value;
 
       // Prompt 字段
-      if (key.contains('prompt') && !key.contains('negative')) {
+      if (key.contains('prompt') &&
+          !key.contains('negative') &&
+          !value.trimLeft().startsWith('{') &&
+          !value.trimLeft().startsWith('[')) {
         prompt ??= value;
       }
 
@@ -2259,72 +2169,125 @@ class ComfyUiParser implements MetadataParser {
 
   @override
   NaiImageMetadata? parse(Map<String, String> textData) {
-    final workflow = textData['workflow'];
     final prompt = textData['prompt'];
-
-    if (workflow == null && prompt == null) return null;
+    if (prompt == null || prompt.isEmpty) return null;
 
     try {
-      // 尝试从 prompt 字段提取
-      if (prompt != null && prompt.isNotEmpty) {
-        final json = jsonDecode(prompt) as Map<String, dynamic>;
-
-        // 查找 KSampler 节点
-        String? positivePrompt;
-        String? negativePrompt;
-        String? sampler;
-        int? steps;
-        double? cfg;
-        int? seed;
-
-        for (final entry in json.entries) {
-          final node = entry.value as Map<String, dynamic>;
-          final classType = node['class_type'] as String?;
-
-          if (classType?.contains('KSampler') == true) {
-            final inputs = node['inputs'] as Map<String, dynamic>?;
-            if (inputs != null) {
-              sampler = inputs['sampler_name'] as String?;
-              steps = inputs['steps'] as int?;
-              cfg = (inputs['cfg'] as num?)?.toDouble();
-              seed = inputs['seed'] as int?;
-            }
-          }
-
-          // 提取提示词
-          if (classType?.contains('CLIPTextEncode') == true) {
-            final inputs = node['inputs'] as Map<String, dynamic>?;
-            final text = inputs?['text'] as String?;
-            if (text != null) {
-              // 假设第一个是正向，第二个是负向（简化处理）
-              if (positivePrompt == null) {
-                positivePrompt = text;
-              } else {
-                negativePrompt = text;
-              }
-            }
-          }
+      final graph = jsonDecode(prompt) as Map<String, dynamic>;
+      Map<String, dynamic> node(String id) => graph[id] as Map<String, dynamic>;
+      Map<String, dynamic> inputs(String id) =>
+          node(id)['inputs'] as Map<String, dynamic>;
+      bool isSampler(String id) => const [
+        'KSampler',
+        'KSamplerAdvanced',
+      ].contains(node(id)['class_type']);
+      (String, int) link(dynamic value) {
+        if (value is! List ||
+            value.length != 2 ||
+            value[1] is! int ||
+            !graph.containsKey(value[0].toString())) {
+          throw const FormatException('Missing ComfyUI node connection');
         }
+        return (value[0].toString(), value[1] as int);
+      }
 
-        if (positivePrompt != null) {
-          return NaiImageMetadata(
-            prompt: positivePrompt,
-            negativePrompt: negativePrompt ?? '',
-            seed: seed ?? 0,
-            sampler: sampler ?? 'Unknown',
-            steps: steps ?? 0,
-            scale: cfg ?? 7.0,
-            model: 'Unknown',
-            software: 'ComfyUI',
-            rawJson: prompt,
-          );
+      // Stop at the nearest sampler, so a refiner cannot inherit base parameters.
+      Set<String> samplersUpstream(String id, Set<String> path) {
+        if (!path.add(id)) throw const FormatException('Cyclic ComfyUI graph');
+        try {
+          if (isSampler(id)) return {id};
+          return {
+            for (final value in inputs(id).values)
+              if (value is List && value.length == 2 && value[1] is int)
+                ...samplersUpstream(link(value).$1, path),
+          };
+        } finally {
+          path.remove(id);
         }
       }
+
+      final savedOutputs = graph.keys
+          .where((id) => node(id)['class_type'] == 'SaveImage')
+          .toList();
+      final outputs = savedOutputs.isNotEmpty
+          ? savedOutputs
+          : graph.keys
+                .where((id) => node(id)['class_type'] == 'PreviewImage')
+                .toList();
+      final samplers = outputs.isEmpty
+          ? graph.keys.where(isSampler).toSet()
+          : {for (final id in outputs) ...samplersUpstream(id, {})};
+      if (samplers.length != 1) {
+        throw const FormatException(
+          'ComfyUI sampler is ambiguous or unavailable',
+        );
+      }
+      final samplerInputs = inputs(samplers.single);
+
+      List<String> conditioning(dynamic connection, Set<String> path) {
+        final (id, slot) = link(connection);
+        final key = '$id:$slot';
+        if (!path.add(key)) {
+          throw const FormatException('Cyclic ComfyUI conditioning');
+        }
+        try {
+          final type = node(id)['class_type'] as String;
+          final values = inputs(id);
+          if (type.startsWith('CLIPTextEncode') && slot == 0) {
+            final keys = type == 'CLIPTextEncodeSDXL'
+                ? ['text_g', 'text_l']
+                : ['text'];
+            return [for (final field in keys) values[field] as String];
+          }
+          if (type == 'ConditioningZeroOut' && slot == 0) return [];
+          final fields = switch (type) {
+            'ConditioningCombine' => ['conditioning_1', 'conditioning_2'],
+            'ConditioningAverage' ||
+            'ConditioningConcat' => ['conditioning_to', 'conditioning_from'],
+            'ControlNetApplyAdvanced' || 'InpaintModelConditioning'
+                when slot == 0 || slot == 1 =>
+              [slot == 0 ? 'positive' : 'negative'],
+            _ when slot == 0 && values.containsKey('conditioning') => [
+              'conditioning',
+            ],
+            _ => throw FormatException(
+              'Unsupported ComfyUI conditioning: $type output $slot',
+            ),
+          };
+          return [
+            for (final field in fields) ...conditioning(values[field], path),
+          ];
+        } finally {
+          path.remove(key);
+        }
+      }
+
+      final positive = conditioning(
+        samplerInputs['positive'],
+        {},
+      ).toSet().join(', ');
+      final negative = conditioning(
+        samplerInputs['negative'],
+        {},
+      ).toSet().join(', ');
+      return NaiImageMetadata(
+        prompt: positive,
+        negativePrompt: negative,
+        seed:
+            ((samplerInputs['seed'] ?? samplerInputs['noise_seed']) as num?)
+                ?.toInt() ??
+            0,
+        sampler: samplerInputs['sampler_name'] as String? ?? 'Unknown',
+        steps: (samplerInputs['steps'] as num?)?.toInt() ?? 0,
+        scale: (samplerInputs['cfg'] as num?)?.toDouble() ?? 7.0,
+        model: 'Unknown',
+        software: 'ComfyUI',
+        rawJson: prompt,
+      );
     } catch (e) {
       PortableLogger.d('ComfyUI parser failed: $e', 'UnifiedMetadataParser');
+      return null;
     }
-
-    return null;
   }
 
   @override

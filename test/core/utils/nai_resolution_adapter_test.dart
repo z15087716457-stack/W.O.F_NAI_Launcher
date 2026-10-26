@@ -4,9 +4,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/utils/nai_resolution_adapter.dart';
 import 'package:nai_launcher/core/utils/pica_lanczos_resizer.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/presentation/wiring/generation_reference_imports.dart';
 
 void main() {
   group('NaiResolutionAdapter official import sizing', () {
+    for (final (source, current, expected) in [
+      ((1000, 500), (1024, 512), (1024, 512)),
+      ((500, 1000), (512, 1024), (512, 1024)),
+      ((1024, 512), (1024, 512), (1024, 512)),
+      ((512, 1024), (512, 1024), (512, 1024)),
+      ((640, 320), (1024, 512), (1024, 512)),
+      ((320, 640), (512, 1024), (512, 1024)),
+      ((2000, 1000), (1024, 512), (1792, 896)),
+      ((1000, 2000), (512, 1024), (896, 1792)),
+      ((1000, 500), (1024, 640), (1792, 896)),
+    ]) {
+      test(
+        'source $source with current $current imports as $expected',
+        () async {
+          final result = await const GenerationReferenceDecoder().source(
+            GenerationReferenceFile(
+              'source.png',
+              _png(width: source.$1, height: source.$2),
+            ),
+            ImageParams(width: current.$1, height: current.$2),
+          );
+          expect((result!.width, result.height), expected);
+        },
+      );
+    }
+
     test('reads encoded image dimensions from the image header', () {
       final source = img.Image(width: 640, height: 960);
       final bytes = Uint8List.fromList(img.encodePng(source));

@@ -219,8 +219,12 @@ class AppLogger {
         await dir.create(recursive: true);
       }
     } catch (e) {
-      // 回退到临时目录
-      _logDirectory = Directory.systemTemp.path;
+      _logDirectory = path.join(
+        Directory.systemTemp.path,
+        'NAI_Launcher',
+        'logs',
+      );
+      await Directory(_logDirectory!).create(recursive: true);
     }
   }
 
@@ -229,24 +233,7 @@ class AppLogger {
     if (_logDirectory == null) return;
 
     try {
-      final dir = Directory(_logDirectory!);
-      if (!await dir.exists()) return;
-
-      // 获取所有日志文件
-      final files = await dir
-          .list()
-          .where((entity) => entity is File)
-          .map((entity) => entity as File)
-          .where((file) {
-            final name = path.basename(file.path);
-            return name.startsWith('app_') || name.startsWith('test_');
-          })
-          .toList();
-
-      // 按修改时间排序（最新的在前）
-      files.sort((a, b) {
-        return b.lastModifiedSync().compareTo(a.lastModifiedSync());
-      });
+      final files = await getLogFiles();
 
       // 删除超大日志文件（超过100MB）
       for (final file in files) {
@@ -261,19 +248,7 @@ class AppLogger {
       }
 
       // 重新获取文件列表（可能已删除部分）
-      final remainingFiles = await dir
-          .list()
-          .where((entity) => entity is File)
-          .map((entity) => entity as File)
-          .where((file) {
-            final name = path.basename(file.path);
-            return name.startsWith('app_') || name.startsWith('test_');
-          })
-          .toList();
-
-      remainingFiles.sort((a, b) {
-        return b.lastModifiedSync().compareTo(a.lastModifiedSync());
-      });
+      final remainingFiles = await getLogFiles();
 
       // 删除超过数量限制的旧日志文件
       if (remainingFiles.length >= _maxLogFiles) {
@@ -328,13 +303,14 @@ class AppLogger {
     final dir = Directory(_logDirectory!);
     if (!await dir.exists()) return [];
 
+    final logName = RegExp(r'^(?:app|test)_\d{8}_\d{6}\.log$');
     final files = await dir
-        .list()
+        .list(followLinks: false)
         .where((entity) => entity is File)
         .map((entity) => entity as File)
         .where((file) {
           final name = path.basename(file.path);
-          return name.startsWith('app_') || name.startsWith('test_');
+          return logName.hasMatch(name);
         })
         .toList();
 

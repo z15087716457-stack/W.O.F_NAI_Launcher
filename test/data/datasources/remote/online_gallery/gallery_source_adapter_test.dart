@@ -457,57 +457,60 @@ void main() {
       );
     });
 
-    test('sends site Referer on config, search, and detail API requests', () async {
-      final http = _RecordingHttpAdapter((request) {
-        if (request.uri.path == '/api/config') return _configJson;
-        if (request.uri.path == '/api/ai_works_search') {
-          return {
-            'page': 1,
-            'page_size': 60,
-            'total': 0,
-            'items': <Object?>[],
-          };
-        }
-        if (request.uri.path == '/api/work/501') {
-          return {
-            'work': _aiWork(501),
-            'images': [_aiImage('501_p0')],
-          };
-        }
-        throw StateError('Unexpected request ${request.uri}');
-      });
-      final adapter = AiTagGallerySourceAdapter(
-        dio: Dio()..httpClientAdapter = http,
-      );
-      const item = GalleryItem(
-        id: 501,
-        sourceId: GallerySourceId.aiTag,
-        createdAt: '',
-        uploaderId: 9,
-        cover: GalleryMedia(
-          id: 'pending',
-          previewUrl: '',
-          displayUrl: '',
-          downloadUrl: '',
-        ),
-      );
+    test(
+      'sends site Referer on config, search, and detail API requests',
+      () async {
+        final http = _RecordingHttpAdapter((request) {
+          if (request.uri.path == '/api/config') return _configJson;
+          if (request.uri.path == '/api/ai_works_search') {
+            return {
+              'page': 1,
+              'page_size': 60,
+              'total': 0,
+              'items': <Object?>[],
+            };
+          }
+          if (request.uri.path == '/api/work/501') {
+            return {
+              'work': _aiWork(501),
+              'images': [_aiImage('501_p0')],
+            };
+          }
+          throw StateError('Unexpected request ${request.uri}');
+        });
+        final adapter = AiTagGallerySourceAdapter(
+          dio: Dio()..httpClientAdapter = http,
+        );
+        const item = GalleryItem(
+          id: 501,
+          sourceId: GallerySourceId.aiTag,
+          createdAt: '',
+          uploaderId: 9,
+          cover: GalleryMedia(
+            id: 'pending',
+            previewUrl: '',
+            displayUrl: '',
+            downloadUrl: '',
+          ),
+        );
 
-      await adapter.getConfig();
-      await adapter.search(
-        const GallerySearchRequest(cursor: '1', pageSize: 60),
-      );
-      await adapter.detail(item);
+        await adapter.getConfig();
+        await adapter.search(
+          const GallerySearchRequest(cursor: '1', pageSize: 60),
+        );
+        await adapter.detail(item);
 
-      expect(http.requests, hasLength(3));
-      expect(
-        http.requests.map((r) => r.headers['Referer']),
-        everyElement('https://aitag.win/'),
-      );
-      expect(
-        http.requests.map((r) => r.headers['Accept']),
-        everyElement('application/json'),
-      );
-    });
+        expect(http.requests, hasLength(3));
+        expect(
+          http.requests.map((r) => r.headers['Referer']),
+          everyElement('https://aitag.win/'),
+        );
+        expect(
+          http.requests.map((r) => r.headers['Accept']),
+          everyElement('application/json'),
+        );
+      },
+    );
 
     test(
       'rejects invalid image_path without falling back to legacy fields',
@@ -810,7 +813,14 @@ Map<String, Object?> _comfyAiImage(String fileName) => {
   'ai_json': jsonEncode({
     '1': {
       'class_type': 'KSampler',
-      'inputs': {'sampler_name': 'euler', 'steps': 20, 'cfg': 7.0, 'seed': 123},
+      'inputs': {
+        'positive': ['2', 0],
+        'negative': ['3', 0],
+        'sampler_name': 'euler',
+        'steps': 20,
+        'cfg': 7.0,
+        'seed': 123,
+      },
     },
     '2': {
       'class_type': 'CLIPTextEncode',

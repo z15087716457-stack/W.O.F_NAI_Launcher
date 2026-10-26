@@ -109,6 +109,10 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
   final KritaBridgeServerFactory _serverFactory;
   final KritaBridgeEnabledPersister? _persistEnabled;
   final KritaBridgeServiceFactory? _serviceFactory;
+  int _operation = 0;
+  Future<void> _lifecycle = Future.value();
+  bool _ownsOperation(int operation) => mounted && operation == _operation;
+
   KritaBridgeServer? _server;
   KritaBridgeMessageService? _service;
   StreamSubscription? _messagesSubscription;
@@ -132,6 +136,7 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       return;
     }
 
+    final operation = ++_operation;
     state = state.copyWith(
       enabled: true,
       status: KritaBridgeStatus.starting,
@@ -139,16 +144,28 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       clearError: true,
     );
 
+    final starting = _lifecycle.then((_) => _startServer(operation, persist));
+    _lifecycle = starting;
+    await starting;
+  }
+
+  Future<void> _startServer(int operation, bool persist) async {
+    if (!_ownsOperation(operation)) return;
     final server = _serverFactory();
+    var registered = false;
     try {
       AppLogger.i('Enabling Krita bridge', _logTag);
       await server.start(preferredPort: 0);
+      if (!_ownsOperation(operation)) return;
       _server = server;
+      registered = true;
       _service = _serviceFactory?.call(server);
-      _service?.setActiveRequestReporter(_setActiveRequest);
+      _service?.setActiveRequestReporter((id) {
+        if (_ownsOperation(operation)) _setActiveRequest(id);
+      });
       _messagesSubscription = server.requests.listen((request) {
         final service = _service;
-        if (service == null) {
+        if (!_ownsOperation(operation) || service == null) {
           return;
         }
         unawaited(
@@ -156,17 +173,20 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
         );
       });
       _sessionSubscription = server.sessionChanges.listen((session) {
-        if (mounted && state.enabled) state = state.copyWith(session: session);
+        if (_ownsOperation(operation) && state.enabled) {
+          state = state.copyWith(session: session);
+        }
       });
       _disconnectSubscription = server.disconnections.listen((client) {
-        if (server.ownsActiveOperation(client.id)) {
+        if (_ownsOperation(operation) &&
+            server.ownsActiveOperation(client.id)) {
           _service?.handleClientDisconnected();
         }
       });
       _connectionSubscription = server.authenticationChanges.listen((
         connected,
       ) {
-        if (!mounted || !state.enabled) {
+        if (!_ownsOperation(operation) || !state.enabled) {
           return;
         }
         AppLogger.i(
@@ -181,10 +201,6 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
           clearConnectedClientLabel: !connected,
         );
       });
-      if (!mounted) {
-        await server.dispose();
-        return;
-      }
       state = KritaBridgeState(
         enabled: true,
         status: KritaBridgeStatus.listening,
@@ -195,54 +211,62 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       if (persist) {
         await _persistEnabled?.call(true);
       }
-      if (!mounted) {
-        await server.dispose();
-        return;
-      }
+      if (!_ownsOperation(operation)) return;
       AppLogger.i('Krita bridge enabled on port ${server.port}', _logTag);
     } catch (error) {
-      await server.dispose();
-      AppLogger.e('Failed to enable Krita bridge', error, null, _logTag);
-      if (!mounted) {
-        return;
+      if (identical(_server, server)) {
+        _server = null;
+        _service = null;
+        registered = false;
       }
+      AppLogger.e('Failed to enable Krita bridge', error, null, _logTag);
+      if (!_ownsOperation(operation)) return;
       state = KritaBridgeState(
         enabled: false,
         status: KritaBridgeStatus.error,
         errorMessage: error.toString(),
       );
+    } finally {
+      if (!registered) await server.dispose();
     }
   }
 
   Future<void> disable({bool persist = true}) async {
-    if (state.isBridgeGenerating) {
+    final operation = ++_operation;
+    if (mounted && state.isBridgeGenerating) {
       _service?.handleClientDisconnected();
     }
-
-    await _messagesSubscription?.cancel();
-    await _connectionSubscription?.cancel();
-    await _sessionSubscription?.cancel();
-    await _disconnectSubscription?.cancel();
+    final subscriptions = [
+      _messagesSubscription,
+      _connectionSubscription,
+      _sessionSubscription,
+      _disconnectSubscription,
+    ];
+    final server = _server;
+    _server = null;
+    _service = null;
     _messagesSubscription = null;
     _connectionSubscription = null;
     _sessionSubscription = null;
     _disconnectSubscription = null;
-    _service = null;
+    if (mounted) state = const KritaBridgeState();
 
-    final server = _server;
-    _server = null;
-    if (server != null) {
-      AppLogger.i('Disabling Krita bridge', _logTag);
-      await server.dispose();
+    // A pending startup owns its local server and closes it when it completes.
+    // Registered resources close in order before another server can start.
+    if (server != null ||
+        subscriptions.any((subscription) => subscription != null)) {
+      final closing = _lifecycle.then((_) async {
+        await Future.wait([
+          for (final subscription in subscriptions)
+            if (subscription != null) subscription.cancel(),
+        ]);
+        await server?.dispose();
+      });
+      _lifecycle = closing;
+      await closing;
     }
-
-    if (!mounted) {
-      return;
-    }
-    state = const KritaBridgeState();
-    if (persist) {
-      await _persistEnabled?.call(false);
-    }
+    if (!_ownsOperation(operation)) return;
+    if (persist) await _persistEnabled?.call(false);
     AppLogger.i('Krita bridge disabled', _logTag);
   }
 
@@ -280,7 +304,10 @@ class KritaBridgeNotifier extends StateNotifier<KritaBridgeState> {
       return;
     }
 
-    await disable(persist: false);
+    final closing = disable(persist: false);
+    final operation = _operation;
+    await closing;
+    if (!_ownsOperation(operation)) return;
     await enable(persist: false);
     AppLogger.i('Krita bridge session regenerated', _logTag);
   }

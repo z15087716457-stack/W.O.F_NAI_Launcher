@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from typing import NamedTuple, Optional
@@ -185,6 +186,14 @@ def restore_profile(
         raise FileNotFoundError(f"Missing restore manifest: {manifest_path}")
 
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if (
+        not isinstance(manifest, dict)
+        or manifest.get("plugin_name") != PLUGIN_NAME
+        or manifest.get("desktop_name") != DESKTOP_NAME
+        or any(type(manifest.get(key)) is not bool
+               for key in ("had_desktop", "had_plugin_dir", "had_kritarc"))
+    ):
+        raise ValueError(f"Invalid restore manifest: {manifest_path}")
     actions = ["restore_profile"]
     kritarc_backup = backup_dir / "kritarc" if manifest.get("had_kritarc") else None
     if not apply:
@@ -202,21 +211,13 @@ def restore_profile(
         allow_running_krita=allow_running_krita,
     )
 
-    _restore_file(
-        backup=backup_dir / DESKTOP_NAME,
-        target=pykrita_dir / DESKTOP_NAME,
-        had_original=bool(manifest.get("had_desktop")),
-    )
-    _restore_directory(
-        backup=backup_dir / PLUGIN_NAME,
-        target=pykrita_dir / PLUGIN_NAME,
-        had_original=bool(manifest.get("had_plugin_dir")),
-    )
-    _restore_file(
-        backup=backup_dir / "kritarc",
-        target=kritarc_path,
-        had_original=bool(manifest.get("had_kritarc")),
-    )
+    _restore_paths((
+        (backup_dir / DESKTOP_NAME, pykrita_dir / DESKTOP_NAME,
+         manifest["had_desktop"], False),
+        (backup_dir / PLUGIN_NAME, pykrita_dir / PLUGIN_NAME,
+         manifest["had_plugin_dir"], True),
+        (backup_dir / "kritarc", kritarc_path, manifest["had_kritarc"], False),
+    ))
 
     return InstallResult(
         applied=True,
@@ -394,25 +395,56 @@ def _backup_existing(source: Path, destination: Path) -> None:
         shutil.copy2(source, destination)
 
 
-def _restore_file(*, backup: Path, target: Path, had_original: bool) -> None:
-    if had_original:
-        if not backup.exists():
-            raise FileNotFoundError(f"Missing backup file: {backup}")
-        target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(backup, target)
-        return
-    _remove_path(target)
+def _restore_paths(paths: tuple[tuple[Path, Path, bool, bool], ...]) -> None:
+    # 整套备份先检查、复制到目标同盘的暂存区，再移动当前版本。
+    for backup, target, had_original, directory in paths:
+        if had_original and not (backup.is_dir() if directory else backup.is_file()):
+            kind = "directory" if directory else "file"
+            raise FileNotFoundError(f"Missing backup {kind}: {backup}")
+        if target.resolve() == backup.resolve() or target.resolve() in backup.resolve().parents:
+            raise ValueError(f"Backup overlaps restore target: {backup}")
 
+    staged = []
+    moved_current = []
+    installed = []
+    preserve_staging = False
+    try:
+        for backup, target, had_original, directory in paths:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            stage = Path(tempfile.mkdtemp(prefix=".restore-", dir=target.parent))
+            staged.append((target, stage, had_original))
+            if had_original:
+                if directory:
+                    shutil.copytree(backup, stage / "replacement")
+                else:
+                    shutil.copy2(backup, stage / "replacement")
 
-def _restore_directory(*, backup: Path, target: Path, had_original: bool) -> None:
-    if target.exists():
-        _remove_path(target)
-    if not had_original:
-        return
-    if not backup.exists():
-        raise FileNotFoundError(f"Missing backup directory: {backup}")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(backup, target)
+        for target, stage, had_original in staged:
+            if target.exists():
+                current = stage / "current"
+                target.rename(current)
+                moved_current.append((target, current))
+            if had_original:
+                (stage / "replacement").rename(target)
+                installed.append(target)
+    except Exception as error:
+        try:
+            for target in reversed(installed):
+                _remove_path(target)
+            for target, current in reversed(moved_current):
+                current.rename(target)
+        except Exception as rollback_error:
+            preserve_staging = True
+            locations = ", ".join(str(stage) for _, stage, _ in staged)
+            raise RuntimeError(
+                f"Restore failed ({error}); rollback failed ({rollback_error}); "
+                f"current files preserved at: {locations}"
+            ) from error
+        raise
+    finally:
+        if not preserve_staging:
+            for _, stage, _ in staged:
+                shutil.rmtree(stage)
 
 
 def _remove_path(path: Path) -> None:

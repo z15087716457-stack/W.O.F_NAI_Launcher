@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -10,8 +11,67 @@ import 'package:nai_launcher/data/datasources/remote/nai_auth_api_service.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/data/services/token_refresh_service.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
+import '../../helpers/app_logger_test_isolation.dart';
 
 void main() {
+  setUpAll(AppLoggerTestIsolation.setUp);
+  tearDownAll(AppLoggerTestIsolation.tearDown);
+  for (final selected in [false, true]) {
+    for (final change in [
+      'switch',
+      'logout',
+      'delete',
+      'token',
+      'key',
+      'same-token-session',
+    ]) {
+      test(
+        'refresh respects changed credentials/session: selected=$selected $change',
+        () async {
+          final h = _RefreshHarness.create();
+          addTearDown(h.dispose);
+          h.adapter.gate = Completer<void>();
+          final service = h.container.read(
+            tokenRefreshServiceProvider.notifier,
+          );
+          final task = selected
+              ? service.refreshTokenForAccount(h.account.id)
+              : service.refreshCurrentToken();
+          await h.adapter.arrived.future;
+          switch (change) {
+            case 'switch':
+              h.storage.replaceCurrent('pst-account-B');
+            case 'logout':
+              h.storage.replaceCurrent(null);
+            case 'delete':
+              h.accountManager.dropAccount();
+            case 'token':
+              h.accountManager.accountToken = 'replacement-token';
+            case 'key':
+              h.storage.accessKeys[h.account.id] = 'replacement-key';
+            case 'same-token-session':
+              h.storage.replaceCurrent(_RefreshHarness.oldToken);
+          }
+          final expectedCurrent = h.storage.currentToken;
+          h.adapter.gate!.complete();
+          final result = await task;
+          expect(h.storage.currentToken, expectedCurrent);
+          expect(h.storage.savedAccessToken, isNull);
+          if (['switch', 'logout', 'same-token-session'].contains(change)) {
+            expect(result, selected ? _RefreshHarness.newToken : false);
+            expect(h.accountManager.accountToken, _RefreshHarness.newToken);
+          } else {
+            expect(result, selected ? null : false);
+            expect(
+              h.accountManager.accountToken,
+              isNot(_RefreshHarness.newToken),
+            );
+          }
+        },
+      );
+    }
+  }
+
   test(
     'refreshes current credentials JWT through the image user host',
     () async {
@@ -137,6 +197,13 @@ class _FakeSecureStorageService extends SecureStorageService {
   String? savedAccessToken;
   DateTime? savedExpiry;
   String? savedEmail;
+  int revision = 0;
+  @override
+  int get authRevision => revision;
+  void replaceCurrent(String? value) {
+    currentToken = value;
+    revision++;
+  }
 
   @override
   Future<String?> getAccessToken() async => currentToken;
@@ -166,6 +233,10 @@ class _FakeAccountManagerNotifier extends AccountManagerNotifier {
 
   final SavedAccount account;
   String? accountToken;
+  void dropAccount() {
+    accountToken = null;
+    state = const AccountManagerState();
+  }
 
   @override
   AccountManagerState build() => AccountManagerState(accounts: [account]);
@@ -184,6 +255,8 @@ class _FakeAccountManagerNotifier extends AccountManagerNotifier {
 
 class _LoginDioAdapter implements HttpClientAdapter {
   final List<RequestOptions> requests = [];
+  final arrived = Completer<void>();
+  Completer<void>? gate;
 
   @override
   Future<ResponseBody> fetch(
@@ -192,6 +265,8 @@ class _LoginDioAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     requests.add(options);
+    arrived.complete();
+    await gate?.future;
     return ResponseBody.fromString(
       jsonEncode({'accessToken': _RefreshHarness.newToken}),
       201,

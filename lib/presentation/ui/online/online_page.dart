@@ -22,6 +22,8 @@ abstract class OnlineController {
   void setPicked(Iterable<String> keys);
 
   void openViewer(String key);
+  int mediaIndex(String workKey);
+  void setMedia(String workKey, int index);
 
   /// “发送到生图”主按钮：记住过方式就直接发，否则在 [anchor] 弹出选择。
   void requestSend(String key, UiPopoverAnchor anchor);
@@ -84,6 +86,8 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
   var _picking = false;
   final _picked = <String>{};
   String? _viewerKey;
+  String? _mediaKey;
+  var _media = 0;
   final _focus = FocusNode(debugLabel: 'online-gallery');
   final _searchFocus = FocusNode(debugLabel: 'online-search');
 
@@ -99,6 +103,9 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
   @override
   void didUpdateWidget(covariant OnlineGalleryPage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.selectedKey != _data.selectedKey) {
+      _selectMediaWork(_data.selectedKey);
+    }
     final keys = {for (final w in _data.list.items) w.key};
     if (_picked.any((k) => !keys.contains(k))) {
       _picked.removeWhere((k) => !keys.contains(k));
@@ -148,8 +155,26 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
   @override
   void openViewer(String key) {
     if (_data.selectedKey != key) _actions.onSelect(key);
-    setState(() => _viewerKey = key);
+    setState(() {
+      _viewerKey = key;
+      _selectMediaWork(key);
+    });
   }
+
+  void _selectMediaWork(String? key) {
+    if (_mediaKey == key) return;
+    _mediaKey = key;
+    _media = 0;
+  }
+
+  @override
+  int mediaIndex(String workKey) => _mediaKey == workKey ? _media : 0;
+
+  @override
+  void setMedia(String workKey, int index) => setState(() {
+    _mediaKey = workKey;
+    _media = index;
+  });
 
   @override
   void requestSend(String key, UiPopoverAnchor anchor) {
@@ -293,7 +318,7 @@ class _OnlineGalleryPageState extends State<OnlineGalleryPage>
               setState(() => _viewerKey = null);
               _focus.requestFocus();
             },
-            onWorkChanged: (key) => setState(() => _viewerKey = key),
+            onWorkChanged: openViewer,
             child: ColoredBox(
               color: c.bg,
               child: LayoutBuilder(

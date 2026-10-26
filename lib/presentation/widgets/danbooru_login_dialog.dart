@@ -40,9 +40,10 @@ class _DanbooruLoginDialogState extends ConsumerState<DanbooruLoginDialog> {
         .read(danbooruAuthProvider.notifier)
         .login(_usernameController.text.trim(), _apiKeyController.text.trim());
 
+    if (!mounted) return;
     setState(() => _isLoading = false);
 
-    if (success && mounted) {
+    if (success) {
       Navigator.of(context).pop();
       AppToast.success(context, context.l10n.danbooru_loginSuccess);
     }

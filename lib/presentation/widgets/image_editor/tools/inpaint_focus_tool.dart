@@ -94,6 +94,16 @@ class InpaintFocusTool extends EditorTool {
   }
 
   @override
+  void onPointerCancel(EditorState state) {
+    if (_start == null) return;
+    state.setInpaintFocusRegion(_before);
+    _start = null;
+    _moving = null;
+    _before = null;
+    _resizing = false;
+  }
+
+  @override
   Widget buildSettingsPanel(BuildContext context, EditorState state) =>
       const SizedBox.shrink();
 }

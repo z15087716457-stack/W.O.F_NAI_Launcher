@@ -146,22 +146,26 @@ extension _ImageEditorScreenCompression on _ImageEditorScreenState {
 
   Future<Uint8List?> _prepareInpaintSourceAtCompressionTarget() async {
     final target = _activeCompressionTarget;
-    Uint8List? source;
-    if (_hasOutpaintChanges) {
-      source = await _materializeVirtualOutpaintSourceIfNeeded(
-        targetWidth: target.width,
-        targetHeight: target.height,
-      );
-    } else {
-      source = _inpaintWorkingSourceImage;
-    }
-    if (source == null) return null;
     final imageLayers = _state.layerManager.layers
         .where(
           (layer) =>
               !layer.inpaintMask && layer.id != _sourceLayerId && layer.visible,
         )
         .toList();
+    Uint8List? source;
+    if (_hasOutpaintChanges) {
+      source = await _materializeVirtualOutpaintSourceIfNeeded(
+        targetWidth: imageLayers.isEmpty
+            ? target.width
+            : _state.canvasSize.width.round(),
+        targetHeight: imageLayers.isEmpty
+            ? target.height
+            : _state.canvasSize.height.round(),
+      );
+    } else {
+      source = _inpaintWorkingSourceImage;
+    }
+    if (source == null) return null;
     if (imageLayers.isNotEmpty) {
       final codec = await ui.instantiateImageCodec(source);
       final image = (await codec.getNextFrame()).image;

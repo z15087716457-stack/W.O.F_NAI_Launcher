@@ -16,10 +16,10 @@ class BridgeClient(QObject):
     connected_changed = pyqtSignal(bool)
     status_changed = pyqtSignal(str)
     message_received = pyqtSignal(object)
-    _fallback_connected = pyqtSignal()
-    _fallback_disconnected = pyqtSignal()
-    _fallback_text_message = pyqtSignal(str)
-    _fallback_error = pyqtSignal(str)
+    _fallback_connected = pyqtSignal(int)
+    _fallback_disconnected = pyqtSignal(int)
+    _fallback_text_message = pyqtSignal(int, str)
+    _fallback_error = pyqtSignal(int, str)
 
     def __init__(self, parent: Optional[QObject] = None) -> None:
         super().__init__(parent)
@@ -27,14 +27,14 @@ class BridgeClient(QObject):
         self._fallback_socket: Optional[FallbackWebSocketClient] = None
         self._discovery: Optional[BridgeDiscovery] = None
         self._authenticated = False
-        self._suppress_next_disconnect_status = False
+        self._connection_revision = 0
         self._retry_timer = QTimer(self)
         self._retry_timer.setInterval(5000)
         self._retry_timer.timeout.connect(self.connect_to_launcher)
         self._fallback_connected.connect(self._on_connected)
         self._fallback_disconnected.connect(self._on_disconnected)
         self._fallback_text_message.connect(self._on_text_message)
-        self._fallback_error.connect(self.status_changed.emit)
+        self._fallback_error.connect(self._on_fallback_error)
 
     @property
     def is_connected(self) -> bool:
@@ -46,14 +46,7 @@ class BridgeClient(QObject):
 
     def stop(self) -> None:
         self._retry_timer.stop()
-        self._authenticated = False
-        if self._socket is not None:
-            self._socket.close()
-            self._socket.deleteLater()
-            self._socket = None
-        if self._fallback_socket is not None:
-            self._fallback_socket.close()
-            self._fallback_socket = None
+        self._reset_socket()
         self.connected_changed.emit(False)
 
     def connect_to_launcher(self) -> None:
@@ -69,11 +62,14 @@ class BridgeClient(QObject):
             self._connect_with_fallback()
             return
 
+        revision = self._connection_revision
         self._socket = QWebSocket()
-        self._socket.connected.connect(self._on_connected)
-        self._socket.disconnected.connect(self._on_disconnected)
-        self._socket.textMessageReceived.connect(self._on_text_message)
-        self._socket.error.connect(self._on_socket_error)
+        self._socket.connected.connect(lambda: self._on_connected(revision))
+        self._socket.disconnected.connect(lambda: self._on_disconnected(revision))
+        self._socket.textMessageReceived.connect(
+            lambda text: self._on_text_message(revision, text))
+        self._socket.error.connect(
+            lambda error: self._on_socket_error(revision, error))
         self.status_changed.emit("正在连接 NAI Launcher...")
         self._socket.open(QUrl(self._discovery.url))
 
@@ -92,11 +88,12 @@ class BridgeClient(QObject):
     def _connect_with_fallback(self) -> None:
         if self._discovery is None:
             return
+        revision = self._connection_revision
         self._fallback_socket = FallbackWebSocketClient(
-            on_connected=self._fallback_connected.emit,
-            on_text_message=self._fallback_text_message.emit,
-            on_disconnected=self._fallback_disconnected.emit,
-            on_error=self._fallback_error.emit,
+            on_connected=lambda: self._fallback_connected.emit(revision),
+            on_text_message=lambda text: self._fallback_text_message.emit(revision, text),
+            on_disconnected=lambda: self._fallback_disconnected.emit(revision),
+            on_error=lambda text: self._fallback_error.emit(revision, text),
         )
         self.status_changed.emit(
             "当前 Krita 缺少 PyQt5.QtWebSockets，正在使用内置 WebSocket 客户端..."
@@ -111,23 +108,23 @@ class BridgeClient(QObject):
             return self._fallback_socket.send_text(text)
         return False
 
-    def _on_connected(self) -> None:
-        if self._discovery is None:
+    def _on_connected(self, revision: int) -> None:
+        if revision != self._connection_revision or self._discovery is None:
             return
-        self._suppress_next_disconnect_status = False
         self._send_raw_text(encode_ping(self._discovery.secret))
 
-    def _on_disconnected(self) -> None:
+    def _on_disconnected(self, revision: int) -> None:
+        if revision != self._connection_revision:
+            return
         was_authenticated = self._authenticated
         self._authenticated = False
         if was_authenticated:
             self.connected_changed.emit(False)
-        elif self._suppress_next_disconnect_status:
-            self._suppress_next_disconnect_status = False
-            return
         self.status_changed.emit("已断开与 NAI Launcher 的连接")
 
-    def _on_text_message(self, text: str) -> None:
+    def _on_text_message(self, revision: int, text: str) -> None:
+        if revision != self._connection_revision:
+            return
         try:
             message: Dict[str, Any] = decode_message(text)
         except Exception as error:
@@ -148,7 +145,6 @@ class BridgeClient(QObject):
             return
 
         if not self._authenticated and message.get("type") == "error":
-            self._suppress_next_disconnect_status = True
             self._reset_socket()
             self.connected_changed.emit(False)
             self.status_changed.emit(self._handshake_error_text(message))
@@ -156,20 +152,26 @@ class BridgeClient(QObject):
 
         self.message_received.emit(message)
 
-    def _on_socket_error(self, _error_code: object) -> None:
-        if self._socket is None:
+    def _on_socket_error(self, revision: int, _error_code: object) -> None:
+        if revision != self._connection_revision or self._socket is None:
             return
         self.status_changed.emit(self._socket.errorString())
 
+    def _on_fallback_error(self, revision: int, text: str) -> None:
+        if revision == self._connection_revision:
+            self.status_changed.emit(text)
+
     def _reset_socket(self) -> None:
+        self._connection_revision += 1
         self._authenticated = False
-        if self._socket is not None:
-            self._socket.close()
-            self._socket.deleteLater()
-            self._socket = None
-        if self._fallback_socket is not None:
-            self._fallback_socket.close()
-            self._fallback_socket = None
+        socket, fallback = self._socket, self._fallback_socket
+        self._socket = None
+        self._fallback_socket = None
+        if socket is not None:
+            socket.close()
+            socket.deleteLater()
+        if fallback is not None:
+            fallback.close()
 
     def _handshake_error_text(self, message: Dict[str, Any]) -> str:
         code = str(message.get("code") or "")

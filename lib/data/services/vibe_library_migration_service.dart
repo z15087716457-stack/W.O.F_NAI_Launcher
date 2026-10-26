@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
 
@@ -67,16 +68,7 @@ class VibeLibraryMigrationService {
   Future<VibeLibraryMigrationResult> migrateIfNeeded({
     ProgressCallback? onProgress,
   }) async {
-    // 若设置中残留“迁移进行中”但当前进程并未持锁，说明上次可能异常退出，需先清理孤立锁。
-    final settingsBox = await _openSettingsBox();
-    final inProgress = settingsBox.get(_migrationInProgressKey) == true;
-    if (inProgress && !_localLock) {
-      AppLogger.w('检测到上次迁移中断的孤立锁，正在恢复...', _tag);
-      await settingsBox.put(_migrationInProgressKey, false);
-      AppLogger.i('孤立锁已清除，允许重新迁移', _tag);
-    }
-
-    if (!await _acquireLock()) {
+    if (_localLock) {
       return const VibeLibraryMigrationResult(
         success: false,
         exportedCount: 0,
@@ -84,11 +76,24 @@ class VibeLibraryMigrationService {
         error: '迁移锁已被占用',
       );
     }
-
-    const backupDirPath = '';
+    _localLock = true;
+    String? backupDirPath;
+    Object? previousVersion;
+    var migrationStarted = false;
     final createdFiles = <String>[];
-
     try {
+      final settings = await _openSettingsBox();
+      if (settings.get(_migrationInProgressKey) == true) {
+        backupDirPath = settings.get(_migrationBackupDirKey) as String?;
+        if (backupDirPath != null) {
+          await _restoreFromBackup(backupDirPath);
+        }
+        await settings.putAll({
+          _schemaVersionKey: null,
+          _migrationInProgressKey: false,
+        });
+      }
+      previousVersion = settings.get(_schemaVersionKey);
       if (!await _needsMigration()) {
         await _markCompleted();
         return const VibeLibraryMigrationResult(
@@ -97,60 +102,79 @@ class VibeLibraryMigrationService {
           failedCount: 0,
         );
       }
-
-      final result = await _executeMigration(onProgress, createdFiles);
-
-      return VibeLibraryMigrationResult(
-        success: true,
-        exportedCount: result.exportedCount,
-        failedCount: 0,
-        backupPath: result.backupPath,
+      if (Hive.isBoxOpen(_entriesBoxName)) {
+        throw StateError('Vibe entries box must be closed before migration');
+      }
+      backupDirPath = null;
+      migrationStarted = true;
+      await settings.putAll({
+        _migrationInProgressKey: true,
+        _migrationBackupDirKey: null,
+      });
+      onProgress?.call(
+        const VibeLibraryMigrationProgress(
+          stage: 'backup',
+          current: 0,
+          total: 1,
+          message: '开始备份 Hive 数据',
+          percentage: 0,
+        ),
       );
+      backupDirPath = await _backupHiveFiles();
+      onProgress?.call(
+        const VibeLibraryMigrationProgress(
+          stage: 'backup',
+          current: 1,
+          total: 1,
+          message: 'Hive 数据备份完成',
+          percentage: 0.15,
+        ),
+      );
+      return await _executeMigration(backupDirPath, onProgress, createdFiles);
     } catch (e, stackTrace) {
       AppLogger.e('Vibe 库迁移失败', e, stackTrace, _tag);
-      await _rollback(backupDirPath: backupDirPath, createdFiles: createdFiles);
+      String? rollbackError;
+      if (migrationStarted) {
+        try {
+          await _rollback(
+            backupDirPath: backupDirPath,
+            createdFiles: createdFiles,
+            previousVersion: previousVersion,
+          );
+        } catch (error, stack) {
+          rollbackError = error.toString();
+          AppLogger.e(
+            'Vibe migration rollback failed; backup and exports retained',
+            error,
+            stack,
+            _tag,
+          );
+        }
+      }
       return VibeLibraryMigrationResult(
         success: false,
         exportedCount: 0,
         failedCount: 1,
-        error: e.toString(),
-        backupPath: backupDirPath.isEmpty ? null : backupDirPath,
+        error: rollbackError == null
+            ? e.toString()
+            : '$e; rollback failed: $rollbackError',
+        backupPath: backupDirPath,
       );
     } finally {
-      await _releaseLock();
+      _localLock = false;
     }
   }
 
   Future<VibeLibraryMigrationResult> _executeMigration(
+    String backupDirPath,
     ProgressCallback? onProgress,
     List<String> createdFiles,
   ) async {
     var totalExported = 0;
-    onProgress?.call(
-      const VibeLibraryMigrationProgress(
-        stage: 'backup',
-        current: 0,
-        total: 1,
-        message: '开始备份 Hive 数据',
-        percentage: 0,
-      ),
-    );
-    final backupDirPath = await _backupHiveFiles();
-    onProgress?.call(
-      const VibeLibraryMigrationProgress(
-        stage: 'backup',
-        current: 1,
-        total: 1,
-        message: 'Hive 数据备份完成',
-        percentage: 0.15,
-      ),
-    );
-
     final legacyEntries = await _readLegacyEntries();
     final total = legacyEntries.length;
 
     if (total == 0) {
-      await _markCompleted();
       onProgress?.call(
         const VibeLibraryMigrationProgress(
           stage: 'verify',
@@ -160,6 +184,7 @@ class VibeLibraryMigrationService {
           percentage: 1,
         ),
       );
+      await _markCompleted();
       return VibeLibraryMigrationResult(
         success: true,
         exportedCount: 0,
@@ -195,7 +220,6 @@ class VibeLibraryMigrationService {
       ),
     );
 
-    await _markCompleted();
     onProgress?.call(
       const VibeLibraryMigrationProgress(
         stage: 'verify',
@@ -205,6 +229,7 @@ class VibeLibraryMigrationService {
         percentage: 1,
       ),
     );
+    await _markCompleted();
     AppLogger.i('Vibe 库迁移完成，导出 $totalExported 条', _tag);
 
     return VibeLibraryMigrationResult(
@@ -267,30 +292,6 @@ class VibeLibraryMigrationService {
     return true;
   }
 
-  Future<bool> _acquireLock() async {
-    if (_localLock) {
-      AppLogger.w('进程内迁移锁已占用', _tag);
-      return false;
-    }
-
-    final settingsBox = await _openSettingsBox();
-    final inProgress = settingsBox.get(_migrationInProgressKey) == true;
-    if (inProgress) {
-      AppLogger.w('设置中检测到迁移进行中标记，拒绝并发迁移', _tag);
-      return false;
-    }
-
-    _localLock = true;
-    await settingsBox.put(_migrationInProgressKey, true);
-    return true;
-  }
-
-  Future<void> _releaseLock() async {
-    _localLock = false;
-    final settingsBox = await _openSettingsBox();
-    await settingsBox.put(_migrationInProgressKey, false);
-  }
-
   Future<String> _backupHiveFiles() async {
     final settingsBox = await _openSettingsBox();
     final hivePath = await HiveStorageHelper.instance.getPath();
@@ -301,9 +302,7 @@ class VibeLibraryMigrationService {
       await backupRoot.create(recursive: true);
     }
 
-    final backupDirName = DateTime.now().millisecondsSinceEpoch.toString();
-    final backupDir = Directory(p.join(backupRoot.path, backupDirName));
-    await backupDir.create(recursive: true);
+    final backupDir = await backupRoot.createTemp('migration_');
 
     final targets = [
       '$_entriesBoxName.hive',
@@ -330,90 +329,11 @@ class VibeLibraryMigrationService {
       Hive.registerAdapter(LegacyVibeLibraryEntryV20Adapter());
     }
 
-    if (Hive.isBoxOpen(_entriesBoxName)) {
-      await Hive.box(_entriesBoxName).close();
-    }
-
+    final box = await Hive.openBox<LegacyVibeLibraryEntryV20>(_entriesBoxName);
     try {
-      final box = await Hive.openBox<LegacyVibeLibraryEntryV20>(
-        _entriesBoxName,
-      );
-      final entries = box.values.toList(growable: false);
+      return box.values.toList(growable: false);
+    } finally {
       await box.close();
-      AppLogger.i('读取到旧条目 ${entries.length} 条', _tag);
-      return entries;
-    } catch (error, stackTrace) {
-      if (_isUnknownTypeIdError(error)) {
-        final errorText = error.toString();
-        final typeId =
-            RegExp(
-              r'unknown typeId[^0-9]*(\d+)',
-            ).firstMatch(errorText)?.group(1) ??
-            'unknown';
-        AppLogger.e(
-          '检测到未知的 typeId 错误(typeId=$typeId)，备份并清理 corrupt 数据: $errorText',
-          error,
-          stackTrace,
-          _tag,
-        );
-
-        final backupPath = await _backupCorruptHiveFiles();
-        await _deleteCorruptHiveFiles();
-        AppLogger.i('已备份 corrupt 文件到: $backupPath', _tag);
-        return <LegacyVibeLibraryEntryV20>[];
-      }
-      rethrow;
-    }
-  }
-
-  bool _isUnknownTypeIdError(Object error) {
-    return error is HiveError && error.toString().contains('unknown typeId');
-  }
-
-  Future<String> _backupCorruptHiveFiles() async {
-    final hivePath = await HiveStorageHelper.instance.getPath();
-    final backupRoot = Directory(
-      p.join(hivePath, 'vibe_library_migration_backup'),
-    );
-    if (!await backupRoot.exists()) {
-      await backupRoot.create(recursive: true);
-    }
-
-    final backupDirName = 'corrupt_${DateTime.now().millisecondsSinceEpoch}';
-    final backupDir = Directory(p.join(backupRoot.path, backupDirName));
-    await backupDir.create(recursive: true);
-
-    final targets = [
-      '$_entriesBoxName.hive',
-      '$_entriesBoxName.lock',
-      '$_entriesBoxName.crc',
-    ];
-
-    for (final name in targets) {
-      final src = File(p.join(hivePath, name));
-      if (!await src.exists()) {
-        continue;
-      }
-      final dst = File(p.join(backupDir.path, name));
-      await src.copy(dst.path);
-    }
-
-    return backupDir.path;
-  }
-
-  Future<void> _deleteCorruptHiveFiles() async {
-    final hivePath = await HiveStorageHelper.instance.getPath();
-    final targets = [
-      '$_entriesBoxName.hive',
-      '$_entriesBoxName.lock',
-      '$_entriesBoxName.crc',
-    ];
-
-    for (final name in targets) {
-      final file = File(p.join(hivePath, name));
-      if (await file.exists()) {
-        await file.delete();
-      }
     }
   }
 
@@ -442,95 +362,109 @@ class VibeLibraryMigrationService {
   }
 
   Future<void> _rebuildEntriesBox(List<_ExportedEntry> exportedEntries) async {
-    if (Hive.isBoxOpen(_entriesBoxName)) {
-      await Hive.box(_entriesBoxName).close();
-    }
-
-    final legacyBox = await Hive.openBox<LegacyVibeLibraryEntryV20>(
-      _entriesBoxName,
-    );
-    await legacyBox.clear();
-    await legacyBox.close();
-
     if (!Hive.isAdapterRegistered(_targetSchemaVersion)) {
       Hive.registerAdapter(VibeLibraryEntryAdapter());
     }
-
-    final newBox = await Hive.openBox<VibeLibraryEntry>(_entriesBoxName);
-    for (final exported in exportedEntries) {
-      final old = exported.legacy;
-      final mapped = VibeLibraryEntry(
-        id: old.id,
-        name: old.name,
-        vibeDisplayName: old.vibeDisplayName,
-        vibeEncoding: old.vibeEncoding,
-        vibeThumbnail: old.vibeThumbnail,
-        rawImageData: old.rawImageData,
-        strength: old.strength,
-        infoExtracted: old.infoExtracted,
-        sourceTypeIndex: old.sourceTypeIndex,
-        categoryId: old.categoryId,
-        tags: old.tags,
-        isFavorite: old.isFavorite,
-        usedCount: old.usedCount,
-        lastUsedAt: old.lastUsedAt,
-        createdAt: old.createdAt ?? DateTime.now(),
-        thumbnail: old.thumbnail,
-        filePath: exported.filePath,
+    final hivePath = await HiveStorageHelper.instance.getPath();
+    final staging = await Directory(hivePath).createTemp('vibe_migration_');
+    try {
+      final newBox = await Hive.openBox<VibeLibraryEntry>(
+        _entriesBoxName,
+        path: staging.path,
       );
-      await newBox.put(mapped.id, mapped);
-    }
+      try {
+        for (final exported in exportedEntries) {
+          final old = exported.legacy;
+          final mapped = VibeLibraryEntry(
+            id: old.id,
+            name: old.name,
+            vibeDisplayName: old.vibeDisplayName,
+            vibeEncoding: old.vibeEncoding,
+            vibeThumbnail: old.vibeThumbnail,
+            rawImageData: old.rawImageData,
+            strength: old.strength,
+            infoExtracted: old.infoExtracted,
+            sourceTypeIndex: old.sourceTypeIndex,
+            categoryId: old.categoryId,
+            tags: old.tags,
+            isFavorite: old.isFavorite,
+            usedCount: old.usedCount,
+            lastUsedAt: old.lastUsedAt,
+            createdAt: old.createdAt ?? DateTime.now(),
+            thumbnail: old.thumbnail,
+            filePath: exported.filePath,
+          );
+          await newBox.put(mapped.id, mapped);
+        }
 
-    final expected = exportedEntries.length;
-    final actual = newBox.length;
-    await newBox.close();
-    if (actual != expected) {
-      throw StateError('重建后条目数量不一致: expected=$expected, actual=$actual');
+        if (newBox.length != exportedEntries.length) {
+          throw StateError('Rebuilt Vibe entry count differs from the source');
+        }
+      } finally {
+        await newBox.close();
+      }
+      await File(
+        p.join(staging.path, '$_entriesBoxName.hive'),
+      ).rename(p.join(hivePath, '$_entriesBoxName.hive'));
+    } finally {
+      // Staging is created inside this Hive directory and contains only our box.
+      if (!p.isWithin(p.absolute(hivePath), p.absolute(staging.path))) {
+        throw StateError('Vibe migration staging escaped the Hive directory');
+      }
+      await staging.delete(recursive: true);
     }
   }
 
   Future<void> _rollback({
-    required String backupDirPath,
+    required String? backupDirPath,
     required List<String> createdFiles,
+    required Object? previousVersion,
   }) async {
-    AppLogger.w('开始回滚 Vibe 库迁移', _tag);
-
-    if (Hive.isBoxOpen(_entriesBoxName)) {
-      await Hive.box(_entriesBoxName).close();
-    }
-
-    if (backupDirPath.isNotEmpty) {
+    if (backupDirPath != null) {
       await _restoreFromBackup(backupDirPath);
     }
-
+    final settings = await _openSettingsBox();
+    await settings.putAll({
+      _schemaVersionKey: previousVersion,
+      _migrationInProgressKey: false,
+    });
+    // Only remove exports once the old library and schema marker are restored.
     for (final filePath in createdFiles) {
       await _fileStorage.deleteVibeFile(filePath);
     }
-
-    final settingsBox = await _openSettingsBox();
-    await settingsBox.put(_migrationInProgressKey, false);
     AppLogger.w('Vibe 库迁移已回滚', _tag);
   }
 
   Future<void> _restoreFromBackup(String backupDirPath) async {
-    final backupDir = Directory(backupDirPath);
-    if (!await backupDir.exists()) return;
-
-    final hivePath = await HiveStorageHelper.instance.getPath();
-    await for (final entity in backupDir.list(recursive: false)) {
-      if (entity is! File) continue;
-
-      final restoredPath = p.join(hivePath, p.basename(entity.path));
-      final dst = File(restoredPath);
-      if (await dst.exists()) await dst.delete();
-      await entity.copy(restoredPath);
+    final backup = File(p.join(backupDirPath, '$_entriesBoxName.hive'));
+    if (!await backup.exists()) {
+      throw FileSystemException('Vibe rollback backup is missing', backup.path);
     }
+    final hivePath = await HiveStorageHelper.instance.getPath();
+    for (final suffix in ['hive', 'crc']) {
+      final source = File(p.join(backupDirPath, '$_entriesBoxName.$suffix'));
+      if (!await source.exists()) continue;
+      final target = p.join(hivePath, '$_entriesBoxName.$suffix');
+      final staged = await source.copy('$target.migration-restore');
+      final originalHash = await sha256.bind(source.openRead()).first;
+      final restoredHash = await sha256.bind(staged.openRead()).first;
+      if (originalHash != restoredHash) {
+        throw FileSystemException(
+          'Vibe rollback copy verification failed',
+          staged.path,
+        );
+      }
+      await staged.rename(target);
+    }
+    await _readLegacyEntries();
   }
 
   Future<void> _markCompleted() async {
     final settingsBox = await _openSettingsBox();
-    await settingsBox.put(_schemaVersionKey, _targetSchemaVersion);
-    await settingsBox.put(_migrationInProgressKey, false);
+    await settingsBox.putAll({
+      _schemaVersionKey: _targetSchemaVersion,
+      _migrationInProgressKey: false,
+    });
   }
 
   Future<Box<dynamic>> _openSettingsBox() async {

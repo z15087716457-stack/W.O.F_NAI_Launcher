@@ -1,4 +1,6 @@
 import '../enums/quality_tag_preset.dart';
+import '../utils/nai_prompt_segments.dart';
+import '../utils/nai_prompt_syntax.dart';
 import 'model_spec.dart';
 
 /// NovelAI API 常量定义
@@ -909,34 +911,51 @@ class UcPresets {
         .toList();
   }
 
-  /// 从字符串中移除 nsfw tag
-  /// 支持移除独立的 "nsfw" 以及带有花括号修饰的变体如 "{nsfw}", "{{nsfw}}" 等
+  /// 移除完整 nsfw 标签，保留其他标签及其权重、字面文本。
   static String removeNsfwTag(String prompt) {
-    if (prompt.isEmpty) return prompt;
+    var changed = false;
+    final remaining = <String>[];
+    for (final segment in splitNaiPromptSegments(prompt)) {
+      final next = _removeNsfwSegment(segment);
+      changed |= next != segment;
+      if (next.isNotEmpty) remaining.add(next);
+    }
+    return changed ? remaining.join(', ') : prompt;
+  }
 
-    // 正则表达式匹配 nsfw 及其变体：
-    // - 可能带有任意数量的花括号或方括号包围
-    // - 后面可能跟着逗号和空格
-    final nsfwPattern = RegExp(
-      r'[\{\[]*nsfw[\}\]]*\s*,?\s*',
-      caseSensitive: false,
-    );
-
-    var result = prompt.replaceAll(nsfwPattern, '');
-
-    // 清理可能残留的多余逗号和空格
-    result = result.replaceAll(RegExp(r',\s*,'), ','); // 双逗号变单逗号
-    result = result.replaceAll(RegExp(r'^\s*,\s*'), ''); // 开头的逗号
-    result = result.replaceAll(RegExp(r'\s*,\s*$'), ''); // 结尾的逗号
-    result = result.trim();
-
-    return result;
+  static String _removeNsfwSegment(String segment) {
+    if (segment.toLowerCase() == 'nsfw') return '';
+    final tokens = NaiPromptSyntax.scan(segment);
+    if (tokens.length == 1 &&
+        tokens.single.kind == NaiPromptTokenKind.group &&
+        (segment.startsWith('{') || segment.startsWith('['))) {
+      final inner = segment.substring(1, segment.length - 1);
+      final next = removeNsfwTag(inner);
+      if (next == inner) return segment;
+      return next.isEmpty
+          ? ''
+          : '${segment[0]}$next${segment[segment.length - 1]}';
+    }
+    if (tokens.isNotEmpty &&
+        tokens.first.kind == NaiPromptTokenKind.prefix &&
+        tokens.first.start == 0) {
+      final start = tokens.first.end;
+      final end = tokens.last.kind == NaiPromptTokenKind.closure
+          ? tokens.last.start
+          : segment.length;
+      final inner = segment.substring(start, end);
+      final next = removeNsfwTag(inner);
+      if (next == inner) return segment;
+      return next.isEmpty
+          ? ''
+          : '${segment.substring(0, start)}$next${segment.substring(end)}';
+    }
+    return segment;
   }
 
   /// 检查正面提示词是否包含 nsfw tag
   static bool containsNsfwTag(String prompt) {
-    final nsfwPattern = RegExp(r'[\{\[]*nsfw[\}\]]*', caseSensitive: false);
-    return nsfwPattern.hasMatch(prompt);
+    return removeNsfwTag(prompt) != prompt;
   }
 
   /// 根据整数 ucPreset 值应用预设到负面提示词，并根据正面提示词决定是否移除 nsfw

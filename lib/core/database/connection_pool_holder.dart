@@ -143,7 +143,7 @@ class ConnectionPoolHolder {
 
     for (var i = 0; i < connections; i++) {
       try {
-        final conn = await pool.acquire().timeout(timeout);
+        final conn = await pool.acquire(timeout: timeout);
 
         try {
           await conn

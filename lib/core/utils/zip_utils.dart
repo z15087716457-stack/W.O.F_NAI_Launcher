@@ -93,21 +93,7 @@ class ZipUtils {
     void Function(int current, int total)? onProgress,
   }) async {
     try {
-      final archive = Archive();
-
-      for (int i = 0; i < imagePaths.length; i++) {
-        final imagePath = imagePaths[i];
-        final file = File(imagePath);
-
-        if (await file.exists()) {
-          final bytes = await file.readAsBytes();
-          final fileName = path.basename(imagePath);
-
-          archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
-        }
-
-        onProgress?.call(i + 1, imagePaths.length);
-      }
+      final archive = await _archiveImages(imagePaths, onProgress: onProgress);
 
       if (archive.isEmpty) {
         return false;
@@ -137,18 +123,7 @@ class ZipUtils {
     List<String> imagePaths,
   ) async {
     try {
-      final archive = Archive();
-
-      for (final imagePath in imagePaths) {
-        final file = File(imagePath);
-
-        if (await file.exists()) {
-          final bytes = await file.readAsBytes();
-          final fileName = path.basename(imagePath);
-
-          archive.addFile(ArchiveFile(fileName, bytes.length, bytes));
-        }
-      }
+      final archive = await _archiveImages(imagePaths);
 
       if (archive.isEmpty) {
         return null;
@@ -161,5 +136,36 @@ class ZipUtils {
     } catch (e) {
       return null;
     }
+  }
+
+  static Future<Archive> _archiveImages(
+    List<String> imagePaths, {
+    void Function(int current, int total)? onProgress,
+  }) async {
+    final archive = Archive();
+    final reserved = imagePaths
+        .map((p) => path.basename(p).toLowerCase())
+        .toSet();
+    final used = <String>{};
+    for (var i = 0; i < imagePaths.length; i++) {
+      final imagePath = imagePaths[i];
+      // 任一选中项读失败都使导出失败，不能返回缺图的成功包。
+      final bytes = await File(imagePath).readAsBytes();
+      final original = path.basename(imagePath);
+      var name = original;
+      if (used.contains(name.toLowerCase())) {
+        final stem = path.basenameWithoutExtension(original);
+        final extension = path.extension(original);
+        var suffix = 2;
+        do {
+          name = '$stem (${suffix++})$extension';
+        } while (used.contains(name.toLowerCase()) ||
+            reserved.contains(name.toLowerCase()));
+      }
+      used.add(name.toLowerCase());
+      archive.addFile(ArchiveFile(name, bytes.length, bytes));
+      onProgress?.call(i + 1, imagePaths.length);
+    }
+    return archive;
   }
 }

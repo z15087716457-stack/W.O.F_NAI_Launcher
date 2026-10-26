@@ -220,6 +220,54 @@ class AddLayerAction extends EditorAction {
   String get description => 'Add Layer';
 }
 
+/// 导入已解码的图片，历史持有像素副本，撤销后重做保留图层 ID。
+class ImportImageLayerAction extends EditorAction {
+  ImportImageLayerAction(Layer layer)
+    : _data = layer.toData(),
+      _image = layer.baseImage!.clone(),
+      _bytes = layer.baseImageBytes;
+
+  final LayerData _data;
+  final Image _image;
+  final Uint8List? _bytes;
+  int? _index;
+  String? _previousActiveId;
+
+  @override
+  void execute(EditorState state) {
+    final manager = state.layerManager;
+    if (_index == null) {
+      _index = manager.layerCount;
+      _previousActiveId = manager.activeLayerId;
+    }
+    manager.runBatch(() {
+      final layer = manager.insertLayerFromData(
+        _data,
+        _index!,
+        setActive: true,
+      );
+      layer.setBaseImageSync(_image.clone(), _bytes);
+      manager.notifyRasterChange();
+    });
+  }
+
+  @override
+  void undo(EditorState state) {
+    state.layerManager.runBatch(() {
+      state.layerManager.removeLayer(_data.id);
+      if (_previousActiveId != null) {
+        state.layerManager.setActiveLayer(_previousActiveId!);
+      }
+    });
+  }
+
+  @override
+  void dispose() => _image.dispose();
+
+  @override
+  String get description => 'Import Image Layer';
+}
+
 /// 删除图层操作
 class DeleteLayerAction extends EditorAction {
   final String layerId;

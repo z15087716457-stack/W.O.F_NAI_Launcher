@@ -43,16 +43,21 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   Timer? _generationStateSaveDebounceTimer;
   Future<void>? _generationStateSaveInFlight;
+  Future<void>? _generationStateRestoreInFlight;
   bool _hasQueuedGenerationStateSave = false;
   bool _isRestoringGenerationState = false;
   bool _hasRestoredGenerationState = false;
   bool _isDisposed = false;
+  bool _restoreSavedVibes = true;
+  bool _restoreSavedPreciseRefs = true;
+  bool _restoreSavedNormalize = true;
 
   /// 获取最近使用的 Vibes (最多 5 个用于显示)
   List<VibeLibraryEntry> get recentVibes => _recentVibes.take(5).toList();
 
   void _scheduleGenerationStateSave({bool immediate = false}) {
     if (_isRestoringGenerationState) {
+      _hasQueuedGenerationStateSave = true;
       return;
     }
 
@@ -332,6 +337,9 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 重置为默认值
   void reset() {
+    _restoreSavedVibes = false;
+    _restoreSavedPreciseRefs = false;
+    _restoreSavedNormalize = false;
     final storage = ref.read(localStorageServiceProvider);
 
     state = ImageParams(
@@ -351,6 +359,9 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// back up and compare the complete draft immediately before this call.
   /// Native presets and pill/character documents are restored by that owner.
   void restoreAgentSnapshot(ImageParams snapshot) {
+    _restoreSavedVibes = false;
+    _restoreSavedPreciseRefs = false;
+    _restoreSavedNormalize = false;
     state = snapshot.copyWith(
       advancedOptionsExpanded: state.advancedOptionsExpanded,
     );
@@ -956,12 +967,14 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 清除所有 V4 Vibe 参考
   void clearVibeReferences() {
+    _restoreSavedVibes = false;
     state = state.copyWith(vibeReferencesV4: []);
     _scheduleGenerationStateSave(immediate: true);
   }
 
   /// 设置 vibe references（替换现有）
   void setVibeReferences(List<VibeReference> vibes) {
+    _restoreSavedVibes = false;
     VibePerformanceDiagnostics.measureSync(
       'generation.setVibeReferences',
       () {
@@ -982,6 +995,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 设置 Vibe 强度标准化开关
   void setNormalizeVibeStrength(bool value) {
+    _restoreSavedNormalize = false;
     state = state.copyWith(normalizeVibeStrength: value);
     _scheduleGenerationStateSave(immediate: true);
   }
@@ -1249,6 +1263,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
   /// 清除所有 Precise Reference
   void clearPreciseReferences() {
+    _restoreSavedPreciseRefs = false;
     state = state.copyWith(preciseReferences: []);
     _scheduleGenerationStateSave(immediate: true);
   }
@@ -1256,9 +1271,10 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   // ==================== 状态持久化 ====================
 
   /// 保存当前 Vibe 和精准参考状态
-  Future<void> saveGenerationState() {
-    if (_isRestoringGenerationState || _isDisposed) {
-      return Future<void>.value();
+  Future<void> saveGenerationState() async {
+    await restoreGenerationState();
+    if (_isDisposed || !_hasRestoredGenerationState) {
+      return;
     }
 
     final activeSave = _generationStateSaveInFlight;
@@ -1347,11 +1363,17 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   }
 
   /// 恢复保存的 Vibe 和精准参考状态
-  Future<void> restoreGenerationState() async {
-    if (_hasRestoredGenerationState || _isRestoringGenerationState) {
-      return;
+  Future<void> restoreGenerationState() {
+    if (_hasRestoredGenerationState || _isDisposed) {
+      return Future<void>.value();
     }
+    return _generationStateRestoreInFlight ??= _restoreGenerationState()
+        .whenComplete(() {
+          _generationStateRestoreInFlight = null;
+        });
+  }
 
+  Future<void> _restoreGenerationState() async {
     final span = VibePerformanceDiagnostics.start('generation.restoreState');
     _isRestoringGenerationState = true;
     var shouldRewriteGenerationState = false;
@@ -1362,6 +1384,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
     try {
       final storageService = ref.read(vibeLibraryStorageServiceProvider);
       final stateJson = await storageService.loadGenerationStateJson();
+      if (_isDisposed) return;
 
       if (stateJson == null || stateJson.isEmpty) {
         _hasRestoredGenerationState = true;
@@ -1373,6 +1396,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       final stateData = await Isolate.run(
         () => _decodeGenerationStateJson(stateJson),
       );
+      if (_isDisposed) return;
 
       final restoredVibes = <VibeReference>[];
       final vibeRefsData = stateData['vibeReferences'] as List? ?? const [];
@@ -1450,12 +1474,17 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
         _primeVibeEncodingCache(vibe);
       }
 
-      // 更新状态
+      // 合并加载期间的新增项；显式替换、清空与开关修改以用户操作为准。
       state = state.copyWith(
-        vibeReferencesV4: restoredVibes,
-        preciseReferences: preciseRefs,
-        normalizeVibeStrength:
-            stateData['normalizeVibeStrength'] as bool? ?? true,
+        vibeReferencesV4: _restoreSavedVibes
+            ? [...restoredVibes, ...state.vibeReferencesV4].take(16).toList()
+            : state.vibeReferencesV4,
+        preciseReferences: _restoreSavedPreciseRefs
+            ? [...preciseRefs, ...state.preciseReferences]
+            : state.preciseReferences,
+        normalizeVibeStrength: _restoreSavedNormalize
+            ? stateData['normalizeVibeStrength'] as bool? ?? true
+            : state.normalizeVibeStrength,
       );
       restoredVibeCount = restoredVibes.length;
       restoredPreciseRefCount = preciseRefs.length;
@@ -1471,7 +1500,9 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       AppLogger.e('Failed to restore generation state', e, stackTrace);
     } finally {
       _isRestoringGenerationState = false;
-      if (shouldRewriteGenerationState && !_isDisposed) {
+      if ((shouldRewriteGenerationState || _hasQueuedGenerationStateSave) &&
+          _hasRestoredGenerationState &&
+          !_isDisposed) {
         unawaited(saveGenerationState());
       }
       span.finish(

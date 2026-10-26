@@ -41,6 +41,7 @@ class NAILauncherBridgeDocker(DockWidget):
         self.setWindowTitle("NAI Launcher Bridge")
         self._client = BridgeClient(self)
         self._active_request_id: Optional[str] = None
+        self._request_document = None
         self._pending_params_request_id: Optional[str] = None
         self._last_preview_at: Optional[float] = None
         self._last_preview_error_text: Optional[str] = None
@@ -213,6 +214,10 @@ class NAILauncherBridgeDocker(DockWidget):
             self._syncing_numeric_controls = False
 
     def canvasChanged(self, canvas) -> None:
+        if (self._active_request_id is not None
+                and canvas_io.active_document() != self._request_document):
+            canvas_io.remove_preview_layer()
+            self._last_preview_at = None
         self._update_buttons()
 
     def _connect_signals(self) -> None:
@@ -365,6 +370,10 @@ class NAILauncherBridgeDocker(DockWidget):
         progress = float(message.get("progress", 0.0))
         self._progress.setValue(max(0, min(100, int(progress * 100))))
         if "preview_image" in message:
+            if (self._request_document is None
+                    or canvas_io.active_document() != self._request_document):
+                self._set_status(status_text)
+                return
             now = time.monotonic()
             if (
                 self._last_preview_at is None
@@ -541,6 +550,7 @@ class NAILauncherBridgeDocker(DockWidget):
 
     def _start_request(self, request_id: str) -> None:
         self._active_request_id = request_id
+        self._request_document = canvas_io.active_document()
         self._last_preview_at = None
         self._preview_frame_count = 0
         self._progress.setValue(0)
@@ -552,6 +562,7 @@ class NAILauncherBridgeDocker(DockWidget):
         if clear_preview:
             canvas_io.remove_preview_layer()
         self._active_request_id = None
+        self._request_document = None
         self._progress.setVisible(False)
         self._update_buttons()
 

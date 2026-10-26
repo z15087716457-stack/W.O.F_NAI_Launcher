@@ -42,6 +42,7 @@ class BulkProgressDialog extends ConsumerStatefulWidget {
 }
 
 class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
+  var _cancelling = false;
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -209,7 +210,7 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
       actions: [
         if (state.isOperationInProgress)
           TextButton(
-            onPressed: () => _handleCancel(context),
+            onPressed: _cancelling ? null : () => _handleCancel(context),
             child: Text(l10n.common_cancel),
           )
         else if (state.hasError || state.isCompleted)
@@ -368,7 +369,16 @@ class _BulkProgressDialogState extends ConsumerState<BulkProgressDialog> {
   }
 
   /// Handle cancel operation
-  void _handleCancel(BuildContext context) {
+  Future<void> _handleCancel(BuildContext context) async {
+    if (_cancelling) return;
+    if (ref.read(bulkOperationNotifierProvider).currentOperation ==
+        BulkOperationType.metadataEdit) {
+      setState(() => _cancelling = true);
+      await ref
+          .read(bulkOperationNotifierProvider.notifier)
+          .cancelMetadataEdit();
+      if (!context.mounted) return;
+    }
     Navigator.of(context).pop(false);
   }
 }

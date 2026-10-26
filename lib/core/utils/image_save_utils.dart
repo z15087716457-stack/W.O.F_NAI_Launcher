@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:image/image.dart' as img;
 import 'package:path/path.dart' as p;
 
 import '../../data/models/gallery/nai_image_metadata.dart';
@@ -325,14 +324,40 @@ class ImageSaveUtils {
     required int height,
   }) async {
     if (hasEmbeddedNovelAiMetadata(imageBytes)) return imageBytes;
-    final source = _extractEmbeddedPngMetadata(sourceBytes);
-    if (source == null) return imageBytes;
+    final parsed = UnifiedMetadataParser.parseFromImageBytes(sourceBytes);
+    if (!parsed.success ||
+        parsed.sourceFormat?.toLowerCase().contains('novelai') != true) {
+      return imageBytes;
+    }
+    final source = parsed.metadata!;
+    final raw = _tryDecodeJsonMap(source.rawJson ?? '');
+    if (raw == null) {
+      throw const FormatException('NovelAI metadata has no JSON payload');
+    }
+    // 更新信封内的实际参数，保留信封形状、未知字段、角色和参考数据。
+    final key = raw.containsKey('prompt')
+        ? null
+        : raw.containsKey('params')
+        ? 'params'
+        : 'Comment';
+    final value = key == null ? raw : raw[key];
+    final parameters = value is String
+        ? jsonDecode(value) as Map<String, dynamic>
+        : Map<String, dynamic>.from(value as Map);
+    final resized = {...parameters, 'width': width, 'height': height};
+    final commentJson = key == null
+        ? resized
+        : {...raw, key: value is String ? jsonEncode(resized) : resized};
     return _embedNaiAlignedMetadata(
       imageBytes: imageBytes,
-      commentJson: {...source.commentJson, 'width': width, 'height': height},
-      description: source.description,
-      software: source.software,
-      source: source.source,
+      commentJson: commentJson,
+      description:
+          _extractEmbeddedPngMetadata(sourceBytes)?.description ??
+          raw['Description'] as String? ??
+          raw['description'] as String? ??
+          source.prompt,
+      software: source.software ?? 'NovelAI',
+      source: source.source ?? 'NovelAI',
       useStealth: false,
     );
   }
@@ -443,13 +468,7 @@ class ImageSaveUtils {
     }
 
     try {
-      final decoder = img.PngDecoder();
-      final info = decoder.startDecode(bytes);
-      if (info is! img.PngInfo) {
-        return null;
-      }
-
-      final textData = info.textData;
+      final textData = UnifiedMetadataParser.extractPngTextData(bytes);
       final rawComment = textData['Comment'];
       if (rawComment == null || rawComment.isEmpty) {
         return null;

@@ -306,7 +306,7 @@ class DanbooruTagDataSource extends BaseDataSource {
   ///
   /// 使用新架构：ConnectionLease 连接生命周期管理
   Future<void> _ensureTableExists() async {
-    await _leaseHelper.execute('ensureTableExists', (db) async {
+    await _leaseHelper.executeWrite('ensureTableExists', (db) async {
       // 验证表是否存在
       final result = await db.rawQuery(
         "SELECT name FROM sqlite_master WHERE type='table' AND name=?",
@@ -494,7 +494,7 @@ class DanbooruTagDataSource extends BaseDataSource {
   Future<void> upsertBatch(List<DanbooruTagRecord> records) async {
     if (records.isEmpty) return;
 
-    await _leaseHelper.execute('upsertBatch', (db) async {
+    await _leaseHelper.executeWrite('upsertBatch', (db) async {
       final batch = db.batch();
 
       for (final record in records) {

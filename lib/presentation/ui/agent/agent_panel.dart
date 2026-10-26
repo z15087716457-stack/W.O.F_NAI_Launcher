@@ -64,10 +64,12 @@ class _AgentPanelState extends State<AgentPanel> {
   void dispose() {
     _toastTimer?.cancel();
     _undoTimer?.cancel();
+    _dismissConfirm?.call(rebuild: false);
     super.dispose();
   }
 
   void _showToast(String text) {
+    if (!mounted) return;
     _toastTimer?.cancel();
     setState(() => _toast = text);
     _toastTimer = Timer(const Duration(milliseconds: 1600), () {
@@ -76,6 +78,7 @@ class _AgentPanelState extends State<AgentPanel> {
   }
 
   void _showUndo(String text, Future<bool> Function() onUndo) {
+    if (!mounted) return;
     _undoTimer?.cancel();
     setState(() => _undo = (text, onUndo));
     _undoTimer = Timer(const Duration(seconds: 6), () {
@@ -99,10 +102,10 @@ class _AgentPanelState extends State<AgentPanel> {
     String? optOut,
   }) {
     final done = Completer<(bool,)?>();
-    void finish((bool,)? v) {
+    void finish((bool,)? v, {bool rebuild = true}) {
       _dismissConfirm = null;
       if (!done.isCompleted) done.complete(v);
-      if (mounted) setState(() => _dialog = null);
+      if (mounted && rebuild) setState(() => _dialog = null);
     }
 
     _openDialog(
@@ -115,17 +118,19 @@ class _AgentPanelState extends State<AgentPanel> {
         onDone: finish,
       ),
     );
-    _dismissConfirm = () => finish(null);
+    _dismissConfirm = ({bool rebuild = true}) => finish(null, rebuild: rebuild);
     return done.future;
   }
 
-  VoidCallback? _dismissConfirm;
+  void Function({bool rebuild})? _dismissConfirm;
 
-  void _openDialog(WidgetBuilder builder, {bool contained = true}) =>
-      setState(() {
-        _dialogContained = contained;
-        _dialog = builder;
-      });
+  void _openDialog(WidgetBuilder builder, {bool contained = true}) {
+    _dismissConfirm?.call(rebuild: false);
+    setState(() {
+      _dialogContained = contained;
+      _dialog = builder;
+    });
+  }
 
   Future<void> _run(Future<bool> Function() action) async {
     var ok = false;

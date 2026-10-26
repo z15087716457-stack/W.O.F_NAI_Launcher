@@ -114,7 +114,7 @@ class DroppedFileReader {
       contentDisposition,
     );
     final uriFileName = uri.pathSegments.isNotEmpty
-        ? Uri.decodeComponent(uri.pathSegments.last)
+        ? uri.pathSegments.last
         : null;
     var fileName = _sanitizeFileName(
       dispositionFileName?.trim().isNotEmpty == true
@@ -383,7 +383,7 @@ class DroppedFileReader {
     }
 
     final fileNameFromUri = uri.pathSegments.isNotEmpty
-        ? Uri.decodeComponent(uri.pathSegments.last)
+        ? uri.pathSegments.last
         : '';
     final fileNameFromDisposition = _extractContentDispositionFileName(
       contentDisposition,

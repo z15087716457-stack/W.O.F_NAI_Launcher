@@ -3,7 +3,7 @@ part of 'gallery_data_source.dart';
 mixin GalleryDataSourceSchema on EnhancedBaseDataSource {
   @override
   Future<void> doInitialize() async {
-    return await execute('doInitialize', (db) async {
+    return await executeWrite('doInitialize', (db) async {
       await _createImagesTable(db);
       await _createMetadataTable(db);
       await _createFavoritesTable(db);

@@ -395,10 +395,12 @@ class ThumbnailCacheService {
     final thumbnailPath = _getThumbnailPath(originalPath, size: size);
     final file = File(thumbnailPath);
 
-    if (await file.exists()) {
+    final cachedStat = await file.stat();
+    if (cachedStat.type == FileSystemEntityType.file &&
+        _isCurrentThumbnail(cachedStat, await File(originalPath).stat())) {
       _stats.recordHit();
       // 记录访问时间用于 LRU
-      _lastAccessTimes[thumbnailPath] = DateTime.now();
+      _lastAccessTimes[galleryFilePathKey(thumbnailPath)] = DateTime.now();
       // AppLogger.d('Thumbnail cache HIT: $thumbnailPath', 'ThumbnailCache');
       return thumbnailPath;
     }
@@ -419,15 +421,21 @@ class ThumbnailCacheService {
     final thumbnailPath = _getThumbnailPath(originalPath, size: size);
     final file = File(thumbnailPath);
 
-    if (file.existsSync()) {
+    final cachedStat = file.statSync();
+    if (cachedStat.type == FileSystemEntityType.file &&
+        _isCurrentThumbnail(cachedStat, File(originalPath).statSync())) {
       _stats.recordHit();
-      _lastAccessTimes[thumbnailPath] = DateTime.now();
+      _lastAccessTimes[galleryFilePathKey(thumbnailPath)] = DateTime.now();
       return thumbnailPath;
     }
 
     _stats.recordMiss();
     return null;
   }
+
+  static bool _isCurrentThumbnail(FileStat cached, FileStat original) =>
+      original.type == FileSystemEntityType.file &&
+      !original.modified.isAfter(cached.modified);
 
   /// 异步获取或生成缩略图
   ///
@@ -488,7 +496,6 @@ class ThumbnailCacheService {
     }
 
     final key = ThumbnailTaskKey(originalPath, size);
-    final thumbnailPath = _getThumbnailPath(originalPath, size: size);
 
     // 检查是否已在生成中或排队中
     if (_generationCompleters.containsKey(key)) {
@@ -498,11 +505,11 @@ class ThumbnailCacheService {
     }
 
     // 检查是否已存在（可能在等待期间其他任务已生成）
-    final file = File(thumbnailPath);
-    if (await file.exists()) {
-      _stats.recordHit();
-      return thumbnailPath;
-    }
+    final cached = await getThumbnailPath(originalPath, size: size);
+    if (cached != null) return cached;
+
+    // 文件检查期间可能已有另一个请求登记了本任务。
+    if (_generationCompleters.containsKey(key)) return _waitForGeneration(key);
 
     // 如果并发数已达上限，加入队列
     if (_activeGenerationCount >= maxConcurrentGenerations) {
@@ -704,12 +711,13 @@ class ThumbnailCacheService {
     required bool isVisible,
     int priority = 1,
   }) {
-    final info = _visibilityInfo[originalPath];
+    final sourceKey = galleryFilePathKey(originalPath);
+    final info = _visibilityInfo[sourceKey];
     if (info != null) {
       info.isVisible = isVisible;
       info.priority = isVisible ? priority : 5;
     } else {
-      _visibilityInfo[originalPath] = _VisibilityInfo(
+      _visibilityInfo[sourceKey] = _VisibilityInfo(
         isVisible: isVisible,
         priority: isVisible ? priority : 5,
       );
@@ -718,7 +726,7 @@ class ThumbnailCacheService {
     // 如果有相关任务在队列中，重新排序
     bool needsReorder = false;
     for (final task in _taskQueue) {
-      if (task.originalPath == originalPath) {
+      if (galleryFilePathsEqual(task.originalPath, originalPath)) {
         needsReorder = true;
         break;
       }
@@ -829,7 +837,10 @@ class ThumbnailCacheService {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
             // 收集要删除的文件路径
-            await for (final file in entity.list(recursive: true)) {
+            await for (final file in entity.list(
+              recursive: true,
+              followLinks: false,
+            )) {
               if (file is File) {
                 deletedPaths.add(file.path);
               }
@@ -848,7 +859,7 @@ class ThumbnailCacheService {
       } else {
         // 只删除已不存在的文件的访问记录
         for (final path in deletedPaths) {
-          _lastAccessTimes.remove(path);
+          _lastAccessTimes.remove(galleryFilePathKey(path));
         }
       }
 
@@ -875,6 +886,7 @@ class ThumbnailCacheService {
       if (!await rootDir.exists()) {
         return 0;
       }
+      final resolvedRoot = await rootDir.resolveSymbolicLinks();
 
       int deletedCount = 0;
 
@@ -885,13 +897,22 @@ class ThumbnailCacheService {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
-            await for (final file in entity.list(recursive: true)) {
+            await for (final file in entity.list(
+              recursive: true,
+              followLinks: false,
+            )) {
               if (file is File) {
                 try {
                   final stat = await file.stat();
                   if (stat.modified.isBefore(before)) {
+                    if (!p.isWithin(
+                      resolvedRoot,
+                      await file.resolveSymbolicLinks(),
+                    )) {
+                      continue;
+                    }
                     await file.delete();
-                    _lastAccessTimes.remove(file.path);
+                    _lastAccessTimes.remove(galleryFilePathKey(file.path));
                     deletedCount++;
                   }
                 } catch (_) {
@@ -1043,7 +1064,10 @@ class ThumbnailCacheService {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
-            await for (final file in entity.list(recursive: true)) {
+            await for (final file in entity.list(
+              recursive: true,
+              followLinks: false,
+            )) {
               if (file is File) {
                 fileCount++;
                 totalSize += await file.length();
@@ -1072,17 +1096,14 @@ class ThumbnailCacheService {
     }
   }
 
-  /// 检查缩略图是否存在（同步版本，仅用于快速检查）
+  /// 检查是否已有可用缩略图（同步版本，仅用于快速检查）
   ///
   /// 警告：此方法是同步的，如果在主线程频繁调用可能阻塞 UI。
   /// 推荐使用 [thumbnailExistsAsync] 进行异步检查。
   bool thumbnailExists(
     String originalPath, {
     ThumbnailSize size = defaultSize,
-  }) {
-    final thumbnailPath = _getThumbnailPath(originalPath, size: size);
-    return File(thumbnailPath).existsSync();
-  }
+  }) => getThumbnailPathSync(originalPath, size: size) != null;
 
   /// 异步检查缩略图是否存在
   ///
@@ -1091,8 +1112,7 @@ class ThumbnailCacheService {
     String originalPath, {
     ThumbnailSize size = defaultSize,
   }) async {
-    final thumbnailPath = _getThumbnailPath(originalPath, size: size);
-    return await File(thumbnailPath).exists();
+    return await getThumbnailPath(originalPath, size: size) != null;
   }
 
   /// 判断路径是否是可安全删除的缩略图缓存文件（目录名 + 扩展名双重校验）
@@ -1133,6 +1153,7 @@ class ThumbnailCacheService {
       if (allThumbnails.isEmpty) {
         return ThumbnailEvictionResult.empty;
       }
+      final resolvedRoot = await Directory(rootPath).resolveSymbolicLinks();
 
       // 计算当前缓存状态（按字节累计，避免逐文件按 MB 截断导致多删）
       var currentBytes = 0;
@@ -1163,12 +1184,14 @@ class ThumbnailCacheService {
 
         // 然后比较优先级
         if (a.visibilityPriority != b.visibilityPriority) {
-          return a.visibilityPriority.compareTo(b.visibilityPriority);
+          return b.visibilityPriority.compareTo(a.visibilityPriority);
         }
 
         // 最后比较访问时间
-        final aTime = _lastAccessTimes[a.path] ?? a.createdAt;
-        final bTime = _lastAccessTimes[b.path] ?? b.createdAt;
+        final aTime =
+            _lastAccessTimes[galleryFilePathKey(a.path)] ?? a.createdAt;
+        final bTime =
+            _lastAccessTimes[galleryFilePathKey(b.path)] ?? b.createdAt;
         return aTime.compareTo(bTime);
       });
 
@@ -1189,12 +1212,16 @@ class ThumbnailCacheService {
 
         try {
           final file = File(info.path);
+          final resolvedPath = await file.resolveSymbolicLinks();
+          if (!p.isWithin(resolvedRoot, resolvedPath) ||
+              !isDeletableThumbnailFile(resolvedPath)) {
+            continue;
+          }
           final fileSize = await file.length();
           await file.delete();
           evictedBytes += fileSize;
           evictedCount++;
-          _lastAccessTimes.remove(info.path);
-          _visibilityInfo.remove(info.path);
+          _lastAccessTimes.remove(galleryFilePathKey(info.path));
         } catch (e) {
           // AppLogger.w('Failed to evict thumbnail: ${info.path}', 'ThumbnailCache');
         }
@@ -1229,7 +1256,10 @@ class ThumbnailCacheService {
         if (entity is Directory) {
           final dirName = entity.path.split(Platform.pathSeparator).last;
           if (dirName == thumbsDirName) {
-            await for (final file in entity.list(recursive: true)) {
+            await for (final file in entity.list(
+              recursive: true,
+              followLinks: false,
+            )) {
               if (file is File && isDeletableThumbnailFile(file.path)) {
                 try {
                   final stat = await file.stat();
@@ -1237,13 +1267,22 @@ class ThumbnailCacheService {
                   // 解析尺寸类型
                   ThumbnailSize size = ThumbnailSize.small;
                   for (final s in ThumbnailSize.values) {
-                    if (file.path.contains(s.fileSuffix)) {
+                    if (file.path.endsWith('${s.fileSuffix}$thumbnailExt')) {
                       size = s;
                       break;
                     }
                   }
 
-                  final visibility = _visibilityInfo[file.path];
+                  final suffix = '${size.fileSuffix}$thumbnailExt';
+                  final name = p.basename(file.path);
+                  final sourceName = name.endsWith(suffix)
+                      ? name.substring(0, name.length - suffix.length)
+                      : null;
+                  final visibility = sourceName == null
+                      ? null
+                      : _visibilityInfo[galleryFilePathKey(
+                          p.join(entity.parent.path, sourceName),
+                        )];
 
                   thumbnails.add(
                     ThumbnailInfo(
@@ -1253,7 +1292,8 @@ class ThumbnailCacheService {
                       createdAt: stat.modified,
                       size: size,
                       lastAccessedAt:
-                          _lastAccessTimes[file.path] ?? stat.accessed,
+                          _lastAccessTimes[galleryFilePathKey(file.path)] ??
+                          stat.accessed,
                       accessCount: 1,
                       isVisible: visibility?.isVisible ?? false,
                       visibilityPriority: visibility?.priority ?? 5,
@@ -1416,12 +1456,8 @@ class ThumbnailCacheService {
       throw ArgumentError('Invalid path: originalFileName cannot be empty');
     }
 
-    // 移除原始扩展名，添加尺寸标识和缩略图扩展名
-    final dotIndex = originalFileName.lastIndexOf('.');
-    final baseName = dotIndex > 0
-        ? originalFileName.substring(0, dotIndex)
-        : originalFileName;
-    return '$baseName${size.fileSuffix}$thumbnailExt';
+    // 完整文件名区分同名 PNG / JPEG；旧的无扩展名缓存不再用于命中。
+    return '$originalFileName${size.fileSuffix}$thumbnailExt';
   }
 
   @visibleForTesting
@@ -1459,7 +1495,8 @@ class _ThumbnailTask {
   /// 获取有效优先级（考虑可见性）
   int get effectivePriority {
     final service = ThumbnailCacheService.instance;
-    final visibility = service._visibilityInfo[originalPath];
+    final visibility =
+        service._visibilityInfo[galleryFilePathKey(originalPath)];
     if (visibility != null && visibility.isVisible) {
       return visibility.priority;
     }
@@ -1551,6 +1588,8 @@ Map<String, Object?> _generateThumbnailBytesInIsolate(
     thumbWidth = (targetHeight * aspectRatio).round();
   }
 
+  thumbWidth = math.max(1, thumbWidth);
+  thumbHeight = math.max(1, thumbHeight);
   final thumbnail = img.copyResize(
     originalImage,
     width: thumbWidth,

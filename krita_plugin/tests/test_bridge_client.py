@@ -110,6 +110,117 @@ def _load_bridge_client():
     return module
 
 
+class FakeNativeSocket:
+    instances = []
+
+    def __init__(self):
+        self.connected = FakeSignal()
+        self.disconnected = FakeSignal()
+        self.textMessageReceived = FakeSignal()
+        self.error = FakeSignal()
+        self.sent = []
+        self.closed = False
+        self.instances.append(self)
+
+    def open(self, _url):
+        self.connected.emit()
+
+    def sendTextMessage(self, text):
+        self.sent.append(text)
+
+    def errorString(self):
+        return 'fixture transport error'
+
+    def close(self):
+        self.closed = True
+        self.disconnected.emit()
+
+    def deleteLater(self):
+        pass
+
+
+class BridgeTransportOwnershipTests(unittest.TestCase):
+    def connect(self, native):
+        module = _load_bridge_client()
+        if native:
+            FakeNativeSocket.instances.clear()
+            module.QWebSocket = FakeNativeSocket
+        client = module.BridgeClient()
+        statuses, messages, connected = [], [], []
+        client.status_changed.connect(statuses.append)
+        client.message_received.connect(messages.append)
+        client.connected_changed.connect(connected.append)
+        client.start()
+        instances = FakeNativeSocket.instances if native else FakeFallbackSocket.instances
+        return client, instances, statuses, messages, connected
+
+    def emit_all(self, socket, native):
+        if native:
+            socket.connected.emit()
+            socket.textMessageReceived.emit('{"type":"pong","version":99}')
+            socket.textMessageReceived.emit('{"type":"progress","id":"old"}')
+            socket.error.emit(1)
+            socket.disconnected.emit()
+        else:
+            socket.on_connected()
+            socket.on_text_message('{"type":"pong","version":99}')
+            socket.on_text_message('{"type":"progress","id":"old"}')
+            socket.on_error('old transport error')
+            socket.on_disconnected()
+
+    def pong(self, socket, native):
+        text = '{"type":"pong","version":1}'
+        if native:
+            socket.textMessageReceived.emit(text)
+        else:
+            socket.on_text_message(text)
+
+    def test_previous_transport_callbacks_do_not_touch_authenticated_replacement(self):
+        for native in (False, True):
+            with self.subTest(native=native):
+                client, instances, statuses, messages, connected = self.connect(native)
+                old = instances[-1]
+                client._retry_timer.timeout.emit()
+                current = instances[-1]
+                self.assertIsNot(old, current)
+                self.pong(current, native)
+                before = (list(statuses), list(current.sent), list(connected))
+                self.emit_all(old, native)
+                self.assertTrue(client.is_connected)
+                self.assertFalse(current.closed)
+                self.assertEqual((statuses, current.sent, connected), before)
+                self.assertEqual(messages, [])
+                self.assertTrue(client.send_text('current message'))
+
+    def test_stop_retires_all_callbacks_including_late_pong(self):
+        for native in (False, True):
+            with self.subTest(native=native):
+                client, instances, statuses, messages, connected = self.connect(native)
+                old = instances[-1]
+                self.pong(old, native)
+                client.stop()
+                before = (list(statuses), list(connected))
+                self.emit_all(old, native)
+                self.pong(old, native)
+                self.assertFalse(client.is_connected)
+                self.assertEqual((statuses, connected), before)
+                self.assertEqual(messages, [])
+
+    def test_current_transport_disconnect_still_disables_sending(self):
+        for native in (False, True):
+            with self.subTest(native=native):
+                client, instances, _, _, connected = self.connect(native)
+                current = instances[-1]
+                self.pong(current, native)
+                if native:
+                    current.disconnected.emit()
+                else:
+                    current.on_disconnected()
+                self.assertFalse(client.is_connected)
+                self.assertFalse(client.send_text('not sent'))
+                self.assertEqual(connected, [True, False])
+
+
 class BridgeClientFallbackTests(unittest.TestCase):
     def test_fallback_connection_uses_signals_for_handshake_and_messages(self):
         bridge_client = _load_bridge_client()
