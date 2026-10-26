@@ -15325,7 +15325,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '$times requests, $total images (scroll to adjust)';
+    return '$times requests, $total images · Hold and drag horizontally to adjust';
   }
 
   @override
@@ -22178,4 +22178,100 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_historyChanges => 'Change summary';
+
+  @override
+  String get gen_translateTapOriginal => 'Tap: show original';
+
+  @override
+  String get gen_translateTapTranslated => 'Tap: show translation';
+
+  @override
+  String get gen_translateClearRestore =>
+      'Clear translation blocks and restore';
+
+  @override
+  String get gen_translateClearRestoreSub =>
+      'Return to plain source text; undo available';
+
+  @override
+  String get gen_translateCleared =>
+      'Translation blocks restored to source text';
+
+  @override
+  String get gen_translateAdjust => 'Continue translation adjustment';
+
+  @override
+  String get gen_translateAdjustSub =>
+      'Continue this translation: split, retranslate, merge';
+
+  @override
+  String get gen_translateAdjustTitle => 'Translation adjustment';
+
+  @override
+  String gen_translateAdjustContext(int count) {
+    return 'Continuing this translation · $count blocks';
+  }
+
+  @override
+  String gen_translateAdjustSelected(int count) {
+    return '$count blocks selected';
+  }
+
+  @override
+  String get gen_translateAdjustCollapse => 'Collapse / expand';
+
+  @override
+  String get gen_translateAdjustIntro =>
+      'Continue from this translation. Click blocks on the left to reference them. Edits can be undone.';
+
+  @override
+  String get gen_translateAdjustSplit => 'Split again';
+
+  @override
+  String get gen_translateAdjustRetranslate => 'Retranslate selected';
+
+  @override
+  String get gen_translateAdjustMerge => 'Merge selected';
+
+  @override
+  String get gen_translateAdjustSplitTemplate =>
+      'Read current blocks and split referenced blocks into finer semantic units. Preserve exact source.';
+
+  @override
+  String get gen_translateAdjustRetranslateTemplate =>
+      'Read current blocks and retranslate referenced blocks without changing source.';
+
+  @override
+  String get gen_translateAdjustMergeTemplate =>
+      'Read current blocks and merge referenced blocks in the requested source order. Leave unrelated blocks unchanged.';
+
+  @override
+  String get gen_translateAdjustMarkers =>
+      'Use markers from translation_blocks_read.';
+
+  @override
+  String get gen_translateAdjustHint => 'Describe how to adjust blocks…';
+
+  @override
+  String get gen_translateAdjustStartFailed =>
+      'Could not start adjustment. Check the model and Agent runtime.';
+
+  @override
+  String get gen_translateAdjustRunFailed =>
+      'Adjustment stopped or failed. Read current blocks before retrying.';
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times requests · $total images';
+  }
+
+  @override
+  String get set_cvGroupBatches => 'Group batch results';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.';
+
+  @override
+  String get gen_groupBatches => 'Group';
 }

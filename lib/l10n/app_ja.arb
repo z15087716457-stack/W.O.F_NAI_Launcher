@@ -8299,7 +8299,7 @@
   "gen_countTip": "1 回のリクエストの枚数（1–4）",
   "gen_repeat": "繰り返し",
   "gen_repeatTip": "連続で送るリクエスト数",
-  "gen_repeatTotal": "{times} 回、計 {total} 枚（ホイールでも調整可）",
+  "gen_repeatTotal": "{times} 回、計 {total} 枚 · 押したまま左右にドラッグして調整",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11899,5 +11899,55 @@
   "ag_historyPositions": "キャラクター位置",
   "ag_historySettings": "設定の変更",
   "ag_historyGallery": "ギャラリーカード",
-  "ag_historyChanges": "変更の要約"
+  "ag_historyChanges": "変更の要約",
+  "gen_translateTapOriginal": "クリック：原文を表示",
+  "gen_translateTapTranslated": "クリック：訳文を表示",
+  "gen_translateClearRestore": "翻訳ブロックを解除して原文に戻す",
+  "gen_translateClearRestoreSub": "通常の原文に戻します。元に戻せます",
+  "gen_translateCleared": "翻訳ブロックを原文に戻しました",
+  "gen_translateAdjust": "続けて翻訳を調整",
+  "gen_translateAdjustSub": "この翻訳を続けて、分割・再翻訳・結合",
+  "gen_translateAdjustTitle": "翻訳の調整",
+  "gen_translateAdjustContext": "この翻訳を継続 · {count} ブロック",
+  "@gen_translateAdjustContext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustSelected": "{count} ブロックを選択",
+  "@gen_translateAdjustSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustCollapse": "折りたたむ / 展開",
+  "gen_translateAdjustIntro": "この翻訳を続けます。左のブロックをクリックして参照できます。変更は元に戻せます。",
+  "gen_translateAdjustSplit": "再分割",
+  "gen_translateAdjustRetranslate": "選択を再翻訳",
+  "gen_translateAdjustMerge": "選択を結合",
+  "gen_translateAdjustSplitTemplate": "現在のブロックを読み、参照ブロックを意味ごとに細分化し、原文を保持してください。",
+  "gen_translateAdjustRetranslateTemplate": "現在のブロックを読み、原文を変えずに参照ブロックを再翻訳してください。",
+  "gen_translateAdjustMergeTemplate": "現在のブロックを読み、参照ブロックを指定の原文順に結合し、無関係なブロックは保持してください。",
+  "gen_translateAdjustMarkers": "translation_blocks_read の marker 一覧を使用してください。",
+  "gen_translateAdjustHint": "ブロックの調整方法を入力…",
+  "gen_translateAdjustStartFailed": "調整を開始できません。モデルと Agent ランタイムを確認してください。",
+  "gen_translateAdjustRunFailed": "調整が中断または失敗しました。再試行前にブロックを読み直してください。",
+  "gen_repeatDragTotal": "{times} 回 · 計 {total} 枚",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_cvGroupBatches": "一括生成の結果をグループ化",
+  "set_cvGroupBatchesSub": "オフの場合は画像を1枚ずつ表示し、履歴のサムネイルでその画像を選べます。シンプルビューアーのみに適用され、無限キャンバスでは常にバッチごとに配置します。",
+  "gen_groupBatches": "グループ"
 }

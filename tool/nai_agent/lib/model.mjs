@@ -100,7 +100,7 @@ export function redactor(config) {
   };
 }
 
-export async function createStudioModelRuntime(config, { acquireRequest } = {}) {
+export async function createStudioModelRuntime(config, { acquireRequest, transformContext } = {}) {
   const spec = adapters[config.protocol];
   if (!spec || !config.modelId?.trim() || !config.providerId?.trim())
     throw new Error('Missing model or unsupported protocol');
@@ -134,7 +134,7 @@ export async function createStudioModelRuntime(config, { acquireRequest } = {}) 
       (config.timeoutSeconds ?? 120) * 1000);
     const signal = options.signal ? AbortSignal.any([options.signal, timeout.signal]) : timeout.signal;
     try {
-      const stream = adapter[method](current, context, {
+      const stream = adapter[method](current, transformContext ? transformContext(context) : context, {
         ...options, apiKey: config.apiKey || 'studio-header-auth', signal,
         maxTokens: Math.min(options.maxTokens ?? model.maxTokens, model.maxTokens),
         ...(config.allowsSampling === false ? { temperature: undefined }

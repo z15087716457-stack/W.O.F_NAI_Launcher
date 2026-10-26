@@ -16,6 +16,7 @@ class UiMenuItem {
     this.divider = false,
     this.checked = false,
     this.trailing,
+    this.subtitle,
     this.enabled = true,
     this.indent = 0,
     this.leading,
@@ -34,6 +35,7 @@ class UiMenuItem {
   /// 当前选中项（右侧打勾）。
   final bool checked;
   final String? trailing;
+  final String? subtitle;
   final bool enabled;
 
   /// 子项缩进（分类树）。
@@ -102,7 +104,7 @@ class UiMenu extends StatelessWidget {
                           ? c.error
                           : c.ink;
                       return Container(
-                        height: 34,
+                        height: it.subtitle == null ? 34 : 52,
                         padding: EdgeInsets.only(
                           left: 10 + it.indent,
                           right: 10,
@@ -123,17 +125,33 @@ class UiMenu extends StatelessWidget {
                             else
                               ?it.leading,
                             Expanded(
-                              child: Text(
-                                it.label,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: UiText.sans(
-                                  13,
-                                  color: fg,
-                                  weight: it.checked
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    it.label,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: UiText.sans(
+                                      13,
+                                      color: fg,
+                                      weight: it.checked
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                  if (it.subtitle != null)
+                                    Text(
+                                      it.subtitle!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: UiText.sans(
+                                        10,
+                                        color: it.enabled ? c.muted : c.faint,
+                                      ),
+                                    ),
+                                ],
                               ),
                             ),
                             if (it.trailing != null)

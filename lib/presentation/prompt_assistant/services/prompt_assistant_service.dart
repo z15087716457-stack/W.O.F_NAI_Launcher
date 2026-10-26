@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../core/nai_agent/translation_context.dart';
 import 'package:crypto/crypto.dart';
 
 import 'package:collection/collection.dart';
@@ -295,6 +296,10 @@ Copy every field ID and every segment ID exactly once, in input order. Do not
 return source text, Markdown, code fences or comments.
 ''';
 
+  final Map<String, TranslationExchange> _translationExchanges = {};
+  TranslationExchange? takeTranslationExchange(String sessionId) =>
+      _translationExchanges.remove(sessionId);
+
   Future<String> translatePromptGroup(
     String requestJson, {
     required String sessionId,
@@ -305,6 +310,12 @@ return source text, Markdown, code fences or comments.
     if (_draftRequests[sessionId] == true) {
       throw StateError(currentL10n.modelService_conversionCancelled);
     }
+    _translationExchanges.remove(sessionId);
+    final system = _promptFor(
+      LauncherInterface.translate,
+      promptTranslationSystemPrompt,
+    );
+    final request = _withLanguage(requestJson, LauncherInterface.translate);
     final output = StringBuffer();
     await for (final chunk in _apiClient.complete(
       request: PromptAssistantRequest(
@@ -312,22 +323,28 @@ return source text, Markdown, code fences or comments.
         provider: execution.provider,
         model: execution.model,
         modelConfig: execution.modelConfig,
-        systemPrompt: _promptFor(
-          LauncherInterface.translate,
-          promptTranslationSystemPrompt,
-        ),
+        systemPrompt: system,
         taskName: LauncherInterface.translate.title,
-        userParts: [
-          PromptAssistantContentPart.text(
-            _withLanguage(requestJson, LauncherInterface.translate),
-          ),
-        ],
+        userParts: [PromptAssistantContentPart.text(request)],
         apiKey: execution.apiKey,
       ),
     )) {
       output.write(chunk.delta);
     }
-    return output.toString();
+    final raw = output.toString();
+    // Only generation-face translations can open an adjustment session. Do not
+    // retain every read-only detail translation in this long-lived service.
+    if (sessionId == 'prompt-translation-pos' ||
+        sessionId == 'prompt-translation-neg') {
+      _translationExchanges[sessionId] = TranslationExchange(
+        system: system,
+        request: request,
+        raw: raw,
+        providerId: execution.provider.id,
+        modelId: execution.model,
+      );
+    }
+    return raw;
   }
 
   Future<void> cancelCurrentTask({String? sessionId}) async {

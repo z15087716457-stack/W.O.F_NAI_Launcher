@@ -8299,7 +8299,7 @@
   "gen_countTip": "Images per request (1–4)",
   "gen_repeat": "Repeat",
   "gen_repeatTip": "How many requests to send in a row",
-  "gen_repeatTotal": "{times} requests, {total} images (scroll to adjust)",
+  "gen_repeatTotal": "{times} requests, {total} images · Hold and drag horizontally to adjust",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11901,5 +11901,55 @@
   "ag_historyPositions": "Character positions",
   "ag_historySettings": "Settings changes",
   "ag_historyGallery": "Gallery card",
-  "ag_historyChanges": "Change summary"
+  "ag_historyChanges": "Change summary",
+  "gen_translateTapOriginal": "Tap: show original",
+  "gen_translateTapTranslated": "Tap: show translation",
+  "gen_translateClearRestore": "Clear translation blocks and restore",
+  "gen_translateClearRestoreSub": "Return to plain source text; undo available",
+  "gen_translateCleared": "Translation blocks restored to source text",
+  "gen_translateAdjust": "Continue translation adjustment",
+  "gen_translateAdjustSub": "Continue this translation: split, retranslate, merge",
+  "gen_translateAdjustTitle": "Translation adjustment",
+  "gen_translateAdjustContext": "Continuing this translation · {count} blocks",
+  "@gen_translateAdjustContext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustSelected": "{count} blocks selected",
+  "@gen_translateAdjustSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustCollapse": "Collapse / expand",
+  "gen_translateAdjustIntro": "Continue from this translation. Click blocks on the left to reference them. Edits can be undone.",
+  "gen_translateAdjustSplit": "Split again",
+  "gen_translateAdjustRetranslate": "Retranslate selected",
+  "gen_translateAdjustMerge": "Merge selected",
+  "gen_translateAdjustSplitTemplate": "Read current blocks and split referenced blocks into finer semantic units. Preserve exact source.",
+  "gen_translateAdjustRetranslateTemplate": "Read current blocks and retranslate referenced blocks without changing source.",
+  "gen_translateAdjustMergeTemplate": "Read current blocks and merge referenced blocks in the requested source order. Leave unrelated blocks unchanged.",
+  "gen_translateAdjustMarkers": "Use markers from translation_blocks_read.",
+  "gen_translateAdjustHint": "Describe how to adjust blocks…",
+  "gen_translateAdjustStartFailed": "Could not start adjustment. Check the model and Agent runtime.",
+  "gen_translateAdjustRunFailed": "Adjustment stopped or failed. Read current blocks before retrying.",
+  "gen_repeatDragTotal": "{times} requests · {total} images",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_cvGroupBatches": "Group batch results",
+  "set_cvGroupBatchesSub": "When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.",
+  "gen_groupBatches": "Group"
 }

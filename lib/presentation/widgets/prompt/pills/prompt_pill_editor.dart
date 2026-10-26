@@ -14,6 +14,7 @@ import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_translation_provider.dart';
+import '../../../providers/translation_adjustment_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../blocks/prompt_block_colors.dart';
 import '../blocks/prompt_block_drag_data.dart';
@@ -222,6 +223,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   @override
   Widget build(BuildContext context) {
+    ref.watch(translationReferencesProvider);
     // 块库就绪/内容变化 → 重算投影（块内容经 resolver 实时解析进投影）
     ref.listen(promptBlockLibraryNotifierProvider, (_, __) {
       ref.read(_workspace.notifier).refreshProjection();
@@ -336,6 +338,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     });
     parts.add(library == null);
     parts.add(_instanceCardMarker ?? '');
+    parts.add(ref.read(translationReferencesProvider));
     return Object.hashAll(parts);
   }
 
@@ -432,9 +435,48 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           child: draggable(handle),
         ),
       );
+      final references = ref.read(translationReferencesProvider);
+      final key = TranslationReferences.key(widget.pillScope, marker);
+      final adjusting = references.includesScope(widget.pillScope);
+      final selected = references.selected.contains(key);
+      final changed = references.changed.contains(key);
+      Widget content = translation.showOriginal ? pill : draggable(pill);
+      if (adjusting) {
+        content = GestureDetector(
+          key: ValueKey('translation-reference-$key'),
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final current = ref.read(translationReferencesProvider);
+            final selection = {...current.selected};
+            if (!selection.remove(key)) selection.add(key);
+            ref
+                .read(translationReferencesProvider.notifier)
+                .state = TranslationReferences(
+              negative: current.negative,
+              selected: selection,
+              changed: current.changed,
+            );
+          },
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: changed
+                    ? Colors.green
+                    : selected
+                    ? Colors.blue
+                    : Colors.transparent,
+                width: 1.5,
+              ),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            child: AbsorbPointer(child: content),
+          ),
+        );
+      }
       return WidgetSpan(
         alignment: PlaceholderAlignment.middle,
-        child: _withPillGap(translation.showOriginal ? pill : draggable(pill)),
+        child: _withPillGap(content),
       );
     }
 

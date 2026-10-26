@@ -14925,7 +14925,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '$times회, 총 $total장 (휠로도 조절)';
+    return '$times회, 총 $total장 · 누른 채 좌우로 드래그하여 조절';
   }
 
   @override
@@ -21496,4 +21496,96 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_historyChanges => '변경 요약';
+
+  @override
+  String get gen_translateTapOriginal => '클릭: 원문 표시';
+
+  @override
+  String get gen_translateTapTranslated => '클릭: 번역문 표시';
+
+  @override
+  String get gen_translateClearRestore => '번역 블록 해제 및 원문 복원';
+
+  @override
+  String get gen_translateClearRestoreSub => '일반 원문으로 복원하며 실행 취소 가능';
+
+  @override
+  String get gen_translateCleared => '번역 블록을 원문으로 복원했습니다';
+
+  @override
+  String get gen_translateAdjust => '추가 번역 조정';
+
+  @override
+  String get gen_translateAdjustSub => '이번 번역을 이어서 분할, 재번역, 병합';
+
+  @override
+  String get gen_translateAdjustTitle => '번역 조정';
+
+  @override
+  String gen_translateAdjustContext(int count) {
+    return '이번 번역 이어가기 · $count개 블록';
+  }
+
+  @override
+  String gen_translateAdjustSelected(int count) {
+    return '$count개 블록 선택됨';
+  }
+
+  @override
+  String get gen_translateAdjustCollapse => '접기 / 펼치기';
+
+  @override
+  String get gen_translateAdjustIntro =>
+      '이번 번역을 이어갑니다. 왼쪽 블록을 클릭해 참조하세요. 변경은 실행 취소할 수 있습니다.';
+
+  @override
+  String get gen_translateAdjustSplit => '다시 분할';
+
+  @override
+  String get gen_translateAdjustRetranslate => '선택 재번역';
+
+  @override
+  String get gen_translateAdjustMerge => '선택 병합';
+
+  @override
+  String get gen_translateAdjustSplitTemplate =>
+      '현재 블록을 읽고 참조 블록을 의미 단위로 나누세요. 정확한 원문을 보존하세요.';
+
+  @override
+  String get gen_translateAdjustRetranslateTemplate =>
+      '현재 블록을 읽고 원문을 바꾸지 않고 참조 블록을 다시 번역하세요.';
+
+  @override
+  String get gen_translateAdjustMergeTemplate =>
+      '현재 블록을 읽고 참조 블록을 지정한 원문 순서로 병합하세요. 관련 없는 블록은 유지하세요.';
+
+  @override
+  String get gen_translateAdjustMarkers =>
+      'translation_blocks_read의 marker 목록을 사용하세요.';
+
+  @override
+  String get gen_translateAdjustHint => '번역 블록 조정 방법 입력…';
+
+  @override
+  String get gen_translateAdjustStartFailed =>
+      '조정을 시작할 수 없습니다. 모델과 Agent 런타임을 확인하세요.';
+
+  @override
+  String get gen_translateAdjustRunFailed =>
+      '조정이 중단되었거나 실패했습니다. 다시 시도하기 전에 블록을 읽으세요.';
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times회 · 총 $total장';
+  }
+
+  @override
+  String get set_cvGroupBatches => '일괄 생성 결과를 그룹으로 표시';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '끄면 이미지를 한 장씩 표시하며 기록 썸네일을 클릭해 해당 이미지를 봅니다. 간단 뷰어에만 적용되며 무한 캔버스는 항상 배치별로 배치합니다.';
+
+  @override
+  String get gen_groupBatches => '그룹';
 }

@@ -8299,7 +8299,7 @@
   "gen_countTip": "一次請求出幾張（1–4）",
   "gen_repeat": "重複",
   "gen_repeatTip": "連續發幾次請求",
-  "gen_repeatTotal": "重複 {times} 次，共 {total} 張（滾輪也能調）",
+  "gen_repeatTotal": "重複 {times} 次，共 {total} 張 · 按住左右拖動調節",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11899,5 +11899,55 @@
   "ag_historyPositions": "角色位置",
   "ag_historySettings": "設定修改",
   "ag_historyGallery": "圖庫卡片",
-  "ag_historyChanges": "修改摘要"
+  "ag_historyChanges": "修改摘要",
+  "gen_translateTapOriginal": "點按：顯示原文",
+  "gen_translateTapTranslated": "點按：顯示譯文",
+  "gen_translateClearRestore": "清除翻譯塊並還原",
+  "gen_translateClearRestoreSub": "全部變回普通原文，可復原",
+  "gen_translateCleared": "已清除翻譯塊並還原原文",
+  "gen_translateAdjust": "追加翻譯調整",
+  "gen_translateAdjustSub": "接著這次翻譯聊，重切、重譯、合併塊",
+  "gen_translateAdjustTitle": "翻譯調整",
+  "gen_translateAdjustContext": "續接本次翻譯 · {count} 塊",
+  "@gen_translateAdjustContext": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustSelected": "已選 {count} 塊",
+  "@gen_translateAdjustSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustCollapse": "收起 / 展開",
+  "gen_translateAdjustIntro": "接著本次翻譯調整。點選左側翻譯塊新增引用，改塊後可以復原。",
+  "gen_translateAdjustSplit": "重新切塊",
+  "gen_translateAdjustRetranslate": "重譯選中",
+  "gen_translateAdjustMerge": "合併選中",
+  "gen_translateAdjustSplitTemplate": "讀取當前塊，按語義細分引用的塊，保留精確原文。",
+  "gen_translateAdjustRetranslateTemplate": "讀取當前塊，重新翻譯引用的塊，不改原文。",
+  "gen_translateAdjustMergeTemplate": "讀取當前塊，按指定的原文順序合併引用的塊，無關塊不動。",
+  "gen_translateAdjustMarkers": "請使用 translation_blocks_read 返回的 marker 列表。",
+  "gen_translateAdjustHint": "描述想怎樣調整翻譯塊…",
+  "gen_translateAdjustStartFailed": "無法啟動翻譯調整，請檢查模型與 Agent 執行時。",
+  "gen_translateAdjustRunFailed": "調整已中止或失敗，重試前請重新讀取當前塊。",
+  "gen_repeatDragTotal": "{times} 次 · 共 {total} 張",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_cvGroupBatches": "批次結果按批次分組",
+  "set_cvGroupBatchesSub": "關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。",
+  "gen_groupBatches": "分組"
 }

@@ -26636,7 +26636,7 @@ abstract class AppLocalizations {
   /// No description provided for @gen_repeatTotal.
   ///
   /// In en, this message translates to:
-  /// **'{times} requests, {total} images (scroll to adjust)'**
+  /// **'{times} requests, {total} images · Hold and drag horizontally to adjust'**
   String gen_repeatTotal(Object times, Object total);
 
   /// No description provided for @gen_steps.
@@ -38547,6 +38547,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change summary'**
   String get ag_historyChanges;
+
+  /// No description provided for @gen_translateTapOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap: show original'**
+  String get gen_translateTapOriginal;
+
+  /// No description provided for @gen_translateTapTranslated.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap: show translation'**
+  String get gen_translateTapTranslated;
+
+  /// No description provided for @gen_translateClearRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear translation blocks and restore'**
+  String get gen_translateClearRestore;
+
+  /// No description provided for @gen_translateClearRestoreSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to plain source text; undo available'**
+  String get gen_translateClearRestoreSub;
+
+  /// No description provided for @gen_translateCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation blocks restored to source text'**
+  String get gen_translateCleared;
+
+  /// No description provided for @gen_translateAdjust.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue translation adjustment'**
+  String get gen_translateAdjust;
+
+  /// No description provided for @gen_translateAdjustSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue this translation: split, retranslate, merge'**
+  String get gen_translateAdjustSub;
+
+  /// No description provided for @gen_translateAdjustTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation adjustment'**
+  String get gen_translateAdjustTitle;
+
+  /// No description provided for @gen_translateAdjustContext.
+  ///
+  /// In en, this message translates to:
+  /// **'Continuing this translation · {count} blocks'**
+  String gen_translateAdjustContext(int count);
+
+  /// No description provided for @gen_translateAdjustSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} blocks selected'**
+  String gen_translateAdjustSelected(int count);
+
+  /// No description provided for @gen_translateAdjustCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse / expand'**
+  String get gen_translateAdjustCollapse;
+
+  /// No description provided for @gen_translateAdjustIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue from this translation. Click blocks on the left to reference them. Edits can be undone.'**
+  String get gen_translateAdjustIntro;
+
+  /// No description provided for @gen_translateAdjustSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'Split again'**
+  String get gen_translateAdjustSplit;
+
+  /// No description provided for @gen_translateAdjustRetranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'Retranslate selected'**
+  String get gen_translateAdjustRetranslate;
+
+  /// No description provided for @gen_translateAdjustMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge selected'**
+  String get gen_translateAdjustMerge;
+
+  /// No description provided for @gen_translateAdjustSplitTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current blocks and split referenced blocks into finer semantic units. Preserve exact source.'**
+  String get gen_translateAdjustSplitTemplate;
+
+  /// No description provided for @gen_translateAdjustRetranslateTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current blocks and retranslate referenced blocks without changing source.'**
+  String get gen_translateAdjustRetranslateTemplate;
+
+  /// No description provided for @gen_translateAdjustMergeTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Read current blocks and merge referenced blocks in the requested source order. Leave unrelated blocks unchanged.'**
+  String get gen_translateAdjustMergeTemplate;
+
+  /// No description provided for @gen_translateAdjustMarkers.
+  ///
+  /// In en, this message translates to:
+  /// **'Use markers from translation_blocks_read.'**
+  String get gen_translateAdjustMarkers;
+
+  /// No description provided for @gen_translateAdjustHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe how to adjust blocks…'**
+  String get gen_translateAdjustHint;
+
+  /// No description provided for @gen_translateAdjustStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not start adjustment. Check the model and Agent runtime.'**
+  String get gen_translateAdjustStartFailed;
+
+  /// No description provided for @gen_translateAdjustRunFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Adjustment stopped or failed. Read current blocks before retrying.'**
+  String get gen_translateAdjustRunFailed;
+
+  /// No description provided for @gen_repeatDragTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{times} requests · {total} images'**
+  String gen_repeatDragTotal(int times, int total);
+
+  /// No description provided for @set_cvGroupBatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Group batch results'**
+  String get set_cvGroupBatches;
+
+  /// No description provided for @set_cvGroupBatchesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.'**
+  String get set_cvGroupBatchesSub;
+
+  /// No description provided for @gen_groupBatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get gen_groupBatches;
 }
 
 class _AppLocalizationsDelegate

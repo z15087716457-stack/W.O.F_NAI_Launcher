@@ -14687,7 +14687,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '重复 $times 次，共 $total 张（滚轮也能调）';
+    return '重复 $times 次，共 $total 张 · 按住左右拖动调节';
   }
 
   @override
@@ -21186,6 +21186,92 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_historyChanges => '修改摘要';
+
+  @override
+  String get gen_translateTapOriginal => '点按：显示原文';
+
+  @override
+  String get gen_translateTapTranslated => '点按：显示译文';
+
+  @override
+  String get gen_translateClearRestore => '清除翻译块并还原';
+
+  @override
+  String get gen_translateClearRestoreSub => '全部变回普通原文，可撤销';
+
+  @override
+  String get gen_translateCleared => '已清除翻译块并还原原文';
+
+  @override
+  String get gen_translateAdjust => '追加翻译调整';
+
+  @override
+  String get gen_translateAdjustSub => '接着这次翻译聊，重切、重译、合并块';
+
+  @override
+  String get gen_translateAdjustTitle => '翻译调整';
+
+  @override
+  String gen_translateAdjustContext(int count) {
+    return '续接本次翻译 · $count 块';
+  }
+
+  @override
+  String gen_translateAdjustSelected(int count) {
+    return '已选 $count 块';
+  }
+
+  @override
+  String get gen_translateAdjustCollapse => '收起 / 展开';
+
+  @override
+  String get gen_translateAdjustIntro => '接着本次翻译调整。点击左侧翻译块添加引用，改块后可以撤销。';
+
+  @override
+  String get gen_translateAdjustSplit => '重新切块';
+
+  @override
+  String get gen_translateAdjustRetranslate => '重译选中';
+
+  @override
+  String get gen_translateAdjustMerge => '合并选中';
+
+  @override
+  String get gen_translateAdjustSplitTemplate => '读取当前块，按语义细分引用的块，保留精确原文。';
+
+  @override
+  String get gen_translateAdjustRetranslateTemplate => '读取当前块，重新翻译引用的块，不改原文。';
+
+  @override
+  String get gen_translateAdjustMergeTemplate => '读取当前块，按指定的原文顺序合并引用的块，无关块不动。';
+
+  @override
+  String get gen_translateAdjustMarkers =>
+      '请使用 translation_blocks_read 返回的 marker 列表。';
+
+  @override
+  String get gen_translateAdjustHint => '描述想怎样调整翻译块…';
+
+  @override
+  String get gen_translateAdjustStartFailed => '无法启动翻译调整，请检查模型与 Agent 运行时。';
+
+  @override
+  String get gen_translateAdjustRunFailed => '调整已中止或失败，重试前请重新读取当前块。';
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times 次 · 共 $total 张';
+  }
+
+  @override
+  String get set_cvGroupBatches => '批量结果按批次分组';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。';
+
+  @override
+  String get gen_groupBatches => '分组';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -35871,7 +35957,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '重複 $times 次，共 $total 張（滾輪也能調）';
+    return '重複 $times 次，共 $total 張 · 按住左右拖動調節';
   }
 
   @override
@@ -42370,4 +42456,90 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_historyChanges => '修改摘要';
+
+  @override
+  String get gen_translateTapOriginal => '點按：顯示原文';
+
+  @override
+  String get gen_translateTapTranslated => '點按：顯示譯文';
+
+  @override
+  String get gen_translateClearRestore => '清除翻譯塊並還原';
+
+  @override
+  String get gen_translateClearRestoreSub => '全部變回普通原文，可復原';
+
+  @override
+  String get gen_translateCleared => '已清除翻譯塊並還原原文';
+
+  @override
+  String get gen_translateAdjust => '追加翻譯調整';
+
+  @override
+  String get gen_translateAdjustSub => '接著這次翻譯聊，重切、重譯、合併塊';
+
+  @override
+  String get gen_translateAdjustTitle => '翻譯調整';
+
+  @override
+  String gen_translateAdjustContext(int count) {
+    return '續接本次翻譯 · $count 塊';
+  }
+
+  @override
+  String gen_translateAdjustSelected(int count) {
+    return '已選 $count 塊';
+  }
+
+  @override
+  String get gen_translateAdjustCollapse => '收起 / 展開';
+
+  @override
+  String get gen_translateAdjustIntro => '接著本次翻譯調整。點選左側翻譯塊新增引用，改塊後可以復原。';
+
+  @override
+  String get gen_translateAdjustSplit => '重新切塊';
+
+  @override
+  String get gen_translateAdjustRetranslate => '重譯選中';
+
+  @override
+  String get gen_translateAdjustMerge => '合併選中';
+
+  @override
+  String get gen_translateAdjustSplitTemplate => '讀取當前塊，按語義細分引用的塊，保留精確原文。';
+
+  @override
+  String get gen_translateAdjustRetranslateTemplate => '讀取當前塊，重新翻譯引用的塊，不改原文。';
+
+  @override
+  String get gen_translateAdjustMergeTemplate => '讀取當前塊，按指定的原文順序合併引用的塊，無關塊不動。';
+
+  @override
+  String get gen_translateAdjustMarkers =>
+      '請使用 translation_blocks_read 返回的 marker 列表。';
+
+  @override
+  String get gen_translateAdjustHint => '描述想怎樣調整翻譯塊…';
+
+  @override
+  String get gen_translateAdjustStartFailed => '無法啟動翻譯調整，請檢查模型與 Agent 執行時。';
+
+  @override
+  String get gen_translateAdjustRunFailed => '調整已中止或失敗，重試前請重新讀取當前塊。';
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times 次 · 共 $total 張';
+  }
+
+  @override
+  String get set_cvGroupBatches => '批次結果按批次分組';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。';
+
+  @override
+  String get gen_groupBatches => '分組';
 }

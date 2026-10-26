@@ -312,7 +312,23 @@ void main() {
         health.resultFor(_provider.id).status,
         ProviderConnectionStatus.failed,
       );
-      await service.translatePromptGroup('{}', sessionId: 'recovery');
+      final raw = await service.translatePromptGroup(
+        '{}',
+        sessionId: 'prompt-translation-pos',
+      );
+      final exchange = service.takeTranslationExchange(
+        'prompt-translation-pos',
+      )!;
+      expect(exchange.raw, raw);
+      expect(exchange.providerId, _provider.id);
+      expect(exchange.modelId, _model.name);
+      expect(
+        exchange.system,
+        contains(PromptAssistantService.promptTranslationSystemPrompt),
+      );
+      expect(exchange.request, contains('target_language'));
+      expect(service.takeTranslationExchange('prompt-translation-pos'), isNull);
+      expect(service.takeTranslationExchange('translation'), isNull);
       expect(
         health.resultFor(_provider.id).status,
         ProviderConnectionStatus.healthy,

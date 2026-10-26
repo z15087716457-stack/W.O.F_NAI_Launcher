@@ -7,6 +7,11 @@ import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../prompt_assistant/services/provider_adapters/model_request_options.dart';
 import '../../prompt_assistant/services/provider_adapters/prompt_assistant_adapter.dart';
 
+class NaiAgentToolModelUnavailable extends StateError {
+  NaiAgentToolModelUnavailable()
+    : super('Selected model does not support tools');
+}
+
 /// A request-scoped snapshot, never a second settings or credential store.
 class NaiAgentModelConnection {
   NaiAgentModelConnection(
@@ -99,7 +104,7 @@ NaiAgentModelConnection mapNaiAgentModel(
   }
   if ((model.supportsTools ?? model.catalogEntry?.supportsToolCalling) ==
       false) {
-    throw StateError('Selected model does not support tools');
+    throw NaiAgentToolModelUnavailable();
   }
   final error = RequestParameters.fromModel(
     model,
