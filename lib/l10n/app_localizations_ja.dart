@@ -21611,4 +21611,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get blocks_tempShowOriginal => 'ライブラリで元を表示';
+
+  @override
+  String get gen_menuNew => '新';
+
+  @override
+  String get gen_repeatDragHint => '数字を左右にドラッグ · ダブルクリックで入力';
 }

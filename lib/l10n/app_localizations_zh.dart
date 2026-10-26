@@ -21367,6 +21367,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get blocks_tempShowOriginal => '在块库中查看原块';
+
+  @override
+  String get gen_menuNew => '新';
+
+  @override
+  String get gen_repeatDragHint => '按住数字左右拖动调节 · 双击直接输入';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42732,4 +42738,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get blocks_tempShowOriginal => '在塊庫中檢視原塊';
+
+  @override
+  String get gen_menuNew => '新';
+
+  @override
+  String get gen_repeatDragHint => '按住數字左右拖動調節 · 雙擊直接輸入';
 }

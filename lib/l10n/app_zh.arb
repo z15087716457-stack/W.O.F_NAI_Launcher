@@ -11391,5 +11391,7 @@
   "blocks_tempSaveAs": "另存为新块",
   "blocks_tempSaveAsHint": "另存为新块后，这里会换成新块，原块保持不变",
   "blocks_tempSaveConfirm": "保存并转正",
-  "blocks_tempShowOriginal": "在块库中查看原块"
+  "blocks_tempShowOriginal": "在块库中查看原块",
+  "gen_menuNew": "新",
+  "gen_repeatDragHint": "按住数字左右拖动调节 · 双击直接输入"
 }

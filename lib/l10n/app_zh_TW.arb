@@ -11976,5 +11976,7 @@
   "blocks_tempSaveAs": "另存為新塊",
   "blocks_tempSaveAsHint": "另存為新塊後，這裡會換成新塊，原塊保持不變",
   "blocks_tempSaveConfirm": "儲存並轉正",
-  "blocks_tempShowOriginal": "在塊庫中檢視原塊"
+  "blocks_tempShowOriginal": "在塊庫中檢視原塊",
+  "gen_menuNew": "新",
+  "gen_repeatDragHint": "按住數字左右拖動調節 · 雙擊直接輸入"
 }

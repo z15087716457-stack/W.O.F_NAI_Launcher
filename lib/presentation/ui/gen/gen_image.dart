@@ -394,11 +394,13 @@ class _RepeatStepperState extends State<_RepeatStepper> {
     final img = GenScope.of(context, GenAspect.image).data.image;
     final l = context.l10n;
     final value = _preview ?? img.repeat;
+    final dragging = _pointer != null;
+    final active = dragging || _editing;
+
+    // `.st .ar`
     Widget arrow(String glyph, int delta, Key key) {
       final enabled =
-          !_editing &&
-          _pointer == null &&
-          (delta < 0 ? img.repeat > 1 : img.repeat < img.maxRepeat);
+          !active && (delta < 0 ? img.repeat > 1 : img.repeat < img.maxRepeat);
       return UiPressable(
         key: key,
         onTap: enabled ? () => _set(img.repeat + delta) : null,
@@ -406,183 +408,284 @@ class _RepeatStepperState extends State<_RepeatStepper> {
           width: 22,
           height: 28,
           child: Center(
-            child: UiGlyph(
-              glyph,
-              size: 13,
-              color: !enabled ? c.faint : (hover ? c.ink : c.muted),
+            child: Opacity(
+              opacity: enabled ? 1 : .45,
+              child: UiGlyph(
+                glyph,
+                size: 13,
+                strokeWidth: 2.2,
+                color: !enabled ? c.faint : (hover ? c.ink : c.muted),
+              ),
             ),
           ),
         ),
       );
     }
 
-    return Tooltip(
-      message: l.gen_repeatTotal(img.repeat, img.repeat * img.count),
-      child: CompositedTransformTarget(
+    // `.bub` + `.ruler`: preview bubble above the number, ticks below.
+    Widget overlay(BuildContext context) => Positioned(
+      left: 0,
+      top: 0,
+      child: CompositedTransformFollower(
         link: _link,
-        child: OverlayPortal(
-          controller: _bubble,
-          overlayChildBuilder: (context) => Positioned(
-            left: 0,
-            top: 0,
-            child: CompositedTransformFollower(
-              link: _link,
-              targetAnchor: Alignment.topCenter,
-              followerAnchor: Alignment.bottomCenter,
-              offset: const Offset(0, -8),
-              child: IgnorePointer(
-                child: Material(
-                  color: const Color(0xFF242428),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    child: Text(
-                      l.gen_repeatDragTotal(value, value * img.count),
-                      key: const Key('gen-repeat-bubble'),
-                      style: UiText.sans(12, color: Colors.white),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          child: Container(
-            key: const Key('gen-repeat'),
-            height: 32,
-            padding: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: c.control,
-              borderRadius: BorderRadius.circular(6),
-              border: _pointer != null || _editing
-                  ? Border.all(color: c.accent)
-                  : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+        targetAnchor: Alignment.center,
+        followerAnchor: Alignment.center,
+        child: IgnorePointer(
+          child: SizedBox(
+            width: 180,
+            height: 32 + 2 * 44,
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
               children: [
-                arrow(UiGlyphs.chevronLeft, -1, const Key('gen-repeat-down')),
-                if (_editing)
-                  SizedBox(
-                    width: 36,
-                    child: Focus(
-                      onKeyEvent: (_, event) {
-                        if (event is KeyDownEvent &&
-                            event.logicalKey == LogicalKeyboardKey.escape) {
-                          _finishEdit(cancel: true);
-                          return KeyEventResult.handled;
-                        }
-                        return KeyEventResult.ignored;
-                      },
-                      child: TextField(
-                        key: const Key('gen-repeat-input'),
-                        controller: _text,
-                        focusNode: _focus,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        style: UiText.mono(13, color: c.ink),
-                        decoration: uiBareDecoration(),
-                        onSubmitted: (_) => _finishEdit(),
-                      ),
-                    ),
-                  )
-                else
-                  MouseRegion(
-                    cursor: SystemMouseCursors.resizeLeftRight,
-                    onEnter: (_) => setState(() => _hover = true),
-                    onExit: (_) => setState(() => _hover = false),
-                    child: GestureDetector(
-                      onDoubleTap: () {
-                        _text.text = '${img.repeat}';
-                        _text.selection = TextSelection(
-                          baseOffset: 0,
-                          extentOffset: _text.text.length,
-                        );
-                        setState(() => _editing = true);
-                        _focus.requestFocus();
-                      },
-                      child: Listener(
-                        onPointerDown: (e) {
-                          if (_pointer != null || e.buttons != kPrimaryButton) {
-                            return;
-                          }
-                          _startX = e.position.dx;
-                          _startValue = img.repeat;
-                          setState(() {
-                            _pointer = e.pointer;
-                            _preview = img.repeat;
-                          });
-                          _bubble.show();
-                        },
-                        onPointerMove: (e) {
-                          if (e.pointer != _pointer) return;
-                          final steps = ((e.position.dx - _startX) / 12)
-                              .truncate();
-                          final scale = HardwareKeyboard.instance.isShiftPressed
-                              ? 5
-                              : 1;
-                          setState(
-                            () => _preview = (_startValue + steps * scale)
-                                .clamp(1, img.maxRepeat),
-                          );
-                        },
-                        onPointerUp: (e) {
-                          if (e.pointer == _pointer) _endDrag(commit: true);
-                        },
-                        onPointerCancel: (e) {
-                          if (e.pointer == _pointer) _endDrag();
-                        },
-                        child: Container(
-                          key: const Key('gen-repeat-value'),
-                          width: 30,
-                          height: 28,
-                          alignment: Alignment.center,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Text(
-                                '$value',
-                                style: UiText.mono(
-                                  13,
-                                  weight: FontWeight.w600,
-                                  color: c.ink,
-                                ),
+                Positioned(
+                  bottom: 44 + 32 + 3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        key: const Key('gen-repeat-bubble'),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: c.ink,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(
+                                alpha: c.dark ? .4 : .14,
                               ),
-                              if (_hover)
-                                Positioned(
-                                  bottom: 2,
-                                  child: Row(
-                                    spacing: 2,
-                                    children: List.generate(
-                                      5,
-                                      (_) => Container(
-                                        width: 2,
-                                        height: 2,
-                                        decoration: BoxDecoration(
-                                          color: c.faint,
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: Text(
+                          l.gen_repeatDragTotal(value, value * img.count),
+                          style: UiText.sans(11.5, color: c.bg, height: 1.3),
                         ),
                       ),
-                    ),
+                      CustomPaint(
+                        size: const Size(10, 5),
+                        painter: _BubbleTail(c.ink),
+                      ),
+                    ],
                   ),
-                arrow(UiGlyphs.chevronRight, 1, const Key('gen-repeat-up')),
+                ),
+                Positioned(
+                  top: 44 + 32 + 6,
+                  child: Row(
+                    key: const Key('gen-repeat-ruler'),
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: 7,
+                    children: [
+                      for (var i = -3; i <= 3; i++)
+                        Container(
+                          width: i == 0 ? 2 : 1,
+                          height: i == 0 ? 9 : 5,
+                          color: i == 0 ? c.accent : c.strong,
+                        ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+
+    final Widget number = _editing
+        ? SizedBox(
+            width: 34,
+            height: 28,
+            child: Center(
+              child: Focus(
+                onKeyEvent: (_, event) {
+                  if (event is KeyDownEvent &&
+                      event.logicalKey == LogicalKeyboardKey.escape) {
+                    _finishEdit(cancel: true);
+                    return KeyEventResult.handled;
+                  }
+                  return KeyEventResult.ignored;
+                },
+                child: TextField(
+                  key: const Key('gen-repeat-input'),
+                  controller: _text,
+                  focusNode: _focus,
+                  textAlign: TextAlign.center,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  style: UiText.mono(13, weight: FontWeight.w600, color: c.ink),
+                  cursorColor: c.accent,
+                  cursorWidth: 1.5,
+                  decoration: uiBareDecoration(),
+                  onSubmitted: (_) => _finishEdit(),
+                ),
+              ),
+            ),
+          )
+        : MouseRegion(
+            cursor: SystemMouseCursors.resizeLeftRight,
+            onEnter: (_) => setState(() => _hover = true),
+            onExit: (_) => setState(() => _hover = false),
+            child: GestureDetector(
+              onDoubleTap: () {
+                _text.text = '${img.repeat}';
+                _text.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: _text.text.length,
+                );
+                setState(() => _editing = true);
+                _focus.requestFocus();
+              },
+              child: Listener(
+                onPointerDown: (e) {
+                  if (_pointer != null || e.buttons != kPrimaryButton) return;
+                  _startX = e.position.dx;
+                  _startValue = img.repeat;
+                  setState(() {
+                    _pointer = e.pointer;
+                    _preview = img.repeat;
+                  });
+                  _bubble.show();
+                },
+                onPointerMove: (e) {
+                  if (e.pointer != _pointer) return;
+                  final steps = ((e.position.dx - _startX) / 12).truncate();
+                  final scale = HardwareKeyboard.instance.isShiftPressed
+                      ? 5
+                      : 1;
+                  setState(
+                    () => _preview = (_startValue + steps * scale).clamp(
+                      1,
+                      img.maxRepeat,
+                    ),
+                  );
+                },
+                onPointerUp: (e) {
+                  if (e.pointer == _pointer) _endDrag(commit: true);
+                },
+                onPointerCancel: (e) {
+                  if (e.pointer == _pointer) _endDrag();
+                },
+                // `.st .v`: hover tint + dotted underline; accent while dragging.
+                child: Container(
+                  key: const Key('gen-repeat-value'),
+                  constraints: const BoxConstraints(minWidth: 34),
+                  height: 28,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: dragging
+                        ? c.accent.withValues(alpha: .10)
+                        : _hover
+                        ? c.ink.withValues(alpha: .06)
+                        : null,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        '$value',
+                        style: UiText.mono(
+                          13,
+                          weight: FontWeight.w600,
+                          color: dragging ? c.accent : c.ink,
+                        ),
+                      ),
+                      if (_hover || dragging)
+                        Positioned(
+                          left: 8,
+                          right: 8,
+                          bottom: 3,
+                          child: CustomPaint(
+                            key: const Key('gen-repeat-dots'),
+                            size: const Size(double.infinity, 2),
+                            painter: _DotLine(c.faint.withValues(alpha: .9)),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+
+    final stepper = CompositedTransformTarget(
+      link: _link,
+      child: OverlayPortal(
+        controller: _bubble,
+        overlayChildBuilder: overlay,
+        // `.st`; raised + accent ring while dragging or typing (`.st.drag`).
+        child: Container(
+          key: const Key('gen-repeat'),
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          decoration: BoxDecoration(
+            color: active ? c.raised : c.control,
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: active
+                ? [
+                    BoxShadow(
+                      color: c.accent.withValues(alpha: .35),
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              arrow(UiGlyphs.chevronLeft, -1, const Key('gen-repeat-down')),
+              number,
+              arrow(UiGlyphs.chevronRight, 1, const Key('gen-repeat-up')),
+            ],
+          ),
+        ),
+      ),
+    );
+    // Keep the tree stable while dragging; the tooltip hides on pointer down.
+    return Tooltip(
+      message:
+          '${l.gen_repeatTotal(img.repeat, img.repeat * img.count)}\n'
+          '${l.gen_repeatDragHint}',
+      child: stepper,
+    );
   }
+}
+
+class _BubbleTail extends CustomPainter {
+  const _BubbleTail(this.color);
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) => canvas.drawPath(
+    Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close(),
+    Paint()..color = color,
+  );
+
+  @override
+  bool shouldRepaint(_BubbleTail old) => old.color != color;
+}
+
+/// Prototype `.st .v::after`: dots every 4px.
+class _DotLine extends CustomPainter {
+  const _DotLine(this.color);
+  final Color color;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    for (var x = 2.0; x < size.width; x += 4) {
+      canvas.drawCircle(Offset(x, size.height / 2), .8, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DotLine old) => old.color != color;
 }

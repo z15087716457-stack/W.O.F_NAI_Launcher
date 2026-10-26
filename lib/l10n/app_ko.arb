@@ -11391,5 +11391,7 @@
   "blocks_tempSaveAs": "새 블록으로 저장",
   "blocks_tempSaveAsHint": "저장하면 이 위치가 새 블록으로 바뀌고 원본은 그대로 유지됩니다",
   "blocks_tempSaveConfirm": "저장",
-  "blocks_tempShowOriginal": "라이브러리에서 원본 보기"
+  "blocks_tempShowOriginal": "라이브러리에서 원본 보기",
+  "gen_menuNew": "신규",
+  "gen_repeatDragHint": "숫자를 좌우로 드래그 · 더블클릭하여 입력"
 }

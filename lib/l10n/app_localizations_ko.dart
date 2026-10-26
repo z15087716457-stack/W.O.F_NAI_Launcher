@@ -21683,4 +21683,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get blocks_tempShowOriginal => '라이브러리에서 원본 보기';
+
+  @override
+  String get gen_menuNew => '신규';
+
+  @override
+  String get gen_repeatDragHint => '숫자를 좌우로 드래그 · 더블클릭하여 입력';
 }

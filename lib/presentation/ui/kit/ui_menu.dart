@@ -17,6 +17,7 @@ class UiMenuItem {
     this.checked = false,
     this.trailing,
     this.subtitle,
+    this.badge,
     this.enabled = true,
     this.indent = 0,
     this.leading,
@@ -35,7 +36,12 @@ class UiMenuItem {
   /// 当前选中项（右侧打勾）。
   final bool checked;
   final String? trailing;
+
+  /// 第二行弱色说明（11 号）。
   final String? subtitle;
+
+  /// 标题后的小蓝标签（例如“新”）。
+  final String? badge;
   final bool enabled;
 
   /// 子项缩进（分类树）。
@@ -104,7 +110,7 @@ class UiMenu extends StatelessWidget {
                           ? c.error
                           : c.ink;
                       return Container(
-                        height: it.subtitle == null ? 34 : 52,
+                        height: it.subtitle == null ? 34 : 48,
                         padding: EdgeInsets.only(
                           left: 10 + it.indent,
                           right: 10,
@@ -129,26 +135,57 @@ class UiMenu extends StatelessWidget {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    it.label,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: UiText.sans(
-                                      13,
-                                      color: fg,
-                                      weight: it.checked
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
-                                    ),
+                                  Row(
+                                    spacing: 6,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          it.label,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: UiText.sans(
+                                            13,
+                                            color: fg,
+                                            weight: it.checked
+                                                ? FontWeight.w600
+                                                : FontWeight.w400,
+                                          ),
+                                        ),
+                                      ),
+                                      if (it.badge != null)
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 5,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: c.brand.withValues(
+                                              alpha: .12,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            it.badge!,
+                                            style: UiText.sans(
+                                              10,
+                                              weight: FontWeight.w600,
+                                              color: c.accent,
+                                              height: 1,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                   if (it.subtitle != null)
-                                    Text(
-                                      it.subtitle!,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: UiText.sans(
-                                        10,
-                                        color: it.enabled ? c.muted : c.faint,
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 1),
+                                      child: Text(
+                                        it.subtitle!,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: UiText.sans(11, color: c.faint),
                                       ),
                                     ),
                                 ],

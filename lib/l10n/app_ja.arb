@@ -11391,5 +11391,7 @@
   "blocks_tempSaveAs": "新しいブロックとして保存",
   "blocks_tempSaveAsHint": "保存後、この位置は新しいブロックに置き換わり、元のブロックは変わりません",
   "blocks_tempSaveConfirm": "保存",
-  "blocks_tempShowOriginal": "ライブラリで元を表示"
+  "blocks_tempShowOriginal": "ライブラリで元を表示",
+  "gen_menuNew": "新",
+  "gen_repeatDragHint": "数字を左右にドラッグ · ダブルクリックで入力"
 }

@@ -314,6 +314,12 @@ void main() {
           ),
         );
         await tapKey(t, 'gen-translate-menu');
+        await captureUiuxRegion(
+          t,
+          find.byKey(const Key('gen-capture')),
+          'translate-menu',
+          const Rect.fromLTWH(0, 0, 700, 520),
+        );
         await tapKey(t, 'gen-translate-clear');
         expect(r.called('onClearTranslations'), isTrue);
         await tapKey(t, 'gen-translate-menu');
@@ -542,9 +548,22 @@ void main() {
       await t.pump();
       expect(r.called('onRepeatChanged'), isFalse);
       expect(find.byKey(const Key('gen-repeat-bubble')), findsOneWidget);
+      expect(find.byKey(const Key('gen-repeat-ruler')), findsOneWidget);
       expect(
         find.descendant(of: value, matching: find.text('4')),
         findsOneWidget,
+      );
+      final stepper = t.getRect(find.byKey(const Key('gen-repeat')));
+      await captureUiuxRegion(
+        t,
+        find.byKey(const Key('gen-capture')),
+        'repeat-drag',
+        Rect.fromLTRB(
+          stepper.left - 80,
+          stepper.top - 60,
+          stepper.right + 80,
+          stepper.bottom + 30,
+        ),
       );
       await gesture.up();
       await t.pumpAndSettle();

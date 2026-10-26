@@ -158,6 +158,7 @@ abstract final class UiGlyphs {
   static const scissors =
       'M6 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM8.4 7.6L20 18M8.4 16.4L20 6';
   static const undo = 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3';
+  static const chat = 'M5 5h14v10H9l-4 4z';
   static const translate =
       'M4 5h8M8 3v2M6 5c0 3.5 2.6 6.4 6 7.5M10.5 5C9.6 8.8 7 11.5 4 12.5M13 21l4-9 4 9M14.5 18h5';
 

@@ -399,7 +399,8 @@ class _Translate extends StatelessWidget {
           key: const Key('gen-translate-adjust'),
           label: l.gen_translateAdjust,
           subtitle: l.gen_translateAdjustSub,
-          glyph: UiGlyphs.external,
+          badge: l.gen_menuNew,
+          glyph: UiGlyphs.chat,
           enabled:
               !t.busy &&
               t.canAdjust &&
@@ -426,7 +427,8 @@ class _Translate extends StatelessWidget {
           key: const Key('gen-translate-clear'),
           label: l.gen_translateClearRestore,
           subtitle: l.gen_translateClearRestoreSub,
-          glyph: UiGlyphs.retry,
+          badge: l.gen_menuNew,
+          glyph: UiGlyphs.undo,
           enabled:
               !t.busy &&
               t.hasTranslations &&
@@ -462,7 +464,7 @@ class _Translate extends StatelessWidget {
           ),
       ],
       tag: #translate,
-      width: 310,
+      width: 280,
     );
   }
 }

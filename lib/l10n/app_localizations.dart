@@ -38865,6 +38865,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Show original in library'**
   String get blocks_tempShowOriginal;
+
+  /// No description provided for @gen_menuNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get gen_menuNew;
+
+  /// No description provided for @gen_repeatDragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the number left/right · double-click to type'**
+  String get gen_repeatDragHint;
 }
 
 class _AppLocalizationsDelegate

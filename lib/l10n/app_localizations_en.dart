@@ -22372,4 +22372,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get blocks_tempShowOriginal => 'Show original in library';
+
+  @override
+  String get gen_menuNew => 'New';
+
+  @override
+  String get gen_repeatDragHint =>
+      'Drag the number left/right · double-click to type';
 }

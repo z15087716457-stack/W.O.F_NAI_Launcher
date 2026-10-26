@@ -11458,5 +11458,7 @@
   "blocks_tempSaveAs": "Save as new block",
   "blocks_tempSaveAsHint": "After saving, this spot uses the new block; the original stays unchanged",
   "blocks_tempSaveConfirm": "Save",
-  "blocks_tempShowOriginal": "Show original in library"
+  "blocks_tempShowOriginal": "Show original in library",
+  "gen_menuNew": "New",
+  "gen_repeatDragHint": "Drag the number left/right · double-click to type"
 }
