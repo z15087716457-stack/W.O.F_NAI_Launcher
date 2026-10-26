@@ -86,6 +86,8 @@ void main() {
         'tools': true,
         'vision': true,
         'maxConcurrentRequests': 1,
+        // Request counts here cover the main loop only (D06 has own tests).
+        'nextSuggestion': false,
       },
       executeTool: (_, __, ___) async => {'content': []},
     );
