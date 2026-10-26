@@ -86,7 +86,9 @@ abstract final class PillDocumentEditor {
         !document.text.contains(marker)) {
       return document;
     }
-    final plain = stripMarkers(source);
+    final plain = document.instances[marker]!.enabled
+        ? stripMarkers(source)
+        : '';
     final instances = Map<String, PillInstance>.of(document.instances)
       ..remove(marker);
     return document.copyWith(
@@ -111,7 +113,9 @@ abstract final class PillDocumentEditor {
       if (translation == null) {
         text.writeCharCode(codeUnit);
       } else {
-        text.write(stripMarkers(translation.source));
+        if (document.instances[String.fromCharCode(codeUnit)]!.enabled) {
+          text.write(stripMarkers(translation.source));
+        }
       }
     }
     final instances = Map<String, PillInstance>.of(document.instances)

@@ -308,10 +308,12 @@ class _Translate extends StatelessWidget {
     final open = scope.controller.popoverTag == #translate;
     final tip = t.busy
         ? l.gen_translating
+        : t.hasTranslations
+        ? (t.showing
+              ? l.gen_translateTapOriginal
+              : l.gen_translateTapTranslated)
         : t.route == null
         ? l.gen_translateNeedsModel
-        : t.showing
-        ? l.gen_translateRestore
         : l.gen_translateWith(t.route!);
     return Builder(
       builder: (context) => Container(
@@ -333,10 +335,10 @@ class _Translate extends StatelessWidget {
                 onTap: t.busy
                     ? null
                     : () {
-                        if (t.route == null) {
-                          scope.actions.onTranslationSettings();
-                        } else if (t.showing) {
+                        if (t.hasTranslations) {
                           scope.actions.onToggleTranslation();
+                        } else if (t.route == null) {
+                          scope.actions.onTranslationSettings();
                         } else {
                           scope.actions.onTranslate();
                         }
@@ -378,9 +380,33 @@ class _Translate extends StatelessWidget {
     final scope = GenScope.of(context, GenAspect.prompt);
     final t = scope.data.prompt.translate;
     final l = context.l10n;
+    Rect adjustmentAnchor() {
+      var rect = genRectOf(context);
+      context.visitAncestorElements((element) {
+        if (element.widget.key == const Key('gen-prompt')) {
+          rect = genRectOf(element);
+          return false;
+        }
+        return true;
+      });
+      return rect;
+    }
+
     scope.controller.openMenu(
       anchor,
       [
+        UiMenuItem(
+          key: const Key('gen-translate-adjust'),
+          label: l.gen_translateAdjust,
+          subtitle: l.gen_translateAdjustSub,
+          glyph: UiGlyphs.external,
+          enabled:
+              !t.busy &&
+              t.canAdjust &&
+              scope.actions.onTranslationAdjust != null,
+          onTap: () =>
+              scope.actions.onTranslationAdjust?.call(adjustmentAnchor()),
+        ),
         UiMenuItem(
           key: const Key('gen-translate-new'),
           label: l.gen_translateNew,
@@ -393,8 +419,19 @@ class _Translate extends StatelessWidget {
               ? l.gen_translateShowOriginal
               : l.gen_translateShowTranslated,
           glyph: UiGlyphs.swap,
-          enabled: !t.busy && t.route != null,
+          enabled: !t.busy && t.hasTranslations,
           onTap: scope.actions.onToggleTranslation,
+        ),
+        UiMenuItem(
+          key: const Key('gen-translate-clear'),
+          label: l.gen_translateClearRestore,
+          subtitle: l.gen_translateClearRestoreSub,
+          glyph: UiGlyphs.retry,
+          enabled:
+              !t.busy &&
+              t.hasTranslations &&
+              scope.actions.onClearTranslations != null,
+          onTap: () => scope.actions.onClearTranslations?.call(),
         ),
         UiMenuItem(
           label: l.gen_translateSettings,
@@ -425,7 +462,7 @@ class _Translate extends StatelessWidget {
           ),
       ],
       tag: #translate,
-      width: 240,
+      width: 310,
     );
   }
 }

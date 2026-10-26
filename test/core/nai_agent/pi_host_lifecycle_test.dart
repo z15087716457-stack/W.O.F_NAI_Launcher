@@ -56,6 +56,7 @@ void main() {
     String id, {
     File? resume,
     String provider = 'lifecycle-test',
+    bool translation = false,
   }) async {
     final workspace = Directory('${root.path}/$id');
     final client = await PiHostClient.start(
@@ -68,6 +69,14 @@ void main() {
       sessionDirectory: Directory('${workspace.path}/sessions'),
       sessionFile: resume,
       systemPrompt: 'NAI Agent.',
+      sessionKind: translation ? 'translation' : null,
+      seedSystemPrompt: translation ? 'Original system' : null,
+      seedMessages: translation
+          ? [
+              {'role': 'user', 'content': 'original request'},
+              {'role': 'assistant', 'content': 'original response'},
+            ]
+          : const [],
       privateModelConfig: {
         'providerId': provider,
         'modelId': 'test',
@@ -83,6 +92,28 @@ void main() {
     clients.add(client);
     return client;
   }
+
+  test(
+    'Dart client starts isolated translation with exact seed prefix and closes',
+    () async {
+      final client = await start('translation', translation: true);
+      expect(client.initialState['sessionFile'], isNull);
+      expect(bodies, isEmpty);
+      await client.prompt('adjust blocks');
+      final messages = bodies.single['messages'] as List;
+      expect(messages[0]['content'], 'Original system');
+      expect(messages[1]['content'], 'original request');
+      expect(messages[2]['content'], 'original response');
+      final tools = bodies.single['tools'] as List;
+      expect(tools.map((tool) => tool['function']['name']).toSet(), {
+        'mcp__nai_studio__translation_blocks_read',
+        'mcp__nai_studio__translation_blocks_edit',
+      });
+      await client.close();
+      expect(client.isClosed, isTrue);
+      await client.whenClosed;
+    },
+  );
 
   test(
     'child resume reads official history without a model request or tool replay',

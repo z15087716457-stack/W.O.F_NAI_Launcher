@@ -11,6 +11,8 @@ import 'package:nai_launcher/core/autocomplete/unified_tag_repository.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/utils/prompt_translation_edit.dart';
+import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
+import 'package:nai_launcher/core/nai_agent/translation_context.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/services/prompt_assistant_service.dart';
@@ -25,6 +27,311 @@ import 'package:nai_launcher/core/wiki/tag_translation_glossary.dart';
 import '../../helpers/fake_tag_translation_glossary.dart';
 
 void main() {
+  test(
+    'successful translation retains exact exchange and face block map',
+    () async {
+      final service = _TranslationService();
+      const exchange = TranslationExchange(
+        system: 'custom system',
+        request: 'exact request',
+        raw: 'exact reply',
+        providerId: 'translation-provider',
+        modelId: 'translation-model',
+      );
+      when(() => service.takeTranslationExchange(any())).thenReturn(exchange);
+      when(
+        () => service.translatePromptGroup(
+          any(),
+          sessionId: any(named: 'sessionId'),
+        ),
+      ).thenAnswer((call) async {
+        final request =
+            jsonDecode(call.positionalArguments.single as String) as Map;
+        return jsonEncode({
+          'fields': [
+            for (final field in request['fields'] as List)
+              {
+                'id': field['id'],
+                'groups': [
+                  for (final segment in field['segments'] as List)
+                    {
+                      'ids': [segment['id']],
+                      'zh': 'reading',
+                    },
+                ],
+              },
+          ],
+        });
+      });
+      final container = ProviderContainer(
+        overrides: [
+          characterPromptNotifierProvider.overrideWith(_Characters.new),
+          promptBlockLibraryNotifierProvider.overrideWith(_Library.new),
+          promptAssistantServiceProvider.overrideWithValue(service),
+          unifiedTagRepositoryProvider.overrideWith((ref) => _Tags()),
+          tagTranslationGlossaryProvider.overrideWith(
+            (ref) => const FakeTagTranslationGlossary(),
+          ),
+          localeNotifierProvider.overrideWith(() => _Locale('en')),
+        ],
+      );
+      addTearDown(container.dispose);
+      for (final scope in ['main', 'char:active:pos', 'negative']) {
+        container
+            .read(pillWorkspaceProvider(scope).notifier)
+            .replaceWithPlainText('blue eyes');
+      }
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      await coordinator.translate(false);
+      final context = container.read(promptTranslationContextsProvider)[false]!;
+      expect(context.exchanges.single, same(exchange));
+      expect(context.seedMessages, [
+        {'role': 'user', 'content': 'exact request'},
+        {'role': 'assistant', 'content': 'exact reply'},
+      ]);
+      expect(context.blocks.map((block) => block['scope']).toSet(), {
+        'main',
+        'char:active:pos',
+      });
+      expect(
+        context.blocks.every((block) => block['source'] == 'blue eyes'),
+        isTrue,
+      );
+      expect(container.read(promptTranslationContextsProvider)[true], isNull);
+    },
+  );
+
+  test('translation adjustment is atomic, versioned, scoped and undoable', () {
+    final container = _testContainer();
+    final coordinator = container.read(promptTranslationCoordinatorProvider);
+    final main = container.read(
+      pillWorkspaceProvider(PillScopes.main).notifier,
+    );
+    main.insertTranslationAt(offset: 0, source: 'blue hair', zh: 'blue');
+    final before = container
+        .read(pillWorkspaceProvider(PillScopes.main))
+        .document;
+    final marker = before.instances.keys.single;
+    final version = coordinator.adjustmentVersion(false);
+    coordinator.editAdjustment(false, version, [
+      {
+        'scope': 'main',
+        'op': 'split',
+        'marker': marker,
+        'parts': [
+          {'source': 'blue ', 'translation': 'color'},
+          {'source': 'hair', 'translation': 'hair'},
+        ],
+      },
+    ]);
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).projection,
+      'blue hair',
+    );
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances
+          .length,
+      2,
+    );
+    expect(
+      () => coordinator.editAdjustment(false, version, []),
+      throwsA(isA<NaiAgentToolError>()),
+    );
+    expect(coordinator.undoAdjustment(false), isTrue);
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document,
+      before,
+    );
+    expect(
+      () => coordinator.editAdjustment(
+        false,
+        coordinator.adjustmentVersion(false),
+        [
+          {'scope': 'negative', 'op': 'rejoin', 'marker': marker},
+        ],
+      ),
+      throwsFormatException,
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document,
+      before,
+    );
+    expect(
+      () => coordinator.editAdjustment(
+        false,
+        coordinator.adjustmentVersion(false),
+        [
+          {
+            'scope': 'main',
+            'op': 'retranslate',
+            'marker': marker,
+            'translation': 'changed',
+          },
+          {'scope': 'char:missing:pos', 'op': 'rejoin', 'marker': marker},
+        ],
+      ),
+      throwsFormatException,
+    );
+    expect(
+      container.read(pillWorkspaceProvider(PillScopes.main)).document,
+      before,
+    );
+  });
+
+  test(
+    'adjustment undo history preserves all steps and rejects newer user edits',
+    () {
+      final container = _testContainer();
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      final lane = container.read(pillWorkspaceProvider('main').notifier);
+      lane.insertTranslationAt(
+        offset: 0,
+        source: 'source',
+        zh: 'original reading',
+      );
+      final marker = container
+          .read(pillWorkspaceProvider('main'))
+          .document
+          .instances
+          .keys
+          .single;
+      for (final reading in ['step 1', 'step 2']) {
+        coordinator.editAdjustment(
+          false,
+          coordinator.adjustmentVersion(false),
+          [
+            {
+              'scope': 'main',
+              'op': 'retranslate',
+              'marker': marker,
+              'translation': reading,
+            },
+          ],
+        );
+      }
+      expect(coordinator.undoAdjustment(true), isFalse);
+      expect(coordinator.undoAdjustment(false), isTrue);
+      expect(
+        container
+            .read(pillWorkspaceProvider('main'))
+            .document
+            .instances[marker]!
+            .translation!
+            .zh,
+        'step 1',
+      );
+      final pill = container
+          .read(pillWorkspaceProvider('main'))
+          .document
+          .instances[marker]!
+          .translation!;
+      lane.updateTranslation(marker, pill.copyWith(source: 'new user source'));
+      expect(coordinator.undoAdjustment(false), isFalse);
+      expect(
+        container.read(pillWorkspaceProvider('main')).projection,
+        'new user source',
+      );
+      lane.updateTranslation(marker, pill);
+      expect(coordinator.undoAdjustment(false), isTrue);
+      expect(
+        container
+            .read(pillWorkspaceProvider('main'))
+            .document
+            .instances[marker]!
+            .translation!
+            .zh,
+        'original reading',
+      );
+    },
+  );
+
+  test(
+    'clear uses latest source, omits disabled instance, and restore is exact',
+    () {
+      final container = _testContainer();
+      final coordinator = container.read(promptTranslationCoordinatorProvider);
+      final lane = container.read(pillWorkspaceProvider('main').notifier);
+      lane.insertTranslationAt(offset: 0, source: 'old source', zh: 'reading');
+      final marker = container
+          .read(pillWorkspaceProvider('main'))
+          .document
+          .instances
+          .keys
+          .single;
+      lane.updateTranslation(
+        marker,
+        const TranslationPill(source: 'latest source', zh: 'reading'),
+      );
+      lane.insertTranslationAt(offset: 1, source: 'never send', zh: 'hidden');
+      final doc = container.read(pillWorkspaceProvider('main')).document;
+      final disabled = doc.instances.keys.last;
+      lane.replaceIfCurrent(
+        doc,
+        doc.copyWith(
+          instances: {
+            ...doc.instances,
+            disabled: doc.instances[disabled]!.copyWith(enabled: false),
+          },
+        ),
+      );
+      final before = container.read(pillWorkspaceProvider('main'));
+      expect(coordinator.clearTranslations(false), 2);
+      final cleared = container.read(pillWorkspaceProvider('main'));
+      expect(cleared.document.text, 'latest source');
+      expect(cleared.document.instances, isEmpty);
+      expect(cleared.projection, before.projection);
+      expect(coordinator.restoreTranslations(false), isTrue);
+      expect(container.read(pillWorkspaceProvider('main')), before);
+    },
+  );
+
+  test('toggle three times and mixed display settle without translating', () {
+    final container = _testContainer();
+    final main = container.read(
+      pillWorkspaceProvider(PillScopes.main).notifier,
+    );
+    main.insertTranslationAt(offset: 0, source: 'blue', zh: 'blue');
+    final coordinator = container.read(promptTranslationCoordinatorProvider);
+    for (final original in [true, false, true]) {
+      coordinator.toggleAll(false);
+      expect(
+        container
+            .read(pillWorkspaceProvider(PillScopes.main))
+            .document
+            .instances
+            .values
+            .single
+            .translation!
+            .showOriginal,
+        original,
+      );
+    }
+    main.insertTranslationAt(offset: 0, source: 'hair', zh: 'hair');
+    coordinator.toggleAll(false);
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances
+          .values
+          .every((instance) => instance.translation!.showOriginal),
+      isTrue,
+    );
+    coordinator.toggleAll(false);
+    expect(
+      container
+          .read(pillWorkspaceProvider(PillScopes.main))
+          .document
+          .instances
+          .values
+          .every((instance) => !instance.translation!.showOriginal),
+      isTrue,
+    );
+  });
+
   test(
     'detail translation preserves raw source and never changes a generation lane',
     () async {

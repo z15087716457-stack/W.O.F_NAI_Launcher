@@ -1047,12 +1047,12 @@ class _LiveLine extends StatelessWidget {
 
 /// Markdown 正文：13.5 / 1.72，可选中，链接交给转接层。
 class AgentMarkdown extends StatelessWidget {
-  const AgentMarkdown(this.markdown, {super.key});
+  const AgentMarkdown(this.markdown, {super.key, this.onOpenLink});
   final String markdown;
+  final ValueChanged<String>? onOpenLink;
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
     final c = context.ui;
     final body = UiText.sans(13.5, color: c.ink, height: 1.72);
     return MarkdownBody(
@@ -1100,7 +1100,9 @@ class AgentMarkdown extends StatelessWidget {
         child: AgentIcon(AgentGlyphs.image, size: 16, color: c.faint),
       ),
       onTapLink: (_, href, _) {
-        if (href != null) s.actions.onOpenLink(href);
+        if (href != null) {
+          (onOpenLink ?? AgentScope.of(context).actions.onOpenLink)(href);
+        }
       },
     );
   }
@@ -1343,7 +1345,7 @@ class _ProcessState extends State<_Process> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _AgentStepRow(
+        AgentStepRow(
           step: step,
           rail: rail && !open,
           open: open,
@@ -1527,8 +1529,9 @@ class _AgentThinkingState extends State<AgentThinking> {
 }
 
 /// 一个工具步骤的行：类型图标 + 动作名 + 等宽工具名 + 右侧耗时。
-class _AgentStepRow extends StatelessWidget {
-  const _AgentStepRow({
+class AgentStepRow extends StatelessWidget {
+  const AgentStepRow({
+    super.key,
     required this.step,
     this.rail = false,
     this.open = false,
@@ -1610,7 +1613,7 @@ class _ReadGroupViewState extends State<_ReadGroupView> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (single)
-          _AgentStepRow(step: first, open: _open, onTap: toggle)
+          AgentStepRow(step: first, open: _open, onTap: toggle)
         else
           _StepRow(
             key: Key('agent-read-group-${first.id}'),

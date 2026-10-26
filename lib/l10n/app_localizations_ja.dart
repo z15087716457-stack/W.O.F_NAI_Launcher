@@ -21348,4 +21348,81 @@ class AppLocalizationsJa extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作に失敗しました：$error';
   }
+
+  @override
+  String get gen_translateTapOriginal => 'クリック：原文を表示';
+
+  @override
+  String get gen_translateTapTranslated => 'クリック：訳文を表示';
+
+  @override
+  String get gen_translateClearRestore => '翻訳ブロックを解除して原文に戻す';
+
+  @override
+  String get gen_translateClearRestoreSub => '通常の原文に戻します。元に戻せます';
+
+  @override
+  String get gen_translateCleared => '翻訳ブロックを原文に戻しました';
+
+  @override
+  String get gen_translateAdjust => '続けて翻訳を調整';
+
+  @override
+  String get gen_translateAdjustSub => 'この翻訳を続けて、分割・再翻訳・結合';
+
+  @override
+  String get gen_translateAdjustTitle => '翻訳の調整';
+
+  @override
+  String gen_translateAdjustContext(int count) {
+    return 'この翻訳を継続 · $count ブロック';
+  }
+
+  @override
+  String gen_translateAdjustSelected(int count) {
+    return '$count ブロックを選択';
+  }
+
+  @override
+  String get gen_translateAdjustCollapse => '折りたたむ / 展開';
+
+  @override
+  String get gen_translateAdjustIntro =>
+      'この翻訳を続けます。左のブロックをクリックして参照できます。変更は元に戻せます。';
+
+  @override
+  String get gen_translateAdjustSplit => '再分割';
+
+  @override
+  String get gen_translateAdjustRetranslate => '選択を再翻訳';
+
+  @override
+  String get gen_translateAdjustMerge => '選択を結合';
+
+  @override
+  String get gen_translateAdjustSplitTemplate =>
+      '現在のブロックを読み、参照ブロックを意味ごとに細分化し、原文を保持してください。';
+
+  @override
+  String get gen_translateAdjustRetranslateTemplate =>
+      '現在のブロックを読み、原文を変えずに参照ブロックを再翻訳してください。';
+
+  @override
+  String get gen_translateAdjustMergeTemplate =>
+      '現在のブロックを読み、参照ブロックを指定の原文順に結合し、無関係なブロックは保持してください。';
+
+  @override
+  String get gen_translateAdjustMarkers =>
+      'translation_blocks_read の marker 一覧を使用してください。';
+
+  @override
+  String get gen_translateAdjustHint => 'ブロックの調整方法を入力…';
+
+  @override
+  String get gen_translateAdjustStartFailed =>
+      '調整を開始できません。モデルと Agent ランタイムを確認してください。';
+
+  @override
+  String get gen_translateAdjustRunFailed =>
+      '調整が中断または失敗しました。再試行前にブロックを読み直してください。';
 }

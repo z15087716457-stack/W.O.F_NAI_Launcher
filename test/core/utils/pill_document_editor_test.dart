@@ -7,6 +7,35 @@ void main() {
   const markerB = '\uE001';
   const markerC = '\uE002';
 
+  test('disabled translations unwrap without starting to send source', () {
+    const document = PillDocument(
+      text: 'start$markerA,$markerB end',
+      instances: {
+        markerA: PillInstance(
+          blockId: '',
+          translation: TranslationPill(source: 'latest source', zh: 'reading'),
+        ),
+        markerB: PillInstance(
+          blockId: '',
+          enabled: false,
+          translation: TranslationPill(source: 'must not send', zh: 'hidden'),
+        ),
+      },
+    );
+    final projected = PillDocumentEditor.project(document, (_) => null);
+    final all = PillDocumentEditor.unwrapAllTranslations(document);
+    expect(all.text, 'startlatest source, end');
+    expect(all.instances, isEmpty);
+    expect(PillDocumentEditor.project(all, (_) => null), projected);
+    final single = PillDocumentEditor.unwrapTranslation(
+      document,
+      markerB,
+      source: 'must not send',
+    );
+    expect(PillDocumentEditor.project(single, (_) => null), projected);
+    expect(single.instances.containsKey(markerB), isFalse);
+  });
+
   group('allocateMarker / insertBlock', () {
     test(
       'negative marker survives document JSON without changing old markers',

@@ -11277,4 +11277,29 @@
       }
     }
   }
+,
+  "gen_translateTapOriginal": "点按：显示原文",
+  "gen_translateTapTranslated": "点按：显示译文",
+  "gen_translateClearRestore": "清除翻译块并还原",
+  "gen_translateClearRestoreSub": "全部变回普通原文，可撤销",
+  "gen_translateCleared": "已清除翻译块并还原原文",
+  "gen_translateAdjust": "追加翻译调整",
+  "gen_translateAdjustSub": "接着这次翻译聊，重切、重译、合并块",
+  "gen_translateAdjustTitle": "翻译调整",
+  "gen_translateAdjustContext": "续接本次翻译 · {count} 块",
+  "@gen_translateAdjustContext": {"placeholders": {"count": {"type": "int"}}},
+  "gen_translateAdjustSelected": "已选 {count} 块",
+  "@gen_translateAdjustSelected": {"placeholders": {"count": {"type": "int"}}},
+  "gen_translateAdjustCollapse": "收起 / 展开",
+  "gen_translateAdjustIntro": "接着本次翻译调整。点击左侧翻译块添加引用，改块后可以撤销。",
+  "gen_translateAdjustSplit": "重新切块",
+  "gen_translateAdjustRetranslate": "重译选中",
+  "gen_translateAdjustMerge": "合并选中",
+  "gen_translateAdjustSplitTemplate": "读取当前块，按语义细分引用的块，保留精确原文。",
+  "gen_translateAdjustRetranslateTemplate": "读取当前块，重新翻译引用的块，不改原文。",
+  "gen_translateAdjustMergeTemplate": "读取当前块，按指定的原文顺序合并引用的块，无关块不动。",
+  "gen_translateAdjustMarkers": "请使用 translation_blocks_read 返回的 marker 列表。",
+  "gen_translateAdjustHint": "描述想怎样调整翻译块…",
+  "gen_translateAdjustStartFailed": "无法启动翻译调整，请检查模型与 Agent 运行时。",
+  "gen_translateAdjustRunFailed": "调整已中止或失败，重试前请重新读取当前块。"
 }

@@ -319,18 +319,36 @@ enum GenPromptTool {
 /// 翻译按钮（`promptTranslationCoordinator`）。
 @immutable
 class GenTranslate with _GenValue {
-  const GenTranslate({this.busy = false, this.showing = false, this.route});
+  const GenTranslate({
+    this.busy = false,
+    this.showing = false,
+    this.hasTranslations = false,
+    this.canAdjust = false,
+    this.route,
+  });
 
   /// 正在翻译：图标转圈、按钮不可点。
   final bool busy;
 
-  /// 当前这一面有译文正在显示（再点一下 = 全部还原）。
+  /// 当前这一面有译文正在显示（再点一下 = 全部显示原文）。
   final bool showing;
+
+  /// 存在翻译块，不受当前显示原文还是译文影响。
+  final bool hasTranslations;
+
+  /// 本次翻译的请求/回复上下文仍可续接。
+  final bool canAdjust;
 
   /// “DeepSeek · deepseek-chat”这类线路名；null = 没配翻译模型（点了先引导去设置）。
   final String? route;
   @override
-  List<Object?> get _values => [busy, showing, route];
+  List<Object?> get _values => [
+    busy,
+    showing,
+    hasTranslations,
+    canAdjust,
+    route,
+  ];
 }
 
 @immutable
@@ -1467,6 +1485,8 @@ class GenActions {
     required this.onTranslate,
     required this.onToggleTranslation,
     required this.onTranslationSettings,
+    this.onClearTranslations,
+    this.onTranslationAdjust,
     required this.onOpenBridge,
     required this.onAddCharacter,
     required this.onClearCharacters,
@@ -1565,6 +1585,8 @@ class GenActions {
     onTranslate: () => log('onTranslate'),
     onToggleTranslation: () => log('onToggleTranslation'),
     onTranslationSettings: () => log('onTranslationSettings'),
+    onClearTranslations: () => log('onClearTranslations'),
+    onTranslationAdjust: (_) => log('onTranslationAdjust'),
     onOpenBridge: (_) => log('onOpenBridge'),
     onAddCharacter: (v) => log('onAddCharacter($v)'),
     onClearCharacters: () => log('onClearCharacters'),
@@ -1666,6 +1688,8 @@ class GenActions {
         onTranslate: onTranslate,
         onToggleTranslation: onToggleTranslation,
         onTranslationSettings: onTranslationSettings,
+        onClearTranslations: onClearTranslations,
+        onTranslationAdjust: onTranslationAdjust,
         onOpenBridge: onOpenBridge,
         onAddCharacter: onAddCharacter,
         onClearCharacters: onClearCharacters,
@@ -1781,6 +1805,8 @@ class GenActions {
 
   /// 去设置里配翻译模型。
   final VoidCallback onTranslationSettings;
+  final VoidCallback? onClearTranslations;
+  final GenAnchorCallback? onTranslationAdjust;
 
   /// 桥接图标（弹现有桥接面板）。
   final GenAnchorCallback onOpenBridge;

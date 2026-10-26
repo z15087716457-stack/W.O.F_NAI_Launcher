@@ -255,6 +255,73 @@ void main() {
       expect(r.called('onTranslationSettings'), isTrue);
     });
 
+    testWidgets('translation primary toggles repeatedly even without a route', (
+      t,
+    ) async {
+      final d = GenFixture.view();
+      for (final showing in [true, false, true]) {
+        await pump(
+          t,
+          d.copyWith(
+            prompt: GenPromptData(
+              qualityPresets: d.prompt.qualityPresets,
+              translate: GenTranslate(hasTranslations: true, showing: showing),
+            ),
+          ),
+        );
+        await tapKey(t, 'gen-translate-run');
+      }
+      expect(r.calls.where((call) => call == 'onToggleTranslation').length, 3);
+      expect(r.called('onTranslate'), isFalse);
+      expect(r.called('onTranslationSettings'), isFalse);
+    });
+
+    testWidgets(
+      'new translation calls translate, clear and adjustment menus are gated',
+      (t) async {
+        final d = GenFixture.view();
+        await pump(
+          t,
+          d.copyWith(
+            prompt: GenPromptData(
+              qualityPresets: d.prompt.qualityPresets,
+              translate: const GenTranslate(route: 'fake'),
+            ),
+          ),
+        );
+        await tapKey(t, 'gen-translate-run');
+        expect(r.called('onTranslate'), isTrue);
+        await tapKey(t, 'gen-translate-menu');
+        expect(find.byKey(const Key('gen-translate-adjust')), findsOneWidget);
+        expect(find.byKey(const Key('gen-translate-clear')), findsOneWidget);
+        await tapKey(t, 'gen-translate-adjust');
+        await tapKey(t, 'gen-translate-clear');
+        expect(r.called('onTranslationAdjust'), isFalse);
+        expect(r.called('onClearTranslations'), isFalse);
+        // Replace the page to close the still-open, disabled menu.
+        await t.pumpWidget(const SizedBox());
+        await pump(
+          t,
+          d.copyWith(
+            prompt: GenPromptData(
+              qualityPresets: d.prompt.qualityPresets,
+              translate: const GenTranslate(
+                route: 'fake',
+                hasTranslations: true,
+                canAdjust: true,
+              ),
+            ),
+          ),
+        );
+        await tapKey(t, 'gen-translate-menu');
+        await tapKey(t, 'gen-translate-clear');
+        expect(r.called('onClearTranslations'), isTrue);
+        await tapKey(t, 'gen-translate-menu');
+        await tapKey(t, 'gen-translate-adjust');
+        expect(r.called('onTranslationAdjust'), isTrue);
+      },
+    );
+
     testWidgets('块库侧栏按钮开关 dock', (t) async {
       await pump(t);
       await tapKey(t, 'gen-tool-dock');

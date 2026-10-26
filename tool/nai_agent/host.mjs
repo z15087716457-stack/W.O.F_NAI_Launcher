@@ -1,6 +1,7 @@
 // Private JSONL stdin/stdout transport. Credentials never enter argv or Pi files.
 import { createInterface } from 'node:readline';
 import { createStudioSession } from './lib/session.mjs';
+import { createTranslationSession } from './lib/translation-session.mjs';
 import { publicModel } from './lib/model.mjs';
 import { mcpRedactor } from './lib/mcp.mjs';
 import { SessionManager } from '@earendil-works/pi-coding-agent';
@@ -91,7 +92,8 @@ async function handle(message) {
     workspaceId = message.workspaceId;
     redact = mcpRedactor(message.config, message.mcp);
     requestLimit = Math.max(1, Math.min(200, message.config.maxRequestsPerRun ?? 32));
-    created = await createStudioSession({ ...message, executeTool, acquireRequest, deferBinding: true,
+    const create = message.sessionKind === 'translation' ? createTranslationSession : createStudioSession;
+    created = await create({ ...message, executeTool, acquireRequest, deferBinding: true,
       onSession: value => { session = value; },
       onExtensionUi: event => {
         if (readingMcpStatus && event.method === 'notify' &&

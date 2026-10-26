@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/nai_agent/translation_context.dart';
+import '../../core/nai_agent/agent_tool.dart';
+import '../../core/utils/translation_block_edit.dart';
 
 import '../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../core/utils/prompt_translation_document.dart';
@@ -79,6 +84,9 @@ Set<String> _editorTagCandidates(String text) {
   collect(text);
   return result.take(160).toSet();
 }
+
+final promptTranslationContextsProvider =
+    StateProvider<Map<bool, TranslationContext>>((ref) => {});
 
 final promptTranslationBusyProvider = StateProvider<bool>((ref) => false);
 
@@ -179,6 +187,11 @@ class PromptTranslationCoordinator {
   }
 
   Map<String, ({PillDocument before, PillDocument after})> _lastUndo = {};
+  final Map<
+    bool,
+    List<Map<String, ({PillDocument before, PillDocument after})>>
+  >
+  _adjustmentUndo = {};
   final Map<bool, Map<String, ({PillDocument before, PillDocument after})>>
   _plainTextUndo = {};
 
@@ -216,6 +229,83 @@ class PromptTranslationCoordinator {
     if (plain.isNotEmpty) {
       _ref.read(provider.notifier).replaceWithPlainText(plain);
     }
+  }
+
+  Map<String, PillDocument> adjustmentDocuments(bool negative) => {
+    for (final scope in _scopes(negative, includeDisabled: true))
+      scope: _ref.read(pillWorkspaceProvider(scope)).document,
+  };
+
+  static List<Map<String, dynamic>> blockMap(
+    Map<String, PillDocument> documents,
+  ) => [
+    for (final entry in documents.entries)
+      for (final item
+          in entry.value.text
+              .split('')
+              .toSet()
+              .where(
+                (marker) => entry.value.instances[marker]?.translation != null,
+              )
+              .indexed)
+        if (entry.value.instances[item.$2]?.translation case final pill?)
+          {
+            'scope': entry.key,
+            'marker': item.$2,
+            'index': item.$1 + 1,
+            'offset': entry.value.text.indexOf(item.$2),
+            'source': pill.source,
+            'translation': pill.zh,
+            'enabled': entry.value.instances[item.$2]!.enabled,
+          },
+  ];
+
+  String adjustmentVersion(bool negative) => sha256
+      .convert(
+        utf8.encode(
+          jsonEncode({
+            for (final entry in adjustmentDocuments(negative).entries)
+              entry.key: entry.value.toJson(),
+          }),
+        ),
+      )
+      .toString();
+
+  Map<String, dynamic> readAdjustment(bool negative) => {
+    'version': adjustmentVersion(negative),
+    'blocks': blockMap(adjustmentDocuments(negative)),
+  };
+
+  Map<String, dynamic> editAdjustment(
+    bool negative,
+    String expectedVersion,
+    List<Map<String, dynamic>> operations,
+  ) {
+    if (_ref.read(promptTranslationBusyProvider) ||
+        adjustmentVersion(negative) != expectedVersion) {
+      throw const NaiAgentToolError(
+        'translation_conflict',
+        'Document changed; read blocks again',
+      );
+    }
+    final before = adjustmentDocuments(negative);
+    final after = TranslationBlockEdit.apply(before, operations);
+    // No await between validation, in-memory backup and writes. The coordinator
+    // groups all lanes in one conflict-safe undo entry before replacing them.
+    final undo = <String, ({PillDocument before, PillDocument after})>{};
+    for (final entry in after.entries) {
+      if (entry.value == before[entry.key]) continue;
+      undo[entry.key] = (before: before[entry.key]!, after: entry.value);
+    }
+    if (undo.isNotEmpty) {
+      _adjustmentUndo.putIfAbsent(negative, () => []).add(undo);
+    }
+    for (final entry in undo.entries) {
+      _ref
+          .read(pillWorkspaceProvider(entry.key).notifier)
+          .replaceIfCurrent(entry.value.before, entry.value.after);
+    }
+    return readAdjustment(negative);
   }
 
   bool hasTranslations(bool negative) => _scopes(negative).any((scope) {
@@ -285,7 +375,7 @@ class PromptTranslationCoordinator {
   }
 
   void toggleAll(bool negative) {
-    final scopes = _scopes(negative);
+    final scopes = _scopes(negative, includeDisabled: true);
     final translations = [
       for (final scope in scopes)
         ..._ref
@@ -297,7 +387,9 @@ class PromptTranslationCoordinator {
             .whereType<TranslationPill>(),
     ];
     if (translations.isEmpty) return;
-    final original = translations.every((pill) => !pill.showOriginal);
+    // Match the button/tooltip: any visible reading means show all originals.
+    // A second press then shows all readings, including an initially mixed face.
+    final original = translations.any((pill) => !pill.showOriginal);
     for (final scope in scopes) {
       _ref
           .read(pillWorkspaceProvider(scope).notifier)
@@ -322,6 +414,7 @@ class PromptTranslationCoordinator {
 
       final groups = <String, List<PromptTranslationGroup>>{};
       final languageCode = language.code;
+      final exchanges = <TranslationExchange>[];
       for (final part in batch.partitions()) {
         final glossary = await _glossaryFor(part);
         final raw = await _ref
@@ -330,6 +423,12 @@ class PromptTranslationCoordinator {
               part.requestJson(glossary, languageCode: languageCode),
               sessionId: 'prompt-translation-${negative ? 'neg' : 'pos'}',
             );
+        final exchange = _ref
+            .read(promptAssistantServiceProvider)
+            .takeTranslationExchange(
+              'prompt-translation-${negative ? 'neg' : 'pos'}',
+            );
+        if (exchange != null) exchanges.add(exchange);
         final parsed = part.parseGroups(
           raw,
           glossary: glossary,
@@ -365,6 +464,15 @@ class PromptTranslationCoordinator {
         }
       }
       _lastUndo = undo;
+      if (converted > 0 && exchanges.isNotEmpty) {
+        _ref.read(promptTranslationContextsProvider.notifier).state = {
+          ..._ref.read(promptTranslationContextsProvider),
+          negative: TranslationContext(
+            List.unmodifiable(exchanges),
+            blockMap(adjustmentDocuments(negative)),
+          ),
+        };
+      }
       return PromptTranslationResult(converted, changed);
     } finally {
       _ref.read(promptTranslationBusyProvider.notifier).state = false;
@@ -535,6 +643,32 @@ class PromptTranslationCoordinator {
       // Optional marks must never prevent a successful text translation.
       return const {};
     }
+  }
+
+  bool canUndoAdjustment(bool negative) {
+    final history = _adjustmentUndo[negative];
+    if (history == null || history.isEmpty) return false;
+    final scopes = _scopes(negative, includeDisabled: true).toSet();
+    final undo = history.last;
+    return undo.keys.every(scopes.contains) &&
+        undo.entries.every(
+          (entry) => _sameExceptDisplay(
+            entry.value.after,
+            _ref.read(pillWorkspaceProvider(entry.key)).document,
+          ),
+        );
+  }
+
+  bool undoAdjustment(bool negative) {
+    if (!canUndoAdjustment(negative)) return false;
+    final undo = _adjustmentUndo[negative]!.removeLast();
+    for (final entry in undo.entries) {
+      final lane = pillWorkspaceProvider(entry.key);
+      _ref
+          .read(lane.notifier)
+          .replaceIfCurrent(_ref.read(lane).document, entry.value.before);
+    }
+    return true;
   }
 
   bool get canUndoLast => _lastUndo.entries.any((entry) {

@@ -396,15 +396,14 @@ final generationViewDataProvider = Provider.autoDispose
           ),
         ),
         for (final role in projectedCharacters)
-          if (role.enabled)
-            PillDocument.fromJson(
-              Map<String, dynamic>.from(
-                draft.documents['characters']['lanes'][role.id][negative
-                        ? 'negative'
-                        : 'positive']
-                    as Map,
-              ),
+          PillDocument.fromJson(
+            Map<String, dynamic>.from(
+              draft.documents['characters']['lanes'][role.id][negative
+                      ? 'negative'
+                      : 'positive']
+                  as Map,
             ),
+          ),
       ];
       final translations = [
         for (final document in translationDocuments)
@@ -501,6 +500,9 @@ final generationViewDataProvider = Provider.autoDispose
           translate: GenTranslate(
             busy: translating,
             showing: translations.any((pill) => !pill.showOriginal),
+            hasTranslations: translations.isNotEmpty,
+            canAdjust:
+                ref.watch(promptTranslationContextsProvider)[negative] != null,
             route: translationRoute,
           ),
           bridge: feedback == null
