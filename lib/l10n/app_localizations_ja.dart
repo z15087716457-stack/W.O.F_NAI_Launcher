@@ -14521,9 +14521,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_translateNeedsModel => '翻訳モデル未設定。クリックして設定';
 
   @override
-  String get gen_translateRestore => '原文を表示';
-
-  @override
   String gen_translateWith(Object route) {
     return '翻訳（$route）';
   }
@@ -21516,4 +21513,36 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_groupBatches => 'グループ';
+
+  @override
+  String get gen_translateAdjustPickHint => '左のブロックをクリックで参照';
+
+  @override
+  String get gen_translateAdjustClearRefs => '参照をクリア';
+
+  @override
+  String get gen_translateAdjustStepRead => 'ブロックを読む';
+
+  @override
+  String get gen_translateAdjustStepEdit => 'ブロックを調整';
+
+  @override
+  String gen_translateAdjustOpSplit(int count) {
+    return '分割 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpMerge(int count) {
+    return '結合 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRetranslate(int count) {
+    return '再翻訳 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRejoin(int count) {
+    return '復元 $count';
+  }
 }

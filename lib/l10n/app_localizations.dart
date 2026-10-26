@@ -25937,12 +25937,6 @@ abstract class AppLocalizations {
   /// **'No translation model yet — click to set one up'**
   String get gen_translateNeedsModel;
 
-  /// No description provided for @gen_translateRestore.
-  ///
-  /// In en, this message translates to:
-  /// **'Show original'**
-  String get gen_translateRestore;
-
   /// No description provided for @gen_translateWith.
   ///
   /// In en, this message translates to:
@@ -38703,6 +38697,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Group'**
   String get gen_groupBatches;
+
+  /// No description provided for @gen_translateAdjustPickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Click blocks on the left to reference'**
+  String get gen_translateAdjustPickHint;
+
+  /// No description provided for @gen_translateAdjustClearRefs.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear references'**
+  String get gen_translateAdjustClearRefs;
+
+  /// No description provided for @gen_translateAdjustStepRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Read blocks'**
+  String get gen_translateAdjustStepRead;
+
+  /// No description provided for @gen_translateAdjustStepEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit blocks'**
+  String get gen_translateAdjustStepEdit;
+
+  /// No description provided for @gen_translateAdjustOpSplit.
+  ///
+  /// In en, this message translates to:
+  /// **'split {count}'**
+  String gen_translateAdjustOpSplit(int count);
+
+  /// No description provided for @gen_translateAdjustOpMerge.
+  ///
+  /// In en, this message translates to:
+  /// **'merge {count}'**
+  String gen_translateAdjustOpMerge(int count);
+
+  /// No description provided for @gen_translateAdjustOpRetranslate.
+  ///
+  /// In en, this message translates to:
+  /// **'retranslate {count}'**
+  String gen_translateAdjustOpRetranslate(int count);
+
+  /// No description provided for @gen_translateAdjustOpRejoin.
+  ///
+  /// In en, this message translates to:
+  /// **'restore {count}'**
+  String gen_translateAdjustOpRejoin(int count);
 }
 
 class _AppLocalizationsDelegate

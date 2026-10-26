@@ -8124,7 +8124,6 @@
   "gen_relatedSub": "补全时推荐常一起出现的标签",
   "gen_translating": "正在翻译…",
   "gen_translateNeedsModel": "还没配翻译模型，点一下去设置",
-  "gen_translateRestore": "显示原文",
   "gen_translateWith": "翻译（{route}）",
   "@gen_translateWith": {
     "placeholders": {
@@ -11364,5 +11363,13 @@
   },
   "set_cvGroupBatches": "批量结果按批次分组",
   "set_cvGroupBatchesSub": "关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。",
-  "gen_groupBatches": "分组"
+  "gen_groupBatches": "分组",
+  "gen_translateAdjustPickHint": "在左侧点块可引用",
+  "gen_translateAdjustClearRefs": "清除引用",
+  "gen_translateAdjustStepRead": "读取翻译块",
+  "gen_translateAdjustStepEdit": "调整翻译块",
+  "gen_translateAdjustOpSplit": "拆分 {count}",
+  "gen_translateAdjustOpMerge": "合并 {count}",
+  "gen_translateAdjustOpRetranslate": "重译 {count}",
+  "gen_translateAdjustOpRejoin": "还原 {count}"
 }

@@ -14,6 +14,7 @@ import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_history.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
@@ -499,6 +500,10 @@ void main() {
     (tester) async {
       final container = _createContainerWithPreviewImage();
       addTearDown(container.dispose);
+      // 网格只在“按批次分组”开启时出现；默认逐张显示。
+      await container
+          .read(simpleViewerGroupBatchesProvider.notifier)
+          .setGrouped(true);
 
       await tester.pumpWidget(_buildPreviewApp(container));
       await tester.pumpAndSettle();

@@ -23,7 +23,7 @@ import '../providers/subscription_provider.dart';
 import '../router/app_router.dart';
 import '../ui/gen/gen_contract.dart';
 import '../ui/gen/gen_page.dart';
-import '../ui/gen/translation_adjustment_overlay.dart';
+import 'translation_adjustment_overlay.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import 'generation_backend.dart';
 import 'generation_canvas_wiring.dart';

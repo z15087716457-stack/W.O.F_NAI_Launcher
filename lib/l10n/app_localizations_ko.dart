@@ -14554,9 +14554,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_translateNeedsModel => '번역 모델이 없습니다. 클릭하여 설정';
 
   @override
-  String get gen_translateRestore => '원문 보기';
-
-  @override
   String gen_translateWith(Object route) {
     return '번역 ($route)';
   }
@@ -21588,4 +21585,36 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_groupBatches => '그룹';
+
+  @override
+  String get gen_translateAdjustPickHint => '왼쪽 블록을 클릭해 참조';
+
+  @override
+  String get gen_translateAdjustClearRefs => '참조 지우기';
+
+  @override
+  String get gen_translateAdjustStepRead => '블록 읽기';
+
+  @override
+  String get gen_translateAdjustStepEdit => '블록 조정';
+
+  @override
+  String gen_translateAdjustOpSplit(int count) {
+    return '분할 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpMerge(int count) {
+    return '병합 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRetranslate(int count) {
+    return '재번역 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRejoin(int count) {
+    return '복원 $count';
+  }
 }

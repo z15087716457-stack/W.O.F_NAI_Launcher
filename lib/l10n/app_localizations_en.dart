@@ -14945,9 +14945,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'No translation model yet — click to set one up';
 
   @override
-  String get gen_translateRestore => 'Show original';
-
-  @override
   String gen_translateWith(Object route) {
     return 'Translate ($route)';
   }
@@ -22274,4 +22271,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gen_groupBatches => 'Group';
+
+  @override
+  String get gen_translateAdjustPickHint =>
+      'Click blocks on the left to reference';
+
+  @override
+  String get gen_translateAdjustClearRefs => 'Clear references';
+
+  @override
+  String get gen_translateAdjustStepRead => 'Read blocks';
+
+  @override
+  String get gen_translateAdjustStepEdit => 'Edit blocks';
+
+  @override
+  String gen_translateAdjustOpSplit(int count) {
+    return 'split $count';
+  }
+
+  @override
+  String gen_translateAdjustOpMerge(int count) {
+    return 'merge $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRetranslate(int count) {
+    return 'retranslate $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRejoin(int count) {
+    return 'restore $count';
+  }
 }

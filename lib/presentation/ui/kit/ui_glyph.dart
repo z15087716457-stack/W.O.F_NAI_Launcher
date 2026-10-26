@@ -107,6 +107,10 @@ abstract final class UiGlyphs {
   static const login = 'M10 17l5-5-5-5M15 12H3M14 4h6v16h-6';
   static const move = 'M4 7h16M4 12h10M4 17h7M17 14l3 3-3 3';
   static const pencil = 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4';
+  static const wrench =
+      'M14.7 6.3a4 4 0 00-5.4 5.4L3.5 17.5l3 3 5.8-5.8a4 4 0 005.4-5.4l-2.6 2.6-2.3-.6-.6-2.3z';
+  static const unfold = 'M4 6h16M4 12h9M4 18h16M16 9l3 3-3 3';
+  static const saveAs = 'M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6';
   static const trash = 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3';
 
   // Vibe / 精准参考库（.devin/mockups/refs/mock.html）
@@ -151,6 +155,11 @@ abstract final class UiGlyphs {
   static const minus = 'M5 12h14';
   static const drag = 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01';
   static const merge = 'M6 4v5a6 6 0 006 6h6M15 12l3 3-3 3M6 20v-3';
+  static const scissors =
+      'M6 9a3 3 0 100-6 3 3 0 000 6zM6 21a3 3 0 100-6 3 3 0 000 6zM8.4 7.6L20 18M8.4 16.4L20 6';
+  static const undo = 'M9 14L4 9l5-5M4 9h11a5 5 0 010 10h-3';
+  static const translate =
+      'M4 5h8M8 3v2M6 5c0 3.5 2.6 6.4 6 7.5M10.5 5C9.6 8.8 7 11.5 4 12.5M13 21l4-9 4 9M14.5 18h5';
 
   // 画风探索（.devin/mockups/style-explore/mock.html）
   static const expand = 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5';

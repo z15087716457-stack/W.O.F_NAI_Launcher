@@ -8124,7 +8124,6 @@
   "gen_relatedSub": "Suggest tags that often appear together",
   "gen_translating": "Translating…",
   "gen_translateNeedsModel": "No translation model yet — click to set one up",
-  "gen_translateRestore": "Show original",
   "gen_translateWith": "Translate ({route})",
   "@gen_translateWith": {
     "placeholders": {
@@ -11376,5 +11375,41 @@
   },
   "set_cvGroupBatches": "Group batch results",
   "set_cvGroupBatchesSub": "When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.",
-  "gen_groupBatches": "Group"
+  "gen_groupBatches": "Group",
+  "gen_translateAdjustPickHint": "Click blocks on the left to reference",
+  "gen_translateAdjustClearRefs": "Clear references",
+  "gen_translateAdjustStepRead": "Read blocks",
+  "gen_translateAdjustStepEdit": "Edit blocks",
+  "gen_translateAdjustOpSplit": "split {count}",
+  "@gen_translateAdjustOpSplit": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustOpMerge": "merge {count}",
+  "@gen_translateAdjustOpMerge": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustOpRetranslate": "retranslate {count}",
+  "@gen_translateAdjustOpRetranslate": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_translateAdjustOpRejoin": "restore {count}",
+  "@gen_translateAdjustOpRejoin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

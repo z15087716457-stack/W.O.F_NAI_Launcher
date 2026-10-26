@@ -8124,7 +8124,6 @@
   "gen_relatedSub": "一緒に使われやすいタグを提案",
   "gen_translating": "翻訳中…",
   "gen_translateNeedsModel": "翻訳モデル未設定。クリックして設定",
-  "gen_translateRestore": "原文を表示",
   "gen_translateWith": "翻訳（{route}）",
   "@gen_translateWith": {
     "placeholders": {
@@ -11364,5 +11363,13 @@
   },
   "set_cvGroupBatches": "一括生成の結果をグループ化",
   "set_cvGroupBatchesSub": "オフの場合は画像を1枚ずつ表示し、履歴のサムネイルでその画像を選べます。シンプルビューアーのみに適用され、無限キャンバスでは常にバッチごとに配置します。",
-  "gen_groupBatches": "グループ"
+  "gen_groupBatches": "グループ",
+  "gen_translateAdjustPickHint": "左のブロックをクリックで参照",
+  "gen_translateAdjustClearRefs": "参照をクリア",
+  "gen_translateAdjustStepRead": "ブロックを読む",
+  "gen_translateAdjustStepEdit": "ブロックを調整",
+  "gen_translateAdjustOpSplit": "分割 {count}",
+  "gen_translateAdjustOpMerge": "結合 {count}",
+  "gen_translateAdjustOpRetranslate": "再翻訳 {count}",
+  "gen_translateAdjustOpRejoin": "復元 {count}"
 }

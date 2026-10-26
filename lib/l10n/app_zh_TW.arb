@@ -8124,7 +8124,6 @@
   "gen_relatedSub": "補全時推薦常一起出現的標籤",
   "gen_translating": "正在翻譯…",
   "gen_translateNeedsModel": "還沒配翻譯模型，點一下去設定",
-  "gen_translateRestore": "顯示原文",
   "gen_translateWith": "翻譯（{route}）",
   "@gen_translateWith": {
     "placeholders": {
@@ -11949,5 +11948,13 @@
   },
   "set_cvGroupBatches": "批次結果按批次分組",
   "set_cvGroupBatchesSub": "關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。",
-  "gen_groupBatches": "分組"
+  "gen_groupBatches": "分組",
+  "gen_translateAdjustPickHint": "在左側點塊可引用",
+  "gen_translateAdjustClearRefs": "清除引用",
+  "gen_translateAdjustStepRead": "讀取翻譯塊",
+  "gen_translateAdjustStepEdit": "調整翻譯塊",
+  "gen_translateAdjustOpSplit": "拆分 {count}",
+  "gen_translateAdjustOpMerge": "合併 {count}",
+  "gen_translateAdjustOpRetranslate": "重譯 {count}",
+  "gen_translateAdjustOpRejoin": "還原 {count}"
 }

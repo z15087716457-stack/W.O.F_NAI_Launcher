@@ -8124,7 +8124,6 @@
   "gen_relatedSub": "자주 함께 쓰는 태그 추천",
   "gen_translating": "번역 중…",
   "gen_translateNeedsModel": "번역 모델이 없습니다. 클릭하여 설정",
-  "gen_translateRestore": "원문 보기",
   "gen_translateWith": "번역 ({route})",
   "@gen_translateWith": {
     "placeholders": {
@@ -11364,5 +11363,13 @@
   },
   "set_cvGroupBatches": "일괄 생성 결과를 그룹으로 표시",
   "set_cvGroupBatchesSub": "끄면 이미지를 한 장씩 표시하며 기록 썸네일을 클릭해 해당 이미지를 봅니다. 간단 뷰어에만 적용되며 무한 캔버스는 항상 배치별로 배치합니다.",
-  "gen_groupBatches": "그룹"
+  "gen_groupBatches": "그룹",
+  "gen_translateAdjustPickHint": "왼쪽 블록을 클릭해 참조",
+  "gen_translateAdjustClearRefs": "참조 지우기",
+  "gen_translateAdjustStepRead": "블록 읽기",
+  "gen_translateAdjustStepEdit": "블록 조정",
+  "gen_translateAdjustOpSplit": "분할 {count}",
+  "gen_translateAdjustOpMerge": "병합 {count}",
+  "gen_translateAdjustOpRetranslate": "재번역 {count}",
+  "gen_translateAdjustOpRejoin": "복원 {count}"
 }

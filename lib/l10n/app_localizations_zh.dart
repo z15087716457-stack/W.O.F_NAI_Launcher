@@ -14316,9 +14316,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_translateNeedsModel => '还没配翻译模型，点一下去设置';
 
   @override
-  String get gen_translateRestore => '显示原文';
-
-  @override
   String gen_translateWith(Object route) {
     return '翻译（$route）';
   }
@@ -21272,6 +21269,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_groupBatches => '分组';
+
+  @override
+  String get gen_translateAdjustPickHint => '在左侧点块可引用';
+
+  @override
+  String get gen_translateAdjustClearRefs => '清除引用';
+
+  @override
+  String get gen_translateAdjustStepRead => '读取翻译块';
+
+  @override
+  String get gen_translateAdjustStepEdit => '调整翻译块';
+
+  @override
+  String gen_translateAdjustOpSplit(int count) {
+    return '拆分 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpMerge(int count) {
+    return '合并 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRetranslate(int count) {
+    return '重译 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRejoin(int count) {
+    return '还原 $count';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -35586,9 +35615,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_translateNeedsModel => '還沒配翻譯模型，點一下去設定';
 
   @override
-  String get gen_translateRestore => '顯示原文';
-
-  @override
   String gen_translateWith(Object route) {
     return '翻譯（$route）';
   }
@@ -42542,4 +42568,36 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_groupBatches => '分組';
+
+  @override
+  String get gen_translateAdjustPickHint => '在左側點塊可引用';
+
+  @override
+  String get gen_translateAdjustClearRefs => '清除引用';
+
+  @override
+  String get gen_translateAdjustStepRead => '讀取翻譯塊';
+
+  @override
+  String get gen_translateAdjustStepEdit => '調整翻譯塊';
+
+  @override
+  String gen_translateAdjustOpSplit(int count) {
+    return '拆分 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpMerge(int count) {
+    return '合併 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRetranslate(int count) {
+    return '重譯 $count';
+  }
+
+  @override
+  String gen_translateAdjustOpRejoin(int count) {
+    return '還原 $count';
+  }
 }

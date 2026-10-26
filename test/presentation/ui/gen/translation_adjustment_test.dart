@@ -17,7 +17,7 @@ import 'package:nai_launcher/presentation/providers/prompt_block_library_provide
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
 import 'package:nai_launcher/presentation/providers/translation_adjustment_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
-import 'package:nai_launcher/presentation/ui/gen/translation_adjustment_overlay.dart';
+import 'package:nai_launcher/presentation/wiring/translation_adjustment_overlay.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
 
@@ -260,7 +260,7 @@ void main() {
         await tester.enterText(input, 'stop fixture');
         await tester.sendKeyEvent(LogicalKeyboardKey.enter);
         await tester.pump();
-        expect(find.byIcon(Icons.stop), findsOneWidget);
+        expect(find.byKey(const Key('translation-adjustment-stop-glyph')), findsOneWidget);
         await tester.tap(find.byKey(const Key('translation-adjustment-send')));
         await tester.pumpAndSettle();
         expect(client.stops, 1);
