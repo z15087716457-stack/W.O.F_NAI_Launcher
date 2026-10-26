@@ -49,6 +49,7 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.completionSoundFile => l.set_apSoundFile,
     SettingKey.historyClick => l.set_cvHistoryClick,
     SettingKey.outputViewer => l.set_cvViewer,
+    SettingKey.simpleViewerGroupBatches => l.set_cvGroupBatches,
     SettingKey.canvasLockCamera => l.set_cvLock,
     SettingKey.canvasZoomToFill => l.set_cvFill,
     SettingKey.shortcutsEnabled => l.set_scEnabled,
@@ -115,7 +116,9 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.reduceMotion ||
     SettingKey.completionSound ||
     SettingKey.completionSoundFile => l.set_apMotion,
-    SettingKey.historyClick || SettingKey.outputViewer => l.set_cvBrowse,
+    SettingKey.historyClick ||
+    SettingKey.outputViewer ||
+    SettingKey.simpleViewerGroupBatches => l.set_cvBrowse,
     SettingKey.canvasLockCamera ||
     SettingKey.canvasZoomToFill => l.set_cvCanvasSec,
     SettingKey.shortcutsEnabled ||
@@ -198,6 +201,7 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
 /// 整个设置的搜索索引（按目录顺序）。
 /// 只参与匹配的同义词（不分语言，主要是英文键和常见说法）。
 const _synonyms = <SettingKey, String>{
+  SettingKey.simpleViewerGroupBatches: 'simple viewer batch group',
   SettingKey.costWarning: 'anlas cost',
   SettingKey.costThreshold: 'anlas cost',
   SettingKey.intervalSeconds: 'delay rate limit',

@@ -1422,6 +1422,7 @@ class GenSlots {
     this.emptyCanvas,
     this.translationGuide,
     this.agentToggle,
+    this.viewerControls,
     this.historyCaptionInset = true,
     this.preserveHistory = false,
   });
@@ -1437,6 +1438,9 @@ class GenSlots {
 
   /// 仅应用启用 Agent 集成时提供。
   final Widget? agentToggle;
+
+  /// 简洁查看器的展示选项，不改变画布数据。
+  final Widget? viewerControls;
 
   /// Agent 停靠右侧时，历史栏不再占用窗口按钮所在的一行。
   final bool historyCaptionInset;

@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/krita/bridge_session.dart';
+import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../providers/comfyui/comfyui_provider.dart';
@@ -88,7 +89,11 @@ class SettingsNetwork extends Notifier<SettingsNetworkData> {
     final proxy = ref.read(currentProxyAddressProvider);
     final targets = <(SettingsEndpointKind, String, String)>[
       (SettingsEndpointKind.naiImage, 'https://image.novelai.net', ''),
-      (SettingsEndpointKind.naiApi, 'https://api.novelai.net', ''),
+      (
+        SettingsEndpointKind.naiApi,
+        ref.read(naiApiEndpointServiceProvider).current.userUrl('/user/login'),
+        '',
+      ),
       (SettingsEndpointKind.danbooru, 'https://danbooru.donmai.us', ''),
       (SettingsEndpointKind.update, 'https://api.github.com', ''),
       for (final provider in providers)

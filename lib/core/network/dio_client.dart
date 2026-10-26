@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:dio_http2_adapter/dio_http2_adapter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,12 +20,14 @@ part 'dio_client.g.dart';
 /// Dio 客户端 Provider
 ///
 /// 根据代理设置动态选择 HTTP 适配器：
-/// - 有代理时：使用默认 HTTP/1.1 适配器（配合 HttpOverrides.global 使用代理）
+/// - 有代理时：使用 HTTP/1.1 适配器，显式应用本次解析的代理
 /// - 无代理时：使用 HTTP/2 适配器（提升并发性能）
 @Riverpod(keepAlive: true)
 Dio dioClient(Ref ref) {
-  // 监听代理设置变化，当代理设置改变时会触发 Dio 重建
-  final proxyAddress = ref.watch(currentProxyAddressProvider);
+  // 监听设置而非已缓存的代理地址，每次重建都重新解析系统代理。
+  final proxyAddress = ref
+      .watch(proxySettingsNotifierProvider)
+      .effectiveProxyAddress;
 
   final dio = Dio(
     BaseOptions(
@@ -40,10 +45,18 @@ Dio dioClient(Ref ref) {
 
   // 根据代理设置选择适配器
   if (proxyAddress != null && proxyAddress.isNotEmpty) {
-    // 有代理时：使用默认 HTTP/1.1 适配器
-    // 默认适配器内部使用 dart:io.HttpClient，会自动遵循 HttpOverrides.global
-    AppLogger.i('Dio using proxy: $proxyAddress (HTTP/1.1 adapter)', 'NETWORK');
-    // 不设置 httpClientAdapter，使用默认值
+    // 不沿用进程启动时 HttpOverrides 缓存的代理。
+    AppLogger.i(
+      'Dio using HTTP proxy host=${Uri.tryParse('http://$proxyAddress')?.host} (h1)',
+      'NETWORK',
+    );
+    dio.httpClientAdapter = IOHttpClientAdapter(
+      createHttpClient: () {
+        final client = HttpClient();
+        client.findProxy = (_) => 'PROXY $proxyAddress';
+        return client;
+      },
+    );
   } else {
     // 无代理时：使用 HTTP/2 适配器以提升并发性能
     AppLogger.d('Dio using HTTP/2 adapter (no proxy)', 'NETWORK');

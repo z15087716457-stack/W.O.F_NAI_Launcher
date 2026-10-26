@@ -33,6 +33,7 @@ import 'package:nai_launcher/presentation/providers/image_generation_provider.da
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
@@ -1163,6 +1164,80 @@ void main() {
     }
     expect(tester.takeException(), isNull);
   });
+  testWidgets('简洁模式历史逐张、选中第2张、分组快捷开关同步且无限画布不受影响', (tester) async {
+    final a = image(4, 0);
+    final b = image(4, 1);
+    publish(ImageGenerationState(history: [a, b], displayImages: [a, b]));
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    await pump(tester, fullPage: true);
+    expect(container.read(generationHistoryBatchesProvider), hasLength(2));
+    expect(find.byKey(Key('gen-tile-${b.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-tile-${a.id}')), findsNothing);
+    container.read(generationHistoryActionsProvider).focusBatch('img:${a.id}');
+    await tester.pumpAndSettle();
+    expect(find.byKey(Key('gen-tile-${a.id}')), findsOneWidget);
+    container.read(generationPreviewFocusNodeProvider).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(container.read(generationPreviewSelectionProvider), b.id);
+    expect(find.byKey(Key('gen-tile-${b.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-tile-${a.id}')), findsNothing);
+    await tester.tap(find.byKey(const Key('simple-viewer-group-batches')));
+    await tester.pumpAndSettle();
+    expect(container.read(simpleViewerGroupBatchesProvider), true);
+    expect(
+      storage.getSetting<bool>(StorageKeys.simpleViewerGroupBatches),
+      true,
+    );
+    expect(container.read(generationHistoryBatchesProvider), hasLength(1));
+    expect(find.byKey(Key('gen-tile-${a.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-tile-${b.id}')), findsOneWidget);
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(false);
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(false);
+    await tester.pumpAndSettle();
+    expect(container.read(generationHistoryBatchesProvider), hasLength(1));
+    expect(find.byType(GenerationCanvasWiring), findsOneWidget);
+    expect(find.byKey(const Key('simple-viewer-group-batches')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('简洁模式新批完成显示最新单张，生成中保留多槽位', (tester) async {
+    await container
+        .read(simpleOutputViewerNotifierProvider.notifier)
+        .setSimple(true);
+    final old = image(1);
+    publish(ImageGenerationState(history: [old], displayImages: [old]));
+    await pump(tester, fullPage: true);
+    publish(loading(9, count: 2));
+    await tester.pump();
+    expect(container.read(generationFocusViewProvider)!.tiles, hasLength(2));
+    container.read(generationPreviewSelectionProvider.notifier).select(old.id);
+    final first = image(9, 0);
+    final last = image(9, 1);
+    publish(
+      ImageGenerationState(
+        status: GenerationStatus.completed,
+        currentImages: [first, last],
+        history: [old],
+        displayImages: [first, last],
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      container.read(generationFocusViewProvider)!.tiles.single.id,
+      last.id,
+    );
+    expect(find.byKey(Key('gen-tile-${last.id}')), findsOneWidget);
+    expect(find.byKey(Key('gen-tile-${first.id}')), findsNothing);
+  });
+
   testWidgets('简单模式不挂相机，切回后定位原选择且可反复切换', (tester) async {
     publish(ImageGenerationState(history: [image(2), image(1)]));
     await container

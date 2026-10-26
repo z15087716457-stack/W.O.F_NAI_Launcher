@@ -28,6 +28,7 @@ import '../providers/generation/image_workflow_controller.dart';
 import '../providers/generation/local_upscale_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/simple_viewer_group_batches_provider.dart';
 import '../providers/image_save_settings_provider.dart';
 import '../providers/krita/bridge_agent_feedback.dart';
 import '../providers/krita/bridge_draft_snapshot.dart';
@@ -136,6 +137,7 @@ final generationFocusViewProvider = Provider<GenGroup?>((ref) {
     focus: ref.watch(generationCanvasGroupSelectionProvider),
     selectedImage: ref.watch(generationPreviewSelectionProvider),
     pinned: ref.read(canvasPinnedNotifierProvider.notifier).images,
+    singleImages: ref.watch(simpleViewerSingleImagesProvider),
   );
 });
 
@@ -166,6 +168,7 @@ final generationHistoryBatchesProvider = Provider<List<GenBatch>>((ref) {
     favorites:
         ref.watch(generationFavoriteImagesProvider).valueOrNull ?? const {},
     now: ref.read(generationClockProvider)(),
+    singleImages: ref.watch(simpleViewerSingleImagesProvider),
   ).batches;
 });
 

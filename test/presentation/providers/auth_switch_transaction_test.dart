@@ -53,12 +53,15 @@ class _Api extends NAIAuthApiService {
   final automaticStarted = Completer<void>();
   final automaticResponse = Completer<Map<String, dynamic>>();
   NaiApiEndpointConfig? requestedEndpoint;
+  final cancels = <CancelToken?>[];
   @override
   Future<Map<String, dynamic>> validateToken(
     String token, {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool allowAnyTokenFormat = false,
+    CancelToken? cancelToken,
   }) async {
+    cancels.add(cancelToken);
     if (token == tokenA) {
       if (holdAutomatic) {
         automaticStarted.complete();
@@ -275,6 +278,130 @@ void main() {
       );
     }
   }
+  test(
+    'new login cancels old request token before validating replacement',
+    () async {
+      await loginA(false);
+      final old = auth.switchAccount(
+        'B',
+        tokenB,
+        accountType: AccountType.token,
+      );
+      await api.started.future;
+      final oldCancel = api.cancels.last!;
+      expect(oldCancel.isCancelled, false);
+      expect(await auth.loginWithToken(tokenC, accountId: 'C'), true);
+      expect(oldCancel.isCancelled, true);
+      api.response.complete({'tier': 1});
+      expect(await old, false);
+      expect(container.read(authNotifierProvider).accountId, 'C');
+    },
+  );
+
+  for (final status in [null, 401, 403, 503]) {
+    test(
+      'startup validation preserves credentials unless HTTP 401/403: $status',
+      () async {
+        container.dispose();
+        SharedPreferences.setMockInitialValues({'auto_login': true});
+        await storage.saveAuth(
+          accessToken: tokenA,
+          expiry: DateTime(2030),
+          email: 'fixture',
+        );
+        api.holdAutomatic = true;
+        container = ProviderContainer(
+          overrides: [
+            secureStorageServiceProvider.overrideWithValue(storage),
+            naiAuthApiServiceProvider.overrideWithValue(api),
+            accountManagerNotifierProvider.overrideWith(() => accounts),
+          ],
+        );
+        auth = container.read(authNotifierProvider.notifier);
+        await api.automaticStarted.future;
+        final ready = Completer<void>();
+        container.listen(authNotifierProvider, (_, next) {
+          if (next.status == AuthStatus.error && !ready.isCompleted) {
+            ready.complete();
+          }
+        });
+        final request = RequestOptions(path: '/offline-fixture');
+        api.automaticResponse.completeError(
+          DioException(
+            requestOptions: request,
+            type: status == null
+                ? DioExceptionType.connectionError
+                : DioExceptionType.badResponse,
+            response: status == null
+                ? null
+                : Response(requestOptions: request, statusCode: status),
+          ),
+        );
+        await ready.future.timeout(const Duration(seconds: 2));
+        expect(
+          await storage.getAccessToken(),
+          status == 401 || status == 403 ? isNull : tokenA,
+        );
+        expect(
+          container.read(accountManagerNotifierProvider).accounts,
+          hasLength(2),
+        );
+        expect(
+          container.read(authNotifierProvider).errorCode,
+          status == null
+              ? AuthErrorCode.networkError
+              : status == 503
+              ? AuthErrorCode.serverError
+              : AuthErrorCode.authFailed,
+        );
+      },
+    );
+  }
+
+  test(
+    'startup five second timeout cancels request and one-click retry succeeds',
+    () async {
+      container.dispose();
+      SharedPreferences.setMockInitialValues({'auto_login': true});
+      await storage.saveAuth(
+        accessToken: tokenA,
+        expiry: DateTime(2030),
+        email: 'fixture',
+      );
+      api.holdAutomatic = true;
+      container = ProviderContainer(
+        overrides: [
+          secureStorageServiceProvider.overrideWithValue(storage),
+          naiAuthApiServiceProvider.overrideWithValue(api),
+          accountManagerNotifierProvider.overrideWith(() => accounts),
+        ],
+      );
+      auth = container.read(authNotifierProvider.notifier);
+      await api.automaticStarted.future;
+      final cancel = api.cancels.last!;
+      final timedOut = Completer<void>();
+      container.listen(authNotifierProvider, (_, next) {
+        if (next.errorCode == AuthErrorCode.networkTimeout &&
+            !timedOut.isCompleted) {
+          timedOut.complete();
+        }
+      });
+      await timedOut.future.timeout(const Duration(seconds: 7));
+      expect(cancel.isCancelled, true);
+      expect(await storage.getAccessToken(), tokenA);
+      api.holdAutomatic = false;
+      expect(
+        await auth.switchAccount('A', tokenA, accountType: AccountType.token),
+        true,
+      );
+      api.automaticResponse.complete({'tier': 1});
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(authNotifierProvider).subscriptionInfo, {
+        'tier': 2,
+      });
+    },
+  );
+
   test('logout cancels a pending validation instead of restoring it', () async {
     await loginA(false);
     final operation = auth.switchAccount(

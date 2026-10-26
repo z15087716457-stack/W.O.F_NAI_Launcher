@@ -5,12 +5,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/core/storage/local_storage_service.dart';
+
+import '../../../../core/settings/settings_preferences_service_test.dart'
+    show MemoryStorage;
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/selectable_image_card.dart';
 
@@ -54,6 +59,7 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          localStorageServiceProvider.overrideWithValue(MemoryStorage()),
           imageGenerationNotifierProvider.overrideWith(
             () => _SelectionImageGenerationNotifier(initialState),
           ),
@@ -89,6 +95,17 @@ void main() {
           .select('missing');
       await tester.pumpAndSettle();
 
+      expect(find.byType(SelectableImageCard), findsOneWidget);
+      expect(
+        tester
+            .widget<SelectableImageCard>(find.byType(SelectableImageCard))
+            .imageBytes,
+        same(displayB.bytes),
+      );
+      await container
+          .read(simpleViewerGroupBatchesProvider.notifier)
+          .setGrouped(true);
+      await tester.pumpAndSettle();
       expect(find.byType(SelectableImageCard), findsNWidgets(2));
     },
   );
@@ -100,6 +117,7 @@ void main() {
     late _SelectionImageGenerationNotifier generationNotifier;
     final container = ProviderContainer(
       overrides: [
+        localStorageServiceProvider.overrideWithValue(MemoryStorage()),
         imageGenerationNotifierProvider.overrideWith(
           () => generationNotifier = _SelectionImageGenerationNotifier(
             ImageGenerationState(history: [history]),

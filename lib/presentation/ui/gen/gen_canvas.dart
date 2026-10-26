@@ -94,7 +94,7 @@ class _GenCanvasState extends State<GenCanvas> {
               if (scope.slots.canvas case final b?)
                 b(context, GenCanvas._tile)
               else if (!empty)
-                const _Stage(),
+                const GenSimpleStage(),
               if (empty && cv.error == null)
                 if (scope.slots.emptyCanvas case final welcome?)
                   welcome(context)
@@ -113,6 +113,8 @@ class _GenCanvasState extends State<GenCanvas> {
                 child: const WindowDragArea(key: Key('gen-canvas-window-drag')),
               ),
             if (!cv.positioning) ...[
+              if (scope.slots.viewerControls case final controls?)
+                Positioned(top: 10, right: 10, child: controls),
               if (bar) ...[
                 Positioned(
                   top: 10,
@@ -279,8 +281,8 @@ class GenBackdropPainter extends CustomPainter {
 
 /// 自带舞台：把焦点组摆在画布中间。一张按原型留白缩放（不放大小图，除非“放大填满”）；
 /// 多张试 1–N 列，取每张最大的排法，间距 16。
-class _Stage extends StatelessWidget {
-  const _Stage();
+class GenSimpleStage extends StatelessWidget {
+  const GenSimpleStage({super.key});
 
   @override
   Widget build(BuildContext context) {

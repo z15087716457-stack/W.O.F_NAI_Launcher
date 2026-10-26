@@ -142,8 +142,22 @@ GenHistoryData generationHistoryView(
   bool autoSave = true,
   int pinned = 0,
   DateTime? now,
+  bool singleImages = false,
 }) {
-  final batches = buildHistoryBatches(state);
+  final batches = buildHistoryBatches(state)
+      .expand(
+        (batch) => singleImages && !batch.isGenerating
+            ? batch.images.map(
+                (image) => HistoryBatch(
+                  key: 'img:${image.id}',
+                  images: [image],
+                  isGenerating: false,
+                  count: 1,
+                ),
+              )
+            : [batch],
+      )
+      .toList();
   DateTime time(HistoryBatch batch) => batch.images.isEmpty
       ? now ?? DateTime.now()
       : batch.images
@@ -203,7 +217,17 @@ GenGroup? generationFocusView(
   CanvasFocus? focus,
   String? selectedImage,
   List<GeneratedImage> pinned = const [],
+  bool singleImages = false,
 }) {
+  if (singleImages && !state.isGenerating) {
+    final image =
+        pinned.where((image) => image.id == selectedImage).firstOrNull ??
+        state.findImageById(selectedImage) ??
+        state.displayImages.lastOrNull ??
+        state.mergedPanelImages.firstOrNull;
+    if (image == null) return null;
+    return GenGroup(id: 'img:${image.id}', tiles: [generationTileView(image)]);
+  }
   final images = <String, GeneratedImage>{};
   for (final image in [...state.mergedPanelImages, ...state.displayImages]) {
     images.putIfAbsent(image.id, () => image);

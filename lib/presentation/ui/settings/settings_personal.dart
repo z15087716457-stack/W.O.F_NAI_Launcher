@@ -902,6 +902,12 @@ class SettingsCanvasPage extends StatelessWidget {
           children: [
             choose(SettingKey.historyClick, l.set_cvHistoryClick),
             choose(SettingKey.outputViewer, l.set_cvViewer),
+            SettingKeyRow(
+              SettingKey.simpleViewerGroupBatches,
+              title: l.set_cvGroupBatches,
+              subtitle: SettingsFormat.simpleViewerGroupDescription(context),
+              control: const SetSwitch(SettingKey.simpleViewerGroupBatches),
+            ),
           ],
         ),
         SettingsSection(

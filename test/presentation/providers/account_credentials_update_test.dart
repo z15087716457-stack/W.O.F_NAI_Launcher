@@ -53,6 +53,7 @@ class _Api extends NAIAuthApiService {
     String token, {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool allowAnyTokenFormat = false,
+    CancelToken? cancelToken,
   }) => response.future;
 }
 

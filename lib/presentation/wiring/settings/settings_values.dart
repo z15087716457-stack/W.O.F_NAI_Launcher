@@ -34,6 +34,7 @@ import '../../providers/settings_font_scale_provider.dart';
 import '../../providers/share_image_settings_provider.dart';
 import '../../providers/shortcuts_provider.dart';
 import '../../providers/simple_output_viewer_provider.dart';
+import '../../providers/simple_viewer_group_batches_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../providers/update_provider.dart';
 import '../../ui/settings/settings_contract.dart';
@@ -81,6 +82,9 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.outputViewer: ref.watch(simpleOutputViewerNotifierProvider)
         ? 'simple'
         : 'canvas',
+    SettingKey.simpleViewerGroupBatches: ref.watch(
+      simpleViewerGroupBatchesProvider,
+    ),
     SettingKey.canvasLockCamera: ref.watch(canvasLockCameraNotifierProvider),
     SettingKey.canvasZoomToFill: ref.watch(canvasZoomToFillNotifierProvider),
     SettingKey.shortcutsEnabled: shortcuts?.enableShortcuts ?? true,
@@ -236,6 +240,8 @@ class SettingsValueStore {
         await ref
             .read(simpleOutputViewerNotifierProvider.notifier)
             .setSimple(text == 'simple');
+      case SettingKey.simpleViewerGroupBatches:
+        await ref.read(simpleViewerGroupBatchesProvider.notifier).setGrouped(b);
       case SettingKey.canvasLockCamera:
         await ref.read(canvasLockCameraNotifierProvider.notifier).setLocked(b);
       case SettingKey.canvasZoomToFill:

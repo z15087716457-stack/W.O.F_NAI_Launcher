@@ -29,6 +29,37 @@ GeneratedImage image(
 );
 
 void main() {
+  test('简洁单图投影按选中图展示，默认最新，批次原身份不变', () {
+    final first = image('a', run: 1, slot: 0);
+    final second = image('b', run: 1, slot: 1);
+    final state = ImageGenerationState(
+      history: [first, second],
+      displayImages: [first, second],
+    );
+    expect(
+      generationFocusView(
+        state,
+        selectedImage: 'b',
+        singleImages: true,
+      )!.tiles.single.id,
+      'b',
+    );
+    expect(
+      generationFocusView(state, singleImages: true)!.tiles.single.id,
+      'b',
+    );
+    expect(
+      generationFocusView(state, selectedImage: 'b')!.tiles.map((t) => t.id),
+      ['a', 'b'],
+    );
+    final flat = generationHistoryView(state, singleImages: true);
+    expect(flat.batches.map((b) => b.id).toSet(), {'img:a', 'img:b'});
+    expect(flat.batches.every((b) => b.images.length == 1), isTrue);
+    expect(generationHistoryView(state).batches.single.images.length, 2);
+    expect(second.generationRunId, 1);
+    expect(state.history, [first, second]);
+  });
+
   test('工具宿主按临时收栏后的真实画布边界定位，不改变用户宽度偏好', () {
     const layout = GenLayout(leftWidth: 560, historyWidth: 400);
     expect(generationCanvasInsets(layout, 780), (left: 380.0, right: 40.0));

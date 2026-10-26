@@ -21,6 +21,24 @@ void main() {
     await t.pumpAndSettle();
   }
 
+  testWidgets('简洁查看器分组默认关闭，可设置且可搜索', (t) async {
+    final rec = await pumpSettings(t, page: SettingsPageId.canvas);
+    expect(
+      SettingSpec.of(SettingKey.simpleViewerGroupBatches).defaultValue,
+      false,
+    );
+    expect(find.text('批量结果按批次分组'), findsOneWidget);
+    await tap(t, 'switch-simpleViewerGroupBatches');
+    expect(rec.changes.single, (SettingKey.simpleViewerGroupBatches, true));
+    await t.pump(const Duration(seconds: 5));
+    await pumpSettings(t, initialQuery: 'simpleViewerGroupBatches');
+    expect(find.text('批量结果按批次分组'), findsOneWidget);
+    expect(
+      find.byKey(const Key('switch-simpleViewerGroupBatches')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('默认打开概览，目录切页走 onOpenPage', (t) async {
     final rec = await pumpSettings(t);
     expect(find.byKey(const Key('settings-account-hero')), findsOneWidget);

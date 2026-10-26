@@ -329,26 +329,79 @@ class _CountRow extends StatelessWidget {
   }
 }
 
-/// 重复步进（原型 `.st2`）：32 高、圆角 6、控件底；两端 22 × 28 箭头，中间等宽数字。滚轮也能调。
-class _RepeatStepper extends StatelessWidget {
+/// 箭头即时提交；数字拖动只预览，松手才更新报价。滚轮留给父级滚动。
+class _RepeatStepper extends StatefulWidget {
   const _RepeatStepper();
+
+  @override
+  State<_RepeatStepper> createState() => _RepeatStepperState();
+}
+
+class _RepeatStepperState extends State<_RepeatStepper> {
+  final _bubble = OverlayPortalController();
+  final _link = LayerLink();
+  final _text = TextEditingController();
+  final _focus = FocusNode();
+  bool _hover = false;
+  bool _editing = false;
+  int? _pointer;
+  double _startX = 0;
+  int _startValue = 1;
+  int? _preview;
+
+  @override
+  void initState() {
+    super.initState();
+    _focus.addListener(() {
+      if (!_focus.hasFocus && _editing) _finishEdit();
+    });
+  }
+
+  @override
+  void dispose() {
+    _focus.dispose();
+    _text.dispose();
+    super.dispose();
+  }
+
+  void _set(int value) {
+    final scope = GenScope.of(context, GenAspect.image);
+    final img = scope.data.image;
+    final next = value.clamp(1, img.maxRepeat);
+    if (next != img.repeat) scope.actions.onRepeatChanged(next);
+  }
+
+  void _endDrag({bool commit = false}) {
+    final value = _preview;
+    _bubble.hide();
+    setState(() {
+      _pointer = null;
+      _preview = null;
+    });
+    if (commit && value != null) _set(value);
+  }
+
+  void _finishEdit({bool cancel = false}) {
+    final value = int.tryParse(_text.text.trim());
+    setState(() => _editing = false);
+    _focus.unfocus();
+    if (!cancel && value != null) _set(value);
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final scope = GenScope.of(context, GenAspect.image);
-    final img = scope.data.image;
+    final img = GenScope.of(context, GenAspect.image).data.image;
     final l = context.l10n;
-    void set(int v) {
-      final n = v.clamp(1, img.maxRepeat);
-      if (n != img.repeat) scope.actions.onRepeatChanged(n);
-    }
-
+    final value = _preview ?? img.repeat;
     Widget arrow(String glyph, int delta, Key key) {
-      final enabled = delta < 0 ? img.repeat > 1 : img.repeat < img.maxRepeat;
+      final enabled =
+          !_editing &&
+          _pointer == null &&
+          (delta < 0 ? img.repeat > 1 : img.repeat < img.maxRepeat);
       return UiPressable(
         key: key,
-        onTap: enabled ? () => set(img.repeat + delta) : null,
+        onTap: enabled ? () => _set(img.repeat + delta) : null,
         builder: (context, hover) => SizedBox(
           width: 22,
           height: 28,
@@ -365,34 +418,168 @@ class _RepeatStepper extends StatelessWidget {
 
     return Tooltip(
       message: l.gen_repeatTotal(img.repeat, img.repeat * img.count),
-      child: Listener(
-        onPointerSignal: (e) {
-          if (e is PointerScrollEvent) {
-            set(img.repeat + (e.scrollDelta.dy < 0 ? 1 : -1));
-          }
-        },
-        child: Container(
-          key: const Key('gen-repeat'),
-          height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 2),
-          decoration: BoxDecoration(
-            color: c.control,
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              arrow(UiGlyphs.chevronLeft, -1, const Key('gen-repeat-down')),
-              Container(
-                constraints: const BoxConstraints(minWidth: 30),
-                alignment: Alignment.center,
-                child: Text(
-                  '${img.repeat}',
-                  style: UiText.mono(13, weight: FontWeight.w600, color: c.ink),
+      child: CompositedTransformTarget(
+        link: _link,
+        child: OverlayPortal(
+          controller: _bubble,
+          overlayChildBuilder: (context) => Positioned(
+            left: 0,
+            top: 0,
+            child: CompositedTransformFollower(
+              link: _link,
+              targetAnchor: Alignment.topCenter,
+              followerAnchor: Alignment.bottomCenter,
+              offset: const Offset(0, -8),
+              child: IgnorePointer(
+                child: Material(
+                  color: const Color(0xFF242428),
+                  borderRadius: BorderRadius.circular(6),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    child: Text(
+                      l.gen_repeatDragTotal(value, value * img.count),
+                      key: const Key('gen-repeat-bubble'),
+                      style: UiText.sans(12, color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
-              arrow(UiGlyphs.chevronRight, 1, const Key('gen-repeat-up')),
-            ],
+            ),
+          ),
+          child: Container(
+            key: const Key('gen-repeat'),
+            height: 32,
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: c.control,
+              borderRadius: BorderRadius.circular(6),
+              border: _pointer != null || _editing
+                  ? Border.all(color: c.accent)
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                arrow(UiGlyphs.chevronLeft, -1, const Key('gen-repeat-down')),
+                if (_editing)
+                  SizedBox(
+                    width: 36,
+                    child: Focus(
+                      onKeyEvent: (_, event) {
+                        if (event is KeyDownEvent &&
+                            event.logicalKey == LogicalKeyboardKey.escape) {
+                          _finishEdit(cancel: true);
+                          return KeyEventResult.handled;
+                        }
+                        return KeyEventResult.ignored;
+                      },
+                      child: TextField(
+                        key: const Key('gen-repeat-input'),
+                        controller: _text,
+                        focusNode: _focus,
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        style: UiText.mono(13, color: c.ink),
+                        decoration: uiBareDecoration(),
+                        onSubmitted: (_) => _finishEdit(),
+                      ),
+                    ),
+                  )
+                else
+                  MouseRegion(
+                    cursor: SystemMouseCursors.resizeLeftRight,
+                    onEnter: (_) => setState(() => _hover = true),
+                    onExit: (_) => setState(() => _hover = false),
+                    child: GestureDetector(
+                      onDoubleTap: () {
+                        _text.text = '${img.repeat}';
+                        _text.selection = TextSelection(
+                          baseOffset: 0,
+                          extentOffset: _text.text.length,
+                        );
+                        setState(() => _editing = true);
+                        _focus.requestFocus();
+                      },
+                      child: Listener(
+                        onPointerDown: (e) {
+                          if (_pointer != null || e.buttons != kPrimaryButton) {
+                            return;
+                          }
+                          _startX = e.position.dx;
+                          _startValue = img.repeat;
+                          setState(() {
+                            _pointer = e.pointer;
+                            _preview = img.repeat;
+                          });
+                          _bubble.show();
+                        },
+                        onPointerMove: (e) {
+                          if (e.pointer != _pointer) return;
+                          final steps = ((e.position.dx - _startX) / 12)
+                              .truncate();
+                          final scale = HardwareKeyboard.instance.isShiftPressed
+                              ? 5
+                              : 1;
+                          setState(
+                            () => _preview = (_startValue + steps * scale)
+                                .clamp(1, img.maxRepeat),
+                          );
+                        },
+                        onPointerUp: (e) {
+                          if (e.pointer == _pointer) _endDrag(commit: true);
+                        },
+                        onPointerCancel: (e) {
+                          if (e.pointer == _pointer) _endDrag();
+                        },
+                        child: Container(
+                          key: const Key('gen-repeat-value'),
+                          width: 30,
+                          height: 28,
+                          alignment: Alignment.center,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                '$value',
+                                style: UiText.mono(
+                                  13,
+                                  weight: FontWeight.w600,
+                                  color: c.ink,
+                                ),
+                              ),
+                              if (_hover)
+                                Positioned(
+                                  bottom: 2,
+                                  child: Row(
+                                    spacing: 2,
+                                    children: List.generate(
+                                      5,
+                                      (_) => Container(
+                                        width: 2,
+                                        height: 2,
+                                        decoration: BoxDecoration(
+                                          color: c.faint,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                arrow(UiGlyphs.chevronRight, 1, const Key('gen-repeat-up')),
+              ],
+            ),
           ),
         ),
       ),

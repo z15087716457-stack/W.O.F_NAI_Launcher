@@ -36,6 +36,7 @@ abstract final class SettingsFixture {
     SettingKey.completionSoundFile: r'C:\Users\Pie\Music\chime-soft.wav',
     SettingKey.historyClick: 'linkedPreview',
     SettingKey.outputViewer: 'canvas',
+    SettingKey.simpleViewerGroupBatches: false,
     SettingKey.canvasZoomToFill: true,
     SettingKey.costWarning: true,
     SettingKey.costThreshold: 50.0,

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/constants/api_constants.dart';
-import '../../../core/network/dio_client.dart';
+import '../../../core/network/nai_auth_transport.dart';
+import '../../../presentation/providers/proxy_settings_provider.dart';
 import '../../../core/network/nai_api_endpoint.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/localization_extension.dart';
@@ -19,15 +20,36 @@ class NAIAuthApiService {
   );
   static final RegExp _allWhitespaceRegex = RegExp(r'\s+');
 
-  final Dio _dio;
+  final Dio? _dio;
 
-  NAIAuthApiService(this._dio);
+  NAIAuthApiService(Dio dio) : _dio = dio, _transport = null;
+
+  NAIAuthApiService.withTransport(NaiAuthTransport transport)
+    : _transport = transport,
+      _dio = null;
+
+  final NaiAuthTransport? _transport;
+  Future<T> _send<T>(
+    CancelToken? cancel,
+    Future<T> Function(Dio) request,
+  ) async {
+    if (_transport case final transport?) {
+      return transport.send(cancel, request);
+    }
+    try {
+      return await request(_dio!);
+    } on DioException catch (error) {
+      logAuthNetworkFailure(_dio!, error);
+      rethrow;
+    }
+  }
 
   /// 验证 API Token 是否有效
   Future<Map<String, dynamic>> validateToken(
     String token, {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
     bool allowAnyTokenFormat = false,
+    CancelToken? cancelToken,
   }) async {
     final normalizedToken = _normalizeToken(token);
 
@@ -44,17 +66,8 @@ class NAIAuthApiService {
 
     // 详细的日志记录用于诊断登录问题
     final tokenFormat = normalizedToken.startsWith('pst-') ? 'pst' : 'jwt';
-    final prefix = normalizedToken.startsWith('pst-')
-        ? normalizedToken.substring(
-            0,
-            normalizedToken.length > 10 ? 10 : normalizedToken.length,
-          )
-        : normalizedToken.substring(
-            0,
-            normalizedToken.length > 20 ? 20 : normalizedToken.length,
-          );
     AppLogger.i(
-      'Validating token: format=$tokenFormat, length=${normalizedToken.length}, prefix=$prefix...',
+      'Validating token: format=$tokenFormat, length=${normalizedToken.length}',
       'NAIAuth',
     );
     AppLogger.d(
@@ -63,12 +76,16 @@ class NAIAuthApiService {
     );
 
     try {
-      final response = await _dio.get(
-        endpoint.userUrl(ApiConstants.userSubscriptionEndpoint),
-        options: Options(
-          headers: {'Authorization': authHeader},
-          receiveTimeout: _timeout,
-          sendTimeout: _timeout,
+      final response = await _send(
+        cancelToken,
+        (dio) => dio.get(
+          endpoint.userUrl(ApiConstants.userSubscriptionEndpoint),
+          cancelToken: cancelToken,
+          options: Options(
+            headers: {'Authorization': authHeader},
+            receiveTimeout: _timeout,
+            sendTimeout: _timeout,
+          ),
         ),
       );
 
@@ -79,7 +96,7 @@ class NAIAuthApiService {
         final responseData = e.response?.data;
         final message = responseData is Map ? responseData['message'] : null;
         AppLogger.e(
-          'Token validation failed (400): $message, authHeader format=$tokenFormat',
+          'Token validation failed (400), authHeader format=$tokenFormat',
           'NAIAuth',
         );
         // 添加更详细的错误信息
@@ -101,15 +118,19 @@ class NAIAuthApiService {
   Future<Map<String, dynamic>> loginWithKey(
     String accessKey, {
     NaiApiEndpointConfig endpoint = NaiApiEndpointConfig.official,
+    CancelToken? cancelToken,
   }) async {
     AppLogger.d('Attempting login with access key', 'NAIAuth');
 
-    final response = await _dio.post(
-      endpoint.userUrl(ApiConstants.loginEndpoint),
-      data: {'key': accessKey},
-      options: Options(receiveTimeout: _timeout, sendTimeout: _timeout),
+    final response = await _send(
+      cancelToken,
+      (dio) => dio.post(
+        endpoint.userUrl(ApiConstants.loginEndpoint),
+        data: {'key': accessKey},
+        cancelToken: cancelToken,
+        options: Options(receiveTimeout: _timeout, sendTimeout: _timeout),
+      ),
     );
-
     return response.data as Map<String, dynamic>;
   }
 
@@ -171,7 +192,10 @@ class NAIAuthApiService {
 /// NAIAuthApiService Provider
 @Riverpod(keepAlive: true)
 NAIAuthApiService naiAuthApiService(Ref ref) {
-  // 使用全局 dioClient，确保代理配置正确应用
-  final dio = ref.watch(dioClientProvider);
-  return NAIAuthApiService(dio);
+  final transport = NaiAuthTransport(
+    resolveProxy: () =>
+        ref.read(proxySettingsNotifierProvider).effectiveProxyAddress,
+  );
+  ref.onDispose(transport.close);
+  return NAIAuthApiService.withTransport(transport);
 }
