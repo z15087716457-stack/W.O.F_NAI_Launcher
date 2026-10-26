@@ -1275,7 +1275,6 @@
   "localGallery_sendToKrita": "Krita に送信",
   "localGallery_importImageMetadata": "画像メタデータをインポート",
   "localGallery_copyPrompt": "プロンプトのコピー",
-  "localGallery_copySeed": "シードをコピー",
   "localGallery_dragToShare": "ドラッグして共有",
   "galleryDragCount": "{count} 枚",
   "@galleryDragCount": {
@@ -11086,7 +11085,6 @@
   "ag_mentionTitle": "このメッセージに参照",
   "ag_mentionEmpty": "一致する内容がありません",
   "ag_mentionSearchBlocks": "ブロックを検索",
-  "ag_skillsTitle": "スキル",
   "ag_keySelect": "選択",
   "ag_keyInsert": "挿入",
   "ag_keyCategory": "カテゴリ切替",
@@ -11493,5 +11491,29 @@
   "set_stSliceIncomplete": "一部のみ読み取り",
   "localGallery_searchHistoryTitle": "最近の検索",
   "localGallery_searchHistoryClear": "クリア",
-  "localGallery_searchHistoryRemove": "履歴から削除"
+  "localGallery_searchHistoryRemove": "履歴から削除",
+  "ag_cacheWarmCount": "延長 {count} 回",
+  "@ag_cacheWarmCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_cacheWarmLast": "前回 {time}",
+  "@ag_cacheWarmLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_cacheWarmTtl": "キャッシュ寿命 {minutes} 分",
+  "@ag_cacheWarmTtl": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

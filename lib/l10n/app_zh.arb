@@ -1263,7 +1263,6 @@
   "localGallery_sendToKrita": "发送到 Krita",
   "localGallery_importImageMetadata": "导入图片元数据",
   "localGallery_copyPrompt": "复制 Prompt",
-  "localGallery_copySeed": "复制 Seed",
   "localGallery_dragToShare": "拖拽以分享",
   "galleryDragCount": "{count} 张",
   "@galleryDragCount": {
@@ -11086,7 +11085,6 @@
   "ag_mentionTitle": "引用到这条消息",
   "ag_mentionEmpty": "没有匹配的内容",
   "ag_mentionSearchBlocks": "搜索积木",
-  "ag_skillsTitle": "技能",
   "ag_keySelect": "选择",
   "ag_keyInsert": "插入",
   "ag_keyCategory": "切类别",
@@ -11493,5 +11491,29 @@
   "set_stSliceIncomplete": "未完整读取",
   "localGallery_searchHistoryTitle": "最近搜索",
   "localGallery_searchHistoryClear": "清空",
-  "localGallery_searchHistoryRemove": "从历史中删除"
+  "localGallery_searchHistoryRemove": "从历史中删除",
+  "ag_cacheWarmCount": "已续期 {count} 次",
+  "@ag_cacheWarmCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_cacheWarmLast": "上次 {time}",
+  "@ag_cacheWarmLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_cacheWarmTtl": "缓存寿命 {minutes} 分钟",
+  "@ag_cacheWarmTtl": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

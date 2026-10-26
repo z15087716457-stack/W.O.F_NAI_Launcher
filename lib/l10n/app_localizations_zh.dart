@@ -2698,9 +2698,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_copyPrompt => '复制 Prompt';
 
   @override
-  String get localGallery_copySeed => '复制 Seed';
-
-  @override
   String get localGallery_dragToShare => '拖拽以分享';
 
   @override
@@ -20595,9 +20592,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_mentionSearchBlocks => '搜索积木';
 
   @override
-  String get ag_skillsTitle => '技能';
-
-  @override
   String get ag_keySelect => '选择';
 
   @override
@@ -21493,6 +21487,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get localGallery_searchHistoryRemove => '从历史中删除';
+
+  @override
+  String ag_cacheWarmCount(int count) {
+    return '已续期 $count 次';
+  }
+
+  @override
+  String ag_cacheWarmLast(String time) {
+    return '上次 $time';
+  }
+
+  @override
+  String ag_cacheWarmTtl(int minutes) {
+    return '缓存寿命 $minutes 分钟';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -24187,9 +24196,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_copyPrompt => '複製 Prompt';
-
-  @override
-  String get localGallery_copySeed => '複製 Seed';
 
   @override
   String get localGallery_dragToShare => '拖曳以分享';
@@ -42086,9 +42092,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_mentionSearchBlocks => '搜尋積木';
 
   @override
-  String get ag_skillsTitle => '技能';
-
-  @override
   String get ag_keySelect => '選擇';
 
   @override
@@ -42984,4 +42987,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get localGallery_searchHistoryRemove => '從歷史中刪除';
+
+  @override
+  String ag_cacheWarmCount(int count) {
+    return '已續期 $count 次';
+  }
+
+  @override
+  String ag_cacheWarmLast(String time) {
+    return '上次 $time';
+  }
+
+  @override
+  String ag_cacheWarmTtl(int minutes) {
+    return '快取壽命 $minutes 分鐘';
+  }
 }

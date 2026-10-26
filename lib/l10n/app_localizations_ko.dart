@@ -2745,9 +2745,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_copyPrompt => '프롬프트 복사';
 
   @override
-  String get localGallery_copySeed => '시드 복사';
-
-  @override
   String get localGallery_dragToShare => '끌어서 공유';
 
   @override
@@ -20904,9 +20901,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_mentionSearchBlocks => '블록 검색';
 
   @override
-  String get ag_skillsTitle => '스킬';
-
-  @override
   String get ag_keySelect => '선택';
 
   @override
@@ -21811,4 +21805,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get localGallery_searchHistoryRemove => '기록에서 삭제';
+
+  @override
+  String ag_cacheWarmCount(int count) {
+    return '연장 $count회';
+  }
+
+  @override
+  String ag_cacheWarmLast(String time) {
+    return '최근 $time';
+  }
+
+  @override
+  String ag_cacheWarmTtl(int minutes) {
+    return '캐시 수명 $minutes분';
+  }
 }

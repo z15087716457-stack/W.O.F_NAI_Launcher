@@ -2813,9 +2813,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_copyPrompt => 'Copy Prompt';
 
   @override
-  String get localGallery_copySeed => 'Copy Seed';
-
-  @override
   String get localGallery_dragToShare => 'Drag to share';
 
   @override
@@ -21578,9 +21575,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_mentionSearchBlocks => 'Search blocks';
 
   @override
-  String get ag_skillsTitle => 'Skills';
-
-  @override
   String get ag_keySelect => 'Select';
 
   @override
@@ -22504,4 +22498,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get localGallery_searchHistoryRemove => 'Remove from history';
+
+  @override
+  String ag_cacheWarmCount(int count) {
+    return 'Warmed $count×';
+  }
+
+  @override
+  String ag_cacheWarmLast(String time) {
+    return 'last $time';
+  }
+
+  @override
+  String ag_cacheWarmTtl(int minutes) {
+    return 'cache $minutes min';
+  }
 }

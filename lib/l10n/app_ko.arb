@@ -1275,7 +1275,6 @@
   "localGallery_sendToKrita": "Krita로 보내기",
   "localGallery_importImageMetadata": "이미지 메타데이터 가져오기",
   "localGallery_copyPrompt": "프롬프트 복사",
-  "localGallery_copySeed": "시드 복사",
   "localGallery_dragToShare": "끌어서 공유",
   "galleryDragCount": "{count, plural, =1{이미지 1장} other{이미지 {count}장}}",
   "@galleryDragCount": {
@@ -11086,7 +11085,6 @@
   "ag_mentionTitle": "이 메시지에 참조",
   "ag_mentionEmpty": "일치하는 내용이 없습니다",
   "ag_mentionSearchBlocks": "블록 검색",
-  "ag_skillsTitle": "스킬",
   "ag_keySelect": "선택",
   "ag_keyInsert": "삽입",
   "ag_keyCategory": "카테고리 전환",
@@ -11493,5 +11491,29 @@
   "set_stSliceIncomplete": "일부만 읽음",
   "localGallery_searchHistoryTitle": "최근 검색",
   "localGallery_searchHistoryClear": "지우기",
-  "localGallery_searchHistoryRemove": "기록에서 삭제"
+  "localGallery_searchHistoryRemove": "기록에서 삭제",
+  "ag_cacheWarmCount": "연장 {count}회",
+  "@ag_cacheWarmCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_cacheWarmLast": "최근 {time}",
+  "@ag_cacheWarmLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_cacheWarmTtl": "캐시 수명 {minutes}분",
+  "@ag_cacheWarmTtl": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

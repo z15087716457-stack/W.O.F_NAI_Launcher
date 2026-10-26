@@ -894,6 +894,24 @@ class _AgentCacheWarmingSectionState extends State<AgentCacheWarmingSection> {
               ),
           ],
         ),
+        if (w.warmCount > 0 || w.ttlSeconds != null)
+          Padding(
+            padding: const EdgeInsets.only(left: 14),
+            child: Text(
+              [
+                if (w.warmCount > 0) l.ag_cacheWarmCount(w.warmCount),
+                if (w.lastWarmAt case final at?)
+                  l.ag_cacheWarmLast(
+                    '${at.hour.toString().padLeft(2, '0')}:'
+                    '${at.minute.toString().padLeft(2, '0')}',
+                  ),
+                if (w.ttlSeconds case final ttl?)
+                  l.ag_cacheWarmTtl((ttl / 60).round()),
+              ].join(' · '),
+              key: const Key('agent-usage-cache-warming-stats'),
+              style: UiText.sans(11, color: c.faint),
+            ),
+          ),
       ],
     );
   }

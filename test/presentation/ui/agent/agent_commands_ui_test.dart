@@ -122,4 +122,49 @@ void main() {
     expect(find.text('待机，下次运行时开始'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
+
+  testWidgets('缓存预热：已排程显示倒计时、次数与寿命', (t) async {
+    final base = AgentFixture.view(AgentScene.chat);
+    final now = DateTime.now();
+    await pumpAgent(
+      t,
+      data: AgentViewData(
+        now: base.now,
+        workspace: base.workspace,
+        chat: base.chat,
+        workspaces: base.workspaces,
+        chats: base.chats,
+        composer: base.composer,
+        thread: base.thread,
+        shelf: base.shelf,
+        memory: base.memory,
+        usage: AgentUsageData(
+          tokens: 1000,
+          window: 200000,
+          cacheWarming: AgentCacheWarmingData(
+            mode: 'streaming',
+            state: 'scheduled',
+            nextWarmAt: now.add(const Duration(seconds: 125)),
+            lastWarmAt: DateTime(2026, 10, 27, 9, 5),
+            warmCount: 3,
+            ttlSeconds: 300,
+          ),
+        ),
+        models: base.models,
+        thinking: base.thinking,
+        permission: base.permission,
+        mentions: base.mentions,
+        skills: base.skills,
+        draft: base.draft,
+        status: base.status,
+        revision: base.revision,
+      ),
+    );
+    await t.tap(find.byKey(const Key('agent-usage')));
+    await t.pump();
+    await t.pump();
+    expect(find.textContaining(RegExp(r'2:0\d 后续期')), findsOneWidget);
+    expect(find.text('已续期 3 次 · 上次 09:05 · 缓存寿命 5 分钟'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
 }

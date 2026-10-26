@@ -2752,9 +2752,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_copyPrompt => 'プロンプトのコピー';
 
   @override
-  String get localGallery_copySeed => 'シードをコピー';
-
-  @override
   String get localGallery_dragToShare => 'ドラッグして共有';
 
   @override
@@ -20833,9 +20830,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_mentionSearchBlocks => 'ブロックを検索';
 
   @override
-  String get ag_skillsTitle => 'スキル';
-
-  @override
   String get ag_keySelect => '選択';
 
   @override
@@ -21739,4 +21733,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get localGallery_searchHistoryRemove => '履歴から削除';
+
+  @override
+  String ag_cacheWarmCount(int count) {
+    return '延長 $count 回';
+  }
+
+  @override
+  String ag_cacheWarmLast(String time) {
+    return '前回 $time';
+  }
+
+  @override
+  String ag_cacheWarmTtl(int minutes) {
+    return 'キャッシュ寿命 $minutes 分';
+  }
 }

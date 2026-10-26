@@ -1263,7 +1263,6 @@
   "localGallery_sendToKrita": "傳送到 Krita",
   "localGallery_importImageMetadata": "匯入圖片後設資料",
   "localGallery_copyPrompt": "複製 Prompt",
-  "localGallery_copySeed": "複製 Seed",
   "localGallery_dragToShare": "拖曳以分享",
   "galleryDragCount": "{count} 張",
   "@galleryDragCount": {
@@ -11546,7 +11545,6 @@
   "ag_mentionTitle": "引用到這條訊息",
   "ag_mentionEmpty": "沒有匹配的內容",
   "ag_mentionSearchBlocks": "搜尋積木",
-  "ag_skillsTitle": "技能",
   "ag_keySelect": "選擇",
   "ag_keyInsert": "插入",
   "ag_keyCategory": "切類別",
@@ -12078,5 +12076,29 @@
   "set_stSliceIncomplete": "未完整讀取",
   "localGallery_searchHistoryTitle": "最近搜尋",
   "localGallery_searchHistoryClear": "清空",
-  "localGallery_searchHistoryRemove": "從歷史中刪除"
+  "localGallery_searchHistoryRemove": "從歷史中刪除",
+  "ag_cacheWarmCount": "已續期 {count} 次",
+  "@ag_cacheWarmCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_cacheWarmLast": "上次 {time}",
+  "@ag_cacheWarmLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_cacheWarmTtl": "快取壽命 {minutes} 分鐘",
+  "@ag_cacheWarmTtl": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -5112,12 +5112,6 @@ abstract class AppLocalizations {
   /// **'Copy Prompt'**
   String get localGallery_copyPrompt;
 
-  /// No description provided for @localGallery_copySeed.
-  ///
-  /// In en, this message translates to:
-  /// **'Copy Seed'**
-  String get localGallery_copySeed;
-
   /// No description provided for @localGallery_dragToShare.
   ///
   /// In en, this message translates to:
@@ -37456,12 +37450,6 @@ abstract class AppLocalizations {
   /// **'Search blocks'**
   String get ag_mentionSearchBlocks;
 
-  /// No description provided for @ag_skillsTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Skills'**
-  String get ag_skillsTitle;
-
   /// No description provided for @ag_keySelect.
   ///
   /// In en, this message translates to:
@@ -39105,6 +39093,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Remove from history'**
   String get localGallery_searchHistoryRemove;
+
+  /// No description provided for @ag_cacheWarmCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Warmed {count}×'**
+  String ag_cacheWarmCount(int count);
+
+  /// No description provided for @ag_cacheWarmLast.
+  ///
+  /// In en, this message translates to:
+  /// **'last {time}'**
+  String ag_cacheWarmLast(String time);
+
+  /// No description provided for @ag_cacheWarmTtl.
+  ///
+  /// In en, this message translates to:
+  /// **'cache {minutes} min'**
+  String ag_cacheWarmTtl(int minutes);
 }
 
 class _AppLocalizationsDelegate

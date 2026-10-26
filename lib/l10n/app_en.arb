@@ -1275,7 +1275,6 @@
   "localGallery_sendToKrita": "Send to Krita",
   "localGallery_importImageMetadata": "Import Image Metadata",
   "localGallery_copyPrompt": "Copy Prompt",
-  "localGallery_copySeed": "Copy Seed",
   "localGallery_dragToShare": "Drag to share",
   "galleryDragCount": "{count, plural, =1{1 image} other{{count} images}}",
   "@galleryDragCount": {
@@ -11098,7 +11097,6 @@
   "ag_mentionTitle": "Reference in this message",
   "ag_mentionEmpty": "Nothing matches",
   "ag_mentionSearchBlocks": "Search blocks",
-  "ag_skillsTitle": "Skills",
   "ag_keySelect": "Select",
   "ag_keyInsert": "Insert",
   "ag_keyCategory": "Category",
@@ -11505,5 +11503,29 @@
   "set_stSliceIncomplete": "Partially read",
   "localGallery_searchHistoryTitle": "Recent searches",
   "localGallery_searchHistoryClear": "Clear",
-  "localGallery_searchHistoryRemove": "Remove from history"
+  "localGallery_searchHistoryRemove": "Remove from history",
+  "ag_cacheWarmCount": "Warmed {count}×",
+  "@ag_cacheWarmCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_cacheWarmLast": "last {time}",
+  "@ag_cacheWarmLast": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_cacheWarmTtl": "cache {minutes} min",
+  "@ag_cacheWarmTtl": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }
