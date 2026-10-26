@@ -21247,7 +21247,7 @@ class AppLocalizationsZh extends AppLocalizations {
       '请使用 translation_blocks_read 返回的 marker 列表。';
 
   @override
-  String get gen_translateAdjustHint => '描述想怎样调整翻译块…';
+  String get gen_translateAdjustHint => '接着说要怎么调整…';
 
   @override
   String get gen_translateAdjustStartFailed => '无法启动翻译调整，请检查模型与 Agent 运行时。';
@@ -21283,24 +21283,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get gen_translateAdjustStepEdit => '调整翻译块';
 
   @override
-  String gen_translateAdjustOpSplit(int count) {
-    return '拆分 $count';
+  String gen_translateAdjustSplitInto(String source, int count) {
+    return '$source → $count 块';
   }
 
   @override
-  String gen_translateAdjustOpMerge(int count) {
-    return '合并 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRetranslate(int count) {
-    return '重译 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRejoin(int count) {
-    return '还原 $count';
-  }
+  String get gen_translateAdjustContextNote => '上下文：本次翻译的原文、切块和译文';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42546,7 +42534,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
       '請使用 translation_blocks_read 返回的 marker 列表。';
 
   @override
-  String get gen_translateAdjustHint => '描述想怎樣調整翻譯塊…';
+  String get gen_translateAdjustHint => '接著說要怎麼調整…';
 
   @override
   String get gen_translateAdjustStartFailed => '無法啟動翻譯調整，請檢查模型與 Agent 執行時。';
@@ -42582,22 +42570,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get gen_translateAdjustStepEdit => '調整翻譯塊';
 
   @override
-  String gen_translateAdjustOpSplit(int count) {
-    return '拆分 $count';
+  String gen_translateAdjustSplitInto(String source, int count) {
+    return '$source → $count 塊';
   }
 
   @override
-  String gen_translateAdjustOpMerge(int count) {
-    return '合併 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRetranslate(int count) {
-    return '重譯 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRejoin(int count) {
-    return '還原 $count';
-  }
+  String get gen_translateAdjustContextNote => '上下文：本次翻譯的原文、切塊和譯文';
 }

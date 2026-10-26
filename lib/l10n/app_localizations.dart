@@ -38722,29 +38722,17 @@ abstract class AppLocalizations {
   /// **'Edit blocks'**
   String get gen_translateAdjustStepEdit;
 
-  /// No description provided for @gen_translateAdjustOpSplit.
+  /// No description provided for @gen_translateAdjustSplitInto.
   ///
   /// In en, this message translates to:
-  /// **'split {count}'**
-  String gen_translateAdjustOpSplit(int count);
+  /// **'{source} → {count} blocks'**
+  String gen_translateAdjustSplitInto(String source, int count);
 
-  /// No description provided for @gen_translateAdjustOpMerge.
+  /// No description provided for @gen_translateAdjustContextNote.
   ///
   /// In en, this message translates to:
-  /// **'merge {count}'**
-  String gen_translateAdjustOpMerge(int count);
-
-  /// No description provided for @gen_translateAdjustOpRetranslate.
-  ///
-  /// In en, this message translates to:
-  /// **'retranslate {count}'**
-  String gen_translateAdjustOpRetranslate(int count);
-
-  /// No description provided for @gen_translateAdjustOpRejoin.
-  ///
-  /// In en, this message translates to:
-  /// **'restore {count}'**
-  String gen_translateAdjustOpRejoin(int count);
+  /// **'Context: this translation\'s source, blocks and output'**
+  String get gen_translateAdjustContextNote;
 }
 
 class _AppLocalizationsDelegate

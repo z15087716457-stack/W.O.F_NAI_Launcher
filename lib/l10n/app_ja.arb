@@ -11368,8 +11368,6 @@
   "gen_translateAdjustClearRefs": "参照をクリア",
   "gen_translateAdjustStepRead": "ブロックを読む",
   "gen_translateAdjustStepEdit": "ブロックを調整",
-  "gen_translateAdjustOpSplit": "分割 {count}",
-  "gen_translateAdjustOpMerge": "結合 {count}",
-  "gen_translateAdjustOpRetranslate": "再翻訳 {count}",
-  "gen_translateAdjustOpRejoin": "復元 {count}"
+  "gen_translateAdjustSplitInto": "{source} → {count} ブロック",
+  "gen_translateAdjustContextNote": "コンテキスト：今回の原文・ブロック・訳文"
 }

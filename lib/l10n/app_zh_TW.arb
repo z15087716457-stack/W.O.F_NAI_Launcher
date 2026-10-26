@@ -11932,7 +11932,7 @@
   "gen_translateAdjustRetranslateTemplate": "讀取當前塊，重新翻譯引用的塊，不改原文。",
   "gen_translateAdjustMergeTemplate": "讀取當前塊，按指定的原文順序合併引用的塊，無關塊不動。",
   "gen_translateAdjustMarkers": "請使用 translation_blocks_read 返回的 marker 列表。",
-  "gen_translateAdjustHint": "描述想怎樣調整翻譯塊…",
+  "gen_translateAdjustHint": "接著說要怎麼調整…",
   "gen_translateAdjustStartFailed": "無法啟動翻譯調整，請檢查模型與 Agent 執行時。",
   "gen_translateAdjustRunFailed": "調整已中止或失敗，重試前請重新讀取當前塊。",
   "gen_repeatDragTotal": "{times} 次 · 共 {total} 張",
@@ -11953,8 +11953,6 @@
   "gen_translateAdjustClearRefs": "清除引用",
   "gen_translateAdjustStepRead": "讀取翻譯塊",
   "gen_translateAdjustStepEdit": "調整翻譯塊",
-  "gen_translateAdjustOpSplit": "拆分 {count}",
-  "gen_translateAdjustOpMerge": "合併 {count}",
-  "gen_translateAdjustOpRetranslate": "重譯 {count}",
-  "gen_translateAdjustOpRejoin": "還原 {count}"
+  "gen_translateAdjustSplitInto": "{source} → {count} 塊",
+  "gen_translateAdjustContextNote": "上下文：本次翻譯的原文、切塊和譯文"
 }

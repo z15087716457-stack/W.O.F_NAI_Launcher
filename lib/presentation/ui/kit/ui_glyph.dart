@@ -173,6 +173,7 @@ abstract final class UiGlyphs {
   static const branch =
       'M6 3v12M6 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM18 9a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM18 9c0 6-12 3-12 9';
   static const arrowDown = 'M12 5v14M6 13l6 6 6-6';
+  static const arrowUp = 'M12 19V5M6 11l6-6 6 6';
   static const skip = 'M5 5l8 7-8 7zM15 5v14';
   static const link =
       'M10 14a4 4 0 005.66 0l3-3a4 4 0 00-5.66-5.66l-1 1M14 10a4 4 0 00-5.66 0l-3 3a4 4 0 005.66 5.66l1-1';

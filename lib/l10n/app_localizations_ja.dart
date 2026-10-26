@@ -21527,22 +21527,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get gen_translateAdjustStepEdit => 'ブロックを調整';
 
   @override
-  String gen_translateAdjustOpSplit(int count) {
-    return '分割 $count';
+  String gen_translateAdjustSplitInto(String source, int count) {
+    return '$source → $count ブロック';
   }
 
   @override
-  String gen_translateAdjustOpMerge(int count) {
-    return '結合 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRetranslate(int count) {
-    return '再翻訳 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRejoin(int count) {
-    return '復元 $count';
-  }
+  String get gen_translateAdjustContextNote => 'コンテキスト：今回の原文・ブロック・訳文';
 }

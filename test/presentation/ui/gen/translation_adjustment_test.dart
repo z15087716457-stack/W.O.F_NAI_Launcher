@@ -260,7 +260,10 @@ void main() {
         await tester.enterText(input, 'stop fixture');
         await tester.sendKeyEvent(LogicalKeyboardKey.enter);
         await tester.pump();
-        expect(find.byKey(const Key('translation-adjustment-stop-glyph')), findsOneWidget);
+        expect(
+          find.byKey(const Key('translation-adjustment-stop-glyph')),
+          findsOneWidget,
+        );
         await tester.tap(find.byKey(const Key('translation-adjustment-send')));
         await tester.pumpAndSettle();
         expect(client.stops, 1);
@@ -298,7 +301,19 @@ void main() {
               'type': 'toolCall',
               'id': 'edit',
               'name': 'translation_blocks_edit',
-              'arguments': {},
+              'arguments': {
+                'operations': [
+                  {
+                    'scope': 'main',
+                    'op': 'split',
+                    'marker': '',
+                    'parts': [
+                      {'source': 'silver ', 'translation': '银发'},
+                      {'source': 'hair', 'translation': '长发'},
+                    ],
+                  },
+                ],
+              },
             },
           ],
         });
@@ -339,6 +354,9 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 200));
         expect(container.read(translationReferencesProvider).changed.length, 2);
+        expect(find.text('split_block'), findsOneWidget);
+        expect(find.text('silver hair → 2 块'), findsOneWidget);
+        expect(find.text('translation_blocks_read'), findsNothing);
         final freshBorder = tester.widget<DecoratedBox>(
           find
               .descendant(

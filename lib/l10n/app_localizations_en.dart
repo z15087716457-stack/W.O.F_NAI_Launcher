@@ -22286,22 +22286,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gen_translateAdjustStepEdit => 'Edit blocks';
 
   @override
-  String gen_translateAdjustOpSplit(int count) {
-    return 'split $count';
+  String gen_translateAdjustSplitInto(String source, int count) {
+    return '$source → $count blocks';
   }
 
   @override
-  String gen_translateAdjustOpMerge(int count) {
-    return 'merge $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRetranslate(int count) {
-    return 'retranslate $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRejoin(int count) {
-    return 'restore $count';
-  }
+  String get gen_translateAdjustContextNote =>
+      'Context: this translation\'s source, blocks and output';
 }

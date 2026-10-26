@@ -11368,8 +11368,6 @@
   "gen_translateAdjustClearRefs": "참조 지우기",
   "gen_translateAdjustStepRead": "블록 읽기",
   "gen_translateAdjustStepEdit": "블록 조정",
-  "gen_translateAdjustOpSplit": "분할 {count}",
-  "gen_translateAdjustOpMerge": "병합 {count}",
-  "gen_translateAdjustOpRetranslate": "재번역 {count}",
-  "gen_translateAdjustOpRejoin": "복원 {count}"
+  "gen_translateAdjustSplitInto": "{source} → {count}개 블록",
+  "gen_translateAdjustContextNote": "컨텍스트: 이번 번역의 원문, 블록, 번역문"
 }

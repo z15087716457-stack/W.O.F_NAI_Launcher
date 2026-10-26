@@ -11380,36 +11380,16 @@
   "gen_translateAdjustClearRefs": "Clear references",
   "gen_translateAdjustStepRead": "Read blocks",
   "gen_translateAdjustStepEdit": "Edit blocks",
-  "gen_translateAdjustOpSplit": "split {count}",
-  "@gen_translateAdjustOpSplit": {
+  "gen_translateAdjustSplitInto": "{source} → {count} blocks",
+  "@gen_translateAdjustSplitInto": {
     "placeholders": {
+      "source": {
+        "type": "String"
+      },
       "count": {
         "type": "int"
       }
     }
   },
-  "gen_translateAdjustOpMerge": "merge {count}",
-  "@gen_translateAdjustOpMerge": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "gen_translateAdjustOpRetranslate": "retranslate {count}",
-  "@gen_translateAdjustOpRetranslate": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "gen_translateAdjustOpRejoin": "restore {count}",
-  "@gen_translateAdjustOpRejoin": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  }
+  "gen_translateAdjustContextNote": "Context: this translation's source, blocks and output"
 }

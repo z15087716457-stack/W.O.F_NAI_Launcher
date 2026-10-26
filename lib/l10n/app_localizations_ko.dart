@@ -21599,22 +21599,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get gen_translateAdjustStepEdit => '블록 조정';
 
   @override
-  String gen_translateAdjustOpSplit(int count) {
-    return '분할 $count';
+  String gen_translateAdjustSplitInto(String source, int count) {
+    return '$source → $count개 블록';
   }
 
   @override
-  String gen_translateAdjustOpMerge(int count) {
-    return '병합 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRetranslate(int count) {
-    return '재번역 $count';
-  }
-
-  @override
-  String gen_translateAdjustOpRejoin(int count) {
-    return '복원 $count';
-  }
+  String get gen_translateAdjustContextNote => '컨텍스트: 이번 번역의 원문, 블록, 번역문';
 }

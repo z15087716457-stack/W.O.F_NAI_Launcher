@@ -161,7 +161,8 @@ String _userText(Object? content) {
   return cut < 0 ? text : text.substring(0, cut);
 }
 
-/// Host transcript → view entries. Consecutive tool calls share one step card.
+/// Host transcript → view entries. Each edit operation is one step row;
+/// consecutive tool calls share one step card. Completed reads are omitted.
 @visibleForTesting
 List<TranslationAdjustEntry> translationAdjustEntries(
   AppLocalizations l,
@@ -203,20 +204,40 @@ List<TranslationAdjustEntry> translationAdjustEntries(
         case 'toolCall':
           final id = part['id'] as String;
           final failed = results[id];
-          steps.add(
-            TranslationAdjustStep(
-              id: id,
-              label: _toolLabel(l, part['name'] as String? ?? ''),
-              subject: _toolSubject(l, part['arguments']),
-              status: failed == null
-                  ? (controller.busy
-                        ? TranslationAdjustStepStatus.running
-                        : TranslationAdjustStepStatus.failed)
-                  : failed
-                  ? TranslationAdjustStepStatus.failed
-                  : TranslationAdjustStepStatus.done,
-            ),
-          );
+          final status = failed == null
+              ? (controller.busy
+                    ? TranslationAdjustStepStatus.running
+                    : TranslationAdjustStepStatus.failed)
+              : failed
+              ? TranslationAdjustStepStatus.failed
+              : TranslationAdjustStepStatus.done;
+          final name = part['name'] as String? ?? '';
+          final args = part['arguments'];
+          final ops =
+              name == 'translation_blocks_edit' &&
+                  args is Map &&
+                  args['operations'] is List
+              ? (args['operations'] as List).whereType<Map>().toList()
+              : const <Map>[];
+          if (ops.isEmpty) {
+            // A completed read is noise; the edits that follow carry the change.
+            if (name == 'translation_blocks_read' &&
+                status == TranslationAdjustStepStatus.done) {
+              break;
+            }
+            steps.add(TranslationAdjustStep(id: id, op: name, status: status));
+            break;
+          }
+          for (final (i, op) in ops.indexed) {
+            steps.add(
+              TranslationAdjustStep(
+                id: '$id-$i',
+                op: _opName(op['op']),
+                subject: _opSubject(l, op),
+                status: status,
+              ),
+            );
+          }
       }
     }
   }
@@ -224,28 +245,33 @@ List<TranslationAdjustEntry> translationAdjustEntries(
   return out;
 }
 
-String _toolLabel(AppLocalizations l, String tool) => switch (tool) {
-  'translation_blocks_read' => l.gen_translateAdjustStepRead,
-  'translation_blocks_edit' => l.gen_translateAdjustStepEdit,
-  _ => tool,
+String _opName(Object? op) => switch (op) {
+  'split' => 'split_block',
+  'merge' => 'merge_blocks',
+  'retranslate' => 'retranslate',
+  'rejoin' => 'rejoin',
+  _ => '$op',
 };
 
-String? _toolSubject(AppLocalizations l, Object? arguments) {
-  if (arguments is! Map || arguments['operations'] is! List) return null;
-  final counts = <String, int>{};
-  for (final op in (arguments['operations'] as List).whereType<Map>()) {
-    final kind = op['op'];
-    if (kind is String) counts[kind] = (counts[kind] ?? 0) + 1;
+String? _opSubject(AppLocalizations l, Map op) {
+  String? text(Object? v) =>
+      v is String && v.trim().isNotEmpty ? v.trim() : null;
+  switch (op['op']) {
+    case 'split':
+      final parts = (op['parts'] as List? ?? const [])
+          .whereType<Map>()
+          .toList();
+      final source = parts
+          .map((p) => p['source'] as String? ?? '')
+          .join()
+          .trim();
+      return parts.isEmpty
+          ? null
+          : l.gen_translateAdjustSplitInto(source, parts.length);
+    case 'merge':
+      return text(op['translation']) ?? text(op['source']);
+    case 'retranslate':
+      return text(op['translation']);
   }
-  final parts = [
-    for (final MapEntry(:key, :value) in counts.entries)
-      switch (key) {
-        'split' => l.gen_translateAdjustOpSplit(value),
-        'merge' => l.gen_translateAdjustOpMerge(value),
-        'retranslate' => l.gen_translateAdjustOpRetranslate(value),
-        'rejoin' => l.gen_translateAdjustOpRejoin(value),
-        _ => '$key x $value',
-      },
-  ];
-  return parts.isEmpty ? null : parts.join(' / ');
+  return null;
 }
