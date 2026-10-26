@@ -498,12 +498,9 @@ void main() {
   testWidgets(
     'generation preview makes completed single and grid images draggable',
     (tester) async {
-      final container = _createContainerWithPreviewImage();
-      addTearDown(container.dispose);
       // 网格只在“按批次分组”开启时出现；默认逐张显示。
-      await container
-          .read(simpleViewerGroupBatchesProvider.notifier)
-          .setGrouped(true);
+      final container = _createContainerWithPreviewImage(grouped: true);
+      addTearDown(container.dispose);
 
       await tester.pumpWidget(_buildPreviewApp(container));
       await tester.pumpAndSettle();
@@ -736,6 +733,11 @@ void _noop() {}
 
 /// 画布（G11）是默认预览实现；这些用例断言经典网格/单卡语义，
 /// 一律强制 simpleOutputViewer=true 走回退档。
+class _GroupedBatches extends SimpleViewerGroupBatches {
+  @override
+  bool build() => true;
+}
+
 class _SimpleViewerNotifier extends SimpleOutputViewerNotifier {
   @override
   bool build() => true;
@@ -743,6 +745,7 @@ class _SimpleViewerNotifier extends SimpleOutputViewerNotifier {
 
 ProviderContainer _createContainerWithPreviewImage({
   ImageClipboardWriter? clipboardWriter,
+  bool grouped = false,
 }) {
   final container = ProviderContainer(
     overrides: [
@@ -752,6 +755,8 @@ ProviderContainer _createContainerWithPreviewImage({
       ),
       if (clipboardWriter != null)
         imageClipboardWriterProvider.overrideWithValue(clipboardWriter),
+      if (grouped)
+        simpleViewerGroupBatchesProvider.overrideWith(_GroupedBatches.new),
     ],
   );
   final bytes = Uint8List.fromList(

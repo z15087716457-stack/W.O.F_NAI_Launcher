@@ -408,14 +408,10 @@ class _RepeatStepperState extends State<_RepeatStepper> {
           width: 22,
           height: 28,
           child: Center(
-            child: Opacity(
-              opacity: enabled ? 1 : .45,
-              child: UiGlyph(
-                glyph,
-                size: 13,
-                strokeWidth: 2.2,
-                color: !enabled ? c.faint : (hover ? c.ink : c.muted),
-              ),
+            child: UiGlyph(
+              glyph,
+              size: 13,
+              color: !enabled ? c.faint : (hover ? c.ink : c.muted),
             ),
           ),
         ),
@@ -499,7 +495,7 @@ class _RepeatStepperState extends State<_RepeatStepper> {
 
     final Widget number = _editing
         ? SizedBox(
-            width: 34,
+            width: 30,
             height: 28,
             child: Center(
               child: Focus(
@@ -574,7 +570,7 @@ class _RepeatStepperState extends State<_RepeatStepper> {
                 // `.st .v`: hover tint + dotted underline; accent while dragging.
                 child: Container(
                   key: const Key('gen-repeat-value'),
-                  constraints: const BoxConstraints(minWidth: 34),
+                  constraints: const BoxConstraints(minWidth: 30),
                   height: 28,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
