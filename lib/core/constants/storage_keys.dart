@@ -2,6 +2,8 @@
 class StorageKeys {
   StorageKeys._();
 
+  static const String floatingResourceWindows = 'floating_resource_windows_v1';
+
   // Secure Storage Keys (敏感数据)
   static const String accessToken = 'nai_access_token';
   static const String tokenExpiry = 'nai_token_expiry';

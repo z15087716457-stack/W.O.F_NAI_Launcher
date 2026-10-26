@@ -21826,4 +21826,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_promptAutocomplete => '프롬프트 자동 완성';
+
+  @override
+  String get shortcut_action_open_resource_window => '리소스 창 열기';
 }

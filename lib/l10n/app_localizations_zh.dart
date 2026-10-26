@@ -21508,6 +21508,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_promptAutocomplete => '提示词自动补全';
+
+  @override
+  String get shortcut_action_open_resource_window => '打开资源小窗';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43014,4 +43017,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_promptAutocomplete => '提示詞自動補全';
+
+  @override
+  String get shortcut_action_open_resource_window => '開啟資源小窗';
 }

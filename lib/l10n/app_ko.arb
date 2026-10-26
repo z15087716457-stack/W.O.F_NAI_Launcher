@@ -11517,5 +11517,6 @@
     }
   },
   "set_workspaceFontScale": "창작 영역 글자 크기",
-  "set_promptAutocomplete": "프롬프트 자동 완성"
+  "set_promptAutocomplete": "프롬프트 자동 완성",
+  "shortcut_action_open_resource_window": "리소스 창 열기"
 }

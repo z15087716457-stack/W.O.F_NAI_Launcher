@@ -37,6 +37,8 @@ import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_header.dart';
+import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
@@ -173,6 +175,25 @@ void main() {
     final params = container.read(generationParamsNotifierProvider);
     return target.negative ? params.negativePrompt : params.prompt;
   }
+
+  testWidgets(
+    'header resource callback opens each kind without a visual button',
+    (tester) async {
+      await pump(tester);
+      final header = tester.widget<GenHeader>(find.byType(GenHeader).first);
+      expect(header.onOpenResourceWindow, isNotNull);
+      for (final kind in FloatingResourceKind.values) {
+        header.onOpenResourceWindow!(kind);
+      }
+      expect(
+        container
+            .read(floatingResourceWindowsProvider)
+            .map((window) => window.kind),
+        FloatingResourceKind.values,
+      );
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets(
     'placing img2img source preserves bytes, reuses tile and focuses it',

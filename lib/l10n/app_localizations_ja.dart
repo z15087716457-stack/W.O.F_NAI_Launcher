@@ -21754,4 +21754,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_promptAutocomplete => 'プロンプトの自動補完';
+
+  @override
+  String get shortcut_action_open_resource_window => 'リソースウィンドウを開く';
 }

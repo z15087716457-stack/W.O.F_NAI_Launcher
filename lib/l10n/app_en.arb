@@ -11529,5 +11529,6 @@
     }
   },
   "set_workspaceFontScale": "Creative text size",
-  "set_promptAutocomplete": "Prompt autocomplete"
+  "set_promptAutocomplete": "Prompt autocomplete",
+  "shortcut_action_open_resource_window": "Open resource window"
 }

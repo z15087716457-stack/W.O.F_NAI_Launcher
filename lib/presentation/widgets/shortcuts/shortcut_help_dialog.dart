@@ -487,6 +487,8 @@ class _ShortcutHelpDialogState extends ConsumerState<ShortcutHelpDialog> {
         return l10n.shortcut_action_quit_app;
       case 'shortcut_action_show_shortcut_help':
         return l10n.shortcut_action_show_shortcut_help;
+      case 'shortcut_action_open_resource_window':
+        return l10n.shortcut_action_open_resource_window;
       case 'shortcut_action_toggle_theme':
         return l10n.shortcut_action_toggle_theme;
       default:

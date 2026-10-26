@@ -12102,5 +12102,6 @@
     }
   },
   "set_workspaceFontScale": "創作區文字字號",
-  "set_promptAutocomplete": "提示詞自動補全"
+  "set_promptAutocomplete": "提示詞自動補全",
+  "shortcut_action_open_resource_window": "開啟資源小窗"
 }

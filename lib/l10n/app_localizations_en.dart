@@ -22519,4 +22519,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_promptAutocomplete => 'Prompt autocomplete';
+
+  @override
+  String get shortcut_action_open_resource_window => 'Open resource window';
 }

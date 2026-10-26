@@ -11517,5 +11517,6 @@
     }
   },
   "set_workspaceFontScale": "創作エリアの文字サイズ",
-  "set_promptAutocomplete": "プロンプトの自動補完"
+  "set_promptAutocomplete": "プロンプトの自動補完",
+  "shortcut_action_open_resource_window": "リソースウィンドウを開く"
 }

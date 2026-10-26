@@ -39123,6 +39123,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Prompt autocomplete'**
   String get set_promptAutocomplete;
+
+  /// No description provided for @shortcut_action_open_resource_window.
+  ///
+  /// In en, this message translates to:
+  /// **'Open resource window'**
+  String get shortcut_action_open_resource_window;
 }
 
 class _AppLocalizationsDelegate
