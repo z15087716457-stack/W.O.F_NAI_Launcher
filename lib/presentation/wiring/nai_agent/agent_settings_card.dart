@@ -17,6 +17,7 @@ const agentSettingRows = <String, (SettingKey?, String)>{
     SettingKey.simpleViewerGroupBatches,
     'canvas',
   ),
+  'thumbnail_cache_limit_gb': (SettingKey.thumbnailCacheLimitGb, 'storage'),
   'canvas_lock_camera': (SettingKey.canvasLockCamera, 'canvas'),
   'canvas_reduced_motion': (SettingKey.reduceMotion, 'appearance'),
   'canvas_zoom_to_fill': (SettingKey.canvasZoomToFill, 'canvas'),
@@ -64,6 +65,7 @@ String agentSettingLabel(String storageKey) {
     SettingKey.historyClick => l.set_cvHistoryClick,
     SettingKey.outputViewer => l.set_cvViewer,
     SettingKey.simpleViewerGroupBatches => l.set_cvGroupBatches,
+    SettingKey.thumbnailCacheLimitGb => l.set_stThumbnailCacheLimit,
     SettingKey.canvasLockCamera => l.set_cvLock,
     SettingKey.reduceMotion => l.set_apReduceMotion,
     SettingKey.canvasZoomToFill => l.set_cvFill,
@@ -88,6 +90,7 @@ String agentSettingValue(String key, Object? value) {
   if (value == null) return l.set_defaultTag;
   if (value is bool) return value ? l.set_on : l.set_off;
   if (key == 'font_scale' || key == 'settings_font_scale') return '$value×';
+  if (key == 'thumbnail_cache_limit_gb') return '$value GB';
   if (key == 'protection_generation_interval_seconds') return '$value s';
   if (key == 'protection_generation_interval_jitter_percent') return '$value%';
   return switch ((key, value)) {

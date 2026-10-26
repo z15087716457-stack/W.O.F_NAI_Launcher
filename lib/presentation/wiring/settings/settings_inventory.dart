@@ -19,7 +19,7 @@ import '../../providers/image_save_settings_provider.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../providers/rag_provider.dart';
 import '../../ui/settings/settings_contract.dart';
-import '../../../core/cache/thumbnail_cache_service.dart';
+import '../../providers/thumbnail_cache_limit_provider.dart';
 
 typedef SettingsDirectoryMeasurement = ({int bytes, int thumbs, int images});
 typedef SettingsDirectoryMeasure =
@@ -183,7 +183,8 @@ final settingsStorageLocationsProvider = FutureProvider<SettingsStorageData>((
           primary: p.equals(path, primary),
         ),
     ],
-    thumbnailLimit: ThumbnailCacheService.defaultMaxCacheSizeMB * 1024 * 1024,
+    thumbnailLimit:
+        ref.watch(thumbnailCacheLimitGbProvider) * 1024 * 1024 * 1024,
     folderNames: {
       for (final entry in folders.entries) entry.key: p.basename(entry.value),
     },

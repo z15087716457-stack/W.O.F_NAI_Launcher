@@ -59,6 +59,42 @@ void main() {
     await Hive.close();
     await directory.delete(recursive: true);
   });
+  test('inpaint suspension is view-only and disabled Vibes need no notice', () {
+    const params = ImageParams(
+      model: 'nai-diffusion-4-5-full',
+      vibeReferencesV4: [
+        VibeReference(displayName: 'draft', vibeEncoding: 'encoded'),
+      ],
+    );
+    final identity = GenerationReferenceIdentity();
+    final view = generationRefsView(
+      params,
+      const ImageWorkflowState(mode: ImageWorkflowMode.inpaint),
+      identity,
+    );
+    expect(view.vibeSuspendedForInpaint, isTrue);
+    expect(view.vibes!.list.single.enabled, isTrue);
+    expect(
+      generationRefsView(
+        params,
+        const ImageWorkflowState(),
+        identity,
+      ).vibeSuspendedForInpaint,
+      isFalse,
+    );
+    expect(
+      generationRefsView(
+        params.copyWith(
+          vibeReferencesV4: [
+            params.vibeReferencesV4.single.copyWith(enabled: false),
+          ],
+        ),
+        const ImageWorkflowState(mode: ImageWorkflowMode.inpaint),
+        identity,
+      ).vibeSuspendedForInpaint,
+      isFalse,
+    );
+  });
   test('参考图按模型隐藏但不丢失已存参数，编码状态按目标模型', () {
     final vibe = VibeReference(
       displayName: 'raw',

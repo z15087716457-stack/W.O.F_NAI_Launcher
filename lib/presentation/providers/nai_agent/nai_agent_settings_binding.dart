@@ -13,6 +13,7 @@ import '../locale_provider.dart';
 import '../history_click_behavior_provider.dart';
 import '../simple_output_viewer_provider.dart';
 import '../simple_viewer_group_batches_provider.dart';
+import '../thumbnail_cache_limit_provider.dart';
 import '../canvas_settings_provider.dart';
 import '../notification_settings_provider.dart';
 import '../share_image_settings_provider.dart';
@@ -49,6 +50,7 @@ NaiAgentSettingsTools bindNaiAgentSettings(
     ref.invalidate(historyClickBehaviorNotifierProvider);
     ref.invalidate(simpleOutputViewerNotifierProvider);
     ref.invalidate(simpleViewerGroupBatchesProvider);
+    ref.invalidate(thumbnailCacheLimitGbProvider);
     ref.invalidate(canvasLockCameraNotifierProvider);
     ref.invalidate(canvasReducedMotionNotifierProvider);
     ref.invalidate(canvasZoomToFillNotifierProvider);

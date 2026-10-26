@@ -309,11 +309,13 @@ class ThumbnailCacheService {
 
   /// 缓存限制配置
   ///
-  /// P7 接入 LRU 清档时定的保守默认：大库（约 5 万图 × 多档位）实测可达
-  /// 2GB+ / 5 万+ 文件，取「约一图一档」的量级把缓存增长压住，
-  /// 超限部分按最久未使用淘汰。
-  static const int defaultMaxCacheSizeMB = 2048;
-  static const int defaultMaxFileCount = 50000;
+  /// 全部图库根共享容量与文件数上限，清理回收到两项的 80%。
+  static const int defaultMaxCacheSizeMB = 20 * 1024;
+  static const int defaultMaxFileCount = 20 * 25000;
+
+  @visibleForTesting
+  ({int maxSizeMB, int maxFiles}) get cacheLimits =>
+      (maxSizeMB: _maxCacheSizeMB, maxFiles: _maxFileCount);
 
   /// LRU 追踪：缩略图路径 -> 最后访问时间
   final Map<String, DateTime> _lastAccessTimes = {};
@@ -1133,27 +1135,52 @@ class ThumbnailCacheService {
   /// [targetSizeMB] 目标缓存大小（MB），默认使用 _maxCacheSizeMB 的 80%
   /// [targetFileCount] 目标文件数，默认使用 _maxFileCount 的 80%
   ///
-  /// 按「最久未使用」优先淘汰，达到任一目标即停；只删除 `.thumbs` 目录内的
+  /// 按「最久未使用」优先淘汰，两项目标均满足才停；只删除 `.thumbs` 目录内的
   /// `.thumb.jpg` 文件，原图与目录外文件不受影响。
   /// 返回本次淘汰的数量与释放字节数。
   Future<ThumbnailEvictionResult> evictLRU(
     String rootPath, {
     int? targetSizeMB,
     int? targetFileCount,
+  }) => evictLRUGlobal(
+    [rootPath],
+    targetSizeMB: targetSizeMB,
+    targetFileCount: targetFileCount,
+  );
+
+  /// Collect all roots before sorting: a per-root quota cannot bound the total.
+  Future<ThumbnailEvictionResult> evictLRUGlobal(
+    Iterable<String> rootPaths, {
+    int? targetSizeMB,
+    int? targetFileCount,
   }) async {
     try {
       const bytesPerMB = 1024 * 1024;
-      final targetBytes =
-          (targetSizeMB ?? (_maxCacheSizeMB * 0.8)).toInt() * bytesPerMB;
+      final targetBytes = targetSizeMB != null
+          ? targetSizeMB * bytesPerMB
+          : (_maxCacheSizeMB * bytesPerMB * .8).floor();
       final targetFiles = targetFileCount ?? (_maxFileCount * 0.8).toInt();
-
-      // 获取所有缩略图文件信息
-      final allThumbnails = await _getAllThumbnails(rootPath);
+      final roots = <String>{};
+      final candidates = <String, ThumbnailInfo>{};
+      for (final root in rootPaths) {
+        if (!await Directory(root).exists()) continue;
+        final resolved = await Directory(root).resolveSymbolicLinks();
+        if (!roots.add(resolved)) continue;
+        // Keep the caller path spelling for in-process access/visibility keys
+        // (Windows TEMP may use a short-path alias). Canonicalize only dedup
+        // and deletion boundaries.
+        for (final info in await _getAllThumbnails(root)) {
+          // Enumeration does not follow child links; resolving the root once
+          // is sufficient for duplicate/overlapping source identity.
+          final path = p.join(resolved, p.relative(info.path, from: root));
+          candidates.putIfAbsent(galleryFilePathKey(path), () => info);
+        }
+      }
+      final allThumbnails = candidates.values.toList();
 
       if (allThumbnails.isEmpty) {
         return ThumbnailEvictionResult.empty;
       }
-      final resolvedRoot = await Directory(rootPath).resolveSymbolicLinks();
 
       // 计算当前缓存状态（按字节累计，避免逐文件按 MB 截断导致多删）
       var currentBytes = 0;
@@ -1213,7 +1240,7 @@ class ThumbnailCacheService {
         try {
           final file = File(info.path);
           final resolvedPath = await file.resolveSymbolicLinks();
-          if (!p.isWithin(resolvedRoot, resolvedPath) ||
+          if (!roots.any((root) => p.isWithin(root, resolvedPath)) ||
               !isDeletableThumbnailFile(resolvedPath)) {
             continue;
           }

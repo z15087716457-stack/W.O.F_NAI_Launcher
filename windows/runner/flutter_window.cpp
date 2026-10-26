@@ -93,6 +93,11 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  clipboard_history_channel_ =
+      std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
+          flutter_controller_->engine()->messenger(),
+          "com.nailauncher/clipboard_history",
+          &flutter::StandardMethodCodec::GetInstance());
   if (!SetChildContent(flutter_controller_->view()->GetNativeWindow())) {
     return false;
   }
@@ -288,7 +293,14 @@ bool FlutterWindow::OnCreate() {
   return true;
 }
 
+void FlutterWindow::OnClipboardHistoryPaste() {
+  if (clipboard_history_channel_) {
+    clipboard_history_channel_->InvokeMethod("paste", nullptr);
+  }
+}
+
 void FlutterWindow::OnDestroy() {
+  clipboard_history_channel_.reset();
   reveal_.reset();
   reveal_channel_.reset();
   material_channel_.reset();

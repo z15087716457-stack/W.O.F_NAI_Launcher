@@ -12035,5 +12035,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "gen_vibeInpaintUnsupported": "Vibe 不支援局部重繪（Inpainting），本次不會生效。",
+  "set_stThumbnailCacheLimit": "縮圖快取上限"
 }

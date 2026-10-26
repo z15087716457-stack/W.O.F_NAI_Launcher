@@ -11450,5 +11450,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "gen_vibeInpaintUnsupported": "Vibe는 부분 다시 그리기(Inpainting)를 지원하지 않으므로 이번 생성에는 적용되지 않습니다.",
+  "set_stThumbnailCacheLimit": "썸네일 캐시 한도"
 }

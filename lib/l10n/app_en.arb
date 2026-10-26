@@ -11462,5 +11462,7 @@
   "gen_groupBatchesOn": "Grouped by batch · click to show one at a time",
   "gen_groupBatchesOff": "One image at a time · click to group by batch",
   "blocks_presetCustom": "Custom",
-  "blocks_presetHint": "Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling."
+  "blocks_presetHint": "Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.",
+  "gen_vibeInpaintUnsupported": "Vibe does not support Inpainting and will not apply to this generation.",
+  "set_stThumbnailCacheLimit": "Thumbnail cache limit"
 }

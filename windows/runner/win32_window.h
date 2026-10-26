@@ -57,6 +57,8 @@ class Win32Window {
   RECT GetClientArea();
 
  protected:
+  virtual void OnClipboardHistoryPaste();
+
   // A reveal temporarily paints beyond the parent HWND's current right edge.
   void SetContentWidthOverride(int width);
   // Processes and route salient window messages for mouse handling,
@@ -76,6 +78,10 @@ class Win32Window {
 
  private:
   friend class WindowClassRegistrar;
+  static LRESULT CALLBACK ClipboardHistoryProc(
+      HWND window, UINT message, WPARAM wparam, LPARAM lparam,
+      UINT_PTR subclass_id, DWORD_PTR reference_data);
+  bool clipboard_history_v_down_ = false;
 
   // OS callback called by message pump. Handles the WM_NCCREATE message which
   // is passed when the non-client area is being created and enables automatic

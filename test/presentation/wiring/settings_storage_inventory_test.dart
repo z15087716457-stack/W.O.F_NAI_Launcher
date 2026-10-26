@@ -112,7 +112,7 @@ void main() {
           .timeout(const Duration(seconds: 1));
       expect(locations.roots.map((r) => r.primary), [true, false]);
       expect(locations.roots.last.path, p.join(temp.path, 'extra'));
-      expect(locations.thumbnailLimit, greaterThan(0));
+      expect(locations.thumbnailLimit, 20 * 1024 * 1024 * 1024);
       expect(locations.folderNames[SettingsFolder.images], 'images');
       expect(container.read(settingsStorageDataProvider).isLoading, isTrue);
       blocked.complete((bytes: 3, thumbs: 2, images: 1));

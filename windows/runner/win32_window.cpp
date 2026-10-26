@@ -35,6 +35,7 @@ static int g_active_window_count = 0;
 
 constexpr UINT_PTR kFlutterAccessibilityCrashGuardSubclassId = 1;
 constexpr UINT_PTR kTitleBarHitTestSubclassId = 2;
+constexpr UINT_PTR kClipboardHistorySubclassId = 3;
 
 // FEAT-23：FlutterView 子窗口铺满整个客户区，鼠标落在其上时
 // WM_NCHITTEST 只发给子窗口，父窗口的 HTCAPTION 分支永远收不到，
@@ -347,6 +348,12 @@ bool Win32Window::SetChildContent(HWND content) {
     return false;
   }
 
+  if (!SetWindowSubclass(content, ClipboardHistoryProc,
+                         kClipboardHistorySubclassId,
+                         reinterpret_cast<DWORD_PTR>(this))) {
+    return false;
+  }
+
   child_content_ = content;
   SetParent(content, window_handle_);
   RECT frame = GetClientArea();
@@ -357,6 +364,41 @@ bool Win32Window::SetChildContent(HWND content) {
   SetFocus(child_content_);
   return true;
 }
+
+LRESULT CALLBACK Win32Window::ClipboardHistoryProc(
+    HWND window, UINT message, WPARAM wparam, LPARAM lparam,
+    UINT_PTR subclass_id, DWORD_PTR reference_data) {
+  auto* self = reinterpret_cast<Win32Window*>(reference_data);
+  const bool zero_scancode = ((lparam >> 16) & 0xff) == 0;
+  if (zero_scancode && (message == WM_KEYDOWN || message == WM_KEYUP)) {
+    // Both synthetic Ctrl edges must bypass the engine: scan code zero gives
+    // Ctrl and V the same physical key and corrupts its pressing records.
+    // Real Ctrl (including AltGr's fake Ctrl, scan code 0x1d) passes unchanged.
+    if (wparam == VK_CONTROL || wparam == VK_LCONTROL || wparam == VK_RCONTROL) {
+      return 0;
+    }
+    if (wparam == 'V') {
+      if (message == WM_KEYDOWN && GetKeyState(VK_CONTROL) < 0) {
+        self->clipboard_history_v_down_ = true;
+        self->OnClipboardHistoryPaste();
+        return 0;
+      }
+      if (message == WM_KEYUP && self->clipboard_history_v_down_) {
+        self->clipboard_history_v_down_ = false;
+        return 0;
+      }
+    }
+  }
+  // TranslateMessage may already have queued the Ctrl+V control character.
+  if (message == WM_CHAR && wparam == 0x16 && zero_scancode) return 0;
+  if (message == WM_KILLFOCUS) self->clipboard_history_v_down_ = false;
+  if (message == WM_NCDESTROY) {
+    RemoveWindowSubclass(window, ClipboardHistoryProc, subclass_id);
+  }
+  return DefSubclassProc(window, message, wparam, lparam);
+}
+
+void Win32Window::OnClipboardHistoryPaste() {}
 
 RECT Win32Window::GetClientArea() {
   RECT frame;

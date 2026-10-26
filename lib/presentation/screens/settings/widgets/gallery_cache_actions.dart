@@ -11,6 +11,7 @@ import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/gallery/index.dart';
 import '../../../../data/services/thumbnail_service.dart';
 import '../../../providers/local_gallery_provider.dart';
+import '../../../providers/thumbnail_cache_limit_provider.dart';
 import '../../../widgets/common/app_toast.dart';
 import 'cache_statistics_tile.dart';
 import 'settings_columns.dart';
@@ -159,7 +160,7 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
 
   /// 清理缩略图缓存（P7）
   ///
-  /// 对每个图库源按 LRU 淘汰超限的 `.thumbs` 缩略图缓存（只删 `.thumbs`
+  /// 对全部图库源按全局 LRU 淘汰超限的 `.thumbs` 缩略图缓存（只删 `.thumbs`
   /// 内的 `.thumb.jpg`，不触碰原图），完成后提示清理数量与释放空间。
   Future<void> _evictThumbnailCache() async {
     if (_isEvictingThumbnails) return;
@@ -201,13 +202,12 @@ class _GalleryCacheActionsState extends ConsumerState<GalleryCacheActions> {
       final service = ref.read(thumbnailServiceProvider);
       final roots = await GalleryFolderRepository.instance.getAllRootDirs();
 
-      var evictedCount = 0;
-      var evictedBytes = 0;
-      for (final dir in roots) {
-        final result = await service.evictThumbnailCache(dir.path);
-        evictedCount += result.evictedCount;
-        evictedBytes += result.evictedBytes;
-      }
+      ref.read(thumbnailCacheLimitGbProvider);
+      final result = await service.evictThumbnailCaches(
+        roots.map((dir) => dir.path),
+      );
+      final evictedCount = result.evictedCount;
+      final evictedBytes = result.evictedBytes;
 
       if (evictedCount > 0) {
         final freedMB = (evictedBytes / 1024 / 1024).toStringAsFixed(1);

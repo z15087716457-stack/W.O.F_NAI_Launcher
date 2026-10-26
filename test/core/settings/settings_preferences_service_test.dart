@@ -45,6 +45,7 @@ void main() {
       storage.values.addAll({
         StorageKeys.tagExpansionResultLimit: CompletionResultLimits.all,
         StorageKeys.fontScale: 1.3,
+        StorageKeys.thumbnailCacheLimitGb: 50,
         'token': 'fake_secret',
         StorageKeys.promptAssistantConfigJson: 'fake_model_config',
         StorageKeys.imageSavePath: 'fake_path',
@@ -52,6 +53,16 @@ void main() {
       final values = service.decode(service.encode(service.capture()));
       expect(values[StorageKeys.tagExpansionResultLimit], 300000);
       expect(values[StorageKeys.fontScale], 1.3);
+      expect(values[StorageKeys.thumbnailCacheLimitGb], 50);
+      for (final invalid in [0, 51, 1.5, '20']) {
+        expect(
+          SettingsPreferencesService.validValue(
+            StorageKeys.thumbnailCacheLimitGb,
+            invalid,
+          ),
+          isFalse,
+        );
+      }
       expect(values.keys, isNot(contains('token')));
       expect(values.keys, isNot(contains(StorageKeys.imageSavePath)));
       expect(

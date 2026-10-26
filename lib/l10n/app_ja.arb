@@ -11450,5 +11450,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "gen_vibeInpaintUnsupported": "Vibe は部分再描画（Inpainting）に対応していないため、今回は適用されません。",
+  "set_stThumbnailCacheLimit": "サムネイルキャッシュの上限"
 }

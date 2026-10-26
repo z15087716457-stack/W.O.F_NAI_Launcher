@@ -41,6 +41,59 @@ void main() {
     return file;
   }
 
+  test('defaults are 20 GiB and 500000 files', () {
+    expect(ThumbnailCacheService.defaultMaxCacheSizeMB, 20480);
+    expect(ThumbnailCacheService.defaultMaxFileCount, 500000);
+  });
+
+  test(
+    'two roots share one byte budget and global oldest-first 80% target',
+    () async {
+      final files = <File>[];
+      for (var i = 0; i < 6; i++) {
+        files.add(
+          await createThumbFile(
+            '${i.isEven ? 'a' : 'b'}/.thumbs/$i.small.thumb.jpg',
+            modified: DateTime(2026, 1, i + 1),
+            byteLength: 200 * 1024,
+          ),
+        );
+      }
+      final service = ThumbnailCacheService.instance
+        ..setCacheLimits(maxSizeMB: 1, maxFiles: 100);
+      final result = await service.evictLRUGlobal([
+        fullPath('a'),
+        fullPath('b'),
+        fullPath('a'),
+      ]);
+      expect(result.evictedCount, 2);
+      expect(result.evictedBytes, 400 * 1024);
+      for (var i = 0; i < files.length; i++) {
+        expect(await files[i].exists(), i >= 2);
+      }
+      expect(4 * 200 * 1024, lessThanOrEqualTo((1024 * 1024 * .8).floor()));
+    },
+  );
+
+  test(
+    'overlapping roots count candidates once, with global file-count budget',
+    () async {
+      for (var i = 0; i < 6; i++) {
+        await createThumbFile(
+          '${i.isEven ? 'a' : 'a/nested'}/.thumbs/$i.small.thumb.jpg',
+          modified: DateTime(2026, 1, i + 1),
+        );
+      }
+      final service = ThumbnailCacheService.instance
+        ..setCacheLimits(maxFiles: 5);
+      final result = await service.evictLRUGlobal([
+        fullPath('a'),
+        fullPath('a/nested'),
+      ]);
+      expect(result.evictedCount, 2);
+    },
+  );
+
   group('evictLRU 淘汰规则', () {
     test('超过文件数上限时按 mtime 从最旧开始淘汰', () async {
       final base = DateTime(2026, 1, 1);

@@ -68,6 +68,7 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.autoSave => l.set_stAutoSave,
     SettingKey.vibePath => l.set_stVibePath,
     SettingKey.galleryQuality => l.set_stQuality,
+    SettingKey.thumbnailCacheLimitGb => l.set_stThumbnailCacheLimit,
     SettingKey.appDataPath => l.set_stAppData,
     SettingKey.cacheStatsAutoRefresh => l.set_dcAutoRefresh,
     SettingKey.agentModel => l.set_agModel,
@@ -134,7 +135,8 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.relatedTags => l.set_gnInput,
     SettingKey.imageSavePath || SettingKey.autoSave => l.set_stSave,
     SettingKey.vibePath || SettingKey.galleryQuality => l.set_stAssets,
-    SettingKey.appDataPath => l.set_stMaintain,
+    SettingKey.appDataPath ||
+    SettingKey.thumbnailCacheLimitGb => l.set_stMaintain,
     SettingKey.cacheStatsAutoRefresh => l.set_dcStats,
     SettingKey.agentModel ||
     SettingKey.agentEnterToSend ||
@@ -182,6 +184,7 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
       return switch (k) {
         SettingKey.settingsFontScale => '${(n * 100).round()}%',
         SettingKey.costThreshold => '${n.round()} Anlas',
+        SettingKey.thumbnailCacheLimitGb => '${n.round()} GB',
         SettingKey.intervalSeconds => '${n.round()} ${l.set_unitSeconds}',
         SettingKey.intervalJitter => '±${n.round()}%',
         SettingKey.seedInputNoise ||
@@ -202,6 +205,7 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
 /// 只参与匹配的同义词（不分语言，主要是英文键和常见说法）。
 const _synonyms = <SettingKey, String>{
   SettingKey.simpleViewerGroupBatches: 'simple viewer batch group',
+  SettingKey.thumbnailCacheLimitGb: 'thumbnail cache global limit GB GiB',
   SettingKey.costWarning: 'anlas cost',
   SettingKey.costThreshold: 'anlas cost',
   SettingKey.intervalSeconds: 'delay rate limit',

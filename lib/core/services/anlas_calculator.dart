@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import 'effective_vibe_references.dart';
+
 import '../../data/models/image/image_params.dart';
 import '../constants/api_constants.dart';
 import '../constants/model_spec.dart';
@@ -36,10 +38,8 @@ class AnlasCalculator {
   }
 
   static bool usesVibeReferences(ImageParams params) {
-    return params.isV4Model &&
-        params.hasVibeReferencesV4 &&
-        params.action != ImageGenerationAction.infill &&
-        !_usesPreciseReferences(params);
+    return ModelSpecs.of(params.model).encodedVibes &&
+        effectiveVibeReferences(params, ModelSpecs.of(params.model)).isNotEmpty;
   }
 
   static int resolvePreciseReferenceExtraCost(ImageParams params) {
