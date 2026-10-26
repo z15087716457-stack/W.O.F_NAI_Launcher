@@ -55,6 +55,12 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
   /// 文本变化回调
   final ValueChanged<String>? onChanged;
 
+  /// Reports platform/keyboard edits before controller mirroring. Programmatic
+  /// controller writes intentionally do not go through this callback.
+  final ValueChanged<TextEditingValue>? onUserEdit;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
+
   /// 提交回调（按 Enter 键时触发，不阻止 Shift+Enter 换行）
   final ValueChanged<String>? onSubmitted;
 
@@ -92,6 +98,9 @@ class UnifiedPromptInput extends ConsumerStatefulWidget {
     this.pillScope,
     this.decoration,
     this.onChanged,
+    this.onUserEdit,
+    this.onUndo,
+    this.onRedo,
     this.onSubmitted,
     this.maxLines,
     this.minLines,
@@ -834,28 +843,19 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
       children: [result],
     );
 
-    if (!_searchVisible) {
-      return inputStack;
-    }
-
-    if (widget.expands) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildSearchToolbar(context),
-          const SizedBox(height: 8),
-          Expanded(child: inputStack),
-        ],
-      );
-    }
-
+    // Keep the input at the same element path when search opens/closes: the
+    // EditableText state (and native histories of standalone inputs) must live.
+    final fillsHeight = widget.expands || !widget.fitContent;
     return Column(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: fillsHeight ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildSearchToolbar(context),
-        const SizedBox(height: 8),
-        inputStack,
+        if (_searchVisible)
+          _buildSearchToolbar(context)
+        else
+          const SizedBox.shrink(),
+        SizedBox(height: _searchVisible ? 8 : 0),
+        if (fillsHeight) Expanded(child: inputStack) else inputStack,
       ],
     );
   }
@@ -1137,10 +1137,13 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
           ? null
           : [
               TextInputFormatter.withFunction((oldValue, newValue) {
-                return TextSelectionUtils.wrapSelectionOnBracketReplacement(
-                  oldValue,
-                  newValue,
-                );
+                final value =
+                    TextSelectionUtils.wrapSelectionOnBracketReplacement(
+                      oldValue,
+                      newValue,
+                    );
+                widget.onUserEdit?.call(value);
+                return value;
               }),
             ],
       onChanged: _handleTextChanged,
@@ -1152,7 +1155,25 @@ class _UnifiedPromptInputState extends ConsumerState<UnifiedPromptInput> {
     );
 
     // Tag expansion opens explicitly on Ctrl + click or selection.
-    Widget result = baseInput;
+    Widget result = widget.onUndo == null
+        ? baseInput
+        : Actions(
+            actions: {
+              UndoTextIntent: CallbackAction<UndoTextIntent>(
+                onInvoke: (_) {
+                  widget.onUndo!();
+                  return null;
+                },
+              ),
+              RedoTextIntent: CallbackAction<RedoTextIntent>(
+                onInvoke: (_) {
+                  widget.onRedo!();
+                  return null;
+                },
+              ),
+            },
+            child: baseInput,
+          );
     if (!widget.config.readOnly) {
       result = TagExpansionWrapper(
         controller: _effectiveController,

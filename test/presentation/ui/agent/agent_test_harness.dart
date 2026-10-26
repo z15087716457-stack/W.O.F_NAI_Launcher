@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
@@ -45,7 +46,7 @@ Future<AgentRecorder> pumpAgent(
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         builder: (context, child) => MediaQuery(
           data: MediaQuery.of(context).copyWith(disableAnimations: !animate),
-          child: child!,
+          child: TextEditingShortcuts(child: child!),
         ),
         home: Scaffold(
           body: WindowChromeScope(

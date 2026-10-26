@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/storage/pill_workspace_storage.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/draft_history.dart';
 import '../../core/utils/pill_document_editor.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
@@ -76,6 +77,38 @@ final pillActiveEditorTargetProvider =
 /// 墓碑缓存与文档实例必须活过 tab 切换，否则剪切→切 tab→粘贴 变失效块。
 /// 块内容从块库 provider 实时解析，库编辑即时反映到投影。
 class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
+  late DraftHistory<PillDocument> _history;
+  int _historyBatchDepth = 0;
+
+  bool get canUndo => _history.canUndo;
+  bool get canRedo => _history.canRedo;
+
+  /// Leaving an editor ends its typing burst without discarding lane history.
+  void closeTypingGroup() => _history.closeGroup();
+
+  /// A compound document operation (for example selection → block) is one
+  /// history step, even when existing insertion helpers perform several writes.
+  void editAsSingleStep(VoidCallback edit) {
+    _history.closeGroup();
+    _historyBatchDepth++;
+    try {
+      edit();
+    } finally {
+      _historyBatchDepth--;
+      if (_historyBatchDepth == 0) _history.record(state.document);
+    }
+  }
+
+  void undo() {
+    final document = _history.undo();
+    if (document != null) _apply(document, recordHistory: false);
+  }
+
+  void redo() {
+    final document = _history.redo();
+    if (document != null) _apply(document, recordHistory: false);
+  }
+
   /// 最近被移除实例的墓碑缓存（marker → 实例快照）。
   ///
   /// 剪切/删除会让标记字符从文本消失、实例被对账移除；此后若同一字符
@@ -117,6 +150,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     final restored = storage.tryLoadSync(scope);
     // 挂载即兜底物化：未锁定存档里的随机实例若缺 currentRoll 先 roll 再投影
     final document = _materializeRolls(restored ?? PillDocument.empty());
+    _history = DraftHistory(document);
+    ref.onDispose(_history.dispose);
     return PillWorkspaceState(
       document: document,
       projection: _project(document),
@@ -124,11 +159,22 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   }
 
   /// 用户直接编辑文本后的入口：复活无主标记、对账实例并重算投影。
-  void setText(String text) {
+  void setText(String text, {bool userEdit = false, bool composing = false}) {
     var document = state.document;
-    if (text == document.text) return;
+    if (text == document.text) {
+      if (userEdit && !composing) _history.record(document, merge: true);
+      return;
+    }
     document = _resurrectMarkers(document, text);
-    _apply(PillDocumentEditor.reconcile(document, text));
+    final reconciled = PillDocumentEditor.reconcile(document, text);
+    _apply(
+      reconciled,
+      // Inserting/removing a marker is a structural edit, never part of the
+      // adjacent typing burst. Its snapshot includes the complete instance map.
+      mergeHistory:
+          userEdit && mapEquals(state.document.instances, reconciled.instances),
+      recordHistory: !composing,
+    );
   }
 
   /// 文本里无实例但墓碑缓存有快照的标记字符 → 恢复其实例。
@@ -657,8 +703,15 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     );
   }
 
-  void _apply(PillDocument document) {
+  void _apply(
+    PillDocument document, {
+    bool mergeHistory = false,
+    bool recordHistory = true,
+  }) {
     document = _materializeRolls(document);
+    if (recordHistory && _historyBatchDepth == 0) {
+      _history.record(document, merge: mergeHistory);
+    }
     _recordTombstones(state.document, document);
     state = PillWorkspaceState(
       document: document,

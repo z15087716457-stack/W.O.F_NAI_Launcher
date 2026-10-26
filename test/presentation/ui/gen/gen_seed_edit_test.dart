@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
@@ -78,6 +79,40 @@ void main() {
       expect(calls, isEmpty);
     });
   }
+
+  testWidgets('seed text supports Ctrl+Z, Ctrl+Y and Ctrl+Shift+Z', (t) async {
+    await open(t);
+    Future<void> type(String text) async {
+      t.testTextInput.updateEditingValue(
+        TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        ),
+      );
+      await t.pump(const Duration(milliseconds: 550));
+    }
+
+    Future<void> key(LogicalKeyboardKey key, {bool shift = false}) async {
+      await t.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      if (shift) await t.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await t.sendKeyEvent(key);
+      if (shift) await t.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await t.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await t.pump();
+    }
+
+    await type('321');
+    await type('321456');
+    final controller = t.widget<TextField>(field).controller!;
+    await key(LogicalKeyboardKey.keyZ);
+    expect(controller.text, '321');
+    await key(LogicalKeyboardKey.keyY);
+    expect(controller.text, '321456');
+    await key(LogicalKeyboardKey.keyZ);
+    await key(LogicalKeyboardKey.keyZ, shift: true);
+    expect(controller.text, '321456');
+    await close(t);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
 
   testWidgets('submitting an unchanged displayed random seed does not pin it', (
     t,

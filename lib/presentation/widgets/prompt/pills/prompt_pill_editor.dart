@@ -12,6 +12,7 @@ import '../../../screens/settings/sections/prompt_assistant_settings_section.dar
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
 import '../../../providers/pill_workspace_provider.dart';
+import '../../common/text_editing_shortcuts.dart';
 import '../../../providers/prompt_translation_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
 import '../blocks/prompt_block_colors.dart';
@@ -50,6 +51,7 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.minLines,
     this.maxLines,
     this.allowEvolutionToggle = false,
+    this.enableBlurredUndo = false,
     this.onChanged,
     this.onComfyuiImport,
     this.beginComfyuiImport,
@@ -78,6 +80,9 @@ class PromptPillEditor extends ConsumerStatefulWidget {
   /// 是否允许在实例卡中切换遗传开关（仅画风探索页开启）。
   final bool allowEvolutionToggle;
 
+  /// Only generation-page editors register for application-level fallback.
+  final bool enableBlurredUndo;
+
   /// 投影（块已展开的完整提示词）变化回调，接旧生成参数链路。
   final ValueChanged<String>? onChanged;
   final void Function(String globalPrompt, List<CharacterPrompt> characters)?
@@ -93,6 +98,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   late final FocusNode _focusNode;
   final GlobalKey _fieldAreaKey = GlobalKey();
 
+  TextEditingShortcutsState? _undoRouter;
   bool _applyingExternal = false;
   int _lastValidOffset = 0;
   String? _lastEmittedProjection;
@@ -124,10 +130,44 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _undoRouter = TextEditingShortcuts.maybeOf(context);
+  }
+
+  void _restoreHistory({required bool redo}) {
+    final notifier = ref.read(_workspace.notifier);
+    if (redo) {
+      notifier.redo();
+    } else {
+      notifier.undo();
+    }
+    final text = ref.read(_workspace).document.text;
+    _applyingExternal = true;
+    try {
+      _controller.value = TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(
+          offset: _lastValidOffset.clamp(0, text.length),
+        ),
+      );
+    } finally {
+      _applyingExternal = false;
+    }
+  }
+
+  @override
   void didUpdateWidget(PromptPillEditor oldWidget) {
     super.didUpdateWidget(oldWidget);
     // scope 切换（角色编辑面板 State 复用、切换编辑目标）：重绑文档
+    if (oldWidget.enableBlurredUndo && !widget.enableBlurredUndo) {
+      _undoRouter?.forgetPrompt(context);
+    }
     if (oldWidget.pillScope != widget.pillScope) {
+      ref
+          .read(pillWorkspaceProvider(oldWidget.pillScope).notifier)
+          .closeTypingGroup();
+      _undoRouter?.forgetPrompt(context);
       _dismissInstanceCard(refresh: false);
       _translationEditor?.dismiss();
       _translationEditor = null;
@@ -148,6 +188,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
         _runPendingSeed();
         _emitProjectionIfChanged(ref.read(_workspace));
       });
+    }
+    if (_focusNode.hasPrimaryFocus && widget.enableBlurredUndo) {
+      _rememberForBlurredUndo();
     }
   }
 
@@ -174,7 +217,14 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   }
 
   @override
+  void deactivate() {
+    ref.read(_workspace.notifier).closeTypingGroup();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
+    _undoRouter?.forgetPrompt(context);
     _dismissInstanceCard(refresh: false);
     _translationEditor?.dismiss();
     _controller
@@ -187,7 +237,21 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   }
 
   void _handleFocusChanged() {
+    if (!_focusNode.hasFocus) {
+      ref.read(_workspace.notifier).closeTypingGroup();
+    }
+    if (_focusNode.hasPrimaryFocus && widget.enableBlurredUndo) {
+      _rememberForBlurredUndo();
+    }
     if (mounted) setState(() {});
+  }
+
+  void _rememberForBlurredUndo() {
+    _undoRouter?.rememberPrompt(
+      context,
+      undo: () => _restoreHistory(redo: false),
+      redo: () => _restoreHistory(redo: true),
+    );
   }
 
   // ==================== L1 实例卡 ====================
@@ -274,6 +338,17 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                 controller: _controller,
                 pillScope: widget.pillScope,
                 focusNode: _focusNode,
+                onUserEdit: (value) => ref
+                    .read(_workspace.notifier)
+                    .setText(
+                      value.text,
+                      userEdit: true,
+                      composing:
+                          value.composing.isValid &&
+                          !value.composing.isCollapsed,
+                    ),
+                onUndo: () => _restoreHistory(redo: false),
+                onRedo: () => _restoreHistory(redo: true),
                 // A source field inside a WidgetSpan owns its own caret.
                 showCursor: _focusNode.hasPrimaryFocus ? null : false,
                 config: effectiveConfig,

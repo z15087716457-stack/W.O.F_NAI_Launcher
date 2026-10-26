@@ -116,6 +116,7 @@ class GenerationEditorWiring extends ConsumerWidget {
     Widget editor(int minLines) => PromptPillEditor(
       key: ValueKey('generation-editor-$scope-${target.fullscreen}'),
       pillScope: scope,
+      enableBlurredUndo: true,
       initialPlainText: plain,
       minLines: minLines,
       autoGrow: true,

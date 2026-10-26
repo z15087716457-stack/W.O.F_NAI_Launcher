@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
@@ -24,6 +25,7 @@ import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_prompt.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
+import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:nai_launcher/presentation/wiring/generation_editor_wiring.dart';
 import '../providers/krita/agent_bridge_draft_test.dart'
     show MemoryCharacters, MemoryDraftSettings, EmptyBlocks;
@@ -94,7 +96,7 @@ void main() {
               disableAnimations: true,
               textScaler: TextScaler.linear(scale),
             ),
-            child: child!,
+            child: TextEditingShortcuts(child: child!),
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
@@ -157,6 +159,64 @@ void main() {
     (widget) =>
         widget is PromptPillEditor && widget.pillScope == PillScopes.main,
   );
+
+  for (final target in [
+    const GenEditorTarget.base(),
+    const GenEditorTarget.base(negative: true),
+    const GenEditorTarget.character(0),
+    const GenEditorTarget.character(0, negative: true),
+    const GenEditorTarget.base(fullscreen: true),
+  ]) {
+    testWidgets('R14 wired editor $target supports blurred undo/redo', (
+      tester,
+    ) async {
+      await pump(tester, target, characterId: target.isBase ? null : 'kept');
+      final field = find.byType(TextField).first;
+      final editor = tester.widget<PromptPillEditor>(
+        find.byType(PromptPillEditor),
+      );
+      expect(editor.enableBlurredUndo, isTrue);
+      final scope = editor.pillScope;
+      await tester.enterText(field, 'first');
+      await tester.pump(const Duration(milliseconds: 550));
+      await tester.enterText(field, 'second');
+      await tester.pump();
+      FocusManager.instance.primaryFocus!.unfocus();
+      await tester.pump();
+      Future<void> key(LogicalKeyboardKey key) async {
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        await tester.sendKeyEvent(key);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+        await tester.pump();
+        await tester.pump();
+      }
+
+      String projected() {
+        final params = container.read(generationParamsNotifierProvider);
+        if (target.isBase) {
+          return target.negative ? params.negativePrompt : params.prompt;
+        }
+        final role = container
+            .read(characterPromptNotifierProvider)
+            .findCharacterById('kept')!;
+        return target.negative ? role.negativePrompt : role.prompt;
+      }
+
+      await key(LogicalKeyboardKey.keyZ);
+      expect(
+        container.read(pillWorkspaceProvider(scope)).document.text,
+        'first',
+      );
+      expect(projected(), 'first');
+      await key(LogicalKeyboardKey.keyY);
+      expect(
+        container.read(pillWorkspaceProvider(scope)).document.text,
+        'second',
+      );
+      expect(projected(), 'second');
+      await tester.pumpWidget(const SizedBox());
+    }, variant: TargetPlatformVariant.only(TargetPlatform.windows));
+  }
 
   testWidgets('F13 主提示 TIP 随轮次切换，输入内容与文档保持', (tester) async {
     container
