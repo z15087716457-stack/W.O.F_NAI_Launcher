@@ -53,6 +53,7 @@ class AgentViewData {
     this.quick,
     this.bypassWarned = false,
     this.runLimit,
+    this.history = const [],
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -125,6 +126,31 @@ class AgentViewData {
   /// 上一次运行因「单次任务最多请求」停下时的上限值；非 null 时对话末尾显示
   /// 步数上限卡（继续 / 调整上限），不再把它当错误显示。发出新消息后清掉。
   final int? runLimit;
+  final List<AgentHistoryEntry> history;
+}
+
+enum AgentHistoryKind { user, card, questions, compaction }
+
+@immutable
+class AgentHistoryEntry {
+  const AgentHistoryEntry({
+    required this.id,
+    required this.turnId,
+    required this.kind,
+    required this.title,
+    this.subtitle = '',
+    this.at,
+    this.number,
+    this.blockIndex,
+    this.beforeCompaction = false,
+    this.auto = false,
+    this.tokensBefore,
+  });
+  final String id, turnId, title, subtitle;
+  final AgentHistoryKind kind;
+  final DateTime? at;
+  final int? number, blockIndex, tokensBefore;
+  final bool beforeCompaction, auto;
 }
 
 /// 聊天正文搜索的一条命中。
@@ -650,6 +676,29 @@ enum AgentGalleryAction {
   collectionAdd,
   collectionRemove,
   export,
+}
+
+enum AgentAnswerKind { option, free }
+
+@immutable
+class AgentAnsweredQuestion {
+  const AgentAnsweredQuestion({
+    required this.question,
+    required this.answer,
+    required this.kind,
+    this.optionLabel,
+    this.recommended = false,
+  });
+  final String question, answer;
+  final AgentAnswerKind kind;
+  final String? optionLabel;
+  final bool recommended;
+}
+
+final class AgentAnsweredQuestionsBlock extends AgentBlock {
+  const AgentAnsweredQuestionsBlock({required this.questions, this.at});
+  final List<AgentAnsweredQuestion> questions;
+  final DateTime? at;
 }
 
 /// 上下文压缩分隔线：之前的对话被压缩成 [summary]（点开看）。

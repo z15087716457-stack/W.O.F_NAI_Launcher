@@ -209,12 +209,14 @@ class AgentThreadMapper {
 
   AgentThreadMapping map(
     AgentChatRuntime runtime, {
+    List<Map<String, dynamic>>? historyMessages,
     String? draftVersion,
     bool waitingUser = false,
     Map<String, Object?>? preferences,
     AgentPromptSet Function(Map<String, dynamic>, Map<String, AgentImage>)?
     promptSetView,
   }) {
+    final messages = historyMessages ?? runtime.messages;
     final turns = <AgentTurn>[];
     final images = <String, AgentImage>{};
     final files = <String, String>{};
@@ -230,7 +232,7 @@ class AgentThreadMapper {
     int? userTimestamp, assistantTimestamp, inputTokens, outputTokens;
     var toolCalls = 0;
     final results = {
-      for (final m in runtime.messages)
+      for (final m in messages)
         if (m['role'] == 'toolResult') m['toolCallId']: m,
     };
 
@@ -332,8 +334,8 @@ class AgentThreadMapper {
       shelfFiles.add(AgentFile(id: id, name: path, bytes: bytes ?? info.$2));
     }
 
-    for (var mi = 0; mi < runtime.messages.length; mi++) {
-      final message = runtime.messages[mi];
+    for (var mi = 0; mi < messages.length; mi++) {
+      final message = messages[mi];
       if (message['role'] == 'compactionSummary') {
         flushSteps();
         final divider = AgentCompactionBlock(
@@ -405,7 +407,7 @@ class AgentThreadMapper {
                 {'type': 'text', 'text': message['content']},
               ]
             : agentMaps(message['content']);
-        final streaming = runtime.running && mi == runtime.messages.length - 1;
+        final streaming = runtime.running && mi == messages.length - 1;
         for (final (pi, part) in parts.indexed) {
           if (part['type'] == 'thinking') {
             final text = (part['thinking'] as String? ?? '').trim();
@@ -457,6 +459,41 @@ class AgentThreadMapper {
                 : waitingUser
                 ? AgentStepStatus.waitingUser
                 : AgentStepStatus.running;
+            if (tool == 'ask_user' &&
+                done &&
+                !failed &&
+                details['status'] == 'answered') {
+              flushSteps();
+              final questions = agentMaps(args['questions']);
+              blocks.add(
+                AgentAnsweredQuestionsBlock(
+                  at: agentInt(results[id]?['timestamp']) != null
+                      ? DateTime.fromMillisecondsSinceEpoch(
+                          agentInt(results[id]?['timestamp'])!,
+                        ).toLocal()
+                      : at,
+                  questions: [
+                    for (final answer in agentMaps(details['answers']))
+                      AgentAnsweredQuestion(
+                        question: answer['question'] as String,
+                        answer: answer['answer'] as String,
+                        kind:
+                            questions.any(
+                              (q) =>
+                                  q['id'] == answer['id'] &&
+                                  (q['options'] as List? ?? []).contains(
+                                    answer['answer'],
+                                  ),
+                            )
+                            ? AgentAnswerKind.option
+                            : AgentAnswerKind.free,
+                        optionLabel: answer['answer'] as String,
+                      ),
+                  ],
+                ),
+              );
+              continue;
+            }
             final nested = agentMaps(
               agentMap(
                     value['nestedCalls'] ??

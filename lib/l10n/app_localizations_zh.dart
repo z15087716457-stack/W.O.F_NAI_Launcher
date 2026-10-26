@@ -21113,6 +21113,79 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get blocks_expandToText => '展开为文本';
+
+  @override
+  String get ag_answeredTitle => '向你提问 · 已回答';
+
+  @override
+  String get ag_historyButton => '历史';
+
+  @override
+  String get ag_historyTitle => '对话历史';
+
+  @override
+  String get ag_historySearch => '搜索发言和卡片…';
+
+  @override
+  String get ag_historyAll => '全部';
+
+  @override
+  String get ag_historyMine => '我的发言';
+
+  @override
+  String get ag_historyCards => '卡片';
+
+  @override
+  String get ag_historyQuestions => '问答';
+
+  @override
+  String get ag_historyKeys => '↑↓ 选择 · Enter 跳到对话 · Esc 关闭';
+
+  @override
+  String get ag_historyEmpty => '没有匹配的条目';
+
+  @override
+  String get ag_historyBeforeCompaction => '这段在压缩之前，点看摘要';
+
+  @override
+  String get ag_historyAuto => '自动压缩';
+
+  @override
+  String get ag_historyManual => '手动压缩';
+
+  @override
+  String get ag_historyImageMessage => '图片消息';
+
+  @override
+  String ag_historyAnswer(String answer) {
+    return '你选了：$answer';
+  }
+
+  @override
+  String get ag_historyPromptSet => '提示词组';
+
+  @override
+  String ag_historyImages(int count) {
+    return '生成卡 · $count 张';
+  }
+
+  @override
+  String get ag_historyPromptChange => '提示词修改';
+
+  @override
+  String get ag_historyParams => '生成参数';
+
+  @override
+  String get ag_historyPositions => '角色位置';
+
+  @override
+  String get ag_historySettings => '设置修改';
+
+  @override
+  String get ag_historyGallery => '图库卡片';
+
+  @override
+  String get ag_historyChanges => '修改摘要';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42224,4 +42297,77 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get blocks_expandToText => '展開為文本';
+
+  @override
+  String get ag_answeredTitle => '向你提問 · 已回答';
+
+  @override
+  String get ag_historyButton => '歷史';
+
+  @override
+  String get ag_historyTitle => '對話歷史';
+
+  @override
+  String get ag_historySearch => '搜尋發言和卡片…';
+
+  @override
+  String get ag_historyAll => '全部';
+
+  @override
+  String get ag_historyMine => '我的發言';
+
+  @override
+  String get ag_historyCards => '卡片';
+
+  @override
+  String get ag_historyQuestions => '問答';
+
+  @override
+  String get ag_historyKeys => '↑↓ 選擇 · Enter 跳到對話 · Esc 關閉';
+
+  @override
+  String get ag_historyEmpty => '沒有匹配的條目';
+
+  @override
+  String get ag_historyBeforeCompaction => '這段在壓縮之前，點看摘要';
+
+  @override
+  String get ag_historyAuto => '自動壓縮';
+
+  @override
+  String get ag_historyManual => '手動壓縮';
+
+  @override
+  String get ag_historyImageMessage => '圖片訊息';
+
+  @override
+  String ag_historyAnswer(String answer) {
+    return '你選了：$answer';
+  }
+
+  @override
+  String get ag_historyPromptSet => '提示片語';
+
+  @override
+  String ag_historyImages(int count) {
+    return '生成卡 · $count 張';
+  }
+
+  @override
+  String get ag_historyPromptChange => '提示詞修改';
+
+  @override
+  String get ag_historyParams => '生成參數';
+
+  @override
+  String get ag_historyPositions => '角色位置';
+
+  @override
+  String get ag_historySettings => '設定修改';
+
+  @override
+  String get ag_historyGallery => '圖庫卡片';
+
+  @override
+  String get ag_historyChanges => '修改摘要';
 }

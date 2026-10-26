@@ -11862,5 +11862,42 @@
       }
     }
   },
-  "blocks_expandToText": "展開為文本"
+  "blocks_expandToText": "展開為文本",
+  "ag_answeredTitle": "向你提問 · 已回答",
+  "ag_historyButton": "歷史",
+  "ag_historyTitle": "對話歷史",
+  "ag_historySearch": "搜尋發言和卡片…",
+  "ag_historyAll": "全部",
+  "ag_historyMine": "我的發言",
+  "ag_historyCards": "卡片",
+  "ag_historyQuestions": "問答",
+  "ag_historyKeys": "↑↓ 選擇 · Enter 跳到對話 · Esc 關閉",
+  "ag_historyEmpty": "沒有匹配的條目",
+  "ag_historyBeforeCompaction": "這段在壓縮之前，點看摘要",
+  "ag_historyAuto": "自動壓縮",
+  "ag_historyManual": "手動壓縮",
+  "ag_historyImageMessage": "圖片訊息",
+  "ag_historyAnswer": "你選了：{answer}",
+  "@ag_historyAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_historyPromptSet": "提示片語",
+  "ag_historyImages": "生成卡 · {count} 張",
+  "@ag_historyImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyPromptChange": "提示詞修改",
+  "ag_historyParams": "生成參數",
+  "ag_historyPositions": "角色位置",
+  "ag_historySettings": "設定修改",
+  "ag_historyGallery": "圖庫卡片",
+  "ag_historyChanges": "修改摘要"
 }

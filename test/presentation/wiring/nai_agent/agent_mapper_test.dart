@@ -111,6 +111,63 @@ void main() {
     },
   );
 
+  test(
+    'answered questions are standalone, ordered, with option and free answers',
+    () {
+      runtime.messages = [
+        {'role': 'user', 'content': 'hello'},
+        assistant([
+          call('before', 'studio_context'),
+          call('qa', 'ask_user', {
+            'questions': [
+              {
+                'id': 'one',
+                'question': 'Which?',
+                'options': ['A', 'B'],
+              },
+              {
+                'id': 'two',
+                'question': 'Why?',
+                'options': ['Yes'],
+              },
+            ],
+          }),
+          call('after', 'studio_context'),
+        ]),
+        result('qa', {
+          'status': 'answered',
+          'answers': [
+            {'id': 'one', 'question': 'Which?', 'answer': 'B'},
+            {'id': 'two', 'question': 'Why?', 'answer': 'A free reply'},
+          ],
+        }),
+      ];
+      final blocks = mapper.map(runtime).turns.single.reply!.blocks;
+      expect(blocks.map((b) => b.runtimeType), [
+        AgentStepsBlock,
+        AgentAnsweredQuestionsBlock,
+        AgentStepsBlock,
+      ]);
+      final qa = blocks[1] as AgentAnsweredQuestionsBlock;
+      expect(qa.questions.map((q) => q.question), ['Which?', 'Why?']);
+      expect(qa.questions.map((q) => q.kind), [
+        AgentAnswerKind.option,
+        AgentAnswerKind.free,
+      ]);
+      expect(qa.questions.last.answer, 'A free reply');
+      runtime.messages.last = result('qa', {'status': 'cancelled'});
+      expect(
+        mapper
+            .map(runtime)
+            .turns
+            .single
+            .reply!
+            .blocks
+            .whereType<AgentAnsweredQuestionsBlock>(),
+        isEmpty,
+      );
+    },
+  );
   test('current branch wins over nested legacy fork snapshots', () {
     runtime.messages = [
       {'role': 'user', 'timestamp': 1, 'content': 'hi'},

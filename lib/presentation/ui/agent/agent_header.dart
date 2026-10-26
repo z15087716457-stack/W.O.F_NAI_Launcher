@@ -14,7 +14,16 @@ import 'agent_scope.dart';
 
 /// 顶栏两层：标志 + 「工作区 / 编号 · 聊天名 ▾」+ 新聊天 / 更多 / 收起；下面 对话 / 产物 / 指令 + 上下文。
 class AgentHeader extends StatefulWidget {
-  const AgentHeader({super.key, required this.tab, required this.onTab});
+  const AgentHeader({
+    super.key,
+    required this.tab,
+    required this.onTab,
+    this.historyOpen = false,
+    this.onHistory,
+    this.onClose,
+  });
+  final bool historyOpen;
+  final VoidCallback? onHistory, onClose;
   final AgentTab tab;
   final ValueChanged<AgentTab> onTab;
 
@@ -143,7 +152,7 @@ class _AgentHeaderState extends State<AgentHeader> {
                           key: const Key('agent-close'),
                           glyph: AgentGlyphs.side,
                           tooltip: l.ag_close,
-                          onPressed: a.onClose,
+                          onPressed: widget.onClose ?? a.onClose,
                         ),
                       ],
                     );
@@ -182,6 +191,55 @@ class _AgentHeaderState extends State<AgentHeader> {
                       onTap: () => widget.onTab(AgentTab.memory),
                     ),
                   ],
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Semantics(
+                        button: true,
+                        selected: widget.historyOpen,
+                        child: InkWell(
+                          key: const Key('agent-history-toggle'),
+                          onTap: widget.onHistory,
+                          borderRadius: BorderRadius.circular(5),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: widget.historyOpen
+                                  ? c.accent.withValues(alpha: .08)
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 4,
+                              children: [
+                                AgentIcon(
+                                  AgentGlyphs.clock,
+                                  size: 14,
+                                  color: widget.historyOpen
+                                      ? c.accent
+                                      : c.muted,
+                                ),
+                                Text(
+                                  l.ag_historyButton,
+                                  style: UiText.sans(
+                                    12,
+                                    color: widget.historyOpen
+                                        ? c.accent
+                                        : c.muted,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                   const Spacer(),
                   UiPopover(
                     anchor: _usage,

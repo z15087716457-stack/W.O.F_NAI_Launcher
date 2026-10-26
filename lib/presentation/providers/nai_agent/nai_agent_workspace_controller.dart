@@ -44,6 +44,7 @@ class AgentChatRuntime {
   PiHostClient? client;
   StreamSubscription<Map<String, dynamic>>? subscription;
   List<Map<String, dynamic>> messages = [], queue = [];
+  List<Map<String, dynamic>> historyMessages = [];
   Map<String, dynamic> stats = {}, context = {};
   List<Map<String, dynamic>> entries = [], userEntries = [];
   final Map<String, Map<String, dynamic>> tools = {};
@@ -65,6 +66,7 @@ class AgentChatRuntime {
   String? error, providerId, modelId, reasoningEffort;
   int usageRevision = 0;
   int importingImages = 0;
+  int pendingImageCount = 0;
   int pendingSends = 0;
   bool _resending = false;
   int modelRevision = -1;
@@ -212,6 +214,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       await runtime.client?.close();
       runtime.client = null;
       runtime.messages = [];
+      runtime.historyMessages = [];
       runtime.runLimitHit = null;
       runtime.tools.clear();
     }
@@ -732,15 +735,18 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   /// Reserve the original conversation before the first OS/file await.
   Future<T> importImages<T>(
     AgentChatRuntime runtime,
-    Future<T> Function() action,
-  ) async {
+    Future<T> Function() action, {
+    int imageCount = 0,
+  }) async {
     checkImageImportTarget(runtime);
     runtime.importingImages++;
+    runtime.pendingImageCount += imageCount;
     _notify();
     try {
       return await action();
     } finally {
       runtime.importingImages--;
+      runtime.pendingImageCount -= imageCount;
       if (runtime.importingImages == 0 && _discardedDrafts.remove(runtime)) {
         await _closeRuntime(runtime);
         await store.discardDraftChat(runtime.workspace.id, runtime.chat.id);
@@ -1367,6 +1373,29 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       );
       unawaited(_persist(runtime));
     }
+    if (envelope['type'] == 'queue' && !runtime._resending) {
+      final queue = _maps(envelope['queue']);
+      final remaining = queue.map((item) => item['queueId']).toSet();
+      final consumed = {
+        ...envelope['consumedQueueIds'] as List? ?? [],
+        for (final item in runtime.queue)
+          if (!remaining.contains(item['queueId'])) item['queueId'],
+      };
+      runtime.queue = queue;
+      runtime.composer = AgentComposerState(
+        text: runtime.composer.text,
+        attachments: runtime.composer.attachments,
+        pending: runtime.composer.pending
+            .where(
+              (item) =>
+                  item['recovered'] == true ||
+                  !consumed.contains(item['queueId']),
+            )
+            .toList(),
+        interrupted: runtime.composer.interrupted,
+      );
+      unawaited(_persist(runtime));
+    }
     final event = envelope['event'] as Map?;
     if (event != null) {
       final type = event['type'];
@@ -1385,34 +1414,6 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       if (type == 'message_start') {
         final message = Map<String, dynamic>.from(event['message'] as Map);
         runtime.messages = [...runtime.messages, message];
-        if (message['role'] == 'user' && !runtime._resending) {
-          final content = message['content'];
-          final text = content is String
-              ? content
-              : [
-                  for (final part in content as List? ?? [])
-                    if (part is Map && part['type'] == 'text')
-                      part['text'] ?? '',
-                ].join('\n');
-          final pending = [...runtime.composer.pending];
-          final consumed = pending.indexWhere(
-            (item) =>
-                item['recovered'] != true &&
-                (item['text'] == text ||
-                    (item['text'] == '' && text == '查看附图。')),
-          );
-          if (consumed >= 0) {
-            final id = pending.removeAt(consumed)['queueId'];
-            runtime.queue.removeWhere((item) => item['queueId'] == id);
-            runtime.composer = AgentComposerState(
-              text: runtime.composer.text,
-              attachments: runtime.composer.attachments,
-              pending: pending,
-              interrupted: runtime.composer.interrupted,
-            );
-            unawaited(_persist(runtime));
-          }
-        }
       }
       if (type == 'message_update' || type == 'message_end') {
         final message = Map<String, dynamic>.from(event['message'] as Map);
@@ -1492,6 +1493,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     runtime.mcpStatus = value['mcpStatus'] as String? ?? runtime.mcpStatus;
     runtime.uiRevision++;
     runtime.messages = _maps(value['messages']);
+    runtime.historyMessages = _maps(value['historyMessages']);
     final lastAssistant = runtime.messages
         .where((m) => m['role'] == 'assistant')
         .lastOrNull;
