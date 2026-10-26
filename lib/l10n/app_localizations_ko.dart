@@ -21707,4 +21707,69 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get set_stThumbnailCacheLimitSub =>
       '모든 갤러리 폴더 합계입니다. 시작할 때나 수동 정리 시 오래된 썸네일부터 한도의 80%까지 삭제하며 원본은 건드리지 않습니다.';
+
+  @override
+  String get ag_slashGroupSkills => '스킬';
+
+  @override
+  String get ag_slashGroupTemplates => '프롬프트 템플릿';
+
+  @override
+  String get ag_slashGroupBuiltin => 'Studio 명령';
+
+  @override
+  String get ag_commandNew => '새 대화 시작';
+
+  @override
+  String get ag_commandCompact => '컨텍스트 압축';
+
+  @override
+  String get ag_commandModel => '모델 선택';
+
+  @override
+  String get ag_commandThinking => '사고 수준 선택';
+
+  @override
+  String get ag_commandHistory => '세션 기록 열기';
+
+  @override
+  String get ag_commandRename => '대화 이름 변경';
+
+  @override
+  String get ag_commandCopy => '마지막 답변 복사';
+
+  @override
+  String get ag_commandExport => '세션 내보내기';
+
+  @override
+  String get ag_commandCompactArgs => '[지침]';
+
+  @override
+  String get ag_commandRenameArgs => '<이름>';
+
+  @override
+  String get set_agNextSuggestion => '다음 메시지 제안';
+
+  @override
+  String get set_agNextSuggestionSub =>
+      '현재 대화 모델로 다음 메시지를 예측합니다. 추가 토큰을 사용하며 Tab으로 채택합니다.';
+
+  @override
+  String get set_agCacheWarming => '프롬프트 캐시 예열';
+
+  @override
+  String get set_agCacheWarmingSub =>
+      'Pi는 예상 절감액이 \$0.05 이상일 때만 예열합니다. 캐시 수명이나 가격이 없는 모델은 제외됩니다.';
+
+  @override
+  String get set_agCacheOff => '끄기';
+
+  @override
+  String get set_agCacheStreaming => 'Agent 실행 중에만';
+
+  @override
+  String get set_agCacheIdle => '대기 중에도 예열';
+
+  @override
+  String get set_agCacheIdleCost => '대기 중 예열에는 추가 모델 요금이 발생합니다.';
 }

@@ -79,6 +79,7 @@ class PiHostClient {
     List<String> extensionPaths = const [],
     Map<String, dynamic> mcp = const {},
     Map<String, dynamic> skills = const {},
+    Map<String, dynamic> prompts = const {},
   }) async {
     final providerId = privateModelConfig['providerId'];
     if (providerId is! String || providerId.trim().isEmpty) {
@@ -117,6 +118,7 @@ class PiHostClient {
             'extensionPaths': extensionPaths,
             'mcp': mcp,
             'skills': skills,
+            'prompts': prompts,
           })
           .timeout(const Duration(seconds: 30));
       client._sessionId = ready['sessionId'] as String?;
@@ -144,6 +146,8 @@ class PiHostClient {
     if (queueId != null) 'queueId': queueId,
   });
 
+  Future<Map<String, dynamic>> cancelSuggestion() =>
+      _request({'type': 'suggestion_cancel'});
   Future<Map<String, dynamic>> state() => _request({'type': 'state'});
   Future<Map<String, dynamic>> setPermissionMode(String mode) =>
       _request({'type': 'permission_mode', 'mode': mode});
@@ -153,6 +157,14 @@ class PiHostClient {
         'action': action,
         if (name != null) 'name': name,
       });
+  Future<Map<String, dynamic>> updateSettings({
+    String? cacheWarming,
+    bool? nextSuggestion,
+  }) => _request({
+    'type': 'settings',
+    if (cacheWarming != null) 'cacheWarming': cacheWarming,
+    if (nextSuggestion != null) 'nextSuggestion': nextSuggestion,
+  });
   Future<Map<String, dynamic>> sessions() => _request({'type': 'session_list'});
   Future<Map<String, dynamic>> setSystemPrompt(String text) =>
       _request({'type': 'system_prompt', 'text': text});
@@ -160,7 +172,10 @@ class PiHostClient {
       _request({'type': 'system_prompt_get'});
   Future<Map<String, dynamic>> rename(String name) =>
       _request({'type': 'rename', 'name': name});
-  Future<Map<String, dynamic>> compact() => _request({'type': 'compact'});
+  Future<Map<String, dynamic>> compact([String? instructions]) => _request({
+    'type': 'compact',
+    if (instructions != null) 'instructions': instructions,
+  });
   Future<Map<String, dynamic>> navigate(String entryId) =>
       _request({'type': 'navigate', 'entryId': entryId});
   Future<Map<String, dynamic>> editQueue(

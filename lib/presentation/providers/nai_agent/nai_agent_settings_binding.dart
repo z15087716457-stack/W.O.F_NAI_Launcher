@@ -1,4 +1,7 @@
 import 'dart:io';
+import '../../../core/nai_agent/pi_host_client.dart';
+import '../../../data/services/nai_agent/agent_workspace_store.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/nai_agent/settings_tools.dart';
 import '../../../core/settings/settings_preferences_service.dart';
@@ -18,6 +21,15 @@ import '../canvas_settings_provider.dart';
 import '../notification_settings_provider.dart';
 import '../share_image_settings_provider.dart';
 import '../generation/generation_settings_notifiers.dart' as generation;
+
+/// Applies persisted Agent preferences to live hosts without restarting a run.
+Future<Map<String, dynamic>> refreshNaiAgentRuntimeSettings(
+  PiHostClient client,
+  AgentSettings settings,
+) => client.updateSettings(
+  cacheWarming: settings.cacheWarming,
+  nextSuggestion: settings.nextSuggestion,
+);
 
 class _WorkspacePreferences extends SettingsPreferencesService {
   _WorkspacePreferences(super.storage, this.workspace);

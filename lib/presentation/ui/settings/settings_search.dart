@@ -74,6 +74,8 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.agentModel => l.set_agModel,
     SettingKey.agentEnterToSend => l.set_agEnter,
     SettingKey.agentMaxRequests => l.set_agMax,
+    SettingKey.agentNextSuggestion => l.set_agNextSuggestion,
+    SettingKey.agentCacheWarming => l.set_agCacheWarming,
     SettingKey.ragEnabled => l.set_pageRag,
     SettingKey.ragContext => l.set_rgRange,
     SettingKey.ragDevice => l.set_rgDevice,
@@ -140,7 +142,9 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.cacheStatsAutoRefresh => l.set_dcStats,
     SettingKey.agentModel ||
     SettingKey.agentEnterToSend ||
-    SettingKey.agentMaxRequests => l.set_agModelSec,
+    SettingKey.agentMaxRequests ||
+    SettingKey.agentNextSuggestion ||
+    SettingKey.agentCacheWarming => l.set_agModelSec,
     SettingKey.ragEnabled => l.set_pageRag,
     SettingKey.ragContext => l.set_rgContext,
     SettingKey.ragDevice ||

@@ -6,6 +6,7 @@ import { mkdtemp, mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createStudioSession } from '../lib/session.mjs';
 import { endpointRoot, requestPatch, redactor, publicModel } from '../lib/model.mjs';
+import { NextSuggestion } from '../lib/next-suggestion.mjs';
 
 export async function httpFixture(protocol, handler) {
   const requests = [];
@@ -130,6 +131,38 @@ for (const protocol of ['openaiChatCompletions', 'openaiResponses', 'anthropicMe
       } finally { await created.close(); await server.close(); }
     });
   }
+  test(protocol + ': side suggestion keeps request prefix and disables tools and expensive thinking', async () => {
+    const server = await httpFixture(protocol, (_, res) => respond(protocol, res, false));
+    const payloadParameters = protocol === 'geminiGenerateContent'
+      ? { generationConfig: { thinkingConfig: { thinkingLevel: 'HIGH' } } }
+      : protocol === 'anthropicMessages' ? { thinking: { type: 'enabled', budget_tokens: 2048 } }
+      : { thinking: { type: 'enabled' }, reasoning_effort: 'high', enable_thinking: true };
+    const created = await sessionFixture(protocol, server, { config: { payloadParameters } });
+    const sent = [];
+    try {
+      await created.session.prompt('synthetic');
+      assert.equal(created.session.messages.at(-1).stopReason, 'stop');
+      const before = created.session.messages.length;
+      const suggestions = new NextSuggestion({ session: created.session, send: event => sent.push(event) });
+      await suggestions.generate();
+      assert.equal(created.session.messages.length, before);
+      assert.ok(sent.some(e => e.text === '已读取上下文。'));
+      assert.equal(server.requests.length, 2);
+      const main = server.requests[0].body, side = server.requests[1].body;
+      if (protocol === 'geminiGenerateContent') {
+        assert.equal(side.toolConfig.functionCallingConfig.mode, 'NONE');
+        assert.equal(side.generationConfig.thinkingConfig.thinkingLevel, 'MINIMAL');
+        assert.deepEqual(side.systemInstruction, main.systemInstruction);
+      } else {
+        assert.deepEqual(side.tool_choice, protocol === 'anthropicMessages' ? { type: 'none' } : 'none');
+        assert.deepEqual(side.thinking, { type: 'disabled' });
+        if (protocol !== 'anthropicMessages') {
+          assert.equal(side.reasoning_effort, 'low'); assert.equal(side.enable_thinking, false);
+        }
+        assert.deepEqual(side.tools, main.tools);
+      }
+    } finally { await created.close(); await server.close(); }
+  });
   test(protocol + ': official CodeMode → Studio MCP → follow-up request', async () => {
     const server = await httpFixture(protocol, (turn, res) => respond(protocol, res, turn === 1,
       'codemode', { code: 'const result = await tools.mcp__nai_studio__prompt_update({changes:{},expected:{}}); text(result.structuredContent);' }));

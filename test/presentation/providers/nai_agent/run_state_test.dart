@@ -45,6 +45,7 @@ void main() {
     beforePromptReply = null;
     client = _Client();
     when(() => client.isClosed).thenReturn(false);
+    when(client.cancelSuggestion).thenAnswer((_) async => {});
     when(() => client.visionAccess).thenReturn(const NaiAgentVisionAccess());
     when(() => client.initialState).thenAnswer((_) => initialState);
     when(() => client.events).thenAnswer((_) => events.stream);
@@ -93,6 +94,47 @@ void main() {
     await events.close();
     await root.delete(recursive: true);
   });
+
+  test(
+    'host suggestions are turn-scoped, suppressed by typing and selection, and accepted without a prompt',
+    () async {
+      await c.sendText('first');
+      events.add({'type': 'suggestion', 'text': 'next', 'forTurn': 1});
+      expect(c.selected!.suggestion, 'next');
+      events.add({'type': 'suggestion', 'text': 'old', 'forTurn': 0});
+      expect(c.selected!.suggestion, 'next');
+      await c.acceptSuggestion();
+      expect(c.selected!.composer.text, 'next');
+      expect(sent.length, 1);
+      await c.saveComposer('');
+      events.add({'type': 'suggestion', 'text': 'late', 'forTurn': 1});
+      expect(c.selected!.suggestion, isNull);
+      await c.sendText('second');
+      final previous = c.selected!;
+      await c.createChat();
+      events.add({'type': 'suggestion', 'text': 'other chat', 'forTurn': 2});
+      expect(previous.suggestion, isNull);
+      verify(client.cancelSuggestion).called(greaterThanOrEqualTo(2));
+    },
+  );
+
+  test(
+    'pending cancellation acknowledgement blocks old suggestion during a new send',
+    () async {
+      await c.sendText('first');
+      final gate = Completer<Map<String, dynamic>>();
+      when(client.cancelSuggestion).thenAnswer((_) => gate.future);
+      final sending = c.sendText('second');
+      events.add({'type': 'suggestion', 'text': 'previous turn', 'forTurn': 1});
+      expect(c.selected!.suggestion, isNull);
+      gate.complete({'forTurn': 2});
+      await sending;
+      events.add({'type': 'suggestion', 'text': 'old', 'forTurn': 1});
+      expect(c.selected!.suggestion, isNull);
+      events.add({'type': 'suggestion', 'text': 'new', 'forTurn': 3});
+      expect(c.selected!.suggestion, 'new');
+    },
+  );
 
   test(
     'compaction_end refreshes native state, marks automatic reason and makes no model call',

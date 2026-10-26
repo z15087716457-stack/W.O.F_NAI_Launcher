@@ -55,6 +55,8 @@ class AgentSettings {
     this.panelWidth = 520,
     this.panelLayoutVersion = 1,
     this.enterToSend = true,
+    this.cacheWarming = 'streaming',
+    this.nextSuggestion = true,
     this.maxRequestsPerRun = 32,
     this.permissionMode = 'auto',
     this.bypassWarned = false,
@@ -73,6 +75,8 @@ class AgentSettings {
   final double panelWidth;
   final int panelLayoutVersion;
   final int maxRequestsPerRun;
+  final String cacheWarming;
+  final bool nextSuggestion;
   final String permissionMode;
   final bool bypassWarned;
 
@@ -121,6 +125,8 @@ class AgentSettings {
     'panelWidth': panelWidth,
     'panelLayoutVersion': panelLayoutVersion,
     'enterToSend': enterToSend,
+    'cacheWarming': cacheWarming,
+    'nextSuggestion': nextSuggestion,
     'maxRequestsPerRun': maxRequestsPerRun,
     'permissionMode': permissionMode,
     'bypassWarned': bypassWarned,
@@ -176,6 +182,11 @@ class AgentSettings {
     panelExpanded: value['panelExpanded'] == true,
     panelWidth: _panelWidth(value),
     enterToSend: value['enterToSend'] != false,
+    nextSuggestion: value['nextSuggestion'] != false,
+    cacheWarming:
+        const {'off', 'streaming', 'idle'}.contains(value['cacheWarming'])
+        ? value['cacheWarming'] as String
+        : 'streaming',
     maxRequestsPerRun: ((value['maxRequestsPerRun'] as num?)?.toInt() ?? 32)
         .clamp(1, 200),
     extensions: List.unmodifiable([
@@ -238,6 +249,7 @@ class AgentWorkspace {
   final String? customSystemPrompt, lastSessionId;
   Directory get sessions => Directory(p.join(directory.path, 'sessions'));
   Directory get agentDirectory => Directory(p.join(directory.path, '.agent'));
+  Directory get prompts => Directory(p.join(directory.path, '.pi', 'prompts'));
   Directory get skills => Directory(p.join(directory.path, 'skills'));
   Map<String, dynamic> toJson() => {
     'schema': 1,
@@ -440,6 +452,8 @@ class AgentWorkspaceStore {
   final Directory builtinSkillsDirectory;
 
   /// User skills shared by every workspace; kept with agent-data across updates.
+  Directory get globalPromptsDirectory =>
+      Directory(p.join(root.path, 'prompts'));
   Directory get globalSkillsDirectory => Directory(p.join(root.path, 'skills'));
   Future<void> _tail = Future.value();
   static final _ids = RegExp(r'^[a-zA-Z0-9][a-zA-Z0-9_-]{0,100}$');

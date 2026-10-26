@@ -105,6 +105,8 @@ enum SettingKey {
   agentModel, // 选项由 options 给
   agentEnterToSend,
   agentMaxRequests, // 1–200
+  agentCacheWarming,
+  agentNextSuggestion,
   // 语义检索
   ragEnabled,
   ragContext, // beforeCursor / around
@@ -301,6 +303,13 @@ class SettingSpec {
       _t,
       _dc,
       defaultValue: true,
+    ),
+    SettingKey.agentNextSuggestion: SettingSpec._(_t, _ag, defaultValue: true),
+    SettingKey.agentCacheWarming: SettingSpec._(
+      _c,
+      _ag,
+      choices: ['off', 'streaming', 'idle'],
+      defaultValue: 'streaming',
     ),
     SettingKey.agentModel: SettingSpec._(_c, _ag),
     SettingKey.agentEnterToSend: SettingSpec._(_t, _ag, defaultValue: true),

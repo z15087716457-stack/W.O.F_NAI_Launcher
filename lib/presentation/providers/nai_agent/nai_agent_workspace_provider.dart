@@ -108,11 +108,21 @@ final naiAgentClientFactoryProvider = Provider<AgentClientFactory>(
       maxRequestsPerRun: settings.maxRequestsPerRun,
       reasoningEffort: settings.reasoningEffort,
       permissionMode: settings.permissionMode,
+      cacheWarming: settings.cacheWarming,
+      nextSuggestion: settings.nextSuggestion,
       nodeExecutable: paths.node,
       hostScript: paths.host,
       systemPrompt: prompt,
       extraToolNames: const ['ask_user'],
       extensionPaths: settings.enabledExtensionPaths,
+      prompts: {
+        'globalDirectory': ref
+            .read(naiAgentWorkspaceStoreProvider)
+            .globalPromptsDirectory
+            .absolute
+            .path,
+        'workspaceDirectory': workspace.prompts.absolute.path,
+      },
       skills: ref
           .read(naiAgentWorkspaceStoreProvider)
           .skillConfig(workspace, settings),

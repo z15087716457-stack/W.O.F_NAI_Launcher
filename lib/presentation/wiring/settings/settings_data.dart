@@ -113,6 +113,18 @@ Map<SettingKey, List<SettingsOption>> settingsOptions(
       for (final account in ref.watch(accountManagerNotifierProvider).accounts)
         SettingsOption(value: account.id, label: account.displayName),
     ],
+    SettingKey.agentCacheWarming: [
+      SettingsOption(value: 'off', label: context.l10n.set_agCacheOff),
+      SettingsOption(
+        value: 'streaming',
+        label: context.l10n.set_agCacheStreaming,
+      ),
+      SettingsOption(
+        value: 'idle',
+        label: context.l10n.set_agCacheIdle,
+        detail: context.l10n.set_agCacheIdleCost,
+      ),
+    ],
     SettingKey.agentModel: [
       for (final provider in config.providers.where((p) => p.enabled))
         for (final model

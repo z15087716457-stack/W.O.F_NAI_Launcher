@@ -22399,4 +22399,70 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get set_stThumbnailCacheLimitSub =>
       'Total for all gallery folders. Oldest thumbnails are removed down to 80% at startup or when you clean; originals are never touched.';
+
+  @override
+  String get ag_slashGroupSkills => 'Skills';
+
+  @override
+  String get ag_slashGroupTemplates => 'Prompt templates';
+
+  @override
+  String get ag_slashGroupBuiltin => 'Studio commands';
+
+  @override
+  String get ag_commandNew => 'Start a new chat';
+
+  @override
+  String get ag_commandCompact => 'Compact context';
+
+  @override
+  String get ag_commandModel => 'Choose a model';
+
+  @override
+  String get ag_commandThinking => 'Choose thinking level';
+
+  @override
+  String get ag_commandHistory => 'Open session history';
+
+  @override
+  String get ag_commandRename => 'Rename this chat';
+
+  @override
+  String get ag_commandCopy => 'Copy the last reply';
+
+  @override
+  String get ag_commandExport => 'Export this session';
+
+  @override
+  String get ag_commandCompactArgs => '[instructions]';
+
+  @override
+  String get ag_commandRenameArgs => '<name>';
+
+  @override
+  String get set_agNextSuggestion => 'Next-message suggestions';
+
+  @override
+  String get set_agNextSuggestionSub =>
+      'Use the current conversation model to suggest your next message. Uses additional tokens; press Tab to accept.';
+
+  @override
+  String get set_agCacheWarming => 'Prompt cache warming';
+
+  @override
+  String get set_agCacheWarmingSub =>
+      'Pi warms eligible caches only when estimated savings reach \$0.05. Models without cache lifetime or pricing are not eligible.';
+
+  @override
+  String get set_agCacheOff => 'Off';
+
+  @override
+  String get set_agCacheStreaming => 'Only while Agent is running';
+
+  @override
+  String get set_agCacheIdle => 'Also while idle';
+
+  @override
+  String get set_agCacheIdleCost =>
+      'Idle warming incurs additional model charges.';
 }
