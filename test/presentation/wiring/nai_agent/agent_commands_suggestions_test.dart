@@ -149,6 +149,9 @@ void main() {
         'mode': 'idle',
         'state': 'scheduled',
         'nextWarmAt': 1000,
+        'lastWarmAt': 700,
+        'warmCount': 3,
+        'ttlSeconds': 300,
         'decision': {'expectedSavings': 0.1, 'action': 'warm'},
       };
       await h.pump(tester);
@@ -158,6 +161,13 @@ void main() {
       expect(data.expectedSavings, .1);
       expect(data.action, 'warm');
       expect(data.nextWarmAt!.millisecondsSinceEpoch, 1000);
+      expect(data.lastWarmAt!.millisecondsSinceEpoch, 700);
+      expect(data.warmCount, 3);
+      expect(data.ttlSeconds, 300);
+      final defaults = view.AgentCacheWarmingData.fromJson(const {});
+      expect(defaults.lastWarmAt, isNull);
+      expect(defaults.warmCount, 0);
+      expect(defaults.ttlSeconds, isNull);
       expect(
         view.AgentCacheWarmingData.fromJson(const {}).expectedSavings,
         isNull,

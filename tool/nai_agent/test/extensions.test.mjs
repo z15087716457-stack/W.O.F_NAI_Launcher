@@ -33,7 +33,8 @@ test('official extension owns context and model-only question; only selected ext
     assert.equal(question.exposure, 'model-only');
     assert.ok(created.session.getActiveToolNames().includes('extension_echo'));
     assert.ok(created.session.getActiveToolNames().includes('studio_context'));
-    assert.equal(loaded.length, 6);
+    assert.equal(loaded.length, 7);
+    assert.ok(loaded.some(extension => extension.path === '<inline:nai-cache-warming>'));
     assert.ok(loaded.some(extension => extension.path === '<inline:nai-permissions>'));
   } finally { await created.close(); }
 });

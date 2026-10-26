@@ -46,6 +46,7 @@ void main() {
           'id': 'test',
           'object': 'chat.completion.chunk',
           'model': 'test',
+          if ((requests.last['max_tokens'] ?? requests.last['max_completion_tokens']) == 1) 'usage': {'prompt_tokens': 32, 'completion_tokens': 1, 'total_tokens': 33},
           'choices': [
             {
               'index': 0,
@@ -81,6 +82,7 @@ void main() {
   NaiAgentWorkspaceController controller({
     bool vision = false,
     bool suggestions = false,
+    int? promptCacheSeconds,
     bool Function()? readVision,
     int Function()? readModelRevision,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
@@ -119,6 +121,8 @@ void main() {
               'permissionMode': settings.permissionMode,
               'nextSuggestion': suggestions && settings.nextSuggestion,
               'cacheWarming': settings.cacheWarming,
+              if (promptCacheSeconds != null)
+                'promptCacheSeconds': promptCacheSeconds,
             },
             executeTool: (_, __, ___) async => {'content': []},
           ),
@@ -147,6 +151,35 @@ void main() {
       await c.sendText('no suggestion');
       await Future<void>.delayed(const Duration(milliseconds: 30));
       expect(c.selected!.suggestion, isNull);
+    },
+  );
+
+  test(
+    'cache_warm usage pushes updated tokens and warming status to Dart while idle',
+    () async {
+      final c = controller(promptCacheSeconds: 11);
+      await c.initialize();
+      await c.updateSettings({'cacheWarming': 'idle'});
+      await c.sendText('warm the synthetic cache');
+      final runtime = c.selected!;
+      expect(runtime.cacheWarming['state'], 'scheduled');
+      final revision = runtime.usageRevision;
+      for (var i = 0; i < 500 && runtime.cacheWarming['warmCount'] != 1; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(runtime.cacheWarming['warmCount'], 1);
+      expect(runtime.cacheWarming['state'], 'scheduled');
+      expect(runtime.cacheWarming['ttlSeconds'], 11);
+      expect(
+        runtime.cacheWarming['nextWarmAt'],
+        (runtime.cacheWarming['lastWarmAt'] as int) + 1000,
+      );
+      expect(runtime.cacheWarming['decision'], isNull);
+      expect(runtime.usageRevision, greaterThan(revision));
+      expect((runtime.stats['tokens'] as Map)['input'], 32);
+      expect(runtime.messages.where((m) => m['role'] == 'assistant').length, 1);
+      await c.updateSettings({'cacheWarming': 'off'});
+      expect(runtime.cacheWarming['state'], 'inactive');
     },
   );
 
