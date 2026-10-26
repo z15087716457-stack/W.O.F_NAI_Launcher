@@ -20,13 +20,16 @@ class RefsImportSession {
     required String model,
     Set<String> names = const {},
     String? categoryId,
+    bool Function()? isCurrent,
   }) async {
     final rows = <RefsImportRow>[];
     final sources = <String, List<VibeReference>>{};
     final reserved = {for (final name in names) name.trim().toLowerCase()};
     for (var i = 0; i < files.length; i++) {
+      if (isCurrent?.call() == false) break;
       final file = files[i];
       final vibes = await VibeFileParser.parseFile(file.fileName, file.bytes);
+      if (isCurrent?.call() == false) break;
       if (vibes.isEmpty) continue;
       final bundle =
           p.extension(file.fileName).toLowerCase() == '.naiv4vibebundle' ||

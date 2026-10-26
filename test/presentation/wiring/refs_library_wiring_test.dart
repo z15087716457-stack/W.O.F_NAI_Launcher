@@ -21,6 +21,9 @@ import 'package:nai_launcher/presentation/wiring/refs_library_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/refs_picker_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/refs_platform.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+
+import '../../helpers/drop_session_fixture.dart';
 
 final png = base64Decode(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAACklEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg==',
@@ -98,6 +101,7 @@ class Platform extends RefsPlatform {
 }
 
 void main() {
+  prepareDropTestPlatform();
   late Settings settings;
   late List<VibeLibraryEntry> entries;
   late Storage storage;
@@ -155,6 +159,108 @@ void main() {
 
   RefsLibraryPage page(WidgetTester tester) =>
       tester.widget(find.byType(RefsLibraryPage));
+
+  testWidgets(
+    'drop callback returns while file reads are held and preserves all readers',
+    (tester) async {
+      await mount(tester);
+      final readers = [
+        HeldDropReader(bytes: png, name: 'one.png'),
+        HeldDropReader(bytes: png, name: 'two.png'),
+      ];
+      final session = FixtureDropSession(readers);
+      final drop = tester.widget<DropRegion>(find.byType(DropRegion));
+      var returned = false;
+      unawaited(
+        drop.onPerformDrop(session.perform()).then((_) => returned = true),
+      );
+      await tester.pump();
+      expect(returned, isTrue);
+      expect(page(tester).data.importDraft, isNull);
+      expect(readers.map((r) => r.fileReads), [1, 1]);
+      expect(await drop.onDropOver(session.over()), DropOperation.none);
+      for (final reader in readers) {
+        reader.callbackReturned = true;
+      }
+      session.items.clear();
+      await drop.onPerformDrop(
+        session.perform(),
+      ); // busy: must not start another batch
+      await tester.runAsync(() async {
+        for (final reader in readers) {
+          reader.release.complete();
+        }
+        for (var i = 0; i < 100; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          await tester.pump();
+          if (page(tester).data.importDraft != null ||
+              platform.errors.isNotEmpty) {
+            break;
+          }
+        }
+      });
+      await tester.pumpAndSettle();
+      expect(platform.errors, isEmpty);
+      expect(page(tester).data.importDraft!.rows.map((r) => r.name), [
+        'one',
+        'two',
+      ]);
+      expect(await drop.onDropOver(session.over()), DropOperation.copy);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'brief hover performs no full-file reads and leaving cancels pending preview',
+    (tester) async {
+      await mount(tester);
+      final reader = HeldDropReader(bytes: png);
+      final session = FixtureDropSession([reader]);
+      final drop = tester.widget<DropRegion>(find.byType(DropRegion));
+      expect(await drop.onDropOver(session.over()), DropOperation.copy);
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(reader.fileReads, 0);
+      drop.onDropLeave!(DropEvent(session: session));
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(reader.fileReads, 0);
+      expect(page(tester).data.drop, isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    'sustained hover still shows the exact summary and late results after leave are discarded',
+    (tester) async {
+      await mount(tester);
+      final first = HeldDropReader(bytes: png);
+      final firstSession = FixtureDropSession([first]);
+      final drop = tester.widget<DropRegion>(find.byType(DropRegion));
+      await drop.onDropOver(firstSession.over());
+      await tester.pump(const Duration(milliseconds: 210));
+      expect(first.fileReads, 1);
+      await tester.runAsync(() async {
+        first.release.complete();
+        for (var i = 0; i < 100; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          await tester.pump();
+          if (page(tester).data.drop != null) break;
+        }
+      });
+      expect(page(tester).data.drop!.images, 1);
+      drop.onDropLeave!(DropEvent(session: firstSession));
+      await tester.pump();
+      final late = HeldDropReader(bytes: png);
+      final lateSession = FixtureDropSession([late]);
+      await drop.onDropOver(lateSession.over());
+      await tester.pump(const Duration(milliseconds: 210));
+      expect(late.fileReads, 1);
+      drop.onDropLeave!(DropEvent(session: lateSession));
+      late.release.complete();
+      await tester.pumpAndSettle();
+      expect(page(tester).data.drop, isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
 
   testWidgets('whole-library counts and category preorder survive filtering', (
     tester,

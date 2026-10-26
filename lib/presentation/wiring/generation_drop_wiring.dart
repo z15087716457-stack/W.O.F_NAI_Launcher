@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 import '../ui/gen/gen_contract.dart';
 import '../utils/dropped_file_reader.dart';
@@ -36,18 +39,27 @@ class _GenerationDropWiringState extends ConsumerState<GenerationDropWiring> {
     if (busy) return;
     busy = true;
     clearHover();
+    // Snapshot and start native reads before returning to the plugin. Never
+    // retain the mutable session or request a reader after the first await.
+    final readers = [
+      for (final item in event.session.items)
+        if (item.dataReader case final reader?) reader,
+    ];
+    unawaited(_importFiles(readers));
+  }
+
+  Future<void> _importFiles(List<DataReader> readers) async {
     try {
+      final pending = [
+        for (final reader in readers)
+          DroppedFileReader.capture(reader, logTag: 'GenerationDrop'),
+      ];
       await ref.read(generationReferenceImportsProvider).files(
         widget.target,
         () async {
           final files = <GenerationReferenceFile>[];
-          for (final item in event.session.items) {
-            final reader = item.dataReader;
-            if (reader == null) continue;
-            final file = await DroppedFileReader.read(
-              reader,
-              logTag: 'GenerationDrop',
-            );
+          for (final read in pending) {
+            final file = await read;
             if (file != null) {
               files.add(GenerationReferenceFile(file.fileName, file.bytes));
             }

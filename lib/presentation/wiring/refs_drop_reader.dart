@@ -77,10 +77,15 @@ class RefsDropReader {
 
   static Future<RefsDropSummary?> summarize(
     List<DroppedFileData> files,
-    String model,
-  ) async {
+    String model, {
+    bool Function()? isCurrent,
+  }) async {
     if (files.isEmpty) return null;
-    final session = await RefsImportSession.prepare(files, model: model);
+    final session = await RefsImportSession.prepare(
+      files,
+      model: model,
+      isCurrent: isCurrent,
+    );
     var images = 0, pngs = 0, vibes = 0, bundles = 0;
     for (final row in session.draft.rows) {
       switch (row.kind) {
@@ -108,12 +113,30 @@ class RefsDropReader {
 
   static Future<List<DroppedFileData>> read(
     List<DataReader> readers,
-    RefsKind kind,
-  ) async {
-    final futures = [
+    RefsKind kind, {
+    bool Function()? isCurrent,
+  }) async {
+    // Start every native request synchronously, before onPerformDrop returns.
+    // Only file IO and parsing may continue after the session is disposed.
+    final captured = [
       for (final reader in readers)
+        (
+          uri: _uri(reader),
+          data: DroppedFileReader.capture(
+            reader,
+            readLocalFiles: false,
+            allowVibeFiles: kind == RefsKind.vibe,
+            allowRemoteImages: false,
+          ),
+        ),
+    ];
+    final futures = [
+      for (final source in captured)
         () async {
-          final uri = await _uri(reader);
+          final uri = await source.uri;
+          if (isCurrent?.call() == false) {
+            return (paths: <String>[], data: null as DroppedFileData?);
+          }
           if (uri != null && uri.scheme == 'file') {
             return (
               paths: await paths(
@@ -123,17 +146,11 @@ class RefsDropReader {
               data: null as DroppedFileData?,
             );
           }
-          return (
-            paths: <String>[],
-            data: await DroppedFileReader.read(
-              reader,
-              allowVibeFiles: kind == RefsKind.vibe,
-              allowRemoteImages: false,
-            ),
-          );
+          return (paths: <String>[], data: await source.data);
         }(),
     ];
     final results = await Future.wait(futures);
+    if (isCurrent?.call() == false) return [];
     final local = await readPaths([
       for (final result in results) ...result.paths,
     ]);

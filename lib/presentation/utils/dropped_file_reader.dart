@@ -79,6 +79,85 @@ class DroppedFileReader {
     return null;
   }
 
+  /// 在 onPerformDrop 返回前发起原生读取；后续只等待已取得的 Future，
+  /// 不再访问可能随 drop session 结束而失效的 reader。
+  static Future<DroppedFileData?> capture(
+    DataReader reader, {
+    bool readLocalFiles = true,
+    bool allowVibeFiles = false,
+    bool allowRemoteImages = true,
+    String logTag = 'DroppedFileReader',
+  }) {
+    final localUri = readLocalFiles && reader.canProvide(Formats.fileUri)
+        ? _readValue(reader, Formats.fileUri, label: 'file URI', logTag: logTag)
+        : Future<Uri?>.value();
+    final imageReads = [
+      for (final entry in _imageFormats)
+        if (reader.canProvide(entry.format) &&
+            // URI-backed files can be opened independently after the callback.
+            !(reader.canProvide(Formats.fileUri) &&
+                reader.isSynthesized(entry.format)))
+          (
+            extension: entry.extension,
+            data: _readImageFile(
+              reader,
+              entry.format,
+              label: entry.extension,
+              logTag: logTag,
+            ),
+          ),
+    ];
+    final name = imageReads.isEmpty
+        ? Future<String?>.value()
+        : _safeSuggestedName(reader);
+    Future<T?> value<T extends Object>(ValueFormat<T> format) =>
+        allowRemoteImages && reader.canProvide(format)
+        ? _readValue(reader, format, label: 'remote source', logTag: logTag)
+        : Future<T?>.value();
+    final remoteUri = value(Formats.uri);
+    final html = value(Formats.htmlText);
+    final text = value(Formats.plainText);
+
+    return () async {
+      final uri = await localUri;
+      if (uri != null && uri.scheme == 'file') {
+        final local = await _readLocalFileUri(
+          uri,
+          allowVibeFiles: allowVibeFiles,
+          logTag: logTag,
+        );
+        if (local != null) return local;
+      }
+      for (final entry in imageReads) {
+        final file = await entry.data;
+        if (file == null || file.bytes.isEmpty) continue;
+        return DroppedFileData(
+          fileName: _ensureImageFileName(
+            file.fileName ?? await name ?? 'dropped_image',
+            fallbackExtension: entry.extension,
+          ),
+          bytes: file.bytes,
+        );
+      }
+      if (allowRemoteImages) {
+        final named = await remoteUri;
+        var remote = _parseHttpUri(named?.uri.toString());
+        if (remote == null) {
+          final htmlText = await html;
+          remote = htmlText == null ? null : extractImageUriFromText(htmlText);
+        }
+        if (remote == null) {
+          final plainText = await text;
+          remote = plainText == null
+              ? null
+              : extractImageUriFromText(plainText);
+        }
+        if (remote != null) return _downloadRemoteImage(remote, logTag: logTag);
+      }
+      return null;
+    }();
+  }
+
   @visibleForTesting
   static Uri? extractImageUriFromText(String text) {
     final normalized = _decodeBasicHtmlEntities(text);
@@ -171,7 +250,18 @@ class DroppedFileReader {
     if (uri == null) {
       return null;
     }
+    return _readLocalFileUri(
+      uri,
+      allowVibeFiles: allowVibeFiles,
+      logTag: logTag,
+    );
+  }
 
+  static Future<DroppedFileData?> _readLocalFileUri(
+    Uri uri, {
+    required bool allowVibeFiles,
+    required String logTag,
+  }) async {
     try {
       final filePath = uri.toFilePath();
       final fileName = _sanitizeFileName(

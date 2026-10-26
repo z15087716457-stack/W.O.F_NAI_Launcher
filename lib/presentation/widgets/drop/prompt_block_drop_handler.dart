@@ -35,11 +35,11 @@ class PromptBlockDropHandler {
     try {
       // 解析图片元数据（此步骤不涉及 context）
       final metadata = await ImageMetadataService().getMetadataFromBytes(bytes);
+      if (!context.mounted) return;
       final prompt = metadata?.prompt ?? '';
 
       // 显示操作选择菜单
       final action = await PromptBlockDropMenu.show(
-        // ignore: use_build_context_synchronously
         context,
         fileName: fileName,
         prompt: prompt,

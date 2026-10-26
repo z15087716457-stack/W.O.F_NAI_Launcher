@@ -78,6 +78,20 @@ DroppedFileData file(
 );
 
 void main() {
+  test('cancelled hover summary stops before parsing further files', () async {
+    var checks = 0;
+    final session = await RefsImportSession.prepare(
+      [
+        file('first', [vibe('A')]),
+        file('second', [vibe('B')]),
+      ],
+      model: model,
+      isCurrent: () => ++checks == 1,
+    );
+    expect(checks, 2);
+    expect(session.draft.rows, isEmpty);
+  });
+
   test(
     'file recognition creates a draft without writing to the library',
     () async {

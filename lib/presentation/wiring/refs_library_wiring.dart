@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import 'package:super_clipboard/super_clipboard.dart';
 
 import '../../core/constants/api_constants.dart';
 import '../../core/constants/model_spec.dart';
@@ -94,7 +95,16 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
   RefsImportSession? _import;
   RefsDropSummary? _drop;
   int _hoverGeneration = 0;
-  bool _hoverStarted = false;
+  bool _hoverStarted = false, _dropBusy = false;
+  Timer? _hoverTimer;
+
+  @override
+  void dispose() {
+    _hoverTimer?.cancel();
+    _hoverGeneration++;
+    super.dispose();
+  }
+
   Future<void> _queue = Future.value();
   bool _exportAll = false;
 
@@ -943,25 +953,37 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
     }),
   );
 
-  Future<void> _summarizeDrop(DropSession session) async {
-    final generation = ++_hoverGeneration;
+  Future<void> _summarizeDrop(List<DataReader> readers, int generation) async {
+    bool current() => mounted && generation == _hoverGeneration;
+    if (!current()) return;
     final model = ref.read(generationParamsNotifierProvider).model;
-    final files = await RefsDropReader.read([
-      for (final item in session.items)
-        if (item.dataReader != null) item.dataReader!,
-    ], widget.kind);
-    final summary = await RefsDropReader.summarize(files, model);
-    if (mounted && generation == _hoverGeneration) {
-      setState(() => _drop = summary);
-    }
+    final files = await RefsDropReader.read(
+      readers,
+      widget.kind,
+      isCurrent: current,
+    );
+    if (!current()) return;
+    final summary = await RefsDropReader.summarize(
+      files,
+      model,
+      isCurrent: current,
+    );
+    if (current()) setState(() => _drop = summary);
   }
 
-  Future<void> _dropFiles(PerformDropEvent event) async {
-    final files = await RefsDropReader.read([
-      for (final item in event.session.items)
-        if (item.dataReader != null) item.dataReader!,
-    ], widget.kind);
-    if (mounted) _run(() => _prepareImport(files));
+  Future<void> _dropFiles(Future<List<DroppedFileData>> captured) async {
+    try {
+      final files = await captured;
+      final operation = _queue.then((_) async {
+        if (mounted) await _prepareImport(files);
+      });
+      _queue = operation.catchError((Object error) => _reportError(error));
+      await _queue;
+    } catch (error) {
+      _reportError(error);
+    } finally {
+      _dropBusy = false;
+    }
   }
 
   @override
@@ -1065,30 +1087,46 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
         formats: Formats.standardFormats,
         hitTestBehavior: HitTestBehavior.opaque,
         onDropOver: (event) {
-          if (!event.session.allowedOperations.contains(DropOperation.copy)) {
+          if (_dropBusy ||
+              !event.session.allowedOperations.contains(DropOperation.copy)) {
             return DropOperation.none;
           }
           if (!_hoverStarted &&
               event.session.items.any((item) => item.dataReader != null)) {
             _hoverStarted = true;
-            unawaited(
-              _summarizeDrop(event.session).catchError((Object error) {}),
-            );
+            final generation = ++_hoverGeneration;
+            final readers = [
+              for (final item in event.session.items)
+                if (item.dataReader case final reader?) reader,
+            ];
+            // Keep the existing exact preview, but don't read/parse entire
+            // batches when the pointer only passes over the library briefly.
+            _hoverTimer = Timer(const Duration(milliseconds: 200), () {
+              unawaited(
+                _summarizeDrop(readers, generation).catchError((Object _) {}),
+              );
+            });
           }
           return DropOperation.copy;
         },
         onDropLeave: (_) {
+          _hoverTimer?.cancel();
           _hoverGeneration++;
           _hoverStarted = false;
           if (_drop != null) setState(() => _drop = null);
         },
         onPerformDrop: (event) async {
+          if (_dropBusy) return;
+          _dropBusy = true;
+          _hoverTimer?.cancel();
           _hoverGeneration++;
           _hoverStarted = false;
           setState(() => _drop = null);
-          await _dropFiles(
-            event,
-          ).catchError((Object error) => _reportError(error));
+          final captured = RefsDropReader.read([
+            for (final item in event.session.items)
+              if (item.dataReader case final reader?) reader,
+          ], widget.kind);
+          unawaited(_dropFiles(captured));
         },
         child: UiModal(
           onDismiss: () => setState(() => _exportAll = false),
