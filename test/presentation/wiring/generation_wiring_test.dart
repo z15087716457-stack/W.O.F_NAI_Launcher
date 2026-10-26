@@ -132,6 +132,37 @@ void main() {
     await tester.pump();
   }
 
+  /// 内联 × 已移除（10-25），清空入口在全屏编辑顶栏。
+  Future<void> clearFromFullscreen(
+    WidgetTester tester,
+    GenEditorTarget target,
+  ) async {
+    Future<void> tap(String key) async {
+      final f = find.byKey(Key(key));
+      await tester.ensureVisible(f);
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+
+    final ch = target.character;
+    if (ch == null) {
+      await tap('gen-tool-menu');
+      await tap('gen-fullscreen');
+    } else {
+      await tap('gen-character-more-$ch');
+      await tap('gen-character-fullscreen-$ch');
+    }
+    final full = ch == null
+        ? GenEditorTarget.base(negative: target.negative, fullscreen: true)
+        : GenEditorTarget.character(
+            ch,
+            negative: target.negative,
+            fullscreen: true,
+          );
+    await tap('gen-clear-$full');
+    await tap('gen-fullscreen-close');
+  }
+
   String promptFor(GenEditorTarget target) {
     if (target.character case final index?) {
       final character = container
@@ -236,10 +267,7 @@ void main() {
         await tester.tap(tab);
         await tester.pumpAndSettle();
       }
-      final clear = find.byKey(Key('gen-clear-$target'));
-      await tester.ensureVisible(clear);
-      await tester.tap(clear);
-      await tester.pumpAndSettle();
+      await clearFromFullscreen(tester, target);
       expect(promptFor(target), isEmpty);
       expect(
         (container.read(generationPlatformProvider) as MemoryGenerationPlatform)
@@ -260,8 +288,7 @@ void main() {
 
   testWidgets('清空后两秒内仍能撤销并恢复原提示词', (tester) async {
     await pump(tester);
-    await tester.tap(find.byKey(const Key('gen-clear-base')));
-    await tester.pumpAndSettle();
+    await clearFromFullscreen(tester, const GenEditorTarget.base());
     expect(promptFor(const GenEditorTarget.base()), isEmpty);
     await tester.pump(const Duration(seconds: 1));
     await tester.tap(find.byType(SnackBarAction));

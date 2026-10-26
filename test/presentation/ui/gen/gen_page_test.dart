@@ -193,10 +193,13 @@ void main() {
       );
     });
 
-    testWidgets('右上角 × 清空这一块', (t) async {
+    testWidgets('提示词框不再有内联清空 ×，清空只在全屏顶栏', (t) async {
       await pump(t);
-      await tapKey(t, 'gen-clear-base');
-      expect(r.last('onClearPrompt'), 'onClearPrompt(base)');
+      expect(find.byKey(const Key('gen-clear-base')), findsNothing);
+      await tapKey(t, 'gen-tool-menu');
+      await tapKey(t, 'gen-fullscreen');
+      await tapKey(t, 'gen-clear-base-full');
+      expect(r.last('onClearPrompt'), 'onClearPrompt(base-full)');
     });
 
     testWidgets('V5 有透明背景，点了切换；V4.5 没有', (t) async {

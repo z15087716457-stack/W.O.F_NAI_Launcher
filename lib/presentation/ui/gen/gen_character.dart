@@ -378,6 +378,7 @@ class _GenCharacterCardState extends State<GenCharacterCard> {
                           onTap: () => scope.actions.onPositioningChanged(true),
                         ),
                         UiMenuItem(
+                          key: Key('gen-character-fullscreen-$i'),
                           label: l.gen_fullscreen,
                           glyph: UiGlyphs.expand,
                           onTap: () => scope.controller.openFullscreen(

@@ -45,55 +45,24 @@ class GenPromptModule extends StatelessWidget {
   }
 }
 
-/// 编辑器槽位 + 右上角清空 ×（原型 `.ptext`：内边距 6 32 4 12；× 在右 8 上 6）。
+/// 编辑器槽位（原型 `.ptext`）。清空入口只保留在全屏编辑顶栏；
+/// 内联 × 已按 10-25 反馈移除，误清可用 Ctrl+Z 撤销。
 class GenEditorArea extends StatelessWidget {
   const GenEditorArea({
     super.key,
     required this.target,
-    this.padding = const EdgeInsets.fromLTRB(12, 6, 32, 4),
-    this.clearButton = true,
+    this.padding = const EdgeInsets.fromLTRB(12, 6, 12, 4),
   });
   final GenEditorTarget target;
   final EdgeInsets padding;
 
-  /// 右上角清空 ×；全屏编辑把清空放到顶栏，这里不再画。
-  final bool clearButton;
-
   @override
   Widget build(BuildContext context) {
-    final c = context.ui;
     final scope = GenScope.of(context, GenAspect.prompt);
-    return Stack(
-      children: [
-        Padding(
-          key: Key('gen-editor-$target'),
-          padding: padding,
-          child: scope.slots.editor(context, target),
-        ),
-        if (clearButton)
-          Positioned(
-            right: 8,
-            top: padding.top,
-            child: Tooltip(
-              message: context.l10n.gen_clear,
-              child: UiPressable(
-                key: Key('gen-clear-$target'),
-                onTap: () => scope.actions.onClearPrompt(target),
-                builder: (context, hover) => SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: Center(
-                    child: UiGlyph(
-                      UiGlyphs.close,
-                      size: 14,
-                      color: hover ? c.ink : c.muted,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
+    return Padding(
+      key: Key('gen-editor-$target'),
+      padding: padding,
+      child: scope.slots.editor(context, target),
     );
   }
 }
@@ -916,7 +885,6 @@ class GenFullscreenEditor extends StatelessWidget {
             Expanded(
               child: GenEditorArea(
                 target: t,
-                clearButton: false,
                 padding: const EdgeInsets.fromLTRB(28, 20, 28, 20),
               ),
             ),

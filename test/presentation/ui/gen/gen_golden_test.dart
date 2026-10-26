@@ -220,6 +220,17 @@ void main() {
             t.getRect(canvasToolbar).inflate(22),
           ); // Includes its shadow.
         }
+        // 10-25: the inline clear x was removed from prompt editors, giving
+        // the editor text the freed 20px. Only editor slots are excluded.
+        for (final e in find
+            .byWidgetPredicate(
+              (w) =>
+                  w.key is ValueKey<String> &&
+                  (w.key! as ValueKey<String>).value.startsWith('gen-editor-'),
+            )
+            .evaluate()) {
+          masks.add(t.getRect(find.byWidget(e.widget)));
+        }
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('gen-capture')),
