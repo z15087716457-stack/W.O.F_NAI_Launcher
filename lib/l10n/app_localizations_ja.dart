@@ -21617,4 +21617,10 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_repeatDragHint => '数字を左右にドラッグ · ダブルクリックで入力';
+
+  @override
+  String get gen_groupBatchesOn => 'バッチごとに表示中 · クリックで1枚ずつ';
+
+  @override
+  String get gen_groupBatchesOff => '1枚ずつ表示中 · クリックでバッチごと';
 }

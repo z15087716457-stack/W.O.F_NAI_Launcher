@@ -21373,6 +21373,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_repeatDragHint => '按住数字左右拖动调节 · 双击直接输入';
+
+  @override
+  String get gen_groupBatchesOn => '按批次分组 · 点击改为逐张显示';
+
+  @override
+  String get gen_groupBatchesOff => '逐张显示 · 点击按批次分组';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42744,4 +42750,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_repeatDragHint => '按住數字左右拖動調節 · 雙擊直接輸入';
+
+  @override
+  String get gen_groupBatchesOn => '按批次分組 · 點選改為逐張顯示';
+
+  @override
+  String get gen_groupBatchesOff => '逐張顯示 · 點選按批次分組';
 }

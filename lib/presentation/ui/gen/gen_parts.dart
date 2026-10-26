@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_glass_surface.dart';
 import '../../widgets/common/studio_animated_icon.dart';
 import '../kit/ui_colors.dart';
@@ -985,6 +986,51 @@ class GenConfirmDialog extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 简洁查看器右上角的「⊞ 分组」开关（原型 `.float .fb`，开着时强调色底）。
+class GenGroupBatchesToggle extends StatelessWidget {
+  const GenGroupBatchesToggle({
+    super.key,
+    required this.grouped,
+    required this.onChanged,
+  });
+  final bool grouped;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final fg = grouped ? c.accent : c.ink;
+    return GenFloat(
+      children: [
+        Semantics(
+          button: true,
+          toggled: grouped,
+          child: GenFloatButton(
+            key: const Key('simple-viewer-group-batches'),
+            width: null,
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            selected: grouped,
+            tooltip: grouped ? l.gen_groupBatchesOn : l.gen_groupBatchesOff,
+            onTap: () => onChanged(!grouped),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 5,
+              children: [
+                UiGlyph(UiGlyphs.grid, size: 14, color: fg),
+                Text(
+                  l.gen_groupBatches,
+                  style: UiText.sans(12, color: fg, height: 1.2),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

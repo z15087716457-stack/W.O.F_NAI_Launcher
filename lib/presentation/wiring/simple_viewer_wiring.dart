@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../core/utils/localization_extension.dart';
+import '../ui/gen/gen_parts.dart';
+
 import '../providers/generation/preview_selection_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/simple_viewer_group_batches_provider.dart';
@@ -12,23 +13,11 @@ class SimpleViewerGroupControl extends ConsumerWidget {
   const SimpleViewerGroupControl({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final grouped = ref.watch(simpleViewerGroupBatchesProvider);
-    return Material(
-      color: Theme.of(context).colorScheme.surface,
-      borderRadius: BorderRadius.circular(8),
-      child: IconButton(
-        key: const Key('simple-viewer-group-batches'),
-        tooltip: context.l10n.gen_groupBatches,
-        isSelected: grouped,
-        icon: const Icon(Icons.grid_view_outlined),
-        selectedIcon: const Icon(Icons.grid_view),
-        onPressed: () => ref
-            .read(simpleViewerGroupBatchesProvider.notifier)
-            .setGrouped(!grouped),
-      ),
-    );
-  }
+  Widget build(BuildContext context, WidgetRef ref) => GenGroupBatchesToggle(
+    grouped: ref.watch(simpleViewerGroupBatchesProvider),
+    onChanged: (grouped) =>
+        ref.read(simpleViewerGroupBatchesProvider.notifier).setGrouped(grouped),
+  );
 }
 
 /// Only the preview owns these keys. Ancestor shortcuts must not steal arrows

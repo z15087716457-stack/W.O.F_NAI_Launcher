@@ -22379,4 +22379,12 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gen_repeatDragHint =>
       'Drag the number left/right · double-click to type';
+
+  @override
+  String get gen_groupBatchesOn =>
+      'Grouped by batch · click to show one at a time';
+
+  @override
+  String get gen_groupBatchesOff =>
+      'One image at a time · click to group by batch';
 }

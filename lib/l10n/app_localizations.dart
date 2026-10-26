@@ -38877,6 +38877,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Drag the number left/right · double-click to type'**
   String get gen_repeatDragHint;
+
+  /// No description provided for @gen_groupBatchesOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Grouped by batch · click to show one at a time'**
+  String get gen_groupBatchesOn;
+
+  /// No description provided for @gen_groupBatchesOff.
+  ///
+  /// In en, this message translates to:
+  /// **'One image at a time · click to group by batch'**
+  String get gen_groupBatchesOff;
 }
 
 class _AppLocalizationsDelegate

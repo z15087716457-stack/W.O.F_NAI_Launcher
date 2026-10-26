@@ -11393,5 +11393,7 @@
   "blocks_tempSaveConfirm": "保存并转正",
   "blocks_tempShowOriginal": "在块库中查看原块",
   "gen_menuNew": "新",
-  "gen_repeatDragHint": "按住数字左右拖动调节 · 双击直接输入"
+  "gen_repeatDragHint": "按住数字左右拖动调节 · 双击直接输入",
+  "gen_groupBatchesOn": "按批次分组 · 点击改为逐张显示",
+  "gen_groupBatchesOff": "逐张显示 · 点击按批次分组"
 }

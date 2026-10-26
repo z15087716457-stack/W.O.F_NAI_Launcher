@@ -11393,5 +11393,7 @@
   "blocks_tempSaveConfirm": "저장",
   "blocks_tempShowOriginal": "라이브러리에서 원본 보기",
   "gen_menuNew": "신규",
-  "gen_repeatDragHint": "숫자를 좌우로 드래그 · 더블클릭하여 입력"
+  "gen_repeatDragHint": "숫자를 좌우로 드래그 · 더블클릭하여 입력",
+  "gen_groupBatchesOn": "배치별 묶음 · 클릭하면 한 장씩",
+  "gen_groupBatchesOff": "한 장씩 표시 · 클릭하면 배치별 묶음"
 }

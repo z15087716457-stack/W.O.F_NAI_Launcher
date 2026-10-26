@@ -59,6 +59,7 @@ import 'generation_data_wiring_test.dart'
     show DataGeneration, DataSubscription, DataShortcuts, DataRecents;
 import '../screens/generation/widgets/reference_module_test.dart'
     show prepareGenerationDropTestPlatform;
+import '../../helpers/uiux_frontend_capture.dart';
 
 class _CountingTipDeck extends TipDeck {
   _CountingTipDeck() : super(seed: 23);
@@ -1185,9 +1186,21 @@ void main() {
     expect(container.read(generationPreviewSelectionProvider), b.id);
     expect(find.byKey(Key('gen-tile-${b.id}')), findsOneWidget);
     expect(find.byKey(Key('gen-tile-${a.id}')), findsNothing);
+    await captureUiuxRegion(
+      tester,
+      find.byType(RepaintBoundary).first,
+      'group-toggle-off',
+      const Rect.fromLTWH(900, 0, 700, 360),
+    );
     await tester.tap(find.byKey(const Key('simple-viewer-group-batches')));
     await tester.pumpAndSettle();
     expect(container.read(simpleViewerGroupBatchesProvider), true);
+    await captureUiuxRegion(
+      tester,
+      find.byType(RepaintBoundary).first,
+      'group-toggle-on',
+      const Rect.fromLTWH(900, 0, 700, 360),
+    );
     expect(
       storage.getSetting<bool>(StorageKeys.simpleViewerGroupBatches),
       true,

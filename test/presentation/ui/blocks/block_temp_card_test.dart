@@ -14,7 +14,7 @@ import 'blocks_test_harness.dart';
 final _block = BlockData(
   id: 'dress',
   title: '白裙蓝花',
-  color: Color(0xFF8E24AA),
+  color: const Color(0xFF8E24AA),
   atoms: const ['white dress', 'frilled dress', 'sunflower', 'straw hat'],
   folderId: 'f-wardrobe',
   folderName: '衣柜',

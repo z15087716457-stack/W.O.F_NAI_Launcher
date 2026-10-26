@@ -21689,4 +21689,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_repeatDragHint => '숫자를 좌우로 드래그 · 더블클릭하여 입력';
+
+  @override
+  String get gen_groupBatchesOn => '배치별 묶음 · 클릭하면 한 장씩';
+
+  @override
+  String get gen_groupBatchesOff => '한 장씩 표시 · 클릭하면 배치별 묶음';
 }

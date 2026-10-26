@@ -86,8 +86,8 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
                 ),
               if (simpleViewer)
                 const Positioned(
-                  top: 0,
-                  right: 0,
+                  top: 10,
+                  right: 10,
                   child: SimpleViewerGroupControl(),
                 ),
               if (!ref.watch(characterPositionCanvasProvider))

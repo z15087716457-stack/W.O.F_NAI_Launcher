@@ -11978,5 +11978,7 @@
   "blocks_tempSaveConfirm": "儲存並轉正",
   "blocks_tempShowOriginal": "在塊庫中檢視原塊",
   "gen_menuNew": "新",
-  "gen_repeatDragHint": "按住數字左右拖動調節 · 雙擊直接輸入"
+  "gen_repeatDragHint": "按住數字左右拖動調節 · 雙擊直接輸入",
+  "gen_groupBatchesOn": "按批次分組 · 點選改為逐張顯示",
+  "gen_groupBatchesOff": "逐張顯示 · 點選按批次分組"
 }

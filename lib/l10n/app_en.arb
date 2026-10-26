@@ -11460,5 +11460,7 @@
   "blocks_tempSaveConfirm": "Save",
   "blocks_tempShowOriginal": "Show original in library",
   "gen_menuNew": "New",
-  "gen_repeatDragHint": "Drag the number left/right · double-click to type"
+  "gen_repeatDragHint": "Drag the number left/right · double-click to type",
+  "gen_groupBatchesOn": "Grouped by batch · click to show one at a time",
+  "gen_groupBatchesOff": "One image at a time · click to group by batch"
 }
