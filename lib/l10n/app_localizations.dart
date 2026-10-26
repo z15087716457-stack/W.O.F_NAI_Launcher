@@ -26636,7 +26636,7 @@ abstract class AppLocalizations {
   /// No description provided for @gen_repeatTotal.
   ///
   /// In en, this message translates to:
-  /// **'{times} requests, {total} images (scroll to adjust)'**
+  /// **'{times} requests, {total} images · Hold and drag horizontally to adjust'**
   String gen_repeatTotal(Object times, Object total);
 
   /// No description provided for @gen_steps.
@@ -38403,6 +38403,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action failed: {error}'**
   String startup_dataActionFailed(String error);
+
+  /// No description provided for @gen_repeatDragTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'{times} requests · {total} images'**
+  String gen_repeatDragTotal(int times, int total);
+
+  /// No description provided for @set_cvGroupBatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Group batch results'**
+  String get set_cvGroupBatches;
+
+  /// No description provided for @set_cvGroupBatchesSub.
+  ///
+  /// In en, this message translates to:
+  /// **'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.'**
+  String get set_cvGroupBatchesSub;
+
+  /// No description provided for @gen_groupBatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get gen_groupBatches;
 }
 
 class _AppLocalizationsDelegate

@@ -210,6 +210,9 @@ abstract final class SettingsFormat {
     };
   }
 
+  static String simpleViewerGroupDescription(BuildContext context) =>
+      context.l10n.set_cvGroupBatchesSub;
+
   static String percent(double v) => '${(v * 100).round()}%';
 
   /// 文案里的 `{keys}` 占位换成 `\u0000`，配合 [SettingsKeyText] 画键帽。

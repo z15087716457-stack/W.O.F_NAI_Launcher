@@ -13,6 +13,10 @@ const agentSettingRows = <String, (SettingKey?, String)>{
   'locale': (SettingKey.language, 'appearance'),
   'history_click_behavior': (SettingKey.historyClick, 'canvas'),
   'simple_output_viewer': (SettingKey.outputViewer, 'canvas'),
+  'simple_viewer_group_batches': (
+    SettingKey.simpleViewerGroupBatches,
+    'canvas',
+  ),
   'canvas_lock_camera': (SettingKey.canvasLockCamera, 'canvas'),
   'canvas_reduced_motion': (SettingKey.reduceMotion, 'appearance'),
   'canvas_zoom_to_fill': (SettingKey.canvasZoomToFill, 'canvas'),
@@ -59,6 +63,7 @@ String agentSettingLabel(String storageKey) {
     SettingKey.language => l.set_apLanguage,
     SettingKey.historyClick => l.set_cvHistoryClick,
     SettingKey.outputViewer => l.set_cvViewer,
+    SettingKey.simpleViewerGroupBatches => l.set_cvGroupBatches,
     SettingKey.canvasLockCamera => l.set_cvLock,
     SettingKey.reduceMotion => l.set_apReduceMotion,
     SettingKey.canvasZoomToFill => l.set_cvFill,

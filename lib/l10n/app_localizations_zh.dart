@@ -14687,7 +14687,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '重复 $times 次，共 $total 张（滚轮也能调）';
+    return '重复 $times 次，共 $total 张 · 按住左右拖动调节';
   }
 
   @override
@@ -21110,6 +21110,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作失败：$error';
   }
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times 次 · 共 $total 张';
+  }
+
+  @override
+  String get set_cvGroupBatches => '批量结果按批次分组';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。';
+
+  @override
+  String get gen_groupBatches => '分组';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -35795,7 +35810,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '重複 $times 次，共 $total 張（滾輪也能調）';
+    return '重複 $times 次，共 $total 張 · 按住左右拖動調節';
   }
 
   @override
@@ -42218,4 +42233,19 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String startup_dataActionFailed(String error) {
     return '操作失敗：$error';
   }
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times 次 · 共 $total 張';
+  }
+
+  @override
+  String get set_cvGroupBatches => '批次結果按批次分組';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。';
+
+  @override
+  String get gen_groupBatches => '分組';
 }

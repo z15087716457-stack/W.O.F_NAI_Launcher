@@ -26,6 +26,7 @@ import 'package:nai_launcher/presentation/screens/generation/widgets/generation_
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/generation_sidebar_style.dart';
 import 'package:nai_launcher/presentation/widgets/character/character_position_canvas.dart';
+import 'reference_module_test.dart' show prepareGenerationDropTestPlatform;
 import '../../../../helpers/light_theme_contrast.dart';
 import '../../../../helpers/official_ui_capture_fonts.dart';
 
@@ -115,6 +116,7 @@ Future<void> _capture(
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  prepareGenerationDropTestPlatform();
   setUpAll(loadOfficialUiCaptureFonts);
 
   for (final simple in [false, true]) {

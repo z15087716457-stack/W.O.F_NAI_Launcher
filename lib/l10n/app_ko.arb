@@ -8299,7 +8299,7 @@
   "gen_countTip": "요청 1회당 장수 (1–4)",
   "gen_repeat": "반복",
   "gen_repeatTip": "연속으로 보낼 요청 수",
-  "gen_repeatTotal": "{times}회, 총 {total}장 (휠로도 조절)",
+  "gen_repeatTotal": "{times}회, 총 {total}장 · 누른 채 좌우로 드래그하여 조절",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11276,5 +11276,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_repeatDragTotal": "{times}회 · 총 {total}장",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "set_cvGroupBatches": "일괄 생성 결과를 그룹으로 표시",
+  "set_cvGroupBatchesSub": "끄면 이미지를 한 장씩 표시하며 기록 썸네일을 클릭해 해당 이미지를 봅니다. 간단 뷰어에만 적용되며 무한 캔버스는 항상 배치별로 배치합니다.",
+  "gen_groupBatches": "그룹"
 }

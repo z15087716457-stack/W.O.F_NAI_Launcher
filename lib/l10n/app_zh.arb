@@ -8299,7 +8299,7 @@
   "gen_countTip": "一次请求出几张（1–4）",
   "gen_repeat": "重复",
   "gen_repeatTip": "连续发几次请求",
-  "gen_repeatTotal": "重复 {times} 次，共 {total} 张（滚轮也能调）",
+  "gen_repeatTotal": "重复 {times} 次，共 {total} 张 · 按住左右拖动调节",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11276,5 +11276,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_repeatDragTotal": "{times} 次 · 共 {total} 张",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "set_cvGroupBatches": "批量结果按批次分组",
+  "set_cvGroupBatchesSub": "关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。",
+  "gen_groupBatches": "分组"
 }

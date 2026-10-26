@@ -458,6 +458,108 @@ void main() {
       );
     });
 
+    testWidgets('重复次数滚轮不改值，拖动 36px 松手只提交一次', (t) async {
+      await pump(t);
+      final value = find.byKey(const Key('gen-repeat-value'));
+      final center = t.getCenter(value);
+      await t.sendEventToBinding(
+        PointerScrollEvent(position: center, scrollDelta: const Offset(0, -40)),
+      );
+      await t.pump();
+      expect(r.called('onRepeatChanged'), isFalse);
+      final gesture = await t.startGesture(
+        center,
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.moveBy(const Offset(36, 0));
+      await t.pump();
+      expect(r.called('onRepeatChanged'), isFalse);
+      expect(find.byKey(const Key('gen-repeat-bubble')), findsOneWidget);
+      expect(
+        find.descendant(of: value, matching: find.text('4')),
+        findsOneWidget,
+      );
+      await gesture.up();
+      await t.pumpAndSettle();
+      expect(r.calls.where((c) => c.startsWith('onRepeatChanged')), [
+        'onRepeatChanged(4)',
+      ]);
+    });
+
+    testWidgets('重复次数 Shift 拖动每格五次，负方向夹紧且取消不提交', (t) async {
+      await pump(t);
+      final value = find.byKey(const Key('gen-repeat-value'));
+      await t.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      final gesture = await t.startGesture(
+        t.getCenter(value),
+        kind: PointerDeviceKind.mouse,
+      );
+      await gesture.moveBy(const Offset(24, 0));
+      await gesture.up();
+      await t.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await t.pumpAndSettle();
+      expect(r.last('onRepeatChanged'), 'onRepeatChanged(11)');
+      r.calls.clear();
+      final cancelled = await t.startGesture(
+        t.getCenter(value),
+        kind: PointerDeviceKind.mouse,
+      );
+      await cancelled.moveBy(const Offset(10000, 0));
+      await cancelled.cancel();
+      await t.pumpAndSettle();
+      expect(r.called('onRepeatChanged'), isFalse);
+      await t.drag(value, const Offset(-60, 0));
+      await t.pumpAndSettle();
+      expect(r.called('onRepeatChanged'), isFalse);
+    });
+
+    testWidgets('重复拖动上限夹紧，只在松手提交', (t) async {
+      await pump(t);
+      final gesture = await t.startGesture(
+        t.getCenter(find.byKey(const Key('gen-repeat-value'))),
+      );
+      await gesture.moveBy(const Offset(9999, 0));
+      await t.pump();
+      expect(r.called('onRepeatChanged'), false);
+      await gesture.up();
+      await t.pumpAndSettle();
+      expect(
+        r.last('onRepeatChanged'),
+        'onRepeatChanged(${GenFixture.view().image.maxRepeat})',
+      );
+    });
+
+    testWidgets('重复次数双击输入夹紧，回车确认、Esc 取消、失焦确认', (t) async {
+      await pump(t);
+      final value = find.byKey(const Key('gen-repeat-value'));
+      Future<void> edit(String text) async {
+        await t.tap(value);
+        await t.pump(const Duration(milliseconds: 50));
+        await t.tap(value);
+        await t.pumpAndSettle();
+        await t.enterText(find.byKey(const Key('gen-repeat-input')), text);
+      }
+
+      await edit('999999');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      await t.pumpAndSettle();
+      expect(
+        r.last('onRepeatChanged'),
+        'onRepeatChanged(${GenFixture.view().image.maxRepeat})',
+      );
+      r.calls.clear();
+      await edit('9');
+      await t.sendKeyEvent(LogicalKeyboardKey.escape);
+      await t.pumpAndSettle();
+      expect(r.called('onRepeatChanged'), isFalse);
+      await edit('6');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await t.pumpAndSettle();
+      expect(r.calls.where((c) => c.startsWith('onRepeatChanged')), [
+        'onRepeatChanged(6)',
+      ]);
+    });
+
     testWidgets('参数条：点种子解除固定，点采样器出分组菜单', (t) async {
       await pump(t);
       expect(find.text('种子 · 固定'), findsOneWidget);

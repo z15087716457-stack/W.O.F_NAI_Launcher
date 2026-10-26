@@ -10,6 +10,8 @@ import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_output_viewer_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/presentation/screens/generation/widgets/image_preview.dart';
 import 'package:nai_launcher/presentation/widgets/common/numpad_editing_shortcuts.dart';
 
@@ -27,6 +29,16 @@ class _PreviewHistoryBehaviorNotifier extends HistoryClickBehaviorNotifier {
   Future<void> setBehavior(HistoryClickBehavior behavior) async {
     state = behavior;
   }
+}
+
+class _SimpleViewer extends SimpleOutputViewerNotifier {
+  @override
+  bool build() => true;
+}
+
+class _Ungrouped extends SimpleViewerGroupBatches {
+  @override
+  bool build() => false;
 }
 
 /// The legacy "previous/next preview" arrow shortcut was removed: on the canvas
@@ -99,7 +111,18 @@ void main() {
     try {
       final controller = TextEditingController(text: 'abc');
       addTearDown(controller.dispose);
-      final container = _container();
+      final container = ProviderContainer(
+        overrides: [
+          simpleOutputViewerNotifierProvider.overrideWith(_SimpleViewer.new),
+          simpleViewerGroupBatchesProvider.overrideWith(_Ungrouped.new),
+          imageGenerationNotifierProvider.overrideWith(
+            _PreviewImageGenerationNotifier.new,
+          ),
+          historyClickBehaviorNotifierProvider.overrideWith(
+            _PreviewHistoryBehaviorNotifier.new,
+          ),
+        ],
+      );
       addTearDown(container.dispose);
 
       await tester.pumpWidget(

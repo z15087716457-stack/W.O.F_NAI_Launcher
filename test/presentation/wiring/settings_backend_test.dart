@@ -10,6 +10,10 @@ import 'package:nai_launcher/core/rag/rag_runtime_probe.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/network/nai_api_endpoint.dart';
+import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
+import 'package:nai_launcher/presentation/providers/proxy_settings_provider.dart';
+import 'package:nai_launcher/presentation/providers/simple_viewer_group_batches_provider.dart';
 import 'package:nai_launcher/core/services/settings_gpu_probe.dart';
 import 'package:nai_launcher/data/models/auth/saved_account.dart';
 import 'package:nai_launcher/data/models/upscale/local_upscale_models.dart';
@@ -24,6 +28,7 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 import 'package:nai_launcher/presentation/providers/theme_provider.dart';
 import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_accounts.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_edits.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_connections.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_inventory.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_models.dart';
@@ -42,6 +47,56 @@ class _SystemBrightness extends StudioSystemBrightness {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test('simple viewer grouping persists, defaults off and reloads', () async {
+    final storage = MemoryStorage();
+    ProviderContainer create() => ProviderContainer(
+      overrides: [localStorageServiceProvider.overrideWithValue(storage)],
+    );
+    final first = create();
+    expect(first.read(simpleViewerGroupBatchesProvider), false);
+    await first
+        .read(settingsValueStoreProvider)
+        .write(SettingKey.simpleViewerGroupBatches, true);
+    expect(storage.values[StorageKeys.simpleViewerGroupBatches], true);
+    first.dispose();
+    final second = create();
+    expect(second.read(simpleViewerGroupBatchesProvider), true);
+    second.dispose();
+  });
+  test(
+    'account connection target follows actual login user routing, official and custom',
+    () async {
+      final storage = MemoryStorage();
+      for (final endpoint in [
+        NaiApiEndpointConfig.official,
+        const NaiApiEndpointConfig(
+          mainBaseUrl: 'https://account.fixture.invalid',
+          imageBaseUrl: 'https://images.fixture.invalid',
+        ),
+      ]) {
+        final called = <Uri>[];
+        final container = ProviderContainer(
+          overrides: [
+            localStorageServiceProvider.overrideWithValue(storage),
+            currentProxyAddressProvider.overrideWith((ref) => null),
+            settingsEndpointProbeProvider.overrideWithValue((uri, _) async {
+              called.add(uri);
+              return 1;
+            }),
+          ],
+        );
+        container.read(naiApiEndpointServiceProvider).setCurrent(endpoint);
+        await container.read(settingsNetworkProvider.notifier).check();
+        final account = container
+            .read(settingsNetworkProvider)
+            .endpoints
+            .singleWhere((e) => e.kind == SettingsEndpointKind.naiApi);
+        expect(account.host, Uri.parse(endpoint.userUrl('/user/login')).host);
+        expect(called, contains(Uri.parse(endpoint.userUrl('/user/login'))));
+        container.dispose();
+      }
+    },
+  );
   test(
     'fresh theme follows system brightness without writing a preference',
     () async {

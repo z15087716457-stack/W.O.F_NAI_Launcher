@@ -8299,7 +8299,7 @@
   "gen_countTip": "Images per request (1–4)",
   "gen_repeat": "Repeat",
   "gen_repeatTip": "How many requests to send in a row",
-  "gen_repeatTotal": "{times} requests, {total} images (scroll to adjust)",
+  "gen_repeatTotal": "{times} requests, {total} images · Hold and drag horizontally to adjust",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11288,5 +11288,15 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_repeatDragTotal": "{times} requests · {total} images",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "set_cvGroupBatches": "Group batch results",
+  "set_cvGroupBatchesSub": "When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.",
+  "gen_groupBatches": "Group"
 }

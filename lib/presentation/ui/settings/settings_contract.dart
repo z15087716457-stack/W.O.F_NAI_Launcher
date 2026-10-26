@@ -75,6 +75,7 @@ enum SettingKey {
   // 画布与浏览
   historyClick, // openDetail / linkedPreview
   outputViewer, // canvas / simple
+  simpleViewerGroupBatches,
   canvasLockCamera,
   canvasZoomToFill,
   // 快捷键显示
@@ -233,6 +234,11 @@ class SettingSpec {
       _cv,
       choices: ['canvas', 'simple'],
       defaultValue: 'canvas',
+    ),
+    SettingKey.simpleViewerGroupBatches: SettingSpec._(
+      _t,
+      _cv,
+      defaultValue: false,
     ),
     SettingKey.canvasLockCamera: SettingSpec._(_t, _cv, defaultValue: false),
     SettingKey.canvasZoomToFill: SettingSpec._(_t, _cv, defaultValue: false),

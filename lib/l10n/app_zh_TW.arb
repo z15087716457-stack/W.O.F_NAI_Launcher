@@ -8299,7 +8299,7 @@
   "gen_countTip": "一次請求出幾張（1–4）",
   "gen_repeat": "重複",
   "gen_repeatTip": "連續發幾次請求",
-  "gen_repeatTotal": "重複 {times} 次，共 {total} 張（滾輪也能調）",
+  "gen_repeatTotal": "重複 {times} 次，共 {total} 張 · 按住左右拖動調節",
   "@gen_repeatTotal": {
     "placeholders": {
       "times": {},
@@ -11861,5 +11861,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "gen_repeatDragTotal": "{times} 次 · 共 {total} 張",
+  "@gen_repeatDragTotal": {
+    "placeholders": {
+      "times": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "set_cvGroupBatches": "批次結果按批次分組",
+  "set_cvGroupBatchesSub": "關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。",
+  "gen_groupBatches": "分組"
 }

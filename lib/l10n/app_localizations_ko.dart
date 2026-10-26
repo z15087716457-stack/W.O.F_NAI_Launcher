@@ -14925,7 +14925,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '$times회, 총 $total장 (휠로도 조절)';
+    return '$times회, 총 $total장 · 누른 채 좌우로 드래그하여 조절';
   }
 
   @override
@@ -21420,4 +21420,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '작업 실패: $error';
   }
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times회 · 총 $total장';
+  }
+
+  @override
+  String get set_cvGroupBatches => '일괄 생성 결과를 그룹으로 표시';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      '끄면 이미지를 한 장씩 표시하며 기록 썸네일을 클릭해 해당 이미지를 봅니다. 간단 뷰어에만 적용되며 무한 캔버스는 항상 배치별로 배치합니다.';
+
+  @override
+  String get gen_groupBatches => '그룹';
 }

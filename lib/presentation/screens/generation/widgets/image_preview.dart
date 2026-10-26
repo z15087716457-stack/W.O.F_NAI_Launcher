@@ -13,6 +13,8 @@ import '../../../providers/history_click_behavior_provider.dart';
 import '../../../providers/character_position_canvas_provider.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/simple_output_viewer_provider.dart';
+import '../../../providers/simple_viewer_group_batches_provider.dart';
+import '../../../wiring/simple_viewer_wiring.dart';
 import '../../../widgets/character/character_position_canvas.dart';
 import '../../../widgets/common/selectable_image_card.dart';
 import '../../../widgets/navigation/window_chrome_layout.dart';
@@ -20,18 +22,21 @@ import 'canvas/generated_image_card.dart' as canvas_card;
 import 'canvas/generation_canvas_view.dart';
 import 'generation_tool_panel.dart';
 
-/// 挂上生成预览的焦点节点。旧预览的左右切图快捷键已删除：它和输入框抢方向键，
-/// 新画布用 Q 跳组、F 飞回焦点代替。
+/// 焦点只挂在预览内：简洁单图模式支持左右切图，不在页面祖先注册快捷键，
+/// 避免抢走提示词输入框的方向键。无限画布仍用 Q 跳组、F 飞回焦点。
 class PreviewNavShortcuts extends ConsumerWidget {
   const PreviewNavShortcuts({required this.child, super.key});
 
   final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => Focus(
-    focusNode: ref.watch(generationPreviewFocusNodeProvider),
-    child: child,
-  );
+  Widget build(BuildContext context, WidgetRef ref) =>
+      ref.watch(simpleOutputViewerNotifierProvider)
+      ? SimpleViewerNavigation(child: child)
+      : Focus(
+          focusNode: ref.watch(generationPreviewFocusNodeProvider),
+          child: child,
+        );
 }
 
 /// 图像预览组件
@@ -55,8 +60,9 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
-          if (ref.read(historyClickBehaviorNotifierProvider) ==
-              HistoryClickBehavior.selectPreview) {
+          if (simpleViewer ||
+              ref.read(historyClickBehaviorNotifierProvider) ==
+                  HistoryClickBehavior.selectPreview) {
             ref.read(generationPreviewFocusNodeProvider).requestFocus();
           }
         },
@@ -77,6 +83,12 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
                   right: 0,
                   height: WindowChromeScope.heightOf(context),
                   child: const WindowDragArea(),
+                ),
+              if (simpleViewer)
+                const Positioned(
+                  top: 0,
+                  right: 0,
+                  child: SimpleViewerGroupControl(),
                 ),
               if (!ref.watch(characterPositionCanvasProvider))
                 const GenerationToolPanel(),
@@ -147,11 +159,39 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
       );
     }
 
+    if (ref.watch(simpleViewerSingleImagesProvider)) {
+      final image =
+          state.findImageById(ref.watch(generationPreviewSelectionProvider)) ??
+          state.displayImages.lastOrNull ??
+          state.mergedPanelImages.firstOrNull;
+      if (image != null) {
+        return _buildImageView(context, ref, image, theme);
+      }
+    }
+
     final behavior = ref.watch(historyClickBehaviorNotifierProvider);
     if (behavior == HistoryClickBehavior.selectPreview) {
       final selectedId = ref.watch(generationPreviewSelectionProvider);
       final selectedImage = state.findImageById(selectedId);
       if (selectedImage != null) {
+        if (simpleViewer &&
+            ref.watch(simpleViewerGroupBatchesProvider) &&
+            selectedImage.generationRunId != null) {
+          final members =
+              <String, GeneratedImage>{
+                for (final image in [
+                  ...state.mergedPanelImages,
+                  ...state.displayImages,
+                ])
+                  if (image.generationRunId == selectedImage.generationRunId)
+                    image.id: image,
+              }.values.toList()..sort(
+                (a, b) => (a.batchIndex ?? 0).compareTo(b.batchIndex ?? 0),
+              );
+          if (members.length > 1) {
+            return _buildMultiImageGrid(context, ref, members, theme);
+          }
+        }
         return _buildImageView(context, ref, selectedImage, theme);
       }
     }

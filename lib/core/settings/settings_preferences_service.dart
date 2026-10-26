@@ -25,6 +25,7 @@ class SettingsPreferencesService {
       StorageKeys.locale,
       StorageKeys.historyClickBehavior,
       StorageKeys.simpleOutputViewer,
+      StorageKeys.simpleViewerGroupBatches,
       StorageKeys.canvasLockCamera,
       StorageKeys.canvasReducedMotion,
       StorageKeys.canvasZoomToFill,

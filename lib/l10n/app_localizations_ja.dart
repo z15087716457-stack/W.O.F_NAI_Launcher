@@ -14892,7 +14892,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '$times 回、計 $total 枚（ホイールでも調整可）';
+    return '$times 回、計 $total 枚 · 押したまま左右にドラッグして調整';
   }
 
   @override
@@ -21348,4 +21348,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作に失敗しました：$error';
   }
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times 回 · 計 $total 枚';
+  }
+
+  @override
+  String get set_cvGroupBatches => '一括生成の結果をグループ化';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      'オフの場合は画像を1枚ずつ表示し、履歴のサムネイルでその画像を選べます。シンプルビューアーのみに適用され、無限キャンバスでは常にバッチごとに配置します。';
+
+  @override
+  String get gen_groupBatches => 'グループ';
 }

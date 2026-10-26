@@ -34,6 +34,8 @@ import 'generation_operations.dart';
 import 'generation_references.dart';
 import 'generation_settings.dart';
 import '../providers/simple_output_viewer_provider.dart';
+import '../ui/gen/gen_canvas.dart';
+import 'simple_viewer_wiring.dart';
 import '../providers/nai_agent/nai_agent_window_controller.dart';
 import '../providers/nai_agent/nai_agent_workspace_provider.dart';
 import 'nai_agent/agent_toggle_wiring.dart';
@@ -267,8 +269,10 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         agentToggle: agentAvailable ? const AgentToggleWiring() : null,
         historyCaptionInset: !agentExpanded,
         preserveHistory: agentExpanded,
+        viewerControls: simpleViewer ? const SimpleViewerGroupControl() : null,
         canvas: simpleViewer
-            ? null
+            ? (context, tile) =>
+                  const SimpleViewerNavigation(child: GenSimpleStage())
             : (context, tile) => GenerationCanvasWiring(tileBuilder: tile),
         editor: (context, target) => GenerationEditorWiring(
           target: target,

@@ -15325,7 +15325,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String gen_repeatTotal(Object times, Object total) {
-    return '$times requests, $total images (scroll to adjust)';
+    return '$times requests, $total images · Hold and drag horizontally to adjust';
   }
 
   @override
@@ -22101,4 +22101,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return 'Action failed: $error';
   }
+
+  @override
+  String gen_repeatDragTotal(int times, int total) {
+    return '$times requests · $total images';
+  }
+
+  @override
+  String get set_cvGroupBatches => 'Group batch results';
+
+  @override
+  String get set_cvGroupBatchesSub =>
+      'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.';
+
+  @override
+  String get gen_groupBatches => 'Group';
 }

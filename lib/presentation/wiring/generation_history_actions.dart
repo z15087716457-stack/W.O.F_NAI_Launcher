@@ -4,6 +4,8 @@ import '../../core/utils/localization_extension.dart';
 import '../providers/canvas_settings_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/simple_output_viewer_provider.dart';
+import '../providers/simple_viewer_group_batches_provider.dart';
 import '../screens/generation/widgets/canvas/canvas_feed_layout.dart';
 import 'generation_view_mapping.dart';
 
@@ -36,6 +38,10 @@ class GenerationHistoryActions {
       (throw StateError(currentL10n.bridge_conflict));
   void focusBatch(String key) {
     if (_disposed) return;
+    if (ref.read(simpleViewerSingleImagesProvider) && key.startsWith('img:')) {
+      focusTile(key.substring(4));
+      return;
+    }
     final layout = ref.read(canvasFeedLayoutProvider);
     final group = layout.groups.where((group) => group.key == key).firstOrNull;
     if (group == null) return;
@@ -56,6 +62,16 @@ class GenerationHistoryActions {
 
   void focusTile(String id) {
     if (_disposed) return;
+    if (ref.read(simpleOutputViewerNotifierProvider)) {
+      final selected = images.where((image) => image.id == id).firstOrNull;
+      if (selected == null) return;
+      ref
+          .read(generationCanvasGroupSelectionProvider.notifier)
+          .selectTile(generationBatchKey(selected), selected.batchIndex ?? 0);
+      ref.read(generationPreviewSelectionProvider.notifier).select(id);
+      ref.read(generationPreviewFocusNodeProvider).requestFocus();
+      return;
+    }
     final layout = ref.read(canvasFeedLayoutProvider);
     final item = layout.items.where((item) => item.image?.id == id).firstOrNull;
     if (item == null) return;
