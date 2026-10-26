@@ -21380,6 +21380,71 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '应用附带参数时质量词和负面预设一并还原。换到别的模型时，档位按目标模型自动换算；Turbo 沿用现有处理。';
+
+  @override
+  String get ag_slashGroupSkills => 'Skill';
+
+  @override
+  String get ag_slashGroupTemplates => '提示词模板';
+
+  @override
+  String get ag_slashGroupBuiltin => 'Studio 命令';
+
+  @override
+  String get ag_commandNew => '新建对话';
+
+  @override
+  String get ag_commandCompact => '压缩上下文';
+
+  @override
+  String get ag_commandModel => '选择模型';
+
+  @override
+  String get ag_commandThinking => '选择思考档位';
+
+  @override
+  String get ag_commandHistory => '打开会话历史';
+
+  @override
+  String get ag_commandRename => '重命名当前对话';
+
+  @override
+  String get ag_commandCopy => '复制最后一条回复';
+
+  @override
+  String get ag_commandExport => '导出当前会话';
+
+  @override
+  String get ag_commandCompactArgs => '[说明]';
+
+  @override
+  String get ag_commandRenameArgs => '<名称>';
+
+  @override
+  String get set_agNextSuggestion => '下一句建议';
+
+  @override
+  String get set_agNextSuggestionSub =>
+      '使用当前对话模型预测你的下一句消息，会额外消耗 token；按 Tab 采纳。';
+
+  @override
+  String get set_agCacheWarming => '提示缓存预热';
+
+  @override
+  String get set_agCacheWarmingSub =>
+      'Pi 仅在预计节省至少 \$0.05 时预热；未声明缓存寿命或价格的模型不参与。';
+
+  @override
+  String get set_agCacheOff => '关闭';
+
+  @override
+  String get set_agCacheStreaming => '只在 Agent 运行时';
+
+  @override
+  String get set_agCacheIdle => '空闲时也预热';
+
+  @override
+  String get set_agCacheIdleCost => '空闲预热会产生额外模型费用。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42758,4 +42823,69 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get blocks_presetHint =>
       '應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。';
+
+  @override
+  String get ag_slashGroupSkills => 'Skill';
+
+  @override
+  String get ag_slashGroupTemplates => '提示詞範本';
+
+  @override
+  String get ag_slashGroupBuiltin => 'Studio 命令';
+
+  @override
+  String get ag_commandNew => '新增對話';
+
+  @override
+  String get ag_commandCompact => '壓縮上下文';
+
+  @override
+  String get ag_commandModel => '選擇模型';
+
+  @override
+  String get ag_commandThinking => '選擇思考檔位';
+
+  @override
+  String get ag_commandHistory => '開啟會話歷史';
+
+  @override
+  String get ag_commandRename => '重新命名當前對話';
+
+  @override
+  String get ag_commandCopy => '複製最後一條回覆';
+
+  @override
+  String get ag_commandExport => '匯出當前會話';
+
+  @override
+  String get ag_commandCompactArgs => '[說明]';
+
+  @override
+  String get ag_commandRenameArgs => '<名稱>';
+
+  @override
+  String get set_agNextSuggestion => '下一句建議';
+
+  @override
+  String get set_agNextSuggestionSub =>
+      '使用當前對話模型預測你的下一句訊息，會額外消耗 token；按 Tab 採納。';
+
+  @override
+  String get set_agCacheWarming => '提示快取預熱';
+
+  @override
+  String get set_agCacheWarmingSub =>
+      'Pi 僅在預計節省至少 \$0.05 時預熱；未宣告快取壽命或價格的模型不參與。';
+
+  @override
+  String get set_agCacheOff => '關閉';
+
+  @override
+  String get set_agCacheStreaming => '只在 Agent 執行時';
+
+  @override
+  String get set_agCacheIdle => '空閒時也預熱';
+
+  @override
+  String get set_agCacheIdleCost => '空閒預熱會產生額外模型費用。';
 }

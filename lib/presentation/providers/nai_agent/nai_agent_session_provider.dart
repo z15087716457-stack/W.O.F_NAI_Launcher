@@ -25,11 +25,14 @@ typedef NaiAgentSessionStarter =
       int? maxRequestsPerRun,
       String? reasoningEffort,
       String? permissionMode,
+      String? cacheWarming,
+      bool? nextSuggestion,
       NaiAgentToolExecutor? executeExtraTool,
       List<String>? extraToolNames,
       List<String>? extensionPaths,
       Map<String, dynamic>? mcp,
       Map<String, dynamic>? skills,
+      Map<String, dynamic>? prompts,
     });
 
 /// No process starts until the workspace/UI explicitly requests a session.
@@ -58,11 +61,14 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
     maxRequestsPerRun,
     reasoningEffort,
     permissionMode = 'auto',
+    cacheWarming = 'streaming',
+    nextSuggestion = true,
     executeExtraTool,
     extraToolNames = const [],
     extensionPaths = const [],
     mcp = const {},
     skills = const {},
+    prompts = const {},
   }) async {
     var model = await ref.read(naiAgentModelResolverProvider)(
       providerId,
@@ -92,6 +98,8 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       privateModelConfig: {
         ...model.toPrivateJson(),
         'permissionMode': permissionMode ?? 'auto',
+        'cacheWarming': cacheWarming ?? 'streaming',
+        'nextSuggestion': nextSuggestion ?? true,
         'permissionLabels': {
           'title': currentL10n.naiAgent_permissionTitle,
           'once': currentL10n.naiAgent_permissionOnce,
@@ -112,6 +120,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       extensionPaths: extensionPaths ?? const [],
       mcp: mcp ?? const {},
       skills: skills ?? const {},
+      prompts: prompts ?? const {},
     );
     if (!alive) {
       await client.close();

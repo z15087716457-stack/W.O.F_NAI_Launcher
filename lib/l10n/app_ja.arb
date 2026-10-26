@@ -11450,5 +11450,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ag_slashGroupSkills": "スキル",
+  "ag_slashGroupTemplates": "プロンプトテンプレート",
+  "ag_slashGroupBuiltin": "Studio コマンド",
+  "ag_commandNew": "新しいチャットを開始",
+  "ag_commandCompact": "コンテキストを圧縮",
+  "ag_commandModel": "モデルを選択",
+  "ag_commandThinking": "思考レベルを選択",
+  "ag_commandHistory": "セッション履歴を開く",
+  "ag_commandRename": "チャット名を変更",
+  "ag_commandCopy": "最後の返信をコピー",
+  "ag_commandExport": "セッションをエクスポート",
+  "ag_commandCompactArgs": "[指示]",
+  "ag_commandRenameArgs": "<名前>",
+  "set_agNextSuggestion": "次のメッセージ候補",
+  "set_agNextSuggestionSub": "現在の会話モデルで次のメッセージを予測します。追加のトークンを使用します。Tab で採用。",
+  "set_agCacheWarming": "プロンプトキャッシュの予熱",
+  "set_agCacheWarmingSub": "Pi は推定節約額が $0.05 以上の場合のみ予熱します。有効期間や料金が不明なモデルは対象外です。",
+  "set_agCacheOff": "オフ",
+  "set_agCacheStreaming": "Agent の実行中のみ",
+  "set_agCacheIdle": "待機中も予熱",
+  "set_agCacheIdleCost": "待機中の予熱には追加のモデル料金が発生します。"
 }

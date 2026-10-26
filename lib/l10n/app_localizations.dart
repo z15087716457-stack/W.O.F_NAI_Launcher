@@ -38889,6 +38889,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.'**
   String get blocks_presetHint;
+
+  /// No description provided for @ag_slashGroupSkills.
+  ///
+  /// In en, this message translates to:
+  /// **'Skills'**
+  String get ag_slashGroupSkills;
+
+  /// No description provided for @ag_slashGroupTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt templates'**
+  String get ag_slashGroupTemplates;
+
+  /// No description provided for @ag_slashGroupBuiltin.
+  ///
+  /// In en, this message translates to:
+  /// **'Studio commands'**
+  String get ag_slashGroupBuiltin;
+
+  /// No description provided for @ag_commandNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a new chat'**
+  String get ag_commandNew;
+
+  /// No description provided for @ag_commandCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact context'**
+  String get ag_commandCompact;
+
+  /// No description provided for @ag_commandModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a model'**
+  String get ag_commandModel;
+
+  /// No description provided for @ag_commandThinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose thinking level'**
+  String get ag_commandThinking;
+
+  /// No description provided for @ag_commandHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Open session history'**
+  String get ag_commandHistory;
+
+  /// No description provided for @ag_commandRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename this chat'**
+  String get ag_commandRename;
+
+  /// No description provided for @ag_commandCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy the last reply'**
+  String get ag_commandCopy;
+
+  /// No description provided for @ag_commandExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export this session'**
+  String get ag_commandExport;
+
+  /// No description provided for @ag_commandCompactArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'[instructions]'**
+  String get ag_commandCompactArgs;
+
+  /// No description provided for @ag_commandRenameArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'<name>'**
+  String get ag_commandRenameArgs;
+
+  /// No description provided for @set_agNextSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Next-message suggestions'**
+  String get set_agNextSuggestion;
+
+  /// No description provided for @set_agNextSuggestionSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the current conversation model to suggest your next message. Uses additional tokens; press Tab to accept.'**
+  String get set_agNextSuggestionSub;
+
+  /// No description provided for @set_agCacheWarming.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt cache warming'**
+  String get set_agCacheWarming;
+
+  /// No description provided for @set_agCacheWarmingSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Pi warms eligible caches only when estimated savings reach \$0.05. Models without cache lifetime or pricing are not eligible.'**
+  String get set_agCacheWarmingSub;
+
+  /// No description provided for @set_agCacheOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get set_agCacheOff;
+
+  /// No description provided for @set_agCacheStreaming.
+  ///
+  /// In en, this message translates to:
+  /// **'Only while Agent is running'**
+  String get set_agCacheStreaming;
+
+  /// No description provided for @set_agCacheIdle.
+  ///
+  /// In en, this message translates to:
+  /// **'Also while idle'**
+  String get set_agCacheIdle;
+
+  /// No description provided for @set_agCacheIdleCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Idle warming incurs additional model charges.'**
+  String get set_agCacheIdleCost;
 }
 
 class _AppLocalizationsDelegate

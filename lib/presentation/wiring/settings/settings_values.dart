@@ -122,6 +122,8 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.agentModel: agent.modelId.isEmpty
         ? null
         : jsonEncode([agent.providerId, agent.modelId]),
+    SettingKey.agentNextSuggestion: agent.nextSuggestion,
+    SettingKey.agentCacheWarming: agent.cacheWarming,
     SettingKey.agentEnterToSend: agent.enterToSend,
     SettingKey.agentMaxRequests: agent.maxRequestsPerRun.toDouble(),
     SettingKey.ragEnabled: rag.enabled,
@@ -329,6 +331,14 @@ class SettingsValueStore {
         await ref.read(settingsAgentBackendProvider).update({
           'providerId': selection[0],
           'modelId': selection[1],
+        });
+      case SettingKey.agentNextSuggestion:
+        await ref.read(settingsAgentBackendProvider).update({
+          'nextSuggestion': b,
+        });
+      case SettingKey.agentCacheWarming:
+        await ref.read(settingsAgentBackendProvider).update({
+          'cacheWarming': text,
         });
       case SettingKey.agentEnterToSend:
         await ref.read(settingsAgentBackendProvider).update({'enterToSend': b});

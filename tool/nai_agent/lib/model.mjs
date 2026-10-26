@@ -125,6 +125,8 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
       throw new Error('Image input is not enabled for this model');
     }
     const adapter = await spec[1]();
+    const { studioSuggestion = false, ...providerOptions } = options;
+    options = providerOptions;
     options.signal?.throwIfAborted();
     // The host shares Studio's provider gate. Waiting for a slot is cancellable
     // and does not consume the HTTP timeout or start a provider request.
@@ -151,6 +153,22 @@ export async function createStudioModelRuntime(config, { acquireRequest, transfo
             }
             if (typeof result.config?.maxOutputTokens === 'number')
               result.config.maxOutputTokens = Math.min(result.config.maxOutputTokens, options.maxTokens);
+          }
+          if (studioSuggestion) {
+            // Keep the cached tool declarations in the prefix, but forbid calling them.
+            if (spec[0] === 'google-generative-ai') {
+              result.config ??= {};
+              result.config.toolConfig = { functionCallingConfig: { mode: 'NONE' } };
+              if (result.config.thinkingConfig) result.config.thinkingConfig = 'thinkingLevel' in result.config.thinkingConfig
+                ? { thinkingLevel: 'MINIMAL' } : { thinkingBudget: 0 };
+            } else {
+              result.tool_choice = spec[0] === 'anthropic-messages' ? { type: 'none' } : 'none';
+              if (spec[0] === 'anthropic-messages' || 'thinking' in result) result.thinking = { type: 'disabled' };
+              if (result.output_config?.effort) result.output_config = { ...result.output_config, effort: 'low' };
+              if ('reasoning_effort' in result) result.reasoning_effort = 'low';
+              if (result.reasoning?.effort) result.reasoning = { ...result.reasoning, effort: 'low' };
+              if ('enable_thinking' in result) result.enable_thinking = false;
+            }
           }
           return result;
         },

@@ -12035,5 +12035,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "ag_slashGroupSkills": "Skill",
+  "ag_slashGroupTemplates": "提示詞範本",
+  "ag_slashGroupBuiltin": "Studio 命令",
+  "ag_commandNew": "新增對話",
+  "ag_commandCompact": "壓縮上下文",
+  "ag_commandModel": "選擇模型",
+  "ag_commandThinking": "選擇思考檔位",
+  "ag_commandHistory": "開啟會話歷史",
+  "ag_commandRename": "重新命名當前對話",
+  "ag_commandCopy": "複製最後一條回覆",
+  "ag_commandExport": "匯出當前會話",
+  "ag_commandCompactArgs": "[說明]",
+  "ag_commandRenameArgs": "<名稱>",
+  "set_agNextSuggestion": "下一句建議",
+  "set_agNextSuggestionSub": "使用當前對話模型預測你的下一句訊息，會額外消耗 token；按 Tab 採納。",
+  "set_agCacheWarming": "提示快取預熱",
+  "set_agCacheWarmingSub": "Pi 僅在預計節省至少 $0.05 時預熱；未宣告快取壽命或價格的模型不參與。",
+  "set_agCacheOff": "關閉",
+  "set_agCacheStreaming": "只在 Agent 執行時",
+  "set_agCacheIdle": "空閒時也預熱",
+  "set_agCacheIdleCost": "空閒預熱會產生額外模型費用。"
 }

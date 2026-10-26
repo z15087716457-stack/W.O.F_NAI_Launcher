@@ -14,6 +14,30 @@ void main() {
   tearDown(() => root.delete(recursive: true));
 
   test(
+    'suggestion and cache settings default, serialize and persist',
+    () async {
+      expect(const AgentSettings().nextSuggestion, true);
+      expect(AgentSettings.fromJson({}).nextSuggestion, true);
+      expect(const AgentSettings().cacheWarming, 'streaming');
+      expect(AgentSettings.fromJson({}).cacheWarming, 'streaming');
+      for (final mode in ['off', 'streaming', 'idle']) {
+        await store.patchSettings({
+          'cacheWarming': mode,
+          'nextSuggestion': false,
+        });
+        final restored = await AgentWorkspaceStore(root).readSettings();
+        expect(restored.cacheWarming, mode);
+        expect(restored.nextSuggestion, false);
+        expect(AgentSettings.fromJson(restored.toJson()).cacheWarming, mode);
+      }
+      expect(
+        AgentSettings.fromJson({'cacheWarming': 'invalid'}).cacheWarming,
+        'streaming',
+      );
+    },
+  );
+
+  test(
     'approval mode and per-model thinking preferences survive concurrent saves',
     () async {
       final a = jsonEncode(['local', 'a']), b = jsonEncode(['local', 'b']);

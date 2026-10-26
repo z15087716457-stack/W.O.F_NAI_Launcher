@@ -33,7 +33,10 @@ void main() {
         ),
       );
       calls++;
-      await waitForResponse?.call();
+      final side = (requests.last['messages'] as List).any(
+        (m) => '$m'.contains('预测用户下一条'),
+      );
+      if (!side) await waitForResponse?.call();
       request.response.headers.set(
         'content-type',
         'text/event-stream; charset=utf-8',
@@ -77,6 +80,7 @@ void main() {
   });
   NaiAgentWorkspaceController controller({
     bool vision = false,
+    bool suggestions = false,
     bool Function()? readVision,
     int Function()? readModelRevision,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
@@ -113,6 +117,8 @@ void main() {
               'maxConcurrentRequests': 1,
               'maxRequestsPerRun': settings.maxRequestsPerRun,
               'permissionMode': settings.permissionMode,
+              'nextSuggestion': suggestions && settings.nextSuggestion,
+              'cacheWarming': settings.cacheWarming,
             },
             executeTool: (_, __, ___) async => {'content': []},
           ),
@@ -120,6 +126,29 @@ void main() {
     controllers.add(value);
     return value;
   }
+
+  test(
+    'suggestions arrive from host, clear on typing, accept into draft and settings apply live',
+    () async {
+      final c = controller(suggestions: true);
+      await c.initialize();
+      await c.sendText('hello');
+      for (var i = 0; i < 300 && c.selected!.suggestion == null; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 10));
+      }
+      expect(c.selected!.suggestion, '完成');
+      expect(c.selected!.messages.where((m) => m['role'] == 'user').length, 1);
+      await c.acceptSuggestion();
+      expect(c.selected!.composer.text, '完成');
+      expect(c.selected!.suggestion, isNull);
+      await c.updateSettings({'nextSuggestion': false, 'cacheWarming': 'off'});
+      expect(c.selected!.cacheWarming['mode'], 'off');
+      await c.saveComposer('');
+      await c.sendText('no suggestion');
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      expect(c.selected!.suggestion, isNull);
+    },
+  );
 
   test(
     'real host limit persists in Pi history; Continue sends without consuming draft',

@@ -54,6 +54,9 @@ class AgentViewData {
     this.bypassWarned = false,
     this.runLimit,
     this.history = const [],
+    this.slashCommands = const [],
+    this.localAction,
+    this.localActionRevision = 0,
   });
 
   /// 当前时间（欢迎语「上午好 / 下午好」、相对时间）。测试里固定。
@@ -95,6 +98,11 @@ class AgentViewData {
 
   /// `/` 技能候选（已启用、可手动调用的 Skill）。
   final List<AgentSkillOption> skills;
+  final List<AgentSlashCommand> slashCommands;
+
+  /// Minimal hook: open the existing model/thinking/history panel once per revision.
+  final AgentLocalAction? localAction;
+  final int localActionRevision;
 
   /// 欢迎页的「当前草稿」卡；null = 不显示（例如不在生图页）。
   final AgentDraftSummary? draft;
@@ -1000,6 +1008,7 @@ class AgentComposerData {
     this.importing = 0,
     this.canAttachCanvas = false,
     this.enterSends = true,
+    this.suggestion,
   });
 
   /// 输入框草稿（切聊天会换）。界面只在 id 或文字被外部改写时同步，不打断正在输入。
@@ -1026,6 +1035,9 @@ class AgentComposerData {
 
   /// Enter 发送（否则 Ctrl+Enter 发送）。
   final bool enterSends;
+
+  /// Only effective while text is empty; Tab calls onAcceptSuggestion.
+  final String? suggestion;
 }
 
 enum AgentSendBlock { noModel, starting, importing }
@@ -1218,6 +1230,7 @@ class AgentUsageData {
     this.assistantMessages,
     this.toolCalls,
     this.anlas,
+    this.cacheWarming,
   });
 
   /// 当前上下文 tokens 与模型窗口；任一为 null = 未知（圆环显示虚线）。
@@ -1229,10 +1242,43 @@ class AgentUsageData {
 
   /// 本聊天里生图类工具的报价合计（估算，实际以账户为准）；null / 0 = 没花。
   final int? anlas;
+  final AgentCacheWarmingData? cacheWarming;
 
   double? get fraction => tokens == null || window == null || window! <= 0
       ? null
       : (tokens! / window!).clamp(0.0, 1.0);
+}
+
+/// Pi status only; Studio does not invent model cache lifetimes or prices.
+@immutable
+class AgentCacheWarmingData {
+  const AgentCacheWarmingData({
+    required this.mode,
+    required this.state,
+    this.nextWarmAt,
+    this.expectedSavings,
+    this.action,
+    this.reason,
+  });
+  final String mode, state;
+  final DateTime? nextWarmAt;
+  final double? expectedSavings;
+  final String? action, reason;
+  factory AgentCacheWarmingData.fromJson(Map<String, dynamic> value) {
+    final decision = value['decision'] as Map?;
+    return AgentCacheWarmingData(
+      mode: value['mode'] as String? ?? 'streaming',
+      state: value['state'] as String? ?? 'inactive',
+      nextWarmAt: value['nextWarmAt'] is num
+          ? DateTime.fromMillisecondsSinceEpoch(
+              (value['nextWarmAt'] as num).toInt(),
+            )
+          : null,
+      expectedSavings: (decision?['expectedSavings'] as num?)?.toDouble(),
+      action: decision?['action'] as String?,
+      reason: value['reason'] as String?,
+    );
+  }
 }
 
 enum AgentMentionKind { prompt, negative, character, image, block }
@@ -1255,6 +1301,28 @@ class AgentMention {
   /// 右侧小字（「24 个标签」「832×1216」）。
   final String? detail;
   final ImageProvider? image;
+}
+
+enum AgentSlashCommandKind { skill, template, builtin }
+
+enum AgentLocalAction { model, thinking, history }
+
+@immutable
+class AgentSlashCommand {
+  const AgentSlashCommand({
+    required this.kind,
+    required this.name,
+    required this.description,
+    this.argumentHint,
+    this.source,
+  });
+  final AgentSlashCommandKind kind;
+  final String name, description;
+  final String? argumentHint, source;
+  String get insertion =>
+      kind == AgentSlashCommandKind.skill ? '/skill:$name ' : '/$name ';
+  bool get executesOnSelect =>
+      kind == AgentSlashCommandKind.builtin && argumentHint == null;
 }
 
 @immutable
@@ -1346,6 +1414,8 @@ class AgentActions {
     required this.onAdjustLimit,
     required this.onOpenSettingAt,
     this.onPromptSetAction,
+    this.onSelectSlashCommand,
+    this.onAcceptSuggestion,
   });
 
   final Future<bool> Function(
@@ -1354,6 +1424,9 @@ class AgentActions {
     AgentPromptSetAction action,
   )?
   onPromptSetAction;
+
+  final Future<bool> Function(AgentSlashCommand command)? onSelectSlashCommand;
+  final Future<bool> Function()? onAcceptSuggestion;
 
   /// 收起侧栏。
   final VoidCallback onClose;

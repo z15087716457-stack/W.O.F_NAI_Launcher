@@ -12,6 +12,7 @@ import { createNaiPermissions } from './extensions/permissions.mjs';
 import { createStudioExtensionUi } from './extensions/ui.mjs';
 import { createStudioMcp, mcpRedactor, validateStudioMcp } from './mcp.mjs';
 import { builtinSkillsDirectory, resolveStudioSkills } from './skills.mjs';
+import { resolveStudioPromptTemplates } from './prompt-templates.mjs';
 
 // Pi caches loader overrides on reload; Studio prompt edits apply on the next turn.
 class StudioResourceLoader extends DefaultResourceLoader {
@@ -49,7 +50,7 @@ export function studioTools(execute, extraToolNames = []) {
 
 export async function createStudioSession({ config, cwd, agentDir, systemPrompt, executeTool,
   sessionDirectory, sessionFile, sessionName, acquireRequest, extraToolNames = [],
-  extensionPaths = [], mcp = {}, skills = {}, onSession, onExtensionUi, onExtensionError, deferBinding = false }) {
+  extensionPaths = [], mcp = {}, skills = {}, prompts = {}, onSession, onExtensionUi, onExtensionError, deferBinding = false }) {
   if (!systemPrompt?.trim()) throw new Error('NAI system prompt is required');
   const data = resolve(agentDir), sessions = resolve(sessionDirectory ?? join(data, 'sessions'));
   await Promise.all([resolve(cwd), data, sessions].map(path => mkdir(path, { recursive: true })));
@@ -91,6 +92,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
   const settingsManager = SettingsManager.inMemory({
     retry: { enabled: (config.retryAttempts ?? 0) > 0, maxRetries: config.retryAttempts ?? 0 },
     images: { autoResize: false },
+    cacheWarming: config.cacheWarming ?? 'streaming',
   });
   const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search',
     'read', 'write', 'edit', 'bash', 'powershell', 'grep', 'find', 'ls']);
@@ -103,10 +105,12 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     }
     return extensions;
   }
+  const templateSet = await resolveStudioPromptTemplates({ cwd: root, agentDir: data, ...prompts });
   const resourceLoader = new StudioResourceLoader({
     cwd: root, agentDir: data, settingsManager,
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
     additionalExtensionPaths: [...new Set(extensionPaths)],
+    promptsOverride: () => ({ prompts: templateSet.prompts, diagnostics: templateSet.diagnostics }),
     // Studio resolves sources, overrides and switches; Pi formats the catalog and expands /skill:.
     skillsOverride: () => ({ skills: skillSet.active, diagnostics: [] }),
     extensionFactories: [createNaiInteractionExtension(interactionTools),
@@ -161,6 +165,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     contextWindowKnown: Number.isFinite(config.contextWindow) && config.contextWindow > 0,
     extensions: extensions.extensions.map(extension => ({ path: extension.path })),
     skills: skillSet.report,
+    commands: templateSet.commands,
     setSystemPrompt(text) {
       if (!text?.trim()) throw new Error('NAI system prompt is required');
       prompt = text;

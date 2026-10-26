@@ -51,6 +51,8 @@ void main() {
     );
     gate = Completer<Map<String, dynamic>>();
     final client = _QueueClient();
+    when(() => client.isClosed).thenReturn(false);
+    when(client.cancelSuggestion).thenAnswer((_) async => {});
     when(client.close).thenAnswer((_) async {});
     when(() => client.editQueue('queued', remove: true)).thenAnswer((_) {
       removals++;

@@ -13,6 +13,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/prompt_assistant/models/prompt_assistant_models.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_skills_provider.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_commands_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_quick_messages.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
@@ -159,7 +160,10 @@ class AgentTestController extends NaiAgentWorkspaceController {
   final resends = <(String, String, List<int>)>[];
   bool canResend = true;
   @override
-  Future<void> send({bool steer = false}) async {
+  Future<void> send({
+    bool steer = false,
+    Future<bool> Function(String)? onSlashAction,
+  }) async {
     calls.add(steer ? 'steer' : 'send');
   }
 
@@ -169,7 +173,7 @@ class AgentTestController extends NaiAgentWorkspaceController {
   }
 
   @override
-  Future<void> compact() async {
+  Future<void> compact([String? instructions]) async {
     calls.add('compact');
   }
 
@@ -223,6 +227,7 @@ class AgentWiringHarness {
         localStorageServiceProvider.overrideWithValue(AgentTestStorage()),
         secureStorageServiceProvider.overrideWithValue(AgentTestSecrets()),
         authNotifierProvider.overrideWith(AgentTestAuth.new),
+        naiAgentCommandsProvider.overrideWith((_, __) async => []),
         naiAgentSkillsProvider.overrideWith(
           (_, __) async => skills ?? const NaiAgentSkillInventory([], 0, {}),
         ),

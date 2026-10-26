@@ -21624,4 +21624,69 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get blocks_presetHint =>
       '付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。';
+
+  @override
+  String get ag_slashGroupSkills => 'スキル';
+
+  @override
+  String get ag_slashGroupTemplates => 'プロンプトテンプレート';
+
+  @override
+  String get ag_slashGroupBuiltin => 'Studio コマンド';
+
+  @override
+  String get ag_commandNew => '新しいチャットを開始';
+
+  @override
+  String get ag_commandCompact => 'コンテキストを圧縮';
+
+  @override
+  String get ag_commandModel => 'モデルを選択';
+
+  @override
+  String get ag_commandThinking => '思考レベルを選択';
+
+  @override
+  String get ag_commandHistory => 'セッション履歴を開く';
+
+  @override
+  String get ag_commandRename => 'チャット名を変更';
+
+  @override
+  String get ag_commandCopy => '最後の返信をコピー';
+
+  @override
+  String get ag_commandExport => 'セッションをエクスポート';
+
+  @override
+  String get ag_commandCompactArgs => '[指示]';
+
+  @override
+  String get ag_commandRenameArgs => '<名前>';
+
+  @override
+  String get set_agNextSuggestion => '次のメッセージ候補';
+
+  @override
+  String get set_agNextSuggestionSub =>
+      '現在の会話モデルで次のメッセージを予測します。追加のトークンを使用します。Tab で採用。';
+
+  @override
+  String get set_agCacheWarming => 'プロンプトキャッシュの予熱';
+
+  @override
+  String get set_agCacheWarmingSub =>
+      'Pi は推定節約額が \$0.05 以上の場合のみ予熱します。有効期間や料金が不明なモデルは対象外です。';
+
+  @override
+  String get set_agCacheOff => 'オフ';
+
+  @override
+  String get set_agCacheStreaming => 'Agent の実行中のみ';
+
+  @override
+  String get set_agCacheIdle => '待機中も予熱';
+
+  @override
+  String get set_agCacheIdleCost => '待機中の予熱には追加のモデル料金が発生します。';
 }
