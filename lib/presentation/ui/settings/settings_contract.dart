@@ -575,6 +575,7 @@ class SettingsViewData {
     SettingsRagData? rag,
     SettingsUpscaleData? upscale,
     SettingsDictionaryData? dictionaries,
+    SettingsStorageData? storage,
   }) => SettingsViewData(
     page: page ?? this.page,
     values: values ?? this.values,
@@ -590,7 +591,7 @@ class SettingsViewData {
     canvas: canvas ?? this.canvas,
     shortcuts: shortcuts ?? this.shortcuts,
     generation: generation,
-    storage: storage,
+    storage: storage ?? this.storage,
     dictionaries: dictionaries ?? this.dictionaries,
     models: models ?? this.models,
     agent: agent ?? this.agent,

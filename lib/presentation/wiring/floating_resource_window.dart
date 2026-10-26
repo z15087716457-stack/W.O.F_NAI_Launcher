@@ -112,11 +112,24 @@ class _FloatingResourceWindowState
           border: Border.all(
             color: focused ? c.strong.withValues(alpha: .5) : c.border,
           ),
+          // 与 UiPopoverSurface 同一套分层阴影；聚焦窗口加深一档。
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: focused ? .28 : .16),
-              blurRadius: focused ? 40 : 28,
-              offset: const Offset(0, 12),
+              color: Colors.black.withValues(
+                alpha: (c.dark ? .32 : .07) * (focused ? 1.6 : 1),
+              ),
+              blurRadius: 40,
+              offset: const Offset(0, 18),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: c.dark ? .36 : .10),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: c.dark ? .4 : .10),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
             ),
           ],
         ),
@@ -359,7 +372,10 @@ class _SearchBox extends StatelessWidget {
               cursorHeight: 14,
               decoration: InputDecoration(
                 isDense: true,
+                filled: false,
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 hintText: hint,
                 hintStyle: UiText.sans(12, color: c.faint, height: 1.2),
@@ -396,7 +412,9 @@ Widget _async<T>(
   Widget Function(T) data,
 ) {
   final l = context.l10n;
+  // 依赖变化（状态、模型、缩略图版本）重算时沿用旧数据，避免列表闪成转圈。
   return value.when(
+    skipLoadingOnReload: true,
     data: (v) => empty(v) ? _Status(l.floating_empty) : data(v),
     loading: () => const Center(
       child: SizedBox(
@@ -601,6 +619,13 @@ class _RefsBody extends ConsumerWidget {
                       image: thumb,
                       fit: BoxFit.cover,
                       gaplessPlayback: true,
+                      errorBuilder: (_, _, _) => Center(
+                        child: UiGlyph(
+                          UiGlyphs.picture,
+                          size: 18,
+                          color: c.faint,
+                        ),
+                      ),
                     )
                   else
                     Center(
