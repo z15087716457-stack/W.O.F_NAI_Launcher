@@ -687,12 +687,10 @@ class AgentAnsweredQuestion {
     required this.answer,
     required this.kind,
     this.optionLabel,
-    this.recommended = false,
   });
   final String question, answer;
   final AgentAnswerKind kind;
   final String? optionLabel;
-  final bool recommended;
 }
 
 final class AgentAnsweredQuestionsBlock extends AgentBlock {
