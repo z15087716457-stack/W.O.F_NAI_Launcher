@@ -8951,65 +8951,17 @@
   "channel_motionSub": "Subtle animation, paused while generating",
   "channel_toastTitle": "This session",
   "channel_batch": "{time} · ×{count}",
-  "@channel_batch": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@channel_batch": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
   "channel_batchNewest": "{time} · ×{count} · latest",
-  "@channel_batchNewest": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@channel_batchNewest": {"placeholders": {"time": {"type": "String"}, "count": {"type": "int"}}},
   "channel_batchPending": "Generating · ×{count}",
-  "@channel_batchPending": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@channel_batchPending": {"placeholders": {"count": {"type": "int"}}},
   "channel_dayToday": "Today · {date}",
-  "@channel_dayToday": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
+  "@channel_dayToday": {"placeholders": {"date": {"type": "String"}}},
   "channel_dayYesterday": "Yesterday · {date}",
-  "@channel_dayYesterday": {
-    "placeholders": {
-      "date": {
-        "type": "String"
-      }
-    }
-  },
+  "@channel_dayYesterday": {"placeholders": {"date": {"type": "String"}}},
   "channel_monthDayWeek": "{weekday}, {month}/{day}",
-  "@channel_monthDayWeek": {
-    "placeholders": {
-      "month": {
-        "type": "int"
-      },
-      "day": {
-        "type": "int"
-      },
-      "weekday": {
-        "type": "String"
-      }
-    }
-  },
+  "@channel_monthDayWeek": {"placeholders": {"month": {"type": "int"}, "day": {"type": "int"}, "weekday": {"type": "String"}}},
   "channel_weekday1": "Mon",
   "channel_weekday2": "Tue",
   "channel_weekday3": "Wed",
@@ -9018,16 +8970,7 @@
   "channel_weekday6": "Sat",
   "channel_weekday7": "Sun",
   "channel_scrubWhen": "{day} {time}",
-  "@channel_scrubWhen": {
-    "placeholders": {
-      "day": {
-        "type": "String"
-      },
-      "time": {
-        "type": "String"
-      }
-    }
-  },
+  "@channel_scrubWhen": {"placeholders": {"day": {"type": "String"}, "time": {"type": "String"}}},
   "rag_title": "RAG vector system",
   "rag_description": "Manage local retrieval, models and contextual tag suggestions",
   "rag_enabled": "Enable RAG",
@@ -9178,23 +9121,8 @@
   "rag_runtimeVerify": "Verifying runtime compatibility",
   "rag_runtimeElapsed": "{seconds}s in this step",
   "rag_useRuntime": "Use existing runtime",
-  "@rag_downloadProgress": {
-    "placeholders": {
-      "done": {
-        "type": "String"
-      },
-      "total": {
-        "type": "String"
-      }
-    }
-  },
-  "@rag_runtimeElapsed": {
-    "placeholders": {
-      "seconds": {
-        "type": "int"
-      }
-    }
-  },
+  "@rag_downloadProgress": {"placeholders": {"done": {"type": "String"}, "total": {"type": "String"}}},
+  "@rag_runtimeElapsed": {"placeholders": {"seconds": {"type": "int"}}},
   "set_title": "Settings",
   "set_search": "Search settings",
   "set_searchResults": "Search results",
@@ -9892,44 +9820,21 @@
   "set_dcLatest": "Up to date",
   "set_dcUpdatesAvailable": "Updates available",
   "set_dcLastChecked": "Last checked {when}",
-  "@set_dcLastChecked": {
-    "placeholders": {
-      "when": {}
-    }
-  },
+  "@set_dcLastChecked": {"placeholders": {"when": {}}},
   "set_dcRefreshWiki": "Refresh Wiki",
   "set_dcRefreshWikiTip": "Download the current Wiki data to refresh existing articles; personal translations are kept.",
   "set_dcChanged": "Added {added}, updated {updated}. Saved locally.",
-  "@set_dcChanged": {
-    "placeholders": {
-      "added": {},
-      "updated": {}
-    }
-  },
+  "@set_dcChanged": {"placeholders": {"added": {}, "updated": {}}},
   "set_dcRagSyncTip": "If you use semantic search, restart Studio, then sync the affected source indexes manually.",
   "set_dcUpdateTags": "Update tags",
   "set_dcUpdateWiki": "Update Wiki",
   "set_dcSources": "Available snapshots: Tag {tagDate} · Wiki {wikiDate}",
-  "@set_dcSources": {
-    "placeholders": {
-      "tagDate": {},
-      "wikiDate": {}
-    }
-  },
+  "@set_dcSources": {"placeholders": {"tagDate": {}, "wikiDate": {}}},
   "set_dcDownloading": "Downloading {received} / {total}",
-  "@set_dcDownloading": {
-    "placeholders": {
-      "received": {},
-      "total": {}
-    }
-  },
+  "@set_dcDownloading": {"placeholders": {"received": {}, "total": {}}},
   "set_dcVerifying": "Verifying download…",
   "set_dcImporting": "Adding local data · {n} rows read",
-  "@set_dcImporting": {
-    "placeholders": {
-      "n": {}
-    }
-  },
+  "@set_dcImporting": {"placeholders": {"n": {}}},
   "set_dcPublishing": "Switching data revision…",
   "set_dcUpdateFailed": "Update failed. Existing data is preserved. Retry when ready.",
   "set_dcUpdateCancelled": "Cancelled. Existing data remains available.",
@@ -10623,18 +10528,9 @@
   "set_accBalanceUnread": "Balance not loaded",
   "set_agBase": "Built-in system prompt",
   "set_agBaseGlobalState": "Global: {state}",
-  "@set_agBaseGlobalState": {
-    "placeholders": {
-      "state": {}
-    }
-  },
+  "@set_agBaseGlobalState": {"placeholders": {"state": {}}},
   "set_agBaseWsState": "Workspace “{name}”: {state}",
-  "@set_agBaseWsState": {
-    "placeholders": {
-      "name": {},
-      "state": {}
-    }
-  },
+  "@set_agBaseWsState": {"placeholders": {"name": {}, "state": {}}},
   "set_agBaseBuiltin": "built-in",
   "set_agBaseCustom": "customized",
   "set_agBaseInherit": "uses global",
@@ -10643,11 +10539,7 @@
   "set_agBaseCollapse": "Collapse",
   "set_agScopeGlobal": "Global",
   "set_agScopeWorkspace": "Workspace · {name}",
-  "@set_agScopeWorkspace": {
-    "placeholders": {
-      "name": {}
-    }
-  },
+  "@set_agScopeWorkspace": {"placeholders": {"name": {}}},
   "set_agBaseUseGlobalOn": "This workspace uses the global prompt; turn off to give it its own",
   "set_agBaseUseGlobalOff": "This workspace has its own prompt; turn on to use the global one",
   "set_agBaseHint": "Custom text replaces the built-in system prompt and follows the “Before built-in prompt” text. The app appends the tool map. Global and workspace prompts are saved separately; existing chats are unchanged.",
@@ -10795,19 +10687,7 @@
   "ag_greetHint": "Agent reads your draft before acting, and always asks before spending Anlas.",
   "ag_draftEyebrow": "Current draft",
   "ag_draftCounts": "{characters} characters · {blocks} blocks · {references} references",
-  "@ag_draftCounts": {
-    "placeholders": {
-      "characters": {
-        "type": "int"
-      },
-      "blocks": {
-        "type": "int"
-      },
-      "references": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_draftCounts": {"placeholders": {"characters": {"type": "int"}, "blocks": {"type": "int"}, "references": {"type": "int"}}},
   "ag_taskReview": "Review draft",
   "ag_taskReviewHint": "Find conflicts, redundancy and syntax the model ignores",
   "ag_taskReviewPrompt": "Review the current draft and parameters for conflicts, redundancy and syntax this model ignores. Don't change anything yet.",
@@ -10834,29 +10714,11 @@
   "ag_delete": "Delete",
   "ag_deleteWorkspaceTitle": "Delete this workspace?",
   "ag_deleteWorkspaceBody": "Workspace \"{name}\" and all its chats move to the trash and can be undone. Generated images stay in the gallery and history.",
-  "@ag_deleteWorkspaceBody": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_deleteWorkspaceBody": {"placeholders": {"name": {"type": "String"}}},
   "ag_chatDeleted": "Deleted \"{title}\"",
-  "@ag_chatDeleted": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_chatDeleted": {"placeholders": {"title": {"type": "String"}}},
   "ag_workspaceDeleted": "Deleted workspace \"{name}\"",
-  "@ag_workspaceDeleted": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_workspaceDeleted": {"placeholders": {"name": {"type": "String"}}},
   "ag_chatsContent": "In messages",
   "ag_chatsSearching": "Searching messages…",
   "ag_imageVibe": "Use as Vibe",
@@ -10879,16 +10741,7 @@
   "ag_sloganExternal": "Trading passwords with an outside tool…\nWaiting to hear back…",
   "ag_foldDone": "Worked",
   "ag_foldTimes": "{label} ×{count}",
-  "@ag_foldTimes": {
-    "placeholders": {
-      "label": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_foldTimes": {"placeholders": {"label": {"type": "String"}, "count": {"type": "int"}}},
   "ag_kindThink": "Thought",
   "ag_kindRead": "Read",
   "ag_kindRun": "Command",
@@ -10898,13 +10751,7 @@
   "ag_kindExternal": "External tool",
   "ag_kindAsk": "Asked you",
   "ag_limitTitle": "Reached the per-task step limit ({count} steps)",
-  "@ag_limitTitle": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_limitTitle": {"placeholders": {"count": {"type": "int"}}},
   "ag_limitBody": "Progress is saved. Press Continue to pick up where it left off. You can change the limit in Settings.",
   "ag_limitContinue": "Continue",
   "ag_limitAdjust": "Adjust limit",
@@ -10912,184 +10759,49 @@
   "ag_diffExpand": "Show all",
   "ag_diffCollapse": "Collapse",
   "ag_readImages": "Viewed images · {count}",
-  "@ag_readImages": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_readImages": {"placeholders": {"count": {"type": "int"}}},
   "ag_turnTook": "Took {time}",
-  "@ag_turnTook": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_turnTook": {"placeholders": {"time": {"type": "String"}}},
   "ag_turnAnlas": "{anlas} Anlas",
-  "@ag_turnAnlas": {
-    "placeholders": {
-      "anlas": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_turnAnlas": {"placeholders": {"anlas": {"type": "String"}}},
   "ag_turnChanges": "{count, plural, =1{1 change} other{{count} changes}}",
-  "@ag_turnChanges": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_turnChanges": {"placeholders": {"count": {"type": "int"}}},
   "ag_turnTools": "{count, plural, =1{1 tool call} other{{count} tool calls}}",
-  "@ag_turnTools": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_turnTools": {"placeholders": {"count": {"type": "int"}}},
   "ag_turnTokens": "{input} in · {output} out tokens",
-  "@ag_turnTokens": {
-    "placeholders": {
-      "input": {
-        "type": "String"
-      },
-      "output": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_turnTokens": {"placeholders": {"input": {"type": "String"}, "output": {"type": "String"}}},
   "ag_settingsTitle": "App settings",
   "ag_settingsGo": "Open settings",
   "ag_tagCopied": "Copied {tag}",
-  "@ag_tagCopied": {
-    "placeholders": {
-      "tag": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_tagCopied": {"placeholders": {"tag": {"type": "String"}}},
   "ag_tagCount": "{count} posts",
-  "@ag_tagCount": {
-    "placeholders": {
-      "count": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_tagCount": {"placeholders": {"count": {"type": "String"}}},
   "ag_galleryFavorite": "{count, plural, =1{Favorited 1 image} other{Favorited {count} images}}",
-  "@ag_galleryFavorite": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryFavorite": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryUnfavorite": "{count, plural, =1{Unfavorited 1 image} other{Unfavorited {count} images}}",
-  "@ag_galleryUnfavorite": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryUnfavorite": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryTags": "{count, plural, =1{Retagged 1 image} other{Retagged {count} images}}",
-  "@ag_galleryTags": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryTags": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryMove": "{count, plural, =1{Moved 1 image to “{target}”} other{Moved {count} images to “{target}”}}",
-  "@ag_galleryMove": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "target": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_galleryMove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
   "ag_galleryCopy": "{count, plural, =1{Copied 1 image to “{target}”} other{Copied {count} images to “{target}”}}",
-  "@ag_galleryCopy": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "target": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_galleryCopy": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
   "ag_galleryDelete": "{count, plural, =1{Moved 1 image to trash} other{Moved {count} images to trash}}",
-  "@ag_galleryDelete": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryDelete": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryRestore": "{count, plural, =1{Restored 1 image} other{Restored {count} images}}",
-  "@ag_galleryRestore": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryRestore": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryCollectionAdd": "{count, plural, =1{Added 1 image to “{target}”} other{Added {count} images to “{target}”}}",
-  "@ag_galleryCollectionAdd": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "target": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_galleryCollectionAdd": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
   "ag_galleryCollectionRemove": "{count, plural, =1{Removed 1 image from “{target}”} other{Removed {count} images from “{target}”}}",
-  "@ag_galleryCollectionRemove": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "target": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_galleryCollectionRemove": {"placeholders": {"count": {"type": "int"}, "target": {"type": "String"}}},
   "ag_galleryExport": "{count, plural, =1{Exported 1 image} other{Exported {count} images}}",
-  "@ag_galleryExport": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryExport": {"placeholders": {"count": {"type": "int"}}},
   "ag_galleryMore": "+{count}",
-  "@ag_galleryMore": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_galleryMore": {"placeholders": {"count": {"type": "int"}}},
   "ag_compacted": "Earlier conversation compacted",
   "ag_compactedAuto": "Context was nearly full; earlier conversation compacted automatically",
   "ag_compactedTokens": "was {tokens} tokens",
-  "@ag_compactedTokens": {
-    "placeholders": {
-      "tokens": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_compactedTokens": {"placeholders": {"tokens": {"type": "String"}}},
   "ag_compactedShow": "Show summary",
   "ag_compactedHide": "Hide summary",
   "ag_editResend": "Send",
@@ -11099,16 +10811,7 @@
   "set_agTrashSub": "Deleted chats, workspaces and skills land here and can be restored. Deleting them for good cannot be undone.",
   "set_agTrashManage": "Manage",
   "set_agTrashSummary": "{count} items · {size}",
-  "@set_agTrashSummary": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "size": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agTrashSummary": {"placeholders": {"count": {"type": "int"}, "size": {"type": "String"}}},
   "set_agTrashEmpty": "Trash is empty",
   "set_agTrashAll": "All",
   "set_agTrashChats": "Chats",
@@ -11119,63 +10822,24 @@
   "set_agTrashPurgeAll": "Empty trash",
   "set_agTrashPurgeTitle": "Delete for good?",
   "set_agTrashPurgeBody": "\"{name}\" will be removed from disk. This cannot be undone.",
-  "@set_agTrashPurgeBody": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agTrashPurgeBody": {"placeholders": {"name": {"type": "String"}}},
   "set_agTrashPurgeAllBody": "All {count} items in the trash will be removed from disk. This cannot be undone.",
-  "@set_agTrashPurgeAllBody": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@set_agTrashPurgeAllBody": {"placeholders": {"count": {"type": "int"}}},
   "set_agTrashRestored": "Restored \"{name}\"",
-  "@set_agTrashRestored": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agTrashRestored": {"placeholders": {"name": {"type": "String"}}},
   "set_agTrashPurged": "Deleted \"{name}\" for good",
-  "@set_agTrashPurged": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agTrashPurged": {"placeholders": {"name": {"type": "String"}}},
   "set_agTrashNeedWorkspace": "Its workspace is in the trash too. Restore the workspace first.",
   "set_agTrashRestoreFailed": "Restore failed: something with the same name is already there",
   "set_agTrashGoneWorkspace": "deleted workspace",
   "set_agSkillRemoveBody": "\"{name}\" moves to the trash. You can restore it or delete it for good from Trash in Agent settings.",
-  "@set_agSkillRemoveBody": {
-    "placeholders": {
-      "name": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agSkillRemoveBody": {"placeholders": {"name": {"type": "String"}}},
   "set_agSkillName": "Name",
   "set_agSkillNewHelp": "Lowercase letters, digits and hyphens only, e.g. watercolor-style. Its folder opens afterwards; edit the SKILL.md inside.",
   "set_agSkillCreate": "Create",
   "set_agSkillAddConfirm": "Add",
   "set_agPromptStats": "{chars} characters · about {tokens} tokens",
-  "@set_agPromptStats": {
-    "placeholders": {
-      "chars": {
-        "type": "String"
-      },
-      "tokens": {
-        "type": "String"
-      }
-    }
-  },
+  "@set_agPromptStats": {"placeholders": {"chars": {"type": "String"}, "tokens": {"type": "String"}}},
   "set_agFinalLive": "The full system prompt the current chat actually sends to the model.",
   "set_agBuiltinSub": "The built-in base prompt shipped with Studio; it changes with updates.",
   "set_agMcpEditTitle": "Edit MCP server",
@@ -11198,13 +10862,7 @@
   "ag_stepArguments": "Arguments",
   "ag_stepResult": "Result",
   "ag_stepsMore": "{count} more steps",
-  "@ag_stepsMore": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_stepsMore": {"placeholders": {"count": {"type": "int"}}},
   "ag_tool_studio_context": "Read current draft",
   "ag_tool_image_read": "View image",
   "ag_tool_prompt_update": "Edit prompt",
@@ -11292,112 +10950,40 @@
   "ag_diffLocked": "Draft changed since",
   "ag_diffUndo": "Undo",
   "ag_diffCounts": "+{added} −{removed}",
-  "@ag_diffCounts": {
-    "placeholders": {
-      "added": {
-        "type": "int"
-      },
-      "removed": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_diffCounts": {"placeholders": {"added": {"type": "int"}, "removed": {"type": "int"}}},
   "ag_outputs": "Outputs",
   "ag_anlasSpent": "{anlas} Anlas used",
-  "@ag_anlasSpent": {
-    "placeholders": {
-      "anlas": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_anlasSpent": {"placeholders": {"anlas": {"type": "String"}}},
   "ag_imageReveal": "Show in history",
   "ag_imageAttach": "Attach to message",
   "ag_imageZoom": "View larger",
   "ag_askHint": "Press 1–{count}",
-  "@ag_askHint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_askHint": {"placeholders": {"count": {"type": "int"}}},
   "ag_askOther": "Something else…",
   "ag_askSubmit": "Answer",
   "ag_askSkip": "Skip",
   "ag_approvalTitle": "Needs your OK · {tool}",
-  "@ag_approvalTitle": {
-    "placeholders": {
-      "tool": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_approvalTitle": {"placeholders": {"tool": {"type": "String"}}},
   "ag_gateTitle": "Confirm · {action}",
-  "@ag_gateTitle": {
-    "placeholders": {
-      "action": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_gateTitle": {"placeholders": {"action": {"type": "String"}}},
   "ag_gateText2img": "Generate {count}",
-  "@ag_gateText2img": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_gateText2img": {"placeholders": {"count": {"type": "int"}}},
   "ag_gateImg2img": "Img2img ×{count}",
-  "@ag_gateImg2img": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_gateImg2img": {"placeholders": {"count": {"type": "int"}}},
   "ag_gateInpaint": "Inpaint ×{count}",
-  "@ag_gateInpaint": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_gateInpaint": {"placeholders": {"count": {"type": "int"}}},
   "ag_gateVariations": "Variations ×{count}",
-  "@ag_gateVariations": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_gateVariations": {"placeholders": {"count": {"type": "int"}}},
   "ag_gateEnhance": "Enhance",
   "ag_gateModelSize": "Model · size",
   "ag_gateRequests": "Requests",
   "ag_gateRequestsValue": "{requests} × {batch}",
-  "@ag_gateRequestsValue": {
-    "placeholders": {
-      "requests": {
-        "type": "int"
-      },
-      "batch": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_gateRequestsValue": {"placeholders": {"requests": {"type": "int"}, "batch": {"type": "int"}}},
   "ag_gateUnit": "Per request",
   "ag_gateEncoding": "Reference encoding",
   "ag_gateAccount": "Account",
   "ag_gateTotal": "Total · balance {balance}",
-  "@ag_gateTotal": {
-    "placeholders": {
-      "balance": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_gateTotal": {"placeholders": {"balance": {"type": "String"}}},
   "ag_gateTotalNoBalance": "Total",
   "ag_gateConfirm": "Confirm & generate",
   "ag_gateConfirmTool": "Confirm & run",
@@ -11407,13 +10993,7 @@
   "ag_placeholder": "Tell Agent what to do · @ to reference · / for skills",
   "ag_dropHint": "Drop to attach to this message",
   "ag_importing": "Adding {count} images…",
-  "@ag_importing": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_importing": {"placeholders": {"count": {"type": "int"}}},
   "ag_attach": "Add images",
   "ag_attachFile": "Choose files…",
   "ag_attachCanvas": "Attach current canvas image",
@@ -11484,13 +11064,7 @@
   "ag_usageContext": "Current context · estimate",
   "ag_usageUnknown": "Shown after the model reports usage",
   "ag_usageRemaining": "{tokens} left",
-  "@ag_usageRemaining": {
-    "placeholders": {
-      "tokens": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_usageRemaining": {"placeholders": {"tokens": {"type": "String"}}},
   "ag_usageSession": "This chat",
   "ag_usageInput": "Input",
   "ag_usageOutput": "Output",
@@ -11501,37 +11075,13 @@
   "ag_usageCost": "Billing is per your provider",
   "ag_usageCompact": "Compact context",
   "ag_shelfAll": "All {count}",
-  "@ag_shelfAll": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_shelfAll": {"placeholders": {"count": {"type": "int"}}},
   "ag_shelfGenerated": "Generated {count}",
-  "@ag_shelfGenerated": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_shelfGenerated": {"placeholders": {"count": {"type": "int"}}},
   "ag_shelfAttachments": "Attachments {count}",
-  "@ag_shelfAttachments": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_shelfAttachments": {"placeholders": {"count": {"type": "int"}}},
   "ag_shelfFiles": "Files {count}",
-  "@ag_shelfFiles": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_shelfFiles": {"placeholders": {"count": {"type": "int"}}},
   "ag_shelfFilesTitle": "Files",
   "ag_shelfHint": "Click to enlarge · drag to canvas",
   "ag_shelfEmpty": "Nothing produced in this chat yet",
@@ -11629,71 +11179,36 @@
   "mp_copyId": "Copy model ID",
   "mp_removeModel": "Remove model",
   "mp_removeTitle": "Remove model “{id}”?",
-  "@mp_removeTitle": {
-    "placeholders": {
-      "id": {}
-    }
-  },
+  "@mp_removeTitle": {"placeholders": {"id": {}}},
   "mp_removeBody": "Features using it fall back to another available model.",
   "mp_catalogId": "Model ID",
   "mp_catalogCtx": "Context",
   "mp_catalogPrice": "In / out · per M",
   "mp_catalogFooter": "{n} match · {total} total · fetched {when}",
-  "@mp_catalogFooter": {
-    "placeholders": {
-      "n": {},
-      "total": {},
-      "when": {}
-    }
-  },
+  "@mp_catalogFooter": {"placeholders": {"n": {}, "total": {}, "when": {}}},
   "mp_catalogMore": "{n} more, type to narrow down",
-  "@mp_catalogMore": {
-    "placeholders": {
-      "n": {}
-    }
-  },
+  "@mp_catalogMore": {"placeholders": {"n": {}}},
   "mp_catalogIdle": "Catalog not loaded yet",
   "mp_catalogIdleSub": "Loads this provider’s models with the saved URL and key",
   "mp_catalogLoading": "Loading catalog…",
   "mp_catalogFailed": "Catalog unavailable: {error}",
-  "@mp_catalogFailed": {
-    "placeholders": {
-      "error": {}
-    }
-  },
+  "@mp_catalogFailed": {"placeholders": {"error": {}}},
   "mp_fetch": "Fetch list",
   "mp_noMatch": "No matching models",
   "mp_picked": "{n} selected",
-  "@mp_picked": {
-    "placeholders": {
-      "n": {}
-    }
-  },
+  "@mp_picked": {"placeholders": {"n": {}}},
   "mp_pickEmpty": "Tick models to add them",
   "mp_pickHint": "Capabilities, context and thinking levels come from the local catalog; adjust them after adding.",
   "mp_addPicked": "Add {n} models",
-  "@mp_addPicked": {
-    "placeholders": {
-      "n": {}
-    }
-  },
+  "@mp_addPicked": {"placeholders": {"n": {}}},
   "mp_new": "New",
   "mp_unsaved": "{name}: {n} unsaved changes",
-  "@mp_unsaved": {
-    "placeholders": {
-      "name": {},
-      "n": {}
-    }
-  },
+  "@mp_unsaved": {"placeholders": {"name": {}, "n": {}}},
   "mp_saving": "Saving…",
   "mp_conflict": "Changed elsewhere: latest values merged, review and save again",
   "mp_saveFailed": "Save failed; changes kept",
   "mp_invalid": "{n} fields need fixing",
-  "@mp_invalid": {
-    "placeholders": {
-      "n": {}
-    }
-  },
+  "@mp_invalid": {"placeholders": {"n": {}}},
   "mp_leaveBody": "Provider changes are not saved. Leaving this page discards them.",
   "mp_show": "Show",
   "mp_hide": "Hide",
@@ -11724,129 +11239,39 @@
   "mp_errorRateLimit": "Rate limit exceeded",
   "ag_tool_prompt_set": "Prompt set",
   "ag_psCount": "{count} {unit}",
-  "@ag_psCount": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      },
-      "unit": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psCount": {"placeholders": {"count": {"type": "int"}, "unit": {"type": "String"}}},
   "ag_psPosition": "{unit} {index} / {count}",
-  "@ag_psPosition": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      },
-      "unit": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psPosition": {"placeholders": {"index": {"type": "int"}, "count": {"type": "int"}, "unit": {"type": "String"}}},
   "ag_psOverview": "Show all",
   "ag_psSingle": "Back to one",
   "ag_psPrompt": "Prompt",
   "ag_psShared": "Shared",
   "ag_psThisItem": "This {unit}",
-  "@ag_psThisItem": {
-    "placeholders": {
-      "unit": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psThisItem": {"placeholders": {"unit": {"type": "String"}}},
   "ag_psMain": "Main prompt",
   "ag_psCharacter": "Character {index}",
-  "@ag_psCharacter": {
-    "placeholders": {
-      "index": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_psCharacter": {"placeholders": {"index": {"type": "int"}}},
   "ag_psNegative": "Negative",
   "ag_psImport": "Import to canvas",
   "ag_psImportTip": "Writes the main prompt, characters and negative; parameters and references stay as they are",
   "ag_psImported": "Imported “{title}” into the prompt",
-  "@ag_psImported": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
   "ag_psGenerate": "Generate",
   "ag_psGenerating": "Generating",
   "ag_psRevision": "v{revision} · {count} changed",
-  "@ag_psRevision": {
-    "placeholders": {
-      "revision": {
-        "type": "int"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
   "ag_psSaveBlock": "Save as block",
   "ag_psSavedBlock": "Saved block “{title}” · {count} items",
-  "@ag_psSavedBlock": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      },
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_psSavedBlock": {"placeholders": {"title": {"type": "String"}, "count": {"type": "int"}}},
   "ag_psCopyItem": "Copy this {unit}'s prompt",
-  "@ag_psCopyItem": {
-    "placeholders": {
-      "unit": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psCopyItem": {"placeholders": {"unit": {"type": "String"}}},
   "ag_psCopyAll": "Copy all",
   "ag_psEditItem": "Ask Agent to edit this {unit}",
-  "@ag_psEditItem": {
-    "placeholders": {
-      "unit": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psEditItem": {"placeholders": {"unit": {"type": "String"}}},
   "ag_psEditDraft": "Edit “{title}”, {unit} {index} ({item}): ",
-  "@ag_psEditDraft": {
-    "placeholders": {
-      "title": {
-        "type": "String"
-      },
-      "index": {
-        "type": "int"
-      },
-      "unit": {
-        "type": "String"
-      },
-      "item": {
-        "type": "String"
-      }
-    }
-  },
+  "@ag_psEditDraft": {"placeholders": {"title": {"type": "String"}, "index": {"type": "int"}, "unit": {"type": "String"}, "item": {"type": "String"}}},
   "ag_psTooManyCharacters": "The current model supports up to {count} characters",
-  "@ag_psTooManyCharacters": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
+  "@ag_psTooManyCharacters": {"placeholders": {"count": {"type": "int"}}},
   "ag_psNoCharacters": "The current model doesn't support character prompts",
   "ag_psMissing": "This card's data is no longer available",
   "startup_dataTitle": "Could not prepare application data",
