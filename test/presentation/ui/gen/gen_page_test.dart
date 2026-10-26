@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart' show GenTokenBar;
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
@@ -758,6 +759,22 @@ void main() {
       );
       expect(last, findsOneWidget);
       expect(t.takeException(), isNull);
+    });
+
+    testWidgets('token 条提示在条的上方，不盖住下面的角色标题行', (t) async {
+      await pump(t, GenFixture.characters());
+      final tip = find.byType(GenTokenBar).first;
+      final bar = t.getRect(tip);
+      final g = await t.createGesture(kind: PointerDeviceKind.mouse);
+      await g.addPointer(location: Offset.zero);
+      await g.moveTo(bar.center);
+      await t.pump();
+      await t.pump(const Duration(seconds: 1));
+      await t.pumpAndSettle();
+      final label = find.textContaining(' tokens');
+      expect(label, findsOneWidget);
+      expect(t.getRect(label).bottom, lessThan(bar.top));
+      await g.removePointer();
     });
 
     testWidgets('垫底：自定义色回车提交；V4.5 不出透明图就没有这一节', (t) async {

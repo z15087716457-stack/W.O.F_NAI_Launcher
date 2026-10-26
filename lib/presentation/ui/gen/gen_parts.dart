@@ -494,8 +494,13 @@ class GenTokenBar extends StatelessWidget {
         : t > .9
         ? c.warn
         : c.ink.withValues(alpha: .85);
+    // 默认提示气泡在下方 24px，会盖住下一张卡的标题行（10-24 反馈）；
+    // 改为贴在条的上方，只压在本卡编辑区的底边。
     return Tooltip(
+      key: const Key('gen-token-tooltip'),
       message: '${tokens.used} / ${tokens.limit} tokens',
+      preferBelow: false,
+      verticalOffset: 10,
       child: Container(
         height: 3,
         margin: margin,
