@@ -16,6 +16,7 @@ import '../providers/pill_workspace_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../router/app_router.dart';
 import 'blocks_actions.dart';
+import 'blocks_mapping.dart';
 import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_instance.dart';
 import '../utils/prompt_block_bundle_insertion.dart';
@@ -336,6 +337,9 @@ class StyleExploreVariableWiring extends ConsumerWidget {
           originalNegativeContent: instance.temp?.originalNegativeContent,
           editedAt: instance.temp?.editedAt,
           editedBy: instance.temp?.editedBy,
+          folders: instance.temporary
+              ? blockFoldersOf(library, const {})
+              : const [],
           locked: source.instance.locked,
           enabled: instance.enabled,
           drawn: styleExploreDrawn(send),

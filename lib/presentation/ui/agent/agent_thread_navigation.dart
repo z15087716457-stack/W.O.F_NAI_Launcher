@@ -74,17 +74,29 @@ class AgentNavigationAnchor extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ValueListenableBuilder<Object?>(
     valueListenable: navigation.highlight,
-    builder: (context, value, _) => AnimatedContainer(
-      key: anchor,
-      duration: Duration(milliseconds: value == target ? 0 : 1200),
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: value == target ? context.ui.accent : Colors.transparent,
-          width: 1.5,
+    // Prototype `.jump`: 2px accent ring + 6px soft halo, fading out after.
+    builder: (context, value, _) {
+      final on = value == target;
+      final accent = context.ui.accent;
+      return AnimatedContainer(
+        key: anchor,
+        duration: Duration(milliseconds: on ? 0 : 1200),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: on ? accent : accent.withValues(alpha: 0),
+              spreadRadius: 2,
+            ),
+            BoxShadow(
+              color: accent.withValues(alpha: on ? .16 : 0),
+              spreadRadius: 6,
+            ),
+          ],
         ),
-      ),
-      child: child,
-    ),
+        child: child,
+      );
+    },
   );
 }
