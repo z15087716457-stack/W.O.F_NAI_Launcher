@@ -5,12 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/constants/api_constants.dart';
+import '../../core/constants/model_spec.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../core/utils/prompt_block_exchange.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/prompt_block/prompt_block_folder.dart';
 import '../../data/repositories/prompt_block_repository.dart';
 import '../providers/character_prompt_provider.dart';
+import '../providers/quality_preset_provider.dart';
+import '../providers/uc_preset_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/pill_roll_coordinator.dart';
 import '../providers/pill_workspace_provider.dart';
@@ -37,6 +40,41 @@ const blocksParamCatalog = BlockParamCatalog(
   samplers: Samplers.samplerDisplayNames,
   noiseSchedules: NoiseSchedules.displayNames,
 );
+BlockParamCatalog blocksParamCatalogWithReader(
+  T Function<T>(ProviderListenable<T>) read,
+) => BlockParamCatalog(
+  models: blocksParamCatalog.models,
+  samplers: blocksParamCatalog.samplers,
+  noiseSchedules: blocksParamCatalog.noiseSchedules,
+  currentModel: read(generationParamsNotifierProvider).model,
+  customPresets: {
+    for (final b
+        in read(promptBlockLibraryNotifierProvider).valueOrNull?.blocks ??
+            <PromptBlock>[])
+      b.id: b.displayTitle,
+  },
+);
+
+BlockParams captureBlockParams(T Function<T>(ProviderListenable<T>) read) {
+  final p = read(generationParamsNotifierProvider);
+  final quality = read(qualityPresetNotifierProvider);
+  final uc = read(ucPresetNotifierProvider);
+  return BlockParams(
+    model: p.model,
+    steps: p.steps,
+    scale: p.scale,
+    cfgRescale: ModelSpecs.of(p.model).isV4OrLater ? p.cfgRescale : null,
+    sampler: p.sampler,
+    noiseSchedule: ModelSpecs.of(p.model).noiseSchedule
+        ? p.noiseSchedule
+        : null,
+    qualityPreset: quality.nativePreset.name,
+    qualityCustomBlockId: quality.isCustom ? quality.customEntryId : null,
+    ucPreset: UcPresets.toApiValue(uc.presetType),
+    ucCustomBlockId: uc.customEntryId,
+  );
+}
+
 final blocksLibrarySelectionProvider = StateProvider<String?>((ref) => null);
 
 class BlocksActions {
@@ -182,17 +220,7 @@ class BlocksActions {
     });
   }
 
-  Future<BlockParams?> captureParams() async {
-    final p = ref.read(generationParamsNotifierProvider);
-    return BlockParams(
-      model: p.model,
-      steps: p.steps,
-      scale: p.scale,
-      cfgRescale: p.cfgRescale,
-      sampler: p.sampler,
-      noiseSchedule: p.noiseSchedule,
-    );
-  }
+  Future<BlockParams?> captureParams() async => captureBlockParams(ref.read);
 
   Future<PromptBlock?> edit({
     String? id,
@@ -239,7 +267,7 @@ class BlocksActions {
                       : BlockDraft.of(block)),
               folders: blockFoldersOf(library, {}),
               tags: mapBlocksLibrary(library).tags.map((t) => t.tag).toList(),
-              catalog: blocksParamCatalog,
+              catalog: blocksParamCatalogWithReader(ref.read),
               sourcePath: block?.sourcePath,
               importedAt: block?.importedAt,
               sourceState: block?.sourceState ?? BlockSourceState.none,

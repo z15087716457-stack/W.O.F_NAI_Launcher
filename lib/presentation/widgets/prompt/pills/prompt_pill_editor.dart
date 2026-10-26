@@ -11,6 +11,7 @@ import '../../../prompt_assistant/services/prompt_assistant_service.dart';
 import '../../../screens/settings/sections/prompt_assistant_settings_section.dart';
 import '../../../../data/models/character/character_prompt.dart';
 import '../../../../data/models/prompt_block/pill_document.dart';
+import '../../../../data/models/prompt_block/prompt_block.dart';
 import '../../../providers/pill_workspace_provider.dart';
 import '../../../providers/prompt_translation_provider.dart';
 import '../../../providers/prompt_block_library_provider.dart';
@@ -103,6 +104,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   /// L1 实例卡浮层（P2.5）：同屏只开一张，编辑器卸载时必须带走。
   UiPopoverAnchor? _instanceCardAnchor;
   String? _instanceCardMarker;
+  int _instanceCardOccurrence = 0;
   TranslationPillEditHandle? _translationEditor;
 
   @override
@@ -193,7 +195,12 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   // ==================== L1 实例卡 ====================
 
   /// 点药丸开 L1 实例卡（P2.5）：点击位置浮卡，点外/再点别处关闭。
-  void _showInstanceCard(String marker, Offset globalPosition) {
+  void _showInstanceCard(
+    String marker,
+    Offset globalPosition, {
+    int occurrence = 0,
+  }) {
+    _instanceCardOccurrence = occurrence;
     setState(() {
       _instanceCardMarker = marker;
       _instanceCardAnchor = UiPopoverAnchor(
@@ -250,6 +257,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       builder: (_) => BlockInstanceWiring(
         scope: widget.pillScope,
         marker: _instanceCardMarker!,
+        occurrence: _instanceCardOccurrence,
         onDismiss: _dismissInstanceCard,
         allowEvolutionToggle: widget.allowEvolutionToggle,
       ),
@@ -321,6 +329,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           block?.iconName ?? '',
           block?.appearance ?? '',
           instance.translation,
+          instance.temp,
           block == null,
         ),
       );
@@ -356,10 +365,11 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       );
     }
 
-    if (instance.translation case final translation?) {
+    if (!instance.temporary && instance.translation != null) {
+      final translation = instance.translation!;
       Widget draggable(Widget child) => Draggable<PromptBlockDragData>(
         data: PromptBlockDragData(
-          blockId: '',
+          blockId: instance.blockId,
           translation: translation,
           instanceMarker: PillInstanceDragRef(
             marker: marker,
@@ -428,7 +438,15 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       );
     }
 
-    final block = library?.blockById(instance.blockId);
+    final block =
+        library?.blockById(instance.blockId) ??
+        (instance.temporary
+            ? PromptBlock.create(
+                id: instance.blockId,
+                title: context.l10n.blocks_missing,
+                content: instance.temp!.content,
+              )
+            : null);
     if (block == null) {
       if (library == null) {
         // 库未就绪：中性占位，库到达后签名变化自动重渲染
@@ -468,7 +486,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       look: blockLook(block.appearance),
       disabled: !instance.enabled,
       icon: block.iconName,
-      badge: widget.allowEvolutionToggle && instance.evolutionEnabled
+      badge: instance.temporary
+          ? UiBlockBadge.none
+          : widget.allowEvolutionToggle && instance.evolutionEnabled
           ? UiBlockBadge.evolution
           : instance.locked
           ? UiBlockBadge.locked
@@ -478,6 +498,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
           ? UiBlockBadge.random
           : UiBlockBadge.none,
       paired: instance.bundleId != null,
+      temporary: instance.temporary,
       open: _instanceCardMarker == marker,
     );
 
@@ -520,6 +541,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
                 _showInstanceCard(
                   marker,
                   box.localToGlobal(box.size.bottomCenter(Offset.zero)),
+                  occurrence: occurrence,
                 );
               },
               child: pill,
@@ -629,6 +651,17 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
               occurrence: dragRef.occurrence,
               newOffset: offset,
             );
+      } else if (data.blockId.isNotEmpty) {
+        final scope = widget.pillScope;
+        BlocksActions(
+          ref,
+          context,
+          () => mounted && widget.pillScope == scope,
+        ).insert(
+          [data.blockId],
+          at: (scope: scope, caret: offset),
+          onInserted: _placeCaretAfter,
+        );
       } else {
         ref
             .read(_workspace.notifier)

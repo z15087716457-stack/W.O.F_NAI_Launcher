@@ -11277,4 +11277,6 @@
       }
     }
   }
+,
+  "blocks_expandToText": "텍스트로 펼치기"
 }

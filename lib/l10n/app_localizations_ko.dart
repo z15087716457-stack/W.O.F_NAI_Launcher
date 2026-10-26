@@ -21420,4 +21420,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '작업 실패: $error';
   }
+
+  @override
+  String get blocks_expandToText => '텍스트로 펼치기';
 }

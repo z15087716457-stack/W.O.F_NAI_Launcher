@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+import '../../data/models/prompt_block/prompt_block.dart';
 
 import '../../core/storage/pill_workspace_storage.dart';
 import '../../core/utils/app_logger.dart';
@@ -12,6 +14,7 @@ import '../../data/models/prompt_block/pill_document.dart';
 import 'prompt_block_library_provider.dart';
 import 'pill_roll_coordinator.dart';
 import 'style_explore/deep_round_roll_guard.dart';
+import '../utils/prompt_block_instance_bundle.dart';
 
 /// 药丸工作区状态：文档 + 最近一次投影结果。
 ///
@@ -127,8 +130,21 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   void setText(String text) {
     var document = state.document;
     if (text == document.text) return;
+    final removed = [
+      for (final entry in document.instances.entries)
+        if (entry.value.bundleId != null && !text.contains(entry.key))
+          readPromptBlockInstanceBundleWithReader(
+            ref.read,
+            arg,
+            entry.key,
+            localDocument: document,
+          ),
+    ];
     document = _resurrectMarkers(document, text);
     _apply(PillDocumentEditor.reconcile(document, text));
+    for (final bundle in removed) {
+      _removeBundlePeers(bundle);
+    }
   }
 
   /// 文本里无实例但墓碑缓存有快照的标记字符 → 恢复其实例。
@@ -181,6 +197,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         needsReview: block.readingTranslationNeedsReview,
         languageCode: block.readingTranslationLanguageCode,
         translationEdited: block.readingTranslationEdited,
+        bundleId: bundleId,
+        rollScopeMask: rollScopeMask,
+        blockId: blockId,
       );
       if (countUse) {
         unawaited(
@@ -220,13 +239,18 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     bool needsReview = false,
     String languageCode = 'zh',
     bool translationEdited = false,
+    String? bundleId,
+    int rollScopeMask = 1,
+    String blockId = '',
   }) {
     final before = state.document;
     final marker = PillDocumentEditor.allocateMarker(before);
     final safe = offset.clamp(0, before.text.length);
     final instances = Map<String, PillInstance>.of(before.instances)
       ..[marker] = PillInstance(
-        blockId: '',
+        blockId: blockId,
+        bundleId: bundleId,
+        rollScopeMask: rollScopeMask,
         translation: TranslationPill(
           source: source,
           zh: zh,
@@ -319,7 +343,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       return;
     }
     var updated = instance.copyWith(settings: settings);
-    if (settings.hasRoll &&
+    if (!instance.temporary &&
+        settings.hasRoll &&
         !instance.locked &&
         !_hasGuardOverride(marker, instance)) {
       final (text, nextCursor, drawn) = _rollFor(updated);
@@ -367,6 +392,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   void rollMarker(String marker) {
     final instance = state.document.instances[marker];
     if (instance == null ||
+        instance.temporary ||
         !instance.settings.hasRoll ||
         instance.locked ||
         _hasGuardOverride(marker, instance)) {
@@ -390,6 +416,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   void stepSequence(String marker, int direction) {
     final instance = state.document.instances[marker];
     if (instance == null ||
+        instance.temporary ||
         instance.settings.mode != PillRollMode.sequential ||
         instance.locked ||
         direction == 0 ||
@@ -430,7 +457,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     final instances = Map<String, PillInstance>.of(state.document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (!instance.settings.hasRoll ||
+      if (instance.temporary ||
+          !instance.settings.hasRoll ||
           instance.locked ||
           _hasGuardOverride(entry.key, instance)) {
         continue;
@@ -453,7 +481,265 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
 
   /// 删除标记（含未知/失效标记），文本中的出现一并清除。
   void removeMarker(String marker) {
+    final bundle = readPromptBlockInstanceBundleWithReader(
+      ref.read,
+      arg,
+      marker,
+      localDocument: state.document,
+    );
     _apply(PillDocumentEditor.removeMarker(state.document, marker));
+    _removeBundlePeers(bundle);
+  }
+
+  void _removeBundlePeers(PromptBlockInstanceBundle bundle) {
+    for (final member in bundle.members) {
+      if (member.scope == arg) continue;
+      final lane = pillWorkspaceProvider(member.scope);
+      ref.read(lane.notifier).removeMarker(member.marker);
+      ref
+          .read(pillRollCoordinatorProvider)
+          .syncLaneProjection(member.scope, ref.read(lane).projection);
+    }
+  }
+
+  /// Returns the occurrence's marker (shared markers are split before editing).
+  String editTempContent(
+    String marker,
+    String content,
+    String? negativeContent, {
+    int occurrence = 0,
+    String editedBy = 'user',
+  }) {
+    final local = state.document.instances[marker];
+    if (local == null) return marker;
+    final bundle = readPromptBlockInstanceBundleWithReader(
+      ref.read,
+      arg,
+      marker,
+      localDocument: state.document,
+    );
+    final block = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(local.blockId);
+    final existing = local.temp;
+    final negativeMember = bundle.negative;
+    final currentNegative = negativeMember == null
+        ? block?.negativeContent
+        : (negativeMember.scope == arg
+                  ? this
+                  : ref.read(
+                      pillWorkspaceProvider(negativeMember.scope).notifier,
+                    ))
+              .contentForMarker(negativeMember.marker);
+    final temp = PillTempContent(
+      content: content,
+      negativeContent:
+          negativeContent ?? existing?.negativeContent ?? currentNegative,
+      originalContent:
+          existing?.originalContent ??
+          local.translation?.source ??
+          block?.content ??
+          '',
+      originalNegativeContent:
+          existing?.originalNegativeContent ?? block?.negativeContent,
+      editedAt: DateTime.now(),
+      editedBy: editedBy,
+    );
+    final split = bundle.members.any((member) {
+      final document = member.scope == arg
+          ? state.document
+          : ref.read(pillWorkspaceProvider(member.scope)).document;
+      return document.text.split(member.marker).length > 2;
+    });
+    final bundleId = split && local.bundleId != null
+        ? const Uuid().v4()
+        : local.bundleId;
+    var actualMarker = marker;
+    for (final member in bundle.members) {
+      final notifier = member.scope == arg
+          ? this
+          : ref.read(pillWorkspaceProvider(member.scope).notifier);
+      final actual = notifier._setTempOccurrence(
+        member.marker,
+        temp,
+        occurrence.clamp(
+          0,
+          notifier.state.document.text.split(member.marker).length - 2,
+        ),
+        bundleId: bundleId,
+      );
+      if (member.scope == arg) actualMarker = actual;
+    }
+    _syncBundle(bundle);
+    return actualMarker;
+  }
+
+  String _setTempOccurrence(
+    String marker,
+    PillTempContent temp,
+    int occurrence, {
+    String? bundleId,
+  }) {
+    final (document, actual) = PillDocumentEditor.isolateOccurrence(
+      state.document,
+      marker,
+      occurrence: occurrence,
+    );
+    final instance = document.instances[actual]!;
+    final instances = Map<String, PillInstance>.of(document.instances)
+      ..[actual] = instance.copyWith(temp: temp, bundleId: bundleId);
+    _apply(document.copyWith(instances: instances));
+    return actual;
+  }
+
+  void _syncBundle(PromptBlockInstanceBundle bundle) {
+    for (final member in bundle.members) {
+      final projection = member.scope == arg
+          ? state.projection
+          : ref.read(pillWorkspaceProvider(member.scope)).projection;
+      ref
+          .read(pillRollCoordinatorProvider)
+          .syncLaneProjection(member.scope, projection);
+    }
+  }
+
+  void revertTemp(String marker) {
+    final bundle = readPromptBlockInstanceBundleWithReader(
+      ref.read,
+      arg,
+      marker,
+      localDocument: state.document,
+    );
+    for (final member in bundle.members) {
+      final notifier = member.scope == arg
+          ? this
+          : ref.read(pillWorkspaceProvider(member.scope).notifier);
+      notifier._replaceTemp(member.marker);
+    }
+    _syncBundle(bundle);
+  }
+
+  void _replaceTemp(String marker, {String? blockId}) {
+    final instance = state.document.instances[marker];
+    if (instance?.temp == null) return;
+    final instances = Map<String, PillInstance>.of(state.document.instances)
+      ..[marker] = instance!.copyWith(
+        temp: null,
+        blockId: blockId,
+        clearTranslation: blockId != null,
+        settings: blockId == null
+            ? instance.settings
+            : PillInstanceSettings.fixedDefault,
+      );
+    _apply(state.document.copyWith(instances: instances));
+  }
+
+  Future<PromptBlock?> saveTempAsNewBlock(
+    String marker, {
+    required String title,
+    String? folderId,
+  }) async {
+    final local = state.document.instances[marker];
+    final temp = local?.temp;
+    if (temp == null) return null;
+    final bundle = readPromptBlockInstanceBundleWithReader(
+      ref.read,
+      arg,
+      marker,
+      localDocument: state.document,
+    );
+    final original = ref
+        .read(promptBlockLibraryNotifierProvider)
+        .valueOrNull
+        ?.blockById(local!.blockId);
+    final created = await ref
+        .read(promptBlockLibraryNotifierProvider.notifier)
+        .createBlock(
+          title: title,
+          folderId: folderId,
+          content: temp.content,
+          negativeContent: temp.negativeContent ?? '',
+          color: original?.color ?? '#FF607D8B',
+          appearance: original?.appearance ?? 'classic',
+          iconName: original?.iconName,
+          tags: original?.tags ?? const [],
+          generationSettings: original?.generationSettings,
+        );
+    // Never overwrite a newer occurrence edit while the library was saving.
+    final unchanged = bundle.members.every(
+      (member) =>
+          (member.scope == arg
+                  ? state.document
+                  : ref.read(pillWorkspaceProvider(member.scope)).document)
+              .instances[member.marker] ==
+          member.instance,
+    );
+    if (unchanged) {
+      for (final member in bundle.members) {
+        final notifier = member.scope == arg
+            ? this
+            : ref.read(pillWorkspaceProvider(member.scope).notifier);
+        notifier._replaceTemp(member.marker, blockId: created.id);
+      }
+      _syncBundle(bundle);
+    }
+    return created;
+  }
+
+  /// Current fixed/rolled source even when disabled; useful when editing only
+  /// the other side of a bundle without changing this side's content.
+  String contentForMarker(String marker) {
+    final instance = state.document.instances[marker];
+    if (instance == null) return '';
+    return _resolveMarkerInstance(marker, instance) ?? '';
+  }
+
+  String projectionForMarker(String marker) =>
+      PillDocumentEditor.projectWithMarker(
+        state.document.copyWith(text: marker),
+        _resolveMarkerInstance,
+      );
+
+  /// Explicit expansion does not trigger bundle deletion during reconciliation.
+  void expandMarker(String marker, {int occurrence = 0}) {
+    final bundle = readPromptBlockInstanceBundleWithReader(
+      ref.read,
+      arg,
+      marker,
+      localDocument: state.document,
+    );
+    for (final member in bundle.members) {
+      final notifier = member.scope == arg
+          ? this
+          : ref.read(pillWorkspaceProvider(member.scope).notifier);
+      notifier._expandOccurrence(
+        member.marker,
+        occurrence.clamp(
+          0,
+          notifier.state.document.text.split(member.marker).length - 2,
+        ),
+      );
+    }
+    for (final member in bundle.members) {
+      final projection = member.scope == arg
+          ? state.projection
+          : ref.read(pillWorkspaceProvider(member.scope)).projection;
+      ref
+          .read(pillRollCoordinatorProvider)
+          .syncLaneProjection(member.scope, projection);
+    }
+  }
+
+  void _expandOccurrence(String marker, int occurrence) {
+    _apply(
+      PillDocumentEditor.expandOccurrence(
+        state.document,
+        marker,
+        occurrence: occurrence,
+        resolveMarker: _resolveMarkerInstance,
+      ),
+    );
   }
 
   void updateTranslation(String marker, TranslationPill translation) {
@@ -566,12 +852,14 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
   /// 实例内容解析（P2.5）：固定模式 = 块库实时内容；随机/顺序模式 =
   /// 物化的 `currentRoll`（投影永不 roll，物化只在文档变更点发生）。
   String? _resolveInstance(PillInstance instance) {
+    if (instance.temporary) return instance.tempProjection;
     if (instance.translation case final translation?) return translation.source;
     if (instance.settings.hasRoll) return instance.currentRoll;
     return _resolveBlockContent(instance);
   }
 
   String? _resolveMarkerInstance(String marker, PillInstance instance) {
+    if (instance.temporary) return instance.tempProjection;
     if (instance.translation case final translation?) return translation.source;
     if (instance.settings.hasRoll) return _effectiveRollFor(marker, instance);
     return _resolveBlockContent(instance);
@@ -613,7 +901,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     final instances = Map<String, PillInstance>.of(document.instances);
     for (final entry in instances.entries) {
       final instance = entry.value;
-      if (instance.settings.hasRoll &&
+      if (!instance.temporary &&
+          instance.settings.hasRoll &&
           !instance.locked &&
           instance.currentRoll == null &&
           !_hasGuardOverride(entry.key, instance)) {

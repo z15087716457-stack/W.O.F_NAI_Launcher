@@ -235,7 +235,15 @@ class StyleExploreVariableWiring extends ConsumerWidget {
     final library =
         ref.watch(promptBlockLibraryNotifierProvider).valueOrNull ??
         PromptBlockLibraryState(blocks: [], folders: []);
-    final block = library.blockById(instance.blockId);
+    final originalBlock = library.blockById(instance.blockId);
+    final block = instance.temporary && originalBlock != null
+        ? originalBlock.copyWith(
+            content: instance.temp!.content,
+            atoms: null,
+            negativeContent: instance.temp!.negativeContent ?? '',
+            negativeAtoms: null,
+          )
+        : originalBlock;
     final bundle = readPromptBlockInstanceBundle(ref, PillScopes.main, marker);
     for (final member in bundle.members) {
       ref.watch(pillWorkspaceProvider(member.scope));
@@ -248,14 +256,9 @@ class StyleExploreVariableWiring extends ConsumerWidget {
     final atoms = instance.useNegativeContent
         ? block?.negativeAtomsOrSplit ?? <String>[]
         : block?.atomsOrSplit ?? <String>[];
-    final send =
-        workspace.document.instances[marker]?.enabled == false || block == null
-        ? ''
-        : instance.settings.hasRoll
-        ? instance.currentRoll ?? ''
-        : instance.useNegativeContent
-        ? block.negativeContent
-        : block.content;
+    final send = ref
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .projectionForMarker(marker);
     final index = atoms.isEmpty
         ? 0
         : (instance.sequenceCursor -
@@ -323,12 +326,22 @@ class StyleExploreVariableWiring extends ConsumerWidget {
                 ),
             library,
           ),
-          settings: styleExploreBlockRules(settings),
+          settings: styleExploreBlockRules(
+            instance.temporary ? PillInstanceSettings.fixedDefault : settings,
+          ),
+          temporary: instance.temporary,
+          tempContent: instance.temp?.content,
+          tempNegativeContent: instance.temp?.negativeContent,
+          originalContent: instance.temp?.originalContent,
+          originalNegativeContent: instance.temp?.originalNegativeContent,
+          editedAt: instance.temp?.editedAt,
+          editedBy: instance.temp?.editedBy,
           locked: source.instance.locked,
           enabled: instance.enabled,
           drawn: styleExploreDrawn(send),
           send: send,
           skipped:
+              !instance.temporary &&
               instance.settings.hasRoll &&
               instance.currentRoll == '' &&
               instance.enabled,
@@ -347,6 +360,45 @@ class StyleExploreVariableWiring extends ConsumerWidget {
           missing: block == null,
         ),
         actions: BlockInstanceActions(
+          onEditTempContent: (content, negative) =>
+              _blockAction(context, () async {
+                final write = ref
+                    .read(styleExploreBackendProvider)
+                    .captureDraft(alive: current);
+                await write(() {
+                  ref
+                      .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                      .editTempContent(marker, content, negative);
+                });
+              }),
+          onRevertTemp: !instance.temporary
+              ? null
+              : () => _blockAction(context, () async {
+                  final write = ref
+                      .read(styleExploreBackendProvider)
+                      .captureDraft(alive: current);
+                  await write(() {
+                    ref
+                        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                        .revertTemp(marker);
+                  });
+                }),
+          onSaveTempAsNewBlock: !instance.temporary
+              ? null
+              : (title, folderId) => _blockAction(context, () async {
+                  final write = ref
+                      .read(styleExploreBackendProvider)
+                      .captureDraft(alive: current);
+                  await write(
+                    () => ref
+                        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                        .saveTempAsNewBlock(
+                          marker,
+                          title: title,
+                          folderId: folderId,
+                        ),
+                  );
+                }),
           onReroll: () =>
               change(() => rollPromptBlockBundle(ref, PillScopes.main, marker)),
           onStep: (delta) => change(
@@ -396,6 +448,12 @@ class StyleExploreVariableWiring extends ConsumerWidget {
                   : 1,
             ),
           ),
+          onExpand: () => change(() {
+            ref
+                .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                .expandMarker(marker);
+            onDismiss();
+          }),
           onRemove: () => change(() {
             removePromptBlockBundle(ref, PillScopes.main, marker);
             onDismiss();

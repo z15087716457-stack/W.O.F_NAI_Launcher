@@ -11,6 +11,7 @@ import '../../../data/models/prompt_block/prompt_block.dart';
 import '../../../data/repositories/prompt_block_repository.dart';
 import '../../../data/services/nai_agent/agent_snapshot_files.dart';
 import '../../utils/prompt_block_bundle_insertion.dart';
+import '../../utils/prompt_block_instance_bundle.dart';
 import '../../wiring/blocks_preferences.dart';
 import '../krita/bridge_draft_snapshot.dart';
 import '../image_generation_provider.dart';
@@ -18,7 +19,14 @@ import '../pill_roll_coordinator.dart';
 import '../pill_workspace_provider.dart';
 import '../prompt_block_library_provider.dart';
 
-const _instanceKeys = {'settings', 'enabled', 'locked', 'evolutionEnabled'};
+const _instanceKeys = {
+  'settings',
+  'enabled',
+  'locked',
+  'evolutionEnabled',
+  'content',
+  'negative_content',
+};
 String _scope(Map<String, dynamic> params, BridgeDraftSnapshot draft) {
   final scope = params['scope'] ?? PillScopes.main;
   if (scope == PillScopes.main || scope == PillScopes.negative) {
@@ -69,6 +77,15 @@ Map<String, dynamic> _instanceChanges(Object? raw) {
     );
   }
   final changes = Map<String, dynamic>.from(raw);
+  for (final key in ['content', 'negative_content']) {
+    if (changes.containsKey(key) &&
+        (changes[key] is! String || (changes[key] as String).length > 100000)) {
+      throw NaiAgentToolError(
+        'invalid_instance',
+        'Expected content string: $key',
+      );
+    }
+  }
   for (final key in ['enabled', 'locked', 'evolutionEnabled']) {
     if (changes.containsKey(key) && changes[key] is! bool) {
       throw NaiAgentToolError('invalid_instance', 'Expected boolean: $key');
@@ -163,6 +180,15 @@ NaiAgentBlockTools bindNaiAgentBlocks(
       );
     }
     _instanceChanges(params['instance']);
+    final occurrence = params['occurrence'] ?? 0;
+    if (occurrence is! int ||
+        occurrence < 0 ||
+        occurrence >= doc.text.split(marker).length - 1) {
+      throw const NaiAgentToolError(
+        'invalid_instance',
+        'occurrence is a zero-based occurrence of marker',
+      );
+    }
   }
 
   return NaiAgentBlockTools(
@@ -219,6 +245,20 @@ NaiAgentBlockTools bindNaiAgentBlocks(
           }
         }
       }
+      if (params['action'] == 'instance_update') {
+        final instance = _document(draft, scope).instances[params['marker']];
+        if (instance?.bundleId != null) {
+          if (scope == PillScopes.main || scope == PillScopes.negative) {
+            scopes.addAll([PillScopes.main, PillScopes.negative]);
+          } else {
+            final match = RegExp(r'^char:(.+):(pos|neg)$').firstMatch(scope)!;
+            scopes.addAll([
+              PillScopes.charPos(match[1]!),
+              PillScopes.charNeg(match[1]!),
+            ]);
+          }
+        }
+      }
       final priorMarkers = <String, Set<String>>{};
       // Lazily opened editors must start with their real saved document.
       // Everything here is synchronous after the backup/version check.
@@ -254,8 +294,35 @@ NaiAgentBlockTools bindNaiAgentBlocks(
         );
       } else {
         final lane = ref.read(pillWorkspaceProvider(scope).notifier);
-        final marker = params['marker'] as String;
+        var marker = params['marker'] as String;
         final changes = _instanceChanges(params['instance']);
+        if (changes.containsKey('content') ||
+            changes.containsKey('negative_content')) {
+          final original = ref
+              .read(pillWorkspaceProvider(scope))
+              .document
+              .instances[marker]!;
+          final bundle = readPromptBlockInstanceBundleWithReader(
+            ref.read,
+            scope,
+            marker,
+          );
+          final positive = bundle.positive;
+          final positiveContent = original.useNegativeContent
+              ? positive == null
+                    ? ''
+                    : ref
+                          .read(pillWorkspaceProvider(positive.scope).notifier)
+                          .contentForMarker(positive.marker)
+              : lane.contentForMarker(marker);
+          marker = lane.editTempContent(
+            marker,
+            changes['content'] as String? ?? positiveContent,
+            changes['negative_content'] as String?,
+            occurrence: params['occurrence'] as int? ?? 0,
+            editedBy: 'agent',
+          );
+        }
         var current = ref
             .read(pillWorkspaceProvider(scope))
             .document

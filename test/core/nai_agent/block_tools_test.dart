@@ -86,6 +86,50 @@ void main() {
   }
 
   test(
+    'Agent create and update accept preset settings and reject invalid values',
+    () async {
+      final created =
+          (await tools.manage({
+                'action': 'create',
+                'changes': {
+                  'title': 'preset',
+                  'content': '',
+                  'generationSettings': {
+                    'qualityPreset': 'light',
+                    'ucPreset': 7,
+                  },
+                },
+              }, NaiAgentCancellation()))['details']
+              as Map;
+      final saved = (await repository.load()).blocks.single;
+      expect(created['block'], isNotNull);
+      await tools.manage({
+        'action': 'update',
+        'id': saved.id,
+        'expected_version': naiAgentBlockVersion(saved),
+        'changes': {
+          'generationSettings': {'qualityPreset': 'none', 'ucPreset': 9},
+        },
+      }, NaiAgentCancellation());
+      expect(
+        (await repository.getBlock(saved.id))!.generationSettings!.ucPreset,
+        9,
+      );
+      for (final settings in [
+        {'qualityPreset': 'wrong'},
+        {'ucPreset': 4},
+        {'ucPreset': 1.5},
+        {'qualityCustomBlockId': 5},
+      ]) {
+        expect(
+          () => validateNaiAgentBlockChanges({'generationSettings': settings}),
+          throwsA(error('invalid_changes')),
+        );
+      }
+    },
+  );
+
+  test(
     'final Hive comparison detects an edit after the repository has read its old row',
     () async {
       final original = await repository.createBlock(

@@ -86,7 +86,10 @@ abstract final class PillDocumentEditor {
         !document.text.contains(marker)) {
       return document;
     }
-    final plain = stripMarkers(source);
+    final instance = document.instances[marker]!;
+    final plain = instance.enabled
+        ? stripMarkers(instance.temporary ? instance.tempProjection! : source)
+        : '';
     final instances = Map<String, PillInstance>.of(document.instances)
       ..remove(marker);
     return document.copyWith(
@@ -111,12 +114,65 @@ abstract final class PillDocumentEditor {
       if (translation == null) {
         text.writeCharCode(codeUnit);
       } else {
-        text.write(stripMarkers(translation.source));
+        if (document.instances[String.fromCharCode(codeUnit)]!.enabled) {
+          final instance = document.instances[String.fromCharCode(codeUnit)]!;
+          text.write(
+            stripMarkers(
+              instance.temporary
+                  ? instance.tempProjection!
+                  : translation.source,
+            ),
+          );
+        }
       }
     }
     final instances = Map<String, PillInstance>.of(document.instances)
       ..removeWhere((marker, _) => translations.containsKey(marker));
     return document.copyWith(text: text.toString(), instances: instances);
+  }
+
+  /// Expand just the selected occurrence using the same projection as sending.
+  static PillDocument expandOccurrence(
+    PillDocument document,
+    String marker, {
+    int occurrence = 0,
+    required String? Function(String, PillInstance) resolveMarker,
+  }) {
+    final index = _occurrenceIndex(document.text, marker, occurrence);
+    if (index < 0 || !document.instances.containsKey(marker)) return document;
+    final projection = projectWithMarker(
+      document.copyWith(text: marker),
+      resolveMarker,
+    );
+    return reconcile(
+      document,
+      document.text.replaceRange(index, index + 1, projection),
+    );
+  }
+
+  /// Split a shared marker before editing one occurrence. Return its new ID.
+  static (PillDocument, String) isolateOccurrence(
+    PillDocument document,
+    String marker, {
+    int occurrence = 0,
+  }) {
+    final index = _occurrenceIndex(document.text, marker, occurrence);
+    if (index < 0 || !document.instances.containsKey(marker)) {
+      return (document, marker);
+    }
+    if (!document.text.replaceRange(index, index + 1, '').contains(marker)) {
+      return (document, marker);
+    }
+    final fresh = allocateMarker(document);
+    final instances = Map<String, PillInstance>.of(document.instances)
+      ..[fresh] = document.instances[marker]!;
+    return (
+      document.copyWith(
+        text: document.text.replaceRange(index, index + 1, fresh),
+        instances: instances,
+      ),
+      fresh,
+    );
   }
 
   /// 设置实例启用态；实例不存在时原样返回。
@@ -165,6 +221,10 @@ abstract final class PillDocumentEditor {
       final marker = String.fromCharCode(codeUnit);
       final instance = document.instances[marker];
       if (instance == null || !instance.enabled) continue;
+      if (instance.temporary) {
+        buffer.write(instance.tempProjection);
+        continue;
+      }
       if (instance.translation case final translation?) {
         buffer.write(translation.source);
         continue;

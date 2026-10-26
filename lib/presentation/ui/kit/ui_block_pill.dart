@@ -34,6 +34,7 @@ class UiBlockPill extends StatelessWidget {
     this.open = false,
     this.disabled = false,
     this.paired = false,
+    this.temporary = false,
     this.dragging = false,
     this.ghost = false,
     this.focused = false,
@@ -42,6 +43,7 @@ class UiBlockPill extends StatelessWidget {
     this.translationMark = '译',
   });
 
+  final bool temporary;
   final String label;
   final Color color;
 

@@ -191,11 +191,68 @@ class PillInstanceSettings {
   );
 }
 
+/// Occurrence-local fixed content, persisted with the draft, not the library.
+class PillTempContent {
+  const PillTempContent({
+    required this.content,
+    this.negativeContent,
+    required this.originalContent,
+    this.originalNegativeContent,
+    required this.editedAt,
+    required this.editedBy,
+  });
+  final String content;
+  final String? negativeContent;
+  final String originalContent;
+  final String? originalNegativeContent;
+  final DateTime editedAt;
+  final String editedBy;
+
+  Map<String, dynamic> toJson() => {
+    'content': content,
+    'negativeContent': negativeContent,
+    'originalContent': originalContent,
+    'originalNegativeContent': originalNegativeContent,
+    'editedAt': editedAt.toIso8601String(),
+    'editedBy': editedBy,
+  };
+  factory PillTempContent.fromJson(Map<String, dynamic> json) =>
+      PillTempContent(
+        content: json['content'] as String,
+        negativeContent: json['negativeContent'] as String?,
+        originalContent: json['originalContent'] as String,
+        originalNegativeContent: json['originalNegativeContent'] as String?,
+        editedAt: DateTime.parse(json['editedAt'] as String),
+        editedBy: json['editedBy'] as String,
+      );
+  @override
+  bool operator ==(Object other) =>
+      other is PillTempContent &&
+      other.content == content &&
+      other.negativeContent == negativeContent &&
+      other.originalContent == originalContent &&
+      other.originalNegativeContent == originalNegativeContent &&
+      other.editedAt == editedAt &&
+      other.editedBy == editedBy;
+  @override
+  int get hashCode => Object.hash(
+    content,
+    negativeContent,
+    originalContent,
+    originalNegativeContent,
+    editedAt,
+    editedBy,
+  );
+}
+
+const _unchangedTemp = Object();
+
 /// 单个块实例：引用库中的块 + 启用态 + 用户锁定 + 遗传开关 + 随机参数 + 物化 roll 结果。
 class PillInstance {
   const PillInstance({
     required this.blockId,
     this.translation,
+    this.temp,
     this.enabled = true,
     this.locked = false,
     this.evolutionEnabled = false,
@@ -213,6 +270,10 @@ class PillInstance {
   /// Inline bilingual text. When present this instance is independent of the
   /// block library and always projects [TranslationPill.source].
   final TranslationPill? translation;
+  final PillTempContent? temp;
+  bool get temporary => temp != null;
+  String? get tempProjection =>
+      useNegativeContent ? temp?.negativeContent ?? '' : temp?.content;
 
   /// 同一块的负面部分。旧存档缺键时仍解析原有正文。
   final bool useNegativeContent;
@@ -252,6 +313,8 @@ class PillInstance {
   PillInstance copyWith({
     String? blockId,
     TranslationPill? translation,
+    bool clearTranslation = false,
+    Object? temp = _unchangedTemp,
     bool? enabled,
     bool? locked,
     bool? evolutionEnabled,
@@ -265,7 +328,10 @@ class PillInstance {
   }) {
     return PillInstance(
       blockId: blockId ?? this.blockId,
-      translation: translation ?? this.translation,
+      translation: clearTranslation ? null : translation ?? this.translation,
+      temp: identical(temp, _unchangedTemp)
+          ? this.temp
+          : temp as PillTempContent?,
       enabled: enabled ?? this.enabled,
       locked: locked ?? this.locked,
       evolutionEnabled: evolutionEnabled ?? this.evolutionEnabled,
@@ -282,6 +348,7 @@ class PillInstance {
   Map<String, dynamic> toJson() => {
     'blockId': blockId,
     if (translation != null) 'translation': translation!.toJson(),
+    if (temp != null) ...{'temporary': true, 'temp': temp!.toJson()},
     if (useNegativeContent) 'useNegativeContent': true,
     if (bundleId != null) 'bundleId': bundleId,
     if (bundleId != null) 'rollScopeMask': rollScopeMask,
@@ -299,6 +366,11 @@ class PillInstance {
     final rawCursor = json['sequenceCursor'];
     return PillInstance(
       blockId: json['blockId'] as String? ?? '',
+      temp: json['temp'] is Map
+          ? PillTempContent.fromJson(
+              Map<String, dynamic>.from(json['temp'] as Map),
+            )
+          : null,
       translation: json['translation'] is Map
           ? TranslationPill.fromJson(
               Map<String, dynamic>.from(json['translation'] as Map),
@@ -337,6 +409,7 @@ class PillInstance {
       other is PillInstance &&
       other.blockId == blockId &&
       other.translation == translation &&
+      other.temp == temp &&
       other.useNegativeContent == useNegativeContent &&
       other.bundleId == bundleId &&
       other.rollScopeMask == rollScopeMask &&
@@ -352,6 +425,7 @@ class PillInstance {
   int get hashCode => Object.hash(
     blockId,
     translation,
+    temp,
     useNegativeContent,
     bundleId,
     rollScopeMask,

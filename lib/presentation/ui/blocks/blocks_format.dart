@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
+import '../../../core/constants/api_constants.dart';
+import '../../../core/constants/model_spec.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_glyph.dart';
@@ -90,6 +92,48 @@ abstract final class BlocksFormat {
     return null;
   }
 
+  static Map<String, String> qualityOptions(
+    BuildContext context,
+    String model,
+  ) => {
+    'standard': context.l10n.qualityTags_standard,
+    if (ModelSpecs.of(model).isV5) 'light': context.l10n.qualityTags_light,
+    'none': context.l10n.qualityTags_none,
+  };
+
+  static String ucLabel(BuildContext context, UcPresetType type) =>
+      switch (type) {
+        UcPresetType.heavy => context.l10n.ucPreset_heavy,
+        UcPresetType.light => context.l10n.ucPreset_light,
+        UcPresetType.none => context.l10n.ucPreset_none,
+        UcPresetType.furryFocus => context.l10n.ucPreset_furryFocus,
+        UcPresetType.humanFocus => context.l10n.ucPreset_humanFocus,
+        UcPresetType.lowQuality => context.l10n.ucPreset_lowQuality,
+        UcPresetType.badAnatomy => context.l10n.ucPreset_badAnatomy,
+      };
+
+  static String qualitySummary(
+    BuildContext context,
+    BlockParams p,
+    BlockParamCatalog cat,
+  ) => p.qualityCustomBlockId != null
+      ? cat.customPresets[p.qualityCustomBlockId] ?? p.qualityCustomBlockId!
+      : qualityOptions(
+              context,
+              ImageModels.animeDiffusionV5Full,
+            )[p.qualityPreset] ??
+            p.qualityPreset ??
+            '';
+  static String ucSummary(
+    BuildContext context,
+    BlockParams p,
+    BlockParamCatalog cat,
+  ) => p.ucCustomBlockId != null
+      ? cat.customPresets[p.ucCustomBlockId] ?? p.ucCustomBlockId!
+      : p.ucPreset == null
+      ? ''
+      : ucLabel(context, UcPresets.getPresetTypeFromInt(p.ucPreset!));
+
   static String percent(double v) => '${(v * 100).round()}%';
 
   /// “V4.5 Full · 28 步 · 引导 5.0 · Euler Ancestral”
@@ -107,6 +151,10 @@ abstract final class BlocksFormat {
       if (p.sampler case final s?)
         short ? shortSampler(catalog.sampler(s)) : catalog.sampler(s),
       if (!short && p.noiseSchedule != null) catalog.noise(p.noiseSchedule!),
+      if (p.qualityPreset != null || p.qualityCustomBlockId != null)
+        '${l10n.qualityTags_label}: ${qualitySummary(context, p, catalog)}',
+      if (p.ucPreset != null || p.ucCustomBlockId != null)
+        '${l10n.ucPreset_label}: ${ucSummary(context, p, catalog)}',
     ].join(' · ');
   }
 

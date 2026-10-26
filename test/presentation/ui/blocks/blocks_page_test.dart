@@ -490,6 +490,20 @@ void main() {
       expect(d.params, BlocksFixture.y99Params);
     });
 
+    testWidgets('附带参数质量词与 UC 预设可编辑并随保存返回', (t) async {
+      await open(t);
+      await tapKey(t, 'block-edit-params');
+      await tapKey(t, 'block-param-quality');
+      await tapKey(t, 'block-param-quality-standard');
+      await tapKey(t, 'block-param-uc');
+      await tapKey(t, 'block-param-uc-1');
+      await t.tap(find.text('完成'));
+      await t.pumpAndSettle();
+      await tapKey(t, 'block-edit-save');
+      expect(rec.drafts.single.params!.qualityPreset, 'standard');
+      expect(rec.drafts.single.params!.ucPreset, 1);
+    });
+
     testWidgets('新建块：没内容时保存不可点，有内容后 onCreate', (t) async {
       await lib(t);
       await tapKey(t, 'blocks-create');

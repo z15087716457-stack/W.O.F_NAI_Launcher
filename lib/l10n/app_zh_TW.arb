@@ -11861,5 +11861,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "blocks_expandToText": "展開為文本"
 }

@@ -37,6 +37,7 @@ List<MapEntry<String, PillInstance>> styleExploreVariableInstances(
         .where(
           (entry) =>
               entry.value.enabled &&
+              !entry.value.temporary &&
               entry.value.settings.hasRoll &&
               document.text.contains(entry.key),
         )

@@ -112,6 +112,13 @@ class _CardState extends State<_Card> {
         label: l10n.blocks_copySend,
         onTap: a.onCopySend,
       ),
+      if (a.onExpand != null)
+        UiMenuItem(
+          key: const Key('block-card-expand'),
+          glyph: UiGlyphs.expand,
+          label: l10n.blocks_expandToText,
+          onTap: a.onExpand!,
+        ),
       UiMenuItem(
         glyph: UiGlyphs.trash,
         label: l10n.blocks_removeInstance,

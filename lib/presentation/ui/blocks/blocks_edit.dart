@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import '../../../core/constants/api_constants.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -1512,6 +1513,57 @@ class _ParamsPanelState extends State<_ParamsPanel> {
               cat.noiseSchedules,
               _p.noiseSchedule,
               (v) => _set(_p.copyWith(noiseSchedule: v)),
+            ),
+          ),
+          row(
+            l10n.qualityTags_label,
+            pick(
+              'quality',
+              {
+                ...BlocksFormat.qualityOptions(
+                  context,
+                  _p.model ??
+                      cat.currentModel ??
+                      ImageModels.animeDiffusionV5Full,
+                ),
+                for (final e in cat.customPresets.entries)
+                  'block:${e.key}': e.value,
+              },
+              _p.qualityCustomBlockId == null
+                  ? _p.qualityPreset
+                  : 'block:${_p.qualityCustomBlockId}',
+              (v) => _set(
+                v.startsWith('block:')
+                    ? _p.copyWith(qualityCustomBlockId: v.substring(6))
+                    : _p.copyWith(qualityPreset: v, clearQualityCustom: true),
+              ),
+            ),
+          ),
+          row(
+            l10n.ucPreset_label,
+            pick(
+              'uc',
+              {
+                for (final type in UcPresets.getPresetsForModel(
+                  _p.model ??
+                      cat.currentModel ??
+                      ImageModels.animeDiffusionV5Full,
+                ).keys)
+                  '${UcPresets.toApiValue(type)}': BlocksFormat.ucLabel(
+                    context,
+                    type,
+                  ),
+                for (final e in cat.customPresets.entries)
+                  'block:${e.key}': e.value,
+              },
+              _p.ucCustomBlockId == null
+                  ? _p.ucPreset?.toString()
+                  : 'block:${_p.ucCustomBlockId}',
+              (v) => _set(
+                v.startsWith('block:')
+                    ? _p.copyWith(ucCustomBlockId: v.substring(6))
+                    : _p.copyWith(ucPreset: int.parse(v), clearUcCustom: true),
+              ),
             ),
           ),
           Row(

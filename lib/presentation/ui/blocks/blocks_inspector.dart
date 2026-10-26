@@ -196,6 +196,14 @@ class _SingleState extends State<_Single> {
         (l10n.blocks_paramSampler, d.catalog.sampler(s)),
       if (p?.noiseSchedule case final n?)
         (l10n.blocks_paramNoise, d.catalog.noise(n)),
+      if (p != null &&
+          (p.qualityPreset != null || p.qualityCustomBlockId != null))
+        (
+          l10n.qualityTags_label,
+          BlocksFormat.qualitySummary(context, p, d.catalog),
+        ),
+      if (p != null && (p.ucPreset != null || p.ucCustomBlockId != null))
+        (l10n.ucPreset_label, BlocksFormat.ucSummary(context, p, d.catalog)),
     ];
 
     final folderName = b.folderId == null
