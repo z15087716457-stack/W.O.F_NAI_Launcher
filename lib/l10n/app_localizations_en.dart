@@ -22387,4 +22387,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get gen_groupBatchesOff =>
       'One image at a time · click to group by batch';
+
+  @override
+  String get blocks_presetCustom => 'Custom';
+
+  @override
+  String get blocks_presetHint =>
+      'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.';
 }

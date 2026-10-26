@@ -38889,6 +38889,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One image at a time · click to group by batch'**
   String get gen_groupBatchesOff;
+
+  /// No description provided for @blocks_presetCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get blocks_presetCustom;
+
+  /// No description provided for @blocks_presetHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.'**
+  String get blocks_presetHint;
 }
 
 class _AppLocalizationsDelegate

@@ -21379,6 +21379,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_groupBatchesOff => '逐张显示 · 点击按批次分组';
+
+  @override
+  String get blocks_presetCustom => '自定义';
+
+  @override
+  String get blocks_presetHint =>
+      '应用附带参数时质量词和负面预设一并还原。换到别的模型时，档位按目标模型自动换算；Turbo 沿用现有处理。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42756,4 +42763,11 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_groupBatchesOff => '逐張顯示 · 點選按批次分組';
+
+  @override
+  String get blocks_presetCustom => '自訂';
+
+  @override
+  String get blocks_presetHint =>
+      '應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。';
 }

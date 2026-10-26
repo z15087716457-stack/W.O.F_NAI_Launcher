@@ -11980,5 +11980,7 @@
   "gen_menuNew": "新",
   "gen_repeatDragHint": "按住數字左右拖動調節 · 雙擊直接輸入",
   "gen_groupBatchesOn": "按批次分組 · 點選改為逐張顯示",
-  "gen_groupBatchesOff": "逐張顯示 · 點選按批次分組"
+  "gen_groupBatchesOff": "逐張顯示 · 點選按批次分組",
+  "blocks_presetCustom": "自訂",
+  "blocks_presetHint": "應用附帶參數時品質詞和負面預設一併還原。換到別的模型時，檔位按目標模型自動換算；Turbo 沿用現有處理。"
 }

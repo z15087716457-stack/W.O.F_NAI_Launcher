@@ -21623,4 +21623,11 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get gen_groupBatchesOff => '1枚ずつ表示中 · クリックでバッチごと';
+
+  @override
+  String get blocks_presetCustom => 'カスタム';
+
+  @override
+  String get blocks_presetHint =>
+      '付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。';
 }

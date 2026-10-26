@@ -11395,5 +11395,7 @@
   "gen_menuNew": "新",
   "gen_repeatDragHint": "按住数字左右拖动调节 · 双击直接输入",
   "gen_groupBatchesOn": "按批次分组 · 点击改为逐张显示",
-  "gen_groupBatchesOff": "逐张显示 · 点击按批次分组"
+  "gen_groupBatchesOff": "逐张显示 · 点击按批次分组",
+  "blocks_presetCustom": "自定义",
+  "blocks_presetHint": "应用附带参数时质量词和负面预设一并还原。换到别的模型时，档位按目标模型自动换算；Turbo 沿用现有处理。"
 }

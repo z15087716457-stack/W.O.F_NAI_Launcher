@@ -137,6 +137,7 @@ class BlockParamCatalog {
     this.samplers = const {},
     this.noiseSchedules = const {},
     this.customPresets = const {},
+    this.customPresetContents = const {},
     this.currentModel,
   });
 
@@ -144,7 +145,12 @@ class BlockParamCatalog {
   final Map<String, String> models;
   final Map<String, String> samplers;
   final Map<String, String> noiseSchedules;
+
+  /// 可作自定义质量词 / 负面预设的块：id → 显示名。
   final Map<String, String> customPresets;
+
+  /// 同上：id → 正文（预览用）。
+  final Map<String, String> customPresetContents;
   final String? currentModel;
 
   String model(String id) => models[id] ?? id;

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../../../core/constants/api_constants.dart';
+import '../../../core/enums/quality_tag_preset.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -1335,8 +1336,21 @@ class _ParamsPanel extends StatefulWidget {
 }
 
 class _ParamsPanelState extends State<_ParamsPanel> {
+  static const _custom = '__custom';
   late var _p = widget.params;
   String? _open;
+  UiPopoverAnchor? _menuAt;
+  List<UiMenuItem> _menuItems = const [];
+
+  void _openMenu(BuildContext anchor, List<UiMenuItem> items) {
+    final box = anchor.findRenderObject()! as RenderBox;
+    setState(() {
+      _menuItems = items;
+      _menuAt = UiPopoverAnchor(
+        box.localToGlobal(box.size.bottomLeft(const Offset(0, 4))),
+      );
+    });
+  }
 
   void _set(BlockParams p) {
     setState(() => _p = p);
@@ -1422,7 +1436,80 @@ class _ParamsPanelState extends State<_ParamsPanel> {
           ),
       ],
     );
-    return UiPopoverSurface(
+    final model =
+        _p.model ?? cat.currentModel ?? ImageModels.animeDiffusionV5Full;
+    final qualityNative = BlocksFormat.qualityOptions(context, model);
+    final ucNative = {
+      for (final type in UcPresets.getPresetsForModel(model).keys)
+        '${UcPresets.toApiValue(type)}': BlocksFormat.ucLabel(context, type),
+    };
+    final qualityPreview = _p.qualityCustomBlockId != null
+        ? cat.customPresetContents[_p.qualityCustomBlockId]
+        : QualityTags.getQualityTags(
+            model,
+            preset:
+                QualityTagPreset.tryParse(_p.qualityPreset) ??
+                QualityTagPreset.none,
+          );
+    final ucPreview = _p.ucCustomBlockId != null
+        ? cat.customPresetContents[_p.ucCustomBlockId]
+        : _p.ucPreset == null
+        ? null
+        : UcPresets.getPresetContentByInt(model, _p.ucPreset!);
+    List<UiMenuItem> blockItems(
+      String key,
+      String? selected,
+      ValueChanged<String> onPick, {
+      bool divider = false,
+    }) => [
+      for (final (i, e) in cat.customPresets.entries.indexed)
+        UiMenuItem(
+          key: Key('block-param-$key-block-${e.key}'),
+          glyph: UiGlyphs.stack,
+          label: e.value,
+          divider: divider && i == 0,
+          checked: selected == e.key,
+          onTap: () => onPick(e.key),
+        ),
+    ];
+    // 下拉触发器（原型 `.inp` + chevron）。
+    Widget dropdown(
+      String key,
+      String label,
+      String? glyph,
+      List<UiMenuItem> Function() items,
+    ) => Builder(
+      builder: (ctx) => UiPressable(
+        key: Key('block-param-$key'),
+        onTap: () => _openMenu(ctx, items()),
+        builder: (context, hover) => Container(
+          height: 28,
+          constraints: const BoxConstraints(maxWidth: 170),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: hover ? c.hover : c.control,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 5,
+            children: [
+              if (glyph != null) UiGlyph(glyph, size: 13, color: c.muted),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12.5, color: c.ink, height: 1.2),
+                ),
+              ),
+              UiGlyph(UiGlyphs.chevronDown, size: 12, color: c.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+    final panel = UiPopoverSurface(
       key: const Key('block-params-panel'),
       width: 330,
       padding: const EdgeInsets.all(12),
@@ -1515,56 +1602,99 @@ class _ParamsPanelState extends State<_ParamsPanel> {
               (v) => _set(_p.copyWith(noiseSchedule: v)),
             ),
           ),
-          row(
-            l10n.qualityTags_label,
-            pick(
-              'quality',
-              {
-                ...BlocksFormat.qualityOptions(
-                  context,
-                  _p.model ??
-                      cat.currentModel ??
-                      ImageModels.animeDiffusionV5Full,
-                ),
-                for (final e in cat.customPresets.entries)
-                  'block:${e.key}': e.value,
-              },
-              _p.qualityCustomBlockId == null
-                  ? _p.qualityPreset
-                  : 'block:${_p.qualityCustomBlockId}',
-              (v) => _set(
-                v.startsWith('block:')
-                    ? _p.copyWith(qualityCustomBlockId: v.substring(6))
-                    : _p.copyWith(qualityPreset: v, clearQualityCustom: true),
-              ),
-            ),
-          ),
-          row(
-            l10n.ucPreset_label,
-            pick(
-              'uc',
-              {
-                for (final type in UcPresets.getPresetsForModel(
-                  _p.model ??
-                      cat.currentModel ??
-                      ImageModels.animeDiffusionV5Full,
-                ).keys)
-                  '${UcPresets.toApiValue(type)}': BlocksFormat.ucLabel(
-                    context,
-                    type,
+          _PresetRow(
+            key: const Key('block-param-quality-row'),
+            label: l10n.qualityTags_label,
+            badge: l10n.gen_menuNew,
+            control: Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Builder(
+                  builder: (segContext) => BlockSeg<String>(
+                    key: const Key('block-param-quality'),
+                    values: [...qualityNative.keys, _custom],
+                    selected: _p.qualityCustomBlockId != null
+                        ? _custom
+                        : _p.qualityPreset,
+                    keyOf: (v) => Key('block-param-quality-$v'),
+                    labelOf: (v) => v == _custom
+                        ? l10n.blocks_presetCustom
+                        : qualityNative[v]!,
+                    onTap: (v) => v == _custom
+                        ? _openMenu(
+                            segContext,
+                            blockItems(
+                              'quality',
+                              _p.qualityCustomBlockId,
+                              (id) =>
+                                  _set(_p.copyWith(qualityCustomBlockId: id)),
+                            ),
+                          )
+                        : _set(
+                            _p.copyWith(
+                              qualityPreset: v,
+                              clearQualityCustom: true,
+                            ),
+                          ),
                   ),
-                for (final e in cat.customPresets.entries)
-                  'block:${e.key}': e.value,
-              },
-              _p.ucCustomBlockId == null
-                  ? _p.ucPreset?.toString()
-                  : 'block:${_p.ucCustomBlockId}',
-              (v) => _set(
-                v.startsWith('block:')
-                    ? _p.copyWith(ucCustomBlockId: v.substring(6))
-                    : _p.copyWith(ucPreset: int.parse(v), clearUcCustom: true),
-              ),
+                ),
+                if (_p.qualityCustomBlockId case final id?)
+                  dropdown(
+                    'quality-block',
+                    cat.customPresets[id] ?? id,
+                    UiGlyphs.stack,
+                    () => blockItems(
+                      'quality',
+                      id,
+                      (v) => _set(_p.copyWith(qualityCustomBlockId: v)),
+                    ),
+                  ),
+              ],
             ),
+            preview: qualityPreview,
+          ),
+          _PresetRow(
+            key: const Key('block-param-uc-row'),
+            label: l10n.ucPreset_label,
+            badge: l10n.gen_menuNew,
+            control: dropdown(
+              'uc',
+              _p.ucCustomBlockId != null
+                  ? cat.customPresets[_p.ucCustomBlockId] ?? _p.ucCustomBlockId!
+                  : _p.ucPreset == null
+                  ? l10n.blocks_keepCurrent
+                  : ucNative[_p.ucPreset.toString()] ?? '${_p.ucPreset}',
+              _p.ucCustomBlockId != null ? UiGlyphs.stack : null,
+              () => [
+                for (final e in ucNative.entries)
+                  UiMenuItem(
+                    key: Key('block-param-uc-${e.key}'),
+                    label: e.value,
+                    checked:
+                        _p.ucCustomBlockId == null &&
+                        _p.ucPreset?.toString() == e.key,
+                    onTap: () => _set(
+                      _p.copyWith(
+                        ucPreset: int.parse(e.key),
+                        clearUcCustom: true,
+                      ),
+                    ),
+                  ),
+                ...blockItems(
+                  'uc',
+                  _p.ucCustomBlockId,
+                  (id) => _set(_p.copyWith(ucCustomBlockId: id)),
+                  divider: true,
+                ),
+              ],
+            ),
+            preview: ucPreview,
+          ),
+          Text(
+            l10n.blocks_presetHint,
+            style: UiText.sans(11, color: c.faint, height: 1.6),
           ),
           Row(
             children: [
@@ -1587,6 +1717,110 @@ class _ParamsPanelState extends State<_ParamsPanel> {
                 children: [Text(l10n.blocks_done)],
               ),
             ],
+          ),
+        ],
+      ),
+    );
+    return UiPopover(
+      anchor: _menuAt,
+      onDismiss: () => setState(() => _menuAt = null),
+      builder: (_) => UiMenu(
+        width: 220,
+        items: _menuItems,
+        onClose: () => setState(() => _menuAt = null),
+      ),
+      child: panel,
+    );
+  }
+}
+
+/// 质量词 / 负面预设一行（原型 R04）：左侧蓝竖条 + 标签 +「新」，右侧控件；下面是会追加的正文预览。
+class _PresetRow extends StatelessWidget {
+  const _PresetRow({
+    super.key,
+    required this.label,
+    required this.badge,
+    required this.control,
+    required this.preview,
+  });
+  final String label, badge;
+  final Widget control;
+  final String? preview;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            width: 2,
+            margin: const EdgeInsets.only(right: 8),
+            decoration: BoxDecoration(
+              color: c.accent,
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
+          SizedBox(
+            width: 54,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Wrap(
+                spacing: 4,
+                runSpacing: 2,
+                children: [
+                  Text(label, style: UiText.sans(12, color: c.muted)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.brand.withValues(alpha: .12),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      badge,
+                      style: UiText.sans(
+                        9.5,
+                        weight: FontWeight.w600,
+                        color: c.accent,
+                        height: 1,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 6,
+              children: [
+                Align(alignment: Alignment.centerLeft, child: control),
+                if (preview != null && preview!.trim().isNotEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: c.panel,
+                      border: Border.all(color: c.line),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      preview!,
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
+                      style: UiText.mono(11, color: c.muted, height: 1.55),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

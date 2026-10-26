@@ -21695,4 +21695,11 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_groupBatchesOff => '한 장씩 표시 · 클릭하면 배치별 묶음';
+
+  @override
+  String get blocks_presetCustom => '사용자 지정';
+
+  @override
+  String get blocks_presetHint =>
+      '부가 매개변수를 적용하면 품질 태그와 네거티브 프리셋도 함께 복원됩니다. 다른 모델에서는 단계를 자동 환산하며 Turbo는 기존 처리를 따릅니다.';
 }

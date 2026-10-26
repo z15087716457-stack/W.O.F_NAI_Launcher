@@ -53,6 +53,12 @@ BlockParamCatalog blocksParamCatalogWithReader(
             <PromptBlock>[])
       b.id: b.displayTitle,
   },
+  customPresetContents: {
+    for (final b
+        in read(promptBlockLibraryNotifierProvider).valueOrNull?.blocks ??
+            <PromptBlock>[])
+      b.id: b.content,
+  },
 );
 
 BlockParams captureBlockParams(T Function<T>(ProviderListenable<T>) read) {

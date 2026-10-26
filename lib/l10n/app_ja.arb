@@ -11395,5 +11395,7 @@
   "gen_menuNew": "新",
   "gen_repeatDragHint": "数字を左右にドラッグ · ダブルクリックで入力",
   "gen_groupBatchesOn": "バッチごとに表示中 · クリックで1枚ずつ",
-  "gen_groupBatchesOff": "1枚ずつ表示中 · クリックでバッチごと"
+  "gen_groupBatchesOff": "1枚ずつ表示中 · クリックでバッチごと",
+  "blocks_presetCustom": "カスタム",
+  "blocks_presetHint": "付属パラメータの適用時に品質タグとネガティブプリセットも復元します。別モデルでは段階を自動換算し、Turbo は既存の処理に従います。"
 }
