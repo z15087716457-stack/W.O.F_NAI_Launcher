@@ -166,62 +166,68 @@ class _AgentHeaderState extends State<AgentHeader> {
             height: 34,
             child: Padding(
               padding: const EdgeInsets.only(left: 16, right: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Tab(
-                    key: const Key('agent-tab-chat'),
-                    label: l.ag_tabChat,
-                    on: widget.tab == AgentTab.chat,
-                    onTap: () => widget.onTab(AgentTab.chat),
-                  ),
-                  const SizedBox(width: 18),
-                  _Tab(
-                    key: const Key('agent-tab-shelf'),
-                    label: l.ag_tabShelf,
-                    count: d.shelf.count,
-                    on: widget.tab == AgentTab.shelf,
-                    onTap: () => widget.onTab(AgentTab.shelf),
-                  ),
-                  if (d.memory != null) ...[
-                    const SizedBox(width: 18),
-                    _Tab(
-                      key: const Key('agent-tab-memory'),
-                      label: l.ag_tabMemory,
-                      on: widget.tab == AgentTab.memory,
-                      onTap: () => widget.onTab(AgentTab.memory),
-                    ),
-                  ],
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: _HistoryButton(
-                        on: widget.historyOpen,
-                        label: l.ag_historyButton,
-                        tooltip: l.ag_historyTitle,
-                        onTap: widget.onHistory,
+              child: LayoutBuilder(
+                builder: (context, box) {
+                  // Narrow panels tighten tab gaps so the history toggle fits.
+                  final gap = box.maxWidth < 320 ? 12.0 : 18.0;
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _Tab(
+                        key: const Key('agent-tab-chat'),
+                        label: l.ag_tabChat,
+                        on: widget.tab == AgentTab.chat,
+                        onTap: () => widget.onTab(AgentTab.chat),
                       ),
-                    ),
-                  ),
-                  UiPopover(
-                    anchor: _usage,
-                    onDismiss: () => setState(() => _usage = null),
-                    builder: (_) => AgentUsagePopover(
-                      onClose: () => setState(() => _usage = null),
-                    ),
-                    child: Builder(
-                      builder: (context) => _UsageButton(
-                        open: _usage != null,
-                        onTap: () async {
-                          final anchor = _below(context, right: true);
-                          await a.onRefreshUsage();
-                          if (mounted) setState(() => _usage = anchor);
-                        },
+                      SizedBox(width: gap),
+                      _Tab(
+                        key: const Key('agent-tab-shelf'),
+                        label: l.ag_tabShelf,
+                        count: d.shelf.count,
+                        on: widget.tab == AgentTab.shelf,
+                        onTap: () => widget.onTab(AgentTab.shelf),
                       ),
-                    ),
-                  ),
-                ],
+                      if (d.memory != null) ...[
+                        SizedBox(width: gap),
+                        _Tab(
+                          key: const Key('agent-tab-memory'),
+                          label: l.ag_tabMemory,
+                          on: widget.tab == AgentTab.memory,
+                          onTap: () => widget.onTab(AgentTab.memory),
+                        ),
+                      ],
+                      SizedBox(width: gap - 8),
+                      Expanded(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: _HistoryButton(
+                            on: widget.historyOpen,
+                            label: l.ag_historyButton,
+                            tooltip: l.ag_historyTitle,
+                            onTap: widget.onHistory,
+                          ),
+                        ),
+                      ),
+                      UiPopover(
+                        anchor: _usage,
+                        onDismiss: () => setState(() => _usage = null),
+                        builder: (_) => AgentUsagePopover(
+                          onClose: () => setState(() => _usage = null),
+                        ),
+                        child: Builder(
+                          builder: (context) => _UsageButton(
+                            open: _usage != null,
+                            onTap: () async {
+                              final anchor = _below(context, right: true);
+                              await a.onRefreshUsage();
+                              if (mounted) setState(() => _usage = anchor);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
             ),
           ),
