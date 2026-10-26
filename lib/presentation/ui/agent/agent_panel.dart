@@ -12,6 +12,8 @@ import 'agent_composer.dart';
 import 'agent_contract.dart';
 import 'agent_glyphs.dart';
 import 'agent_header.dart';
+import 'agent_history.dart';
+import 'agent_thread_navigation.dart';
 import 'agent_pages.dart';
 import 'agent_parts.dart';
 import 'agent_scope.dart';
@@ -49,10 +51,84 @@ class _AgentPanelState extends State<AgentPanel> {
   (String, Future<bool> Function())? _undo;
   Timer? _undoTimer;
   var _dropping = false;
+  final _historyAnchor = GlobalKey();
+  final _navigation = AgentThreadNavigation();
+  OverlayEntry? _history;
+
+  void _closeHistory() {
+    _history?.remove();
+    _history?.dispose();
+    _history = null;
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _jumpHistory(AgentHistoryEntry entry) async {
+    if (_tab != AgentTab.chat) {
+      setState(() => _tab = AgentTab.chat);
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    await _navigation.jump?.call(entry);
+    if (mounted && entry.beforeCompaction) {
+      _showToast(context.l10n.ag_historyBeforeCompaction);
+    }
+  }
+
+  void _toggleHistory() {
+    if (_history != null) {
+      _closeHistory();
+      return;
+    }
+    final overlay = Overlay.of(context, rootOverlay: true);
+    _history = OverlayEntry(
+      builder: (context) {
+        final box =
+            _historyAnchor.currentContext!.findRenderObject()! as RenderBox;
+        final root = overlay.context.findRenderObject()! as RenderBox;
+        final origin = box.localToGlobal(Offset.zero, ancestor: root);
+        final width = root.size.width < 348 ? root.size.width : 348.0;
+        final left = origin.dx >= width
+            ? origin.dx - width
+            : root.size.width - origin.dx - box.size.width >= width
+            ? origin.dx + box.size.width
+            : origin.dx.clamp(0.0, root.size.width - width);
+        return Positioned(
+          left: left,
+          top: origin.dy,
+          width: width,
+          height: box.size.height,
+          child: AgentHistory(
+            entries: widget.data.history,
+            navigation: _navigation,
+            onClose: _closeHistory,
+            onJump: (entry) => unawaited(_jumpHistory(entry)),
+          ),
+        );
+      },
+    );
+    overlay.insert(_history!);
+    setState(() {});
+  }
 
   @override
   void didUpdateWidget(covariant AgentPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.data.chat.id != widget.data.chat.id) {
+      _closeHistory();
+      _navigation.turns.clear();
+      _navigation.users.clear();
+      _navigation.blocks.clear();
+    } else {
+      _history?.markNeedsBuild();
+    }
+    final blocks = {
+      for (final t in widget.data.thread)
+        for (final (i, _) in (t.reply?.blocks ?? <AgentBlock>[]).indexed)
+          (t.id, i),
+    };
+    _navigation.blocks.removeWhere((key, _) => !blocks.contains(key));
+    final turns = widget.data.thread.map((t) => t.id).toSet();
+    _navigation.turns.removeWhere((key, _) => !turns.contains(key));
+    _navigation.users.removeWhere((key, _) => !turns.contains(key));
     if (_tab == AgentTab.memory && widget.data.memory == null) {
       _tab = AgentTab.chat;
     }
@@ -62,6 +138,9 @@ class _AgentPanelState extends State<AgentPanel> {
 
   @override
   void dispose() {
+    _history?.remove();
+    _history?.dispose();
+    _navigation.dispose();
     _toastTimer?.cancel();
     _undoTimer?.cancel();
     _dismissConfirm?.call(rebuild: false);
@@ -197,7 +276,16 @@ class _AgentPanelState extends State<AgentPanel> {
     } else {
       body = Column(
         children: [
-          AgentHeader(tab: _tab, onTab: (t) => setState(() => _tab = t)),
+          AgentHeader(
+            tab: _tab,
+            onTab: (t) => setState(() => _tab = t),
+            historyOpen: _history != null,
+            onHistory: _toggleHistory,
+            onClose: () {
+              _closeHistory();
+              widget.actions.onClose();
+            },
+          ),
           if (d.status == AgentRunStatus.starting ||
               d.status == AgentRunStatus.working ||
               d.status == AgentRunStatus.waitingSlot)
@@ -228,50 +316,53 @@ class _AgentPanelState extends State<AgentPanel> {
         ],
       );
     }
-    Widget panel = AgentScope(
-      data: d,
-      actions: widget.actions,
-      slots: widget.slots,
-      run: _run,
-      rename: _rename,
-      zoom: _zoom,
-      insert: _insert,
-      toast: _showToast,
-      confirm: _confirm,
-      undoToast: _showUndo,
-      child: UiModal(
-        dialog: _dialog,
-        contained: _dialogContained,
-        onDismiss: () {
-          final dismiss = _dismissConfirm;
-          _dismissConfirm = null;
-          if (dismiss != null) {
-            dismiss();
-          } else {
-            setState(() => _dialog = null);
-          }
-        },
-        child: Stack(
-          children: [
-            Positioned.fill(child: body),
-            if (_dropping) const Positioned.fill(child: _DropOverlay()),
-            if (_toast != null)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 132,
-                child: IgnorePointer(child: Center(child: _Toast(_toast!))),
-              ),
-            if (_undo != null && _toast == null)
-              Positioned(
-                left: 12,
-                right: 12,
-                bottom: 132,
-                child: Center(
-                  child: _UndoToast(text: _undo!.$1, onUndo: _takeUndo),
+    Widget panel = AgentNavigationScope(
+      navigation: _navigation,
+      child: AgentScope(
+        data: d,
+        actions: widget.actions,
+        slots: widget.slots,
+        run: _run,
+        rename: _rename,
+        zoom: _zoom,
+        insert: _insert,
+        toast: _showToast,
+        confirm: _confirm,
+        undoToast: _showUndo,
+        child: UiModal(
+          dialog: _dialog,
+          contained: _dialogContained,
+          onDismiss: () {
+            final dismiss = _dismissConfirm;
+            _dismissConfirm = null;
+            if (dismiss != null) {
+              dismiss();
+            } else {
+              setState(() => _dialog = null);
+            }
+          },
+          child: Stack(
+            children: [
+              Positioned.fill(child: body),
+              if (_dropping) const Positioned.fill(child: _DropOverlay()),
+              if (_toast != null)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 132,
+                  child: IgnorePointer(child: Center(child: _Toast(_toast!))),
                 ),
-              ),
-          ],
+              if (_undo != null && _toast == null)
+                Positioned(
+                  left: 12,
+                  right: 12,
+                  bottom: 132,
+                  child: Center(
+                    child: _UndoToast(text: _undo!.$1, onUndo: _takeUndo),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -286,7 +377,7 @@ class _AgentPanelState extends State<AgentPanel> {
       color: c.page,
       child: DefaultTextStyle.merge(
         style: UiText.sans(13, color: c.ink),
-        child: panel,
+        child: SizedBox(key: _historyAnchor, child: panel),
       ),
     );
   }

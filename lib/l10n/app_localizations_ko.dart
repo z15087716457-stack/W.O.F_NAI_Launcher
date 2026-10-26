@@ -21420,4 +21420,77 @@ class AppLocalizationsKo extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '작업 실패: $error';
   }
+
+  @override
+  String get ag_answeredTitle => '사용자에게 질문 · 답변 완료';
+
+  @override
+  String get ag_historyButton => '기록';
+
+  @override
+  String get ag_historyTitle => '대화 기록';
+
+  @override
+  String get ag_historySearch => '메시지 및 카드 검색…';
+
+  @override
+  String get ag_historyAll => '전체';
+
+  @override
+  String get ag_historyMine => '내 메시지';
+
+  @override
+  String get ag_historyCards => '카드';
+
+  @override
+  String get ag_historyQuestions => '질문과 답변';
+
+  @override
+  String get ag_historyKeys => '↑↓ 선택 · Enter 이동 · Esc 닫기';
+
+  @override
+  String get ag_historyEmpty => '일치하는 항목 없음';
+
+  @override
+  String get ag_historyBeforeCompaction => '압축 이전의 내용입니다. 눌러 요약을 확인하세요.';
+
+  @override
+  String get ag_historyAuto => '자동 압축';
+
+  @override
+  String get ag_historyManual => '수동 압축';
+
+  @override
+  String get ag_historyImageMessage => '이미지 메시지';
+
+  @override
+  String ag_historyAnswer(String answer) {
+    return '내 답변: $answer';
+  }
+
+  @override
+  String get ag_historyPromptSet => '프롬프트 세트';
+
+  @override
+  String ag_historyImages(int count) {
+    return '생성 카드 · $count장';
+  }
+
+  @override
+  String get ag_historyPromptChange => '프롬프트 변경';
+
+  @override
+  String get ag_historyParams => '생성 설정';
+
+  @override
+  String get ag_historyPositions => '캐릭터 위치';
+
+  @override
+  String get ag_historySettings => '설정 변경';
+
+  @override
+  String get ag_historyGallery => '갤러리 카드';
+
+  @override
+  String get ag_historyChanges => '변경 요약';
 }

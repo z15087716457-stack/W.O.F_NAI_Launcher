@@ -64,6 +64,7 @@ import 'agent_quick.dart';
 import 'agent_pending_mapper.dart';
 import 'agent_resources.dart';
 import 'agent_thread_mapper.dart';
+import 'agent_history_mapper.dart';
 import '../../../core/nai_agent/prompt_set_tools.dart';
 import 'agent_prompt_set_actions.dart';
 import 'agent_prompt_set_mapper.dart';
@@ -295,10 +296,34 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           // Native clipboard failure must not swallow ordinary text.
         }
         controller.checkImageImportTarget(target);
+        final fileReaders = readers.where((r) => r.canProvide(Formats.fileUri));
+        final paths = <String>{};
+        for (final reader in fileReaders) {
+          paths.add((await readAgentFileUri(reader)).toFilePath());
+        }
+        controller.checkImageImportTarget(target);
+        final textPaths = paths
+            .where((path) => !isAgentImagePath(path))
+            .toList();
+        // A file list may also advertise a synthesized bitmap. Import the files
+        // only, just as a single reader prefers its URI over its bitmap.
         final report = await importAgentImageSources(controller, target, [
-          for (final reader in readers)
-            () => readAgentImage(reader, clipboard: true),
+          if (paths.isNotEmpty)
+            for (final path in paths.where(isAgentImagePath))
+              () => readAgentImageFile(path)
+          else
+            for (final reader in readers.where(
+              (reader) =>
+                  agentImageReadFormats.any(reader.canProvide) ||
+                  reader.rawReader != null,
+            ))
+              () => readAgentImage(reader, clipboard: true),
         ]);
+        if (textPaths.isNotEmpty) {
+          if (!mounted || !identical(controller.selected, target)) return null;
+          presentAgentImageImport(context, report);
+          return textPaths.join('\n');
+        }
         if (report.added > 0 || report.failures.isNotEmpty) {
           if (mounted && identical(controller.selected, target)) {
             presentAgentImageImport(context, report);
@@ -611,6 +636,32 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               );
             },
           );
+    final historyMessages = r?.historyMessages ?? <Map<String, dynamic>>[];
+    final archive = r == null || historyMessages.isEmpty
+        ? null
+        : _mapper.map(
+            r,
+            historyMessages: [
+              for (final old in historyMessages)
+                r.messages
+                        .where(
+                          (m) =>
+                              m['role'] == old['role'] &&
+                              m['timestamp'] == old['timestamp'],
+                        )
+                        .firstOrNull ??
+                    old,
+              ...r.messages.where(
+                (m) => !historyMessages.any(
+                  (old) => m['role'] == 'compactionSummary'
+                      ? old['role'] == m['role'] &&
+                            old['summary'] == m['summary']
+                      : old['role'] == m['role'] &&
+                            old['timestamp'] == m['timestamp'],
+                ),
+              ),
+            ],
+          );
     _mapping = mapping;
     final recent = <String, AgentImage>{};
     for (final image
@@ -755,11 +806,15 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
             r != null &&
             (r.composer.text.trim().isNotEmpty ||
                 r.composer.attachments.isNotEmpty),
-        importing: r?.importingImages ?? 0,
+        importing: r?.pendingImageCount ?? 0,
         canAttachCanvas: _selectedImage()?.canDrag == true,
         enterSends: c.settings.enterToSend,
       ),
       thread: mapping?.turns ?? [],
+      history: agentHistoryEntries(
+        mapping?.turns ?? [],
+        archive: archive?.turns ?? [],
+      ),
       shelf: mapping?.shelf ?? const AgentShelfData(),
       memory: AgentMemoryData(
         globalInstructions: c.settings.globalInstructions,

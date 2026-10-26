@@ -14,7 +14,13 @@ let extensionsReady = Promise.resolve(), stopEpoch = 0;
 let created, requestCount = 0, requestLimit = 32, permitSequence = 0;
 const pending = new Map();
 const permits = new Map();
-let queued = [];
+let queued = [], activePromptId;
+function publishQueue(consumedQueueIds = []) {
+  const previous = queued.map(item => item.queueId);
+  const queue = queueState();
+  consumedQueueIds.push(...previous.filter(id => !queue.some(item => item.queueId === id)));
+  send({ type: 'queue', queue, consumedQueueIds });
+}
 let mcpStatus = '', readingMcpStatus = false;
 const send = value => process.stdout.write(JSON.stringify(redact({
   protocol: 1, workspaceId, sessionId: session?.sessionId, costKnown: false, ...value,
@@ -42,13 +48,13 @@ async function acquireRequest(signal) {
 }
 function queueState() {
   // Pi owns the queues. This sidecar only retains attachment bytes and UI IDs.
-  const remaining = { steer: [...session.getSteeringMessages()], followUp: [...session.getFollowUpMessages()] };
-  queued = queued.filter(item => {
-    const index = remaining[item.behavior].indexOf(item.text);
-    if (index < 0) return false;
-    remaining[item.behavior].splice(index, 1);
-    return true;
-  });
+  const consumed = {
+    steer: queued.filter(item => item.behavior === 'steer').length - session.getSteeringMessages().length,
+    followUp: queued.filter(item => item.behavior === 'followUp').length - session.getFollowUpMessages().length,
+  };
+  // Pi drains each behavior FIFO. Counts identify the consumed prefix even when
+  // several entries have identical text or Pi decorates attachment content.
+  queued = queued.filter(item => consumed[item.behavior]-- <= 0);
   return queued.map(({ images, ...item }) => ({ ...item, imageCount: images?.length ?? 0 }));
 }
 function usage() {
@@ -57,6 +63,9 @@ function usage() {
 }
 function state() {
   return { messages: session.messages, sessionFile: session.sessionFile,
+    historyMessages: created.manager.getBranch().flatMap(entry => entry.type === 'message'
+      ? [entry.message] : entry.type === 'compaction'
+        ? [{role:'compactionSummary', summary:entry.summary, tokensBefore:entry.tokensBefore, timestamp:Date.parse(entry.timestamp)}] : []),
     entries: created.manager.getBranch().filter(entry => entry.type === 'message')
       .map(entry => ({ id: entry.id, parentId: entry.parentId, role: entry.message.role, timestamp: entry.message.timestamp })),
     userMessages: session.getUserMessagesForForking(), queue: queueState(),
@@ -108,6 +117,11 @@ async function handle(message) {
     redact = created.redact;
     session.subscribe(event => {
       send({ type: 'event', event });
+      if (event.type === 'message_start' && event.message.role === 'user') {
+        const consumed = activePromptId ? [activePromptId] : [];
+        activePromptId = undefined;
+        publishQueue(consumed);
+      }
       if (['message_end', 'compaction_end', 'agent_settled'].includes(event.type))
         queueMicrotask(() => {
           if (!closing) send({ type: 'usage', ...usage() });
@@ -166,7 +180,7 @@ async function handle(message) {
       const epoch = stopEpoch;
       await extensionsReady;
       if (epoch !== stopEpoch || closing) throw new Error('Stopped while preparing extensions');
-      if (!session.isStreaming) requestCount = 0;
+      if (!session.isStreaming) { requestCount = 0; activePromptId = message.queueId ?? id; }
       else {
         queueState();
         queued.push({ queueId: message.queueId ?? id, text: message.text, images: message.images,
@@ -203,6 +217,7 @@ async function handle(message) {
         if (item.behavior === 'steer') await session.steer(item.text, item.images);
         else await session.followUp(item.text, item.images);
       }
+      publishQueue();
       send({ type: 'response', id, queue: queueState() }); break;
     }
     case 'navigate': {

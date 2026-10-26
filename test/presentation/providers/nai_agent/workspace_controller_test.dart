@@ -921,6 +921,58 @@ void main() {
     },
   );
 
+  for (final withImage in [false, true]) {
+    test(
+      'queue consumption clears stable IDs with image=$withImage and retains follow-up',
+      () async {
+        final c = controller(vision: true);
+        await c.initialize();
+        final firstEntered = Completer<void>(),
+            firstRelease = Completer<void>();
+        final secondEntered = Completer<void>(),
+            secondRelease = Completer<void>();
+        waitForResponse = () async {
+          if (calls == 1) {
+            firstEntered.complete();
+            await firstRelease.future;
+          }
+          if (calls == 2) {
+            secondEntered.complete();
+            await secondRelease.future;
+          }
+        };
+        await c.saveComposer('first');
+        final run = c.send();
+        await firstEntered.future.timeout(const Duration(seconds: 15));
+        if (withImage) {
+          await c.attach(
+            'queued.png',
+            img.encodePng(img.Image(width: 2, height: 2)),
+            'image/png',
+          );
+        }
+        await c.saveComposer('same text');
+        await c.send(steer: true);
+        final consumed = c.selected!.composer.pending.single['queueId'];
+        await c.saveComposer('same text');
+        await c.send();
+        final remaining = c.selected!.composer.pending.last['queueId'];
+        firstRelease.complete();
+        await secondEntered.future.timeout(const Duration(seconds: 15));
+        expect(c.selected!.composer.pending.map((p) => p['queueId']), [
+          remaining,
+        ]);
+        expect(c.selected!.queue.map((p) => p['queueId']), [remaining]);
+        expect(
+          c.selected!.composer.pending.any((p) => p['queueId'] == consumed),
+          false,
+        );
+        secondRelease.complete();
+        await run;
+        expect(c.selected!.composer.pending, isEmpty);
+      },
+    );
+  }
   test(
     'stopping preserves only unsent queue messages for explicit restoration',
     () async {

@@ -11276,5 +11276,42 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ag_answeredTitle": "向你提问 · 已回答",
+  "ag_historyButton": "历史",
+  "ag_historyTitle": "对话历史",
+  "ag_historySearch": "搜索发言和卡片…",
+  "ag_historyAll": "全部",
+  "ag_historyMine": "我的发言",
+  "ag_historyCards": "卡片",
+  "ag_historyQuestions": "问答",
+  "ag_historyKeys": "↑↓ 选择 · Enter 跳到对话 · Esc 关闭",
+  "ag_historyEmpty": "没有匹配的条目",
+  "ag_historyBeforeCompaction": "这段在压缩之前，点看摘要",
+  "ag_historyAuto": "自动压缩",
+  "ag_historyManual": "手动压缩",
+  "ag_historyImageMessage": "图片消息",
+  "ag_historyAnswer": "你选了：{answer}",
+  "@ag_historyAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_historyPromptSet": "提示词组",
+  "ag_historyImages": "生成卡 · {count} 张",
+  "@ag_historyImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyPromptChange": "提示词修改",
+  "ag_historyParams": "生成参数",
+  "ag_historyPositions": "角色位置",
+  "ag_historySettings": "设置修改",
+  "ag_historyGallery": "图库卡片",
+  "ag_historyChanges": "修改摘要"
 }

@@ -11288,5 +11288,42 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ag_answeredTitle": "Asked you · Answered",
+  "ag_historyButton": "History",
+  "ag_historyTitle": "Conversation history",
+  "ag_historySearch": "Search messages and cards…",
+  "ag_historyAll": "All",
+  "ag_historyMine": "My messages",
+  "ag_historyCards": "Cards",
+  "ag_historyQuestions": "Q&A",
+  "ag_historyKeys": "↑↓ Select · Enter Jump · Esc Close",
+  "ag_historyEmpty": "No matching entries",
+  "ag_historyBeforeCompaction": "This was before compaction. Click to read the summary.",
+  "ag_historyAuto": "Auto compaction",
+  "ag_historyManual": "Manual compaction",
+  "ag_historyImageMessage": "Image message",
+  "ag_historyAnswer": "You answered: {answer}",
+  "@ag_historyAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_historyPromptSet": "Prompt set",
+  "ag_historyImages": "Generation card · {count} images",
+  "@ag_historyImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyPromptChange": "Prompt changes",
+  "ag_historyParams": "Generation settings",
+  "ag_historyPositions": "Character positions",
+  "ag_historySettings": "Settings changes",
+  "ag_historyGallery": "Gallery card",
+  "ag_historyChanges": "Change summary"
 }

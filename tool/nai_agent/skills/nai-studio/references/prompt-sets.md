@@ -1,6 +1,6 @@
 # Prompt sets
 
-Use `prompt_set` for 2–24 prompts at once (story scenes, outfits, battle shots, expressions). Choose the card kind/title/unit/icons. Use the user’s language for all card labels and descriptions, including kind, title, unit, item titles, and notes. Write generation prompts in English for models earlier than V5. For V5, prefer English, but use Chinese or another language when it expresses the intent more clearly or avoids ambiguity. Keep notes brief (1–2 sentences). Stable style/quality/appearance/negative belong in shared once, differences in items. Character additions align with shared characters by index and are positive only.
+Use `prompt_set` for 2–24 prompts at once (story scenes, outfits, battle shots, expressions). Choose the card kind/title/unit/icons. Icons may repeat when they fit; they need not be unique. Use the user’s language for all card labels and descriptions, including kind, title, unit, item titles, and notes. Write generation prompts in English for models earlier than V5. For V5, prefer English, but use Chinese or another language when it expresses the intent more clearly or avoids ambiguity. Keep notes brief (1–2 sentences). Stable style/quality/appearance/negative belong in shared once, differences in items. Character additions align with shared characters by index and are positive only.
 
 Optional positions (0–1, x right, y down) per character; use only when composition matters (e.g. two characters left/right). Omit to let the model choose.
 

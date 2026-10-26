@@ -10,7 +10,7 @@ import { createServer } from 'node:http';
 import { createStudioSession } from '../lib/session.mjs';
 import { listenFetchTestServer } from './fixture-http.mjs';
 
-async function fixture({ leafUser = false, rootUser = false, cancel = false } = {}) {
+async function fixture({ leafUser = false, rootUser = false, cancel = false, compact = false } = {}) {
   const root = await mkdtemp(join(tmpdir(), 'host-resend-'));
   const requests = [];
   const server = createServer(async (req, res) => {
@@ -52,6 +52,8 @@ async function fixture({ leafUser = false, rootUser = false, cancel = false } = 
   if (!leafUser) m.appendMessage({ role: 'assistant', timestamp: 5,
     content: [{ type: 'text', text: 'old answer' }], api: 'openai-completions',
     provider: 'test', model: 'test', stopReason: 'stop', usage });
+  const historyBeforeCompaction = m.getBranch().filter(e => e.type === 'message').map(e => e.message);
+  if (compact) m.appendCompaction('Synthetic summary boundary', userId, 131000);
   const sessionFile = seeded.session.sessionFile;
   await seeded.close();
   if (cancel) {
@@ -98,14 +100,30 @@ async function fixture({ leafUser = false, rootUser = false, cancel = false } = 
   try {
     const { executeTool, ...init } = options;
     const ready = await request('init', { ...init, sessionFile });
-    return { request, ready, requests, userId, parentId, offBranch, image, sessionFile, close };
+    return { request, ready, requests, userId, parentId, offBranch, image, sessionFile, close, historyBeforeCompaction };
   } catch (error) { await close(); throw error; }
 }
+
+test('host state exposes archived current-branch messages and a real Pi compaction boundary', async () => {
+  const f = await fixture({compact:true});
+  try {
+    assert.ok(f.ready.historyMessages.some(m=>m.role==='user' && m.timestamp===1));
+    assert.ok(!f.ready.messages.some(m=>m.role==='user' && m.timestamp===1));
+    const marker = f.ready.historyMessages.find(m=>m.role==='compactionSummary');
+    assert.equal(marker.summary,'Synthetic summary boundary');
+    assert.equal(marker.tokensBefore,131000);
+    assert.ok(Number.isFinite(marker.timestamp));
+    assert.ok(!f.ready.historyMessages.some(m=>m.timestamp===4));
+    assert.equal(f.requests.length,0);
+  } finally { await f.close(); }
+});
 
 for (const options of [{}, { leafUser: true }, { leafUser: true, rootUser: true }]) {
   test('host resend navigates to parent then creates sibling, retaining abandoned history ' + JSON.stringify(options), async () => {
     const f = await fixture(options);
     try {
+      assert.deepEqual(f.ready.historyMessages, f.historyBeforeCompaction);
+      assert.ok(!f.ready.historyMessages.some(m => m.timestamp === 4));
       const entry = f.ready.entries.find(e => e.id === f.userId);
       assert.deepEqual(entry, { id: f.userId, parentId: f.parentId, role: 'user', timestamp: 3 });
       assert.ok(!('message' in entry));

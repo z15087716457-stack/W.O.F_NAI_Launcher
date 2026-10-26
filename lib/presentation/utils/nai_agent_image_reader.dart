@@ -46,6 +46,40 @@ Future<DroppedFileData> readAgentImageFile(String path) async {
   );
 }
 
+bool isAgentImagePath(String path) => const {
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.webp',
+  '.gif',
+  '.bmp',
+}.contains(p.extension(path).toLowerCase());
+
+Future<Uri> readAgentFileUri(DataReader reader) async {
+  final complete = Completer<Uri?>();
+  final progress = reader.getValue<Uri>(
+    Formats.fileUri,
+    (uri) {
+      if (!complete.isCompleted) complete.complete(uri);
+    },
+    onError: (error) {
+      if (!complete.isCompleted) complete.completeError(error);
+    },
+  );
+  if (progress == null) throw const AgentImageInputException('unreadable');
+  final uri = await complete.future.timeout(
+    agentImageReadTimeout,
+    onTimeout: () {
+      progress.cancel();
+      throw const AgentImageInputException('unreadable');
+    },
+  );
+  if (uri == null || !uri.isScheme('file')) {
+    throw const AgentImageInputException('unreadable');
+  }
+  return uri;
+}
+
 /// File URI takes priority over a synthesized bitmap, retaining PNG chunks,
 /// EXIF and exact source bytes. URL/HTML-only sources never trigger a download.
 Future<DroppedFileData?> readAgentImage(
@@ -54,28 +88,7 @@ Future<DroppedFileData?> readAgentImage(
   bool clipboard = false,
 }) async {
   if (reader.canProvide(Formats.fileUri)) {
-    final complete = Completer<Uri?>();
-    final progress = reader.getValue<Uri>(
-      Formats.fileUri,
-      (uri) {
-        if (!complete.isCompleted) complete.complete(uri);
-      },
-      onError: (error) {
-        if (!complete.isCompleted) complete.completeError(error);
-      },
-    );
-    if (progress == null) throw const AgentImageInputException('unreadable');
-    final uri = await complete.future.timeout(
-      agentImageReadTimeout,
-      onTimeout: () {
-        progress.cancel();
-        throw const AgentImageInputException('unreadable');
-      },
-    );
-    if (uri == null || !uri.isScheme('file')) {
-      throw const AgentImageInputException('unreadable');
-    }
-    return readAgentImageFile(uri.toFilePath());
+    return readAgentImageFile((await readAgentFileUri(reader)).toFilePath());
   }
   for (final format in agentImageReadFormats) {
     if (!reader.canProvide(format)) continue;

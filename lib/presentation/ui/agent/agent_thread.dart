@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
@@ -9,6 +10,7 @@ import '../kit/ui_colors.dart';
 import '../kit/ui_preview_image.dart';
 import '../kit/ui_text.dart';
 import 'agent_activity.dart';
+import 'agent_answered_questions.dart';
 import 'agent_cards.dart';
 import 'agent_contract.dart';
 import 'agent_prompt_set_card.dart';
@@ -18,6 +20,7 @@ export 'agent_tag_window.dart' show agentDiffWindow;
 import 'agent_glyphs.dart';
 import 'agent_parts.dart';
 import 'agent_scope.dart';
+import 'agent_thread_navigation.dart';
 
 /// 对话页：每轮 = 左侧黑线的用户句 + 一张任务卡；最后是待处理卡片。
 /// 内容从上往下排；停在底部时跟随最新内容，往上翻就停止跟随，右下角出现
@@ -41,6 +44,98 @@ class _AgentThreadState extends State<AgentThread> {
   var _jumpQueued = false;
   int? _revision;
   String? _chat;
+  AgentThreadNavigation? _navigation;
+  var _navigationEpoch = 0;
+
+  void _reportVisible() {
+    final nav = _navigation;
+    if (nav == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !identical(_navigation, nav)) return;
+      final viewport = context.findRenderObject() as RenderBox?;
+      if (viewport == null || !viewport.hasSize) return;
+      final rect = viewport.localToGlobal(Offset.zero) & viewport.size;
+      final visible = <String>{};
+      for (final e in AgentScope.of(context).data.history) {
+        final turn = AgentScope.of(
+          context,
+        ).data.thread.where((t) => t.id == e.turnId).firstOrNull;
+        final block = e.blockIndex == null
+            ? null
+            : turn?.reply?.blocks.elementAtOrNull(e.blockIndex!);
+        final box =
+            (block == null
+                        ? nav.users[e.turnId]
+                        : nav.blocks[(e.turnId, e.blockIndex!)])
+                    ?.currentContext
+                    ?.findRenderObject()
+                as RenderBox?;
+        if (box != null &&
+            box.attached &&
+            box.hasSize &&
+            rect.overlaps(box.localToGlobal(Offset.zero) & box.size)) {
+          visible.add(e.id);
+        }
+      }
+      if (!setEquals(nav.visible.value, visible)) nav.visible.value = visible;
+    });
+  }
+
+  Future<bool> _jumpHistory(AgentHistoryEntry entry) async {
+    final epoch = ++_navigationEpoch;
+    final d = AgentScope.of(context).data;
+    final index = d.thread.indexWhere((t) => t.id == entry.turnId);
+    final nav = _navigation;
+    if (index < 0 || nav == null || !_scroll.hasClients) return false;
+    _follow = false;
+    // Walk viewport-sized chunks through the lazy list until the target mounts.
+    // Unlike estimated index offsets, this also handles very tall mixed cards.
+    while (mounted &&
+        epoch == _navigationEpoch &&
+        nav.turns[entry.turnId]?.currentContext == null) {
+      final built = [
+        for (final (i, t) in d.thread.indexed)
+          if (nav.turns[t.id]?.currentContext != null) i,
+      ];
+      final forward = built.isEmpty || index > built.last;
+      final position = _scroll.position;
+      final next =
+          (_scroll.offset +
+                  (forward ? 1 : -1) * position.viewportDimension * .85)
+              .clamp(0.0, position.maxScrollExtent);
+      if (next == _scroll.offset) return false;
+      _auto = true;
+      _scroll.jumpTo(next);
+      _auto = false;
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    if (!mounted || epoch != _navigationEpoch) return false;
+    final block = entry.blockIndex == null
+        ? null
+        : d.thread[index].reply?.blocks.elementAtOrNull(entry.blockIndex!);
+    final Object target = block == null
+        ? entry.turnId
+        : (entry.turnId, entry.blockIndex!);
+    final anchor = block == null
+        ? nav.users[entry.turnId]
+        : nav.blocks[(entry.turnId, entry.blockIndex!)];
+    final targetContext = anchor?.currentContext;
+    if (targetContext == null || !targetContext.mounted) return false;
+    _auto = true;
+    await Scrollable.ensureVisible(
+      targetContext,
+      alignment: .12,
+      duration: const Duration(milliseconds: 180),
+    );
+    _auto = false;
+    if (!mounted || epoch != _navigationEpoch) return false;
+    nav.highlight.value = target;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && epoch == _navigationEpoch) nav.highlight.value = null;
+    });
+    _reportVisible();
+    return true;
+  }
 
   /// 打开 / 换聊天后的第一帧不做进场动画（已有内容直接显示），之后新内容才动。
   var _armed = false;
@@ -87,11 +182,13 @@ class _AgentThreadState extends State<AgentThread> {
     // 用户自己滚（拖动、滚轮、拖滚动条）才改跟随状态；程序跳底不算。
     if (n is ScrollUpdateNotification && !_auto) _follow = _atBottom;
     _syncAway();
+    _reportVisible();
     return false;
   }
 
   bool _onMetrics(ScrollMetricsNotification n) {
     if (n.depth != 0) return false;
+    _reportVisible();
     // 内容变高（新消息、流式文字、卡片展开）：跟随中就贴到底。
     if (_follow) {
       _queueJump();
@@ -122,8 +219,12 @@ class _AgentThreadState extends State<AgentThread> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final d = AgentScope.of(context).data;
+    _navigation = AgentNavigationScope.of(context);
+    _navigation?.jump = _jumpHistory;
+    _reportVisible();
     final r = d.revision;
     if (_chat != null && d.chat.id != _chat) {
+      _navigationEpoch++;
       // 换了聊天：从最新处开始看。
       _follow = true;
       _fresh = false;
@@ -144,6 +245,8 @@ class _AgentThreadState extends State<AgentThread> {
 
   @override
   void dispose() {
+    _navigationEpoch++;
+    _navigation?.jump = null;
     _scroll.dispose();
     super.dispose();
   }
@@ -155,11 +258,21 @@ class _AgentThreadState extends State<AgentThread> {
     final c = context.ui;
     final items = <Widget>[
       for (final (i, turn) in d.thread.indexed)
-        _Turn(
-          key: ValueKey('turn-${turn.id}'),
-          turn: turn,
-          last: i == d.thread.length - 1,
-        ),
+        if (_navigation case final nav?)
+          KeyedSubtree(
+            key: nav.turns.putIfAbsent(turn.id, GlobalKey.new),
+            child: _Turn(
+              key: ValueKey('turn-${turn.id}'),
+              turn: turn,
+              last: i == d.thread.length - 1,
+            ),
+          )
+        else
+          _Turn(
+            key: ValueKey('turn-${turn.id}'),
+            turn: turn,
+            last: i == d.thread.length - 1,
+          ),
       for (final p in d.composer.pending)
         AgentAppear(
           key: ValueKey('pending-${p.id}'),
@@ -407,6 +520,19 @@ class _ErrorLine extends StatelessWidget {
   }
 }
 
+Widget _userAnchor(BuildContext context, AgentTurn turn) {
+  final nav = AgentNavigationScope.of(context);
+  final child = _UserLine(message: turn.user);
+  return nav == null
+      ? child
+      : AgentNavigationAnchor(
+          navigation: nav,
+          target: turn.id,
+          anchor: nav.users.putIfAbsent(turn.id, GlobalKey.new),
+          child: child,
+        );
+}
+
 class _Turn extends StatelessWidget {
   const _Turn({super.key, required this.turn, required this.last});
   final AgentTurn turn;
@@ -415,27 +541,31 @@ class _Turn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reply = turn.reply;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: 10,
-      children: [
-        AgentAppear(
-          id: '${turn.id}/user',
-          enabled: last,
-          child: _UserLine(message: turn.user),
-        ),
-        if (reply != null && (reply.blocks.isNotEmpty || reply.live))
+    return AgentTurnNavigationScope(
+      turnId: turn.id,
+      blocks: reply?.blocks ?? const [],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 10,
+        children: [
           AgentAppear(
-            id: '${turn.id}/card',
+            id: '${turn.id}/user',
             enabled: last,
-            child: _TaskCard(
-              turnId: turn.id,
-              reply: reply,
-              last: last,
-              since: turn.user.at,
-            ),
+            child: _userAnchor(context, turn),
           ),
-      ],
+          if (reply != null && (reply.blocks.isNotEmpty || reply.live))
+            AgentAppear(
+              id: '${turn.id}/card',
+              enabled: last,
+              child: _TaskCard(
+                turnId: turn.id,
+                reply: reply,
+                last: last,
+                since: turn.user.at,
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -750,7 +880,10 @@ class _TaskCard extends StatelessWidget {
     final c = context.ui;
     // Prompt sets are standalone cards (not a card nested in the task shell).
     // Leave all existing block-only replies on their original rendering path.
-    if (reply.blocks.any((block) => block is AgentPromptSetBlock)) {
+    if (reply.blocks.any(
+      (block) =>
+          block is AgentPromptSetBlock || block is AgentAnsweredQuestionsBlock,
+    )) {
       final groups = <Widget>[];
       var ordinary = <AgentBlock>[];
       void flush({bool tail = false}) {
@@ -777,7 +910,18 @@ class _TaskCard extends StatelessWidget {
       for (final block in reply.blocks) {
         if (block is AgentPromptSetBlock) {
           flush();
-          groups.add(_promptSetView(context, block));
+          groups.add(
+            agentBlockAnchor(context, block, _promptSetView(context, block)),
+          );
+        } else if (block is AgentAnsweredQuestionsBlock) {
+          flush();
+          groups.add(
+            agentBlockAnchor(
+              context,
+              block,
+              AgentAnsweredQuestionsView(block: block),
+            ),
+          );
         } else {
           ordinary.add(block);
         }
@@ -825,26 +969,35 @@ class _TaskCard extends StatelessWidget {
               AgentImagesBlock() => 'images',
               _ => 'card',
             }}',
-            switch (item) {
-              _ReadGroup() => _ReadGroupView(
-                key: ValueKey('read-$i'),
-                group: item,
-              ),
-              AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
-              AgentPromptSetBlock() => _promptSetView(context, item),
-              AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
-              AgentPositionBlock() => AgentPositionView(block: item),
-              AgentParamBlock() => AgentParamView(block: item),
-              AgentSettingsBlock() => AgentSettingsView(block: item),
-              AgentGalleryBlock() => AgentGalleryView(block: item),
-              AgentCompactionBlock() => AgentCompactionView(
-                key: ValueKey('compaction-$i'),
-                block: item,
-              ),
-              AgentChangeSummaryBlock() => AgentChangeSummaryView(block: item),
-              AgentImagesBlock() => AgentOutputs(block: item),
-              _ => const SizedBox.shrink(),
-            },
+            agentBlockAnchor(
+              context,
+              item is AgentBlock ? item : null,
+              switch (item) {
+                _ReadGroup() => _ReadGroupView(
+                  key: ValueKey('read-$i'),
+                  group: item,
+                ),
+                AgentTextBlock(:final markdown) => AgentMarkdown(markdown),
+                AgentPromptSetBlock() => _promptSetView(context, item),
+                AgentAnsweredQuestionsBlock() => AgentAnsweredQuestionsView(
+                  block: item,
+                ),
+                AgentDiffBlock(:final diff) => AgentDiffView(diff: diff),
+                AgentPositionBlock() => AgentPositionView(block: item),
+                AgentParamBlock() => AgentParamView(block: item),
+                AgentSettingsBlock() => AgentSettingsView(block: item),
+                AgentGalleryBlock() => AgentGalleryView(block: item),
+                AgentCompactionBlock() => AgentCompactionView(
+                  key: ValueKey('compaction-$i'),
+                  block: item,
+                ),
+                AgentChangeSummaryBlock() => AgentChangeSummaryView(
+                  block: item,
+                ),
+                AgentImagesBlock() => AgentOutputs(block: item),
+                _ => const SizedBox.shrink(),
+              },
+            ),
             item is _ReadGroup
                 ? proc
                 : item is AgentCompactionBlock

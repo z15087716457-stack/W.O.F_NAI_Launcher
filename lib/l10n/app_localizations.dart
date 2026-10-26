@@ -38403,6 +38403,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action failed: {error}'**
   String startup_dataActionFailed(String error);
+
+  /// No description provided for @ag_answeredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Asked you · Answered'**
+  String get ag_answeredTitle;
+
+  /// No description provided for @ag_historyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get ag_historyButton;
+
+  /// No description provided for @ag_historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversation history'**
+  String get ag_historyTitle;
+
+  /// No description provided for @ag_historySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search messages and cards…'**
+  String get ag_historySearch;
+
+  /// No description provided for @ag_historyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get ag_historyAll;
+
+  /// No description provided for @ag_historyMine.
+  ///
+  /// In en, this message translates to:
+  /// **'My messages'**
+  String get ag_historyMine;
+
+  /// No description provided for @ag_historyCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Cards'**
+  String get ag_historyCards;
+
+  /// No description provided for @ag_historyQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Q&A'**
+  String get ag_historyQuestions;
+
+  /// No description provided for @ag_historyKeys.
+  ///
+  /// In en, this message translates to:
+  /// **'↑↓ Select · Enter Jump · Esc Close'**
+  String get ag_historyKeys;
+
+  /// No description provided for @ag_historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching entries'**
+  String get ag_historyEmpty;
+
+  /// No description provided for @ag_historyBeforeCompaction.
+  ///
+  /// In en, this message translates to:
+  /// **'This was before compaction. Click to read the summary.'**
+  String get ag_historyBeforeCompaction;
+
+  /// No description provided for @ag_historyAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto compaction'**
+  String get ag_historyAuto;
+
+  /// No description provided for @ag_historyManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual compaction'**
+  String get ag_historyManual;
+
+  /// No description provided for @ag_historyImageMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image message'**
+  String get ag_historyImageMessage;
+
+  /// No description provided for @ag_historyAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'You answered: {answer}'**
+  String ag_historyAnswer(String answer);
+
+  /// No description provided for @ag_historyPromptSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt set'**
+  String get ag_historyPromptSet;
+
+  /// No description provided for @ag_historyImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation card · {count} images'**
+  String ag_historyImages(int count);
+
+  /// No description provided for @ag_historyPromptChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt changes'**
+  String get ag_historyPromptChange;
+
+  /// No description provided for @ag_historyParams.
+  ///
+  /// In en, this message translates to:
+  /// **'Generation settings'**
+  String get ag_historyParams;
+
+  /// No description provided for @ag_historyPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'Character positions'**
+  String get ag_historyPositions;
+
+  /// No description provided for @ag_historySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings changes'**
+  String get ag_historySettings;
+
+  /// No description provided for @ag_historyGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery card'**
+  String get ag_historyGallery;
+
+  /// No description provided for @ag_historyChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Change summary'**
+  String get ag_historyChanges;
 }
 
 class _AppLocalizationsDelegate

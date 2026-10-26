@@ -11276,5 +11276,42 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ag_answeredTitle": "사용자에게 질문 · 답변 완료",
+  "ag_historyButton": "기록",
+  "ag_historyTitle": "대화 기록",
+  "ag_historySearch": "메시지 및 카드 검색…",
+  "ag_historyAll": "전체",
+  "ag_historyMine": "내 메시지",
+  "ag_historyCards": "카드",
+  "ag_historyQuestions": "질문과 답변",
+  "ag_historyKeys": "↑↓ 선택 · Enter 이동 · Esc 닫기",
+  "ag_historyEmpty": "일치하는 항목 없음",
+  "ag_historyBeforeCompaction": "압축 이전의 내용입니다. 눌러 요약을 확인하세요.",
+  "ag_historyAuto": "자동 압축",
+  "ag_historyManual": "수동 압축",
+  "ag_historyImageMessage": "이미지 메시지",
+  "ag_historyAnswer": "내 답변: {answer}",
+  "@ag_historyAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_historyPromptSet": "프롬프트 세트",
+  "ag_historyImages": "생성 카드 · {count}장",
+  "@ag_historyImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyPromptChange": "프롬프트 변경",
+  "ag_historyParams": "생성 설정",
+  "ag_historyPositions": "캐릭터 위치",
+  "ag_historySettings": "설정 변경",
+  "ag_historyGallery": "갤러리 카드",
+  "ag_historyChanges": "변경 요약"
 }

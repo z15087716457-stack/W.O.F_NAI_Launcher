@@ -22101,4 +22101,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return 'Action failed: $error';
   }
+
+  @override
+  String get ag_answeredTitle => 'Asked you · Answered';
+
+  @override
+  String get ag_historyButton => 'History';
+
+  @override
+  String get ag_historyTitle => 'Conversation history';
+
+  @override
+  String get ag_historySearch => 'Search messages and cards…';
+
+  @override
+  String get ag_historyAll => 'All';
+
+  @override
+  String get ag_historyMine => 'My messages';
+
+  @override
+  String get ag_historyCards => 'Cards';
+
+  @override
+  String get ag_historyQuestions => 'Q&A';
+
+  @override
+  String get ag_historyKeys => '↑↓ Select · Enter Jump · Esc Close';
+
+  @override
+  String get ag_historyEmpty => 'No matching entries';
+
+  @override
+  String get ag_historyBeforeCompaction =>
+      'This was before compaction. Click to read the summary.';
+
+  @override
+  String get ag_historyAuto => 'Auto compaction';
+
+  @override
+  String get ag_historyManual => 'Manual compaction';
+
+  @override
+  String get ag_historyImageMessage => 'Image message';
+
+  @override
+  String ag_historyAnswer(String answer) {
+    return 'You answered: $answer';
+  }
+
+  @override
+  String get ag_historyPromptSet => 'Prompt set';
+
+  @override
+  String ag_historyImages(int count) {
+    return 'Generation card · $count images';
+  }
+
+  @override
+  String get ag_historyPromptChange => 'Prompt changes';
+
+  @override
+  String get ag_historyParams => 'Generation settings';
+
+  @override
+  String get ag_historyPositions => 'Character positions';
+
+  @override
+  String get ag_historySettings => 'Settings changes';
+
+  @override
+  String get ag_historyGallery => 'Gallery card';
+
+  @override
+  String get ag_historyChanges => 'Change summary';
 }

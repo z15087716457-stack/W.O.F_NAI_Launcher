@@ -59,7 +59,7 @@ Future<AgentImageImportReport> importAgentImageSources(
     }
   }
   return result;
-});
+}, imageCount: sources.length);
 
 void presentAgentImageImport(
   BuildContext context,

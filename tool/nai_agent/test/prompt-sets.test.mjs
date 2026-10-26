@@ -12,7 +12,12 @@ const content = {kind:'Storyboard', kind_icon:'film', title:'Rain', unit:'scene'
 
 test('prompt_set schema bounds, action requirements and exact Dart icon catalog', async () => {
   const tool = domainTools.find(t => t.name === 'prompt_set');
-  assert.ok(tool.description.length <= 1100);
+  assert.ok(tool.description.length <= 1200);
+  assert.match(tool.description, /Icons may repeat/);
+  assert.ok(Value.Check(tool.parameters, {action:'create', ...content,
+    items:content.items.map(item => ({...item, icon:'heart'}))}));
+  const guide = await readFile(new URL('../skills/nai-studio/references/prompt-sets.md', import.meta.url), 'utf8');
+  assert.match(guide, /Icons may repeat/);
   const schema = tool.parameters;
   assert.ok(Value.Check(schema,{action:'create',...content}));
   assert.ok(Value.Check(schema,{action:'read',set_id:'012345abcdef'}));

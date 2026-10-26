@@ -11276,5 +11276,42 @@
         "type": "String"
       }
     }
-  }
+  },
+  "ag_answeredTitle": "あなたへの質問 · 回答済み",
+  "ag_historyButton": "履歴",
+  "ag_historyTitle": "会話履歴",
+  "ag_historySearch": "発言とカードを検索…",
+  "ag_historyAll": "すべて",
+  "ag_historyMine": "自分の発言",
+  "ag_historyCards": "カード",
+  "ag_historyQuestions": "質問と回答",
+  "ag_historyKeys": "↑↓ 選択 · Enter 移動 · Esc 閉じる",
+  "ag_historyEmpty": "一致する項目はありません",
+  "ag_historyBeforeCompaction": "この部分は圧縮前です。クリックして要約を確認。",
+  "ag_historyAuto": "自動圧縮",
+  "ag_historyManual": "手動圧縮",
+  "ag_historyImageMessage": "画像メッセージ",
+  "ag_historyAnswer": "あなたの回答：{answer}",
+  "@ag_historyAnswer": {
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "ag_historyPromptSet": "プロンプトセット",
+  "ag_historyImages": "生成カード · {count} 枚",
+  "@ag_historyImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_historyPromptChange": "プロンプトの変更",
+  "ag_historyParams": "生成設定",
+  "ag_historyPositions": "キャラクター位置",
+  "ag_historySettings": "設定の変更",
+  "ag_historyGallery": "ギャラリーカード",
+  "ag_historyChanges": "変更の要約"
 }

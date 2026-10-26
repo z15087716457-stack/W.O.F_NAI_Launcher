@@ -21348,4 +21348,77 @@ class AppLocalizationsJa extends AppLocalizations {
   String startup_dataActionFailed(String error) {
     return '操作に失敗しました：$error';
   }
+
+  @override
+  String get ag_answeredTitle => 'あなたへの質問 · 回答済み';
+
+  @override
+  String get ag_historyButton => '履歴';
+
+  @override
+  String get ag_historyTitle => '会話履歴';
+
+  @override
+  String get ag_historySearch => '発言とカードを検索…';
+
+  @override
+  String get ag_historyAll => 'すべて';
+
+  @override
+  String get ag_historyMine => '自分の発言';
+
+  @override
+  String get ag_historyCards => 'カード';
+
+  @override
+  String get ag_historyQuestions => '質問と回答';
+
+  @override
+  String get ag_historyKeys => '↑↓ 選択 · Enter 移動 · Esc 閉じる';
+
+  @override
+  String get ag_historyEmpty => '一致する項目はありません';
+
+  @override
+  String get ag_historyBeforeCompaction => 'この部分は圧縮前です。クリックして要約を確認。';
+
+  @override
+  String get ag_historyAuto => '自動圧縮';
+
+  @override
+  String get ag_historyManual => '手動圧縮';
+
+  @override
+  String get ag_historyImageMessage => '画像メッセージ';
+
+  @override
+  String ag_historyAnswer(String answer) {
+    return 'あなたの回答：$answer';
+  }
+
+  @override
+  String get ag_historyPromptSet => 'プロンプトセット';
+
+  @override
+  String ag_historyImages(int count) {
+    return '生成カード · $count 枚';
+  }
+
+  @override
+  String get ag_historyPromptChange => 'プロンプトの変更';
+
+  @override
+  String get ag_historyParams => '生成設定';
+
+  @override
+  String get ag_historyPositions => 'キャラクター位置';
+
+  @override
+  String get ag_historySettings => '設定の変更';
+
+  @override
+  String get ag_historyGallery => 'ギャラリーカード';
+
+  @override
+  String get ag_historyChanges => '変更の要約';
 }
