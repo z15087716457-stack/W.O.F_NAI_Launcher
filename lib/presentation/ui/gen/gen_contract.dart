@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../data/models/resources/floating_window_data.dart';
 import '../channel/channel_contract.dart';
 
 export '../channel/channel_contract.dart' show ChannelSettings;
@@ -1499,6 +1500,7 @@ class GenActions {
     required this.onTransparentChanged,
     required this.onPromptTool,
     required this.onOpenPalette,
+    this.onOpenResourceWindow,
     required this.onTranslate,
     required this.onToggleTranslation,
     required this.onTranslationSettings,
@@ -1599,6 +1601,7 @@ class GenActions {
     onTransparentChanged: (v) => log('onTransparentChanged($v)'),
     onPromptTool: (tool, value) => log('onPromptTool($tool, $value)'),
     onOpenPalette: (_) => log('onOpenPalette'),
+    onOpenResourceWindow: (kind) => log('onOpenResourceWindow($kind)'),
     onTranslate: () => log('onTranslate'),
     onToggleTranslation: () => log('onToggleTranslation'),
     onTranslationSettings: () => log('onTranslationSettings'),
@@ -1702,6 +1705,7 @@ class GenActions {
         onTransparentChanged: onTransparentChanged,
         onPromptTool: onPromptTool,
         onOpenPalette: onOpenPalette,
+        onOpenResourceWindow: onOpenResourceWindow,
         onTranslate: onTranslate,
         onToggleTranslation: onToggleTranslation,
         onTranslationSettings: onTranslationSettings,
@@ -1813,6 +1817,9 @@ class GenActions {
 
   /// 积木板按钮（现有 `PromptBlockPalette` 弹层由接线方贴着 [Rect] 弹）。
   final GenAnchorCallback onOpenPalette;
+
+  /// Resource opener contract only; header visuals are owned by the main agent.
+  final ValueChanged<FloatingResourceKind>? onOpenResourceWindow;
 
   /// 翻译当前这一面（`coordinator.translate`）。
   final VoidCallback onTranslate;

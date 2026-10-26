@@ -12,6 +12,7 @@ import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/share_image_settings_provider.dart';
 import 'package:nai_launcher/presentation/widgets/common/draggable_memory_image.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/draggable_image_card.dart';
+import 'package:nai_launcher/presentation/wiring/floating_resource_drag.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 class _TestShareImageSettingsNotifier extends ShareImageSettingsNotifier {
@@ -132,10 +133,41 @@ void main() {
     expect(_feedbackKey(tester), protectedDragFeedbackMarkerKey);
   });
 
+  testWidgets(
+    'floating gallery wrapper preserves gallery_internal original paths and native drag item',
+    (tester) async {
+      final session = _FakeDragSession();
+      addTearDown(session.dispose);
+      await tester.pumpWidget(
+        _app(
+          settings: const ShareImageSettings(protectionMode: false),
+          child: FloatingResourceDrag.gallery(
+            record: _record,
+            selectedPaths: [_record.path, r'C:\sentinel\second.png'],
+            child: const SizedBox(width: 100, height: 100),
+          ),
+        ),
+      );
+      final drag = tester.widget<DragItemWidget>(find.byType(DragItemWidget));
+      final item = await drag.dragItemProvider(
+        DragItemRequest(location: Offset.zero, session: session),
+      );
+      expect(item?.localData, {
+        'source': 'gallery_internal',
+        'path': _record.path,
+        'paths': [_record.path, r'C:\sentinel\second.png'],
+      });
+    },
+  );
+
   for (final entry in <String, Widget Function(LocalImageRecord, Uint8List)>{
     'public gallery card': (record, bytes) => DraggableImageCard(
       record: record,
       previewBytes: bytes,
+      child: const SizedBox(width: 100, height: 100),
+    ),
+    'floating gallery wrapper': (record, bytes) => FloatingResourceDrag.gallery(
+      record: record,
       child: const SizedBox(width: 100, height: 100),
     ),
     'gallery production wrapper': (record, bytes) =>

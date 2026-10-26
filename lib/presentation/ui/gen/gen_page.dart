@@ -666,7 +666,10 @@ class GenEditorColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        GenHeader(collapsible: collapsible),
+        GenHeader(
+          collapsible: collapsible,
+          onOpenResourceWindow: scope.actions.onOpenResourceWindow,
+        ),
         Expanded(
           child: GenParamDrawerHost(
             child: ClipRect(

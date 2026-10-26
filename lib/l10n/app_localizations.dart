@@ -39111,6 +39111,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'cache {minutes} min'**
   String ag_cacheWarmTtl(int minutes);
+
+  /// No description provided for @shortcut_action_open_resource_window.
+  ///
+  /// In en, this message translates to:
+  /// **'Open resource window'**
+  String get shortcut_action_open_resource_window;
 }
 
 class _AppLocalizationsDelegate

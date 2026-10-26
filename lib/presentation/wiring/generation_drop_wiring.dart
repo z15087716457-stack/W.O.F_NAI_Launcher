@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 
 import '../ui/gen/gen_contract.dart';
+import '../ui/refs/refs_contract.dart';
+import 'refs_entry_drop_target.dart';
 import '../utils/dropped_file_reader.dart';
 import '../widgets/common/app_toast.dart';
 import 'generation_reference_imports.dart';
@@ -64,19 +66,35 @@ class _GenerationDropWiringState extends ConsumerState<GenerationDropWiring> {
   }
 
   @override
-  Widget build(BuildContext context) => DropRegion(
-    formats: Formats.standardFormats,
-    hitTestBehavior: HitTestBehavior.opaque,
-    onDropOver: (event) {
-      if (busy ||
-          !event.session.allowedOperations.contains(DropOperation.copy)) {
-        return DropOperation.none;
-      }
-      ref.read(generationDropHoverProvider.notifier).state = widget.target;
-      return DropOperation.copy;
-    },
-    onDropLeave: (_) => clearHover(),
-    onPerformDrop: dropped,
-    child: widget.child,
-  );
+  Widget build(BuildContext context) {
+    final files = DropRegion(
+      formats: Formats.standardFormats,
+      hitTestBehavior: HitTestBehavior.opaque,
+      onDropOver: (event) {
+        if (busy ||
+            !event.session.allowedOperations.contains(DropOperation.copy)) {
+          return DropOperation.none;
+        }
+        ref.read(generationDropHoverProvider.notifier).state = widget.target;
+        return DropOperation.copy;
+      },
+      onDropLeave: (_) => clearHover(),
+      onPerformDrop: dropped,
+      child: widget.child,
+    );
+    if (widget.target == GenDropTarget.img2img) return files;
+    return RefsEntryDropTarget(
+      kind: widget.target == GenDropTarget.vibe
+          ? RefsKind.vibe
+          : RefsKind.precise,
+      onHover: (hover) {
+        if (hover) {
+          ref.read(generationDropHoverProvider.notifier).state = widget.target;
+        } else {
+          clearHover();
+        }
+      },
+      child: files,
+    );
+  }
 }

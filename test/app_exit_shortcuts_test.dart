@@ -10,6 +10,8 @@ import 'package:hive/hive.dart';
 import 'package:nai_launcher/app.dart';
 import 'package:nai_launcher/main.dart' show AppWindowListener;
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
+import 'package:nai_launcher/presentation/wiring/floating_resource_windows_host.dart';
 import 'package:nai_launcher/core/services/desktop_app_shutdown_service.dart';
 import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -125,6 +127,22 @@ void main() {
     final shortcuts = tester.widget<GlobalShortcuts>(
       find.byType(GlobalShortcuts),
     );
+    expect(find.byType(FloatingResourceWindowsHost), findsOneWidget);
+    expect(DefaultShortcuts.all[ShortcutIds.openResourceWindow], isEmpty);
+    expect(
+      DefaultShortcuts.getContext(ShortcutIds.openResourceWindow),
+      ShortcutContext.global,
+    );
+    shortcuts.shortcuts[ShortcutIds.openResourceWindow]!();
+    await tester.pump();
+    expect(
+      container.read(floatingResourceWindowsProvider).single.kind,
+      FloatingResourceKind.gallery,
+    );
+    container
+        .read(floatingResourceWindowsProvider.notifier)
+        .close(container.read(floatingResourceWindowsProvider).single.id);
+    await tester.pump();
     await tester.runAsync(() async {
       final cleanupStarted = Completer<void>();
       final release = Completer<void>();

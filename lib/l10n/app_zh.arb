@@ -11515,5 +11515,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "shortcut_action_open_resource_window": "打开资源小窗"
 }

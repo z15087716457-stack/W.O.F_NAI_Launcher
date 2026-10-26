@@ -22513,4 +22513,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return 'cache $minutes min';
   }
+
+  @override
+  String get shortcut_action_open_resource_window => 'Open resource window';
 }

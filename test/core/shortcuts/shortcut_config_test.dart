@@ -8,6 +8,11 @@ void main() {
     () {
       final config = ShortcutConfig.createDefault();
       for (final binding in config.bindings.values) {
+        if (binding.effectiveShortcut!.isEmpty) {
+          expect(binding.id, ShortcutIds.openResourceWindow);
+          expect(binding.context, ShortcutContext.global);
+          continue;
+        }
         expect(
           ShortcutParser.parse(binding.effectiveShortcut!),
           isNotNull,
@@ -56,6 +61,28 @@ void main() {
       expect(all.withCurrentDefaults(), all);
     },
   );
+
+  test('resource action is unassigned by default and can be customized', () {
+    final config = ShortcutConfig.createDefault();
+    expect(
+      config.getEffectiveShortcut(ShortcutIds.openResourceWindow),
+      isEmpty,
+    );
+    final customized = config.setCustomShortcut(
+      ShortcutIds.openResourceWindow,
+      'alt+w',
+    );
+    expect(
+      customized.getEffectiveShortcut(ShortcutIds.openResourceWindow),
+      'alt+w',
+    );
+    expect(
+      customized.withCurrentDefaults().getEffectiveShortcut(
+        ShortcutIds.openResourceWindow,
+      ),
+      'alt+w',
+    );
+  });
 
   test('navigation defaults follow the new rail order', () {
     final config = ShortcutConfig.createDefault();

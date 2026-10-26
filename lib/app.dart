@@ -31,6 +31,8 @@ import 'presentation/widgets/shortcuts/shortcut_aware_widget.dart';
 import 'presentation/widgets/shortcuts/shortcut_help_dialog.dart';
 import 'presentation/wiring/nai_agent_generation_host.dart';
 import 'presentation/wiring/clipboard_history_paste.dart';
+import 'presentation/wiring/floating_resource_windows_host.dart';
+import 'presentation/providers/floating_resource_windows_provider.dart';
 
 double windowCaptionHeightForRoute(String path) => switch (path) {
   AppRoutes.localGallery => 62,
@@ -163,6 +165,12 @@ class NAILauncherApp extends ConsumerWidget {
         router.go(AppRoutes.tagWiki);
       },
 
+      ShortcutIds.openResourceWindow: () {
+        ref
+            .read(floatingResourceWindowsProvider.notifier)
+            .open(FloatingResourceKind.gallery);
+      },
+
       // 全局应用快捷键
       ShortcutIds.showShortcutHelp: () {
         final dialogContext = router.routerDelegate.navigatorKey.currentContext;
@@ -219,7 +227,9 @@ class NAILauncherApp extends ConsumerWidget {
                       ref.read(themeNotifierProvider.notifier).nextTheme(),
                   child: NumpadEditingShortcuts(
                     child: TextEditingShortcuts(
-                      child: child ?? const SizedBox.shrink(),
+                      child: FloatingResourceWindowsHost(
+                        child: child ?? const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ),

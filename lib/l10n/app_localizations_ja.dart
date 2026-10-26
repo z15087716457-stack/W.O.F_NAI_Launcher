@@ -21748,4 +21748,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return 'キャッシュ寿命 $minutes 分';
   }
+
+  @override
+  String get shortcut_action_open_resource_window => 'リソースウィンドウを開く';
 }

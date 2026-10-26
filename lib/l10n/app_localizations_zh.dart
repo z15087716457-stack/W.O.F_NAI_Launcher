@@ -21502,6 +21502,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return '缓存寿命 $minutes 分钟';
   }
+
+  @override
+  String get shortcut_action_open_resource_window => '打开资源小窗';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43002,4 +43005,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ag_cacheWarmTtl(int minutes) {
     return '快取壽命 $minutes 分鐘';
   }
+
+  @override
+  String get shortcut_action_open_resource_window => '開啟資源小窗';
 }

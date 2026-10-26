@@ -21820,4 +21820,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return '캐시 수명 $minutes분';
   }
+
+  @override
+  String get shortcut_action_open_resource_window => '리소스 창 열기';
 }

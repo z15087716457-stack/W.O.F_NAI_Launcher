@@ -60,6 +60,7 @@ class ShortcutIds {
   static const String quitApp = 'quit_app';
   static const String showShortcutHelp = 'show_shortcut_help';
   static const String toggleTheme = 'toggle_theme';
+  static const String openResourceWindow = 'open_resource_window';
 
   // Vibe库快捷键
   static const String vibeImport = 'vibe_import';
@@ -152,6 +153,8 @@ class DefaultShortcuts {
     ShortcutIds.quitApp: 'ctrl+q',
     ShortcutIds.showShortcutHelp: 'f1',
     ShortcutIds.toggleTheme: 'ctrl+shift+t',
+    // Unassigned action placeholder; users/main agent can bind a shortcut.
+    ShortcutIds.openResourceWindow: '',
 
     // Vibe库
     ShortcutIds.vibeImport: 'ctrl+i',
@@ -185,6 +188,7 @@ class DefaultShortcuts {
       case ShortcutIds.quitApp:
       case ShortcutIds.showShortcutHelp:
       case ShortcutIds.toggleTheme:
+      case ShortcutIds.openResourceWindow:
         return ShortcutContext.global;
 
       // 生成页面

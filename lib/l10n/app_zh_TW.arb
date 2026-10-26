@@ -12100,5 +12100,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "shortcut_action_open_resource_window": "開啟資源小窗"
 }
