@@ -12100,5 +12100,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_workspaceFontScale": "創作區文字字號",
+  "set_promptAutocomplete": "提示詞自動補全"
 }

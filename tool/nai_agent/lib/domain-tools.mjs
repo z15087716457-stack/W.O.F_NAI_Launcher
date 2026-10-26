@@ -1,6 +1,6 @@
 import { Type } from 'typebox';
 
-export const promptSetIcons = ["film","book","star","heart","spark","camera","flag","sword","shield","bolt","flame","skull","wind","rain","snow","sun","moon","leaf","umbrella","coffee","music","mail","door","shirt","dress","hat","mask","smile","home","tree","mountain","wave","car","gift","palette"];
+export const promptSetIcons = ["film","book","star","heart","spark","camera","flag","sword","shield","bolt","flame","skull","wind","rain","snow","sun","moon","leaf","umbrella","coffee","music","mail","door","shirt","dress","hat","mask","smile","home","tree","mountain","wave","car","gift","palette","eye","hand","lips","crown","ribbon","glasses","headphones","mic","guitar","phone","key","clock","candle","lantern","potion","wand","crystal_ball","feather","flower","sakura","rose","butterfly","cat","rabbit","bird","fish","wing","halo","ghost","pumpkin","rainbow","drop","castle","torii","train","anchor","bed","bathtub","lingerie","heels","handcuffs","collar","kiss","r18"];
 const blockGenerationSettings = Type.Object({
   model: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   width: Type.Optional(Type.Union([Type.Integer(), Type.Null()])), height: Type.Optional(Type.Union([Type.Integer(), Type.Null()])),

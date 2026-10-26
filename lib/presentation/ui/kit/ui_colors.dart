@@ -39,6 +39,10 @@ class UiColors {
     required this.warn,
     required this.warnBg,
     required this.star,
+    required this.weightTop,
+    required this.weightTopInk,
+    required this.weightBottom,
+    required this.weightBottomInk,
     required this.weightUp,
     required this.weightUpInk,
     required this.weightDown,
@@ -90,6 +94,10 @@ class UiColors {
       warn: dark ? const Color(0xFFF1A10D) : const Color(0xFFB86E00),
       warnBg: dark ? const Color(0xFF2A2110) : const Color(0xFFFFF6E5),
       star: dark ? const Color(0xFFFFB224) : const Color(0xFFF5A400),
+      weightTop: dark ? const Color(0xFF3A2A10) : const Color(0xFFFFF1DC),
+      weightTopInk: dark ? const Color(0xFFFFB547) : const Color(0xFFA85B00),
+      weightBottom: dark ? const Color(0xFF10264A) : const Color(0xFFE6F0FF),
+      weightBottomInk: dark ? const Color(0xFF7CB8FF) : const Color(0xFF0057C2),
       weightUp: dark ? const Color(0xFF3A2A10) : const Color(0xFFFFF1DC),
       weightUpInk: dark ? const Color(0xFFFFB547) : const Color(0xFFA85B00),
       weightDown: dark ? const Color(0xFF10264A) : const Color(0xFFE6F0FF),
@@ -196,6 +204,10 @@ class UiColors {
   final Color star;
 
   /// 提示词权重高亮（大图信息栏）：权重大于 1 暖色、小于 1 冷色、负数红色；底色 + 权重数字色。
+  final Color weightTop;
+  final Color weightTopInk;
+  final Color weightBottom;
+  final Color weightBottomInk;
   final Color weightUp;
   final Color weightUpInk;
   final Color weightDown;

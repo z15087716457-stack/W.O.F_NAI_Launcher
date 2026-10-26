@@ -33,9 +33,18 @@ test('prompt_set schema bounds, action requirements and exact Dart icon catalog'
     {action:'read',set_id:'../outside'},
   ]) assert.equal(Value.Check(schema,bad),false,JSON.stringify(bad));
   const source = await readFile(new URL('../../../lib/core/nai_agent/prompt_set_icons.dart',import.meta.url),'utf8');
-  assert.deepEqual([...source.matchAll(/'([a-z]+)'/g)].map(m=>m[1]),promptSetIcons);
+  const catalog = await readFile(new URL('../../../lib/core/utils/prompt_icon_catalog.dart',import.meta.url),'utf8');
+  const names = raw => [...raw.matchAll(/'([a-z0-9_]+)'/g)].map(m=>m[1]);
+  const legacy = names(source.match(/const agentPromptSetGlyphNames = \[([\s\S]*?)\];/)[1]);
+  const extra = names(catalog.match(/const additionalPromptIconNames = <String>\[([\s\S]*?)\];/)[1]);
+  assert.deepEqual([...legacy, ...extra],promptSetIcons);
+  assert.equal(new Set(promptSetIcons).size,promptSetIcons.length);
   const glyphs = await readFile(new URL('../../../lib/presentation/ui/agent/agent_glyphs.dart',import.meta.url),'utf8');
-  for (const name of promptSetIcons) assert.match(glyphs,new RegExp("'"+name+"' => AgentGlyphs\\."));
+  for (const name of legacy) assert.match(glyphs,new RegExp("'"+name+"' => AgentGlyphs\\."));
+  assert.match(glyphs, /UiExtraIcons\.paths\[name\] \?\? AgentGlyphs\.book/);
+  for (const icon of extra) {
+    assert.ok(Value.Check(schema,{action:'create',...content,kind_icon:icon,items:[{icon,title:'x'},content.items[1]]}), icon);
+  }
 });
 
 test('prompt_set accepts optional per-character positions and rejects invalid shapes/ranges', () => {

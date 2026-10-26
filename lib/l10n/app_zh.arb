@@ -11515,5 +11515,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_workspaceFontScale": "创作区文字字号",
+  "set_promptAutocomplete": "提示词自动补全"
 }

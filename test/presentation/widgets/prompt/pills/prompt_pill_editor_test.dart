@@ -8,6 +8,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/presentation/wiring/blocks_platform.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/prompt_autocomplete_controller.dart';
+import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
+import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
+import 'package:nai_launcher/presentation/providers/workspace_text_settings_provider.dart';
+import 'package:nai_launcher/presentation/widgets/prompt/prompt_autocomplete_binding.dart';
+import 'package:nai_launcher/presentation/widgets/common/workspace_text_scale_scope.dart';
+import '../../../../core/autocomplete/prompt_autocomplete_controller_test.dart'
+    show candidates;
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
@@ -25,6 +34,15 @@ import 'package:nai_launcher/presentation/ui/blocks/blocks_instance.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/prompt_pill_editor.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/pills/translation_pill_view.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/unified/unified_prompt_config.dart';
+
+class _AutocompleteSource implements CompletionSource {
+  final queries = <CompletionQuery>[];
+  @override
+  Future<List<CompletionCandidate>> search(CompletionQuery query) async {
+    queries.add(query);
+    return candidates;
+  }
+}
 
 class _MemorySettings extends LocalStorageService {
   @override
@@ -52,6 +70,130 @@ class _TestBlocksPlatform extends BlocksPlatform {
 
 void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
+  for (final scope in [
+    PillScopes.main,
+    PillScopes.charPos('autocomplete-character'),
+    PillScopes.charNeg('autocomplete-character'),
+  ]) {
+    testWidgets(
+      'typed completion is opt-in and replaces current token in $scope',
+      (tester) async {
+        var services = 0;
+        final source = _AutocompleteSource();
+        PromptAutocompleteController? completion;
+        ValueChanged<int>? accept;
+        final container = await _pump(
+          tester,
+          libraryState: PromptBlockLibraryState(
+            blocks: const [],
+            folders: const [],
+          ),
+          pillScope: scope,
+          overrides: [
+            localTagExpansionServiceProvider.overrideWith((ref) {
+              services++;
+              return LocalTagExpansionService(
+                catalog: source,
+                relatedTags: source,
+                substringSearch: (_, {int limit = 40}) async => [],
+                popularSearch: ({int limit = 12}) async => [],
+              );
+            }),
+            promptAutocompleteBuilderProvider.overrideWithValue((
+              context,
+              controller,
+              onAccept,
+              child,
+            ) {
+              completion = controller;
+              accept = onAccept;
+              return child;
+            }),
+          ],
+        );
+        final field = find
+            .descendant(
+              of: find.byType(PromptPillEditor),
+              matching: find.byType(TextField),
+            )
+            .first;
+        await tester.tap(field);
+        await tester.enterText(field, 'bl');
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(services, 0);
+        expect(source.queries, isEmpty);
+        await container
+            .read(promptAutocompleteEnabledProvider.notifier)
+            .setEnabled(true);
+        await tester.pump();
+        await tester.enterText(field, '2.5::bl::');
+        tester.widget<TextField>(field).controller!.selection =
+            const TextSelection.collapsed(offset: 7);
+        await tester.pump(const Duration(milliseconds: 120));
+        expect(services, 1);
+        expect(completion!.value.visible, true);
+        expect(source.queries.last.token, 'bl');
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          '2.5::blue eyes::, ',
+        );
+        expect(
+          tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
+          true,
+        );
+        await tester.enterText(field, 'bl');
+        await tester.pump(const Duration(milliseconds: 120));
+        accept!(1);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          'blue hair, ',
+        );
+        await container
+            .read(promptAutocompleteEnabledProvider.notifier)
+            .setEnabled(false);
+        await tester.pump();
+        final queries = source.queries.length;
+        await tester.enterText(field, 're');
+        await tester.pump(const Duration(milliseconds: 200));
+        expect(source.queries.length, queries);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+  testWidgets('creative scale updates editor and inline chips exactly once', (
+    tester,
+  ) async {
+    final block = _block('scale', 'Scale chip', 'blue eyes');
+    final container = await _pump(
+      tester,
+      libraryState: PromptBlockLibraryState(blocks: [block], folders: const []),
+    );
+    container
+        .read(pillWorkspaceProvider(PillScopes.main).notifier)
+        .insertBlockAt(offset: 0, blockId: block.id);
+    await tester.pump();
+    await tester.pump();
+    final before = tester.getRect(find.text('Scale chip')).height;
+    await container.read(workspaceFontScaleProvider.notifier).setFontScale(1.5);
+    await tester.pump();
+    await tester.pump();
+    final field = find
+        .descendant(
+          of: find.byType(PromptPillEditor),
+          matching: find.byType(TextField),
+        )
+        .first;
+    expect(MediaQuery.textScalerOf(tester.element(field)).scale(10), 15);
+    expect(
+      tester.getRect(find.text('Scale chip')).height,
+      closeTo(before * 1.5, .001),
+    );
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
   const markerA = '\uE000';
   const markerB = '\uE001';
 
@@ -1669,14 +1811,16 @@ Future<ProviderContainer> _pump(
         body: SizedBox(
           width: editorWidth,
           height: 360,
-          child: PromptPillEditor(
-            pillScope: pillScope,
-            config: UnifiedPromptConfig(
-              enableSyntaxHighlight: false,
-              enableAutoFormat: autoFormat,
+          child: WorkspaceTextScaleHost(
+            child: PromptPillEditor(
+              pillScope: pillScope,
+              config: UnifiedPromptConfig(
+                enableSyntaxHighlight: false,
+                enableAutoFormat: autoFormat,
+              ),
+              allowEvolutionToggle: allowEvolutionToggle,
+              onChanged: onChanged,
             ),
-            allowEvolutionToggle: allowEvolutionToggle,
-            onChanged: onChanged,
           ),
         ),
       ),

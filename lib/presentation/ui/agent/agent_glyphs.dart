@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 export '../../../core/nai_agent/prompt_set_icons.dart';
 
 import '../kit/ui_colors.dart';
+import '../kit/ui_extra_icons.dart';
 import '../kit/ui_svg_icon.dart';
 
 /// 侧栏用到的线性图标（24 网格、1.7 描边），照抄 `.devin/mockups/agent-redesign/mock.html` 的 `const P`。
@@ -160,7 +161,7 @@ String agentPromptSetGlyph(String name) => switch (name) {
   'car' => AgentGlyphs.pscar,
   'gift' => AgentGlyphs.psgift,
   'palette' => AgentGlyphs.pspalette,
-  _ => throw ArgumentError.value(name, 'name', 'Unknown prompt-set glyph'),
+  _ => UiExtraIcons.paths[name] ?? AgentGlyphs.book,
 };
 
 /// 线性图标。

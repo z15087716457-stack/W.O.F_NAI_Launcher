@@ -11527,5 +11527,7 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_workspaceFontScale": "Creative text size",
+  "set_promptAutocomplete": "Prompt autocomplete"
 }

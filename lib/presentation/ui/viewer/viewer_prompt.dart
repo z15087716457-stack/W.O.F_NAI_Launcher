@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/weight_tier.dart';
+import '../../widgets/common/workspace_text_scale_scope.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_text.dart';
 import 'viewer_format.dart';
@@ -7,7 +9,7 @@ import 'viewer_format.dart';
 final _weight = RegExp(r'(-?\d+(?:\.\d+)?)::([\s\S]*?)::');
 final _artist = RegExp(r'artist:[^,<:\[\]\n]+');
 
-/// 提示词高亮：`1.2::…::` 权重组按大于 1 / 小于 1 / 负数分色（底色 + 权重数字），画师串强调色。
+/// 提示词高亮：权重使用共享 WeightTier 分档（底色 + 权重数字），画师串强调色。
 /// 只改样式不改字：拼回来的纯文本与原始提示词逐字一致（保留 `::`、空白和空行）。
 /// [highlight] 关掉时原样显示。
 List<InlineSpan> viewerPromptSpans(
@@ -39,11 +41,28 @@ List<InlineSpan> viewerPromptSpans(
   for (final m in _weight.allMatches(t)) {
     if (m.start > at) spans.addAll(artists(t.substring(at, m.start)));
     final w = double.tryParse(m.group(1)!) ?? 1;
-    final (bg, ink) = w < 0
-        ? (c.weightNeg, c.weightNegInk)
-        : w > 1
-        ? (c.weightUp, c.weightUpInk)
-        : (c.weightDown, c.weightDownInk);
+    final tier = weightTier(w);
+    if (tier == WeightTier.none) {
+      spans.add(
+        TextSpan(
+          children: [
+            TextSpan(text: '${m.group(1)}::'),
+            ...artists(m.group(2)!),
+            const TextSpan(text: '::'),
+          ],
+        ),
+      );
+      at = m.end;
+      continue;
+    }
+    final (bg, ink) = switch (tier) {
+      WeightTier.negative => (c.weightNeg, c.weightNegInk),
+      WeightTier.top => (c.weightTop, c.weightTopInk),
+      WeightTier.high => (c.weightUp, c.weightUpInk),
+      WeightTier.bottom => (c.weightBottom, c.weightBottomInk),
+      WeightTier.low => (c.weightDown, c.weightDownInk),
+      WeightTier.none => throw StateError('Neutral weight has no tint'),
+    };
     final mark = TextStyle(
       fontSize: 10.5,
       fontWeight: FontWeight.w500,
@@ -88,7 +107,10 @@ class ViewerPromptBox extends StatelessWidget {
   final ValueChanged<bool>? onOverflow;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      WorkspaceTextScaleScope(child: Builder(builder: _buildPrompt));
+
+  Widget _buildPrompt(BuildContext context) {
     final c = context.ui;
     final style = UiText.mono(12, color: muted ? c.muted : c.ink, height: 1.65);
     final span = TextSpan(

@@ -45,6 +45,8 @@ void main() {
       storage.values.addAll({
         StorageKeys.tagExpansionResultLimit: CompletionResultLimits.all,
         StorageKeys.fontScale: 1.3,
+        StorageKeys.workspaceFontScale: 1.5,
+        StorageKeys.promptAutocompleteEnabled: true,
         StorageKeys.thumbnailCacheLimitGb: 50,
         'token': 'fake_secret',
         StorageKeys.promptAssistantConfigJson: 'fake_model_config',
@@ -53,6 +55,8 @@ void main() {
       final values = service.decode(service.encode(service.capture()));
       expect(values[StorageKeys.tagExpansionResultLimit], 300000);
       expect(values[StorageKeys.fontScale], 1.3);
+      expect(values[StorageKeys.workspaceFontScale], 1.5);
+      expect(values[StorageKeys.promptAutocompleteEnabled], true);
       expect(values[StorageKeys.thumbnailCacheLimitGb], 50);
       for (final invalid in [0, 51, 1.5, '20']) {
         expect(
@@ -82,6 +86,8 @@ void main() {
         }),
         service.encode({'api_key': 'fake'}),
         service.encode({StorageKeys.fontScale: 10}),
+        service.encode({StorageKeys.workspaceFontScale: 1.6}),
+        service.encode({StorageKeys.promptAutocompleteEnabled: 1}),
         service.encode({StorageKeys.tagExpansionResultLimit: 0}),
         service.encode({StorageKeys.enableCooccurrenceRecommendation: 'true'}),
       ]) {

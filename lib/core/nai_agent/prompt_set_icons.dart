@@ -1,3 +1,7 @@
+import '../utils/prompt_icon_catalog.dart';
+
+const agentPromptSetIconGroups = promptSetIconGroups;
+
 /// Stable model-facing names. UI paths and the Node schema use this catalog.
 const agentPromptSetGlyphNames = [
   'film',
@@ -35,4 +39,5 @@ const agentPromptSetGlyphNames = [
   'car',
   'gift',
   'palette',
+  ...additionalPromptIconNames,
 ];

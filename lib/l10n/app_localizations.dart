@@ -39111,6 +39111,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'cache {minutes} min'**
   String ag_cacheWarmTtl(int minutes);
+
+  /// No description provided for @set_workspaceFontScale.
+  ///
+  /// In en, this message translates to:
+  /// **'Creative text size'**
+  String get set_workspaceFontScale;
+
+  /// No description provided for @set_promptAutocomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Prompt autocomplete'**
+  String get set_promptAutocomplete;
 }
 
 class _AppLocalizationsDelegate

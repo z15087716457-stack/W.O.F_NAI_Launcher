@@ -10,6 +10,7 @@ import '../providers/pill_workspace_provider.dart';
 import '../providers/tips_provider.dart';
 import '../ui/gen/gen_contract.dart';
 import '../widgets/prompt/comfyui_import_wrapper.dart';
+import '../widgets/common/workspace_text_scale_scope.dart';
 import '../widgets/prompt/pills/prompt_pill_editor.dart';
 import '../widgets/prompt/unified/unified_prompt_config.dart';
 import 'generation_backend.dart';
@@ -47,7 +48,11 @@ class GenerationEditorWiring extends ConsumerWidget {
   final bool explore;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context, WidgetRef ref) => WorkspaceTextScaleScope(
+    child: Builder(builder: (context) => _buildEditor(context, ref)),
+  );
+
+  Widget _buildEditor(BuildContext context, WidgetRef ref) {
     final model = ref.watch(
       generationParamsNotifierProvider.select((p) => p.model),
     );

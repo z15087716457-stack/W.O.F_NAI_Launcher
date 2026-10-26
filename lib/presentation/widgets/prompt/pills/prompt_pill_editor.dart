@@ -4,7 +4,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/autocomplete/autocomplete_settings.dart';
+import '../../../../core/autocomplete/prompt_autocomplete_controller.dart';
+import '../../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../../core/utils/localization_extension.dart';
+import '../../../providers/workspace_text_settings_provider.dart';
+import '../../common/workspace_text_scale_scope.dart';
+import '../prompt_autocomplete_binding.dart';
 import '../../../../core/utils/prompt_input_normalization.dart';
 import '../../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
 import '../../../prompt_assistant/services/prompt_assistant_service.dart';
@@ -57,8 +63,13 @@ class PromptPillEditor extends ConsumerStatefulWidget {
     this.onChanged,
     this.onComfyuiImport,
     this.beginComfyuiImport,
+    this.autocomplete,
+    this.autocompleteBuilder,
   });
 
+  /// Optional externally owned controller and visual adapter. No focus transfer.
+  final PromptAutocompleteController? autocomplete;
+  final PromptAutocompleteBuilder? autocompleteBuilder;
   final UnifiedPromptConfig config;
 
   /// 药丸工作区 lane（P3）：每个输入框一个独立 scope，
@@ -100,6 +111,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
   late final FocusNode _focusNode;
   final GlobalKey _fieldAreaKey = GlobalKey();
 
+  PromptAutocompleteController? _ownedAutocomplete;
   TextEditingShortcutsState? _undoRouter;
   bool _applyingExternal = false;
   int _lastValidOffset = 0;
@@ -167,6 +179,8 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       _undoRouter?.forgetPrompt(context);
     }
     if (oldWidget.pillScope != widget.pillScope) {
+      _ownedAutocomplete?.dismiss();
+      widget.autocomplete?.dismiss();
       ref
           .read(pillWorkspaceProvider(oldWidget.pillScope).notifier)
           .closeTypingGroup();
@@ -227,6 +241,7 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
   @override
   void dispose() {
+    _ownedAutocomplete?.dispose();
     _undoRouter?.forgetPrompt(context);
     _dismissInstanceCard(refresh: false);
     _translationEditor?.dismiss();
@@ -293,6 +308,30 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       ref.read(_workspace.notifier).refreshProjection();
     });
 
+    final autocompleteEnabled =
+        !widget.config.readOnly && ref.watch(promptAutocompleteEnabledProvider);
+    if (autocompleteEnabled && widget.autocomplete == null) {
+      _ownedAutocomplete ??= PromptAutocompleteController.local(
+        service: ref.read(localTagExpansionServiceProvider),
+        enabled: true,
+      );
+    }
+    _ownedAutocomplete?.enabled = autocompleteEnabled;
+    final autocomplete = autocompleteEnabled
+        ? widget.autocomplete ?? _ownedAutocomplete
+        : null;
+    final autocompleteBuilder =
+        widget.autocompleteBuilder ??
+        (autocomplete == null
+            ? null
+            : ref.watch(promptAutocompleteBuilderProvider));
+    final autoInsertComma = autocomplete == null
+        ? true
+        : ref.watch(
+            autocompleteSettingsProvider.select(
+              (value) => value.autoInsertComma,
+            ),
+          );
     final workspace = ref.watch(_workspace);
     final library = ref.watch(promptBlockLibraryNotifierProvider).valueOrNull;
 
@@ -317,64 +356,78 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
       pillVisualsSignature: _pillSignature(workspace, library),
     );
 
-    return UiPopover(
-      anchor: _instanceCardAnchor,
-      onDismiss: _dismissInstanceCard,
-      builder: (_) => BlockInstanceWiring(
-        scope: widget.pillScope,
-        marker: _instanceCardMarker!,
-        occurrence: _instanceCardOccurrence,
-        onDismiss: _dismissInstanceCard,
-        allowEvolutionToggle: widget.allowEvolutionToggle,
-      ),
-      child: DragTarget<PromptBlockDragData>(
-        onWillAcceptWithDetails: (_) => true,
-        onAcceptWithDetails: (details) =>
-            _handleDrop(details.data, details.offset),
-        builder: (context, candidateData, rejectedData) {
-          final highlighted = candidateData.isNotEmpty;
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 120),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: highlighted
-                  ? Border.all(color: Theme.of(context).colorScheme.primary)
-                  : null,
-            ),
-            child: KeyedSubtree(
-              key: _fieldAreaKey,
-              child: UnifiedPromptInput(
-                textStyle: widget.textStyle,
-                controller: _controller,
-                pillScope: widget.pillScope,
-                focusNode: _focusNode,
-                onUserEdit: (value) => ref
-                    .read(_workspace.notifier)
-                    .setText(
-                      value.text,
-                      userEdit: true,
-                      composing:
-                          value.composing.isValid &&
-                          !value.composing.isCollapsed,
-                    ),
-                onUndo: () => _restoreHistory(redo: false),
-                onRedo: () => _restoreHistory(redo: true),
-                // A source field inside a WidgetSpan owns its own caret.
-                showCursor: _focusNode.hasPrimaryFocus ? null : false,
-                config: effectiveConfig,
-                decoration: widget.decoration,
-                beginComfyuiImport: widget.beginComfyuiImport,
-                onComfyuiImport: widget.onComfyuiImport == null
-                    ? null
-                    : _handleComfyuiImport,
-                maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
-                minLines: widget.minLines ?? (widget.compact ? 1 : 2),
-                expands: false,
-                fitContent: true,
-              ),
-            ),
-          );
+    return WorkspaceTextScaleScope(
+      child: PromptAutocompleteBinding(
+        autocomplete: autocomplete,
+        controller: _controller,
+        focusNode: _focusNode,
+        locale: Localizations.localeOf(context).toLanguageTag(),
+        autoInsertComma: autoInsertComma,
+        builder: autocompleteBuilder,
+        onAccept: (value) {
+          ref.read(_workspace.notifier).closeTypingGroup();
+          _controller.value = value;
         },
+        child: UiPopover(
+          anchor: _instanceCardAnchor,
+          onDismiss: _dismissInstanceCard,
+          builder: (_) => BlockInstanceWiring(
+            scope: widget.pillScope,
+            marker: _instanceCardMarker!,
+            occurrence: _instanceCardOccurrence,
+            onDismiss: _dismissInstanceCard,
+            allowEvolutionToggle: widget.allowEvolutionToggle,
+          ),
+          child: DragTarget<PromptBlockDragData>(
+            onWillAcceptWithDetails: (_) => true,
+            onAcceptWithDetails: (details) =>
+                _handleDrop(details.data, details.offset),
+            builder: (context, candidateData, rejectedData) {
+              final highlighted = candidateData.isNotEmpty;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: highlighted
+                      ? Border.all(color: Theme.of(context).colorScheme.primary)
+                      : null,
+                ),
+                child: KeyedSubtree(
+                  key: _fieldAreaKey,
+                  child: UnifiedPromptInput(
+                    textStyle: widget.textStyle,
+                    controller: _controller,
+                    pillScope: widget.pillScope,
+                    focusNode: _focusNode,
+                    onUserEdit: (value) => ref
+                        .read(_workspace.notifier)
+                        .setText(
+                          value.text,
+                          userEdit: true,
+                          composing:
+                              value.composing.isValid &&
+                              !value.composing.isCollapsed,
+                        ),
+                    onUndo: () => _restoreHistory(redo: false),
+                    onRedo: () => _restoreHistory(redo: true),
+                    // A source field inside a WidgetSpan owns its own caret.
+                    showCursor: _focusNode.hasPrimaryFocus ? null : false,
+                    config: effectiveConfig,
+                    decoration: widget.decoration,
+                    beginComfyuiImport: widget.beginComfyuiImport,
+                    onComfyuiImport: widget.onComfyuiImport == null
+                        ? null
+                        : _handleComfyuiImport,
+                    maxLines: widget.maxLines ?? (widget.compact ? 2 : null),
+                    minLines: widget.minLines ?? (widget.compact ? 1 : 2),
+                    expands: false,
+                    fitContent: true,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
@@ -669,8 +722,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
     );
   }
 
-  Widget _withPillGap(Widget child) =>
-      Padding(padding: const EdgeInsets.symmetric(horizontal: 1), child: child);
+  Widget _withPillGap(Widget child) => WorkspaceTextScaleScope.inline(
+    Padding(padding: const EdgeInsets.symmetric(horizontal: 1), child: child),
+  );
 
   Future<void> _editTranslation(
     String marker,

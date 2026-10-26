@@ -31,6 +31,7 @@ import '../../providers/notification_settings_provider.dart';
 import '../../providers/online_gallery_blacklist_provider.dart';
 import '../../providers/proxy_settings_provider.dart';
 import '../../providers/settings_font_scale_provider.dart';
+import '../../providers/workspace_text_settings_provider.dart';
 import '../../providers/share_image_settings_provider.dart';
 import '../../providers/shortcuts_provider.dart';
 import '../../providers/simple_output_viewer_provider.dart';
@@ -43,6 +44,14 @@ import 'settings_agent.dart';
 import '../../../core/cache/thumbnail_cache_service.dart';
 
 final settingsRefreshProvider = StateProvider<int>((ref) => 0);
+
+/// Small reactive projection shared by the full settings view and isolated tests.
+final workspaceTextSettingValuesProvider = Provider<Map<SettingKey, Object>>(
+  (ref) => {
+    SettingKey.workspaceFontScale: ref.watch(workspaceFontScaleProvider),
+    SettingKey.promptAutocomplete: ref.watch(promptAutocompleteEnabledProvider),
+  },
+);
 
 String settingsSeedModel(UpscaleWorkflowSettings settings) =>
     settings.localModel.startsWith('seedvr2-')
@@ -71,6 +80,7 @@ final settingsValuesProvider = Provider<SettingsValues>((ref) {
     SettingKey.themeMode: store.getStudioThemeMode(),
     SettingKey.fontFamily: font == FontConfig.defaultFont ? 'system' : font.key,
     SettingKey.settingsFontScale: ref.watch(settingsFontScaleProvider),
+    ...ref.watch(workspaceTextSettingValuesProvider),
     SettingKey.language: AppLanguage.fromLocale(locale).storageCode,
     SettingKey.reduceMotion: ref.watch(canvasReducedMotionNotifierProvider),
     SettingKey.completionSound: sound.soundEnabled,
@@ -218,6 +228,12 @@ class SettingsValueStore {
             );
       case SettingKey.settingsFontScale:
         await ref.read(settingsFontScaleProvider.notifier).setFontScale(n);
+      case SettingKey.workspaceFontScale:
+        await ref.read(workspaceFontScaleProvider.notifier).setFontScale(n);
+      case SettingKey.promptAutocomplete:
+        await ref
+            .read(promptAutocompleteEnabledProvider.notifier)
+            .setEnabled(b);
       case SettingKey.language:
         await ref.read(localeNotifierProvider.notifier).setLocale(text!);
       case SettingKey.reduceMotion:
