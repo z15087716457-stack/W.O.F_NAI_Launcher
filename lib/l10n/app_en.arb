@@ -11464,5 +11464,6 @@
   "blocks_presetCustom": "Custom",
   "blocks_presetHint": "Applying block params also restores quality tags and UC preset. On a different model the tier is converted; Turbo follows existing handling.",
   "gen_vibeInpaintUnsupported": "Vibe does not support Inpainting and will not apply to this generation.",
-  "set_stThumbnailCacheLimit": "Thumbnail cache limit"
+  "set_stThumbnailCacheLimit": "Thumbnail cache limit",
+  "set_stThumbnailCacheLimitSub": "Total for all gallery folders. Oldest thumbnails are removed down to 80% at startup or when you clean; originals are never touched."
 }

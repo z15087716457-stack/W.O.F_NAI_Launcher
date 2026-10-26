@@ -178,6 +178,7 @@ void main() {
             masks.add(Rect.fromLTWH(row.left, row.top, 30, row.height));
           }
         }
+        masks.addAll(promptEditorSlotRegions(t));
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('gen-capture')),

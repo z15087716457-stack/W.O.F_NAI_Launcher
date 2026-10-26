@@ -22395,4 +22395,8 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_stThumbnailCacheLimit => 'Thumbnail cache limit';
+
+  @override
+  String get set_stThumbnailCacheLimitSub =>
+      'Total for all gallery folders. Oldest thumbnails are removed down to 80% at startup or when you clean; originals are never touched.';
 }

@@ -11452,5 +11452,6 @@
     }
   },
   "gen_vibeInpaintUnsupported": "Vibe は部分再描画（Inpainting）に対応していないため、今回は適用されません。",
-  "set_stThumbnailCacheLimit": "サムネイルキャッシュの上限"
+  "set_stThumbnailCacheLimit": "サムネイルキャッシュの上限",
+  "set_stThumbnailCacheLimitSub": "すべてのギャラリーフォルダの合計。起動時や手動クリーンで、古いサムネイルから上限の 80% まで削除します。元画像には触れません。"
 }

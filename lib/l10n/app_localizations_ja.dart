@@ -21631,4 +21631,8 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_stThumbnailCacheLimit => 'サムネイルキャッシュの上限';
+
+  @override
+  String get set_stThumbnailCacheLimitSub =>
+      'すべてのギャラリーフォルダの合計。起動時や手動クリーンで、古いサムネイルから上限の 80% まで削除します。元画像には触れません。';
 }

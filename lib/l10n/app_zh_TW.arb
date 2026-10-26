@@ -12037,5 +12037,6 @@
     }
   },
   "gen_vibeInpaintUnsupported": "Vibe 不支援局部重繪（Inpainting），本次不會生效。",
-  "set_stThumbnailCacheLimit": "縮圖快取上限"
+  "set_stThumbnailCacheLimit": "縮圖快取上限",
+  "set_stThumbnailCacheLimitSub": "所有圖庫目錄合計。啟動或手動清理時，從最久沒看的縮圖刪到上限的 80%，不碰原圖。"
 }

@@ -38901,6 +38901,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thumbnail cache limit'**
   String get set_stThumbnailCacheLimit;
+
+  /// No description provided for @set_stThumbnailCacheLimitSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Total for all gallery folders. Oldest thumbnails are removed down to 80% at startup or when you clean; originals are never touched.'**
+  String get set_stThumbnailCacheLimitSub;
 }
 
 class _AppLocalizationsDelegate

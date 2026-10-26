@@ -382,7 +382,7 @@ class _DropZone extends StatelessWidget {
 
 /// 风格迁移 / 精准参考冲突提示：琥珀底一行。
 class _Warn extends StatelessWidget {
-  const _Warn(this.text, {this.action});
+  const _Warn(this.text, {super.key, this.action});
   final String text;
   final Widget? action;
 
@@ -670,10 +670,12 @@ class _VibeSection extends StatelessWidget {
     final v = refs.vibes!;
     final l = context.l10n;
     final conflict = _conflict(refs);
-    final extra = (v.list.where((x) => x.enabled).length - v.freeCount).clamp(
-      0,
-      999,
-    );
+    // 局部重绘：Vibe 本次不发送、不编码、不计费（挂载和启用状态保留）。
+    final inpaint = refs.vibeSuspendedForInpaint;
+    final skipped = conflict || inpaint;
+    final extra = skipped
+        ? 0
+        : (v.list.where((x) => x.enabled).length - v.freeCount).clamp(0, 999);
     void addMenu(BuildContext ctx) => scope.controller.openMenu(
       genBelow(ctx, dy: 4),
       [
@@ -701,8 +703,12 @@ class _VibeSection extends StatelessWidget {
           key: const Key('gen-ref-vibe-row'),
           icon: StudioIcons.styleTransfer,
           name: l.gen_vibe,
-          desc: conflict ? l.gen_vibeSkipped : l.gen_vibeDesc,
-          warn: conflict,
+          desc: inpaint
+              ? l.gen_vibeInpaintUnsupported
+              : conflict
+              ? l.gen_vibeSkipped
+              : l.gen_vibeDesc,
+          warn: skipped,
           open: open,
           onToggle: onToggle,
           images: [for (final x in v.list.take(3)) x.thumb],
@@ -723,7 +729,13 @@ class _VibeSection extends StatelessWidget {
           _Body(
             key: const Key('gen-vibe-body'),
             children: [
-              if (conflict) _Warn(l.gen_vibeConflict),
+              if (inpaint)
+                _Warn(
+                  l.gen_vibeInpaintUnsupported,
+                  key: const Key('gen-vibe-inpaint-note'),
+                )
+              else if (conflict)
+                _Warn(l.gen_vibeConflict),
               if (v.list.isEmpty)
                 _DropZone(
                   text: l.gen_vibeDrop,

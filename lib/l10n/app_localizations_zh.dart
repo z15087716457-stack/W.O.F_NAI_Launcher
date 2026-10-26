@@ -21386,6 +21386,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_stThumbnailCacheLimit => '缩略图缓存上限';
+
+  @override
+  String get set_stThumbnailCacheLimitSub =>
+      '所有图库目录合计。启动或手动清理时，从最久没看的缩略图删到上限的 80%，不碰原图。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42770,4 +42774,8 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_stThumbnailCacheLimit => '縮圖快取上限';
+
+  @override
+  String get set_stThumbnailCacheLimitSub =>
+      '所有圖庫目錄合計。啟動或手動清理時，從最久沒看的縮圖刪到上限的 80%，不碰原圖。';
 }

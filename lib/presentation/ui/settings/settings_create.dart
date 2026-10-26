@@ -773,6 +773,16 @@ class SettingsStoragePage extends StatelessWidget {
               ),
             ),
             SettingKeyRow(
+              SettingKey.thumbnailCacheLimitGb,
+              title: l.set_stThumbnailCacheLimit,
+              subtitle: l.set_stThumbnailCacheLimitSub,
+              control: SetSlider(
+                SettingKey.thumbnailCacheLimitGb,
+                width: 200,
+                label: (x) => '${x.round()} GB',
+              ),
+            ),
+            SettingKeyRow(
               SettingKey.appDataPath,
               title: l.set_stAppData,
               subtitle: l.set_stAppDataSub,

@@ -21703,4 +21703,8 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_stThumbnailCacheLimit => '썸네일 캐시 한도';
+
+  @override
+  String get set_stThumbnailCacheLimitSub =>
+      '모든 갤러리 폴더 합계입니다. 시작할 때나 수동 정리 시 오래된 썸네일부터 한도의 80%까지 삭제하며 원본은 건드리지 않습니다.';
 }

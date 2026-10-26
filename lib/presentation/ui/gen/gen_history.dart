@@ -516,7 +516,25 @@ class _BatchItem extends StatelessWidget {
     final w = h * ratio;
     final time = b.time.toLocal();
     final day = GenFormat.day(context, time, now);
-    Widget image = cover == null
+    final preview = b.pendingPreview;
+    Widget image = cover == null && preview != null
+        // 流式生成：封面跟画布同一帧模糊预览，角上留小转圈（10-25 反馈）。
+        ? ClipRRect(
+            key: Key('gen-batch-stream-${b.id}'),
+            borderRadius: BorderRadius.circular(5),
+            child: Stack(
+              children: [
+                UiPreviewImage(
+                  image: preview,
+                  width: w,
+                  height: h,
+                  gaplessPlayback: true,
+                ),
+                const Positioned(right: 6, top: 6, child: UiSpinner(size: 12)),
+              ],
+            ),
+          )
+        : cover == null
         ? Container(
             width: w,
             height: h,

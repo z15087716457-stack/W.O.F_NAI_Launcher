@@ -682,6 +682,7 @@ class GenRefsData with _GenValue {
     vibeSuspendedForInpaint,
   ];
 
+  /// 局部重绘中且有启用的 Vibe：本次不发送、不编码、不计费，参考区出备注。
   final bool vibeSuspendedForInpaint;
 }
 

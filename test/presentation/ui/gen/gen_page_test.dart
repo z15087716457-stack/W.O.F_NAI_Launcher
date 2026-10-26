@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart' show GenTokenBar;
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_preview_image.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import '../../../helpers/uiux_frontend_capture.dart';
@@ -777,6 +780,25 @@ void main() {
       await g.removePointer();
     });
 
+    testWidgets('局部重绘：Vibe 行与展开区写明本次不生效，不显示附加费', (t) async {
+      final v = GenFixture.refsFull();
+      await pump(
+        t,
+        v.copyWith(
+          refs: GenRefsData(
+            img2img: v.refs.img2img,
+            vibes: v.refs.vibes,
+            vibeSuspendedForInpaint: true,
+          ),
+        ),
+      );
+      const note = 'Vibe 不支持局部重绘（Inpainting），本次不会生效。';
+      expect(find.text(note), findsOneWidget);
+      await tapKey(t, 'gen-ref-vibe-row');
+      expect(find.byKey(const Key('gen-vibe-inpaint-note')), findsOneWidget);
+      expect(find.text(note), findsNWidgets(2));
+    });
+
     testWidgets('垫底：自定义色回车提交；V4.5 不出透明图就没有这一节', (t) async {
       await pump(t);
       await tapKey(t, 'gen-display');
@@ -901,5 +923,43 @@ void main() {
       await pump(t, GenFixture.generating());
       expect(find.text('· 还剩 3 张'), findsOneWidget);
     });
+
+    testWidgets('流式生成：首图前历史封面显示同一帧模糊预览', (t) async {
+      final g = GenFixture.generating();
+      final first = g.history.batches.first;
+      final preview = MemoryImage(base64Decode(_png1x1));
+      await pump(
+        t,
+        g.copyWith(
+          history: GenHistoryData(
+            selected: 'b0',
+            batches: [
+              GenBatch(
+                id: 'b0',
+                time: first.time,
+                images: const [],
+                pending: 4,
+                pendingPreview: preview,
+              ),
+              ...g.history.batches.skip(1),
+            ],
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('gen-batch-stream-b0')), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('gen-batch-stream-b0')),
+          matching: find.byWidgetPredicate(
+            (w) => w is UiPreviewImage && identical(w.image, preview),
+          ),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('生成中'), findsNothing);
+    });
   });
 }
+
+const _png1x1 =
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
