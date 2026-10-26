@@ -43,6 +43,8 @@ String settingTitle(BuildContext context, SettingKey k) {
     SettingKey.themeMode => l.set_apTheme,
     SettingKey.fontFamily => l.set_apFont,
     SettingKey.settingsFontScale => l.set_apScale,
+    SettingKey.workspaceFontScale => l.set_workspaceFontScale,
+    SettingKey.promptAutocomplete => l.set_promptAutocomplete,
     SettingKey.language => l.set_apLanguage,
     SettingKey.reduceMotion => l.set_apReduceMotion,
     SettingKey.completionSound => l.set_apSound,
@@ -115,6 +117,7 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.themeMode => l.set_apTheme,
     SettingKey.fontFamily ||
     SettingKey.settingsFontScale ||
+    SettingKey.workspaceFontScale ||
     SettingKey.language => l.set_apText,
     SettingKey.reduceMotion ||
     SettingKey.completionSound ||
@@ -134,7 +137,8 @@ String settingSection(BuildContext context, SettingKey k) {
     SettingKey.intervalJitter => l.set_gnPace,
     SettingKey.wheelWeight ||
     SettingKey.wheelModifier ||
-    SettingKey.relatedTags => l.set_gnInput,
+    SettingKey.relatedTags ||
+    SettingKey.promptAutocomplete => l.set_gnInput,
     SettingKey.imageSavePath || SettingKey.autoSave => l.set_stSave,
     SettingKey.vibePath || SettingKey.galleryQuality => l.set_stAssets,
     SettingKey.appDataPath ||
@@ -186,7 +190,8 @@ String settingValue(BuildContext context, SettingKey k, SettingsValues v) {
     case SettingKind.number:
       final n = v.number(k);
       return switch (k) {
-        SettingKey.settingsFontScale => '${(n * 100).round()}%',
+        SettingKey.settingsFontScale ||
+        SettingKey.workspaceFontScale => '${(n * 100).round()}%',
         SettingKey.costThreshold => '${n.round()} Anlas',
         SettingKey.thumbnailCacheLimitGb => '${n.round()} GB',
         SettingKey.intervalSeconds => '${n.round()} ${l.set_unitSeconds}',
@@ -240,13 +245,15 @@ List<SettingsHit> settingsIndex(BuildContext context) {
       SettingKind.toggle => SetSwitch(k),
       SettingKind.number =>
         k == SettingKey.settingsFontScale ||
+                k == SettingKey.workspaceFontScale ||
                 k == SettingKey.intervalJitter ||
                 k.name.startsWith('seed')
             ? SetSlider(
                 k,
                 width: 140,
                 label: (x) => switch (k) {
-                  SettingKey.settingsFontScale => '${(x * 100).round()}%',
+                  SettingKey.settingsFontScale ||
+                  SettingKey.workspaceFontScale => '${(x * 100).round()}%',
                   SettingKey.intervalJitter => '±${x.round()}%',
                   SettingKey.seedCpuOffload => '${x.round()}',
                   _ => x.toStringAsFixed(2),

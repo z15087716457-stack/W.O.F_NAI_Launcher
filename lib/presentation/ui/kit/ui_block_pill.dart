@@ -2,9 +2,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/utils/prompt_icon_catalog.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/workspace_text_scale_scope.dart';
 import 'ui_colors.dart';
 import 'ui_glyph.dart';
+import 'ui_extra_icons.dart';
 import 'ui_lib_nav.dart';
 import 'ui_text.dart';
 
@@ -92,7 +95,10 @@ class UiBlockPill extends StatelessWidget {
       color.computeLuminance() > .5 ? const Color(0xFF1A1A1A) : Colors.white;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      WorkspaceTextScaleScope(child: Builder(builder: _buildPill));
+
+  Widget _buildPill(BuildContext context) {
     final c = context.ui;
     final h = large ? 24.0 : 20.0;
     final radius = large ? 6.0 : 5.0;
@@ -262,7 +268,7 @@ class UiBlockPill extends StatelessWidget {
     );
 
     Widget pill = Container(
-      height: h,
+      height: h * WorkspaceTextScaleScope.scaleOf(context),
       padding: EdgeInsets.only(
         left: large ? 6 : 4,
         right: hazardOn ? 2 : (large ? 8 : 6),
@@ -468,8 +474,8 @@ class UiBlockIcon extends StatelessWidget {
   final double size;
   final Color? color;
 
-  /// 编辑块里图标网格的顺序。
-  static const keys = [
+  /// Stable legacy order, retained by the existing ungrouped picker draft.
+  static const legacyKeys = [
     'palette', 'brush', 'draw', 'color_lens', 'image', 'photo', 'filter', //
     'person', 'face', 'groups', 'heart', 'star', 'bolt', 'fire', 'sparkle',
     'moon', 'sun', 'cloud', 'snow', 'landscape', 'city', 'home', 'park',
@@ -477,6 +483,11 @@ class UiBlockIcon extends StatelessWidget {
     'pets', 'book', 'science', 'school', 'car', 'flight', 'shield', 'build',
     'tag',
   ];
+
+  /// Complete storage/tool catalog; presentation decides which groups to show.
+  static const keys = [...legacyKeys, ...additionalPromptIconNames];
+
+  static const groups = blockIconGroups;
 
   static const _paths = <String, String>{
     'palette': UiGlyphs.palette,
@@ -541,7 +552,7 @@ class UiBlockIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ink = color ?? IconTheme.of(context).color ?? context.ui.muted;
-    final path = _paths[name];
+    final path = _paths[name] ?? UiExtraIcons.paths[name];
     if (path == null) {
       return Icon(StudioIcons.promptBlocks, size: size, color: ink);
     }

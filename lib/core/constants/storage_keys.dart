@@ -37,6 +37,8 @@ class StorageKeys {
   static const String studioThemeMode = 'studio_theme_mode';
   static const String fontFamily = 'font_family';
   static const String fontScale = 'font_scale';
+  static const String workspaceFontScale = 'workspace_font_scale';
+  static const String promptAutocompleteEnabled = 'prompt_autocomplete_enabled';
   static const String settingsFontScale = 'settings_font_scale';
   static const String locale = 'locale';
   static const String fileLoggingEnabled = 'file_logging_enabled';
@@ -235,7 +237,8 @@ class StorageKeys {
   /// 本地画廊排序字段（GallerySortField.name 字符串）
   static const String localGallerySortField = 'local_gallery_sort_field';
 
-  static const String localGallerySearchHistory = 'local_gallery_search_history';
+  static const String localGallerySearchHistory =
+      'local_gallery_search_history';
 
   /// 本地画廊排序方向（GallerySortDirection.name 字符串）
   static const String localGallerySortDirection =

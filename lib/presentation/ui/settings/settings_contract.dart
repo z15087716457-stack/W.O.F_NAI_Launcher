@@ -68,6 +68,8 @@ enum SettingKey {
   themeMode, // light / dark / system（system 是新增：跟随 Windows）
   fontFamily, // 选项由 [SettingsViewData.options] 给
   settingsFontScale, // 设置页与对话框字号 0.8–1.5
+  workspaceFontScale, // 创作文字，与界面字号独立
+  promptAutocomplete, // 本地输入补全，默认关闭
   language, // zh / zh_TW / en / ja / ko
   reduceMotion, // 现有画布“减少动态效果”（也让视觉通道停微动）
   completionSound,
@@ -217,6 +219,15 @@ class SettingSpec {
       step: .1,
       defaultValue: 1.0,
     ),
+    SettingKey.workspaceFontScale: SettingSpec._(
+      _n,
+      _ap,
+      min: .8,
+      max: 1.5,
+      step: .1,
+      defaultValue: 1.0,
+    ),
+    SettingKey.promptAutocomplete: SettingSpec._(_t, _ge, defaultValue: false),
     SettingKey.language: SettingSpec._(
       _c,
       _ap,

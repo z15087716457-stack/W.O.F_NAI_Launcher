@@ -21502,6 +21502,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return '缓存寿命 $minutes 分钟';
   }
+
+  @override
+  String get set_workspaceFontScale => '创作区文字字号';
+
+  @override
+  String get set_promptAutocomplete => '提示词自动补全';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43002,4 +43008,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ag_cacheWarmTtl(int minutes) {
     return '快取壽命 $minutes 分鐘';
   }
+
+  @override
+  String get set_workspaceFontScale => '創作區文字字號';
+
+  @override
+  String get set_promptAutocomplete => '提示詞自動補全';
 }

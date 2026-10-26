@@ -63,7 +63,8 @@ SettingsValueLabel settingsValueLabels(
     if (value is bool) return value ? l.set_on : l.set_off;
     if (value is num) {
       return switch (key) {
-        SettingKey.settingsFontScale => '${(value * 100).round()}%',
+        SettingKey.settingsFontScale ||
+        SettingKey.workspaceFontScale => '${(value * 100).round()}%',
         SettingKey.costThreshold => '${value.round()} Anlas',
         SettingKey.intervalSeconds => '${value.round()} ${l.set_unitSeconds}',
         SettingKey.intervalJitter => '±${value.round()}%',

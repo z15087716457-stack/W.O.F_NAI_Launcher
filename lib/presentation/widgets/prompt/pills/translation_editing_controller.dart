@@ -171,6 +171,7 @@ class _FieldIcons extends CustomPainter {
       final last = boxes.last;
       final icon = TagCategoryVisuals.icon(category);
       final painter = TextPainter(
+        textScaler: MediaQuery.textScalerOf(context),
         textDirection: TextDirection.ltr,
         text: TextSpan(
           text: String.fromCharCode(icon.codePoint),

@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 
 import '../../../core/utils/alias_parser.dart';
+import '../../../core/utils/weight_tier.dart';
 import '../../../core/utils/pill_document_editor.dart';
 import '../../../core/utils/localization_extension.dart';
 
@@ -416,7 +417,8 @@ class NaiSyntaxController extends TextEditingController {
   }
 
   _HighlightMark? _markForEmphasis(double emphasis) {
-    if ((emphasis - 1.0).abs() < 0.01) return null;
+    final tier = weightTier(emphasis);
+    if (tier == WeightTier.none) return null;
 
     final normalizationDistance = emphasis > 0 ? 1.0 : 0.5;
     final intensity = ((emphasis - 1.0).abs() / normalizationDistance).clamp(
@@ -424,10 +426,14 @@ class NaiSyntaxController extends TextEditingController {
       1.0,
     );
     final opacityClass = (40 * (0.2 + 0.4 * intensity)).round();
-    return _HighlightMark(
-      emphasis > 1.0 ? _HighlightTone.high : _HighlightTone.low,
-      opacityClass / 40,
-    );
+    return _HighlightMark(switch (tier) {
+      WeightTier.top => _HighlightTone.top,
+      WeightTier.high => _HighlightTone.high,
+      WeightTier.low => _HighlightTone.low,
+      WeightTier.bottom => _HighlightTone.bottom,
+      WeightTier.negative => _HighlightTone.negative,
+      WeightTier.none => throw StateError('Neutral weight has no tint'),
+    }, opacityClass / 40);
   }
 
   void _fillMarks(
@@ -504,7 +510,7 @@ class NaiSyntaxController extends TextEditingController {
   }
 }
 
-enum _HighlightTone { high, low, mid, alias }
+enum _HighlightTone { top, high, low, bottom, negative, mid, alias }
 
 enum _PipeMark { single, double }
 
@@ -541,6 +547,9 @@ class _SpanDecoration {
 /// 官网强调高亮的默认主题色。
 class NaiSyntaxColors {
   final bool isDark;
+  final Color weightTop;
+  final Color weightBottom;
+  final Color weightNegative;
   final Color highIntensityColor;
   final Color lowIntensityColor;
   final Color midIntensityColor;
@@ -548,6 +557,9 @@ class NaiSyntaxColors {
 
   const NaiSyntaxColors._({
     required this.isDark,
+    required this.weightTop,
+    required this.weightBottom,
+    required this.weightNegative,
     required this.highIntensityColor,
     required this.lowIntensityColor,
     required this.midIntensityColor,
@@ -557,6 +569,9 @@ class NaiSyntaxColors {
   factory NaiSyntaxColors.fromTheme(ThemeData theme) {
     return NaiSyntaxColors._(
       isDark: theme.brightness == Brightness.dark,
+      weightTop: const Color(0xFFED5807),
+      weightBottom: const Color(0xFF079CED),
+      weightNegative: const Color(0xFF079CED),
       highIntensityColor: const Color(0xFFED5807),
       lowIntensityColor: const Color(0xFF079CED),
       midIntensityColor: const Color(0xFF7ACC29),
@@ -566,6 +581,9 @@ class NaiSyntaxColors {
 
   int get cacheSignature => Object.hash(
     isDark,
+    weightTop,
+    weightBottom,
+    weightNegative,
     highIntensityColor,
     lowIntensityColor,
     midIntensityColor,
@@ -590,6 +608,9 @@ class NaiSyntaxColors {
 
   Color _getBackgroundColor(_HighlightMark mark) {
     final baseColor = switch (mark.tone) {
+      _HighlightTone.top => weightTop,
+      _HighlightTone.bottom => weightBottom,
+      _HighlightTone.negative => weightNegative,
       _HighlightTone.high => highIntensityColor,
       _HighlightTone.low => lowIntensityColor,
       _HighlightTone.mid => midIntensityColor,

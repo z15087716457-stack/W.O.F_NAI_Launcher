@@ -3,6 +3,41 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/widgets/prompt/nai_syntax_controller.dart';
 
 void main() {
+  testWidgets('shared weight tiers render top/high/low/bottom/negative', (
+    tester,
+  ) async {
+    late NaiSyntaxColors colors;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) {
+            colors = NaiSyntaxColors.fromTheme(Theme.of(context));
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
+    );
+    for (final (weight, color) in [
+      (2.5, colors.weightTop),
+      (1.5, colors.highIntensityColor),
+      (.7, colors.lowIntensityColor),
+      (.3, colors.weightBottom),
+      (-1.0, colors.weightNegative),
+      (2.0, colors.highIntensityColor),
+      (.5, colors.lowIntensityColor),
+    ]) {
+      final controller = NaiSyntaxController(text: '$weight::tag');
+      final spans = await _buildTextSpanChildren(tester, controller);
+      expect(_rgb(spans.single.style!.backgroundColor!), _rgb(color));
+      controller.dispose();
+    }
+    final neutral = NaiSyntaxController(text: '1::tag');
+    final spans = await _buildTextSpanChildren(tester, neutral);
+    expect(spans.last.text, 'tag');
+    expect(spans.last.style?.backgroundColor, isNull);
+    neutral.dispose();
+  });
+
   group('NaiSyntaxController official emphasis parity', () {
     testWidgets('highlights complete multi-word numerical emphasis', (
       tester,

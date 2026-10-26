@@ -30,8 +30,11 @@ class BlockIconGrid extends StatelessWidget {
     required this.selected,
     required this.color,
     required this.onChanged,
+    this.iconKeys = UiBlockIcon.legacyKeys,
   });
 
+  /// Data hook for the grouped picker; preserve the current visual draft.
+  final List<String> iconKeys;
   final String? selected;
   final Color color;
 
@@ -65,7 +68,7 @@ class BlockIconGrid extends StatelessWidget {
       child: Wrap(
         spacing: 4,
         runSpacing: 4,
-        children: [cell(null), for (final k in UiBlockIcon.keys) cell(k)],
+        children: [cell(null), for (final k in iconKeys) cell(k)],
       ),
     );
   }

@@ -21748,4 +21748,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return 'キャッシュ寿命 $minutes 分';
   }
+
+  @override
+  String get set_workspaceFontScale => '創作エリアの文字サイズ';
+
+  @override
+  String get set_promptAutocomplete => 'プロンプトの自動補完';
 }

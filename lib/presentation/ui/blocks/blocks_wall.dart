@@ -8,6 +8,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/common/studio_icons.dart';
+import '../../widgets/common/workspace_text_scale_scope.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
@@ -405,7 +406,10 @@ class BlocksWall extends StatelessWidget {
       math.max(1, ((width - 36 + 12) / (minCard(size) + 12)).floor());
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) =>
+      WorkspaceTextScaleScope(child: Builder(builder: _buildWall));
+
+  Widget _buildWall(BuildContext context) {
     final c = context.ui;
     final l10n = context.l10n;
     final scope = BlocksPageScope.of(context);

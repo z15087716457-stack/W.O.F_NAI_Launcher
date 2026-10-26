@@ -18,6 +18,7 @@ import 'presentation/providers/guest_session_provider.dart';
 import 'presentation/router/app_router.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/widgets/common/workspace_typography_scope.dart';
+import 'presentation/widgets/common/workspace_text_scale_scope.dart';
 import 'presentation/widgets/common/numpad_editing_shortcuts.dart';
 import 'presentation/widgets/common/text_editing_shortcuts.dart';
 import 'presentation/providers/locale_provider.dart';
@@ -205,21 +206,23 @@ class NAILauncherApp extends ConsumerWidget {
             // 让 Navigator 的菜单、提示与对话框位于按钮上方。
             // child 作为普通子组件直传，保证 element 在 MaterialApp
             // rebuild 时原地更新、不拆树重建。
-            return NaiAgentIntegrationScope(
-              child: WorkspaceTypographyScope(
-                child: _RouteAwareTitleBar(
-                  router: router,
-                  // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
-                  // 认证尚未建立（例如测试里）时不在这里触发它
-                  initialImmersive: () =>
-                      ref.exists(authNotifierProvider) &&
-                      !ref.read(authNotifierProvider).isAuthenticated &&
-                      !ref.read(guestSessionNotifierProvider),
-                  onToggleTheme: () =>
-                      ref.read(themeNotifierProvider.notifier).nextTheme(),
-                  child: NumpadEditingShortcuts(
-                    child: TextEditingShortcuts(
-                      child: child ?? const SizedBox.shrink(),
+            return WorkspaceTextScaleHost(
+              child: NaiAgentIntegrationScope(
+                child: WorkspaceTypographyScope(
+                  child: _RouteAwareTitleBar(
+                    router: router,
+                    // 首个路由解析前按认证状态先行判断，未登录时不先闪 Logo 标题栏；
+                    // 认证尚未建立（例如测试里）时不在这里触发它
+                    initialImmersive: () =>
+                        ref.exists(authNotifierProvider) &&
+                        !ref.read(authNotifierProvider).isAuthenticated &&
+                        !ref.read(guestSessionNotifierProvider),
+                    onToggleTheme: () =>
+                        ref.read(themeNotifierProvider.notifier).nextTheme(),
+                    child: NumpadEditingShortcuts(
+                      child: TextEditingShortcuts(
+                        child: child ?? const SizedBox.shrink(),
+                      ),
                     ),
                   ),
                 ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
 import 'package:nai_launcher/core/nai_agent/prompt_set_tools.dart';
+import 'package:nai_launcher/core/utils/prompt_icon_catalog.dart';
 
 Map<String, dynamic> promptSetInput() => {
   'action': 'create',
@@ -42,6 +43,22 @@ void main() {
   tearDown(() async {
     await dir.delete(recursive: true);
   });
+  test(
+    'all additional stable icons validate and persist including hidden NSFW keys',
+    () async {
+      for (final icon in additionalPromptIconNames) {
+        final input = promptSetInput();
+        input['kind_icon'] = icon;
+        input['items'][0]['icon'] = icon;
+        final result =
+            (await sets.execute(input, NaiAgentCancellation()))['details']
+                as Map;
+        final stored = (await sets.read(result['set_id'] as String))!;
+        expect(stored['kind_icon'], icon);
+        expect(stored['items'][0]['icon'], icon);
+      }
+    },
+  );
   test(
     'storage round trip, read strips paths, update changed indexes and preserved images',
     () async {

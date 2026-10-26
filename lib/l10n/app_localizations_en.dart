@@ -22513,4 +22513,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return 'cache $minutes min';
   }
+
+  @override
+  String get set_workspaceFontScale => 'Creative text size';
+
+  @override
+  String get set_promptAutocomplete => 'Prompt autocomplete';
 }

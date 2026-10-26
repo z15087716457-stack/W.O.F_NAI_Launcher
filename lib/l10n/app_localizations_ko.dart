@@ -21820,4 +21820,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String ag_cacheWarmTtl(int minutes) {
     return '캐시 수명 $minutes분';
   }
+
+  @override
+  String get set_workspaceFontScale => '창작 영역 글자 크기';
+
+  @override
+  String get set_promptAutocomplete => '프롬프트 자동 완성';
 }
