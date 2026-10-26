@@ -21544,4 +21544,71 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ag_historyKeyClose => '閉じる';
+
+  @override
+  String get blocks_tempLabel => '一時ブロック';
+
+  @override
+  String blocks_tempEditedByAgent(String time) {
+    return 'Agent が$timeここを編集しました。';
+  }
+
+  @override
+  String blocks_tempEditedByYou(String time) {
+    return '$timeここを編集しました。';
+  }
+
+  @override
+  String blocks_tempExplain(String title) {
+    return 'ライブラリの「$title」から切り離され、変更はこの位置だけに残ります。ライブラリや他のプロンプトの同じブロックには影響しません。';
+  }
+
+  @override
+  String get blocks_tempEdit => '編集';
+
+  @override
+  String get blocks_tempCompare => '元と比較';
+
+  @override
+  String get blocks_tempAdded => '追加';
+
+  @override
+  String blocks_tempAddedCount(int count) {
+    return '$count 語を追加';
+  }
+
+  @override
+  String get blocks_tempAddedNone => '追加なし';
+
+  @override
+  String get blocks_tempRemoved => '削除';
+
+  @override
+  String blocks_tempRemovedHint(int count) {
+    return '$count 語を削除';
+  }
+
+  @override
+  String get blocks_tempRemovedNone => '削除なし';
+
+  @override
+  String get blocks_tempRevert => '元に戻す';
+
+  @override
+  String get blocks_tempKeepEditing => '編集を続ける';
+
+  @override
+  String get blocks_tempApply => '適用';
+
+  @override
+  String get blocks_tempSaveAs => '新しいブロックとして保存';
+
+  @override
+  String get blocks_tempSaveAsHint => '保存後、この位置は新しいブロックに置き換わり、元のブロックは変わりません';
+
+  @override
+  String get blocks_tempSaveConfirm => '保存';
+
+  @override
+  String get blocks_tempShowOriginal => 'ライブラリで元を表示';
 }

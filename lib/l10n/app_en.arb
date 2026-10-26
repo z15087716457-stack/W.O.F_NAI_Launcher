@@ -11404,5 +11404,59 @@
   },
   "ag_historyKeySelect": "Select",
   "ag_historyKeyJump": "Jump to chat",
-  "ag_historyKeyClose": "Close"
+  "ag_historyKeyClose": "Close",
+  "blocks_tempLabel": "Temporary block",
+  "blocks_tempEditedByAgent": "Agent edited this{time}.",
+  "@blocks_tempEditedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempEditedByYou": "You edited this{time}.",
+  "@blocks_tempEditedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempExplain": " It is detached from \"{title}\" in the library; changes stay at this spot only. The library and other prompts using this block are unaffected.",
+  "@blocks_tempExplain": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempEdit": "Edit",
+  "blocks_tempCompare": "Compare with original",
+  "blocks_tempAdded": "Added",
+  "blocks_tempAddedCount": "{count} new tags",
+  "@blocks_tempAddedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "blocks_tempAddedNone": "Nothing added",
+  "blocks_tempRemoved": "Removed",
+  "blocks_tempRemovedHint": "{count} removed",
+  "@blocks_tempRemovedHint": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "blocks_tempRemovedNone": "Nothing removed",
+  "blocks_tempRevert": "Restore original",
+  "blocks_tempKeepEditing": "Keep editing",
+  "blocks_tempApply": "Apply",
+  "blocks_tempSaveAs": "Save as new block",
+  "blocks_tempSaveAsHint": "After saving, this spot uses the new block; the original stays unchanged",
+  "blocks_tempSaveConfirm": "Save",
+  "blocks_tempShowOriginal": "Show original in library"
 }

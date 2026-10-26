@@ -1067,6 +1067,7 @@ class BlockInstanceViewData {
     this.originalNegativeContent,
     this.editedAt,
     this.editedBy,
+    this.folders = const [],
     this.seqIndex = 0,
     this.seqCount = 1,
     this.prevText,
@@ -1102,7 +1103,12 @@ class BlockInstanceViewData {
   final String? originalContent;
   final String? originalNegativeContent;
   final DateTime? editedAt;
+
+  /// 谁改成临时块的：`agent` / `user`。
   final String? editedBy;
+
+  /// 临时块“另存为新块”可选的文件夹（树序拍平）。
+  final List<BlocksFolder> folders;
 
   /// 顺序模式：当前这批的起点（`sequenceCursor − lastRollCount`，0 起）和这批的项数；
   /// 池长是 `block.atoms.length`。

@@ -21616,4 +21616,71 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_historyKeyClose => '닫기';
+
+  @override
+  String get blocks_tempLabel => '임시 블록';
+
+  @override
+  String blocks_tempEditedByAgent(String time) {
+    return 'Agent가$time 여기를 수정했습니다.';
+  }
+
+  @override
+  String blocks_tempEditedByYou(String time) {
+    return '$time 여기를 수정했습니다.';
+  }
+
+  @override
+  String blocks_tempExplain(String title) {
+    return '라이브러리의 「$title」와 분리되어 변경은 이 위치에만 남습니다. 라이브러리와 다른 프롬프트의 같은 블록에는 영향이 없습니다.';
+  }
+
+  @override
+  String get blocks_tempEdit => '편집';
+
+  @override
+  String get blocks_tempCompare => '원본과 비교';
+
+  @override
+  String get blocks_tempAdded => '추가';
+
+  @override
+  String blocks_tempAddedCount(int count) {
+    return '$count개 단어 추가';
+  }
+
+  @override
+  String get blocks_tempAddedNone => '추가 없음';
+
+  @override
+  String get blocks_tempRemoved => '삭제';
+
+  @override
+  String blocks_tempRemovedHint(int count) {
+    return '$count개 삭제';
+  }
+
+  @override
+  String get blocks_tempRemovedNone => '삭제 없음';
+
+  @override
+  String get blocks_tempRevert => '원본으로 복원';
+
+  @override
+  String get blocks_tempKeepEditing => '계속 편집';
+
+  @override
+  String get blocks_tempApply => '적용';
+
+  @override
+  String get blocks_tempSaveAs => '새 블록으로 저장';
+
+  @override
+  String get blocks_tempSaveAsHint => '저장하면 이 위치가 새 블록으로 바뀌고 원본은 그대로 유지됩니다';
+
+  @override
+  String get blocks_tempSaveConfirm => '저장';
+
+  @override
+  String get blocks_tempShowOriginal => '라이브러리에서 원본 보기';
 }

@@ -21300,6 +21300,73 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get ag_historyKeyClose => '关闭';
+
+  @override
+  String get blocks_tempLabel => '临时块';
+
+  @override
+  String blocks_tempEditedByAgent(String time) {
+    return 'Agent$time 改过这里。';
+  }
+
+  @override
+  String blocks_tempEditedByYou(String time) {
+    return '你$time 改过这里。';
+  }
+
+  @override
+  String blocks_tempExplain(String title) {
+    return '它已和块库里的「$title」断开，改动只留在这个位置，块库和其他提示词里的同名块不受影响。';
+  }
+
+  @override
+  String get blocks_tempEdit => '编辑';
+
+  @override
+  String get blocks_tempCompare => '对比原块';
+
+  @override
+  String get blocks_tempAdded => '新增';
+
+  @override
+  String blocks_tempAddedCount(int count) {
+    return '新增 $count 个词';
+  }
+
+  @override
+  String get blocks_tempAddedNone => '没有新增';
+
+  @override
+  String get blocks_tempRemoved => '删除';
+
+  @override
+  String blocks_tempRemovedHint(int count) {
+    return '删了 $count 个词';
+  }
+
+  @override
+  String get blocks_tempRemovedNone => '没有删除';
+
+  @override
+  String get blocks_tempRevert => '还原为原块';
+
+  @override
+  String get blocks_tempKeepEditing => '继续编辑';
+
+  @override
+  String get blocks_tempApply => '应用修改';
+
+  @override
+  String get blocks_tempSaveAs => '另存为新块';
+
+  @override
+  String get blocks_tempSaveAsHint => '另存为新块后，这里会换成新块，原块保持不变';
+
+  @override
+  String get blocks_tempSaveConfirm => '保存并转正';
+
+  @override
+  String get blocks_tempShowOriginal => '在块库中查看原块';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -42598,4 +42665,71 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_historyKeyClose => '關閉';
+
+  @override
+  String get blocks_tempLabel => '臨時塊';
+
+  @override
+  String blocks_tempEditedByAgent(String time) {
+    return 'Agent$time 改過這裡。';
+  }
+
+  @override
+  String blocks_tempEditedByYou(String time) {
+    return '你$time 改過這裡。';
+  }
+
+  @override
+  String blocks_tempExplain(String title) {
+    return '它已和塊庫裡的「$title」斷開，改動只留在這個位置，塊庫和其他提示詞裡的同名塊不受影響。';
+  }
+
+  @override
+  String get blocks_tempEdit => '編輯';
+
+  @override
+  String get blocks_tempCompare => '對比原塊';
+
+  @override
+  String get blocks_tempAdded => '新增';
+
+  @override
+  String blocks_tempAddedCount(int count) {
+    return '新增 $count 個詞';
+  }
+
+  @override
+  String get blocks_tempAddedNone => '沒有新增';
+
+  @override
+  String get blocks_tempRemoved => '刪除';
+
+  @override
+  String blocks_tempRemovedHint(int count) {
+    return '刪了 $count 個詞';
+  }
+
+  @override
+  String get blocks_tempRemovedNone => '沒有刪除';
+
+  @override
+  String get blocks_tempRevert => '還原為原塊';
+
+  @override
+  String get blocks_tempKeepEditing => '繼續編輯';
+
+  @override
+  String get blocks_tempApply => '應用修改';
+
+  @override
+  String get blocks_tempSaveAs => '另存為新塊';
+
+  @override
+  String get blocks_tempSaveAsHint => '另存為新塊後，這裡會換成新塊，原塊保持不變';
+
+  @override
+  String get blocks_tempSaveConfirm => '儲存並轉正';
+
+  @override
+  String get blocks_tempShowOriginal => '在塊庫中檢視原塊';
 }

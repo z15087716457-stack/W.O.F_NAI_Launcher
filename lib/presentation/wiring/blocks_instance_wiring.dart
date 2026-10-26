@@ -131,6 +131,9 @@ class BlockInstanceWiring extends ConsumerWidget {
           originalNegativeContent: instance.temp?.originalNegativeContent,
           editedAt: instance.temp?.editedAt,
           editedBy: instance.temp?.editedBy,
+          folders: instance.temporary
+              ? blockFoldersOf(library, const {})
+              : const [],
           locked: source.instance.locked,
           enabled: instance.enabled,
           drawn: blockDrawnOf(send),

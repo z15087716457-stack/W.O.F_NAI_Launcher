@@ -15,6 +15,7 @@ import '../kit/ui_text.dart';
 import 'blocks_contract.dart';
 import 'blocks_format.dart';
 import 'blocks_parts.dart';
+import 'blocks_temp_card.dart';
 
 /// 点开药丸的实例卡（宽 348）。“调整”进抽取规则面板（宽 452），同一个浮层里切换，点“完成”才写回。
 ///
@@ -45,6 +46,13 @@ class _BlockInstanceCardState extends State<BlockInstanceCard> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.data.temporary) {
+      return BlockTempCard(
+        key: const Key('block-temp-card'),
+        data: widget.data,
+        actions: widget.actions,
+      );
+    }
     final reduce = MediaQuery.disableAnimationsOf(context);
     return AnimatedSwitcher(
       duration: reduce ? Duration.zero : const Duration(milliseconds: 180),
@@ -115,7 +123,7 @@ class _CardState extends State<_Card> {
       if (a.onExpand != null)
         UiMenuItem(
           key: const Key('block-card-expand'),
-          glyph: UiGlyphs.expand,
+          glyph: UiGlyphs.unfold,
           label: l10n.blocks_expandToText,
           onTap: a.onExpand!,
         ),

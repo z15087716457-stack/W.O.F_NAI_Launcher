@@ -22304,4 +22304,72 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ag_historyKeyClose => 'Close';
+
+  @override
+  String get blocks_tempLabel => 'Temporary block';
+
+  @override
+  String blocks_tempEditedByAgent(String time) {
+    return 'Agent edited this$time.';
+  }
+
+  @override
+  String blocks_tempEditedByYou(String time) {
+    return 'You edited this$time.';
+  }
+
+  @override
+  String blocks_tempExplain(String title) {
+    return ' It is detached from \"$title\" in the library; changes stay at this spot only. The library and other prompts using this block are unaffected.';
+  }
+
+  @override
+  String get blocks_tempEdit => 'Edit';
+
+  @override
+  String get blocks_tempCompare => 'Compare with original';
+
+  @override
+  String get blocks_tempAdded => 'Added';
+
+  @override
+  String blocks_tempAddedCount(int count) {
+    return '$count new tags';
+  }
+
+  @override
+  String get blocks_tempAddedNone => 'Nothing added';
+
+  @override
+  String get blocks_tempRemoved => 'Removed';
+
+  @override
+  String blocks_tempRemovedHint(int count) {
+    return '$count removed';
+  }
+
+  @override
+  String get blocks_tempRemovedNone => 'Nothing removed';
+
+  @override
+  String get blocks_tempRevert => 'Restore original';
+
+  @override
+  String get blocks_tempKeepEditing => 'Keep editing';
+
+  @override
+  String get blocks_tempApply => 'Apply';
+
+  @override
+  String get blocks_tempSaveAs => 'Save as new block';
+
+  @override
+  String get blocks_tempSaveAsHint =>
+      'After saving, this spot uses the new block; the original stays unchanged';
+
+  @override
+  String get blocks_tempSaveConfirm => 'Save';
+
+  @override
+  String get blocks_tempShowOriginal => 'Show original in library';
 }

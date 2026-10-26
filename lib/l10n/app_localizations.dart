@@ -38751,6 +38751,120 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get ag_historyKeyClose;
+
+  /// No description provided for @blocks_tempLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Temporary block'**
+  String get blocks_tempLabel;
+
+  /// No description provided for @blocks_tempEditedByAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent edited this{time}.'**
+  String blocks_tempEditedByAgent(String time);
+
+  /// No description provided for @blocks_tempEditedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You edited this{time}.'**
+  String blocks_tempEditedByYou(String time);
+
+  /// No description provided for @blocks_tempExplain.
+  ///
+  /// In en, this message translates to:
+  /// **' It is detached from \"{title}\" in the library; changes stay at this spot only. The library and other prompts using this block are unaffected.'**
+  String blocks_tempExplain(String title);
+
+  /// No description provided for @blocks_tempEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get blocks_tempEdit;
+
+  /// No description provided for @blocks_tempCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare with original'**
+  String get blocks_tempCompare;
+
+  /// No description provided for @blocks_tempAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get blocks_tempAdded;
+
+  /// No description provided for @blocks_tempAddedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} new tags'**
+  String blocks_tempAddedCount(int count);
+
+  /// No description provided for @blocks_tempAddedNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing added'**
+  String get blocks_tempAddedNone;
+
+  /// No description provided for @blocks_tempRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get blocks_tempRemoved;
+
+  /// No description provided for @blocks_tempRemovedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} removed'**
+  String blocks_tempRemovedHint(int count);
+
+  /// No description provided for @blocks_tempRemovedNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing removed'**
+  String get blocks_tempRemovedNone;
+
+  /// No description provided for @blocks_tempRevert.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore original'**
+  String get blocks_tempRevert;
+
+  /// No description provided for @blocks_tempKeepEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep editing'**
+  String get blocks_tempKeepEditing;
+
+  /// No description provided for @blocks_tempApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get blocks_tempApply;
+
+  /// No description provided for @blocks_tempSaveAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Save as new block'**
+  String get blocks_tempSaveAs;
+
+  /// No description provided for @blocks_tempSaveAsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After saving, this spot uses the new block; the original stays unchanged'**
+  String get blocks_tempSaveAsHint;
+
+  /// No description provided for @blocks_tempSaveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get blocks_tempSaveConfirm;
+
+  /// No description provided for @blocks_tempShowOriginal.
+  ///
+  /// In en, this message translates to:
+  /// **'Show original in library'**
+  String get blocks_tempShowOriginal;
 }
 
 class _AppLocalizationsDelegate
