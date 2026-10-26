@@ -8,13 +8,14 @@ final _weight = RegExp(r'(-?\d+(?:\.\d+)?)::([\s\S]*?)::');
 final _artist = RegExp(r'artist:[^,<:\[\]\n]+');
 
 /// 提示词高亮：`1.2::…::` 权重组按大于 1 / 小于 1 / 负数分色（底色 + 权重数字），画师串强调色。
-/// [highlight] 关掉时原样显示。空行合并成一行。
+/// 只改样式不改字：拼回来的纯文本与原始提示词逐字一致（保留 `::`、空白和空行）。
+/// [highlight] 关掉时原样显示。
 List<InlineSpan> viewerPromptSpans(
   String text, {
   required UiColors c,
   required bool highlight,
 }) {
-  final t = text.trim().replaceAll(RegExp(r'\n{2,}'), '\n');
+  final t = text;
   if (!highlight) return [TextSpan(text: t)];
   List<InlineSpan> artists(String s) {
     final out = <InlineSpan>[];
@@ -43,19 +44,20 @@ List<InlineSpan> viewerPromptSpans(
         : w > 1
         ? (c.weightUp, c.weightUpInk)
         : (c.weightDown, c.weightDownInk);
+    final mark = TextStyle(
+      fontSize: 10.5,
+      fontWeight: FontWeight.w500,
+      color: ink.withValues(alpha: .85),
+    );
     spans.add(
       TextSpan(
-        style: TextStyle(background: Paint()..color = bg),
+        style: TextStyle(
+          background: Paint()..color = uiSelectableTint(bg, c.card),
+        ),
         children: [
-          TextSpan(
-            text: '${m.group(1)} ',
-            style: TextStyle(
-              fontSize: 10.5,
-              fontWeight: FontWeight.w500,
-              color: ink.withValues(alpha: .85),
-            ),
-          ),
+          TextSpan(text: '${m.group(1)}::', style: mark),
           ...artists(m.group(2)!),
+          TextSpan(text: '::', style: mark),
         ],
       ),
     );

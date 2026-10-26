@@ -506,7 +506,7 @@ class _BodyState extends State<_Body> {
                 ViewerPromptBox(
                   muted: true,
                   prefix: l10n.imageViewer_characterNegative,
-                  spans: [TextSpan(text: ch.negative.trim())],
+                  spans: [TextSpan(text: ch.negative)],
                 ),
             ],
           ),
@@ -537,9 +537,7 @@ class _BodyState extends State<_Body> {
               ),
               ViewerPromptBox(
                 muted: true,
-                spans: [
-                  TextSpan(text: shown(ViewerPart.negative, d.negative).trim()),
-                ],
+                spans: [TextSpan(text: shown(ViewerPart.negative, d.negative))],
                 maxLines: _negFull ? null : 3,
                 onOverflow: (v) {
                   if (v != _negOver && mounted) setState(() => _negOver = v);

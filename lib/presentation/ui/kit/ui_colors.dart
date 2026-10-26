@@ -215,3 +215,17 @@ class UiColors {
 extension UiColorsContext on BuildContext {
   UiColors get ui => UiColors.of(this);
 }
+
+/// 可框选文字的行内底色：半透明色叠在 [base] 上与不透明的 [target] 看起来一样。
+/// Flutter 的段落先画选区、再画带 `background` 的文字，不透明底色会盖住选区，
+/// 框选时像“穿过”了这些词（10-24 反馈）；按 [alpha] 透出选区。
+Color uiSelectableTint(Color target, Color base, [double alpha = .35]) {
+  int ch(double t, double b) =>
+      ((t - (1 - alpha) * b) / alpha * 255).round().clamp(0, 255);
+  return Color.fromARGB(
+    (alpha * 255).round(),
+    ch(target.r, base.r),
+    ch(target.g, base.g),
+    ch(target.b, base.b),
+  );
+}

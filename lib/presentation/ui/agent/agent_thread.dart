@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:markdown/markdown.dart' as md;
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../l10n/app_localizations.dart';
@@ -1229,10 +1230,11 @@ class AgentMarkdown extends StatelessWidget {
           border: Border(left: BorderSide(color: c.border, width: 3)),
         ),
         blockquotePadding: const EdgeInsets.only(left: 10),
+        // 行内代码底色半透明，框选时不盖住选区（10-24 反馈）。
         code: UiText.mono(
           12,
           color: c.ink,
-        ).copyWith(backgroundColor: c.control),
+        ).copyWith(backgroundColor: uiSelectableTint(c.control, c.panel)),
         codeblockPadding: const EdgeInsets.all(10),
         codeblockDecoration: BoxDecoration(
           color: agentSunk(c),
@@ -1248,6 +1250,7 @@ class AgentMarkdown extends StatelessWidget {
         pPadding: EdgeInsets.zero,
         blockSpacing: 8,
       ),
+      builders: {'pre': _AgentCodeBlockBuilder(c)},
       imageBuilder: (uri, title, alt) => Tooltip(
         message: uri.toString(),
         child: AgentIcon(AgentGlyphs.image, size: 16, color: c.faint),
@@ -1257,6 +1260,101 @@ class AgentMarkdown extends StatelessWidget {
           (onOpenLink ?? AgentScope.of(context).actions.onOpenLink)(href);
         }
       },
+    );
+  }
+}
+
+/// 围栏代码块：自动换行（不再横向滚动）+ 右上角单块复制。
+/// 复制的是块内原文（不含围栏、语言名），软换行不插入换行符。
+class _AgentCodeBlockBuilder extends MarkdownElementBuilder {
+  _AgentCodeBlockBuilder(this.c);
+  final UiColors c;
+
+  @override
+  bool isBlockElement() => true;
+
+  @override
+  Widget? visitElementAfterWithContext(
+    BuildContext context,
+    md.Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle,
+  ) {
+    final code = element.children?.firstOrNull;
+    final lang = code is md.Element
+        ? (code.attributes['class'] ?? '').replaceFirst('language-', '')
+        : '';
+    var text = element.textContent;
+    if (text.endsWith('\n')) {
+      text = text.substring(0, text.length - 1);
+    }
+    return AgentCodeBlock(text: text, language: lang);
+  }
+}
+
+class AgentCodeBlock extends StatefulWidget {
+  const AgentCodeBlock({super.key, required this.text, this.language = ''});
+  final String text;
+  final String language;
+
+  @override
+  State<AgentCodeBlock> createState() => _AgentCodeBlockState();
+}
+
+class _AgentCodeBlockState extends State<AgentCodeBlock> {
+  var _copied = false;
+  var _serial = 0;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.text));
+    if (!mounted) return;
+    final serial = ++_serial;
+    setState(() => _copied = true);
+    await Future<void>.delayed(const Duration(milliseconds: 1400));
+    if (mounted && serial == _serial) setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final lang = widget.language;
+    return Container(
+      key: const Key('agent-code-block'),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: agentSunk(c),
+        borderRadius: BorderRadius.circular(9),
+        border: Border.all(color: c.line),
+      ),
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 34, 10),
+            child: Text(
+              widget.text,
+              softWrap: true,
+              style: UiText.mono(12, color: c.ink, height: 1.55),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: AgentIconButton(
+              key: const Key('agent-code-copy'),
+              small: true,
+              glyph: _copied ? AgentGlyphs.check : AgentGlyphs.copy,
+              color: _copied ? c.ok : null,
+              tooltip: _copied
+                  ? l.ag_copied
+                  : lang.isEmpty
+                  ? l.ag_copy
+                  : '${l.ag_copy} · $lang',
+              onPressed: _copy,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_prompt.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import '../../../helpers/approved_visual_regions.dart';
@@ -268,6 +269,25 @@ void main() {
                 ),
               );
             }
+          }
+        }
+        // 10-24 B07: prompt boxes now show the raw text (keeps `::`, blank
+        // lines and edge whitespace), so they grow and push the rest of the
+        // info column down. Exclude the info viewport from the first prompt
+        // box downward; viewer_prompt_fidelity_test covers that content.
+        final boxes = find.byType(ViewerPromptBox);
+        if (scroll.evaluate().isNotEmpty && boxes.evaluate().isNotEmpty) {
+          final viewport = t.getRect(scroll);
+          final top = t.getRect(boxes.first).top;
+          if (top < viewport.bottom) {
+            approved.add(
+              Rect.fromLTRB(
+                viewport.left,
+                top.clamp(viewport.top, viewport.bottom),
+                viewport.right,
+                viewport.bottom,
+              ),
+            );
           }
         }
         await expectOutsideApprovedRegions(
