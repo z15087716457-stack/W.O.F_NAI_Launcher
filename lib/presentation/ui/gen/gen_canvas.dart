@@ -1497,70 +1497,79 @@ class _DisplayPopover extends StatelessWidget {
     final channel = cv.channel;
     final onChannel = scope.actions.onChannelChanged;
     final showChannel = channel != null && onChannel != null;
+    // 窗口矮时弹层被限高（浮层可用高度 − 8）：内容改为内部滚动，
+    // 不再被裁掉底部几节（10-25 反馈）。
     return UiPopoverSurface(
       key: const Key('gen-display-popover'),
       width: showChannel ? 316 : 260,
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: 10,
-        children: [
-          if (cv.backdrop case final bd?) ...[
-            Text(
-              l.gen_backdrop,
-              style: UiText.sans(12, weight: FontWeight.w600, color: c.muted),
-            ),
-            Text(
-              l.gen_backdropSub,
-              style: UiText.sans(11.5, color: c.faint, height: 1.35),
-            ),
-            Wrap(
-              spacing: 4,
-              runSpacing: 4,
-              children: [
-                for (final b in GenBackdrop.presets) swatch(b),
-                if (bd.startsWith('#')) swatch(bd),
-              ],
-            ),
-            _HexField(current: bd),
-            Container(height: 1, color: c.line),
-          ],
-          UiPressable(
-            key: const Key('gen-zoom-fill'),
-            onTap: () => scope.actions.onZoomToFillChanged(!cv.zoomToFill),
-            builder: (context, _) => Row(
-              spacing: 10,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l.gen_zoomToFill,
-                        style: UiText.sans(13, color: c.ink),
-                      ),
-                      Text(
-                        l.gen_zoomToFillSub,
-                        style: UiText.sans(11.5, color: c.muted, height: 1.35),
-                      ),
-                    ],
+      child: SingleChildScrollView(
+        key: const Key('gen-display-scroll'),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: 10,
+          children: [
+            if (cv.backdrop case final bd?) ...[
+              Text(
+                l.gen_backdrop,
+                style: UiText.sans(12, weight: FontWeight.w600, color: c.muted),
+              ),
+              Text(
+                l.gen_backdropSub,
+                style: UiText.sans(11.5, color: c.faint, height: 1.35),
+              ),
+              Wrap(
+                spacing: 4,
+                runSpacing: 4,
+                children: [
+                  for (final b in GenBackdrop.presets) swatch(b),
+                  if (bd.startsWith('#')) swatch(bd),
+                ],
+              ),
+              _HexField(current: bd),
+              Container(height: 1, color: c.line),
+            ],
+            UiPressable(
+              key: const Key('gen-zoom-fill'),
+              onTap: () => scope.actions.onZoomToFillChanged(!cv.zoomToFill),
+              builder: (context, _) => Row(
+                spacing: 10,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l.gen_zoomToFill,
+                          style: UiText.sans(13, color: c.ink),
+                        ),
+                        Text(
+                          l.gen_zoomToFillSub,
+                          style: UiText.sans(
+                            11.5,
+                            color: c.muted,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                UiSwitch(value: cv.zoomToFill),
-              ],
+                  UiSwitch(value: cv.zoomToFill),
+                ],
+              ),
             ),
-          ),
-          if (showChannel) ...[
-            Container(height: 1, color: c.line),
-            ChannelSettingsSection(
-              settings: channel,
-              onChanged: onChannel,
-              anchorY: cv.channelTop,
-              generating: scope.data.generate.state == GenRunState.generating,
-            ),
+            if (showChannel) ...[
+              Container(height: 1, color: c.line),
+              ChannelSettingsSection(
+                settings: channel,
+                onChanged: onChannel,
+                anchorY: cv.channelTop,
+                generating: scope.data.generate.state == GenRunState.generating,
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

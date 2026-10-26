@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 
@@ -75,3 +76,16 @@ Future<void> expectOutsideApprovedRegions(
         '$baseline: $changed pixels changed outside approved regions ($excluded pixels); bounds=$bounds',
   );
 }
+
+/// 10-25: the inline prompt clear x was removed, so editor text reflows into
+/// the freed 20px. Only the prompt editor slots (`gen-editor-*`) are excluded.
+List<Rect> promptEditorSlotRegions(WidgetTester tester) => [
+  for (final e in find
+      .byWidgetPredicate(
+        (w) =>
+            w.key is ValueKey<String> &&
+            (w.key! as ValueKey<String>).value.startsWith('gen-editor-'),
+      )
+      .evaluate())
+    tester.getRect(find.byWidget(e.widget)),
+];

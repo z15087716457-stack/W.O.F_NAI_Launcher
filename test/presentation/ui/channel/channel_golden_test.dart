@@ -102,6 +102,7 @@ void main() {
           );
           text.dispose();
         }
+        masks.addAll(promptEditorSlotRegions(t));
         await expectOutsideApprovedRegions(
           t,
           find.byKey(const Key('gen-capture')),

@@ -734,6 +734,32 @@ void main() {
       expect(r.last('onZoomToFillChanged'), 'onZoomToFillChanged(true)');
     });
 
+    testWidgets('显示设置：矮窗口里内部滚动，底部几节不被裁掉', (t) async {
+      final v = GenFixture.view();
+      await pump(
+        t,
+        v.copyWith(canvas: v.canvas.withChannel(const ChannelSettings())),
+        1100,
+        620,
+      );
+      await tapKey(t, 'gen-display');
+      final pop = t.getRect(find.byKey(const Key('gen-display-popover')));
+      expect(pop.height, lessThanOrEqualTo(620));
+      expect(t.takeException(), isNull);
+      final scroll = find.byKey(const Key('gen-display-scroll'));
+      expect(scroll, findsOneWidget);
+      final last = find.byKey(const Key('gen-zoom-fill'));
+      await t.scrollUntilVisible(
+        find.byKey(const Key('channel-motion')),
+        80,
+        scrollable: find
+            .descendant(of: scroll, matching: find.byType(Scrollable))
+            .first,
+      );
+      expect(last, findsOneWidget);
+      expect(t.takeException(), isNull);
+    });
+
     testWidgets('垫底：自定义色回车提交；V4.5 不出透明图就没有这一节', (t) async {
       await pump(t);
       await tapKey(t, 'gen-display');
