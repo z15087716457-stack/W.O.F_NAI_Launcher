@@ -234,7 +234,9 @@ class _CardState extends State<_Card> {
             ),
           );
 
-    final pool = b.atoms.length;
+    final pool = b.primaryAtoms.length;
+    // 纯负面块没有正面页，固定模式直接显示负面内容。
+    final showNegative = _negative || b.atoms.isEmpty;
     final body = <Widget>[
       if (s.mode != BlockMode.fixed)
         Row(
@@ -264,7 +266,7 @@ class _CardState extends State<_Card> {
         BlockLabel(
           l10n.blocks_content,
           count: l10n.blocks_items(
-            _negative ? b.negativeAtoms.length : b.atoms.length,
+            showNegative ? b.negativeAtoms.length : b.atoms.length,
           ),
           trailing: b.hasNegative && b.atoms.isNotEmpty
               ? BlockSeg<bool>(
@@ -280,7 +282,7 @@ class _CardState extends State<_Card> {
               : null,
         ),
         BlockAtoms(
-          _negative ? b.negativeAtoms : b.atoms,
+          showNegative ? b.negativeAtoms : b.atoms,
           mono: true,
           fontSize: 11,
           max: 24,
@@ -579,11 +581,12 @@ class _CardState extends State<_Card> {
     final c = context.ui;
     final l10n = context.l10n;
     final col = d.block.color;
-    final total = math.max(1, d.block.atoms.length);
+    final atoms = d.block.primaryAtoms;
+    final total = math.max(1, atoms.length);
     final cur = d.seqIndex.clamp(0, total - 1);
     final current = d.drawn.isNotEmpty
         ? d.drawn
-        : [BlockDrawn(d.block.atoms.isEmpty ? '' : d.block.atoms[cur])];
+        : [BlockDrawn(atoms.isEmpty ? '' : atoms[cur])];
     Widget step(String glyph, int delta, Key key, String tip) => UiPressable(
       key: key,
       onTap: () => a.onStep(delta),
@@ -922,7 +925,7 @@ class _RulesPanelState extends State<_RulesPanel> {
     final l10n = context.l10n;
     final b = widget.data.block;
     final s = _s;
-    final pool = b.atoms.length;
+    final pool = b.primaryAtoms.length;
 
     Widget section(List<Widget> children, {Color? color, Key? key}) =>
         Container(

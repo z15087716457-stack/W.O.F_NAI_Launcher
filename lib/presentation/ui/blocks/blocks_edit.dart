@@ -707,12 +707,18 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
                                     spacing: 3,
                                     children: [
                                       BlockPill(_shown, look: look),
-                                      Text(
-                                        BlocksFormat.look(context, look),
-                                        style: UiText.sans(
-                                          11,
-                                          color: on ? c.accent : c.muted,
-                                          height: 1.2,
+                                      // 固定 46 高：长名称（如日文）缩小，不换行撑破。
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          BlocksFormat.look(context, look),
+                                          maxLines: 1,
+                                          softWrap: false,
+                                          style: UiText.sans(
+                                            11,
+                                            color: on ? c.accent : c.muted,
+                                            height: 1.2,
+                                          ),
                                         ),
                                       ),
                                     ],
@@ -1244,6 +1250,7 @@ class _TagPickerState extends State<_TagPicker> {
       width: 260,
       padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
         children: [
@@ -1264,41 +1271,54 @@ class _TagPickerState extends State<_TagPicker> {
             Container(height: 1, color: c.line),
           ],
           BlockLabel(l10n.blocks_newTag),
-          UiTextInput(
-            key: const Key('block-tag-name'),
-            value: '',
-            submitOnBlur: false,
-            hint: l10n.blocks_tagName,
-            height: 30,
-            onChanged: (v) => setState(() => _name = v),
-            onSubmitted: (v) {
-              if (v.trim().isNotEmpty) {
-                widget.onPick(BlockTag(v.trim(), _color));
-              }
-            },
-          ),
-          Row(
-            spacing: 7,
-            children: [
-              for (final col in _palette)
-                UiPressable(
-                  onTap: () => setState(() => _color = col),
-                  builder: (_, _) => Container(
-                    width: 18,
-                    height: 18,
-                    decoration: BoxDecoration(
-                      color: col,
-                      shape: BoxShape.circle,
-                      boxShadow: col == _color
-                          ? [
-                              BoxShadow(color: col, spreadRadius: 3.5),
-                              BoxShadow(color: c.raised, spreadRadius: 2),
-                            ]
-                          : null,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final col in _palette)
+                  UiPressable(
+                    key: Key(
+                      'block-tag-color-${col.toARGB32().toRadixString(16)}',
+                    ),
+                    onTap: () => setState(() => _color = col),
+                    builder: (_, _) => Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: col,
+                        shape: BoxShape.circle,
+                        boxShadow: col == _color
+                            ? [
+                                BoxShadow(color: col, spreadRadius: 3.5),
+                                BoxShadow(color: c.raised, spreadRadius: 2),
+                              ]
+                            : null,
+                      ),
                     ),
                   ),
+              ],
+            ),
+          ),
+          // 名称与添加并排；色板在上方独占一行均分宽度，任何语言／字号都不溢出。
+          Row(
+            spacing: 8,
+            children: [
+              Expanded(
+                child: UiTextInput(
+                  key: const Key('block-tag-name'),
+                  value: '',
+                  submitOnBlur: false,
+                  hint: l10n.blocks_tagName,
+                  height: 30,
+                  onChanged: (v) => setState(() => _name = v),
+                  onSubmitted: (v) {
+                    if (v.trim().isNotEmpty) {
+                      widget.onPick(BlockTag(v.trim(), _color));
+                    }
+                  },
                 ),
-              const Spacer(),
+              ),
               UiBtn(
                 key: const Key('block-tag-create'),
                 size: UiBtnSize.small,

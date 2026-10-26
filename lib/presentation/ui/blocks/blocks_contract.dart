@@ -256,7 +256,10 @@ class BlockData {
   final bool readingNeedsReview;
 
   /// 项数：正面原子数；只有负面的块（负面词块）算负面原子数。
-  int get itemCount => atoms.isEmpty ? negativeAtoms.length : atoms.length;
+  int get itemCount => primaryAtoms.length;
+
+  /// 实例实际抽取的内容：纯负面块（负面词块）只在负面一侧插入并抽取负面原子。
+  List<String> get primaryAtoms => atoms.isEmpty ? negativeAtoms : atoms;
   bool get hasNegative => negativeAtoms.isNotEmpty;
   bool get hasParams => params != null && !params!.isEmpty;
 
@@ -1117,7 +1120,7 @@ class BlockInstanceViewData {
   final List<BlocksFolder> folders;
 
   /// 顺序模式：当前这批的起点（`sequenceCursor − lastRollCount`，0 起）和这批的项数；
-  /// 池长是 `block.atoms.length`。
+  /// 池长是 `block.primaryAtoms.length`。
   final int seqIndex;
   final int seqCount;
 

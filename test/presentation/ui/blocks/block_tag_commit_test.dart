@@ -49,12 +49,8 @@ void main() {
     );
     await t.pumpAndSettle();
     await tapKey(t, 'block-edit-add-tag');
-    // F67 remains UI-deferred. Assert its specific existing layout error;
-    // do not hide other exceptions or change the production palette dimensions.
-    expect(
-      '${t.takeException()}',
-      contains('RenderFlex overflowed by 17 pixels'),
-    );
+    // F67: the palette row has its own line and must not overflow.
+    expect(t.takeException(), isNull);
   }
 
   Future<void> color(WidgetTester t, Color color) async {
