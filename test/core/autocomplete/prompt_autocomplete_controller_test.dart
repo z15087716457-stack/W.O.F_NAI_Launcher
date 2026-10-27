@@ -415,4 +415,74 @@ void main() {
     expect(key(LogicalKeyboardKey.escape, PhysicalKeyboardKey.escape), true);
     expect(controller.value.visible, false);
   });
+
+  testWidgets(
+    'arrow right opens related, left closes; numpad 4/6 only without NumLock',
+    (tester) async {
+      final controller = PromptAutocompleteController(
+        enabled: true,
+        search: (_) async => candidates,
+        relatedSearch: (_, {required locale, required existingTags}) async => [
+          candidates.last,
+        ],
+      );
+      addTearDown(controller.dispose);
+      bool key(
+        LogicalKeyboardKey logical,
+        PhysicalKeyboardKey physical, [
+        String? character,
+      ]) => controller.handleKeyEvent(
+        KeyDownEvent(
+          logicalKey: logical,
+          physicalKey: physical,
+          character: character,
+          timeStamp: Duration.zero,
+        ),
+        onAccept: (_) {},
+      );
+      controller.update(editing('bl'), locale: 'en');
+      await tester.pump(const Duration(milliseconds: 120));
+      // 关联栏没开时 ← 交还编辑器。
+      expect(
+        key(LogicalKeyboardKey.arrowLeft, PhysicalKeyboardKey.arrowLeft),
+        false,
+      );
+      controller.move(1);
+      expect(
+        key(LogicalKeyboardKey.arrowRight, PhysicalKeyboardKey.arrowRight),
+        true,
+      );
+      await tester.pump();
+      expect(controller.value.relatedFor?.index, 1);
+      // 已开着时 → 被吞掉（不挪光标），不重开。
+      expect(
+        key(LogicalKeyboardKey.arrowRight, PhysicalKeyboardKey.arrowRight),
+        true,
+      );
+      expect(
+        key(LogicalKeyboardKey.arrowLeft, PhysicalKeyboardKey.arrowLeft),
+        true,
+      );
+      expect(controller.value.relatedFor, isNull);
+      expect(controller.value.visible, true);
+      // NumLock 开：小键盘 6 带字符，照常输入。
+      expect(
+        key(LogicalKeyboardKey.numpad6, PhysicalKeyboardKey.numpad6, '6'),
+        false,
+      );
+      expect(controller.value.relatedFor, isNull);
+      // NumLock 关：小键盘 6 = →。
+      expect(
+        key(LogicalKeyboardKey.numpad6, PhysicalKeyboardKey.numpad6),
+        true,
+      );
+      await tester.pump();
+      expect(controller.value.relatedFor, isNotNull);
+      expect(
+        key(LogicalKeyboardKey.numpad4, PhysicalKeyboardKey.numpad4),
+        true,
+      );
+      expect(controller.value.relatedFor, isNull);
+    },
+  );
 }

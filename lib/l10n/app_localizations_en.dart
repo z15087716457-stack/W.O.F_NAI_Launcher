@@ -22565,11 +22565,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHint =>
-      'Tab / Enter complete · right-click related tags · ↑↓ move';
+      '↑↓ move · → related · ← back · Tab / Enter complete · Esc close';
 
   @override
   String get prompt_autocompleteHintRelated =>
-      'Click or Enter to add · click left list or Esc to close';
+      '↑↓ move · ← back · Enter / click to add · Esc close related';
 
   @override
   String get resourceWindow_pin => 'Keep on top';

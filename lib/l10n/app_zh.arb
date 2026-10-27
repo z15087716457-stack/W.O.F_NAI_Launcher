@@ -11541,8 +11541,8 @@
     }
   },
   "prompt_autocompleteTitle": "补全",
-  "prompt_autocompleteHint": "Tab / 回车 补全 · 右键 关联标签 · ↑↓ 选择",
-  "prompt_autocompleteHintRelated": "点击 / 回车 追加 · 点左栏或 Esc 关闭关联",
+  "prompt_autocompleteHint": "↑↓ 选择 · → 关联 · ← 返回 · Tab / 回车 补全 · Esc 关闭",
+  "prompt_autocompleteHintRelated": "↑↓ 选择 · ← 返回 · 回车 / 点击 追加 · Esc 关闭关联",
   "resourceWindow_pin": "窗口置顶",
   "resourceWindow_newWindow": "新开一个资源窗口",
   "resourceWindow_rowHeight": "行高",

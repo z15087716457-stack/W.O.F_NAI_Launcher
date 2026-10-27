@@ -11541,8 +11541,8 @@
     }
   },
   "prompt_autocompleteTitle": "자동 완성",
-  "prompt_autocompleteHint": "Tab / Enter 완성 · 우클릭 연관 태그 · ↑↓ 선택",
-  "prompt_autocompleteHintRelated": "클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기",
+  "prompt_autocompleteHint": "↑↓ 선택 · → 연관 · ← 돌아가기 · Tab / Enter 완성 · Esc 닫기",
+  "prompt_autocompleteHintRelated": "↑↓ 선택 · ← 돌아가기 · Enter / 클릭 추가 · Esc 연관 닫기",
   "resourceWindow_pin": "항상 위에",
   "resourceWindow_newWindow": "리소스 창 하나 더 열기",
   "resourceWindow_rowHeight": "행 높이",

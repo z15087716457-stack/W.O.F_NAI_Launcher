@@ -11541,8 +11541,8 @@
     }
   },
   "prompt_autocompleteTitle": "補完",
-  "prompt_autocompleteHint": "Tab / Enter で補完 · 右クリックで関連タグ · ↑↓ 選択",
-  "prompt_autocompleteHintRelated": "クリック / Enter で追加 · 左の一覧か Esc で閉じる",
+  "prompt_autocompleteHint": "↑↓ 選択 · → 関連 · ← 戻る · Tab / Enter で補完 · Esc で閉じる",
+  "prompt_autocompleteHintRelated": "↑↓ 選択 · ← 戻る · Enter / クリックで追加 · Esc で関連を閉じる",
   "resourceWindow_pin": "最前面に表示",
   "resourceWindow_newWindow": "リソースウィンドウをもう一つ開く",
   "resourceWindow_rowHeight": "行の高さ",

@@ -343,9 +343,33 @@ class PromptAutocompleteController
       return false;
     }
     final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.arrowUp ||
-        key == LogicalKeyboardKey.arrowDown) {
-      move(key == LogicalKeyboardKey.arrowUp ? -1 : 1);
+    // NumLock 关时小键盘 8/2/4/6 是方向键（`character == null`）；开着时照常输入数字。
+    bool arrow(LogicalKeyboardKey a, LogicalKeyboardKey pad) =>
+        key == a || (key == pad && event.character == null);
+    final up = arrow(LogicalKeyboardKey.arrowUp, LogicalKeyboardKey.numpad8);
+    final down = arrow(
+      LogicalKeyboardKey.arrowDown,
+      LogicalKeyboardKey.numpad2,
+    );
+    final left = arrow(
+      LogicalKeyboardKey.arrowLeft,
+      LogicalKeyboardKey.numpad4,
+    );
+    final right = arrow(
+      LogicalKeyboardKey.arrowRight,
+      LogicalKeyboardKey.numpad6,
+    );
+    if (up || down) {
+      move(up ? -1 : 1);
+    } else if (right) {
+      // → 打开当前候选的关联标签（用户 10-28：方向键右开、左关）；已开着就吞掉，不挪光标。
+      if (value.relatedFor == null) {
+        unawaited(openRelated(value.selectedIndex));
+      }
+    } else if (left) {
+      // ← 只在关联栏开着时关闭它；否则交还编辑器移动光标。
+      if (value.relatedFor == null) return false;
+      closeRelated();
     } else if (key == LogicalKeyboardKey.escape) {
       if (value.relatedFor != null) {
         closeRelated();

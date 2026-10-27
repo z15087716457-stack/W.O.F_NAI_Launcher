@@ -17,9 +17,9 @@ import '../autocomplete/tag_category_visuals.dart';
 
 /// B06 输入补全候选层：跟在当前词下方，不抢焦点。
 ///
-/// 左栏是补全候选（标签 · 中文名 · 热度）；**右键**某个候选在右侧打开它的关联标签栏，
-/// 关联栏开着时左栏**左键**只关闭关联栏；关联栏里左键追加，可连续加、已加的打勾。
-/// 键盘：↑↓ 移动，Tab / Enter 补全或追加，Esc 先关关联栏再关整个（键盘在绑定里处理）。
+/// 左栏是补全候选（标签 · 中文名 · 热度）；**→**（或右键）在右侧打开当前候选的关联标签栏，
+/// **←** 关闭回到左栏；关联栏里回车 / 点击追加，可连续加、已加的打勾。左栏点击直接补全。
+/// 键盘：↑↓ 在当前栏移动，Tab / Enter 补全或追加，Esc 先关关联栏再关整个（键盘在控制器里处理）。
 /// 滚轮只滚候选列表，不带动下面的提示词框。
 Widget promptAutocompletePopupBuilder(
   BuildContext context,
@@ -296,10 +296,11 @@ class _PromptAutocompletePopupState
           // 关联栏开着时主栏选中项退成描边：键盘焦点在右边。
           dim: related != null && related.index != i,
           source: related?.index == i,
-          // 关联栏开着时左键只关掉关联栏（用户 10-27：右键开、左键关），不顺手补全。
-          onTap: related != null
-              ? widget.controller.closeRelated
-              : () => widget.onAccept(i),
+          // 鼠标：左键补全，右键开关联（键盘 → / ← 开关，见控制器）。
+          onTap: () {
+            widget.controller.closeRelated();
+            widget.onAccept(i);
+          },
           onSecondaryTap: () => widget.controller.openRelated(i),
         );
       },

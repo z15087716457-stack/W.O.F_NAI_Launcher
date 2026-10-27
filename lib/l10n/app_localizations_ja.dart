@@ -21799,11 +21799,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get prompt_autocompleteTitle => '補完';
 
   @override
-  String get prompt_autocompleteHint => 'Tab / Enter で補完 · 右クリックで関連タグ · ↑↓ 選択';
+  String get prompt_autocompleteHint =>
+      '↑↓ 選択 · → 関連 · ← 戻る · Tab / Enter で補完 · Esc で閉じる';
 
   @override
   String get prompt_autocompleteHintRelated =>
-      'クリック / Enter で追加 · 左の一覧か Esc で閉じる';
+      '↑↓ 選択 · ← 戻る · Enter / クリックで追加 · Esc で関連を閉じる';
 
   @override
   String get resourceWindow_pin => '最前面に表示';

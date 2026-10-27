@@ -39205,13 +39205,13 @@ abstract class AppLocalizations {
   /// No description provided for @prompt_autocompleteHint.
   ///
   /// In en, this message translates to:
-  /// **'Tab / Enter complete · right-click related tags · ↑↓ move'**
+  /// **'↑↓ move · → related · ← back · Tab / Enter complete · Esc close'**
   String get prompt_autocompleteHint;
 
   /// No description provided for @prompt_autocompleteHintRelated.
   ///
   /// In en, this message translates to:
-  /// **'Click or Enter to add · click left list or Esc to close'**
+  /// **'↑↓ move · ← back · Enter / click to add · Esc close related'**
   String get prompt_autocompleteHintRelated;
 
   /// No description provided for @resourceWindow_pin.

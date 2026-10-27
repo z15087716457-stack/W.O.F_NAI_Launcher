@@ -270,7 +270,7 @@ void main() {
   });
 
   testWidgets(
-    'E01 popup: right-click opens related column, add, left list closes',
+    'E01 popup: arrow right opens related, enter adds, arrow left closes; click completes',
     (tester) async {
       final source = _AutocompleteSource();
       final container = await _pump(
@@ -310,29 +310,28 @@ void main() {
         find.byKey(const Key('prompt-autocomplete-related')),
         findsNothing,
       );
-      await tester.tap(
-        find.byKey(const Key('prompt-autocomplete-0')),
-        buttons: kSecondaryButton,
-      );
+      // 2026-10-28：方向键 → 开关联、← 关；在右栏里 ↑↓ 移动、回车追加。
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
       await tester.pump();
       await tester.pump();
       expect(find.byKey(const Key('prompt-autocomplete-related')), findsOne);
       expect(tester.getSize(popup).width, greaterThan(narrow + 200));
-      // 关联栏里点 blue_hair：先补全 blue eyes，再在其后追加。
-      await tester.tap(find.byKey(const Key('prompt-autocomplete-related-1')));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
       await tester.pump();
+      // 先补全 blue eyes，再在其后追加关联的 blue_hair。
       expect(
         container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
         'blue eyes, blue hair, ',
       );
       expect(find.byKey(const Key('prompt-autocomplete-related')), findsOne);
-      // 左栏左键只关关联栏，不再补全。
-      await tester.tap(find.byKey(const Key('prompt-autocomplete-1')));
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
       await tester.pump();
       expect(
         find.byKey(const Key('prompt-autocomplete-related')),
         findsNothing,
       );
+      // 关联栏关闭后 ← 交还编辑器（移动光标），不再被补全层吞掉。
       expect(
         container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
         'blue eyes, blue hair, ',

@@ -11553,8 +11553,8 @@
     }
   },
   "prompt_autocompleteTitle": "Complete",
-  "prompt_autocompleteHint": "Tab / Enter complete · right-click related tags · ↑↓ move",
-  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close",
+  "prompt_autocompleteHint": "↑↓ move · → related · ← back · Tab / Enter complete · Esc close",
+  "prompt_autocompleteHintRelated": "↑↓ move · ← back · Enter / click to add · Esc close related",
   "resourceWindow_pin": "Keep on top",
   "resourceWindow_newWindow": "Open another resource window",
   "resourceWindow_rowHeight": "Row height",

@@ -12126,8 +12126,8 @@
     }
   },
   "prompt_autocompleteTitle": "補全",
-  "prompt_autocompleteHint": "Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇",
-  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯",
+  "prompt_autocompleteHint": "↑↓ 選擇 · → 關聯 · ← 返回 · Tab / 回車 補全 · Esc 關閉",
+  "prompt_autocompleteHintRelated": "↑↓ 選擇 · ← 返回 · 回車 / 點選 追加 · Esc 關閉關聯",
   "resourceWindow_pin": "視窗置頂",
   "resourceWindow_newWindow": "新開一個資源視窗",
   "resourceWindow_rowHeight": "行高",

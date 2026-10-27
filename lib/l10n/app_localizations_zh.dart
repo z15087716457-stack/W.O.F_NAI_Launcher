@@ -21552,10 +21552,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get prompt_autocompleteTitle => '补全';
 
   @override
-  String get prompt_autocompleteHint => 'Tab / 回车 补全 · 右键 关联标签 · ↑↓ 选择';
+  String get prompt_autocompleteHint =>
+      '↑↓ 选择 · → 关联 · ← 返回 · Tab / 回车 补全 · Esc 关闭';
 
   @override
-  String get prompt_autocompleteHintRelated => '点击 / 回车 追加 · 点左栏或 Esc 关闭关联';
+  String get prompt_autocompleteHintRelated =>
+      '↑↓ 选择 · ← 返回 · 回车 / 点击 追加 · Esc 关闭关联';
 
   @override
   String get resourceWindow_pin => '窗口置顶';
@@ -43154,10 +43156,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get prompt_autocompleteTitle => '補全';
 
   @override
-  String get prompt_autocompleteHint => 'Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇';
+  String get prompt_autocompleteHint =>
+      '↑↓ 選擇 · → 關聯 · ← 返回 · Tab / 回車 補全 · Esc 關閉';
 
   @override
-  String get prompt_autocompleteHintRelated => '點選 / 回車 追加 · 點左欄或 Esc 關閉關聯';
+  String get prompt_autocompleteHintRelated =>
+      '↑↓ 選擇 · ← 返回 · 回車 / 點選 追加 · Esc 關閉關聯';
 
   @override
   String get resourceWindow_pin => '視窗置頂';
