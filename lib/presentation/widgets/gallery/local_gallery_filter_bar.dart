@@ -129,7 +129,7 @@ class LocalGalleryFilterBar extends ConsumerWidget {
           if (state.isTimeSorted)
             Padding(
               padding: const EdgeInsets.only(right: 12),
-              child: _GroupModeButton(
+              child: GalleryGroupModeButton(
                 value: state.groupMode,
                 onChanged: (mode) {
                   notifier.setGroupMode(mode);
@@ -211,8 +211,12 @@ class _DateRangeChip extends StatelessWidget {
   }
 }
 
-class _GroupModeButton extends StatelessWidget {
-  const _GroupModeButton({required this.value, required this.onChanged});
+class GalleryGroupModeButton extends StatelessWidget {
+  const GalleryGroupModeButton({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   final GalleryGroupMode value;
   final ValueChanged<GalleryGroupMode> onChanged;

@@ -144,14 +144,16 @@ class FakeLocalGalleryService implements LocalGalleryService {
           modifiedAt: record.modifiedAt,
           width: _dimensions[record.path]?.$1 ?? record.metadata?.width,
           height: _dimensions[record.path]?.$2 ?? record.metadata?.height,
+          size: record.size,
         ),
     ];
   }
 
   @override
   Future<List<GalleryTimelineEntry>> getTimelineForFilter(
-    FilterCriteria criteria,
-  ) async {
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  }) async {
     final previous = _filter;
     try {
       _filter = criteria;

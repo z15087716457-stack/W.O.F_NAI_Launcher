@@ -48,7 +48,7 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
   List<ViewerCollection>? _collections;
   String? _selection;
   bool _infoOpen = true, _fullscreen = false, _zoomHintSeen = false;
-  bool _confirmDangerous = true, _loadingMore = false;
+  bool _confirmDangerous = true;
   bool _highlight = true, _kritaConnected = false;
   Map<ViewerCommand, List<SingleActivator>> _keys = ViewerKeys.defaults;
 
@@ -62,7 +62,9 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
   void initState() {
     super.initState();
     _backend = ImageViewerBackend(
-      keys: widget.controller.data.items.map((item) => item.id).toList(),
+      keys: widget.controller.galleryTimeline
+          .map((entry) => entry.path)
+          .toList(),
       initialKey: widget.initialId,
       pageSize: 12,
       load: (keys) async {
@@ -176,7 +178,7 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
         thumb: ResourceWindowImage(
           FloatingResourceKind.gallery,
           record.path,
-          '${record.size}:${record.modifiedAt.microsecondsSinceEpoch}',
+          '${record.size}:${record.modifiedAt.millisecondsSinceEpoch}',
           widget.controller.call,
         ),
         missing: missing,
@@ -206,52 +208,6 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
           ),
       ];
     });
-  }
-
-  Future<void> _loadMore({required bool forward}) async {
-    if (_loadingMore) return;
-    _loadingMore = true;
-    try {
-      if (forward &&
-          (widget.controller.data.hasMore ||
-              _backend.total < widget.controller.data.total)) {
-        final more = widget.controller.data.hasMore;
-        await widget.controller.refresh(
-          more: more,
-          retain: more ? null : widget.controller.data.items.length,
-        );
-        if (!mounted) return;
-        _backend.appendKeys(
-          widget.controller.data.items.map((item) => item.id),
-        );
-      }
-      await _backend.loadMore(forward: forward);
-    } finally {
-      _loadingMore = false;
-    }
-  }
-
-  Future<void> _step(int delta) async {
-    if (_backend.position + delta >= _backend.total && delta > 0) {
-      await _loadMore(forward: true);
-    }
-    if (mounted) await _backend.step(delta);
-  }
-
-  Future<void> _jump({required bool last}) async {
-    while (last &&
-        mounted &&
-        (widget.controller.data.hasMore ||
-            _backend.total < widget.controller.data.total)) {
-      final previous = _backend.total;
-      final hadMore = widget.controller.data.hasMore;
-      await _loadMore(forward: true);
-      if (_backend.total == previous &&
-          widget.controller.data.hasMore == hadMore) {
-        break;
-      }
-    }
-    if (mounted) await _backend.jump(last: last);
   }
 
   Future<void> _translate(String key, ViewerPart part) async {
@@ -376,11 +332,14 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
         onSelect: (key) =>
             unawaited(widget.controller.runViewer(() => _backend.select(key))),
         onStep: (delta) =>
-            unawaited(widget.controller.runViewer(() => _step(delta))),
-        onJump: ({required last}) =>
-            unawaited(widget.controller.runViewer(() => _jump(last: last))),
+            unawaited(widget.controller.runViewer(() => _backend.step(delta))),
+        onJump: ({required last}) => unawaited(
+          widget.controller.runViewer(() => _backend.jump(last: last)),
+        ),
         onLoadMore: ({required forward}) => unawaited(
-          widget.controller.runViewer(() => _loadMore(forward: forward)),
+          widget.controller.runViewer(
+            () => _backend.loadMore(forward: forward),
+          ),
         ),
         onInfoChanged: (value) => setState(() => _infoOpen = value),
         onFullscreenChanged: (value) => setState(() => _fullscreen = value),

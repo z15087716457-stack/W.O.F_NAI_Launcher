@@ -9,6 +9,16 @@ class Backend extends ResourceWindowBackend {
   final calls = <String>[];
   Completer<Map<String, Object?>>? pending;
   Completer<Uint8List?>? thumbnailPending;
+  Completer<List<Map<String, Object?>>>? recordsPending;
+  @override
+  Future<List<Map<String, Object?>>> galleryRecords(List<String> ids) async {
+    calls.add('records:${ids.join(',')}');
+    return recordsPending?.future ??
+        [
+          for (final id in ids) {'id': id},
+        ];
+  }
+
   @override
   Future<Object?> galleryViewer(Map<String, Object?> arguments) async {
     calls.add('viewer:${arguments['operation']}');
@@ -129,6 +139,62 @@ void main() {
         {'records': []},
       );
       expect(backend.calls, ['viewer:records']);
+    },
+  );
+  test(
+    'visible gallery records are bounded and tied to the content revision',
+    () async {
+      expect(
+        await host.handle(
+          const MethodCall('gallery.records', {
+            'revision': 0,
+            'ids': ['a', 'b'],
+          }),
+        ),
+        [
+          {'id': 'a'},
+          {'id': 'b'},
+        ],
+      );
+      for (final args in [
+        {'revision': 0, 'ids': List.filled(61, 'a')},
+        {
+          'revision': 0,
+          'ids': [1],
+        },
+        {
+          'ids': ['a'],
+        },
+      ]) {
+        await expectLater(
+          host.handle(MethodCall('gallery.records', args)),
+          throwsA(code('invalid_arguments')),
+        );
+      }
+      backend.recordsPending = Completer();
+      final waiting = host.handle(
+        const MethodCall('gallery.records', {
+          'revision': 0,
+          'ids': ['a'],
+        }),
+      );
+      final check = expectLater(waiting, throwsA(code('cancelled')));
+      host.changed(FloatingResourceKind.gallery);
+      backend.recordsPending!.complete([
+        {'id': 'a'},
+      ]);
+      await check;
+      final count = backend.calls.length;
+      await expectLater(
+        host.handle(
+          const MethodCall('gallery.records', {
+            'revision': 0,
+            'ids': ['a'],
+          }),
+        ),
+        throwsA(code('cancelled')),
+      );
+      expect(backend.calls.length, count);
     },
   );
   test(

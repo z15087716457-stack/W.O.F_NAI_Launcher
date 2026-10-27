@@ -16,6 +16,7 @@ import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/services/gallery/gallery_sort_store.dart';
+import '../../data/services/gallery/gallery_group_mode.dart';
 import '../../data/models/resources/floating_window_data.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
 import '../../data/services/gallery/gallery_sort.dart';
@@ -69,6 +70,17 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   final Ref ref;
   final _exports = <String, Future<File>>{};
   final _viewerDeleted = <String>{};
+  final _galleryKnown = <String, GalleryTimelineEntry>{};
+  @override
+  void changed(FloatingResourceKind kind) {
+    if (kind == FloatingResourceKind.gallery) _galleryKnown.clear();
+  }
+
+  @override
+  Future<List<Map<String, Object?>>> galleryRecords(List<String> ids) async => [
+    for (final record in await gallery.getLibraryRecordsForPaths(ids))
+      galleryItem(record),
+  ];
   Future<void>? _collectionsReady;
   final windowKinds = <String, FloatingResourceKind>{};
   LocalGalleryService get gallery => ref.read(galleryServiceProvider);
@@ -311,6 +323,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     bool descending;
     int total;
     List<Map<String, Object?>> items;
+    List<GalleryTimelineEntry>? timeline;
     final group = request.groupId ?? 'all';
     final favorite = group == 'favorites' || request.chips.contains('favorite');
     if (request.kind == FloatingResourceKind.gallery) {
@@ -448,7 +461,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
                 .where((c) => c.id == group.substring(7))
                 .firstOrNull
           : null;
-      final page = await gallery.queryRecords(
+      timeline = await gallery.getTimelineForFilter(
         FilterCriteria(
           searchQuery: request.query,
           showFavoritesOnly: favorite,
@@ -459,12 +472,13 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
               ? group.substring(11)
               : null,
         ),
-        offset: request.offset,
-        limit: request.limit,
         sort: sort,
       );
-      total = page.totalCount;
-      items = [for (final r in page.records) galleryItem(r)];
+      _galleryKnown.addEntries(
+        timeline.map((entry) => MapEntry(entry.path, entry)),
+      );
+      total = timeline.length;
+      items = [];
       layouts = ['grid', 'masonry', 'justified'];
       layout = (await const GalleryViewModeStore().load()).name;
     } else if (request.kind == FloatingResourceKind.blocks) {
@@ -724,7 +738,20 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     return {
       'items': items,
       'total': total,
-      'hasMore': request.offset + items.length < total,
+      'hasMore': timeline == null && request.offset + items.length < total,
+      if (timeline != null)
+        'timeline': [
+          for (final entry in timeline)
+            [
+              entry.path,
+              entry.modifiedAt.millisecondsSinceEpoch,
+              entry.width,
+              entry.height,
+              entry.size,
+            ],
+        ],
+      if (timeline != null)
+        'groupMode': (await const GalleryGroupModeStore().load()).name,
       'sections': sections,
       'chips': [
         for (final chip in chips)
@@ -773,7 +800,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
           ? m!.width! / m.height!
           : null,
       'badge': GalleryNaiVersions.labelForModel(m?.effectiveModel),
-      'thumbVersion': '${r.size}:${r.modifiedAt.microsecondsSinceEpoch}',
+      'thumbVersion': '${r.size}:${r.modifiedAt.millisecondsSinceEpoch}',
       'favorite': r.isFavorite,
       'positive': m?.prompt,
       'negative': m?.negativePrompt,
@@ -923,10 +950,11 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     String id,
     int revision,
   ) async {
+    String? galleryPath;
     // Validate only the current ID here, not the whole library's encoding
     // statuses for every visible thumbnail. No child-supplied paths are read.
     if (kind == FloatingResourceKind.gallery) {
-      await galleryRecord(id);
+      galleryPath = _galleryKnown[id]?.path ?? (await galleryRecord(id)).path;
     } else if (kind == FloatingResourceKind.blocks) {
       final library = await ref.read(promptBlockLibraryNotifierProvider.future);
       if (library.blockById(id) == null) resourceError('not_found');
@@ -953,10 +981,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
           .getDisplayThumbnail(id);
     }
     final path = kind == FloatingResourceKind.gallery
-        ? await ThumbnailCacheService.instance.getOrGenerateThumbnail(
-            (await galleryRecord(id)).path,
-            size: ThumbnailSize.medium,
-          )
+        ? await ref
+              .read(thumbnailCacheServiceProvider)
+              .getOrGenerateThumbnail(galleryPath!, size: ThumbnailSize.medium)
         : (await ref.read(
             promptBlockLibraryNotifierProvider.future,
           )).blockById(id)?.thumbnail;
@@ -1098,6 +1125,16 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       resourceError('invalid_arguments');
     }
     final prefs = await SharedPreferences.getInstance();
+    if (values['groupMode'] != null) {
+      final mode = GalleryGroupMode.values.asNameMap()[values['groupMode']];
+      if (kind != FloatingResourceKind.gallery || mode == null) {
+        resourceError('invalid_arguments', 'groupMode');
+      }
+      await const GalleryGroupModeStore().save(mode);
+      if (ref.exists(localGalleryNotifierProvider)) {
+        ref.read(localGalleryNotifierProvider.notifier).setGroupMode(mode);
+      }
+    }
     if (values['layout'] case final String layout) {
       final allowed = switch (kind) {
         FloatingResourceKind.gallery => ['grid', 'masonry', 'justified'],

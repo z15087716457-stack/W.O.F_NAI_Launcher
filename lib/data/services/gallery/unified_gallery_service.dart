@@ -35,12 +35,14 @@ class GalleryTimelineEntry {
   final DateTime modifiedAt;
   final int? width;
   final int? height;
+  final int? size;
 
   const GalleryTimelineEntry({
     required this.path,
     required this.modifiedAt,
     this.width,
     this.height,
+    this.size,
   });
 
   bool get hasDimensions =>
@@ -169,8 +171,9 @@ abstract class LocalGalleryService {
 
   /// Read-only scope query; does not change visible filters or sort state.
   Future<List<GalleryTimelineEntry>> getTimelineForFilter(
-    FilterCriteria criteria,
-  );
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  });
 
   /// 按路径批量加载完整记录（复用排序 stat 缓存，按传入顺序返回；
   /// 已不存在的文件跳过）。
@@ -500,11 +503,11 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
       _lowerBaseNames[path] ??= p.basename(path).toLowerCase();
 
   /// 当前排序下的比较（与旧 [_sortFileListByCache] 内联比较器逐项同义）
-  int _compareBySortKey(File a, File b) {
+  int _compareBySortKey(File a, File b, {GallerySort? sort}) {
     sortComparisonsForTesting++;
     final keyA = _fileStats[a.path] ?? _missingSortStats;
     final keyB = _fileStats[b.path] ?? _missingSortStats;
-    return _sort.compareFiles(
+    return (sort ?? _sort).compareFiles(
       modifiedAtA: keyA.modified,
       modifiedAtB: keyB.modified,
       fileSizeA: keyA.size,
@@ -518,9 +521,9 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     );
   }
 
-  void _sortFileListByCache(List<File> files) {
+  void _sortFileListByCache(List<File> files, {GallerySort? sort}) {
     _precomputeLowerBaseNames(files);
-    files.sort(_compareBySortKey);
+    files.sort((a, b) => _compareBySortKey(a, b, sort: sort));
   }
 
   /// 把 [file] 移到当前排序下的正确位置（二分查找插入点 + O(N) 位移）。
@@ -954,14 +957,16 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           modifiedAt: (_fileStats[file.path] ?? _missingSortStats).modified,
           width: _dimensions[file.path]?.$1,
           height: _dimensions[file.path]?.$2,
+          size: (_fileStats[file.path] ?? _missingSortStats).size,
         ),
     ];
   }
 
   @override
   Future<List<GalleryTimelineEntry>> getTimelineForFilter(
-    FilterCriteria criteria,
-  ) async {
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  }) async {
     _ensureInitialized();
     final deleted = await _dataSource.getDeletedImagePaths();
     final roots = await GalleryFolderRepository.instance.getAllRootDirs();
@@ -972,9 +977,11 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           file,
     ];
     final filter = GalleryFilterService(_dataSource);
-    filter.setSort(_filterService.sort);
+    final order = sort ?? _filterService.sort;
+    filter.setSort(order);
     final result = await filter.applyFilters(tracked, criteria);
-    await _ensureFileStats(result.files);
+    await _ensureFileStats(result.files, querySort: order);
+    _sortFileListByCache(result.files, sort: order);
     await _ensureDimensions(result.files);
     return [
       for (final file in result.files)
@@ -983,6 +990,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           modifiedAt: (_fileStats[file.path] ?? _missingSortStats).modified,
           width: _dimensions[file.path]?.$1,
           height: _dimensions[file.path]?.$2,
+          size: (_fileStats[file.path] ?? _missingSortStats).size,
         ),
     ];
   }
@@ -1014,23 +1022,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     final result = await filter.applyFilters(files, criteria);
     final candidates = List<File>.of(result.files);
     await _ensureFileStats(candidates, querySort: sort);
-    final order = sort;
-    candidates.sort((a, b) {
-      final ka = _fileStats[a.path] ?? _missingSortStats;
-      final kb = _fileStats[b.path] ?? _missingSortStats;
-      return order.compareFiles(
-        modifiedAtA: ka.modified,
-        modifiedAtB: kb.modified,
-        fileSizeA: ka.size,
-        fileSizeB: kb.size,
-        fileNameKeyA: _lowerBaseNameOf(a.path),
-        fileNameKeyB: _lowerBaseNameOf(b.path),
-        createdAtA: ka.created,
-        createdAtB: kb.created,
-        imageAreaA: ka.area,
-        imageAreaB: kb.area,
-      );
-    });
+    _sortFileListByCache(candidates, sort: sort);
     final batch = candidates.skip(offset).take(limit).toList();
     return GalleryQueryPage(
       records: await _loadExistingLibraryRecords(batch),
@@ -2058,8 +2050,9 @@ class ErrorGalleryService implements LocalGalleryService {
   Future<List<GalleryTimelineEntry>> getTimelineEntries() => _throwError();
   @override
   Future<List<GalleryTimelineEntry>> getTimelineForFilter(
-    FilterCriteria criteria,
-  ) => _throwError();
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  }) => _throwError();
 
   @override
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>
@@ -2172,8 +2165,9 @@ class _PlaceholderGalleryService implements LocalGalleryService {
       _throwNotInitialized();
   @override
   Future<List<GalleryTimelineEntry>> getTimelineForFilter(
-    FilterCriteria criteria,
-  ) => _throwNotInitialized();
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  }) => _throwNotInitialized();
 
   @override
   Future<List<LocalImageRecord>> getRecordsForPaths(List<String> paths) =>

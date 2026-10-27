@@ -15,6 +15,8 @@ import '../ui/kit/ui_resource_kind.dart';
 import '../ui/resource_window/resource_window_page.dart';
 import 'resource_window_controller.dart';
 import 'resource_gallery_viewer.dart';
+import 'resource_gallery_timeline.dart';
+import '../widgets/gallery/local_gallery_filter_bar.dart';
 
 /// No ProviderScope, data-directory resolution, Hive/SQLite, migration, logging,
 /// Agent, RAG, Krita, tray or media setup. The page is owned by the front-end.
@@ -134,6 +136,22 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
       builder: (_, _) => ResourceWindowPage(
         data: widget.controller.data,
         actions: widget.controller.actions,
+        galleryBuilder: (scroll, cell) => ResourceGalleryTimeline(
+          controller: widget.controller,
+          scroll: scroll,
+          cell: cell,
+        ),
+        galleryHeaderTrailing:
+            const [
+              'modifiedAt',
+              'createdAt',
+            ].contains(widget.controller.data.sortId)
+            ? GalleryGroupModeButton(
+                value: widget.controller.galleryGroupMode,
+                onChanged: (mode) =>
+                    unawaited(widget.controller.preferences(groupMode: mode)),
+              )
+            : null,
         viewer: widget.controller.viewerId == null
             ? null
             : ResourceGalleryViewer(

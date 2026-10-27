@@ -155,12 +155,17 @@ class ResourceWindowService {
     return window;
   }
 
-  Future<void> viewChanged(FloatingResourceKind kind, String layout) async {
+  Future<void> viewChanged(
+    FloatingResourceKind kind,
+    String layout, {
+    String? groupMode,
+  }) async {
     for (final window in _windows.values.where((w) => w.kind == kind)) {
       try {
         await window.controller.invokeMethod<void>('resources.viewChanged', {
           'kind': kind.name,
           'layout': layout,
+          if (groupMode != null) 'groupMode': groupMode,
         });
       } on WindowChannelException catch (error) {
         if (!const [

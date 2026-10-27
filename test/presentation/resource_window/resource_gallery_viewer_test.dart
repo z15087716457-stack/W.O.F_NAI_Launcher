@@ -45,7 +45,6 @@ void main() {
       invoke: (method, args) async {
         calls.add({'method': method, ...args});
         if (method == 'resources.query') {
-          final offset = args['offset'] as int;
           final active = paths
               .where((path) => !deleted.contains(path))
               .toList();
@@ -53,11 +52,21 @@ void main() {
             'requestId': args['requestId'],
             'revision': 1,
             'items': [
-              for (final path in active.skip(offset).take(2))
-                {'id': path, 'title': path},
+              for (final path in active) {'id': path, 'title': path},
             ],
             'total': active.length,
-            'hasMore': offset + 2 < active.length,
+            'hasMore': false,
+            'groupMode': 'day',
+            'timeline': [
+              for (final path in active)
+                [
+                  path,
+                  DateTime(2026).millisecondsSinceEpoch,
+                  100,
+                  150,
+                  pixels.length,
+                ],
+            ],
             'layout': 'grid',
             'sortId': 'modifiedAt',
             'sections': [
@@ -199,7 +208,7 @@ void main() {
         calls
             .where((call) => call['method'] == 'resources.query')
             .last['offset'],
-        2,
+        0,
       );
       expect(
         calls.where(
@@ -212,7 +221,7 @@ void main() {
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
       await tester.pump();
       expect(find.text('resource list'), findsOneWidget);
-      expect(controller.data.items.map((item) => item.id), paths);
+      expect(controller.galleryTimeline.map((entry) => entry.path), paths);
       expect(tester.takeException(), isNull);
       await finish(tester);
     },

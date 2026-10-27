@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:async';
 import 'dart:convert';
+import 'package:mocktail/mocktail.dart';
+import 'package:nai_launcher/core/cache/thumbnail_cache_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort_store.dart';
 import 'package:nai_launcher/presentation/wiring/refs_preferences.dart';
 import 'package:nai_launcher/presentation/providers/gallery_scan_progress_provider.dart';
@@ -85,6 +87,8 @@ class MutableParams extends Params {
   );
 }
 
+class Thumbnails extends Mock implements ThumbnailCacheService {}
+
 class LoadingShortcuts extends ShortcutConfigNotifier {
   final loaded = Completer<ShortcutConfig>();
   @override
@@ -157,6 +161,23 @@ class VibeCategories extends VibeLibraryCategoryNotifier {
 
 class Gallery extends FakeLocalGalleryService {
   Gallery(super.records);
+  final libraryRequests = <List<String>>[];
+  @override
+  Future<List<LocalImageRecord>> getLibraryRecordsForPaths(List<String> paths) {
+    libraryRequests.add(List.of(paths));
+    return super.getLibraryRecordsForPaths(paths);
+  }
+
+  final timelines = <({FilterCriteria criteria, GallerySort? sort})>[];
+  @override
+  Future<List<GalleryTimelineEntry>> getTimelineForFilter(
+    FilterCriteria criteria, {
+    GallerySort? sort,
+  }) {
+    timelines.add((criteria: criteria, sort: sort));
+    return super.getTimelineForFilter(criteria, sort: sort);
+  }
+
   FilterCriteria? criteria;
   final queries =
       <({FilterCriteria criteria, GallerySort sort, int offset, int limit})>[];
@@ -285,7 +306,11 @@ class NativeWindows extends ResourceWindowService {
   }
 
   @override
-  Future<void> viewChanged(FloatingResourceKind kind, String layout) async {
+  Future<void> viewChanged(
+    FloatingResourceKind kind,
+    String layout, {
+    String? groupMode,
+  }) async {
     views.add('${kind.name}:$layout');
   }
 
@@ -325,6 +350,7 @@ void main() {
   late NativeWindows native;
   late GoRouter router;
   late LoadingShortcuts shortcuts;
+  late Thumbnails thumbnails;
   final clipboardWrites = <Uint8List>[];
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
@@ -335,6 +361,11 @@ void main() {
     storage = MemoryWindowSettings();
     native = NativeWindows();
     shortcuts = LoadingShortcuts();
+    thumbnails = Thumbnails();
+    when(
+      () =>
+          thumbnails.getOrGenerateThumbnail(any(), size: ThumbnailSize.medium),
+    ).thenAnswer((_) async => cover.path);
     clipboardWrites.clear();
     router = GoRouter(
       initialLocation: AppRoutes.generation,
@@ -359,6 +390,7 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        thumbnailCacheServiceProvider.overrideWithValue(thumbnails),
         imageViewerGalleryProvider.overrideWith(ViewerGallery.new),
         detailPromptTranslatorProvider.overrideWithValue(
           (document, session) async => document.copyWith(text: 'translated'),
@@ -1032,7 +1064,12 @@ void main() {
         ((result['sections'] as List).first as Map)['groups'],
         hasLength(2),
       );
-      expect(((result['items'] as List).first as Map)['badge'], isNull);
+      expect(
+        (await backend.galleryRecords([
+          (result['timeline'] as List).first[0] as String,
+        ])).first['badge'],
+        isNull,
+      );
     },
   );
 
@@ -1166,7 +1203,35 @@ void main() {
   );
 
   test(
-    'gallery forwards queryRecords page/filter/sort and all tab counts',
+    'gallery thumbnails reuse canonical timeline IDs without scanning the library per image',
+    () async {
+      await backend.query(request('gallery'));
+      gallery.libraryRequests.clear();
+      await backend.thumbnail(
+        FloatingResourceKind.gallery,
+        '/library/0.png',
+        0,
+      );
+      await backend.thumbnail(
+        FloatingResourceKind.gallery,
+        '/library/1.png',
+        0,
+      );
+      expect(gallery.libraryRequests, isEmpty);
+      backend.changed(FloatingResourceKind.gallery);
+      await backend.thumbnail(
+        FloatingResourceKind.gallery,
+        '/library/0.png',
+        1,
+      );
+      expect(gallery.libraryRequests, [
+        ['/library/0.png'],
+      ]);
+    },
+  );
+
+  test(
+    'gallery forwards a full read-only timeline/filter/sort and all tab counts',
     () async {
       final page = await backend.query(
         request(
@@ -1177,15 +1242,15 @@ void main() {
         ),
       );
       expect(page['items'], isEmpty); // no fake favorite records
-      final forwarded = gallery.queries.firstWhere((q) => q.offset == 60);
-      expect(forwarded.offset, 60);
-      expect(forwarded.limit, 60);
+      final forwarded = gallery.timelines.single;
+      expect(page['timeline'], isEmpty);
+      expect(page['hasMore'], false);
       expect(forwarded.criteria.showFavoritesOnly, true);
       expect(forwarded.criteria.naiOnly, true);
       expect(forwarded.criteria.dateStart, isNull);
       expect(forwarded.criteria.dateEnd, isNull);
-      expect(forwarded.sort.field, GallerySortField.fileName);
-      expect(forwarded.sort.direction, GallerySortDirection.ascending);
+      expect(forwarded.sort!.field, GallerySortField.fileName);
+      expect(forwarded.sort!.direction, GallerySortDirection.ascending);
       expect(page['counts'], {
         'gallery': 125,
         'blocks': 2,

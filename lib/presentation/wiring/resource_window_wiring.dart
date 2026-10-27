@@ -109,6 +109,18 @@ class ResourceWindowOpener {
     ) {
       unawaited(service.viewChanged(FloatingResourceKind.gallery, next.name));
     });
+    ref.listen(localGalleryNotifierProvider.select((s) => s.groupMode), (
+      _,
+      next,
+    ) {
+      unawaited(
+        service.viewChanged(
+          FloatingResourceKind.gallery,
+          ref.read(localGalleryNotifierProvider).viewMode.name,
+          groupMode: next.name,
+        ),
+      );
+    });
     ref.listen(blocksPreferencesProvider.select((s) => s.valueOrNull?.view), (
       _,
       next,

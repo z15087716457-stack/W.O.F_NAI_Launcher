@@ -10,6 +10,9 @@ import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import '../../core/services/resource_window_host.dart';
 import '../../core/services/resource_window_service.dart';
 import '../../core/utils/resource_window_drag.dart';
+import '../../data/services/gallery/unified_gallery_service.dart'
+    show GalleryTimelineEntry;
+import '../../data/services/gallery/gallery_group_mode.dart';
 import '../ui/kit/ui_resource_kind.dart';
 import '../ui/resource_window/resource_window_contract.dart';
 
@@ -62,6 +65,76 @@ class ResourceWindowController extends ChangeNotifier {
   Timer? _debounce, _layoutDebounce;
   final _exportUris = <String, Uri>{};
   final _exportsPending = <String>{};
+  List<GalleryTimelineEntry> _galleryTimeline = const [];
+  final _galleryIndex = <String, int>{};
+  final _galleryItems = <String, ({int revision, ResourceItem item})>{};
+  final _galleryPending = <String>{};
+  List<String> _galleryVisible = const [];
+  GalleryGroupMode galleryGroupMode = GalleryGroupMode.day;
+  List<GalleryTimelineEntry> get galleryTimeline => _galleryTimeline;
+  int get selectedGalleryIndex => _galleryIndex[_selected] ?? -1;
+  GalleryGroupMode get effectiveGalleryGroupMode =>
+      const ['modifiedAt', 'createdAt'].contains(_sort)
+      ? galleryGroupMode
+      : GalleryGroupMode.none;
+
+  ResourceItem galleryItem(int index) {
+    final entry = _galleryTimeline[index];
+    final cached = _galleryItems.remove(entry.path);
+    if (cached != null) {
+      _galleryItems[entry.path] = cached;
+      return cached.item;
+    }
+    return ResourceItem(
+      id: entry.path,
+      title:
+          '${entry.modifiedAt.hour.toString().padLeft(2, '0')}:${entry.modifiedAt.minute.toString().padLeft(2, '0')}',
+      date: entry.modifiedAt,
+      aspect: entry.aspectRatio,
+      thumb: ResourceWindowImage(
+        FloatingResourceKind.gallery,
+        entry.path,
+        '${entry.size}:${entry.modifiedAt.millisecondsSinceEpoch}',
+        call,
+      ),
+    );
+  }
+
+  Future<void> ensureGalleryItems(List<int> indices) async {
+    final epoch = _epoch;
+    final revision = _revision;
+    _galleryVisible = [
+      for (final index in indices) _galleryTimeline[index].path,
+    ];
+    final missing = [
+      for (final id in _galleryVisible)
+        if (_galleryItems[id]?.revision != revision && _galleryPending.add(id))
+          id,
+    ];
+    await _run(() async {
+      try {
+        for (var start = 0; start < missing.length; start += 60) {
+          final ids = missing.skip(start).take(60).toList();
+          final result =
+              await call('gallery.records', {'ids': ids, 'revision': revision})
+                  as List;
+          if (_disposed || epoch != _epoch) return;
+          for (final value in result.map(resourceMap)) {
+            final item = _decodeItem(value);
+            _galleryItems.remove(item.id);
+            _galleryItems[item.id] = (revision: revision, item: item);
+          }
+          while (_galleryItems.length > 6000) {
+            _galleryItems.remove(_galleryItems.keys.first);
+          }
+          _changed();
+        }
+      } finally {
+        if (epoch == _epoch) _galleryPending.removeAll(missing);
+      }
+    });
+  }
+
   String? _viewerId;
   String? get viewerId => _viewerId;
 
@@ -154,6 +227,7 @@ class ResourceWindowController extends ChangeNotifier {
 
   Future<void> initialize() => refresh();
   Future<void> refresh({bool more = false, int? retain}) async {
+    if (_kind == FloatingResourceKind.gallery && more) return;
     if (_disposed || more && (_loading || _page['hasMore'] != true)) return;
     final epoch = _epoch;
     var id = _requestId;
@@ -210,6 +284,25 @@ class ResourceWindowController extends ChangeNotifier {
       } while (offset < target);
       _revision = snapshot;
       _page = result;
+      if (_kind == FloatingResourceKind.gallery) {
+        _galleryTimeline = [
+          for (final value in result['timeline'] as List)
+            GalleryTimelineEntry(
+              path: (value as List)[0] as String,
+              modifiedAt: DateTime.fromMillisecondsSinceEpoch(value[1] as int),
+              width: value[2] as int?,
+              height: value[3] as int?,
+              size: value[4] as int?,
+            ),
+        ];
+        _galleryIndex.clear();
+        for (var i = 0; i < _galleryTimeline.length; i++) {
+          _galleryIndex[_galleryTimeline[i].path] = i;
+        }
+        galleryGroupMode = GalleryGroupMode.values.byName(
+          result['groupMode'] as String,
+        );
+      }
       _updateCounts(result['counts']);
       if (!more) _items.clear();
       final ids = _items.map((i) => i['id']).toSet();
@@ -219,7 +312,10 @@ class ResourceWindowController extends ChangeNotifier {
       _sortPending = false;
       _layout = ResourceLayout.values.byName(result['layout'] as String);
       _cellSize = (result['cellSize'] as num).toDouble();
-      if (_selected != null && !_items.any((i) => i['id'] == _selected)) {
+      if (_selected != null &&
+          (_kind == FloatingResourceKind.gallery
+              ? !_galleryIndex.containsKey(_selected)
+              : !_items.any((i) => i['id'] == _selected))) {
         _selectionEpoch++;
         _selected = null;
         _detail = null;
@@ -247,6 +343,10 @@ class ResourceWindowController extends ChangeNotifier {
     _selected = null;
     _detail = null;
     _items.clear();
+    _galleryTimeline = const [];
+    _galleryIndex.clear();
+    _galleryVisible = const [];
+    _galleryPending.clear();
     _page = {};
     _loading = false;
     _sortPending = false;
@@ -380,20 +480,25 @@ class ResourceWindowController extends ChangeNotifier {
     }, query: true);
   }
 
-  Future<void> preferences({ResourceLayout? layout, double? size}) =>
-      _run(() async {
-        final kind = _kind;
-        await call('resources.preferences', {
-          'kind': kind.name,
-          if (layout != null) 'layout': layout.name,
-          if (size != null) 'cellSize': size,
-        });
-        if (!_disposed && kind == _kind) {
-          if (layout != null) _layout = layout;
-          if (size != null) _cellSize = size;
-          _changed();
-        }
-      });
+  Future<void> preferences({
+    ResourceLayout? layout,
+    double? size,
+    GalleryGroupMode? groupMode,
+  }) => _run(() async {
+    final kind = _kind;
+    await call('resources.preferences', {
+      'kind': kind.name,
+      if (layout != null) 'layout': layout.name,
+      if (size != null) 'cellSize': size,
+      if (groupMode != null) 'groupMode': groupMode.name,
+    });
+    if (!_disposed && kind == _kind) {
+      if (layout != null) _layout = layout;
+      if (size != null) _cellSize = size;
+      if (groupMode != null) galleryGroupMode = groupMode;
+      _changed();
+    }
+  });
   Future<void> command(String method, String id, {String? action}) =>
       _run(() async {
         final kind = _kind;
@@ -434,6 +539,9 @@ class ResourceWindowController extends ChangeNotifier {
   void viewChanged(Map<String, Object?> args) {
     if (args['kind'] != _kind.name) return;
     _layout = ResourceLayout.values.byName(args['layout'] as String);
+    if (args['groupMode'] case final String mode) {
+      galleryGroupMode = GalleryGroupMode.values.byName(mode);
+    }
     _changed();
   }
 
@@ -450,6 +558,7 @@ class ResourceWindowController extends ChangeNotifier {
       _exportUris.clear();
       _exportsPending.clear();
       _epoch++;
+      _galleryPending.clear();
       unawaited(
         _run(() async {
           final epoch = _epoch;
@@ -522,6 +631,17 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   ResourceWindowActions get actions => ResourceWindowActions(
+    onMove: _kind != FloatingResourceKind.gallery
+        ? null
+        : (delta) {
+            if (_galleryTimeline.isEmpty) return;
+            final current = _galleryIndex[_selected] ?? -1;
+            final next = (current < 0 ? 0 : current + delta).clamp(
+              0,
+              _galleryTimeline.length - 1,
+            );
+            unawaited(select(_galleryTimeline[next].path));
+          },
     onKind: kind,
     onGroup: group,
     onQuery: query,
@@ -562,6 +682,45 @@ class ResourceWindowController extends ChangeNotifier {
     ),
     onRetry: () => unawaited(refresh()),
     dragWrap: dragWrap,
+  );
+
+  ResourceItem _decodeItem(Map<String, Object?> i) => ResourceItem(
+    id: i['id'] as String,
+    title: i['title'] as String,
+    meta: i['meta'] as String?,
+    aspect: (i['aspect'] as num?)?.toDouble(),
+    badge: i['badge'] as String?,
+    favorite: i['favorite'] as bool? ?? false,
+    color: i['color'] == null ? null : Color(i['color'] as int),
+    iconKey: i['iconKey'] as String?,
+    positive: i['positive'] as String?,
+    negative: i['negative'] as String?,
+    folder: i['folder'] as String?,
+    date: i['date'] == null
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(i['date'] as int),
+    thumb: i['hasThumb'] == false
+        ? null
+        : ResourceWindowImage(
+            _kind,
+            i['id'] as String,
+            i['thumbVersion'] ?? '',
+            call,
+          ),
+    crop: i['crop'] == null
+        ? null
+        : ResourceThumbCrop(
+            offsetX: (resourceMap(i['crop'])['offsetX'] as num).toDouble(),
+            offsetY: (resourceMap(i['crop'])['offsetY'] as num).toDouble(),
+            scale: (resourceMap(i['crop'])['scale'] as num).toDouble(),
+          ),
+    itemCount: i['itemCount'] as int?,
+    useCount: i['useCount'] as int?,
+    hasParams: i['hasParams'] as bool? ?? false,
+    strength: (i['strength'] as num?)?.toDouble(),
+    secondary: (i['secondary'] as num?)?.toDouble(),
+    inGeneration: i['inGeneration'] as bool? ?? false,
+    bundleCount: i['bundleCount'] as int? ?? 0,
   );
 
   ResourceWindowViewData get data => ResourceWindowViewData(
@@ -616,49 +775,15 @@ class ResourceWindowController extends ChangeNotifier {
     ],
     layout: _layout,
     cellSize: _cellSize,
-    items: [
-      for (final i in _items)
-        ResourceItem(
-          id: i['id'] as String,
-          title: i['title'] as String,
-          meta: i['meta'] as String?,
-          aspect: (i['aspect'] as num?)?.toDouble(),
-          badge: i['badge'] as String?,
-          favorite: i['favorite'] as bool? ?? false,
-          color: i['color'] == null ? null : Color(i['color'] as int),
-          iconKey: i['iconKey'] as String?,
-          positive: i['positive'] as String?,
-          negative: i['negative'] as String?,
-          folder: i['folder'] as String?,
-          date: i['date'] == null
-              ? null
-              : DateTime.fromMillisecondsSinceEpoch(i['date'] as int),
-          thumb: i['hasThumb'] == false
-              ? null
-              : ResourceWindowImage(
-                  _kind,
-                  i['id'] as String,
-                  i['thumbVersion'] ?? '',
-                  call,
-                ),
-          crop: i['crop'] == null
-              ? null
-              : ResourceThumbCrop(
-                  offsetX: (resourceMap(i['crop'])['offsetX'] as num)
-                      .toDouble(),
-                  offsetY: (resourceMap(i['crop'])['offsetY'] as num)
-                      .toDouble(),
-                  scale: (resourceMap(i['crop'])['scale'] as num).toDouble(),
-                ),
-          itemCount: i['itemCount'] as int?,
-          useCount: i['useCount'] as int?,
-          hasParams: i['hasParams'] as bool? ?? false,
-          strength: (i['strength'] as num?)?.toDouble(),
-          secondary: (i['secondary'] as num?)?.toDouble(),
-          inGeneration: i['inGeneration'] as bool? ?? false,
-          bundleCount: i['bundleCount'] as int? ?? 0,
-        ),
-    ],
+    items: _kind == FloatingResourceKind.gallery
+        ? [
+            for (final id in {
+              ..._galleryVisible,
+              if (_selected != null) _selected!,
+            })
+              if (_galleryIndex[id] case final index?) galleryItem(index),
+          ]
+        : [for (final i in _items) _decodeItem(i)],
     total: _page['total'] as int? ?? 0,
     hasMore: _page['hasMore'] as bool? ?? false,
     selectedId: _selected,

@@ -35,11 +35,15 @@ class ResourceWindowPage extends StatefulWidget {
     required this.data,
     required this.actions,
     this.viewer,
+    this.galleryBuilder,
+    this.galleryHeaderTrailing,
   });
 
   final ResourceWindowViewData data;
   final ResourceWindowActions actions;
   final Widget? viewer;
+  final Widget Function(ScrollController scroll, double cell)? galleryBuilder;
+  final Widget? galleryHeaderTrailing;
 
   static const narrow = 780.0;
   static const tight = 620.0;
@@ -120,6 +124,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   }
 
   void _move(int delta) {
+    if (widget.actions.onMove case final move?) return move(delta);
     final items = widget.data.items;
     if (items.isEmpty) return;
     final i = items.indexWhere((it) => it.id == widget.data.selectedId);
@@ -195,14 +200,27 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    _MainHead(data: widget.data),
+                                    _MainHead(
+                                      data: widget.data,
+                                      trailing: widget.galleryHeaderTrailing,
+                                    ),
                                     Expanded(
-                                      child: _Wall(
-                                        data: widget.data,
-                                        actions: widget.actions,
-                                        scroll: _scroll,
-                                        cell: _cell ?? widget.data.cellSize,
-                                      ),
+                                      child:
+                                          widget.data.kind ==
+                                                  FloatingResourceKind
+                                                      .gallery &&
+                                              widget.galleryBuilder != null
+                                          ? widget.galleryBuilder!(
+                                              _scroll,
+                                              _cell ?? widget.data.cellSize,
+                                            )
+                                          : _Wall(
+                                              data: widget.data,
+                                              actions: widget.actions,
+                                              scroll: _scroll,
+                                              cell:
+                                                  _cell ?? widget.data.cellSize,
+                                            ),
                                     ),
                                     if (widget.data.detail case final detail?)
                                       _DetailBar(
@@ -758,8 +776,9 @@ const _justifiedGlyph =
 // ── 主区头 ─────────────────────────────────────────────────────────────
 
 class _MainHead extends StatelessWidget {
-  const _MainHead({required this.data});
+  const _MainHead({required this.data, this.trailing});
   final ResourceWindowViewData data;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -795,16 +814,19 @@ class _MainHead extends StatelessWidget {
             ),
             if (data.loading) const UiSpinner(size: 12),
             const Spacer(),
-            Flexible(
-              child: Text(
-                data.kind == FloatingResourceKind.blocks
-                    ? l.resourceWindow_dragHintBlocks
-                    : l.resourceWindow_dragHint,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: UiText.sans(12, color: c.faint),
+            if (trailing != null)
+              trailing!
+            else
+              Flexible(
+                child: Text(
+                  data.kind == FloatingResourceKind.blocks
+                      ? l.resourceWindow_dragHintBlocks
+                      : l.resourceWindow_dragHint,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: UiText.sans(12, color: c.faint),
+                ),
               ),
-            ),
           ],
         ),
       ),

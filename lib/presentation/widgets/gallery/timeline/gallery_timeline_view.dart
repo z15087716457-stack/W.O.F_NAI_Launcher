@@ -4,10 +4,8 @@ import 'dart:math' as math;
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/cache/thumbnail_cache_service.dart';
-import '../../../../core/utils/localization_extension.dart';
 import '../../../../data/models/gallery/local_image_record.dart';
 import '../../../../data/services/gallery/gallery_group_mode.dart';
 import '../../../../data/services/gallery/gallery_sort.dart';
@@ -15,7 +13,6 @@ import '../../../../data/services/gallery/gallery_view_mode.dart';
 import '../../../../data/services/gallery/unified_gallery_service.dart'
     show GalleryTimelineEntry;
 import '../../../../data/services/thumbnail_service.dart';
-import '../../../../l10n/app_localizations.dart';
 import '../../../providers/canvas_settings_provider.dart';
 import '../../../providers/local_gallery_focus_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
@@ -24,14 +21,16 @@ import '../draggable_image_card.dart';
 import '../gallery_state_views.dart';
 import '../local_image_card.dart';
 import 'gallery_timeline_layout.dart';
+import 'gallery_timeline_header.dart';
 import 'gallery_timeline_scrubber.dart';
-import '../../common/studio_icons.dart';
 
 /// 卡片间距与内容边距（右侧留出时间轴宽度）
-const double galleryTimelineGap = 4;
-const double galleryTimelineLeftPadding = 16;
-const double galleryTimelineRightPadding = 48;
-const double galleryTimelineHeaderHeight = 44;
+export 'gallery_timeline_layout.dart'
+    show
+        galleryTimelineGap,
+        galleryTimelineLeftPadding,
+        galleryTimelineRightPadding,
+        galleryTimelineHeaderHeight;
 
 /// 外部（快捷键、日期跳转）控制时间线滚动。
 class GalleryTimelineController {
@@ -90,8 +89,9 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
   double _viewportHeight = 0;
 
   /// 已构建区域（内容坐标），滚动离开时才重建可见卡片
-  double _builtTop = 0;
-  double _builtBottom = 0;
+  final _window = GalleryTimelineWindow();
+  double get _builtTop => _window.top;
+  double get _builtBottom => _window.bottom;
   String? _lastPreloadKey;
 
   @override
@@ -130,17 +130,13 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
     if (!_scroll.hasClients) return;
     final offset = _scroll.offset;
     final viewport = _viewportHeight;
-    final needTop = offset - viewport * 0.5;
-    final needBottom = offset + viewport * 1.5;
-    if (needTop < _builtTop || needBottom > _builtBottom) {
+    if (_window.needsUpdate(offset, viewport)) {
       setState(() => _resetWindow(offset));
     }
   }
 
   void _resetWindow(double offset) {
-    final viewport = math.max(_viewportHeight, 400.0);
-    _builtTop = offset - viewport * 1.25;
-    _builtBottom = offset + viewport * 2.25;
+    _window.reset(offset, _viewportHeight);
   }
 
   void _scrollByViewport(double factor) {
@@ -173,19 +169,12 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
   }
 
   void _reveal(int index) {
-    if (!_scroll.hasClients || index < 0 || index >= _layout.tiles.length) {
-      return;
-    }
-    final rect = _layout.tiles[index];
-    final offset = _scroll.offset;
-    final top = rect.top - _layout.headerHeight - 8;
-    final bottom = rect.bottom + 8;
-    double? target;
-    if (top < offset) {
-      target = top;
-    } else if (bottom > offset + _viewportHeight) {
-      target = bottom - _viewportHeight;
-    }
+    if (!_scroll.hasClients) return;
+    final target = _layout.offsetToReveal(
+      index,
+      _scroll.offset,
+      _viewportHeight,
+    );
     if (target != null) {
       _scroll.jumpTo(target.clamp(0.0, _scroll.position.maxScrollExtent));
     }
@@ -740,171 +729,39 @@ class _TimelineTilesState extends ConsumerState<_TimelineTiles> {
 }
 
 /// 分组标题：日期 + 数量，悬停或有选中时出现整组选择圈。
-class GalleryTimelineSectionHeader extends ConsumerStatefulWidget {
+class GalleryTimelineSectionHeader extends ConsumerWidget {
   const GalleryTimelineSectionHeader({
     super.key,
     required this.section,
     required this.onToggle,
     this.opaque = false,
   });
-
   final GalleryTimelineSection section;
   final VoidCallback onToggle;
-
-  /// 吸顶标题需要实心底遮住下方内容
   final bool opaque;
-
   @override
-  ConsumerState<GalleryTimelineSectionHeader> createState() =>
-      _GalleryTimelineSectionHeaderState();
-}
-
-class _GalleryTimelineSectionHeaderState
-    extends ConsumerState<GalleryTimelineSectionHeader> {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final l10n = context.l10n;
-    final section = widget.section;
-    final date = section.date!;
-    final locale = Localizations.localeOf(context).toLanguageTag();
-    final groupMode = ref.watch(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(
       localGalleryNotifierProvider.select((s) => s.effectiveGroupMode),
     );
     final selection = ref.watch(localGallerySelectionNotifierProvider);
     final entries = ref.watch(
       localGalleryNotifierProvider.select((s) => s.timeline.entries),
     );
-    var selectedCount = 0;
+    var selected = 0;
     if (selection.selectedIds.isNotEmpty) {
       for (var i = section.start; i < section.end && i < entries.length; i++) {
-        if (selection.selectedIds.contains(entries[i].path)) selectedCount++;
+        if (selection.selectedIds.contains(entries[i].path)) selected++;
       }
     }
-    final allSelected = selectedCount > 0 && selectedCount == section.count;
-    final showCheck = _hovered || selectedCount > 0;
-    final reducedMotion =
-        ref.watch(canvasReducedMotionNotifierProvider) ||
-        MediaQuery.disableAnimationsOf(context);
-
-    final count = NumberFormat.decimalPattern(locale).format(section.count);
-    final countText = l10n.localGallery_groupImageCount(section.count, count);
-    final (title, detail) = _labels(date, groupMode, locale, l10n);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: Container(
-        color: widget.opaque ? colors.surface : null,
-        padding: const EdgeInsets.only(left: galleryTimelineLeftPadding),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            AnimatedContainer(
-              duration: reducedMotion
-                  ? Duration.zero
-                  : const Duration(milliseconds: 140),
-              curve: Curves.easeOut,
-              width: showCheck ? 26 : 0,
-              child: showCheck
-                  ? Semantics(
-                      button: true,
-                      selected: allSelected,
-                      label: l10n.localGallery_selectGroup,
-                      child: GestureDetector(
-                        key: const Key('gallery-group-select'),
-                        behavior: HitTestBehavior.opaque,
-                        onTap: widget.onToggle,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Container(
-                            width: 18,
-                            height: 18,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: allSelected ? colors.primary : null,
-                              border: Border.all(
-                                color: allSelected
-                                    ? colors.primary
-                                    : colors.outline,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: allSelected
-                                ? Icon(
-                                    StudioIcons.galleryCheckBold,
-                                    size: 13,
-                                    color: colors.onPrimary,
-                                  )
-                                : selectedCount > 0
-                                ? Center(
-                                    child: Container(
-                                      width: 8,
-                                      height: 2,
-                                      color: colors.primary,
-                                    ),
-                                  )
-                                : null,
-                          ),
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-            Text(
-              title,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Flexible(
-              child: Text(
-                detail == null ? countText : '$detail · $countText',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    return GalleryTimelineGroupHeader(
+      section: section,
+      groupMode: mode,
+      selectedCount: selected,
+      opaque: opaque,
+      onToggle: onToggle,
+      reducedMotion: ref.watch(canvasReducedMotionNotifierProvider),
     );
-  }
-
-  (String, String?) _labels(
-    DateTime date,
-    GalleryGroupMode mode,
-    String locale,
-    AppLocalizations l10n,
-  ) {
-    final now = DateTime.now();
-    if (mode == GalleryGroupMode.month) {
-      return (
-        date.year == now.year
-            ? DateFormat.MMMM(locale).format(date)
-            : DateFormat.yMMMM(locale).format(date),
-        null,
-      );
-    }
-    final today = DateTime(now.year, now.month, now.day);
-    final weekday = DateFormat.E(locale).format(date);
-    final dayText = date.year == now.year
-        ? DateFormat.MMMd(locale).format(date)
-        : DateFormat.yMMMd(locale).format(date);
-    if (date == today) {
-      return (l10n.localGallery_group_today, '$dayText $weekday');
-    }
-    if (date == today.subtract(const Duration(days: 1))) {
-      return (l10n.localGallery_group_yesterday, '$dayText $weekday');
-    }
-    return (dayText, weekday);
   }
 }
 
@@ -921,39 +778,14 @@ class _StickyHeader extends StatelessWidget {
   final void Function(GalleryTimelineSection section) onToggleSection;
 
   @override
-  Widget build(BuildContext context) {
-    return ClipRect(
-      child: AnimatedBuilder(
-        animation: scrollController,
-        builder: (context, _) {
-          final offset = scrollController.hasClients
-              ? scrollController.offset
-              : 0.0;
-          if (offset <= 0) return const SizedBox.shrink();
-          final index = layout.sectionIndexAt(offset);
-          if (index < 0) return const SizedBox.shrink();
-          final section = layout.sections[index];
-          if (!section.hasHeader || section.headerTop >= offset) {
-            return const SizedBox.shrink();
-          }
-          var shift = 0.0;
-          if (index + 1 < layout.sections.length) {
-            final nextTop = layout.sections[index + 1].headerTop - offset;
-            if (nextTop < layout.headerHeight) {
-              shift = nextTop - layout.headerHeight;
-            }
-          }
-          return Transform.translate(
-            offset: Offset(0, shift),
-            child: GalleryTimelineSectionHeader(
-              key: ValueKey('sticky-${section.start}'),
-              section: section,
-              opaque: true,
-              onToggle: () => onToggleSection(section),
-            ),
-          );
-        },
-      ),
-    );
-  }
+  Widget build(BuildContext context) => GalleryTimelineStickyHeader(
+    layout: layout,
+    scrollController: scrollController,
+    headerBuilder: (section) => GalleryTimelineSectionHeader(
+      key: ValueKey('sticky-${section.start}'),
+      section: section,
+      opaque: true,
+      onToggle: () => onToggleSection(section),
+    ),
+  );
 }

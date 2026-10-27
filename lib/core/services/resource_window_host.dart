@@ -20,6 +20,9 @@ abstract class ResourceWindowBackend {
   Future<void> favorite(FloatingResourceKind kind, String id);
   Future<void> open(FloatingResourceKind kind, String id);
   Future<Uri> exportGallery(String id);
+  Future<List<Map<String, Object?>>> galleryRecords(List<String> ids) async =>
+      resourceError('unsupported');
+  void changed(FloatingResourceKind kind) {}
   Future<Object?> galleryViewer(Map<String, Object?> arguments) async =>
       resourceError('unsupported');
   Future<void> layout(String windowId, Map<String, Object?> values);
@@ -100,8 +103,11 @@ class ResourceWindowHost {
   final revisions = {for (final kind in FloatingResourceKind.values) kind: 0};
   final _latest = <String, int>{};
 
-  void changed(FloatingResourceKind kind) =>
-      revisions[kind] = revisions[kind]! + 1;
+  void changed(FloatingResourceKind kind) {
+    revisions[kind] = revisions[kind]! + 1;
+    backend?.changed(kind);
+  }
+
   void closed(String id) => _latest.remove(id);
 
   Future<Object?> handle(MethodCall call) async {
@@ -141,6 +147,18 @@ class ResourceWindowHost {
         };
       }
       switch (call.method) {
+        case 'gallery.records':
+          final ids = (args['ids'] as List).cast<String>();
+          if (ids.length > 60) resourceError('invalid_arguments', 'ids');
+          final revision = args['revision'] as int;
+          if (revision != revisions[FloatingResourceKind.gallery]) {
+            resourceError('cancelled');
+          }
+          final records = await source.galleryRecords(ids);
+          if (revision != revisions[FloatingResourceKind.gallery]) {
+            resourceError('cancelled');
+          }
+          return records;
         case 'gallery.viewer':
           return await source.galleryViewer(args);
         case 'resources.counts':

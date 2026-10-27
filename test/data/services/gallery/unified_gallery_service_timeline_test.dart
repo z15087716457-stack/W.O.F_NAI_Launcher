@@ -11,6 +11,7 @@ import 'package:nai_launcher/core/database/datasources/gallery_data_source.dart'
 import 'package:nai_launcher/core/utils/app_logger.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 
 void main() {
   group('LocalGalleryService 时间线条目与 stat 缓存', () {
@@ -142,6 +143,23 @@ void main() {
         'c.png',
         'b.png',
       ]);
+      final ascending = await service.getTimelineForFilter(
+        const FilterCriteria(),
+        sort: const GallerySort(
+          field: GallerySortField.modifiedAt,
+          direction: GallerySortDirection.ascending,
+        ),
+      );
+      expect(ascending.map((e) => p.basename(e.path)), [
+        'b.png',
+        'c.png',
+        'a.png',
+      ]);
+      expect(ascending.map((e) => e.size), everyElement(4));
+      expect(
+        (await service.getTimelineEntries()).map((e) => e.path),
+        entries.map((e) => e.path),
+      );
     });
 
     test('getRecordsForPaths 按传入顺序返回并跳过不存在的文件', () async {

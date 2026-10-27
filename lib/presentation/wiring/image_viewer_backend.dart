@@ -56,12 +56,6 @@ class ImageViewerBackend extends ChangeNotifier {
     if (currentKey case final key?) await select(key, resetWindow: true);
   }
 
-  void appendKeys(Iterable<String> keys) {
-    final known = _keys.toSet();
-    _keys.addAll(keys.where(known.add));
-    _changed();
-  }
-
   Future<void> _readWindow(int start, int end, {bool reset = false}) async {
     final serial = reset ? ++_windowSerial : _windowSerial;
     final paths = _keys.sublist(start, end);

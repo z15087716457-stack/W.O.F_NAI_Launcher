@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../kit/ui_new_badge.dart';
@@ -82,116 +84,264 @@ class _PromptHead extends StatelessWidget {
     final p = data.prompt;
     final l = context.l10n;
     final tools = p.tools;
-    return Row(
-      spacing: 2,
-      children: [
-        Expanded(
-          child: Row(
-            spacing: 2,
-            children: [
-              Flexible(
-                child: _PreviewTip(
-                  sections: p.positivePreview,
-                  title: l.gen_finalPositive,
-                  child: GenTab(
-                    key: const Key('gen-tab-positive'),
-                    label: l.gen_basePrompt,
-                    selected: !p.negative,
-                    onTap: () => scope.actions.onNegativeTab(false),
-                  ),
-                ),
-              ),
-              Flexible(
-                child: _PreviewTip(
-                  sections: p.negativePreview,
-                  title: p.negativeSupported
-                      ? l.gen_finalNegative
-                      : l.gen_turboNegative,
-                  disabledHint: p.negativeSupported
-                      ? null
-                      : l.gen_turboNegative,
-                  child: GenTab(
-                    key: const Key('gen-tab-negative'),
-                    label: l.gen_negative,
-                    selected: p.negative,
-                    onTap: p.negativeSupported
-                        ? () => scope.actions.onNegativeTab(true)
-                        : null,
-                  ),
-                ),
-              ),
-              if (p.bridge case final b?) _Bridge(bridge: b),
-            ],
-          ),
-        ),
-        if (tools.palettePinned)
-          Builder(
-            builder: (context) => GenIb(
-              key: const Key('gen-tool-palette'),
-              animatedIcon: StudioIcons.promptBlockPalette,
-              glyphSize: 15,
-              tooltip: l.gen_toolPalette,
-              onTap: () => scope.actions.onOpenPalette(genRectOf(context)),
+    return LayoutBuilder(
+      builder: (context, box) => Row(
+        spacing: 2,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: math.max(0, box.maxWidth - 30),
             ),
-          ),
-        if (tools.dockPinned)
-          GenIb(
-            key: const Key('gen-tool-dock'),
-            animatedIcon: StudioIcons.promptBlocks,
-            glyphSize: 16,
-            active: data.layout.dockOpen,
-            tooltip: l.gen_toolDock,
-            onTap: () => scope.actions.onLayoutChanged(
-              data.layout.copyWith(dockOpen: !data.layout.dockOpen),
-            ),
-          ),
-        if (tools.translatePinned) const _Translate(),
-        if (tools.resourceWindowsPinned &&
-            scope.actions.onOpenResourceWindow != null)
-          Builder(
-            builder: (context) => GenIb(
-              key: const Key('gen-tool-resources'),
-              glyph: GenGlyphs.resourceWindows,
-              glyphSize: 15,
-              active: scope.controller.popoverTag == #resourceWindows,
-              tooltip: l.floating_open,
-              onTap: () => scope.controller.openMenu(
-                genBelow(context, dy: 4, right: true),
-                [
-                  for (final (kind, glyph, label) in _resourceKinds(context))
-                    UiMenuItem(
-                      key: Key('gen-tool-resource-${kind.name}'),
-                      label: label,
-                      glyph: glyph,
-                      onTap: () => scope.actions.onOpenResourceWindow!(kind),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 2,
+              children: [
+                Flexible(
+                  child: _PreviewTip(
+                    sections: p.positivePreview,
+                    title: l.gen_finalPositive,
+                    child: GenTab(
+                      key: const Key('gen-tab-positive'),
+                      label: l.gen_basePrompt,
+                      selected: !p.negative,
+                      onTap: () => scope.actions.onNegativeTab(false),
                     ),
+                  ),
+                ),
+                Flexible(
+                  child: _PreviewTip(
+                    sections: p.negativePreview,
+                    title: p.negativeSupported
+                        ? l.gen_finalNegative
+                        : l.gen_turboNegative,
+                    disabledHint: p.negativeSupported
+                        ? null
+                        : l.gen_turboNegative,
+                    child: GenTab(
+                      key: const Key('gen-tab-negative'),
+                      label: l.gen_negative,
+                      selected: p.negative,
+                      onTap: p.negativeSupported
+                          ? () => scope.actions.onNegativeTab(true)
+                          : null,
+                    ),
+                  ),
+                ),
+                if (p.bridge case final b?) _Bridge(bridge: b),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _PromptToolsStrip(
+                translationIndex: tools.translatePinned
+                    ? (tools.palettePinned ? 1 : 0) + (tools.dockPinned ? 1 : 0)
+                    : null,
+                children: [
+                  if (tools.palettePinned)
+                    Builder(
+                      builder: (context) => GenIb(
+                        key: const Key('gen-tool-palette'),
+                        animatedIcon: StudioIcons.promptBlockPalette,
+                        glyphSize: 15,
+                        tooltip: l.gen_toolPalette,
+                        onTap: () =>
+                            scope.actions.onOpenPalette(genRectOf(context)),
+                      ),
+                    ),
+                  if (tools.dockPinned)
+                    GenIb(
+                      key: const Key('gen-tool-dock'),
+                      animatedIcon: StudioIcons.promptBlocks,
+                      glyphSize: 16,
+                      active: data.layout.dockOpen,
+                      tooltip: l.gen_toolDock,
+                      onTap: () => scope.actions.onLayoutChanged(
+                        data.layout.copyWith(dockOpen: !data.layout.dockOpen),
+                      ),
+                    ),
+                  if (tools.translatePinned) const _Translate(),
+                  if (tools.resourceWindowsPinned &&
+                      scope.actions.onOpenResourceWindow != null)
+                    Builder(
+                      builder: (context) => GenIb(
+                        key: const Key('gen-tool-resources'),
+                        glyph: GenGlyphs.resourceWindows,
+                        glyphSize: 15,
+                        active: scope.controller.popoverTag == #resourceWindows,
+                        tooltip: l.floating_open,
+                        onTap: () => scope.controller.openMenu(
+                          genBelow(context, dy: 4, right: true),
+                          [
+                            for (final (kind, glyph, label) in _resourceKinds(
+                              context,
+                            ))
+                              UiMenuItem(
+                                key: Key('gen-tool-resource-${kind.name}'),
+                                label: label,
+                                glyph: glyph,
+                                onTap: () =>
+                                    scope.actions.onOpenResourceWindow!(kind),
+                              ),
+                          ],
+                          tag: #resourceWindows,
+                          width: 200,
+                        ),
+                      ),
+                    ),
+                  if (tools.agentPinned && scope.slots.agentToggle != null)
+                    scope.slots.agentToggle!,
+                  Builder(
+                    builder: (context) => GenIb(
+                      key: const Key('gen-tool-menu'),
+                      animateOnTap: true,
+                      icon: GenNaiIcon(
+                        'prompt-chunk',
+                        size: 16,
+                        color: scope.controller.popoverTag == #tools
+                            ? c.ink
+                            : c.muted,
+                      ),
+                      active: scope.controller.popoverTag == #tools,
+                      tooltip: l.gen_toolsMenu,
+                      onTap: () => scope.controller.openPopover(
+                        genBelow(context, dy: 4, right: true),
+                        (_) => const _ToolsMenu(),
+                        tag: #tools,
+                      ),
+                    ),
+                  ),
                 ],
-                tag: #resourceWindows,
-                width: 200,
               ),
             ),
           ),
-        if (tools.agentPinned && scope.slots.agentToggle != null)
-          scope.slots.agentToggle!,
-        Builder(
-          builder: (context) => GenIb(
-            key: const Key('gen-tool-menu'),
-            animateOnTap: true,
-            icon: GenNaiIcon(
-              'prompt-chunk',
-              size: 16,
-              color: scope.controller.popoverTag == #tools ? c.ink : c.muted,
-            ),
-            active: scope.controller.popoverTag == #tools,
-            tooltip: l.gen_toolsMenu,
-            onTap: () => scope.controller.openPopover(
-              genBelow(context, dy: 4, right: true),
-              (_) => const _ToolsMenu(),
-              tag: #tools,
+        ],
+      ),
+    );
+  }
+}
+
+class _PromptToolsStrip extends StatefulWidget {
+  const _PromptToolsStrip({required this.children, this.translationIndex});
+  final List<Widget> children;
+  final int? translationIndex;
+  @override
+  State<_PromptToolsStrip> createState() => _PromptToolsStripState();
+}
+
+class _PromptToolsStripState extends State<_PromptToolsStrip> {
+  final _scroll = ScrollController();
+  bool _left = false, _right = false;
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_edges);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _edges());
+  }
+
+  @override
+  void didUpdateWidget(covariant _PromptToolsStrip oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _edges());
+  }
+
+  void _edges() {
+    if (!mounted || !_scroll.hasClients) return;
+    final left = _scroll.offset > 0.5;
+    final right = _scroll.offset < _scroll.position.maxScrollExtent - 0.5;
+    if (left != _left || right != _right) {
+      setState(() {
+        _left = left;
+        _right = right;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final widths = [
+      for (var i = 0; i < widget.children.length; i++)
+        i == widget.translationIndex ? 46.0 : 28.0,
+    ];
+    final overflow = widths.length > 5;
+    final desiredWidth = overflow
+        ? widths.take(4).fold<double>(0, (total, value) => total + value) +
+              widths[4] / 2 +
+              8
+        : widths.fold<double>(0, (total, value) => total + value) +
+              (widths.length - 1) * 2;
+    return LayoutBuilder(
+      builder: (context, limits) {
+        final width = math.min(desiredWidth, limits.maxWidth);
+        return SizedBox(
+          key: const Key('gen-prompt-tools-strip'),
+          width: width,
+          height: 28,
+          child: Listener(
+            onPointerSignal: (event) {
+              if (event is! PointerScrollEvent ||
+                  !_scroll.hasClients ||
+                  _scroll.position.maxScrollExtent <= 0) {
+                return;
+              }
+              GestureBinding.instance.pointerSignalResolver.register(event, (
+                _,
+              ) {
+                final delta = event.scrollDelta.dx != 0
+                    ? event.scrollDelta.dx
+                    : event.scrollDelta.dy;
+                _scroll.jumpTo(
+                  (_scroll.offset + delta).clamp(
+                    0.0,
+                    _scroll.position.maxScrollExtent,
+                  ),
+                );
+              });
+            },
+            child: ShaderMask(
+              key: const Key('gen-prompt-tools-fade'),
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (bounds) => LinearGradient(
+                colors: [
+                  _left ? Colors.transparent : Colors.white,
+                  Colors.white,
+                  Colors.white,
+                  _right ? Colors.transparent : Colors.white,
+                ],
+                stops: [0, 12 / bounds.width, 1 - 12 / bounds.width, 1],
+              ).createShader(bounds),
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(
+                  context,
+                ).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  controller: _scroll,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    spacing: 2,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (var i = 0; i < widget.children.length; i++)
+                        SizedBox(
+                          width: widths[i],
+                          height: 28,
+                          child: Center(child: widget.children[i]),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

@@ -372,6 +372,7 @@ class ResourceWindowActions {
     this.onDragRegion,
     this.onRetry,
     this.dragWrap,
+    this.onMove,
   });
 
   final ValueChanged<FloatingResourceKind> onKind;
@@ -386,6 +387,7 @@ class ResourceWindowActions {
   /// 拖动结束才回调持久化；拖动中界面自己预览。
   final ValueChanged<double> onCellSize;
   final ValueChanged<String> onSelect;
+  final ValueChanged<int>? onMove;
 
   /// 双击：图库在小窗内部看大图，其余在主窗口编辑。
   final ValueChanged<String> onOpen;

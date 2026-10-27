@@ -8,6 +8,23 @@ import '../../../../data/services/gallery/gallery_view_mode.dart';
 import '../../../../data/services/gallery/unified_gallery_service.dart'
     show GalleryTimelineEntry;
 
+const double galleryTimelineGap = 4;
+const double galleryTimelineLeftPadding = 16;
+const double galleryTimelineRightPadding = 48;
+const double galleryTimelineHeaderHeight = 44;
+
+/// Shared buffered visible-window policy for the main and resource galleries.
+class GalleryTimelineWindow {
+  double top = 0, bottom = 0;
+  bool needsUpdate(double offset, double viewport) =>
+      offset - viewport * .5 < top || offset + viewport * 1.5 > bottom;
+  void reset(double offset, double viewport) {
+    final height = math.max(viewport, 400.0);
+    top = offset - height * 1.25;
+    bottom = offset + height * 2.25;
+  }
+}
+
 /// 连续画廊中的一个分组（按天/月；不分组时只有一个无日期分组）。
 class GalleryTimelineSection {
   const GalleryTimelineSection({
@@ -70,6 +87,15 @@ class GalleryTimelineLayout {
   final double _maxTileHeight;
 
   bool get isEmpty => tiles.isEmpty;
+
+  double? offsetToReveal(int index, double offset, double viewport) {
+    if (index < 0 || index >= tiles.length) return null;
+    final top = tiles[index].top - headerHeight - 8;
+    final bottom = tiles[index].bottom + 8;
+    if (top < offset) return top;
+    if (bottom > offset + viewport) return bottom - viewport;
+    return null;
+  }
 
   /// 与 [top, bottom) 相交的条目索引（按顶边升序）。
   List<int> indicesIn(double top, double bottom) {
