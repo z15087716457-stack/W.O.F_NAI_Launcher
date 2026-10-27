@@ -18,6 +18,33 @@ enum ResourceLayout { grid, masonry, justified, list }
 
 enum ResourceBadgeTone { plain, ok, warn, accent }
 
+/// 侧栏行图标（界面按主程序各页同款图标画）。
+enum ResourceGroupIcon {
+  /// 图库“全部图片”、块库“全部块”、参考库“全部”。
+  all,
+  favorite,
+  recent,
+  folder,
+
+  /// 图库收藏集（书签）/ 块库收藏集（叠层）。
+  collection,
+
+  /// 收藏集里的分组文件夹（块库 `isFolder`）。
+  collectionFolder,
+
+  /// 块库“未分类”、图库“未分类”目录。
+  uncategorized,
+
+  /// Vibe 分类。
+  category,
+
+  /// 参考库“在生图页”。
+  inGeneration,
+  typeCharacter,
+  typeStyle,
+  typeBoth,
+}
+
 @immutable
 class ResourceGroup {
   const ResourceGroup({
@@ -27,6 +54,9 @@ class ResourceGroup {
     this.glyph,
     this.color,
     this.parentId,
+    this.icon,
+    this.expanded = false,
+    this.dim = false,
   });
 
   final String id;
@@ -39,12 +69,30 @@ class ResourceGroup {
   /// `UiGlyphs` 路径；与 [color] 二选一（块库文件夹、Vibe 分类用色块）。
   final String? glyph;
   final Color? color;
+
+  /// 优先于 [glyph]。
+  final ResourceGroupIcon? icon;
+
+  /// 有子级时的初始展开状态：读主程序对应页面记住的那份；窗口里展开 / 收起只在本窗口生效。
+  final bool expanded;
+
+  /// 弱化显示（图库下划线开头的系统 / 杂项目录）。
+  final bool dim;
 }
 
 @immutable
 class ResourceGroupSection {
-  const ResourceGroupSection({required this.title, required this.groups});
+  const ResourceGroupSection({
+    this.id = '',
+    required this.title,
+    required this.groups,
+  });
+
+  /// `library` / `collections` / `folders` / `categories` / `types`。`library` 不画标题。
+  final String id;
   final String title;
+
+  /// 先序（父在子前），子级用 [ResourceGroup.parentId] 指向父级。
   final List<ResourceGroup> groups;
 }
 
@@ -65,9 +113,42 @@ class ResourceChip {
 
 @immutable
 class ResourceOption {
-  const ResourceOption({required this.id, required this.label});
+  const ResourceOption({
+    required this.id,
+    required this.label,
+    this.directional = true,
+  });
   final String id;
   final String label;
+
+  /// 排序字段有没有升 / 降方向（块库“自定义顺序”没有）。
+  final bool directional;
+}
+
+/// 块封面预览图的裁切（坐标系同主程序 `BlockThumb`）。
+@immutable
+class ResourceThumbCrop {
+  const ResourceThumbCrop({this.offsetX = 0, this.offsetY = 0, this.scale = 1});
+
+  /// −1…1。
+  final double offsetX;
+  final double offsetY;
+
+  /// 1…3。
+  final double scale;
+}
+
+/// 操作失败等一次性提示。界面按 [code] 选文案，[message] 只作补充细节。
+@immutable
+class ResourceNotice {
+  const ResourceNotice({required this.id, required this.code, this.message});
+
+  /// 自增序号：同样的错误再来一次也要重新显示。
+  final int id;
+
+  /// `not_found` / `not_ready` / `unsupported` / `disconnected` / `failed`。
+  final String code;
+  final String? message;
 }
 
 /// 卡片墙里的一项。四类资源共用，按 [FloatingResourceKind] 取用不同字段。
@@ -88,6 +169,14 @@ class ResourceItem {
     this.negative,
     this.folder,
     this.date,
+    this.crop,
+    this.itemCount,
+    this.useCount,
+    this.hasParams = false,
+    this.strength,
+    this.secondary,
+    this.inGeneration = false,
+    this.bundleCount = 0,
   });
 
   final String id;
@@ -120,6 +209,24 @@ class ResourceItem {
 
   /// 图库：按天分段用。
   final DateTime? date;
+
+  /// 块：有预览图时的裁切；[thumb] 为 null 表示没有预览图（画文字封面）。
+  final ResourceThumbCrop? crop;
+
+  /// 块：项数、使用次数、是否带参数（卡片第二行与小标签）。
+  final int? itemCount;
+  final int? useCount;
+  final bool hasParams;
+
+  /// Vibe / 精准：强度；[secondary] 是 Vibe 信息提取或精准保真度。
+  final double? strength;
+  final double? secondary;
+
+  /// 参考：当前就在生图页。
+  final bool inGeneration;
+
+  /// Vibe 组合包里的条数；0 = 不是组合包。
+  final int bundleCount;
 }
 
 @immutable
@@ -171,6 +278,7 @@ class ResourceWindowViewData {
     this.chips = const [],
     this.sorts = const [],
     this.sortId,
+    this.descending = true,
     this.layouts = const [ResourceLayout.grid],
     this.layout = ResourceLayout.grid,
     this.cellSize = 132,
@@ -186,6 +294,8 @@ class ResourceWindowViewData {
     this.connected = true,
     this.statusNote,
     this.now,
+    this.notice,
+    this.maximized = false,
   });
 
   final FloatingResourceKind kind;
@@ -197,8 +307,11 @@ class ResourceWindowViewData {
   final String query;
   final String queryHint;
   final List<ResourceChip> chips;
+
+  /// 排序字段（不含方向）；方向见 [descending]。
   final List<ResourceOption> sorts;
   final String? sortId;
+  final bool descending;
 
   /// 当前资源支持的排布，第一个是主程序没有设置时的默认。
   final List<ResourceLayout> layouts;
@@ -224,6 +337,12 @@ class ResourceWindowViewData {
 
   /// 图库按天分段的“今天”。为 null 时用 `DateTime.now()`。
   final DateTime? now;
+
+  /// 最近一次操作失败的提示（界面显示几秒后自己收起）。
+  final ResourceNotice? notice;
+
+  /// 窗口已最大化（顶栏双击切换）。
+  final bool maximized;
 }
 
 /// 包一层原生拖动（子窗口里由控制器用 `ResourceWindowDrag` 实现）。界面只负责把卡片交出去。
@@ -246,6 +365,10 @@ class ResourceWindowActions {
     required this.onLoadMore,
     required this.onAlwaysOnTop,
     required this.onNewWindow,
+    this.onSortDirection,
+    this.onClose,
+    this.onStartDrag,
+    this.onToggleMaximize,
     this.onRetry,
     this.dragWrap,
   });
@@ -270,6 +393,14 @@ class ResourceWindowActions {
   final VoidCallback onLoadMore;
   final ValueChanged<bool> onAlwaysOnTop;
   final VoidCallback onNewWindow;
+
+  /// 切换升 / 降序（写回主程序同一个排序设置）。
+  final ValueChanged<bool>? onSortDirection;
+
+  /// 一体顶栏：关闭本窗口、在空白处按下开始原生拖动、双击最大化 / 还原。
+  final VoidCallback? onClose;
+  final VoidCallback? onStartDrag;
+  final VoidCallback? onToggleMaximize;
   final VoidCallback? onRetry;
   final ResourceDragWrap? dragWrap;
 
@@ -290,6 +421,10 @@ class ResourceWindowActions {
         onLoadMore: () => log('more'),
         onAlwaysOnTop: (v) => log('top:$v'),
         onNewWindow: () => log('new'),
+        onSortDirection: (d) => log('desc:$d'),
+        onClose: () => log('close'),
+        onStartDrag: () => log('drag'),
+        onToggleMaximize: () => log('max'),
         onRetry: () => log('retry'),
       );
 }
