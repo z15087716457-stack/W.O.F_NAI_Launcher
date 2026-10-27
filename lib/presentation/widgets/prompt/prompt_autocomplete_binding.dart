@@ -132,10 +132,10 @@ class _PromptAutocompleteBindingState extends State<PromptAutocompleteBinding> {
     );
     return widget.autocomplete != null && widget.builder != null
         ? widget.builder!(context, widget.autocomplete!, (index) {
-            final value = widget.autocomplete!.accept(
-              index,
-              widget.autoInsertComma,
-            );
+            final autocomplete = widget.autocomplete!;
+            final value = autocomplete.value.relatedFor == null
+                ? autocomplete.accept(index, widget.autoInsertComma)
+                : autocomplete.acceptRelated(index, widget.autoInsertComma);
             if (value != null) _accept(value);
           }, child)
         : child;

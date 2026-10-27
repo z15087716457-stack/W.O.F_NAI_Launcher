@@ -1,4 +1,8 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/presentation/providers/new_badge_provider.dart';
+import '../../../helpers/light_theme_contrast.dart'
+    show InMemoryLocalStorageService;
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,21 +46,28 @@ Future<void> pumpBlocks(
 }
 
 Widget blocksApp(Widget child, {String locale = 'zh', bool dark = false}) =>
-    RepaintBoundary(
-      key: const Key('blocks-capture'),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: dark ? GeistTheme.dark : GeistTheme.light,
-        locale: locale.contains('_')
-            ? Locale(locale.split('_')[0], locale.split('_')[1])
-            : Locale(locale),
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(disableAnimations: true),
-          child: TextEditingShortcuts(child: child!),
+    ProviderScope(
+      overrides: [
+        newBadgeServiceProvider.overrideWith(
+          (ref) => NewBadgeService(InMemoryLocalStorageService()),
         ),
-        home: Scaffold(body: WindowChromeScope(child: child)),
+      ],
+      child: RepaintBoundary(
+        key: const Key('blocks-capture'),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: dark ? GeistTheme.dark : GeistTheme.light,
+          locale: locale.contains('_')
+              ? Locale(locale.split('_')[0], locale.split('_')[1])
+              : Locale(locale),
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: TextEditingShortcuts(child: child!),
+          ),
+          home: Scaffold(body: WindowChromeScope(child: child)),
+        ),
       ),
     );
 

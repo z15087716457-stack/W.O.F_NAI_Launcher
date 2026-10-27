@@ -7,6 +7,7 @@ import '../../../core/enums/quality_tag_preset.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../providers/new_badge_provider.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -1697,7 +1698,7 @@ class _ParamsPanelState extends State<_ParamsPanel> {
           _PresetRow(
             key: const Key('block-param-quality-row'),
             label: l10n.qualityTags_label,
-            badge: l10n.gen_menuNew,
+            badge: newBadgeLabel(context, 'presets.quality', l10n.gen_menuNew),
             control: Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -1750,7 +1751,7 @@ class _ParamsPanelState extends State<_ParamsPanel> {
           _PresetRow(
             key: const Key('block-param-uc-row'),
             label: l10n.ucPreset_label,
-            badge: l10n.gen_menuNew,
+            badge: newBadgeLabel(context, 'presets.uc', l10n.gen_menuNew),
             control: dropdown(
               'uc',
               _p.ucCustomBlockId != null
@@ -1835,7 +1836,8 @@ class _PresetRow extends StatelessWidget {
     required this.control,
     required this.preview,
   });
-  final String label, badge;
+  final String label;
+  final String? badge;
   final Widget control;
   final String? preview;
 
@@ -1863,25 +1865,26 @@ class _PresetRow extends StatelessWidget {
                 runSpacing: 2,
                 children: [
                   Text(label, style: UiText.sans(12, color: c.muted)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: c.brand.withValues(alpha: .12),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      badge,
-                      style: UiText.sans(
-                        9.5,
-                        weight: FontWeight.w600,
-                        color: c.accent,
-                        height: 1,
+                  if (badge != null)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: c.brand.withValues(alpha: .12),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: UiText.sans(
+                          9.5,
+                          weight: FontWeight.w600,
+                          color: c.accent,
+                          height: 1,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),

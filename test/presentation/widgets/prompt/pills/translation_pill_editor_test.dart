@@ -895,6 +895,8 @@ LocalTagExpansionService _tagService() => LocalTagExpansionService(
   relatedTags: _Source(),
   substringSearch: (input, {limit = 20}) async => const [],
   popularSearch: ({limit = 12}) async => [_candidate],
+  semanticNames: (input, {limit = 80}) async =>
+      input == '绿眼睛' ? [_candidate] : [],
 );
 
 class _Source implements CompletionSource {
