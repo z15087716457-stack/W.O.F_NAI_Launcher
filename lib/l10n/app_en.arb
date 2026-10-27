@@ -11570,5 +11570,9 @@
   "resourceWindow_disconnected": "Main window disconnected",
   "resourceWindow_currentModelUsable": "Currently usable with this model",
   "resourceWindow_insertPositive": "Insert into positive prompt",
-  "resourceWindow_insertNegative": "Insert into negative prompt"
+  "resourceWindow_insertNegative": "Insert into negative prompt",
+  "resourceWindow_errorNotFound": "This item no longer exists — the list has been refreshed",
+  "resourceWindow_errorNotReady": "The main window isn't ready yet — try again in a moment",
+  "resourceWindow_errorUnsupported": "The current model doesn't support this action",
+  "resourceWindow_errorFailed": "Action failed"
 }

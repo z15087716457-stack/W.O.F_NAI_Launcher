@@ -22620,4 +22620,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resourceWindow_insertNegative => 'Insert into negative prompt';
+
+  @override
+  String get resourceWindow_errorNotFound =>
+      'This item no longer exists — the list has been refreshed';
+
+  @override
+  String get resourceWindow_errorNotReady =>
+      'The main window isn\'t ready yet — try again in a moment';
+
+  @override
+  String get resourceWindow_errorUnsupported =>
+      'The current model doesn\'t support this action';
+
+  @override
+  String get resourceWindow_errorFailed => 'Action failed';
 }

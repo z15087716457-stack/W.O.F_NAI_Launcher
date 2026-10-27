@@ -12143,5 +12143,9 @@
   "resourceWindow_disconnected": "主視窗未連線",
   "resourceWindow_currentModelUsable": "當前模型可用",
   "resourceWindow_insertPositive": "插入正面",
-  "resourceWindow_insertNegative": "插入負面"
+  "resourceWindow_insertNegative": "插入負面",
+  "resourceWindow_errorNotFound": "這一項已經不存在，列表已重新整理",
+  "resourceWindow_errorNotReady": "主視窗還沒準備好，請稍後再試",
+  "resourceWindow_errorUnsupported": "當前模型不支援這個操作",
+  "resourceWindow_errorFailed": "操作失敗"
 }

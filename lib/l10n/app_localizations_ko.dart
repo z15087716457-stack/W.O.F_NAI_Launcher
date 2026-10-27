@@ -21925,4 +21925,17 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resourceWindow_insertNegative => '부정 프롬프트에 삽입';
+
+  @override
+  String get resourceWindow_errorNotFound => '이 항목은 더 이상 없습니다. 목록을 새로 고쳤습니다';
+
+  @override
+  String get resourceWindow_errorNotReady =>
+      '메인 창이 아직 준비되지 않았습니다. 잠시 후 다시 시도하세요';
+
+  @override
+  String get resourceWindow_errorUnsupported => '현재 모델은 이 작업을 지원하지 않습니다';
+
+  @override
+  String get resourceWindow_errorFailed => '작업에 실패했습니다';
 }

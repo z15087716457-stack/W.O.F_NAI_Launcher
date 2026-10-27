@@ -26,17 +26,17 @@ abstract final class ResourceWindowFixture {
     final today = now ?? DateTime(2026, 10, 27, 16, 30);
     return switch (kind) {
       FloatingResourceKind.gallery => _gallery(image, layout, today, connected),
-      FloatingResourceKind.blocks => _blocks(layout, connected),
+      FloatingResourceKind.blocks => _blocks(image, layout, connected),
       FloatingResourceKind.vibe => _refs(kind, image, layout, connected),
       FloatingResourceKind.precise => _refs(kind, image, layout, connected),
     };
   }
 
   static const _counts = {
-    FloatingResourceKind.gallery: 1284,
-    FloatingResourceKind.blocks: 86,
-    FloatingResourceKind.vibe: 42,
-    FloatingResourceKind.precise: 17,
+    FloatingResourceKind.gallery: 48714,
+    FloatingResourceKind.blocks: 704,
+    FloatingResourceKind.vibe: 4,
+    FloatingResourceKind.precise: 1,
   };
 
   static ResourceWindowViewData _gallery(
@@ -63,7 +63,7 @@ abstract final class ResourceWindowFixture {
           meta: '832×1216',
           thumb: image?.call(j),
           aspect: aspects[j % aspects.length],
-          badge: j % 5 == 3 ? 'V4' : null,
+          badge: const ['V4.5', 'V4.5', 'V5', null, 'V4'][j % 5],
           favorite: const {1, 4, 9, 15}.contains(j),
           positive: _prompts[j % _prompts.length],
           date: now.subtract(Duration(days: j < 8 ? 0 : (j < 18 ? 1 : 3))),
@@ -75,50 +75,154 @@ abstract final class ResourceWindowFixture {
       counts: _counts,
       sections: const [
         ResourceGroupSection(
+          id: 'library',
           title: '资料库',
           groups: [
             ResourceGroup(
               id: 'all',
               label: '全部图片',
-              count: 1284,
-              glyph: UiGlyphs.clock,
+              count: 48714,
+              icon: ResourceGroupIcon.all,
             ),
             ResourceGroup(
-              id: 'today',
-              label: '今天',
-              count: 24,
-              glyph: UiGlyphs.calendar,
-            ),
-            ResourceGroup(
-              id: 'fav',
+              id: 'favorites',
               label: '收藏',
-              count: 186,
-              glyph: UiGlyphs.heart,
+              count: 163,
+              icon: ResourceGroupIcon.favorite,
             ),
           ],
         ),
         ResourceGroupSection(
-          title: '文件夹',
-          groups: [
-            ResourceGroup(id: 'f1', label: 'outputs', count: 9840),
-            ResourceGroup(id: 'f2', label: 'Pixiv 收藏', count: 1962),
-            ResourceGroup(id: 'f3', label: '临时存图', count: 606),
-          ],
-        ),
-        ResourceGroupSection(
+          id: 'collections',
           title: '收藏集',
           groups: [
             ResourceGroup(
-              id: 'c1',
-              label: '雨夜系列',
-              count: 38,
-              glyph: UiGlyphs.star,
+              id: 'collection:wof',
+              label: 'W.O.F',
+              count: 77,
+              icon: ResourceGroupIcon.collectionFolder,
+              expanded: true,
             ),
             ResourceGroup(
-              id: 'c2',
-              label: '角色设定',
-              count: 121,
-              glyph: UiGlyphs.star,
+              id: 'collection:artists',
+              parentId: 'collection:wof',
+              label: '画师收藏集',
+              count: 0,
+              icon: ResourceGroupIcon.collection,
+            ),
+            ResourceGroup(
+              id: 'collection:trip',
+              parentId: 'collection:wof',
+              label: '旅行',
+              count: 77,
+              icon: ResourceGroupIcon.collection,
+            ),
+            ResourceGroup(
+              id: 'collection:style',
+              label: '画风',
+              count: 0,
+              icon: ResourceGroupIcon.collection,
+            ),
+            ResourceGroup(
+              id: 'collection:interest',
+              label: '兴趣点',
+              count: 80,
+              icon: ResourceGroupIcon.collection,
+            ),
+          ],
+        ),
+        ResourceGroupSection(
+          id: 'folders',
+          title: '文件夹',
+          groups: [
+            ResourceGroup(
+              id: 'folder:lib',
+              label: '01_图库',
+              count: 49177,
+              expanded: true,
+            ),
+            ResourceGroup(
+              id: 'folder:n3',
+              parentId: 'folder:lib',
+              label: 'NAI 3',
+              count: 375,
+              expanded: true,
+            ),
+            ResourceGroup(
+              id: 'folder:n3r',
+              parentId: 'folder:n3',
+              label: 'R18',
+              count: 112,
+            ),
+            ResourceGroup(
+              id: 'folder:n3n',
+              parentId: 'folder:n3',
+              label: '正常向',
+              count: 263,
+            ),
+            ResourceGroup(
+              id: 'folder:n4',
+              parentId: 'folder:lib',
+              label: 'NAI 4',
+              count: 749,
+            ),
+            ResourceGroup(
+              id: 'folder:n4r',
+              parentId: 'folder:n4',
+              label: 'R18',
+              count: 126,
+            ),
+            ResourceGroup(
+              id: 'folder:n45',
+              parentId: 'folder:lib',
+              label: 'NAI 4.5',
+              count: 27049,
+            ),
+            ResourceGroup(
+              id: 'folder:n45r',
+              parentId: 'folder:n45',
+              label: 'R18',
+              count: 7217,
+            ),
+            ResourceGroup(
+              id: 'folder:unk',
+              parentId: 'folder:lib',
+              label: 'NAI未知版本',
+              count: 36,
+            ),
+            ResourceGroup(
+              id: 'folder:wof',
+              parentId: 'folder:lib',
+              label: 'W.O.F 艺术家收藏',
+              count: 1373,
+            ),
+            ResourceGroup(
+              id: 'folder:wof1',
+              parentId: 'folder:wof',
+              label: 'airfish (lefko d)-116',
+              count: 5,
+            ),
+            ResourceGroup(
+              id: 'folder:log',
+              parentId: 'folder:lib',
+              label: '_分类日志',
+              count: 0,
+              dim: true,
+            ),
+            ResourceGroup(
+              id: 'folder:misc',
+              parentId: 'folder:lib',
+              label: '_杂物',
+              count: 0,
+              dim: true,
+            ),
+            ResourceGroup(id: 'folder:tmp', label: '临时存储栈堆', count: 250),
+            ResourceGroup(id: 'folder:ref', label: '参考图', count: 106),
+            ResourceGroup(
+              id: 'folder:none',
+              label: '未分类',
+              count: 66,
+              icon: ResourceGroupIcon.uncategorized,
             ),
           ],
         ),
@@ -130,10 +234,14 @@ abstract final class ResourceWindowFixture {
         ResourceChip(id: 'fav', label: '收藏', glyph: UiGlyphs.heart),
       ],
       sorts: const [
-        ResourceOption(id: 'new', label: '最新'),
-        ResourceOption(id: 'old', label: '最早'),
+        ResourceOption(id: 'modifiedAt', label: '修改时间'),
+        ResourceOption(id: 'createdAt', label: '创建时间'),
+        ResourceOption(id: 'fileName', label: '文件名'),
+        ResourceOption(id: 'fileSize', label: '文件大小'),
+        ResourceOption(id: 'imageDimensions', label: '尺寸'),
       ],
-      sortId: 'new',
+      sortId: 'modifiedAt',
+      descending: true,
       layouts: const [
         ResourceLayout.justified,
         ResourceLayout.masonry,
@@ -144,7 +252,7 @@ abstract final class ResourceWindowFixture {
           ? 170
           : 132,
       items: items,
-      total: 1284,
+      total: 48714,
       hasMore: true,
       selectedId: sel.id,
       detail: ResourceDetail(
@@ -175,6 +283,7 @@ abstract final class ResourceWindowFixture {
   }
 
   static ResourceWindowViewData _blocks(
+    ImageProvider Function(int)? image,
     ResourceLayout? layout,
     bool connected,
   ) {
@@ -263,8 +372,17 @@ abstract final class ResourceWindowFixture {
           negative: neg.isEmpty ? null : neg,
           folder: folder,
           favorite: i % 4 == 1,
-          meta:
-              '${'$pos,$neg'.split(',').where((s) => s.trim().isNotEmpty).length} 词',
+          // 一半带预览图（裁切不同），其余画文字封面。
+          thumb: i.isEven ? image?.call(i + 3) : null,
+          crop: i.isEven
+              ? ResourceThumbCrop(offsetY: i % 4 == 0 ? -.4 : .2, scale: 1.2)
+              : null,
+          itemCount: '$pos,$neg'
+              .split(',')
+              .where((s) => s.trim().isNotEmpty)
+              .length,
+          useCount: (i * 13) % 50,
+          hasParams: i == 0,
         ),
     ];
     return ResourceWindowViewData(
@@ -272,54 +390,93 @@ abstract final class ResourceWindowFixture {
       counts: _counts,
       sections: const [
         ResourceGroupSection(
-          title: '分组',
+          id: 'library',
+          title: '',
           groups: [
             ResourceGroup(
               id: 'all',
               label: '全部块',
-              count: 86,
-              glyph: UiGlyphs.layers,
+              count: 704,
+              icon: ResourceGroupIcon.all,
             ),
             ResourceGroup(
-              id: 'fav',
+              id: 'recent',
+              label: '最近使用',
+              count: 20,
+              icon: ResourceGroupIcon.recent,
+            ),
+            ResourceGroup(
+              id: 'favorites',
               label: '收藏',
               count: 14,
-              glyph: UiGlyphs.star,
+              icon: ResourceGroupIcon.favorite,
             ),
           ],
         ),
         ResourceGroupSection(
+          id: 'collections',
+          title: '收藏集',
+          groups: [
+            ResourceGroup(
+              id: 'collection:daily',
+              label: '日常组合',
+              count: 12,
+              icon: ResourceGroupIcon.collection,
+            ),
+          ],
+        ),
+        ResourceGroupSection(
+          id: 'folders',
           title: '文件夹',
           groups: [
             ResourceGroup(
-              id: 'style',
+              id: 'uncategorized',
+              label: '未分类',
+              count: 37,
+              icon: ResourceGroupIcon.uncategorized,
+            ),
+            ResourceGroup(
+              id: 'folder:style',
               label: '画风',
-              count: 18,
-              color: Color(0xFFF59E0B),
+              count: 165,
+              expanded: true,
             ),
             ResourceGroup(
-              id: 'char',
-              label: '角色',
-              count: 23,
-              color: Color(0xFF3B82F6),
+              id: 'folder:style2',
+              parentId: 'folder:style',
+              label: '画风',
+              count: 164,
             ),
             ResourceGroup(
-              id: 'scene',
-              label: '场景',
-              count: 15,
-              color: Color(0xFF22C55E),
+              id: 'folder:misc',
+              parentId: 'folder:style',
+              label: '其他',
+              count: 1,
             ),
             ResourceGroup(
-              id: 'wear',
-              label: '服装',
-              count: 19,
-              color: Color(0xFFA855F7),
+              id: 'folder:official',
+              label: 'NovelAI 官方预设',
+              count: 12,
             ),
             ResourceGroup(
-              id: 'neg',
-              label: '负面',
-              count: 11,
-              color: Color(0xFFE5484D),
+              id: 'folder:quality',
+              parentId: 'folder:official',
+              label: '质量词预设',
+              count: 4,
+            ),
+            ResourceGroup(id: 'folder:char', label: '角色', count: 73),
+            ResourceGroup(
+              id: 'folder:oc',
+              parentId: 'folder:char',
+              label: 'OC',
+              count: 71,
+            ),
+            ResourceGroup(id: 'folder:wear', label: '衣柜', count: 171),
+            ResourceGroup(
+              id: 'folder:wear2',
+              parentId: 'folder:wear',
+              label: '衣柜',
+              count: 171,
             ),
           ],
         ),
@@ -331,8 +488,13 @@ abstract final class ResourceWindowFixture {
         ResourceChip(id: 'neg', label: '负面'),
         ResourceChip(id: 'fav', label: '收藏', glyph: UiGlyphs.star),
       ],
-      sorts: const [ResourceOption(id: 'recent', label: '最近使用')],
-      sortId: 'recent',
+      sorts: const [
+        ResourceOption(id: 'custom', label: '自定义顺序', directional: false),
+        ResourceOption(id: 'updated', label: '最近修改'),
+        ResourceOption(id: 'title', label: '名称'),
+      ],
+      sortId: 'updated',
+      descending: true,
       layouts: const [
         ResourceLayout.masonry,
         ResourceLayout.grid,
@@ -340,7 +502,7 @@ abstract final class ResourceWindowFixture {
       ],
       layout: layout ?? ResourceLayout.masonry,
       items: items,
-      total: 86,
+      total: 704,
       selectedId: 'b1',
       detail: ResourceDetail(
         itemId: 'b1',
@@ -378,8 +540,10 @@ abstract final class ResourceWindowFixture {
         ResourceItem(
           id: 'r$j',
           title: vibe ? _vibes[j % 6] : _people[j % 6],
-          meta: vibe ? '0.6 · 1.0' : '1.0',
           thumb: image?.call(j + off),
+          strength: vibe ? .6 : 1,
+          secondary: vibe ? 1 : 0,
+          inGeneration: j == 0,
           badge: vibe
               ? (j % 4 == 2 ? '需编码' : 'V4.5')
               : ['角色', '风格', '角色+风格'][j % 3],
@@ -396,61 +560,102 @@ abstract final class ResourceWindowFixture {
       sections: vibe
           ? const [
               ResourceGroupSection(
-                title: '分组',
+                id: 'library',
+                title: '',
                 groups: [
                   ResourceGroup(
                     id: 'all',
-                    label: '全部 Vibe',
-                    count: 42,
-                    glyph: UiGlyphs.spark,
+                    label: '全部',
+                    count: 4,
+                    icon: ResourceGroupIcon.all,
                   ),
                   ResourceGroup(
-                    id: 'fav',
+                    id: 'favorites',
                     label: '收藏',
-                    count: 9,
-                    glyph: UiGlyphs.star,
+                    count: 1,
+                    icon: ResourceGroupIcon.favorite,
+                  ),
+                  ResourceGroup(
+                    id: 'inGeneration',
+                    label: '在生图页',
+                    count: 1,
+                    icon: ResourceGroupIcon.inGeneration,
                   ),
                 ],
               ),
               ResourceGroupSection(
+                id: 'categories',
                 title: '分类',
                 groups: [
                   ResourceGroup(
-                    id: 'light',
+                    id: 'category:light',
                     label: '光影',
-                    count: 12,
-                    color: Color(0xFF3B82F6),
+                    count: 2,
+                    icon: ResourceGroupIcon.category,
+                    expanded: true,
                   ),
                   ResourceGroup(
-                    id: 'tone',
+                    id: 'category:neon',
+                    parentId: 'category:light',
+                    label: '霓虹',
+                    count: 1,
+                    icon: ResourceGroupIcon.category,
+                  ),
+                  ResourceGroup(
+                    id: 'category:tone',
                     label: '色调',
-                    count: 10,
-                    color: Color(0xFFF59E0B),
-                  ),
-                  ResourceGroup(
-                    id: 'comp',
-                    label: '构图',
-                    count: 8,
-                    color: Color(0xFF22C55E),
+                    count: 2,
+                    icon: ResourceGroupIcon.category,
                   ),
                 ],
               ),
             ]
           : const [
               ResourceGroupSection(
-                title: '分组',
+                id: 'library',
+                title: '',
                 groups: [
                   ResourceGroup(
                     id: 'all',
-                    label: '全部参考',
-                    count: 17,
-                    glyph: UiGlyphs.personStar,
+                    label: '全部',
+                    count: 1,
+                    icon: ResourceGroupIcon.all,
                   ),
                   ResourceGroup(
-                    id: 'fav',
+                    id: 'favorites',
                     label: '收藏',
-                    count: 5,
-                    glyph: UiGlyphs.star,
+                    count: 0,
+                    icon: ResourceGroupIcon.favorite,
+                  ),
+                  ResourceGroup(
+                    id: 'inGeneration',
+                    label: '在生图页',
+                    count: 1,
+                    icon: ResourceGroupIcon.inGeneration,
+                  ),
+                ],
+              ),
+              ResourceGroupSection(
+                id: 'types',
+                title: '类型',
+                groups: [
+                  ResourceGroup(
+                    id: 'type:character',
+                    label: '角色',
+                    count: 1,
+                    icon: ResourceGroupIcon.typeCharacter,
+                  ),
+                  ResourceGroup(
+                    id: 'type:style',
+                    label: '风格',
+                    count: 0,
+                    icon: ResourceGroupIcon.typeStyle,
+                  ),
+                  ResourceGroup(
+                    id: 'type:both',
+                    label: '角色和风格',
+                    count: 0,
+                    icon: ResourceGroupIcon.typeBoth,
                   ),
                 ],
               ),
@@ -463,8 +668,16 @@ abstract final class ResourceWindowFixture {
               ResourceChip(id: 'usable', label: '当前模型可用', on: true),
             ]
           : const [ResourceChip(id: 'fav', label: '收藏', glyph: UiGlyphs.star)],
-      sorts: const [ResourceOption(id: 'recent', label: '最近使用')],
-      sortId: 'recent',
+      sorts: const [
+        ResourceOption(id: 'lastUsed', label: '最近使用'),
+        ResourceOption(id: 'createdAt', label: '添加时间'),
+        ResourceOption(id: 'usedCount', label: '使用次数'),
+        ResourceOption(id: 'name', label: '名称'),
+      ],
+      sortId: 'lastUsed',
+      descending: true,
+      cellSize: 180,
+      cellRange: const (140.0, 240.0),
       layouts: const [ResourceLayout.grid, ResourceLayout.list],
       layout: layout ?? ResourceLayout.grid,
       items: items,

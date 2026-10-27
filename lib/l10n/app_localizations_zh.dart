@@ -21606,6 +21606,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resourceWindow_insertNegative => '插入负面';
+
+  @override
+  String get resourceWindow_errorNotFound => '这一项已经不存在，列表已刷新';
+
+  @override
+  String get resourceWindow_errorNotReady => '主窗口还没准备好，请稍后再试';
+
+  @override
+  String get resourceWindow_errorUnsupported => '当前模型不支持这个操作';
+
+  @override
+  String get resourceWindow_errorFailed => '操作失败';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43210,4 +43222,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get resourceWindow_insertNegative => '插入負面';
+
+  @override
+  String get resourceWindow_errorNotFound => '這一項已經不存在，列表已重新整理';
+
+  @override
+  String get resourceWindow_errorNotReady => '主視窗還沒準備好，請稍後再試';
+
+  @override
+  String get resourceWindow_errorUnsupported => '當前模型不支援這個操作';
+
+  @override
+  String get resourceWindow_errorFailed => '操作失敗';
 }

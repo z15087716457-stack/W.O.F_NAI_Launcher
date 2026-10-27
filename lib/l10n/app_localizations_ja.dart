@@ -21853,4 +21853,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resourceWindow_insertNegative => '負のプロンプトに挿入';
+
+  @override
+  String get resourceWindow_errorNotFound => 'この項目はもう存在しません（一覧を更新しました）';
+
+  @override
+  String get resourceWindow_errorNotReady =>
+      'メインウィンドウの準備ができていません。少し待ってから再試行してください';
+
+  @override
+  String get resourceWindow_errorUnsupported => '現在のモデルはこの操作に対応していません';
+
+  @override
+  String get resourceWindow_errorFailed => '操作に失敗しました';
 }

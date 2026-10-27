@@ -11558,5 +11558,9 @@
   "resourceWindow_disconnected": "メインウィンドウ未接続",
   "resourceWindow_currentModelUsable": "現在のモデルで使用可能",
   "resourceWindow_insertPositive": "正のプロンプトに挿入",
-  "resourceWindow_insertNegative": "負のプロンプトに挿入"
+  "resourceWindow_insertNegative": "負のプロンプトに挿入",
+  "resourceWindow_errorNotFound": "この項目はもう存在しません（一覧を更新しました）",
+  "resourceWindow_errorNotReady": "メインウィンドウの準備ができていません。少し待ってから再試行してください",
+  "resourceWindow_errorUnsupported": "現在のモデルはこの操作に対応していません",
+  "resourceWindow_errorFailed": "操作に失敗しました"
 }

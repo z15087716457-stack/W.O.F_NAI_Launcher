@@ -39309,6 +39309,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Insert into negative prompt'**
   String get resourceWindow_insertNegative;
+
+  /// No description provided for @resourceWindow_errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This item no longer exists — the list has been refreshed'**
+  String get resourceWindow_errorNotFound;
+
+  /// No description provided for @resourceWindow_errorNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'The main window isn\'t ready yet — try again in a moment'**
+  String get resourceWindow_errorNotReady;
+
+  /// No description provided for @resourceWindow_errorUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'The current model doesn\'t support this action'**
+  String get resourceWindow_errorUnsupported;
+
+  /// No description provided for @resourceWindow_errorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Action failed'**
+  String get resourceWindow_errorFailed;
 }
 
 class _AppLocalizationsDelegate

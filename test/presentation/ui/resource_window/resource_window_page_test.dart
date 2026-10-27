@@ -34,6 +34,8 @@ Future<List<String>> _pump(
     ),
   );
   await t.pump();
+  // 列表末尾的加载行一出现就要下一页；交互断言只看用户操作。
+  log.removeWhere((e) => e == 'more');
   return log;
 }
 
@@ -59,15 +61,16 @@ void main() {
       final other = FloatingResourceKind.values.firstWhere((k) => k != kind);
       await t.tap(find.byKey(Key('rw-tab-${other.name}')));
       await t.tap(
-        find.byKey(Key('rw-group-${data.sections.last.groups.last.id}')),
+        find.byKey(Key('rw-group-${data.sections.last.groups.first.id}')),
       );
       await t.tap(find.byKey(Key('rw-item-${data.items.first.id}')));
       await t.pump(const Duration(milliseconds: 400));
       final primary = data.detail!.actions.firstWhere((a) => a.primary);
       await t.tap(find.byKey(Key('rw-act-${primary.id}')));
+      log.removeWhere((e) => e == 'more');
       expect(log, [
         'kind:${other.name}',
-        'group:${data.sections.last.groups.last.id}',
+        'group:${data.sections.last.groups.first.id}',
         'select:${data.items.first.id}',
         'action:${data.detail!.itemId}:${primary.id}',
       ]);
@@ -89,7 +92,7 @@ void main() {
           matching: find.byKey(const ValueKey(ResourceLayout.grid)),
         ),
       );
-      expect(log, ['layout:grid']);
+      expect(log.where((e) => e != 'more'), ['layout:grid']);
       for (final l in [ResourceLayout.masonry, ResourceLayout.grid]) {
         await _pump(t, _view(FloatingResourceKind.gallery, l));
         expect(t.takeException(), isNull);
@@ -121,7 +124,7 @@ void main() {
       expect(find.byKey(Key('rw-act-${a.id}')), findsNothing);
     }
     await _pump(t, data);
-    expect(t.getSize(find.byKey(const Key('rw-side'))).width, 212);
+    expect(t.getSize(find.byKey(const Key('rw-side'))).width, 224);
   });
 
   testWidgets('pin, new window and favorite report through actions', (t) async {
@@ -133,7 +136,13 @@ void main() {
     await t.tap(find.byKey(Key('rw-fav-${fav.id}')));
     // 卡片有双击手势：单击要等过了双击判定时间才落定。
     await t.pump(const Duration(milliseconds: 400));
-    expect(log, ['top:true', 'new', 'favorite:${fav.id}']);
+    await t.tap(find.byKey(const Key('rw-close')));
+    expect(log.where((e) => e != 'more'), [
+      'top:true',
+      'new',
+      'favorite:${fav.id}',
+      'close',
+    ]);
   });
 
   testWidgets('disconnected main window shows in the status row', (t) async {
@@ -142,5 +151,126 @@ void main() {
       ResourceWindowFixture.view(FloatingResourceKind.blocks, connected: false),
     );
     expect(find.text('主窗口未连接'), findsOne);
+  });
+
+  testWidgets('group tree: children follow expanded state, toggles locally', (
+    t,
+  ) async {
+    final log = await _pump(t, _view(FloatingResourceKind.gallery));
+    // 01_图库（展开）→ NAI 3（展开）→ R18 可见；NAI 4（收起）的 R18 不可见。
+    expect(find.byKey(const Key('rw-group-folder:n3r')), findsOne);
+    expect(find.byKey(const Key('rw-group-folder:n4r')), findsNothing);
+    await t.tap(find.byKey(const Key('rw-toggle-folder:n4')));
+    await t.pump();
+    expect(find.byKey(const Key('rw-group-folder:n4r')), findsOne);
+    await t.tap(find.byKey(const Key('rw-toggle-folder:lib')));
+    await t.pump();
+    expect(find.byKey(const Key('rw-group-folder:n3')), findsNothing);
+    // 展开 / 收起不切分组。
+    expect(log.where((e) => e.startsWith('group:')), isEmpty);
+    // 子级比父级缩进更深。
+    await t.tap(find.byKey(const Key('rw-toggle-folder:lib')));
+    await t.pump();
+    final parent = t.getTopLeft(
+      find.descendant(
+        of: find.byKey(const Key('rw-group-folder:lib')),
+        matching: find.text('01_图库'),
+      ),
+    );
+    final child = t.getTopLeft(
+      find.descendant(
+        of: find.byKey(const Key('rw-group-folder:n3')),
+        matching: find.text('NAI 3'),
+      ),
+    );
+    expect(child.dx, greaterThan(parent.dx + 10));
+    // 资料库没有“今天”。
+    expect(find.text('今天'), findsOne); // 只剩卡片墙的日期段头
+    expect(find.byKey(const Key('rw-group-today')), findsNothing);
+  });
+
+  testWidgets('sort menu lists fields only; arrow toggles direction', (
+    t,
+  ) async {
+    final data = _view(FloatingResourceKind.gallery);
+    final log = await _pump(t, data);
+    await t.tap(find.byKey(const Key('rw-sort-field')));
+    await t.pump();
+    for (final s in data.sorts) {
+      expect(find.byKey(Key('rw-sort-${s.id}')), findsOne);
+    }
+    expect(find.textContaining('升序'), findsNothing);
+    await t.tap(find.byKey(const Key('rw-sort-fileName')));
+    await t.pump();
+    await t.tap(find.byKey(const Key('rw-sort-direction')));
+    expect(log.where((e) => e != 'more'), ['sort:fileName', 'desc:false']);
+    // 块库“自定义顺序”没有方向箭头。
+    await _pump(
+      t,
+      ResourceWindowViewData(
+        kind: FloatingResourceKind.blocks,
+        sorts: const [
+          ResourceOption(id: 'custom', label: 'C', directional: false),
+        ],
+        sortId: 'custom',
+        items: _view(FloatingResourceKind.blocks).items,
+      ),
+    );
+    expect(find.byKey(const Key('rw-sort-direction')), findsNothing);
+  });
+
+  testWidgets('tab counts stay and badges never overflow the card', (t) async {
+    await _pump(t, _view(FloatingResourceKind.gallery, ResourceLayout.grid));
+    for (final k in FloatingResourceKind.values) {
+      expect(find.byKey(Key('rw-tab-count-${k.name}')), findsOne);
+    }
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('single tap selects at once; second tap opens', (t) async {
+    final data = _view(FloatingResourceKind.blocks);
+    final log = await _pump(t, data);
+    final id = data.items[3].id;
+    await t.tap(find.byKey(Key('rw-item-$id')));
+    expect(log.where((e) => e != 'more'), ['select:$id']);
+    await t.pump(const Duration(milliseconds: 80));
+    await t.tap(find.byKey(Key('rw-item-$id')));
+    expect(log.where((e) => e != 'more'), [
+      'select:$id',
+      'select:$id',
+      'open:$id',
+    ]);
+  });
+
+  testWidgets('action failure shows a notice that goes away', (t) async {
+    final base = _view(FloatingResourceKind.gallery);
+    await _pump(t, base);
+    expect(find.byKey(const Key('rw-notice')), findsNothing);
+    await _pump(
+      t,
+      ResourceWindowViewData(
+        kind: base.kind,
+        sections: base.sections,
+        items: base.items,
+        notice: const ResourceNotice(id: 1, code: 'not_found'),
+      ),
+    );
+    await t.pump();
+    expect(find.byKey(const Key('rw-notice')), findsOne);
+    expect(find.text('这一项已经不存在，列表已刷新'), findsOne);
+    await t.pump(const Duration(seconds: 6));
+    expect(find.byKey(const Key('rw-notice')), findsNothing);
+  });
+
+  testWidgets('narrow top bar keeps close/pin visible and tabs icon-only', (
+    t,
+  ) async {
+    await _pump(t, _view(FloatingResourceKind.blocks), width: 560);
+    expect(t.takeException(), isNull);
+    for (final k in ['rw-pin', 'rw-new', 'rw-close']) {
+      final r = t.getRect(find.byKey(Key(k)));
+      expect(r.right, lessThanOrEqualTo(560));
+    }
+    expect(find.text('Vibe 库'), findsNothing);
   });
 }

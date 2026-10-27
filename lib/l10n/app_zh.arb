@@ -11558,5 +11558,9 @@
   "resourceWindow_disconnected": "主窗口未连接",
   "resourceWindow_currentModelUsable": "当前模型可用",
   "resourceWindow_insertPositive": "插入正面",
-  "resourceWindow_insertNegative": "插入负面"
+  "resourceWindow_insertNegative": "插入负面",
+  "resourceWindow_errorNotFound": "这一项已经不存在，列表已刷新",
+  "resourceWindow_errorNotReady": "主窗口还没准备好，请稍后再试",
+  "resourceWindow_errorUnsupported": "当前模型不支持这个操作",
+  "resourceWindow_errorFailed": "操作失败"
 }
