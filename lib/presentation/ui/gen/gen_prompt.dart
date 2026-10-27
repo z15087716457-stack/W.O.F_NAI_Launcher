@@ -84,6 +84,121 @@ class _PromptHead extends StatelessWidget {
     final p = data.prompt;
     final l = context.l10n;
     final tools = p.tools;
+    final buttons = <Widget>[
+      if (tools.palettePinned)
+        Builder(
+          builder: (context) => GenIb(
+            key: const Key('gen-tool-palette'),
+            animatedIcon: StudioIcons.promptBlockPalette,
+            glyphSize: 15,
+            tooltip: l.gen_toolPalette,
+            onTap: () => scope.actions.onOpenPalette(genRectOf(context)),
+          ),
+        ),
+      if (tools.dockPinned)
+        GenIb(
+          key: const Key('gen-tool-dock'),
+          animatedIcon: StudioIcons.promptBlocks,
+          glyphSize: 16,
+          active: data.layout.dockOpen,
+          tooltip: l.gen_toolDock,
+          onTap: () => scope.actions.onLayoutChanged(
+            data.layout.copyWith(dockOpen: !data.layout.dockOpen),
+          ),
+        ),
+      if (tools.translatePinned) const _Translate(),
+      if (tools.resourceWindowsPinned &&
+          scope.actions.onOpenResourceWindow != null)
+        Builder(
+          builder: (context) => GenIb(
+            key: const Key('gen-tool-resources'),
+            glyph: GenGlyphs.resourceWindows,
+            glyphSize: 15,
+            active: scope.controller.popoverTag == #resourceWindows,
+            tooltip: l.floating_open,
+            onTap: () => scope.controller.openMenu(
+              genBelow(context, dy: 4, right: true),
+              [
+                for (final (kind, glyph, label) in _resourceKinds(context))
+                  UiMenuItem(
+                    key: Key('gen-tool-resource-${kind.name}'),
+                    label: label,
+                    glyph: glyph,
+                    onTap: () => scope.actions.onOpenResourceWindow!(kind),
+                  ),
+              ],
+              tag: #resourceWindows,
+              width: 200,
+            ),
+          ),
+        ),
+      if (tools.agentPinned && scope.slots.agentToggle != null)
+        scope.slots.agentToggle!,
+      Builder(
+        builder: (context) => GenIb(
+          key: const Key('gen-tool-menu'),
+          animateOnTap: true,
+          icon: GenNaiIcon(
+            'prompt-chunk',
+            size: 16,
+            color: scope.controller.popoverTag == #tools ? c.ink : c.muted,
+          ),
+          active: scope.controller.popoverTag == #tools,
+          tooltip: l.gen_toolsMenu,
+          onTap: () => scope.controller.openPopover(
+            genBelow(context, dy: 4, right: true),
+            (_) => const _ToolsMenu(),
+            tag: #tools,
+          ),
+        ),
+      ),
+    ];
+    final overflow = buttons.length > 5;
+    final tabs = Row(
+      mainAxisSize: overflow ? MainAxisSize.min : MainAxisSize.max,
+      spacing: 2,
+      children: [
+        Flexible(
+          child: _PreviewTip(
+            sections: p.positivePreview,
+            title: l.gen_finalPositive,
+            child: GenTab(
+              key: const Key('gen-tab-positive'),
+              label: l.gen_basePrompt,
+              selected: !p.negative,
+              onTap: () => scope.actions.onNegativeTab(false),
+            ),
+          ),
+        ),
+        Flexible(
+          child: _PreviewTip(
+            sections: p.negativePreview,
+            title: p.negativeSupported
+                ? l.gen_finalNegative
+                : l.gen_turboNegative,
+            disabledHint: p.negativeSupported ? null : l.gen_turboNegative,
+            child: GenTab(
+              key: const Key('gen-tab-negative'),
+              label: l.gen_negative,
+              selected: p.negative,
+              onTap: p.negativeSupported
+                  ? () => scope.actions.onNegativeTab(true)
+                  : null,
+            ),
+          ),
+        ),
+        if (p.bridge case final b?) _Bridge(bridge: b),
+      ],
+    );
+    if (!overflow) {
+      return Row(
+        spacing: 2,
+        children: [
+          Expanded(child: tabs),
+          ...buttons,
+        ],
+      );
+    }
     return LayoutBuilder(
       builder: (context, box) => Row(
         spacing: 2,
@@ -92,44 +207,7 @@ class _PromptHead extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: math.max(0, box.maxWidth - 30),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 2,
-              children: [
-                Flexible(
-                  child: _PreviewTip(
-                    sections: p.positivePreview,
-                    title: l.gen_finalPositive,
-                    child: GenTab(
-                      key: const Key('gen-tab-positive'),
-                      label: l.gen_basePrompt,
-                      selected: !p.negative,
-                      onTap: () => scope.actions.onNegativeTab(false),
-                    ),
-                  ),
-                ),
-                Flexible(
-                  child: _PreviewTip(
-                    sections: p.negativePreview,
-                    title: p.negativeSupported
-                        ? l.gen_finalNegative
-                        : l.gen_turboNegative,
-                    disabledHint: p.negativeSupported
-                        ? null
-                        : l.gen_turboNegative,
-                    child: GenTab(
-                      key: const Key('gen-tab-negative'),
-                      label: l.gen_negative,
-                      selected: p.negative,
-                      onTap: p.negativeSupported
-                          ? () => scope.actions.onNegativeTab(true)
-                          : null,
-                    ),
-                  ),
-                ),
-                if (p.bridge case final b?) _Bridge(bridge: b),
-              ],
-            ),
+            child: tabs,
           ),
           Expanded(
             child: Align(
@@ -138,81 +216,7 @@ class _PromptHead extends StatelessWidget {
                 translationIndex: tools.translatePinned
                     ? (tools.palettePinned ? 1 : 0) + (tools.dockPinned ? 1 : 0)
                     : null,
-                children: [
-                  if (tools.palettePinned)
-                    Builder(
-                      builder: (context) => GenIb(
-                        key: const Key('gen-tool-palette'),
-                        animatedIcon: StudioIcons.promptBlockPalette,
-                        glyphSize: 15,
-                        tooltip: l.gen_toolPalette,
-                        onTap: () =>
-                            scope.actions.onOpenPalette(genRectOf(context)),
-                      ),
-                    ),
-                  if (tools.dockPinned)
-                    GenIb(
-                      key: const Key('gen-tool-dock'),
-                      animatedIcon: StudioIcons.promptBlocks,
-                      glyphSize: 16,
-                      active: data.layout.dockOpen,
-                      tooltip: l.gen_toolDock,
-                      onTap: () => scope.actions.onLayoutChanged(
-                        data.layout.copyWith(dockOpen: !data.layout.dockOpen),
-                      ),
-                    ),
-                  if (tools.translatePinned) const _Translate(),
-                  if (tools.resourceWindowsPinned &&
-                      scope.actions.onOpenResourceWindow != null)
-                    Builder(
-                      builder: (context) => GenIb(
-                        key: const Key('gen-tool-resources'),
-                        glyph: GenGlyphs.resourceWindows,
-                        glyphSize: 15,
-                        active: scope.controller.popoverTag == #resourceWindows,
-                        tooltip: l.floating_open,
-                        onTap: () => scope.controller.openMenu(
-                          genBelow(context, dy: 4, right: true),
-                          [
-                            for (final (kind, glyph, label) in _resourceKinds(
-                              context,
-                            ))
-                              UiMenuItem(
-                                key: Key('gen-tool-resource-${kind.name}'),
-                                label: label,
-                                glyph: glyph,
-                                onTap: () =>
-                                    scope.actions.onOpenResourceWindow!(kind),
-                              ),
-                          ],
-                          tag: #resourceWindows,
-                          width: 200,
-                        ),
-                      ),
-                    ),
-                  if (tools.agentPinned && scope.slots.agentToggle != null)
-                    scope.slots.agentToggle!,
-                  Builder(
-                    builder: (context) => GenIb(
-                      key: const Key('gen-tool-menu'),
-                      animateOnTap: true,
-                      icon: GenNaiIcon(
-                        'prompt-chunk',
-                        size: 16,
-                        color: scope.controller.popoverTag == #tools
-                            ? c.ink
-                            : c.muted,
-                      ),
-                      active: scope.controller.popoverTag == #tools,
-                      tooltip: l.gen_toolsMenu,
-                      onTap: () => scope.controller.openPopover(
-                        genBelow(context, dy: 4, right: true),
-                        (_) => const _ToolsMenu(),
-                        tag: #tools,
-                      ),
-                    ),
-                  ),
-                ],
+                children: buttons,
               ),
             ),
           ),
