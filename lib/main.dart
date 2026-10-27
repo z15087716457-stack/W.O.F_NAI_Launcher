@@ -2,6 +2,7 @@ import 'package:nai_launcher/core/constants/brand.dart';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,9 @@ import 'core/database/database_manager.dart';
 import 'core/services/data_migration_service.dart';
 import 'core/services/app_data_startup.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
+import 'core/services/resource_window_protocol.dart';
+import 'core/services/resource_window_service.dart';
+import 'presentation/resource_window/resource_window_entry.dart';
 import 'core/services/sqflite_bootstrap_service.dart';
 import 'core/utils/app_error_reporter.dart';
 import 'core/utils/fatal_diagnostics.dart';
@@ -189,6 +193,7 @@ class AppWindowListener extends WindowListener {
     try {
       // 阻止窗口关闭
       await windowManager.setPreventClose(true);
+      await ResourceWindowService().closeAll();
       await windowManager.hide();
       AppLogger.d('Window hidden to tray', 'WindowListener');
     } catch (e) {
@@ -316,6 +321,24 @@ void main() {
 
 Future<void> _bootstrapApplication() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (Platform.isWindows) {
+    final controller = await WindowController.fromCurrentEngine();
+    await dispatchResourceWindow(
+      arguments: controller.arguments,
+      startMain: _bootstrapMainWindow,
+      startResource: (arguments) => runResourceWindow(controller, arguments),
+    );
+    return;
+  }
+  await _bootstrapMainWindow();
+}
+
+Future<void> _bootstrapMainWindow() async {
+  if (Platform.isWindows) {
+    final resources = ResourceWindowService();
+    await resources.initialize();
+    DesktopAppShutdownService.registerCleanup(resources.closeAll);
+  }
   registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
 
