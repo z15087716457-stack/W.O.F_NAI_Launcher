@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../presentation/prompt_assistant/models/prompt_assistant_models.dart';
+import '../../presentation/prompt_assistant/services/prompt_assistant_service.dart';
+
 import '../autocomplete/autocomplete_providers.dart';
 import '../autocomplete/completion_models.dart';
 import '../autocomplete/unified_tag_repository.dart';
@@ -23,22 +26,20 @@ final localTagExpansionServiceProvider = Provider<LocalTagExpansionService>((
     relatedTags: ref.watch(cooccurrenceCompletionSourceProvider),
     substringSearch: catalog.searchContains,
     popularSearch: catalog.popular,
+    semantics: ref.watch(tagSemanticsRepositoryProvider),
+    readingLanguage: () => ref
+        .read(promptAssistantServiceProvider)
+        .targetLanguageFor(LauncherInterface.tagTranslate),
     semanticNames: (input, {limit = 80}) async {
       final repository = ref.read(tagSemanticsRepositoryProvider);
       final candidates = await catalog.byNames(
         await repository.searchNames(input, limit: limit),
       );
-      final profiles = await repository.findAll(
-        candidates.map((c) => c.canonicalTag),
-      );
       return [
         for (final candidate in candidates)
           candidate.copyWith(
-            translation: profiles[candidate.canonicalTag]?.coreZh,
             retrievalOrigins: const ['chinese-name'],
-            matchKind: profiles[candidate.canonicalTag]?.coreZh == input.trim()
-                ? CompletionMatchKind.chineseExact
-                : CompletionMatchKind.chineseContains,
+            matchKind: CompletionMatchKind.chineseContains,
           ),
       ];
     },

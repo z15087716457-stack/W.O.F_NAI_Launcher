@@ -97,6 +97,8 @@ void main() {
                 relatedTags: source,
                 substringSearch: (_, {int limit = 40}) async => [],
                 popularSearch: ({int limit = 12}) async => [],
+                semanticNames: (input, {int limit = 80}) async =>
+                    input == '蓝眼' ? [candidates.first] : [],
               );
             }),
             promptAutocompleteBuilderProvider.overrideWithValue((
@@ -151,6 +153,57 @@ void main() {
           container.read(pillWorkspaceProvider(scope)).document.text,
           'blue hair, ',
         );
+        // A composing-only notification must restart completion after IME
+        // commit, even when the text and selection did not change.
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: '蓝眼',
+            selection: TextSelection.collapsed(offset: 2),
+            composing: TextRange(start: 0, end: 2),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(completion!.value.visible, false);
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: '蓝眼',
+            selection: TextSelection.collapsed(offset: 2),
+          ),
+        );
+        await tester.pump(const Duration(milliseconds: 150));
+        expect(completion!.value.candidates.single.canonicalTag, 'blue_eyes');
+        await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          'blue eyes, ',
+        );
+        expect(
+          tester.widget<TextField>(field).focusNode!.hasPrimaryFocus,
+          true,
+        );
+        await tester.enterText(field, 'bl');
+        await tester.pump(const Duration(milliseconds: 150));
+        await completion!.openRelated(0);
+        accept!(1);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          'blue eyes, blue hair, ',
+        );
+        expect(completion!.value.relatedFor, isNotNull);
+        await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+        await tester.pump();
+        expect(
+          container.read(pillWorkspaceProvider(scope)).document.text,
+          'blue eyes, blue hair, ',
+        );
+        expect(completion!.value.relatedAdded, {'blue_hair'});
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        expect(completion!.value.visible, true);
+        expect(completion!.value.relatedFor, isNull);
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        expect(completion!.value.visible, false);
         await container
             .read(promptAutocompleteEnabledProvider.notifier)
             .setEnabled(false);
