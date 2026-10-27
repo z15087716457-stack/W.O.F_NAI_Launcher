@@ -127,6 +127,21 @@ void main() {
     expect(t.getSize(find.byKey(const Key('rw-side'))).width, 224);
   });
 
+  testWidgets('window controls stay flush in narrow and wide windows', (
+    t,
+  ) async {
+    for (final width in [640.0, 1040.0, 1600.0]) {
+      for (final kind in FloatingResourceKind.values) {
+        await _pump(t, _view(kind), width: width);
+        expect(t.takeException(), isNull);
+        final bar = t.getRect(find.byKey(const Key('rw-topbar')));
+        final close = t.getRect(find.byKey(const Key('rw-close')));
+        expect(close.right, bar.right, reason: '$kind at width $width');
+        expect(close.width, 46);
+      }
+    }
+  });
+
   testWidgets('pin, new window and favorite report through actions', (t) async {
     final data = _view(FloatingResourceKind.vibe);
     final log = await _pump(t, data);

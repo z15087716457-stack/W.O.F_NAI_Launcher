@@ -298,6 +298,7 @@ class _TopBarState extends State<_TopBar> {
       child: Row(
         children: [
           Flexible(
+            fit: FlexFit.tight,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Container(

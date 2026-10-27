@@ -2,7 +2,6 @@ import 'package:nai_launcher/core/constants/brand.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,6 +28,7 @@ import 'core/database/database_manager.dart';
 import 'core/services/data_migration_service.dart';
 import 'core/services/app_data_startup.dart';
 import 'core/services/desktop_app_shutdown_service.dart';
+import 'core/services/resource_window_bootstrap.dart';
 import 'core/services/resource_window_protocol.dart';
 import 'core/services/resource_window_service.dart';
 import 'presentation/resource_window/resource_window_entry.dart';
@@ -323,7 +323,7 @@ void main() {
 Future<void> _bootstrapApplication() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isWindows) {
-    final controller = await WindowController.fromCurrentEngine();
+    final controller = await waitForResourceWindowPlugins();
     await dispatchResourceWindow(
       arguments: controller.arguments,
       startMain: _bootstrapMainWindow,
