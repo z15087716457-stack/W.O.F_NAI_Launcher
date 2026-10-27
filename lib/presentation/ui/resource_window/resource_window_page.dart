@@ -34,10 +34,12 @@ class ResourceWindowPage extends StatefulWidget {
     super.key,
     required this.data,
     required this.actions,
+    this.viewer,
   });
 
   final ResourceWindowViewData data;
   final ResourceWindowActions actions;
+  final Widget? viewer;
 
   static const narrow = 780.0;
   static const tight = 620.0;
@@ -49,6 +51,7 @@ class ResourceWindowPage extends StatefulWidget {
 
 class _ResourceWindowPageState extends State<ResourceWindowPage> {
   final _search = FocusNode();
+  final _focus = FocusNode();
   final _scroll = ScrollController();
 
   /// 大小滑杆拖动中的预览值；松手才回调持久化。
@@ -68,6 +71,11 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   @override
   void didUpdateWidget(covariant ResourceWindowPage old) {
     super.didUpdateWidget(old);
+    if (old.viewer != null && widget.viewer == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _focus.requestFocus();
+      });
+    }
     if (old.data.kind != widget.data.kind ||
         old.data.groupId != widget.data.groupId) {
       _cell = null;
@@ -93,13 +101,20 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   void dispose() {
     _noticeTimer?.cancel();
     _search.dispose();
+    _focus.dispose();
     _scroll.dispose();
     super.dispose();
   }
 
   void _maybeLoadMore() {
     final d = widget.data;
-    if (!mounted || !d.hasMore || d.loading || !_scroll.hasClients) return;
+    if (!mounted ||
+        widget.viewer != null ||
+        !d.hasMore ||
+        d.loading ||
+        !_scroll.hasClients) {
+      return;
+    }
     final p = _scroll.position;
     if (p.pixels > p.maxScrollExtent - 600) widget.actions.onLoadMore();
   }
@@ -124,14 +139,22 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   Widget build(BuildContext context) {
     final c = context.ui;
     return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.keyF, control: true): () =>
-            _search.requestFocus(),
-        const SingleActivator(LogicalKeyboardKey.arrowRight): () => _move(1),
-        const SingleActivator(LogicalKeyboardKey.arrowLeft): () => _move(-1),
-        const SingleActivator(LogicalKeyboardKey.enter): _primary,
-      },
+      bindings: widget.viewer == null
+          ? {
+              const SingleActivator(
+                LogicalKeyboardKey.keyF,
+                control: true,
+              ): () =>
+                  _search.requestFocus(),
+              const SingleActivator(LogicalKeyboardKey.arrowRight): () =>
+                  _move(1),
+              const SingleActivator(LogicalKeyboardKey.arrowLeft): () =>
+                  _move(-1),
+              const SingleActivator(LogicalKeyboardKey.enter): _primary,
+            }
+          : const {},
       child: Focus(
+        focusNode: _focus,
         autofocus: true,
         // 子窗口入口直接挂在 MaterialApp 下：页面自带 Material（输入框需要）。
         child: Material(
@@ -142,59 +165,67 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
               final tight = box.maxWidth < ResourceWindowPage.tight;
               return Stack(
                 children: [
-                  Column(
-                    children: [
-                      _TopBar(
-                        data: widget.data,
-                        actions: widget.actions,
-                        tight: tight,
-                      ),
-                      _Toolbar(
-                        data: widget.data,
-                        actions: widget.actions,
-                        narrow: narrow,
-                        focus: _search,
-                        cell: _cell ?? widget.data.cellSize,
-                        onCell: (v) => setState(() => _cell = v),
-                        onCellEnd: widget.actions.onCellSize,
-                      ),
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            ResourceWindowSide(
-                              data: widget.data,
-                              actions: widget.actions,
-                              collapsed: narrow,
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  _MainHead(data: widget.data),
-                                  Expanded(
-                                    child: _Wall(
-                                      data: widget.data,
-                                      actions: widget.actions,
-                                      scroll: _scroll,
-                                      cell: _cell ?? widget.data.cellSize,
-                                    ),
-                                  ),
-                                  if (widget.data.detail case final detail?)
-                                    _DetailBar(
-                                      data: widget.data,
-                                      detail: detail,
-                                      actions: widget.actions,
-                                      narrow: narrow,
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
+                  ExcludeFocus(
+                    excluding: widget.viewer != null,
+                    child: Column(
+                      children: [
+                        _TopBar(
+                          data: widget.data,
+                          actions: widget.actions,
+                          tight: tight,
                         ),
-                      ),
-                      _StatusRow(data: widget.data),
-                    ],
+                        _Toolbar(
+                          data: widget.data,
+                          actions: widget.actions,
+                          narrow: narrow,
+                          focus: _search,
+                          cell: _cell ?? widget.data.cellSize,
+                          onCell: (v) => setState(() => _cell = v),
+                          onCellEnd: widget.actions.onCellSize,
+                        ),
+                        Expanded(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              ResourceWindowSide(
+                                data: widget.data,
+                                actions: widget.actions,
+                                collapsed: narrow,
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    _MainHead(data: widget.data),
+                                    Expanded(
+                                      child: _Wall(
+                                        data: widget.data,
+                                        actions: widget.actions,
+                                        scroll: _scroll,
+                                        cell: _cell ?? widget.data.cellSize,
+                                      ),
+                                    ),
+                                    if (widget.data.detail case final detail?)
+                                      _DetailBar(
+                                        data: widget.data,
+                                        detail: detail,
+                                        actions: widget.actions,
+                                        narrow: narrow,
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _StatusRow(data: widget.data),
+                      ],
+                    ),
                   ),
+                  if (widget.viewer case final viewer?)
+                    Positioned.fill(
+                      top: ResourceWindowPage.topBarHeight,
+                      child: viewer,
+                    ),
                   if (_notice case final n?)
                     Positioned(
                       left: 0,

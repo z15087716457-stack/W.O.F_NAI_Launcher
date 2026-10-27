@@ -387,7 +387,7 @@ class ResourceWindowActions {
   final ValueChanged<double> onCellSize;
   final ValueChanged<String> onSelect;
 
-  /// 双击：图库看大图，其余编辑（在主窗口打开）。
+  /// 双击：图库在小窗内部看大图，其余在主窗口编辑。
   final ValueChanged<String> onOpen;
   final void Function(String itemId, String actionId) onAction;
   final ValueChanged<String> onFavorite;

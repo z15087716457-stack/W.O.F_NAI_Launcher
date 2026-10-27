@@ -20,6 +20,8 @@ abstract class ResourceWindowBackend {
   Future<void> favorite(FloatingResourceKind kind, String id);
   Future<void> open(FloatingResourceKind kind, String id);
   Future<Uri> exportGallery(String id);
+  Future<Object?> galleryViewer(Map<String, Object?> arguments) async =>
+      resourceError('unsupported');
   Future<void> layout(String windowId, Map<String, Object?> values);
   Future<void> preferences(
     FloatingResourceKind kind,
@@ -139,6 +141,8 @@ class ResourceWindowHost {
         };
       }
       switch (call.method) {
+        case 'gallery.viewer':
+          return await source.galleryViewer(args);
         case 'resources.counts':
           return await source.counts();
         case 'resources.layout':

@@ -47,6 +47,62 @@ ResourceWindowViewData _view(FloatingResourceKind k, [ResourceLayout? l]) =>
     );
 
 void main() {
+  testWidgets(
+    'in-window viewer preserves library scroll and selection and suspends hidden library shortcuts',
+    (t) async {
+      final data = _view(FloatingResourceKind.gallery);
+      final overlay = ValueNotifier<Widget?>(null);
+      addTearDown(overlay.dispose);
+      final log = <String>[];
+      t.view.devicePixelRatio = 1;
+      t.view.physicalSize = const Size(1040, 680);
+      addTearDown(t.view.resetPhysicalSize);
+      addTearDown(t.view.resetDevicePixelRatio);
+      await t.pumpWidget(
+        MaterialApp(
+          theme: GeistTheme.light,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: ValueListenableBuilder<Widget?>(
+            valueListenable: overlay,
+            builder: (_, viewer, _) => ResourceWindowPage(
+              data: data,
+              actions: ResourceWindowActions.logging(log.add),
+              viewer: viewer,
+            ),
+          ),
+        ),
+      );
+      await t.pump();
+      final wall = t
+          .widget<CustomScrollView>(find.byKey(const Key('rw-wall')))
+          .controller!;
+      wall.jumpTo(200);
+      await t.pump();
+      final offset = wall.offset;
+      final selected = data.selectedId;
+      log.clear();
+      overlay.value = const Material(
+        child: Focus(autofocus: true, child: Text('viewer overlay')),
+      );
+      await t.pump();
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      await t.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+      expect(log, isEmpty);
+      expect(
+        t.getRect(find.text('viewer overlay')).top,
+        greaterThanOrEqualTo(ResourceWindowPage.topBarHeight),
+      );
+      expect(find.byKey(const Key('rw-close')), findsOneWidget);
+      overlay.value = null;
+      await t.pump();
+      await t.pump();
+      expect(wall.offset, offset);
+      expect(data.selectedId, selected);
+      await t.sendKeyEvent(LogicalKeyboardKey.enter);
+      expect(log.single, startsWith('action:'));
+    },
+  );
   for (final kind in FloatingResourceKind.values) {
     testWidgets('${kind.name}: tabs, groups, detail and primary action', (
       t,

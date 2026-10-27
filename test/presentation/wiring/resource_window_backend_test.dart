@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:nai_launcher/data/services/gallery/gallery_sort_store.dart';
 import 'package:nai_launcher/presentation/wiring/refs_preferences.dart';
 import 'package:nai_launcher/presentation/providers/gallery_scan_progress_provider.dart';
@@ -16,6 +17,9 @@ import 'package:nai_launcher/presentation/wiring/refs_entry_drop_target.dart';
 import 'package:nai_launcher/presentation/wiring/refs_generation_target.dart';
 import 'package:nai_launcher/presentation/wiring/floating_resource_drag.dart';
 import 'package:nai_launcher/presentation/wiring/image_viewer_session.dart';
+import 'package:nai_launcher/presentation/wiring/image_viewer_gallery.dart';
+import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
+import 'package:nai_launcher/presentation/widgets/common/image_detail/components/detail_prompt_translation.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
@@ -110,6 +114,36 @@ class Collections extends CollectionNotifier {
   CollectionState build() => const CollectionState();
   @override
   Future<void> initialize() async {}
+  @override
+  Future<ImageCollection?> createCollection(
+    String name, {
+    String? description,
+    String? parentId,
+    bool isFolder = false,
+  }) async => ImageCollection(id: 'new', name: name, createdAt: DateTime(2026));
+}
+
+class ViewerGallery extends ImageViewerGallery {
+  ViewerGallery(super.ref);
+  final calls = <String>[];
+  @override
+  Future<List<ViewerCollection>> collections(String path) async => [
+    const ViewerCollection(id: 'c', name: 'Collection', member: true),
+  ];
+  @override
+  Future<void> setFavorite(String path, bool value) async =>
+      calls.add('favorite:$path:$value');
+  @override
+  Future<void> setCollection(String path, String id, bool member) async =>
+      calls.add('collection:$path:$id:$member');
+  @override
+  Future<bool> delete(String path) async {
+    calls.add('delete:$path');
+    return true;
+  }
+
+  @override
+  Future<void> restore(String path) async => calls.add('restore:$path');
 }
 
 class VibeCategories extends VibeLibraryCategoryNotifier {
@@ -325,6 +359,10 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        imageViewerGalleryProvider.overrideWith(ViewerGallery.new),
+        detailPromptTranslatorProvider.overrideWithValue(
+          (document, session) async => document.copyWith(text: 'translated'),
+        ),
         shortcutConfigNotifierProvider.overrideWith(() => shortcuts),
         imageClipboardServiceProvider.overrideWithValue(
           ImageClipboardService(
@@ -432,6 +470,157 @@ void main() {
     'offset': offset,
     'limit': 60,
   });
+
+  test(
+    'child viewer reads canonical records/metadata and routes library mutations without a visual bridge',
+    () async {
+      gallery = Gallery([
+        LocalImageRecord(
+          path: cover.path,
+          size: 3,
+          modifiedAt: DateTime(2026),
+          metadata: const NaiImageMetadata(
+            prompt: 'source',
+            width: 100,
+            height: 150,
+          ),
+        ),
+      ]);
+      final records = resourceMap(
+        await backend.galleryViewer({
+          'operation': 'records',
+          'ids': [cover.path, '/missing.png'],
+        }),
+      );
+      expect((records['records'] as List).length, 1);
+      expect(
+        resourceMap((records['records'] as List).single)['path'],
+        cover.path,
+      );
+      expect(container.read(resourceMainActionsProvider).perform, isNull);
+      final metadata =
+          jsonDecode(
+                await backend.galleryViewer({
+                      'operation': 'metadata',
+                      'id': cover.path,
+                    })
+                    as String,
+              )
+              as Map;
+      expect(metadata['prompt'], 'source');
+      expect(
+        await backend.galleryViewer({
+          'operation': 'translate',
+          'id': cover.path,
+          'part': 'prompt',
+          'session': 'test',
+        }),
+        'translated',
+      );
+      expect(
+        (await backend.galleryViewer({
+                  'operation': 'collections',
+                  'id': cover.path,
+                })
+                as List)
+            .single,
+        containsPair('member', true),
+      );
+      await backend.galleryViewer({
+        'operation': 'favorite',
+        'id': cover.path,
+        'value': true,
+      });
+      await backend.galleryViewer({
+        'operation': 'setCollection',
+        'id': cover.path,
+        'collectionId': 'c',
+        'member': false,
+      });
+      await backend.galleryViewer({
+        'operation': 'createCollection',
+        'id': cover.path,
+        'name': 'New',
+      });
+      await expectLater(
+        backend.galleryViewer({'operation': 'restore', 'id': cover.path}),
+        throwsA(code('not_found')),
+      );
+      expect(
+        await backend.galleryViewer({'operation': 'delete', 'id': cover.path}),
+        true,
+      );
+      await backend.galleryViewer({'operation': 'restore', 'id': cover.path});
+      expect(
+        (container.read(imageViewerGalleryProvider) as ViewerGallery).calls,
+        [
+          'favorite:${cover.path}:true',
+          'collection:${cover.path}:c:false',
+          'collection:${cover.path}:new:true',
+          'delete:${cover.path}',
+          'restore:${cover.path}',
+        ],
+      );
+      await expectLater(
+        backend.galleryViewer({'operation': 'metadata', 'id': '/missing.png'}),
+        throwsA(code('not_found')),
+      );
+      await expectLater(
+        backend.galleryViewer({
+          'operation': 'action',
+          'id': cover.path,
+          'action': 'invalid',
+        }),
+        throwsA(code('invalid_arguments')),
+      );
+      await expectLater(
+        backend.galleryViewer({
+          'operation': 'translate',
+          'id': cover.path,
+          'part': 'invalid',
+        }),
+        throwsA(code('invalid_arguments')),
+      );
+    },
+  );
+
+  test(
+    'child viewer explicit workflow/copy actions use the protected main bridge with canonical ID',
+    () async {
+      final calls = <String>[];
+      container.read(resourceMainActionsProvider).perform =
+          (kind, id, action) async => calls.add('${kind.name}:$id:$action');
+      for (final action in ViewerAction.values.where(
+        (action) => action != ViewerAction.save,
+      )) {
+        await backend.galleryViewer({
+          'operation': 'action',
+          'id': '/library/0.png',
+          'action': action.name,
+        });
+      }
+      await backend.galleryViewer({
+        'operation': 'saveVibe',
+        'id': '/library/0.png',
+        'index': 0,
+      });
+      expect(calls, [
+        for (final action in ViewerAction.values.where(
+          (action) => action != ViewerAction.save,
+        ))
+          'gallery:/library/0.png:viewer:${action.name}',
+        'gallery:/library/0.png:saveVibe:0',
+      ]);
+      await expectLater(
+        backend.galleryViewer({
+          'operation': 'action',
+          'id': '/library/0.png',
+          'action': 'save',
+        }),
+        throwsA(code('unsupported')),
+      );
+    },
+  );
 
   testWidgets(
     'global shortcut startup and settings rebuild keep resource actions registered',

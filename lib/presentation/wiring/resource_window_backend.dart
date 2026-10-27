@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/image_share_sanitizer.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/gallery/local_image_record.dart';
+import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/services/gallery/gallery_sort_store.dart';
@@ -25,6 +27,8 @@ import '../../data/services/vibe_library_storage_service.dart';
 import '../providers/collection_provider.dart';
 import '../providers/gallery_category_provider.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/krita/krita_bridge_notifier.dart';
+import '../providers/shortcuts_provider.dart';
 import '../providers/local_gallery_provider.dart';
 import '../providers/precise_ref_library_provider.dart';
 import '../providers/prompt_block_library_provider.dart';
@@ -36,12 +40,17 @@ import '../ui/refs/refs_contract.dart';
 import '../widgets/prompt/blocks/prompt_block_colors.dart';
 import '../widgets/gallery/gallery_nai_versions.dart';
 import '../utils/gallery_category_label.dart';
+import '../utils/local_gallery_metadata_resolver.dart';
+import '../ui/viewer/viewer_contract.dart';
+import '../widgets/common/image_detail/components/detail_prompt_translation.dart';
 import 'refs_preferences.dart';
 import 'refs_generation_target.dart';
 import 'blocks_mapping.dart';
 import 'blocks_preferences.dart';
 import 'floating_resource_sources.dart';
 import 'gallery_search_history.dart';
+import 'image_viewer_gallery.dart';
+import 'image_viewer_mapping.dart';
 import 'refs_library_wiring.dart';
 import 'refs_mapping.dart';
 
@@ -59,6 +68,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   ResourceLibraryBackend(this.ref);
   final Ref ref;
   final _exports = <String, Future<File>>{};
+  final _viewerDeleted = <String>{};
   Future<void>? _collectionsReady;
   final windowKinds = <String, FloatingResourceKind>{};
   LocalGalleryService get gallery => ref.read(galleryServiceProvider);
@@ -68,6 +78,128 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     final records = await gallery.getLibraryRecordsForPaths([id]);
     if (records.isEmpty) resourceError('not_found');
     return records.single;
+  }
+
+  @override
+  Future<Object?> galleryViewer(Map<String, Object?> arguments) async {
+    final operation = resourceString(arguments, 'operation');
+    if (operation == 'records') {
+      final ids = (arguments['ids'] as List).cast<String>();
+      if (ids.length > 60) resourceError('invalid_arguments', 'ids');
+      if (!gallery.isInitialized) resourceError('not_ready');
+      return {
+        'records': [
+          for (final record in await gallery.getLibraryRecordsForPaths(ids))
+            {
+              'path': record.path,
+              'size': record.size,
+              'modifiedAt': record.modifiedAt.millisecondsSinceEpoch,
+              'favorite': record.isFavorite,
+            },
+        ],
+        'confirmDangerousActions': ref
+            .read(shareImageSettingsProvider)
+            .effectiveConfirmDangerousActions,
+        'highlight': ref.read(highlightEmphasisSettingsProvider),
+        'kritaConnected':
+            ref.exists(kritaBridgeNotifierProvider) &&
+            ref.read(kritaBridgeNotifierProvider).status ==
+                KritaBridgeStatus.connected,
+        'shortcuts':
+            ref.read(shortcutConfigNotifierProvider).valueOrNull == null
+            ? null
+            : jsonEncode(
+                ref.read(shortcutConfigNotifierProvider).requireValue.toJson(),
+              ),
+      };
+    }
+    final id = resourceString(arguments, 'id');
+    final viewer = ref.read(imageViewerGalleryProvider);
+    if (operation == 'restore') {
+      if (!_viewerDeleted.contains(id)) resourceError('not_found');
+      await viewer.restore(id);
+      _viewerDeleted.remove(id);
+      return null;
+    }
+    final record = await galleryRecord(id);
+    switch (operation) {
+      case 'metadata':
+        final metadata = await resolveLocalGalleryMetadata(record);
+        return metadata == null ? null : jsonEncode(metadata.toJson());
+      case 'collections':
+        return [
+          for (final collection in await viewer.collections(id))
+            {
+              'id': collection.id,
+              'name': collection.name,
+              'member': collection.member,
+              'depth': collection.depth,
+            },
+        ];
+      case 'favorite':
+        await viewer.setFavorite(id, arguments['value'] as bool);
+        return null;
+      case 'setCollection':
+        await viewer.setCollection(
+          id,
+          resourceString(arguments, 'collectionId'),
+          arguments['member'] as bool,
+        );
+        return null;
+      case 'createCollection':
+        final collection = await ref
+            .read(collectionNotifierProvider.notifier)
+            .createCollection(resourceString(arguments, 'name'));
+        if (collection == null) resourceError('failed');
+        await viewer.setCollection(id, collection.id, true);
+        return null;
+      case 'delete':
+        final deleted = await viewer.delete(id);
+        if (deleted) _viewerDeleted.add(id);
+        return deleted;
+      case 'translate':
+        final part = ViewerPartKind.values
+            .asNameMap()[resourceString(arguments, 'part')];
+        if (part == null) resourceError('invalid_arguments', 'part');
+        final text = viewerPartText(
+          await resolveLocalGalleryMetadata(record),
+          part == ViewerPartKind.character
+              ? ViewerPart.character(arguments['index'] as int)
+              : switch (part) {
+                  ViewerPartKind.prompt => ViewerPart.prompt,
+                  ViewerPartKind.negative => ViewerPart.negative,
+                  _ => ViewerPart.seed,
+                },
+        );
+        if (text == null || text.isEmpty) return null;
+        final translated = await ref.read(detailPromptTranslatorProvider)(
+          PillDocument(text: text, instances: const {}),
+          resourceString(arguments, 'session'),
+        );
+        return viewerTranslationText(translated);
+      case 'action':
+        final action = ViewerAction.values
+            .asNameMap()[resourceString(arguments, 'action')];
+        if (action == null) resourceError('invalid_arguments', 'action');
+        if (action == ViewerAction.save) resourceError('unsupported');
+        final perform = ref.read(resourceMainActionsProvider).perform;
+        if (perform == null) resourceError('not_ready');
+        await perform(
+          FloatingResourceKind.gallery,
+          id,
+          'viewer:${action.name}',
+        );
+        return null;
+      case 'saveVibe':
+        final index = arguments['index'] as int;
+        if (index < 0) resourceError('invalid_arguments', 'index');
+        final perform = ref.read(resourceMainActionsProvider).perform;
+        if (perform == null) resourceError('not_ready');
+        await perform(FloatingResourceKind.gallery, id, 'saveVibe:$index');
+        return null;
+      default:
+        resourceError('invalid_arguments', 'operation');
+    }
   }
 
   Future<List<RefsEntry>> refs(FloatingResourceKind kind) async {

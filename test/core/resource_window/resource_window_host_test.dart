@@ -10,6 +10,12 @@ class Backend extends ResourceWindowBackend {
   Completer<Map<String, Object?>>? pending;
   Completer<Uint8List?>? thumbnailPending;
   @override
+  Future<Object?> galleryViewer(Map<String, Object?> arguments) async {
+    calls.add('viewer:${arguments['operation']}');
+    return {'records': []};
+  }
+
+  @override
   Future<Map<String, Object?>> query(ResourceQuery r) async {
     calls.add(
       'query:${r.offset}:${r.limit}:${r.groupId}:${r.query}:${r.chips}:${r.sortId}',
@@ -111,6 +117,21 @@ void main() {
     host = ResourceWindowHost()..backend = backend;
   });
   test(
+    'child viewer requests use data IPC without opening the main viewer',
+    () async {
+      expect(
+        await host.handle(
+          const MethodCall('gallery.viewer', {
+            'operation': 'records',
+            'ids': ['a'],
+          }),
+        ),
+        {'records': []},
+      );
+      expect(backend.calls, ['viewer:records']);
+    },
+  );
+  test(
     'queries page 60 and preserve request IDs, filters, independent windows',
     () async {
       final first =
@@ -129,10 +150,7 @@ void main() {
       expect((next['items'] as List).first, {'id': '60'});
       expect(next['hasMore'], true);
       expect(other['requestId'], 1);
-      expect(
-        backend.calls.first,
-        contains('all:cat:{favorite}:fileName'),
-      );
+      expect(backend.calls.first, contains('all:cat:{favorite}:fileName'));
     },
   );
   test(

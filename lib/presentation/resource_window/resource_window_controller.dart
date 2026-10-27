@@ -62,6 +62,24 @@ class ResourceWindowController extends ChangeNotifier {
   Timer? _debounce, _layoutDebounce;
   final _exportUris = <String, Uri>{};
   final _exportsPending = <String>{};
+  String? _viewerId;
+  String? get viewerId => _viewerId;
+
+  void open(String id) {
+    if (_kind == FloatingResourceKind.gallery) {
+      _viewerId = id;
+      _changed();
+    } else {
+      unawaited(command('resources.open', id));
+    }
+  }
+
+  void closeViewer() {
+    _viewerId = null;
+    _changed();
+  }
+
+  Future<void> runViewer(Future<void> Function() operation) => _run(operation);
 
   void _changed() {
     if (!_disposed) notifyListeners();
@@ -223,6 +241,7 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   void _reset() {
+    _viewerId = null;
     _epoch++;
     _selectionEpoch++;
     _selected = null;
@@ -531,7 +550,7 @@ class ResourceWindowController extends ChangeNotifier {
     onLayout: (v) => unawaited(preferences(layout: v)),
     onCellSize: (v) => unawaited(preferences(size: v)),
     onSelect: (id) => unawaited(select(id)),
-    onOpen: (id) => unawaited(command('resources.open', id)),
+    onOpen: open,
     onAction: (id, a) => unawaited(command('resources.action', id, action: a)),
     onFavorite: (id) => unawaited(command('resources.favorite', id)),
     onLoadMore: () => unawaited(refresh(more: true)),

@@ -14,6 +14,7 @@ import '../themes/app_theme.dart';
 import '../ui/kit/ui_resource_kind.dart';
 import '../ui/resource_window/resource_window_page.dart';
 import 'resource_window_controller.dart';
+import 'resource_gallery_viewer.dart';
 
 /// No ProviderScope, data-directory resolution, Hive/SQLite, migration, logging,
 /// Agent, RAG, Krita, tray or media setup. The page is owned by the front-end.
@@ -133,6 +134,12 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
       builder: (_, _) => ResourceWindowPage(
         data: widget.controller.data,
         actions: widget.controller.actions,
+        viewer: widget.controller.viewerId == null
+            ? null
+            : ResourceGalleryViewer(
+                controller: widget.controller,
+                initialId: widget.controller.viewerId!,
+              ),
       ),
     ),
   );

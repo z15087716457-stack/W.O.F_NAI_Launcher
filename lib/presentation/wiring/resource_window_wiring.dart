@@ -31,6 +31,7 @@ import '../providers/vibe_library_provider.dart';
 import '../router/app_router.dart';
 import '../ui/viewer/viewer_contract.dart';
 import '../widgets/common/image_detail/image_detail_data.dart';
+import '../widgets/common/save_vibe_dialog.dart';
 import '../utils/local_gallery_metadata_resolver.dart';
 import 'blocks_actions.dart';
 import 'image_viewer_actions.dart';
@@ -231,7 +232,18 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
     if (actionContext == null) resourceError('not_ready');
     // Windows can deny foreground activation while the child owns focus.
     // This must not abort the actual resource operation.
-    for (final activate in [windowManager.show, windowManager.focus]) {
+    for (final activate in [
+      if (!(kind == FloatingResourceKind.gallery &&
+          const [
+            'copy',
+            'viewer:copyImage',
+            'viewer:copyPath',
+            'viewer:copyAllPrompts',
+          ].contains(action))) ...[
+        windowManager.show,
+        windowManager.focus,
+      ],
+    ]) {
       try {
         await activate();
       } on PlatformException {
@@ -240,8 +252,17 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
     }
     if (!mounted || !actionContext.mounted) return;
     if (kind == FloatingResourceKind.gallery) {
+      final viewerAction = action.startsWith('viewer:')
+          ? ViewerAction.values.byName(action.substring(7))
+          : switch (action) {
+              'reuse' => ViewerAction.reuse,
+              'img2img' => ViewerAction.img2img,
+              'vibe' => ViewerAction.styleTransfer,
+              'copy' => ViewerAction.copyImage,
+              _ => null,
+            };
       // Read the current record before navigating or changing the draft.
-      if (action == 'vibe' &&
+      if (viewerAction == ViewerAction.styleTransfer &&
           !ModelSpecs.of(
             ref.read(generationParamsNotifierProvider).model,
           ).vibetransfer) {
@@ -249,6 +270,16 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
       }
       final record = await backend.galleryRecord(id);
       if (!mounted || !actionContext.mounted) return;
+      if (action.startsWith('saveVibe:')) {
+        final metadata = await resolveLocalGalleryMetadata(record);
+        final index = int.parse(action.substring(9));
+        final vibes = metadata?.vibeReferences ?? [];
+        if (index >= vibes.length) resourceError('not_found');
+        if (mounted && actionContext.mounted) {
+          await SaveVibeDialog.show(actionContext, vibe: vibes[index]);
+        }
+        return;
+      }
       if (action == 'open') {
         // MainShell clears the current viewer on branch transitions. Let any
         // pending route frame (including cleanup microtasks) finish before
@@ -282,7 +313,13 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
           mode: ViewerMode.gallery,
         );
       } else {
-        if (action != 'copy') {
+        if (const {
+          ViewerAction.reuse,
+          ViewerAction.img2img,
+          ViewerAction.styleTransfer,
+          ViewerAction.preciseRef,
+          ViewerAction.upscale,
+        }.contains(viewerAction)) {
           ref.read(appRouterProvider).go(AppRoutes.generation);
           await WidgetsBinding.instance.endOfFrame;
           if (!mounted || !actionContext.mounted) resourceError('not_ready');
@@ -291,13 +328,7 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
         if (!mounted || !actionContext.mounted) return;
         await ImageViewerActionHost(actionContext, ref, alive).perform(
           LocalImageDetailData(record),
-          switch (action) {
-            'reuse' => ViewerAction.reuse,
-            'img2img' => ViewerAction.img2img,
-            'vibe' => ViewerAction.styleTransfer,
-            'copy' => ViewerAction.copyImage,
-            _ => throw ArgumentError.value(action),
-          },
+          viewerAction ?? (throw ArgumentError.value(action)),
           metadata,
         );
       }
