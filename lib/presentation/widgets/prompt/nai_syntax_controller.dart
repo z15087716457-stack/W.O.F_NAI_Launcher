@@ -120,38 +120,75 @@ class NaiSyntaxController extends TextEditingController {
     final theme = Theme.of(context);
     final colors = NaiSyntaxColors.fromTheme(theme);
 
-    // 检查缓存是否有效（文本未变化且主题未变化）
-    if (_cachedText == text &&
-        _cachedColorSignature == colors.cacheSignature &&
-        _cachedBaseStyle == baseStyle &&
-        _cachedFinalSpans != null) {
-      return TextSpan(style: baseStyle, children: _cachedFinalSpans);
+    // 缓存语法和药丸；选区变化只处理下方的显示副本，不重新解析或重建药丸。
+    if (_cachedText != text ||
+        _cachedColorSignature != colors.cacheSignature ||
+        _cachedBaseStyle != baseStyle ||
+        _cachedFinalSpans == null) {
+      // 官网的竖线提示独立于“高亮强调”开关，搜索高亮也需要继续叠加。
+      final spans = _parseAndHighlight(
+        text,
+        baseStyle,
+        colors,
+        includeEmphasis: highlightEnabled,
+      );
+      final resolvedSpans = _applySearchHighlights(spans, baseStyle, colors);
+
+      final builder = pillBuilder;
+      _cachedFinalSpans = builder == null || !_containsPillMarker(text)
+          ? resolvedSpans
+          : _splicePillSpans(resolvedSpans, context, builder);
+      _cachedText = text;
+      _cachedColorSignature = colors.cacheSignature;
+      _cachedBaseStyle = baseStyle;
     }
 
-    // 官网的竖线提示独立于“高亮强调”开关，搜索高亮也需要继续叠加。
-    final spans = _parseAndHighlight(
-      text,
-      baseStyle,
-      colors,
-      includeEmphasis: highlightEnabled,
-    );
-    final resolvedSpans = _applySearchHighlights(spans, baseStyle, colors);
-
-    final builder = pillBuilder;
-    final List<InlineSpan> finalSpans;
-    if (builder == null || !_containsPillMarker(text)) {
-      finalSpans = resolvedSpans;
-    } else {
-      finalSpans = _splicePillSpans(resolvedSpans, context, builder);
+    final finalSpans = _cachedFinalSpans!;
+    final selected = selection;
+    final editor = context.widget;
+    if (!selected.isValid ||
+        selected.isCollapsed ||
+        editor is EditableText && editor.selectionColor == null) {
+      return TextSpan(style: baseStyle, children: finalSpans);
     }
 
-    // 更新缓存
-    _cachedText = text;
-    _cachedColorSignature = colors.cacheSignature;
-    _cachedBaseStyle = baseStyle;
-    _cachedFinalSpans = finalSpans;
+    // RenderEditable 先画选区，再画文字底色。只清除选中文字的语法／搜索
+    // 底色，让原生选区完整显现；未选中部分和缓存中的配色保持原样。
+    final selectedSpans = <InlineSpan>[];
+    var offset = 0;
+    for (final span in finalSpans) {
+      final start = offset;
+      offset += span.toPlainText().length;
+      if (span is! TextSpan ||
+          span.text == null ||
+          span.style?.backgroundColor == null ||
+          selected.start >= offset ||
+          selected.end <= start) {
+        selectedSpans.add(span);
+        continue;
+      }
+      final value = span.text!;
+      final from = (selected.start - start).clamp(0, value.length);
+      final to = (selected.end - start).clamp(0, value.length);
+      if (from > 0) {
+        selectedSpans.add(
+          TextSpan(text: value.substring(0, from), style: span.style),
+        );
+      }
+      selectedSpans.add(
+        TextSpan(
+          text: value.substring(from, to),
+          style: span.style!.copyWith(backgroundColor: Colors.transparent),
+        ),
+      );
+      if (to < value.length) {
+        selectedSpans.add(
+          TextSpan(text: value.substring(to), style: span.style),
+        );
+      }
+    }
 
-    return TextSpan(style: baseStyle, children: finalSpans);
+    return TextSpan(style: baseStyle, children: selectedSpans);
   }
 
   /// 药丸拼接后的 span 缓存（与 [_cachedSpans] 同生命周期）。

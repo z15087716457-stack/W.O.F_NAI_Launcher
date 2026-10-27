@@ -139,4 +139,36 @@ void main() {
         .toList();
     expect(highlighted, isNotEmpty);
   });
+
+  testWidgets(
+    'selection around pills keeps offsets and reuses cached widgets',
+    (tester) async {
+      final context = await pumpContext(tester);
+      var calls = 0;
+      final controller = NaiSyntaxController(text: '2::a${markerA}b::')
+        ..pillBuilder = (_, _, _) {
+          calls++;
+          return const WidgetSpan(child: SizedBox(width: 8, height: 8));
+        };
+      addTearDown(controller.dispose);
+      final original = build(controller, context);
+      final pill = original.children!.whereType<WidgetSpan>().single;
+      final index = controller.text.indexOf('b');
+      controller.selection = TextSelection(
+        baseOffset: index + 1,
+        extentOffset: index,
+      );
+      final selected = build(controller, context);
+      expect(selected.children!.whereType<WidgetSpan>().single, same(pill));
+      final highlighted = selected.children!
+          .whereType<TextSpan>()
+          .where((s) => s.text == 'b')
+          .single;
+      expect(highlighted.style!.backgroundColor, Colors.transparent);
+      expect(selected.toPlainText(), '2::a\uFFFCb::');
+      controller.selection = const TextSelection.collapsed(offset: 0);
+      expect(build(controller, context).children, same(original.children));
+      expect(calls, 1);
+    },
+  );
 }
