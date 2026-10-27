@@ -26,7 +26,7 @@ import 'resource_window_side.dart';
 /// E05 独立资源窗口整页。
 ///
 /// 无系统标题栏：最上面一条是一体顶栏（四类资源标签页 · 置顶 / 新开窗口 · 关闭），空白处
-/// 拖动窗口、双击最大化（原生命中区由控制器按 [ResourceWindowPage.dragRegionOf] 上报）。
+/// 拖动窗口、双击最大化（顶栏布局后经 [ResourceWindowActions.onDragRegion] 上报原生命中区）。
 /// 其下：工具条（搜索 · 筛选片 · 排序字段 + 方向 · 大小 · 排布）· 主体（左侧分组树 ·
 /// 卡片墙）· 详情条 · 状态行。卡片、侧栏外观照各主页面。
 class ResourceWindowPage extends StatefulWidget {
@@ -34,14 +34,10 @@ class ResourceWindowPage extends StatefulWidget {
     super.key,
     required this.data,
     required this.actions,
-    this.onDragRegion,
   });
 
   final ResourceWindowViewData data;
   final ResourceWindowActions actions;
-
-  /// 顶栏布局后回调：顶栏高度与不可拖动的矩形（逻辑像素，窗口坐标）。
-  final void Function(double height, List<Rect> blocked)? onDragRegion;
 
   static const narrow = 780.0;
   static const tight = 620.0;
@@ -152,7 +148,6 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
                         data: widget.data,
                         actions: widget.actions,
                         tight: tight,
-                        onDragRegion: widget.onDragRegion,
                       ),
                       _Toolbar(
                         data: widget.data,
@@ -247,12 +242,10 @@ class _TopBar extends StatefulWidget {
     required this.data,
     required this.actions,
     required this.tight,
-    required this.onDragRegion,
   });
   final ResourceWindowViewData data;
   final ResourceWindowActions actions;
   final bool tight;
-  final void Function(double height, List<Rect> blocked)? onDragRegion;
 
   @override
   State<_TopBar> createState() => _TopBarState();
@@ -264,7 +257,7 @@ class _TopBarState extends State<_TopBar> {
   List<Rect>? _reported;
 
   void _report() {
-    final cb = widget.onDragRegion;
+    final cb = widget.actions.onDragRegion;
     if (cb == null || !mounted) return;
     Rect? rectOf(GlobalKey k) {
       final box = k.currentContext?.findRenderObject() as RenderBox?;
