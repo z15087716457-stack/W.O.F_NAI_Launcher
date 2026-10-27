@@ -1,4 +1,5 @@
 ﻿#include "flutter_window.h"
+#include "studio_sandbox.h"
 
 #include <optional>
 #include <cmath>
@@ -72,7 +73,7 @@ constexpr const wchar_t kWakeUpMessageName[] =
     L"NAI_Launcher_WakeUp_Message";
 
 static UINT GetWakeUpMessage() {
-  static const UINT message = RegisterWindowMessage(kWakeUpMessageName);
+  static const UINT message = RegisterWindowMessageW(studio_sandbox::Identity(kWakeUpMessageName).c_str());
   return message;
 }
 

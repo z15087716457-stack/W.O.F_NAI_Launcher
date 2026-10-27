@@ -1,4 +1,8 @@
 import 'dart:io';
+import 'dart:async';
+import 'package:nai_launcher/data/services/gallery/gallery_sort_store.dart';
+import 'package:nai_launcher/presentation/wiring/refs_preferences.dart';
+import 'package:nai_launcher/presentation/providers/gallery_scan_progress_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/services/metadata/unified_metadata_parser.dart';
@@ -21,6 +25,9 @@ import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:nai_launcher/presentation/wiring/resource_window_wiring.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
+import 'package:nai_launcher/data/models/gallery/image_collection.dart';
+import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/prompt_block/prompt_block_folder.dart';
@@ -60,7 +67,21 @@ import 'floating_resource_sources_test.dart'
     show Blocks, Vibes, Precise, Params, MainGallery;
 import '../../core/resource_window/resource_window_host_test.dart' show code;
 
+class MutableParams extends Params {
+  void model(String value) => state = state.copyWith(model: value);
+  @override
+  void addVibeReference(VibeReference vibe) => state = state.copyWith(
+    vibeReferencesV4: [...state.vibeReferencesV4, vibe],
+  );
+}
+
+class ScanProgress extends GalleryScanProgressNotifier {
+  void scanning(bool value) => state = state.copyWith(isScanning: value);
+}
+
 class Categories extends GalleryCategoryNotifier {
+  void publish(List<GalleryCategory> categories) =>
+      state = state.copyWith(categories: categories);
   @override
   GalleryCategoryState build() => GalleryCategoryState(
     categories: [
@@ -70,6 +91,8 @@ class Categories extends GalleryCategoryNotifier {
 }
 
 class Collections extends CollectionNotifier {
+  void publish(List<ImageCollection> collections) =>
+      state = state.copyWith(collections: collections);
   @override
   CollectionState build() => const CollectionState();
   @override
@@ -162,6 +185,15 @@ class FavoritePrecise extends Precise {
 }
 
 class FavoriteGallery extends MainGallery {
+  void publish(LocalGalleryState next) => state = next;
+  @override
+  Future<void> setSort(
+    GallerySortField field,
+    GallerySortDirection direction,
+  ) async {
+    state = state.copyWith(sortField: field, sortDirection: direction);
+  }
+
   final favorites = <String>[];
   @override
   Future<bool> toggleFavorite(String id) async {
@@ -198,6 +230,18 @@ class DropActions extends RefsEntryDropActions {
 
 class NativeWindows extends ResourceWindowService {
   final opened = <FloatingResourceKind>[];
+  final changes = <FloatingResourceKind>[];
+  final views = <String>[];
+  @override
+  Future<void> changed(FloatingResourceKind kind) async {
+    changes.add(kind);
+  }
+
+  @override
+  Future<void> viewChanged(FloatingResourceKind kind, String layout) async {
+    views.add('${kind.name}:$layout');
+  }
+
   @override
   Future<WindowController> openKind(
     FloatingResourceKind kind, {
@@ -265,6 +309,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         appRouterProvider.overrideWithValue(router),
+        galleryScanProgressProvider.overrideWith((ref) => ScanProgress()),
         localStorageServiceProvider.overrideWithValue(storage),
         nativeResourceWindowsProvider.overrideWithValue(true),
         resourceWindowServiceProvider.overrideWithValue(native),
@@ -275,7 +320,7 @@ void main() {
         galleryCategoryNotifierProvider.overrideWith(Categories.new),
         collectionNotifierProvider.overrideWith(Collections.new),
         localGalleryNotifierProvider.overrideWith(FavoriteGallery.new),
-        generationParamsNotifierProvider.overrideWith(Params.new),
+        generationParamsNotifierProvider.overrideWith(MutableParams.new),
         shareImageSettingsProvider.overrideWith(ShareSettings.new),
         promptBlockLibraryNotifierProvider.overrideWith(
           () => FavoriteBlocks(
@@ -348,6 +393,7 @@ void main() {
     String group = 'all',
     List<String> chips = const [],
     String? sort,
+    bool? descending,
     String search = '',
     int offset = 0,
   }) => ResourceQuery({
@@ -358,6 +404,7 @@ void main() {
     'query': search,
     'chips': chips,
     'sortId': sort,
+    'descending': descending,
     'offset': offset,
     'limit': 60,
   });
@@ -389,7 +436,12 @@ void main() {
         (container.read(refsEntryDropActionsProvider) as DropActions).calls,
         ['vibe:v:true', 'precise:p:true'],
       );
-      await backend.open(FloatingResourceKind.gallery, '/library/0.png');
+      final opening = backend.open(
+        FloatingResourceKind.gallery,
+        '/library/0.png',
+      );
+      await tester.pumpAndSettle();
+      await opening;
       expect(
         container.read(imageViewerSessionProvider)!.backend.currentKey,
         '/library/0.png',
@@ -416,6 +468,398 @@ void main() {
     },
   );
 
+  testWidgets(
+    'foreground show/focus failure cannot abort gallery open or refs button',
+    (tester) async {
+      const channel = MethodChannel('window_manager');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (_) async {
+            throw PlatformException(code: 'window_operation_failed');
+          });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            builder: (_, child) => ResourceWindowBridge(child: child!),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        router.routerDelegate.navigatorKey.currentState?.overlay,
+        isNotNull,
+      );
+      final opening = backend.open(
+        FloatingResourceKind.gallery,
+        '/library/0.png',
+      );
+      await tester.pumpAndSettle();
+      await opening;
+      final session = container.read(imageViewerSessionProvider)!;
+      expect(session.backend.currentKey, '/library/0.png');
+      await backend.action(FloatingResourceKind.vibe, 'v', 'add');
+      expect(
+        (container.read(refsEntryDropActionsProvider) as DropActions).calls,
+        ['vibe:v:true'],
+      );
+      await tester.pumpWidget(const SizedBox());
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    },
+  );
+
+  testWidgets(
+    'pending branch cleanup completes before external viewer session is installed',
+    (tester) async {
+      const channel = MethodChannel('window_manager');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (call) async => call.method == 'isMinimized' ? false : null,
+          );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            builder: (_, child) => ResourceWindowBridge(child: child!),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // Equivalent to MainShell's cleanup during a pending branch rebuild.
+        scheduleMicrotask(
+          () =>
+              container.read(imageViewerSessionProvider.notifier).state = null,
+        );
+      });
+      final opening = backend.open(
+        FloatingResourceKind.gallery,
+        '/library/0.png',
+      );
+      await tester.pumpAndSettle();
+      await opening;
+      expect(
+        container.read(imageViewerSessionProvider)!.backend.currentKey,
+        '/library/0.png',
+      );
+      await tester.pumpWidget(const SizedBox());
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    },
+  );
+
+  testWidgets(
+    'unsupported Vibe and negative actions fail explicitly before protected drop/draft mutation',
+    (tester) async {
+      const channel = MethodChannel('window_manager');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (call) async => call.method == 'isMinimized' ? false : null,
+          );
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp.router(
+            routerConfig: router,
+            builder: (_, child) => ResourceWindowBridge(child: child!),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      (container.read(generationParamsNotifierProvider.notifier)
+              as MutableParams)
+          .model(ImageModels.animeDiffusionV5FullMedium);
+      await expectLater(
+        backend.action(FloatingResourceKind.vibe, 'v', 'add'),
+        throwsA(code('unsupported')),
+      );
+      await expectLater(
+        backend.action(FloatingResourceKind.gallery, '/library/0.png', 'vibe'),
+        throwsA(code('unsupported')),
+      );
+      await expectLater(
+        backend.action(FloatingResourceKind.blocks, 'a', 'negative'),
+        throwsA(code('unsupported')),
+      );
+      expect(
+        (container.read(refsEntryDropActionsProvider) as DropActions).calls,
+        isEmpty,
+      );
+      await tester.pumpWidget(const SizedBox());
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    },
+  );
+
+  test(
+    'records and layout changes do not announce content; mutations and scan completion do',
+    () async {
+      await container
+          .read(resourceWindowOpenerProvider)
+          .open(FloatingResourceKind.gallery);
+      await container.read(blocksPreferencesProvider.future);
+      native.changes.clear();
+      native.views.clear();
+      final notifier =
+          container.read(localGalleryNotifierProvider.notifier)
+              as FavoriteGallery;
+      notifier.publish(
+        container
+            .read(localGalleryNotifierProvider)
+            .copyWith(recordsRevision: 1),
+      );
+      notifier.publish(
+        container
+            .read(localGalleryNotifierProvider)
+            .copyWith(viewMode: GalleryViewMode.grid),
+      );
+      expect(native.changes, isEmpty);
+      expect(native.views, ['gallery:grid']);
+      notifier.publish(
+        container
+            .read(localGalleryNotifierProvider)
+            .copyWith(contentRevision: 1),
+      );
+      expect(native.changes, [FloatingResourceKind.gallery]);
+      native.changes.clear();
+      container.read(refsSortChangedProvider(RefsKind.vibe).notifier).state = (
+        sort: RefsSort.name,
+        descending: false,
+      );
+      expect(native.changes, [FloatingResourceKind.vibe]);
+      native.changes.clear();
+      final scan =
+          container.read(galleryScanProgressProvider.notifier) as ScanProgress;
+      scan.scanning(true);
+      expect(native.changes, isEmpty);
+      scan.scanning(false);
+      expect(native.changes, [FloatingResourceKind.gallery]);
+    },
+  );
+
+  test(
+    'shared sort stores round-trip direction independently for every kind',
+    () async {
+      var result = await backend.query(request('gallery', sort: 'fileName'));
+      expect(result['sortId'], 'fileName');
+      expect(result['descending'], false);
+      expect(
+        (await const GallerySortStore().load())!.direction,
+        GallerySortDirection.ascending,
+      );
+      result = await backend.query(
+        request('gallery', sort: 'fileName', descending: true),
+      );
+      expect(result['descending'], true);
+      result = await backend.query(request('gallery', sort: 'fileSize'));
+      expect(result['descending'], true);
+      await backend.query(request('blocks', sort: 'title', descending: false));
+      expect(
+        (await container.read(blocksPreferencesProvider.future)).descending,
+        false,
+      );
+      for (final kind in ['vibe', 'precise']) {
+        result = await backend.query(
+          request(kind, sort: 'name', descending: false),
+        );
+        final prefs = RefsPreferenceStore(
+          storage,
+          kind == 'vibe' ? RefsKind.vibe : RefsKind.precise,
+        ).read();
+        expect(prefs.filter.sort, RefsSort.name);
+        expect(prefs.filter.descending, false);
+        expect(result['descending'], false);
+        expect(
+          container.read(
+            refsSortChangedProvider(
+              kind == 'vibe' ? RefsKind.vibe : RefsKind.precise,
+            ),
+          ),
+          (sort: RefsSort.name, descending: false),
+        );
+      }
+      await expectLater(
+        backend.query(request('gallery', sort: 'modifiedAt:descending')),
+        throwsA(code('invalid_arguments')),
+      );
+    },
+  );
+
+  test(
+    'tree DTO uses main mapping, recent and uncategorized; cards carry crop and metrics',
+    () async {
+      await container.read(blocksPreferencesProvider.future);
+      await container
+          .read(blocksPreferencesProvider.notifier)
+          .change(
+            (p) => p.copyWith(recentIds: ['b', 'a'], expanded: {'parent'}),
+          );
+      var result = await backend.query(request('blocks', group: 'recent'));
+      expect((result['items'] as List).map((b) => (b as Map)['id']), [
+        'b',
+        'a',
+      ]);
+      result = await backend.query(request('blocks', group: 'uncategorized'));
+      expect((result['items'] as List).single, containsPair('id', 'b'));
+      final sections = result['sections'] as List;
+      expect(sections.map((s) => (s as Map)['id']), [
+        'library',
+        'collections',
+        'folders',
+      ]);
+      final folders = (sections.last as Map)['groups'] as List;
+      expect((folders[1] as Map)['expanded'], true);
+      expect((folders.first as Map)['icon'], 'uncategorized');
+      final custom = (result['sorts'] as List).first as Map;
+      expect(custom['directional'], false);
+      final block = await backend.item(FloatingResourceKind.blocks, 'a');
+      expect(block['hasThumb'], true);
+      expect(block['crop'], {'offsetX': 0.0, 'offsetY': 0.0, 'scale': 1.0});
+      expect(block['itemCount'], 1);
+      expect(block['useCount'], 0);
+      expect(block['hasParams'], false);
+      expect(
+        (await backend.item(FloatingResourceKind.blocks, 'b'))['hasThumb'],
+        false,
+      );
+      result = await backend.query(request('vibe'));
+      expect(
+        ((result['sections'] as List).first as Map)['groups'],
+        hasLength(3),
+      );
+      final vibe = (result['items'] as List).single as Map;
+      expect(vibe['strength'], isA<double>());
+      expect(vibe['secondary'], isA<double>());
+      expect(vibe['inGeneration'], false);
+      expect(vibe['bundleCount'], 0);
+      expect(vibe['thumbVersion'], isNotNull);
+      result = await backend.query(request('gallery'));
+      expect(
+        ((result['sections'] as List).first as Map)['groups'],
+        hasLength(2),
+      );
+      expect(((result['items'] as List).first as Map)['badge'], isNull);
+    },
+  );
+
+  test(
+    'gallery trees follow sorted pre-order and shared expanded ids with localized uncategorized',
+    () async {
+      final now = DateTime(2026);
+      GalleryCategory folder(
+        String id,
+        String name,
+        int order, {
+        String? parent,
+        String? path,
+      }) => GalleryCategory(
+        id: id,
+        name: name,
+        folderPath: path ?? name,
+        parentId: parent,
+        sortOrder: order,
+        imageCount: 3,
+        createdAt: now,
+        updatedAt: now,
+      );
+      (container.read(galleryCategoryNotifierProvider.notifier) as Categories)
+          .publish([
+            folder('child', 'Child', 0, parent: 'parent'),
+            folder('other', '_Hidden', 2),
+            folder('parent', 'Parent', 1),
+            folder('u', 'Uncategorized', 0),
+          ]);
+      (container.read(collectionNotifierProvider.notifier) as Collections)
+          .publish([
+            ImageCollection(
+              id: 'child',
+              name: 'Child',
+              parentId: 'parent',
+              createdAt: now,
+            ),
+            ImageCollection(
+              id: 'parent',
+              name: 'Parent',
+              isFolder: true,
+              createdAt: now,
+            ),
+          ]);
+      storage.values[StorageKeys.galleryCategoryTreeExpandedIds] = ['parent'];
+      final page = await backend.query(request('gallery'));
+      final sections = page['sections'] as List;
+      final collections = (sections[1] as Map)['groups'] as List;
+      expect(collections.map((g) => (g as Map)['id']), [
+        'collection:parent',
+        'collection:child',
+      ]);
+      expect((collections.first as Map)['icon'], 'collectionFolder');
+      expect((collections.first as Map)['expanded'], true);
+      final folders = (sections.last as Map)['groups'] as List;
+      expect(folders.map((g) => (g as Map)['id']), [
+        'folder:u',
+        'folder:parent',
+        'folder:child',
+        'folder:other',
+      ]);
+      expect((folders.first as Map)['icon'], 'uncategorized');
+      expect((folders.last as Map)['dim'], true);
+      expect((folders[1] as Map)['expanded'], true);
+      expect((folders[2] as Map)['parentId'], 'folder:parent');
+      expect(
+        ((sections.first as Map)['groups'] as List).first,
+        containsPair('count', 125),
+      );
+    },
+  );
+
+  test(
+    'refs in-generation filter uses shared tray identity and thumbnail versions survive metadata changes',
+    () async {
+      final target = container.read(refsGenerationTargetProvider);
+      final entry = container.read(vibeLibraryNotifierProvider).entries.single;
+      final reference = entry.toVibeReference();
+      target.vibeOrigins[refsVibeFingerprint(reference)] = 'v';
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .addVibeReference(reference);
+      final page = await backend.query(request('vibe', group: 'inGeneration'));
+      expect(
+        (page['items'] as List).single,
+        containsPair('inGeneration', true),
+      );
+      final precise = await backend.item(FloatingResourceKind.precise, 'p');
+      await backend.favorite(FloatingResourceKind.precise, 'p');
+      expect(
+        (await backend.item(FloatingResourceKind.precise, 'p'))['thumbVersion'],
+        precise['thumbVersion'],
+      );
+      final record = LocalImageRecord(
+        path: '/library/sample.png',
+        size: 12,
+        modifiedAt: DateTime(2026),
+        metadata: const NaiImageMetadata(
+          model: ImageModels.animeDiffusionV45Full,
+        ),
+      );
+      expect(backend.galleryItem(record)['badge'], 'V4.5');
+      final thumbVersion = backend.galleryItem(record)['thumbVersion'];
+      expect(
+        backend.galleryItem(record.copyWith(isFavorite: true))['thumbVersion'],
+        thumbVersion,
+      );
+      expect(
+        backend.galleryItem(
+          record.copyWith(modifiedAt: DateTime(2027)),
+        )['thumbVersion'],
+        isNot(thumbVersion),
+      );
+    },
+  );
+
   test(
     'Windows opener attaches the primary backend and forwards every kind to native windows',
     () async {
@@ -437,20 +881,19 @@ void main() {
       final page = await backend.query(
         request(
           'gallery',
-          group: 'today',
           chips: ['favorite', 'nai'],
-          sort: 'fileName:ascending',
+          sort: 'fileName',
           offset: 60,
         ),
       );
       expect(page['items'], isEmpty); // no fake favorite records
-      final forwarded = gallery.queries.first;
+      final forwarded = gallery.queries.firstWhere((q) => q.offset == 60);
       expect(forwarded.offset, 60);
       expect(forwarded.limit, 60);
       expect(forwarded.criteria.showFavoritesOnly, true);
       expect(forwarded.criteria.naiOnly, true);
-      expect(forwarded.criteria.dateStart, isNotNull);
-      expect(forwarded.criteria.dateEndExclusive, true);
+      expect(forwarded.criteria.dateStart, isNull);
+      expect(forwarded.criteria.dateEnd, isNull);
       expect(forwarded.sort.field, GallerySortField.fileName);
       expect(forwarded.sort.direction, GallerySortDirection.ascending);
       expect(page['counts'], {
@@ -463,7 +906,8 @@ void main() {
       expect(page['layout'], 'justified');
       expect((page['sections'] as List).length, 3);
       final sorts = page['sorts'] as List;
-      expect(sorts, hasLength(10));
+      expect(sorts, hasLength(5));
+      expect(page['descending'], false);
       await expectLater(
         backend.query(request('gallery', group: 'trash')),
         throwsA(code('invalid_arguments')),
@@ -485,7 +929,10 @@ void main() {
       expect((page['items'] as List).single, containsPair('id', 'a'));
       expect(page['total'], 1);
       final sections = page['sections'] as List;
-      final folders = (sections[1] as Map)['groups'] as List;
+      final folders =
+          (sections.firstWhere((s) => (s as Map)['id'] == 'folders')
+                  as Map)['groups']
+              as List;
       expect(folders.last, containsPair('parentId', 'folder:parent'));
       await expectLater(
         backend.detail(FloatingResourceKind.blocks, 'deleted'),

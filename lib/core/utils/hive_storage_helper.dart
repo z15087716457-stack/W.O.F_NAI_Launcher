@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'studio_sandbox.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
@@ -148,6 +149,7 @@ class HiveStorageHelper {
       AppLogger.i('Hive 初始化完成', 'HiveStorage');
     } catch (e, stackTrace) {
       AppLogger.e('Hive 初始化失败: $e', 'HiveStorage', stackTrace);
+      if (studioSandboxRoot() != null) rethrow;
       // 降级：使用默认的 initFlutter
       await Hive.initFlutter();
       _initialized = true;
@@ -163,6 +165,7 @@ class HiveStorageHelper {
   ///
   /// 由 [DataMigrationService] 在预热阶段调用
   Future<void> migrateFromOldLocation(String newPath) async {
+    if (studioSandboxRoot() != null) return;
     try {
       final appDir = await getApplicationDocumentsDirectory();
       final appSupportDir = await getLegacyApplicationSupportDirectory();

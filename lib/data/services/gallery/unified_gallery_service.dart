@@ -1046,14 +1046,16 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     List<String> paths,
   ) async {
     _ensureInitialized();
-    final wanted = paths.toSet();
-    final deleted = await _dataSource.getDeletedImagePaths();
+    final wanted = paths.map(galleryFilePathKey).toSet();
+    final deleted = (await _dataSource.getDeletedImagePaths())
+        .map(galleryFilePathKey)
+        .toSet();
     final roots = await GalleryFolderRepository.instance.getAllRootDirs();
     return _loadExistingLibraryRecords([
       for (final file in _allFiles)
-        if (wanted.contains(file.path) &&
-            !deleted.contains(file.path) &&
-            roots.any((root) => p.isWithin(root.path, file.path)))
+        if (wanted.contains(galleryFilePathKey(file.path)) &&
+            !deleted.contains(galleryFilePathKey(file.path)) &&
+            roots.any((root) => galleryPathIsWithin(root.path, file.path)))
           file,
     ]);
   }

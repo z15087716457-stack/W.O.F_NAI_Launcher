@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'studio_sandbox.dart';
 
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
@@ -38,7 +38,7 @@ class PreciseRefLibraryPathHelper {
       return defaultPath;
     } catch (e) {
       AppLogger.e('获取应用目录失败', e);
-      final tempDir = Directory.systemTemp;
+      final tempDir = studioTemporaryRoot();
       final fallbackPath = p.join(
         tempDir.path,
         'nai_launcher',

@@ -369,6 +369,7 @@ class ResourceWindowActions {
     this.onClose,
     this.onStartDrag,
     this.onToggleMaximize,
+    this.onDragRegion,
     this.onRetry,
     this.dragWrap,
   });
@@ -390,6 +391,8 @@ class ResourceWindowActions {
   final ValueChanged<String> onOpen;
   final void Function(String itemId, String actionId) onAction;
   final ValueChanged<String> onFavorite;
+
+  /// 列表末尾加载行每次布局后可调用；控制器加载中忽略，失败/取消后可重试。
   final VoidCallback onLoadMore;
   final ValueChanged<bool> onAlwaysOnTop;
   final VoidCallback onNewWindow;
@@ -401,6 +404,9 @@ class ResourceWindowActions {
   final VoidCallback? onClose;
   final VoidCallback? onStartDrag;
   final VoidCallback? onToggleMaximize;
+
+  /// 布局后上报顶栏高度及所有交互控件矩形（客户区逻辑像素）；矩形内不拖窗。
+  final void Function(double height, List<Rect> exclusions)? onDragRegion;
   final VoidCallback? onRetry;
   final ResourceDragWrap? dragWrap;
 

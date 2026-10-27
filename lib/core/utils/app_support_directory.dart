@@ -4,9 +4,13 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as system_paths;
 
 import '../services/adjacent_app_data_migration.dart';
+import 'studio_sandbox.dart';
 
 export 'package:path_provider/path_provider.dart'
-    hide getApplicationSupportDirectory, getTemporaryDirectory;
+    hide
+        getApplicationSupportDirectory,
+        getTemporaryDirectory,
+        getApplicationDocumentsDirectory;
 
 final _applicationSupportDirectory = ApplicationSupportDirectoryResolver(
   _prepareAdjacentData,
@@ -31,6 +35,10 @@ bool get _usesAdjacentData =>
 /// Windows internal state belongs to the executable, never the current working
 /// directory. Tests retain the injected path_provider implementation.
 Future<Directory> getApplicationSupportDirectory() {
+  final sandbox = studioSandboxRoot();
+  if (sandbox != null) {
+    return Directory(p.join(sandbox, 'user-data')).create(recursive: true);
+  }
   if (!_usesAdjacentData) return system_paths.getApplicationSupportDirectory();
   return _applicationSupportDirectory.resolve();
 }
@@ -46,11 +54,21 @@ Future<Directory> _prepareAdjacentData() async {
 }
 
 /// Only historical migration code may use the original Windows directory.
-Future<Directory> getLegacyApplicationSupportDirectory() =>
-    system_paths.getApplicationSupportDirectory();
+Future<Directory> getLegacyApplicationSupportDirectory() {
+  if (studioSandboxRoot() != null) return getApplicationSupportDirectory();
+  return system_paths.getApplicationSupportDirectory();
+}
+
+Future<Directory> getApplicationDocumentsDirectory() {
+  final sandbox = studioSandboxRoot();
+  if (sandbox == null) return system_paths.getApplicationDocumentsDirectory();
+  return Directory(p.join(sandbox, 'documents')).create(recursive: true);
+}
 
 Future<Directory> getTemporaryDirectory() async {
-  if (!_usesAdjacentData) return system_paths.getTemporaryDirectory();
+  if (!_usesAdjacentData && studioSandboxRoot() == null) {
+    return system_paths.getTemporaryDirectory();
+  }
   return Directory(
     p.join((await getApplicationSupportDirectory()).path, 'temp'),
   ).create(recursive: true);

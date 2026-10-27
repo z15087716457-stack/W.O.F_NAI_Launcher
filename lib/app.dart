@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'core/services/desktop_app_shutdown_service.dart';
+import 'core/utils/studio_sandbox.dart';
 import 'presentation/widgets/common/update_capsule.dart';
 import 'presentation/widgets/common/update_check_dialog.dart';
 import 'presentation/widgets/branding/entry_language_button.dart';
@@ -197,7 +198,7 @@ class NAILauncherApp extends ConsumerWidget {
       child: GlobalShortcuts(
         shortcuts: globalShortcuts,
         child: MaterialApp.router(
-          title: Brand.name,
+          title: studioWindowTitle(Brand.name),
           debugShowCheckedModeBanner: false,
 
           theme: ref.watch(studioLightThemeProvider),

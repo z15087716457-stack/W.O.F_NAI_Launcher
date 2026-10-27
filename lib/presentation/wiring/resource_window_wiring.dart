@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -16,6 +17,7 @@ import '../providers/collection_provider.dart';
 import '../providers/floating_resource_windows_provider.dart';
 import '../providers/font_provider.dart';
 import '../providers/gallery_category_provider.dart';
+import '../providers/gallery_scan_progress_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/local_gallery_provider.dart';
 import '../providers/locale_provider.dart';
@@ -35,6 +37,7 @@ import 'image_viewer_actions.dart';
 import 'image_viewer_backend.dart';
 import 'image_viewer_session.dart';
 import 'refs_entry_drop_target.dart';
+import 'refs_preferences.dart';
 import 'floating_resource_drag.dart';
 import '../ui/refs/refs_contract.dart';
 import 'resource_window_backend.dart';
@@ -83,26 +86,80 @@ class ResourceWindowOpener {
     }
 
     watch(
-      localGalleryNotifierProvider.select(
-        (s) => (s.recordsRevision, s.contentRevision, s.viewMode),
-      ),
+      localGalleryNotifierProvider.select((s) => s.contentRevision),
       FloatingResourceKind.gallery,
     );
-    watch(galleryServiceProvider, FloatingResourceKind.gallery);
-    watch(galleryCategoryNotifierProvider, FloatingResourceKind.gallery);
-    watch(blocksPreferencesProvider, FloatingResourceKind.blocks);
-    watch(collectionNotifierProvider, FloatingResourceKind.gallery);
-    watch(promptBlockLibraryNotifierProvider, FloatingResourceKind.blocks);
-    watch(vibeLibraryNotifierProvider, FloatingResourceKind.vibe);
-    watch(vibeLibraryCategoryNotifierProvider, FloatingResourceKind.vibe);
-    watch(preciseRefLibraryNotifierProvider, FloatingResourceKind.precise);
-    ref.listen(generationParamsNotifierProvider.select((p) => p.model), (
-      _,
-      __,
-    ) {
-      unawaited(service.changed(FloatingResourceKind.vibe));
-      unawaited(service.changed(FloatingResourceKind.precise));
+    ref.listen(galleryServiceProvider, (previous, next) {
+      if (!identical(previous, next)) {
+        unawaited(service.changed(FloatingResourceKind.gallery));
+      }
     });
+    ref.listen(galleryScanProgressProvider.select((s) => s.isScanning), (
+      previous,
+      next,
+    ) {
+      if (previous == true && !next) {
+        unawaited(service.changed(FloatingResourceKind.gallery));
+      }
+    });
+    ref.listen(localGalleryNotifierProvider.select((s) => s.viewMode), (
+      _,
+      next,
+    ) {
+      unawaited(service.viewChanged(FloatingResourceKind.gallery, next.name));
+    });
+    ref.listen(blocksPreferencesProvider.select((s) => s.valueOrNull?.view), (
+      _,
+      next,
+    ) {
+      if (next != null) {
+        unawaited(service.viewChanged(FloatingResourceKind.blocks, next.name));
+      }
+    });
+    watch(
+      galleryCategoryNotifierProvider.select((s) => (s.categories, s.error)),
+      FloatingResourceKind.gallery,
+    );
+    watch(
+      blocksPreferencesProvider.select((s) {
+        final p = s.valueOrNull;
+        return (p?.sort, p?.descending, p?.expanded, p?.recentIds);
+      }),
+      FloatingResourceKind.blocks,
+    );
+    watch(
+      collectionNotifierProvider.select((s) => (s.collections, s.error)),
+      FloatingResourceKind.gallery,
+    );
+    watch(promptBlockLibraryNotifierProvider, FloatingResourceKind.blocks);
+    watch(refsSortChangedProvider(RefsKind.vibe), FloatingResourceKind.vibe);
+    watch(
+      refsSortChangedProvider(RefsKind.precise),
+      FloatingResourceKind.precise,
+    );
+    watch(
+      vibeLibraryNotifierProvider.select((s) => (s.entries, s.error)),
+      FloatingResourceKind.vibe,
+    );
+    watch(
+      vibeLibraryCategoryNotifierProvider.select(
+        (s) => (s.categories, s.error),
+      ),
+      FloatingResourceKind.vibe,
+    );
+    watch(
+      preciseRefLibraryNotifierProvider.select((s) => (s.entries, s.error)),
+      FloatingResourceKind.precise,
+    );
+    ref.listen(
+      generationParamsNotifierProvider.select(
+        (p) => (p.model, p.vibeReferencesV4, p.preciseReferences),
+      ),
+      (_, __) {
+        unawaited(service.changed(FloatingResourceKind.vibe));
+        unawaited(service.changed(FloatingResourceKind.precise));
+      },
+    );
     ref.listen(
       shareImageSettingsProvider,
       (_, __) => unawaited(service.changed(FloatingResourceKind.gallery)),
@@ -160,7 +217,7 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
     String id,
     String action,
   ) async {
-    if (!mounted) return;
+    if (!mounted) resourceError('not_ready');
     final backend = ref.read(resourceWindowBackendProvider);
     final actionContext = ref
         .read(appRouterProvider)
@@ -170,28 +227,47 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
         ?.overlay
         ?.context;
     if (actionContext == null) resourceError('not_ready');
-    await windowManager.show();
-    await windowManager.focus();
+    // Windows can deny foreground activation while the child owns focus.
+    // This must not abort the actual resource operation.
+    for (final activate in [windowManager.show, windowManager.focus]) {
+      try {
+        await activate();
+      } on PlatformException {
+        // Best effort activation, not a data/action failure.
+      }
+    }
     if (!mounted || !actionContext.mounted) return;
     if (kind == FloatingResourceKind.gallery) {
-      if (action != 'copy' && action != 'open') {
-        ref.read(appRouterProvider).go(AppRoutes.generation);
-      }
+      // Read the current record before navigating or changing the draft.
       if (action == 'vibe' &&
           !ModelSpecs.of(
             ref.read(generationParamsNotifierProvider).model,
           ).vibetransfer) {
-        resourceError('invalid_arguments', 'Model does not support Vibe');
+        resourceError('unsupported', 'Model does not support Vibe');
       }
       final record = await backend.galleryRecord(id);
       if (!mounted || !actionContext.mounted) return;
       if (action == 'open') {
+        // MainShell clears the current viewer on branch transitions. Let any
+        // pending route frame (including cleanup microtasks) finish before
+        // installing this external request. The host wraps every shell branch.
+        if (ref
+                .read(appRouterProvider)
+                .routeInformationProvider
+                .value
+                .uri
+                .path ==
+            AppRoutes.login) {
+          ref.read(appRouterProvider).go(AppRoutes.generation);
+        }
+        await WidgetsBinding.instance.endOfFrame;
+        if (!mounted || !actionContext.mounted) resourceError('not_ready');
         ref
             .read(imageViewerSessionProvider.notifier)
             .state = ImageViewerSession(
           backend: ImageViewerBackend(
-            keys: [id],
-            initialKey: id,
+            keys: [record.path],
+            initialKey: record.path,
             load: (keys) async => [
               for (final r in await backend.gallery.getLibraryRecordsForPaths(
                 keys,
@@ -204,6 +280,11 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
           mode: ViewerMode.gallery,
         );
       } else {
+        if (action != 'copy') {
+          ref.read(appRouterProvider).go(AppRoutes.generation);
+          await WidgetsBinding.instance.endOfFrame;
+          if (!mounted || !actionContext.mounted) resourceError('not_ready');
+        }
         final metadata = await resolveLocalGalleryMetadata(record);
         if (!mounted || !actionContext.mounted) return;
         await ImageViewerActionHost(actionContext, ref, alive).perform(
@@ -229,7 +310,7 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
               ref.read(generationParamsNotifierProvider).model,
             ).customNegativePrompt) {
           resourceError(
-            'invalid_arguments',
+            'unsupported',
             'Model does not use custom negative prompt',
           );
         }
@@ -255,6 +336,9 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
       final refsKind = kind == FloatingResourceKind.vibe
           ? RefsKind.vibe
           : RefsKind.precise;
+      if (!ref.read(refsEntryDropActionsProvider).supports(refsKind)) {
+        resourceError('unsupported', 'Model does not support ${refsKind.name}');
+      }
       final result = await ref
           .read(refsEntryDropActionsProvider)
           .drop(

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'studio_sandbox.dart';
 
 import 'package:path/path.dart' as p;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
@@ -80,7 +81,7 @@ class VibeLibraryPathHelper {
     } catch (e) {
       AppLogger.e('获取应用目录失败', e);
       // 降级方案：使用临时目录
-      final tempDir = Directory.systemTemp;
+      final tempDir = studioTemporaryRoot();
       final fallbackPath = p.join(
         tempDir.path,
         'nai_launcher',

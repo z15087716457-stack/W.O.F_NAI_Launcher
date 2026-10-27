@@ -154,6 +154,18 @@ void main() {
       expect(calls.where((c) => c.method == 'createWindow'), hasLength(1));
       await service.open(arguments, newWindow: true);
       expect(service.windows, hasLength(2));
+      await service.viewChanged(FloatingResourceKind.blocks, 'list');
+      expect(service.host.revisions[FloatingResourceKind.blocks], 0);
+      final views = calls.where(
+        (c) =>
+            c.method == 'invokeMethod' &&
+            (c.arguments as Map)['method'] == 'resources.viewChanged',
+      );
+      expect(views, hasLength(2));
+      expect(
+        ((views.first.arguments as Map)['arguments'] as Map)['layout'],
+        'list',
+      );
       await service.changed(FloatingResourceKind.blocks);
       final pushed = calls.where(
         (c) =>
@@ -276,6 +288,19 @@ void main() {
       'windowId': 'child-id',
       'kind': 'blocks',
     });
+    await incoming(
+      const MethodChannel('com.nailauncher/resource_window_native').name,
+      'maximizedChanged',
+      true,
+    );
+    expect(
+      tester
+          .widget<ResourceWindowApp>(find.byType(ResourceWindowApp))
+          .controller
+          .data
+          .maximized,
+      true,
+    );
     await incoming(channels.name, 'methodCall', {
       'channel': 'mixin.one/window_controller/child-id',
       'method': 'resource.setAlwaysOnTop',
