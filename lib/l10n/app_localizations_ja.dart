@@ -21791,14 +21791,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get floating_loadMore => 'さらに読み込む';
 
   @override
-  String get blocks_iconsMore => 'その他のアイコン';
-
-  @override
-  String get blocks_iconsLess => '閉じる';
-
-  @override
-  String get blocks_iconsNsfwShow => 'NSFW アイコンを表示';
-
-  @override
-  String get blocks_iconsNsfwHide => 'NSFW アイコンを隠す';
+  String set_stThumbQuotaTip(int count, String time) {
+    return 'サムネイル $count 枚 · $timeに集計';
+  }
 }

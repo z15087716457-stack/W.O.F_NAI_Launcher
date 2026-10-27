@@ -555,7 +555,7 @@ void main() {
       await t.pump();
       expect(r.called('onRepeatChanged'), isFalse);
       expect(find.byKey(const Key('gen-repeat-bubble')), findsOneWidget);
-      expect(find.byKey(const Key('gen-repeat-ruler')), findsOneWidget);
+      expect(find.byKey(const Key('gen-repeat-ruler')), findsNothing);
       expect(
         find.descendant(of: value, matching: find.text('4')),
         findsOneWidget,

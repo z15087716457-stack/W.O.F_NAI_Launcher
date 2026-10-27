@@ -250,9 +250,24 @@ void main() {
           'test/presentation/ui/blocks/goldens/$file.png',
           [
             if (bar.evaluate().isNotEmpty) t.getRect(bar).deflate(1),
-            // 2026-10-27 C03（用户确认）：图标网格末尾新增「更多图标」格，只排除这一格。
-            for (final e in find.byKey(const Key('block-icon-more')).evaluate())
+            // 2026-10-27 C03（用户确认）：图标网格改为固定 4.5 行高的内部滚动区，
+            // 末尾接新增 / NSFW 图标；只排除网格区本身（编辑框其余部分照旧锁定）。
+            for (final e
+                in find.byKey(const Key('block-icon-scroll')).evaluate())
               t.getRect(find.byWidget(e.widget)).inflate(1),
+            // 网格比原来矮半行，编辑弹窗里「外观」之后的字段整体上移：排除外观行下沿到弹窗底。
+            for (final e
+                in find.byKey(const Key('block-edit-icons')).evaluate())
+              () {
+                final grid = t.getRect(find.byWidget(e.widget));
+                final modal = t.getRect(find.byKey(const Key('block-edit')));
+                return Rect.fromLTRB(
+                  modal.left,
+                  grid.bottom - 20,
+                  modal.right,
+                  modal.bottom,
+                );
+              }(),
           ],
         );
         debugDisableShadows = true;

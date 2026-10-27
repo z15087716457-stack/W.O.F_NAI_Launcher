@@ -39190,29 +39190,11 @@ abstract class AppLocalizations {
   /// **'Load more'**
   String get floating_loadMore;
 
-  /// No description provided for @blocks_iconsMore.
+  /// No description provided for @set_stThumbQuotaTip.
   ///
   /// In en, this message translates to:
-  /// **'More icons'**
-  String get blocks_iconsMore;
-
-  /// No description provided for @blocks_iconsLess.
-  ///
-  /// In en, this message translates to:
-  /// **'Fewer icons'**
-  String get blocks_iconsLess;
-
-  /// No description provided for @blocks_iconsNsfwShow.
-  ///
-  /// In en, this message translates to:
-  /// **'Show NSFW icons'**
-  String get blocks_iconsNsfwShow;
-
-  /// No description provided for @blocks_iconsNsfwHide.
-  ///
-  /// In en, this message translates to:
-  /// **'Hide NSFW icons'**
-  String get blocks_iconsNsfwHide;
+  /// **'{count} thumbnails · counted {time}'**
+  String set_stThumbQuotaTip(int count, String time);
 }
 
 class _AppLocalizationsDelegate

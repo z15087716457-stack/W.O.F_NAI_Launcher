@@ -11541,8 +11541,15 @@
   "floating_empty": "Nothing here",
   "floating_loadFailed": "Could not load",
   "floating_loadMore": "Load more",
-  "blocks_iconsMore": "More icons",
-  "blocks_iconsLess": "Fewer icons",
-  "blocks_iconsNsfwShow": "Show NSFW icons",
-  "blocks_iconsNsfwHide": "Hide NSFW icons"
+  "set_stThumbQuotaTip": "{count} thumbnails · counted {time}",
+  "@set_stThumbQuotaTip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

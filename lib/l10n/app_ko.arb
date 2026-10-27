@@ -11529,8 +11529,15 @@
   "floating_empty": "항목 없음",
   "floating_loadFailed": "불러오지 못했습니다",
   "floating_loadMore": "더 불러오기",
-  "blocks_iconsMore": "아이콘 더 보기",
-  "blocks_iconsLess": "접기",
-  "blocks_iconsNsfwShow": "NSFW 아이콘 표시",
-  "blocks_iconsNsfwHide": "NSFW 아이콘 숨기기"
+  "set_stThumbQuotaTip": "썸네일 {count}개 · {time} 집계",
+  "@set_stThumbQuotaTip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

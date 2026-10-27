@@ -418,7 +418,7 @@ class _RepeatStepperState extends State<_RepeatStepper> {
       );
     }
 
-    // `.bub` + `.ruler`: preview bubble above the number, ticks below.
+    // `.bub`: preview bubble above the number (10-27 removed the ruler below the box).
     Widget overlay(BuildContext context) => Positioned(
       left: 0,
       top: 0,
@@ -467,22 +467,6 @@ class _RepeatStepperState extends State<_RepeatStepper> {
                         size: const Size(10, 5),
                         painter: _BubbleTail(c.ink),
                       ),
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 44 + 32 + 6,
-                  child: Row(
-                    key: const Key('gen-repeat-ruler'),
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    spacing: 7,
-                    children: [
-                      for (var i = -3; i <= 3; i++)
-                        Container(
-                          width: i == 0 ? 2 : 1,
-                          height: i == 0 ? 9 : 5,
-                          color: i == 0 ? c.accent : c.strong,
-                        ),
                     ],
                   ),
                 ),

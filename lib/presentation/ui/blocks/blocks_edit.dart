@@ -35,6 +35,7 @@ class BlockIconGrid extends StatefulWidget {
     this.iconKeys = UiBlockIcon.legacyKeys,
   });
 
+  /// 前排（默认原 40 格）；其余图标按「新增 → NSFW」依次接在后面，同一个网格。
   final List<String> iconKeys;
   final String? selected;
   final Color color;
@@ -42,29 +43,62 @@ class BlockIconGrid extends StatefulWidget {
   /// null = 默认图标。
   final ValueChanged<String?> onChanged;
 
+  static const cell = 30.0, gap = 4.0, columns = 10;
+
+  /// 可见约 4.5 行：第 5 行故意只露一半，提示下面还能滚（10-27 用户确认）。
+  static const viewport = cell * 4.5 + gap * 4;
+
   @override
   State<BlockIconGrid> createState() => _BlockIconGridState();
 }
 
 class _BlockIconGridState extends State<BlockIconGrid> {
-  static final _extra = [
-    for (final k in UiBlockIcon.keys)
-      if (!UiBlockIcon.legacyKeys.contains(k) && !UiExtraIcons.nsfw.contains(k))
-        k,
-  ];
-  static final _nsfw = [
-    for (final k in UiBlockIcon.keys)
-      if (UiExtraIcons.nsfw.contains(k)) k,
-  ];
+  final _scroll = ScrollController();
 
-  // 当前选中的是新增 / NSFW 图标时直接展开，免得选中项被藏起来。
-  late var _more = _extra.contains(widget.selected) || _showNsfw;
-  late var _showNsfw = _nsfw.contains(widget.selected);
+  List<String?> get _all {
+    final front = widget.iconKeys;
+    final rest = [
+      for (final k in UiBlockIcon.keys)
+        if (!front.contains(k)) k,
+    ];
+    return [
+      null,
+      ...front,
+      for (final k in rest)
+        if (!UiExtraIcons.nsfw.contains(k)) k,
+      for (final k in rest)
+        if (UiExtraIcons.nsfw.contains(k)) k,
+    ];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 选中项在视区外（新增 / NSFW 图标）时，打开就滚到它那一行。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      final i = _all.indexOf(widget.selected);
+      if (i < 0) return;
+      const step = BlockIconGrid.cell + BlockIconGrid.gap;
+      final top = (i ~/ BlockIconGrid.columns) * step;
+      final pos = _scroll.position;
+      if (top + BlockIconGrid.cell > pos.viewportDimension) {
+        _scroll.jumpTo(
+          (top - step).clamp(pos.minScrollExtent, pos.maxScrollExtent),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
-    final l = context.l10n;
     final color = widget.color;
     Widget cell(String? key) {
       final on = key == widget.selected;
@@ -72,8 +106,8 @@ class _BlockIconGridState extends State<BlockIconGrid> {
         key: Key('block-icon-${key ?? 'default'}'),
         onTap: () => widget.onChanged(key),
         builder: (context, hover) => Container(
-          width: 30,
-          height: 30,
+          width: BlockIconGrid.cell,
+          height: BlockIconGrid.cell,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: on ? color.withValues(alpha: .14) : (hover ? c.hover : null),
@@ -85,70 +119,25 @@ class _BlockIconGridState extends State<BlockIconGrid> {
       );
     }
 
-    Widget toggle(Key key, String tooltip, Widget child, VoidCallback onTap) =>
-        Tooltip(
-          message: tooltip,
-          waitDuration: const Duration(milliseconds: 400),
-          child: UiPressable(
-            key: key,
-            onTap: onTap,
-            builder: (context, hover) => Container(
-              width: 30,
-              height: 30,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: hover ? c.hover : null,
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: c.border),
-              ),
-              child: child,
-            ),
-          ),
-        );
-
-    final legacyOnly = identical(widget.iconKeys, UiBlockIcon.legacyKeys);
+    const width =
+        BlockIconGrid.cell * BlockIconGrid.columns +
+        BlockIconGrid.gap * (BlockIconGrid.columns - 1);
     return SizedBox(
-      width: 30 * 10 + 4 * 9,
-      child: Wrap(
-        spacing: 4,
-        runSpacing: 4,
-        children: [
-          cell(null),
-          for (final k in widget.iconKeys) cell(k),
-          if (legacyOnly) ...[
-            toggle(
-              const Key('block-icon-more'),
-              _more ? l.blocks_iconsLess : l.blocks_iconsMore,
-              UiGlyph(
-                _more ? UiGlyphs.chevronUp : UiGlyphs.more,
-                size: 14,
-                color: c.muted,
-              ),
-              () => setState(() {
-                _more = !_more;
-                if (!_more) _showNsfw = false;
-              }),
-            ),
-            if (_more) ...[
-              for (final k in _extra) cell(k),
-              toggle(
-                const Key('block-icon-nsfw'),
-                _showNsfw ? l.blocks_iconsNsfwHide : l.blocks_iconsNsfwShow,
-                Text(
-                  '18+',
-                  style: UiText.sans(
-                    10,
-                    weight: FontWeight.w700,
-                    color: _showNsfw ? c.fav : c.faint,
-                  ),
-                ),
-                () => setState(() => _showNsfw = !_showNsfw),
-              ),
-              if (_showNsfw)
-                for (final k in _nsfw) cell(k),
-            ],
-          ],
-        ],
+      key: const Key('block-icon-scroll'),
+      width: width,
+      height: BlockIconGrid.viewport,
+      // 网格内部滚轮；露半行提示可滚，不额外画滚动条（会压住最右一列）。
+      child: ScrollConfiguration(
+        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+        child: SingleChildScrollView(
+          controller: _scroll,
+          physics: const ClampingScrollPhysics(),
+          child: Wrap(
+            spacing: BlockIconGrid.gap,
+            runSpacing: BlockIconGrid.gap,
+            children: [for (final k in _all) cell(k)],
+          ),
+        ),
       ),
     );
   }
@@ -156,7 +145,7 @@ class _BlockIconGridState extends State<BlockIconGrid> {
 
 /// 编辑块 / 新建块（原型 `editModal`）：1000 × 720（窗口小时缩到 92%）、圆角 16。
 /// 左 330 预览（预览图可拖动 / 滚轮缩放、正文里的样子、卡片样子、来源）；右边 名称 + 文件夹 · 内容（正面 / 负面 / 纯文本）·
-/// 外观（10 色 + 41 格图标 + 6 种外观直接画效果）· 标签 · 附带参数。Ctrl+Enter 保存，Esc 取消。
+/// 外观（10 色 + 可滚图标网格 + 6 种外观直接画效果）· 标签 · 附带参数。Ctrl+Enter 保存，Esc 取消。
 class BlockEditDialog extends StatefulWidget {
   const BlockEditDialog({super.key, required this.data, required this.actions});
 

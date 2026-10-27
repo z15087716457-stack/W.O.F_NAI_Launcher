@@ -196,9 +196,7 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       for (final e in find.text(l.set_agDesc).evaluate()) {
         masks.add(t.getRect(find.byWidget(e.widget)));
       }
-      masks.add(
-        Rect.fromLTRB(tabs.left, tabs.top, tabs.right, capture.bottom),
-      );
+      masks.add(Rect.fromLTRB(tabs.left, tabs.top, tabs.right, capture.bottom));
       final aside = find
           .byType(SettingsAsideCard)
           .evaluate()

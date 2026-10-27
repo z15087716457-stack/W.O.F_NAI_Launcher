@@ -127,6 +127,12 @@ abstract final class SettingsFormat {
   /// GB 数字（不带单位，一位小数）。
   static String gb(int b) => (b / (1024 * 1024 * 1024)).toStringAsFixed(1);
 
+  /// GB 数字：不到 10 GB 两位小数（2.26），否则一位（12.4）。缩略图配额这类要看清余量的地方用。
+  static String gbFine(int b) {
+    final g = b / (1024 * 1024 * 1024);
+    return g.toStringAsFixed(g < 10 ? 2 : 1);
+  }
+
   static String two(int n) => n.toString().padLeft(2, '0');
   static String time(DateTime t) => '${two(t.hour)}:${two(t.minute)}';
   static String monthDay(DateTime t) => '${two(t.month)}-${two(t.day)}';

@@ -161,6 +161,7 @@ class SettingsHostState extends State<SettingsHost> {
         },
         onReset: (k) => call('reset:${k.name}'),
         onResetPage: (p) => call('resetPage:${p.name}'),
+        onRecomputeStorage: () => call('recomputeStorage'),
         onUndo: (id) => call('undo:$id'),
         onChannelChanged: (c) {
           r.channel = c;

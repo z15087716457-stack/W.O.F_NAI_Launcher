@@ -89,6 +89,21 @@ Future<void> _capture(WidgetTester t, String name) async {
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
+  // 10-27：历史按钮只随内容宽，打开后也不铺满页签与圆环之间的空白；贴着上下文圆环。
+  for (final width in [420.0, 300.0]) {
+    testWidgets('history toggle hugs content next to usage ring ($width)', (
+      t,
+    ) async {
+      await pumpAgent(t, data: _data([_turn(0)]), width: width);
+      await t.tap(find.byKey(const Key('agent-history-toggle')));
+      await t.pump();
+      final button = t.getRect(find.byKey(const Key('agent-history-toggle')));
+      final usage = t.getRect(find.byKey(const Key('agent-usage')));
+      expect(button.width, lessThan(80));
+      expect(usage.left - button.right, inInclusiveRange(0, 6));
+      expect(t.takeException(), isNull);
+    });
+  }
   testWidgets(
     'history opens without a modal barrier, searches, jumps through lazy turns, and Esc closes',
     (t) async {

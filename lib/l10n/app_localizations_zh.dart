@@ -21544,16 +21544,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get floating_loadMore => '加载更多';
 
   @override
-  String get blocks_iconsMore => '更多图标';
-
-  @override
-  String get blocks_iconsLess => '收起';
-
-  @override
-  String get blocks_iconsNsfwShow => '显示 NSFW 图标';
-
-  @override
-  String get blocks_iconsNsfwHide => '隐藏 NSFW 图标';
+  String set_stThumbQuotaTip(int count, String time) {
+    return '$count 张缩略图 · 统计于$time';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43096,14 +43089,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get floating_loadMore => '載入更多';
 
   @override
-  String get blocks_iconsMore => '更多圖示';
-
-  @override
-  String get blocks_iconsLess => '收起';
-
-  @override
-  String get blocks_iconsNsfwShow => '顯示 NSFW 圖示';
-
-  @override
-  String get blocks_iconsNsfwHide => '隱藏 NSFW 圖示';
+  String set_stThumbQuotaTip(int count, String time) {
+    return '$count 張縮圖 · 統計於$time';
+  }
 }

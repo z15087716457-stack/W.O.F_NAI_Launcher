@@ -468,366 +468,376 @@ class SettingsStoragePage extends StatelessWidget {
       SettingsFolder.logs => l.set_stLogs,
       SettingsFolder.agent => l.set_stAgent,
     };
-    return SettingsPageFrame(
-      title: SettingsPageTitle(
-        eyebrow: SettingsFormat.eyebrow(SettingsPageId.storage),
-        title: l.set_pageStorage,
-        description: l.set_stDesc,
-      ),
-      top: [if (d.restartPending) const SettingsRestartBanner()],
-      aside: [
-        SettingsAsideCard(
-          title: l.set_stOpenFolders,
-          child: SettingsAsideList(
-            rows: [
-              for (final f in [
-                SettingsFolder.images,
-                SettingsFolder.vibes,
-                SettingsFolder.thumbnails,
-                SettingsFolder.appData,
-                SettingsFolder.logs,
-              ])
-                Row(
-                  spacing: 8,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        folderName(f),
-                        style: UiText.sans(12, color: c.ink),
-                      ),
-                    ),
-                    Text(
-                      st.folderNames[f] ?? '',
-                      style: UiText.mono(11, color: c.faint),
-                    ),
-                    SettingsIconBtn(
-                      key: Key('open-folder-${f.name}'),
-                      glyph: SettingsGlyphs.external,
-                      glyphSize: 13,
-                      tooltip: l.set_open,
-                      onTap: () => s.actions.onOpenFolder(f),
-                    ),
-                  ],
-                ),
-            ],
-          ),
+    return _StaleStorageRefresh(
+      measuredAt: st.measuredAt,
+      computing: st.computing,
+      onRefresh: s.actions.onRecomputeStorage,
+      child: SettingsPageFrame(
+        title: SettingsPageTitle(
+          eyebrow: SettingsFormat.eyebrow(SettingsPageId.storage),
+          title: l.set_pageStorage,
+          description: l.set_stDesc,
         ),
-        SettingsHint.text(context, l.set_stDeleteTip),
-      ],
-      children: [
-        SettingsSection(
-          title: l.set_stUsage,
-          children: [
-            SettingsBlock(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+        top: [if (d.restartPending) const SettingsRestartBanner()],
+        aside: [
+          SettingsAsideCard(
+            title: l.set_stOpenFolders,
+            child: SettingsAsideList(
+              rows: [
+                for (final f in [
+                  SettingsFolder.images,
+                  SettingsFolder.vibes,
+                  SettingsFolder.thumbnails,
+                  SettingsFolder.appData,
+                  SettingsFolder.logs,
+                ])
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
                     spacing: 8,
                     children: [
-                      Text(
-                        st.slices.isEmpty ? '—' : SettingsFormat.gb(total),
-                        style: settingsBig(context, size: 28),
-                      ),
-                      Text('GB', style: UiText.sans(12, color: c.muted)),
-                      const Spacer(),
-                      if (st.diskFree != null)
-                        Text(
-                          l.set_stFree(
-                            st.diskLabel,
-                            SettingsFormat.bytes(st.diskFree!),
-                          ),
-                          style: UiText.sans(12, color: c.faint),
+                      Expanded(
+                        child: Text(
+                          folderName(f),
+                          style: UiText.sans(12, color: c.ink),
                         ),
-                      SettingsBtn(
-                        label: st.computing
-                            ? l.set_stCounting
-                            : l.set_stRecount,
-                        glyph: UiGlyphs.refresh,
-                        small: true,
-                        tone: SettingsBtnTone.ghost,
-                        onTap: st.computing
-                            ? null
-                            : s.actions.onRecomputeStorage,
+                      ),
+                      Text(
+                        st.folderNames[f] ?? '',
+                        style: UiText.mono(11, color: c.faint),
+                      ),
+                      SettingsIconBtn(
+                        key: Key('open-folder-${f.name}'),
+                        glyph: SettingsGlyphs.external,
+                        glyphSize: 13,
+                        tooltip: l.set_open,
+                        onTap: () => s.actions.onOpenFolder(f),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 10,
-                    child: LayoutBuilder(
+              ],
+            ),
+          ),
+          SettingsHint.text(context, l.set_stDeleteTip),
+        ],
+        children: [
+          SettingsSection(
+            title: l.set_stUsage,
+            children: [
+              SettingsBlock(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      spacing: 8,
+                      children: [
+                        Text(
+                          st.slices.isEmpty ? '—' : SettingsFormat.gb(total),
+                          style: settingsBig(context, size: 28),
+                        ),
+                        Text('GB', style: UiText.sans(12, color: c.muted)),
+                        const Spacer(),
+                        if (st.diskFree != null)
+                          Text(
+                            l.set_stFree(
+                              st.diskLabel,
+                              SettingsFormat.bytes(st.diskFree!),
+                            ),
+                            style: UiText.sans(12, color: c.faint),
+                          ),
+                        SettingsBtn(
+                          label: st.computing
+                              ? l.set_stCounting
+                              : l.set_stRecount,
+                          glyph: UiGlyphs.refresh,
+                          small: true,
+                          tone: SettingsBtnTone.ghost,
+                          onTap: st.computing
+                              ? null
+                              : s.actions.onRecomputeStorage,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 10,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final n = st.slices.length;
+                          final room =
+                              constraints.maxWidth - 2 * math.max(0, n - 1);
+                          return Row(
+                            spacing: 2,
+                            children: [
+                              for (final p in st.slices)
+                                Container(
+                                  width:
+                                      3 +
+                                      math.max(0, room - 3 * n) *
+                                          p.bytes /
+                                          (total == 0 ? 1 : total),
+                                  decoration: BoxDecoration(
+                                    color: c.storage(p.kind),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    LayoutBuilder(
                       builder: (context, constraints) {
-                        final n = st.slices.length;
-                        final room =
-                            constraints.maxWidth - 2 * math.max(0, n - 1);
-                        return Row(
-                          spacing: 2,
+                        final cols = constraints.maxWidth >= 600 ? 4 : 2;
+                        final w =
+                            (constraints.maxWidth - 16 * (cols - 1)) / cols;
+                        return Wrap(
+                          spacing: 16,
+                          runSpacing: 8,
                           children: [
                             for (final p in st.slices)
-                              Container(
-                                width:
-                                    3 +
-                                    math.max(0, room - 3 * n) *
-                                        p.bytes /
-                                        (total == 0 ? 1 : total),
-                                decoration: BoxDecoration(
-                                  color: c.storage(p.kind),
-                                  borderRadius: BorderRadius.circular(2),
+                              SizedBox(
+                                width: w,
+                                child: Tooltip(
+                                  key: Key('storage-slice-${p.kind.name}'),
+                                  message: [
+                                    if (p.incomplete) l.set_stSliceIncomplete,
+                                    ...p.paths,
+                                  ].join('\n'),
+                                  waitDuration: const Duration(
+                                    milliseconds: 400,
+                                  ),
+                                  child: Row(
+                                    spacing: 8,
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: c.storage(p.kind),
+                                          borderRadius: BorderRadius.circular(
+                                            2,
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          kindName(p.kind),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: UiText.sans(
+                                            12,
+                                            color: c.muted,
+                                          ),
+                                        ),
+                                      ),
+                                      if (p.incomplete)
+                                        UiGlyph(
+                                          UiGlyphs.alert,
+                                          key: Key(
+                                            'storage-incomplete-${p.kind.name}',
+                                          ),
+                                          size: 12,
+                                          color: c.warn,
+                                        ),
+                                      Text(
+                                        SettingsFormat.bytes(p.bytes),
+                                        style: UiText.mono(12, color: c.ink),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                           ],
                         );
                       },
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cols = constraints.maxWidth >= 600 ? 4 : 2;
-                      final w = (constraints.maxWidth - 16 * (cols - 1)) / cols;
-                      return Wrap(
-                        spacing: 16,
-                        runSpacing: 8,
-                        children: [
-                          for (final p in st.slices)
-                            SizedBox(
-                              width: w,
-                              child: Tooltip(
-                                key: Key('storage-slice-${p.kind.name}'),
-                                message: [
-                                  if (p.incomplete) l.set_stSliceIncomplete,
-                                  ...p.paths,
-                                ].join('\n'),
-                                waitDuration: const Duration(milliseconds: 400),
-                                child: Row(
-                                  spacing: 8,
-                                  children: [
-                                    Container(
-                                      width: 8,
-                                      height: 8,
-                                      decoration: BoxDecoration(
-                                        color: c.storage(p.kind),
-                                        borderRadius: BorderRadius.circular(2),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        kindName(p.kind),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: UiText.sans(12, color: c.muted),
-                                      ),
-                                    ),
-                                    if (p.incomplete)
-                                      UiGlyph(
-                                        UiGlyphs.alert,
-                                        key: Key(
-                                          'storage-incomplete-${p.kind.name}',
-                                        ),
-                                        size: 12,
-                                        color: c.warn,
-                                      ),
-                                    Text(
-                                      SettingsFormat.bytes(p.bytes),
-                                      style: UiText.mono(12, color: c.ink),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                  if (st.incomplete) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      l.set_stIncomplete,
-                      key: const Key('storage-incomplete'),
-                      style: UiText.sans(11.5, color: c.warn),
-                    ),
+                    if (st.incomplete) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        l.set_stIncomplete,
+                        key: const Key('storage-incomplete'),
+                        style: UiText.sans(11.5, color: c.warn),
+                      ),
+                    ],
                   ],
-                ],
-              ),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: l.set_stSave,
-          children: [
-            SettingKeyRow(
-              SettingKey.imageSavePath,
-              title: l.set_stSavePath,
-              control: const SetPath(SettingKey.imageSavePath),
-            ),
-            SettingKeyRow(
-              SettingKey.autoSave,
-              title: l.set_stAutoSave,
-              subtitle: l.set_stAutoSaveSub,
-              control: const SetSwitch(SettingKey.autoSave),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: l.set_stAssets,
-          children: [
-            SettingKeyRow(
-              SettingKey.vibePath,
-              title: l.set_stVibePath,
-              control: const SetPath(
-                SettingKey.vibePath,
-                defaultPath: r'Documents\NAI_Launcher\vibes',
-              ),
-            ),
-            SettingKeyRow(
-              SettingKey.galleryQuality,
-              title: l.set_stQuality,
-              subtitle: l.set_stQualitySub,
-              control: const SetSeg(SettingKey.galleryQuality),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: l.set_stRoots,
-          subtitle: l.set_stRootsSub,
-          children: [
-            for (final r in st.roots)
-              SettingsRow(
-                key: Key('root-${r.id}'),
-                minHeight: 50,
-                leading: UiGlyph(
-                  SettingsGlyphs.folder,
-                  size: 16,
-                  color: c.faint,
                 ),
-                title: r.path,
-                titleStyle: UiText.mono(12.5, color: c.ink),
-                badges: [if (r.primary) UiMini(l.set_stPrimary)],
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: l.set_stSave,
+            children: [
+              SettingKeyRow(
+                SettingKey.imageSavePath,
+                title: l.set_stSavePath,
+                control: const SetPath(SettingKey.imageSavePath),
+              ),
+              SettingKeyRow(
+                SettingKey.autoSave,
+                title: l.set_stAutoSave,
+                subtitle: l.set_stAutoSaveSub,
+                control: const SetSwitch(SettingKey.autoSave),
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: l.set_stAssets,
+            children: [
+              SettingKeyRow(
+                SettingKey.vibePath,
+                title: l.set_stVibePath,
+                control: const SetPath(
+                  SettingKey.vibePath,
+                  defaultPath: r'Documents\NAI_Launcher\vibes',
+                ),
+              ),
+              SettingKeyRow(
+                SettingKey.galleryQuality,
+                title: l.set_stQuality,
+                subtitle: l.set_stQualitySub,
+                control: const SetSeg(SettingKey.galleryQuality),
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: l.set_stRoots,
+            subtitle: l.set_stRootsSub,
+            children: [
+              for (final r in st.roots)
+                SettingsRow(
+                  key: Key('root-${r.id}'),
+                  minHeight: 50,
+                  leading: UiGlyph(
+                    SettingsGlyphs.folder,
+                    size: 16,
+                    color: c.faint,
+                  ),
+                  title: r.path,
+                  titleStyle: UiText.mono(12.5, color: c.ink),
+                  badges: [if (r.primary) UiMini(l.set_stPrimary)],
+                  control: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 8,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Text(
+                          st.slices.isEmpty
+                              ? '—'
+                              : l.set_stCount(SettingsFormat.count(r.images)),
+                          style: UiText.mono(12, color: c.muted),
+                        ),
+                      ),
+                      SettingsIconBtn(
+                        glyph: SettingsGlyphs.external,
+                        tooltip: l.set_open,
+                        onTap: () => s.actions.onOpenGalleryRoot(r.id),
+                      ),
+                      if (r.primary)
+                        const SizedBox(width: 26)
+                      else
+                        SettingsIconBtn(
+                          key: Key('root-remove-${r.id}'),
+                          glyph: UiGlyphs.close,
+                          tooltip: l.set_stRemoveRoot,
+                          onTap: () => s.actions.onRemoveGalleryRoot(r.id),
+                        ),
+                    ],
+                  ),
+                ),
+              SettingsBlock(
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    SettingsBtn(
+                      label: l.set_stAddFolder,
+                      glyph: UiGlyphs.plus,
+                      onTap: s.actions.onAddGalleryRoot,
+                    ),
+                    SettingsBtn(
+                      label: l.set_stImportIndex,
+                      glyph: SettingsGlyphs.file,
+                      onTap: s.actions.onImportTagIndex,
+                    ),
+                    if (st.lastScanAt != null)
+                      Text(
+                        l.set_stLastScan(
+                          SettingsFormat.ago(context, st.lastScanAt!, d.now),
+                          SettingsFormat.count(st.imageCount),
+                        ),
+                        style: UiText.sans(11, color: c.faint),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: l.set_stMaintain,
+            children: [
+              SettingsRow(
+                anchor: 'rescan',
+                title: l.set_stRescan,
+                subtitle: l.set_stRescanSub,
+                control: SettingsBtn(
+                  key: const Key('rescan'),
+                  label: st.scanning ? l.set_stScanning : l.set_stScan,
+                  glyph: UiGlyphs.refresh,
+                  small: true,
+                  onTap: st.scanning ? null : s.actions.onRescanGallery,
+                ),
+              ),
+              SettingsRow(
+                title: l.set_stCleanThumbs,
+                subtitle: l.set_stCleanThumbsSub,
                 control: Row(
                   mainAxisSize: MainAxisSize.min,
-                  spacing: 8,
+                  spacing: 12,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text(
-                        st.slices.isEmpty
-                            ? '—'
-                            : l.set_stCount(SettingsFormat.count(r.images)),
-                        style: UiText.mono(12, color: c.muted),
+                    _ThumbQuota(st),
+                    SettingsBtn(
+                      key: const Key('clean-thumbs'),
+                      label: l.set_stClean,
+                      small: true,
+                      onTap: () => s.confirm(
+                        title: l.set_stCleanTitle,
+                        body: l.set_stCleanBody,
+                        confirm: l.set_stClean,
+                        onConfirm: s.actions.onCleanThumbnails,
                       ),
                     ),
-                    SettingsIconBtn(
-                      glyph: SettingsGlyphs.external,
-                      tooltip: l.set_open,
-                      onTap: () => s.actions.onOpenGalleryRoot(r.id),
-                    ),
-                    if (r.primary)
-                      const SizedBox(width: 26)
-                    else
-                      SettingsIconBtn(
-                        key: Key('root-remove-${r.id}'),
-                        glyph: UiGlyphs.close,
-                        tooltip: l.set_stRemoveRoot,
-                        onTap: () => s.actions.onRemoveGalleryRoot(r.id),
-                      ),
                   ],
                 ),
               ),
-            SettingsBlock(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  SettingsBtn(
-                    label: l.set_stAddFolder,
-                    glyph: UiGlyphs.plus,
-                    onTap: s.actions.onAddGalleryRoot,
-                  ),
-                  SettingsBtn(
-                    label: l.set_stImportIndex,
-                    glyph: SettingsGlyphs.file,
-                    onTap: s.actions.onImportTagIndex,
-                  ),
-                  if (st.lastScanAt != null)
-                    Text(
-                      l.set_stLastScan(
-                        SettingsFormat.ago(context, st.lastScanAt!, d.now),
-                        SettingsFormat.count(st.imageCount),
-                      ),
-                      style: UiText.sans(11, color: c.faint),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        SettingsSection(
-          title: l.set_stMaintain,
-          children: [
-            SettingsRow(
-              anchor: 'rescan',
-              title: l.set_stRescan,
-              subtitle: l.set_stRescanSub,
-              control: SettingsBtn(
-                key: const Key('rescan'),
-                label: st.scanning ? l.set_stScanning : l.set_stScan,
-                glyph: UiGlyphs.refresh,
-                small: true,
-                onTap: st.scanning ? null : s.actions.onRescanGallery,
-              ),
-            ),
-            SettingsRow(
-              title: l.set_stCleanThumbs,
-              subtitle: l.set_stCleanThumbsSub,
-              control: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 8,
-                children: [
-                  Text(
-                    '${st.slices.isEmpty ? '—' : SettingsFormat.gb(st.thumbnailBytes)} / ${SettingsFormat.bytes(st.thumbnailLimit)}',
-                    style: UiText.mono(12, color: c.muted),
-                  ),
-                  SettingsBtn(
-                    key: const Key('clean-thumbs'),
-                    label: l.set_stClean,
-                    small: true,
-                    onTap: () => s.confirm(
-                      title: l.set_stCleanTitle,
-                      body: l.set_stCleanBody,
-                      confirm: l.set_stClean,
-                      onConfirm: s.actions.onCleanThumbnails,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SettingKeyRow(
-              SettingKey.thumbnailCacheLimitGb,
-              title: l.set_stThumbnailCacheLimit,
-              subtitle: l.set_stThumbnailCacheLimitSub,
-              control: SetSlider(
+              SettingKeyRow(
                 SettingKey.thumbnailCacheLimitGb,
-                width: 200,
-                label: (x) => '${x.round()} GB',
+                title: l.set_stThumbnailCacheLimit,
+                subtitle: l.set_stThumbnailCacheLimitSub,
+                control: SetSlider(
+                  SettingKey.thumbnailCacheLimitGb,
+                  width: 200,
+                  label: (x) => '${x.round()} GB',
+                ),
               ),
-            ),
-            SettingKeyRow(
-              SettingKey.appDataPath,
-              title: l.set_stAppData,
-              subtitle: l.set_stAppDataSub,
-              control: const SetPath(
+              SettingKeyRow(
                 SettingKey.appDataPath,
-                width: 300,
-                open: false,
-                defaultPath: './user-data/hive',
+                title: l.set_stAppData,
+                subtitle: l.set_stAppDataSub,
+                control: const SetPath(
+                  SettingKey.appDataPath,
+                  width: 300,
+                  open: false,
+                  defaultPath: './user-data/hive',
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1245,6 +1255,115 @@ class SettingsDictionaryPage extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// 进存储页时，上次占用统计已超过 [maxAge] 就在后台重算（10-27）；正在算或还没算过不重复触发。
+class _StaleStorageRefresh extends StatefulWidget {
+  const _StaleStorageRefresh({
+    required this.measuredAt,
+    required this.computing,
+    required this.onRefresh,
+    required this.child,
+  });
+  final DateTime? measuredAt;
+  final bool computing;
+  final VoidCallback onRefresh;
+  final Widget child;
+  static const maxAge = Duration(minutes: 5);
+
+  @override
+  State<_StaleStorageRefresh> createState() => _StaleStorageRefreshState();
+}
+
+class _StaleStorageRefreshState extends State<_StaleStorageRefresh> {
+  @override
+  void initState() {
+    super.initState();
+    final at = widget.measuredAt;
+    if (!widget.computing &&
+        at != null &&
+        DateTime.now().difference(at) > _StaleStorageRefresh.maxAge) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onRefresh();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// 缩略图配额：「2.26 / 20 GB」+ 一条细比例条；悬停显示张数与统计时间。
+class _ThumbQuota extends StatelessWidget {
+  const _ThumbQuota(this.st);
+  final SettingsStorageData st;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final ready = st.slices.isNotEmpty;
+    final limit = st.thumbnailLimit;
+    final ratio = ready && limit > 0
+        ? (st.thumbnailBytes / limit).clamp(0.0, 1.0)
+        : 0.0;
+    final tone = ratio >= .9
+        ? c.warn
+        : ratio >= .75
+        ? c.amber
+        : c.accent;
+    final at = st.measuredAt;
+    return Tooltip(
+      key: const Key('thumb-quota'),
+      message: ready && at != null
+          ? l.set_stThumbQuotaTip(
+              st.thumbnailCount,
+              SettingsFormat.ago(context, at, DateTime.now()),
+            )
+          : '',
+      waitDuration: const Duration(milliseconds: 400),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        spacing: 5,
+        children: [
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: ready ? SettingsFormat.gbFine(st.thumbnailBytes) : '—',
+                  style: UiText.mono(12, color: c.ink),
+                ),
+                TextSpan(
+                  // 上限总是整数 GB，和下面滑杆的「20 GB」写法一致。
+                  text: ' / ${(limit / (1024 * 1024 * 1024)).round()} GB',
+                  style: UiText.mono(12, color: c.faint),
+                ),
+              ],
+            ),
+          ),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: SizedBox(
+              key: const Key('thumb-quota-bar'),
+              width: 96,
+              height: 3,
+              child: Stack(
+                children: [
+                  Positioned.fill(child: ColoredBox(color: c.control)),
+                  FractionallySizedBox(
+                    widthFactor: ratio,
+                    heightFactor: 1,
+                    child: ColoredBox(color: tone),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

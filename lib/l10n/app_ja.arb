@@ -11529,8 +11529,15 @@
   "floating_empty": "何もありません",
   "floating_loadFailed": "読み込めませんでした",
   "floating_loadMore": "さらに読み込む",
-  "blocks_iconsMore": "その他のアイコン",
-  "blocks_iconsLess": "閉じる",
-  "blocks_iconsNsfwShow": "NSFW アイコンを表示",
-  "blocks_iconsNsfwHide": "NSFW アイコンを隠す"
+  "set_stThumbQuotaTip": "サムネイル {count} 枚 · {time}に集計",
+  "@set_stThumbQuotaTip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

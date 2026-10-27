@@ -12114,8 +12114,15 @@
   "floating_empty": "沒有內容",
   "floating_loadFailed": "載入失敗",
   "floating_loadMore": "載入更多",
-  "blocks_iconsMore": "更多圖示",
-  "blocks_iconsLess": "收起",
-  "blocks_iconsNsfwShow": "顯示 NSFW 圖示",
-  "blocks_iconsNsfwHide": "隱藏 NSFW 圖示"
+  "set_stThumbQuotaTip": "{count} 張縮圖 · 統計於{time}",
+  "@set_stThumbQuotaTip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

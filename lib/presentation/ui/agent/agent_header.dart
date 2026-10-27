@@ -196,18 +196,23 @@ class _AgentHeaderState extends State<AgentHeader> {
                           onTap: () => widget.onTab(AgentTab.memory),
                         ),
                       ],
-                      SizedBox(width: gap - 8),
+                      // 10-27：历史贴在上下文圆环左边，宽度只随内容；
+                      // 剩余空间不够放文字时退成时钟图标（LayoutBuilder 只量剩余宽度，不撑开按钮）。
                       Expanded(
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: _HistoryButton(
-                            on: widget.historyOpen,
-                            label: l.ag_historyButton,
-                            tooltip: l.ag_historyTitle,
-                            onTap: widget.onHistory,
+                        child: LayoutBuilder(
+                          builder: (context, rest) => Align(
+                            alignment: Alignment.centerRight,
+                            child: _HistoryButton(
+                              on: widget.historyOpen,
+                              label: l.ag_historyButton,
+                              tooltip: l.ag_historyTitle,
+                              iconOnly: rest.maxWidth < 72,
+                              onTap: widget.onHistory,
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: 2),
                       UiPopover(
                         anchor: _usage,
                         onDismiss: () => setState(() => _usage = null),
@@ -522,15 +527,16 @@ class _UsageButtonState extends State<_UsageButton> {
   }
 }
 
-/// 「指令」右边的「历史」：高 28、圆角 7，开着时控件底 + 墨色加粗（原型 `.hbtn`）。
+/// 「历史」：与右侧上下文按钮同高同圆角（24 / 6），开着时控件底 + 墨色加粗。
 class _HistoryButton extends StatelessWidget {
   const _HistoryButton({
     required this.on,
     required this.label,
     required this.tooltip,
+    required this.iconOnly,
     required this.onTap,
   });
-  final bool on;
+  final bool on, iconOnly;
   final String label, tooltip;
   final VoidCallback? onTap;
 
@@ -542,47 +548,39 @@ class _HistoryButton extends StatelessWidget {
       child: Semantics(
         button: true,
         selected: on,
-        child: LayoutBuilder(
-          builder: (context, box) => UiPressable(
-            key: const Key('agent-history-toggle'),
-            onTap: onTap,
-            builder: (context, hover) {
-              // Narrow panels (long tab labels) keep only the clock icon.
-              final iconOnly = box.maxWidth < 64;
-              final fg = on || hover ? c.ink : c.muted;
-              return Container(
-                height: 28,
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: on ? c.control : (hover ? c.hover : null),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 5,
-                  children: [
-                    AgentIcon(AgentGlyphs.clock, size: 15, color: fg),
-                    if (!iconOnly)
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.clip,
-                          softWrap: false,
-                          style: UiText.sans(
-                            12.5,
-                            color: fg,
-                            weight: on ? FontWeight.w600 : FontWeight.w400,
-                            height: 1.2,
-                          ),
-                        ),
+        child: UiPressable(
+          key: const Key('agent-history-toggle'),
+          onTap: onTap,
+          builder: (context, hover) {
+            final fg = on || hover ? c.ink : c.muted;
+            return Container(
+              height: 24,
+              padding: EdgeInsets.symmetric(horizontal: iconOnly ? 5 : 7),
+              decoration: BoxDecoration(
+                color: on ? c.control : (hover ? c.hover : null),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 5,
+                children: [
+                  AgentIcon(AgentGlyphs.clock, size: 14, color: fg),
+                  if (!iconOnly)
+                    Text(
+                      label,
+                      maxLines: 1,
+                      softWrap: false,
+                      style: UiText.sans(
+                        12,
+                        color: fg,
+                        weight: on ? FontWeight.w600 : FontWeight.w400,
+                        height: 1.2,
                       ),
-                  ],
-                ),
-              );
-            },
-          ),
+                    ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

@@ -69,7 +69,8 @@ void main() {
   });
 
   testWidgets(
-    'picker draft keeps legacy footprint and accepts explicit grouped keys',
+    // 10-27 用户确认：全部图标同一网格（原 40 在前），新增与 NSFW 不再隐藏。
+    'picker lists legacy first, then every grouped key; explicit keys go first',
     (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -81,8 +82,8 @@ void main() {
         ),
       );
       expect(find.byKey(const Key('block-icon-palette')), findsOneWidget);
-      expect(find.byKey(const Key('block-icon-eye')), findsNothing);
-      expect(find.byKey(const Key('block-icon-r18')), findsNothing);
+      expect(find.byKey(const Key('block-icon-eye')), findsOneWidget);
+      expect(find.byKey(const Key('block-icon-r18')), findsOneWidget);
       await tester.pumpWidget(
         MaterialApp(
           home: BlockIconGrid(

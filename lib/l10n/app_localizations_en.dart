@@ -22556,14 +22556,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get floating_loadMore => 'Load more';
 
   @override
-  String get blocks_iconsMore => 'More icons';
-
-  @override
-  String get blocks_iconsLess => 'Fewer icons';
-
-  @override
-  String get blocks_iconsNsfwShow => 'Show NSFW icons';
-
-  @override
-  String get blocks_iconsNsfwHide => 'Hide NSFW icons';
+  String set_stThumbQuotaTip(int count, String time) {
+    return '$count thumbnails · counted $time';
+  }
 }

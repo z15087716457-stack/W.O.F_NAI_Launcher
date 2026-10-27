@@ -340,6 +340,12 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     thumbnailBytes: slices
         .firstWhere((s) => s.kind == SettingsStorageKind.thumbnails)
         .bytes,
+    thumbnailCount: {
+      for (final measurement in measurements.values)
+        for (final file in measurement.files.entries)
+          if (file.value.thumbnail) file.key,
+    }.length,
+    measuredAt: DateTime.now(),
     thumbnailLimit: locations.thumbnailLimit,
     folderNames: locations.folderNames,
   );

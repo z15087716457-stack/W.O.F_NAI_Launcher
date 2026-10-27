@@ -898,6 +898,8 @@ class SettingsStorageData {
     this.thumbnailLimit = 0,
     this.folderNames = const {},
     this.incomplete = false,
+    this.thumbnailCount = 0,
+    this.measuredAt,
   });
 
   /// 占用分类（新增：后台统计各目录大小，可缓存）；空 = 还没统计。
@@ -918,6 +920,12 @@ class SettingsStorageData {
   final Map<SettingsFolder, String> folderNames;
 
   final bool incomplete;
+
+  /// 缩略图文件数；悬停缩略图占用时显示。
+  final int thumbnailCount;
+
+  /// 这份占用统计完成的时间；存储页据此判断是否过期需要重算（null = 还没统计）。
+  final DateTime? measuredAt;
   int get totalBytes => slices.fold(0, (s, e) => s + e.bytes);
 }
 

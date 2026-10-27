@@ -317,6 +317,8 @@ SettingsViewData settingsViewData(
       lastScanAt: lastScan,
       scanning: ref.watch(settingsStorageBusyProvider),
       thumbnailBytes: measured?.thumbnailBytes ?? 0,
+      thumbnailCount: measured?.thumbnailCount ?? 0,
+      measuredAt: measured?.measuredAt,
       thumbnailLimit:
           locations?.thumbnailLimit ?? measured?.thumbnailLimit ?? 0,
       folderNames: locations?.folderNames ?? measured?.folderNames ?? const {},

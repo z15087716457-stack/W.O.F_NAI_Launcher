@@ -11529,8 +11529,15 @@
   "floating_empty": "没有内容",
   "floating_loadFailed": "加载失败",
   "floating_loadMore": "加载更多",
-  "blocks_iconsMore": "更多图标",
-  "blocks_iconsLess": "收起",
-  "blocks_iconsNsfwShow": "显示 NSFW 图标",
-  "blocks_iconsNsfwHide": "隐藏 NSFW 图标"
+  "set_stThumbQuotaTip": "{count} 张缩略图 · 统计于{time}",
+  "@set_stThumbQuotaTip": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

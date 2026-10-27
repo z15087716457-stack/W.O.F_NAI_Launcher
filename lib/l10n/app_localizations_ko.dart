@@ -21863,14 +21863,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get floating_loadMore => '더 불러오기';
 
   @override
-  String get blocks_iconsMore => '아이콘 더 보기';
-
-  @override
-  String get blocks_iconsLess => '접기';
-
-  @override
-  String get blocks_iconsNsfwShow => 'NSFW 아이콘 표시';
-
-  @override
-  String get blocks_iconsNsfwHide => 'NSFW 아이콘 숨기기';
+  String set_stThumbQuotaTip(int count, String time) {
+    return '썸네일 $count개 · $time 집계';
+  }
 }
