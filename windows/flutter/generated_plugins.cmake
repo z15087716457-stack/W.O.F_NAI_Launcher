@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
+  desktop_multi_window
   flutter_inappwebview_windows
   flutter_secure_storage_windows
   irondash_engine_context

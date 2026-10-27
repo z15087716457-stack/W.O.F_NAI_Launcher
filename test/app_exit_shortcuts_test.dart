@@ -66,7 +66,11 @@ void main() {
     Hive.init(directory.path);
     final box = await Hive.openBox(StorageKeys.settingsBox);
     await box.put('test-draft', 'kept');
-    for (final channel in ['window_manager', 'tray_manager']) {
+    for (final channel in [
+      'window_manager',
+      'tray_manager',
+      'com.nailauncher/resource_window_native',
+    ]) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(MethodChannel(channel), (call) async {
             calls.add(call);
@@ -76,7 +80,11 @@ void main() {
   });
 
   tearDown(() async {
-    for (final channel in ['window_manager', 'tray_manager']) {
+    for (final channel in [
+      'window_manager',
+      'tray_manager',
+      'com.nailauncher/resource_window_native',
+    ]) {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(MethodChannel(channel), null);
     }
@@ -86,7 +94,11 @@ void main() {
 
   test('ordinary window close still hides to tray', () async {
     await AppWindowListener().onWindowClose();
-    expect(calls.map((call) => call.method), ['setPreventClose', 'hide']);
+    expect(calls.map((call) => call.method), [
+      'setPreventClose',
+      'closeAll',
+      'hide',
+    ]);
   });
 
   testWidgets('root quit action waits for cleanup, closes stores and exits', (

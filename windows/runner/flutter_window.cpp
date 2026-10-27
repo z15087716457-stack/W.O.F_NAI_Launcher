@@ -9,11 +9,15 @@
 #include <flutter/method_channel.h>
 #include <flutter/standard_method_codec.h>
 #include "flutter/generated_plugin_registrant.h"
+#include "desktop_multi_window/desktop_multi_window_plugin.h"
+#include "resource_window.h"
 #include "titlebar_region.h"
 #include "window_material.h"
 
 // Global set to store font names
 static std::set<std::wstring> g_font_names;
+// Callback is a C function pointer; keep the primary HWND on its platform thread.
+static HWND g_resource_window_owner = nullptr;
 
 // Font enumeration callback function
 int CALLBACK EnumFontFamExProc(
@@ -93,6 +97,12 @@ bool FlutterWindow::OnCreate() {
     return false;
   }
   RegisterPlugins(flutter_controller_->engine());
+  g_resource_window_owner = GetHandle();
+  RegisterResourceWindowHost(flutter_controller_->engine(), GetHandle());
+  DesktopMultiWindowSetWindowCreatedCallback([](void* controller) {
+    auto* child = reinterpret_cast<flutter::FlutterViewController*>(controller);
+    RegisterResourceWindowPlugins(child, g_resource_window_owner);
+  });
   clipboard_history_channel_ =
       std::make_unique<flutter::MethodChannel<flutter::EncodableValue>>(
           flutter_controller_->engine()->messenger(),
