@@ -64,7 +64,6 @@ List<InlineSpan> viewerPromptSpans(
       WeightTier.none => throw StateError('Neutral weight has no tint'),
     };
     final mark = TextStyle(
-      fontSize: 10.5,
       fontWeight: FontWeight.w500,
       color: ink.withValues(alpha: .85),
     );
