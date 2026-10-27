@@ -11555,5 +11555,8 @@
   "resourceWindow_hintView": "크게 보기",
   "resourceWindow_hintPrimary": "기본 작업",
   "resourceWindow_connected": "메인 창 연결됨",
-  "resourceWindow_disconnected": "메인 창 연결 끊김"
+  "resourceWindow_disconnected": "메인 창 연결 끊김",
+  "resourceWindow_currentModelUsable": "현재 모델에서 사용 가능",
+  "resourceWindow_insertPositive": "긍정 프롬프트에 삽입",
+  "resourceWindow_insertNegative": "부정 프롬프트에 삽입"
 }

@@ -12140,5 +12140,8 @@
   "resourceWindow_hintView": "看大圖",
   "resourceWindow_hintPrimary": "執行主操作",
   "resourceWindow_connected": "主視窗已連線",
-  "resourceWindow_disconnected": "主視窗未連線"
+  "resourceWindow_disconnected": "主視窗未連線",
+  "resourceWindow_currentModelUsable": "當前模型可用",
+  "resourceWindow_insertPositive": "插入正面",
+  "resourceWindow_insertNegative": "插入負面"
 }

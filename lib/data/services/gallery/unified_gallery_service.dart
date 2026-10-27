@@ -155,6 +155,7 @@ abstract class LocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   });
 
   /// Resolve only tracked library files, without changing the visible dataset.
@@ -413,7 +414,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
   /// 初始化（[_getAllImageFiles]）时所有条目都以 area: 0 入缓存。
   /// 仅当当前排序字段为 [GallerySortField.imageDimensions] 时才发起 DB 尺寸补齐；
   /// 查过 DB 但无尺寸（宽/高为空或 0）的文件标记为 [_sentinelArea] 哨兵，避免死循环补查。
-  Future<void> _ensureFileStats(List<File> files) async {
+  Future<void> _ensureFileStats(
+    List<File> files, {
+    GallerySort? querySort,
+  }) async {
     // 1. stat 只补完全缺失的条目（所有排序都依赖 modified/size 等基础属性）
     final missingStatFiles = files
         .where((file) => !_fileStats.containsKey(file.path))
@@ -438,7 +442,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     }
 
     // 2. 仅当按尺寸排序时才执行 DB 面积补齐；其他排序直接跳过
-    if (_sort.field != GallerySortField.imageDimensions) return;
+    if ((querySort ?? _sort).field != GallerySortField.imageDimensions) return;
 
     // 3. 面积过滤：仅查未补齐过的条目（entry.area == 0 表示尚未查过；_sentinelArea 表示已查过确认无尺寸）
     final needArea = files.where((file) {
@@ -988,6 +992,7 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   }) async {
     _ensureInitialized();
     if (offset < 0 || limit < 1 || limit > 100) {
@@ -1005,11 +1010,11 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
           f,
     ];
     final filter = GalleryFilterService(_dataSource);
-    filter.setSort(const GallerySort.modifiedAtDesc());
+    filter.setSort(sort);
     final result = await filter.applyFilters(files, criteria);
     final candidates = List<File>.of(result.files);
-    await _ensureFileStats(candidates);
-    const order = GallerySort.modifiedAtDesc();
+    await _ensureFileStats(candidates, querySort: sort);
+    final order = sort;
     candidates.sort((a, b) {
       final ka = _fileStats[a.path] ?? _missingSortStats;
       final kb = _fileStats[b.path] ?? _missingSortStats;
@@ -1020,6 +1025,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
         fileSizeB: kb.size,
         fileNameKeyA: _lowerBaseNameOf(a.path),
         fileNameKeyB: _lowerBaseNameOf(b.path),
+        createdAtA: ka.created,
+        createdAtB: kb.created,
+        imageAreaA: ka.area,
+        imageAreaB: kb.area,
       );
     });
     final batch = candidates.skip(offset).take(limit).toList();
@@ -2035,6 +2044,7 @@ class ErrorGalleryService implements LocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   }) => _throwError();
 
   @override
@@ -2147,6 +2157,7 @@ class _PlaceholderGalleryService implements LocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   }) => _throwNotInitialized();
 
   @override

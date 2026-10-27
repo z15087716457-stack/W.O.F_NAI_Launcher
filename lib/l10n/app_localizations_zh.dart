@@ -21595,6 +21595,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resourceWindow_disconnected => '主窗口未连接';
+
+  @override
+  String get resourceWindow_currentModelUsable => '当前模型可用';
+
+  @override
+  String get resourceWindow_insertPositive => '插入正面';
+
+  @override
+  String get resourceWindow_insertNegative => '插入负面';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43188,4 +43197,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get resourceWindow_disconnected => '主視窗未連線';
+
+  @override
+  String get resourceWindow_currentModelUsable => '當前模型可用';
+
+  @override
+  String get resourceWindow_insertPositive => '插入正面';
+
+  @override
+  String get resourceWindow_insertNegative => '插入負面';
 }

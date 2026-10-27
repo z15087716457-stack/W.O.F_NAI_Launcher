@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
 import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -130,6 +131,13 @@ void main() {
     container.dispose();
     await Hive.close();
     await directory.delete(recursive: true);
+  });
+  test('resource pin is projected into the prompt tools contract', () async {
+    expect(container.read(provider).prompt.tools.resourceWindowsPinned, false);
+    await container
+        .read(layoutStateNotifierProvider.notifier)
+        .setResourceWindowsPinned(true);
+    expect(container.read(provider).prompt.tools.resourceWindowsPinned, true);
   });
   test('整页绑定真实 provider 值而非假数据默认值', () {
     final params = container.read(generationParamsNotifierProvider.notifier);

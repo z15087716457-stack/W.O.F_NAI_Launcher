@@ -21,6 +21,7 @@ class LayoutState {
   final bool blockLibraryPanelExpanded;
   final double blockLibraryPanelWidth;
   final bool blockPaletteToolPinned;
+  final bool resourceWindowsPinned;
   final bool translationToolPinned;
   final bool naiAgentToolPinned;
   final bool blockLibraryPanelToolPinned;
@@ -43,6 +44,7 @@ class LayoutState {
     this.blockLibraryPanelExpanded = false,
     this.blockLibraryPanelWidth = 320.0,
     this.blockPaletteToolPinned = true,
+    this.resourceWindowsPinned = false,
     this.translationToolPinned = true,
     this.naiAgentToolPinned = true,
     this.blockLibraryPanelToolPinned = false,
@@ -65,6 +67,7 @@ class LayoutState {
     bool? blockLibraryPanelExpanded,
     double? blockLibraryPanelWidth,
     bool? blockPaletteToolPinned,
+    bool? resourceWindowsPinned,
     bool? translationToolPinned,
     bool? naiAgentToolPinned,
     bool? blockLibraryPanelToolPinned,
@@ -89,6 +92,8 @@ class LayoutState {
           blockLibraryPanelWidth ?? this.blockLibraryPanelWidth,
       blockPaletteToolPinned:
           blockPaletteToolPinned ?? this.blockPaletteToolPinned,
+      resourceWindowsPinned:
+          resourceWindowsPinned ?? this.resourceWindowsPinned,
       translationToolPinned:
           translationToolPinned ?? this.translationToolPinned,
       naiAgentToolPinned: naiAgentToolPinned ?? this.naiAgentToolPinned,
@@ -135,6 +140,12 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
       blockLibraryPanelExpanded: storage.getBlockLibraryPanelExpanded(),
       blockLibraryPanelWidth: storage.getBlockLibraryPanelWidth(),
       blockPaletteToolPinned: storage.getBlockPaletteToolPinned(),
+      resourceWindowsPinned:
+          storage.getSetting<bool>(
+            'resource_windows_pinned',
+            defaultValue: false,
+          ) ??
+          false,
       translationToolPinned: storage.getTranslationToolPinned(),
       naiAgentToolPinned: storage.getNaiAgentToolPinned(),
       blockLibraryPanelToolPinned: storage.getBlockLibraryPanelToolPinned(),
@@ -263,6 +274,13 @@ class LayoutStateNotifier extends _$LayoutStateNotifier {
   }
 
   /// 切换积木工具钮钉住状态
+  Future<void> setResourceWindowsPinned(bool pinned) async {
+    state = state.copyWith(resourceWindowsPinned: pinned);
+    await ref
+        .read(localStorageServiceProvider)
+        .setSetting('resource_windows_pinned', pinned);
+  }
+
   Future<void> toggleBlockPaletteToolPinned() async {
     await setBlockPaletteToolPinned(!state.blockPaletteToolPinned);
   }

@@ -111,6 +111,7 @@ class FakeLocalGalleryService implements LocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   }) async {
     final items = _records
         .where(

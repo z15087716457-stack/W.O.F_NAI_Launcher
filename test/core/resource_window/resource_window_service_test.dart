@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:nai_launcher/core/services/resource_window_protocol.dart';
@@ -16,8 +17,9 @@ void main() {
   const windows = MethodChannel('mixin.one/desktop_multi_window');
   const channels = MethodChannel('mixin.one/desktop_multi_window/channels');
   const native = MethodChannel('com.nailauncher/resource_window_native');
-  final service = ResourceWindowService();
+  late ResourceWindowService service;
   final calls = <MethodCall>[];
+  var created = 0;
 
   Future<Object?> incoming(
     String channel,
@@ -43,9 +45,14 @@ void main() {
 
   setUp(() {
     calls.clear();
+    created = 0;
+    service = ResourceWindowService();
     messenger.setMockMethodCallHandler(windows, (call) async {
       calls.add(call);
-      if (call.method == 'createWindow') return 'child-id';
+      if (call.method == 'createWindow') {
+        created++;
+        return created == 1 ? 'child-id' : 'child-$created';
+      }
       if (call.method == 'getWindowDefinition') {
         return {'windowId': 'child-id', 'windowArgument': ''};
       }
@@ -53,7 +60,22 @@ void main() {
     });
     messenger.setMockMethodCallHandler(channels, (call) async {
       calls.add(call);
-      if (call.method == 'invokeMethod') return {'version': 1};
+      if (call.method == 'invokeMethod') {
+        final args = call.arguments as Map;
+        if (args['method'] == 'ready') return {'version': 1};
+        if (args['method'] == 'resources.query') {
+          final request = args['arguments'] as Map;
+          return {
+            'requestId': request['requestId'],
+            'revision': 0,
+            'total': 0,
+            'hasMore': false,
+            'items': [],
+            'layout': 'grid',
+            'cellSize': 132,
+          };
+        }
+      }
       return null;
     });
     messenger.setMockMethodCallHandler(native, (call) async {
@@ -63,7 +85,7 @@ void main() {
   });
 
   tearDown(() async {
-    await ResourceWindowService.hostChannel.setMethodCallHandler(null);
+    await service.dispose();
     for (final channel in [
       windows,
       channels,
@@ -89,7 +111,7 @@ void main() {
   );
 
   test(
-    'host uses one unidirectional handler and rejects unimplemented data methods',
+    'host uses one unidirectional handler and reports not_ready before data attachment',
     () async {
       await service.initialize();
       expect(calls.single.arguments, {
@@ -104,19 +126,84 @@ void main() {
         }),
         {'version': 1},
       );
-      // MissingPluginException is encoded as a null platform response.
-      final reply = Completer<ByteData?>();
-      await messenger.handlePlatformMessage(
-        channels.name,
-        const StandardMethodCodec().encodeMethodCall(
-          MethodCall('methodCall', {
-            'channel': ResourceWindowService.hostChannel.name,
-            'method': 'query',
-          }),
+      await expectLater(
+        incoming(channels.name, 'methodCall', {
+          'channel': ResourceWindowService.hostChannel.name,
+          'method': 'resources.query',
+          'arguments': {},
+        }),
+        throwsA(
+          isA<PlatformException>().having((e) => e.code, 'code', 'not_ready'),
         ),
-        reply.complete,
       );
-      expect(await reply.future, isNull);
+    },
+  );
+
+  test(
+    'registry focuses an existing kind, explicit new opens another and changes push revisions',
+    () async {
+      const arguments = ResourceWindowArguments(
+        kind: FloatingResourceKind.blocks,
+      );
+      final a = await service.open(arguments);
+      final waiting = service.open(arguments);
+      await service.handle(
+        const MethodCall('ready', {'windowId': 'child-id', 'kind': 'blocks'}),
+      );
+      expect((await waiting).windowId, a.windowId);
+      expect(calls.where((c) => c.method == 'createWindow'), hasLength(1));
+      await service.open(arguments, newWindow: true);
+      expect(service.windows, hasLength(2));
+      await service.changed(FloatingResourceKind.blocks);
+      final pushed = calls.where(
+        (c) =>
+            c.method == 'invokeMethod' &&
+            (c.arguments as Map)['method'] == 'resources.changed',
+      );
+      expect(pushed, hasLength(2));
+      expect(
+        ((pushed.first.arguments as Map)['arguments'] as Map)['revision'],
+        1,
+      );
+      await service.handle(
+        const MethodCall('resources.kind', {
+          'windowId': 'child-id',
+          'kind': 'vibe',
+        }),
+      );
+      expect(service.windows['child-id'], FloatingResourceKind.vibe);
+      await service.handle(
+        const MethodCall('resources.closed', {'windowId': 'child-id'}),
+      );
+      expect(service.windows, hasLength(1));
+      await service.closeAll();
+      expect(service.windows, isEmpty);
+    },
+  );
+
+  test(
+    'closeAll waits for in-flight creation without waiting for child ready',
+    () async {
+      final created = Completer<String>();
+      final started = Completer<void>();
+      messenger.setMockMethodCallHandler(windows, (call) async {
+        if (call.method == 'createWindow') {
+          started.complete();
+          return created.future;
+        }
+        return null;
+      });
+      final opening = service.open(
+        const ResourceWindowArguments(kind: FloatingResourceKind.blocks),
+      );
+      await started.future;
+      final closing = service.closeAll();
+      expect(calls.where((c) => c.method == 'closeAll'), isEmpty);
+      created.complete('pending');
+      await opening;
+      await closing;
+      expect(calls.last.method, 'closeAll');
+      expect(service.windows, isEmpty);
     },
   );
 
@@ -160,7 +247,7 @@ void main() {
     },
   );
 
-  testWidgets('child entry initializes only its channels and placeholder', (
+  testWidgets('child entry initializes channels and real page without stores', (
     tester,
   ) async {
     final controller = WindowController.fromWindowId('child-id');
@@ -169,7 +256,7 @@ void main() {
       const ResourceWindowArguments(kind: FloatingResourceKind.blocks),
     );
     await tester.pumpAndSettle();
-    expect(find.byType(ResourceWindowPlaceholder), findsOneWidget);
+    expect(find.byType(ResourceWindowApp), findsOneWidget);
     expect(
       calls.map((c) => c.method),
       containsAllInOrder([
@@ -179,7 +266,11 @@ void main() {
         'window_show',
       ]),
     );
-    final ready = calls.singleWhere((call) => call.method == 'invokeMethod');
+    final ready = calls.singleWhere(
+      (call) =>
+          call.method == 'invokeMethod' &&
+          (call.arguments as Map)['method'] == 'ready',
+    );
     expect((ready.arguments as Map)['method'], 'ready');
     expect((ready.arguments as Map)['arguments'], {
       'windowId': 'child-id',
@@ -199,6 +290,7 @@ void main() {
       'close',
       'setAlwaysOnTop',
     ]);
+    await tester.pumpWidget(const SizedBox.shrink());
     await controller.setWindowMethodHandler(null);
   });
 }

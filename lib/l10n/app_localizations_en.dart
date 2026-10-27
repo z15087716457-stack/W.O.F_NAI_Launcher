@@ -22610,4 +22610,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resourceWindow_disconnected => 'Main window disconnected';
+
+  @override
+  String get resourceWindow_currentModelUsable =>
+      'Currently usable with this model';
+
+  @override
+  String get resourceWindow_insertPositive => 'Insert into positive prompt';
+
+  @override
+  String get resourceWindow_insertNegative => 'Insert into negative prompt';
 }

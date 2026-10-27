@@ -11555,5 +11555,8 @@
   "resourceWindow_hintView": "拡大表示",
   "resourceWindow_hintPrimary": "メイン操作",
   "resourceWindow_connected": "メインウィンドウに接続済み",
-  "resourceWindow_disconnected": "メインウィンドウ未接続"
+  "resourceWindow_disconnected": "メインウィンドウ未接続",
+  "resourceWindow_currentModelUsable": "現在のモデルで使用可能",
+  "resourceWindow_insertPositive": "正のプロンプトに挿入",
+  "resourceWindow_insertNegative": "負のプロンプトに挿入"
 }

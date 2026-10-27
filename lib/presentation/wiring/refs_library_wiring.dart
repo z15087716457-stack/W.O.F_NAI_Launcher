@@ -38,6 +38,8 @@ import 'refs_import_session.dart';
 import 'refs_mapping.dart';
 import 'refs_platform.dart';
 import 'refs_preferences.dart';
+import 'resource_window_wiring.dart';
+import '../ui/kit/ui_resource_kind.dart';
 
 final refsVibeStatusesProvider =
     FutureProvider.autoDispose<Map<String, RefsVibeStatus>>((ref) async {
@@ -1076,6 +1078,21 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
       importDraft: _import?.draft,
       reducedMotion: ref.watch(canvasReducedMotionNotifierProvider),
     );
+    final request = ref.watch(resourceRefsEditRequestProvider);
+    if (request != null &&
+        (request.kind == FloatingResourceKind.vibe) == _vibe) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || ref.read(resourceRefsEditRequestProvider) != request) {
+          return;
+        }
+        ref.read(resourceRefsEditRequestProvider.notifier).state = null;
+        setState(() {
+          _inspectorOpen = true;
+          _filter = const RefsFilter();
+        });
+        unawaited(_select(request.id));
+      });
+    }
     final page = RefsLibraryPage(
       key: _page,
       data: data(filterRefsEntries(all, _filter)),

@@ -1,6 +1,7 @@
 import 'package:nai_launcher/presentation/router/app_router.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:async';
+import 'package:nai_launcher/presentation/wiring/resource_window_wiring.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_sheets.dart';
 import 'dart:io';
 import 'package:nai_launcher/presentation/providers/prompt_translation_provider.dart';
@@ -82,6 +83,7 @@ void main() {
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
+        nativeResourceWindowsProvider.overrideWithValue(false),
         imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
         tipEpochProvider.overrideWith((ref) => Stream.value(0)),
@@ -176,29 +178,28 @@ void main() {
     return target.negative ? params.negativePrompt : params.prompt;
   }
 
-  testWidgets(
-    'prompt tools menu opens each resource window kind',
-    (tester) async {
-      await pump(tester);
-      final header = tester.widget<GenHeader>(find.byType(GenHeader).first);
-      expect(header.onOpenResourceWindow, isNotNull);
-      for (final kind in FloatingResourceKind.values) {
-        await tester.tap(find.byKey(const Key('gen-tool-menu')).first);
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('gen-resource-windows')));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(Key('gen-resource-${kind.name}')));
-        await tester.pumpAndSettle();
-      }
-      expect(
-        container
-            .read(floatingResourceWindowsProvider)
-            .map((window) => window.kind),
-        FloatingResourceKind.values,
-      );
-      await tester.pumpWidget(const SizedBox());
-    },
-  );
+  testWidgets('prompt tools menu opens each resource window kind', (
+    tester,
+  ) async {
+    await pump(tester);
+    final header = tester.widget<GenHeader>(find.byType(GenHeader).first);
+    expect(header.onOpenResourceWindow, isNotNull);
+    for (final kind in FloatingResourceKind.values) {
+      await tester.tap(find.byKey(const Key('gen-tool-menu')).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('gen-resource-windows')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Key('gen-resource-${kind.name}')));
+      await tester.pumpAndSettle();
+    }
+    expect(
+      container
+          .read(floatingResourceWindowsProvider)
+          .map((window) => window.kind),
+      FloatingResourceKind.values,
+    );
+    await tester.pumpWidget(const SizedBox());
+  });
 
   testWidgets(
     'placing img2img source preserves bytes, reuses tile and focuses it',

@@ -201,6 +201,8 @@ class GenerationSettings {
   Future<void> promptTool(GenPromptTool tool, bool value) async {
     final layout = ref.read(layoutStateNotifierProvider.notifier);
     switch (tool) {
+      case GenPromptTool.resourceWindowsPinned:
+        await layout.setResourceWindowsPinned(value);
       case GenPromptTool.palettePinned:
         await layout.setBlockPaletteToolPinned(value);
       case GenPromptTool.dockPinned:

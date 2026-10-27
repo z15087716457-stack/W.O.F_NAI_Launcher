@@ -90,7 +90,10 @@ class BlocksActions {
   final bool Function() alive;
   BlocksLibraryBackend get backend => ref.read(blocksLibraryBackendProvider);
 
-  Future<T?> run<T>(Future<T> Function() operation) async {
+  Future<T?> run<T>(
+    Future<T> Function() operation, {
+    bool propagate = false,
+  }) async {
     try {
       if ((!alive() || !context.mounted)) return null;
       return await operation();
@@ -101,6 +104,7 @@ class BlocksActions {
           context.l10n.promptBlockLibrary_importFailed('$error'),
         );
       }
+      if (propagate) rethrow;
       return null;
     }
   }
@@ -113,6 +117,8 @@ class BlocksActions {
   Future<void> insert(
     List<String> ids, {
     String fallbackScope = PillScopes.main,
+    String? targetScope,
+    bool propagateErrors = false,
     ({String scope, int caret})? at,
     ValueChanged<int>? onInserted,
   }) async {
@@ -131,8 +137,12 @@ class BlocksActions {
       if (blocks.isEmpty) return;
       final committed = await guard.commit(
         () {
-          final target = at ?? ref.read(pillActiveEditorTargetProvider);
-          final scope = target?.scope ?? fallbackScope;
+          final target =
+              at ??
+              (targetScope == null
+                  ? ref.read(pillActiveEditorTargetProvider)
+                  : null);
+          final scope = target?.scope ?? targetScope ?? fallbackScope;
           final params = ref.read(generationParamsNotifierProvider);
           void seed(String laneScope, String text) {
             final lane = pillWorkspaceProvider(laneScope);
@@ -199,7 +209,7 @@ class BlocksActions {
           AppToast.success(context, context.l10n.blocks_insertToPrompt);
         }
       }
-    });
+    }, propagate: propagateErrors);
   }
 
   Future<void> applyParams(String id) async {

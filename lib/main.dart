@@ -193,7 +193,7 @@ class AppWindowListener extends WindowListener {
     try {
       // 阻止窗口关闭
       await windowManager.setPreventClose(true);
-      await ResourceWindowService().closeAll();
+      await ResourceWindowService.instance.closeAll();
       await windowManager.hide();
       AppLogger.d('Window hidden to tray', 'WindowListener');
     } catch (e) {
@@ -335,7 +335,7 @@ Future<void> _bootstrapApplication() async {
 
 Future<void> _bootstrapMainWindow() async {
   if (Platform.isWindows) {
-    final resources = ResourceWindowService();
+    final resources = ResourceWindowService.instance;
     await resources.initialize();
     DesktopAppShutdownService.registerCleanup(resources.closeAll);
   }

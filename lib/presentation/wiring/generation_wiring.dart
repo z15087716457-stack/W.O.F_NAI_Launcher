@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../providers/floating_resource_windows_provider.dart';
+import 'resource_window_wiring.dart';
 
 import 'nai_agent_generation_host.dart';
 import 'package:flutter/material.dart';
@@ -332,7 +332,7 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
             run(() => settings.promptTool(tool, value)),
         onOpenPalette: (rect) => run(() => operations.openPalette(rect)),
         onOpenResourceWindow: (kind) =>
-            ref.read(floatingResourceWindowsProvider.notifier).open(kind),
+            run(() => ref.read(resourceWindowOpenerProvider).open(kind)),
         onTranslate: () => run(() async {
           await ref
               .read(promptTranslationCoordinatorProvider)

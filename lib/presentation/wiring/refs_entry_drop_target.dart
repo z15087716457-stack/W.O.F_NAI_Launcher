@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
+import '../../core/utils/resource_window_drag.dart';
 
 import '../../core/constants/model_spec.dart';
 import '../../core/utils/localization_extension.dart';
@@ -18,13 +20,12 @@ class RefsEntryDropActions {
   RefsEntryDropActions(this.ref);
   final Ref ref;
 
+  bool supports(RefsKind kind) {
+    final spec = ModelSpecs.of(ref.read(generationParamsNotifierProvider).model);
+    return kind == RefsKind.vibe ? spec.vibetransfer : spec.characterReferences;
+  }
   bool accepts(RefsKind kind, RefsEntryDragData data) {
-    final spec = ModelSpecs.of(
-      ref.read(generationParamsNotifierProvider).model,
-    );
-    return data.kind == kind &&
-        data.keys.isNotEmpty &&
-        (kind == RefsKind.vibe ? spec.vibetransfer : spec.characterReferences);
+    return data.kind == kind && data.keys.isNotEmpty && supports(kind);
   }
 
   Future<RefsSendResult> drop(
@@ -87,22 +88,60 @@ class _RefsEntryDropTargetState extends ConsumerState<RefsEntryDropTarget> {
   }
 
   @override
-  Widget build(BuildContext context) => DragTarget<RefsEntryDragData>(
+  Widget build(BuildContext context) => DropRegion(
+    formats: [
+      ResourceWindowDrag.formatFor(
+        widget.kind == RefsKind.vibe
+            ? ResourceDragKind.vibe
+            : ResourceDragKind.precise,
+      ),
+    ],
     hitTestBehavior: HitTestBehavior.translucent,
-    onWillAcceptWithDetails: (details) {
-      final accepted =
-          !_busy &&
-          ref
+    onDropOver: (event) {
+      if (_busy ||
+          !ref
               .read(refsEntryDropActionsProvider)
-              .accepts(widget.kind, details.data);
-      widget.onHover?.call(accepted);
-      return accepted;
+              .supports(widget.kind)) {
+        return DropOperation.none;
+      }
+      return ResourceWindowDrag.operation(
+        event.session,
+        widget.kind == RefsKind.vibe
+            ? ResourceDragKind.vibe
+            : ResourceDragKind.precise,
+      );
     },
-    onLeave: (_) => widget.onHover?.call(false),
-    onAcceptWithDetails: (details) {
-      widget.onHover?.call(false);
-      unawaited(_drop(details.data));
+    onPerformDrop: (event) async {
+      ResourceWindowDrag.receive(
+        event,
+        kind: widget.kind == RefsKind.vibe
+            ? ResourceDragKind.vibe
+            : ResourceDragKind.precise,
+        onReference: (reference) => unawaited(
+          _drop(RefsEntryDragData(kind: widget.kind, keys: [reference.id])),
+        ),
+        onError: (error) {
+          if (mounted) AppToast.error(context, '$error');
+        },
+      );
     },
-    builder: (_, __, ___) => widget.child,
+    child: DragTarget<RefsEntryDragData>(
+      hitTestBehavior: HitTestBehavior.translucent,
+      onWillAcceptWithDetails: (details) {
+        final accepted =
+            !_busy &&
+            ref
+                .read(refsEntryDropActionsProvider)
+                .accepts(widget.kind, details.data);
+        widget.onHover?.call(accepted);
+        return accepted;
+      },
+      onLeave: (_) => widget.onHover?.call(false),
+      onAcceptWithDetails: (details) {
+        widget.onHover?.call(false);
+        unawaited(_drop(details.data));
+      },
+      builder: (_, __, ___) => widget.child,
+    ),
   );
 }

@@ -85,6 +85,43 @@ void main() {
       }
     });
 
+    test(
+      'resource queries honor independent sort and pagination without changing visible dataset',
+      () async {
+        final first = await service.queryRecords(
+          const FilterCriteria(),
+          limit: 2,
+          sort: const GallerySort(
+            field: GallerySortField.fileName,
+            direction: GallerySortDirection.ascending,
+          ),
+        );
+        final next = await service.queryRecords(
+          const FilterCriteria(),
+          offset: 2,
+          limit: 2,
+          sort: const GallerySort(
+            field: GallerySortField.fileName,
+            direction: GallerySortDirection.ascending,
+          ),
+        );
+        expect(first.records.map((r) => p.basename(r.path)), [
+          'a.png',
+          'b.png',
+        ]);
+        expect(next.records.map((r) => p.basename(r.path)), ['c.png']);
+        expect(first.totalCount, 3);
+        expect(first.nextOffset, 2);
+        expect(
+          (await service.getPage(
+            0,
+            pageSize: 10,
+          )).map((r) => p.basename(r.path)),
+          ['a.png', 'c.png', 'b.png'],
+        );
+      },
+    );
+
     test('default order is modifiedAt descending (newest first)', () async {
       final records = await service.getPage(0, pageSize: 10);
 

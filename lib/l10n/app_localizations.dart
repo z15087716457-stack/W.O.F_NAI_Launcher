@@ -39291,6 +39291,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Main window disconnected'**
   String get resourceWindow_disconnected;
+
+  /// No description provided for @resourceWindow_currentModelUsable.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently usable with this model'**
+  String get resourceWindow_currentModelUsable;
+
+  /// No description provided for @resourceWindow_insertPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into positive prompt'**
+  String get resourceWindow_insertPositive;
+
+  /// No description provided for @resourceWindow_insertNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into negative prompt'**
+  String get resourceWindow_insertNegative;
 }
 
 class _AppLocalizationsDelegate

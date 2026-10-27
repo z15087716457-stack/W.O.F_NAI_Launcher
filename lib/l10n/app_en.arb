@@ -11567,5 +11567,8 @@
   "resourceWindow_hintView": "view large",
   "resourceWindow_hintPrimary": "primary action",
   "resourceWindow_connected": "Connected to main window",
-  "resourceWindow_disconnected": "Main window disconnected"
+  "resourceWindow_disconnected": "Main window disconnected",
+  "resourceWindow_currentModelUsable": "Currently usable with this model",
+  "resourceWindow_insertPositive": "Insert into positive prompt",
+  "resourceWindow_insertNegative": "Insert into negative prompt"
 }

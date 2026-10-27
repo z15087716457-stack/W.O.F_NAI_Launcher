@@ -261,6 +261,7 @@ class GenPreviewSection with _GenValue {
 class GenPromptTools with _GenValue {
   const GenPromptTools({
     this.palettePinned = false,
+    this.resourceWindowsPinned = false,
     this.dockPinned = true,
     this.translatePinned = true,
     this.agentPinned = true,
@@ -272,6 +273,7 @@ class GenPromptTools with _GenValue {
 
   /// 积木板按钮钉在头部。
   final bool palettePinned;
+  final bool resourceWindowsPinned;
 
   /// 块库侧栏按钮钉在头部。
   final bool dockPinned;
@@ -296,6 +298,7 @@ class GenPromptTools with _GenValue {
   @override
   List<Object?> get _values => [
     palettePinned,
+    resourceWindowsPinned,
     dockPinned,
     translatePinned,
     agentPinned,
@@ -308,6 +311,7 @@ class GenPromptTools with _GenValue {
 
 enum GenPromptTool {
   palettePinned,
+  resourceWindowsPinned,
   dockPinned,
   translatePinned,
   agentPinned,

@@ -36,6 +36,7 @@ import 'presentation/wiring/clipboard_history_paste.dart';
 import 'presentation/wiring/floating_resource_window.dart';
 import 'presentation/wiring/floating_resource_windows_host.dart';
 import 'presentation/providers/floating_resource_windows_provider.dart';
+import 'presentation/wiring/resource_window_wiring.dart';
 
 double windowCaptionHeightForRoute(String path) => switch (path) {
   AppRoutes.localGallery => 62,
@@ -169,9 +170,11 @@ class NAILauncherApp extends ConsumerWidget {
       },
 
       ShortcutIds.openResourceWindow: () {
-        ref
-            .read(floatingResourceWindowsProvider.notifier)
-            .open(FloatingResourceKind.gallery);
+        unawaited(
+          ref
+              .read(resourceWindowOpenerProvider)
+              .open(FloatingResourceKind.gallery),
+        );
       },
 
       // 全局应用快捷键
@@ -234,7 +237,9 @@ class NAILauncherApp extends ConsumerWidget {
                         child: NewBadgeScope(
                           child: FloatingResourceWindowsHost(
                             builder: floatingResourceWindowBuilder,
-                            child: child ?? const SizedBox.shrink(),
+                            child: ResourceWindowBridge(
+                              child: child ?? const SizedBox.shrink(),
+                            ),
                           ),
                         ),
                       ),

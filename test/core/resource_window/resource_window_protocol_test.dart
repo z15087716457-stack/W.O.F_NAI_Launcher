@@ -41,6 +41,32 @@ void main() {
   }
 
   test(
+    'launch preserves appearance, custom font and monitor logical layout',
+    () {
+      const args = ResourceWindowArguments(
+        kind: FloatingResourceKind.gallery,
+        brightness: 'light',
+        locale: 'zh-TW',
+        fontKey: 'system:Arial',
+        rect: {
+          'left': -800.0,
+          'top': 10.0,
+          'width': 1040.0,
+          'height': 680.0,
+          'dpiScale': 1.5,
+        },
+        alwaysOnTop: true,
+      );
+      final decoded = ResourceWindowArguments.parse(args.encode())!;
+      expect(decoded.brightness, 'light');
+      expect(decoded.locale, 'zh-TW');
+      expect(decoded.fontKey, 'system:Arial');
+      expect(decoded.rect, args.rect);
+      expect(decoded.alwaysOnTop, true);
+    },
+  );
+
+  test(
     'unknown or invalid launches never fall back to main data preparation',
     () async {
       for (final arguments in [
