@@ -9,6 +9,7 @@ import '../../data/models/resources/floating_window_data.dart';
 /// boundary must be StandardMethodCodec values, never library/provider objects.
 abstract class ResourceWindowBackend {
   Future<Map<String, Object?>> query(ResourceQuery request);
+  Future<Map<String, int>> counts() async => {};
   Future<Uint8List?> thumbnail(
     FloatingResourceKind kind,
     String id,
@@ -61,6 +62,7 @@ class ResourceQuery {
       groupId = values['groupId'] as String?,
       query = values['query'] as String? ?? '',
       sortId = values['sortId'] as String?,
+      descending = values['descending'] as bool?,
       chips = _chips(values['chips']) {
     if (requestId < 0 || offset < 0 || limit < 1 || limit > 60) {
       resourceError('invalid_arguments', 'pagination');
@@ -70,6 +72,7 @@ class ResourceQuery {
   final FloatingResourceKind kind;
   final int requestId, offset, limit;
   final String? groupId, sortId;
+  final bool? descending;
   final String query;
   final Set<String> chips;
 
@@ -136,6 +139,8 @@ class ResourceWindowHost {
         };
       }
       switch (call.method) {
+        case 'resources.counts':
+          return await source.counts();
         case 'resources.layout':
           await source.layout(resourceString(args, 'windowId'), args);
           return null;
@@ -153,14 +158,13 @@ class ResourceWindowHost {
           };
         case 'resources.thumbnail':
           final kind = resourceKind(args);
-          final revision = ResourceQuery._int(args, 'revision');
-          if (revision != revisions[kind]) resourceError('cancelled');
+          // Thumbnail identity is per item, independent of query revisions.
+          final revision = revisions[kind]!;
           final bytes = await source.thumbnail(
             kind,
             resourceString(args, 'id'),
             revision,
           );
-          if (revision != revisions[kind]) resourceError('cancelled');
           return bytes;
         case 'resources.detail':
           return await source.detail(
@@ -192,7 +196,7 @@ class ResourceWindowHost {
     } on PlatformException {
       rethrow;
     } catch (error) {
-      resourceError('not_ready', error.toString());
+      resourceError('failed', error.toString());
     }
   }
 }

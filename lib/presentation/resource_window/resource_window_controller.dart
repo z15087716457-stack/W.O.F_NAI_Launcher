@@ -46,6 +46,13 @@ class ResourceWindowController extends ChangeNotifier {
   final _chips = <String>{};
   final _items = <Map<String, Object?>>[];
   Map<String, Object?> _page = {};
+  Map<FloatingResourceKind, int> _counts = {};
+  bool? _descending;
+  bool _sortPending = false;
+  bool _maximized = false, _loadingMore = false;
+  ResourceNotice? _notice;
+  int _noticeId = 0;
+  static const native = MethodChannel('com.nailauncher/resource_window_native');
   ResourceDetail? _detail;
   ResourceLayout _layout = ResourceLayout.grid;
   double _cellSize = 132;
@@ -72,14 +79,13 @@ class ResourceWindowController extends ChangeNotifier {
       return result;
     } on Object catch (error) {
       if (error is MissingPluginException ||
-          (error is WindowChannelException || error is PlatformException) &&
-              !const [
-                'not_ready',
-                'not_found',
-                'invalid_arguments',
-                'unsupported_version',
-                'cancelled',
-              ].contains(_code(error))) {
+          const [
+            'CHANNEL_NOT_FOUND',
+            'CHANNEL_UNREGISTERED',
+            'CHANNEL_CLOSED',
+            'channel-error',
+            'disconnected',
+          ].contains(_code(error))) {
         _connected = false;
         _changed();
       }
@@ -87,61 +93,116 @@ class ResourceWindowController extends ChangeNotifier {
     }
   }
 
-  Future<void> _run(Future<void> Function() operation) async {
+  Future<void> _run(
+    Future<void> Function() operation, {
+    bool query = false,
+  }) async {
     try {
       await operation();
     } catch (error) {
       if (!_disposed && _code(error) != 'cancelled') {
-        _error = '$error';
+        if (query) {
+          _error = '$error';
+          _changed();
+          return;
+        }
+        final raw = _code(error);
+        final message = switch (error) {
+          PlatformException() => error.message,
+          WindowChannelException() => error.message,
+          _ => error.toString(),
+        };
+        final capability =
+            raw == 'invalid_arguments' &&
+            RegExp(
+              'not support|does not use|unsupported',
+              caseSensitive: false,
+            ).hasMatch(message ?? '');
+        _notice = ResourceNotice(
+          id: ++_noticeId,
+          code: !_connected
+              ? 'disconnected'
+              : capability
+              ? 'unsupported'
+              : const ['not_found', 'not_ready', 'unsupported'].contains(raw)
+              ? raw!
+              : 'failed',
+          message: message,
+        );
         _changed();
       }
     }
   }
 
   Future<void> initialize() => refresh();
-  Future<void> refresh({bool more = false}) async {
+  Future<void> refresh({bool more = false, int? retain}) async {
     if (_disposed || more && (_loading || _page['hasMore'] != true)) return;
     final epoch = _epoch;
-    final id = ++_requestId;
-    final offset = more ? _items.length : 0;
+    var id = _requestId;
+    final collected = <Map<String, Object?>>[];
+    var offset = more ? _items.length : 0;
+    final target = retain == null || retain < 60 ? 60 : retain;
     _loading = true;
+    _loadingMore = more;
     _error = null;
     _changed();
     try {
-      final result = resourceMap(
-        await call('resources.query', {
-          'windowId': windowId,
-          'requestId': id,
-          'kind': _kind.name,
-          'groupId': _group,
-          'query': _query,
-          'chips': _chips.toList(),
-          'sortId': _sort,
-          'offset': offset,
-          'limit': 60,
-        }),
-      );
-      if (_disposed ||
-          epoch != _epoch ||
-          id != _requestId ||
-          result['requestId'] != id) {
-        return;
-      }
-      final revision = result['revision'] as int;
-      if (more && revision != _revision) {
-        await refresh();
-        return;
-      }
-      _revision = revision;
-      final items = (result['items'] as List).map(resourceMap).toList();
+      late Map<String, Object?> result;
+      int? snapshot;
+      do {
+        id = ++_requestId;
+        result = resourceMap(
+          await call('resources.query', {
+            'windowId': windowId,
+            'requestId': id,
+            'kind': _kind.name,
+            'groupId': _group,
+            'query': _query,
+            'chips': _chips.toList(),
+            'sortId': _sortPending ? _sort : null,
+            'descending': _sortPending ? _descending : null,
+            'offset': offset,
+            'limit': more || retain == null
+                ? 60
+                : (target - offset).clamp(1, 60),
+          }),
+        );
+        if (_disposed ||
+            epoch != _epoch ||
+            id != _requestId ||
+            result['requestId'] != id) {
+          return;
+        }
+        final revision = result['revision'] as int;
+        if ((more && revision != _revision) ||
+            (snapshot != null && snapshot != revision)) {
+          await refresh(retain: _items.length);
+          return;
+        }
+        snapshot = revision;
+        final items = (result['items'] as List).map(resourceMap).toList();
+        collected.addAll(items);
+        offset += items.length;
+        if (more ||
+            retain == null ||
+            items.isEmpty ||
+            result['hasMore'] != true) {
+          break;
+        }
+      } while (offset < target);
+      _revision = snapshot;
       _page = result;
+      _updateCounts(result['counts']);
       if (!more) _items.clear();
       final ids = _items.map((i) => i['id']).toSet();
-      _items.addAll(items.where((i) => ids.add(i['id'])));
+      _items.addAll(collected.where((i) => ids.add(i['id'])));
       _sort = result['sortId'] as String?;
+      _descending = result['descending'] as bool? ?? true;
+      _sortPending = false;
       _layout = ResourceLayout.values.byName(result['layout'] as String);
       _cellSize = (result['cellSize'] as num).toDouble();
       if (_selected != null && !_items.any((i) => i['id'] == _selected)) {
+        _selectionEpoch++;
         _selected = null;
         _detail = null;
       }
@@ -155,6 +216,7 @@ class ResourceWindowController extends ChangeNotifier {
     } finally {
       if (!_disposed && epoch == _epoch && id == _requestId) {
         _loading = false;
+        _loadingMore = false;
         _changed();
       }
     }
@@ -168,6 +230,8 @@ class ResourceWindowController extends ChangeNotifier {
     _items.clear();
     _page = {};
     _loading = false;
+    _sortPending = false;
+    _loadingMore = false;
     _exportUris.clear();
     _exportsPending.clear();
     _debounce?.cancel();
@@ -180,6 +244,7 @@ class ResourceWindowController extends ChangeNotifier {
     _group = 'all';
     _query = '';
     _sort = null;
+    _descending = null;
     _chips.clear();
     unawaited(
       _run(() async {
@@ -230,7 +295,34 @@ class ResourceWindowController extends ChangeNotifier {
   void sort(String value) {
     _reset();
     _sort = value;
+    _descending = null;
+    _sortPending = true;
     unawaited(refresh());
+  }
+
+  void sortDirection(bool value) {
+    _reset();
+    _descending = value;
+    _sortPending = true;
+    unawaited(refresh());
+  }
+
+  void maximized(bool value) {
+    _maximized = value;
+    _changed();
+  }
+
+  Future<void> nativeCommand(String method) => _run(() async {
+    final result = await native.invokeMethod<Object?>(method);
+    if (result is bool) maximized(result);
+  });
+
+  void _updateCounts(Object? value) {
+    if (value == null) return;
+    _counts = {
+      for (final e in resourceMap(value).entries)
+        FloatingResourceKind.values.byName(e.key): e.value as int,
+    };
   }
 
   Future<void> select(String id) async {
@@ -266,7 +358,7 @@ class ResourceWindowController extends ChangeNotifier {
         ],
       );
       _changed();
-    });
+    }, query: true);
   }
 
   Future<void> preferences({ResourceLayout? layout, double? size}) =>
@@ -292,7 +384,7 @@ class ResourceWindowController extends ChangeNotifier {
           if (action != null) 'actionId': action,
         });
         if (!_disposed && kind == _kind && method == 'resources.favorite') {
-          await refresh();
+          await refresh(retain: _items.length);
           if (_selected == id) await select(id);
         }
       });
@@ -320,6 +412,12 @@ class ResourceWindowController extends ChangeNotifier {
     );
   }
 
+  void viewChanged(Map<String, Object?> args) {
+    if (args['kind'] != _kind.name) return;
+    _layout = ResourceLayout.values.byName(args['layout'] as String);
+    _changed();
+  }
+
   void disconnected() {
     _connected = false;
     _changed();
@@ -328,17 +426,28 @@ class ResourceWindowController extends ChangeNotifier {
   void changed(Map<String, Object?> args) {
     if (args['kind'] == _kind.name) {
       final selected = _selected;
+      final retain = _items.length;
+      final resumeMore = _loadingMore;
       _exportUris.clear();
       _exportsPending.clear();
       _epoch++;
       unawaited(
         _run(() async {
-          await refresh();
+          final epoch = _epoch;
+          await refresh(retain: retain);
+          if (_disposed || epoch != _epoch) return;
+          if (resumeMore && _error == null) await refresh(more: true);
+          if (_disposed || epoch != _epoch) return;
           if (selected != null && _selected == selected) await select(selected);
         }),
       );
     } else {
-      unawaited(refresh());
+      unawaited(
+        _run(() async {
+          _updateCounts(await call('resources.counts', {}));
+          _changed();
+        }, query: true),
+      );
     }
   }
 
@@ -399,6 +508,26 @@ class ResourceWindowController extends ChangeNotifier {
     onQuery: query,
     onChip: chip,
     onSort: sort,
+    onSortDirection: sortDirection,
+    onDragRegion: (height, exclusions) => unawaited(
+      _run(() async {
+        await native.invokeMethod<void>('setDragRegion', {
+          'height': height,
+          'exclusions': [
+            for (final rect in exclusions)
+              {
+                'left': rect.left,
+                'top': rect.top,
+                'width': rect.width,
+                'height': rect.height,
+              },
+          ],
+        });
+      }),
+    ),
+    onClose: () => unawaited(nativeCommand('close')),
+    onStartDrag: () => unawaited(nativeCommand('startDrag')),
+    onToggleMaximize: () => unawaited(nativeCommand('toggleMaximize')),
     onLayout: (v) => unawaited(preferences(layout: v)),
     onCellSize: (v) => unawaited(preferences(size: v)),
     onSelect: (id) => unawaited(select(id)),
@@ -421,13 +550,14 @@ class ResourceWindowController extends ChangeNotifier {
     query: _query,
     groupId: _group,
     queryHint: _page['queryHint'] as String? ?? '',
-    counts: {
-      for (final e in resourceMap(_page['counts'] ?? {}).entries)
-        FloatingResourceKind.values.byName(e.key): e.value as int,
-    },
+    counts: _counts,
+    descending: _descending ?? true,
+    notice: _notice,
+    maximized: _maximized,
     sections: [
       for (final s in ((_page['sections'] as List?) ?? []).map(resourceMap))
         ResourceGroupSection(
+          id: s['id'] as String? ?? '',
           title: s['title'] as String,
           groups: [
             for (final g in (s['groups'] as List).map(resourceMap))
@@ -436,6 +566,9 @@ class ResourceWindowController extends ChangeNotifier {
                 label: g['label'] as String,
                 count: g['count'] as int?,
                 parentId: g['parentId'] as String?,
+                icon: ResourceGroupIcon.values.asNameMap()[g['icon']],
+                expanded: g['expanded'] as bool? ?? false,
+                dim: g['dim'] as bool? ?? false,
                 color: g['color'] == null ? null : Color(g['color'] as int),
               ),
           ],
@@ -451,7 +584,11 @@ class ResourceWindowController extends ChangeNotifier {
     ],
     sorts: [
       for (final s in ((_page['sorts'] as List?) ?? []).map(resourceMap))
-        ResourceOption(id: s['id'] as String, label: s['label'] as String),
+        ResourceOption(
+          id: s['id'] as String,
+          label: s['label'] as String,
+          directional: s['directional'] as bool? ?? true,
+        ),
     ],
     sortId: _sort,
     layouts: [
@@ -477,7 +614,30 @@ class ResourceWindowController extends ChangeNotifier {
           date: i['date'] == null
               ? null
               : DateTime.fromMillisecondsSinceEpoch(i['date'] as int),
-          thumb: ResourceWindowImage(_kind, i['id'] as String, _revision, call),
+          thumb: i['hasThumb'] == false
+              ? null
+              : ResourceWindowImage(
+                  _kind,
+                  i['id'] as String,
+                  i['thumbVersion'] ?? '',
+                  call,
+                ),
+          crop: i['crop'] == null
+              ? null
+              : ResourceThumbCrop(
+                  offsetX: (resourceMap(i['crop'])['offsetX'] as num)
+                      .toDouble(),
+                  offsetY: (resourceMap(i['crop'])['offsetY'] as num)
+                      .toDouble(),
+                  scale: (resourceMap(i['crop'])['scale'] as num).toDouble(),
+                ),
+          itemCount: i['itemCount'] as int?,
+          useCount: i['useCount'] as int?,
+          hasParams: i['hasParams'] as bool? ?? false,
+          strength: (i['strength'] as num?)?.toDouble(),
+          secondary: (i['secondary'] as num?)?.toDouble(),
+          inGeneration: i['inGeneration'] as bool? ?? false,
+          bundleCount: i['bundleCount'] as int? ?? 0,
         ),
     ],
     total: _page['total'] as int? ?? 0,
@@ -501,10 +661,10 @@ class ResourceWindowController extends ChangeNotifier {
 }
 
 class ResourceWindowImage extends ImageProvider<ResourceWindowImage> {
-  const ResourceWindowImage(this.kind, this.id, this.revision, this.invoke);
+  const ResourceWindowImage(this.kind, this.id, this.thumbVersion, this.invoke);
   final FloatingResourceKind kind;
   final String id;
-  final int revision;
+  final Object thumbVersion;
   final ResourceHostCall invoke;
   @override
   Future<ResourceWindowImage> obtainKey(ImageConfiguration configuration) =>
@@ -518,7 +678,7 @@ class ResourceWindowImage extends ImageProvider<ResourceWindowImage> {
     final bytes = await invoke('resources.thumbnail', {
       'kind': kind.name,
       'id': id,
-      'revision': revision,
+      'thumbVersion': thumbVersion,
     });
     if (bytes is! Uint8List || bytes.isEmpty) {
       throw StateError('Resource thumbnail unavailable');
@@ -531,7 +691,7 @@ class ResourceWindowImage extends ImageProvider<ResourceWindowImage> {
       other is ResourceWindowImage &&
       other.kind == kind &&
       other.id == id &&
-      other.revision == revision;
+      other.thumbVersion == thumbVersion;
   @override
-  int get hashCode => Object.hash(kind, id, revision);
+  int get hashCode => Object.hash(kind, id, thumbVersion);
 }

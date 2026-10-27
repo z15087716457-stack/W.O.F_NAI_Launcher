@@ -4,6 +4,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../constants/storage_keys.dart';
 import '../utils/app_logger.dart';
+import '../utils/studio_sandbox.dart';
+import 'sandbox_credential_store.dart';
 
 part 'secure_storage_service.g.dart';
 
@@ -27,7 +29,8 @@ class SecureStorageService {
     _memoryCache.remove(key);
   }
 
-  final FlutterSecureStorage _storage;
+  final SandboxCredentialStore _storage;
+  final String? _sandbox;
 
   static final RegExp _bearerPrefixRegex = RegExp(
     r'^Bearer\s+',
@@ -36,19 +39,20 @@ class SecureStorageService {
   static final RegExp _allWhitespaceRegex = RegExp(r'\s+');
 
   /// 内存缓存 - 解决 Windows 上 secure storage 写入后立即读取为 null 的问题
-  static final Map<String, String> _memoryCache = {};
+  static final Map<String, Map<String, String>> _memoryCaches = {};
+  Map<String, String> get _memoryCache =>
+      _memoryCaches.putIfAbsent(_sandbox ?? '', () => {});
   static int _authRevision = 0;
 
   /// 当前认证写入版本；同一个 Token 的重新登录也属于新会话。
   int get authRevision => _authRevision;
 
   SecureStorageService({FlutterSecureStorage? storage})
-    : _storage =
-          storage ??
-          const FlutterSecureStorage(
-            // Windows: 使用默认配置
-            wOptions: WindowsOptions(),
-          );
+    : _sandbox = studioSandboxRoot(),
+      _storage = SandboxCredentialStore(
+        sandbox: studioSandboxRoot(),
+        storage: storage,
+      );
 
   // ==================== Access Token ====================
 

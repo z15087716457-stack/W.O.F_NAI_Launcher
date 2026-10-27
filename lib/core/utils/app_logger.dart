@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'studio_sandbox.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
@@ -220,7 +221,7 @@ class AppLogger {
       }
     } catch (e) {
       _logDirectory = path.join(
-        Directory.systemTemp.path,
+        studioTemporaryRoot().path,
         'NAI_Launcher',
         'logs',
       );

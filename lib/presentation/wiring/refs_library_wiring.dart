@@ -674,7 +674,13 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
   RefsActions _actions(List<RefsEntry> all) => RefsActions(
     onFilterChanged: (filter) {
       setState(() => _filter = filter);
-      _run(() => _preferences.saveFilter(filter));
+      _run(() async {
+        await _preferences.saveFilter(filter);
+        ref.read(refsSortChangedProvider(widget.kind).notifier).state = (
+          sort: filter.sort,
+          descending: filter.descending,
+        );
+      });
     },
     onCardSizeChanged: (size) {
       _cardChanged = true;
@@ -990,6 +996,18 @@ class _RefsLibraryWiringState extends ConsumerState<_RefsLibraryWiring> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(refsSortChangedProvider(widget.kind), (_, next) {
+      if (next != null &&
+          (_filter.sort != next.sort ||
+              _filter.descending != next.descending)) {
+        setState(
+          () => _filter = _filter.copyWith(
+            sort: next.sort,
+            descending: next.descending,
+          ),
+        );
+      }
+    });
     final params = ref.watch(generationParamsNotifierProvider);
     final statuses = _vibe ? ref.watch(refsVibeStatusesProvider) : null;
     final tray = _target.tray(

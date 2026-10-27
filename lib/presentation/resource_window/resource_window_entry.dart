@@ -48,6 +48,9 @@ Future<void> runResourceWindow(
         return native.invokeMethod<void>('focus');
       case 'resource.setAlwaysOnTop':
         return native.invokeMethod<void>('setAlwaysOnTop', call.arguments);
+      case 'resources.viewChanged':
+        controller.viewChanged(resourceMap(call.arguments));
+        return;
       case 'resources.changed':
         controller.changed(resourceMap(call.arguments));
         return;
@@ -63,6 +66,8 @@ Future<void> runResourceWindow(
   native.setMethodCallHandler((call) async {
     if (call.method == 'layout') {
       controller.nativeLayout(resourceMap(call.arguments));
+    } else if (call.method == 'maximizedChanged') {
+      controller.maximized(call.arguments as bool);
     }
   });
   await native.invokeMethod<void>('configure', {
@@ -70,6 +75,7 @@ Future<void> runResourceWindow(
     'rect': arguments.rect,
     'alwaysOnTop': arguments.alwaysOnTop,
   });
+  controller.maximized(await native.invokeMethod<bool>('isMaximized') ?? false);
   final response = resourceMap(
     await ResourceWindowService.hostChannel.invokeMethod<Object?>('ready', {
       'windowId': window.windowId,

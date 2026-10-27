@@ -8,6 +8,7 @@ import 'package:nai_launcher/data/models/resources/floating_window_data.dart';
 class Backend extends ResourceWindowBackend {
   final calls = <String>[];
   Completer<Map<String, Object?>>? pending;
+  Completer<Uint8List?>? thumbnailPending;
   @override
   Future<Map<String, Object?>> query(ResourceQuery r) async {
     calls.add(
@@ -28,7 +29,7 @@ class Backend extends ResourceWindowBackend {
     int revision,
   ) async {
     calls.add('thumbnail:${kind.name}:$id:$revision');
-    return Uint8List.fromList([1, 2]);
+    return thumbnailPending?.future ?? Uint8List.fromList([1, 2]);
   }
 
   @override
@@ -94,7 +95,8 @@ Map<String, Object?> query(int id, {String window = 'w', int offset = 0}) => {
   'groupId': 'all',
   'query': 'cat',
   'chips': ['favorite'],
-  'sortId': 'fileName:ascending',
+  'sortId': 'fileName',
+  'descending': false,
   'offset': offset,
   'limit': 60,
 };
@@ -129,7 +131,7 @@ void main() {
       expect(other['requestId'], 1);
       expect(
         backend.calls.first,
-        contains('all:cat:{favorite}:fileName:ascending'),
+        contains('all:cat:{favorite}:fileName'),
       );
     },
   );
@@ -201,6 +203,40 @@ void main() {
       await expectLater(
         host.handle(MethodCall('resources.query', {...query(1), 'version': 2})),
         throwsA(code('unsupported_version')),
+      );
+    },
+  );
+  test(
+    'thumbnail is not cancelled when library revision changes in flight',
+    () async {
+      backend.thumbnailPending = Completer<Uint8List?>();
+      host.changed(FloatingResourceKind.blocks);
+      final result = host.handle(
+        const MethodCall('resources.thumbnail', {
+          'kind': 'blocks',
+          'id': 'a',
+          'thumbVersion': 'cover-v1',
+          'revision': 0,
+        }),
+      );
+      host.changed(FloatingResourceKind.blocks);
+      backend.thumbnailPending!.complete(Uint8List.fromList([7]));
+      expect(await result, [7]);
+      expect(backend.calls.single, 'thumbnail:blocks:a:1');
+    },
+  );
+  test(
+    'sort direction is typed separately and counts do not start a query',
+    () async {
+      expect(ResourceQuery(query(1)).sortId, 'fileName');
+      expect(ResourceQuery(query(1)).descending, false);
+      expect(await host.handle(const MethodCall('resources.counts', {})), {});
+      expect(backend.calls, isEmpty);
+      await expectLater(
+        host.handle(
+          MethodCall('resources.query', {...query(1), 'descending': 'false'}),
+        ),
+        throwsA(code('invalid_arguments')),
       );
     },
   );

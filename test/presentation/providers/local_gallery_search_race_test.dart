@@ -7,6 +7,7 @@ import 'package:nai_launcher/core/exceptions/gallery_exceptions.dart';
 import 'package:nai_launcher/core/rag/rag_settings.dart';
 import 'package:nai_launcher/data/models/gallery/local_image_record.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 import 'package:nai_launcher/data/services/gallery/unified_gallery_service.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 
@@ -40,6 +41,64 @@ class _NoRag extends RagSettingsController {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  test(
+    'browse/cache/sort do not publish content changes; refresh and tags do',
+    () async {
+      SharedPreferences.setMockInitialValues({});
+      final service = FakeLocalGalleryService([
+        LocalImageRecord(
+          path: '/gallery/a.png',
+          size: 1,
+          modifiedAt: DateTime(2026),
+        ),
+      ]);
+      final container = ProviderContainer(
+        overrides: [
+          galleryServiceProvider.overrideWith(
+            () => FakeGalleryServiceNotifier(service),
+          ),
+          ragSettingsProvider.overrideWith(_NoRag.new),
+        ],
+      );
+      addTearDown(container.dispose);
+      final gallery = container.read(localGalleryNotifierProvider.notifier);
+      await gallery.initialize();
+      final initial = container
+          .read(localGalleryNotifierProvider)
+          .contentRevision;
+      await gallery.loadRecords(['/gallery/a.png']);
+      expect(
+        container.read(localGalleryNotifierProvider).recordsRevision,
+        greaterThan(0),
+      );
+      expect(
+        container.read(localGalleryNotifierProvider).contentRevision,
+        initial,
+      );
+      await gallery.setSearchQuery('a');
+      await gallery.setSort(
+        GallerySortField.fileName,
+        GallerySortDirection.ascending,
+      );
+      expect(
+        container.read(localGalleryNotifierProvider).contentRevision,
+        initial,
+      );
+      await gallery.refresh(scan: false);
+      expect(
+        container.read(localGalleryNotifierProvider).contentRevision,
+        greaterThan(initial),
+      );
+      final refreshed = container
+          .read(localGalleryNotifierProvider)
+          .contentRevision;
+      await gallery.setTags('/gallery/a.png', ['test']);
+      expect(
+        container.read(localGalleryNotifierProvider).contentRevision,
+        refreshed + 1,
+      );
+    },
+  );
   for (final failOld in [false, true]) {
     test(
       'late old ${failOld ? 'failure' : 'success'} cannot stop loading or set error for new query',

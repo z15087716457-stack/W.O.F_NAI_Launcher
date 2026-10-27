@@ -39,6 +39,7 @@ import 'core/utils/app_logger.dart';
 import 'core/utils/hive_startup_box_opener.dart';
 import 'core/utils/hive_storage_helper.dart';
 import 'core/utils/app_support_directory.dart';
+import 'core/utils/studio_sandbox.dart';
 import 'core/utils/window_focus_tracker.dart';
 import 'core/utils/window_state_coercion.dart';
 import 'core/utils/window_state_persistence.dart';
@@ -342,6 +343,8 @@ Future<void> _bootstrapMainWindow() async {
   registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
 
+  initializeSandboxPreferences();
+
   // 先初始化控制台日志；文件日志稍后读取设置后按需开启，默认关闭。
   await AppLogger.initialize(
     isTestEnvironment: false,
@@ -383,11 +386,11 @@ Future<void> _prepareDataAndStart() => startWithPreparedAppData(
     if (Platform.isWindows) {
       await windowManager.ensureInitialized();
       await windowManager.waitUntilReadyToShow(
-        const WindowOptions(
-          size: Size(900, 700),
-          minimumSize: Size(480, 360),
+        WindowOptions(
+          size: const Size(900, 700),
+          minimumSize: const Size(480, 360),
           center: true,
-          title: Brand.name,
+          title: studioWindowTitle(Brand.name),
           titleBarStyle: TitleBarStyle.normal,
         ),
         () async {
@@ -695,7 +698,7 @@ Future<void> _bootstrapPreparedApplication() async {
         // FEAT-23 内置一体标题栏：隐藏原生栏，由 Flutter 自绘
         // （拖拽/双击/Aero Snap 经 runner WM_NCHITTEST 返回 HTCAPTION）。
         titleBarStyle: TitleBarStyle.hidden,
-        title: Brand.name,
+        title: studioWindowTitle(Brand.name),
       );
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {

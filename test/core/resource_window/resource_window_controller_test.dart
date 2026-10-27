@@ -200,7 +200,276 @@ void main() {
     },
   );
 
-  test('thumbnail cache identity is kind + id + revision', () {
+  testWidgets(
+    'changed preserves loaded pages and selection, resumes interrupted more',
+    (tester) async {
+      controller.dispose();
+      final pending = Completer<Object?>();
+      var queries = 0;
+      final offsets = <int>[];
+      controller = ResourceWindowController(
+        windowId: 'w',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async {
+          if (method != 'resources.query') return invoke(method, args);
+          queries++;
+          final offset = args['offset'] as int;
+          offsets.add(offset);
+          if (queries == 3) return pending.future;
+          return {
+            ...page(args),
+            'total': 240,
+            'hasMore': offset + 60 < 240,
+            'items': List.generate(
+              60,
+              (i) => {
+                'id': '${offset + i}',
+                'title': '$i',
+                'thumbVersion': 'stable',
+              },
+            ),
+          };
+        },
+      );
+      await controller.initialize();
+      await controller.refresh(more: true);
+      await controller.select('90');
+      final thumb = controller.data.items.first.thumb;
+      final more = controller.refresh(more: true);
+      controller.changed({'kind': 'blocks', 'revision': 3});
+      expect(controller.data.items, hasLength(120));
+      expect(controller.data.selectedId, '90');
+      await tester.pump();
+      pending.complete(page({'requestId': 3, 'offset': 120}));
+      await more;
+      await tester.pump();
+      expect(offsets, [0, 60, 120, 0, 60, 120]);
+      expect(controller.data.items, hasLength(180));
+      expect(controller.data.selectedId, '90');
+      expect(controller.data.items.first.thumb, thumb);
+      expect(controller.data.hasMore, true);
+      expect(controller.data.loading, false);
+      controller.actions.onLoadMore();
+      controller.actions.onLoadMore();
+      await tester.pump();
+      expect(controller.data.items, hasLength(240));
+      expect(offsets.last, 180);
+    },
+  );
+
+  testWidgets(
+    'counts survive kind reset and unrelated changes do not reload items',
+    (tester) async {
+      await controller.initialize();
+      calls.clear();
+      controller.actions.onKind(FloatingResourceKind.vibe);
+      expect(controller.data.counts, {FloatingResourceKind.blocks: 3});
+      await tester.pump();
+      calls.clear();
+      controller.changed({'kind': 'gallery', 'revision': 1});
+      await tester.pump();
+      expect(calls.map((e) => e.method), ['resources.counts']);
+      expect(controller.data.items.single.id, 'a');
+      controller.viewChanged({'kind': 'vibe', 'layout': 'list'});
+      expect(controller.data.layout, ResourceLayout.list);
+      expect(calls, hasLength(1));
+    },
+  );
+
+  test(
+    'operation errors emit sequential notices, not query errors; cancelled is silent',
+    () async {
+      controller.dispose();
+      var error = PlatformException(code: 'not_found', message: 'missing');
+      controller = ResourceWindowController(
+        windowId: 'w',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async {
+          if (method == 'resources.query') return page(args);
+          throw error;
+        },
+      );
+      await controller.initialize();
+      for (final (code, message, expected) in [
+        ('not_found', 'missing', 'not_found'),
+        ('not_ready', 'loading', 'not_ready'),
+        ('invalid_arguments', 'Model does not support Vibe', 'unsupported'),
+        ('invalid_arguments', 'bad id', 'failed'),
+        ('failed', 'disk', 'failed'),
+        ('window_operation_failed', 'SetWindowPos failed', 'failed'),
+        ('CHANNEL_NOT_FOUND', 'gone', 'disconnected'),
+      ]) {
+        error = PlatformException(code: code, message: message);
+        await controller.command('resources.open', 'a');
+        expect(controller.data.notice!.code, expected);
+        expect(controller.data.error, isNull);
+      }
+      expect(controller.data.notice!.id, 7);
+      final notice = controller.data.notice;
+      error = PlatformException(code: 'cancelled');
+      await controller.command('resources.action', 'a', action: 'add');
+      expect(controller.data.notice, same(notice));
+    },
+  );
+
+  test(
+    'detail query failure uses error rather than an operation notice',
+    () async {
+      controller.dispose();
+      controller = ResourceWindowController(
+        windowId: 'w',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async {
+          if (method == 'resources.detail') {
+            throw PlatformException(code: 'not_found');
+          }
+          return invoke(method, args);
+        },
+      );
+      await controller.initialize();
+      await controller.select('a');
+      expect(controller.data.error, contains('not_found'));
+      expect(controller.data.notice, isNull);
+    },
+  );
+
+  testWidgets(
+    'load more failure can retry without duplicate concurrent requests',
+    (tester) async {
+      controller.dispose();
+      var fail = true;
+      controller = ResourceWindowController(
+        windowId: 'w',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async {
+          if (method == 'resources.query' && args['offset'] == 1 && fail) {
+            fail = false;
+            throw PlatformException(code: 'failed');
+          }
+          return invoke(method, args);
+        },
+      );
+      await controller.initialize();
+      await controller.refresh(more: true);
+      expect(controller.data.loading, false);
+      expect(controller.data.hasMore, true);
+      expect(controller.data.error, isNotNull);
+      controller.actions.onLoadMore();
+      controller.actions.onLoadMore();
+      await tester.pump();
+      expect(controller.data.items.map((i) => i.id), ['a', 'b']);
+      expect(controller.data.error, isNull);
+    },
+  );
+
+  testWidgets(
+    'chrome and sort direction callbacks use separate protocol fields',
+    (tester) async {
+      const channel = MethodChannel('com.nailauncher/resource_window_native');
+      final nativeCalls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            nativeCalls.add(call);
+            return call.method == 'toggleMaximize' ? true : null;
+          });
+      await controller.initialize();
+      controller.actions.onSortDirection!(false);
+      await tester.pump();
+      expect(calls.last.args['sortId'], 'updated');
+      expect(calls.last.args['descending'], false);
+      calls.clear();
+      await controller.refresh();
+      expect(calls.single.args['sortId'], isNull);
+      expect(calls.single.args['descending'], isNull);
+      controller.actions.onDragRegion!(42, [
+        const Rect.fromLTWH(0, 0, 200, 42),
+      ]);
+      controller.actions.onToggleMaximize!();
+      controller.actions.onStartDrag!();
+      controller.actions.onClose!();
+      await tester.pump();
+      expect(controller.data.maximized, true);
+      expect(nativeCalls.map((c) => c.method), [
+        'setDragRegion',
+        'toggleMaximize',
+        'startDrag',
+        'close',
+      ]);
+      expect((nativeCalls.first.arguments as Map)['exclusions'], [
+        {'left': 0.0, 'top': 0.0, 'width': 200.0, 'height': 42.0},
+      ]);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    },
+  );
+
+  testWidgets(
+    'DTO maps tree, directional sort, crop, card metrics and empty block covers',
+    (tester) async {
+      controller.dispose();
+      controller = ResourceWindowController(
+        windowId: 'w',
+        kind: FloatingResourceKind.blocks,
+        invoke: (method, args) async => {
+          ...page(args),
+          'hasMore': false,
+          'sections': [
+            {
+              'id': 'folders',
+              'title': 'Folders',
+              'groups': [
+                {
+                  'id': 'folder:p',
+                  'label': 'Parent',
+                  'icon': 'folder',
+                  'expanded': true,
+                  'dim': true,
+                },
+              ],
+            },
+          ],
+          'sorts': [
+            {'id': 'custom', 'label': 'Custom', 'directional': false},
+          ],
+          'items': [
+            {
+              'id': 'a',
+              'title': 'A',
+              'hasThumb': false,
+              'itemCount': 4,
+              'useCount': 2,
+              'hasParams': true,
+              'crop': {'offsetX': .2, 'offsetY': -.3, 'scale': 1.5},
+              'strength': .6,
+              'secondary': .7,
+              'inGeneration': true,
+              'bundleCount': 3,
+            },
+          ],
+        },
+      );
+      await controller.initialize();
+      expect(controller.data.sections.single.id, 'folders');
+      final group = controller.data.sections.single.groups.single;
+      expect(group.icon, ResourceGroupIcon.folder);
+      expect(group.expanded, true);
+      expect(group.dim, true);
+      expect(controller.data.sorts.single.directional, false);
+      final item = controller.data.items.single;
+      expect(item.thumb, isNull);
+      expect(item.crop!.offsetX, .2);
+      expect(item.crop!.scale, 1.5);
+      expect(item.itemCount, 4);
+      expect(item.useCount, 2);
+      expect(item.hasParams, true);
+      expect(item.strength, .6);
+      expect(item.secondary, .7);
+      expect(item.inGeneration, true);
+      expect(item.bundleCount, 3);
+    },
+  );
+
+  test('thumbnail cache identity is kind + id + thumbVersion', () {
     final a = ResourceWindowImage(FloatingResourceKind.blocks, 'a', 1, invoke);
     expect(a, ResourceWindowImage(FloatingResourceKind.blocks, 'a', 1, invoke));
     expect(

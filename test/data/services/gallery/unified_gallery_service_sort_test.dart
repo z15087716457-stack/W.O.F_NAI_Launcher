@@ -122,6 +122,23 @@ void main() {
       },
     );
 
+    test(
+      'library lookup normalizes case and separators and still rejects outside ids',
+      () async {
+        final id = Platform.isWindows
+            ? fileA.path.toUpperCase().replaceAll(r'\', '/')
+            : fileA.path;
+        final records = await service.getLibraryRecordsForPaths([id]);
+        expect(records.map((r) => r.path), [fileA.path]);
+        expect(
+          await service.getLibraryRecordsForPaths([
+            p.join(tempDir.path, 'outside.png'),
+          ]),
+          isEmpty,
+        );
+      },
+    );
+
     test('default order is modifiedAt descending (newest first)', () async {
       final records = await service.getPage(0, pageSize: 10);
 

@@ -1,7 +1,17 @@
 import 'dart:convert';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../core/storage/local_storage_service.dart';
 import '../ui/refs/refs_contract.dart';
+
+/// Cross-entry notification only; persisted truth remains RefsPreferenceStore.
+/// Keeps a mounted main page and resource windows on the same sort without
+/// replacing that page's current search/category/selection.
+final refsSortChangedProvider =
+    StateProvider.family<({RefsSort sort, bool descending})?, RefsKind>(
+      (ref, kind) => null,
+    );
 
 class RefsPreferences {
   const RefsPreferences({

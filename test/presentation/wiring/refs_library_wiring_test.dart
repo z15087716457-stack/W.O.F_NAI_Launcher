@@ -18,6 +18,7 @@ import 'package:nai_launcher/presentation/ui/refs/refs_page.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_picker.dart';
 import 'package:nai_launcher/presentation/utils/dropped_file_reader.dart';
 import 'package:nai_launcher/presentation/wiring/refs_library_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/refs_preferences.dart';
 import 'package:nai_launcher/presentation/wiring/refs_picker_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/refs_platform.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -277,6 +278,34 @@ void main() {
     expect(page(tester).data.counts.favorites, 1);
     expect(platform.errors, isEmpty);
   });
+
+  testWidgets(
+    'external sort updates a mounted page without replacing its active filters',
+    (tester) async {
+      await mount(tester);
+      page(tester).actions.onFilterChanged(
+        const RefsFilter(view: RefsView.favorites, query: 'a'),
+      );
+      await tester.pumpAndSettle();
+      container.read(refsSortChangedProvider(RefsKind.vibe).notifier).state = (
+        sort: RefsSort.name,
+        descending: false,
+      );
+      await tester.pump();
+      expect(page(tester).data.filter.sort, RefsSort.name);
+      expect(page(tester).data.filter.descending, false);
+      expect(page(tester).data.filter.query, 'a');
+      expect(page(tester).data.filter.view, RefsView.favorites);
+      page(tester).actions.onFilterChanged(
+        page(tester).data.filter.copyWith(descending: true),
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(refsSortChangedProvider(RefsKind.vibe)), (
+        sort: RefsSort.name,
+        descending: true,
+      ));
+    },
+  );
 
   testWidgets('card size and panel preferences restore after remount', (
     tester,

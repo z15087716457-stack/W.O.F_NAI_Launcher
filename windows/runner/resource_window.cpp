@@ -5,13 +5,20 @@
 #include <irondash_engine_context/irondash_engine_context_plugin_c_api.h>
 #include <super_native_extensions/super_native_extensions_plugin_c_api.h>
 
+#include <dwmapi.h>
+#include <windowsx.h>
 #include <cwchar>
+#include <vector>
+#include <cmath>
+#include "studio_sandbox.h"
+#include "resource_window_geometry.h"
 #include <commctrl.h>
 #include <algorithm>
 #include <memory>
 #include <string>
 
 #pragma comment(lib, "comctl32.lib")
+#pragma comment(lib, "dwmapi.lib")
 
 namespace {
 constexpr char kChannel[] = "com.nailauncher/resource_window_native";
@@ -21,6 +28,10 @@ using Channel = flutter::MethodChannel<Value>;
 
 struct ResourceState {
   std::unique_ptr<Channel> channel;
+  HWND view = nullptr;
+  double bar_height = 0, reserved_right = 0;
+  using Exclusion = resource_window_geometry::Exclusion;
+  std::vector<Exclusion> exclusions;
 };
 
 double Number(const Map& values, const char* key, double fallback) {
@@ -42,9 +53,62 @@ Value Layout(HWND hwnd) {
                    {Value("dpiScale"), Value(scale)}});
 }
 
+bool IsWindows11() {
+  using RtlGetVersionFn = LONG(WINAPI*)(OSVERSIONINFOW*);
+  const auto fn = reinterpret_cast<RtlGetVersionFn>(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetVersion"));
+  OSVERSIONINFOW info{sizeof(info)};
+  return fn && fn(&info) == 0 && info.dwBuildNumber >= 22000;
+}
+
+LRESULT HitTest(HWND hwnd, ResourceState* state, LPARAM lparam) {
+  RECT outer{};
+  GetWindowRect(hwnd, &outer);
+  const int x = GET_X_LPARAM(lparam), y = GET_Y_LPARAM(lparam);
+  const int edge = static_cast<int>(std::ceil(6 * GetDpiForWindow(hwnd) / 96.0));
+  const auto border = resource_window_geometry::BorderHit(x - outer.left, y - outer.top,
+      outer.right - outer.left, outer.bottom - outer.top, edge, IsZoomed(hwnd) != FALSE);
+  if (border != HTCLIENT) return border;
+  POINT point{x, y};
+  ScreenToClient(hwnd, &point);
+  const double scale = GetDpiForWindow(hwnd) / 96.0;
+  const double lx = point.x / scale, ly = point.y / scale;
+  RECT client{};
+  GetClientRect(hwnd, &client);
+  if (!resource_window_geometry::InTitle(lx, ly, client.right / scale,
+      state->bar_height, state->reserved_right)) return HTCLIENT;
+  for (const auto& rect : state->exclusions) {
+    if (rect.Contains(lx, ly)) return HTCLIENT;
+  }
+  return HTCAPTION;
+}
+
+LRESULT CALLBACK ResourceViewProc(HWND view, UINT message, WPARAM wparam,
+                                  LPARAM lparam, UINT_PTR id, DWORD_PTR data) {
+  if (message == WM_NCHITTEST &&
+      HitTest(GetAncestor(view, GA_ROOT), reinterpret_cast<ResourceState*>(data), lparam) != HTCLIENT) {
+    return HTTRANSPARENT;
+  }
+  if (message == WM_NCDESTROY) RemoveWindowSubclass(view, ResourceViewProc, id);
+  return DefSubclassProc(view, message, wparam, lparam);
+}
+
 LRESULT CALLBACK ResourceProc(HWND hwnd, UINT message, WPARAM wparam,
                               LPARAM lparam, UINT_PTR id, DWORD_PTR data) {
   auto* state = reinterpret_cast<ResourceState*>(data);
+  if (message == WM_NCCALCSIZE) {
+    auto* rect = wparam ? &reinterpret_cast<NCCALCSIZE_PARAMS*>(lparam)->rgrc[0]
+                        : reinterpret_cast<RECT*>(lparam);
+    MONITORINFO monitor{sizeof(monitor)};
+    GetMonitorInfoW(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &monitor);
+    *rect = resource_window_geometry::ClientBounds(*rect, IsZoomed(hwnd) != FALSE,
+        monitor.rcWork, IsWindows11());
+    return 0;
+  }
+  if (message == WM_NCHITTEST) return HitTest(hwnd, state, lparam);
+  if (message == WM_NCACTIVATE) return TRUE;
+  if (message == WM_SIZE) {
+    state->channel->InvokeMethod("maximizedChanged", std::make_unique<Value>(IsZoomed(hwnd) != FALSE));
+  }
   if (message == WM_GETMINMAXINFO) {
     auto* bounds = reinterpret_cast<MINMAXINFO*>(lparam);
     const double scale = GetDpiForWindow(hwnd) / 96.0;
@@ -56,6 +120,7 @@ LRESULT CALLBACK ResourceProc(HWND hwnd, UINT message, WPARAM wparam,
     state->channel->InvokeMethod("layout", std::make_unique<Value>(Layout(hwnd)));
   }
   if (message == WM_NCDESTROY) {
+    if (IsWindow(state->view)) RemoveWindowSubclass(state->view, ResourceViewProc, 1);
     RemoveWindowSubclass(hwnd, ResourceProc, id);
     delete state;
   }
@@ -70,7 +135,7 @@ void Configure(HWND hwnd, const Map& args) {
                                            static_cast<int>(title->size()), nullptr, 0);
       std::wstring wide(size, L'\0');
       MultiByteToWideChar(CP_UTF8, 0, title->data(), static_cast<int>(title->size()), wide.data(), size);
-      SetWindowTextW(hwnd, wide.c_str());
+      SetWindowTextW(hwnd, studio_sandbox::Title(wide).c_str());
     }
   }
   const auto rect_it = args.find(Value("rect"));
@@ -147,13 +212,60 @@ void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
 
   auto* state = new ResourceState{std::make_unique<Channel>(
       engine->messenger(), kChannel, &flutter::StandardMethodCodec::GetInstance())};
+  state->view = controller->view()->GetNativeWindow();
   SetWindowSubclass(hwnd, ResourceProc, 1, reinterpret_cast<DWORD_PTR>(state));
-  state->channel->SetMethodCallHandler([hwnd](const auto& call, auto result) {
+  SetWindowSubclass(state->view, ResourceViewProc, 1, reinterpret_cast<DWORD_PTR>(state));
+  const MARGINS margins{1, 1, 1, 1};
+  DwmExtendFrameIntoClientArea(hwnd, &margins);
+  // DWMWA_WINDOW_CORNER_PREFERENCE / DWMWCP_ROUND (Win10 ignores it).
+  const DWORD round = 2;
+  DwmSetWindowAttribute(hwnd, 33, &round, sizeof(round));
+  SetWindowPos(hwnd, nullptr, 0, 0, 0, 0,
+      SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+  state->channel->SetMethodCallHandler([hwnd, state](const auto& call, auto result) {
     if (call.method_name() == "configure" || call.method_name() == "setTitle") {
       Map values;
       if (const auto* map = std::get_if<Map>(call.arguments())) values = *map;
       if (const auto* title = std::get_if<std::string>(call.arguments())) values[Value("title")] = Value(*title);
       Configure(hwnd, values);
+      result->Success();
+    } else if (call.method_name() == "setDragRegion") {
+      const auto* args = std::get_if<Map>(call.arguments());
+      if (!args) { result->Error("invalid_arguments", "Expected drag region."); return; }
+      const double height = Number(*args, "height", 0);
+      const double right = Number(*args, "reservedRight", 0);
+      std::vector<ResourceState::Exclusion> exclusions;
+      if (!std::isfinite(height) || height < 0 || !std::isfinite(right) || right < 0) {
+        result->Error("invalid_arguments", "Invalid drag region."); return;
+      }
+      const auto it = args->find(Value("exclusions"));
+      if (it != args->end()) {
+        const auto* list = std::get_if<flutter::EncodableList>(&it->second);
+        if (!list) { result->Error("invalid_arguments", "Expected rectangles."); return; }
+        for (const auto& value : *list) {
+          const auto* rect = std::get_if<Map>(&value);
+          if (!rect) { result->Error("invalid_arguments", "Expected rectangle."); return; }
+          ResourceState::Exclusion r{Number(*rect, "left", -1), Number(*rect, "top", -1),
+                                    Number(*rect, "width", -1), Number(*rect, "height", -1)};
+          if (!std::isfinite(r.left) || !std::isfinite(r.top) || !std::isfinite(r.width) || !std::isfinite(r.height) ||
+              r.left < 0 || r.top < 0 || r.width < 0 || r.height < 0) {
+            result->Error("invalid_arguments", "Invalid rectangle."); return;
+          }
+          exclusions.push_back(r);
+        }
+      }
+      state->bar_height = height;
+      state->reserved_right = right;
+      state->exclusions = std::move(exclusions);
+      result->Success();
+    } else if (call.method_name() == "toggleMaximize") {
+      ShowWindow(hwnd, IsZoomed(hwnd) ? SW_RESTORE : SW_MAXIMIZE);
+      result->Success(Value(IsZoomed(hwnd) != FALSE));
+    } else if (call.method_name() == "isMaximized") {
+      result->Success(Value(IsZoomed(hwnd) != FALSE));
+    } else if (call.method_name() == "startDrag") {
+      ReleaseCapture();
+      PostMessage(hwnd, WM_NCLBUTTONDOWN, HTCAPTION, GetMessagePos());
       result->Success();
     } else if (call.method_name() == "getLayout") {
       result->Success(Layout(hwnd));

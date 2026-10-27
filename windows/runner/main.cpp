@@ -6,6 +6,7 @@
 
 #include "flutter_window.h"
 #include "utils.h"
+#include "studio_sandbox.h"
 
 // 单实例互斥体名称（使用应用唯一标识）
 constexpr const wchar_t kSingleInstanceMutexName[] =
@@ -23,7 +24,7 @@ constexpr const wchar_t kAlreadyStartingMessage[] =
     L"Please wait a few seconds and try again.";
 
 static UINT GetWakeUpMessage() {
-  static const UINT message = RegisterWindowMessage(kWakeUpMessageName);
+  static const UINT message = RegisterWindowMessageW(studio_sandbox::Identity(kWakeUpMessageName).c_str());
   return message;
 }
 
@@ -112,8 +113,14 @@ bool IsLauncherWindow(HWND hwnd) {
   }
 
   const std::wstring title = GetWindowTitle(hwnd);
-  if (title != kLauncherWindowTitle && title != kLegacyLauncherWindowTitle) {
+  if (title != studio_sandbox::Title(kLauncherWindowTitle) &&
+      title != studio_sandbox::Title(kLegacyLauncherWindowTitle)) {
     return false;
+  }
+
+  if (studio_sandbox::Enabled() &&
+      GetPropW(hwnd, studio_sandbox::Identity(kWakeUpMessageName).c_str()) == nullptr) {
+    return false;  // Another sandbox may use the exact same executable/title.
   }
 
   DWORD process_id = 0;
@@ -195,9 +202,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     CreateAndAttachConsole();
   }
 
-  // 单实例检测
+  if (!studio_sandbox::Valid()) return EXIT_FAILURE;
+  // Each sandbox has its own single-instance identity and wake-up message.
   HANDLE single_instance_mutex =
-      CreateMutex(nullptr, TRUE, kSingleInstanceMutexName);
+      CreateMutexW(nullptr, TRUE, studio_sandbox::Identity(kSingleInstanceMutexName).c_str());
 
   bool is_another_instance_running = (GetLastError() == ERROR_ALREADY_EXISTS);
 
@@ -233,12 +241,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   FlutterWindow window(project);
   Win32Window::Point origin(10, 10);
   Win32Window::Size size(1280, 720);
-  if (!window.Create(kLauncherWindowTitle, origin, size)) {
+  if (!window.Create(studio_sandbox::Title(kLauncherWindowTitle), origin, size)) {
     if (single_instance_mutex != nullptr) {
       CloseHandle(single_instance_mutex);
     }
     ::CoUninitialize();
     return EXIT_FAILURE;
+  }
+  if (studio_sandbox::Enabled()) {
+    SetPropW(window.GetHandle(), studio_sandbox::Identity(kWakeUpMessageName).c_str(),
+             reinterpret_cast<HANDLE>(1));
   }
   window.SetQuitOnClose(true);
 

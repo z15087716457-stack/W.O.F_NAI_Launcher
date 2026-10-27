@@ -155,6 +155,24 @@ class ResourceWindowService {
     return window;
   }
 
+  Future<void> viewChanged(FloatingResourceKind kind, String layout) async {
+    for (final window in _windows.values.where((w) => w.kind == kind)) {
+      try {
+        await window.controller.invokeMethod<void>('resources.viewChanged', {
+          'kind': kind.name,
+          'layout': layout,
+        });
+      } on WindowChannelException catch (error) {
+        if (!const [
+          'CHANNEL_NOT_FOUND',
+          'CHANNEL_UNREGISTERED',
+        ].contains(error.code)) {
+          rethrow;
+        }
+      }
+    }
+  }
+
   Future<void> changed(FloatingResourceKind kind) async {
     host.changed(kind);
     await Future.wait([

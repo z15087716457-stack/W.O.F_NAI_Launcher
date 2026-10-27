@@ -329,6 +329,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
             _reloadTimeline(
               newDataset: false,
               preserveSemantic: preserveSemantic,
+              contentChanged: false,
             ),
           );
         }
@@ -545,6 +546,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   Future<void> _reloadTimeline({
     required bool newDataset,
     bool preserveSemantic = false,
+    bool contentChanged = true,
   }) async {
     final serial = ++_timelineSerial;
     _ragCancellation?.cancel();
@@ -583,7 +585,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
             ),
             filteredCount: service.filteredCount,
             totalCount: service.totalCount,
-            contentRevision: state.contentRevision + 1,
+            // Browsing/filter/sort changes are not library mutations.
+            contentRevision:
+                state.contentRevision + (!newDataset && contentChanged ? 1 : 0),
             isLoading: false,
           ),
         );
@@ -704,7 +708,6 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
             semanticRanked: ranked,
           ),
           filteredCount: result.length,
-          contentRevision: state.contentRevision + 1,
         ),
       );
     } catch (_) {
@@ -1719,6 +1722,7 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _updateCachedRecords({
       galleryFilePathKey(filePath),
     }, (record) => record.copyWith(tags: tags));
+    _setState(state.copyWith(contentRevision: state.contentRevision + 1));
   }
 
   /// Re-read externally changed metadata without resetting the visible dataset.

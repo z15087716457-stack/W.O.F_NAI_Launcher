@@ -5,6 +5,7 @@ import 'package:path/path.dart' as path;
 import 'package:nai_launcher/core/utils/app_support_directory.dart';
 
 import 'app_logger.dart';
+import 'studio_sandbox.dart';
 
 /// Writes crash-startup diagnostics independently of the optional app log file.
 class FatalDiagnostics {
@@ -81,7 +82,11 @@ class FatalDiagnostics {
 
   static Directory _fallbackDirectory() {
     return Directory(
-      path.join(Directory.systemTemp.path, 'NAI_Launcher', 'crash_diagnostics'),
+      path.join(
+        studioTemporaryRoot().path,
+        'NAI_Launcher',
+        'crash_diagnostics',
+      ),
     );
   }
 
