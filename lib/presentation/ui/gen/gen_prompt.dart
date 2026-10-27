@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
@@ -559,81 +561,7 @@ class _ToolsMenu extends StatelessWidget {
             ),
           ),
           if (scope.actions.onOpenResourceWindow case final open?)
-            Builder(
-              builder: (context) => UiPressable(
-                key: const Key('gen-resource-windows'),
-                onTap: () => scope.controller.openMenu(
-                  genBelow(context, dy: 2),
-                  [
-                    for (final (kind, glyph, label) in [
-                      (
-                        FloatingResourceKind.gallery,
-                        UiGlyphs.picture,
-                        l.localGallery_title,
-                      ),
-                      (
-                        FloatingResourceKind.blocks,
-                        UiGlyphs.layers,
-                        l.blocks_title,
-                      ),
-                      (
-                        FloatingResourceKind.vibe,
-                        UiGlyphs.spark,
-                        l.refs_vibeTitle,
-                      ),
-                      (
-                        FloatingResourceKind.precise,
-                        UiGlyphs.personStar,
-                        l.refs_preciseTitle,
-                      ),
-                    ])
-                      UiMenuItem(
-                        key: Key('gen-resource-${kind.name}'),
-                        label: label,
-                        glyph: glyph,
-                        onTap: () => open(kind),
-                      ),
-                  ],
-                  tag: #resourceWindows,
-                  width: 200,
-                ),
-                builder: (context, hover) => Container(
-                  height: 34,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: hover ? c.control : null,
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  child: Row(
-                    spacing: 10,
-                    children: [
-                      SizedBox(
-                        width: 16,
-                        child: UiGlyph(
-                          GenGlyphs.resourceWindows,
-                          size: 15,
-                          color: c.muted,
-                        ),
-                      ),
-                      Expanded(
-                        child: Text(
-                          l.floating_open,
-                          style: UiText.sans(13, color: c.ink),
-                        ),
-                      ),
-                      if (uiNewBadge(
-                            context,
-                            'tools.resourceWindows',
-                            l.gen_menuNew,
-                          )
-                          case final b?)
-                        UiMini(b, tone: UiMiniTone.accent),
-                      UiGlyph(UiGlyphs.chevronRight, size: 13, color: c.faint),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            _ResourceWindowsRow(onOpen: open),
           _MenuSection(l.gen_toolsPinned),
           pinRow(
             const Key('gen-pin-palette'),
@@ -1003,6 +931,158 @@ class GenFullscreenEditor extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 资源窗口的四类入口（工具菜单的二级菜单和头部钉住按钮共用）。
+List<(FloatingResourceKind, String, String)> _resourceKinds(
+  BuildContext context,
+) {
+  final l = context.l10n;
+  return [
+    (FloatingResourceKind.gallery, UiGlyphs.picture, l.localGallery_title),
+    (FloatingResourceKind.blocks, UiGlyphs.layers, l.blocks_title),
+    (FloatingResourceKind.vibe, UiGlyphs.spark, l.refs_vibeTitle),
+    (FloatingResourceKind.precise, UiGlyphs.personStar, l.refs_preciseTitle),
+  ];
+}
+
+/// 工具菜单里的「资源窗口」行：悬停或点击在菜单右侧展开二级菜单（右边放不下就翻到左边）。
+/// 二级菜单不铺遮罩：鼠标移回其它行即收起，点某一类打开对应窗口并关掉整个菜单。
+class _ResourceWindowsRow extends StatefulWidget {
+  const _ResourceWindowsRow({required this.onOpen});
+  final ValueChanged<FloatingResourceKind> onOpen;
+
+  @override
+  State<_ResourceWindowsRow> createState() => _ResourceWindowsRowState();
+}
+
+class _ResourceWindowsRowState extends State<_ResourceWindowsRow> {
+  final _portal = OverlayPortalController();
+  final _row = GlobalKey();
+  Timer? _close;
+  var _inRow = false, _inSub = false;
+
+  @override
+  void dispose() {
+    _close?.cancel();
+    super.dispose();
+  }
+
+  void _open() {
+    _close?.cancel();
+    if (!_portal.isShowing) setState(_portal.show);
+  }
+
+  /// 鼠标从行移到二级菜单要经过一条缝：留 160ms 再判断是否真的离开了两者。
+  void _maybeClose() {
+    _close?.cancel();
+    _close = Timer(const Duration(milliseconds: 160), () {
+      if (mounted && !_inRow && !_inSub && _portal.isShowing) {
+        setState(_portal.hide);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.ui;
+    final l = context.l10n;
+    final scope = GenScope.of(context, GenAspect.prompt);
+    return OverlayPortal(
+      controller: _portal,
+      overlayChildBuilder: (overlayContext) {
+        final box = _row.currentContext?.findRenderObject();
+        final overlay = Overlay.of(overlayContext).context.findRenderObject();
+        if (box is! RenderBox || overlay is! RenderBox) {
+          return const SizedBox.shrink();
+        }
+        // 菜单外框比行宽 4（内边距）+ 1（描边）；二级菜单和外框留 4 的缝。
+        final rect =
+            overlay.globalToLocal(box.localToGlobal(Offset.zero)) & box.size;
+        const width = 200.0, gap = 9.0;
+        final right = rect.right + gap;
+        final left = right + width > overlay.size.width - 4
+            ? rect.left - gap - width
+            : right;
+        return Positioned(
+          left: left,
+          top: rect.top - 5,
+          child: MouseRegion(
+            onEnter: (_) {
+              _inSub = true;
+              _open();
+            },
+            onExit: (_) {
+              _inSub = false;
+              _maybeClose();
+            },
+            child: TextFieldTapRegion(
+              child: UiMenu(
+                key: const Key('gen-resource-menu'),
+                width: width,
+                onClose: scope.controller.closePopover,
+                items: [
+                  for (final (kind, glyph, label) in _resourceKinds(context))
+                    UiMenuItem(
+                      key: Key('gen-resource-${kind.name}'),
+                      label: label,
+                      glyph: glyph,
+                      onTap: () => widget.onOpen(kind),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: MouseRegion(
+        onEnter: (_) {
+          _inRow = true;
+          _open();
+        },
+        onExit: (_) {
+          _inRow = false;
+          _maybeClose();
+        },
+        child: UiPressable(
+          key: const Key('gen-resource-windows'),
+          onTap: _open,
+          builder: (context, hover) => Container(
+            key: _row,
+            height: 34,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            decoration: BoxDecoration(
+              color: hover || _portal.isShowing ? c.control : null,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: Row(
+              spacing: 10,
+              children: [
+                SizedBox(
+                  width: 16,
+                  child: UiGlyph(
+                    GenGlyphs.resourceWindows,
+                    size: 15,
+                    color: c.muted,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    l.floating_open,
+                    style: UiText.sans(13, color: c.ink),
+                  ),
+                ),
+                if (uiNewBadge(context, 'tools.resourceWindows', l.gen_menuNew)
+                    case final b?)
+                  UiMini(b, tone: UiMiniTone.accent),
+                UiGlyph(UiGlyphs.chevronRight, size: 13, color: c.faint),
+              ],
+            ),
+          ),
         ),
       ),
     );
