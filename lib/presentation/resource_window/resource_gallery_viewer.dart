@@ -14,6 +14,7 @@ import '../../core/utils/localization_extension.dart';
 import '../../core/utils/nai_resolution_adapter.dart';
 import '../../data/models/gallery/local_image_record.dart';
 import '../../data/models/gallery/nai_image_metadata.dart';
+import '../../data/services/gallery/gallery_sort.dart';
 import '../ui/kit/ui_resource_kind.dart';
 import '../ui/viewer/viewer_contract.dart';
 import '../ui/viewer/viewer_page.dart';
@@ -246,8 +247,9 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
       final hadMore = widget.controller.data.hasMore;
       await _loadMore(forward: true);
       if (_backend.total == previous &&
-          widget.controller.data.hasMore == hadMore)
+          widget.controller.data.hasMore == hadMore) {
         break;
+      }
     }
     if (mounted) await _backend.jump(last: last);
   }
@@ -309,6 +311,8 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
   @override
   Widget build(BuildContext context) {
     final key = _backend.currentKey ?? widget.initialId;
+    final resources = widget.controller.data;
+    final sort = GallerySortField.values.asNameMap()[resources.sortId];
     return ImageViewerPage(
       data: ViewerViewData(
         mode: ViewerMode.gallery,
@@ -316,6 +320,16 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
         now: DateTime.now(),
         position: _backend.position,
         total: math.max(_backend.total, widget.controller.data.total),
+        scope: ViewerScope(
+          name: resources.query.isNotEmpty
+              ? resources.query
+              : resources.sections
+                    .expand((section) => section.groups)
+                    .where((group) => group.id == resources.groupId)
+                    .firstOrNull
+                    ?.label,
+          sort: sort == null ? null : viewerSortOf(sort),
+        ),
         items: [
           for (final source in _backend.sources)
             if (_media[source.identifier] case final media?)

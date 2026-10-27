@@ -59,6 +59,15 @@ void main() {
             'total': active.length,
             'hasMore': offset + 2 < active.length,
             'layout': 'grid',
+            'sortId': 'modifiedAt',
+            'sections': [
+              {
+                'title': 'Library',
+                'groups': [
+                  {'id': 'all', 'label': 'Filtered scope'},
+                ],
+              },
+            ],
             'cellSize': 132.0,
             'layouts': ['grid'],
           };
@@ -170,6 +179,8 @@ void main() {
       expect(viewer(tester).data.current!.width, 100);
       expect(viewer(tester).data.current!.height, 150);
       expect(viewer(tester).data.detail!.prompt, 'blue sky 0');
+      expect(viewer(tester).data.scope!.name, 'Filtered scope');
+      expect(viewer(tester).data.scope!.sort, ViewerSort.modified);
       expect(viewer(tester).data.current!.image, isA<ResizeImage>());
       expect(viewer(tester).data.current!.thumb, isA<ResourceWindowImage>());
       await tester.sendKeyEvent(LogicalKeyboardKey.digit1);
