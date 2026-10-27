@@ -146,6 +146,31 @@ class _PromptHead extends StatelessWidget {
             ),
           ),
         if (tools.translatePinned) const _Translate(),
+        if (tools.resourceWindowsPinned &&
+            scope.actions.onOpenResourceWindow != null)
+          Builder(
+            builder: (context) => GenIb(
+              key: const Key('gen-tool-resources'),
+              glyph: GenGlyphs.resourceWindows,
+              glyphSize: 15,
+              active: scope.controller.popoverTag == #resourceWindows,
+              tooltip: l.floating_open,
+              onTap: () => scope.controller.openMenu(
+                genBelow(context, dy: 4, right: true),
+                [
+                  for (final (kind, glyph, label) in _resourceKinds(context))
+                    UiMenuItem(
+                      key: Key('gen-tool-resource-${kind.name}'),
+                      label: label,
+                      glyph: glyph,
+                      onTap: () => scope.actions.onOpenResourceWindow!(kind),
+                    ),
+                ],
+                tag: #resourceWindows,
+                width: 200,
+              ),
+            ),
+          ),
         if (tools.agentPinned && scope.slots.agentToggle != null)
           scope.slots.agentToggle!,
         Builder(
@@ -584,6 +609,14 @@ class _ToolsMenu extends StatelessWidget {
             GenPromptTool.translatePinned,
             t.translatePinned,
           ),
+          if (scope.actions.onOpenResourceWindow != null)
+            pinRow(
+              const Key('gen-pin-resources'),
+              UiGlyph(GenGlyphs.resourceWindows, size: 15, color: c.muted),
+              l.floating_open,
+              GenPromptTool.resourceWindowsPinned,
+              t.resourceWindowsPinned,
+            ),
           if (scope.slots.agentToggle != null)
             pinRow(
               const Key('gen-pin-agent'),

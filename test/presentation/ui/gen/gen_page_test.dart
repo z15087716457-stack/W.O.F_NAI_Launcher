@@ -237,6 +237,33 @@ void main() {
       );
     });
 
+    testWidgets('资源窗口：可钉到头部，头部按钮弹出四类入口', (t) async {
+      await pump(t);
+      await tapKey(t, 'gen-tool-menu');
+      await tapKey(t, 'gen-pin-resources');
+      expect(
+        r.last('onPromptTool'),
+        'onPromptTool(GenPromptTool.resourceWindowsPinned, true)',
+      );
+      await t.pumpWidget(const SizedBox());
+      final d = GenFixture.view();
+      await pump(
+        t,
+        d.copyWith(
+          prompt: GenPromptData(
+            qualityPresets: d.prompt.qualityPresets,
+            tools: const GenPromptTools(resourceWindowsPinned: true),
+          ),
+        ),
+      );
+      await tapKey(t, 'gen-tool-resources');
+      await tapKey(t, 'gen-tool-resource-vibe');
+      expect(
+        r.last('onOpenResourceWindow'),
+        'onOpenResourceWindow(FloatingResourceKind.vibe)',
+      );
+    });
+
     testWidgets('全屏编辑：弹窗里放同一块编辑器（fullscreen 目标）', (t) async {
       await pump(t);
       await tapKey(t, 'gen-tool-menu');
