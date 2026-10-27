@@ -39213,6 +39213,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Click or Enter to add · click left list or Esc to close'**
   String get prompt_autocompleteHintRelated;
+
+  /// No description provided for @resourceWindow_currentModelUsable.
+  ///
+  /// In en, this message translates to:
+  /// **'Currently usable with this model'**
+  String get resourceWindow_currentModelUsable;
+
+  /// No description provided for @resourceWindow_insertPositive.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into positive prompt'**
+  String get resourceWindow_insertPositive;
+
+  /// No description provided for @resourceWindow_insertNegative.
+  ///
+  /// In en, this message translates to:
+  /// **'Insert into negative prompt'**
+  String get resourceWindow_insertNegative;
 }
 
 class _AppLocalizationsDelegate

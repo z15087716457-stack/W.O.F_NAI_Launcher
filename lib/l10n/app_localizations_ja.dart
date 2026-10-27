@@ -21804,4 +21804,13 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       'クリック / Enter で追加 · 左の一覧か Esc で閉じる';
+
+  @override
+  String get resourceWindow_currentModelUsable => '現在のモデルで使用可能';
+
+  @override
+  String get resourceWindow_insertPositive => '正のプロンプトに挿入';
+
+  @override
+  String get resourceWindow_insertNegative => '負のプロンプトに挿入';
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
 
 import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,6 +60,7 @@ class QueryGallery extends FakeLocalGalleryService {
     FilterCriteria criteria, {
     int offset = 0,
     int limit = 50,
+    GallerySort sort = const GallerySort.modifiedAtDesc(),
   }) {
     queries.add((criteria: criteria, offset: offset, limit: limit));
     return pending?.future ??

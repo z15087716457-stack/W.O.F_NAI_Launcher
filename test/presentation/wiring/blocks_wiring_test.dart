@@ -516,6 +516,48 @@ void main() {
     },
   );
 
+  testWidgets(
+    'explicit resource lane overrides stale focus and preserves paired bundle insertion',
+    (tester) async {
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.updatePromptImmediately('keep positive');
+      params.updateNegativePromptImmediately('keep negative');
+      await mount(tester, const BlocksLibraryWiring());
+      container.read(pillActiveEditorTargetProvider.notifier).state = (
+        scope: PillScopes.main,
+        caret: 0,
+      );
+      final host = tester.state<ConsumerState>(
+        find.byType(BlocksLibraryWiring),
+      );
+      await tester.runAsync(
+        () => BlocksActions(host.ref, host.context, () => host.mounted).insert(
+          [blockId],
+          targetScope: PillScopes.negative,
+          propagateErrors: true,
+        ),
+      );
+      await flush(tester);
+      expect(platform.backups, hasLength(1));
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).projection,
+        contains('keep positive'),
+      );
+      expect(
+        container.read(pillActiveEditorTargetProvider)?.scope,
+        PillScopes.negative,
+      );
+      expect(
+        container
+            .read(pillWorkspaceProvider(PillScopes.negative))
+            .document
+            .instances,
+        isNotEmpty,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('dock uses live data and persists expanded state', (
     tester,
   ) async {

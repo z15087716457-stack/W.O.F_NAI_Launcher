@@ -11554,5 +11554,8 @@
   },
   "prompt_autocompleteTitle": "Complete",
   "prompt_autocompleteHint": "Tab / Enter complete · right-click related tags · ↑↓ move",
-  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close"
+  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close",
+  "resourceWindow_currentModelUsable": "Currently usable with this model",
+  "resourceWindow_insertPositive": "Insert into positive prompt",
+  "resourceWindow_insertNegative": "Insert into negative prompt"
 }

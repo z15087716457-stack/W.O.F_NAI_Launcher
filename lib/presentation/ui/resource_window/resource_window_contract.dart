@@ -26,9 +26,13 @@ class ResourceGroup {
     this.count,
     this.glyph,
     this.color,
+    this.parentId,
   });
 
   final String id;
+
+  /// Stable parent group ID; null denotes a section root.
+  final String? parentId;
   final String label;
   final int? count;
 

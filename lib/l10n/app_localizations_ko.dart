@@ -21876,4 +21876,13 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       '클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기';
+
+  @override
+  String get resourceWindow_currentModelUsable => '현재 모델에서 사용 가능';
+
+  @override
+  String get resourceWindow_insertPositive => '긍정 프롬프트에 삽입';
+
+  @override
+  String get resourceWindow_insertNegative => '부정 프롬프트에 삽입';
 }

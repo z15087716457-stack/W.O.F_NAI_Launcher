@@ -201,6 +201,24 @@ void main() {
     await settings.seed(31);
     expect(container.read(generationParamsNotifierProvider).seed, 31);
   });
+  test(
+    'resource window pin uses the settings callback and restores persisted state',
+    () async {
+      expect(
+        container.read(layoutStateNotifierProvider).resourceWindowsPinned,
+        false,
+      );
+      await settings.promptTool(GenPromptTool.resourceWindowsPinned, true);
+      expect(
+        container.read(layoutStateNotifierProvider).resourceWindowsPinned,
+        true,
+      );
+      final storage = container.read(localStorageServiceProvider);
+      expect(storage.getSetting<bool>('resource_windows_pinned'), true);
+      await settings.promptTool(GenPromptTool.resourceWindowsPinned, false);
+      expect(storage.getSetting<bool>('resource_windows_pinned'), false);
+    },
+  );
   test('质量词与 UC 选择同步原生参数和权威预设状态', () async {
     await settings.quality('light');
     expect(

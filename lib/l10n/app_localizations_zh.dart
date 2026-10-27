@@ -21556,6 +21556,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated => '点击 / 回车 追加 · 点左栏或 Esc 关闭关联';
+
+  @override
+  String get resourceWindow_currentModelUsable => '当前模型可用';
+
+  @override
+  String get resourceWindow_insertPositive => '插入正面';
+
+  @override
+  String get resourceWindow_insertNegative => '插入负面';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43110,4 +43119,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get prompt_autocompleteHintRelated => '點選 / 回車 追加 · 點左欄或 Esc 關閉關聯';
+
+  @override
+  String get resourceWindow_currentModelUsable => '當前模型可用';
+
+  @override
+  String get resourceWindow_insertPositive => '插入正面';
+
+  @override
+  String get resourceWindow_insertNegative => '插入負面';
 }

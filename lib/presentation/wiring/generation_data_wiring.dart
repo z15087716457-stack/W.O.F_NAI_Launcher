@@ -492,6 +492,7 @@ final generationViewDataProvider = Provider.autoDispose
           negativePreview: sections(PromptTokenCountTarget.negative),
           tools: GenPromptTools(
             palettePinned: layout.blockPaletteToolPinned,
+            resourceWindowsPinned: layout.resourceWindowsPinned,
             dockPinned: layout.blockLibraryPanelToolPinned,
             translatePinned: layout.translationToolPinned,
             agentPinned: layout.naiAgentToolPinned,

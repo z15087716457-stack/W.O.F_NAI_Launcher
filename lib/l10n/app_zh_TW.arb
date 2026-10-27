@@ -12127,5 +12127,8 @@
   },
   "prompt_autocompleteTitle": "補全",
   "prompt_autocompleteHint": "Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇",
-  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯"
+  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯",
+  "resourceWindow_currentModelUsable": "當前模型可用",
+  "resourceWindow_insertPositive": "插入正面",
+  "resourceWindow_insertNegative": "插入負面"
 }

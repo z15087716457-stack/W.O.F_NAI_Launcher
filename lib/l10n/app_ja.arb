@@ -11542,5 +11542,8 @@
   },
   "prompt_autocompleteTitle": "補完",
   "prompt_autocompleteHint": "Tab / Enter で補完 · 右クリックで関連タグ · ↑↓ 選択",
-  "prompt_autocompleteHintRelated": "クリック / Enter で追加 · 左の一覧か Esc で閉じる"
+  "prompt_autocompleteHintRelated": "クリック / Enter で追加 · 左の一覧か Esc で閉じる",
+  "resourceWindow_currentModelUsable": "現在のモデルで使用可能",
+  "resourceWindow_insertPositive": "正のプロンプトに挿入",
+  "resourceWindow_insertNegative": "負のプロンプトに挿入"
 }

@@ -1,51 +1,132 @@
+import 'dart:async';
+
 import 'package:desktop_multi_window/desktop_multi_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/services/resource_window_host.dart';
 import '../../core/services/resource_window_protocol.dart';
 import '../../core/services/resource_window_service.dart';
+import '../../core/utils/localization_extension.dart';
 import '../../l10n/app_localizations.dart';
+import '../providers/font_provider.dart';
+import '../themes/app_theme.dart';
+import '../ui/kit/ui_resource_kind.dart';
+import '../ui/resource_window/resource_window_page.dart';
+import 'resource_window_controller.dart';
 
-/// Intentionally no ProviderScope, data-directory resolution, Hive/SQLite,
-/// migrations, logging files, bootstrap, Agent, RAG, Krita, tray or media setup.
+/// No ProviderScope, data-directory resolution, Hive/SQLite, migration, logging,
+/// Agent, RAG, Krita, tray or media setup. The page is owned by the front-end.
 Future<void> runResourceWindow(
-  WindowController controller,
+  WindowController window,
   ResourceWindowArguments arguments,
 ) async {
   const native = MethodChannel('com.nailauncher/resource_window_native');
-  await controller.setWindowMethodHandler((call) async {
+  final localeParts = arguments.locale.replaceAll('-', '_').split('_');
+  final locale = Locale(
+    localeParts.first,
+    localeParts.length > 1 ? localeParts.last : null,
+  );
+  setCurrentL10nLocale(locale);
+  String title(FloatingResourceKind kind) => switch (kind) {
+    FloatingResourceKind.gallery => currentL10n.localGallery_title,
+    FloatingResourceKind.blocks => currentL10n.blocks_title,
+    FloatingResourceKind.vibe => currentL10n.refs_vibeTitle,
+    FloatingResourceKind.precise => currentL10n.refs_preciseTitle,
+  };
+  final controller = ResourceWindowController(
+    windowId: window.windowId,
+    kind: arguments.kind,
+    alwaysOnTop: arguments.alwaysOnTop,
+    onKindChanged: (kind) => native.invokeMethod<void>('setTitle', title(kind)),
+  );
+  await window.setWindowMethodHandler((call) async {
     switch (call.method) {
       case 'resource.close':
         return native.invokeMethod<void>('close');
+      case 'resource.focus':
+        return native.invokeMethod<void>('focus');
       case 'resource.setAlwaysOnTop':
         return native.invokeMethod<void>('setAlwaysOnTop', call.arguments);
+      case 'resources.changed':
+        controller.changed(resourceMap(call.arguments));
+        return;
+      case 'resources.disconnected':
+        controller.disconnected();
+        return;
       default:
         throw MissingPluginException(
           'Unsupported resource method: ${call.method}',
         );
     }
   });
-  await ResourceWindowService.hostChannel.invokeMethod<Object?>('ready', {
-    'windowId': controller.windowId,
-    'kind': arguments.kind.name,
+  native.setMethodCallHandler((call) async {
+    if (call.method == 'layout') {
+      controller.nativeLayout(resourceMap(call.arguments));
+    }
   });
-  runApp(const ResourceWindowPlaceholder());
-  WidgetsBinding.instance.addPostFrameCallback((_) async {
-    await controller.show();
+  await native.invokeMethod<void>('configure', {
+    'title': title(arguments.kind),
+    'rect': arguments.rect,
+    'alwaysOnTop': arguments.alwaysOnTop,
   });
+  final response = resourceMap(
+    await ResourceWindowService.hostChannel.invokeMethod<Object?>('ready', {
+      'windowId': window.windowId,
+      'kind': arguments.kind.name,
+    }),
+  );
+  if (response['version'] != 1) resourceError('unsupported_version');
+  runApp(
+    ResourceWindowApp(
+      controller: controller,
+      arguments: arguments,
+      locale: locale,
+    ),
+  );
+  unawaited(controller.initialize());
+  WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(window.show()));
 }
 
-/// Only the task-authorized placeholder; the front-end owns the actual window.
-class ResourceWindowPlaceholder extends StatelessWidget {
-  const ResourceWindowPlaceholder({super.key});
+class ResourceWindowApp extends StatefulWidget {
+  const ResourceWindowApp({
+    super.key,
+    required this.controller,
+    required this.arguments,
+    required this.locale,
+  });
+  final ResourceWindowController controller;
+  final ResourceWindowArguments arguments;
+  final Locale locale;
+  @override
+  State<ResourceWindowApp> createState() => _ResourceWindowAppState();
+}
+
+class _ResourceWindowAppState extends State<ResourceWindowApp> {
+  @override
+  void dispose() {
+    widget.controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    locale: widget.locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,
-    home: Builder(
-      builder: (context) => Text(
-        AppLocalizations.of(context)!.shortcut_action_open_resource_window,
+    theme: AppTheme.getTheme(
+      AppStyle.values.byName(widget.arguments.style),
+      widget.arguments.brightness == 'light'
+          ? Brightness.light
+          : Brightness.dark,
+      fontConfig: FontConfig.fromKey(widget.arguments.fontKey),
+    ),
+    home: ListenableBuilder(
+      listenable: widget.controller,
+      builder: (_, _) => ResourceWindowPage(
+        data: widget.controller.data,
+        actions: widget.controller.actions,
       ),
     ),
   );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:nai_launcher/presentation/wiring/resource_window_wiring.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -121,6 +122,7 @@ void main() {
           InMemoryLocalStorageService(),
         ),
         appRouterProvider.overrideWithValue(router),
+        nativeResourceWindowsProvider.overrideWithValue(false),
         anlasBalanceWatcherProvider.overrideWith(_Balance.new),
         generationCompletionWatcherProvider.overrideWith(_Completion.new),
         backgroundRefreshNotifierProvider.overrideWith(_Refresh.new),

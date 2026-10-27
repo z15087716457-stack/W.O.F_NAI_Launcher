@@ -22570,4 +22570,14 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       'Click or Enter to add · click left list or Esc to close';
+
+  @override
+  String get resourceWindow_currentModelUsable =>
+      'Currently usable with this model';
+
+  @override
+  String get resourceWindow_insertPositive => 'Insert into positive prompt';
+
+  @override
+  String get resourceWindow_insertNegative => 'Insert into negative prompt';
 }
