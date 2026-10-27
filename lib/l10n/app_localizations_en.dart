@@ -22570,4 +22570,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       'Click or Enter to add · click left list or Esc to close';
+
+  @override
+  String get resourceWindow_pin => 'Keep on top';
+
+  @override
+  String get resourceWindow_newWindow => 'Open another resource window';
+
+  @override
+  String get resourceWindow_rowHeight => 'Row height';
+
+  @override
+  String get resourceWindow_cardSize => 'Card size';
+
+  @override
+  String get resourceWindow_dragHint =>
+      'Drag onto the matching area in Generate';
+
+  @override
+  String get resourceWindow_dragHintBlocks => 'Drag into a prompt to insert';
+
+  @override
+  String get resourceWindow_keyDrag => 'Drag';
+
+  @override
+  String get resourceWindow_keyDouble => 'Double-click';
+
+  @override
+  String get resourceWindow_hintDrag => 'use in Generate';
+
+  @override
+  String get resourceWindow_hintView => 'view large';
+
+  @override
+  String get resourceWindow_hintPrimary => 'primary action';
+
+  @override
+  String get resourceWindow_connected => 'Connected to main window';
+
+  @override
+  String get resourceWindow_disconnected => 'Main window disconnected';
 }

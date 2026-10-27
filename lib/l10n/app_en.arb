@@ -11554,5 +11554,18 @@
   },
   "prompt_autocompleteTitle": "Complete",
   "prompt_autocompleteHint": "Tab / Enter complete · right-click related tags · ↑↓ move",
-  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close"
+  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close",
+  "resourceWindow_pin": "Keep on top",
+  "resourceWindow_newWindow": "Open another resource window",
+  "resourceWindow_rowHeight": "Row height",
+  "resourceWindow_cardSize": "Card size",
+  "resourceWindow_dragHint": "Drag onto the matching area in Generate",
+  "resourceWindow_dragHintBlocks": "Drag into a prompt to insert",
+  "resourceWindow_keyDrag": "Drag",
+  "resourceWindow_keyDouble": "Double-click",
+  "resourceWindow_hintDrag": "use in Generate",
+  "resourceWindow_hintView": "view large",
+  "resourceWindow_hintPrimary": "primary action",
+  "resourceWindow_connected": "Connected to main window",
+  "resourceWindow_disconnected": "Main window disconnected"
 }

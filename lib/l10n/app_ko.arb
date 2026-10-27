@@ -11542,5 +11542,18 @@
   },
   "prompt_autocompleteTitle": "자동 완성",
   "prompt_autocompleteHint": "Tab / Enter 완성 · 우클릭 연관 태그 · ↑↓ 선택",
-  "prompt_autocompleteHintRelated": "클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기"
+  "prompt_autocompleteHintRelated": "클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기",
+  "resourceWindow_pin": "항상 위에",
+  "resourceWindow_newWindow": "리소스 창 하나 더 열기",
+  "resourceWindow_rowHeight": "행 높이",
+  "resourceWindow_cardSize": "카드 크기",
+  "resourceWindow_dragHint": "생성 페이지의 해당 영역으로 끌어다 놓기",
+  "resourceWindow_dragHintBlocks": "프롬프트로 끌어다 삽입",
+  "resourceWindow_keyDrag": "드래그",
+  "resourceWindow_keyDouble": "더블클릭",
+  "resourceWindow_hintDrag": "생성 페이지에서 사용",
+  "resourceWindow_hintView": "크게 보기",
+  "resourceWindow_hintPrimary": "기본 작업",
+  "resourceWindow_connected": "메인 창 연결됨",
+  "resourceWindow_disconnected": "메인 창 연결 끊김"
 }

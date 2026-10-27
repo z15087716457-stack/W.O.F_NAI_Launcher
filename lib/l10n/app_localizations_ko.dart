@@ -21876,4 +21876,43 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       '클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기';
+
+  @override
+  String get resourceWindow_pin => '항상 위에';
+
+  @override
+  String get resourceWindow_newWindow => '리소스 창 하나 더 열기';
+
+  @override
+  String get resourceWindow_rowHeight => '행 높이';
+
+  @override
+  String get resourceWindow_cardSize => '카드 크기';
+
+  @override
+  String get resourceWindow_dragHint => '생성 페이지의 해당 영역으로 끌어다 놓기';
+
+  @override
+  String get resourceWindow_dragHintBlocks => '프롬프트로 끌어다 삽입';
+
+  @override
+  String get resourceWindow_keyDrag => '드래그';
+
+  @override
+  String get resourceWindow_keyDouble => '더블클릭';
+
+  @override
+  String get resourceWindow_hintDrag => '생성 페이지에서 사용';
+
+  @override
+  String get resourceWindow_hintView => '크게 보기';
+
+  @override
+  String get resourceWindow_hintPrimary => '기본 작업';
+
+  @override
+  String get resourceWindow_connected => '메인 창 연결됨';
+
+  @override
+  String get resourceWindow_disconnected => '메인 창 연결 끊김';
 }

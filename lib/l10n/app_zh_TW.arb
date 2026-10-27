@@ -12127,5 +12127,18 @@
   },
   "prompt_autocompleteTitle": "補全",
   "prompt_autocompleteHint": "Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇",
-  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯"
+  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯",
+  "resourceWindow_pin": "視窗置頂",
+  "resourceWindow_newWindow": "新開一個資源視窗",
+  "resourceWindow_rowHeight": "行高",
+  "resourceWindow_cardSize": "卡片大小",
+  "resourceWindow_dragHint": "拖到生成頁對應區域使用",
+  "resourceWindow_dragHintBlocks": "拖到提示詞插入",
+  "resourceWindow_keyDrag": "拖動",
+  "resourceWindow_keyDouble": "雙擊",
+  "resourceWindow_hintDrag": "到生成頁使用",
+  "resourceWindow_hintView": "看大圖",
+  "resourceWindow_hintPrimary": "執行主操作",
+  "resourceWindow_connected": "主視窗已連線",
+  "resourceWindow_disconnected": "主視窗未連線"
 }

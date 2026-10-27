@@ -39213,6 +39213,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Click or Enter to add · click left list or Esc to close'**
   String get prompt_autocompleteHintRelated;
+
+  /// No description provided for @resourceWindow_pin.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep on top'**
+  String get resourceWindow_pin;
+
+  /// No description provided for @resourceWindow_newWindow.
+  ///
+  /// In en, this message translates to:
+  /// **'Open another resource window'**
+  String get resourceWindow_newWindow;
+
+  /// No description provided for @resourceWindow_rowHeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Row height'**
+  String get resourceWindow_rowHeight;
+
+  /// No description provided for @resourceWindow_cardSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Card size'**
+  String get resourceWindow_cardSize;
+
+  /// No description provided for @resourceWindow_dragHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag onto the matching area in Generate'**
+  String get resourceWindow_dragHint;
+
+  /// No description provided for @resourceWindow_dragHintBlocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag into a prompt to insert'**
+  String get resourceWindow_dragHintBlocks;
+
+  /// No description provided for @resourceWindow_keyDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag'**
+  String get resourceWindow_keyDrag;
+
+  /// No description provided for @resourceWindow_keyDouble.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-click'**
+  String get resourceWindow_keyDouble;
+
+  /// No description provided for @resourceWindow_hintDrag.
+  ///
+  /// In en, this message translates to:
+  /// **'use in Generate'**
+  String get resourceWindow_hintDrag;
+
+  /// No description provided for @resourceWindow_hintView.
+  ///
+  /// In en, this message translates to:
+  /// **'view large'**
+  String get resourceWindow_hintView;
+
+  /// No description provided for @resourceWindow_hintPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'primary action'**
+  String get resourceWindow_hintPrimary;
+
+  /// No description provided for @resourceWindow_connected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected to main window'**
+  String get resourceWindow_connected;
+
+  /// No description provided for @resourceWindow_disconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Main window disconnected'**
+  String get resourceWindow_disconnected;
 }
 
 class _AppLocalizationsDelegate

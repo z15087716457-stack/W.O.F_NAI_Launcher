@@ -21804,4 +21804,43 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get prompt_autocompleteHintRelated =>
       'クリック / Enter で追加 · 左の一覧か Esc で閉じる';
+
+  @override
+  String get resourceWindow_pin => '最前面に表示';
+
+  @override
+  String get resourceWindow_newWindow => 'リソースウィンドウをもう一つ開く';
+
+  @override
+  String get resourceWindow_rowHeight => '行の高さ';
+
+  @override
+  String get resourceWindow_cardSize => 'カードサイズ';
+
+  @override
+  String get resourceWindow_dragHint => '生成ページの対応エリアへドラッグ';
+
+  @override
+  String get resourceWindow_dragHintBlocks => 'プロンプトへドラッグして挿入';
+
+  @override
+  String get resourceWindow_keyDrag => 'ドラッグ';
+
+  @override
+  String get resourceWindow_keyDouble => 'ダブルクリック';
+
+  @override
+  String get resourceWindow_hintDrag => '生成ページで使う';
+
+  @override
+  String get resourceWindow_hintView => '拡大表示';
+
+  @override
+  String get resourceWindow_hintPrimary => 'メイン操作';
+
+  @override
+  String get resourceWindow_connected => 'メインウィンドウに接続済み';
+
+  @override
+  String get resourceWindow_disconnected => 'メインウィンドウ未接続';
 }

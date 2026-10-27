@@ -11542,5 +11542,18 @@
   },
   "prompt_autocompleteTitle": "補完",
   "prompt_autocompleteHint": "Tab / Enter で補完 · 右クリックで関連タグ · ↑↓ 選択",
-  "prompt_autocompleteHintRelated": "クリック / Enter で追加 · 左の一覧か Esc で閉じる"
+  "prompt_autocompleteHintRelated": "クリック / Enter で追加 · 左の一覧か Esc で閉じる",
+  "resourceWindow_pin": "最前面に表示",
+  "resourceWindow_newWindow": "リソースウィンドウをもう一つ開く",
+  "resourceWindow_rowHeight": "行の高さ",
+  "resourceWindow_cardSize": "カードサイズ",
+  "resourceWindow_dragHint": "生成ページの対応エリアへドラッグ",
+  "resourceWindow_dragHintBlocks": "プロンプトへドラッグして挿入",
+  "resourceWindow_keyDrag": "ドラッグ",
+  "resourceWindow_keyDouble": "ダブルクリック",
+  "resourceWindow_hintDrag": "生成ページで使う",
+  "resourceWindow_hintView": "拡大表示",
+  "resourceWindow_hintPrimary": "メイン操作",
+  "resourceWindow_connected": "メインウィンドウに接続済み",
+  "resourceWindow_disconnected": "メインウィンドウ未接続"
 }

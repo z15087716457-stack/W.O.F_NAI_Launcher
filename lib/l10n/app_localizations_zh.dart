@@ -21556,6 +21556,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get prompt_autocompleteHintRelated => '点击 / 回车 追加 · 点左栏或 Esc 关闭关联';
+
+  @override
+  String get resourceWindow_pin => '窗口置顶';
+
+  @override
+  String get resourceWindow_newWindow => '新开一个资源窗口';
+
+  @override
+  String get resourceWindow_rowHeight => '行高';
+
+  @override
+  String get resourceWindow_cardSize => '卡片大小';
+
+  @override
+  String get resourceWindow_dragHint => '拖到生成页对应区域使用';
+
+  @override
+  String get resourceWindow_dragHintBlocks => '拖到提示词插入';
+
+  @override
+  String get resourceWindow_keyDrag => '拖动';
+
+  @override
+  String get resourceWindow_keyDouble => '双击';
+
+  @override
+  String get resourceWindow_hintDrag => '到生成页使用';
+
+  @override
+  String get resourceWindow_hintView => '看大图';
+
+  @override
+  String get resourceWindow_hintPrimary => '执行主操作';
+
+  @override
+  String get resourceWindow_connected => '主窗口已连接';
+
+  @override
+  String get resourceWindow_disconnected => '主窗口未连接';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43110,4 +43149,43 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get prompt_autocompleteHintRelated => '點選 / 回車 追加 · 點左欄或 Esc 關閉關聯';
+
+  @override
+  String get resourceWindow_pin => '視窗置頂';
+
+  @override
+  String get resourceWindow_newWindow => '新開一個資源視窗';
+
+  @override
+  String get resourceWindow_rowHeight => '行高';
+
+  @override
+  String get resourceWindow_cardSize => '卡片大小';
+
+  @override
+  String get resourceWindow_dragHint => '拖到生成頁對應區域使用';
+
+  @override
+  String get resourceWindow_dragHintBlocks => '拖到提示詞插入';
+
+  @override
+  String get resourceWindow_keyDrag => '拖動';
+
+  @override
+  String get resourceWindow_keyDouble => '雙擊';
+
+  @override
+  String get resourceWindow_hintDrag => '到生成頁使用';
+
+  @override
+  String get resourceWindow_hintView => '看大圖';
+
+  @override
+  String get resourceWindow_hintPrimary => '執行主操作';
+
+  @override
+  String get resourceWindow_connected => '主視窗已連線';
+
+  @override
+  String get resourceWindow_disconnected => '主視窗未連線';
 }
