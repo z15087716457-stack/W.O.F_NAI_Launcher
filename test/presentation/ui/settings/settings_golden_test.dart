@@ -136,7 +136,23 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
       masks.add(t.getRect(find.byWidget(label.widget)));
     }
     final l = AppLocalizations.of(t.element(find.byType(SettingsHost)))!;
-    expect(find.text('新'), findsNothing);
+    // 2026-10-27 E04（用户确认）：「新」改为只在首次见到的那次启动显示，
+    // 只允许出现在本批两行新设置里（这两行已整体排除），别处仍不准有常驻角标。
+    final newRows = [
+      for (final k in ['workspaceFontScale', 'promptAutocomplete'])
+        find.byKey(Key('setting-$k')),
+    ];
+    for (final e in find.text('新').evaluate()) {
+      expect(
+        newRows.any(
+          (row) => find
+              .descendant(of: row, matching: find.byWidget(e.widget))
+              .evaluate()
+              .isNotEmpty,
+        ),
+        isTrue,
+      );
+    }
     // 只豁免旧“新”标签本身的矩形，标题、卡片及其下方的控件继续逐像素锁定。
     final badgeText = TextPainter(
       text: TextSpan(

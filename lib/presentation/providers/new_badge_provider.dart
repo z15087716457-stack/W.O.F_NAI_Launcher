@@ -4,13 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/storage/local_storage_service.dart';
+import '../ui/kit/ui_new_badge.dart';
 
 /// Kept alive for the root container's lifetime, i.e. one application launch.
 final newBadgeServiceProvider = Provider<NewBadgeService>(
   (ref) => NewBadgeService(ref.read(localStorageServiceProvider)),
 );
 
-class NewBadgeService {
+class NewBadgeService implements UiNewBadgeStore {
   NewBadgeService(this._storage)
     : _seenBeforeLaunch = Set.unmodifiable(
         (_storage.getSetting<List<dynamic>>(storageKey) ?? const [])
@@ -22,8 +23,10 @@ class NewBadgeService {
   final Set<String> _seenBeforeLaunch;
   final Set<String> _seenThisLaunch = {};
 
+  @override
   bool showNewBadge(String id) => !_seenBeforeLaunch.contains(id);
 
+  @override
   void markNewBadgeSeen(String id) {
     if (_seenBeforeLaunch.contains(id) || !_seenThisLaunch.add(id)) return;
     unawaited(
@@ -35,17 +38,12 @@ class NewBadgeService {
   }
 }
 
-/// Minimal adapter for existing string badge parameters. Call only when the
-/// entry is presented (menus: when opened, panels: when built), not for preload.
-/// Persistence is deferred until the rendered frame, never during build.
-String? newBadgeLabel(BuildContext context, String id, String label) {
-  final service = ProviderScope.containerOf(
-    context,
-    listen: false,
-  ).read(newBadgeServiceProvider);
-  if (!service.showNewBadge(id)) return null;
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    if (context.mounted) service.markNewBadgeSeen(id);
-  });
-  return label;
+/// 把本次启动的已见记录挂到界面层（[UiNewBadges]）。
+class NewBadgeScope extends ConsumerWidget {
+  const NewBadgeScope({super.key, required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      UiNewBadges(store: ref.watch(newBadgeServiceProvider), child: child);
 }

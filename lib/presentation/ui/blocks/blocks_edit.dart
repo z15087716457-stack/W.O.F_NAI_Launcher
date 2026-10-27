@@ -7,7 +7,7 @@ import '../../../core/enums/quality_tag_preset.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../../providers/new_badge_provider.dart';
+import '../kit/ui_new_badge.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -1698,7 +1698,7 @@ class _ParamsPanelState extends State<_ParamsPanel> {
           _PresetRow(
             key: const Key('block-param-quality-row'),
             label: l10n.qualityTags_label,
-            badge: newBadgeLabel(context, 'presets.quality', l10n.gen_menuNew),
+            badge: uiNewBadge(context, 'presets.quality', l10n.gen_menuNew),
             control: Wrap(
               spacing: 6,
               runSpacing: 6,
@@ -1751,7 +1751,7 @@ class _ParamsPanelState extends State<_ParamsPanel> {
           _PresetRow(
             key: const Key('block-param-uc-row'),
             label: l10n.ucPreset_label,
-            badge: newBadgeLabel(context, 'presets.uc', l10n.gen_menuNew),
+            badge: uiNewBadge(context, 'presets.uc', l10n.gen_menuNew),
             control: dropdown(
               'uc',
               _p.ucCustomBlockId != null

@@ -15,6 +15,7 @@ import 'package:window_manager/window_manager.dart';
 import 'core/shortcuts/default_shortcuts.dart';
 import 'presentation/providers/auth_provider.dart';
 import 'presentation/providers/guest_session_provider.dart';
+import 'presentation/providers/new_badge_provider.dart';
 import 'presentation/router/app_router.dart';
 import 'presentation/providers/theme_provider.dart';
 import 'presentation/widgets/common/workspace_typography_scope.dart';
@@ -230,9 +231,11 @@ class NAILauncherApp extends ConsumerWidget {
                         ref.read(themeNotifierProvider.notifier).nextTheme(),
                     child: NumpadEditingShortcuts(
                       child: TextEditingShortcuts(
-                        child: FloatingResourceWindowsHost(
-                          builder: floatingResourceWindowBuilder,
-                          child: child ?? const SizedBox.shrink(),
+                        child: NewBadgeScope(
+                          child: FloatingResourceWindowsHost(
+                            builder: floatingResourceWindowBuilder,
+                            child: child ?? const SizedBox.shrink(),
+                          ),
                         ),
                       ),
                     ),

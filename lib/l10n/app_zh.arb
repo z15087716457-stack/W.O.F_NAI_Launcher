@@ -11539,5 +11539,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "prompt_autocompleteTitle": "补全",
+  "prompt_autocompleteHint": "Tab / 回车 补全 · 右键 关联标签 · ↑↓ 选择",
+  "prompt_autocompleteHintRelated": "点击 / 回车 追加 · 点左栏或 Esc 关闭关联"
 }

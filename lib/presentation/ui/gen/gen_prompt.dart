@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
-import '../../providers/new_badge_provider.dart';
+import '../kit/ui_new_badge.dart';
 import '../../widgets/common/studio_icons.dart';
 import '../../widgets/common/translation_icon.dart';
 import '../../widgets/bridge/bridge_link_icon.dart';
@@ -370,7 +370,7 @@ class _Translate extends StatelessWidget {
           key: const Key('gen-translate-adjust'),
           label: l.gen_translateAdjust,
           subtitle: l.gen_translateAdjustSub,
-          badge: newBadgeLabel(context, 'translate.adjust', l.gen_menuNew),
+          badge: uiNewBadge(context, 'translate.adjust', l.gen_menuNew),
           glyph: UiGlyphs.chat,
           enabled:
               !t.busy &&
@@ -398,11 +398,7 @@ class _Translate extends StatelessWidget {
           key: const Key('gen-translate-clear'),
           label: l.gen_translateClearRestore,
           subtitle: l.gen_translateClearRestoreSub,
-          badge: newBadgeLabel(
-            context,
-            'translate.clearRestore',
-            l.gen_menuNew,
-          ),
+          badge: uiNewBadge(context, 'translate.clearRestore', l.gen_menuNew),
           glyph: UiGlyphs.undo,
           enabled:
               !t.busy &&
@@ -625,6 +621,13 @@ class _ToolsMenu extends StatelessWidget {
                           style: UiText.sans(13, color: c.ink),
                         ),
                       ),
+                      if (uiNewBadge(
+                            context,
+                            'tools.resourceWindows',
+                            l.gen_menuNew,
+                          )
+                          case final b?)
+                        UiMini(b, tone: UiMiniTone.accent),
                       UiGlyph(UiGlyphs.chevronRight, size: 13, color: c.faint),
                     ],
                   ),

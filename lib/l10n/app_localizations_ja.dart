@@ -21794,4 +21794,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String set_stThumbQuotaTip(int count, String time) {
     return 'サムネイル $count 枚 · $timeに集計';
   }
+
+  @override
+  String get prompt_autocompleteTitle => '補完';
+
+  @override
+  String get prompt_autocompleteHint => 'Tab / Enter で補完 · 右クリックで関連タグ · ↑↓ 選択';
+
+  @override
+  String get prompt_autocompleteHintRelated =>
+      'クリック / Enter で追加 · 左の一覧か Esc で閉じる';
 }

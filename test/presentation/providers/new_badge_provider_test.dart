@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/new_badge_provider.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_new_badge.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
@@ -47,29 +48,31 @@ void main() {
         var launch = _launch(storage);
         Widget page() => UncontrolledProviderScope(
           container: launch,
-          child: MaterialApp(
-            theme: GeistTheme.light,
-            locale: const Locale('zh'),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            home: Scaffold(
-              body: blocks
-                  ? Center(
-                      child: BlockEditDialog(
-                        data: BlocksFixture.edit(),
-                        actions: BlockEditActions(
-                          onSave: (_) {},
-                          onCancel: () {},
-                          onPickThumbnail: () async => null,
-                          onCaptureParams: () async => null,
+          child: NewBadgeScope(
+            child: MaterialApp(
+              theme: GeistTheme.light,
+              locale: const Locale('zh'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: Scaffold(
+                body: blocks
+                    ? Center(
+                        child: BlockEditDialog(
+                          data: BlocksFixture.edit(),
+                          actions: BlockEditActions(
+                            onSave: (_) {},
+                            onCancel: () {},
+                            onPickThumbnail: () async => null,
+                            onCaptureParams: () async => null,
+                          ),
                         ),
+                      )
+                    : GenerationPage(
+                        data: GenFixture.view(),
+                        actions: GenActions.logging((_) {}),
+                        slots: const GenSlots(editor: GenFixtureEditor.builder),
                       ),
-                    )
-                  : GenerationPage(
-                      data: GenFixture.view(),
-                      actions: GenActions.logging((_) {}),
-                      slots: const GenSlots(editor: GenFixtureEditor.builder),
-                    ),
+              ),
             ),
           ),
         );
@@ -161,11 +164,13 @@ void main() {
     addTearDown(first.dispose);
     Widget entry(ProviderContainer container) => UncontrolledProviderScope(
       container: container,
-      child: Directionality(
-        textDirection: TextDirection.ltr,
-        child: Builder(
-          builder: (context) => Text(
-            newBadgeLabel(context, 'translate.adjust', 'NEW') ?? 'hidden',
+      child: NewBadgeScope(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Builder(
+            builder: (context) => Text(
+              uiNewBadge(context, 'translate.adjust', 'NEW') ?? 'hidden',
+            ),
           ),
         ),
       ),

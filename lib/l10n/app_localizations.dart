@@ -39195,6 +39195,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} thumbnails · counted {time}'**
   String set_stThumbQuotaTip(int count, String time);
+
+  /// No description provided for @prompt_autocompleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete'**
+  String get prompt_autocompleteTitle;
+
+  /// No description provided for @prompt_autocompleteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tab / Enter complete · right-click related tags · ↑↓ move'**
+  String get prompt_autocompleteHint;
+
+  /// No description provided for @prompt_autocompleteHintRelated.
+  ///
+  /// In en, this message translates to:
+  /// **'Click or Enter to add · click left list or Esc to close'**
+  String get prompt_autocompleteHintRelated;
 }
 
 class _AppLocalizationsDelegate

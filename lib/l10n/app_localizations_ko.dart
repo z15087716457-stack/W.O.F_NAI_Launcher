@@ -21866,4 +21866,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String set_stThumbQuotaTip(int count, String time) {
     return '썸네일 $count개 · $time 집계';
   }
+
+  @override
+  String get prompt_autocompleteTitle => '자동 완성';
+
+  @override
+  String get prompt_autocompleteHint => 'Tab / Enter 완성 · 우클릭 연관 태그 · ↑↓ 선택';
+
+  @override
+  String get prompt_autocompleteHintRelated =>
+      '클릭 / Enter 추가 · 왼쪽 목록이나 Esc로 닫기';
 }

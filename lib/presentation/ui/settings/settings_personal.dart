@@ -12,6 +12,7 @@ import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
 import '../kit/ui_glyph.dart';
 import '../kit/ui_lib_controls.dart';
+import '../kit/ui_new_badge.dart';
 import '../kit/ui_text.dart';
 import 'settings_contract.dart';
 import 'settings_controls.dart';
@@ -571,6 +572,15 @@ class SettingsAppearancePage extends StatelessWidget {
               SettingKey.workspaceFontScale,
               title: l.set_workspaceFontScale,
               subtitle: l.set_workspaceFontScaleSub,
+              badges: [
+                if (uiNewBadge(
+                      context,
+                      'settings.workspaceFontScale',
+                      l.gen_menuNew,
+                    )
+                    case final b?)
+                  UiMini(b, tone: UiMiniTone.accent),
+              ],
               control: SetSlider(
                 SettingKey.workspaceFontScale,
                 width: 180,

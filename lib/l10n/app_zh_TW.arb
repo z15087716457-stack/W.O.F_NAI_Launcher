@@ -12124,5 +12124,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "prompt_autocompleteTitle": "補全",
+  "prompt_autocompleteHint": "Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇",
+  "prompt_autocompleteHintRelated": "點選 / 回車 追加 · 點左欄或 Esc 關閉關聯"
 }

@@ -269,6 +269,79 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets(
+    'E01 popup: right-click opens related column, add, left list closes',
+    (tester) async {
+      final source = _AutocompleteSource();
+      final container = await _pump(
+        tester,
+        libraryState: PromptBlockLibraryState(
+          blocks: const [],
+          folders: const [],
+        ),
+        overrides: [
+          localTagExpansionServiceProvider.overrideWith(
+            (ref) => LocalTagExpansionService(
+              catalog: source,
+              relatedTags: source,
+              substringSearch: (_, {int limit = 40}) async => [],
+              popularSearch: ({int limit = 12}) async => [],
+            ),
+          ),
+        ],
+      );
+      await container
+          .read(promptAutocompleteEnabledProvider.notifier)
+          .setEnabled(true);
+      await tester.pump();
+      final field = find
+          .descendant(
+            of: find.byType(PromptPillEditor),
+            matching: find.byType(TextField),
+          )
+          .first;
+      await tester.tap(field);
+      await tester.enterText(field, 'bl');
+      await tester.pump(const Duration(milliseconds: 150));
+      await tester.pump();
+      final popup = find.byKey(const Key('prompt-autocomplete'));
+      final narrow = tester.getSize(popup).width;
+      expect(
+        find.byKey(const Key('prompt-autocomplete-related')),
+        findsNothing,
+      );
+      await tester.tap(
+        find.byKey(const Key('prompt-autocomplete-0')),
+        buttons: kSecondaryButton,
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(const Key('prompt-autocomplete-related')), findsOne);
+      expect(tester.getSize(popup).width, greaterThan(narrow + 200));
+      // 关联栏里点 blue_hair：先补全 blue eyes，再在其后追加。
+      await tester.tap(find.byKey(const Key('prompt-autocomplete-related-1')));
+      await tester.pump();
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+        'blue eyes, blue hair, ',
+      );
+      expect(find.byKey(const Key('prompt-autocomplete-related')), findsOne);
+      // 左栏左键只关关联栏，不再补全。
+      await tester.tap(find.byKey(const Key('prompt-autocomplete-1')));
+      await tester.pump();
+      expect(
+        find.byKey(const Key('prompt-autocomplete-related')),
+        findsNothing,
+      );
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).document.text,
+        'blue eyes, blue hair, ',
+      );
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   testWidgets('creative scale updates editor and inline chips exactly once', (
     tester,
   ) async {

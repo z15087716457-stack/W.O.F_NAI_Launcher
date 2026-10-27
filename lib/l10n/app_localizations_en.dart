@@ -22559,4 +22559,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String set_stThumbQuotaTip(int count, String time) {
     return '$count thumbnails · counted $time';
   }
+
+  @override
+  String get prompt_autocompleteTitle => 'Complete';
+
+  @override
+  String get prompt_autocompleteHint =>
+      'Tab / Enter complete · right-click related tags · ↑↓ move';
+
+  @override
+  String get prompt_autocompleteHintRelated =>
+      'Click or Enter to add · click left list or Esc to close';
 }

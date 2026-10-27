@@ -21547,6 +21547,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String set_stThumbQuotaTip(int count, String time) {
     return '$count 张缩略图 · 统计于$time';
   }
+
+  @override
+  String get prompt_autocompleteTitle => '补全';
+
+  @override
+  String get prompt_autocompleteHint => 'Tab / 回车 补全 · 右键 关联标签 · ↑↓ 选择';
+
+  @override
+  String get prompt_autocompleteHintRelated => '点击 / 回车 追加 · 点左栏或 Esc 关闭关联';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43092,4 +43101,13 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String set_stThumbQuotaTip(int count, String time) {
     return '$count 張縮圖 · 統計於$time';
   }
+
+  @override
+  String get prompt_autocompleteTitle => '補全';
+
+  @override
+  String get prompt_autocompleteHint => 'Tab / 回車 補全 · 右鍵 關聯標籤 · ↑↓ 選擇';
+
+  @override
+  String get prompt_autocompleteHintRelated => '點選 / 回車 追加 · 點左欄或 Esc 關閉關聯';
 }

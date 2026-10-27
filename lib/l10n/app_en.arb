@@ -11551,5 +11551,8 @@
         "type": "String"
       }
     }
-  }
+  },
+  "prompt_autocompleteTitle": "Complete",
+  "prompt_autocompleteHint": "Tab / Enter complete · right-click related tags · ↑↓ move",
+  "prompt_autocompleteHintRelated": "Click or Enter to add · click left list or Esc to close"
 }
