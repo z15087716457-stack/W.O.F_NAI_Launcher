@@ -108,7 +108,8 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
       },
       child: Focus(
         autofocus: true,
-        child: ColoredBox(
+        // 子窗口入口直接挂在 MaterialApp 下：页面自带 Material（输入框需要）。
+        child: Material(
           color: c.card,
           child: LayoutBuilder(
             builder: (context, box) {

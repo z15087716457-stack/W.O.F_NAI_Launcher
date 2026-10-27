@@ -222,11 +222,12 @@ void main() {
                 .first,
           );
           masks.add(
-            // 含菜单阴影（模糊约 30px，向下偏移）。
+            // 含菜单阴影（模糊约 30px，向下偏移）。2026-10-27 E05：「钉在头部」
+            // 多一行「资源小窗」，菜单再高 34，底角软影外扩到 44 之外几像素，左右放宽到 52。
             Rect.fromLTRB(
-              menu.left - 44,
+              menu.left - 52,
               row.top,
-              menu.right + 44,
+              menu.right + 52,
               menu.bottom + 60,
             ),
           );
