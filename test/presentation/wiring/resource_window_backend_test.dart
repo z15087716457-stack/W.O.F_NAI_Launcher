@@ -19,6 +19,12 @@ import 'package:nai_launcher/presentation/wiring/image_viewer_session.dart';
 import 'package:nai_launcher/presentation/ui/refs/refs_contract.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/shortcuts/default_shortcuts.dart';
+import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
+import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
+import 'package:nai_launcher/presentation/widgets/shortcuts/shortcut_aware_widget.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/services/image_clipboard_service.dart';
 import 'package:nai_launcher/core/services/resource_window_host.dart';
 import 'package:nai_launcher/core/services/resource_window_service.dart';
 import 'package:desktop_multi_window/desktop_multi_window.dart';
@@ -73,6 +79,13 @@ class MutableParams extends Params {
   void addVibeReference(VibeReference vibe) => state = state.copyWith(
     vibeReferencesV4: [...state.vibeReferencesV4, vibe],
   );
+}
+
+class LoadingShortcuts extends ShortcutConfigNotifier {
+  final loaded = Completer<ShortcutConfig>();
+  @override
+  Future<ShortcutConfig> build() => loaded.future;
+  void publish(ShortcutConfig config) => state = AsyncData(config);
 }
 
 class ScanProgress extends GalleryScanProgressNotifier {
@@ -277,6 +290,8 @@ void main() {
   late PathProviderPlatform originalPaths;
   late NativeWindows native;
   late GoRouter router;
+  late LoadingShortcuts shortcuts;
+  final clipboardWrites = <Uint8List>[];
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     temp = await Directory.systemTemp.createTemp('resource-backend-');
@@ -285,6 +300,8 @@ void main() {
     cover = await File('${temp.path}/cover.png').writeAsBytes([1, 2, 3]);
     storage = MemoryWindowSettings();
     native = NativeWindows();
+    shortcuts = LoadingShortcuts();
+    clipboardWrites.clear();
     router = GoRouter(
       initialLocation: AppRoutes.generation,
       routes: [
@@ -308,6 +325,13 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        shortcutConfigNotifierProvider.overrideWith(() => shortcuts),
+        imageClipboardServiceProvider.overrideWithValue(
+          ImageClipboardService(
+            stripMetadata: () => false,
+            write: (bytes) async => clipboardWrites.add(bytes),
+          ),
+        ),
         appRouterProvider.overrideWithValue(router),
         galleryScanProgressProvider.overrideWith((ref) => ScanProgress()),
         localStorageServiceProvider.overrideWithValue(storage),
@@ -408,6 +432,83 @@ void main() {
     'offset': offset,
     'limit': 60,
   });
+
+  testWidgets(
+    'global shortcut startup and settings rebuild keep resource actions registered',
+    (tester) async {
+      final pixels = Uint8List.fromList(
+        img.encodePng(img.Image(width: 16, height: 16)),
+      );
+      await tester.runAsync(() => cover.writeAsBytes(pixels));
+      gallery = Gallery([
+        LocalImageRecord(
+          path: cover.path,
+          size: pixels.length,
+          modifiedAt: DateTime(2026),
+        ),
+      ]);
+      const channel = MethodChannel('window_manager');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (call) async => call.method == 'isMinimized' ? false : null,
+          );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(channel, null);
+      });
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: GlobalShortcuts(
+            shortcuts: {ShortcutIds.minimizeToTray: () {}},
+            child: MaterialApp.router(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              routerConfig: router,
+              builder: (_, child) => ResourceWindowBridge(child: child!),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(container.read(resourceMainActionsProvider).perform, isNotNull);
+      shortcuts.publish(ShortcutConfig.createDefault());
+      await tester.pumpAndSettle();
+      expect(container.read(resourceMainActionsProvider).perform, isNotNull);
+
+      for (final enabled in [true, false, true]) {
+        shortcuts.publish(
+          ShortcutConfig.createDefault().copyWith(enableShortcuts: enabled),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          container.read(resourceMainActionsProvider).perform,
+          isNotNull,
+          reason: 'shortcuts enabled: $enabled',
+        );
+        await backend.action(FloatingResourceKind.vibe, 'v', 'add');
+        await tester.runAsync(
+          () =>
+              backend.action(FloatingResourceKind.gallery, cover.path, 'copy'),
+        );
+        final opening = backend.open(FloatingResourceKind.gallery, cover.path);
+        await tester.pumpAndSettle();
+        await opening;
+        expect(
+          container.read(imageViewerSessionProvider)!.backend.currentKey,
+          cover.path,
+        );
+      }
+      expect(
+        (container.read(refsEntryDropActionsProvider) as DropActions).calls,
+        ['vibe:v:true', 'vibe:v:true', 'vibe:v:true'],
+      );
+      expect(clipboardWrites, [pixels, pixels, pixels]);
+      await tester.pumpWidget(const SizedBox());
+      expect(container.read(resourceMainActionsProvider).perform, isNull);
+    },
+  );
 
   testWidgets(
     'primary bridge forwards refs to protected drop actions, opens gallery viewer and requests editors',

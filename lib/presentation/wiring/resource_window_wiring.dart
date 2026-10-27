@@ -208,7 +208,9 @@ class _ResourceWindowBridgeState extends ConsumerState<ResourceWindowBridge> {
 
   @override
   void dispose() {
-    _mainActions.perform = null;
+    // A root rebuild mounts the replacement before disposing this bridge.
+    // Only unregister this instance, preserving the replacement's actions.
+    if (_mainActions.perform == perform) _mainActions.perform = null;
     super.dispose();
   }
 
