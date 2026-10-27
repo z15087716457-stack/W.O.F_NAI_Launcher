@@ -40,6 +40,16 @@ Both versions support in-app updates. Your settings, gallery database and Agent 
 
 > The installer is not code-signed yet. On first launch, Windows may say “Windows protected your PC.” Click “More info → Run anyway.” Each release includes SHA-256 checksums.
 
+## What's new in 2.2
+
+- **Independent resource windows**: Open and pin Local Gallery, Blocks, Vibes and Precise References, drag resources back to the workspace, and view full images inside the same window. Gallery timelines and the thumbnail disk cache are shared.
+- **Chinese-aware prompt autocomplete**: Local candidates, Chinese names and related tags in the base and character editors, with independent workspace font sizing and a scrolling prompt toolbar.
+- **Temporary blocks and translation adjustments**: Compare, restore or save Agent-edited blocks; refine, split, merge and undo translations.
+- **Agent workflow improvements**: Slash commands, next-message suggestions, cache-warming status, searchable conversation history, wrapping code blocks and per-block copy.
+- **Gallery and storage controls**: Whole-phrase and exact-tag search, search history, Copy Prompt, an adjustable thumbnail cache limit and clearer storage statistics.
+
+See the [complete 2.2.0 changelog](CHANGELOG.md#220---2026-10-27) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.0). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+
 ## Get started in three steps
 
 1. **Sign in**: Use a NovelAI API Token (recommended) or your account and password. You can also enter as a guest to try local features first.
