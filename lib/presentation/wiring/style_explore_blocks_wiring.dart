@@ -22,6 +22,7 @@ import '../ui/blocks/blocks_instance.dart';
 import '../utils/prompt_block_bundle_insertion.dart';
 import '../utils/prompt_block_generation_settings_applier.dart';
 import '../utils/prompt_block_instance_bundle.dart';
+import '../utils/prompt_block_instance_display.dart';
 import '../widgets/common/app_toast.dart';
 import '../widgets/prompt/blocks/prompt_block_colors.dart';
 import 'style_explore_backend.dart';
@@ -244,7 +245,10 @@ class StyleExploreVariableWiring extends ConsumerWidget {
             negativeContent: instance.temp!.negativeContent ?? '',
             negativeAtoms: null,
           )
+        : isStandaloneTemp(instance)
+        ? standaloneTempBlock(instance, context.l10n.blocks_tempLabel)
         : originalBlock;
+    final standalone = isStandaloneTemp(instance);
     final bundle = readPromptBlockInstanceBundle(ref, PillScopes.main, marker);
     for (final member in bundle.members) {
       ref.watch(pillWorkspaceProvider(member.scope));
@@ -331,6 +335,7 @@ class StyleExploreVariableWiring extends ConsumerWidget {
             instance.temporary ? PillInstanceSettings.fixedDefault : settings,
           ),
           temporary: instance.temporary,
+          standalone: standalone,
           tempContent: instance.temp?.content,
           tempNegativeContent: instance.temp?.negativeContent,
           originalContent: instance.temp?.originalContent,
@@ -375,7 +380,7 @@ class StyleExploreVariableWiring extends ConsumerWidget {
                       .editTempContent(marker, content, negative);
                 });
               }),
-          onRevertTemp: !instance.temporary
+          onRevertTemp: !instance.temporary || standalone
               ? null
               : () => _blockAction(context, () async {
                   final write = ref
