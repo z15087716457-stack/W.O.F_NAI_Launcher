@@ -200,6 +200,9 @@ class PillTempContent {
     this.originalNegativeContent,
     required this.editedAt,
     required this.editedBy,
+    this.title,
+    this.color,
+    this.iconName,
   });
   final String content;
   final String? negativeContent;
@@ -208,6 +211,14 @@ class PillTempContent {
   final DateTime editedAt;
   final String editedBy;
 
+  /// Display fields for library-free temporary blocks (`blockId` empty).
+  /// Library-backed temps keep using the library block's title/color/icon.
+  /// [color] uses the `PromptBlock.color` format (`#AARRGGBB`), [iconName] the
+  /// `PromptBlock.iconName` preset key. Old drafts omit these keys.
+  final String? title;
+  final String? color;
+  final String? iconName;
+
   Map<String, dynamic> toJson() => {
     'content': content,
     'negativeContent': negativeContent,
@@ -215,6 +226,9 @@ class PillTempContent {
     'originalNegativeContent': originalNegativeContent,
     'editedAt': editedAt.toIso8601String(),
     'editedBy': editedBy,
+    if (title != null) 'title': title,
+    if (color != null) 'color': color,
+    if (iconName != null) 'iconName': iconName,
   };
   factory PillTempContent.fromJson(Map<String, dynamic> json) =>
       PillTempContent(
@@ -224,6 +238,9 @@ class PillTempContent {
         originalNegativeContent: json['originalNegativeContent'] as String?,
         editedAt: DateTime.parse(json['editedAt'] as String),
         editedBy: json['editedBy'] as String,
+        title: json['title'] as String?,
+        color: json['color'] as String?,
+        iconName: json['iconName'] as String?,
       );
   @override
   bool operator ==(Object other) =>
@@ -233,7 +250,10 @@ class PillTempContent {
       other.originalContent == originalContent &&
       other.originalNegativeContent == originalNegativeContent &&
       other.editedAt == editedAt &&
-      other.editedBy == editedBy;
+      other.editedBy == editedBy &&
+      other.title == title &&
+      other.color == color &&
+      other.iconName == iconName;
   @override
   int get hashCode => Object.hash(
     content,
@@ -242,6 +262,9 @@ class PillTempContent {
     originalNegativeContent,
     editedAt,
     editedBy,
+    title,
+    color,
+    iconName,
   );
 }
 

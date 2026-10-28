@@ -592,6 +592,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           existing?.originalNegativeContent ?? block?.negativeContent,
       editedAt: DateTime.now(),
       editedBy: editedBy,
+      title: existing?.title,
+      color: existing?.color,
+      iconName: existing?.iconName,
     );
     final split = bundle.members.any((member) {
       final document = member.scope == arg
