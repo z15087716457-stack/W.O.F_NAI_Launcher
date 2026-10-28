@@ -117,6 +117,18 @@ class NaiSyntaxController extends TextEditingController {
   }) {
     final baseStyle = style ?? const TextStyle();
 
+    // Material TextField paints the Windows caret below text, so opaque syntax
+    // backgrounds hide it. TextField does not expose this EditableText option
+    // and resets it on rebuild; apply it after that render update. Measurement
+    // and read-only Text.rich callers do not have an EditableText state.
+    if (context case StatefulElement(state: final EditableTextState editor)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (editor.mounted) {
+          editor.renderEditable.paintCursorAboveText = true;
+        }
+      });
+    }
+
     final theme = Theme.of(context);
     final colors = NaiSyntaxColors.fromTheme(theme);
 
