@@ -17,7 +17,7 @@ void main() {
     for (final dark in [false, true]) {
       for (final width in [340.0, 400.0, 480.0]) {
         testWidgets(
-          'five pinned tools preserve tabs and scroll internally: $locale $width dark=$dark',
+          'five pinned tools scroll before a fixed menu: $locale $width dark=$dark',
           (t) async {
             final record = GenRecorder();
             await pumpGen(
@@ -64,6 +64,17 @@ void main() {
             expect(paragraph.didExceedMaxLines, false);
             final strip = find.byKey(const Key('gen-prompt-tools-strip'));
             final rect = t.getRect(strip);
+            final menu = find.byKey(const Key('gen-tool-menu'));
+            final menuRect = t.getRect(menu);
+            expect(find.descendant(of: strip, matching: menu), findsNothing);
+            expect(menu.hitTestable(), findsOneWidget);
+            final divider = t.getRect(
+              find.byKey(const Key('gen-prompt-tools-divider')),
+            );
+            expect(divider.left, greaterThan(rect.right));
+            expect(divider.right, lessThan(menuRect.left));
+            expect(divider.width, 1);
+            expect(divider.height, 16);
             final scrollable = find.descendant(
               of: strip,
               matching: find.byType(Scrollable),
@@ -111,12 +122,14 @@ void main() {
             await t.sendEventToBinding(
               PointerScrollEvent(
                 position: rect.center,
-                scrollDelta: const Offset(0, 100),
+                scrollDelta: Offset(0, position.maxScrollExtent + 1),
               ),
             );
             await t.pumpAndSettle();
             expect(position.pixels, position.maxScrollExtent);
             expect(parentPosition.pixels, parentOffset);
+            expect(t.getRect(menu), menuRect);
+            expect(menu.hitTestable(), findsOneWidget);
             final before = position.pixels;
             await t.sendEventToBinding(
               PointerScrollEvent(
@@ -126,6 +139,7 @@ void main() {
             );
             await t.pumpAndSettle();
             expect(position.pixels, closeTo(before - 10, .1));
+            expect(t.getRect(menu), menuRect);
             await t.sendEventToBinding(
               PointerScrollEvent(
                 position: rect.center,
@@ -133,10 +147,7 @@ void main() {
               ),
             );
             await t.pumpAndSettle();
-            expect(
-              t.getRect(find.byKey(const Key('gen-tool-menu'))).right,
-              lessThanOrEqualTo(rect.right + .1),
-            );
+            expect(t.getRect(menu), menuRect);
             await tapKey(t, 'gen-tool-menu');
             expect(find.byKey(const Key('gen-pin-resources')), findsOneWidget);
             expect(t.takeException(), isNull);
@@ -145,4 +156,22 @@ void main() {
       }
     }
   }
+  testWidgets('a toolbar that fits keeps the menu without a divider', (
+    t,
+  ) async {
+    await pumpGen(
+      t,
+      height: 720,
+      data: GenFixture.view(layout: const GenLayout(leftWidth: 400)),
+    );
+    expect(find.byKey(const Key('gen-prompt-tools-strip')), findsNothing);
+    expect(find.byKey(const Key('gen-prompt-tools-divider')), findsNothing);
+    expect(
+      find.byKey(const Key('gen-tool-menu')).hitTestable(),
+      findsOneWidget,
+    );
+    await tapKey(t, 'gen-tool-menu');
+    expect(find.byKey(const Key('gen-pin-resources')), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
 }

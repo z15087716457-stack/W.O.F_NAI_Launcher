@@ -134,26 +134,39 @@ class _PromptHead extends StatelessWidget {
         ),
       if (tools.agentPinned && scope.slots.agentToggle != null)
         scope.slots.agentToggle!,
-      Builder(
-        builder: (context) => GenIb(
-          key: const Key('gen-tool-menu'),
-          animateOnTap: true,
-          icon: GenNaiIcon(
-            'prompt-chunk',
-            size: 16,
-            color: scope.controller.popoverTag == #tools ? c.ink : c.muted,
-          ),
-          active: scope.controller.popoverTag == #tools,
-          tooltip: l.gen_toolsMenu,
-          onTap: () => scope.controller.openPopover(
-            genBelow(context, dy: 4, right: true),
-            (_) => const _ToolsMenu(),
-            tag: #tools,
-          ),
+    ];
+    final menu = Builder(
+      builder: (context) => GenIb(
+        key: const Key('gen-tool-menu'),
+        animateOnTap: true,
+        icon: GenNaiIcon(
+          'prompt-chunk',
+          size: 16,
+          color: scope.controller.popoverTag == #tools ? c.ink : c.muted,
+        ),
+        active: scope.controller.popoverTag == #tools,
+        tooltip: l.gen_toolsMenu,
+        onTap: () => scope.controller.openPopover(
+          genBelow(context, dy: 4, right: true),
+          (_) => const _ToolsMenu(),
+          tag: #tools,
         ),
       ),
-    ];
-    final overflow = buttons.length > 5;
+    );
+    final overflow = buttons.length >= 5;
+    final negativeTab = _PreviewTip(
+      sections: p.negativePreview,
+      title: p.negativeSupported ? l.gen_finalNegative : l.gen_turboNegative,
+      disabledHint: p.negativeSupported ? null : l.gen_turboNegative,
+      child: GenTab(
+        key: const Key('gen-tab-negative'),
+        label: l.gen_negative,
+        selected: p.negative,
+        onTap: p.negativeSupported
+            ? () => scope.actions.onNegativeTab(true)
+            : null,
+      ),
+    );
     final tabs = Row(
       mainAxisSize: overflow ? MainAxisSize.min : MainAxisSize.max,
       spacing: 2,
@@ -170,23 +183,7 @@ class _PromptHead extends StatelessWidget {
             ),
           ),
         ),
-        Flexible(
-          child: _PreviewTip(
-            sections: p.negativePreview,
-            title: p.negativeSupported
-                ? l.gen_finalNegative
-                : l.gen_turboNegative,
-            disabledHint: p.negativeSupported ? null : l.gen_turboNegative,
-            child: GenTab(
-              key: const Key('gen-tab-negative'),
-              label: l.gen_negative,
-              selected: p.negative,
-              onTap: p.negativeSupported
-                  ? () => scope.actions.onNegativeTab(true)
-                  : null,
-            ),
-          ),
-        ),
+        if (overflow) negativeTab else Flexible(child: negativeTab),
         if (p.bridge case final b?) _Bridge(bridge: b),
       ],
     );
@@ -196,16 +193,18 @@ class _PromptHead extends StatelessWidget {
         children: [
           Expanded(child: tabs),
           ...buttons,
+          menu,
         ],
       );
     }
+    const fixedTailWidth = 28 + 7 + 6; // Menu, divider and row gaps.
     return LayoutBuilder(
       builder: (context, box) => Row(
         spacing: 2,
         children: [
           ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: math.max(0, box.maxWidth - 30),
+              maxWidth: math.max(0, box.maxWidth - fixedTailWidth - 28),
             ),
             child: tabs,
           ),
@@ -220,6 +219,11 @@ class _PromptHead extends StatelessWidget {
               ),
             ),
           ),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 3),
+            child: UiVSep(key: Key('gen-prompt-tools-divider'), height: 16),
+          ),
+          menu,
         ],
       ),
     );
@@ -274,7 +278,7 @@ class _PromptToolsStripState extends State<_PromptToolsStrip> {
       for (var i = 0; i < widget.children.length; i++)
         i == widget.translationIndex ? 46.0 : 28.0,
     ];
-    final overflow = widths.length > 5;
+    final overflow = widths.length >= 5;
     final desiredWidth = overflow
         ? widths.take(4).fold<double>(0, (total, value) => total + value) +
               widths[4] / 2 +
