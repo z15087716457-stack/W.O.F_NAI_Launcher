@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
 import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
+import 'package:nai_launcher/core/utils/pill_document_editor.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_block_binding.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/enums/quality_tag_preset.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
@@ -47,6 +49,24 @@ class _Library extends PromptBlockLibraryNotifier {
   }
 }
 
+class _ProjectionMismatch extends PillWorkspaceNotifier {
+  @override
+  List<String> applyInlineEdits(
+    List<PillInlineEdit> edits, {
+    String prefix = '',
+    void Function()? afterApply,
+    PillDocument? document,
+  }) => super.applyInlineEdits(
+    edits,
+    prefix: prefix,
+    document: document,
+    afterApply: () {
+      state = state.copyWith(projection: 'synthetic mismatch');
+      afterApply?.call();
+    },
+  );
+}
+
 class _Preferences extends BlocksPreferencesNotifier {
   bool fail = false;
   int calls = 0;
@@ -70,6 +90,60 @@ class _Blocks extends PromptBlockRepository {
   _Blocks(super.storage);
   Future<void> Function()? afterUsage;
   void Function()? beforeOrganizationWrite;
+  void Function()? beforeCreateWrite;
+  @override
+  Future<PromptBlock> createBlock({
+    required String title,
+    required String content,
+    String? folderId,
+    String color = '#FF607D8B',
+    String appearance = 'classic',
+    String? readingTranslationZh,
+    List<Map<String, dynamic>>? readingTranslationMarks,
+    bool readingTranslationNeedsReview = false,
+    String readingTranslationLanguageCode = 'zh',
+    bool readingTranslationEdited = false,
+    String? iconName,
+    String? thumbnail,
+    double thumbnailOffsetX = 0,
+    double thumbnailOffsetY = 0,
+    double thumbnailScale = 1,
+    int? sortOrder,
+    List<String>? atoms,
+    String negativeContent = '',
+    List<String>? negativeAtoms,
+    PromptBlockGenerationSettings? generationSettings,
+    List<PromptBlockTag> tags = const [],
+    bool isFavorite = false,
+    void Function()? beforeWrite,
+  }) => super.createBlock(
+    title: title,
+    content: content,
+    folderId: folderId,
+    color: color,
+    appearance: appearance,
+    readingTranslationZh: readingTranslationZh,
+    readingTranslationMarks: readingTranslationMarks,
+    readingTranslationNeedsReview: readingTranslationNeedsReview,
+    readingTranslationLanguageCode: readingTranslationLanguageCode,
+    readingTranslationEdited: readingTranslationEdited,
+    iconName: iconName,
+    thumbnail: thumbnail,
+    thumbnailOffsetX: thumbnailOffsetX,
+    thumbnailOffsetY: thumbnailOffsetY,
+    thumbnailScale: thumbnailScale,
+    sortOrder: sortOrder,
+    atoms: atoms,
+    negativeContent: negativeContent,
+    negativeAtoms: negativeAtoms,
+    generationSettings: generationSettings,
+    tags: tags,
+    isFavorite: isFavorite,
+    beforeWrite: () {
+      beforeCreateWrite?.call();
+      beforeWrite?.call();
+    },
+  );
   @override
   Future<PromptBlockFolder> createFolder({
     required String name,
@@ -106,7 +180,9 @@ void main() {
   late _Blocks repository;
   late ProviderContainer container;
   late _Preferences preferences;
+  late bool projectionMismatch;
   setUp(() async {
+    projectionMismatch = false;
     SharedPreferences.setMockInitialValues({});
     preferences = _Preferences();
     root = await Directory.systemTemp.createTemp('nai-agent-blocks-');
@@ -126,6 +202,11 @@ void main() {
         imageGenerationNotifierProvider.overrideWith(IdleGeneration.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
         blocksPreferencesProvider.overrideWith(() => preferences),
+        pillWorkspaceProvider.overrideWith(
+          () => projectionMismatch
+              ? _ProjectionMismatch()
+              : PillWorkspaceNotifier(),
+        ),
       ],
     );
     await container.read(promptBlockLibraryNotifierProvider.future);
@@ -149,6 +230,802 @@ void main() {
   Future<Map<String, dynamic>> create(Map<String, dynamic> changes) async =>
       await run('block_manage', {'action': 'create', 'changes': changes});
   BridgeDraftSnapshot draft() => container.read(_draftProvider)();
+  Future<Map<String, dynamic>> insert(
+    String id, {
+    String scope = 'main',
+    int? offset,
+  }) async => run('block_manage', {
+    'action': 'insert',
+    'id': id,
+    'expected_version': (await block(id))['version'],
+    'expected_draft_version': draft().acknowledgementVersion,
+    'scope': scope,
+    if (offset != null) 'offset': offset,
+  });
+  Future<Map<String, dynamic>> instance(
+    String action,
+    Map<String, dynamic> params,
+  ) => run('block_manage', {
+    'action': action,
+    'expected_draft_version': draft().acknowledgementVersion,
+    ...params,
+  });
+  PillWorkspaceState lane([String scope = 'main']) =>
+      container.read(pillWorkspaceProvider(scope));
+  PillWorkspaceNotifier editor([String scope = 'main']) =>
+      container.read(pillWorkspaceProvider(scope).notifier);
+  int backupCount() =>
+      workspace.listSync(recursive: true).whereType<File>().length;
+
+  test(
+    'inline temp roundtrip, display edit, no-original revert, roll and default promote',
+    () async {
+      editor().setText('start');
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {
+          'content': '猫😀',
+          'title': '  one-off  ',
+          'color': '#12ab34',
+          'icon': 'star',
+          'settings': {'mode': 'random'},
+        },
+      });
+      final marker = result['marker'] as String;
+      expect(lane().projection, 'start, 猫😀');
+      final saved = lane().document;
+      expect(saved.instances[marker]!.blockId, '');
+      expect(saved.instances[marker]!.temp!.title, 'one-off');
+      expect(saved.instances[marker]!.temp!.color, '#FF12AB34');
+      expect(saved.instances[marker]!.temp!.iconName, 'star');
+      expect(
+        PillDocument.fromJson(
+          jsonDecode(jsonEncode(saved.toJson())) as Map<String, dynamic>,
+        ),
+        saved,
+      );
+      editor().revertTemp(marker);
+      expect(lane().document, saved);
+      expect(editor().rollAllRandom(), isFalse);
+      editor().rollMarker(marker);
+      expect(lane().projection, 'start, 猫😀');
+      final context = await run('studio_context', {'scope': 'draft'});
+      final json = context['draft']['documents']['prompt']['instances'][marker];
+      expect(json['kind'], 'temporary');
+      expect(json['temporary'], true);
+      expect(json['temp']['iconName'], 'star');
+      await instance('instance_update', {
+        'marker': marker,
+        'instance': {'title': 'renamed', 'color': '#80112233', 'icon': 'moon'},
+      });
+      expect(lane().document.instances[marker]!.temp!.title, 'renamed');
+      final before = lane().document;
+      final promoted = await instance('instance_promote', {
+        'marker': marker,
+        'expected_library_version': (await run('block_query', {
+          'kind': 'tree',
+        }))['library_version'],
+      });
+      expect(promoted['block']['title'], 'renamed');
+      expect(promoted['block']['color'], '#80112233');
+      expect(promoted['block']['iconName'], 'moon');
+      expect(promoted['version'], promoted['block']['version']);
+      expect(lane().document.instances[marker]!.temp, isNull);
+      expect(lane().projection, 'start, 猫😀');
+      editor().undo();
+      expect(lane().document, before);
+    },
+  );
+
+  test(
+    'translation creation/update emits source and review semantics, unwrap uses selected occurrence',
+    () async {
+      editor().setText('tail');
+      final result = await instance('instance_create', {
+        'kind': 'translation',
+        'anchor': {'text': 'tail', 'mode': 'before'},
+        'translation': {
+          'source': 'rain',
+          'zh': '雨天',
+          'marks': [
+            {'start': 0, 'end': 1, 'tag': 'rain', 'icon_id': 'weather'},
+          ],
+        },
+      });
+      final marker = result['marker'] as String;
+      expect(lane().projection, 'raintail');
+      expect(
+        lane().document.instances[marker]!.translation!.translationEdited,
+        isTrue,
+      );
+      await instance('instance_update', {
+        'marker': marker,
+        'translation': {'source': 'snow'},
+      });
+      expect(lane().projection, 'snowtail');
+      expect(
+        lane().document.instances[marker]!.translation!.needsReview,
+        isTrue,
+      );
+      await instance('instance_update', {
+        'marker': marker,
+        'translation': {'zh': '雪', 'language_code': 'ja'},
+      });
+      expect(lane().document.instances[marker]!.translation!.marks, isEmpty);
+      expect(
+        lane().document.instances[marker]!.translation!.needsReview,
+        isFalse,
+      );
+      editor().setText('$marker/$marker');
+      final before = lane().document;
+      final projection = lane().projection;
+      await instance('instance_unwrap', {'marker': marker, 'occurrence': 1});
+      expect(lane().document.text, '$marker/snow');
+      expect(lane().projection, projection);
+      editor().undo();
+      expect(lane().document, before);
+      await expectLater(
+        instance('instance_promote', {
+          'marker': marker,
+          'expected_library_version': (await run('block_query', {
+            'kind': 'tree',
+          }))['library_version'],
+        }),
+        throwsA(toolError('unsupported_kind')),
+      );
+    },
+  );
+
+  test(
+    'batch convert resolves pre-operation anchors, writes once, preserves projection and undoes once',
+    () async {
+      const text = '中文😀, 1.2::x::, rain, 中文😀';
+      editor().setText(text);
+      final before = lane().document;
+      final revision = container.read(pillWorkspaceRevisionProvider);
+      final count = backupCount();
+      final result = await instance('instance_convert', {
+        'segments': [
+          {
+            'anchor': {'text': 'rain', 'mode': 'replace'},
+            'kind': 'translation',
+            'translation': {'zh': '雨'},
+          },
+          {
+            'anchor': {'text': '中文😀', 'occurrence': 1, 'mode': 'replace'},
+            'kind': 'temporary',
+            'instance': {'title': 'last'},
+          },
+          {
+            'anchor': {'text': '1.2::x::', 'mode': 'replace'},
+            'kind': 'temporary',
+            'instance': {'title': 'weight'},
+          },
+        ],
+      });
+      expect(result['markers'], hasLength(3));
+      expect(container.read(pillWorkspaceRevisionProvider), revision + 1);
+      expect(backupCount(), count + 1);
+      expect(lane().projection, text);
+      final markers = (result['markers'] as List).cast<String>();
+      expect(
+        lane().document.instances[markers[0]]!.translation!.source,
+        'rain',
+      );
+      expect(lane().document.instances[markers[1]]!.temp!.content, '中文😀');
+      editor().undo();
+      expect(lane().document, before);
+    },
+  );
+
+  test(
+    'invalid batch is atomic before backup: overlap, missing, marker crossing, changed source',
+    () async {
+      editor().setText('left right rain');
+      await instance('instance_create', {
+        'kind': 'temporary',
+        'offset': 4,
+        'instance': {'content': 'middle', 'title': 'middle'},
+      });
+      final before = draft().acknowledgementVersion;
+      final count = backupCount();
+      final valid = {
+        'anchor': {'text': 'rain', 'mode': 'replace'},
+        'kind': 'temporary',
+        'instance': {'title': 'rain'},
+      };
+      for (final item in [
+        [
+          valid,
+          {
+            ...valid,
+            'anchor': {'text': 'missing', 'mode': 'replace'},
+          },
+        ],
+        [valid, valid],
+        [
+          valid,
+          {
+            ...valid,
+            'anchor': {'text': 'left right', 'mode': 'replace'},
+          },
+        ],
+        [
+          valid,
+          {
+            'anchor': {'text': 'right', 'mode': 'replace'},
+            'kind': 'translation',
+            'translation': {'source': 'wrong', 'zh': '右'},
+          },
+        ],
+      ]) {
+        await expectLater(
+          instance('instance_convert', {'segments': item}),
+          throwsA(
+            isA<NaiAgentToolError>().having(
+              (e) => e.message,
+              'segment',
+              contains('Segment 2'),
+            ),
+          ),
+        );
+        expect(draft().acknowledgementVersion, before);
+        expect(backupCount(), count);
+      }
+      await expectLater(
+        instance('instance_convert', {
+          'segments': [valid],
+          'kind': 'temporary',
+        }),
+        throwsA(toolError('invalid_arguments')),
+      );
+      await expectLater(
+        instance('instance_convert', {'segments': List.filled(65, valid)}),
+        throwsA(toolError('invalid_arguments')),
+      );
+    },
+  );
+
+  test(
+    'create anchors handle ambiguity, modes, offsets and exact boundaries without backup',
+    () async {
+      editor().setText('a😀, a😀');
+      final before = draft().acknowledgementVersion;
+      final count = backupCount();
+      for (final params in [
+        {
+          'anchor': {'text': 'a😀', 'mode': 'after'},
+        },
+        {
+          'anchor': {'text': 'missing', 'mode': 'before'},
+        },
+        {
+          'anchor': {'text': 'a😀', 'occurrence': 2, 'mode': 'after'},
+        },
+        {
+          'anchor': {'text': 'a😀', 'mode': 'replace'},
+        },
+        {'offset': 2},
+        {
+          'offset': 0,
+          'anchor': {'text': 'a😀', 'occurrence': 0, 'mode': 'before'},
+        },
+      ]) {
+        await expectLater(
+          instance('instance_create', {
+            'kind': 'temporary',
+            'instance': {'title': 'x', 'content': 'new'},
+            ...params,
+          }),
+          throwsA(isA<NaiAgentToolError>()),
+        );
+        expect(draft().acknowledgementVersion, before);
+        expect(backupCount(), count);
+      }
+      await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'x', 'content': 'new'},
+        'anchor': {'text': 'a😀', 'occurrence': 1, 'mode': 'after'},
+      });
+      expect(lane().projection, 'a😀, a😀new');
+    },
+  );
+
+  test(
+    'inline validation rejects display fields, bundle and invalid translation before backup',
+    () async {
+      for (final fields in [
+        <String, dynamic>{},
+        {'title': ' '},
+        {'title': 'x' * 41},
+        {'title': 'ok', 'color': 'blue'},
+        {'title': 'ok', 'icon': 'unknown'},
+        {'title': 'ok', 'negative_content': 'UC'},
+      ]) {
+        await expectLater(
+          instance('instance_create', {
+            'kind': 'temporary',
+            'instance': {'content': 'words', ...fields},
+          }),
+          throwsA(isA<NaiAgentToolError>()),
+        );
+      }
+      for (final translation in [
+        {'source': 'rain', 'zh': '雨', 'language_code': 'xx'},
+        {
+          'source': 'rain',
+          'zh': '雨',
+          'marks': [
+            {'start': 0, 'end': 2, 'tag': 'rain', 'icon_id': 'tag'},
+          ],
+        },
+        {
+          'source': 'rain',
+          'zh': '雨天',
+          'marks': [
+            {'start': 0, 'end': 2, 'tag': 'a', 'icon_id': 'tag'},
+            {'start': 1, 'end': 2, 'tag': 'b', 'icon_id': 'tag'},
+          ],
+        },
+      ]) {
+        await expectLater(
+          instance('instance_create', {
+            'kind': 'translation',
+            'translation': translation,
+          }),
+          throwsA(toolError('invalid_translation')),
+        );
+      }
+      await expectLater(
+        instance('instance_create', {
+          'kind': 'translation',
+          'instance': {'title': 'ignored?'},
+          'translation': {'source': 'rain', 'zh': '雨'},
+        }),
+        throwsA(toolError('invalid_arguments')),
+      );
+      expect(backupCount(), 0);
+    },
+  );
+
+  test(
+    'all inline actions reject stale draft before backup and promote rejects stale library',
+    () async {
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'x', 'content': 'words'},
+      });
+      final marker = result['marker'];
+      final count = backupCount();
+      for (final params in [
+        {
+          'action': 'instance_create',
+          'kind': 'translation',
+          'translation': {'source': 'rain', 'zh': '雨'},
+        },
+        {
+          'action': 'instance_convert',
+          'kind': 'temporary',
+          'anchor': {'text': 'missing', 'mode': 'replace'},
+          'instance': {'title': 'x'},
+        },
+        {
+          'action': 'instance_update',
+          'marker': marker,
+          'instance': {'title': 'x'},
+        },
+        {'action': 'instance_delete', 'marker': marker},
+        {'action': 'instance_unwrap', 'marker': marker},
+        {
+          'action': 'instance_promote',
+          'marker': marker,
+          'expected_library_version': (await run('block_query', {
+            'kind': 'tree',
+          }))['library_version'],
+        },
+      ]) {
+        await expectLater(
+          instance(params['action'] as String, {
+            ...params,
+            'expected_draft_version': 'stale',
+          }),
+          throwsA(isA<NaiAgentToolError>()),
+        );
+        expect(backupCount(), count);
+      }
+      await expectLater(
+        instance('instance_promote', {
+          'marker': marker,
+          'expected_library_version': 'stale',
+        }),
+        throwsA(toolError('library_conflict')),
+      );
+      expect((await repository.load()).blocks, isEmpty);
+    },
+  );
+
+  test(
+    'delete one occurrence versus all; library bundle peers follow native semantics',
+    () async {
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'one', 'content': 'words'},
+      });
+      final marker = result['marker'] as String;
+      editor().setText('$marker/$marker');
+      final before = lane().document;
+      await instance('instance_delete', {'marker': marker, 'occurrence': 1});
+      expect(lane().document.text, '$marker/');
+      editor().undo();
+      expect(lane().document, before);
+      await instance('instance_delete', {'marker': marker});
+      expect(lane().document.text, '/');
+      expect(lane().document.instances, isEmpty);
+      final created = await create({
+        'title': 'pair',
+        'content': 'positive',
+        'negativeContent': 'negative',
+      });
+      await insert(created['block']['id'] as String);
+      const m = '\uE000';
+      final original = lane().document;
+      final negOriginal = lane('negative').document;
+      await instance('instance_unwrap', {'marker': m});
+      expect(lane().projection, '/, positive');
+      expect(lane('negative').projection, 'negative');
+      expect(lane('negative').document.instances, isEmpty);
+      editor().undo();
+      editor('negative').undo();
+      expect(lane().document, original);
+      expect(lane('negative').document, negOriginal);
+      await instance('instance_delete', {'marker': m});
+      expect(lane('negative').projection, '');
+      expect(lane().document.instances, isEmpty);
+    },
+  );
+
+  test(
+    'character positive and negative scopes support all inline operations',
+    () async {
+      final id = container
+          .read(characterPromptNotifierProvider)
+          .characters
+          .single
+          .id;
+      for (final scope in ['char:$id:pos', 'char:$id:neg']) {
+        editor(scope).setText('rain sky');
+        final result = await instance('instance_convert', {
+          'scope': scope,
+          'kind': 'translation',
+          'anchor': {'text': 'rain', 'mode': 'replace'},
+          'translation': {'zh': '雨'},
+        });
+        final marker = result['marker'] as String;
+        expect(lane(scope).projection, 'rain sky');
+        await instance('instance_update', {
+          'scope': scope,
+          'marker': marker,
+          'translation': {'source': 'snow'},
+        });
+        expect(lane(scope).projection, 'snow sky');
+        await instance('instance_unwrap', {'scope': scope, 'marker': marker});
+        final temp = await instance('instance_create', {
+          'scope': scope,
+          'kind': 'temporary',
+          'instance': {'title': 'inline', 'content': 'sun'},
+        });
+        await instance('instance_promote', {
+          'scope': scope,
+          'marker': temp['marker'],
+          'expected_library_version': (await run('block_query', {
+            'kind': 'tree',
+          }))['library_version'],
+        });
+        await instance('instance_delete', {
+          'scope': scope,
+          'marker': temp['marker'],
+        });
+        expect(lane(scope).projection, 'snow sky, ');
+      }
+    },
+  );
+
+  test(
+    'prompt_update protects instances but permits exact projection no-op and other fields',
+    () async {
+      await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'one', 'content': 'words'},
+      });
+      final before = lane().document;
+      final version = draft();
+      await expectLater(
+        run('prompt_update', {
+          'changes': {'prompt': 'different'},
+          'expected': version.fieldVersions,
+        }),
+        throwsA(toolError('pill_conflict')),
+      );
+      await run('prompt_update', {
+        'changes': {'prompt': 'words', 'steps': 20},
+        'expected': version.fieldVersions,
+      });
+      expect(lane().document, before);
+    },
+  );
+
+  test(
+    'unopened lane conversion is one write and one undo back to actual draft',
+    () async {
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .updateModel(ImageModels.animeDiffusionV5Full);
+      // Direct initialization deliberately avoids the prompt setter opening a lane.
+      container
+          .read(generationParamsNotifierProvider.notifier)
+          .restoreAgentSnapshot(
+            container
+                .read(generationParamsNotifierProvider)
+                .copyWith(prompt: 'rain sky'),
+          );
+      expect(container.exists(pillWorkspaceProvider('main')), false);
+      final before = draft().documents['prompt'];
+      final revision = container.read(pillWorkspaceRevisionProvider);
+      await instance('instance_convert', {
+        'kind': 'temporary',
+        'anchor': {'text': 'rain', 'mode': 'replace'},
+        'instance': {'title': 'rain'},
+      });
+      expect(container.read(pillWorkspaceRevisionProvider), revision + 1);
+      expect(lane().projection, 'rain sky');
+      editor().undo();
+      expect(lane().document.toJson(), before);
+    },
+  );
+
+  test(
+    'library-free temp persists across storage/provider restoration and snapshots',
+    () async {
+      await Hive.openBox<String>(PillWorkspaceStorage.boxName);
+      await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {
+          'title': 'snapshot temp',
+          'content': 'kept',
+          'color': '#123456',
+          'icon': 'star',
+        },
+      });
+      final expected = lane().document;
+      final saved = await run('snapshot', {
+        'action': 'save',
+        'name': 'inline temp',
+      });
+      await container
+          .read(pillWorkspaceStorageProvider)
+          .persist('main', expected);
+      container.invalidate(pillWorkspaceProvider('main'));
+      expect(lane().document, expected);
+      editor().replaceWithPlainText('replacement');
+      final loaded = await run('snapshot', {
+        'action': 'load',
+        'id': saved['saved']['id'],
+        'expected_version': draft().acknowledgementVersion,
+      });
+      expect(loaded, isNotNull);
+      expect(lane().document, expected);
+      expect(lane().projection, 'kept');
+    },
+  );
+
+  test(
+    'projection mismatch rolls back conversion with no conversion undo entry',
+    () async {
+      projectionMismatch = true;
+      editor().setText('rain sky');
+      final before = lane().document;
+      await expectLater(
+        instance('instance_convert', {
+          'kind': 'temporary',
+          'anchor': {'text': 'rain', 'mode': 'replace'},
+          'instance': {'title': 'x'},
+        }),
+        throwsA(toolError('projection_changed')),
+      );
+      expect(lane().document, before);
+      expect(lane().projection, 'rain sky');
+      editor().undo();
+      expect(lane().document, PillDocument.empty());
+    },
+  );
+
+  test(
+    'promote final Hive admission rejects draft edit, busy and closed without library write',
+    () async {
+      var busy = false, alive = true;
+      final toolsProvider = Provider(
+        (ref) => bindNaiAgentBlocks(ref, workspace, () => busy, () => alive),
+      );
+      final tools = container.read(toolsProvider);
+      final created = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'x', 'content': 'words'},
+      });
+      for (final code in ['draft_conflict', 'busy', 'closed']) {
+        busy = false;
+        alive = true;
+        repository.beforeCreateWrite = () {
+          if (code == 'draft_conflict') {
+            editor().setText('${lane().document.text}newer');
+          }
+          if (code == 'busy') busy = true;
+          if (code == 'closed') alive = false;
+        };
+        await expectLater(
+          tools.manage({
+            'action': 'instance_promote',
+            'marker': created['marker'],
+            'expected_draft_version': draft().acknowledgementVersion,
+            'expected_library_version': (await run('block_query', {
+              'kind': 'tree',
+            }))['library_version'],
+          }, NaiAgentCancellation()),
+          throwsA(toolError(code)),
+        );
+        expect((await repository.load()).blocks, isEmpty);
+        expect(lane().document.instances[created['marker']]!.temporary, true);
+      }
+    },
+  );
+
+  test(
+    'new instance actions refuse active generation and closed binding before backup',
+    () async {
+      var busy = true, alive = true;
+      final toolsProvider = Provider(
+        (ref) => bindNaiAgentBlocks(ref, workspace, () => busy, () => alive),
+      );
+      final tools = container.read(toolsProvider);
+      for (final code in ['busy', 'closed']) {
+        if (code == 'closed') {
+          busy = false;
+          alive = false;
+        }
+        for (final action in [
+          'instance_create',
+          'instance_convert',
+          'instance_unwrap',
+          'instance_delete',
+          'instance_update',
+          'instance_promote',
+        ]) {
+          await expectLater(
+            tools.manage({
+              'action': action,
+              'expected_draft_version': draft().acknowledgementVersion,
+            }, NaiAgentCancellation()),
+            throwsA(toolError(code)),
+          );
+        }
+      }
+      expect(backupCount(), 0);
+    },
+  );
+
+  test(
+    'library-backed temps reject display edits and bundle occurrence deletion preserves other peer',
+    () async {
+      final created = await create({
+        'title': 'paired',
+        'content': 'P',
+        'negativeContent': 'N',
+      });
+      await insert(created['block']['id'] as String);
+      const marker = '\uE000';
+      editor().setText('$marker/$marker');
+      editor('negative').setText('$marker/$marker');
+      await instance('instance_update', {
+        'marker': marker,
+        'instance': {'content': 'temporary'},
+      });
+      final actual = lane().document.text[0];
+      await expectLater(
+        instance('instance_update', {
+          'marker': actual,
+          'instance': {'title': 'no'},
+        }),
+        throwsA(toolError('unsupported_kind')),
+      );
+      await instance('instance_delete', {'marker': actual, 'occurrence': 0});
+      expect(lane().projection, '/P');
+      expect(lane('negative').projection, '/N');
+    },
+  );
+
+  test(
+    'instance conversion near markers and disabled options keep exact projection contracts',
+    () async {
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {'title': 'center', 'content': 'middle'},
+      });
+      final marker = result['marker'] as String;
+      editor().setText('left${marker}right');
+      await instance('instance_convert', {
+        'segments': [
+          {
+            'kind': 'temporary',
+            'anchor': {'text': 'left', 'mode': 'replace'},
+            'instance': {'title': 'L'},
+          },
+          {
+            'kind': 'translation',
+            'anchor': {'text': 'right', 'mode': 'replace'},
+            'translation': {'zh': '右'},
+          },
+        ],
+      });
+      expect(lane().projection, 'leftmiddleright');
+      expect(lane().document.instances[marker]!.temp!.content, 'middle');
+      editor().undo();
+      final before = draft().acknowledgementVersion;
+      final count = backupCount();
+      await expectLater(
+        instance('instance_convert', {
+          'kind': 'temporary',
+          'anchor': {'text': 'left', 'mode': 'replace'},
+          'instance': {'title': 'L', 'enabled': false},
+        }),
+        throwsA(toolError('projection_changed')),
+      );
+      expect(draft().acknowledgementVersion, before);
+      expect(backupCount(), count);
+      final disabled = await instance('instance_create', {
+        'kind': 'translation',
+        'offset': 0,
+        'instance': {
+          'enabled': false,
+          'locked': true,
+          'evolutionEnabled': true,
+        },
+        'translation': {'source': 'hidden', 'zh': '隐藏'},
+      });
+      expect(lane().projection, 'leftmiddleright');
+      final inserted = lane().document.instances[disabled['marker']]!;
+      expect(inserted.locked, true);
+      expect(inserted.evolutionEnabled, true);
+      expect(
+        (await run(
+          'studio_context',
+          {'scope': 'draft'},
+        ))['draft']['documents']['prompt']['instances'][disabled['marker']]['translation']['languageCode'],
+        'zh',
+      );
+    },
+  );
+
+  test('promote explicit display overrides temp defaults', () async {
+    final result = await instance('instance_create', {
+      'kind': 'temporary',
+      'instance': {
+        'title': 'temp',
+        'content': 'words',
+        'color': '#112233',
+        'icon': 'star',
+      },
+    });
+    final promoted = await instance('instance_promote', {
+      'marker': result['marker'],
+      'expected_library_version': (await run('block_query', {
+        'kind': 'tree',
+      }))['library_version'],
+      'changes': {'title': 'saved', 'color': '#FF998877', 'iconName': 'moon'},
+    });
+    expect(promoted['block']['title'], 'saved');
+    expect(promoted['block']['color'], '#FF998877');
+    expect(promoted['block']['iconName'], 'moon');
+  });
+
   test(
     'quality and UC capture save reload apply round trip, native and custom',
     () async {
@@ -205,19 +1082,6 @@ void main() {
       );
     },
   );
-
-  Future<Map<String, dynamic>> insert(
-    String id, {
-    String scope = 'main',
-    int? offset,
-  }) async => run('block_manage', {
-    'action': 'insert',
-    'id': id,
-    'expected_version': (await block(id))['version'],
-    'expected_draft_version': draft().acknowledgementVersion,
-    'scope': scope,
-    if (offset != null) 'offset': offset,
-  });
 
   test(
     'Agent temporary edits isolate one shared occurrence, persist, revert and save as new',

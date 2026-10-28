@@ -262,6 +262,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
     List<PromptBlockTag> tags = const [],
+    void Function()? beforeWrite,
   }) {
     return _mutate(
       (repository) => repository.createBlock(
@@ -286,6 +287,7 @@ class PromptBlockLibraryNotifier extends _$PromptBlockLibraryNotifier {
         thumbnailOffsetY: thumbnailOffsetY,
         thumbnailScale: thumbnailScale,
         sortOrder: sortOrder,
+        beforeWrite: beforeWrite,
       ),
     );
   }

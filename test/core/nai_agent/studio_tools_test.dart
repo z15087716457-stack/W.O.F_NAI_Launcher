@@ -62,6 +62,89 @@ void main() {
     },
   );
   test(
+    'pill_conflict protects changed main/UC and removed or changed character lanes before backup',
+    () async {
+      const document = {
+        'text': '\uE000',
+        'instances': {
+          '\uE000': {
+            'blockId': '',
+            'temp': {'content': 'words'},
+          },
+        },
+      };
+      final initial = BridgeDraftSnapshot(
+        fields: {
+          'prompt': 'words',
+          'negative_prompt': 'words',
+          'characters': [
+            {'id': 'c1', 'prompt': 'words', 'uc': 'words'},
+          ],
+        },
+        documents: {
+          'prompt': document,
+          'negative_prompt': document,
+          'characters': {
+            'lanes': {
+              'c1': {'positive': document, 'negative': document},
+            },
+          },
+        },
+      );
+      for (final changes in [
+        {'prompt': 'new'},
+        {'prompt': '\uE000'},
+        {'negative_prompt': 'new'},
+        {'clear_characters': true},
+        {'characters': <dynamic>[]},
+        {
+          'characters': [
+            {'id': 'c1', 'prompt': 'new', 'uc': 'words'},
+          ],
+        },
+        {
+          'characters': [
+            {'id': 'c1', 'prompt': 'words'},
+          ],
+        },
+        {
+          'characters': [
+            {'prompt': 'words', 'uc': 'words'},
+          ],
+        },
+      ]) {
+        draft = initial;
+        await expectLater(
+          tools.execute('prompt_update', {
+            'changes': changes,
+            'expected': draft.fieldVersions,
+          }, NaiAgentCancellation()),
+          throwsA(
+            isA<NaiAgentToolError>().having(
+              (e) => e.code,
+              'code',
+              'pill_conflict',
+            ),
+          ),
+        );
+        expect(backups, isEmpty);
+      }
+      draft = initial;
+      await tools.execute('prompt_update', {
+        'changes': {
+          'prompt': 'words',
+          'negative_prompt': 'words',
+          'characters': [
+            {'id': 'c1', 'prompt': 'words', 'uc': 'words', 'name': 'renamed'},
+          ],
+        },
+        'expected': draft.fieldVersions,
+      }, NaiAgentCancellation());
+      expect(backups, hasLength(1));
+    },
+  );
+
+  test(
     'backup precedes write and return value is actual post-write draft',
     () async {
       final old = draft;
