@@ -1,3 +1,4 @@
+import '../../../../../helpers/grouped_canvas_batches.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -106,6 +107,7 @@ void main() {
           ];
           final container = ProviderContainer(
             overrides: [
+              groupedCanvasBatchesOverride,
               localStorageServiceProvider.overrideWith((_) => _Storage()),
               generationParamsNotifierProvider.overrideWith(_Params.new),
               imageGenerationNotifierProvider.overrideWith(

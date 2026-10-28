@@ -1,3 +1,4 @@
+import '../../../../../helpers/grouped_canvas_batches.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -85,6 +86,7 @@ class _Camera extends GenerationCanvasCameraNotifier {
 
 ProviderContainer _container(ImageGenerationState initial) => ProviderContainer(
   overrides: [
+    groupedCanvasBatchesOverride,
     imageGenerationNotifierProvider.overrideWith(() => _Generation(initial)),
     localStorageServiceProvider.overrideWith((ref) => _Storage()),
     estimatedCostProvider.overrideWithValue(7),

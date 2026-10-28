@@ -39,7 +39,7 @@ import '../../../../../core/utils/localization_extension.dart';
 ///   q 跳组；Home/End 首尾；Ctrl+0 复位；Ctrl+S 保存焦点图；双击空处切放大填充
 /// - 视觉：非焦点 tile scale(0.98)、悬停回 1（0.25s cubic-bezier(.22,1,.36,1)）；
 ///   非焦点悬停出底部迷你条；焦点组出 top/bottom 边缘工具条
-/// - 归组：组 = 一次生成请求（generationRunId），连续单张各自成组（官网原样）
+/// - 归组：按批次设置排列，关闭分组时已完成图逐张纵向堆叠。
 class GenerationCanvasView extends ConsumerStatefulWidget {
   const GenerationCanvasView({
     required this.generationState,
@@ -503,6 +503,25 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
       final selectionMissing =
           selected != null &&
           !next.groups.any((group) => group.key == selected.group);
+      // Regrouping changes presentation keys while the selected image still
+      // exists. Keep that image focused instead of jumping to the feed's head.
+      if (selectionMissing && prev != null) {
+        final previousImage = _resolveSelectedImage(prev, selected);
+        final retained = next.items
+            .where(
+              (item) =>
+                  item.image?.id == previousImage?.id && item.image != null,
+            )
+            .firstOrNull;
+        if (retained != null) {
+          ref
+              .read(generationCanvasGroupSelectionProvider.notifier)
+              .selectTile(retained.group.key, retained.subimageIndex);
+          _syncPreviewToImage(retained.image!);
+          _flyToSubimage(next, retained.group, retained.subimageIndex);
+          return;
+        }
+      }
       if (prev?.groups.firstOrNull?.key != head.key || selectionMissing) {
         if (widget.visualChannel && prev?.groups.isEmpty == true) {
           // Start the first focus flight from what was actually on screen,

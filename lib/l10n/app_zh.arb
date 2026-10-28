@@ -11359,7 +11359,7 @@
     }
   },
   "set_cvGroupBatches": "批量结果按批次分组",
-  "set_cvGroupBatchesSub": "关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。",
+  "set_cvGroupBatchesSub": "关闭后逐张显示，点历史缩略图可直接定位单张图片。适用于简洁查看器和无限画布。",
   "gen_groupBatches": "分组",
   "gen_translateAdjustPickHint": "在左侧点块可引用",
   "gen_translateAdjustClearRefs": "清除引用",

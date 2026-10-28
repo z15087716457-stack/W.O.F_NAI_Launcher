@@ -21255,8 +21255,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_cvGroupBatches => '批量结果按批次分组';
 
   @override
-  String get set_cvGroupBatchesSub =>
-      '关闭后每张图单独显示，点历史缩略图直接看那一张。只影响简洁查看器；无限画布始终按批次排列。';
+  String get set_cvGroupBatchesSub => '关闭后逐张显示，点历史缩略图可直接定位单张图片。适用于简洁查看器和无限画布。';
 
   @override
   String get gen_groupBatches => '分组';
@@ -42884,8 +42883,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_cvGroupBatches => '批次結果按批次分組';
 
   @override
-  String get set_cvGroupBatchesSub =>
-      '關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。';
+  String get set_cvGroupBatchesSub => '關閉後逐張顯示，點歷史縮圖可直接定位單張圖片。適用於簡潔檢視器和無限畫布。';
 
   @override
   String get gen_groupBatches => '分組';

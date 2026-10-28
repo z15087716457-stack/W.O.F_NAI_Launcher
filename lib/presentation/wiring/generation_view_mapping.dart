@@ -257,7 +257,8 @@ GenGroup? generationFocusView(
   List<GeneratedImage> pinned = const [],
   bool singleImages = false,
 }) {
-  if (singleImages && !state.isGenerating) {
+  if (singleImages &&
+      (!state.isGenerating || focus?.group.startsWith('img:') == true)) {
     final image =
         pinned.where((image) => image.id == selectedImage).firstOrNull ??
         state.findImageById(selectedImage) ??

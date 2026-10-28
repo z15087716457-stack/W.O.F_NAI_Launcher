@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../../../helpers/grouped_canvas_batches.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,7 @@ import 'package:nai_launcher/presentation/providers/canvas_settings_provider.dar
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
+import 'package:nai_launcher/presentation/providers/history_click_behavior_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
@@ -54,8 +56,11 @@ void main() {
   });
   ProviderContainer create(List<GeneratedImage> images) {
     final storage = MemoryDraftSettings();
+    storage.values[StorageKeys.historyClickBehavior] =
+        HistoryClickBehavior.selectPreview.storageValue;
     final container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         localStorageServiceProvider.overrideWithValue(storage),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
         promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),

@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/providers/generation/generation_models.dart';
@@ -26,6 +26,24 @@ GeneratedImage _img({
 
 void main() {
   group('groupCanvasImages', () {
+    test('逐张展示沿用批内排序，纵向排列且不改真实批次', () {
+      final second = _img(id: 'second', runId: 3, batchIndex: 1);
+      final first = _img(id: 'first', runId: 3, batchIndex: 0);
+      final groups = groupCanvasImages([second, first], singleImages: true);
+      expect(groups.map((group) => group.key), ['img:first', 'img:second']);
+      expect(groups.map((group) => group.images.single), [first, second]);
+      expect(groups.every((group) => group.requestedCount == 1), isTrue);
+      final items = layoutCanvasFeed(groups).items;
+      expect(items[0].worldRect.center.dx, items[1].worldRect.center.dx);
+      expect(
+        items[1].worldRect.top - items[0].worldRect.bottom,
+        kCanvasGroupSpacing,
+      );
+      expect(first.generationRunId, 3);
+      expect(second.generationRunId, 3);
+      expect(groupCanvasImages([second, first]).single.tiles, hasLength(2));
+    });
+
     test('同 runId 归一组，无 runId 各自成组', () {
       final images = [
         _img(id: 'a', runId: 1, batchIndex: 0),
@@ -46,21 +64,14 @@ void main() {
       final images = [
         _img(id: 'a', runId: 1, batchIndex: 2, createdAt: t),
         _img(id: 'b', runId: 1, batchIndex: 0, createdAt: t),
-        _img(
-          id: 'c',
-          runId: 1,
-          createdAt: t.add(const Duration(seconds: 1)),
-        ),
+        _img(id: 'c', runId: 1, createdAt: t.add(const Duration(seconds: 1))),
       ];
       final groups = groupCanvasImages(images);
       expect(groups[0].images.map((e) => e.id), ['b', 'a', 'c']);
     });
 
     test('保持传入的组顺序（mergedPanelImages 新→旧）', () {
-      final images = [
-        _img(id: 'new', runId: 9),
-        _img(id: 'old', runId: 1),
-      ];
+      final images = [_img(id: 'new', runId: 9), _img(id: 'old', runId: 1)];
       final groups = groupCanvasImages(images);
       expect(groups.map((g) => g.key), ['run:9', 'run:1']);
     });
@@ -95,10 +106,7 @@ void main() {
       // 单图 832 宽 → 居中 x=-416
       expect(items[0].worldRect.left, -416);
       expect(items[0].worldRect.top, 0);
-      expect(
-        items[1].worldRect.top,
-        1216 + kCanvasGroupSpacing,
-      );
+      expect(items[1].worldRect.top, 1216 + kCanvasGroupSpacing);
       expect(items[1].worldRect.left, -416);
       // 官网 bounds.height = cursorY-340（i 含尾随 340）：
       // (1216+340)+(1216+340)-340 = 2772

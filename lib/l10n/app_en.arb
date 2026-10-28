@@ -11371,7 +11371,7 @@
     }
   },
   "set_cvGroupBatches": "Group batch results",
-  "set_cvGroupBatchesSub": "When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.",
+  "set_cvGroupBatchesSub": "Applies to both the simple viewer and infinite canvas. Turn off to show images individually and select each image from its history thumbnail.",
   "gen_groupBatches": "Group",
   "gen_translateAdjustPickHint": "Click blocks on the left to reference",
   "gen_translateAdjustClearRefs": "Clear references",

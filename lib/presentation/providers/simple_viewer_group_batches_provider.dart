@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/storage_keys.dart';
 import '../../core/storage/local_storage_service.dart';
-import 'simple_output_viewer_provider.dart';
 
 final simpleViewerGroupBatchesProvider =
     NotifierProvider<SimpleViewerGroupBatches, bool>(
@@ -28,9 +27,8 @@ class SimpleViewerGroupBatches extends Notifier<bool> {
   }
 }
 
-/// Presentation only: canvas, saving and generation retain the original batches.
+/// Presentation only, shared by both output viewers. Keep the existing setting
+/// and provider names for compatibility; saving and generation retain batches.
 final simpleViewerSingleImagesProvider = Provider<bool>(
-  (ref) =>
-      ref.watch(simpleOutputViewerNotifierProvider) &&
-      !ref.watch(simpleViewerGroupBatchesProvider),
+  (ref) => !ref.watch(simpleViewerGroupBatchesProvider),
 );

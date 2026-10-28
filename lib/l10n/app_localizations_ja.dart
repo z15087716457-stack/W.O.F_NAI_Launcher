@@ -21500,7 +21500,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get set_cvGroupBatchesSub =>
-      'オフの場合は画像を1枚ずつ表示し、履歴のサムネイルでその画像を選べます。シンプルビューアーのみに適用され、無限キャンバスでは常にバッチごとに配置します。';
+      'シンプルビューアーと無限キャンバスの両方に適用されます。オフにすると1枚ずつ表示し、履歴のサムネイルから各画像を選べます。';
 
   @override
   String get gen_groupBatches => 'グループ';

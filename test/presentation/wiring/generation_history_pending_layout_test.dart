@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ void main() {
       ) async {
         final container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             imageGenerationNotifierProvider.overrideWith(_Generation.new),
             generationFavoriteImagesProvider.overrideWith((_) async => {}),
             generationClockProvider.overrideWithValue(

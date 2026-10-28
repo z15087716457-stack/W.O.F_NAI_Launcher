@@ -1,3 +1,4 @@
+import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -120,6 +121,7 @@ void main() {
     setUp(() {
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           subscriptionNotifierProvider.overrideWith(
             TestSubscriptionNotifier.new,
           ),
@@ -146,6 +148,7 @@ void main() {
           container.dispose();
           container = ProviderContainer(
             overrides: [
+              groupedCanvasBatchesOverride,
               generationParamsNotifierProvider.overrideWith(
                 () => _PendingVibeParams(prepared),
               ),
@@ -284,6 +287,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(api),
             subscriptionNotifierProvider.overrideWith(
               TestSubscriptionNotifier.new,
@@ -351,6 +355,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             imageGenerationNotifierProvider.overrideWith(
               () => _SourceImportGeneration(
                 ImageGenerationState(
@@ -392,6 +397,7 @@ void main() {
       const busy = ImageGenerationState(status: GenerationStatus.generating);
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           imageGenerationNotifierProvider.overrideWith(
             () => _SourceImportGeneration(busy),
           ),
@@ -479,6 +485,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -547,6 +554,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -608,6 +616,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(api),
             subscriptionNotifierProvider.overrideWith(
               TestSubscriptionNotifier.new,
@@ -727,6 +736,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -796,6 +806,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -871,6 +882,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -943,6 +955,7 @@ void main() {
       container.dispose();
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1189,6 +1202,7 @@ void main() {
       container.dispose();
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1302,6 +1316,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -1376,6 +1391,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -1482,6 +1498,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(api),
             naiImageEnhancementApiServiceProvider.overrideWithValue(
               enhancement,
@@ -1575,6 +1592,7 @@ void main() {
       container.dispose();
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1667,6 +1685,7 @@ void main() {
       container.dispose();
       container = ProviderContainer(
         overrides: [
+          groupedCanvasBatchesOverride,
           naiImageGenerationApiServiceProvider.overrideWithValue(
             mockApiService,
           ),
@@ -1747,6 +1766,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),
@@ -1823,6 +1843,7 @@ void main() {
         container.dispose();
         container = ProviderContainer(
           overrides: [
+            groupedCanvasBatchesOverride,
             naiImageGenerationApiServiceProvider.overrideWithValue(
               mockApiService,
             ),

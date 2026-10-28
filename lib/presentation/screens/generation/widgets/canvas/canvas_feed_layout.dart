@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../providers/image_generation_provider.dart';
 import '../../../../providers/canvas_settings_provider.dart';
+import '../../../../providers/simple_viewer_group_batches_provider.dart';
 import 'generation_canvas_controller.dart';
 
 /// An explicit history-row click focuses a batch, even if its cover is already
@@ -72,7 +73,7 @@ class CanvasTileSpec {
 ///
 /// - key `run:<generationRunId>`：正常完成批；inflight 批在建组时直接
 ///   用 `run:<activeRunId>`，完成图与占位共存于一组（官网同组混合渲染）。
-/// - key `img:<imageId>`：无 runId 的外部登记图，各自成组。
+/// - key `img:<imageId>`：逐张展示，或无 runId 的外部登记图。
 /// - 生成中的槽位和完成图共享 run 身份，点击生成即允许选中占位组。
 class CanvasFeedGroup {
   CanvasFeedGroup({
@@ -347,8 +348,11 @@ _GroupLayout _layoutGroupTiles(
 /// 兜底：无 runId 的相邻图若宽高/种子一致且 createdAt 相差 ≤120s，
 /// 视为同批并入上一组（覆盖外部登记/桥接等漏打 runId 的路径）。
 /// 保持传入顺序（mergedPanelImages 新→旧），组内按 batchIndex 升序，
-/// 缺失回退 createdAt。
-List<CanvasFeedGroup> groupCanvasImages(List<GeneratedImage> images) {
+/// 缺失回退 createdAt；[singleImages] 在排序后把每张图作为独立展示组。
+List<CanvasFeedGroup> groupCanvasImages(
+  List<GeneratedImage> images, {
+  bool singleImages = false,
+}) {
   final groups = <String, CanvasFeedGroup>{};
   final order = <String>[];
   CanvasFeedGroup? lastGroup;
@@ -391,7 +395,18 @@ List<CanvasFeedGroup> groupCanvasImages(List<GeneratedImage> images) {
     });
     g.requestedCount = g.images.length;
   }
-  return order.map((k) => groups[k]!).toList();
+  return [
+    for (final key in order)
+      if (singleImages)
+        for (final tile in groups[key]!.tiles)
+          CanvasFeedGroup(
+            key: 'img:${tile.image!.id}',
+            runId: tile.image!.generationRunId,
+            tiles: [tile],
+          )
+      else
+        groups[key]!,
+  ];
 }
 
 /// 生成中占位组（feed 置顶）：slots 按 imageNumber 升序成 tile。
@@ -554,7 +569,7 @@ class _CanvasFeedGeometryNotifier extends Notifier<CanvasFeedLayoutResult> {
     final groups = groupCanvasImages([
       for (final img in mergedImages)
         if (!state.isGenerating || !doneIds.contains(img.id)) img,
-    ]);
+    ], singleImages: ref.watch(simpleViewerSingleImagesProvider));
 
     if (state.isGenerating) {
       final bw = state.batchWidth;

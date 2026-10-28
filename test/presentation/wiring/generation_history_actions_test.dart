@@ -1,3 +1,4 @@
+import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -46,6 +47,7 @@ void main() {
     final storage = MemoryDraftSettings();
     container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         localStorageServiceProvider.overrideWithValue(storage),
         imageGenerationNotifierProvider.overrideWith(HistoryGeneration.new),
       ],

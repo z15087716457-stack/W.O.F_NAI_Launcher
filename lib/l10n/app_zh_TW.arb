@@ -11944,7 +11944,7 @@
     }
   },
   "set_cvGroupBatches": "批次結果按批次分組",
-  "set_cvGroupBatchesSub": "關閉後每張圖單獨顯示，點歷史縮圖直接看那一張。隻影響簡潔檢視器；無限畫布始終按批次排列。",
+  "set_cvGroupBatchesSub": "關閉後逐張顯示，點歷史縮圖可直接定位單張圖片。適用於簡潔檢視器和無限畫布。",
   "gen_groupBatches": "分組",
   "gen_translateAdjustPickHint": "在左側點塊可引用",
   "gen_translateAdjustClearRefs": "清除引用",

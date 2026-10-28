@@ -22258,7 +22258,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_cvGroupBatchesSub =>
-      'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.';
+      'Applies to both the simple viewer and infinite canvas. Turn off to show images individually and select each image from its history thumbnail.';
 
   @override
   String get gen_groupBatches => 'Group';

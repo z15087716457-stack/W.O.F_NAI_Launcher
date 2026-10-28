@@ -38671,7 +38671,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_cvGroupBatchesSub.
   ///
   /// In en, this message translates to:
-  /// **'When off, show each image separately; click a history thumbnail to view that image. Only affects the simple viewer; the infinite canvas always arranges images by batch.'**
+  /// **'Applies to both the simple viewer and infinite canvas. Turn off to show images individually and select each image from its history thumbnail.'**
   String get set_cvGroupBatchesSub;
 
   /// No description provided for @gen_groupBatches.

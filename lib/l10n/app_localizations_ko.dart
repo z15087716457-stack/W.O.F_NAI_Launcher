@@ -21572,7 +21572,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_cvGroupBatchesSub =>
-      '끄면 이미지를 한 장씩 표시하며 기록 썸네일을 클릭해 해당 이미지를 봅니다. 간단 뷰어에만 적용되며 무한 캔버스는 항상 배치별로 배치합니다.';
+      '간단 뷰어와 무한 캔버스 모두에 적용됩니다. 끄면 이미지를 한 장씩 표시하며 기록 썸네일로 각 이미지를 선택할 수 있습니다.';
 
   @override
   String get gen_groupBatches => '그룹';

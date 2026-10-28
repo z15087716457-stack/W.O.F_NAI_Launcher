@@ -1,3 +1,4 @@
+import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 
@@ -152,6 +153,7 @@ void main() {
     storage.values[StorageKeys.canvasReducedMotion] = true;
     container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         tipDeckProvider.overrideWithValue(deck),
         tipEpochProvider.overrideWith((ref) => Stream.value(0)),
         localStorageServiceProvider.overrideWithValue(storage),
@@ -1169,7 +1171,10 @@ void main() {
     }
     expect(tester.takeException(), isNull);
   });
-  testWidgets('简洁模式历史逐张、选中第2张、分组快捷开关同步且无限画布不受影响', (tester) async {
+  testWidgets('分组开关同时控制简洁查看器与无限画布，切换保留选中图', (tester) async {
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(false);
     final a = image(4, 0);
     final b = image(4, 1);
     publish(ImageGenerationState(history: [a, b], displayImages: [a, b]));
@@ -1219,13 +1224,139 @@ void main() {
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(false);
     await tester.pumpAndSettle();
-    expect(container.read(generationHistoryBatchesProvider), hasLength(1));
+    expect(container.read(generationHistoryBatchesProvider), hasLength(2));
     expect(find.byType(GenerationCanvasWiring), findsOneWidget);
     expect(find.byKey(const Key('simple-viewer-group-batches')), findsNothing);
+    final singles = container.read(canvasFeedLayoutProvider);
+    expect(singles.groups.map((group) => group.key), [
+      'img:${a.id}',
+      'img:${b.id}',
+    ]);
+    expect(singles.groups.every((group) => group.tiles.length == 1), isTrue);
+    expect(
+      singles.items[1].worldRect.center.dx,
+      singles.items[0].worldRect.center.dx,
+    );
+    expect(
+      singles.items[1].worldRect.top,
+      greaterThan(singles.items[0].worldRect.bottom),
+    );
+    container.read(generationHistoryActionsProvider).focusBatch('img:${b.id}');
+    await tester.pumpAndSettle();
+    expect(container.read(generationPreviewSelectionProvider), b.id);
+    expect(
+      container.read(generationCanvasGroupSelectionProvider)!.group,
+      'img:${b.id}',
+    );
+    final beforeWheel = camera();
+    await wheel(tester, const Offset(0, 80));
+    expect(camera().offset, isNot(beforeWheel.offset));
+    expect(camera().scale, beforeWheel.scale);
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(true);
+    await tester.pumpAndSettle();
+    expect(container.read(canvasFeedLayoutProvider).groups.single.key, 'run:4');
+    expect(container.read(generationHistoryBatchesProvider), hasLength(1));
+    expect(container.read(generationPreviewSelectionProvider), b.id);
+    expect(container.read(generationCanvasGroupSelectionProvider)!.subimage, 1);
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(false);
+    await tester.pumpAndSettle();
+    expect(container.read(generationPreviewSelectionProvider), b.id);
+    expect(
+      container.read(generationCanvasGroupSelectionProvider)!.group,
+      'img:${b.id}',
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('无限画布逐张模式保留生成多槽位，完成后逐张接管', (tester) async {
+    final old = image(4);
+    final first = image(9);
+    final last = image(9, 1);
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(false);
+    publish(
+      ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: 9,
+        totalImages: 2,
+        currentImage: 1,
+        batchWidth: 512,
+        batchHeight: 768,
+        history: [old],
+      ),
+    );
+    await pump(tester, fullPage: true);
+    final pending = container.read(canvasFeedLayoutProvider);
+    expect(pending.groups.map((group) => group.key), [
+      'run:9',
+      'img:${old.id}',
+    ]);
+    expect(pending.groups.first.tiles, hasLength(2));
+    expect(pending.groups.first.tiles.every((tile) => tile.isInFlight), isTrue);
+    publish(
+      ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: 9,
+        totalImages: 2,
+        currentImage: 2,
+        batchWidth: 512,
+        batchHeight: 768,
+        currentImages: [first],
+        history: [old],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final partial = container.read(canvasFeedLayoutProvider).groups.first;
+    expect(partial.key, 'run:9');
+    expect(partial.tiles.first.image, same(first));
+    expect(partial.tiles.last.isInFlight, isTrue);
+    container
+        .read(generationHistoryActionsProvider)
+        .focusBatch('img:${old.id}');
+    await tester.pumpAndSettle();
+    expect(container.read(generationFocusViewProvider)!.id, 'img:${old.id}');
+    expect(
+      tester
+          .widget<GenerationPage>(find.byType(GenerationPage))
+          .data
+          .history
+          .selected,
+      'img:${old.id}',
+    );
+    container.read(generationHistoryActionsProvider).focusBatch('run:9');
+    await tester.pumpAndSettle();
+    publish(
+      ImageGenerationState(
+        status: GenerationStatus.completed,
+        generationRunId: 9,
+        currentImages: [first, last],
+        history: [old],
+        displayImages: [first, last],
+      ),
+    );
+    await tester.pumpAndSettle();
+    final completed = container.read(canvasFeedLayoutProvider);
+    expect(completed.groups.map((group) => group.key), [
+      'img:${first.id}',
+      'img:${last.id}',
+      'img:${old.id}',
+    ]);
+    expect(completed.groups.every((group) => group.tiles.length == 1), isTrue);
+    expect(container.read(generationHistoryBatchesProvider), hasLength(3));
+    expect(container.read(generationPreviewSelectionProvider), first.id);
+    expect(first.generationRunId, last.generationRunId);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('简洁模式新批完成显示最新单张，生成中保留多槽位', (tester) async {
+    await container
+        .read(simpleViewerGroupBatchesProvider.notifier)
+        .setGrouped(false);
     await container
         .read(simpleOutputViewerNotifierProvider.notifier)
         .setSimple(true);

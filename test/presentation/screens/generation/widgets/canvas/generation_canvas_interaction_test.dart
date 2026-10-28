@@ -1,3 +1,4 @@
+import '../../../../../helpers/grouped_canvas_batches.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -100,6 +101,7 @@ class _Camera extends GenerationCanvasCameraNotifier {
 
 ProviderContainer _container(ImageGenerationState initial) => ProviderContainer(
   overrides: [
+    groupedCanvasBatchesOverride,
     imageGenerationNotifierProvider.overrideWith(() => _Generation(initial)),
     localStorageServiceProvider.overrideWith((ref) => _Storage()),
     kritaBridgeNotifierProvider.overrideWith((ref) => KritaBridgeNotifier()),
@@ -343,6 +345,7 @@ void main() {
   ) async {
     final container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         imageGenerationNotifierProvider.overrideWith(
           () => _Generation(ImageGenerationState(history: [_image(1)])),
         ),
@@ -386,6 +389,7 @@ void main() {
   ) async {
     final container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         imageGenerationNotifierProvider.overrideWith(
           () => _Generation(const ImageGenerationState()),
         ),
@@ -529,6 +533,7 @@ void main() {
   testWidgets('lock camera should block plus zoom', (tester) async {
     final container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         imageGenerationNotifierProvider.overrideWith(
           () => _Generation(ImageGenerationState(history: [_image(1)])),
         ),
@@ -646,6 +651,7 @@ void main() {
   test('two zoom ticks should accumulate to 1.44 before the first frame', () {
     final container = ProviderContainer(
       overrides: [
+        groupedCanvasBatchesOverride,
         localStorageServiceProvider.overrideWith((ref) => _AnimatedStorage()),
         generationCanvasCameraProvider.overrideWith(_Camera.new),
       ],
