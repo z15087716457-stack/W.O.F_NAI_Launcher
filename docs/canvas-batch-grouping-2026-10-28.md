@@ -1,6 +1,6 @@
 # 无限画布共用批次分组开关
 
-2026-10-28，按用户要求将“批量结果按批次分组”扩展到无限画布。源码验证完成，**尚未构建或安装**；本机仍为 2.2.0+59、编译 `1283c03e0`。本项与[光标修复](syntax-caret-visibility-2026-10-28.md)、[历史单击详情修复](history-open-detail-2026-10-28.md)一起待本机更新，状态见[接手说明](../../../../04_工具/启动器接手说明.md)。
+2026-10-28，本项已随本机 **2.2.0+60** 原位安装，编译 `bc745f5af`，安装校验与回退通过。当前无待安装增量；下文保留源码实现阶段的原因与验证。完整交付见[+60 安装记录](local-2.2.0-build60-2026-10-28.md)。
 
 ## 行为与范围
 
@@ -22,4 +22,4 @@
 
 证据目录：有效源码 `.dart_tool/canvas-batch-grouping-20261028/`，包括 `switching.log`、`active-generation.log`、`full-regression.jsonl`、`recheck-final.jsonl`、`verification.json`、`analyze.log`、`fixture-analyze.log`、`settings-canvas.before.png`、`settings-baseline-diff.json`。早期依赖旧默认分组的失败及修正过程保留于 `regression-initial.log`、`regression.log` 和 `failed-suite-recheck.log`，不删除失败原日志。
 
-使用登记的 Flutter 3.47.7 / Dart 3.13.5，测试为隔离存储、合成图片和 widget 界面；不把它们视为用户显卡的帧率实测。本次未操作运行中的 Studio、用户草稿、桥接或正式索引，未调用真实生成／模型，未安装、发布或制作分发包。
+使用登记的 Flutter 3.47.7 / Dart 3.13.5，测试为隔离存储、合成图片和 widget 界面；不把它们视为用户显卡的帧率实测。源码实现阶段未操作运行中的 Studio、用户草稿、桥接或正式索引，未调用真实生成／模型，未安装、发布或制作分发包。
