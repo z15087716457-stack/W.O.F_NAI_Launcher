@@ -268,7 +268,6 @@ void main() {
           'title': '  one-off  ',
           'color': '#12ab34',
           'icon': 'star',
-          'settings': {'mode': 'random'},
         },
       });
       final marker = result['marker'] as String;
@@ -291,7 +290,7 @@ void main() {
       expect(lane().projection, 'start, 猫😀');
       final context = await run('studio_context', {'scope': 'draft'});
       final json = context['draft']['documents']['prompt']['instances'][marker];
-      expect(json['kind'], 'temporary');
+      expect(json.containsKey('kind'), false);
       expect(json['temporary'], true);
       expect(json['temp']['iconName'], 'star');
       await instance('instance_update', {
@@ -324,15 +323,21 @@ void main() {
       final result = await instance('instance_create', {
         'kind': 'translation',
         'anchor': {'text': 'tail', 'mode': 'before'},
-        'translation': {
-          'source': 'rain',
-          'zh': '雨天',
-          'marks': [
-            {'start': 0, 'end': 1, 'tag': 'rain', 'icon_id': 'weather'},
-          ],
-        },
+        'translation': {'source': 'rain', 'zh': '雨天'},
       });
       final marker = result['marker'] as String;
+      final original = lane().document.instances[marker]!.translation!;
+      expect(original.toJson().containsKey('needsReview'), false);
+      expect(original.toJson().containsKey('languageCode'), false);
+      expect(
+        lane().document.instances[marker]!.toJson().containsKey('kind'),
+        false,
+      );
+      // Existing native tag marks remain supported, but are not Agent input.
+      const marks = [
+        TranslationTagMark(start: 0, end: 1, tag: 'rain', iconId: 'weather'),
+      ];
+      editor().updateTranslation(marker, original.copyWith(marks: marks));
       expect(lane().projection, 'raintail');
       expect(
         lane().document.instances[marker]!.translation!.translationEdited,
@@ -343,14 +348,33 @@ void main() {
         'translation': {'source': 'snow'},
       });
       expect(lane().projection, 'snowtail');
+      expect(lane().document.instances[marker]!.translation!.marks, marks);
+      expect(
+        lane().document.instances[marker]!.translation!.toJson()['needsReview'],
+        true,
+      );
       expect(
         lane().document.instances[marker]!.translation!.needsReview,
         isTrue,
       );
       await instance('instance_update', {
         'marker': marker,
+        'translation': {'zh': '雨天'},
+      });
+      expect(lane().document.instances[marker]!.translation!.marks, marks);
+      expect(
+        lane().document.instances[marker]!.translation!.needsReview,
+        false,
+      );
+      await instance('instance_update', {
+        'marker': marker,
         'translation': {'zh': '雪', 'language_code': 'ja'},
       });
+      expect(
+        lane().document.instances[marker]!.translation!
+            .toJson()['languageCode'],
+        'ja',
+      );
       expect(lane().document.instances[marker]!.translation!.marks, isEmpty);
       expect(
         lane().document.instances[marker]!.translation!.needsReview,
@@ -404,6 +428,7 @@ void main() {
         ],
       });
       expect(result['markers'], hasLength(3));
+      expect(result.containsKey('marker'), false);
       expect(container.read(pillWorkspaceRevisionProvider), revision + 1);
       expect(backupCount(), count + 1);
       expect(lane().projection, text);
@@ -473,10 +498,7 @@ void main() {
         expect(backupCount(), count);
       }
       await expectLater(
-        instance('instance_convert', {
-          'segments': [valid],
-          'kind': 'temporary',
-        }),
+        instance('instance_convert', valid),
         throwsA(toolError('invalid_arguments')),
       );
       await expectLater(
@@ -552,21 +574,6 @@ void main() {
       }
       for (final translation in [
         {'source': 'rain', 'zh': '雨', 'language_code': 'xx'},
-        {
-          'source': 'rain',
-          'zh': '雨',
-          'marks': [
-            {'start': 0, 'end': 2, 'tag': 'rain', 'icon_id': 'tag'},
-          ],
-        },
-        {
-          'source': 'rain',
-          'zh': '雨天',
-          'marks': [
-            {'start': 0, 'end': 2, 'tag': 'a', 'icon_id': 'tag'},
-            {'start': 1, 'end': 2, 'tag': 'b', 'icon_id': 'tag'},
-          ],
-        },
       ]) {
         await expectLater(
           instance('instance_create', {
@@ -589,6 +596,51 @@ void main() {
   );
 
   test(
+    'creation and conversion reject ineffective instance options before backup',
+    () async {
+      editor().setText('rain');
+      final before = draft().acknowledgementVersion;
+      final count = backupCount();
+      for (final kind in ['temporary', 'translation']) {
+        for (final option in [
+          {'locked': true},
+          {'evolutionEnabled': true},
+          {
+            'settings': {'mode': 'random'},
+          },
+        ]) {
+          final fields = {
+            'kind': kind,
+            'instance': {
+              if (kind == 'temporary') ...{'title': 'rain', 'content': 'rain'},
+              ...option,
+            },
+            if (kind == 'translation')
+              'translation': {'source': 'rain', 'zh': '雨'},
+          };
+          await expectLater(
+            instance('instance_create', fields),
+            throwsA(toolError('invalid_instance')),
+          );
+          await expectLater(
+            instance('instance_convert', {
+              'segments': [
+                {
+                  ...fields,
+                  'anchor': {'text': 'rain', 'mode': 'replace'},
+                },
+              ],
+            }),
+            throwsA(toolError('invalid_instance')),
+          );
+          expect(draft().acknowledgementVersion, before);
+          expect(backupCount(), count);
+        }
+      }
+    },
+  );
+
+  test(
     'all inline actions reject stale draft before backup and promote rejects stale library',
     () async {
       final result = await instance('instance_create', {
@@ -605,9 +657,13 @@ void main() {
         },
         {
           'action': 'instance_convert',
-          'kind': 'temporary',
-          'anchor': {'text': 'missing', 'mode': 'replace'},
-          'instance': {'title': 'x'},
+          'segments': [
+            {
+              'kind': 'temporary',
+              'anchor': {'text': 'missing', 'mode': 'replace'},
+              'instance': {'title': 'x'},
+            },
+          ],
         },
         {
           'action': 'instance_update',
@@ -696,11 +752,16 @@ void main() {
         editor(scope).setText('rain sky');
         final result = await instance('instance_convert', {
           'scope': scope,
-          'kind': 'translation',
-          'anchor': {'text': 'rain', 'mode': 'replace'},
-          'translation': {'zh': '雨'},
+          'segments': [
+            {
+              'kind': 'translation',
+              'anchor': {'text': 'rain', 'mode': 'replace'},
+              'translation': {'zh': '雨'},
+            },
+          ],
         });
-        final marker = result['marker'] as String;
+        expect(result.containsKey('marker'), false);
+        final marker = (result['markers'] as List).single as String;
         expect(lane(scope).projection, 'rain sky');
         await instance('instance_update', {
           'scope': scope,
@@ -772,9 +833,13 @@ void main() {
       final before = draft().documents['prompt'];
       final revision = container.read(pillWorkspaceRevisionProvider);
       await instance('instance_convert', {
-        'kind': 'temporary',
-        'anchor': {'text': 'rain', 'mode': 'replace'},
-        'instance': {'title': 'rain'},
+        'segments': [
+          {
+            'kind': 'temporary',
+            'anchor': {'text': 'rain', 'mode': 'replace'},
+            'instance': {'title': 'rain'},
+          },
+        ],
       });
       expect(container.read(pillWorkspaceRevisionProvider), revision + 1);
       expect(lane().projection, 'rain sky');
@@ -826,9 +891,13 @@ void main() {
       final before = lane().document;
       await expectLater(
         instance('instance_convert', {
-          'kind': 'temporary',
-          'anchor': {'text': 'rain', 'mode': 'replace'},
-          'instance': {'title': 'x'},
+          'segments': [
+            {
+              'kind': 'temporary',
+              'anchor': {'text': 'rain', 'mode': 'replace'},
+              'instance': {'title': 'x'},
+            },
+          ],
         }),
         throwsA(toolError('projection_changed')),
       );
@@ -972,9 +1041,13 @@ void main() {
       final count = backupCount();
       await expectLater(
         instance('instance_convert', {
-          'kind': 'temporary',
-          'anchor': {'text': 'left', 'mode': 'replace'},
-          'instance': {'title': 'L', 'enabled': false},
+          'segments': [
+            {
+              'kind': 'temporary',
+              'anchor': {'text': 'left', 'mode': 'replace'},
+              'instance': {'title': 'L', 'enabled': false},
+            },
+          ],
         }),
         throwsA(toolError('projection_changed')),
       );
@@ -983,23 +1056,21 @@ void main() {
       final disabled = await instance('instance_create', {
         'kind': 'translation',
         'offset': 0,
-        'instance': {
-          'enabled': false,
-          'locked': true,
-          'evolutionEnabled': true,
-        },
+        'instance': {'enabled': false},
         'translation': {'source': 'hidden', 'zh': '隐藏'},
       });
       expect(lane().projection, 'leftmiddleright');
       final inserted = lane().document.instances[disabled['marker']]!;
-      expect(inserted.locked, true);
-      expect(inserted.evolutionEnabled, true);
+      expect(inserted.locked, false);
+      expect(inserted.evolutionEnabled, false);
+      expect(inserted.settings, PillInstanceSettings.fixedDefault);
       expect(
         (await run(
-          'studio_context',
-          {'scope': 'draft'},
-        ))['draft']['documents']['prompt']['instances'][disabled['marker']]['translation']['languageCode'],
-        'zh',
+              'studio_context',
+              {'scope': 'draft'},
+            ))['draft']['documents']['prompt']['instances'][disabled['marker']]['translation']
+            .containsKey('languageCode'),
+        false,
       );
     },
   );

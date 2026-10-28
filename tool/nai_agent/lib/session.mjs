@@ -34,7 +34,7 @@ export function studioTools(execute, extraToolNames = []) {
       Type.Object({ scope: Type.Optional(Type.Union([Type.Literal('summary'), Type.Literal('draft')])) })),
     tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including attachments/ and outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
       Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),
-    tool('prompt_update', 'Patch Studio draft after studio_context(scope=draft). Send expected field_versions for each affected field; changing model also checks sampler. Version aliases: clear_characters -> characters, seed_lock -> seed, quality_toggle -> quality_preset. Lanes containing instances accept only their unchanged projection; other text edits (even retaining markers), character removal or clearing fail pill_conflict. Use block_manage instance_* instead; unrelated fields are editable. Backs up and rechecks before writing; returns actual readback.',
+    tool('prompt_update', 'Lanes containing blocks accept only their unchanged projection; otherwise pill_conflict; edit blocks with block_manage instance_*.',
       Type.Object({ changes: Type.Record(Type.String(), Type.Unknown()),
         expected: Type.Record(Type.String(), Type.String()) })),
     ...domainTools.filter(definition => extraToolNames.includes(definition.name))

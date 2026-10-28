@@ -23,18 +23,12 @@ class PillInlineEdit {
     this.temp,
     this.translation,
     this.enabled = true,
-    this.locked = false,
-    this.evolutionEnabled = false,
-    this.settings = PillInstanceSettings.fixedDefault,
   }) : assert((temp == null) != (translation == null));
   final int start;
   final int end;
   final PillTempContent? temp;
   final TranslationPill? translation;
   final bool enabled;
-  final bool locked;
-  final bool evolutionEnabled;
-  final PillInstanceSettings settings;
 }
 
 class PillAnchorException implements Exception {

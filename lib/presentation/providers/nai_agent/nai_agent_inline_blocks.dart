@@ -44,12 +44,11 @@ TranslationPill _translation(
 }) {
   if (raw is! Map ||
       raw.keys.any(
-        (key) =>
-            !const {'source', 'zh', 'marks', 'language_code'}.contains(key),
+        (key) => !const {'source', 'zh', 'language_code'}.contains(key),
       )) {
     throw const NaiAgentToolError(
       'invalid_translation',
-      'Provide translation source/zh/marks/language_code',
+      'Provide translation source/zh/language_code',
     );
   }
   for (final key in ['source', 'zh']) {
@@ -87,52 +86,17 @@ TranslationPill _translation(
       'language_code must be zh, zh-TW, en, ja or ko',
     );
   }
-  // A changed reading without new marks must not retain stale reading offsets.
-  var marks = raw.containsKey('zh')
-      ? <TranslationTagMark>[]
-      : original?.marks ?? <TranslationTagMark>[];
-  if (raw.containsKey('marks')) {
-    if (raw['marks'] is! List) {
-      throw const NaiAgentToolError(
-        'invalid_translation',
-        'marks must be a list',
-      );
-    }
-    marks = [];
-    for (final value in raw['marks'] as List) {
-      final mark = value is Map
-          ? TranslationTagMark.fromJson(
-              Map<String, dynamic>.from(value),
-              zh.length,
-            )
-          : null;
-      if (mark == null ||
-          !PillDocumentEditor.isUtf16Boundary(zh, mark.start) ||
-          !PillDocumentEditor.isUtf16Boundary(zh, mark.end) ||
-          marks.any(
-            (other) => mark.start < other.end && other.start < mark.end,
-          )) {
-        throw const NaiAgentToolError(
-          'invalid_translation',
-          'marks must have valid, non-overlapping UTF-16 ranges in zh',
-        );
-      }
-      marks.add(mark);
-    }
-  }
   final sourceChanged = original != null && source != original.source;
   return TranslationPill(
     source: source,
     zh: zh,
-    marks: marks,
+    marks: zh == original?.zh ? original!.marks : const [],
     languageCode: language as String,
     translationEdited: true,
     showOriginal: original?.showOriginal ?? false,
-    needsReview: sourceChanged && !raw.containsKey('zh')
-        ? true
-        : raw.containsKey('zh')
-        ? false
-        : original?.needsReview ?? false,
+    needsReview:
+        !raw.containsKey('zh') &&
+        (sourceChanged || (original?.needsReview ?? false)),
   );
 }
 
@@ -202,22 +166,7 @@ List<PillInlineEdit> _inlinePlan(
   PillDocument document,
 ) {
   final convert = params['action'] == 'instance_convert';
-  final batch = params.containsKey('segments');
-  if (batch &&
-      (!convert ||
-          const [
-            'anchor',
-            'offset',
-            'kind',
-            'instance',
-            'translation',
-          ].any(params.containsKey))) {
-    throw const NaiAgentToolError(
-      'invalid_arguments',
-      'segments is exclusive with single-segment parameters',
-    );
-  }
-  final segments = batch ? params['segments'] : [params];
+  final segments = convert ? params['segments'] : [params];
   if (segments is! List || segments.isEmpty || segments.length > 64) {
     throw const NaiAgentToolError(
       'invalid_arguments',
@@ -229,7 +178,7 @@ List<PillInlineEdit> _inlinePlan(
     try {
       final raw = segments[index];
       if (raw is! Map ||
-          (batch &&
+          (convert &&
               raw.keys.any(
                 (key) => !const {
                   'anchor',
@@ -251,7 +200,11 @@ List<PillInlineEdit> _inlinePlan(
           'kind must be temporary or translation',
         );
       }
-      final changes = _instanceChanges(part['instance'], optional: true);
+      final changes = _instanceChanges(
+        part['instance'],
+        optional: true,
+        inline: true,
+      );
       if (changes.containsKey('negative_content')) {
         throw const NaiAgentToolError(
           'unsupported_bundle',
@@ -273,12 +226,6 @@ List<PillInlineEdit> _inlinePlan(
       }
       final PillAnchorRange range;
       if (convert) {
-        if (part.containsKey('offset')) {
-          throw const NaiAgentToolError(
-            'invalid_position',
-            'Conversion requires anchor, not offset',
-          );
-        }
         range = _anchor(part['anchor'], document, replace: true);
       } else {
         final offset = _insertionPosition(part, document);
@@ -340,15 +287,10 @@ List<PillInlineEdit> _inlinePlan(
           temp: temp,
           translation: translation,
           enabled: changes['enabled'] as bool? ?? true,
-          locked: changes['locked'] as bool? ?? false,
-          evolutionEnabled: changes['evolutionEnabled'] as bool? ?? false,
-          settings: PillInstanceSettings.fromJson(
-            Map<String, dynamic>.from(changes['settings'] as Map? ?? {}),
-          ),
         ),
       );
     } on NaiAgentToolError catch (error) {
-      if (!batch) rethrow;
+      if (!convert) rethrow;
       throw NaiAgentToolError(
         error.code,
         'Segment ${index + 1}: ${error.message}',
@@ -485,13 +427,9 @@ List<String> _applyInline(
       offset: edit.start,
       source: translation.source,
       zh: translation.zh,
-      marks: translation.marks,
       languageCode: translation.languageCode,
       translationEdited: true,
       enabled: edit.enabled,
-      locked: edit.locked,
-      evolutionEnabled: edit.evolutionEnabled,
-      settings: edit.settings,
       prefix: prefix,
       document: document,
     );

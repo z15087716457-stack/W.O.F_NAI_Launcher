@@ -75,18 +75,27 @@ PillDocument _document(BridgeDraftSnapshot draft, String scope) {
   );
 }
 
-Map<String, dynamic> _instanceChanges(Object? raw, {bool optional = false}) {
+Map<String, dynamic> _instanceChanges(
+  Object? raw, {
+  bool optional = false,
+  bool inline = false,
+}) {
   if (raw == null && optional) return {};
   if (raw is! Map ||
       (raw.isEmpty && !optional) ||
-      raw.keys.any((key) => !_instanceKeys.contains(key))) {
+      raw.keys.any(
+        (key) =>
+            !_instanceKeys.contains(key) ||
+            (inline &&
+                const {'locked', 'evolutionEnabled', 'settings'}.contains(key)),
+      )) {
     throw const NaiAgentToolError(
       'invalid_instance',
-      'Provide settings, enabled, locked or evolutionEnabled',
+      'Provide supported instance fields',
     );
   }
   final changes = Map<String, dynamic>.from(raw);
-  _validateDisplay(changes);
+  if (!inline) _validateDisplay(changes);
   for (final key in ['content', 'negative_content']) {
     if (changes.containsKey(key) &&
         (changes[key] is! String || (changes[key] as String).length > 100000)) {
@@ -162,8 +171,8 @@ NaiAgentBlockTools bindNaiAgentBlocks(
     PromptBlock? block,
     BridgeDraftSnapshot draft,
   ) {
-    final scope = _scope(params, draft),
-        doc = _document(draft, _scope(params, draft));
+    final scope = _scope(params, draft);
+    final doc = _document(draft, scope);
     if (params['action'] == 'instance_create' ||
         params['action'] == 'instance_convert') {
       _inlinePlan(params, doc);
@@ -171,12 +180,6 @@ NaiAgentBlockTools bindNaiAgentBlocks(
     }
     if (params['action'] == 'insert') {
       _insertionPosition(params, doc);
-      if (block == null) {
-        throw const NaiAgentToolError(
-          'block_missing',
-          'Read block_query again',
-        );
-      }
       return;
     }
     final marker = params['marker'];
@@ -314,7 +317,7 @@ NaiAgentBlockTools bindNaiAgentBlocks(
             _document(draft, scope),
             _draftProjection(draft, scope),
           );
-          if (params.containsKey('segments')) {
+          if (params['action'] == 'instance_convert') {
             convertedMarkers = markers;
           } else {
             createdMarker = markers.single;

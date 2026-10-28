@@ -290,9 +290,6 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     int rollScopeMask = 1,
     String blockId = '',
     bool enabled = true,
-    bool locked = false,
-    bool evolutionEnabled = false,
-    PillInstanceSettings settings = PillInstanceSettings.fixedDefault,
     String prefix = '',
     PillDocument? document,
   }) {
@@ -306,9 +303,6 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         bundleId: bundleId,
         rollScopeMask: rollScopeMask,
         enabled: enabled,
-        locked: locked,
-        evolutionEnabled: evolutionEnabled,
-        settings: settings,
         translation: TranslationPill(
           source: source,
           zh: zh,
@@ -349,9 +343,6 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
         temp: edit.temp,
         translation: edit.translation,
         enabled: edit.enabled,
-        locked: edit.locked,
-        evolutionEnabled: edit.evolutionEnabled,
-        settings: edit.settings,
       );
       markers.add(marker);
     }

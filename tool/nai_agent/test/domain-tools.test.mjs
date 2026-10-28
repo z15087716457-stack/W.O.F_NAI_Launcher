@@ -71,14 +71,22 @@ test('block schema accepts presets and occurrence-local content, rejects invalid
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',occurrence:-1,instance:{content:'new'}}),false);
 });
 
-test('inline block schemas expose kinds, anchors, bounded batches and translation ranges', async () => {
+test('inline block schemas keep segments-only conversion and minimal creation options', async () => {
   const tool = domainTools.find(tool=>tool.name==='block_manage');
-  for (const action of ['instance_create','instance_convert','instance_unwrap','instance_delete','instance_promote']) {
+  for (const action of ['instance_create','instance_unwrap','instance_delete','instance_promote']) {
     assert.equal(Value.Check(tool.parameters,{action}),true);
   }
   const segment = {kind:'temporary',anchor:{text:'中文😀',mode:'replace'},instance:{title:'one-off',color:'#80112233',icon:'star'}};
   assert.equal(Value.Check(tool.parameters,{action:'instance_convert',segments:[segment]}),true);
-  assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'translation',translation:{source:'rain',zh:'雨',language_code:'ja',marks:[{start:0,end:1,tag:'rain',icon_id:'tag'}]}}),true);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'translation',instance:{enabled:false},translation:{source:'rain',zh:'雨',language_code:'ja'}}),true);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_convert'}),false);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_convert',...segment}),false);
+  for (const extra of [{locked:true},{evolutionEnabled:true},{settings:{mode:'random'}}]) {
+    assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'temporary',instance:{title:'one-off',content:'rain',...extra}}),false);
+    assert.equal(Value.Check(tool.parameters,{action:'instance_convert',segments:[{...segment,instance:{title:'one-off',...extra}}]}),false);
+    assert.equal(Value.Check(tool.parameters,{action:'instance_update',marker:'x',instance:extra}),true);
+  }
+  assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'translation',translation:{source:'rain',zh:'雨',marks:[]}}),false);
   for (const segments of [[],Array(65).fill(segment),[{...segment,anchor:{text:'',mode:'replace'}}]]) {
     assert.equal(Value.Check(tool.parameters,{action:'instance_convert',segments}),false);
   }
@@ -87,9 +95,14 @@ test('inline block schemas expose kinds, anchors, bounded batches and translatio
   }
   assert.equal(Value.Check(tool.parameters,{action:'instance_create',translation:{language_code:'xx'}}),false);
   assert.equal(Value.Check(tool.parameters,{action:'instance_convert',anchor:{text:'x',mode:'unknown'}}),false);
-  for (const phrase of [/1\.\.64 segments/, /unsupported_bundle/, /source \(generation text\)/, /expected_library_version/, /preset key listed/]) assert.match(tool.description,phrase);
-  assert.match(studioTools(()=>{}) .find(t=>t.name==='prompt_update').description,/pill_conflict/);
+  for (const phrase of [/1\.\.64 segments/, /source \(generation text\)/, /expected_library_version/, /skills\/nai-studio\/references\/blocks\.md/]) assert.match(tool.description,phrase);
+  assert.ok(tool.description.length >= 1600 && tool.description.length <= 2000);
+  const promptDescription = studioTools(()=>{}).find(t=>t.name==='prompt_update').description;
+  assert.match(promptDescription,/pill_conflict/);
+  assert.ok(promptDescription.length <= 150);
   const skill = await readFile(new URL('../skills/nai-studio/references/blocks.md',import.meta.url),'utf8');
+  assert.match(skill, /## Merging and splitting/);
+  assert.match(skill, /Missing translation needsReview means false; missing languageCode means `zh`/);
   const icons = await readFile(new URL('../../../lib/presentation/widgets/prompt/blocks/prompt_block_icons.dart',import.meta.url),'utf8');
   for (const [,key] of icons.split('};')[0].matchAll(/'([a-z_]+)': Icons\./g)) assert.ok(skill.includes('`'+key+'`'),key);
 });
