@@ -20,6 +20,14 @@
 - `instance_promote(marker,changes?)`: temporary blocks only; translations return `unsupported_kind`. Writes library and replaces temp with the new reference. `changes` accepts title/folderId/color/iconName; missing title uses temp.title (library-backed temps without it need changes.title). New block defaults keep temp color/iconName, or original library appearance metadata. Returns new id, version and lanes. There is no original to revert for a library-free temp: revertTemp is a no-op; promote or unwrap it instead.
 - Inline create/convert, and updates of library-free instances, **reject negative_content with unsupported_bundle**. Create separate instances in positive/negative scopes. Existing library bundle insert/update/unwrap/delete keep native paired behavior.
 
+## Merging and splitting
+
+There is no merge/split action; decide the grouping yourself and compose existing actions. Each mutation returns the next `draft_version`, so chain calls without re-reading.
+
+- Merge: `instance_update` one library-free temp with the combined content (and new title/icon), then `instance_delete` the others. If the kept block is library-backed (title/icon locked to the library), `instance_delete` them all and `instance_create` one new temp at the same spot.
+- Split: `instance_update` the block down to its first part, then `instance_create` the rest with `anchor` or `offset` next to it; or `instance_unwrap` and re-`instance_convert` with `segments`.
+- Keep the generation text equivalent unless the user asked to change it.
+
 ## Positioning
 
 - Create/insert: omit offset/anchor to append with the native comma separator; or pass raw document UTF-16 offset; or `anchor:{text,occurrence?,mode:"before"|"after"}`. offset and anchor are mutually exclusive. Never split an emoji surrogate pair.
