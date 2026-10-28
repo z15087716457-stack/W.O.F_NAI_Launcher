@@ -61,12 +61,19 @@ class ReleaseAssetInfo {
     final downloadUrl = asset['browser_download_url'] as String? ?? '';
     final size = (asset['size'] as num?)?.toInt();
     final type = inferType(fileName: fileName);
+    // Release metadata already contains GitHub's SHA256. Keep it when the
+    // separately hosted manifest is unavailable so automatic updates still work.
+    final digest = asset['digest'];
+    final digestMatch = digest is String
+        ? RegExp(r'^sha256:([0-9a-fA-F]{64})$').firstMatch(digest)
+        : null;
 
     return ReleaseAssetInfo(
       type: type,
       platform: inferPlatform(type),
       fileName: fileName,
       downloadUrl: downloadUrl,
+      sha256: digestMatch?.group(1)?.toLowerCase(),
       size: size,
       label: defaultLabel(type),
       description: defaultDescription(type),

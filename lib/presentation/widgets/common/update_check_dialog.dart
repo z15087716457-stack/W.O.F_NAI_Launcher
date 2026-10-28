@@ -604,7 +604,7 @@ class UpdateCheckDialog extends ConsumerWidget {
     BuildContext context,
     VersionInfo? versionInfo,
   ) async {
-    final url = versionInfo?.downloadUrl ?? versionInfo?.htmlUrl;
+    final url = versionInfo?.htmlUrl ?? versionInfo?.downloadUrl;
     if (url == null) return;
 
     final uri = Uri.parse(url);

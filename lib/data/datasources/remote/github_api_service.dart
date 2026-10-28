@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,15 +128,19 @@ class GitHubApiService {
       return null;
     }
 
-    final response = await _dio.get<Map<String, dynamic>>(
+    // GitHub serves release attachments as application/octet-stream, including
+    // JSON files. Decode the document ourselves instead of relying on its MIME.
+    final response = await _dio.get<String>(
       manifestAsset.downloadUrl,
       options: Options(
         connectTimeout: connectTimeout,
         receiveTimeout: receiveTimeout,
+        responseType: ResponseType.plain,
         headers: {'Accept': 'application/json'},
       ),
     );
-    return response.data;
+    final data = jsonDecode(response.data ?? '');
+    return data is Map<String, dynamic> ? data : null;
   }
 
   /// 解析 Release 数据
