@@ -1,5 +1,8 @@
 import { Type } from 'typebox';
 
+// Plain JSON-schema enum: renders as `"a" | "b"` once instead of an anyOf of consts.
+const E = values => Type.Unsafe({type: values.every(Number.isInteger) ? 'integer' : typeof values[0] === 'number' ? 'number' : 'string', enum: values});
+
 export const promptSetIcons = ["film","book","star","heart","spark","camera","flag","sword","shield","bolt","flame","skull","wind","rain","snow","sun","moon","leaf","umbrella","coffee","music","mail","door","shirt","dress","hat","mask","smile","home","tree","mountain","wave","car","gift","palette","eye","hand","lips","crown","ribbon","glasses","headphones","mic","guitar","phone","key","clock","candle","lantern","potion","wand","crystal_ball","feather","flower","sakura","rose","butterfly","cat","rabbit","bird","fish","wing","halo","ghost","pumpkin","rainbow","drop","castle","torii","train","anchor","bed","bathtub","lingerie","heels","handcuffs","collar","kiss","r18"];
 const blockGenerationSettings = Type.Object({
   model: Type.Optional(Type.Union([Type.String(), Type.Null()])),
@@ -8,8 +11,8 @@ const blockGenerationSettings = Type.Object({
   scale: Type.Optional(Type.Union([Type.Number({minimum:1,maximum:20}), Type.Null()])),
   sampler: Type.Optional(Type.Union([Type.String(), Type.Null()])), noiseSchedule: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   cfgRescale: Type.Optional(Type.Union([Type.Number({minimum:0,maximum:1}), Type.Null()])),
-  qualityPreset: Type.Optional(Type.Union(['standard','light','none'].map(v=>Type.Literal(v)).concat([Type.Null()]))),
-  ucPreset: Type.Optional(Type.Union([0,1,2,3,7,8,9].map(v=>Type.Literal(v)).concat([Type.Null()]))),
+  qualityPreset: Type.Optional(Type.Union([E(['standard','light','none']), Type.Null()])),
+  ucPreset: Type.Optional(Type.Union([E([0,1,2,3,7,8,9]), Type.Null()])),
   qualityCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   ucCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 }, {additionalProperties:false});
@@ -24,18 +27,17 @@ const blockInstance = Type.Object({
   evolutionEnabled: Type.Optional(Type.Boolean()),
   settings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
 }, {additionalProperties:false});
-const blockInlineInstance = Type.Omit(blockInstance, ['negative_content', 'locked', 'evolutionEnabled', 'settings'], {additionalProperties:false});
 const blockAnchor = Type.Object({text:Type.String({minLength:1}),
   occurrence:Type.Optional(Type.Integer({minimum:0})),
-  mode:Type.Union(['before','after','replace'].map(v=>Type.Literal(v))),
+  mode:E(['before','after','replace']),
 }, {additionalProperties:false});
 const blockTranslation = Type.Object({
   source:Type.Optional(Type.String({minLength:1,maxLength:100000})),
   zh:Type.Optional(Type.String({minLength:1,maxLength:100000})),
-  language_code:Type.Optional(Type.Union(['zh','zh-TW','en','ja','ko'].map(v=>Type.Literal(v)))),
+  language_code:Type.Optional(E(['zh','zh-TW','en','ja','ko'])),
 }, {additionalProperties:false});
-const blockInlineKind = Type.Union(['temporary','translation'].map(v=>Type.Literal(v)));
-const promptSetIcon = Type.Union(promptSetIcons.map(v => Type.Literal(v)));
+const blockInlineKind = E(['temporary','translation']);
+const promptSetIcon = E(promptSetIcons);
 const promptSetPositions = Type.Optional(Type.Array(Type.Union([Type.Null(), Type.Object({
   x:Type.Number({minimum:0,maximum:1}), y:Type.Number({minimum:0,maximum:1})
 }, {additionalProperties:false})]), {maxItems:6}));
@@ -52,18 +54,18 @@ const promptSetContent = {kind: Type.String({minLength:1,maxLength:24}), kind_ic
 // lives in skills/nai-studio; schemas and descriptions stay beside the executors.
 export const domainTools = [
   { name: 'prompt_set',
-    description: 'Write 2–24 prompts in ONE story/outfit/variation card. Put stable style/quality/appearance/negative ONCE in shared; items add only differences and index-aligned positive character tags. Card kind/title/unit/item titles/notes (1–2 sentences) use the user’s language. Prompts: English before V5; V5 prefers English, but other languages may clarify intent or avoid ambiguity. Icons may repeat when they fit; they need not be unique. Choose kind/title/unit/allowlisted icons; ordered=true for sequences, false for parallel options. Optional character positions: 0–1, x right/y down; use only for composition. create returns set_id/revision. Edit in ONE CodeMode call: read, change requested fields only, update SAME set_id with its revision as expected_revision and full content reused from read; never regenerate/print the whole set or duplicate it. Users import one item at a time; a human Generate click authorizes ONE image of that item with no second price gate. Native price/balance checks remain. Model generation always needs genuine native approval, even 0 Anlas/in all permission modes. Do NOT call prompt_update/generation for this set unless asked.',
-    parameters: Type.Union([
-      Type.Object({action:Type.Literal('create'), ...promptSetContent}),
-      Type.Object({action:Type.Literal('update'), set_id:Type.String({pattern:'^[a-f0-9]{12}$'}), expected_revision:Type.Integer({minimum:1}), ...promptSetContent}),
-      Type.Object({action:Type.Literal('read'), set_id:Type.String({pattern:'^[a-f0-9]{12}$'})}),
-    ]),
+    description: 'Write 2–24 prompts as ONE story/outfit/variation card: stable style/quality/appearance/negative once in shared, per-item differences and index-aligned positive character tags in items. Labels and notes in the user\'s language; prompts in English before V5 (V5 may use other languages for clarity). Icons from the enum, repeats allowed; ordered=true for sequences. Optional character positions 0–1 (x right, y down) only for composition. create returns set_id/revision. To edit: read, change only requested fields, update the SAME set_id with expected_revision and the full content; never duplicate or reprint the set. A user\'s Generate click on the card authorizes one image of that item; model-initiated generation still needs native approval. Do not call prompt_update/generation for the set unless asked. Details: references/prompt-sets.md.',
+    // One object instead of a create/update/read union: the content (with two 79-icon enums) is
+    // declared once. Dart enforces per-action requirements (set_id, expected_revision, content).
+    parameters: Type.Object({action:E(['create','update','read']),
+      set_id:Type.Optional(Type.String({pattern:'^[a-f0-9]{12}$'})),
+      expected_revision:Type.Optional(Type.Integer({minimum:1})),
+      ...Object.fromEntries(Object.entries(promptSetContent).map(([k,v])=>[k,Type.Optional(v)]))}),
   },
   { name: 'snapshot',
-
-    description: 'Save, list, inspect or explicitly restore Studio generation configurations in this workspace, including source/mask geometry and native enhance/upscale settings. Temporary canvas tools are excluded. read omits binary image data; workflow_settings_saved=false identifies older snapshots which retain current workflow preferences. load requires expected_version from fresh studio_context(scope=draft). Changed library blocks restore as independent copies, preserving newer edits. Default list limit 20.',
+    description: 'Save, list, read or restore complete Studio generation configurations (prompts, characters, blocks, references, source/mask, enhance/upscale settings). load needs expected_version from fresh studio_context(scope=draft) and backs up first; changed library blocks restore as independent copies. read omits image data. Default list limit 20.',
     parameters: Type.Object({
-      action: Type.Union(['save', 'list', 'read', 'load'].map(v => Type.Literal(v))),
+      action: E(['save', 'list', 'read', 'load']),
       name: Type.Optional(Type.String({ maxLength: 200 })),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),
       offset: Type.Optional(Type.Integer({ minimum: 0 })),
@@ -71,7 +73,7 @@ export const domainTools = [
     }),
   },
   { name: 'wiki_query',
-    description: 'Read local Danbooru wiki source text for one to twenty canonical tags. Offline by default. include_examples=true fetches official explicit example metadata for one tag; unavailable/deleted posts retain source links. example_offset/example_limit page at most eight previews. Pixels load through image_read using returned IDs and the native static preview cache. Returns source-language text; follow source_url for attribution. Page long bodies by character offset/limit; limit is a total text budget shared across found pages, default 12000. Follow each next_offset for more.',
+    description: 'Read local Danbooru wiki text for 1–20 canonical tags (offline). Page long bodies with offset/limit (shared text budget, default 12000) and next_offset. include_examples=true fetches official example posts for one tag (example_offset/example_limit ≤ 8); view them via image_read with returned IDs. Cite source_url.',
     parameters: Type.Object({ tags: Type.Array(Type.String(), { minItems: 1, maxItems: 20 }),
       offset: Type.Optional(Type.Integer({ minimum: 0 })),
       limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 24000 })),
@@ -81,15 +83,14 @@ export const domainTools = [
     }),
   },
   { name: 'tag_query',
-    description: 'Search bundled and locally synced tag indexes by English canonical name or alias. Returns counts, category, aliases, and available cached Chinese names/short definitions with language labels. contains enables substring matching.',
+    description: 'Search local tag indexes by English canonical name or alias: counts, category, aliases and cached short Chinese definitions. contains=true for substring match.',
     parameters: Type.Object({ query: Type.String({ minLength: 1, maxLength: 200 }),
       contains: Type.Optional(Type.Boolean()),
       limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 100 })),
     }),
   },
   { name: 'block_query',
-
-    description: 'Read the real Studio prompt block library. kind=tree returns folders, collections and library_version; id returns one complete block and its version; otherwise returns paged summaries. Search title/content/tags, filter folder_id (null=root), favorites or collection_id. Archived snapshot dependencies are hidden unless explicitly included.',
+    description: 'Read the prompt block library. kind=tree: folders, collections, library_version. id: one complete block and its version. Otherwise paged search over title/content/tags with folder_id (null=root), favorites, collection_id; include_archived shows hidden snapshot dependencies.',
     parameters: Type.Object({
       kind: Type.Optional(Type.Literal('tree')), id: Type.Optional(Type.String()),
       query: Type.Optional(Type.String({ maxLength: 200 })),
@@ -101,72 +102,59 @@ export const domainTools = [
     }),
   },
   { name: 'block_manage',
-
-    description: 'Manage library blocks or prompt instances; backs up library/draft and returns readback. create needs changes.title/content; update/delete/insert need id + expected_version from block_query(id). Content edits clear obsolete atoms unless replaced. insert and all instance_* need fresh expected_draft_version. scope: main/negative/char:<ID>:pos/neg. instance_create needs no library entry: temporary uses instance.title/content (optional color/icon); translation uses source (generation text), zh (reading), optional language_code. Both accept enabled only as an instance option. instance_convert accepts only 1..64 segments:[{anchor,kind,instance?,translation?}]; title or zh required, content/source comes from selection. All segments validate against the original document; no overlap/marker crossing, exact projection preserved, one undo; returns markers in input order. instance_update content edits only this occurrence as a temporary block; library block unchanged. Existing instances retain settings/enabled/locked/evolutionEnabled updates; title/color/icon edits require a library-free temp. Translation updates accept source/zh/language_code. instance_unwrap expands occurrence (default 0); instance_delete removes all occurrences unless occurrence supplied; native bundle peers follow. instance_promote saves temps only, needs expected_library_version, accepts changes.title/folderId/color/iconName; omitted display fields use temp/original values. create/insert accept offset or anchor before/after; omission appends with separator. Organization actions need expected_library_version; moves use parent_id, reorders complete ordered_ids, membership uses id + block_id. For anchor rules, icons, generation presets, organization details, examples and errors, read skills/nai-studio/references/blocks.md.',
-    parameters: Type.Intersect([Type.Object({
+    description: 'Prompt block library and current-prompt instances. Writes back up and return readback; pass the version from the last read: expected_version (block_query id) for update/delete/insert, expected_library_version (block_query kind=tree) for folder_*/collection_*/block_reorder/instance_promote, expected_draft_version (studio_context draft) for insert and instance_*. scope: main, negative, char:<ID>:pos|neg. Library: create(changes.title/content), update(id, changes), delete(id), insert(id) into the prompt. Instances need no library entry: instance_create kind=temporary with instance.title/content (color/icon optional) or kind=translation with translation.source (generation text) and zh (reading only); place by anchor {text, mode before|after} or offset, default append. instance_convert turns existing text into blocks: 1..64 segments [{anchor {text, mode replace}, kind, instance|translation}], generation text unchanged, one undo. instance_update(marker, occurrence) edits content (a library block becomes a temporary block for this occurrence only), title/color/icon of library-free temps, translation, or settings/enabled/locked. instance_unwrap and instance_delete; instance_promote saves a temporary block to the library. Merge, split, rename: compose these. Details: skills/nai-studio/references/blocks.md.',
+    parameters: Type.Object({
+      action: E(['create', 'update', 'delete', 'insert', 'instance_create', 'instance_convert', 'instance_update', 'instance_unwrap', 'instance_delete', 'instance_promote', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove']),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),
-      expected_library_version: Type.Optional(Type.String()),
+      expected_library_version: Type.Optional(Type.String()), expected_draft_version: Type.Optional(Type.String()),
       parent_id: Type.Optional(Type.Union([Type.String(), Type.Null()])),
       ordered_ids: Type.Optional(Type.Array(Type.String())), block_id: Type.Optional(Type.String()),
-      expected_draft_version: Type.Optional(Type.String()), scope: Type.Optional(Type.String()),
-      offset: Type.Optional(Type.Integer({ minimum: 0 })), marker: Type.Optional(Type.String()),
+      scope: Type.Optional(Type.String()), marker: Type.Optional(Type.String()),
+      offset: Type.Optional(Type.Integer({minimum: 0})), occurrence: Type.Optional(Type.Integer({minimum: 0})),
+      anchor: Type.Optional(blockAnchor), kind: Type.Optional(blockInlineKind),
+      instance: Type.Optional(blockInstance), translation: Type.Optional(blockTranslation),
+      segments: Type.Optional(Type.Array(Type.Object({anchor: blockAnchor, kind: blockInlineKind,
+        instance: Type.Optional(blockInstance), translation: Type.Optional(blockTranslation)}, {additionalProperties: false}), {minItems: 1, maxItems: 64})),
       changes: Type.Optional(blockChanges),
-      occurrence: Type.Optional(Type.Integer({minimum: 0})),
-      translation:Type.Optional(blockTranslation),
-    }), Type.Union([
-      Type.Object({action:Type.Literal('instance_convert'),
-        segments:Type.Array(Type.Object({anchor:blockAnchor,kind:blockInlineKind,
-          instance:Type.Optional(blockInlineInstance),translation:Type.Optional(blockTranslation)}, {additionalProperties:false}), {minItems:1,maxItems:64})}),
-      Type.Object({action:Type.Literal('instance_update'),instance:Type.Optional(blockInstance)}),
-      Type.Object({action:Type.Union(['create', 'update', 'delete', 'insert', 'instance_create', 'instance_unwrap', 'instance_delete', 'instance_promote', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove'].map(v => Type.Literal(v))),
-        instance:Type.Optional(blockInlineInstance),kind:Type.Optional(blockInlineKind),
-        anchor:Type.Optional(blockAnchor)}),
-    ])], {type:'object'}),
+    }),
   },
   { name: 'settings_read',
-
-    description: 'Read the same public preference allowlist used by Settings import/export. keys optionally selects fields; version covers all public preferences. A null value means the native default.',
+    description: 'Read public preferences (the Settings import/export allowlist). keys selects fields; version covers all. null means native default.',
     parameters: Type.Object({keys: Type.Optional(Type.Array(Type.String(), {minItems: 1}))}),
   },
   { name: 'settings_update',
-
-    description: 'Update existing allowed public preferences using the fresh settings_read version. changes is a key/value object; null resets to the native default. Unknown keys or invalid values fail before writing. Native conflict checks and guarded rollback preserve newer changes. Returns actual readback and backup_path.',
+    description: 'Update public preferences with expected_version from settings_read. changes: key → value, null resets. Invalid keys/values fail before writing; returns readback and backup_path.',
     parameters: Type.Object({changes: Type.Record(Type.String(), Type.Unknown()), expected_version: Type.String()}),
   },
   { name: 'explore_manage',
-
-    description: 'Manage native style exploration runs. list/read are paged with default limit 20; read includes roll snapshots and candidate image IDs. create freezes current recipe/parameters for documentation (name/count/expected_draft_version); execution follows the current Studio recipe/parameters. Edits require id and fresh expected_version: rename(name), complete, heart(candidate_id,heart), folder_create/folder_rename(name), folder_delete(folder_id; candidates become unfiled), candidate_move(candidate_id,folder_id or null). prepare(id,expected_version,mode=basic/retry/deep) returns a five-minute quote with all candidate costs; deep also needs existing family_id,parent_set_id,count. run(quote_id) requires user confirmation in Studio. Native progress, partial results and recovery apply. pause/cancel affect only this conversation admission.',
-    parameters: Type.Object({action: Type.Union(['list','read','create','rename','complete','heart','folder_create','folder_rename','folder_delete','candidate_move','prepare','run','status','pause','cancel'].map(v => Type.Literal(v))),
+    description: 'Native style exploration runs. list/read paged (default 20); read includes roll snapshots and candidate image IDs. create(name, count, expected_draft_version) records the current recipe. Edits need id + expected_version: rename, complete, heart(candidate_id, heart), folder_create/folder_rename(name), folder_delete(folder_id), candidate_move(candidate_id, folder_id|null). prepare(id, expected_version, mode basic|retry|deep; deep also family_id, parent_set_id, count) returns a 5-minute quote; run(quote_id) waits for user confirmation in Studio. status; pause/cancel affect this chat\'s run only.',
+    parameters: Type.Object({action: E(['list','read','create','rename','complete','heart','folder_create','folder_rename','folder_delete','candidate_move','prepare','run','status','pause','cancel']),
       id: Type.Optional(Type.String()), name: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       count: Type.Optional(Type.Integer({minimum: 1, maximum: 999})), expected_version: Type.Optional(Type.String()),
       expected_draft_version: Type.Optional(Type.String()), candidate_id: Type.Optional(Type.String()),
       folder_id: Type.Optional(Type.Union([Type.String(),Type.Null()])), heart: Type.Optional(Type.Boolean()),
-      mode: Type.Optional(Type.Union(['basic','retry','deep'].map(v => Type.Literal(v)))),
+      mode: Type.Optional(E(['basic','retry','deep'])),
       family_id: Type.Optional(Type.String()), parent_set_id: Type.Optional(Type.String()), quote_id: Type.Optional(Type.String()),
       offset: Type.Optional(Type.Integer({minimum: 0})), limit: Type.Optional(Type.Integer({minimum: 1, maximum: 100})),
     }),
   },
   { name: 'generation_prepare',
-
-    description: 'Prepare a local generation quote for the current Studio draft, references, effective presets and NAI account. Defaults to configured request count and images per request. Optional batch overrides do not change the draft. Reports per-request Anlas, one-time encoding, estimated total, loaded account balance, local enhancement and readiness. Quote expires after five minutes and belongs to this chat. Configure source/mask/references with reference_manage.',
+    description: 'Quote generating the current draft: per-request Anlas, encoding, total, balance and readiness. requests/images_per_request override the batch without changing the draft. Quote expires in 5 minutes.',
     parameters: Type.Object({requests: Type.Optional(Type.Integer({minimum: 1, maximum: 999})),
       images_per_request: Type.Optional(Type.Integer({minimum: 1, maximum: 4}))}),
   },
   { name: 'generation_run',
-
-    description: 'Run a generation_prepare quote_id after user confirmation on the Studio price/balance card. Rechecks current draft/account/references/batch/price/balance and backs up before starting the native pipeline. Native block rerolls, history, progress and auto local enhancement apply. Waits for completion and returns actual image IDs/files or error/cancellation/partial results.',
+    description: 'Run a generation_prepare quote after the user confirms the price card in Studio. Rechecks state, backs up, waits for completion and returns image IDs/files or error/partial results.',
     parameters: Type.Object({quote_id: Type.String()}),
   },
   { name: 'generation_cancel',
-
-    description: 'Cancel the active native generation owned by this chat, optionally checking its returned run_id. Already produced images remain available; cancellation does not guarantee a refund. Agent Stop or main generation Stop can interrupt a waiting generation_run directly.',
+    description: 'Cancel this chat\'s active generation (optional run_id). Finished images stay; no refund guarantee.',
     parameters: Type.Object({run_id: Type.Optional(Type.String())}),
   },
   { name: 'gallery_query',
-
-    description: 'Read current canvas/history images (default) or the configured local gallery. image_id returns full available metadata; selected resolves the canvas selection only for history. Library supports native text/tag/model/favorite/date filters, ordered by modified time newest first. Dates are inclusive YYYY-MM-DD. Metadata comes from the current local index; unindexed items have no image_id yet. Use returned gallery:<ID> with image_read for original library pixels. Deleted pool and stale/off-root index rows are excluded. History text search checks prompt and saved path; other filters require library scope. Default limit 30.',
+    description: 'Find canvas/history images (default) or local gallery (scope=library). image_id returns full metadata; selected = current canvas selection. Library filters: text, tags, models, favorites, inclusive YYYY-MM-DD dates; newest first. Returns gallery:<ID> for image_read. Default limit 30.',
     parameters: Type.Object({
-      scope: Type.Optional(Type.Union([Type.Literal('history'), Type.Literal('library')])),
+      scope: Type.Optional(E(['history', 'library'])),
       image_id: Type.Optional(Type.String({minLength: 1})),
       query: Type.Optional(Type.String({maxLength: 200})),
       tags: Type.Optional(Type.Array(Type.String({minLength: 1, maxLength: 200}), {maxItems: 30})),
@@ -178,13 +166,13 @@ export const domainTools = [
     }),
   },
   { name: 'studio_search',
-    description: 'Read-only local multimodal/semantic search over existing gallery, blocks, Wiki or tag vectors. Provide a nonempty query (at most 500 characters) and/or one image_id or workspace-relative image path; images are gallery-only and follow image_read rules. Gallery mode defaults to visual with an image, mixed otherwise. Gallery favorites/date filters narrow the configured, non-deleted library before semantic ranking; dates are inclusive YYYY-MM-DD. Gallery items include image_id gallery:<ID>, usable by image_read/reference_manage, path, channel and rank. Block IDs work with block_query(id); Wiki IDs are canonical tags for wiki_query(tags). Tags use descriptive lookup of canonical names. Default limit 20. Returns disabled/not_indexed/busy statuses; an incomplete available index has partial=true.',
+    description: 'Local semantic search over gallery, blocks, wiki or tags. Give query (≤500 chars) and/or one image_id/path (gallery only). Gallery mode defaults to visual with an image, else mixed; favorites/date filters apply first. Gallery items return gallery:<ID>; block IDs work with block_query(id); wiki IDs are tags for wiki_query. Default limit 20. Statuses: disabled, not_indexed, busy; partial=true for incomplete indexes.',
     parameters: Type.Object({
-      source: Type.Union(['gallery', 'blocks', 'wiki', 'tags'].map(v => Type.Literal(v))),
+      source: E(['gallery', 'blocks', 'wiki', 'tags']),
       query: Type.Optional(Type.String({maxLength: 500})),
       image_id: Type.Optional(Type.String({minLength: 1})),
       path: Type.Optional(Type.String({minLength: 1})),
-      mode: Type.Optional(Type.Union(['mixed', 'visual', 'parameters'].map(v => Type.Literal(v)))),
+      mode: Type.Optional(E(['mixed', 'visual', 'parameters'])),
       favorites: Type.Optional(Type.Boolean()),
       date_start: Type.Optional(Type.String({pattern: '^\\d{4}-\\d{2}-\\d{2}$'})),
       date_end: Type.Optional(Type.String({pattern: '^\\d{4}-\\d{2}-\\d{2}$'})),
@@ -192,11 +180,10 @@ export const domainTools = [
     }),
   },
   { name: 'gallery_manage',
-
-    description: 'Native gallery. read returns image_version; update/delete/restore/export need expected_image_version; update uses changes.favorite/tags; trash lists native pool. Collections (library): collections returns collection_version; collection_members pages IDs; writes need expected_collection_version. create/update use changes; reorder needs all siblings in ordered_collection_ids; add/remove need a leaf collection_id and only 1..20 image_ids. Physical folders (library): folders returns root_path/folder_version; folder_* writes need expected_folder_version. folder_delete_empty takes folder_id OR 1..50 unique folder_ids (selected empty parent/child trees allowed; no files). move_file/copy_file take image_id + expected_image_version OR 1..50 unique image_ids + expected_image_versions (every ID mapped to its read version), plus existing absolute target_folder. Never mix single/batch forms. ONE Studio confirmation per call when required by external-move risk/protection. Batch whole reorganizations: one move_file per target folder, then one folder_delete_empty for all emptied folders; never loop single-image calls. Partial failures stop immediately: re-read before retrying. See nai-studio references/gallery.md for backups/results.',
+    description: 'Gallery images, collections and physical folders. Pass versions from reads: expected_image_version (read), expected_collection_version (collections), expected_folder_version (folders). Images: update changes.favorite/tags, delete, restore, export, trash. Collections: create/update(changes), delete, reorder(all sibling ordered_collection_ids), add/remove(leaf collection_id, only 1..20 image_ids). Folders: folder_create/rename/move, folder_delete_empty(folder_id or 1..50 folder_ids), folder_sync. move_file/copy_file: image_id + expected_image_version, or 1..50 image_ids + expected_image_versions, plus absolute target_folder; never mix forms. ONE Studio confirmation per call at most. Reorganize with one batch move per target folder, then one folder_delete_empty; never loop single-image calls. On partial failure stop and re-read. Details: references/gallery.md.',
     parameters: Type.Object({
-      action: Type.Union(['read', 'update', 'delete', 'restore', 'export', 'trash', 'collections', 'collection_members', 'collection_create', 'collection_update', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove', 'folders', 'folder_create', 'folder_rename', 'folder_move', 'folder_delete_empty', 'folder_sync', 'move_file', 'copy_file'].map(Type.Literal)),
-      scope: Type.Optional(Type.Union(['history', 'library'].map(Type.Literal))),
+      action: E(['read', 'update', 'delete', 'restore', 'export', 'trash', 'collections', 'collection_members', 'collection_create', 'collection_update', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove', 'folders', 'folder_create', 'folder_rename', 'folder_move', 'folder_delete_empty', 'folder_sync', 'move_file', 'copy_file']),
+      scope: Type.Optional(E(['history', 'library'])),
       image_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       expected_image_version: Type.Optional(Type.String()),
       expected_image_versions: Type.Optional(Type.Record(Type.String(), Type.String())),
@@ -222,14 +209,13 @@ export const domainTools = [
     }),
   },
   { name: 'reference_manage',
-
-    description: 'Inspect/configure native source, mask, Vibe and precise references. list (default) returns current indices, draft_version, effective participation/reasons and draft:* image IDs. Mutations require fresh expected_draft_version and full backup/recheck. Image actions use exactly one image_id or workspace-relative path with ORIGINAL pixels. set_source clears old mask/temporary tool and enters img2img; use_image_size defaults true, false keeps request dimensions. set_mask needs original source-sized pixels (white=repaint) and enters inpainting; optional source-pixel focus_region uses an eight-pixel grid and leaves an interior after context. clear_mask returns to img2img; clear_source restores base. Vibe: deferred encoding, finite free-form strength, info_extracted 0.01..1, max 16. Precise: native local PNG normalization, default type character. Precise strength/fidelity are 0..10; source strength/noise remain 0..1. update/remove use current index and relevant fields only. Unsupported additions/updates reject; removal is allowed. Native precise priority/inpainting can exclude Vibe without disabling it. generation_prepare quotes deferred encoding costs.',
+    description: 'Current draft source image, mask, Vibe and precise references. list returns indices, draft_version and draft:* image IDs. Writes need expected_draft_version; image actions take one image_id or workspace path. set_source enters img2img (use_image_size default true); set_mask (source-sized, white=repaint, optional focus_region) enters inpainting; clear_mask/clear_source step back. Vibe: strength free, info_extracted 0.01–1, max 16, encoded at generation. Precise: type default character, strength/fidelity 0–10. update/remove by index. generation_prepare quotes encoding costs.',
     parameters: Type.Object({
-      action: Type.Optional(Type.Union(['list','set_source','clear_source','set_mask','clear_mask','add_vibe','update_vibe','remove_vibe','clear_vibes','add_precise','update_precise','remove_precise','clear_precise'].map(v => Type.Literal(v)))),
+      action: Type.Optional(E(['list','set_source','clear_source','set_mask','clear_mask','add_vibe','update_vibe','remove_vibe','clear_vibes','add_precise','update_precise','remove_precise','clear_precise'])),
       expected_draft_version: Type.Optional(Type.String()),
       image_id: Type.Optional(Type.String({minLength: 1})), path: Type.Optional(Type.String({minLength: 1})),
       index: Type.Optional(Type.Integer({minimum: 0})), name: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
-      type: Type.Optional(Type.Union(['character','style','characterAndStyle'].map(v => Type.Literal(v)))),
+      type: Type.Optional(E(['character','style','characterAndStyle'])),
       strength: Type.Optional(Type.Number()), noise: Type.Optional(Type.Number({minimum: 0, maximum: 1})),
       info_extracted: Type.Optional(Type.Number({minimum: 0.01, maximum: 1})), fidelity: Type.Optional(Type.Number({minimum: 0, maximum: 10})),
       enabled: Type.Optional(Type.Boolean()), use_image_size: Type.Optional(Type.Boolean()),
@@ -238,16 +224,15 @@ export const domainTools = [
     }),
   },
   { name: 'reference_library',
-
-    description: 'Native Vibe/precise library query/read/apply/import/save/export/update/delete and Vibe category actions. read returns versions, file_missing/file_invalid and child/image IDs. apply needs expected_draft_version and expected_entry_version; a whole bundle must fit 16 references. update/delete need expected_entry_version and back up original file/native data without altering the draft. Bundle parameters need child_index. Information levels reuse exact existing/cached encodings; encoding_required directs apply, draft update, generation_prepare/generation_run, then save. Category writes need expected_category_version; deletion reparents children and optionally moves entries to the parent. Precise has no categories. Partial commits return ok=false, applied_fields and backup; deletion may remove the index entry while reporting a residual file. Files are workspace-relative.',
+    description: 'Reusable Vibe/precise library: query, read, apply, import, save, export, update, delete; Vibe categories. apply needs expected_draft_version + expected_entry_version (bundles must fit 16 references); update/delete need expected_entry_version and back up; category writes need expected_category_version. Bundle fields use child_index. encoding_required means apply, generate, then save. Paths are workspace-relative.',
     parameters: Type.Object({
-      kind: Type.Optional(Type.Union(['vibe','precise'].map(v=>Type.Literal(v)))),
-      action: Type.Optional(Type.Union(['query','read','apply','import','save','export','update','delete','categories','category_create','category_update','category_delete'].map(v=>Type.Literal(v)))),
+      kind: Type.Optional(E(['vibe','precise'])),
+      action: Type.Optional(E(['query','read','apply','import','save','export','update','delete','categories','category_create','category_update','category_delete'])),
       id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), image_id: Type.Optional(Type.String()),
       query: Type.Optional(Type.String({maxLength:300})), name: Type.Optional(Type.String({maxLength:160})),
       offset: Type.Optional(Type.Integer({minimum:0})), limit: Type.Optional(Type.Integer({minimum:1,maximum:100})),
       favorites_only: Type.Optional(Type.Boolean()), category_id: Type.Optional(Type.Union([Type.String(),Type.Null()])),
-      type: Type.Optional(Type.Union(['character','style','characterAndStyle'].map(v=>Type.Literal(v)))),
+      type: Type.Optional(E(['character','style','characterAndStyle'])),
       index: Type.Optional(Type.Integer({minimum:0})), child_index: Type.Optional(Type.Integer({minimum:0})),
       strength: Type.Optional(Type.Number()), fidelity: Type.Optional(Type.Number()),
       expected_draft_version: Type.Optional(Type.String()), expected_entry_version: Type.Optional(Type.String()),
@@ -256,29 +241,28 @@ export const domainTools = [
         name: Type.Optional(Type.String({minLength:1,maxLength:160})), favorite: Type.Optional(Type.Boolean()),
         category_id: Type.Optional(Type.Union([Type.String(),Type.Null()])), tags: Type.Optional(Type.Array(Type.String({minLength:1,maxLength:80}),{maxItems:100})),
         strength: Type.Optional(Type.Number()), info_extracted: Type.Optional(Type.Number({minimum:0.01,maximum:1})),
-        type: Type.Optional(Type.Union(['character','style','characterAndStyle'].map(v=>Type.Literal(v)))), fidelity: Type.Optional(Type.Number()),
+        type: Type.Optional(E(['character','style','characterAndStyle'])), fidelity: Type.Optional(Type.Number()),
         parent_id: Type.Optional(Type.Union([Type.String(),Type.Null()])), sort_order: Type.Optional(Type.Integer({minimum:0})),
       })),
     }),
   },
   { name: 'image_tool',
-
-    description: 'Native local image processing and cloud director tools. list reads installed/bundled/custom models, methods, scales and SeedVR2 defaults. upscale requires model_id, scale=1..4 and exactly one image_id or workspace-relative path. Uses original pixels and native task/model locks, progress and shutdown. SeedVR2 uses the listed camelCase fields and model block limit. Returns exact-sized output, original source, operation metadata, a fresh workspace outputs folder, image artifact and history image_id when Studio is idle; leaves draft/display unchanged. status gives this chat job_id/progress; cancel requires job_id. Cloud prepare freezes source/tool/prompt/defry/emotion, account and native price; run(quote_id) requires user confirmation in Studio. Cloud results include all variants. pixel_snap uses native paletteMode/colors/avoidOverRefining/upscale options locally for zero Anlas. Use image_generate for variations/enhance.',
+    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) waits for user confirmation in Studio. Outputs go to workspace outputs/ and history. Use image_generate for variations/enhance.',
     parameters: Type.Object({
-      action: Type.Union(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run'].map(Type.Literal)),
-      tool: Type.Optional(Type.Union(['cloud_upscale','removeBackground','extractLineArt','toSketch','colorize','fixEmotion','declutter'].map(Type.Literal))),
+      action: E(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run']),
+      tool: Type.Optional(E(['cloud_upscale','removeBackground','extractLineArt','toSketch','colorize','fixEmotion','declutter'])),
       quote_id: Type.Optional(Type.String({minLength:1,maxLength:200})),
       prompt: Type.Optional(Type.String({maxLength:20000})),
       defry: Type.Optional(Type.Integer({minimum:0,maximum:5})),
       emotion: Type.Optional(Type.String({minLength:1,maxLength:100})),
-      pixel: Type.Optional(Type.Object({paletteMode:Type.Optional(Type.Union(['off','auto','custom'].map(Type.Literal))),colors:Type.Optional(Type.Integer({minimum:16,maximum:256})),avoidOverRefining:Type.Optional(Type.Boolean()),upscale:Type.Optional(Type.Boolean())})),
+      pixel: Type.Optional(Type.Object({paletteMode:Type.Optional(E(['off','auto','custom'])),colors:Type.Optional(Type.Integer({minimum:16,maximum:256})),avoidOverRefining:Type.Optional(Type.Boolean()),upscale:Type.Optional(Type.Boolean())})),
       image_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       path: Type.Optional(Type.String({minLength: 1, maxLength: 2000})),
       model_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       scale: Type.Optional(Type.Number({minimum: 1, maximum: 4})),
       job_id: Type.Optional(Type.String({minLength: 1, maxLength: 200})),
       seedvr2: Type.Optional(Type.Object({
-        colorCorrection: Type.Optional(Type.Union(['lab', 'wavelet', 'wavelet_adaptive', 'hsv', 'adain', 'none'].map(Type.Literal))),
+        colorCorrection: Type.Optional(E(['lab', 'wavelet', 'wavelet_adaptive', 'hsv', 'adain', 'none'])),
         seed: Type.Optional(Type.Integer({minimum: 0, maximum: 4294967295})),
         blocksToSwap: Type.Optional(Type.Integer({minimum: 0, maximum: 36})),
         vaeTiled: Type.Optional(Type.Boolean()),
@@ -290,15 +274,14 @@ export const domainTools = [
     }),
   },
   { name: 'image_generate',
-
-    description: 'Generate variations/enhance from original pixels, leaving the Studio draft unchanged. prepare requires operation=variations/enhance and exactly one image_id or workspace-relative path. Variations use native three-image settings and metadata projection, with current prompts as fallback. Enhance uses current composed prompts/references and native settings: optional magnitude=1..5 or strength/noise=0..1, scale=1/1.5/2 where supported, or eligible V5 max=true without scale. prepare reports frozen prompts, output dimensions, sample count, estimated Anlas and cached balance. run(quote_id) requires user confirmation in Studio. Native progress, focus, cancellation and history apply; originals and outputs are exported to this workspace. status/cancel target the owned run. Use image_tool for local upscale/pixel_snap.',
+    description: 'Variations or enhance from one image_id or workspace path; draft unchanged. prepare(operation): variations makes three images from source metadata (current prompts as fallback); enhance uses current prompts/references with magnitude 1–5 or strength/noise 0–1, scale 1/1.5/2, or V5 max=true. Reports prompts, size, count, Anlas and balance; run(quote_id) waits for user confirmation in Studio. status/cancel target this chat\'s run.',
     parameters: Type.Object({
-      action: Type.Union(['prepare', 'run', 'status', 'cancel'].map(Type.Literal)),
-      operation: Type.Optional(Type.Union(['variations', 'enhance'].map(Type.Literal))),
+      action: E(['prepare', 'run', 'status', 'cancel']),
+      operation: Type.Optional(E(['variations', 'enhance'])),
       image_id: Type.Optional(Type.String({minLength: 1})),
       path: Type.Optional(Type.String({minLength: 1})),
       quote_id: Type.Optional(Type.String()), run_id: Type.Optional(Type.String()),
-      scale: Type.Optional(Type.Union([1, 1.5, 2].map(Type.Literal))),
+      scale: Type.Optional(E([1, 1.5, 2])),
       max: Type.Optional(Type.Boolean()),
       magnitude: Type.Optional(Type.Integer({minimum: 1, maximum: 5})),
       strength: Type.Optional(Type.Number({minimum: 0, maximum: 1})),

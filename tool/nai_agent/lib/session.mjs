@@ -31,10 +31,10 @@ export function studioTools(execute, extraToolNames = []) {
   });
   return [
     tool('studio_context', 'Read current Studio state on demand. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
-      Type.Object({ scope: Type.Optional(Type.Union([Type.Literal('summary'), Type.Literal('draft')])) })),
+      Type.Object({ scope: Type.Optional(Type.Unsafe({ type: 'string', enum: ['summary', 'draft'] })) })),
     tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including attachments/ and outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
       Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),
-    tool('prompt_update', 'Lanes containing blocks accept only their unchanged projection; otherwise pill_conflict; edit blocks with block_manage instance_*.',
+    tool('prompt_update', 'Patch draft fields read by studio_context(scope=draft); expected maps each changed field to its field_version (aliases: clear_characters->characters, seed_lock->seed, quality_toggle->quality_preset). Backs up, rechecks and returns readback. Lanes containing blocks only accept unchanged text (else pill_conflict): edit those with block_manage instance_*.',
       Type.Object({ changes: Type.Record(Type.String(), Type.Unknown()),
         expected: Type.Record(Type.String(), Type.String()) })),
     ...domainTools.filter(definition => extraToolNames.includes(definition.name))

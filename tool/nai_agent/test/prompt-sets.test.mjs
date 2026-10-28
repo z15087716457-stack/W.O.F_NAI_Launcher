@@ -10,10 +10,10 @@ const content = {kind:'Storyboard', kind_icon:'film', title:'Rain', unit:'scene'
   shared:{main:'best quality',characters:['silver hair']},
   items:[{icon:'rain',title:'Rain',characters:['running']},{icon:'coffee',title:'Cafe'}]};
 
-test('prompt_set schema bounds, action requirements and exact Dart icon catalog', async () => {
+test('prompt_set schema bounds and exact Dart icon catalog (action requirements are enforced in Dart)', async () => {
   const tool = domainTools.find(t => t.name === 'prompt_set');
-  assert.ok(tool.description.length <= 1200);
-  assert.match(tool.description, /Icons may repeat/);
+  assert.ok(tool.description.length <= 1000);
+  assert.match(tool.description, /repeats allowed/);
   assert.ok(Value.Check(tool.parameters, {action:'create', ...content,
     items:content.items.map(item => ({...item, icon:'heart'}))}));
   const guide = await readFile(new URL('../skills/nai-studio/references/prompt-sets.md', import.meta.url), 'utf8');
@@ -29,7 +29,6 @@ test('prompt_set schema bounds, action requirements and exact Dart icon catalog'
     {action:'create',...content,items:[{icon:'alien',title:'x'},content.items[1]]},
     {action:'create',...content,title:'x'.repeat(61)},
     {action:'create',...content,shared:{main:'x'.repeat(2001)}},
-    {action:'update',set_id:'012345abcdef',...content},
     {action:'read',set_id:'../outside'},
   ]) assert.equal(Value.Check(schema,bad),false,JSON.stringify(bad));
   const source = await readFile(new URL('../../../lib/core/nai_agent/prompt_set_icons.dart',import.meta.url),'utf8');
