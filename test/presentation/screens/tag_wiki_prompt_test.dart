@@ -140,6 +140,7 @@ class _Blocks extends PromptBlockLibraryNotifier {
     List<String>? negativeAtoms,
     PromptBlockGenerationSettings? generationSettings,
     List<PromptBlockTag> tags = const [],
+    void Function()? beforeWrite,
   }) async {
     final block = PromptBlock.create(
       title: title,
