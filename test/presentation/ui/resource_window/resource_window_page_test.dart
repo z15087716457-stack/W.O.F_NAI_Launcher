@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_group_mode.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_fixture_image.dart';
@@ -8,6 +9,9 @@ import 'package:nai_launcher/presentation/ui/kit/ui_resource_kind.dart';
 import 'package:nai_launcher/presentation/ui/resource_window/resource_window_contract.dart';
 import 'package:nai_launcher/presentation/ui/resource_window/resource_window_fixture.dart';
 import 'package:nai_launcher/presentation/ui/resource_window/resource_window_page.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/local_gallery_filter_bar.dart';
+
+import '../../../helpers/studio_capture_fonts.dart';
 
 Future<List<String>> _pump(
   WidgetTester t,
@@ -47,6 +51,52 @@ ResourceWindowViewData _view(FloatingResourceKind k, [ResourceLayout? l]) =>
     );
 
 void main() {
+  testWidgets('gallery grouping stays at the right edge with a short title', (
+    t,
+  ) async {
+    await t.runAsync(loadStudioCaptureFonts);
+    t.view.devicePixelRatio = 1;
+    addTearDown(t.view.resetDevicePixelRatio);
+    addTearDown(t.view.resetPhysicalSize);
+    for (final width in [620.0, 1040.0]) {
+      for (final dark in [false, true]) {
+        t.view.physicalSize = Size(width, 680);
+        final changes = <GalleryGroupMode>[];
+        await t.pumpWidget(
+          MaterialApp(
+            theme: dark ? GeistTheme.dark : GeistTheme.light,
+            locale: const Locale('zh'),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            home: ResourceWindowPage(
+              data: _view(FloatingResourceKind.gallery),
+              actions: ResourceWindowActions.logging((_) {}),
+              galleryBuilder: (_, _) => const SizedBox(),
+              galleryHeaderTrailing: GalleryGroupModeButton(
+                value: GalleryGroupMode.day,
+                onChanged: changes.add,
+              ),
+            ),
+          ),
+        );
+        await t.pumpAndSettle();
+        final button = find.byKey(const Key('gallery-filter-group-mode'));
+        expect(
+          t.getRect(button).right,
+          closeTo(width - 14, .1),
+          reason: 'width=$width, dark=$dark',
+        );
+        await t.tap(button);
+        await t.pumpAndSettle();
+        final l10n = AppLocalizations.of(t.element(button))!;
+        await t.tap(find.text(l10n.localGallery_groupByMonth));
+        await t.pumpAndSettle();
+        expect(changes, [GalleryGroupMode.month]);
+        expect(t.takeException(), isNull);
+      }
+    }
+  });
+
   testWidgets(
     'in-window viewer preserves library scroll and selection and suspends hidden library shortcuts',
     (t) async {

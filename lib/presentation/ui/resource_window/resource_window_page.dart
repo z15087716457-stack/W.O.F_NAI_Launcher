@@ -788,6 +788,19 @@ class _MainHead extends StatelessWidget {
         .expand((s) => s.groups)
         .where((g) => g.id == data.groupId)
         .firstOrNull;
+    final leading = <Widget>[
+      if (group != null)
+        Flexible(
+          child: Text(
+            group.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: UiText.sans(12.5, weight: FontWeight.w500, color: c.ink),
+          ),
+        ),
+      Text(resourceCount(data.total), style: UiText.mono(11.5, color: c.faint)),
+      if (data.loading) const UiSpinner(size: 12),
+    ];
     return SizedBox(
       height: 36,
       child: Padding(
@@ -795,25 +808,13 @@ class _MainHead extends StatelessWidget {
         child: Row(
           spacing: 8,
           children: [
-            if (group != null)
-              Flexible(
-                child: Text(
-                  group.label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: UiText.sans(
-                    12.5,
-                    weight: FontWeight.w500,
-                    color: c.ink,
-                  ),
-                ),
-              ),
-            Text(
-              resourceCount(data.total),
-              style: UiText.mono(11.5, color: c.faint),
-            ),
-            if (data.loading) const UiSpinner(size: 12),
-            const Spacer(),
+            if (trailing != null)
+              // A loose title and a Spacer leave unused flex space at the end.
+              Expanded(child: Row(spacing: 8, children: leading))
+            else ...[
+              ...leading,
+              const Spacer(),
+            ],
             if (trailing != null)
               trailing!
             else
