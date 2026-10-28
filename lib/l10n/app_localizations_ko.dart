@@ -21938,4 +21938,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get resourceWindow_errorFailed => '작업에 실패했습니다';
+
+  @override
+  String get blocks_tempStandaloneExplain =>
+      '이 프롬프트에만 있고 라이브러리에는 저장되지 않았습니다. 남기려면 새 블록으로 저장하세요.';
+
+  @override
+  String blocks_tempCreatedByAgent(String time) {
+    return 'Agent가$time 이 블록을 만들었습니다.';
+  }
+
+  @override
+  String blocks_tempCreatedByYou(String time) {
+    return '$time 이 블록을 만들었습니다.';
+  }
 }

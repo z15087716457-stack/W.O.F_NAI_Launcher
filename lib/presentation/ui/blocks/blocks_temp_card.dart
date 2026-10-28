@@ -140,7 +140,10 @@ class _BlockTempCardState extends State<BlockTempCard> {
   }
 
   _DiffController _controller(_Hz hz) {
-    final style = TextStyle(backgroundColor: hz.add, color: hz.addInk);
+    // 没有原块时不标“新增”：对着空串，每个词都会被标绿。
+    final style = d.standalone
+        ? const TextStyle()
+        : TextStyle(backgroundColor: hz.add, color: hz.addInk);
     final t = _text ??= _DiffController(
       _current,
       _tags(_original).map(_norm).toSet(),
@@ -260,12 +263,20 @@ class _BlockTempCardState extends State<BlockTempCard> {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: d.editedBy == 'agent'
+                    text: d.standalone
+                        ? (d.editedBy == 'agent'
+                              ? l.blocks_tempCreatedByAgent(when)
+                              : l.blocks_tempCreatedByYou(when))
+                        : d.editedBy == 'agent'
                         ? l.blocks_tempEditedByAgent(when)
                         : l.blocks_tempEditedByYou(when),
                     style: TextStyle(fontWeight: FontWeight.w600, color: c.ink),
                   ),
-                  TextSpan(text: l.blocks_tempExplain(b.title)),
+                  TextSpan(
+                    text: d.standalone
+                        ? l.blocks_tempStandaloneExplain
+                        : l.blocks_tempExplain(b.title),
+                  ),
                 ],
               ),
               style: UiText.sans(12, color: c.muted, height: 1.55),
@@ -283,7 +294,7 @@ class _BlockTempCardState extends State<BlockTempCard> {
     final removed = original.where((t) => !currentSet.contains(_norm(t)));
 
     final mono = UiText.mono(12.5, color: c.ink, height: 1.75);
-    final Widget content = _compare
+    final Widget content = _compare && !d.standalone
         ? Container(
             key: const Key('block-temp-diff'),
             constraints: const BoxConstraints(minHeight: 72),
@@ -376,41 +387,43 @@ class _BlockTempCardState extends State<BlockTempCard> {
                   onTap: _switchFace,
                 ),
               const Spacer(),
-              BlockSeg<bool>(
-                values: const [false, true],
-                selected: _compare,
-                keyOf: (v) => Key('block-temp-${v ? 'compare' : 'edit'}'),
-                labelOf: (v) => v ? l.blocks_tempCompare : l.blocks_tempEdit,
-                onTap: (v) => setState(() => _compare = v),
-              ),
+              if (!d.standalone)
+                BlockSeg<bool>(
+                  values: const [false, true],
+                  selected: _compare,
+                  keyOf: (v) => Key('block-temp-${v ? 'compare' : 'edit'}'),
+                  labelOf: (v) => v ? l.blocks_tempCompare : l.blocks_tempEdit,
+                  onTap: (v) => setState(() => _compare = v),
+                ),
             ],
           ),
           content,
-          Wrap(
-            spacing: 6,
-            runSpacing: 4,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              tag(l.blocks_tempAdded, add: true),
-              Text(
-                added.isEmpty
-                    ? l.blocks_tempAddedNone
-                    : l.blocks_tempAddedCount(added.length),
-                style: UiText.sans(11, color: c.faint),
-              ),
-              const SizedBox(width: 6),
-              tag(
-                removed.isEmpty ? l.blocks_tempRemoved : removed.first,
-                add: false,
-              ),
-              Text(
-                removed.isEmpty
-                    ? l.blocks_tempRemovedNone
-                    : l.blocks_tempRemovedHint(removed.length),
-                style: UiText.sans(11, color: c.faint),
-              ),
-            ],
-          ),
+          if (!d.standalone)
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                tag(l.blocks_tempAdded, add: true),
+                Text(
+                  added.isEmpty
+                      ? l.blocks_tempAddedNone
+                      : l.blocks_tempAddedCount(added.length),
+                  style: UiText.sans(11, color: c.faint),
+                ),
+                const SizedBox(width: 6),
+                tag(
+                  removed.isEmpty ? l.blocks_tempRemoved : removed.first,
+                  add: false,
+                ),
+                Text(
+                  removed.isEmpty
+                      ? l.blocks_tempRemovedNone
+                      : l.blocks_tempRemovedHint(removed.length),
+                  style: UiText.sans(11, color: c.faint),
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -426,19 +439,20 @@ class _BlockTempCardState extends State<BlockTempCard> {
       child: Row(
         spacing: 8,
         children: [
-          UiBtn(
-            key: const Key('block-temp-revert'),
-            size: UiBtnSize.small,
-            tone: UiBtnTone.ghost,
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            onTap: a.onRevertTemp == null || _busy
-                ? null
-                : () => _run(a.onRevertTemp!),
-            children: [
-              const UiGlyph(UiGlyphs.undo, size: 13),
-              Text(l.blocks_tempRevert),
-            ],
-          ),
+          if (!d.standalone)
+            UiBtn(
+              key: const Key('block-temp-revert'),
+              size: UiBtnSize.small,
+              tone: UiBtnTone.ghost,
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              onTap: a.onRevertTemp == null || _busy
+                  ? null
+                  : () => _run(a.onRevertTemp!),
+              children: [
+                const UiGlyph(UiGlyphs.undo, size: 13),
+                Text(l.blocks_tempRevert),
+              ],
+            ),
           const Spacer(),
           UiBtn(
             key: const Key('block-temp-apply'),
@@ -604,11 +618,12 @@ class _BlockTempCardState extends State<BlockTempCard> {
         onDismiss: () => setState(() => _menu = null),
         builder: (_) => UiMenu(
           items: [
-            UiMenuItem(
-              glyph: UiGlyphs.external,
-              label: l.blocks_tempShowOriginal,
-              onTap: a.onShowInLibrary,
-            ),
+            if (!d.standalone)
+              UiMenuItem(
+                glyph: UiGlyphs.external,
+                label: l.blocks_tempShowOriginal,
+                onTap: a.onShowInLibrary,
+              ),
             UiMenuItem(
               glyph: UiGlyphs.copy,
               label: l.blocks_copySend,

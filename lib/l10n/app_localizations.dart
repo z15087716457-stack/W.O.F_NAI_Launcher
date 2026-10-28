@@ -39333,6 +39333,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Action failed'**
   String get resourceWindow_errorFailed;
+
+  /// No description provided for @blocks_tempStandaloneExplain.
+  ///
+  /// In en, this message translates to:
+  /// **' It exists only in this prompt and is not saved to the library. Use Save as new block to keep it.'**
+  String get blocks_tempStandaloneExplain;
+
+  /// No description provided for @blocks_tempCreatedByAgent.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent created this{time}.'**
+  String blocks_tempCreatedByAgent(String time);
+
+  /// No description provided for @blocks_tempCreatedByYou.
+  ///
+  /// In en, this message translates to:
+  /// **'You created this{time}.'**
+  String blocks_tempCreatedByYou(String time);
 }
 
 class _AppLocalizationsDelegate

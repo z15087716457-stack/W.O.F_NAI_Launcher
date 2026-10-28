@@ -21618,6 +21618,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get resourceWindow_errorFailed => '操作失败';
+
+  @override
+  String get blocks_tempStandaloneExplain => '它只存在于当前提示词中，没有保存到块库；想留着就另存为新块。';
+
+  @override
+  String blocks_tempCreatedByAgent(String time) {
+    return 'Agent$time 建了这个块。';
+  }
+
+  @override
+  String blocks_tempCreatedByYou(String time) {
+    return '你$time 建了这个块。';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -43234,4 +43247,17 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get resourceWindow_errorFailed => '操作失敗';
+
+  @override
+  String get blocks_tempStandaloneExplain => '它只存在於當前提示詞中，沒有儲存到塊庫；想留著就另存為新塊。';
+
+  @override
+  String blocks_tempCreatedByAgent(String time) {
+    return 'Agent$time 建了這個塊。';
+  }
+
+  @override
+  String blocks_tempCreatedByYou(String time) {
+    return '你$time 建了這個塊。';
+  }
 }

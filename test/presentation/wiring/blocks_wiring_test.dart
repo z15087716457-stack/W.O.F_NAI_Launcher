@@ -1061,4 +1061,52 @@ void main() {
       expect(tester.takeException(), isNull);
     },
   );
+  testWidgets(
+    'standalone temporary instance shows its own title and no revert in the card',
+    (tester) async {
+      const marker = '';
+      final notifier = container.read(
+        pillWorkspaceProvider(PillScopes.main).notifier,
+      );
+      notifier.restoreDocument(
+        PillDocument(
+          text: 'masterpiece, $marker',
+          instances: {
+            marker: PillInstance(
+              blockId: '',
+              temp: PillTempContent(
+                content: 'white dress, straw hat',
+                originalContent: '',
+                editedAt: DateTime(2026, 10, 28, 9, 5),
+                editedBy: 'agent',
+                title: '服装',
+                color: '#FF1E88E5',
+              ),
+            ),
+          },
+        ),
+      );
+      expect(
+        container.read(pillWorkspaceProvider(PillScopes.main)).projection,
+        'masterpiece, white dress, straw hat',
+      );
+      await mount(
+        tester,
+        Align(
+          alignment: Alignment.topLeft,
+          child: BlockInstanceWiring(
+            scope: PillScopes.main,
+            marker: marker,
+            onDismiss: () {},
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('block-temp-card')), findsOneWidget);
+      expect(find.text('服装'), findsWidgets);
+      expect(find.text('块已删除'), findsNothing);
+      expect(find.byKey(const Key('block-temp-revert')), findsNothing);
+      expect(find.byKey(const Key('block-temp-compare')), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

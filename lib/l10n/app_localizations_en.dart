@@ -22635,4 +22635,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resourceWindow_errorFailed => 'Action failed';
+
+  @override
+  String get blocks_tempStandaloneExplain =>
+      ' It exists only in this prompt and is not saved to the library. Use Save as new block to keep it.';
+
+  @override
+  String blocks_tempCreatedByAgent(String time) {
+    return 'Agent created this$time.';
+  }
+
+  @override
+  String blocks_tempCreatedByYou(String time) {
+    return 'You created this$time.';
+  }
 }

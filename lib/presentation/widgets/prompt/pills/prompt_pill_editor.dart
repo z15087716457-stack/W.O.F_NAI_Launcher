@@ -32,6 +32,7 @@ import '../../../ui/kit/ui_popover.dart';
 import '../../../wiring/blocks_instance_wiring.dart';
 import '../../../wiring/blocks_mapping.dart';
 import '../../../wiring/blocks_actions.dart';
+import '../../../utils/prompt_block_instance_display.dart';
 import 'prompt_pill.dart';
 import 'translation_pill_view.dart';
 
@@ -610,7 +611,9 @@ class _PromptPillEditorState extends ConsumerState<PromptPillEditor> {
 
     final block =
         library?.blockById(instance.blockId) ??
-        (instance.temporary
+        (isStandaloneTemp(instance)
+            ? standaloneTempBlock(instance, context.l10n.blocks_tempLabel)
+            : instance.temporary
             ? PromptBlock.create(
                 id: instance.blockId,
                 title: context.l10n.blocks_missing,

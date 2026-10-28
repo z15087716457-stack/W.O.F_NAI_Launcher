@@ -12147,5 +12147,22 @@
   "resourceWindow_errorNotFound": "這一項已經不存在，列表已重新整理",
   "resourceWindow_errorNotReady": "主視窗還沒準備好，請稍後再試",
   "resourceWindow_errorUnsupported": "當前模型不支援這個操作",
-  "resourceWindow_errorFailed": "操作失敗"
+  "resourceWindow_errorFailed": "操作失敗",
+  "blocks_tempStandaloneExplain": "它只存在於當前提示詞中，沒有儲存到塊庫；想留著就另存為新塊。",
+  "blocks_tempCreatedByAgent": "Agent{time} 建了這個塊。",
+  "@blocks_tempCreatedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempCreatedByYou": "你{time} 建了這個塊。",
+  "@blocks_tempCreatedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

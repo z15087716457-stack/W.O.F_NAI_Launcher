@@ -165,4 +165,89 @@ void main() {
       debugDisableShadows = true;
     });
   }
+  testWidgets('standalone temporary card hides revert, compare and diff', (
+    t,
+  ) async {
+    final calls = <String>[];
+    final data = BlockInstanceViewData(
+      block: BlockData(
+        id: '',
+        title: '服装',
+        color: const Color(0xFF1E88E5),
+        atoms: const ['white dress', 'straw hat'],
+        createdAt: DateTime(2026, 10, 28),
+        updatedAt: DateTime(2026, 10, 28),
+      ),
+      settings: const BlockRollSettings(),
+      temporary: true,
+      standalone: true,
+      tempContent: 'white dress, straw hat',
+      originalContent: '',
+      editedAt: DateTime(2026, 10, 28, 9, 5),
+      editedBy: 'agent',
+    );
+    await pumpBlocks(
+      t,
+      Padding(
+        padding: const EdgeInsets.all(24),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: BlockInstanceCard(
+            data: data,
+            actions: BlockInstanceActions(
+              onReroll: () {},
+              onLockChanged: (_) {},
+              onModeChanged: (_) {},
+              onStep: (_) {},
+              onSideChanged: (_) {},
+              onEnabledChanged: (_) {},
+              onEditBlock: () {},
+              onRemove: () {},
+              onApplyParams: () {},
+              onSaveSettings: (_) {},
+              sample: (_, _) => const [],
+              onShowInLibrary: () {},
+              onCopySend: () {},
+              onEditTempContent: (content, negative) async =>
+                  calls.add('edit:$content'),
+              onSaveTempAsNewBlock: (title, folder) async =>
+                  calls.add('save:$title:$folder'),
+            ),
+          ),
+        ),
+      ),
+      window: 600,
+      height: 520,
+      rail: false,
+    );
+    expect(find.byKey(const Key('block-temp-card')), findsOneWidget);
+    await _capture(t, 'temp-standalone');
+    expect(find.text('服装'), findsWidgets);
+    expect(find.textContaining('块已删除', findRichText: true), findsNothing);
+    expect(
+      find.textContaining('Agent 09:05 建了这个块', findRichText: true),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('只存在于当前提示词中', findRichText: true),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('block-temp-revert')), findsNothing);
+    expect(find.byKey(const Key('block-temp-compare')), findsNothing);
+    expect(find.byKey(const Key('block-temp-diff')), findsNothing);
+    expect(find.text('新增'), findsNothing);
+
+    await t.tap(find.byKey(const Key('block-temp-more')));
+    await t.pumpAndSettle();
+    expect(find.text('在块库中查看原块'), findsNothing);
+    await t.tapAt(const Offset(590, 510));
+    await t.pumpAndSettle();
+
+    await t.tap(find.byKey(const Key('block-temp-save-as')));
+    await t.pumpAndSettle();
+    await t.tap(find.byKey(const Key('block-temp-save-confirm')));
+    await t.pumpAndSettle();
+    expect(calls.last, 'save:服装:null');
+    expect(t.takeException(), isNull);
+  });
 }

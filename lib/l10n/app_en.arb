@@ -11574,5 +11574,22 @@
   "resourceWindow_errorNotFound": "This item no longer exists — the list has been refreshed",
   "resourceWindow_errorNotReady": "The main window isn't ready yet — try again in a moment",
   "resourceWindow_errorUnsupported": "The current model doesn't support this action",
-  "resourceWindow_errorFailed": "Action failed"
+  "resourceWindow_errorFailed": "Action failed",
+  "blocks_tempStandaloneExplain": " It exists only in this prompt and is not saved to the library. Use Save as new block to keep it.",
+  "blocks_tempCreatedByAgent": "Agent created this{time}.",
+  "@blocks_tempCreatedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempCreatedByYou": "You created this{time}.",
+  "@blocks_tempCreatedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

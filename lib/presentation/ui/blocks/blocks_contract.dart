@@ -1070,6 +1070,7 @@ class BlockInstanceViewData {
     this.send = '',
     this.skipped = false,
     this.temporary = false,
+    this.standalone = false,
     this.tempContent,
     this.tempNegativeContent,
     this.originalContent,
@@ -1107,6 +1108,10 @@ class BlockInstanceViewData {
   /// 出现概率没通过，这次整个块没出场。
   final bool skipped;
   final bool temporary;
+
+  /// 临时块没有原块（不依赖块库直接建的）：没有可还原 / 对比的内容，[block] 的标题、
+  /// 颜色、图标来自临时块自身。
+  final bool standalone;
   final String? tempContent;
   final String? tempNegativeContent;
   final String? originalContent;

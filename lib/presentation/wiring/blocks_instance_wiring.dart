@@ -14,6 +14,7 @@ import '../providers/prompt_block_library_provider.dart';
 import '../ui/blocks/blocks_contract.dart';
 import '../ui/blocks/blocks_instance.dart';
 import '../utils/prompt_block_instance_bundle.dart';
+import '../utils/prompt_block_instance_display.dart';
 import 'blocks_actions.dart';
 import 'blocks_generation_target.dart';
 import 'blocks_mapping.dart';
@@ -101,11 +102,14 @@ class BlockInstanceWiring extends ConsumerWidget {
       }
     }
 
-    final missing = PromptBlock.create(
-      id: instance.blockId,
-      title: context.l10n.blocks_missing,
-      content: '',
-    );
+    final standalone = isStandaloneTemp(instance);
+    final missing = standalone
+        ? standaloneTempBlock(instance, context.l10n.blocks_tempLabel)
+        : PromptBlock.create(
+            id: instance.blockId,
+            title: context.l10n.blocks_missing,
+            content: '',
+          );
     return Material(
       type: MaterialType.transparency,
       child: BlockInstanceCard(
@@ -125,6 +129,7 @@ class BlockInstanceWiring extends ConsumerWidget {
             instance.temporary ? PillInstanceSettings.fixedDefault : settings,
           ),
           temporary: instance.temporary,
+          standalone: standalone,
           tempContent: instance.temp?.content,
           tempNegativeContent: instance.temp?.negativeContent,
           originalContent: instance.temp?.originalContent,
@@ -157,7 +162,7 @@ class BlockInstanceWiring extends ConsumerWidget {
           evolution: allowEvolutionToggle
               ? source.instance.evolutionEnabled
               : null,
-          missing: block == null,
+          missing: block == null && !standalone,
           catalog: blocksParamCatalogWithReader(ref.read),
         ),
         actions: BlockInstanceActions(
@@ -180,7 +185,7 @@ class BlockInstanceWiring extends ConsumerWidget {
                 );
             if (context.mounted) onDismiss();
           }),
-          onRevertTemp: !instance.temporary
+          onRevertTemp: !instance.temporary || standalone
               ? null
               : () => host.run(() async {
                   await ref

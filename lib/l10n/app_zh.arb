@@ -11562,5 +11562,22 @@
   "resourceWindow_errorNotFound": "这一项已经不存在，列表已刷新",
   "resourceWindow_errorNotReady": "主窗口还没准备好，请稍后再试",
   "resourceWindow_errorUnsupported": "当前模型不支持这个操作",
-  "resourceWindow_errorFailed": "操作失败"
+  "resourceWindow_errorFailed": "操作失败",
+  "blocks_tempStandaloneExplain": "它只存在于当前提示词中，没有保存到块库；想留着就另存为新块。",
+  "blocks_tempCreatedByAgent": "Agent{time} 建了这个块。",
+  "@blocks_tempCreatedByAgent": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "blocks_tempCreatedByYou": "你{time} 建了这个块。",
+  "@blocks_tempCreatedByYou": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
 }

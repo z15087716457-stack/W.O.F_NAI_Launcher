@@ -21866,4 +21866,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get resourceWindow_errorFailed => '操作に失敗しました';
+
+  @override
+  String get blocks_tempStandaloneExplain =>
+      'このプロンプトの中だけにあり、ライブラリには保存されていません。残すには新しいブロックとして保存してください。';
+
+  @override
+  String blocks_tempCreatedByAgent(String time) {
+    return 'Agent が$timeこのブロックを作成しました。';
+  }
+
+  @override
+  String blocks_tempCreatedByYou(String time) {
+    return '$timeこのブロックを作成しました。';
+  }
 }
