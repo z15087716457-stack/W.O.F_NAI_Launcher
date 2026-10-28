@@ -1260,6 +1260,7 @@ class GenHistoryData with _GenValue {
     this.selected,
     this.autoSave = true,
     this.pinned = 0,
+    this.openDetailOnClick = false,
   });
 
   /// 新到旧。
@@ -1274,9 +1275,18 @@ class GenHistoryData with _GenValue {
   /// 画布上钉住的张数（> 0 时标题旁显示“钉住 N”，点了把画布飞到钉住区）。
   final int pinned;
 
+  /// 单击缩略图直接打开大图；false 时单击联动预览、双击打开大图。
+  final bool openDetailOnClick;
+
   int get total => batches.fold(0, (s, b) => s + b.images.length);
   @override
-  List<Object?> get _values => [batches, selected, autoSave, pinned];
+  List<Object?> get _values => [
+    batches,
+    selected,
+    autoSave,
+    pinned,
+    openDetailOnClick,
+  ];
 }
 
 // ───────────────────────── 整页 ─────────────────────────

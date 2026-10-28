@@ -28,6 +28,7 @@ import '../providers/generation/image_workflow_controller.dart';
 import '../providers/generation/local_upscale_provider.dart';
 import '../providers/generation/preview_selection_provider.dart';
 import '../providers/image_generation_provider.dart';
+import '../providers/history_click_behavior_provider.dart';
 import '../providers/simple_viewer_group_batches_provider.dart';
 import '../providers/image_save_settings_provider.dart';
 import '../providers/krita/bridge_agent_feedback.dart';
@@ -659,6 +660,9 @@ final generationViewDataProvider = Provider.autoDispose
           selected: focus?.id,
           autoSave: ref.watch(imageSaveSettingsNotifierProvider).autoSave,
           pinned: pins.length,
+          openDetailOnClick:
+              ref.watch(historyClickBehaviorNotifierProvider) ==
+              HistoryClickBehavior.openDetail,
         ),
         now: now,
       );

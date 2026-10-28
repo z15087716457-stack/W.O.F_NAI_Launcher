@@ -16,7 +16,8 @@ import 'gen_page.dart';
 import 'gen_parts.dart';
 
 /// 历史栏（原型 `rightA`）：标题行 40 │ 批次列表（时间 · 张数 + 封面）│ 底栏 40。
-/// 单击一批 = 画布切到这批；300ms 内再点 = 开大图；右键菜单；多选（按钮 / Ctrl / Shift）出操作条。
+/// 单击按设置开大图或联动预览；联动时 300ms 内再点开大图。
+/// 右键菜单；多选（按钮 / Ctrl / Shift）出操作条。
 /// 窗口按钮压在这一栏顶上，所以有窗口按钮时整栏下移 36。
 class GenHistoryPanel extends StatefulWidget {
   const GenHistoryPanel({super.key, required this.width});
@@ -95,7 +96,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
         now.difference(_lastTapAt!) < const Duration(milliseconds: 300);
     _lastTap = b.id;
     _lastTapAt = now;
-    if (again && b.images.isNotEmpty) {
+    if ((h.openDetailOnClick || again) && b.images.isNotEmpty) {
       _lastTap = null;
       scope.actions.onOpenViewer(b.images.first.id);
     } else {

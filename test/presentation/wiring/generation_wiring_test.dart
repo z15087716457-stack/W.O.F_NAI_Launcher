@@ -41,6 +41,8 @@ import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_header.dart';
 import 'package:nai_launcher/presentation/providers/floating_resource_windows_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_edits.dart';
 import 'package:nai_launcher/presentation/wiring/generation_wiring.dart';
 import 'package:nai_launcher/presentation/wiring/generation_backend.dart';
 import 'package:nai_launcher/presentation/wiring/generation_operations.dart';
@@ -558,7 +560,10 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  Future<GoRouter> pumpViewer(WidgetTester tester) async {
+  Future<GoRouter> pumpViewer(
+    WidgetTester tester, {
+    bool startInViewer = true,
+  }) async {
     final image = GeneratedImage(
       id: 'viewer-image',
       bytes: img.encodePng(img.Image(width: 512, height: 768)),
@@ -569,7 +574,7 @@ void main() {
     (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
         .publish(ImageGenerationState(history: [image]));
     final router = GoRouter(
-      initialLocation: '/generation/viewer',
+      initialLocation: startInViewer ? '/generation/viewer' : '/generation',
       routes: [
         GoRoute(
           path: '/generation',
@@ -607,6 +612,72 @@ void main() {
     );
     await tester.pump();
     return router;
+  }
+
+  for (final output in ['canvas', 'simple']) {
+    testWidgets('历史单击实时遵循设置并打开真实大图路由：$output', (tester) async {
+      final settings = container.read(settingsValueStoreProvider);
+      await tester.runAsync(() async {
+        await settings.write(SettingKey.outputViewer, output);
+        await settings.write(SettingKey.historyClick, 'linkedPreview');
+      });
+      final router = await pumpViewer(tester, startInViewer: false);
+      await tester.pumpAndSettle();
+      final before = container.read(generationParamsNotifierProvider);
+      final batch = tester
+          .widget<GenerationPage>(find.byType(GenerationPage))
+          .data
+          .history
+          .batches
+          .single;
+      final tile = find.byKey(Key('gen-batch-tile-${batch.id}'));
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsNothing);
+      expect(
+        container.read(generationPreviewSelectionProvider),
+        'viewer-image',
+      );
+
+      // Write through the same adapter as the two settings cards. No page
+      // remount or restart should be needed for the next click to open detail.
+      await tester.runAsync(() async {
+        await settings.write(SettingKey.historyClick, 'openDetail');
+        // History's double-click interval uses the wall clock. Keep this a
+        // separate click, otherwise the old linked behavior also opens detail.
+        await Future<void>.delayed(const Duration(milliseconds: 350));
+      });
+      await tester.pump();
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsOneWidget);
+      expect(
+        tester
+            .widget<GenerationViewerWiring>(find.byType(GenerationViewerWiring))
+            .request
+            .selected,
+        'viewer-image',
+      );
+      router.pop();
+      await tester.pumpAndSettle();
+      await tester.runAsync(
+        () => settings.write(SettingKey.historyClick, 'linkedPreview'),
+      );
+      await tester.pump();
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsNothing);
+      expect(
+        container.read(generationPreviewSelectionProvider),
+        'viewer-image',
+      );
+      await tester.tap(tile);
+      await tester.pumpAndSettle();
+      expect(find.byType(ImageViewerPage), findsOneWidget);
+      expect(container.read(generationParamsNotifierProvider), same(before));
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    });
   }
 
   testWidgets('大图翻译显示忙态，取消后慢结果不复活，也不写入生图草稿', (tester) async {

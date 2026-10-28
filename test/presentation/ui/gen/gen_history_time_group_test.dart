@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
@@ -26,8 +27,72 @@ void main() {
     );
   }
 
-  GenViewData data(List<GenBatch> batches) =>
-      GenFixture.view().copyWith(history: GenHistoryData(batches: batches));
+  GenViewData data(List<GenBatch> batches, {bool openDetailOnClick = false}) =>
+      GenFixture.view().copyWith(
+        history: GenHistoryData(
+          batches: batches,
+          openDetailOnClick: openDetailOnClick,
+        ),
+      );
+  test('点击模式变化使历史契约失效并触发刷新', () {
+    expect(
+      const GenHistoryData(),
+      isNot(const GenHistoryData(openDetailOnClick: true)),
+    );
+  });
+  testWidgets('打开详情模式单击开封面，未出图占位仍只定位', (tester) async {
+    final recorder = GenRecorder();
+    await pumpGen(
+      tester,
+      actions: recorder.actions,
+      data: data([
+        batch('done', DateTime(2026, 10, 12, 10, 46), count: 2),
+        batch('pending', DateTime(2026, 10, 12, 10, 45), count: 0, pending: 1),
+      ], openDetailOnClick: true),
+    );
+    await tapKey(tester, 'gen-batch-tile-done');
+    expect(recorder.last('onOpenViewer'), 'onOpenViewer(done-0)');
+    expect(recorder.called('onFocusBatch'), isFalse);
+    await tapKey(tester, 'gen-batch-tile-pending');
+    expect(recorder.last('onFocusBatch'), 'onFocusBatch(pending)');
+    expect(recorder.calls.where((c) => c.startsWith('onOpenViewer')), [
+      'onOpenViewer(done-0)',
+    ]);
+  });
+  testWidgets('打开详情模式仍优先 Ctrl、Shift 和多选按钮', (tester) async {
+    final recorder = GenRecorder();
+    await pumpGen(
+      tester,
+      actions: recorder.actions,
+      data: data([
+        for (final id in ['first', 'second', 'third'])
+          batch(id, DateTime(2026, 10, 12, 10, 46)),
+      ], openDetailOnClick: true),
+    );
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tapKey(tester, 'gen-batch-tile-first');
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tapKey(tester, 'gen-batch-tile-third');
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tapKey(tester, 'gen-history-save-selected');
+    expect(
+      recorder.last('onSaveImages'),
+      'onSaveImages([first-0, second-0, third-0])',
+    );
+    expect(recorder.called('onOpenViewer'), isFalse);
+    expect(recorder.called('onFocusBatch'), isFalse);
+    await tapKey(tester, 'gen-history-select');
+    await tapKey(tester, 'gen-history-select');
+    await tapKey(tester, 'gen-batch-tile-second');
+    await tapKey(tester, 'gen-history-save-selected');
+    expect(recorder.last('onSaveImages'), 'onSaveImages([second-0])');
+    expect(recorder.called('onOpenViewer'), isFalse);
+    await tapKey(tester, 'gen-history-select');
+    await tapKey(tester, 'gen-batch-tile-second');
+    expect(recorder.last('onOpenViewer'), 'onOpenViewer(second-0)');
+    expect(tester.takeException(), isNull);
+  });
   for (final dark in [false, true]) {
     testWidgets('同一分钟不同请求共享时间标题，保留两个缩略图 $dark', (tester) async {
       await pumpGen(
