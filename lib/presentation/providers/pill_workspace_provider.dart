@@ -358,7 +358,7 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     }
     _history.closeGroup();
     _apply(
-      before.copyWith(text: text, instances: instances),
+      PillDocumentEditor.reconcile(before.copyWith(instances: instances), text),
       recordHistory: false,
     );
     try {
@@ -658,6 +658,8 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     String? title,
     String? color,
     String? iconName,
+    List<TranslationPill>? translations,
+    List<TranslationPill>? negativeTranslations,
   }) {
     final local = state.document.instances[marker];
     if (local == null) return marker;
@@ -697,6 +699,16 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       title: title ?? existing?.title,
       color: color ?? existing?.color,
       iconName: iconName ?? existing?.iconName,
+      translations: PillTempContent.retainTranslations(
+        content,
+        translations ??
+            existing?.translations ??
+            (local.translation == null ? const [] : [local.translation!]),
+      ),
+      negativeTranslations: PillTempContent.retainTranslations(
+        negativeContent ?? existing?.negativeContent ?? currentNegative ?? '',
+        negativeTranslations ?? existing?.negativeTranslations ?? const [],
+      ),
     );
     final split = bundle.members.any((member) {
       final document = member.scope == arg
@@ -825,6 +837,13 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           title: actualTitle,
           folderId: folderId,
           content: temp.content,
+          readingTranslationZh: temp.reading,
+          readingTranslationNeedsReview: temp.translations.any(
+            (t) => t.needsReview,
+          ),
+          readingTranslationLanguageCode:
+              temp.translations.firstOrNull?.languageCode ?? 'zh',
+          readingTranslationEdited: temp.translations.isNotEmpty,
           negativeContent: temp.negativeContent ?? '',
           color: color ?? original?.color ?? temp.color ?? '#FF607D8B',
           appearance: original?.appearance ?? 'classic',
@@ -869,7 +888,12 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
       );
 
   /// Explicit expansion does not trigger bundle deletion during reconciliation.
-  void expandMarker(String marker, {int occurrence = 0}) {
+  void expandMarker(
+    String marker, {
+    int occurrence = 0,
+    String? tempContent,
+    String? tempNegativeContent,
+  }) {
     final bundle = readPromptBlockInstanceBundleWithReader(
       ref.read,
       arg,
@@ -886,6 +910,9 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
           0,
           notifier.state.document.text.split(member.marker).length - 2,
         ),
+        content: member.instance.useNegativeContent
+            ? tempNegativeContent
+            : tempContent,
       );
     }
     for (final member in bundle.members) {
@@ -898,13 +925,14 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     }
   }
 
-  void _expandOccurrence(String marker, int occurrence) {
+  void _expandOccurrence(String marker, int occurrence, {String? content}) {
     _apply(
       PillDocumentEditor.expandOccurrence(
         state.document,
         marker,
         occurrence: occurrence,
         resolveMarker: _resolveMarkerInstance,
+        temporaryContent: content,
       ),
     );
   }

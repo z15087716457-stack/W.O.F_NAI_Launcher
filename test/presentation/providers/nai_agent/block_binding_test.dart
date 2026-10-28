@@ -258,6 +258,139 @@ void main() {
       workspace.listSync(recursive: true).whereType<File>().length;
 
   test(
+    'temporary readings roundtrip, preserve source, unwrap/delete undo and promote',
+    () async {
+      await Hive.openBox<String>(PillWorkspaceStorage.boxName);
+      const source = 'brown cloak, black boots';
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {
+          'title': '服装',
+          'content': source,
+          'translations': [
+            {'source': 'brown cloak', 'zh': '棕色斗篷'},
+            {'source': 'black boots', 'zh': '黑色靴子'},
+          ],
+        },
+      });
+      final marker = result['marker'] as String;
+      final before = lane().document;
+      expect(lane().projection, source);
+      expect(before.instances[marker]!.temp!.translations.length, 2);
+      expect(
+        PillDocument.fromJson(
+          jsonDecode(jsonEncode(before.toJson())) as Map<String, dynamic>,
+        ),
+        before,
+      );
+      await Hive.box<String>(PillWorkspaceStorage.boxName).flush();
+      container.invalidate(pillWorkspaceProvider('main'));
+      expect(lane().document, before);
+      await instance('instance_unwrap', {'marker': marker});
+      expect(lane().document.text, source);
+      editor().undo();
+      expect(lane().document, before);
+      await instance('instance_delete', {'marker': marker});
+      expect(lane().projection, '');
+      editor().undo();
+      expect(lane().document, before);
+      final promoted = await instance('instance_promote', {
+        'marker': marker,
+        'expected_library_version': (await run('block_query', {
+          'kind': 'tree',
+        }))['library_version'],
+      });
+      final saved = await container
+          .read(promptBlockRepositoryProvider)
+          .getBlock(promoted['id'] as String);
+      expect(saved!.content, source);
+      expect(saved.readingTranslationZh, '棕色斗篷, 黑色靴子');
+      expect(lane().projection, source);
+    },
+  );
+
+  test(
+    'converting existing translation blocks preserves multiple readings in one undo',
+    () async {
+      await instance('instance_create', {
+        'kind': 'translation',
+        'translation': {'source': 'brown cloak', 'zh': '棕色斗篷'},
+      });
+      await instance('instance_create', {
+        'kind': 'translation',
+        'translation': {'source': 'black boots', 'zh': '黑色靴子'},
+      });
+      final before = lane().document;
+      final source = lane().projection;
+      expect(source, 'brown cloak, black boots');
+      final result = await instance('instance_convert', {
+        'segments': [
+          {
+            'kind': 'temporary',
+            'anchor': {'text': source, 'mode': 'replace'},
+            'instance': {'title': '服装'},
+          },
+        ],
+      });
+      final marker = (result['markers'] as List).single;
+      final temp = lane().document.instances.values.single.temp!;
+      expect(temp.translations.map((t) => t.zh), ['棕色斗篷', '黑色靴子']);
+      expect(temp.content, source);
+      expect(lane().projection, source);
+      editor().undo();
+      expect(lane().document, before);
+      expect(marker, isNotNull);
+    },
+  );
+
+  test(
+    'temporary content edits retain only matching readings and expansion uses unsaved source',
+    () async {
+      final result = await instance('instance_create', {
+        'kind': 'temporary',
+        'instance': {
+          'title': '服装',
+          'content': 'brown cloak, black boots',
+          'translations': [
+            {'source': 'brown cloak', 'zh': '棕色斗篷'},
+            {'source': 'black boots', 'zh': '黑色靴子'},
+          ],
+        },
+      });
+      final marker = result['marker'] as String;
+      await instance('instance_update', {
+        'marker': marker,
+        'instance': {'content': 'brown cloak, white boots'},
+      });
+      expect(
+        lane().document.instances[marker]!.temp!.translations.map(
+          (t) => t.source,
+        ),
+        ['brown cloak'],
+      );
+      final before = lane().document;
+      editor().expandMarker(marker, tempContent: 'brown cloak, red boots');
+      expect(lane().projection, 'brown cloak, red boots');
+      editor().undo();
+      expect(lane().document, before);
+      final backup = backupCount();
+      await expectLater(
+        instance('instance_update', {
+          'marker': marker,
+          'instance': {
+            'translations': [
+              {'source': 'missing', 'zh': '不存在'},
+            ],
+          },
+        }),
+        throwsA(isA<NaiAgentToolError>()),
+      );
+      expect(backupCount(), backup);
+      expect(lane().document, before);
+    },
+  );
+
+  test(
     'inline temp roundtrip, display edit, no-original revert, roll and default promote',
     () async {
       editor().setText('start');
@@ -315,6 +448,41 @@ void main() {
       expect(lane().document, before);
     },
   );
+
+  test('paired temporary readings preserve both generation faces', () async {
+    final created = await create({
+      'title': 'paired',
+      'content': 'cloak',
+      'negativeContent': 'blur',
+    });
+    await insert((created['block'] as Map)['id'] as String);
+    final marker = lane().document.instances.keys.single;
+    await instance('instance_update', {
+      'marker': marker,
+      'instance': {
+        'content': 'brown cloak',
+        'negative_content': 'blur',
+        'translations': [
+          {'source': 'brown cloak', 'zh': '棕色斗篷'},
+        ],
+        'negative_translations': [
+          {'source': 'blur', 'zh': '模糊'},
+        ],
+      },
+    });
+    expect(lane().projection, 'brown cloak');
+    expect(lane('negative').projection, 'blur');
+    expect(
+      lane().document.instances[marker]!.temp!.translations.single.zh,
+      '棕色斗篷',
+    );
+    expect(
+      lane(
+        'negative',
+      ).document.instances.values.single.temp!.negativeTranslations.single.zh,
+      '模糊',
+    );
+  });
 
   test(
     'translation creation/update emits source and review semantics, unwrap uses selected occurrence',

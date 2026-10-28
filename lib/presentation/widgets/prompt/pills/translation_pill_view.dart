@@ -22,6 +22,7 @@ class TranslationPillView extends StatefulWidget {
     this.highlightEnabled = true,
     this.numericEmphasisEnabled = true,
     this.autoFormat = false,
+    this.toggleOnTap = false,
   });
 
   final TranslationPill pill;
@@ -32,6 +33,9 @@ class TranslationPillView extends StatefulWidget {
   final bool highlightEnabled;
   final bool numericEmphasisEnabled;
   final bool autoFormat;
+
+  /// Embedded temporary-block reading: both mouse buttons only toggle display.
+  final bool toggleOnTap;
 
   @override
   State<TranslationPillView> createState() => _TranslationPillViewState();
@@ -284,8 +288,9 @@ class _TranslationPillViewState extends State<TranslationPillView> {
                     message: context.l10n.promptTranslation_blockNeedsReview,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onTapUp: (details) =>
-                          widget.onEdit(details.globalPosition),
+                      onTapUp: (details) => widget.toggleOnTap
+                          ? widget.onToggle()
+                          : widget.onEdit(details.globalPosition),
                       child: Icon(
                         Icons.build_outlined,
                         size: 13,
@@ -300,7 +305,9 @@ class _TranslationPillViewState extends State<TranslationPillView> {
           return GestureDetector(
             onTapUp: editableSource
                 ? null
-                : (details) => widget.onEdit(details.globalPosition),
+                : (details) => widget.toggleOnTap
+                      ? widget.onToggle()
+                      : widget.onEdit(details.globalPosition),
             onTertiaryTapUp: (_) => widget.onToggle(),
             child: content,
           );

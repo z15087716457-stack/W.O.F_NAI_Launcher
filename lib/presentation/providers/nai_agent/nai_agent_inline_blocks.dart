@@ -161,6 +161,64 @@ int _insertionPosition(Map<String, dynamic> params, PillDocument document) {
   return offset as int? ?? document.text.length;
 }
 
+/// Resolve generation-text anchors while preserving complete reading blocks.
+({PillAnchorRange range, String content, List<TranslationPill> translations})
+_temporarySelection(Object? anchor, PillDocument document) {
+  final projected = StringBuffer();
+  final boundaries = <int, int>{0: 0};
+  for (var index = 0; index < document.text.length; index++) {
+    final marker = document.text[index];
+    final instance = document.instances[marker];
+    if (instance?.translation != null &&
+        !instance!.temporary &&
+        instance.enabled) {
+      projected.write(instance.translation!.source);
+    } else {
+      projected.write(marker);
+    }
+    boundaries[projected.length] = index + 1;
+  }
+  final range = _anchor(
+    anchor,
+    PillDocument(text: projected.toString(), instances: const {}),
+    replace: true,
+  );
+  final start = boundaries[range.start], end = boundaries[range.end];
+  if (start == null || end == null) {
+    throw const NaiAgentToolError(
+      'invalid_position',
+      'Include complete translation blocks when converting to a temporary block',
+    );
+  }
+  final translations = <TranslationPill>[];
+  for (var index = start; index < end; index++) {
+    final instance = document.instances[document.text[index]];
+    if (instance?.translation != null &&
+        !instance!.temporary &&
+        instance.enabled) {
+      translations.add(instance.translation!);
+    }
+  }
+  return (
+    range: (start: start, end: end),
+    content: projected.toString().substring(range.start, range.end),
+    translations: translations,
+  );
+}
+
+void _validateTempTranslations(
+  String content,
+  List<TranslationPill> translations,
+) {
+  if (PillTempContent.retainTranslations(content, translations).length !=
+      translations.length) {
+    throw const NaiAgentToolError(
+      'invalid_translation',
+      'Translation sources must occur completely in content, in source order',
+    );
+  }
+}
+
 List<PillInlineEdit> _inlinePlan(
   Map<String, dynamic> params,
   PillDocument document,
@@ -205,14 +263,17 @@ List<PillInlineEdit> _inlinePlan(
         optional: true,
         inline: true,
       );
-      if (changes.containsKey('negative_content')) {
+      if (changes.containsKey('negative_content') ||
+          changes.containsKey('negative_translations')) {
         throw const NaiAgentToolError(
           'unsupported_bundle',
           'Inline creation/conversion does not support negative_content; create a separate negative-scope instance',
         );
       }
       if (kind == 'translation' &&
-          (changes.containsKey('content') || _hasDisplay(changes))) {
+          (changes.containsKey('content') ||
+              changes.containsKey('translations') ||
+              _hasDisplay(changes))) {
         throw const NaiAgentToolError(
           'invalid_arguments',
           'Translation instances do not accept content/title/color/icon',
@@ -225,14 +286,23 @@ List<PillInlineEdit> _inlinePlan(
         );
       }
       final PillAnchorRange range;
+      String? selectedContent;
+      var selectedTranslations = <TranslationPill>[];
       if (convert) {
-        range = _anchor(part['anchor'], document, replace: true);
+        if (kind == 'temporary') {
+          final selected = _temporarySelection(part['anchor'], document);
+          range = selected.range;
+          selectedContent = selected.content;
+          selectedTranslations = selected.translations;
+        } else {
+          range = _anchor(part['anchor'], document, replace: true);
+        }
       } else {
         final offset = _insertionPosition(part, document);
         range = (start: offset, end: offset);
       }
       final selected = convert
-          ? document.text.substring(range.start, range.end)
+          ? selectedContent ?? document.text.substring(range.start, range.end)
           : null;
       if (edits.any(
         (other) => range.start < other.end && other.start < range.end,
@@ -268,6 +338,10 @@ List<PillInlineEdit> _inlinePlan(
             'Converted content must equal the selected text',
           );
         }
+        final translations =
+            changes['translations'] as List<TranslationPill>? ??
+            selectedTranslations;
+        _validateTempTranslations(content, translations);
         temp = PillTempContent(
           content: content,
           originalContent: '',
@@ -276,6 +350,7 @@ List<PillInlineEdit> _inlinePlan(
           title: changes['title'] as String,
           color: changes['color'] as String?,
           iconName: changes['icon'] as String?,
+          translations: translations,
         );
       } else {
         translation = _translation(part['translation'], selected: selected);
@@ -308,6 +383,23 @@ void _validateExisting(Map<String, dynamic> params, PillInstance instance) {
       params['instance'],
       optional: params.containsKey('translation'),
     );
+    for (final (key, text) in [
+      ('translations', changes['content'] as String? ?? instance.temp?.content),
+      (
+        'negative_translations',
+        changes['negative_content'] as String? ??
+            instance.temp?.negativeContent,
+      ),
+    ]) {
+      if (!changes.containsKey(key)) continue;
+      if (text == null) {
+        throw const NaiAgentToolError(
+          'invalid_translation',
+          'Provide content together with translations when editing a library block',
+        );
+      }
+      _validateTempTranslations(text, changes[key] as List<TranslationPill>);
+    }
     if (_hasDisplay(changes) &&
         (instance.blockId.isNotEmpty || !instance.temporary)) {
       throw const NaiAgentToolError(
@@ -323,7 +415,9 @@ void _validateExisting(Map<String, dynamic> params, PillInstance instance) {
         'Invalid empty block instance',
       );
     }
-    if (instance.blockId.isEmpty && changes.containsKey('negative_content')) {
+    if (instance.blockId.isEmpty &&
+        (changes.containsKey('negative_content') ||
+            changes.containsKey('negative_translations'))) {
       throw const NaiAgentToolError(
         'unsupported_bundle',
         'Library-free instances do not support negative_content',

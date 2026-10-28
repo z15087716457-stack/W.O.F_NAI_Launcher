@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/prompt/pills/translation_pill_view.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -96,6 +97,8 @@ class _BlockTempCardState extends State<BlockTempCard> {
   var _compare = false;
   var _saving = false;
   var _busy = false;
+  var _editingTranslations = false;
+  final _sourceViews = <int>{};
   String? _folderId;
   late String _name = widget.data.block.title;
   UiPopoverAnchor? _menu;
@@ -157,6 +160,8 @@ class _BlockTempCardState extends State<BlockTempCard> {
     if (negative == _negative) return;
     _text?.dispose();
     _text = null;
+    _editingTranslations = false;
+    _sourceViews.clear();
     setState(() => _negative = negative);
   }
 
@@ -179,6 +184,20 @@ class _BlockTempCardState extends State<BlockTempCard> {
       () => _negative
           ? edit(d.tempContent ?? '', value)
           : edit(value, d.tempNegativeContent),
+    );
+  }
+
+  void _expand() {
+    final expand = a.onExpandTempContent;
+    if (!_dirty || expand == null) {
+      a.onExpand?.call();
+      return;
+    }
+    _run(
+      () => expand(
+        _negative ? d.tempContent ?? '' : _text!.text,
+        _negative ? _text!.text : d.tempNegativeContent,
+      ),
     );
   }
 
@@ -294,6 +313,50 @@ class _BlockTempCardState extends State<BlockTempCard> {
     final removed = original.where((t) => !currentSet.contains(_norm(t)));
 
     final mono = UiText.mono(12.5, color: c.ink, height: 1.75);
+    final translations = _negative
+        ? d.tempNegativeTranslations
+        : d.tempTranslations;
+    final reading = translations.isEmpty || _editingTranslations
+        ? null
+        : LayoutBuilder(
+            builder: (context, constraints) {
+              final spans = <InlineSpan>[];
+              var offset = 0;
+              for (final (index, translation) in translations.indexed) {
+                final start = _current.indexOf(translation.source, offset);
+                if (start > offset) {
+                  spans.add(TextSpan(text: _current.substring(offset, start)));
+                }
+                void toggle() => setState(() {
+                  if (!_sourceViews.remove(index)) _sourceViews.add(index);
+                });
+                spans.add(
+                  WidgetSpan(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: TranslationPillView(
+                        key: ValueKey('block-temp-translation-$index'),
+                        pill: translation.copyWith(
+                          marks: const [],
+                          showOriginal:
+                              translation.showOriginal !=
+                              _sourceViews.contains(index),
+                        ),
+                        toggleOnTap: true,
+                        onToggle: toggle,
+                        onEdit: (_) => toggle(),
+                      ),
+                    ),
+                  ),
+                );
+                offset = start + translation.source.length;
+              }
+              spans.add(TextSpan(text: _current.substring(offset)));
+              return Text.rich(TextSpan(children: spans), style: mono);
+            },
+          );
     final Widget content = _compare && !d.standalone
         ? Container(
             key: const Key('block-temp-diff'),
@@ -317,28 +380,30 @@ class _BlockTempCardState extends State<BlockTempCard> {
               border: Border.all(color: _focus.hasFocus ? c.strong : c.line),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Focus(
-              onFocusChange: (_) => setState(() {}),
-              child: TextField(
-                key: const Key('block-temp-editor'),
-                controller: _controller(hz),
-                focusNode: _focus,
-                minLines: 2,
-                maxLines: 8,
-                style: mono,
-                cursorColor: c.accent,
-                cursorWidth: 1.5,
-                onChanged: (_) => setState(() {}),
-                decoration: const InputDecoration(
-                  isCollapsed: true,
-                  filled: false,
-                  contentPadding: EdgeInsets.zero,
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
+            child:
+                reading ??
+                Focus(
+                  onFocusChange: (_) => setState(() {}),
+                  child: TextField(
+                    key: const Key('block-temp-editor'),
+                    controller: _controller(hz),
+                    focusNode: _focus,
+                    minLines: 2,
+                    maxLines: 8,
+                    style: mono,
+                    cursorColor: c.accent,
+                    cursorWidth: 1.5,
+                    onChanged: (_) => setState(() {}),
+                    decoration: const InputDecoration(
+                      isCollapsed: true,
+                      filled: false,
+                      contentPadding: EdgeInsets.zero,
+                      border: InputBorder.none,
+                      enabledBorder: InputBorder.none,
+                      focusedBorder: InputBorder.none,
+                    ),
+                  ),
                 ),
-              ),
-            ),
           );
 
     Widget tag(String text, {required bool add}) => Container(
@@ -428,6 +493,29 @@ class _BlockTempCardState extends State<BlockTempCard> {
       ),
     );
 
+    final quickActions = <Widget>[
+      if (a.onExpand != null)
+        UiBtn(
+          key: const Key('block-temp-expand'),
+          size: UiBtnSize.small,
+          tone: UiBtnTone.ghost,
+          padding: const EdgeInsets.symmetric(horizontal: 7),
+          tooltip: l.translationEditor_restore,
+          onTap: _busy || (_dirty && a.onExpandTempContent == null)
+              ? null
+              : _expand,
+          children: [Text('A', style: UiText.sans(18, color: c.muted))],
+        ),
+      UiIconBox(
+        key: const Key('block-temp-delete'),
+        glyph: UiGlyphs.trash,
+        glyphSize: 16,
+        size: 26,
+        tooltip: l.blocks_removeInstance,
+        color: c.error,
+        onTap: _busy ? null : a.onRemove,
+      ),
+    ];
     // `.bcf`
     final footer = Container(
       key: const Key('block-temp-footer'),
@@ -436,53 +524,87 @@ class _BlockTempCardState extends State<BlockTempCard> {
         color: Color.alphaBlend(c.panel.withValues(alpha: .7), c.raised),
         border: Border(top: BorderSide(color: c.line)),
       ),
-      child: Row(
-        spacing: 8,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (!d.standalone)
-            UiBtn(
-              key: const Key('block-temp-revert'),
-              size: UiBtnSize.small,
-              tone: UiBtnTone.ghost,
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              onTap: a.onRevertTemp == null || _busy
-                  ? null
-                  : () => _run(a.onRevertTemp!),
-              children: [
-                const UiGlyph(UiGlyphs.undo, size: 13),
-                Text(l.blocks_tempRevert),
-              ],
-            ),
-          const Spacer(),
-          UiBtn(
-            key: const Key('block-temp-apply'),
-            size: UiBtnSize.small,
-            tone: _dirty ? UiBtnTone.primary : UiBtnTone.normal,
-            onTap: _busy
-                ? null
-                : _dirty
-                ? _applyEdit
-                : () => setState(() {
-                    _compare = false;
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (_) => _focus.requestFocus(),
-                    );
-                  }),
+          Row(
+            spacing: 8,
             children: [
-              UiGlyph(_dirty ? UiGlyphs.check : UiGlyphs.pencil, size: 13),
-              Text(_dirty ? l.blocks_tempApply : l.blocks_tempKeepEditing),
+              if (d.standalone) ...quickActions,
+              if (!d.standalone)
+                UiBtn(
+                  key: const Key('block-temp-revert'),
+                  size: UiBtnSize.small,
+                  tone: UiBtnTone.ghost,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  onTap: a.onRevertTemp == null || _busy
+                      ? null
+                      : () => _run(a.onRevertTemp!),
+                  children: [
+                    const UiGlyph(UiGlyphs.undo, size: 13),
+                    Text(l.blocks_tempRevert),
+                  ],
+                ),
+              Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    UiBtn(
+                      key: const Key('block-temp-apply'),
+                      size: UiBtnSize.small,
+                      tone: _dirty ? UiBtnTone.primary : UiBtnTone.normal,
+                      onTap: _busy
+                          ? null
+                          : _dirty
+                          ? _applyEdit
+                          : () => setState(() {
+                              _compare = false;
+                              _editingTranslations = true;
+                              WidgetsBinding.instance.addPostFrameCallback(
+                                (_) => _focus.requestFocus(),
+                              );
+                            }),
+                      children: [
+                        UiGlyph(
+                          _dirty ? UiGlyphs.check : UiGlyphs.pencil,
+                          size: 13,
+                        ),
+                        Text(
+                          _dirty
+                              ? l.blocks_tempApply
+                              : l.blocks_tempKeepEditing,
+                        ),
+                      ],
+                    ),
+                    if (a.onSaveTempAsNewBlock != null)
+                      UiBtn(
+                        key: const Key('block-temp-save-as'),
+                        size: UiBtnSize.small,
+                        tone: _saving ? UiBtnTone.normal : UiBtnTone.primary,
+                        onTap: _busy
+                            ? null
+                            : () => setState(() => _saving = !_saving),
+                        children: [
+                          const UiGlyph(UiGlyphs.saveAs, size: 13),
+                          Text(l.blocks_tempSaveAs),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
             ],
           ),
-          if (a.onSaveTempAsNewBlock != null)
-            UiBtn(
-              key: const Key('block-temp-save-as'),
-              size: UiBtnSize.small,
-              tone: _saving ? UiBtnTone.normal : UiBtnTone.primary,
-              onTap: _busy ? null : () => setState(() => _saving = !_saving),
-              children: [
-                const UiGlyph(UiGlyphs.saveAs, size: 13),
-                Text(l.blocks_tempSaveAs),
-              ],
+          if (!d.standalone)
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 8,
+                children: quickActions,
+              ),
             ),
         ],
       ),

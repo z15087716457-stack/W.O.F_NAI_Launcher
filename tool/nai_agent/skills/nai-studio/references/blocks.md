@@ -6,6 +6,7 @@ Read `studio_context(scope=draft)` for prompt documents and markers, `block_quer
 
 - Types: `temporary` (has `temp`), `translation`, otherwise a library reference. Library-free instances have `blockId:""`. Missing `needsReview` means false; missing `languageCode` means `zh`.
 - Temporary: `title` 1..40 characters; `color` `#RRGGBB`/`#AARRGGBB`; `icon` from the list below; omitted color/icon use native defaults. Only temporary blocks carry content; translations carry `source` (sent to generation) and `zh` (reading only, any `language_code` of `zh`, `zh-TW`, `en`, `ja`, `ko`).
+- A temporary block can contain `instance.translations:[{source,zh,language_code?}]` (normally one whole-content translation; up to 64 in content order). Source must match a complete substring; it stays the generation text. Empty arrays clear readings. Existing complete translation blocks are preserved when converted into one temporary block. Content edits keep only readings whose sources still match; promotion preserves the combined reading.
 - Create/convert options: `enabled` only. Library-free blocks have no negative side: create a separate block in the negative scope.
 - Convert segments need `title` (temporary) or `zh` (translation); the selected text becomes the content/source. A failing segment is reported by number and nothing is written.
 - `instance_update`: content edits make that occurrence a temporary block; display fields only on library-free temps; translation edits cannot mix with content. A source-only change marks the reading for review.
@@ -21,11 +22,11 @@ No dedicated actions; compose them. Each write returns the next `draft_version`,
 
 ## Positioning
 
-`anchor.text` matches the prompt's handwritten text (markers stripped), not block contents; it may touch but not cross a marker. Several matches need zero-based `occurrence`. `offset` is a raw UTF-16 position (never inside an emoji pair); offset and anchor are exclusive.
+`instance_convert` to temporary blocks also matches the source text of existing translation blocks and must include them completely. Otherwise `anchor.text` matches the prompt's handwritten text (markers stripped), not block contents; it may touch but not cross a marker. Several matches need zero-based `occurrence`. `offset` is a raw UTF-16 position (never inside an emoji pair); offset and anchor are exclusive.
 
 ```json
 {"action":"instance_convert","scope":"main","expected_draft_version":"<fresh>","segments":[
-  {"anchor":{"text":"rooftop, after rain","mode":"replace"},"kind":"temporary","instance":{"title":"Setting","icon":"city"}},
+  {"anchor":{"text":"rooftop, after rain","mode":"replace"},"kind":"temporary","instance":{"title":"Setting","icon":"city","translations":[{"source":"rooftop, after rain","zh":"雨后的屋顶"}]}},
   {"anchor":{"text":"soft lighting","mode":"replace"},"kind":"translation","translation":{"zh":"柔和光照"}}
 ]}
 ```

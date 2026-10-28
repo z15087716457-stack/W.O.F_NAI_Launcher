@@ -5,14 +5,14 @@
 
 ## 本地图片超分
 
-- 本地超分不读取 ComfyUI 启用状态、模型列表或端口，也不调用 NAI 生成/放大接口。当前原生组件支持 Windows / Vulkan，SeedVR2 与 RTX SDK 是后续阶段。
+- 本地超分不读取 ComfyUI 启用状态、模型列表或端口，也不调用 NAI 生成/放大接口。当前支持 Windows / Vulkan 常规引擎与独立管理的 SeedVR2／RTX 可选组件；权重和真实推理验证按各组件的既定授权范围。
 - 任务冻结来源、模型和倍率，原始模型输出上限 6400 万像素；推理后用 Pica Lanczos3 精确调整尺寸并保留透明度。
 - 只继承源图实际元数据，保存及画布登记不能补写当前无关草稿。来源或手动选择改变过时保护最新状态；正常成功定位新结果而不抢提示词输入焦点。
 - 取消与托盘退出必须结束并等待自有工作进程/isolate 清理，不能在子进程仍运行时释放任务或模型锁。引擎、模型和清单的原始字节必须保留，不能由 Git 自动换行转换破坏哈希。
 
 ## 画风探索多池遗传
 
-- A工作台界面：编辑列384、舞台至少480、检查器312；1280及以下默认收起检查器，手动打开在窄窗浮出。每次手动生成点击登记独立轮，旧探索行内改名；检查器、全屏共用查看器、进化页签、两两比较、开始进化、存为块及首次使用的现行说明见 `docs/style-explore-redesign-2026-10-10.md`。存块默认正向遗传抽取原子，无记录时完整正向；合并父本走 `addParentsToActiveSet`。检查点⑤待复查，未安装运行包。
+- A工作台界面：编辑列384、舞台至少480、检查器312；1280及以下默认收起检查器，手动打开在窄窗浮出。每次手动生成点击登记独立轮，旧探索行内改名；检查器、全屏共用查看器、进化页签、两两比较、开始进化、存为块及首次使用的现行说明见 `docs/style-explore-redesign-2026-10-10.md`。存块默认正向遗传抽取原子，无记录时完整正向；合并父本走 `addParentsToActiveSet`。该界面已随九页整合安装并累计包含于 +58；旧检查点⑤已废止，不作为当前待办。
 - 探索页基础轮和手动登记统一使用 `N×1` 逐张生成；每个候选槽位保存自己的生成前 `ExploreRollSnapshot`，不能把一个多图请求的同一快照复制给多个候选。
 - `PillInstance.locked` 是用户持久化的实例级锁，只冻结随机实例的内容，不改变触发概率；固定模式没有可锁定的 roll。
 - 深度轮的自动保护只使用 runner/provider 运行态 guard：非 override 的遗传随机实例按锁空语义参与投影，用户原有锁状态和 `currentRoll` 不被覆盖；guard 不写入 Hive、Recipe 或 `PillDocument`，完成、暂停、取消、异常和恢复时必须清理并恢复原状态。
@@ -57,7 +57,7 @@
 
 ## 模型与计费
 
-- 模型栏的 Turbo 胶囊与 A／F 紧凑标签仅由 V5 模型族开启，不复用 V4+ 通用的 Anime／Furry 能力作为显示条件。V5 Full 可切换，V5 Curated 显示不可用提示；模式段按实际内容宽度加左右各 6px 留白，高度 26px，不补足旧宽度预算。V4／V4.5 等旧模型保留完整 Anime／Furry 和原留白。这两项修正源码完成、待本机更新，见 [修正与验证](docs/v5-turbo-capsule-scope-fix-2026-10-17.md)。
+- 模型栏的 Turbo 胶囊与 A／F 紧凑标签仅由 V5 模型族开启，不复用 V4+ 通用的 Anime／Furry 能力作为显示条件。V5 Full 可切换，V5 Curated 显示不可用提示；模式段按实际内容宽度加左右各 6px 留白，高度 26px，不补足旧宽度预算。V4／V4.5 等旧模型保留完整 Anime／Furry 和原留白。这两项修正已随 r25 安装并累计包含于 +58，见 [修正与验证](docs/v5-turbo-capsule-scope-fix-2026-10-17.md)。
 
 - V5 Full 的 Turbo／Medium Effort 使用 `nai-diffusion-5-full-medium`，重绘为 `nai-diffusion-5-full-medium-inpainting`。固定 14 步、Euler Ancestral、Heavy UC，忽略自定义主／角色负面及 CFG Rescale，引导强度可调。固定值仅在请求投影中生效，存储的 Full 步数／采样器／UC 和负面草稿保留，切回 Full 恢复；界面不提供固定参数编辑。黑色胶囊仍显示 Full 家族，独立闪电表示实际模式，Anime／Furry 缩为 A／F，模式段按内容宽度收紧。桥接生效读数和 Agent 报价带 `model_constraints`，原始 `_draft`／`draft_summary` 不能被生效投影覆盖；元数据必须有明确 Medium 标记才认定为 Turbo，不根据 14 步推断。见 [实现与验证](docs/v5-turbo-support-2026-10-17.md)。
 - 云端 NAI 放大使用 image API `/ai/upscale`，`nai-diffusion-5-curated` / blur=0，固定 2x；输入面积≤3,145,728，费用按源图像素为 1 / 2 / 3 / 4，Opus 不免。不要恢复旧主域、4x / width / height 请求。

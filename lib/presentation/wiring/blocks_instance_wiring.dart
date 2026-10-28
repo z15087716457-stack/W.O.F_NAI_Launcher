@@ -110,6 +110,24 @@ class BlockInstanceWiring extends ConsumerWidget {
             title: context.l10n.blocks_missing,
             content: '',
           );
+    Future<void> expand([String? content, String? negative]) =>
+        host.run(() async {
+          final applied = await ref
+              .read(blocksGenerationTargetProvider)
+              .commit(
+                () => ref
+                    .read(pillWorkspaceProvider(scope).notifier)
+                    .expandMarker(
+                      marker,
+                      occurrence: occurrence,
+                      tempContent: content,
+                      tempNegativeContent: negative,
+                    ),
+                alive: () => context.mounted,
+                unchanged: current,
+              );
+          if (applied && context.mounted) onDismiss();
+        });
     return Material(
       type: MaterialType.transparency,
       child: BlockInstanceCard(
@@ -132,6 +150,9 @@ class BlockInstanceWiring extends ConsumerWidget {
           standalone: standalone,
           tempContent: instance.temp?.content,
           tempNegativeContent: instance.temp?.negativeContent,
+          tempTranslations: instance.temp?.translations ?? const [],
+          tempNegativeTranslations:
+              instance.temp?.negativeTranslations ?? const [],
           originalContent: instance.temp?.originalContent,
           originalNegativeContent: instance.temp?.originalNegativeContent,
           editedAt: instance.temp?.editedAt,
@@ -298,20 +319,8 @@ class BlockInstanceWiring extends ConsumerWidget {
           onEditBlock: () {
             if (block != null) host.edit(id: block.id);
           },
-          onExpand: () => host.run(() async {
-            final applied = await ref
-                .read(blocksGenerationTargetProvider)
-                .commit(
-                  () {
-                    ref
-                        .read(pillWorkspaceProvider(scope).notifier)
-                        .expandMarker(marker, occurrence: occurrence);
-                  },
-                  alive: () => context.mounted,
-                  unchanged: current,
-                );
-            if (applied && context.mounted) onDismiss();
-          }),
+          onExpand: expand,
+          onExpandTempContent: expand,
           onRemove: () {
             if (current()) {
               removePromptBlockBundle(ref, scope, marker);

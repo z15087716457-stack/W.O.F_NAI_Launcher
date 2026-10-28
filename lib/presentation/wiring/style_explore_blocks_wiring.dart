@@ -338,6 +338,9 @@ class StyleExploreVariableWiring extends ConsumerWidget {
           standalone: standalone,
           tempContent: instance.temp?.content,
           tempNegativeContent: instance.temp?.negativeContent,
+          tempTranslations: instance.temp?.translations ?? const [],
+          tempNegativeTranslations:
+              instance.temp?.negativeTranslations ?? const [],
           originalContent: instance.temp?.originalContent,
           originalNegativeContent: instance.temp?.originalNegativeContent,
           editedAt: instance.temp?.editedAt,
@@ -463,6 +466,22 @@ class StyleExploreVariableWiring extends ConsumerWidget {
                 .expandMarker(marker);
             onDismiss();
           }),
+          onExpandTempContent: (content, negative) =>
+              _blockAction(context, () async {
+                final write = ref
+                    .read(styleExploreBackendProvider)
+                    .captureDraft(alive: current);
+                await write(() {
+                  ref
+                      .read(pillWorkspaceProvider(PillScopes.main).notifier)
+                      .expandMarker(
+                        marker,
+                        tempContent: content,
+                        tempNegativeContent: negative,
+                      );
+                  onDismiss();
+                });
+              }),
           onRemove: () => change(() {
             removePromptBlockBundle(ref, PillScopes.main, marker);
             onDismiss();

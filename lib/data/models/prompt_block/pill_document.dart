@@ -6,6 +6,7 @@
 library;
 
 import '../../../core/utils/prompt_translation_language.dart';
+import 'package:collection/collection.dart';
 
 /// 实例随机模式（P2.5）：固定 = 投影恒为块内容；随机抽取 = 投影为物化的
 /// `currentRoll`（未锁定实例可在参数变更/手动骰子/生成入队后重抽）；
@@ -203,6 +204,8 @@ class PillTempContent {
     this.title,
     this.color,
     this.iconName,
+    this.translations = const [],
+    this.negativeTranslations = const [],
   });
   final String content;
   final String? negativeContent;
@@ -219,6 +222,41 @@ class PillTempContent {
   final String? color;
   final String? iconName;
 
+  /// Reading-only blocks, in source order. Generation always uses [content].
+  final List<TranslationPill> translations;
+  final List<TranslationPill> negativeTranslations;
+
+  /// Keep translations whose complete source still occurs after an edit.
+  static List<TranslationPill> retainTranslations(
+    String content,
+    Iterable<TranslationPill> translations,
+  ) {
+    final result = <TranslationPill>[];
+    var offset = 0;
+    for (final translation in translations) {
+      if (translation.source.isEmpty) continue;
+      final start = content.indexOf(translation.source, offset);
+      if (start < 0) continue;
+      result.add(translation);
+      offset = start + translation.source.length;
+    }
+    return List.unmodifiable(result);
+  }
+
+  String? get reading {
+    if (translations.isEmpty) return null;
+    final result = StringBuffer();
+    var offset = 0;
+    for (final translation in translations) {
+      final start = content.indexOf(translation.source, offset);
+      result
+        ..write(content.substring(offset, start))
+        ..write(translation.zh);
+      offset = start + translation.source.length;
+    }
+    return (result..write(content.substring(offset))).toString();
+  }
+
   Map<String, dynamic> toJson() => {
     'content': content,
     'negativeContent': negativeContent,
@@ -229,6 +267,12 @@ class PillTempContent {
     if (title != null) 'title': title,
     if (color != null) 'color': color,
     if (iconName != null) 'iconName': iconName,
+    if (translations.isNotEmpty)
+      'translations': translations.map((t) => t.toJson()).toList(),
+    if (negativeTranslations.isNotEmpty)
+      'negativeTranslations': negativeTranslations
+          .map((t) => t.toJson())
+          .toList(),
   };
   factory PillTempContent.fromJson(Map<String, dynamic> json) =>
       PillTempContent(
@@ -241,6 +285,20 @@ class PillTempContent {
         title: json['title'] as String?,
         color: json['color'] as String?,
         iconName: json['iconName'] as String?,
+        translations: retainTranslations(
+          json['content'] as String,
+          (json['translations'] as List? ?? const []).map(
+            (t) =>
+                TranslationPill.fromJson(Map<String, dynamic>.from(t as Map)),
+          ),
+        ),
+        negativeTranslations: retainTranslations(
+          json['negativeContent'] as String? ?? '',
+          (json['negativeTranslations'] as List? ?? const []).map(
+            (t) =>
+                TranslationPill.fromJson(Map<String, dynamic>.from(t as Map)),
+          ),
+        ),
       );
   @override
   bool operator ==(Object other) =>
@@ -253,7 +311,15 @@ class PillTempContent {
       other.editedBy == editedBy &&
       other.title == title &&
       other.color == color &&
-      other.iconName == iconName;
+      other.iconName == iconName &&
+      const ListEquality<TranslationPill>().equals(
+        other.translations,
+        translations,
+      ) &&
+      const ListEquality<TranslationPill>().equals(
+        other.negativeTranslations,
+        negativeTranslations,
+      );
   @override
   int get hashCode => Object.hash(
     content,
@@ -265,6 +331,8 @@ class PillTempContent {
     title,
     color,
     iconName,
+    Object.hashAll(translations),
+    Object.hashAll(negativeTranslations),
   );
 }
 

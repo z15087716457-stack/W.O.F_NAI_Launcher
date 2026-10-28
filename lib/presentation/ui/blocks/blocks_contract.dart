@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import '../../../data/models/prompt_block/pill_document.dart';
 
 import '../kit/ui_block_pill.dart';
 
@@ -1073,6 +1074,8 @@ class BlockInstanceViewData {
     this.standalone = false,
     this.tempContent,
     this.tempNegativeContent,
+    this.tempTranslations = const [],
+    this.tempNegativeTranslations = const [],
     this.originalContent,
     this.originalNegativeContent,
     this.editedAt,
@@ -1114,6 +1117,8 @@ class BlockInstanceViewData {
   final bool standalone;
   final String? tempContent;
   final String? tempNegativeContent;
+  final List<TranslationPill> tempTranslations;
+  final List<TranslationPill> tempNegativeTranslations;
   final String? originalContent;
   final String? originalNegativeContent;
   final DateTime? editedAt;
@@ -1159,6 +1164,7 @@ class BlockInstanceActions {
     required this.onCopySend,
     this.onEvolutionChanged,
     this.onExpand,
+    this.onExpandTempContent,
     this.onEditTempContent,
     this.onRevertTemp,
     this.onSaveTempAsNewBlock,
@@ -1192,6 +1198,8 @@ class BlockInstanceActions {
   /// 复制实际发送的文本。
   final VoidCallback onCopySend;
   final VoidCallback? onExpand;
+  final Future<void> Function(String content, String? negativeContent)?
+  onExpandTempContent;
   final Future<void> Function(String content, String? negativeContent)?
   onEditTempContent;
   final Future<void> Function()? onRevertTemp;

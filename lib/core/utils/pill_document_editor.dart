@@ -218,13 +218,14 @@ abstract final class PillDocumentEditor {
     String marker, {
     int occurrence = 0,
     required String? Function(String, PillInstance) resolveMarker,
+    String? temporaryContent,
   }) {
     final index = _occurrenceIndex(document.text, marker, occurrence);
     if (index < 0 || !document.instances.containsKey(marker)) return document;
-    final projection = projectWithMarker(
-      document.copyWith(text: marker),
-      resolveMarker,
-    );
+    final instance = document.instances[marker]!;
+    final projection = temporaryContent != null && instance.temporary
+        ? (instance.enabled ? stripMarkers(temporaryContent) : '')
+        : projectWithMarker(document.copyWith(text: marker), resolveMarker);
     return reconcile(
       document,
       document.text.replaceRange(index, index + 1, projection),

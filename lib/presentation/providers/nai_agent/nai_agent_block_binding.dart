@@ -34,6 +34,8 @@ const _instanceKeys = {
   'title',
   'color',
   'icon',
+  'translations',
+  'negative_translations',
 };
 String _scope(Map<String, dynamic> params, BridgeDraftSnapshot draft) {
   final scope = params['scope'] ?? PillScopes.main;
@@ -95,6 +97,19 @@ Map<String, dynamic> _instanceChanges(
     );
   }
   final changes = Map<String, dynamic>.from(raw);
+  for (final key in ['translations', 'negative_translations']) {
+    if (!changes.containsKey(key)) continue;
+    final value = changes[key];
+    if (value is! List || value.length > 64) {
+      throw const NaiAgentToolError(
+        'invalid_translation',
+        'Provide at most 64 translations in source order',
+      );
+    }
+    changes[key] = <TranslationPill>[
+      for (final item in value) _translation(item),
+    ];
+  }
   if (!inline) _validateDisplay(changes);
   for (final key in ['content', 'negative_content']) {
     if (changes.containsKey(key) &&
@@ -360,6 +375,8 @@ NaiAgentBlockTools bindNaiAgentBlocks(
           );
           if (changes.containsKey('content') ||
               changes.containsKey('negative_content') ||
+              changes.containsKey('translations') ||
+              changes.containsKey('negative_translations') ||
               _hasDisplay(changes)) {
             final original = ref
                 .read(pillWorkspaceProvider(scope))
@@ -389,6 +406,9 @@ NaiAgentBlockTools bindNaiAgentBlocks(
               title: changes['title'] as String?,
               color: changes['color'] as String?,
               iconName: changes['icon'] as String?,
+              translations: changes['translations'] as List<TranslationPill>?,
+              negativeTranslations:
+                  changes['negative_translations'] as List<TranslationPill>?,
             );
           }
           if (params['translation'] != null) {

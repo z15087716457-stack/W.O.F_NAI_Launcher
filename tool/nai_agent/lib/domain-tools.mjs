@@ -17,8 +17,15 @@ const blockGenerationSettings = Type.Object({
   ucCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 }, {additionalProperties:false});
 const blockChanges = Type.Object({generationSettings:Type.Optional(Type.Union([blockGenerationSettings, Type.Null()]))}, {additionalProperties:true});
+const blockTranslation = Type.Object({
+  source:Type.Optional(Type.String({minLength:1,maxLength:100000})),
+  zh:Type.Optional(Type.String({minLength:1,maxLength:100000})),
+  language_code:Type.Optional(E(['zh','zh-TW','en','ja','ko'])),
+}, {additionalProperties:false});
 const blockInstance = Type.Object({
   content: Type.Optional(Type.String({maxLength:100000})),
+  translations: Type.Optional(Type.Array(blockTranslation,{maxItems:64})),
+  negative_translations: Type.Optional(Type.Array(blockTranslation,{maxItems:64})),
   negative_content: Type.Optional(Type.String({maxLength:100000})),
   title: Type.Optional(Type.String({minLength:1,maxLength:40})),
   color: Type.Optional(Type.String({pattern:'^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$'})),
@@ -30,11 +37,6 @@ const blockInstance = Type.Object({
 const blockAnchor = Type.Object({text:Type.String({minLength:1}),
   occurrence:Type.Optional(Type.Integer({minimum:0})),
   mode:E(['before','after','replace']),
-}, {additionalProperties:false});
-const blockTranslation = Type.Object({
-  source:Type.Optional(Type.String({minLength:1,maxLength:100000})),
-  zh:Type.Optional(Type.String({minLength:1,maxLength:100000})),
-  language_code:Type.Optional(E(['zh','zh-TW','en','ja','ko'])),
 }, {additionalProperties:false});
 const blockInlineKind = E(['temporary','translation']);
 const promptSetIcon = E(promptSetIcons);
@@ -102,7 +104,7 @@ export const domainTools = [
     }),
   },
   { name: 'block_manage',
-    description: 'Prompt block library and current-prompt instances. Writes back up and return readback; pass the version from the last read: expected_version (block_query id) for update/delete/insert, expected_library_version (block_query kind=tree) for folder_*/collection_*/block_reorder/instance_promote, expected_draft_version (studio_context draft) for insert and instance_*. scope: main, negative, char:<ID>:pos|neg. Library: create(changes.title/content), update(id, changes), delete(id), insert(id) into the prompt. Instances need no library entry: instance_create kind=temporary with instance.title/content (color/icon optional) or kind=translation with translation.source (generation text) and zh (reading only); place by anchor {text, mode before|after} or offset, default append. instance_convert turns existing text into blocks: 1..64 segments [{anchor {text, mode replace}, kind, instance|translation}], generation text unchanged, one undo. instance_update(marker, occurrence) edits content (a library block becomes a temporary block for this occurrence only), title/color/icon of library-free temps, translation, or settings/enabled/locked. instance_unwrap and instance_delete; instance_promote saves a temporary block to the library. Merge, split, rename: compose these. Details: skills/nai-studio/references/blocks.md.',
+    description: 'Prompt block library and prompt instances. Writes back up and return readback; pass the version from the last read: expected_version (block_query id) for update/delete/insert, expected_library_version (block_query kind=tree) for folder_*/collection_*/block_reorder/instance_promote, expected_draft_version (studio_context draft) for insert and instance_*. scope: main, negative, char:<ID>:pos|neg. Library: create(changes.title/content), update(id, changes), delete(id), insert(id) into the prompt. Instances need no library entry: instance_create kind=temporary with instance.title/content (color/icon optional) with optional instance.translations [{source,zh}] (reading only, in content order), or kind=translation with translation.source (generation text) and zh (reading only); place by anchor {text, mode before|after} or offset, default append. instance_convert turns existing text into blocks: 1..64 segments [{anchor {text, mode replace}, kind, instance|translation}], generation text unchanged, one undo. instance_update(marker, occurrence) edits content (a library block becomes a temporary block for this occurrence only), title/color/icon of library-free temps, translation, or settings/enabled/locked. instance_unwrap and instance_delete; instance_promote saves a temporary block to the library. Merge, split, rename: compose these. Details: skills/nai-studio/references/blocks.md.',
     parameters: Type.Object({
       action: E(['create', 'update', 'delete', 'insert', 'instance_create', 'instance_convert', 'instance_update', 'instance_unwrap', 'instance_delete', 'instance_promote', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove']),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),

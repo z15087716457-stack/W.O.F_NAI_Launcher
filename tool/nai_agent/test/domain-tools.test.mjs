@@ -69,6 +69,12 @@ test('block schema accepts presets and occurrence-local content, rejects invalid
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',marker:'x',occurrence:1,instance:{content:'new',negative_content:'UC'}}),true);
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',instance:{content:42}}),false);
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',occurrence:-1,instance:{content:'new'}}),false);
+  const reading = {source:'brown cloak',zh:'棕色斗篷'};
+  assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'temporary',instance:{title:'服装',content:'brown cloak',translations:[reading]}}),true);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_update',instance:{translations:[],negative_translations:[reading]}}),true);
+  for (const translations of ['reading',Array(65).fill(reading),[{...reading,language_code:'invalid'}]]) {
+    assert.equal(Value.Check(tool.parameters,{action:'instance_update',instance:{translations}}),false);
+  }
 });
 
 test('inline block schema stays one flat object with enums; per-action rules live in Dart', async () => {
