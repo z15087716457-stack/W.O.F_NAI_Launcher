@@ -71,6 +71,29 @@ test('block schema accepts presets and occurrence-local content, rejects invalid
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',occurrence:-1,instance:{content:'new'}}),false);
 });
 
+test('inline block schemas expose kinds, anchors, bounded batches and translation ranges', async () => {
+  const tool = domainTools.find(tool=>tool.name==='block_manage');
+  for (const action of ['instance_create','instance_convert','instance_unwrap','instance_delete','instance_promote']) {
+    assert.equal(Value.Check(tool.parameters,{action}),true);
+  }
+  const segment = {kind:'temporary',anchor:{text:'中文😀',mode:'replace'},instance:{title:'one-off',color:'#80112233',icon:'star'}};
+  assert.equal(Value.Check(tool.parameters,{action:'instance_convert',segments:[segment]}),true);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'translation',translation:{source:'rain',zh:'雨',language_code:'ja',marks:[{start:0,end:1,tag:'rain',icon_id:'tag'}]}}),true);
+  for (const segments of [[],Array(65).fill(segment),[{...segment,anchor:{text:'',mode:'replace'}}]]) {
+    assert.equal(Value.Check(tool.parameters,{action:'instance_convert',segments}),false);
+  }
+  for (const instance of [{title:'x'.repeat(41)},{color:'blue'},{icon:7}]) {
+    assert.equal(Value.Check(tool.parameters,{action:'instance_create',kind:'temporary',instance}),false);
+  }
+  assert.equal(Value.Check(tool.parameters,{action:'instance_create',translation:{language_code:'xx'}}),false);
+  assert.equal(Value.Check(tool.parameters,{action:'instance_convert',anchor:{text:'x',mode:'unknown'}}),false);
+  for (const phrase of [/1\.\.64 segments/, /unsupported_bundle/, /source \(generation text\)/, /expected_library_version/, /preset key listed/]) assert.match(tool.description,phrase);
+  assert.match(studioTools(()=>{}) .find(t=>t.name==='prompt_update').description,/pill_conflict/);
+  const skill = await readFile(new URL('../skills/nai-studio/references/blocks.md',import.meta.url),'utf8');
+  const icons = await readFile(new URL('../../../lib/presentation/widgets/prompt/blocks/prompt_block_icons.dart',import.meta.url),'utf8');
+  for (const [,key] of icons.split('};')[0].matchAll(/'([a-z_]+)': Icons\./g)) assert.ok(skill.includes('`'+key+'`'),key);
+});
+
 test('only registered domain tools enter the Pi tool list', async () => {
   const calls = [];
   const tools = studioTools(async (...args) => { calls.push(args); return { content: [{ type: 'text', text: 'saved' }] }; },

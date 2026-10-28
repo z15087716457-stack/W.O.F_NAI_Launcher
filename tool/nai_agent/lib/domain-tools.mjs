@@ -14,6 +14,28 @@ const blockGenerationSettings = Type.Object({
   ucCustomBlockId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 }, {additionalProperties:false});
 const blockChanges = Type.Object({generationSettings:Type.Optional(Type.Union([blockGenerationSettings, Type.Null()]))}, {additionalProperties:true});
+const blockInstance = Type.Object({
+  content: Type.Optional(Type.String({maxLength:100000})),
+  negative_content: Type.Optional(Type.String({maxLength:100000})),
+  title: Type.Optional(Type.String({minLength:1,maxLength:40})),
+  color: Type.Optional(Type.String({pattern:'^#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$'})),
+  icon: Type.Optional(Type.String()),
+  enabled: Type.Optional(Type.Boolean()), locked: Type.Optional(Type.Boolean()),
+  evolutionEnabled: Type.Optional(Type.Boolean()),
+  settings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+}, {additionalProperties:false});
+const blockAnchor = Type.Object({text:Type.String({minLength:1}),
+  occurrence:Type.Optional(Type.Integer({minimum:0})),
+  mode:Type.Union(['before','after','replace'].map(v=>Type.Literal(v))),
+}, {additionalProperties:false});
+const blockTranslation = Type.Object({
+  source:Type.Optional(Type.String({minLength:1,maxLength:100000})),
+  zh:Type.Optional(Type.String({minLength:1,maxLength:100000})),
+  language_code:Type.Optional(Type.Union(['zh','zh-TW','en','ja','ko'].map(v=>Type.Literal(v)))),
+  marks:Type.Optional(Type.Array(Type.Object({start:Type.Integer({minimum:0}),end:Type.Integer({minimum:1}),
+    tag:Type.String({minLength:1}),icon_id:Type.String({minLength:1})}, {additionalProperties:false}))),
+}, {additionalProperties:false});
+const blockInlineKind = Type.Union(['temporary','translation'].map(v=>Type.Literal(v)));
 const promptSetIcon = Type.Union(promptSetIcons.map(v => Type.Literal(v)));
 const promptSetPositions = Type.Optional(Type.Array(Type.Union([Type.Null(), Type.Object({
   x:Type.Number({minimum:0,maximum:1}), y:Type.Number({minimum:0,maximum:1})
@@ -81,9 +103,9 @@ export const domainTools = [
   },
   { name: 'block_manage',
 
-    description: 'Manage real library blocks or current prompt block instances, with a complete library/draft backup. create requires changes.title/content. update/delete/insert require id and its expected_version from block_query(id). Editing content clears obsolete atom pools unless new atoms are supplied. changes.generationSettings accepts model, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (standard/light/none), ucPreset (0/1/2/3/7/8/9), qualityCustomBlockId and ucCustomBlockId (existing library preset IDs; custom replaces native preset). insert and instance_update also require expected_draft_version from fresh studio_context(scope=draft). scope=main/negative/char:<ID>:pos/neg; omit offset to append with separator, explicit offsets use raw document UTF-16 positions. Double-sided blocks keep the native positive/negative bundle behavior. instance_update content edits only this occurrence as a temporary block; library block unchanged. instance_update uses marker and optional zero-based occurrence from that document and instance fields (settings, enabled, locked, evolutionEnabled, content, negative_content); returns actual editor readback. Organization actions require expected_library_version. Folder/collection create/update use changes (name, parentId, sortOrder; collection_create also isFolder). *_move uses parent_id (null=root), *_reorder uses complete ordered_ids under parent_id. folder_delete requires an empty folder. collection_delete removes its subtree and memberships while retaining blocks. collection_add/remove use id plus block_id, with explicit membership and native favorite semantics.',
+    description: 'Manage real library blocks or current prompt block instances, with a complete library/draft backup. create requires changes.title/content. update/delete/insert require id and its expected_version from block_query(id). Editing content clears obsolete atom pools unless new atoms are supplied. changes.generationSettings accepts model, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (standard/light/none), ucPreset (0/1/2/3/7/8/9), qualityCustomBlockId and ucCustomBlockId (existing library preset IDs; custom replaces native preset). insert and ALL instance_* actions require expected_draft_version from fresh studio_context(scope=draft). scope=main/negative/char:<ID>:pos/neg; omit offset to append with separator, explicit offsets use raw document UTF-16 positions. Double-sided library blocks keep native bundle behavior. instance_create(kind=temporary/translation) needs no library entry. Temporary needs instance.title (trimmed 1..40 characters) and content; color accepts RGB/ARGB hex (stored #AARRGGBB), icon must be a preset key listed in nai-studio/references/blocks.md. Inline create/convert/update of library-free instances reject negative_content with unsupported_bundle; use a separate negative scope. Translation needs source (generation text) and zh (reading text), language_code defaults zh; invalid/overlapping marks in zh UTF-16 offsets reject invalid_translation. Translation instances reject content/title/color/icon. instance_update translation accepts partial source/zh/marks/language_code; source-only edits mark needsReview. Display edits are only for library-free temps. instance_convert replaces nonempty plain text selected by anchor(mode=replace); content/source must equal selection if supplied. Batch convert uses 1..64 segments, exclusive with single parameters: all anchors resolve before writing, no overlap or markers, atomic single undo, projection must stay byte-for-byte equal; returns markers in input order. create/insert anchor(mode=before/after) excludes offset; matches stripMarkers text without crossing markers. Ambiguous anchors need zero-based occurrence; missing/ambiguous fail before backup. instance_unwrap expands marker occurrence (default 0) to current projection, including bundle peers. instance_delete deletes all marker occurrences and peers; occurrence deletes only that occurrence. instance_promote supports temps only (translations: unsupported_kind), requires expected_library_version, changes title defaults to temp.title; folderId/color/iconName optional, temp display defaults retained. Returns id/version. Create/convert return marker and lanes readback. instance_update content edits only this occurrence as a temporary block; library block unchanged. instance_update uses marker and optional zero-based occurrence from that document and instance fields (settings, enabled, locked, evolutionEnabled, content, negative_content); returns actual editor readback. Organization actions require expected_library_version. Folder/collection create/update use changes (name, parentId, sortOrder; collection_create also isFolder). *_move uses parent_id (null=root), *_reorder uses complete ordered_ids under parent_id. folder_delete requires an empty folder. collection_delete removes its subtree and memberships while retaining blocks. collection_add/remove use id plus block_id, with explicit membership and native favorite semantics.',
     parameters: Type.Object({
-      action: Type.Union(['create', 'update', 'delete', 'insert', 'instance_update', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove'].map(v => Type.Literal(v))),
+      action: Type.Union(['create', 'update', 'delete', 'insert', 'instance_update', 'instance_create', 'instance_convert', 'instance_unwrap', 'instance_delete', 'instance_promote', 'folder_create', 'folder_update', 'folder_move', 'folder_delete', 'folder_reorder', 'block_reorder', 'collection_create', 'collection_update', 'collection_move', 'collection_delete', 'collection_reorder', 'collection_add', 'collection_remove'].map(v => Type.Literal(v))),
       id: Type.Optional(Type.String()), expected_version: Type.Optional(Type.String()),
       expected_library_version: Type.Optional(Type.String()),
       parent_id: Type.Optional(Type.Union([Type.String(), Type.Null()])),
@@ -92,13 +114,10 @@ export const domainTools = [
       offset: Type.Optional(Type.Integer({ minimum: 0 })), marker: Type.Optional(Type.String()),
       changes: Type.Optional(blockChanges),
       occurrence: Type.Optional(Type.Integer({minimum: 0})),
-      instance: Type.Optional(Type.Object({
-        content: Type.Optional(Type.String({maxLength: 100000})),
-        negative_content: Type.Optional(Type.String({maxLength: 100000})),
-        enabled: Type.Optional(Type.Boolean()), locked: Type.Optional(Type.Boolean()),
-        evolutionEnabled: Type.Optional(Type.Boolean()),
-        settings: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
-      })),
+      instance: Type.Optional(blockInstance), kind:Type.Optional(blockInlineKind),
+      anchor:Type.Optional(blockAnchor), translation:Type.Optional(blockTranslation),
+      segments:Type.Optional(Type.Array(Type.Object({anchor:blockAnchor,kind:blockInlineKind,
+        instance:Type.Optional(blockInstance),translation:Type.Optional(blockTranslation)}, {additionalProperties:false}), {minItems:1,maxItems:64})),
     }),
   },
   { name: 'settings_read',

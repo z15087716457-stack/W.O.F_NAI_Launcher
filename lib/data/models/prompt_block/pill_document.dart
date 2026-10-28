@@ -295,6 +295,11 @@ class PillInstance {
   final TranslationPill? translation;
   final PillTempContent? temp;
   bool get temporary => temp != null;
+  String get kind => temporary
+      ? 'temporary'
+      : translation != null
+      ? 'translation'
+      : 'library';
   String? get tempProjection =>
       useNegativeContent ? temp?.negativeContent ?? '' : temp?.content;
 
@@ -369,6 +374,7 @@ class PillInstance {
   }
 
   Map<String, dynamic> toJson() => {
+    'kind': kind,
     'blockId': blockId,
     if (translation != null) 'translation': translation!.toJson(),
     if (temp != null) ...{'temporary': true, 'temp': temp!.toJson()},
@@ -562,8 +568,8 @@ class TranslationPill {
     'zh': zh,
     if (marks.isNotEmpty) 'marks': marks.map((mark) => mark.toJson()).toList(),
     if (showOriginal) 'showOriginal': true,
-    if (needsReview) 'needsReview': true,
-    if (languageCode != 'zh') 'languageCode': languageCode,
+    'needsReview': needsReview,
+    'languageCode': languageCode,
     if (translationEdited) 'translationEdited': true,
   };
 

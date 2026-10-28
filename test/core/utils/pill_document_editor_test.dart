@@ -36,6 +36,100 @@ void main() {
     expect(single.instances.containsKey(markerB), isFalse);
   });
 
+  group('anchor UTF-16 mapping', () {
+    test('Chinese, emoji and weight syntax keep original positions', () {
+      const text = '$markerA中文😀 1.2::x::$markerB结束';
+      expect(PillDocumentEditor.resolveAnchor(text, '中文😀'), (
+        start: 1,
+        end: 5,
+      ));
+      expect(PillDocumentEditor.resolveAnchor(text, '1.2::x::'), (
+        start: 6,
+        end: 14,
+      ));
+      expect(PillDocumentEditor.resolveAnchor(text, '结束'), (
+        start: 15,
+        end: 17,
+      ));
+      expect(PillDocumentEditor.isUtf16Boundary(text, 4), isFalse);
+      expect(
+        () => PillDocumentEditor.resolveAnchor(text, '\uDE00'),
+        throwsA(
+          isA<PillAnchorException>().having(
+            (e) => e.code,
+            'code',
+            'anchor_missing',
+          ),
+        ),
+      );
+    });
+    test('adjacent markers are allowed, spanning markers is refused', () {
+      const text = 'left${markerA}right';
+      expect(PillDocumentEditor.resolveAnchor(text, 'left'), (
+        start: 0,
+        end: 4,
+      ));
+      expect(PillDocumentEditor.resolveAnchor(text, 'right'), (
+        start: 5,
+        end: 10,
+      ));
+      expect(
+        () => PillDocumentEditor.resolveAnchor(text, 'leftright'),
+        throwsA(
+          isA<PillAnchorException>().having(
+            (e) => e.code,
+            'code',
+            'anchor_crosses_marker',
+          ),
+        ),
+      );
+      expect(
+        () => PillDocumentEditor.resolveAnchor(text, markerA),
+        throwsA(
+          isA<PillAnchorException>().having(
+            (e) => e.code,
+            'code',
+            'invalid_position',
+          ),
+        ),
+      );
+    });
+    test(
+      'ambiguity reports count; occurrence selects original document match',
+      () {
+        const text = '重复$markerA重复';
+        expect(
+          () => PillDocumentEditor.resolveAnchor(text, '重复'),
+          throwsA(
+            isA<PillAnchorException>()
+                .having((e) => e.matches, 'matches', 2)
+                .having((e) => e.code, 'code', 'anchor_ambiguous'),
+          ),
+        );
+        expect(PillDocumentEditor.resolveAnchor(text, '重复', occurrence: 1), (
+          start: 3,
+          end: 5,
+        ));
+        for (final occurrence in [-1, 2]) {
+          expect(
+            () => PillDocumentEditor.resolveAnchor(
+              text,
+              '重复',
+              occurrence: occurrence,
+            ),
+            throwsA(
+              isA<PillAnchorException>().having(
+                (e) => e.code,
+                'code',
+                'anchor_missing',
+              ),
+            ),
+          );
+        }
+      },
+    );
+  });
+
   group('allocateMarker / insertBlock', () {
     test(
       'negative marker survives document JSON without changing old markers',

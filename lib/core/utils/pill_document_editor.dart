@@ -11,8 +11,95 @@ bool isPillMarkerCodeUnit(int codeUnit) {
   return codeUnit >= kPillMarkerBase && codeUnit <= kPillMarkerEnd;
 }
 
+/// A UTF-16 range in the original (marker-containing) document.
+typedef PillAnchorRange = ({int start, int end});
+
+/// Validated inline content, independent of any library block. Ranges refer to
+/// the document before the operation, never to an intermediate replacement.
+class PillInlineEdit {
+  const PillInlineEdit({
+    required this.start,
+    required this.end,
+    this.temp,
+    this.translation,
+    this.enabled = true,
+    this.locked = false,
+    this.evolutionEnabled = false,
+    this.settings = PillInstanceSettings.fixedDefault,
+  }) : assert((temp == null) != (translation == null));
+  final int start;
+  final int end;
+  final PillTempContent? temp;
+  final TranslationPill? translation;
+  final bool enabled;
+  final bool locked;
+  final bool evolutionEnabled;
+  final PillInstanceSettings settings;
+}
+
+class PillAnchorException implements Exception {
+  const PillAnchorException(this.code, {this.matches = 0});
+  final String code;
+  final int matches;
+}
+
 /// 药丸文档的不可变纯操作集。不依赖 Flutter，可独立单测。
 abstract final class PillDocumentEditor {
+  /// Match in stripMarkers(text), retaining original UTF-16 positions. A match
+  /// may touch a marker, but must never span one or split a surrogate pair.
+  static PillAnchorRange resolveAnchor(
+    String text,
+    String anchor, {
+    int? occurrence,
+  }) {
+    if (anchor.isEmpty || stripMarkers(anchor) != anchor) {
+      throw const PillAnchorException('invalid_position');
+    }
+    final offsets = <int>[];
+    for (var i = 0; i < text.length; i++) {
+      if (!isPillMarkerCodeUnit(text.codeUnitAt(i))) offsets.add(i);
+    }
+    final visible = stripMarkers(text);
+    final matches = <int>[];
+    var from = 0;
+    while (from <= visible.length - anchor.length) {
+      final index = visible.indexOf(anchor, from);
+      if (index < 0) break;
+      if (isUtf16Boundary(visible, index) &&
+          isUtf16Boundary(visible, index + anchor.length)) {
+        matches.add(index);
+      }
+      from = index + 1;
+    }
+    if (matches.isEmpty ||
+        (occurrence != null &&
+            (occurrence < 0 || occurrence >= matches.length))) {
+      throw PillAnchorException('anchor_missing', matches: matches.length);
+    }
+    if (occurrence == null && matches.length > 1) {
+      throw PillAnchorException('anchor_ambiguous', matches: matches.length);
+    }
+    final index = matches[occurrence ?? 0];
+    final start = offsets[index], end = offsets[index + anchor.length - 1] + 1;
+    if (end - start != anchor.length) {
+      throw PillAnchorException(
+        'anchor_crosses_marker',
+        matches: matches.length,
+      );
+    }
+    return (start: start, end: end);
+  }
+
+  static bool isUtf16Boundary(String text, int offset) =>
+      offset >= 0 &&
+      offset <= text.length &&
+      !(offset > 0 &&
+          offset < text.length &&
+          text.codeUnitAt(offset - 1) >= 0xD800 &&
+          text.codeUnitAt(offset - 1) <= 0xDBFF &&
+          text.codeUnitAt(offset) >= 0xDC00 &&
+          text.codeUnitAt(offset) <= 0xDFFF);
+
   /// 分配最小空闲标记字符；区间耗尽时抛 [StateError]（上限 6400 个实例）。
   static String allocateMarker(PillDocument document) {
     for (var code = kPillMarkerBase; code <= kPillMarkerEnd; code++) {

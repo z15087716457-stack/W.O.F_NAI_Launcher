@@ -62,7 +62,9 @@ NaiAgentSnapshotTool bindNaiAgentSnapshots(
     final ids = <String>{};
     void collect(Object? value) {
       if (value is Map) {
-        if (value['blockId'] is String && value['translation'] == null) {
+        if (value['blockId'] is String &&
+            (value['blockId'] as String).isNotEmpty &&
+            value['translation'] == null) {
           ids.add(value['blockId'] as String);
         }
         for (final child in value.values) {
@@ -208,7 +210,8 @@ NaiAgentSnapshotTool bindNaiAgentSnapshots(
         if (ucId != null) ucId,
         for (final doc in documents.values)
           for (final instance in doc.instances.values)
-            if (instance.translation == null) instance.blockId,
+            if (instance.translation == null && instance.blockId.isNotEmpty)
+              instance.blockId,
       };
       if (!requiredIds.every(byId.containsKey)) {
         throw const FormatException(

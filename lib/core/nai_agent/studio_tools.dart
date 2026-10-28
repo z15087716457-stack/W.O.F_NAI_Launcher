@@ -125,6 +125,7 @@ class NaiAgentStudioTools {
           'Draft changed; read studio_context(scope=draft) again',
         );
       }
+      _checkPillPatch(draft, changes);
     }
 
     final before = readDraft();
@@ -142,6 +143,70 @@ class NaiAgentStudioTools {
         'draft_version': actual.acknowledgementVersion,
       },
     });
+  }
+
+  // The native writer accepts projections, not marker-bearing documents. It
+  // preserves an equivalent projection but rebuilds any changed lane as plain
+  // text, even when the caller retained marker characters. Reject such writes
+  // before backup rather than silently discarding instance metadata.
+  static void _checkPillPatch(
+    BridgeDraftSnapshot draft,
+    Map<String, dynamic> changes,
+  ) {
+    void lane(Object? raw, Object? value, Object? projection, String scope) {
+      if (raw is Map &&
+          raw['instances'] is Map &&
+          (raw['instances'] as Map).isNotEmpty &&
+          value != projection) {
+        throw NaiAgentToolError(
+          'pill_conflict',
+          'prompt_update would discard instances in $scope; use block_manage instance_* operations',
+        );
+      }
+    }
+
+    for (final key in ['prompt', 'negative_prompt']) {
+      if (changes.containsKey(key)) {
+        lane(draft.documents[key], changes[key], draft.fields[key], key);
+      }
+    }
+    if (!changes.containsKey('characters') &&
+        changes['clear_characters'] != true) {
+      return;
+    }
+    final characters = draft.documents['characters'];
+    if (characters is! Map || characters['lanes'] is! Map) return;
+    final old = draft.fields['characters'] as List? ?? [];
+    final next = changes.containsKey('characters')
+        ? changes['characters'] as List
+        : const [];
+    for (var index = 0; index < old.length; index++) {
+      final previous = old[index] as Map;
+      final id = previous['id'];
+      // The native writer creates a new identity when no ID is supplied.
+      Map? replacement;
+      for (var i = 0; i < next.length; i++) {
+        final candidate = next[i] as Map;
+        if (candidate['id'] == id) {
+          replacement = candidate;
+          break;
+        }
+      }
+      final documents = (characters['lanes'] as Map)[id];
+      if (documents is! Map) continue;
+      lane(
+        documents['positive'],
+        replacement?['prompt'],
+        previous['prompt'],
+        'char:$id:pos',
+      );
+      lane(
+        documents['negative'],
+        replacement == null ? null : replacement['uc'] ?? '',
+        previous['uc'] ?? '',
+        'char:$id:neg',
+      );
+    }
   }
 
   Future<Map<String, dynamic>> _image(

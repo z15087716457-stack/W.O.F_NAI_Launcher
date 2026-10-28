@@ -2,9 +2,14 @@ import 'dart:convert';
 import 'dart:async';
 
 class NaiAgentToolError implements Exception {
-  const NaiAgentToolError(this.code, this.message);
+  const NaiAgentToolError(this.code, this.message, [this.details = const {}]);
   final String code, message;
-  Map<String, dynamic> toJson() => {'code': code, 'message': message};
+  final Map<String, dynamic> details;
+  Map<String, dynamic> toJson() => {
+    'code': code,
+    'message': message,
+    ...details,
+  };
   @override
   String toString() => '$code: $message';
 }
