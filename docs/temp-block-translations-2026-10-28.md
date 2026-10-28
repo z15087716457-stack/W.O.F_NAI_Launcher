@@ -1,6 +1,6 @@
 # 临时块内翻译与底部快捷操作
 
-2026-10-28（Asia/Taipei）。本轮为 +58 之后的源码增量，尚未安装；本机继续为 **2.2.0+58**。有效源码与安装范围见[当前接手说明](../../../../04_工具/启动器接手说明.md)。
+2026-10-28（Asia/Taipei）。本轮已随本机 **2.2.0+59** 安装（编译 `1283c03e0`，2026-10-28 20:35 Asia/Taipei），正式收据及程序文件核验通过。有效源码与安装范围见[当前接手说明](../../../../04_工具/启动器接手说明.md)。
 
 ## 用户确定的范围
 
@@ -28,4 +28,12 @@
 - 最终业务源码完整 Flutter（`--concurrency=4`）**9775 通过／0 失败／5 项既有跳过**，见 `full-regression.jsonl`、`full-result.json`。最终 A 按钮及截图补帧检查见 `ui-final.log` 和 `ui-analysis-final.log`；只是采图时多等一帧，避免截图遗漏尚未刷新的静态绘制。
 - 修改前后非翻译样例逐像素对照：标题、说明与内容区域保持，差异位于新增页脚入口及其阴影／高度影响范围；见 `pixel-comparison.json`。新增译文样例为真实 Flutter 部件实绘，不是 HTML 示例或用户运行窗口；最终实绘在 `verified-captures/`，主场景 `temp-nested-single-light.png`。
 
-本轮未改版本号、构建／安装程序、启动／重载 Studio、写用户草稿／桥接、真实模型调用、生图或发布。交付验证与用户实机验收分别记录。
+## 本机交付
+
+用户随后明确要求“ok，安装吧”。版本已提交为 2.2.0+59，编译 `1283c03e09e6747fef7fbf3bfe0c3c66887d337f`；Windows Release 成功，2101 个生产输入冻结并核验。完整功能回归 9775／0／5 与 Node 112 按生产源码一致性复用，新增版本／更新检查 56 通过、安装／回退夹具 12 通过；完整程序包、四份 SQLite 资源、19 个字体文件、Agent／CodeMode 与隔离 RAG 冒烟通过。
+
+在 Studio／Agent 完全退出后原位安装，仅替换 AOT、exe、清单、Agent 工具声明与块用法 5 个文件；完整程序树 15294 个文件及 226 个资源核验通过。桌面入口、用户数据根、旧 AppData 兼容联接及正式索引元数据保持，备份可单步回退到 +58。AOT SHA-256：`dd649a14dcec95e2a1cbe4f3f494efe24efd6e3de43e2523a351ad1364fe553e`。
+
+交付材料 `.dart_tool/cumulative-2.2.0-r3-20261028/`；[已安装收据](../.dart_tool/cumulative-2.2.0-r3-20261028/installed-delivery.json)、[最终核验](../.dart_tool/cumulative-2.2.0-r3-20261028/final-verification.json)。需要回退时，完全退出 Studio／Agent 后在该目录运行 `python update.py rollback`。
+
+本次没有自动启动／重启／热重载 Studio，没有写用户草稿或桥接、真实模型调用、生图、正式建库、制作 ZIP 或发布 GitHub。程序包与安装验证不代替用户实机体验验收。
