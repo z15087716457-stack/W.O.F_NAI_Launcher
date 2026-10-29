@@ -70,8 +70,9 @@ void main() {
             '-NoProfile',
             '-NonInteractive',
             '-Command',
-            'Get-Process -Id $childPid -ErrorAction SilentlyContinue | '
-                'Wait-Process -Timeout 10 -ErrorAction Stop',
+            "\$ErrorActionPreference = 'Stop'; "
+                'Get-Process -Id $childPid -ErrorAction SilentlyContinue | '
+                'Wait-Process -Timeout 10 -ErrorAction Stop; exit 0',
           ]);
           expect(wait.exitCode, 0, reason: '${wait.stdout}\n${wait.stderr}');
         } finally {
