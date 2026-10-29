@@ -879,44 +879,53 @@ class _ToastDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.ui;
     final l = context.l10n;
-    return SettingsDockBar(
-      key: const Key('settings-toast'),
-      children: [
-        UiGlyph(UiGlyphs.check, size: 15, color: c.ok),
-        Flexible(
-          child: Text(
-            l.set_savedChange(change.title, change.from, change.to),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: UiText.sans(12.5, color: c.tipInk),
-          ),
-        ),
-        if (change.undoable) ...[
-          SettingsDockButton(label: l.set_undo, onTap: onUndo),
-          Text(
-            'Ctrl+Z',
-            style: UiText.mono(
-              10.5,
-              weight: FontWeight.w500,
-              color: c.tipInk.withValues(alpha: .55),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: SettingsDockBar(
+        key: const Key('settings-toast'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        children: [
+          UiGlyph(UiGlyphs.check, size: 15, color: c.ok),
+          Flexible(
+            child: Text(
+              l.set_savedChange(change.title, change.from, change.to),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: UiText.sans(12.5, color: c.tipInk),
             ),
           ),
+          if (change.undoable) ...[
+            SettingsDockButton(label: l.set_undo, onTap: onUndo),
+            Text(
+              'Ctrl+Z',
+              style: UiText.mono(
+                10.5,
+                weight: FontWeight.w500,
+                color: c.tipInk.withValues(alpha: .55),
+              ),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
 
-/// 深色浮条：圆角 12、内边距 8 8 8 16、间距 12。
+/// 浮条：圆角 12、可配置内边距、间距 12。
 class SettingsDockBar extends StatelessWidget {
-  const SettingsDockBar({super.key, required this.children});
+  const SettingsDockBar({
+    super.key,
+    required this.children,
+    this.padding = const EdgeInsets.fromLTRB(16, 8, 8, 8),
+  });
   final List<Widget> children;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      padding: padding,
       decoration: BoxDecoration(
         color: c.tipBg,
         borderRadius: BorderRadius.circular(12),

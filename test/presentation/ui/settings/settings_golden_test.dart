@@ -88,9 +88,20 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     find.byWidget(scroll.child! as Align),
   );
   final current = align.alignment;
+  // 2026-10-29（用户要求）：保存提示条右留白由 8px 补齐为 16px。
+  // 比较原基准时仅临时还原内边距，避免扩大阴影豁免区；
+  // 实际居中、动态宽度、边距和长文案由 settings_toast_layout_test 验证。
+  final toast = find.byKey(const Key('settings-toast'));
+  final toastPadding = toast.evaluate().isEmpty
+      ? null
+      : t.renderObject<RenderPadding>(
+          find.descendant(of: toast, matching: find.byType(Padding)).first,
+        );
+  final currentToastPadding = toastPadding?.padding;
   expect(current, Alignment.topCenter);
   try {
     align.alignment = Alignment.topLeft;
+    toastPadding?.padding = const EdgeInsets.fromLTRB(16, 8, 8, 8);
     await t.pump();
     final masks = <Rect>[];
     // F36：字号示例在原占位内下移 8px，外侧行高及其余文字设置保持。
@@ -331,6 +342,7 @@ Future<void> _expectCenteredGolden(WidgetTester t, String name) async {
     );
   } finally {
     align.alignment = current;
+    if (toastPadding != null) toastPadding.padding = currentToastPadding!;
     await t.pump();
   }
 }
