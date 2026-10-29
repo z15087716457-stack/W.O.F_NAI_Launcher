@@ -1,6 +1,6 @@
 # 设置保存提示条对齐
 
-2026-10-29，源码已验证，尚未编译／安装／发布；本机仍为 2.2.1+62。
+2026-10-29，已随本机 2.2.1+63 安装，公开发布版尚未包含。[本机交付](local-2.2.1-build63-2026-10-29.md)。
 
 保存提示条原先左侧内边距 16px、右侧 8px，使 Ctrl+Z 显得贴边。隔离组件回归在修改前复现 8px 差值。现在左右均为 16px，保留 15px 勾号和既有 12px 内容间距，常规宽度自然增加 8px，仍按内容收缩并整体居中。
 
@@ -10,4 +10,4 @@
 
 原基准 PNG 和豁免区不变。保存提示条在原截图比较时仅临时恢复旧内边距，再恢复新值；实际新布局由专项几何检查和组件截图验证。
 
-实现：`lib/presentation/ui/settings/settings_page.dart`。证据：`.dart_tool/settings-toast-alignment-20261029/`，包含修改前失败、最终测试／分析日志、组件截图及 `verification.json`。未安装或操作用户窗口，草稿和真实生成接口未改动。
+实现：`lib/presentation/ui/settings/settings_page.dart`。证据：`.dart_tool/settings-toast-alignment-20261029/`，包含修改前失败、最终测试／分析日志、组件截图及 `verification.json`。源码验证阶段未安装或操作用户窗口，草稿和真实生成接口未改动；当前本机交付状态见本文开头。
