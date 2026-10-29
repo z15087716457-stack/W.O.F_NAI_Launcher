@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/widgets/common/app_toast.dart';
-import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -47,7 +46,6 @@ void main() {
       final boundary = GlobalKey();
       final branch = GlobalKey<NavigatorState>();
       late BuildContext pageContext;
-      var accessoryTaps = 0;
       await tester.pumpWidget(
         MaterialApp(
           theme: dark ? GeistTheme.dark : GeistTheme.light,
@@ -59,8 +57,6 @@ void main() {
             child: IntegratedTitleBarShell(
               deferToRoute: true,
               captionHeight: 62,
-              accessoryWidth: UpdateCapsule.width,
-              accessory: UpdateCapsule(onPressed: () => accessoryTaps++),
               child: child!,
             ),
           ),
@@ -90,14 +86,10 @@ void main() {
       );
       await tester.pumpAndSettle();
       final minimize = find.byIcon(Icons.remove);
-      final capsule = find.byKey(const Key('window-update-capsule'));
       await tester.enterText(find.byType(TextField), 'preserved draft');
-      await tester.tap(capsule);
-      expect(accessoryTaps, 1);
       AppToast.info(pageContext, '检测到 48458 张图片。首次建立索引可能需要几分钟，期间仍可正常使用图库。');
       await tester.pumpAndSettle();
       expect(minimize.hitTestable(), findsNothing);
-      expect(capsule.hitTestable(), findsNothing);
       if (Platform.environment['CAPTURE_STUDIO_UI'] == '1') {
         await tester.runAsync(() async {
           final image =

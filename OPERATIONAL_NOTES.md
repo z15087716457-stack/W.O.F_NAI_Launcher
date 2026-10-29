@@ -243,6 +243,7 @@
 
 ## 构建与更新
 
+- 桌面主窗口按 2026-10-29 用户要求移除顶部更新胶囊、专属弹窗入口及 88px 预留，不恢复；日常更新提示使用设置入口红点。导航的 `updateAvailable` 接线、设置页检查／下载／安装和更新状态保持，窗口按钮、Agent 入口与各页标题栏继续沿用原组件。
 - Windows 内部数据统一经 `app_support_directory.dart` 使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；不依赖工作目录，不静默退回 C 盘。旧 AppData 数据必须在数据库打开前完整备份、SHA-256 校验和迁移；保留旧路径联接兼容已存绝对路径，两端有不同数据时拒绝合并。旧目录识别仍取自 `CompanyName=com.example` 与 `ProductName=nai_launcher`，原生身份保持稳定。更新、打包和卸载必须保护 `user-data/` 及迁移备份。
 - 首次新建、旧目录为空或仅已有相邻数据时，同样在插件启动前建立并验证兼容联接。历史缺联接造成的分叉只允许恢复标记中 `schema=1`、`layout=executable-adjacent`、原路径匹配且 `backup=null` 的首次新建配置；旧目录只能包含根级 `flutter_secure_storage.dat`、`shared_preferences.json`、`*.secure` 普通文件。先独立备份，SHA-256 复核，独占创建缺失目标；同名内容必须相同，未知条目／链接／真实冲突拒绝处理，保留旧原件与备份。数据准备失败显示独立五语言恢复页，重试先重新准备目录，成功后才打开数据库。见 [修复与验证](docs/startup-data-recovery-2026-10-23.md)。
 

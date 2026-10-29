@@ -19,7 +19,6 @@ import 'package:nai_launcher/presentation/providers/online_gallery_provider.dart
 import 'package:nai_launcher/data/services/danbooru_auth_service.dart';
 import 'package:nai_launcher/data/services/gelbooru_auth_service.dart';
 import 'package:nai_launcher/presentation/providers/precise_ref_library_provider.dart';
-import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import 'package:nai_launcher/presentation/providers/vibe_library_provider.dart';
@@ -313,12 +312,6 @@ void main() {
                         : isLibrary
                         ? 61
                         : 36,
-                    accessoryWidth: isLibrary && brightness == Brightness.dark
-                        ? UpdateCapsule.width
-                        : 0,
-                    accessory: isLibrary && brightness == Brightness.dark
-                        ? UpdateCapsule(onPressed: () {})
-                        : null,
                     child: name == 'online' ? Material(child: screen) : screen,
                   ),
                 ),
@@ -381,15 +374,6 @@ void main() {
           final search = find
               .descendant(of: headerFinder, matching: find.byType(TextField))
               .first;
-          if (brightness == Brightness.dark) {
-            final capsule = find.byKey(const Key('window-update-capsule'));
-            expect(tester.getCenter(capsule).dy, tester.getCenter(minimize).dy);
-            expect(tester.getSize(capsule).height, 26);
-            expect(
-              tester.getRect(capsule).overlaps(tester.getRect(search)),
-              isFalse,
-            );
-          }
           expect(
             tester.getCenter(minimize).dy,
             closeTo(tester.getCenter(search).dy, .1),

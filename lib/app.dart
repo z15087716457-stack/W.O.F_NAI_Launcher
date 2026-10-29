@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'core/services/desktop_app_shutdown_service.dart';
 import 'core/utils/studio_sandbox.dart';
-import 'presentation/widgets/common/update_capsule.dart';
-import 'presentation/widgets/common/update_check_dialog.dart';
+import 'presentation/widgets/navigation/integrated_title_bar.dart';
 import 'presentation/widgets/branding/entry_language_button.dart';
 import 'package:nai_launcher/core/constants/brand.dart';
 import 'package:flutter/material.dart';
@@ -281,7 +280,6 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
   late bool _immersive = _resolve();
   late double _captionHeight = _resolveCaptionHeight();
   bool _refreshQueued = false;
-  bool _updateDialogOpen = false;
 
   @override
   void initState() {
@@ -343,25 +341,12 @@ class _RouteAwareTitleBarState extends State<_RouteAwareTitleBar> {
     }
   }
 
-  Future<void> _showUpdate() async {
-    final navigatorContext =
-        widget.router.routerDelegate.navigatorKey.currentContext;
-    if (_updateDialogOpen || navigatorContext == null) return;
-    _updateDialogOpen = true;
-    try {
-      await UpdateCheckDialog.show(navigatorContext);
-    } finally {
-      _updateDialogOpen = false;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return UpdateAwareWindowShell(
+    return IntegratedTitleBarShell(
       deferToRoute: true,
       immersive: _immersive,
       captionHeight: _captionHeight,
-      onShowUpdate: _showUpdate,
       onToggleTheme: widget.onToggleTheme,
       entryLanguageButton: _immersive ? const EntryLanguageButton() : null,
       child: widget.child,

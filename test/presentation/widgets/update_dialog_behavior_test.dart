@@ -1,4 +1,3 @@
-import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -12,26 +11,14 @@ import 'package:nai_launcher/data/models/version/version_info.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/update_provider.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
-import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/common/update_check_dialog.dart';
-import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 import '../../helpers/studio_capture_fonts.dart';
 
 class _Updates extends UpdateStateNotifier {
-  int downloads = 0;
   int installs = 0;
   @override
   UpdateState build() => const UpdateState();
   void set(UpdateState value) => state = value;
-  @override
-  Future<void> downloadUpdate() async {
-    downloads++;
-    state = state.copyWith(
-      status: UpdateStatus.downloading,
-      downloadProgress: .42,
-    );
-  }
-
   @override
   Future<void> installDownloadedUpdate() async {
     installs++;
@@ -64,81 +51,6 @@ void main() {
       asset: info.primaryAsset!,
       version: '2.0.0',
     ),
-  );
-
-  testWidgets(
-    'capsule persists through snooze, cancel and failure; disappears when up to date',
-    (tester) async {
-      final notifier = _Updates();
-      final container = ProviderContainer(
-        overrides: [updateStateProvider.overrideWith(() => notifier)],
-      );
-      addTearDown(container.dispose);
-      final nav = GlobalKey<NavigatorState>();
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            navigatorKey: nav,
-            locale: const Locale('zh'),
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            builder: (context, child) => UpdateAwareWindowShell(
-              deferToRoute: true,
-              onShowUpdate: () => UpdateCheckDialog.show(nav.currentContext!),
-              child: child!,
-            ),
-            home: const WindowChromePage(
-              child: Scaffold(
-                body: Column(
-                  children: [
-                    WindowHeader(child: TextField()),
-                    Expanded(child: SizedBox()),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-      expect(find.byType(UpdateCapsule), findsNothing);
-      await tester.enterText(find.byType(TextField), 'preserve draft');
-      notifier.set(available);
-      await tester.pumpAndSettle();
-      final capsule = find.byKey(const Key('window-update-capsule'));
-      expect(capsule, findsOneWidget);
-      expect(tester.getRect(capsule).right, lessThanOrEqualTo(800 - 138));
-      expect(
-        tester
-            .getRect(find.byType(TextField))
-            .overlaps(tester.getRect(capsule)),
-        isFalse,
-      );
-      await tester.tap(capsule);
-      await tester.pumpAndSettle();
-      expect(find.text('界面改进'), findsOneWidget);
-      await tester.tap(find.text('下载更新'));
-      await tester.pump();
-      expect(notifier.downloads, 1);
-      expect(find.text('界面改进'), findsOneWidget);
-      expect(find.textContaining('42%'), findsOneWidget);
-      await tester.tap(find.byIcon(Icons.close_rounded));
-      await tester.pumpAndSettle();
-      expect(capsule, findsOneWidget);
-      notifier.set(available.copyWith(notificationVisible: false));
-      await tester.pump();
-      expect(capsule, findsOneWidget);
-      notifier.set(
-        available.copyWith(status: UpdateStatus.error, errorMessage: 'offline'),
-      );
-      await tester.pump();
-      expect(capsule, findsOneWidget);
-      notifier.set(const UpdateState(status: UpdateStatus.upToDate));
-      await tester.pump();
-      expect(capsule, findsNothing);
-      expect(find.text('preserve draft'), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
   );
 
   testWidgets('ready update waits for tasks; restart has no second dialog', (

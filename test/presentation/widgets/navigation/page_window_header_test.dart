@@ -24,7 +24,6 @@ import 'package:nai_launcher/presentation/ui/tools/tools_fixture.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_contract.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_fixture.dart';
 import 'package:nai_launcher/presentation/ui/viewer/viewer_page.dart';
-import 'package:nai_launcher/presentation/widgets/common/update_capsule.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/integrated_title_bar.dart';
 import 'package:nai_launcher/presentation/widgets/navigation/window_chrome_layout.dart';
 
@@ -320,9 +319,7 @@ void main() {
     }
   }
 
-  testWidgets('captions and update accessory follow a split header surface', (
-    tester,
-  ) async {
+  testWidgets('captions follow a split header surface', (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(1000, 500);
     addTearDown(tester.view.reset);
@@ -336,8 +333,6 @@ void main() {
           home: RepaintBoundary(
             key: boundary,
             child: IntegratedTitleBarShell(
-              accessoryWidth: UpdateCapsule.width,
-              accessory: UpdateCapsule(onPressed: () {}),
               child: ColoredBox(color: panel, child: const SizedBox.expand()),
             ),
           ),
