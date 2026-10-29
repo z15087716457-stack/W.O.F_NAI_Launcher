@@ -4,8 +4,44 @@
 /// 重新启动旧版本；便携版通过同卷目录切换和备份实现可回滚更新。
 library;
 
+import 'dart:io';
+
 class WindowsUpdateScript {
   WindowsUpdateScript._();
+
+  /// Windows PowerShell can exit before reading the script when started with
+  /// Dart's detached modes. A short-lived, normally started PowerShell launches
+  /// the hidden updater, which remains alive after Studio exits.
+  static Future<void> launch(String scriptPath) async {
+    final result = await Process.run(
+      'powershell.exe',
+      [
+        '-NoProfile',
+        '-NonInteractive',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-WindowStyle',
+        'Hidden',
+        '-Command',
+        r'''
+$ErrorActionPreference = 'Stop'
+$ScriptArguments = '-NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' + $env:WOF_NAI_UPDATE_SCRIPT + '"'
+Start-Process -FilePath (Join-Path $PSHOME 'powershell.exe') -ArgumentList $ScriptArguments -WindowStyle Hidden
+''',
+      ],
+      // Do not pin the application directory while the portable updater moves it.
+      workingDirectory: File(scriptPath).parent.path,
+      environment: {'WOF_NAI_UPDATE_SCRIPT': scriptPath},
+    );
+    if (result.exitCode != 0) {
+      throw ProcessException(
+        'powershell.exe',
+        const [],
+        result.stderr.toString().trim(),
+        result.exitCode,
+      );
+    }
+  }
 
   static String buildInstallerScript({
     required int appPid,

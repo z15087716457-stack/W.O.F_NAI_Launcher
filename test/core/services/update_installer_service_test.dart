@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -43,6 +44,77 @@ void main() {
       );
       expect(UpdateInstallerService.equalsSha256(hash, 'bad'), isFalse);
     });
+
+    test('writes a UTF-8 BOM script and launches before shutdown', () async {
+      final file = File('${tempDir.path}/update.zip');
+      await file.writeAsString('synthetic verified package');
+      final asset = ReleaseAssetInfo(
+        type: ReleaseAssetType.windowsPortable,
+        platform: 'windows',
+        fileName: 'update.zip',
+        downloadUrl: 'https://example.invalid/update.zip',
+        sha256: await UpdateInstallerService.calculateSha256(file),
+        size: await file.length(),
+      );
+      final events = <String>[];
+      final service = UpdateInstallerService(
+        dio: Dio(),
+        installationService: _SupportedInstallationService(),
+        updateDirectory: tempDir,
+        scriptLauncher: (path) async {
+          final bytes = await File(path).readAsBytes();
+          expect(bytes.take(3), [0xef, 0xbb, 0xbf]);
+          final script = utf8.decode(bytes.skip(3).toList());
+          expect(script, contains('Wait-ApplicationExit'));
+          expect(script, contains(file.path));
+          events.add('launch');
+        },
+        shutdownHandler: (code) async {
+          expect(code, 0);
+          events.add('shutdown');
+        },
+      );
+      await service.installAndRestart(
+        DownloadedUpdate(file: file, asset: asset, version: '9.9.9'),
+      );
+      expect(events, ['launch', 'shutdown']);
+    }, skip: !Platform.isWindows);
+
+    test('a helper launch failure keeps the application open', () async {
+      final file = File('${tempDir.path}/update.zip');
+      await file.writeAsString('synthetic verified package');
+      final asset = ReleaseAssetInfo(
+        type: ReleaseAssetType.windowsPortable,
+        platform: 'windows',
+        fileName: 'update.zip',
+        downloadUrl: 'https://example.invalid/update.zip',
+        sha256: await UpdateInstallerService.calculateSha256(file),
+        size: await file.length(),
+      );
+      var shutdown = false;
+      final service = UpdateInstallerService(
+        dio: Dio(),
+        installationService: _SupportedInstallationService(),
+        updateDirectory: tempDir,
+        scriptLauncher: (_) async => throw const ProcessException(
+          'powershell.exe',
+          [],
+          'Synthetic launch failure',
+          1,
+        ),
+        shutdownHandler: (_) async {
+          shutdown = true;
+        },
+      );
+      await expectLater(
+        service.installAndRestart(
+          DownloadedUpdate(file: file, asset: asset, version: '9.9.9'),
+        ),
+        throwsA(isA<UpdateInstallException>()),
+      );
+      expect(shutdown, isFalse);
+      expect(await file.exists(), isTrue);
+    }, skip: !Platform.isWindows);
 
     test(
       'resumes a part file with Range and restores pending metadata',
