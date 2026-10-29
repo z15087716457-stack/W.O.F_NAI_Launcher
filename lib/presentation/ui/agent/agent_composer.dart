@@ -59,7 +59,7 @@ class AgentComposerState extends State<AgentComposer> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final external = AgentScope.of(context).data.composer.text;
+    final external = AgentScope.composerOf(context).data.composer.text;
     if (external != _sent) {
       _sent = external;
       if (external != _text.text) {
@@ -84,7 +84,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   void _changed(String value) {
     _sent = value;
-    AgentScope.of(context).actions.onComposerChanged(value);
+    AgentScope.composerOf(context).actions.onComposerChanged(value);
   }
 
   void _detect() {
@@ -147,7 +147,7 @@ class AgentComposerState extends State<AgentComposer> {
   List<AgentMention> _mentions() {
     final t = _trigger!;
     return AgentMentionPanel.filter(
-      AgentScope.of(context).data.mentions,
+      AgentScope.composerOf(context).data.mentions,
       t.query,
       _category,
       search: _category == AgentMentionKind.block ? _blockSearch.text : '',
@@ -276,14 +276,14 @@ class AgentComposerState extends State<AgentComposer> {
     );
     _changed(next);
     if (imageId != null) {
-      final s = AgentScope.of(context);
+      final s = AgentScope.composerOf(context);
       unawaited(s.run(() => s.actions.onAttachImage(imageId)));
     }
   }
 
   /// `/` 选中：无参 Studio 命令直接执行并清掉 `/查询`；其余替换成插入文本。
   void _command(AgentSlashCommand cmd) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     if (cmd.executesOnSelect && s.actions.onSelectSlashCommand != null) {
       _detect();
       final t = _trigger;
@@ -304,7 +304,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   int _candidateCount() {
     final t = _trigger!;
-    final d = AgentScope.of(context).data;
+    final d = AgentScope.composerOf(context).data;
     return t.slash
         ? AgentMentionPanel.filterCommands(d, t.query).length
         : _mentions().length;
@@ -312,7 +312,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   void _pickIndex() {
     final t = _trigger!;
-    final d = AgentScope.of(context).data;
+    final d = AgentScope.composerOf(context).data;
     if (t.slash) {
       final list = AgentMentionPanel.filterCommands(d, t.query);
       if (_index < list.length) _command(list[_index]);
@@ -346,7 +346,7 @@ class AgentComposerState extends State<AgentComposer> {
     }
     final k = HardwareKeyboard.instance;
     if (k.isShiftPressed || k.isAltPressed) return KeyEventResult.ignored;
-    final enterSends = AgentScope.of(context).data.composer.enterSends;
+    final enterSends = AgentScope.composerOf(context).data.composer.enterSends;
     if (enterSends || k.isControlPressed || k.isMetaPressed) {
       _send(steer: false);
       return KeyEventResult.handled;
@@ -356,7 +356,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   /// 下一句建议：只在输入框为空时有效。
   String? get _suggestion {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final text = s.data.composer.suggestion;
     if (text == null || text.isEmpty || _text.text.isNotEmpty) return null;
     if (s.actions.onAcceptSuggestion == null) return null;
@@ -364,19 +364,19 @@ class AgentComposerState extends State<AgentComposer> {
   }
 
   void _acceptSuggestion() {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     _focus.requestFocus();
     unawaited(s.run(() => s.actions.onAcceptSuggestion!()));
   }
 
   void _send({required bool steer}) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     if (!s.data.composer.canSend || _composing) return;
     unawaited(s.run(() => s.actions.onSend(steer: steer)));
   }
 
   Future<void> _paste() async {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final text = await s.actions.onPaste();
     if (text != null && mounted) insert(text);
   }
@@ -397,7 +397,7 @@ class AgentComposerState extends State<AgentComposer> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final d = s.data;
     final comp = d.composer;
     final c = context.ui;
@@ -573,7 +573,7 @@ class AgentComposerState extends State<AgentComposer> {
   }
 
   Widget _bar(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final d = s.data;
     final comp = d.composer;
     final c = context.ui;
@@ -779,7 +779,7 @@ class AgentComposerState extends State<AgentComposer> {
   }
 
   Widget _attachMenu(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final c = context.ui;
     final l = context.l10n;
     void close() => setState(() => _attach = null);
@@ -1028,7 +1028,7 @@ class _QueueLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final c = context.ui;
     final l = context.l10n;
     final recovered = item.kind == AgentQueueKind.recovered;
@@ -1145,7 +1145,7 @@ class _AttachmentChipState extends State<_AttachmentChip> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final c = context.ui;
     final l = context.l10n;
     final a = widget.attachment;
@@ -1384,7 +1384,7 @@ class _Notices extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.composerOf(context);
     final c = context.ui;
     final l = context.l10n;
     return Container(

@@ -94,7 +94,12 @@ Map<String, dynamic> agentResultDetails(Map<String, dynamic> value) {
   return {};
 }
 
+final _tagDiffCache = <(String, String), List<AgentDiffSegment>>{};
+
 List<AgentDiffSegment> agentTagDiff(String before, String after) {
+  final key = (before, after);
+  final cached = _tagDiffCache[key];
+  if (cached != null) return cached;
   List<String> tags(String value) =>
       value.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty).toList();
   final old = tags(before), next = tags(after);
@@ -133,6 +138,13 @@ List<AgentDiffSegment> agentTagDiff(String before, String after) {
     } else {
       add(next[j++], AgentDiffKind.added);
     }
+  }
+  if (before.length + after.length <= 32768) {
+    if (_tagDiffCache.length >= 128) {
+      _tagDiffCache.remove(_tagDiffCache.keys.first);
+    }
+    _tagDiffCache[key] = List.unmodifiable(result);
+    return _tagDiffCache[key]!;
   }
   return result;
 }
@@ -217,6 +229,23 @@ class AgentThreadMapper {
     promptSetView,
   }) {
     final messages = historyMessages ?? runtime.messages;
+    final renderContext = Object.hash(
+      runtime,
+      resources.revision,
+      draftVersion,
+      waitingUser,
+      Object.hashAll(
+        preferences?.entries.map((e) => (e.key, e.value)) ?? const [],
+      ),
+      Object.hashAll(undone),
+      Object.hashAll(runtime.tools.values),
+      Object.hashAll(runtime.entries),
+      Object.hashAll(runtime.userEntries),
+      Object.hashAll(runtime.autoCompactions),
+      runtime.running,
+      runtime.starting,
+    );
+    var sourceStart = 0, mi = 0;
     final turns = <AgentTurn>[];
     final images = <String, AgentImage>{};
     final files = <String, String>{};
@@ -310,6 +339,11 @@ class AgentThreadMapper {
       turns.add(
         AgentTurn(
           id: turnId,
+          renderKey: (
+            renderContext,
+            Object.hashAll(messages.getRange(sourceStart, mi)),
+            last,
+          ),
           user:
               user ??
               AgentUserMessage(text: '', at: runtime.chat.createdAt.toLocal()),
@@ -319,6 +353,7 @@ class AgentThreadMapper {
         ),
       );
       blocks = [];
+      sourceStart = mi;
       user = null;
       userTimestamp = assistantTimestamp = inputTokens = outputTokens = null;
       toolCalls = 0;
@@ -334,7 +369,7 @@ class AgentThreadMapper {
       shelfFiles.add(AgentFile(id: id, name: path, bytes: bytes ?? info.$2));
     }
 
-    for (var mi = 0; mi < messages.length; mi++) {
+    for (; mi < messages.length; mi++) {
       final message = messages[mi];
       if (message['role'] == 'compactionSummary') {
         flushSteps();
@@ -975,6 +1010,7 @@ class AgentThreadMapper {
       turns.add(
         AgentTurn(
           id: last.id,
+          renderKey: (last.renderKey, runtime.pendingSends),
           user: last.user,
           reply: AgentReply(
             blocks: last.reply?.blocks ?? const [],
@@ -1026,6 +1062,10 @@ class AgentThreadMapper {
       for (final turn in turns)
         AgentTurn(
           id: turn.id,
+          renderKey:
+              turn.reply?.blocks.any((b) => b is AgentPromptSetBlock) == true
+              ? null
+              : turn.renderKey,
           user: turn.user,
           reply: turn.reply == null
               ? null

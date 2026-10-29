@@ -141,6 +141,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   AgentChatRuntime? selected;
   bool initialized = false, _disposed = false;
   Future<void>? _closeFuture;
+  Timer? _streamNotification;
   int _selectionRevision = 0;
 
   /// Read-only inventory for sidebar chat status; never creates a runtime.
@@ -148,6 +149,8 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Iterable<AgentChatRuntime> get runningChats =>
       _runtimes.values.where((chat) => chat.running);
   void _notify() {
+    _streamNotification?.cancel();
+    _streamNotification = null;
     if (!_disposed) notifyListeners();
   }
 
@@ -1627,7 +1630,18 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         };
       }
     }
-    _notify();
+    final delta = event?['assistantMessageEvent'] as Map?;
+    if (event?['type'] == 'message_update' &&
+        const {
+          'thinking_delta',
+          'text_delta',
+          'toolcall_delta',
+        }.contains(delta?['type'])) {
+      // Process every event immediately; only the UI publication is coalesced.
+      _streamNotification ??= Timer(const Duration(milliseconds: 100), _notify);
+    } else {
+      _notify();
+    }
   }
 
   Future<void> _refreshAfterCompaction(AgentChatRuntime runtime) async {
@@ -1774,6 +1788,8 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   Future<void> close() => _closeFuture ??= _close();
   Future<void> _close() async {
+    _streamNotification?.cancel();
+    _streamNotification = null;
     for (final runtime in _runtimes.values.toList()) {
       await _persist(runtime);
       await runtime.subscription?.cancel();
@@ -1787,6 +1803,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _streamNotification?.cancel();
     unawaited(close());
     super.dispose();
   }

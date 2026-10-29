@@ -21,6 +21,7 @@ export 'agent_tag_window.dart' show agentDiffWindow;
 import 'agent_glyphs.dart';
 import 'agent_parts.dart';
 import 'agent_scope.dart';
+import 'agent_stream_reveal.dart';
 import 'agent_thread_navigation.dart';
 
 /// 对话页：每轮 = 左侧黑线的用户句 + 一张任务卡；最后是待处理卡片。
@@ -47,6 +48,7 @@ class _AgentThreadState extends State<AgentThread> {
   String? _chat;
   AgentThreadNavigation? _navigation;
   var _navigationEpoch = 0;
+  final _turnViews = <String, (Object, bool, Widget)>{};
 
   void _reportVisible() {
     final nav = _navigation;
@@ -257,23 +259,35 @@ class _AgentThreadState extends State<AgentThread> {
     final s = AgentScope.of(context);
     final d = s.data;
     final c = context.ui;
+    final ids = d.thread.map((t) => t.id).toSet();
+    _turnViews.removeWhere((id, _) => !ids.contains(id));
+    Widget turnView(AgentTurn turn, bool last) {
+      final key = turn.renderKey;
+      final cached = _turnViews[turn.id];
+      if (key != null &&
+          cached != null &&
+          cached.$1 == key &&
+          cached.$2 == last) {
+        return cached.$3;
+      }
+      final view = _Turn(
+        key: ValueKey('turn-${turn.id}'),
+        turn: turn,
+        last: last,
+      );
+      if (key != null) _turnViews[turn.id] = (key, last, view);
+      return view;
+    }
+
     final items = <Widget>[
       for (final (i, turn) in d.thread.indexed)
         if (_navigation case final nav?)
           KeyedSubtree(
             key: nav.turns.putIfAbsent(turn.id, GlobalKey.new),
-            child: _Turn(
-              key: ValueKey('turn-${turn.id}'),
-              turn: turn,
-              last: i == d.thread.length - 1,
-            ),
+            child: turnView(turn, i == d.thread.length - 1),
           )
         else
-          _Turn(
-            key: ValueKey('turn-${turn.id}'),
-            turn: turn,
-            last: i == d.thread.length - 1,
-          ),
+          turnView(turn, i == d.thread.length - 1),
       for (final p in d.composer.pending)
         AgentAppear(
           key: ValueKey('pending-${p.id}'),
@@ -639,7 +653,7 @@ class _UserLineState extends State<_UserLine> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final m = widget.message;
     final c = context.ui;
     final l = context.l10n;
@@ -876,7 +890,7 @@ class _TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final l = context.l10n;
     final c = context.ui;
     // Prompt sets are standalone cards (not a card nested in the task shell).
@@ -1105,15 +1119,15 @@ Widget _promptSetView(BuildContext context, AgentPromptSetBlock block) =>
       key: ValueKey('prompt-set-${block.setId}'),
       data: block.data,
       onAction: (index, action) async {
-        final scope = AgentScope.of(context),
-            callback = AgentScope.of(context).actions.onPromptSetAction;
+        final scope = AgentScope.controlsOf(context),
+            callback = AgentScope.controlsOf(context).actions.onPromptSetAction;
         if (callback != null) {
           await scope.run(() => callback(block.setId, index, action));
         }
       },
-      onEdit: (text) => AgentScope.of(context).insert(text),
+      onEdit: (text) => AgentScope.controlsOf(context).insert(text),
       onImage: (image, group) =>
-          AgentScope.of(context).zoom(image, group: group),
+          AgentScope.controlsOf(context).zoom(image, group: group),
     );
 
 /// 一轮小结：淡色一行「用时 1m 12s · 48 Anlas · 改动 5 处」，悬停看明细（含工具次数、token）。
@@ -1257,7 +1271,9 @@ class AgentMarkdown extends StatelessWidget {
       ),
       onTapLink: (_, href, _) {
         if (href != null) {
-          (onOpenLink ?? AgentScope.of(context).actions.onOpenLink)(href);
+          (onOpenLink ?? AgentScope.controlsOf(context).actions.onOpenLink)(
+            href,
+          );
         }
       },
     );
@@ -1728,33 +1744,70 @@ class AgentThinking extends StatefulWidget {
   State<AgentThinking> createState() => _AgentThinkingState();
 }
 
-class _AgentThinkingState extends State<AgentThinking> {
+class _AgentThinkingState extends State<AgentThinking>
+    with SingleTickerProviderStateMixin {
   var _open = false;
+  var _still = true;
+  late final _progress = AgentStreamProgress(this, widget.block.text);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _still = MediaQuery.disableAnimationsOf(context);
+    if (_still) _progress.finish();
+  }
+
+  @override
+  void didUpdateWidget(covariant AgentThinking oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.block.text != widget.block.text) {
+      _progress.update(
+        widget.block.text,
+        animate: widget.block.live && !_still,
+      );
+    }
+    if (!widget.block.live) _progress.finish();
+  }
+
+  @override
+  void dispose() {
+    _progress.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final c = context.ui;
     final l = context.l10n;
     final b = widget.block;
-    final chars = b.text.runes.length;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _StepRow(
-          key: const Key('agent-thinking'),
-          dot: AgentActivityIcon(
-            kind: AgentActivityKind.think,
-            state: b.live
-                ? AgentActivityState.running
-                : AgentActivityState.done,
+        ListenableBuilder(
+          listenable: _progress,
+          builder: (context, _) => _StepRow(
+            key: const Key('agent-thinking'),
+            dot: AgentActivityIcon(
+              kind: AgentActivityKind.think,
+              state: b.live
+                  ? AgentActivityState.running
+                  : AgentActivityState.done,
+            ),
+            label: b.live ? l.ag_thinkingLive : l.ag_thought,
+            subject: _progress.visibleCharacters == 0
+                ? null
+                : l.ag_thoughtChars(_progress.visibleCharacters),
+            muted: true,
+            shimmer: b.live,
+            rail: widget.rail && !_open,
+            open: _open,
+            onTap: b.text.isEmpty
+                ? null
+                : () => setState(() {
+                    _progress.finish();
+                    _open = !_open;
+                  }),
           ),
-          label: b.live ? l.ag_thinkingLive : l.ag_thought,
-          subject: chars == 0 ? null : l.ag_thoughtChars(chars),
-          muted: true,
-          shimmer: b.live,
-          rail: widget.rail && !_open,
-          open: _open,
-          onTap: b.text.isEmpty ? null : () => setState(() => _open = !_open),
         ),
         if (_open)
           Padding(
@@ -1767,9 +1820,15 @@ class _AgentThinkingState extends State<AgentThinking> {
                 border: Border(left: BorderSide(color: c.border, width: 1)),
               ),
               child: SingleChildScrollView(
-                child: Text(
-                  b.text,
-                  style: UiText.sans(11.5, color: c.muted, height: 1.65),
+                child: Listener(
+                  onPointerDown: (_) => _progress.finish(),
+                  child: AgentStreamReveal(
+                    progress: _progress,
+                    child: Text(
+                      b.text,
+                      style: UiText.sans(11.5, color: c.muted, height: 1.65),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1959,7 +2018,7 @@ class _TagHitsState extends State<_TagHits> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     final step = widget.step;
@@ -2352,7 +2411,7 @@ class _AgentDiffViewState extends State<AgentDiffView> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     final diff = widget.diff;
@@ -2538,7 +2597,7 @@ class _DiffStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     return Row(
@@ -2592,7 +2651,7 @@ class AgentSettingsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     final undone = block.state == AgentDiffState.undone;
@@ -2716,7 +2775,7 @@ class AgentGalleryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     final n = block.count > 0 ? block.count : block.images.length;
@@ -2943,7 +3002,7 @@ class AgentChangeSummaryView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     return SizedBox(
@@ -3022,7 +3081,7 @@ class AgentParamView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final l = context.l10n;
     final undone = block.state == AgentDiffState.undone;
@@ -3471,7 +3530,7 @@ class _AgentThumbState extends State<AgentThumb> {
 
   @override
   Widget build(BuildContext context) {
-    final s = AgentScope.of(context);
+    final s = AgentScope.controlsOf(context);
     final c = context.ui;
     final img = widget.image;
     final label = [if (img.starred) '★', ?img.label].join(' ');
@@ -3599,7 +3658,7 @@ Future<void> agentImageAction(
   AgentImage image,
   AgentImageAction action,
 ) async {
-  final s = AgentScope.of(context);
+  final s = AgentScope.controlsOf(context);
   final l = context.l10n;
   var ok = false;
   await s.run(() async {
@@ -3625,7 +3684,7 @@ Future<void> showAgentImageMenu(
   Offset at,
   AgentImage img,
 ) async {
-  final s = AgentScope.of(context);
+  final s = AgentScope.controlsOf(context);
   final l = context.l10n;
   final c = context.ui;
   final overlay = Overlay.of(context).context.findRenderObject()! as RenderBox;

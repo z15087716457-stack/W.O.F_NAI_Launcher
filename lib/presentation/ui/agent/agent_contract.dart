@@ -249,10 +249,18 @@ class AgentChatInfo {
 /// 一轮 = 用户说的一句话 + Agent 对它的全部处理（可能没有，例如刚发出去）。
 @immutable
 class AgentTurn {
-  const AgentTurn({required this.id, required this.user, this.reply});
+  const AgentTurn({
+    required this.id,
+    required this.user,
+    this.reply,
+    this.renderKey,
+  });
   final String id;
   final AgentUserMessage user;
   final AgentReply? reply;
+
+  /// Stable projection identity for unchanged messages; null disables reuse.
+  final Object? renderKey;
 }
 
 @immutable

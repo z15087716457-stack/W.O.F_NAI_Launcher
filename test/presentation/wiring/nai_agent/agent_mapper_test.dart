@@ -31,6 +31,52 @@ void main() {
     resources.dispose();
     await root.delete(recursive: true);
   });
+  test(
+    'projection keys retain completed turns but react to authoritative context changes',
+    () {
+      runtime.running = true;
+      runtime.messages = [
+        {'role': 'user', 'timestamp': 1, 'content': 'old'},
+        {
+          'role': 'assistant',
+          'timestamp': 2,
+          'content': [
+            {'type': 'text', 'text': 'old reply'},
+          ],
+        },
+        {'role': 'user', 'timestamp': 3, 'content': 'current'},
+        {
+          'role': 'assistant',
+          'timestamp': 4,
+          'content': [
+            {'type': 'thinking', 'thinking': 'first'},
+          ],
+        },
+      ];
+      final first = mapper.map(runtime, draftVersion: 'v1');
+      runtime.messages.last = {
+        'role': 'assistant',
+        'timestamp': 4,
+        'content': [
+          {'type': 'thinking', 'thinking': 'first and more'},
+        ],
+      };
+      final second = mapper.map(runtime, draftVersion: 'v1');
+      expect(second.turns.first.renderKey, first.turns.first.renderKey);
+      expect(second.turns.last.renderKey, isNot(first.turns.last.renderKey));
+      expect(
+        mapper.map(runtime, draftVersion: 'v2').turns.first.renderKey,
+        isNot(second.turns.first.renderKey),
+      );
+      mapper.undone.add('a restore');
+      expect(
+        mapper.map(runtime, draftVersion: 'v1').turns.first.renderKey,
+        isNot(second.turns.first.renderKey),
+      );
+      final cached = agentTagDiff('a, b, c', 'a, new, c');
+      expect(identical(cached, agentTagDiff('a, b, c', 'a, new, c')), isTrue);
+    },
+  );
   Map<String, dynamic> call(
     String id,
     String name, [

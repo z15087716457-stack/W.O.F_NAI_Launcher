@@ -35,6 +35,7 @@ class AgentResources {
   final _files = <String, (String, int)?>{};
   final _pending = <String, Future<void>>{};
   bool _disposed = false;
+  int revision = 0;
 
   void dispose() {
     _disposed = true;
@@ -44,6 +45,7 @@ class AgentResources {
   }
 
   void refreshPromptSets() {
+    revision++;
     _promptSets.clear();
   }
 
@@ -103,6 +105,7 @@ class AgentResources {
         })
         .whenComplete(() {
           _pending.remove(key);
+          revision++;
           if (!_disposed) changed();
         });
   }

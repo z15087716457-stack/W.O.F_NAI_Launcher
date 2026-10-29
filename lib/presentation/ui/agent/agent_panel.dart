@@ -42,6 +42,8 @@ class AgentPanel extends StatefulWidget {
 class _AgentPanelState extends State<AgentPanel> {
   late var _tab = widget.initialTab;
   final _composer = GlobalKey<AgentComposerState>();
+  String? _composerChat;
+  Widget? _composerView;
   WidgetBuilder? _dialog;
 
   /// 确认 / 改名弹窗只盖侧栏；看大图仍盖整个窗口。
@@ -283,6 +285,10 @@ class _AgentPanelState extends State<AgentPanel> {
   Widget build(BuildContext context) {
     final d = widget.data;
     final c = context.ui;
+    if (_composerChat != d.chat.id) {
+      _composerChat = d.chat.id;
+      _composerView = AgentComposer(key: _composer, chatId: d.chat.id);
+    }
     Widget body;
     if (d.initError != null) {
       body = _InitError(
@@ -330,7 +336,7 @@ class _AgentPanelState extends State<AgentPanel> {
                     : const AgentMemory(),
             },
           ),
-          AgentComposer(key: _composer, chatId: d.chat.id),
+          _composerView!,
         ],
       );
     }

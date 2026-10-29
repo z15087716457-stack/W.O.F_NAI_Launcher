@@ -1,10 +1,11 @@
 import 'package:flutter/widgets.dart';
+import 'package:collection/collection.dart';
 
 import 'agent_contract.dart';
 
 /// 侧栏内部共享：数据、操作，以及页面层的几个服务（执行并提示失败、改名弹窗、
 /// 放大看图、往输入框插字、轻提示）。由 [AgentPanel] 提供。
-class AgentScope extends InheritedWidget {
+class AgentScope extends InheritedModel<String> {
   const AgentScope({
     super.key,
     required super.child,
@@ -60,9 +61,72 @@ class AgentScope extends InheritedWidget {
   final void Function(String text, Future<bool> Function() onUndo) undoToast;
 
   static AgentScope of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<AgentScope>()!;
+      InheritedModel.inheritFrom<AgentScope>(context)!;
+
+  static AgentScope controlsOf(BuildContext context) =>
+      InheritedModel.inheritFrom<AgentScope>(context, aspect: 'controls')!;
+
+  static AgentScope composerOf(BuildContext context) =>
+      InheritedModel.inheritFrom<AgentScope>(context, aspect: 'composer')!;
+
+  List<Object?> get _composerKey => [
+    data.chat.id,
+    data.workspace.id,
+    data.status,
+    data.permission,
+    data.composer.text,
+    data.composer.canSend,
+    data.composer.blocked,
+    data.composer.importing,
+    data.composer.canAttachCanvas,
+    data.composer.enterSends,
+    data.composer.suggestion,
+    for (final a in data.composer.attachments)
+      [
+        a.id,
+        a.name,
+        a.image,
+        a.width,
+        a.height,
+        a.metadata?.prompt,
+        a.metadata?.characters,
+      ],
+    for (final q in data.composer.queue) [q.id, q.text, q.kind],
+    data.notices,
+    for (final m in data.models)
+      [
+        m.providerId,
+        m.modelId,
+        m.label,
+        m.provider,
+        m.selected,
+        m.logoAsset,
+        m.mark,
+      ],
+    data.thinking.options,
+    data.thinking.selected,
+    data.thinking.followsModel,
+    for (final m in data.mentions) [m.id, m.kind, m.label, m.detail, m.image],
+    for (final s in data.skills) [s.name, s.description],
+    for (final c in data.slashCommands)
+      [c.kind, c.name, c.description, c.argumentHint, c.source],
+    actions.onSelectSlashCommand != null,
+    actions.onAcceptSuggestion != null,
+  ];
 
   @override
   bool updateShouldNotify(AgentScope old) =>
       data != old.data || actions != old.actions || slots != old.slots;
+
+  @override
+  bool updateShouldNotifyDependent(AgentScope old, Set<String> dependencies) {
+    if (dependencies.contains('controls') &&
+        (data.status != old.data.status ||
+            data.chat.id != old.data.chat.id ||
+            data.workspace.id != old.data.workspace.id)) {
+      return true;
+    }
+    return dependencies.contains('composer') &&
+        !const DeepCollectionEquality().equals(_composerKey, old._composerKey);
+  }
 }
