@@ -18,6 +18,7 @@ while (Get-Process -Id $pid -ErrorAction SilentlyContinue) {
   Start-Sleep -Milliseconds 50
 }
 Move-Item -LiteralPath '$app' -Destination '$app.old'
+[IO.File]::WriteAllText('$marker.pid', [string]\$PID)
 [IO.File]::WriteAllText('$marker', '父进程退出后仍完成')
 '''),
   ]);

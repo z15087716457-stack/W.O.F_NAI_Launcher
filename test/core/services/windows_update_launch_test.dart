@@ -63,6 +63,17 @@ void main() {
             await File(p.join('${app.path}.old', 'keep.txt')).readAsString(),
             'old app fixture',
           );
+          final childPid = int.parse(
+            await File('${marker.path}.pid').readAsString(),
+          );
+          final wait = await Process.run('powershell.exe', [
+            '-NoProfile',
+            '-NonInteractive',
+            '-Command',
+            'Get-Process -Id $childPid -ErrorAction SilentlyContinue | '
+                'Wait-Process -Timeout 10 -ErrorAction Stop',
+          ]);
+          expect(wait.exitCode, 0, reason: '${wait.stdout}\n${wait.stderr}');
         } finally {
           expect(root.parent.absolute.path, Directory.systemTemp.absolute.path);
           expect(p.basename(root.path), startsWith('update_launch_test_'));
