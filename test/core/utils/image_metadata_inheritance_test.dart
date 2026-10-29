@@ -56,6 +56,46 @@ void main() {
     );
     expect(source, originalBytes);
     expect(img.decodePng(output)!.getBytes(), img.decodePng(plain)!.getBytes());
+
+    // Alignment edits PNG results. WebP/JPEG here are source-metadata fixtures,
+    // so place their complete envelope in a PNG before checking alignment.
+    final pngSource = UnifiedMetadataParser.isPngHeader(source)
+        ? source
+        : UnifiedMetadataParser.embedTextChunkOnly(
+            plain,
+            'Comment',
+            before.metadata!.rawJson!,
+          );
+    final aligned = await ImageSaveUtils.alignEmbeddedResolution(
+      imageBytes: pngSource,
+      width: 16,
+      height: 24,
+    );
+    expect(aligned, isNotNull);
+    final alignedMetadata = UnifiedMetadataParser.parseFromImageBytes(
+      aligned!,
+    ).metadata!;
+    expect(alignedMetadata.width, 16);
+    expect(alignedMetadata.height, 24);
+    expect(alignedMetadata.prompt, before.metadata!.prompt);
+    expect(alignedMetadata.characterPrompts, before.metadata!.characterPrompts);
+    expect(
+      alignedMetadata.characterNegativePrompts,
+      before.metadata!.characterNegativePrompts,
+    );
+    expect(
+      withoutDimensions(jsonDecode(alignedMetadata.rawJson!)),
+      withoutDimensions(jsonDecode(before.metadata!.rawJson!)),
+    );
+    expect(source, originalBytes);
+    expect(
+      await ImageSaveUtils.alignEmbeddedResolution(
+        imageBytes: aligned,
+        width: 16,
+        height: 24,
+      ),
+      same(aligned),
+    );
   }
 
   for (final name in [
@@ -94,6 +134,49 @@ void main() {
       'keep': [1, 2, 3],
     },
   };
+  test(
+    'alignment preserves independent PNG headers and wrapped fields',
+    () async {
+      final envelope = {
+        'Description': 'inner description',
+        'Software': 'NovelAI inner',
+        'Source': 'NovelAI inner model',
+        'Comment': jsonEncode(params),
+        'opaque_envelope': {'width': 777, 'keep': true},
+      };
+      final headers = {
+        'Comment': jsonEncode(envelope),
+        'Description': 'outer description differs',
+        'Software': 'NovelAI outer',
+        'Source': 'NovelAI outer model',
+        'Title': 'independent title',
+      };
+      var source = plain;
+      for (final entry in headers.entries) {
+        source = UnifiedMetadataParser.embedTextChunkOnly(
+          source,
+          entry.key,
+          entry.value,
+        );
+      }
+      final aligned = await ImageSaveUtils.alignEmbeddedResolution(
+        imageBytes: source,
+        width: 16,
+        height: 24,
+      );
+      final after = UnifiedMetadataParser.extractPngTextData(aligned!);
+      expect({...after}..remove('Comment'), {...headers}..remove('Comment'));
+      final expected = {
+        ...envelope,
+        'Comment': jsonEncode({...params, 'width': 16, 'height': 24}),
+      };
+      expect(jsonDecode(after['Comment']!), expected);
+      expect(
+        img.decodePng(aligned)!.getBytes(),
+        img.decodePng(source)!.getBytes(),
+      );
+    },
+  );
   test('JPEG EXIF source preserves its full params envelope', () async {
     final image = img.Image(width: 2, height: 3);
     image.exif.exifIfd[0x9286] = img.IfdValueUndefined.list(
@@ -155,6 +238,14 @@ void main() {
     );
   });
   test('a source without metadata leaves the derived image intact', () async {
+    expect(
+      await ImageSaveUtils.alignEmbeddedResolution(
+        imageBytes: plain,
+        width: 16,
+        height: 24,
+      ),
+      isNull,
+    );
     expect(
       await ImageSaveUtils.inheritSourceMetadata(
         imageBytes: plain,

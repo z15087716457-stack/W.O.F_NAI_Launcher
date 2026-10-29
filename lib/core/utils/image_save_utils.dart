@@ -315,6 +315,29 @@ class ImageSaveUtils {
     );
   }
 
+  /// Align only the size of a PNG result's NovelAI metadata. Matching metadata
+  /// keeps the original bytes; null means the caller must supply missing metadata.
+  static Future<Uint8List?> alignEmbeddedResolution({
+    required Uint8List imageBytes,
+    required int width,
+    required int height,
+  }) async {
+    final parsed = UnifiedMetadataParser.parseFromImageBytes(imageBytes);
+    if (!parsed.success ||
+        parsed.sourceFormat?.toLowerCase().contains('novelai') != true) {
+      return null;
+    }
+    final source = parsed.metadata!;
+    if (source.width == width && source.height == height) return imageBytes;
+    return _embedSourceMetadataWithResolution(
+      imageBytes: imageBytes,
+      sourceBytes: imageBytes,
+      source: source,
+      width: width,
+      height: height,
+    );
+  }
+
   /// A derived image inherits its source metadata, never the current draft.
   /// Outputs with their own metadata and sources without metadata stay intact.
   static Future<Uint8List> inheritSourceMetadata({
@@ -329,7 +352,22 @@ class ImageSaveUtils {
         parsed.sourceFormat?.toLowerCase().contains('novelai') != true) {
       return imageBytes;
     }
-    final source = parsed.metadata!;
+    return _embedSourceMetadataWithResolution(
+      imageBytes: imageBytes,
+      sourceBytes: sourceBytes,
+      source: parsed.metadata!,
+      width: width,
+      height: height,
+    );
+  }
+
+  static Future<Uint8List> _embedSourceMetadataWithResolution({
+    required Uint8List imageBytes,
+    required Uint8List sourceBytes,
+    required NaiImageMetadata source,
+    required int width,
+    required int height,
+  }) {
     final raw = _tryDecodeJsonMap(source.rawJson ?? '');
     if (raw == null) {
       throw const FormatException('NovelAI metadata has no JSON payload');
@@ -348,16 +386,19 @@ class ImageSaveUtils {
     final commentJson = key == null
         ? resized
         : {...raw, key: value is String ? jsonEncode(resized) : resized};
+    final sourceText = UnifiedMetadataParser.isPngHeader(sourceBytes)
+        ? UnifiedMetadataParser.extractPngTextData(sourceBytes)
+        : const <String, String>{};
     return _embedNaiAlignedMetadata(
       imageBytes: imageBytes,
       commentJson: commentJson,
       description:
-          _extractEmbeddedPngMetadata(sourceBytes)?.description ??
+          sourceText['Description'] ??
           raw['Description'] as String? ??
           raw['description'] as String? ??
           source.prompt,
-      software: source.software ?? 'NovelAI',
-      source: source.source ?? 'NovelAI',
+      software: sourceText['Software'] ?? source.software ?? 'NovelAI',
+      source: sourceText['Source'] ?? source.source ?? 'NovelAI',
       useStealth: false,
     );
   }

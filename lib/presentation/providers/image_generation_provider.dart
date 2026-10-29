@@ -1538,25 +1538,40 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         _resolveImageSize(imageBytes, width: width, height: height) ??
         (params.width, params.height);
 
-    final existingMetadata = await ImageMetadataService().getMetadataFromBytes(
-      imageBytes,
-    );
     final effectiveParams = params.copyWith(
       width: resolvedSize.$1,
       height: resolvedSize.$2,
     );
-    final normalizedBytes = operation != null && originalBytes != null
-        ? await ImageSaveUtils.inheritSourceMetadata(
-            imageBytes: imageBytes,
-            sourceBytes: originalBytes,
-            width: resolvedSize.$1,
-            height: resolvedSize.$2,
-          )
-        : await ImageSaveUtils.rebuildImageBytesWithMetadata(
-            imageBytes: imageBytes,
-            params: effectiveParams,
-            actualSeed: existingMetadata?.seed,
-          );
+    final alignedBytes = await ImageSaveUtils.alignEmbeddedResolution(
+      imageBytes: imageBytes,
+      width: resolvedSize.$1,
+      height: resolvedSize.$2,
+    );
+    final Uint8List normalizedBytes;
+    if (alignedBytes != null) {
+      normalizedBytes = alignedBytes;
+    } else if (operation != null && originalBytes != null) {
+      normalizedBytes = await ImageSaveUtils.inheritSourceMetadata(
+        imageBytes: imageBytes,
+        sourceBytes: originalBytes,
+        width: resolvedSize.$1,
+        height: resolvedSize.$2,
+      );
+    } else {
+      final existingMetadata = await ImageMetadataService()
+          .getMetadataFromBytes(imageBytes);
+      final (charCaptions, charNegCaptions) = _buildCharacterCaptions(
+        effectiveParams,
+      );
+      normalizedBytes = await ImageSaveUtils.rebuildImageBytesWithMetadata(
+        imageBytes: imageBytes,
+        params: effectiveParams,
+        actualSeed: existingMetadata?.seed,
+        charCaptions: charCaptions,
+        charNegCaptions: charNegCaptions,
+        useCoords: effectiveParams.useCoords,
+      );
+    }
 
     final generatedImage = GeneratedImage.create(
       normalizedBytes,

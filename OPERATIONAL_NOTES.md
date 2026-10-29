@@ -35,6 +35,7 @@
 
 ## 桥接与参数
 
+- 外部 Agent/Krita 成图登记时优先保留响应原始 NAI 元数据；实际尺寸不同时仅对齐参数层宽高，保留角色正负词／坐标、信封、未知字段及独立 PNG 头字段。缺少 NAI 元数据才从本次显式请求构建完整角色信息，不能用当前草稿覆盖原成图 Comment。见 [角色元数据丢失修复](docs/external-agent-character-metadata-2026-10-29.md)。
 - 本机桌面运行包与开发源码分开；实际运行目录从工作区接手说明读取，当前为旧源码根下 `build/windows-glass-preview/runner/Release/nai_launcher.exe`。标准 Windows Release 是构建产物，不是可直接覆盖的 Glass 桌面包。
 - Krita 桥接：`ws://127.0.0.1:<port>/krita`；端口和 secret 从 `%APPDATA%/nai-launcher/krita-bridge.json` 发现，每次启动会重生成。
 - Windows 包在可执行文件同级 `tools/studio-bridge.exe` 附带独立客户端，不依赖 Python 或源码树。入口 `status`、`get --out current.json`、`set k=v --base current.json`、`set-json changes.json --base current.json`、`quote --out quote.json`、`gen --quote quote.json --authorized`、`cancel REQUEST_ID`；每个命令均携带同一 `--name`。生成固定一张，报价有效期 5 分钟且只可使用一次，失败至少隔 2 秒再尝试。完整契约见 [外部 Agent 桥接](docs/agent-bridge.md)。

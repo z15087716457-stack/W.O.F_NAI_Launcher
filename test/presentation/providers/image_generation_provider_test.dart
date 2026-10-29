@@ -1,5 +1,6 @@
 import '../../helpers/grouped_canvas_batches.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -1182,6 +1183,172 @@ void main() {
         expect(parsed.metadata?.prompt, equals('source prompt'));
       },
     );
+
+    for (final saveToLocal in [false, true]) {
+      test(
+        'registerExternalImage keeps original NovelAI characters (save=$saveToLocal)',
+        () async {
+          final comment = {
+            'prompt': 'scene, quality tags from actual request',
+            'uc': 'actual negative',
+            'seed': 456789,
+            'width': 16,
+            'height': 24,
+            'model': 'nai-diffusion-4-5-full',
+            'v4_prompt': {
+              'caption': {
+                'base_caption': 'scene, quality tags from actual request',
+                'char_captions': [
+                  {
+                    'char_caption': 'first character',
+                    'centers': [
+                      {'x': 0.2, 'y': 0.7},
+                    ],
+                  },
+                  {
+                    'char_caption': 'second character',
+                    'centers': [
+                      {'x': 0.8, 'y': 0.3},
+                    ],
+                  },
+                ],
+              },
+              'use_coords': true,
+              'use_order': true,
+            },
+            'v4_negative_prompt': {
+              'caption': {
+                'base_caption': 'actual negative',
+                'char_captions': [
+                  {'char_caption': 'first negative'},
+                  {'char_caption': 'second negative'},
+                ],
+              },
+            },
+            'unknown_upstream_field': {
+              'keep': [1, 2, 3],
+            },
+          };
+          final source = await ImageSaveUtils.buildPrebuiltMetadataBytes(
+            imageBytes: _validImageBytes(width: 16, height: 24),
+            metadata: {
+              'Description': 'scene, quality tags from actual request',
+              'Software': 'NovelAI',
+              'Source': 'NovelAI Diffusion V4.5',
+              'Comment': jsonEncode(comment),
+            },
+          );
+          final temp = await Directory.systemTemp.createTemp('external_roles_');
+          addTearDown(() => temp.delete(recursive: true));
+          final before = container.read(generationParamsNotifierProvider);
+          final notifier = container.read(
+            imageGenerationNotifierProvider.notifier,
+          );
+          await notifier.registerExternalImage(
+            source,
+            params: before.copyWith(
+              prompt: 'unrelated draft',
+              negativePrompt: 'unrelated negative',
+              model: 'nai-diffusion-4-5-full',
+              seed: -1,
+            ),
+            saveToLocal: saveToLocal,
+            saveDirectoryPath: temp.path,
+            syncToGalleryIndex: false,
+            addToDisplay: true,
+          );
+          final stored = container
+              .read(imageGenerationNotifierProvider)
+              .history
+              .single;
+          final metadata = UnifiedMetadataParser.parseFromImageBytes(
+            stored.bytes,
+          ).metadata!;
+          expect(metadata.characterPrompts, [
+            'first character',
+            'second character',
+          ]);
+          expect(metadata.characterNegativePrompts, [
+            'first negative',
+            'second negative',
+          ]);
+          expect(stored.bytes, source);
+          expect(jsonDecode(metadata.rawJson!), comment);
+          expect(metadata.prompt, comment['prompt']);
+          expect(metadata.seed, 456789);
+          expect(container.read(generationParamsNotifierProvider), before);
+          if (saveToLocal) {
+            expect(await File(stored.filePath!).readAsBytes(), source);
+          }
+        },
+      );
+    }
+
+    for (final useCoords in [false, true]) {
+      test(
+        'registerExternalImage fills missing metadata with request characters (coords=$useCoords)',
+        () async {
+          final params = ImageParams(
+            prompt: 'request scene',
+            negativePrompt: 'request negative',
+            model: 'nai-diffusion-4-5-full',
+            seed: 123,
+            qualityToggle: false,
+            useCoords: useCoords,
+            characters: const [
+              CharacterPrompt(
+                prompt: 'first character',
+                negativePrompt: 'first negative',
+                positionX: 0.2,
+                positionY: 0.7,
+              ),
+              CharacterPrompt(
+                prompt: 'second character',
+                negativePrompt: 'second negative',
+                positionX: 0.8,
+                positionY: 0.3,
+              ),
+            ],
+          );
+          final before = container.read(generationParamsNotifierProvider);
+          await container
+              .read(imageGenerationNotifierProvider.notifier)
+              .registerExternalImage(
+                _validImageBytes(width: 16, height: 24),
+                params: params,
+              );
+          final stored = container
+              .read(imageGenerationNotifierProvider)
+              .history
+              .single;
+          final metadata = UnifiedMetadataParser.parseFromImageBytes(
+            stored.bytes,
+          ).metadata!;
+          expect(metadata.characterPrompts, [
+            'first character',
+            'second character',
+          ]);
+          expect(metadata.characterNegativePrompts, [
+            'first negative',
+            'second negative',
+          ]);
+          final comment = jsonDecode(metadata.rawJson!) as Map<String, dynamic>;
+          final positive = comment['v4_prompt'] as Map<String, dynamic>;
+          expect(positive['use_coords'], useCoords);
+          final captions =
+              (positive['caption'] as Map)['char_captions'] as List;
+          expect(captions[0]['centers'], [
+            {'x': useCoords ? 0.2 : 0.5, 'y': useCoords ? 0.7 : 0.5},
+          ]);
+          expect(captions[1]['centers'], [
+            {'x': useCoords ? 0.8 : 0.5, 'y': useCoords ? 0.3 : 0.5},
+          ]);
+          expect(metadata.width, 16);
+          expect(metadata.height, 24);
+          expect(container.read(generationParamsNotifierProvider), before);
+        },
+      );
+    }
 
     test('generate should保留重绘会话状态并使用流式 inpaint', () async {
       final mockApiService = MockNAIImageGenerationApiService();
