@@ -1,0 +1,47 @@
+# Agent 思考期间卡顿调查
+
+2026-10-29，按用户要求只调查，未修改运行逻辑、安装或操作 Studio，也未调用真实模型／生图接口。调查时源码提交为 `72c4c5f137bdf53fb45c85e4523f0d9d804002a3`，本机仍为 2.2.1+62。
+
+## 结论
+
+确认存在未合并的高频流式通知、整段聊天重复映射与旧内容重建，以及设置未变化仍通知生图页面外层的问题。思考内容折叠时这些工作仍会发生，和“思考时很卡”的反馈吻合。当前证据足以确定优化入口，但未采集用户当次 Release 会话的 CPU／GPU 帧时间，不能将全部卡顿归因于某一项，也不能把调试测试的耗时当作实机 FPS。
+
+## 已核验链路
+
+1. Pi 的 `thinking_delta` 等事件逐次转换为 `message_update`，携带累计 `message` 和相同的 `assistantMessageEvent.partial`。`tool/nai_agent/host.mjs:129` 对订阅事件立即 `send`；`send` 经过脱敏的序列化／解析后再次序列化，没有刷新合并。Dart `lib/core/nai_agent/pi_host_client.dart:233` 逐条解码并发布。
+2. `lib/presentation/providers/nai_agent/nai_agent_workspace_controller.dart:1498` 每个事件增加 `uiRevision`，更新当前消息后调用 `_notify()`，思考折叠状态不影响通知。
+3. `lib/presentation/wiring/nai_agent/agent_wiring.dart:538` 订阅整个控制器；每次重建调用 `AgentThreadMapper.map`，有历史时还会额外映射历史。`agent_thread_mapper.dart:210` 每次重新构造所有轮次；原始备份缓存已有，但提示词差异的 LCS 和展示模型未按已完成消息缓存，`agentTagDiff` 可反复执行。
+4. 新 `AgentViewData` 使 `AgentScope` 通知其依赖者；历史回复、Markdown 和输入区也跟着重建。`AgentThinking` 折叠时不绘制全文，只统计 `b.text.runes.length` 并显示字数；展开才构建全文 `Text`，因此“隐藏的全文仍在每帧排版”并非当前代码事实。
+5. `nai_agent_workspace_provider.dart:160` 把控制器的每次通知都转给 `NaiAgentUiPreferences.replace`；后者不检查设置是否相同，仍 `notifyListeners()`。`nai_agent_generation_host.dart:62` 订阅该偏好，故生图页面外层也跟着重建。此处没有把外层重建等同于全部画布像素重绘，画布内层边界仍需后续原生测量。
+
+## 隔离测量
+
+所有数据和正文均为合成内容，临时工作区已清理。证据位于 `.dart_tool/agent-thinking-audit-20261029/`。
+
+- **真实 Node／Pi 宿主，localhost SSE 替身**：300 个思考片段产生 300 次思考更新、共 305 次消息更新，约 64.2 次／秒（Windows 定时器使 5ms 请求间隔实际更长）。最终 9900 字符的思考对应约 3.30 MB 累计更新载荷，单条最高 20873 字节；两个累计快照相同。速率是这次模拟值，不代表用户模型的实际速率。见 `host-stream.json`。
+- **真实 AgentPanel，动画关闭以隔离流式影响**：60 次数据更新，在思考折叠／展开两种状态下都重建 AgentPanel、AgentThread、AgentComposer 各 60 次，4 条旧回复的 AgentMarkdown 共重建 240 次。折叠状态共 33540 次组件构建，展开为 35100 次；两者接近，说明全文展示之外有显著重复工作。见 `flutter-audit.json`。
+- **偏好与真实页面宿主**：同一设置对象连续传入 300 次，产生 300 次通知；60 次相同设置通知使 NaiAgentGenerationHost 重建 60 次。该夹具禁止创建用户存储，未启动 Agent。
+- **动画对照**：不更新数据，只推进 60 帧动画，AgentPanel／AgentThread／AgentComposer／AgentMarkdown 的重建数均为 0。动画仍有局部构建／绘制成本，本次未测其 GPU 成本。
+
+下表为同一 10000 字符合成思考下，预热、资源加载完成后单次聊天映射的调试 CPU 耗时（20 次采样；不含网络、组件布局或绘制）：
+
+| 历史内容 | P50 | P95 |
+|---|---:|---:|
+| 无历史 | 0.030 ms | 0.062 ms |
+| 20 轮纯文字 | 0.367 ms | 0.619 ms |
+| 100 轮纯文字 | 1.580 ms | 1.959 ms |
+| 20 轮、每轮 60 个标签的提示词差异 | 1.905 ms | 8.024 ms |
+| 20 轮、每轮 200 个标签的提示词差异 | 5.442 ms | 8.864 ms |
+| 60 轮、每轮 200 个标签的提示词差异 | 16.163 ms | 16.866 ms |
+
+差异夹具逐项断言实际产生了 20／60 条差异。初跑夹具误用 `backups/` 路径，未加载差异；已更正为 `draft-backups/` 并复测，不采信初跑的差异耗时。原日志和 JSON 保留为 `*-initial*`。最终四项诊断均通过。
+
+10 个相关生产文件的 SHA-256 均与 +62 编译快照一致，已安装 Node host 也与当前源码相同；不是未安装开发修改引入的问题。核验见 `installed-source-match.json`。
+
+## 后续优化顺序（尚未施工）
+
+1. 把思考／正文的连续增量合并为有限频率的 UI 发布，立即处理停止、错误、工具状态和最终消息；保证完整正文仍被接收，避免用纯防抖导致持续输出时不更新。
+2. 只更新活动消息，缓存已完成轮次及其差异／Markdown 展示数据，避免每个片段重算整段历史。
+3. 设置没有变化时不广播布局偏好，切断流式事件对生图页面外层的无效刷新；再对比原生 Release 帧时间确认收益。
+
+不建议先隐藏思考全文或移除小动画：折叠对照已经复现主要重复工作。当前三项既有待安装增量保持原状态，本调查不计为第四项已完成修复。
