@@ -34066,6 +34066,12 @@ abstract class AppLocalizations {
   /// **'Let local agents such as Claude Code or Codex read and edit parameters and generate.'**
   String get set_brAgentsSub;
 
+  /// No description provided for @set_brAgentsRequiresKrita.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the Krita bridge above to use this feature.'**
+  String get set_brAgentsRequiresKrita;
+
   /// No description provided for @set_brLocal.
   ///
   /// In en, this message translates to:

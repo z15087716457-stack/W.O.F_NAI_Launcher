@@ -259,6 +259,8 @@ class SettingsHostState extends State<SettingsHost> {
             ),
         onCopyDiagnostics: () => call('copyDiagnostics'),
         onCopyModelConfig: () => call('copyModelConfig'),
+        onCopyAgentTakeover: () => call('copyAgentTakeover'),
+        onEndAgentConnections: () => call('endAgentConnections'),
         providers: widget.providers,
       ),
     );

@@ -10381,6 +10381,7 @@
   "set_brDiscovery": "發現檔案",
   "set_brAgents": "外部 Agent",
   "set_brAgentsSub": "讓 Claude Code、Codex 等能執行本機命令的 Agent 讀寫參數和生圖。",
+  "set_brAgentsRequiresKrita": "此功能需要開啟上方的 Krita 橋接",
   "set_brLocal": "本機橋接",
   "set_brClients": "{n} 個 Agent 已連線",
   "@set_brClients": {

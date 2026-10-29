@@ -18999,6 +18999,9 @@ class AppLocalizationsKo extends AppLocalizations {
       'Claude Code, Codex 같은 로컬 Agent가 매개변수를 읽고 쓰고 생성할 수 있습니다.';
 
   @override
+  String get set_brAgentsRequiresKrita => '이 기능을 사용하려면 위의 Krita 브리지를 켜세요.';
+
+  @override
   String get set_brLocal => '로컬 브리지';
 
   @override

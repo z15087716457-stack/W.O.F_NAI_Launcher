@@ -18715,6 +18715,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_brAgentsSub => '让 Claude Code、Codex 等能执行本机命令的 Agent 读写参数和生图。';
 
   @override
+  String get set_brAgentsRequiresKrita => '此功能需要开启上方的 Krita 桥接';
+
+  @override
   String get set_brLocal => '本机桥接';
 
   @override
@@ -40341,6 +40344,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_brAgentsSub => '讓 Claude Code、Codex 等能執行本機命令的 Agent 讀寫參數和生圖。';
+
+  @override
+  String get set_brAgentsRequiresKrita => '此功能需要開啟上方的 Krita 橋接';
 
   @override
   String get set_brLocal => '本機橋接';

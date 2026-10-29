@@ -18936,6 +18936,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_brAgentsSub => 'Claude Code や Codex などがパラメーターの読み書きと生成を行えます。';
 
   @override
+  String get set_brAgentsRequiresKrita =>
+      'この機能を使用するには、上の Krita ブリッジを有効にしてください。';
+
+  @override
   String get set_brLocal => 'ローカルブリッジ';
 
   @override

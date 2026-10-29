@@ -10276,6 +10276,7 @@
   "set_brDiscovery": "検出ファイル",
   "set_brAgents": "外部 Agent",
   "set_brAgentsSub": "Claude Code や Codex などがパラメーターの読み書きと生成を行えます。",
+  "set_brAgentsRequiresKrita": "この機能を使用するには、上の Krita ブリッジを有効にしてください。",
   "set_brLocal": "ローカルブリッジ",
   "set_brClients": "{n} 件の Agent が接続中",
   "@set_brClients": {

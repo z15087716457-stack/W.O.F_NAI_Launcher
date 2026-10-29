@@ -10288,6 +10288,7 @@
   "set_brDiscovery": "Discovery file",
   "set_brAgents": "External agents",
   "set_brAgentsSub": "Let local agents such as Claude Code or Codex read and edit parameters and generate.",
+  "set_brAgentsRequiresKrita": "Enable the Krita bridge above to use this feature.",
   "set_brLocal": "Local bridge",
   "set_brClients": "{n} agents connected",
   "@set_brClients": {

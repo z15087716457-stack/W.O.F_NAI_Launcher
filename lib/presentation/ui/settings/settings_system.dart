@@ -157,8 +157,17 @@ class SettingsBridgesPage extends StatelessWidget {
           subtitle: l.set_brAgentsSub,
           children: [
             SettingsRow(
+              key: const Key('external-agent-bridge'),
               anchor: 'agents',
               title: l.set_brLocal,
+              disabled: !krita,
+              subtitleWidget: krita
+                  ? null
+                  : Text(
+                      l.set_brAgentsRequiresKrita,
+                      key: const Key('agent-krita-required'),
+                      style: UiText.sans(11, color: c.ink),
+                    ),
               control: Row(
                 mainAxisSize: MainAxisSize.min,
                 spacing: 8,
@@ -171,16 +180,20 @@ class SettingsBridgesPage extends StatelessWidget {
                         : l.set_brNoClients,
                   ),
                   SettingsBtn(
+                    key: const Key('agent-copy-takeover'),
                     label: l.set_brTakeover,
                     glyph: SettingsGlyphs.copy,
                     small: true,
-                    onTap: a.onCopyAgentTakeover,
+                    onTap: krita ? a.onCopyAgentTakeover : null,
                   ),
                   SettingsBtn(
+                    key: const Key('agent-end-connections'),
                     label: l.set_brEnd,
                     small: true,
                     tone: SettingsBtnTone.ghost,
-                    onTap: b.agentClients == 0 ? null : a.onEndAgentConnections,
+                    onTap: !krita || b.agentClients == 0
+                        ? null
+                        : a.onEndAgentConnections,
                   ),
                 ],
               ),

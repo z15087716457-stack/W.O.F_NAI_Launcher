@@ -19527,6 +19527,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Let local agents such as Claude Code or Codex read and edit parameters and generate.';
 
   @override
+  String get set_brAgentsRequiresKrita =>
+      'Enable the Krita bridge above to use this feature.';
+
+  @override
   String get set_brLocal => 'Local bridge';
 
   @override
