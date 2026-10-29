@@ -50,7 +50,9 @@ Both versions support in-app updates. Your settings, gallery database and Agent 
 
 **2.2.1 additions**: Let the Agent split prompts into temporary blocks, with whole-module or multiple translations inside. This update also fixes single-click history details, caret visibility over weighted text and update-manifest parsing, and adds individual-image browsing to the infinite canvas.
 
-See the [complete 2.2.1 changelog](CHANGELOG.md#221---2026-10-28) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.1). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+**2.2.2 update**: Smoother Agent thinking, word counts and expanded reasoning text with the existing UI preserved. This release also preserves character metadata from external bridge generations, fixes restart-to-install updates, disables external Agent controls while the bridge is off, balances the saved-settings toast and removes the top update pill.
+
+See the [complete 2.2.2 changelog](CHANGELOG.md#222---2026-10-29) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.2). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
 
 ## Get started in three steps
 
