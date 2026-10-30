@@ -220,11 +220,7 @@ class _GalleryTimelineViewState extends ConsumerState<GalleryTimelineView> {
 
     if (selection.isActive || isCtrl) {
       if (!selection.isActive) {
-        final focused = ref.read(localGalleryFocusNotifierProvider);
         selectionNotifier.enter();
-        if (focused != null && focused != path) {
-          selectionNotifier.select(focused);
-        }
       }
       selectionNotifier.toggle(path);
       focusNotifier.focus(path);
