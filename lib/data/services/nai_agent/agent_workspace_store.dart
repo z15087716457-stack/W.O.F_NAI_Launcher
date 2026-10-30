@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import '../../../core/nai_agent/attachment_manifest.dart';
 import '../../../core/nai_agent/mcp_config.dart';
 import '../../../core/utils/app_language.dart';
@@ -310,12 +311,15 @@ class AgentChat {
     required this.workspaceId,
     required this.title,
     required this.createdAt,
+    this.lastActivityAt,
     this.sessionFile,
     this.isDraft = false,
   });
   final bool isDraft;
   final String id, workspaceId, title;
   final DateTime createdAt;
+  final DateTime? lastActivityAt;
+  DateTime get activityAt => lastActivityAt ?? createdAt;
 
   /// A reference to official Pi history, never copied conversation messages.
   final String? sessionFile;
@@ -325,6 +329,7 @@ class AgentChat {
     'workspaceId': workspaceId,
     'title': title,
     'createdAt': createdAt.toIso8601String(),
+    'lastActivityAt': lastActivityAt?.toIso8601String(),
     'sessionFile': sessionFile,
   };
 }
@@ -986,6 +991,7 @@ class AgentWorkspaceStore {
       workspaceId: draft.workspaceId,
       title: draft.title,
       createdAt: draft.createdAt,
+      lastActivityAt: draft.lastActivityAt,
     );
     await _atomic(file, chat.toJson());
     return chat;
@@ -1040,11 +1046,20 @@ class AgentWorkspaceStore {
           workspaceId: workspaceId,
           title: value['title'] as String,
           createdAt: DateTime.parse(value['createdAt'] as String),
+          lastActivityAt: value['lastActivityAt'] == null
+              ? await _legacyChatActivity(
+                  workspaceId,
+                  value['sessionFile'] as String?,
+                )
+              : DateTime.parse(value['lastActivityAt'] as String),
           sessionFile: value['sessionFile'] as String?,
         ),
       );
     }
-    result.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    result.sort((a, b) {
+      final activity = b.activityAt.compareTo(a.activityAt);
+      return activity != 0 ? activity : b.createdAt.compareTo(a.createdAt);
+    });
     return result;
   }
 
@@ -1053,6 +1068,7 @@ class AgentWorkspaceStore {
     String chatId, {
     String? title,
     String? sessionFile,
+    DateTime? lastActivityAt,
   }) => _write(() async {
     _id(chatId);
     final chat = (await listChats(
@@ -1072,6 +1088,7 @@ class AgentWorkspaceStore {
       workspaceId: workspaceId,
       title: title ?? chat.title,
       createdAt: chat.createdAt,
+      lastActivityAt: lastActivityAt ?? chat.lastActivityAt,
       sessionFile: sessionFile ?? chat.sessionFile,
     );
     await _atomic(
@@ -1087,6 +1104,55 @@ class AgentWorkspaceStore {
     );
     return value;
   });
+
+  // Legacy histories are read once per file version, independently of title or
+  // filesystem modification times. No model or session host is started.
+  final _legacyActivity = <String, (int, DateTime, DateTime?)>{};
+  Future<DateTime?> _legacyChatActivity(
+    String workspaceId,
+    String? relative,
+  ) async {
+    if (relative == null) return null;
+    final file = File(
+      p.join(workspaceDirectory(workspaceId).path, _sessionRelative(relative)),
+    );
+    await _guard(file.path);
+    final stat = await file.stat();
+    if (stat.type != FileSystemEntityType.file) return null;
+    final cached = _legacyActivity[file.path];
+    if (cached != null &&
+        cached.$1 == stat.size &&
+        cached.$2 == stat.modified) {
+      return cached.$3;
+    }
+    final latest = await Isolate.run(() async {
+      DateTime? latest;
+      await for (final line
+          in file
+              .openRead()
+              .transform(const Utf8Decoder(allowMalformed: true))
+              .transform(const LineSplitter())) {
+        dynamic entry;
+        try {
+          entry = jsonDecode(line);
+        } on FormatException {
+          continue; // Pi can be appending an unfinished final line.
+        }
+        if (entry is! Map || entry['type'] != 'message') continue;
+        final message = entry['message'];
+        if (message is! Map ||
+            !const {'user', 'assistant'}.contains(message['role'])) {
+          continue;
+        }
+        final raw = entry['timestamp'];
+        final at = raw is String ? DateTime.tryParse(raw) : null;
+        if (at != null && (latest == null || at.isAfter(latest))) latest = at;
+      }
+      return latest;
+    });
+    _legacyActivity[file.path] = (stat.size, stat.modified, latest);
+    return latest;
+  }
 
   /// Reject traversal and links, including links hidden in existing ancestors.
   Future<void> _guard(String path) async {

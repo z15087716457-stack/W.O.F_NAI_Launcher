@@ -21,6 +21,27 @@ import '../../providers/rag_provider.dart';
 import '../../ui/settings/settings_contract.dart';
 import '../../providers/thumbnail_cache_limit_provider.dart';
 import 'settings_storage_measurement.dart';
+import 'settings_storage_snapshot.dart';
+
+final settingsStorageSignatureProvider = FutureProvider<String>((ref) async {
+  final folders = await ref.watch(settingsFoldersProvider.future);
+  final roots = await ref.watch(settingsGalleryExtraRootsProvider.future);
+  final support = await getApplicationSupportDirectory();
+  final rag = await ref.read(ragDirectoryProvider)();
+  return [
+    for (final folder in SettingsFolder.values) folders[folder] ?? '',
+    ...roots,
+    support.path,
+    rag.path,
+  ].map(_physicalPath).join('|');
+});
+
+final settingsStorageCachedProvider = FutureProvider<SettingsStorageData?>((
+  ref,
+) async {
+  final signature = await ref.watch(settingsStorageSignatureProvider.future);
+  return ref.read(settingsStorageSnapshotStoreProvider).read(signature);
+});
 
 class SettingsMeasuredFile {
   const SettingsMeasuredFile(
@@ -260,6 +281,7 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
   ref,
 ) async {
   final locations = await ref.watch(settingsStorageLocationsProvider.future);
+  final signature = await ref.watch(settingsStorageSignatureProvider.future);
   final folders = await ref.watch(settingsFoldersProvider.future);
   final support = await getApplicationSupportDirectory();
   final rag = await ref.read(ragDirectoryProvider)();
@@ -326,7 +348,8 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
       ),
     );
   }
-  return SettingsStorageData(
+  final measured = SettingsStorageData(
+    configurationKey: signature,
     slices: slices,
     incomplete: slices.any((s) => s.incomplete),
     diskLabel: p.rootPrefix(primary),
@@ -349,6 +372,16 @@ final settingsStorageDataProvider = FutureProvider<SettingsStorageData>((
     thumbnailLimit: locations.thumbnailLimit,
     folderNames: locations.folderNames,
   );
+  if (!measured.incomplete) {
+    await ref
+        .read(settingsStorageSnapshotStoreProvider)
+        .save(signature, measured)
+        .catchError((Object error) {
+          AppLogger.w('Storage snapshot save failed: $error', 'Settings');
+        });
+    ref.invalidate(settingsStorageCachedProvider);
+  }
+  return measured;
 });
 
 final settingsGalleryCacheManagerProvider = Provider(

@@ -11,6 +11,7 @@ import 'package:flutter/gestures.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
+import 'package:nai_launcher/presentation/providers/gallery_trash_provider.dart';
 import 'package:nai_launcher/presentation/router/gallery_navigation_request.dart';
 import 'package:flutter/material.dart';
 import 'package:nai_launcher/presentation/widgets/common/text_editing_shortcuts.dart';
@@ -116,6 +117,112 @@ void main() {
       StorageKeys.hasSeenLocalGalleryTip: true,
     });
   });
+
+  testWidgets(
+    'recent and trash reuse the gallery without a dialog or sidebar shift',
+    (tester) async {
+      final container = await _pumpScreen(
+        tester,
+        records: records,
+        dimensions: dimensions,
+        locale: const Locale('zh'),
+        dark: true,
+        size: const Size(1600, 1000),
+        extraOverrides: [
+          galleryTrashTimelineProvider.overrideWith(
+            (ref) async => [
+              for (final r in records.take(2))
+                GalleryTimelineEntry(
+                  path: r.path,
+                  modifiedAt: r.modifiedAt,
+                  width: dimensions[r.path]?.$1,
+                  height: dimensions[r.path]?.$2,
+                ),
+            ],
+          ),
+        ],
+      );
+      final gallery = container.read(localGalleryNotifierProvider.notifier);
+      final beforeTitle = tester.getTopLeft(
+        find.byKey(const Key('gallery-toolbar-sort')),
+      );
+      await tester.runAsync(() => gallery.recordViewed(records.first.path));
+      await tester.tap(find.byKey(const Key('gallery-sidebar-recent')));
+      await _settle(tester);
+      expect(
+        container.read(localGalleryNotifierProvider).browseScope,
+        GalleryBrowseScope.recent,
+      );
+      expect(find.byType(GalleryTimelineView), findsOneWidget);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        container
+            .read(localGalleryNotifierProvider)
+            .timeline
+            .entries
+            .single
+            .path,
+        records.first.path,
+      );
+      await _capture(tester, 'recent-gallery');
+      await tester.tap(find.byKey(const Key('gallery-sidebar-trash')));
+      await _settle(tester);
+      expect(
+        container.read(localGalleryNotifierProvider).browseScope,
+        GalleryBrowseScope.trash,
+      );
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(
+        tester.getTopLeft(find.byKey(const Key('gallery-toolbar-sort'))).dy,
+        beforeTitle.dy,
+      );
+      final cards = tester.widgetList<LocalImageCard>(
+        find.byType(LocalImageCard),
+      );
+      expect(cards.length, 2);
+      expect(
+        cards.every(
+          (c) =>
+              c.onFavoriteToggle == null &&
+              c.onUseImage == null &&
+              c.dragWrapper == null,
+        ),
+        isTrue,
+      );
+      await tester.tap(_cardFor(records.first));
+      await _settle(tester);
+      expect(find.byKey(const Key('gallery-inspector-reuse')), findsNothing);
+      expect(find.text('恢复'), findsOneWidget);
+      await tester.tap(_cardFor(records.first), buttons: kSecondaryMouseButton);
+      await _settle(tester);
+      expect(find.text('彻底删除'), findsOneWidget);
+      await tester.tap(find.text('彻底删除'));
+      await _settle(tester);
+      expect(find.textContaining('不可恢复'), findsOneWidget);
+      await tester.tap(find.text('取消'));
+      await _settle(tester);
+      expect(
+        await tester.runAsync(() => File(records.first.path).exists()),
+        isTrue,
+      );
+      await _capture(tester, 'trash-gallery');
+      await tester.tap(find.byKey(const Key('gallery-sidebar-all')));
+      await _settle(tester);
+      expect(
+        container.read(localGalleryNotifierProvider).browseScope,
+        GalleryBrowseScope.library,
+      );
+      expect(
+        container.read(localGallerySelectionNotifierProvider).selectedIds,
+        isEmpty,
+      );
+      expect(container.read(localGalleryFocusNotifierProvider), isNull);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+      container.dispose();
+      await tester.pump(const Duration(seconds: 1));
+    },
+  );
 
   testWidgets(
     'R2 gallery bulk undo/redo never runs while search text is focused',

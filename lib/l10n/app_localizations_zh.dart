@@ -2921,11 +2921,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_trashHint => '池内文件仍在磁盘上，下次启动时彻底删除；恢复后立即回到图库。';
 
   @override
-  String localGallery_trashCount(Object count) {
-    return '$count 项';
-  }
-
-  @override
   String get localGallery_trashRestore => '恢复';
 
   @override
@@ -2943,17 +2938,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get localGallery_trashDeleteAll => '彻底删除全部';
 
   @override
-  String localGallery_trashDeleteAllConfirm(Object count) {
-    return '将立即物理删除池内全部 $count 个文件，不可恢复。';
-  }
-
-  @override
   String localGallery_trashDeletedForever(Object count) {
     return '已彻底删除 $count 个文件';
   }
-
-  @override
-  String get localGallery_trashFileMissing => '文件已不在磁盘上';
 
   @override
   String localGallery_movedImages(Object count) {
@@ -6586,9 +6573,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settings_geistDescription => '全工作室统一外观：黑白灰底色，蓝色作为操作强调。';
-
-  @override
-  String get updateCapsuleLabel => '更新';
 
   @override
   String get updateWaitForTask => '任务进行中，结束后即可重启更新';
@@ -20619,9 +20603,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_toggle => 'NAI Agent';
 
   @override
-  String get ag_yesterday => '昨天';
-
-  @override
   String get ag_attachmentTag => '附件';
 
   @override
@@ -21632,6 +21613,43 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String blocks_tempCreatedByYou(String time) {
     return '你$time 建了这个块。';
+  }
+
+  @override
+  String get ag_chatJustNow => '刚刚';
+
+  @override
+  String get localGallery_recentViews => '最近浏览';
+
+  @override
+  String get localGallery_recentViewsEmpty => '还没有浏览记录';
+
+  @override
+  String get localGallery_deleteForever => '彻底删除';
+
+  @override
+  String localGallery_deleteForeverConfirm(int count) {
+    return '将立即物理删除选中的 $count 个文件，不可恢复。';
+  }
+
+  @override
+  String ag_chatAgeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String ag_chatAgeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String ag_chatAgeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String ag_chatAgeWeeks(int count) {
+    return '${count}w';
   }
 }
 
@@ -24552,11 +24570,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_trashHint => '池內檔案仍在磁碟上，下次啟動時徹底刪除；恢復後立即回到圖庫。';
 
   @override
-  String localGallery_trashCount(Object count) {
-    return '$count 項';
-  }
-
-  @override
   String get localGallery_trashRestore => '恢復';
 
   @override
@@ -24574,17 +24587,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get localGallery_trashDeleteAll => '徹底刪除全部';
 
   @override
-  String localGallery_trashDeleteAllConfirm(Object count) {
-    return '將立即物理刪除池內全部 $count 個檔案，不可恢復。';
-  }
-
-  @override
   String localGallery_trashDeletedForever(Object count) {
     return '已徹底刪除 $count 個檔案';
   }
-
-  @override
-  String get localGallery_trashFileMissing => '檔案已不在磁碟上';
 
   @override
   String localGallery_movedImages(Object count) {
@@ -28217,9 +28222,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get settings_geistDescription => '全工作室統一外觀：黑白灰底色，藍色作為操作強調。';
-
-  @override
-  String get updateCapsuleLabel => '更新';
 
   @override
   String get updateWaitForTask => '任務進行中，結束後即可重啟更新';
@@ -42250,9 +42252,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_toggle => 'NAI Agent';
 
   @override
-  String get ag_yesterday => '昨天';
-
-  @override
   String get ag_attachmentTag => '附件';
 
   @override
@@ -43263,5 +43262,42 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String blocks_tempCreatedByYou(String time) {
     return '你$time 建了這個塊。';
+  }
+
+  @override
+  String get ag_chatJustNow => '剛剛';
+
+  @override
+  String get localGallery_recentViews => '最近瀏覽';
+
+  @override
+  String get localGallery_recentViewsEmpty => '還沒有瀏覽記錄';
+
+  @override
+  String get localGallery_deleteForever => '徹底刪除';
+
+  @override
+  String localGallery_deleteForeverConfirm(int count) {
+    return '將立即物理刪除選中的 $count 個檔案，不可恢復。';
+  }
+
+  @override
+  String ag_chatAgeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String ag_chatAgeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String ag_chatAgeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String ag_chatAgeWeeks(int count) {
+    return '${count}w';
   }
 }

@@ -69,6 +69,43 @@ void main() {
     await done(t);
   });
 
+  testWidgets(
+    'trash preview keeps browsing but hides library mutations and shortcuts',
+    (t) async {
+      final base = ViewerFixture.gallery();
+      await pump(
+        t,
+        ViewerViewData(
+          mode: base.mode,
+          items: base.items,
+          currentKey: base.currentKey,
+          now: base.now,
+          position: base.position,
+          total: base.total,
+          detail: base.detail,
+          actions: const {
+            ViewerAction.copyImage,
+            ViewerAction.copyPath,
+            ViewerAction.copyAllPrompts,
+            ViewerAction.showInFolder,
+          },
+          libraryReadOnly: true,
+        ),
+      );
+      expect(find.byKey(const Key('viewer-info-delete')), findsNothing);
+      expect(find.byKey(const Key('viewer-info-favorite')), findsNothing);
+      await key(t, LogicalKeyboardKey.keyF);
+      await key(t, LogicalKeyboardKey.delete);
+      expect(
+        rec.calls.where(
+          (c) => c.startsWith('favorite:') || c.startsWith('delete:'),
+        ),
+        isEmpty,
+      );
+      await done(t);
+    },
+  );
+
   testWidgets('左右键 / Home End / 箭头 / 胶片条', (t) async {
     await pump(t, ViewerFixture.gallery());
     await key(t, LogicalKeyboardKey.arrowLeft);

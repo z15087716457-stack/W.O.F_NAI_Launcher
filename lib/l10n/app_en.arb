@@ -1409,12 +1409,6 @@
   "localGallery_trashTitle": "Trash",
   "localGallery_trashEmpty": "Trash is empty",
   "localGallery_trashHint": "Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.",
-  "localGallery_trashCount": "{count} items",
-  "@localGallery_trashCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashRestore": "Restore",
   "localGallery_trashRestoreAll": "Restore all",
   "localGallery_trashRestoreFailed": "Failed to restore",
@@ -1425,19 +1419,12 @@
     }
   },
   "localGallery_trashDeleteAll": "Delete permanently",
-  "localGallery_trashDeleteAllConfirm": "This will permanently delete all {count} files in the trash immediately. This cannot be undone.",
-  "@localGallery_trashDeleteAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashDeletedForever": "Permanently deleted {count} files",
   "@localGallery_trashDeletedForever": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_trashFileMissing": "File no longer on disk",
   "localGallery_movedImages": "Moved {count} images",
   "@localGallery_movedImages": {
     "placeholders": {
@@ -3983,7 +3970,6 @@
   "settings_geistDark": "Geist Dark",
   "settings_geistLight": "Geist Light",
   "settings_geistDescription": "One appearance across your studio. Black or white surfaces, with blue accents.",
-  "updateCapsuleLabel": "Update",
   "updateWaitForTask": "Wait for the current task to finish before restarting",
   "updateLater": "Later",
   "nav_tagWiki": "Tag Wiki",
@@ -11106,7 +11092,6 @@
   "ag_retry": "Retry",
   "ag_initFailed": "Agent couldn't start",
   "ag_toggle": "NAI Agent",
-  "ag_yesterday": "Yesterday",
   "ag_attachmentTag": "Attached",
   "ag_zoomClose": "Close",
   "ag_thought": "Thought",
@@ -11590,6 +11575,50 @@
     "placeholders": {
       "time": {
         "type": "String"
+      }
+    }
+  },
+  "ag_chatJustNow": "Just now",
+  "localGallery_recentViews": "Recently viewed",
+  "localGallery_recentViewsEmpty": "No recently viewed images",
+  "localGallery_deleteForever": "Delete permanently",
+  "localGallery_deleteForeverConfirm": "Permanently delete the selected {count} files? This cannot be undone.",
+  "@localGallery_deleteForeverConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeMinutes": "{count}m",
+  "@ag_chatAgeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeHours": "{count}h",
+  "@ag_chatAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeDays": "{count}d",
+  "@ag_chatAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeWeeks": "{count}w",
+  "@ag_chatAgeWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

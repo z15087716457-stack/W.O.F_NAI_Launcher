@@ -15,6 +15,8 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/storage_keys.dart';
+import '../../../core/database/database_providers.dart';
+import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
@@ -67,7 +69,8 @@ import '../../widgets/gallery/gallery_favorite_menu.dart';
 import '../../widgets/gallery/gallery_floating_bulk_bar.dart';
 import '../../widgets/gallery/gallery_inspector_panel.dart';
 import '../../widgets/gallery/gallery_state_views.dart';
-import '../../widgets/gallery/gallery_trash_panel.dart';
+import '../../../data/services/gallery/gallery_delete_pool_store.dart';
+import '../../../data/services/gallery/gallery_trash_service.dart';
 import '../../widgets/gallery/local_gallery_filter_bar.dart';
 import '../../widgets/gallery/local_gallery_toolbar.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
@@ -330,7 +333,15 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    const LocalGalleryFilterBar(),
+                                    if (ref.watch(
+                                          localGalleryNotifierProvider.select(
+                                            (s) => s.browseScope,
+                                          ),
+                                        ) ==
+                                        GalleryBrowseScope.trash)
+                                      _buildTrashToolbar()
+                                    else
+                                      const LocalGalleryFilterBar(),
                                     Expanded(
                                       child: _buildBody(
                                         state.error,
@@ -344,6 +355,14 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                                 SizedBox(
                                   width: galleryInspectorWidth,
                                   child: GalleryInspectorPanel(
+                                    onRestore:
+                                        ref.watch(
+                                              localGalleryNotifierProvider
+                                                  .select((s) => s.browseScope),
+                                            ) ==
+                                            GalleryBrowseScope.trash
+                                        ? (path) => _restoreTrash([path])
+                                        : null,
                                     onAction: (record, action) =>
                                         _handleImageAction(record, action),
                                     onOpenViewer: _openViewerForPath,
@@ -448,7 +467,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                 onDeleteCollection: _handleDeleteCollection,
                 onCollectionReorder: _handleCollectionReorder,
                 onMoveCollection: _handleMoveCollection,
-                onOpenTrash: () => showGalleryTrashPanel(context, ref),
+                onOpenTrash: () => _handleCategorySelected('trash'),
                 onRefresh: _refreshGallery,
                 indexedCount: totalCount,
               ),
@@ -498,6 +517,20 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
                   ? _removeSelectedFromCollection
                   : null,
               onDelete: _deleteSelectedImages,
+              onRestore:
+                  ref.watch(
+                        localGalleryNotifierProvider.select(
+                          (s) => s.browseScope,
+                        ),
+                      ) ==
+                      GalleryBrowseScope.trash
+                  ? () => _restoreTrash(
+                      ref
+                          .read(localGallerySelectionNotifierProvider)
+                          .selectedIds
+                          .toList(),
+                    )
+                  : null,
             ),
           ),
         ),
@@ -516,6 +549,117 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     );
   }
 
+  bool _trashBusy = false;
+
+  Widget _buildTrashToolbar() {
+    final l = context.l10n;
+    return SizedBox(
+      height: localGalleryFilterBarHeight,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                l.localGallery_trashHint,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ),
+            TextButton(
+              onPressed: _trashBusy
+                  ? null
+                  : () async => _restoreTrash(
+                      await const GalleryDeletePoolStore().load(),
+                    ),
+              child: Text(l.localGallery_trashRestoreAll),
+            ),
+            TextButton(
+              onPressed: _trashBusy
+                  ? null
+                  : () async => _purgeTrash(
+                      await const GalleryDeletePoolStore().load(),
+                    ),
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: Text(l.localGallery_trashDeleteAll),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _restoreTrash(List<String> paths) async {
+    if (_trashBusy || paths.isEmpty) return;
+    setState(() => _trashBusy = true);
+    try {
+      final manager = await ref.read(databaseManagerProvider.future);
+      final source = manager.getDataSource<GalleryDataSource>('gallery');
+      if (source == null) throw StateError('Gallery database unavailable');
+      final restored = await GalleryTrashService(
+        restoreIndex: (paths) async {
+          await source.batchRestoreDeleted(paths);
+        },
+      ).restore(paths);
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .clearRecentlyDeleted(restored);
+      ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+      await ref
+          .read(localGalleryNotifierProvider.notifier)
+          .refresh(scan: false);
+      await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+      if (mounted) {
+        AppToast.success(
+          context,
+          context.l10n.localGallery_trashRestored(restored.length),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        AppToast.error(context, context.l10n.localGallery_trashRestoreFailed);
+      }
+    } finally {
+      if (mounted) setState(() => _trashBusy = false);
+    }
+  }
+
+  Future<void> _purgeTrash(List<String> paths) async {
+    if (_trashBusy || paths.isEmpty || !mounted) return;
+    final l = context.l10n;
+    final confirmed = await ThemedConfirmDialog.show(
+      context: context,
+      title: l.localGallery_deleteForever,
+      content: l.localGallery_deleteForeverConfirm(paths.length),
+      confirmText: l.localGallery_deleteForever,
+      cancelText: l.common_cancel,
+      type: ThemedConfirmDialogType.danger,
+      icon: Icons.delete_forever_outlined,
+    );
+    if (!confirmed || !mounted || _trashBusy) return;
+    setState(() => _trashBusy = true);
+    try {
+      final removed = await GalleryTrashService(
+        restoreIndex: (_) async {},
+      ).purge(paths);
+      ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+      await ref.read(localGalleryNotifierProvider.notifier).reloadTimeline();
+      if (mounted) {
+        AppToast.success(
+          context,
+          l.localGallery_trashDeletedForever(removed.length),
+        );
+      }
+    } catch (error) {
+      if (mounted) AppToast.error(context, l.common_error);
+    } finally {
+      if (mounted) setState(() => _trashBusy = false);
+    }
+  }
+
   /// Delete 键：多选时删除选中内容，否则删除当前查看的图片
   Future<void> _deleteFocusedOrSelected() async {
     final selection = ref.read(localGallerySelectionNotifierProvider);
@@ -525,6 +669,11 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     }
     final focused = ref.read(localGalleryFocusNotifierProvider);
     if (focused == null) return;
+    if (ref.read(localGalleryNotifierProvider).browseScope ==
+        GalleryBrowseScope.trash) {
+      await _purgeTrash([focused]);
+      return;
+    }
     final records = await ref
         .read(localGalleryNotifierProvider.notifier)
         .loadRecords([focused]);
@@ -542,7 +691,8 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
 
   /// 打开大图：以当前图片为中心读取前后各 60 张的完整记录供左右切换
   Future<void> _openViewerAt(int index) async {
-    final criteria = ref.read(localGalleryNotifierProvider).filterCriteria;
+    final gallery = ref.read(localGalleryNotifierProvider);
+    final criteria = gallery.filterCriteria;
     final category = ref.read(galleryCategoryNotifierProvider).selectedCategory;
     final collections = ref.read(collectionNotifierProvider).collections;
     final collection = collections
@@ -552,10 +702,13 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
       ImageViewerOpener.showGallery(
         context,
         initialIndex: index,
-        scopeName:
-            collection?.name ??
-            category?.galleryLabel(context) ??
-            (criteria.searchQuery.isEmpty ? null : criteria.searchQuery),
+        scopeName: gallery.browseScope == GalleryBrowseScope.trash
+            ? context.l10n.localGallery_trashTitle
+            : gallery.browseScope == GalleryBrowseScope.recent
+            ? context.l10n.localGallery_recentViews
+            : collection?.name ??
+                  category?.galleryLabel(context) ??
+                  (criteria.searchQuery.isEmpty ? null : criteria.searchQuery),
       ),
     );
   }
@@ -699,9 +852,22 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
         .reorder(parentId, oldIndex, newIndex);
   }
 
-  void _handleCategorySelected(String? id) {
+  int _categoryRequest = 0;
+  Future<void> _handleCategorySelected(String? id) async {
+    final request = ++_categoryRequest;
+    ref.read(localGallerySelectionNotifierProvider.notifier).exit();
+    ref.read(localGalleryFocusNotifierProvider.notifier).clear();
+    await ref.read(localGalleryNotifierProvider.notifier).setBrowseScope(
+      switch (id) {
+        'recent' => GalleryBrowseScope.recent,
+        'trash' => GalleryBrowseScope.trash,
+        _ => GalleryBrowseScope.library,
+      },
+    );
+    if (!mounted || request != _categoryRequest) return;
     // 更新分类选中状态
     ref.read(galleryCategoryNotifierProvider.notifier).selectCategory(id);
+    if (id == 'recent' || id == 'trash') return;
 
     // 获取分类信息以便应用过滤
     final categoryState = ref.read(galleryCategoryNotifierProvider);
@@ -971,6 +1137,13 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
   }
 
   Future<void> _deleteSelectedImages() async {
+    if (ref.read(localGalleryNotifierProvider).browseScope ==
+        GalleryBrowseScope.trash) {
+      await _purgeTrash(
+        ref.read(localGallerySelectionNotifierProvider).selectedIds.toList(),
+      );
+      return;
+    }
     final selectionState = ref.read(localGallerySelectionNotifierProvider);
     // 保存 context 相关数据（必须在任何 await 之前）
     final l10n = context.l10n;
@@ -1719,6 +1892,41 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     LocalImageRecord record,
     Offset position,
   ) async {
+    if (ref.read(localGalleryNotifierProvider).browseScope ==
+        GalleryBrowseScope.trash) {
+      final overlay =
+          Navigator.of(
+                context,
+                rootNavigator: true,
+              ).overlay!.context.findRenderObject()!
+              as RenderBox;
+      final anchor = overlay.globalToLocal(position);
+      final action = await showMenu<String>(
+        context: context,
+        useRootNavigator: true,
+        menuPadding: const EdgeInsets.symmetric(vertical: 4),
+        position: RelativeRect.fromRect(
+          Rect.fromLTWH(anchor.dx, anchor.dy, 0, 0),
+          Offset.zero & overlay.size,
+        ),
+        items: [
+          PopupMenuItem(
+            height: 34,
+            value: 'restore',
+            child: Text(context.l10n.localGallery_trashRestore),
+          ),
+          PopupMenuItem(
+            height: 34,
+            value: 'purge',
+            child: Text(context.l10n.localGallery_deleteForever),
+          ),
+        ],
+      );
+      if (!mounted) return;
+      if (action == 'restore') await _restoreTrash([record.path]);
+      if (action == 'purge') await _purgeTrash([record.path]);
+      return;
+    }
     final metadata = record.metadata;
     final action = await LocalImageContextMenu.show(
       context,
@@ -1741,6 +1949,12 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     LocalImageContextAction action, {
     NaiImageMetadata? metadata,
   }) async {
+    if (ref.read(localGalleryNotifierProvider).browseScope ==
+            GalleryBrowseScope.trash &&
+        action == LocalImageContextAction.delete) {
+      await _purgeTrash([record.path]);
+      return;
+    }
     final availableMetadata = metadata ?? record.metadata;
 
     switch (action) {

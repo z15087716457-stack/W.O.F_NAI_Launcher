@@ -771,6 +771,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         id: chat.id,
         title: chat.title.trim().isEmpty ? c.initialChatName : chat.title,
         createdAt: chat.createdAt.toLocal(),
+        lastActivityAt: chat.lastActivityAt?.toLocal(),
         canExport: !chat.isDraft && chat.sessionFile != null,
         state: waiting
             ? AgentChatState.waitingUser

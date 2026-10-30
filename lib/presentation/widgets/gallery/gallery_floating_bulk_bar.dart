@@ -19,6 +19,7 @@ class GalleryFloatingBulkBar extends ConsumerWidget {
     required this.onAddToCollection,
     required this.onDelete,
     this.onRemoveFromCollection,
+    this.onRestore,
   });
 
   final Future<void> Function() onSelectAllResults;
@@ -31,6 +32,7 @@ class GalleryFloatingBulkBar extends ConsumerWidget {
 
   /// 仅在按收藏集浏览时提供
   final VoidCallback? onRemoveFromCollection;
+  final VoidCallback? onRestore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -156,41 +158,51 @@ class GalleryFloatingBulkBar extends ConsumerWidget {
                       ),
                     ),
                     divider(),
-                    action(
-                      StudioIcons.galleryMove,
-                      l10n.localGallery_moveSelected,
-                      hasSelection ? onMove : null,
-                    ),
-                    action(
-                      StudioIcons.galleryCopy,
-                      l10n.localGallery_copyTo,
-                      hasSelection ? onCopy : null,
-                    ),
-                    action(
-                      StudioIcons.galleryArchive,
-                      l10n.localGallery_packSelected,
-                      hasSelection ? onPack : null,
-                    ),
-                    action(
-                      StudioIcons.galleryEdit,
-                      l10n.localGallery_editMetadata,
-                      hasSelection ? onEditMetadata : null,
-                    ),
-                    action(
-                      StudioIcons.galleryCollection,
-                      l10n.localGallery_addToCollection,
-                      hasSelection ? onAddToCollection : null,
-                    ),
-                    if (onRemoveFromCollection != null)
+                    if (onRestore != null)
                       action(
-                        StudioIcons.galleryBookmarkRemove,
-                        l10n.localGallery_removeFromCollection,
-                        hasSelection ? onRemoveFromCollection : null,
+                        StudioIcons.galleryUndo,
+                        l10n.localGallery_trashRestore,
+                        hasSelection ? onRestore : null,
+                      )
+                    else ...[
+                      action(
+                        StudioIcons.galleryMove,
+                        l10n.localGallery_moveSelected,
+                        hasSelection ? onMove : null,
                       ),
+                      action(
+                        StudioIcons.galleryCopy,
+                        l10n.localGallery_copyTo,
+                        hasSelection ? onCopy : null,
+                      ),
+                      action(
+                        StudioIcons.galleryArchive,
+                        l10n.localGallery_packSelected,
+                        hasSelection ? onPack : null,
+                      ),
+                      action(
+                        StudioIcons.galleryEdit,
+                        l10n.localGallery_editMetadata,
+                        hasSelection ? onEditMetadata : null,
+                      ),
+                      action(
+                        StudioIcons.galleryCollection,
+                        l10n.localGallery_addToCollection,
+                        hasSelection ? onAddToCollection : null,
+                      ),
+                      if (onRemoveFromCollection != null)
+                        action(
+                          StudioIcons.galleryBookmarkRemove,
+                          l10n.localGallery_removeFromCollection,
+                          hasSelection ? onRemoveFromCollection : null,
+                        ),
+                    ],
                     divider(),
                     action(
                       StudioIcons.galleryTrash,
-                      l10n.common_delete,
+                      onRestore == null
+                          ? l10n.common_delete
+                          : l10n.localGallery_deleteForever,
                       hasSelection ? onDelete : null,
                       danger: true,
                       key: const Key('gallery-bulk-delete'),

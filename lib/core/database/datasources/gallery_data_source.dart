@@ -332,7 +332,10 @@ class GalleryDataSource extends EnhancedBaseDataSource
     }
   }
 
-  Future<Map<String, int?>> getImageIdsByPaths(List<String> filePaths) async {
+  Future<Map<String, int?>> getImageIdsByPaths(
+    List<String> filePaths, {
+    bool includeDeleted = false,
+  }) async {
     if (filePaths.isEmpty) return {};
 
     return _trackQuery('getImageIdsByPaths', () async {
@@ -349,7 +352,7 @@ class GalleryDataSource extends EnhancedBaseDataSource
 
               final dbResult = await db.rawQuery('''
                   SELECT id, file_path FROM $_imagesTable
-                  WHERE file_path IN ($placeholders) AND +is_deleted = 0
+                  WHERE file_path IN ($placeholders) ${includeDeleted ? '' : 'AND +is_deleted = 0'}
                   ''', chunk);
 
               for (final row in dbResult) {

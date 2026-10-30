@@ -4,8 +4,9 @@ part of 'gallery_data_source.dart';
 extension GalleryDataSourceDimensions on GalleryDataSource {
   /// 按路径批量读取已索引图片的宽高（只返回宽高均为正数的条目）。
   Future<Map<String, (int, int)>> getImageDimensionsByPaths(
-    List<String> filePaths,
-  ) async {
+    List<String> filePaths, {
+    bool includeDeleted = false,
+  }) async {
     if (filePaths.isEmpty) return {};
 
     return _trackQuery('getImageDimensionsByPaths', () async {
@@ -18,7 +19,7 @@ extension GalleryDataSourceDimensions on GalleryDataSource {
               final placeholders = List.filled(batch.length, '?').join(',');
               final rows = await db.rawQuery('''
                   SELECT file_path, width, height FROM ${GalleryDataSource._imagesTable}
-                  WHERE file_path IN ($placeholders) AND +is_deleted = 0
+                  WHERE file_path IN ($placeholders) ${includeDeleted ? '' : 'AND +is_deleted = 0'}
                   ''', batch);
               GalleryDataSourceDimensions._collectDimensions(rows, result);
             },

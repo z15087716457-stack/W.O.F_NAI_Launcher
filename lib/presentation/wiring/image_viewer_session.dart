@@ -20,11 +20,13 @@ class ImageViewerSession {
     required this.mode,
     this.scope,
     this.save,
+    this.libraryReadOnly = false,
     this.dimensions = const {},
     this.dates = const {},
   });
   final ImageViewerBackend backend;
   final ViewerMode mode;
+  final bool libraryReadOnly;
   final ViewerScope? scope;
   final Future<void> Function(ImageDetailData)? save;
   final Map<String, ({int width, int height})> dimensions;

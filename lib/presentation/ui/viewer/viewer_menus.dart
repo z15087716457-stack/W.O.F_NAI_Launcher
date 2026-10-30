@@ -206,7 +206,7 @@ class _ViewerMoreMenuState extends State<ViewerMoreMenu> {
     final meta =
         data.detail?.key == item.key &&
         data.detail!.status == ViewerMetaStatus.ready;
-    final gallery = data.mode == ViewerMode.gallery;
+    final gallery = data.mode == ViewerMode.gallery && !data.libraryReadOnly;
     void run(ViewerAction a) {
       scope.controller.closePopover();
       scope.actions.onAction(item.key, a);
@@ -360,7 +360,7 @@ class ViewerHelpDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final data = ViewerPageScope.of(context).data;
-    final gallery = data.mode == ViewerMode.gallery;
+    final gallery = data.mode == ViewerMode.gallery && !data.libraryReadOnly;
     List<String> k(ViewerCommand c) {
       final a =
           data.keys[c]?.firstOrNull ?? ViewerKeys.defaults[c]?.firstOrNull;

@@ -1409,12 +1409,6 @@
   "localGallery_trashTitle": "휴지통",
   "localGallery_trashEmpty": "휴지통이 비어 있습니다",
   "localGallery_trashHint": "휴지통의 파일은 아직 디스크에 있으며 다음 실행 때 완전히 삭제됩니다. 복원한 파일은 즉시 갤러리로 돌아갑니다.",
-  "localGallery_trashCount": "{count}개 항목",
-  "@localGallery_trashCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashRestore": "복원",
   "localGallery_trashRestoreAll": "모두 복원",
   "localGallery_trashRestoreFailed": "복원하지 못했습니다",
@@ -1425,19 +1419,12 @@
     }
   },
   "localGallery_trashDeleteAll": "영구 삭제",
-  "localGallery_trashDeleteAllConfirm": "휴지통의 파일 {count}개를 모두 즉시 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.",
-  "@localGallery_trashDeleteAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashDeletedForever": "파일 {count}개를 영구 삭제했습니다",
   "@localGallery_trashDeletedForever": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_trashFileMissing": "파일이 더 이상 디스크에 없습니다",
   "localGallery_movedImages": "이미지 {count}장을 이동했습니다",
   "@localGallery_movedImages": {
     "placeholders": {
@@ -3983,7 +3970,6 @@
   "settings_geistDark": "Geist 다크",
   "settings_geistLight": "Geist 라이트",
   "settings_geistDescription": "스튜디오 전체에 하나의 외관. 검정 또는 흰색 바탕에 파란색 강조.",
-  "updateCapsuleLabel": "업데이트",
   "updateWaitForTask": "현재 작업이 끝난 뒤 다시 시작하세요",
   "updateLater": "나중에",
   "nav_tagWiki": "태그 백과",
@@ -11094,7 +11080,6 @@
   "ag_retry": "다시 시도",
   "ag_initFailed": "Agent를 시작하지 못했습니다",
   "ag_toggle": "NAI Agent",
-  "ag_yesterday": "어제",
   "ag_attachmentTag": "첨부",
   "ag_zoomClose": "닫기",
   "ag_thought": "생각함",
@@ -11578,6 +11563,50 @@
     "placeholders": {
       "time": {
         "type": "String"
+      }
+    }
+  },
+  "ag_chatJustNow": "방금",
+  "localGallery_recentViews": "최근 본 이미지",
+  "localGallery_recentViewsEmpty": "최근 본 이미지가 없습니다",
+  "localGallery_deleteForever": "영구 삭제",
+  "localGallery_deleteForeverConfirm": "선택한 파일 {count}개를 영구 삭제합니다. 되돌릴 수 없습니다.",
+  "@localGallery_deleteForeverConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeMinutes": "{count}m",
+  "@ag_chatAgeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeHours": "{count}h",
+  "@ag_chatAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeDays": "{count}d",
+  "@ag_chatAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeWeeks": "{count}w",
+  "@ag_chatAgeWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

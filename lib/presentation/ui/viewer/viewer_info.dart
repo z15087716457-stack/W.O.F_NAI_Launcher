@@ -82,7 +82,7 @@ class _Header extends StatelessWidget {
     final data = scope.data;
     final ctrl = scope.controller;
     final item = data.current;
-    final gallery = data.mode == ViewerMode.gallery;
+    final gallery = data.mode == ViewerMode.gallery && !data.libraryReadOnly;
     final chrome = WindowChromeScope.activeOf(context);
     return WindowHeader(
       enabled: !drawer,

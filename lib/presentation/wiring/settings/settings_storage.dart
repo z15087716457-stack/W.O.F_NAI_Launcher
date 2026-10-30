@@ -19,6 +19,7 @@ import '../../utils/gallery_extra_root_add_flow.dart';
 import 'settings_dialogs.dart';
 import 'settings_inventory.dart';
 import 'settings_caches.dart';
+import 'settings_storage_snapshot.dart';
 
 final settingsStorageBusyProvider = StateProvider<bool>((ref) => false);
 final settingsLastScanProvider = StateProvider<DateTime?>((ref) => null);
@@ -62,9 +63,23 @@ class SettingsStorageActions {
     ref.invalidate(settingsGalleryExtraRootsProvider);
     ref.invalidate(settingsStorageLocationsProvider);
     ref.invalidate(settingsStorageDataProvider);
+    ref.invalidate(settingsStorageSignatureProvider);
+    ref.invalidate(settingsStorageCachedProvider);
     ref.invalidate(settingsCacheStatsProvider);
     ref.invalidate(settingsDictionaryDataProvider);
     ref.invalidate(settingsCacheFootprintProvider);
+  }
+
+  Future<void> recount() async {
+    final manual = ref.read(settingsStorageManualRefreshProvider.notifier);
+    if (manual.state) return;
+    manual.state = true;
+    try {
+      refresh();
+      await ref.read(settingsStorageDataProvider.future);
+    } finally {
+      if (manual.mounted) manual.state = false;
+    }
   }
 
   Future<void> open(String path) async {

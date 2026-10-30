@@ -34,6 +34,9 @@ class ImageViewerOpener {
     final backend = ImageViewerBackend(
       keys: entries.map((entry) => entry.path).toList(),
       initialKey: target,
+      onViewed: gallery.browseScope == GalleryBrowseScope.trash
+          ? null
+          : (path) => unawaited(notifier.recordViewed(path)),
       load: (paths) async {
         await notifier.loadRecords(paths);
         return [
@@ -57,6 +60,7 @@ class ImageViewerOpener {
     final session = ImageViewerSession(
       backend: backend,
       mode: ViewerMode.gallery,
+      libraryReadOnly: gallery.browseScope == GalleryBrowseScope.trash,
       scope: ViewerScope(
         name: scopeName,
         sort: viewerSortOf(gallery.sortField),

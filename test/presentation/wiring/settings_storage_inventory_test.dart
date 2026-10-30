@@ -9,6 +9,17 @@ import 'package:nai_launcher/presentation/wiring/settings/settings_inventory.dar
 import 'package:path/path.dart' as p;
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
 import 'package:nai_launcher/presentation/wiring/settings/settings_storage_measurement.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_storage_snapshot.dart';
+
+class _CachedStorage extends SettingsStorageSnapshotStore {
+  _CachedStorage(this.data);
+  SettingsStorageData data;
+  @override
+  SettingsStorageData? read(String signature) => data;
+  @override
+  Future<void> save(String signature, SettingsStorageData data) async =>
+      this.data = data;
+}
 
 class _Paths extends PathProviderPlatform {
   _Paths(this.root);
@@ -27,6 +38,66 @@ void main() {
     addTearDown(() => PathProviderPlatform.instance = original);
   });
   tearDown(() async => temp.delete(recursive: true));
+
+  test(
+    'cached totals resolve before traversal and survive a failed silent refresh',
+    () async {
+      final blocked = Completer<SettingsDirectoryMeasurement>();
+      final started = Completer<void>();
+      final cached = _CachedStorage(
+        SettingsStorageData(
+          measuredAt: DateTime(2026, 10, 29),
+          slices: const [
+            SettingsStorageSlice(SettingsStorageKind.images, 500),
+            SettingsStorageSlice(SettingsStorageKind.thumbnails, 30),
+          ],
+          thumbnailBytes: 30,
+          thumbnailCount: 3,
+        ),
+      );
+      final container = ProviderContainer(
+        overrides: [
+          settingsFoldersProvider.overrideWith(
+            (ref) async => {
+              for (final folder in SettingsFolder.values)
+                folder: p.join(temp.path, folder.name),
+            },
+          ),
+          settingsGalleryExtraRootsProvider.overrideWith((ref) async => []),
+          ragDirectoryProvider.overrideWithValue(
+            () async => Directory(p.join(temp.path, 'rag')),
+          ),
+          settingsStorageSnapshotStoreProvider.overrideWithValue(cached),
+          settingsMeasurementsProvider.overrideWithValue(
+            SettingsDirectoryMeasurements(
+              measure: (_, __) {
+                if (!started.isCompleted) started.complete();
+                return blocked.future;
+              },
+            ),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      final pending = container.read(settingsStorageDataProvider.future);
+      final old = await container
+          .read(settingsStorageCachedProvider.future)
+          .timeout(const Duration(seconds: 1));
+      expect(old!.totalBytes, 530);
+      expect(old.thumbnailBytes, 30);
+      expect(container.read(settingsStorageDataProvider).isLoading, isTrue);
+      expect(container.read(settingsStorageManualRefreshProvider), isFalse);
+      await started.future;
+      final failed = expectLater(pending, throwsStateError);
+      blocked.completeError(StateError('fixture read failure'));
+      await failed;
+      expect(
+        container.read(settingsStorageCachedProvider).requireValue!.totalBytes,
+        530,
+      );
+      expect(cached.data.thumbnailBytes, 30);
+    },
+  );
 
   test(
     'production isolate completes, shares a pending read and can refresh',

@@ -16,6 +16,7 @@ import 'package:nai_launcher/data/services/thumbnail_service.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_focus_provider.dart';
+import 'package:nai_launcher/presentation/providers/gallery_recent_views_provider.dart';
 import 'package:nai_launcher/presentation/providers/local_gallery_provider.dart';
 import 'package:nai_launcher/presentation/providers/selection_mode_provider.dart';
 import 'package:nai_launcher/presentation/widgets/gallery/local_image_card.dart';
@@ -208,6 +209,10 @@ void main() {
         expect(selection().isActive, isTrue);
         expect(selection().selectedIds, {records[3].path});
         expect(focused(), records[3].path);
+        final recentlyViewed = await container
+            .read(galleryRecentViewsStoreProvider)
+            .load();
+        expect(recentlyViewed.map((e) => e.path), [records[0].path]);
         expect(tester.widget<LocalImageCard>(card(0)).isSelected, isFalse);
         expect(tester.widget<LocalImageCard>(card(0)).isFocused, isFalse);
         expect(tester.widget<LocalImageCard>(card(3)).isSelected, isTrue);

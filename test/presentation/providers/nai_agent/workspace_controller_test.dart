@@ -263,6 +263,31 @@ void main() {
   );
 
   test(
+    'sending to an older chat moves it first; merely opening it preserves activity',
+    () async {
+      final c = controller();
+      await c.initialize();
+      await c.saveComposer('first');
+      await c.send();
+      final first = c.selected!.chat.id;
+      await c.createChat();
+      await c.saveComposer('second');
+      await c.send();
+      final second = c.selected!.chat.id;
+      expect(c.chats.first.id, second);
+      final firstAt = c.chats.firstWhere((chat) => chat.id == first).activityAt;
+      await c.selectChat(first);
+      expect(c.chats.first.id, second);
+      expect(c.selected!.chat.activityAt, firstAt);
+      await c.saveComposer('continue');
+      await c.send();
+      expect(c.chats.first.id, first);
+      expect(c.selected!.chat.activityAt.isAfter(firstAt), isTrue);
+      expect(calls, 3);
+    },
+  );
+
+  test(
     'switching away discards draft composer and staged attachments',
     () async {
       final c = controller();

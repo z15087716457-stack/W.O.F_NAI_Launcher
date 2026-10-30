@@ -126,7 +126,8 @@ class LocalGalleryFilterBar extends ConsumerWidget {
               ),
             ),
           ),
-          if (state.isTimeSorted)
+          if (state.isTimeSorted &&
+              state.browseScope != GalleryBrowseScope.recent)
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: GalleryGroupModeButton(

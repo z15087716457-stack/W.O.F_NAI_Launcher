@@ -1141,7 +1141,10 @@ class LocalGalleryServiceImpl implements LocalGalleryService {
 
     // 批量获取数据库信息
     final paths = files.map((f) => f.path).toList();
-    final pathToIdMap = await _dataSource.getImageIdsByPaths(paths);
+    final pathToIdMap = await _dataSource.getImageIdsByPaths(
+      paths,
+      includeDeleted: true,
+    );
 
     // 收集有效的图片ID
     final imageIds = pathToIdMap.values.whereType<int>().toList();

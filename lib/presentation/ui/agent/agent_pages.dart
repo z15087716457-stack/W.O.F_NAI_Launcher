@@ -339,11 +339,7 @@ class _RecentRowState extends State<_RecentRow> {
                 ),
               ),
               Text(
-                agentDay(
-                  widget.chat.createdAt,
-                  s.data.now,
-                  context.l10n.ag_yesterday,
-                ),
+                agentChatAge(context, widget.chat.activityAt, s.data.now),
                 style: UiText.mono(11, color: c.faint),
               ),
             ],

@@ -120,6 +120,32 @@ void main() {
 
       final pool = await const GalleryDeletePoolStore().load();
       expect(pool, contains(fileB.path));
+      expect(
+        (await dataSource.getImageIdsByPaths([fileB.path]))[fileB.path],
+        isNull,
+      );
+      expect(
+        (await dataSource.getImageIdsByPaths([
+          fileB.path,
+        ], includeDeleted: true))[fileB.path],
+        isNotNull,
+      );
+      expect(await dataSource.getImageDimensionsByPaths([fileB.path]), isEmpty);
+      expect(
+        (await dataSource.getImageDimensionsByPaths([
+          fileB.path,
+        ], includeDeleted: true))[fileB.path],
+        (100, 100),
+      );
+      service.removeImagesFromMemory([fileB.path]);
+      expect(
+        (await service.getRecordsForPaths([fileB.path])).single.path,
+        fileB.path,
+      );
+      expect(
+        (await service.getTimelineEntries()).map((e) => e.path),
+        isNot(contains(fileB.path)),
+      );
     });
 
     test(

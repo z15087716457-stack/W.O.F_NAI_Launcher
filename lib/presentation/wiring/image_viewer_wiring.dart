@@ -139,7 +139,9 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
       _translationTokens.clear();
       _collections = null;
       _collectionRequest++;
-      if (widget.session.mode == ViewerMode.gallery && _selection != null) {
+      if (!widget.session.libraryReadOnly &&
+          widget.session.mode == ViewerMode.gallery &&
+          _selection != null) {
         unawaited(_run(_refreshCollections));
       }
     }
@@ -523,6 +525,14 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
         });
       }
     }
+    if (widget.session.libraryReadOnly) {
+      actions.retainAll({
+        ViewerAction.copyImage,
+        ViewerAction.copyPath,
+        ViewerAction.copyAllPrompts,
+        ViewerAction.showInFolder,
+      });
+    }
     final data = ViewerViewData(
       mode: widget.session.mode,
       items: items,
@@ -538,6 +548,7 @@ class _ImageViewerWiringState extends ConsumerState<ImageViewerWiring> {
         loading: backend.metadataLoading,
       ),
       actions: actions,
+      libraryReadOnly: widget.session.libraryReadOnly,
       infoOpen: _infoOpen,
       fullscreen: window.fullscreen,
       kritaConnected: krita,

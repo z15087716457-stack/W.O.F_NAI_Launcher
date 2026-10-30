@@ -347,6 +347,19 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     chats = [...drafts, ...listed];
   }
 
+  Future<void> _recordActivity(AgentChatRuntime runtime) async {
+    runtime.chat = await store.updateChat(
+      runtime.workspace.id,
+      runtime.chat.id,
+      lastActivityAt: DateTime.now(),
+    );
+    if (selectedWorkspace?.id != runtime.workspace.id) return;
+    chats = [
+      for (final chat in chats)
+        if (chat.id == runtime.chat.id) runtime.chat else chat,
+    ]..sort((a, b) => b.activityAt.compareTo(a.activityAt));
+  }
+
   Future<void> createChat() async {
     final workspace = selectedWorkspace!;
     // Publish the draft before the first await, so rapid '+' clicks coalesce.
@@ -1283,6 +1296,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       runtime.running = true;
       if (visionNotice != null) runtime.visionNotice = visionNotice;
       await _persist(runtime);
+      await _recordActivity(runtime);
       _notify();
       final responding = client.prompt(
         prompt.text,
@@ -1322,6 +1336,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
         runtime.running = false;
       }
       await _persist(runtime);
+      await _recordActivity(runtime);
       return true;
     } catch (error) {
       runtime.error = _error(error, runtime);

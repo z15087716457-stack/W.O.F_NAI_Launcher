@@ -232,12 +232,15 @@ class AgentChatInfo {
     required this.id,
     required this.title,
     required this.createdAt,
+    this.lastActivityAt,
     this.state = AgentChatState.idle,
     this.canExport = false,
   });
   final String id;
   final String title;
   final DateTime createdAt;
+  final DateTime? lastActivityAt;
+  DateTime get activityAt => lastActivityAt ?? createdAt;
   final AgentChatState state;
 
   /// 已有 Pi 会话文件，可导出 `.jsonl`。

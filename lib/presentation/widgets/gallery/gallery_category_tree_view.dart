@@ -203,10 +203,19 @@ class _GalleryCategoryTreeViewState extends State<GalleryCategoryTreeView> {
       ),
       if (widget.onOpenTrash != null)
         _CategoryItem(
+          key: const Key('gallery-sidebar-recent'),
+          icon: Icons.history_outlined,
+          label: l10n.localGallery_recentViews,
+          isSelected: widget.selectedCategoryId == 'recent',
+          showChevronSlot: false,
+          onTap: () => widget.onCategorySelected('recent'),
+        ),
+      if (widget.onOpenTrash != null)
+        _CategoryItem(
           key: const Key('gallery-sidebar-trash'),
           icon: StudioIcons.galleryTrash,
           label: l10n.localGallery_trashTitle,
-          isSelected: false,
+          isSelected: widget.selectedCategoryId == 'trash',
           showChevronSlot: false,
           onTap: widget.onOpenTrash!,
         ),

@@ -334,6 +334,7 @@ class ViewerViewData {
     required this.items,
     required this.currentKey,
     required this.now,
+    this.libraryReadOnly = false,
     this.position = 0,
     this.total = 0,
     this.scope,
@@ -352,6 +353,7 @@ class ViewerViewData {
   });
 
   final ViewerMode mode;
+  final bool libraryReadOnly;
 
   /// 胶片条窗口（按范围的排序）。
   final List<ViewerItem> items;

@@ -275,7 +275,8 @@ class _ImageViewerPageState extends State<ImageViewerPage>
     _focus.requestFocus();
   }
 
-  bool get _gallery => _data.mode == ViewerMode.gallery;
+  bool get _gallery =>
+      _data.mode == ViewerMode.gallery && !_data.libraryReadOnly;
 
   bool _can(ViewerAction a) => _data.actions.contains(a);
 
@@ -344,6 +345,7 @@ class _ImageViewerPageState extends State<ImageViewerPage>
 
   @override
   void requestDelete() {
+    if (_data.libraryReadOnly) return;
     final item = _current;
     if (item == null) return;
     if (item.protected) {

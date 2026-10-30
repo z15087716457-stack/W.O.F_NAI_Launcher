@@ -481,7 +481,8 @@ class SettingsStoragePage extends StatelessWidget {
     return _StaleStorageRefresh(
       measuredAt: st.measuredAt,
       computing: st.computing,
-      onRefresh: s.actions.onRecomputeStorage,
+      onRefresh:
+          s.actions.onRefreshStorageSilently ?? s.actions.onRecomputeStorage,
       child: SettingsPageFrame(
         title: SettingsPageTitle(
           eyebrow: SettingsFormat.eyebrow(SettingsPageId.storage),

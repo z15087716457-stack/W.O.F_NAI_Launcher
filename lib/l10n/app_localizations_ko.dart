@@ -2975,11 +2975,6 @@ class AppLocalizationsKo extends AppLocalizations {
       '휴지통의 파일은 아직 디스크에 있으며 다음 실행 때 완전히 삭제됩니다. 복원한 파일은 즉시 갤러리로 돌아갑니다.';
 
   @override
-  String localGallery_trashCount(Object count) {
-    return '$count개 항목';
-  }
-
-  @override
   String get localGallery_trashRestore => '복원';
 
   @override
@@ -2997,17 +2992,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get localGallery_trashDeleteAll => '영구 삭제';
 
   @override
-  String localGallery_trashDeleteAllConfirm(Object count) {
-    return '휴지통의 파일 $count개를 모두 즉시 영구 삭제합니다. 이 작업은 되돌릴 수 없습니다.';
-  }
-
-  @override
   String localGallery_trashDeletedForever(Object count) {
     return '파일 $count개를 영구 삭제했습니다';
   }
-
-  @override
-  String get localGallery_trashFileMissing => '파일이 더 이상 디스크에 없습니다';
 
   @override
   String localGallery_movedImages(Object count) {
@@ -6721,9 +6708,6 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String get settings_geistDescription =>
       '스튜디오 전체에 하나의 외관. 검정 또는 흰색 바탕에 파란색 강조.';
-
-  @override
-  String get updateCapsuleLabel => '업데이트';
 
   @override
   String get updateWaitForTask => '현재 작업이 끝난 뒤 다시 시작하세요';
@@ -20928,9 +20912,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_toggle => 'NAI Agent';
 
   @override
-  String get ag_yesterday => '어제';
-
-  @override
   String get ag_attachmentTag => '첨부';
 
   @override
@@ -21954,5 +21935,42 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String blocks_tempCreatedByYou(String time) {
     return '$time 이 블록을 만들었습니다.';
+  }
+
+  @override
+  String get ag_chatJustNow => '방금';
+
+  @override
+  String get localGallery_recentViews => '최근 본 이미지';
+
+  @override
+  String get localGallery_recentViewsEmpty => '최근 본 이미지가 없습니다';
+
+  @override
+  String get localGallery_deleteForever => '영구 삭제';
+
+  @override
+  String localGallery_deleteForeverConfirm(int count) {
+    return '선택한 파일 $count개를 영구 삭제합니다. 되돌릴 수 없습니다.';
+  }
+
+  @override
+  String ag_chatAgeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String ag_chatAgeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String ag_chatAgeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String ag_chatAgeWeeks(int count) {
+    return '${count}w';
   }
 }

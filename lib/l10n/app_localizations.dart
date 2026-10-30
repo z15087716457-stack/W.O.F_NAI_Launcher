@@ -5520,12 +5520,6 @@ abstract class AppLocalizations {
   /// **'Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.'**
   String get localGallery_trashHint;
 
-  /// No description provided for @localGallery_trashCount.
-  ///
-  /// In en, this message translates to:
-  /// **'{count} items'**
-  String localGallery_trashCount(Object count);
-
   /// No description provided for @localGallery_trashRestore.
   ///
   /// In en, this message translates to:
@@ -5556,23 +5550,11 @@ abstract class AppLocalizations {
   /// **'Delete permanently'**
   String get localGallery_trashDeleteAll;
 
-  /// No description provided for @localGallery_trashDeleteAllConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'This will permanently delete all {count} files in the trash immediately. This cannot be undone.'**
-  String localGallery_trashDeleteAllConfirm(Object count);
-
   /// No description provided for @localGallery_trashDeletedForever.
   ///
   /// In en, this message translates to:
   /// **'Permanently deleted {count} files'**
   String localGallery_trashDeletedForever(Object count);
-
-  /// No description provided for @localGallery_trashFileMissing.
-  ///
-  /// In en, this message translates to:
-  /// **'File no longer on disk'**
-  String get localGallery_trashFileMissing;
 
   /// No description provided for @localGallery_movedImages.
   ///
@@ -11937,12 +11919,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'One appearance across your studio. Black or white surfaces, with blue accents.'**
   String get settings_geistDescription;
-
-  /// No description provided for @updateCapsuleLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Update'**
-  String get updateCapsuleLabel;
 
   /// No description provided for @updateWaitForTask.
   ///
@@ -37504,12 +37480,6 @@ abstract class AppLocalizations {
   /// **'NAI Agent'**
   String get ag_toggle;
 
-  /// No description provided for @ag_yesterday.
-  ///
-  /// In en, this message translates to:
-  /// **'Yesterday'**
-  String get ag_yesterday;
-
   /// No description provided for @ag_attachmentTag.
   ///
   /// In en, this message translates to:
@@ -39357,6 +39327,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You created this{time}.'**
   String blocks_tempCreatedByYou(String time);
+
+  /// No description provided for @ag_chatJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get ag_chatJustNow;
+
+  /// No description provided for @localGallery_recentViews.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently viewed'**
+  String get localGallery_recentViews;
+
+  /// No description provided for @localGallery_recentViewsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No recently viewed images'**
+  String get localGallery_recentViewsEmpty;
+
+  /// No description provided for @localGallery_deleteForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get localGallery_deleteForever;
+
+  /// No description provided for @localGallery_deleteForeverConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanently delete the selected {count} files? This cannot be undone.'**
+  String localGallery_deleteForeverConfirm(int count);
+
+  /// No description provided for @ag_chatAgeMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m'**
+  String ag_chatAgeMinutes(int count);
+
+  /// No description provided for @ag_chatAgeHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h'**
+  String ag_chatAgeHours(int count);
+
+  /// No description provided for @ag_chatAgeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d'**
+  String ag_chatAgeDays(int count);
+
+  /// No description provided for @ag_chatAgeWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}w'**
+  String ag_chatAgeWeeks(int count);
 }
 
 class _AppLocalizationsDelegate

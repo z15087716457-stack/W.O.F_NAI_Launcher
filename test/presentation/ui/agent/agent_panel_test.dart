@@ -422,6 +422,47 @@ void main() {
       expect(rec.last('selectChat'), 'c2');
     });
 
+    testWidgets(
+      'chat timestamps use activity minutes, hours, days and weeks with exact-time tooltips',
+      (tester) async {
+        final base = AgentFixture.view(AgentScene.chat);
+        final ages = [
+          Duration.zero,
+          const Duration(minutes: 5),
+          const Duration(hours: 3),
+          const Duration(days: 2),
+          const Duration(days: 21),
+        ];
+        await pumpAgent(
+          tester,
+          data: _copy(
+            base,
+            chats: [
+              for (final (i, age) in ages.indexed)
+                AgentChatInfo(
+                  id: 'age-$i',
+                  title: 'chat $i',
+                  createdAt: DateTime(2020),
+                  lastActivityAt: base.now.subtract(age),
+                ),
+            ],
+          ),
+        );
+        await tester.tap(find.byKey(const Key('agent-chats')));
+        await tester.pump();
+        for (final text in ['刚刚', '5m', '3h', '2d', '3w']) {
+          expect(find.text(text), findsOneWidget);
+        }
+        final row = find.byKey(const Key('agent-chat-age-1'));
+        expect(
+          find.descendant(of: row, matching: find.byType(Tooltip)),
+          findsOneWidget,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+      },
+    );
+
     testWidgets('更多菜单：重命名聊天', (tester) async {
       final rec = await pumpAgent(tester);
       await tester.tap(find.byKey(const Key('agent-more')));

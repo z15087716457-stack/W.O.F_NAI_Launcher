@@ -1405,12 +1405,6 @@
   "localGallery_trashTitle": "刪除池",
   "localGallery_trashEmpty": "刪除池是空的",
   "localGallery_trashHint": "池內檔案仍在磁碟上，下次啟動時徹底刪除；恢復後立即回到圖庫。",
-  "localGallery_trashCount": "{count} 項",
-  "@localGallery_trashCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashRestore": "恢復",
   "localGallery_trashRestoreAll": "全部恢復",
   "localGallery_trashRestoreFailed": "恢復失敗",
@@ -1421,19 +1415,12 @@
     }
   },
   "localGallery_trashDeleteAll": "徹底刪除全部",
-  "localGallery_trashDeleteAllConfirm": "將立即物理刪除池內全部 {count} 個檔案，不可恢復。",
-  "@localGallery_trashDeleteAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashDeletedForever": "已徹底刪除 {count} 個檔案",
   "@localGallery_trashDeletedForever": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_trashFileMissing": "檔案已不在磁碟上",
   "localGallery_movedImages": "已移動 {count} 張圖片",
   "@localGallery_movedImages": {
     "placeholders": {
@@ -3983,7 +3970,6 @@
   "settings_geistDark": "Geist 深色",
   "settings_geistLight": "Geist 淺色",
   "settings_geistDescription": "全工作室統一外觀：黑白灰底色，藍色作為操作強調。",
-  "updateCapsuleLabel": "更新",
   "updateWaitForTask": "任務進行中，結束後即可重啟更新",
   "updateLater": "稍後",
   "nav_tagWiki": "標籤百科",
@@ -11554,7 +11540,6 @@
   "ag_retry": "重試",
   "ag_initFailed": "Agent 沒能啟動",
   "ag_toggle": "NAI Agent",
-  "ag_yesterday": "昨天",
   "ag_attachmentTag": "附件",
   "ag_zoomClose": "關閉",
   "ag_thought": "已思考",
@@ -12163,6 +12148,50 @@
     "placeholders": {
       "time": {
         "type": "String"
+      }
+    }
+  },
+  "ag_chatJustNow": "剛剛",
+  "localGallery_recentViews": "最近瀏覽",
+  "localGallery_recentViewsEmpty": "還沒有瀏覽記錄",
+  "localGallery_deleteForever": "徹底刪除",
+  "localGallery_deleteForeverConfirm": "將立即物理刪除選中的 {count} 個檔案，不可恢復。",
+  "@localGallery_deleteForeverConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeMinutes": "{count}m",
+  "@ag_chatAgeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeHours": "{count}h",
+  "@ag_chatAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeDays": "{count}d",
+  "@ag_chatAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeWeeks": "{count}w",
+  "@ag_chatAgeWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

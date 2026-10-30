@@ -34,6 +34,10 @@ import 'rag_provider.dart';
 import 'gallery_rag_query_provider.dart';
 import 'collection_provider.dart';
 import 'gallery_category_provider.dart';
+import 'gallery_recent_views_provider.dart';
+import 'gallery_trash_provider.dart';
+import '../../data/services/gallery/gallery_recent_views_store.dart';
+import 'package:path/path.dart' as p;
 
 part 'local_gallery_provider.freezed.dart';
 part 'local_gallery_provider.g.dart';
@@ -140,10 +144,14 @@ class GalleryTimeline {
   }
 }
 
+enum GalleryBrowseScope { library, recent, trash }
+
 /// 本地画廊状态
 @freezed
 class LocalGalleryState with _$LocalGalleryState {
   const factory LocalGalleryState({
+    @Default(GalleryBrowseScope.library) GalleryBrowseScope browseScope,
+
     /// 当前过滤与排序下的全部条目（连续滚动，无分页）
     @Default(GalleryTimeline.empty) GalleryTimeline timeline,
 
@@ -223,7 +231,11 @@ class LocalGalleryState with _$LocalGalleryState {
 
   /// 当前结果数（有过滤时为过滤结果数）
   int get resultCount =>
-      hasFilters || timeline.semanticRanked ? filteredCount : totalCount;
+      browseScope != GalleryBrowseScope.library ||
+          hasFilters ||
+          timeline.semanticRanked
+      ? filteredCount
+      : totalCount;
 
   /// 当前排序是否按时间（按天/月分组只在时间排序下有意义）
   bool get isTimeSorted =>
@@ -232,7 +244,9 @@ class LocalGalleryState with _$LocalGalleryState {
 
   /// 实际生效的分组方式
   GalleryGroupMode get effectiveGroupMode =>
-      isTimeSorted && !timeline.semanticRanked
+      isTimeSorted &&
+          !timeline.semanticRanked &&
+          browseScope != GalleryBrowseScope.recent
       ? groupMode
       : GalleryGroupMode.none;
 }
@@ -552,11 +566,55 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
     _ragCancellation?.cancel();
     try {
       final service = await getService();
-      var entries = await service.getTimelineEntries();
+      final scope = state.browseScope;
+      var entries = scope == GalleryBrowseScope.trash
+          ? List<GalleryTimelineEntry>.of(
+              await ref.refresh(galleryTrashTimelineProvider.future),
+            )
+          : await service.getTimelineEntries();
       if (serial != _timelineSerial) return;
 
+      if (scope == GalleryBrowseScope.recent) {
+        final byPath = {
+          for (final entry in entries) galleryFilePathKey(entry.path): entry,
+        };
+        entries = [
+          for (final recent in _recentOrder)
+            if (byPath[galleryFilePathKey(recent.path)] case final entry?)
+              entry,
+        ];
+      } else if (scope == GalleryBrowseScope.trash) {
+        final query = state.filterCriteria.searchQuery.trim().toLowerCase();
+        entries = entries
+            .where(
+              (e) =>
+                  query.isEmpty ||
+                  p.basename(e.path).toLowerCase().contains(query),
+            )
+            .toList();
+        final order = GallerySort(
+          field: state.sortField,
+          direction: state.sortDirection,
+        );
+        entries.sort(
+          (a, b) => order.compareFiles(
+            modifiedAtA: a.modifiedAt,
+            modifiedAtB: b.modifiedAt,
+            createdAtA: a.modifiedAt,
+            createdAtB: b.modifiedAt,
+            fileSizeA: a.size ?? 0,
+            fileSizeB: b.size ?? 0,
+            fileNameA: p.basename(a.path),
+            fileNameB: p.basename(b.path),
+            imageAreaA: (a.width ?? 0) * (a.height ?? 0),
+            imageAreaB: (b.width ?? 0) * (b.height ?? 0),
+          ),
+        );
+      }
+
       // 防复活屏：服务层重扫/重建期间可能返回尚未摘除的软删图
-      if (_recentlyDeletedKeys.isNotEmpty) {
+      if (scope != GalleryBrowseScope.trash &&
+          _recentlyDeletedKeys.isNotEmpty) {
         entries = entries
             .where(
               (e) => !_recentlyDeletedKeys.contains(galleryFilePathKey(e.path)),
@@ -583,7 +641,9 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
               entries,
               datasetId: newDataset ? current.datasetId + 1 : current.datasetId,
             ),
-            filteredCount: service.filteredCount,
+            filteredCount: scope == GalleryBrowseScope.library
+                ? service.filteredCount
+                : entries.length,
             totalCount: service.totalCount,
             // Browsing/filter/sort changes are not library mutations.
             contentRevision:
@@ -592,7 +652,8 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
           ),
         );
       }
-      if (ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
+      if (scope == GalleryBrowseScope.library &&
+          ref.read(ragSettingsProvider).enabledFor(RagSource.gallery)) {
         unawaited(
           _loadGalleryRag(
             serial,
@@ -719,6 +780,33 @@ class LocalGalleryNotifier extends _$LocalGalleryNotifier {
   Future<void> reloadTimeline() async {
     if (!state.isInitialized) return;
     await _reloadTimeline(newDataset: false);
+  }
+
+  List<GalleryRecentView> _recentOrder = [];
+  int _browseRequest = 0;
+
+  Future<void> recordViewed(String path) async {
+    if (state.browseScope == GalleryBrowseScope.trash) return;
+    await ref.read(galleryRecentViewsStoreProvider).record(path);
+  }
+
+  Future<void> setBrowseScope(GalleryBrowseScope scope) async {
+    final request = ++_browseRequest;
+    if (scope == state.browseScope && scope != GalleryBrowseScope.recent) {
+      return;
+    }
+    if (scope == GalleryBrowseScope.recent) {
+      _recentOrder = await ref.read(galleryRecentViewsStoreProvider).load();
+      if (request != _browseRequest) return;
+    }
+    _markRecordsStale();
+    _setState(
+      state.copyWith(
+        browseScope: scope,
+        filterCriteria: FilterCriteria(naiOnly: state.filterCriteria.naiOnly),
+      ),
+    );
+    await _applyFilters();
   }
 
   /// 已缓存的完整记录（未加载时返回 null，不触发加载）。

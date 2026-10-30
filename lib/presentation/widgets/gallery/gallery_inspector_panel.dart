@@ -35,6 +35,7 @@ class GalleryInspectorPanel extends ConsumerStatefulWidget {
     required this.onOpenViewer,
     required this.onClose,
     required this.onFavoriteMenu,
+    this.onRestore,
   });
 
   /// 复用参数、发送、在文件夹中显示、删除等操作（由宿主执行确认与跳转）
@@ -45,6 +46,7 @@ class GalleryInspectorPanel extends ConsumerStatefulWidget {
   onAction;
   final void Function(String path) onOpenViewer;
   final VoidCallback onClose;
+  final ValueChanged<String>? onRestore;
   final void Function(LocalImageRecord record, Offset anchor) onFavoriteMenu;
 
   @override
@@ -180,22 +182,24 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
             ],
             const Spacer(),
             if (record != null) ...[
-              Builder(
-                builder: (buttonContext) => _HeaderButton(
-                  icon: record.isFavorite
-                      ? StudioIcons.galleryHeartFilled
-                      : StudioIcons.galleryHeart,
-                  tooltip: l10n.common_favorite,
-                  onPressed: () {
-                    final box = buttonContext.findRenderObject() as RenderBox?;
-                    if (box == null) return;
-                    widget.onFavoriteMenu(
-                      record,
-                      box.localToGlobal(Offset.zero),
-                    );
-                  },
+              if (widget.onRestore == null)
+                Builder(
+                  builder: (buttonContext) => _HeaderButton(
+                    icon: record.isFavorite
+                        ? StudioIcons.galleryHeartFilled
+                        : StudioIcons.galleryHeart,
+                    tooltip: l10n.common_favorite,
+                    onPressed: () {
+                      final box =
+                          buttonContext.findRenderObject() as RenderBox?;
+                      if (box == null) return;
+                      widget.onFavoriteMenu(
+                        record,
+                        box.localToGlobal(Offset.zero),
+                      );
+                    },
+                  ),
                 ),
-              ),
               _HeaderButton(
                 icon: StudioIcons.galleryReveal,
                 tooltip: l10n.localGallery_showInFolder,
@@ -206,7 +210,9 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
               ),
               _HeaderButton(
                 icon: StudioIcons.galleryTrash,
-                tooltip: l10n.common_delete,
+                tooltip: widget.onRestore == null
+                    ? l10n.common_delete
+                    : l10n.localGallery_deleteForever,
                 onPressed: () =>
                     widget.onAction(record, LocalImageContextAction.delete),
               ),
@@ -463,6 +469,16 @@ class _GalleryInspectorPanelState extends ConsumerState<GalleryInspectorPanel> {
     final theme = Theme.of(context);
     final compact = MediaQuery.sizeOf(context).height < 820;
     final l10n = context.l10n;
+    if (widget.onRestore != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: FilledButton.icon(
+          onPressed: () => widget.onRestore!(record.path),
+          icon: const Icon(StudioIcons.galleryUndo, size: 16),
+          label: Text(l10n.localGallery_trashRestore),
+        ),
+      );
+    }
     final isKritaConnected = ref.watch(
       kritaBridgeNotifierProvider.select(
         (state) => state.status == KritaBridgeStatus.connected,

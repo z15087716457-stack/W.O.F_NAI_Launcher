@@ -33,6 +33,7 @@ import 'settings_backups.dart';
 import 'settings_connections.dart';
 import 'settings_edits.dart';
 import 'settings_inventory.dart';
+import 'settings_storage_snapshot.dart';
 import 'settings_caches.dart';
 import 'settings_dictionary_update.dart';
 import 'settings_models.dart';
@@ -240,7 +241,23 @@ SettingsViewData settingsViewData(
       ),
   ];
   final lastScan = ref.watch(settingsLastScanProvider);
-  final measured = storage.valueOrNull;
+  final isStoragePage =
+      page == SettingsPageId.storage || page == SettingsPageId.overview;
+  final configurationKey = isStoragePage
+      ? ref.watch(settingsStorageSignatureProvider).valueOrNull
+      : null;
+  final previousMeasurement = storage.valueOrNull;
+  final cachedMeasurement = isStoragePage
+      ? ref.watch(settingsStorageCachedProvider).valueOrNull
+      : null;
+  final measured =
+      previousMeasurement != null &&
+          (previousMeasurement.configurationKey == null ||
+              previousMeasurement.configurationKey == configurationKey)
+      ? previousMeasurement
+      : cachedMeasurement?.configurationKey == configurationKey
+      ? cachedMeasurement
+      : null;
   final dictionary = page == SettingsPageId.dictionaries
       ? ref.watch(settingsDictionaryDataProvider).valueOrNull
       : null;
@@ -297,7 +314,9 @@ SettingsViewData settingsViewData(
       slices: measured?.slices ?? const [],
       diskLabel: measured?.diskLabel ?? locations?.diskLabel ?? '',
       diskFree: measured?.diskFree,
-      computing: storage.isLoading,
+      computing:
+          storage.isLoading &&
+          (measured == null || ref.watch(settingsStorageManualRefreshProvider)),
       roots:
           locations?.roots.map((root) {
             final previous = measured?.roots.where((r) => r.id == root.id);

@@ -14,6 +14,7 @@ class ImageViewerBackend extends ChangeNotifier {
     this.deleteImage,
     this.restoreImage,
     this.pageSize = 60,
+    this.onViewed,
   }) : _keys = keys.toSet().toList(),
        currentKey = keys.contains(initialKey) ? initialKey : keys.firstOrNull;
 
@@ -22,6 +23,7 @@ class ImageViewerBackend extends ChangeNotifier {
   final Future<bool> Function(String)? deleteImage;
   final Future<void> Function(String)? restoreImage;
   final int pageSize;
+  final void Function(String)? onViewed;
   final List<String> _keys;
   final _sources = <String, ImageDetailData>{};
   int _start = 0;
@@ -83,6 +85,7 @@ class ImageViewerBackend extends ChangeNotifier {
     if (_disposed || index < 0) return;
     final serial = ++_selectionSerial;
     currentKey = key;
+    onViewed?.call(key);
     metadata = null;
     metadataLoading = true;
     _changed();

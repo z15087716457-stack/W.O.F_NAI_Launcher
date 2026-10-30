@@ -2977,11 +2977,6 @@ class AppLocalizationsJa extends AppLocalizations {
       'ゴミ箱内のファイルはディスクに残っており、次回起動時に完全に削除されます。復元するとすぐにギャラリーへ戻ります。';
 
   @override
-  String localGallery_trashCount(Object count) {
-    return '$count 件';
-  }
-
-  @override
   String get localGallery_trashRestore => '復元';
 
   @override
@@ -2999,17 +2994,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get localGallery_trashDeleteAll => '完全に削除';
 
   @override
-  String localGallery_trashDeleteAllConfirm(Object count) {
-    return 'ゴミ箱内の $count 個のファイルを今すぐ完全に削除します。元に戻せません。';
-  }
-
-  @override
   String localGallery_trashDeletedForever(Object count) {
     return '$count 個のファイルを完全に削除しました';
   }
-
-  @override
-  String get localGallery_trashFileMissing => 'ファイルはディスク上にありません';
 
   @override
   String localGallery_movedImages(Object count) {
@@ -6712,9 +6699,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings_geistDescription => 'スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。';
-
-  @override
-  String get updateCapsuleLabel => '更新';
 
   @override
   String get updateWaitForTask => 'タスク完了後に再起動して更新できます';
@@ -20858,9 +20842,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_toggle => 'NAI Agent';
 
   @override
-  String get ag_yesterday => '昨日';
-
-  @override
   String get ag_attachmentTag => '添付';
 
   @override
@@ -21883,5 +21864,42 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String blocks_tempCreatedByYou(String time) {
     return '$timeこのブロックを作成しました。';
+  }
+
+  @override
+  String get ag_chatJustNow => 'たった今';
+
+  @override
+  String get localGallery_recentViews => '最近見た画像';
+
+  @override
+  String get localGallery_recentViewsEmpty => '閲覧履歴はありません';
+
+  @override
+  String get localGallery_deleteForever => '完全に削除';
+
+  @override
+  String localGallery_deleteForeverConfirm(int count) {
+    return '選択した $count 個のファイルを完全に削除します。元に戻せません。';
+  }
+
+  @override
+  String ag_chatAgeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String ag_chatAgeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String ag_chatAgeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String ag_chatAgeWeeks(int count) {
+    return '${count}w';
   }
 }

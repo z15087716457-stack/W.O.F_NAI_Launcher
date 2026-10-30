@@ -189,6 +189,16 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
   final _query = TextEditingController();
   final _focus = FocusNode();
   Timer? _debounce;
+  Timer? _clock;
+  DateTime? _now;
+
+  @override
+  void initState() {
+    super.initState();
+    _clock = Timer.periodic(const Duration(minutes: 1), (_) {
+      setState(() => _now = DateTime.now());
+    });
+  }
 
   /// 正文命中：(查的词, 结果)；结果为 null = 正在查。
   (String, List<AgentChatHit>?)? _hits;
@@ -205,6 +215,7 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
   @override
   void dispose() {
     _debounce?.cancel();
+    _clock?.cancel();
     _query.dispose();
     _focus.dispose();
     super.dispose();
@@ -345,72 +356,78 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                                 s.run(() => a.onSelectChat(chat.id));
                               }
                             },
-                            builder: (context, hover) => Row(
-                              spacing: 9,
-                              children: [
-                                Container(
-                                  width: 7,
-                                  height: 7,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: switch (chat.state) {
-                                      AgentChatState.waitingUser => c.warn,
-                                      AgentChatState.running => c.accent,
-                                      AgentChatState.idle =>
-                                        chat.id == d.chat.id
-                                            ? c.ink
-                                            : Colors.transparent,
-                                    },
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    chat.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: UiText.sans(
-                                      12.5,
-                                      weight: chat.id == d.chat.id
-                                          ? FontWeight.w500
-                                          : FontWeight.w400,
-                                      color: c.ink,
+                            builder: (context, hover) => Tooltip(
+                              message: agentChatTimeTooltip(
+                                context,
+                                chat.activityAt,
+                              ),
+                              child: Row(
+                                spacing: 9,
+                                children: [
+                                  Container(
+                                    width: 7,
+                                    height: 7,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: switch (chat.state) {
+                                        AgentChatState.waitingUser => c.warn,
+                                        AgentChatState.running => c.accent,
+                                        AgentChatState.idle =>
+                                          chat.id == d.chat.id
+                                              ? c.ink
+                                              : Colors.transparent,
+                                      },
                                     ),
                                   ),
-                                ),
-                                if (hover &&
-                                    chat.state == AgentChatState.idle &&
-                                    !(chat.id == d.chat.id &&
-                                        d.status != AgentRunStatus.idle))
-                                  AgentIconButton(
-                                    key: Key('agent-chat-delete-${chat.id}'),
-                                    small: true,
-                                    glyph: AgentGlyphs.trash,
-                                    tooltip: l.ag_menuDeleteChat,
-                                    onPressed: () => _confirmDelete(chat.id),
-                                  )
-                                else
-                                  Text(
-                                    switch (chat.state) {
-                                      AgentChatState.waitingUser =>
-                                        l.ag_chatWaiting,
-                                      AgentChatState.running =>
-                                        l.ag_chatRunning,
-                                      AgentChatState.idle => agentDay(
-                                        chat.createdAt,
-                                        d.now,
-                                        l.ag_yesterday,
+                                  Expanded(
+                                    child: Text(
+                                      chat.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: UiText.sans(
+                                        12.5,
+                                        weight: chat.id == d.chat.id
+                                            ? FontWeight.w500
+                                            : FontWeight.w400,
+                                        color: c.ink,
                                       ),
-                                    },
-                                    style: UiText.mono(
-                                      11,
-                                      color:
-                                          chat.state ==
-                                              AgentChatState.waitingUser
-                                          ? c.warn
-                                          : c.faint,
                                     ),
                                   ),
-                              ],
+                                  if (hover &&
+                                      chat.state == AgentChatState.idle &&
+                                      !(chat.id == d.chat.id &&
+                                          d.status != AgentRunStatus.idle))
+                                    AgentIconButton(
+                                      key: Key('agent-chat-delete-${chat.id}'),
+                                      small: true,
+                                      glyph: AgentGlyphs.trash,
+                                      tooltip: l.ag_menuDeleteChat,
+                                      onPressed: () => _confirmDelete(chat.id),
+                                    )
+                                  else
+                                    Text(
+                                      switch (chat.state) {
+                                        AgentChatState.waitingUser =>
+                                          l.ag_chatWaiting,
+                                        AgentChatState.running =>
+                                          l.ag_chatRunning,
+                                        AgentChatState.idle => agentChatAge(
+                                          context,
+                                          chat.activityAt,
+                                          _now ?? d.now,
+                                        ),
+                                      },
+                                      style: UiText.mono(
+                                        11,
+                                        color:
+                                            chat.state ==
+                                                AgentChatState.waitingUser
+                                            ? c.warn
+                                            : c.faint,
+                                      ),
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                       if (_hits case (

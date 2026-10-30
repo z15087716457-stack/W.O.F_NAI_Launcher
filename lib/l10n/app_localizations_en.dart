@@ -3058,11 +3058,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Files in the trash are still on disk and will be removed permanently on the next launch. Restored files return to the gallery immediately.';
 
   @override
-  String localGallery_trashCount(Object count) {
-    return '$count items';
-  }
-
-  @override
   String get localGallery_trashRestore => 'Restore';
 
   @override
@@ -3080,17 +3075,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get localGallery_trashDeleteAll => 'Delete permanently';
 
   @override
-  String localGallery_trashDeleteAllConfirm(Object count) {
-    return 'This will permanently delete all $count files in the trash immediately. This cannot be undone.';
-  }
-
-  @override
   String localGallery_trashDeletedForever(Object count) {
     return 'Permanently deleted $count files';
   }
-
-  @override
-  String get localGallery_trashFileMissing => 'File no longer on disk';
 
   @override
   String localGallery_movedImages(Object count) {
@@ -6891,9 +6878,6 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settings_geistDescription =>
       'One appearance across your studio. Black or white surfaces, with blue accents.';
-
-  @override
-  String get updateCapsuleLabel => 'Update';
 
   @override
   String get updateWaitForTask =>
@@ -21603,9 +21587,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_toggle => 'NAI Agent';
 
   @override
-  String get ag_yesterday => 'Yesterday';
-
-  @override
   String get ag_attachmentTag => 'Attached';
 
   @override
@@ -22652,5 +22633,42 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String blocks_tempCreatedByYou(String time) {
     return 'You created this$time.';
+  }
+
+  @override
+  String get ag_chatJustNow => 'Just now';
+
+  @override
+  String get localGallery_recentViews => 'Recently viewed';
+
+  @override
+  String get localGallery_recentViewsEmpty => 'No recently viewed images';
+
+  @override
+  String get localGallery_deleteForever => 'Delete permanently';
+
+  @override
+  String localGallery_deleteForeverConfirm(int count) {
+    return 'Permanently delete the selected $count files? This cannot be undone.';
+  }
+
+  @override
+  String ag_chatAgeMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String ag_chatAgeHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String ag_chatAgeDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String ag_chatAgeWeeks(int count) {
+    return '${count}w';
   }
 }

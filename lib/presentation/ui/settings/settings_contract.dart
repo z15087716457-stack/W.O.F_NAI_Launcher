@@ -887,6 +887,7 @@ enum SettingsFolder { images, vibes, thumbnails, appData, logs, agent }
 @immutable
 class SettingsStorageData {
   const SettingsStorageData({
+    this.configurationKey,
     this.slices = const [],
     this.diskLabel = '',
     this.diskFree,
@@ -905,6 +906,10 @@ class SettingsStorageData {
 
   /// 占用分类（新增：后台统计各目录大小，可缓存）；空 = 还没统计。
   final List<SettingsStorageSlice> slices;
+
+  /// Directory identity of a measured summary; avoids reusing old counts after
+  /// a configured source changes while a new traversal is still loading.
+  final String? configurationKey;
 
   /// 图片保存位置所在盘，例如 `E:`。
   final String diskLabel;
@@ -1970,6 +1975,7 @@ class SettingsActions {
     this.onShowShortcutHelp = _none,
     // 存储
     this.onRecomputeStorage = _none,
+    this.onRefreshStorageSilently,
     this.onAddGalleryRoot = _none,
     this.onRemoveGalleryRoot = _noId,
     this.onOpenGalleryRoot = _noId,
@@ -2121,6 +2127,7 @@ class SettingsActions {
   final VoidCallback onShowShortcutHelp;
 
   final VoidCallback onRecomputeStorage;
+  final VoidCallback? onRefreshStorageSilently;
   final VoidCallback onAddGalleryRoot;
   final ValueChanged<String> onRemoveGalleryRoot;
   final ValueChanged<String> onOpenGalleryRoot;

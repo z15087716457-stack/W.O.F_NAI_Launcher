@@ -26,6 +26,7 @@ import '../tag_expansion/tag_expansion_wrapper.dart';
 import '../common/studio_icons.dart';
 import '../../../core/rag/rag_settings.dart';
 import 'gallery_rag_search_menu.dart';
+import 'gallery_filter_widgets.dart';
 import '../../ui/kit/ui_colors.dart';
 import '../../ui/kit/ui_glyph.dart';
 import '../../ui/kit/ui_popover.dart';
@@ -320,7 +321,8 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
           ),
         ),
         SizedBox(width: compact ? 12 : 24),
-        _buildSortButton(theme, state, showLabel: !compact),
+        if (state.browseScope != GalleryBrowseScope.recent)
+          _buildSortButton(theme, state, showLabel: !compact),
         const SizedBox(width: 4),
         _ViewModeSegment(
           value: state.viewMode,
@@ -433,6 +435,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   List<String> _scopeSegments(LocalGalleryState state) {
     final l10n = context.l10n;
+    if (state.browseScope == GalleryBrowseScope.recent) {
+      return [l10n.localGallery_recentViews];
+    }
+    if (state.browseScope == GalleryBrowseScope.trash) {
+      return [l10n.localGallery_trashTitle];
+    }
     final criteria = state.filterCriteria;
     if (criteria.showFavoritesOnly) return [l10n.common_favorite];
     final collectionId = criteria.collectionId;
@@ -461,6 +469,12 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
 
   /// 当前搜索范围名称（收藏/收藏集/分类/日期范围），无范围时返回 null
   String? _searchScopeLabel(LocalGalleryState state) {
+    if (state.browseScope == GalleryBrowseScope.recent) {
+      return context.l10n.localGallery_recentViews;
+    }
+    if (state.browseScope == GalleryBrowseScope.trash) {
+      return context.l10n.localGallery_trashTitle;
+    }
     final criteria = state.filterCriteria;
     if (criteria.showFavoritesOnly || criteria.categoryId == 'favorites') {
       return context.l10n.common_favorite;
@@ -649,6 +663,8 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       tooltip: l10n.localGallery_sortButton,
       position: PopupMenuPosition.under,
       offset: const Offset(0, 4),
+      menuPadding: const EdgeInsets.symmetric(vertical: 4),
+      constraints: const BoxConstraints(minWidth: 128, maxWidth: 280),
       onSelected: (value) {
         if (value is GallerySortField) {
           apply(value, GallerySort.defaultDirectionFor(value));
@@ -658,21 +674,21 @@ class _LocalGalleryToolbarState extends ConsumerState<LocalGalleryToolbar> {
       },
       itemBuilder: (context) => [
         for (final (field, label) in fields)
-          CheckedPopupMenuItem<Object>(
+          GalleryChoiceMenuItem<Object>(
             value: field,
-            checked: field == state.sortField,
-            child: Text(label),
+            selected: field == state.sortField,
+            label: label,
           ),
         const PopupMenuDivider(),
-        CheckedPopupMenuItem<Object>(
+        GalleryChoiceMenuItem<Object>(
           value: GallerySortDirection.descending,
-          checked: descending,
-          child: Text(l10n.localGallery_sortDescending),
+          selected: descending,
+          label: l10n.localGallery_sortDescending,
         ),
-        CheckedPopupMenuItem<Object>(
+        GalleryChoiceMenuItem<Object>(
           value: GallerySortDirection.ascending,
-          checked: !descending,
-          child: Text(l10n.localGallery_sortAscending),
+          selected: !descending,
+          label: l10n.localGallery_sortAscending,
         ),
       ],
       child: Container(

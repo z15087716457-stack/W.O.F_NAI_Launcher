@@ -1409,12 +1409,6 @@
   "localGallery_trashTitle": "ゴミ箱",
   "localGallery_trashEmpty": "ゴミ箱は空です",
   "localGallery_trashHint": "ゴミ箱内のファイルはディスクに残っており、次回起動時に完全に削除されます。復元するとすぐにギャラリーへ戻ります。",
-  "localGallery_trashCount": "{count} 件",
-  "@localGallery_trashCount": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashRestore": "復元",
   "localGallery_trashRestoreAll": "すべて復元",
   "localGallery_trashRestoreFailed": "復元に失敗しました",
@@ -1425,19 +1419,12 @@
     }
   },
   "localGallery_trashDeleteAll": "完全に削除",
-  "localGallery_trashDeleteAllConfirm": "ゴミ箱内の {count} 個のファイルを今すぐ完全に削除します。元に戻せません。",
-  "@localGallery_trashDeleteAllConfirm": {
-    "placeholders": {
-      "count": {}
-    }
-  },
   "localGallery_trashDeletedForever": "{count} 個のファイルを完全に削除しました",
   "@localGallery_trashDeletedForever": {
     "placeholders": {
       "count": {}
     }
   },
-  "localGallery_trashFileMissing": "ファイルはディスク上にありません",
   "localGallery_movedImages": "{count} 個の画像を移動しました",
   "@localGallery_movedImages": {
     "placeholders": {
@@ -3983,7 +3970,6 @@
   "settings_geistDark": "Geist ダーク",
   "settings_geistLight": "Geist ライト",
   "settings_geistDescription": "スタジオ全体で共通の外観。白黒の背景にブルーのアクセント。",
-  "updateCapsuleLabel": "更新",
   "updateWaitForTask": "タスク完了後に再起動して更新できます",
   "updateLater": "後で",
   "nav_tagWiki": "タグ百科",
@@ -11094,7 +11080,6 @@
   "ag_retry": "再試行",
   "ag_initFailed": "Agent を起動できませんでした",
   "ag_toggle": "NAI Agent",
-  "ag_yesterday": "昨日",
   "ag_attachmentTag": "添付",
   "ag_zoomClose": "閉じる",
   "ag_thought": "思考済み",
@@ -11578,6 +11563,50 @@
     "placeholders": {
       "time": {
         "type": "String"
+      }
+    }
+  },
+  "ag_chatJustNow": "たった今",
+  "localGallery_recentViews": "最近見た画像",
+  "localGallery_recentViewsEmpty": "閲覧履歴はありません",
+  "localGallery_deleteForever": "完全に削除",
+  "localGallery_deleteForeverConfirm": "選択した {count} 個のファイルを完全に削除します。元に戻せません。",
+  "@localGallery_deleteForeverConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeMinutes": "{count}m",
+  "@ag_chatAgeMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeHours": "{count}h",
+  "@ag_chatAgeHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeDays": "{count}d",
+  "@ag_chatAgeDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "ag_chatAgeWeeks": "{count}w",
+  "@ag_chatAgeWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
       }
     }
   }

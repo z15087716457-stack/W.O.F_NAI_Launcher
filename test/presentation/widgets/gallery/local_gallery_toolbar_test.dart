@@ -19,6 +19,7 @@ import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/data/models/gallery/gallery_category.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_filter_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort.dart';
+import 'package:nai_launcher/presentation/widgets/gallery/gallery_filter_widgets.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort_store.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_view_mode.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
@@ -499,6 +500,14 @@ void main() {
 
     await tester.tap(find.byKey(const Key('gallery-toolbar-sort')));
     await tester.pumpAndSettle();
+    final rows = find.byType(GalleryChoiceMenuItem<Object>);
+    expect(rows, findsNWidgets(7));
+    for (final row in rows.evaluate()) {
+      expect(tester.getSize(find.byWidget(row.widget)).height, 34);
+    }
+    final nameLeft = tester.getTopLeft(find.text('文件名').last).dx;
+    expect(tester.getTopLeft(find.text('修改时间').last).dx, nameLeft);
+    expect(tester.getTopLeft(find.text('降序').last).dx, nameLeft);
     await tester.tap(find.text('文件名').last);
     await tester.pumpAndSettle();
     expect(notifier.sortCalls.last, (

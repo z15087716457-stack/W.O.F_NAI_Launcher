@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/localization_extension.dart';
 
 import '../kit/ui_colors.dart';
 import '../kit/ui_text.dart';
@@ -763,14 +764,19 @@ String agentTokens(int value) {
 String agentClock(DateTime t) =>
     '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
 
-/// 聊天列表里的相对时间：今天「16:12」，昨天「昨天」（交给调用方传入本地化词），更早「10-16」。
-String agentDay(DateTime t, DateTime now, String yesterday) {
-  final d = DateTime(t.year, t.month, t.day);
-  final today = DateTime(now.year, now.month, now.day);
-  final diff = today.difference(d).inDays;
-  if (diff <= 0) return agentClock(t);
-  if (diff == 1) return yesterday;
-  return '${t.month.toString().padLeft(2, '0')}-${t.day.toString().padLeft(2, '0')}';
+String agentChatAge(BuildContext context, DateTime at, DateTime now) {
+  final age = now.difference(at);
+  final l = context.l10n;
+  if (age.inMinutes < 1) return l.ag_chatJustNow;
+  if (age.inHours < 1) return l.ag_chatAgeMinutes(age.inMinutes);
+  if (age.inDays < 1) return l.ag_chatAgeHours(age.inHours);
+  if (age.inDays < 7) return l.ag_chatAgeDays(age.inDays);
+  return l.ag_chatAgeWeeks(age.inDays ~/ 7);
+}
+
+String agentChatTimeTooltip(BuildContext context, DateTime at) {
+  final local = MaterialLocalizations.of(context);
+  return '${local.formatFullDate(at)} ${local.formatTimeOfDay(TimeOfDay.fromDateTime(at))}';
 }
 
 /// 「8ms」「420ms」「3.1s」「1m 04s」。本地工具常在几十毫秒内完成，
