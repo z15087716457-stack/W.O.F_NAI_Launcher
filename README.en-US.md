@@ -38,6 +38,8 @@ Get the latest version from [Releases](https://github.com/z15087716457-stack/W.O
 
 Both versions support in-app updates. Your settings, gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. Updates and uninstallation leave them intact.
 
+> **Upgrading an older Portable to 2.2.4:** Exit the app completely, then extract this release over the existing program folder, keeping `user-data/` and `agent-data/`. Subsequent in-app updates use the corrected script. Setup updates are unaffected.
+
 > The installer is not code-signed yet. On first launch, Windows may say “Windows protected your PC.” Click “More info → Run anyway.” Each release includes SHA-256 checksums.
 
 ## What's new in 2.2
@@ -50,9 +52,9 @@ Both versions support in-app updates. Your settings, gallery database and Agent 
 
 **2.2.1 additions**: Let the Agent split prompts into temporary blocks, with whole-module or multiple translations inside. This update also fixes single-click history details, caret visibility over weighted text and update-manifest parsing, and adds individual-image browsing to the infinite canvas.
 
-**2.2.3 update**: Recent views and gallery-based trash browsing, matching filters in resource windows, better tag retrieval and co-occurrence ranking, activity-sorted Agent chats and original-history lookup. Workspace data moves into `.W.O.F/`; repeated index scans are fixed and built-in Skills are streamlined.
+**2.2.4 update**: Improved multi-image drops, image previews, native Tab suggestions, scroll-to-bottom on send and continuous chat deletion. MCP configuration is easier, and Pi can manage its own Skills, extensions, packages and settings through one on-demand tool. App data lives directly beside the program, and Portable updates no longer restore old managed files over the new version.
 
-See the [complete 2.2.3 changelog](CHANGELOG.md#223---2026-10-31) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.3). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+See the [complete 2.2.4 changelog](CHANGELOG.md#224---2026-10-31) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.4). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
 
 ## Get started in three steps
 

@@ -6,6 +6,7 @@ import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import 'nai_agent_session_provider.dart';
 import 'nai_agent_workspace_controller.dart';
 import 'nai_agent_questions.dart';
+import 'nai_agent_management.dart';
 import '../../../core/storage/secure_storage_service.dart';
 import 'dart:convert';
 import '../../../core/utils/localization_extension.dart';
@@ -116,6 +117,9 @@ final naiAgentClientFactoryProvider = Provider<AgentClientFactory>(
       systemPrompt: prompt,
       extraToolNames: const ['ask_user'],
       extensionPaths: settings.enabledExtensionPaths,
+      packages: ref
+          .read(naiAgentWorkspaceStoreProvider)
+          .packageConfig(workspace, settings),
       prompts: {
         'globalDirectory': ref
             .read(naiAgentWorkspaceStoreProvider)
@@ -133,6 +137,11 @@ final naiAgentClientFactoryProvider = Provider<AgentClientFactory>(
         'builtinExposure': settings.studioMcpExposure,
       },
       executeExtraTool: (name, params, cancellation) {
+        if (name == 'agent_manage') {
+          return ref
+              .read(naiAgentManagementProvider)
+              .execute(workspace.id, params, cancellation);
+        }
         final questions = ref.read(naiAgentQuestionsProvider);
         return name == '_nai_extension_ui'
             ? questions.askExtensionUi(

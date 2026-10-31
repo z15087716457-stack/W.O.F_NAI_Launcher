@@ -23,6 +23,7 @@ class NaiAgentSkill {
     this.mode = 'auto',
     this.error,
     this.shadowedBy,
+    this.packageSource,
   });
 
   factory NaiAgentSkill.fromJson(Map<String, dynamic> value) => NaiAgentSkill(
@@ -37,6 +38,7 @@ class NaiAgentSkill {
     mode: value['mode'] == 'manual' ? 'manual' : 'auto',
     error: value['error'] as String?,
     shadowedBy: value['shadowedBy'] as String?,
+    packageSource: value['packageSource'] as String?,
   );
 
   final String key, name, source, state, description, directory, file, mode;
@@ -45,6 +47,7 @@ class NaiAgentSkill {
   /// `description` | `name` | `missing` | `parse`.
   final String? error;
   final String? shadowedBy;
+  final String? packageSource;
   bool get builtin => source == 'builtin';
 
   /// Settings / composer text. Built-ins ship an English SKILL.md for the
@@ -111,12 +114,19 @@ final naiAgentSkillsProvider = FutureProvider.autoDispose
       ref.watch(naiAgentSkillRevisionProvider);
       final settings = ref.watch(
         naiAgentUiPreferencesProvider.select(
-          (value) => (value.settings.disabledSkills, value.settings.skillModes),
+          (value) => (
+            value.settings.disabledSkills,
+            value.settings.skillModes,
+            value.settings.packages,
+          ),
         ),
       );
       final store = ref.read(naiAgentWorkspaceStoreProvider);
       final paths = ref.read(naiAgentRuntimePathsProvider);
       final script = p.join(p.dirname(paths.host), 'list-skills.mjs');
+      final workspace = workspaceId == null
+          ? null
+          : await store.getWorkspace(workspaceId);
       final config = <String, dynamic>{
         'builtinDirectory': store.builtinSkillsDirectory.absolute.path,
         'globalDirectory': store.globalSkillsDirectory.absolute.path,
@@ -127,6 +137,12 @@ final naiAgentSkillsProvider = FutureProvider.autoDispose
               .path,
         'disabled': settings.$1,
         'modes': settings.$2,
+        'cwd': (workspace?.directory ?? store.root).absolute.path,
+        'agentDir': (workspace?.agentDirectory ?? store.root).absolute.path,
+        'packages': store.packageConfig(
+          workspace,
+          ref.read(naiAgentUiPreferencesProvider).settings,
+        ),
       };
       if (!await File(paths.node).exists() || !await File(script).exists()) {
         return NaiAgentSkillInventory(const [], 0, config);

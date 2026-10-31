@@ -15999,10 +15999,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get naiAgent_mcpConfig => '服务器配置（JSON）';
 
   @override
-  String get naiAgent_mcpConfigHint =>
-      '支持 stdio 和 Streamable HTTP。粘贴单个服务器配置对象；command 为可执行文件，args 为数组。可设置 env、cwd、url、headers、oauth 和 toolExposure。配置保存在加密存储中。';
-
-  @override
   String get naiAgent_mcpStatus => '查看连接状态';
 
   @override
@@ -19238,7 +19234,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agBaseFailed => '没有保存：工作区已切换或写入失败，修改还在。';
 
   @override
-  String get set_agMcpUnchecked => '未检测';
+  String get set_agMcpUnchecked => '尚未连接';
 
   @override
   String get set_agInstructionsSaving => '正在保存指令…';
@@ -21117,9 +21113,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_historyEmpty => '没有匹配的条目';
 
   @override
-  String get ag_historyBeforeCompaction => '这段在压缩之前，点看摘要';
-
-  @override
   String get ag_historyAuto => '自动压缩';
 
   @override
@@ -21434,9 +21427,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_agCacheIdleCost => '空闲时也预热（最多 30 分钟）会产生额外模型费用。';
 
   @override
-  String get ag_suggestionAccept => '按 Tab 填入这句建议';
-
-  @override
   String get ag_cacheWarmTitle => '缓存预热';
 
   @override
@@ -21651,6 +21641,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String ag_chatAgeWeeks(int count) {
     return '${count}w';
   }
+
+  @override
+  String get set_agMcpStdio => '本地命令';
+
+  @override
+  String get set_agMcpAddress => '服务器地址';
+
+  @override
+  String get set_agMcpCommand => '可执行命令';
+
+  @override
+  String get set_agMcpArgs => '参数（每行一个）';
+
+  @override
+  String get set_agMcpEnv => '环境变量';
+
+  @override
+  String get set_agMcpHeaders => '请求头';
+
+  @override
+  String get set_agMcpCwd => '工作目录';
+
+  @override
+  String get set_agMcpAdvanced => '高级设置';
+
+  @override
+  String get set_agMcpJson => 'JSON 导入／编辑';
+
+  @override
+  String get set_agMcpForm => '表单';
+
+  @override
+  String get set_agMcpTest => '测试连接';
+
+  @override
+  String get set_agMcpJsonOne => '请一次导入一个 MCP 服务器。';
+
+  @override
+  String get set_agMcpPending => '下轮生效';
+
+  @override
+  String get ag_tool_agent_manage => '管理 Agent';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -37648,10 +37680,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get naiAgent_mcpConfig => '伺服器配置（JSON）';
 
   @override
-  String get naiAgent_mcpConfigHint =>
-      '支援 stdio 和 Streamable HTTP。貼上單個伺服器配置物件；command 為執行檔，args 為陣列。可設定 env、cwd、url、headers、oauth 和 toolExposure。配置儲存在加密儲存中。';
-
-  @override
   String get naiAgent_mcpStatus => '檢視連線狀態';
 
   @override
@@ -40887,7 +40915,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agBaseFailed => '沒有儲存：工作區已切換或寫入失敗，修改還在。';
 
   @override
-  String get set_agMcpUnchecked => '未檢測';
+  String get set_agMcpUnchecked => '尚未連線';
 
   @override
   String get set_agInstructionsSaving => '正在儲存指令…';
@@ -42766,9 +42794,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_historyEmpty => '沒有匹配的條目';
 
   @override
-  String get ag_historyBeforeCompaction => '這段在壓縮之前，點看摘要';
-
-  @override
   String get ag_historyAuto => '自動壓縮';
 
   @override
@@ -43083,9 +43108,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_agCacheIdleCost => '空閒時也預熱（最多 30 分鐘）會產生額外模型費用。';
 
   @override
-  String get ag_suggestionAccept => '按 Tab 填入這句建議';
-
-  @override
   String get ag_cacheWarmTitle => '快取預熱';
 
   @override
@@ -43300,4 +43322,46 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String ag_chatAgeWeeks(int count) {
     return '${count}w';
   }
+
+  @override
+  String get set_agMcpStdio => '本地命令';
+
+  @override
+  String get set_agMcpAddress => '伺服器地址';
+
+  @override
+  String get set_agMcpCommand => '可執行命令';
+
+  @override
+  String get set_agMcpArgs => '參數（每行一個）';
+
+  @override
+  String get set_agMcpEnv => '環境變數';
+
+  @override
+  String get set_agMcpHeaders => '請求標頭';
+
+  @override
+  String get set_agMcpCwd => '工作目錄';
+
+  @override
+  String get set_agMcpAdvanced => '進階設定';
+
+  @override
+  String get set_agMcpJson => 'JSON 匯入／編輯';
+
+  @override
+  String get set_agMcpForm => '表單';
+
+  @override
+  String get set_agMcpTest => '測試連線';
+
+  @override
+  String get set_agMcpJsonOne => '請一次匯入一個 MCP 伺服器。';
+
+  @override
+  String get set_agMcpPending => '下輪生效';
+
+  @override
+  String get ag_tool_agent_manage => '管理 Agent';
 }

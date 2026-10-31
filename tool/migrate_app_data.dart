@@ -44,7 +44,9 @@ Future<void> main(List<String> arguments) async {
       'success': true,
       'dataDirectory': destination.path,
       'legacyDirectory': legacy.path,
-      'legacyResolvesTo': await legacy.resolveSymbolicLinks(),
+      'legacyResolvesTo': await legacy.exists()
+          ? await legacy.resolveSymbolicLinks()
+          : null,
       'backup': jsonDecode(
         await File(
           p.join(destination.path, AdjacentAppDataMigration.markerName),

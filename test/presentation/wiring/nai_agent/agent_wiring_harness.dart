@@ -304,14 +304,17 @@ class AgentWiringHarness {
     tester.view.devicePixelRatio = 1;
     setCurrentL10nLocale(locale);
     await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp(
-          locale: locale,
-          supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          theme: AppTheme.getTheme(AppStyle.geist, brightness),
-          home: Scaffold(body: child),
+      RepaintBoundary(
+        key: const Key('agent-wiring-capture'),
+        child: UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: locale,
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            theme: AppTheme.getTheme(AppStyle.geist, brightness),
+            home: Scaffold(body: child),
+          ),
         ),
       ),
     );

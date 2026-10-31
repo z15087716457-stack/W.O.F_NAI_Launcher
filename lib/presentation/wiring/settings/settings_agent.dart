@@ -8,10 +8,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/nai_agent/tool_catalog.dart';
 import '../../../core/nai_agent/mcp_config.dart';
-import '../../../core/storage/secure_storage_service.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
 import '../../providers/nai_agent/nai_agent_skills_provider.dart';
+import '../../providers/nai_agent/nai_agent_management.dart';
 import '../../providers/nai_agent/nai_agent_workspace_provider.dart';
 import '../../screens/settings/sections/nai_agent_mcp_settings.dart';
 import 'settings_agent_quick.dart';
@@ -60,6 +60,8 @@ final settingsAgentTrashProvider =
 final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
   ref,
 ) async {
+  // Becoming ready replaces preferences even when Settings opened first.
+  ref.watch(naiAgentUiPreferencesProvider.select((value) => value.settings));
   if (!ref.exists(naiAgentControllerProvider)) return '';
   final runtime = ref.watch(
     naiAgentControllerProvider.select(
@@ -88,7 +90,12 @@ final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
   }
 });
 
-SettingsMcpServer settingsMcpServer(AgentMcpServer server, String status) {
+SettingsMcpServer settingsMcpServer(
+  AgentMcpServer server,
+  String status, {
+  bool pending = false,
+  bool canCheck = true,
+}) {
   final line =
       RegExp(
         '^${RegExp.escape(server.name)}: (.+)\$',
@@ -111,6 +118,15 @@ SettingsMcpServer settingsMcpServer(AgentMcpServer server, String status) {
     name: server.name,
     transport: server.transport,
     state: state,
+    pending: pending,
+    canCheck: canCheck,
+    detail: status
+        .split('\n')
+        .skipWhile((l) => !l.startsWith('${server.name}: '))
+        .skip(1)
+        .takeWhile((l) => l.startsWith('    '))
+        .map((l) => l.trim())
+        .join('\n'),
     mode: SettingsMcpMode.values.byName(server.exposure),
     enabled: server.enabled,
     tools:
@@ -132,18 +148,8 @@ class SettingsAgentBackend {
   Future<void> update(
     Map<String, dynamic> changes, {
     Map<String, dynamic>? expected,
-  }) async {
-    if (ref.exists(naiAgentControllerProvider)) {
-      final controller = ref.read(naiAgentControllerProvider);
-      await controller.ready;
-      await controller.updateSettings(changes, expected: expected);
-    } else {
-      final result = expected == null
-          ? await store.patchSettings(changes)
-          : await store.patchSettingsChecked(changes, expected: expected);
-      ref.read(naiAgentUiPreferencesProvider).replace(result);
-    }
-  }
+  }) =>
+      ref.read(naiAgentManagementProvider).update(changes, expected: expected);
 
   Future<void> saveInstructions({
     required String global,
@@ -223,43 +229,16 @@ class SettingsAgentBackend {
     bool? enabled,
     SettingsMcpMode? mode,
     bool remove = false,
-  }) async {
-    final current = await store.readSettings();
-    if (id == 'nai_studio') {
-      if (remove) {
-        throw ArgumentError('The built-in tool group cannot be deleted');
-      }
-      await update({
-        if (enabled != null) 'studioMcpEnabled': enabled,
-        if (mode != null) 'studioMcpExposure': mode.name,
-      });
-      return;
-    }
-    final server = current.mcpServers
-        .where((s) => s.configId == id)
-        .firstOrNull;
-    if (server == null) throw ArgumentError.value(id, 'id');
-    await update(
-      {
-        'mcpServers': [
-          for (final item in current.mcpServers)
-            if (item.configId != id)
-              item.toJson()
-            else if (!remove)
-              {
-                ...item.toJson(),
-                if (enabled != null) 'enabled': enabled,
-                if (mode != null) 'exposure': mode.name,
-              },
-        ],
-      },
-      expected: {
-        'mcpServers': current.mcpServers.map((s) => s.toJson()).toList(),
-      },
-    );
-    if (remove) {
-      await ref.read(secureStorageServiceProvider).deleteAgentMcpConfig(id);
-    }
+  }) => ref
+      .read(naiAgentManagementProvider)
+      .configureMcp(id, enabled: enabled, exposure: mode?.name, remove: remove);
+
+  Future<void> checkMcp(String id) async {
+    final current = settings.mcpServers.firstWhere((s) => s.configId == id);
+    final c = ref.read(naiAgentControllerProvider);
+    await c.ready;
+    await c.mcpCommand('reconnect', name: current.name);
+    ref.invalidate(settingsMcpStatusProvider);
   }
 
   Future<void> mcpLogin(String id) async {
@@ -438,6 +417,13 @@ class SettingsAgentBackend {
   }
 
   String skillFolder(String id) =>
+      ref
+          .read(naiAgentSkillsProvider(_workspaceId))
+          .valueOrNull
+          ?.skills
+          .where((s) => s.key == id)
+          .firstOrNull
+          ?.directory ??
       store.skillFolder(id, workspaceId: _workspaceId).path;
 
   String skillRoot(SettingsSkillSource source) =>
@@ -541,7 +527,15 @@ class SettingsAgentActions {
   Future<void> viewSkill(String id) async {
     final l = context.l10n;
     final builtin = id.startsWith('builtin/');
-    final file = File(p.join(backend.skillFolder(id), 'SKILL.md'));
+    final listed = ref
+        .read(naiAgentSkillsProvider(backend._workspaceId))
+        .valueOrNull
+        ?.skills
+        .where((s) => s.key == id)
+        .firstOrNull;
+    final file = File(
+      listed?.file ?? p.join(backend.skillFolder(id), 'SKILL.md'),
+    );
     final text = await file.exists() ? await file.readAsString() : '';
     if (!context.mounted) return;
     await showSettingsDialog<void>(
@@ -738,6 +732,7 @@ SettingsAgentData settingsAgentData(
           source: SettingsSkillSource.values.byName(skill.source),
           description: skill.displayDescription(currentL10n),
           path: skill.directory,
+          packageSource: skill.packageSource,
           enabled: skill.enabled,
           manual: skill.mode == 'manual',
           state: SettingsSkillState.values.byName(skill.state),
@@ -793,7 +788,17 @@ SettingsAgentData settingsAgentData(
         tools: naiAgentToolNames.length,
       ),
       for (final server in settings.mcpServers)
-        settingsMcpServer(server, mcpStatus),
+        settingsMcpServer(
+          server,
+          mcpStatus,
+          pending:
+              controller?.selected?.client != null &&
+              controller!.selected!.extensionSignature !=
+                  settings.extensionSignature,
+          canCheck:
+              controller?.selected?.running != true &&
+              controller?.selected?.starting != true,
+        ),
     ],
     tools: naiAgentDefaultToolNames,
     dataPath: ref.watch(naiAgentWorkspaceStoreProvider).root.path,

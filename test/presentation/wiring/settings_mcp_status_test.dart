@@ -14,6 +14,55 @@ class _Client extends Mock implements PiHostClient {}
 
 void main() {
   test(
+    'status reconnects to the lifecycle when Settings opens before Agent',
+    () async {
+      final root = await Directory.systemTemp.createTemp('settings-mcp-late-');
+      final client = _Client();
+      when(() => client.isClosed).thenReturn(false);
+      when(() => client.close()).thenAnswer((_) async {});
+      when(() => client.mcpCommand('status')).thenAnswer(
+        (_) async => {'mcpStatus': 'exa: connected, 2 tools (codemode)'},
+      );
+      final controller = NaiAgentWorkspaceController(
+        store: AgentWorkspaceStore(root),
+        startClient: (_, __, ___, ____, _____) async => client,
+        initialWorkspaceName: 'Test',
+        initialChatName: 'Test',
+      );
+      final preferences = NaiAgentUiPreferences();
+      final container = ProviderContainer(
+        overrides: [
+          naiAgentUiPreferencesProvider.overrideWith((_) => preferences),
+          naiAgentControllerProvider.overrideWith((_) => controller),
+        ],
+      );
+      final subscription = container.listen(
+        settingsMcpStatusProvider,
+        (_, __) {},
+      );
+      addTearDown(() async {
+        subscription.close();
+        await controller.close();
+        container.dispose();
+        await root.delete(recursive: true);
+      });
+      expect(await container.read(settingsMcpStatusProvider.future), isEmpty);
+      expect(container.exists(naiAgentControllerProvider), isFalse);
+      await controller.initialize();
+      controller.selected!.client = client;
+      controller.selected!.extensionSignature =
+          controller.settings.extensionSignature;
+      container.read(naiAgentControllerProvider);
+      preferences.replace(controller.settings);
+      expect(
+        await container.read(settingsMcpStatusProvider.future),
+        contains('exa: connected'),
+      );
+      verify(() => client.mcpCommand('status')).called(1);
+    },
+  );
+
+  test(
     'status updates do not invalidate their own query; busy hosts use cached status',
     () async {
       final root = await Directory.systemTemp.createTemp('settings-mcp-');
@@ -26,6 +75,9 @@ void main() {
       );
       final container = ProviderContainer(
         overrides: [
+          naiAgentUiPreferencesProvider.overrideWith(
+            (_) => NaiAgentUiPreferences(),
+          ),
           naiAgentControllerProvider.overrideWith((ref) => controller),
         ],
       );

@@ -16,6 +16,8 @@ import { createStudioMcp, mcpRedactor, validateStudioMcp } from './mcp.mjs';
 import { builtinSkillsDirectory, resolveStudioSkills } from './skills.mjs';
 import { resolveStudioPromptTemplates } from './prompt-templates.mjs';
 import { resolveWorkspaceReadPath } from './workspace-paths.mjs';
+import { resolveStudioPackages } from './packages.mjs';
+import { createAgentManagementExtension } from './extensions/agent-management.mjs';
 
 // Pi caches loader overrides on reload; Studio prompt edits apply on the next turn.
 class StudioResourceLoader extends DefaultResourceLoader {
@@ -53,7 +55,7 @@ export function studioTools(execute, extraToolNames = []) {
 
 export async function createStudioSession({ config, cwd, agentDir, systemPrompt, executeTool,
   sessionDirectory, sessionFile, sessionName, acquireRequest, extraToolNames = [],
-  extensionPaths = [], mcp = {}, skills = {}, prompts = {}, onSession, onExtensionUi, onExtensionError, onCacheWarmingChange, deferBinding = false }) {
+  extensionPaths = [], mcp = {}, skills = {}, prompts = {}, packages = {}, onSession, onExtensionUi, onExtensionError, onCacheWarmingChange, deferBinding = false }) {
   if (!systemPrompt?.trim()) throw new Error('NAI system prompt is required');
   const data = resolve(agentDir), sessions = resolve(sessionDirectory ?? join(data, 'sessions'));
   await Promise.all([resolve(cwd), data, sessions].map(path => mkdir(path, { recursive: true })));
@@ -86,9 +88,10 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     '- Workspace files: read, write, edit, bash.',
     ...(extraToolNames.includes('ask_user') ? ['- Missing input/preferences: ask_user (direct tool, not from codemode).'] : []),
   ].join('\n');
+  const packageSet = await resolveStudioPackages({ ...packages, cwd: root, agentDir: data });
   const skillSet = resolveStudioSkills({ builtinDirectory: skills.builtinDirectory ?? builtinSkillsDirectory,
     globalDirectory: skills.globalDirectory, workspaceDirectory: skills.workspaceDirectory,
-    disabled: skills.disabled, modes: skills.modes });
+    disabled: skills.disabled, modes: skills.modes, packageSkills: packageSet.packageSkills });
   if (!Array.isArray(extensionPaths) || extensionPaths.length > 64
     || extensionPaths.some(path => typeof path !== 'string' || !isAbsolute(path)))
     throw new Error('Extensions must be explicitly selected local absolute paths');
@@ -98,7 +101,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     cacheWarming: config.cacheWarming ?? 'streaming',
   });
   const cacheWarming = new StudioCacheWarming({ model, settingsManager, onChange: onCacheWarmingChange });
-  const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search', 'session_history',
+  const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search', 'session_history', 'agent_manage',
     'read', 'write', 'edit', 'bash', 'powershell', 'grep', 'find', 'ls']);
   function validateExtensions(extensions) {
     if (extensions.errors.length) throw new Error(extensions.errors.map(error => error.path + ': ' + error.error).join('\n'));
@@ -109,15 +112,16 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     }
     return extensions;
   }
-  const templateSet = await resolveStudioPromptTemplates({ cwd: root, agentDir: data, ...prompts });
+  const templateSet = await resolveStudioPromptTemplates({ cwd: root, agentDir: data, ...prompts,
+    packagePrompts: packageSet.prompts });
   const resourceLoader = new StudioResourceLoader({
     cwd: root, agentDir: data, settingsManager,
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,
-    additionalExtensionPaths: [...new Set(extensionPaths)],
+    additionalExtensionPaths: [...new Set([...extensionPaths, ...packageSet.extensions.map(p => p.path)])],
     promptsOverride: () => ({ prompts: templateSet.prompts, diagnostics: templateSet.diagnostics }),
     // Studio resolves sources, overrides and switches; Pi formats the catalog and expands /skill:.
     skillsOverride: () => ({ skills: skillSet.active, diagnostics: [] }),
-    extensionFactories: [cacheWarming.extension, createNaiInteractionExtension(interactionTools), createSessionHistoryExtension(redact),
+    extensionFactories: [cacheWarming.extension, createNaiInteractionExtension(interactionTools), createSessionHistoryExtension(redact), createAgentManagementExtension(executeTool, skills.builtinDirectory),
       { name: 'nai-codemode', factory: createCodemodeExtension({ mode: 'on', models: false }) },
       { name: 'nai-tool-search', factory: createToolSearchExtension() },
       { name: 'nai-mcp', factory: createStudioMcp({ mcp, definitions: businessTools,

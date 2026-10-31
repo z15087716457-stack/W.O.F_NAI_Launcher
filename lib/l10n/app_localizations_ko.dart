@@ -16245,10 +16245,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get naiAgent_mcpConfig => '서버 설정 (JSON)';
 
   @override
-  String get naiAgent_mcpConfigHint =>
-      'stdio 및 Streamable HTTP를 지원합니다. 서버 설정 객체 하나를 붙여 넣으세요. command는 실행 파일이고 args는 배열입니다. env, cwd, url, headers, oauth, toolExposure도 지원합니다. 설정은 암호화하여 저장됩니다.';
-
-  @override
   String get naiAgent_mcpStatus => '연결 상태 확인';
 
   @override
@@ -19526,7 +19522,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '저장하지 못했습니다. 작업 공간이 바뀌었거나 쓰기에 실패했습니다. 변경 내용은 남아 있습니다.';
 
   @override
-  String get set_agMcpUnchecked => '확인 전';
+  String get set_agMcpUnchecked => '연결 안 됨';
 
   @override
   String get set_agInstructionsSaving => '지침 저장 중…';
@@ -21427,9 +21423,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_historyEmpty => '일치하는 항목 없음';
 
   @override
-  String get ag_historyBeforeCompaction => '압축 이전의 내용입니다. 눌러 요약을 확인하세요.';
-
-  @override
   String get ag_historyAuto => '자동 압축';
 
   @override
@@ -21752,9 +21745,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_agCacheIdleCost => '대기 중 예열(최대 30분)은 추가 모델 비용이 발생합니다.';
 
   @override
-  String get ag_suggestionAccept => 'Tab으로 이 제안 입력';
-
-  @override
   String get ag_cacheWarmTitle => '캐시 예열';
 
   @override
@@ -21973,4 +21963,46 @@ class AppLocalizationsKo extends AppLocalizations {
   String ag_chatAgeWeeks(int count) {
     return '${count}w';
   }
+
+  @override
+  String get set_agMcpStdio => '로컬 명령';
+
+  @override
+  String get set_agMcpAddress => '서버 주소';
+
+  @override
+  String get set_agMcpCommand => '실행 명령';
+
+  @override
+  String get set_agMcpArgs => '인수 (한 줄에 하나)';
+
+  @override
+  String get set_agMcpEnv => '환경 변수';
+
+  @override
+  String get set_agMcpHeaders => '요청 헤더';
+
+  @override
+  String get set_agMcpCwd => '작업 폴더';
+
+  @override
+  String get set_agMcpAdvanced => '고급 설정';
+
+  @override
+  String get set_agMcpJson => 'JSON 가져오기 / 편집';
+
+  @override
+  String get set_agMcpForm => '양식';
+
+  @override
+  String get set_agMcpTest => '연결 테스트';
+
+  @override
+  String get set_agMcpJsonOne => 'MCP 서버를 한 번에 하나씩 가져오세요.';
+
+  @override
+  String get set_agMcpPending => '다음 턴에 적용';
+
+  @override
+  String get ag_tool_agent_manage => 'Agent 관리';
 }

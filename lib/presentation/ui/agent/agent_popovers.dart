@@ -255,6 +255,9 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
     final chats = d.chats
         .where((x) => q.isEmpty || x.title.toLowerCase().contains(q))
         .toList();
+    final contentHits = _hits?.$2
+        ?.where((hit) => d.chats.any((chat) => chat.id == hit.chatId))
+        .toList();
     final others = d.workspaces
         .where(
           (w) =>
@@ -336,10 +339,9 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                             id: chat.id,
                             title: chat.title,
                             onCancel: () => _confirmDelete(null),
-                            // 确认后关列表：列表的遮罩会挡住底部的撤销提示。
                             onDelete: () {
-                              widget.onClose();
-                              agentDeleteChat(context, chat);
+                              _confirmDelete(null);
+                              unawaited(agentDeleteChat(context, chat));
                             },
                           )
                         else
@@ -432,10 +434,10 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                           ),
                       if (_hits case (
                         final hq,
-                        final found,
+                        _,
                       ) when hq == _query.text.trim()) ...[
                         _GroupLabel(l.ag_chatsContent),
-                        if (found == null)
+                        if (contentHits == null)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
                             child: Text(
@@ -443,7 +445,7 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                               style: UiText.sans(12, color: c.faint),
                             ),
                           )
-                        else if (found.isEmpty)
+                        else if (contentHits.isEmpty)
                           Padding(
                             padding: const EdgeInsets.fromLTRB(14, 6, 14, 6),
                             child: Text(
@@ -452,7 +454,7 @@ class _AgentChatsPopoverState extends State<AgentChatsPopover> {
                             ),
                           )
                         else
-                          for (final hit in found)
+                          for (final hit in contentHits)
                             AgentPopRow(
                               key: Key('agent-chat-hit-${hit.chatId}'),
                               height: 48,

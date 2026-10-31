@@ -614,7 +614,11 @@ void main() {
       await tester.pump();
       await tester.pump();
       expect(rec.last('deleteChat'), 'c2');
+      expect(find.byKey(const Key('agent-chats-popover')), findsOneWidget);
+      expect(find.byKey(const Key('agent-chat-delete-ok-c2')), findsNothing);
       expect(find.byKey(const Key('agent-undo-toast')), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
       await tester.tap(find.byKey(const Key('agent-undo-toast-undo')));
       await tester.pump();
       await tester.pump();

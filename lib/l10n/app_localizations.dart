@@ -29135,12 +29135,6 @@ abstract class AppLocalizations {
   /// **'Server configuration (JSON)'**
   String get naiAgent_mcpConfig;
 
-  /// No description provided for @naiAgent_mcpConfigHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Supports stdio and Streamable HTTP. Paste one server configuration object; command is an executable and args is an array. Supports env, cwd, url, headers, oauth and toolExposure. Configuration is saved in encrypted storage.'**
-  String get naiAgent_mcpConfigHint;
-
   /// No description provided for @naiAgent_mcpStatus.
   ///
   /// In en, this message translates to:
@@ -35035,7 +35029,7 @@ abstract class AppLocalizations {
   /// No description provided for @set_agMcpUnchecked.
   ///
   /// In en, this message translates to:
-  /// **'Not checked'**
+  /// **'Not connected'**
   String get set_agMcpUnchecked;
 
   /// No description provided for @set_agInstructionsSaving.
@@ -38422,12 +38416,6 @@ abstract class AppLocalizations {
   /// **'No matching entries'**
   String get ag_historyEmpty;
 
-  /// No description provided for @ag_historyBeforeCompaction.
-  ///
-  /// In en, this message translates to:
-  /// **'This was before compaction. Click to read the summary.'**
-  String get ag_historyBeforeCompaction;
-
   /// No description provided for @ag_historyAuto.
   ///
   /// In en, this message translates to:
@@ -38998,12 +38986,6 @@ abstract class AppLocalizations {
   /// **'Warming while idle (up to 30 minutes) costs extra model usage.'**
   String get set_agCacheIdleCost;
 
-  /// No description provided for @ag_suggestionAccept.
-  ///
-  /// In en, this message translates to:
-  /// **'Tab to fill in this suggestion'**
-  String get ag_suggestionAccept;
-
   /// No description provided for @ag_cacheWarmTitle.
   ///
   /// In en, this message translates to:
@@ -39381,6 +39363,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}w'**
   String ag_chatAgeWeeks(int count);
+
+  /// No description provided for @set_agMcpStdio.
+  ///
+  /// In en, this message translates to:
+  /// **'Local command'**
+  String get set_agMcpStdio;
+
+  /// No description provided for @set_agMcpAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Server URL'**
+  String get set_agMcpAddress;
+
+  /// No description provided for @set_agMcpCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Executable command'**
+  String get set_agMcpCommand;
+
+  /// No description provided for @set_agMcpArgs.
+  ///
+  /// In en, this message translates to:
+  /// **'Arguments (one per line)'**
+  String get set_agMcpArgs;
+
+  /// No description provided for @set_agMcpEnv.
+  ///
+  /// In en, this message translates to:
+  /// **'Environment variables'**
+  String get set_agMcpEnv;
+
+  /// No description provided for @set_agMcpHeaders.
+  ///
+  /// In en, this message translates to:
+  /// **'Request headers'**
+  String get set_agMcpHeaders;
+
+  /// No description provided for @set_agMcpCwd.
+  ///
+  /// In en, this message translates to:
+  /// **'Working directory'**
+  String get set_agMcpCwd;
+
+  /// No description provided for @set_agMcpAdvanced.
+  ///
+  /// In en, this message translates to:
+  /// **'Advanced'**
+  String get set_agMcpAdvanced;
+
+  /// No description provided for @set_agMcpJson.
+  ///
+  /// In en, this message translates to:
+  /// **'Import / edit JSON'**
+  String get set_agMcpJson;
+
+  /// No description provided for @set_agMcpForm.
+  ///
+  /// In en, this message translates to:
+  /// **'Form'**
+  String get set_agMcpForm;
+
+  /// No description provided for @set_agMcpTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test connection'**
+  String get set_agMcpTest;
+
+  /// No description provided for @set_agMcpJsonOne.
+  ///
+  /// In en, this message translates to:
+  /// **'Import one MCP server at a time.'**
+  String get set_agMcpJsonOne;
+
+  /// No description provided for @set_agMcpPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies next turn'**
+  String get set_agMcpPending;
+
+  /// No description provided for @ag_tool_agent_manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Agent'**
+  String get ag_tool_agent_manage;
 }
 
 class _AppLocalizationsDelegate

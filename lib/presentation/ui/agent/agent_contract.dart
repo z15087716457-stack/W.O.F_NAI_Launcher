@@ -1588,7 +1588,7 @@ enum AgentMemoryTarget { global, workspace, skills, quick }
 class AgentSlots {
   const AgentSlots({this.dropTarget, this.imageDrag});
 
-  /// 包住整个侧栏的系统拖放区（外部文件、历史缩略图拖进来 = 附图）。
+  /// 包住输入卡片的系统拖放区（外部文件、历史缩略图拖进来 = 附图）。
   /// [onHover] 由转接层在拖入 / 离开时调用，界面据此显示「松开以附加」。
   final Widget Function(
     BuildContext context,

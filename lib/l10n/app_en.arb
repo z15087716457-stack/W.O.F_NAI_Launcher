@@ -8870,7 +8870,6 @@
   "naiAgent_mcpAdd": "Add MCP server",
   "naiAgent_mcpName": "Server name",
   "naiAgent_mcpConfig": "Server configuration (JSON)",
-  "naiAgent_mcpConfigHint": "Supports stdio and Streamable HTTP. Paste one server configuration object; command is an executable and args is an array. Supports env, cwd, url, headers, oauth and toolExposure. Configuration is saved in encrypted storage.",
   "naiAgent_mcpStatus": "Check connections",
   "naiAgent_mcpReconnect": "Reconnect",
   "naiAgent_mcpLogin": "Sign in",
@@ -10535,7 +10534,7 @@
   "set_agBaseSwitchBody": "Switching scope discards unsaved changes.",
   "set_agBaseSaving": "Saving…",
   "set_agBaseFailed": "Not saved: the workspace changed or the write failed. Your edits are kept.",
-  "set_agMcpUnchecked": "Not checked",
+  "set_agMcpUnchecked": "Not connected",
   "set_agInstructionsSaving": "Saving instructions…",
   "set_agInstructionsFailed": "Instructions were not saved: the stored content changed or the write failed. Your draft is kept. Try again.",
   "set_agOrderSkills": "Skill catalog",
@@ -11282,7 +11281,6 @@
   "ag_historyCards": "Cards",
   "ag_historyQuestions": "Q&A",
   "ag_historyEmpty": "No matching entries",
-  "ag_historyBeforeCompaction": "This was before compaction. Click to read the summary.",
   "ag_historyAuto": "Auto compaction",
   "ag_historyManual": "Manual compaction",
   "ag_historyImageMessage": "Image message",
@@ -11471,7 +11469,6 @@
   "set_agCacheStreaming": "Only while Agent is running",
   "set_agCacheIdle": "Also while idle",
   "set_agCacheIdleCost": "Warming while idle (up to 30 minutes) costs extra model usage.",
-  "ag_suggestionAccept": "Tab to fill in this suggestion",
   "ag_cacheWarmTitle": "Cache warming",
   "ag_cacheWarmOff": "Off",
   "ag_cacheWarmRefreshing": "Refreshing the cache…",
@@ -11621,5 +11618,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_agMcpStdio": "Local command",
+  "set_agMcpAddress": "Server URL",
+  "set_agMcpCommand": "Executable command",
+  "set_agMcpArgs": "Arguments (one per line)",
+  "set_agMcpEnv": "Environment variables",
+  "set_agMcpHeaders": "Request headers",
+  "set_agMcpCwd": "Working directory",
+  "set_agMcpAdvanced": "Advanced",
+  "set_agMcpJson": "Import / edit JSON",
+  "set_agMcpForm": "Form",
+  "set_agMcpTest": "Test connection",
+  "set_agMcpJsonOne": "Import one MCP server at a time.",
+  "set_agMcpPending": "Applies next turn",
+  "ag_tool_agent_manage": "Manage Agent"
 }

@@ -109,12 +109,14 @@ void main() {
     () async {
       final temp = await Directory.systemTemp.createTemp('sandbox-prefs-');
       final original = SharedPreferencesStorePlatform.instance;
+      final originalPaths = PathProviderPlatform.instance;
       addTearDown(() async {
         SharedPreferencesStorePlatform.instance = original;
+        PathProviderPlatform.instance = originalPaths;
         await temp.delete(recursive: true);
       });
       SharedPreferences.setMockInitialValues({'formal-only': true});
-      initializeSandboxPreferences(root: temp.path);
+      initializeSandboxStorage(root: temp.path);
       final prefs = await SharedPreferences.getInstance();
       await prefs.reload();
       expect(prefs.getBool('formal-only'), isNull);

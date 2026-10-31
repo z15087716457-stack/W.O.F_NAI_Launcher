@@ -727,6 +727,45 @@ void main() {
     expect(await c.store.readAttachment(runtime.workspace.id, original), bmp);
   });
   test(
+    'self-management applies next idle send and resumes the same Pi conversation',
+    () async {
+      final c = controller();
+      await c.initialize();
+      final entered = Completer<void>(), release = Completer<void>();
+      waitForResponse = () async {
+        entered.complete();
+        await release.future;
+      };
+      final running = c.sendText('before management');
+      await entered.future.timeout(const Duration(seconds: 10));
+      final runtime = c.selected!, client = runtime.client!;
+      try {
+        await c.updateSettings({
+          'permissionMode': 'readonly',
+        }, deferRuntime: true);
+        expect(runtime.running, isTrue);
+        expect(client.isClosed, isFalse);
+        expect((await client.state())['permissionMode'], 'auto');
+        expect(runtime.extensionSignature, isNull);
+      } finally {
+        release.complete();
+      }
+      await running;
+      final session = runtime.chat.sessionFile;
+      waitForResponse = null;
+      await c.sendText('after management');
+      expect(runtime.error, isNull);
+      expect(runtime.client, isNot(same(client)));
+      expect(client.isClosed, isTrue);
+      expect(runtime.chat.sessionFile, session);
+      expect((await runtime.client!.state())['permissionMode'], 'readonly');
+      expect(
+        jsonEncode(requests.last['messages']),
+        contains('before management'),
+      );
+    },
+  );
+  test(
     'live approval mode updates the owned Pi host without a model request',
     () async {
       final c = controller();

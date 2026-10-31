@@ -16688,10 +16688,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get naiAgent_mcpConfig => 'Server configuration (JSON)';
 
   @override
-  String get naiAgent_mcpConfigHint =>
-      'Supports stdio and Streamable HTTP. Paste one server configuration object; command is an executable and args is an array. Supports env, cwd, url, headers, oauth and toolExposure. Configuration is saved in encrypted storage.';
-
-  @override
   String get naiAgent_mcpStatus => 'Check connections';
 
   @override
@@ -20077,7 +20073,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Not saved: the workspace changed or the write failed. Your edits are kept.';
 
   @override
-  String get set_agMcpUnchecked => 'Not checked';
+  String get set_agMcpUnchecked => 'Not connected';
 
   @override
   String get set_agInstructionsSaving => 'Saving instructions…';
@@ -22109,10 +22105,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_historyEmpty => 'No matching entries';
 
   @override
-  String get ag_historyBeforeCompaction =>
-      'This was before compaction. Click to read the summary.';
-
-  @override
   String get ag_historyAuto => 'Auto compaction';
 
   @override
@@ -22446,9 +22438,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'Warming while idle (up to 30 minutes) costs extra model usage.';
 
   @override
-  String get ag_suggestionAccept => 'Tab to fill in this suggestion';
-
-  @override
   String get ag_cacheWarmTitle => 'Cache warming';
 
   @override
@@ -22671,4 +22660,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String ag_chatAgeWeeks(int count) {
     return '${count}w';
   }
+
+  @override
+  String get set_agMcpStdio => 'Local command';
+
+  @override
+  String get set_agMcpAddress => 'Server URL';
+
+  @override
+  String get set_agMcpCommand => 'Executable command';
+
+  @override
+  String get set_agMcpArgs => 'Arguments (one per line)';
+
+  @override
+  String get set_agMcpEnv => 'Environment variables';
+
+  @override
+  String get set_agMcpHeaders => 'Request headers';
+
+  @override
+  String get set_agMcpCwd => 'Working directory';
+
+  @override
+  String get set_agMcpAdvanced => 'Advanced';
+
+  @override
+  String get set_agMcpJson => 'Import / edit JSON';
+
+  @override
+  String get set_agMcpForm => 'Form';
+
+  @override
+  String get set_agMcpTest => 'Test connection';
+
+  @override
+  String get set_agMcpJsonOne => 'Import one MCP server at a time.';
+
+  @override
+  String get set_agMcpPending => 'Applies next turn';
+
+  @override
+  String get ag_tool_agent_manage => 'Manage Agent';
 }

@@ -98,8 +98,7 @@ Future<void> attachAgentImage(
   await controller.attach(data.fileName, data.bytes, mime, target: target);
 }
 
-/// Covers the entire chat surface, so dropping over messages cannot fall
-/// through to the canvas's import workflow.
+/// Native attachment drop target supplied to the composer.
 class NaiAgentDropTarget extends ConsumerStatefulWidget {
   const NaiAgentDropTarget({
     super.key,
@@ -130,13 +129,13 @@ class _DropTargetState extends ConsumerState<NaiAgentDropTarget> {
               )
             : null;
         final reader = item.dataReader;
-        sources.add(
-          () async =>
-              internal ??
-              (reader == null
-                  ? null
-                  : await readAgentImage(reader, dropping: true)),
-        );
+        // Every native request must start before OLE releases this session.
+        // Import/decode remains sequential; attach an error listener now too.
+        final pending = internal != null || reader == null
+            ? Future<DroppedFileData?>.value(internal)
+            : readAgentImage(reader, dropping: true);
+        pending.ignore();
+        sources.add(() => pending);
       }
       final report = await importAgentImageSources(controller, target, sources);
       if (mounted && identical(controller.selected, target)) {

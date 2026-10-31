@@ -54,13 +54,15 @@ function scan(directory, source) {
  * modes: `<source>/<name>` -> 'auto' | 'manual'; missing keys keep the SKILL.md default.
  */
 export function resolveStudioSkills({ builtinDirectory = builtinSkillsDirectory, globalDirectory,
-  workspaceDirectory, disabled = [], modes = {} } = {}) {
+  workspaceDirectory, disabled = [], modes = {}, packageSkills = [] } = {}) {
   const off = new Set(Array.isArray(disabled) ? disabled : []);
   const directories = { builtin: builtinDirectory, global: globalDirectory, workspace: workspaceDirectory };
   const winners = new Map(), report = [], active = [];
   for (const source of order) {
-    for (const entry of scan(directories[source], source)) {
-      const key = source + '/' + entry.name;
+    for (const entry of [...scan(directories[source], source),
+      ...packageSkills.filter(skill => skill.source === source).map(skill => ({ ...skill,
+        skill, manualDefault: skill.disableModelInvocation === true }))]) {
+      const key = entry.key ?? source + '/' + entry.name;
       const mode = modes?.[key] === 'manual' || modes?.[key] === 'auto' ? modes[key]
         : entry.manualDefault ? 'manual' : 'auto';
       const enabled = !off.has(key);
@@ -71,6 +73,7 @@ export function resolveStudioSkills({ builtinDirectory = builtinSkillsDirectory,
       }
       report.push({ key, name: entry.name, description: entry.description, source,
         directory: entry.directory, file: entry.file, enabled, mode, state,
+        ...(entry.packageSource ? { packageSource: entry.packageSource } : {}),
         ...(entry.error ? { error: entry.error } : {}),
         ...(state === 'shadowed' ? { shadowedBy: winners.get(entry.name) } : {}) });
     }

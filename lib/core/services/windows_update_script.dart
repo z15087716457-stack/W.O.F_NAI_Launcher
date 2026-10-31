@@ -173,7 +173,7 @@ try {
       throw 'The existing application file manifest is invalid.'
     }
     foreach (\$RelativePath in \$OldManifest.files) {
-      \$ManagedFiles[\$RelativePath.ToString().ToLowerInvariant()] = \$true
+      \$ManagedFiles[\$RelativePath.ToString().Replace('/', '\\').ToLowerInvariant()] = \$true
     }
     \$ManagedFiles['app_files_manifest.json'] = \$true
     \$CanPreserveUserFiles = \$true

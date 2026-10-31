@@ -33,6 +33,7 @@ typedef NaiAgentSessionStarter =
       Map<String, dynamic>? mcp,
       Map<String, dynamic>? skills,
       Map<String, dynamic>? prompts,
+      Map<String, dynamic>? packages,
     });
 
 /// No process starts until the workspace/UI explicitly requests a session.
@@ -69,6 +70,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
     mcp = const {},
     skills = const {},
     prompts = const {},
+    packages = const {},
   }) async {
     var model = await ref.read(naiAgentModelResolverProvider)(
       providerId,
@@ -109,7 +111,9 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
         if (maxRequestsPerRun != null) 'maxRequestsPerRun': maxRequestsPerRun,
       },
       executeTool: (name, params, cancellation) =>
-          (extraNames.contains(name) || name == '_nai_extension_ui') &&
+          (extraNames.contains(name) ||
+                  name == '_nai_extension_ui' ||
+                  name == 'agent_manage') &&
               executeExtraTool != null
           ? executeExtraTool(name, params, cancellation)
           : studio.execute(name, params, cancellation),
@@ -121,6 +125,7 @@ final naiAgentSessionStarterProvider = Provider<NaiAgentSessionStarter>((ref) {
       mcp: mcp ?? const {},
       skills: skills ?? const {},
       prompts: prompts ?? const {},
+      packages: packages ?? const {},
     );
     if (!alive) {
       await client.close();

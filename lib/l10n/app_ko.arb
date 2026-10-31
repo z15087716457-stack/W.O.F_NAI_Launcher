@@ -8868,7 +8868,6 @@
   "naiAgent_mcpAdd": "MCP 서버 추가",
   "naiAgent_mcpName": "서버 이름",
   "naiAgent_mcpConfig": "서버 설정 (JSON)",
-  "naiAgent_mcpConfigHint": "stdio 및 Streamable HTTP를 지원합니다. 서버 설정 객체 하나를 붙여 넣으세요. command는 실행 파일이고 args는 배열입니다. env, cwd, url, headers, oauth, toolExposure도 지원합니다. 설정은 암호화하여 저장됩니다.",
   "naiAgent_mcpStatus": "연결 상태 확인",
   "naiAgent_mcpReconnect": "다시 연결",
   "naiAgent_mcpLogin": "로그인",
@@ -10523,7 +10522,7 @@
   "set_agBaseSwitchBody": "범위를 바꾸면 저장하지 않은 변경이 사라집니다.",
   "set_agBaseSaving": "저장 중…",
   "set_agBaseFailed": "저장하지 못했습니다. 작업 공간이 바뀌었거나 쓰기에 실패했습니다. 변경 내용은 남아 있습니다.",
-  "set_agMcpUnchecked": "확인 전",
+  "set_agMcpUnchecked": "연결 안 됨",
   "set_agInstructionsSaving": "지침 저장 중…",
   "set_agInstructionsFailed": "지침을 저장하지 못했습니다. 저장된 내용이 변경되었거나 쓰기에 실패했습니다. 초안은 유지됩니다. 다시 시도하세요.",
   "set_agOrderSkills": "스킬 카탈로그",
@@ -11270,7 +11269,6 @@
   "ag_historyCards": "카드",
   "ag_historyQuestions": "질문과 답변",
   "ag_historyEmpty": "일치하는 항목 없음",
-  "ag_historyBeforeCompaction": "압축 이전의 내용입니다. 눌러 요약을 확인하세요.",
   "ag_historyAuto": "자동 압축",
   "ag_historyManual": "수동 압축",
   "ag_historyImageMessage": "이미지 메시지",
@@ -11459,7 +11457,6 @@
   "set_agCacheStreaming": "Agent 실행 중에만",
   "set_agCacheIdle": "대기 중에도 예열",
   "set_agCacheIdleCost": "대기 중 예열(최대 30분)은 추가 모델 비용이 발생합니다.",
-  "ag_suggestionAccept": "Tab으로 이 제안 입력",
   "ag_cacheWarmTitle": "캐시 예열",
   "ag_cacheWarmOff": "꺼짐",
   "ag_cacheWarmRefreshing": "캐시 연장 중…",
@@ -11609,5 +11606,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_agMcpStdio": "로컬 명령",
+  "set_agMcpAddress": "서버 주소",
+  "set_agMcpCommand": "실행 명령",
+  "set_agMcpArgs": "인수 (한 줄에 하나)",
+  "set_agMcpEnv": "환경 변수",
+  "set_agMcpHeaders": "요청 헤더",
+  "set_agMcpCwd": "작업 폴더",
+  "set_agMcpAdvanced": "고급 설정",
+  "set_agMcpJson": "JSON 가져오기 / 편집",
+  "set_agMcpForm": "양식",
+  "set_agMcpTest": "연결 테스트",
+  "set_agMcpJsonOne": "MCP 서버를 한 번에 하나씩 가져오세요.",
+  "set_agMcpPending": "다음 턴에 적용",
+  "ag_tool_agent_manage": "Agent 관리"
 }

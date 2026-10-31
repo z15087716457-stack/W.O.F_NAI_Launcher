@@ -1,10 +1,8 @@
 # 开发与发布参考
 
-当前桌面 **2.2.2+70** 已安装并核验，编译 `058b46fee`。标签 checkpoint 签名与完成记录一致性修复、内置 Skill／工具说明精简已交付；+69 及此前更新累计保留，无上述事项的待安装增量。[安装、验证与回退](docs/local-2.2.2-build70-2026-10-31.md)。
+本机版本、实际载荷、有效源码与恢复边界统一见[工作区接手说明](../../../04_工具/启动器接手说明.md)。公开功能及产物验证见 [2.2.3 发布报告](docs/release-2.2.3-2026-10-31.md)。用户完成应用内更新后的运行状态另行核对，历史直装收据不自动代表当前安装。
 
-**公开 2.2.3+71 已发布并核验**，标签固定于 `3cf2700e6`，包含本机 +65 至 +70 全部功能；桌面保留 +70，仅版本号不同，无功能待安装增量。[正式产物与验证](docs/release-2.2.3-2026-10-31.md)。
-
-按任务读取对应章节。命令在当前有效启动器源码目录执行，不从桌面包所在的旧源码分支施工；本机路径与当前交付见工作区接手说明。通用约束见 [AGENTS.md](AGENTS.md)，功能不变量见 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md)。
+命令在当前有效源码执行。通用约束见 [AGENTS.md](AGENTS.md)，功能不变量见 [OPERATIONAL_NOTES.md](OPERATIONAL_NOTES.md)，当前待修与暂缓项见[活跃待办](../../../04_工具/开发计划/待办清单.md)。
 
 ## 构建、测试与开发命令
 
@@ -43,7 +41,9 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
 
-本机累计更新的交付材料按批次放在有效源码 `.dart_tool/cumulative-r<N>-<日期>/`（最近一批见工作区接手说明登记），复用上一批的 `snapshot` → `run_build` → `prepare` → `verify_package` → `install` → `finalize` 链；r26 起安装器支持带备份的退役文件删除，`tools/nai-agent` 按源码整树同步。历史 Glass 组包曾使用 `.dart_tool/assemble_glass.py` / `build/glass-bundle/`；这些不是当前批次固定入口，后续使用当次登记的构建输入与组包脚本。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
+本机累计更新的交付材料按批次放在有效源码 `.dart_tool/cumulative-r<N>-<日期>/`（最近一批见工作区接手说明登记），复用上一批的 `snapshot` → `run_build` → `prepare` → `verify_package` → `install` → `finalize` 链；r26 起安装器支持带备份的退役文件删除，涉及 Agent 运行资源变化时，`tools/nai-agent` 按源码整树同步。历史 Glass 组包曾使用 `.dart_tool/assemble_glass.py` / `build/glass-bundle/`；这些不是当前批次固定入口，后续使用当次登记的构建输入与组包脚本。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
+
+本机小更新（仅 Dart UI／文案、原生依赖／Agent／RAG／资源未变）直接沿用上一份完整收据构造差量载荷，不创建或复制完整 `program/`。先核对本次实际源码变化与功能验证，再重编 Release，核对未变资源、原生库及已安装模块的文件哈希；源码与产物均未变的模块复用其已通过的整包验证，不重复执行无关的 Node／RAG 冒烟。现有安装引擎、安装前后完整程序核验与回退备份保持。当前脚本模板见接手说明登记的 `.dart_tool/native-suggestion-install-20261031/`：`prepare.py` 已包含差量包核验，无需再复制整包跑旧 `verify_package.py`。仅复用脚本，已清理的载荷不重跑；原生、资源或运行依赖变化仍按实际影响完整组包并验证。
 
 覆盖前现场检查 `nai_launcher` 进程路径，等用户从托盘完全退出，备份当前程序 `data/` 与记录；安装后逐项复验并保存单步回退，不自动启动。不要用标准 `build/windows/x64/runner/Release/` 整目录覆盖既有 Glass 包，尤其不能移除其原生插件。Release 发布流程另按下方规范执行。
 
@@ -98,10 +98,8 @@ README 中英文同批同步，保留相互切换和上游归属链接。截图�
 
 本地高级放大宿主构建入口为 `tool/local_upscale/build_worker.ps1`；源码、组件固定版本与用户暂缓大模型下载的边界见 `docs/advanced-upscale-2026-10-05.md`。
 
-## NAI Agent 当前交付
+## NAI Agent 当前能力
 
-**工作区收纳（已随本机 +69 安装）**：启动器管理资料全部进入项目内 `.W.O.F/`，Agent cwd 仍为项目根目录，支持根目录 `AGENTS.md`；旧布局先备份校验后迁移，Pi JSONL 不改写。[目录与验证](docs/agent-workspace-layout-2026-10-31.md)、[安装与回退](docs/local-2.2.2-build69-2026-10-31.md)。
+Agent、MCP／CodeMode、Skill 管理、提示词框内块操作、完整历史与检索等已交付能力及验证统一见[Agent 进度](../../../04_工具/NAI_Agent_开发/06_实施进度.md)。运行时说明读取 `tool/nai_agent/skills/`，详细流程按需读取 `references/`。
 
-10-30 五项浏览与统计优化已随本机 **2.2.2+66** 安装，编译 `94341eec8`；会话活动排序、统计缓存、最近浏览、删除池共用画廊和紧凑排序菜单均已交付，侧栏不移动。[安装与回退](docs/local-2.2.2-build66-2026-10-30.md)。
-
-本机 2.2.2+70（编译 `058b46fee`）已累计安装完整 Agent 域工具、MCP／CodeMode、Node 24.18.0／Pi 1.3.0、Skill 管理、框内块／翻译快捷操作及流式性能优化；角色元数据、桥接依赖提示与保存提示条对齐同批交付。[本机交付](docs/local-2.2.2-build70-2026-10-31.md)。公开 [2.2.3+71](docs/release-2.2.3-2026-10-31.md) 已包含 +65 至 +70 全部功能及此前修复；桌面保留 +70，图库首次 Ctrl 多选与 Shift 范围选择保持现行规则。当前安装与恢复入口见 [工作区接手说明](../../../04_工具/启动器接手说明.md)，实机验收见 [Agent 进度](../../../04_工具/NAI_Agent_开发/06_实施进度.md)。E5D 文件管理与扫描互斥已累计包含，[历史报告](docs/nai-agent-stage-e5d-2026-10-07.md) 不作为未完成项。
+工作区收纳与迁移见[布局说明](docs/agent-workspace-layout-2026-10-31.md)，Skill／声明精简见[实现记录](docs/agent-skill-declaration-polish-2026-10-31.md)。现行待修与实机反馈按工作区入口维护；带日期的交付报告保留当时的安装、测试与恢复边界。

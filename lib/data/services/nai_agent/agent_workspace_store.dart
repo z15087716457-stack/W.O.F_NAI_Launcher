@@ -45,6 +45,28 @@ class AgentExtensionConfig {
   Map<String, dynamic> toJson() => {'path': path, 'enabled': enabled};
 }
 
+class AgentPackageConfig {
+  const AgentPackageConfig({
+    required this.source,
+    this.workspaceId,
+    this.enabled = true,
+  });
+  final String source;
+  final String? workspaceId;
+  final bool enabled;
+  Map<String, dynamic> toJson() => {
+    'source': source,
+    'workspaceId': workspaceId,
+    'enabled': enabled,
+  };
+  factory AgentPackageConfig.fromJson(Map<String, dynamic> value) =>
+      AgentPackageConfig(
+        source: value['source'] as String,
+        workspaceId: value['workspaceId'] as String?,
+        enabled: value['enabled'] != false,
+      );
+}
+
 class AgentSettings {
   const AgentSettings({
     this.providerId = '',
@@ -64,6 +86,7 @@ class AgentSettings {
     this.bypassWarned = false,
     this.reasoningEfforts = const {},
     this.extensions = const [],
+    this.packages = const [],
     this.mcpServers = const [],
     this.studioMcpEnabled = true,
     this.studioMcpExposure = 'codemode',
@@ -90,6 +113,7 @@ class AgentSettings {
       });
   final Map<String, String> reasoningEfforts;
   final List<AgentExtensionConfig> extensions;
+  final List<AgentPackageConfig> packages;
   final List<AgentMcpServer> mcpServers;
   final bool studioMcpEnabled;
   final String studioMcpExposure;
@@ -107,6 +131,7 @@ class AgentSettings {
   ];
   String get extensionSignature => jsonEncode({
     'extensions': enabledExtensionPaths,
+    'packages': packages.map((item) => item.toJson()).toList(),
     'disabledSkills': disabledSkills,
     'skillModes': skillModes,
     'studioMcpEnabled': studioMcpEnabled,
@@ -134,6 +159,7 @@ class AgentSettings {
     'bypassWarned': bypassWarned,
     'reasoningEfforts': reasoningEfforts,
     'extensions': extensions.map((extension) => extension.toJson()).toList(),
+    'packages': packages.map((item) => item.toJson()).toList(),
     'mcpServers': mcpServers.map((server) => server.toJson()).toList(),
     'studioMcpEnabled': studioMcpEnabled,
     'studioMcpExposure': studioMcpExposure,
@@ -200,6 +226,10 @@ class AgentSettings {
             path: row['path'] as String,
             enabled: row['enabled'] != false,
           ),
+    ]),
+    packages: List.unmodifiable([
+      for (final row in value['packages'] as List? ?? [])
+        AgentPackageConfig.fromJson(Map<String, dynamic>.from(row as Map)),
     ]),
     disabledSkills: List.unmodifiable({
       for (final key in value['disabledSkills'] as List? ?? [])
@@ -951,6 +981,22 @@ class AgentWorkspaceStore {
   }
 
   /// Host-side skill sources and switches. Pi formats the catalog itself.
+  Map<String, dynamic> packageConfig(
+    AgentWorkspace? workspace,
+    AgentSettings settings,
+  ) => {
+    'globalDirectory': root.absolute.path,
+    'entries': [
+      for (final item in settings.packages)
+        if (item.workspaceId == null || item.workspaceId == workspace?.id)
+          {
+            'source': item.source,
+            'enabled': item.enabled,
+            'scope': item.workspaceId == null ? 'global' : 'workspace',
+          },
+    ],
+  };
+
   Map<String, dynamic> skillConfig(
     AgentWorkspace workspace,
     AgentSettings settings,
@@ -961,6 +1007,9 @@ class AgentWorkspaceStore {
       'workspaceDirectory': workspace.skills.absolute.path,
       'disabled': settings.disabledSkills,
       'modes': settings.skillModes,
+      'cwd': workspace.directory.absolute.path,
+      'agentDir': workspace.agentDirectory.absolute.path,
+      'packages': packageConfig(workspace, settings),
     };
   }
 

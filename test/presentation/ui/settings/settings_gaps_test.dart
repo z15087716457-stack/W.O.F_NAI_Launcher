@@ -144,7 +144,7 @@ void main() {
     expect([...xs]..sort(), xs);
   });
 
-  testWidgets('MCP 未检测：灰点中性状态，不出登录、不算出错', (t) async {
+  testWidgets('MCP 尚未连接：灰点中性状态，不出登录、不算出错', (t) async {
     final d = SettingsFixture.view(page: SettingsPageId.agent);
     await pumpSettings(
       t,
@@ -167,7 +167,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('mcp-fs')),
-        matching: find.text('未检测'),
+        matching: find.text('尚未连接'),
       ),
       findsOneWidget,
     );

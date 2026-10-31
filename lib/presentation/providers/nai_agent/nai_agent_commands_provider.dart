@@ -28,6 +28,10 @@ final naiAgentCommandsProvider = FutureProvider.autoDispose
           'agentDir': workspace.agentDirectory.absolute.path,
           'globalDirectory': store.globalPromptsDirectory.absolute.path,
           'workspaceDirectory': workspace.prompts.absolute.path,
+          'packages': store.packageConfig(
+            workspace,
+            ref.read(naiAgentUiPreferencesProvider).settings,
+          ),
         }),
       );
       await process.stdin.close();

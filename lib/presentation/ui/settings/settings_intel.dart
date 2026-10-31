@@ -452,14 +452,16 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
       l.set_agOrderWorkspace,
       l.set_agOrderSkills,
     ];
-    String mcpState(SettingsMcpServer m) => switch (m.state) {
-      SettingsMcpState.connected => l.set_agConnected('${m.tools}'),
-      SettingsMcpState.connecting => l.set_agConnecting,
-      SettingsMcpState.needsLogin => l.set_agNeedsLogin,
-      SettingsMcpState.error => l.set_agMcpError,
-      SettingsMcpState.disabled => l.set_agMcpOff,
-      SettingsMcpState.unchecked => l.set_agMcpUnchecked,
-    };
+    String mcpState(SettingsMcpServer m) => m.pending
+        ? l.set_agMcpPending
+        : switch (m.state) {
+            SettingsMcpState.connected => l.set_agConnected('${m.tools}'),
+            SettingsMcpState.connecting => l.set_agConnecting,
+            SettingsMcpState.needsLogin => l.set_agNeedsLogin,
+            SettingsMcpState.error => l.set_agMcpError,
+            SettingsMcpState.disabled => l.set_agMcpOff,
+            SettingsMcpState.unchecked => l.set_agMcpUnchecked,
+          };
     SettingsTone mcpTone(SettingsMcpServer m) => switch (m.state) {
       SettingsMcpState.connected => SettingsTone.ok,
       SettingsMcpState.connecting => SettingsTone.idle,
@@ -969,13 +971,16 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                     spacing: 6,
                     children: [
                       SettingsDot(mcpTone(m)),
-                      Text(
-                        mcpState(m),
-                        style: UiText.sans(
-                          12,
-                          color: m.state == SettingsMcpState.needsLogin
-                              ? c.warn
-                              : c.muted,
+                      Tooltip(
+                        message: m.detail,
+                        child: Text(
+                          mcpState(m),
+                          style: UiText.sans(
+                            12,
+                            color: m.state == SettingsMcpState.needsLogin
+                                ? c.warn
+                                : c.muted,
+                          ),
                         ),
                       ),
                     ],
@@ -1002,6 +1007,12 @@ class _SettingsAgentPageState extends State<SettingsAgentPage> {
                         false,
                       ),
                       (l.set_agEditMcp, () => a.onEditMcp(m.id), false),
+                      if (m.canCheck && m.enabled)
+                        (
+                          l.naiAgent_mcpReconnect,
+                          () => a.onMcpCheck(m.id),
+                          false,
+                        ),
                       (l.set_agRemoveMcp, () => a.onRemoveMcp(m.id), true),
                     ],
                   ),
@@ -1361,7 +1372,7 @@ class _SkillRow extends StatelessWidget {
       items: [
         (l.set_agSkillView, () => a.onViewSkill(k.id), false),
         (l.set_agSkillOpenFolder, () => a.onOpenSkillFolder(k.id), false),
-        if (!k.builtin)
+        if (!k.builtin && k.packageSource == null)
           (l.set_agSkillRemove, () => a.onRemoveSkill(k.id), true),
       ],
     );

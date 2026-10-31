@@ -37,6 +37,7 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 | Prompt blocks and library | `block_query`, `block_manage` | [blocks.md](references/blocks.md) |
 | Tags, related tags, Wiki text and examples | `tag_query`, `tag_related`, `wiki_query` | [lookup.md](references/lookup.md) |
 | Snapshots and preferences | `snapshot`, `settings_read`, `settings_update` | [settings.md](references/settings.md) |
+| Configure Pi itself: Skill, packages, extensions, MCP and Agent settings | Native `agent_manage` (deferred) | [self-management.md](references/self-management.md) |
 | Workspace, notes and external MCP servers | - | [workspace.md](references/workspace.md) |
 
 Read the reference for the current task; use `nai-prompt` for prompt writing.

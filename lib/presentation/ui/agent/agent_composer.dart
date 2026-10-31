@@ -14,6 +14,7 @@ import 'agent_glyphs.dart';
 import 'agent_parts.dart';
 import 'agent_popovers.dart';
 import 'agent_scope.dart';
+import 'agent_thread_navigation.dart';
 
 /// 输入区：快捷任务 / 排队行 / 输入框（附件、`@` 引用、`/` 技能）/ 控制条。
 class AgentComposer extends StatefulWidget {
@@ -337,7 +338,8 @@ class AgentComposerState extends State<AgentComposer> {
         event.logicalKey == LogicalKeyboardKey.tab &&
         !HardwareKeyboard.instance.isShiftPressed &&
         _suggestion != null) {
-      _acceptSuggestion();
+      final s = AgentScope.composerOf(context);
+      unawaited(s.run(s.actions.onAcceptSuggestion!));
       return KeyEventResult.handled;
     }
     if (event is! KeyDownEvent ||
@@ -363,15 +365,10 @@ class AgentComposerState extends State<AgentComposer> {
     return text;
   }
 
-  void _acceptSuggestion() {
-    final s = AgentScope.composerOf(context);
-    _focus.requestFocus();
-    unawaited(s.run(() => s.actions.onAcceptSuggestion!()));
-  }
-
   void _send({required bool steer}) {
     final s = AgentScope.composerOf(context);
     if (!s.data.composer.canSend || _composing) return;
+    unawaited(AgentNavigationScope.of(context)?.latest?.call());
     unawaited(s.run(() => s.actions.onSend(steer: steer)));
   }
 
@@ -477,82 +474,104 @@ class AgentComposerState extends State<AgentComposer> {
                       ],
                     ),
                   ),
-                Shortcuts(
-                  shortcuts: const {
-                    SingleActivator(LogicalKeyboardKey.keyV, control: true):
-                        _PasteIntent(),
-                    SingleActivator(LogicalKeyboardKey.keyV, meta: true):
-                        _PasteIntent(),
-                  },
-                  child: Actions(
-                    actions: {
-                      _PasteIntent: CallbackAction<_PasteIntent>(
-                        onInvoke: (_) {
-                          unawaited(_paste());
-                          return null;
+                ValueListenableBuilder(
+                  valueListenable: _text,
+                  builder: (context, _, _) {
+                    final suggestion = _suggestion;
+                    return Shortcuts(
+                      shortcuts: const {
+                        SingleActivator(LogicalKeyboardKey.keyV, control: true):
+                            _PasteIntent(),
+                        SingleActivator(LogicalKeyboardKey.keyV, meta: true):
+                            _PasteIntent(),
+                      },
+                      child: Actions(
+                        actions: {
+                          _PasteIntent: CallbackAction<_PasteIntent>(
+                            onInvoke: (_) {
+                              unawaited(_paste());
+                              return null;
+                            },
+                          ),
+                          PasteTextIntent: CallbackAction<PasteTextIntent>(
+                            onInvoke: (_) {
+                              unawaited(_paste());
+                              return null;
+                            },
+                          ),
                         },
-                      ),
-                      PasteTextIntent: CallbackAction<PasteTextIntent>(
-                        onInvoke: (_) {
-                          unawaited(_paste());
-                          return null;
-                        },
-                      ),
-                    },
-                    child: Focus(
-                      onKeyEvent: _key,
-                      onFocusChange: (_) => setState(() {}),
-                      child: TextField(
-                        key: const Key('agent-input'),
-                        controller: _text,
-                        focusNode: _focus,
-                        minLines: 1,
-                        maxLines: 8,
-                        onChanged: _changed,
-                        style: UiText.sans(13.5, color: c.ink, height: 1.6),
-                        cursorColor: c.accent,
-                        cursorWidth: 1.5,
-                        contextMenuBuilder: (context, editable) =>
-                            AdaptiveTextSelectionToolbar.buttonItems(
-                              anchors: editable.contextMenuAnchors,
-                              buttonItems: [
-                                for (final item
-                                    in editable.contextMenuButtonItems)
-                                  if (item.type == ContextMenuButtonType.paste)
-                                    ContextMenuButtonItem(
-                                      type: ContextMenuButtonType.paste,
-                                      onPressed: () {
-                                        ContextMenuController.removeAny();
-                                        unawaited(_paste());
-                                      },
-                                    )
-                                  else
-                                    item,
-                              ],
-                            ),
-                        decoration: agentBareInput(
-                          padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
-                          constraints: const BoxConstraints(minHeight: 44),
-                          hint: l.ag_placeholder,
-                          hintMaxLines: 1,
-                          hintStyle: UiText.sans(
-                            13.5,
-                            color: c.faint,
-                            height: 1.6,
+                        child: Focus(
+                          onKeyEvent: _key,
+                          onFocusChange: (_) => setState(() {}),
+                          child: TextField(
+                            key: const Key('agent-input'),
+                            controller: _text,
+                            focusNode: _focus,
+                            minLines: 1,
+                            maxLines: 8,
+                            onChanged: _changed,
+                            style: UiText.sans(13.5, color: c.ink, height: 1.6),
+                            cursorColor: c.accent,
+                            cursorWidth: 1.5,
+                            contextMenuBuilder: (context, editable) =>
+                                AdaptiveTextSelectionToolbar.buttonItems(
+                                  anchors: editable.contextMenuAnchors,
+                                  buttonItems: [
+                                    for (final item
+                                        in editable.contextMenuButtonItems)
+                                      if (item.type ==
+                                          ContextMenuButtonType.paste)
+                                        ContextMenuButtonItem(
+                                          type: ContextMenuButtonType.paste,
+                                          onPressed: () {
+                                            ContextMenuController.removeAny();
+                                            unawaited(_paste());
+                                          },
+                                        )
+                                      else
+                                        item,
+                                  ],
+                                ),
+                            decoration:
+                                agentBareInput(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    10,
+                                    12,
+                                    4,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minHeight: 44,
+                                  ),
+                                  hint: suggestion ?? l.ag_placeholder,
+                                  hintMaxLines: suggestion == null ? 1 : 8,
+                                  hintStyle: UiText.sans(
+                                    13.5,
+                                    color: c.faint,
+                                    height: 1.6,
+                                  ),
+                                ).copyWith(
+                                  suffixIcon: suggestion == null
+                                      ? null
+                                      : const Padding(
+                                          padding: EdgeInsets.only(
+                                            left: 8,
+                                            right: 12,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [AgentKey('Tab')],
+                                          ),
+                                        ),
+                                  suffixIconConstraints: const BoxConstraints(
+                                    minWidth: 0,
+                                    minHeight: 0,
+                                  ),
+                                ),
                           ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _text,
-                  builder: (context, _, _) => switch (_suggestion) {
-                    final hint? => _SuggestionRow(
-                      text: hint,
-                      onAccept: _acceptSuggestion,
-                    ),
-                    null => const SizedBox.shrink(),
+                    );
                   },
                 ),
                 if (comp.blocked == AgentSendBlock.noModel)
@@ -1164,92 +1183,119 @@ class _AttachmentChipState extends State<_AttachmentChip> {
             )
           : null,
       child: MouseRegion(
+        cursor: a.image == null
+            ? SystemMouseCursors.basic
+            : SystemMouseCursors.click,
         onEnter: (_) => _track(chip: true),
         onExit: (_) => _track(chip: false),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              key: Key('agent-attachment-${a.id}'),
-              width: 48,
-              height: 48,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                color: c.control,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: c.border),
-              ),
-              child: a.image == null
-                  ? Center(
-                      child: AgentIcon(
-                        AgentGlyphs.alert,
-                        size: 16,
-                        color: c.faint,
-                      ),
-                    )
-                  : Image(
-                      image: a.image!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => Center(
+        child: GestureDetector(
+          onTap: a.image == null
+              ? null
+              : () {
+                  final images = [
+                    for (final item in s.data.composer.attachments)
+                      if (item.image != null)
+                        AgentImage(
+                          id: item.id,
+                          image: item.image!,
+                          width: item.width,
+                          height: item.height,
+                          label: item.name,
+                          source: AgentImageSource.attachment,
+                        ),
+                  ];
+                  setState(() => _hover = false);
+                  s.zoom(
+                    images.firstWhere((image) => image.id == a.id),
+                    group: images,
+                  );
+                },
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                key: Key('agent-attachment-${a.id}'),
+                width: 48,
+                height: 48,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: c.control,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: c.border),
+                ),
+                child: a.image == null
+                    ? Center(
                         child: AgentIcon(
                           AgentGlyphs.alert,
                           size: 16,
                           color: c.faint,
                         ),
+                      )
+                    : Image(
+                        image: a.image!,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Center(
+                          child: AgentIcon(
+                            AgentGlyphs.alert,
+                            size: 16,
+                            color: c.faint,
+                          ),
+                        ),
                       ),
-                    ),
-            ),
-            if (a.metadata != null)
-              Positioned(
-                left: 3,
-                bottom: 3,
-                child: Container(
-                  width: 14,
-                  height: 14,
-                  decoration: const BoxDecoration(
-                    color: Color(0x99000000),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: const AgentIcon(
-                    AgentGlyphs.info,
-                    size: 10,
-                    color: Colors.white,
-                  ),
-                ),
               ),
-            if (_hover)
-              Positioned(
-                right: -5,
-                top: -5,
-                child: GestureDetector(
-                  key: Key('agent-attachment-remove-${a.id}'),
-                  onTap: () => s.run(() => s.actions.onRemoveAttachment(a.id)),
-                  child: MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    child: Tooltip(
-                      message: l.ag_attachmentRemove,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          color: c.ink,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: c.card, width: 1.5),
-                        ),
-                        alignment: Alignment.center,
-                        child: AgentIcon(
-                          AgentGlyphs.close,
-                          size: 10,
-                          color: c.bg,
-                          stroke: 2.2,
-                        ),
-                      ),
+              if (a.metadata != null)
+                Positioned(
+                  left: 3,
+                  bottom: 3,
+                  child: Container(
+                    width: 14,
+                    height: 14,
+                    decoration: const BoxDecoration(
+                      color: Color(0x99000000),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const AgentIcon(
+                      AgentGlyphs.info,
+                      size: 10,
+                      color: Colors.white,
                     ),
                   ),
                 ),
-              ),
-          ],
+              if (_hover)
+                Positioned(
+                  right: -5,
+                  top: -5,
+                  child: GestureDetector(
+                    key: Key('agent-attachment-remove-${a.id}'),
+                    onTap: () =>
+                        s.run(() => s.actions.onRemoveAttachment(a.id)),
+                    child: MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: Tooltip(
+                        message: l.ag_attachmentRemove,
+                        child: Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: c.ink,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: c.card, width: 1.5),
+                          ),
+                          alignment: Alignment.center,
+                          child: AgentIcon(
+                            AgentGlyphs.close,
+                            size: 10,
+                            color: c.bg,
+                            stroke: 2.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -1418,49 +1464,6 @@ class _Notices extends StatelessWidget {
             onPressed: s.actions.onDismissNotices,
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 下一句建议（10-25）：输入框下方一行灰字，右侧 Tab 键帽；点或按 Tab 采纳（只填入不发送）。
-class _SuggestionRow extends StatelessWidget {
-  const _SuggestionRow({required this.text, required this.onAccept});
-  final String text;
-  final VoidCallback onAccept;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ui;
-    final l = context.l10n;
-    return Tooltip(
-      message: l.ag_suggestionAccept,
-      waitDuration: const Duration(milliseconds: 500),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          key: const Key('agent-suggestion'),
-          behavior: HitTestBehavior.opaque,
-          onTap: onAccept,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 10, 2),
-            child: Row(
-              spacing: 8,
-              children: [
-                AgentIcon(AgentGlyphs.wand, size: 12, color: c.faint),
-                Expanded(
-                  child: Text(
-                    text,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: UiText.sans(12.5, color: c.faint, height: 1.4),
-                  ),
-                ),
-                const AgentKey('Tab'),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -16207,10 +16207,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get naiAgent_mcpConfig => 'サーバー設定（JSON）';
 
   @override
-  String get naiAgent_mcpConfigHint =>
-      'stdio と Streamable HTTP に対応。サーバー設定オブジェクトを貼り付けてください。command は実行ファイル、args は配列です。env、cwd、url、headers、oauth、toolExposure も使用できます。設定は暗号化して保存されます。';
-
-  @override
   String get naiAgent_mcpStatus => '接続状態を確認';
 
   @override
@@ -19461,7 +19457,7 @@ class AppLocalizationsJa extends AppLocalizations {
       '保存できませんでした。ワークスペースが変わったか、書き込みに失敗しました。変更は残っています。';
 
   @override
-  String get set_agMcpUnchecked => '未確認';
+  String get set_agMcpUnchecked => '未接続';
 
   @override
   String get set_agInstructionsSaving => '指示を保存中…';
@@ -21356,9 +21352,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get ag_historyEmpty => '一致する項目はありません';
 
   @override
-  String get ag_historyBeforeCompaction => 'この部分は圧縮前です。クリックして要約を確認。';
-
-  @override
   String get ag_historyAuto => '自動圧縮';
 
   @override
@@ -21681,9 +21674,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get set_agCacheIdleCost => '待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。';
 
   @override
-  String get ag_suggestionAccept => 'Tab でこの提案を入力';
-
-  @override
   String get ag_cacheWarmTitle => 'キャッシュのウォームアップ';
 
   @override
@@ -21902,4 +21892,46 @@ class AppLocalizationsJa extends AppLocalizations {
   String ag_chatAgeWeeks(int count) {
     return '${count}w';
   }
+
+  @override
+  String get set_agMcpStdio => 'ローカルコマンド';
+
+  @override
+  String get set_agMcpAddress => 'サーバー URL';
+
+  @override
+  String get set_agMcpCommand => '実行コマンド';
+
+  @override
+  String get set_agMcpArgs => '引数（1 行に 1 つ）';
+
+  @override
+  String get set_agMcpEnv => '環境変数';
+
+  @override
+  String get set_agMcpHeaders => 'リクエストヘッダー';
+
+  @override
+  String get set_agMcpCwd => '作業ディレクトリ';
+
+  @override
+  String get set_agMcpAdvanced => '詳細設定';
+
+  @override
+  String get set_agMcpJson => 'JSON インポート／編集';
+
+  @override
+  String get set_agMcpForm => 'フォーム';
+
+  @override
+  String get set_agMcpTest => '接続テスト';
+
+  @override
+  String get set_agMcpJsonOne => 'MCP サーバーを 1 つずつインポートしてください。';
+
+  @override
+  String get set_agMcpPending => '次のターンで適用';
+
+  @override
+  String get ag_tool_agent_manage => 'Agent を管理';
 }

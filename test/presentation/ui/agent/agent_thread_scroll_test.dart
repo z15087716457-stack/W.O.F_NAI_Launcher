@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/themes/presets/geist_theme.dart';
@@ -16,7 +17,7 @@ AgentTurn _turn(int i, {int lines = 1}) => AgentTurn(
   ),
 );
 
-AgentViewData _view(List<AgentTurn> thread, int revision) {
+AgentViewData _view(List<AgentTurn> thread, int revision, {String text = ''}) {
   final d = AgentFixture.view(AgentScene.chat);
   return AgentViewData(
     now: d.now,
@@ -24,7 +25,11 @@ AgentViewData _view(List<AgentTurn> thread, int revision) {
     chat: d.chat,
     workspaces: d.workspaces,
     chats: d.chats,
-    composer: const AgentComposerData(text: '', pending: []),
+    composer: AgentComposerData(
+      text: text,
+      canSend: text.isNotEmpty,
+      pending: const [],
+    ),
     thread: thread,
     shelf: d.shelf,
     memory: d.memory,
@@ -124,6 +129,106 @@ void main() {
     pos = _position(tester);
     expect(pos.pixels, pos.maxScrollExtent, reason: 'following resumed');
   });
+
+  testWidgets(
+    'typing keeps the reading position; sending returns to latest and resumes following',
+    (tester) async {
+      final turns = [for (var i = 0; i < 6; i++) _turn(i, lines: 6)];
+      await _pump(tester, _view(turns, 1, text: 'message'));
+      final thread = find.byKey(const Key('agent-thread'));
+      final input = find.byKey(const Key('agent-input'));
+      await tester.drag(thread, const Offset(0, 400));
+      await tester.pumpAndSettle();
+      final held = _position(tester).pixels;
+      expect(held, lessThan(_position(tester).maxScrollExtent));
+
+      await tester.tap(input);
+      await tester.pump();
+      expect(
+        _position(tester).pixels,
+        held,
+        reason: 'focus alone keeps the reading position',
+      );
+      const composing = TextEditingValue(
+        text: 'ni',
+        selection: TextSelection.collapsed(offset: 2),
+        composing: TextRange(start: 0, end: 2),
+      );
+      tester.testTextInput.updateEditingValue(composing);
+      await tester.pumpAndSettle();
+      expect(
+        _position(tester).pixels,
+        held,
+        reason: 'typing keeps the reading position',
+      );
+      expect(tester.widget<TextField>(input).controller!.value, composing);
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(
+        _position(tester).pixels,
+        held,
+        reason: 'IME candidate confirmation is not a send',
+      );
+      tester.testTextInput.updateEditingValue(
+        composing.copyWith(composing: TextRange.empty),
+      );
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+      expect(_position(tester).pixels, held, reason: 'a newline is not a send');
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(_position(tester).pixels, _position(tester).maxScrollExtent);
+      expect(find.byKey(const Key('agent-jump-latest')), findsNothing);
+
+      await _pump(tester, _view([...turns, _turn(6, lines: 8)], 2, text: 'ni'));
+      expect(
+        _position(tester).pixels,
+        _position(tester).maxScrollExtent,
+        reason: 'new content follows after sending',
+      );
+
+      await tester.drag(thread, const Offset(0, 400));
+      await tester.pumpAndSettle();
+      final reading = _position(tester).pixels;
+      tester.testTextInput.updateEditingValue(
+        composing.copyWith(selection: const TextSelection.collapsed(offset: 1)),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        _position(tester).pixels,
+        reading,
+        reason: 'selection alone does not jump',
+      );
+
+      await tester.enterText(input, 'pasted text\nsecond line');
+      await tester.pumpAndSettle();
+      expect(
+        _position(tester).pixels,
+        reading,
+        reason: 'pasting does not jump either',
+      );
+      await tester.tap(find.byKey(const Key('agent-send')));
+      await tester.pumpAndSettle();
+      expect(_position(tester).pixels, _position(tester).maxScrollExtent);
+
+      await tester.drag(thread, const Offset(0, 400));
+      await tester.pumpAndSettle();
+      final beforeEmptySend = _position(tester).pixels;
+      await _pump(tester, _view([...turns, _turn(6, lines: 8)], 2));
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.pumpAndSettle();
+      expect(
+        _position(tester).pixels,
+        beforeEmptySend,
+        reason: 'an empty composer cannot send or jump',
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('thinking block collapses to one line and expands', (
     tester,

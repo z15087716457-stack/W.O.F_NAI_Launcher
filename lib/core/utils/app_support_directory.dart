@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as system_paths;
 
 import '../services/adjacent_app_data_migration.dart';
+import '../storage/application_storage.dart';
 import 'studio_sandbox.dart';
 
 export 'package:path_provider/path_provider.dart'
@@ -47,16 +48,24 @@ Future<Directory> _prepareAdjacentData() async {
   final destination = Directory(
     p.join(p.dirname(Platform.resolvedExecutable), 'user-data'),
   );
-  return AdjacentAppDataMigration(
+  final directory = await AdjacentAppDataMigration(
     legacy: await getLegacyApplicationSupportDirectory(),
     destination: destination,
   ).prepare();
+  initializeApplicationStorage(directory);
+  return directory;
 }
 
 /// Only historical migration code may use the original Windows directory.
-Future<Directory> getLegacyApplicationSupportDirectory() {
+Future<Directory> getLegacyApplicationSupportDirectory() async {
   if (studioSandboxRoot() != null) return getApplicationSupportDirectory();
-  return system_paths.getApplicationSupportDirectory();
+  if (!_usesAdjacentData) return system_paths.getApplicationSupportDirectory();
+  // Resolve without creating AppData or going through the redirected provider.
+  final roaming = Platform.environment['APPDATA'];
+  if (roaming == null || roaming.isEmpty) {
+    throw const FileSystemException('Cannot locate legacy application data');
+  }
+  return Directory(p.join(roaming, 'com.example', 'nai_launcher'));
 }
 
 Future<Directory> getApplicationDocumentsDirectory() {

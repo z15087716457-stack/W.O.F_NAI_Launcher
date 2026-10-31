@@ -21,12 +21,17 @@ class _CountingController extends AgentTestController {
   Future<void> updateSettings(
     Map<String, dynamic> patch, {
     Map<String, dynamic>? expected,
+    bool deferRuntime = false,
   }) async {
     if (patch['panelWidth'] case final num width) {
       widths.add(width.toDouble());
       await writeGate?.future;
     }
-    await super.updateSettings(patch, expected: expected);
+    await super.updateSettings(
+      patch,
+      expected: expected,
+      deferRuntime: deferRuntime,
+    );
   }
 }
 

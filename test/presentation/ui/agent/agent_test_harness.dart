@@ -21,6 +21,7 @@ Future<AgentRecorder> pumpAgent(
   AgentScene scene = AgentScene.chat,
   AgentViewData? data,
   AgentActions? actions,
+  AgentSlots slots = const AgentSlots(),
   AgentTab tab = AgentTab.chat,
   double width = 420,
   double height = 900,
@@ -51,6 +52,7 @@ Future<AgentRecorder> pumpAgent(
         home: Scaffold(
           body: WindowChromeScope(
             child: AgentPanel(
+              slots: slots,
               data: data ?? AgentFixture.view(scene),
               actions:
                   actions ??

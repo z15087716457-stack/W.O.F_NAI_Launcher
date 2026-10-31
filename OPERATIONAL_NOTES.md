@@ -256,10 +256,11 @@
 ## 构建与更新
 
 - 桌面主窗口按 2026-10-29 用户要求移除顶部更新胶囊、专属弹窗入口及 88px 预留，不恢复；日常更新提示使用设置入口红点。导航的 `updateAvailable` 接线、设置页检查／下载／安装和更新状态保持，窗口按钮、Agent 入口与各页标题栏继续沿用原组件。
-- Windows 内部数据统一经 `app_support_directory.dart` 使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；不依赖工作目录，不静默退回 C 盘。旧 AppData 数据必须在数据库打开前完整备份、SHA-256 校验和迁移；保留旧路径联接兼容已存绝对路径，两端有不同数据时拒绝合并。旧目录识别仍取自 `CompanyName=com.example` 与 `ProductName=nai_launcher`，原生身份保持稳定。更新、打包和卸载必须保护 `user-data/` 及迁移备份。
-- 首次新建、旧目录为空或仅已有相邻数据时，同样在插件启动前建立并验证兼容联接。历史缺联接造成的分叉只允许恢复标记中 `schema=1`、`layout=executable-adjacent`、原路径匹配且 `backup=null` 的首次新建配置；旧目录只能包含根级 `flutter_secure_storage.dat`、`shared_preferences.json`、`*.secure` 普通文件。先独立备份，SHA-256 复核，独占创建缺失目标；同名内容必须相同，未知条目／链接／真实冲突拒绝处理，保留旧原件与备份。数据准备失败显示独立五语言恢复页，重试先重新准备目录，成功后才打开数据库。见 [修复与验证](docs/startup-data-recovery-2026-10-23.md)。
+- Windows 内部数据使用 EXE 旁 `user-data/`，临时文件使用其 `temp/`；偏好设置与加密凭据在存储打开前经同一初始化入口直接使用该目录，沙箱复用同一偏好实现，凭据仍只保存在沙箱会话内。现有格式与原生 Windows 加密不变，不依赖工作目录或全局 AppData 联接。
+- 当前位置已有资料时优先保留；旧 `schema=1` 新建配置遗留的根级插件文件仅在原路径匹配、无先前迁移且目录只含已知插件文件时补入缺失项，源文件与独立备份保留，当前文件不覆盖。`schema=2` 之后不再检查旧目录。只有确需迁移完整旧资料时才保留原完整备份、SHA-256 校验和绝对路径兼容联接；新装不创建联接，已有联接不改指向。原生身份 `com.example/nai_launcher` 仅用于旧路径识别。更新、打包和卸载仍保护相邻数据及备份，真实准备失败仍进入现有恢复页。[实现与验证](docs/app-data-location-review-2026-10-31.md)。
 
 - 应用内更新启动：不要用 Dart `detached`／`detachedWithStdio` 直接启动 Windows PowerShell；本机复现会在读脚本前退出。使用 `WindowsUpdateScript.launch` 的短命启动器与隐藏独立进程，工作目录设为脚本临时目录，避免更新进程自身锁住旧程序目录；生成 `.ps1` 写 UTF-8 BOM。回归必须验证真实 Dart 父进程退出后脚本仍运行且旧目录可移动，另测便携切换、回退和私有数据保留；只直接运行脚本或解包发布产物不足以证明这条链。[诊断与修复](docs/in-app-update-launch-fix-2026-10-29.md)。
+- Portable 更新读取旧程序清单时统一 `/` 与 `\`，以免旧受管文件被当作自定义文件覆盖回新包。2.2.3 及更早 Portable 首次升级到 2.2.4 需退出后手动解压覆盖，保留相邻用户资料；脚本由当前旧程序生成，修复不能追溯到该次更新。回归覆盖正斜线、反斜线、混合大小写、嵌套受管文件、自定义文件保留与原失败回退。
 - 正常覆盖构建需目标文件未被运行实例锁定；用户要求自行核验时，不自动关闭程序，可使用独立 CMake 产物目录。Flutter 位于 `C:/flutter`，NuGet 位于 `C:/tools/nuget`，下载和 git 使用本机代理 `http://127.0.0.1:7897`。NSIS 3.12 已装于默认位置（makensis 在 PATH/Program Files (x86)），安装器打包与 `scripts/validate_windows_installer_process_handling.ps1` 依赖它。
 - 安装器（`installer/windows/nai_launcher.nsi`）进程检测自 2026-09-09 起为「软化 fail-closed」语义：进程枚举/查询失败时不再直接阻断，改为以 `CreateFileW(GENERIC_WRITE, share=0)` 探 `$INSTDIR\nai_launcher.exe` 文件锁——文件可写打开或不存在（全新安装）则放行，共享冲突/拒绝访问（文件真被占用）或其他未知错误仍阻断（静默退出码 3 不变）。每次检查失败会把失败阶段、GetLastError、疑似 PID、探锁结果追加写入 `$INSTDIR\install_diagnostics.log`（UTF-16，随卸载删除）。验证脚本已覆盖四场景：目标在跑阻断 / 他目录实例放行 / 查询失败+无锁放行+落诊断 / 全新目录放行。
 - 远程布局（2026-09-11 整理）：origin=本分叉仓库（z15087716457-stack/W.O.F_NAI_Launcher）；上游 Aaalice233 不再常驻远程——需要观察上游改动时临时 `git remote add upstream https://github.com/Aaalice233/Aaalice_NAI_Launcher.git` 并 fetch，看完 `git remote remove upstream`。自行实现有价值的改动，不直接 merge 或 cherry-pick 上游提交。
@@ -300,6 +301,16 @@ Wiki 顶部类型 chip 条将鼠标纵向滚轮映射为水平移动，原生横
 启动器管理的资料统一放在项目内 `.W.O.F/`：`workspace.json`、`instructions.md`、`sessions/`、`ui/`、`attachments/`、`outputs/`、`notes/`、`skills/`、`prompts/`、`snapshots/`，原 `.agent/` 内容也平移至此。Agent cwd 保持项目根目录，根目录 `AGENTS.md` 是用户项目规则；Dart 在既有规则刷新点读取它，与 `.W.O.F/instructions.md` 各加入一次，Pi 不额外发现父目录或环境规则。全局资料仍由原 `agent-data/` 管理。
 
 旧工作区首次读取时，先在 `.W.O.F/migration-backup/` 备份并校验，再搬迁已知启动器路径；元数据最后转移，中断按 manifest 恢复后重试，目标冲突不覆盖。会话 JSONL 逐字保留，聊天 `sessionFile` 仍为数据目录内的 `sessions/*.jsonl`，附件新引用为项目相对 `.W.O.F/attachments/...`。缺失的旧路径仅在文件读取时回查新位置，实际存在的项目文件优先，write/edit/bash 不改写路径。[实现与验证](docs/agent-workspace-layout-2026-10-31.md)。已随本机 +69 安装；安装时未迁移正式工作区，下次用户启动时才执行。[交付记录](docs/local-2.2.2-build69-2026-10-31.md)。
+
+## NAI Agent 自管理与输入
+
+补全使用同一 `TextField` 的 `hintText` 与正文样式，Tab 键帽放在原生尾部槽位；点击仅聚焦，只有按 Tab 采纳，采纳前草稿仍为空。真实字体下核对灰字／正文首字和光标坐标，避免仅凭字号、边距相同判断对齐；[源码验证](.dart_tool/agent-native-suggestion-20261031/verification.json)。
+
+会话列表确认删除后保持打开和搜索条件，关闭列表后仍可使用现有撤销。工作区面板在聊天切换时保留，输入区按聊天重建；初始化完成后的短暂空选中不卸载顶栏，正文搜索命中随当前聊天清单过滤。回归位于 `agent_new_callbacks_test.dart` 的连续删除／最后一条／撤销用例及 `agent_panel_test.dart` 的行内确认用例。
+
+原生 deferred `agent_manage` 统一管理自身 Skill、扩展、Pi 包、MCP、设置、指令与模板，独立于可关闭的业务 MCP，默认七入口保持。设置页与模型共用 `NaiAgentManagement` 及现有存储；文件内容继续用原生文件工具，包资源保留 Pi 返回的原安装路径，连接检测／OAuth 复用 Pi 连接器。自管理修改返回下轮生效，沿用配置签名与空闲重建恢复同一会话；设置页即时操作保留。详细契约和验证见[实现报告](docs/agent-input-self-management-2026-10-31.md)。
+
+多图拖入须在原生 drop 回调返回前发起所有读取；只将解码和导入串行化。接收及高亮限定输入卡片，其他 Agent 区域通过命中元数据拒绝全局画布导入。待发送缩略图复用现有 `AgentScope.zoom`；中文输入法偶发失效继续暂缓。
 
 ## NAI Agent 流式显示
 

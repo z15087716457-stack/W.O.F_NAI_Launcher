@@ -8868,7 +8868,6 @@
   "naiAgent_mcpAdd": "添加 MCP 服务器",
   "naiAgent_mcpName": "服务器名称",
   "naiAgent_mcpConfig": "服务器配置（JSON）",
-  "naiAgent_mcpConfigHint": "支持 stdio 和 Streamable HTTP。粘贴单个服务器配置对象；command 为可执行文件，args 为数组。可设置 env、cwd、url、headers、oauth 和 toolExposure。配置保存在加密存储中。",
   "naiAgent_mcpStatus": "查看连接状态",
   "naiAgent_mcpReconnect": "重新连接",
   "naiAgent_mcpLogin": "登录",
@@ -10523,7 +10522,7 @@
   "set_agBaseSwitchBody": "切换范围会丢掉还没保存的修改。",
   "set_agBaseSaving": "正在保存…",
   "set_agBaseFailed": "没有保存：工作区已切换或写入失败，修改还在。",
-  "set_agMcpUnchecked": "未检测",
+  "set_agMcpUnchecked": "尚未连接",
   "set_agInstructionsSaving": "正在保存指令…",
   "set_agInstructionsFailed": "指令未保存：内容已变化或写入失败。草稿已保留，请重试。",
   "set_agOrderSkills": "Skill 目录",
@@ -11270,7 +11269,6 @@
   "ag_historyCards": "卡片",
   "ag_historyQuestions": "问答",
   "ag_historyEmpty": "没有匹配的条目",
-  "ag_historyBeforeCompaction": "这段在压缩之前，点看摘要",
   "ag_historyAuto": "自动压缩",
   "ag_historyManual": "手动压缩",
   "ag_historyImageMessage": "图片消息",
@@ -11459,7 +11457,6 @@
   "set_agCacheStreaming": "只在 Agent 运行时",
   "set_agCacheIdle": "空闲时也预热",
   "set_agCacheIdleCost": "空闲时也预热（最多 30 分钟）会产生额外模型费用。",
-  "ag_suggestionAccept": "按 Tab 填入这句建议",
   "ag_cacheWarmTitle": "缓存预热",
   "ag_cacheWarmOff": "已关闭",
   "ag_cacheWarmRefreshing": "正在续期缓存…",
@@ -11609,5 +11606,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_agMcpStdio": "本地命令",
+  "set_agMcpAddress": "服务器地址",
+  "set_agMcpCommand": "可执行命令",
+  "set_agMcpArgs": "参数（每行一个）",
+  "set_agMcpEnv": "环境变量",
+  "set_agMcpHeaders": "请求头",
+  "set_agMcpCwd": "工作目录",
+  "set_agMcpAdvanced": "高级设置",
+  "set_agMcpJson": "JSON 导入／编辑",
+  "set_agMcpForm": "表单",
+  "set_agMcpTest": "测试连接",
+  "set_agMcpJsonOne": "请一次导入一个 MCP 服务器。",
+  "set_agMcpPending": "下轮生效",
+  "ag_tool_agent_manage": "管理 Agent"
 }

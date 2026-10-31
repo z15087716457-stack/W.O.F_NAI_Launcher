@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -85,6 +87,8 @@ class _PasteImageIntent extends Intent {
 /// 包装整个生成界面，监听拖拽事件
 /// 当用户拖拽图片到界面任意位置时，弹出选择对话框
 class GlobalDropHandler extends ConsumerStatefulWidget {
+  /// A nested surface owns its drop policy, including areas that reject drops.
+  static const excludedRegion = #excludeGlobalImageDrop;
   final Widget child;
 
   const GlobalDropHandler({super.key, required this.child});
@@ -196,6 +200,21 @@ class _GlobalDropHandlerState extends ConsumerState<GlobalDropHandler> {
           formats: Formats.standardFormats,
           hitTestBehavior: HitTestBehavior.opaque,
           onDropOver: (event) {
+            final hit = HitTestResult();
+            GestureBinding.instance.hitTestInView(
+              hit,
+              event.position.global,
+              View.of(context).viewId,
+            );
+            if (hit.path.any(
+              (e) =>
+                  e.target is RenderMetaData &&
+                  (e.target as RenderMetaData).metaData ==
+                      GlobalDropHandler.excludedRegion,
+            )) {
+              if (_isDragging) setState(() => _isDragging = false);
+              return DropOperation.none;
+            }
             // Gallery drags have category-specific targets. History drags must
             // continue through the global image destination flow.
             final isGalleryInternalDrag = event.session.items.any(

@@ -8868,7 +8868,6 @@
   "naiAgent_mcpAdd": "新增 MCP 伺服器",
   "naiAgent_mcpName": "伺服器名稱",
   "naiAgent_mcpConfig": "伺服器配置（JSON）",
-  "naiAgent_mcpConfigHint": "支援 stdio 和 Streamable HTTP。貼上單個伺服器配置物件；command 為執行檔，args 為陣列。可設定 env、cwd、url、headers、oauth 和 toolExposure。配置儲存在加密儲存中。",
   "naiAgent_mcpStatus": "檢視連線狀態",
   "naiAgent_mcpReconnect": "重新連線",
   "naiAgent_mcpLogin": "登入",
@@ -10641,7 +10640,7 @@
   "set_agBaseSwitchBody": "切換範圍會丟掉還沒儲存的修改。",
   "set_agBaseSaving": "正在儲存…",
   "set_agBaseFailed": "沒有儲存：工作區已切換或寫入失敗，修改還在。",
-  "set_agMcpUnchecked": "未檢測",
+  "set_agMcpUnchecked": "尚未連線",
   "set_agInstructionsSaving": "正在儲存指令…",
   "set_agInstructionsFailed": "指令未儲存：內容已變化或寫入失敗。草稿已保留，請重試。",
   "set_agOrderSkills": "Skill 目錄",
@@ -11855,7 +11854,6 @@
   "ag_historyCards": "卡片",
   "ag_historyQuestions": "問答",
   "ag_historyEmpty": "沒有匹配的條目",
-  "ag_historyBeforeCompaction": "這段在壓縮之前，點看摘要",
   "ag_historyAuto": "自動壓縮",
   "ag_historyManual": "手動壓縮",
   "ag_historyImageMessage": "圖片訊息",
@@ -12044,7 +12042,6 @@
   "set_agCacheStreaming": "只在 Agent 執行時",
   "set_agCacheIdle": "空閒時也預熱",
   "set_agCacheIdleCost": "空閒時也預熱（最多 30 分鐘）會產生額外模型費用。",
-  "ag_suggestionAccept": "按 Tab 填入這句建議",
   "ag_cacheWarmTitle": "快取預熱",
   "ag_cacheWarmOff": "已關閉",
   "ag_cacheWarmRefreshing": "正在續期快取…",
@@ -12194,5 +12191,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_agMcpStdio": "本地命令",
+  "set_agMcpAddress": "伺服器地址",
+  "set_agMcpCommand": "可執行命令",
+  "set_agMcpArgs": "參數（每行一個）",
+  "set_agMcpEnv": "環境變數",
+  "set_agMcpHeaders": "請求標頭",
+  "set_agMcpCwd": "工作目錄",
+  "set_agMcpAdvanced": "進階設定",
+  "set_agMcpJson": "JSON 匯入／編輯",
+  "set_agMcpForm": "表單",
+  "set_agMcpTest": "測試連線",
+  "set_agMcpJsonOne": "請一次匯入一個 MCP 伺服器。",
+  "set_agMcpPending": "下輪生效",
+  "ag_tool_agent_manage": "管理 Agent"
 }

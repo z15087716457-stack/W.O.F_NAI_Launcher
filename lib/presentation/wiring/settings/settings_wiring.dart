@@ -373,6 +373,7 @@ class _SettingsWiringState extends ConsumerState<SettingsWiring> {
           _run(() => agentBackend.mcp(id, enabled: value)),
       onMcpMode: (id, mode) => _run(() => agentBackend.mcp(id, mode: mode)),
       onMcpLogin: (id) => _run(() => agentBackend.mcpLogin(id)),
+      onMcpCheck: (id) => _run(() => agentBackend.checkMcp(id)),
       onEditMcp: (id) => _run(() => agent.editMcp(id)),
       onRemoveMcp: (id) => _run(() => agentBackend.mcp(id, remove: true)),
       onEditQuick: (id) => _run(() => quick.edit(id)),

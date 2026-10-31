@@ -10,9 +10,44 @@ import { redactor } from './model.mjs';
 // Keep this version-specific surface here; never copy Pi's connector or OAuth.
 const sdkRoot = new URL('.', import.meta.resolve('@earendil-works/pi-coding-agent'));
 const { validateMcpServerConfig } = await import(new URL('core/mcp-servers.js', sdkRoot));
-const { createDefaultTransport, McpOAuthCredentialStore } =
+const { createDefaultTransport, McpOAuthCredentialStore, McpServerConnection, signInMcpServer } =
   await import(new URL('extensions/mcp/runtime.js', sdkRoot));
 const { FileAuthStorageBackend } = await import(new URL('core/auth-storage.js', sdkRoot));
+
+// On-demand handshake/OAuth for the form and agent_manage; no Agent session.
+export async function inspectStudioMcp({ name, config, cwd, agentDir, action = 'test', emit = () => {} }) {
+  const { entries: [entry] } = validateStudioMcp({ mcpServers: { [name]: config } });
+  const credentials = new McpOAuthCredentialStore(new FileAuthStorageBackend(join(agentDir, 'mcp-auth.json')), agentDir);
+  const redact = mcpRedactor({}, { mcpServers: { [name]: config } });
+  const connection = new McpServerConnection({ entry, cwd, createTransport: createDefaultTransport,
+    credentials, onTools() {} });
+  try {
+    if (action === 'logout') {
+      if (connection.oauthUrl) credentials.remove(name, connection.oauthUrl);
+      return { name, state: 'disconnected', tools: 0 };
+    }
+    // The official connection owns discovery, auth challenges and timeouts.
+    try { await connection.getClient(); }
+    catch (error) { if (connection.state !== 'needs-auth') throw error; }
+    if (action === 'login' && connection.state === 'needs-auth') {
+      if (!connection.oauthUrl) throw new Error('This server does not support OAuth');
+      await signInMcpServer({ serverUrl: connection.oauthUrl,
+        store: credentials.forServer(name, connection.oauthUrl),
+        settings: connection.oauthSettings(), challenge: connection.challenge,
+        prompt: {
+          showAuthorizationUrl(url) { emit({ event: 'oauth', url: url.href }); },
+          promptForRedirectUrl(signal) { return new Promise(resolve =>
+            signal.addEventListener('abort', () => resolve(undefined), { once: true })); },
+        },
+      });
+      await connection.reconnect();
+    }
+    return { name, state: connection.state, tools: connection.tools.length,
+      toolNames: connection.tools.map(t => t.name), error: connection.error };
+  } catch (error) {
+    return redact({ name, state: 'failed', tools: 0, error: error.message });
+  } finally { await connection.close(); }
+}
 
 export function validateStudioMcp(raw = {}) {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('Invalid MCP configuration');
@@ -160,7 +195,7 @@ export function createStudioMcp({ mcp, definitions, execute, agentDir, instructi
       return transport;
     },
     // Settings are persisted by Studio, not a second mcp.json registry.
-    updateConfig: () => { throw new Error('Change MCP configuration in NAI Agent settings'); },
+    updateConfig: () => { throw new Error('Use agent_manage to persist MCP changes in Studio settings'); },
   });
   // SDK createAgentSession starts with defaultTools, unlike the CLI's restored
   // loadout. Reapply names from Pi's canonical transcript when MCP registers

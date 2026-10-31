@@ -343,7 +343,7 @@ Future<void> _bootstrapMainWindow() async {
   registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
 
-  initializeSandboxPreferences();
+  initializeSandboxStorage();
 
   // 先初始化控制台日志；文件日志稍后读取设置后按需开启，默认关闭。
   await AppLogger.initialize(

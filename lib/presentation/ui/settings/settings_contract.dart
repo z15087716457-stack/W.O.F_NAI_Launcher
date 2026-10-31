@@ -1241,10 +1241,16 @@ class SettingsMcpServer {
     this.tools = 0,
     this.enabled = true,
     this.builtin = false,
+    this.pending = false,
+    this.canCheck = true,
+    this.detail = '',
   });
 
   final String id;
   final String name;
+
+  final bool pending, canCheck;
+  final String detail;
 
   /// 例如 `stdio · npx @modelcontextprotocol/server-filesystem`。
   final String transport;
@@ -1294,6 +1300,7 @@ class SettingsSkill {
     this.enabled = true,
     this.manual = false,
     this.error,
+    this.packageSource,
   });
 
   /// `<source>/<name>`，回调都用它。
@@ -1310,6 +1317,7 @@ class SettingsSkill {
   /// 仅手动：不进提示词目录，只能 `/skill:名称` 调用。
   final bool manual;
   final SettingsSkillError? error;
+  final String? packageSource;
   bool get builtin => source == SettingsSkillSource.builtin;
 }
 
@@ -2018,6 +2026,7 @@ class SettingsActions {
     this.onMcpEnabled = _noIdBool,
     this.onMcpMode = _noMcpMode,
     this.onMcpLogin = _noId,
+    this.onMcpCheck = _noId,
     this.onEditMcp = _noIdOpt,
     this.onRemoveMcp = _noId,
     this.onOpenAgent = _none,
@@ -2214,6 +2223,7 @@ class SettingsActions {
   final void Function(String id, bool enabled) onMcpEnabled;
   final void Function(String id, SettingsMcpMode mode) onMcpMode;
   final ValueChanged<String> onMcpLogin;
+  final ValueChanged<String> onMcpCheck;
 
   /// 编辑 MCP 服务器；null = 新建（接线方打开现有表单）。
   final ValueChanged<String?> onEditMcp;

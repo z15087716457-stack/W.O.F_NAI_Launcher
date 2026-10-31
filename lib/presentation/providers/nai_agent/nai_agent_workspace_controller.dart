@@ -574,11 +574,16 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
   Future<void> updateSettings(
     Map<String, dynamic> changes, {
     Map<String, dynamic>? expected,
+    bool deferRuntime = false,
   }) async {
     final before = settings;
     settings = expected == null
         ? await store.patchSettings(changes)
         : await store.patchSettingsChecked(changes, expected: expected);
+    if (deferRuntime) {
+      skillFilesChanged();
+      return;
+    }
     if (before.providerId != settings.providerId ||
         before.modelId != settings.modelId) {
       for (final runtime in _runtimes.values) {
@@ -665,11 +670,13 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
 
   Future<void> setWorkspacePrompt(
     String? text, {
+    String? workspaceId,
     String? expectedWorkspaceId,
     bool checkPrompt = false,
     String? expectedPrompt,
+    bool deferRuntime = false,
   }) async {
-    final id = selectedWorkspace!.id;
+    final id = workspaceId ?? selectedWorkspace!.id;
     if (expectedWorkspaceId != null && expectedWorkspaceId != id) {
       throw StateError('Selected workspace changed while editing');
     }
@@ -687,6 +694,10 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       for (final workspace in workspaces)
         if (workspace.id == id) updated else workspace,
     ];
+    if (deferRuntime) {
+      skillFilesChanged();
+      return;
+    }
     for (final runtime in _runtimes.values.where((r) => r.workspace.id == id)) {
       if (runtime.client != null && !runtime.client!.isClosed) {
         await runtime.client!.setSystemPrompt(

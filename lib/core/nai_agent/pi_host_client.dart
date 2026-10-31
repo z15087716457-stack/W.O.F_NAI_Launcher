@@ -80,6 +80,7 @@ class PiHostClient {
     Map<String, dynamic> mcp = const {},
     Map<String, dynamic> skills = const {},
     Map<String, dynamic> prompts = const {},
+    Map<String, dynamic> packages = const {},
   }) async {
     final providerId = privateModelConfig['providerId'];
     if (providerId is! String || providerId.trim().isEmpty) {
@@ -119,6 +120,7 @@ class PiHostClient {
             'mcp': mcp,
             'skills': skills,
             'prompts': prompts,
+            'packages': packages,
           })
           .timeout(const Duration(seconds: 30));
       client._sessionId = ready['sessionId'] as String?;

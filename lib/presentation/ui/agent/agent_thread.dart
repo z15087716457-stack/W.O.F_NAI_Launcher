@@ -202,7 +202,7 @@ class _AgentThreadState extends State<AgentThread> {
   }
 
   Future<void> _jumpToLatest() async {
-    if (!_scroll.hasClients) return;
+    if (_follow || !_scroll.hasClients) return;
     setState(() => _follow = true);
     _auto = true;
     try {
@@ -224,6 +224,7 @@ class _AgentThreadState extends State<AgentThread> {
     final d = AgentScope.of(context).data;
     _navigation = AgentNavigationScope.of(context);
     _navigation?.jump = _jumpHistory;
+    _navigation?.latest = _jumpToLatest;
     _reportVisible();
     final r = d.revision;
     if (_chat != null && d.chat.id != _chat) {
@@ -250,6 +251,7 @@ class _AgentThreadState extends State<AgentThread> {
   void dispose() {
     _navigationEpoch++;
     _navigation?.jump = null;
+    _navigation?.latest = null;
     _scroll.dispose();
     super.dispose();
   }
@@ -2370,6 +2372,7 @@ class _StepDetail extends StatelessWidget {
 
 /// 工具名 → 动作名；未知工具（外部 MCP）返回原名。
 String agentToolLabel(AppLocalizations l, String tool) => switch (tool) {
+  'agent_manage' => l.ag_tool_agent_manage,
   'studio_context' => l.ag_tool_studio_context,
   'image_read' => l.ag_tool_image_read,
   'prompt_set' => l.ag_tool_prompt_set,

@@ -41,7 +41,7 @@ class AgentPanel extends StatefulWidget {
 
 class _AgentPanelState extends State<AgentPanel> {
   late var _tab = widget.initialTab;
-  final _composer = GlobalKey<AgentComposerState>();
+  var _composer = GlobalKey<AgentComposerState>();
   String? _composerChat;
   Widget? _composerView;
   WidgetBuilder? _dialog;
@@ -284,7 +284,20 @@ class _AgentPanelState extends State<AgentPanel> {
     final c = context.ui;
     if (_composerChat != d.chat.id) {
       _composerChat = d.chat.id;
+      _composer = GlobalKey<AgentComposerState>();
       _composerView = AgentComposer(key: _composer, chatId: d.chat.id);
+    }
+    Widget composer = Stack(
+      children: [
+        _composerView!,
+        if (_dropping) const Positioned.fill(child: _DropOverlay()),
+      ],
+    );
+    final drop = widget.slots.dropTarget;
+    if (drop != null) {
+      composer = drop(context, (v) {
+        if (v != _dropping && mounted) setState(() => _dropping = v);
+      }, composer);
     }
     Widget body;
     if (d.initError != null) {
@@ -333,11 +346,11 @@ class _AgentPanelState extends State<AgentPanel> {
                     : const AgentMemory(),
             },
           ),
-          _composerView!,
+          composer,
         ],
       );
     }
-    Widget panel = AgentNavigationScope(
+    final panel = AgentNavigationScope(
       navigation: _navigation,
       child: AgentScope(
         data: d,
@@ -365,7 +378,6 @@ class _AgentPanelState extends State<AgentPanel> {
           child: Stack(
             children: [
               Positioned.fill(child: body),
-              if (_dropping) const Positioned.fill(child: _DropOverlay()),
               if (_toast != null)
                 Positioned(
                   left: 0,
@@ -387,12 +399,6 @@ class _AgentPanelState extends State<AgentPanel> {
         ),
       ),
     );
-    final drop = widget.slots.dropTarget;
-    if (drop != null && d.initError == null) {
-      panel = drop(context, (v) {
-        if (v != _dropping && mounted) setState(() => _dropping = v);
-      }, panel);
-    }
     return ColoredBox(
       key: const Key('agent-panel'),
       color: c.page,

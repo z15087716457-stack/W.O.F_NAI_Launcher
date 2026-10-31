@@ -26,7 +26,10 @@ AgentActivityKind agentActivityKind(String tool) => switch (tool) {
   'reference_library' ||
   'studio_search' ||
   'read' => AgentActivityKind.read,
-  'bash' || 'codemode' || 'code_mode' => AgentActivityKind.run,
+  'bash' ||
+  'codemode' ||
+  'code_mode' ||
+  'agent_manage' => AgentActivityKind.run,
   'image_read' || 'image_tool' => AgentActivityKind.image,
   'prompt_set' ||
   'prompt_update' ||

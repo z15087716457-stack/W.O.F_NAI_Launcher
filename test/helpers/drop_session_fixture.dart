@@ -81,7 +81,8 @@ class _HeldFile extends DataReaderFile {
   }
 
   @override
-  Stream<Uint8List> getStream() => file.getStream();
+  Stream<Uint8List> getStream() =>
+      Stream.fromFuture(release).asyncExpand((_) => file.getStream());
   @override
   void close() => file.close();
 }

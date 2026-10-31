@@ -98,18 +98,35 @@ void main() {
     expect(find.byKey(const Key('agent-history')), findsOneWidget);
   });
 
-  testWidgets('下一句建议：空输入时显示，点或 Tab 采纳；输入后消失', (t) async {
+  testWidgets('下一句建议：只有 Tab 采纳，点击仅聚焦；输入后消失', (t) async {
     final rec = await pumpAgent(t, scene: AgentScene.shelf);
-    expect(find.byKey(const Key('agent-suggestion')), findsOneWidget);
-    expect(find.text('再出 4 张，把背景换成黄昏'), findsOneWidget);
-    await t.tap(find.byKey(const Key('agent-input')));
+    final input = find.byKey(const Key('agent-input'));
+    expect(find.byKey(const Key('agent-suggestion')), findsNothing);
+    expect(t.widget<TextField>(input).decoration!.hintText, '再出 4 张，把背景换成黄昏');
+    await t.tapAt(t.getCenter(find.text('再出 4 张，把背景换成黄昏')));
     await t.pump();
+    expect(t.widget<TextField>(input).focusNode!.hasFocus, isTrue);
+    expect(t.widget<TextField>(input).controller!.text, isEmpty);
+    expect(rec.names, isNot(contains('acceptSuggestion')));
+    await t.tap(find.descendant(of: input, matching: find.text('Tab')));
+    await t.pump();
+    expect(rec.names, isNot(contains('acceptSuggestion')));
+    await t.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(rec.names, isNot(contains('send')));
     await t.sendKeyEvent(LogicalKeyboardKey.tab);
     await t.pump();
-    expect(rec.names, contains('acceptSuggestion'));
-    await t.enterText(find.byKey(const Key('agent-input')), 'x');
+    expect(rec.names.where((name) => name == 'acceptSuggestion'), hasLength(1));
+    expect(rec.names, isNot(contains('send')));
+    await t.enterText(input, 'x');
     await t.pump();
-    expect(find.byKey(const Key('agent-suggestion')), findsNothing);
+    expect(
+      t.widget<TextField>(input).decoration!.hintText,
+      isNot('再出 4 张，把背景换成黄昏'),
+    );
+    expect(
+      find.descendant(of: input, matching: find.text('Tab')),
+      findsNothing,
+    );
   });
 
   testWidgets('上下文弹窗：缓存预热一节显示模式与状态', (t) async {

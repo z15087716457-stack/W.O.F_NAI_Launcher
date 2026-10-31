@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,7 @@ import 'package:nai_launcher/presentation/wiring/nai_agent/agent_wiring.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart' as view;
+import 'package:nai_launcher/presentation/ui/agent/agent_popovers.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'agent_wiring_harness.dart';
@@ -36,8 +39,9 @@ class _Controller extends AgentTestController {
   @override
   Future<String> deleteChat(String chatId) async {
     check();
+    final token = await super.deleteChat(chatId);
     deleted.add('chat:$chatId');
-    return super.deleteChat(chatId);
+    return token;
   }
 
   @override
@@ -72,9 +76,14 @@ class _Controller extends AgentTestController {
   Future<void> updateSettings(
     Map<String, dynamic> changes, {
     Map<String, dynamic>? expected,
+    bool deferRuntime = false,
   }) async {
     check();
-    await super.updateSettings(changes, expected: expected);
+    await super.updateSettings(
+      changes,
+      expected: expected,
+      deferRuntime: deferRuntime,
+    );
   }
 }
 
@@ -174,6 +183,97 @@ void main() {
     expect(h.panel(tester).data.chat.canExport, false);
     expect(c.calls, isNot(contains('send')));
   });
+
+  testWidgets(
+    'chat picker stays open while deleting selected chats, keeps search and supports undo',
+    (tester) async {
+      final chats = (await tester.runAsync(() async {
+        final workspace = c.selectedWorkspace!.id;
+        final saved = [
+          for (final title in ['Batch one', 'Batch two', 'Batch three'])
+            await c.store.createChat(workspace, title),
+        ];
+        await c.selectWorkspace(workspace, restoreHistory: false);
+        await c.selectChat(saved.first.id);
+        c.hits = [
+          for (final chat in saved)
+            AgentChatSearchHit(
+              chatId: chat.id,
+              title: chat.title,
+              snippet: 'Batch fixture',
+            ),
+        ];
+        return saved;
+      }))!;
+      await h.pump(tester);
+      await tester.tap(find.byKey(const Key('agent-chats')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('agent-chats-search')),
+        'Batch',
+      );
+      await tester.pump(const Duration(milliseconds: 350));
+      await tester.pump();
+      final popup = tester.state(find.byType(AgentChatsPopover));
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      for (final chat in chats) {
+        await mouse.moveTo(
+          tester.getCenter(find.byKey(Key('agent-chat-${chat.id}'))),
+        );
+        await tester.pump();
+        await tester.tap(find.byKey(Key('agent-chat-delete-${chat.id}')));
+        await tester.pump();
+        await tester.runAsync(
+          () => tester.tap(find.byKey(Key('agent-chat-delete-ok-${chat.id}'))),
+        );
+        for (var i = 0; i < 200; i++) {
+          await tester.runAsync(
+            () => Future<void>.delayed(const Duration(milliseconds: 10)),
+          );
+          await tester.pump();
+          if (c.deleted.contains('chat:${chat.id}') &&
+              find.byKey(const Key('agent-undo-toast')).evaluate().isNotEmpty) {
+            break;
+          }
+        }
+        expect(
+          c.chats.any((item) => item.id == chat.id),
+          isFalse,
+          reason: chat.title,
+        );
+        expect(tester.state(find.byType(AgentChatsPopover)), same(popup));
+        expect(
+          tester
+              .widget<TextField>(find.byKey(const Key('agent-chats-search')))
+              .controller!
+              .text,
+          'Batch',
+        );
+        expect(find.byKey(Key('agent-chat-${chat.id}')), findsNothing);
+        expect(find.byKey(Key('agent-chat-hit-${chat.id}')), findsNothing);
+      }
+      expect(c.deleted, chats.map((chat) => 'chat:${chat.id}'));
+      expect(c.selected!.chat.isDraft, isTrue);
+      await tester.enterText(find.byKey(const Key('agent-chats-search')), '');
+      await tester.pump();
+      expect(
+        find.byKey(Key('agent-chat-${c.selected!.chat.id}')),
+        findsOneWidget,
+      );
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(AgentChatsPopover), findsNothing);
+      await tester.runAsync(
+        () => tester.tap(find.byKey(const Key('agent-undo-toast-undo'))),
+      );
+      await h.finishFiles(tester);
+      expect(c.chats.any((chat) => chat.id == chats.last.id), isTrue);
+      expect(c.restored.single, startsWith('chat:'));
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets('workspace tokens dispatch independently; last workspace fails', (
     tester,

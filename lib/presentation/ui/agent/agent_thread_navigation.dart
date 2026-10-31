@@ -5,6 +5,7 @@ import 'agent_contract.dart';
 /// UI-only navigation. It never edits a Pi branch or makes a host request.
 class AgentThreadNavigation {
   Future<bool> Function(AgentHistoryEntry)? jump;
+  Future<void> Function()? latest;
   final visible = ValueNotifier<Set<String>>({});
   final highlight = ValueNotifier<Object?>(null);
   final turns = <String, GlobalKey>{};

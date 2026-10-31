@@ -6,7 +6,7 @@ $ErrorActionPreference = 'Stop'
 $executable = Get-Item -LiteralPath $ExecutablePath
 $version = $executable.VersionInfo
 
-# path_provider_windows derives persistent storage paths from these PE fields.
+# These PE fields identify old AppData profiles for the one-time migration.
 # FileDescription and the window title are the independent, visible brand name.
 if ($version.CompanyName -cne 'com.example' -or $version.ProductName -cne 'nai_launcher') {
   throw 'Windows storage identity changed: CompanyName/ProductName must remain com.example/nai_launcher.'
@@ -19,5 +19,6 @@ if ($version.FileDescription -cne 'W.O.F NAI Studio') {
   Executable = $executable.FullName
   DisplayName = $version.FileDescription
   StorageIdentity = "$($version.CompanyName)/$($version.ProductName)"
-  ApplicationSupportDirectory = Join-Path $env:APPDATA 'com.example\nai_launcher'
+  ApplicationSupportDirectory = Join-Path $executable.DirectoryName 'user-data'
+  LegacyApplicationSupportDirectory = Join-Path $env:APPDATA 'com.example\nai_launcher'
 } | ConvertTo-Json

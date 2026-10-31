@@ -10,6 +10,6 @@
 
 ## MCP servers
 
-- External MCP servers are added and managed in Settings (stdio or Streamable HTTP). Exposure: `codemode` (call from codemode scripts, default), `deferred` (find with `tool_search`, then call directly), `direct` (always declared), `hidden` (not callable).
+- External MCP servers are managed through Settings or native `agent_manage` (see [self-management.md](self-management.md)); both use the same configuration. Transports: stdio or Streamable HTTP. Exposure: `codemode` (call from codemode scripts, default), `deferred` (find with `tool_search`, then call directly), `direct` (always declared), `hidden` (not callable).
 - Setting changes apply on the next idle send and resume the same session.
 - The four Pi file tools and user servers run with the user's local permissions; the workspace binding is not a system sandbox.

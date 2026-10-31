@@ -8868,7 +8868,6 @@
   "naiAgent_mcpAdd": "MCP サーバーを追加",
   "naiAgent_mcpName": "サーバー名",
   "naiAgent_mcpConfig": "サーバー設定（JSON）",
-  "naiAgent_mcpConfigHint": "stdio と Streamable HTTP に対応。サーバー設定オブジェクトを貼り付けてください。command は実行ファイル、args は配列です。env、cwd、url、headers、oauth、toolExposure も使用できます。設定は暗号化して保存されます。",
   "naiAgent_mcpStatus": "接続状態を確認",
   "naiAgent_mcpReconnect": "再接続",
   "naiAgent_mcpLogin": "ログイン",
@@ -10523,7 +10522,7 @@
   "set_agBaseSwitchBody": "範囲を切り替えると未保存の変更は失われます。",
   "set_agBaseSaving": "保存中…",
   "set_agBaseFailed": "保存できませんでした。ワークスペースが変わったか、書き込みに失敗しました。変更は残っています。",
-  "set_agMcpUnchecked": "未確認",
+  "set_agMcpUnchecked": "未接続",
   "set_agInstructionsSaving": "指示を保存中…",
   "set_agInstructionsFailed": "指示を保存できませんでした。保存済みの内容が変更されたか、書き込みに失敗しました。下書きは保持されています。再試行してください。",
   "set_agOrderSkills": "スキルカタログ",
@@ -11270,7 +11269,6 @@
   "ag_historyCards": "カード",
   "ag_historyQuestions": "質問と回答",
   "ag_historyEmpty": "一致する項目はありません",
-  "ag_historyBeforeCompaction": "この部分は圧縮前です。クリックして要約を確認。",
   "ag_historyAuto": "自動圧縮",
   "ag_historyManual": "手動圧縮",
   "ag_historyImageMessage": "画像メッセージ",
@@ -11459,7 +11457,6 @@
   "set_agCacheStreaming": "Agent の実行中のみ",
   "set_agCacheIdle": "待機中も予熱",
   "set_agCacheIdleCost": "待機中のウォームアップ（最大 30 分）は追加のモデル料金がかかります。",
-  "ag_suggestionAccept": "Tab でこの提案を入力",
   "ag_cacheWarmTitle": "キャッシュのウォームアップ",
   "ag_cacheWarmOff": "オフ",
   "ag_cacheWarmRefreshing": "キャッシュを延長中…",
@@ -11609,5 +11606,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "set_agMcpStdio": "ローカルコマンド",
+  "set_agMcpAddress": "サーバー URL",
+  "set_agMcpCommand": "実行コマンド",
+  "set_agMcpArgs": "引数（1 行に 1 つ）",
+  "set_agMcpEnv": "環境変数",
+  "set_agMcpHeaders": "リクエストヘッダー",
+  "set_agMcpCwd": "作業ディレクトリ",
+  "set_agMcpAdvanced": "詳細設定",
+  "set_agMcpJson": "JSON インポート／編集",
+  "set_agMcpForm": "フォーム",
+  "set_agMcpTest": "接続テスト",
+  "set_agMcpJsonOne": "MCP サーバーを 1 つずつインポートしてください。",
+  "set_agMcpPending": "次のターンで適用",
+  "ag_tool_agent_manage": "Agent を管理"
 }
