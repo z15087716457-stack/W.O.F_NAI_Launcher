@@ -1,3 +1,5 @@
+import 'package:nai_launcher/core/enums/precise_ref_type.dart';
+import 'package:nai_launcher/core/utils/nai_api_utils.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -17,6 +19,160 @@ import 'package:nai_launcher/data/models/image/image_params.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 
 void main() {
+  for (final streamed in [false, true]) {
+    for (final action in [
+      ImageGenerationAction.img2img,
+      ImageGenerationAction.infill,
+    ]) {
+      test(
+        'multipart precise references are real attachments: $action stream=$streamed',
+        () async {
+          final adapter = _PendingDioAdapter();
+          final dio = Dio()..httpClientAdapter = adapter;
+          final endpoint = NaiApiEndpointService();
+          final service = NAIImageGenerationApiService(
+            dio,
+            NAIImageEnhancementApiService(dio, endpoint),
+            endpoint,
+          );
+          final source = _solidPng(
+            width: 256,
+            height: 256,
+            r: 10,
+            g: 20,
+            b: 30,
+          );
+          final references = [
+            NAIApiUtils.markNormalizedPreciseReferencePng(
+              _solidPng(width: 256, height: 256, r: 70, g: 80, b: 90),
+            ),
+            NAIApiUtils.markNormalizedPreciseReferencePng(
+              _solidPng(width: 256, height: 256, r: 40, g: 50, b: 60),
+            ),
+          ];
+          final params = ImageParams(
+            prompt: 'source prompt',
+            negativePrompt: 'source negative',
+            seed: 123,
+            action: action,
+            model: action == ImageGenerationAction.infill
+                ? 'nai-diffusion-4-5-full-inpainting'
+                : 'nai-diffusion-4-5-full',
+            width: 256,
+            height: 256,
+            sourceImage: source,
+            maskImage: action == ImageGenerationAction.infill
+                ? _rectMaskPng(
+                    width: 256,
+                    height: 256,
+                    x: 112,
+                    y: 112,
+                    rectWidth: 32,
+                    rectHeight: 32,
+                  )
+                : null,
+            preciseReferences: [
+              PreciseReference(
+                image: references[0],
+                type: PreciseRefType.character,
+                strength: .8,
+                fidelity: .7,
+              ),
+              PreciseReference(
+                image: references[1],
+                type: PreciseRefType.style,
+                strength: .6,
+                fidelity: .5,
+              ),
+            ],
+          );
+          final operation = streamed
+              ? service.generateImageStream(params).drain<Object?>()
+              : service.generateImage(params).then<Object?>((_) => null);
+          final handled = operation.catchError((_) => null);
+          await _waitForRequestCount(adapter, 1);
+          final request = adapter.requests.single;
+          final parts = Map.fromEntries(
+            (request.options.data as FormData).files,
+          );
+          final payload =
+              jsonDecode(
+                    utf8.decode(
+                      await parts['request']!
+                          .clone()
+                          .finalize()
+                          .expand((b) => b)
+                          .toList(),
+                    ),
+                  )
+                  as Map;
+          if (streamed) {
+            request.completeWithEmptyStream();
+          } else {
+            request.completeWithEmptyZip();
+          }
+          await handled;
+          expect(payload['action'], action.value);
+          final parameters = payload['parameters'] as Map;
+          expect(parameters['image'], 'image');
+          expect(
+            await parts['image']!.clone().finalize().expand((b) => b).toList(),
+            source,
+          );
+          if (action == ImageGenerationAction.infill) {
+            expect(parameters['mask'], 'mask');
+            expect(
+              img.decodeImage(
+                Uint8List.fromList(
+                  await parts['mask']!
+                      .clone()
+                      .finalize()
+                      .expand((b) => b)
+                      .toList(),
+                ),
+              ),
+              isNotNull,
+            );
+          }
+          final referenceParts =
+              parameters['director_reference_images'] as List;
+          expect(referenceParts, hasLength(2));
+          expect(referenceParts.toSet(), hasLength(2));
+          for (final (i, name) in referenceParts.indexed) {
+            expect(
+              parts.containsKey(name),
+              isTrue,
+              reason: 'Every PR image must name an uploaded form part',
+            );
+            expect(
+              await parts[name]!.clone().finalize().expand((b) => b).toList(),
+              references[i],
+            );
+          }
+          expect(
+            parts,
+            hasLength(action == ImageGenerationAction.infill ? 5 : 4),
+          );
+          expect(parameters['director_reference_strength_values'], [.8, .6]);
+          expect(parameters['director_reference_secondary_strength_values'], [
+            closeTo(.3, .000001),
+            .5,
+          ]);
+          expect(
+            (parameters['director_reference_descriptions'] as List).map(
+              (d) => d['caption']['base_caption'],
+            ),
+            ['character', 'style'],
+          );
+          expect(parameters['seed'], 123);
+          expect(params.sourceImage, same(source));
+          expect(params.preciseReferences[0].image, same(references[0]));
+          expect(params.preciseReferences[1].image, same(references[1]));
+        },
+      );
+    }
+  }
+
   test(
     'stream gateway HTML is mapped through the common error formatter',
     () async {

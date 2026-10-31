@@ -132,6 +132,45 @@ void main() {
     await Hive.close();
     await directory.delete(recursive: true);
   });
+  test('generation error card exposes HTTP status and server reason', () {
+    const detail =
+        'API_ERROR_400|image field references unknown form part "missing"';
+    (container.read(imageGenerationNotifierProvider.notifier) as DataGeneration)
+        .publish(
+          const ImageGenerationState(
+            status: GenerationStatus.error,
+            errorMessage: detail,
+          ),
+        );
+    final error = container.read(provider).canvas.error!;
+    expect(error.title, contains('400'));
+    expect(error.hint, contains('image field references unknown form part'));
+    expect(error.detail, detail);
+  });
+  test(
+    'generation error card bounds an echoed image while keeping copy details',
+    () {
+      final detail =
+          'API_ERROR_400|image field references unknown form part "${List.filled(600000, 'AAAA').join()}"';
+      (container.read(imageGenerationNotifierProvider.notifier)
+              as DataGeneration)
+          .publish(
+            ImageGenerationState(
+              status: GenerationStatus.error,
+              errorMessage: detail,
+            ),
+          );
+      final error = container.read(provider).canvas.error!;
+      expect(error.title, contains('400'));
+      expect(
+        error.hint,
+        startsWith('image field references unknown form part'),
+      );
+      expect(error.hint!.length, lessThan(300));
+      expect(error.hint, isNot(contains('AAAA')));
+      expect(error.detail, detail);
+    },
+  );
   test('resource pin is projected into the prompt tools contract', () async {
     expect(container.read(provider).prompt.tools.resourceWindowsPinned, false);
     await container

@@ -1,3 +1,4 @@
+import '../../../utils/generation_error_presentation.dart';
 import 'generation_welcome.dart';
 import 'dart:math';
 import 'dart:typed_data';
@@ -435,7 +436,10 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
     BuildContext context,
   ) {
     // 解析错误代码和详情
-    final (errorTitle, errorHint) = _parseApiError(message, context);
+    final (errorTitle, errorHint) = generationErrorPresentation(
+      message,
+      context.l10n,
+    );
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -463,82 +467,6 @@ class _ImagePreviewWidgetState extends ConsumerState<ImagePreviewWidget> {
         ],
       ],
     );
-  }
-
-  /// 解析 API 错误代码，返回 (标题, 提示)
-  (String, String?) _parseApiError(String? message, BuildContext context) {
-    if (message == null || message.isEmpty) {
-      return (context.l10n.generation_generationFailed, null);
-    }
-
-    // 取消操作
-    if (message == 'Cancelled') {
-      return (context.l10n.generation_cancelGeneration, null);
-    }
-
-    // 解析错误代码格式: "ERROR_CODE|详情"
-    final parts = message.split('|');
-    final errorCode = parts[0];
-    final details = parts.length > 1 ? parts.sublist(1).join('|') : null;
-
-    // 固定文案后拼接服务端真实详情，避免所有错误只显示同一句兜底提示
-    String? withDetails(String? localizedHint) {
-      if (details == null || details.trim().isEmpty) return localizedHint;
-      if (localizedHint == null) return details;
-      return '$localizedHint\n$details';
-    }
-
-    switch (errorCode) {
-      case 'API_ERROR_429':
-        return (
-          context.l10n.api_error_429,
-          withDetails(context.l10n.api_error_429_hint),
-        );
-      case 'API_ERROR_401':
-        return (
-          context.l10n.api_error_401,
-          withDetails(context.l10n.api_error_401_hint),
-        );
-      case 'API_ERROR_402':
-        return (
-          context.l10n.api_error_402,
-          withDetails(context.l10n.api_error_402_hint),
-        );
-      case 'API_ERROR_400':
-        return ('${context.l10n.common_error} (400)', details);
-      case 'API_ERROR_500':
-        return (
-          context.l10n.api_error_500,
-          withDetails(context.l10n.api_error_500_hint),
-        );
-      case 'API_ERROR_503':
-        return (
-          context.l10n.api_error_503,
-          withDetails(context.l10n.api_error_503_hint),
-        );
-      case 'API_ERROR_TIMEOUT':
-        return (
-          context.l10n.api_error_timeout,
-          withDetails(context.l10n.api_error_timeout_hint),
-        );
-      case 'API_ERROR_NETWORK':
-        return (
-          context.l10n.api_error_network,
-          withDetails(context.l10n.api_error_network_hint),
-        );
-      default:
-        // 未知错误或其他 HTTP 错误
-        if (errorCode.startsWith('API_ERROR_HTTP_')) {
-          final code = errorCode.replaceFirst('API_ERROR_HTTP_', '');
-          return ('${context.l10n.common_error} (HTTP $code)', details);
-        }
-        if (errorCode.startsWith('API_ERROR_')) {
-          // 已编码但无专属文案的错误：显示真实状态码+详情而非整段原始串
-          final code = errorCode.replaceFirst('API_ERROR_', '');
-          return ('${context.l10n.common_error} ($code)', details ?? message);
-        }
-        return (context.l10n.generation_generationFailed, message);
-    }
   }
 
   Widget _buildImageView(

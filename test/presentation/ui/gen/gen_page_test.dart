@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
-import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart' show GenTokenBar;
+import 'package:nai_launcher/presentation/ui/gen/gen_parts.dart'
+    show GenTokenBar;
 import 'package:nai_launcher/presentation/ui/gen/gen_fixture.dart';
 import 'package:nai_launcher/presentation/ui/kit/ui_preview_image.dart';
+import 'package:nai_launcher/presentation/utils/generation_error_presentation.dart';
+import 'package:nai_launcher/l10n/app_localizations_zh.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import '../../../helpers/uiux_frontend_capture.dart';
@@ -846,6 +849,37 @@ void main() {
       expect(find.byKey(const Key('gen-bar-top')), findsNothing);
       expect(find.byKey(const Key('gen-history-empty')), findsOneWidget);
     });
+
+    for (final longImage in [false, true]) {
+      testWidgets('错误卡显示 HTTP 代码和原因 longImage=$longImage', (t) async {
+        final raw = longImage
+            ? 'API_ERROR_400|image field references unknown form part "${List.filled(600000, 'AAAA').join()}"'
+            : 'API_ERROR_400|image field references unknown form part "missing"';
+        final (title, hint) = generationErrorPresentation(
+          raw,
+          AppLocalizationsZh(),
+        );
+        await pump(
+          t,
+          GenFixture.view().copyWith(
+            canvas: GenCanvasData(
+              error: GenError(title: title, hint: hint, detail: raw),
+            ),
+          ),
+        );
+        expect(find.text('错误 (HTTP 400)'), findsOneWidget);
+        expect(find.text(hint!), findsOneWidget);
+        if (longImage) expect(hint, isNot(contains('AAAA')));
+        expect(find.byKey(const Key('gen-retry')), findsOneWidget);
+        expect(t.takeException(), isNull);
+        await captureUiuxRegion(
+          t,
+          find.byKey(const Key('gen-capture')),
+          longImage ? 'generation-http-400-image' : 'generation-http-400',
+          t.getRect(find.byKey(const Key('gen-error'))).inflate(8),
+        );
+      });
+    }
 
     testWidgets('失败卡：重试、关闭', (t) async {
       await pump(t, GenFixture.failed());

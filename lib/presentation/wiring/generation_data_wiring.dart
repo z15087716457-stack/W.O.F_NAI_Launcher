@@ -47,6 +47,7 @@ import '../ui/gen/gen_contract.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import '../utils/official_image_variations.dart';
 import '../utils/opus_usage_presentation.dart';
+import '../utils/generation_error_presentation.dart';
 import 'generation_backend.dart';
 import 'generation_drop_wiring.dart';
 import 'generation_reference_identity.dart';
@@ -427,6 +428,18 @@ final generationViewDataProvider = Provider.autoDispose
       final localModels = workflow.upscale.backend == UpscaleBackend.novelai
           ? null
           : ref.watch(localUpscaleModelsProvider).valueOrNull;
+      GenError? error;
+      if (generation.status == GenerationStatus.error) {
+        final (title, hint) = generationErrorPresentation(
+          generation.errorMessage,
+          l,
+        );
+        error = GenError(
+          title: title,
+          hint: hint,
+          detail: generation.errorMessage,
+        );
+      }
       return GenViewData(
         model: params.model,
         displayModel: ImageModels.baseModelForTurboModel(params.model),
@@ -650,9 +663,7 @@ final generationViewDataProvider = Provider.autoDispose
           generateShortcut:
               ref.watch(effectiveShortcutProvider(ShortcutIds.generateImage)) ??
               '',
-          error: generation.status == GenerationStatus.error
-              ? GenError(title: l.common_error, detail: generation.errorMessage)
-              : null,
+          error: error,
           sheet: toolSheet?.image.id == image?.id ? toolSheet?.sheet : null,
         ),
         history: GenHistoryData(
