@@ -24,6 +24,7 @@ enum ResourceGroupIcon {
   all,
   favorite,
   recent,
+  trash,
   folder,
 
   /// 图库收藏集（书签）/ 块库收藏集（叠层）。
@@ -287,6 +288,8 @@ class ResourceWindowViewData {
     this.total = 0,
     this.hasMore = false,
     this.loading = false,
+    this.replacing = false,
+    this.trashPaths = const [],
     this.error,
     this.selectedId,
     this.detail,
@@ -324,6 +327,10 @@ class ResourceWindowViewData {
   final int total;
   final bool hasMore;
   final bool loading;
+  final bool replacing;
+  final List<String> trashPaths;
+  bool get galleryTrash =>
+      kind == FloatingResourceKind.gallery && groupId == 'trash';
   final String? error;
   final String? selectedId;
   final ResourceDetail? detail;
@@ -373,6 +380,7 @@ class ResourceWindowActions {
     this.onRetry,
     this.dragWrap,
     this.onMove,
+    this.onTrash,
   });
 
   final ValueChanged<FloatingResourceKind> onKind;
@@ -388,6 +396,7 @@ class ResourceWindowActions {
   final ValueChanged<double> onCellSize;
   final ValueChanged<String> onSelect;
   final ValueChanged<int>? onMove;
+  final Future<void> Function(String action, List<String> paths)? onTrash;
 
   /// 双击：图库在小窗内部看大图，其余在主窗口编辑。
   final ValueChanged<String> onOpen;
@@ -434,5 +443,7 @@ class ResourceWindowActions {
         onStartDrag: () => log('drag'),
         onToggleMaximize: () => log('max'),
         onRetry: () => log('retry'),
+        onTrash: (action, paths) async =>
+            log('trash:$action:${paths.join(',')}'),
       );
 }

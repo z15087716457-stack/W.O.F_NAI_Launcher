@@ -8,6 +8,7 @@ import { getCurrentSystemMessage } from '@earendil-works/pi-ai';
 import { createStudioModelRuntime } from './model.mjs';
 import { domainTools } from './domain-tools.mjs';
 import { createNaiInteractionExtension } from './extensions/interaction.mjs';
+import { createSessionHistoryExtension } from './extensions/session-history.mjs';
 import { StudioCacheWarming } from './extensions/cache-warming.mjs';
 import { createNaiPermissions } from './extensions/permissions.mjs';
 import { createStudioExtensionUi } from './extensions/ui.mjs';
@@ -96,7 +97,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     cacheWarming: config.cacheWarming ?? 'streaming',
   });
   const cacheWarming = new StudioCacheWarming({ model, settingsManager, onChange: onCacheWarmingChange });
-  const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search',
+  const reserved = new Set([...definitions.map(tool => tool.name), '_nai_extension_ui', 'codemode', 'tool_search', 'session_history',
     'read', 'write', 'edit', 'bash', 'powershell', 'grep', 'find', 'ls']);
   function validateExtensions(extensions) {
     if (extensions.errors.length) throw new Error(extensions.errors.map(error => error.path + ': ' + error.error).join('\n'));
@@ -115,7 +116,7 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
     promptsOverride: () => ({ prompts: templateSet.prompts, diagnostics: templateSet.diagnostics }),
     // Studio resolves sources, overrides and switches; Pi formats the catalog and expands /skill:.
     skillsOverride: () => ({ skills: skillSet.active, diagnostics: [] }),
-    extensionFactories: [cacheWarming.extension, createNaiInteractionExtension(interactionTools),
+    extensionFactories: [cacheWarming.extension, createNaiInteractionExtension(interactionTools), createSessionHistoryExtension(redact),
       { name: 'nai-codemode', factory: createCodemodeExtension({ mode: 'on', models: false }) },
       { name: 'nai-tool-search', factory: createToolSearchExtension() },
       { name: 'nai-mcp', factory: createStudioMcp({ mcp, definitions: businessTools,

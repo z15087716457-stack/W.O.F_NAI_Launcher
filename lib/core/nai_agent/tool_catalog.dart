@@ -8,6 +8,7 @@ const naiAgentToolNames = [
   'snapshot',
   'wiki_query',
   'tag_query',
+  'tag_related',
   'block_query',
   'block_manage',
   'settings_read',

@@ -228,6 +228,34 @@ void main() {
   );
 
   testWidgets(
+    'trash opens the same viewer read-only and does not enter recent history',
+    (tester) async {
+      controller.group('trash');
+      await tester.pump();
+      calls.clear();
+      await pump(tester);
+      expect(viewer(tester).data.libraryReadOnly, true);
+      viewer(tester).actions.onSelect(paths[1]);
+      await flush(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.delete);
+      await tester.pump();
+      expect(
+        calls.where(
+          (c) => const [
+            'viewed',
+            'delete',
+            'collections',
+          ].contains(c['operation']),
+        ),
+        isEmpty,
+      );
+      expect(deleted, isEmpty);
+      expect(tester.takeException(), isNull);
+      await finish(tester);
+    },
+  );
+
+  testWidgets(
     'explicit actions and favorite forward current IDs; deletion keeps existing confirmation and undo UI',
     (tester) async {
       await pump(tester, width: 1440);

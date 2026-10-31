@@ -4,6 +4,7 @@ from contextlib import redirect_stdout
 import json
 import os
 import queue
+import sqlite3
 import sys
 import threading
 import time
@@ -64,6 +65,11 @@ class Worker:
 
     @staticmethod
     def error_code(error):
+        if isinstance(error, (FileNotFoundError, PermissionError)):
+            return 'source_unavailable'
+        if (isinstance(error, sqlite3.OperationalError) and
+            getattr(error, 'sqlite_errorcode', 0) & 255 in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED)):
+            return 'database_locked'
         # Never expose paths, query text, URLs, or raw backend exceptions.
         allowed = {'cancelled','source_changed','invalid_plan','index_busy','cuda_unavailable',
                    'invalid_embeddings','invalid_rerank_scores','invalid_context_mode','disabled_source',

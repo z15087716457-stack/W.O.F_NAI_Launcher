@@ -55,6 +55,13 @@ const promptSetContent = {kind: Type.String({minLength:1,maxLength:24}), kind_ic
 // Only names supplied by the production Dart binding are enabled. Usage guidance
 // lives in skills/nai-studio; schemas and descriptions stay beside the executors.
 export const domainTools = [
+  { name: 'tag_related',
+    description: 'Find complementary tags from local pairwise co-occurrence, without RAG or network. Inputs are canonical names or known aliases. sources/support identify contributing input tags; score is association, not probability. Use studio_search(tags) for natural-language lookup and wiki_query for meanings.',
+    parameters: Type.Object({tags:Type.Array(Type.String({minLength:1,maxLength:512}),{minItems:1,maxItems:20}),
+      exclude:Type.Optional(Type.Array(Type.String({minLength:1,maxLength:512}),{maxItems:500})),
+      categories:Type.Optional(Type.Array(E(['general','artist','copyright','character','meta','contributor','species','lore']),{minItems:1,maxItems:8})),
+      limit:Type.Optional(Type.Integer({minimum:1,maximum:50}))}, {additionalProperties:false}),
+  },
   { name: 'prompt_set',
     description: 'Write 2–24 prompts as ONE story/outfit/variation card: stable style/quality/appearance/negative once in shared, per-item differences and index-aligned positive character tags in items. Labels and notes in the user\'s language; prompts in English before V5 (V5 may use other languages for clarity). Icons from the enum, repeats allowed; ordered=true for sequences. Optional character positions 0–1 (x right, y down) only for composition. create returns set_id/revision. To edit: read, change only requested fields, update the SAME set_id with expected_revision and the full content; never duplicate or reprint the set. A user\'s Generate click on the card authorizes one image of that item; model-initiated generation still needs native approval. Do not call prompt_update/generation for the set unless asked. Details: references/prompt-sets.md.',
     // One object instead of a create/update/read union: the content (with two 79-icon enums) is

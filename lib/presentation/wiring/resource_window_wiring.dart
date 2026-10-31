@@ -66,7 +66,7 @@ class ResourceWindowOpener {
     service.host.backend = backend;
     service.onAllClosed = backend.dispose;
     service.onKind = (id, kind) => backend.windowKinds[id] = kind;
-    service.onClosed = backend.windowKinds.remove;
+    service.onClosed = backend.closed;
     service.argumentsFor = (kind) async {
       final saved = ref
           .read(localStorageServiceProvider)

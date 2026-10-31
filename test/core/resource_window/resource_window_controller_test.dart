@@ -43,6 +43,80 @@ Map<String, Object?> page(Map<String, Object?> args, {String id = 'a'}) => {
   'sortId': 'updated',
 };
 void main() {
+  testWidgets(
+    'group changes retain the loaded page, skip repeats and discard old replies in every resource',
+    (tester) async {
+      for (final kind in FloatingResourceKind.values) {
+        final pending =
+            <({Map<String, Object?> args, Completer<Object?> result})>[];
+        var delay = false;
+        var queries = 0;
+        var details = 0;
+        Map<String, Object?> result(Map<String, Object?> args, String id) => {
+          ...page(args, id: id),
+          'hasMore': false,
+          if (kind == FloatingResourceKind.gallery) ...{
+            'timeline': [
+              [id, 1000000, 832, 1216, 100],
+            ],
+            'groupMode': 'day',
+          },
+        };
+        final subject = ResourceWindowController(
+          windowId: 'w',
+          kind: kind,
+          invoke: (method, args) async {
+            if (method != 'resources.query') {
+              details++;
+              return null;
+            }
+            queries++;
+            if (!delay) return result(args, 'initial');
+            final entry = (args: args, result: Completer<Object?>());
+            pending.add(entry);
+            return entry.result.future;
+          },
+        );
+        await subject.initialize();
+        subject.group('all');
+        expect(queries, 1);
+        delay = true;
+        subject.group('folder:a');
+        expect(subject.data.sections, isNotEmpty);
+        expect(subject.data.total, 3);
+        expect(subject.data.loading, true);
+        expect(subject.data.replacing, true);
+        await subject.select('initial');
+        subject.open('initial');
+        await subject.refresh(more: true);
+        expect(details, 0);
+        expect(queries, 2);
+        subject.group('folder:a');
+        expect(queries, 2);
+        subject.group('folder:b');
+        pending[1].result.complete(result(pending[1].args, 'new'));
+        await tester.pump();
+        pending[0].result.complete(result(pending[0].args, 'old'));
+        await tester.pump();
+        expect(subject.data.groupId, 'folder:b');
+        expect(subject.data.replacing, false);
+        expect(
+          kind == FloatingResourceKind.gallery
+              ? subject.galleryTimeline.single.path
+              : subject.data.items.single.id,
+          'new',
+        );
+        subject.group('folder:failed');
+        pending[2].result.completeError(PlatformException(code: 'failed'));
+        await tester.pump();
+        expect(subject.data.sections, isNotEmpty);
+        expect(subject.data.total, 0);
+        expect(subject.data.error, isNotNull);
+        expect(subject.data.replacing, false);
+        subject.dispose();
+      }
+    },
+  );
   final calls = <({String method, Map<String, Object?> args})>[];
   late ResourceWindowController controller;
   Future<Object?> invoke(String method, Map<String, Object?> args) async {

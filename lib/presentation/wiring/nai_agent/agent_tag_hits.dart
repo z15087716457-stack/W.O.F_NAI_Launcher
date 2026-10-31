@@ -6,6 +6,7 @@ List<AgentTagHit> agentTagHits(String tool, Map<String, dynamic> details) {
   final raw = switch (tool) {
     'tag_query' => details['tags'],
     'studio_search' => details['items'],
+    'tag_related' => details['items'],
     'wiki_query' => details['pages'],
     _ => null,
   };
@@ -42,11 +43,13 @@ List<AgentTagHit> agentTagHits(String tool, Map<String, dynamic> details) {
       ),
     );
   }
-  hits.sort((a, b) {
-    if (a.count == null) return b.count == null ? a.tag.compareTo(b.tag) : 1;
-    if (b.count == null) return -1;
-    final count = b.count!.compareTo(a.count!);
-    return count == 0 ? a.tag.compareTo(b.tag) : count;
-  });
+  if (tool != 'tag_related') {
+    hits.sort((a, b) {
+      if (a.count == null) return b.count == null ? a.tag.compareTo(b.tag) : 1;
+      if (b.count == null) return -1;
+      final count = b.count!.compareTo(a.count!);
+      return count == 0 ? a.tag.compareTo(b.tag) : count;
+    });
+  }
   return hits.take(24).toList();
 }

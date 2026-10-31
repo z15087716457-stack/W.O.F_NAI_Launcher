@@ -5,6 +5,7 @@ Draft windows are query data and are never written into the index or diagnostics
 """
 import hashlib
 import json
+import math
 import os
 import re
 from pathlib import Path
@@ -15,16 +16,18 @@ from context import context_window, clean_tag
 from pool import VectorPool
 
 
-def readonly(path):
-    return sqlite3.connect(Path(path).resolve(strict=True).as_uri() + '?mode=ro', uri=True)
+def readonly(path, *, timeout=5.0):
+    return sqlite3.connect(Path(path).resolve(strict=True).as_uri() + '?mode=ro', uri=True, timeout=timeout)
 
 
 class Sources:
     representation_version = 'tag-profile-v2'
 
-    def __init__(self, catalog, runtime='', wiki='', semantics='', supplements=''):
+    def __init__(self, catalog, runtime='', wiki='', semantics='', supplements='', *, optional_supplements=False):
         self.paths = [str(Path(p).resolve(strict=True)) if p else '' for p in (catalog, runtime, wiki, semantics, supplements)]
         self._count_cache = None
+        self.optional_supplements = optional_supplements
+        self.degraded = False
 
     def _file_signature(self, paths):
         records = []
@@ -38,7 +41,7 @@ class Sources:
     def change_state(self):
         revision = 0
         if self.paths[4]:
-            db = readonly(self.paths[4])
+            db = readonly(self.paths[4], timeout=0.2)
             try: revision = db.execute('SELECT revision FROM semantic_state').fetchone()[0]
             except sqlite3.OperationalError: revision = None
             finally: db.close()
@@ -59,16 +62,29 @@ class Sources:
                 ') t ON t.name=c.tag WHERE c.revision>? ORDER BY c.revision,c.tag', (int(metadata['semantic_revision']),))]
         finally: db.close()
 
-    def connect(self):
+    def connect(self, *, details=True):
         db = readonly(self.paths[0])
+        if self.optional_supplements: db.execute('PRAGMA busy_timeout=200')
         runtime = False
         if self.paths[1]:
             db.execute('ATTACH DATABASE ? AS runtime', (Path(self.paths[1]).as_uri() + '?mode=ro',))
             runtime = bool(db.execute("SELECT 1 FROM runtime.sqlite_master WHERE name='danbooru_tags'").fetchone())
-        if self.paths[2]:
+        if details and self.paths[2]:
             db.execute('ATTACH DATABASE ? AS wiki', (Path(self.paths[2]).as_uri() + '?mode=ro',))
         for schema, name in zip(('semantics', 'supplements'), self.paths[3:]):
-            if name: db.execute('ATTACH DATABASE ? AS ' + schema, (Path(name).as_uri() + '?mode=ro',))
+            if not details or not name: continue
+            try:
+                db.execute('ATTACH DATABASE ? AS ' + schema, (Path(name).as_uri() + '?mode=ro',))
+                if schema == 'supplements' and self.optional_supplements:
+                    db.execute('SELECT tag FROM supplements.tag_semantics LIMIT 1').fetchone()
+            except sqlite3.OperationalError as error:
+                db.close()
+                if (schema != 'supplements' or not self.optional_supplements or
+                    getattr(error, 'sqlite_errorcode', 0) & 255 not in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED)):
+                    raise
+                # Only the per-search Sources copy may omit an unavailable overlay.
+                self.paths[4] = ''; self.degraded = True
+                return self.connect()
         union = ('SELECT tag name, category, post_count FROM runtime.danbooru_tags UNION ALL '
                  'SELECT name, category, post_count FROM tags t WHERE NOT EXISTS '
                  '(SELECT 1 FROM runtime.danbooru_tags r WHERE r.tag=t.name)' if runtime else
@@ -79,7 +95,7 @@ class Sources:
         signature = self._file_signature(self.paths[:2])
         if self._count_cache and self._count_cache[0] == signature:
             return self._count_cache[1]
-        db, union = self.connect()
+        db, union = self.connect(details=False)
         try:
             total = db.execute('SELECT COUNT(*) FROM (' + union + ')').fetchone()[0]
             if self._file_signature(self.paths[:2]) == signature: self._count_cache = (signature, total)
@@ -146,6 +162,15 @@ class Sources:
             return list(dict.fromkeys(names))[:limit]
         finally: db.close()
 
+    def danbooru_counts(self, names):
+        if not self.paths[1] or not names: return {}
+        db=readonly(self.paths[1])
+        try:
+            if not db.execute("SELECT 1 FROM sqlite_master WHERE name='danbooru_tags'").fetchone(): return {}
+            return dict(db.execute('SELECT tag,post_count FROM danbooru_tags WHERE tag IN ('+
+                ','.join('?' for _ in names)+')',names))
+        finally: db.close()
+
     def core_concepts(self, query, limit=4):
         """Protect explicit known concepts in compound Chinese descriptions.
 
@@ -193,7 +218,7 @@ class Sources:
         # Sort once per pass, rather than sorting the entire catalogue again
         # for every 32 vectors. Keep only names in memory, not a long-lived
         # source transaction that would pin the runtime database's WAL.
-        db, union = self.connect()
+        db, union = self.connect(details=False)
         try:
             return [r[0] for r in db.execute('SELECT name FROM (' + union + ') ORDER BY post_count DESC, name')]
         finally: db.close()
@@ -340,6 +365,15 @@ class Engine:
             if not closing: self._checkpoint()
 
     def search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
+        original = self.sources
+        self.sources = Sources(*original.paths, optional_supplements=True)
+        try:
+            result = self._search(text, cursor, mode, existing, lexical, negative, limit, cancelled, keyword)
+            if self.sources.degraded: result['degraded'] = ['supplements_unavailable']
+            return result
+        finally: self.sources = original
+
+    def _search(self, text, cursor, mode, existing, lexical, negative, limit=40, cancelled=lambda: False, keyword=''):
         import numpy as np
         if mode not in ('before','around'): raise ValueError('invalid_context_mode')
         if not len(self.ann): return {'items': [], 'context_tokens':0}
@@ -363,14 +397,29 @@ class Engine:
         direct = self.sources.rows(names=exact, limit=80)
         entity_query = any(r['category'] in (1,3,4,8,9,10,11) for r in direct)
         keys = []
+        popularity = {}; semantic_scores = {}
         if len(self.ann):
             query = self.models.embed([query_text], query=True)[0]
             # Reserve recall inside visual categories instead of filtering a
             # small global top-k after artist/character names have filled it.
             if not entity_query:
-                visual = list(self.ann.search(query, budget, categories=(0,7,5,14,12,15)).keys)
-                names = list(self.ann.search(query, max(budget//4,budget-len(visual)),
-                    categories=(1,3,4,8,9,10,11)).keys)
+                recall = self.ann.search(query, max(1000,budget) if manual else budget, categories=(0,7,5,14,12,15))
+                visual = list(recall.keys)
+                if manual:
+                    names_by_id = {int(key):self.db.execute('SELECT name FROM documents WHERE id=?',(int(key),)).fetchone()[0] for key in visual}
+                    counts = self.sources.danbooru_counts(list(names_by_id.values()))
+                    popularity = {name:math.log10(max(0,count)+1) for name,count in counts.items()}
+                    weights = {int(key):1-distance+0.04*popularity.get(names_by_id[int(key)],0)
+                        for key,distance in zip(recall.keys,recall.distances)}
+                    semantic_scores.update({names_by_id[key]:value for key,value in weights.items()})
+                    visual.sort(key=lambda key:-weights[int(key)])
+                    visual=visual[:budget]
+                name_recall = self.ann.search(query, max(budget//4,budget-len(visual)),categories=(1,3,4,8,9,10,11))
+                names = list(name_recall.keys)
+                if manual:
+                    for key,distance in zip(name_recall.keys,name_recall.distances):
+                        name=self.db.execute('SELECT name FROM documents WHERE id=?',(int(key),)).fetchone()[0]
+                        semantic_scores[name]=1-distance
                 visual = visual[:budget-len(names)]
                 # Preserve a name lane for descriptive character/work queries.
                 # A scene must not silently turn into an absolute class filter.
@@ -391,13 +440,19 @@ class Engine:
         # or requiring a complete index. Recheck all candidates against live data.
         names = list(dict.fromkeys([*exact, *sorted(concept_names), *lexical, *candidates]))[:320]
         live = {r['name']:r for r in self.sources.rows(names=names, limit=320)}
+        # A locked overlay may have contributed to saved vectors. Trust those
+        # vectors only while all non-overlay source files still match the build.
+        base = self.db.execute("SELECT value FROM metadata WHERE key='source_base'").fetchone()
+        retained_overlay = self.sources.degraded and base and base[0] == self.sources._file_signature(self.sources.paths[:4])
         excluded = {clean_tag(t).lower() for t in existing}
         valid = []
         for name in names:
             item = live.get(name)
             if not item or clean_tag(name).lower() in excluded: continue
             if any(clean_tag(a).lower() in excluded for a in item['aliases']): continue
-            if name in candidates and candidates[name][5] != item['digest'] and name not in lexical and name not in exact and name not in concept_names: continue
+            if (name in candidates and candidates[name][5] != item['digest'] and
+                not (retained_overlay and candidates[name][1] == item['category']) and
+                name not in lexical and name not in exact and name not in concept_names): continue
             valid.append(item)
         for rank, name in enumerate(lexical):
             ranks[name] = ranks.get(name, 0)+1/(60+rank+1)
@@ -411,11 +466,13 @@ class Engine:
         if cancelled(): raise ValueError('cancelled')
         if not valid: return {'items': [], 'context_tokens':window['tokens'], 'context_mode':mode}
         documents = ['Category: '+category_name(r['category'])+'\n'+r['text'] for r in valid]
-        scores = (self.models.rerank(query_text, documents, negative, purpose='tag_search') if manual else
+        scores = ([semantic_scores.get(row['name'],0) for row in valid] if manual and not entity_query else
+                  self.models.rerank(query_text, documents, negative, purpose='tag_search') if manual else
                   self.models.rerank(query_text, documents, negative))
         if cancelled(): raise ValueError('cancelled')
         order = sorted(range(len(valid)), key=lambda i: (valid[i]['name'] not in exact,
-            -scores[i], -ranks.get(valid[i]['name'],0), -valid[i]['post_count'], valid[i]['name']))
+            -scores[i],
+            -ranks.get(valid[i]['name'],0), -valid[i]['post_count'], valid[i]['name']))
         pinned=[i for i in order if valid[i]['name'] in exact]
         for group in concepts:
             choices=[i for i in order if valid[i]['name'] in group]

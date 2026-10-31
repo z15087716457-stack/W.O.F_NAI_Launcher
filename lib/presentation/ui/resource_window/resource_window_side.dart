@@ -195,6 +195,8 @@ Widget resourceGroupIcon(
       ResourceGroupIcon.favorite =>
         selected ? StudioIcons.galleryHeartFilled : StudioIcons.galleryHeart,
       ResourceGroupIcon.collection => StudioIcons.galleryCollection,
+      ResourceGroupIcon.recent => Icons.history_outlined,
+      ResourceGroupIcon.trash => StudioIcons.galleryTrash,
       ResourceGroupIcon.uncategorized => StudioIcons.galleryArchive,
       _ => StudioIcons.galleryFolder,
     };
@@ -227,6 +229,7 @@ Widget resourceGroupIcon(
     ResourceGroupIcon.all => UiGlyphs.grid,
     ResourceGroupIcon.favorite => UiGlyphs.star,
     ResourceGroupIcon.recent => UiGlyphs.clock,
+    ResourceGroupIcon.trash => UiGlyphs.trash,
     ResourceGroupIcon.collection => UiGlyphs.layers,
     ResourceGroupIcon.uncategorized => UiGlyphs.minus,
     ResourceGroupIcon.inGeneration => UiGlyphs.check,
@@ -292,6 +295,7 @@ class _GalleryRow extends StatelessWidget {
             borderRadius: BorderRadius.circular(6),
           ),
           child: Stack(
+            fit: StackFit.expand,
             children: [
               Padding(
                 padding: EdgeInsets.only(left: 6 + depth * 14.0, right: 8),

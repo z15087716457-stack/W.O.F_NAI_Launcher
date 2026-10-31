@@ -4,6 +4,7 @@ import '../../../core/nai_agent/studio_tools.dart';
 import '../../../core/nai_agent/vision_access.dart';
 import '../../../core/nai_agent/generation_tools.dart';
 import '../../../core/nai_agent/prompt_set_tools.dart';
+import '../../../core/rag/rag_settings.dart';
 import '../../../data/models/image/image_params.dart';
 import '../image_generation_provider.dart';
 import '../generation/preview_selection_provider.dart';
@@ -24,6 +25,7 @@ import 'nai_agent_settings_binding.dart';
 import 'nai_agent_wiki_images.dart';
 import 'nai_agent_explore_binding.dart';
 import '../prompt_block_library_provider.dart';
+import '../rag_provider.dart';
 
 /// Explicit dependencies supplied by the workspace/session owner (stage C/D).
 typedef NaiAgentStudioFactory =
@@ -191,11 +193,53 @@ final naiAgentStudioFactoryProvider = Provider<NaiAgentStudioFactory>((ref) {
       },
       readDraft: () => readBridgeDraft(ref),
       readSummary: () {
+        // Context reads must not create the controller: its build starts RAG.
+        final settings = ref.exists(ragSettingsProvider)
+            ? ref.read(ragSettingsProvider)
+            : null;
+        final rag = ref.exists(ragControllerProvider)
+            ? ref.read(ragControllerProvider)
+            : null;
+        final gpuBusy =
+            rag != null && ref.read(ragControllerProvider.notifier).isGpuBusy;
+        final searchStatus = <String, String>{};
+        for (final source in const [
+          RagSource.gallery,
+          RagSource.tags,
+          RagSource.wiki,
+          RagSource.blocks,
+        ]) {
+          if (settings == null) {
+            searchStatus[source.name] = 'unknown';
+          } else if (!settings.enabledFor(source)) {
+            searchStatus[source.name] = 'disabled';
+          } else if (rag == null) {
+            searchStatus[source.name] = 'unknown';
+          } else {
+            final status = rag.forSource(source);
+            searchStatus[source.name] = switch (status) {
+              _
+                  when gpuBusy ||
+                      status.suspended ||
+                      status.error == 'resource_busy' =>
+                'busy',
+              _ when rag.initializing => 'unknown',
+              _ when status.error != null => 'error',
+              _ when !status.hasIndexStatus => 'unknown',
+              _ when status.indexed == 0 =>
+                status.busy ? 'busy' : 'not_indexed',
+              _ when status.partial || status.busy || !status.complete =>
+                'partial',
+              _ => 'ready',
+            };
+          }
+        }
         final state = ref.read(imageGenerationNotifierProvider);
         final imageParams = ref.read(generationParamsNotifierProvider);
         final selected = image('selected');
         final draft = readBridgeDraft(ref);
         return {
+          'search': searchStatus,
           'page': ref.exists(appRouterProvider)
               ? ref
                     .read(appRouterProvider)

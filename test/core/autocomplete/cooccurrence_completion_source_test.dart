@@ -55,7 +55,7 @@ void main() {
       expect(results.first.cooccurrenceCount, 221957);
       expect(results.first.relatedScore, closeTo(0.769, 0.001));
       expect(results.first.sources, {CompletionSourceKind.cooccurrence});
-      expect(dataSource.requestedLimit, CompletionResultLimits.maxRelatedTags);
+      expect(dataSource.requestedLimit, isNull);
     },
   );
 
@@ -155,13 +155,15 @@ class _FakeCooccurrenceDataSource extends CooccurrenceDataSource {
   int? requestedLimit;
 
   @override
-  Future<List<RelatedTag>> getRelatedTags(
-    String tag, {
-    int limit = 20,
-    int minCount = 1,
+  Future<Map<String, List<RelatedTag>>> getRelatedTagsBatch(
+    List<String> tags, {
+    int? limit = 10,
   }) async {
     requestedLimit = limit;
-    return rows.take(limit).toList(growable: false);
+    return {
+      for (final tag in tags)
+        tag: limit == null ? rows : rows.take(limit).toList(),
+    };
   }
 }
 

@@ -5,7 +5,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/database/database_providers.dart';
 import '../../core/database/datasources/gallery_data_source.dart';
 import '../../data/services/gallery/gallery_delete_pool_store.dart';
+import '../../data/services/gallery/gallery_trash_service.dart';
 import '../../data/services/gallery/unified_gallery_service.dart';
+
+final galleryTrashServiceProvider = Provider(
+  (ref) => GalleryTrashService(
+    restoreIndex: (paths) async {
+      final manager = await ref.read(databaseManagerProvider.future);
+      final source = manager.getDataSource<GalleryDataSource>('gallery');
+      if (source == null) throw StateError('Gallery database unavailable');
+      await source.batchRestoreDeleted(paths);
+    },
+  ),
+);
 
 /// Explicit deletion-pool scope. It never changes the normal library query.
 final galleryTrashTimelineProvider = FutureProvider<List<GalleryTimelineEntry>>(

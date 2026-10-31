@@ -25,14 +25,22 @@ class TagQueryTests(unittest.TestCase):
         result=self.engine.search('',0,'around',[],[],False,keyword='在阳光下奔跑')
         self.assertTrue(result['items'])
         self.assertEqual(self.models.queries,['在阳光下奔跑'])
-        self.assertEqual(self.models.ranked,[('在阳光下奔跑',False,'tag_search')])
+        self.assertEqual(self.models.ranked,[])
 
     def test_existing_prompt_cursor_and_context_mode_cannot_change_manual_query(self):
         for text,cursor,mode in [('rain, night, ',0,'before'),('blue hair, city, ',16,'around')]:
             result=self.engine.search(text,cursor,mode,[],[],False,keyword='在阳光下奔跑')
             self.assertTrue(result['items'])
         self.assertEqual(self.models.queries,['在阳光下奔跑']*2)
-        self.assertTrue(all(query=='在阳光下奔跑' for query,_,_ in self.models.ranked))
+        self.assertEqual(self.models.ranked,[])
+
+    def test_known_entity_query_keeps_category_aware_rerank(self):
+        import sqlite3
+        db=sqlite3.connect(self.source)
+        db.execute("UPDATE tags SET category=4 WHERE name='tag_0'")
+        db.commit();db.close();self.build()
+        self.engine.search('',0,'around',[],[],False,keyword='tag_0')
+        self.assertEqual(self.models.ranked,[('tag 0',False,'tag_search')])
 
     def test_manual_query_does_not_even_tokenize_an_unrelated_prompt(self):
         original='unrelated_prompt_'*200

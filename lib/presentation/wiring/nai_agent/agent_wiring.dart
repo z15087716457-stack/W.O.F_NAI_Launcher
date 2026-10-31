@@ -659,32 +659,6 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
               );
             },
           );
-    final historyMessages = r?.historyMessages ?? <Map<String, dynamic>>[];
-    final archive = r == null || historyMessages.isEmpty
-        ? null
-        : _mapper.map(
-            r,
-            historyMessages: [
-              for (final old in historyMessages)
-                r.messages
-                        .where(
-                          (m) =>
-                              m['role'] == old['role'] &&
-                              m['timestamp'] == old['timestamp'],
-                        )
-                        .firstOrNull ??
-                    old,
-              ...r.messages.where(
-                (m) => !historyMessages.any(
-                  (old) => m['role'] == 'compactionSummary'
-                      ? old['role'] == m['role'] &&
-                            old['summary'] == m['summary']
-                      : old['role'] == m['role'] &&
-                            old['timestamp'] == m['timestamp'],
-                ),
-              ),
-            ],
-          );
     _mapping = mapping;
     final recent = <String, AgentImage>{};
     for (final image
@@ -845,10 +819,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
         enterSends: c.settings.enterToSend,
       ),
       thread: mapping?.turns ?? [],
-      history: agentHistoryEntries(
-        mapping?.turns ?? [],
-        archive: archive?.turns ?? [],
-      ),
+      history: agentHistoryEntries(mapping?.turns ?? []),
       shelf: mapping?.shelf ?? const AgentShelfData(),
       memory: AgentMemoryData(
         globalInstructions: c.settings.globalInstructions,

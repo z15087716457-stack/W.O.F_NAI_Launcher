@@ -13,6 +13,7 @@ import '../../core/utils/resource_window_drag.dart';
 import '../../data/services/gallery/unified_gallery_service.dart'
     show GalleryTimelineEntry;
 import '../../data/services/gallery/gallery_group_mode.dart';
+import '../../data/services/gallery/gallery_filter_service.dart';
 import '../ui/kit/ui_resource_kind.dart';
 import '../ui/resource_window/resource_window_contract.dart';
 
@@ -47,6 +48,15 @@ class ResourceWindowController extends ChangeNotifier {
   String _query = '', _group = 'all';
   String? _sort, _selected;
   final _chips = <String>{};
+  List<String> _galleryModels = const [];
+  DateTime? _galleryStart, _galleryEnd;
+  FilterCriteria get galleryCriteria => FilterCriteria(
+    searchQuery: _query,
+    naiOnly: _chips.contains('nai'),
+    filterModels: _galleryModels,
+    dateStart: _galleryStart,
+    dateEnd: _galleryEnd,
+  );
   final _items = <Map<String, Object?>>[];
   Map<String, Object?> _page = {};
   Map<FloatingResourceKind, int> _counts = {};
@@ -60,6 +70,9 @@ class ResourceWindowController extends ChangeNotifier {
   ResourceLayout _layout = ResourceLayout.grid;
   double _cellSize = 132;
   bool _connected = true, _loading = false, _disposed = false, _alwaysOnTop;
+  bool _replacing = false;
+  bool get galleryTrash =>
+      _kind == FloatingResourceKind.gallery && _group == 'trash';
   String? _error;
   int _requestId = 0, _epoch = 0, _selectionEpoch = 0, _revision = 0;
   Timer? _debounce, _layoutDebounce;
@@ -74,7 +87,7 @@ class ResourceWindowController extends ChangeNotifier {
   List<GalleryTimelineEntry> get galleryTimeline => _galleryTimeline;
   int get selectedGalleryIndex => _galleryIndex[_selected] ?? -1;
   GalleryGroupMode get effectiveGalleryGroupMode =>
-      const ['modifiedAt', 'createdAt'].contains(_sort)
+      _group != 'recent' && const ['modifiedAt', 'createdAt'].contains(_sort)
       ? galleryGroupMode
       : GalleryGroupMode.none;
 
@@ -101,6 +114,7 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   Future<void> ensureGalleryItems(List<int> indices) async {
+    if (_replacing) return;
     final epoch = _epoch;
     final revision = _revision;
     _galleryVisible = [
@@ -139,6 +153,7 @@ class ResourceWindowController extends ChangeNotifier {
   String? get viewerId => _viewerId;
 
   void open(String id) {
+    if (_replacing) return;
     if (_kind == FloatingResourceKind.gallery) {
       _viewerId = id;
       _changed();
@@ -228,7 +243,10 @@ class ResourceWindowController extends ChangeNotifier {
   Future<void> initialize() => refresh();
   Future<void> refresh({bool more = false, int? retain}) async {
     if (_kind == FloatingResourceKind.gallery && more) return;
-    if (_disposed || more && (_loading || _page['hasMore'] != true)) return;
+    if (_disposed ||
+        more && (_loading || _replacing || _page['hasMore'] != true)) {
+      return;
+    }
     final epoch = _epoch;
     var id = _requestId;
     final collected = <Map<String, Object?>>[];
@@ -250,7 +268,12 @@ class ResourceWindowController extends ChangeNotifier {
             'kind': _kind.name,
             'groupId': _group,
             'query': _query,
-            'chips': _chips.toList(),
+            'chips': galleryTrash ? <String>[] : _chips.toList(),
+            if (_kind == FloatingResourceKind.gallery && !galleryTrash) ...{
+              'models': _galleryModels,
+              'dateStart': _galleryStart?.millisecondsSinceEpoch,
+              'dateEnd': _galleryEnd?.millisecondsSinceEpoch,
+            },
             'sortId': _sortPending ? _sort : null,
             'descending': _sortPending ? _descending : null,
             'offset': offset,
@@ -284,6 +307,7 @@ class ResourceWindowController extends ChangeNotifier {
       } while (offset < target);
       _revision = snapshot;
       _page = result;
+      _replacing = false;
       if (_kind == FloatingResourceKind.gallery) {
         _galleryTimeline = [
           for (final value in result['timeline'] as List)
@@ -326,6 +350,14 @@ class ResourceWindowController extends ChangeNotifier {
           id == _requestId &&
           _code(error) != 'cancelled') {
         _error = '$error';
+        if (_replacing) {
+          _items.clear();
+          _galleryTimeline = const [];
+          _galleryIndex.clear();
+          _galleryVisible = const [];
+          _page = {..._page, 'total': 0, 'hasMore': false};
+          _replacing = false;
+        }
       }
     } finally {
       if (!_disposed && epoch == _epoch && id == _requestId) {
@@ -336,18 +368,21 @@ class ResourceWindowController extends ChangeNotifier {
     }
   }
 
-  void _reset() {
+  void _reset({bool clearPage = false}) {
     _viewerId = null;
     _epoch++;
     _selectionEpoch++;
     _selected = null;
     _detail = null;
-    _items.clear();
-    _galleryTimeline = const [];
-    _galleryIndex.clear();
-    _galleryVisible = const [];
+    _replacing = true;
+    if (clearPage) {
+      _items.clear();
+      _galleryTimeline = const [];
+      _galleryIndex.clear();
+      _galleryVisible = const [];
+      _page = {};
+    }
     _galleryPending.clear();
-    _page = {};
     _loading = false;
     _sortPending = false;
     _loadingMore = false;
@@ -358,13 +393,15 @@ class ResourceWindowController extends ChangeNotifier {
 
   void kind(FloatingResourceKind value) {
     if (_kind == value) return;
-    _reset();
+    _reset(clearPage: true);
     _kind = value;
     _group = 'all';
     _query = '';
     _sort = null;
     _descending = null;
     _chips.clear();
+    _galleryModels = const [];
+    _galleryStart = _galleryEnd = null;
     unawaited(
       _run(() async {
         await call('resources.kind', {
@@ -400,8 +437,53 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   void group(String value) {
+    if (_group == value) return;
     _reset();
     _group = value;
+    unawaited(refresh());
+  }
+
+  void galleryFilters({
+    bool? naiOnly,
+    List<String>? models,
+    DateTime? start,
+    DateTime? end,
+    bool dates = false,
+    bool clear = false,
+  }) {
+    final nextModels = clear || naiOnly == false
+        ? const <String>[]
+        : models ?? _galleryModels;
+    final nextNai =
+        naiOnly ?? (models?.isNotEmpty == true || _chips.contains('nai'));
+    final nextStart = clear
+        ? null
+        : dates
+        ? start
+        : _galleryStart;
+    final nextEnd = clear
+        ? null
+        : dates
+        ? end
+        : _galleryEnd;
+    final nextQuery = clear ? '' : _query;
+    if (listEquals(nextModels, _galleryModels) &&
+        nextNai == _chips.contains('nai') &&
+        nextStart == _galleryStart &&
+        nextEnd == _galleryEnd &&
+        nextQuery == _query) {
+      return;
+    }
+    _reset();
+    _galleryModels = List.unmodifiable(nextModels);
+    if (nextNai) {
+      _chips.add('nai');
+    } else {
+      _chips.remove('nai');
+    }
+    _galleryStart = nextStart;
+    _galleryEnd = nextEnd;
+    _query = nextQuery;
     unawaited(refresh());
   }
 
@@ -445,6 +527,7 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   Future<void> select(String id) async {
+    if (_replacing) return;
     final epoch = ++_selectionEpoch;
     final kind = _kind;
     _selected = id;
@@ -477,6 +560,9 @@ class ResourceWindowController extends ChangeNotifier {
         ],
       );
       _changed();
+      if (kind == FloatingResourceKind.gallery && !galleryTrash) {
+        await call('gallery.viewer', {'operation': 'viewed', 'id': id});
+      }
     }, query: true);
   }
 
@@ -581,6 +667,8 @@ class ResourceWindowController extends ChangeNotifier {
 
   Future<void> prepareExport(String id) async {
     if (_kind != FloatingResourceKind.gallery ||
+        galleryTrash ||
+        _replacing ||
         _exportUris.containsKey(id) ||
         !_exportsPending.add(id)) {
       return;
@@ -599,6 +687,7 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   Widget dragWrap(ResourceItem item, Widget child) {
+    if (galleryTrash) return child;
     final kind = _kind;
     return MouseRegion(
       onEnter: (_) => unawaited(prepareExport(item.id)),
@@ -607,6 +696,7 @@ class ResourceWindowController extends ChangeNotifier {
         child: DragItemWidget(
           allowedOperations: () => [DropOperation.copy],
           dragItemProvider: (_) async {
+            if (_replacing) return null;
             if (kind == FloatingResourceKind.gallery) {
               // No disk/IPC await during OLE startup. If prewarming is unfinished,
               // this gesture is declined; a later gesture can use the ready URI.
@@ -631,10 +721,18 @@ class ResourceWindowController extends ChangeNotifier {
   }
 
   ResourceWindowActions get actions => ResourceWindowActions(
+    onTrash: (action, paths) => _run(() async {
+      if (!const {'restore', 'purge'}.contains(action)) return;
+      await call('gallery.viewer', {
+        'operation': action == 'restore' ? 'trashRestore' : 'trashPurge',
+        'ids': paths,
+      });
+      if (!_disposed && _kind == FloatingResourceKind.gallery) await refresh();
+    }),
     onMove: _kind != FloatingResourceKind.gallery
         ? null
         : (delta) {
-            if (_galleryTimeline.isEmpty) return;
+            if (_replacing || _galleryTimeline.isEmpty) return;
             final current = _galleryIndex[_selected] ?? -1;
             final next = (current < 0 ? 0 : current + delta).clamp(
               0,
@@ -789,6 +887,10 @@ class ResourceWindowController extends ChangeNotifier {
     selectedId: _selected,
     detail: _detail,
     loading: _loading,
+    replacing: _replacing,
+    trashPaths: galleryTrash
+        ? [for (final entry in _galleryTimeline) entry.path]
+        : const [],
     error: _error,
     connected: _connected,
     alwaysOnTop: _alwaysOnTop,

@@ -46,6 +46,22 @@ class AgentChatRuntime {
   StreamSubscription<Map<String, dynamic>>? subscription;
   List<Map<String, dynamic>> messages = [], queue = [];
   List<Map<String, dynamic>> historyMessages = [];
+
+  /// Full current-branch display, with live updates replacing persisted copies.
+  /// This never changes the compacted messages sent to Pi/model providers.
+  List<Map<String, dynamic>> get displayMessages {
+    if (historyMessages.isEmpty) return messages;
+    Object key(Map<String, dynamic> message) =>
+        (message['role'], message['timestamp']);
+    final live = {for (final message in messages) key(message): message};
+    final saved = {for (final message in historyMessages) key(message)};
+    return [
+      for (final message in historyMessages) live[key(message)] ?? message,
+      for (final message in messages)
+        if (!saved.contains(key(message))) message,
+    ];
+  }
+
   Map<String, dynamic> stats = {}, context = {}, cacheWarming = {};
   List<Map<String, dynamic>> entries = [], userEntries = [], commands = [];
   final Map<String, Map<String, dynamic>> tools = {};
@@ -109,7 +125,7 @@ class AgentChatRuntime {
     if (entry == null) return null;
     final value = _entryMessage(entry);
     if (value['role'] != 'user' || value['timestamp'] == null) return null;
-    return messages
+    return displayMessages
         .where(
           (m) => m['role'] == 'user' && m['timestamp'] == value['timestamp'],
         )

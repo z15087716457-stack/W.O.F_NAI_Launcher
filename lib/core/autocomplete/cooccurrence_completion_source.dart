@@ -2,6 +2,12 @@ import '../database/datasources/cooccurrence_data_source.dart';
 import 'completion_models.dart';
 import 'tag_catalog_repository.dart';
 
+class RelatedTagMatch {
+  const RelatedTagMatch(this.candidate, this.sources);
+  final CompletionCandidate candidate;
+  final List<String> sources;
+}
+
 typedef CooccurrenceDataSourceLoader =
     Future<CooccurrenceDataSource> Function();
 
@@ -34,61 +40,90 @@ class CooccurrenceCompletionSource implements CompletionSource {
     final requestedLimit = CompletionResultLimits.isAll(query.limit)
         ? CompletionResultLimits.maxRelatedTags
         : query.limit.clamp(1, CompletionResultLimits.maxRelatedTags);
-    final dataSource = await _loadDataSource();
-    final rows = await dataSource.getRelatedTags(
-      relatedTag,
+    final matches = await related(
+      [relatedTag],
+      exclude: query.existingTags,
       limit: requestedLimit,
     );
-    if (rows.isEmpty) return const [];
+    return [for (final match in matches) match.candidate];
+  }
 
-    final records = await _catalog.recordsByCanonicalTag([
-      relatedTag,
-      ...rows.map((row) => row.tag),
-    ]);
-    final sourcePostCount = records[relatedTag]?.postCount;
-    final candidates = <CompletionCandidate>[];
-    for (final row in rows) {
-      final canonicalTag = row.tag.trim().toLowerCase();
-      if (canonicalTag.isEmpty ||
-          canonicalTag == relatedTag ||
-          query.existingTags.contains(canonicalTag)) {
-        continue;
-      }
-      final record = records[canonicalTag];
-      final score = row.cooccurrenceScore > 0
-          ? row.cooccurrenceScore.clamp(0.0, 1.0)
-          : _jaccard(
-              intersection: row.count,
-              sourcePostCount: sourcePostCount,
-              targetPostCount: record?.postCount,
-            );
-      candidates.add(
-        CompletionCandidate(
-          canonicalTag: canonicalTag,
-          category: record?.category ?? TagCategory.general,
-          postCount: record?.postCount ?? 0,
-          matchKind: CompletionMatchKind.related,
-          sources: const {CompletionSourceKind.cooccurrence},
-          relatedScore: score,
-          cooccurrenceCount: row.count,
-        ),
-      );
-    }
+  /// Shared offline ranking for editor completion and the Agent tool.
+  /// Inputs are canonical tags; score every adjacent edge before taking top-k.
+  Future<List<RelatedTagMatch>> related(
+    List<String> tags, {
+    Set<String> exclude = const {},
+    Set<TagCategory>? categories,
+    int limit = 20,
+  }) async {
+    final seeds = tags.toSet();
+    if (seeds.isEmpty) return const [];
+    final dataSource = await _loadDataSource();
+    final rows = await dataSource.getRelatedTagsBatch(
+      seeds.toList(),
+      limit: null,
+    );
 
-    candidates.sort((left, right) {
-      final similarity = (right.relatedScore ?? 0).compareTo(
-        left.relatedScore ?? 0,
-      );
-      if (similarity != 0) return similarity;
-      final occurrences = (right.cooccurrenceCount ?? 0).compareTo(
-        left.cooccurrenceCount ?? 0,
-      );
-      if (occurrences != 0) return occurrences;
-      final popularity = right.postCount.compareTo(left.postCount);
-      if (popularity != 0) return popularity;
-      return left.canonicalTag.compareTo(right.canonicalTag);
+    final records = await _catalog.recordsByCanonicalTag({
+      ...seeds,
+      for (final batch in rows.values) ...batch.map((row) => row.tag),
     });
-    return candidates;
+    final scores = <String, double>{};
+    final counts = <String, int>{};
+    final sources = <String, List<String>>{};
+    for (final seed in seeds) {
+      for (final row in rows[seed] ?? const <RelatedTag>[]) {
+        final record = records[row.tag];
+        if (record == null ||
+            seeds.contains(row.tag) ||
+            exclude.contains(row.tag) ||
+            (categories != null && !categories.contains(record.category))) {
+          continue;
+        }
+        final score = _jaccard(
+          intersection: row.count,
+          sourcePostCount: records[seed]?.postCount,
+          targetPostCount: record.postCount,
+        );
+        if (score == null || score <= 0) continue;
+        scores.update(row.tag, (value) => value + score, ifAbsent: () => score);
+        counts.update(
+          row.tag,
+          (value) => value + row.count,
+          ifAbsent: () => row.count,
+        );
+        sources.putIfAbsent(row.tag, () => []).add(seed);
+      }
+    }
+    final names = scores.keys.toList();
+    names.sort((left, right) {
+      final support = sources[right]!.length.compareTo(sources[left]!.length);
+      if (support != 0) return support;
+      final similarity = scores[right]!.compareTo(scores[left]!);
+      if (similarity != 0) return similarity;
+      final occurrences = counts[right]!.compareTo(counts[left]!);
+      if (occurrences != 0) return occurrences;
+      final popularity = records[right]!.postCount.compareTo(
+        records[left]!.postCount,
+      );
+      if (popularity != 0) return popularity;
+      return left.compareTo(right);
+    });
+    return [
+      for (final name in names.take(limit))
+        RelatedTagMatch(
+          CompletionCandidate(
+            canonicalTag: name,
+            category: records[name]!.category,
+            postCount: records[name]!.postCount,
+            matchKind: CompletionMatchKind.related,
+            sources: const {CompletionSourceKind.cooccurrence},
+            relatedScore: scores[name]! / seeds.length,
+            cooccurrenceCount: counts[name],
+          ),
+          List.unmodifiable(sources[name]!),
+        ),
+    ];
   }
 
   static double? _jaccard({
@@ -103,6 +138,12 @@ class CooccurrenceCompletionSource implements CompletionSource {
         targetPostCount <= 0) {
       return null;
     }
+    // Marginals and edge counts are different snapshots. Bound stale counts
+    // before deriving similarity rather than presenting impossible overlaps.
+    intersection = intersection.clamp(
+      0,
+      sourcePostCount < targetPostCount ? sourcePostCount : targetPostCount,
+    );
     final union = sourcePostCount + targetPostCount - intersection;
     if (union <= 0) return null;
     return (intersection / union).clamp(0.0, 1.0);

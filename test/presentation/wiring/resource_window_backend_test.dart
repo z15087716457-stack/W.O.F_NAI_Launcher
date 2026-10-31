@@ -4,6 +4,10 @@ import 'dart:convert';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/cache/thumbnail_cache_service.dart';
 import 'package:nai_launcher/data/services/gallery/gallery_sort_store.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_delete_pool_store.dart';
+import 'package:nai_launcher/data/services/gallery/gallery_trash_service.dart';
+import 'package:nai_launcher/presentation/providers/gallery_trash_provider.dart';
+import 'package:nai_launcher/presentation/providers/gallery_recent_views_provider.dart';
 import 'package:nai_launcher/presentation/wiring/refs_preferences.dart';
 import 'package:nai_launcher/presentation/providers/gallery_scan_progress_provider.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -101,6 +105,8 @@ class ScanProgress extends GalleryScanProgressNotifier {
 }
 
 class Categories extends GalleryCategoryNotifier {
+  @override
+  Future<void> refresh() async {}
   void publish(List<GalleryCategory> categories) =>
       state = state.copyWith(categories: categories);
   @override
@@ -161,6 +167,13 @@ class VibeCategories extends VibeLibraryCategoryNotifier {
 
 class Gallery extends FakeLocalGalleryService {
   Gallery(super.records);
+  int favoriteCountRequests = 0;
+  @override
+  Future<int> getFavoriteCount() {
+    favoriteCountRequests++;
+    return super.getFavoriteCount();
+  }
+
   final libraryRequests = <List<String>>[];
   @override
   Future<List<LocalImageRecord>> getLibraryRecordsForPaths(List<String> paths) {
@@ -253,6 +266,15 @@ class FavoritePrecise extends Precise {
 }
 
 class FavoriteGallery extends MainGallery {
+  final refreshScans = <bool>[];
+  int reloads = 0;
+  @override
+  Future<void> refresh({bool scan = true}) async => refreshScans.add(scan);
+  @override
+  Future<void> reloadTimeline() async {
+    reloads++;
+  }
+
   void publish(LocalGalleryState next) => state = next;
   @override
   Future<void> setSort(
@@ -352,6 +374,7 @@ void main() {
   late LoadingShortcuts shortcuts;
   late Thumbnails thumbnails;
   final clipboardWrites = <Uint8List>[];
+  final restoredPaths = <String>[];
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
     temp = await Directory.systemTemp.createTemp('resource-backend-');
@@ -367,6 +390,7 @@ void main() {
           thumbnails.getOrGenerateThumbnail(any(), size: ThumbnailSize.medium),
     ).thenAnswer((_) async => cover.path);
     clipboardWrites.clear();
+    restoredPaths.clear();
     router = GoRouter(
       initialLocation: AppRoutes.generation,
       routes: [
@@ -390,6 +414,23 @@ void main() {
     );
     container = ProviderContainer(
       overrides: [
+        galleryTrashServiceProvider.overrideWithValue(
+          GalleryTrashService(
+            restoreIndex: (paths) async => restoredPaths.addAll(paths),
+          ),
+        ),
+        galleryTrashTimelineProvider.overrideWith(
+          (ref) async => [
+            for (final path in await const GalleryDeletePoolStore().load())
+              if (await File(path).exists())
+                GalleryTimelineEntry(
+                  path: path,
+                  modifiedAt: DateTime(2026),
+                  width: 832,
+                  height: 1216,
+                ),
+          ],
+        ),
         thumbnailCacheServiceProvider.overrideWithValue(thumbnails),
         imageViewerGalleryProvider.overrideWith(ViewerGallery.new),
         detailPromptTranslatorProvider.overrideWithValue(
@@ -490,6 +531,9 @@ void main() {
     bool? descending,
     String search = '',
     int offset = 0,
+    List<String> models = const [],
+    DateTime? start,
+    DateTime? end,
   }) => ResourceQuery({
     'windowId': 'w',
     'requestId': 1,
@@ -500,6 +544,9 @@ void main() {
     'sortId': sort,
     'descending': descending,
     'offset': offset,
+    'models': models,
+    'dateStart': start?.millisecondsSinceEpoch,
+    'dateEnd': end?.millisecondsSinceEpoch,
     'limit': 60,
   });
 
@@ -1062,7 +1109,7 @@ void main() {
       result = await backend.query(request('gallery'));
       expect(
         ((result['sections'] as List).first as Map)['groups'],
-        hasLength(2),
+        hasLength(4),
       );
       expect(
         (await backend.galleryRecords([
@@ -1231,6 +1278,39 @@ void main() {
   );
 
   test(
+    'shared filter bar models and inclusive dates reach the gallery query independently of main filters',
+    () async {
+      final start = DateTime(2026, 10, 1), end = DateTime(2026, 10, 30);
+      await backend.query(
+        request(
+          'gallery',
+          chips: ['nai'],
+          models: [ImageModels.animeDiffusionV45Curated],
+          start: start,
+          end: end,
+        ),
+      );
+      final criteria = gallery.timelines.single.criteria;
+      expect(criteria.filterModels, [ImageModels.animeDiffusionV45Curated]);
+      expect(criteria.naiOnly, true);
+      expect(criteria.dateStart, start);
+      expect(criteria.dateEnd, end);
+      expect(criteria.dateEndExclusive, false);
+      expect(
+        container.read(localGalleryNotifierProvider).filterCriteria.searchQuery,
+        'main page',
+      );
+      expect(
+        container
+            .read(localGalleryNotifierProvider)
+            .filterCriteria
+            .filterModels,
+        isEmpty,
+      );
+    },
+  );
+
+  test(
     'gallery forwards a full read-only timeline/filter/sort and all tab counts',
     () async {
       final page = await backend.query(
@@ -1263,9 +1343,141 @@ void main() {
       final sorts = page['sorts'] as List;
       expect(sorts, hasLength(5));
       expect(page['descending'], false);
+      expect(
+        (await backend.query(request('gallery', group: 'trash')))['timeline'],
+        isEmpty,
+      );
+    },
+  );
+  test(
+    'switching any resource reuses counts without gallery queries; gallery cache follows content changes',
+    () async {
+      for (final kind in ['gallery', 'blocks', 'vibe', 'precise', 'gallery']) {
+        await backend.query(request(kind));
+      }
+      expect(gallery.queries, isEmpty);
+      expect(gallery.timelines, hasLength(1));
+      expect(gallery.favoriteCountRequests, 1);
+      backend.changed(FloatingResourceKind.gallery);
+      await backend.query(request('gallery'));
+      expect(gallery.timelines, hasLength(2));
+      expect(gallery.favoriteCountRequests, 2);
+      expect(gallery.queries, isEmpty);
+    },
+  );
+
+  test(
+    'recent uses the shared history and freezes order until reentry',
+    () async {
+      for (final id in ['/library/1.png', '/library/2.png']) {
+        await backend.galleryViewer({'operation': 'viewed', 'id': id});
+      }
+      final first = await backend.query(request('gallery', group: 'recent'));
+      expect((first['timeline'] as List).map((e) => (e as List).first), [
+        '/library/2.png',
+        '/library/1.png',
+      ]);
+      expect(first['groupMode'], 'none');
+      await backend.galleryViewer({
+        'operation': 'viewed',
+        'id': '/library/1.png',
+      });
+      final stable = await backend.query(request('gallery', group: 'recent'));
+      expect(stable['timeline'], first['timeline']);
+      await backend.query(request('gallery'));
+      final reentered = await backend.query(
+        request('gallery', group: 'recent'),
+      );
+      expect((reentered['timeline'] as List).map((e) => (e as List).first), [
+        '/library/1.png',
+        '/library/2.png',
+      ]);
+      expect(
+        (await container.read(galleryRecentViewsStoreProvider).load())
+            .first
+            .path,
+        '/library/1.png',
+      );
       await expectLater(
-        backend.query(request('gallery', group: 'trash')),
-        throwsA(code('invalid_arguments')),
+        backend.galleryViewer({'operation': 'viewed', 'id': '/unknown.png'}),
+        throwsA(code('not_found')),
+      );
+    },
+  );
+
+  test(
+    'trash shares records and mutations, excludes normal paths from purge and never records a view',
+    () async {
+      final deleted = await File('${temp.path}/deleted.png').writeAsBytes([1]);
+      final restored = await File(
+        '${temp.path}/restored.png',
+      ).writeAsBytes([2]);
+      final normal = await File('${temp.path}/normal.png').writeAsBytes([3]);
+      gallery = Gallery([
+        for (final file in [deleted, restored, normal])
+          LocalImageRecord(
+            path: file.path,
+            size: 1,
+            modifiedAt: DateTime(2026),
+          ),
+      ]);
+      const pool = GalleryDeletePoolStore();
+      await pool.addAll([deleted.path, restored.path]);
+      final page = await backend.query(request('gallery', group: 'trash'));
+      expect(page['total'], 2);
+      expect(page['chips'], isEmpty);
+      expect(
+        (await backend.galleryRecords([deleted.path])).single['id'],
+        deleted.path,
+      );
+      expect(gallery.libraryRequests, isEmpty);
+      final detail = await backend.detail(
+        FloatingResourceKind.gallery,
+        deleted.path,
+      );
+      expect((detail['actions'] as List).map((a) => (a as Map)['id']), [
+        'restore',
+        'purge',
+      ]);
+      await backend.galleryViewer({'operation': 'viewed', 'id': deleted.path});
+      expect(
+        await container.read(galleryRecentViewsStoreProvider).load(),
+        isEmpty,
+      );
+      await expectLater(
+        backend.favorite(FloatingResourceKind.gallery, deleted.path),
+        throwsA(code('unsupported')),
+      );
+      await expectLater(
+        backend.galleryViewer({
+          'operation': 'favorite',
+          'id': deleted.path,
+          'value': true,
+        }),
+        throwsA(code('unsupported')),
+      );
+      await backend.galleryViewer({
+        'operation': 'trashRestore',
+        'ids': [restored.path],
+      });
+      expect(restoredPaths, [restored.path]);
+      expect(await restored.exists(), true);
+      expect(
+        (container.read(localGalleryNotifierProvider.notifier)
+                as FavoriteGallery)
+            .refreshScans,
+        [false],
+      );
+      await backend.galleryViewer({
+        'operation': 'trashPurge',
+        'ids': [deleted.path, normal.path],
+      });
+      expect(await deleted.exists(), false);
+      expect(await normal.exists(), true);
+      expect(await pool.load(), isEmpty);
+      expect(
+        (await backend.query(request('gallery', group: 'trash')))['timeline'],
+        isEmpty,
       );
     },
   );

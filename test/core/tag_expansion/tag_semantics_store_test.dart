@@ -31,6 +31,41 @@ void main() {
   );
 
   test(
+    'supplements use WAL and independent readers survive a write transaction',
+    () async {
+      await save();
+      final path = await store.readyPath();
+      final writer = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(singleInstance: false),
+      );
+      final reader = await databaseFactoryFfi.openDatabase(
+        path,
+        options: OpenDatabaseOptions(readOnly: true, singleInstance: false),
+      );
+      try {
+        expect(
+          (await reader.rawQuery('PRAGMA journal_mode')).single.values.single,
+          'wal',
+        );
+        await writer.transaction((txn) async {
+          await txn.rawUpdate(
+            "UPDATE tag_semantics SET core_zh='uncommitted' WHERE tag='grass'",
+          );
+          expect((await reader.query('tag_semantics')).single['core_zh'], '草坪');
+        });
+        expect(
+          (await reader.query('tag_semantics')).single['core_zh'],
+          'uncommitted',
+        );
+      } finally {
+        await reader.close();
+        await writer.close();
+      }
+    },
+  );
+
+  test(
     'fill gaps preserves existing fields and revision ignores attempt-only changes',
     () async {
       await save();

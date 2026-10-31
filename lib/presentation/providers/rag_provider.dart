@@ -44,6 +44,7 @@ class RagStatus {
     this.initializationPhase = '',
     this.initializationProcessed = 0,
     this.initializationTotal = 0,
+    this.degraded = const [],
   });
   final String phase;
   final int indexed, processed, total, bytes, searching;
@@ -54,6 +55,7 @@ class RagStatus {
   final String installDetail;
   final Map<RagSource, RagStatus> sources;
   final Map<String, int> details;
+  final List<String> degraded;
   final bool indexKnown, initializing;
   final String initializationPhase;
   final int initializationProcessed, initializationTotal;
@@ -91,6 +93,7 @@ class RagStatus {
     String? initializationPhase,
     int? initializationProcessed,
     int? initializationTotal,
+    List<String>? degraded,
   }) => RagStatus(
     phase: phase ?? this.phase,
     indexed: indexed ?? this.indexed,
@@ -116,6 +119,7 @@ class RagStatus {
     initializationProcessed:
         initializationProcessed ?? this.initializationProcessed,
     initializationTotal: initializationTotal ?? this.initializationTotal,
+    degraded: degraded ?? this.degraded,
   );
 }
 
@@ -1054,6 +1058,12 @@ class RagController extends Notifier<RagStatus> {
       if (_disposed || epoch != _epoch || cancellation.isCancelled) {
         return const [];
       }
+      state = state.copyWith(
+        clearError: true,
+        degraded: List<String>.unmodifiable(
+          (result['degraded'] as List? ?? const []).cast<String>(),
+        ),
+      );
       return [
         for (final raw in result['items'] as List? ?? const [])
           CompletionCandidate(

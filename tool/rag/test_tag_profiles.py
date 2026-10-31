@@ -107,6 +107,52 @@ class TagProfileTests(unittest.TestCase):
         db=sqlite3.connect(self.overlay);db.execute("CREATE TABLE attempts(tag TEXT)");db.execute("INSERT INTO attempts VALUES('tag_5')");db.commit();db.close()
         self.assertEqual(signature,self.source_impl.signature())
 
+    def test_locked_overlay_degrades_only_this_search_and_retains_saved_vectors(self):
+        self.profile(self.overlay,'tag_5','补充名称',revision=1)
+        self.build()
+        original_paths=list(self.source_impl.paths)
+        before=self.engine.db.execute('SELECT id,digest,vector FROM documents ORDER BY id').fetchall()
+        writer=sqlite3.connect(self.overlay)
+        try:
+            writer.execute('BEGIN EXCLUSIVE')
+            writer.execute("UPDATE tag_semantics SET core_zh='not committed'")
+            result=self.engine.search('',0,'around',[],[],False,keyword='visual subject')
+            self.assertTrue(result['items'])
+            self.assertEqual(self.engine.status()['indexed'],70)
+            self.assertTrue(self.engine.status()['partial'])
+            self.assertEqual(result['degraded'],['supplements_unavailable'])
+            self.assertIs(self.engine.sources,self.source_impl)
+            self.assertEqual(self.source_impl.paths,original_paths)
+            self.assertEqual(self.engine.db.execute('SELECT id,digest,vector FROM documents ORDER BY id').fetchall(),before)
+        finally: writer.rollback();writer.close()
+        self.assertNotIn('degraded',self.engine.search('',0,'around',[],[],False,keyword='visual subject'))
+        self.assertTrue(self.engine.status()['complete'])
+
+    def test_invalid_overlay_schema_is_not_silently_treated_as_a_lock(self):
+        self.build()
+        db=sqlite3.connect(self.overlay)
+        db.execute('DROP TABLE tag_semantics');db.commit();db.close()
+        with self.assertRaises(sqlite3.OperationalError):
+            self.engine.search('',0,'around',[],[],False,keyword='visual subject')
+        self.assertIs(self.engine.sources,self.source_impl)
+
+    def test_manual_popularity_uses_danbooru_counts_and_preserves_other_sources(self):
+        runtime=self.root/'runtime.db'
+        db=sqlite3.connect(runtime)
+        db.execute('CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY,category INTEGER,post_count INTEGER)')
+        db.execute("INSERT INTO danbooru_tags VALUES('tag_0',0,100000)")
+        db.commit();db.close()
+        db=sqlite3.connect(self.source)
+        db.execute("UPDATE tags SET post_count=100000000,category=7 WHERE name='tag_1'")
+        db.commit();db.close()
+        self.engine.sources=Sources(self.source,runtime=runtime,semantics=self.semantic,supplements=self.overlay)
+        self.build()
+        result=self.engine.search('',0,'around',[],[],False,limit=80,keyword='an unnamed visual scene')
+        self.assertEqual(result['items'][0]['name'],'tag_0')
+        self.assertGreater(result['items'][0]['score'],0.2)
+        self.assertLess(result['items'][0]['score'],1.4)
+        self.assertTrue(any(row['name']=='tag_1' and row['post_count']==100000000 for row in result['items']))
+
     def test_catalog_change_falls_back_to_full_verification_and_deletes_stale(self):
         self.build()
         db=sqlite3.connect(self.source);db.execute('DELETE FROM tags WHERE id=2');db.commit();db.close()

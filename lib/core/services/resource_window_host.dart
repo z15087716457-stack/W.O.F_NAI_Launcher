@@ -68,9 +68,15 @@ class ResourceQuery {
       query = values['query'] as String? ?? '',
       sortId = values['sortId'] as String?,
       descending = values['descending'] as bool?,
-      chips = _chips(values['chips']) {
+      chips = _chips(values['chips']),
+      models = _chips(values['models']).toList(),
+      dateStart = _date(values['dateStart']),
+      dateEnd = _date(values['dateEnd']) {
     if (requestId < 0 || offset < 0 || limit < 1 || limit > 60) {
       resourceError('invalid_arguments', 'pagination');
+    }
+    if (dateStart != null && dateEnd != null && dateEnd!.isBefore(dateStart!)) {
+      resourceError('invalid_arguments', 'dateRange');
     }
   }
   final String windowId;
@@ -80,6 +86,14 @@ class ResourceQuery {
   final bool? descending;
   final String query;
   final Set<String> chips;
+  final List<String> models;
+  final DateTime? dateStart, dateEnd;
+
+  static DateTime? _date(Object? value) {
+    if (value == null) return null;
+    if (value is! int) resourceError('invalid_arguments', 'date');
+    return DateTime.fromMillisecondsSinceEpoch(value);
+  }
 
   static int _int(Map<String, Object?> values, String key) {
     final value = values[key];

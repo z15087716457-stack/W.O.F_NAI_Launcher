@@ -36,7 +36,7 @@ Call `await tools.mcp__nai_studio__<name>({...})`. Serialize dependent writes; b
 | Pictures, collections, folders and files | `gallery_query`, `gallery_manage` | [gallery.md](references/gallery.md) |
 | Source, mask, Vibe and precise references | `reference_manage`, `reference_library` | [references.md](references/references.md) |
 | Prompt blocks and library | `block_query`, `block_manage` | [blocks.md](references/blocks.md) |
-| Tags, Wiki text and examples | `tag_query`, `wiki_query` | [lookup.md](references/lookup.md) |
+| Tags, related tags, Wiki text and examples | `tag_query`, `tag_related`, `wiki_query` | [lookup.md](references/lookup.md) |
 | Snapshots and preferences | `snapshot`, `settings_read`, `settings_update` | [settings.md](references/settings.md) |
 | Workspace, notes and external MCP servers | - | [workspace.md](references/workspace.md) |
 

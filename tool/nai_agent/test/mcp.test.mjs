@@ -92,6 +92,22 @@ test('model-only questions cannot be nested and MCP errors remain structured', a
   } finally { await f.close(); }
 });
 
+test('native history is discoverable on demand without changing the seven entry tools', async () => {
+  const f=await fixture(`
+    text(await searchTools('session_history'));
+    text(await tools.session_history({action:'search',query:'Exact earlier wording'}));
+  `);
+  try {
+    f.manager.appendMessage({role:'user',timestamp:1,content:'Exact earlier wording model-secret'});
+    await f.session.prompt('perform history test');
+    assert.deepEqual(f.requests[0].tools.map(tool=>tool.function.name).sort(),
+      ['read','write','edit','bash','studio_context','ask_user','codemode'].sort());
+    assert.match(JSON.stringify(f.result()),/Exact earlier wording/);
+    assert.doesNotMatch(JSON.stringify(f.result()),/model-secret/);
+    assert.equal(f.calls.length,0);
+  } finally {await f.close();}
+});
+
 test('CodeMode retains native image artifacts in official Pi history without dumping nested results to the model', async () => {
   const f = await fixture('const result=await tools.mcp__nai_studio__snapshot({action:"list"}); text(result.isError);', {
     execute: async () => ({ content:[{type:'text',text:'native-large-result'}],

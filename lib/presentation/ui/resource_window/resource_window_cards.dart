@@ -78,12 +78,14 @@ class ResourceGalleryCard extends StatefulWidget {
     required this.onDouble,
     required this.onFavorite,
     required this.onAction,
+    this.libraryReadOnly = false,
   });
   final ResourceItem item;
   final double width, height;
   final bool selected;
   final VoidCallback onTap, onDouble, onFavorite;
   final ValueChanged<String> onAction;
+  final bool libraryReadOnly;
 
   static const radius = 6.0;
 
@@ -250,26 +252,28 @@ class _ResourceGalleryCardState extends State<ResourceGalleryCard> {
                               )
                             : const SizedBox.shrink(),
                       ),
-                      _HoverAction(
-                        key: Key('rw-fav-${it.id}'),
-                        icon: it.favorite
-                            ? StudioIcons.galleryHeartFilled
-                            : StudioIcons.galleryHeart,
-                        tooltip: l.common_favorite,
-                        onTap: widget.onFavorite,
-                      ),
-                      if (!compact)
+                      if (!widget.libraryReadOnly)
+                        _HoverAction(
+                          key: Key('rw-fav-${it.id}'),
+                          icon: it.favorite
+                              ? StudioIcons.galleryHeartFilled
+                              : StudioIcons.galleryHeart,
+                          tooltip: l.common_favorite,
+                          onTap: widget.onFavorite,
+                        ),
+                      if (!widget.libraryReadOnly && !compact)
                         _HoverAction(
                           icon: StudioIcons.galleryCopy,
                           tooltip: l.common_copy,
                           onTap: () => widget.onAction('copy'),
                         ),
-                      _HoverAction(
-                        key: Key('rw-reuse-${it.id}'),
-                        icon: StudioIcons.gallerySend,
-                        tooltip: l.imageViewer_reuse,
-                        onTap: () => widget.onAction('reuse'),
-                      ),
+                      if (!widget.libraryReadOnly)
+                        _HoverAction(
+                          key: Key('rw-reuse-${it.id}'),
+                          icon: StudioIcons.gallerySend,
+                          tooltip: l.imageViewer_reuse,
+                          onTap: () => widget.onAction('reuse'),
+                        ),
                     ],
                   ),
                 ),

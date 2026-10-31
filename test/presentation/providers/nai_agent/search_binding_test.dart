@@ -446,13 +446,50 @@ void main() {
         .read(ragSettingsProvider.notifier)
         .update(const RagSettings(enabled: true, wikiEnabled: true));
     container.read(ragControllerProvider);
-    rag.status(const RagStatus());
+    rag.status(
+      const RagStatus(sources: {RagSource.wiki: RagStatus(indexKnown: true)}),
+    );
     expect(
       (await search({'source': 'wiki', 'query': 'rain'}))['status'],
       'not_indexed',
     );
     expect(rag.calls, 0);
   });
+
+  for (final s in ['tags', 'blocks', 'wiki', 'gallery']) {
+    test('$s unknown or initializing index is warming, not empty', () async {
+      container.read(ragControllerProvider);
+      for (final state in [
+        const RagStatus(),
+        const RagStatus(initializing: true, indexKnown: true),
+        const RagStatus(initializing: true, indexed: 10, complete: true),
+      ]) {
+        rag.status(state);
+        final result = await search({'source': s, 'query': 'rain'});
+        expect(result['status'], 'busy');
+        expect(result['reason'], 'warming');
+      }
+      expect(rag.calls, 0);
+    });
+  }
+
+  test(
+    'known empty building index is busy; failed initialization is error',
+    () async {
+      container.read(ragControllerProvider);
+      rag.status(const RagStatus(indexKnown: true, busy: true));
+      expect(
+        (await search({'source': 'tags', 'query': 'rain'}))['status'],
+        'busy',
+      );
+      rag.status(const RagStatus(error: 'runtime_missing'));
+      expect(
+        (await search({'source': 'tags', 'query': 'rain'}))['status'],
+        'error',
+      );
+      expect(rag.calls, 0);
+    },
+  );
 
   test(
     'GPU hold before worker startup reports busy even without suspended status',

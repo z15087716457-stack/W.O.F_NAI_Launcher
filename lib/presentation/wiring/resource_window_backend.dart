@@ -10,12 +10,15 @@ import '../../core/cache/thumbnail_cache_service.dart';
 import '../../core/services/resource_window_host.dart';
 import '../../core/storage/local_storage_service.dart';
 import '../../core/utils/image_share_sanitizer.dart';
+import '../../core/utils/gallery_path_utils.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/gallery/local_image_record.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/prompt_block/prompt_block.dart';
 import '../../data/models/gallery/gallery_category.dart';
 import '../../data/services/gallery/gallery_sort_store.dart';
+import '../../data/services/gallery/gallery_delete_pool_store.dart';
+import '../../data/services/gallery/gallery_recent_views_store.dart';
 import '../../data/services/gallery/gallery_group_mode.dart';
 import '../../data/models/resources/floating_window_data.dart';
 import '../../data/services/gallery/gallery_filter_service.dart';
@@ -27,6 +30,8 @@ import '../../data/services/precise_ref_library_storage_service.dart';
 import '../../data/services/vibe_library_storage_service.dart';
 import '../providers/collection_provider.dart';
 import '../providers/gallery_category_provider.dart';
+import '../providers/gallery_recent_views_provider.dart';
+import '../providers/gallery_trash_provider.dart';
 import '../providers/image_generation_provider.dart';
 import '../providers/krita/krita_bridge_notifier.dart';
 import '../providers/shortcuts_provider.dart';
@@ -56,6 +61,9 @@ import 'refs_library_wiring.dart';
 import 'refs_mapping.dart';
 
 final resourceWindowBackendProvider = Provider(ResourceLibraryBackend.new);
+final resourceGalleryFavoriteCountProvider = FutureProvider(
+  (ref) => ref.read(galleryServiceProvider).getFavoriteCount(),
+);
 
 /// Visual operations need the existing WidgetRef-based action hosts. The
 /// primary app's non-visual bridge installs these callbacks, never the child.
@@ -71,23 +79,56 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   final _exports = <String, Future<File>>{};
   final _viewerDeleted = <String>{};
   final _galleryKnown = <String, GalleryTimelineEntry>{};
+  final _galleryTimelines = <String, List<GalleryTimelineEntry>>{};
+  final _recentOrders = <String, List<GalleryRecentView>>{};
+  final _windowGroups = <String, String>{};
+  int _galleryVersion = 0;
   @override
   void changed(FloatingResourceKind kind) {
-    if (kind == FloatingResourceKind.gallery) _galleryKnown.clear();
+    if (kind == FloatingResourceKind.gallery) {
+      _galleryVersion++;
+      _galleryKnown.clear();
+      _galleryTimelines.clear();
+      ref.invalidate(resourceGalleryFavoriteCountProvider);
+      ref.invalidate(galleryTrashTimelineProvider);
+    }
+  }
+
+  /// Only explicit pool members may bypass the normal soft-deletion filter.
+  Future<List<LocalImageRecord>> readGalleryRecords(List<String> ids) async {
+    if (!gallery.isInitialized) resourceError('not_ready');
+    final trash = (await const GalleryDeletePoolStore().load()).toSet();
+    final normalIds = ids.where((id) => !trash.contains(id)).toList();
+    final trashIds = ids.where(trash.contains).toList();
+    final records = [
+      if (normalIds.isNotEmpty)
+        ...await gallery.getLibraryRecordsForPaths(normalIds),
+      if (trashIds.isNotEmpty) ...await gallery.getRecordsForPaths(trashIds),
+    ];
+    final byPath = {for (final record in records) record.path: record};
+    return [
+      for (final id in ids)
+        if (byPath[id] case final record?) record,
+    ];
   }
 
   @override
   Future<List<Map<String, Object?>>> galleryRecords(List<String> ids) async => [
-    for (final record in await gallery.getLibraryRecordsForPaths(ids))
-      galleryItem(record),
+    for (final record in await readGalleryRecords(ids)) galleryItem(record),
   ];
   Future<void>? _collectionsReady;
   final windowKinds = <String, FloatingResourceKind>{};
+  void closed(String id) {
+    windowKinds.remove(id);
+    _windowGroups.remove(id);
+    _recentOrders.remove(id);
+  }
+
   LocalGalleryService get gallery => ref.read(galleryServiceProvider);
 
   Future<LocalImageRecord> galleryRecord(String id) async {
     if (!gallery.isInitialized) resourceError('not_ready');
-    final records = await gallery.getLibraryRecordsForPaths([id]);
+    final records = await readGalleryRecords([id]);
     if (records.isEmpty) resourceError('not_found');
     return records.single;
   }
@@ -95,13 +136,18 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   @override
   Future<Object?> galleryViewer(Map<String, Object?> arguments) async {
     final operation = resourceString(arguments, 'operation');
+    if (operation == 'trashRestore' || operation == 'trashPurge') {
+      final ids = (arguments['ids'] as List).cast<String>();
+      await changeTrash(ids, restore: operation == 'trashRestore');
+      return null;
+    }
     if (operation == 'records') {
       final ids = (arguments['ids'] as List).cast<String>();
       if (ids.length > 60) resourceError('invalid_arguments', 'ids');
       if (!gallery.isInitialized) resourceError('not_ready');
       return {
         'records': [
-          for (final record in await gallery.getLibraryRecordsForPaths(ids))
+          for (final record in await readGalleryRecords(ids))
             {
               'path': record.path,
               'size': record.size,
@@ -132,6 +178,23 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       await viewer.restore(id);
       _viewerDeleted.remove(id);
       return null;
+    }
+    final trash = (await const GalleryDeletePoolStore().load()).contains(id);
+    if (operation == 'viewed') {
+      if (!trash) {
+        if (!_galleryKnown.containsKey(id)) await galleryRecord(id);
+        await ref.read(galleryRecentViewsStoreProvider).record(id);
+      }
+      return null;
+    }
+    if (trash &&
+        const {
+          'favorite',
+          'setCollection',
+          'createCollection',
+          'delete',
+        }.contains(operation)) {
+      resourceError('unsupported');
     }
     final record = await galleryRecord(id);
     switch (operation) {
@@ -214,6 +277,23 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     }
   }
 
+  Future<void> changeTrash(List<String> paths, {required bool restore}) async {
+    final service = ref.read(galleryTrashServiceProvider);
+    final changed = await (restore
+        ? service.restore(paths)
+        : service.purge(paths));
+    if (changed.isEmpty) return;
+    final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    if (restore) {
+      await notifier.clearRecentlyDeleted(changed);
+      await notifier.refresh(scan: false);
+      await ref.read(galleryCategoryNotifierProvider.notifier).refresh();
+    } else {
+      await notifier.reloadTimeline();
+    }
+    this.changed(FloatingResourceKind.gallery);
+  }
+
   Future<List<RefsEntry>> refs(FloatingResourceKind kind) async {
     await ref.read(floatingRefsReadyProvider(kind).future);
     if (kind == FloatingResourceKind.vibe) {
@@ -293,11 +373,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       resourceError('not_ready', vibeError ?? preciseError);
     }
     return {
-      if (gallery.isInitialized)
-        'gallery': (await gallery.queryRecords(
-          const FilterCriteria(),
-          limit: 1,
-        )).totalCount,
+      if (gallery.isInitialized) 'gallery': gallery.totalCount,
       if (ref.read(promptBlockLibraryNotifierProvider).valueOrNull
           case final library?)
         'blocks': library.blocks.length,
@@ -311,6 +387,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   @override
   Future<Map<String, Object?>> query(ResourceQuery request) async {
     windowKinds[request.windowId] = request.kind;
+    final previousGroup = _windowGroups[request.windowId];
+    _windowGroups[request.windowId] =
+        '${request.kind.name}/${request.groupId ?? 'all'}';
     final l = currentL10n;
     final prefs = await SharedPreferences.getInstance();
     final sections = <Map<String, Object?>>[];
@@ -327,6 +406,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     final group = request.groupId ?? 'all';
     final favorite = group == 'favorites' || request.chips.contains('favorite');
     if (request.kind == FloatingResourceKind.gallery) {
+      if (group == 'trash') chips.clear();
       if (!gallery.isInitialized) resourceError('not_ready');
       await (_collectionsReady ??= ref
           .read(collectionNotifierProvider.notifier)
@@ -400,17 +480,16 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
             'all',
             l.localGallery_allImages,
             icon: 'all',
-            count: (await gallery.queryRecords(
-              const FilterCriteria(),
-              limit: 1,
-            )).totalCount,
+            count: gallery.totalCount,
           ),
           _group(
             'favorites',
             l.common_favorite,
             icon: 'favorite',
-            count: await gallery.getFavoriteCount(),
+            count: await ref.read(resourceGalleryFavoriteCountProvider.future),
           ),
+          _group('recent', l.localGallery_recentViews, icon: 'recent'),
+          _group('trash', l.localGallery_trashTitle, icon: 'trash'),
         ]),
         _section(
           'collections',
@@ -419,7 +498,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
         ),
         _section('folders', l.localGallery_sectionFolders, folders),
       ]);
-      chips.add(_option('nai', l.localGallery_naiOnlyChip));
+      if (group != 'trash') {
+        chips.add(_option('nai', l.localGallery_naiOnlyChip));
+      }
       final labels = [
         l.imageViewer_sortModified,
         l.imageViewer_sortCreated,
@@ -461,19 +542,72 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
                 .where((c) => c.id == group.substring(7))
                 .firstOrNull
           : null;
-      timeline = await gallery.getTimelineForFilter(
-        FilterCriteria(
-          searchQuery: request.query,
-          showFavoritesOnly: favorite,
-          naiOnly: request.chips.contains('nai'),
-          categoryId: category?.id,
-          categoryFolderPath: category?.folderPath,
-          collectionId: group.startsWith('collection:')
-              ? group.substring(11)
-              : null,
-        ),
-        sort: sort,
+      final criteria = FilterCriteria(
+        searchQuery: request.query,
+        filterModels: request.models,
+        dateStart: request.dateStart,
+        dateEnd: request.dateEnd,
+        showFavoritesOnly: favorite,
+        naiOnly: request.chips.contains('nai'),
+        categoryId: category?.id,
+        categoryFolderPath: category?.folderPath,
+        collectionId: group.startsWith('collection:')
+            ? group.substring(11)
+            : null,
       );
+      if (group == 'trash') {
+        timeline = List.of(await ref.read(galleryTrashTimelineProvider.future));
+        final query = request.query.trim().toLowerCase();
+        timeline = timeline
+            .where(
+              (e) =>
+                  query.isEmpty ||
+                  p.basename(e.path).toLowerCase().contains(query),
+            )
+            .toList();
+        timeline.sort(
+          (a, b) => sort.compareFiles(
+            modifiedAtA: a.modifiedAt,
+            modifiedAtB: b.modifiedAt,
+            createdAtA: a.modifiedAt,
+            createdAtB: b.modifiedAt,
+            fileSizeA: a.size ?? 0,
+            fileSizeB: b.size ?? 0,
+            fileNameA: p.basename(a.path),
+            fileNameB: p.basename(b.path),
+            imageAreaA: (a.width ?? 0) * (a.height ?? 0),
+            imageAreaB: (b.width ?? 0) * (b.height ?? 0),
+          ),
+        );
+      } else {
+        final key = '${criteria.cacheKey}|${sort.cacheKey}';
+        final version = _galleryVersion;
+        timeline =
+            _galleryTimelines.remove(key) ??
+            await gallery.getTimelineForFilter(criteria, sort: sort);
+        if (version == _galleryVersion) {
+          _galleryTimelines[key] = timeline;
+          while (_galleryTimelines.length > 8) {
+            _galleryTimelines.remove(_galleryTimelines.keys.first);
+          }
+        }
+        if (group == 'recent') {
+          if (previousGroup != 'gallery/recent' ||
+              !_recentOrders.containsKey(request.windowId)) {
+            _recentOrders[request.windowId] = await ref
+                .read(galleryRecentViewsStoreProvider)
+                .load();
+          }
+          final byPath = {
+            for (final entry in timeline) galleryFilePathKey(entry.path): entry,
+          };
+          timeline = [
+            for (final recent in _recentOrders[request.windowId]!)
+              if (byPath[galleryFilePathKey(recent.path)] case final entry?)
+                entry,
+          ];
+        }
+      }
       _galleryKnown.addEntries(
         timeline.map((entry) => MapEntry(entry.path, entry)),
       );
@@ -751,7 +885,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
             ],
         ],
       if (timeline != null)
-        'groupMode': (await const GalleryGroupModeStore().load()).name,
+        'groupMode': group == 'recent'
+            ? 'none'
+            : (await const GalleryGroupModeStore().load()).name,
       'sections': sections,
       'chips': [
         for (final chip in chips)
@@ -765,7 +901,8 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       'cellSize':
           prefs.getDouble('resource_window_${request.kind.name}_cell_size') ??
           132,
-      'queryHint': request.kind == FloatingResourceKind.gallery
+      'queryHint':
+          request.kind == FloatingResourceKind.gallery && group != 'trash'
           ? l.floating_searchGallery
           : l.floating_searchName,
       'counts': await counts(),
@@ -907,6 +1044,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
   ) async {
     final value = await item(kind, id);
     final l = currentL10n;
+    final trash =
+        kind == FloatingResourceKind.gallery &&
+        (await const GalleryDeletePoolStore().load()).contains(id);
     Map<String, Object?> action(
       String id,
       String label, [
@@ -919,6 +1059,10 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       'body': value['positive'],
       'negative': value['negative'],
       'actions': switch (kind) {
+        FloatingResourceKind.gallery when trash => [
+          action('restore', l.localGallery_trashRestore, true),
+          action('purge', l.localGallery_deleteForever),
+        ],
         FloatingResourceKind.gallery => [
           action('reuse', l.imageViewer_reuse, true),
           action('img2img', l.imageViewer_img2img),
@@ -1002,6 +1146,11 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
     if (!actions.any((a) => (a as Map)['id'] == actionId)) {
       resourceError('invalid_arguments');
     }
+    if (kind == FloatingResourceKind.gallery &&
+        (actionId == 'restore' || actionId == 'purge')) {
+      await changeTrash([id], restore: actionId == 'restore');
+      return;
+    }
     final perform = ref.read(resourceMainActionsProvider).perform;
     if (perform == null) resourceError('not_ready');
     await perform(kind, id, actionId);
@@ -1021,6 +1170,10 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
 
   @override
   Future<void> favorite(FloatingResourceKind kind, String id) async {
+    if (kind == FloatingResourceKind.gallery &&
+        (await const GalleryDeletePoolStore().load()).contains(id)) {
+      resourceError('unsupported');
+    }
     final value = await item(kind, id);
     switch (kind) {
       case FloatingResourceKind.gallery:
@@ -1055,6 +1208,7 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
           resourceError('not_ready', 'Favorite update failed');
         }
     }
+    changed(kind);
   }
 
   @override
@@ -1185,5 +1339,9 @@ class ResourceLibraryBackend implements ResourceWindowBackend {
       }
     }
     windowKinds.clear();
+    _windowGroups.clear();
+    _recentOrders.clear();
+    _galleryTimelines.clear();
+    _galleryKnown.clear();
   }
 }

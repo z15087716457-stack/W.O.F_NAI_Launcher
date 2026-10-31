@@ -15,8 +15,6 @@ import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/constants/storage_keys.dart';
-import '../../../core/database/database_providers.dart';
-import '../../../core/database/datasources/gallery_data_source.dart';
 import '../../../core/shortcuts/default_shortcuts.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/file_explorer_utils.dart';
@@ -36,6 +34,7 @@ import '../../../data/services/gallery/gallery_view_mode_store.dart';
 import '../../providers/bulk_operation_provider.dart';
 import '../../providers/collection_provider.dart';
 import '../../providers/gallery_category_provider.dart';
+import '../../providers/gallery_trash_provider.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/krita_bridge_notifier.dart';
 import '../../providers/local_gallery_focus_provider.dart';
@@ -70,7 +69,6 @@ import '../../widgets/gallery/gallery_floating_bulk_bar.dart';
 import '../../widgets/gallery/gallery_inspector_panel.dart';
 import '../../widgets/gallery/gallery_state_views.dart';
 import '../../../data/services/gallery/gallery_delete_pool_store.dart';
-import '../../../data/services/gallery/gallery_trash_service.dart';
 import '../../widgets/gallery/local_gallery_filter_bar.dart';
 import '../../widgets/gallery/local_gallery_toolbar.dart';
 import '../../widgets/gallery/local_image_context_menu.dart';
@@ -596,14 +594,9 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     if (_trashBusy || paths.isEmpty) return;
     setState(() => _trashBusy = true);
     try {
-      final manager = await ref.read(databaseManagerProvider.future);
-      final source = manager.getDataSource<GalleryDataSource>('gallery');
-      if (source == null) throw StateError('Gallery database unavailable');
-      final restored = await GalleryTrashService(
-        restoreIndex: (paths) async {
-          await source.batchRestoreDeleted(paths);
-        },
-      ).restore(paths);
+      final restored = await ref
+          .read(galleryTrashServiceProvider)
+          .restore(paths);
       await ref
           .read(localGalleryNotifierProvider.notifier)
           .clearRecentlyDeleted(restored);
@@ -642,9 +635,7 @@ class _LocalGalleryScreenState extends ConsumerState<_LocalGalleryContents> {
     if (!confirmed || !mounted || _trashBusy) return;
     setState(() => _trashBusy = true);
     try {
-      final removed = await GalleryTrashService(
-        restoreIndex: (_) async {},
-      ).purge(paths);
+      final removed = await ref.read(galleryTrashServiceProvider).purge(paths);
       ref.read(localGallerySelectionNotifierProvider.notifier).exit();
       await ref.read(localGalleryNotifierProvider.notifier).reloadTimeline();
       if (mounted) {

@@ -120,6 +120,33 @@ Matcher code(String value) =>
     isA<PlatformException>().having((e) => e.code, 'code', value);
 
 void main() {
+  test(
+    'gallery model/date query fields reject malformed values and reversed ranges',
+    () {
+      final base = <String, Object?>{
+        'windowId': 'w',
+        'kind': 'gallery',
+        'requestId': 1,
+        'offset': 0,
+        'limit': 60,
+      };
+      for (final invalid in <Map<String, Object?>>[
+        {
+          'models': [1],
+        },
+        {'dateStart': '2026-10-30'},
+        {
+          'dateStart': DateTime(2026, 10, 30).millisecondsSinceEpoch,
+          'dateEnd': DateTime(2026, 10, 1).millisecondsSinceEpoch,
+        },
+      ]) {
+        expect(
+          () => ResourceQuery({...base, ...invalid}),
+          throwsA(code('invalid_arguments')),
+        );
+      }
+    },
+  );
   late ResourceWindowHost host;
   late Backend backend;
   setUp(() {

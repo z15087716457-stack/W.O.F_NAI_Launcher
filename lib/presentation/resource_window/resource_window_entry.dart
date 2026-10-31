@@ -133,32 +133,60 @@ class _ResourceWindowAppState extends State<ResourceWindowApp> {
     ),
     home: ListenableBuilder(
       listenable: widget.controller,
-      builder: (_, _) => ResourceWindowPage(
-        data: widget.controller.data,
-        actions: widget.controller.actions,
-        galleryBuilder: (scroll, cell) => ResourceGalleryTimeline(
-          controller: widget.controller,
-          scroll: scroll,
-          cell: cell,
-        ),
-        galleryHeaderTrailing:
-            const [
-              'modifiedAt',
-              'createdAt',
-            ].contains(widget.controller.data.sortId)
-            ? GalleryGroupModeButton(
-                value: widget.controller.galleryGroupMode,
-                onChanged: (mode) =>
-                    unawaited(widget.controller.preferences(groupMode: mode)),
-              )
-            : null,
-        viewer: widget.controller.viewerId == null
-            ? null
-            : ResourceGalleryViewer(
-                controller: widget.controller,
-                initialId: widget.controller.viewerId!,
-              ),
-      ),
+      builder: (_, _) {
+        final controller = widget.controller;
+        final data = controller.data;
+        final criteria = controller.galleryCriteria;
+        return ResourceWindowPage(
+          data: data,
+          actions: controller.actions,
+          galleryBuilder: (scroll, cell) => ResourceGalleryTimeline(
+            controller: controller,
+            scroll: scroll,
+            cell: cell,
+          ),
+          galleryFilters:
+              data.kind != FloatingResourceKind.gallery ||
+                  controller.galleryTrash
+              ? null
+              : GalleryFilterBar(
+                  key: const Key('rw-gallery-filters'),
+                  criteria: criteria,
+                  showClearFilters:
+                      criteria.filterModels.isNotEmpty ||
+                      criteria.dateStart != null ||
+                      criteria.dateEnd != null ||
+                      data.query.isNotEmpty,
+                  groupMode:
+                      data.groupId != 'recent' &&
+                          const [
+                            'modifiedAt',
+                            'createdAt',
+                          ].contains(data.sortId)
+                      ? controller.galleryGroupMode
+                      : null,
+                  onNaiOnly: (value) =>
+                      controller.galleryFilters(naiOnly: value),
+                  onModels: (models) =>
+                      controller.galleryFilters(models: models),
+                  onDateRange: (start, end) => controller.galleryFilters(
+                    start: start,
+                    end: end,
+                    dates: true,
+                  ),
+                  onRemoveTag: (_) {},
+                  onClear: () => controller.galleryFilters(clear: true),
+                  onGroupMode: (mode) =>
+                      unawaited(controller.preferences(groupMode: mode)),
+                ),
+          viewer: controller.viewerId == null
+              ? null
+              : ResourceGalleryViewer(
+                  controller: controller,
+                  initialId: controller.viewerId!,
+                ),
+        );
+      },
     ),
   );
 }

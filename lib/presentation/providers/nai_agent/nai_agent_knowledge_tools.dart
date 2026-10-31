@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/nai_agent/agent_tool.dart';
 import '../../../core/autocomplete/completion_models.dart';
+import '../../../core/autocomplete/autocomplete_providers.dart';
+import '../../../core/autocomplete/cooccurrence_completion_source.dart';
 import '../../../core/tag_expansion/tag_expansion_providers.dart';
 import '../../../core/wiki/tag_wiki_repository.dart';
 import '../../../core/wiki/tag_translation_glossary.dart';
@@ -136,6 +138,119 @@ Map<String, NaiAgentToolExecutor> naiAgentKnowledgeTools(
       ],
       'source': 'local_catalog_and_synced_tags',
       'network_requests': 0,
+    });
+  },
+  'tag_related': (name, params, cancellation) async {
+    cancellation.check();
+    const keys = {'tags', 'exclude', 'categories', 'limit'};
+    List<String> names(Object? value, int min, int max) {
+      if (value is! List ||
+          value.length < min ||
+          value.length > max ||
+          value.any(
+            (v) => v is! String || v.trim().isEmpty || v.length > 512,
+          )) {
+        throw const NaiAgentToolError(
+          'invalid_query',
+          'Provide bounded nonempty tag names',
+        );
+      }
+      return value.cast<String>();
+    }
+
+    final limit = params['limit'] ?? 20;
+    if (params.keys.any((key) => !keys.contains(key)) ||
+        limit is! int ||
+        limit < 1 ||
+        limit > 50) {
+      throw const NaiAgentToolError(
+        'invalid_query',
+        'Expected tag_related fields and limit 1 to 50',
+      );
+    }
+    final inputs = names(params['tags'], 1, 20);
+    final excluded = names(params['exclude'] ?? const [], 0, 500);
+    final categoryNames = names(
+      params['categories'] ?? const ['general'],
+      1,
+      8,
+    );
+    final categories = <TagCategory>{};
+    for (final category in categoryNames) {
+      final match = TagCategory.values
+          .where((v) => v.name == category && v != TagCategory.library)
+          .firstOrNull;
+      if (match == null) {
+        throw const NaiAgentToolError('invalid_query', 'Unknown tag category');
+      }
+      categories.add(match);
+    }
+    final normalized = {
+      for (final raw in [...inputs, ...excluded])
+        raw: TagNormalizer.normalize(raw),
+    };
+    final catalog = ref.read(tagCatalogRepositoryProvider);
+    final records = await catalog.recordsByCanonicalTag(normalized.values);
+    final aliases = await catalog.exactAliases(
+      normalized.values.where((tag) => !records.containsKey(tag)),
+    );
+    cancellation.check();
+    final resolved = <Map<String, String>>[];
+    final unknown = <String>[];
+    final seeds = <String>{};
+    for (final input in inputs.toSet()) {
+      final normalizedTag = normalized[input]!;
+      final tag =
+          records[normalizedTag]?.canonicalTag ??
+          aliases[normalizedTag]?.canonicalTag;
+      if (tag == null) {
+        unknown.add(input);
+      } else {
+        resolved.add({'input': input, 'tag': tag});
+        seeds.add(tag);
+      }
+    }
+    final exclude = <String>{...seeds};
+    for (final raw in excluded) {
+      final tag = normalized[raw]!;
+      exclude.add(
+        records[tag]?.canonicalTag ?? aliases[tag]?.canonicalTag ?? tag,
+      );
+    }
+    final List<RelatedTagMatch> matches = seeds.isEmpty
+        ? const []
+        : await ref
+              .read(cooccurrenceCompletionSourceProvider)
+              .related(
+                seeds.toList(),
+                exclude: exclude,
+                categories: categories,
+                limit: limit,
+              );
+    cancellation.check();
+    final terms = await ref
+        .read(tagTranslationGlossaryProvider)
+        .termsFor(matches.map((match) => match.candidate.canonicalTag));
+    cancellation.check();
+    return naiAgentTextResult({
+      'source': 'local_cooccurrence',
+      'network_requests': 0,
+      'algorithm': 'jaccard',
+      'resolved': resolved,
+      'unknown': unknown,
+      'items': [
+        for (final match in matches)
+          {
+            'tag': match.candidate.canonicalTag,
+            'category': match.candidate.category.name,
+            'post_count': match.candidate.postCount,
+            'score': match.candidate.relatedScore,
+            'sources': match.sources,
+            'support': match.sources.length,
+            if (terms[match.candidate.canonicalTag]?['zh'] case final zh?)
+              'translation': zh,
+          },
+      ],
     });
   },
 };

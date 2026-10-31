@@ -70,9 +70,6 @@ class _AgentPanelState extends State<AgentPanel> {
       await WidgetsBinding.instance.endOfFrame;
     }
     await _navigation.jump?.call(entry);
-    if (mounted && entry.beforeCompaction) {
-      _showToast(context.l10n.ag_historyBeforeCompaction);
-    }
   }
 
   void _toggleHistory() {

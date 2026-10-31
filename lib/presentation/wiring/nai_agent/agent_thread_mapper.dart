@@ -201,7 +201,7 @@ List<int>? agentUserImagePartIndexes(
   if (message == null || keepImages.toSet().length != keepImages.length) {
     return null;
   }
-  final mi = runtime.messages.indexOf(message);
+  final mi = runtime.displayMessages.indexOf(message);
   final ids = <String, int>{
     for (final (pi, part) in agentMaps(message['content']).indexed)
       if (part['type'] == 'image') '${runtime.chat.id}/turn/$mi/user/$pi': pi,
@@ -228,7 +228,7 @@ class AgentThreadMapper {
     AgentPromptSet Function(Map<String, dynamic>, Map<String, AgentImage>)?
     promptSetView,
   }) {
-    final messages = historyMessages ?? runtime.messages;
+    final messages = historyMessages ?? runtime.displayMessages;
     final renderContext = Object.hash(
       runtime,
       resources.revision,

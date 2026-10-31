@@ -168,9 +168,10 @@ class CooccurrenceDataSource {
   ///
   /// [tags] 标签列表
   /// [limit] 每个标签返回的相关标签数量
+  /// null keeps full adjacency for callers that rank by association before top-k.
   Future<Map<String, List<RelatedTag>>> getRelatedTagsBatch(
     List<String> tags, {
-    int limit = 10,
+    int? limit = 10,
   }) async {
     if (tags.isEmpty) return {};
     if (!_initialized) await initialize();
@@ -194,7 +195,7 @@ class CooccurrenceDataSource {
         FROM cooccurrences
         WHERE tag2 IN ($placeholders)
       )
-      ORDER BY source_tag ASC, count DESC, related_tag ASC
+      ${limit == null ? '' : 'ORDER BY source_tag ASC, count DESC, related_tag ASC'}
       ''',
       [...normalizedTags, ...normalizedTags],
     );
@@ -205,7 +206,7 @@ class CooccurrenceDataSource {
       final sourceTag = row['source_tag'] as String;
       final relatedTag = row['related_tag'] as String;
       final related = groups.putIfAbsent(sourceTag, () => []);
-      if (related.length >= limit ||
+      if ((limit != null && related.length >= limit) ||
           !(seenBySource.putIfAbsent(
             sourceTag,
             () => {sourceTag},
@@ -227,7 +228,7 @@ class CooccurrenceDataSource {
       result[tag] = limited;
 
       // 更新缓存
-      if (limited.isNotEmpty) {
+      if (limited.isNotEmpty && limit != null) {
         _addToCache(
           _buildCacheKey(tag: tag, minCount: 1, limit: limit),
           limited,

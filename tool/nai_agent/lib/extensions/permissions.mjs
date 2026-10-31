@@ -3,7 +3,7 @@ import { realpath } from 'node:fs/promises';
 import { dirname, resolve, relative, isAbsolute } from 'node:path';
 
 const modes = new Set(['auto', 'ask', 'readonly', 'bypass']);
-const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'studio_search', 'ask_user', 'image_read', 'wiki_query', 'tag_query', 'block_query', 'settings_read', 'generation_prepare', 'gallery_query', 'generation_cancel', 'tool_search', 'codemode']);
+const reads = new Set(['read', 'grep', 'find', 'ls', 'studio_context', 'studio_search', 'session_history', 'ask_user', 'image_read', 'wiki_query', 'tag_query', 'tag_related', 'block_query', 'settings_read', 'generation_prepare', 'gallery_query', 'generation_cancel', 'tool_search', 'codemode']);
 const readActions = {
   prompt_set: new Set(['read']),
   snapshot: new Set(['list', 'read']),

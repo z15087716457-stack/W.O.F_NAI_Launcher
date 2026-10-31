@@ -7,6 +7,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/utils/justified_layout.dart';
 import '../../../core/utils/localization_extension.dart';
+import '../../widgets/common/themed_confirm_dialog.dart';
 import '../kit/ui_block_pill.dart';
 import '../kit/ui_colors.dart';
 import '../kit/ui_controls.dart';
@@ -37,6 +38,7 @@ class ResourceWindowPage extends StatefulWidget {
     this.viewer,
     this.galleryBuilder,
     this.galleryHeaderTrailing,
+    this.galleryFilters,
   });
 
   final ResourceWindowViewData data;
@@ -44,6 +46,7 @@ class ResourceWindowPage extends StatefulWidget {
   final Widget? viewer;
   final Widget Function(ScrollController scroll, double cell)? galleryBuilder;
   final Widget? galleryHeaderTrailing;
+  final Widget? galleryFilters;
 
   static const narrow = 780.0;
   static const tight = 620.0;
@@ -54,6 +57,7 @@ class ResourceWindowPage extends StatefulWidget {
 }
 
 class _ResourceWindowPageState extends State<ResourceWindowPage> {
+  bool _trashBusy = false;
   final _search = FocusNode();
   final _focus = FocusNode();
   final _scroll = ScrollController();
@@ -124,6 +128,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   }
 
   void _move(int delta) {
+    if (widget.data.replacing) return;
     if (widget.actions.onMove case final move?) return move(delta);
     final items = widget.data.items;
     if (items.isEmpty) return;
@@ -133,10 +138,46 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
   }
 
   void _primary() {
+    if (widget.data.replacing) return;
     final d = widget.data.detail;
     if (d == null) return;
     for (final a in d.actions) {
-      if (a.primary) return widget.actions.onAction(d.itemId, a.id);
+      if (a.primary) return _action(d.itemId, a.id);
+    }
+  }
+
+  void _action(String id, String action) {
+    if (widget.data.galleryTrash &&
+        const {'restore', 'purge'}.contains(action)) {
+      unawaited(_trash(action, id: id));
+    } else {
+      widget.actions.onAction(id, action);
+    }
+  }
+
+  Future<void> _trash(String action, {String? id}) async {
+    final perform = widget.actions.onTrash;
+    if (_trashBusy || widget.data.replacing || perform == null) return;
+    final paths = id == null ? List<String>.of(widget.data.trashPaths) : [id];
+    if (paths.isEmpty) return;
+    setState(() => _trashBusy = true);
+    try {
+      if (action == 'purge') {
+        final l = context.l10n;
+        final confirmed = await ThemedConfirmDialog.show(
+          context: context,
+          title: l.localGallery_deleteForever,
+          content: l.localGallery_deleteForeverConfirm(paths.length),
+          confirmText: l.localGallery_deleteForever,
+          cancelText: l.common_cancel,
+          type: ThemedConfirmDialogType.danger,
+          icon: Icons.delete_forever_outlined,
+        );
+        if (!confirmed || !mounted) return;
+      }
+      await perform(action, paths);
+    } finally {
+      if (mounted) setState(() => _trashBusy = false);
     }
   }
 
@@ -180,6 +221,7 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
                           tight: tight,
                         ),
                         _Toolbar(
+                          hideGalleryNai: widget.galleryFilters != null,
                           data: widget.data,
                           actions: widget.actions,
                           narrow: narrow,
@@ -204,29 +246,107 @@ class _ResourceWindowPageState extends State<ResourceWindowPage> {
                                       data: widget.data,
                                       trailing: widget.galleryHeaderTrailing,
                                     ),
-                                    Expanded(
-                                      child:
-                                          widget.data.kind ==
-                                                  FloatingResourceKind
-                                                      .gallery &&
-                                              widget.galleryBuilder != null
-                                          ? widget.galleryBuilder!(
-                                              _scroll,
-                                              _cell ?? widget.data.cellSize,
-                                            )
-                                          : _Wall(
-                                              data: widget.data,
-                                              actions: widget.actions,
-                                              scroll: _scroll,
-                                              cell:
-                                                  _cell ?? widget.data.cellSize,
+                                    if (widget.galleryFilters != null &&
+                                        widget.data.kind ==
+                                            FloatingResourceKind.gallery &&
+                                        !widget.data.galleryTrash)
+                                      widget.galleryFilters!,
+                                    if (widget.data.galleryTrash)
+                                      Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          14,
+                                          0,
+                                          14,
+                                          8,
+                                        ),
+                                        child: Row(
+                                          spacing: 6,
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                context
+                                                    .l10n
+                                                    .localGallery_trashHint,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: UiText.sans(
+                                                  11.5,
+                                                  color: c.muted,
+                                                ),
+                                              ),
                                             ),
+                                            UiBtn(
+                                              key: const Key(
+                                                'rw-trash-restore-all',
+                                              ),
+                                              size: UiBtnSize.small,
+                                              onTap:
+                                                  _trashBusy ||
+                                                      widget.data.replacing
+                                                  ? null
+                                                  : () => unawaited(
+                                                      _trash('restore'),
+                                                    ),
+                                              children: [
+                                                Text(
+                                                  context
+                                                      .l10n
+                                                      .localGallery_trashRestoreAll,
+                                                ),
+                                              ],
+                                            ),
+                                            UiBtn(
+                                              key: const Key(
+                                                'rw-trash-purge-all',
+                                              ),
+                                              size: UiBtnSize.small,
+                                              color: c.error,
+                                              onTap:
+                                                  _trashBusy ||
+                                                      widget.data.replacing
+                                                  ? null
+                                                  : () => unawaited(
+                                                      _trash('purge'),
+                                                    ),
+                                              children: [
+                                                Text(
+                                                  context
+                                                      .l10n
+                                                      .localGallery_trashDeleteAll,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    Expanded(
+                                      child: IgnorePointer(
+                                        ignoring: widget.data.replacing,
+                                        child:
+                                            widget.data.kind ==
+                                                    FloatingResourceKind
+                                                        .gallery &&
+                                                widget.galleryBuilder != null
+                                            ? widget.galleryBuilder!(
+                                                _scroll,
+                                                _cell ?? widget.data.cellSize,
+                                              )
+                                            : _Wall(
+                                                data: widget.data,
+                                                actions: widget.actions,
+                                                scroll: _scroll,
+                                                cell:
+                                                    _cell ??
+                                                    widget.data.cellSize,
+                                              ),
+                                      ),
                                     ),
                                     if (widget.data.detail case final detail?)
                                       _DetailBar(
                                         data: widget.data,
                                         detail: detail,
                                         actions: widget.actions,
+                                        onAction: _action,
                                         narrow: narrow,
                                       ),
                                   ],
@@ -529,10 +649,12 @@ class _Toolbar extends StatefulWidget {
     required this.cell,
     required this.onCell,
     required this.onCellEnd,
+    required this.hideGalleryNai,
   });
   final ResourceWindowViewData data;
   final ResourceWindowActions actions;
   final bool narrow;
+  final bool hideGalleryNai;
   final FocusNode focus;
   final double cell;
   final ValueChanged<double> onCell, onCellEnd;
@@ -579,7 +701,8 @@ class _ToolbarState extends State<_Toolbar> {
             ),
           ),
           for (final (i, chip) in d.chips.indexed)
-            if (!widget.narrow || i < 2)
+            if ((!widget.hideGalleryNai || chip.id != 'nai') &&
+                (!widget.narrow || i < 2))
               UiFilterChip(
                 key: Key('rw-chip-${chip.id}'),
                 label: chip.label,
@@ -921,6 +1044,7 @@ class _Wall extends StatelessWidget {
   Widget _galleryCard(ResourceItem it, double w, double h) => _wrap(
     it,
     ResourceGalleryCard(
+      libraryReadOnly: data.galleryTrash,
       key: Key('rw-item-${it.id}'),
       item: it,
       width: w,
@@ -1254,11 +1378,13 @@ class _DetailBar extends StatelessWidget {
     required this.detail,
     required this.actions,
     required this.narrow,
+    required this.onAction,
   });
   final ResourceWindowViewData data;
   final ResourceDetail detail;
   final ResourceWindowActions actions;
   final bool narrow;
+  final void Function(String id, String action) onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -1365,7 +1491,7 @@ class _DetailBar extends StatelessWidget {
                 UiBtn(
                   key: Key('rw-act-${a.id}'),
                   tone: a.primary ? UiBtnTone.primary : UiBtnTone.normal,
-                  onTap: () => actions.onAction(detail.itemId, a.id),
+                  onTap: () => onAction(detail.itemId, a.id),
                   children: [
                     if (a.glyph != null)
                       UiGlyph(

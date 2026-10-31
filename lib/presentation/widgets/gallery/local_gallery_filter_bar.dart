@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/gallery/gallery_group_mode.dart';
+import '../../../data/services/gallery/gallery_filter_service.dart';
 import '../../../data/services/gallery/gallery_nai_only_store.dart';
 import '../../providers/local_gallery_provider.dart';
 import 'date_range_picker_dialog.dart';
@@ -26,19 +27,68 @@ class LocalGalleryFilterBar extends ConsumerWidget {
     final state = ref.watch(localGalleryChromeStateProvider);
     final criteria = state.filterCriteria;
     final notifier = ref.read(localGalleryNotifierProvider.notifier);
+    return GalleryFilterBar(
+      criteria: criteria,
+      showClearFilters: state.hasSessionFilters,
+      groupMode:
+          state.isTimeSorted && state.browseScope != GalleryBrowseScope.recent
+          ? state.groupMode
+          : null,
+      onNaiOnly: (value) {
+        notifier.setNaiOnly(value);
+        unawaited(const GalleryNaiOnlyStore().save(value));
+        if (!value && criteria.filterModels.isNotEmpty) {
+          notifier.setFilterModels(const []);
+        }
+      },
+      onModels: (ids) {
+        notifier.setFilterModels(ids);
+        if (ids.isNotEmpty && !criteria.naiOnly) {
+          notifier.setNaiOnly(true);
+          unawaited(const GalleryNaiOnlyStore().save(true));
+        }
+      },
+      onDateRange: notifier.setDateRange,
+      onRemoveTag: notifier.removeSelectedTag,
+      onClear: notifier.clearAllFilters,
+      onGroupMode: (mode) {
+        notifier.setGroupMode(mode);
+        unawaited(const GalleryGroupModeStore().save(mode));
+      },
+    );
+  }
+}
+
+/// Shared gallery controls. Data and persistence belong to each window's owner.
+class GalleryFilterBar extends StatelessWidget {
+  const GalleryFilterBar({
+    super.key,
+    required this.criteria,
+    required this.onNaiOnly,
+    required this.onModels,
+    required this.onDateRange,
+    required this.onRemoveTag,
+    required this.onClear,
+    required this.onGroupMode,
+    this.showClearFilters = false,
+    this.groupMode,
+  });
+  final FilterCriteria criteria;
+  final ValueChanged<bool> onNaiOnly;
+  final ValueChanged<List<String>> onModels;
+  final void Function(DateTime?, DateTime?) onDateRange;
+  final ValueChanged<String> onRemoveTag;
+  final VoidCallback onClear;
+  final ValueChanged<GalleryGroupMode> onGroupMode;
+  final bool showClearFilters;
+  final GalleryGroupMode? groupMode;
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final match = GalleryNaiVersions.match(criteria.filterModels);
-
-    void selectModels(List<String> ids) {
-      notifier.setFilterModels(ids);
-      if (ids.isNotEmpty && !criteria.naiOnly) {
-        notifier.setNaiOnly(true);
-        unawaited(const GalleryNaiOnlyStore().save(true));
-      }
-    }
-
     final chips = <Widget>[
       GalleryFilterChip(
         key: const Key('gallery-filter-nai'),
@@ -46,14 +96,7 @@ class LocalGalleryFilterBar extends ConsumerWidget {
         tooltip: l10n.localGallery_naiOnlyTooltip,
         active: criteria.naiOnly,
         icon: criteria.naiOnly ? StudioIcons.galleryCheck : null,
-        onTap: () {
-          final next = !criteria.naiOnly;
-          notifier.setNaiOnly(next);
-          unawaited(const GalleryNaiOnlyStore().save(next));
-          if (!next && criteria.filterModels.isNotEmpty) {
-            notifier.setFilterModels(const <String>[]);
-          }
-        },
+        onTap: () => onNaiOnly(!criteria.naiOnly),
       ),
       Padding(
         padding: const EdgeInsets.only(left: 4, right: 2),
@@ -69,21 +112,21 @@ class LocalGalleryFilterBar extends ConsumerWidget {
         tooltip: l10n.localGallery_naiVersionFilterTooltip,
         allLabel: l10n.localGallery_allVersions,
         allVariantsLabel: l10n.localGallery_allVariants,
-        onSelectAll: () => notifier.setFilterModels(const <String>[]),
+        onSelectAll: () => onModels(const <String>[]),
         onSelectVersion: (version, variant) {
           final ids = switch (variant) {
             'F' => GalleryNaiVersions.fullIds[version]!,
             'C' => GalleryNaiVersions.curatedIds[version]!,
             _ => GalleryNaiVersions.modelIds[version]!,
           };
-          selectModels(ids);
+          onModels(ids);
         },
       ),
       _DateRangeChip(
         start: criteria.dateStart,
         end: criteria.displayDateEnd,
-        onPick: (result) => notifier.setDateRange(result.start, result.end),
-        onClear: () => notifier.setDateRange(null, null),
+        onPick: (result) => onDateRange(result.start, result.end),
+        onClear: () => onDateRange(null, null),
       ),
       for (final tag in criteria.selectedTags)
         GalleryFilterChip(
@@ -92,13 +135,13 @@ class LocalGalleryFilterBar extends ConsumerWidget {
           tooltip: l10n.localGallery_tagIntersection,
           active: true,
           icon: StudioIcons.galleryTag,
-          onTap: () => notifier.removeSelectedTag(tag),
-          onClear: () => notifier.removeSelectedTag(tag),
+          onTap: () => onRemoveTag(tag),
+          onClear: () => onRemoveTag(tag),
         ),
-      if (state.hasSessionFilters)
+      if (showClearFilters)
         TextButton(
           key: const Key('gallery-filter-clear'),
-          onPressed: notifier.clearAllFilters,
+          onPressed: onClear,
           style: TextButton.styleFrom(
             minimumSize: const Size(0, 28),
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -126,16 +169,12 @@ class LocalGalleryFilterBar extends ConsumerWidget {
               ),
             ),
           ),
-          if (state.isTimeSorted &&
-              state.browseScope != GalleryBrowseScope.recent)
+          if (groupMode != null)
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: GalleryGroupModeButton(
-                value: state.groupMode,
-                onChanged: (mode) {
-                  notifier.setGroupMode(mode);
-                  unawaited(const GalleryGroupModeStore().save(mode));
-                },
+                value: groupMode!,
+                onChanged: onGroupMode,
               ),
             ),
         ],

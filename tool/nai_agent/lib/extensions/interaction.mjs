@@ -37,8 +37,8 @@ function studioProjection(event, native) {
   else if (tool === 'wiki_query') projection = { pages: rows(native.pages).map(row => ({
     ...pick(row, ['tag', 'found']), body: short(row.body),
   })) };
-  else if (tool === 'studio_search') projection = { items: rows(native.items)
-    .map(row => pick(row, ['name', 'category', 'post_count', 'translation'])) };
+  else if (tool === 'studio_search' || tool === 'tag_related') projection = { items: rows(native.items)
+    .map(row => pick(row, ['name', 'tag', 'category', 'post_count', 'translation'])) };
   else if (tool === 'settings_update') {
     const fields = Array.isArray(native.applied_fields) ? native.applied_fields.filter(key => typeof key === 'string') : [];
     projection = { ...pick(native, ['ok', 'version']), applied_fields: fields,
@@ -64,7 +64,7 @@ function studioProjection(event, native) {
   const sanitized = withoutBinary(result);
   // Removing part of an undo snapshot could restore the wrong state. A change
   // projection containing binary is omitted atomically instead of half-kept.
-  if (!['tag_query', 'wiki_query', 'studio_search'].includes(tool) &&
+  if (!['tag_query', 'tag_related', 'wiki_query', 'studio_search'].includes(tool) &&
       JSON.stringify(sanitized) !== JSON.stringify(result)) return undefined;
   return sanitized;
 }

@@ -51,6 +51,60 @@ ResourceWindowViewData _view(FloatingResourceKind k, [ResourceLayout? l]) =>
     );
 
 void main() {
+  testWidgets('trash stays in the gallery and purge requires confirmation', (
+    t,
+  ) async {
+    await t.runAsync(loadStudioCaptureFonts);
+    final base = _view(FloatingResourceKind.gallery);
+    final log = await _pump(
+      t,
+      ResourceWindowViewData(
+        kind: base.kind,
+        sections: base.sections,
+        items: base.items,
+        groupId: 'trash',
+        total: 2,
+        trashPaths: const ['a', 'b'],
+        detail: const ResourceDetail(
+          itemId: 'a',
+          title: 'A',
+          actions: [
+            ResourceActionSpec(id: 'restore', label: '恢复', primary: true),
+            ResourceActionSpec(id: 'purge', label: '彻底删除'),
+          ],
+        ),
+      ),
+    );
+    final context = t.element(find.byKey(const Key('rw-trash-purge-all')));
+    final l = AppLocalizations.of(context)!;
+    await t.tap(find.byKey(const Key('rw-trash-purge-all')));
+    await t.pumpAndSettle();
+    expect(log, isEmpty);
+    await t.tap(find.text(l.common_cancel));
+    await t.pumpAndSettle();
+    expect(log, isEmpty);
+    await t.tap(find.byKey(const Key('rw-trash-purge-all')));
+    await t.pumpAndSettle();
+    await t.tap(find.text(l.localGallery_deleteForever).last);
+    await t.pumpAndSettle();
+    expect(log, ['trash:purge:a,b']);
+    log.clear();
+    await t.tap(find.byKey(const Key('rw-act-restore')));
+    await t.pumpAndSettle();
+    expect(log, ['trash:restore:a']);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('gallery navigation labels are centered in the actual row', (
+    t,
+  ) async {
+    await t.runAsync(loadStudioCaptureFonts);
+    await _pump(t, _view(FloatingResourceKind.gallery));
+    final row = find.byKey(const Key('rw-group-all'));
+    final label = find.descendant(of: row, matching: find.text('全部图片'));
+    expect(t.getRect(row).height, 30);
+    expect(t.getRect(label).center.dy, closeTo(t.getRect(row).center.dy, .1));
+  });
   testWidgets('gallery grouping stays at the right edge with a short title', (
     t,
   ) async {
@@ -283,6 +337,14 @@ void main() {
     expect(find.byKey(const Key('rw-group-folder:n4r')), findsNothing);
     await t.tap(find.byKey(const Key('rw-toggle-folder:n4')));
     await t.pump();
+    await t.scrollUntilVisible(
+      find.byKey(const Key('rw-group-folder:n4r')),
+      60,
+      scrollable: find.descendant(
+        of: find.byKey(const Key('rw-side-list')),
+        matching: find.byType(Scrollable),
+      ),
+    );
     expect(find.byKey(const Key('rw-group-folder:n4r')), findsOne);
     await t.tap(find.byKey(const Key('rw-toggle-folder:lib')));
     await t.pump();

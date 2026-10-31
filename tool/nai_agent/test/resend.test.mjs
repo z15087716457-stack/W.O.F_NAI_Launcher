@@ -113,6 +113,7 @@ test('host state exposes archived current-branch messages and a real Pi compacti
     assert.equal(marker.summary,'Synthetic summary boundary');
     assert.equal(marker.tokensBefore,131000);
     assert.ok(Number.isFinite(marker.timestamp));
+    assert.equal(marker.timestamp, f.ready.messages.find(m=>m.role==='compactionSummary').timestamp);
     assert.ok(!f.ready.historyMessages.some(m=>m.timestamp===4));
     assert.equal(f.requests.length,0);
   } finally { await f.close(); }

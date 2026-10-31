@@ -563,11 +563,14 @@ class _Turn extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: 10,
         children: [
-          AgentAppear(
-            id: '${turn.id}/user',
-            enabled: last,
-            child: _userAnchor(context, turn),
-          ),
+          if (turn.user.entryId != null ||
+              turn.user.text.isNotEmpty ||
+              turn.user.images.isNotEmpty)
+            AgentAppear(
+              id: '${turn.id}/user',
+              enabled: last,
+              child: _userAnchor(context, turn),
+            ),
           if (reply != null && (reply.blocks.isNotEmpty || reply.live))
             AgentAppear(
               id: '${turn.id}/card',

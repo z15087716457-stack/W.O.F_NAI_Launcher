@@ -107,6 +107,13 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
       restoreImage: (key) async {
         await _request('restore', {'id': key});
       },
+      onViewed: widget.controller.galleryTrash
+          ? null
+          : (key) => unawaited(
+              widget.controller.runViewer(() async {
+                await _request('viewed', {'id': key});
+              }),
+            ),
     )..addListener(_changed);
     unawaited(widget.controller.runViewer(_backend.initialize));
   }
@@ -126,7 +133,7 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
       _collections = null;
       _translations.clear();
       _translationTokens.clear();
-      if (_selection != null) {
+      if (_selection != null && !widget.controller.galleryTrash) {
         unawaited(widget.controller.runViewer(_refreshCollections));
       }
     }
@@ -271,6 +278,7 @@ class _ResourceGalleryViewerState extends State<ResourceGalleryViewer> {
     final sort = GallerySortField.values.asNameMap()[resources.sortId];
     return ImageViewerPage(
       data: ViewerViewData(
+        libraryReadOnly: widget.controller.galleryTrash,
         mode: ViewerMode.gallery,
         currentKey: key,
         now: DateTime.now(),

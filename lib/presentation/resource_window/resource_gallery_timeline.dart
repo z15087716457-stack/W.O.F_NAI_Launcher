@@ -99,7 +99,13 @@ class _ResourceGalleryTimelineState extends State<ResourceGalleryTimeline> {
                 onPressed: controller.refresh,
                 child: Text(context.l10n.common_retry),
               )
-            : Text(context.l10n.floating_empty),
+            : Text(
+                controller.galleryTrash
+                    ? context.l10n.localGallery_trashEmpty
+                    : data.groupId == 'recent'
+                    ? context.l10n.localGallery_recentViewsEmpty
+                    : context.l10n.floating_empty,
+              ),
       );
     }
     return LayoutBuilder(
@@ -184,6 +190,7 @@ class _ResourceGalleryTimelineState extends State<ResourceGalleryTimeline> {
                                 builder: (context) {
                                   final item = controller.galleryItem(index);
                                   final card = ResourceGalleryCard(
+                                    libraryReadOnly: controller.galleryTrash,
                                     key: Key('rw-item-${item.id}'),
                                     item: item,
                                     width: layout.tiles[index].width,

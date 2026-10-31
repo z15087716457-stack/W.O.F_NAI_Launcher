@@ -77,6 +77,152 @@ void main() {
       expect(identical(cached, agentTagDiff('a, b, c', 'a, new, c')), isTrue);
     },
   );
+  test(
+    'full branch survives compaction while live messages and model context stay separate',
+    () async {
+      final imageData = base64Encode(
+        img.encodePng(img.Image(width: 3, height: 2)),
+      );
+      final oldUser = <String, dynamic>{
+        'role': 'user',
+        'timestamp': 1,
+        'content': [
+          {'type': 'text', 'text': 'Old requirement'},
+          {'type': 'image', 'mimeType': 'image/png', 'data': imageData},
+        ],
+      };
+      final compact = <String, dynamic>{
+        'role': 'compactionSummary',
+        'timestamp': 5,
+        'summary': 'Summary',
+        'tokensBefore': 100,
+      };
+      runtime.historyMessages = [
+        oldUser,
+        {
+          'role': 'assistant',
+          'timestamp': 2,
+          'content': [
+            {'type': 'text', 'text': 'Old answer'},
+          ],
+        },
+        {'role': 'user', 'timestamp': 3, 'content': 'Second requirement'},
+        {
+          'role': 'assistant',
+          'timestamp': 4,
+          'content': [
+            {'type': 'text', 'text': 'Persisted reply'},
+          ],
+        },
+        compact,
+        {'role': 'user', 'timestamp': 6, 'content': 'Newest requirement'},
+      ];
+      runtime.messages = [
+        compact,
+        {
+          'role': 'assistant',
+          'timestamp': 4,
+          'content': [
+            {'type': 'text', 'text': 'Live replacement'},
+          ],
+        },
+        runtime.historyMessages.last,
+        {
+          'role': 'assistant',
+          'timestamp': 7,
+          'content': [
+            {'type': 'text', 'text': 'Streaming answer'},
+          ],
+        },
+      ];
+      runtime.entries = [
+        {'id': 'old-entry', 'role': 'user', 'timestamp': 1},
+        {'id': 'second-entry', 'role': 'user', 'timestamp': 3},
+        {'id': 'new-entry', 'role': 'user', 'timestamp': 6},
+      ];
+      final context = List<Map<String, dynamic>>.of(runtime.messages);
+      mapper.map(runtime);
+      await resources.settle();
+      final mapped = mapper.map(runtime);
+      expect(mapped.turns.map((turn) => turn.user.text), [
+        'Old requirement',
+        'Second requirement',
+        'Newest requirement',
+      ]);
+      expect(
+        mapped.turns[1].reply!.blocks
+            .whereType<AgentCompactionBlock>()
+            .single
+            .summary,
+        'Summary',
+      );
+      expect(
+        mapped.turns.expand(
+          (turn) =>
+              turn.reply?.blocks.whereType<AgentCompactionBlock>() ??
+              const <AgentCompactionBlock>[],
+        ),
+        hasLength(1),
+      );
+      expect(mapped.turns.first.user.entryId, 'old-entry');
+      final imageId = mapped.turns.first.user.images.single.id;
+      expect(agentUserImagePartIndexes(runtime, 'old-entry', [imageId]), [1]);
+      expect(runtime.messages, context);
+      expect(
+        runtime.messages.any((message) => identical(message, oldUser)),
+        false,
+      );
+      expect(runtime.userMessageForEntry('foreign-entry'), isNull);
+    },
+  );
+
+  test('repeated summaries retain each original compaction boundary', () {
+    final first = <String, dynamic>{
+      'role': 'compactionSummary',
+      'timestamp': 3,
+      'summary': 'Same summary',
+      'tokensBefore': 100,
+    };
+    final second = <String, dynamic>{
+      ...first,
+      'timestamp': 6,
+      'tokensBefore': 200,
+    };
+    runtime.historyMessages = [
+      {'role': 'user', 'timestamp': 1, 'content': 'First turn'},
+      first,
+      {'role': 'user', 'timestamp': 4, 'content': 'Second turn'},
+      second,
+    ];
+    runtime.messages = [
+      {...second},
+      {'role': 'user', 'timestamp': 7, 'content': 'Third turn'},
+    ];
+    expect(runtime.displayMessages, [
+      runtime.historyMessages[0],
+      first,
+      runtime.historyMessages[2],
+      second,
+      runtime.messages.last,
+    ]);
+    final turns = mapper.map(runtime).turns;
+    expect(turns.map((turn) => turn.user.text), [
+      'First turn',
+      'Second turn',
+      'Third turn',
+    ]);
+    expect(
+      turns
+          .expand(
+            (turn) =>
+                turn.reply?.blocks.whereType<AgentCompactionBlock>() ??
+                const <AgentCompactionBlock>[],
+          )
+          .map((block) => block.tokensBefore),
+      [100, 200],
+    );
+  });
+
   Map<String, dynamic> call(
     String id,
     String name, [

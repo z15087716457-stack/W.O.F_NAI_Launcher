@@ -841,7 +841,7 @@ class _HDash extends CustomPainter {
   bool shouldRepaint(_HDash o) => o.color != color;
 }
 
-/// 键值列表（原型 `.kvs`）：下沉底、圆角 8；每行“键 | 值 | ×”，可直接改。
+/// 键值列表：名称与删除按钮一行，值独占下一行。
 class ProviderKeyValues extends StatelessWidget {
   const ProviderKeyValues({
     super.key,
@@ -884,64 +884,71 @@ class ProviderKeyValues extends StatelessWidget {
             if (i > 0) Container(height: 1, color: c.rowLine),
             Padding(
               key: Key('$keyPrefix-$i'),
-              padding: const EdgeInsets.fromLTRB(4, 2, 4, 2),
-              child: Row(
-                spacing: 6,
+              padding: const EdgeInsets.all(4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 4,
                 children: [
-                  if (tag != null)
-                    Container(
-                      key: Key('$keyPrefix-$i-tag'),
-                      height: 18,
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      margin: const EdgeInsets.only(left: 2),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: (json ? c.accent : c.ok).withValues(alpha: .10),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        tag!,
-                        style: UiText.sans(
-                          10.5,
-                          weight: FontWeight.w600,
-                          color: json ? c.accent : c.ok,
-                          height: 1.2,
+                  Row(
+                    spacing: 6,
+                    children: [
+                      if (tag != null)
+                        Container(
+                          key: Key('$keyPrefix-$i-tag'),
+                          height: 18,
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          margin: const EdgeInsets.only(left: 2),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: (json ? c.accent : c.ok).withValues(
+                              alpha: .10,
+                            ),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            tag!,
+                            style: UiText.sans(
+                              10.5,
+                              weight: FontWeight.w600,
+                              color: json ? c.accent : c.ok,
+                              height: 1.2,
+                            ),
+                          ),
+                        ),
+                      Expanded(
+                        child: _Bare(
+                          key: Key('$keyPrefix-$i-key'),
+                          value: kv.key,
+                          hint: json
+                              ? l.modelOverrides_fieldName
+                              : l.mp_headerName,
+                          bold: true,
+                          error: errors.contains(i),
+                          onChanged: (v) => onChanged([
+                            for (final (j, x) in items.indexed)
+                              j == i ? ProviderKeyValue(v, x.value) : x,
+                          ]),
                         ),
                       ),
-                    ),
-                  Expanded(
-                    flex: 4,
-                    child: _Bare(
-                      key: Key('$keyPrefix-$i-key'),
-                      value: kv.key,
-                      hint: json ? l.modelOverrides_fieldName : l.mp_headerName,
-                      bold: true,
-                      error: errors.contains(i),
-                      onChanged: (v) => onChanged([
-                        for (final (j, x) in items.indexed)
-                          j == i ? ProviderKeyValue(v, x.value) : x,
-                      ]),
-                    ),
+                      ProviderTinyBtn(
+                        key: Key('$keyPrefix-$i-remove'),
+                        glyph: UiGlyphs.close,
+                        glyphSize: 12,
+                        tooltip: l.modelOverrides_removeItem,
+                        onTap: () => onChanged([...items]..removeAt(i)),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    flex: 7,
-                    child: _Bare(
-                      key: Key('$keyPrefix-$i-value'),
-                      value: kv.value,
-                      hint: json ? l.modelOverrides_valueJson : l.mp_value,
-                      error: errors.contains(i),
-                      onChanged: (v) => onChanged([
-                        for (final (j, x) in items.indexed)
-                          j == i ? ProviderKeyValue(x.key, v) : x,
-                      ]),
-                    ),
-                  ),
-                  ProviderTinyBtn(
-                    key: Key('$keyPrefix-$i-remove'),
-                    glyph: UiGlyphs.close,
-                    glyphSize: 12,
-                    tooltip: l.modelOverrides_removeItem,
-                    onTap: () => onChanged([...items]..removeAt(i)),
+                  _Bare(
+                    key: Key('$keyPrefix-$i-value'),
+                    value: kv.value,
+                    hint: json ? l.modelOverrides_valueJson : l.mp_value,
+                    error: errors.contains(i),
+                    multiline: true,
+                    onChanged: (v) => onChanged([
+                      for (final (j, x) in items.indexed)
+                        j == i ? ProviderKeyValue(x.key, v) : x,
+                    ]),
                   ),
                 ],
               ),
@@ -953,7 +960,7 @@ class ProviderKeyValues extends StatelessWidget {
   }
 }
 
-/// 键值行里的无框输入：26 高，聚焦时才出描边。
+/// 名称单行，值随内容长到六行；外框随实际行高留出上下内边距。
 class _Bare extends StatefulWidget {
   const _Bare({
     super.key,
@@ -962,12 +969,14 @@ class _Bare extends StatefulWidget {
     this.hint,
     this.bold = false,
     this.error = false,
+    this.multiline = false,
   });
   final String value;
   final ValueChanged<String> onChanged;
   final String? hint;
   final bool bold;
   final bool error;
+  final bool multiline;
 
   @override
   State<_Bare> createState() => _BareState();
@@ -1005,12 +1014,11 @@ class _BareState extends State<_Bare> {
       12,
       weight: widget.bold ? FontWeight.w500 : FontWeight.w400,
       color: widget.bold ? c.ink : c.muted,
-      height: 1.2,
+      height: 1.45,
     );
     return Container(
-      height: 26,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      // 文字垂直居中（以前贴顶，整行看着偏上）。
+      constraints: BoxConstraints(minHeight: widget.multiline ? 32 : 30),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       alignment: Alignment.centerLeft,
       decoration: BoxDecoration(
         color: _focus.hasFocus ? c.card : null,
@@ -1029,7 +1037,10 @@ class _BareState extends State<_Bare> {
         style: style,
         cursorColor: c.accent,
         cursorHeight: 13,
-        textAlignVertical: TextAlignVertical.center,
+        minLines: 1,
+        maxLines: widget.multiline ? 6 : 1,
+        keyboardType: widget.multiline ? TextInputType.multiline : null,
+        textAlignVertical: TextAlignVertical.top,
         decoration: uiBareDecoration(
           hintText: widget.hint,
           hintStyle: style.copyWith(color: c.faint),

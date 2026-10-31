@@ -40,6 +40,10 @@ class TagSemanticsStore {
             await databasePath(),
             options: OpenDatabaseOptions(
               version: 1,
+              onConfigure: (db) async {
+                await db.rawQuery('PRAGMA journal_mode=WAL');
+                await db.execute('PRAGMA busy_timeout=2000');
+              },
               onCreate: (db, _) async {
                 await db.execute('''CREATE TABLE tag_semantics(
               tag TEXT PRIMARY KEY, core_zh TEXT NOT NULL,

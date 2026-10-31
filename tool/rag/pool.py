@@ -260,27 +260,45 @@ class VectorPool:
 
 class CollectionAnn:
     """A source-filtered view of one ANN; small scopes use exact pool rows."""
-    def __init__(self,pool,name): self.pool=pool;self.name=name;self.keys=set()
+    def __init__(self,pool,name):
+        self.pool=pool;self.name=name;self.keys=set()
+        self._categories = {}; self._category_version = None
     def refresh(self):
         self.keys={r[0] for r in self.pool.db.execute('SELECT id FROM pool_documents WHERE collection=?',(self.name,))}
+        self._categories.clear()
     def __len__(self): return len(self.keys)
     def __contains__(self,key): return key in self.keys
-    def add(self,key,vector): self.pool.writable().add(key,vector);self.keys.add(key)
-    def remove(self,key): self.pool.writable().remove(key);self.keys.discard(key)
+    def add(self,key,vector):
+        self.pool.writable().add(key,vector);self.keys.add(key);self._categories.clear()
+    def remove(self,key):
+        self.pool.writable().remove(key);self.keys.discard(key);self._categories.clear()
     def search(self,vector,count,*,categories=None):
         import numpy as np
         eligible = self.keys
         if categories is not None:
-            if not categories:return SimpleNamespace(keys=[])
-            eligible = {r[0] for r in self.pool.db.execute(
-                'SELECT id FROM pool_documents WHERE collection=? AND category IN ('+','.join('?' for _ in categories)+')',
-                (self.name,*categories))}
+            if not categories:return SimpleNamespace(keys=[],distances=[])
+            version = self.pool.db.execute('PRAGMA data_version').fetchone()[0]
+            if version != self._category_version:
+                self._categories.clear(); self._category_version = version
+            categories = tuple(sorted(set(categories)))
+            if categories not in self._categories:
+                self._categories[categories] = {r[0] for r in self.pool.db.execute(
+                    'SELECT id FROM pool_documents WHERE collection=? AND category IN ('+','.join('?' for _ in categories)+')',
+                    (self.name,*categories))}
+            eligible = self._categories[categories]
         count=min(count,len(eligible))
-        if not count:return SimpleNamespace(keys=[])
+        if not count:return SimpleNamespace(keys=[],distances=[])
         if len(eligible)>16384:
             overfetch=min(len(self.pool.ann),max(count,int(count*len(self.pool.ann)/len(eligible)*2)))
-            candidates=[int(k) for k in self.pool.ann.search(vector,overfetch).keys if int(k) in eligible]
-            if len(candidates)>=count:return SimpleNamespace(keys=candidates[:count])
+            # Category membership is correlated with the query, not uniform.
+            # Enlarge the global recall before paying for an exact scope scan.
+            for _ in range(4):
+                matches=self.pool.ann.search(vector,overfetch)
+                candidates=[(int(k),float(d)) for k,d in zip(matches.keys,matches.distances) if int(k) in eligible]
+                if len(candidates)>=count:return SimpleNamespace(
+                    keys=[key for key,_ in candidates[:count]],distances=[distance for _,distance in candidates[:count]])
+                if overfetch == len(self.pool.ann): break
+                overfetch=min(len(self.pool.ann),max(256,overfetch*8))
         # Exact filtered ranking avoids losing tiny sources to a large global
         # top-k. Read in bounded batches, never copy the entire pool in memory.
         import heapq
@@ -294,4 +312,4 @@ class CollectionAnn:
             matrix=np.stack([np.frombuffer(row[1],dtype=np.float32) for row in batch])
             scores=(matrix@vector)/np.maximum(np.linalg.norm(matrix,axis=1),1e-8)
             best=heapq.nlargest(count,(*best,*((float(score),row[0]) for score,row in zip(scores,batch))))
-        return SimpleNamespace(keys=[key for _,key in best])
+        return SimpleNamespace(keys=[key for _,key in best],distances=[1-score for score,_ in best])

@@ -90,6 +90,16 @@ abstract final class ResourceWindowFixture {
               count: 163,
               icon: ResourceGroupIcon.favorite,
             ),
+            ResourceGroup(
+              id: 'recent',
+              label: '最近浏览',
+              icon: ResourceGroupIcon.recent,
+            ),
+            ResourceGroup(
+              id: 'trash',
+              label: '删除池',
+              icon: ResourceGroupIcon.trash,
+            ),
           ],
         ),
         ResourceGroupSection(
