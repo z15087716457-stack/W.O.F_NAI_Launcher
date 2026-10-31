@@ -1,16 +1,19 @@
 # Prompt blocks
 
-Read `studio_context(scope=draft)` for prompt documents and markers, `block_query(id)` for one library entry, `block_query(kind=tree)` for folders, collections and `library_version`. For a one-off block use `instance_create`; do not create a library entry just to insert it.
+Read documents/markers with `studio_context(scope=draft)`, library entries with `block_query(id)`, folders/collections with `block_query(kind=tree)`.
+
+Scopes: `main`, `negative`, `char:<ID>:pos|neg`. Versions: `expected_version` from `block_query(id)` for update/delete/insert; `expected_library_version` from `block_query(kind=tree)` for folder/collection writes, block_reorder and instance_promote; `expected_draft_version` from `studio_context(scope=draft)` for insert and instance actions.
 
 ## Instances
 
+- `instance_create`: `kind=temporary` with `instance.title/content`, or `kind=translation` with `translation.source/zh`. Place by `anchor` (before/after) or `offset`; default append. `instance_convert` uses 1..64 segments with replace anchors, preserving generation text in one undo.
 - Types: `temporary` (has `temp`), `translation`, otherwise a library reference. Library-free instances have `blockId:""`. Missing `needsReview` means false; missing `languageCode` means `zh`.
-- Temporary: `title` 1..40 characters; `color` `#RRGGBB`/`#AARRGGBB`; `icon` from the list below; omitted color/icon use native defaults. Only temporary blocks carry content; translations carry `source` (sent to generation) and `zh` (reading only, any `language_code` of `zh`, `zh-TW`, `en`, `ja`, `ko`).
-- A temporary block can contain `instance.translations:[{source,zh,language_code?}]` (normally one whole-content translation; up to 64 in content order). Source must match a complete substring; it stays the generation text. Empty arrays clear readings. Existing complete translation blocks are preserved when converted into one temporary block. Content edits keep only readings whose sources still match; promotion preserves the combined reading.
+- Temporary fields: `title`, `color`, `icon` (keys below); omitted color/icon use native defaults. Translations carry `source` (sent to generation) and `zh` (reading only), with `language_code` from the schema.
+- Temporary blocks accept `instance.translations:[{source,zh,language_code?}]`, usually one whole-content translation. Sources match complete substrings in content order; empty arrays clear readings. Conversion preserves complete translation blocks, content edits retain matching readings, promotion preserves the combined reading.
 - Create/convert options: `enabled` only. Library-free blocks have no negative side: create a separate block in the negative scope.
-- Convert segments need `title` (temporary) or `zh` (translation); the selected text becomes the content/source. A failing segment is reported by number and nothing is written.
-- `instance_update`: content edits make that occurrence a temporary block; display fields only on library-free temps; translation edits cannot mix with content. A source-only change marks the reading for review.
-- A library-free temp has nothing to revert to: unwrap or promote it. Promote defaults to the temp's title/color/icon.
+- Convert segments need `title` (temporary) or `zh` (translation); selected text fills content/source.
+- `instance_update`: content edits change that occurrence into a temporary block, leaving the library entry intact. Display fields apply to library-free temps; translation and content edits are separate. Source-only changes mark readings for review.
+- `instance_unwrap` expands the generation text; `instance_delete` removes the occurrence. `instance_promote` saves a temporary block to the library, defaulting to its title/color/icon.
 
 ## Merging and splitting
 
@@ -32,6 +35,8 @@ No dedicated actions; compose them. Each write returns the next `draft_version`,
 ```
 
 ## Library
+
+`create(changes.title/content)`, `update(id, changes)`, `delete(id)` and `insert(id)` manage entries and insert them into a prompt.
 
 `changes.generationSettings`: model, width, height, steps, scale, sampler, noiseSchedule, cfgRescale, qualityPreset (`standard/light/none`), ucPreset (`0/1/2/3/7/8/9`), qualityCustomBlockId/ucCustomBlockId (library IDs replacing native presets). Content edits clear obsolete atom pools unless new atoms are given.
 

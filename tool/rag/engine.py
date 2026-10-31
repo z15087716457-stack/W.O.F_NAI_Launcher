@@ -4,6 +4,7 @@ Sources are opened read-only. Only an explicit confirmed plan creates vectors.
 Draft windows are query data and are never written into the index or diagnostics.
 """
 import hashlib
+from functools import lru_cache
 import json
 import math
 import os
@@ -20,6 +21,18 @@ def readonly(path, *, timeout=5.0):
     return sqlite3.connect(Path(path).resolve(strict=True).as_uri() + '?mode=ro', uri=True, timeout=timeout)
 
 
+@lru_cache(maxsize=32)
+def _database_digest(path, stamp):
+    # The physical stamp is a cache key, not the persisted source identity.
+    db = readonly(path)
+    try:
+        # Pin the visible SQLite snapshot, including committed WAL pages.
+        db.execute('BEGIN')
+        db.execute('SELECT name FROM sqlite_master LIMIT 1').fetchone()
+        return hashlib.sha256(db.serialize()).hexdigest()
+    finally: db.close()
+
+
 class Sources:
     representation_version = 'tag-profile-v2'
 
@@ -29,17 +42,20 @@ class Sources:
         self.optional_supplements = optional_supplements
         self.degraded = False
 
-    def _file_signature(self, paths):
+    def _file_stamp(self, paths):
         records = []
         for name in paths:
             if not name: continue
             for p in (Path(name), Path(name + '-wal')):
                 if p.exists():
                     s = p.stat()
-                    # Read-only opens can create empty WALs without changing
-                    # content. Keep nonempty WALs in the change detector.
+                    # Empty WAL creation does not invalidate cached snapshots.
                     if p.name.endswith('-wal') and not s.st_size: continue
                     records.append((str(p), s.st_size, s.st_mtime_ns))
+        return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
+
+    def _file_signature(self, paths):
+        records = [(name, _database_digest(name, self._file_stamp([name]))) for name in paths if name]
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
 
     def change_state(self):
@@ -51,9 +67,9 @@ class Sources:
             finally: db.close()
         return {'base':self._file_signature(self.paths[:4]), 'revision':revision}
 
-    def signature(self):
-        state = self.change_state()
-        if state['revision'] is None: return self._file_signature(self.paths)
+    def signature(self, state=None):
+        if state is None: state = self.change_state()
+        if state['revision'] is None: return self._file_stamp(self.paths)
         return hashlib.sha256(json.dumps([state,self.paths[4]]).encode()).hexdigest()
 
     def changed_names(self, metadata):
@@ -280,14 +296,16 @@ class Engine:
                 'paused': metadata.get('paused') == '1', 'skipped': int(metadata.get('skipped','0'))}
 
     def preview(self):
-        self.plan = {'source_signature': self.sources.signature(),
+        state = self.sources.change_state() if isinstance(self.sources,Sources) else None
+        self.plan = {'source_signature': self.sources.signature(state) if state is not None else self.sources.signature(),
                      'model_fingerprint': self.models.fingerprint,
                      'total': self.sources.count(), 'expires': time.monotonic() + 1800}
-        if isinstance(self.sources,Sources):
+        if state is not None:
+            self.plan['source_state'] = state
             changes = self.sources.changed_names(dict(self.db.execute('SELECT key,value FROM metadata')))
             if changes is not None: self.plan['incremental_names'] = changes
         self.plan['plan_id'] = hashlib.sha256(json.dumps(self.plan, sort_keys=True).encode()).hexdigest()
-        return {k: v for k, v in self.plan.items() if k not in ('expires','incremental_names')}
+        return {k: v for k, v in self.plan.items() if k not in ('expires','incremental_names','source_state')}
 
     def embed_rows(self, rows):
         return self.models.embed([item['text'] for item in rows])
@@ -367,7 +385,7 @@ class Engine:
                     self.db.execute("INSERT OR REPLACE INTO metadata VALUES('ann_generation',?)",(str(self._ann_generation),))
                 self.db.execute("INSERT OR REPLACE INTO metadata VALUES('complete_signature',?)", (signature,))
                 if isinstance(self.sources,Sources):
-                    state = self.sources.change_state()
+                    state = plan['source_state']
                     self.db.execute("INSERT OR REPLACE INTO metadata VALUES('source_base',?)", (state['base'],))
                     if state['revision'] is not None:
                         self.db.execute("INSERT OR REPLACE INTO metadata VALUES('semantic_revision',?)", (str(state['revision']),))

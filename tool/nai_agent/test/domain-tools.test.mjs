@@ -35,7 +35,7 @@ test('studio_search schema exposes only supported sources and bounded inputs', (
   // dates) are additionally enforced by the production Dart binding.
 });
 
-test('gallery batch schema exposes bounded IDs and per-image versions with batching guidance', () => {
+test('gallery batch schema exposes bounded IDs and per-image versions with batching guidance', async () => {
   const tool = domainTools.find(tool => tool.name === 'gallery_manage');
   const schema = tool.parameters;
   assert.equal(schema.properties.image_ids.maxItems, 50);
@@ -50,14 +50,16 @@ test('gallery batch schema exposes bounded IDs and per-image versions with batch
   assert.equal(Value.Check(schema, {action:'move_file',expected_image_versions:{'gallery:1':42}}), false);
   assert.equal(Value.Check(schema, {action:'folder_delete_empty',folder_ids:[]}), false);
   assert.equal(Value.Check(schema, {action:'folder_delete_empty',folder_ids:Array(51).fill('a')}), false);
-  assert.ok(tool.description.length <= 1300);
+  assert.ok(tool.description.length <= 600);
   assert.match(tool.description, /ONE Studio confirmation per call/);
-  assert.match(tool.description, /never loop single-image calls/);
-  assert.match(tool.description, /only 1\.\.20 image_ids/);
+  assert.match(tool.description, /references\/gallery\.md/);
+  const guide = await readFile(new URL('../skills/nai-studio/references/gallery.md',import.meta.url),'utf8');
+  assert.match(guide, /one batch `move_file` per target folder/);
+  assert.match(guide, /1\.\.20 `image_ids`/);
   // Exact-form/unique-ID/per-ID completeness validation belongs to Dart.
 });
 
-test('block schema accepts presets and occurrence-local content, rejects invalid values', () => {
+test('block schema accepts presets and occurrence-local content, rejects invalid values', async () => {
   const tool = domainTools.find(tool=>tool.name==='block_manage');
   for (const action of ['create','update']) {
     assert.equal(Value.Check(tool.parameters, {action,changes:{title:'preset',content:'text',generationSettings:{qualityPreset:'light',ucPreset:7,qualityCustomBlockId:'q',ucCustomBlockId:'u'}}}), true);
@@ -65,7 +67,8 @@ test('block schema accepts presets and occurrence-local content, rejects invalid
       assert.equal(Value.Check(tool.parameters,{action,changes:{generationSettings}}),false);
     }
   }
-  assert.match(tool.description, /temporary block for this occurrence only/);
+  const guide = await readFile(new URL('../skills/nai-studio/references/blocks.md',import.meta.url),'utf8');
+  assert.match(guide, /that occurrence into a temporary block, leaving the library entry intact/);
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',marker:'x',occurrence:1,instance:{content:'new',negative_content:'UC'}}),true);
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',instance:{content:42}}),false);
   assert.equal(Value.Check(tool.parameters,{action:'instance_update',occurrence:-1,instance:{content:'new'}}),false);
@@ -95,13 +98,14 @@ test('inline block schema stays one flat object with enums; per-action rules liv
   assert.equal(Value.Check(tool.parameters,{action:'instance_create',translation:{language_code:'xx'}}),false);
   assert.equal(Value.Check(tool.parameters,{action:'instance_create',anchor:{text:'x',mode:'unknown'}}),false);
   assert.equal(Value.Check(tool.parameters,{action:'merge'}),false);
-  for (const phrase of [/1\.\.64 segments/, /source \(generation text\)/, /expected_library_version/, /references\/blocks\.md/, /compose/]) assert.match(tool.description,phrase);
-  assert.ok(tool.description.length <= 1400);
+  for (const phrase of [/expected_library_version/, /references\/blocks\.md/]) assert.match(tool.description,phrase);
+  assert.ok(tool.description.length <= 600);
   const promptDescription = studioTools(()=>{}).find(t=>t.name==='prompt_update').description;
   assert.match(promptDescription,/pill_conflict/);
   assert.match(promptDescription,/field_version/);
   assert.ok(promptDescription.length <= 400);
   const skill = await readFile(new URL('../skills/nai-studio/references/blocks.md',import.meta.url),'utf8');
+  for (const phrase of [/1\.\.64 segments/, /`source` \(sent to generation\)/, /compose/]) assert.match(skill,phrase);
   assert.match(skill, /## Merging and splitting/);
   assert.match(skill, /Missing `needsReview` means false; missing `languageCode` means `zh`/);
   const icons = await readFile(new URL('../../../lib/presentation/widgets/prompt/blocks/prompt_block_icons.dart',import.meta.url),'utf8');
@@ -110,7 +114,7 @@ test('inline block schema stays one flat object with enums; per-action rules liv
 
 test('every domain tool description stays compact and schemas avoid anyOf enums', () => {
   for (const tool of domainTools) {
-    assert.ok(tool.description.length <= 1400, tool.name);
+    assert.ok(tool.description.length <= 600, tool.name);
     const json = JSON.stringify(tool.parameters);
     assert.ok(!/"anyOf":\[\{"type":"string","const"/.test(json), tool.name);
   }

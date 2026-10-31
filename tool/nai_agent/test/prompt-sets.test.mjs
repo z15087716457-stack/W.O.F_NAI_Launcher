@@ -12,7 +12,7 @@ const content = {kind:'Storyboard', kind_icon:'film', title:'Rain', unit:'scene'
 
 test('prompt_set schema bounds and exact Dart icon catalog (action requirements are enforced in Dart)', async () => {
   const tool = domainTools.find(t => t.name === 'prompt_set');
-  assert.ok(tool.description.length <= 1000);
+  assert.ok(tool.description.length <= 600);
   assert.match(tool.description, /repeats allowed/);
   assert.ok(Value.Check(tool.parameters, {action:'create', ...content,
     items:content.items.map(item => ({...item, icon:'heart'}))}));
