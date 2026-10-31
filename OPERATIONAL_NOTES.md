@@ -208,7 +208,7 @@
 
 - **标签查询与共现（已随本机 +67 安装）**：RAG 未知／初始化返回 warming，确认空索引才报 not_indexed；补充库 WAL 与本次查询的锁定降级不改建库指纹。普通手动 tags 查询用宽召回、cosine＋Danbooru 常用度，实体及 idle 保留重排；Wiki／块库／图库与向量格式不变，不自动重建。编辑器和 `tag_related` 共用完整邻接后 Jaccard 排序，分数是关联而非多标签交集概率；纯本地只读，不初始化 RAG。[实现与证据](docs/rag-related-history-2026-10-31.md)。
 - **共现／查询追加（已随本机 +68 安装）**：共用 Jaccard 乘 `log10(1+C/post_count)`，C 按活动词库版本缓存最大词频；Ctrl+左键、完整单标签框选和 Agent 同步生效，多标签／部分短语保持搜索语义。只有手动 tags 的视觉召回可在至少 800 个候选时提前返回，目标 1000 与其他调用的严格取数保持。outline 只在摘要投影清理完整合法附件信封，原文回查不变。[质量、性能及限制](docs/tag-query-followup-2026-10-31.md)。
-- **标签扫描稳定性（源码完成，尚未安装）**：来源签名仅忽略 0 字节 WAL，保留非空 WAL 和主库检测。资料／旧 digest 按批读取；合并名称查询同时启用 NOCASE 索引条件和原比较条件，避免目录分支全表扫描，保持匹配语义。首次新旧签名对齐可核对一次，内容未变复用向量。×2 扩取试验因质量回退未保留，沿用 +68 策略。[验证与边界](docs/rag-scan-stability-2026-10-31.md)。
+- **标签扫描稳定性（已随本机 +69 安装）**：来源签名仅忽略 0 字节 WAL，保留非空 WAL 和主库检测。资料／旧 digest 按批读取；合并名称查询同时启用 NOCASE 索引条件和原比较条件，避免目录分支全表扫描，保持匹配语义。首次新旧签名对齐可核对一次，内容未变复用向量。×2 扩取试验因质量回退未保留，沿用 +68 策略。[验证与边界](docs/rag-scan-stability-2026-10-31.md)。
 
 - 词库页「标签翻译与语义补充」状态从 `LauncherInterface.tagTranslate` 投影，不能沿用提示词翻译槽位或遗漏字段而误报未配置。实际执行路由与配置存储保持；显示接线修复已随 r24 安装，见 `docs/settings-tag-route-status-fix-2026-10-17.md`。
 
@@ -298,7 +298,7 @@ Wiki 顶部类型 chip 条将鼠标纵向滚轮映射为水平移动，原生横
 
 启动器管理的资料统一放在项目内 `.W.O.F/`：`workspace.json`、`instructions.md`、`sessions/`、`ui/`、`attachments/`、`outputs/`、`notes/`、`skills/`、`prompts/`、`snapshots/`，原 `.agent/` 内容也平移至此。Agent cwd 保持项目根目录，根目录 `AGENTS.md` 是用户项目规则；Dart 在既有规则刷新点读取它，与 `.W.O.F/instructions.md` 各加入一次，Pi 不额外发现父目录或环境规则。全局资料仍由原 `agent-data/` 管理。
 
-旧工作区首次读取时，先在 `.W.O.F/migration-backup/` 备份并校验，再搬迁已知启动器路径；元数据最后转移，中断按 manifest 恢复后重试，目标冲突不覆盖。会话 JSONL 逐字保留，聊天 `sessionFile` 仍为数据目录内的 `sessions/*.jsonl`，附件新引用为项目相对 `.W.O.F/attachments/...`。缺失的旧路径仅在文件读取时回查新位置，实际存在的项目文件优先，write/edit/bash 不改写路径。[实现与验证](docs/agent-workspace-layout-2026-10-31.md)。当前仅源码完成，未迁移正式用户工作区。
+旧工作区首次读取时，先在 `.W.O.F/migration-backup/` 备份并校验，再搬迁已知启动器路径；元数据最后转移，中断按 manifest 恢复后重试，目标冲突不覆盖。会话 JSONL 逐字保留，聊天 `sessionFile` 仍为数据目录内的 `sessions/*.jsonl`，附件新引用为项目相对 `.W.O.F/attachments/...`。缺失的旧路径仅在文件读取时回查新位置，实际存在的项目文件优先，write/edit/bash 不改写路径。[实现与验证](docs/agent-workspace-layout-2026-10-31.md)。已随本机 +69 安装；安装时未迁移正式工作区，下次用户启动时才执行。[交付记录](docs/local-2.2.2-build69-2026-10-31.md)。
 
 ## NAI Agent 流式显示
 
