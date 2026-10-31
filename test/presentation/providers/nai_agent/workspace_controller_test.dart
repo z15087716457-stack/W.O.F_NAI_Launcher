@@ -236,7 +236,9 @@ void main() {
       expect(c.selected!.chat.id, draftId);
       await c.saveComposer('尚未发送');
       expect(
-        await File('${workspace.directory.path}/ui/$draftId.json').exists(),
+        await File(
+          '${workspace.agentDirectory.path}/ui/$draftId.json',
+        ).exists(),
         false,
       );
       await c.close();
@@ -309,7 +311,7 @@ void main() {
         saved,
       );
       final attachmentDirectory = Directory(
-        '${draft.workspace.directory.path}/attachments/${draft.chat.id}',
+        '${draft.workspace.agentDirectory.path}/attachments/${draft.chat.id}',
       );
       expect(await attachmentDirectory.exists(), true);
       await c.selectChat(saved);
@@ -325,7 +327,7 @@ void main() {
       await c.createWorkspace('other');
       expect(
         await File(
-          '${draft.workspace.directory.path}/ui/chats/$newDraftId.json',
+          '${draft.workspace.agentDirectory.path}/ui/chats/$newDraftId.json',
         ).exists(),
         false,
       );
@@ -1100,7 +1102,7 @@ void main() {
       final runtime = c.selected!, callsBefore = calls;
       final exported = await c.exportSession(runtime);
       final original = await File(
-        '${runtime.workspace.directory.path}/${runtime.chat.sessionFile}',
+        '${runtime.workspace.agentDirectory.path}/${runtime.chat.sessionFile}',
       ).readAsBytes();
       expect(exported, original);
       final rows = utf8

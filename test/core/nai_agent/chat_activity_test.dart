@@ -36,7 +36,7 @@ void main() {
     () async {
       final w = await store.createWorkspace('workspace');
       final a = await store.createChat(w.id, 'old');
-      final session = File('${w.directory.path}/sessions/legacy.jsonl');
+      final session = File('${w.agentDirectory.path}/sessions/legacy.jsonl');
       await session.parent.create(recursive: true);
       await session.writeAsString(
         [

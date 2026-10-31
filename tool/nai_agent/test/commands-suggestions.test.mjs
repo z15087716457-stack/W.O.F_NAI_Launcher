@@ -36,10 +36,10 @@ test('cache warming defaults to streaming; init and live changes reach Pi', asyn
 test('host lists only explicit templates, workspace overrides global, arguments expand before model', async () => {
   const f = await hostFixture({ config: { nextSuggestion: false }, respond: finishReply,
     setup: async (root, { mkdir, writeFile, join }) => {
-      for (const path of ['agent/prompts', 'workspace/.pi/prompts', 'other/prompts']) await mkdir(join(root, path), { recursive: true });
+      for (const path of ['agent/prompts', 'workspace/.W.O.F/prompts', 'workspace/.pi', 'other/prompts']) await mkdir(join(root, path), { recursive: true });
       await writeFile(join(root, 'agent/prompts/global.md'), '---\ndescription: Global\nargument-hint: "<subject>"\n---\nGlobal $1');
       await writeFile(join(root, 'agent/prompts/review.md'), 'Global shadowed');
-      await writeFile(join(root, 'workspace/.pi/prompts/review.md'), '---\ndescription: Review it\nargument-hint: "[focus]"\n---\nReview $@');
+      await writeFile(join(root, 'workspace/.W.O.F/prompts/review.md'), '---\ndescription: Review it\nargument-hint: "[focus]"\n---\nReview $@');
       await writeFile(join(root, 'other/prompts/ambient.md'), 'Do not load');
       await writeFile(join(root, 'workspace/.pi/settings.json'), JSON.stringify({ prompts: [join(root, 'other/prompts')] }));
     } });

@@ -256,7 +256,7 @@ export const domainTools = [
     }),
   },
   { name: 'image_tool',
-    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) waits for user confirmation in Studio. Outputs go to workspace outputs/ and history. Use image_generate for variations/enhance.',
+    description: 'Local and cloud image tools; draft unchanged. list: models, methods, scales, SeedVR2 defaults. upscale(model_id, scale 1–4, one image_id or path) and pixel_snap(pixel options) run locally for free; status/cancel(job_id). Cloud tools (cloud_upscale, removeBackground, extractLineArt, toSketch, colorize, fixEmotion, declutter): prepare freezes source/prompt/price, run(quote_id) waits for user confirmation in Studio. Outputs go to workspace .W.O.F/outputs/ and history. Use image_generate for variations/enhance.',
     parameters: Type.Object({
       action: E(['list', 'status', 'upscale', 'cancel', 'pixel_snap', 'prepare', 'run']),
       tool: Type.Optional(E(['cloud_upscale','removeBackground','extractLineArt','toSketch','colorize','fixEmotion','declutter'])),

@@ -376,7 +376,7 @@ class NaiAgentSearchBinding {
   Future<String> _temporaryDirectory() async {
     final root = await workspace.resolveSymbolicLinks();
     var parent = root;
-    for (final name in ['.agent', 'search-images']) {
+    for (final name in ['.W.O.F', 'search-images']) {
       final directory = Directory(p.join(parent, name));
       if (await FileSystemEntity.type(directory.path, followLinks: false) !=
               FileSystemEntityType.notFound &&

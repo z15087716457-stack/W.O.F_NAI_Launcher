@@ -61,7 +61,7 @@ void main() {
     () async {
       final workspace = await store.createWorkspace('w');
       await File(
-        '${workspace.directory.path}/instructions.md',
+        '${workspace.agentDirectory.path}/instructions.md',
       ).writeAsString('RULE');
       await store.patchSettings({'globalInstructions': 'GLOBAL'});
 

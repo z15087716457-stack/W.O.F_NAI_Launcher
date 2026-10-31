@@ -350,7 +350,7 @@ void main() {
     expect(rag.image, await File(records[0].path).resolveSymbolicLinks());
     expect(rag.mode, RagGalleryMode.visual);
     expect(
-      await Directory(p.join(root.path, '.agent', 'search-images')).exists(),
+      await Directory(p.join(root.path, '.W.O.F', 'search-images')).exists(),
       false,
     );
   });
@@ -380,7 +380,7 @@ void main() {
           p.isWithin(
             p.join(
               await root.resolveSymbolicLinks(),
-              '.agent',
+              '.W.O.F',
               'search-images',
             ),
             rag.image!,

@@ -332,7 +332,7 @@ void main() {
         }
       }
       expect(requests, isEmpty);
-      expect(await Directory('${root.path}/outputs').exists(), isFalse);
+      expect(await Directory('${root.path}/.W.O.F/outputs').exists(), isFalse);
     },
   );
 
@@ -406,7 +406,7 @@ void main() {
       broker.decide(broker.forChat('chat').single.id, generate: true);
       await checked;
       expect(requests, isEmpty);
-      expect(await Directory('${root.path}/outputs').exists(), isFalse);
+      expect(await Directory('${root.path}/.W.O.F/outputs').exists(), isFalse);
     },
   );
   for (final operation in ['variations', 'enhance']) {

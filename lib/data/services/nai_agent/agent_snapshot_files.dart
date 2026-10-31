@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
+import 'agent_workspace_layout.dart';
 
 /// Self-contained, explicitly saved configuration files. Listing reads small
 /// sidecars rather than decoding all source/reference images in every snapshot.
@@ -14,7 +15,9 @@ class AgentSnapshotFiles {
 
   Future<Directory> _directory(String name) async {
     final root = await workspace.resolveSymbolicLinks();
-    final directory = Directory(p.join(root, name));
+    final directory = Directory(
+      p.join(agentWorkspaceData(Directory(root)).path, name),
+    );
     var ancestor = directory;
     while (!await ancestor.exists()) {
       ancestor = ancestor.parent;
@@ -41,9 +44,7 @@ class AgentSnapshotFiles {
         'Snapshot name must contain 1 to 200 characters',
       );
     }
-    final dir = await _directory(
-      backup ? '.agent/snapshot-backups' : 'snapshots',
-    );
+    final dir = await _directory(backup ? 'snapshot-backups' : 'snapshots');
     final id = const Uuid().v4();
     final metadata = {
       'id': id,

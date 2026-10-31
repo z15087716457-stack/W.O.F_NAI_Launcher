@@ -740,7 +740,7 @@ void main() {
           ImageWorkflowMode.inpaint,
         );
         expect(
-          await File('${root.path}/snapshots/$savedId.json').exists(),
+          await File('${root.path}/.W.O.F/snapshots/$savedId.json').exists(),
           isTrue,
         );
         final message = (requests.last['messages'] as List).lastWhere(
@@ -885,7 +885,7 @@ void main() {
           ]),
         );
         final backups = Directory(
-          '${root.path}/.agent/snapshot-backups',
+          '${root.path}/.W.O.F/snapshot-backups',
         ).listSync().whereType<File>();
         expect(backups.length, 3);
         expect(jsonEncode(requests.last), contains('Synthetic SDK block'));

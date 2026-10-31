@@ -75,13 +75,13 @@ void main() {
       final a = await store.createWorkspace('画风 / ../研究');
       final b = await store.createWorkspace('画风 / ../研究');
       expect(a.id, isNot(b.id));
-      final notes = File('${a.directory.path}/notes/private.txt');
+      final notes = File('${a.agentDirectory.path}/notes/private.txt');
       await notes.writeAsString('甲');
       await store.updateWorkspace(a.id, name: '新的名字');
       expect((await store.getWorkspace(a.id)).directory.path, a.directory.path);
       expect(await notes.readAsString(), '甲');
       expect(
-        await File('${b.directory.path}/notes/private.txt').exists(),
+        await File('${b.agentDirectory.path}/notes/private.txt').exists(),
         false,
       );
       expect(await store.listWorkspaces(), hasLength(2));
@@ -104,7 +104,7 @@ void main() {
       });
       await store.updateWorkspace(b.id, customSystemPrompt: 'PROJECT_BASE');
       await File(
-        '${b.directory.path}/instructions.md',
+        '${b.agentDirectory.path}/instructions.md',
       ).writeAsString('LOCAL_RULE');
       final reopened = AgentWorkspaceStore(root);
       final settings = await reopened.readSettings();
@@ -186,7 +186,7 @@ void main() {
       expect(await store.effectiveSystemPrompt(workspace.id), contains('全局二'));
       await store.updateWorkspace(workspace.id, customSystemPrompt: '工作区');
       await File(
-        '${workspace.directory.path}/instructions.md',
+        '${workspace.agentDirectory.path}/instructions.md',
       ).writeAsString('项目规则');
       expect(await store.effectiveSystemPrompt(workspace.id), contains('工作区'));
       expect(await store.effectiveSystemPrompt(workspace.id), contains('项目规则'));

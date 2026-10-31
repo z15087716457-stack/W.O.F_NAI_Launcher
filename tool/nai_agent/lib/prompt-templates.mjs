@@ -3,7 +3,7 @@ import { DefaultResourceLoader, SettingsManager } from '@earendil-works/pi-codin
 
 // Like skills, Studio owns the source roots and precedence, not Pi's ambient config.
 export async function resolveStudioPromptTemplates({ cwd, agentDir, globalDirectory, workspaceDirectory }) {
-  const workspace = resolve(workspaceDirectory ?? join(cwd, '.pi', 'prompts'));
+  const workspace = resolve(workspaceDirectory ?? join(cwd, '.W.O.F', 'prompts'));
   const global = resolve(globalDirectory ?? join(agentDir, 'prompts'));
   const loader = new DefaultResourceLoader({ cwd, agentDir, settingsManager: SettingsManager.inMemory(),
     noExtensions: true, noSkills: true, noPromptTemplates: true, noThemes: true, noContextFiles: true,

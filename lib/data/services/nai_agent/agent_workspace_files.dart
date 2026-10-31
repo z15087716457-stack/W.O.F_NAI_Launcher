@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import '../../../core/nai_agent/agent_tool.dart';
+import 'agent_workspace_layout.dart';
 
 /// Domain imports/exports stay in the same workspace as Pi's file tools.
 class AgentWorkspaceFiles {
@@ -25,7 +26,10 @@ class AgentWorkspaceFiles {
         'File leaves this workspace',
       );
     }
-    final target = await File(candidate).resolveSymbolicLinks();
+    final target = await (await agentWorkspaceReadFile(
+      Directory(root),
+      relative,
+    )).resolveSymbolicLinks();
     if (!p.isWithin(root, target)) {
       throw const NaiAgentToolError(
         'path_outside_workspace',
@@ -73,7 +77,16 @@ class AgentWorkspaceFiles {
       );
     }
     final root = await workspace.resolveSymbolicLinks();
-    final parent = Directory(p.join(root, 'outputs'));
+    final data = agentWorkspaceData(Directory(root));
+    if (await FileSystemEntity.type(data.path, followLinks: false) !=
+            FileSystemEntityType.notFound &&
+        !p.isWithin(root, await data.resolveSymbolicLinks())) {
+      throw const NaiAgentToolError(
+        'path_outside_workspace',
+        'Launcher directory leaves workspace',
+      );
+    }
+    final parent = Directory(p.join(data.path, 'outputs'));
     if ((await parent.exists() ||
             await FileSystemEntity.type(parent.path, followLinks: false) ==
                 FileSystemEntityType.link) &&

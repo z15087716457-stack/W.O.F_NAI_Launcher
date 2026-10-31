@@ -234,7 +234,7 @@ void main() {
       expect(target.importingImages, 0);
       expect(
         await Directory(
-          '${target.workspace.directory.path}/attachments/${target.chat.id}',
+          '${target.workspace.agentDirectory.path}/attachments/${target.chat.id}',
         ).exists(),
         false,
       );

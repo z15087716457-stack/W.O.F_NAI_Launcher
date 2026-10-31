@@ -415,7 +415,7 @@ void main() {
         await File((await storage.getEntryRecord(id))!.filePath!).readAsBytes(),
         original,
       );
-      expect(await Directory('${root.path}/outputs').exists(), false);
+      expect(await Directory('${root.path}/.W.O.F/outputs').exists(), false);
       final raw = (await importVibe(raw: true))['id'] as String;
       expect((await update(raw, {'info_extracted': 0.83}))['ok'], true);
       expect((await read(raw))['vibes'].single['info_extracted'], 0.83);
@@ -804,7 +804,7 @@ void main() {
         }, NaiAgentCancellation()),
         error('closed'),
       );
-      expect(await Directory('${root.path}/outputs').exists(), false);
+      expect(await Directory('${root.path}/.W.O.F/outputs').exists(), false);
     },
   );
   test(
@@ -1009,7 +1009,7 @@ void main() {
         expect((await storage.getCategory(categoryId!))!.name, 'Pi styles');
         expect(container.read(generationParamsNotifierProvider), same(before));
         final backups = await Directory(
-          '${root.path}/outputs',
+          '${root.path}/.W.O.F/outputs',
         ).list().where((f) => f is Directory).toList();
         expect(backups, hasLength(4));
         for (final dir in backups.where(

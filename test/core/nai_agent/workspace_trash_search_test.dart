@@ -57,7 +57,7 @@ void main() {
         bytes: Uint8List.fromList([1, 2, 3]),
         mimeType: 'image/png',
       );
-      final note = File('${workspace.directory.path}/notes/stays.txt');
+      final note = File('${workspace.agentDirectory.path}/notes/stays.txt');
       await note.writeAsString('keep');
       final entry = await store.trashChat(workspace.id, chat.id);
       expect(entry.chatId, chat.id);
@@ -68,7 +68,7 @@ void main() {
       expect(await session.exists(), false);
       expect(
         await Directory(
-          '${workspace.directory.path}/attachments/${chat.id}',
+          '${workspace.agentDirectory.path}/attachments/${chat.id}',
         ).exists(),
         false,
       );
@@ -104,7 +104,9 @@ void main() {
         const AgentComposerState(text: 'old'),
       );
       final entry = await store.trashChat(workspace.id, chat.id);
-      final composer = File('${workspace.directory.path}/ui/${chat.id}.json');
+      final composer = File(
+        '${workspace.agentDirectory.path}/ui/${chat.id}.json',
+      );
       await composer.writeAsString('new');
       await expectLater(store.restoreChat(entry.id), throwsStateError);
       expect(await composer.readAsString(), 'new');
@@ -189,7 +191,7 @@ void main() {
       final workspace = await store.createWorkspace('A');
       final chat = await store.createChat(workspace.id, 'Title');
       final chatFile = File(
-        '${workspace.directory.path}/ui/chats/${chat.id}.json',
+        '${workspace.agentDirectory.path}/ui/chats/${chat.id}.json',
       );
       final json = chat.toJson()..['sessionFile'] = '../outside.jsonl';
       await chatFile.writeAsString(jsonEncode(json));
@@ -200,7 +202,9 @@ void main() {
       await chatFile.writeAsString(jsonEncode(chat.toJson()));
       final outside = await Directory.systemTemp.createTemp('outside-trash-');
       try {
-        final link = Link('${workspace.directory.path}/attachments/${chat.id}');
+        final link = Link(
+          '${workspace.agentDirectory.path}/attachments/${chat.id}',
+        );
         try {
           await link.create(outside.path);
         } on FileSystemException {
@@ -334,9 +338,11 @@ void main() {
       final a = await store.createWorkspace('A');
       final b = await store.createWorkspace('B');
       final chat = await store.createChat(a.id, 'Hello');
-      await File('${a.directory.path}/ui/chats/${chat.id}.json').writeAsString(
+      await File(
+        '${a.agentDirectory.path}/ui/chats/${chat.id}.json',
+      ).writeAsString(
         await File(
-          '${a.directory.path}/ui/chats/${chat.id}.json',
+          '${a.agentDirectory.path}/ui/chats/${chat.id}.json',
         ).readAsString(),
       );
       final chatEntry = await store.trashChat(a.id, chat.id);

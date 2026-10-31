@@ -85,6 +85,64 @@ class TagProfileTests(unittest.TestCase):
         db=sqlite3.connect(self.overlay);db.execute("UPDATE tag_semantics SET wiki_hash='stale'");db.commit();db.close()
         self.assertEqual(self.source_impl.rows(names=['tag_0'])[0]['summary_zh'],'原始释义')
 
+    def test_batch_profiles_keep_alias_limits_full_wiki_hash_and_constant_queries(self):
+        wiki=self.root/'wiki.db'
+        body='完整的释义。'*100
+        db=sqlite3.connect(wiki);db.execute('CREATE TABLE wiki_pages(tag TEXT PRIMARY KEY,body TEXT)')
+        db.executemany('INSERT INTO wiki_pages VALUES(?,?)',[(f'tag_{i}',body) for i in range(60)])
+        db.commit();db.close()
+        self.source_impl=Sources(self.source,wiki=wiki,semantics=self.semantic,supplements=self.overlay)
+        for path in (self.semantic,self.overlay):
+            db=sqlite3.connect(path)
+            db.executemany('INSERT INTO tag_semantics VALUES(?,?,?,?,?)',
+                [(f'tag_{i}','基础' if path==self.semantic else '补充','[]','原释义' if path==self.semantic else '新释义','stale') for i in range(60)])
+            if path==self.overlay:
+                db.execute('ALTER TABLE tag_semantics ADD COLUMN summary_hash TEXT')
+                db.execute('UPDATE tag_semantics SET summary_hash=?',(hashlib.sha256(body.encode()).hexdigest(),))
+                db.execute("UPDATE tag_semantics SET summary_hash='stale' WHERE tag='tag_1'")
+            db.commit();db.close()
+        db=sqlite3.connect(self.source)
+        db.executemany('INSERT INTO aliases VALUES(1,?)',[(f'alias_{i:02d}',) for i in range(30)])
+        db.commit();db.close()
+        statements=[];connect=self.source_impl.connect
+        def traced():
+            db,union=connect();db.set_trace_callback(statements.append);return db,union
+        names=[f'tag_{i}' for i in range(60)]+['missing']
+        with patch.object(self.source_impl,'connect',side_effect=traced):
+            rows=self.source_impl.rows(names=names,limit=80)
+        self.assertEqual([row['name'] for row in rows],names[:-1])
+        self.assertEqual(rows[0]['aliases'],[f'alias_{i:02d}' for i in range(24)])
+        self.assertEqual(rows[0]['summary_zh'],'新释义')
+        self.assertEqual(rows[1]['summary_zh'],'原释义')
+        self.assertIn(body[:500],rows[0]['text']);self.assertNotIn(body[:501],rows[0]['text'])
+        self.assertEqual(len(statements),7)
+        self.assertEqual(sum('table_info' in sql for sql in statements),1)
+        self.assertEqual(rows,[self.source_impl.rows(names=[name])[0] for name in names[:-1]])
+
+    def test_mixed_name_collations_use_the_catalog_index_without_broadening_matches(self):
+        catalog=self.root/'case-catalog.db';runtime=self.root/'runtime.db'
+        db=sqlite3.connect(catalog)
+        db.executescript('CREATE TABLE tags(id INTEGER PRIMARY KEY,name TEXT COLLATE NOCASE UNIQUE,category INTEGER,post_count INTEGER); CREATE TABLE aliases(tag_id INTEGER,alias TEXT)')
+        db.executemany('INSERT INTO tags VALUES(?,?,0,?)',[(i+1,f'tag_{i}',2000-i) for i in range(2000)])
+        db.commit();db.close()
+        db=sqlite3.connect(runtime)
+        db.executescript("CREATE TABLE danbooru_tags(tag TEXT PRIMARY KEY,category INTEGER,post_count INTEGER); INSERT INTO danbooru_tags VALUES('tag_0',0,9000),('tag_2',0,8000)")
+        db.commit();db.close()
+        source=Sources(catalog,runtime);connect=source.connect;statements=[]
+        def traced():
+            db,union=connect();db.set_trace_callback(statements.append);return db,union
+        with patch.object(source,'connect',side_effect=traced):
+            rows=source.rows(names=['tag_0','TAG_1','tag_2','tag_3'])
+        self.assertEqual([row['name'] for row in rows],['tag_0','tag_2','tag_3'])
+        self.assertEqual([row['post_count'] for row in rows],[9000,8000,1997])
+        sql=next(sql for sql in statements if sql.startswith('SELECT name, category, post_count'))
+        db,_=connect()
+        try:plan=[row[3] for row in db.execute('EXPLAIN QUERY PLAN '+sql)]
+        finally:db.close()
+        self.assertTrue(any('SEARCH t USING INDEX' in row for row in plan),plan)
+        self.assertFalse(any('SCAN t' in row for row in plan),plan)
+        self.assertEqual(Sources(catalog).rows(names=['TAG_1'])[0]['name'],'tag_1')
+
     def test_semantic_change_only_visits_changed_live_tag_and_keeps_others(self):
         self.build();self.models.embedded.clear()
         original=dict(self.engine.db.execute('SELECT name,vector FROM documents'))

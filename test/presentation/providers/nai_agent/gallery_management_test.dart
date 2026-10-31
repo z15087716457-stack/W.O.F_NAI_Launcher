@@ -184,8 +184,8 @@ void main() {
     if (changes != null) 'changes': changes,
   });
   Future<int> backups() async =>
-      await Directory('${workspace.path}/outputs').exists()
-      ? await Directory('${workspace.path}/outputs').list().length
+      await Directory('${workspace.path}/.W.O.F/outputs').exists()
+      ? await Directory('${workspace.path}/.W.O.F/outputs').list().length
       : 0;
   Future<Map<String, dynamic>> collections() =>
       run({'action': 'collections', 'limit': 100});
@@ -2058,7 +2058,9 @@ void main() {
       );
       expect(await pool.load(), isEmpty);
       expect(await source.getImageById(id), isNotNull);
-      final dirs = await Directory('${workspace.path}/outputs').list().toList();
+      final dirs = await Directory(
+        '${workspace.path}/.W.O.F/outputs',
+      ).list().toList();
       expect(
         await File('${dirs.single.path}/image.png').readAsBytes(),
         original,
@@ -2260,7 +2262,7 @@ void main() {
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'native-gallery-management',
           workspaceDirectory: workspace,
-          agentDirectory: Directory('${workspace.path}/.agent'),
+          agentDirectory: Directory('${workspace.path}/.W.O.F'),
           systemPrompt: 'NAI Agent uses actual native gallery tools.',
           privateModelConfig: {
             'providerId': 'local',
@@ -2318,7 +2320,7 @@ void main() {
         expect(await image.readAsBytes(), original);
         expect(container.read(imageGenerationNotifierProvider), same(history));
         final directories = await Directory(
-          '${workspace.path}/outputs',
+          '${workspace.path}/.W.O.F/outputs',
         ).list().toList();
         expect(directories, hasLength(4));
         for (final directory in directories) {
@@ -2470,7 +2472,7 @@ void main() {
       expect(container.read(imageGenerationNotifierProvider), same(history));
       expect(container.exists(localGalleryNotifierProvider), false);
       final exports = await Directory(
-        '${workspace.path}/outputs',
+        '${workspace.path}/.W.O.F/outputs',
       ).list().toList();
       for (final directory in exports) {
         final entries = await Directory(directory.path).list().toList();
@@ -2597,7 +2599,7 @@ void main() {
       expect(rows.single['name'], 'New user edit');
       expect(await backups(), 1);
       final output = (await Directory(
-        '${workspace.path}/outputs',
+        '${workspace.path}/.W.O.F/outputs',
       ).list().toList()).single;
       final saved =
           jsonDecode(
@@ -2897,7 +2899,7 @@ void main() {
           hostScript: File('tool/nai_agent/host.mjs').absolute.path,
           workspaceId: 'native-collection-management',
           workspaceDirectory: workspace,
-          agentDirectory: Directory('${workspace.path}/.agent'),
+          agentDirectory: Directory('${workspace.path}/.W.O.F'),
           systemPrompt: 'Use actual native collection tools.',
           privateModelConfig: {
             'providerId': 'local',
@@ -2959,7 +2961,7 @@ void main() {
         expect(container.read(imageGenerationNotifierProvider), same(history));
         expect(await backups(), 8);
         for (final directory in await Directory(
-          '${workspace.path}/outputs',
+          '${workspace.path}/.W.O.F/outputs',
         ).list().toList()) {
           expect(await Directory(directory.path).list().length, 1);
           expect(

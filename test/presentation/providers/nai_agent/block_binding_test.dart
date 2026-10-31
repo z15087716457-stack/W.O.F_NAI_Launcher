@@ -2141,7 +2141,7 @@ void main() {
         throwsA(toolError('invalid_changes')),
       );
       final created = await create({'title': 'good', 'content': 'raw'});
-      final dir = Directory('${workspace.path}/.agent/snapshot-backups');
+      final dir = Directory('${workspace.path}/.W.O.F/snapshot-backups');
       final count = await dir.list().length;
       final id = created['id'] as String;
       for (final patch in [

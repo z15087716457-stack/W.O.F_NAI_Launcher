@@ -195,7 +195,7 @@ void main() {
       expect(actual.rawImageData, pixels);
       expect((await storage.getAllEntries()).single.usedCount, 1);
       expect(
-        await Directory('${root.path}/.agent/snapshot-backups').exists(),
+        await Directory('${root.path}/.W.O.F/snapshot-backups').exists(),
         isTrue,
       );
     },
@@ -582,7 +582,7 @@ void main() {
       isEmpty,
     );
     final backups = await Directory(
-      '${root.path}/.agent/snapshot-backups',
+      '${root.path}/.W.O.F/snapshot-backups',
     ).list().where((e) => e.path.endsWith('.json')).toList();
     expect(
       jsonDecode(
@@ -610,7 +610,8 @@ void main() {
         'nai-agent-reference-outside-',
       );
       try {
-        final link = Link('${root.path}/outputs');
+        await Directory('${root.path}/.W.O.F').create(recursive: true);
+        final link = Link('${root.path}/.W.O.F/outputs');
         try {
           await link.create(outside.path);
         } on FileSystemException {

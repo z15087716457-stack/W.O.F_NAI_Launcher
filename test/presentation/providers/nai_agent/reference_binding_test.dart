@@ -71,9 +71,9 @@ void main() {
           }, NaiAgentCancellation()))['details']
           as Map<String, dynamic>;
   List<File> backups() =>
-      Directory('${root.path}/.agent/snapshot-backups').existsSync()
+      Directory('${root.path}/.W.O.F/snapshot-backups').existsSync()
       ? Directory(
-          '${root.path}/.agent/snapshot-backups',
+          '${root.path}/.W.O.F/snapshot-backups',
         ).listSync().whereType<File>().toList()
       : [];
   Matcher code(String code) =>

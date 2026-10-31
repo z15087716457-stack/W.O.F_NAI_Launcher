@@ -1,6 +1,6 @@
 import { mkdir, realpath } from 'node:fs/promises';
 import { resolve, join, relative, isAbsolute } from 'node:path';
-import { createAgentSession, DefaultResourceLoader, SessionManager, SettingsManager,
+import { createAgentSession, createReadTool, DefaultResourceLoader, SessionManager, SettingsManager,
   createCodemodeExtension, createToolSearchExtension }
   from '@earendil-works/pi-coding-agent';
 import { Type } from 'typebox';
@@ -15,6 +15,7 @@ import { createStudioExtensionUi } from './extensions/ui.mjs';
 import { createStudioMcp, mcpRedactor, validateStudioMcp } from './mcp.mjs';
 import { builtinSkillsDirectory, resolveStudioSkills } from './skills.mjs';
 import { resolveStudioPromptTemplates } from './prompt-templates.mjs';
+import { resolveWorkspaceReadPath } from './workspace-paths.mjs';
 
 // Pi caches loader overrides on reload; Studio prompt edits apply on the next turn.
 class StudioResourceLoader extends DefaultResourceLoader {
@@ -33,7 +34,7 @@ export function studioTools(execute, extraToolNames = []) {
   return [
     tool('studio_context', 'Read current Studio state on demand. scope=draft returns RAW editable fields, pill documents and field_versions. Never write effective preset text back.',
       Type.Object({ scope: Type.Optional(Type.Unsafe({ type: 'string', enum: ['summary', 'draft'] })) })),
-    tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including attachments/ and outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
+    tool('image_read', 'Read one actual canvas/history or library image by image_id (selected means current canvas selection; gallery:<ID> comes from gallery_query), or any image file using its workspace-relative path (including .W.O.F/attachments/ and .W.O.F/outputs/). metadata_only=true reads original dimensions and metadata locally without returning pixels or requiring vision. Default returns a separate visual copy and original metadata, without altering the original file or draft.',
       Type.Object({ image_id: Type.Optional(Type.String()), path: Type.Optional(Type.String()), metadata_only: Type.Optional(Type.Boolean()) })),
     tool('prompt_update', 'Patch draft fields read by studio_context(scope=draft); expected maps each changed field to its field_version (aliases: clear_characters->characters, seed_lock->seed, quality_toggle->quality_preset). Backs up, rechecks and returns readback. Lanes containing blocks only accept unchanged text (else pill_conflict): edit those with block_manage instance_*.',
       Type.Object({ changes: Type.Record(Type.String(), Type.Unknown()),
@@ -136,11 +137,14 @@ export async function createStudioSession({ config, cwd, agentDir, systemPrompt,
       .filter(tool => tool.definition.defaultActive !== false &&
         ['direct', 'model-only'].includes(tool.definition.exposure ?? 'direct'))
       .map(tool => tool.definition.name))])] });
+  const read = createReadTool(root);
   const { session } = await createAgentSession({
     cwd: root, agentDir: data, model, modelRuntime: runtime, thinkingLevel: config.thinkingLevel ?? 'off',
     // Use official Pi tools and session persistence, not a second agent loop.
     sessionManager: manager,
     resourceLoader, settingsManager,
+    customTools: [{...read, execute: async (id,args,...rest) =>
+      read.execute(id,{...args,path:await resolveWorkspaceReadPath(root,args.path)},...rest)}],
   });
   cacheWarming.attach(session);
   const ui = createStudioExtensionUi(executeTool, onExtensionUi);

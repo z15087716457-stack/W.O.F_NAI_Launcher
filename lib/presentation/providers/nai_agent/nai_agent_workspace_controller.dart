@@ -890,7 +890,9 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
       final chat = runtime.chat;
       final file = chat.sessionFile == null
           ? null
-          : File(p.join(runtime.workspace.directory.path, chat.sessionFile!));
+          : File(
+              p.join(runtime.workspace.agentDirectory.path, chat.sessionFile!),
+            );
       final selection = settings;
       final revision = readModelRevision();
       client = await startClient(
@@ -956,7 +958,8 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
               await sessionFile.parent.resolveSymbolicLinks(),
               p.basename(path),
             );
-      final root = await runtime.workspace.directory.resolveSymbolicLinks();
+      final root = await runtime.workspace.agentDirectory
+          .resolveSymbolicLinks();
       runtime.chat = await store.updateChat(
         runtime.workspace.id,
         runtime.chat.id,
@@ -1512,7 +1515,7 @@ class NaiAgentWorkspaceController extends ChangeNotifier {
     }
     final relative = runtime.chat.sessionFile;
     if (relative == null) throw const FormatException('No saved session');
-    final file = File(p.join(runtime.workspace.directory.path, relative));
+    final file = File(p.join(runtime.workspace.agentDirectory.path, relative));
     final canonical = await file.resolveSymbolicLinks();
     final root = await runtime.workspace.sessions.resolveSymbolicLinks();
     if (!p.isWithin(root, canonical)) {

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'agent_workspace_layout.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -248,10 +249,10 @@ class AgentWorkspace {
   final Directory directory;
   final DateTime createdAt;
   final String? customSystemPrompt, lastSessionId;
-  Directory get sessions => Directory(p.join(directory.path, 'sessions'));
-  Directory get agentDirectory => Directory(p.join(directory.path, '.agent'));
-  Directory get prompts => Directory(p.join(directory.path, '.pi', 'prompts'));
-  Directory get skills => Directory(p.join(directory.path, 'skills'));
+  Directory get sessions => Directory(p.join(agentDirectory.path, 'sessions'));
+  Directory get agentDirectory => agentWorkspaceData(directory);
+  Directory get prompts => Directory(p.join(agentDirectory.path, 'prompts'));
+  Directory get skills => Directory(p.join(agentDirectory.path, 'skills'));
   Map<String, dynamic> toJson() => {
     'schema': 1,
     'id': id,
@@ -293,7 +294,7 @@ class AgentAttachment {
       AgentAttachment(
         id: value['id'] as String,
         name: value['name'] as String,
-        relativePath: value['path'] as String,
+        relativePath: agentWorkspaceReference(value['path'] as String),
         mimeType: value['mimeType'] as String,
         bytes: value['bytes'] as int,
         sha256Hex: value['sha256'] as String,
@@ -480,8 +481,196 @@ class AgentWorkspaceStore {
     return Directory(p.join(root.path, 'workspaces', id));
   }
 
+  Directory _workspaceDataDirectory(String id) =>
+      agentWorkspaceData(workspaceDirectory(id));
+
   File _metadata(String id) =>
-      File(p.join(workspaceDirectory(id).path, 'workspace.json'));
+      File(p.join(_workspaceDataDirectory(id).path, 'workspace.json'));
+
+  final _layoutMigrations = <String, Future<void>>{};
+  Future<void> _ensureWorkspaceLayout(String id) =>
+      _layoutMigrations.putIfAbsent(id, () async {
+        try {
+          await _migrateWorkspaceLayout(id);
+        } finally {
+          _layoutMigrations.remove(id);
+        }
+      });
+
+  Future<void> _migrateWorkspaceLayout(String id) async {
+    final workspace = workspaceDirectory(id);
+    final data = _workspaceDataDirectory(id);
+    final backup = Directory(p.join(data.path, 'migration-backup'));
+    final manifest = File(p.join(backup.path, 'manifest.json'));
+    await _guard(data.path);
+    await _guard(manifest.path);
+    if (await _metadata(id).exists()) {
+      if (!await manifest.exists()) return;
+      final state = await _read(manifest);
+      if (state['complete'] == true) return;
+      // Metadata is transferred last; its arrival commits the new layout.
+      for (final name in ['.agent', '.pi']) {
+        final old = Directory(p.join(workspace.path, name));
+        await _guard(old.path);
+        if (await old.exists() && await old.list().isEmpty) await old.delete();
+      }
+      await _atomic(manifest, {...state, 'complete': true});
+      return;
+    }
+    final moves = <({String from, String to})>[];
+    Map<String, dynamic> state;
+    if (await manifest.exists()) {
+      state = await _read(manifest);
+      if (state['schema'] != 1 || state['workspaceId'] != id) {
+        throw const FormatException('Invalid workspace migration');
+      }
+      for (final raw in state['moves'] as List) {
+        final relative = (raw as Map)['from'] as String;
+        final parts = p.split(relative);
+        if (p.isAbsolute(relative) ||
+            p.normalize(relative) != relative ||
+            parts.contains('..') ||
+            !(agentWorkspaceManagedNames.contains(relative) ||
+                (parts.length == 2 && parts.first == '.agent') ||
+                relative == p.join('.pi', 'prompts'))) {
+          throw const FormatException('Invalid workspace migration path');
+        }
+        moves.add((from: relative, to: agentWorkspaceReference(relative)));
+      }
+      // Recover an interrupted transfer before retrying. Never merge over a
+      // project file or overwrite a destination that appeared meanwhile.
+      final restore = <({String from, String to})>[];
+      for (final move in moves) {
+        final from = p.join(workspace.path, move.from);
+        final to = p.join(workspace.path, move.to);
+        await _guardTree(from);
+        await _guardTree(to);
+        if (await FileSystemEntity.type(from) ==
+                FileSystemEntityType.notFound &&
+            await FileSystemEntity.type(to) != FileSystemEntityType.notFound) {
+          restore.add((from: to, to: from));
+        }
+      }
+      await _transfer(restore);
+    } else {
+      final legacy = File(p.join(workspace.path, 'workspace.json'));
+      await _guard(legacy.path);
+      if (!await legacy.exists()) return;
+      if ((await _read(legacy))['id'] != id) {
+        throw const FormatException('Workspace identity differs');
+      }
+      for (final name in agentWorkspaceManagedNames.where(
+        (n) => n != 'workspace.json',
+      )) {
+        if (await FileSystemEntity.type(
+              p.join(workspace.path, name),
+              followLinks: false,
+            ) !=
+            FileSystemEntityType.notFound) {
+          moves.add((from: name, to: agentWorkspaceReference(name)));
+        }
+      }
+      final oldAgent = Directory(p.join(workspace.path, '.agent'));
+      await _guardTree(oldAgent.path);
+      if (await oldAgent.exists()) {
+        await for (final entry in oldAgent.list(followLinks: false)) {
+          final relative = p.join('.agent', p.basename(entry.path));
+          moves.add((from: relative, to: agentWorkspaceReference(relative)));
+        }
+      }
+      final prompts = p.join('.pi', 'prompts');
+      if (await FileSystemEntity.type(
+            p.join(workspace.path, prompts),
+            followLinks: false,
+          ) !=
+          FileSystemEntityType.notFound) {
+        moves.add((from: prompts, to: agentWorkspaceReference(prompts)));
+      }
+      moves.add((
+        from: 'workspace.json',
+        to: agentWorkspaceReference('workspace.json'),
+      ));
+      state = {
+        'schema': 1,
+        'workspaceId': id,
+        'complete': false,
+        'moves': [
+          for (final move in moves) {'from': move.from},
+        ],
+      };
+    }
+    if (moves.isEmpty ||
+        moves.last.from != 'workspace.json' ||
+        moves.map((move) => move.to).toSet().length != moves.length) {
+      throw const FormatException('Conflicting workspace migration paths');
+    }
+    for (final move in moves) {
+      await _guardTree(p.join(workspace.path, move.from));
+      final target = p.join(workspace.path, move.to);
+      await _guard(target);
+      if (await FileSystemEntity.type(target, followLinks: false) !=
+          FileSystemEntityType.notFound) {
+        throw StateError('Workspace migration destination already exists');
+      }
+    }
+    await _atomic(manifest, state);
+    final hashes = <String, String>{};
+    for (final move in moves) {
+      final source = p.join(workspace.path, move.from);
+      final entries =
+          await FileSystemEntity.type(source) == FileSystemEntityType.directory
+          ? await Directory(
+              source,
+            ).list(recursive: true, followLinks: false).toList()
+          : <FileSystemEntity>[File(source)];
+      await Directory(
+        p.join(backup.path, move.from),
+      ).parent.create(recursive: true);
+      if (await FileSystemEntity.type(source) ==
+          FileSystemEntityType.directory) {
+        await Directory(p.join(backup.path, move.from)).create(recursive: true);
+      }
+      for (final entry in entries) {
+        final relative = p.relative(entry.path, from: workspace.path);
+        final target = p.join(backup.path, relative);
+        await _guard(target);
+        if (entry is Directory) {
+          await Directory(target).create(recursive: true);
+        } else if (entry is File) {
+          await File(target).parent.create(recursive: true);
+          await entry.copy(target);
+          final digest = await sha256.bind(entry.openRead()).first;
+          if (digest != await sha256.bind(File(target).openRead()).first) {
+            throw StateError('Workspace changed while backing up');
+          }
+          hashes[relative] = digest.toString();
+        }
+      }
+    }
+    await _atomic(manifest, {...state, 'sha256': hashes});
+    for (final entry in hashes.entries) {
+      if ((await sha256
+                  .bind(File(p.join(workspace.path, entry.key)).openRead())
+                  .first)
+              .toString() !=
+          entry.value) {
+        throw StateError('Workspace changed before migration');
+      }
+    }
+    await _transfer([
+      for (final move in moves)
+        (
+          from: p.join(workspace.path, move.from),
+          to: p.join(workspace.path, move.to),
+        ),
+    ]);
+    for (final name in ['.agent', '.pi']) {
+      final old = Directory(p.join(workspace.path, name));
+      await _guard(old.path);
+      if (await old.exists() && await old.list().isEmpty) await old.delete();
+    }
+    await _atomic(manifest, {...state, 'sha256': hashes, 'complete': true});
+  }
 
   Future<void> _atomic(File file, Map<String, dynamic> value) async {
     await file.parent.create(recursive: true);
@@ -631,20 +820,21 @@ class AgentWorkspaceStore {
       'sessions',
       'snapshots',
       'skills',
-      '.agent',
+      'prompts',
       'ui',
     ]) {
       await Directory(
-        p.join(actual.directory.path, child),
+        p.join(actual.agentDirectory.path, child),
       ).create(recursive: true);
     }
     await File(
-      p.join(actual.directory.path, 'instructions.md'),
+      p.join(actual.agentDirectory.path, 'instructions.md'),
     ).writeAsString('', flush: true);
     await _atomic(_metadata(actual.id), actual.toJson());
     return actual;
   });
   Future<AgentWorkspace> getWorkspace(String id) async {
+    await _ensureWorkspaceLayout(id);
     final value = await _read(_metadata(id));
     if (value['id'] != id) {
       throw const FormatException('Workspace is missing or identity differs');
@@ -718,8 +908,7 @@ class AgentWorkspaceStore {
       await _atomic(
         File(
           p.join(
-            old.directory.path,
-            '.agent',
+            old.agentDirectory.path,
             'prompt-history',
             '${const Uuid().v4()}.json',
           ),
@@ -737,8 +926,12 @@ class AgentWorkspaceStore {
     final workspace = await getWorkspace(workspaceId);
     final settings = await readSettings();
     final instructions = await File(
-      p.join(workspace.directory.path, 'instructions.md'),
+      p.join(workspace.agentDirectory.path, 'instructions.md'),
     ).readAsString();
+    final projectFile = File(p.join(workspace.directory.path, 'AGENTS.md'));
+    final projectRules = await projectFile.exists()
+        ? await projectFile.readAsString()
+        : '';
     final zh = currentAppLanguage.isChinese;
     return [
       if (settings.systemPromptPrefix.trim().isNotEmpty)
@@ -747,11 +940,13 @@ class AgentWorkspaceStore {
       if (settings.globalInstructions.trim().isNotEmpty)
         '${zh ? '用户的全局指令：' : 'User global instructions:'}\n'
             '${settings.globalInstructions}',
+      if (projectRules.trim().isNotEmpty)
+        'Project instructions (AGENTS.md):\n$projectRules',
       if (instructions.trim().isNotEmpty)
         '${zh ? '用户的工作区规则：' : 'User workspace rules:'}\n$instructions',
       zh
-          ? '工作区笔记在 notes/，产物在 outputs/。'
-          : 'Workspace notes live in notes/; outputs go to outputs/.',
+          ? '启动器工作区资料在 .W.O.F/；笔记在 .W.O.F/notes/，默认产物在 .W.O.F/outputs/。项目文件按用户指定的路径组织。'
+          : 'Launcher workspace data lives in .W.O.F/; notes in .W.O.F/notes/ and default outputs in .W.O.F/outputs/. Organize project files at the paths requested by the user.',
     ].join('\n\n');
   }
 
@@ -774,7 +969,7 @@ class AgentWorkspaceStore {
         'builtin' => builtinSkillsDirectory,
         'global' => globalSkillsDirectory,
         'workspace' => Directory(
-          p.join(workspaceDirectory(workspaceId!).path, 'skills'),
+          p.join(_workspaceDataDirectory(workspaceId!).path, 'skills'),
         ),
         _ => throw FormatException('Invalid skill source: $source'),
       };
@@ -963,7 +1158,7 @@ class AgentWorkspaceStore {
         await _atomic(
           File(
             p.join(
-              workspaceDirectory(workspaceId).path,
+              _workspaceDataDirectory(workspaceId).path,
               'ui',
               'chats',
               '${chat.id}.json',
@@ -979,7 +1174,7 @@ class AgentWorkspaceStore {
     _id(draft.id);
     final workspace = await getWorkspace(draft.workspaceId);
     final file = File(
-      p.join(workspace.directory.path, 'ui', 'chats', '${draft.id}.json'),
+      p.join(workspace.agentDirectory.path, 'ui', 'chats', '${draft.id}.json'),
     );
     await _guard(file.path);
     if (await FileSystemEntity.type(file.path, followLinks: false) !=
@@ -1003,7 +1198,7 @@ class AgentWorkspaceStore {
         _id(chatId);
         final workspace = await getWorkspace(workspaceId);
         final chatFile = p.join(
-          workspace.directory.path,
+          workspace.agentDirectory.path,
           'ui',
           'chats',
           '$chatId.json',
@@ -1014,7 +1209,7 @@ class AgentWorkspaceStore {
           throw StateError('Cannot discard a saved chat');
         }
         for (final path in [
-          p.join(workspace.directory.path, 'attachments', chatId),
+          p.join(workspace.agentDirectory.path, 'attachments', chatId),
           _composer(workspaceId, chatId).path,
         ]) {
           await _guardTree(path);
@@ -1025,7 +1220,7 @@ class AgentWorkspaceStore {
   Future<List<AgentChat>> listChats(String workspaceId) async {
     await getWorkspace(workspaceId);
     final dir = Directory(
-      p.join(workspaceDirectory(workspaceId).path, 'ui', 'chats'),
+      p.join(_workspaceDataDirectory(workspaceId).path, 'ui', 'chats'),
     );
     await _guard(dir.path);
     if (!await dir.exists()) return [];
@@ -1094,7 +1289,7 @@ class AgentWorkspaceStore {
     await _atomic(
       File(
         p.join(
-          workspaceDirectory(workspaceId).path,
+          _workspaceDataDirectory(workspaceId).path,
           'ui',
           'chats',
           '$chatId.json',
@@ -1114,7 +1309,10 @@ class AgentWorkspaceStore {
   ) async {
     if (relative == null) return null;
     final file = File(
-      p.join(workspaceDirectory(workspaceId).path, _sessionRelative(relative)),
+      p.join(
+        _workspaceDataDirectory(workspaceId).path,
+        _sessionRelative(relative),
+      ),
     );
     await _guard(file.path);
     final stat = await file.stat();
@@ -1399,7 +1597,7 @@ class AgentWorkspaceStore {
             _sessionRelative(chat.sessionFile!).replaceAll('\\', '/'),
           'attachments/$chatId',
         ]) {
-          final path = p.join(workspace.directory.path, relative);
+          final path = p.join(workspace.agentDirectory.path, relative);
           await _guardTree(path);
           if (await FileSystemEntity.type(path, followLinks: false) !=
               FileSystemEntityType.notFound) {
@@ -1421,7 +1619,7 @@ class AgentWorkspaceStore {
         await _trashTransfer(entry, dir, [
           for (final file in files)
             (
-              from: p.join(workspace.directory.path, file),
+              from: p.join(workspace.agentDirectory.path, file),
               to: p.join(dir.path, file),
             ),
         ]);
@@ -1437,7 +1635,7 @@ class AgentWorkspaceStore {
     _id(chat.id);
     final workspace = await getWorkspace(chat.workspaceId);
     final chatPath = p.join(
-      workspace.directory.path,
+      workspace.agentDirectory.path,
       'ui',
       'chats',
       '${chat.id}.json',
@@ -1448,7 +1646,7 @@ class AgentWorkspaceStore {
       throw StateError('Draft was already saved');
     }
     final attachment = 'attachments/${chat.id}';
-    final from = p.join(workspace.directory.path, attachment);
+    final from = p.join(workspace.agentDirectory.path, attachment);
     await _guardTree(from);
     final hasAttachments = await Directory(from).exists();
     final now = DateTime.now();
@@ -1515,7 +1713,7 @@ class AgentWorkspaceStore {
     // Draft metadata is restored in memory by the controller, but collisions
     // at any original path still prevent restoring the entry.
     for (final file in entry.files) {
-      final target = p.join(workspace.directory.path, file);
+      final target = p.join(workspace.agentDirectory.path, file);
       await _guard(target);
       if (await FileSystemEntity.type(target, followLinks: false) !=
           FileSystemEntityType.notFound) {
@@ -1527,7 +1725,7 @@ class AgentWorkspaceStore {
         if (!entry.isDraft || file.startsWith('attachments/'))
           (
             from: p.join(dir.path, file),
-            to: p.join(workspace.directory.path, file),
+            to: p.join(workspace.agentDirectory.path, file),
           ),
     ]);
     await dir.delete(recursive: true);
@@ -1730,7 +1928,10 @@ class AgentWorkspaceStore {
       if (chat.sessionFile == null) continue;
       try {
         final file = File(
-          p.join(workspace.directory.path, _sessionRelative(chat.sessionFile!)),
+          p.join(
+            workspace.agentDirectory.path,
+            _sessionRelative(chat.sessionFile!),
+          ),
         );
         await _guard(file.path);
         final stat = await file.stat();
@@ -1821,7 +2022,11 @@ class AgentWorkspaceStore {
   File _composer(String workspaceId, String sessionId) {
     _id(sessionId);
     return File(
-      p.join(workspaceDirectory(workspaceId).path, 'ui', '$sessionId.json'),
+      p.join(
+        _workspaceDataDirectory(workspaceId).path,
+        'ui',
+        '$sessionId.json',
+      ),
     );
   }
 
@@ -1875,7 +2080,12 @@ class AgentWorkspaceStore {
       'image/bmp' => '.bmp',
       _ => '.png',
     };
-    final relative = p.join('attachments', sessionId, id + suffix);
+    final relative = p.join(
+      agentWorkspaceDataName,
+      'attachments',
+      sessionId,
+      id + suffix,
+    );
     final file = File(p.join(workspace.directory.path, relative));
     await file.parent.create(recursive: true);
     await file.writeAsBytes(bytes, flush: true);
@@ -1900,10 +2110,13 @@ class AgentWorkspaceStore {
       throw const FormatException('Invalid attachment path');
     }
     final resolved = await File(
-      p.join(workspace.directory.path, attachment.relativePath),
+      p.join(
+        workspace.directory.path,
+        agentWorkspaceReference(attachment.relativePath),
+      ),
     ).resolveSymbolicLinks();
     final expectedRoot = await Directory(
-      p.join(workspace.directory.path, 'attachments'),
+      p.join(workspace.agentDirectory.path, 'attachments'),
     ).resolveSymbolicLinks();
     if (!p.isWithin(expectedRoot, resolved)) {
       throw const FormatException('Attachment leaves workspace');
@@ -1926,7 +2139,7 @@ class AgentWorkspaceStore {
     final workspace = await getWorkspace(workspaceId);
     final file = File(
       p.join(
-        workspace.directory.path,
+        workspace.agentDirectory.path,
         'snapshots',
         '${const Uuid().v4()}.json',
       ),
@@ -1942,7 +2155,7 @@ class AgentWorkspaceStore {
   Future<List<File>> snapshots(String workspaceId) async {
     final workspace = await getWorkspace(workspaceId);
     return (await Directory(
-          p.join(workspace.directory.path, 'snapshots'),
+          p.join(workspace.agentDirectory.path, 'snapshots'),
         ).list(followLinks: false).toList())
         .whereType<File>()
         .where((file) => p.extension(file.path) == '.json')
@@ -1956,11 +2169,11 @@ class AgentWorkspaceStore {
     _id(id);
     final workspace = await getWorkspace(workspaceId);
     final file = File(
-      p.join(workspace.directory.path, 'snapshots', '$id.json'),
+      p.join(workspace.agentDirectory.path, 'snapshots', '$id.json'),
     );
     final canonical = await file.resolveSymbolicLinks();
     final parent = await Directory(
-      p.join(workspace.directory.path, 'snapshots'),
+      p.join(workspace.agentDirectory.path, 'snapshots'),
     ).resolveSymbolicLinks();
     if (!p.isWithin(parent, canonical)) {
       throw const FormatException('Snapshot leaves workspace');

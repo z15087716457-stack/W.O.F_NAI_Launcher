@@ -17,7 +17,7 @@ const readActions = {
 const edits = new Set(['write', 'edit', 'prompt_update', 'prompt_set', 'snapshot', 'block_manage', 'settings_update', 'reference_manage', 'reference_library', 'gallery_manage', 'image_tool', 'image_generate', 'explore_manage']);
 const destructive = /(?:^|_)(?:delete|delete_empty|move|move_file|remove)(?:$|_)/;
 
-async function canonical(path) {
+export async function canonical(path) {
   try { return await realpath(path); }
   catch (error) {
     if (!['ENOENT', 'ENOTDIR'].includes(error.code)) throw error;

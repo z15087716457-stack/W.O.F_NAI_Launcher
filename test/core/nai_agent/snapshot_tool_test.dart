@@ -152,7 +152,7 @@ void main() {
       );
       expect(
         await Directory(
-          p.join(root.path, '.agent', 'snapshot-backups'),
+          p.join(root.path, '.W.O.F', 'snapshot-backups'),
         ).exists(),
         isFalse,
       );
@@ -172,10 +172,10 @@ void main() {
     () async {
       await save();
       await File(
-        p.join(root.path, 'snapshots', 'bad.meta.json'),
+        p.join(root.path, '.W.O.F', 'snapshots', 'bad.meta.json'),
       ).writeAsString('{"schema":2,"id":20}');
       await File(
-        p.join(root.path, 'snapshots', 'wrong.meta.json'),
+        p.join(root.path, '.W.O.F', 'snapshots', 'wrong.meta.json'),
       ).writeAsString('[]');
       expect(await files.list(), hasLength(1));
       await expectLater(files.read('../../outside'), throwsFormatException);

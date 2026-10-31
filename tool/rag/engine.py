@@ -35,7 +35,11 @@ class Sources:
             if not name: continue
             for p in (Path(name), Path(name + '-wal')):
                 if p.exists():
-                    s = p.stat(); records.append((str(p), s.st_size, s.st_mtime_ns))
+                    s = p.stat()
+                    # Read-only opens can create empty WALs without changing
+                    # content. Keep nonempty WALs in the change detector.
+                    if p.name.endswith('-wal') and not s.st_size: continue
+                    records.append((str(p), s.st_size, s.st_mtime_ns))
         return hashlib.sha256(json.dumps([self.representation_version, records]).encode()).hexdigest()
 
     def change_state(self):
@@ -109,26 +113,41 @@ class Sources:
             args = []
             if names is not None:
                 if not names: return []
-                sql += ' WHERE name IN (' + ','.join('?' for _ in names) + ')'; args.extend(names)
+                # The catalog's name index is NOCASE, the runtime's is BINARY.
+                # Enable both indexes while preserving the union's comparison.
+                slots = ','.join('?' for _ in names)
+                sql += ' WHERE name COLLATE NOCASE IN ('+slots+') AND name IN ('+slots+')'
+                args.extend(names); args.extend(names)
             sql += ' ORDER BY post_count DESC, name LIMIT ? OFFSET ?'; args.extend([limit, offset])
             rows = db.execute(sql, args).fetchall(); result = []
+            if not rows: return result
+            names = [row[0] for row in rows]
+            slots = ','.join('?' for _ in names)
+            aliases_by_name = {name:[] for name in names}
+            for name, alias in db.execute('SELECT t.name,a.alias FROM aliases a JOIN tags t ON t.id=a.tag_id '
+                    'WHERE t.name IN ('+slots+') ORDER BY t.name,a.alias',names):
+                if len(aliases_by_name[name]) < 24: aliases_by_name[name].append(alias)
+            bodies = dict(db.execute('SELECT tag,body FROM wiki.wiki_pages WHERE tag IN ('+slots+')',names)) if self.paths[2] else {}
+            profiles = {}
+            saved_hashes = {}
+            for schema, path in zip(('semantics','supplements'),self.paths[3:]):
+                if not path: continue
+                profiles[schema] = {row[0]:row[1:] for row in db.execute(
+                    'SELECT tag,core_zh,synonyms_zh,summary_zh FROM '+schema+'.tag_semantics WHERE tag IN ('+slots+')',names)}
+                if schema == 'supplements' and any(row[2] for row in profiles[schema].values()):
+                    columns = {r[1] for r in db.execute('PRAGMA supplements.table_info(tag_semantics)')}
+                    column = 'summary_hash' if 'summary_hash' in columns else 'wiki_hash'
+                    saved_hashes = dict(db.execute('SELECT tag,'+column+' FROM supplements.tag_semantics WHERE tag IN ('+slots+')',names))
             for name, category, count in rows:
-                aliases = [r[0] for r in db.execute('SELECT a.alias FROM aliases a JOIN tags t ON t.id=a.tag_id WHERE t.name=? ORDER BY a.alias LIMIT 24', (name,))]
-                body = ''; full_body = ''
-                if self.paths[2]:
-                    row = db.execute('SELECT body FROM wiki.wiki_pages WHERE tag=?', (name,)).fetchone()
-                    if row: full_body = row[0] or ''; body = full_body[:500]
+                aliases = aliases_by_name[name]
+                full_body = bodies.get(name) or ''; body = full_body[:500]
                 profile = {'core_zh':'', 'synonyms_zh':[], 'summary_zh':''}
-                for schema, path in zip(('semantics', 'supplements'), self.paths[3:]):
-                    if not path: continue
-                    row = db.execute('SELECT core_zh,synonyms_zh,summary_zh FROM '+schema+'.tag_semantics WHERE tag=?',(name,)).fetchone()
+                for schema, records in profiles.items():
+                    row = records.get(name)
                     if row:
                         summary = row[2]
                         if schema == 'supplements' and summary:
-                            columns = {r[1] for r in db.execute('PRAGMA supplements.table_info(tag_semantics)')}
-                            column = 'summary_hash' if 'summary_hash' in columns else 'wiki_hash'
-                            saved = db.execute('SELECT '+column+' FROM supplements.tag_semantics WHERE tag=?',(name,)).fetchone()[0]
-                            if saved != hashlib.sha256(full_body.encode()).hexdigest(): summary = ''
+                            if saved_hashes[name] != hashlib.sha256(full_body.encode()).hexdigest(): summary = ''
                         for key, value in zip(profile, (row[0], json.loads(row[1]), summary)):
                             if value: profile[key] = value
                 text = clean_tag(name)
@@ -303,11 +322,14 @@ class Engine:
                 batch = names[processed:processed+self.batch_size]
                 rows = self.sources.rows(names=batch, limit=self.batch_size)
                 if len(rows) != len(batch) or not rows: raise ValueError('source_changed')
-                pending = []
+                old = dict(self.db.execute('SELECT name,digest FROM documents WHERE name IN ('+
+                    ','.join('?' for _ in rows)+')',[item['name'] for item in rows]))
+                pending = []; unchanged = []
                 for item in rows:
-                    old = self.db.execute('SELECT digest FROM documents WHERE name=?', (item['name'],)).fetchone()
-                    if not old or old[0] != item['digest']: pending.append(item)
-                    else: self.db.execute('UPDATE documents SET seen=?, post_count=? WHERE name=?', (signature, item['post_count'], item['name']))
+                    if old.get(item['name']) != item['digest']: pending.append(item)
+                    else: unchanged.append((signature,item['post_count'],item['name']))
+                if unchanged:
+                    self.db.executemany('UPDATE documents SET seen=?, post_count=? WHERE name=?',unchanged)
                 self.writing = bool(pending)
                 if pending:
                     if progress: progress({'processed':plan['total']-work_total+processed, **self.status()})
