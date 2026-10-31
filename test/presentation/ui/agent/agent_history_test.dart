@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_fixture.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_panel.dart';
+import 'package:nai_launcher/presentation/ui/agent/agent_parts.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_answered_questions.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_history_mapper.dart';
 import '../../../helpers/studio_capture_fonts.dart';
@@ -112,6 +113,7 @@ void main() {
     );
     await _frames(t, 3);
     expect(find.byKey(const Key('agent-compaction')), findsOneWidget);
+    expect(find.byType(AgentCard), findsNothing);
     expect(
       find.byKey(Key('agent-user-${_at.millisecondsSinceEpoch}')),
       findsNothing,

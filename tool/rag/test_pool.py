@@ -103,6 +103,35 @@ class PoolTests(unittest.TestCase):
         finally:engine.close()
 
 class FilteredRecallTests(unittest.TestCase):
+    def test_partial_budget_is_opt_in_and_preserves_strict_recall(self):
+        import numpy as np
+        db=sqlite3.connect(':memory:')
+        db.execute('CREATE TABLE pool_documents(id INTEGER,collection TEXT,category INTEGER)')
+        db.executemany('INSERT INTO pool_documents VALUES(?,?,?)',
+            [(i,'tags',0 if i<=10000 else 1) for i in range(1,30001)])
+        order=list(range(1,2601))+list(range(10001,10401))+list(range(2601,10001))+list(range(10401,30001))
+        class Ann:
+            def __init__(self):self.calls=[]
+            def __len__(self):return 30000
+            def search(self,vector,count):
+                self.calls.append(count)
+                return SimpleNamespace(keys=order[:count],distances=np.zeros(count))
+        ann=Ann();view=CollectionAnn(SimpleNamespace(db=db,ann=ann),'tags');view.refresh()
+        try:
+            partial=view.search(np.zeros(768),1000,categories=(1,),min_count=400)
+            self.assertEqual(len(partial.keys),400)
+            self.assertEqual(len(ann.calls),1)
+            ann.calls.clear()
+            strict=view.search(np.zeros(768),1000,categories=(1,))
+            self.assertEqual(len(strict.keys),1000)
+            self.assertEqual(len(ann.calls),2)
+            self.assertTrue(all(key>10000 for key in strict.keys))
+            ann.calls.clear()
+            sparse=view.search(np.zeros(768),1000,categories=(1,),min_count=600)
+            self.assertEqual(len(sparse.keys),1000)
+            self.assertEqual(len(ann.calls),2)
+        finally:db.close()
+
     def test_correlated_categories_expand_ann_recall_without_reading_vectors(self):
         import numpy as np
         db=sqlite3.connect(':memory:')

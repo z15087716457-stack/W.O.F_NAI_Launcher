@@ -70,6 +70,7 @@ class TagCatalogRepository implements CompletionSource {
   }) async => (await _current()).searchContains(input, limit: limit);
   Future<List<CompletionCandidate>> popular({int limit = 12}) async =>
       (await _current()).popular(limit: limit);
+  Future<int> maximumPostCount() async => (await _current()).maximumPostCount();
   Future<int?> postCount(String tag) async => (await _current()).postCount(tag);
   Future<Map<String, CompletionCandidate>> exactAliases(
     Iterable<String> terms,
@@ -95,6 +96,17 @@ class _TagCatalogQueries implements CompletionSource {
 
   Database? _database;
   Future<Database>? _opening;
+  int? _maximumPostCount;
+
+  // Each query owner belongs to one immutable catalog revision.
+  Future<int> maximumPostCount() async {
+    await initialize();
+    if (_maximumPostCount case final maximum?) return maximum;
+    final rows = await _database!.rawQuery(
+      'SELECT COALESCE(MAX(post_count), 0) AS maximum FROM tags',
+    );
+    return _maximumPostCount = (rows.single['maximum'] as num).toInt();
+  }
 
   Future<void> initialize() async {
     if (_database != null) return;

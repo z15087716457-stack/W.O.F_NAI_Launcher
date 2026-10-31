@@ -19,6 +19,8 @@ import 'package:nai_launcher/presentation/providers/rag_provider.dart';
 import '../../../helpers/fetch_test_server.dart';
 
 class _Catalog extends TagCatalogRepository {
+  @override
+  Future<int> maximumPostCount() async => 10000000;
   final records = {
     for (final name in [
       'rain',

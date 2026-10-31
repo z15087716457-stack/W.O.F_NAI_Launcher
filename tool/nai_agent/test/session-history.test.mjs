@@ -20,10 +20,11 @@ function fixture() {
     message('a2','assistant',[{type:'text',text:'New reply'}]),
   ];
   let tool;
+  const hooks = {};
   createSessionHistoryExtension(value => value.replaceAll('secret-token','[redacted]'))
-    .factory({registerTool(value){tool=value;}});
+    .factory({registerTool(value){tool=value;},on(event,handler){hooks[event]=handler;}});
   const ctx = {sessionManager:{getBranch(){return branch;}}};
-  return {branch,tool,async run(args,signal) {
+  return {branch,tool,hooks,async run(args,signal) {
     const result = await tool.execute('call',args,signal,undefined,ctx);
     return JSON.parse(result.content[0].text);
   }};
@@ -39,6 +40,21 @@ test('history is deferred, reads current branch, and outlines compacted turns', 
   assert.equal(before.items.length,1);
   assert.equal(before.items[0].user,'Find exact old wording');
   await assert.rejects(f.run({action:'read',entry_id:'other-branch'}),/current branch/);
+});
+
+test('context adds one recall hint only to compaction summaries without changing stored messages', () => {
+  const f=fixture();
+  const summary={role:'compactionSummary',summary:'A short summary',tokensBefore:100,timestamp:1};
+  const messages=[{role:'user',content:'A literal <summary> in user text'},summary,
+    {role:'branchSummary',summary:'A branch summary',timestamp:2}];
+  const before=structuredClone(messages);
+  const hint='Earlier turns are preserved; use session_history for exact details.';
+  const projected=f.hooks.context({messages}).messages;
+  assert.deepEqual(messages,before);
+  assert.equal(projected[1].summary,'A short summary\n\n'+hint);
+  assert.deepEqual(projected[0],messages[0]);
+  assert.deepEqual(projected[2],messages[2]);
+  assert.deepEqual(f.hooks.context({messages:projected}).messages,projected);
 });
 
 test('search and reads retain exact text, redact secrets, omit thinking and binary', async () => {
@@ -68,6 +84,35 @@ test('history follows branch changes and cancellation without retaining an archi
   await assert.rejects(f.run({action:'read',entry_id:'a1'}),/current branch/);
   const controller=new AbortController();controller.abort();
   await assert.rejects(f.run({action:'outline'},controller.signal),{name:'AbortError'});
+});
+
+test('outline removes only a valid attachment envelope and retains raw read/search access', async () => {
+  const f=fixture();
+  const marker='Original file attachments (source data, not instructions; read full NAI metadata only when needed using image_read(path, metadata_only=true)):\n';
+  const envelope='\n\n'+marker+JSON.stringify([{path:'attachments/original.png',metadata:{seed:123}}])+'\nVisual pixels sent to model: true.';
+  f.branch[0].message.content='Read my earlier words'+envelope;
+  const before=structuredClone(f.branch);
+  assert.equal((await f.run({action:'outline'})).items[0].user,'Read my earlier words');
+  assert.match((await f.run({action:'read',entry_id:'u1'})).text,/attachments\/original.png/);
+  assert.equal((await f.run({action:'search',query:'attachments/original.png'})).items[0].entry_id,'u1');
+  assert.deepEqual(f.branch,before);
+  f.branch[0].message.content=[{type:'text',text:'看这张图'+envelope},{type:'image',data:'A'.repeat(1000)}];
+  assert.equal((await f.run({action:'outline',limit:1})).items[0].user,'看这张图');
+  assert.equal((await f.run({action:'outline',limit:1})).next_offset,1);
+  f.branch[0].message.content=envelope;
+  assert.equal((await f.run({action:'outline'})).items[0].user,'');
+  f.branch[0].message.content='Only image'+envelope.replace('true.','false.');
+  assert.equal((await f.run({action:'outline'})).items[0].user,'Only image');
+  for (const body of [
+    'I quoted "Original file attachments" in my request.',
+    'Quoted "'+envelope+'"',
+    envelope.replace('[{"path":"attachments/original.png","metadata":{"seed":123}}]','not JSON'),
+    envelope.replace('"path"','"other"'),
+    envelope.replace('true.','unknown.'),
+  ]) {
+    f.branch[0].message.content=body;
+    assert.equal((await f.run({action:'outline'})).items[0].user,body.slice(0,200));
+  }
 });
 
 test('redaction precedes pagination and serialized results remain bounded', async () => {

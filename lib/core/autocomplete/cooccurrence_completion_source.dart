@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../database/datasources/cooccurrence_data_source.dart';
 import 'completion_models.dart';
 import 'tag_catalog_repository.dart';
@@ -14,8 +16,8 @@ typedef CooccurrenceDataSourceLoader =
 /// Offline related-tag source backed by the bundled cooccurrence CSV database.
 ///
 /// The asset stores intersection counts. Catalog post counts are joined at
-/// query time so ranking can use the same Jaccard metric as Danbooru's related
-/// tag endpoint without duplicating the complete tag catalog in another database.
+/// query time for frequency-weighted Jaccard ranking without duplicating the
+/// complete tag catalog in another database.
 class CooccurrenceCompletionSource implements CompletionSource {
   CooccurrenceCompletionSource(
     CooccurrenceDataSource dataSource, {
@@ -68,6 +70,7 @@ class CooccurrenceCompletionSource implements CompletionSource {
       ...seeds,
       for (final batch in rows.values) ...batch.map((row) => row.tag),
     });
+    final maximum = await _catalog.maximumPostCount();
     final scores = <String, double>{};
     final counts = <String, int>{};
     final sources = <String, List<String>>{};
@@ -86,7 +89,13 @@ class CooccurrenceCompletionSource implements CompletionSource {
           targetPostCount: record.postCount,
         );
         if (score == null || score <= 0) continue;
-        scores.update(row.tag, (value) => value + score, ifAbsent: () => score);
+        final weighted =
+            score * math.log(1 + maximum / record.postCount) / math.ln10;
+        scores.update(
+          row.tag,
+          (value) => value + weighted,
+          ifAbsent: () => weighted,
+        );
         counts.update(
           row.tag,
           (value) => value + row.count,

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/autocomplete/cooccurrence_completion_source.dart';
@@ -9,7 +10,32 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
   test(
-    'enriches CSV intersections and ranks them by Jaccard similarity',
+    'frequency weighting demotes generic tags without removing them',
+    () async {
+      final source = CooccurrenceCompletionSource(
+        _FakeCooccurrenceDataSource([
+          const RelatedTag(tag: 'generic', count: 800),
+          const RelatedTag(tag: 'specific', count: 100),
+        ]),
+        catalog: _FakeCatalog({
+          for (final name in ['seed', 'generic', 'specific'])
+            name: TagCatalogRecord(
+              canonicalTag: name,
+              category: TagCategory.general,
+              postCount: name == 'generic' ? 10000 : 1000,
+            ),
+        }),
+      );
+
+      // Raw Jaccard favors generic (800/10200 > 100/1900).
+      final results = await source.search(_query(relatedTag: 'seed'));
+      expect(results.map((item) => item.canonicalTag), ['specific', 'generic']);
+      expect(results.last.relatedScore, greaterThan(0));
+    },
+  );
+
+  test(
+    'enriches CSV intersections and ranks them by frequency-weighted Jaccard',
     () async {
       final dataSource = _FakeCooccurrenceDataSource([
         const RelatedTag(tag: 'long_hair', count: 193346),
@@ -53,7 +79,10 @@ void main() {
       expect(results.first.category, TagCategory.general);
       expect(results.first.postCount, 265497);
       expect(results.first.cooccurrenceCount, 221957);
-      expect(results.first.relatedScore, closeTo(0.769, 0.001));
+      expect(
+        results.first.relatedScore,
+        closeTo(0.769 * math.log(1 + 5000954 / 265497) / math.ln10, 0.002),
+      );
       expect(results.first.sources, {CompletionSourceKind.cooccurrence});
       expect(dataSource.requestedLimit, isNull);
     },
@@ -125,7 +154,10 @@ void main() {
       );
 
       expect(results.single.canonicalTag, 'smile');
-      expect(results.single.relatedScore, closeTo(50 / 1450, 0.0001));
+      expect(
+        results.single.relatedScore,
+        closeTo(50 / 1450 * math.log(3) / math.ln10, 0.0001),
+      );
     },
   );
 }
@@ -171,6 +203,12 @@ class _FakeCatalog extends TagCatalogRepository {
   _FakeCatalog(this.records);
 
   final Map<String, TagCatalogRecord> records;
+
+  @override
+  Future<int> maximumPostCount() async => records.values.fold<int>(
+    0,
+    (maximum, row) => row.postCount > maximum ? row.postCount : maximum,
+  );
 
   @override
   Future<Map<String, TagCatalogRecord>> recordsByCanonicalTag(

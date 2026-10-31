@@ -42,6 +42,15 @@ class TagQueryTests(unittest.TestCase):
         self.engine.search('',0,'around',[],[],False,keyword='tag_0')
         self.assertEqual(self.models.ranked,[('tag 0',False,'tag_search')])
 
+    def test_only_manual_visual_recall_may_stop_at_a_partial_budget(self):
+        with patch.object(self.engine.ann,'search',wraps=self.engine.ann.search) as search:
+            self.engine.search('',0,'around',[],[],False,keyword='sunlit running')
+            self.assertEqual(search.call_args_list[0].kwargs['min_count'],800)
+            self.assertNotIn('min_count',search.call_args_list[1].kwargs)
+            search.reset_mock()
+            self.engine.search('rain, ',6,'before',[],[],False)
+            self.assertTrue(all(call.kwargs.get('min_count') is None for call in search.call_args_list))
+
     def test_manual_query_does_not_even_tokenize_an_unrelated_prompt(self):
         original='unrelated_prompt_'*200
         count=self.models.count

@@ -272,7 +272,7 @@ class CollectionAnn:
         self.pool.writable().add(key,vector);self.keys.add(key);self._categories.clear()
     def remove(self,key):
         self.pool.writable().remove(key);self.keys.discard(key);self._categories.clear()
-    def search(self,vector,count,*,categories=None):
+    def search(self,vector,count,*,categories=None,min_count=None):
         import numpy as np
         eligible = self.keys
         if categories is not None:
@@ -288,6 +288,7 @@ class CollectionAnn:
             eligible = self._categories[categories]
         count=min(count,len(eligible))
         if not count:return SimpleNamespace(keys=[],distances=[])
+        minimum=count if min_count is None else min(count,min_count)
         if len(eligible)>16384:
             overfetch=min(len(self.pool.ann),max(count,int(count*len(self.pool.ann)/len(eligible)*2)))
             # Category membership is correlated with the query, not uniform.
@@ -295,7 +296,7 @@ class CollectionAnn:
             for _ in range(4):
                 matches=self.pool.ann.search(vector,overfetch)
                 candidates=[(int(k),float(d)) for k,d in zip(matches.keys,matches.distances) if int(k) in eligible]
-                if len(candidates)>=count:return SimpleNamespace(
+                if len(candidates)>=minimum:return SimpleNamespace(
                     keys=[key for key,_ in candidates[:count]],distances=[distance for _,distance in candidates[:count]])
                 if overfetch == len(self.pool.ann): break
                 overfetch=min(len(self.pool.ann),max(256,overfetch*8))

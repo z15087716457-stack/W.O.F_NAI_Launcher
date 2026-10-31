@@ -235,7 +235,7 @@ Map<String, NaiAgentToolExecutor> naiAgentKnowledgeTools(
     return naiAgentTextResult({
       'source': 'local_cooccurrence',
       'network_requests': 0,
-      'algorithm': 'jaccard',
+      'algorithm': 'jaccard_frequency',
       'resolved': resolved,
       'unknown': unknown,
       'items': [

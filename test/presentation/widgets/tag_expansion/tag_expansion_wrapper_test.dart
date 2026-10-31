@@ -6,8 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:nai_launcher/core/autocomplete/cooccurrence_completion_source.dart';
 import 'package:nai_launcher/core/autocomplete/completion_models.dart';
+import 'package:nai_launcher/core/autocomplete/tag_catalog_repository.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
+import 'package:nai_launcher/core/database/datasources/cooccurrence_data_source.dart';
 import 'package:nai_launcher/core/tag_expansion/local_tag_expansion_service.dart';
 import 'package:nai_launcher/core/tag_expansion/tag_expansion_providers.dart';
 import 'package:nai_launcher/core/utils/prompt_input_normalization.dart';
@@ -29,6 +32,67 @@ void main() {
   tearDown(() async {
     await Hive.close();
   });
+
+  for (final drag in [false, true]) {
+    testWidgets(
+      '${drag ? 'Ctrl+drag' : 'Ctrl+click'} uses shared frequency-weighted cooccurrence',
+      (tester) async {
+        final controller = TextEditingController(text: 'blue hair, solo');
+        final focusNode = FocusNode();
+        addTearDown(controller.dispose);
+        addTearDown(focusNode.dispose);
+        await _pumpEditor(
+          tester,
+          controller,
+          focusNode,
+          _Source(const []),
+          related: CooccurrenceCompletionSource(
+            _WeightedEdges(),
+            catalog: _WeightedCatalog(),
+          ),
+        );
+        await tester.tap(find.byKey(const Key('prompt-editor')));
+        await tester.pump();
+        final editable = tester
+            .state<EditableTextState>(find.byType(EditableText))
+            .renderEditable;
+        Offset caret(int offset) {
+          final rect = editable.getLocalRectForCaret(
+            TextPosition(offset: offset),
+          );
+          return editable.localToGlobal(Offset(rect.left + 1, rect.center.dy));
+        }
+
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+        final gesture = await tester.startGesture(
+          caret(drag ? 0 : 4),
+          kind: PointerDeviceKind.mouse,
+        );
+        if (drag) {
+          await gesture.moveTo(caret(9));
+          await tester.pump();
+        }
+        await gesture.up();
+        await tester.pump();
+        await tester.pump();
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+
+        expect(find.text('hair ribbon'), findsOneWidget);
+        expect(find.text('long hair'), findsOneWidget);
+        final specific = tester.getTopLeft(find.text('hair ribbon'));
+        final generic = tester.getTopLeft(find.text('long hair'));
+        expect(
+          specific.dy < generic.dy ||
+              (specific.dy == generic.dy && specific.dx < generic.dx),
+          isTrue,
+        );
+        expect(controller.text, 'blue hair, solo');
+        if (drag) {
+          expect(controller.selection.textInside(controller.text), 'blue hair');
+        }
+      },
+    );
+  }
 
   testWidgets('typing stays quiet; Ctrl+click searches and inserts locally', (
     tester,
@@ -1225,6 +1289,37 @@ class _Source implements CompletionSource {
     queries.add(query);
     return results;
   }
+}
+
+class _WeightedCatalog extends TagCatalogRepository {
+  @override
+  Future<int> maximumPostCount() async => 10000;
+
+  @override
+  Future<Map<String, TagCatalogRecord>> recordsByCanonicalTag(
+    Iterable<String> tags,
+  ) async => {
+    for (final tag in tags)
+      tag: TagCatalogRecord(
+        canonicalTag: tag,
+        category: TagCategory.general,
+        postCount: tag == 'long_hair' ? 10000 : 1000,
+      ),
+  };
+}
+
+class _WeightedEdges extends CooccurrenceDataSource {
+  @override
+  Future<Map<String, List<RelatedTag>>> getRelatedTagsBatch(
+    List<String> tags, {
+    int? limit = 10,
+  }) async => {
+    for (final tag in tags)
+      tag: const [
+        RelatedTag(tag: 'long_hair', count: 800),
+        RelatedTag(tag: 'hair_ribbon', count: 100),
+      ],
+  };
 }
 
 class _Wiki implements TagWikiRepository {

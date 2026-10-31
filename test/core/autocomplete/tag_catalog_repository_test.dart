@@ -140,6 +140,24 @@ void main() {
     expect(results.map((tag) => tag.canonicalTag), ['blue_hair', 'blue_eyes']);
     expect(results.every((tag) => tag.category == TagCategory.general), isTrue);
   });
+
+  test('frequency baseline follows the catalog revision', () async {
+    var currentPath = database.path;
+    final dynamicRepository = TagCatalogRepository(
+      path: () async => currentPath,
+    );
+    addTearDown(dynamicRepository.dispose);
+    expect(await dynamicRepository.maximumPostCount(), 3000);
+    final nextPath = p.join(temp.path, 'next.db');
+    final next = native.sqlite3.open(nextPath);
+    next.execute(
+      'CREATE TABLE tags(post_count INTEGER); INSERT INTO tags VALUES(9000)',
+    );
+    next.dispose();
+    currentPath = nextPath;
+    expect(await dynamicRepository.maximumPostCount(), 9000);
+    expect(await repository.maximumPostCount(), 3000);
+  });
 }
 
 CompletionQuery _query(String token, {int limit = 20}) => CompletionQuery(

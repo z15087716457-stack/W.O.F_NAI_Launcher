@@ -403,7 +403,10 @@ class Engine:
             # Reserve recall inside visual categories instead of filtering a
             # small global top-k after artist/character names have filled it.
             if not entity_query:
-                recall = self.ann.search(query, max(1000,budget) if manual else budget, categories=(0,7,5,14,12,15))
+                # Manual queries can use a near-full first recall instead of
+                # expanding the ANN solely to fill the last few candidates.
+                recall = self.ann.search(query, max(1000,budget) if manual else budget,
+                    categories=(0,7,5,14,12,15), min_count=800 if manual else None)
                 visual = list(recall.keys)
                 if manual:
                     names_by_id = {int(key):self.db.execute('SELECT name FROM documents WHERE id=?',(int(key),)).fetchone()[0] for key in visual}

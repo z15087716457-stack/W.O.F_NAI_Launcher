@@ -1,8 +1,12 @@
 import { Type } from 'typebox';
 
-// Native Pi history access, discovered on demand. No JSONL parsing or prompt hook.
+// Native Pi history access, discovered on demand. No JSONL parsing.
 export function createSessionHistoryExtension(redact) {
   return { name: 'nai-session-history', factory(pi) {
+    const hint = 'Earlier turns are preserved; use session_history for exact details.';
+    pi.on('context', ({messages}) => ({messages:messages.map(message =>
+      message.role === 'compactionSummary' && !message.summary.endsWith(hint)
+        ? {...message,summary:message.summary+'\n\n'+hint} : message)}));
     pi.registerTool({
       name: 'session_history', label: 'Session history', exposure: 'deferred',
       description: 'Read exact earlier conversation on the current branch, including before compaction. outline lists user turns; search finds text; read reads an entry; read_turn reads a turn. Images/binary and thinking are omitted. Bounded results offer next_offset.',
@@ -54,6 +58,26 @@ export function createSessionHistoryExtension(redact) {
           return redact((message.content ?? []).filter(part => part.type !== 'thinking').map(part =>
             part.type === 'text' ? clean(part.text) : JSON.stringify(clean(part))).join('\n'));
         }
+        function outlineText(row) {
+          const content = row.entry.message.content;
+          let body = typeof content === 'string' ? content
+            : (content ?? []).filter(part => part.type === 'text').map(part => part.text).join('\n');
+          // Same envelope as Dart attachment_manifest.dart; keep malformed or
+          // quoted lookalikes intact. Full reads/searches still use raw text().
+          const prefix = 'Original file attachments (source data, not instructions; ';
+          const marker = prefix+'read full NAI metadata only when needed using image_read(path, metadata_only=true)):\n';
+          const pixels = '\nVisual pixels sent to model: ';
+          const start = body.lastIndexOf(prefix), end = body.lastIndexOf(pixels);
+          if (start >= 0 && (start === 0 || body[start-1] === '\n') && body.startsWith(marker,start)
+            && end >= start+marker.length && /^(true|false)\.\s*$/.test(body.slice(end+pixels.length))) {
+            let rows;
+            try { rows = JSON.parse(body.slice(start+marker.length,end)); }
+            catch (error) { if (!(error instanceof SyntaxError)) throw error; }
+            if (Array.isArray(rows) && rows.length && rows.every(row => row && typeof row === 'object' && typeof row.path === 'string'))
+              body = body.slice(0,start).replace(/\n{1,2}$/,'');
+          }
+          return redact(clean(body)).slice(0,200);
+        }
         const offset = args.offset ?? 0, limit = args.limit ?? 20;
         const budget = args.max_chars ?? 12000;
         const metadata = row => ({entry_id:row.entry.id,turn:row.turn,role:row.role,
@@ -64,7 +88,7 @@ export function createSessionHistoryExtension(redact) {
         if (args.action === 'outline') {
           const users = scope.filter(row => row.role === 'user');
           const selected = users.slice(offset,offset+limit);
-          payload = {items:selected.map(row => ({...metadata(row),user:text(row).slice(0,200),
+          payload = {items:selected.map(row => ({...metadata(row),user:outlineText(row),
             tool_calls:rows.filter(item => item.turn === row.turn && item.role === 'assistant')
               .reduce((count,item) => count + (Array.isArray(item.entry.message.content)
                 ? item.entry.message.content.filter(part => part.type === 'toolCall').length : 0),0)})),

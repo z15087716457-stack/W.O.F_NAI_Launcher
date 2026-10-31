@@ -116,6 +116,14 @@ test('host state exposes archived current-branch messages and a real Pi compacti
     assert.equal(marker.timestamp, f.ready.messages.find(m=>m.role==='compactionSummary').timestamp);
     assert.ok(!f.ready.historyMessages.some(m=>m.timestamp===4));
     assert.equal(f.requests.length,0);
+    await f.request('prompt',{text:'Continue after compaction'});
+    const sent=JSON.stringify(f.requests[0]);
+    const hint='Earlier turns are preserved; use session_history for exact details.';
+    assert.equal(sent.split(hint).length-1,1);
+    const stored=await readFile(f.sessionFile,'utf8');
+    assert.ok(!stored.includes(hint));
+    const state=await f.request('state');
+    assert.equal(state.messages.find(message=>message.role==='compactionSummary').summary,marker.summary);
   } finally { await f.close(); }
 });
 

@@ -9,6 +9,7 @@ import 'package:nai_launcher/presentation/ui/agent/agent_parts.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_thread.dart';
 
 import 'agent_test_harness.dart';
+import '../../../helpers/studio_capture_fonts.dart';
 
 final _at = DateTime(2026, 10, 20, 15);
 
@@ -73,6 +74,7 @@ AgentStep _read(String id, {AgentStepStatus status = AgentStepStatus.done}) =>
 String _plain(List<AgentDiffSegment?> w) => w.map((s) => s?.text ?? '…').join();
 
 void main() {
+  setUpAll(loadStudioCaptureFonts);
   setUp(AgentAppear.reset);
 
   group('提示词改动窗口', () {
@@ -341,6 +343,12 @@ void main() {
         const AgentTextBlock('后面'),
       ]),
     );
+    final divider = find.byType(AgentCompactionView);
+    expect(
+      find.ancestor(of: divider, matching: find.byType(AgentCard)),
+      findsNothing,
+    );
+    expect(find.byType(AgentCard), findsNWidgets(2));
     expect(find.text('上下文快满了，之前的对话已自动压缩'), findsOneWidget);
     expect(find.byKey(const Key('agent-compaction-summary')), findsNothing);
     await t.tap(find.text('上下文快满了，之前的对话已自动压缩'));
@@ -348,6 +356,105 @@ void main() {
     expect(find.byKey(const Key('agent-compaction-summary')), findsOneWidget);
     expect(find.text('用户在整理画廊'), findsOneWidget);
     expect(find.text('原 182k token'), findsOneWidget);
+  });
+
+  for (final width in [300.0, 420.0]) {
+    for (final locale in ['zh', 'en']) {
+      testWidgets('独立压缩行居中 $locale @ $width', (t) async {
+        await pumpAgent(
+          t,
+          width: width,
+          locale: locale,
+          data: _view([
+            const AgentTextBlock('Before'),
+            AgentCompactionBlock(summary: 'Summary', auto: true, at: _at),
+            const AgentTextBlock('After'),
+          ]),
+        );
+        final divider = find.byType(AgentCompactionView);
+        final label = find.descendant(of: divider, matching: find.byType(Text));
+        expect(t.getCenter(label).dx, closeTo(t.getCenter(divider).dx, 1));
+        expect(
+          t.getRect(find.byType(AgentCard).first).bottom,
+          lessThan(t.getRect(divider).top),
+        );
+        expect(
+          t.getRect(divider).bottom,
+          lessThan(t.getRect(find.byType(AgentCard).last).top),
+        );
+        expect(t.takeException(), isNull);
+      });
+    }
+  }
+
+  testWidgets('末尾连续压缩行放在用时栏外，不产生空回复卡', (t) async {
+    final rec = await pumpAgent(
+      t,
+      data: _view([
+        const AgentTextBlock('Completed answer'),
+        AgentCompactionBlock(summary: 'First summary', at: _at),
+        AgentCompactionBlock(summary: 'Second summary', at: _at),
+      ], summary: const AgentTurnSummary(took: Duration(seconds: 168))),
+    );
+    expect(find.byType(AgentCard), findsOneWidget);
+    expect(find.byType(AgentCompactionView), findsNWidgets(2));
+    expect(find.text('用时 2m 48s'), findsOneWidget);
+    expect(
+      t.getRect(find.byType(AgentCard)).bottom,
+      lessThan(t.getRect(find.byType(AgentCompactionView).first).top),
+    );
+    await t.tap(find.byKey(const Key('agent-regenerate')));
+    await t.pump();
+    expect(rec.names, contains('regenerate'));
+  });
+
+  testWidgets('分开的回复复制仍包含压缩前后正文，运行中保留工作提示', (t) async {
+    final copied = <String>[];
+    t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+      SystemChannels.platform,
+      (call) async {
+        if (call.method == 'Clipboard.setData') {
+          copied.add((call.arguments as Map)['text'] as String);
+        }
+        return null;
+      },
+    );
+    addTearDown(
+      () => t.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        null,
+      ),
+    );
+    final compact = AgentCompactionBlock(summary: 'Summary', at: _at);
+    await pumpAgent(
+      t,
+      data: _view([
+        const AgentTextBlock('Before'),
+        compact,
+        const AgentTextBlock('After'),
+      ]),
+    );
+    final card = find.ancestor(
+      of: find.byKey(const Key('agent-regenerate')),
+      matching: find.byType(AgentCard),
+    );
+    await t.tap(find.descendant(of: card, matching: find.byTooltip('复制')));
+    await t.pump();
+    expect(copied, ['Before\n\nAfter']);
+    await pumpAgent(
+      t,
+      data: _view(
+        [const AgentTextBlock('Before'), compact],
+        live: true,
+        regenerate: false,
+      ),
+    );
+    expect(find.byKey(const Key('agent-live-slogan')), findsOneWidget);
+    expect(
+      t.getRect(find.byType(AgentCard).last).top,
+      greaterThan(t.getRect(find.byType(AgentCompactionView)).bottom),
+    );
+    expect(t.takeException(), isNull);
   });
 
   testWidgets('一轮小结：一行淡字，没有的项不写；进行中不显示', (t) async {
