@@ -14,6 +14,8 @@
 
 本轮 110 项应用回归及 3 项打包回归、全仓分析和发布清单夹具通过；此前专项按匹配源码复用。安装／回退引擎沿用当前已验证实现，仅更换本批路径和版本常量，12 个原隔离场景证据复用并明确标注，未冒称重跑。构建中的本地化换行变化已确认仅为格式转换并恢复，原始冻结输入复验通过。
 
+最终一致性检查校正了桌面 `package-info.json` 遗留的 Pi 1.3.0 标记，实际运行时始终为 1.5.0；载荷和收据的对应校验值同步更新，前值另行备份。15,550 个程序文件、5 个载荷文件与 +79 完整回退再次核验通过，AOT 不变；材料见 `desktop/metadata-fix-verification.json`。本批准备脚本同时补齐该字段。
+
 收据：`nai-launcher-src/.dart_tool/glass-rollout-delivery.json`。材料：有效源码 `.dart_tool/release-2.2.5/desktop/`，完成核验见 `final-verification.json`。
 
 单步回退（须完全退出 Studio）：
