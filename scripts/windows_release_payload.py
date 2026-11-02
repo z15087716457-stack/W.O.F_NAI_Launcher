@@ -50,11 +50,12 @@ def verify_agent(root, runtime):
     installed = json.loads((source / 'node_modules/.package-lock.json').read_text(encoding='utf-8'))['packages']
     if set(installed) != set(lock) - {''}:
         raise RuntimeError('Agent node_modules package key set differs from package-lock.json; run npm ci in CI.')
-    for family in ('pi-agent-core', 'pi-ai', 'pi-codemode', 'pi-coding-agent', 'pi-mcp', 'pi-telemetry', 'pi-tui'):
+    pi_version = lock['node_modules/@earendil-works/pi-coding-agent']['version']
+    for family in ('pi-agent-core', 'pi-ai', 'pi-codemode', 'pi-coding-agent', 'pi-mcp', 'pi-schema', 'pi-telemetry', 'pi-tui'):
         key = f'node_modules/@earendil-works/{family}'
         version = json.loads((source / key / 'package.json').read_text(encoding='utf-8'))['version']
-        if not (version == installed[key]['version'] == lock[key]['version'] == '1.3.0'):
-            raise RuntimeError(f'Expected Pi 1.3.0: {family}')
+        if not (version == installed[key]['version'] == lock[key]['version'] == pi_version):
+            raise RuntimeError(f'Expected Pi {pi_version}: {family}')
     if (source / 'node_modules/@earendil-works/chord').exists():
         raise RuntimeError('Obsolete chord package found; run npm ci in CI.')
     for name in ('node.exe', 'NODE-LICENSE', 'PI-LICENSE'):
@@ -107,13 +108,14 @@ def finish(root, destination, version, display, flutter_json, crt_json):
     reject_private(destination)
     flutter = json.loads(path(flutter_json).read_text(encoding='utf-8-sig'))
     node = subprocess.check_output([str(destination / 'tools/nai-agent/node.exe'), '--version'], text=True).strip()
+    pi_version = json.loads((destination / 'tools/nai-agent/node_modules/@earendil-works/pi-coding-agent/package.json').read_text(encoding='utf-8'))['version']
     write_json(destination / 'package-info.json', {
         'product': 'W.O.F NAI Studio', 'version': display, 'buildVersion': version,
         'channel': 'stable', 'platform': 'windows-x64',
         'sourceCommit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip(),
         'aotSha256': sha(destination / 'data/app.so'),
         'flutterVersion': flutter['frameworkVersion'], 'dartVersion': flutter['dartSdkVersion'],
-        'nodeVersion': node, 'piVersion': '1.3.0',
+        'nodeVersion': node, 'piVersion': pi_version,
         'containsPublisherUserData': False, 'dataStorage': '<app dir>/user-data',
         'crtFiles': json.loads(path(crt_json).read_text(encoding='utf-8-sig')),
     })

@@ -37,6 +37,8 @@ $sdk = (Resolve-Path '../../sdk/flutter-3.47.7').Path
 
 Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服务，不请求真实模型或 NAI。`NAI_AGENT_COMPOSER_CAPTURES` 指定 widget 实绘输出目录；紧凑面板测试覆盖五种语言、320/380/460px、深浅色及六种状态。运行中状态有持续进度动画，使用定时 `pump` 而非 `pumpAndSettle`。截图仅作组件／合成数据证据，不代表已安装版本。
 
+Agent 依赖变化还须覆盖分发入口：`python -m unittest discover -s test/scripts -p windows_release_payload_test.py` 验证版本预检和包信息；Pi 组件版本从锁文件核对，发布元数据读取实际包内版本，不另留版本常量。
+
 ## 当前 Glass 包交付
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
