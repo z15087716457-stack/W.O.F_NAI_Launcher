@@ -1171,12 +1171,16 @@ class AgentFile {
 class AgentMemoryData {
   const AgentMemoryData({
     this.globalInstructions = '',
+    this.chatPrefix = '',
     this.workspaceRules = '',
     this.activeSkills = const [],
   });
 
   /// 全局指令（所有工作区）。
   final String globalInstructions;
+
+  /// 当前聊天的前置指令，放在内置提示词之前。
+  final String chatPrefix;
 
   /// 本工作区规则（`instructions.md`）。
   final String workspaceRules;
@@ -1581,7 +1585,7 @@ class AgentActions {
   final void Function(String section, String anchor) onOpenSettingAt;
 }
 
-enum AgentMemoryTarget { global, workspace, skills, quick }
+enum AgentMemoryTarget { global, chatPrefix, workspace, skills, quick }
 
 /// 需要平台能力的包装，由转接层提供；null = 不包。
 @immutable

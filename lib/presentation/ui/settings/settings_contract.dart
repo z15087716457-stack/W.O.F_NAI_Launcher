@@ -1912,14 +1912,22 @@ class SettingsBackupData {
 
 // ── 关于
 
-enum SettingsUpdateState { upToDate, available, checking, downloading, failed }
+enum SettingsUpdateState {
+  unchecked,
+  skipped,
+  upToDate,
+  available,
+  checking,
+  downloading,
+  failed,
+}
 
 @immutable
 class SettingsAboutData {
   const SettingsAboutData({
     this.build = '',
     this.platform = '',
-    this.update = SettingsUpdateState.upToDate,
+    this.update = SettingsUpdateState.unchecked,
     this.latest = '',
     this.releasedAt,
     this.updateBytes = 0,

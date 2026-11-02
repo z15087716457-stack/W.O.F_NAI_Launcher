@@ -56,13 +56,18 @@ final settingsAgentTrashProvider =
       (ref) => ref.watch(naiAgentWorkspaceStoreProvider).listTrash(),
     );
 
-/// Query only an existing idle host; rendering settings cannot start one.
+/// Opening MCP settings initializes the existing session when servers are enabled.
 final settingsMcpStatusProvider = FutureProvider.autoDispose<String>((
   ref,
 ) async {
   // Becoming ready replaces preferences even when Settings opened first.
-  ref.watch(naiAgentUiPreferencesProvider.select((value) => value.settings));
-  if (!ref.exists(naiAgentControllerProvider)) return '';
+  final settings = ref.watch(
+    naiAgentUiPreferencesProvider.select((value) => value.settings),
+  );
+  if (!ref.exists(naiAgentControllerProvider) &&
+      !settings.mcpServers.any((server) => server.enabled)) {
+    return '';
+  }
   final runtime = ref.watch(
     naiAgentControllerProvider.select(
       (value) => (
@@ -95,6 +100,7 @@ SettingsMcpServer settingsMcpServer(
   String status, {
   bool pending = false,
   bool canCheck = true,
+  bool connecting = false,
 }) {
   final line =
       RegExp(
@@ -104,6 +110,8 @@ SettingsMcpServer settingsMcpServer(
       '';
   final state = !server.enabled
       ? SettingsMcpState.disabled
+      : connecting
+      ? SettingsMcpState.connecting
       : line.startsWith('needs sign-in')
       ? SettingsMcpState.needsLogin
       : line.startsWith('connected')
@@ -115,7 +123,7 @@ SettingsMcpServer settingsMcpServer(
       : SettingsMcpState.unchecked;
   return SettingsMcpServer(
     id: server.configId,
-    name: server.name,
+    name: server.label,
     transport: server.transport,
     state: state,
     pending: pending,
@@ -137,7 +145,7 @@ SettingsMcpServer settingsMcpServer(
   );
 }
 
-/// These settings can be read/edited without creating a workspace or Node child.
+/// Shares persistence and the current Pi host with the Agent.
 class SettingsAgentBackend {
   SettingsAgentBackend(this.ref);
   final Ref ref;
@@ -258,7 +266,12 @@ class SettingsAgentBackend {
       }
       final workspace = controller.selectedWorkspace;
       if (workspace != null) {
-        return _pending(await store.effectiveSystemPrompt(workspace.id));
+        return _pending(
+          await store.effectiveSystemPrompt(
+            workspace.id,
+            chatPrefix: controller.selected?.chat.systemPromptPrefix ?? '',
+          ),
+        );
       }
     }
     final value = await store.readSettings();
@@ -267,7 +280,16 @@ class SettingsAgentBackend {
         .where((w) => w.id == value.selectedWorkspaceId)
         .firstOrNull;
     if (workspace != null) {
-      return _pending(await store.effectiveSystemPrompt(workspace.id));
+      final chats = await store.listChats(workspace.id);
+      final chat =
+          chats.where((c) => c.id == workspace.lastSessionId).firstOrNull ??
+          chats.firstOrNull;
+      return _pending(
+        await store.effectiveSystemPrompt(
+          workspace.id,
+          chatPrefix: chat?.systemPromptPrefix ?? '',
+        ),
+      );
     }
     return _pending(
       [
@@ -708,9 +730,7 @@ SettingsAgentData settingsAgentData(
       : null;
   final workspace = controller?.selectedWorkspace ?? inventory?.selected;
   final skills = ref.watch(naiAgentSkillsProvider(workspace?.id)).valueOrNull;
-  final mcpStatus = inspect
-      ? ref.watch(settingsMcpStatusProvider).valueOrNull ?? ''
-      : '';
+  final mcpStatus = inspect ? ref.watch(settingsMcpStatusProvider) : null;
   return SettingsAgentData(
     globalInstructions: settings.globalInstructions,
     workspaceRulesPath: workspace == null
@@ -790,7 +810,10 @@ SettingsAgentData settingsAgentData(
       for (final server in settings.mcpServers)
         settingsMcpServer(
           server,
-          mcpStatus,
+          mcpStatus?.valueOrNull ?? '',
+          connecting:
+              controller?.selected?.starting == true ||
+              mcpStatus?.isLoading == true,
           pending:
               controller?.selected?.client != null &&
               controller!.selected!.extensionSignature !=

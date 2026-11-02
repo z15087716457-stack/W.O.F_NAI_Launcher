@@ -4898,6 +4898,8 @@
   "update_errorPackageCorrupted": "업데이트 패키지가 손상되었습니다. 다시 다운로드하세요",
   "update_errorLaunchFailed": "업데이트 프로그램을 시작하지 못했습니다",
   "update_errorCheckFailed": "업데이트를 확인하지 못했습니다",
+  "update_errorRateLimited": "GitHub 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.",
+  "update_retryAt": "{time}(현지 시간) 이후에 다시 시도하세요.",
   "update_errorCheckUnknown": "업데이트를 확인하는 중 알 수 없는 오류가 발생했습니다",
   "update_errorLogPath": "로그: {path}",
   "@update_errorLogPath": {
@@ -8236,7 +8238,6 @@
       "total": {}
     }
   },
-  "gen_recent": "최근",
   "gen_encoded": "인코딩됨",
   "gen_encoding": "인코딩 중",
   "gen_encode": "인코딩",
@@ -10443,6 +10444,8 @@
     }
   },
   "set_abLatest": "최신 버전",
+  "set_abUnchecked": "확인 전",
+  "set_abSkipped": "업데이트 건너뜀",
   "set_abChecking": "업데이트 확인 중…",
   "set_abCheckFailed": "업데이트 확인 실패",
   "set_abDownloading": "다운로드 중 {pct}",
@@ -11059,6 +11062,8 @@
   "ag_shelfEmpty": "이 채팅에는 아직 산출물이 없습니다",
   "ag_shelfEmptyHint": "Agent가 생성한 이미지, 직접 첨부한 이미지, 작성한 파일이 모두 여기에 모입니다.",
   "ag_memoryGlobal": "전역 지침",
+  "ag_memoryChatPrefix": "이 대화의 선행 지침",
+  "ag_memoryChatPrefixHint": "현재 대화에만 적용되며 기본 시스템 프롬프트 앞에 추가됩니다.",
   "ag_memoryWorkspace": "작업 공간 규칙",
   "ag_memorySkills": "적용 중인 스킬",
   "ag_memoryEmpty": "설정 안 됨",
@@ -11608,6 +11613,9 @@
     }
   },
   "set_agMcpStdio": "로컬 명령",
+  "set_agMcpDisplayName": "표시 이름(선택)",
+  "set_agMcpDisplayNameHint": "화면에만 표시되며 도구 이름은 변경되지 않습니다.",
+  "set_agMcpIdentifier": "도구 식별자",
   "set_agMcpAddress": "서버 주소",
   "set_agMcpCommand": "실행 명령",
   "set_agMcpArgs": "인수 (한 줄에 하나)",

@@ -90,6 +90,17 @@ void main() {
     expect(find.text('新版本 v2.0.0 可用'), findsNothing);
   });
 
+  testWidgets('后台检查失败在没有通知授权时保持安静', (tester) async {
+    await tester.pumpWidget(
+      app(
+        const UpdateState(status: UpdateStatus.error, errorMessage: 'offline'),
+      ),
+    );
+    expect(find.text('offline'), findsNothing);
+    final l = AppLocalizations.of(tester.element(find.byType(Scaffold)))!;
+    expect(find.text(l.updateNoticeFailed), findsNothing);
+  });
+
   testWidgets('distinguishes a verified package ready to install', (
     tester,
   ) async {

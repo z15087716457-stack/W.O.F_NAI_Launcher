@@ -833,8 +833,6 @@ class _VibeSection extends StatelessWidget {
                     ),
                   ],
                 ),
-              if (v.recent.isNotEmpty && v.list.length < v.max)
-                _Recent(recent: v.recent, onAdd: a.onAddRecentVibe),
             ],
           ),
       ],
@@ -1016,55 +1014,6 @@ class _VibeItem extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// 最近用过：一排 28 方缩略图，点一下加回来。
-class _Recent extends StatelessWidget {
-  const _Recent({required this.recent, required this.onAdd});
-  final List<GenRecentVibe> recent;
-  final ValueChanged<String> onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.ui;
-    return Row(
-      spacing: 6,
-      children: [
-        Text(context.l10n.gen_recent, style: UiText.sans(11.5, color: c.faint)),
-        Expanded(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              spacing: 4,
-              children: [
-                for (final r in recent)
-                  Tooltip(
-                    message: r.name,
-                    child: UiPressable(
-                      key: Key('gen-recent-${r.id}'),
-                      onTap: () => onAdd(r.id),
-                      builder: (context, hover) => Container(
-                        width: 28,
-                        height: 28,
-                        clipBehavior: Clip.antiAlias,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          border: Border.all(
-                            color: hover ? c.accent : Colors.transparent,
-                            width: 1.5,
-                          ),
-                        ),
-                        child: UiPreviewImage(image: r.thumb),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

@@ -32,16 +32,22 @@ class NaiAgentMcpSettings extends ConsumerWidget {
       throw StateError('MCP configuration missing: ${server.name}');
     }
     if (!context.mounted) return;
-    final value = await showSettingsDialog<(String, Map<String, dynamic>)>(
-      context,
-      (_) => _McpEditor(server: server, existing: existing),
-    );
+    final value =
+        await showSettingsDialog<(String, Map<String, dynamic>, String)>(
+          context,
+          (_) => _McpEditor(server: server, existing: existing),
+        );
     if (value == null || !context.mounted) return;
     await agentUiAction(
       context,
       () => ref
           .read(naiAgentManagementProvider)
-          .saveMcp(value.$1, value.$2, replacing: server?.configId),
+          .saveMcp(
+            value.$1,
+            value.$2,
+            replacing: server?.configId,
+            displayName: value.$3,
+          ),
     );
   }
 
@@ -169,7 +175,7 @@ class NaiAgentMcpSettings extends ConsumerWidget {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            server.name,
+                            server.label,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -288,6 +294,9 @@ class _McpEditor extends ConsumerStatefulWidget {
 
 class _McpEditorState extends ConsumerState<_McpEditor> {
   late final _name = TextEditingController(text: widget.server?.name ?? '');
+  late final _displayName = TextEditingController(
+    text: widget.server?.displayName ?? '',
+  );
   final _json = TextEditingController();
   final _url = TextEditingController(), _command = TextEditingController();
   final _args = TextEditingController(), _cwd = TextEditingController();
@@ -420,7 +429,11 @@ class _McpEditorState extends ConsumerState<_McpEditor> {
   void _save() {
     try {
       final config = _configuration();
-      Navigator.pop(context, (_name.text.trim(), config));
+      Navigator.pop(context, (
+        _name.text.trim(),
+        config,
+        _displayName.text.trim(),
+      ));
     } catch (e) {
       setState(() => _error = '$e');
     }
@@ -464,7 +477,16 @@ class _McpEditorState extends ConsumerState<_McpEditor> {
   @override
   void dispose() {
     _testing?.cancel();
-    for (final c in [_name, _json, _url, _command, _args, _cwd, _oauth]) {
+    for (final c in [
+      _name,
+      _displayName,
+      _json,
+      _url,
+      _command,
+      _args,
+      _cwd,
+      _oauth,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -535,7 +557,18 @@ class _McpEditorState extends ConsumerState<_McpEditor> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16,
           children: [
-            field('nai-mcp-name', l.naiAgent_mcpName, _name, hint: 'my-server'),
+            field(
+              'nai-mcp-display-name',
+              l.set_agMcpDisplayName,
+              _displayName,
+              hint: l.set_agMcpDisplayNameHint,
+            ),
+            field(
+              'nai-mcp-name',
+              l.set_agMcpIdentifier,
+              _name,
+              hint: 'my-server',
+            ),
             Row(
               spacing: 8,
               children: [

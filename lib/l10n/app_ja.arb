@@ -4898,6 +4898,8 @@
   "update_errorPackageCorrupted": "更新パッケージが破損しています。もう一度ダウンロードしてください",
   "update_errorLaunchFailed": "更新プログラムの起動に失敗しました",
   "update_errorCheckFailed": "更新の確認に失敗しました",
+  "update_errorRateLimited": "GitHub のリクエスト上限に達しました。しばらくしてから再試行してください。",
+  "update_retryAt": "{time}（現地時刻）以降に再試行してください。",
   "update_errorCheckUnknown": "更新の確認中に不明なエラーが発生しました",
   "update_errorLogPath": "ログ：{path}",
   "@update_errorLogPath": {
@@ -8236,7 +8238,6 @@
       "total": {}
     }
   },
-  "gen_recent": "最近",
   "gen_encoded": "エンコード済み",
   "gen_encoding": "エンコード中",
   "gen_encode": "エンコード",
@@ -10443,6 +10444,8 @@
     }
   },
   "set_abLatest": "最新です",
+  "set_abUnchecked": "未確認",
+  "set_abSkipped": "この更新はスキップ済み",
   "set_abChecking": "更新を確認中…",
   "set_abCheckFailed": "更新の確認に失敗",
   "set_abDownloading": "ダウンロード中 {pct}",
@@ -11059,6 +11062,8 @@
   "ag_shelfEmpty": "このチャットにはまだ出力がありません",
   "ag_shelfEmptyHint": "Agent が生成した画像、添付した画像、書き出したファイルがここにまとまります。",
   "ag_memoryGlobal": "共通指示",
+  "ag_memoryChatPrefix": "このチャットの前置指示",
+  "ag_memoryChatPrefixHint": "このチャットにのみ適用され、内蔵システムプロンプトの前に追加されます。",
   "ag_memoryWorkspace": "ワークスペースのルール",
   "ag_memorySkills": "有効なスキル",
   "ag_memoryEmpty": "未設定",
@@ -11608,6 +11613,9 @@
     }
   },
   "set_agMcpStdio": "ローカルコマンド",
+  "set_agMcpDisplayName": "表示名（任意）",
+  "set_agMcpDisplayNameHint": "画面上の表示のみ変更し、ツール名は変わりません。",
+  "set_agMcpIdentifier": "ツール識別子",
   "set_agMcpAddress": "サーバー URL",
   "set_agMcpCommand": "実行コマンド",
   "set_agMcpArgs": "引数（1 行に 1 つ）",

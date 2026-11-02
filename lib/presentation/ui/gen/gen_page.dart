@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/utils/localization_extension.dart';
 import '../../widgets/navigation/window_chrome_layout.dart';
@@ -23,9 +24,12 @@ import 'gen_params.dart';
 import 'gen_parts.dart';
 import 'gen_prompt.dart';
 import 'gen_refs.dart';
+import 'gen_selection.dart';
 
 /// 页面级的界面状态和命令：菜单、弹层、弹窗、参数抽屉，各部件通过 [GenScope] 拿到。
 abstract class GenController {
+  GenImageSelection get selection;
+
   /// 弹一个菜单；[tag] 用来让触发按钮显示“打开中”。
   void openMenu(
     UiPopoverAnchor anchor,
@@ -69,6 +73,7 @@ enum GenAspect {
   canvas,
   canvasTile,
   history,
+  selection,
 }
 
 class GenScope extends InheritedModel<GenAspect> {
@@ -80,6 +85,7 @@ class GenScope extends InheritedModel<GenAspect> {
     required this.controller,
     this.drawerSnapshot,
     this.popoverSnapshot,
+    this.selectionRevision = 0,
     required super.child,
   });
 
@@ -87,6 +93,7 @@ class GenScope extends InheritedModel<GenAspect> {
   final GenActions actions;
   final GenSlots slots;
   final GenController controller;
+  final int selectionRevision;
 
   static GenScope of(BuildContext context, [GenAspect? aspect]) =>
       InheritedModel.inheritFrom<GenScope>(context, aspect: aspect)!;
@@ -133,6 +140,7 @@ class GenScope extends InheritedModel<GenAspect> {
       data.now?.month,
       data.now?.day,
     ),
+    GenAspect.selection => selectionRevision,
   };
 
   @override
@@ -220,6 +228,30 @@ class _GenHostState extends State<GenHost> implements GenController {
   var _drawer = false;
 
   @override
+  final selection = GenImageSelection();
+
+  @override
+  void initState() {
+    super.initState();
+    selection.sync(widget.data.history.batches);
+    selection.addListener(_selectionChanged);
+  }
+
+  void _selectionChanged() => setState(() {});
+
+  @override
+  void didUpdateWidget(GenHost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    selection.sync(widget.data.history.batches);
+  }
+
+  @override
+  void dispose() {
+    selection.dispose();
+    super.dispose();
+  }
+
+  @override
   void openMenu(
     UiPopoverAnchor anchor,
     List<UiMenuItem> items, {
@@ -278,21 +310,29 @@ class _GenHostState extends State<GenHost> implements GenController {
     controller: this,
     drawerSnapshot: _drawer,
     popoverSnapshot: _tag,
+    selectionRevision: selection.revision,
     child: child,
   );
 
   @override
-  Widget build(BuildContext context) => _scope(
-    UiModal(
-      dialog: _dialog == null ? null : (ctx) => _scope(_dialog!(ctx)),
-      onDismiss: closeDialog,
-      child: UiPopover(
-        anchor: _anchor,
-        onDismiss: closePopover,
-        builder: (ctx) => _popover == null
-            ? const SizedBox.shrink()
-            : _scope(Builder(builder: _popover!)),
-        child: widget.child,
+  Widget build(BuildContext context) => CallbackShortcuts(
+    bindings: {
+      if (selection.active)
+        const SingleActivator(LogicalKeyboardKey.escape): () =>
+            selection.setActive(false),
+    },
+    child: _scope(
+      UiModal(
+        dialog: _dialog == null ? null : (ctx) => _scope(_dialog!(ctx)),
+        onDismiss: closeDialog,
+        child: UiPopover(
+          anchor: _anchor,
+          onDismiss: closePopover,
+          builder: (ctx) => _popover == null
+              ? const SizedBox.shrink()
+              : _scope(Builder(builder: _popover!)),
+          child: widget.child,
+        ),
       ),
     ),
   );

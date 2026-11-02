@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -323,8 +324,17 @@ class UpdateCheckService {
       await _storage.setUpdateRemindAfter(null);
       return null;
     } on GitHubApiException catch (e) {
+      final l10n = currentL10n;
       throw UpdateCheckException(
-        currentL10n.update_errorCheckFailed,
+        [
+          '${l10n.update_errorCheckFailed}${e.statusCode == null ? '' : ' · HTTP ${e.statusCode}'}',
+          if (e.rateLimited) l10n.update_errorRateLimited,
+          e.message,
+          if (e.retryAt != null)
+            l10n.update_retryAt(
+              DateFormat('yyyy-MM-dd HH:mm:ss').format(e.retryAt!.toLocal()),
+            ),
+        ].join('\n'),
         originalError: e,
       );
     } catch (e) {
@@ -338,6 +348,13 @@ class UpdateCheckService {
 
   /// 当前应用版本
   String get currentVersion => _packageInfo.version;
+
+  /// 最近一次成功检查发现了新版，包括已忽略的版本。
+  bool get hasKnownUpdate {
+    final version = _storage.getLastKnownUpdateVersion();
+    return version != null &&
+        VersionInfoComparator.isNewer(version, currentVersion);
+  }
 
   /// 标记为成功完成检查
   Future<void> markAsChecked() async {

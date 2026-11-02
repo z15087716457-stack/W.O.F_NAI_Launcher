@@ -42,7 +42,7 @@ class CloudUpscaleTask extends Notifier<CloudUpscaleState> {
     final remove = DesktopAppShutdownService.registerCleanup(() async {
       cancel();
       await _pending;
-    });
+    }, name: 'Cloud upscale');
     ref.onDispose(() {
       _disposed = true;
       _cancellation?.cancel();

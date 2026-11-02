@@ -94,6 +94,10 @@ class _GenerationCanvasWiringState
               true,
         ),
         deferKeyEvent: (event) {
+          if (event.logicalKey == LogicalKeyboardKey.escape &&
+              GenScope.read(context).controller.selection.active) {
+            return true;
+          }
           final config = ref.read(shortcutConfigNotifierProvider).valueOrNull;
           if (config == null || !config.enableShortcuts) return false;
           return config.bindings.values.any((binding) {

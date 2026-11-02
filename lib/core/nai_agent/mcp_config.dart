@@ -11,15 +11,19 @@ class AgentMcpServer {
     required this.transport,
     this.enabled = true,
     this.exposure = 'codemode',
+    this.displayName = '',
   });
-  final String name, configId, transport, exposure;
+  final String name, configId, transport, exposure, displayName;
   final bool enabled;
-  Map<String, dynamic> toJson() => {
+  String get label => displayName.isEmpty ? name : displayName;
+  Map<String, dynamic> toJson({bool includeDisplayName = true}) => {
     'name': name,
     'configId': configId,
     'transport': transport,
     'enabled': enabled,
     'exposure': exposure,
+    if (includeDisplayName && displayName.isNotEmpty)
+      'displayName': displayName,
   };
   factory AgentMcpServer.fromJson(Map<String, dynamic> json) => AgentMcpServer(
     name: json['name'] as String,
@@ -27,6 +31,7 @@ class AgentMcpServer {
     transport: json['transport'] as String,
     enabled: json['enabled'] != false,
     exposure: json['exposure'] as String? ?? 'codemode',
+    displayName: json['displayName'] as String? ?? '',
   );
 }
 

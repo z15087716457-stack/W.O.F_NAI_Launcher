@@ -1069,6 +1069,8 @@ class SettingsAboutPage extends StatelessWidget {
     final ab = d.about;
     final a = s.actions;
     final (statusText, statusTone) = switch (ab.update) {
+      SettingsUpdateState.unchecked => (l.set_abUnchecked, UiMiniTone.plain),
+      SettingsUpdateState.skipped => (l.set_abSkipped, UiMiniTone.plain),
       SettingsUpdateState.available => (
         l.set_abNew(ab.latest),
         UiMiniTone.error,

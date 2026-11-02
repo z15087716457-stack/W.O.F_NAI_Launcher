@@ -145,20 +145,7 @@ GenHistoryData generationHistoryView(
   DateTime? now,
   bool singleImages = false,
 }) {
-  final batches = buildHistoryBatches(state)
-      .expand(
-        (batch) => singleImages && !batch.isGenerating
-            ? batch.images.map(
-                (image) => HistoryBatch(
-                  key: 'img:${image.id}',
-                  images: [image],
-                  isGenerating: false,
-                  count: 1,
-                ),
-              )
-            : [batch],
-      )
-      .toList();
+  final batches = buildHistoryBatches(state);
   DateTime time(HistoryBatch batch) => batch.images.isEmpty
       ? now ?? DateTime.now()
       : batch.images
@@ -174,7 +161,18 @@ GenHistoryData generationHistoryView(
     autoSave: autoSave,
     pinned: pinned,
     batches: [
-      for (final batch in batches)
+      for (final batch in batches.expand(
+        (batch) => singleImages && !batch.isGenerating
+            ? batch.images.map(
+                (image) => HistoryBatch(
+                  key: 'img:${image.id}',
+                  images: [image],
+                  isGenerating: false,
+                  count: 1,
+                ),
+              )
+            : [batch],
+      ))
         GenBatch(
           id: batch.key,
           time: time(batch),

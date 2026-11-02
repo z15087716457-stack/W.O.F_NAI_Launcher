@@ -59,6 +59,7 @@ import 'data/services/temp_image_service.dart';
 import 'data/services/thumbnail_service.dart';
 import 'presentation/providers/online_gallery_blacklist_provider.dart';
 import 'presentation/screens/splash/app_bootstrap.dart';
+import 'presentation/providers/warmup_provider.dart';
 import 'presentation/screens/splash/startup_data_recovery.dart';
 
 AppLanguage _storedLanguage() => AppLanguage.fromStorage(
@@ -99,9 +100,18 @@ Future<void> _runNonFatalStartupStep(
   );
 }
 
-void _runDeferredStartupStep(String name, Future<void> Function() action) {
+void _runDeferredStartupStep(
+  String name,
+  Future<void> servicesReady,
+  Future<void> Function() action,
+) {
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    unawaited(_runNonFatalStartupStep(name, action));
+    unawaited(
+      _runNonFatalStartupStep(name, () async {
+        await servicesReady;
+        await action();
+      }),
+    );
   });
 }
 
@@ -123,7 +133,7 @@ class WindowStateObserver extends WidgetsBindingObserver {
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     // 仅桌面端保存窗口状态
-    if (!Platform.isWindows) {
+    if (!Platform.isWindows || DesktopAppShutdownService.isShuttingDown) {
       return;
     }
 
@@ -149,6 +159,7 @@ class WindowStateObserver extends WidgetsBindingObserver {
 class AppTrayListener extends TrayListener {
   @override
   Future<void> onTrayIconMouseDown() async {
+    if (DesktopAppShutdownService.isShuttingDown) return;
     // 左键点击托盘图标 - 恢复窗口
     try {
       await windowManager.show();
@@ -162,6 +173,7 @@ class AppTrayListener extends TrayListener {
 
   @override
   void onTrayIconRightMouseDown() {
+    if (DesktopAppShutdownService.isShuttingDown) return;
     // 右键点击托盘图标 - 显示上下文菜单 (Windows)
     trayManager.popUpContextMenu();
   }
@@ -170,6 +182,7 @@ class AppTrayListener extends TrayListener {
   Future<void> onTrayMenuItemClick(MenuItem menuItem) async {
     try {
       if (menuItem.key == 'show') {
+        if (DesktopAppShutdownService.isShuttingDown) return;
         // 显示窗口
         await windowManager.show();
         await windowManager.focus();
@@ -190,12 +203,13 @@ class AppWindowListener extends WindowListener {
 
   @override
   Future<void> onWindowClose() async {
+    if (DesktopAppShutdownService.isShuttingDown) return;
     // 阻止默认关闭行为，改为隐藏到托盘
     try {
       // 阻止窗口关闭
       await windowManager.setPreventClose(true);
-      await ResourceWindowService.instance.closeAll();
       await windowManager.hide();
+      await ResourceWindowService.instance.closeAll();
       AppLogger.d('Window hidden to tray', 'WindowListener');
     } catch (e) {
       AppLogger.e('Failed to hide window to tray: $e', 'WindowListener');
@@ -218,6 +232,7 @@ class AppWindowListener extends WindowListener {
 
   @override
   Future<void> onWindowResize() async {
+    if (DesktopAppShutdownService.isShuttingDown) return;
     // 窗口大小变化时实时保存（带防抖）
     final now = DateTime.now();
     if (_lastResizeSave != null &&
@@ -243,6 +258,7 @@ class AppWindowListener extends WindowListener {
 
   @override
   Future<void> onWindowMove() async {
+    if (DesktopAppShutdownService.isShuttingDown) return;
     // 窗口移动时也保存位置
     final now = DateTime.now();
     if (_lastResizeSave != null &&
@@ -275,6 +291,7 @@ void setupWindowsWakeUpChannel() {
   const channel = MethodChannel('com.nailauncher/window_control');
   channel.setMethodCallHandler((call) async {
     if (call.method == 'wakeUp') {
+      if (DesktopAppShutdownService.isShuttingDown) return;
       try {
         // 确保窗口显示并置于前台
         await windowManager.show();
@@ -338,7 +355,10 @@ Future<void> _bootstrapMainWindow() async {
   if (Platform.isWindows) {
     final resources = ResourceWindowService.instance;
     await resources.initialize();
-    DesktopAppShutdownService.registerCleanup(resources.closeAll);
+    DesktopAppShutdownService.registerCleanup(
+      resources.closeAll,
+      name: 'Resource windows',
+    );
   }
   registerStudioAssetLicenses();
   AppErrorReporter.installGlobalHandlers();
@@ -401,6 +421,74 @@ Future<void> _prepareDataAndStart() => startWithPreparedAppData(
     }
   },
 );
+
+Future<void> _initializeMainServices() async {
+  // 启动清理删除池：上次会话软删的文件逐条物理删除。
+  // Run alongside database preparation; finish before gallery actions are available.
+  final deletePoolCleanup = _runNonFatalStartupStep(
+    'Delete pool cleanup',
+    () async {
+      final deletedCount = await const GalleryDeletePoolStore()
+          .cleanupPendingFiles();
+      if (deletedCount > 0) {
+        AppLogger.i('删除池清理完成: 删除了 $deletedCount 个文件', 'Main');
+      }
+    },
+  );
+
+  try {
+    // V2 架构：DatabaseManagerV2 自动处理热重启检测
+    final manager = await DatabaseManager.initialize();
+    await manager.initialized;
+
+    AppLogger.i('数据库初始化完成', 'Main');
+  } catch (e, stack) {
+    AppLogger.e('数据库初始化失败', e, stack, 'Main');
+    // 继续启动，应用内会显示错误',
+  }
+
+  // 初始化图像元数据服务（包含持久化缓存，用于详情页快速加载）
+  await _runNonFatalStartupStep(
+    'Image metadata service initialization',
+    () async {
+      await ImageMetadataService().initialize();
+      AppLogger.i('图像元数据服务初始化完成', 'Main');
+    },
+  );
+
+  // 初始化统一缩略图服务
+  final thumbnailService = ThumbnailService.instance;
+  await _runNonFatalStartupStep('Thumbnail service initialization', () async {
+    await thumbnailService.initialize();
+    AppLogger.i('缩略图服务初始化完成', 'Main');
+  });
+
+  // 【修复】初始化收藏集合仓库
+  await _runNonFatalStartupStep(
+    'Collection repository initialization',
+    () async {
+      await CollectionRepository.instance.initialize();
+      AppLogger.i('收藏集合仓库初始化完成', 'Main');
+    },
+  );
+
+  // 【修复】初始化扫描状态管理器（确保检查点功能正常工作）
+  await _runNonFatalStartupStep('Scan state manager initialization', () async {
+    await ScanStateManager.instance.initialize();
+    AppLogger.i('扫描状态管理器初始化完成', 'Main');
+  });
+
+  // 【修复】初始化 Isolate 元数据服务（详情页快速解析）
+  await _runNonFatalStartupStep(
+    'Isolate metadata service initialization',
+    () async {
+      await IsolateMetadataService.instance.initialize();
+      AppLogger.i('Isolate 元数据服务初始化完成', 'Main');
+    },
+  );
+
+  await deletePoolCleanup;
+}
 
 Future<void> _bootstrapPreparedApplication() async {
   // Finish storage migration before Hive, SQLite or background services open.
@@ -472,134 +560,26 @@ Future<void> _bootstrapPreparedApplication() async {
     systemLocales: WidgetsBinding.instance.platformDispatcher.locales,
   );
 
-  // ===== V2 架构：数据库初始化和恢复（在 runApp 之前完成）====
-  AppLogger.i('等待数据库初始化...', 'Main');
-  final container = ProviderContainer();
-
-  try {
-    // V2 架构：DatabaseManagerV2 自动处理热重启检测
-    final manager = await DatabaseManager.initialize();
-    await manager.initialized;
-
-    // 检查核心资产库完整性。共现数据已迁移到独立资产数据库，
-    // 不应再从 danbooru.db 的运行时表统计里判断。
-    final coreAssetStats = await manager.getCoreAssetStatistics();
-    final cooccurrenceCount = coreAssetStats['cooccurrences'] ?? 0;
-
-    AppLogger.i('核心资产数据库状态: cooccurrences=$cooccurrenceCount', 'Main');
-
-    if (cooccurrenceCount == 0) {
-      AppLogger.w('核心资产数据为空，请检查打包数据库', 'Main');
-    }
-
-    AppLogger.i('数据库初始化完成', 'Main');
-  } catch (e, stack) {
-    AppLogger.e('数据库初始化失败', e, stack, 'Main');
-    // 继续启动，应用内会显示错误',
-  }
-
-  // 预先打开 Hive boxes (确保 LocalStorageService 可用)
-  await _openHiveBoxIfNeeded(StorageKeys.settingsBox, hivePath: hivePath);
-  await _openHiveBoxIfNeeded(StorageKeys.historyBox, hivePath: hivePath);
-  await _openHiveBoxIfNeeded(StorageKeys.tagCacheBox, hivePath: hivePath);
-  await _openHiveBoxIfNeeded(StorageKeys.galleryBox, hivePath: hivePath);
-  // Local Gallery 新功能所需的 Hive boxes
-  await _openHiveBoxIfNeeded(StorageKeys.localFavoritesBox, hivePath: hivePath);
-  await _openHiveBoxIfNeeded(StorageKeys.tagsBox, hivePath: hivePath);
-  await _openHiveBoxIfNeeded(StorageKeys.searchIndexBox, hivePath: hivePath);
-  // 统计数据缓存 Box
-  await _openHiveBoxIfNeeded(
-    StorageKeys.statisticsCacheBox,
-    hivePath: hivePath,
-  );
-  // 收藏集合 Box
-  await _openHiveBoxIfNeeded(StorageKeys.collectionsBox, hivePath: hivePath);
-  // 全局 Prompt 块库（独立版本化 Box）
-  await _openHiveBoxIfNeeded<String>(
-    StorageKeys.promptBlockLibraryBox,
-    hivePath: hivePath,
-  );
-  // 药丸 Prompt 工作区持久化（生成页/角色框/画风探索 lane 文档快照）
-  await _openHiveBoxIfNeeded<String>(
-    StorageKeys.promptWorkspaceStateBox,
-    hivePath: hivePath,
-  );
-  // 初始化图像元数据服务（包含持久化缓存，用于详情页快速加载）
-  await _runNonFatalStartupStep(
-    'Image metadata service initialization',
-    () async {
-      await ImageMetadataService().initialize();
-      AppLogger.i('图像元数据服务初始化完成', 'Main');
-    },
-  );
-
-  // 后台执行 L2 Hive 缓存清理（不阻塞启动）
-  Future.microtask(() async {
-    try {
-      await L2CacheCleaner().checkAndClean();
-    } catch (e) {
-      AppLogger.w('L2 cache cleanup failed: $e', 'Main');
-    }
-  });
-
-  // 初始化统一缩略图服务
-  final thumbnailService = ThumbnailService.instance;
-  await _runNonFatalStartupStep('Thumbnail service initialization', () async {
-    await thumbnailService.initialize();
-    AppLogger.i('缩略图服务初始化完成', 'Main');
-  });
-
-  // 【修复】初始化收藏集合仓库
-  await _runNonFatalStartupStep(
-    'Collection repository initialization',
-    () async {
-      await CollectionRepository.instance.initialize();
-      AppLogger.i('收藏集合仓库初始化完成', 'Main');
-    },
-  );
-
-  // 【修复】初始化扫描状态管理器（确保检查点功能正常工作）
-  await _runNonFatalStartupStep('Scan state manager initialization', () async {
-    await ScanStateManager.instance.initialize();
-    AppLogger.i('扫描状态管理器初始化完成', 'Main');
-  });
-
-  // 【修复】初始化 Isolate 元数据服务（详情页快速解析）
-  await _runNonFatalStartupStep(
-    'Isolate metadata service initialization',
-    () async {
-      await IsolateMetadataService.instance.initialize();
-      AppLogger.i('Isolate 元数据服务初始化完成', 'Main');
-    },
-  );
-
-  // 【修复】启动时清理嵌套缩略图（修复递归生成bug遗留问题）
-  Future.microtask(() async {
-    try {
-      final rootPath = await GalleryFolderRepository.instance.getRootPath();
-      if (rootPath != null) {
-        final cleanedCount = await thumbnailService.cleanupNestedThumbs(
-          rootPath,
-        );
-        if (cleanedCount > 0) {
-          AppLogger.i('启动清理完成: 删除了 $cleanedCount 个嵌套缩略图目录', 'Main');
-        }
-      }
-    } catch (e) {
-      AppLogger.w('清理嵌套缩略图失败: $e', 'Main');
-    }
-  });
-
-  // 启动清理删除池：上次会话软删的文件逐条物理删除。
-  // 不存在=成功；删除失败（占用/权限）保留在池中，下次启动再试。
-  await _runNonFatalStartupStep('Delete pool cleanup', () async {
-    final deletedCount = await const GalleryDeletePoolStore()
-        .cleanupPendingFiles();
-    if (deletedCount > 0) {
-      AppLogger.i('删除池清理完成: 删除了 $deletedCount 个文件', 'Main');
-    }
-  });
-
+  // Migration is complete; independent boxes can open together.
+  await Future.wait([
+    _openHiveBoxIfNeeded(StorageKeys.settingsBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.historyBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.tagCacheBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.galleryBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.localFavoritesBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.tagsBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.searchIndexBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.statisticsCacheBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded(StorageKeys.collectionsBox, hivePath: hivePath),
+    _openHiveBoxIfNeeded<String>(
+      StorageKeys.promptBlockLibraryBox,
+      hivePath: hivePath,
+    ),
+    _openHiveBoxIfNeeded<String>(
+      StorageKeys.promptWorkspaceStateBox,
+      hivePath: hivePath,
+    ),
+  ]);
   // 扫描已由 UnifiedGalleryService 处理，在打开本地画廊时自动执行
 
   // 初始化快捷键存储
@@ -615,38 +595,6 @@ Future<void> _bootstrapPreparedApplication() async {
   timeago.setLocaleMessages('zh_TW', timeago.ZhMessages());
   timeago.setLocaleMessages('ja', timeago.JaMessages());
   timeago.setLocaleMessages('ko', timeago.KoMessages());
-
-  // 清理过期临时文件（不阻塞启动）
-  Future.microtask(() async {
-    try {
-      await TempImageService().cleanupOldTempFiles();
-    } catch (e) {
-      AppLogger.w('Temp files cleanup failed: $e', 'Main');
-    }
-  });
-
-  // 后台预加载 NAI 标签数据（不阻塞启动）
-  // 使用已创建的 container
-  Future.microtask(() async {
-    try {
-      await container.read(naiTagsDataSourceProvider).loadData();
-      AppLogger.d('NAI tags preloaded successfully', 'Main');
-    } catch (e) {
-      AppLogger.w('NAI tags preload failed: $e', 'Main');
-      // 预加载失败不影响应用启动
-    }
-  });
-
-  // 启动时自动同步在线画廊黑名单（不阻塞启动）
-  Future.delayed(const Duration(seconds: 8), () async {
-    try {
-      await container
-          .read(onlineGalleryBlacklistNotifierProvider.notifier)
-          .syncOnStartup();
-    } catch (e) {
-      AppLogger.w('Online gallery blacklist auto-sync failed: $e', 'Main');
-    }
-  });
 
   // 桌面端窗口配置
   if (Platform.isWindows) {
@@ -744,6 +692,9 @@ Future<void> _bootstrapPreparedApplication() async {
 
         trayManager.addListener(AppTrayListener());
         windowManager.addListener(AppWindowListener());
+        DesktopAppShutdownService.registerCleanup(() async {
+          await _saveCurrentWindowState();
+        }, name: 'Window state');
 
         AppLogger.d('System tray initialized', 'Main');
       } catch (e) {
@@ -807,23 +758,100 @@ Future<void> _bootstrapPreparedApplication() async {
     AppLogger.d('Window state observer registered', 'Main');
   }
 
-  _runDeferredStartupStep('Retired ffdkj dictionary cleanup', () async {
-    if (await removeRetiredZhDictionary()) {
-      AppLogger.i('Removed the retired ffdkj dictionary folder', 'Main');
+  final servicesReady = WidgetsBinding.instance.endOfFrame.then(
+    (_) => _initializeMainServices(),
+  );
+  final container = ProviderContainer(
+    overrides: [appStartupReadyProvider.overrideWithValue(servicesReady)],
+  );
+
+  // 后台执行 L2 Hive 缓存清理（不阻塞启动）
+  _runDeferredStartupStep('Metadata cache cleanup', servicesReady, () async {
+    try {
+      await L2CacheCleaner().checkAndClean();
+    } catch (e) {
+      AppLogger.w('L2 cache cleanup failed: $e', 'Main');
     }
   });
 
-  final searchIndexService = SearchIndexService();
-  _runDeferredStartupStep('Search index service initialization', () async {
-    await searchIndexService.init();
-    AppLogger.i('搜索索引服务初始化完成', 'Main');
+  // 【修复】启动时清理嵌套缩略图（修复递归生成bug遗留问题）
+  _runDeferredStartupStep('Nested thumbnail cleanup', servicesReady, () async {
+    try {
+      final rootPath = await GalleryFolderRepository.instance.getRootPath();
+      if (rootPath != null) {
+        final cleanedCount = await ThumbnailService.instance
+            .cleanupNestedThumbs(rootPath);
+        if (cleanedCount > 0) {
+          AppLogger.i('启动清理完成: 删除了 $cleanedCount 个嵌套缩略图目录', 'Main');
+        }
+      }
+    } catch (e) {
+      AppLogger.w('清理嵌套缩略图失败: $e', 'Main');
+    }
   });
 
-  final tagCacheService = TagCacheService();
-  _runDeferredStartupStep('Tag cache service initialization', () async {
-    await tagCacheService.init();
-    AppLogger.i('Tag 缓存服务初始化完成', 'Main');
+  // 清理过期临时文件（不阻塞启动）
+  _runDeferredStartupStep('Temporary image cleanup', servicesReady, () async {
+    try {
+      await TempImageService().cleanupOldTempFiles();
+    } catch (e) {
+      AppLogger.w('Temp files cleanup failed: $e', 'Main');
+    }
   });
+
+  // 后台预加载 NAI 标签数据（不阻塞启动）
+  // 使用已创建的 container
+  _runDeferredStartupStep('NAI tag preload', servicesReady, () async {
+    try {
+      await container.read(naiTagsDataSourceProvider).loadData();
+      AppLogger.d('NAI tags preloaded successfully', 'Main');
+    } catch (e) {
+      AppLogger.w('NAI tags preload failed: $e', 'Main');
+      // 预加载失败不影响应用启动
+    }
+  });
+
+  // 启动时自动同步在线画廊黑名单（不阻塞启动）
+  Future.delayed(const Duration(seconds: 8), () async {
+    await servicesReady;
+    try {
+      await container
+          .read(onlineGalleryBlacklistNotifierProvider.notifier)
+          .syncOnStartup();
+    } catch (e) {
+      AppLogger.w('Online gallery blacklist auto-sync failed: $e', 'Main');
+    }
+  });
+
+  _runDeferredStartupStep(
+    'Retired ffdkj dictionary cleanup',
+    servicesReady,
+    () async {
+      if (await removeRetiredZhDictionary()) {
+        AppLogger.i('Removed the retired ffdkj dictionary folder', 'Main');
+      }
+    },
+  );
+
+  final searchIndexService = SearchIndexService();
+  _runDeferredStartupStep(
+    'Search index service initialization',
+    servicesReady,
+    () async {
+      await searchIndexService.init();
+      AppLogger.i('搜索索引服务初始化完成', 'Main');
+    },
+  );
+
+  final tagCacheService = TagCacheService();
+  _runDeferredStartupStep(
+    'Tag cache service initialization',
+    servicesReady,
+    () async {
+      await tagCacheService.init();
+      AppLogger.i('Tag 缓存服务初始化完成', 'Main');
+    },
+  );
 
   runApp(
     UncontrolledProviderScope(

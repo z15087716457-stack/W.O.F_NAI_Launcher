@@ -136,7 +136,9 @@ class AgentSettings {
     'skillModes': skillModes,
     'studioMcpEnabled': studioMcpEnabled,
     'studioMcpExposure': studioMcpExposure,
-    'mcpServers': mcpServers.map((server) => server.toJson()).toList(),
+    'mcpServers': mcpServers
+        .map((server) => server.toJson(includeDisplayName: false))
+        .toList(),
   });
   String get systemPrompt => customSystemPrompt ?? naiAgentDefaultSystemPrompt;
   Map<String, dynamic> toJson() => {
@@ -345,15 +347,34 @@ class AgentChat {
     this.lastActivityAt,
     this.sessionFile,
     this.isDraft = false,
+    this.systemPromptPrefix = '',
   });
   final bool isDraft;
   final String id, workspaceId, title;
+  final String systemPromptPrefix;
   final DateTime createdAt;
   final DateTime? lastActivityAt;
   DateTime get activityAt => lastActivityAt ?? createdAt;
 
   /// A reference to official Pi history, never copied conversation messages.
   final String? sessionFile;
+  AgentChat copyWith({
+    String? title,
+    String? sessionFile,
+    DateTime? lastActivityAt,
+    String? systemPromptPrefix,
+    bool? isDraft,
+  }) => AgentChat(
+    id: id,
+    workspaceId: workspaceId,
+    title: title ?? this.title,
+    createdAt: createdAt,
+    lastActivityAt: lastActivityAt ?? this.lastActivityAt,
+    sessionFile: sessionFile ?? this.sessionFile,
+    systemPromptPrefix: systemPromptPrefix ?? this.systemPromptPrefix,
+    isDraft: isDraft ?? this.isDraft,
+  );
+
   Map<String, dynamic> toJson() => {
     'schema': 1,
     'id': id,
@@ -362,6 +383,7 @@ class AgentChat {
     'createdAt': createdAt.toIso8601String(),
     'lastActivityAt': lastActivityAt?.toIso8601String(),
     'sessionFile': sessionFile,
+    'systemPromptPrefix': systemPromptPrefix,
   };
 }
 
@@ -952,7 +974,10 @@ class AgentWorkspaceStore {
     await _atomic(_metadata(id), value.toJson());
     return value;
   });
-  Future<String> effectiveSystemPrompt(String workspaceId) async {
+  Future<String> effectiveSystemPrompt(
+    String workspaceId, {
+    String chatPrefix = '',
+  }) async {
     final workspace = await getWorkspace(workspaceId);
     final settings = await readSettings();
     final instructions = await File(
@@ -966,6 +991,7 @@ class AgentWorkspaceStore {
     return [
       if (settings.systemPromptPrefix.trim().isNotEmpty)
         settings.systemPromptPrefix,
+      if (chatPrefix.trim().isNotEmpty) chatPrefix,
       workspace.customSystemPrompt ?? settings.systemPrompt,
       if (settings.globalInstructions.trim().isNotEmpty)
         '${zh ? '用户的全局指令：' : 'User global instructions:'}\n'
@@ -1230,13 +1256,7 @@ class AgentWorkspaceStore {
         FileSystemEntityType.notFound) {
       throw StateError('Chat already exists');
     }
-    final chat = AgentChat(
-      id: draft.id,
-      workspaceId: draft.workspaceId,
-      title: draft.title,
-      createdAt: draft.createdAt,
-      lastActivityAt: draft.lastActivityAt,
-    );
+    final chat = draft.copyWith(isDraft: false);
     await _atomic(file, chat.toJson());
     return chat;
   });
@@ -1297,6 +1317,7 @@ class AgentWorkspaceStore {
                 )
               : DateTime.parse(value['lastActivityAt'] as String),
           sessionFile: value['sessionFile'] as String?,
+          systemPromptPrefix: value['systemPromptPrefix'] as String? ?? '',
         ),
       );
     }
@@ -1313,12 +1334,18 @@ class AgentWorkspaceStore {
     String? title,
     String? sessionFile,
     DateTime? lastActivityAt,
+    String? systemPromptPrefix,
+    String? expectedSystemPromptPrefix,
   }) => _write(() async {
     _id(chatId);
     final chat = (await listChats(
       workspaceId,
     )).where((c) => c.id == chatId).firstOrNull;
     if (chat == null) throw const FormatException('Chat missing');
+    if (expectedSystemPromptPrefix != null &&
+        chat.systemPromptPrefix != expectedSystemPromptPrefix) {
+      throw StateError('Chat instructions changed while editing');
+    }
     if (sessionFile != null &&
         (p.isAbsolute(sessionFile) ||
             p.dirname(p.normalize(sessionFile)) != 'sessions' ||
@@ -1327,14 +1354,28 @@ class AgentWorkspaceStore {
         'Pi session reference leaves workspace sessions',
       );
     }
-    final value = AgentChat(
-      id: chatId,
-      workspaceId: workspaceId,
-      title: title ?? chat.title,
-      createdAt: chat.createdAt,
-      lastActivityAt: lastActivityAt ?? chat.lastActivityAt,
-      sessionFile: sessionFile ?? chat.sessionFile,
+    final value = chat.copyWith(
+      title: title,
+      lastActivityAt: lastActivityAt,
+      sessionFile: sessionFile,
+      systemPromptPrefix: systemPromptPrefix,
     );
+    if (value.systemPromptPrefix != chat.systemPromptPrefix) {
+      await _atomic(
+        File(
+          p.join(
+            _workspaceDataDirectory(workspaceId).path,
+            'prompt-history',
+            '${const Uuid().v4()}.json',
+          ),
+        ),
+        {
+          'savedAt': DateTime.now().toIso8601String(),
+          'chatId': chatId,
+          'systemPromptPrefix': chat.systemPromptPrefix,
+        },
+      );
+    }
     await _atomic(
       File(
         p.join(
@@ -1748,6 +1789,7 @@ class AgentWorkspaceStore {
         title: value['title'] as String,
         createdAt: DateTime.parse(value['createdAt'] as String),
         isDraft: true,
+        systemPromptPrefix: value['systemPromptPrefix'] as String? ?? '',
       ),
       composer: AgentComposerState.fromJson(
         await _read(File(p.join(dir.path, 'ui', '${entry.chatId}.json'))),

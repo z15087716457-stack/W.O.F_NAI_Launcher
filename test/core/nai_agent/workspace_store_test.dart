@@ -144,6 +144,116 @@ void main() {
   );
 
   test(
+    'chat prefixes persist independently through metadata updates and deletion restore',
+    () async {
+      final workspace = await store.createWorkspace('Shared project');
+      await store.patchSettings({
+        'systemPromptPrefix': 'GLOBAL_PREFIX',
+        'customSystemPrompt': 'BASE_PROMPT',
+        'globalInstructions': 'GLOBAL_RULE',
+      });
+      final a = await store.createChat(workspace.id, 'A');
+      final b = await store.createChat(workspace.id, 'B');
+      await store.updateChat(workspace.id, a.id, systemPromptPrefix: 'CHAT_A');
+      await store.updateChat(
+        workspace.id,
+        a.id,
+        title: 'Renamed A',
+        lastActivityAt: DateTime(2026, 11, 1),
+        sessionFile: 'sessions/synthetic.jsonl',
+      );
+      final reopened = AgentWorkspaceStore(root);
+      final chats = await reopened.listChats(workspace.id);
+      final saved = chats.firstWhere((c) => c.id == a.id);
+      expect(saved.systemPromptPrefix, 'CHAT_A');
+      expect(chats.firstWhere((c) => c.id == b.id).systemPromptPrefix, isEmpty);
+      final prompt = await reopened.effectiveSystemPrompt(
+        workspace.id,
+        chatPrefix: saved.systemPromptPrefix,
+      );
+      expect(prompt, startsWith('GLOBAL_PREFIX\n\nCHAT_A\n\nBASE_PROMPT'));
+      expect(
+        prompt.indexOf('BASE_PROMPT'),
+        lessThan(prompt.indexOf('GLOBAL_RULE')),
+      );
+      expect(
+        await reopened.effectiveSystemPrompt(workspace.id),
+        isNot(contains('CHAT_A')),
+      );
+      await expectLater(
+        reopened.updateChat(
+          workspace.id,
+          a.id,
+          systemPromptPrefix: 'STALE',
+          expectedSystemPromptPrefix: '',
+        ),
+        throwsStateError,
+      );
+      await reopened.updateChat(
+        workspace.id,
+        a.id,
+        systemPromptPrefix: '',
+        expectedSystemPromptPrefix: 'CHAT_A',
+      );
+      final history = Directory(
+        '${workspace.agentDirectory.path}/prompt-history',
+      );
+      final backups = [
+        await for (final file in history.list())
+          if (file is File) jsonDecode(await file.readAsString()) as Map,
+      ];
+      expect(
+        backups.any(
+          (b) => b['chatId'] == a.id && b['systemPromptPrefix'] == 'CHAT_A',
+        ),
+        true,
+      );
+      await reopened.updateChat(
+        workspace.id,
+        a.id,
+        systemPromptPrefix: 'RESTORED_PREFIX',
+      );
+      final trashed = await reopened.trashChat(workspace.id, a.id);
+      await reopened.restoreChat(trashed.id);
+      expect(
+        (await reopened.listChats(
+          workspace.id,
+        )).firstWhere((c) => c.id == a.id).systemPromptPrefix,
+        'RESTORED_PREFIX',
+      );
+    },
+  );
+
+  test(
+    'draft prefix materializes with its chat and older metadata defaults empty',
+    () async {
+      final workspace = await store.createWorkspace('Draft');
+      final draft = AgentChat(
+        id: 'draft-prefix',
+        workspaceId: workspace.id,
+        title: 'Unsent',
+        createdAt: DateTime(2026),
+        isDraft: true,
+        systemPromptPrefix: 'BEFORE_FIRST_MESSAGE',
+      );
+      final saved = await store.saveDraftChat(draft);
+      expect(saved.isDraft, false);
+      expect(saved.systemPromptPrefix, 'BEFORE_FIRST_MESSAGE');
+      final file = File(
+        '${workspace.agentDirectory.path}/ui/chats/${saved.id}.json',
+      );
+      final legacy =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      legacy.remove('systemPromptPrefix');
+      await file.writeAsString(jsonEncode(legacy));
+      expect(
+        (await store.listChats(workspace.id)).single.systemPromptPrefix,
+        isEmpty,
+      );
+    },
+  );
+
+  test(
     'independent instruction saves merge settings and retain previous instruction text',
     () async {
       await store.saveSettings(

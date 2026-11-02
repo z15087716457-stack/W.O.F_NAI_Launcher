@@ -45,6 +45,7 @@ import '../../providers/subscription_provider.dart';
 import '../../router/app_router.dart';
 import '../../ui/agent/agent_contract.dart';
 import '../../ui/agent/agent_panel.dart';
+import '../../ui/settings/settings_dialog_kit.dart';
 import '../../utils/dropped_file_reader.dart';
 import '../../utils/nai_agent_file_link.dart';
 import '../../utils/nai_agent_image_reader.dart';
@@ -464,6 +465,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
   }) {
     anchor ??= switch (memory) {
       AgentMemoryTarget.global => 'agentInstructions',
+      AgentMemoryTarget.chatPrefix => null,
       AgentMemoryTarget.workspace => 'agentWorkspaceRules',
       AgentMemoryTarget.skills => 'agentSkills',
       AgentMemoryTarget.quick => 'agentQuick',
@@ -824,6 +826,7 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
       shelf: mapping?.shelf ?? const AgentShelfData(),
       memory: AgentMemoryData(
         globalInstructions: c.settings.globalInstructions,
+        chatPrefix: r?.chat.systemPromptPrefix ?? '',
         workspaceRules: r == null ? '' : _resources.rules(r.workspace),
         activeSkills: active.map((s) => s.name).toList(),
       ),
@@ -1276,7 +1279,26 @@ class _AgentWiringState extends ConsumerState<AgentWiring>
           c.initializationFailed(error);
         }
       }),
-      onEditMemory: (target) => _settings(memory: target),
+      onEditMemory: (target) {
+        if (target != AgentMemoryTarget.chatPrefix) {
+          _settings(memory: target);
+          return;
+        }
+        final edited = r?.chat;
+        if (edited == null) return;
+        _background(() async {
+          final text = await showSettingsDialog<String>(
+            context,
+            (_) => SettingsTextDialog(
+              title: l.ag_memoryChatPrefix,
+              subtitle: l.ag_memoryChatPrefixHint,
+              initial: edited.systemPromptPrefix,
+              maxLines: 12,
+            ),
+          );
+          if (text != null) await c.setChatPromptPrefix(edited, text);
+        });
+      },
     );
     return MetaData(
       metaData: GlobalDropHandler.excludedRegion,

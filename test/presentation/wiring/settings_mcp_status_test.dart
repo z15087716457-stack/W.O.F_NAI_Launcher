@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
+import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
+import 'package:nai_launcher/presentation/ui/settings/settings_contract.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
@@ -13,6 +15,85 @@ import 'package:nai_launcher/presentation/wiring/settings/settings_agent.dart';
 class _Client extends Mock implements PiHostClient {}
 
 void main() {
+  test(
+    'opening configured MCP settings starts one session and reuses its connection',
+    () async {
+      final root = await Directory.systemTemp.createTemp('settings-mcp-auto-');
+      const server = AgentMcpServer(
+        name: 'exa',
+        configId: 'synthetic',
+        transport: 'http',
+        displayName: 'EXA免费联网搜索',
+      );
+      final store = AgentWorkspaceStore(root);
+      await store.saveSettings(
+        const AgentSettings(
+          providerId: 'local',
+          modelId: 'test',
+          mcpServers: [server],
+        ),
+      );
+      final client = _Client();
+      when(() => client.isClosed).thenReturn(false);
+      when(() => client.initialState).thenReturn({});
+      when(() => client.events).thenAnswer((_) => const Stream.empty());
+      when(() => client.close()).thenAnswer((_) async {});
+      final status = Completer<Map<String, dynamic>>();
+      when(() => client.mcpCommand('status')).thenAnswer((_) => status.future);
+      var starts = 0;
+      final controller = NaiAgentWorkspaceController(
+        store: store,
+        initialWorkspaceName: 'Test',
+        initialChatName: 'Test',
+        startClient: (_, __, ___, ____, _____) async {
+          starts++;
+          return client;
+        },
+      );
+      final preferences = NaiAgentUiPreferences();
+      await preferences.load(store);
+      controller.addListener(() => preferences.replace(controller.settings));
+      final container = ProviderContainer(
+        overrides: [
+          naiAgentUiPreferencesProvider.overrideWith((_) => preferences),
+          naiAgentControllerProvider.overrideWith((_) {
+            controller.ready = controller.initialize(restoreHistory: false);
+            return controller;
+          }),
+        ],
+      );
+      final subscription = container.listen(
+        settingsMcpStatusProvider,
+        (_, __) {},
+      );
+      addTearDown(() async {
+        subscription.close();
+        await controller.close();
+        container.dispose();
+        await root.delete(recursive: true);
+      });
+      await controller.ready;
+      final pending = container.read(settingsMcpStatusProvider.future);
+      expect(container.read(settingsMcpStatusProvider).isLoading, true);
+      expect(
+        settingsMcpServer(server, '', connecting: true).state,
+        SettingsMcpState.connecting,
+      );
+      status.complete({'mcpStatus': 'exa: connected, 2 tools (codemode)'});
+      final result = await pending;
+      expect(result, contains('exa: connected'));
+      final row = settingsMcpServer(server, result);
+      expect(row.name, 'EXA免费联网搜索');
+      expect(row.state, SettingsMcpState.connected);
+      expect(row.tools, 2);
+      container.invalidate(settingsMcpStatusProvider);
+      expect(await container.read(settingsMcpStatusProvider.future), result);
+      expect(starts, 1);
+      verify(() => client.mcpCommand('status')).called(2);
+      verifyNever(() => client.mcpCommand('reconnect', name: 'exa'));
+    },
+  );
+
   test(
     'status reconnects to the lifecycle when Settings opens before Agent',
     () async {

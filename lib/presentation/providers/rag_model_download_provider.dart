@@ -34,6 +34,7 @@ class RagModelDownloads extends Notifier<RagModelDownloadState> {
   RagModelDownloadState build() {
     final unregister = DesktopAppShutdownService.registerCleanup(
       () async => _job?.cancel(),
+      name: 'RAG download',
     );
     ref.onDispose(() {
       _disposed = true;

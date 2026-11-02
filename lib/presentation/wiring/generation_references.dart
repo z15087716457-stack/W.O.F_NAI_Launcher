@@ -8,7 +8,6 @@ import '../../core/constants/model_spec.dart';
 import '../../core/enums/precise_ref_type.dart';
 import '../../core/utils/localization_extension.dart';
 import '../../data/models/image/image_params.dart';
-import '../../data/models/vibe/vibe_library_entry.dart';
 import '../providers/generation/image_workflow_controller.dart';
 import '../providers/image_generation_provider.dart';
 import '../ui/gen/gen_contract.dart';
@@ -32,7 +31,6 @@ GenRefsData generationRefsView(
   GenerationReferenceIdentity identity, {
   bool enabled = true,
   Set<String> encoding = const {},
-  List<VibeLibraryEntry> recent = const [],
   GenDropTarget? dropHover,
 }) {
   identity.sync(params);
@@ -78,14 +76,6 @@ GenRefsData generationRefsView(
                         )
                       ? GenVibeState.pending
                       : GenVibeState.encoded,
-                ),
-            ],
-            recent: [
-              for (final entry in recent)
-                GenRecentVibe(
-                  id: entry.id,
-                  name: entry.displayName,
-                  thumb: generationReferenceThumbnail(entry.thumbnail),
                 ),
             ],
           )

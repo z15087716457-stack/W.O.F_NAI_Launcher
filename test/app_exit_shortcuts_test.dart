@@ -97,10 +97,35 @@ void main() {
     await AppWindowListener().onWindowClose();
     expect(calls.map((call) => call.method), [
       'setPreventClose',
-      'closeAll',
       'hide',
+      'closeAll',
     ]);
   });
+
+  test(
+    'ordinary close hides before a resource window finishes cleanup',
+    () async {
+      final release = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('com.nailauncher/resource_window_native'),
+            (call) async {
+              calls.add(call);
+              await release.future;
+              return null;
+            },
+          );
+      final closing = AppWindowListener().onWindowClose();
+      await Future<void>.delayed(Duration.zero);
+      expect(calls.map((call) => call.method), [
+        'setPreventClose',
+        'hide',
+        'closeAll',
+      ]);
+      release.complete();
+      await closing;
+    },
+  );
 
   testWidgets('root quit action waits for cleanup, closes stores and exits', (
     tester,
@@ -191,11 +216,7 @@ void main() {
       release.complete();
       expect(await exited.future, 0);
       expect(Hive.isBoxOpen(StorageKeys.settingsBox), isFalse);
-      expect(calls.map((call) => call.method), [
-        'destroy',
-        'setPreventClose',
-        'destroy',
-      ]);
+      expect(calls.map((call) => call.method), ['hide', 'destroy']);
       expect(
         (await Hive.openBox(StorageKeys.settingsBox)).get('test-draft'),
         'kept',

@@ -7,6 +7,121 @@ import 'package:nai_launcher/data/datasources/remote/github_api_service.dart';
 import 'package:nai_launcher/data/models/version/release_asset_info.dart';
 
 void main() {
+  for (final scenario in [
+    (
+      status: 403,
+      body: {'message': 'Access denied by policy'},
+      headers: <String, String>{},
+      limited: false,
+    ),
+    (
+      status: 403,
+      body: {'message': 'API rate limit exceeded'},
+      headers: {
+        'x-ratelimit-remaining': '0',
+        'x-ratelimit-reset': '1893456000',
+      },
+      limited: true,
+    ),
+    (
+      status: 403,
+      body: {'message': 'You have exceeded a secondary rate limit'},
+      headers: {
+        'retry-after': '60',
+        'x-ratelimit-remaining': '5',
+        'x-ratelimit-reset': '1893456000',
+      },
+      limited: true,
+    ),
+    (
+      status: 429,
+      body: {'message': 'Too many requests'},
+      headers: <String, String>{},
+      limited: true,
+    ),
+    (
+      status: 404,
+      body: {'message': 'Not Found'},
+      headers: <String, String>{},
+      limited: false,
+    ),
+    (
+      status: 403,
+      body: {'message': 123},
+      headers: {'x-ratelimit-reset': '1893456000'},
+      limited: false,
+    ),
+  ]) {
+    test(
+      'HTTP ${scenario.status} preserves reason and identifies rate limits: ${scenario.body}',
+      () async {
+        final server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+        addTearDown(() => server.close(force: true));
+        var requests = 0;
+        server.listen((request) async {
+          requests++;
+          request.response.statusCode = scenario.status;
+          request.response.headers.contentType = ContentType.json;
+          scenario.headers.forEach(request.response.headers.set);
+          request.response.write(jsonEncode(scenario.body));
+          await request.response.close();
+        });
+        final dio = Dio(
+          BaseOptions(baseUrl: 'http://127.0.0.1:${server.port}'),
+        );
+        addTearDown(dio.close);
+        final started = DateTime.now().toUtc();
+        await expectLater(
+          GitHubApiService(dio: dio).fetchLatestRelease(
+            owner: 'test',
+            repo: 'studio',
+            currentVersion: '2.2.4',
+          ),
+          throwsA(
+            isA<GitHubApiException>()
+                .having((e) => e.statusCode, 'status', scenario.status)
+                .having(
+                  (e) => e.message,
+                  'server reason',
+                  scenario.body['message'] is String
+                      ? scenario.body['message']
+                      : 'Forbidden',
+                )
+                .having((e) => e.rateLimited, 'rate limited', scenario.limited)
+                .having(
+                  (e) => e.originalError,
+                  'original error',
+                  isA<DioException>(),
+                )
+                .having(
+                  (e) => e.toString(),
+                  'diagnostics',
+                  contains('Response:'),
+                )
+                .having(
+                  (e) => e.retryAt?.millisecondsSinceEpoch,
+                  'retry time',
+                  scenario.headers.containsKey('retry-after')
+                      ? inInclusiveRange(
+                          started
+                              .add(const Duration(seconds: 60))
+                              .millisecondsSinceEpoch,
+                          DateTime.now()
+                              .toUtc()
+                              .add(const Duration(minutes: 2))
+                              .millisecondsSinceEpoch,
+                        )
+                      : scenario.headers['x-ratelimit-remaining'] == '0'
+                      ? DateTime.utc(2030).millisecondsSinceEpoch
+                      : isNull,
+                ),
+          ),
+        );
+        expect(requests, 1);
+      },
+    );
+  }
+
   const portableHash =
       'ac94c80df00816b0dec6b46d68fb82bc1a1c36c35088d6bb3ee5b29702d9b39a';
   const installerHash =

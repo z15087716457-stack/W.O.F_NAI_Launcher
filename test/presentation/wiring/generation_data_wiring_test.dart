@@ -13,6 +13,9 @@ import 'package:nai_launcher/core/shortcuts/shortcut_config.dart';
 import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/core/services/prompt_token_counter_service.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
+import 'package:nai_launcher/core/storage/pill_workspace_storage.dart';
+import 'package:nai_launcher/data/models/prompt_block/pill_document.dart';
+import 'package:nai_launcher/data/models/prompt_block/prompt_block.dart';
 import 'package:nai_launcher/data/models/user/user_subscription.dart';
 import 'package:nai_launcher/data/models/gallery/nai_image_metadata.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
@@ -27,6 +30,9 @@ import 'package:nai_launcher/presentation/providers/image_generation_provider.da
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
+import 'package:nai_launcher/presentation/providers/character_prompt_provider.dart';
+import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
+import 'package:nai_launcher/presentation/providers/uc_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_token_counter_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
@@ -67,6 +73,20 @@ class DataRecents extends ReferencePanelNotifier {
   ReferencePanelState build() => const ReferencePanelState();
 }
 
+class _DraftStorage extends PillWorkspaceStorage {
+  int reads = 0;
+  @override
+  PillDocument? tryLoadSync(String scope) {
+    reads++;
+    return super.tryLoadSync(scope);
+  }
+}
+
+class _Blocks extends EmptyBlocks {
+  void publish(PromptBlock block) =>
+      state = AsyncData(PromptBlockLibraryState(blocks: [block], folders: []));
+}
+
 final _variationQuotes = StateProvider<Map<String, int?>>((ref) => {});
 
 void main() {
@@ -77,7 +97,9 @@ void main() {
   final provider = generationViewDataProvider(l);
   late ProviderSubscription<GenViewData> subscription;
   late Completer<NaiImageMetadata?> pendingMetadata;
+  late _DraftStorage draftStorage;
   setUp(() async {
+    draftStorage = _DraftStorage();
     pendingMetadata = Completer<NaiImageMetadata?>();
     SharedPreferences.setMockInitialValues({});
     directory = await Directory.systemTemp.createTemp('generation-data-');
@@ -86,8 +108,9 @@ void main() {
     container = ProviderContainer(
       overrides: [
         localStorageServiceProvider.overrideWithValue(MemoryDraftSettings()),
+        pillWorkspaceStorageProvider.overrideWithValue(draftStorage),
         characterPromptRepositoryProvider.overrideWithValue(MemoryCharacters()),
-        promptBlockLibraryNotifierProvider.overrideWith(EmptyBlocks.new),
+        promptBlockLibraryNotifierProvider.overrideWith(_Blocks.new),
         authNotifierProvider.overrideWith(OfflineAuth.new),
         imageGenerationNotifierProvider.overrideWith(DataGeneration.new),
         subscriptionNotifierProvider.overrideWith(DataSubscription.new),
@@ -132,6 +155,192 @@ void main() {
     await Hive.close();
     await directory.delete(recursive: true);
   });
+  test(
+    'progress reuses the UI draft, while real input changes refresh it',
+    () async {
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      params.setSourceImage(Uint8List(1024 * 1024));
+      params.setMaskImage(Uint8List(1024 * 1024));
+      final generation =
+          container.read(imageGenerationNotifierProvider.notifier)
+              as DataGeneration;
+      const state = ImageGenerationState(
+        status: GenerationStatus.generating,
+        generationRunId: 900,
+        totalImages: 1,
+        currentImage: 1,
+        batchWidth: 832,
+        batchHeight: 1216,
+      );
+      generation.publish(state);
+      container.read(provider);
+      await container.pump();
+      container.read(provider);
+      final reads = draftStorage.reads;
+      final version = container.read(bridgeDraftVersionProvider);
+      final original = container.read(generationParamsNotifierProvider);
+      for (var i = 1; i <= 20; i++) {
+        generation.publish(state.copyWith(progress: i / 20));
+        expect(
+          container.read(provider).prompt.positivePreview.first.text,
+          contains('user prompt'),
+        );
+      }
+      expect(draftStorage.reads, reads);
+      expect(container.read(bridgeDraftVersionProvider), version);
+      expect(
+        identical(container.read(generationParamsNotifierProvider), original),
+        isTrue,
+      );
+
+      params.updatePromptImmediately('edited after progress');
+      expect(
+        container.read(provider).prompt.positivePreview.first.text,
+        contains('edited after progress'),
+      );
+      expect(draftStorage.reads, greaterThan(reads));
+      expect(container.read(bridgeDraftVersionProvider), isNot(version));
+    },
+  );
+
+  test('cached UI follows late-opened lanes, translation edits and undo', () {
+    expect(
+      container.exists(pillWorkspaceProvider(PillScopes.negative)),
+      isFalse,
+    );
+    expect(
+      container.read(provider).prompt.positivePreview.first.text,
+      contains('user prompt'),
+    );
+    final main = container.read(
+      pillWorkspaceProvider(PillScopes.main).notifier,
+    );
+    main.replaceWithPlainText('live main');
+    expect(
+      container.read(provider).prompt.positivePreview.first.text,
+      contains('live main'),
+    );
+    main.insertTranslationAt(
+      offset: 0,
+      source: 'translated source, ',
+      zh: '译文',
+    );
+    final view = container.read(provider);
+    expect(
+      view.prompt.positivePreview.first.text,
+      contains('translated source'),
+    );
+    final document = container
+        .read(pillWorkspaceProvider(PillScopes.main))
+        .document;
+    final marker = document.instances.keys.single;
+    main.updateTranslation(
+      marker,
+      document.instances[marker]!.translation!.copyWith(source: 'revised, '),
+    );
+    expect(
+      container.read(provider).prompt.positivePreview.first.text,
+      contains('revised'),
+    );
+    main.undo();
+    expect(
+      container.read(provider).prompt.positivePreview.first.text,
+      contains('translated source'),
+    );
+    main.redo();
+    expect(
+      container.read(provider).prompt.positivePreview.first.text,
+      contains('revised'),
+    );
+
+    final characters = container.read(characterPromptNotifierProvider.notifier);
+    final role = container
+        .read(characterPromptNotifierProvider)
+        .characters
+        .single;
+    characters.updateCharacter(role.copyWith(enabled: true));
+    final lane = container.read(
+      pillWorkspaceProvider(PillScopes.charPos(role.id)).notifier,
+    );
+    lane.replaceWithPlainText('live character');
+    expect(
+      container.read(provider).prompt.positivePreview.map((s) => s.text),
+      contains(contains('live character')),
+    );
+    final negative = container.read(
+      pillWorkspaceProvider(PillScopes.negative).notifier,
+    );
+    negative.replaceWithPlainText('live negative');
+    expect(
+      container.read(provider).prompt.negativePreview.first.text,
+      contains('live negative'),
+    );
+  });
+
+  test(
+    'UI draft cache invalidates for model, presets, image import and pause',
+    () {
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      void changed(void Function() edit) {
+        container.read(provider);
+        final before = container.read(bridgeDraftVersionProvider);
+        final reads = draftStorage.reads;
+        edit();
+        container.read(provider);
+        expect(container.read(bridgeDraftVersionProvider), isNot(before));
+        expect(draftStorage.reads, greaterThan(reads));
+      }
+
+      changed(() => params.updateModel(ImageModels.animeDiffusionV5Full));
+      changed(
+        () => container.read(qualityPresetNotifierProvider.notifier).setNone(),
+      );
+      changed(
+        () => container
+            .read(ucPresetNotifierProvider.notifier)
+            .setPresetType(UcPresetType.none),
+      );
+      changed(() => params.setSourceImage(Uint8List.fromList([1, 2, 3])));
+      changed(() => params.setMaskImage(Uint8List.fromList([4, 5, 6])));
+      changed(
+        () => container.read(generationImg2ImgEnabledProvider.notifier).state =
+            false,
+      );
+      changed(
+        () => container.read(generationImg2ImgEnabledProvider.notifier).state =
+            true,
+      );
+    },
+  );
+  test('cached UI follows edits to a referenced library block', () {
+    final block = PromptBlock(
+      id: 'quality',
+      title: 'Quality',
+      content: 'first custom quality',
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+    );
+    final library =
+        container.read(promptBlockLibraryNotifierProvider.notifier) as _Blocks;
+    library.publish(block);
+    container
+        .read(qualityPresetNotifierProvider.notifier)
+        .setCustomEntry(block.id);
+    expect(
+      container.read(provider).prompt.positivePreview.map((s) => s.text),
+      contains(contains('first custom quality')),
+    );
+    library.publish(block.copyWith(content: 'revised custom quality'));
+    expect(
+      container.read(provider).prompt.positivePreview.map((s) => s.text),
+      contains(contains('revised custom quality')),
+    );
+    expect(
+      container.read(provider).prompt.positivePreview.map((s) => s.text),
+      isNot(contains(contains('first custom quality'))),
+    );
+  });
+
   test('generation error card exposes HTTP status and server reason', () {
     const detail =
         'API_ERROR_400|image field references unknown form part "missing"';

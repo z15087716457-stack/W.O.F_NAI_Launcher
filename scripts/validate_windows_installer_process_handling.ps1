@@ -268,7 +268,41 @@ try {
     throw "Fresh-directory silent uninstaller exited with code $freshUninstallExit instead of 0."
   }
 
-  Write-Host 'Windows installer process isolation, fail-closed and lock-probe softening checks passed.'
+  # A file handle can prevent overwrite even when this executable has no process.
+  $lockedDir = Join-Path $tempRoot 'locked-payload'
+  [void](New-Item -ItemType Directory -Path $lockedDir -Force)
+  $lockedExe = Join-Path $lockedDir $appName
+  Copy-Item -LiteralPath (Join-Path $env:SystemRoot 'System32\whoami.exe') -Destination $lockedExe
+  $oldHash = (Get-FileHash -LiteralPath $lockedExe -Algorithm SHA256).Hash
+  $newHash = (Get-FileHash -LiteralPath (Join-Path $sourceDir $appName) -Algorithm SHA256).Hash
+  $registryPath = "HKCU:\$uninstallKey"
+  [void](New-Item -Path $registryPath -Force)
+  Set-ItemProperty -LiteralPath $registryPath -Name DisplayVersion -Value 'old-version'
+  $lock = [System.IO.File]::OpenRead($lockedExe)
+  try {
+    $lockedExit = Invoke-SilentExecutable -Path $normalInstaller -InstallDir $lockedDir
+  } finally {
+    $lock.Dispose()
+  }
+  if ($lockedExit -ne 4) {
+    throw "Payload-write failure returned $lockedExit instead of 4."
+  }
+  if ((Get-FileHash -LiteralPath $lockedExe -Algorithm SHA256).Hash -ne $oldHash) {
+    throw 'The locked executable unexpectedly changed.'
+  }
+  if ((Get-ItemProperty -LiteralPath $registryPath).DisplayVersion -ne 'old-version') {
+    throw 'The failed installer registered a successful update.'
+  }
+  $retryExit = Invoke-SilentExecutable -Path $normalInstaller -InstallDir $lockedDir
+  if ($retryExit -ne 0 -or (Get-FileHash -LiteralPath $lockedExe -Algorithm SHA256).Hash -ne $newHash) {
+    throw 'The installer did not replace the executable after releasing the lock.'
+  }
+  $retryUninstallExit = Invoke-SilentExecutable -Path (Join-Path $lockedDir 'Uninstall.exe')
+  if ($retryUninstallExit -ne 0) {
+    throw "Retry uninstall exited with code $retryUninstallExit."
+  }
+
+  Write-Host 'Windows installer process isolation, lock-probe, payload-write failure and retry checks passed.'
 } finally {
   foreach ($process in $script:StartedProcesses) {
     try {
@@ -284,18 +318,6 @@ try {
   $registryPath = "HKCU:\$uninstallKey"
   if (Test-Path -LiteralPath $registryPath) {
     Remove-Item -LiteralPath $registryPath -Recurse -Force
-  }
-
-  # 兜底清理测试安装器创建的快捷方式（正常路径由场景内卸载器回收）
-  $testMenuDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\W.O.F NAI Studio Process Test'
-  if (Test-Path -LiteralPath $testMenuDir) {
-    Remove-Item -LiteralPath $testMenuDir -Recurse -Force
-  }
-  $testDesktopLink = Join-Path `
-    ([Environment]::GetFolderPath('Desktop')) `
-    'W.O.F NAI Studio Process Test.lnk'
-  if (Test-Path -LiteralPath $testDesktopLink) {
-    Remove-Item -LiteralPath $testDesktopLink -Force
   }
 
   if (Test-Path -LiteralPath $tempRoot) {

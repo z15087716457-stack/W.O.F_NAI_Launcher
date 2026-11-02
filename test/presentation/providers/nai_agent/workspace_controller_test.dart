@@ -7,6 +7,7 @@ import 'package:image/image.dart' as img;
 import 'package:nai_launcher/core/nai_agent/pi_host_client.dart';
 import 'package:nai_launcher/core/nai_agent/vision_access.dart';
 import 'package:nai_launcher/core/nai_agent/agent_tool.dart';
+import 'package:nai_launcher/core/nai_agent/mcp_config.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_controller.dart';
 
@@ -86,6 +87,7 @@ void main() {
     bool Function()? readVision,
     int Function()? readModelRevision,
     NaiAgentVisionAccess visionAccess = const NaiAgentVisionAccess(),
+    Map<String, dynamic>? mcpConfig,
   }) {
     final value = NaiAgentWorkspaceController(
       store: AgentWorkspaceStore(root),
@@ -106,6 +108,12 @@ void main() {
             visionAccess: visionAccess,
             extensionPaths: settings.enabledExtensionPaths,
             mcp: {
+              if (mcpConfig != null)
+                'mcpServers': {
+                  for (final server in settings.mcpServers)
+                    if (server.enabled)
+                      server.name: {...mcpConfig, 'exposure': server.exposure},
+                },
               'builtinEnabled': settings.studioMcpEnabled,
               'builtinExposure': settings.studioMcpExposure,
             },
@@ -130,6 +138,71 @@ void main() {
     controllers.add(value);
     return value;
   }
+
+  test(
+    'configured MCP connects before first send and display renames retain actual tool names',
+    () async {
+      final script = File('${root.path}/synthetic-mcp.mjs');
+      await script.writeAsString(r'''
+import {createInterface} from 'node:readline';
+createInterface({input:process.stdin}).on('line', line=>{
+  const m=JSON.parse(line); if(m.id===undefined)return;
+  const result=m.method==='initialize'
+    ?{protocolVersion:m.params.protocolVersion,capabilities:{tools:{}},serverInfo:{name:'fixture',version:'1'}}
+    :m.method==='tools/list'
+      ?{tools:[{name:'lookup',description:'Synthetic lookup',inputSchema:{type:'object',properties:{}}}]}
+      :{content:[{type:'text',text:'synthetic'}]};
+  process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:m.id,result})+'\n');
+});
+''');
+      const server = AgentMcpServer(
+        name: 'exa',
+        configId: 'synthetic-ref',
+        transport: 'stdio',
+        exposure: 'direct',
+        displayName: 'EXA免费联网搜索',
+      );
+      await AgentWorkspaceStore(root).saveSettings(
+        const AgentSettings(
+          providerId: 'local',
+          modelId: 'test',
+          mcpServers: [server],
+        ),
+      );
+      final c = controller(
+        mcpConfig: {
+          'command': 'E:/node/node.exe',
+          'args': [script.path],
+        },
+      );
+      await c.initialize(restoreHistory: false);
+      final client = c.selected!.client!;
+      final status = await client.mcpCommand('status');
+      expect(status['mcpStatus'], contains('exa: connected, 1 tool'));
+      expect(calls, 0);
+      expect(c.selected!.chat.isDraft, true);
+      expect(await c.store.listChats(c.selectedWorkspace!.id), isEmpty);
+      expect(await c.sendText('First synthetic request'), true);
+      await c.updateSettings({
+        'mcpServers': [
+          {...server.toJson(), 'displayName': 'EXA付费联网搜索'},
+        ],
+      });
+      expect(await c.sendText('Display renamed'), true);
+      expect(c.selected!.client, same(client));
+      for (final request in requests) {
+        final names = (request['tools'] as List).map(
+          (t) => t['function']['name'],
+        );
+        expect(names, contains('mcp__exa__lookup'));
+        expect(names.any((name) => '$name'.contains('联网')), false);
+      }
+      await c.createChat();
+      expect(c.selected!.client, isNotNull);
+      expect(c.selected!.client, isNot(same(client)));
+      expect(calls, 2);
+    },
+  );
 
   test(
     'suggestions arrive from host, clear on typing, accept into draft and settings apply live',
@@ -821,6 +894,68 @@ void main() {
       }
     },
   );
+  test(
+    'chat prefix saves before sending, restores and stays isolated in actual Pi requests',
+    () async {
+      final original = controller();
+      await original.initialize();
+      final a = original.selected!.chat;
+      await original.setChatPromptPrefix(a, 'CHAT_A_PREFIX');
+      expect(original.selected!.chat.isDraft, false);
+      expect(calls, 0);
+      await original.renameChat(a.id, 'Configured chat');
+      expect(original.selected!.chat.systemPromptPrefix, 'CHAT_A_PREFIX');
+      await original.close();
+
+      final c = controller();
+      await c.initialize();
+      expect(c.selected!.chat.id, a.id);
+      expect(c.selected!.chat.systemPromptPrefix, 'CHAT_A_PREFIX');
+      expect(calls, 0);
+      await c.updateSettings({
+        'customSystemPrompt': 'BASE_PROMPT',
+        'systemPromptPrefix': 'GLOBAL_PREFIX',
+        'globalInstructions': 'GLOBAL_RULE',
+      });
+      expect(await c.sendText('First chat'), true);
+      await c.createChat();
+      expect(c.selected!.chat.systemPromptPrefix, isEmpty);
+      expect(await c.sendText('Second chat'), true);
+      final b = c.selected!.chat;
+      await c.setChatPromptPrefix(b, 'CHAT_B_PREFIX');
+      await c.selectChat(a.id);
+      await c.setWorkspacePrompt('WORKSPACE_BASE');
+      await c.updateSettings({'globalInstructions': 'UPDATED_RULE'});
+      expect(await c.sendText('First chat restored'), true);
+      await c.setChatPromptPrefix(c.selected!.chat, '');
+      expect(await c.sendText('First chat cleared'), true);
+      await c.selectChat(b.id);
+      expect(await c.sendText('Second chat restored'), true);
+
+      String systemAt(int index) =>
+          (requests[index]['messages'] as List).firstWhere(
+                (m) => m['role'] == 'system',
+              )['content']
+              as String;
+      expect(
+        systemAt(0),
+        startsWith('GLOBAL_PREFIX\n\nCHAT_A_PREFIX\n\nBASE_PROMPT'),
+      );
+      expect(systemAt(1), isNot(contains('CHAT_A_PREFIX')));
+      expect(
+        systemAt(2),
+        startsWith('GLOBAL_PREFIX\n\nCHAT_A_PREFIX\n\nWORKSPACE_BASE'),
+      );
+      expect(systemAt(2), contains('UPDATED_RULE'));
+      expect(systemAt(3), isNot(contains('CHAT_A_PREFIX')));
+      expect(
+        systemAt(4),
+        startsWith('GLOBAL_PREFIX\n\nCHAT_B_PREFIX\n\nWORKSPACE_BASE'),
+      );
+      expect(systemAt(4), isNot(contains('CHAT_A_PREFIX')));
+    },
+  );
+
   test(
     'instruction changes refresh live and restored Pi sessions while retaining each base prompt',
     () async {

@@ -8,6 +8,7 @@ import 'package:nai_launcher/presentation/providers/generation/generation_models
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_contract.dart';
 import 'package:nai_launcher/presentation/wiring/generation_view_mapping.dart';
+import 'package:nai_launcher/presentation/screens/generation/widgets/canvas/canvas_feed_layout.dart';
 
 GeneratedImage image(
   String id, {
@@ -129,12 +130,40 @@ void main() {
       ['a', 'b'],
     );
     final flat = generationHistoryView(state, singleImages: true);
-    expect(flat.batches.map((b) => b.id).toSet(), {'img:a', 'img:b'});
+    expect(flat.batches.map((b) => b.id), ['img:a', 'img:b']);
     expect(flat.batches.every((b) => b.images.length == 1), isTrue);
     expect(generationHistoryView(state).batches.single.images.length, 2);
     expect(second.generationRunId, 1);
     expect(state.history, [first, second]);
   });
+
+  for (final times in [
+    [1, 2, 3, 4],
+    [3, 1, 4, 2],
+  ]) {
+    test('单图历史与画布保留批内序号和跨批次新旧顺序：$times', () {
+      final latest = [
+        for (var slot = 0; slot < times.length; slot++)
+          image('new-$slot', run: 2, slot: slot, time: 10 + times[slot]),
+      ];
+      final old = image('old', run: 1, slot: 0);
+      final state = ImageGenerationState(history: [...latest.reversed, old]);
+      final history = generationHistoryView(state, singleImages: true);
+      final canvas = layoutCanvasFeed(
+        groupCanvasImages(state.mergedPanelImages, singleImages: true),
+      );
+      final expected = ['new-0', 'new-1', 'new-2', 'new-3', 'old'];
+      expect(
+        history.batches.expand((b) => b.images.map((i) => i.id)),
+        expected,
+      );
+      expect(canvas.items.map((i) => i.image!.id), expected);
+      expect(generationHistoryView(state).batches.map((b) => b.id), [
+        'run:2',
+        'run:1',
+      ]);
+    });
+  }
 
   test('工具宿主按临时收栏后的真实画布边界定位，不改变用户宽度偏好', () {
     const layout = GenLayout(leftWidth: 560, historyWidth: 400);

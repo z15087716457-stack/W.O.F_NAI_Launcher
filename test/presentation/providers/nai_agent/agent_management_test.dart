@@ -93,9 +93,13 @@ void main() {
           'url': 'https://example.invalid/mcp',
           'headers': {'x-api-key': 'fixture-private-key'},
           'exposure': 'codemode',
+          'displayName': 'EXA免费联网搜索',
         },
       });
       final first = (await c.store.readSettings()).mcpServers.single;
+      expect(first.label, 'EXA免费联网搜索');
+      expect(first.name, 'web');
+      expect(await management.mcpConfig(first), isNot(contains('displayName')));
       expect(secrets.values[first.configId], contains('fixture-private-key'));
       expect(
         await File('${root.path}/settings.json').readAsString(),
@@ -110,6 +114,7 @@ void main() {
         'changes': {'description': 'changed'},
       });
       final changed = (await c.store.readSettings()).mcpServers.single;
+      expect(changed.label, 'EXA免费联网搜索');
       expect(changed.configId, isNot(first.configId));
       expect(secrets.values[first.configId], isNull);
       expect(secrets.values[changed.configId], contains('fixture-private-key'));

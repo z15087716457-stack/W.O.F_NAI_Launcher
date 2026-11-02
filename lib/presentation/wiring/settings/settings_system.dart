@@ -28,13 +28,15 @@ SettingsAboutData settingsAboutData(UpdateState state, DateTime? checkedAt) =>
       build: AppVersion.buildNumber,
       platform: Platform.operatingSystem,
       update: switch (state.status) {
+        UpdateStatus.idle => SettingsUpdateState.unchecked,
+        UpdateStatus.skipped => SettingsUpdateState.skipped,
         UpdateStatus.checking => SettingsUpdateState.checking,
         UpdateStatus.available ||
         UpdateStatus.downloaded ||
         UpdateStatus.installing => SettingsUpdateState.available,
         UpdateStatus.downloading => SettingsUpdateState.downloading,
         UpdateStatus.error => SettingsUpdateState.failed,
-        _ => SettingsUpdateState.upToDate,
+        UpdateStatus.upToDate => SettingsUpdateState.upToDate,
       },
       latest: state.versionInfo?.version ?? '',
       releasedAt: DateTime.tryParse(state.versionInfo?.publishedAt ?? ''),

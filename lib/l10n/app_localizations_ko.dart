@@ -8932,6 +8932,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get update_errorCheckFailed => '업데이트를 확인하지 못했습니다';
 
   @override
+  String get update_errorRateLimited => 'GitHub 요청 한도에 도달했습니다. 잠시 후 다시 시도하세요.';
+
+  @override
+  String update_retryAt(String time) {
+    return '$time(현지 시간) 이후에 다시 시도하세요.';
+  }
+
+  @override
   String get update_errorCheckUnknown => '업데이트를 확인하는 중 알 수 없는 오류가 발생했습니다';
 
   @override
@@ -14790,9 +14798,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get gen_recent => '최근';
-
-  @override
   String get gen_encoded => '인코딩됨';
 
   @override
@@ -19335,6 +19340,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get set_abLatest => '최신 버전';
 
   @override
+  String get set_abUnchecked => '확인 전';
+
+  @override
+  String get set_abSkipped => '업데이트 건너뜀';
+
+  @override
   String get set_abChecking => '업데이트 확인 중…';
 
   @override
@@ -20848,6 +20859,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get ag_memoryGlobal => '전역 지침';
 
   @override
+  String get ag_memoryChatPrefix => '이 대화의 선행 지침';
+
+  @override
+  String get ag_memoryChatPrefixHint => '현재 대화에만 적용되며 기본 시스템 프롬프트 앞에 추가됩니다.';
+
+  @override
   String get ag_memoryWorkspace => '작업 공간 규칙';
 
   @override
@@ -21966,6 +21983,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get set_agMcpStdio => '로컬 명령';
+
+  @override
+  String get set_agMcpDisplayName => '표시 이름(선택)';
+
+  @override
+  String get set_agMcpDisplayNameHint => '화면에만 표시되며 도구 이름은 변경되지 않습니다.';
+
+  @override
+  String get set_agMcpIdentifier => '도구 식별자';
 
   @override
   String get set_agMcpAddress => '서버 주소';

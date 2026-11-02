@@ -189,7 +189,7 @@ class DirectorToolsNotifier extends Notifier<DirectorToolsState> {
     final remove = DesktopAppShutdownService.registerCleanup(() async {
       _cancellation?.cancel();
       await _pending;
-    });
+    }, name: 'Director tools');
     ref.onDispose(() {
       _disposed = true;
       _cancellation?.cancel();

@@ -615,6 +615,7 @@ class AgentMemory extends StatelessWidget {
       String body,
       AgentMemoryTarget target, {
       List<String>? chips,
+      String? hint,
     }) => Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: AgentCard(
@@ -646,6 +647,8 @@ class AgentMemory extends StatelessWidget {
                   ),
                 ],
               ),
+              if (hint != null)
+                Text(hint, style: UiText.sans(11, color: c.faint, height: 1.5)),
               Padding(
                 padding: const EdgeInsets.only(right: 6),
                 child: chips != null
@@ -711,6 +714,13 @@ class AgentMemory extends StatelessWidget {
           l.ag_memoryGlobal,
           m.globalInstructions,
           AgentMemoryTarget.global,
+        ),
+        card(
+          const Key('agent-memory-chat-prefix'),
+          l.ag_memoryChatPrefix,
+          m.chatPrefix,
+          AgentMemoryTarget.chatPrefix,
+          hint: l.ag_memoryChatPrefixHint,
         ),
         card(
           const Key('agent-memory-workspace'),

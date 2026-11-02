@@ -9,6 +9,7 @@ import '../../../../core/utils/image_save_utils.dart';
 import '../../../../data/models/gallery/nai_image_metadata.dart';
 import '../../../../data/repositories/gallery_folder_repository.dart';
 import '../../../../data/services/image_metadata_service.dart';
+import '../../../../data/services/gallery/gallery_file_changes.dart';
 import '../../../providers/image_generation_provider.dart';
 import '../../../providers/local_gallery_provider.dart';
 import '../../../utils/image_viewer_opener.dart';
@@ -136,8 +137,12 @@ class GenerationSaveService {
         ref
             .read(imageGenerationNotifierProvider.notifier)
             .updateImageFilePath(image.identifier, path);
-        ref.read(localGalleryNotifierProvider.notifier).refresh();
-        AppToast.success(context, context.l10n.image_imageSaved(saveDirPath));
+        await ref
+            .read(localGalleryNotifierProvider.notifier)
+            .applyFileChanges(GalleryFileChanges()..files.add(path));
+        if (context.mounted) {
+          AppToast.success(context, context.l10n.image_imageSaved(saveDirPath));
+        }
       }
     } catch (e) {
       if (context.mounted) {

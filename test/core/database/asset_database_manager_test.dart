@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +19,7 @@ void main() {
   late Map<String, dynamic> manifest;
 
   setUp(() async {
+    rootBundle.evict('assets/databases/manifest.json');
     AssetDatabaseManager.resetForTesting();
     tempDir = await Directory.systemTemp.createTemp(
       'asset_database_manager_test_',
@@ -126,7 +126,212 @@ void main() {
       assetLoadCounts['assets/databases/${AssetDatabaseManager.cooccurrenceDb}'],
       isNull,
     );
+    final target = File(p.join(dbDir.path, AssetDatabaseManager.tagCatalogDb));
+    final state = jsonDecode(
+      await File('${target.path}.install.json').readAsString(),
+    );
+    expect(
+      state['modified'],
+      (await target.stat()).modified.microsecondsSinceEpoch,
+    );
+    expect(state['size'], await target.length());
   });
+
+  test(
+    'unchanged validated assets restart without reading locked database contents',
+    () async {
+      await AssetDatabaseManager.initialize();
+      final handles = <RandomAccessFile>[];
+      try {
+        for (final name in [
+          AssetDatabaseManager.tagCatalogDb,
+          AssetDatabaseManager.cooccurrenceDb,
+        ]) {
+          final file = File(
+            p.join(appSupportDir.path, 'asset_databases', name),
+          );
+          final handle = await file.open(mode: FileMode.append);
+          await handle.lock(FileLock.exclusive);
+          handles.add(handle);
+        }
+        AssetDatabaseManager.resetForTesting();
+        await AssetDatabaseManager.initialize();
+        expect(
+          assetLoadCounts['assets/databases/${AssetDatabaseManager.tagCatalogDb}'],
+          1,
+        );
+        expect(
+          assetLoadCounts['assets/databases/${AssetDatabaseManager.cooccurrenceDb}'],
+          1,
+        );
+      } finally {
+        for (final handle in handles) {
+          await handle.unlock();
+          await handle.close();
+        }
+      }
+    },
+    skip: !Platform.isWindows,
+  );
+
+  test(
+    'timestamp-only change is verified and recorded without reinstalling',
+    () async {
+      await AssetDatabaseManager.initialize();
+      final file = File(
+        p.join(
+          appSupportDir.path,
+          'asset_databases',
+          AssetDatabaseManager.tagCatalogDb,
+        ),
+      );
+      await file.setLastModified(DateTime(2025, 1, 2));
+      AssetDatabaseManager.resetForTesting();
+      await AssetDatabaseManager.initialize();
+      expect(
+        assetLoadCounts['assets/databases/${AssetDatabaseManager.tagCatalogDb}'],
+        1,
+      );
+      final state = jsonDecode(
+        await File('${file.path}.install.json').readAsString(),
+      );
+      expect(
+        state['modified'],
+        (await file.stat()).modified.microsecondsSinceEpoch,
+      );
+    },
+  );
+
+  for (final truncate in [false, true]) {
+    test(
+      'changed ${truncate ? 'size' : 'same-size content'} reinstalls a corrupt asset',
+      () async {
+        await AssetDatabaseManager.initialize();
+        final file = File(
+          p.join(
+            appSupportDir.path,
+            'asset_databases',
+            AssetDatabaseManager.tagCatalogDb,
+          ),
+        );
+        final original = await file.readAsBytes();
+        final corrupt = truncate
+            ? original.sublist(0, 12)
+            : Uint8List.fromList(original);
+        corrupt[0] = 0;
+        await file.writeAsBytes(corrupt);
+        await file.setLastModified(DateTime(2025));
+        AssetDatabaseManager.resetForTesting();
+        await AssetDatabaseManager.initialize();
+        expect(await file.readAsBytes(), original);
+        expect(
+          assetLoadCounts['assets/databases/${AssetDatabaseManager.tagCatalogDb}'],
+          2,
+        );
+      },
+    );
+  }
+
+  test(
+    'missing or malformed validation record is repaired without replacing valid data',
+    () async {
+      await AssetDatabaseManager.initialize();
+      final file = File(
+        p.join(
+          appSupportDir.path,
+          'asset_databases',
+          AssetDatabaseManager.tagCatalogDb,
+        ),
+      );
+      final state = File('${file.path}.install.json');
+      for (final missing in [true, false]) {
+        if (missing) {
+          await state.delete();
+        } else {
+          await state.writeAsString('{broken');
+        }
+        AssetDatabaseManager.resetForTesting();
+        await AssetDatabaseManager.initialize();
+        expect(
+          assetLoadCounts['assets/databases/${AssetDatabaseManager.tagCatalogDb}'],
+          1,
+        );
+        final record = jsonDecode(await state.readAsString());
+        expect(
+          record['sha256'],
+          sha256.convert(await file.readAsBytes()).toString(),
+        );
+        expect(
+          record['modified'],
+          (await file.stat()).modified.microsecondsSinceEpoch,
+        );
+      }
+    },
+  );
+
+  test(
+    'a new manifest installs the new database even when the old file is unchanged',
+    () async {
+      await AssetDatabaseManager.initialize();
+      const name = AssetDatabaseManager.cooccurrenceDb;
+      const key = 'assets/databases/$name';
+      final updated = File(p.join(tempDir.path, 'updated.db'));
+      await updated.writeAsBytes(assets[key]!);
+      final db = sqlite3.open(updated.path);
+      db.execute(
+        "INSERT INTO cooccurrences VALUES ('blue_hair', 'long_hair', 10)",
+      );
+      db.dispose();
+      final bytes = await updated.readAsBytes();
+      final metadata = manifest['databases'][name] as Map<String, dynamic>;
+      metadata['sha256'] = sha256.convert(bytes).toString();
+      metadata['size'] = bytes.length;
+      assets[key] = bytes;
+      assets['assets/databases/manifest.json'] = Uint8List.fromList(
+        utf8.encode(jsonEncode(manifest)),
+      );
+      rootBundle.evict('assets/databases/manifest.json');
+      AssetDatabaseManager.resetForTesting();
+      await AssetDatabaseManager.initialize();
+      final installed = File(
+        p.join(appSupportDir.path, 'asset_databases', name),
+      );
+      expect(await installed.readAsBytes(), bytes);
+      expect(assetLoadCounts[key], 2);
+    },
+  );
+
+  test(
+    'failed new asset keeps the validated old database and its version record',
+    () async {
+      await AssetDatabaseManager.initialize();
+      const name = AssetDatabaseManager.cooccurrenceDb;
+      const key = 'assets/databases/$name';
+      final installed = File(
+        p.join(appSupportDir.path, 'asset_databases', name),
+      );
+      final before = await installed.readAsBytes();
+      final record = await File(
+        '${installed.path}.install.json',
+      ).readAsString();
+      final invalid = Uint8List.fromList([1, 2, 3]);
+      assets[key] = invalid;
+      final metadata = manifest['databases'][name] as Map<String, dynamic>;
+      metadata['sha256'] = sha256.convert(invalid).toString();
+      metadata['size'] = invalid.length;
+      assets['assets/databases/manifest.json'] = Uint8List.fromList(
+        utf8.encode(jsonEncode(manifest)),
+      );
+      rootBundle.evict('assets/databases/manifest.json');
+      AssetDatabaseManager.resetForTesting();
+      await AssetDatabaseManager.initialize();
+      expect(await installed.readAsBytes(), before);
+      expect(
+        await File('${installed.path}.install.json').readAsString(),
+        record,
+      );
+    },
+  );
 
   test('installs missing assets atomically with manifest state', () async {
     await AssetDatabaseManager.initialize();

@@ -198,7 +198,7 @@ class NaiAgentSettingsSectionState
     final prompt = client != null && !client.isClosed
         ? (await client.getSystemPrompt())['text'] as String
         : '[${context.l10n.set_agFinalPending}]\n\n'
-              '${await c.store.effectiveSystemPrompt(workspace.id)}';
+              '${await c.store.effectiveSystemPrompt(workspace.id, chatPrefix: c.selected?.chat.systemPromptPrefix ?? '')}';
     if (!mounted) return;
     await showDialog<void>(
       context: context,

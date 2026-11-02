@@ -198,18 +198,28 @@ class AssetDatabaseManager {
     var existingUsable = false;
     if (await target.exists()) {
       try {
-        await _validateDatabase(target.path, requiredTables: requiredTables);
-        existingUsable = true;
-        if (await _stateMatches(state, expectedHash) &&
-            await target.length() == metadata['size'] &&
+        final stat = await target.stat();
+        if (stat.size == metadata['size'] &&
+            await _stateMatches(state, expectedHash, stat)) {
+          return;
+        }
+        final matches =
+            stat.size == metadata['size'] &&
             (await sha256.bind(target.openRead()).first).toString() ==
-                expectedHash) {
-          await _validateDatabase(
-            target.path,
-            requiredTables: requiredTables,
-            expectedSchemaVersion: metadata['schemaVersion'] as int?,
-            expectedDataVersion: metadata['dataVersion'] as String?,
-          );
+                expectedHash;
+        await _validateDatabase(
+          target.path,
+          requiredTables: requiredTables,
+          expectedSchemaVersion: matches
+              ? metadata['schemaVersion'] as int?
+              : null,
+          expectedDataVersion: matches
+              ? metadata['dataVersion'] as String?
+              : null,
+        );
+        existingUsable = true;
+        if (matches) {
+          await _writeInstallState(state, metadata, await target.stat());
           return;
         }
       } catch (error) {
@@ -245,15 +255,7 @@ class AssetDatabaseManager {
       if (await target.exists()) await target.rename(backup.path);
       try {
         await temp.rename(target.path);
-        await state.writeAsString(
-          jsonEncode({
-            'sha256': expectedHash,
-            'schemaVersion': metadata['schemaVersion'],
-            'dataVersion': metadata['dataVersion'],
-          }),
-          encoding: utf8,
-          flush: true,
-        );
+        await _writeInstallState(state, metadata, await target.stat());
         await backup.deleteIfExists();
       } catch (_) {
         await target.deleteIfExists();
@@ -328,12 +330,32 @@ class AssetDatabaseManager {
     }
   }
 
-  static Future<bool> _stateMatches(File state, String hash) async {
+  static Future<void> _writeInstallState(
+    File state,
+    Map<String, dynamic> metadata,
+    FileStat stat,
+  ) => state.writeAsString(
+    jsonEncode({
+      ...metadata,
+      'size': stat.size,
+      'modified': stat.modified.microsecondsSinceEpoch,
+    }),
+    encoding: utf8,
+    flush: true,
+  );
+
+  static Future<bool> _stateMatches(
+    File state,
+    String hash,
+    FileStat stat,
+  ) async {
     try {
       if (!await state.exists()) return false;
       final data =
           jsonDecode(await state.readAsString()) as Map<String, dynamic>;
-      return data['sha256'] == hash;
+      return data['sha256'] == hash &&
+          data['size'] == stat.size &&
+          data['modified'] == stat.modified.microsecondsSinceEpoch;
     } catch (_) {
       return false;
     }

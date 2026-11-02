@@ -9217,6 +9217,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get update_errorCheckFailed => 'Failed to check for updates';
 
   @override
+  String get update_errorRateLimited =>
+      'GitHub request limit reached. Please try again later.';
+
+  @override
+  String update_retryAt(String time) {
+    return 'Try again after $time (local time).';
+  }
+
+  @override
   String get update_errorCheckUnknown =>
       'An unknown error occurred while checking for updates';
 
@@ -15188,9 +15197,6 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get gen_recent => 'Recent';
-
-  @override
   String get gen_encoded => 'Encoded';
 
   @override
@@ -19882,6 +19888,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get set_abLatest => 'Up to date';
 
   @override
+  String get set_abUnchecked => 'Not checked';
+
+  @override
+  String get set_abSkipped => 'Update skipped';
+
+  @override
   String get set_abChecking => 'Checking for updates…';
 
   @override
@@ -21522,6 +21534,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ag_memoryGlobal => 'Global instructions';
 
   @override
+  String get ag_memoryChatPrefix => 'Chat pre-instructions';
+
+  @override
+  String get ag_memoryChatPrefixHint =>
+      'Applies only to this chat, before the built-in system prompt.';
+
+  @override
   String get ag_memoryWorkspace => 'Workspace rules';
 
   @override
@@ -22663,6 +22682,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get set_agMcpStdio => 'Local command';
+
+  @override
+  String get set_agMcpDisplayName => 'Display name (optional)';
+
+  @override
+  String get set_agMcpDisplayNameHint =>
+      'Shown in the interface; tool names stay unchanged.';
+
+  @override
+  String get set_agMcpIdentifier => 'Tool identifier';
 
   @override
   String get set_agMcpAddress => 'Server URL';

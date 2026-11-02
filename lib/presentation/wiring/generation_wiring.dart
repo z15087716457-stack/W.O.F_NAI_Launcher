@@ -396,7 +396,6 @@ class _GenerationWiringState extends ConsumerState<GenerationWiring> {
         onAddVibeFiles: () => run(() => operations.files(GenDropTarget.vibe)),
         onAddVibeFromLibrary: () =>
             run(() => operations.library(GenDropTarget.vibe)),
-        onAddRecentVibe: (id) => run(() => operations.recentVibe(id)),
         onVibeChanged: (value) => run(
           () => references.vibe(
             value,

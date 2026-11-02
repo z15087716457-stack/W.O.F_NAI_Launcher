@@ -16010,6 +16010,18 @@ abstract class AppLocalizations {
   /// **'Failed to check for updates'**
   String get update_errorCheckFailed;
 
+  /// No description provided for @update_errorRateLimited.
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub request limit reached. Please try again later.'**
+  String get update_errorRateLimited;
+
+  /// No description provided for @update_retryAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again after {time} (local time).'**
+  String update_retryAt(String time);
+
   /// No description provided for @update_errorCheckUnknown.
   ///
   /// In en, this message translates to:
@@ -26381,12 +26393,6 @@ abstract class AppLocalizations {
   /// **'Each vibe beyond {free} costs +{each} Anlas · +{total} this time'**
   String gen_vibeExtraCost(Object free, Object each, Object total);
 
-  /// No description provided for @gen_recent.
-  ///
-  /// In en, this message translates to:
-  /// **'Recent'**
-  String get gen_recent;
-
   /// No description provided for @gen_encoded.
   ///
   /// In en, this message translates to:
@@ -34690,6 +34696,18 @@ abstract class AppLocalizations {
   /// **'Up to date'**
   String get set_abLatest;
 
+  /// No description provided for @set_abUnchecked.
+  ///
+  /// In en, this message translates to:
+  /// **'Not checked'**
+  String get set_abUnchecked;
+
+  /// No description provided for @set_abSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'Update skipped'**
+  String get set_abSkipped;
+
   /// No description provided for @set_abChecking.
   ///
   /// In en, this message translates to:
@@ -37354,6 +37372,18 @@ abstract class AppLocalizations {
   /// **'Global instructions'**
   String get ag_memoryGlobal;
 
+  /// No description provided for @ag_memoryChatPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat pre-instructions'**
+  String get ag_memoryChatPrefix;
+
+  /// No description provided for @ag_memoryChatPrefixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Applies only to this chat, before the built-in system prompt.'**
+  String get ag_memoryChatPrefixHint;
+
   /// No description provided for @ag_memoryWorkspace.
   ///
   /// In en, this message translates to:
@@ -39369,6 +39399,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Local command'**
   String get set_agMcpStdio;
+
+  /// No description provided for @set_agMcpDisplayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Display name (optional)'**
+  String get set_agMcpDisplayName;
+
+  /// No description provided for @set_agMcpDisplayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shown in the interface; tool names stay unchanged.'**
+  String get set_agMcpDisplayNameHint;
+
+  /// No description provided for @set_agMcpIdentifier.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool identifier'**
+  String get set_agMcpIdentifier;
 
   /// No description provided for @set_agMcpAddress.
   ///

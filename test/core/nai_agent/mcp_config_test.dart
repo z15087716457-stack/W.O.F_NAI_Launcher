@@ -44,6 +44,37 @@ void main() {
   );
 
   test(
+    'display labels persist separately and do not change runtime tool identity',
+    () async {
+      final root = await Directory.systemTemp.createTemp('nai-mcp-label-');
+      addTearDown(() => root.delete(recursive: true));
+      final store = AgentWorkspaceStore(root);
+      const original = AgentMcpServer(
+        name: 'exa',
+        configId: 'secret-ref',
+        transport: 'http',
+      );
+      final before = await store.patchSettings({
+        'mcpServers': [original.toJson()],
+      });
+      final after = await store.patchSettings({
+        'mcpServers': [
+          {...original.toJson(), 'displayName': 'EXA免费联网搜索'},
+        ],
+      });
+      final restored = (await AgentWorkspaceStore(
+        root,
+      ).readSettings()).mcpServers.single;
+      expect(restored.label, 'EXA免费联网搜索');
+      expect(restored.name, 'exa');
+      expect(restored.configId, original.configId);
+      expect(after.extensionSignature, before.extensionSignature);
+      expect(original.label, 'exa');
+      expect(AgentMcpServer.fromJson(original.toJson()).displayName, isEmpty);
+    },
+  );
+
+  test(
     'MCP metadata persists, invalidates idle hosts and preserves unrelated settings',
     () async {
       final root = await Directory.systemTemp.createTemp('nai-mcp-settings-');

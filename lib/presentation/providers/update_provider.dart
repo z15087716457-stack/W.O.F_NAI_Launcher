@@ -15,6 +15,7 @@ part 'update_provider.g.dart';
 
 enum UpdateStatus {
   idle,
+  skipped,
   checking,
   available,
   downloading,
@@ -28,6 +29,7 @@ class UpdateState {
   final UpdateStatus status;
   final VersionInfo? versionInfo;
   final String? errorMessage;
+  final String? errorDetails;
   final double downloadProgress;
   final int receivedBytes;
   final int totalBytes;
@@ -41,6 +43,7 @@ class UpdateState {
     this.status = UpdateStatus.idle,
     this.versionInfo,
     this.errorMessage,
+    this.errorDetails,
     this.downloadProgress = 0,
     this.receivedBytes = 0,
     this.totalBytes = 0,
@@ -53,6 +56,7 @@ class UpdateState {
     UpdateStatus? status,
     VersionInfo? versionInfo,
     String? errorMessage,
+    String? errorDetails,
     double? downloadProgress,
     int? receivedBytes,
     int? totalBytes,
@@ -64,6 +68,7 @@ class UpdateState {
       status: status ?? this.status,
       versionInfo: versionInfo ?? this.versionInfo,
       errorMessage: errorMessage,
+      errorDetails: errorDetails,
       downloadProgress: downloadProgress ?? this.downloadProgress,
       receivedBytes: receivedBytes ?? this.receivedBytes,
       totalBytes: totalBytes ?? this.totalBytes,
@@ -206,6 +211,8 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
       if (manual) {
         await service.clearReminder();
         if (!_canPublishCheck(revision)) return;
+      }
+      if (manual || !state.hasNewVersion) {
         state = const UpdateState(status: UpdateStatus.checking);
       }
       final versionInfo = await service.checkForUpdates(ignoreSkipped: manual);
@@ -216,22 +223,23 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
           versionInfo: versionInfo,
           notificationVisible: true,
         );
-      } else if (manual) {
-        state = const UpdateState(status: UpdateStatus.upToDate);
-      } else if (!state.hasDownloadedUpdate) {
-        state = const UpdateState();
+      } else {
+        state = UpdateState(
+          status: service.hasKnownUpdate
+              ? UpdateStatus.skipped
+              : UpdateStatus.upToDate,
+        );
       }
     } catch (error, stackTrace) {
       if (!_canPublishCheck(revision)) return;
       AppLogger.w('Update check failed: $error', 'UpdateNotifier');
       AppLogger.d('$stackTrace', 'UpdateNotifier');
-      if (manual) {
+      if (manual || !state.hasNewVersion) {
         state = UpdateState(
           status: UpdateStatus.error,
           errorMessage: _formatError(error),
+          errorDetails: error.toString(),
         );
-      } else if (!state.hasNewVersion && !state.hasDownloadedUpdate) {
-        state = const UpdateState();
       }
     }
   }
@@ -245,7 +253,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
     await ref.read(updateCheckServiceProvider).skipVersion(version);
     if (_disposed || revision != _checkRevision) return;
     _reminderTimer?.cancel();
-    state = const UpdateState();
+    state = const UpdateState(status: UpdateStatus.skipped);
   }
 
   Future<void> skipUpdate() async {
@@ -345,6 +353,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
         status: UpdateStatus.error,
         versionInfo: versionInfo,
         errorMessage: _formatError(error),
+        errorDetails: error.toString(),
         notificationVisible: true,
       );
     } finally {
@@ -378,6 +387,7 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
       state = state.copyWith(
         status: UpdateStatus.error,
         errorMessage: _formatError(error),
+        errorDetails: error.toString(),
         notificationVisible: true,
       );
     }
@@ -403,7 +413,8 @@ class UpdateStateNotifier extends _$UpdateStateNotifier {
   }
 
   String _formatError(Object error) {
-    if (error is UpdateCheckException || error is UpdateInstallException) {
+    if (error is UpdateCheckException) return error.message;
+    if (error is UpdateInstallException) {
       return error.toString().replaceFirst(RegExp(r'^[^:]+:\s*'), '');
     }
     return error.toString();

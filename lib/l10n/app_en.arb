@@ -4898,6 +4898,11 @@
   "update_errorPackageCorrupted": "The update package is corrupted; download it again",
   "update_errorLaunchFailed": "Failed to start the updater",
   "update_errorCheckFailed": "Failed to check for updates",
+  "update_errorRateLimited": "GitHub request limit reached. Please try again later.",
+  "update_retryAt": "Try again after {time} (local time).",
+  "@update_retryAt": {
+    "placeholders": {"time": {"type": "String"}}
+  },
   "update_errorCheckUnknown": "An unknown error occurred while checking for updates",
   "update_errorLogPath": "Log: {path}",
   "@update_errorLogPath": {
@@ -8236,7 +8241,6 @@
       "total": {}
     }
   },
-  "gen_recent": "Recent",
   "gen_encoded": "Encoded",
   "gen_encoding": "Encoding",
   "gen_encode": "Encode",
@@ -10455,6 +10459,8 @@
     }
   },
   "set_abLatest": "Up to date",
+  "set_abUnchecked": "Not checked",
+  "set_abSkipped": "Update skipped",
   "set_abChecking": "Checking for updates…",
   "set_abCheckFailed": "Update check failed",
   "set_abDownloading": "Downloading {pct}",
@@ -11071,6 +11077,8 @@
   "ag_shelfEmpty": "Nothing produced in this chat yet",
   "ag_shelfEmptyHint": "Images Agent generates, images you attach and files it writes all land here.",
   "ag_memoryGlobal": "Global instructions",
+  "ag_memoryChatPrefix": "Chat pre-instructions",
+  "ag_memoryChatPrefixHint": "Applies only to this chat, before the built-in system prompt.",
   "ag_memoryWorkspace": "Workspace rules",
   "ag_memorySkills": "Active skills",
   "ag_memoryEmpty": "Not set",
@@ -11620,6 +11628,9 @@
     }
   },
   "set_agMcpStdio": "Local command",
+  "set_agMcpDisplayName": "Display name (optional)",
+  "set_agMcpDisplayNameHint": "Shown in the interface; tool names stay unchanged.",
+  "set_agMcpIdentifier": "Tool identifier",
   "set_agMcpAddress": "Server URL",
   "set_agMcpCommand": "Executable command",
   "set_agMcpArgs": "Arguments (one per line)",

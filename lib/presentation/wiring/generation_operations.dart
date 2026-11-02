@@ -323,14 +323,6 @@ class GenerationOperations {
     }
   }
 
-  Future<void> recentVibe(String id) =>
-      ref.read(generationReferenceImportsProvider).vibes(() async {
-        final entry = await ref
-            .read(vibeLibraryStorageServiceProvider)
-            .getEntry(id);
-        if (entry == null) throw StateError(currentL10n.bridge_conflict);
-        return hydrateVibe(entry);
-      }, alive: () => mounted);
   Future<void> encodeVibe(String id) => ref
       .read(generationReferenceImportsProvider)
       .encode(

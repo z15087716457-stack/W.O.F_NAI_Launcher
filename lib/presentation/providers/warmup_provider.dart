@@ -6,8 +6,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/network/proxy_service.dart';
 import '../../core/enums/warmup_phase.dart';
-import '../../core/database/database.dart';
-import '../../core/database/datasources/gallery_data_source.dart';
 import '../../core/services/data_migration_service.dart';
 import '../../core/services/warmup_task_scheduler.dart';
 
@@ -23,6 +21,9 @@ import 'thumbnail_cache_limit_provider.dart';
 import '../../data/services/vibe_library_migration_service.dart';
 
 part 'warmup_provider.g.dart';
+
+// The existing splash waits here while main prepares services after first paint.
+final appStartupReadyProvider = Provider<Future<void>>((ref) async {});
 
 /// 预加载进度
 class WarmupProgress {
@@ -102,20 +103,18 @@ class WarmupState {
 @riverpod
 class WarmupNotifier extends _$WarmupNotifier {
   late WarmupTaskScheduler _scheduler;
-  StreamSubscription<PhaseProgress>? _phaseSubscription;
-  final _completer = Completer<void>();
+  var _completer = Completer<void>();
+  bool _disposed = false;
 
   @override
   WarmupState build() {
+    _disposed = false;
     ref.onDispose(() {
-      _phaseSubscription?.cancel();
+      _disposed = true;
     });
 
     _scheduler = WarmupTaskScheduler();
     _registerTasks();
-
-    // 延迟后台任务注册到 build 完成后，避免修改其他 provider
-    Future.microtask(_registerBackgroundPhaseTasks);
 
     _startWarmup();
 
@@ -202,8 +201,8 @@ class WarmupNotifier extends _$WarmupNotifier {
 
   /// 重试预加载
   void retry() {
-    _phaseSubscription?.cancel();
     _scheduler.clear();
+    _completer = Completer<void>();
     state = WarmupState.initial();
     _registerTasks();
     _startWarmup();
@@ -217,10 +216,7 @@ class WarmupNotifier extends _$WarmupNotifier {
     const timeout = Duration(seconds: 3);
 
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
-      state = state.copyWith(
-        subTaskMessage: 'warmup_networkCheck_attempt|$attempt|$maxAttempts',
-      );
-
+      if (_disposed) return;
       try {
         final result = await ProxyService.testNovelAIConnection(
           timeout: timeout,
@@ -231,10 +227,6 @@ class WarmupNotifier extends _$WarmupNotifier {
             'Network check successful: ${result.latencyMs}ms',
             'Warmup',
           );
-          state = state.copyWith(
-            subTaskMessage: 'warmup_networkCheck_success|${result.latencyMs}',
-          );
-          await Future.delayed(const Duration(milliseconds: 300));
           return;
         }
 
@@ -254,7 +246,6 @@ class WarmupNotifier extends _$WarmupNotifier {
           'Network check reached max attempts, continuing offline',
           'Warmup',
         );
-        state = state.copyWith(subTaskMessage: 'warmup_networkCheck_timeout');
         return;
       }
 
@@ -263,7 +254,7 @@ class WarmupNotifier extends _$WarmupNotifier {
   }
 
   // ===========================================================================
-  // 三阶段预热架构
+  // 必要预热与后台诊断
   // ===========================================================================
 
   /// 注册所有预热任务
@@ -271,11 +262,7 @@ class WarmupNotifier extends _$WarmupNotifier {
     // ==== 阶段 1: Critical ====
     _registerCriticalPhaseTasks();
 
-    // ==== 阶段 2: Quick ====
-    _registerQuickPhaseTasks();
-
-    // 注意: 阶段 3 (Background) 在 build() 完成后通过 Future.microtask 注册
-    // 避免在 build() 中修改其他 provider
+    _registerBackgroundPhaseTasks();
   }
 
   void _registerCriticalPhaseTasks() {
@@ -291,7 +278,7 @@ class WarmupNotifier extends _$WarmupNotifier {
       ),
     );
 
-    // 2. 基础UI服务（并行）- 移除了数据库初始化，让它在 Quick 阶段异步执行
+    // 基础 UI 服务：数据库等服务已经由 main 的就绪边界准备。
     _scheduler.registerGroup(
       PhasedTaskGroup(
         name: 'basicUI',
@@ -320,84 +307,24 @@ class WarmupNotifier extends _$WarmupNotifier {
     );
   }
 
-  void _registerQuickPhaseTasks() {
-    // 1. 数据库初始化
-    _scheduler.registerTask(
-      PhasedWarmupTask(
-        name: 'warmup_unifiedDbInit',
-        displayName: 'warmup_initUnifiedDatabase',
-        phase: WarmupPhase.quick,
-        weight: 2,
-        task: _initUnifiedDatabaseLightweight,
-      ),
-    );
-
-    // 2. 共现数据初始化（轻量级检查，依赖数据库）
-    _scheduler.registerTask(
-      PhasedWarmupTask(
-        name: 'warmup_cooccurrenceInit',
-        displayName: 'warmup_cooccurrenceInit',
-        phase: WarmupPhase.quick,
-        weight: 1,
-        task: () async {
-          // 只执行轻量级检查，实际导入在 background 阶段
-          await _initCooccurrenceData();
-        },
-      ),
-    );
-
-    // 4. 网络检测（8秒超时，防止无限等待）
+  void _registerBackgroundPhaseTasks() {
     _scheduler.registerTask(
       PhasedWarmupTask(
         name: 'warmup_networkCheck',
         displayName: 'warmup_networkCheck',
-        phase: WarmupPhase.quick,
-        weight: 1,
+        phase: WarmupPhase.background,
         timeout: const Duration(seconds: 8),
         task: _checkNetworkEnvironment,
       ),
     );
-
-    // 5. 画廊数据源初始化
-    _scheduler.registerTask(
-      PhasedWarmupTask(
-        name: 'warmup_galleryDataSource',
-        displayName: 'warmup_galleryDataSource',
-        phase: WarmupPhase.quick,
-        weight: 3,
-        timeout: const Duration(seconds: 30),
-        task: _initGalleryDataSource,
-      ),
-    );
-
-    // 6. 画廊计数
-    _scheduler.registerTask(
-      PhasedWarmupTask(
-        name: 'warmup_galleryFileCount',
-        displayName: 'warmup_galleryFileCount',
-        phase: WarmupPhase.quick,
-        weight: 1,
-        task: _countGalleryFiles,
-      ),
-    );
-
-    // 7. 订阅信息（仅缓存，不强制网络）
     _scheduler.registerTask(
       PhasedWarmupTask(
         name: 'warmup_subscription',
         displayName: 'warmup_subscription',
-        phase: WarmupPhase.quick,
-        weight: 1,
+        phase: WarmupPhase.background,
         task: _loadSubscriptionCached,
       ),
     );
-
-    // 标签 catalog 随应用提供并按需只读查询；启动阶段不再下载全量标签。
-  }
-
-  void _registerBackgroundPhaseTasks() {
-    // 注意：共现数据是预打包的数据库，在 _initCooccurrenceData() 中已完成初始化
-    // 不需要额外的后台导入任务
   }
 
   /// 启动全局画廊扫描（预热结束后推迟启动，把 I/O 让给首屏渲染）
@@ -408,14 +335,17 @@ class WarmupNotifier extends _$WarmupNotifier {
 
     // L8 性能优化：推迟 2.5 秒启动全局扫描，避免与首屏页面加载争夺磁盘 I/O 和数据库连接
     Future.delayed(const Duration(milliseconds: 2500), () async {
+      if (_disposed) return;
       try {
         await ref.read(galleryFileMonitorProvider).start();
+        if (_disposed) return;
         // 【修复】读取 provider 会触发 GalleryService 的创建和初始化
         // 但需要等待真正的初始化完成，扫描才会开始
         var attempts = 0;
         const maxAttempts = 100; // 最多等待10秒
 
         while (attempts < maxAttempts) {
+          if (_disposed) return;
           final service = ref.read(galleryServiceProvider);
 
           if (service.isInitialized) {
@@ -443,6 +373,7 @@ class WarmupNotifier extends _$WarmupNotifier {
   /// 执行，把启动期磁盘 IO 让给首屏渲染；失败不影响主流程。
   void _trimThumbnailCacheInBackground() {
     Future.delayed(const Duration(seconds: 10), () async {
+      if (_disposed) return;
       try {
         final service = ThumbnailService.instance;
         if (service.state != ThumbnailServiceState.running) {
@@ -450,6 +381,7 @@ class WarmupNotifier extends _$WarmupNotifier {
         }
 
         final roots = await GalleryFolderRepository.instance.getAllRootDirs();
+        if (_disposed) return;
         ref.read(thumbnailCacheLimitGbProvider);
         final result = await service.evictThumbnailCaches(
           roots.map((dir) => dir.path),
@@ -473,22 +405,16 @@ class WarmupNotifier extends _$WarmupNotifier {
   /// 开始预热流程
   Future<void> _startWarmup() async {
     try {
+      // Auto-login can overlap local service preparation.
+      ref.read(authNotifierProvider);
+      await ref.read(appStartupReadyProvider);
+      if (_disposed) return;
       // 阶段 1: Critical
       await for (final progress in _scheduler.runPhase(WarmupPhase.critical)) {
+        if (_disposed) return;
         state = state.copyWith(
           progress: WarmupProgress(
-            progress: progress.progress * 0.3, // critical 占 30%
-            currentTask: progress.currentTask,
-          ),
-          clearSubTaskMessage: true,
-        );
-      }
-
-      // 阶段 2: Quick
-      await for (final progress in _scheduler.runPhase(WarmupPhase.quick)) {
-        state = state.copyWith(
-          progress: WarmupProgress(
-            progress: 0.3 + progress.progress * 0.7, // quick 占 70%
+            progress: progress.progress,
             currentTask: progress.currentTask,
           ),
           clearSubTaskMessage: true,
@@ -505,74 +431,22 @@ class WarmupNotifier extends _$WarmupNotifier {
       // P7：再启动后台缩略图缓存清理（低优先，避免与首屏渲染争抢磁盘 IO）
       _trimThumbnailCacheInBackground();
     } catch (e, stack) {
+      if (_disposed) return;
       AppLogger.e('Warmup failed', e, stack, 'Warmup');
       state = state.copyWith(
         error: e.toString(),
         progress: WarmupProgress.error(e.toString()),
       );
       _completer.completeError(e);
+      return;
+    }
+    // Background diagnostics do not change completed splash state.
+    await for (final _ in _scheduler.runPhase(WarmupPhase.background)) {
+      if (_disposed) break;
     }
   }
 
-  /// 轻量级初始化统一数据库（带进度反馈、错误处理和损坏检测）
-  Future<void> _initUnifiedDatabaseLightweight() async {
-    AppLogger.i('等待数据库准备就绪...', 'Warmup');
-
-    try {
-      // 数据库已在 main() 中初始化和恢复，这里只需等待就绪
-      final manager = await ref.watch(databaseManagerProvider.future);
-      await manager.initialized.timeout(
-        const Duration(seconds: 60),
-        onTimeout: () {
-          AppLogger.w('Database initialization timeout', 'Warmup');
-          throw TimeoutException(
-            'Database initialization timed out. Check disk space.',
-          );
-        },
-      );
-
-      AppLogger.i('数据库已就绪', 'Warmup');
-    } on TimeoutException {
-      rethrow;
-    } catch (e, stack) {
-      AppLogger.e('Database initialization failed', e, stack, 'Warmup');
-      // 数据库初始化失败不应阻塞启动，记录错误但继续
-      AppLogger.w(
-        'Continuing without database - will retry on first use',
-        'Warmup',
-      );
-    }
-  }
-
-  /// 初始化画廊数据源
-  Future<void> _initGalleryDataSource() async {
-    try {
-      // 获取 DatabaseManager 并等待初始化
-      final dbManager = await ref.read(databaseManagerProvider.future);
-
-      // 获取 GalleryDataSource
-      final galleryDs = dbManager.getDataSource<GalleryDataSource>('gallery');
-      if (galleryDs != null) {
-        // 数据源已初始化（DatabaseManager 中已完成）
-        AppLogger.i('GalleryDataSource initialized in warmup phase', 'Warmup');
-      }
-    } catch (e) {
-      AppLogger.w('GalleryDataSource warmup failed: $e', 'Warmup');
-      // 不抛出异常，避免阻塞启动
-    }
-  }
-
-  /// 统计画廊文件数
-  Future<void> _countGalleryFiles() async {
-    try {
-      final count = await GalleryFolderRepository.instance.getTotalImageCount();
-      AppLogger.i('Gallery file count: $count', 'Warmup');
-    } catch (e) {
-      AppLogger.w('Gallery file count failed: $e', 'Warmup');
-    }
-  }
-
-  /// 加载缓存的订阅信息（快速）
+  /// 后台读取订阅缓存，必要时沿用现有刷新入口。
   Future<void> _loadSubscriptionCached() async {
     try {
       final authState = ref.read(authNotifierProvider);
@@ -580,7 +454,7 @@ class WarmupNotifier extends _$WarmupNotifier {
         AppLogger.i('User not authenticated, skip subscription', 'Warmup');
         return;
       }
-      // 仅读取缓存，不强制网络请求
+      // 优先使用现有状态，未载入时刷新。
       final subState = ref.read(subscriptionNotifierProvider);
       if (!subState.isLoaded) {
         // 尝试快速加载，超时则跳过
@@ -591,38 +465,6 @@ class WarmupNotifier extends _$WarmupNotifier {
       }
     } catch (e) {
       AppLogger.w('Subscription load failed (non-critical): $e', 'Warmup');
-    }
-  }
-
-  // ==== 后台任务方法 ====
-
-  Future<void> _initCooccurrenceData() async {
-    AppLogger.i('开始初始化共现数据...', 'Warmup');
-
-    try {
-      final cooccurrenceService = await ref.watch(
-        cooccurrenceServiceProvider.future,
-      );
-
-      // 初始化共现服务
-      final isReady = await cooccurrenceService.initialize();
-
-      if (isReady) {
-        final count = await cooccurrenceService.getCount();
-        AppLogger.i('共现数据已就绪（$count 条记录）', 'Warmup');
-      } else {
-        final count = await cooccurrenceService.getCount();
-        if (count > 0) {
-          AppLogger.w('共现数据不完整（$count 条记录），将在后台继续导入', 'Warmup');
-        } else {
-          AppLogger.i('共现数据为空，将在后台导入', 'Warmup');
-        }
-      }
-    } on StateError catch (e) {
-      // 数据库正在恢复中，不阻塞启动
-      AppLogger.w('共现数据初始化时数据库正在恢复，将在后台重试: $e', 'Warmup');
-    } catch (e, stack) {
-      AppLogger.e('共现数据初始化失败', e, stack, 'Warmup');
     }
   }
 }

@@ -206,7 +206,7 @@ void RegisterResourceWindowPlugins(flutter::FlutterViewController* controller,
   HWND hwnd = GetAncestor(controller->view()->GetNativeWindow(), GA_ROOT);
   // An owned top-level window can leave the client area / move to another
   // monitor. Win32 hides it with its minimized owner and destroys it with
-  // the owner. Tray-close explicitly posts closeAll before hiding the owner.
+  // the owner. Tray-close explicitly posts closeAll while the owner is alive.
   // This is NOT a child (WS_CHILD) or runner subclass.
   SetWindowLongPtr(hwnd, GWLP_HWNDPARENT, reinterpret_cast<LONG_PTR>(owner));
 

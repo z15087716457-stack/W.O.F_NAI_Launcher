@@ -25,7 +25,8 @@ final localUpscaleServiceProvider = Provider(
   (ref) => LocalUpscaleService(
     ref.watch(localUpscaleModelManagerProvider),
     advanced: ref.watch(advancedUpscaleComponentManagerProvider),
-    beforeInference: () => ref.read(ragControllerProvider.notifier).suspendForGpu(),
+    beforeInference: () =>
+        ref.read(ragControllerProvider.notifier).suspendForGpu(),
     afterInference: () => ref.read(ragControllerProvider.notifier).releaseGpu(),
   ),
 );
@@ -76,7 +77,7 @@ class AdvancedUpscaleInstall extends Notifier<AdvancedUpscaleInstallState> {
     final remove = DesktopAppShutdownService.registerCleanup(() async {
       _cancel?.cancel();
       await _pending;
-    });
+    }, name: 'Upscale installation');
     ref.onDispose(() {
       _disposed = true;
       _cancel?.cancel();
@@ -189,7 +190,7 @@ class LocalUpscaleTask extends Notifier<LocalUpscaleTaskState> {
     final removeCleanup = DesktopAppShutdownService.registerCleanup(() async {
       _cancellation?.cancel();
       await _pending;
-    });
+    }, name: 'Local upscale');
     ref.listen(generationParamsNotifierProvider, (previous, next) {
       if (!_disposed &&
           !state.running &&

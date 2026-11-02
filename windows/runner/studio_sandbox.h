@@ -28,9 +28,23 @@ inline bool Valid() {
        (root[2] == L'\\' || root[2] == L'/')) ||
       (root.size() >= 2 && root[0] == L'\\' && root[1] == L'\\');
 }
+inline std::wstring ExecutableDirectory() {
+  std::wstring path(MAX_PATH, L'\0');
+  while (true) {
+    const DWORD length = GetModuleFileNameW(
+        nullptr, path.data(), static_cast<DWORD>(path.size()));
+    if (length == 0) return L"";
+    if (length < path.size()) {
+      path.resize(length);
+      return path.substr(0, path.find_last_of(L"\\/"));
+    }
+    path.resize(path.size() * 2);
+  }
+}
 inline std::wstring Suffix() {
   auto root = Root();
-  if (root.empty()) return L"";
+  const bool sandbox = !root.empty();
+  if (!sandbox) root = ExecutableDirectory();
   DWORD size = GetFullPathNameW(root.c_str(), 0, nullptr, nullptr);
   std::wstring normalized(size, L'\0');
   normalized.resize(GetFullPathNameW(root.c_str(), size, normalized.data(), nullptr));
@@ -39,7 +53,7 @@ inline std::wstring Suffix() {
   while (normalized.size() > 3 && normalized.back() == L'\\') normalized.pop_back();
   uint64_t hash = 14695981039346656037ULL;
   for (const auto c : normalized) { hash ^= static_cast<uint64_t>(c); hash *= 1099511628211ULL; }
-  return L"_sandbox_" + std::to_wstring(hash);
+  return (sandbox ? L"_sandbox_" : L"_app_") + std::to_wstring(hash);
 }
 inline std::wstring Title(const std::wstring& title) {
   return Enabled() ? title + L" [sandbox]" : title;

@@ -4898,6 +4898,8 @@
   "update_errorPackageCorrupted": "更新包已损坏，请重新下载",
   "update_errorLaunchFailed": "启动更新程序失败",
   "update_errorCheckFailed": "检查更新失败",
+  "update_errorRateLimited": "GitHub 请求已达上限，请稍后重试。",
+  "update_retryAt": "请在 {time}（本地时间）后重试。",
   "update_errorCheckUnknown": "检查更新时发生未知错误",
   "update_errorLogPath": "日志：{path}",
   "@update_errorLogPath": {
@@ -8236,7 +8238,6 @@
       "total": {}
     }
   },
-  "gen_recent": "最近",
   "gen_encoded": "已编码",
   "gen_encoding": "编码中",
   "gen_encode": "编码",
@@ -10443,6 +10444,8 @@
     }
   },
   "set_abLatest": "已是最新版本",
+  "set_abUnchecked": "尚未检查更新",
+  "set_abSkipped": "已忽略此版本",
   "set_abChecking": "正在检查更新…",
   "set_abCheckFailed": "检查更新失败",
   "set_abDownloading": "正在下载 {pct}",
@@ -11059,6 +11062,8 @@
   "ag_shelfEmpty": "这个聊天还没有产物",
   "ag_shelfEmptyHint": "Agent 生成的图、你附上的图和它写的文件都会收在这里。",
   "ag_memoryGlobal": "全局指令",
+  "ag_memoryChatPrefix": "本会话前置指令",
+  "ag_memoryChatPrefixHint": "仅当前会话生效，放在内置提示词之前。",
   "ag_memoryWorkspace": "本工作区规则",
   "ag_memorySkills": "生效的 Skill",
   "ag_memoryEmpty": "还没写",
@@ -11608,6 +11613,9 @@
     }
   },
   "set_agMcpStdio": "本地命令",
+  "set_agMcpDisplayName": "显示名称（可选）",
+  "set_agMcpDisplayNameHint": "仅用于界面，不改变工具名称。",
+  "set_agMcpIdentifier": "工具标识",
   "set_agMcpAddress": "服务器地址",
   "set_agMcpCommand": "可执行命令",
   "set_agMcpArgs": "参数（每行一个）",

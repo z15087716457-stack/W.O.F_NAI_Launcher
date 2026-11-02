@@ -1,4 +1,4 @@
-// Pi 1.3.0 does not export getCacheWarmingDelayMs through its package exports.
+// Pi 1.5.0 does not export getCacheWarmingDelayMs through its package exports.
 // Mirror its delay for status projection only; Pi still owns every timer,
 // replay-safety check, deadline and the 30-minute / one-hour safety limits.
 function warmingDelayMs(ttlSeconds) {

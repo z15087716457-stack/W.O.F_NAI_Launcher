@@ -80,6 +80,7 @@ void main() {
     automaticCalls = 0;
     manualCalls = 0;
     check = _Check();
+    when(() => check.hasKnownUpdate).thenReturn(false);
     when(check.clearReminder).thenAnswer((_) async {});
     when(() => check.skipVersion(any())).thenAnswer((_) async {});
     when(() => check.checkForUpdates(ignoreSkipped: false)).thenAnswer((_) {
@@ -194,8 +195,55 @@ void main() {
     await notifier.skipVersion(info.version);
     automatic.complete(info);
     await task;
-    expect(current().status, UpdateStatus.idle);
+    expect(current().status, UpdateStatus.skipped);
     expect(current().versionInfo, isNull);
+  });
+  test('后台成功检查才发布最新状态，过程及结果不弹提示', () async {
+    expect(current().status, UpdateStatus.idle);
+    final task = start();
+    await automaticStarted.future;
+    expect(current().status, UpdateStatus.checking);
+    automatic.complete(null);
+    await task;
+    expect(current().status, UpdateStatus.upToDate);
+    expect(current().notificationVisible, isFalse);
+  });
+  test('后台失败保留失败状态且不弹提示', () async {
+    final task = start();
+    await automaticStarted.future;
+    automatic.completeError(StateError('offline fixture'));
+    await task;
+    expect(current().status, UpdateStatus.error);
+    expect(current().errorMessage, isNotEmpty);
+    expect(current().notificationVisible, isFalse);
+  });
+  test(
+    'check error publishes a short message and retains copyable diagnostics',
+    () async {
+      final task = start(byHand: true);
+      await manualStarted.future;
+      manual.completeError(
+        const UpdateCheckException(
+          'HTTP 403 · actual reason',
+          originalError: 'raw Dio diagnostic fixture',
+        ),
+      );
+      await task;
+      expect(current().status, UpdateStatus.error);
+      expect(current().errorMessage, 'HTTP 403 · actual reason');
+      expect(current().errorDetails, contains('raw Dio diagnostic fixture'));
+      expect(current().notificationVisible, isFalse);
+    },
+  );
+  test('被忽略的已知更新不会发布最新状态', () async {
+    when(() => check.hasKnownUpdate).thenReturn(true);
+    final task = start();
+    await automaticStarted.future;
+    automatic.complete(null);
+    await task;
+    expect(current().status, UpdateStatus.skipped);
+    expect(current().hasNewVersion, isFalse);
+    expect(current().notificationVisible, isFalse);
   });
   test(
     'dispose ignores a pending check without publishing or reading providers',

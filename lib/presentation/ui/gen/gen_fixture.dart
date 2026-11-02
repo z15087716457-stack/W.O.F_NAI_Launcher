@@ -172,10 +172,6 @@ abstract final class GenFixture {
                     strength: .45,
                   ),
                 ],
-                recent: [
-                  GenRecentVibe(id: 'r1', thumb: _img('g33', f), name: '水彩'),
-                  GenRecentVibe(id: 'r2', thumb: _img('g50', f), name: '逆光'),
-                ],
               )
             : null,
         precise: v45 ? const GenPreciseData() : null,
@@ -294,7 +290,7 @@ abstract final class GenFixture {
       models: models,
       quota: base.quota,
       prompt: base.prompt,
-      refs: GenRefsData(vibes: GenVibesData(recent: base.refs.vibes!.recent)),
+      refs: const GenRefsData(vibes: GenVibesData()),
       image: base.image,
       params: const GenParamsData(
         seed: 3274348526,
@@ -437,7 +433,6 @@ abstract final class GenFixture {
               state: GenVibeState.pending,
             ),
           ],
-          recent: base.refs.vibes!.recent,
         ),
         precise: GenPreciseData(
           list: [

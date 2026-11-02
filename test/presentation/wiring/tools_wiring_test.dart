@@ -28,6 +28,7 @@ import 'package:nai_launcher/presentation/providers/shortcuts_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
 import 'package:nai_launcher/presentation/providers/tips_provider.dart';
 import 'package:nai_launcher/presentation/ui/gen/gen_page.dart';
+import 'package:nai_launcher/presentation/ui/kit/ui_slider.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_contract.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_director.dart';
 import 'package:nai_launcher/presentation/ui/tools/tools_editor.dart';
@@ -261,6 +262,26 @@ void main() {
       expect(cloudOption.title, isNot(cloudOption.detail));
       expect(cloudOption.title, isNot(contains('2')));
       expect(cloudOption.detail, contains('2'));
+      final scaleNumber = find.descendant(
+        of: find.byKey(const Key('tools-upscale-scale')),
+        matching: find.byType(UiNumBox),
+      );
+      await tester.tap(scaleNumber);
+      await tester.pump();
+      await tester.enterText(
+        find.descendant(of: scaleNumber, matching: find.byType(TextField)),
+        '3.25',
+      );
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await drain(tester);
+      expect(
+        container.read(imageWorkflowControllerProvider).upscale.localScale,
+        3.25,
+      );
+      sheet = tester.widget<ToolsUpscaleSheet>(find.byType(ToolsUpscaleSheet));
+      expect(sheet.data.scale, 3.25);
+      expect(sheet.data.outWidth, 832);
+      expect(sheet.data.outHeight, 416);
       sheet.actions.onMethod('seedvr2');
       await drain(tester);
       sheet = tester.widget<ToolsUpscaleSheet>(find.byType(ToolsUpscaleSheet));

@@ -2598,7 +2598,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       }
     }
 
-    if (image == null) return;
+    if (image == null || image.filePath == filePath) return;
     _updateImageInState(imageId, image.copyWithFilePath(filePath));
   }
 

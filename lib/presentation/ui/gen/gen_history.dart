@@ -29,9 +29,6 @@ class GenHistoryPanel extends StatefulWidget {
 
 class _GenHistoryPanelState extends State<GenHistoryPanel> {
   final _scroll = ScrollController();
-  var _selecting = false;
-  final _selected = <String>{};
-  String? _anchor;
   var _locked = false;
   String? _first;
   String? _lastTap;
@@ -57,7 +54,6 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
       });
     }
     _first = first;
-    _selected.removeWhere((id) => !batches.any((b) => b.id == id));
   }
 
   List<String> _ids(GenHistoryData h, Iterable<String> batchIds) => [
@@ -68,27 +64,16 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
   void _tap(GenScope scope, GenBatch b) {
     final keys = HardwareKeyboard.instance;
     final h = scope.data.history;
-    if (keys.isShiftPressed && _anchor != null) {
-      final ids = h.batches.map((x) => x.id).toList();
-      final a = ids.indexOf(_anchor!);
-      final z = ids.indexOf(b.id);
-      if (a >= 0 && z >= 0) {
-        setState(() {
-          _selecting = true;
-          _selected.addAll(ids.sublist(a < z ? a : z, (a < z ? z : a) + 1));
-        });
-        return;
-      }
-    }
-    if (_selecting || keys.isControlPressed || keys.isMetaPressed) {
-      setState(() {
-        _selecting = true;
-        _selected.contains(b.id) ? _selected.remove(b.id) : _selected.add(b.id);
-        _anchor = b.id;
-      });
+    if (scope.controller.selection.tap(
+      b.images.map((image) => image.id).toList(),
+      modify: keys.isControlPressed || keys.isMetaPressed,
+      range: keys.isShiftPressed,
+      pendingBatch: b.pending > 0 ? b.id : null,
+    )) {
+      _lastTap = null;
+      _lastTapAt = null;
       return;
     }
-    _anchor = b.id;
     final now = DateTime.now();
     final again =
         _lastTap == b.id &&
@@ -104,10 +89,8 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     }
   }
 
-  void _setSelecting(bool v) => setState(() {
-    _selecting = v;
-    if (!v) _selected.clear();
-  });
+  void _setSelecting(bool value) =>
+      GenScope.read(context).controller.selection.setActive(value);
 
   void _confirmDelete(GenScope scope, List<String> ids, {bool all = false}) {
     final l = context.l10n;
@@ -205,7 +188,11 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
     final scope = GenScope.of(context, GenAspect.history);
     final h = scope.data.history;
     final l = context.l10n;
-    final selectedIds = _ids(h, _selected);
+    final selection = GenScope.of(
+      context,
+      GenAspect.selection,
+    ).controller.selection;
+    final selectedIds = selection.images;
     return GenPanelSurface(
       key: const Key('gen-history'),
       width: widget.width,
@@ -315,12 +302,14 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
                       key: const Key('gen-history-select'),
                       glyph: GenGlyphs.multi,
                       glyphSize: 16,
-                      active: _selecting,
-                      color: _selecting ? c.accent : null,
-                      tooltip: _selecting ? l.gen_selectDone : l.gen_select,
+                      active: selection.active,
+                      color: selection.active ? c.accent : null,
+                      tooltip: selection.active
+                          ? l.gen_selectDone
+                          : l.gen_select,
                       onTap: h.batches.isEmpty
                           ? null
-                          : () => _setSelecting(!_selecting),
+                          : () => _setSelecting(!selection.active),
                     ),
                   ],
                 ),
@@ -346,8 +335,9 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
                             width: widget.width - 16,
                             now: scope.data.now ?? DateTime.now(),
                             focused: h.selected == b.id,
-                            selecting: _selecting,
-                            checked: _selected.contains(b.id),
+                            selecting: selection.active,
+                            checked: selection.checked(b),
+                            partial: selection.partial(b),
                             onTap: () => _tap(scope, b),
                             onMenu: (at) => _menu(scope, b, at),
                           ),
@@ -355,7 +345,7 @@ class _GenHistoryPanelState extends State<GenHistoryPanel> {
                       },
                     ),
             ),
-            if (_selecting)
+            if (selection.active)
               Container(
                 key: const Key('gen-history-selection'),
                 height: 40,
@@ -488,6 +478,7 @@ class _BatchItem extends StatelessWidget {
     required this.focused,
     required this.selecting,
     required this.checked,
+    required this.partial,
     required this.onTap,
     required this.onMenu,
   });
@@ -499,6 +490,7 @@ class _BatchItem extends StatelessWidget {
   final bool focused;
   final bool selecting;
   final bool checked;
+  final bool partial;
   final VoidCallback onTap;
   final ValueChanged<Offset> onMenu;
 
@@ -613,7 +605,8 @@ class _BatchItem extends StatelessWidget {
               child: Center(
                 child: Container(
                   key: focused ? const Key('gen-batch-focused') : null,
-                  foregroundDecoration: focused || checked
+                  foregroundDecoration:
+                      (selecting ? checked || partial : focused)
                       ? BoxDecoration(
                           border: Border.all(
                             color: c.accent,
@@ -700,7 +693,7 @@ class _BatchItem extends StatelessWidget {
                             width: 18,
                             height: 18,
                             decoration: BoxDecoration(
-                              color: checked
+                              color: checked || partial
                                   ? c.accent
                                   : Colors.black.withValues(alpha: .35),
                               shape: BoxShape.circle,
@@ -709,10 +702,10 @@ class _BatchItem extends StatelessWidget {
                                 width: 1.5,
                               ),
                             ),
-                            child: checked
-                                ? const Center(
+                            child: checked || partial
+                                ? Center(
                                     child: UiGlyph(
-                                      UiGlyphs.check,
+                                      checked ? UiGlyphs.check : UiGlyphs.minus,
                                       size: 11,
                                       strokeWidth: 3,
                                       color: Colors.white,

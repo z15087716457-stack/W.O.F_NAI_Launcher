@@ -37,7 +37,10 @@ class SettingsEdits extends Notifier<SettingsEditState> {
   final _restartBaseline = <SettingKey, Object?>{};
   @override
   SettingsEditState build() {
-    final unregister = DesktopAppShutdownService.registerCleanup(() => settled);
+    final unregister = DesktopAppShutdownService.registerCleanup(
+      () => settled,
+      name: 'Settings writes',
+    );
     ref.onDispose(unregister);
     return const SettingsEditState();
   }

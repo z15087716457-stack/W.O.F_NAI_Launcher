@@ -174,7 +174,7 @@ void main() {
         isNull,
       );
       final history = Directory(
-        '${workspace.directory.path}/.agent/prompt-history',
+        '${workspace.agentDirectory.path}/prompt-history',
       );
       expect(await history.list().where((file) => file is File).length, 2);
       expect(container.exists(naiAgentControllerProvider), isFalse);

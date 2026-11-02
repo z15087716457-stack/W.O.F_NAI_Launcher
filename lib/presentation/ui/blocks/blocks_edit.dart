@@ -144,7 +144,7 @@ class _BlockIconGridState extends State<BlockIconGrid> {
   }
 }
 
-/// 编辑块 / 新建块（原型 `editModal`）：1000 × 720（窗口小时缩到 92%）、圆角 16。
+/// 编辑块 / 新建块（原型 `editModal`）：1000 × 744（窗口小时缩到 92%）、圆角 16。
 /// 左 330 预览（预览图可拖动 / 滚轮缩放、正文里的样子、卡片样子、来源）；右边 名称 + 文件夹 · 内容（正面 / 负面 / 纯文本）·
 /// 外观（10 色 + 可滚图标网格 + 6 种外观直接画效果）· 标签 · 附带参数。Ctrl+Enter 保存，Esc 取消。
 class BlockEditDialog extends StatefulWidget {
@@ -226,7 +226,7 @@ class _BlockEditDialogState extends State<BlockEditDialog> {
     final l10n = context.l10n;
     final mq = MediaQuery.sizeOf(context);
     final w = math.min(1000.0, mq.width * .92);
-    final h = math.min(720.0, mq.height * .92);
+    final h = math.min(744.0, mq.height * .92);
     final narrow = w < 820;
     final isNew = widget.data.blockId == null;
 

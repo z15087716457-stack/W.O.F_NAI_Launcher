@@ -28,59 +28,6 @@ static UINT GetWakeUpMessage() {
   return message;
 }
 
-bool EqualsOrdinalIgnoreCase(const std::wstring& left,
-                             const std::wstring& right) {
-  if (left.empty() || right.empty()) {
-    return false;
-  }
-
-  return CompareStringOrdinal(left.c_str(), -1, right.c_str(), -1, TRUE) ==
-         CSTR_EQUAL;
-}
-
-std::wstring GetCurrentExecutablePath() {
-  std::wstring path(MAX_PATH, L'\0');
-  DWORD length = 0;
-
-  while (true) {
-    length = GetModuleFileNameW(
-        nullptr, path.data(), static_cast<DWORD>(path.size()));
-    if (length == 0) {
-      return L"";
-    }
-    if (length < path.size()) {
-      path.resize(length);
-      return path;
-    }
-    path.resize(path.size() * 2);
-  }
-}
-
-std::wstring GetProcessExecutablePath(DWORD process_id) {
-  HANDLE process =
-      OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, process_id);
-  if (process == nullptr) {
-    return L"";
-  }
-
-  std::wstring path(MAX_PATH, L'\0');
-  while (true) {
-    DWORD size = static_cast<DWORD>(path.size());
-    if (QueryFullProcessImageNameW(process, 0, path.data(), &size)) {
-      path.resize(size);
-      CloseHandle(process);
-      return path;
-    }
-
-    if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
-      CloseHandle(process);
-      return L"";
-    }
-
-    path.resize(path.size() * 2);
-  }
-}
-
 std::wstring GetWindowTitle(HWND hwnd) {
   const int length = GetWindowTextLengthW(hwnd);
   if (length <= 0) {
@@ -118,19 +65,8 @@ bool IsLauncherWindow(HWND hwnd) {
     return false;
   }
 
-  if (studio_sandbox::Enabled() &&
-      GetPropW(hwnd, studio_sandbox::Identity(kWakeUpMessageName).c_str()) == nullptr) {
-    return false;  // Another sandbox may use the exact same executable/title.
-  }
-
-  DWORD process_id = 0;
-  GetWindowThreadProcessId(hwnd, &process_id);
-  if (process_id == 0) {
-    return false;
-  }
-
-  return EqualsOrdinalIgnoreCase(
-      GetProcessExecutablePath(process_id), GetCurrentExecutablePath());
+  return GetPropW(hwnd, studio_sandbox::Identity(kWakeUpMessageName).c_str()) !=
+         nullptr;
 }
 
 // 查找已存在的 Flutter 窗口
@@ -203,7 +139,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   }
 
   if (!studio_sandbox::Valid()) return EXIT_FAILURE;
-  // Each sandbox has its own single-instance identity and wake-up message.
+  // Instances that share a storage root share their mutex and wake-up message.
   HANDLE single_instance_mutex =
       CreateMutexW(nullptr, TRUE, studio_sandbox::Identity(kSingleInstanceMutexName).c_str());
 
@@ -248,10 +184,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
     ::CoUninitialize();
     return EXIT_FAILURE;
   }
-  if (studio_sandbox::Enabled()) {
-    SetPropW(window.GetHandle(), studio_sandbox::Identity(kWakeUpMessageName).c_str(),
-             reinterpret_cast<HANDLE>(1));
-  }
+  SetPropW(window.GetHandle(), studio_sandbox::Identity(kWakeUpMessageName).c_str(),
+           reinterpret_cast<HANDLE>(1));
   window.SetQuitOnClose(true);
 
   ::MSG msg;

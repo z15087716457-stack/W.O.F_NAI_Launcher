@@ -694,6 +694,9 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                               widget.visualChannel && layout.groups.isEmpty
                               ? _welcomeCamera()
                               : retainedCamera;
+                          final visible = camera
+                              .visibleWorldRect(_viewport)
+                              .inflate(500);
                           final channel = channelFeed == null
                               ? null
                               : ChannelViewData(
@@ -739,16 +742,11 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
                                   camera: camera,
                                   children: tiles
                                       .where(
-                                        (tile) => tile.rect.overlaps(
-                                          camera
-                                              .visibleWorldRect(_viewport)
-                                              .inflate(500),
-                                        ),
+                                        (tile) => tile.rect.overlaps(visible),
                                       )
                                       .toList(),
                                 ),
                               ),
-                              ..._buildGroupBadges(layout, camera),
                               if (channel != null)
                                 Positioned.fill(
                                   key: const ValueKey('canvas-channel-overlay'),
@@ -926,55 +924,6 @@ class _GenerationCanvasViewState extends ConsumerState<GenerationCanvasView>
     }
     _embeddedTiles.removeWhere((key, _) => !retained.contains(key));
     return result;
-  }
-
-  List<Widget> _buildGroupBadges(
-    CanvasFeedLayoutResult layout,
-    CanvasCamera camera,
-  ) {
-    final visible = camera.visibleWorldRect(_viewport);
-    return [
-      for (final group in layout.groups)
-        if (group.tiles.length > 1 &&
-            _groupBounds(layout, group).overlaps(visible))
-          Positioned(
-            right:
-                _viewport.width -
-                camera
-                    .worldToScreen(_groupBounds(layout, group).bottomRight)
-                    .dx +
-                6,
-            bottom:
-                _viewport.height -
-                camera
-                    .worldToScreen(_groupBounds(layout, group).bottomRight)
-                    .dy +
-                6,
-            child: IgnorePointer(
-              key: ValueKey('canvas-batch-count:${group.key}'),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 7,
-                    vertical: 3,
-                  ),
-                  child: Text(
-                    '×${group.tiles.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-    ];
   }
 
   void _onTileTap(CanvasFeedItem item) {

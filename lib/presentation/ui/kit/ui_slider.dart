@@ -9,7 +9,7 @@ import 'ui_lib_controls.dart';
 import 'ui_text.dart';
 
 /// 滑杆（库页原型 `.trk`）：18 高；3px 控件底槽 + 强调色填充；15px 白底圆钮、2px 强调色描边；
-/// [defaultValue] 非 null 时在槽上画一道 2 × 11 的默认值刻度。取值 0–1，拖动按 0.01 取整。
+/// [defaultValue] 非 null 时在槽上画一道 2 × 11 的默认值刻度。取值 0–1，按 [divisions] 分段。
 class UiSlider extends StatelessWidget {
   const UiSlider({
     super.key,
@@ -17,6 +17,7 @@ class UiSlider extends StatelessWidget {
     this.onChanged,
     this.onChangeEnd,
     this.defaultValue,
+    this.divisions = 100,
     this.compact = false,
     this.empty = false,
   });
@@ -25,6 +26,7 @@ class UiSlider extends StatelessWidget {
   final ValueChanged<double>? onChanged;
   final ValueChanged<double>? onChangeEnd;
   final double? defaultValue;
+  final int divisions;
 
   /// 组合包网格里的小号：16 高、13px 圆钮。
   final bool compact;
@@ -40,7 +42,8 @@ class UiSlider extends StatelessWidget {
       builder: (context, box) {
         final w = box.maxWidth;
         double at(Offset p) =>
-            ((p.dx / w).clamp(0.0, 1.0) * 100).roundToDouble() / 100;
+            ((p.dx / w).clamp(0.0, 1.0) * divisions).roundToDouble() /
+            divisions;
         return MouseRegion(
           cursor: enabled ? SystemMouseCursors.click : MouseCursor.defer,
           child: GestureDetector(

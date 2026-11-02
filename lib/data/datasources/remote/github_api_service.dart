@@ -14,11 +14,66 @@ part 'github_api_service.g.dart';
 class GitHubApiException implements Exception {
   final String message;
   final Object? originalError;
+  final int? statusCode;
+  final bool rateLimited;
+  final DateTime? retryAt;
 
-  GitHubApiException(this.message, {this.originalError});
+  GitHubApiException(
+    this.message, {
+    this.originalError,
+    this.statusCode,
+    this.rateLimited = false,
+    this.retryAt,
+  });
+
+  factory GitHubApiException.fromDio(DioException error) {
+    final response = error.response;
+    final status = response?.statusCode;
+    final message = switch (response?.data) {
+      {'message': final String reason} when reason.trim().isNotEmpty =>
+        reason.trim(),
+      _ =>
+        response?.statusMessage ?? error.message ?? 'Failed to fetch release',
+    };
+    final headers = response?.headers;
+    final remaining = headers?.value('x-ratelimit-remaining');
+    final retrySeconds = int.tryParse(headers?.value('retry-after') ?? '');
+    final resetSeconds = int.tryParse(
+      headers?.value('x-ratelimit-reset') ?? '',
+    );
+    final rateLimited =
+        status == 429 ||
+        (status == 403 &&
+            (remaining == '0' ||
+                retrySeconds != null ||
+                message.toLowerCase().contains('rate limit')));
+    DateTime? retryAt;
+    if (rateLimited) {
+      if (retrySeconds != null && retrySeconds >= 0) {
+        retryAt = DateTime.now().toUtc().add(Duration(seconds: retrySeconds));
+      } else if (remaining == '0' && resetSeconds != null) {
+        retryAt = DateTime.fromMillisecondsSinceEpoch(
+          resetSeconds * 1000,
+          isUtc: true,
+        );
+      }
+    }
+    return GitHubApiException(
+      message,
+      originalError: error,
+      statusCode: status,
+      rateLimited: rateLimited,
+      retryAt: retryAt,
+    );
+  }
 
   @override
-  String toString() => 'GitHubApiException: $message';
+  String toString() => [
+    'GitHubApiException: ${statusCode == null ? '' : 'HTTP $statusCode · '}$message',
+    if (originalError != null) '$originalError',
+    if (originalError case DioException(response: final response?))
+      if (response.data != null) 'Response: ${response.data}',
+  ].join('\n');
 }
 
 /// GitHub API 服务
@@ -63,16 +118,7 @@ class GitHubApiService {
 
       return await _parseReleaseData(data, currentVersion, platform);
     } on DioException catch (e) {
-      if (e.response?.statusCode == 404) {
-        throw GitHubApiException(
-          'Release not found for $owner/$repo',
-          originalError: e,
-        );
-      }
-      throw GitHubApiException(
-        'Failed to fetch release: ${e.message}',
-        originalError: e,
-      );
+      throw GitHubApiException.fromDio(e);
     } catch (e) {
       if (e is GitHubApiException) rethrow;
       throw GitHubApiException('Unexpected error: $e', originalError: e);

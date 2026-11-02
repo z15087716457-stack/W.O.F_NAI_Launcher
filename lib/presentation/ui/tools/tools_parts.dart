@@ -434,6 +434,7 @@ class ToolsSlider extends StatefulWidget {
     this.display,
     this.live = false,
     this.enabled = true,
+    this.editable = false,
   });
 
   final double value;
@@ -452,6 +453,7 @@ class ToolsSlider extends StatefulWidget {
   /// 拖动中也回调（调色实时预览）。
   final bool live;
   final bool enabled;
+  final bool editable;
 
   @override
   State<ToolsSlider> createState() => _ToolsSliderState();
@@ -459,13 +461,15 @@ class ToolsSlider extends StatefulWidget {
 
 class _ToolsSliderState extends State<ToolsSlider> {
   double? _drag;
+  int get _precision =>
+      widget.decimals == 0 ? 1 : (widget.decimals == 1 ? 10 : 100);
 
   double _norm(double v) =>
       ((v - widget.min) / (widget.max - widget.min)).clamp(0.0, 1.0);
 
   double _denorm(double t) {
     final v = widget.min + t * (widget.max - widget.min);
-    final k = widget.decimals == 0 ? 1 : (widget.decimals == 1 ? 10 : 100);
+    final k = _precision;
     return (v * k).roundToDouble() / k;
   }
 
@@ -475,6 +479,7 @@ class _ToolsSliderState extends State<ToolsSlider> {
     final v = _drag ?? widget.value;
     final slider = UiSlider(
       value: _norm(v),
+      divisions: ((widget.max - widget.min) * _precision).round(),
       onChanged: widget.enabled
           ? (t) {
               final next = _denorm(t);
@@ -491,27 +496,39 @@ class _ToolsSliderState extends State<ToolsSlider> {
           : null,
     );
     // 数值块（原型 `.num`）：26 高、最小宽 48、右对齐、等宽 12 / w500。
-    final box = Container(
-      height: 26,
-      constraints: const BoxConstraints(minWidth: 48),
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      alignment: Alignment.centerRight,
-      decoration: BoxDecoration(
-        color: c.control,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        widget.display?.call(v) ??
-            '${v.toStringAsFixed(widget.decimals)}${widget.suffix ?? ''}',
-        maxLines: 1,
-        style: UiText.mono(
-          12,
-          weight: FontWeight.w500,
-          color: c.ink,
-          height: 1.2,
-        ),
-      ),
-    );
+    final box = widget.editable
+        ? SizedBox(
+            height: 26,
+            child: UiNumBox(
+              value: v,
+              min: widget.min,
+              max: widget.max,
+              decimals: widget.decimals,
+              suffix: widget.suffix,
+              onSubmitted: widget.enabled ? widget.onChanged : null,
+            ),
+          )
+        : Container(
+            height: 26,
+            constraints: const BoxConstraints(minWidth: 48),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            alignment: Alignment.centerRight,
+            decoration: BoxDecoration(
+              color: c.control,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              widget.display?.call(v) ??
+                  '${v.toStringAsFixed(widget.decimals)}${widget.suffix ?? ''}',
+              maxLines: 1,
+              style: UiText.mono(
+                12,
+                weight: FontWeight.w500,
+                color: c.ink,
+                height: 1.2,
+              ),
+            ),
+          );
     return Row(
       mainAxisSize: widget.width == null ? MainAxisSize.max : MainAxisSize.min,
       spacing: 10,

@@ -8736,6 +8736,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get update_errorCheckFailed => '检查更新失败';
 
   @override
+  String get update_errorRateLimited => 'GitHub 请求已达上限，请稍后重试。';
+
+  @override
+  String update_retryAt(String time) {
+    return '请在 $time（本地时间）后重试。';
+  }
+
+  @override
   String get update_errorCheckUnknown => '检查更新时发生未知错误';
 
   @override
@@ -14552,9 +14560,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get gen_recent => '最近';
-
-  @override
   String get gen_encoded => '已编码';
 
   @override
@@ -19050,6 +19055,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get set_abLatest => '已是最新版本';
 
   @override
+  String get set_abUnchecked => '尚未检查更新';
+
+  @override
+  String get set_abSkipped => '已忽略此版本';
+
+  @override
   String get set_abChecking => '正在检查更新…';
 
   @override
@@ -20539,6 +20550,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_memoryGlobal => '全局指令';
 
   @override
+  String get ag_memoryChatPrefix => '本会话前置指令';
+
+  @override
+  String get ag_memoryChatPrefixHint => '仅当前会话生效，放在内置提示词之前。';
+
+  @override
   String get ag_memoryWorkspace => '本工作区规则';
 
   @override
@@ -21644,6 +21661,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get set_agMcpStdio => '本地命令';
+
+  @override
+  String get set_agMcpDisplayName => '显示名称（可选）';
+
+  @override
+  String get set_agMcpDisplayNameHint => '仅用于界面，不改变工具名称。';
+
+  @override
+  String get set_agMcpIdentifier => '工具标识';
 
   @override
   String get set_agMcpAddress => '服务器地址';
@@ -30417,6 +30443,14 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get update_errorCheckFailed => '檢查更新失敗';
 
   @override
+  String get update_errorRateLimited => 'GitHub 請求已達上限，請稍後重試。';
+
+  @override
+  String update_retryAt(String time) {
+    return '請在 $time（本地時間）後重試。';
+  }
+
+  @override
   String get update_errorCheckUnknown => '檢查更新時發生未知錯誤';
 
   @override
@@ -36233,9 +36267,6 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   }
 
   @override
-  String get gen_recent => '最近';
-
-  @override
   String get gen_encoded => '已編碼';
 
   @override
@@ -40731,6 +40762,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get set_abLatest => '已是最新版本';
 
   @override
+  String get set_abUnchecked => '尚未檢查更新';
+
+  @override
+  String get set_abSkipped => '已忽略此版本';
+
+  @override
   String get set_abChecking => '正在檢查更新…';
 
   @override
@@ -42220,6 +42257,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get ag_memoryGlobal => '全域指令';
 
   @override
+  String get ag_memoryChatPrefix => '本會話前置指令';
+
+  @override
+  String get ag_memoryChatPrefixHint => '僅當前會話生效，放在內建提示詞之前。';
+
+  @override
   String get ag_memoryWorkspace => '本工作區規則';
 
   @override
@@ -43325,6 +43368,15 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get set_agMcpStdio => '本地命令';
+
+  @override
+  String get set_agMcpDisplayName => '顯示名稱（可選）';
+
+  @override
+  String get set_agMcpDisplayNameHint => '僅用於介面，不改變工具名稱。';
+
+  @override
+  String get set_agMcpIdentifier => '工具標識';
 
   @override
   String get set_agMcpAddress => '伺服器地址';

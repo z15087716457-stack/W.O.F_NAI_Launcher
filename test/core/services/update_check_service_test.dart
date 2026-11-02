@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/core/services/app_installation_service.dart';
 import 'package:nai_launcher/core/services/update_check_service.dart';
 import 'package:nai_launcher/data/datasources/remote/github_api_service.dart';
@@ -105,6 +108,99 @@ void main() {
     storage = _FakeUpdateStorage();
   });
 
+  for (final locale in [
+    const Locale('zh'),
+    const Locale('zh', 'TW'),
+    const Locale('en'),
+    const Locale('ja'),
+    const Locale('ko'),
+  ]) {
+    test(
+      'check failure has localized HTTP reason and retry time in $locale',
+      () async {
+        setCurrentL10nLocale(locale);
+        addTearDown(() => setCurrentL10nLocale(const Locale('zh')));
+        final retryAt = DateTime.utc(2030);
+        final service = buildService(
+          (_) async => throw GitHubApiException(
+            'API rate limit exceeded',
+            statusCode: 403,
+            rateLimited: true,
+            retryAt: retryAt,
+            originalError: 'Dio diagnostic fixture',
+          ),
+        );
+        await expectLater(
+          service.checkForUpdates(),
+          throwsA(
+            isA<UpdateCheckException>()
+                .having((e) => e.message, 'HTTP status', contains('HTTP 403'))
+                .having(
+                  (e) => e.message,
+                  'server reason',
+                  contains('API rate limit exceeded'),
+                )
+                .having(
+                  (e) => e.message,
+                  'rate limit',
+                  contains(currentL10n.update_errorRateLimited),
+                )
+                .having(
+                  (e) => e.message,
+                  'retry time',
+                  contains(
+                    currentL10n.update_retryAt(
+                      DateFormat(
+                        'yyyy-MM-dd HH:mm:ss',
+                      ).format(retryAt.toLocal()),
+                    ),
+                  ),
+                )
+                .having(
+                  (e) => e.message,
+                  'no raw exception in UI',
+                  isNot(contains('Dio diagnostic fixture')),
+                )
+                .having(
+                  (e) => e.toString(),
+                  'diagnostic retained',
+                  contains('Dio diagnostic fixture'),
+                ),
+          ),
+        );
+        expect(storage.success, isNull);
+      },
+    );
+  }
+
+  test('403 without limit evidence is not called rate limiting', () async {
+    final service = buildService(
+      (_) async =>
+          throw GitHubApiException('Access denied by policy', statusCode: 403),
+    );
+    await expectLater(
+      service.checkForUpdates(),
+      throwsA(
+        isA<UpdateCheckException>()
+            .having(
+              (e) => e.message,
+              'reason',
+              contains('Access denied by policy'),
+            )
+            .having(
+              (e) => e.message,
+              'not rate limited',
+              isNot(contains(currentL10n.update_errorRateLimited)),
+            )
+            .having(
+              (e) => e.message,
+              'no invented retry time',
+              isNot(contains('2030')),
+            ),
+      ),
+    );
+  });
+
   test(
     'failed checks record only an attempt and retry after 30 minutes',
     () async {
@@ -126,61 +222,57 @@ void main() {
     },
   );
 
-  test(
-    'successful checks use the regular 24 hour interval',
-    () async {
-      final service = buildService(
-        (current) async => VersionInfo(
-          version: current,
-          currentVersion: current,
-          isNewer: false,
-        ),
-      );
+  test('successful checks use the regular 24 hour interval', () async {
+    final service = buildService(
+      (current) async => VersionInfo(
+        version: current,
+        currentVersion: current,
+        isNewer: false,
+      ),
+    );
 
-      expect(await service.checkForUpdates(), isNull);
-      expect(storage.success, now);
-      expect(await service.shouldCheck(), isFalse);
+    expect(await service.checkForUpdates(), isNull);
+    expect(storage.success, now);
+    expect(await service.shouldCheck(), isFalse);
 
-      now = now.add(const Duration(hours: 24));
-      expect(await service.shouldCheck(), isTrue);
-    },
-  );
+    now = now.add(const Duration(hours: 24));
+    expect(await service.shouldCheck(), isTrue);
+  });
 
-  test(
-    'remind later suppresses a known update until the deadline',
-    () async {
-      final service = buildService(
-        (current) async => VersionInfo(
-          version: '2.0.0',
-          currentVersion: current,
-          isNewer: true,
-        ),
-      );
+  test('remind later suppresses a known update until the deadline', () async {
+    final service = buildService(
+      (current) async =>
+          VersionInfo(version: '2.0.0', currentVersion: current, isNewer: true),
+    );
 
-      expect(await service.checkForUpdates(), isNotNull);
-      await service.remindLater();
-      expect(storage.known, '2.0.0');
-      expect(await service.shouldCheck(), isFalse);
+    expect(await service.checkForUpdates(), isNotNull);
+    await service.remindLater();
+    expect(storage.known, '2.0.0');
+    expect(await service.shouldCheck(), isFalse);
 
-      now = now.add(const Duration(hours: 4));
-      expect(await service.shouldCheck(), isTrue);
-    },
-  );
+    now = now.add(const Duration(hours: 4));
+    expect(await service.shouldCheck(), isTrue);
+  });
 
-  test(
-    'manual checks can reveal a previously skipped version',
-    () async {
-      final service = buildService(
-        (current) async => VersionInfo(
-          version: '2.0.0',
-          currentVersion: current,
-          isNewer: true,
-        ),
-      );
-      await service.skipVersion('2.0.0');
+  test('manual checks can reveal a previously skipped version', () async {
+    final service = buildService(
+      (current) async =>
+          VersionInfo(version: '2.0.0', currentVersion: current, isNewer: true),
+    );
+    await service.skipVersion('2.0.0');
 
-      expect(await service.checkForUpdates(), isNull);
-      expect(await service.checkForUpdates(ignoreSkipped: true), isNotNull);
-    },
-  );
+    expect(await service.checkForUpdates(), isNull);
+    expect(service.hasKnownUpdate, isTrue);
+    expect(await service.checkForUpdates(ignoreSkipped: true), isNotNull);
+  });
+
+  test('成功检查确认没有新版本后清除旧的已知更新', () async {
+    storage.known = '2.0.0';
+    final service = buildService(
+      (current) async => VersionInfo(version: current),
+    );
+    expect(service.hasKnownUpdate, isTrue);
+    expect(await service.checkForUpdates(), isNull);
+    expect(service.hasKnownUpdate, isFalse);
+  });
 }

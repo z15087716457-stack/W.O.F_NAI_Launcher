@@ -11,6 +11,7 @@ import 'package:nai_launcher/presentation/ui/agent/agent_parts.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_answered_questions.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_history_mapper.dart';
 import '../../../helpers/studio_capture_fonts.dart';
+import '../../../helpers/uiux_frontend_capture.dart';
 import 'agent_test_harness.dart';
 
 final _at = DateTime(2026, 10, 24, 11, 4);
@@ -29,12 +30,16 @@ final _qa = AgentAnsweredQuestionsBlock(
     ),
   ],
 );
-AgentViewData _data(List<AgentTurn> turns, {List<AgentHistoryEntry>? history}) {
+AgentViewData _data(
+  List<AgentTurn> turns, {
+  List<AgentHistoryEntry>? history,
+  AgentChatInfo? chat,
+}) {
   final d = AgentFixture.view(AgentScene.chat);
   return AgentViewData(
     now: d.now,
     workspace: d.workspace,
-    chat: d.chat,
+    chat: chat ?? d.chat,
     workspaces: d.workspaces,
     chats: d.chats,
     composer: const AgentComposerData(text: '', pending: []),
@@ -90,6 +95,150 @@ Future<void> _capture(WidgetTester t, String name) async {
 
 void main() {
   setUpAll(loadStudioCaptureFonts);
+  testWidgets('history updates in place and closes after switching chats', (
+    t,
+  ) async {
+    final chat = AgentFixture.chats.first;
+    await pumpAgent(t, data: _data([_turn(0)], chat: chat));
+    await t.tap(find.byKey(const Key('agent-history-toggle')));
+    await _frames(t);
+    await pumpAgent(t, data: _data([_turn(0), _turn(1)], chat: chat));
+    await _frames(t);
+    expect(
+      find.byKey(const Key('agent-history-entry-t1/history/user')),
+      findsOneWidget,
+    );
+    await pumpAgent(t, data: _data([_turn(2)], chat: AgentFixture.chats[1]));
+    await _frames(t);
+    expect(find.byKey(const Key('agent-history')), findsNothing);
+    await t.tap(find.byKey(const Key('agent-history-toggle')));
+    await _frames(t);
+    expect(
+      find.byKey(const Key('agent-history-entry-t2/history/user')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const Key('agent-history-entry-t0/history/user')),
+      findsNothing,
+    );
+    expect(t.takeException(), isNull);
+  });
+  for (final (locale, dark) in [('zh', false), ('en', true)]) {
+    testWidgets(
+      '$locale prompt-set viewer covers history and preserves it on close',
+      (t) async {
+        debugDisableShadows = false;
+        final set = AgentFixture.promptSet();
+        await pumpAgent(
+          t,
+          data: _data([
+            _turn(
+              0,
+              blocks: [
+                AgentPromptSetBlock(
+                  setId: set.setId,
+                  revision: set.revision,
+                  data: set,
+                ),
+              ],
+            ),
+          ]),
+          width: 1200,
+          height: 900,
+          locale: locale,
+          dark: dark,
+        );
+        final panel = t.widget<AgentPanel>(find.byType(AgentPanel));
+        final app = t.widget<MaterialApp>(find.byType(MaterialApp));
+        await t.pumpWidget(
+          RepaintBoundary(
+            key: const Key('agent-capture'),
+            child: MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: app.theme,
+              locale: app.locale,
+              supportedLocales: app.supportedLocales,
+              localizationsDelegates: app.localizationsDelegates,
+              builder: app.builder,
+              home: Scaffold(
+                body: Row(
+                  children: [
+                    const Expanded(child: ColoredBox(color: Color(0xFF282828))),
+                    SizedBox(width: 420, child: panel),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        await _frames(t);
+        await t.runAsync(() async {
+          final context = t.element(find.byType(Scaffold));
+          for (final image in set.images.values.expand((images) => images)) {
+            await precacheImage(image.image, context);
+          }
+        });
+        for (var i = 0; i < 2; i++) {
+          await t.tap(find.byKey(const Key('agent-ps-next')));
+          await _frames(t);
+        }
+        final thumb = find
+            .descendant(
+              of: find.byKey(Key('agent-ps-${set.setId}')),
+              matching: find.byType(Image),
+            )
+            .first;
+        await t.ensureVisible(thumb);
+        await _frames(t);
+        await t.tap(find.byKey(const Key('agent-history-toggle')));
+        await _frames(t);
+        await t.enterText(
+          find.byKey(const Key('agent-history-search')),
+          'Message',
+        );
+        await _frames(t);
+        final history = find.byKey(const Key('agent-history'));
+        final historyRect = t.getRect(history);
+        expect(historyRect.right, lessThanOrEqualTo(780));
+        final boundary = find.byKey(const Key('agent-capture'));
+        Future<void> capture(String suffix) => captureUiuxRegion(
+          t,
+          boundary,
+          '$locale-$suffix',
+          t.getRect(boundary),
+        );
+        await capture('history');
+        await t.tap(thumb);
+        await _frames(t);
+        expect(find.byKey(const Key('agent-zoom')), findsOneWidget);
+        await capture('zoom');
+        expect(history, findsOneWidget);
+        expect(history.hitTestable(), findsNothing);
+        await t.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+        await _frames(t);
+        expect(find.text('2 / 2'), findsOneWidget);
+        // This point used to hit the history flyout instead of the viewer.
+        await t.tapAt(historyRect.center);
+        await _frames(t);
+        expect(find.byKey(const Key('agent-zoom')), findsNothing);
+        expect(history.hitTestable(), findsOneWidget);
+        expect(
+          t
+              .widget<TextField>(find.byKey(const Key('agent-history-search')))
+              .controller!
+              .text,
+          'Message',
+        );
+        expect(t.getRect(history), historyRect);
+        await capture('restored');
+        await t.sendKeyEvent(LogicalKeyboardKey.escape);
+        await _frames(t);
+        expect(history, findsNothing);
+        expect(t.takeException(), isNull);
+        debugDisableShadows = true;
+      },
+    );
+  }
   testWidgets('a summary-only split turn has no fabricated user bubble', (
     t,
   ) async {

@@ -83,6 +83,7 @@ class AnlasUsageMetricsStore extends AsyncNotifier<AnlasUsageMetrics> {
     _disposed = false;
     final unregister = DesktopAppShutdownService.registerCleanup(
       () => _pending.catchError((Object _) {}),
+      name: 'Usage metrics',
     );
     ref.onDispose(() {
       _disposed = true;

@@ -59,7 +59,7 @@ class SettingsUpscaleOperations extends Notifier<SettingsUpscaleOperation> {
     final unregister = DesktopAppShutdownService.registerCleanup(() async {
       _cancel?.cancel();
       await _pending;
-    });
+    }, name: 'Upscale settings');
     ref.onDispose(() {
       _disposed = true;
       _cancel?.cancel();

@@ -65,7 +65,6 @@ class ToolsRecorder {
       onImg2ImgRemove: b.onImg2ImgRemove,
       onAddVibeFiles: b.onAddVibeFiles,
       onAddVibeFromLibrary: b.onAddVibeFromLibrary,
-      onAddRecentVibe: b.onAddRecentVibe,
       onVibeChanged: b.onVibeChanged,
       onEncodeVibe: b.onEncodeVibe,
       onRemoveVibe: b.onRemoveVibe,

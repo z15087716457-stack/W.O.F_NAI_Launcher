@@ -26,6 +26,142 @@ class _Updates extends UpdateStateNotifier {
 }
 
 void main() {
+  for (final locale in [
+    const Locale('zh'),
+    const Locale('zh', 'TW'),
+    const Locale('en'),
+    const Locale('ja'),
+    const Locale('ko'),
+  ]) {
+    for (final dark in [false, true]) {
+      for (final compact in [false, true]) {
+        testWidgets(
+          'long update errors stay inside the dialog: $locale dark=$dark compact=$compact',
+          (tester) async {
+            await tester.binding.setSurfaceSize(
+              compact ? const Size(420, 520) : const Size(1000, 800),
+            );
+            addTearDown(() => tester.binding.setSurfaceSize(null));
+            await tester.runAsync(() async {
+              await loadStudioCaptureFonts();
+              await (FontLoader('MaterialIcons')..addFont(
+                    rootBundle.load('fonts/MaterialIcons-Regular.otf'),
+                  ))
+                  .load();
+            });
+            final reason =
+                'HTTP 403\n${List.filled(48, 'GitHub: API rate limit exceeded for this network. 请求已达上限。').join('\n')}';
+            const details = 'Full original Dio diagnostics fixture';
+            final notifier = _Updates();
+            final copied = <String>[];
+            tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+              SystemChannels.platform,
+              (call) async {
+                if (call.method == 'Clipboard.setData') {
+                  copied.add((call.arguments as Map)['text'] as String);
+                }
+                return null;
+              },
+            );
+            addTearDown(
+              () => tester.binding.defaultBinaryMessenger
+                  .setMockMethodCallHandler(SystemChannels.platform, null),
+            );
+            final container = ProviderContainer(
+              overrides: [updateStateProvider.overrideWith(() => notifier)],
+            );
+            addTearDown(container.dispose);
+            container.read(updateStateProvider);
+            notifier.set(
+              UpdateState(
+                status: UpdateStatus.error,
+                errorMessage: reason,
+                errorDetails: details,
+              ),
+            );
+            final key = GlobalKey();
+            final theme = dark ? GeistTheme.dark : GeistTheme.light;
+            await tester.pumpWidget(
+              UncontrolledProviderScope(
+                container: container,
+                child: MaterialApp(
+                  locale: locale,
+                  supportedLocales: AppLocalizations.supportedLocales,
+                  localizationsDelegates:
+                      AppLocalizations.localizationsDelegates,
+                  theme: theme.copyWith(
+                    textTheme: theme.textTheme.apply(
+                      fontFamily: 'HarmonyOS Sans SC',
+                    ),
+                  ),
+                  builder: (context, child) => MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaler: TextScaler.linear(compact ? 1.4 : 1),
+                    ),
+                    child: child!,
+                  ),
+                  home: RepaintBoundary(
+                    key: key,
+                    child: const Scaffold(body: UpdateCheckDialog()),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+            final context = tester.element(find.byType(UpdateCheckDialog));
+            final l10n = AppLocalizations.of(context)!;
+            final copy = find.widgetWithText(TextButton, l10n.gen_copyDetail);
+            final retry = find.widgetWithText(FilledButton, l10n.common_retry);
+            expect(copy.hitTestable(), findsOneWidget);
+            expect(retry.hitTestable(), findsOneWidget);
+            expect(find.text(details), findsNothing);
+            final scroll = find.byType(SingleChildScrollView).first;
+            final position = tester
+                .state<ScrollableState>(
+                  find
+                      .descendant(of: scroll, matching: find.byType(Scrollable))
+                      .first,
+                )
+                .position;
+            expect(position.maxScrollExtent, greaterThan(0));
+            expect(
+              tester.getRect(scroll).bottom,
+              lessThanOrEqualTo(tester.getRect(copy).top),
+            );
+            expect(tester.takeException(), isNull);
+            final capture = Platform.environment['UPDATE_ERROR_CAPTURES'];
+            if (capture != null) {
+              await tester.runAsync(() async {
+                final image =
+                    await (key.currentContext!.findRenderObject()!
+                            as RenderRepaintBoundary)
+                        .toImage();
+                final data = (await image.toByteData(
+                  format: ui.ImageByteFormat.png,
+                ))!;
+                final file = File(
+                  '$capture/${locale.toLanguageTag()}-${dark ? 'dark' : 'light'}-${compact ? 'compact' : 'wide'}.png',
+                );
+                await file.parent.create(recursive: true);
+                await file.writeAsBytes(data.buffer.asUint8List());
+                image.dispose();
+              });
+            }
+            await tester.drag(scroll, const Offset(0, -300));
+            await tester.pumpAndSettle();
+            expect(position.pixels, greaterThan(0));
+            await tester.tap(copy);
+            await tester.pump();
+            expect(copied, [details]);
+            expect(tester.takeException(), isNull);
+            await tester.pumpWidget(const SizedBox());
+            await tester.pumpAndSettle();
+          },
+        );
+      }
+    }
+  }
+
   const info = VersionInfo(
     version: '2.0.0',
     currentVersion: '1.0.0',

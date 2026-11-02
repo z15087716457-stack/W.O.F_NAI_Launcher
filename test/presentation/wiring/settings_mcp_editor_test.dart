@@ -143,6 +143,10 @@ void main() {
     'JSON import and form share advanced fields and encrypted persistence',
     (t) async {
       final h = await open(t);
+      await t.enterText(
+        find.byKey(const Key('nai-mcp-display-name')),
+        'EXA免费联网搜索',
+      );
       expect(find.byKey(const Key('nai-mcp-url')), findsOneWidget);
       await t.tap(find.byKey(const Key('nai-mcp-json')));
       await t.pumpAndSettle();
@@ -180,9 +184,11 @@ void main() {
           .mcpServers
           .single;
       expect(server.name, 'web');
+      expect(server.displayName, 'EXA免费联网搜索');
       final secrets =
           h.container.read(secureStorageServiceProvider) as AgentTestSecrets;
       final config = jsonDecode(secrets.mcp[server.configId]!) as Map;
+      expect(config.containsKey('displayName'), false);
       expect(config['url'], 'https://example.invalid/new');
       expect(config['timeout'], 9);
       expect(config['headers']['x-api-key'], 'fixture-key');

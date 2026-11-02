@@ -62,7 +62,7 @@ class SettingsDictionaryUpdater extends Notifier<SettingsDictionaryUpdate> {
       _checker?.cancel();
       await _running;
       await _checking;
-    });
+    }, name: 'Dictionary update');
     ref.onDispose(() {
       _disposed = true;
       unregister();

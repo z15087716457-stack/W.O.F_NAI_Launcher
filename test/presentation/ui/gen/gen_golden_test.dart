@@ -178,6 +178,26 @@ void main() {
           await precacheGen(t, const []);
         }
         final masks = <Rect>[];
+        void allowFrame(Rect rect) {
+          final outer = rect.inflate(3), inner = rect.deflate(3);
+          masks.addAll([
+            Rect.fromLTRB(outer.left, outer.top, outer.right, inner.top),
+            Rect.fromLTRB(outer.left, inner.bottom, outer.right, outer.bottom),
+            Rect.fromLTRB(outer.left, inner.top, inner.left, inner.bottom),
+            Rect.fromLTRB(inner.right, inner.top, outer.right, inner.bottom),
+          ]);
+        }
+
+        // 11-01: main-image frames now represent bulk selection only.
+        // 11-02: history keeps browsing focus, and switches to checked frames
+        // during bulk selection. Preserve the original PNG and image interiors.
+        if (name == 'generating') {
+          allowFrame(t.getRect(find.byKey(const Key('gen-tile-n1'))));
+        }
+        final historyFocus = find.byKey(const Key('gen-batch-focused'));
+        if (historyFocus.evaluate().isNotEmpty) {
+          allowFrame(t.getRect(historyFocus));
+        }
         // Only the user-approved Turbo + A/F area changes. Keep the model
         // button, quota, header size and all original PNGs under comparison.
         final turbo = find.byKey(const Key('gen-turbo'));

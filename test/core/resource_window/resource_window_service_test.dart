@@ -241,7 +241,7 @@ void main() {
   );
 
   test(
-    'main close posts child closure before hiding the main window',
+    'main close hides promptly and still closes owned child windows',
     () async {
       messenger.setMockMethodCallHandler(
         const MethodChannel('window_manager'),
@@ -253,8 +253,8 @@ void main() {
       await AppWindowListener().onWindowClose();
       expect(calls.map((call) => call.method), [
         'setPreventClose',
-        'closeAll',
         'hide',
+        'closeAll',
       ]);
     },
   );

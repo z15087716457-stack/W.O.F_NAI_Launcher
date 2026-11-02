@@ -58,7 +58,6 @@ Iterable<ImageProvider> _images(GenViewData d) => [
   for (final b in d.history.batches) ...b.images.map((i) => i.thumb),
   ?d.refs.img2img.image,
   for (final v in d.refs.vibes?.list ?? const <GenVibe>[]) v.thumb,
-  for (final v in d.refs.vibes?.recent ?? const <GenRecentVibe>[]) v.thumb,
   for (final p in d.refs.precise?.list ?? const <GenPrecise>[]) p.thumb,
 ];
 

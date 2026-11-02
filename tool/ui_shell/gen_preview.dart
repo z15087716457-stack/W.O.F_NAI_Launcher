@@ -199,7 +199,6 @@ class GenPreviewSim extends ChangeNotifier {
       freeCount: v.freeCount,
       extraCost: v.extraCost,
       normalize: normalize ?? v.normalize,
-      recent: v.recent,
     );
   }
 
@@ -612,23 +611,6 @@ class GenPreviewSim extends ChangeNotifier {
         );
       },
       onAddVibeFromLibrary: base.onAddVibeFromLibrary,
-      onAddRecentVibe: (id) {
-        final v = _d.refs.vibes!;
-        final r = v.recent.firstWhere((r) => r.id == id);
-        _set(
-          _d.copyWith(
-            refs: _refs(
-              vibes: _vibes(
-                list: [
-                  ...v.list,
-                  GenVibe(id: 'v${++_n}', thumb: r.thumb, name: r.name),
-                ],
-              ),
-            ),
-          ),
-          'onAddRecentVibe($id)',
-        );
-      },
       onVibeChanged: (x) => _set(
         _d.copyWith(
           refs: _refs(

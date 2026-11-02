@@ -55,12 +55,10 @@ class _AgentPanelState extends State<AgentPanel> {
   var _dropping = false;
   final _historyAnchor = GlobalKey();
   final _navigation = AgentThreadNavigation();
-  OverlayEntry? _history;
+  final _history = OverlayPortalController();
 
   void _closeHistory() {
-    _history?.remove();
-    _history?.dispose();
-    _history = null;
+    _history.hide();
     if (mounted) setState(() {});
   }
 
@@ -73,55 +71,54 @@ class _AgentPanelState extends State<AgentPanel> {
   }
 
   void _toggleHistory() {
-    if (_history != null) {
+    if (_history.isShowing) {
       _closeHistory();
-      return;
+    } else {
+      setState(_history.show);
     }
-    final overlay = Overlay.of(context, rootOverlay: true);
-    _history = OverlayEntry(
-      builder: (context) {
-        final box =
-            _historyAnchor.currentContext!.findRenderObject()! as RenderBox;
-        final root = overlay.context.findRenderObject()! as RenderBox;
-        final origin = box.localToGlobal(Offset.zero, ancestor: root);
-        final width = root.size.width < AgentHistory.width
-            ? root.size.width
-            : AgentHistory.width;
-        final outsideLeft = origin.dx >= width;
-        final left = outsideLeft
-            ? origin.dx - width
-            : root.size.width - origin.dx - box.size.width >= width
-            ? origin.dx + box.size.width
-            : origin.dx.clamp(0.0, root.size.width - width);
-        return Positioned(
-          left: left,
-          top: origin.dy,
-          width: width,
-          height: box.size.height,
-          child: AgentHistory(
-            edge: outsideLeft ? AxisDirection.left : AxisDirection.right,
-            entries: widget.data.history,
-            navigation: _navigation,
-            onClose: _closeHistory,
-            onJump: (entry) => unawaited(_jumpHistory(entry)),
-          ),
-        );
-      },
+  }
+
+  Widget _historyLayer(BuildContext context) {
+    final overlay = Overlay.of(context);
+    final box = _historyAnchor.currentContext!.findRenderObject()! as RenderBox;
+    final root = overlay.context.findRenderObject()! as RenderBox;
+    final origin = box.localToGlobal(Offset.zero, ancestor: root);
+    final width = root.size.width < AgentHistory.width
+        ? root.size.width
+        : AgentHistory.width;
+    final outsideLeft = origin.dx >= width;
+    final left = outsideLeft
+        ? origin.dx - width
+        : root.size.width - origin.dx - box.size.width >= width
+        ? origin.dx + box.size.width
+        : origin.dx.clamp(0.0, root.size.width - width);
+    return Positioned(
+      left: left,
+      top: origin.dy,
+      width: width,
+      height: box.size.height,
+      child: AgentHistory(
+        edge: outsideLeft ? AxisDirection.left : AxisDirection.right,
+        entries: widget.data.history,
+        navigation: _navigation,
+        onClose: _closeHistory,
+        onJump: (entry) => unawaited(_jumpHistory(entry)),
+      ),
     );
-    overlay.insert(_history!);
-    setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant AgentPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.data.chat.id != widget.data.chat.id) {
-      _closeHistory();
+      if (_history.isShowing) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _closeHistory();
+        });
+      }
       _navigation.turns.clear();
       _navigation.users.clear();
       _navigation.blocks.clear();
-    } else {
-      _history?.markNeedsBuild();
     }
     final blocks = {
       for (final t in widget.data.thread)
@@ -144,7 +141,7 @@ class _AgentPanelState extends State<AgentPanel> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         if (action == AgentLocalAction.history) {
-          if (_history == null) _toggleHistory();
+          if (!_history.isShowing) _toggleHistory();
         } else {
           if (_tab != AgentTab.chat) setState(() => _tab = AgentTab.chat);
           _composer.currentState?.openModelPicker();
@@ -155,8 +152,6 @@ class _AgentPanelState extends State<AgentPanel> {
 
   @override
   void dispose() {
-    _history?.remove();
-    _history?.dispose();
     _navigation.dispose();
     _toastTimer?.cancel();
     _undoTimer?.cancel();
@@ -313,7 +308,7 @@ class _AgentPanelState extends State<AgentPanel> {
           AgentHeader(
             tab: _tab,
             onTab: (t) => setState(() => _tab = t),
-            historyOpen: _history != null,
+            historyOpen: _history.isShowing,
             onHistory: _toggleHistory,
             onClose: () {
               _closeHistory();
@@ -399,12 +394,16 @@ class _AgentPanelState extends State<AgentPanel> {
         ),
       ),
     );
-    return ColoredBox(
-      key: const Key('agent-panel'),
-      color: c.page,
-      child: DefaultTextStyle.merge(
-        style: UiText.sans(13, color: c.ink),
-        child: SizedBox(key: _historyAnchor, child: panel),
+    return OverlayPortal(
+      controller: _history,
+      overlayChildBuilder: _historyLayer,
+      child: ColoredBox(
+        key: const Key('agent-panel'),
+        color: c.page,
+        child: DefaultTextStyle.merge(
+          style: UiText.sans(13, color: c.ink),
+          child: SizedBox(key: _historyAnchor, child: panel),
+        ),
       ),
     );
   }

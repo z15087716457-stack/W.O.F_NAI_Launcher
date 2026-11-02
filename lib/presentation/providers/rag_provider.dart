@@ -266,7 +266,7 @@ class RagController extends Notifier<RagStatus> {
           await (await opening.timeout(const Duration(seconds: 3))).close();
         } catch (_) {}
       }
-    });
+    }, name: 'RAG');
     ref.listen(ragSettingsProvider, (previous, next) {
       if (previous?.connectionKey != next.connectionKey) unawaited(_reset());
     });

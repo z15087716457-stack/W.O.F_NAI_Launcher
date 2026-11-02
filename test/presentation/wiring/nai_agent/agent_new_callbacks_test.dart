@@ -9,10 +9,12 @@ import 'package:go_router/go_router.dart';
 import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/wiring/nai_agent/agent_wiring.dart';
+import 'package:nai_launcher/presentation/wiring/settings/settings_agent.dart';
 import 'package:image/image.dart' as img;
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/presentation/ui/agent/agent_contract.dart' as view;
 import 'package:nai_launcher/presentation/ui/agent/agent_popovers.dart';
+import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_workspace_provider.dart';
 
 import '../../../helpers/studio_capture_fonts.dart';
 import 'agent_wiring_harness.dart';
@@ -123,6 +125,68 @@ void main() {
     expect(c.calls, isNot(contains('send')));
     expect(c.calls.where((s) => s.startsWith('edit:')), isEmpty);
   });
+
+  testWidgets(
+    'chat prefix edits in place and saves the unsent chat independently',
+    (tester) async {
+      await h.pump(tester);
+      final id = c.selected!.chat.id;
+      final draft = c.selected!.composer;
+      await tester.runAsync(() async {
+        h.panel(tester).actions.onEditMemory(view.AgentMemoryTarget.chatPrefix);
+      });
+      await tester.pumpAndSettle();
+      expect(find.text(currentL10n.ag_memoryChatPrefix), findsOneWidget);
+      final field = find.descendant(
+        of: find.byKey(const Key('settings-dialog-input')),
+        matching: find.byType(TextField),
+      );
+      await tester.enterText(field, 'CHAT_ONLY_PREFIX\nSecond line');
+      await tester.tap(find.byKey(const Key('settings-dialog-ok')));
+      await h.finishFiles(tester);
+      expect(c.selected!.chat.isDraft, false);
+      expect(c.selected!.composer, same(draft));
+      expect(
+        h.panel(tester).data.memory!.chatPrefix,
+        'CHAT_ONLY_PREFIX\nSecond line',
+      );
+      final preview = await tester.runAsync(
+        () => h.container.read(settingsAgentBackendProvider).finalPrompt(),
+      );
+      expect(preview, contains('CHAT_ONLY_PREFIX\nSecond line'));
+      final cold = ProviderContainer(
+        overrides: [naiAgentWorkspaceStoreProvider.overrideWithValue(c.store)],
+      );
+      addTearDown(cold.dispose);
+      expect(cold.exists(naiAgentControllerProvider), false);
+      final coldPreview = await tester.runAsync(
+        () => cold.read(settingsAgentBackendProvider).finalPrompt(),
+      );
+      expect(coldPreview, contains('CHAT_ONLY_PREFIX\nSecond line'));
+      expect(cold.exists(naiAgentControllerProvider), false);
+      expect(c.calls, isNot(contains('send')));
+      await tester.runAsync(c.createChat);
+      await tester.pump();
+      expect(h.panel(tester).data.memory!.chatPrefix, isEmpty);
+      await tester.runAsync(() => c.selectChat(id));
+      await tester.pump();
+      await tester.runAsync(() async {
+        h.panel(tester).actions.onEditMemory(view.AgentMemoryTarget.chatPrefix);
+      });
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(field).controller!.text,
+        'CHAT_ONLY_PREFIX\nSecond line',
+      );
+      await tester.enterText(field, 'Cancelled change');
+      await tester.tap(find.text(currentL10n.set_cancel));
+      await tester.pumpAndSettle();
+      expect(
+        c.selected!.chat.systemPromptPrefix,
+        'CHAT_ONLY_PREFIX\nSecond line',
+      );
+    },
+  );
 
   testWidgets('Adjust limit opens Agent settings at agentMaxRequests', (
     tester,

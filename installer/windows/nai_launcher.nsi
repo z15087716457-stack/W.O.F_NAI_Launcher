@@ -86,6 +86,8 @@ LangString AppRunningPrompt ${LANG_SIMPCHINESE} "检测到 ${APP_NAME} 仍在运
 LangString AppRunningPrompt ${LANG_ENGLISH} "${APP_NAME} is still running (closing its window may only hide it to the tray). Close it and continue setup?"
 LangString AppCloseFailed ${LANG_SIMPCHINESE} "无法关闭正在运行的 ${APP_NAME}。请从系统托盘退出应用后重试。"
 LangString AppCloseFailed ${LANG_ENGLISH} "Unable to close ${APP_NAME}. Exit it from the system tray and try again."
+LangString AppWriteFailed ${LANG_SIMPCHINESE} "无法写入程序文件：$INSTDIR。请确认应用已完全退出、安装目录可写且文件未被占用后重试。"
+LangString AppWriteFailed ${LANG_ENGLISH} "Unable to write application files to $INSTDIR. Make sure the app is fully closed, the folder is writable and its files are not locked, then retry."
 LangString AppInspectionFailed ${LANG_SIMPCHINESE} "无法确认正在运行的 ${APP_NAME} 是否来自当前安装目录，且安装目录内的 ${APP_EXE} 当前被占用。请从系统托盘退出应用后重试；若仍失败，可右键「开始」按钮以管理员身份运行终端，执行 taskkill /IM ${APP_EXE} /T /F 后重试。详情见安装目录下 install_diagnostics.log。"
 LangString AppInspectionFailed ${LANG_ENGLISH} "Setup could not verify whether a running ${APP_NAME} belongs to this installation, and ${APP_EXE} in the installation folder is currently locked. Exit the app from the system tray and try again; if it still fails, run $\"taskkill /IM ${APP_EXE} /T /F$\" in a terminal opened as administrator and retry. See install_diagnostics.log in the installation folder for details."
 
@@ -368,10 +370,13 @@ Section "${APP_NAME}" SecMain
   ; conservative upgrade overwrites only shipped files, keeping unknown files
   ; and private state; retired-file pruning is deliberately not performed.
   SetOverwrite on
+  ClearErrors
   SetOutPath "$INSTDIR"
   File /r /x user-data /x agent-data /x nai_launcher.exe.WebView2 /x .studio-data-* "${SOURCE_DIR}\*.*"
+  IfErrors payload_write_failed
 
   WriteUninstaller "$INSTDIR\Uninstall.exe"
+  IfErrors payload_write_failed
 
   ; Migrate only the registration for this exact directory, never a side-by-side install.
   ReadRegStr $0 HKCU "${LEGACY_UNINSTALL_KEY}" "InstallLocation"
@@ -403,6 +408,16 @@ legacy_registration_done:
   WriteRegStr HKCU "${UNINSTALL_KEY}" "QuietUninstallString" '"$INSTDIR\Uninstall.exe" /S'
   WriteRegDWORD HKCU "${UNINSTALL_KEY}" "NoModify" 1
   WriteRegDWORD HKCU "${UNINSTALL_KEY}" "NoRepair" 1
+  Goto install_done
+
+payload_write_failed:
+  IfSilent payload_write_exit
+  MessageBox MB_ICONSTOP|MB_OK "$(AppWriteFailed)"
+payload_write_exit:
+  SetErrorLevel 4
+  Quit
+
+install_done:
 SectionEnd
 
 !ifndef NO_SHORTCUTS

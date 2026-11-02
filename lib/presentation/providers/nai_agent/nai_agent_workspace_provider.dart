@@ -8,6 +8,7 @@ import 'nai_agent_workspace_controller.dart';
 import 'nai_agent_questions.dart';
 import 'nai_agent_management.dart';
 import '../../../core/storage/secure_storage_service.dart';
+import '../../../core/services/desktop_app_shutdown_service.dart';
 import 'dart:convert';
 import '../../../core/utils/localization_extension.dart';
 import '../../prompt_assistant/providers/prompt_assistant_config_provider.dart';
@@ -166,6 +167,12 @@ final naiAgentControllerProvider =
         initialWorkspaceName: currentL10n.naiAgent_defaultWorkspace,
         initialChatName: currentL10n.naiAgent_newChat,
         readModelRevision: () => modelRevision,
+      );
+      ref.onDispose(
+        DesktopAppShutdownService.registerCleanup(
+          controller.close,
+          name: 'Agent sessions',
+        ),
       );
       controller.addListener(() {
         ref.read(naiAgentUiPreferencesProvider).replace(controller.settings);

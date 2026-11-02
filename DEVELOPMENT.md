@@ -6,7 +6,7 @@
 
 ## 构建、测试与开发命令
 
-当前整合分支使用登记的 `E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7/`（Flutter 3.47.7 / Dart 3.13.5），最低约束以 `pubspec.yaml` 为准。PATH / `C:/flutter` 上旧 3.44.2 不作为本分支验证入口，执行前核对 `flutter --version`。Shell 使用 Bash，原生 `.ps1` 使用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
+当前整合分支使用登记的 `E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7/`（Flutter 3.47.7 / Dart 3.13.5），最低约束以 `pubspec.yaml` 为准。执行前核对登记 SDK，不使用 PATH 中的旧版。Shell 优先 Bash；使用 PowerShell 且输出含中文时设 UTF-8，原生 `.ps1` 用 PowerShell 执行。以下按实际修改选用，不是每次必跑清单：
 
 ```bash
 studio_sdk="E:/A.I/NovelAI/.devin/sdk/flutter-3.47.7"
@@ -41,11 +41,13 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 本机桌面实际使用 `E:/A.I/NovelAI/nai-launcher-src/build/windows-glass-preview/runner/Release/`，不是标准 Release 或 Debug 目录。完整交付状态以该源码根 `.dart_tool/glass-rollout-delivery.json` 与安装文件为准；当前有效源码位置从工作区接手说明读取。
 
-本机累计更新的交付材料按批次放在有效源码 `.dart_tool/cumulative-r<N>-<日期>/`（最近一批见工作区接手说明登记），复用上一批的 `snapshot` → `run_build` → `prepare` → `verify_package` → `install` → `finalize` 链；r26 起安装器支持带备份的退役文件删除，涉及 Agent 运行资源变化时，`tools/nai-agent` 按源码整树同步。历史 Glass 组包曾使用 `.dart_tool/assemble_glass.py` / `build/glass-bundle/`；这些不是当前批次固定入口，后续使用当次登记的构建输入与组包脚本。先完成按范围测试、analyze、资源与原生数据身份核验，再使用本次交付的安装脚本；本机脚本是交付材料，不假设所有 clone 都带有 `.dart_tool/`。
+每批交付从接手说明读取当前脚本与收据，重新冻结本次输入、核对真实安装基线，再执行构建、组包、安装与核验。可以复用上一批脚本，不能重跑旧批次的载荷或版本常量。安装器沿用已有备份、失败恢复与退役文件删除；Agent 运行资源变化时，`tools/nai-agent` 按源码整树同步。本机交付脚本不作为所有 clone 的前置依赖。
 
-本机小更新（仅 Dart UI／文案、原生依赖／Agent／RAG／资源未变）直接沿用上一份完整收据构造差量载荷，不创建或复制完整 `program/`。先核对本次实际源码变化与功能验证，再重编 Release，核对未变资源、原生库及已安装模块的文件哈希；源码与产物均未变的模块复用其已通过的整包验证，不重复执行无关的 Node／RAG 冒烟。现有安装引擎、安装前后完整程序核验与回退备份保持。当前脚本模板见接手说明登记的 `.dart_tool/native-suggestion-install-20261031/`：`prepare.py` 已包含差量包核验，无需再复制整包跑旧 `verify_package.py`。仅复用脚本，已清理的载荷不重跑；原生、资源或运行依赖变化仍按实际影响完整组包并验证。
+仅 Dart 代码／文案变化，且原生依赖、Agent、RAG 与资源未变时，沿用完整收据构造差量载荷，不复制完整 `program/`。重编 Release 并核对源码、资源和原生库哈希；源码与产物均未变的模块复用原验证，不重复跑无关的 Node／RAG 冒烟。差量 `prepare.py` 已包含包核验，流程为 `snapshot` → `run_build` → `prepare` → `install` → `finalize`；原生、资源或运行依赖变化时，按实际影响组包和验证。正式分发包仍走发布流程。
 
 覆盖前现场检查 `nai_launcher` 进程路径，等用户从托盘完全退出，备份当前程序 `data/` 与记录；安装后逐项复验并保存单步回退，不自动启动。不要用标准 `build/windows/x64/runner/Release/` 整目录覆盖既有 Glass 包，尤其不能移除其原生插件。Release 发布流程另按下方规范执行。
+
+安装和回退核验通过后，按当批清单清理已用 `payload` 与空暂存目录，保留 `rollback`、当前编译缓存和核验记录；这是同次更新的收尾。清理前核对绝对路径、清单和当前用途，不把回退材料当作暂存删除。
 
 ## 代码风格与输入组件
 
@@ -55,7 +57,7 @@ Pi 本地回归在 `tool/nai_agent/` 执行 `npm test`，使用本地合成服�
 
 ## 测试规范
 
-使用 `flutter_test` / `mocktail`，测试放在对应 `test/` 路径。选择实际影响的 service、provider、widget 与布局路径；必要时扩大范围，全量结果记录实际通过 / 跳过 / 失败，不引用旧数字冒充新验证。界面检查使用 `test/helpers/studio_capture_fonts.dart` 的真实字体，覆盖涉及语言、主题、宽窄和字号；临时存储 / 合成数据不读取用户账号、数据库或提示词。
+使用 `flutter_test` / `mocktail`，测试放在对应 `test/` 路径。按实际依赖覆盖 service、provider、widget 与布局；公共契约变化要包含调用方，不以单一目录划死范围，也不一律运行全量。新失败、共享影响或未解决的问题支持扩大范围时再扩测；源码哈希一致的既有验证注明复用，不冒称重跑。界面检查使用 `test/helpers/studio_capture_fonts.dart` 的真实字体，覆盖涉及语言、主题、宽窄和字号；临时存储 / 合成数据不读取用户账号、数据库或提示词。
 
 日志测试使用 `test/helpers/app_logger_test_isolation.dart` 隔离输出，避免并发套件互相污染。可用测试与采集入口见 [test/README.md](test/README.md)。交付记录、历史报告和用户验收是不同证据；widget 实绘不能写成运行中用户窗口截图。
 

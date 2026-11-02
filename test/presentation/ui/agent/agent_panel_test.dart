@@ -46,6 +46,7 @@ void main() {
           AgentScene.chat,
           AgentScene.ask,
           AgentScene.run,
+          AgentScene.memory,
         ]) {
           await pumpAgent(tester, scene: scene, width: 320, locale: locale);
           expect(tester.takeException(), isNull, reason: scene.name);
@@ -55,6 +56,29 @@ void main() {
   });
 
   group('交互', () {
+    testWidgets('会话前置指令沿用卡片并位于全局指令下方', (tester) async {
+      final rec = await pumpAgent(
+        tester,
+        scene: AgentScene.memory,
+        tab: AgentTab.memory,
+      );
+      final global = find.byKey(const Key('agent-memory-global'));
+      final prefix = find.byKey(const Key('agent-memory-chat-prefix'));
+      final workspace = find.byKey(const Key('agent-memory-workspace'));
+      expect(
+        tester.getTopLeft(prefix).dy,
+        greaterThan(tester.getBottomLeft(global).dy),
+      );
+      expect(
+        tester.getTopLeft(workspace).dy,
+        greaterThan(tester.getBottomLeft(prefix).dy),
+      );
+      expect(tester.getRect(prefix).left, tester.getRect(global).left);
+      expect(tester.getRect(prefix).width, tester.getRect(global).width);
+      await tester.tap(find.descendant(of: prefix, matching: find.text('编辑')));
+      expect(rec.last('editMemory'), AgentMemoryTarget.chatPrefix);
+    });
+
     testWidgets('标签切换到产物和记忆', (tester) async {
       await pumpAgent(tester);
       await tester.tap(find.byKey(const Key('agent-tab-shelf')));
