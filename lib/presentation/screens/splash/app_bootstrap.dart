@@ -32,6 +32,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
   static const _authSettleTimeout = Duration(seconds: 5);
 
   bool _showMainApp = false;
+  bool _progressComplete = false;
   bool _hasCheckedFirstLaunch = false;
   bool _authWaitExpired = false;
   Timer? _authWaitTimer;
@@ -52,7 +53,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
       final status = ref.watch(authNotifierProvider.select((s) => s.status));
       final settled =
           status != AuthStatus.loading && status != AuthStatus.initial;
-      if (settled || _authWaitExpired) {
+      if ((settled || _authWaitExpired) && _progressComplete) {
         _authWaitTimer?.cancel();
         // 延迟一帧后切换，确保动画流畅
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,7 +63,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
             });
           }
         });
-      } else {
+      } else if (!settled && !_authWaitExpired) {
         _authWaitTimer ??= Timer(_authSettleTimeout, () {
           if (mounted) setState(() => _authWaitExpired = true);
         });
@@ -102,8 +103,15 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap> {
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      home: const WindowChromePage(
-        child: SplashScreen(key: ValueKey('splash')),
+      home: WindowChromePage(
+        child: SplashScreen(
+          key: const ValueKey('splash'),
+          onProgressComplete: () {
+            if (mounted && !_progressComplete) {
+              setState(() => _progressComplete = true);
+            }
+          },
+        ),
       ),
     );
   }

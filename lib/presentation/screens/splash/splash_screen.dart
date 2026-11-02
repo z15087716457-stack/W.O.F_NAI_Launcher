@@ -13,7 +13,9 @@ import '../../widgets/branding/brand_entry_scene.dart';
 /// 载入页：与登录页同一场景，背景随预热进度「去噪」成提示词墙，
 /// Logo 下方是像素分段进度条、百分比与当前任务。
 class SplashScreen extends ConsumerWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.onProgressComplete});
+
+  final VoidCallback? onProgressComplete;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,18 +39,32 @@ class SplashScreen extends ConsumerWidget {
         ? WarmupMessageLocalizer.localizeSubTask(l10n, state.subTaskMessage!)
         : null;
     final tip = ref.watch(splashTipProvider).hint(l10n);
-    return BrandEntryScene(
-      loading: true,
-      progress: progress,
-      child: _BootPanel(
-        progress: progress,
-        task: task,
-        detail: error != null
-            ? WarmupMessageLocalizer.localizeSubTask(l10n, error)
-            : subTask,
-        tip: tip,
-        isError: error != null,
-      ),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: progress),
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+      builder: (context, displayedProgress, _) {
+        if (displayedProgress == 1 && state.isComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            onProgressComplete?.call();
+          });
+        }
+        return BrandEntryScene(
+          loading: true,
+          progress: displayedProgress,
+          child: _BootPanel(
+            progress: displayedProgress,
+            task: task,
+            detail: error != null
+                ? WarmupMessageLocalizer.localizeSubTask(l10n, error)
+                : subTask,
+            tip: tip,
+            isError: error != null,
+          ),
+        );
+      },
     );
   }
 }

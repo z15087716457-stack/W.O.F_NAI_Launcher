@@ -244,7 +244,12 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    for (final target in view.AgentMemoryTarget.values) {
+    for (final (target, anchor) in const [
+      (view.AgentMemoryTarget.global, 'agentInstructions'),
+      (view.AgentMemoryTarget.workspace, 'agentWorkspaceRules'),
+      (view.AgentMemoryTarget.skills, 'agentSkills'),
+      (view.AgentMemoryTarget.quick, 'agentQuick'),
+    ]) {
       h.panel(tester).actions.onEditMemory(target);
       await tester.pumpAndSettle();
       expect(
@@ -253,12 +258,7 @@ void main() {
       );
       expect(
         router.routeInformationProvider.value.uri.queryParameters['anchor'],
-        switch (target) {
-          view.AgentMemoryTarget.global => 'agentInstructions',
-          view.AgentMemoryTarget.workspace => 'agentWorkspaceRules',
-          view.AgentMemoryTarget.skills => 'agentSkills',
-          view.AgentMemoryTarget.quick => 'agentQuick',
-        },
+        anchor,
       );
       router.go('/');
       await tester.pumpAndSettle();

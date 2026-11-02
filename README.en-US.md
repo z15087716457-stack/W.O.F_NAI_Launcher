@@ -38,7 +38,7 @@ Get the latest version from [Releases](https://github.com/z15087716457-stack/W.O
 
 Both versions support in-app updates. Your settings, gallery database and Agent data live in `user-data/` and `agent-data/` beside the program. Updates and uninstallation leave them intact.
 
-> **Upgrading an older Portable to 2.2.4:** Exit the app completely, then extract this release over the existing program folder, keeping `user-data/` and `agent-data/`. Subsequent in-app updates use the corrected script. Setup updates are unaffected.
+> **First upgrade from Portable 2.2.3 or earlier:** Exit the app completely, then extract the new release over the existing program folder, keeping `user-data/` and `agent-data/`. In-app updates work normally from 2.2.4 onward. Setup updates are unaffected by this older script issue.
 
 > The installer is not code-signed yet. On first launch, Windows may say “Windows protected your PC.” Click “More info → Run anyway.” Each release includes SHA-256 checksums.
 
@@ -52,9 +52,9 @@ Both versions support in-app updates. Your settings, gallery database and Agent 
 
 **2.2.1 additions**: Let the Agent split prompts into temporary blocks, with whole-module or multiple translations inside. This update also fixes single-click history details, caret visibility over weighted text and update-manifest parsing, and adds individual-image browsing to the infinite canvas.
 
-**2.2.4 update**: Improved multi-image drops, image previews, native Tab suggestions, scroll-to-bottom on send and continuous chat deletion. MCP configuration is easier, and Pi can manage its own Skills, extensions, packages and settings through one on-demand tool. App data lives directly beside the program, and Portable updates no longer restore old managed files over the new version.
+**2.2.5 update**: Pi 1.5.0, per-chat prompt prefixes, automatic MCP connections and separate display names. Improved image selection, WebP metadata imports, precise-reference inpainting, editable upscale factors, manual saving, startup and shutdown, loading transitions and update errors.
 
-See the [complete 2.2.4 changelog](CHANGELOG.md#224---2026-10-31) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.4). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
+See the [complete 2.2.5 changelog](CHANGELOG.md#225---2026-11-03) and [release downloads](https://github.com/z15087716457-stack/W.O.F_NAI_Launcher/releases/tag/v2.2.5). Agent suggestions, cache warming and translation adjustments use your own model service; their settings are configurable.
 
 ## Get started in three steps
 

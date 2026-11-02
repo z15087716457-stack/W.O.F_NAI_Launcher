@@ -59,6 +59,9 @@ class _Warmup extends WarmupNotifier {
   @override
   WarmupState build() => initial;
   void complete() => state = WarmupState.complete();
+  void advance(double progress) => state = WarmupState(
+    progress: WarmupProgress(progress: progress, currentTask: 'warmup_fonts'),
+  );
 }
 
 Future<void> capture(WidgetTester tester, GlobalKey key, String name) async {
@@ -89,6 +92,7 @@ Future<GlobalKey> pumpEntry(
   ),
   // 打开动画时字符场一直在走，不能 pumpAndSettle，改为推进固定时长
   bool animate = false,
+  VoidCallback? onProgressComplete,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -132,7 +136,9 @@ Future<GlobalKey> pumpEntry(
               onToggleTheme: () =>
                   ref.read(themeNotifierProvider.notifier).nextTheme(),
               entryLanguageButton: const EntryLanguageButton(),
-              child: splash ? const SplashScreen() : const LoginScreen(),
+              child: splash
+                  ? SplashScreen(onProgressComplete: onProgressComplete)
+                  : const LoginScreen(),
             ),
           ),
         ),
@@ -738,4 +744,127 @@ void main() {
     expect(container.read(themeNotifierProvider), Brightness.light);
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('splash progress, numbers and field finish the same transition', (
+    tester,
+  ) async {
+    var completed = 0;
+    final captureKey = await pumpEntry(
+      tester,
+      splash: true,
+      animate: true,
+      warmup: WarmupState.initial(),
+      onProgressComplete: () => completed++,
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SplashScreen)),
+    );
+    final warmup = container.read(warmupNotifierProvider.notifier) as _Warmup;
+    warmup.advance(.42);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(completed, 0);
+    expect(find.text('42%'), findsOneWidget);
+
+    warmup.complete();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 225));
+    final progress = tester.widget<BootProgressBar>(
+      find.byType(BootProgressBar),
+    );
+    expect(progress.value, greaterThan(.42));
+    expect(progress.value, lessThan(1));
+    expect(container.read(warmupNotifierProvider).isComplete, isTrue);
+    expect(completed, 0);
+    expect(
+      tester.widget<BrandEntryScene>(find.byType(BrandEntryScene)).progress,
+      progress.value,
+    );
+    expect(find.text('${(progress.value * 100).round()}%'), findsOneWidget);
+    expect(
+      find.text(
+        'STEP ${(progress.value * 28).round().toString().padLeft(2, '0')}/28',
+      ),
+      findsOneWidget,
+    );
+    await capture(tester, captureKey, 'splash-progress-mid');
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(find.text('100%'), findsOneWidget);
+    expect(completed, 1);
+    await tester.pump(const Duration(seconds: 1));
+    expect(completed, 1);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('fast bootstrap keeps splash visible during its progress sweep', (
+    tester,
+  ) async {
+    final storage = InMemoryLocalStorageService();
+    await storage.setLocaleCode('en');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStorageServiceProvider.overrideWithValue(storage),
+          authNotifierProvider.overrideWith(_Auth.new),
+          warmupNotifierProvider.overrideWith(
+            () => _Warmup(WarmupState.initial()),
+          ),
+        ],
+        child: const AppBootstrap(),
+      ),
+    );
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(SplashScreen)),
+    );
+    (container.read(warmupNotifierProvider.notifier) as _Warmup).complete();
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 225));
+    expect(find.byType(SplashScreen), findsOneWidget);
+    final value = tester
+        .widget<BootProgressBar>(find.byType(BootProgressBar))
+        .value;
+    expect(value, greaterThan(0));
+    expect(value, lessThan(1));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('reduced motion completes the splash without a timed wait', (
+    tester,
+  ) async {
+    var completed = 0;
+    await pumpEntry(
+      tester,
+      splash: true,
+      warmup: WarmupState.complete(),
+      onProgressComplete: () => completed++,
+    );
+    expect(find.text('100%'), findsOneWidget);
+    expect(completed, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'completed work leaves a splash that already reached 100 percent',
+    (tester) async {
+      var completed = 0;
+      await pumpEntry(
+        tester,
+        splash: true,
+        warmup: const WarmupState(
+          progress: WarmupProgress(progress: 1, currentTask: 'warmup_fonts'),
+        ),
+        onProgressComplete: () => completed++,
+      );
+      expect(completed, 0);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(SplashScreen)),
+      );
+      (container.read(warmupNotifierProvider.notifier) as _Warmup).complete();
+      await tester.pumpAndSettle();
+      expect(completed, 1);
+      expect(find.text('100%'), findsOneWidget);
+    },
+  );
 }
