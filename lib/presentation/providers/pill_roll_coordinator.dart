@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/constants/model_spec.dart';
 import 'character_prompt_provider.dart';
 import 'generation/generation_params_notifier.dart';
 import 'pill_workspace_provider.dart';
@@ -61,6 +62,51 @@ class PillRollCoordinator {
     return rolled;
   }
 
+  /// [rollAllLanesAndSync] 会不会给发往 [model] 的生成请求重新抽词：不在抑制
+  /// 期，而且请求带上的框里有会重抽的块
+  /// （[PillWorkspaceNotifier.rollRedrawsProjection]）。只看设置，不 roll：
+  /// 批量生成发请求前据此就知道每批的词会不会重新抽。
+  bool rollRedrawsRequest(String model) {
+    if (isRollSuppressed) return false;
+    final spec = ModelSpecs.of(model);
+    for (final scope in PillWorkspaceNotifier.activeScopes.toList()) {
+      final provider = pillWorkspaceProvider(scope);
+      if (_ref.exists(provider) &&
+          _ref.read(provider.notifier).rollRedrawsProjection &&
+          _feedsRequest(scope, spec)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// lane 的投影进不进发往 [spec] 的生成请求：
+  /// - 正向一律进；
+  /// - 负向和角色负面在 Turbo 下不进：请求里的自定义负面一律清空
+  ///   （`ImageParams.constrainedForModel`）；
+  /// - 角色框只有 V4 起的模型进（V3 的请求不带角色），而且角色要启用；角色
+  ///   负面还要角色正面不为空，正面为空的角色转换时整个丢掉
+  ///   （`CharacterConversionService.convert`）。
+  bool _feedsRequest(String scope, ModelSpec spec) {
+    if (scope == PillScopes.main) return true;
+    if (scope == PillScopes.negative) return !spec.isTurbo;
+    final charMatch = _characterLane.firstMatch(scope);
+    if (charMatch == null || !spec.isV4OrLater) return false;
+    final id = charMatch.group(1)!;
+    final isPositive = charMatch.group(2) == 'pos';
+    return _ref
+        .read(characterPromptNotifierProvider)
+        .characters
+        .any(
+          (character) =>
+              character.id == id &&
+              character.enabled &&
+              (isPositive || (!spec.isTurbo && character.prompt.isNotEmpty)),
+        );
+  }
+
+  static final _characterLane = RegExp(r'^char:(.+):(pos|neg)$');
+
   /// 块库编辑等非 roll 变更也可调用，确保未挂载编辑器的 lane 同步到生成状态。
   void syncLaneProjection(String scope, String projection) {
     if (scope == PillScopes.main) {
@@ -75,7 +121,7 @@ class PillRollCoordinator {
           .updateNegativePromptFromPill(projection);
       return;
     }
-    final charMatch = RegExp(r'^char:(.+):(pos|neg)$').firstMatch(scope);
+    final charMatch = _characterLane.firstMatch(scope);
     if (charMatch == null) return;
     final id = charMatch.group(1)!;
     final isPositive = charMatch.group(2) == 'pos';

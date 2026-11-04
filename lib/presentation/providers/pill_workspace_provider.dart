@@ -625,6 +625,26 @@ class PillWorkspaceNotifier extends FamilyNotifier<PillWorkspaceState, String> {
     return true;
   }
 
+  /// [rollAllRandom] 会不会给投影重新抽词：文本里有启用、没锁定的随机或顺序
+  /// 实例。临时块和译文块的投影不读抽到的词，深度轮 Guard 覆盖的不重抽，
+  /// 都不算。只看设置，不 roll。
+  bool get rollRedrawsProjection {
+    final document = state.document;
+    for (final MapEntry(key: marker, value: instance)
+        in document.instances.entries) {
+      if (instance.enabled &&
+          !instance.temporary &&
+          instance.translation == null &&
+          instance.settings.hasRoll &&
+          !instance.locked &&
+          document.text.contains(marker) &&
+          !_hasGuardOverride(marker, instance)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   /// 删除标记（含未知/失效标记），文本中的出现一并清除。
   void removeMarker(String marker) {
     final bundle = readPromptBlockInstanceBundleWithReader(

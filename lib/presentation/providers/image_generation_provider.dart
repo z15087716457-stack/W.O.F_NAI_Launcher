@@ -5,7 +5,6 @@ import 'dart:math';
 import 'dart:typed_data';
 import '../../data/models/image/image_operation.dart';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:image/image.dart' as img;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -44,6 +43,7 @@ import 'quality_preset_provider.dart';
 import 'uc_preset_provider.dart';
 
 import 'generation/generation_models.dart';
+import 'generation/generation_retry_policy.dart';
 import 'generation/generation_cooldown_provider.dart';
 import 'generation/generation_params_notifier.dart';
 import 'generation/generation_settings_notifiers.dart';
@@ -72,6 +72,7 @@ class GenerationRetryRequest {
     required this.accountId,
     this.operation,
     this.original,
+    this.rejectedBatches,
   });
   final ImageParams params;
   final int count;
@@ -79,16 +80,30 @@ class GenerationRetryRequest {
   final String? accountId;
   final ImageOperation? operation;
   final GeneratedImage? original;
-  GenerationRetryRequest withParams(ImageParams value) =>
-      GenerationRetryRequest(
-        params: value,
-        count: count,
-        workflow: workflow,
-        accountId: accountId,
-        operation: operation,
-        original: original,
-      );
+
+  /// 停下之前已经被 NovelAI 拒绝（400）、跳过的请求。重试只补没发出去的，跳过
+  /// 的那几次不再发；重试补完了，画布照样说明跳过了几次。
+  final GenerationRejectedBatches? rejectedBatches;
+
+  /// 换成 [value] 这组参数；[rejectedBatches] 不传就照旧。
+  GenerationRetryRequest withParams(
+    ImageParams value, {
+    GenerationRejectedBatches? rejectedBatches,
+  }) => GenerationRetryRequest(
+    params: value,
+    count: count,
+    workflow: workflow,
+    accountId: accountId,
+    operation: operation,
+    original: original,
+    rejectedBatches: rejectedBatches ?? this.rejectedBatches,
+  );
 }
+
+typedef _BatchStreamResult = ({
+  Iterable<(int, Uint8List)> images,
+  Object? interruption,
+});
 
 class _RememberedStreamPreview {
   const _RememberedStreamPreview({
@@ -134,7 +149,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   ImageOperation? _activeImageOperation;
   UpscaleWorkflowSettings? _activeLocalEnhance;
   GenerationRetryRequest? _lastRequest;
-  GenerationRetryRequest? get lastRequest => _lastRequest;
+  GenerationRetryRequest? get lastRequest =>
+      state.isExploreRun ? null : _lastRequest;
 
   Future<void> retry(GenerationRetryRequest request) => _generate(
     request.params,
@@ -143,6 +159,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     variationOriginal: request.original,
     workflowOverride: request.workflow,
     preserveSnapshot: true,
+    rejectedBefore: request.rejectedBatches,
   );
   List<GeneratedImage> _pendingLocalEnhanceImages = [];
   final Map<String, _RememberedStreamPreview> _streamPreviewsForSnapshots =
@@ -163,6 +180,33 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   void _invalidateGenerationRun() {
     _isCancelled = true;
     _activeGenerationRunId = ++_generationRunCounter;
+    _interruptRetryWait();
+  }
+
+  /// 正在等的那次重试的取消信号：取消时立刻醒来，不等满这一段。
+  /// 每次等待用自己的，等完就放掉，不在常驻的 notifier 上越攒越多。
+  Completer<void>? _retryWaitInterrupt;
+
+  Future<void> _waitBeforeRetry(Duration delay) async {
+    final interrupt = Completer<void>();
+    _retryWaitInterrupt = interrupt;
+    try {
+      // 换掉的等待（测试替身）不一定理会取消信号，取消时也照样醒。
+      await Future.any<void>([
+        ref.read(generationRetryDelayProvider)(delay, interrupt.future),
+        interrupt.future,
+      ]);
+    } finally {
+      if (identical(_retryWaitInterrupt, interrupt)) {
+        _retryWaitInterrupt = null;
+      }
+    }
+  }
+
+  void _interruptRetryWait() {
+    final interrupt = _retryWaitInterrupt;
+    _retryWaitInterrupt = null;
+    if (interrupt != null && !interrupt.isCompleted) interrupt.complete();
   }
 
   bool _isCurrentGenerationRun(int generationRunId) =>
@@ -225,6 +269,27 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     required int batchCount,
     required int batchSize,
     required int totalSlots,
+  }) => _emitUnfinishedBatchEvents(
+    callback: callback,
+    completedBatches: completedBatches,
+    generationRunId: generationRunId,
+    firstBatch: firstBatch,
+    batchCount: batchCount,
+    batchSize: batchSize,
+    totalSlots: totalSlots,
+    error: 'cancelled',
+  );
+
+  /// 从 [firstBatch] 起还没结束的批次都发一个带 [error] 的结束事件。
+  Future<void> _emitUnfinishedBatchEvents({
+    required GenerationBatchCallback? callback,
+    required Set<int> completedBatches,
+    required int generationRunId,
+    required int firstBatch,
+    required int batchCount,
+    required int batchSize,
+    required int totalSlots,
+    required Object error,
   }) async {
     if (callback == null) return;
     for (var batch = firstBatch; batch < batchCount; batch++) {
@@ -236,7 +301,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         slotStart: batch * batchSize + 1,
         slotCount: batchSize,
         totalSlots: totalSlots,
-        error: 'cancelled',
+        error: error,
       );
     }
   }
@@ -725,16 +790,21 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   ImageParams _applyPromptPipeline(ImageParams params) =>
       preparePromptParams(params);
 
+  /// [badRequestStopsRun]：批量里碰到 400 是否整次停下（[stopsGenerationRun]）。
+  /// 画风探索页逐张抽候选，每张的画风串不同，传 false 让 400 只算那一张失败。
+  /// 提示词里有随机块、每批重新抽词时，传 true 也只算那一批失败。
   Future<void> generate(
     ImageParams params, {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
+    bool badRequestStopsRun = true,
   }) => _generate(
     params,
     onBatchEvent: onBatchEvent,
     imagesPerRequestOverride: imagesPerRequestOverride,
     operation: operation,
+    badRequestStopsRun: badRequestStopsRun,
   );
 
   /// Official source-based action. Batch preferences and draft prompt lanes
@@ -802,6 +872,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     // 记账的 identical 判定与失败快照语义均不受影响。
     state = state.copyWith(
       generationRunId: generationRunId,
+      isExploreRun: true,
       status: GenerationStatus.generating,
       progress: 0.0,
       currentImage: 1,
@@ -866,6 +937,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     ImageWorkflowState? workflowOverride,
     bool preserveSnapshot = false,
     bool preservePromptSnapshot = false,
+    bool badRequestStopsRun = true,
+    GenerationRejectedBatches? rejectedBefore,
   }) async {
     preserveSnapshot = preserveSnapshot || preservePromptSnapshot;
     // 同步在途门禁：已有生成进行中时直接丢弃本次调用。
@@ -936,9 +1009,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : null,
       operation: operation,
       original: variationOriginal,
+      rejectedBatches: rejectedBefore,
     );
     state = state.copyWith(
       generationRunId: generationRunId,
+      isExploreRun: !badRequestStopsRun,
       currentImages: withOriginal([]),
       status: GenerationStatus.generating,
       progress: 0.0,
@@ -1023,6 +1098,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         1,
         1,
         generationRunId,
+        rejectedBatches: rejectedBefore,
       );
       // P2.5：入队后即刻重 roll 随机块实例——本张用入队前的投影，
       // UI 随即显示下一张的内容（roll 时机 4）。
@@ -1072,7 +1148,37 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final random = Random();
     int generatedImages = 0;
     Object? lastBatchError;
-    DateTime? concurrencyDeadline;
+    // 429 的等待预算按整次运行算。等满了，或者碰到 400、401、402、403、404，
+    // 就记下停下的原因，剩下的批次不再发。
+    final concurrencyBackoff = GenerationConcurrencyBackoff();
+    String? runStopError;
+    GenerationPartialBatch? partialBatch;
+    // 提示词里有随机块（或顺序块）时每批重新抽词，一批 400 可能只是这一批
+    // 抽到的词不行：只算这一批失败，接着发下一批。不重新抽的话每批发的都
+    // 一样，400 照旧整次停下。发请求前按块的设置定下来，不比两批的提示词；
+    // 请求不带的框（Turbo 的负面、V3 的角色框等）重抽了也不算。
+    final redrawsEachBatch =
+        !preserveSnapshot &&
+        batchCount > 1 &&
+        ref
+            .read(pillRollCoordinatorProvider)
+            .rollRedrawsRequest(preparedParams.model);
+    // 每批重新抽词时被 400 跳过的批次记下来，出完后画布说明跳过了几次（生图
+    // 页的运行；画风探索在候选上写原因，不记）。重试接着算停下之前跳过的
+    // （[rejectedBefore]）。
+    var rejectedBatches = 0;
+    Object? lastRejected;
+    GenerationRejectedBatches? rejectedSoFar() {
+      final count = (rejectedBefore?.count ?? 0) + rejectedBatches;
+      if (count == 0) return null;
+      return GenerationRejectedBatches(
+        count: count,
+        lastError: lastRejected == null
+            ? rejectedBefore!.lastError
+            : '$lastRejected',
+      );
+    }
+
     final startedBatches = <int>{};
     final completedBatches = <int>{};
 
@@ -1141,7 +1247,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
       try {
         // 使用流式 API 生成，支持预览
-        final imageBytes = await _generateBatchWithStream(
+        final result = await _generateBatchWithStream(
           batchParams,
           slotStart,
           totalImages,
@@ -1161,7 +1267,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           return;
         }
         final generatedList = await _completeGeneratedImages(
-          imageBytes,
+          result.images,
           batchParams,
           generationRunId,
           offset: slotStart - 1,
@@ -1180,6 +1286,23 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         }
         generatedImages += batchSize;
         batchStopwatch.stop();
+        if (result.interruption case final error?) {
+          final remaining = batchCount - batch - 1;
+          partialBatch = (
+            received: generatedList.length,
+            expected: batchSize,
+            unsentRequests: remaining,
+          );
+          runStopError = generationFailureDetail(error.toString());
+          // The service already processed this request. A manual retry can
+          // only submit whole requests that have never started.
+          _lastRequest = remaining == 0
+              ? null
+              : _lastRequest!.withParams(
+                  currentParams.copyWith(nSamples: remaining),
+                  rejectedBatches: rejectedSoFar(),
+                );
+        }
         await _emitBatchComplete(
           callback: onBatchEvent,
           completedBatches: completedBatches,
@@ -1189,9 +1312,25 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           slotCount: batchSize,
           totalSlots: totalImages,
           images: generatedList,
-          error: generatedList.isEmpty ? 'no image produced' : null,
+          error:
+              result.interruption ??
+              (generatedList.isEmpty ? 'no image produced' : null),
           elapsedMs: batchStopwatch.elapsedMilliseconds,
         );
+        if (result.interruption case final error?) {
+          await _emitUnfinishedBatchEvents(
+            callback: onBatchEvent,
+            completedBatches: completedBatches,
+            generationRunId: generationRunId,
+            firstBatch: batch + 1,
+            batchCount: batchCount,
+            batchSize: batchSize,
+            totalSlots: totalImages,
+            error: error,
+          );
+          break;
+        }
+        concurrencyBackoff.reset();
       } catch (e) {
         if (_isCancelledError(e, generationRunId)) {
           batchStopwatch.stop();
@@ -1217,15 +1356,18 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           // 取消的请求不记账：NovelAI 交回结果才记（AnlasRequestLedger）
           return;
         }
-        // 并发限制：等待 NAI 释放额度后重试当前批次（取消可随时中断）
+        String? stopError;
+        // 并发限制：等 NAI 释放额度后重试当前批次（取消可随时中断）
         if (_isConcurrencyLimited(e)) {
-          concurrencyDeadline ??= DateTime.now().add(_concurrencyRetryBudget);
-          if (DateTime.now().isBefore(concurrencyDeadline)) {
+          final delay = concurrencyBackoff.nextDelay(
+            retryAfter: generationRetryAfterOf(e),
+          );
+          if (delay != null) {
             AppLogger.w(
-              'NAI 并发限制(429)，${_concurrencyRetryInterval.inSeconds}s 后自动重试第 ${batch + 1} 批',
+              'NAI 并发限制(429)，${_formatRetryDelay(delay)} 后自动重试第 ${batch + 1} 批',
               'Generation',
             );
-            await Future.delayed(_concurrencyRetryInterval);
+            await _waitBeforeRetry(delay);
             if (_shouldAbortGenerationRun(generationRunId)) {
               await _emitCancelledBatchEvents(
                 callback: onBatchEvent,
@@ -1241,10 +1383,70 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             batch--;
             continue;
           }
+          // 等满了：整次运行停下，剩下的批次不再发。
+          stopError = generationConcurrencyStoppedError(e);
+          AppLogger.w(
+            'NAI 并发限制(429)：本次已等 ${_formatRetryDelay(concurrencyBackoff.waited)}，'
+                '停止生成，剩下 ${batchCount - batch - 1} 批不再发送',
+            'Generation',
+          );
+        } else if (stopsGenerationRun(
+          e,
+          badRequestStopsRun: badRequestStopsRun && !redrawsEachBatch,
+        )) {
+          // 请求无效、登录失效、余额不足、没有权限、找不到（400、401、402、
+          // 403、404）不会自己好，后面的批次发了也是白发：整次运行停下
+          // （每批重新抽词时 400 除外）。
+          stopError = generationStatusStoppedError(e);
+          AppLogger.w(
+            '生成第 ${batch + 1} 批失败（HTTP ${generationFailureStatus(e)}），'
+                '停止生成，剩下 ${batchCount - batch - 1} 批不再发送',
+            'Generation',
+          );
+        }
+        if (stopError != null) {
+          runStopError = stopError;
+          lastBatchError = stopError;
+          // 失败卡上的「重试」只补没发出去的这几批（这一批和后面的），
+          // 报价也按这几批算；出好的不再重出一遍。词用停下这一批的：每批
+          // 重新抽词时，第一批抽到的可能正是被 400 拒掉的那组。停下之前
+          // 被 400 跳过的几批也带上，重试补完了画布照样说明。
+          _lastRequest = _lastRequest!.withParams(
+            currentParams.copyWith(nSamples: batchCount - batch),
+            rejectedBatches: rejectedSoFar(),
+          );
+          _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+          batchStopwatch.stop();
+          await _emitBatchComplete(
+            callback: onBatchEvent,
+            completedBatches: completedBatches,
+            generationRunId: generationRunId,
+            batchIndex: batch,
+            slotStart: slotStart,
+            slotCount: batchSize,
+            totalSlots: totalImages,
+            error: stopError,
+            elapsedMs: batchStopwatch.elapsedMilliseconds,
+          );
+          await _emitUnfinishedBatchEvents(
+            callback: onBatchEvent,
+            completedBatches: completedBatches,
+            generationRunId: generationRunId,
+            firstBatch: batch + 1,
+            batchCount: batchCount,
+            batchSize: batchSize,
+            totalSlots: totalImages,
+            error: stopError,
+          );
+          break;
         }
         // 本批次失败，继续下一批
         _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
         lastBatchError = e;
+        if (badRequestStopsRun && generationFailureStatus(e) == 400) {
+          rejectedBatches++;
+          lastRejected = e;
+        }
         AppLogger.e('生成第 ${batch + 1} 批失败: $e');
         generatedImages += batchSize;
         batchStopwatch.stop();
@@ -1298,11 +1500,23 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       return;
     }
 
-    // 完成（不再随机，保持图像和提示词对应）
+    // 完成（不再随机，保持图像和提示词对应）。整次停下（429 等满，或者
+    // 400、401、402、403、404）时已出的图照常展示和保存，状态记为失败，好让
+    // 画布说明为什么没出完。出完了但有几批被 400 跳过，状态照旧是完成，另
+    // 记下跳过了几批，画布据此说明；停下了就只说停下的原因，跳过的几批跟着
+    // 重试走（[GenerationRetryRequest.rejectedBatches]），重试补完了再说明。
     state = state.copyWith(
       status: _isCancelled
           ? GenerationStatus.cancelled
+          : runStopError != null
+          ? GenerationStatus.error
           : GenerationStatus.completed,
+      errorMessage: runStopError,
+      partialBatch: partialBatch,
+      rejectedBatches: !_isCancelled && runStopError == null
+          ? rejectedSoFar()
+          : null,
+      clearStreamPreview: runStopError != null,
       currentImages: withOriginal(allImages),
       displayImages: withOriginal(allImages),
       displayWidth: allImages.isEmpty
@@ -1335,7 +1549,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// Only publish the final enhanced image. Raw bytes stay temporary during
   /// inference and are recovered only when enhancement fails or is cancelled.
   Future<List<GeneratedImage>> _completeGeneratedImages(
-    Iterable<Uint8List> bytes,
+    Iterable<(int, Uint8List)> images,
     ImageParams params,
     int runId, {
     int offset = 0,
@@ -1343,15 +1557,15 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final settings = _activeLocalEnhance;
     final result = <GeneratedImage>[];
     final originals = [
-      for (final entry in bytes.indexed)
+      for (final (index, bytes) in images)
         GeneratedImage.create(
-          entry.$2,
+          bytes,
           width: params.width,
           height: params.height,
           sourceParams: params,
           operation: _activeImageOperation,
           generationRunId: runId,
-          batchIndex: offset + entry.$1,
+          batchIndex: offset + index,
         ),
     ];
     if (settings != null) _pendingLocalEnhanceImages = List.of(originals);
@@ -1574,6 +1788,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           : state.displayImages,
       displayWidth: shouldDisplay ? resolvedSize.$1 : state.displayWidth,
       displayHeight: shouldDisplay ? resolvedSize.$2 : state.displayHeight,
+      // 只登记一张图，不改状态：失败卡（比如 429 停下的说明）照旧。
+      errorMessage: state.errorMessage,
     );
     _retainSharePreparationCacheForCurrentHistory();
 
@@ -1619,7 +1835,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       );
     }
     if (results.isEmpty) return const [];
-    state = state.copyWith(history: [...results, ...state.history]);
+    state = state.copyWith(
+      history: [...results, ...state.history],
+      errorMessage: state.errorMessage,
+    );
     _retainSharePreparationCacheForCurrentHistory();
     _preloadMetadataInBackground(results);
     return results;
@@ -1794,14 +2013,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
 
   /// NAI 并发限制（429）自动等待重试。
   /// 取消生成后服务器仍会占用账号并发额度直至孤儿任务结束，
-  /// 期间新请求会立即 429；自动等待释放而不是直接报错。
-  static const Duration _concurrencyRetryInterval = Duration(seconds: 3);
-  static const Duration _concurrencyRetryBudget = Duration(seconds: 90);
+  /// 期间新请求会立即 429；按 [GenerationConcurrencyBackoff] 等释放，
+  /// 一次运行最多等 90 秒，等满就停下并说明原因。
+  bool _isConcurrencyLimited(Object error) =>
+      classifyGenerationFailure(error) ==
+      GenerationFailureKind.concurrencyLimited;
 
-  bool _isConcurrencyLimited(dynamic error) {
-    if (error is DioException) return error.response?.statusCode == 429;
-    return error.toString().contains('API_ERROR_429');
-  }
+  /// 只有网络错误、超时和 5xx 值得重试；400、401、402 等客户端错误重试也没用。
+  bool _isRetryableFailure(Object error) =>
+      classifyGenerationFailure(error) == GenerationFailureKind.transient;
+
+  static String _formatRetryDelay(Duration delay) =>
+      delay.inMilliseconds % 1000 == 0
+      ? '${delay.inSeconds}s'
+      : '${(delay.inMilliseconds / 1000).toStringAsFixed(1)}s';
 
   /// 检查错误是否为流式不支持
   bool _isStreamingNotAllowed(String error) {
@@ -1838,11 +2063,11 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_isRemoteCancelledError(e, generationRunId)) rethrow;
         if (_isConcurrencyLimited(e)) rethrow; // 交给上层等待并发额度释放
 
-        if (retry < _maxRetries) {
+        if (retry < _maxRetries && _isRetryableFailure(e)) {
           AppLogger.w(
             '生成失败，${_retryDelays[retry]}ms 后重试 (${retry + 1}/$_maxRetries): $e',
           );
-          await Future.delayed(Duration(milliseconds: _retryDelays[retry]));
+          await _waitBeforeRetry(Duration(milliseconds: _retryDelays[retry]));
           if (_shouldAbortGenerationRun(generationRunId)) {
             throw StateError('Generation cancelled');
           }
@@ -1883,7 +2108,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   /// [params] 生成参数（nSamples 表示本次请求要生成的图片数量）
   /// [currentStart] 当前批次起始图像编号
   /// [total] 总图像数量
-  Future<List<Uint8List>> _generateBatchWithStream(
+  Future<_BatchStreamResult> _generateBatchWithStream(
     ImageParams params,
     int currentStart,
     int total,
@@ -1892,6 +2117,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     final apiService = ref.read(naiImageGenerationApiServiceProvider);
     final requestParams = _materializeRandomSeed(params);
     final batchSize = max(1, requestParams.nSamples);
+    const _BatchStreamResult empty = (images: [], interruption: null);
     var useNonStreamFallback = false;
 
     int imageNumberForSample(int sampleIndex) {
@@ -1918,16 +2144,46 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       }
     }
 
-    Future<List<Uint8List>> runNonStreamFallback() async {
-      final fallback = await apiService.generateImageCancellable(
+    _BatchStreamResult delivered(
+      Map<int, Uint8List> finalImages, [
+      Object? error,
+    ]) {
+      final indices = finalImages.keys.toList()..sort();
+      for (final index in indices) {
+        _clearRememberedStreamPreview(
+          generationRunId: generationRunId,
+          imageNumber: imageNumberForSample(index),
+        );
+      }
+      final interrupted = !hasAllRequestedImages(
+        received: finalImages.length,
+        requested: batchSize,
+      );
+      if (interrupted) {
+        _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
+      }
+      clearRememberedPreviewsForRequest(batchSize);
+      return (
+        images: [for (final index in indices) (index, finalImages[index]!)],
+        interruption: interrupted
+            ? error ??
+                  const GenerationStreamError(
+                    'No final image received from stream',
+                    source: ImageStreamErrorSource.noFinalImage,
+                  )
+            : null,
+      );
+    }
+
+    Future<_BatchStreamResult> runNonStreamFallback() async {
+      final images = await apiService.generateImageCancellable(
         requestParams,
         onProgress: (_, __) {},
       );
-      if (_shouldAbortGenerationRun(generationRunId)) {
-        return const <Uint8List>[];
+      if (_shouldAbortGenerationRun(generationRunId) || images.isEmpty) {
+        return empty;
       }
-      clearRememberedPreviewsForRequest(fallback.length);
-      return fallback;
+      return delivered(images.asMap());
     }
 
     final initialSlots = [
@@ -1953,25 +2209,28 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           return await runNonStreamFallback();
         }
 
-        var streamingNotAllowed = false;
         await for (final chunk in apiService.generateImageStream(
           requestParams,
         )) {
           if (_shouldAbortGenerationRun(generationRunId)) {
-            return const <Uint8List>[];
+            return empty;
           }
 
           if (chunk.hasError) {
-            if (_isStreamingNotAllowed(chunk.error ?? '')) {
+            if (finalImages.isEmpty &&
+                _isStreamingNotAllowed(chunk.error ?? '')) {
               AppLogger.w(
                 'Streaming not allowed, falling back to non-stream API',
                 'Generation',
               );
-              streamingNotAllowed = true;
               useNonStreamFallback = true;
               break;
             }
-            throw Exception(chunk.error);
+            throw GenerationStreamError(
+              chunk.error!,
+              retryAfter: chunk.retryAfter,
+              source: chunk.errorSource,
+            );
           }
 
           final imageNumber = imageNumberForSample(chunk.sampleIndex);
@@ -2036,31 +2295,18 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         }
 
         if (_shouldAbortGenerationRun(generationRunId)) {
-          return const <Uint8List>[];
+          return empty;
         }
 
-        if (streamingNotAllowed) {
-          final fallback = await runNonStreamFallback();
-          if (fallback.isNotEmpty) return fallback;
-          continue;
-        }
-
-        if (finalImages.isNotEmpty) {
-          final orderedImages = finalImages.entries.toList()
-            ..sort((a, b) => a.key.compareTo(b.key));
-          clearRememberedPreviewsForRequest(batchSize);
-          return orderedImages.map((entry) => entry.value).toList();
-        }
-
+        if (finalImages.isNotEmpty) return delivered(finalImages);
         final fallback = await runNonStreamFallback();
-        if (fallback.isNotEmpty) return fallback;
+        if (fallback.images.isNotEmpty) return fallback;
       } catch (e) {
         if (_isCancelledError(e, generationRunId)) {
           _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-          final orderedImages = finalImages.entries.toList()
-            ..sort((a, b) => a.key.compareTo(b.key));
-          return orderedImages.map((entry) => entry.value).toList();
+          return empty;
         }
+        if (finalImages.isNotEmpty) return delivered(finalImages, e);
         if (_isRemoteCancelledError(e, generationRunId)) {
           _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
           rethrow;
@@ -2075,7 +2321,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           useNonStreamFallback = true;
           try {
             final fallback = await runNonStreamFallback();
-            if (fallback.isNotEmpty) return fallback;
+            if (fallback.images.isNotEmpty) return fallback;
           } catch (fallbackError) {
             _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
             AppLogger.e('非流式回退生成失败: $fallbackError');
@@ -2083,13 +2329,13 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           break;
         }
 
-        if (retry < _maxRetries) {
+        if (retry < _maxRetries && _isRetryableFailure(e)) {
           AppLogger.w(
             '生成失败，${_retryDelays[retry]}ms 后重试 (${retry + 1}/$_maxRetries): $e',
           );
-          await Future.delayed(Duration(milliseconds: _retryDelays[retry]));
+          await _waitBeforeRetry(Duration(milliseconds: _retryDelays[retry]));
           if (_shouldAbortGenerationRun(generationRunId)) {
-            return const <Uint8List>[];
+            return empty;
           }
         } else {
           AppLogger.e('生成第 $currentStart 批图像失败: $e');
@@ -2100,16 +2346,20 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     }
 
     _appendFailedStreamSnapshotsForCurrentSlots(generationRunId);
-    return const <Uint8List>[];
+    return empty;
   }
 
   /// 生成单张（使用流式 API 支持渐进式预览）
+  ///
+  /// [rejectedBatches]：重试只剩这一张要补时，停下之前被 400 跳过的请求；出完
+  /// 了照样记进状态，画布说明跳过了几次。
   Future<void> _generateSingle(
     ImageParams params,
     int current,
     int total,
     int generationRunId, {
-    DateTime? concurrencyDeadline,
+    GenerationConcurrencyBackoff? concurrencyBackoff,
+    GenerationRejectedBatches? rejectedBatches,
   }) async {
     if (_shouldAbortGenerationRun(generationRunId)) return;
 
@@ -2149,25 +2399,33 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             streamingNotAllowed = true;
             break;
           }
-          if (_isConcurrencyLimited(chunk.error ?? '') &&
-              DateTime.now().isBefore(
-                concurrencyDeadline ??= DateTime.now().add(
-                  _concurrencyRetryBudget,
-                ),
-              )) {
-            // 并发限制：等待 NAI 释放额度后自动重试（取消可随时中断）
+          String? stopError;
+          if (_isConcurrencyLimited(chunk.error!)) {
+            // 并发限制：等 NAI 释放额度后自动重试（取消可随时中断）
+            final backoff =
+                concurrencyBackoff ?? GenerationConcurrencyBackoff();
+            final delay = backoff.nextDelay(retryAfter: chunk.retryAfter);
+            if (delay != null) {
+              AppLogger.w(
+                'NAI 并发限制(429)，${_formatRetryDelay(delay)} 后自动重试',
+                'Generation',
+              );
+              await _waitBeforeRetry(delay);
+              if (_shouldAbortGenerationRun(generationRunId)) return;
+              return await _generateSingle(
+                params,
+                current,
+                total,
+                generationRunId,
+                concurrencyBackoff: backoff,
+                rejectedBatches: rejectedBatches,
+              );
+            }
+            // 等满了：停下并说明原因。
+            stopError = generationConcurrencyStoppedError(chunk.error!);
             AppLogger.w(
-              'NAI 并发限制(429)，${_concurrencyRetryInterval.inSeconds}s 后自动重试',
+              'NAI 并发限制(429)：本次已等 ${_formatRetryDelay(backoff.waited)}，停止生成',
               'Generation',
-            );
-            await Future.delayed(_concurrencyRetryInterval);
-            if (_shouldAbortGenerationRun(generationRunId)) return;
-            return await _generateSingle(
-              params,
-              current,
-              total,
-              generationRunId,
-              concurrencyDeadline: concurrencyDeadline,
             );
           }
           _appendFailedStreamSnapshotToHistory(
@@ -2176,7 +2434,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           );
           state = state.copyWith(
             status: GenerationStatus.error,
-            errorMessage: chunk.error,
+            errorMessage: stopError ?? chunk.error,
             progress: 0.0,
             currentImage: 0,
             totalImages: 0,
@@ -2249,7 +2507,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           throw Exception('No images returned from generation');
         }
         final generatedList = await _completeGeneratedImages(
-          imageBytes,
+          imageBytes.indexed,
           params,
           generationRunId,
           offset: 0,
@@ -2257,6 +2515,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
+          rejectedBatches: rejectedBatches,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
@@ -2288,7 +2547,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         final orderedImages = finalImages.entries.toList()
           ..sort((a, b) => a.key.compareTo(b.key));
         final generatedList = await _completeGeneratedImages(
-          orderedImages.map((entry) => entry.value),
+          orderedImages.map((entry) => (entry.key, entry.value)),
           params,
           generationRunId,
           offset: 0,
@@ -2296,6 +2555,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
+          rejectedBatches: rejectedBatches,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
@@ -2330,7 +2590,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           throw Exception('No images returned from generation');
         }
         final generatedList = await _completeGeneratedImages(
-          imageBytes,
+          imageBytes.indexed,
           params,
           generationRunId,
           offset: 0,
@@ -2338,6 +2598,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
         if (_shouldAbortGenerationRun(generationRunId)) return;
         state = state.copyWith(
           status: GenerationStatus.completed,
+          rejectedBatches: rejectedBatches,
           currentImages: generatedList,
           displayImages: generatedList,
           displayWidth: generatedList.first.width,
@@ -2377,23 +2638,44 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             clearStreamPreview: true,
           );
         }
-      } else if (_isConcurrencyLimited(e) &&
-          DateTime.now().isBefore(
-            concurrencyDeadline ??= DateTime.now().add(_concurrencyRetryBudget),
-          )) {
-        // 并发限制：等待 NAI 释放额度后自动重试（取消可随时中断）
+      } else if (_isConcurrencyLimited(e)) {
+        // 并发限制：等 NAI 释放额度后自动重试（取消可随时中断）
+        final backoff = concurrencyBackoff ?? GenerationConcurrencyBackoff();
+        final delay = backoff.nextDelay(retryAfter: generationRetryAfterOf(e));
+        if (delay == null) {
+          // 等满了：停下并说明原因。
+          if (!_isCurrentGenerationRun(generationRunId)) return;
+          AppLogger.w(
+            'NAI 并发限制(429)：本次已等 ${_formatRetryDelay(backoff.waited)}，停止生成',
+            'Generation',
+          );
+          _appendFailedStreamSnapshotToHistory(
+            generationRunId: generationRunId,
+            imageNumber: current,
+          );
+          state = state.copyWith(
+            status: GenerationStatus.error,
+            errorMessage: generationConcurrencyStoppedError(e),
+            progress: 0.0,
+            currentImage: 0,
+            totalImages: 0,
+            clearStreamPreview: true,
+          );
+          return;
+        }
         AppLogger.w(
-          'NAI 并发限制(429)，${_concurrencyRetryInterval.inSeconds}s 后自动重试',
+          'NAI 并发限制(429)，${_formatRetryDelay(delay)} 后自动重试',
           'Generation',
         );
-        await Future.delayed(_concurrencyRetryInterval);
+        await _waitBeforeRetry(delay);
         if (_shouldAbortGenerationRun(generationRunId)) return;
         return _generateSingle(
           params,
           current,
           total,
           generationRunId,
-          concurrencyDeadline: concurrencyDeadline,
+          concurrencyBackoff: backoff,
+          rejectedBatches: rejectedBatches,
         );
       } else if (_isStreamingNotAllowed(e.toString())) {
         AppLogger.w(
@@ -2410,7 +2692,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
             throw Exception('No images returned from generation');
           }
           final generatedList = await _completeGeneratedImages(
-            imageBytes,
+            imageBytes.indexed,
             params,
             generationRunId,
             offset: 0,
@@ -2418,6 +2700,7 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
           if (_shouldAbortGenerationRun(generationRunId)) return;
           state = state.copyWith(
             status: GenerationStatus.completed,
+            rejectedBatches: rejectedBatches,
             currentImages: generatedList,
             displayImages: generatedList,
             displayWidth: generatedList.first.width,
@@ -2520,16 +2803,26 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
     _retainSharePreparationCacheForCurrentHistory();
   }
 
-  /// 清除错误
+  /// 清除错误（失败卡上的“关闭”）。批量出完、只是有几批被拒跳过的说明也收
+  /// 起，状态和出好的图不动。
   void clearError() {
     if (state.status == GenerationStatus.error) {
       state = state.copyWith(status: GenerationStatus.idle, errorMessage: null);
+    } else if (state.rejectedBatches != null) {
+      state = state.copyWith(
+        clearRejectedBatches: true,
+        errorMessage: state.errorMessage,
+      );
     }
   }
 
   /// 清除历史记录（包含当前批次图像）
   void clearHistory() {
-    state = state.copyWith(currentImages: [], history: []);
+    state = state.copyWith(
+      currentImages: [],
+      history: [],
+      errorMessage: state.errorMessage,
+    );
     _retainSharePreparationCacheForCurrentHistory();
   }
 
@@ -2547,6 +2840,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       displayImages: state.displayImages
           .where((img) => !imageIds.contains(img.id))
           .toList(),
+      // 删图不改状态：失败卡上的说明（比如 429 停下的原因）要留着。
+      errorMessage: state.errorMessage,
     );
     _retainSharePreparationCacheForCurrentHistory();
   }
@@ -2555,7 +2850,10 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
   ///
   /// 用于保存图像后更新 filePath 等信息
   void updateDisplayImages(List<GeneratedImage> images) {
-    state = state.copyWith(displayImages: images);
+    state = state.copyWith(
+      displayImages: images,
+      errorMessage: state.errorMessage,
+    );
   }
 
   /// 更新指定生成图像的本地文件路径。
@@ -2599,6 +2897,8 @@ class ImageGenerationNotifier extends _$ImageGenerationNotifier {
       currentImages: updatedCurrentImages,
       history: updatedHistory,
       displayImages: updatedDisplayImages,
+      // 保存已出的图不改状态，失败卡上的说明（比如 429 停下的原因）要留着。
+      errorMessage: state.errorMessage,
     );
     _retainSharePreparationCacheForCurrentHistory();
 

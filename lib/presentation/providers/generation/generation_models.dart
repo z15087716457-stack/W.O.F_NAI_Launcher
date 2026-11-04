@@ -259,11 +259,43 @@ class StreamPreviewSlot {
   }
 }
 
+/// 批量生成里被 NovelAI 拒绝（400）、跳过的请求：提示词里有顺序或随机块、每次
+/// 请求重新抽词时，400 只算那一次失败，其余照发（`stopsGenerationRun`）。
+class GenerationRejectedBatches {
+  const GenerationRejectedBatches({
+    required this.count,
+    required this.lastError,
+  });
+
+  /// 跳过了几次请求（批）。
+  final int count;
+
+  /// 最后被拒那一次的原文：失败卡“复制详情”复制它。
+  final String lastError;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GenerationRejectedBatches &&
+      other.count == count &&
+      other.lastError == lastError;
+
+  @override
+  int get hashCode => Object.hash(count, lastError);
+}
+
+typedef GenerationPartialBatch = ({
+  int received,
+  int expected,
+  int unsentRequests,
+});
+
 /// 图像生成状态
 class ImageGenerationState {
   /// 从点击生成到完成保持不变，连接画布占位、预览帧与最终图片。
   final int? generationRunId;
   final GenerationStatus status;
+  final bool isExploreRun;
+  final GenerationPartialBatch? partialBatch;
   final List<GeneratedImage> currentImages;
   final List<GeneratedImage> history;
   final String? errorMessage;
@@ -291,9 +323,18 @@ class ImageGenerationState {
   final int? displayWidth;
   final int? displayHeight;
 
+  /// 这次批量生成出完了，但有几次请求被 NovelAI 拒绝、跳过了：画布用失败卡
+  /// 说明。中途停下、点“重试”补完的也算，停下之前跳过的跟着重试带过来。它说
+  /// 的是这次运行怎么结束的，跟着状态走：[copyWith] 换了状态（新一次生成开
+  /// 始、关掉说明……）就换成同时传进来的值，没传就清掉；不换状态（存图、删
+  /// 图、登记工具结果……）就留着。
+  final GenerationRejectedBatches? rejectedBatches;
+
   const ImageGenerationState({
     this.generationRunId,
     this.status = GenerationStatus.idle,
+    this.isExploreRun = false,
+    this.partialBatch,
     this.currentImages = const [],
     this.history = const [],
     this.errorMessage,
@@ -308,11 +349,14 @@ class ImageGenerationState {
     this.displayImages = const [],
     this.displayWidth,
     this.displayHeight,
+    this.rejectedBatches,
   });
 
   ImageGenerationState copyWith({
     int? generationRunId,
     GenerationStatus? status,
+    bool? isExploreRun,
+    GenerationPartialBatch? partialBatch,
     List<GeneratedImage>? currentImages,
     List<GeneratedImage>? history,
     String? errorMessage,
@@ -329,10 +373,16 @@ class ImageGenerationState {
     List<GeneratedImage>? displayImages,
     int? displayWidth,
     int? displayHeight,
+    GenerationRejectedBatches? rejectedBatches,
+    bool clearRejectedBatches = false,
   }) {
     return ImageGenerationState(
       generationRunId: generationRunId ?? this.generationRunId,
       status: status ?? this.status,
+      isExploreRun: isExploreRun ?? this.isExploreRun,
+      partialBatch: status == null
+          ? partialBatch ?? this.partialBatch
+          : partialBatch,
       currentImages: currentImages ?? this.currentImages,
       history: history ?? this.history,
       errorMessage: errorMessage,
@@ -354,6 +404,11 @@ class ImageGenerationState {
       displayImages: displayImages ?? this.displayImages,
       displayWidth: displayWidth ?? this.displayWidth,
       displayHeight: displayHeight ?? this.displayHeight,
+      rejectedBatches: clearRejectedBatches
+          ? null
+          : status != null
+          ? rejectedBatches
+          : rejectedBatches ?? this.rejectedBatches,
     );
   }
 

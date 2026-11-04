@@ -15,11 +15,13 @@ import '../../../core/nai_agent/prompt_set_tools.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../../data/services/nai_agent/agent_workspace_files.dart';
 import '../../../data/services/nai_agent/agent_workspace_store.dart';
+import '../../providers/generation/generation_retry_policy.dart';
 import '../../providers/image_generation_provider.dart';
 import '../../providers/krita/bridge_draft_snapshot.dart';
 import '../../providers/krita/bridge_draft_writer.dart';
 import '../../providers/nai_agent/nai_agent_generation_binding.dart';
 import '../../providers/prompt_block_library_provider.dart';
+import '../generation_error_view.dart';
 import 'agent_diff_undo.dart';
 import 'agent_thread_mapper.dart';
 
@@ -290,9 +292,21 @@ Future<void> recordAgentPromptSetImages({
 }) async {
   if (result['status'] != 'completed') {
     if (result['status'] == 'cancelled') return;
+    final error = result['error'] as String?;
+    // The toast says why and what to do, as the generation page's error card
+    // does. The card sends one image and has Generate, not Retry: a 429 that
+    // waited out its time reads as any 429 there, not as a run whose
+    // remaining images were not sent. Its Generate writes this item's prompt
+    // into the draft again first, so a 400 does not ask to fix the prompt on
+    // the canvas (GenerationErrorPlace.promptSet).
     throw NaiAgentToolError(
       'generation_failed',
-      result['error'] as String? ?? currentL10n.naiAgent_error,
+      generationErrorText(
+            currentL10n,
+            error == null ? null : generationErrorWithoutStopMarker(error),
+            place: GenerationErrorPlace.promptSet,
+          ) ??
+          currentL10n.naiAgent_error,
     );
   }
   final images = <Map<String, dynamic>>[];

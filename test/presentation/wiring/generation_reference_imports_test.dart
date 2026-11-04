@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
 import 'package:nai_launcher/core/constants/storage_keys.dart';
 import 'package:nai_launcher/core/utils/nai_api_utils.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/core/utils/vibe_export_utils.dart';
 import 'package:nai_launcher/core/network/request_builders/nai_image_request_builder.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
@@ -453,6 +454,35 @@ void main() {
     expect(encoded, isEmpty);
     expect(container.read(generationEncodingReferencesProvider), isEmpty);
   });
+  for (final result in [null, '']) {
+    test('无效编码结果报告编码失败并保留待编码状态：$result', () async {
+      final id = pendingVibe();
+      pendingEncoding = Completer<String?>();
+      final running = imports.encode(id, confirm: (_) async => true);
+      final rejected = expectLater(
+        running,
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'reason',
+            currentL10n.vibe_encodeFailed,
+          ),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      pendingEncoding!.complete(result);
+      await rejected;
+      expect(
+        container
+            .read(generationParamsNotifierProvider)
+            .vibeReferencesV4
+            .single
+            .vibeEncoding,
+        isEmpty,
+      );
+      expect(container.read(generationEncodingReferencesProvider), isEmpty);
+    });
+  }
   test('编码结果按原 ID 和草稿世代复查，期间改参数不写旧编码', () async {
     final id = pendingVibe();
     pendingEncoding = Completer<String?>();

@@ -13,6 +13,7 @@ import '../../../core/models/image_generation_artifact.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/network/request_builders/nai_image_request_builder.dart';
+import '../../../core/network/retry_after.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/inpaint_mask_utils.dart';
 import '../../../core/utils/isolate_pool.dart';
@@ -346,7 +347,12 @@ class NAIImageGenerationApiService {
       // 6. 解压 ZIP 响应
       final zipBytes = response.data as Uint8List;
       final images = ZipUtils.extractAllImages(zipBytes);
-      if (images.isNotEmpty) charge.delivered();
+      if (hasAllRequestedImages(
+        received: images.length,
+        requested: effectiveParams.nSamples,
+      )) {
+        charge.delivered();
+      }
       final artifacts = await _compositeInpaintImages(
         images,
         params,
@@ -677,7 +683,10 @@ class NAIImageGenerationApiService {
               final eventType = msg['event_type']?.toString();
               final sampleIndex = _optionalInt(msg['samp_ix']) ?? 0;
               final stepIx = _optionalInt(msg['step_ix']);
-              final imageData = msg['image'];
+              // Some compatible services send one length-prefixed {data: ...}
+              // frame in place of a final event. The frame is consumed here.
+              final singleImage = eventType == null && msg.containsKey('data');
+              final imageData = singleImage ? msg['data'] : msg['image'];
 
               if (eventType == 'error' || msg.containsKey('error')) {
                 final errorMessage =
@@ -685,7 +694,10 @@ class NAIImageGenerationApiService {
                     msg['error'] ??
                     'Stream generation failed';
                 AppLogger.e('Stream error: $errorMessage', 'Stream');
-                yield ImageStreamChunk.error(errorMessage.toString());
+                yield ImageStreamChunk.error(
+                  errorMessage.toString(),
+                  source: ImageStreamErrorSource.serverEvent,
+                );
                 return;
               }
 
@@ -707,9 +719,12 @@ class NAIImageGenerationApiService {
               }
 
               if (imageBytes != null && imageBytes.isNotEmpty) {
-                if (eventType == 'final') {
+                if (eventType == 'final' || singleImage) {
                   deliveredSamples.add(sampleIndex);
-                  if (deliveredSamples.length >= expectedSamples) {
+                  if (hasAllRequestedImages(
+                    received: deliveredSamples.length,
+                    requested: expectedSamples,
+                  )) {
                     charge.delivered();
                   }
                   final compositeStopwatch = Stopwatch()..start();
@@ -809,100 +824,57 @@ class NAIImageGenerationApiService {
         'Stream',
       );
 
-      // 流结束但没有收到完成消息，尝试从 buffer 解析最终结果
-      if (buffer.isNotEmpty) {
-        try {
-          final bytes = Uint8List.fromList(buffer);
-
-          // 检查是否为 ZIP 格式（非流式回退）
-          if (bytes.length > 4 && bytes[0] == 0x50 && bytes[1] == 0x4B) {
-            // ZIP 文件头 "PK"
-            AppLogger.d('Stream fallback: parsing as ZIP', 'Stream');
-            final compositeStopwatch = Stopwatch()..start();
-            final images = ZipUtils.extractAllImages(bytes);
-            if (images.isNotEmpty) {
-              charge.delivered();
-              final compositedImage = await _compositeInpaintImage(
-                images.first,
-                params,
-                requestBuildResult,
-              );
-              compositeStopwatch.stop();
-              if (_enablePipelineTracing) {
-                AppLogger.i(
-                  '[Pipeline:$stageName] ZIP fallback composite: ${compositeStopwatch.elapsedMilliseconds}ms TOTAL:${pipelineStopwatch.elapsedMilliseconds}ms',
-                  'PipelineTrace',
-                );
-              }
-              yield ImageStreamChunk.complete(
-                compositedImage.displayImageBytes,
-                vibeEncodings: requestBuildResult.vibeEncodingMap,
-              );
-              return;
-            }
-          }
-
-          // 尝试作为带长度前缀的 MessagePack 解析
-          if (bytes.length >= 4) {
-            final msgLength =
-                (bytes[0] << 24) |
-                (bytes[1] << 16) |
-                (bytes[2] << 8) |
-                bytes[3];
-            if (bytes.length >= 4 + msgLength) {
-              final msgBytes = bytes.sublist(4, 4 + msgLength);
-              final decoded = msgpack.deserialize(msgBytes);
-              if (decoded is Map) {
-                final Map<String, dynamic> msg = {};
-                decoded.forEach((key, value) {
-                  msg[key.toString()] = value;
-                });
-                if (msg.containsKey('data')) {
-                  final data = msg['data'];
-                  final imageBytes = data is Uint8List
-                      ? data
-                      : data is List<int>
-                      ? Uint8List.fromList(data)
-                      : data is String
-                      ? Uint8List.fromList(base64Decode(data))
-                      : Uint8List(0);
-                  if (imageBytes.isNotEmpty) charge.delivered();
-                  final compositeStopwatch = Stopwatch()..start();
-                  final compositedImage = await _compositeInpaintImage(
-                    imageBytes,
-                    params,
-                    requestBuildResult,
-                  );
-                  compositeStopwatch.stop();
-                  if (_enablePipelineTracing) {
-                    AppLogger.i(
-                      '[Pipeline:$stageName] Fallback msgpack composite: ${compositeStopwatch.elapsedMilliseconds}ms TOTAL:${pipelineStopwatch.elapsedMilliseconds}ms',
-                      'PipelineTrace',
-                    );
-                  }
-                  yield ImageStreamChunk.complete(
-                    compositedImage.displayImageBytes,
-                    vibeEncodings: requestBuildResult.vibeEncodingMap,
-                  );
-                  return;
-                }
-              }
-            }
-          }
-
-          yield ImageStreamChunk.error('No final image received from stream');
-        } catch (e) {
-          AppLogger.e('Failed to parse final stream data: $e', 'Stream');
-          yield ImageStreamChunk.error('Failed to parse response');
+      // A ZIP returned by the streaming endpoint is not length-prefixed.
+      // Complete MessagePack frames, including single-image data frames, have
+      // already been consumed above. Remaining bytes can be an incomplete frame.
+      if (buffer.length > 4 && buffer[0] == 0x50 && buffer[1] == 0x4B) {
+        final images = ZipUtils.extractAllImages(Uint8List.fromList(buffer));
+        if (hasAllRequestedImages(
+          received: images.length,
+          requested: expectedSamples,
+        )) {
+          charge.delivered();
         }
-      } else if (completedSamples.length < expectedSamples) {
+        final compositeStopwatch = Stopwatch()..start();
+        for (final (index, image) in images.indexed) {
+          if (cancelToken.isCancelled) {
+            yield ImageStreamChunk.error('Cancelled');
+            return;
+          }
+          final composited = await _compositeInpaintImage(
+            image,
+            params,
+            requestBuildResult,
+          );
+          completedSamples.add(index);
+          yield ImageStreamChunk.complete(
+            composited.displayImageBytes,
+            sampleIndex: index,
+            vibeEncodings: requestBuildResult.vibeEncodingMap,
+          );
+        }
+        compositeStopwatch.stop();
+        if (_enablePipelineTracing) {
+          AppLogger.i(
+            '[Pipeline:$stageName] ZIP fallback composite: ${compositeStopwatch.elapsedMilliseconds}ms TOTAL:${pipelineStopwatch.elapsedMilliseconds}ms',
+            'PipelineTrace',
+          );
+        }
+      }
+      if (!hasAllRequestedImages(
+        received: completedSamples.length,
+        requested: expectedSamples,
+      )) {
         AppLogger.w(
           'Stream ended without final image for all samples '
               '(${completedSamples.length}/$expectedSamples); '
               'previews=${latestPreviews.length}',
           'Stream',
         );
-        yield ImageStreamChunk.error('No final image received from stream');
+        yield ImageStreamChunk.error(
+          'No final image received from stream',
+          source: ImageStreamErrorSource.noFinalImage,
+        );
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.cancel) {
@@ -935,7 +907,7 @@ class NAIImageGenerationApiService {
           errorMsg = NAIApiUtils.formatDioError(e);
         }
         AppLogger.e('Stream generation failed: $errorMsg', 'ImgGen');
-        yield ImageStreamChunk.error(errorMsg);
+        yield ImageStreamChunk.error(errorMsg, retryAfter: retryAfterOf(e));
       }
     } catch (e) {
       AppLogger.e('Stream generation failed: $e', 'ImgGen');

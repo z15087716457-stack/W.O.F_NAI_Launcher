@@ -21,6 +21,8 @@ import 'package:nai_launcher/presentation/providers/generation/generation_params
 import 'package:nai_launcher/presentation/providers/pill_workspace_provider.dart';
 import 'package:nai_launcher/presentation/providers/quality_preset_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
+import 'package:nai_launcher/presentation/wiring/generation_reference_imports.dart';
+import 'package:nai_launcher/presentation/providers/generation/reference_panel_notifier.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../helpers/balance_requests.dart';
@@ -212,6 +214,122 @@ void main() {
       container.read(qualityPresetNotifierProvider).mode,
       PromptPresetMode.naiDefault,
     );
+  });
+
+  for (final failure in [
+    Exception('Vibe encode failed: 500 upstream unavailable'),
+    Exception('Vibe encode failed: 429 concurrent limit'),
+    Exception('Vibe encode failed: network unavailable'),
+  ]) {
+    test('手动编码保留服务错误并允许重试：$failure', () async {
+      final api = _FakeEnhancementApiService()..encodingError = failure;
+      final container = ProviderContainer(
+        overrides: [
+          naiImageEnhancementApiServiceProvider.overrideWithValue(api),
+        ],
+      );
+      addTearDown(container.dispose);
+      final encoder = container.read(generationVibeEncoderProvider);
+      final params = container.read(generationParamsNotifierProvider.notifier);
+      final vibe = VibeReference(
+        displayName: 'qa',
+        vibeEncoding: '',
+        rawImageData: Uint8List.fromList([1, 2]),
+      );
+      await expectLater(
+        encoder(vibe, 'nai-diffusion-4-full'),
+        throwsA(same(failure)),
+      );
+      expect(params.vibeEncodingCacheSize, 0);
+      api.encodingError = null;
+      final encoded = await encoder(vibe, 'nai-diffusion-4-full');
+      expect(encoded, isNotEmpty);
+      expect(await encoder(vibe, 'nai-diffusion-4-full'), encoded);
+      expect(api.callCount, 2);
+    });
+  }
+
+  for (final entry in [
+    'generation button',
+    'library import',
+    'reference panel',
+  ]) {
+    test(
+      'manual Vibe $entry shows HTTP reason with no exception prefix',
+      () async {
+        final api = FakeNovelAi()..refuse = (_, _) => 403;
+        final service = NAIImageEnhancementApiService(
+          Dio()..httpClientAdapter = api,
+          ledger: unrecordedLedger(),
+        );
+        final container = ProviderContainer(
+          overrides: [
+            naiImageEnhancementApiServiceProvider.overrideWithValue(service),
+          ],
+        );
+        addTearDown(container.dispose);
+        final params = container.read(
+          generationParamsNotifierProvider.notifier,
+        );
+        const model = 'nai-diffusion-4-full';
+        final vibe = VibeReference(
+          displayName: 'source',
+          vibeEncoding: '',
+          rawImageData: Uint8List.fromList([1, 2]),
+          sourceType: VibeSourceType.rawImage,
+        );
+        final operation = switch (entry) {
+          'generation button' => container.read(generationVibeEncoderProvider)(
+            vibe,
+            model,
+          ),
+          'library import' => params.prepareVibeForLibraryParamSave(
+            vibe,
+            strength: .7,
+            infoExtracted: .8,
+            model: model,
+          ),
+          _ =>
+            container
+                .read(referencePanelNotifierProvider.notifier)
+                .encodeVibesNow([vibe], model: model),
+        };
+        await expectLater(
+          operation,
+          throwsA(
+            predicate<Object>((error) {
+              final detail = error.toString();
+              return detail.contains('403') &&
+                  detail.contains('synthetic refusal') &&
+                  !detail.contains('Exception:');
+            }),
+          ),
+        );
+        expect(api.paths, ['/ai/encode-vibe']);
+        expect(params.vibeEncodingCacheSize, 0);
+      },
+    );
+  }
+
+  test('空编码响应不进入缓存，下次仍可重新请求', () async {
+    final api = _FakeEnhancementApiService()..encodingResult = '';
+    final container = ProviderContainer(
+      overrides: [naiImageEnhancementApiServiceProvider.overrideWithValue(api)],
+    );
+    addTearDown(container.dispose);
+    final params = container.read(generationParamsNotifierProvider.notifier);
+    final bytes = Uint8List.fromList([1, 2]);
+    expect(
+      await params.encodeVibeWithCache(bytes, model: 'nai-diffusion-4-full'),
+      isNull,
+    );
+    expect(params.vibeEncodingCacheSize, 0);
+    api.encodingResult = 'recovered';
+    expect(
+      await params.encodeVibeWithCache(bytes, model: 'nai-diffusion-4-full'),
+      'recovered',
+    );
+    expect(api.callCount, 2);
   });
 
   test('encodeVibeWithCache 会区分 model 和 informationExtracted', () async {
@@ -763,6 +881,8 @@ class _FakeEnhancementApiService extends NAIImageEnhancementApiService {
   _FakeEnhancementApiService() : super(Dio(), ledger: unrecordedLedger());
 
   int callCount = 0;
+  Object? encodingError;
+  String? encodingResult;
   final List<double> requestedInformationExtracted = [];
 
   @override
@@ -773,6 +893,8 @@ class _FakeEnhancementApiService extends NAIImageEnhancementApiService {
   }) async {
     callCount++;
     requestedInformationExtracted.add(informationExtracted);
+    if (encodingError case final error?) throw error;
+    if (encodingResult case final result?) return result;
     return '$model|$informationExtracted|$callCount';
   }
 }

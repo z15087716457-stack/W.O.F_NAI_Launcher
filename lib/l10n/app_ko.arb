@@ -1094,10 +1094,16 @@
   "resolution_height": "높이",
   "api_error_429": "동시 요청 한도 도달",
   "api_error_429_hint": "요청이 너무 많습니다. 잠시 기다린 후 다시 시도하세요(공유 계정에서 자주 발생합니다)",
+  "api_error_400": "잘못된 요청",
+  "api_error_400_hint": "생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 프롬프트와 매개변수를 확인한 뒤 “생성”을 누르세요",
   "api_error_401": "인증 실패",
   "api_error_401_hint": "토큰이 유효하지 않거나 만료되었습니다. 다시 로그인하세요",
   "api_error_402": "잔액 부족",
   "api_error_402_hint": "Anlas가 부족합니다. 충전한 뒤 다시 시도하세요",
+  "api_error_403": "권한 없음",
+  "api_error_403_hint": "생성할 수 없습니다. 이 계정에는 이 기능을 사용할 권한이 없습니다. 구독을 확인하거나 다른 계정으로 바꾼 뒤 “생성”을 누르세요",
+  "api_error_404": "찾을 수 없음",
+  "api_error_404_hint": "생성할 수 없습니다. 서버에 이 엔드포인트나 모델이 없습니다. API 주소와 모델을 확인한 뒤 “생성”을 누르세요",
   "api_error_500": "서버 오류",
   "api_error_500_hint": "NovelAI 서버 오류입니다. 잠시 후 다시 시도하세요",
   "api_error_503": "서비스 사용 불가",
@@ -7962,6 +7968,22 @@
   "explore_negative": "네거티브",
   "explore_failReason": "실패 이유",
   "explore_retryFailed": "실패한 후보 다시 시도",
+  "explore_error400Hint": "생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 프롬프트와 매개변수를 확인한 뒤 “실패한 후보 다시 시도”를 누르세요",
+  "@explore_error400Hint": {
+    "description": "Hint after api_error_400 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error403Hint": "생성할 수 없습니다. 이 계정에는 이 기능을 사용할 권한이 없습니다. 구독을 확인하거나 다른 계정으로 바꾼 뒤 “실패한 후보 다시 시도”를 누르세요",
+  "@explore_error403Hint": {
+    "description": "Hint after api_error_403 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error404Hint": "생성할 수 없습니다. 서버에 이 엔드포인트나 모델이 없습니다. API 주소와 모델을 확인한 뒤 “실패한 후보 다시 시도”를 누르세요",
+  "@explore_error404Hint": {
+    "description": "Hint after api_error_404 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_concurrencyStoppedHint": "이번 실행에서 생성 순서를 기다릴 수 있는 시간은 총 90초입니다. 더 기다리면 한도를 넘기 때문에 후속 요청을 중단했습니다. 잠시 후 “실패한 후보 다시 시도”를 누르세요.",
+  "@explore_concurrencyStoppedHint": {
+    "description": "Hint after api_error_429 when a style explore stopped because the 429 waits ran out. Word for word gen_concurrencyStopped, but it ends with the explore_retryFailed button, not Retry"
+  },
   "explore_waitHint": "생성되면 뽑힌 작가가 여기에 표시됩니다",
   "explore_mergedArtists": "합친 작가 · {count}",
   "@explore_mergedArtists": {
@@ -8544,6 +8566,23 @@
   "gen_openViewer": "크게 보기",
   "gen_retry": "다시 시도",
   "gen_copyDetail": "자세히 복사",
+  "gen_concurrencyStopped": "이번 실행에서 생성 순서를 기다릴 수 있는 시간은 총 90초입니다. 더 기다리면 한도를 넘기 때문에 후속 요청을 중단했습니다. 잠시 후 “다시 시도”를 누르세요.",
+  "gen_partialBatchHint": "이 요청의 이미지 {expected}장 중 수신한 {received}장을 캔버스에 보관했습니다. 이후에 아직 보내지 않은 요청만 다시 시도할 수 있습니다.",
+  "@gen_partialBatchHint": {
+    "placeholders": {
+      "received": { "type": "int" },
+      "expected": { "type": "int" }
+    }
+  },
+  "gen_rejectedRequestsHint": "요청 {count}회에서 뽑힌 단어를 NovelAI가 받아들이지 않아 그 요청은 건너뛰고 나머지 요청은 그대로 보냈습니다. 순차 또는 무작위 블록의 단어를 확인한 뒤 “생성”을 누르세요",
+  "@gen_rejectedRequestsHint": {
+    "description": "Hint after api_error_400 on the generation canvas when a run with sequential or random blocks finished but NovelAI rejected (400) the words drawn for {count} of its requests: they were skipped and the others were sent. Ends with the Generate button, as api_error_400_hint does; this card has no Retry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gen_history": "기록",
   "gen_historyEmpty": "아직 생성한 이미지가 없습니다",
   "gen_historyEmptySub": "생성한 이미지가 묶음별로 표시됩니다",
@@ -11435,6 +11474,8 @@
   "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
   "ag_psGenerate": "생성",
   "ag_psGenerating": "생성 중",
+  "ag_psError400Hint": "생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 매개변수를 확인하거나 이 항목의 프롬프트 수정을 Agent에 요청한 뒤 “생성”을 누르세요",
+  "@ag_psError400Hint": {"description": "Hint after api_error_400 on a prompt-set card. Its Generate writes the item's prompt into the draft again, so the prompt is fixed through Agent (ag_psEditItem), not on the canvas. Ends with the card's Generate (ag_psGenerate)"},
   "ag_psRevision": "v{revision} · {count}개 수정",
   "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
   "ag_psSaveBlock": "블록으로 저장",

@@ -297,6 +297,7 @@ class _UnifiedReferencePanelState extends ConsumerState<UnifiedReferencePanel> {
       model: model,
       informationExtracted: informationExtracted,
       vibeName: vibeName,
+      propagateErrors: true,
     );
   }
 

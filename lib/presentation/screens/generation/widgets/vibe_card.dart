@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nai_launcher/presentation/widgets/common/studio_icons.dart';
 
 import '../../../../core/utils/localization_extension.dart';
+import '../../../../core/utils/vibe_encoding_utils.dart';
 import '../../../../data/models/vibe/vibe_reference.dart';
 import '../../../widgets/common/app_toast.dart';
 import '../../../widgets/common/decoded_memory_image.dart';
@@ -484,7 +485,12 @@ class _VibeCardState extends ConsumerState<VibeCard> {
       }
     } catch (e) {
       if (mounted) {
-        AppToast.error(context, context.l10n.vibe_encodeError(e.toString()));
+        AppToast.error(
+          context,
+          e is VibeEncodingException
+              ? e.message
+              : context.l10n.vibe_encodeError(e.toString()),
+        );
       }
     } finally {
       if (mounted) {

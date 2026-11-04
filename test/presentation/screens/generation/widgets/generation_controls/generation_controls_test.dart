@@ -78,6 +78,8 @@ void main() {
       await tester.pump();
       expect(generation.submitted!.prompt, 'city lights');
       expect(generation.batchSizeOverride, 1);
+      // Each candidate has its own artist string: a 400 fails only that one.
+      expect(generation.badRequestStops, isFalse);
       expect(generation.callback, same(callback));
       expect(invoked, 1);
       final button = tester.widget<GenerateButtonWithCost>(
@@ -575,6 +577,7 @@ class _CaptureGeneration extends ImageGenerationNotifier {
   int submissions = 0;
   ImageParams? submitted;
   int? batchSizeOverride;
+  bool? badRequestStops;
   GenerationBatchCallback? callback;
   void setBusy() =>
       state = const ImageGenerationState(status: GenerationStatus.generating);
@@ -586,10 +589,12 @@ class _CaptureGeneration extends ImageGenerationNotifier {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
+    bool badRequestStopsRun = true,
   }) async {
     submissions++;
     submitted = params;
     batchSizeOverride = imagesPerRequestOverride;
+    badRequestStops = badRequestStopsRun;
     callback = onBatchEvent;
   }
 }

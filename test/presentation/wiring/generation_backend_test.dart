@@ -78,6 +78,7 @@ class RecordingGeneration extends IdleGeneration {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
+    bool badRequestStopsRun = true,
   }) async {
     requests.add(params);
   }

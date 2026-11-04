@@ -10,6 +10,7 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/nai_api_endpoint_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/vibe_encoding_utils.dart';
 import '../../../core/utils/zip_utils.dart';
 import '../../../core/utils/localization_extension.dart';
 import '../../services/anlas_request_ledger.dart';
@@ -125,7 +126,9 @@ class NAIImageEnhancementApiService {
       return base64Encode(encoded);
     } on DioException catch (e) {
       AppLogger.w('Encode vibe failed: ${e.message}', 'NAIEnhancement');
-      throw Exception(currentL10n.enhance_vibeEncodeFailed(_mapDioError(e)));
+      throw VibeEncodingException(
+        currentL10n.enhance_vibeEncodeFailed(_mapDioError(e)),
+      );
     }
   }
 

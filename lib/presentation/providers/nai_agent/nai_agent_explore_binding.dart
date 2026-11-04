@@ -104,6 +104,16 @@ class NaiAgentExploreBinding {
             throw reason;
           }
 
+          // Failed before this run and not sent again by it; retry sends
+          // every failed candidate again.
+          final previousFailed = {
+            if (config['mode'] != 'retry')
+              for (final c in _find(input.sourceImageId!).candidates)
+                if (c.generation.status ==
+                    ExploreCandidateGenerationStatus.failed)
+                  c.id,
+          };
+
           /// Throws for anything that stops the next candidate except what
           /// the cached account says; returns the next candidate's input.
           NaiAgentGenerationInput checkNext() {
@@ -216,6 +226,20 @@ class NaiAgentExploreBinding {
                       )
                       .toList() ??
                   <ExploreCandidate>[];
+              // A stop marks the candidate that hit it and every one after
+              // it with the same error.
+              final stopped = started
+                  ? run?.candidates
+                        .where(
+                          (c) =>
+                              c.generation.status ==
+                                  ExploreCandidateGenerationStatus.failed &&
+                              !previousFailed.contains(c.id),
+                        )
+                        .map((c) => naiAgentRunStopped(c.generation.error))
+                        .nonNulls
+                        .firstOrNull
+                  : null;
               return {
                 'status': started ? run?.status.name : 'not_started',
                 if (run?.status == ExploreRunStatus.paused &&
@@ -224,6 +248,7 @@ class NaiAgentExploreBinding {
                 'explore_id': input.sourceImageId,
                 'done_count': run?.generatedCount,
                 'failed_count': run?.failedCount,
+                if (stopped != null) 'run_stopped': stopped,
                 'new_image_count': produced.length,
                 'candidates_truncated': produced.length > 100,
                 'candidates': [
@@ -345,12 +370,24 @@ class NaiAgentExploreBinding {
     return run;
   }
 
-  Map<String, dynamic> _candidate(ExploreRun run, ExploreCandidate c) => {
-    ...Map<String, dynamic>.from(jsonDecode(jsonEncode(c.toJson())) as Map),
-    'image_id': c.generation.filePath == null
-        ? null
-        : 'explore:${run.id}:${c.id}',
-  };
+  Map<String, dynamic> _candidate(ExploreRun run, ExploreCandidate c) {
+    final json = Map<String, dynamic>.from(
+      jsonDecode(jsonEncode(c.toJson())) as Map,
+    );
+    return {
+      ...json,
+      // Storage keeps the stop marker for the explore page's reason; the
+      // Agent reads the error without it and run_stopped beside it.
+      'generation': {
+        ...Map<String, dynamic>.from(json['generation'] as Map),
+        ...naiAgentGenerationError(c.generation.error),
+      },
+      'image_id': c.generation.filePath == null
+          ? null
+          : 'explore:${run.id}:${c.id}',
+    };
+  }
+
   Future<String> _backup(ExploreRun? run, String kind) async =>
       (await AgentSnapshotFiles(
             workspace,

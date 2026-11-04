@@ -29,6 +29,7 @@ import 'package:nai_launcher/presentation/ui/channel/channel_layer.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_overlay.dart';
 import 'package:nai_launcher/presentation/ui/channel/channel_settings.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/preview_selection_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
@@ -1791,6 +1792,251 @@ void main() {
     expect(tester.state(find.byType(GenerationCanvasView)), same(engine));
     expect(find.byKey(const Key('gen-tile-1-0')), findsOneWidget);
   });
+  for (final language in ['zh', 'en']) {
+    testWidgets('429 等满停下时失败卡写明原因和下一步（$language）', (tester) async {
+      await pump(tester, language: language);
+      final message = generationConcurrencyStoppedError(
+        'API_ERROR_429|Concurrent generation is locked',
+      );
+      publish(
+        ImageGenerationState(
+          status: GenerationStatus.error,
+          errorMessage: message,
+          history: [image(1)],
+        ),
+      );
+      await tester.pumpAndSettle();
+      final l = lookupAppLocalizations(Locale(language));
+      final card = find.byKey(const Key('gen-error'));
+      expect(card, findsOneWidget);
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.text('${l.api_error_429} (HTTP 429)'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.textContaining(l.gen_concurrencyStopped),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.textContaining('Concurrent generation is locked'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        GenScope.of(tester.element(card)).data.canvas.error!.detail,
+        message,
+      );
+      // 已经出好的图仍在画布上。
+      expect(find.byKey(const Key('gen-tile-1-0')), findsOneWidget);
+    });
+
+    testWidgets('失败卡按错误类型写原因和怎么办，复制详情和它的悬停提示去掉整次停下的标记（$language）', (
+      tester,
+    ) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await pump(tester, language: language);
+      final l = lookupAppLocalizations(Locale(language));
+      final card = find.byKey(const Key('gen-error'));
+      Finder inCard(String text) =>
+          find.descendant(of: card, matching: find.text(text));
+      // 鼠标停在“复制详情”上弹出的提示。
+      String? hover() => tester
+          .widget<Tooltip>(
+            find.descendant(
+              of: find.byKey(const Key('gen-error-copy')),
+              matching: find.byType(Tooltip),
+            ),
+          )
+          .message;
+      for (final (message, title, hint, copy) in [
+        // 没停下的原样复制。
+        (
+          'Exception: API_ERROR_402|Insufficient Anlas',
+          '${l.api_error_402} (HTTP 402)',
+          l.api_error_402_hint,
+          'Exception: API_ERROR_402|Insufficient Anlas',
+        ),
+        // 两批出好后第三批 401，整次停下：标记不复制，后面的原样。
+        (
+          generationStatusStoppedError(
+            const GenerationStreamError('API_ERROR_401|Unauthorized'),
+          ),
+          '${l.api_error_401} (HTTP 401)',
+          l.api_error_401_hint,
+          'API_ERROR_401|Unauthorized',
+        ),
+        (
+          generationStatusStoppedError(
+            const GenerationStreamError('API_ERROR_HTTP_404|Not Found'),
+          ),
+          '${l.api_error_404} (HTTP 404)',
+          l.api_error_404_hint,
+          'API_ERROR_HTTP_404|Not Found',
+        ),
+        (
+          generationConcurrencyStoppedError(
+            'API_ERROR_429|Concurrent generation is locked',
+          ),
+          '${l.api_error_429} (HTTP 429)',
+          l.gen_concurrencyStopped,
+          'API_ERROR_429|Concurrent generation is locked',
+        ),
+      ]) {
+        publish(
+          ImageGenerationState(
+            status: GenerationStatus.error,
+            errorMessage: message,
+            history: [image(1)],
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(card, findsOneWidget);
+        expect(inCard(title), findsOneWidget, reason: message);
+        expect(
+          find.descendant(of: card, matching: find.textContaining(hint)),
+          findsOneWidget,
+          reason: message,
+        );
+        final serverReason = copy.substring(copy.indexOf('|') + 1);
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.textContaining(serverReason),
+          ),
+          findsOneWidget,
+          reason: message,
+        );
+        expect(inCard(l.common_error), findsNothing, reason: message);
+        // 悬停提示跟复制出来的一样，不带标记。
+        expect(hover(), copy, reason: message);
+        await tester.tap(find.byKey(const Key('gen-error-copy')));
+        await tester.pump();
+        expect(copied, copy, reason: message);
+        // 记下的错误不变，卡片照旧据它写原因。
+        expect(
+          GenScope.of(tester.element(card)).data.canvas.error!.detail,
+          message,
+        );
+        await tester.pump(const Duration(seconds: 2));
+      }
+      // 认不出的照旧只写「错误」。
+      publish(
+        ImageGenerationState(
+          status: GenerationStatus.error,
+          errorMessage: 'API_ERROR_UNKNOWN|Something odd',
+          history: [image(1)],
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(inCard(l.common_error), findsOneWidget);
+      expect(hover(), 'API_ERROR_UNKNOWN|Something odd');
+      await tester.tap(find.byKey(const Key('gen-error-copy')));
+      await tester.pump();
+      expect(copied, 'API_ERROR_UNKNOWN|Something odd');
+      await tester.pump(const Duration(seconds: 2));
+    });
+  }
+  for (final language in ['zh', 'zh_TW', 'en', 'ja', 'ko']) {
+    testWidgets('批量出完、有几次请求被 NovelAI 拒绝跳过：失败卡写明几次和怎么办，不出重试，'
+        '关掉只收说明（$language）', (tester) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      const lastError = 'Exception: API_ERROR_400|Bad request';
+      final made = [image(1, 0), image(1, 2)];
+      ImageGenerationState finished(GenerationStatus status) =>
+          ImageGenerationState(
+            status: status,
+            generationRunId: 1,
+            currentImages: made,
+            displayImages: made,
+            history: made,
+            rejectedBatches: const GenerationRejectedBatches(
+              count: 2,
+              lastError: lastError,
+            ),
+          );
+      // The real page: Close goes to the notifier.
+      publish(finished(GenerationStatus.completed));
+      await pump(tester, fullPage: true, language: language);
+      final l = AppLocalizations.of(tester.element(find.byType(GenCanvas)))!;
+      final card = find.byKey(const Key('gen-error'));
+      Finder inCard(Finder finder) =>
+          find.descendant(of: card, matching: finder);
+      expect(card, findsOneWidget);
+      expect(inCard(find.text(l.api_error_400)), findsOneWidget);
+      expect(inCard(find.text(l.gen_rejectedRequestsHint(2))), findsOneWidget);
+      // Retry would send a turned-down request as it was: not on this card.
+      expect(inCard(find.byKey(const Key('gen-retry'))), findsNothing);
+      // Copy details gives the last turned-down request's error.
+      await tester.tap(inCard(find.byKey(const Key('gen-error-copy'))));
+      await tester.pump();
+      expect(copied, lastError);
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+
+      // Close: the explanation goes, the run and its images stay.
+      await tester.tap(inCard(find.byKey(const Key('gen-error-close'))));
+      await tester.pumpAndSettle();
+      expect(card, findsNothing);
+      final state = container.read(imageGenerationNotifierProvider);
+      expect(state.rejectedBatches, isNull);
+      expect(state.status, GenerationStatus.completed);
+      expect(state.displayImages, made);
+
+      // A run going on shows no card; a run that failed shows its own
+      // card with Retry, as before.
+      publish(finished(GenerationStatus.generating));
+      await tester.pumpAndSettle();
+      expect(card, findsNothing);
+      publish(
+        ImageGenerationState(
+          status: GenerationStatus.error,
+          errorMessage: lastError,
+          history: made,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(inCard(find.textContaining(l.api_error_400_hint)), findsOneWidget);
+      expect(inCard(find.byKey(const Key('gen-retry'))), findsOneWidget);
+    });
+  }
   testWidgets('窗口缩窄重新对焦，图片避开新工具条和底栏', (tester) async {
     publish(ImageGenerationState(history: [image(1)]));
     await pump(tester, fullPage: true);

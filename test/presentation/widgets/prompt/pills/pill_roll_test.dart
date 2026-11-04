@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nai_launcher/core/constants/api_constants.dart'
+    show ImageModels;
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart'
     hide CharacterPrompt;
@@ -756,6 +758,89 @@ void main() {
         isEmpty,
       );
     });
+
+    test('tells before rolling whether a roll draws new words for the '
+        'request', () async {
+      final container = makeContainer(
+        characters: const [
+          CharacterPrompt(id: 'on', name: 'On'),
+          CharacterPrompt(id: 'off', name: 'Off', enabled: false),
+        ],
+      );
+      await container.read(promptBlockLibraryNotifierProvider.future);
+      final coordinator = container.read(pillRollCoordinatorProvider);
+      bool redraws() =>
+          coordinator.rollRedrawsRequest(ImageModels.animeDiffusionV45Full);
+      final main = container.read(pillWorkspaceNotifierProvider.notifier);
+
+      // 固定块、停用角色框里的随机块：重抽了请求也不变。
+      main.insertBlockAt(offset: 0, blockId: 'style');
+      await insertRandomBlock(container, PillScopes.charPos('off'));
+      expect(redraws(), isFalse);
+
+      // 正向里的随机或顺序块算；锁定、停用后不算。
+      main.updateInstanceSettings(markerA, randomSettings);
+      expect(redraws(), isTrue);
+      main.updateInstanceSettings(markerA, sequentialSettings);
+      expect(redraws(), isTrue);
+      main.toggleLocked(markerA);
+      expect(redraws(), isFalse);
+      main.toggleLocked(markerA);
+      main.toggleEnabled(markerA);
+      expect(redraws(), isFalse);
+      main.toggleEnabled(markerA);
+      expect(redraws(), isTrue);
+
+      // 探索 runner 抑制期间不重抽。
+      addTearDown(PillRollCoordinator.resetRollSuppression);
+      PillRollCoordinator.suppressRoll();
+      expect(redraws(), isFalse);
+      PillRollCoordinator.releaseRollSuppression();
+      expect(redraws(), isTrue);
+    });
+
+    // 只算请求带上的框：Turbo 清空自定义负面（主负面和角色负面），V3 的请求
+    // 不带角色，正面为空的角色整个不进请求。
+    const full = ImageModels.animeDiffusionV5Full;
+    const turbo = ImageModels.animeDiffusionV5FullMedium;
+    const v3 = ImageModels.animeDiffusionV3;
+    for (final (scope, model, carried) in [
+      (PillScopes.main, turbo, true),
+      (PillScopes.main, v3, true),
+      (PillScopes.negative, full, true),
+      (PillScopes.negative, v3, true),
+      (PillScopes.negative, turbo, false),
+      (PillScopes.charPos('on'), full, true),
+      (PillScopes.charPos('on'), turbo, true),
+      (PillScopes.charPos('on'), v3, false),
+      (PillScopes.charPos('on'), ImageModels.furryDiffusionV3, false),
+      (PillScopes.charNeg('on'), full, true),
+      (PillScopes.charNeg('on'), turbo, false),
+      (PillScopes.charNeg('on'), v3, false),
+      // 正面里的块给角色抽出正面，角色就进请求了。
+      (PillScopes.charPos('blank'), full, true),
+      (PillScopes.charNeg('blank'), full, false),
+    ]) {
+      test(
+        'a random block in $scope '
+        '${carried ? 'draws new words' : 'draws nothing new'} for $model',
+        () async {
+          final container = makeContainer(
+            characters: const [
+              CharacterPrompt(id: 'on', name: 'On', prompt: 'girl'),
+              CharacterPrompt(id: 'blank', name: 'Blank'),
+            ],
+          );
+          await container.read(promptBlockLibraryNotifierProvider.future);
+          final coordinator = container.read(pillRollCoordinatorProvider);
+          expect(coordinator.rollRedrawsRequest(model), isFalse);
+
+          await insertRandomBlock(container, scope);
+
+          expect(coordinator.rollRedrawsRequest(model), carried);
+        },
+      );
+    }
   });
 
   group('L1 instance card', () {

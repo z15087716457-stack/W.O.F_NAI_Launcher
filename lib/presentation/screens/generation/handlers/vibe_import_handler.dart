@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Import for locale-aware string comparison
 
 import '../../../../core/utils/app_logger.dart';
+import '../../../../core/utils/vibe_encoding_utils.dart';
 import '../../../../core/utils/localization_extension.dart';
 import '../../../../core/utils/vibe_file_parser.dart';
 import '../../../../core/utils/vibe_performance_diagnostics.dart';
@@ -114,21 +115,14 @@ class VibeImportHandler {
 
                 // 如果需要提前编码
                 if (encodeNow && context.mounted) {
-                  final encodedVibes = await _encodeVibesNow(vibes);
-                  if (!context.mounted) continue;
-                  if (encodedVibes != null) {
-                    vibes = encodedVibes;
+                  final result = await _encodeVibesNow(vibes);
+                  if (!context.mounted || result == null) continue;
+                  vibes = result.vibes;
+                  if (result.encoded) {
                     encodedFiles++;
-                    // 编码成功后自动保存到库
-                    if (autoSaveToLibrary && context.mounted) {
-                      await _saveEncodedVibesToLibrary(encodedVibes, fileName);
+                    if (autoSaveToLibrary) {
+                      await _saveEncodedVibesToLibrary(vibes, fileName);
                       autoSavedFiles++;
-                    }
-                  } else {
-                    // 编码失败，询问是否继续添加未编码的
-                    final continueAnyway = await _showEncodingFailedDialog();
-                    if (continueAnyway != true) {
-                      continue; // 跳过此文件
                     }
                   }
                 }
@@ -201,22 +195,12 @@ class VibeImportHandler {
         final encodeNow = dialogResult.$2;
         final autoSaveToLibrary = dialogResult.$3;
         if (encodeNow && context.mounted) {
-          final encodedVibes = await _encodeVibesNow(vibes);
-          if (!context.mounted) {
-            return 0;
-          }
-
-          if (encodedVibes != null) {
-            vibes = encodedVibes;
-            encoded = true;
-            if (autoSaveToLibrary && context.mounted) {
-              await _saveEncodedVibesToLibrary(encodedVibes, fileName);
-            }
-          } else {
-            final continueAnyway = await _showEncodingFailedDialog();
-            if (continueAnyway != true) {
-              return 0;
-            }
+          final result = await _encodeVibesNow(vibes);
+          if (!context.mounted || result == null) return 0;
+          vibes = result.vibes;
+          encoded = result.encoded;
+          if (encoded && autoSaveToLibrary) {
+            await _saveEncodedVibesToLibrary(vibes, fileName);
           }
         }
       }
@@ -389,13 +373,13 @@ class VibeImportHandler {
   }
 
   /// 显示编码失败对话框
-  Future<bool?> _showEncodingFailedDialog() async {
+  Future<bool?> _showEncodingFailedDialog(String reason) async {
     final l10n = context.l10n;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.vibe_import_encodingFailed),
-        content: Text(l10n.vibe_import_encodingFailedMessage),
+        content: Text('$reason\n\n${l10n.vibe_import_encodingFailedMessage}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -411,7 +395,7 @@ class VibeImportHandler {
   }
 
   /// 立即编码 Vibes（调用 API）
-  Future<List<VibeReference>?> _encodeVibesNow(
+  Future<({List<VibeReference> vibes, bool encoded})?> _encodeVibesNow(
     List<VibeReference> vibes,
   ) async {
     final span = VibePerformanceDiagnostics.start(
@@ -429,9 +413,9 @@ class VibeImportHandler {
     );
     var encodedCount = 0;
     var returnedCount = 0;
-    final notifier = ref.read(generationParamsNotifierProvider.notifier);
-    final params = ref.read(generationParamsNotifierProvider);
-    final model = params.model;
+    final model = ref.read(generationParamsNotifierProvider).model;
+    final encoder = ref.read(generationParamsNotifierProvider.notifier);
+    final l10n = context.l10n;
 
     // 显示编码进度对话框，使用 rootNavigator 确保正确关闭
     final dialogCompleter = Completer<void>();
@@ -467,77 +451,47 @@ class VibeImportHandler {
       }
     }
 
+    final processed = <VibeReference>[];
     try {
-      final encodedVibes = <VibeReference>[];
       for (final vibe in vibes) {
-        if (vibe.sourceType == VibeSourceType.rawImage &&
-            vibe.rawImageData != null) {
-          // 添加 30 秒超时保护，防止 API 无限卡住
-          final encoding = await notifier
-              .encodeVibeWithCache(
-                vibe.rawImageData!,
-                model: model,
-                informationExtracted: vibe.infoExtracted,
-                vibeName: vibe.displayName,
-              )
-              .timeout(
-                const Duration(seconds: 30),
-                onTimeout: () {
-                  AppLogger.w(
-                    'Vibe encoding timeout: ${vibe.displayName}',
-                    _tag,
-                  );
-                  return null;
-                },
-              );
-
-          if (encoding != null) {
-            encodedVibes.add(
-              buildEncodedImportVibe(vibe, encoding, model: model),
-            );
-            encodedCount++;
-          } else {
-            // 编码失败，保留原始 vibe
-            encodedVibes.add(vibe);
-          }
-        } else {
-          // 不需要编码或已有编码
-          encodedVibes.add(vibe);
+        if (vibe.sourceType != VibeSourceType.rawImage ||
+            vibe.rawImageData == null) {
+          processed.add(vibe);
+          continue;
         }
+        final encoding = await encoder
+            .encodeVibeWithCache(
+              vibe.rawImageData!,
+              model: model,
+              informationExtracted: vibe.infoExtracted,
+              vibeName: vibe.displayName,
+              propagateErrors: true,
+            )
+            .timeout(const Duration(seconds: 30));
+        if (encoding == null || encoding.isEmpty) {
+          throw VibeEncodingException(l10n.vibe_encodeFailed);
+        }
+        processed.add(buildEncodedImportVibe(vibe, encoding, model: model));
+        encodedCount++;
       }
-
       closeDialog();
-
-      // 检查是否全部编码成功
-      final allEncoded = encodedVibes.every(
-        (v) =>
-            v.sourceType != VibeSourceType.rawImage ||
-            v.vibeEncoding.isNotEmpty,
-      );
-      returnedCount = encodedVibes.length;
-
-      if (allEncoded) {
-        if (context.mounted) {
-          AppToast.success(context, context.l10n.vibe_import_encodingComplete);
-        }
-        return encodedVibes;
-      } else {
-        if (context.mounted) {
-          AppToast.warning(context, context.l10n.vibe_import_partialFailed);
-        }
-        return encodedVibes;
-      }
-    } on TimeoutException catch (e) {
-      AppLogger.e('Vibe encoding timeout', e, null, _tag);
-      closeDialog();
+      returnedCount = processed.length;
       if (context.mounted) {
-        AppToast.error(context, context.l10n.vibe_import_timeout);
+        AppToast.success(context, l10n.vibe_import_encodingComplete);
       }
-      return null;
-    } catch (e, stackTrace) {
-      AppLogger.e('Failed to encode vibes', e, stackTrace, _tag);
+      return (vibes: processed, encoded: true);
+    } catch (error, stackTrace) {
+      AppLogger.e('Failed to encode vibes', error, stackTrace, _tag);
       closeDialog();
-      return null;
+      if (!context.mounted) return null;
+      final reason = error is TimeoutException
+          ? l10n.vibe_import_timeout
+          : error.toString();
+      if (await _showEncodingFailedDialog(reason) != true) return null;
+      // Keep successful encodings if the user chooses to add the rest as raw images.
+      final retained = [...processed, ...vibes.skip(processed.length)];
+      returnedCount = retained.length;
+      return (vibes: retained, encoded: false);
     } finally {
       span.finish(
         details: {'encoded': encodedCount, 'returnedVibes': returnedCount},
@@ -606,7 +560,12 @@ class VibeImportHandler {
         _tag,
       );
       if (context.mounted) {
-        AppToast.error(context, context.l10n.vibe_saveToLibrary_saveFailed);
+        AppToast.error(
+          context,
+          e is VibeEncodingException
+              ? e.message
+              : context.l10n.vibe_saveToLibrary_saveFailed,
+        );
       }
     } finally {
       span.finish(details: {'saved': savedCount, 'reused': reusedCount});
@@ -941,7 +900,12 @@ class VibeImportHandler {
       } catch (e, stackTrace) {
         AppLogger.e('Failed to save to library', e, stackTrace, _tag);
         if (context.mounted) {
-          AppToast.error(context, context.l10n.vibe_saveToLibrary_saveFailed);
+          AppToast.error(
+            context,
+            e is VibeEncodingException
+                ? e.message
+                : context.l10n.vibe_saveToLibrary_saveFailed,
+          );
         }
       }
     }

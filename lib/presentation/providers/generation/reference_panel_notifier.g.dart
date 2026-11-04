@@ -7,7 +7,7 @@ part of 'reference_panel_notifier.dart';
 // **************************************************************************
 
 String _$referencePanelNotifierHash() =>
-    r'7ee0d67976b34e8d3333bf508b965397ff27b105';
+    r'af7e39d3520fc25feeeb1eae15e9ef61863a6aae';
 
 /// 引用面板 UI 状态
 ///

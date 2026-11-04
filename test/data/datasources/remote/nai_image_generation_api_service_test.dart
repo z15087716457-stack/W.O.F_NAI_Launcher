@@ -16,6 +16,7 @@ import 'package:nai_launcher/core/network/nai_api_endpoint_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
 import 'package:nai_launcher/data/datasources/remote/nai_image_generation_api_service.dart';
 import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/data/models/image/image_stream_chunk.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import '../../../helpers/novelai_billing.dart';
 
@@ -211,8 +212,127 @@ void main() {
       );
       final chunks = await result;
       expect(chunks.last.error, 'API_ERROR_HTTP_504|Gateway Time-out');
+      expect(chunks.last.errorSource, ImageStreamErrorSource.other);
     },
   );
+
+  for (final (event, said) in [
+    (
+      {'event_type': 'error', 'message': 'Internal error while sampling'},
+      'Internal error while sampling',
+    ),
+    ({'event_type': 'error'}, 'Stream generation failed'),
+    ({'error': 'Worker lost'}, 'Worker lost'),
+  ]) {
+    test(
+      'a server error event in the stream is marked as one: $said',
+      () async {
+        final adapter = _PendingDioAdapter();
+        final dio = Dio()..httpClientAdapter = adapter;
+        final endpoint = NaiApiEndpointService();
+        final service = NAIImageGenerationApiService(
+          dio,
+          NAIImageEnhancementApiService(
+            dio,
+            endpointService: endpoint,
+            ledger: unrecordedLedger(),
+          ),
+          endpoint,
+          ledger: unrecordedLedger(),
+        );
+        final result = service
+            .generateImageStream(const ImageParams(prompt: 'test'))
+            .toList();
+        await _waitForRequestCount(adapter, 1);
+        adapter.requests.single.completeWithMsgpackMessages([
+          {
+            'event_type': 'intermediate',
+            'samp_ix': 0,
+            'step_ix': 0,
+            'image': Uint8List.fromList([1, 2, 3]),
+          },
+          event,
+        ]);
+        final chunks = await result.timeout(const Duration(seconds: 2));
+        expect(chunks.last.error, said);
+        expect(chunks.last.errorSource, ImageStreamErrorSource.serverEvent);
+      },
+    );
+  }
+
+  test('a stream cut short in a message ends without a final image', () async {
+    final adapter = _PendingDioAdapter();
+    final dio = Dio()..httpClientAdapter = adapter;
+    final endpoint = NaiApiEndpointService();
+    final service = NAIImageGenerationApiService(
+      dio,
+      NAIImageEnhancementApiService(
+        dio,
+        endpointService: endpoint,
+        ledger: unrecordedLedger(),
+      ),
+      endpoint,
+      ledger: unrecordedLedger(),
+    );
+    final result = service
+        .generateImageStream(const ImageParams(prompt: 'test'))
+        .toList();
+    await _waitForRequestCount(adapter, 1);
+    // A length prefix for 64 bytes, then only two of them.
+    adapter.requests.single.response.complete(
+      ResponseBody.fromBytes(
+        Uint8List.fromList([0, 0, 0, 64, 1, 2]),
+        200,
+        headers: {
+          Headers.contentTypeHeader: ['application/x-msgpack'],
+        },
+      ),
+    );
+    final chunks = await result.timeout(const Duration(seconds: 2));
+    expect(chunks.last.error, 'No final image received from stream');
+    expect(chunks.last.errorSource, ImageStreamErrorSource.noFinalImage);
+  });
+
+  for (final retryAfter in ['7', null]) {
+    test('stream 429 hands on Retry-After: $retryAfter', () async {
+      final adapter = _PendingDioAdapter();
+      final dio = Dio()..httpClientAdapter = adapter;
+      final endpoint = NaiApiEndpointService();
+      final service = NAIImageGenerationApiService(
+        dio,
+        NAIImageEnhancementApiService(
+          dio,
+          endpointService: endpoint,
+          ledger: unrecordedLedger(),
+        ),
+        endpoint,
+        ledger: unrecordedLedger(),
+      );
+      final result = service
+          .generateImageStream(const ImageParams(prompt: 'test'))
+          .toList();
+      await _waitForRequestCount(adapter, 1);
+      adapter.requests.single.response.complete(
+        ResponseBody.fromString(
+          '{"message":"Concurrent generation is locked"}',
+          429,
+          headers: {
+            Headers.contentTypeHeader: ['application/json'],
+            if (retryAfter != null) 'retry-after': [retryAfter],
+          },
+        ),
+      );
+      final chunks = await result;
+      expect(
+        chunks.last.error,
+        'API_ERROR_429|Concurrent generation is locked',
+      );
+      expect(
+        chunks.last.retryAfter,
+        retryAfter == null ? isNull : const Duration(seconds: 7),
+      );
+    });
+  }
 
   for (final streamed in [false, true]) {
     test(
@@ -578,6 +698,7 @@ void main() {
     expect(adapter.requests, isEmpty);
     expect(chunks, hasLength(1));
     expect(chunks.single.error, contains('Cancelled'));
+    expect(chunks.single.errorSource, ImageStreamErrorSource.other);
   });
 
   test('stream completes only from final event image', () async {
@@ -659,6 +780,7 @@ void main() {
     expect(chunks.first.previewImage, orderedEquals(preview));
     expect(chunks.last.hasError, isTrue);
     expect(chunks.last.error, contains('No final image'));
+    expect(chunks.last.errorSource, ImageStreamErrorSource.noFinalImage);
     expect(chunks.last.hasFinalImage, isFalse);
   });
 

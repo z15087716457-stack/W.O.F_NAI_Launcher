@@ -29,6 +29,7 @@ import '../ui/nav/nav_contract.dart';
 import '../ui/nav/nav_shell.dart';
 import '../widgets/auth/account_switch_helper.dart';
 import '../widgets/auth/add_account_dialog.dart';
+import 'generation_error_view.dart';
 
 const navBranchPages = <AppBranch, NavPage>{
   AppBranch.generation: NavPage.generation,
@@ -112,6 +113,7 @@ NavGeneration navGenerationData(
   ImageGenerationState generation,
   NavGenerationResult? unread, {
   required bool visible,
+  required AppLocalizations l10n,
 }) {
   if (generation.isGenerating) {
     final bytes =
@@ -137,7 +139,11 @@ NavGeneration navGenerationData(
         : NavGenerationState.failed,
     current: unread.total,
     total: unread.total,
-    error: unread.error?.split('\n').first,
+    // 原因跟生图页失败卡同一个标题（余额不足、并发限制……），整次停下的内部
+    // 标记不原样露出来；认不出的照旧给原文第一行。
+    error:
+        generationErrorTitle(l10n, unread.error) ??
+        unread.error?.split('\n').first,
   );
 }
 
@@ -321,6 +327,7 @@ class _NavWiringState extends ConsumerState<NavWiring> {
           generation,
           activity.unreadGeneration,
           visible: branch == AppBranch.generation,
+          l10n: context.l10n,
         ),
         tasks: List.unmodifiable(
           activity.tasks.map(

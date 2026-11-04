@@ -24,6 +24,8 @@ import 'package:nai_launcher/data/services/explore_run_image_store.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart'
+    show generationConcurrencyStoppedError, isGenerationRunStopped;
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/bridge_draft_snapshot.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
@@ -612,6 +614,140 @@ void main() {
       expect(generated, hasLength(4));
     },
   );
+  for (final (name, runError, error, stopped) in [
+    (
+      'a 402',
+      'API_ERROR_402|Insufficient Anlas',
+      'API_ERROR_402|Insufficient Anlas',
+      'http_status',
+    ),
+    (
+      'a 429 for the whole wait',
+      generationConcurrencyStoppedError(
+        'API_ERROR_429|Concurrent generation is locked',
+      ),
+      'API_ERROR_429|Concurrent generation is locked',
+      'concurrency_limit',
+    ),
+  ]) {
+    test('$name stops the exploration: run says so, and read gives each '
+        'candidate the error without the stop marker', () async {
+      final native =
+          container.read(imageGenerationNotifierProvider.notifier)
+              as ControlledAgentGeneration;
+      // The first candidate's request reaches the native run, which fails.
+      generate = (params) {
+        unawaited(native.generate(params));
+        return Future(() {
+          native.finish(status: GenerationStatus.error, errorMessage: runError);
+          return null;
+        });
+      };
+      final id = await create(3);
+      final result = await runApproved(id, await quote(id));
+      expect(generated, hasLength(1));
+      expect(result['status'], 'generated');
+      expect(result['done_count'], 0);
+      expect(result['failed_count'], 3);
+      // The one that was sent and the two that were not.
+      final candidates = (await read(id))['run']['candidates'] as List;
+      expect(candidates, hasLength(3));
+      for (final candidate in candidates) {
+        final generation = candidate['generation'] as Map;
+        expect(generation['status'], 'failed');
+        expect(generation['error'], error);
+        expect(generation['run_stopped'], stopped);
+      }
+      expect(result['run_stopped'], stopped);
+      // The explore page reads its reason from what is stored, marker and all.
+      final stored = await container
+          .read(styleExploreRunRepositoryProvider)
+          .getRun(id);
+      for (final candidate in stored!.candidates) {
+        expect(isGenerationRunStopped(candidate.generation.error), isTrue);
+      }
+      // A later run that does not stop says nothing of the earlier stop,
+      // whose candidates still read as they were.
+      generate = (_) async => ExploreGenerationResult(
+        imageBytes: pixels,
+        seed: 7,
+        elapsedMs: 1,
+        imageWidth: 6,
+        imageHeight: 4,
+      );
+      final next = await runApproved(id, await quote(id));
+      expect(next['new_image_count'], 3);
+      expect(next['failed_count'], 3);
+      expect(next.containsKey('run_stopped'), isFalse);
+      final after = (await read(id))['run']['candidates'] as List;
+      expect(after, hasLength(6));
+      for (final candidate in after.take(3)) {
+        expect(candidate['generation']['run_stopped'], stopped);
+      }
+      for (final candidate in after.skip(3)) {
+        expect(candidate['generation']['status'], 'done');
+        expect(candidate['generation']['error'], isNull);
+        expect(
+          (candidate['generation'] as Map).containsKey('run_stopped'),
+          false,
+        );
+      }
+    });
+  }
+  test('a retry that stops says so too, though it sends candidates that '
+      'had failed before', () async {
+    final native =
+        container.read(imageGenerationNotifierProvider.notifier)
+            as ControlledAgentGeneration;
+    final id = await create(2);
+    // Both fail on their own first, without reaching the native run.
+    generate = (_) async => null;
+    final first = await runApproved(id, await quote(id));
+    expect(first['failed_count'], 2);
+    expect(first.containsKey('run_stopped'), isFalse);
+    generate = (params) {
+      unawaited(native.generate(params));
+      return Future(() {
+        native.finish(
+          status: GenerationStatus.error,
+          errorMessage: 'API_ERROR_402|Insufficient Anlas',
+        );
+        return null;
+      });
+    };
+    final retry = await runApproved(id, await quote(id, {'mode': 'retry'}));
+    expect(generated, hasLength(3));
+    expect(retry['failed_count'], 2);
+    expect(retry['run_stopped'], 'http_status');
+    for (final candidate in (await read(id))['run']['candidates'] as List) {
+      expect(
+        candidate['generation']['error'],
+        'API_ERROR_402|Insufficient Anlas',
+      );
+      expect(candidate['generation']['run_stopped'], 'http_status');
+    }
+  });
+  test('a candidate that failed on its own keeps its error and no '
+      'run_stopped', () async {
+    final id = await create(2);
+    generate = (_) async => generated.length == 1
+        ? null
+        : ExploreGenerationResult(
+            imageBytes: pixels,
+            seed: 2,
+            elapsedMs: 1,
+            imageWidth: 6,
+            imageHeight: 4,
+          );
+    final result = await runApproved(id, await quote(id));
+    expect(result['failed_count'], 1);
+    expect(result['done_count'], 1);
+    expect(result.containsKey('run_stopped'), isFalse);
+    final failed = ((await read(id))['run']['candidates'] as List).first;
+    expect(failed['generation']['status'], 'failed');
+    expect(failed['generation']['error'], 'generation failed');
+    expect((failed['generation'] as Map).containsKey('run_stopped'), isFalse);
+  });
   test(
     'deep generation uses existing native family and guard, without writing mutated text into the draft',
     () async {

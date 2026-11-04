@@ -15,6 +15,7 @@ import 'package:nai_launcher/presentation/providers/account_manager_provider.dar
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/presentation/providers/bulk_operation_provider.dart';
 import 'package:nai_launcher/presentation/providers/generation/cloud_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
@@ -27,6 +28,7 @@ import 'package:nai_launcher/presentation/router/app_branch.dart';
 import 'package:nai_launcher/presentation/router/app_router.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_contract.dart';
 import 'package:nai_launcher/presentation/ui/nav/nav_shell.dart';
+import 'package:nai_launcher/presentation/wiring/generation_error_view.dart';
 import 'package:nai_launcher/presentation/wiring/nav_wiring.dart';
 
 class _Shell extends Mock implements StatefulNavigationShell {
@@ -300,6 +302,7 @@ void main() {
         ),
         null,
         visible: false,
+        l10n: lookupAppLocalizations(const Locale('zh')),
       );
       expect(data.state, NavGenerationState.running);
       expect(data.current, 2);
@@ -316,6 +319,7 @@ void main() {
           const ImageGenerationState(),
           unread,
           visible: false,
+          l10n: lookupAppLocalizations(const Locale('zh')),
         ).error,
         'first',
       );
@@ -324,11 +328,84 @@ void main() {
           const ImageGenerationState(),
           unread,
           visible: true,
+          l10n: lookupAppLocalizations(const Locale('zh')),
         ).state,
         NavGenerationState.idle,
       );
     },
   );
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    test('a run stopped by 429 names the reason, not its marker '
+        '(${locale.toLanguageTag()})', () {
+      final l = lookupAppLocalizations(locale);
+      final data = navGenerationData(
+        const ImageGenerationState(),
+        NavGenerationResult(
+          status: GenerationStatus.error,
+          total: 3,
+          error: generationConcurrencyStoppedError(
+            'API_ERROR_429|Concurrent generation is locked',
+          ),
+        ),
+        visible: false,
+        l10n: l,
+      );
+      expect(data.state, NavGenerationState.failed);
+      expect(data.error, l.api_error_429);
+    });
+
+    test('a run stopped by 400, 401, 402, 403 or 404 names the reason '
+        '(${locale.toLanguageTag()})', () {
+      final l = lookupAppLocalizations(locale);
+      for (final (reason, title) in [
+        ('API_ERROR_400|Bad request', l.api_error_400),
+        ('API_ERROR_401|Unauthorized', l.api_error_401),
+        ('API_ERROR_402|Payment required', l.api_error_402),
+        ('API_ERROR_HTTP_403|Forbidden', l.api_error_403),
+        ('API_ERROR_HTTP_404|Not Found', l.api_error_404),
+      ]) {
+        final data = navGenerationData(
+          const ImageGenerationState(),
+          NavGenerationResult(
+            status: GenerationStatus.error,
+            total: 2,
+            error: generationStatusStoppedError(GenerationStreamError(reason)),
+          ),
+          visible: false,
+          l10n: l,
+        );
+        expect(data.state, NavGenerationState.failed, reason: reason);
+        expect(data.error, title, reason: reason);
+      }
+    });
+
+    test('the tip names the reason the error card gives '
+        '(${locale.toLanguageTag()})', () {
+      final l = lookupAppLocalizations(locale);
+      for (final (message, title) in [
+        ('Exception: API_ERROR_402|Payment required', l.api_error_402),
+        ('API_ERROR_401|Unauthorized', l.api_error_401),
+        ('Exception: API_ERROR_400|Bad request', l.api_error_400),
+        ('Exception: API_ERROR_HTTP_404|Not Found', l.api_error_404),
+        ('Exception: API_ERROR_HTTP_502|Bad Gateway', l.api_error_500),
+        ('API_ERROR_NETWORK|Connection refused', l.api_error_network),
+      ]) {
+        final data = navGenerationData(
+          const ImageGenerationState(),
+          NavGenerationResult(
+            status: GenerationStatus.error,
+            total: 0,
+            error: message,
+          ),
+          visible: false,
+          l10n: l,
+        );
+        expect(data.error, title, reason: message);
+        expect(data.error, generationErrorView(l, message).title);
+      }
+    });
+  }
 
   late ProviderContainer container;
   late _Shell shell;

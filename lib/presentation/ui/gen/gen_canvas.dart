@@ -1669,7 +1669,8 @@ class _HexFieldState extends State<_HexField> {
   }
 }
 
-/// 生成失败卡：红色感叹号 │ 标题 + 说明 │ 复制详情、重试、关闭。
+/// 生成失败卡：红色感叹号 │ 标题 + 说明 │ 重试、复制详情、关闭。没有可补发的
+/// （[GenError.retry] 为 false，比如批量出完、只有几次请求被拒）不出重试。
 class _ErrorCard extends StatelessWidget {
   const _ErrorCard({required this.error});
   final GenError error;
@@ -1728,24 +1729,27 @@ class _ErrorCard extends StatelessWidget {
                     error.hint!,
                     style: UiText.sans(12, color: c.muted, height: 1.45),
                   ),
-                const SizedBox(height: 6),
-                Row(
-                  spacing: 6,
-                  children: [
-                    UiBtn(
-                      key: const Key('gen-retry'),
-                      size: UiBtnSize.small,
-                      tone: UiBtnTone.primary,
-                      onTap: scope.actions.onRetry,
-                      children: [
-                        const UiGlyph(UiGlyphs.retry, size: 12),
-                        Text(l.gen_retry),
-                      ],
-                    ),
-                    if (error.detail != null)
-                      _CopyDetail(detail: error.detail!),
-                  ],
-                ),
+                if (error.retry || error.detail != null) ...[
+                  const SizedBox(height: 6),
+                  Row(
+                    spacing: 6,
+                    children: [
+                      if (error.retry)
+                        UiBtn(
+                          key: const Key('gen-retry'),
+                          size: UiBtnSize.small,
+                          tone: UiBtnTone.primary,
+                          onTap: scope.actions.onRetry,
+                          children: [
+                            const UiGlyph(UiGlyphs.retry, size: 12),
+                            Text(l.gen_retry),
+                          ],
+                        ),
+                      if (error.detail != null)
+                        _CopyDetail(copy: error.copy ?? error.detail!),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
@@ -1762,10 +1766,11 @@ class _ErrorCard extends StatelessWidget {
   }
 }
 
-/// “复制详情”：点了把原始错误放进剪贴板，按钮变“已复制” 1.5 秒。
+/// “复制详情”：点了把原始错误放进剪贴板（[copy]，整次停下的内部标记已经去掉），
+/// 按钮变“已复制” 1.5 秒；悬停显示的也是 [copy]。
 class _CopyDetail extends StatefulWidget {
-  const _CopyDetail({required this.detail});
-  final String detail;
+  const _CopyDetail({required this.copy});
+  final String copy;
 
   @override
   State<_CopyDetail> createState() => _CopyDetailState();
@@ -1786,9 +1791,9 @@ class _CopyDetailState extends State<_CopyDetail> {
     key: const Key('gen-error-copy'),
     size: UiBtnSize.small,
     tone: UiBtnTone.ghost,
-    tooltip: widget.detail,
+    tooltip: widget.copy,
     onTap: () {
-      unawaited(Clipboard.setData(ClipboardData(text: widget.detail)));
+      unawaited(Clipboard.setData(ClipboardData(text: widget.copy)));
       setState(() => _done = true);
       _t?.cancel();
       _t = Timer(const Duration(milliseconds: 1500), () {

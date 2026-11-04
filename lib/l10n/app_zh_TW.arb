@@ -1030,10 +1030,16 @@
   "resolution_height": "高度",
   "api_error_429": "併發限制",
   "api_error_429_hint": "請求過於頻繁，請稍後重試（常見於合租帳號）",
+  "api_error_400": "請求無效",
+  "api_error_400_hint": "無法生成：NovelAI 不接受這組設定。請檢查提示詞和參數，改好後再點“生成”",
   "api_error_401": "認證失敗",
   "api_error_401_hint": "Token 無效或已過期，請重新登入",
   "api_error_402": "餘額不足",
   "api_error_402_hint": "Anlas 餘額不足，請充值後重試",
+  "api_error_403": "沒有權限",
+  "api_error_403_hint": "無法生成：這個帳號沒有這項功能的權限。請檢查訂閱，或換個帳號後再點“生成”",
+  "api_error_404": "未找到",
+  "api_error_404_hint": "無法生成：伺服器上沒有這個介面或模型。請檢查 API 地址和模型，改好後再點“生成”",
   "api_error_500": "伺服器錯誤",
   "api_error_500_hint": "NovelAI 伺服器出現問題，請稍後重試",
   "api_error_503": "服務不可用",
@@ -7962,6 +7968,22 @@
   "explore_negative": "負面",
   "explore_failReason": "失敗原因",
   "explore_retryFailed": "重試失敗的候選",
+  "explore_error400Hint": "無法生成：NovelAI 不接受這組設定。請檢查提示詞和參數，改好後再點“重試失敗的候選”",
+  "@explore_error400Hint": {
+    "description": "Hint after api_error_400 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error403Hint": "無法生成：這個帳號沒有這項功能的權限。請檢查訂閱，或換個帳號後再點“重試失敗的候選”",
+  "@explore_error403Hint": {
+    "description": "Hint after api_error_403 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error404Hint": "無法生成：伺服器上沒有這個介面或模型。請檢查 API 地址和模型，改好後再點“重試失敗的候選”",
+  "@explore_error404Hint": {
+    "description": "Hint after api_error_404 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_concurrencyStoppedHint": "繼續等待生成名額會超出本輪累計 90 秒的上限，後續請求已停止。請稍後再點“重試失敗的候選”。",
+  "@explore_concurrencyStoppedHint": {
+    "description": "Hint after api_error_429 when a style explore stopped because the 429 waits ran out. Word for word gen_concurrencyStopped, but it ends with the explore_retryFailed button, not Retry"
+  },
   "explore_waitHint": "生成好以後這裡會顯示它抽到的畫師",
   "explore_mergedArtists": "合在一起的畫師 · {count}",
   "@explore_mergedArtists": {
@@ -8544,6 +8566,27 @@
   "gen_openViewer": "開啟大圖",
   "gen_retry": "重試",
   "gen_copyDetail": "複製詳情",
+  "gen_concurrencyStopped": "繼續等待生成名額會超出本輪累計 90 秒的上限，後續請求已停止。請稍後再點“重試”。",
+  "gen_partialBatchHint": "本次請求共 {expected} 張，已收到的 {received} 張保留在畫布上。重試只會提交尚未開始的後續請求。",
+  "@gen_partialBatchHint": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "expected": {
+        "type": "int"
+      }
+    }
+  },
+  "gen_rejectedRequestsHint": "有 {count} 次請求抽到的詞 NovelAI 不接受，已跳過，其餘請求照常傳送。請檢查順序或隨機塊裡的詞，改好後再點“生成”",
+  "@gen_rejectedRequestsHint": {
+    "description": "Hint after api_error_400 on the generation canvas when a run with sequential or random blocks finished but NovelAI rejected (400) the words drawn for {count} of its requests: they were skipped and the others were sent. Ends with the Generate button, as api_error_400_hint does; this card has no Retry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gen_history": "歷史記錄",
   "gen_historyEmpty": "這次還沒有生成",
   "gen_historyEmptySub": "生成的圖會按批次排在這裡",
@@ -11969,6 +12012,10 @@
   },
   "ag_psGenerate": "生成",
   "ag_psGenerating": "生成中",
+  "ag_psError400Hint": "無法生成：NovelAI 不接受這組設定。請檢查參數，或讓 Agent 修改這一項的提示詞，改好後再點“生成”",
+  "@ag_psError400Hint": {
+    "description": "Hint after api_error_400 on a prompt-set card. Its Generate writes the item's prompt into the draft again, so the prompt is fixed through Agent (ag_psEditItem), not on the canvas. Ends with the card's Generate (ag_psGenerate)"
+  },
   "ag_psRevision": "v{revision} · 已改 {count} 項",
   "@ag_psRevision": {
     "placeholders": {

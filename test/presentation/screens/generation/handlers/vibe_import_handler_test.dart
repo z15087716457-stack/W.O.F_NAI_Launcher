@@ -1,4 +1,15 @@
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nai_launcher/data/datasources/remote/nai_image_enhancement_api_service.dart';
+import 'package:nai_launcher/data/models/image/image_params.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_params_notifier.dart';
+
+import '../../../../helpers/novelai_billing.dart';
+import '../../../../helpers/light_theme_contrast.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nai_launcher/core/constants/api_constants.dart';
@@ -6,7 +17,116 @@ import 'package:nai_launcher/data/models/vibe/vibe_library_entry.dart';
 import 'package:nai_launcher/data/models/vibe/vibe_reference.dart';
 import 'package:nai_launcher/presentation/screens/generation/handlers/vibe_import_handler.dart';
 
+class _FilePicker extends FilePicker {
+  _FilePicker(this.file);
+  final PlatformFile file;
+  @override
+  Future<FilePickerResult?> pickFiles({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    bool allowCompression = true,
+    int compressionQuality = 30,
+    bool allowMultiple = false,
+    bool withData = false,
+    bool withReadStream = false,
+    bool lockParentWindow = false,
+    bool readSequential = false,
+  }) async => FilePickerResult([file]);
+}
+
+class _Params extends GenerationParamsNotifier {
+  @override
+  ImageParams build() =>
+      const ImageParams(model: ImageModels.animeDiffusionV45Full);
+  @override
+  Future<void> saveGenerationState() async {}
+}
+
 void main() {
+  for (final picked in [true, false]) {
+    testWidgets(
+      'manual Vibe file import shows server reason before adding a raw image (picked: $picked)',
+      (tester) async {
+        final api = FakeNovelAi()..refuse = (_, _) => 403;
+        final container = createStorageFreeContainer(
+          overrides: [
+            generationParamsNotifierProvider.overrideWith(_Params.new),
+            naiImageEnhancementApiServiceProvider.overrideWithValue(
+              NAIImageEnhancementApiService(
+                Dio()..httpClientAdapter = api,
+                ledger: unrecordedLedger(),
+              ),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        final bytes = Uint8List.fromList([1, 2]);
+        const fileName = 'source.jpg';
+        if (picked) {
+          FilePicker? previous;
+          try {
+            previous = FilePicker.platform;
+          } catch (_) {
+            /* no desktop plugin */
+          }
+          FilePicker.platform = _FilePicker(
+            PlatformFile(name: fileName, size: bytes.length, bytes: bytes),
+          );
+          addTearDown(() {
+            if (previous != null) FilePicker.platform = previous;
+          });
+        }
+        late VibeImportHandler handler;
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Consumer(
+                  builder: (context, ref, _) {
+                    handler = VibeImportHandler(ref: ref, context: context);
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+        final running = picked
+            ? handler.importFromFiles()
+            : handler.importDroppedFile(fileName: fileName, bytes: bytes);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byType(ElevatedButton));
+        await tester.pumpAndSettle();
+        final reason = find.textContaining('synthetic refusal');
+        expect(reason, findsOneWidget);
+        expect(
+          tester.widget<Text>(reason).data,
+          allOf(contains('403'), isNot(contains('Exception:'))),
+        );
+        expect(
+          container.read(generationParamsNotifierProvider).vibeReferencesV4,
+          isEmpty,
+        );
+        expect(api.paths, ['/ai/encode-vibe']);
+        await tester.tap(find.byType(TextButton));
+        await tester.pumpAndSettle();
+        await running;
+        expect(
+          container.read(generationParamsNotifierProvider).vibeReferencesV4,
+          isEmpty,
+        );
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
+
   test('单个来自库的 Vibe 会匹配到可覆盖的原始条目', () {
     final imageBytes = Uint8List.fromList(const [1, 2, 3, 4]);
     final entry = VibeLibraryEntry(

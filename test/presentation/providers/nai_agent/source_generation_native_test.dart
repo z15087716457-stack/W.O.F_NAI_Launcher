@@ -34,6 +34,8 @@ import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart'
+    show isGenerationStatusStopped;
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/image_save_settings_provider.dart';
 import 'package:nai_launcher/presentation/providers/notification_settings_provider.dart';
@@ -629,6 +631,28 @@ void main() {
       expect(requests, hasLength(1));
     },
   );
+  test('variations NovelAI refuses with 402 stop the run: the result gives the '
+      '402 without the stop marker and says the run stopped', () async {
+    when(() => api.generateImageStream(any())).thenAnswer((invocation) {
+      requests.add(invocation.positionalArguments.single as ImageParams);
+      return Stream.value(
+        ImageStreamChunk.error('API_ERROR_402|Insufficient Anlas'),
+      );
+    });
+    final q = await quote({'operation': 'variations'}, metadata: true);
+    expect(q['samples'], 3);
+    final result = await run(q);
+    expect(requests, hasLength(1));
+    expect(result['status'], 'error');
+    expect(result['error'], 'API_ERROR_402|Insufficient Anlas');
+    expect(result['run_stopped'], 'http_status');
+    expect(result['artifacts'], isEmpty);
+    // The generation page reads its reason from the run, marker and all.
+    final stopped = container
+        .read(imageGenerationNotifierProvider)
+        .errorMessage;
+    expect(isGenerationStatusStopped(stopped), isTrue, reason: stopped);
+  });
   test(
     'official Pi tool loop waits for a source confirmation, executes the native batch and reads exported pixels',
     () async {

@@ -94,6 +94,10 @@ void main() {
         rollCalls++;
         return onRoll?.call() ?? {};
       });
+      // 有 roll 结果的用例就是提示词里有会重抽的块。
+      when(
+        () => rollCoordinator.rollRedrawsRequest(any()),
+      ).thenAnswer((_) => onRoll != null);
 
       when(
         () => mockApiService.generateImage(

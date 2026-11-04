@@ -1,5 +1,19 @@
 import '../../l10n/app_localizations.dart';
 
+/// Bounded server detail for error cards; copying still uses the original text.
+String? generationErrorDetails(String? message, {int maxLength = 240}) {
+  if (message == null) return null;
+  final separator = message.indexOf('|');
+  if (separator < 0) return null;
+  final summary = message
+      .substring(separator + 1)
+      .trim()
+      .replaceAll(RegExp(r'"[A-Za-z0-9+/=]{256,}"'), '"…"');
+  return summary.length > maxLength
+      ? '${summary.substring(0, maxLength)}…'
+      : summary;
+}
+
 /// 解析 API 错误代码，返回 (标题, 提示)
 (String, String?) generationErrorPresentation(
   String? message,
@@ -16,16 +30,7 @@ import '../../l10n/app_localizations.dart';
 
   final separator = message.indexOf('|');
   final errorCode = separator < 0 ? message : message.substring(0, separator);
-  final rawDetails = separator < 0
-      ? null
-      : message.substring(separator + 1).trim();
-  final summary = rawDetails?.replaceAll(
-    RegExp(r'"[A-Za-z0-9+/=]{256,}"'),
-    '"…"',
-  );
-  final details = summary != null && summary.length > 240
-      ? '${summary.substring(0, 240)}…'
-      : summary;
+  final details = generationErrorDetails(message);
 
   // 固定文案后拼接服务端真实详情，避免所有错误只显示同一句兜底提示
   String withDetails(String localizedHint) {

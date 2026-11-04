@@ -359,13 +359,15 @@ class _GenerationControlsState extends ConsumerState<GenerationControls> {
       return;
     }
 
-    // 生成（探索模式在真实批次 start 前完成布防，并强制逐张请求）。
+    // 生成（探索模式在真实批次 start 前完成布防，并强制逐张请求；每张候选
+    // 抽到的画风串不同，400 只算那一张失败，接着抽下一张）。
     ref
         .read(imageGenerationNotifierProvider.notifier)
         .generate(
           params,
           onBatchEvent: widget.onBatchEvent,
           imagesPerRequestOverride: widget.exploreMode ? 1 : null,
+          badRequestStopsRun: !widget.exploreMode,
         );
     widget.onGenerateInvoked?.call();
   }

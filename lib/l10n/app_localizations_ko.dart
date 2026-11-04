@@ -2368,6 +2368,13 @@ class AppLocalizationsKo extends AppLocalizations {
       '요청이 너무 많습니다. 잠시 기다린 후 다시 시도하세요(공유 계정에서 자주 발생합니다)';
 
   @override
+  String get api_error_400 => '잘못된 요청';
+
+  @override
+  String get api_error_400_hint =>
+      '생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 프롬프트와 매개변수를 확인한 뒤 “생성”을 누르세요';
+
+  @override
   String get api_error_401 => '인증 실패';
 
   @override
@@ -2378,6 +2385,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get api_error_402_hint => 'Anlas가 부족합니다. 충전한 뒤 다시 시도하세요';
+
+  @override
+  String get api_error_403 => '권한 없음';
+
+  @override
+  String get api_error_403_hint =>
+      '생성할 수 없습니다. 이 계정에는 이 기능을 사용할 권한이 없습니다. 구독을 확인하거나 다른 계정으로 바꾼 뒤 “생성”을 누르세요';
+
+  @override
+  String get api_error_404 => '찾을 수 없음';
+
+  @override
+  String get api_error_404_hint =>
+      '생성할 수 없습니다. 서버에 이 엔드포인트나 모델이 없습니다. API 주소와 모델을 확인한 뒤 “생성”을 누르세요';
 
   @override
   String get api_error_500 => '서버 오류';
@@ -14286,6 +14307,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get explore_retryFailed => '실패한 후보 다시 시도';
 
   @override
+  String get explore_error400Hint =>
+      '생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 프롬프트와 매개변수를 확인한 뒤 “실패한 후보 다시 시도”를 누르세요';
+
+  @override
+  String get explore_error403Hint =>
+      '생성할 수 없습니다. 이 계정에는 이 기능을 사용할 권한이 없습니다. 구독을 확인하거나 다른 계정으로 바꾼 뒤 “실패한 후보 다시 시도”를 누르세요';
+
+  @override
+  String get explore_error404Hint =>
+      '생성할 수 없습니다. 서버에 이 엔드포인트나 모델이 없습니다. API 주소와 모델을 확인한 뒤 “실패한 후보 다시 시도”를 누르세요';
+
+  @override
+  String get explore_concurrencyStoppedHint =>
+      '이번 실행에서 생성 순서를 기다릴 수 있는 시간은 총 90초입니다. 더 기다리면 한도를 넘기 때문에 후속 요청을 중단했습니다. 잠시 후 “실패한 후보 다시 시도”를 누르세요.';
+
+  @override
   String get explore_waitHint => '생성되면 뽑힌 작가가 여기에 표시됩니다';
 
   @override
@@ -15387,6 +15424,20 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gen_copyDetail => '자세히 복사';
+
+  @override
+  String get gen_concurrencyStopped =>
+      '이번 실행에서 생성 순서를 기다릴 수 있는 시간은 총 90초입니다. 더 기다리면 한도를 넘기 때문에 후속 요청을 중단했습니다. 잠시 후 “다시 시도”를 누르세요.';
+
+  @override
+  String gen_partialBatchHint(int received, int expected) {
+    return '이 요청의 이미지 $expected장 중 수신한 $received장을 캔버스에 보관했습니다. 이후에 아직 보내지 않은 요청만 다시 시도할 수 있습니다.';
+  }
+
+  @override
+  String gen_rejectedRequestsHint(int count) {
+    return '요청 $count회에서 뽑힌 단어를 NovelAI가 받아들이지 않아 그 요청은 건너뛰고 나머지 요청은 그대로 보냈습니다. 순차 또는 무작위 블록의 단어를 확인한 뒤 “생성”을 누르세요';
+  }
 
   @override
   String get gen_history => '기록';
@@ -21668,6 +21719,10 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get ag_psGenerating => '생성 중';
+
+  @override
+  String get ag_psError400Hint =>
+      '생성할 수 없습니다. NovelAI가 이 설정을 받아들이지 않았습니다. 매개변수를 확인하거나 이 항목의 프롬프트 수정을 Agent에 요청한 뒤 “생성”을 누르세요';
 
   @override
   String ag_psRevision(int revision, int count) {

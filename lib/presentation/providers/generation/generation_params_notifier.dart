@@ -16,6 +16,7 @@ import '../../../core/enums/precise_ref_type.dart';
 import '../../../core/enums/quality_tag_preset.dart';
 import '../../../core/storage/local_storage_service.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/vibe_encoding_utils.dart';
 import '../../../core/utils/nai_api_utils.dart';
 import '../../../core/utils/vibe_performance_diagnostics.dart';
 import '../../../data/datasources/remote/nai_image_enhancement_api_service.dart';
@@ -603,12 +604,14 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
   /// [informationExtracted] 信息提取量
   /// [vibeName] Vibe 名称（用于日志）
   ///
-  /// 返回编码后的 vibe 字符串，如果出错返回 null
+  /// 返回编码后的 vibe 字符串，默认出错返回 null。
+  /// 手动编码入口用 [propagateErrors] 保留服务端错误，避免误报成文件解析失败。
   Future<String?> encodeVibeWithCache(
     Uint8List imageData, {
     required String model,
     double informationExtracted = 1.0,
     String? vibeName,
+    bool propagateErrors = false,
   }) async {
     final cacheKey = _buildVibeEncodingCacheKey(
       imageData,
@@ -631,6 +634,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
         model: model,
         informationExtracted: informationExtracted,
       );
+      if (encoding.isEmpty) return null;
 
       // 存入缓存
       _vibeEncodingCache[cacheKey] = encoding;
@@ -639,6 +643,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
       return encoding;
     } catch (e, stack) {
       AppLogger.e('Vibe 编码失败: ${vibeName ?? 'unknown'}', e, stack, 'VibeCache');
+      if (propagateErrors) rethrow;
       return null;
     }
   }
@@ -787,6 +792,7 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
           model: resolvedModel,
           informationExtracted: nextInfoExtracted,
           vibeName: nextVibe.displayName,
+          propagateErrors: true,
         );
     if (encoding == null || encoding.isEmpty) {
       return null;
@@ -1055,6 +1061,8 @@ class GenerationParamsNotifier extends _$GenerationParamsNotifier {
 
       // 返回第一个条目的 ID
       return savedIds.isNotEmpty ? savedIds.first : null;
+    } on VibeEncodingException {
+      rethrow;
     } catch (e, stackTrace) {
       AppLogger.e('Failed to save vibes to library', e, stackTrace);
       return null;

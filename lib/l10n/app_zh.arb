@@ -1030,10 +1030,16 @@
   "resolution_height": "高度",
   "api_error_429": "并发限制",
   "api_error_429_hint": "请求过于频繁，请稍后重试（常见于合租账号）",
+  "api_error_400": "请求无效",
+  "api_error_400_hint": "无法生成：NovelAI 不接受这组设置。请检查提示词和参数，改好后再点“生成”",
   "api_error_401": "认证失败",
   "api_error_401_hint": "Token 无效或已过期，请重新登录",
   "api_error_402": "余额不足",
   "api_error_402_hint": "Anlas 余额不足，请充值后重试",
+  "api_error_403": "没有权限",
+  "api_error_403_hint": "无法生成：这个账号没有这项功能的权限。请检查订阅，或换个账号后再点“生成”",
+  "api_error_404": "未找到",
+  "api_error_404_hint": "无法生成：服务器上没有这个接口或模型。请检查 API 地址和模型，改好后再点“生成”",
   "api_error_500": "服务器错误",
   "api_error_500_hint": "NovelAI 服务器出现问题，请稍后重试",
   "api_error_503": "服务不可用",
@@ -7962,6 +7968,22 @@
   "explore_negative": "负面",
   "explore_failReason": "失败原因",
   "explore_retryFailed": "重试失败的候选",
+  "explore_error400Hint": "无法生成：NovelAI 不接受这组设置。请检查提示词和参数，改好后再点“重试失败的候选”",
+  "@explore_error400Hint": {
+    "description": "Hint after api_error_400 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error403Hint": "无法生成：这个账号没有这项功能的权限。请检查订阅，或换个账号后再点“重试失败的候选”",
+  "@explore_error403Hint": {
+    "description": "Hint after api_error_403 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error404Hint": "无法生成：服务器上没有这个接口或模型。请检查 API 地址和模型，改好后再点“重试失败的候选”",
+  "@explore_error404Hint": {
+    "description": "Hint after api_error_404 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_concurrencyStoppedHint": "继续等待生成名额会超出本轮累计 90 秒的上限，后续请求已停止。请稍后再点“重试失败的候选”。",
+  "@explore_concurrencyStoppedHint": {
+    "description": "Hint after api_error_429 when a style explore stopped because the 429 waits ran out. Word for word gen_concurrencyStopped, but it ends with the explore_retryFailed button, not Retry"
+  },
   "explore_waitHint": "生成好以后这里会显示它抽到的画师",
   "explore_mergedArtists": "合在一起的画师 · {count}",
   "@explore_mergedArtists": {
@@ -8544,6 +8566,23 @@
   "gen_openViewer": "打开大图",
   "gen_retry": "重试",
   "gen_copyDetail": "复制详情",
+  "gen_concurrencyStopped": "继续等待生成名额会超出本轮累计 90 秒的上限，后续请求已停止。请稍后再点“重试”。",
+  "gen_partialBatchHint": "本次请求共 {expected} 张，已收到的 {received} 张保留在画布上。重试只会提交尚未开始的后续请求。",
+  "@gen_partialBatchHint": {
+    "placeholders": {
+      "received": { "type": "int" },
+      "expected": { "type": "int" }
+    }
+  },
+  "gen_rejectedRequestsHint": "有 {count} 次请求抽到的词 NovelAI 不接受，已跳过，其余请求照常发送。请检查顺序或随机块里的词，改好后再点“生成”",
+  "@gen_rejectedRequestsHint": {
+    "description": "Hint after api_error_400 on the generation canvas when a run with sequential or random blocks finished but NovelAI rejected (400) the words drawn for {count} of its requests: they were skipped and the others were sent. Ends with the Generate button, as api_error_400_hint does; this card has no Retry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gen_history": "历史记录",
   "gen_historyEmpty": "这次还没有生成",
   "gen_historyEmptySub": "生成的图会按批次排在这里",
@@ -11435,6 +11474,8 @@
   "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
   "ag_psGenerate": "生成",
   "ag_psGenerating": "生成中",
+  "ag_psError400Hint": "无法生成：NovelAI 不接受这组设置。请检查参数，或让 Agent 修改这一项的提示词，改好后再点“生成”",
+  "@ag_psError400Hint": {"description": "Hint after api_error_400 on a prompt-set card. Its Generate writes the item's prompt into the draft again, so the prompt is fixed through Agent (ag_psEditItem), not on the canvas. Ends with the card's Generate (ag_psGenerate)"},
   "ag_psRevision": "v{revision} · 已改 {count} 项",
   "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
   "ag_psSaveBlock": "存成积木",

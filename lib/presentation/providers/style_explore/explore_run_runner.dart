@@ -10,6 +10,7 @@ import '../../../core/utils/explore_mutation_engine.dart';
 import '../../../data/models/image/image_params.dart';
 import '../../../data/models/prompt_block/pill_document.dart';
 import '../../../data/models/style_explore/explore_run.dart';
+import '../generation/generation_retry_policy.dart';
 import '../image_generation_provider.dart';
 import '../pill_roll_coordinator.dart';
 import '../pill_workspace_provider.dart';
@@ -707,8 +708,10 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           : null;
       session.generationOwner = generationOwner;
       final result = await pendingResult;
+      final generationId = session.activeGenerationId;
       session.activeGenerationId = null;
       session.generationOwner = null;
+      String? stopError;
       if (result != null) {
         final storedPath = await ref
             .read(exploreRunImageStoreProvider)
@@ -729,9 +732,11 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
           ),
         );
       } else {
+        stopError = _cancelRequested ? null : _stopErrorOf(generationId);
         final errorText = _cancelRequested
             ? 'cancelled'
-            : (ref.read(imageGenerationNotifierProvider).errorMessage ??
+            : (stopError ??
+                  ref.read(imageGenerationNotifierProvider).errorMessage ??
                   'generation failed');
         await listNotifier.updateGeneration(
           session.runId,
@@ -744,9 +749,70 @@ class ExploreRunRunner extends Notifier<ExploreRunRunnerState> {
       }
       _incrementProcessed();
       if (_cancelRequested) break;
+      if (stopError != null) {
+        // 整个探索停下：后面的候选不再开始，记上同一个原因，
+        // 「重试失败的候选」能把它们接着生成。
+        await _failUnstarted(
+          session.runId,
+          prepared.pendingIds.skipWhile((id) => id != candidateId).skip(1),
+          stopError,
+        );
+        break;
+      }
     }
 
     await _finalize(session);
+  }
+
+  /// 这一张自己的那次生成失败、而且这个失败让整个探索停下时，返回记到候选上
+  /// 的报错（带整次停下的标记，界面据此写原因和怎么办）；否则 null。
+  ///
+  /// 401、402、403 不会自己好，429 已经等满 90 秒，404 是服务地址或模型不对
+  /// （所有候选都一样）：后面的候选发了也是白发。400 只算这一张失败：候选之间
+  /// 画风串不同，一张请求无效不代表都无效。没进生成的（被生成门禁挡下），
+  /// 状态里的报错不是这一张的，不据此停下。
+  String? _stopErrorOf(int? generationId) {
+    final generation = ref.read(imageGenerationNotifierProvider);
+    final message = generation.errorMessage;
+    if (generationId == null ||
+        generation.generationRunId != generationId ||
+        generation.status != GenerationStatus.error ||
+        message == null) {
+      return null;
+    }
+    if (isGenerationConcurrencyStopped(message)) return message;
+    return stopsGenerationRun(message, badRequestStopsRun: false)
+        ? generationStatusStoppedError(message)
+        : null;
+  }
+
+  Future<void> _failUnstarted(
+    String runId,
+    Iterable<String> candidateIds,
+    String error,
+  ) async {
+    final ids = candidateIds.toSet();
+    if (ids.isEmpty) return;
+    await ref
+        .read(exploreRunListNotifierProvider.notifier)
+        .transform(
+          runId,
+          (run) => run.copyWith(
+            candidates: [
+              for (final candidate in run.candidates)
+                ids.contains(candidate.id) &&
+                        candidate.generation.status ==
+                            ExploreCandidateGenerationStatus.pending
+                    ? candidate.copyWith(
+                        generation: ExploreCandidateGeneration(
+                          status: ExploreCandidateGenerationStatus.failed,
+                          error: error,
+                        ),
+                      )
+                    : candidate,
+            ],
+          ),
+        );
   }
 
   Future<void> _ensureDeepGuard(

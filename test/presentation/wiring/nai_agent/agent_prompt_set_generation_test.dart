@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,11 +12,14 @@ import 'package:nai_launcher/core/nai_agent/generation_tools.dart';
 import 'package:nai_launcher/core/nai_agent/prompt_set_tools.dart';
 import 'package:nai_launcher/core/storage/local_storage_service.dart';
 import 'package:nai_launcher/core/storage/prompt_block_storage.dart';
+import 'package:nai_launcher/core/utils/localization_extension.dart';
 import 'package:nai_launcher/data/repositories/character_prompt_repository.dart';
 import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/nai_agent/agent_workspace_store.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
+import 'package:nai_launcher/l10n/app_localizations.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/nai_agent/nai_agent_generation_approvals.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
@@ -200,6 +204,92 @@ void main() {
     },
   );
 
+  test("a card's failed Generate says why and what to do, as the error card "
+      'does, and the raw error only when it cannot name it', () async {
+    addTearDown(() => setCurrentL10nLocale(const Locale('zh')));
+    final request = RequestOptions(path: '/ai/generate-image');
+    DioException rejected(int status) => DioException.badResponse(
+      statusCode: status,
+      requestOptions: request,
+      response: Response<void>(requestOptions: request, statusCode: status),
+    );
+    for (final locale in const [Locale('zh'), Locale('en')]) {
+      setCurrentL10nLocale(locale);
+      final l = lookupAppLocalizations(locale);
+      Future<String> shown(Map<String, dynamic> result) async {
+        try {
+          await recordAgentPromptSetImages(
+            workspace: workspace,
+            setId: id,
+            index: 0,
+            result: result,
+            check: () {},
+          );
+        } on NaiAgentToolError catch (error) {
+          expect(error.code, 'generation_failed');
+          return error.message;
+        }
+        fail('$result did not fail');
+      }
+
+      Future<String> failed(String? error) =>
+          shown({'status': 'error', 'error': error});
+      // The card asks for one image in one request: a 429 that waited out
+      // its time is any 429 there (it has no remaining images and no Retry).
+      for (final error in [
+        generationConcurrencyStoppedError(
+          'API_ERROR_429|Concurrent generation is locked',
+        ),
+        generationConcurrencyStoppedError(rejected(429)),
+      ]) {
+        expect(
+          await failed(error),
+          '${l.api_error_429}\n${l.api_error_429_hint}',
+          reason: '$locale $error',
+        );
+      }
+      for (final (status, title, hint) in [
+        // Generate writes this item's prompt into the draft again, so a
+        // prompt fixed on the canvas would not go out: a 400 points to the
+        // parameters or to Agent. The other hints work on the card as they
+        // read on the page (the import leaves parameters, model and account).
+        (400, l.api_error_400, l.ag_psError400Hint),
+        (401, l.api_error_401, l.api_error_401_hint),
+        (402, l.api_error_402, l.api_error_402_hint),
+        (403, l.api_error_403, l.api_error_403_hint),
+        (404, l.api_error_404, l.api_error_404_hint),
+        (500, l.api_error_500, l.api_error_500_hint),
+      ]) {
+        // The one request failed, streamed or not (dio's text).
+        for (final error in [
+          'API_ERROR_$status|Synthetic $status',
+          rejected(status).toString(),
+        ]) {
+          expect(
+            await failed(error),
+            '$title\n$hint',
+            reason: '$locale $error',
+          );
+        }
+      }
+      // What the error card cannot name either reads as it was, without the
+      // stop marker; with no error at all, the general message.
+      expect(
+        await failed('No images returned from generation'),
+        'No images returned from generation',
+      );
+      expect(
+        await failed(generationStatusStoppedError('API_ERROR_UNKNOWN|odd')),
+        'API_ERROR_UNKNOWN|odd',
+      );
+      for (final error in [null, '', generationStatusStoppedError('')]) {
+        expect(await failed(error), l.naiAgent_error, reason: '$error');
+      }
+      expect(await shown({'status': 'interrupted'}), l.naiAgent_error);
+    }
+    expect((await sets.read(id))!['images'], isEmpty);
+  });
+
   test(
     'draft change during controlled backup refuses before native start',
     () async {
@@ -304,6 +394,101 @@ void main() {
       expect(restarted['images']['1'], isNull);
       expect(tester.takeException(), isNull);
       // No app navigation, running model turn or extra approval was needed.
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    "the toast of a card's failed Generate gives the reason and what to do, "
+    'not the internal stop marker',
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final native = (await tester.runAsync(
+        () async =>
+            container.read(imageGenerationNotifierProvider.notifier)
+                as ControlledAgentGeneration,
+      ))!;
+      await harness.pump(tester);
+      final action = harness.panel(tester).actions.onPromptSetAction!;
+      await tester.runAsync(() async {
+        final generate = action(id, 0, AgentPromptSetAction.generate);
+        await waitForAgentStart(native);
+        // NovelAI kept the account busy (429) for the whole wait.
+        native.finish(
+          status: GenerationStatus.error,
+          errorMessage: generationConcurrencyStoppedError(
+            'API_ERROR_429|Concurrent generation is locked',
+          ),
+        );
+        expect(await generate, isTrue);
+      });
+      await tester.pump();
+      final l = lookupAppLocalizations(const Locale('zh'));
+      expect(find.text(l.toast_titleError), findsOneWidget);
+      expect(find.textContaining('GENERATION_'), findsNothing);
+      expect(find.textContaining('API_ERROR_'), findsNothing);
+      expect(
+        find.text('${l.api_error_429}\n${l.api_error_429_hint}'),
+        findsOneWidget,
+      );
+      final restarted = (await tester.runAsync(
+        () => NaiAgentPromptSets(workspace.agentDirectory).read(id),
+      ))!;
+      expect(restarted['images'], isEmpty);
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox());
+    },
+  );
+
+  testWidgets(
+    "after a 400 a card's Generate toast sends a prompt fix to Agent, since "
+    "Generate writes the item's prompt over the one on the canvas",
+    (tester) async {
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final native = (await tester.runAsync(
+        () async =>
+            container.read(imageGenerationNotifierProvider.notifier)
+                as ControlledAgentGeneration,
+      ))!;
+      await harness.pump(tester);
+      final action = harness.panel(tester).actions.onPromptSetAction!;
+      final set = (await tester.runAsync(() => sets.read(id)))!;
+      final item = container.read(agentPromptSetActionsProvider).merged(set, 0);
+      await tester.runAsync(() async {
+        // The prompt as the user fixed it on the canvas, as the page's 400
+        // hint asks ...
+        container
+            .read(generationParamsNotifierProvider.notifier)
+            .updatePromptImmediately('best quality, 1girl, fixed on canvas');
+        final generate = action(id, 0, AgentPromptSetAction.generate);
+        await waitForAgentStart(native);
+        // ... does not go out: the card wrote its item's prompt back first.
+        expect(native.requests.single.prompt, item['prompt']);
+        expect(native.requests.single.prompt, isNot(contains('canvas')));
+        native.finish(
+          status: GenerationStatus.error,
+          errorMessage: 'API_ERROR_400|Invalid request',
+        );
+        expect(await generate, isTrue);
+      });
+      await tester.pump();
+      final l = lookupAppLocalizations(const Locale('zh'));
+      expect(find.text(l.toast_titleError), findsOneWidget);
+      expect(find.textContaining('API_ERROR_'), findsNothing);
+      // The reason as on the page; what to do points to the parameters, or
+      // to Agent for this item's prompt, then to the card's Generate.
+      expect(find.textContaining(l.api_error_400_hint), findsNothing);
+      expect(
+        find.text('${l.api_error_400}\n${l.ag_psError400Hint}'),
+        findsOneWidget,
+      );
+      final restarted = (await tester.runAsync(
+        () => NaiAgentPromptSets(workspace.agentDirectory).read(id),
+      ))!;
+      expect(restarted['images'], isEmpty);
+      expect(tester.takeException(), isNull);
       await tester.pumpWidget(const SizedBox());
     },
   );

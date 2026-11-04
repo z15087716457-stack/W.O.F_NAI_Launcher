@@ -192,6 +192,21 @@ void main() {
       await tapKey(t, 'explore-retry-r3');
       expect(rec.calls.last, 'retry');
     });
+
+    testWidgets('点开失败的候选：检查器写失败原因，“重试失败的候选”接着生成', (t) async {
+      await pump(t, data: ExploreFixture.view(failed: true));
+      await tapKey(t, 'explore-card-c32');
+      final inspector = find.byKey(const Key('explore-inspector'));
+      for (final shown in ['失败原因', '服务器繁忙（429），已自动重试 3 次', '重试失败的候选']) {
+        expect(
+          find.descendant(of: inspector, matching: find.text(shown)),
+          findsOneWidget,
+          reason: shown,
+        );
+      }
+      await tapKey(t, 'explore-inspector-retry');
+      expect(rec.calls.last, 'retry');
+    });
   });
 
   group('多选', () {

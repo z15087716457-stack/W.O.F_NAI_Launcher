@@ -71,6 +71,7 @@ final generationVibeEncoderProvider =
                 model: model,
                 informationExtracted: vibe.infoExtracted,
                 vibeName: vibe.displayName,
+                propagateErrors: true,
               ),
     );
 
@@ -236,7 +237,7 @@ class GenerationReferenceImports {
       });
       final encoding = await result;
       if (encoding == null || encoding.isEmpty) {
-        throw StateError(currentL10n.vibeParseFailed);
+        throw StateError(currentL10n.vibe_encodeFailed);
       }
       await commit(() {
         final identity = ref.read(generationReferenceIdentityProvider)

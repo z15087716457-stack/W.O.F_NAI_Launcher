@@ -8,4 +8,4 @@
 
 ## image_generate
 
-`prepare`/`run`/`status`/`cancel` use one original `image_id` or workspace-relative `path`. `operation=variations` makes three images, projecting source NAI metadata with current prompts as fallback. `operation=enhance` uses current composed prompts/references and native magnitude, scale and Max settings. Native canvas/history and workspace originals/results apply; the Studio draft stays unchanged.
+`prepare`/`run`/`status`/`cancel` use one original `image_id` or workspace-relative `path`. `operation=variations` makes three images, projecting source NAI metadata with current prompts as fallback. `operation=enhance` uses current composed prompts/references and native magnitude, scale and Max settings. Native canvas/history and workspace originals/results apply; the Studio draft stays unchanged. `run` results carry `error` and `run_stopped` as `generation_run` does (generation.md).

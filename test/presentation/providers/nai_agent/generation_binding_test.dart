@@ -25,6 +25,11 @@ import 'package:nai_launcher/data/repositories/prompt_block_repository.dart';
 import 'package:nai_launcher/data/services/vibe_library_storage_service.dart';
 import 'package:nai_launcher/presentation/providers/account_manager_provider.dart';
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart'
+    show
+        GenerationStreamError,
+        generationConcurrencyStoppedError,
+        generationStatusStoppedError;
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/prompt_block_library_provider.dart';
 import 'package:nai_launcher/presentation/providers/subscription_provider.dart';
@@ -129,6 +134,7 @@ class ControlledAgentGeneration extends ImageGenerationNotifier {
     GenerationBatchCallback? onBatchEvent,
     int? imagesPerRequestOverride,
     ImageOperation? operation,
+    bool badRequestStopsRun = true,
   }) {
     requests.add(params);
     sizes.add(imagesPerRequestOverride);
@@ -147,7 +153,10 @@ class ControlledAgentGeneration extends ImageGenerationNotifier {
     );
   }
 
-  void finish({GenerationStatus status = GenerationStatus.completed}) {
+  void finish({
+    GenerationStatus status = GenerationStatus.completed,
+    String? errorMessage,
+  }) {
     final image = GeneratedImage(
       id: 'native-image',
       bytes: pixels,
@@ -161,6 +170,7 @@ class ControlledAgentGeneration extends ImageGenerationNotifier {
         currentImages: [image],
         displayImages: [image],
         progress: 1,
+        errorMessage: errorMessage,
       );
     }
     callback?.call(
@@ -704,6 +714,120 @@ void main() {
       expect(result['balance_before_anlas'], 10000);
     },
   );
+  test(
+    'a 401 that signs the account out leaves the owned native run to stop at '
+    'that 401 with its reason, as on the generation page',
+    () async {
+      final service = tools();
+      final q = await quote(service);
+      final future = execute(service, q);
+      decide();
+      await waitForAgentStart(native());
+      // NovelAI answered 401 and the token could not be refreshed: the auth
+      // interceptor signs out before it hands the 401 back to the run
+      // (dio_client.dart), which then stops at it by itself.
+      (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+          .setAuth(
+            const AuthState(
+              status: AuthStatus.error,
+              errorCode: AuthErrorCode.authFailed,
+              httpStatusCode: 401,
+            ),
+          );
+      expect(native().cancels, 0);
+      final stopped = generationStatusStoppedError(
+        'API_ERROR_401|Unauthorized',
+      );
+      native().finish(status: GenerationStatus.error, errorMessage: stopped);
+      final result = await future;
+      expect(native().cancels, 0);
+      expect(result['status'], 'error');
+      // The Agent gets NovelAI's 401 as upstream reports it; that the run
+      // stopped there is a field of its own, not a marker in the error.
+      expect(result['error'], 'API_ERROR_401|Unauthorized');
+      expect(result['run_stopped'], 'http_status');
+      expect(result.containsKey('stop_reason'), isFalse);
+      expect(result['images'].single['image_id'], 'native-image');
+      // The quoted account is gone: no balance is reported for it.
+      expect(result['balance_after_anlas'], null);
+    },
+  );
+  for (final (name, runError, error, stopped) in [
+    (
+      'a 429 for the whole wait',
+      generationConcurrencyStoppedError(
+        const GenerationStreamError(
+          'API_ERROR_429|Concurrent generation is locked',
+        ),
+      ),
+      'API_ERROR_429|Concurrent generation is locked',
+      'concurrency_limit',
+    ),
+    (
+      'a 402',
+      generationStatusStoppedError(
+        const GenerationStreamError('API_ERROR_402|Insufficient Anlas'),
+      ),
+      'API_ERROR_402|Insufficient Anlas',
+      'http_status',
+    ),
+    // A failure that did not stop the run is reported as it was.
+    (
+      'a 500 that did not',
+      'Exception: API_ERROR_500|Internal Server Error',
+      'Exception: API_ERROR_500|Internal Server Error',
+      null,
+    ),
+  ]) {
+    test('$name: the result gives the error without the stop marker and '
+        'says whether the run stopped', () async {
+      final service = tools();
+      final q = await quote(service, {'requests': 3});
+      final future = execute(service, q);
+      decide();
+      await waitForAgentStart(native());
+      native().finish(status: GenerationStatus.error, errorMessage: runError);
+      final result = await future;
+      expect(result['status'], 'error');
+      expect(result['error'], error);
+      expect(result['run_stopped'], stopped);
+      expect(result.containsKey('run_stopped'), stopped != null);
+      expect(result.containsKey('stop_reason'), isFalse);
+      // What the run made before it ended is still reported.
+      expect(result['images'].single['image_id'], 'native-image');
+      // The generation page reads its reason from the run, marker and all.
+      expect(
+        container.read(imageGenerationNotifierProvider).errorMessage,
+        runError,
+      );
+    });
+  }
+  test('a completed run has no error and no run_stopped', () async {
+    final service = tools();
+    final q = await quote(service);
+    final future = execute(service, q);
+    decide();
+    await waitForAgentStart(native());
+    native().finish();
+    final result = await future;
+    expect(result['status'], 'completed');
+    expect(result['error'], isNull);
+    expect(result.containsKey('run_stopped'), isFalse);
+  });
+  test('signing out during the run still cancels it', () async {
+    final service = tools();
+    final q = await quote(service);
+    final future = execute(service, q);
+    decide();
+    await waitForAgentStart(native());
+    (container.read(authNotifierProvider.notifier) as GenerationTestAuth)
+        .setAuth(const AuthState(status: AuthStatus.unauthenticated));
+    final result = await future;
+    expect(native().cancels, 1);
+    expect(result['status'], 'cancelled');
+    expect(result['stop_reason'], 'account_changed');
+    expect(result['balance_after_anlas'], null);
+  });
   test(
     'a disposed binding returns collected results without reading the disposed Ref',
     () async {

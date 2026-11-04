@@ -47,9 +47,9 @@ import '../ui/gen/gen_contract.dart';
 import '../widgets/bridge/agent_bridge_indicator.dart';
 import '../utils/official_image_variations.dart';
 import '../utils/opus_usage_presentation.dart';
-import '../utils/generation_error_presentation.dart';
 import 'generation_backend.dart';
 import 'generation_drop_wiring.dart';
+import 'generation_error_view.dart';
 import 'generation_reference_identity.dart';
 import 'generation_references.dart';
 import 'generation_settings.dart';
@@ -431,18 +431,6 @@ final generationViewDataProvider = Provider.autoDispose
           ? null
           : ref.watch(localUpscaleModelsProvider).valueOrNull;
       final localPlatform = ref.watch(localUpscalePlatformProvider);
-      GenError? error;
-      if (generation.status == GenerationStatus.error) {
-        final (title, hint) = generationErrorPresentation(
-          generation.errorMessage,
-          l,
-        );
-        error = GenError(
-          title: title,
-          hint: hint,
-          detail: generation.errorMessage,
-        );
-      }
       return GenViewData(
         model: params.model,
         displayModel: ImageModels.baseModelForTurboModel(params.model),
@@ -666,7 +654,9 @@ final generationViewDataProvider = Provider.autoDispose
           generateShortcut:
               ref.watch(effectiveShortcutProvider(ShortcutIds.generateImage)) ??
               '',
-          error: error,
+          // 失败了写原因；出完了但有几次请求被 NovelAI 拒绝跳过，同一张卡写
+          // 跳过了几次。
+          error: generationCanvasError(l, generation),
           sheet: toolSheet?.image.id == image?.id ? toolSheet?.sheet : null,
         ),
         history: GenHistoryData(

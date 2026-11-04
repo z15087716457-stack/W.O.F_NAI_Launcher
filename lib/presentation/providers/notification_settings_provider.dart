@@ -9,6 +9,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/constants/storage_keys.dart';
 import '../../core/services/notification_service.dart';
 import '../../core/storage/local_storage_service.dart';
+import 'generation/generation_retry_policy.dart';
 import 'image_generation_provider.dart';
 
 part 'notification_settings_provider.g.dart';
@@ -101,7 +102,8 @@ class NotificationSettingsNotifier extends _$NotificationSettingsNotifier {
 
 /// 生成完成音效监听器
 ///
-/// 监听生成状态从 generating 变为 completed 时播放完成音效
+/// 监听生成状态从 generating 变为 completed 时播放完成音效；整次停下（429
+/// 等满，或者 400、401、402、403、404）、但已经出了图的那次也放，照旧提醒图出好了
 /// （原由 QueueExecutionNotifier 托管，队列功能移除后独立常驻）
 @Riverpod(keepAlive: true)
 class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
@@ -115,11 +117,19 @@ class GenerationCompletionWatcher extends _$GenerationCompletionWatcher {
       next,
     ) {
       if (previous?.status == GenerationStatus.generating &&
-          next.status == GenerationStatus.completed) {
+          (next.status == GenerationStatus.completed ||
+              _stoppedWithImages(next))) {
         _notifyGenerationComplete();
       }
     });
   }
+
+  static bool _stoppedWithImages(ImageGenerationState state) =>
+      state.status == GenerationStatus.error &&
+      isGenerationRunStopped(state.errorMessage) &&
+      state.currentImages.any(
+        (image) => image.canSave && !image.isVariationOriginal,
+      );
 
   Future<void> _notifyGenerationComplete() async {
     final settings = ref.read(notificationSettingsNotifierProvider);

@@ -32,6 +32,7 @@ import '../wiring/generation_backend_test.dart' show MemoryGenerationPlatform;
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
 import 'package:nai_launcher/presentation/providers/director_tools_notifier.dart';
 import 'package:nai_launcher/presentation/providers/generation/cloud_upscale_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_action_providers.dart';
 import 'package:nai_launcher/presentation/providers/generation/image_workflow_controller.dart';
 import 'package:nai_launcher/presentation/providers/generation/local_upscale_provider.dart';
@@ -123,6 +124,7 @@ class _Session {
         ...realBalanceOverrides(this.balances, auth: auth),
         if (!realStatistics)
           anlasStatisticsServiceProvider.overrideWith(() => spend),
+        generationRetryDelayProvider.overrideWithValue((_, __) async {}),
         ...overrides,
       ],
     );
@@ -477,12 +479,164 @@ void main() {
       final shown = await session.generate();
       expect(await session.recorded(), [shown]);
       await session.generation.retry(session.generation.lastRequest!);
+      expect(session.container.read(imageGenerationNotifierProvider).status,
+          GenerationStatus.completed);
+      expect(await session.recorded(), [shown, shown]);
+      expect(session.novelAi.paths, [_stream, _stream]);
+      expect(session.balances.requests, 0);
+    });
+
+    test('a three-image ZIP on the stream endpoint publishes every image in archive order', () async {
+      session = _Session();
+      await session.open(perRequest: 3);
+      final originals = [
+        for (var index = 0; index < 3; index++) syntheticPng(32 + index, 48),
+      ];
+      session.novelAi
+        ..streamAnswer = StreamAnswer.zip
+        ..zipImages = originals;
+      final shown = await session.generate();
+      final state = session.container.read(imageGenerationNotifierProvider);
+      expect(state.currentImages.map((image) => image.batchIndex), [0, 1, 2]);
+      expect(state.currentImages.map((image) => image.bytes), originals);
+      expect(state.status, GenerationStatus.completed);
+      expect(await session.recorded(), [shown]);
+      expect(session.novelAi.paths, [_stream]);
+    });
+
+    for (final format in [
+      StreamAnswer.zip,
+      StreamAnswer.events,
+      StreamAnswer.dataMessage,
+    ]) {
+      test(
+        'a clean EOF after one of three images in $format keeps the image and quotes only unsent requests',
+        () async {
+          session = _Session();
+          await session.open(requests: 2, perRequest: 3);
+          session.novelAi
+            ..streamAnswer = format
+            ..streamImagesBeforeEnd = 1
+            ..zipImages = [syntheticPng(32, 48)];
+          final shown = await session.generate();
+          final state = session.container.read(imageGenerationNotifierProvider);
+          expect(state.status, GenerationStatus.error);
+          expect(state.currentImages.map((image) => image.batchIndex), [0]);
+          expect(state.partialBatch, (
+            received: 1,
+            expected: 3,
+            unsentRequests: 1,
+          ));
+          expect(session.novelAi.paths, [_stream]);
+          expect(await session.recorded(), isEmpty);
+          final pending = session.generation.lastRequest!;
+          expect((pending.params.nSamples, pending.count), (1, 3));
+          session.novelAi
+            ..streamAnswer = StreamAnswer.events
+            ..streamImagesBeforeEnd = null
+            ..zipImages = null;
+          await session.generation.retry(pending);
+          expect(session.novelAi.paths, [_stream, _stream]);
+          expect(await session.recorded(), [shown ~/ 2]);
+          expect(
+            session.container
+                .read(imageGenerationNotifierProvider)
+                .history
+                .where((image) => image.canSave),
+            hasLength(4),
+          );
+        },
+      );
+    }
+
+    test('a short ZIP from the actual non-stream fallback is retained without charging or repeating the accepted batch', () async {
+      session = _Session();
+      await session.open(requests: 2, perRequest: 3);
+      final only = syntheticPng(41, 67);
+      session.novelAi
+        ..streamErrorEvent = 'Streaming is not allowed for this request'
+        ..zipImages = [only];
+      final shown = await session.generate();
+      final state = session.container.read(imageGenerationNotifierProvider);
+      expect(session.novelAi.paths, [
+        _stream,
+        ApiConstants.generateImageEndpoint,
+      ]);
+      expect(state.status, GenerationStatus.error);
+      expect(state.currentImages.single.bytes, only);
+      expect(state.partialBatch, (received: 1, expected: 3, unsentRequests: 1));
+      expect(await session.recorded(), isEmpty);
+      final pending = session.generation.lastRequest!;
+      expect((pending.params.nSamples, pending.count), (1, 3));
+      session.novelAi
+        ..streamErrorEvent = null
+        ..zipImages = null;
+      await session.generation.retry(pending);
+      expect(session.novelAi.paths, [
+        _stream,
+        ApiConstants.generateImageEndpoint,
+        _stream,
+      ]);
+      expect(await session.recorded(), [shown ~/ 2]);
+      expect(
+        session.container
+            .read(imageGenerationNotifierProvider)
+            .history
+            .where((image) => image.canSave),
+        hasLength(4),
+      );
+    });
+
+    test('a truncated paid stream keeps its final image and never replays that request', () async {
+      session = _Session();
+      await session.open(requests: 3, perRequest: 2);
+      session.novelAi.refuse = (index, _) {
+        session.novelAi.streamImagesBeforeEnd = index == 1 ? 1 : null;
+        return null;
+      };
+      final shown = await session.generate();
+      final state = session.container.read(imageGenerationNotifierProvider);
+      expect(state.status, GenerationStatus.error);
+      expect(state.currentImages.map((image) => image.batchIndex), [0, 1, 2]);
+      expect(session.novelAi.paths, [_stream, _stream]);
+      final oneRequest = shown ~/ 3;
+      expect(await session.recorded(), [oneRequest]);
+      final pending = session.generation.lastRequest!;
+      expect((pending.params.nSamples, pending.count), (1, 2));
+      await session.generation.retry(pending);
+      expect(session.novelAi.paths, [_stream, _stream, _stream]);
+      expect(await session.recorded(), [oneRequest, oneRequest]);
+      expect(session.balances.requests, 0);
+    });
+
+    test('a retry records only the requests it sends again', () async {
+      session = _Session();
+      await session.open(requests: 3);
+      // The second of three requests is refused (not enough Anlas): the run
+      // stops, the first one was billed.
+      session.novelAi.refuse = (index, _) => index == 1 ? 402 : null;
+      final shown = await session.generate();
+      final state = session.container.read(imageGenerationNotifierProvider);
+      expect(state.status, GenerationStatus.error);
+      final price = shown ~/ 3;
+      expect(await session.recorded(), [price]);
+      final retry = session.generation.lastRequest!;
+      expect(retry.params.nSamples, 2);
+      final quoted = generationRequestCost(
+        retry.params,
+        retry.workflow,
+        session.container.read(subscriptionNotifierProvider).subscription,
+        retry.count,
+      );
+      session.novelAi.refuse = null;
+      await session.generation.retry(retry);
       expect(
         session.container.read(imageGenerationNotifierProvider).status,
         GenerationStatus.completed,
       );
-      expect(await session.recorded(), [shown, shown]);
-      expect(session.novelAi.paths, [_stream, _stream]);
+      expect(await session.recorded(), [price, price, price]);
+      expect(quoted, price * 2);
+      expect(session.novelAi.paths, [_stream, _stream, _stream, _stream]);
       expect(session.balances.requests, 0);
     });
 
@@ -1025,20 +1179,15 @@ void main() {
       ]);
     });
 
-    test('a stream answered with a lone data message', () async {
-      // The stream's MessagePack loop takes such a message as an event
-      // without an image, so it ends without one: nothing was delivered and
-      // nothing is recorded. (The fallback after the loop that reads a `data`
-      // message is never reached: the loop always takes a whole message
-      // first.)
+    test('a single-image request with a data message publishes that image and records one charge', () async {
       session = _Session();
       await session.open();
       session.novelAi.streamAnswer = StreamAnswer.dataMessage;
-      await session.generate();
+      final shown = await session.generate();
       final state = session.container.read(imageGenerationNotifierProvider);
-      expect(state.status, GenerationStatus.error);
-      expect(state.errorMessage, contains('No final image'));
-      expect(await session.recorded(), isEmpty);
+      expect(state.status, GenerationStatus.completed);
+      expect(state.currentImages, hasLength(1));
+      expect(await session.recorded(), [shown]);
       expect(session.novelAi.paths, [_stream]);
     });
 

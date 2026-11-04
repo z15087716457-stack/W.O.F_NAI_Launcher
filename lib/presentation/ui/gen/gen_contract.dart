@@ -1060,17 +1060,32 @@ abstract final class GenBackdrop {
       presets.contains(v) || RegExp(r'^#[0-9a-fA-F]{6}$').hasMatch(v);
 }
 
-/// 生成失败（`image_preview.dart` 按错误码映射好的标题和说明）。
+/// 生成失败（`generation_error_view.dart` 按错误类型映射好的标题和说明）。
 @immutable
 class GenError with _GenValue {
-  const GenError({required this.title, this.hint, this.detail});
+  const GenError({
+    required this.title,
+    this.hint,
+    this.detail,
+    this.copy,
+    this.retry = true,
+  });
   final String title;
   final String? hint;
 
   /// 原始错误（可复制）。
   final String? detail;
+
+  /// “复制详情”放进剪贴板、悬停时显示的文字（整次停下的内部标记去掉了）；
+  /// null 就用 [detail]。
+  final String? copy;
+
+  /// 卡上出不出“重试”（[GenActions.onRetry]）。重试照原样补发失败的请求；
+  /// 没有可补发的（比如出完了、只有几次请求被拒，说明让人改好后点“生成”）
+  /// 就不出。
+  final bool retry;
   @override
-  List<Object?> get _values => [title, hint, detail];
+  List<Object?> get _values => [title, hint, detail, copy, retry];
 }
 
 @immutable
@@ -1098,6 +1113,7 @@ class GenCanvasData with _GenValue {
   final GenUpscale upscale;
 
   /// 最近一次生成失败，画在画布下方，点“关闭”回调 [GenActions.onDismissError]。
+  /// 批量出完了、只是有几次请求被 NovelAI 拒绝跳过，也用这张卡说明（不出重试）。
   final GenError? error;
 
   /// 透明图垫底（`canvasImageBackgroundNotifierProvider`）；null = 当前模型不出透明图

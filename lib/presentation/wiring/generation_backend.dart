@@ -83,6 +83,10 @@ class GenerationBackend {
       (_, _) {
         _intentRevision++;
         _accountRevision++;
+        // NovelAI 回了 401：认证拦截器先登出，再把这个 401 交回生图，这次运行
+        // 自己会按 401 整次停下（已出的图照常保存，「重试」只补没发的批次）。
+        // 在这里取消就成了「已取消」，这些都没了。切换账号、主动登出照旧取消。
+        if (ref.read(authNotifierProvider).signedOutBy401) return;
         if (ref.read(imageGenerationNotifierProvider).isGenerating) {
           ref.read(imageGenerationNotifierProvider.notifier).cancel();
         }

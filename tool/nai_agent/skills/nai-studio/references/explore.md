@@ -4,4 +4,5 @@
 - `create(name, count, expected_draft_version)` freezes the current recipe and parameters for documentation; execution follows the native current Studio recipe.
 - Edits need `id` and a fresh `expected_version`: `rename`, `complete`, `heart(candidate_id, heart)`, `folder_create` / `folder_rename` / `folder_delete(folder_id)` (candidates become unfiled), `candidate_move(candidate_id, folder_id | null)`.
 - `prepare(id, expected_version, mode=basic|retry|deep)` returns a five-minute quote covering all candidates; `deep` also needs an existing `family_id`, `parent_set_id` and `count`. `run(quote_id)` executes the quote with native progress, partial results and recovery.
+- A failed candidate's `generation.error` says why. With `generation.run_stopped` (`http_status` or `concurrency_limit`, as in generation.md) the exploration stopped at that failure, and the candidate either got it or was not sent; `run` returns `run_stopped` when it stopped that way. Fix the cause, then `prepare(mode=retry)` sends the failed candidates again.
 - `status` reports progress; `pause` / `cancel` affect only this chat's admitted run.

@@ -966,6 +966,32 @@ void main() {
       expect(r.called('onDismissError'), isTrue);
     });
 
+    testWidgets('失败卡没有可重试的：不出重试，复制详情、关闭照旧', (t) async {
+      final failed = GenFixture.failed();
+      await pump(
+        t,
+        failed.copyWith(
+          canvas: GenCanvasData(
+            focus: failed.canvas.focus,
+            info: failed.canvas.info,
+            upscale: failed.canvas.upscale,
+            error: const GenError(
+              title: '请求无效',
+              hint: '有 2 次请求抽到的词 NovelAI 不接受，已跳过，其余请求照常发送。',
+              detail: 'Exception: API_ERROR_400|Bad request',
+              retry: false,
+            ),
+          ),
+        ),
+      );
+      expect(find.byKey(const Key('gen-error')), findsOneWidget);
+      expect(find.byKey(const Key('gen-retry')), findsNothing);
+      expect(find.byKey(const Key('gen-error-copy')), findsOneWidget);
+      await tapKey(t, 'gen-error-close');
+      expect(r.called('onDismissError'), isTrue);
+      expect(r.called('onRetry'), isFalse);
+    });
+
     testWidgets('多张一组：点另一张换焦点，300ms 内再点开大图', (t) async {
       await pump(t, GenFixture.generating());
       await tapKey(t, 'gen-tile-n1');

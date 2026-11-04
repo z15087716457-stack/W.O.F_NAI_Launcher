@@ -74,6 +74,7 @@ class FakeNovelAi implements HttpClientAdapter {
 
   /// What a stream request is answered with.
   StreamAnswer streamAnswer = StreamAnswer.events;
+  List<Uint8List>? zipImages;
 
   /// While set, answers wait for it (a request still running at NovelAI).
   Completer<void>? hold;
@@ -117,7 +118,7 @@ class FakeNovelAi implements HttpClientAdapter {
         : _png;
     switch (uri.path) {
       case ApiConstants.generateImageEndpoint:
-        return _zip([for (var i = 0; i < samples; i++) image]);
+        return _zip(zipImages ?? [for (var i = 0; i < samples; i++) image]);
       case ApiConstants.generateImageStreamEndpoint:
         return _stream(samples, image);
       case ApiConstants.upscaleEndpoint:
@@ -166,7 +167,7 @@ class FakeNovelAi implements HttpClientAdapter {
   /// NovelAI's stream framing: a 4-byte big-endian length, then MessagePack.
   ResponseBody _stream(int samples, Uint8List image) {
     if (streamAnswer == StreamAnswer.zip) {
-      return _zip([for (var i = 0; i < samples; i++) image]);
+      return _zip(zipImages ?? [for (var i = 0; i < samples; i++) image]);
     }
     final events = <Map<String, Object?>>[
       if (streamAnswer == StreamAnswer.dataMessage)

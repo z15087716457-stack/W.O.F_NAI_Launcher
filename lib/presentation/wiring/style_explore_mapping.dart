@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 
 import '../../core/constants/api_constants.dart';
+import '../../core/utils/localization_extension.dart';
 import '../../core/utils/pill_roll_engine.dart';
 import '../../data/models/prompt_block/pill_document.dart';
 import '../../data/models/style_explore/explore_run.dart' as domain;
+import '../../l10n/app_localizations.dart';
 import '../providers/generation/generation_models.dart';
 import '../providers/prompt_block_library_provider.dart';
 import '../providers/style_explore/explore_manual_capture.dart';
@@ -15,6 +17,7 @@ import '../providers/style_explore/explore_run_provider.dart';
 import '../utils/explore_display_data.dart';
 import '../ui/explore/explore_contract.dart' as ui;
 import '../widgets/prompt/blocks/prompt_block_colors.dart';
+import 'generation_error_view.dart';
 
 ImageProvider? styleExploreImage(String? path, {bool thumbnail = false}) {
   if (path == null || path.isEmpty) return null;
@@ -75,6 +78,7 @@ ui.ExploreCandidate styleExploreCandidate(
   domain.ExploreCandidate candidate, {
   PromptBlockLibraryState? library,
   String? runningId,
+  AppLocalizations? l10n,
 }) {
   final snapshot = candidate.rollSnapshot;
   final params = candidate.paramsSnapshot ?? run.paramsSnapshot;
@@ -151,7 +155,7 @@ ui.ExploreCandidate styleExploreCandidate(
     scale: params.scale,
     sampler: Samplers.samplerDisplayNames[params.sampler] ?? params.sampler,
     createdAt: candidate.createdAt ?? round?.createdAt ?? run.createdAt,
-    error: candidate.generation.error,
+    error: styleExploreFailure(l10n ?? currentL10n, candidate.generation.error),
     op: switch (candidate.lineage.operation) {
       domain.ExploreLineageOperation.mutation => ui.ExploreOp.mutation,
       domain.ExploreLineageOperation.crossover => ui.ExploreOp.crossover,
@@ -173,6 +177,14 @@ ui.ExploreCandidate styleExploreCandidate(
     ),
   );
 }
+
+/// 候选的失败原因，跟生图页失败卡一样写原因标题和下一步怎么办：整个探索停下
+/// 留下的（401、402、403、404，或者 429 等满）和自己失败的（400、网络断了、
+/// 服务器出错、超时……）都是；400、403、404 改好后、429 等满后点的是“重试
+/// 失败的候选”。
+/// 失败卡认不出的照旧给原文（不带整次停下的标记），没有原文的返回 null。
+String? styleExploreFailure(AppLocalizations l, String? error) =>
+    generationErrorText(l, error, place: GenerationErrorPlace.styleExplore);
 
 String? styleExploreRunningCandidate(
   domain.ExploreRun run,
@@ -261,6 +273,7 @@ ui.ExploreRunView styleExploreRunView(
   PromptBlockLibraryState? library,
   ExploreRunRunnerState runner = const ExploreRunRunnerState(),
   ExploreManualCaptureState capture = const ExploreManualCaptureState(),
+  AppLocalizations? l10n,
 }) {
   final runningId = styleExploreRunningCandidate(run, runner, capture);
   var basicNumber = 0;
@@ -277,6 +290,7 @@ ui.ExploreRunView styleExploreRunView(
           candidate,
           library: library,
           runningId: runningId,
+          l10n: l10n,
         ),
     ],
     rounds: [

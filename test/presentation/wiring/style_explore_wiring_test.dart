@@ -29,6 +29,7 @@ import 'package:nai_launcher/presentation/providers/character_prompt_provider.da
 import 'package:nai_launcher/presentation/providers/auth_provider.dart';
 import 'package:nai_launcher/data/models/character/character_prompt.dart';
 import 'package:nai_launcher/presentation/providers/cost_estimate_provider.dart';
+import 'package:nai_launcher/presentation/providers/generation/generation_retry_policy.dart';
 import 'package:nai_launcher/presentation/providers/image_generation_provider.dart';
 import 'package:nai_launcher/presentation/providers/krita/krita_bridge_notifier.dart';
 import 'package:nai_launcher/presentation/providers/layout_state_provider.dart';
@@ -764,6 +765,122 @@ void main() {
       expect(runner.calls, ['retry:first']);
     },
   );
+
+  for (final locale in const [Locale('zh'), Locale('en')]) {
+    testWidgets(
+      'a candidate that failed on its own gives the same reason on its card '
+      'and in the inspector (${locale.languageCode})',
+      (tester) async {
+        // The second candidate's own request was turned down (400).
+        final run = _run('first');
+        storage.runs['first'] = run.copyWith(
+          candidates: [
+            for (final candidate in run.candidates)
+              candidate.id == 'b'
+                  ? candidate.copyWith(
+                      generation: const domain.ExploreCandidateGeneration(
+                        status: domain.ExploreCandidateGenerationStatus.failed,
+                        error: 'Exception: API_ERROR_400|Bad request',
+                      ),
+                    )
+                  : candidate,
+          ],
+        );
+        await mount(tester, locale: locale);
+        final l = lookupAppLocalizations(locale);
+        final reason = '${l.api_error_400}\n${l.explore_error400Hint}';
+        final card = find.byKey(const Key('explore-card-b'));
+
+        // Hovering the failed card.
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.byWidgetPredicate(
+              (widget) => widget is Tooltip && widget.message == reason,
+            ),
+          ),
+          findsOneWidget,
+        );
+        // Reason in the inspector.
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+        final inspector = find.byKey(const Key('explore-inspector'));
+        expect(
+          find.descendant(of: inspector, matching: find.text(reason)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: inspector,
+            matching: find.text('Exception: API_ERROR_400|Bad request'),
+          ),
+          findsNothing,
+        );
+      },
+    );
+  }
+
+  for (final locale in AppLocalizations.supportedLocales) {
+    testWidgets(
+      'a candidate a waited-out 429 left behind sends the user to the button '
+      'under its reason (${locale.toLanguageTag()})',
+      (tester) async {
+        // The explore stopped at a 429 that waited out its time and left the
+        // second candidate with the stop's reason.
+        final stop = generationConcurrencyStoppedError(
+          'API_ERROR_429|Concurrent generation is locked',
+        );
+        final run = _run('first');
+        storage.runs['first'] = run.copyWith(
+          candidates: [
+            for (final candidate in run.candidates)
+              candidate.id == 'b'
+                  ? candidate.copyWith(
+                      generation: domain.ExploreCandidateGeneration(
+                        status: domain.ExploreCandidateGenerationStatus.failed,
+                        error: stop,
+                      ),
+                    )
+                  : candidate,
+          ],
+        );
+        await mount(tester, locale: locale);
+        final l = lookupAppLocalizations(locale);
+        final reason =
+            '${l.api_error_429}\n${l.explore_concurrencyStoppedHint}';
+        final card = find.byKey(const Key('explore-card-b'));
+
+        // Hovering the failed card.
+        expect(
+          find.descendant(
+            of: card,
+            matching: find.byWidgetPredicate(
+              (widget) => widget is Tooltip && widget.message == reason,
+            ),
+          ),
+          findsOneWidget,
+        );
+        // Reason in the inspector, and under it the button it names. The
+        // page's hint, which names the error card's Retry, is not shown.
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+        final inspector = find.byKey(const Key('explore-inspector'));
+        expect(
+          find.descendant(of: inspector, matching: find.text(reason)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('explore-inspector-retry')),
+            matching: find.text(l.explore_retryFailed),
+          ),
+          findsOneWidget,
+        );
+        expect(reason, contains(l.explore_retryFailed));
+        expect(reason, isNot(contains(l.gen_concurrencyStopped)));
+      },
+    );
+  }
 
   testWidgets(
     'apply backs up before replacing only the positive draft and its parameter state',

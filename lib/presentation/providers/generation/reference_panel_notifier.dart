@@ -7,6 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/constants/storage_keys.dart';
 import '../../../core/extensions/vibe_library_extensions.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/localization_extension.dart';
+import '../../../core/utils/vibe_encoding_utils.dart';
 import '../../../core/utils/vibe_file_parser.dart';
 import '../../../core/utils/vibe_performance_diagnostics.dart';
 import '../../../data/models/vibe/vibe_library_entry.dart';
@@ -146,33 +148,26 @@ class ReferencePanelNotifier extends _$ReferencePanelNotifier {
   }) async {
     final notifier = ref.read(generationParamsNotifierProvider.notifier);
 
-    try {
-      final encodedVibes = <VibeReference>[];
-      for (final vibe in vibes) {
-        if (vibe.sourceType == VibeSourceType.rawImage &&
-            vibe.rawImageData != null) {
-          final encoding = await notifier.encodeVibeWithCache(
-            vibe.rawImageData!,
-            model: model,
-            informationExtracted: vibe.infoExtracted,
-            vibeName: vibe.displayName,
-          );
-
-          if (encoding != null) {
-            encodedVibes.add(vibe.withEncodedVibe(encoding, model: model));
-          } else {
-            encodedVibes.add(vibe);
-          }
-        } else {
-          encodedVibes.add(vibe);
-        }
+    final encodedVibes = <VibeReference>[];
+    for (final vibe in vibes) {
+      if (vibe.sourceType != VibeSourceType.rawImage ||
+          vibe.rawImageData == null) {
+        encodedVibes.add(vibe);
+        continue;
       }
-
-      return encodedVibes;
-    } catch (e, stackTrace) {
-      AppLogger.e('Failed to encode vibes', e, stackTrace);
-      return null;
+      final encoding = await notifier.encodeVibeWithCache(
+        vibe.rawImageData!,
+        model: model,
+        informationExtracted: vibe.infoExtracted,
+        vibeName: vibe.displayName,
+        propagateErrors: true,
+      );
+      if (encoding == null || encoding.isEmpty) {
+        throw VibeEncodingException(currentL10n.vibe_encodeFailed);
+      }
+      encodedVibes.add(vibe.withEncodedVibe(encoding, model: model));
     }
+    return encodedVibes;
   }
 
   /// 保存已编码的 Vibes 到库
@@ -273,6 +268,8 @@ class ReferencePanelNotifier extends _$ReferencePanelNotifier {
         savedCount: savedCount,
         reusedCount: reusedCount,
       );
+    } on VibeEncodingException {
+      rethrow;
     } catch (e, stackTrace) {
       AppLogger.e('Failed to save to library', e, stackTrace);
       return const SaveToLibraryResult(savedCount: 0, reusedCount: 0);

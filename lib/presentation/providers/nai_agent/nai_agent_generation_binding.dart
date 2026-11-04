@@ -13,6 +13,7 @@ import '../../../data/models/image/image_params.dart';
 import '../../../data/services/nai_agent/agent_snapshot_files.dart';
 import '../auth_provider.dart';
 import '../image_generation_provider.dart';
+import '../generation/generation_retry_policy.dart';
 import '../generation/image_workflow_controller.dart';
 import '../generation/image_workflow_snapshot.dart';
 import '../prompt_block_library_provider.dart';
@@ -24,6 +25,28 @@ import '../generation/local_upscale_provider.dart';
 import '../generation/cloud_upscale_provider.dart';
 import '../director_tools_notifier.dart';
 import '../krita/krita_bridge_notifier.dart';
+
+/// How a run that stopped by itself is named in an Agent result
+/// (`run_stopped`): `concurrency_limit` after 429 for the whole wait,
+/// `http_status` after 400–404 (the error says which). Its remaining
+/// requests were not sent. Null for a run that did not stop.
+String? naiAgentRunStopped(String? error) =>
+    isGenerationConcurrencyStopped(error)
+    ? 'concurrency_limit'
+    : isGenerationStatusStopped(error)
+    ? 'http_status'
+    : null;
+
+/// A native failure for an Agent result: `error` without the stop marker the
+/// native run puts in front of it for the generation page (upstream has no
+/// such marker), and `run_stopped` when the run stopped.
+Map<String, dynamic> naiAgentGenerationError(String? error) {
+  final stopped = naiAgentRunStopped(error);
+  return {
+    'error': error == null ? null : generationErrorWithoutStopMarker(error),
+    if (stopped != null) 'run_stopped': stopped,
+  };
+}
 
 /// Same native busy boundary for model calls and idle prompt-set buttons.
 bool naiAgentGenerationBusy(Ref ref) =>
@@ -231,6 +254,10 @@ NaiAgentGenerationRun? startNaiAgentNativeGeneration(
 
   String? stopReason;
   final accountGuard = ref.listen(authNotifierProvider, (_, next) {
+    // A 401 the token cannot recover from signs out before it reaches the
+    // run, which then stops at it with its reason, as on the generation page
+    // (GenerationBackend). Switching accounts and signing out still cancel.
+    if (next.signedOutBy401) return;
     if ((!next.isAuthenticated || next.accountId != input.accountId) &&
         cancel()) {
       stopReason = 'account_changed';
@@ -275,7 +302,9 @@ NaiAgentGenerationRun? startNaiAgentNativeGeneration(
             ? state.status.name
             : 'interrupted',
         'native_generation_id': nativeId,
-        'error': state.generationRunId == nativeId ? state.errorMessage : null,
+        ...naiAgentGenerationError(
+          state.generationRunId == nativeId ? state.errorMessage : null,
+        ),
         'images': imageResults(),
         if (stopReason != null) 'stop_reason': stopReason,
         'balance_after_anlas': sameAccount

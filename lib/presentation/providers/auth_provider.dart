@@ -79,6 +79,17 @@ class AuthState {
   bool get isLoading => status == AuthStatus.loading;
   bool get hasError => errorCode != null;
 
+  /// 认证拦截器碰到 401、又刷新不了 token 时的登出
+  /// （`logout(errorCode: authFailed, httpStatusCode: 401)`）。
+  ///
+  /// 拦截器先登出，再把这个 401 交回发请求的一方；正在跑的生成自己会按 401
+  /// 整次停下，所以生图页和 Agent 都不因这次登出取消它。切换账号、主动登出
+  /// 照旧取消。
+  bool get signedOutBy401 =>
+      status == AuthStatus.error &&
+      errorCode == AuthErrorCode.authFailed &&
+      httpStatusCode == 401;
+
   /// 从异常解析错误码
   static (AuthErrorCode, int?) parseError(Object e) {
     if (e is LocalCredentialStoreException) {

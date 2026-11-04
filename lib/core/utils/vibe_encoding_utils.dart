@@ -259,5 +259,5 @@ class VibeEncodingException implements Exception {
   final String message;
 
   @override
-  String toString() => 'VibeEncodingException: $message';
+  String toString() => message;
 }

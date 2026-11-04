@@ -2320,6 +2320,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get api_error_429_hint => '请求过于频繁，请稍后重试（常见于合租账号）';
 
   @override
+  String get api_error_400 => '请求无效';
+
+  @override
+  String get api_error_400_hint => '无法生成：NovelAI 不接受这组设置。请检查提示词和参数，改好后再点“生成”';
+
+  @override
   String get api_error_401 => '认证失败';
 
   @override
@@ -2330,6 +2336,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get api_error_402_hint => 'Anlas 余额不足，请充值后重试';
+
+  @override
+  String get api_error_403 => '没有权限';
+
+  @override
+  String get api_error_403_hint => '无法生成：这个账号没有这项功能的权限。请检查订阅，或换个账号后再点“生成”';
+
+  @override
+  String get api_error_404 => '未找到';
+
+  @override
+  String get api_error_404_hint => '无法生成：服务器上没有这个接口或模型。请检查 API 地址和模型，改好后再点“生成”';
 
   @override
   String get api_error_500 => '服务器错误';
@@ -14041,6 +14059,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get explore_retryFailed => '重试失败的候选';
 
   @override
+  String get explore_error400Hint =>
+      '无法生成：NovelAI 不接受这组设置。请检查提示词和参数，改好后再点“重试失败的候选”';
+
+  @override
+  String get explore_error403Hint =>
+      '无法生成：这个账号没有这项功能的权限。请检查订阅，或换个账号后再点“重试失败的候选”';
+
+  @override
+  String get explore_error404Hint =>
+      '无法生成：服务器上没有这个接口或模型。请检查 API 地址和模型，改好后再点“重试失败的候选”';
+
+  @override
+  String get explore_concurrencyStoppedHint =>
+      '继续等待生成名额会超出本轮累计 90 秒的上限，后续请求已停止。请稍后再点“重试失败的候选”。';
+
+  @override
   String get explore_waitHint => '生成好以后这里会显示它抽到的画师';
 
   @override
@@ -15136,6 +15170,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get gen_copyDetail => '复制详情';
+
+  @override
+  String get gen_concurrencyStopped =>
+      '继续等待生成名额会超出本轮累计 90 秒的上限，后续请求已停止。请稍后再点“重试”。';
+
+  @override
+  String gen_partialBatchHint(int received, int expected) {
+    return '本次请求共 $expected 张，已收到的 $received 张保留在画布上。重试只会提交尚未开始的后续请求。';
+  }
+
+  @override
+  String gen_rejectedRequestsHint(int count) {
+    return '有 $count 次请求抽到的词 NovelAI 不接受，已跳过，其余请求照常发送。请检查顺序或随机块里的词，改好后再点“生成”';
+  }
 
   @override
   String get gen_history => '历史记录';
@@ -21347,6 +21395,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get ag_psGenerating => '生成中';
 
   @override
+  String get ag_psError400Hint =>
+      '无法生成：NovelAI 不接受这组设置。请检查参数，或让 Agent 修改这一项的提示词，改好后再点“生成”';
+
+  @override
   String ag_psRevision(int revision, int count) {
     return 'v$revision · 已改 $count 项';
   }
@@ -24346,6 +24398,12 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get api_error_429_hint => '請求過於頻繁，請稍後重試（常見於合租帳號）';
 
   @override
+  String get api_error_400 => '請求無效';
+
+  @override
+  String get api_error_400_hint => '無法生成：NovelAI 不接受這組設定。請檢查提示詞和參數，改好後再點“生成”';
+
+  @override
   String get api_error_401 => '認證失敗';
 
   @override
@@ -24356,6 +24414,18 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get api_error_402_hint => 'Anlas 餘額不足，請充值後重試';
+
+  @override
+  String get api_error_403 => '沒有權限';
+
+  @override
+  String get api_error_403_hint => '無法生成：這個帳號沒有這項功能的權限。請檢查訂閱，或換個帳號後再點“生成”';
+
+  @override
+  String get api_error_404 => '未找到';
+
+  @override
+  String get api_error_404_hint => '無法生成：伺服器上沒有這個介面或模型。請檢查 API 地址和模型，改好後再點“生成”';
 
   @override
   String get api_error_500 => '伺服器錯誤';
@@ -36067,6 +36137,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get explore_retryFailed => '重試失敗的候選';
 
   @override
+  String get explore_error400Hint =>
+      '無法生成：NovelAI 不接受這組設定。請檢查提示詞和參數，改好後再點“重試失敗的候選”';
+
+  @override
+  String get explore_error403Hint =>
+      '無法生成：這個帳號沒有這項功能的權限。請檢查訂閱，或換個帳號後再點“重試失敗的候選”';
+
+  @override
+  String get explore_error404Hint =>
+      '無法生成：伺服器上沒有這個介面或模型。請檢查 API 地址和模型，改好後再點“重試失敗的候選”';
+
+  @override
+  String get explore_concurrencyStoppedHint =>
+      '繼續等待生成名額會超出本輪累計 90 秒的上限，後續請求已停止。請稍後再點“重試失敗的候選”。';
+
+  @override
   String get explore_waitHint => '生成好以後這裡會顯示它抽到的畫師';
 
   @override
@@ -37162,6 +37248,20 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get gen_copyDetail => '複製詳情';
+
+  @override
+  String get gen_concurrencyStopped =>
+      '繼續等待生成名額會超出本輪累計 90 秒的上限，後續請求已停止。請稍後再點“重試”。';
+
+  @override
+  String gen_partialBatchHint(int received, int expected) {
+    return '本次請求共 $expected 張，已收到的 $received 張保留在畫布上。重試只會提交尚未開始的後續請求。';
+  }
+
+  @override
+  String gen_rejectedRequestsHint(int count) {
+    return '有 $count 次請求抽到的詞 NovelAI 不接受，已跳過，其餘請求照常傳送。請檢查順序或隨機塊裡的詞，改好後再點“生成”';
+  }
 
   @override
   String get gen_history => '歷史記錄';
@@ -43371,6 +43471,10 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get ag_psGenerating => '生成中';
+
+  @override
+  String get ag_psError400Hint =>
+      '無法生成：NovelAI 不接受這組設定。請檢查參數，或讓 Agent 修改這一項的提示詞，改好後再點“生成”';
 
   @override
   String ag_psRevision(int revision, int count) {

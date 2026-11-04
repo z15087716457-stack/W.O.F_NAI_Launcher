@@ -52,6 +52,22 @@ class InpaintStreamPreviewPlacement {
   }
 }
 
+/// 流式生成的错误块是怎么来的。
+enum ImageStreamErrorSource {
+  /// 请求失败（HTTP 错误码、网络、超时）、响应解析失败、取消等：文字说明了原因。
+  other,
+
+  /// HTTP 200 的流里服务器发来 error 事件。
+  serverEvent,
+
+  /// 流结束了却没有最终图。
+  noFinalImage,
+}
+
+/// A complete response contains all requested images and at least one final image.
+bool hasAllRequestedImages({required int received, required int requested}) =>
+    received > 0 && received >= requested;
+
 /// 流式图像生成数据块
 ///
 /// NovelAI 的流式 API 使用 MessagePack 格式返回数据，
@@ -84,6 +100,12 @@ class ImageStreamChunk {
   /// 错误信息
   final String? error;
 
+  /// 失败响应里服务器给的 `Retry-After`（429 时据此等待）。
+  final Duration? retryAfter;
+
+  /// 错误块是怎么来的（只对错误块有意义）。
+  final ImageStreamErrorSource errorSource;
+
   /// Vibe 原始索引到请求编码的映射（仅完成块携带）。
   final Map<int, String>? vibeEncodings;
 
@@ -97,6 +119,8 @@ class ImageStreamChunk {
     this.currentStep,
     this.totalSteps,
     this.error,
+    this.retryAfter,
+    this.errorSource = ImageStreamErrorSource.other,
     this.vibeEncodings,
   });
 
@@ -135,8 +159,17 @@ class ImageStreamChunk {
   }
 
   /// 创建错误块
-  factory ImageStreamChunk.error(String message) {
-    return ImageStreamChunk(error: message, isComplete: true);
+  factory ImageStreamChunk.error(
+    String message, {
+    Duration? retryAfter,
+    ImageStreamErrorSource source = ImageStreamErrorSource.other,
+  }) {
+    return ImageStreamChunk(
+      error: message,
+      retryAfter: retryAfter,
+      errorSource: source,
+      isComplete: true,
+    );
   }
 
   /// 是否有预览图像

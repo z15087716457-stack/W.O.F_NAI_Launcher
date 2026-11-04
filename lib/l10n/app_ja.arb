@@ -1094,10 +1094,16 @@
   "resolution_height": "高さ",
   "api_error_429": "同時実行制限に達しました",
   "api_error_429_hint": "リクエストが多すぎます。しばらく待ってからもう一度お試しください (共有アカウントの場合に共通)",
+  "api_error_400": "無効なリクエスト",
+  "api_error_400_hint": "生成できません：NovelAI がこの設定を受け付けませんでした。プロンプトとパラメーターを見直してから、「生成」を押してください",
   "api_error_401": "認証に失敗しました",
   "api_error_401_hint": "トークンが無効か、期限切れです。再度ログインしてください",
   "api_error_402": "残高が不足しています",
   "api_error_402_hint": "Anlas が不足しています。補充してもう一度お試しください",
+  "api_error_403": "権限がありません",
+  "api_error_403_hint": "生成できません：このアカウントにはこの機能を使う権限がありません。サブスクリプションを確認するか、別のアカウントに切り替えてから、「生成」を押してください",
+  "api_error_404": "見つかりません",
+  "api_error_404_hint": "生成できません：サーバーにこのエンドポイントまたはモデルがありません。API アドレスとモデルを見直してから、「生成」を押してください",
   "api_error_500": "サーバーエラー",
   "api_error_500_hint": "NovelAI サーバー エラー。後でもう一度試してください",
   "api_error_503": "サービスが利用できません",
@@ -7962,6 +7968,22 @@
   "explore_negative": "ネガティブ",
   "explore_failReason": "失敗の理由",
   "explore_retryFailed": "失敗した候補を再試行",
+  "explore_error400Hint": "生成できません：NovelAI がこの設定を受け付けませんでした。プロンプトとパラメーターを見直してから、「失敗した候補を再試行」を押してください",
+  "@explore_error400Hint": {
+    "description": "Hint after api_error_400 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error403Hint": "生成できません：このアカウントにはこの機能を使う権限がありません。サブスクリプションを確認するか、別のアカウントに切り替えてから、「失敗した候補を再試行」を押してください",
+  "@explore_error403Hint": {
+    "description": "Hint after api_error_403 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_error404Hint": "生成できません：サーバーにこのエンドポイントまたはモデルがありません。API アドレスとモデルを見直してから、「失敗した候補を再試行」を押してください",
+  "@explore_error404Hint": {
+    "description": "Hint after api_error_404 in a style explore. Ends with the explore_retryFailed button, not Generate"
+  },
+  "explore_concurrencyStoppedHint": "この実行で生成枠を待てるのは合計90秒までです。これ以上待つと上限を超えるため、後続のリクエストを停止しました。しばらくしてから「失敗した候補を再試行」を押してください。",
+  "@explore_concurrencyStoppedHint": {
+    "description": "Hint after api_error_429 when a style explore stopped because the 429 waits ran out. Word for word gen_concurrencyStopped, but it ends with the explore_retryFailed button, not Retry"
+  },
   "explore_waitHint": "生成されると抽選された絵師がここに表示されます",
   "explore_mergedArtists": "まとめた絵師 · {count}",
   "@explore_mergedArtists": {
@@ -8544,6 +8566,23 @@
   "gen_openViewer": "大きく表示",
   "gen_retry": "再試行",
   "gen_copyDetail": "詳細をコピー",
+  "gen_concurrencyStopped": "この実行で生成枠を待てるのは合計90秒までです。これ以上待つと上限を超えるため、後続のリクエストを停止しました。しばらくしてから「再試行」を押してください。",
+  "gen_partialBatchHint": "このリクエストの {expected} 枚中、受信した {received} 枚をキャンバスに残しました。再試行の対象は未送信の後続リクエストのみです。",
+  "@gen_partialBatchHint": {
+    "placeholders": {
+      "received": { "type": "int" },
+      "expected": { "type": "int" }
+    }
+  },
+  "gen_rejectedRequestsHint": "{count} 回のリクエストで抽選された語句を NovelAI が受け付けなかったため、その分はスキップし、ほかのリクエストはそのまま送信しました。順番またはランダムブロックの語句を見直してから、「生成」を押してください",
+  "@gen_rejectedRequestsHint": {
+    "description": "Hint after api_error_400 on the generation canvas when a run with sequential or random blocks finished but NovelAI rejected (400) the words drawn for {count} of its requests: they were skipped and the others were sent. Ends with the Generate button, as api_error_400_hint does; this card has no Retry",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "gen_history": "履歴",
   "gen_historyEmpty": "まだ生成していません",
   "gen_historyEmptySub": "生成した画像がバッチごとに並びます",
@@ -11435,6 +11474,8 @@
   "@ag_psImported": {"placeholders": {"title": {"type": "String"}}},
   "ag_psGenerate": "生成",
   "ag_psGenerating": "生成中",
+  "ag_psError400Hint": "生成できません：NovelAI がこの設定を受け付けませんでした。パラメーターを見直すか、この項目のプロンプトの修正を Agent に頼むかしてから、「生成」を押してください",
+  "@ag_psError400Hint": {"description": "Hint after api_error_400 on a prompt-set card. Its Generate writes the item's prompt into the draft again, so the prompt is fixed through Agent (ag_psEditItem), not on the canvas. Ends with the card's Generate (ag_psGenerate)"},
   "ag_psRevision": "v{revision} · {count}件変更",
   "@ag_psRevision": {"placeholders": {"revision": {"type": "int"}, "count": {"type": "int"}}},
   "ag_psSaveBlock": "ブロックとして保存",

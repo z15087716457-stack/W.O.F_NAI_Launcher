@@ -332,6 +332,7 @@ class _StyleExploreWiringState extends ConsumerState<StyleExploreWiring> {
               library: library,
               runner: runner,
               capture: capture,
+              l10n: context.l10n,
             ),
       variables: styleExploreVariables(
         ref.watch(pillWorkspaceProvider(PillScopes.main)).document,
